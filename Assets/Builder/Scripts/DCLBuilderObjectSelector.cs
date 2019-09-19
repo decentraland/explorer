@@ -34,7 +34,7 @@ namespace Builder
 
         private bool isGameObjectActive = false;
 
-        private SceneBoundariesDebugModeChecker boundariesChecker;
+        private SceneBoundariesChecker boundariesChecker;
 
         private void Awake()
         {
@@ -220,7 +220,7 @@ namespace Builder
 
         private void OnSceneChanged(ParcelScene scene)
         {
-            boundariesChecker = new SceneBoundariesDebugModeChecker(scene);
+            boundariesChecker = scene.boundariesChecker;
         }
 
         private bool CanSelect(DCLBuilderEntity entity)

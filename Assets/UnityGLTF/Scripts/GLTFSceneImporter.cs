@@ -245,7 +245,17 @@ namespace UnityGLTF
                     _assetCache = new AssetCache(_gltfRoot);
                 }
 
+
+                float profiling = Time.realtimeSinceStartup;
+                float frames = Time.frameCount;
+
+                if (VERBOSE)
+                    Debug.Log("Load will start");
+
                 yield return _LoadScene(sceneIndex, showSceneObj);
+
+                if (VERBOSE)
+                    Debug.Log("Load finished in " + (Time.realtimeSinceStartup - profiling) + " seconds... frames = " + (Time.frameCount - frames));
 
                 yield return null; // NOTE(Brian): DO NOT REMOVE, we must wait a frame in order to
                                    //              start enqueued coroutines, if this is removed
@@ -469,13 +479,15 @@ namespace UnityGLTF
                 if (_assetCache.MeshCache[meshIdIndex][i].MeshAttributes.Count == 0)
                 {
                     yield return ConstructMeshAttributes(primitive, meshIdIndex, i);
-                    if (primitive.Material != null)
+                    if (primitive.Material != null && !pendingImageBuffers.Contains(primitive.Material.Value))
                     {
-                        yield return ConstructMaterialImageBuffers(primitive.Material.Value);
+                        pendingImageBuffers.Add(primitive.Material.Value);
                     }
                 }
             }
         }
+
+        HashSet<GLTFMaterial> pendingImageBuffers = new HashSet<GLTFMaterial>();
 
         static List<string> streamingImagesStaticList = new List<string>();
         List<string> streamingImagesLocalList = new List<string>();
@@ -599,7 +611,6 @@ namespace UnityGLTF
             Node nodeToLoad = _gltfRoot.Nodes[nodeIndex];
 
             yield return ConstructBufferData(nodeToLoad);
-
             yield return ConstructNode(nodeToLoad, nodeIndex, parent);
         }
 
@@ -1260,17 +1271,55 @@ namespace UnityGLTF
             for (int i = 0; i < scene.Nodes.Count; ++i)
             {
                 NodeId node = scene.Nodes[i];
-                yield return _LoadNode(node.Id, sceneObj.transform);
+
+                if (renderingIsDisabled)
+                {
+                    RunCoroutineSync(_LoadNode(node.Id, sceneObj.transform));
+                }
+                else
+                {
+                    yield return _LoadNode(node.Id, sceneObj.transform);
+                }
+
                 GameObject nodeObj = _assetCache.NodeCache[node.Id];
                 nodeTransforms[i] = nodeObj.transform;
+            }
+
+            foreach (var gltfMaterial in pendingImageBuffers)
+            {
+                yield return ConstructMaterialImageBuffers(gltfMaterial);
             }
 
             for (int i = 0; i < nodesWithMeshes.Count; i++)
             {
                 NodeId_Like nodeId = nodesWithMeshes[i];
                 Node node = nodeId.Value;
-                yield return ConstructMesh(node.Mesh.Value, _assetCache.NodeCache[nodeId.Id].transform, node.Mesh.Id, node.Skin != null ? node.Skin.Value : null);
+
+                if (renderingIsDisabled)
+                {
+                    RunCoroutineSync(ConstructMesh(mesh: node.Mesh.Value,
+                                                   parent: _assetCache.NodeCache[nodeId.Id].transform,
+                                                   meshId: node.Mesh.Id,
+                                                   skin: node.Skin != null ? node.Skin.Value : null,
+                                                   constructMaterials: false));
+
+                    bool isColliderMesh = _assetCache.NodeCache[nodeId.Id].transform.name.Contains("_collider");
+
+                    if (!isColliderMesh)
+                    {
+                        yield return ConstructMeshMaterials(node.Mesh.Value, node.Mesh.Id);
+                    }
+                }
+                else
+                {
+                    yield return ConstructMesh(mesh: node.Mesh.Value,
+                                               parent: _assetCache.NodeCache[nodeId.Id].transform,
+                                               meshId: node.Mesh.Id,
+                                               skin: node.Skin != null ? node.Skin.Value : null,
+                                               constructMaterials: true);
+                }
             }
+
 
             if (_gltfRoot.Animations != null && _gltfRoot.Animations.Count > 0)
             {
@@ -1516,7 +1565,55 @@ namespace UnityGLTF
             }
         }
 
-        protected virtual IEnumerator ConstructMesh(GLTFMesh mesh, Transform parent, int meshId, Skin skin)
+        protected virtual IEnumerator ConstructMeshMaterials(GLTFMesh mesh, int meshId)
+        {
+            for (int i = 0; i < mesh.Primitives.Count; ++i)
+            {
+                yield return ConstructPrimitiveMaterials(mesh, meshId, i);
+            }
+        }
+
+        protected virtual IEnumerator ConstructPrimitiveMaterials(GLTFMesh mesh, int meshId, int primitiveIndex)
+        {
+            var primitive = mesh.Primitives[primitiveIndex];
+            int materialIndex = primitive.Material != null ? primitive.Material.Id : -1;
+
+            GameObject primitiveObj = _assetCache.MeshCache[meshId][primitiveIndex].PrimitiveGO;
+
+            Renderer renderer = primitiveObj.GetComponent<Renderer>();
+
+            //// NOTE(Brian): Texture loading
+            if (useMaterialTransition && InitialVisibility)
+            {
+                var matController = primitiveObj.AddComponent<MaterialTransitionController>();
+                var coroutine = DownloadAndConstructMaterial(primitive, materialIndex, renderer, matController);
+
+                if (_asyncCoroutineHelper != null)
+                {
+                    _asyncCoroutineHelper.RunAsTask(coroutine, "matDownload");
+                }
+                else
+                {
+                    yield return coroutine;
+                }
+            }
+            else
+            {
+                if (LoadingTextureMaterial != null)
+                {
+                    renderer.sharedMaterial = LoadingTextureMaterial;
+                }
+
+                yield return DownloadAndConstructMaterial(primitive, materialIndex, renderer, null);
+
+                if (LoadingTextureMaterial == null)
+                {
+                    primitiveObj.SetActive(true);
+                }
+            }
+        }
+
+        protected virtual IEnumerator ConstructMesh(GLTFMesh mesh, Transform parent, int meshId, Skin skin, bool constructMaterials)
         {
             bool isColliderMesh = parent.name.Contains("_collider");
 
@@ -1536,6 +1633,8 @@ namespace UnityGLTF
                 var primitiveObj = new GameObject("Primitive");
                 primitiveObj.transform.SetParent(parent, false);
                 primitiveObj.SetActive(useMaterialTransition || LoadingTextureMaterial != null);
+
+                _assetCache.MeshCache[meshId][i].PrimitiveGO = primitiveObj;
 
                 SkinnedMeshRenderer skinnedMeshRenderer = null;
                 MeshRenderer meshRenderer = null;
@@ -1567,34 +1666,9 @@ namespace UnityGLTF
                         renderer.enabled = InitialVisibility;
                     }
 
-                    //// NOTE(Brian): Texture loading
-                    if (useMaterialTransition && InitialVisibility)
+                    if (constructMaterials)
                     {
-                        var matController = primitiveObj.AddComponent<MaterialTransitionController>();
-                        var coroutine = DownloadAndConstructMaterial(primitive, materialIndex, renderer, matController);
-
-                        if (_asyncCoroutineHelper != null)
-                        {
-                            _asyncCoroutineHelper.RunAsTask(coroutine, "matDownload");
-                        }
-                        else
-                        {
-                            yield return coroutine;
-                        }
-                    }
-                    else
-                    {
-                        if (LoadingTextureMaterial != null)
-                        {
-                            renderer.sharedMaterial = LoadingTextureMaterial;
-                        }
-
-                        yield return DownloadAndConstructMaterial(primitive, materialIndex, renderer, null);
-
-                        if (LoadingTextureMaterial == null)
-                        {
-                            primitiveObj.SetActive(true);
-                        }
+                        yield return ConstructPrimitiveMaterials(mesh, meshId, i);
                     }
                 }
                 else
@@ -1620,7 +1694,6 @@ namespace UnityGLTF
                         break;
                 }
 
-                _assetCache.MeshCache[meshId][i].PrimitiveGO = primitiveObj;
             }
         }
 
