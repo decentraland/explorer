@@ -187,7 +187,7 @@ namespace DCL.Helpers
                         {
                             ac = DownloadHandlerAudioClip.GetContent(request);
                         }
-                        catch(Exception e)
+                        catch (Exception e)
                         {
                             Debug.LogError(e);
                         }
@@ -330,6 +330,21 @@ namespace DCL.Helpers
                 (int)Mathf.Floor(worldPosition.x / ParcelSettings.PARCEL_SIZE),
                 (int)Mathf.Floor(worldPosition.z / ParcelSettings.PARCEL_SIZE)
             );
+        }
+
+        public static Bounds GetBoundsFromRenderers(Renderer[] renderers)
+        {
+            Bounds bounds = new Bounds();
+
+            for(int i=0; i < renderers.Length; i++)
+             { 
+                 if(i == 0)
+                     bounds = renderers[i].bounds;
+                 else
+                     bounds.Encapsulate(renderers[i].bounds);
+             }
+
+            return bounds;
         }
     }
 }

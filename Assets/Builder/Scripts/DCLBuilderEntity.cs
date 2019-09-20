@@ -1,12 +1,15 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
+using System;
 using DCL.Models;
 using DCL.Components;
+using DCL.Helpers;
 
 namespace Builder
 {
     public class DCLBuilderEntity : MonoBehaviour
     {
+        public static Action<DCLBuilderEntity> OnEntityShapeUpdated;
+
         public DecentralandEntity rootEntity { private set; get; }
         public bool hasGizmoComponent
         {
@@ -29,18 +32,33 @@ namespace Builder
         {
             rootEntity = entity;
 
-            rootEntity.OnShapeUpdated -= ProcessEntityShape;
-            entity.OnShapeUpdated += ProcessEntityShape;
+            rootEntity.OnShapeUpdated -= OnShapeUpdated;
+            entity.OnShapeUpdated += OnShapeUpdated;
 
             if (entity.meshesInfo.currentShape != null)
             {
-                ProcessEntityShape(entity);
+                OnShapeUpdated(entity);
             }
+        }
+
+        public bool IsInsideSceneBoundaries()
+        {
+            if (rootEntity != null && rootEntity.meshesInfo.renderers != null)
+            {
+                return rootEntity.scene.IsInsideSceneBoundaries(Utils.GetBoundsFromRenderers(rootEntity.meshesInfo.renderers));
+            }
+            return false;
         }
 
         private void OnDestroy()
         {
-            rootEntity.OnShapeUpdated -= ProcessEntityShape;
+            rootEntity.OnShapeUpdated -= OnShapeUpdated;
+        }
+
+        private void OnShapeUpdated(DecentralandEntity entity)
+        {
+            OnEntityShapeUpdated?.Invoke(this);
+            ProcessEntityShape(entity);
         }
 
         private void ProcessEntityShape(DecentralandEntity entity)

@@ -1,10 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 using DCL;
 using DCL.Models;
 using DCL.Controllers;
 using DCL.Interface;
 using DCL.Components;
+using DCL.Helpers;
 
 namespace Builder
 {
@@ -30,10 +32,14 @@ namespace Builder
 
         private MouseCatcher mouseCatcher;
         private ParcelScene currentScene;
-        private bool isPreviewMode = false;
         private Vector3 defaultCharacterPosition;
 
+        private bool isPreviewMode = false;
+        private List<string> outOfBoundariesEntitiesId = new List<string>();
+
         private bool isGameObjectActive = false;
+
+        private EntitiesOutOfBoundariesEventPayload outOfBoundariesEventPayload = new EntitiesOutOfBoundariesEventPayload();
 
         [System.Serializable]
         private class MousePayload
@@ -53,6 +59,12 @@ namespace Builder
         [System.Serializable]
         private class OnEntityLoadingEvent : DCL.Interface.WebInterface.UUIDEvent<EntityLoadingPayload>
         {
+        };
+
+        [System.Serializable]
+        private class EntitiesOutOfBoundariesEventPayload
+        {
+            public string[] entities;
         };
 
         [System.Serializable]
@@ -128,6 +140,7 @@ namespace Builder
         {
             OnResetBuilderScene?.Invoke();
             DCLCharacterController.i?.gameObject.SetActive(false);
+            outOfBoundariesEntitiesId.Clear();
 
             if (currentScene)
             {
@@ -203,26 +216,7 @@ namespace Builder
 
         #endregion
 
-        public static DecentralandEntity GetEntityFromGameObject(GameObject currentSelected)
-        {
-            LoadWrapper wrapper = currentSelected.GetComponent<LoadWrapper>();
-
-            if (wrapper?.entity != null)
-            {
-                return wrapper.entity;
-            }
-            else
-            {
-                if (currentSelected.transform.parent != null)
-                {
-                    return GetEntityFromGameObject(currentSelected.transform.parent.gameObject);
-                }
-
-                return null;
-            }
-        }
-
-        public static ParcelScene GetLoadedScene()
+        private static ParcelScene GetLoadedScene()
         {
             ParcelScene loadedScene = null;
 
@@ -269,7 +263,7 @@ namespace Builder
             var builderEntity = AddBuilderEntityComponent(entity);
             OnEntityAdded?.Invoke(builderEntity);
 
-            entity.OnShapeUpdated += ClearEntityLoadingState;
+            entity.OnShapeUpdated += OnEntityShapeUpdated;
 
             onGetLoadingEntity.uuid = entity.entityId;
             onGetLoadingEntity.payload.entityId = entity.entityId;
@@ -286,9 +280,9 @@ namespace Builder
             }
         }
 
-        private void ClearEntityLoadingState(DecentralandEntity entity)
+        private void OnEntityShapeUpdated(DecentralandEntity entity)
         {
-            entity.OnShapeUpdated -= ClearEntityLoadingState;
+            entity.OnShapeUpdated -= OnEntityShapeUpdated;
 
             onGetLoadingEntity.uuid = entity.entityId;
             onGetLoadingEntity.payload.entityId = entity.entityId;
@@ -303,6 +297,7 @@ namespace Builder
                 DCLBuilderObjectSelector.OnDraggingObjectEnd += OnObjectDragEnd;
                 DCLBuilderObjectSelector.OnSelectedObject += OnObjectSelected;
                 DCLBuilderObjectSelector.OnGizmoTransformObjectEnd += OnGizmoTransformObjectEnded;
+                DCLBuilderEntity.OnEntityShapeUpdated += ProcessEntityBoundaries;
             }
             isGameObjectActive = true;
         }
@@ -313,15 +308,18 @@ namespace Builder
             DCLBuilderObjectSelector.OnDraggingObjectEnd -= OnObjectDragEnd;
             DCLBuilderObjectSelector.OnSelectedObject -= OnObjectSelected;
             DCLBuilderObjectSelector.OnGizmoTransformObjectEnd -= OnGizmoTransformObjectEnded;
+            DCLBuilderEntity.OnEntityShapeUpdated -= ProcessEntityBoundaries;
         }
 
         private void OnObjectDragEnd(DCLBuilderEntity entity, Vector3 position)
         {
+            ProcessEntityBoundaries(entity);
             NotifyGizmoEvent(entity, DCLGizmos.Gizmo.NONE);
         }
 
         private void OnGizmoTransformObjectEnded(DCLBuilderEntity entity, Vector3 position, string gizmoType)
         {
+            ProcessEntityBoundaries(entity);
             NotifyGizmoEvent(entity, gizmoType);
         }
 
@@ -399,13 +397,30 @@ namespace Builder
 
         private DCLBuilderEntity AddBuilderEntityComponent(DecentralandEntity entity)
         {
-            DCLBuilderEntity builderComponent = entity.gameObject.GetComponent<DCLBuilderEntity>();
-            if (builderComponent == null)
-            {
-                builderComponent = entity.gameObject.AddComponent<DCLBuilderEntity>();
-            }
+            DCLBuilderEntity builderComponent = Utils.GetOrCreateComponent<DCLBuilderEntity>(entity.gameObject);
             builderComponent.SetEntity(entity);
             return builderComponent;
+        }
+
+        private void ProcessEntityBoundaries(DCLBuilderEntity entity)
+        {
+            string entityId = entity.rootEntity.entityId;
+            int entityIndexInList = outOfBoundariesEntitiesId.IndexOf(entityId);
+
+            bool wasInsideSceneBoundaries = entityIndexInList == -1;
+            bool isInsideSceneBoundaries = entity.IsInsideSceneBoundaries();
+
+            if (wasInsideSceneBoundaries && !isInsideSceneBoundaries)
+            {
+                outOfBoundariesEntitiesId.Add(entityId);
+            }
+            else if (!wasInsideSceneBoundaries && isInsideSceneBoundaries)
+            {
+                outOfBoundariesEntitiesId.RemoveAt(entityIndexInList);
+            }
+
+            outOfBoundariesEventPayload.entities = outOfBoundariesEntitiesId.ToArray();
+            WebInterface.SendSceneEvent<EntitiesOutOfBoundariesEventPayload>(currentScene.sceneData.id, "entitiesOutOfBoundaries", outOfBoundariesEventPayload);
         }
     }
 }
