@@ -39,6 +39,9 @@ namespace Builder
         private void Awake()
         {
             DCLBuilderBridge.OnPreviewModeChanged += OnPreviewModeChanged;
+
+            //this will be unsubscribed after the first time is triggered
+            DCLBuilderCamera.OnCameraZoomChanged += OnCameraZoomChanged;
         }
 
         private void OnDestroy()
@@ -388,6 +391,18 @@ namespace Builder
         {
             Deselect();
             gameObject.SetActive(!isPreview);
+        }
+
+        private void OnCameraZoomChanged(Camera camera, float zoom)
+        {
+            DCLBuilderCamera.OnCameraZoomChanged -= OnCameraZoomChanged;
+            for (int i = 0; i < gizmos.Length; i++)
+            {
+                if (!gizmos[i].initialized)
+                {
+                    gizmos[i].Initialize(builderRaycast.builderCamera);
+                }
+            }
         }
 
         private class DragInfo

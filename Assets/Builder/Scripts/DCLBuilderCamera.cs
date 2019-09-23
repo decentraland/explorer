@@ -6,6 +6,9 @@ namespace Builder
 {
     public class DCLBuilderCamera : MonoBehaviour
     {
+
+        public static System.Action<Camera, float> OnCameraZoomChanged;
+
         [Header("References")]
         public Transform pitchPivot;
         public Transform yawPivot;
@@ -71,6 +74,7 @@ namespace Builder
             pitchCurrent += (pitchTarget - pitchCurrent) * Time.deltaTime * rotationSpeed;
             pitchPivot.localRotation = Quaternion.Euler(pitchCurrent, 0, 0);
 
+            float zoomPrev = zoomCurrent;
             zoomCurrent += (zoomTarget - zoomCurrent) * Time.deltaTime * zoomSpeed;
             builderCamera.transform.localPosition = new Vector3(0, 0, zoomCurrent);
 
@@ -80,6 +84,10 @@ namespace Builder
             {
                 panCurrent = panCurrent + panOffset.normalized * sqDist * panSpeed * Time.deltaTime;
                 rootPivot.localPosition = panCurrent;
+            }
+            if (zoomPrev != zoomCurrent)
+            {
+                OnCameraZoomChanged?.Invoke(builderCamera, zoomCurrent);
             }
         }
 
@@ -217,6 +225,7 @@ namespace Builder
         {
             zoomCurrent = zoomTarget = zoomDefault;
             builderCamera.transform.position.Set(0, 0, zoomCurrent);
+            OnCameraZoomChanged?.Invoke(builderCamera, zoomCurrent);
         }
 
         private bool CanOrbit()
