@@ -298,6 +298,7 @@ namespace Builder
                 DCLBuilderObjectSelector.OnSelectedObject += OnObjectSelected;
                 DCLBuilderObjectSelector.OnGizmoTransformObjectEnd += OnGizmoTransformObjectEnded;
                 DCLBuilderEntity.OnEntityShapeUpdated += ProcessEntityBoundaries;
+                DCLBuilderEntity.OnEntityTransformUpdated += ProcessEntityBoundaries;
             }
             isGameObjectActive = true;
         }
@@ -309,17 +310,16 @@ namespace Builder
             DCLBuilderObjectSelector.OnSelectedObject -= OnObjectSelected;
             DCLBuilderObjectSelector.OnGizmoTransformObjectEnd -= OnGizmoTransformObjectEnded;
             DCLBuilderEntity.OnEntityShapeUpdated -= ProcessEntityBoundaries;
+            DCLBuilderEntity.OnEntityTransformUpdated -= ProcessEntityBoundaries;
         }
 
         private void OnObjectDragEnd(DCLBuilderEntity entity, Vector3 position)
         {
-            ProcessEntityBoundaries(entity);
             NotifyGizmoEvent(entity, DCLGizmos.Gizmo.NONE);
         }
 
         private void OnGizmoTransformObjectEnded(DCLBuilderEntity entity, Vector3 position, string gizmoType)
         {
-            ProcessEntityBoundaries(entity);
             NotifyGizmoEvent(entity, gizmoType);
         }
 
@@ -421,6 +421,7 @@ namespace Builder
 
             outOfBoundariesEventPayload.entities = outOfBoundariesEntitiesId.ToArray();
             WebInterface.SendSceneEvent<EntitiesOutOfBoundariesEventPayload>(currentScene.sceneData.id, "entitiesOutOfBoundaries", outOfBoundariesEventPayload);
+            currentScene.boundariesChecker?.EvaluateEntityPosition(entity.rootEntity);
         }
     }
 }

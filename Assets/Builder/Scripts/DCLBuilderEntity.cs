@@ -9,6 +9,7 @@ namespace Builder
     public class DCLBuilderEntity : MonoBehaviour
     {
         public static Action<DCLBuilderEntity> OnEntityShapeUpdated;
+        public static Action<DCLBuilderEntity> OnEntityTransformUpdated;
 
         public DecentralandEntity rootEntity { private set; get; }
         public bool hasGizmoComponent
@@ -33,7 +34,10 @@ namespace Builder
             rootEntity = entity;
 
             rootEntity.OnShapeUpdated -= OnShapeUpdated;
-            entity.OnShapeUpdated += OnShapeUpdated;
+            rootEntity.OnShapeUpdated += OnShapeUpdated;
+
+            rootEntity.OnTransformChange -= OnTransformUpdated;
+            rootEntity.OnTransformChange += OnTransformUpdated;
 
             if (entity.meshesInfo.currentShape != null)
             {
@@ -53,12 +57,21 @@ namespace Builder
         private void OnDestroy()
         {
             rootEntity.OnShapeUpdated -= OnShapeUpdated;
+            rootEntity.OnTransformChange -= OnTransformUpdated;
         }
 
         private void OnShapeUpdated(DecentralandEntity entity)
         {
             OnEntityShapeUpdated?.Invoke(this);
             ProcessEntityShape(entity);
+        }
+
+        private void OnTransformUpdated(DCLTransform.Model transformModel)
+        {
+            gameObject.transform.localPosition = DCLTransform.model.position;
+            gameObject.transform.localRotation = DCLTransform.model.rotation;
+            gameObject.transform.localScale = DCLTransform.model.scale;
+            OnEntityTransformUpdated?.Invoke(this);
         }
 
         private void ProcessEntityShape(DecentralandEntity entity)
