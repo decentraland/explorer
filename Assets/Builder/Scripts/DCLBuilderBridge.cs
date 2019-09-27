@@ -7,6 +7,7 @@ using DCL.Controllers;
 using DCL.Interface;
 using DCL.Components;
 using DCL.Helpers;
+using Builder.Gizmos;
 
 namespace Builder
 {
@@ -296,7 +297,7 @@ namespace Builder
             {
                 DCLBuilderObjectSelector.OnDraggingObjectEnd += OnObjectDragEnd;
                 DCLBuilderObjectSelector.OnSelectedObject += OnObjectSelected;
-                DCLBuilderObjectSelector.OnGizmoTransformObjectEnd += OnGizmoTransformObjectEnded;
+                DCLBuilderGizmoManager.OnGizmoTransformObjectEnd += OnGizmoTransformObjectEnded;
                 DCLBuilderEntity.OnEntityShapeUpdated += ProcessEntityBoundaries;
                 DCLBuilderEntity.OnEntityTransformUpdated += ProcessEntityBoundaries;
             }
@@ -308,7 +309,7 @@ namespace Builder
             isGameObjectActive = false;
             DCLBuilderObjectSelector.OnDraggingObjectEnd -= OnObjectDragEnd;
             DCLBuilderObjectSelector.OnSelectedObject -= OnObjectSelected;
-            DCLBuilderObjectSelector.OnGizmoTransformObjectEnd -= OnGizmoTransformObjectEnded;
+            DCLBuilderGizmoManager.OnGizmoTransformObjectEnd -= OnGizmoTransformObjectEnded;
             DCLBuilderEntity.OnEntityShapeUpdated -= ProcessEntityBoundaries;
             DCLBuilderEntity.OnEntityTransformUpdated -= ProcessEntityBoundaries;
         }

@@ -8,7 +8,7 @@ namespace Builder
     {
         public Camera builderCamera;
 
-        private const float raycastMaxDistance = 10000f;
+        private const float RAYCAST_MAX_DISTANCE = 10000f;
 
         public LayerMask defaultMask { get; private set; }
         public LayerMask gizmoMask { get; private set; }
@@ -16,10 +16,8 @@ namespace Builder
         public int defaultLayer { get; private set; }
 
         private Plane groundPlane;
-        private Plane hitPlane;
-
-        private ParcelScene currentScene;
-        private bool isGameObjectActive = false;
+        private Plane entityHitPlane;
+        private Plane gizmosHitPlane;
 
         private void Awake()
         {
@@ -33,7 +31,12 @@ namespace Builder
 
         public void SetEntityHitPlane(float height)
         {
-            hitPlane = new Plane(Vector3.up, new Vector3(0, height, 0));
+            entityHitPlane = new Plane(Vector3.up, new Vector3(0, height, 0));
+        }
+
+        public void SetGizmoHitPlane(Gizmos.DCLBuilderGizmoAxis gizmoAxis)
+        {
+            gizmosHitPlane = new Plane(gizmoAxis.GetGizmo().GetPlaneNormal(), gizmoAxis.transform.position);
         }
 
         public bool Raycast(Vector3 mousePosition, LayerMask mask, out RaycastHit hitInfo, bool checkGizmo = false)
@@ -46,7 +49,7 @@ namespace Builder
                 }
             }
 
-            return Physics.Raycast(GetMouseRay(mousePosition), out hitInfo, raycastMaxDistance, mask);
+            return Physics.Raycast(GetMouseRay(mousePosition), out hitInfo, RAYCAST_MAX_DISTANCE, mask);
         }
 
         public Ray GetMouseRay(Vector3 mousePosition)
@@ -56,7 +59,7 @@ namespace Builder
 
         public bool RaycastToGizmos(Ray ray, out RaycastHit hitInfo)
         {
-            return Physics.Raycast(ray, out hitInfo, raycastMaxDistance, gizmoMask);
+            return Physics.Raycast(ray, out hitInfo, RAYCAST_MAX_DISTANCE, gizmoMask);
         }
 
         public bool RaycastToGizmos(Vector3 mousePosition, out RaycastHit hitInfo)
@@ -83,7 +86,7 @@ namespace Builder
             Ray ray = GetMouseRay(mousePosition);
             float enter = 0.0f;
 
-            if (hitPlane.Raycast(ray, out enter))
+            if (entityHitPlane.Raycast(ray, out enter))
             {
                 return ray.GetPoint(enter);
             }
@@ -91,24 +94,18 @@ namespace Builder
             return Vector3.zero;
         }
 
-        private void OnEnable()
+        public bool RaycastToGizmosHitPlane(Vector3 mousePosition, out Vector3 hitPosition)
         {
-            if (!isGameObjectActive)
+            Ray ray = GetMouseRay(mousePosition);
+            float enter = 0.0f;
+
+            if (gizmosHitPlane.Raycast(ray, out enter))
             {
-                DCLBuilderBridge.OnSceneChanged += OnSceneChanged;
+                hitPosition = ray.GetPoint(enter);
+                return true;
             }
-            isGameObjectActive = true;
-        }
-
-        private void OnDisable()
-        {
-            isGameObjectActive = false;
-            DCLBuilderBridge.OnSceneChanged -= OnSceneChanged;
-        }
-
-        private void OnSceneChanged(ParcelScene scene)
-        {
-            currentScene = scene;
+            hitPosition = Vector3.zero;
+            return false;
         }
     }
 }

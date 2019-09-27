@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using DCL.Controllers;
 using DCL.Models;
+using Builder.Gizmos;
 
 namespace Builder
 {
@@ -104,8 +105,8 @@ namespace Builder
                 DCLBuilderBridge.OnResetCameraZoom += OnResetCameraZoom;
                 DCLBuilderObjectSelector.OnDraggingObjectStart += OnDragObjectStart;
                 DCLBuilderObjectSelector.OnDraggingObjectEnd += OnDragObjectEnd;
-                DCLBuilderObjectSelector.OnGizmoTransformObjectStart += OnGizmoTransformObjectStart;
-                DCLBuilderObjectSelector.OnGizmoTransformObjectEnd += OnGizmoTransformObjectEnd;
+                DCLBuilderGizmoManager.OnGizmoTransformObjectStart += OnGizmoTransformObjectStart;
+                DCLBuilderGizmoManager.OnGizmoTransformObjectEnd += OnGizmoTransformObjectEnd;
             }
             isGameObjectActive = true;
         }
@@ -122,8 +123,8 @@ namespace Builder
             DCLBuilderBridge.OnResetCameraZoom -= OnResetCameraZoom;
             DCLBuilderObjectSelector.OnDraggingObjectStart -= OnDragObjectStart;
             DCLBuilderObjectSelector.OnDraggingObjectEnd -= OnDragObjectEnd;
-            DCLBuilderObjectSelector.OnGizmoTransformObjectStart -= OnGizmoTransformObjectStart;
-            DCLBuilderObjectSelector.OnGizmoTransformObjectEnd -= OnGizmoTransformObjectEnd;
+            DCLBuilderGizmoManager.OnGizmoTransformObjectStart -= OnGizmoTransformObjectStart;
+            DCLBuilderGizmoManager.OnGizmoTransformObjectEnd -= OnGizmoTransformObjectEnd;
         }
 
         private void OnMouseDrag(int buttonId, Vector3 mousePosition, float axisX, float axisY)

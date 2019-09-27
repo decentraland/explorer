@@ -1,14 +1,14 @@
 ﻿using UnityEngine;
 using DCL.Controllers;
+using Builder.Gizmos;
 
 namespace Builder
 {
     public class DCLBuilderObjectSelector : MonoBehaviour
     {
         public DCLBuilderRaycast builderRaycast;
-        public Gizmo[] gizmos;
+        public DCLBuilderGizmoManager gizmosManager;
 
-        public delegate void GizmoTransformDelegate(DCLBuilderEntity entity, Vector3 position, string gizmoType);
         public delegate void DragDelegate(DCLBuilderEntity entity, Vector3 position);
         public delegate void EntitySelectedDelegate(DCLBuilderEntity entity, string gizmoType);
         public delegate void EntityDeselectedDelegate(DCLBuilderEntity entity);
@@ -18,19 +18,12 @@ namespace Builder
         public static event DragDelegate OnDraggingObjectStart;
         public static event DragDelegate OnDraggingObject;
         public static event DragDelegate OnDraggingObjectEnd;
-        public static event GizmoTransformDelegate OnGizmoTransformObjectStart;
-        public static event GizmoTransformDelegate OnGizmoTransformObjectEnd;
 
         private DCLBuilderEntity selectedEntity = null;
 
         private DragInfo dragInfo = new DragInfo();
-        private bool isGizmoTransformingObject = false;
 
         private float snapFactorPosition = 0;
-
-        private Gizmo activeGizmo = null;
-        private GizmoAxis gizmoAxis = null;
-        private GizmoAxis gizmoAxisOver = null;
 
         private bool isGameObjectActive = false;
 
@@ -39,9 +32,6 @@ namespace Builder
         private void Awake()
         {
             DCLBuilderBridge.OnPreviewModeChanged += OnPreviewModeChanged;
-
-            //this will be unsubscribed after the first time is triggered
-            DCLBuilderCamera.OnCameraZoomChanged += OnCameraZoomChanged;
         }
 
         private void OnDestroy()
@@ -56,7 +46,6 @@ namespace Builder
                 DCLBuilderInput.OnMouseDown += OnMouseDown;
                 DCLBuilderInput.OnMouseDrag += OnMouseDrag;
                 DCLBuilderInput.OnMouseUp += OnMouseUp;
-                DCLBuilderBridge.OnSelectGizmo += OnSelectGizmo;
                 DCLBuilderBridge.OnResetObject += OnResetObject;
                 DCLBuilderBridge.OnEntityAdded += OnEntityAdded;
                 DCLBuilderBridge.OnEntityRemoved += OnEntityRemoved;
@@ -72,7 +61,6 @@ namespace Builder
             DCLBuilderInput.OnMouseDown -= OnMouseDown;
             DCLBuilderInput.OnMouseDrag -= OnMouseDrag;
             DCLBuilderInput.OnMouseUp -= OnMouseUp;
-            DCLBuilderBridge.OnSelectGizmo -= OnSelectGizmo;
             DCLBuilderBridge.OnResetObject -= OnResetObject;
             DCLBuilderBridge.OnEntityAdded -= OnEntityAdded;
             DCLBuilderBridge.OnEntityRemoved -= OnEntityRemoved;
@@ -82,7 +70,7 @@ namespace Builder
 
         private void Update()
         {
-            if (activeGizmo != null && !isGizmoTransformingObject)
+            if (!gizmosManager.isTransformingObject)
             {
                 CheckGizmoHover(Input.mousePosition);
             }
@@ -95,12 +83,11 @@ namespace Builder
                 RaycastHit hit;
                 if (builderRaycast.Raycast(mousePosition, builderRaycast.defaultMask, out hit, true))
                 {
-                    gizmoAxis = hit.collider.gameObject.GetComponent<GizmoAxis>();
-                    if (gizmoAxis != null)
+                    DCLBuilderGizmoAxis gizmosAxis = hit.collider.gameObject.GetComponent<DCLBuilderGizmoAxis>();
+                    if (gizmosAxis != null)
                     {
-                        gizmoAxis.SelectAxis(true);
-                        isGizmoTransformingObject = true;
-                        OnGizmoTransformObjectStart?.Invoke(selectedEntity, selectedEntity.transform.position, activeGizmo.gizmoType);
+                        gizmosManager.OnBeginDrag(gizmosAxis, selectedEntity);
+                        builderRaycast.SetGizmoHitPlane(gizmosAxis);
                     }
                     else
                     {
@@ -137,17 +124,9 @@ namespace Builder
                 dragInfo.isDraggingObject = false;
                 dragInfo.entity = null;
 
-                if (isGizmoTransformingObject)
+                if (gizmosManager.isTransformingObject)
                 {
-                    isGizmoTransformingObject = false;
-                    OnGizmoTransformObjectEnd?.Invoke(selectedEntity, selectedEntity.transform.position, activeGizmo.gizmoType);
-                }
-
-                if (gizmoAxis != null)
-                {
-                    gizmoAxis.SelectAxis(false);
-                    gizmoAxis.ResetTransformation();
-                    gizmoAxis = null;
+                    gizmosManager.OnEndDrag();
                 }
             }
         }
@@ -157,7 +136,7 @@ namespace Builder
             if (buttonId == 0)
             {
                 bool hasMouseMoved = (axisX != 0 || axisY != 0);
-                if (gizmoAxis != null)
+                if (gizmosManager.isTransformingObject)
                 {
                     UpdateGizmoAxis(mousePosition);
                 }
@@ -171,33 +150,14 @@ namespace Builder
         private void OnSetGridResolution(float position, float rotation, float scale)
         {
             snapFactorPosition = position;
-            for (int i = 0; i < gizmos.Length; i++)
-            {
-                gizmos[i].SetSnapFactor(position, rotation, scale);
-            }
         }
 
-        private void OnSelectGizmo(string gizmoType)
-        {
-            ActivateGizmo(activeGizmo, false);
-
-            Gizmo gizmo = GetGizmo(gizmoType);
-
-            if (gizmo != null)
-            {
-                ActivateGizmo(gizmo, true);
-            }
-        }
 
         private void OnResetObject()
         {
-
             if (selectedEntity != null)
             {
                 selectedEntity.transform.localRotation = Quaternion.identity;
-
-                if (activeGizmo != null)
-                    activeGizmo.transform.localRotation = Quaternion.identity;
             }
         }
 
@@ -206,16 +166,12 @@ namespace Builder
             if (selectedEntity == entity)
             {
                 Deselect();
-                if (activeGizmo != null)
-                {
-                    activeGizmo.SetObject(null);
-                }
             }
         }
 
         private void OnEntityAdded(DCLBuilderEntity entity)
         {
-            if (!dragInfo.isDraggingObject && !isGizmoTransformingObject && CanSelect(entity))
+            if (!dragInfo.isDraggingObject && !gizmosManager.isTransformingObject && CanSelect(entity))
             {
                 Select(entity);
             }
@@ -236,12 +192,9 @@ namespace Builder
             Deselect();
 
             selectedEntity = entity;
-            if (activeGizmo != null)
-            {
-                ActivateGizmo(activeGizmo, true);
-            }
+
             SelectionEffect(entity.gameObject);
-            OnSelectedObject?.Invoke(entity, activeGizmo != null ? activeGizmo.gizmoType : DCL.Components.DCLGizmos.Gizmo.NONE);
+            OnSelectedObject?.Invoke(entity, gizmosManager.GetSelectedGizmo());
         }
 
         private void Deselect(DCLBuilderEntity entity)
@@ -250,10 +203,6 @@ namespace Builder
             {
                 OnDeselectedObject?.Invoke(entity);
                 selectedEntity = null;
-                if (activeGizmo != null && activeGizmo.gameObject.activeSelf)
-                {
-                    activeGizmo.gameObject.SetActive(false);
-                }
                 UnSelectionEffect(entity.gameObject);
             }
         }
@@ -281,63 +230,17 @@ namespace Builder
             entity.transform.position = newPosition;
             boundariesChecker?.EvaluateEntityPosition(selectedEntity.rootEntity);
 
-            if (activeGizmo != null && !activeGizmo.transformWithObject)
-            {
-                activeGizmo.transform.position = entity.transform.position;
-            }
-
             OnDraggingObject?.Invoke(entity, newPosition);
         }
 
         private void UpdateGizmoAxis(Vector3 mousePosition)
         {
             Vector3 hit;
-            if (builderRaycast.RaycastToGround(mousePosition, out hit))
+            if (builderRaycast.RaycastToGizmosHitPlane(mousePosition, out hit))
             {
-                Camera builderCamera = builderRaycast.builderCamera;
-                Vector3 pointerWorldPos = builderCamera.ScreenToWorldPoint(new Vector3(mousePosition.x, mousePosition.y, builderCamera.nearClipPlane));
-                gizmoAxis.UpdateTransformation(new Vector3(mousePosition.x, mousePosition.y, 0), pointerWorldPos, selectedEntity.gameObject, hit);
+                gizmosManager.OnDrag(hit);
                 boundariesChecker?.EvaluateEntityPosition(selectedEntity.rootEntity);
             }
-        }
-
-        private void ActivateGizmo(Gizmo gizmo, bool activate)
-        {
-            if (activate)
-            {
-                if (activeGizmo != null && activeGizmo != gizmo)
-                {
-                    ActivateGizmo(activeGizmo, false);
-                }
-
-                activeGizmo = gizmo;
-
-                if (selectedEntity != null)
-                {
-                    gizmo.SetObject(selectedEntity.gameObject);
-                }
-            }
-            else
-            {
-                activeGizmo = null;
-
-                if (gizmo != null)
-                {
-                    gizmo.SetObject(null);
-                }
-            }
-        }
-
-        private Gizmo GetGizmo(string gizmoType)
-        {
-            for (int i = 0; i < gizmos.Length; i++)
-            {
-                Gizmo gizmo = gizmos[i];
-                if (gizmo.gizmoType.CompareTo(gizmoType) == 0)
-                    return gizmo;
-            }
-
-            return null;
         }
 
         private void CheckGizmoHover(Vector3 mousePosition)
@@ -345,23 +248,15 @@ namespace Builder
             RaycastHit hit;
             if (builderRaycast.RaycastToGizmos(mousePosition, out hit))
             {
-                GizmoAxis gizmoAxis = hit.collider.gameObject.GetComponent<GizmoAxis>();
-
-                if (gizmoAxis != null)
-                {
-                    if (gizmoAxisOver != gizmoAxis && gizmoAxisOver != null)
-                    {
-                        gizmoAxisOver.SelectAxis(false);
-                    }
-                    gizmoAxisOver = gizmoAxis;
-                    gizmoAxisOver.SelectAxis(true);
-                }
+                DCLBuilderGizmoAxis gizmoAxis = hit.collider.gameObject.GetComponent<DCLBuilderGizmoAxis>();
+                gizmosManager.SetAxisHover(gizmoAxis);
             }
-            else if (gizmoAxisOver != null)
+            else
             {
-                gizmoAxisOver.SelectAxis(false);
+                gizmosManager.SetAxisHover(null);
             }
         }
+
         private void SelectionEffect(GameObject gameObject)
         {
             gameObject.layer = builderRaycast.selectionLayer;
@@ -391,18 +286,6 @@ namespace Builder
         {
             Deselect();
             gameObject.SetActive(!isPreview);
-        }
-
-        private void OnCameraZoomChanged(Camera camera, float zoom)
-        {
-            DCLBuilderCamera.OnCameraZoomChanged -= OnCameraZoomChanged;
-            for (int i = 0; i < gizmos.Length; i++)
-            {
-                if (!gizmos[i].initialized)
-                {
-                    gizmos[i].Initialize(builderRaycast.builderCamera);
-                }
-            }
         }
 
         private class DragInfo

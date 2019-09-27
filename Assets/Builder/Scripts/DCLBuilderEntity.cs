@@ -11,7 +11,7 @@ namespace Builder
         public static Action<DCLBuilderEntity> OnEntityShapeUpdated;
         public static Action<DCLBuilderEntity> OnEntityTransformUpdated;
 
-        public DecentralandEntity rootEntity { private set; get; }
+        public DecentralandEntity rootEntity { protected set; get; }
         public bool hasGizmoComponent
         {
             get
@@ -33,11 +33,11 @@ namespace Builder
         {
             rootEntity = entity;
 
-            rootEntity.OnShapeUpdated -= OnShapeUpdated;
-            rootEntity.OnShapeUpdated += OnShapeUpdated;
+            entity.OnShapeUpdated -= OnShapeUpdated;
+            entity.OnShapeUpdated += OnShapeUpdated;
 
-            rootEntity.OnTransformChange -= OnTransformUpdated;
-            rootEntity.OnTransformChange += OnTransformUpdated;
+            entity.OnTransformChange -= OnTransformUpdated;
+            entity.OnTransformChange += OnTransformUpdated;
 
             if (entity.meshesInfo.currentShape != null)
             {
