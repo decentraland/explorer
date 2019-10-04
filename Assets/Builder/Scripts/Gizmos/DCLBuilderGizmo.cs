@@ -45,6 +45,7 @@ namespace Builder.Gizmos
         public virtual void SetTargetTransform(Transform entityTransform)
         {
             targetTransform = entityTransform;
+            SetPositionToTarget();
         }
 
         public virtual void OnBeginDrag(DCLBuilderGizmoAxis axis, Transform entityTransform)
@@ -99,7 +100,7 @@ namespace Builder.Gizmos
             prevAxisValue = axisValue - transformValue;
         }
 
-        private void Update()
+        private void SetPositionToTarget()
         {
             if (targetTransform)
             {
@@ -109,6 +110,11 @@ namespace Builder.Gizmos
                     transform.rotation = targetTransform.rotation;
                 }
             }
+        }
+
+        private void Update()
+        {
+            SetPositionToTarget();
             if (builderCamera)
             {
                 float dist = GetCameraPlaneDistance(builderCamera, transform.position);

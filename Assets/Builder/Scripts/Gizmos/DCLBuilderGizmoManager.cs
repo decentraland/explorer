@@ -137,7 +137,6 @@ namespace Builder.Gizmos
                     HideGizmo();
                 }
                 activeGizmo = null;
-                targetEntity = null;
             }
             else
             {
@@ -196,6 +195,8 @@ namespace Builder.Gizmos
                 {
                     HideGizmo();
                 }
+                isTransformingObject = false;
+                targetEntity = null;
             }
         }
 

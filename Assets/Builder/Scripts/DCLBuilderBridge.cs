@@ -246,9 +246,6 @@ namespace Builder
                 DCLCharacterController.i.gameObject.SetActive(false);
             }
 
-            //TODO: we need a better way for doing this
-            RemoveNoneBuilderGameObjects();
-
             SceneController.i?.fpsPanel.SetActive(false);
             SetCaptureKeyboardInputEnabled(false);
         }
@@ -364,18 +361,6 @@ namespace Builder
                 if (!isPreview) mouseCatcher.UnlockCursor();
             }
             SetCaptureKeyboardInputEnabled(isPreview);
-        }
-
-        private void RemoveNoneBuilderGameObjects()
-        {
-            Component go = FindObjectOfType<HUDController>();
-            if (go) Destroy(go.gameObject);
-            go = FindObjectOfType<AvatarHUDView>();
-            if (go) Destroy(go.gameObject);
-            go = FindObjectOfType<MinimapHUDView>();
-            if (go) Destroy(go.gameObject);
-            go = FindObjectOfType<MinimapMetadataRetriever>();
-            if (go && go.transform.parent) Destroy(go.transform.parent.gameObject);
         }
 
         private void SetCaptureKeyboardInputEnabled(bool value)
