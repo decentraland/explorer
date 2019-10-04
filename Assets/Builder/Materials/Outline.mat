@@ -79,7 +79,7 @@ Material:
     - _GlossyReflections: 0
     - _Metallic: 0
     - _OcclusionStrength: 1
-    - _Outline: 0.0138
+    - _Outline: 0.0127
     - _OutlineWidth: 0.05
     - _QueueOffset: 0
     - _ReceiveShadows: 1

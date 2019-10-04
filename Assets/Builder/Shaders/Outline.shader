@@ -3,7 +3,7 @@ Shader "Builder/Basic Outline"
 	Properties 
 	{
 		_OutlineColor ("Outline Color", Color) = (0,0,0,1)
-		_Outline ("Outline width", Range (.002, 0.03)) = .005
+		_Outline ("Outline width", Range (.002, 0.1)) = .005
 	}
 	SubShader 
 	{

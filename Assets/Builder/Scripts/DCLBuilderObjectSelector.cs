@@ -91,7 +91,12 @@ namespace Builder
                     }
                     else
                     {
-                        dragInfo.entity = hit.collider.gameObject.GetComponent<DCLBuilderEntity>();
+                        var builderSelectionCollider = hit.collider.gameObject.GetComponent<DCLBuilderSelectionCollider>();
+                        if (builderSelectionCollider != null)
+                        {
+                            dragInfo.entity = builderSelectionCollider.ownerEntity;
+                        }
+
                         if (dragInfo.entity != null)
                         {
                             Debug.Log("unity-client: pressed entity: " + dragInfo.entity.rootEntity.entityId);
@@ -157,7 +162,6 @@ namespace Builder
             snapFactorPosition = position;
         }
 
-
         private void OnResetObject()
         {
             if (selectedEntity != null)
@@ -202,7 +206,7 @@ namespace Builder
             {
                 Debug.Log("unity-client: do select entity: " + entity.rootEntity.entityId);
                 selectedEntity = entity;
-                selectedEntity.Select();
+                selectedEntity.SetSelectLayer();
 
                 OnSelectedObject?.Invoke(entity, gizmosManager.GetSelectedGizmo());
             }
@@ -216,7 +220,7 @@ namespace Builder
                 if (entity != null)
                 {
                     Debug.Log("unity-client: do deselect entity: " + entity.rootEntity.entityId);
-                    entity.Deselect();
+                    entity.SetDefaultLayer();
                 }
                 selectedEntity = null;
             }
@@ -271,20 +275,6 @@ namespace Builder
             {
                 gizmosManager.SetAxisHover(null);
             }
-        }
-
-        // TODO: remove?
-        private void SelectionEffect(DCLBuilderEntity entity)
-        {
-            gameObject.layer = builderRaycast.selectionLayer;
-            ChangeLayersRecursively(gameObject.transform, builderRaycast.selectionLayer, builderRaycast.defaultLayer);
-        }
-
-        // TODO: remove?
-        private void UnSelectionEffect(GameObject gameObject)
-        {
-            gameObject.layer = builderRaycast.defaultLayer;
-            ChangeLayersRecursively(gameObject.transform, builderRaycast.defaultLayer, builderRaycast.selectionLayer);
         }
 
         private void ChangeLayersRecursively(Transform root, int layer, int currentLayer)

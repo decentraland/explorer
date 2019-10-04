@@ -6,14 +6,15 @@ namespace Builder
 {
     public class DCLBuilderRaycast : MonoBehaviour
     {
+        public const string LAYER_GIZMOS = "Gizmo";
+        public const string LAYER_SELECTION = "Selection";
+
         public Camera builderCamera;
 
         private const float RAYCAST_MAX_DISTANCE = 10000f;
 
         public LayerMask defaultMask { get; private set; }
         public LayerMask gizmoMask { get; private set; }
-        public int selectionLayer { get; private set; }
-        public int defaultLayer { get; private set; }
 
         private Plane groundPlane;
         private Plane entityHitPlane;
@@ -21,10 +22,8 @@ namespace Builder
 
         private void Awake()
         {
-            defaultMask = LayerMask.GetMask(OnPointerEventColliders.COLLIDER_LAYER) | LayerMask.GetMask("Selection");
-            gizmoMask = LayerMask.GetMask("Gizmo");
-            selectionLayer = LayerMask.NameToLayer("Selection");
-            defaultLayer = LayerMask.NameToLayer(OnPointerEventColliders.COLLIDER_LAYER);
+            defaultMask = LayerMask.GetMask(DCLBuilderSelectionCollider.LAYER_BUILDER_POINTER_CLICK) | LayerMask.GetMask(LAYER_SELECTION);
+            gizmoMask = LayerMask.GetMask(LAYER_GIZMOS);
 
             groundPlane = new Plane(Vector3.up, Vector3.zero);
         }

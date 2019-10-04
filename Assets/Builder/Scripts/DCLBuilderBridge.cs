@@ -210,7 +210,7 @@ namespace Builder
             }
         }
 
-        public void UnloadScene(string sceneKey)
+        public void UnloadBuilderScene(string sceneKey)
         {
             SceneController.i?.UnloadScene(sceneKey);
         }

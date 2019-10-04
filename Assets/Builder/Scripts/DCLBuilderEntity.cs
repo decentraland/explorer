@@ -27,7 +27,7 @@ namespace Builder
             }
         }
 
-        private MeshCollider[] meshColliders;
+        private DCLBuilderSelectionCollider[] meshColliders;
 
         public void SetEntity(DecentralandEntity entity)
         {
@@ -38,6 +38,15 @@ namespace Builder
 
             entity.OnTransformChange -= OnTransformUpdated;
             entity.OnTransformChange += OnTransformUpdated;
+
+            if (meshColliders != null)
+            {
+                for (int i = 0; i < meshColliders.Length; i++)
+                {
+                    Destroy(meshColliders[i]);
+                }
+                meshColliders = null;
+            }
 
             if (entity.meshesInfo.currentShape != null)
             {
@@ -54,26 +63,26 @@ namespace Builder
             return false;
         }
 
-        public void Select()
+        public void SetSelectLayer()
         {
-            int layer = LayerMask.NameToLayer("Selection");
-            if (meshColliders != null)
+            int selectionLayer = LayerMask.NameToLayer(DCLBuilderRaycast.LAYER_SELECTION);
+            if (rootEntity.meshesInfo != null)
             {
-                for (int i = 0; i < meshColliders.Length; i++)
+                for (int i = 0; i < rootEntity.meshesInfo.renderers.Length; i++)
                 {
-                    meshColliders[i].gameObject.layer = layer;
+                    rootEntity.meshesInfo.renderers[i].gameObject.layer = selectionLayer;
                 }
             }
         }
 
-        public void Deselect()
+        public void SetDefaultLayer()
         {
-            int layer = LayerMask.NameToLayer(OnPointerEventColliders.COLLIDER_LAYER);
-            if (meshColliders != null)
+            int selectionLayer = 0;
+            if (rootEntity.meshesInfo != null)
             {
-                for (int i = 0; i < meshColliders.Length; i++)
+                for (int i = 0; i < rootEntity.meshesInfo.renderers.Length; i++)
                 {
-                    meshColliders[i].gameObject.layer = layer;
+                    rootEntity.meshesInfo.renderers[i].gameObject.layer = selectionLayer;
                 }
             }
         }
@@ -108,21 +117,12 @@ namespace Builder
 
         private void CreateColliders(DecentralandEntity.MeshesInfo meshInfo)
         {
-            Debug.Log("unity-cliente CreateColliders " + meshInfo.renderers.Length + " for entity " + rootEntity.entityId);
-            gameObject.layer = LayerMask.NameToLayer(OnPointerEventColliders.COLLIDER_LAYER);
-
-            meshColliders = new MeshCollider[meshInfo.renderers.Length];
+            meshColliders = new DCLBuilderSelectionCollider[meshInfo.renderers.Length];
             for (int i = 0; i < meshInfo.renderers.Length; i++)
             {
-                meshColliders[i] = gameObject.AddComponent<MeshCollider>();
-                SetupMeshCollider(meshColliders[i], meshInfo.renderers[i]);
+                meshColliders[i] = new GameObject("BuilderSelectionCollider").AddComponent<DCLBuilderSelectionCollider>();
+                meshColliders[i].Initialize(this, meshInfo.renderers[i]);
             }
-        }
-
-        private void SetupMeshCollider(MeshCollider meshCollider, Renderer renderer)
-        {
-            meshCollider.sharedMesh = renderer.GetComponent<MeshFilter>().sharedMesh;
-            meshCollider.enabled = renderer.enabled;
         }
     }
 }

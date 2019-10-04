@@ -99,6 +99,7 @@ namespace DCL
         public SceneController sceneController;
         public DCLCharacterController characterController;
         public HUDController hudController;
+        private Builder.DCLBuilderBridge builderBridge = null;
 
         [System.NonSerialized]
         public static Queue<DCLWebSocketService.Message> queuedMessages = new Queue<DCLWebSocketService.Message>();
@@ -262,6 +263,129 @@ namespace DCL
                             case "ShowNotification":
                                 hudController.ShowNotificationFromJson(msg.payload);
                                 break;
+                            case "BuilderReady":
+                                sceneController.BuilderReady();
+                                break;
+                            case "UpdateParcelScenes":
+                                sceneController.UpdateParcelScenes(msg.payload);
+                                break;
+                            case "GetMousePosition":
+                                {
+                                    var builderbridge = GetBuilderBridge();
+                                    if (builderbridge)
+                                    {
+                                        builderbridge.GetMousePosition(msg.payload);
+                                    }
+                                    break;
+                                }
+                            case "SelectGizmo":
+                                {
+                                    var builderbridge = GetBuilderBridge();
+                                    if (builderbridge)
+                                    {
+                                        builderbridge.SelectGizmo(msg.payload);
+                                    }
+                                    break;
+                                }
+                            case "ResetObject":
+                                {
+                                    var builderbridge = GetBuilderBridge();
+                                    if (builderbridge)
+                                    {
+                                        builderbridge.ResetObject();
+                                    }
+                                    break;
+                                }
+                            case "ZoomDelta":
+                                {
+                                    var builderbridge = GetBuilderBridge();
+                                    if (builderbridge)
+                                    {
+                                        builderbridge.ZoomDelta(msg.payload);
+                                    }
+                                    break;
+                                }
+                            case "SetPlayMode":
+                                {
+                                    var builderbridge = GetBuilderBridge();
+                                    if (builderbridge)
+                                    {
+                                        builderbridge.SetPlayMode(msg.payload);
+                                    }
+                                    break;
+                                }
+                            case "TakeScreenshot":
+                                {
+                                    var builderbridge = GetBuilderBridge();
+                                    if (builderbridge)
+                                    {
+                                        builderbridge.TakeScreenshot(msg.payload);
+                                    }
+                                    break;
+                                }
+                            case "ResetBuilderScene":
+                                {
+                                    var builderbridge = GetBuilderBridge();
+                                    if (builderbridge)
+                                    {
+                                        builderbridge.ResetBuilderScene();
+                                    }
+                                    break;
+                                }
+                            case "SetBuilderCameraPosition":
+                                {
+                                    var builderbridge = GetBuilderBridge();
+                                    if (builderbridge)
+                                    {
+                                        builderbridge.SetBuilderCameraPosition(msg.payload);
+                                    }
+                                    break;
+                                }
+                            case "SetBuilderCameraRotation":
+                                {
+                                    var builderbridge = GetBuilderBridge();
+                                    if (builderbridge)
+                                    {
+                                        builderbridge.SetBuilderCameraRotation(msg.payload);
+                                    }
+                                    break;
+                                }
+                            case "ResetBuilderCameraZoom":
+                                {
+                                    var builderbridge = GetBuilderBridge();
+                                    if (builderbridge)
+                                    {
+                                        builderbridge.ResetBuilderCameraZoom();
+                                    }
+                                    break;
+                                }
+                            case "SetGridResolution":
+                                {
+                                    var builderbridge = GetBuilderBridge();
+                                    if (builderbridge)
+                                    {
+                                        builderbridge.SetGridResolution(msg.payload);
+                                    }
+                                    break;
+                                }
+                            case "SetArrowKeyDown":
+                                {
+                                    var builderbridge = GetBuilderBridge();
+                                    if (builderbridge)
+                                    {
+                                        builderbridge.SetArrowKeyDown(msg.payload);
+                                    }
+                                    break;
+                                }
+                            case "UnloadBuilderScene":
+                                {
+                                    var builderbridge = GetBuilderBridge();
+                                    if (builderbridge)
+                                    {
+                                        builderbridge.UnloadBuilderScene(msg.payload);
+                                    }
+                                    break;
+                                }
                             default:
                                 Debug.Log("<b><color=#FF0000>WSSController</color></b> WHAT IS " + msg.type);
                                 break;
@@ -272,6 +396,15 @@ namespace DCL
                 }
             }
 #endif
+        }
+
+        private Builder.DCLBuilderBridge GetBuilderBridge()
+        {
+            if (builderBridge == null)
+            {
+                builderBridge = FindObjectOfType<Builder.DCLBuilderBridge>();
+            }
+            return builderBridge;
         }
     }
 }
