@@ -18,7 +18,6 @@ namespace Builder
 
         private Plane groundPlane;
         private Plane entityHitPlane;
-        private Plane gizmosHitPlane;
 
         private void Awake()
         {
@@ -31,11 +30,6 @@ namespace Builder
         public void SetEntityHitPlane(float height)
         {
             entityHitPlane = new Plane(Vector3.up, new Vector3(0, height, 0));
-        }
-
-        public void SetGizmoHitPlane(Gizmos.DCLBuilderGizmoAxis gizmoAxis)
-        {
-            gizmosHitPlane = new Plane(gizmoAxis.GetGizmo().GetPlaneNormal(), gizmoAxis.transform.position);
         }
 
         public bool Raycast(Vector3 mousePosition, LayerMask mask, out RaycastHit hitInfo, bool checkGizmo = false)
@@ -91,20 +85,6 @@ namespace Builder
             }
 
             return Vector3.zero;
-        }
-
-        public bool RaycastToGizmosHitPlane(Vector3 mousePosition, out Vector3 hitPosition)
-        {
-            Ray ray = GetMouseRay(mousePosition);
-            float enter = 0.0f;
-
-            if (gizmosHitPlane.Raycast(ray, out enter))
-            {
-                hitPosition = ray.GetPoint(enter);
-                return true;
-            }
-            hitPosition = Vector3.zero;
-            return false;
         }
     }
 }

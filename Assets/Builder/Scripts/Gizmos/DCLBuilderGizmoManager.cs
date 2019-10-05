@@ -12,8 +12,8 @@ namespace Builder.Gizmos
         [SerializeField] private DCLBuilderGizmo[] gizmos = null;
 
         public bool isTransformingObject { private set; get; }
+        public DCLBuilderGizmo activeGizmo { private set; get; }
 
-        private DCLBuilderGizmo activeGizmo = null;
         private DCLBuilderEntity targetEntity;
 
         private SnapInfo snapInfo = new SnapInfo();
@@ -103,6 +103,16 @@ namespace Builder.Gizmos
                 return activeGizmo.GetGizmoType();
             }
             return DCL.Components.DCLGizmos.Gizmo.NONE;
+        }
+
+        public bool RaycastHit(Ray ray, out Vector3 hitPoint)
+        {
+            if (activeGizmo != null)
+            {
+                return activeGizmo.RaycastHit(ray, out hitPoint);
+            }
+            hitPoint = Vector3.zero;
+            return false;
         }
 
         private void OnEnable()

@@ -87,7 +87,6 @@ namespace Builder
                     if (gizmosAxis != null)
                     {
                         gizmosManager.OnBeginDrag(gizmosAxis, selectedEntity);
-                        builderRaycast.SetGizmoHitPlane(gizmosAxis);
                     }
                     else
                     {
@@ -99,13 +98,10 @@ namespace Builder
 
                         if (dragInfo.entity != null)
                         {
-                            Debug.Log("unity-client: pressed entity: " + dragInfo.entity.rootEntity.entityId);
                             if (CanSelect(dragInfo.entity))
                             {
-                                Debug.Log("unity-client: can selected entity: " + dragInfo.entity.rootEntity.entityId);
                                 if (dragInfo.entity != selectedEntity)
                                 {
-                                    Debug.Log("unity-client: select entity: " + dragInfo.entity.rootEntity.entityId);
                                     Select(dragInfo.entity);
                                 }
 
@@ -126,11 +122,9 @@ namespace Builder
             {
                 if (dragInfo.isDraggingObject && dragInfo.entity != null)
                 {
-                    Debug.Log("unity-client: drag entity ends: " + dragInfo.entity.rootEntity.entityId);
                     OnDraggingObjectEnd?.Invoke(dragInfo.entity, dragInfo.entity.transform.position);
                 }
 
-                Debug.Log("unity-client: stop drag entity");
                 dragInfo.isDraggingObject = false;
                 dragInfo.entity = null;
 
@@ -184,7 +178,6 @@ namespace Builder
         {
             if (!dragInfo.isDraggingObject && !gizmosManager.isTransformingObject && CanSelect(entity))
             {
-                Debug.Log("unity-client: autoselect entity: " + entity.rootEntity.entityId);
                 Select(entity);
             }
         }
@@ -204,7 +197,6 @@ namespace Builder
             Deselect();
             if (entity != null)
             {
-                Debug.Log("unity-client: do select entity: " + entity.rootEntity.entityId);
                 selectedEntity = entity;
                 selectedEntity.SetSelectLayer();
 
@@ -219,7 +211,6 @@ namespace Builder
                 OnDeselectedObject?.Invoke(entity);
                 if (entity != null)
                 {
-                    Debug.Log("unity-client: do deselect entity: " + entity.rootEntity.entityId);
                     entity.SetDefaultLayer();
                 }
                 selectedEntity = null;
@@ -248,7 +239,6 @@ namespace Builder
 
             entity.transform.position = newPosition;
             boundariesChecker?.EvaluateEntityPosition(selectedEntity.rootEntity);
-            Debug.Log("unity-client: drag entity: " + entity.rootEntity.entityId);
 
             OnDraggingObject?.Invoke(entity, newPosition);
         }
@@ -256,7 +246,7 @@ namespace Builder
         private void UpdateGizmoAxis(Vector3 mousePosition)
         {
             Vector3 hit;
-            if (builderRaycast.RaycastToGizmosHitPlane(mousePosition, out hit))
+            if (gizmosManager.RaycastHit(builderRaycast.GetMouseRay(mousePosition), out hit))
             {
                 gizmosManager.OnDrag(hit);
                 boundariesChecker?.EvaluateEntityPosition(selectedEntity.rootEntity);

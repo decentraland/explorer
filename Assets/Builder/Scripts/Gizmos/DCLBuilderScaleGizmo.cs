@@ -46,15 +46,6 @@ namespace Builder.Gizmos
             prevAxisValue = axisValue;
         }
 
-        public override Vector3 GetPlaneNormal()
-        {
-            if (activeAxis == axisProportionalScale)
-            {
-                return -builderCamera.transform.forward;
-            }
-            return activeAxis.transform.up;
-        }
-
         protected override float GetHitPointToAxisValue(DCLBuilderGizmoAxis axis, Vector3 hitPoint)
         {
             if (axis == axisProportionalScale)

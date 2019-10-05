@@ -22,7 +22,7 @@ namespace Builder.Gizmos
         private bool startDragging = false;
         protected float prevAxisValue;
 
-        protected DCLBuilderGizmoAxis activeAxis;
+        public DCLBuilderGizmoAxis activeAxis { protected set; get; }
 
         public abstract void SetSnapFactor(DCLBuilderGizmoManager.SnapInfo snapInfo);
         public abstract void TransformEntity(Transform targetTransform, DCLBuilderGizmoAxis axis, float axisValue);
@@ -85,9 +85,12 @@ namespace Builder.Gizmos
             activeAxis.SetColorDefault();
         }
 
-        public virtual Vector3 GetPlaneNormal()
+        public virtual bool RaycastHit(Ray ray, out Vector3 hitPoint)
         {
-            return activeAxis.transform.up;
+            Vector3 hitPos = ray.GetPoint(Vector3.Distance(ray.origin, activeAxis.transform.position));
+            Vector3 hitOffset = (hitPos - activeAxis.transform.position);
+            hitPoint = activeAxis.transform.position + Vector3.Project(hitOffset, activeAxis.transform.forward);
+            return true;
         }
 
         protected virtual float GetHitPointToAxisValue(DCLBuilderGizmoAxis axis, Vector3 hitPoint)

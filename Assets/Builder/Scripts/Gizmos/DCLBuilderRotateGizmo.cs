@@ -4,6 +4,8 @@ namespace Builder.Gizmos
 {
     public class DCLBuilderRotateGizmo : DCLBuilderGizmo
     {
+        private Plane raycastPlane;
+
         public override void SetSnapFactor(DCLBuilderGizmoManager.SnapInfo snapInfo)
         {
             snapFactor = snapInfo.rotation;
@@ -16,9 +18,23 @@ namespace Builder.Gizmos
             entityTransform.Rotate(rotationVector, axisValue * Mathf.Rad2Deg, space);
         }
 
-        public override Vector3 GetPlaneNormal()
+        public override void OnBeginDrag(DCLBuilderGizmoAxis axis, Transform entityTransform)
         {
-            return activeAxis.transform.forward;
+            base.OnBeginDrag(axis, entityTransform);
+            raycastPlane = new Plane(activeAxis.transform.forward, transform.position);
+        }
+
+        public override bool RaycastHit(Ray ray, out Vector3 hitPoint)
+        {
+            float enter = 0.0f;
+
+            if (raycastPlane.Raycast(ray, out enter))
+            {
+                hitPoint = ray.GetPoint(enter);
+                return true;
+            }
+            hitPoint = Vector3.zero;
+            return false;
         }
 
         protected override float GetHitPointToAxisValue(DCLBuilderGizmoAxis axis, Vector3 hitPoint)
