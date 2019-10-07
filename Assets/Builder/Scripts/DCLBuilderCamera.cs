@@ -64,7 +64,6 @@ namespace Builder
         private void OnDestroy()
         {
             DCLBuilderBridge.OnPreviewModeChanged -= OnPreviewModeChanged;
-
         }
 
         private void Update()

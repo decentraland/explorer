@@ -30,6 +30,7 @@ namespace Builder
         public static System.Action<KeyCode> OnSetArrowKeyDown;
         public static event SetGridResolutionDelegate OnSetGridResolution;
         public static System.Action<ParcelScene> OnSceneChanged;
+        public static System.Action<string> OnBuilderSelectEntity;
 
         private MouseCatcher mouseCatcher;
         private ParcelScene currentScene;
@@ -215,6 +216,11 @@ namespace Builder
             SceneController.i?.UnloadScene(sceneKey);
         }
 
+        public void SelectEntity(string entityId)
+        {
+            OnBuilderSelectEntity?.Invoke(entityId);
+        }
+
         #endregion
 
         private static ParcelScene GetLoadedScene()
@@ -248,6 +254,7 @@ namespace Builder
 
             SceneController.i?.fpsPanel.SetActive(false);
             SetCaptureKeyboardInputEnabled(false);
+            RemoveNoneBuilderGameObjects();
         }
 
         private void Start()
@@ -408,6 +415,19 @@ namespace Builder
             outOfBoundariesEventPayload.entities = outOfBoundariesEntitiesId.ToArray();
             WebInterface.SendSceneEvent<EntitiesOutOfBoundariesEventPayload>(currentScene.sceneData.id, "entitiesOutOfBoundaries", outOfBoundariesEventPayload);
             currentScene.boundariesChecker?.EvaluateEntityPosition(entity.rootEntity);
+        }
+
+        private void RemoveNoneBuilderGameObjects()
+        {
+            GameObject go = GameObject.Find("HUDController");
+            if (go) Destroy(go.gameObject);
+            go = GameObject.Find("Minimap");
+            if (go) Destroy(go.gameObject);
+            go = GameObject.Find("_AvatarHUD");
+            if (go) Destroy(go.gameObject);
+            go = GameObject.Find("_MinimapHUD");
+            if (go) Destroy(go.gameObject);
+
         }
     }
 }

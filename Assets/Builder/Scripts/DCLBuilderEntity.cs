@@ -28,6 +28,7 @@ namespace Builder
         }
 
         private DCLBuilderSelectionCollider[] meshColliders;
+        private Action onShapeLoaded;
 
         public void SetEntity(DecentralandEntity entity)
         {
@@ -48,7 +49,7 @@ namespace Builder
                 meshColliders = null;
             }
 
-            if (entity.meshesInfo.currentShape != null)
+            if (HasShape())
             {
                 OnShapeUpdated(entity);
             }
@@ -87,6 +88,23 @@ namespace Builder
             }
         }
 
+        public bool HasShape()
+        {
+            return meshColliders != null;
+        }
+
+        public void SetOnShapeLoaded(Action onShapeLoad)
+        {
+            if (HasShape())
+            {
+                if (onShapeLoad != null) onShapeLoad();
+            }
+            else
+            {
+                onShapeLoaded = onShapeLoad;
+            }
+        }
+
         private void OnDestroy()
         {
             rootEntity.OnShapeUpdated -= OnShapeUpdated;
@@ -97,6 +115,12 @@ namespace Builder
         {
             OnEntityShapeUpdated?.Invoke(this);
             ProcessEntityShape(entity);
+
+            if (onShapeLoaded != null)
+            {
+                onShapeLoaded();
+                onShapeLoaded = null;
+            }
         }
 
         private void OnTransformUpdated(DCLTransform.Model transformModel)

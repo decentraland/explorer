@@ -386,6 +386,15 @@ namespace DCL
                                     }
                                     break;
                                 }
+                            case "SelectEntity":
+                                {
+                                    var builderbridge = GetBuilderBridge();
+                                    if (builderbridge)
+                                    {
+                                        builderbridge.SelectEntity(msg.payload);
+                                    }
+                                    break;
+                                }
                             default:
                                 Debug.Log("<b><color=#FF0000>WSSController</color></b> WHAT IS " + msg.type);
                                 break;

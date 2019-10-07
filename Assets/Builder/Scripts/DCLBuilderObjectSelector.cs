@@ -28,6 +28,7 @@ namespace Builder
         private bool isGameObjectActive = false;
 
         private SceneBoundariesChecker boundariesChecker;
+        private ParcelScene currentScene;
 
         private void Awake()
         {
@@ -47,10 +48,10 @@ namespace Builder
                 DCLBuilderInput.OnMouseDrag += OnMouseDrag;
                 DCLBuilderInput.OnMouseUp += OnMouseUp;
                 DCLBuilderBridge.OnResetObject += OnResetObject;
-                DCLBuilderBridge.OnEntityAdded += OnEntityAdded;
                 DCLBuilderBridge.OnEntityRemoved += OnEntityRemoved;
                 DCLBuilderBridge.OnSetGridResolution += OnSetGridResolution;
                 DCLBuilderBridge.OnSceneChanged += OnSceneChanged;
+                DCLBuilderBridge.OnBuilderSelectEntity += OnBuilderSelectEntity;
             }
             isGameObjectActive = true;
         }
@@ -62,10 +63,10 @@ namespace Builder
             DCLBuilderInput.OnMouseDrag -= OnMouseDrag;
             DCLBuilderInput.OnMouseUp -= OnMouseUp;
             DCLBuilderBridge.OnResetObject -= OnResetObject;
-            DCLBuilderBridge.OnEntityAdded -= OnEntityAdded;
             DCLBuilderBridge.OnEntityRemoved -= OnEntityRemoved;
             DCLBuilderBridge.OnSetGridResolution -= OnSetGridResolution;
             DCLBuilderBridge.OnSceneChanged -= OnSceneChanged;
+            DCLBuilderBridge.OnBuilderSelectEntity -= OnBuilderSelectEntity;
         }
 
         private void Update()
@@ -174,17 +175,25 @@ namespace Builder
             }
         }
 
-        private void OnEntityAdded(DCLBuilderEntity entity)
-        {
-            if (!dragInfo.isDraggingObject && !gizmosManager.isTransformingObject && CanSelect(entity))
-            {
-                Select(entity);
-            }
-        }
-
         private void OnSceneChanged(ParcelScene scene)
         {
             boundariesChecker = scene.boundariesChecker;
+            currentScene = scene;
+        }
+
+        private void OnBuilderSelectEntity(string entityId)
+        {
+            if (currentScene && currentScene.entities.ContainsKey(entityId))
+            {
+                DCLBuilderEntity entity = currentScene.entities[entityId].gameObject.GetComponent<DCLBuilderEntity>();
+                if (entity && !dragInfo.isDraggingObject && !gizmosManager.isTransformingObject && CanSelect(entity))
+                {
+                    entity.SetOnShapeLoaded(() =>
+                    {
+                        Select(entity);
+                    });
+                }
+            }
         }
 
         private bool CanSelect(DCLBuilderEntity entity)
@@ -264,19 +273,6 @@ namespace Builder
             else
             {
                 gizmosManager.SetAxisHover(null);
-            }
-        }
-
-        private void ChangeLayersRecursively(Transform root, int layer, int currentLayer)
-        {
-            for (int i = 0; i < root.childCount; i++)
-            {
-                Transform child = root.GetChild(i);
-                if (child.gameObject.layer == currentLayer)
-                {
-                    child.gameObject.layer = layer;
-                    ChangeLayersRecursively(child, layer, currentLayer);
-                }
             }
         }
 
