@@ -43,9 +43,9 @@ namespace UnityGLTF
     }
 
     /// <summary>
-	/// Converts gltf animation data to unity
-	/// </summary>
-	public delegate float[] ValuesConvertion(NumericArray data, int frame);
+    /// Converts gltf animation data to unity
+    /// </summary>
+    public delegate float[] ValuesConvertion(NumericArray data, int frame);
 
     public class GLTFSceneImporter : IDisposable
     {
@@ -281,7 +281,6 @@ namespace UnityGLTF
                 }
 
                 yield return _LoadScene(sceneIndex, showSceneObj);
-
 
                 if (PROFILING_ENABLED)
                 {
@@ -726,7 +725,7 @@ namespace UnityGLTF
 
             //  NOTE: the second parameter of LoadImage() marks non-readable, but we can't mark it until after we call Apply()
             texture.LoadImage(buffer, markGpuOnly);
-            texture = CheckAndReduceTextureSize(texture);
+            //texture = CheckAndReduceTextureSize(texture);
 
             _assetCache.ImageCache[imageCacheIndex] = texture;
 
@@ -1021,11 +1020,11 @@ namespace UnityGLTF
                         // var targetCount = primitives[0].Targets.Count;
                         // for (int primitiveIndex = 0; primitiveIndex < primitives.Count; primitiveIndex++)
                         // {
-                        // 	for (int targetIndex = 0; targetIndex < targetCount; targetIndex++)
-                        // 	{
+                        //  for (int targetIndex = 0; targetIndex < targetCount; targetIndex++)
+                        //  {
                         //
-                        // 		//clip.SetCurve(primitiveObjPath, typeof(SkinnedMeshRenderer), "blendShape." + targetIndex, curves[targetIndex]);
-                        // 	}
+                        //      //clip.SetCurve(primitiveObjPath, typeof(SkinnedMeshRenderer), "blendShape." + targetIndex, curves[targetIndex]);
+                        //  }
                         // }
                         break;
 
@@ -2188,6 +2187,22 @@ namespace UnityGLTF
             for (int i = 0; i < 2; i++)
             {
                 string materialCRC = material[i].ComputeCRC().ToString() + material[i].name;
+
+                if (Application.isEditor)
+                {
+                    switch (i)
+                    {
+                        case MATERIAL:
+                            materialWrapper.CachedMaterial = new RefCountedMaterialData(materialCRC, material[i]);
+                            break;
+                        case MATERIAL_WITH_VERTEX_COLORS:
+                            materialWrapper.CachedMaterialWithVertexColor = new RefCountedMaterialData(materialCRC, material[i]);
+                            break;
+                    }
+
+                    continue;
+                }
+
 
                 //TODO(Brian): Remove old material here if the material won't be used. 
                 //             (We can use Resources.UnloadUnusedAssets too, but I hate to rely on this)
