@@ -19,25 +19,6 @@ public static class AssetBundleBuilder
         ExportSceneToAssetBundles("QmbKgHPENpzGGEfagGP5BbEd7CvqXeXuuXLeMEkuswGvrK", "");
     }
 
-    /// <summary>
-    /// Gets the relative path ("..\..\to_file_or_dir") of another file or directory (to) in relation to the current file/dir (from)
-    /// </summary>
-    /// <param name="to"></param>
-    /// <param name="from"></param>
-    /// <returns></returns>
-    public static string GetRelativePathTo(string from, string to)
-    {
-        var fromPath = Path.GetFullPath(from);
-        var toPath = Path.GetFullPath(to);
-
-        var fromUri = new Uri(fromPath);
-        var toUri = new Uri(toPath);
-
-        var relativeUri = fromUri.MakeRelativeUri(toUri);
-        var relativePath = Uri.UnescapeDataString(relativeUri.ToString());
-
-        return relativePath.Replace('/', Path.DirectorySeparatorChar);
-    }
 
     [System.Serializable]
     public class ParcelInfoAPI
@@ -237,6 +218,27 @@ public static class AssetBundleBuilder
         {
             dir.Delete(true);
         }
+    }
+
+
+    /// <summary>
+    /// Gets the relative path ("..\..\to_file_or_dir") of another file or directory (to) in relation to the current file/dir (from)
+    /// </summary>
+    /// <param name="to"></param>
+    /// <param name="from"></param>
+    /// <returns></returns>
+    public static string GetRelativePathTo(string from, string to)
+    {
+        var fromPath = Path.GetFullPath(from);
+        var toPath = Path.GetFullPath(to);
+
+        var fromUri = new Uri(fromPath);
+        var toUri = new Uri(toPath);
+
+        var relativeUri = fromUri.MakeRelativeUri(toUri);
+        var relativePath = Uri.UnescapeDataString(relativeUri.ToString());
+
+        return relativePath.Replace('/', Path.DirectorySeparatorChar);
     }
 
 }
