@@ -38,7 +38,29 @@ public static class AssetBundleBuilder
         public Data[] data;
     }
 
-    private static void ExportSceneToAssetBundles(string sceneCid, string putUrl)
+    class MappingPairFilter
+    {
+        public Dictionary<string, DCL.ContentProvider.MappingPair> hashToFilteredPair;
+
+        public void Filter(string[] extensions)
+        {
+        }
+    }
+
+    static string[] textureExtensions = { ".jpg", ".png" };
+    static string[] gltfExtensions = { ".glb", ".gltf" };
+    static List<string> assetBundleOutputPaths = new List<string>();
+    static Dictionary<string, AssetBundle> stringToAB = new Dictionary<string, AssetBundle>();
+    static Dictionary<string, DCL.ContentProvider.MappingPair> hashToTexturePair = new Dictionary<string, DCL.ContentProvider.MappingPair>();
+    static Dictionary<string, DCL.ContentProvider.MappingPair> hashToGltfPair = new Dictionary<string, DCL.ContentProvider.MappingPair>();
+
+    public static void ExportSceneToAssetBundles()
+    {
+        //TODO(Brian): Read arguments from command line
+        ExportSceneToAssetBundles_Internal("QmSAIOJDAOSIDJO");
+    }
+
+    private static void ExportSceneToAssetBundles_Internal(string sceneCid)
     {
         InitializeDirectory(DOWNLOADED_PATH);
         InitializeDirectory(ASSET_BUNDLES_PATH);
@@ -57,12 +79,11 @@ public static class AssetBundleBuilder
         contentProvider.baseUrl = "https://content.decentraland.org/contents/";
         contentProvider.BakeHashes();
 
-        string[] textureExtensions = { ".jpg", ".png" };
-        string[] gltfExtensions = { ".glb", ".gltf" };
-        List<string> assetBundleOutputPaths = new List<string>();
-        Dictionary<string, AssetBundle> stringToAB = new Dictionary<string, AssetBundle>();
-        Dictionary<string, DCL.ContentProvider.MappingPair> hashToTexturePair = new Dictionary<string, DCL.ContentProvider.MappingPair>();
-        Dictionary<string, DCL.ContentProvider.MappingPair> hashToGltfPair = new Dictionary<string, DCL.ContentProvider.MappingPair>();
+        var contentProviderAB = new DCL.ContentProvider();
+        contentProviderAB.contents = new List<DCL.ContentProvider.MappingPair>(rawContents);
+        contentProviderAB.baseUrl = "https://content.decentraland.org/contents/";
+        contentProviderAB.BakeHashes();
+
 
         //TODO: Download all jpg/png files
         foreach (var mappingPair in rawContents)
@@ -92,6 +113,7 @@ public static class AssetBundleBuilder
 
         foreach (string hash in textureHashes)
         {
+            //TODO(Brian): try to get an AB before getting the original texture, so we bind the dependencies correctly
             string finalUrl = contentProvider.GetContentsUrl(hashToTexturePair[hash].file);
 
             UnityWebRequest req = UnityWebRequest.Get(finalUrl);
@@ -170,7 +192,7 @@ public static class AssetBundleBuilder
         EditorApplication.delayCall += () =>
         {
             AssetDatabase.SaveAssets();
-            var manifest = BuildPipeline.BuildAssetBundles(ASSET_BUNDLES_PATH, BuildAssetBundleOptions.None, BuildTarget.WebGL);
+            var manifest = BuildPipeline.BuildAssetBundles(ASSET_BUNDLES_PATH, BuildAssetBundleOptions.UncompressedAssetBundle, BuildTarget.WebGL);
 
             string[] abs = manifest.GetAllAssetBundles();
 
