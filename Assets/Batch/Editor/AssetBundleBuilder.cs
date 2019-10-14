@@ -16,7 +16,7 @@ public static class AssetBundleBuilder
     [MenuItem("AssetBundleBuilder/Download Test")]
     public static void TestExample()
     {
-        ExportSceneToAssetBundles("QmbKgHPENpzGGEfagGP5BbEd7CvqXeXuuXLeMEkuswGvrK", "");
+        ExportSceneToAssetBundles_Internal("QmbKgHPENpzGGEfagGP5BbEd7CvqXeXuuXLeMEkuswGvrK");
     }
 
 
@@ -38,21 +38,7 @@ public static class AssetBundleBuilder
         public Data[] data;
     }
 
-    class MappingPairFilter
-    {
-        public Dictionary<string, DCL.ContentProvider.MappingPair> hashToFilteredPair;
 
-        public void Filter(string[] extensions)
-        {
-        }
-    }
-
-    static string[] textureExtensions = { ".jpg", ".png" };
-    static string[] gltfExtensions = { ".glb", ".gltf" };
-    static List<string> assetBundleOutputPaths = new List<string>();
-    static Dictionary<string, AssetBundle> stringToAB = new Dictionary<string, AssetBundle>();
-    static Dictionary<string, DCL.ContentProvider.MappingPair> hashToTexturePair = new Dictionary<string, DCL.ContentProvider.MappingPair>();
-    static Dictionary<string, DCL.ContentProvider.MappingPair> hashToGltfPair = new Dictionary<string, DCL.ContentProvider.MappingPair>();
 
     public static void ExportSceneToAssetBundles()
     {
@@ -84,70 +70,36 @@ public static class AssetBundleBuilder
         contentProviderAB.baseUrl = "https://content.decentraland.org/contents/";
         contentProviderAB.BakeHashes();
 
+        string[] textureExtensions = { ".jpg", ".png" };
+        string[] gltfExtensions = { ".glb", ".gltf" };
 
-        //TODO: Download all jpg/png files
-        foreach (var mappingPair in rawContents)
+        List<string> assetBundleOutputPaths = new List<string>();
+
+        var stringToAB = new Dictionary<string, AssetBundle>();
+        var hashToTexturePair = new Dictionary<string, DCL.ContentProvider.MappingPair>();
+        var hashToGltfPair = new Dictionary<string, DCL.ContentProvider.MappingPair>();
+
+        hashToTexturePair = FilterExtensions(rawContents, textureExtensions);
+        hashToGltfPair = FilterExtensions(rawContents, gltfExtensions);
+
+        //NOTE(Brian): Prepare textures
+        foreach (var kvp in hashToTexturePair)
         {
-            bool endsWithTextureExtensions = textureExtensions.Any((x) => mappingPair.file.ToLower().EndsWith(x));
-
-            if (endsWithTextureExtensions)
-            {
-                if (!hashToTexturePair.ContainsKey(mappingPair.hash))
-                {
-                    hashToTexturePair.Add(mappingPair.hash, mappingPair);
-                }
-            }
-
-            bool endsWithGltfExtensions = gltfExtensions.Any((x) => mappingPair.file.ToLower().EndsWith(x));
-
-            if (endsWithGltfExtensions)
-            {
-                if (!hashToGltfPair.ContainsKey(mappingPair.hash))
-                {
-                    hashToGltfPair.Add(mappingPair.hash, mappingPair);
-                }
-            }
-        }
-
-        string[] textureHashes = hashToTexturePair.Keys.ToArray();
-
-        foreach (string hash in textureHashes)
-        {
+            string hash = kvp.Key;
             //TODO(Brian): try to get an AB before getting the original texture, so we bind the dependencies correctly
-            string finalUrl = contentProvider.GetContentsUrl(hashToTexturePair[hash].file);
-
-            UnityWebRequest req = UnityWebRequest.Get(finalUrl);
-            req.SendWebRequest();
-            while (req.isDone == false) { }
-
-            //TODO: Make AB with jpg/png files
-            string fileExt = Path.GetExtension(hashToTexturePair[hash].file);
-            string outputPath = DOWNLOADED_PATH + hash + fileExt;
-            string outputPathDir = Path.GetDirectoryName(outputPath);
-
-            if (!Directory.Exists(outputPathDir))
-                Directory.CreateDirectory(outputPathDir);
-
-            File.WriteAllBytes(outputPath, req.downloadHandler.data);
-
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
-            AssetImporter importer = null;
-
-            importer = AssetImporter.GetAtPath(DOWNLOADED_ASSET_DB_PATH + hash + fileExt);
-
-            importer.SetAssetBundleNameAndVariant(hash, "");
+            PrepareUrlContentsForBundleBuild(contentProvider, hashToTexturePair, hash);
         }
 
-        string[] gltfHashes = hashToGltfPair.Keys.ToArray();
-
-        foreach (string gltfHash in gltfHashes)
+        //NOTE(Brian): Prepare gltfs
+        foreach (var kvp in hashToGltfPair)
         {
+            string gltfHash = kvp.Key;
             PersistentAssetCache.ImageCacheByUri.Clear();
 
             foreach (var mappingPair in rawContents)
             {
                 bool endsWithTextureExtensions = textureExtensions.Any((x) => mappingPair.file.ToLower().EndsWith(x));
+
                 if (endsWithTextureExtensions)
                 {
                     string relativePath = GetRelativePathTo(hashToGltfPair[gltfHash].file, mappingPair.file);
@@ -155,34 +107,13 @@ public static class AssetBundleBuilder
                     string outputPath = DOWNLOADED_ASSET_DB_PATH + mappingPair.hash + fileExt;
 
                     Texture2D t2d = AssetDatabase.LoadAssetAtPath<Texture2D>(outputPath);
+                    //NOTE(Brian): This cache will be used by the GLTF importer when seeking textures. This way the importer will
+                    //             consume the asset bundle dependencies instead of trying to create new textures.
                     PersistentAssetCache.ImageCacheByUri[relativePath] = new RefCountedTextureData(relativePath, t2d);
                 }
             }
 
-            {
-                string finalUrl = contentProvider.GetContentsUrl(hashToGltfPair[gltfHash].file);
-                UnityWebRequest req = UnityWebRequest.Get(finalUrl);
-                req.SendWebRequest();
-                while (req.isDone == false) { }
-
-                //TODO: Import GLTF so it uses the new images
-                string fileExt = Path.GetExtension(hashToGltfPair[gltfHash].file);
-                string outputPath = DOWNLOADED_PATH + gltfHash + "/" + gltfHash + fileExt;
-                string outputPathDir = Path.GetDirectoryName(outputPath);
-
-                if (!Directory.Exists(outputPathDir))
-                    Directory.CreateDirectory(outputPathDir);
-
-                File.WriteAllBytes(outputPath, req.downloadHandler.data);
-
-                AssetDatabase.SaveAssets();
-                AssetDatabase.Refresh();
-
-                AssetImporter importer = null;
-
-                importer = AssetImporter.GetAtPath(DOWNLOADED_ASSET_DB_PATH + gltfHash + "/" + gltfHash + fileExt);
-                importer.SetAssetBundleNameAndVariant(gltfHash, "");
-            }
+            PrepareUrlContentsForBundleBuild(contentProvider, hashToGltfPair, gltfHash, gltfHash + "/");
         }
 
 
@@ -194,25 +125,26 @@ public static class AssetBundleBuilder
             AssetDatabase.SaveAssets();
             var manifest = BuildPipeline.BuildAssetBundles(ASSET_BUNDLES_PATH, BuildAssetBundleOptions.UncompressedAssetBundle, BuildTarget.WebGL);
 
-            string[] abs = manifest.GetAllAssetBundles();
+            string[] assetBundles = manifest.GetAllAssetBundles();
 
-            for (int i = 0; i < abs.Length; i++)
+            for (int i = 0; i < assetBundles.Length; i++)
             {
-                if (string.IsNullOrEmpty(abs[i]))
+                if (string.IsNullOrEmpty(assetBundles[i]))
                     continue;
 
-                DCL.ContentProvider.MappingPair pair = contentProvider.contents.FirstOrDefault((x) => abs[i].Contains(x.hash.ToLower()));
+                DCL.ContentProvider.MappingPair pair = contentProvider.contents.FirstOrDefault((x) => assetBundles[i].Contains(x.hash.ToLower()));
 
                 if (pair == null)
                 {
                     continue;
                 }
 
+                //NOTE(Brian): This is done for correctness sake, rename files to preserve the hash upper-case
                 string hashWithUppercase = pair.hash;
-                string oldPath = ASSET_BUNDLES_PATH + abs[i];
+                string oldPath = ASSET_BUNDLES_PATH + assetBundles[i];
                 string path = ASSET_BUNDLES_PATH + hashWithUppercase;
 
-                string oldPathMf = ASSET_BUNDLES_PATH + abs[i] + ".manifest";
+                string oldPathMf = ASSET_BUNDLES_PATH + assetBundles[i] + ".manifest";
                 string pathMf = ASSET_BUNDLES_PATH + hashWithUppercase + ".manifest";
 
                 File.Move(oldPath, path);
@@ -221,6 +153,31 @@ public static class AssetBundleBuilder
         };
 
         AssetDatabase.Refresh();
+    }
+
+    private static void PrepareUrlContentsForBundleBuild(DCL.ContentProvider contentProvider, Dictionary<string, DCL.ContentProvider.MappingPair> filteredPairs, string hash, string additionalPath = "")
+    {
+        string finalUrl = contentProvider.GetContentsUrl(filteredPairs[hash].file);
+
+        UnityWebRequest req = UnityWebRequest.Get(finalUrl);
+        req.SendWebRequest();
+        while (req.isDone == false) { }
+
+        //TODO: Make AB with jpg/png files
+        string fileExt = Path.GetExtension(filteredPairs[hash].file);
+        string outputPath = DOWNLOADED_PATH + additionalPath + hash + fileExt;
+        string outputPathDir = Path.GetDirectoryName(outputPath);
+
+        if (!Directory.Exists(outputPathDir))
+            Directory.CreateDirectory(outputPathDir);
+
+        File.WriteAllBytes(outputPath, req.downloadHandler.data);
+
+        AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
+
+        AssetImporter importer = AssetImporter.GetAtPath(DOWNLOADED_ASSET_DB_PATH + additionalPath + hash + fileExt);
+        importer.SetAssetBundleNameAndVariant(hash, "");
     }
 
     private static void InitializeDirectory(string path)
@@ -240,6 +197,28 @@ public static class AssetBundleBuilder
         {
             dir.Delete(true);
         }
+    }
+
+    public static Dictionary<string, DCL.ContentProvider.MappingPair> FilterExtensions(DCL.ContentProvider.MappingPair[] pairsToSearch, string[] extensions)
+    {
+        var result = new Dictionary<string, DCL.ContentProvider.MappingPair>();
+
+        for (int i = 0; i < pairsToSearch.Length; i++)
+        {
+            DCL.ContentProvider.MappingPair mappingPair = pairsToSearch[i];
+
+            bool hasExtension = extensions.Any((x) => mappingPair.file.ToLower().EndsWith(x));
+
+            if (hasExtension)
+            {
+                if (!result.ContainsKey(mappingPair.hash))
+                {
+                    result.Add(mappingPair.hash, mappingPair);
+                }
+            }
+        }
+
+        return result;
     }
 
 
