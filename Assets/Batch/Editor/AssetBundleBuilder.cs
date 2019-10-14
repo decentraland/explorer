@@ -67,7 +67,7 @@ public static class AssetBundleBuilder
 
         var contentProviderAB = new DCL.ContentProvider();
         contentProviderAB.contents = new List<DCL.ContentProvider.MappingPair>(rawContents);
-        contentProviderAB.baseUrl = "https://content.decentraland.org/contents/";
+        contentProviderAB.baseUrl = "https://asset-bundle-content.decentraland.org/contents/";
         contentProviderAB.BakeHashes();
 
         string[] textureExtensions = { ".jpg", ".png" };
@@ -82,15 +82,21 @@ public static class AssetBundleBuilder
         hashToTexturePair = FilterExtensions(rawContents, textureExtensions);
         hashToGltfPair = FilterExtensions(rawContents, gltfExtensions);
 
-        //NOTE(Brian): Prepare textures
+        //NOTE(Brian): Prepare textures. We should prepare all the dependencies in this phase.
         foreach (var kvp in hashToTexturePair)
         {
             string hash = kvp.Key;
-            //TODO(Brian): try to get an AB before getting the original texture, so we bind the dependencies correctly
-            PrepareUrlContentsForBundleBuild(contentProvider, hashToTexturePair, hash);
+
+            //NOTE(Brian): try to get an AB before getting the original texture, so we bind the dependencies correctly
+            bool dependencyAlreadyIsAB = PrepareUrlContents(contentProviderAB, hashToTexturePair, hash);
+
+            if (!dependencyAlreadyIsAB)
+            {
+                PrepareUrlContentsForBundleBuild(contentProvider, hashToTexturePair, hash);
+            }
         }
 
-        //NOTE(Brian): Prepare gltfs
+        //NOTE(Brian): Prepare gltfs gathering its dependencies first and filling the importer's static cache.
         foreach (var kvp in hashToGltfPair)
         {
             string gltfHash = kvp.Key;
@@ -107,9 +113,13 @@ public static class AssetBundleBuilder
                     string outputPath = DOWNLOADED_ASSET_DB_PATH + mappingPair.hash + fileExt;
 
                     Texture2D t2d = AssetDatabase.LoadAssetAtPath<Texture2D>(outputPath);
-                    //NOTE(Brian): This cache will be used by the GLTF importer when seeking textures. This way the importer will
-                    //             consume the asset bundle dependencies instead of trying to create new textures.
-                    PersistentAssetCache.ImageCacheByUri[relativePath] = new RefCountedTextureData(relativePath, t2d);
+
+                    if (t2d != null)
+                    {
+                        //NOTE(Brian): This cache will be used by the GLTF importer when seeking textures. This way the importer will
+                        //             consume the asset bundle dependencies instead of trying to create new textures.
+                        PersistentAssetCache.ImageCacheByUri[relativePath] = new RefCountedTextureData(relativePath, t2d);
+                    }
                 }
             }
 
@@ -150,18 +160,28 @@ public static class AssetBundleBuilder
                 File.Move(oldPath, path);
                 File.Move(oldPathMf, pathMf);
             }
+
+            UploadBundles(assetBundles);
         };
 
         AssetDatabase.Refresh();
     }
 
-    private static void PrepareUrlContentsForBundleBuild(DCL.ContentProvider contentProvider, Dictionary<string, DCL.ContentProvider.MappingPair> filteredPairs, string hash, string additionalPath = "")
+    private static void UploadBundles(string[] bundleNames)
+    {
+        //TODO(Brian): Implement me.
+    }
+
+    private static bool PrepareUrlContents(DCL.ContentProvider contentProvider, Dictionary<string, DCL.ContentProvider.MappingPair> filteredPairs, string hash, string additionalPath = "")
     {
         string finalUrl = contentProvider.GetContentsUrl(filteredPairs[hash].file);
 
         UnityWebRequest req = UnityWebRequest.Get(finalUrl);
         req.SendWebRequest();
         while (req.isDone == false) { }
+
+        if (req.isHttpError)
+            return false;
 
         //TODO: Make AB with jpg/png files
         string fileExt = Path.GetExtension(filteredPairs[hash].file);
@@ -175,9 +195,17 @@ public static class AssetBundleBuilder
 
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
+        return true;
+    }
 
+    private static bool PrepareUrlContentsForBundleBuild(DCL.ContentProvider contentProvider, Dictionary<string, DCL.ContentProvider.MappingPair> filteredPairs, string hash, string additionalPath = "")
+    {
+        PrepareUrlContents(contentProvider, filteredPairs, hash, additionalPath);
+
+        string fileExt = Path.GetExtension(filteredPairs[hash].file);
         AssetImporter importer = AssetImporter.GetAtPath(DOWNLOADED_ASSET_DB_PATH + additionalPath + hash + fileExt);
         importer.SetAssetBundleNameAndVariant(hash, "");
+        return true;
     }
 
     private static void InitializeDirectory(string path)
