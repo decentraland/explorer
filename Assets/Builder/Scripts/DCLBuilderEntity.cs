@@ -79,7 +79,7 @@ namespace Builder
         public void SetDefaultLayer()
         {
             int selectionLayer = 0;
-            if (rootEntity.meshesInfo != null)
+            if (rootEntity.meshesInfo != null && rootEntity.meshesInfo.renderers != null)
             {
                 for (int i = 0; i < rootEntity.meshesInfo.renderers.Length; i++)
                 {

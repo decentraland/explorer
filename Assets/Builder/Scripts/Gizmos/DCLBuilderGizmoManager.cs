@@ -124,6 +124,7 @@ namespace Builder.Gizmos
                 DCLBuilderBridge.OnSetGridResolution += OnSetGridResolution;
                 DCLBuilderCamera.OnCameraZoomChanged += OnCameraZoomChanged;
                 DCLBuilderObjectSelector.OnSelectedObject += OnEntitySelected;
+                DCLBuilderObjectSelector.OnDeselectedObject += OnEntityDeselected;
                 isGameObjectActive = true;
             }
         }
@@ -135,6 +136,7 @@ namespace Builder.Gizmos
             DCLBuilderBridge.OnSetGridResolution -= OnSetGridResolution;
             DCLBuilderCamera.OnCameraZoomChanged -= OnCameraZoomChanged;
             DCLBuilderObjectSelector.OnSelectedObject -= OnEntitySelected;
+            DCLBuilderObjectSelector.OnDeselectedObject -= OnEntityDeselected;
             isGameObjectActive = false;
         }
 
@@ -198,6 +200,19 @@ namespace Builder.Gizmos
         }
 
         private void OnEntityRemoved(DCLBuilderEntity entity)
+        {
+            if (targetEntity == entity)
+            {
+                if (IsGizmoActive())
+                {
+                    HideGizmo();
+                }
+                isTransformingObject = false;
+                targetEntity = null;
+            }
+        }
+
+        private void OnEntityDeselected(DCLBuilderEntity entity)
         {
             if (targetEntity == entity)
             {

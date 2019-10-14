@@ -63,6 +63,11 @@ namespace Builder
         public bool RaycastToGround(Vector3 mousePosition, out Vector3 hitPosition)
         {
             Ray ray = GetMouseRay(mousePosition);
+            return RaycastToGround(ray, out hitPosition);
+        }
+
+        public bool RaycastToGround(Ray ray, out Vector3 hitPosition)
+        {
             float enter = 0.0f;
 
             if (groundPlane.Raycast(ray, out enter))

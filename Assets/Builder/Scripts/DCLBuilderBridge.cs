@@ -84,7 +84,15 @@ namespace Builder
             public string eventType = "builderSceneStart";
         }
 
+        [System.Serializable]
+        private class ReportCameraTargetPosition
+        {
+            public Vector3 cameraTarget;
+            public string id;
+        }
+
         private static OnEntityLoadingEvent onGetLoadingEntity = new OnEntityLoadingEvent();
+        private static ReportCameraTargetPosition onReportCameraTarget = new ReportCameraTargetPosition();
 
         #region "Messages from Explorer"
 
@@ -219,6 +227,19 @@ namespace Builder
         public void SelectEntity(string entityId)
         {
             OnBuilderSelectEntity?.Invoke(entityId);
+        }
+
+        public void GetCameraTargetBuilder(string id)
+        {
+            Vector3 targetPosition;
+            Camera builderCamera = builderRaycast.builderCamera;
+            if (builderRaycast.RaycastToGround(builderCamera.ScreenPointToRay(new Vector3(Screen.width * 0.5f, Screen.height * 0.5f, builderCamera.nearClipPlane)),
+                out targetPosition))
+            {
+                onReportCameraTarget.cameraTarget = targetPosition;
+                onReportCameraTarget.id = id;
+                WebInterface.SendMessage("ReportBuilderCameraTarget", onReportCameraTarget);
+            }
         }
 
         #endregion

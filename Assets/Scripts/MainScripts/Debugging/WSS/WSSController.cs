@@ -270,131 +270,50 @@ namespace DCL
                                 sceneController.UpdateParcelScenes(msg.payload);
                                 break;
                             case "GetMousePosition":
-                                {
-                                    var builderbridge = GetBuilderBridge();
-                                    if (builderbridge)
-                                    {
-                                        builderbridge.GetMousePosition(msg.payload);
-                                    }
-                                    break;
-                                }
+                                GetBuilderBridge()?.GetMousePosition(msg.payload);
+                                break;
                             case "SelectGizmo":
-                                {
-                                    var builderbridge = GetBuilderBridge();
-                                    if (builderbridge)
-                                    {
-                                        builderbridge.SelectGizmo(msg.payload);
-                                    }
-                                    break;
-                                }
+                                GetBuilderBridge()?.SelectGizmo(msg.payload);
+                                break;
                             case "ResetObject":
-                                {
-                                    var builderbridge = GetBuilderBridge();
-                                    if (builderbridge)
-                                    {
-                                        builderbridge.ResetObject();
-                                    }
-                                    break;
-                                }
+                                GetBuilderBridge()?.ResetObject();
+                                break;
                             case "ZoomDelta":
-                                {
-                                    var builderbridge = GetBuilderBridge();
-                                    if (builderbridge)
-                                    {
-                                        builderbridge.ZoomDelta(msg.payload);
-                                    }
-                                    break;
-                                }
+                                GetBuilderBridge()?.ZoomDelta(msg.payload);
+                                break;
                             case "SetPlayMode":
-                                {
-                                    var builderbridge = GetBuilderBridge();
-                                    if (builderbridge)
-                                    {
-                                        builderbridge.SetPlayMode(msg.payload);
-                                    }
-                                    break;
-                                }
+                                GetBuilderBridge()?.SetPlayMode(msg.payload);
+                                break;
                             case "TakeScreenshot":
-                                {
-                                    var builderbridge = GetBuilderBridge();
-                                    if (builderbridge)
-                                    {
-                                        builderbridge.TakeScreenshot(msg.payload);
-                                    }
-                                    break;
-                                }
+                                GetBuilderBridge()?.TakeScreenshot(msg.payload);
+                                break;
                             case "ResetBuilderScene":
-                                {
-                                    var builderbridge = GetBuilderBridge();
-                                    if (builderbridge)
-                                    {
-                                        builderbridge.ResetBuilderScene();
-                                    }
-                                    break;
-                                }
+                                GetBuilderBridge()?.ResetBuilderScene();
+                                break;
                             case "SetBuilderCameraPosition":
-                                {
-                                    var builderbridge = GetBuilderBridge();
-                                    if (builderbridge)
-                                    {
-                                        builderbridge.SetBuilderCameraPosition(msg.payload);
-                                    }
-                                    break;
-                                }
+                                GetBuilderBridge()?.SetBuilderCameraPosition(msg.payload);
+                                break;
                             case "SetBuilderCameraRotation":
-                                {
-                                    var builderbridge = GetBuilderBridge();
-                                    if (builderbridge)
-                                    {
-                                        builderbridge.SetBuilderCameraRotation(msg.payload);
-                                    }
-                                    break;
-                                }
+                                GetBuilderBridge()?.SetBuilderCameraRotation(msg.payload);
+                                break;
                             case "ResetBuilderCameraZoom":
-                                {
-                                    var builderbridge = GetBuilderBridge();
-                                    if (builderbridge)
-                                    {
-                                        builderbridge.ResetBuilderCameraZoom();
-                                    }
-                                    break;
-                                }
+                                GetBuilderBridge()?.ResetBuilderCameraZoom();
+                                break;
                             case "SetGridResolution":
-                                {
-                                    var builderbridge = GetBuilderBridge();
-                                    if (builderbridge)
-                                    {
-                                        builderbridge.SetGridResolution(msg.payload);
-                                    }
-                                    break;
-                                }
+                                GetBuilderBridge()?.SetGridResolution(msg.payload);
+                                break;
                             case "SetArrowKeyDown":
-                                {
-                                    var builderbridge = GetBuilderBridge();
-                                    if (builderbridge)
-                                    {
-                                        builderbridge.SetArrowKeyDown(msg.payload);
-                                    }
-                                    break;
-                                }
+                                GetBuilderBridge()?.SetArrowKeyDown(msg.payload);
+                                break;
                             case "UnloadBuilderScene":
-                                {
-                                    var builderbridge = GetBuilderBridge();
-                                    if (builderbridge)
-                                    {
-                                        builderbridge.UnloadBuilderScene(msg.payload);
-                                    }
-                                    break;
-                                }
+                                GetBuilderBridge()?.UnloadBuilderScene(msg.payload);
+                                break;
                             case "SelectEntity":
-                                {
-                                    var builderbridge = GetBuilderBridge();
-                                    if (builderbridge)
-                                    {
-                                        builderbridge.SelectEntity(msg.payload);
-                                    }
-                                    break;
-                                }
+                                GetBuilderBridge()?.SelectEntity(msg.payload);
+                                break;
+                            case "GetCameraTargetBuilder":
+                                GetBuilderBridge()?.GetCameraTargetBuilder(msg.payload);
+                                break;
                             default:
                                 Debug.Log("<b><color=#FF0000>WSSController</color></b> WHAT IS " + msg.type);
                                 break;

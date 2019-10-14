@@ -1786,9 +1786,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e938e4e3938944fafbbc66bbcfc95c3b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  PostOutlineMaterial: {fileID: 2100000, guid: 632b73518a1f042eb98dff1fcbaed124, type: 2}
-  GaussianBlurMaterial: {fileID: 2100000, guid: 139b6bfc37f8845aca41a8c5f51557ec,
-    type: 2}
+  OutlineMaterial: {fileID: 2100000, guid: 632b73518a1f042eb98dff1fcbaed124, type: 2}
 --- !u!20 &1992111983
 Camera:
   m_ObjectHideFlags: 0

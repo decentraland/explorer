@@ -22,6 +22,7 @@ namespace Builder
         private DCLBuilderEntity selectedEntity = null;
 
         private DragInfo dragInfo = new DragInfo();
+        private float groundClickTime = 0;
 
         private float snapFactorPosition = 0;
 
@@ -113,6 +114,11 @@ namespace Builder
                             }
                         }
                     }
+                    groundClickTime = 0;
+                }
+                else
+                {
+                    groundClickTime = Time.unscaledTime;
                 }
             }
         }
@@ -133,6 +139,12 @@ namespace Builder
                 {
                     gizmosManager.OnEndDrag();
                 }
+
+                if (groundClickTime != 0 && (Time.unscaledTime - groundClickTime) < 0.25f)
+                {
+                    Deselect();
+                }
+                groundClickTime = 0;
             }
         }
 

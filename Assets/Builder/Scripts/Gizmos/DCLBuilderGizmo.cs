@@ -95,7 +95,9 @@ namespace Builder.Gizmos
 
         protected virtual float GetHitPointToAxisValue(DCLBuilderGizmoAxis axis, Vector3 hitPoint)
         {
-            return axis.transform.InverseTransformPoint(hitPoint).z;
+            Vector3 dir = (hitPoint - axis.transform.position).normalized;
+            float sign = Vector3.Angle(dir, axis.transform.forward) == 180 ? -1 : 1;
+            return Vector3.Distance(activeAxis.transform.position, hitPoint) * sign;
         }
 
         protected virtual void SetPreviousAxisValue(float axisValue, float transformValue)
