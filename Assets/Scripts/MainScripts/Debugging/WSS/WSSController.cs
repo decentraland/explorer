@@ -302,8 +302,8 @@ namespace DCL
                             case "SetGridResolution":
                                 GetBuilderBridge()?.SetGridResolution(msg.payload);
                                 break;
-                            case "SetArrowKeyDown":
-                                GetBuilderBridge()?.SetArrowKeyDown(msg.payload);
+                            case "OnBuilderKeyDown":
+                                GetBuilderBridge()?.OnBuilderKeyDown(msg.payload);
                                 break;
                             case "UnloadBuilderScene":
                                 GetBuilderBridge()?.UnloadBuilderScene(msg.payload);

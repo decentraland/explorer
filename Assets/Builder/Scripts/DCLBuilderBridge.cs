@@ -210,7 +210,7 @@ namespace Builder
             }
         }
 
-        public void SetArrowKeyDown(string key)
+        public void OnBuilderKeyDown(string key)
         {
             KeyCode arrowKey;
             if (System.Enum.TryParse(key, false, out arrowKey))
