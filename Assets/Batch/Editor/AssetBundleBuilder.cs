@@ -46,6 +46,7 @@ public static class AssetBundleBuilder
         ExportSceneToAssetBundles_Internal("QmSAIOJDAOSIDJO");
     }
 
+
     private static void ExportSceneToAssetBundles_Internal(string sceneCid)
     {
         InitializeDirectory(DOWNLOADED_PATH);
@@ -136,6 +137,7 @@ public static class AssetBundleBuilder
             var manifest = BuildPipeline.BuildAssetBundles(ASSET_BUNDLES_PATH, BuildAssetBundleOptions.UncompressedAssetBundle, BuildTarget.WebGL);
 
             string[] assetBundles = manifest.GetAllAssetBundles();
+            string[] assetBundlePaths = new string[assetBundles.Length];
 
             for (int i = 0; i < assetBundles.Length; i++)
             {
@@ -159,17 +161,58 @@ public static class AssetBundleBuilder
 
                 File.Move(oldPath, path);
                 File.Move(oldPathMf, pathMf);
+
+                assetBundlePaths[i] = path;
             }
 
-            UploadBundles(assetBundles);
+            UploadBundles(assetBundlePaths);
         };
 
         AssetDatabase.Refresh();
     }
 
-    private static void UploadBundles(string[] bundleNames)
+    private static void UploadBundles(string[] bundlePaths)
     {
-        //TODO(Brian): Implement me.
+        List<UnityWebRequest> requests = new List<UnityWebRequest>();
+
+        foreach (string assetBundlePath in bundlePaths)
+        {
+            byte[] rawData = File.ReadAllBytes(assetBundlePath);
+            string fileName = Path.GetFileNameWithoutExtension(assetBundlePath);
+
+            string fullUrl = $"http://content-assets-as-bundle.decentraland.zone.s3.amazonaws.com/{fileName}";
+
+            var req = UnityWebRequest.Put(fullUrl, rawData);
+            req.SendWebRequest();
+
+            requests.Add(req);
+        }
+
+        bool requestsAreDone = false;
+
+        while (requestsAreDone == false)
+        {
+            requestsAreDone = true;
+
+            foreach (var request in requests)
+            {
+                if (!request.isDone)
+                {
+                    requestsAreDone = false;
+                }
+                else
+                {
+                    if (request.isHttpError || request.isNetworkError)
+                    {
+                        Debug.Log($"FAIL!. Upload request response: {request.responseCode}... error: {request.error}");
+                    }
+                    else
+                    {
+                        Debug.Log($"SUCCESS!. Upload request response: {request.responseCode}... progress: {request.uploadProgress}... bytes uploaded: {request.uploadedBytes}");
+                    }
+                }
+            }
+        }
     }
 
     private static bool PrepareUrlContents(DCL.ContentProvider contentProvider, Dictionary<string, DCL.ContentProvider.MappingPair> filteredPairs, string hash, string additionalPath = "")
