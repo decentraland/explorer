@@ -4,24 +4,118 @@ using System.IO;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Assertions;
 using UnityEngine.Networking;
 using UnityGLTF.Cache;
 
 public static class AssetBundleBuilder
 {
-    private static string DOWNLOADED_ASSET_DB_PATH = "Assets/_Downloaded/";
-    private static string DOWNLOADED_PATH = Application.dataPath + "/_Downloaded/";
-    private static string ASSET_BUNDLES_PATH = "/_AssetBundles/";
+    private static string DOWNLOADED_ASSET_DB_PATH_ROOT = "Assets/_Downloaded/";
+    private static string DOWNLOADED_PATH_ROOT = Application.dataPath + "/_Downloaded/";
+    private static string ASSET_BUNDLES_PATH_ROOT = "/_AssetBundles/";
+
+    private static string finalAssetBundlePath = "";
+    private static string finalDownloadedPath = "";
+    private static string finalDownloadedAssetDbPath = "";
+
+    private static string contentScenesAPI = "https://content.decentraland.zone/scenes?x1=54&x2=64&y1=-54&y2=-64";
+    private static string contentMappingsAPI = "https://content.decentraland.zone/parcel_info?cids=";
+
+    //private static string contentScenesAPI = "https://content.decentraland.org/scenes?x1=54&x2=64&y1=-54&y2=-64";
+    //private static string contentMappingsAPI = "https://content.decentraland.org/parcel_info?cids=";
+
+    public enum ApiEnvironment
+    {
+        NONE,
+        TODAY,
+        ZONE,
+        ORG
+    }
+
+    public static ApiEnvironment environment = ApiEnvironment.ORG;
+
+    public static string GetEnvironmentString(ApiEnvironment env)
+    {
+        switch (env)
+        {
+            case ApiEnvironment.NONE:
+                break;
+            case ApiEnvironment.TODAY:
+                return "today";
+            case ApiEnvironment.ZONE:
+                return "zone";
+            case ApiEnvironment.ORG:
+                return "org";
+        }
+
+        return "org";
+    }
+
+    public static string ConstructContentScenesAPIUrl(ApiEnvironment env, int x1, int y1, int width, int height)
+    {
+        string envString = GetEnvironmentString(env);
+        return $"https://content.decentraland.{envString}/scenes?x1={x1}&x2={x1 + width}&y1={y1}&y2={y1 + height}";
+    }
+
+    public static string ConstructContentMappingsAPIUrl(ApiEnvironment env, string cid)
+    {
+        string envString = GetEnvironmentString(env);
+        return $"https://content.decentraland.{envString}/parcel_info?cids={cid}";
+    }
 
     [MenuItem("AssetBundleBuilder/Download Test")]
     public static void TestExample()
     {
-        ExportSceneToAssetBundles_Internal("QmbKgHPENpzGGEfagGP5BbEd7CvqXeXuuXLeMEkuswGvrK");
+        ExportSceneToAssetBundles_Internal("QmbKgHPENpzGGEfagGP5BbEd7CvqXeXuuXLeMEkuswGvrK", false);
     }
 
+    [MenuItem("AssetBundleBuilder/Download Test 2")]
+    public static void TestExample2()
+    {
+        string url = ConstructContentScenesAPIUrl(environment, 64, -64, 2, 2);
+        Debug.Log("url = " + url);
+        UnityWebRequest w = UnityWebRequest.Get(url);
+        w.SendWebRequest();
+
+        while (w.isDone == false) { }
+
+        ScenesAPIData scenesApiData = JsonUtility.FromJson<ScenesAPIData>(w.downloadHandler.text);
+        HashSet<string> sceneCids = new HashSet<string>();
+
+        Assert.IsTrue(scenesApiData != null, "Invalid response from ScenesAPI");
+        Assert.IsTrue(scenesApiData.data != null, "Invalid response from ScenesAPI");
+
+        foreach (var data in scenesApiData.data)
+        {
+            if (!sceneCids.Contains(data.root_cid))
+            {
+                Debug.Log("Preparing scene: " + data.root_cid);
+                sceneCids.Add(data.root_cid);
+            }
+        }
+
+        foreach (string cid in sceneCids)
+        {
+            ExportSceneToAssetBundles_Internal(cid, false);
+        }
+    }
 
     [System.Serializable]
-    public class ParcelInfoAPI
+    public class ScenesAPIData
+    {
+        [System.Serializable]
+        public class Data
+        {
+            public string parcel_id;
+            public string root_cid;
+            public string scene_cid;
+        }
+
+        public Data[] data;
+    }
+
+    [System.Serializable]
+    public class MappingsAPIData
     {
         [System.Serializable]
         public class Data
@@ -43,21 +137,32 @@ public static class AssetBundleBuilder
     public static void ExportSceneToAssetBundles()
     {
         //TODO(Brian): Read arguments from command line
-        ExportSceneToAssetBundles_Internal("QmSAIOJDAOSIDJO");
+        ExportSceneToAssetBundles_Internal("QmbKgHPENpzGGEfagGP5BbEd7CvqXeXuuXLeMEkuswGvrK");
     }
 
 
-    private static void ExportSceneToAssetBundles_Internal(string sceneCid)
+    private static void ExportSceneToAssetBundles_Internal(string sceneCid, bool tryToUpload = true)
     {
-        InitializeDirectory(DOWNLOADED_PATH);
-        InitializeDirectory(ASSET_BUNDLES_PATH);
-        string url = "https://content.decentraland.org/parcel_info?cids=" + sceneCid;
+        finalAssetBundlePath = ASSET_BUNDLES_PATH_ROOT + $"{sceneCid}/";
+        finalDownloadedPath = DOWNLOADED_PATH_ROOT + $"{sceneCid}/";
+        finalDownloadedAssetDbPath = DOWNLOADED_ASSET_DB_PATH_ROOT + $"{sceneCid}/";
+
+        string url = ConstructContentMappingsAPIUrl(environment, sceneCid);
         UnityWebRequest w = UnityWebRequest.Get(url);
         w.SendWebRequest();
 
         while (w.isDone == false) { }
 
-        ParcelInfoAPI parcelInfoApiData = JsonUtility.FromJson<ParcelInfoAPI>(w.downloadHandler.text);
+        MappingsAPIData parcelInfoApiData = JsonUtility.FromJson<MappingsAPIData>(w.downloadHandler.text);
+
+        if (parcelInfoApiData.data.Length == 0 || parcelInfoApiData.data == null)
+        {
+            Debug.LogWarning("Data is null?");
+            return;
+        }
+
+        InitializeDirectory(finalDownloadedPath);
+        InitializeDirectory(finalAssetBundlePath);
 
         DCL.ContentProvider.MappingPair[] rawContents = parcelInfoApiData.data[0].content.contents;
 
@@ -68,7 +173,7 @@ public static class AssetBundleBuilder
 
         var contentProviderAB = new DCL.ContentProvider();
         contentProviderAB.contents = new List<DCL.ContentProvider.MappingPair>(rawContents);
-        contentProviderAB.baseUrl = "https://asset-bundle-content.decentraland.org/contents/";
+        contentProviderAB.baseUrl = "https://content-as-bundle.decentraland.org/contents/";
         contentProviderAB.BakeHashes();
 
         string[] textureExtensions = { ".jpg", ".png" };
@@ -111,7 +216,7 @@ public static class AssetBundleBuilder
                 {
                     string relativePath = GetRelativePathTo(hashToGltfPair[gltfHash].file, mappingPair.file);
                     string fileExt = Path.GetExtension(mappingPair.file);
-                    string outputPath = DOWNLOADED_ASSET_DB_PATH + mappingPair.hash + fileExt;
+                    string outputPath = finalDownloadedAssetDbPath + mappingPair.hash + fileExt;
 
                     Texture2D t2d = AssetDatabase.LoadAssetAtPath<Texture2D>(outputPath);
 
@@ -128,13 +233,13 @@ public static class AssetBundleBuilder
         }
 
 
-        if (!Directory.Exists(ASSET_BUNDLES_PATH))
-            Directory.CreateDirectory(ASSET_BUNDLES_PATH);
+        if (!Directory.Exists(finalAssetBundlePath))
+            Directory.CreateDirectory(finalAssetBundlePath);
 
         EditorApplication.delayCall += () =>
         {
             AssetDatabase.SaveAssets();
-            var manifest = BuildPipeline.BuildAssetBundles(ASSET_BUNDLES_PATH, BuildAssetBundleOptions.UncompressedAssetBundle, BuildTarget.WebGL);
+            var manifest = BuildPipeline.BuildAssetBundles(finalAssetBundlePath, BuildAssetBundleOptions.UncompressedAssetBundle, BuildTarget.WebGL);
 
             string[] assetBundles = manifest.GetAllAssetBundles();
             string[] assetBundlePaths = new string[assetBundles.Length];
@@ -153,11 +258,11 @@ public static class AssetBundleBuilder
 
                 //NOTE(Brian): This is done for correctness sake, rename files to preserve the hash upper-case
                 string hashWithUppercase = pair.hash;
-                string oldPath = ASSET_BUNDLES_PATH + assetBundles[i];
-                string path = ASSET_BUNDLES_PATH + hashWithUppercase;
+                string oldPath = finalAssetBundlePath + assetBundles[i];
+                string path = finalAssetBundlePath + hashWithUppercase;
 
-                string oldPathMf = ASSET_BUNDLES_PATH + assetBundles[i] + ".manifest";
-                string pathMf = ASSET_BUNDLES_PATH + hashWithUppercase + ".manifest";
+                string oldPathMf = finalAssetBundlePath + assetBundles[i] + ".manifest";
+                string pathMf = finalAssetBundlePath + hashWithUppercase + ".manifest";
 
                 File.Move(oldPath, path);
                 File.Move(oldPathMf, pathMf);
@@ -165,7 +270,10 @@ public static class AssetBundleBuilder
                 assetBundlePaths[i] = path;
             }
 
-            UploadBundles(assetBundlePaths);
+            if (tryToUpload)
+            {
+                UploadBundles(assetBundlePaths);
+            }
         };
 
         AssetDatabase.Refresh();
@@ -228,7 +336,7 @@ public static class AssetBundleBuilder
 
         //TODO: Make AB with jpg/png files
         string fileExt = Path.GetExtension(filteredPairs[hash].file);
-        string outputPath = DOWNLOADED_PATH + additionalPath + hash + fileExt;
+        string outputPath = finalDownloadedPath + additionalPath + hash + fileExt;
         string outputPathDir = Path.GetDirectoryName(outputPath);
 
         if (!Directory.Exists(outputPathDir))
@@ -246,7 +354,7 @@ public static class AssetBundleBuilder
         PrepareUrlContents(contentProvider, filteredPairs, hash, additionalPath);
 
         string fileExt = Path.GetExtension(filteredPairs[hash].file);
-        AssetImporter importer = AssetImporter.GetAtPath(DOWNLOADED_ASSET_DB_PATH + additionalPath + hash + fileExt);
+        AssetImporter importer = AssetImporter.GetAtPath(finalDownloadedAssetDbPath + additionalPath + hash + fileExt);
         importer.SetAssetBundleNameAndVariant(hash, "");
         return true;
     }
