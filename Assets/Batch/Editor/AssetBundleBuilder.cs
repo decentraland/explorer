@@ -94,10 +94,10 @@ public static class AssetBundleBuilder
             }
         }
 
-        foreach (string cid in sceneCids)
-        {
-            ExportSceneToAssetBundles_Internal(cid, false);
-        }
+        //foreach (string cid in sceneCids)
+        //{
+        //    ExportSceneToAssetBundles_Internal(cid, false);
+        //}
     }
 
     [System.Serializable]
@@ -136,8 +136,26 @@ public static class AssetBundleBuilder
 
     public static void ExportSceneToAssetBundles()
     {
-        //TODO(Brian): Read arguments from command line
-        ExportSceneToAssetBundles_Internal("QmbKgHPENpzGGEfagGP5BbEd7CvqXeXuuXLeMEkuswGvrK");
+        string[] args = System.Environment.GetCommandLineArgs();
+
+        string sceneCid = "";
+
+        for (int i = 0; i < args.Length - 1; i++)
+        {
+            if (args[i] == "-sceneCid")
+            {
+                sceneCid = args[i + 1];
+            }
+        }
+
+        if (string.IsNullOrEmpty(sceneCid))
+        {
+            Debug.LogError("Invalid sceneCid argument! Please use -sceneCid <id> to establish the desired id to process.");
+            EditorApplication.Exit(1);
+            return;
+        }
+
+        ExportSceneToAssetBundles_Internal(sceneCid);
     }
 
 
