@@ -44,7 +44,7 @@ namespace Builder
             {
                 for (int i = 0; i < meshColliders.Length; i++)
                 {
-                    Destroy(meshColliders[i]);
+                    Destroy(meshColliders[i].gameObject);
                 }
                 meshColliders = null;
             }
