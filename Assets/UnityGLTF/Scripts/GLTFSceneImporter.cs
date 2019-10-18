@@ -495,6 +495,8 @@ namespace UnityGLTF
                     streamingImagesStaticList.Add(image.Uri);
                     streamingImagesLocalList.Add(image.Uri);
 
+                    Debug.Log("No deberia entrar nunca aca: " + image.Uri);
+
                     yield return _loader.LoadStream(image.Uri);
                     _assetCache.ImageStreamCache[sourceId] = _loader.LoadedStream;
 
@@ -654,9 +656,16 @@ namespace UnityGLTF
                 }
                 else
                 {
-                    yield return _loader.LoadStream(buffer.Uri);
+                    if (PersistentAssetCache.StreamCacheByUri.ContainsKey(buffer.Uri))
+                    {
+                        bufferDataStream = PersistentAssetCache.StreamCacheByUri[buffer.Uri].stream;
+                    }
+                    else
+                    {
+                        yield return _loader.LoadStream(buffer.Uri);
+                        bufferDataStream = _loader.LoadedStream;
+                    }
 
-                    bufferDataStream = _loader.LoadedStream;
                 }
 
                 _assetCache.BufferCache[bufferIndex] = new BufferCacheData

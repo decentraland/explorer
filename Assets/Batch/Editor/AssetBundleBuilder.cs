@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GLTF.Schema;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -6,24 +7,11 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Networking;
+using UnityGLTF;
 using UnityGLTF.Cache;
 
-public static class AssetBundleBuilder
+public static class ContentServerUtils
 {
-    private static string DOWNLOADED_ASSET_DB_PATH_ROOT = "Assets/_Downloaded/";
-    private static string DOWNLOADED_PATH_ROOT = Application.dataPath + "/_Downloaded/";
-    private static string ASSET_BUNDLES_PATH_ROOT = "/_AssetBundles/";
-
-    private static string finalAssetBundlePath = "";
-    private static string finalDownloadedPath = "";
-    private static string finalDownloadedAssetDbPath = "";
-
-    private static string contentScenesAPI = "https://content.decentraland.zone/scenes?x1=54&x2=64&y1=-54&y2=-64";
-    private static string contentMappingsAPI = "https://content.decentraland.zone/parcel_info?cids=";
-
-    //private static string contentScenesAPI = "https://content.decentraland.org/scenes?x1=54&x2=64&y1=-54&y2=-64";
-    //private static string contentMappingsAPI = "https://content.decentraland.org/parcel_info?cids=";
-
     public enum ApiEnvironment
     {
         NONE,
@@ -32,9 +20,8 @@ public static class AssetBundleBuilder
         ORG
     }
 
-    public static ApiEnvironment environment = ApiEnvironment.ORG;
 
-    public static string GetEnvironmentString(ApiEnvironment env)
+    public static string GetEnvString(ApiEnvironment env)
     {
         switch (env)
         {
@@ -51,17 +38,31 @@ public static class AssetBundleBuilder
         return "org";
     }
 
-    public static string ConstructContentScenesAPIUrl(ApiEnvironment env, int x1, int y1, int width, int height)
+    public static string GetScenesAPIUrl(ApiEnvironment env, int x1, int y1, int width, int height)
     {
-        string envString = GetEnvironmentString(env);
+        string envString = GetEnvString(env);
         return $"https://content.decentraland.{envString}/scenes?x1={x1}&x2={x1 + width}&y1={y1}&y2={y1 + height}";
     }
 
-    public static string ConstructContentMappingsAPIUrl(ApiEnvironment env, string cid)
+    public static string GetMappingsAPIUrl(ApiEnvironment env, string cid)
     {
-        string envString = GetEnvironmentString(env);
+        string envString = GetEnvString(env);
         return $"https://content.decentraland.{envString}/parcel_info?cids={cid}";
     }
+}
+
+public static class AssetBundleBuilder
+{
+    private static string DOWNLOADED_ASSET_DB_PATH_ROOT = "Assets/_Downloaded/";
+    private static string DOWNLOADED_PATH_ROOT = Application.dataPath + "/_Downloaded/";
+    private static string ASSET_BUNDLES_PATH_ROOT = "/_AssetBundles/";
+
+    private static string finalAssetBundlePath = "";
+    private static string finalDownloadedPath = "";
+    private static string finalDownloadedAssetDbPath = "";
+
+    public static ContentServerUtils.ApiEnvironment environment = ContentServerUtils.ApiEnvironment.ORG;
+
 
     [MenuItem("AssetBundleBuilder/Download Test")]
     public static void TestExample()
@@ -72,7 +73,7 @@ public static class AssetBundleBuilder
     [MenuItem("AssetBundleBuilder/Download Test 2")]
     public static void TestExample2()
     {
-        string url = ConstructContentScenesAPIUrl(environment, 64, -64, 2, 2);
+        string url = ContentServerUtils.GetScenesAPIUrl(environment, 14, 75, 1, 1);
         Debug.Log("url = " + url);
         UnityWebRequest w = UnityWebRequest.Get(url);
         w.SendWebRequest();
@@ -93,6 +94,8 @@ public static class AssetBundleBuilder
                 sceneCids.Add(data.root_cid);
             }
         }
+
+        ExportSceneToAssetBundles_Internal("QmQCHrim1KkQ4KDfHKqgmxwGzeZzY9bDB63MfHrqEG3hcm", false);
 
         //foreach (string cid in sceneCids)
         //{
@@ -151,7 +154,10 @@ public static class AssetBundleBuilder
         if (string.IsNullOrEmpty(sceneCid))
         {
             Debug.LogError("Invalid sceneCid argument! Please use -sceneCid <id> to establish the desired id to process.");
-            EditorApplication.Exit(1);
+
+            if (Application.isBatchMode)
+                EditorApplication.Exit(1);
+
             return;
         }
 
@@ -165,7 +171,7 @@ public static class AssetBundleBuilder
         finalDownloadedPath = DOWNLOADED_PATH_ROOT + $"{sceneCid}/";
         finalDownloadedAssetDbPath = DOWNLOADED_ASSET_DB_PATH_ROOT + $"{sceneCid}/";
 
-        string url = ConstructContentMappingsAPIUrl(environment, sceneCid);
+        string url = ContentServerUtils.GetMappingsAPIUrl(environment, sceneCid);
         UnityWebRequest w = UnityWebRequest.Get(url);
         w.SendWebRequest();
 
@@ -176,6 +182,10 @@ public static class AssetBundleBuilder
         if (parcelInfoApiData.data.Length == 0 || parcelInfoApiData.data == null)
         {
             Debug.LogWarning("Data is null?");
+
+            if (Application.isBatchMode)
+                EditorApplication.Exit(1);
+
             return;
         }
 
@@ -194,62 +204,101 @@ public static class AssetBundleBuilder
         contentProviderAB.baseUrl = "https://content-as-bundle.decentraland.org/contents/";
         contentProviderAB.BakeHashes();
 
+        string[] bufferExtensions = { ".bin" };
         string[] textureExtensions = { ".jpg", ".png" };
         string[] gltfExtensions = { ".glb", ".gltf" };
 
         List<string> assetBundleOutputPaths = new List<string>();
 
         var stringToAB = new Dictionary<string, AssetBundle>();
-        var hashToTexturePair = new Dictionary<string, DCL.ContentProvider.MappingPair>();
-        var hashToGltfPair = new Dictionary<string, DCL.ContentProvider.MappingPair>();
 
-        hashToTexturePair = FilterExtensions(rawContents, textureExtensions);
-        hashToGltfPair = FilterExtensions(rawContents, gltfExtensions);
+        var hashToTexturePair = FilterExtensions(rawContents, textureExtensions);
+        var hashToGltfPair = FilterExtensions(rawContents, gltfExtensions);
+        var hashToBufferPair = FilterExtensions(rawContents, bufferExtensions);
 
-        //NOTE(Brian): Prepare textures. We should prepare all the dependencies in this phase.
-        foreach (var kvp in hashToTexturePair)
+        //try
         {
-            string hash = kvp.Key;
-
-            //NOTE(Brian): try to get an AB before getting the original texture, so we bind the dependencies correctly
-            bool dependencyAlreadyIsAB = PrepareUrlContents(contentProviderAB, hashToTexturePair, hash);
-
-            if (!dependencyAlreadyIsAB)
+            //NOTE(Brian): Prepare buffers. We should prepare all the dependencies in this phase.
+            foreach (var kvp in hashToBufferPair)
             {
-                PrepareUrlContentsForBundleBuild(contentProvider, hashToTexturePair, hash);
+                string hash = kvp.Key;
+                PrepareUrlContents(contentProvider, hashToBufferPair, hash, hash + "/");
             }
-        }
 
-        //NOTE(Brian): Prepare gltfs gathering its dependencies first and filling the importer's static cache.
-        foreach (var kvp in hashToGltfPair)
-        {
-            string gltfHash = kvp.Key;
-            PersistentAssetCache.ImageCacheByUri.Clear();
-
-            foreach (var mappingPair in rawContents)
+            //NOTE(Brian): Prepare textures. We should prepare all the dependencies in this phase.
+            foreach (var kvp in hashToTexturePair)
             {
-                bool endsWithTextureExtensions = textureExtensions.Any((x) => mappingPair.file.ToLower().EndsWith(x));
+                string hash = kvp.Key;
 
-                if (endsWithTextureExtensions)
+                //NOTE(Brian): try to get an AB before getting the original texture, so we bind the dependencies correctly
+                bool dependencyAlreadyIsAB = PrepareUrlContents(contentProviderAB, hashToTexturePair, hash, hash + "/");
+
+                if (!dependencyAlreadyIsAB)
                 {
-                    string relativePath = GetRelativePathTo(hashToGltfPair[gltfHash].file, mappingPair.file);
-                    string fileExt = Path.GetExtension(mappingPair.file);
-                    string outputPath = finalDownloadedAssetDbPath + mappingPair.hash + fileExt;
-
-                    Texture2D t2d = AssetDatabase.LoadAssetAtPath<Texture2D>(outputPath);
-
-                    if (t2d != null)
-                    {
-                        //NOTE(Brian): This cache will be used by the GLTF importer when seeking textures. This way the importer will
-                        //             consume the asset bundle dependencies instead of trying to create new textures.
-                        PersistentAssetCache.ImageCacheByUri[relativePath] = new RefCountedTextureData(relativePath, t2d);
-                    }
+                    PrepareUrlContentsForBundleBuild(contentProvider, hashToTexturePair, hash, hash + "/");
                 }
             }
 
-            PrepareUrlContentsForBundleBuild(contentProvider, hashToGltfPair, gltfHash, gltfHash + "/");
-        }
+            GLTFImporter.OnGLTFRootIsConstructed += FixGltfDependencyPaths;
 
+            //NOTE(Brian): Prepare gltfs gathering its dependencies first and filling the importer's static cache.
+            foreach (var kvp in hashToGltfPair)
+            {
+                string gltfHash = kvp.Key;
+
+                PersistentAssetCache.ImageCacheByUri.Clear();
+                PersistentAssetCache.StreamCacheByUri.Clear();
+
+                foreach (var mappingPair in rawContents)
+                {
+                    bool endsWithTextureExtensions = textureExtensions.Any((x) => mappingPair.file.ToLower().EndsWith(x));
+
+                    if (endsWithTextureExtensions)
+                    {
+                        string relativePath = GetRelativePathTo(hashToGltfPair[gltfHash].file, mappingPair.file);
+                        string fileExt = Path.GetExtension(mappingPair.file);
+                        string outputPath = finalDownloadedAssetDbPath + mappingPair.hash + "/" + mappingPair.hash + fileExt;
+
+                        Texture2D t2d = AssetDatabase.LoadAssetAtPath<Texture2D>(outputPath);
+
+                        if (t2d != null)
+                        {
+                            //NOTE(Brian): This cache will be used by the GLTF importer when seeking textures. This way the importer will
+                            //             consume the asset bundle dependencies instead of trying to create new textures.
+                            PersistentAssetCache.ImageCacheByUri[relativePath] = new RefCountedTextureData(relativePath, t2d);
+                        }
+                    }
+
+                    bool endsWithBufferExtensions = bufferExtensions.Any((x) => mappingPair.file.ToLower().EndsWith(x));
+
+                    if (endsWithBufferExtensions)
+                    {
+                        string relativePath = GetRelativePathTo(hashToGltfPair[gltfHash].file, mappingPair.file);
+                        string fileExt = Path.GetExtension(mappingPair.file);
+                        string outputPath = finalDownloadedAssetDbPath + mappingPair.hash + "/" + mappingPair.hash + fileExt;
+
+                        Stream stream = File.OpenRead(outputPath);
+
+                        //NOTE(Brian): This cache will be used by the GLTF importer when seeking streams. This way the importer will
+                        //             consume the asset bundle dependencies instead of trying to create new streams.
+                        PersistentAssetCache.StreamCacheByUri[relativePath] = new RefCountedStreamData(relativePath, stream);
+                    }
+                }
+
+                //NOTE(Brian): Finally, load the gLTF. The GLTFImporter will use the PersistentAssetCache to resolve the external dependencies.
+                PrepareUrlContentsForBundleBuild(contentProvider, hashToGltfPair, gltfHash, gltfHash + "/");
+            }
+        }
+        //catch (Exception e)
+        //{
+        //    Debug.LogError(e.Message);
+        //    Debug.LogError("Error importing assets!");
+
+        //    if (Application.isBatchMode)
+        //        EditorApplication.Exit(1);
+
+        //    return;
+        //}
 
         if (!Directory.Exists(finalAssetBundlePath))
             Directory.CreateDirectory(finalAssetBundlePath);
@@ -258,6 +307,16 @@ public static class AssetBundleBuilder
         {
             AssetDatabase.SaveAssets();
             var manifest = BuildPipeline.BuildAssetBundles(finalAssetBundlePath, BuildAssetBundleOptions.UncompressedAssetBundle, BuildTarget.WebGL);
+
+            if (manifest == null)
+            {
+                Debug.LogError("Error generating asset bundle!");
+
+                if (Application.isBatchMode)
+                    EditorApplication.Exit(1);
+
+                return;
+            }
 
             string[] assetBundles = manifest.GetAllAssetBundles();
             string[] assetBundlePaths = new string[assetBundles.Length];
@@ -287,58 +346,9 @@ public static class AssetBundleBuilder
 
                 assetBundlePaths[i] = path;
             }
-
-            if (tryToUpload)
-            {
-                UploadBundles(assetBundlePaths);
-            }
         };
 
         AssetDatabase.Refresh();
-    }
-
-    private static void UploadBundles(string[] bundlePaths)
-    {
-        List<UnityWebRequest> requests = new List<UnityWebRequest>();
-
-        foreach (string assetBundlePath in bundlePaths)
-        {
-            byte[] rawData = File.ReadAllBytes(assetBundlePath);
-            string fileName = Path.GetFileNameWithoutExtension(assetBundlePath);
-
-            string fullUrl = $"http://content-assets-as-bundle.decentraland.zone.s3.amazonaws.com/{fileName}";
-
-            var req = UnityWebRequest.Put(fullUrl, rawData);
-            req.SendWebRequest();
-
-            requests.Add(req);
-        }
-
-        bool requestsAreDone = false;
-
-        while (requestsAreDone == false)
-        {
-            requestsAreDone = true;
-
-            foreach (var request in requests)
-            {
-                if (!request.isDone)
-                {
-                    requestsAreDone = false;
-                }
-                else
-                {
-                    if (request.isHttpError || request.isNetworkError)
-                    {
-                        Debug.Log($"FAIL!. Upload request response: {request.responseCode}... error: {request.error}");
-                    }
-                    else
-                    {
-                        Debug.Log($"SUCCESS!. Upload request response: {request.responseCode}... progress: {request.uploadProgress}... bytes uploaded: {request.uploadedBytes}");
-                    }
-                }
-            }
-        }
     }
 
     private static bool PrepareUrlContents(DCL.ContentProvider contentProvider, Dictionary<string, DCL.ContentProvider.MappingPair> filteredPairs, string hash, string additionalPath = "")
@@ -352,7 +362,6 @@ public static class AssetBundleBuilder
         if (req.isHttpError)
             return false;
 
-        //TODO: Make AB with jpg/png files
         string fileExt = Path.GetExtension(filteredPairs[hash].file);
         string outputPath = finalDownloadedPath + additionalPath + hash + fileExt;
         string outputPathDir = Path.GetDirectoryName(outputPath);
@@ -364,6 +373,7 @@ public static class AssetBundleBuilder
 
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
+
         return true;
     }
 
@@ -371,11 +381,34 @@ public static class AssetBundleBuilder
     {
         PrepareUrlContents(contentProvider, filteredPairs, hash, additionalPath);
 
-        string fileExt = Path.GetExtension(filteredPairs[hash].file);
-        AssetImporter importer = AssetImporter.GetAtPath(finalDownloadedAssetDbPath + additionalPath + hash + fileExt);
-        importer.SetAssetBundleNameAndVariant(hash, "");
+        //string fileExt = Path.GetExtension(filteredPairs[hash].file);
+        //AssetImporter importer = AssetImporter.GetAtPath(finalDownloadedAssetDbPath + additionalPath + hash + fileExt);
+        //importer.SetAssetBundleNameAndVariant(hash, "");
+
+        List<AssetImporter> importers = GetAssetList(finalDownloadedPath + additionalPath);
+
+        foreach (AssetImporter importer in importers)
+        {
+            importer.SetAssetBundleNameAndVariant(hash, "");
+        }
+
         return true;
     }
+
+    public static List<AssetImporter> GetAssetList(string path)
+    {
+        string[] fileEntries = Directory.GetFiles(path);
+
+        return fileEntries.Select(fileName =>
+        {
+            string assetPath = fileName.Substring(fileName.IndexOf("Assets"));
+            assetPath = Path.ChangeExtension(assetPath, null);
+            return AssetImporter.GetAtPath(assetPath);
+        })
+        .OfType<AssetImporter>()
+        .ToList();
+    }
+
 
     private static void InitializeDirectory(string path)
     {
@@ -383,17 +416,21 @@ public static class AssetBundleBuilder
         {
             Directory.CreateDirectory(path);
         }
-
-        DirectoryInfo di = new DirectoryInfo(path);
-
-        foreach (FileInfo file in di.GetFiles())
+        else
         {
-            file.Delete();
+            Directory.Delete(path, true);
+            Directory.CreateDirectory(path);
         }
-        foreach (DirectoryInfo dir in di.GetDirectories())
-        {
-            dir.Delete(true);
-        }
+        //DirectoryInfo di = new DirectoryInfo(path);
+
+        //foreach (FileInfo file in di.GetFiles())
+        //{
+        //    file.Delete();
+        //}
+        //foreach (DirectoryInfo dir in di.GetDirectories())
+        //{
+        //    dir.Delete(true);
+        //}
     }
 
     public static Dictionary<string, DCL.ContentProvider.MappingPair> FilterExtensions(DCL.ContentProvider.MappingPair[] pairsToSearch, string[] extensions)
@@ -416,6 +453,46 @@ public static class AssetBundleBuilder
         }
 
         return result;
+    }
+
+    public static void FixGltfDependencyPaths(GLTFRoot gltfRoot)
+    {
+        GLTFRoot root = gltfRoot;
+
+        if (root != null)
+        {
+            if (root.Images != null)
+            {
+                foreach (GLTFImage image in root.Images)
+                {
+                    if (!string.IsNullOrEmpty(image.Uri))
+                    {
+                        bool isBase64 = URIHelper.IsBase64Uri(image.Uri);
+
+                        if (!isBase64)
+                        {
+                            image.Uri = image.Uri.Replace('/', Path.DirectorySeparatorChar);
+                        }
+                    }
+                }
+            }
+
+            if (root.Buffers != null)
+            {
+                foreach (GLTFBuffer buffer in root.Buffers)
+                {
+                    if (!string.IsNullOrEmpty(buffer.Uri))
+                    {
+                        bool isBase64 = URIHelper.IsBase64Uri(buffer.Uri);
+
+                        if (!isBase64)
+                        {
+                            buffer.Uri = buffer.Uri.Replace('/', Path.DirectorySeparatorChar);
+                        }
+                    }
+                }
+            }
+        }
     }
 
 
