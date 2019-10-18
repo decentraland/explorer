@@ -21,7 +21,7 @@ namespace Builder
 
         private void Awake()
         {
-            defaultMask = LayerMask.GetMask(DCLBuilderSelectionCollider.LAYER_BUILDER_POINTER_CLICK) | LayerMask.GetMask(LAYER_SELECTION);
+            defaultMask = LayerMask.GetMask(DCLBuilderSelectionCollider.LAYER_BUILDER_POINTER_CLICK);
             gizmoMask = LayerMask.GetMask(LAYER_GIZMOS);
 
             groundPlane = new Plane(Vector3.up, Vector3.zero);
