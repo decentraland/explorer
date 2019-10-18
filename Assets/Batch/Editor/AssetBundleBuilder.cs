@@ -303,9 +303,17 @@ public static class AssetBundleBuilder
         if (!Directory.Exists(finalAssetBundlePath))
             Directory.CreateDirectory(finalAssetBundlePath);
 
-        EditorApplication.delayCall += () =>
+        float time = Time.realtimeSinceStartup;
+
+        EditorApplication.CallbackFunction delayedCall = null;
+
+        delayedCall = () =>
         {
+            EditorApplication.update -= delayedCall;
             AssetDatabase.SaveAssets();
+
+            while (Time.realtimeSinceStartup - time < 0.1f) { }
+
             var manifest = BuildPipeline.BuildAssetBundles(finalAssetBundlePath, BuildAssetBundleOptions.UncompressedAssetBundle, BuildTarget.WebGL);
 
             if (manifest == null)
@@ -346,7 +354,12 @@ public static class AssetBundleBuilder
 
                 assetBundlePaths[i] = path;
             }
+
+            if (Application.isBatchMode)
+                EditorApplication.Exit(0);
         };
+
+        EditorApplication.update += delayedCall;
 
         AssetDatabase.Refresh();
     }
