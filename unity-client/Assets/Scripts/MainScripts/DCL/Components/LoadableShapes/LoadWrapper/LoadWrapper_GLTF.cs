@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.Assertions;
+using UnityEngine.Networking;
 
 namespace DCL.Components
 {
@@ -27,6 +29,40 @@ namespace DCL.Components
         {
             Assert.IsFalse(string.IsNullOrEmpty(targetUrl), "url is null!!");
 
+            StartCoroutine(TryToFetchAssetBundle(targetUrl, OnSuccess, OnFail));
+        }
+
+        IEnumerator TryToFetchAssetBundle(string targetUrl, Action<LoadWrapper> OnSuccess, Action<LoadWrapper> OnFail)
+        {
+            if (contentProvider.fileToHash.ContainsKey(targetUrl))
+            {
+                string hash = contentProvider.fileToHash[targetUrl];
+
+                UnityWebRequest manifestRequest = UnityWebRequest.Get($"http://localhost:8000/{entity.scene.sceneData.id}/{hash}.manifest");
+                yield return manifestRequest.SendWebRequest();
+
+                if (manifestRequest.isNetworkError || manifestRequest.isHttpError)
+                {
+                    LoadGltf(targetUrl, OnSuccess, OnFail);
+                    yield break;
+                }
+
+                AssetBundle abmf = DownloadHandlerAssetBundle.GetContent(manifestRequest);
+                AssetBundleManifest manifest = abmf.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
+
+                UnityWebRequest assetBundleRequest = UnityWebRequest.Get($"http://localhost:8000/{entity.scene.sceneData.id}/{hash}");
+                yield return assetBundleRequest.SendWebRequest();
+
+                AssetBundle ab = DownloadHandlerAssetBundle.GetContent(assetBundleRequest);
+
+                manifest.GetAllDependencies(ab.GetAllAssetNames()[0]);
+
+            }
+            yield break;
+        }
+
+        void LoadGltf(string targetUrl, Action<LoadWrapper> OnSuccess, Action<LoadWrapper> OnFail)
+        {
             if (gltfPromise != null)
             {
                 AssetPromiseKeeper_GLTF.i.Forget(gltfPromise);

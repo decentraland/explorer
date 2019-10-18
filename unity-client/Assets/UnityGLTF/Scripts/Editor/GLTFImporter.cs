@@ -389,6 +389,7 @@ namespace UnityGLTF
 #endif
         }
 
+        public static System.Action<GLTFRoot> OnGLTFRootIsConstructed;
         private GameObject CreateGLTFScene(string projectFilePath)
         {
             ILoader fileLoader = new FileLoader(Path.GetDirectoryName(projectFilePath));
@@ -396,6 +397,9 @@ namespace UnityGLTF
             {
                 GLTFRoot gLTFRoot;
                 GLTFParser.ParseJson(stream, out gLTFRoot);
+
+                OnGLTFRootIsConstructed?.Invoke(gLTFRoot);
+
                 var loader = new GLTFSceneImporter(gLTFRoot, fileLoader, null, stream);
                 GLTFSceneImporter.budgetPerFrameInMilliseconds = float.MaxValue;
                 loader.InitialVisibility = true;
