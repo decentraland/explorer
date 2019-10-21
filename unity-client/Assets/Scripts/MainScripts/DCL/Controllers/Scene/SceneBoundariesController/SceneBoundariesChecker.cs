@@ -46,6 +46,11 @@ namespace DCL.Controllers
                 if (loadWrapper != null && !loadWrapper.alreadyLoaded) return;
             }
 
+            EvaluateMeshBounds(entity);
+        }
+
+        protected virtual void EvaluateMeshBounds(DecentralandEntity entity)
+        {
             Bounds meshBounds = BuildMergedBounds(entity.meshesInfo);
 
             // 1st check (full mesh AABB)
@@ -82,7 +87,7 @@ namespace DCL.Controllers
             }
         }
 
-        void UpdateEntityCollidersValidState(DecentralandEntity entity, bool isInsideBoundaries)
+        protected virtual void UpdateEntityCollidersValidState(DecentralandEntity entity, bool isInsideBoundaries)
         {
             int collidersCount = entity.meshesInfo.colliders.Count;
             if (collidersCount > 0 && isInsideBoundaries != entity.meshesInfo.colliders[0].enabled && entity.meshesInfo.currentShape.HasCollisions())
@@ -95,7 +100,7 @@ namespace DCL.Controllers
         }
 
         // GLTF models may have several child renderers with different positions and different bounds
-        Bounds BuildMergedBounds(DecentralandEntity.MeshesInfo meshesInfo)
+        protected virtual Bounds BuildMergedBounds(DecentralandEntity.MeshesInfo meshesInfo)
         {
             Bounds bounds = new Bounds();
 
