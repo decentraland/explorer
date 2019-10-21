@@ -55,8 +55,23 @@ namespace DCL.Components
 
                 AssetBundle ab = DownloadHandlerAssetBundle.GetContent(assetBundleRequest);
 
-                manifest.GetAllDependencies(ab.GetAllAssetNames()[0]);
+                string[] assetNames = ab.GetAllAssetNames();
+                string gltfAsset = null;
 
+                for (int i = 0; i < assetNames.Length; i++)
+                {
+                    if (assetNames[i].Contains("gltf") || assetNames[i].Contains("glb"))
+                    {
+                        gltfAsset = assetNames[i];
+                        break;
+                    }
+                }
+
+                if (gltfAsset != null)
+                {
+                    string[] deps = manifest.GetAllDependencies(gltfAsset);
+                    //TODO(Brian): Load dependencies and load the desired bundle
+                }
             }
             yield break;
         }
