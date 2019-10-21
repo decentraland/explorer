@@ -10,6 +10,7 @@ namespace Builder
     {
         public static Action<DCLBuilderEntity> OnEntityShapeUpdated;
         public static Action<DCLBuilderEntity> OnEntityTransformUpdated;
+        public static Action<DCLBuilderEntity> OnEntityAddedWithTransform;
 
         public DecentralandEntity rootEntity { protected set; get; }
         public bool hasGizmoComponent
@@ -29,6 +30,7 @@ namespace Builder
 
         private DCLBuilderSelectionCollider[] meshColliders;
         private Action onShapeLoaded;
+        private bool isEntityJustSet;
 
         public void SetEntity(DecentralandEntity entity)
         {
@@ -39,6 +41,8 @@ namespace Builder
 
             entity.OnTransformChange -= OnTransformUpdated;
             entity.OnTransformChange += OnTransformUpdated;
+
+            isEntityJustSet = true;
 
             if (meshColliders != null)
             {
@@ -90,7 +94,16 @@ namespace Builder
 
         public bool HasShape()
         {
-            return meshColliders != null;
+            if (hasGizmoComponent)
+            {
+                return meshColliders != null;
+            }
+            else
+            {
+                Debug.Log(string.Format("rootEntity.meshesInfo != null: {0} rootEntity.meshesInfo.renderers != null: {1}",
+                (rootEntity.meshesInfo != null), rootEntity.meshesInfo.renderers != null));
+                return rootEntity.meshesInfo != null && rootEntity.meshesInfo.renderers != null;
+            }
         }
 
         public void SetOnShapeLoaded(Action onShapeLoad)
@@ -128,6 +141,13 @@ namespace Builder
             gameObject.transform.localPosition = DCLTransform.model.position;
             gameObject.transform.localRotation = DCLTransform.model.rotation;
             gameObject.transform.localScale = DCLTransform.model.scale;
+
+            if (isEntityJustSet)
+            {
+                isEntityJustSet = false;
+                OnEntityAddedWithTransform?.Invoke(this);
+            }
+
             OnEntityTransformUpdated?.Invoke(this);
         }
 

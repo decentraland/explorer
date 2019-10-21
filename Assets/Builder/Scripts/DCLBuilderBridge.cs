@@ -42,6 +42,8 @@ namespace Builder
         private bool isGameObjectActive = false;
 
         private EntitiesOutOfBoundariesEventPayload outOfBoundariesEventPayload = new EntitiesOutOfBoundariesEventPayload();
+        private static OnEntityLoadingEvent onGetLoadingEntity = new OnEntityLoadingEvent();
+        private static ReportCameraTargetPosition onReportCameraTarget = new ReportCameraTargetPosition();
 
         [System.Serializable]
         private class MousePayload
@@ -91,13 +93,28 @@ namespace Builder
             public string id;
         }
 
-        private static OnEntityLoadingEvent onGetLoadingEntity = new OnEntityLoadingEvent();
-        private static ReportCameraTargetPosition onReportCameraTarget = new ReportCameraTargetPosition();
-
         #region "Messages from Explorer"
 
         public void PreloadFile(string url)
         {
+            if (currentScene != null)
+            {
+                string[] split = url.Split('\t');
+                string hash = split[0];
+                string file = split[1];
+
+                if (!currentScene.contentProvider.fileToHash.ContainsKey(file.ToLower()))
+                {
+                    currentScene.contentProvider.fileToHash.Add(file.ToLower(), hash);
+                }
+
+                if (file.EndsWith(".glb") || file.EndsWith(".gltf"))
+                {
+                    AssetPromise_GLTF gltfPromise = new AssetPromise_GLTF(currentScene.contentProvider, file);
+                    gltfPromise.settings.visibleFlags = AssetPromise_GLTF.VisibleFlags.INVISIBLE;
+                    AssetPromiseKeeper_GLTF.i.Keep(gltfPromise);
+                }
+            }
         }
 
         public void GetMousePosition(string newJson)
