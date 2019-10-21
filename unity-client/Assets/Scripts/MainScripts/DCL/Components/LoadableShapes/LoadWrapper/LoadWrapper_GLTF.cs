@@ -3,6 +3,8 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Networking;
+using System.Linq;
+using DCL.Helpers;
 
 namespace DCL.Components
 {
@@ -32,48 +34,86 @@ namespace DCL.Components
             StartCoroutine(TryToFetchAssetBundle(targetUrl, OnSuccess, OnFail));
         }
 
+        IEnumerator FetchAssetBundleWithDependencies(string hash, string[] extensionFilter = null)
+        {
+            UnityWebRequest manifestRequest = UnityWebRequest.Get($"http://localhost:8000/{entity.scene.sceneData.id}/{hash}.manifest");
+            yield return manifestRequest.SendWebRequest();
+
+            AssetBundle abmf = DownloadHandlerAssetBundle.GetContent(manifestRequest);
+            AssetBundleManifest manifest = abmf.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
+
+            UnityWebRequest assetBundleRequest = UnityWebRequest.Get($"http://localhost:8000/{entity.scene.sceneData.id}/{hash}");
+            yield return assetBundleRequest.SendWebRequest();
+
+            AssetBundle mainAssetBundle = DownloadHandlerAssetBundle.GetContent(assetBundleRequest);
+
+            string[] assetNames = mainAssetBundle.GetAllAssetNames();
+
+            if (extensionFilter != null)
+            {
+                for (int i = 0; i < assetNames.Length; i++)
+                {
+                    string asset = assetNames[i];
+
+                    bool containsExtension = extensionFilter.Any(x => asset.Contains(x));
+
+                    if (containsExtension)
+                    {
+                        string[] deps = manifest.GetAllDependencies(asset);
+
+                        foreach (string dep in deps)
+                        {
+                            string[] depPath = dep.Split('/');
+                            string depHash = contentProvider.contents.FirstOrDefault((pair) => pair.hash.ToLowerInvariant() == depPath[2].ToLowerInvariant()).hash;
+
+                            if (depHash != null)
+                            {
+                                yield return FetchAssetBundleWithDependencies(depHash);
+                            }
+                        }
+
+                        if (asset.Contains("glb") || asset.Contains("gltf"))
+                        {
+                            Debug.Log("Instantiating asset bundle! " + asset);
+                            gltfContainer = Instantiate(mainAssetBundle.LoadAsset<GameObject>(asset));
+                            yield break;
+                        }
+                    }
+                }
+            }
+        }
+
         IEnumerator TryToFetchAssetBundle(string targetUrl, Action<LoadWrapper> OnSuccess, Action<LoadWrapper> OnFail)
         {
             if (contentProvider.fileToHash.ContainsKey(targetUrl))
             {
+                alreadyLoaded = false;
                 string hash = contentProvider.fileToHash[targetUrl];
+                yield return FetchAssetBundleWithDependencies(hash, new string[] { "gltf", "glb" });
 
-                UnityWebRequest manifestRequest = UnityWebRequest.Get($"http://localhost:8000/{entity.scene.sceneData.id}/{hash}.manifest");
-                yield return manifestRequest.SendWebRequest();
-
-                if (manifestRequest.isNetworkError || manifestRequest.isHttpError)
+                if (gltfContainer == null)
                 {
                     LoadGltf(targetUrl, OnSuccess, OnFail);
-                    yield break;
                 }
-
-                AssetBundle abmf = DownloadHandlerAssetBundle.GetContent(manifestRequest);
-                AssetBundleManifest manifest = abmf.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
-
-                UnityWebRequest assetBundleRequest = UnityWebRequest.Get($"http://localhost:8000/{entity.scene.sceneData.id}/{hash}");
-                yield return assetBundleRequest.SendWebRequest();
-
-                AssetBundle ab = DownloadHandlerAssetBundle.GetContent(assetBundleRequest);
-
-                string[] assetNames = ab.GetAllAssetNames();
-                string gltfAsset = null;
-
-                for (int i = 0; i < assetNames.Length; i++)
+                else
                 {
-                    if (assetNames[i].Contains("gltf") || assetNames[i].Contains("glb"))
+                    alreadyLoaded = true;
+                    gltfContainer.transform.SetParent(transform);
+                    gltfContainer.transform.ResetLocalTRS();
+
+                    if (initialVisibility == false)
                     {
-                        gltfAsset = assetNames[i];
-                        break;
+                        foreach (Renderer r in gltfContainer.GetComponentsInChildren<Renderer>())
+                        {
+                            r.enabled = false;
+                        }
                     }
-                }
 
-                if (gltfAsset != null)
-                {
-                    string[] deps = manifest.GetAllDependencies(gltfAsset);
-                    //TODO(Brian): Load dependencies and load the desired bundle
+                    this.entity.OnCleanupEvent -= OnEntityCleanup;
+                    this.entity.OnCleanupEvent += OnEntityCleanup;
+                    OnSuccess.Invoke(this);
                 }
             }
-            yield break;
         }
 
         void LoadGltf(string targetUrl, Action<LoadWrapper> OnSuccess, Action<LoadWrapper> OnFail)
@@ -86,7 +126,6 @@ namespace DCL.Components
                     Debug.Log("Forgetting not null promise...");
             }
 
-            alreadyLoaded = false;
 
             gltfPromise = new AssetPromise_GLTF(contentProvider, targetUrl);
 
