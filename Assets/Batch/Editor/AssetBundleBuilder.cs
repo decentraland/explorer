@@ -139,29 +139,34 @@ public static class AssetBundleBuilder
 
     public static void ExportSceneToAssetBundles()
     {
-        string[] args = System.Environment.GetCommandLineArgs();
-
-        string sceneCid = "";
-
-        for (int i = 0; i < args.Length - 1; i++)
+        try
         {
-            if (args[i] == "-sceneCid")
+            string[] args = System.Environment.GetCommandLineArgs();
+
+            string sceneCid = "";
+
+            for (int i = 0; i < args.Length - 1; i++)
             {
-                sceneCid = args[i + 1];
+                if (args[i] == "-sceneCid")
+                {
+                    sceneCid = args[i + 1];
+                }
             }
-        }
 
-        if (string.IsNullOrEmpty(sceneCid))
+            if (string.IsNullOrEmpty(sceneCid))
+            {
+                throw new ArgumentException("Invalid sceneCid argument! Please use -sceneCid <id> to establish the desired id to process.");
+            }
+
+            ExportSceneToAssetBundles_Internal(sceneCid);
+        }
+        catch (Exception e)
         {
-            Debug.LogError("Invalid sceneCid argument! Please use -sceneCid <id> to establish the desired id to process.");
+            Debug.LogError(e.Message);
 
             if (Application.isBatchMode)
                 EditorApplication.Exit(1);
-
-            return;
         }
-
-        ExportSceneToAssetBundles_Internal(sceneCid);
     }
 
 
@@ -216,89 +221,77 @@ public static class AssetBundleBuilder
         var hashToGltfPair = FilterExtensions(rawContents, gltfExtensions);
         var hashToBufferPair = FilterExtensions(rawContents, bufferExtensions);
 
-        //try
+        //NOTE(Brian): Prepare buffers. We should prepare all the dependencies in this phase.
+        foreach (var kvp in hashToBufferPair)
         {
-            //NOTE(Brian): Prepare buffers. We should prepare all the dependencies in this phase.
-            foreach (var kvp in hashToBufferPair)
+            string hash = kvp.Key;
+            PrepareUrlContents(contentProvider, hashToBufferPair, hash, hash + "/");
+        }
+
+        //NOTE(Brian): Prepare textures. We should prepare all the dependencies in this phase.
+        foreach (var kvp in hashToTexturePair)
+        {
+            string hash = kvp.Key;
+
+            //NOTE(Brian): try to get an AB before getting the original texture, so we bind the dependencies correctly
+            bool dependencyAlreadyIsAB = PrepareUrlContents(contentProviderAB, hashToTexturePair, hash, hash + "/");
+
+            if (!dependencyAlreadyIsAB)
             {
-                string hash = kvp.Key;
-                PrepareUrlContents(contentProvider, hashToBufferPair, hash, hash + "/");
-            }
-
-            //NOTE(Brian): Prepare textures. We should prepare all the dependencies in this phase.
-            foreach (var kvp in hashToTexturePair)
-            {
-                string hash = kvp.Key;
-
-                //NOTE(Brian): try to get an AB before getting the original texture, so we bind the dependencies correctly
-                bool dependencyAlreadyIsAB = PrepareUrlContents(contentProviderAB, hashToTexturePair, hash, hash + "/");
-
-                if (!dependencyAlreadyIsAB)
-                {
-                    PrepareUrlContentsForBundleBuild(contentProvider, hashToTexturePair, hash, hash + "/");
-                }
-            }
-
-            GLTFImporter.OnGLTFRootIsConstructed += FixGltfDependencyPaths;
-
-            //NOTE(Brian): Prepare gltfs gathering its dependencies first and filling the importer's static cache.
-            foreach (var kvp in hashToGltfPair)
-            {
-                string gltfHash = kvp.Key;
-
-                PersistentAssetCache.ImageCacheByUri.Clear();
-                PersistentAssetCache.StreamCacheByUri.Clear();
-
-                foreach (var mappingPair in rawContents)
-                {
-                    bool endsWithTextureExtensions = textureExtensions.Any((x) => mappingPair.file.ToLower().EndsWith(x));
-
-                    if (endsWithTextureExtensions)
-                    {
-                        string relativePath = GetRelativePathTo(hashToGltfPair[gltfHash].file, mappingPair.file);
-                        string fileExt = Path.GetExtension(mappingPair.file);
-                        string outputPath = finalDownloadedAssetDbPath + mappingPair.hash + "/" + mappingPair.hash + fileExt;
-
-                        Texture2D t2d = AssetDatabase.LoadAssetAtPath<Texture2D>(outputPath);
-
-                        if (t2d != null)
-                        {
-                            //NOTE(Brian): This cache will be used by the GLTF importer when seeking textures. This way the importer will
-                            //             consume the asset bundle dependencies instead of trying to create new textures.
-                            PersistentAssetCache.ImageCacheByUri[relativePath] = new RefCountedTextureData(relativePath, t2d);
-                        }
-                    }
-
-                    bool endsWithBufferExtensions = bufferExtensions.Any((x) => mappingPair.file.ToLower().EndsWith(x));
-
-                    if (endsWithBufferExtensions)
-                    {
-                        string relativePath = GetRelativePathTo(hashToGltfPair[gltfHash].file, mappingPair.file);
-                        string fileExt = Path.GetExtension(mappingPair.file);
-                        string outputPath = finalDownloadedAssetDbPath + mappingPair.hash + "/" + mappingPair.hash + fileExt;
-
-                        Stream stream = File.OpenRead(outputPath);
-
-                        //NOTE(Brian): This cache will be used by the GLTF importer when seeking streams. This way the importer will
-                        //             consume the asset bundle dependencies instead of trying to create new streams.
-                        PersistentAssetCache.StreamCacheByUri[relativePath] = new RefCountedStreamData(relativePath, stream);
-                    }
-                }
-
-                //NOTE(Brian): Finally, load the gLTF. The GLTFImporter will use the PersistentAssetCache to resolve the external dependencies.
-                PrepareUrlContentsForBundleBuild(contentProvider, hashToGltfPair, gltfHash, gltfHash + "/");
+                PrepareUrlContentsForBundleBuild(contentProvider, hashToTexturePair, hash, hash + "/");
             }
         }
-        //catch (Exception e)
-        //{
-        //    Debug.LogError(e.Message);
-        //    Debug.LogError("Error importing assets!");
 
-        //    if (Application.isBatchMode)
-        //        EditorApplication.Exit(1);
+        GLTFImporter.OnGLTFRootIsConstructed += FixGltfDependencyPaths;
 
-        //    return;
-        //}
+        //NOTE(Brian): Prepare gltfs gathering its dependencies first and filling the importer's static cache.
+        foreach (var kvp in hashToGltfPair)
+        {
+            string gltfHash = kvp.Key;
+
+            PersistentAssetCache.ImageCacheByUri.Clear();
+            PersistentAssetCache.StreamCacheByUri.Clear();
+
+            foreach (var mappingPair in rawContents)
+            {
+                bool endsWithTextureExtensions = textureExtensions.Any((x) => mappingPair.file.ToLower().EndsWith(x));
+
+                if (endsWithTextureExtensions)
+                {
+                    string relativePath = GetRelativePathTo(hashToGltfPair[gltfHash].file, mappingPair.file);
+                    string fileExt = Path.GetExtension(mappingPair.file);
+                    string outputPath = finalDownloadedAssetDbPath + mappingPair.hash + "/" + mappingPair.hash + fileExt;
+
+                    Texture2D t2d = AssetDatabase.LoadAssetAtPath<Texture2D>(outputPath);
+
+                    if (t2d != null)
+                    {
+                        //NOTE(Brian): This cache will be used by the GLTF importer when seeking textures. This way the importer will
+                        //             consume the asset bundle dependencies instead of trying to create new textures.
+                        PersistentAssetCache.ImageCacheByUri[relativePath] = new RefCountedTextureData(relativePath, t2d);
+                    }
+                }
+
+                bool endsWithBufferExtensions = bufferExtensions.Any((x) => mappingPair.file.ToLower().EndsWith(x));
+
+                if (endsWithBufferExtensions)
+                {
+                    string relativePath = GetRelativePathTo(hashToGltfPair[gltfHash].file, mappingPair.file);
+                    string fileExt = Path.GetExtension(mappingPair.file);
+                    string outputPath = finalDownloadedAssetDbPath + mappingPair.hash + "/" + mappingPair.hash + fileExt;
+
+                    Stream stream = File.OpenRead(outputPath);
+
+                    //NOTE(Brian): This cache will be used by the GLTF importer when seeking streams. This way the importer will
+                    //             consume the asset bundle dependencies instead of trying to create new streams.
+                    PersistentAssetCache.StreamCacheByUri[relativePath] = new RefCountedStreamData(relativePath, stream);
+                }
+            }
+
+            //NOTE(Brian): Finally, load the gLTF. The GLTFImporter will use the PersistentAssetCache to resolve the external dependencies.
+            PrepareUrlContentsForBundleBuild(contentProvider, hashToGltfPair, gltfHash, gltfHash + "/");
+        }
+
 
         if (!Directory.Exists(finalAssetBundlePath))
             Directory.CreateDirectory(finalAssetBundlePath);
