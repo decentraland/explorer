@@ -30,7 +30,9 @@ namespace Builder
 
         private DCLBuilderSelectionCollider[] meshColliders;
         private Action onShapeLoaded;
-        private bool isEntityJustSet;
+
+        private bool isTransformComponentSet;
+        private bool isShapeComponentSet;
 
         public void SetEntity(DecentralandEntity entity)
         {
@@ -42,7 +44,8 @@ namespace Builder
             entity.OnTransformChange -= OnTransformUpdated;
             entity.OnTransformChange += OnTransformUpdated;
 
-            isEntityJustSet = true;
+            isTransformComponentSet = false;
+            isShapeComponentSet = false;
 
             if (meshColliders != null)
             {
@@ -94,16 +97,12 @@ namespace Builder
 
         public bool HasShape()
         {
-            if (hasGizmoComponent)
-            {
-                return meshColliders != null;
-            }
-            else
-            {
-                Debug.Log(string.Format("rootEntity.meshesInfo != null: {0} rootEntity.meshesInfo.renderers != null: {1}",
-                (rootEntity.meshesInfo != null), rootEntity.meshesInfo.renderers != null));
-                return rootEntity.meshesInfo != null && rootEntity.meshesInfo.renderers != null;
-            }
+            return isShapeComponentSet;
+        }
+
+        public bool HasRenderer()
+        {
+            return rootEntity.meshesInfo != null && rootEntity.meshesInfo.renderers != null;
         }
 
         public void SetOnShapeLoaded(Action onShapeLoad)
@@ -126,6 +125,7 @@ namespace Builder
 
         private void OnShapeUpdated(DecentralandEntity entity)
         {
+            isShapeComponentSet = true;
             OnEntityShapeUpdated?.Invoke(this);
             ProcessEntityShape(entity);
 
@@ -142,9 +142,9 @@ namespace Builder
             gameObject.transform.localRotation = DCLTransform.model.rotation;
             gameObject.transform.localScale = DCLTransform.model.scale;
 
-            if (isEntityJustSet)
+            if (!isTransformComponentSet)
             {
-                isEntityJustSet = false;
+                isTransformComponentSet = true;
                 OnEntityAddedWithTransform?.Invoke(this);
             }
 

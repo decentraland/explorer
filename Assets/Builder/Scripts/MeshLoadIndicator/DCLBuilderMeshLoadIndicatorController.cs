@@ -24,7 +24,7 @@ namespace Builder.MeshLoadIndicator
         {
             if (!isGameObjectActive)
             {
-                DCLBuilderEntity.OnEntityTransformUpdated += OnEntityAdded;
+                DCLBuilderEntity.OnEntityAddedWithTransform += OnEntityAdded;
                 DCLBuilderEntity.OnEntityShapeUpdated += OnShapeUpdated;
                 DCLBuilderBridge.OnResetBuilderScene += OnResetBuilderScene;
                 DCLBuilderBridge.OnPreviewModeChanged += OnPreviewModeChanged;
@@ -35,7 +35,7 @@ namespace Builder.MeshLoadIndicator
         private void OnDisable()
         {
             isGameObjectActive = false;
-            DCLBuilderEntity.OnEntityTransformUpdated -= OnEntityAdded;
+            DCLBuilderEntity.OnEntityAddedWithTransform -= OnEntityAdded;
             DCLBuilderEntity.OnEntityShapeUpdated -= OnShapeUpdated;
             DCLBuilderBridge.OnResetBuilderScene -= OnResetBuilderScene;
             DCLBuilderBridge.OnPreviewModeChanged -= OnPreviewModeChanged;
@@ -43,17 +43,14 @@ namespace Builder.MeshLoadIndicator
 
         private void OnEntityAdded(DCLBuilderEntity entity)
         {
-            Debug.Log("Indicator OnEntityAdded");
             if (!entity.HasShape())
             {
-                Debug.Log("Indicator No SHape, show indicator");
                 ShowIndicator(entity.transform.position, entity.rootEntity.entityId);
             }
         }
 
         private void OnShapeUpdated(DCLBuilderEntity entity)
         {
-            Debug.Log("Indicator SHape updated, hide indicator");
             HideIndicator(entity.rootEntity.entityId);
         }
 

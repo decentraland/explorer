@@ -112,6 +112,7 @@ namespace Builder
                 {
                     AssetPromise_GLTF gltfPromise = new AssetPromise_GLTF(currentScene.contentProvider, file);
                     gltfPromise.settings.visibleFlags = AssetPromise_GLTF.VisibleFlags.INVISIBLE;
+                    gltfPromise.settings.instantiate = false;
                     AssetPromiseKeeper_GLTF.i.Keep(gltfPromise);
                 }
             }

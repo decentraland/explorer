@@ -22,6 +22,7 @@ namespace DCL
             public Vector3? initialLocalPosition;
             public Quaternion? initialLocalRotation;
             public Vector3? initialLocalScale;
+            public bool instantiate = true;
         }
 
         public Settings settings = new Settings();
@@ -127,7 +128,7 @@ namespace DCL
         {
             library.Add(asset);
 
-            if (asset.visible)
+            if (asset.visible && settings.instantiate)
             {
                 //NOTE(Brian): If the asset did load "in world" add it to library and then Get it immediately
                 //             So it keeps being there. As master gltfs can't be in the world.
@@ -135,6 +136,18 @@ namespace DCL
                 //             ApplySettings will reposition the newly Get asset to the proper coordinates.
                 asset = library.Get(asset.id);
                 ApplySettings_LoadStart();
+            }
+        }
+
+        internal override void Load()
+        {
+            if (settings.instantiate || !library.Contains(GetId()))
+            {
+                base.Load();
+            }
+            else
+            {
+                CallAndClearEvents(false);
             }
         }
 
