@@ -97,7 +97,7 @@ public static class AssetBundleBuilder
         environment = ContentServerUtils.ApiEnvironment.ZONE;
         HashSet<string> sceneCids = new HashSet<string>();
 
-        string url = ContentServerUtils.GetScenesAPIUrl(environment, 64, -64, 0, 0);
+        string url = ContentServerUtils.GetScenesAPIUrl(environment, 60, -68, 4, 4);
         UnityWebRequest w = UnityWebRequest.Get(url);
         w.SendWebRequest();
 
@@ -116,9 +116,26 @@ public static class AssetBundleBuilder
             }
         }
 
-        List<string> sceneCidsList = sceneCids.ToList();
-        ExportSceneToAssetBundles_Internal(sceneCidsList[0]);
+        sceneCidsList = sceneCids.ToList();
+        onFinish = null;
+        Debug.Log($"Building {sceneCidsList.Count} scenes...");
+
+        ExportSceneToAssetBundles_Internal(sceneCidsList[0], onFinish);
+
+        onFinish = () =>
+        {
+            Debug.Log("On Finish was called?");
+            if (sceneCidsList.Count > 1)
+            {
+                Debug.Log("Count > 1?");
+                sceneCidsList.RemoveAt(0);
+                ExportSceneToAssetBundles_Internal(sceneCidsList[0], onFinish);
+            }
+        };
     }
+
+    static List<string> sceneCidsList;
+    static System.Action onFinish = null;
 
     [System.Serializable]
     public class ScenesAPIData
@@ -212,7 +229,6 @@ public static class AssetBundleBuilder
         }
 
         InitializeDirectory(finalDownloadedPath);
-        InitializeDirectory(finalAssetBundlePath);
         AssetDatabase.Refresh();
 
         DCL.ContentProvider.MappingPair[] rawContents = parcelInfoApiData.data[0].content.contents;
@@ -379,7 +395,7 @@ public static class AssetBundleBuilder
                 string oldPathMf = finalAssetBundlePath + assetBundles[i] + ".manifest";
 
                 File.Move(oldPath, path);
-                //File.Delete(oldPathMf);
+                File.Delete(oldPathMf);
 
                 assetBundlePaths[i] = path;
             }
@@ -394,6 +410,11 @@ public static class AssetBundleBuilder
             File.Delete(finalAssetBundlePath + ASSET_BUNDLE_FOLDER_NAME + ".manifest");
 
             OnFinish?.Invoke();
+
+            if (Directory.Exists(finalDownloadedPath))
+                Directory.Delete(finalDownloadedPath, true);
+
+            AssetDatabase.Refresh();
 
             if (Application.isBatchMode)
                 EditorApplication.Exit(0);
