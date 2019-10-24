@@ -11,6 +11,7 @@ namespace Builder.MeshLoadIndicator
         private List<DCLBuilderMeshLoadIndicator> indicatorsInUse;
 
         private bool isGameObjectActive = false;
+        private bool isPreviewMode = false;
 
         private void Awake()
         {
@@ -43,7 +44,7 @@ namespace Builder.MeshLoadIndicator
 
         private void OnEntityAdded(DCLBuilderEntity entity)
         {
-            if (!entity.HasShape())
+            if (!entity.HasShape() && !isPreviewMode)
             {
                 ShowIndicator(entity.transform.position, entity.rootEntity.entityId);
             }
@@ -51,7 +52,10 @@ namespace Builder.MeshLoadIndicator
 
         private void OnShapeUpdated(DCLBuilderEntity entity)
         {
-            HideIndicator(entity.rootEntity.entityId);
+            if (!isPreviewMode)
+            {
+                HideIndicator(entity.rootEntity.entityId);
+            }
         }
 
         private void OnResetBuilderScene()
@@ -61,6 +65,7 @@ namespace Builder.MeshLoadIndicator
 
         private void OnPreviewModeChanged(bool isPreview)
         {
+            isPreviewMode = isPreview;
             if (isPreview)
             {
                 HideAllIndicators();

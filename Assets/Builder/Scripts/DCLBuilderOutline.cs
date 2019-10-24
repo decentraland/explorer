@@ -14,8 +14,6 @@ namespace Builder
         private Canvas outlineCanvas;
         private RawImage outlineRawImage;
 
-        private RenderTexture outlinedRenderTexture;
-
         private int lastScreenWidth = 0;
         private int lastScreenHeight = 0;
 
@@ -56,10 +54,11 @@ namespace Builder
 
         private void OnResize()
         {
-            outlinedRenderTexture = new RenderTexture(builderCamera.pixelWidth, builderCamera.pixelHeight, 24);
-            outlineCamera.targetTexture = outlinedRenderTexture;
-            outlineRawImage.material.mainTexture = outlinedRenderTexture;
-            outlineRawImage.rectTransform.sizeDelta = new Vector2(builderCamera.pixelWidth, builderCamera.pixelHeight);
+            outlineRawImage.gameObject.SetActive(false); // Hack: force Unity to refresh the texture
+            outlineCamera.targetTexture = new RenderTexture(Screen.width, Screen.height, 24);
+            OutlineMaterial.mainTexture = outlineCamera.targetTexture;
+            outlineRawImage.rectTransform.sizeDelta = new Vector2(outlineCanvas.pixelRect.width, outlineCanvas.pixelRect.height);
+            outlineRawImage.gameObject.SetActive(true);
         }
 
         private void OnPreviewModeChanged(bool isPreview)

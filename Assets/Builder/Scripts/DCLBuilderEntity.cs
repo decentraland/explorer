@@ -68,7 +68,7 @@ namespace Builder
             {
                 return rootEntity.scene.IsInsideSceneBoundaries(Utils.GetBoundsFromRenderers(rootEntity.meshesInfo.renderers));
             }
-            return false;
+            return true;
         }
 
         public void SetSelectLayer()
@@ -78,7 +78,10 @@ namespace Builder
             {
                 for (int i = 0; i < rootEntity.meshesInfo.renderers.Length; i++)
                 {
-                    rootEntity.meshesInfo.renderers[i].gameObject.layer = selectionLayer;
+                    if (rootEntity.meshesInfo.renderers[i])
+                    {
+                        rootEntity.meshesInfo.renderers[i].gameObject.layer = selectionLayer;
+                    }
                 }
             }
         }
@@ -90,7 +93,10 @@ namespace Builder
             {
                 for (int i = 0; i < rootEntity.meshesInfo.renderers.Length; i++)
                 {
-                    rootEntity.meshesInfo.renderers[i].gameObject.layer = selectionLayer;
+                    if (rootEntity.meshesInfo.renderers[i])
+                    {
+                        rootEntity.meshesInfo.renderers[i].gameObject.layer = selectionLayer;
+                    }
                 }
             }
         }

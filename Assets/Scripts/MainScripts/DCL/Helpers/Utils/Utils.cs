@@ -336,13 +336,16 @@ namespace DCL.Helpers
         {
             Bounds bounds = new Bounds();
 
-            for(int i=0; i < renderers.Length; i++)
-             { 
-                 if(i == 0)
-                     bounds = renderers[i].bounds;
-                 else
-                     bounds.Encapsulate(renderers[i].bounds);
-             }
+            for (int i = 0; i < renderers.Length; i++)
+            {
+                if (renderers[i])
+                {
+                    if (i == 0)
+                        bounds = renderers[i].bounds;
+                    else
+                        bounds.Encapsulate(renderers[i].bounds);
+                }
+            }
 
             return bounds;
         }
