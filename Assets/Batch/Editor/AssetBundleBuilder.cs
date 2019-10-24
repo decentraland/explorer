@@ -67,7 +67,7 @@ public static class AssetBundleBuilder
 {
     private static string DOWNLOADED_ASSET_DB_PATH_ROOT = "Assets/_Downloaded/";
     private static string DOWNLOADED_PATH_ROOT = Application.dataPath + "/_Downloaded/";
-    private static string ASSET_BUNDLE_FOLDER_NAME = "_AssetBundles";
+    private static string ASSET_BUNDLE_FOLDER_NAME = "_AssetBundles2";
     private static string ASSET_BUNDLES_PATH_ROOT = "/" + ASSET_BUNDLE_FOLDER_NAME + "/";
 
     private static string finalAssetBundlePath = "";
@@ -379,7 +379,7 @@ public static class AssetBundleBuilder
                 string oldPathMf = finalAssetBundlePath + assetBundles[i] + ".manifest";
 
                 File.Move(oldPath, path);
-                File.Delete(oldPathMf);
+                //File.Delete(oldPathMf);
 
                 assetBundlePaths[i] = path;
             }
