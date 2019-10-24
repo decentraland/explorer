@@ -6,6 +6,7 @@ using UnityEngine.Networking;
 using System.Linq;
 using DCL.Helpers;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace DCL.Components
 {
@@ -119,19 +120,18 @@ namespace DCL.Components
                     {
                         if (loadDependencies)
                         {
-                            string[] deps = manifest.GetAllDependencies(asset);
+                            string assetBundleName = Regex.Match(asset, @"(\w*)\.\w*$").Groups[1].Value;
+                            string[] deps = manifest.GetAllDependencies(assetBundleName);
 
                             foreach (string dep in deps)
                             {
-                                if (dep == asset)
+                                if (dep == assetBundleName)
                                     continue;
 
-                                string[] depPath = dep.Split('/');
-                                string depHash = contentProvider.contents.FirstOrDefault((pair) => pair.hash.ToLowerInvariant() == depPath[2].ToLowerInvariant()).hash;
+                                string depHash = contentProvider.contents.FirstOrDefault((pair) => pair.hash.ToLowerInvariant() == dep.ToLowerInvariant()).hash;
 
                                 if (depHash != null)
                                 {
-                                    Debug.Log("Loading dependency... " + depHash);
                                     yield return FetchAssetBundleWithDependencies(depHash, null, false);
                                 }
                             }
@@ -139,30 +139,29 @@ namespace DCL.Components
 
                         if (asset.Contains("glb") || asset.Contains("gltf"))
                         {
-                            Debug.Log("Instantiating asset bundle! " + asset);
                             gltfContainer = Instantiate(mainAssetBundle.LoadAsset<GameObject>(asset));
-                            #if UNITY_EDITOR
+#if UNITY_EDITOR
                             gltfContainer.GetComponentsInChildren<Renderer>().ToList().ForEach(ResetShader);
-                            #endif
+#endif
                             yield break;
                         }
                     }
                 }
             }
         }
-        
+
 #if UNITY_EDITOR
         private static void ResetShader(Renderer renderer)
         {
             if (renderer.material == null) return;
 
-            for ( int i = 0; i < renderer.materials.Length; i++)
+            for (int i = 0; i < renderer.materials.Length; i++)
             {
                 renderer.materials[i].shader = Shader.Find(renderer.materials[i].shader.name);
             }
         }
 #endif
-        
+
 
         IEnumerator TryToFetchAssetBundle(string targetUrl, Action<LoadWrapper> OnSuccess, Action<LoadWrapper> OnFail)
         {
