@@ -21,11 +21,14 @@ namespace DCL.Controllers
 
             public void ResetMaterials()
             {
-                if(meshesInfo.meshRootGameObject == null) return;
+                if (meshesInfo.meshRootGameObject == null) return;
 
                 for (int i = 0; i < meshesInfo.renderers.Length; i++)
                 {
-                    meshesInfo.renderers[i].sharedMaterial = originalMaterials[meshesInfo.renderers[i]];
+                    if (meshesInfo.renderers[i])
+                    {
+                        meshesInfo.renderers[i].sharedMaterial = originalMaterials[meshesInfo.renderers[i]];
+                    }
                 }
 
                 int wireframeObjectscount = wireframeObjects.Count;
@@ -52,7 +55,7 @@ namespace DCL.Controllers
 
         protected override void UpdateEntityMeshesValidState(DecentralandEntity entity, bool isInsideBoundaries, Bounds meshBounds)
         {
-            if(isInsideBoundaries)
+            if (isInsideBoundaries)
                 RemoveInvalidMeshEffect(entity);
             else
                 AddInvalidMeshEffect(entity, meshBounds);
@@ -60,25 +63,25 @@ namespace DCL.Controllers
 
         void RemoveInvalidMeshEffect(DecentralandEntity entity)
         {
-            if(WasEntityInAValidPosition(entity)) return;
+            if (WasEntityInAValidPosition(entity)) return;
 
             PoolableObject shapePoolableObjectBehaviour = entity.meshesInfo.meshRootGameObject.GetComponentInChildren<PoolableObject>();
-            if(shapePoolableObjectBehaviour != null)
+            if (shapePoolableObjectBehaviour != null)
                 shapePoolableObjectBehaviour.OnRelease -= invalidMeshesInfo[entity.gameObject].ResetMaterials;
-                
+
             invalidMeshesInfo[entity.gameObject].ResetMaterials();
         }
 
         void AddInvalidMeshEffect(DecentralandEntity entity, Bounds meshBounds)
         {
-            if(!WasEntityInAValidPosition(entity)) return;
+            if (!WasEntityInAValidPosition(entity)) return;
 
             InvalidMeshInfo invalidMeshInfo = new InvalidMeshInfo(entity.meshesInfo);
 
-            invalidMeshInfo.OnResetMaterials = ()=> { invalidMeshesInfo.Remove(entity.gameObject); };
+            invalidMeshInfo.OnResetMaterials = () => { invalidMeshesInfo.Remove(entity.gameObject); };
 
             PoolableObject shapePoolableObjectBehaviour = entity.meshesInfo.meshRootGameObject.GetComponentInChildren<PoolableObject>();
-            if(shapePoolableObjectBehaviour != null)
+            if (shapePoolableObjectBehaviour != null)
             {
                 shapePoolableObjectBehaviour.OnRelease -= invalidMeshInfo.ResetMaterials;
                 shapePoolableObjectBehaviour.OnRelease += invalidMeshInfo.ResetMaterials;
@@ -88,18 +91,21 @@ namespace DCL.Controllers
             Renderer[] entityRenderers = entity.meshesInfo.renderers;
             for (int i = 0; i < entityRenderers.Length; i++)
             {
-                // Save original materials
-                invalidMeshInfo.originalMaterials.Add(entityRenderers[i], entityRenderers[i].sharedMaterial);
+                if (entityRenderers[i])
+                {
+                    // Save original materials
+                    invalidMeshInfo.originalMaterials.Add(entityRenderers[i], entityRenderers[i].sharedMaterial);
 
-                entityRenderers[i].sharedMaterial = invalidMeshMaterial;
+                    entityRenderers[i].sharedMaterial = invalidMeshMaterial;
 
-                // Wireframe that shows the boundaries to the dev (We don't use the GameObject.Instantiate(prefab, parent) 
-                // overload because we need to set the position and scale before parenting, to deal with scaled objects)
-                GameObject wireframeObject = GameObject.Instantiate(Resources.Load<GameObject>(WIREFRAME_PREFAB_NAME));
-                wireframeObject.transform.position = entityRenderers[i].bounds.center;
-                wireframeObject.transform.localScale = entityRenderers[i].bounds.size;
-                wireframeObject.transform.SetParent(entity.gameObject.transform);
-                invalidMeshInfo.wireframeObjects.Add(wireframeObject);
+                    // Wireframe that shows the boundaries to the dev (We don't use the GameObject.Instantiate(prefab, parent) 
+                    // overload because we need to set the position and scale before parenting, to deal with scaled objects)
+                    GameObject wireframeObject = GameObject.Instantiate(Resources.Load<GameObject>(WIREFRAME_PREFAB_NAME));
+                    wireframeObject.transform.position = entityRenderers[i].bounds.center;
+                    wireframeObject.transform.localScale = entityRenderers[i].bounds.size;
+                    wireframeObject.transform.SetParent(entity.gameObject.transform);
+                    invalidMeshInfo.wireframeObjects.Add(wireframeObject);
+                }
             }
 
             invalidMeshesInfo.Add(entity.gameObject, invalidMeshInfo);

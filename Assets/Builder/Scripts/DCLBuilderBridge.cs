@@ -288,6 +288,7 @@ namespace Builder
             if (DCLCharacterController.i)
             {
                 defaultCharacterPosition = DCLCharacterController.i.transform.position;
+                DCLCharacterController.i.initialPositionAlreadySet = true;
                 DCLCharacterController.i.gameObject.SetActive(false);
             }
 
