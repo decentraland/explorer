@@ -38,6 +38,7 @@ namespace DCL.Components
         static Dictionary<string, AssetBundle> cachedBundles = new Dictionary<string, AssetBundle>();
         static Dictionary<string, AssetBundleManifest> cachedManifests = new Dictionary<string, AssetBundleManifest>();
         static HashSet<string> failedRequests = new HashSet<string>();
+        static List<string> downloadingBundle = new List<string>();
 
         IEnumerator GetAssetBundle(string url)
         {
@@ -46,6 +47,13 @@ namespace DCL.Components
 
             UnityWebRequest assetBundleRequest = UnityWebRequestAssetBundle.GetAssetBundle(url);
 
+            if (downloadingBundle.Contains(url))
+            {
+                yield return new WaitUntil(() => cachedBundles.ContainsKey(url));
+                yield break;
+            }
+
+            downloadingBundle.Add(url);
             yield return assetBundleRequest.SendWebRequest();
 
             if (assetBundleRequest.isHttpError || assetBundleRequest.isNetworkError)
@@ -58,6 +66,7 @@ namespace DCL.Components
             {
                 AssetBundle assetBundle = DownloadHandlerAssetBundle.GetContent(assetBundleRequest);
                 cachedBundles[url] = assetBundle;
+                downloadingBundle.Remove(url);
             }
         }
 
@@ -132,12 +141,28 @@ namespace DCL.Components
                         {
                             Debug.Log("Instantiating asset bundle! " + asset);
                             gltfContainer = Instantiate(mainAssetBundle.LoadAsset<GameObject>(asset));
+                            #if UNITY_EDITOR
+                            gltfContainer.GetComponentsInChildren<Renderer>().ToList().ForEach(ResetShader);
+                            #endif
                             yield break;
                         }
                     }
                 }
             }
         }
+        
+#if UNITY_EDITOR
+        private static void ResetShader(Renderer renderer)
+        {
+            if (renderer.material == null) return;
+
+            for ( int i = 0; i < renderer.materials.Length; i++)
+            {
+                renderer.materials[i].shader = Shader.Find(renderer.materials[i].shader.name);
+            }
+        }
+#endif
+        
 
         IEnumerator TryToFetchAssetBundle(string targetUrl, Action<LoadWrapper> OnSuccess, Action<LoadWrapper> OnFail)
         {
