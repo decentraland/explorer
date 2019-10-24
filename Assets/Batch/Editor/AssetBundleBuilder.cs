@@ -52,9 +52,8 @@ public static class ContentServerUtils
 
     public static string GetContentAPIUrlBase(ApiEnvironment env)
     {
-        return $"http://localhost:1337/contents/";
-        //string envString = GetEnvString(env);
-        //return $"https://content.decentraland.{envString}/contents/";
+        string envString = GetEnvString(env);
+        return $"https://content.decentraland.{envString}/contents/";
     }
 
     public static string GetBundlesAPIUrlBase(ApiEnvironment env)
@@ -68,7 +67,7 @@ public static class AssetBundleBuilder
 {
     private static string DOWNLOADED_ASSET_DB_PATH_ROOT = "Assets/_Downloaded/";
     private static string DOWNLOADED_PATH_ROOT = Application.dataPath + "/_Downloaded/";
-    private static string ASSET_BUNDLE_FOLDER_NAME = "_AssetBundles2";
+    private static string ASSET_BUNDLE_FOLDER_NAME = "_AssetBundles";
     private static string ASSET_BUNDLES_PATH_ROOT = "/" + ASSET_BUNDLE_FOLDER_NAME + "/";
 
     private static string finalAssetBundlePath = "";
@@ -84,49 +83,6 @@ public static class AssetBundleBuilder
         ExportSceneToAssetBundles_Internal("QmbKgHPENpzGGEfagGP5BbEd7CvqXeXuuXLeMEkuswGvrK");
     }
 
-    [MenuItem("AssetBundleBuilder/Try To Load Bundle")]
-    public static void LoadAB()
-    {
-        string hash = "QmX2vbrBA5uQdABge2942YdXjfeuhtNKV8qDDRNs8gmBxc";
-        string assetUrl = $"http://localhost:1338/manifests/{hash}";
-
-        UnityWebRequest assetBundleRequest = UnityWebRequestAssetBundle.GetAssetBundle(assetUrl);
-        assetBundleRequest.SendWebRequest();
-        while (assetBundleRequest.isDone == false) { }
-
-        if (assetBundleRequest.isHttpError || assetBundleRequest.isNetworkError)
-        {
-            return;
-        }
-        else
-        {
-            Debug.Log("asset url success = " + assetUrl);
-        }
-
-        AssetBundle mainAssetBundle = DownloadHandlerAssetBundle.GetContent(assetBundleRequest);
-        AssetBundleManifest manifest = mainAssetBundle.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
-
-        if (manifest != null)
-        {
-            Debug.Log("VALID MANIFEST? " + mainAssetBundle.name);
-
-            foreach (var assetName in manifest.GetAllAssetBundles())
-            {
-                Debug.Log("asset: " + assetName);
-                foreach (var dep in manifest.GetAllDependencies(assetName))
-                {
-                    Debug.Log("dep: " + assetName);
-                }
-            }
-
-        }
-        else
-        {
-            Debug.Log("Manifest is null!");
-        }
-
-        mainAssetBundle.Unload(true);
-    }
 
     [MenuItem("AssetBundleBuilder/Dump Museum District")]
     public static void DumpMuseum()
@@ -140,93 +96,6 @@ public static class AssetBundleBuilder
     {
         environment = ContentServerUtils.ApiEnvironment.ZONE;
         HashSet<string> sceneCids = new HashSet<string>();
-
-        //for (int x = 64 - 10; x < 64 + 10; x++)
-        //{
-        //    for (int y = -64 - 10; y < -64 + 10; y++)
-        //    {
-        //        string url = ContentServerUtils.GetScenesAPIUrl(environment, x, y, 1, 1);
-        //        UnityWebRequest w = UnityWebRequest.Get(url);
-        //        w.SendWebRequest();
-
-        //        while (w.isDone == false) { }
-
-        //        ScenesAPIData scenesApiData = JsonUtility.FromJson<ScenesAPIData>(w.downloadHandler.text);
-
-        //        Assert.IsTrue(scenesApiData != null, "Invalid response from ScenesAPI");
-        //        Assert.IsTrue(scenesApiData.data != null, "Invalid response from ScenesAPI");
-
-        //        foreach (var data in scenesApiData.data)
-        //        {
-        //            if (!sceneCids.Contains(data.root_cid))
-        //            {
-        //                sceneCids.Add(data.root_cid);
-        //            }
-        //        }
-        //    }
-        //}
-        //List<string> scenes = new List<string>() {
-        //"QmPg1wCvMmDLoaQQrxjaeVPEWpxrsqSskkfQYQGW1BxTaN",
-        //"QmbySKR6UZycb38pUWnYLKmq4P3gLAEDNfsoQ6Qf3QAhJp",
-        //"QmegPh6hYFbkNajcABVXvkMWXoVKQ4PQW2wPRgZzE1vpbj",
-        //"QmUkyKcs7MmSwKXEuyZvc4ng9VtzRZyh7k8beJTVWDzf3N",
-        //"QmcdBBi8s1JygEkYQbU9tNauaEZJFJgqheBt3j55ayTPPY",
-        //"QmUSA67fNpuHUHcjdKYc41Pr6GCE29yCF23Gd4ngXE9DHf",
-        //"Qmf6EuBxHMoZTrWYEbDzbKJbTxkbkULKnJMDodPSEa44FH" 
-        //"QmUEj6Yw9JgyMrVoeDU7MBhzBL2P5i9aQ7nWkRQ7mA2fv4",
-        //"QmZEJey5qCPpQhV8odTAWz1CMANd1y82CPhTikcGxNBZUU",
-        //"QmahPyF9P6sEXk9GCej2t4wZrJ7qxMMtetEBhw12aHNZJq",
-        //"QmPVB9XaG4zqnWSvUKcpBE1yKAY3QaB1LYfkXkjMaY3RnD",
-        //"QmWZHDbmvhbxr6frBMbU5XZXUvKEXKZZJmGs3nhJc3at8i",
-        //"QmUpkH5ipnirDGYsAm9yty1S8Vh8gUCbqStKXMwTQLEAFt",
-        //"QmYCKFGNTnRUHxTeuvf3fq8V6LkZWKwszeERMQLn8TYQzr",
-        //"QmRqkpVd3dwYqPES2eXs49snsP4M2eMVZHWKUSJNXbJdKu",
-        //"QmYGo4Bv6fUnxkyJJH67fWAcSRM85Zn4r64F9McXtFYphx",
-        //"QmZZEKSD3kE3Ww1oDbC5c9dP3jtuGQrbf5FcdgXNeoptKm",
-        //"QmYQeTmUCu3ZJwv23Cw7Hirn2mRZhdD6u774f35hMqCCCX",
-        //"QmbJzo3wy1onHkLNcQn7ZcExJQWQhZA4LfNjWZm3sDyFgr",
-        //"QmeSvKrrmkDoWa2DEid68ceEDUppyLUkvWrssCknSUukPK",
-        //"QmXPvpaWWiQaa5fDf3m6zauetPpzKW15cvX7W4hGQw4NVN",
-        //"QmSEqVroQ51H5Q6vw3Wpwx3T17WWpb7r14UYJWfSoKniXH",
-        //"QmckxoZchoQ3XA85ygz8Kbga8yxeRgVrKJQvooJGcjsYTm",
-        //"QmUbwFJtMURkNZWeLKkXCZtpP5dPPrsKbx1kWCqfVXizHo",
-        //"QmWiwWUD9sFRjNVkctQ4kd9DnVmRFdaf5Atz529cKoZps2",
-        //"QmWUsrRmBubLfsmqyFtfki3L6t41NFGRgKzNUhMq47nsiP",
-        //"QmbwfFoDywsA6Ku48ycNspncV1WYzbaKVTTJ94rrdfCSvq",
-        //"QmRrtBSJmVDXXDzgrU8rfs6Nx6gbMeivqkpx3cm4wN3s9o",
-        //"QmUAnadqEdVA5KBKLDNKExhjKtWu8kE31vuqKgzCTUp3cp",
-        //"QmcqJ2ngQY1Nb9jfT9RNJgvqUJbsrx8X2mAj57Rgu1E6VM",
-        //"QmWEWyx4khgKRnEd7yRsMocSrb1japZCkzBPhRkKaMbyRk",
-        //"QmZxi7jNWHDXTm233Wma8czVCHxfMcanbx6vvKWsBSKn9R",
-        //"QmeNU4auZYD7owPGUzbEEDG236avhbkJ6ibfJuYnsDkAG6",
-        //"QmRJ8Ez8yBC8EUXaGm6T41F8kPCCCbNoqjA2awg4VyENVs",
-        //"QmTXVKoowhc4gbc4iqjjJJ8pxsYJNPjz7oXUS55vhHxvC1",
-        //"QmUWrSR66Ptbd29i1Z2wdttZhCTaw2pJVMTbsha4Lt6jKS",
-        //"QmRadoSwLd4ixm9bjLUzotQjgpoh2BW9V7miprc6P7oDuH",
-        //"QmTGBgspYcPvw4d5YzWuBKQz17V9KfRD24m7dbFgNGmmmx",
-        //"QmctKjAsg6aspxqjDW8fprHB9yAZR9RfsnXx5LrMPZNPVU",
-        //"QmYbTLiae65ri16dyyAVBVWxxzmKAoWrY4ZnCr26ebHoDb",
-        //"QmX2vbrBA5uQdABge2942YdXjfeuhtNKV8qDDRNs8gmBxc",
-        //"QmSRhwPdKzHZKf6D49u7TmnxibhNxmjb3gCydjCx1d632g",
-        //"QmYgRtEjAhRLyq1B6puujhmnHktbPTUMiAX2quWUjz48oX",
-        //"Qmdsdvc5SmszriVshnPesn88dvqLz6DacSNXNk45CpX39f",
-        //"QmUba5LLqPjakA47UULDKGQnYkeacXpAuEyL33dULgdvaz",
-        //"QmZSdRwuSh7gs6CqL2T7DDY1t34xbQNtd9xivnq11L8P4Q",
-        //"QmdjSJjNEcM97CqBThwAUcWW3K1gEXzUArDqyJuNDLTgcP",
-        //"QmaTi4ijVN15mqpKfZAHL1nQATbvWXHXamvxx5GiRTk8Sj",
-        //"QmTuxGksmGhcRbQZCimuMvWDkhR2HfV2MqB5BMd2GAwXTK",
-        //"QmVJypyNg9q8Wauj4V7GfY8iRguTSSx3Tfh9fjqoUsTq6d",
-        //"QmP824oqTAS9qcGoVd6nCpRqWh4LYQuw39hMbuhTpWGPFV",
-        //"Qmemy3dVDgAFB9e9Pvebwrt1WTyaW7dWtxV6HayRjEpuMW",
-        //"QmY4VwVfisk5xtX2Ma2EJQHCBTAUXqM6VJazEVgCT6GPbG",
-        //"QmY2yiN5iiR4r1NF7rgsXW6TYKUEihnRhRXhKrDfYqWqtS",
-        //"QmZLvwZyyikDW8ARAes5vGREmjA25vVjsHKYGwPr2ff7kj",
-        //"QmQQmRKxrgut5546siNdWXSM9rm7KCXHKDNeNJEDbaKTer",
-        //"QmQBq4J4tMGo2WRJYF6tRmDz1UYQwQ3zmoq719qCkVqo5R",
-        //"QmeABnihTo9pbhJPEsVMKDrXTR3es3vUjyQ4UV4CU1dUgM",
-        //"QmTq1Ha4kDmaQqnbxsvLbpcBth3PLqkC99MSmz5dnU8Ebp",
-        //"QmSwWVrnJRe7zCSSpcURBFatKMybFfUuhaG2DGL1cFShaZ",
-        //"QmTeUdTEpNoEq3fGAiAF13VAPVSQPZz2NeonDuwDmJg2ax" };
 
         string url = ContentServerUtils.GetScenesAPIUrl(environment, 64, -64, 0, 0);
         UnityWebRequest w = UnityWebRequest.Get(url);
