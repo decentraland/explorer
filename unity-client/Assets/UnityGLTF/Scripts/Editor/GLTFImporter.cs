@@ -402,9 +402,11 @@ namespace UnityGLTF
 
                 var loader = new GLTFSceneImporter(gLTFRoot, fileLoader, null, stream);
                 GLTFSceneImporter.budgetPerFrameInMilliseconds = float.MaxValue;
-                loader.InitialVisibility = true;
+                loader.addImagesToPersistentCaching = false;
+                loader.addMaterialsToPersistentCaching = false;
+                loader.initialVisibility = true;
                 loader.useMaterialTransition = false;
-                loader.MaximumLod = _maximumLod;
+                loader.maximumLod = _maximumLod;
                 loader.isMultithreaded = true;
 
                 // HACK: Force the coroutine to run synchronously in the editor
@@ -424,7 +426,7 @@ namespace UnityGLTF
                         }
                     }
                 }
-                return loader.LastLoadedScene;
+                return loader.lastLoadedScene;
             }
         }
 

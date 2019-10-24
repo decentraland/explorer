@@ -5,6 +5,7 @@ using UnityEngine.Assertions;
 using UnityEngine.Networking;
 using System.Linq;
 using DCL.Helpers;
+using System.Collections.Generic;
 
 namespace DCL.Components
 {
@@ -34,18 +35,66 @@ namespace DCL.Components
             StartCoroutine(TryToFetchAssetBundle(targetUrl, OnSuccess, OnFail));
         }
 
-        IEnumerator FetchAssetBundleWithDependencies(string hash, string[] extensionFilter = null)
+        static Dictionary<string, AssetBundle> cachedBundles = new Dictionary<string, AssetBundle>();
+        static Dictionary<string, AssetBundleManifest> cachedManifests = new Dictionary<string, AssetBundleManifest>();
+        static HashSet<string> failedRequests = new HashSet<string>();
+
+        IEnumerator GetAssetBundle(string url)
         {
-            UnityWebRequest manifestRequest = UnityWebRequest.Get($"http://localhost:8000/{entity.scene.sceneData.id}/{hash}.manifest");
-            yield return manifestRequest.SendWebRequest();
+            if (failedRequests.Contains(url) || cachedBundles.ContainsKey(url))
+                yield break;
 
-            AssetBundle abmf = DownloadHandlerAssetBundle.GetContent(manifestRequest);
-            AssetBundleManifest manifest = abmf.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
+            UnityWebRequest assetBundleRequest = UnityWebRequestAssetBundle.GetAssetBundle(url);
 
-            UnityWebRequest assetBundleRequest = UnityWebRequest.Get($"http://localhost:8000/{entity.scene.sceneData.id}/{hash}");
             yield return assetBundleRequest.SendWebRequest();
 
-            AssetBundle mainAssetBundle = DownloadHandlerAssetBundle.GetContent(assetBundleRequest);
+            if (assetBundleRequest.isHttpError || assetBundleRequest.isNetworkError)
+            {
+                failedRequests.Add(url);
+                yield break;
+            }
+
+            if (!cachedBundles.ContainsKey(url))
+            {
+                AssetBundle assetBundle = DownloadHandlerAssetBundle.GetContent(assetBundleRequest);
+                cachedBundles[url] = assetBundle;
+            }
+        }
+
+        IEnumerator FetchManifest(string sceneCid)
+        {
+            if (cachedManifests.ContainsKey(sceneCid))
+                yield break;
+
+            string url = $"http://localhost:1338/manifests/{sceneCid}";
+
+            yield return GetAssetBundle(url);
+
+            AssetBundle mainAssetBundle;
+
+            if (cachedBundles.TryGetValue(url, out mainAssetBundle))
+            {
+                AssetBundleManifest manifest = mainAssetBundle.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
+                cachedManifests[sceneCid] = manifest;
+            }
+        }
+
+
+        IEnumerator FetchAssetBundleWithDependencies(string hash, string[] extensionFilter = null, bool loadDependencies = true)
+        {
+            if (!cachedManifests.ContainsKey(entity.scene.sceneData.id))
+                yield break;
+
+            string url = $"http://localhost:1338/{hash}";
+
+            yield return GetAssetBundle(url);
+
+            AssetBundle mainAssetBundle;
+
+            if (!cachedBundles.TryGetValue(url, out mainAssetBundle))
+                yield break;
+
+            AssetBundleManifest manifest = cachedManifests[entity.scene.sceneData.id];
 
             string[] assetNames = mainAssetBundle.GetAllAssetNames();
 
@@ -59,16 +108,23 @@ namespace DCL.Components
 
                     if (containsExtension)
                     {
-                        string[] deps = manifest.GetAllDependencies(asset);
-
-                        foreach (string dep in deps)
+                        if (loadDependencies)
                         {
-                            string[] depPath = dep.Split('/');
-                            string depHash = contentProvider.contents.FirstOrDefault((pair) => pair.hash.ToLowerInvariant() == depPath[2].ToLowerInvariant()).hash;
+                            string[] deps = manifest.GetAllDependencies(asset);
 
-                            if (depHash != null)
+                            foreach (string dep in deps)
                             {
-                                yield return FetchAssetBundleWithDependencies(depHash);
+                                if (dep == asset)
+                                    continue;
+
+                                string[] depPath = dep.Split('/');
+                                string depHash = contentProvider.contents.FirstOrDefault((pair) => pair.hash.ToLowerInvariant() == depPath[2].ToLowerInvariant()).hash;
+
+                                if (depHash != null)
+                                {
+                                    Debug.Log("Loading dependency... " + depHash);
+                                    yield return FetchAssetBundleWithDependencies(depHash, null, false);
+                                }
                             }
                         }
 
@@ -85,34 +141,41 @@ namespace DCL.Components
 
         IEnumerator TryToFetchAssetBundle(string targetUrl, Action<LoadWrapper> OnSuccess, Action<LoadWrapper> OnFail)
         {
-            if (contentProvider.fileToHash.ContainsKey(targetUrl))
+            string lowerCaseUrl = targetUrl.ToLower();
+            if (!contentProvider.fileToHash.ContainsKey(lowerCaseUrl))
             {
-                alreadyLoaded = false;
-                string hash = contentProvider.fileToHash[targetUrl];
-                yield return FetchAssetBundleWithDependencies(hash, new string[] { "gltf", "glb" });
+                Debug.Log("targetUrl not found?... " + targetUrl);
+                OnFail.Invoke(this);
+                yield break;
+            }
 
-                if (gltfContainer == null)
-                {
-                    LoadGltf(targetUrl, OnSuccess, OnFail);
-                }
-                else
-                {
-                    alreadyLoaded = true;
-                    gltfContainer.transform.SetParent(transform);
-                    gltfContainer.transform.ResetLocalTRS();
+            alreadyLoaded = false;
+            string hash = contentProvider.fileToHash[lowerCaseUrl];
 
-                    if (initialVisibility == false)
+            yield return FetchManifest(entity.scene.sceneData.id);
+            yield return FetchAssetBundleWithDependencies(hash, new string[] { "gltf", "glb" });
+
+            if (gltfContainer == null)
+            {
+                LoadGltf(targetUrl, OnSuccess, OnFail);
+            }
+            else
+            {
+                alreadyLoaded = true;
+                gltfContainer.transform.SetParent(transform);
+                gltfContainer.transform.ResetLocalTRS();
+
+                if (initialVisibility == false)
+                {
+                    foreach (Renderer r in gltfContainer.GetComponentsInChildren<Renderer>())
                     {
-                        foreach (Renderer r in gltfContainer.GetComponentsInChildren<Renderer>())
-                        {
-                            r.enabled = false;
-                        }
+                        r.enabled = false;
                     }
-
-                    this.entity.OnCleanupEvent -= OnEntityCleanup;
-                    this.entity.OnCleanupEvent += OnEntityCleanup;
-                    OnSuccess.Invoke(this);
                 }
+
+                this.entity.OnCleanupEvent -= OnEntityCleanup;
+                this.entity.OnCleanupEvent += OnEntityCleanup;
+                OnSuccess.Invoke(this);
             }
         }
 
@@ -125,7 +188,6 @@ namespace DCL.Components
                 if (VERBOSE)
                     Debug.Log("Forgetting not null promise...");
             }
-
 
             gltfPromise = new AssetPromise_GLTF(contentProvider, targetUrl);
 

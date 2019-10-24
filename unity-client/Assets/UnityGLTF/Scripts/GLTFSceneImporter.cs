@@ -63,7 +63,7 @@ namespace UnityGLTF
         /// <summary>
         /// Maximum LOD
         /// </summary>
-        public int MaximumLod = 300;
+        public int maximumLod = 300;
 
         /// <summary>
         /// Timeout for certain threading operations
@@ -103,7 +103,7 @@ namespace UnityGLTF
         /// <summary>
         /// Initial state of the meshes
         /// </summary>
-        public bool InitialVisibility { get; set; }
+        public bool initialVisibility { get; set; }
 
         public static bool renderingIsDisabled = false;
         private static float budgetPerFrameInMillisecondsValue = 2f;
@@ -133,6 +133,9 @@ namespace UnityGLTF
 
         static protected float _timeAtLastYield = 0f;
         protected AsyncCoroutineHelper _asyncCoroutineHelper;
+
+        public bool addImagesToPersistentCaching = true;
+        public bool addMaterialsToPersistentCaching = true;
 
         protected GameObject _lastLoadedScene;
         protected readonly GLTFMaterial DefaultMaterial = new GLTFMaterial();
@@ -206,7 +209,7 @@ namespace UnityGLTF
             }
         }
 
-        public GameObject LastLoadedScene
+        public GameObject lastLoadedScene
         {
             get { return _lastLoadedScene; }
         }
@@ -339,7 +342,7 @@ namespace UnityGLTF
                 }
             }
 
-            onLoadComplete?.Invoke(LastLoadedScene, null);
+            onLoadComplete?.Invoke(lastLoadedScene, null);
         }
 
         /// <summary>
@@ -494,8 +497,6 @@ namespace UnityGLTF
                 {
                     streamingImagesStaticList.Add(image.Uri);
                     streamingImagesLocalList.Add(image.Uri);
-
-                    Debug.Log("No deberia entrar nunca aca: " + image.Uri);
 
                     yield return _loader.LoadStream(image.Uri);
                     _assetCache.ImageStreamCache[sourceId] = _loader.LoadedStream;
@@ -1548,7 +1549,7 @@ namespace UnityGLTF
             Renderer renderer = primitiveObj.GetComponent<Renderer>();
 
             //// NOTE(Brian): Texture loading
-            if (useMaterialTransition && InitialVisibility)
+            if (useMaterialTransition && initialVisibility)
             {
                 var matController = primitiveObj.AddComponent<MaterialTransitionController>();
                 var coroutine = DownloadAndConstructMaterial(primitive, materialIndex, renderer, matController);
@@ -1617,7 +1618,7 @@ namespace UnityGLTF
                         skinnedMeshRenderer.sharedMesh = curMesh;
                         skinnedMeshRenderer.quality = SkinQuality.Auto;
                         renderer = skinnedMeshRenderer;
-                        renderer.enabled = InitialVisibility;
+                        renderer.enabled = initialVisibility;
 
                         if (HasBones(skin))
                         {
@@ -1628,7 +1629,7 @@ namespace UnityGLTF
                     {
                         meshRenderer = primitiveObj.AddComponent<MeshRenderer>();
                         renderer = meshRenderer;
-                        renderer.enabled = InitialVisibility;
+                        renderer.enabled = initialVisibility;
                     }
 
                     yield return ConstructPrimitiveMaterials(mesh, meshId, i);
@@ -2046,17 +2047,17 @@ namespace UnityGLTF
             {
                 if (!string.IsNullOrEmpty(CustomShaderName))
                 {
-                    mapper = new SpecGlossMap(CustomShaderName, MaximumLod);
+                    mapper = new SpecGlossMap(CustomShaderName, maximumLod);
                 }
                 else
                 {
                     if (cachedSpecGlossMat != null)
                     {
-                        mapper = new SpecGlossMap(new Material(cachedSpecGlossMat), MaximumLod);
+                        mapper = new SpecGlossMap(new Material(cachedSpecGlossMat), maximumLod);
                     }
                     else
                     {
-                        mapper = new SpecGlossMap(MaximumLod);
+                        mapper = new SpecGlossMap(maximumLod);
                         cachedSpecGlossMat = mapper.GetMaterialCopy();
                     }
                 }
@@ -2065,17 +2066,17 @@ namespace UnityGLTF
             {
                 if (!string.IsNullOrEmpty(CustomShaderName))
                 {
-                    mapper = new MetalRoughMap(CustomShaderName, MaximumLod);
+                    mapper = new MetalRoughMap(CustomShaderName, maximumLod);
                 }
                 else
                 {
                     if (cachedMetalRoughMat != null)
                     {
-                        mapper = new MetalRoughMap(new Material(cachedMetalRoughMat), MaximumLod);
+                        mapper = new MetalRoughMap(new Material(cachedMetalRoughMat), maximumLod);
                     }
                     else
                     {
-                        mapper = new MetalRoughMap(MaximumLod);
+                        mapper = new MetalRoughMap(maximumLod);
                         cachedMetalRoughMat = mapper.GetMaterialCopy();
                     }
                 }
@@ -2197,7 +2198,7 @@ namespace UnityGLTF
             {
                 string materialCRC = material[i].ComputeCRC().ToString() + material[i].name;
 
-                if (Application.isEditor)
+                if (!addMaterialsToPersistentCaching)
                 {
                     switch (i)
                     {
@@ -2211,7 +2212,6 @@ namespace UnityGLTF
 
                     continue;
                 }
-
 
                 //TODO(Brian): Remove old material here if the material won't be used. 
                 //             (We can use Resources.UnloadUnusedAssets too, but I hate to rely on this)
@@ -2339,8 +2339,10 @@ namespace UnityGLTF
                     yield return ConstructImage(image, sourceId, markGpuOnly, isLinear);
                     source = new RefCountedTextureData(image.Uri, _assetCache.ImageCache[sourceId]);
 
-                    if (image.Uri != null)
+                    if (image.Uri != null && addImagesToPersistentCaching)
+                    {
                         PersistentAssetCache.ImageCacheByUri[image.Uri] = source;
+                    }
                 }
 
                 var desiredFilterMode = FilterMode.Bilinear;

@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 8900000, guid: ade92094798774df4a51b327374145b8, type: 3}
   m_Sun: {fileID: 943100645024490816}
-  m_IndirectSpecularColor: {r: 0.7626854, g: 0.79658186, b: 0.8308228, a: 1}
+  m_IndirectSpecularColor: {r: 0.76268655, g: 0.7965855, b: 0.8308271, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -278,6 +278,21 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 114754758112584508, guid: b387035aa46399445bdc7951a41d5213,
+        type: 3}
+      propertyPath: debugSceneCoords.x
+      value: 64
+      objectReference: {fileID: 0}
+    - target: {fileID: 114754758112584508, guid: b387035aa46399445bdc7951a41d5213,
+        type: 3}
+      propertyPath: debugSceneCoords.y
+      value: -65
+      objectReference: {fileID: 0}
+    - target: {fileID: 114754758112584508, guid: b387035aa46399445bdc7951a41d5213,
+        type: 3}
+      propertyPath: debugScenes
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: b387035aa46399445bdc7951a41d5213, type: 3}
 --- !u!114 &322303338 stripped
@@ -382,10 +397,10 @@ MonoBehaviour:
   openBrowserWhenStart: 1
   baseUrlMode: 0
   baseUrlCustom: 
-  contentSource: 1
+  contentSource: 2
   startInCoords: {x: 64, y: -64}
-  forceLocalComms: 1
-  debugPanelMode: 2
+  forceLocalComms: 0
+  debugPanelMode: 0
 --- !u!4 &1444882337
 Transform:
   m_ObjectHideFlags: 0
