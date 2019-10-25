@@ -97,7 +97,7 @@ public static class AssetBundleBuilder
         environment = ContentServerUtils.ApiEnvironment.ZONE;
         HashSet<string> sceneCids = new HashSet<string>();
 
-        string url = ContentServerUtils.GetScenesAPIUrl(environment, 60, -68, 4, 4);
+        string url = ContentServerUtils.GetScenesAPIUrl(environment, 60, -70, 8, 8);
         UnityWebRequest w = UnityWebRequest.Get(url);
         w.SendWebRequest();
 
@@ -117,25 +117,24 @@ public static class AssetBundleBuilder
         }
 
         sceneCidsList = sceneCids.ToList();
-        onFinish = null;
         Debug.Log($"Building {sceneCidsList.Count} scenes...");
 
-        ExportSceneToAssetBundles_Internal(sceneCidsList[0], onFinish);
-
-        onFinish = () =>
+        OnBundleBuildFinish = () =>
         {
             Debug.Log("On Finish was called?");
             if (sceneCidsList.Count > 1)
             {
                 Debug.Log("Count > 1?");
                 sceneCidsList.RemoveAt(0);
-                ExportSceneToAssetBundles_Internal(sceneCidsList[0], onFinish);
+                ExportSceneToAssetBundles_Internal(sceneCidsList[0]);
             }
         };
+
+        ExportSceneToAssetBundles_Internal(sceneCidsList[0]);
     }
 
     static List<string> sceneCidsList;
-    static System.Action onFinish = null;
+    static System.Action OnBundleBuildFinish = null;
 
     [System.Serializable]
     public class ScenesAPIData
@@ -203,12 +202,19 @@ public static class AssetBundleBuilder
         }
     }
 
-    private static void ExportSceneToAssetBundles_Internal(string sceneCid, System.Action OnFinish = null)
+    private static void ExportSceneToAssetBundles_Internal(string sceneCid)
     {
         Debug.Log($"Exporting scene... {sceneCid}");
         finalAssetBundlePath = ASSET_BUNDLES_PATH_ROOT;
         finalDownloadedPath = DOWNLOADED_PATH_ROOT + $"{sceneCid}/";
         finalDownloadedAssetDbPath = DOWNLOADED_ASSET_DB_PATH_ROOT + $"{sceneCid}/";
+
+        if (File.Exists(finalAssetBundlePath + "/manifests/" + sceneCid))
+        {
+            Debug.Log("Scene already exists!");
+            OnBundleBuildFinish?.Invoke();
+            return;
+        }
 
         string url = ContentServerUtils.GetMappingsAPIUrl(environment, sceneCid);
         UnityWebRequest w = UnityWebRequest.Get(url);
@@ -336,10 +342,10 @@ public static class AssetBundleBuilder
             }
         }
 
-        BuildAssetBundles(sceneCid, contentProvider, OnFinish);
+        BuildAssetBundles(sceneCid, contentProvider);
     }
 
-    private static void BuildAssetBundles(string sceneCid, DCL.ContentProvider contentProvider, System.Action OnFinish)
+    private static void BuildAssetBundles(string sceneCid, DCL.ContentProvider contentProvider)
     {
         if (!Directory.Exists(finalAssetBundlePath))
             Directory.CreateDirectory(finalAssetBundlePath);
@@ -360,7 +366,7 @@ public static class AssetBundleBuilder
             if (manifest == null)
             {
                 Debug.LogError("Error generating asset bundle!");
-                OnFinish?.Invoke();
+                OnBundleBuildFinish?.Invoke();
 
                 if (Application.isBatchMode)
                     EditorApplication.Exit(1);
@@ -403,26 +409,53 @@ public static class AssetBundleBuilder
             //NOTE(Brian): Move manifest bundle to manifests folder
             string manifestDirectoryName = finalAssetBundlePath + "manifests/";
 
-            if (!Directory.Exists(manifestDirectoryName))
-                Directory.CreateDirectory(manifestDirectoryName);
+            try
+            {
+                if (!Directory.Exists(manifestDirectoryName))
+                    Directory.CreateDirectory(manifestDirectoryName);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError("Error trying to create manifest directory!\n" + e.Message);
+            }
 
-            File.Move(finalAssetBundlePath + ASSET_BUNDLE_FOLDER_NAME, manifestDirectoryName + sceneCid);
-            File.Delete(finalAssetBundlePath + ASSET_BUNDLE_FOLDER_NAME + ".manifest");
+            try
+            {
+                File.Move(finalAssetBundlePath + ASSET_BUNDLE_FOLDER_NAME, manifestDirectoryName + sceneCid);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError("Error trying to move manifest bundle!\n" + e.Message);
+            }
 
-            OnFinish?.Invoke();
+            try
+            {
+                File.Delete(finalAssetBundlePath + ASSET_BUNDLE_FOLDER_NAME + ".manifest");
+            }
+            catch (Exception e)
+            {
+                Debug.LogError("Error trying to delete manifest bundle manifest file!\n" + e.Message);
+            }
 
-            if (Directory.Exists(finalDownloadedPath))
-                Directory.Delete(finalDownloadedPath, true);
+            try
+            {
+                if (Directory.Exists(finalDownloadedPath))
+                    Directory.Delete(finalDownloadedPath, true);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError("Error trying to delete Assets downloaded path!\n" + e.Message);
+            }
 
             AssetDatabase.Refresh();
+
+            OnBundleBuildFinish?.Invoke();
 
             if (Application.isBatchMode)
                 EditorApplication.Exit(0);
         };
 
         EditorApplication.update += delayedCall;
-
-        AssetDatabase.Refresh();
     }
 
     private static bool PrepareUrlContents(DCL.ContentProvider contentProvider, Dictionary<string, DCL.ContentProvider.MappingPair> filteredPairs, string hash, string additionalPath = "")

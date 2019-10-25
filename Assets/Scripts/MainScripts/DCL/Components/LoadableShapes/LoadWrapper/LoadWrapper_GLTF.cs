@@ -50,25 +50,40 @@ namespace DCL.Components
 
             if (downloadingBundle.Contains(url))
             {
-                yield return new WaitUntil(() => cachedBundles.ContainsKey(url));
+                yield return new WaitUntil(() => !downloadingBundle.Contains(url));
                 yield break;
             }
 
+            Debug.Log("downloading... " + url);
             downloadingBundle.Add(url);
+
             yield return assetBundleRequest.SendWebRequest();
 
             if (assetBundleRequest.isHttpError || assetBundleRequest.isNetworkError)
             {
                 failedRequests.Add(url);
+                downloadingBundle.Remove(url);
+                Debug.Log("fail! " + url);
                 yield break;
             }
 
             if (!cachedBundles.ContainsKey(url))
             {
                 AssetBundle assetBundle = DownloadHandlerAssetBundle.GetContent(assetBundleRequest);
-                cachedBundles[url] = assetBundle;
-                downloadingBundle.Remove(url);
+
+                if (assetBundle != null)
+                {
+                    assetBundle.LoadAllAssets();
+                    cachedBundles[url] = assetBundle;
+                }
+                else
+                {
+                    failedRequests.Add(url);
+                }
             }
+
+            Debug.Log("finished... " + url);
+            downloadingBundle.Remove(url);
         }
 
         IEnumerator FetchManifest(string sceneCid)
@@ -86,6 +101,11 @@ namespace DCL.Components
             {
                 AssetBundleManifest manifest = mainAssetBundle.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
                 cachedManifests[sceneCid] = manifest;
+                Debug.Log("fetching manifest success!..." + sceneCid);
+            }
+            else
+            {
+                Debug.Log("fetching manifest fail!..." + sceneCid);
             }
         }
 
@@ -132,6 +152,7 @@ namespace DCL.Components
 
                                 if (depHash != null)
                                 {
+                                    Debug.Log("Loading dependency " + depHash);
                                     yield return FetchAssetBundleWithDependencies(depHash, null, false);
                                 }
                             }
@@ -139,6 +160,7 @@ namespace DCL.Components
 
                         if (asset.Contains("glb") || asset.Contains("gltf"))
                         {
+                            Debug.Log("Instantiating glb " + asset);
                             gltfContainer = Instantiate(mainAssetBundle.LoadAsset<GameObject>(asset));
 #if UNITY_EDITOR
                             gltfContainer.GetComponentsInChildren<Renderer>().ToList().ForEach(ResetShader);
