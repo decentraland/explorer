@@ -37,9 +37,15 @@ namespace DCL.Components
         }
 
         static Dictionary<string, AssetBundle> cachedBundles = new Dictionary<string, AssetBundle>();
-        static Dictionary<string, AssetBundleManifest> cachedManifests = new Dictionary<string, AssetBundleManifest>();
+
+        static Dictionary<string, List<string>> dependenciesMap = new Dictionary<string, List<string>>();
+        static HashSet<string> processedManifests = new HashSet<string>();
         static HashSet<string> failedRequests = new HashSet<string>();
         static List<string> downloadingBundle = new List<string>();
+
+        UnityWebRequest currentRequest;
+
+        static List<UnityEngine.Object> allLoadedAssets = new List<UnityEngine.Object>();
 
         IEnumerator GetAssetBundle(string url)
         {
@@ -47,6 +53,7 @@ namespace DCL.Components
                 yield break;
 
             UnityWebRequest assetBundleRequest = UnityWebRequestAssetBundle.GetAssetBundle(url);
+            currentRequest = assetBundleRequest;
 
             if (downloadingBundle.Contains(url))
             {
@@ -54,7 +61,6 @@ namespace DCL.Components
                 yield break;
             }
 
-            Debug.Log("downloading... " + url);
             downloadingBundle.Add(url);
 
             yield return assetBundleRequest.SendWebRequest();
@@ -73,8 +79,9 @@ namespace DCL.Components
 
                 if (assetBundle != null)
                 {
-                    assetBundle.LoadAllAssets();
                     cachedBundles[url] = assetBundle;
+                    UnityEngine.Object[] loadedAssets = assetBundle.LoadAllAssets();
+                    allLoadedAssets.AddRange(loadedAssets); //NOTE(Brian): Done to prevent Resources.UnloadUnusedAssets to strip them before they are used.
                 }
                 else
                 {
@@ -82,13 +89,12 @@ namespace DCL.Components
                 }
             }
 
-            Debug.Log("finished... " + url);
             downloadingBundle.Remove(url);
         }
 
-        IEnumerator FetchManifest(string sceneCid)
+        IEnumerator FetchManifest(string hash, string sceneCid)
         {
-            if (cachedManifests.ContainsKey(sceneCid))
+            if (processedManifests.Contains(sceneCid) || dependenciesMap.ContainsKey(hash))
                 yield break;
 
             string url = $"http://localhost:1338/manifests/{sceneCid}";
@@ -100,21 +106,61 @@ namespace DCL.Components
             if (cachedBundles.TryGetValue(url, out mainAssetBundle))
             {
                 AssetBundleManifest manifest = mainAssetBundle.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
-                cachedManifests[sceneCid] = manifest;
-                Debug.Log("fetching manifest success!..." + sceneCid);
-            }
-            else
-            {
-                Debug.Log("fetching manifest fail!..." + sceneCid);
+                processedManifests.Add(sceneCid);
+
+                List<string> dependencies = new List<string>();
+
+                foreach (string asset in manifest.GetAllAssetBundles())
+                {
+                    string[] deps = manifest.GetAllDependencies(asset);
+                    dependencies = new List<string>();
+
+                    foreach (string dep in deps)
+                    {
+                        if (dep == asset)
+                            continue;
+
+                        var matchingPair = contentProvider.contents.FirstOrDefault((pair) => pair.hash.ToLowerInvariant() == dep.ToLowerInvariant());
+
+                        if (matchingPair == null)
+                        {
+                            Debug.Log($"matchingPair not found? {dep}\n{contentProvider.ToString()}");
+                            continue;
+                        }
+
+                        string depHash = matchingPair.hash;
+
+                        if (depHash != null)
+                        {
+                            dependencies.Add(depHash);
+                        }
+                    }
+
+                    var matchingPair2 = contentProvider.contents.FirstOrDefault((pair) => pair.hash.ToLowerInvariant() == asset.ToLowerInvariant());
+
+                    if (matchingPair2 == null)
+                    {
+                        Debug.Log($"matchingPair2 not found? {asset}\n{contentProvider.ToString()}");
+                        continue;
+                    }
+
+                    if (!dependenciesMap.ContainsKey(matchingPair2.hash))
+                    {
+                        dependenciesMap.Add(matchingPair2.hash, dependencies);
+                        Debug.Log($"Adding dep map. Hash = {matchingPair2.hash}. Count = {dependencies.Count}.");
+                    }
+                }
+
+
+                mainAssetBundle.Unload(true);
+
+                cachedBundles.Remove(url);
             }
         }
 
 
-        IEnumerator FetchAssetBundleWithDependencies(string hash, string[] extensionFilter = null, bool loadDependencies = true)
+        IEnumerator FetchAssetBundleWithDependencies(string hash)
         {
-            if (!cachedManifests.ContainsKey(entity.scene.sceneData.id))
-                yield break;
-
             string url = $"http://localhost:1338/{hash}";
 
             yield return GetAssetBundle(url);
@@ -124,51 +170,30 @@ namespace DCL.Components
             if (!cachedBundles.TryGetValue(url, out mainAssetBundle))
                 yield break;
 
-            AssetBundleManifest manifest = cachedManifests[entity.scene.sceneData.id];
+            if (dependenciesMap.ContainsKey(hash))
+            {
+                foreach (string dep in dependenciesMap[hash])
+                {
+                    yield return FetchAssetBundleWithDependencies(dep);
+                }
+            }
 
             string[] assetNames = mainAssetBundle.GetAllAssetNames();
 
-            if (extensionFilter != null)
+            for (int i = 0; i < assetNames.Length; i++)
             {
-                for (int i = 0; i < assetNames.Length; i++)
+                string asset = assetNames[i];
+
+                if (asset.Contains("glb") || asset.Contains("gltf"))
                 {
-                    string asset = assetNames[i];
-
-                    bool containsExtension = extensionFilter.Any(x => asset.Contains(x));
-
-                    if (containsExtension)
-                    {
-                        if (loadDependencies)
-                        {
-                            string assetBundleName = Regex.Match(asset, @"(\w*)\.\w*$").Groups[1].Value;
-                            string[] deps = manifest.GetAllDependencies(assetBundleName);
-
-                            foreach (string dep in deps)
-                            {
-                                if (dep == assetBundleName)
-                                    continue;
-
-                                string depHash = contentProvider.contents.FirstOrDefault((pair) => pair.hash.ToLowerInvariant() == dep.ToLowerInvariant()).hash;
-
-                                if (depHash != null)
-                                {
-                                    Debug.Log("Loading dependency " + depHash);
-                                    yield return FetchAssetBundleWithDependencies(depHash, null, false);
-                                }
-                            }
-                        }
-
-                        if (asset.Contains("glb") || asset.Contains("gltf"))
-                        {
-                            Debug.Log("Instantiating glb " + asset);
-                            gltfContainer = Instantiate(mainAssetBundle.LoadAsset<GameObject>(asset));
+                    GameObject model = mainAssetBundle.LoadAsset<GameObject>(asset);
+                    gltfContainer = Instantiate(model);
 #if UNITY_EDITOR
-                            gltfContainer.GetComponentsInChildren<Renderer>().ToList().ForEach(ResetShader);
+                    gltfContainer.GetComponentsInChildren<Renderer>().ToList().ForEach(ResetShader);
 #endif
-                            yield break;
-                        }
-                    }
+                    yield break;
                 }
+
             }
         }
 
@@ -198,8 +223,12 @@ namespace DCL.Components
             alreadyLoaded = false;
             string hash = contentProvider.fileToHash[lowerCaseUrl];
 
-            yield return FetchManifest(entity.scene.sceneData.id);
-            yield return FetchAssetBundleWithDependencies(hash, new string[] { "gltf", "glb" });
+            yield return FetchManifest(hash, entity.scene.sceneData.id);
+
+            if (processedManifests.Contains(entity.scene.sceneData.id))
+            {
+                yield return FetchAssetBundleWithDependencies(hash);
+            }
 
             if (gltfContainer == null)
             {
@@ -301,6 +330,10 @@ namespace DCL.Components
             if (Application.isPlaying)
             {
                 Unload();
+
+                //NOTE(Brian): Fix for https://forum.unity.com/threads/5-5-1f-855646-not-fixed-unitywebreqest-high-cpu-use.453139/
+                if (currentRequest != null)
+                    currentRequest.Abort();
             }
         }
     }

@@ -482,7 +482,7 @@ namespace UnityGLTF
             int sourceId = GetTextureSourceId(texture);
             GLTFImage image = _gltfRoot.Images[sourceId];
 
-            if (image.Uri != null)
+            if (image.Uri != null && this.addImagesToPersistentCaching)
             {
                 while (streamingImagesStaticList.Contains(image.Uri))
                 {
