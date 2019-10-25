@@ -97,22 +97,41 @@ public static class AssetBundleBuilder
         environment = ContentServerUtils.ApiEnvironment.ZONE;
         HashSet<string> sceneCids = new HashSet<string>();
 
-        string url = ContentServerUtils.GetScenesAPIUrl(environment, 60, -70, 8, 8);
-        UnityWebRequest w = UnityWebRequest.Get(url);
-        w.SendWebRequest();
-
-        while (w.isDone == false) { }
-
-        ScenesAPIData scenesApiData = JsonUtility.FromJson<ScenesAPIData>(w.downloadHandler.text);
-
-        Assert.IsTrue(scenesApiData != null, "Invalid response from ScenesAPI");
-        Assert.IsTrue(scenesApiData.data != null, "Invalid response from ScenesAPI");
-
-        foreach (var data in scenesApiData.data)
+        //        61, -66
+        //61, -63
+        //59, -64
+        //61, -63
+        //66, -64
+        //66, -66
+        Vector2Int[] coords = new Vector2Int[]
         {
-            if (!sceneCids.Contains(data.root_cid))
+            new Vector2Int(61, -66),
+            new Vector2Int(61, -63),
+            new Vector2Int(59, -64),
+            new Vector2Int(61, -63),
+            new Vector2Int(66, -64),
+            new Vector2Int(66, -66)
+        };
+
+        foreach (Vector2Int v in coords)
+        {
+            string url = ContentServerUtils.GetScenesAPIUrl(environment, v.x, v.y, 0, 0);
+            UnityWebRequest w = UnityWebRequest.Get(url);
+            w.SendWebRequest();
+
+            while (w.isDone == false) { }
+
+            ScenesAPIData scenesApiData = JsonUtility.FromJson<ScenesAPIData>(w.downloadHandler.text);
+
+            Assert.IsTrue(scenesApiData != null, "Invalid response from ScenesAPI");
+            Assert.IsTrue(scenesApiData.data != null, "Invalid response from ScenesAPI");
+
+            foreach (var data in scenesApiData.data)
             {
-                sceneCids.Add(data.root_cid);
+                if (!sceneCids.Contains(data.root_cid))
+                {
+                    sceneCids.Add(data.root_cid);
+                }
             }
         }
 
@@ -121,10 +140,8 @@ public static class AssetBundleBuilder
 
         OnBundleBuildFinish = () =>
         {
-            Debug.Log("On Finish was called?");
             if (sceneCidsList.Count > 1)
             {
-                Debug.Log("Count > 1?");
                 sceneCidsList.RemoveAt(0);
                 ExportSceneToAssetBundles_Internal(sceneCidsList[0]);
             }
@@ -206,8 +223,8 @@ public static class AssetBundleBuilder
     {
         Debug.Log($"Exporting scene... {sceneCid}");
         finalAssetBundlePath = ASSET_BUNDLES_PATH_ROOT;
-        finalDownloadedPath = DOWNLOADED_PATH_ROOT + $"{sceneCid}/";
-        finalDownloadedAssetDbPath = DOWNLOADED_ASSET_DB_PATH_ROOT + $"{sceneCid}/";
+        finalDownloadedPath = DOWNLOADED_PATH_ROOT;
+        finalDownloadedAssetDbPath = DOWNLOADED_ASSET_DB_PATH_ROOT;
 
         if (File.Exists(finalAssetBundlePath + "/manifests/" + sceneCid))
         {
@@ -265,7 +282,7 @@ public static class AssetBundleBuilder
         foreach (var kvp in hashToBufferPair)
         {
             string hash = kvp.Key;
-            PrepareUrlContents(contentProvider, hashToBufferPair, hash, hash + "/");
+            PrepareUrlContents(contentProvider, hashToBufferPair, hash);
         }
 
         //NOTE(Brian): Prepare textures. We should prepare all the dependencies in this phase.
@@ -278,13 +295,14 @@ public static class AssetBundleBuilder
 
             //if (!dependencyAlreadyIsAB)
             //{
-            PrepareUrlContentsForBundleBuild(contentProvider, hashToTexturePair, hash, hash + "/");
+            PrepareUrlContentsForBundleBuild(contentProvider, hashToTexturePair, hash);
             //}
             //else
             //{
             //    Debug.Log("Recycling hash " + hash + "!");
             //}
         }
+
 
         GLTFImporter.OnGLTFRootIsConstructed -= FixGltfDependencyPaths;
         GLTFImporter.OnGLTFRootIsConstructed += FixGltfDependencyPaths;
@@ -305,7 +323,7 @@ public static class AssetBundleBuilder
                 {
                     string relativePath = GetRelativePathTo(hashToGltfPair[gltfHash].file, mappingPair.file);
                     string fileExt = Path.GetExtension(mappingPair.file);
-                    string outputPath = finalDownloadedAssetDbPath + mappingPair.hash + "/" + mappingPair.hash + fileExt;
+                    string outputPath = finalDownloadedAssetDbPath + mappingPair.hash + fileExt;
 
                     Texture2D t2d = AssetDatabase.LoadAssetAtPath<Texture2D>(outputPath);
 
@@ -323,7 +341,7 @@ public static class AssetBundleBuilder
                 {
                     string relativePath = GetRelativePathTo(hashToGltfPair[gltfHash].file, mappingPair.file);
                     string fileExt = Path.GetExtension(mappingPair.file);
-                    string outputPath = finalDownloadedAssetDbPath + mappingPair.hash + "/" + mappingPair.hash + fileExt;
+                    string outputPath = finalDownloadedAssetDbPath + mappingPair.hash + fileExt;
 
                     Stream stream = File.OpenRead(outputPath);
 
@@ -447,7 +465,6 @@ public static class AssetBundleBuilder
                 Debug.LogError("Error trying to delete Assets downloaded path!\n" + e.Message);
             }
 
-            AssetDatabase.Refresh();
 
             OnBundleBuildFinish?.Invoke();
 

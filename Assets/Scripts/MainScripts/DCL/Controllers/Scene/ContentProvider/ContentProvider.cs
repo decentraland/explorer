@@ -20,6 +20,18 @@ namespace DCL
             public string hash;
         }
 
+        public override string ToString()
+        {
+            string result = $"baseUrl: {baseUrl}\n";
+
+            foreach (var pair in contents)
+            {
+                result += $"file: {pair.file} ... hash: {pair.hash}\n";
+            }
+
+            return result;
+        }
+
         public ContentProvider()
         {
         }
