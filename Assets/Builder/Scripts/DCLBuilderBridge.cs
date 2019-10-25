@@ -305,15 +305,18 @@ namespace Builder
 
         private void OnEntityIsAdded(DecentralandEntity entity)
         {
-            var builderEntity = AddBuilderEntityComponent(entity);
-            OnEntityAdded?.Invoke(builderEntity);
+            if (!isPreviewMode)
+            {
+                var builderEntity = AddBuilderEntityComponent(entity);
+                OnEntityAdded?.Invoke(builderEntity);
 
-            entity.OnShapeUpdated += OnEntityShapeUpdated;
+                entity.OnShapeUpdated += OnEntityShapeUpdated;
 
-            onGetLoadingEntity.uuid = entity.entityId;
-            onGetLoadingEntity.payload.entityId = entity.entityId;
-            onGetLoadingEntity.payload.type = "onEntityLoading";
-            WebInterface.SendSceneEvent(currentScene.sceneData.id, "uuidEvent", onGetLoadingEntity);
+                onGetLoadingEntity.uuid = entity.entityId;
+                onGetLoadingEntity.payload.entityId = entity.entityId;
+                onGetLoadingEntity.payload.type = "onEntityLoading";
+                WebInterface.SendSceneEvent(currentScene.sceneData.id, "uuidEvent", onGetLoadingEntity);
+            }
         }
 
         private void OnEntityIsRemoved(DecentralandEntity entity)

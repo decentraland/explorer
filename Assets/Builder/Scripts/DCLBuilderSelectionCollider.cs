@@ -9,20 +9,36 @@ namespace Builder
 
         public DCLBuilderEntity ownerEntity { get; private set; }
 
+        private Mesh meshColliderForSkinnedMesh = null;
+
         public void Initialize(DCLBuilderEntity builderEntity, Renderer renderer)
         {
             ownerEntity = builderEntity;
 
             gameObject.layer = LayerMask.NameToLayer(LAYER_BUILDER_POINTER_CLICK);
 
-            var meshCollider = gameObject.AddComponent<MeshCollider>();
-            meshCollider.sharedMesh = renderer.GetComponent<MeshFilter>().sharedMesh;
-            meshCollider.enabled = renderer.enabled;
-
             Transform t = gameObject.transform;
-
             t.SetParent(renderer.transform);
             Utils.ResetLocalTRS(t);
+
+            var meshCollider = gameObject.AddComponent<MeshCollider>();
+
+            if (renderer is SkinnedMeshRenderer)
+            {
+                if (meshColliderForSkinnedMesh)
+                {
+                    Object.Destroy(meshColliderForSkinnedMesh);
+                }
+                meshColliderForSkinnedMesh = new Mesh();
+                (renderer as SkinnedMeshRenderer).BakeMesh(meshColliderForSkinnedMesh);
+                meshCollider.sharedMesh = meshColliderForSkinnedMesh;
+                t.localScale = new Vector3(1 / transform.lossyScale.x, 1 / transform.lossyScale.y, 1 / transform.lossyScale.z);
+            }
+            else
+            {
+                meshCollider.sharedMesh = renderer.GetComponent<MeshFilter>().sharedMesh;
+            }
+            meshCollider.enabled = renderer.enabled;
         }
     }
 }
