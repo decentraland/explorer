@@ -40,5 +40,13 @@ namespace Builder
             }
             meshCollider.enabled = renderer.enabled;
         }
+
+        private void OnDestroy()
+        {
+            if (meshColliderForSkinnedMesh)
+            {
+                Object.Destroy(meshColliderForSkinnedMesh);
+            }
+        }
     }
 }
