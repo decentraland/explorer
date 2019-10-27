@@ -89,6 +89,7 @@ namespace DCL.Components
                 }
             }
 
+            assetBundleRequest.Dispose();
             downloadingBundle.Remove(url);
         }
 
