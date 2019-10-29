@@ -18,8 +18,10 @@ public static class AssetBundleLoadHelper
 
     static List<string> downloadingBundle = new List<string>();
     static List<string> downloadingBundleWithDeps = new List<string>();
+    static bool downloadingBundleManifests = false;
 
     static List<UnityEngine.Object> allLoadedAssets = new List<UnityEngine.Object>();
+    static Dictionary<string, Object> loadedAssets = new Dictionary<string, Object>();
 
     public static bool HasManifest(string sceneId)
     {
@@ -57,12 +59,20 @@ public static class AssetBundleLoadHelper
 
             if (assetBundle != null)
             {
-                UnityEngine.Object[] loadedAssets;
-                var req = assetBundle.LoadAllAssetsAsync();
-                yield return req;
-                loadedAssets = req.allAssets;
+                foreach (string asset in assetBundle.GetAllAssetNames())
+                {
+                    if (!loadedAssets.ContainsKey(asset))
+                    {
+                        //Debug.Log("Loading asset " + asset);
+                        //var req = assetBundle.LoadAssetAsync(asset);
+                        //yield return req;
+                        //loadedAssets.Add(asset, req.asset);
+                        loadedAssets.Add(asset, assetBundle.LoadAsset(asset));
+                    }
+                }
+
                 cachedBundles[url] = assetBundle;
-                allLoadedAssets.AddRange(loadedAssets); //NOTE(Brian): Done to prevent Resources.UnloadUnusedAssets to strip them before they are used.
+                yield return null;
             }
             else
             {
@@ -80,6 +90,14 @@ public static class AssetBundleLoadHelper
             yield break;
 
         string url = $"http://localhost:1338/manifests/{sceneCid}";
+
+        if (downloadingBundleManifests)
+        {
+            yield return new WaitUntil(() => !downloadingBundleManifests);
+            yield break;
+        }
+
+        downloadingBundleManifests = true;
 
         yield return GetAssetBundle(url);
 
@@ -137,10 +155,12 @@ public static class AssetBundleLoadHelper
 
             cachedBundles.Remove(url);
         }
+
+        downloadingBundleManifests = false;
     }
 
 
-    public static IEnumerator FetchAssetBundleWithDependencies(string hash, System.Action<GameObject> OnComplete = null)
+    public static IEnumerator FetchAssetBundleWithDependencies(string hash, System.Action<GameObject> OnComplete = null, bool instantiate = true)
     {
         string url = $"http://localhost:1338/{hash}";
 
@@ -153,7 +173,8 @@ public static class AssetBundleLoadHelper
 
         if (cachedBundlesWithDeps.ContainsKey(url))
         {
-            yield return InstantiateAssetBundle(cachedBundlesWithDeps[url], OnComplete);
+            if (instantiate)
+                yield return InstantiateAssetBundle(cachedBundlesWithDeps[url], OnComplete);
             yield break;
         }
 
@@ -173,37 +194,51 @@ public static class AssetBundleLoadHelper
         {
             foreach (string dep in dependenciesMap[hash])
             {
-                yield return FetchAssetBundleWithDependencies(dep);
+                yield return FetchAssetBundleWithDependencies(dep, null, false);
             }
         }
 
         cachedBundlesWithDeps.Add(url, mainAssetBundle);
         downloadingBundleWithDeps.Remove(url);
-        yield return InstantiateAssetBundle(mainAssetBundle, OnComplete);
+
+        if (instantiate)
+            yield return InstantiateAssetBundle(mainAssetBundle, OnComplete);
     }
 
     public static IEnumerator InstantiateAssetBundle(AssetBundle bundle, System.Action<GameObject> OnComplete)
     {
         string[] assetNames = bundle.GetAllAssetNames();
+        string targetAsset = null;
 
         for (int i = 0; i < assetNames.Length; i++)
         {
             string asset = assetNames[i];
 
+            if (!loadedAssets.ContainsKey(asset))
+            {
+                Debug.Log("asset not loaded??? " + asset);
+            }
+
             if (asset.Contains("glb") || asset.Contains("gltf"))
             {
-                var req = bundle.LoadAssetAsync<GameObject>(asset);
-                yield return req;
-                GameObject model = req.asset as GameObject;
-                GameObject container = Object.Instantiate(model);
-                container.name = asset;
-#if UNITY_EDITOR
-                container.GetComponentsInChildren<Renderer>().ToList().ForEach(ResetShader);
-#endif
-                OnComplete?.Invoke(container);
-                yield break;
+                targetAsset = asset;
+                break;
             }
         }
+
+        if (string.IsNullOrEmpty(targetAsset))
+        {
+            Debug.Log("target asset not found?");
+            yield break;
+        }
+
+        GameObject container = Object.Instantiate(loadedAssets[targetAsset] as GameObject);
+        container.name = targetAsset;
+#if UNITY_EDITOR
+        container.GetComponentsInChildren<Renderer>().ToList().ForEach(ResetShader);
+#endif
+        OnComplete?.Invoke(container);
+        yield break;
     }
 
 #if UNITY_EDITOR
