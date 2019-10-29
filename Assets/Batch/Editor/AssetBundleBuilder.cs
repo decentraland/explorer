@@ -97,21 +97,15 @@ public static class AssetBundleBuilder
         environment = ContentServerUtils.ApiEnvironment.ZONE;
         HashSet<string> sceneCids = new HashSet<string>();
 
-        //        61, -66
-        //61, -63
-        //59, -64
-        //61, -63
-        //66, -64
-        //66, -66
-        Vector2Int[] coords = new Vector2Int[]
+        List<Vector2Int> coords = new List<Vector2Int>();
+
+        for (int x = 57; x < 69; x++)
         {
-            new Vector2Int(61, -66),
-            new Vector2Int(61, -63),
-            new Vector2Int(59, -64),
-            new Vector2Int(61, -63),
-            new Vector2Int(66, -64),
-            new Vector2Int(66, -66)
-        };
+            for (int y = -70; y < -60; y++)
+            {
+                coords.Add(new Vector2Int(x, y));
+            }
+        }
 
         foreach (Vector2Int v in coords)
         {
@@ -282,7 +276,7 @@ public static class AssetBundleBuilder
         foreach (var kvp in hashToBufferPair)
         {
             string hash = kvp.Key;
-            PrepareUrlContents(contentProvider, hashToBufferPair, hash);
+            PrepareUrlContents(contentProvider, hashToBufferPair, hash, hash + "/");
         }
 
         //NOTE(Brian): Prepare textures. We should prepare all the dependencies in this phase.
@@ -295,7 +289,7 @@ public static class AssetBundleBuilder
 
             //if (!dependencyAlreadyIsAB)
             //{
-            PrepareUrlContentsForBundleBuild(contentProvider, hashToTexturePair, hash);
+            PrepareUrlContentsForBundleBuild(contentProvider, hashToTexturePair, hash, hash + "/");
             //}
             //else
             //{
@@ -303,6 +297,7 @@ public static class AssetBundleBuilder
             //}
         }
 
+        AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
 
         GLTFImporter.OnGLTFRootIsConstructed -= FixGltfDependencyPaths;
         GLTFImporter.OnGLTFRootIsConstructed += FixGltfDependencyPaths;
@@ -311,6 +306,9 @@ public static class AssetBundleBuilder
         foreach (var kvp in hashToGltfPair)
         {
             string gltfHash = kvp.Key;
+
+            if (File.Exists(finalAssetBundlePath + "/" + gltfHash))
+                continue;
 
             PersistentAssetCache.ImageCacheByUri.Clear();
             PersistentAssetCache.StreamCacheByUri.Clear();
@@ -323,7 +321,7 @@ public static class AssetBundleBuilder
                 {
                     string relativePath = GetRelativePathTo(hashToGltfPair[gltfHash].file, mappingPair.file);
                     string fileExt = Path.GetExtension(mappingPair.file);
-                    string outputPath = finalDownloadedAssetDbPath + mappingPair.hash + fileExt;
+                    string outputPath = finalDownloadedAssetDbPath + mappingPair.hash + "/" + mappingPair.hash + fileExt;
 
                     Texture2D t2d = AssetDatabase.LoadAssetAtPath<Texture2D>(outputPath);
 
@@ -341,7 +339,7 @@ public static class AssetBundleBuilder
                 {
                     string relativePath = GetRelativePathTo(hashToGltfPair[gltfHash].file, mappingPair.file);
                     string fileExt = Path.GetExtension(mappingPair.file);
-                    string outputPath = finalDownloadedAssetDbPath + mappingPair.hash + fileExt;
+                    string outputPath = finalDownloadedAssetDbPath + mappingPair.hash + "/" + mappingPair.hash + fileExt;
 
                     Stream stream = File.OpenRead(outputPath);
 
@@ -459,6 +457,8 @@ public static class AssetBundleBuilder
             {
                 if (Directory.Exists(finalDownloadedPath))
                     Directory.Delete(finalDownloadedPath, true);
+
+                AssetDatabase.Refresh();
             }
             catch (Exception e)
             {
@@ -473,6 +473,7 @@ public static class AssetBundleBuilder
         };
 
         EditorApplication.update += delayedCall;
+        AssetDatabase.Refresh();
     }
 
     private static bool PrepareUrlContents(DCL.ContentProvider contentProvider, Dictionary<string, DCL.ContentProvider.MappingPair> filteredPairs, string hash, string additionalPath = "")

@@ -100,7 +100,7 @@ namespace DCL
 
         protected virtual AssetType GetAsset(object id)
         {
-           return library.Get(id);
+            return library.Get(id);
         }
 
         protected virtual void OnReuse(Action OnFinish)
