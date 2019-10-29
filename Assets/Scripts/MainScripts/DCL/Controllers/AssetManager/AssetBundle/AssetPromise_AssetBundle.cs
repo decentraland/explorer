@@ -79,9 +79,6 @@ namespace DCL
 
             string hash = provider.fileToHash[lowerCaseUrl];
 
-            if (hash.ToLower().Contains("u3j"))
-                Debug.Log($"url = {url} ... hash = {hash} ... sceneId = {sceneId}");
-
             yield return AssetBundleLoadHelper.FetchManifest(provider, hash, sceneId);
 
             GameObject container = null;

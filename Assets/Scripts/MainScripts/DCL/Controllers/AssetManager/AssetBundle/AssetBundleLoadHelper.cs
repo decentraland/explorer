@@ -9,6 +9,9 @@ using WaitUntil = DCL.WaitUntil;
 public static class AssetBundleLoadHelper
 {
     static bool VERBOSE = false;
+    static readonly string ASSET_BUNDLE_SERVER_URL = "https://content-as-bundle.decentraland.org/contents/";
+    static readonly string ASSET_BUNDLE_SERVER_URL_LOCAL = "http://localhost:1338/";
+
     static Dictionary<string, AssetBundle> cachedBundles = new Dictionary<string, AssetBundle>();
     static Dictionary<string, AssetBundle> cachedBundlesWithDeps = new Dictionary<string, AssetBundle>();
 
@@ -115,7 +118,7 @@ public static class AssetBundleLoadHelper
         if (processedManifests.Contains(sceneCid) || dependenciesMap.ContainsKey(hash))
             yield break;
 
-        string url = $"http://localhost:1338/manifests/{sceneCid}";
+        string url = ASSET_BUNDLE_SERVER_URL + "manifests/" + hash;
 
         if (downloadingBundleManifests)
         {
@@ -191,7 +194,7 @@ public static class AssetBundleLoadHelper
 
     public static IEnumerator FetchAssetBundleWithDependencies(string hash, System.Action<GameObject> OnComplete = null, bool instantiate = true, bool verbose = true)
     {
-        string url = $"http://localhost:1338/{hash}";
+        string url = ASSET_BUNDLE_SERVER_URL + hash;
 
         AssetBundle mainAssetBundle;
 
