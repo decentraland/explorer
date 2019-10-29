@@ -8,13 +8,13 @@ using WaitUntil = DCL.WaitUntil;
 
 public static class AssetBundleLoadHelper
 {
+    static bool VERBOSE = false;
     static Dictionary<string, AssetBundle> cachedBundles = new Dictionary<string, AssetBundle>();
     static Dictionary<string, AssetBundle> cachedBundlesWithDeps = new Dictionary<string, AssetBundle>();
 
     static Dictionary<string, List<string>> dependenciesMap = new Dictionary<string, List<string>>();
     static HashSet<string> processedManifests = new HashSet<string>();
     static HashSet<string> failedRequests = new HashSet<string>();
-
 
     static List<string> downloadingBundle = new List<string>();
     static List<string> downloadingBundleWithDeps = new List<string>();
@@ -56,17 +56,43 @@ public static class AssetBundleLoadHelper
         if (!cachedBundles.ContainsKey(url))
         {
             AssetBundle assetBundle = DownloadHandlerAssetBundle.GetContent(assetBundleRequest);
+            string[] assets = assetBundle.GetAllAssetNames();
 
             if (assetBundle != null)
             {
-                foreach (string asset in assetBundle.GetAllAssetNames())
+                foreach (string asset in assets)
+                {
+                    bool isTexture = asset.EndsWith("jpg") || asset.EndsWith("png");
+
+                    if (!loadedAssets.ContainsKey(asset) && isTexture)
+                    {
+                        loadedAssets.Add(asset, assetBundle.LoadAsset(asset));
+                    }
+                }
+
+                foreach (string asset in assets)
+                {
+                    bool isMaterial = asset.EndsWith("mat");
+
+                    if (!loadedAssets.ContainsKey(asset) && isMaterial)
+                    {
+                        loadedAssets.Add(asset, assetBundle.LoadAsset(asset));
+                    }
+                }
+
+                foreach (string asset in assets)
+                {
+                    bool isModel = asset.EndsWith("glb") || asset.EndsWith("gltf");
+                    if (!loadedAssets.ContainsKey(asset) && isModel)
+                    {
+                        loadedAssets.Add(asset, assetBundle.LoadAsset(asset));
+                    }
+                }
+
+                foreach (string asset in assets)
                 {
                     if (!loadedAssets.ContainsKey(asset))
                     {
-                        //Debug.Log("Loading asset " + asset);
-                        //var req = assetBundle.LoadAssetAsync(asset);
-                        //yield return req;
-                        //loadedAssets.Add(asset, req.asset);
                         loadedAssets.Add(asset, assetBundle.LoadAsset(asset));
                     }
                 }
@@ -107,6 +133,9 @@ public static class AssetBundleLoadHelper
         {
             AssetBundleManifest manifest = mainAssetBundle.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
             processedManifests.Add(sceneCid);
+
+            if (VERBOSE)
+                Debug.Log("loading manifest: " + sceneCid);
 
             List<string> dependencies = new List<string>();
 
@@ -160,7 +189,7 @@ public static class AssetBundleLoadHelper
     }
 
 
-    public static IEnumerator FetchAssetBundleWithDependencies(string hash, System.Action<GameObject> OnComplete = null, bool instantiate = true)
+    public static IEnumerator FetchAssetBundleWithDependencies(string hash, System.Action<GameObject> OnComplete = null, bool instantiate = true, bool verbose = true)
     {
         string url = $"http://localhost:1338/{hash}";
 
@@ -175,10 +204,19 @@ public static class AssetBundleLoadHelper
         {
             if (instantiate)
                 yield return InstantiateAssetBundle(cachedBundlesWithDeps[url], OnComplete);
+
             yield break;
         }
 
         downloadingBundleWithDeps.Add(url);
+
+        if (dependenciesMap.ContainsKey(hash))
+        {
+            foreach (string dep in dependenciesMap[hash])
+            {
+                yield return FetchAssetBundleWithDependencies(dep, null, false, false);
+            }
+        }
 
         if (!cachedBundles.ContainsKey(url))
             yield return GetAssetBundle(url);
@@ -188,14 +226,6 @@ public static class AssetBundleLoadHelper
             downloadingBundleWithDeps.Remove(url);
             OnComplete?.Invoke(null);
             yield break;
-        }
-
-        if (dependenciesMap.ContainsKey(hash))
-        {
-            foreach (string dep in dependenciesMap[hash])
-            {
-                yield return FetchAssetBundleWithDependencies(dep, null, false);
-            }
         }
 
         cachedBundlesWithDeps.Add(url, mainAssetBundle);
@@ -213,11 +243,6 @@ public static class AssetBundleLoadHelper
         for (int i = 0; i < assetNames.Length; i++)
         {
             string asset = assetNames[i];
-
-            if (!loadedAssets.ContainsKey(asset))
-            {
-                Debug.Log("asset not loaded??? " + asset);
-            }
 
             if (asset.Contains("glb") || asset.Contains("gltf"))
             {

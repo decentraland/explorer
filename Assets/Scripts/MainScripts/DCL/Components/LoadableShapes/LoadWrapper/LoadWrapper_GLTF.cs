@@ -44,6 +44,7 @@ namespace DCL.Components
                     Debug.Log("Forgetting not null promise...");
             }
 
+
             abPromise = new AssetPromise_AssetBundle(contentProvider, targetUrl, entity.scene.sceneData.id);
             abPromise.settings.parent = transform;
 
@@ -53,35 +54,6 @@ namespace DCL.Components
 
             AssetPromiseKeeper_AssetBundle.i.Keep(abPromise);
         }
-
-
-        //IEnumerator TryToFetchAssetBundle(string targetUrl, Action<LoadWrapper> OnSuccess, Action<LoadWrapper> OnFail)
-        //{
-
-        //    if (gltfContainer == null)
-        //    {
-        //        //LoadGltf(targetUrl, OnSuccess, OnFail);
-        //        OnSuccess?.Invoke(this);
-        //    }
-        //    else
-        //    {
-        //        alreadyLoaded = true;
-        //        gltfContainer.transform.SetParent(transform);
-        //        gltfContainer.transform.ResetLocalTRS();
-
-        //        if (initialVisibility == false)
-        //        {
-        //            foreach (Renderer r in gltfContainer.GetComponentsInChildren<Renderer>())
-        //            {
-        //                r.enabled = false;
-        //            }
-        //        }
-
-        //        this.entity.OnCleanupEvent -= OnEntityCleanup;
-        //        this.entity.OnCleanupEvent += OnEntityCleanup;
-        //        OnSuccess?.Invoke(this);
-        //    }
-        //}
 
         void LoadGltf(string targetUrl, Action<LoadWrapper> OnSuccess, Action<LoadWrapper> OnFail)
         {
