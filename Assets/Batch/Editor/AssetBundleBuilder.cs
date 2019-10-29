@@ -285,16 +285,7 @@ public static class AssetBundleBuilder
             string hash = kvp.Key;
 
             //NOTE(Brian): try to get an AB before getting the original texture, so we bind the dependencies correctly
-            //bool dependencyAlreadyIsAB = PrepareUrlContents(contentProviderAB, hashToTexturePair, hash, hash + "/");
-
-            //if (!dependencyAlreadyIsAB)
-            //{
             PrepareUrlContentsForBundleBuild(contentProvider, hashToTexturePair, hash, hash + "/");
-            //}
-            //else
-            //{
-            //    Debug.Log("Recycling hash " + hash + "!");
-            //}
         }
 
         AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
@@ -306,9 +297,6 @@ public static class AssetBundleBuilder
         foreach (var kvp in hashToGltfPair)
         {
             string gltfHash = kvp.Key;
-
-            if (File.Exists(finalAssetBundlePath + "/" + gltfHash))
-                continue;
 
             PersistentAssetCache.ImageCacheByUri.Clear();
             PersistentAssetCache.StreamCacheByUri.Clear();
@@ -464,7 +452,6 @@ public static class AssetBundleBuilder
             {
                 Debug.LogError("Error trying to delete Assets downloaded path!\n" + e.Message);
             }
-
 
             OnBundleBuildFinish?.Invoke();
 
