@@ -19,7 +19,7 @@ namespace Builder.Gizmos
         protected Camera builderCamera;
 
         private Vector3 relativeScaleRatio;
-        private bool startDragging = false;
+        protected bool startDragging = false;
         protected float prevAxisValue;
 
         public DCLBuilderGizmoAxis activeAxis { protected set; get; }

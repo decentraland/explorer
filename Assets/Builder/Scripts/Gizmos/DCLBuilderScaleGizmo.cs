@@ -8,6 +8,9 @@ namespace Builder.Gizmos
 
         [SerializeField] DCLBuilderGizmoAxis axisProportionalScale = null;
 
+        private Vector3 lastHitPoint;
+        private Vector3 inputReferencePoint;
+
         public override void Initialize(Camera camera)
         {
             base.Initialize(camera);
@@ -25,6 +28,12 @@ namespace Builder.Gizmos
             if (axis == axisProportionalScale)
             {
                 scaleDirection = Vector3.one;
+                float inputViewportDir = builderCamera.WorldToViewportPoint(lastHitPoint).y - builderCamera.WorldToViewportPoint(inputReferencePoint).y;
+                if (inputViewportDir > 0)
+                {
+                    scaleDirection = -Vector3.one;
+                }
+                inputReferencePoint = lastHitPoint;
             }
             else if (worldOrientedGizmos)
             {
@@ -43,14 +52,19 @@ namespace Builder.Gizmos
 
         protected override void SetPreviousAxisValue(float axisValue, float transformValue)
         {
-            prevAxisValue = axisValue;
+            prevAxisValue = 0;
         }
 
         protected override float GetHitPointToAxisValue(DCLBuilderGizmoAxis axis, Vector3 hitPoint)
         {
             if (axis == axisProportionalScale)
             {
-                return Vector3.Distance(transform.position, hitPoint);
+                if (startDragging)
+                {
+                    inputReferencePoint = hitPoint;
+                }
+                lastHitPoint = hitPoint;
+                return Vector3.Distance(inputReferencePoint, hitPoint);
             }
             return axis.transform.InverseTransformPoint(hitPoint).z;
         }
