@@ -104,6 +104,14 @@ namespace DCL
             }
         }
 
+        protected override void AddToLibrary()
+        {
+            library.Add(asset);
+            asset = library.Get(asset.id);
+            ApplySettings_LoadStart();
+        }
+
+
         internal override object GetId()
         {
             if (id == null)
