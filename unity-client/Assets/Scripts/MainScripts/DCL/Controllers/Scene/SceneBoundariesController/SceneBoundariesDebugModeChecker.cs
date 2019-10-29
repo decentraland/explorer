@@ -51,32 +51,21 @@ namespace DCL.Controllers
             invalidMeshMaterial = Resources.Load(INVALID_MESH_MATERIAL_NAME) as Material;
         }
 
-        protected override void EvaluateMeshBounds(DecentralandEntity entity)
+        protected override bool AreSubmeshesInsideBoundaries(DecentralandEntity entity)
         {
-            Bounds meshBounds = BuildMergedBounds(entity.meshesInfo);
+            bool isInsideBoundaries = true;
 
-            // 1st check (full mesh AABB)
-            bool isInsideBoundaries = scene.IsInsideSceneBoundaries(meshBounds);
-
-            // 2nd check (submeshes AABB)
-            if (!isInsideBoundaries)
+            for (int i = 0; i < entity.meshesInfo.renderers.Length; i++)
             {
-                isInsideBoundaries = true;
-
-                for (int i = 0; i < entity.meshesInfo.renderers.Length; i++)
+                if (!scene.IsInsideSceneBoundaries(entity.meshesInfo.renderers[i].bounds))
                 {
-                    if (!scene.IsInsideSceneBoundaries(entity.meshesInfo.renderers[i].bounds))
-                    {
-                        isInsideBoundaries = false;
+                    isInsideBoundaries = false;
 
-                        invalidSubmeshes.Add(entity.renderers[i]);
-                    }
+                    invalidSubmeshes.Add(entity.renderers[i]);
                 }
             }
 
-            UpdateEntityMeshesValidState(entity, isInsideBoundaries, meshBounds);
-
-            UpdateEntityCollidersValidState(entity, isInsideBoundaries);
+            return isInsideBoundaries;
         }
 
         protected override void UpdateEntityMeshesValidState(DecentralandEntity entity, bool isInsideBoundaries, Bounds meshBounds)
