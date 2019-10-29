@@ -118,7 +118,7 @@ public static class AssetBundleLoadHelper
         if (processedManifests.Contains(sceneCid) || dependenciesMap.ContainsKey(hash))
             yield break;
 
-        string url = ASSET_BUNDLE_SERVER_URL + "manifests/" + hash;
+        string url = ASSET_BUNDLE_SERVER_URL + "manifests/" + sceneCid;
 
         if (downloadingBundleManifests)
         {
