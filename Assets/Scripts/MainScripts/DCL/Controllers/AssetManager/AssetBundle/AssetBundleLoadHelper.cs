@@ -9,7 +9,7 @@ using WaitUntil = DCL.WaitUntil;
 public static class AssetBundleLoadHelper
 {
     static bool VERBOSE = false;
-    static readonly string ASSET_BUNDLE_SERVER_URL = "https://content-as-bundle.decentraland.org/contents/";
+    static readonly string ASSET_BUNDLE_SERVER_URL = "https://content-as-bundle.decentraland.zone/";
     static readonly string ASSET_BUNDLE_SERVER_URL_LOCAL = "http://localhost:1338/";
 
     static Dictionary<string, AssetBundle> cachedBundles = new Dictionary<string, AssetBundle>();
@@ -24,7 +24,7 @@ public static class AssetBundleLoadHelper
     static bool downloadingBundleManifests = false;
 
     static List<UnityEngine.Object> allLoadedAssets = new List<UnityEngine.Object>();
-    static Dictionary<string, Object> loadedAssets = new Dictionary<string, Object>();
+    static Dictionary<string, AssetBundleRequest> loadedAssets = new Dictionary<string, AssetBundleRequest>();
 
     public static bool HasManifest(string sceneId)
     {
@@ -60,6 +60,7 @@ public static class AssetBundleLoadHelper
         {
             AssetBundle assetBundle = DownloadHandlerAssetBundle.GetContent(assetBundleRequest);
             string[] assets = assetBundle.GetAllAssetNames();
+            List<string> assetsToLoad = new List<string>();
 
             if (assetBundle != null)
             {
@@ -67,9 +68,9 @@ public static class AssetBundleLoadHelper
                 {
                     bool isTexture = asset.EndsWith("jpg") || asset.EndsWith("png");
 
-                    if (!loadedAssets.ContainsKey(asset) && isTexture)
+                    if (isTexture)
                     {
-                        loadedAssets.Add(asset, assetBundle.LoadAsset(asset));
+                        assetsToLoad.Add(asset);
                     }
                 }
 
@@ -77,26 +78,33 @@ public static class AssetBundleLoadHelper
                 {
                     bool isMaterial = asset.EndsWith("mat");
 
-                    if (!loadedAssets.ContainsKey(asset) && isMaterial)
+                    if (isMaterial)
                     {
-                        loadedAssets.Add(asset, assetBundle.LoadAsset(asset));
+                        assetsToLoad.Add(asset);
                     }
                 }
 
                 foreach (string asset in assets)
                 {
                     bool isModel = asset.EndsWith("glb") || asset.EndsWith("gltf");
-                    if (!loadedAssets.ContainsKey(asset) && isModel)
+                    if (isModel)
                     {
-                        loadedAssets.Add(asset, assetBundle.LoadAsset(asset));
+                        assetsToLoad.Add(asset);
                     }
                 }
 
                 foreach (string asset in assets)
                 {
+                    assetsToLoad.Add(asset);
+                }
+
+                foreach (var asset in assetsToLoad)
+                {
                     if (!loadedAssets.ContainsKey(asset))
                     {
-                        loadedAssets.Add(asset, assetBundle.LoadAsset(asset));
+                        var request = assetBundle.LoadAssetAsync(asset);
+                        yield return request;
+                        loadedAssets.Add(asset, request);
                     }
                 }
 
@@ -260,7 +268,9 @@ public static class AssetBundleLoadHelper
             yield break;
         }
 
-        GameObject container = Object.Instantiate(loadedAssets[targetAsset] as GameObject);
+        yield return loadedAssets[targetAsset];
+
+        GameObject container = Object.Instantiate(loadedAssets[targetAsset].asset as GameObject);
         container.name = targetAsset;
 #if UNITY_EDITOR
         container.GetComponentsInChildren<Renderer>().ToList().ForEach(ResetShader);
