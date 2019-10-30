@@ -79,15 +79,15 @@ namespace DCL
 
             string hash = provider.fileToHash[lowerCaseUrl];
 
-            yield return AssetBundleLoadHelper.FetchManifest(provider, hash, sceneId);
+            //yield return AssetBundleLoadHelper.FetchManifest(provider, hash, sceneId);
 
             GameObject container = null;
 
-            if (!AssetBundleLoadHelper.HasManifest(sceneId))
-            {
-                OnFail?.Invoke();
-                yield break;
-            }
+            //if (!AssetBundleLoadHelper.HasManifest(sceneId))
+            //{
+            //    OnFail?.Invoke();
+            //    yield break;
+            //}
 
             yield return AssetBundleLoadHelper.FetchAssetBundleWithDependencies(hash, (go) => { container = go; });
 
