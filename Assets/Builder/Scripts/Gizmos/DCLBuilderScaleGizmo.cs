@@ -8,8 +8,10 @@ namespace Builder.Gizmos
 
         [SerializeField] DCLBuilderGizmoAxis axisProportionalScale = null;
 
+        private Vector2 lastMousePosition;
+        private Vector2 initialMousePosition;
+        private Vector3 initialHitPoint;
         private Vector3 lastHitPoint;
-        private Vector3 inputReferencePoint;
 
         public override void Initialize(Camera camera)
         {
@@ -28,12 +30,13 @@ namespace Builder.Gizmos
             if (axis == axisProportionalScale)
             {
                 scaleDirection = Vector3.one;
-                float inputViewportDir = builderCamera.WorldToViewportPoint(lastHitPoint).y - builderCamera.WorldToViewportPoint(inputReferencePoint).y;
-                if (inputViewportDir > 0)
+                float inputDirection = lastMousePosition.y - initialMousePosition.y;
+                if (inputDirection < 0)
                 {
                     scaleDirection = -Vector3.one;
                 }
-                inputReferencePoint = lastHitPoint;
+                initialMousePosition = lastMousePosition;
+                initialHitPoint = lastHitPoint;
             }
             else if (worldOrientedGizmos)
             {
@@ -52,19 +55,28 @@ namespace Builder.Gizmos
 
         protected override void SetPreviousAxisValue(float axisValue, float transformValue)
         {
-            prevAxisValue = 0;
+            if (activeAxis == axisProportionalScale)
+            {
+                prevAxisValue = 0;
+            }
+            else
+            {
+                prevAxisValue = axisValue;
+            }
         }
 
-        protected override float GetHitPointToAxisValue(DCLBuilderGizmoAxis axis, Vector3 hitPoint)
+        protected override float GetHitPointToAxisValue(DCLBuilderGizmoAxis axis, Vector3 hitPoint, Vector2 mousePosition)
         {
             if (axis == axisProportionalScale)
             {
                 if (startDragging)
                 {
-                    inputReferencePoint = hitPoint;
+                    initialMousePosition = mousePosition;
+                    initialHitPoint = hitPoint;
                 }
+                lastMousePosition = mousePosition;
                 lastHitPoint = hitPoint;
-                return Vector3.Distance(inputReferencePoint, hitPoint);
+                return Vector3.Distance(initialHitPoint, hitPoint);
             }
             return axis.transform.InverseTransformPoint(hitPoint).z;
         }

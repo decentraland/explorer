@@ -56,9 +56,9 @@ namespace Builder.Gizmos
             axis.SetColorHighlight();
         }
 
-        public virtual void OnDrag(Vector3 hitPoint)
+        public virtual void OnDrag(Vector3 hitPoint, Vector2 mousePosition)
         {
-            float axisValue = GetHitPointToAxisValue(activeAxis, hitPoint);
+            float axisValue = GetHitPointToAxisValue(activeAxis, hitPoint, mousePosition);
 
             if (startDragging)
             {
@@ -93,7 +93,7 @@ namespace Builder.Gizmos
             return true;
         }
 
-        protected virtual float GetHitPointToAxisValue(DCLBuilderGizmoAxis axis, Vector3 hitPoint)
+        protected virtual float GetHitPointToAxisValue(DCLBuilderGizmoAxis axis, Vector3 hitPoint, Vector2 mousePosition)
         {
             Vector3 dir = (hitPoint - axis.transform.position).normalized;
             float sign = Vector3.Angle(dir, axis.transform.forward) == 180 ? -1 : 1;

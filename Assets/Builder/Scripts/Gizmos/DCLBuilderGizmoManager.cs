@@ -44,9 +44,9 @@ namespace Builder.Gizmos
             OnGizmoTransformObjectStart?.Invoke(entity, entity.transform.position, activeGizmo.GetGizmoType());
         }
 
-        public void OnDrag(Vector3 hitPoint)
+        public void OnDrag(Vector3 hitPoint, Vector2 mousePosition)
         {
-            activeGizmo.OnDrag(hitPoint);
+            activeGizmo.OnDrag(hitPoint, mousePosition);
         }
 
         public void OnEndDrag()

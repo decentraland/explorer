@@ -37,7 +37,7 @@ namespace Builder.Gizmos
             return false;
         }
 
-        protected override float GetHitPointToAxisValue(DCLBuilderGizmoAxis axis, Vector3 hitPoint)
+        protected override float GetHitPointToAxisValue(DCLBuilderGizmoAxis axis, Vector3 hitPoint, Vector2 mousePosition)
         {
             Vector3 hitDir = (hitPoint - transform.position).normalized;
             return Vector3.SignedAngle(axis.transform.up, hitDir, axis.transform.forward) * Mathf.Deg2Rad;

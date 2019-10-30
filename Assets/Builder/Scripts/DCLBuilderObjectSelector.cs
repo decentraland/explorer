@@ -269,7 +269,7 @@ namespace Builder
             Vector3 hit;
             if (gizmosManager.RaycastHit(builderRaycast.GetMouseRay(mousePosition), out hit))
             {
-                gizmosManager.OnDrag(hit);
+                gizmosManager.OnDrag(hit, mousePosition);
                 boundariesChecker?.EvaluateEntityPosition(selectedEntity.rootEntity);
             }
         }
