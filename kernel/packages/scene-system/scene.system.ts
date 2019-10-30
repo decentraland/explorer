@@ -293,11 +293,12 @@ export default class GamekitScene extends Script {
         },
 
         /** queries for a specific system with a certain query configuration */
-        query(queryId: QueryType, payload: any) {
+        query(queryType: QueryType, payload: any) {
           that.events.push({
             type: 'Query',
+            tag: payload.queryId,
             payload: {
-              queryId,
+              queryId: queryType,
               payload
             } as QueryPayload
           })
