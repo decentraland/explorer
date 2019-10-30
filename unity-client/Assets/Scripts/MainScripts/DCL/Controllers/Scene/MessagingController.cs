@@ -140,7 +140,7 @@ namespace DCL
             if (queuedMessage.method == MessagingTypes.ENTITY_COMPONENT_CREATE_OR_UPDATE)
             {
                 // By default, the tag is the id of the entity/component
-                string entityId = queuedMessage.tag;
+                string entityId = queuedMessage.payload.Tag;
                 int classId = 0;
 
                 // We need to extract the entityId and the classId from the tag.
@@ -152,6 +152,10 @@ namespace DCL
                 {
                     queueMode = QueueMode.Lossy;
                 }
+            }
+            else if (queuedMessage.method == MessagingTypes.QUERY)
+            {
+                queueMode = QueueMode.Lossy;
             }
             else if (queuedMessage.method == MessagingTypes.INIT_DONE)
             {

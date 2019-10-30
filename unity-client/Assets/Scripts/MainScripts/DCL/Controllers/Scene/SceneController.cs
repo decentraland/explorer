@@ -121,14 +121,30 @@ namespace DCL
         {
             ParcelScene.parcelScenesCleaner.Stop();
         }
-
+        int showCount = 0;
+        int count = 0;
         private void Update()
         {
+            showCount = count;
+            count = 0;
+
             InputController.i.Update();
 
             PrioritizeMessageControllerList();
 
             MessagingControllersManager.i.UpdateThrottling();
+        }
+        float lastTime = 0;
+        int counterToShow = 0;
+        void OnGUI()
+        {
+            if (Time.realtimeSinceStartup - lastTime >= 0.25f)
+            {
+                lastTime = Time.realtimeSinceStartup;
+                counterToShow = showCount;
+            }
+
+            GUILayout.Label("Queries per update: " + counterToShow);
         }
 
         private void PrioritizeMessageControllerList(bool force = false)
@@ -493,7 +509,7 @@ namespace DCL
 
         Queue<string> payloadsToDecode = new Queue<string>();
         const float MAX_TIME_FOR_DECODE = 0.033f;
-        const float MIN_TIME_FOR_DECODE = 0.008f;
+        const float MIN_TIME_FOR_DECODE = 0.016f;
         float maxTimeForDecode = MAX_TIME_FOR_DECODE;
         float secsPerThousandMsgs = 0.0075f;
         private IEnumerator DeferredDecoding()
@@ -660,6 +676,7 @@ namespace DCL
 
         public void ParseQuery(string queryId, string payload, string sceneId)
         {
+            count++;
             QueryMessage query = new QueryMessage();
 
             MessageDecoder.DecodeQueryMessage(queryId, payload, ref query);
