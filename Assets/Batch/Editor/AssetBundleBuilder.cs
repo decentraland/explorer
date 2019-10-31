@@ -43,14 +43,13 @@ namespace DCL
         public static void DumpMuseum()
         {
             environment = ContentServerUtils.ApiEnvironment.ORG;
-            ExportSceneToAssetBundles_Internal("QmQCHrim1KkQ4KDfHKqgmxwGzeZzY9bDB63MfHrqEG3hcm");
+            DumpArea(new List<Vector2Int>() { new Vector2Int(13, 75) });
         }
 
         [MenuItem("AssetBundleBuilder/Dump Zone 64,-64")]
         public static void DumpZoneArea()
         {
             environment = ContentServerUtils.ApiEnvironment.ZONE;
-            HashSet<string> sceneCids = new HashSet<string>();
 
             List<Vector2Int> coords = new List<Vector2Int>();
 
@@ -61,6 +60,13 @@ namespace DCL
                     coords.Add(new Vector2Int(x, y));
                 }
             }
+
+            DumpArea(coords);
+        }
+
+        static void DumpArea(List<Vector2Int> coords)
+        {
+            HashSet<string> sceneCids = new HashSet<string>();
 
             foreach (Vector2Int v in coords)
             {
@@ -432,7 +438,20 @@ namespace DCL
 
         private static bool PrepareUrlContents(DCL.ContentProvider contentProvider, Dictionary<string, DCL.ContentProvider.MappingPair> filteredPairs, string hash, string additionalPath = "")
         {
+            string fileExt = Path.GetExtension(filteredPairs[hash].file);
+            string outputPath = finalDownloadedPath + additionalPath + hash + fileExt;
+            string outputPathDir = Path.GetDirectoryName(outputPath);
             string finalUrl = contentProvider.GetContentsUrl(filteredPairs[hash].file);
+            string hashLowercase = hash.ToLowerInvariant();
+
+            if (File.Exists(outputPath))
+            {
+                if (!hashLowercaseToHashProper.ContainsKey(hashLowercase))
+                    hashLowercaseToHashProper.Add(hashLowercase, hash);
+
+                return true;
+            }
+
             UnityWebRequest req = UnityWebRequest.Get(finalUrl);
             req.SendWebRequest();
             while (req.isDone == false) { }
@@ -440,16 +459,10 @@ namespace DCL
             if (req.isHttpError || req.isNetworkError)
                 return false;
 
-            string fileExt = Path.GetExtension(filteredPairs[hash].file);
-            string outputPath = finalDownloadedPath + additionalPath + hash + fileExt;
-            string outputPathDir = Path.GetDirectoryName(outputPath);
-
             if (!Directory.Exists(outputPathDir))
                 Directory.CreateDirectory(outputPathDir);
 
             File.WriteAllBytes(outputPath, req.downloadHandler.data);
-
-            string hashLowercase = hash.ToLowerInvariant();
 
             if (!hashLowercaseToHashProper.ContainsKey(hashLowercase))
                 hashLowercaseToHashProper.Add(hashLowercase, hash);
