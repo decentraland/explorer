@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System;
+using System.Collections;
 using DCL.Models;
 using DCL.Components;
 using DCL.Helpers;
@@ -33,6 +34,9 @@ namespace Builder
 
         private bool isTransformComponentSet;
         private bool isShapeComponentSet;
+
+        private Vector3 scaleTarget;
+        private bool isScalingAnimation = false;
 
         public void SetEntity(DecentralandEntity entity)
         {
@@ -135,6 +139,12 @@ namespace Builder
             OnEntityShapeUpdated?.Invoke(this);
             ProcessEntityShape(entity);
 
+            if (hasGizmoComponent)
+            {
+                scaleTarget = DCLTransform.model.scale;
+                StartCoroutine(ScaleAnimationRoutine(0.3f));
+            }
+
             if (onShapeLoaded != null)
             {
                 onShapeLoaded();
@@ -146,7 +156,15 @@ namespace Builder
         {
             gameObject.transform.localPosition = DCLTransform.model.position;
             gameObject.transform.localRotation = DCLTransform.model.rotation;
-            gameObject.transform.localScale = DCLTransform.model.scale;
+
+            if (isScalingAnimation)
+            {
+                scaleTarget = DCLTransform.model.scale;
+            }
+            else
+            {
+                gameObject.transform.localScale = DCLTransform.model.scale;
+            }
 
             if (!isTransformComponentSet)
             {
@@ -173,6 +191,26 @@ namespace Builder
                 meshColliders[i] = new GameObject("BuilderSelectionCollider").AddComponent<DCLBuilderSelectionCollider>();
                 meshColliders[i].Initialize(this, meshInfo.renderers[i]);
             }
+        }
+
+        private IEnumerator ScaleAnimationRoutine(float seconds)
+        {
+            float startingTime = Time.time;
+            float normalizedTime = 0;
+            Vector3 scale = Vector3.zero;
+
+            gameObject.transform.localScale = scale;
+            isScalingAnimation = true;
+
+            while (Time.time - startingTime <= seconds)
+            {
+                normalizedTime = (Time.time - startingTime) / seconds;
+                scale = Vector3.Lerp(scale, scaleTarget, normalizedTime);
+                gameObject.transform.localScale = scale;
+                yield return null;
+            }
+            gameObject.transform.localScale = scaleTarget;
+            isScalingAnimation = false;
         }
     }
 }

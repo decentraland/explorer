@@ -7,6 +7,7 @@ using DCL.Controllers;
 using DCL.Interface;
 using DCL.Components;
 using DCL.Helpers;
+using DCL.Configuration;
 using Builder.Gizmos;
 
 namespace Builder
@@ -347,6 +348,7 @@ namespace Builder
                 DCLBuilderGizmoManager.OnGizmoTransformObjectEnd += OnGizmoTransformObjectEnded;
                 DCLBuilderEntity.OnEntityShapeUpdated += ProcessEntityBoundaries;
                 DCLBuilderEntity.OnEntityTransformUpdated += ProcessEntityBoundaries;
+                RenderingController.i.OnRenderingStateChanged += OnRenderingStateChanged;
             }
             isGameObjectActive = true;
         }
@@ -359,6 +361,7 @@ namespace Builder
             DCLBuilderGizmoManager.OnGizmoTransformObjectEnd -= OnGizmoTransformObjectEnded;
             DCLBuilderEntity.OnEntityShapeUpdated -= ProcessEntityBoundaries;
             DCLBuilderEntity.OnEntityTransformUpdated -= ProcessEntityBoundaries;
+            RenderingController.i.OnRenderingStateChanged -= OnRenderingStateChanged;
         }
 
         private void OnObjectDragEnd(DCLBuilderEntity entity, Vector3 position)
@@ -411,6 +414,14 @@ namespace Builder
                 if (!isPreview) mouseCatcher.UnlockCursor();
             }
             SetCaptureKeyboardInputEnabled(isPreview);
+        }
+
+        private void OnRenderingStateChanged(bool renderingEnabled)
+        {
+            if (renderingEnabled)
+            {
+                ParcelSettings.VISUAL_LOADING_ENABLED = false;
+            }
         }
 
         private void SetCaptureKeyboardInputEnabled(bool value)

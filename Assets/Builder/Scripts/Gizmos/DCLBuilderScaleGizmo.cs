@@ -41,6 +41,9 @@ namespace Builder.Gizmos
             else if (worldOrientedGizmos)
             {
                 scaleDirection = entityTransform.rotation * activeAxis.transform.forward;
+                scaleDirection.x = Mathf.Abs(scaleDirection.x);
+                scaleDirection.y = Mathf.Abs(scaleDirection.y);
+                scaleDirection.z = Mathf.Abs(scaleDirection.z);
             }
 
             Vector3 newScale = entityTransform.localScale + scaleDirection * axisValue;
