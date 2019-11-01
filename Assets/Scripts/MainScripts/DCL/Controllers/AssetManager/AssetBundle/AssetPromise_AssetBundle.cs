@@ -10,7 +10,6 @@ namespace DCL
         public string url { get; private set; }
         ContentProvider provider = null;
         object id = null;
-        string sceneId = "";
         UnityEngine.Object[] loadedAssets;
 
         public class Settings
@@ -54,11 +53,10 @@ namespace DCL
             }
         }
 
-        public AssetPromise_AssetBundle(ContentProvider provider, string url, string sceneId)
+        public AssetPromise_AssetBundle(ContentProvider provider, string url)
         {
             this.provider = provider;
             this.url = url;
-            this.sceneId = sceneId; //TODO(Brian): Remove this field
         }
 
         protected override void OnLoad(Action OnSuccess, Action OnFail)
@@ -79,15 +77,7 @@ namespace DCL
 
             string hash = provider.fileToHash[lowerCaseUrl];
 
-            //yield return AssetBundleLoadHelper.FetchManifest(provider, hash, sceneId);
-
             GameObject container = null;
-
-            //if (!AssetBundleLoadHelper.HasManifest(sceneId))
-            //{
-            //    OnFail?.Invoke();
-            //    yield break;
-            //}
 
             yield return AssetBundleLoadHelper.FetchAssetBundleWithDependencies(hash, (go) => { container = go; });
 
