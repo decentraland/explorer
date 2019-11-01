@@ -735,7 +735,7 @@ namespace UnityGLTF
 
             //  NOTE: the second parameter of LoadImage() marks non-readable, but we can't mark it until after we call Apply()
             texture.LoadImage(buffer, markGpuOnly);
-            //texture = CheckAndReduceTextureSize(texture);
+            texture = CheckAndReduceTextureSize(texture);
 
             _assetCache.ImageCache[imageCacheIndex] = texture;
 
@@ -775,7 +775,11 @@ namespace UnityGLTF
                 }
 
                 Texture2D dstTex = TextureScale.Resize(source, (int)(width * factor), (int)(height * factor));
-                Texture2D.Destroy(source);
+
+                if (Application.isPlaying)
+                    Texture2D.Destroy(source);
+                else
+                    Texture2D.DestroyImmediate(source);
 
                 return dstTex;
             }

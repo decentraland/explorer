@@ -27,7 +27,7 @@ namespace UnityGLTF
         [SerializeField] private GLTFImporterNormals _importNormals = GLTFImporterNormals.Import;
         [SerializeField] private bool _importMaterials = true;
         [SerializeField] private bool _useJpgTextures = false;
-        public bool _importTextures = false;
+        public bool _importTextures = true;
 
         public override void OnImportAsset(AssetImportContext ctx)
         {
@@ -143,7 +143,8 @@ namespace UnityGLTF
                         }
 
                         AssetDatabase.CreateAsset(clip, animationsRoot + fileName + ".anim");
-                        AssetDatabase.SaveAssets();
+                        var importer = AssetImporter.GetAtPath(animationsRoot + fileName + ".anim");
+                        importer.SaveAndReimport();
                     }
                 }
 
@@ -178,7 +179,7 @@ namespace UnityGLTF
 
                     Texture2D[] textures = null;
                     var texMaterialMap = new Dictionary<Texture2D, List<TexMaterialMap>>();
-
+                    _importTextures = true;
                     if (_importTextures)
                     {
                         // Get textures
@@ -285,6 +286,7 @@ namespace UnityGLTF
                                     r.sharedMaterials = sharedMaterials;
                                 }
                             });
+
                             // Fix textures
                             // HACK: This needs to be a delayed call.
                             // Unity needs a frame to kick off the texture import so we can rewrite the ref
@@ -305,6 +307,8 @@ namespace UnityGLTF
                                         var importedTex = AssetDatabase.LoadAssetAtPath<Texture2D>(texPath);
                                         if (importer != null)
                                         {
+                                            importer.isReadable = true;
+
                                             var isNormalMap = false;
                                             foreach (var materialMap in materialMaps)
                                             {
