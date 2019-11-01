@@ -64,6 +64,13 @@ namespace DCL
             DumpArea(coords);
         }
 
+        [MenuItem("AssetBundleBuilder/Only Build Bundles")]
+        public static void OnlyBuildBundles()
+        {
+            finalAssetBundlePath = ASSET_BUNDLES_PATH_ROOT;
+            BuildPipeline.BuildAssetBundles(finalAssetBundlePath, BuildAssetBundleOptions.UncompressedAssetBundle | BuildAssetBundleOptions.ForceRebuildAssetBundle, BuildTarget.WebGL);
+        }
+
         static void DumpArea(List<Vector2Int> coords)
         {
             HashSet<string> sceneCids = new HashSet<string>();
@@ -93,16 +100,12 @@ namespace DCL
             sceneCidsList = sceneCids.ToList();
             Debug.Log($"Building {sceneCidsList.Count} scenes...");
 
-            OnBundleBuildFinish = () =>
+            foreach (var v in sceneCidsList)
             {
-                if (sceneCidsList.Count > 1)
-                {
-                    sceneCidsList.RemoveAt(0);
-                    ExportSceneToAssetBundles_Internal(sceneCidsList[0]);
-                }
-            };
+                ExportSceneToAssetBundles_Internal(v);
+            }
 
-            ExportSceneToAssetBundles_Internal(sceneCidsList[0]);
+            BuildAssetBundles();
         }
 
         static List<string> sceneCidsList;
@@ -147,7 +150,7 @@ namespace DCL
         {
             try
             {
-                string[] args = System.Environment.GetCommandLineArgs();
+                string[] args = Environment.GetCommandLineArgs();
 
                 string sceneCid = "";
 
@@ -185,7 +188,6 @@ namespace DCL
             if (File.Exists(finalAssetBundlePath + "/manifests/" + sceneCid))
             {
                 Debug.Log("Scene already exists!");
-                OnBundleBuildFinish?.Invoke();
                 return;
             }
 
@@ -226,13 +228,13 @@ namespace DCL
             string[] textureExtensions = { ".jpg", ".png" };
             string[] gltfExtensions = { ".glb", ".gltf" };
 
-            List<string> assetBundleOutputPaths = new List<string>();
-
             var stringToAB = new Dictionary<string, AssetBundle>();
 
             var hashToTexturePair = FilterExtensions(rawContents, textureExtensions);
             var hashToGltfPair = FilterExtensions(rawContents, gltfExtensions);
             var hashToBufferPair = FilterExtensions(rawContents, bufferExtensions);
+
+            Dictionary<string, string> pathsToTag = new Dictionary<string, string>();
 
             //NOTE(Brian): Prepare buffers. We should prepare all the dependencies in this phase.
             foreach (var kvp in hashToBufferPair)
@@ -247,13 +249,25 @@ namespace DCL
                 string hash = kvp.Key;
 
                 //NOTE(Brian): try to get an AB before getting the original texture, so we bind the dependencies correctly
-                PrepareUrlContentsForBundleBuild(contentProvider, hashToTexturePair, hash, hash + "/");
+                string fullPathToTag = PrepareUrlContents(contentProvider, hashToTexturePair, hash, hash + "/");
+
+                if (fullPathToTag != null)
+                    pathsToTag.Add(fullPathToTag, hash);
             }
 
             AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
+            AssetDatabase.SaveAssets();
+
+            foreach (var kvp in pathsToTag)
+            {
+                MarkForAssetBundleBuild(kvp.Key, kvp.Value);
+            }
 
             GLTFImporter.OnGLTFRootIsConstructed -= FixGltfDependencyPaths;
             GLTFImporter.OnGLTFRootIsConstructed += FixGltfDependencyPaths;
+
+            pathsToTag.Clear();
+            List<Stream> streamsToDispose = new List<Stream>();
 
             //NOTE(Brian): Prepare gltfs gathering its dependencies first and filling the importer's static cache.
             foreach (var kvp in hashToGltfPair)
@@ -273,13 +287,16 @@ namespace DCL
                         string fileExt = Path.GetExtension(mappingPair.file);
                         string outputPath = finalDownloadedAssetDbPath + mappingPair.hash + "/" + mappingPair.hash + fileExt;
 
-                        Texture2D t2d = AssetDatabase.LoadAssetAtPath<Texture2D>(outputPath);
-
-                        if (t2d != null)
+                        if (File.Exists(outputPath))
                         {
-                            //NOTE(Brian): This cache will be used by the GLTF importer when seeking textures. This way the importer will
-                            //             consume the asset bundle dependencies instead of trying to create new textures.
-                            PersistentAssetCache.ImageCacheByUri[relativePath] = new RefCountedTextureData(relativePath, t2d);
+                            Texture2D t2d = AssetDatabase.LoadAssetAtPath<Texture2D>(outputPath);
+
+                            if (t2d != null)
+                            {
+                                //NOTE(Brian): This cache will be used by the GLTF importer when seeking textures. This way the importer will
+                                //             consume the asset bundle dependencies instead of trying to create new textures.
+                                PersistentAssetCache.ImageCacheByUri[relativePath] = new RefCountedTextureData(relativePath, t2d);
+                            }
                         }
                     }
 
@@ -291,41 +308,72 @@ namespace DCL
                         string fileExt = Path.GetExtension(mappingPair.file);
                         string outputPath = finalDownloadedAssetDbPath + mappingPair.hash + "/" + mappingPair.hash + fileExt;
 
-                        Stream stream = File.OpenRead(outputPath);
+                        if (File.Exists(outputPath))
+                        {
+                            Stream stream = File.OpenRead(outputPath);
 
-                        //NOTE(Brian): This cache will be used by the GLTF importer when seeking streams. This way the importer will
-                        //             consume the asset bundle dependencies instead of trying to create new streams.
-                        PersistentAssetCache.StreamCacheByUri[relativePath] = new RefCountedStreamData(relativePath, stream);
+                            //NOTE(Brian): This cache will be used by the GLTF importer when seeking streams. This way the importer will
+                            //             consume the asset bundle dependencies instead of trying to create new streams.
+                            PersistentAssetCache.StreamCacheByUri[relativePath] = new RefCountedStreamData(relativePath, stream);
+                        }
                     }
                 }
 
                 //NOTE(Brian): Finally, load the gLTF. The GLTFImporter will use the PersistentAssetCache to resolve the external dependencies.
-                PrepareUrlContentsForBundleBuild(contentProvider, hashToGltfPair, gltfHash, gltfHash + "/");
+                string path = PrepareUrlContents(contentProvider, hashToGltfPair, gltfHash, gltfHash + "/");
+
+                if (path != null)
+                {
+                    pathsToTag.Add(path, gltfHash);
+                }
 
                 foreach (var streamDataKvp in PersistentAssetCache.StreamCacheByUri)
                 {
-                    streamDataKvp.Value.stream?.Dispose();
+                    if (streamDataKvp.Value.stream != null)
+                        streamsToDispose.Add(streamDataKvp.Value.stream);
                 }
             }
 
-            BuildAssetBundles(sceneCid);
+            AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
+            AssetDatabase.SaveAssets();
+
+            foreach (var kvp in pathsToTag)
+            {
+                MarkForAssetBundleBuild(kvp.Key, kvp.Value);
+            }
+
+            foreach (var s in streamsToDispose)
+            {
+                s.Dispose();
+            }
         }
 
-        private static void BuildAssetBundles(string sceneCid)
+        static void MarkForAssetBundleBuild(string path, string abName)
+        {
+            string assetPath = path.Substring(path.IndexOf("Assets"));
+            assetPath = Path.ChangeExtension(assetPath, null);
+
+            assetPath = assetPath.Substring(0, assetPath.Length - 1);
+            AssetImporter a = AssetImporter.GetAtPath(assetPath);
+            a.SetAssetBundleNameAndVariant(abName, "");
+        }
+
+        private static void BuildAssetBundles()
         {
             if (!Directory.Exists(finalAssetBundlePath))
                 Directory.CreateDirectory(finalAssetBundlePath);
 
-            float time = Time.realtimeSinceStartup;
-
             EditorApplication.CallbackFunction delayedCall = null;
+
+            float time = Time.realtimeSinceStartup;
 
             delayedCall = () =>
             {
+                if (Time.realtimeSinceStartup - time < 2.0f)
+                    return;
+
                 EditorApplication.update -= delayedCall;
                 AssetDatabase.SaveAssets();
-
-                while (Time.realtimeSinceStartup - time < 0.1f) { }
 
                 var manifest = BuildPipeline.BuildAssetBundles(finalAssetBundlePath, BuildAssetBundleOptions.UncompressedAssetBundle, BuildTarget.WebGL);
 
@@ -383,7 +431,7 @@ namespace DCL
                     if (Directory.Exists(finalDownloadedPath))
                         Directory.Delete(finalDownloadedPath, true);
 
-                    AssetDatabase.Refresh();
+                    AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
                 }
                 catch (Exception e)
                 {
@@ -396,8 +444,8 @@ namespace DCL
                     EditorApplication.Exit(0);
             };
 
-            EditorApplication.update += delayedCall;
             AssetDatabase.Refresh();
+            EditorApplication.update += delayedCall;
         }
 
         /// <summary>
@@ -436,7 +484,7 @@ namespace DCL
             }
         }
 
-        private static bool PrepareUrlContents(DCL.ContentProvider contentProvider, Dictionary<string, DCL.ContentProvider.MappingPair> filteredPairs, string hash, string additionalPath = "")
+        private static string PrepareUrlContents(DCL.ContentProvider contentProvider, Dictionary<string, DCL.ContentProvider.MappingPair> filteredPairs, string hash, string additionalPath = "")
         {
             string fileExt = Path.GetExtension(filteredPairs[hash].file);
             string outputPath = finalDownloadedPath + additionalPath + hash + fileExt;
@@ -449,7 +497,7 @@ namespace DCL
                 if (!hashLowercaseToHashProper.ContainsKey(hashLowercase))
                     hashLowercaseToHashProper.Add(hashLowercase, hash);
 
-                return true;
+                return null;
             }
 
             UnityWebRequest req = UnityWebRequest.Get(finalUrl);
@@ -457,7 +505,7 @@ namespace DCL
             while (req.isDone == false) { }
 
             if (req.isHttpError || req.isNetworkError)
-                return false;
+                return null;
 
             if (!Directory.Exists(outputPathDir))
                 Directory.CreateDirectory(outputPathDir);
@@ -467,43 +515,8 @@ namespace DCL
             if (!hashLowercaseToHashProper.ContainsKey(hashLowercase))
                 hashLowercaseToHashProper.Add(hashLowercase, hash);
 
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
-
-            return true;
+            return finalDownloadedPath + additionalPath;
         }
-
-        private static bool PrepareUrlContentsForBundleBuild(DCL.ContentProvider contentProvider, Dictionary<string, DCL.ContentProvider.MappingPair> filteredPairs, string hash, string additionalPath = "")
-        {
-            bool prepareSuccess = PrepareUrlContents(contentProvider, filteredPairs, hash, additionalPath);
-
-            if (prepareSuccess)
-            {
-                List<AssetImporter> importers = GetAssetList(finalDownloadedPath + additionalPath);
-
-                foreach (AssetImporter importer in importers)
-                {
-                    importer.SetAssetBundleNameAndVariant(hash, "");
-                }
-            }
-
-            return prepareSuccess;
-        }
-
-        public static List<AssetImporter> GetAssetList(string path)
-        {
-            string[] fileEntries = Directory.GetFiles(path);
-
-            return fileEntries.Select(fileName =>
-            {
-                string assetPath = fileName.Substring(fileName.IndexOf("Assets"));
-                assetPath = Path.ChangeExtension(assetPath, null);
-                return AssetImporter.GetAtPath(assetPath);
-            })
-            .OfType<AssetImporter>()
-            .ToList();
-        }
-
 
         private static void InitializeDirectory(string path)
         {
@@ -522,6 +535,12 @@ namespace DCL
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="pairsToSearch"></param>
+        /// <param name="extensions"></param>
+        /// <returns>A dictionary that maps hashes to mapping pairs</returns>
         public static Dictionary<string, DCL.ContentProvider.MappingPair> FilterExtensions(DCL.ContentProvider.MappingPair[] pairsToSearch, string[] extensions)
         {
             var result = new Dictionary<string, DCL.ContentProvider.MappingPair>();
