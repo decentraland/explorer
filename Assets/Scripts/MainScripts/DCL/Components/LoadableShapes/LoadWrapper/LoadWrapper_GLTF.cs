@@ -33,9 +33,11 @@ namespace DCL.Components
         public override void Load(string targetUrl, Action<LoadWrapper> OnSuccess, Action<LoadWrapper> OnFail)
         {
             Assert.IsFalse(string.IsNullOrEmpty(targetUrl), "url is null!!");
+            LoadAssetBundle(targetUrl, OnSuccess, OnFail);
+        }
 
-            //StartCoroutine(TryToFetchAssetBundle(targetUrl, OnSuccess, OnFail));
-
+        void LoadAssetBundle(string targetUrl, Action<LoadWrapper> OnSuccess, Action<LoadWrapper> OnFail)
+        {
             if (abPromise != null)
             {
                 AssetPromiseKeeper_AssetBundle.i.Forget(abPromise);
@@ -45,7 +47,7 @@ namespace DCL.Components
             }
 
 
-            abPromise = new AssetPromise_AssetBundle(contentProvider, targetUrl, entity.scene.sceneData.id);
+            abPromise = new AssetPromise_AssetBundle(contentProvider, targetUrl);
             abPromise.settings.parent = transform;
 
 
