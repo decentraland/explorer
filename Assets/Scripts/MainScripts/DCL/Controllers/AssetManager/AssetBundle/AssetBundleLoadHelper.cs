@@ -19,8 +19,7 @@ public static class AssetBundleLoadHelper
     static List<string> downloadingBundle = new List<string>();
     static List<string> downloadingBundleWithDeps = new List<string>();
 
-    static List<UnityEngine.Object> allLoadedAssets = new List<UnityEngine.Object>();
-    static Dictionary<string, AssetBundleRequest> loadedAssets = new Dictionary<string, AssetBundleRequest>();
+    static Dictionary<string, Object> loadedAssets = new Dictionary<string, Object>();
 
     [System.Serializable]
     public class AssetDependencyMap
@@ -125,16 +124,15 @@ public static class AssetBundleLoadHelper
 
                 foreach (string asset in assets)
                 {
-                    assetsToLoad.Add(asset);
+                    if (!assetsToLoad.Contains(asset))
+                        assetsToLoad.Add(asset);
                 }
 
-                foreach (var asset in assetsToLoad)
+                foreach (string asset in assetsToLoad)
                 {
                     if (!loadedAssets.ContainsKey(asset))
                     {
-                        var request = assetBundle.LoadAssetAsync(asset);
-                        yield return request;
-                        loadedAssets.Add(asset, request);
+                        loadedAssets.Add(asset, assetBundle.LoadAsset(asset));
                     }
                 }
 
@@ -216,15 +214,14 @@ public static class AssetBundleLoadHelper
             }
         }
 
-        if (string.IsNullOrEmpty(targetAsset))
+        if (string.IsNullOrEmpty(targetAsset) || !loadedAssets.ContainsKey(targetAsset))
         {
             Debug.Log("target asset not found?");
             yield break;
         }
 
-        yield return loadedAssets[targetAsset];
+        GameObject container = Object.Instantiate(loadedAssets[targetAsset] as GameObject);
 
-        GameObject container = Object.Instantiate(loadedAssets[targetAsset].asset as GameObject);
         container.name = targetAsset;
 #if UNITY_EDITOR
         container.GetComponentsInChildren<Renderer>().ToList().ForEach(ResetShader);
