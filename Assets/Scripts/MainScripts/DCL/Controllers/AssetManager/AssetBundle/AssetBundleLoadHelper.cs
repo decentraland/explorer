@@ -27,9 +27,9 @@ public static class AssetBundleLoadHelper
         public string[] dependencies;
     }
 
-    public static IEnumerator GetDepMap(string hash)
+    public static IEnumerator GetDepMap(string baseUrl, string hash)
     {
-        string url = ContentServerUtils.GetBundlesAPIUrlBase(ContentServerUtils.ApiEnvironment.ZONE) + hash + ".depmap";
+        string url = baseUrl + hash + ".depmap";
 
         if (failedRequests.Contains(url))
             yield break;
@@ -150,9 +150,9 @@ public static class AssetBundleLoadHelper
     }
 
 
-    public static IEnumerator FetchAssetBundleWithDependencies(string hash, System.Action<GameObject> OnComplete = null, bool instantiate = true, bool verbose = true)
+    public static IEnumerator FetchAssetBundleWithDependencies(string baseUrl, string hash, System.Action<GameObject> OnComplete = null, bool instantiate = true, bool verbose = true)
     {
-        string url = ContentServerUtils.GetBundlesAPIUrlBase(ContentServerUtils.ApiEnvironment.ZONE) + hash;
+        string url = baseUrl + hash;
 
         AssetBundle mainAssetBundle;
 
@@ -171,13 +171,13 @@ public static class AssetBundleLoadHelper
 
         downloadingBundleWithDeps.Add(url);
 
-        yield return GetDepMap(hash);
+        yield return GetDepMap(baseUrl, hash);
 
         if (dependenciesMap.ContainsKey(hash))
         {
             foreach (string dep in dependenciesMap[hash])
             {
-                yield return FetchAssetBundleWithDependencies(dep, null, false, false);
+                yield return FetchAssetBundleWithDependencies(baseUrl, dep, null, false, false);
             }
         }
 

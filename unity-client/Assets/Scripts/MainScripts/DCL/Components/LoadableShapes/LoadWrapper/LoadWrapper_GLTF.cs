@@ -12,11 +12,13 @@ namespace DCL.Components
 {
     public class LoadWrapper_GLTF : LoadWrapper
     {
-        static bool VERBOSE = false;
+        static readonly bool VERBOSE = false;
+        static readonly bool USE_GLTF_FALLBACK = false;
 
         public GameObject gltfContainer;
 
         AssetPromise_GLTF gltfPromise;
+
         AssetPromise_AssetBundle abPromise;
 
         string assetDirectoryPath;
@@ -33,7 +35,11 @@ namespace DCL.Components
         public override void Load(string targetUrl, Action<LoadWrapper> OnSuccess, Action<LoadWrapper> OnFail)
         {
             Assert.IsFalse(string.IsNullOrEmpty(targetUrl), "url is null!!");
-            LoadAssetBundle(targetUrl, OnSuccess, OnFail);
+
+            if (USE_GLTF_FALLBACK)
+                LoadAssetBundle(targetUrl, OnSuccess, (x) => LoadGltf(targetUrl, OnSuccess, OnFail));
+            else
+                LoadAssetBundle(targetUrl, OnSuccess, OnFail);
         }
 
         void LoadAssetBundle(string targetUrl, Action<LoadWrapper> OnSuccess, Action<LoadWrapper> OnFail)
@@ -46,10 +52,8 @@ namespace DCL.Components
                     Debug.Log("Forgetting not null promise...");
             }
 
-
-            abPromise = new AssetPromise_AssetBundle(contentProvider, targetUrl);
+            abPromise = new AssetPromise_AssetBundle(entity.scene.contentProvider, entity.scene.sceneData.baseUrlBundles, targetUrl);
             abPromise.settings.parent = transform;
-
 
             abPromise.OnSuccessEvent += (x) => OnSuccessWrapper(x, OnSuccess);
             abPromise.OnFailEvent += (x) => OnFailWrapper(x, OnFail);
@@ -67,7 +71,7 @@ namespace DCL.Components
                     Debug.Log("Forgetting not null promise...");
             }
 
-            gltfPromise = new AssetPromise_GLTF(contentProvider, targetUrl);
+            gltfPromise = new AssetPromise_GLTF(entity.scene.contentProvider, targetUrl);
 
             if (VERBOSE)
                 Debug.Log($"Load(): target URL -> {targetUrl},  url -> {gltfPromise.url}, directory path -> {assetDirectoryPath}");
