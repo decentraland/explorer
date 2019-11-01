@@ -7,8 +7,10 @@ namespace DCL
 {
     public class AssetPromise_AssetBundle : AssetPromise<Asset_AssetBundle>
     {
-        public string url { get; private set; }
-        ContentProvider provider = null;
+        readonly string url;
+        readonly string baseUrl;
+        readonly ContentProvider provider = null;
+
         object id = null;
         UnityEngine.Object[] loadedAssets;
 
@@ -53,10 +55,11 @@ namespace DCL
             }
         }
 
-        public AssetPromise_AssetBundle(ContentProvider provider, string url)
+        public AssetPromise_AssetBundle(ContentProvider provider, string baseUrl, string url)
         {
             this.provider = provider;
             this.url = url;
+            this.baseUrl = baseUrl;
         }
 
         protected override void OnLoad(Action OnSuccess, Action OnFail)
@@ -79,7 +82,7 @@ namespace DCL
 
             GameObject container = null;
 
-            yield return AssetBundleLoadHelper.FetchAssetBundleWithDependencies(hash, (go) => { container = go; });
+            yield return AssetBundleLoadHelper.FetchAssetBundleWithDependencies(baseUrl, hash, (go) => { container = go; });
 
             if (container == null)
                 OnFail?.Invoke();

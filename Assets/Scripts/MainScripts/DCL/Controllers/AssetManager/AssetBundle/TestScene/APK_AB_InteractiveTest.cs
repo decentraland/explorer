@@ -19,7 +19,7 @@ public class APK_AB_InteractiveTest : MonoBehaviour
 
     void Generate(string url, string hash)
     {
-        AssetPromise_AssetBundle promise = new AssetPromise_AssetBundle(provider, url);
+        AssetPromise_AssetBundle promise = new AssetPromise_AssetBundle(provider, "http://localhost:1338/", url);
 
         if (!provider.fileToHash.ContainsKey(url.ToLower()))
             provider.fileToHash.Add(url.ToLower(), hash);
