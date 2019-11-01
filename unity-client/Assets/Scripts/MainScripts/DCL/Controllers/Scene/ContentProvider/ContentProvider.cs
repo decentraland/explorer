@@ -10,8 +10,8 @@ namespace DCL
         public static bool VERBOSE = false;
 
         public string baseUrl;
-        public List<MappingPair> contents;
-        public Dictionary<string, string> fileToHash;
+        public List<MappingPair> contents = new List<MappingPair>();
+        public Dictionary<string, string> fileToHash = new Dictionary<string, string>();
 
         [System.Serializable]
         public class MappingPair
