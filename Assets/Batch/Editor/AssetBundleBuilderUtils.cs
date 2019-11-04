@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
@@ -24,11 +25,26 @@ namespace DCL
         public static void DumpZoneArea()
         {
             AssetBundleBuilder.environment = ContentServerUtils.ApiEnvironment.ZONE;
-            var zoneArray = GetZoneArray(new Vector2Int(64, -64), new Vector2Int(7, 7));
+            var zoneArray = GetCenteredZoneArray(new Vector2Int(64, -64), new Vector2Int(7, 7));
             AssetBundleBuilder.DumpArea(zoneArray);
         }
 
-        public static List<Vector2Int> GetZoneArray(Vector2Int center, Vector2Int size)
+        public static List<Vector2Int> GetBottomLeftZoneArray(Vector2Int bottomLeftAnchor, Vector2Int size)
+        {
+            List<Vector2Int> coords = new List<Vector2Int>();
+
+            for (int x = bottomLeftAnchor.x; x < bottomLeftAnchor.x + size.x; x++)
+            {
+                for (int y = bottomLeftAnchor.y; y < bottomLeftAnchor.y + size.y; y++)
+                {
+                    coords.Add(new Vector2Int(x, y));
+                }
+            }
+
+            return coords;
+        }
+
+        public static List<Vector2Int> GetCenteredZoneArray(Vector2Int center, Vector2Int size)
         {
             List<Vector2Int> coords = new List<Vector2Int>();
 
@@ -42,6 +58,40 @@ namespace DCL
 
             return coords;
         }
+
+        internal static bool ParseOption(string optionName, int argsQty, out string[] foundArgs)
+        {
+            string[] args = Environment.GetCommandLineArgs();
+            foundArgs = null;
+
+            if (args.Length > argsQty + 1)
+            {
+                return false;
+            }
+
+            var foundArgsList = new List<string>();
+            int argState = 0;
+
+            for (int i = 0; i < args.Length - argsQty; i++)
+            {
+                switch (argState)
+                {
+                    case 0:
+                        if (args[i] == "-" + optionName)
+                        {
+                            argState++;
+                        }
+                        break;
+                    default:
+                        foundArgsList.Add(args[i]);
+                        break;
+                }
+            }
+
+            foundArgs = foundArgsList.ToArray();
+            return true;
+        }
+
 
         [MenuItem("AssetBundleBuilder/Only Build Bundles")]
         public static void OnlyBuildBundles()
