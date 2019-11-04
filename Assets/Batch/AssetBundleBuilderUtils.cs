@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEditor;
 using UnityEngine;
 
+[assembly: InternalsVisibleTo("AssetBundleBuilderTests")]
 namespace DCL
 {
     public static class AssetBundleBuilderUtils
@@ -68,15 +70,15 @@ namespace DCL
         {
             foundArgs = null;
 
-            if (rawArgsList.Length > expectedArgsQty + 1)
-            {
+            if (rawArgsList == null || rawArgsList.Length < expectedArgsQty + 1)
                 return false;
-            }
+
+            expectedArgsQty = Mathf.Min(expectedArgsQty, 100);
 
             var foundArgsList = new List<string>();
             int argState = 0;
 
-            for (int i = 0; i < rawArgsList.Length - expectedArgsQty; i++)
+            for (int i = 0; i < rawArgsList.Length; i++)
             {
                 switch (argState)
                 {
@@ -91,12 +93,17 @@ namespace DCL
                         argState++;
                         break;
                 }
+
+                if (argState > 0 && foundArgsList.Count == expectedArgsQty)
+                    break;
             }
 
-            if (argState == 0)
+            if (argState == 0 || foundArgsList.Count < expectedArgsQty)
                 return false;
 
-            foundArgs = foundArgsList.ToArray();
+            if (expectedArgsQty > 0)
+                foundArgs = foundArgsList.ToArray();
+
             return true;
         }
 

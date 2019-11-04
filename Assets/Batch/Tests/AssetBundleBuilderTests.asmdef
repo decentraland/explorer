@@ -1,0 +1,17 @@
+{
+    "name": "AssetBundleBuilderTests",
+    "references": [
+        "GUID:a074773cd9a997a4f9795e8556e72c8b"
+    ],
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": []
+}
