@@ -36,6 +36,7 @@ namespace DCL
         public Vector2Int debugSceneCoords;
         public bool ignoreGlobalScenes = false;
         public bool msgStepByStep = false;
+        public bool deferredMessagesDecoding = false;
 
         #region BENCHMARK_EVENTS
 
@@ -114,7 +115,8 @@ namespace DCL
 
             ParcelScene.parcelScenesCleaner.Start();
 
-            StartCoroutine(DeferredDecoding());
+            if (deferredMessagesDecoding)
+                StartCoroutine(DeferredDecoding());
         }
 
         void OnDestroy()
@@ -448,7 +450,7 @@ namespace DCL
 
             for (int i = 0; i < count; i++)
             {
-                if (RenderingController.i.renderingEnabled && enqueue)
+                if (deferredMessagesDecoding && RenderingController.i.renderingEnabled && enqueue)
                 {
                     payloadsToDecode.Enqueue(chunks[i]);
                 }
