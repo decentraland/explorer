@@ -12,8 +12,9 @@ namespace DCL.Components
 {
     public class LoadWrapper_GLTF : LoadWrapper
     {
-        static readonly bool VERBOSE = false;
+        static readonly bool USE_LOCAL_HOST = true;
         static readonly bool USE_GLTF_FALLBACK = false;
+        static readonly bool VERBOSE = false;
 
         public GameObject gltfContainer;
 
@@ -52,7 +53,9 @@ namespace DCL.Components
                     Debug.Log("Forgetting not null promise...");
             }
 
-            abPromise = new AssetPromise_AssetBundle(entity.scene.contentProvider, entity.scene.sceneData.baseUrlBundles, targetUrl);
+            string bundlesBaseUrl = USE_LOCAL_HOST ? "http://localhost:1338/" : entity.scene.sceneData.baseUrlBundles;
+
+            abPromise = new AssetPromise_AssetBundle(entity.scene.contentProvider, bundlesBaseUrl, targetUrl);
             abPromise.settings.parent = transform;
 
             abPromise.OnSuccessEvent += (x) => OnSuccessWrapper(x, OnSuccess);

@@ -2,6 +2,45 @@
 {
     public static class ContentServerUtils
     {
+        [System.Serializable]
+        public class ScenesAPIData
+        {
+            [System.Serializable]
+            public class Data
+            {
+                public string parcel_id;
+                public string root_cid;
+                public string scene_cid;
+            }
+
+            public Data[] data;
+        }
+
+        [System.Serializable]
+        public class MappingsAPIData
+        {
+            [System.Serializable]
+            public class Data
+            {
+                [System.Serializable]
+                public class Content
+                {
+                    public MappingPair[] contents;
+                }
+
+                public Content content;
+            }
+
+            public Data[] data;
+        }
+
+        [System.Serializable]
+        public class MappingPair
+        {
+            public string file;
+            public string hash;
+        }
+
         public enum ApiEnvironment
         {
             NONE,

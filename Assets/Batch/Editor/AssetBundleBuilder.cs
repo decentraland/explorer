@@ -9,6 +9,9 @@ using UnityEngine.Assertions;
 using UnityEngine.Networking;
 using UnityGLTF;
 using UnityGLTF.Cache;
+using MappingPair = DCL.ContentServerUtils.MappingPair;
+using MappingsAPIData = DCL.ContentServerUtils.MappingsAPIData;
+using ScenesAPIData = DCL.ContentServerUtils.ScenesAPIData;
 
 namespace DCL
 {
@@ -20,67 +23,30 @@ namespace DCL
             public string[] dependencies;
         }
 
-        private static string DOWNLOADED_ASSET_DB_PATH_ROOT = "Assets/_Downloaded/";
-        private static string DOWNLOADED_PATH_ROOT = Application.dataPath + "/_Downloaded/";
-        private static string ASSET_BUNDLE_FOLDER_NAME = "_AssetBundles2";
-        private static string ASSET_BUNDLES_PATH_ROOT = "/" + ASSET_BUNDLE_FOLDER_NAME + "/";
+        internal static string DOWNLOADED_ASSET_DB_PATH_ROOT = "Assets/_Downloaded/";
+        internal static string DOWNLOADED_PATH_ROOT = Application.dataPath + "/_Downloaded/";
+        internal static string ASSET_BUNDLE_FOLDER_NAME = "_AssetBundles2";
+        internal static string ASSET_BUNDLES_PATH_ROOT = "/" + ASSET_BUNDLE_FOLDER_NAME + "/";
 
-        private static string finalAssetBundlePath = "";
-        private static string finalDownloadedPath = "";
-        private static string finalDownloadedAssetDbPath = "";
+        internal static string finalAssetBundlePath = "";
+        internal static string finalDownloadedPath = "";
+        internal static string finalDownloadedAssetDbPath = "";
 
-        public static ContentServerUtils.ApiEnvironment environment = ContentServerUtils.ApiEnvironment.ORG;
-
-
-        [MenuItem("AssetBundleBuilder/Dump Test Scene")]
-        public static void DumpMisc()
-        {
-            ExportSceneToAssetBundles_Internal("QmbKgHPENpzGGEfagGP5BbEd7CvqXeXuuXLeMEkuswGvrK");
-        }
+        internal static ContentServerUtils.ApiEnvironment environment = ContentServerUtils.ApiEnvironment.ORG;
 
 
-        [MenuItem("AssetBundleBuilder/Dump Museum District")]
-        public static void DumpMuseum()
-        {
-            environment = ContentServerUtils.ApiEnvironment.ORG;
-            DumpArea(new List<Vector2Int>() { new Vector2Int(13, 75) });
-        }
+        internal static System.Action OnBundleBuildFinish = null;
+        static Dictionary<string, string> hashLowercaseToHashProper = new Dictionary<string, string>();
 
-        [MenuItem("AssetBundleBuilder/Dump Zone 64,-64")]
-        public static void DumpZoneArea()
-        {
-            environment = ContentServerUtils.ApiEnvironment.ZONE;
+        static float startTime;
 
-            List<Vector2Int> coords = new List<Vector2Int>();
-
-            int width = 2;
-            int height = 2;
-
-            for (int x = 64 - width; x < 64 + width; x++)
-            {
-                for (int y = -64 - height; y < -64 + height; y++)
-                {
-                    coords.Add(new Vector2Int(x, y));
-                }
-            }
-
-            DumpArea(coords);
-        }
-
-        [MenuItem("AssetBundleBuilder/Only Build Bundles")]
-        public static void OnlyBuildBundles()
-        {
-            finalAssetBundlePath = ASSET_BUNDLES_PATH_ROOT;
-            BuildPipeline.BuildAssetBundles(finalAssetBundlePath, BuildAssetBundleOptions.UncompressedAssetBundle | BuildAssetBundleOptions.ForceRebuildAssetBundle, BuildTarget.WebGL);
-        }
-
-        static void DumpArea(List<Vector2Int> coords)
+        internal static void DumpArea(List<Vector2Int> coords)
         {
             HashSet<string> sceneCids = new HashSet<string>();
 
             foreach (Vector2Int v in coords)
             {
-                string url = ContentServerUtils.GetScenesAPIUrl(environment, v.x, v.y, 0, 0);
+                string url = ContentServerUtils.GetScenesAPIUrl(AssetBundleBuilder.environment, v.x, v.y, 0, 0);
                 UnityWebRequest w = UnityWebRequest.Get(url);
                 w.SendWebRequest();
 
@@ -100,55 +66,19 @@ namespace DCL
                 }
             }
 
-            sceneCidsList = sceneCids.ToList();
+            List<string> sceneCidsList = sceneCids.ToList();
             Debug.Log($"Building {sceneCidsList.Count} scenes...");
 
             startTime = Time.realtimeSinceStartup;
             foreach (var v in sceneCidsList)
             {
-                ExportSceneToAssetBundles_Internal(v);
+                AssetBundleBuilder.ExportSceneToAssetBundles_Internal(v);
             }
 
-            BuildAssetBundles();
-            OnBundleBuildFinish = () => { Debug.Log($"Conversion finished. [Time:{Time.realtimeSinceStartup - startTime}]"); };
+            AssetBundleBuilder.BuildAssetBundles();
+            AssetBundleBuilder.OnBundleBuildFinish = () => { Debug.Log($"Conversion finished. [Time:{Time.realtimeSinceStartup - startTime}]"); };
         }
 
-        static float startTime;
-        static List<string> sceneCidsList;
-        static System.Action OnBundleBuildFinish = null;
-        static Dictionary<string, string> hashLowercaseToHashProper = new Dictionary<string, string>();
-
-        [System.Serializable]
-        public class ScenesAPIData
-        {
-            [System.Serializable]
-            public class Data
-            {
-                public string parcel_id;
-                public string root_cid;
-                public string scene_cid;
-            }
-
-            public Data[] data;
-        }
-
-        [System.Serializable]
-        public class MappingsAPIData
-        {
-            [System.Serializable]
-            public class Data
-            {
-                [System.Serializable]
-                public class Content
-                {
-                    public DCL.ContentProvider.MappingPair[] contents;
-                }
-
-                public Content content;
-            }
-
-            public Data[] data;
-        }
 
 
 
@@ -184,7 +114,7 @@ namespace DCL
             }
         }
 
-        private static void ExportSceneToAssetBundles_Internal(string sceneCid)
+        internal static void ExportSceneToAssetBundles_Internal(string sceneCid)
         {
             Debug.Log($"Exporting scene... {sceneCid}");
             finalAssetBundlePath = ASSET_BUNDLES_PATH_ROOT;
@@ -218,15 +148,15 @@ namespace DCL
             InitializeDirectory(finalDownloadedPath);
             AssetDatabase.Refresh();
 
-            DCL.ContentProvider.MappingPair[] rawContents = parcelInfoApiData.data[0].content.contents;
+            MappingPair[] rawContents = parcelInfoApiData.data[0].content.contents;
 
             var contentProvider = new DCL.ContentProvider();
-            contentProvider.contents = new List<DCL.ContentProvider.MappingPair>(rawContents);
+            contentProvider.contents = new List<MappingPair>(rawContents);
             contentProvider.baseUrl = ContentServerUtils.GetContentAPIUrlBase(environment);
             contentProvider.BakeHashes();
 
             var contentProviderAB = new DCL.ContentProvider();
-            contentProviderAB.contents = new List<DCL.ContentProvider.MappingPair>(rawContents);
+            contentProviderAB.contents = new List<MappingPair>(rawContents);
             contentProviderAB.baseUrl = ContentServerUtils.GetBundlesAPIUrlBase(environment);
             contentProviderAB.BakeHashes();
 
@@ -366,7 +296,7 @@ namespace DCL
             a.SetAssetBundleNameAndVariant(abName, "");
         }
 
-        private static void BuildAssetBundles()
+        internal static void BuildAssetBundles()
         {
             if (!Directory.Exists(finalAssetBundlePath))
                 Directory.CreateDirectory(finalAssetBundlePath);
@@ -492,7 +422,7 @@ namespace DCL
             }
         }
 
-        private static string PrepareUrlContents(DCL.ContentProvider contentProvider, Dictionary<string, DCL.ContentProvider.MappingPair> filteredPairs, string hash, string additionalPath = "")
+        private static string PrepareUrlContents(DCL.ContentProvider contentProvider, Dictionary<string, MappingPair> filteredPairs, string hash, string additionalPath = "")
         {
             string fileExt = Path.GetExtension(filteredPairs[hash].file);
             string outputPath = finalDownloadedPath + additionalPath + hash + fileExt;
@@ -549,13 +479,13 @@ namespace DCL
         /// <param name="pairsToSearch"></param>
         /// <param name="extensions"></param>
         /// <returns>A dictionary that maps hashes to mapping pairs</returns>
-        public static Dictionary<string, DCL.ContentProvider.MappingPair> FilterExtensions(DCL.ContentProvider.MappingPair[] pairsToSearch, string[] extensions)
+        public static Dictionary<string, MappingPair> FilterExtensions(MappingPair[] pairsToSearch, string[] extensions)
         {
-            var result = new Dictionary<string, DCL.ContentProvider.MappingPair>();
+            var result = new Dictionary<string, MappingPair>();
 
             for (int i = 0; i < pairsToSearch.Length; i++)
             {
-                DCL.ContentProvider.MappingPair mappingPair = pairsToSearch[i];
+                MappingPair mappingPair = pairsToSearch[i];
 
                 bool hasExtension = extensions.Any((x) => mappingPair.file.ToLower().EndsWith(x));
 
