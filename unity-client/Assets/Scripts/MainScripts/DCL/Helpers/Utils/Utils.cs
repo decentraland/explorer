@@ -134,7 +134,7 @@ namespace DCL.Helpers
             return component;
         }
 
-        public static bool WebRequestSucceded(UnityWebRequest request)
+        public static bool WebRequestSucceded(this UnityWebRequest request)
         {
             return request != null && !request.isNetworkError && !request.isHttpError;
         }
@@ -187,7 +187,7 @@ namespace DCL.Helpers
                         {
                             ac = DownloadHandlerAudioClip.GetContent(request);
                         }
-                        catch(Exception e)
+                        catch (Exception e)
                         {
                             Debug.LogError(e);
                         }
