@@ -75,6 +75,8 @@ namespace DCL
             public Type type;
             public string sceneId;
             public string message;
+            public bool isUnreliable;
+            public string unreliableMessageKey;
         }
         public class QueuedSceneMessage_Scene : QueuedSceneMessage
         {
@@ -148,22 +150,24 @@ namespace DCL
 
             if (queueMode == QueueMode.Reliable)
             {
+                message.isUnreliable = false;
                 pendingMessages.AddLast(message);
             }
             else
             {
-                stringBuilder.Clear();
+                message.isUnreliable = true;
 
                 LinkedListNode<MessagingBus.QueuedSceneMessage> node = null;
 
+                stringBuilder.Clear();
                 stringBuilder.Append(message.tag);
                 stringBuilder.Append(message.sceneId);
 
-                string tag = stringBuilder.ToString();
+                message.unreliableMessageKey = stringBuilder.ToString();
 
-                if (unreliableMessages.ContainsKey(tag))
+                if (unreliableMessages.ContainsKey(message.unreliableMessageKey))
                 {
-                    node = unreliableMessages[tag];
+                    node = unreliableMessages[message.unreliableMessageKey];
 
                     if (node.List != null)
                     {
@@ -176,7 +180,7 @@ namespace DCL
                 if (enqueued)
                 {
                     node = pendingMessages.AddLast(message);
-                    unreliableMessages[tag] = node;
+                    unreliableMessages[message.unreliableMessageKey] = node;
                 }
             }
 
@@ -197,6 +201,17 @@ namespace DCL
             }
         }
 
+        private void RemoveUnreliableMessage(MessagingBus.QueuedSceneMessage message)
+        {
+            // Note (Zak): Right now it's not necessary to check if this key exists
+            // within the dictionary, because this is the only place were it's 
+            // removed and it's called *only* when processing a message, so we
+            // know it's there. In the future, if we think this is slowing down
+            // things, we could remove it. 
+            if (unreliableMessages.ContainsKey(message.unreliableMessageKey))
+                unreliableMessages.Remove(message.unreliableMessageKey);
+        }
+
         public bool ProcessQueue(float timeBudget, out IEnumerator yieldReturn)
         {
             LinkedList<MessagingBus.QueuedSceneMessage> queue = pendingMessages;
@@ -215,6 +230,9 @@ namespace DCL
 
                 if (queue.First != null)
                     queue.RemoveFirst();
+
+                if (m.isUnreliable)
+                    RemoveUnreliableMessage(m);
 
                 bool shouldLogMessage = VERBOSE;
 

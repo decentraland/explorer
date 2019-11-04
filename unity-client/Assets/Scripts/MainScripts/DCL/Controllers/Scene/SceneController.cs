@@ -121,30 +121,13 @@ namespace DCL
         {
             ParcelScene.parcelScenesCleaner.Stop();
         }
-        int showCount = 0;
-        int count = 0;
         private void Update()
         {
-            showCount = count;
-            count = 0;
-
             InputController.i.Update();
 
             PrioritizeMessageControllerList();
 
             MessagingControllersManager.i.UpdateThrottling();
-        }
-        float lastTime = 0;
-        int counterToShow = 0;
-        void OnGUI()
-        {
-            if (Time.realtimeSinceStartup - lastTime >= 0.25f)
-            {
-                lastTime = Time.realtimeSinceStartup;
-                counterToShow = showCount;
-            }
-
-            GUILayout.Label("Queries per update: " + counterToShow);
         }
 
         private void PrioritizeMessageControllerList(bool force = false)
@@ -508,10 +491,10 @@ namespace DCL
         }
 
         Queue<string> payloadsToDecode = new Queue<string>();
-        const float MAX_TIME_FOR_DECODE = 0.033f;
-        const float MIN_TIME_FOR_DECODE = 0.016f;
+        const float MAX_TIME_FOR_DECODE = 0.1f;
+        const float MIN_TIME_FOR_DECODE = 0.001f;
         float maxTimeForDecode = MAX_TIME_FOR_DECODE;
-        float secsPerThousandMsgs = 0.0075f;
+        float secsPerThousandMsgs = 0.01f;
         private IEnumerator DeferredDecoding()
         {
             float lastTimeDecoded = Time.unscaledTime;
@@ -528,7 +511,7 @@ namespace DCL
                     {
                         yield return null;
                         maxTimeForDecode = Mathf.Clamp(MIN_TIME_FOR_DECODE + (float)payloadsToDecode.Count / 1000.0f * secsPerThousandMsgs, MIN_TIME_FOR_DECODE, MAX_TIME_FOR_DECODE);
-                        lastTimeDecoded = Time.unscaledTime;
+                        lastTimeDecoded = Time.realtimeSinceStartup;
                     }
                 }
                 else
@@ -676,7 +659,6 @@ namespace DCL
 
         public void ParseQuery(string queryId, string payload, string sceneId)
         {
-            count++;
             QueryMessage query = new QueryMessage();
 
             MessageDecoder.DecodeQueryMessage(queryId, payload, ref query);

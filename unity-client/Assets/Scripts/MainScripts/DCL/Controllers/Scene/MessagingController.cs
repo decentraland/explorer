@@ -155,6 +155,7 @@ namespace DCL
             }
             else if (queuedMessage.method == MessagingTypes.QUERY)
             {
+                busId = MessagingBusId.UI;
                 queueMode = QueueMode.Lossy;
             }
             else if (queuedMessage.method == MessagingTypes.INIT_DONE)
