@@ -1,0 +1,13 @@
+fileFormatVersion: 2
+<<<<<<< HEAD:unity-client/Assets/Scripts/Editor.meta
+guid: 1abb57e0102037143ab8a9deacbfffc5
+folderAsset: yes
+DefaultImporter:
+=======
+guid: dc774998836b93947a6c9ff6159387a9
+AssemblyDefinitionImporter:
+>>>>>>> move AssetBundleBuilder to its own editor assembly, add tests for ParseOption methods:Assets/Batch/Tests/AssetBundleBuilderTests.asmdef.meta
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
