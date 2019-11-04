@@ -2395,11 +2395,19 @@ namespace UnityGLTF
                 }
                 else
                 {
-                    var unityTexture = Object.Instantiate(source.Texture);
-                    unityTexture.filterMode = desiredFilterMode;
-                    unityTexture.wrapMode = desiredWrapMode;
+                    if (source.Texture.isReadable)
+                    {
+                        var unityTexture = Object.Instantiate(source.Texture);
+                        unityTexture.filterMode = desiredFilterMode;
+                        unityTexture.wrapMode = desiredWrapMode;
 
-                    _assetCache.TextureCache[textureIndex].CachedTexture = new RefCountedTextureData(image.Uri, unityTexture);
+                        _assetCache.TextureCache[textureIndex].CachedTexture = new RefCountedTextureData(image.Uri, unityTexture);
+                    }
+                    else
+                    {
+                        Debug.LogWarning("Skipping instantiation of non-readable texture: " + image.Uri);
+                        _assetCache.TextureCache[textureIndex].CachedTexture = source;
+                    }
                 }
             }
         }
