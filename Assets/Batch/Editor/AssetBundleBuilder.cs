@@ -1,4 +1,5 @@
-﻿using GLTF.Schema;
+﻿using DCL.Helpers;
+using GLTF.Schema;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -23,10 +24,14 @@ namespace DCL
             public string[] dependencies;
         }
 
+        static bool VERBOSE = false;
+
         internal static string DOWNLOADED_ASSET_DB_PATH_ROOT = "Assets/_Downloaded/";
         internal static string DOWNLOADED_PATH_ROOT = Application.dataPath + "/_Downloaded/";
         internal static string ASSET_BUNDLE_FOLDER_NAME = "_AssetBundles2";
         internal static string ASSET_BUNDLES_PATH_ROOT = "/" + ASSET_BUNDLE_FOLDER_NAME + "/";
+
+        private static bool deleteDownloadPathAfterFinished = true;
 
         internal static string finalAssetBundlePath = "";
         internal static string finalDownloadedPath = "";
@@ -34,23 +39,25 @@ namespace DCL
 
         internal static ContentServerUtils.ApiEnvironment environment = ContentServerUtils.ApiEnvironment.ORG;
 
-
         internal static System.Action OnBundleBuildFinish = null;
         static Dictionary<string, string> hashLowercaseToHashProper = new Dictionary<string, string>();
 
         static float startTime;
 
-        internal static void DumpArea(List<Vector2Int> coords)
+        internal static void DumpArea(List<Vector2Int> coords, Action OnFinish = null)
         {
             HashSet<string> sceneCids = new HashSet<string>();
 
             foreach (Vector2Int v in coords)
             {
-                string url = ContentServerUtils.GetScenesAPIUrl(AssetBundleBuilder.environment, v.x, v.y, 0, 0);
+                string url = ContentServerUtils.GetScenesAPIUrl(environment, v.x, v.y, 0, 0);
                 UnityWebRequest w = UnityWebRequest.Get(url);
                 w.SendWebRequest();
 
                 while (w.isDone == false) { }
+
+                if (!w.WebRequestSucceded())
+                    throw new Exception($"Request error! Parcels couldn't be fetched! -- {w.error}");
 
                 ScenesAPIData scenesApiData = JsonUtility.FromJson<ScenesAPIData>(w.downloadHandler.text);
 
@@ -70,62 +77,82 @@ namespace DCL
             Debug.Log($"Building {sceneCidsList.Count} scenes...");
 
             startTime = Time.realtimeSinceStartup;
+
+            finalAssetBundlePath = ASSET_BUNDLES_PATH_ROOT;
+            finalDownloadedPath = DOWNLOADED_PATH_ROOT;
+            finalDownloadedAssetDbPath = DOWNLOADED_ASSET_DB_PATH_ROOT;
+
+            InitializeDirectory(finalDownloadedPath);
+
             foreach (var v in sceneCidsList)
             {
-                AssetBundleBuilder.ExportSceneToAssetBundles_Internal(v);
+                ExportSceneToAssetBundles_Internal(v);
             }
 
-            AssetBundleBuilder.BuildAssetBundles();
-            AssetBundleBuilder.OnBundleBuildFinish = () => { Debug.Log($"Conversion finished. [Time:{Time.realtimeSinceStartup - startTime}]"); };
+            BuildAssetBundles();
+            OnBundleBuildFinish = () => { Debug.Log($"Conversion finished. [Time:{Time.realtimeSinceStartup - startTime}]"); OnFinish?.Invoke(); };
         }
-
-
 
 
         public static void ExportSceneToAssetBundles()
         {
             try
             {
-                string[] args = Environment.GetCommandLineArgs();
-
-                string sceneCid = "";
-
-                for (int i = 0; i < args.Length - 1; i++)
+                if (AssetBundleBuilderUtils.ParseOption("sceneCid", 1, out string[] sceneCid))
                 {
-                    if (args[i] == "-sceneCid")
+                    if (sceneCid == null || string.IsNullOrEmpty(sceneCid[0]))
                     {
-                        sceneCid = args[i + 1];
+                        throw new ArgumentException("Invalid sceneCid argument! Please use -sceneCid <id> to establish the desired id to process.");
                     }
+
+                    ExportSceneToAssetBundles_Internal(sceneCid[0]);
+                    return;
                 }
 
-                if (string.IsNullOrEmpty(sceneCid))
+                if (AssetBundleBuilderUtils.ParseOption("parcelsXYWH", 4, out string[] xywh))
                 {
-                    throw new ArgumentException("Invalid sceneCid argument! Please use -sceneCid <id> to establish the desired id to process.");
-                }
+                    if (xywh == null)
+                    {
+                        throw new ArgumentException("Invalid parcelsXYWH argument! Please use -parcelsXYWH x y w h to establish the desired parcels range to process.");
+                    }
 
-                ExportSceneToAssetBundles_Internal(sceneCid);
+                    int x, y, w, h;
+                    bool parseSuccess = false;
+
+                    parseSuccess |= int.TryParse(xywh[0], out x);
+                    parseSuccess |= int.TryParse(xywh[1], out y);
+                    parseSuccess |= int.TryParse(xywh[2], out w);
+                    parseSuccess |= int.TryParse(xywh[3], out h);
+
+                    if (!parseSuccess)
+                    {
+                        throw new ArgumentException("Invalid parcelsXYWH argument! Please use -parcelsXYWH x y w h to establish the desired parcels range to process.");
+                    }
+
+                    var zoneArray = AssetBundleBuilderUtils.GetBottomLeftZoneArray(new Vector2Int(x, y), new Vector2Int(w, h));
+
+                    DumpArea(zoneArray, () =>
+                    {
+                        Exit(1);
+                    });
+
+                    return;
+                }
             }
             catch (Exception e)
             {
                 Debug.LogError(e.Message);
 
-                if (Application.isBatchMode)
-                    EditorApplication.Exit(1);
+                Exit(1);
             }
         }
 
         internal static void ExportSceneToAssetBundles_Internal(string sceneCid)
         {
-            Debug.Log($"Exporting scene... {sceneCid}");
-            finalAssetBundlePath = ASSET_BUNDLES_PATH_ROOT;
-            finalDownloadedPath = DOWNLOADED_PATH_ROOT;
-            finalDownloadedAssetDbPath = DOWNLOADED_ASSET_DB_PATH_ROOT;
+            if (string.IsNullOrEmpty(sceneCid))
+                throw new ArgumentException($"invalid sceneCid! -- cid: {sceneCid}");
 
-            if (File.Exists(finalAssetBundlePath + "/manifests/" + sceneCid))
-            {
-                Debug.Log("Scene already exists!");
-                return;
-            }
+            Debug.Log($"Exporting scene... {sceneCid}");
 
             string url = ContentServerUtils.GetMappingsAPIUrl(environment, sceneCid);
             UnityWebRequest w = UnityWebRequest.Get(url);
@@ -133,19 +160,18 @@ namespace DCL
 
             while (w.isDone == false) { }
 
+            if (!w.WebRequestSucceded())
+                throw new Exception($"Request error! mappings couldn't be fetched for scene {sceneCid}! -- {w.error}");
+
             MappingsAPIData parcelInfoApiData = JsonUtility.FromJson<MappingsAPIData>(w.downloadHandler.text);
 
             if (parcelInfoApiData.data.Length == 0 || parcelInfoApiData.data == null)
             {
                 Debug.LogWarning("Data is null?");
-
-                if (Application.isBatchMode)
-                    EditorApplication.Exit(1);
-
+                Exit(1);
                 return;
             }
 
-            InitializeDirectory(finalDownloadedPath);
             AssetDatabase.Refresh();
 
             MappingPair[] rawContents = parcelInfoApiData.data[0].content.contents;
@@ -176,7 +202,7 @@ namespace DCL
             foreach (var kvp in hashToBufferPair)
             {
                 string hash = kvp.Key;
-                PrepareUrlContents(contentProvider, hashToBufferPair, hash, hash + "/");
+                DownloadAsset(contentProvider, hashToBufferPair, hash, hash + "/");
             }
 
             //NOTE(Brian): Prepare textures. We should prepare all the dependencies in this phase.
@@ -185,7 +211,7 @@ namespace DCL
                 string hash = kvp.Key;
 
                 //NOTE(Brian): try to get an AB before getting the original texture, so we bind the dependencies correctly
-                string fullPathToTag = PrepareUrlContents(contentProvider, hashToTexturePair, hash, hash + "/");
+                string fullPathToTag = DownloadAsset(contentProvider, hashToTexturePair, hash, hash + "/");
 
                 if (fullPathToTag != null)
                     pathsToTag.Add(fullPathToTag, hash);
@@ -209,6 +235,14 @@ namespace DCL
             foreach (var kvp in hashToGltfPair)
             {
                 string gltfHash = kvp.Key;
+
+                if (CheckContentUrlExists(contentProviderAB, hashToGltfPair, gltfHash))
+                {
+                    if (VERBOSE)
+                        Debug.Log("Skipping existing gltf: " + gltfHash);
+
+                    continue;
+                }
 
                 PersistentAssetCache.ImageCacheByUri.Clear();
                 PersistentAssetCache.StreamCacheByUri.Clear();
@@ -258,7 +292,7 @@ namespace DCL
                 }
 
                 //NOTE(Brian): Finally, load the gLTF. The GLTFImporter will use the PersistentAssetCache to resolve the external dependencies.
-                string path = PrepareUrlContents(contentProvider, hashToGltfPair, gltfHash, gltfHash + "/");
+                string path = DownloadAsset(contentProvider, hashToGltfPair, gltfHash, gltfHash + "/");
 
                 AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
                 AssetDatabase.SaveAssets();
@@ -286,6 +320,14 @@ namespace DCL
             }
         }
 
+        static void Exit(int errorCode = 0)
+        {
+            if (Application.isBatchMode)
+                EditorApplication.Exit(errorCode);
+            else
+                Debug.Log($"Process finished with code {errorCode}");
+        }
+
         static void MarkForAssetBundleBuild(string path, string abName)
         {
             string assetPath = path.Substring(path.IndexOf("Assets"));
@@ -307,21 +349,19 @@ namespace DCL
 
             delayedCall = () =>
             {
-                if (Time.realtimeSinceStartup - time < 2.0f)
+                if (Time.realtimeSinceStartup - time < .5f)
                     return;
 
                 EditorApplication.update -= delayedCall;
                 AssetDatabase.SaveAssets();
 
-                var manifest = BuildPipeline.BuildAssetBundles(finalAssetBundlePath, BuildAssetBundleOptions.UncompressedAssetBundle, BuildTarget.WebGL);
+                var manifest = BuildPipeline.BuildAssetBundles(finalAssetBundlePath, BuildAssetBundleOptions.UncompressedAssetBundle | BuildAssetBundleOptions.ForceRebuildAssetBundle, BuildTarget.WebGL);
 
                 if (manifest == null)
                 {
                     Debug.LogError("Error generating asset bundle!");
                     OnBundleBuildFinish?.Invoke();
-
-                    if (Application.isBatchMode)
-                        EditorApplication.Exit(1);
+                    Exit();
 
                     return;
                 }
@@ -364,22 +404,23 @@ namespace DCL
                     Debug.LogError("Error trying to delete AssetBundleManifest root files!\n" + e.Message);
                 }
 
-                try
+                if (deleteDownloadPathAfterFinished)
                 {
-                    if (Directory.Exists(finalDownloadedPath))
-                        Directory.Delete(finalDownloadedPath, true);
+                    try
+                    {
+                        if (Directory.Exists(finalDownloadedPath))
+                            Directory.Delete(finalDownloadedPath, true);
 
-                    AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
-                }
-                catch (Exception e)
-                {
-                    Debug.LogError("Error trying to delete Assets downloaded path!\n" + e.Message);
+                        AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogError("Error trying to delete Assets downloaded path!\n" + e.Message);
+                    }
                 }
 
                 OnBundleBuildFinish?.Invoke();
-
-                if (Application.isBatchMode)
-                    EditorApplication.Exit(0);
+                Exit();
             };
 
             AssetDatabase.Refresh();
@@ -422,7 +463,22 @@ namespace DCL
             }
         }
 
-        private static string PrepareUrlContents(DCL.ContentProvider contentProvider, Dictionary<string, MappingPair> filteredPairs, string hash, string additionalPath = "")
+        private static bool CheckContentUrlExists(DCL.ContentProvider contentProvider, Dictionary<string, MappingPair> filteredPairs, string hash)
+        {
+            string finalUrl = contentProvider.GetContentsUrl(filteredPairs[hash].file);
+
+            UnityWebRequest req = UnityWebRequest.Head(finalUrl);
+            req.SendWebRequest();
+
+            while (req.isDone == false) { }
+
+            if (req.WebRequestSucceded())
+                return true;
+
+            return false;
+        }
+
+        private static string DownloadAsset(DCL.ContentProvider contentProvider, Dictionary<string, MappingPair> filteredPairs, string hash, string additionalPath = "")
         {
             string fileExt = Path.GetExtension(filteredPairs[hash].file);
             string outputPath = finalDownloadedPath + additionalPath + hash + fileExt;
@@ -430,19 +486,28 @@ namespace DCL
             string finalUrl = contentProvider.GetContentsUrl(filteredPairs[hash].file);
             string hashLowercase = hash.ToLowerInvariant();
 
+            if (VERBOSE)
+                Debug.Log("checking against " + outputPath);
+
             if (File.Exists(outputPath))
             {
+                if (VERBOSE)
+                    Debug.Log("Skipping already generated asset: " + outputPath);
+
                 if (!hashLowercaseToHashProper.ContainsKey(hashLowercase))
                     hashLowercaseToHashProper.Add(hashLowercase, hash);
 
-                return null;
+                return finalDownloadedPath + additionalPath;
             }
 
             UnityWebRequest req = UnityWebRequest.Get(finalUrl);
             req.SendWebRequest();
             while (req.isDone == false) { }
 
-            if (req.isHttpError || req.isNetworkError)
+            if (VERBOSE)
+                Debug.Log("Downloaded asset = " + finalUrl);
+
+            if (!req.WebRequestSucceded())
                 return null;
 
             if (!Directory.Exists(outputPathDir))
