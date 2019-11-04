@@ -61,10 +61,14 @@ namespace DCL
 
         internal static bool ParseOption(string optionName, int argsQty, out string[] foundArgs)
         {
-            string[] args = Environment.GetCommandLineArgs();
+            return ParseOptionExplicit(Environment.GetCommandLineArgs(), optionName, argsQty, out foundArgs);
+        }
+
+        internal static bool ParseOptionExplicit(string[] rawArgsList, string optionName, int expectedArgsQty, out string[] foundArgs)
+        {
             foundArgs = null;
 
-            if (args.Length > argsQty + 1)
+            if (rawArgsList.Length > expectedArgsQty + 1)
             {
                 return false;
             }
@@ -72,21 +76,25 @@ namespace DCL
             var foundArgsList = new List<string>();
             int argState = 0;
 
-            for (int i = 0; i < args.Length - argsQty; i++)
+            for (int i = 0; i < rawArgsList.Length - expectedArgsQty; i++)
             {
                 switch (argState)
                 {
                     case 0:
-                        if (args[i] == "-" + optionName)
+                        if (rawArgsList[i] == "-" + optionName)
                         {
                             argState++;
                         }
                         break;
                     default:
-                        foundArgsList.Add(args[i]);
+                        foundArgsList.Add(rawArgsList[i]);
+                        argState++;
                         break;
                 }
             }
+
+            if (argState == 0)
+                return false;
 
             foundArgs = foundArgsList.ToArray();
             return true;

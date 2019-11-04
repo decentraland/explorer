@@ -32,6 +32,7 @@ namespace DCL
         internal static string ASSET_BUNDLES_PATH_ROOT = "/" + ASSET_BUNDLE_FOLDER_NAME + "/";
 
         private static bool deleteDownloadPathAfterFinished = true;
+        private static bool skipUploadedGltfs = true;
 
         internal static string finalAssetBundlePath = "";
         internal static string finalDownloadedPath = "";
@@ -98,6 +99,15 @@ namespace DCL
         {
             try
             {
+                skipUploadedGltfs = true;
+                deleteDownloadPathAfterFinished = true;
+
+                if (AssetBundleBuilderUtils.ParseOption("alwaysBuild", 0, out string[] noargs))
+                    skipUploadedGltfs = false;
+
+                if (AssetBundleBuilderUtils.ParseOption("keepBundles", 0, out string[] noargs2))
+                    deleteDownloadPathAfterFinished = false;
+
                 if (AssetBundleBuilderUtils.ParseOption("sceneCid", 1, out string[] sceneCid))
                 {
                     if (sceneCid == null || string.IsNullOrEmpty(sceneCid[0]))
@@ -236,12 +246,15 @@ namespace DCL
             {
                 string gltfHash = kvp.Key;
 
-                if (CheckContentUrlExists(contentProviderAB, hashToGltfPair, gltfHash))
+                if (skipUploadedGltfs)
                 {
-                    if (VERBOSE)
-                        Debug.Log("Skipping existing gltf: " + gltfHash);
+                    if (CheckContentUrlExists(contentProviderAB, hashToGltfPair, gltfHash))
+                    {
+                        if (VERBOSE)
+                            Debug.Log("Skipping existing gltf: " + gltfHash);
 
-                    continue;
+                        continue;
+                    }
                 }
 
                 PersistentAssetCache.ImageCacheByUri.Clear();
@@ -370,6 +383,7 @@ namespace DCL
                 string[] assetBundlePaths = new string[assetBundles.Length];
 
                 Debug.Log($"Total generated asset bundles: {assetBundles.Length}");
+
                 GenerateDependencyMaps(manifest);
 
                 for (int i = 0; i < assetBundles.Length; i++)
