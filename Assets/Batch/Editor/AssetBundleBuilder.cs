@@ -53,9 +53,12 @@ namespace DCL
 
             List<Vector2Int> coords = new List<Vector2Int>();
 
-            for (int x = 57; x < 69; x++)
+            int width = 2;
+            int height = 2;
+
+            for (int x = 64 - width; x < 64 + width; x++)
             {
-                for (int y = -70; y < -60; y++)
+                for (int y = -64 - height; y < -64 + height; y++)
                 {
                     coords.Add(new Vector2Int(x, y));
                 }
@@ -100,14 +103,17 @@ namespace DCL
             sceneCidsList = sceneCids.ToList();
             Debug.Log($"Building {sceneCidsList.Count} scenes...");
 
+            startTime = Time.realtimeSinceStartup;
             foreach (var v in sceneCidsList)
             {
                 ExportSceneToAssetBundles_Internal(v);
             }
 
             BuildAssetBundles();
+            OnBundleBuildFinish = () => { Debug.Log($"Conversion finished. [Time:{Time.realtimeSinceStartup - startTime}]"); };
         }
 
+        static float startTime;
         static List<string> sceneCidsList;
         static System.Action OnBundleBuildFinish = null;
         static Dictionary<string, string> hashLowercaseToHashProper = new Dictionary<string, string>();
@@ -286,8 +292,9 @@ namespace DCL
                         string relativePath = GetRelativePathTo(hashToGltfPair[gltfHash].file, mappingPair.file);
                         string fileExt = Path.GetExtension(mappingPair.file);
                         string outputPath = finalDownloadedAssetDbPath + mappingPair.hash + "/" + mappingPair.hash + fileExt;
+                        string realOutputPath = finalDownloadedPath + mappingPair.hash + "/" + mappingPair.hash + fileExt;
 
-                        if (File.Exists(outputPath))
+                        if (File.Exists(realOutputPath))
                         {
                             Texture2D t2d = AssetDatabase.LoadAssetAtPath<Texture2D>(outputPath);
 
@@ -307,10 +314,11 @@ namespace DCL
                         string relativePath = GetRelativePathTo(hashToGltfPair[gltfHash].file, mappingPair.file);
                         string fileExt = Path.GetExtension(mappingPair.file);
                         string outputPath = finalDownloadedAssetDbPath + mappingPair.hash + "/" + mappingPair.hash + fileExt;
+                        string realOutputPath = finalDownloadedPath + mappingPair.hash + "/" + mappingPair.hash + fileExt;
 
-                        if (File.Exists(outputPath))
+                        if (File.Exists(realOutputPath))
                         {
-                            Stream stream = File.OpenRead(outputPath);
+                            Stream stream = File.OpenRead(realOutputPath);
 
                             //NOTE(Brian): This cache will be used by the GLTF importer when seeking streams. This way the importer will
                             //             consume the asset bundle dependencies instead of trying to create new streams.
@@ -321,6 +329,9 @@ namespace DCL
 
                 //NOTE(Brian): Finally, load the gLTF. The GLTFImporter will use the PersistentAssetCache to resolve the external dependencies.
                 string path = PrepareUrlContents(contentProvider, hashToGltfPair, gltfHash, gltfHash + "/");
+
+                AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
+                AssetDatabase.SaveAssets();
 
                 if (path != null)
                 {
@@ -333,9 +344,6 @@ namespace DCL
                         streamsToDispose.Add(streamDataKvp.Value.stream);
                 }
             }
-
-            AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
-            AssetDatabase.SaveAssets();
 
             foreach (var kvp in pathsToTag)
             {

@@ -10,6 +10,7 @@ using UnityEditor;
 using UnityEditor.Experimental.AssetImporters;
 using UnityEngine;
 using UnityGLTF.Loader;
+using UnityGLTF.Cache;
 using Object = UnityEngine.Object;
 // using System.Threading.Tasks;
 
@@ -179,12 +180,14 @@ namespace UnityGLTF
 
                     Texture2D[] textures = null;
                     var texMaterialMap = new Dictionary<Texture2D, List<TexMaterialMap>>();
-                    _importTextures = true;
+
                     if (_importTextures)
                     {
                         // Get textures
                         var textureNames = new List<string>();
                         var textureHash = new HashSet<Texture2D>();
+                        Texture2D[] cachedTextures = PersistentAssetCache.ImageCacheByUri.Values.Select((x) => { return x.Texture; }).ToArray();
+
                         textures = materials.SelectMany(mat =>
                         {
                             var shader = mat.shader;
@@ -200,6 +203,10 @@ namespace UnityGLTF
                                 {
                                     var propertyName = ShaderUtil.GetPropertyName(shader, i);
                                     var tex = mat.GetTexture(propertyName) as Texture2D;
+
+                                    if (cachedTextures.Contains(tex))
+                                        continue;
+
                                     if (tex)
                                     {
                                         if (textureHash.Add(tex))
