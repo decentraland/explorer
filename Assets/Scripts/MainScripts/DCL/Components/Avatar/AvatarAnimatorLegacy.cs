@@ -160,4 +160,15 @@ public class AvatarAnimatorLegacy : MonoBehaviour
             Update();
         }
     }
+
+    public void Reset()
+    {
+        //It will set the animation to the first frame, but due to the nature of the script and its Update. It wont stop the animation from playing
+        animation.Stop();
+    }
+
+    public void SetIdleFrame()
+    {
+        animation.Play(clips.idle);
+    }
 }

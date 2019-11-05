@@ -22,6 +22,7 @@ TagManager:
   - Selection
   - Minimap
   - OnBuilderPointerClick
+  - CharacterPreview
   - 
   - 
   - 

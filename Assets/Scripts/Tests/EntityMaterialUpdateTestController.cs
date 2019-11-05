@@ -1,4 +1,4 @@
-using DCL;
+﻿using DCL;
 using DCL.Components;
 using DCL.Helpers;
 using DCL.Models;
@@ -18,13 +18,13 @@ public class EntityMaterialUpdateTestController : MonoBehaviour
 
         DCLTexture dclAtlasTexture = TestHelpers.CreateDCLTexture(
             scene,
-            TestHelpers.GetTestsAssetsPath() + "/Images/atlas.png",
+            Utils.GetTestsAssetsPath() + "/Images/atlas.png",
             DCLTexture.BabylonWrapMode.CLAMP,
             FilterMode.Bilinear);
 
         DCLTexture dclAvatarTexture = TestHelpers.CreateDCLTexture(
             scene,
-            TestHelpers.GetTestsAssetsPath() + "/Images/avatar.png",
+            Utils.GetTestsAssetsPath() + "/Images/avatar.png",
             DCLTexture.BabylonWrapMode.CLAMP,
             FilterMode.Bilinear);
 
@@ -45,7 +45,6 @@ public class EntityMaterialUpdateTestController : MonoBehaviour
                 albedoTexture = dclAvatarTexture.id,
                 metallic = 0,
                 roughness = 1,
-                hasAlpha = true
             },
             out entity);
 
@@ -68,7 +67,7 @@ public class EntityMaterialUpdateTestController : MonoBehaviour
         ColorUtility.TryParseHtmlString("#FF9292", out color1);
 
         // Update material attached to 2 entities, adding albedoColor
-        scene.SharedComponentUpdate(JsonUtility.ToJson(new SharedComponentUpdateMessage
+        scene.SharedComponentUpdate(m.id, JsonUtility.ToJson(new SharedComponentUpdateMessage
         {
             id = m.id,
             json = JsonUtility.ToJson(new DCL.Components.PBRMaterial.Model

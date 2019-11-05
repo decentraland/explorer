@@ -13,17 +13,21 @@ namespace DCL
 
     public class Pool : ICleanable
     {
+        public delegate void OnReleaseAllDlg(Pool pool);
+
+        public const int PREWARM_ACTIVE_MULTIPLIER = 2;
         public object id;
         public GameObject original;
         public GameObject container;
 
-        public System.Action<Pool> OnReleaseAll;
         public System.Action<Pool> OnCleanup;
 
         public IPooledObjectInstantiator instantiator;
 
-        private readonly List<PoolableObject> inactiveObjects = new List<PoolableObject>();
-        private readonly List<PoolableObject> activeObjects = new List<PoolableObject>();
+        private readonly LinkedList<PoolableObject> inactiveObjects = new LinkedList<PoolableObject>();
+        private readonly LinkedList<PoolableObject> activeObjects = new LinkedList<PoolableObject>();
+        private int maxPrewarmCount = 0;
+        private bool initializing = true;
 
         public float lastGetTime
         {
@@ -35,7 +39,10 @@ namespace DCL
 
         public int inactiveCount
         {
-            get { return inactiveObjects.Count; }
+            get
+            {
+                return inactiveObjects.Count;
+            }
         }
 
         public int activeCount
@@ -43,27 +50,95 @@ namespace DCL
             get { return activeObjects.Count; }
         }
 
-        public Pool(string name)
+        public Pool(string name, int maxPrewarmCount)
         {
             container = new GameObject("Pool - " + name);
+            this.maxPrewarmCount = maxPrewarmCount;
+            initializing = true;
+
+#if UNITY_EDITOR
+            Application.quitting += OnIsQuitting;
+#endif
+
+            if (RenderingController.i != null)
+                RenderingController.i.OnRenderingStateChanged += OnRenderingStateChanged;
+
         }
 
+        void OnRenderingStateChanged(bool renderingState)
+        {
+            if (renderingState)
+            {
+                if (RenderingController.i != null)
+                    RenderingController.i.OnRenderingStateChanged -= OnRenderingStateChanged;
+
+                initializing = false;
+            }
+        }
+
+        public void ForcePrewarm()
+        {
+            for (int i = 0; i < maxPrewarmCount; i++)
+                Instantiate();
+        }
 
         public PoolableObject Get()
         {
             PoolableObject poolable = null;
 
-            if (inactiveObjects.Count > 0)
-                poolable = inactiveObjects[0];
-            else
-                poolable = Instantiate();
+            if (initializing || inactiveObjects.Count == 0)
+            {
+                if (RenderingController.i != null)
+                {
+                    if (!RenderingController.i.renderingEnabled)
+                    {
+                        int count = activeCount;
+
+                        for (int i = inactiveCount; i < Mathf.Min(count * PREWARM_ACTIVE_MULTIPLIER, maxPrewarmCount); i++)
+                        {
+                            Instantiate();
+                        }
+                    }
+                }
+                Instantiate();
+            }
+            poolable = Extract();
 
             EnablePoolableObject(poolable);
 
             return poolable;
         }
 
-        private PoolableObject Instantiate()
+        private PoolableObject Extract()
+        {
+            PoolableObject po = inactiveObjects.First.Value;
+            inactiveObjects.RemoveFirst();
+            po.node = activeObjects.AddFirst(po);
+
+#if UNITY_EDITOR
+            RefreshName();
+#endif
+            return po;
+        }
+
+        private void Return(PoolableObject po)
+        {
+            inactiveObjects.AddFirst(po);
+            po.node.List.Remove(po.node);
+            po.node = null;
+
+#if UNITY_EDITOR
+            RefreshName();
+#endif
+        }
+
+        public PoolableObject Instantiate()
+        {
+            var gameObject = InstantiateAsOriginal();
+            return SetupPoolableObject(gameObject);
+        }
+
+        public GameObject InstantiateAsOriginal()
         {
             GameObject gameObject = null;
 
@@ -72,7 +147,7 @@ namespace DCL
             else
                 gameObject = GameObject.Instantiate(original);
 
-            return SetupPoolableObject(gameObject);
+            return gameObject;
         }
 
         private PoolableObject SetupPoolableObject(GameObject gameObject, bool active = false)
@@ -86,12 +161,17 @@ namespace DCL
             if (!active)
             {
                 DisablePoolableObject(poolable);
+                inactiveObjects.AddFirst(poolable);
             }
             else
             {
                 EnablePoolableObject(poolable);
+                poolable.node = activeObjects.AddFirst(poolable);
             }
 
+#if UNITY_EDITOR
+            RefreshName();
+#endif
             return poolable;
         }
 
@@ -102,18 +182,19 @@ namespace DCL
                 return;
 #endif
 
-            if (poolable == null || inactiveObjects.Contains(poolable))
+            if (poolable == null || poolable.isInsidePool)
                 return;
 
             DisablePoolableObject(poolable);
-#if UNITY_EDITOR
-            RefreshName();
-#endif
+            Return(poolable);
         }
 
         public void ReleaseAll()
         {
-            OnReleaseAll?.Invoke(this);
+            while (activeObjects.Count > 0)
+            {
+                activeObjects.First.Value.Release();
+            }
         }
 
         /// <summary>
@@ -156,24 +237,16 @@ namespace DCL
         {
             ReleaseAll();
 
+            while (inactiveObjects.Count > 0)
             {
-                int count = inactiveObjects.Count;
-
-                for (int i = 0; i < count; i++)
-                {
-                    if (inactiveObjects[i])
-                        Object.Destroy(inactiveObjects[i].gameObject);
-                }
+                Object.Destroy(inactiveObjects.First.Value);
+                inactiveObjects.RemoveFirst();
             }
 
+            while (activeObjects.Count > 0)
             {
-                int count = activeObjects.Count;
-
-                for (int i = 0; i < count; i++)
-                {
-                    if (activeObjects[i])
-                        Object.Destroy(activeObjects[i].gameObject);
-                }
+                Object.Destroy(activeObjects.First.Value);
+                activeObjects.RemoveFirst();
             }
 
             inactiveObjects.Clear();
@@ -184,6 +257,7 @@ namespace DCL
 
             OnCleanup?.Invoke(this);
 
+            RenderingController.i.OnRenderingStateChanged -= OnRenderingStateChanged;
         }
 
         public void EnablePoolableObject(PoolableObject poolable)
@@ -194,16 +268,7 @@ namespace DCL
                 poolable.gameObject.transform.SetParent(null);
             }
 
-            lastGetTime = Time.realtimeSinceStartup;
-
-            if (inactiveObjects.Contains(poolable))
-                inactiveObjects.Remove(poolable);
-
-            if (!activeObjects.Contains(poolable))
-                activeObjects.Add(poolable);
-#if UNITY_EDITOR
-            RefreshName();
-#endif
+            lastGetTime = Time.unscaledTime;
         }
 
         public void DisablePoolableObject(PoolableObject poolable)
@@ -222,16 +287,6 @@ namespace DCL
                     poolable.gameObject.transform.ResetLocalTRS();
                 }
             }
-
-            if (!inactiveObjects.Contains(poolable))
-                inactiveObjects.Add(poolable);
-
-            if (activeObjects.Contains(poolable))
-                activeObjects.Remove(poolable);
-
-#if UNITY_EDITOR
-            RefreshName();
-#endif
         }
 
         private void RefreshName()
@@ -263,30 +318,13 @@ namespace DCL
             return false;
         }
 
-        public bool IsInPool(PoolableObject po)
-        {
-            return inactiveObjects.Contains(po);
-        }
-
-        public bool IsOutOfPool(PoolableObject po)
-        {
-            return activeObjects.Contains(po);
-        }
-
-
 #if UNITY_EDITOR
         // In production it will always be false
         private bool isQuitting = false;
 
-
         // We need to check if application is quitting in editor
         // to prevent the pool from releasing objects that are
         // being destroyed 
-        void Awake()
-        {
-            Application.quitting += OnIsQuitting;
-        }
-
         void OnIsQuitting()
         {
             Application.quitting -= OnIsQuitting;

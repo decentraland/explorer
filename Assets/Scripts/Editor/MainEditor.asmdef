@@ -2,7 +2,8 @@
     "name": "MainEditor",
     "references": [
         "MainScripts",
-        "MainAttributes"
+        "MainAttributes",
+        "WebGLRetinaTools"
     ],
     "optionalUnityReferences": [],
     "includePlatforms": [
@@ -13,5 +14,6 @@
     "overrideReferences": false,
     "precompiledReferences": [],
     "autoReferenced": true,
-    "defineConstraints": []
+    "defineConstraints": [],
+    "versionDefines": []
 }

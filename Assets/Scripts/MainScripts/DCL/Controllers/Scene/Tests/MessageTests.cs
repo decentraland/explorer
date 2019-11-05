@@ -46,9 +46,10 @@ namespace Tests
                         {
                             entityId = entity.entityId,
                             classId = (int)CLASS_ID_COMPONENT.AVATAR_SHAPE,
-                            json = JsonUtility.ToJson(new AvatarShape.Model() { name = "test1", useDummyModel = false })
+                            json = JsonUtility.ToJson(new AvatarModel())
                         }
-                    ))
+                    )),
+                    enqueue: false
             );
 
             sceneController.SendSceneMessage(
@@ -61,16 +62,17 @@ namespace Tests
                         {
                             entityId = entity.entityId,
                             classId = (int)CLASS_ID_COMPONENT.AVATAR_SHAPE,
-                            json = JsonUtility.ToJson(new AvatarShape.Model() { name = "test2", useDummyModel = false })
+                            json = JsonUtility.ToJson(new AvatarModel())
                         }
-                    ))
+                    )),
+                    enqueue: false
             );
 
-            sceneController.OnMessageProcessInfoStart += delegate (string id, string method, string payload)
+            sceneController.OnMessageProcessInfoStart += delegate (string id, string method)
             {
                 if (VERBOSE)
                 {
-                    Debug.Log($"Msg Processed: {id} - {method} - {payload}");
+                    Debug.Log($"Msg Processed: {id} - {method} ");
                 }
             };
 
@@ -127,7 +129,7 @@ namespace Tests
 
             int msgId = 0;
 
-            sceneController.OnMessageProcessInfoStart += delegate (string id, string method, string payload)
+            sceneController.OnMessageProcessInfoStart += delegate (string id, string method)
             {
                 if (VERBOSE)
                 {
@@ -150,7 +152,8 @@ namespace Tests
                         new CreateEntityMessage
                         {
                             id = entityId
-                        }))
+                        })),
+                    enqueue: false
             );
 
             Assert.IsTrue(busId == MessagingBusId.UI);
@@ -164,7 +167,8 @@ namespace Tests
                         new CreateEntityMessage
                         {
                             id = entityId
-                        }))
+                        })),
+                    enqueue: false
             );
 
             Assert.IsTrue(busId == MessagingBusId.INIT);
@@ -180,7 +184,8 @@ namespace Tests
                             entityId = entityId,
                             classId = (int)CLASS_ID_COMPONENT.TRANSFORM,
                         }
-                    ))
+                    )),
+                    enqueue: false
             );
 
             Assert.IsTrue(busId == MessagingBusId.INIT);
@@ -196,7 +201,8 @@ namespace Tests
                             entityId = entityId,
                             classId = (int)CLASS_ID_COMPONENT.TRANSFORM,
                         }
-                    ))
+                    )),
+                    enqueue: false
             );
 
             Assert.IsTrue(busId == MessagingBusId.INIT);
@@ -212,7 +218,8 @@ namespace Tests
                             entityId = entityId,
                             classId = (int)CLASS_ID_COMPONENT.TRANSFORM,
                         }
-                    ))
+                    )),
+                    enqueue: false
             );
 
             Assert.IsTrue(busId == MessagingBusId.INIT);
@@ -223,7 +230,8 @@ namespace Tests
                     "",
                     MessagingTypes.INIT_DONE,
                     ""
-                )
+                ),
+                enqueue: false
             );
 
             Assert.IsTrue(busId == MessagingBusId.INIT);
@@ -239,7 +247,8 @@ namespace Tests
                             entityId = entityId,
                             parentId = "0"
                         })
-                )
+                ),
+                enqueue: false
             );
 
             Assert.IsTrue(busId == MessagingBusId.UI);
@@ -255,7 +264,8 @@ namespace Tests
                             entityId = entityId,
                             classId = (int)CLASS_ID_COMPONENT.TRANSFORM,
                         }
-                    ))
+                    )),
+                    enqueue: false
             );
 
             Assert.IsTrue(busId == MessagingBusId.SYSTEM);
@@ -271,7 +281,8 @@ namespace Tests
                             entityId = entityId,
                             parentId = "0"
                         })
-                )
+                ),
+                enqueue: false
             );
 
             Assert.IsTrue(busId == MessagingBusId.SYSTEM);
@@ -285,7 +296,8 @@ namespace Tests
                         new CreateEntityMessage
                         {
                             id = entityId
-                        }))
+                        })),
+                    enqueue: false
             );
 
             Assert.IsTrue(busId == MessagingBusId.UI);
@@ -299,7 +311,8 @@ namespace Tests
                         new CreateEntityMessage
                         {
                             id = entityId
-                        }))
+                        })),
+                    enqueue: false
             );
 
             Assert.IsTrue(busId == MessagingBusId.SYSTEM);
@@ -317,7 +330,8 @@ namespace Tests
                             entityId = entityId,
                             parentId = "0"
                         })
-                )
+                ),
+                enqueue: false
             );
 
             Assert.IsTrue(busId == MessagingBusId.UI);
@@ -333,7 +347,8 @@ namespace Tests
                             entityId = entityId,
                             parentId = "0"
                         })
-                )
+                ),
+                    enqueue: false
             );
 
             Assert.IsTrue(busId == MessagingBusId.SYSTEM);
@@ -347,7 +362,8 @@ namespace Tests
                         new CreateEntityMessage
                         {
                             id = entityId
-                        }))
+                        })),
+                    enqueue: false
             );
 
             Assert.IsTrue(busId == MessagingBusId.UI);
@@ -361,7 +377,8 @@ namespace Tests
                         new CreateEntityMessage
                         {
                             id = entityId
-                        }))
+                        })),
+                    enqueue: false
             );
 
             Assert.IsTrue(busId == MessagingBusId.SYSTEM);

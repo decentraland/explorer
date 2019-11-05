@@ -12,10 +12,10 @@ public class AvatarHUDView : MonoBehaviour
     private const string VIEW_OBJECT_NAME = "_AvatarHUD";
 
 
-    [SerializeField] private Sprite defaultSprite;
+    [SerializeField] private GameObject loadingAvatar;
 
     [Header("Minimized UI")]
-    [SerializeField] private Image topAvatarPic;
+    [SerializeField] private RawImage topAvatarPic;
 
     [SerializeField] private Button toggleExpandButton;
 
@@ -28,18 +28,25 @@ public class AvatarHUDView : MonoBehaviour
     [Header("Edit Avatar")]
     [SerializeField] private Button editAvatarButton;
 
+    [SerializeField] private GameObject newWearableNotification;
+    [SerializeField] private TextMeshProUGUI newWearableNotificationText;
+
     [Header("Sign Out")]
     [SerializeField] private Button signOutButton;
 
     private AvatarHUDController controller;
 
-
     private void Initialize(AvatarHUDController controller)
     {
         gameObject.name = VIEW_OBJECT_NAME;
+
         toggleExpandButton.onClick.AddListener(controller.ToggleExpanded);
+
         editAvatarButton.onClick.AddListener(controller.EditAvatar);
+        editAvatarButton.onClick.AddListener(controller.ToggleExpanded);
+
         signOutButton.onClick.AddListener(controller.SignOut);
+        signOutButton.onClick.AddListener(controller.ToggleExpanded);
     }
 
     internal static AvatarHUDView Create(AvatarHUDController controller)
@@ -51,9 +58,12 @@ public class AvatarHUDView : MonoBehaviour
 
     internal void UpdateData(AvatarHUDModel model)
     {
-        topAvatarPic.sprite = model.avatarPic ?? defaultSprite;
+        topAvatarPic.texture = model.avatarPic;
+        loadingAvatar.SetActive(topAvatarPic.texture == null);
         nameText.text = model.name;
         mailText.text = model.mail;
+        newWearableNotificationText.text = model.newWearables.ToString();
+        newWearableNotification.SetActive(model.newWearables != 0);
     }
 
     internal void SetVisibility(bool visibility)
@@ -64,5 +74,10 @@ public class AvatarHUDView : MonoBehaviour
     internal void SetExpanded(bool visibility)
     {
         expandedContainer.SetActive(visibility);
+    }
+
+    public void SetActive(bool active)
+    {
+        gameObject.SetActive(active);
     }
 }

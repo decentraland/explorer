@@ -3,6 +3,7 @@ using DCL.Helpers;
 using DCL.Interface;
 using DCL.Models;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -16,12 +17,6 @@ namespace DCL
 
         public bool startDecentralandAutomatically = true;
         public static bool VERBOSE = false;
-
-        private const float GLOBAL_MAX_MSG_BUDGET = 0.012f;
-        private const float GLTF_BUDGET_MAX = 0.012f;
-        private const float GLTF_BUDGET_MIN = 0.001f;
-
-        public const string GLOBAL_MESSAGING_CONTROLLER = "global_messaging_controller";
 
         [FormerlySerializedAs("factoryManifest")]
         public DCLComponentFactory componentFactory;
@@ -56,14 +51,15 @@ namespace DCL
 
         #endregion
 
+        public static Action OnDebugModeSet;
+
 #if UNITY_EDITOR
-        public delegate void ProcessDelegate(string sceneId, string method, string payload);
+        public delegate void ProcessDelegate(string sceneId, string method);
         public event ProcessDelegate OnMessageProcessInfoStart;
         public event ProcessDelegate OnMessageProcessInfoEnds;
 #endif
-        public Dictionary<string, MessagingController> messagingControllers = new Dictionary<string, MessagingController>();
-
-        private List<ParcelScene> scenesSortedByDistance = new List<ParcelScene>();
+        public List<ParcelScene> scenesSortedByDistance = new List<ParcelScene>();
+        private Queue<MessagingBus.QueuedSceneMessage_Scene> sceneMessagesPool = new Queue<MessagingBus.QueuedSceneMessage_Scene>();
 
         [System.NonSerialized]
         public bool isDebugMode;
@@ -71,39 +67,7 @@ namespace DCL
         [System.NonSerialized]
         public bool isWssDebugMode;
 
-        public bool hasPendingMessages => pendingMessagesCount > 0;
-
-        public int pendingMessagesCount
-        {
-            get
-            {
-                int total = 0;
-                using (var iterator = messagingControllers.GetEnumerator())
-                {
-                    while (iterator.MoveNext())
-                    {
-                        total += iterator.Current.Value.pendingMessagesCount;
-                    }
-                }
-                return total;
-            }
-        }
-
-        public int pendingInitMessagesCount
-        {
-            get
-            {
-                int total = 0;
-                using (var iterator = messagingControllers.GetEnumerator())
-                {
-                    while (iterator.MoveNext())
-                    {
-                        total += iterator.Current.Value.pendingInitMessagesCount;
-                    }
-                }
-                return total;
-            }
-        }
+        public bool hasPendingMessages => MessagingControllersManager.i.pendingMessagesCount > 0;
 
         public string GlobalSceneId
         {
@@ -125,6 +89,11 @@ namespace DCL
                 return;
             }
 
+            for (int i = 0; i < 100000; i++)
+            {
+                sceneMessagesPool.Enqueue(new MessagingBus.QueuedSceneMessage_Scene());
+            }
+
             i = this;
 
             PointerEventsController.i.Initialize();
@@ -135,65 +104,44 @@ namespace DCL
             Debug.unityLogger.logEnabled = false;
 #endif
 
-            messagingControllers[GLOBAL_MESSAGING_CONTROLLER] = new MessagingController(this, GLOBAL_MESSAGING_CONTROLLER);
+            MessagingControllersManager.i.Initialize(this);
 
             // We trigger the Decentraland logic once SceneController has been instanced and is ready to act.
             if (startDecentralandAutomatically)
             {
                 WebInterface.StartDecentraland();
             }
+
+            ParcelScene.parcelScenesCleaner.Start();
+
+            StartCoroutine(DeferredDecoding());
+        }
+
+        void OnDestroy()
+        {
+            ParcelScene.parcelScenesCleaner.Stop();
         }
 
         private void Update()
         {
             InputController.i.Update();
 
-            float prevTimeBudget = GLOBAL_MAX_MSG_BUDGET;
-
             PrioritizeMessageControllerList();
 
-            // First we process Load/Unload scene messages
-            prevTimeBudget -= messagingControllers[GLOBAL_MESSAGING_CONTROLLER].UpdateThrottling(prevTimeBudget);
-
-            // If we already have a messaging controller for global scene,
-            // we update throttling
-            if (!string.IsNullOrEmpty(globalSceneId) && messagingControllers.ContainsKey(globalSceneId))
-                prevTimeBudget -= messagingControllers[globalSceneId].UpdateThrottling(prevTimeBudget);
-
-            // Update throttling to the rest of the messaging controllers
-            for (int i = 0; i < scenesSortedByDistance.Count; i++)
-            {
-                ParcelScene scene = scenesSortedByDistance[i];
-                prevTimeBudget -= messagingControllers[scene.sceneData.id].UpdateThrottling(prevTimeBudget);
-            }
-
-            if (pendingInitMessagesCount == 0)
-            {
-                UnityGLTF.GLTFSceneImporter.budgetPerFrameInMilliseconds = Mathf.Clamp(GLTF_BUDGET_MAX - prevTimeBudget, GLTF_BUDGET_MIN, GLTF_BUDGET_MAX) * 1000f;
-            }
-            else
-            {
-                UnityGLTF.GLTFSceneImporter.budgetPerFrameInMilliseconds = 0;
-            }
+            MessagingControllersManager.i.UpdateThrottling();
         }
 
         private void PrioritizeMessageControllerList(bool force = false)
         {
-            if (force || Time.unscaledTime - lastTimeMessageControllerSorted >= SORT_MESSAGE_CONTROLLER_TIME)
+            if (force || DCLTime.realtimeSinceStartup - lastTimeMessageControllerSorted >= SORT_MESSAGE_CONTROLLER_TIME)
             {
-                lastTimeMessageControllerSorted = Time.unscaledDeltaTime;
+                lastTimeMessageControllerSorted = DCLTime.realtimeSinceStartup;
                 scenesSortedByDistance.Sort(SceneMessagingSortByDistance);
             }
         }
 
         private int SceneMessagingSortByDistance(ParcelScene sceneA, ParcelScene sceneB)
         {
-            if (sceneA.IsInsideSceneBoundaries(DCLCharacterController.i.characterPosition.worldPosition))
-                return -1;
-
-            if (sceneB.IsInsideSceneBoundaries(DCLCharacterController.i.characterPosition.worldPosition))
-                return 1;
-
             int dist1 = (int)(sceneA.transform.position - DCLCharacterController.i.transform.position).sqrMagnitude;
             int dist2 = (int)(sceneB.transform.position - DCLCharacterController.i.transform.position).sqrMagnitude;
 
@@ -231,8 +179,8 @@ namespace DCL
 
                 globalSceneId = uiSceneId;
 
-                if (!messagingControllers.ContainsKey(globalSceneId))
-                    messagingControllers[globalSceneId] = new MessagingController(this, globalSceneId);
+                if (!MessagingControllersManager.i.ContainsController(globalSceneId))
+                    MessagingControllersManager.i.AddController(this, globalSceneId, isGlobal: true);
 
                 if (VERBOSE)
                 {
@@ -247,6 +195,8 @@ namespace DCL
 
             isDebugMode = true;
             fpsPanel.SetActive(true);
+
+            OnDebugModeSet?.Invoke();
         }
 
         public void SetSceneDebugPanel()
@@ -346,8 +296,8 @@ namespace DCL
 
                 scenesSortedByDistance.Add(newScene);
 
-                if (!messagingControllers.ContainsKey(newScene.sceneData.id))
-                    messagingControllers[newScene.sceneData.id] = new MessagingController(this, newScene.sceneData.id);
+                if (!MessagingControllersManager.i.ContainsController(newScene.sceneData.id))
+                    MessagingControllersManager.i.AddController(this, newScene.sceneData.id);
 
                 PrioritizeMessageControllerList(force: true);
 
@@ -404,10 +354,10 @@ namespace DCL
 
             OnMessageWillQueue?.Invoke(MessagingTypes.SCENE_DESTROY);
 
-            messagingControllers[GLOBAL_MESSAGING_CONTROLLER].ForceEnqueue(MessagingBusId.INIT, queuedMessage);
+            MessagingControllersManager.i.ForceEnqueueToGlobal(MessagingBusId.INIT, queuedMessage);
 
-            if (messagingControllers.ContainsKey(sceneKey))
-                messagingControllers[sceneKey].Stop();
+            if (MessagingControllersManager.i.ContainsController(sceneKey))
+                MessagingControllersManager.i.RemoveController(sceneKey);
         }
 
         public void UnloadParcelSceneExecute(string sceneKey)
@@ -428,12 +378,8 @@ namespace DCL
             scenesSortedByDistance.Remove(scene);
 
             // Remove messaging controller for unloaded scene
-            if (messagingControllers.ContainsKey(scene.sceneData.id))
-            {
-                // We need to dispose the messaging controller to stop bus coroutines
-                messagingControllers[scene.sceneData.id].Dispose();
-                messagingControllers.Remove(scene.sceneData.id);
-            }
+            if (MessagingControllersManager.i.ContainsController(scene.sceneData.id))
+                MessagingControllersManager.i.RemoveController(scene.sceneData.id);
 
             if (scene)
             {
@@ -464,7 +410,7 @@ namespace DCL
 
             OnMessageWillQueue?.Invoke(MessagingTypes.SCENE_LOAD);
 
-            messagingControllers[GLOBAL_MESSAGING_CONTROLLER].ForceEnqueue(MessagingBusId.INIT, queuedMessage);
+            MessagingControllersManager.i.ForceEnqueueToGlobal(MessagingBusId.INIT, queuedMessage);
 
             if (VERBOSE)
                 Debug.Log($"{Time.frameCount} : Load parcel scene queue {decentralandSceneJSON}");
@@ -478,7 +424,7 @@ namespace DCL
 
             OnMessageWillQueue?.Invoke(MessagingTypes.SCENE_UPDATE);
 
-            messagingControllers[GLOBAL_MESSAGING_CONTROLLER].ForceEnqueue(MessagingBusId.INIT, queuedMessage);
+            MessagingControllersManager.i.ForceEnqueueToGlobal(MessagingBusId.INIT, queuedMessage);
         }
 
         public void UnloadAllScenesQueued()
@@ -487,86 +433,94 @@ namespace DCL
 
             OnMessageWillQueue?.Invoke(MessagingTypes.SCENE_DESTROY);
 
-            messagingControllers[GLOBAL_MESSAGING_CONTROLLER].ForceEnqueue(MessagingBusId.INIT, queuedMessage);
+            MessagingControllersManager.i.ForceEnqueueToGlobal(MessagingBusId.INIT, queuedMessage);
         }
 
         public string SendSceneMessage(string payload)
         {
-            string busId = "none";
+            return SendSceneMessage(payload, true);
+        }
 
-            OnMessageDecodeStart?.Invoke("Misc");
-            var chunks = payload.Split('\n');
-            OnMessageDecodeEnds?.Invoke("Misc");
+        public string SendSceneMessage(string payload, bool enqueue)
+        {
+            string[] chunks = payload.Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            int count = chunks.Length;
+            string lastBusId = null;
 
-            for (int i = 0; i < chunks.Length; i++)
+            for (int i = 0; i < count; i++)
             {
-                if (chunks[i].Length > 0)
+                if (RenderingController.i.renderingEnabled && enqueue)
                 {
-                    string sceneId;
-                    string message;
-                    string tag;
-
-                    if (!DecodePayloadChunk(chunks[i], out sceneId, out message, out tag))
-                    {
-                        continue;
-                    }
-
-                    var queuedMessage = DecodeSceneMessage(sceneId, message, tag);
-
-                    busId = EnqueueMessage(queuedMessage);
+                    payloadsToDecode.Enqueue(chunks[i]);
+                }
+                else
+                {
+                    lastBusId = DecodeAndEnqueue(chunks[i]);
                 }
             }
-            return busId;
+
+            return lastBusId;
         }
 
-        private bool DecodePayloadChunk(string chunk, out string sceneId, out string message, out string tag)
+        private string DecodeAndEnqueue(string payload)
         {
             OnMessageDecodeStart?.Invoke("Misc");
 
-            sceneId = message = tag = null;
+            string sceneId;
+            string message;
+            string messageTag;
+            PB_SendSceneMessage sendSceneMessage;
 
-            var separatorPosition = chunk.IndexOf('\t');
-
-            if (separatorPosition == -1)
+            if (!MessageDecoder.DecodePayloadChunk(payload, out sceneId, out message, out messageTag, out sendSceneMessage))
             {
-                OnMessageDecodeEnds?.Invoke("Misc");
-
-                return false;
+                return null;
             }
 
-            sceneId = chunk.Substring(0, separatorPosition);
+            MessagingBus.QueuedSceneMessage_Scene queuedMessage;
 
-            var lastPosition = separatorPosition + 1;
-            separatorPosition = chunk.IndexOf('\t', lastPosition);
+            if (sceneMessagesPool.Count > 0)
+                queuedMessage = sceneMessagesPool.Dequeue();
+            else
+                queuedMessage = new MessagingBus.QueuedSceneMessage_Scene();
 
-            message = chunk.Substring(lastPosition, separatorPosition - lastPosition);
-            lastPosition = separatorPosition + 1;
-
-            separatorPosition = chunk.IndexOf('\t', lastPosition);
-
-            message += '\t' + chunk.Substring(lastPosition, separatorPosition - lastPosition);
-            lastPosition = separatorPosition + 1;
-
-            tag = chunk.Substring(lastPosition);
+            MessageDecoder.DecodeSceneMessage(sceneId, message, messageTag, sendSceneMessage, ref queuedMessage);
+            EnqueueMessage(queuedMessage);
 
             OnMessageDecodeEnds?.Invoke("Misc");
 
-            return true;
+            return "";
         }
 
-        private MessagingBus.QueuedSceneMessage_Scene DecodeSceneMessage(string sceneId, string message, string tag)
+        Queue<string> payloadsToDecode = new Queue<string>();
+        const float MAX_TIME_FOR_DECODE = 0.033f;
+        const float MIN_TIME_FOR_DECODE = 0.008f;
+        float maxTimeForDecode = MAX_TIME_FOR_DECODE;
+        float secsPerThousandMsgs = 0.0075f;
+        private IEnumerator DeferredDecoding()
         {
-            var queuedMessage = new MessagingBus.QueuedSceneMessage_Scene()
-            { type = MessagingBus.QueuedSceneMessage.Type.SCENE_MESSAGE, sceneId = sceneId, message = message, tag = tag };
+            float lastTimeDecoded = Time.unscaledTime;
 
-            OnMessageDecodeStart?.Invoke("Misc");
-            var queuedMessageSeparatorIndex = queuedMessage.message.IndexOf('\t');
+            while (true)
+            {
+                if (payloadsToDecode.Count > 0)
+                {
+                    string payload = payloadsToDecode.Dequeue();
 
-            queuedMessage.method = queuedMessage.message.Substring(0, queuedMessageSeparatorIndex);
-            queuedMessage.payload = queuedMessage.message.Substring(queuedMessageSeparatorIndex + 1);
-            OnMessageDecodeEnds?.Invoke("Misc");
+                    DecodeAndEnqueue(payload);
 
-            return queuedMessage;
+                    if (Time.realtimeSinceStartup - lastTimeDecoded >= maxTimeForDecode)
+                    {
+                        yield return null;
+                        maxTimeForDecode = Mathf.Clamp(MIN_TIME_FOR_DECODE + (float)payloadsToDecode.Count / 1000.0f * secsPerThousandMsgs, MIN_TIME_FOR_DECODE, MAX_TIME_FOR_DECODE);
+                        lastTimeDecoded = Time.unscaledTime;
+                    }
+                }
+                else
+                {
+                    yield return null;
+                    lastTimeDecoded = Time.unscaledTime;
+                }
+            }
         }
 
         private string EnqueueMessage(MessagingBus.QueuedSceneMessage_Scene queuedMessage)
@@ -579,19 +533,26 @@ namespace DCL
                 scene = loadedScenes[queuedMessage.sceneId];
 
             // If it doesn't exist, create messaging controller for this scene id
-            if (!messagingControllers.ContainsKey(queuedMessage.sceneId))
-                messagingControllers[queuedMessage.sceneId] = new MessagingController(this, queuedMessage.sceneId);
+            if (!MessagingControllersManager.i.ContainsController(queuedMessage.sceneId))
+                MessagingControllersManager.i.AddController(this, queuedMessage.sceneId);
 
-            busId = messagingControllers[queuedMessage.sceneId].Enqueue(scene, queuedMessage);
+            busId = MessagingControllersManager.i.Enqueue(scene, queuedMessage);
 
             return busId;
+
         }
 
-        public bool ProcessMessage(string sceneId, string tag, string method, string payload, out CleanableYieldInstruction yieldInstruction)
+        public bool ProcessMessage(MessagingBus.QueuedSceneMessage_Scene msgObject, out CleanableYieldInstruction yieldInstruction)
         {
+            string sceneId = msgObject.sceneId;
+            string tag = msgObject.tag;
+            string method = msgObject.method;
+            DCL.Interface.PB_SendSceneMessage payload = msgObject.payload;
+
             yieldInstruction = null;
 
             ParcelScene scene;
+            bool res = false;
 
             if (loadedScenes.TryGetValue(sceneId, out scene))
             {
@@ -615,38 +576,38 @@ namespace DCL
                 }
 
 #if UNITY_EDITOR
-                OnMessageProcessInfoStart?.Invoke(sceneId, method, payload);
+                OnMessageProcessInfoStart?.Invoke(sceneId, method);
 #endif
                 OnMessageProcessStart?.Invoke(method);
                 switch (method)
                 {
                     case MessagingTypes.ENTITY_CREATE:
-                        scene.CreateEntity(tag, payload);
+                        scene.CreateEntity(tag);
                         break;
                     case MessagingTypes.ENTITY_REPARENT:
-                        scene.SetEntityParent(payload);
+                        scene.SetEntityParent(payload.SetEntityParent.EntityId, payload.SetEntityParent.ParentId);
                         break;
 
                     //NOTE(Brian): EntityComponent messages
                     case MessagingTypes.ENTITY_COMPONENT_CREATE_OR_UPDATE:
-                        scene.EntityComponentCreateOrUpdate(payload, out yieldInstruction);
+                        scene.EntityComponentCreateOrUpdate(payload.UpdateEntityComponent.EntityId, payload.UpdateEntityComponent.Name, payload.UpdateEntityComponent.ClassId, payload.UpdateEntityComponent.Data, out yieldInstruction);
                         break;
                     case MessagingTypes.ENTITY_COMPONENT_DESTROY:
-                        scene.EntityComponentRemove(payload);
+                        scene.EntityComponentRemove(payload.ComponentRemoved.EntityId, payload.ComponentRemoved.Name);
                         break;
 
                     //NOTE(Brian): SharedComponent messages
                     case MessagingTypes.SHARED_COMPONENT_ATTACH:
-                        scene.SharedComponentAttach(payload);
+                        scene.SharedComponentAttach(payload.AttachEntityComponent.EntityId, payload.AttachEntityComponent.Id, payload.AttachEntityComponent.Name);
                         break;
                     case MessagingTypes.SHARED_COMPONENT_CREATE:
-                        scene.SharedComponentCreate(payload);
+                        scene.SharedComponentCreate(payload.ComponentCreated.Id, payload.ComponentCreated.Name, payload.ComponentCreated.Classid);
                         break;
                     case MessagingTypes.SHARED_COMPONENT_DISPOSE:
-                        scene.SharedComponentDispose(payload);
+                        scene.SharedComponentDispose(payload.ComponentDisposed.Id);
                         break;
                     case MessagingTypes.SHARED_COMPONENT_UPDATE:
-                        scene.SharedComponentUpdate(payload, out yieldInstruction);
+                        scene.SharedComponentUpdate(payload.ComponentUpdated.Id, payload.ComponentUpdated.Json, out yieldInstruction);
                         break;
                     case MessagingTypes.ENTITY_DESTROY:
                         scene.RemoveEntity(tag);
@@ -655,7 +616,7 @@ namespace DCL
                         scene.SetInitMessagesDone();
                         break;
                     case MessagingTypes.QUERY:
-                        ParseQuery(payload, scene.sceneData.id);
+                        ParseQuery(payload.Query.QueryId, payload.Query.Payload, scene.sceneData.id);
                         break;
                     default:
                         Debug.LogError($"Unknown method {method}");
@@ -665,15 +626,20 @@ namespace DCL
                 OnMessageProcessEnds?.Invoke(method);
 
 #if UNITY_EDITOR
-                OnMessageProcessInfoEnds?.Invoke(sceneId, method, payload);
+                OnMessageProcessInfoEnds?.Invoke(sceneId, method);
 #endif
 
-                return true;
+                res = true;
             }
+
             else
             {
-                return false;
+                res = false;
             }
+
+            sceneMessagesPool.Enqueue(msgObject);
+
+            return res;
         }
 
         public Vector3 ConvertUnityToScenePosition(Vector3 pos, ParcelScene scene = null)
@@ -692,10 +658,11 @@ namespace DCL
             return worldPosition - Utils.GridToWorldPosition(scene.sceneData.basePosition.x, scene.sceneData.basePosition.y);
         }
 
-        public void ParseQuery(string payload, string sceneId)
+        public void ParseQuery(string queryId, string payload, string sceneId)
         {
             QueryMessage query = new QueryMessage();
-            query.FromJSON(payload);
+
+            MessageDecoder.DecodeQueryMessage(queryId, payload, ref query);
 
             ParcelScene scene = loadedScenes[sceneId];
 
@@ -751,10 +718,8 @@ namespace DCL
 
             scenesSortedByDistance.Add(newScene);
 
-            if (!messagingControllers.ContainsKey(data.id))
-            {
-                messagingControllers[data.id] = new MessagingController(this, data.id);
-            }
+            if (!MessagingControllersManager.i.ContainsController(data.id))
+                MessagingControllersManager.i.AddController(this, data.id);
 
             if (!loadedScenes.ContainsKey(data.id))
             {
@@ -772,15 +737,7 @@ namespace DCL
         {
             readyScenes.Add(sceneId);
 
-            // Start processing SYSTEM queue
-            if (messagingControllers.ContainsKey(sceneId))
-            {
-                // Start processing SYSTEM queue 
-                MessagingController sceneMessagingController = messagingControllers[sceneId];
-                sceneMessagingController.StartBus(MessagingBusId.SYSTEM);
-                sceneMessagingController.StartBus(MessagingBusId.UI);
-                sceneMessagingController.StopBus(MessagingBusId.INIT);
-            }
+            MessagingControllersManager.i.SetSceneReady(sceneId);
 
             WebInterface.ReportControlEvent(new WebInterface.SceneReady(sceneId));
         }

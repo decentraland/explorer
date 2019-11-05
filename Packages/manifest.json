@@ -1,8 +1,9 @@
 {
   "dependencies": {
+    "com.unity.test-framework.performance": "1.1.2-preview",
     "com.unity.cinemachine": "2.3.3",
     "com.unity.package-manager-ui": "2.1.2",
-    "com.unity.performance.profile-analyzer": "0.4.0-preview.5",
+    "com.unity.performance.profile-analyzer": "0.5.0-preview.1",
     "com.unity.postprocessing": "2.1.7",
     "com.unity.render-pipelines.lightweight": "5.16.1",
     "com.unity.textmeshpro": "2.0.1",
@@ -34,5 +35,8 @@
     "com.unity.modules.video": "1.0.0",
     "com.unity.modules.vr": "1.0.0",
     "com.unity.modules.xr": "1.0.0"
-  }
+  },
+  "testables": [
+    "com.unity.test-framework.performance"
+  ]
 }

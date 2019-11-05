@@ -35,7 +35,6 @@ namespace DCL.Interface
             public string id;
         }
 
-
         [System.Serializable]
         public abstract class ControlEvent
         {
@@ -44,8 +43,8 @@ namespace DCL.Interface
 
         public abstract class ControlEvent<T> : ControlEvent
         {
-
             public T payload;
+
             protected ControlEvent(string eventType, T payload)
             {
                 this.eventType = eventType;
@@ -104,13 +103,11 @@ namespace DCL.Interface
         {
         };
 
-
         [System.Serializable]
         public class OnGlobalPointerEvent
         {
             public OnGlobalPointerEventPayload payload = new OnGlobalPointerEventPayload();
         };
-
 
         [System.Serializable]
         public class OnPointerUpEvent : UUIDEvent<OnPointerEventPayload>
@@ -123,7 +120,12 @@ namespace DCL.Interface
         };
 
         [System.Serializable]
-        private class OnChangeEvent : UUIDEvent<OnChangeEventPayload>
+        private class OnTextInputChangeEvent : UUIDEvent<OnTextInputChangeEventPayload>
+        {
+        };
+
+        [System.Serializable]
+        private class OnScrollChangeEvent : UUIDEvent<OnScrollChangeEventPayload>
         {
         };
 
@@ -189,9 +191,15 @@ namespace DCL.Interface
         }
 
         [System.Serializable]
-        public class OnChangeEventPayload
+        public class OnTextInputChangeEventPayload
         {
-            public object value;
+            public string value;
+        }
+
+        [System.Serializable]
+        public class OnScrollChangeEventPayload
+        {
+            public Vector2 value;
             public int pointerId;
         }
 
@@ -266,7 +274,6 @@ namespace DCL.Interface
             public Vector3 hitNormal;
         }
 
-
         [System.Serializable]
         public class HitEntityInfo
         {
@@ -331,6 +338,12 @@ namespace DCL.Interface
         }
 #endif
 
+        public static void SendMessage(string type)
+        {
+            // sending an empty JSON object to be compatible with other messages
+            MessageFromEngine(type, "{}");
+        }
+
         public static void SendMessage<T>(string type, T message)
         {
             string messageJson = JsonUtility.ToJson(message);
@@ -349,7 +362,8 @@ namespace DCL.Interface
         private static OnPointerDownEvent onPointerDownEvent = new OnPointerDownEvent();
         private static OnPointerUpEvent onPointerUpEvent = new OnPointerUpEvent();
         private static OnTextSubmitEvent onTextSubmitEvent = new OnTextSubmitEvent();
-        private static OnChangeEvent onChangeEvent = new OnChangeEvent();
+        private static OnTextInputChangeEvent onTextInputChangeEvent = new OnTextInputChangeEvent();
+        private static OnScrollChangeEvent onScrollChangeEvent = new OnScrollChangeEvent();
         private static OnFocusEvent onFocusEvent = new OnFocusEvent();
         private static OnBlurEvent onBlurEvent = new OnBlurEvent();
         private static OnEnterEvent onEnterEvent = new OnEnterEvent();
@@ -502,6 +516,19 @@ namespace DCL.Interface
             SendSceneEvent(sceneId, "uuidEvent", onTextSubmitEvent);
         }
 
+        public static void ReportOnTextInputChangedEvent(string sceneId, string uuid, string text)
+        {
+            if (string.IsNullOrEmpty(uuid))
+            {
+                return;
+            }
+
+            onTextInputChangeEvent.uuid = uuid;
+            onTextInputChangeEvent.payload.value = text;
+
+            SendSceneEvent(sceneId, "uuidEvent", onTextInputChangeEvent);
+        }
+
         public static void ReportOnFocusEvent(string sceneId, string uuid)
         {
             if (string.IsNullOrEmpty(uuid))
@@ -524,20 +551,6 @@ namespace DCL.Interface
             SendSceneEvent(sceneId, "uuidEvent", onBlurEvent);
         }
 
-        public static void ReportOnChangedEvent(string sceneId, string uuid, string text, int pointerId)
-        {
-            if (string.IsNullOrEmpty(uuid))
-            {
-                return;
-            }
-
-            onChangeEvent.uuid = uuid;
-            onChangeEvent.payload.value = text;
-            onChangeEvent.payload.pointerId = pointerId;
-
-            SendSceneEvent(sceneId, "uuidEvent", onChangeEvent);
-        }
-
         public static void ReportOnScrollChange(string sceneId, string uuid, Vector2 value, int pointerId)
         {
             if (string.IsNullOrEmpty(uuid))
@@ -545,11 +558,11 @@ namespace DCL.Interface
                 return;
             }
 
-            onChangeEvent.uuid = uuid;
-            onChangeEvent.payload.value = value;
-            onChangeEvent.payload.pointerId = pointerId;
+            onScrollChangeEvent.uuid = uuid;
+            onScrollChangeEvent.payload.value = value;
+            onScrollChangeEvent.payload.pointerId = pointerId;
 
-            SendSceneEvent(sceneId, "uuidEvent", onChangeEvent);
+            SendSceneEvent(sceneId, "uuidEvent", onScrollChangeEvent);
         }
 
         public static void ReportEvent<T>(string sceneId, T @event)
@@ -579,7 +592,7 @@ namespace DCL.Interface
 
         public static void LogOut()
         {
-            SendMessage("LogOut", string.Empty);
+            SendMessage("LogOut");
         }
 
         public static void PreloadFinished(string sceneId)
@@ -619,6 +632,36 @@ namespace DCL.Interface
             onSendScreenshot.encodedTexture = encodedTexture;
             onSendScreenshot.id = id;
             SendMessage("SendScreenshot", onSendScreenshot);
+        }
+
+        public static void ReportEditAvatarClicked()
+        {
+            SendMessage("EditAvatarClicked");
+        }
+
+        [System.Serializable]
+        public class SaveAvatarPayload
+        {
+            public string face;
+            public string body;
+            public AvatarModel avatar;
+        }
+
+        public static void SendSaveAvatar(AvatarModel avatar, Texture2D faceSnapshot, Texture2D bodySnapshot)
+        {
+            var payload = new SaveAvatarPayload()
+            {
+                avatar = avatar,
+                face = System.Convert.ToBase64String(faceSnapshot.EncodeToPNG()),
+                body = System.Convert.ToBase64String(bodySnapshot.EncodeToPNG())
+            };
+            WebInterface.SendMessage("SaveUserAvatar", payload);
+        }
+
+        public static void SendPerformanceReport(string encodedFrameTimesInMS)
+        {
+            WebInterface.MessageFromEngine("PerformanceReport", encodedFrameTimesInMS);
+
         }
     }
 }

@@ -114,7 +114,7 @@ namespace Builder
                 {
                     AssetPromise_GLTF gltfPromise = new AssetPromise_GLTF(currentScene.contentProvider, file);
                     gltfPromise.settings.visibleFlags = AssetPromise_GLTF.VisibleFlags.INVISIBLE;
-                    gltfPromise.settings.instantiate = false;
+                    gltfPromise.settings.forceNewInstance = false;
                     AssetPromiseKeeper_GLTF.i.Keep(gltfPromise);
                 }
             }
@@ -494,7 +494,6 @@ namespace Builder
             if (go) Destroy(go.gameObject);
             go = GameObject.Find("_MinimapHUD");
             if (go) Destroy(go.gameObject);
-
         }
     }
 }

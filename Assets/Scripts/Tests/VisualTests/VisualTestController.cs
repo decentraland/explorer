@@ -47,7 +47,7 @@ public class VisualTestController : MonoBehaviour
         yield return null;
 
         var scene = sceneController.loadedScenes["0,0"];
-        string textureUrl = TestHelpers.GetTestsAssetsPath() + "/Images/atlas.png";
+        string textureUrl = DCL.Helpers.Utils.GetTestsAssetsPath() + "/Images/atlas.png";
 
         TestHelpers.InstantiateEntityWithMaterial(scene, "1", new Vector3(-3, 1, 3),
             new DCL.Components.BasicMaterial.Model
@@ -60,7 +60,6 @@ public class VisualTestController : MonoBehaviour
             albedoTexture = textureUrl,
             metallic = 0,
             roughness = 1,
-            hasAlpha = true
         }, "testMaterial1");
 
         string materialID = "testMaterial2";
@@ -77,17 +76,16 @@ public class VisualTestController : MonoBehaviour
 
         string entityId = "4";
 
-        scene.SharedComponentAttach(JsonUtility.ToJson(new DCL.Models.SharedComponentAttachMessage
-        {
-            entityId = entityId,
-            id = materialID,
-            name = "material"
-        }));
+        scene.SharedComponentAttach(
+            entityId,
+            materialID,
+            "material"
+        );
 
         Color color = new Color(1, 0.7f, 0.7f);
 
         // Update material attached to 2 entities, adding albedoColor
-        scene.SharedComponentUpdate(JsonUtility.ToJson(new DCL.Models.SharedComponentUpdateMessage
+        scene.SharedComponentUpdate(materialID, JsonUtility.ToJson(new DCL.Models.SharedComponentUpdateMessage
         {
             id = materialID,
             json = JsonUtility.ToJson(new DCL.Components.PBRMaterial.Model

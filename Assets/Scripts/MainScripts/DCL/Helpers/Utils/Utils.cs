@@ -349,5 +349,30 @@ namespace DCL.Helpers
 
             return bounds;
         }
+
+        public static string GetTestsAssetsPath(bool useWebServerPath = false)
+        {
+            if (useWebServerPath)
+            {
+                return "http://127.0.0.1:9991";
+            }
+            else
+            {
+                var uri = new System.Uri(Application.dataPath + "/../TestResources");
+                var converted = uri.AbsoluteUri;
+                return converted;
+            }
+        }
+
+        public static bool AproxComparison(this Color color1, Color color2, float tolerance = 0.01f) // tolerance of roughly 1f / 255f 
+        {
+            if (Mathf.Abs(color1.r - color2.r) < tolerance
+                && Mathf.Abs(color1.g - color2.g) < tolerance
+                && Mathf.Abs(color1.b - color2.b) < tolerance)
+            {
+                return true;
+            }
+            return false;
+        }
     }
 }

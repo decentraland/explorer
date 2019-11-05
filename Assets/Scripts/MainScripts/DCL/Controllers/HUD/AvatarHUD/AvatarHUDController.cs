@@ -1,11 +1,13 @@
 using UnityEngine;
 
-public class AvatarHUDController
+public class AvatarHUDController : IHUD
 {
     private AvatarHUDView view;
     public AvatarHUDModel model { get; private set; }
     public bool visibility { get; private set; }
     public bool expanded { get; private set; }
+
+    public event System.Action OnEditAvatarPressed;
 
     public AvatarHUDController(bool visibility = true, bool expanded = false) : this(new AvatarHUDModel(), visibility, expanded) { }
 
@@ -42,12 +44,30 @@ public class AvatarHUDController
 
     public void EditAvatar()
     {
-        //TODO
-        Debug.Log("Called AvatarHUD Edit Avatar");
+        model.newWearables = 0;
+        view.UpdateData(model);
+        DCL.Interface.WebInterface.ReportEditAvatarClicked();
+        OnEditAvatarPressed?.Invoke();
     }
 
     public void SignOut()
     {
         DCL.Interface.WebInterface.LogOut();
+    }
+
+    public void SetConfiguration(HUDConfiguration configuration)
+    {
+        SetActive(configuration.active);
+    }
+
+    private void SetActive(bool active)
+    {
+        view.SetActive(active);
+    }
+
+    public void SetNewWearablesNotification(int wearableCount)
+    {
+        model.newWearables = wearableCount;
+        view.UpdateData(model);
     }
 }

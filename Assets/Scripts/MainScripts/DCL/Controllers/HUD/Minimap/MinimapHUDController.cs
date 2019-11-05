@@ -1,24 +1,28 @@
-using System;
+﻿using System;
 using UnityEngine;
 
-public class MinimapHUDController : IDisposable
+public class MinimapHUDController : IDisposable, IHUD
 {
     private MinimapHUDView view;
+
+    private FloatVariable minimapZoom => CommonScriptableObjects.minimapZoom;
+    
     public MinimapHUDModel model { get; private set; }
 
     public MinimapHUDController() : this(new MinimapHUDModel()) { }
 
     public MinimapHUDController(MinimapHUDModel model)
     {
-        CommonScriptableObjects.playerCoords.onChange += OnPlayerCoordsChange;
-
+        CommonScriptableObjects.playerCoords.OnChange += OnPlayerCoordsChange;
+        minimapZoom.Set(1f);
+        
         view = MinimapHUDView.Create(this);
         UpdateData(model);
     }
 
     public void Dispose()
     {
-        CommonScriptableObjects.playerCoords.onChange -= OnPlayerCoordsChange;
+        CommonScriptableObjects.playerCoords.OnChange -= OnPlayerCoordsChange;
     }
 
     private void OnPlayerCoordsChange(Vector2Int current, Vector2Int previous)
@@ -51,6 +55,11 @@ public class MinimapHUDController : IDisposable
         view.UpdateData(model);
     }
 
+    public void AddZoomDelta(float delta)
+    {
+        minimapZoom.Set(Mathf.Clamp01(minimapZoom.Get() + delta));
+    }
+
     public void ToggleOptions()
     {
         view.ToggleOptions();
@@ -66,5 +75,15 @@ public class MinimapHUDController : IDisposable
     {
         //TODO:
         Debug.Log("Report scene pressed");
+    }
+
+    public void SetConfiguration(HUDConfiguration configuration)
+    {
+        SetActive(configuration.active);
+    }
+
+    private void SetActive(bool active)
+    {
+        view.SetActive(active);
     }
 }

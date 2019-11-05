@@ -17,7 +17,7 @@ namespace Tests
             yield return InitScene();
 
             DCLTexture texture =
-                TestHelpers.CreateDCLTexture(scene, TestHelpers.GetTestsAssetsPath() + "/Images/atlas.png");
+                TestHelpers.CreateDCLTexture(scene, Utils.GetTestsAssetsPath() + "/Images/atlas.png");
 
             yield return texture.routine;
 
@@ -29,7 +29,6 @@ namespace Tests
                     albedoTexture = texture.id,
                     metallic = 0,
                     roughness = 1,
-                    hasAlpha = true
                 },
                 out entity);
 
@@ -98,17 +97,17 @@ namespace Tests
                     ColorUtility.ToHtmlStringRGB(materialComponent.material.GetColor("_SpecColor")));
 
                 // Other properties
-                Assert.AreEqual("0.5", materialComponent.material.GetFloat("_Metallic").ToString());
-                Assert.AreEqual("0.5", materialComponent.material.GetFloat("_Smoothness").ToString());
-                Assert.AreEqual("1", materialComponent.material.GetFloat("_EnvironmentReflections").ToString());
-                Assert.AreEqual("1", materialComponent.material.GetFloat("_SpecularHighlights").ToString());
-                Assert.AreEqual("1", materialComponent.material.GetFloat("_AlphaClip").ToString());
+                Assert.AreApproximatelyEqual(0.5f, materialComponent.material.GetFloat("_Metallic"));
+                Assert.AreApproximatelyEqual(0.5f, materialComponent.material.GetFloat("_Smoothness"));
+                Assert.AreApproximatelyEqual(1.0f, materialComponent.material.GetFloat("_EnvironmentReflections"));
+                Assert.AreApproximatelyEqual(1.0f, materialComponent.material.GetFloat("_SpecularHighlights"));
+                Assert.AreApproximatelyEqual(.0f, materialComponent.material.GetFloat("_AlphaClip"));
                 Assert.AreEqual((int)UnityEngine.Rendering.RenderQueue.Geometry, materialComponent.material.renderQueue);
             }
 
             // Update material
             DCLTexture texture =
-                TestHelpers.CreateDCLTexture(scene, TestHelpers.GetTestsAssetsPath() + "/Images/atlas.png");
+                TestHelpers.CreateDCLTexture(scene, Utils.GetTestsAssetsPath() + "/Images/atlas.png");
 
             yield return texture.routine;
 
@@ -118,7 +117,7 @@ namespace Tests
             ColorUtility.TryParseHtmlString("#42f4aa", out color2);
             ColorUtility.TryParseHtmlString("#601121", out color3);
 
-            scene.SharedComponentUpdate(JsonUtility.ToJson(new DCL.Models.SharedComponentUpdateMessage
+            scene.SharedComponentUpdate(materialID, JsonUtility.ToJson(new DCL.Models.SharedComponentUpdateMessage
             {
                 id = materialID,
                 json = JsonUtility.ToJson(new DCL.Components.PBRMaterial.Model
@@ -132,9 +131,7 @@ namespace Tests
                     roughness = 0.9f,
                     microSurface = 0.4f,
                     specularIntensity = 2f,
-                    alpha = 0.5f,
                     transparencyMode = 2,
-                    hasAlpha = true
                 })
             }));
 
@@ -153,11 +150,11 @@ namespace Tests
                     ColorUtility.ToHtmlStringRGB(materialComponent.material.GetColor("_SpecColor")));
 
                 // Other properties
-                Assert.AreEqual("0.37", materialComponent.material.GetFloat("_Metallic").ToString());
-                Assert.AreEqual("0.1", materialComponent.material.GetFloat("_Smoothness").ToString());
-                Assert.AreEqual("0.4", materialComponent.material.GetFloat("_EnvironmentReflections").ToString());
-                Assert.AreEqual("2", materialComponent.material.GetFloat("_SpecularHighlights").ToString());
-                Assert.AreEqual("0.5", materialComponent.material.GetFloat("_AlphaClip").ToString());
+                Assert.AreApproximatelyEqual(0.37f, materialComponent.material.GetFloat("_Metallic"));
+                Assert.AreApproximatelyEqual(0.1f, materialComponent.material.GetFloat("_Smoothness"));
+                Assert.AreApproximatelyEqual(0.4f, materialComponent.material.GetFloat("_EnvironmentReflections"));
+                Assert.AreApproximatelyEqual(2.0f, materialComponent.material.GetFloat("_SpecularHighlights"));
+                Assert.AreApproximatelyEqual(.0f, materialComponent.material.GetFloat("_AlphaClip"));
                 Assert.AreEqual((int)UnityEngine.Rendering.RenderQueue.Transparent, materialComponent.material.renderQueue);
                 Assert.AreEqual((int)UnityEngine.Rendering.BlendMode.SrcAlpha,
                     materialComponent.material.GetInt("_SrcBlend"));
@@ -202,12 +199,11 @@ namespace Tests
             string thirdEntityID = "3";
 
             TestHelpers.InstantiateEntityWithShape(scene, thirdEntityID, DCL.Models.CLASS_ID.BOX_SHAPE, Vector3.zero);
-            scene.SharedComponentAttach(JsonUtility.ToJson(new DCL.Models.SharedComponentAttachMessage
-            {
-                entityId = thirdEntityID,
-                id = firstMaterialID,
-                name = "material"
-            }));
+            scene.SharedComponentAttach(
+                thirdEntityID,
+                firstMaterialID,
+                "material"
+            );
 
             Assert.IsTrue(scene.entities[thirdEntityID].meshRootGameObject != null,
                 "Every entity with a shape should have the mandatory 'Mesh' object as a child");
@@ -257,12 +253,11 @@ namespace Tests
             string thirdEntityID = "3";
 
             TestHelpers.InstantiateEntityWithShape(scene, thirdEntityID, DCL.Models.CLASS_ID.BOX_SHAPE, Vector3.zero);
-            scene.SharedComponentAttach(JsonUtility.ToJson(new DCL.Models.SharedComponentAttachMessage
-            {
-                entityId = thirdEntityID,
-                id = firstMaterialID,
-                name = "material"
-            }));
+            scene.SharedComponentAttach(
+                thirdEntityID,
+                firstMaterialID,
+                "material"
+            );
 
             Assert.IsTrue(scene.entities[thirdEntityID].meshRootGameObject != null,
                 "Every entity with a shape should have the mandatory 'Mesh' object as a child");
@@ -277,11 +272,11 @@ namespace Tests
                 "1st and 3rd entities should have the same material");
 
             // Check material properties before updating them
-            Assert.AreEqual("0.3", firstRenderer.sharedMaterial.GetFloat("_Metallic").ToString());
-            Assert.AreEqual("0.66", secondRenderer.sharedMaterial.GetFloat("_Metallic").ToString());
+            Assert.AreApproximatelyEqual(0.3f, firstRenderer.sharedMaterial.GetFloat("_Metallic"));
+            Assert.AreApproximatelyEqual(0.66f, secondRenderer.sharedMaterial.GetFloat("_Metallic"));
 
             // Update material properties
-            scene.SharedComponentUpdate(JsonUtility.ToJson(new DCL.Models.SharedComponentUpdateMessage
+            scene.SharedComponentUpdate(firstMaterialID, JsonUtility.ToJson(new DCL.Models.SharedComponentUpdateMessage
             {
                 id = firstMaterialID,
                 json = JsonUtility.ToJson(new DCL.Components.PBRMaterial.Model
@@ -293,8 +288,8 @@ namespace Tests
             yield return (scene.disposableComponents[firstMaterialID] as DCL.Components.PBRMaterial).routine;
 
             // Check material properties after updating them
-            Assert.AreEqual("0.95", firstRenderer.sharedMaterial.GetFloat("_Metallic").ToString());
-            Assert.AreEqual("0.66", secondRenderer.sharedMaterial.GetFloat("_Metallic").ToString());
+            Assert.AreApproximatelyEqual(0.95f, firstRenderer.sharedMaterial.GetFloat("_Metallic"));
+            Assert.AreApproximatelyEqual(0.66f, secondRenderer.sharedMaterial.GetFloat("_Metallic"));
         }
 
         [UnityTest]
@@ -352,12 +347,11 @@ namespace Tests
 
             // Create 2nd entity and attach same material to it
             TestHelpers.InstantiateEntityWithShape(scene, secondEntityId, DCL.Models.CLASS_ID.BOX_SHAPE, Vector3.zero);
-            scene.SharedComponentAttach(JsonUtility.ToJson(new DCL.Models.SharedComponentAttachMessage
-            {
-                entityId = secondEntityId,
-                id = materialID,
-                name = "material"
-            }));
+            scene.SharedComponentAttach(
+                secondEntityId,
+                materialID,
+                "material"
+            );
 
             Assert.IsTrue(scene.entities[secondEntityId].meshRootGameObject != null,
                 "Every entity with a shape should have the mandatory 'Mesh' object as a child");
@@ -400,7 +394,7 @@ namespace Tests
 
             DCLTexture dclTexture = TestHelpers.CreateDCLTexture(
                 scene,
-                TestHelpers.GetTestsAssetsPath() + "/Images/atlas.png",
+                Utils.GetTestsAssetsPath() + "/Images/atlas.png",
                 DCLTexture.BabylonWrapMode.CLAMP,
                 FilterMode.Bilinear);
 
@@ -439,7 +433,7 @@ namespace Tests
 
             DCLTexture dclTexture = TestHelpers.CreateDCLTexture(
                 scene,
-                TestHelpers.GetTestsAssetsPath() + "/Images/atlas.png",
+                Utils.GetTestsAssetsPath() + "/Images/atlas.png",
                 DCLTexture.BabylonWrapMode.CLAMP,
                 FilterMode.Bilinear);
 
@@ -452,7 +446,6 @@ namespace Tests
                     albedoTexture = dclTexture.id,
                     metallic = 0,
                     roughness = 1,
-                    hasAlpha = true
                 }
             );
 
@@ -512,23 +505,23 @@ namespace Tests
             // Check default properties
             {
                 Assert.IsTrue(materialComponent.material.GetTexture("_BaseMap") == null);
-                Assert.AreEqual(0.5f, materialComponent.material.GetFloat("_AlphaClip"));
+                Assert.AreApproximatelyEqual(1.0f, materialComponent.material.GetFloat("_AlphaClip"));
             }
 
             DCLTexture dclTexture = TestHelpers.CreateDCLTexture(
                 scene,
-                TestHelpers.GetTestsAssetsPath() + "/Images/atlas.png",
+                Utils.GetTestsAssetsPath() + "/Images/atlas.png",
                 DCLTexture.BabylonWrapMode.MIRROR,
                 FilterMode.Bilinear);
 
             // Update material
-            scene.SharedComponentUpdate(JsonUtility.ToJson(new DCL.Models.SharedComponentUpdateMessage
+            scene.SharedComponentUpdate(materialID, JsonUtility.ToJson(new DCL.Models.SharedComponentUpdateMessage
             {
                 id = materialID,
                 json = JsonUtility.ToJson(new DCL.Components.BasicMaterial.Model
                 {
                     texture = dclTexture.id,
-                    alphaTest = 0.5f
+                    alphaTest = 0.5f,
                 })
             }));
 
@@ -538,7 +531,8 @@ namespace Tests
             {
                 Texture mainTex = materialComponent.material.GetTexture("_BaseMap");
                 Assert.IsTrue(mainTex != null);
-                Assert.AreEqual("0.5", materialComponent.material.GetFloat("_AlphaClip").ToString());
+                Assert.AreApproximatelyEqual(0.5f, materialComponent.material.GetFloat("_Cutoff"));
+                Assert.AreApproximatelyEqual(1.0f, materialComponent.material.GetFloat("_AlphaClip"));
                 Assert.AreEqual(TextureWrapMode.Mirror, mainTex.wrapMode);
                 Assert.AreEqual(FilterMode.Bilinear, mainTex.filterMode);
             }
@@ -564,7 +558,7 @@ namespace Tests
 
             // 3. Update component with missing values
 
-            scene.SharedComponentUpdate(JsonUtility.ToJson(new DCL.Models.SharedComponentUpdateMessage
+            scene.SharedComponentUpdate(basicMaterialComponent.id, JsonUtility.ToJson(new DCL.Models.SharedComponentUpdateMessage
             {
                 id = basicMaterialComponent.id,
                 json = JsonUtility.ToJson(new BasicMaterial.Model { })
@@ -614,7 +608,7 @@ namespace Tests
             Assert.AreEqual(3f, PBRMaterialComponent.model.specularIntensity);
 
             // 3. Update component with missing values
-            scene.SharedComponentUpdate(JsonUtility.ToJson(new DCL.Models.SharedComponentUpdateMessage
+            scene.SharedComponentUpdate(PBRMaterialComponent.id, JsonUtility.ToJson(new DCL.Models.SharedComponentUpdateMessage
             {
                 id = PBRMaterialComponent.id,
                 json = JsonUtility.ToJson(new PBRMaterial.Model { })

@@ -22,7 +22,7 @@ namespace DCL
             public Vector3? initialLocalPosition;
             public Quaternion? initialLocalRotation;
             public Vector3? initialLocalScale;
-            public bool instantiate = true;
+            public bool forceNewInstance = false;
         }
 
         public Settings settings = new Settings();
@@ -128,26 +128,22 @@ namespace DCL
         {
             library.Add(asset);
 
-            if (asset.visible && settings.instantiate)
+            if (asset.visible)
             {
                 //NOTE(Brian): If the asset did load "in world" add it to library and then Get it immediately
                 //             So it keeps being there. As master gltfs can't be in the world.
                 //
                 //             ApplySettings will reposition the newly Get asset to the proper coordinates.
-                asset = library.Get(asset.id);
-                ApplySettings_LoadStart();
-            }
-        }
+                if (settings.forceNewInstance)
+                {
+                    asset = (library as AssetLibrary_GLTF).GetCopyFromOriginal(asset.id);
+                }
+                else
+                {
+                    asset = library.Get(asset.id);
+                }
 
-        internal override void Load()
-        {
-            if (settings.instantiate || !library.Contains(GetId()))
-            {
-                base.Load();
-            }
-            else
-            {
-                CallAndClearEvents(false);
+                ApplySettings_LoadStart();
             }
         }
 
@@ -169,5 +165,18 @@ namespace DCL
             if (asset != null)
                 asset.CancelShow();
         }
+
+        protected override Asset_GLTF GetAsset(object id)
+        {
+            if (settings.forceNewInstance)
+            {
+                return ((AssetLibrary_GLTF)library).GetCopyFromOriginal(id);
+            }
+            else
+            {
+                return base.GetAsset(id);
+            }
+        }
+
     }
 }

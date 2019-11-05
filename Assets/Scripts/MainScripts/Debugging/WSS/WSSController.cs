@@ -174,7 +174,7 @@ namespace DCL
                         break;
                 }
 
-                if (contentSource != ContentSource.LOCAL && forceLocalComms)
+                if (forceLocalComms)
                 {
                     debugString += "LOCAL_COMMS&";
                 }
@@ -320,8 +320,35 @@ namespace DCL
                             case "DeselectBuilderEntity":
                                 GetBuilderBridge()?.PreloadFile(msg.payload);
                                 break;
+                            case "AddWearableToCatalog":
+                                CatalogController.i.AddWearableToCatalog(msg.payload);
+                                break;
+                            case "AddWearablesToCatalog":
+                                CatalogController.i.AddWearablesToCatalog(msg.payload);
+                                break;
+                            case "RemoveWearablesFromCatalog":
+                                CatalogController.i.RemoveWearablesFromCatalog(msg.payload);
+                                break;
+                            case "ClearWearableCatalog":
+                                CatalogController.i.ClearWearableCatalog();
+                                break;
+                            case "ShowNewWearablesNotification":
+                                hudController.ShowNewWearablesNotification(msg.payload);
+                                break;
+                            case "ConfigureMinimapHUD":
+                                hudController.ConfigureMinimapHUD(msg.payload);
+                                break;
+                            case "ConfigureAvatarHUD":
+                                hudController.ConfigureAvatarHUD(msg.payload);
+                                break;
+                            case "ConfigureNotificationHUD":
+                                hudController.ConfigureNotificationHUD(msg.payload);
+                                break;
+                            case "ConfigureAvatarEditorHUD":
+                                hudController.ConfigureAvatarEditorHUD(msg.payload);
+                                break;
                             default:
-                                Debug.Log("<b><color=#FF0000>WSSController</color></b> WHAT IS " + msg.type);
+                                Debug.Log("<b><color=#FF0000>WSSController:</color></b> received an unknown message from kernel to renderer: " + msg.type);
                                 break;
                         }
                     }

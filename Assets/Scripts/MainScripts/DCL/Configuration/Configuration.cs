@@ -2,16 +2,18 @@
 {
     public static class ApplicationSettings
     {
-        public static string version = "0.7.91";
+        public static string version = "0.7";
     }
 
     public static class Environment
     {
         public static bool DEBUG = true;
     }
+
     public static class PlayerSettings
     {
         public static float POSITION_REPORTING_DELAY = 0.1f; // In seconds
+        public static float WORLD_REPOSITION_MINIMUM_DISTANCE = 100f;
     }
 
     public static class ParcelSettings

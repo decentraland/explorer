@@ -2,6 +2,7 @@ using DCL;
 using DCL.Configuration;
 using DCL.Helpers;
 using UnityEngine;
+using System.Collections;
 
 public class DCLCharacterController : MonoBehaviour
 {
@@ -82,12 +83,14 @@ public class DCLCharacterController : MonoBehaviour
     bool isSprinting = false;
     bool isJumping = false;
     bool isGrounded = false;
+    bool supportsMovingPlatforms = true;
     Transform groundTransform;
     Vector3 lastPosition;
     Vector3 groundLastPosition;
     Quaternion groundLastRotation;
     bool jumpButtonPressed = false;
     bool jumpButtonPressedThisFrame = false;
+    bool reEnablingGameObject = false;
 
     public static System.Action<DCLCharacterPosition> OnCharacterMoved;
     public static System.Action<DCLCharacterPosition> OnPositionSet;
@@ -110,9 +113,30 @@ public class DCLCharacterController : MonoBehaviour
         characterController = GetComponent<CharacterController>();
         rigidbody = GetComponent<Rigidbody>();
         collider = GetComponent<Collider>();
+
         characterPosition.OnPrecisionAdjust += OnPrecisionAdjust;
+        SceneController.OnDebugModeSet += () => supportsMovingPlatforms = true;
 
         lastPosition = transform.position;
+    }
+
+    // To keep the character always active, just in case
+    void OnDisable()
+    {
+        if (!reEnablingGameObject && SceneController.i != null)
+            SceneController.i.StartCoroutine(ReEnableGameObject()); // gameObject cannot start the routine as it's being deactivated
+    }
+
+    IEnumerator ReEnableGameObject()
+    {
+        reEnablingGameObject = true;
+
+        yield return null;
+
+        gameObject.SetActive(true);
+        ResetGround();
+
+        reEnablingGameObject = false;
     }
 
     void OnDestroy()
@@ -216,24 +240,27 @@ public class DCLCharacterController : MonoBehaviour
 
             return;
         }
-        
-        LockCharacterScaleAndRotations();
+
+        LockCharacterScale();
+
+        velocity.x = 0f;
+        velocity.z = 0f;
+        velocity.y += gravity * deltaTime;
 
         bool previouslyGrounded = isGrounded;
-        CheckGround();
-        
+        if (!isJumping || velocity.y <= 0f)
+            CheckGround();
+
         if (isGrounded)
         {
             isJumping = false;
+
+            velocity.y = gravity * deltaTime; // to avoid accumulating gravity in velocity.y while grounded
         }
         else if (previouslyGrounded && !isJumping)
         {
             lastUngroundedTime = Time.time;
         }
-        
-        velocity.x = 0f;
-        velocity.z = 0f;
-        velocity.y += gravity * deltaTime;
 
         if (Cursor.lockState == CursorLockMode.Locked)
         {
@@ -274,7 +301,7 @@ public class DCLCharacterController : MonoBehaviour
             }
         }
 
-        if(IsOnMovingPlatform() && Vector3.Distance(lastPosition, transform.position) > movingPlatformAllowedPosDelta)
+        if (IsOnMovingPlatform() && !characterPosition.RepositionedWorldLastFrame() && Vector3.Distance(lastPosition, transform.position) > movingPlatformAllowedPosDelta)
         {
             ResetGround();
 
@@ -285,7 +312,7 @@ public class DCLCharacterController : MonoBehaviour
         characterController.Move(velocity * deltaTime);
         SetPosition(characterPosition.UnityToWorldPosition(transform.position));
 
-        if ((Time.realtimeSinceStartup - lastMovementReportTime) > PlayerSettings.POSITION_REPORTING_DELAY)
+        if ((DCLTime.realtimeSinceStartup - lastMovementReportTime) > PlayerSettings.POSITION_REPORTING_DELAY)
         {
             ReportMovement();
         }
@@ -299,6 +326,7 @@ public class DCLCharacterController : MonoBehaviour
         }
 
         isJumping = true;
+        isGrounded = false;
 
         velocity.y = jumpForce;
     }
@@ -323,22 +351,21 @@ public class DCLCharacterController : MonoBehaviour
         jumpButtonPressed = Input.GetKey(KeyCode.Space);
     }
 
-    void LockCharacterScaleAndRotations()
+    void LockCharacterScale()
     {
-        // To keep the character always at global scale 1 and only rotated in Y
-        if(transform.lossyScale == Vector3.one && transform.localRotation.x == 0f && transform.localRotation.z == 0f) return;
+        // To keep the character always at global scale 1
+        if (transform.lossyScale == Vector3.one) return;
 
         Transform parentTransform = null;
-        if(transform.parent != null)
+        if (transform.parent != null)
         {
             parentTransform = transform.parent;
             transform.SetParent(null);
         }
 
         transform.localScale = Vector3.one;
-        transform.localRotation = Quaternion.Euler(0f, transform.rotation.y, 0f);
 
-        if(parentTransform != null)
+        if (parentTransform != null)
         {
             transform.SetParent(parentTransform);
         }
@@ -346,16 +373,13 @@ public class DCLCharacterController : MonoBehaviour
 
     void CheckGround()
     {
-#if UNITY_EDITOR
-        Debug.DrawRay(transform.position, -transform.up * (collider.bounds.extents.y + groundCheckExtraDistance), Color.red);
-#endif
+        Transform transformHit = CastGroundCheckingRays();
 
-        RaycastHit hitInfo;
-        if(Physics.Raycast(transform.position, Vector3.down, out hitInfo, collider.bounds.extents.y + groundCheckExtraDistance, groundLayers))
+        if (transformHit != null)
         {
-            if(groundTransform == hitInfo.transform)
+            if (groundTransform == transformHit)
             {
-                if(hitInfo.transform.position != groundLastPosition || hitInfo.transform.rotation != groundLastRotation)
+                if (supportsMovingPlatforms && transform.parent == null && !characterPosition.RepositionedWorldLastFrame() && (transformHit.position != groundLastPosition || transformHit.rotation != groundLastRotation))
                 {
                     // By letting unity parenting handle the transformations for us, the UX is smooth.
                     transform.SetParent(groundTransform);
@@ -363,7 +387,7 @@ public class DCLCharacterController : MonoBehaviour
             }
             else
             {
-                groundTransform = hitInfo.transform;
+                groundTransform = transformHit;
             }
 
             groundLastPosition = groundTransform.position;
@@ -377,11 +401,42 @@ public class DCLCharacterController : MonoBehaviour
         isGrounded = groundTransform != null;
     }
 
+    // We secuentially cast rays in 4 directions (only if the previous one didn't hit anything)
+    Transform CastGroundCheckingRays()
+    {
+        RaycastHit hitInfo;
+        float rayMagnitude = (collider.bounds.extents.y + groundCheckExtraDistance);
+
+        Ray ray = new Ray(transform.position, Vector3.down * rayMagnitude);
+        if (!CastGroundCheckingRay(ray, Vector3.zero, out hitInfo, rayMagnitude) // center
+            && !CastGroundCheckingRay(ray, transform.forward, out hitInfo, rayMagnitude) // forward
+            && !CastGroundCheckingRay(ray, transform.right, out hitInfo, rayMagnitude) // right
+            && !CastGroundCheckingRay(ray, -transform.forward, out hitInfo, rayMagnitude) // back
+            && !CastGroundCheckingRay(ray, -transform.right, out hitInfo, rayMagnitude)) // left
+        {
+            return null;
+        }
+
+        // At this point there is a guaranteed hit, so this is not null
+        return hitInfo.transform;
+    }
+
+    bool CastGroundCheckingRay(Ray ray, Vector3 originOffset, out RaycastHit hitInfo, float rayMagnitude)
+    {
+        ray.origin = transform.position + 0.9f * collider.bounds.extents.x * originOffset;
+#if UNITY_EDITOR
+        Debug.DrawRay(ray.origin, ray.direction, Color.red);
+#endif
+        return Physics.Raycast(ray, out hitInfo, rayMagnitude, groundLayers);
+    }
+
     public void ResetGround()
     {
+        if (groundTransform == null && transform.parent == null) return;
+
         groundTransform = null;
 
-        if(transform.parent != null)
+        if (transform.parent != null)
         {
             transform.SetParent(null);
             velocity = Vector3.zero;
@@ -413,6 +468,6 @@ public class DCLCharacterController : MonoBehaviour
         if (initialPositionAlreadySet)
             DCL.Interface.WebInterface.ReportPosition(reportPosition, compositeRotation, playerHeight);
 
-        lastMovementReportTime = Time.realtimeSinceStartup;
+        lastMovementReportTime = DCLTime.realtimeSinceStartup;
     }
 }

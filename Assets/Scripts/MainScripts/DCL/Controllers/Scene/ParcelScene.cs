@@ -24,8 +24,8 @@ namespace DCL.Controllers
         }
 
         private const string PARCEL_BLOCKER_PREFAB = "Prefabs/ParcelBlocker";
-        private const float MAX_CLEANUP_BUDGET = 0.014f;
-        private const float CLEANUP_NOISE = 0.0025f;
+        private const int ENTITY_POOL_PREWARM_COUNT = 2000;
+        private static Vector3 MORDOR = new Vector3(1000, 1000, 1000);
 
         public Dictionary<string, DecentralandEntity> entities = new Dictionary<string, DecentralandEntity>();
         public Dictionary<string, BaseDisposable> disposableComponents = new Dictionary<string, BaseDisposable>();
@@ -48,9 +48,10 @@ namespace DCL.Controllers
         [System.NonSerialized]
         public bool unloadWithDistance = true;
 
-        private readonly List<GameObject> blockers = new List<GameObject>();
+        public static ParcelScenesCleaner parcelScenesCleaner = new ParcelScenesCleaner();
+
+        private readonly List<PoolableObject> blockers = new List<PoolableObject>();
         private readonly List<string> disposableNotReady = new List<string>();
-        private List<string> entitiesMarkedForRemoval = new List<string>();
         private bool flaggedToUnload = false;
         private bool isReleased = false;
         private State state = State.NOT_READY;
@@ -61,6 +62,17 @@ namespace DCL.Controllers
         public void Awake()
         {
             state = State.NOT_READY;
+
+            if (blockerPrefab == null)
+                blockerPrefab = Resources.Load<GameObject>(PARCEL_BLOCKER_PREFAB);
+
+            // We need to manually create the Pool for empty game objects if it doesn't exist
+            if (!PoolManager.i.ContainsPool(PARCEL_BLOCKER_POOL_NAME))
+            {
+                GameObject go = Instantiate(blockerPrefab);
+                Pool pool = PoolManager.i.AddPool(PARCEL_BLOCKER_POOL_NAME, go);
+                pool.ForcePrewarm();
+            }
 
             metricsController = new SceneMetricsController(this);
             metricsController.Enable();
@@ -133,34 +145,48 @@ namespace DCL.Controllers
             SetupBlockers(data.parcels);
         }
 
-        private void CleanBlockers()
+        public void CleanBlockers()
         {
-            int blockersCount = blockers.Count;
-            for (int i = 0; i < blockersCount; i++)
+            int count = blockers.Count;
+
+            for (int i = 0; i < count; i++)
             {
-                Destroy(blockers[i]);
+                blockers[i].Release();
             }
 
             blockers.Clear();
         }
 
+        const string PARCEL_BLOCKER_POOL_NAME = "ParcelBlocker";
+        Vector3 auxVec = new Vector3();
+
         private void SetupBlockers(Vector2Int[] parcels)
         {
-            if (blockerPrefab == null)
-                blockerPrefab = Resources.Load<GameObject>(PARCEL_BLOCKER_PREFAB);
-
             CleanBlockers();
 
             int parcelsLength = parcels.Length;
             for (int i = 0; i < parcelsLength; i++)
             {
                 Vector2Int pos = parcels[i];
-                var blocker = Instantiate(blockerPrefab, transform);
+
+                PoolableObject blocker = PoolManager.i.Get(PARCEL_BLOCKER_POOL_NAME);
+
+                blocker.transform.SetParent(this.transform, false);
                 blocker.transform.position = DCLCharacterController.i.characterPosition.WorldToUnityPosition(Utils.GridToWorldPosition(pos.x, pos.y)) + (Vector3.up * blockerPrefab.transform.localPosition.y) + new Vector3(ParcelSettings.PARCEL_SIZE / 2, 0, ParcelSettings.PARCEL_SIZE / 2);
 
                 float sceneHeight = metricsController.GetLimits().sceneHeight;
-                blocker.transform.position = new Vector3(blocker.transform.position.x, sceneHeight / 2, blocker.transform.position.z);
-                blocker.transform.localScale = new Vector3(blocker.transform.localScale.x, sceneHeight, blocker.transform.localScale.z);
+
+                auxVec.x = blocker.transform.position.x;
+                auxVec.y = sceneHeight / 2;
+                auxVec.z = blocker.transform.position.z;
+
+                blocker.transform.position = auxVec;
+
+                auxVec.x = ParcelSettings.PARCEL_SIZE;
+                auxVec.y = sceneHeight;
+                auxVec.z = ParcelSettings.PARCEL_SIZE;
+                blocker.transform.localScale = auxVec;
+
                 blockers.Add(blocker);
             }
         }
@@ -176,7 +202,6 @@ namespace DCL.Controllers
             contentProvider.baseUrl = data.baseUrl;
             contentProvider.contents = data.contents;
             contentProvider.BakeHashes();
-
         }
 
         public void InitializeDebugPlane()
@@ -229,6 +254,9 @@ namespace DCL.Controllers
             if (isReleased)
                 return;
 
+            if (DCLCharacterController.i)
+                DCLCharacterController.i.characterPosition.OnPrecisionAdjust -= OnPrecisionAdjust;
+
             if (!RenderingController.i.renderingEnabled)
             {
                 RemoveAllEntitiesImmediate();
@@ -237,14 +265,13 @@ namespace DCL.Controllers
             {
                 if (entities.Count > 0)
                 {
-                    CoroutineStarter.Start(RemoveAllEntitiesCoroutine());
+                    this.gameObject.transform.position = MORDOR;
+
+                    RemoveAllEntities();
                 }
                 else
                 {
                     Destroy(this.gameObject);
-
-                    if (DCLCharacterController.i)
-                        DCLCharacterController.i.characterPosition.OnPrecisionAdjust -= OnPrecisionAdjust;
                 }
             }
 
@@ -273,11 +300,14 @@ namespace DCL.Controllers
         {
             if (sceneData.parcels == null) return false;
 
-            float heightLimit = metricsController.GetLimits().sceneHeight;
+            float heightLimit = 0;
+
+            if (height != 0)
+                heightLimit = metricsController.GetLimits().sceneHeight;
 
             for (int i = 0; i < sceneData.parcels.Length; i++)
             {
-                if (height > heightLimit) continue;
+                if (height != 0 && height > heightLimit) continue;
 
                 if (sceneData.parcels[i] == gridPosition) return true;
             }
@@ -309,7 +339,7 @@ namespace DCL.Controllers
 
         private CreateEntityMessage tmpCreateEntityMessage = new CreateEntityMessage();
         private const string EMPTY_GO_POOL_NAME = "Empty";
-        public DecentralandEntity CreateEntity(string id, string json)
+        public DecentralandEntity CreateEntity(string id)
         {
             SceneController.i.OnMessageDecodeStart?.Invoke("CreateEntity");
             tmpCreateEntityMessage.id = id;
@@ -327,7 +357,8 @@ namespace DCL.Controllers
             if (!PoolManager.i.ContainsPool(EMPTY_GO_POOL_NAME))
             {
                 GameObject go = new GameObject();
-                PoolManager.i.AddPool(EMPTY_GO_POOL_NAME, go);
+                Pool pool = PoolManager.i.AddPool(EMPTY_GO_POOL_NAME, go, maxPrewarmCount: ENTITY_POOL_PREWARM_COUNT);
+                pool.ForcePrewarm();
             }
 
             // As we know that the pool already exists, we just get one gameobject from it
@@ -355,20 +386,13 @@ namespace DCL.Controllers
             SceneController.i.OnMessageDecodeStart?.Invoke("RemoveEntity");
             tmpRemoveEntityMessage.id = id;
             SceneController.i.OnMessageDecodeEnds?.Invoke("RemoveEntity");
-
             if (entities.ContainsKey(tmpRemoveEntityMessage.id))
             {
-                if (!entitiesMarkedForRemoval.Contains(tmpRemoveEntityMessage.id))
+                DecentralandEntity entity = entities[tmpRemoveEntityMessage.id];
+                if (!entity.markedForCleanup)
                 {
-                    DecentralandEntity entity = entities[tmpRemoveEntityMessage.id];
-
-                    entity.SetParent(null);
-
                     // This will also cleanup its children
-                    CleanUpEntityRecursively(entity);
-
-                    if (removeImmediatelyFromEntitiesList)
-                        CleanEntitiesList();
+                    CleanUpEntityRecursively(entity, removeImmediatelyFromEntitiesList);
                 }
             }
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
@@ -379,43 +403,34 @@ namespace DCL.Controllers
 #endif
         }
 
-        void CleanUpEntityRecursively(DecentralandEntity entity)
+
+
+        void CleanUpEntityRecursively(DecentralandEntity entity, bool removeImmediatelyFromEntitiesList)
         {
             // Iterate through all entity children
             using (var iterator = entity.children.GetEnumerator())
             {
                 while (iterator.MoveNext())
                 {
-                    CleanUpEntityRecursively(iterator.Current.Value);
+                    CleanUpEntityRecursively(iterator.Current.Value, removeImmediatelyFromEntitiesList);
                 }
             }
 
             OnEntityRemoved?.Invoke(entity);
 
-            MarkForRemoval(entity);
-
-            entity.Cleanup();
-        }
-
-        void MarkForRemoval(DecentralandEntity entity)
-        {
-            if (!entitiesMarkedForRemoval.Contains(entity.entityId))
+            if (removeImmediatelyFromEntitiesList)
             {
-                entitiesMarkedForRemoval.Add(entity.entityId);
+                // Every entity ends up being removed through here
+                entity.Cleanup();
+                entities.Remove(entity.entityId);
+            }
+            else
+            {
+                parcelScenesCleaner.MarkForCleanup(entity);
             }
         }
 
-        void CleanEntitiesList()
-        {
-            int count = entitiesMarkedForRemoval.Count;
-
-            for (int i = 0; i < count; i++)
-                entities.Remove(entitiesMarkedForRemoval[i]);
-
-            entitiesMarkedForRemoval.Clear();
-        }
-
-        IEnumerator RemoveAllEntitiesCoroutine(bool instant = false)
+        void RemoveAllEntities(bool instant = false)
         {
             //NOTE(Brian): We need to remove only the rootEntities. 
             //             If we don't, duplicated entities will get removed when destroying 
@@ -427,48 +442,42 @@ namespace DCL.Controllers
                 while (iterator.MoveNext())
                 {
                     if (iterator.Current.Value.parent == null)
-                        rootEntities.Add(iterator.Current.Value);
-                }
-            }
-
-            float maxBudget = MAX_CLEANUP_BUDGET + Random.Range(-CLEANUP_NOISE, CLEANUP_NOISE);
-            float lastTime = Time.realtimeSinceStartup;
-
-            int rootEntitiesCount = rootEntities.Count;
-            for (int i = 0; i < rootEntitiesCount; i++)
-            {
-                DecentralandEntity entity = rootEntities[i];
-                RemoveEntity(entity.entityId);
-
-                if (!instant)
-                {
-                    if (Time.realtimeSinceStartup - lastTime >= maxBudget)
                     {
-                        yield return null;
-                        lastTime = Time.realtimeSinceStartup;
+                        if (instant)
+                            rootEntities.Add(iterator.Current.Value);
+                        else
+                            parcelScenesCleaner.MarkRootEntityForCleanup(this, iterator.Current.Value);
                     }
                 }
             }
 
-            Destroy(this.gameObject);
+            if (instant)
+            {
+                int rootEntitiesCount = rootEntities.Count;
+                for (int i = 0; i < rootEntitiesCount; i++)
+                {
+                    DecentralandEntity entity = rootEntities[i];
+                    RemoveEntity(entity.entityId, instant);
+                }
 
-            if (DCLCharacterController.i)
-                DCLCharacterController.i.characterPosition.OnPrecisionAdjust -= OnPrecisionAdjust;
+                entities.Clear();
+
+                Destroy(this.gameObject);
+            }
         }
 
         private void RemoveAllEntitiesImmediate()
         {
-            var enumerator = RemoveAllEntitiesCoroutine(instant: true);
-            //IEnumerator needs call MoveNext to be executed
-            enumerator.MoveNext();
+            RemoveAllEntities(instant: true);
         }
 
         private SetEntityParentMessage tmpParentMessage = new SetEntityParentMessage();
 
-        public void SetEntityParent(string json)
+        public void SetEntityParent(string entityId, string parentId)
         {
             SceneController.i.OnMessageDecodeStart?.Invoke("SetEntityParent");
-            tmpParentMessage.FromJSON(json);
+            tmpParentMessage.entityId = entityId;
+            tmpParentMessage.parentId = parentId;
             SceneController.i.OnMessageDecodeEnds?.Invoke("SetEntityParent");
 
             if (tmpParentMessage.entityId == tmpParentMessage.parentId)
@@ -498,10 +507,12 @@ namespace DCL.Controllers
         /**
           * This method is called when we need to attach a disposable component to the entity
           */
-        public void SharedComponentAttach(string json)
+        public void SharedComponentAttach(string entityId, string id, string name)
         {
             SceneController.i.OnMessageDecodeStart?.Invoke("AttachEntityComponent");
-            attachSharedComponentMessage.FromJSON(json);
+            attachSharedComponentMessage.entityId = entityId;
+            attachSharedComponentMessage.id = id;
+            attachSharedComponentMessage.name = name;
             SceneController.i.OnMessageDecodeEnds?.Invoke("AttachEntityComponent");
 
             DecentralandEntity decentralandEntity = GetEntityForUpdate(attachSharedComponentMessage.entityId);
@@ -522,14 +533,16 @@ namespace DCL.Controllers
 
         UUIDCallbackMessage uuidMessage = new UUIDCallbackMessage();
         EntityComponentCreateMessage createEntityComponentMessage = new EntityComponentCreateMessage();
-
-        public BaseComponent EntityComponentCreateOrUpdate(string json, out CleanableYieldInstruction yieldInstruction)
+        public BaseComponent EntityComponentCreateOrUpdate(string entityId, string name, int classIdNum, string data, out CleanableYieldInstruction yieldInstruction)
         {
             yieldInstruction = null;
 
             SceneController.i.OnMessageDecodeStart?.Invoke("UpdateEntityComponent");
 
-            createEntityComponentMessage.FromJSON(json);
+            createEntityComponentMessage.name = name;
+            createEntityComponentMessage.classId = classIdNum;
+            createEntityComponentMessage.entityId = entityId;
+            createEntityComponentMessage.json = data;
 
             SceneController.i.OnMessageDecodeEnds?.Invoke("UpdateEntityComponent");
 
@@ -545,7 +558,7 @@ namespace DCL.Controllers
 
             if (classId == CLASS_ID_COMPONENT.TRANSFORM)
             {
-                JsonUtility.FromJsonOverwrite(createEntityComponentMessage.json, DCLTransform.model);
+                MessageDecoder.DecodeTransform(data, ref DCLTransform.model);
 
                 if (entity.OnTransformChange != null)
                 {
@@ -693,10 +706,12 @@ namespace DCL.Controllers
 
         SharedComponentCreateMessage sharedComponentCreatedMessage = new SharedComponentCreateMessage();
 
-        public BaseDisposable SharedComponentCreate(string json)
+        public BaseDisposable SharedComponentCreate(string id, string name, int classId)
         {
             SceneController.i.OnMessageDecodeStart?.Invoke("ComponentCreated");
-            sharedComponentCreatedMessage.FromJSON(json);
+            sharedComponentCreatedMessage.id = id;
+            sharedComponentCreatedMessage.name = name;
+            sharedComponentCreatedMessage.classId = classId;
             SceneController.i.OnMessageDecodeEnds?.Invoke("ComponentCreated");
 
             BaseDisposable disposableComponent;
@@ -830,7 +845,7 @@ namespace DCL.Controllers
                     }
 
                 default:
-                    Debug.LogError($"Unknown classId {json}");
+                    Debug.LogError($"Unknown classId");
                     break;
             }
 
@@ -845,10 +860,10 @@ namespace DCL.Controllers
 
         SharedComponentDisposeMessage sharedComponentDisposedMessage = new SharedComponentDisposeMessage();
 
-        public void SharedComponentDispose(string json)
+        public void SharedComponentDispose(string id)
         {
             SceneController.i.OnMessageDecodeStart?.Invoke("ComponentDisposed");
-            sharedComponentDisposedMessage.FromJSON(json);
+            sharedComponentDisposedMessage.id = id;
             SceneController.i.OnMessageDecodeEnds?.Invoke("ComponentDisposed");
 
             BaseDisposable disposableComponent;
@@ -866,11 +881,12 @@ namespace DCL.Controllers
 
         EntityComponentRemoveMessage entityComponentRemovedMessage = new EntityComponentRemoveMessage();
 
-        public void EntityComponentRemove(string json)
+        public void EntityComponentRemove(string entityId, string name)
         {
             SceneController.i.OnMessageDecodeStart?.Invoke("ComponentRemoved");
 
-            entityComponentRemovedMessage.FromJSON(json);
+            entityComponentRemovedMessage.entityId = entityId;
+            entityComponentRemovedMessage.name = name;
 
             SceneController.i.OnMessageDecodeEnds?.Invoke("ComponentRemoved");
 
@@ -931,10 +947,10 @@ namespace DCL.Controllers
 
         SharedComponentUpdateMessage sharedComponentUpdatedMessage = new SharedComponentUpdateMessage();
 
-        public BaseDisposable SharedComponentUpdate(string json, out CleanableYieldInstruction yieldInstruction)
+        public BaseDisposable SharedComponentUpdate(string id, string json, out CleanableYieldInstruction yieldInstruction)
         {
             SceneController.i.OnMessageDecodeStart?.Invoke("ComponentUpdated");
-            BaseDisposable newComponent = SharedComponentUpdate(json);
+            BaseDisposable newComponent = SharedComponentUpdate(id, json);
             SceneController.i.OnMessageDecodeEnds?.Invoke("ComponentUpdated");
 
             yieldInstruction = null;
@@ -945,10 +961,11 @@ namespace DCL.Controllers
             return newComponent;
         }
 
-        public BaseDisposable SharedComponentUpdate(string json)
+        public BaseDisposable SharedComponentUpdate(string id, string json)
         {
             SceneController.i.OnMessageDecodeStart?.Invoke("ComponentUpdated");
-            sharedComponentUpdatedMessage.FromJSON(json);
+            sharedComponentUpdatedMessage.json = json;
+            sharedComponentUpdatedMessage.id = id;
             SceneController.i.OnMessageDecodeEnds?.Invoke("ComponentUpdated");
 
             BaseDisposable disposableComponent = null;
@@ -1020,6 +1037,9 @@ namespace DCL.Controllers
 
         private void OnDisposableReady(BaseDisposable disposable)
         {
+            if (isReleased)
+                return;
+
             disposableNotReady.Remove(disposable.id);
 
             if (VERBOSE)
@@ -1037,6 +1057,9 @@ namespace DCL.Controllers
 
         public void SetInitMessagesDone()
         {
+            if (isReleased)
+                return;
+
             if (state == State.READY)
             {
                 Debug.LogWarning($"Init messages done after ready?! {sceneData.basePosition}", gameObject);

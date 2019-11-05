@@ -14,15 +14,24 @@ public class MinimapCamera : MonoBehaviour
     private Vector3Variable playerUnityPosition => CommonScriptableObjects.playerUnityPosition;
     private Vector3Variable playerUnityEulerAngles => CommonScriptableObjects.playerUnityEulerAngles;
 
+    private FloatVariable minimapZoom => CommonScriptableObjects.minimapZoom;
+
+
     private void Awake()
     {
-        SetNormalizedSize(1);
+        minimapZoom.OnChange += OnZoomChange;
+        SetNormalizedSize(minimapZoom.Get());
     }
 
     private void Start()
     {
-        playerUnityPosition.onChange += OnUnityPositionChange;
-        playerUnityEulerAngles.onChange += OnUnityEulerAnglesChange;
+        playerUnityPosition.OnChange += OnUnityPositionChange;
+        playerUnityEulerAngles.OnChange += OnUnityEulerAnglesChange;
+    }
+
+    private void OnZoomChange(float current, float previous)
+    {
+        SetNormalizedSize(current);
     }
 
     private void OnUnityPositionChange(Vector3 current, Vector3 previous)
@@ -42,7 +51,8 @@ public class MinimapCamera : MonoBehaviour
 
     private void OnDestroy()
     {
-        playerUnityPosition.onChange -= OnUnityPositionChange;
-        playerUnityEulerAngles.onChange -= OnUnityEulerAnglesChange;
+        playerUnityPosition.OnChange -= OnUnityPositionChange;
+        playerUnityEulerAngles.OnChange -= OnUnityEulerAnglesChange;
+        minimapZoom.OnChange -= OnZoomChange;
     }
 }
