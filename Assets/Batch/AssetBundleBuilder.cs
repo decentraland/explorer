@@ -45,12 +45,12 @@ namespace DCL
 
         internal static ContentServerUtils.ApiEnvironment environment = ContentServerUtils.ApiEnvironment.ORG;
 
-        internal static System.Action OnBundleBuildFinish = null;
+        internal static System.Action<int> OnBundleBuildFinish = null;
         static Dictionary<string, string> hashLowercaseToHashProper = new Dictionary<string, string>();
 
         static float startTime;
 
-        internal static void DumpArea(List<Vector2Int> coords, Action OnFinish = null)
+        internal static void DumpArea(List<Vector2Int> coords, Action<int> OnFinish = null)
         {
             HashSet<string> sceneCids = new HashSet<string>();
 
@@ -89,6 +89,7 @@ namespace DCL
             finalDownloadedAssetDbPath = DOWNLOADED_ASSET_DB_PATH_ROOT;
 
             InitializeDirectory(finalDownloadedPath);
+            OnBundleBuildFinish = (errorCode) => { Debug.Log($"Conversion finished. [Time:{Time.realtimeSinceStartup - startTime}]"); OnFinish?.Invoke(errorCode); };
 
             foreach (var v in sceneCidsList)
             {
@@ -96,10 +97,9 @@ namespace DCL
             }
 
             BuildAssetBundles();
-            OnBundleBuildFinish = () => { Debug.Log($"Conversion finished. [Time:{Time.realtimeSinceStartup - startTime}]"); OnFinish?.Invoke(); };
         }
 
-        internal static void DumpScene(string cid, Action OnFinish = null)
+        internal static void DumpScene(string cid, Action<int> OnFinish = null)
         {
             startTime = Time.realtimeSinceStartup;
 
@@ -107,10 +107,10 @@ namespace DCL
             finalDownloadedPath = DOWNLOADED_PATH_ROOT;
             finalDownloadedAssetDbPath = DOWNLOADED_ASSET_DB_PATH_ROOT;
 
+            OnBundleBuildFinish = (errorCode) => { Debug.Log($"Conversion finished. [Time:{Time.realtimeSinceStartup - startTime}]"); OnFinish?.Invoke(errorCode); };
             InitializeDirectory(finalDownloadedPath);
             ExportSceneToAssetBundles_Internal(cid);
             BuildAssetBundles();
-            OnBundleBuildFinish = () => { Debug.Log($"Conversion finished. [Time:{Time.realtimeSinceStartup - startTime}]"); OnFinish?.Invoke(); };
         }
 
 
@@ -134,10 +134,7 @@ namespace DCL
                         throw new ArgumentException("Invalid sceneCid argument! Please use -sceneCid <id> to establish the desired id to process.");
                     }
 
-                    DumpScene(sceneCid[0], () =>
-                    {
-                        Exit(1);
-                    });
+                    DumpScene(sceneCid[0], Exit);
                     return;
                 }
 
@@ -163,10 +160,7 @@ namespace DCL
 
                     var zoneArray = AssetBundleBuilderUtils.GetBottomLeftZoneArray(new Vector2Int(x, y), new Vector2Int(w, h));
 
-                    DumpArea(zoneArray, () =>
-                    {
-                        Exit(1);
-                    });
+                    DumpArea(zoneArray, Exit);
 
                     return;
                 }
@@ -174,7 +168,6 @@ namespace DCL
             catch (Exception e)
             {
                 Debug.LogError(e.Message);
-
                 Exit(1);
             }
         }
@@ -199,9 +192,7 @@ namespace DCL
 
             if (parcelInfoApiData.data.Length == 0 || parcelInfoApiData.data == null)
             {
-                Debug.LogWarning("Data is null?");
-                Exit(1);
-                return;
+                throw new Exception("MappingsAPIData is null?");
             }
 
             AssetDatabase.Refresh();
@@ -357,10 +348,10 @@ namespace DCL
 
         static void Exit(int errorCode = 0)
         {
+            Debug.Log($"Process finished with code {errorCode}");
+
             if (Application.isBatchMode)
                 EditorApplication.Exit(errorCode);
-            else
-                Debug.Log($"Process finished with code {errorCode}");
         }
 
         static void MarkForAssetBundleBuild(string path, string abName)
@@ -394,11 +385,8 @@ namespace DCL
 
                 if (manifest == null)
                 {
-                    Debug.LogError("Error generating asset bundle!");
-                    OnBundleBuildFinish?.Invoke();
-                    Exit();
-
-                    return;
+                    OnBundleBuildFinish?.Invoke(2);
+                    throw new Exception("Error generating asset bundle!");
                 }
 
                 string[] assetBundles = manifest.GetAllAssetBundles();
@@ -412,7 +400,6 @@ namespace DCL
                 {
                     if (string.IsNullOrEmpty(assetBundles[i]))
                         continue;
-
 
                     Debug.Log($"#{i} Generated asset bundle name: {assetBundles[i]}");
 
@@ -455,8 +442,7 @@ namespace DCL
                     }
                 }
 
-                OnBundleBuildFinish?.Invoke();
-                Exit();
+                OnBundleBuildFinish?.Invoke(0);
             };
 
             AssetDatabase.Refresh();
