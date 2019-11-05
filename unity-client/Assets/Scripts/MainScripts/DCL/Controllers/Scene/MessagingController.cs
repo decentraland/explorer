@@ -139,13 +139,11 @@ namespace DCL
             // Check if the message type is an UpdateEntityComponent 
             if (queuedMessage.method == MessagingTypes.ENTITY_COMPONENT_CREATE_OR_UPDATE)
             {
-                // By default, the tag is the id of the entity/component
-                string entityId = queuedMessage.payload.Tag;
                 int classId = 0;
 
                 // We need to extract the entityId and the classId from the tag.
                 // The tag format is "entityId_classId", i.e: "E1_2". 
-                GetEntityIdAndClassIdFromTag(queuedMessage.tag, out entityId, out classId);
+                GetEntityIdAndClassIdFromTag(queuedMessage.tag, out classId);
 
                 // If it is a transform update, the queue mode is Lossy
                 if (classId == (int)CLASS_ID_COMPONENT.TRANSFORM)
@@ -169,11 +167,10 @@ namespace DCL
             messagingBuses[busId].Enqueue(queuedMessage, queueMode);
         }
 
-        private void GetEntityIdAndClassIdFromTag(string tag, out string entityId, out int classId)
+        private void GetEntityIdAndClassIdFromTag(string tag, out int classId)
         {
-            int separator = tag.IndexOf('_');
-            entityId = tag.Substring(0, separator);
-            classId = System.Convert.ToInt32(tag.Substring(separator + 1));
+            int lastSeparator = tag.LastIndexOf('_');
+            classId = System.Convert.ToInt32(tag.Substring(lastSeparator + 1));
         }
 
         private string FormatQueueId(string sceneId, string tag)

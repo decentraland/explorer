@@ -159,11 +159,7 @@ namespace DCL
 
                 LinkedListNode<MessagingBus.QueuedSceneMessage> node = null;
 
-                stringBuilder.Clear();
-                stringBuilder.Append(message.tag);
-                stringBuilder.Append(message.sceneId);
-
-                message.unreliableMessageKey = stringBuilder.ToString();
+                message.unreliableMessageKey = message.tag;
 
                 if (unreliableMessages.ContainsKey(message.unreliableMessageKey))
                 {
