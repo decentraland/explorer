@@ -14,7 +14,7 @@ export type QueryType = 'HitFirst' | 'HitAll' | 'HitFirstAvatar' | 'HitAllAvatar
 /**
  * @internal
  */
-export enum QueryPrefix {
+enum QueryPrefix {
   HitFirst = 'rqhf',
   HitAll = 'rqha'
 }
