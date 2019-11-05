@@ -14,6 +14,14 @@ export type QueryType = 'HitFirst' | 'HitAll' | 'HitFirstAvatar' | 'HitAllAvatar
 /**
  * @internal
  */
+export enum QueryPrefix {
+  HitFirst = 'rqhf',
+  HitAll = 'rqha'
+}
+
+/**
+ * @internal
+ */
 export interface RaycastQuery {
   queryId: string
   queryType: QueryType
@@ -88,10 +96,8 @@ export interface RaycastHitAvatars extends RaycastHit {
  * @public
  */
 export interface IPhysicsCast {
-  hitFirst(ray: Ray, hitCallback: (event: RaycastHitEntity) => void): void
-  hitAll(ray: Ray, hitCallback: (event: RaycastHitEntities) => void): void
-  hitFirst(ray: Ray, hitCallback: (event: RaycastHitEntity) => void, id: number): void
-  hitAll(ray: Ray, hitCallback: (event: RaycastHitEntities) => void, id: number): void
+  hitFirst(ray: Ray, hitCallback: (event: RaycastHitEntity) => void, id?: number): void
+  hitAll(ray: Ray, hitCallback: (event: RaycastHitEntities) => void, id?: number): void
   /** @internal */
   hitFirstAvatar(ray: Ray, hitCallback: (event: RaycastHitAvatar) => void): void
   /** @internal */
@@ -150,7 +156,7 @@ export class PhysicsCast implements IPhysicsCast {
   }
 
   public hitFirst(ray: Ray, hitCallback: (event: RaycastHitEntity) => void, id?: number) {
-    const queryId = typeof id === 'number' ? 'rqhf' + id : uuid()
+    const queryId = typeof id === 'number' ? QueryPrefix.HitFirst + id : uuid()
 
     this.queries[queryId] = hitCallback as (event: RaycastHit) => void
 
@@ -158,7 +164,7 @@ export class PhysicsCast implements IPhysicsCast {
   }
 
   public hitAll(ray: Ray, hitCallback: (event: RaycastHitEntities) => void, id?: number) {
-    const queryId = typeof id === 'number' ? 'rqha' + id : uuid()
+    const queryId = typeof id === 'number' ? QueryPrefix.HitAll + id : uuid()
 
     this.queries[queryId] = hitCallback as (event: RaycastHit) => void
 
