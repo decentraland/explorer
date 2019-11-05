@@ -33,8 +33,8 @@ namespace DCL
 
         internal static string DOWNLOADED_ASSET_DB_PATH_ROOT = "Assets/_Downloaded/";
         internal static string DOWNLOADED_PATH_ROOT = Application.dataPath + "/_Downloaded/";
-        internal static string ASSET_BUNDLE_FOLDER_NAME = Application.dataPath + "../AssetBundles";
-        internal static string ASSET_BUNDLES_PATH_ROOT = ASSET_BUNDLE_FOLDER_NAME + "/";
+        internal static string ASSET_BUNDLE_FOLDER_NAME = "AssetBundles";
+        internal static string ASSET_BUNDLES_PATH_ROOT = Application.dataPath + "/../" + ASSET_BUNDLE_FOLDER_NAME + "/";
 
         private static bool deleteDownloadPathAfterFinished = true;
         private static bool skipUploadedGltfs = true;
@@ -99,6 +99,20 @@ namespace DCL
             OnBundleBuildFinish = () => { Debug.Log($"Conversion finished. [Time:{Time.realtimeSinceStartup - startTime}]"); OnFinish?.Invoke(); };
         }
 
+        internal static void DumpScene(string cid, Action OnFinish = null)
+        {
+            startTime = Time.realtimeSinceStartup;
+
+            finalAssetBundlePath = ASSET_BUNDLES_PATH_ROOT;
+            finalDownloadedPath = DOWNLOADED_PATH_ROOT;
+            finalDownloadedAssetDbPath = DOWNLOADED_ASSET_DB_PATH_ROOT;
+
+            InitializeDirectory(finalDownloadedPath);
+            ExportSceneToAssetBundles_Internal(cid);
+            BuildAssetBundles();
+            OnBundleBuildFinish = () => { Debug.Log($"Conversion finished. [Time:{Time.realtimeSinceStartup - startTime}]"); OnFinish?.Invoke(); };
+        }
+
 
         public static void ExportSceneToAssetBundles()
         {
@@ -120,9 +134,13 @@ namespace DCL
                         throw new ArgumentException("Invalid sceneCid argument! Please use -sceneCid <id> to establish the desired id to process.");
                     }
 
-                    ExportSceneToAssetBundles_Internal(sceneCid[0]);
+                    DumpScene(sceneCid[0], () =>
+                    {
+                        Exit(1);
+                    });
                     return;
                 }
+
                 if (AssetBundleBuilderUtils.ParseOption(CLI_BUILD_PARCELS_RANGE_SYNTAX, 4, out string[] xywh))
                 {
                     if (xywh == null)
