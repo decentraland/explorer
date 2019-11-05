@@ -28,8 +28,8 @@ namespace DCL
 
         internal static string DOWNLOADED_ASSET_DB_PATH_ROOT = "Assets/_Downloaded/";
         internal static string DOWNLOADED_PATH_ROOT = Application.dataPath + "/_Downloaded/";
-        internal static string ASSET_BUNDLE_FOLDER_NAME = "_AssetBundles2";
-        internal static string ASSET_BUNDLES_PATH_ROOT = "/" + ASSET_BUNDLE_FOLDER_NAME + "/";
+        internal static string ASSET_BUNDLE_FOLDER_NAME = Application.dataPath + "../AssetBundles";
+        internal static string ASSET_BUNDLES_PATH_ROOT = ASSET_BUNDLE_FOLDER_NAME + "/";
 
         private static bool deleteDownloadPathAfterFinished = true;
         private static bool skipUploadedGltfs = true;

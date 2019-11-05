@@ -16,10 +16,9 @@ namespace DCL.Components
         static readonly bool USE_GLTF_FALLBACK = false;
         static readonly bool VERBOSE = false;
 
-        public GameObject gltfContainer;
+        public GameObject container;
 
         AssetPromise_GLTF gltfPromise;
-
         AssetPromise_AssetBundle abPromise;
 
         string assetDirectoryPath;
