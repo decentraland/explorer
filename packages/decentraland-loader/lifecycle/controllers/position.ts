@@ -74,4 +74,12 @@ export class PositionLifecycleController extends EventEmitter {
   private queueTrackingEvent(name: string, data: any) {
     this.emit('Tracking Event', { name, data })
   }
+
+  private waitForWindow(): Promise<void> {
+    return new Promise(resolve => {
+      if (typeof window !== 'undefined') {
+        resolve()
+      }
+    })
+  }
 }

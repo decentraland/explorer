@@ -3,6 +3,7 @@ import { future, IFuture } from 'fp-future'
 import { ILand, IScene, ParcelInfoResponse } from 'shared/types'
 import { jsonFetch } from 'atomicHelpers/jsonFetch'
 import { createLogger } from 'shared/logger'
+import { getServerConfigurations } from 'config'
 
 const emptyScenes = require('./emptyScenes.json')
 
@@ -29,7 +30,7 @@ export class SceneDataDownloadManager {
   sceneIdToLandData: Map<string, IFuture<ILand | null>> = new Map()
   rootIdToLandData: Map<string, IFuture<ILand | null>> = new Map()
 
-  constructor(public options: { contentServer: string }) {
+  constructor(public options: { contentServer: string; contentServerBundles: string }) {
     // stub
   }
 
@@ -80,6 +81,7 @@ export class SceneDataDownloadManager {
     return {
       sceneId: sceneId,
       baseUrl: this.options.contentServer + '/contents/',
+      baseUrlBundles: getServerConfigurations().contentAsBundle + '/',
       name: 'Empty parcel',
       scene: {
         display: { title: 'Empty parcel' },
@@ -150,6 +152,7 @@ export class SceneDataDownloadManager {
     }
 
     const baseUrl = this.options.contentServer + '/contents/'
+    const baseUrlBundles = this.options.contentServerBundles + '/'
 
     const scene = (await jsonFetch(baseUrl + sceneJsonMapping.hash)) as IScene
 
@@ -159,7 +162,8 @@ export class SceneDataDownloadManager {
 
     const data: ILand = {
       sceneId: sceneId,
-      baseUrl,
+      baseUrl: baseUrl,
+      baseUrlBundles: baseUrlBundles,
       name: scene.name,
       scene,
       mappingsResponse: content.content

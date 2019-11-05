@@ -664,6 +664,7 @@ export async function loadPreviewScene() {
       name: scene.name,
       sceneId: 'previewScene',
       baseUrl: location.toString().replace(/\?[^\n]+/g, ''),
+      baseUrlBundles: '',
       scene,
       mappingsResponse: mappingsResponse
     }
