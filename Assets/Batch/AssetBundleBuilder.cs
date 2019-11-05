@@ -26,6 +26,11 @@ namespace DCL
 
         static bool VERBOSE = false;
 
+        const string CLI_ALWAYS_BUILD_SYNTAX = "alwaysBuild";
+        const string CLI_KEEP_BUNDLES_SYNTAX = "keepBundles";
+        const string CLI_BUILD_SCENE_SYNTAX = "sceneCid";
+        const string CLI_BUILD_PARCELS_RANGE_SYNTAX = "parcelsXYWH";
+
         internal static string DOWNLOADED_ASSET_DB_PATH_ROOT = "Assets/_Downloaded/";
         internal static string DOWNLOADED_PATH_ROOT = Application.dataPath + "/_Downloaded/";
         internal static string ASSET_BUNDLE_FOLDER_NAME = Application.dataPath + "../AssetBundles";
@@ -102,13 +107,13 @@ namespace DCL
                 skipUploadedGltfs = true;
                 deleteDownloadPathAfterFinished = true;
 
-                if (AssetBundleBuilderUtils.ParseOption("alwaysBuild", 0, out string[] noargs))
+                if (AssetBundleBuilderUtils.ParseOption(CLI_ALWAYS_BUILD_SYNTAX, 0, out string[] noargs))
                     skipUploadedGltfs = false;
 
-                if (AssetBundleBuilderUtils.ParseOption("keepBundles", 0, out string[] noargs2))
+                if (AssetBundleBuilderUtils.ParseOption(CLI_KEEP_BUNDLES_SYNTAX, 0, out string[] noargs2))
                     deleteDownloadPathAfterFinished = false;
 
-                if (AssetBundleBuilderUtils.ParseOption("sceneCid", 1, out string[] sceneCid))
+                if (AssetBundleBuilderUtils.ParseOption(CLI_BUILD_SCENE_SYNTAX, 1, out string[] sceneCid))
                 {
                     if (sceneCid == null || string.IsNullOrEmpty(sceneCid[0]))
                     {
@@ -118,8 +123,7 @@ namespace DCL
                     ExportSceneToAssetBundles_Internal(sceneCid[0]);
                     return;
                 }
-
-                if (AssetBundleBuilderUtils.ParseOption("parcelsXYWH", 4, out string[] xywh))
+                if (AssetBundleBuilderUtils.ParseOption(CLI_BUILD_PARCELS_RANGE_SYNTAX, 4, out string[] xywh))
                 {
                     if (xywh == null)
                     {
