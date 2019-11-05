@@ -31,8 +31,8 @@ namespace Builder
         [Header("Zoom")]
         public float zoomMin = 1f;
         public float zoomMax = 60f;
-        public float zoomSpeed = 5f;
-        public float zoomAmount = 0.5f;
+        public float zoomSpeed = 15f;
+        public float zoomAmount = 5f;
 
         private float pitchCurrent = 0;
         private float pitchTarget = 0;
@@ -145,6 +145,10 @@ namespace Builder
         private void OnMouseWheel(float axisValue)
         {
             Zoom(axisValue * zoomAmount);
+            // if (Mathf.Abs(zoomTarget - zoomCurrent) < 0.001f && Mathf.Abs(axisValue) > 0.2f)
+            // {
+            //     Zoom(Mathf.Sign(axisValue) * zoomAmount);
+            // }
         }
 
         private void OnKeyboardButtonHold(KeyCode keyCode)

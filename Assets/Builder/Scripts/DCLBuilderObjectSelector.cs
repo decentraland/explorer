@@ -15,6 +15,7 @@ namespace Builder
 
         public static event EntitySelectedDelegate OnSelectedObject;
         public static event EntityDeselectedDelegate OnDeselectedObject;
+        public static event System.Action OnNoObjectSelected;
         public static event DragDelegate OnDraggingObjectStart;
         public static event DragDelegate OnDraggingObject;
         public static event DragDelegate OnDraggingObjectEnd;
@@ -53,6 +54,7 @@ namespace Builder
                 DCLBuilderBridge.OnSetGridResolution += OnSetGridResolution;
                 DCLBuilderBridge.OnSceneChanged += OnSceneChanged;
                 DCLBuilderBridge.OnBuilderSelectEntity += OnBuilderSelectEntity;
+                DCLBuilderBridge.OnBuilderDeselectEntity += OnBuilderDeselectEntity;
             }
             isGameObjectActive = true;
         }
@@ -68,6 +70,7 @@ namespace Builder
             DCLBuilderBridge.OnSetGridResolution -= OnSetGridResolution;
             DCLBuilderBridge.OnSceneChanged -= OnSceneChanged;
             DCLBuilderBridge.OnBuilderSelectEntity -= OnBuilderSelectEntity;
+            DCLBuilderBridge.OnBuilderDeselectEntity -= OnBuilderDeselectEntity;
         }
 
         private void Update()
@@ -142,6 +145,10 @@ namespace Builder
 
                 if (groundClickTime != 0 && (Time.unscaledTime - groundClickTime) < 0.25f)
                 {
+                    if (selectedEntity != null)
+                    {
+                        OnNoObjectSelected?.Invoke();
+                    }
                     Deselect();
                 }
                 groundClickTime = 0;
@@ -184,6 +191,7 @@ namespace Builder
                 Deselect();
                 dragInfo.isDraggingObject = false;
                 dragInfo.entity = null;
+                OnNoObjectSelected?.Invoke();
             }
         }
 
@@ -205,6 +213,14 @@ namespace Builder
                         Select(entity);
                     });
                 }
+            }
+        }
+
+        private void OnBuilderDeselectEntity(string entityId)
+        {
+            if (selectedEntity && selectedEntity.rootEntity.entityId == entityId)
+            {
+                Deselect();
             }
         }
 

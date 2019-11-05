@@ -1678,8 +1678,8 @@ MonoBehaviour:
   panAmount: 0.5
   zoomMin: 1
   zoomMax: 100
-  zoomSpeed: 5
-  zoomAmount: 0.5
+  zoomSpeed: 10
+  zoomAmount: 2
 --- !u!4 &1824549429
 Transform:
   m_ObjectHideFlags: 0
@@ -1900,6 +1900,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2a004588ddfe24b59b99343f060a6074, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mouseWheelThrottle: 0.1
 --- !u!114 &1948480741
 MonoBehaviour:
   m_ObjectHideFlags: 0

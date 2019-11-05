@@ -32,6 +32,7 @@ namespace Builder
         public static event SetGridResolutionDelegate OnSetGridResolution;
         public static System.Action<ParcelScene> OnSceneChanged;
         public static System.Action<string> OnBuilderSelectEntity;
+        public static System.Action<string> OnBuilderDeselectEntity;
 
         private MouseCatcher mouseCatcher;
         private ParcelScene currentScene;
@@ -248,6 +249,11 @@ namespace Builder
             OnBuilderSelectEntity?.Invoke(entityId);
         }
 
+        public void DeselectBuilderEntity(string entityId)
+        {
+            OnBuilderDeselectEntity?.Invoke(entityId);
+        }
+
         public void GetCameraTargetBuilder(string id)
         {
             Vector3 targetPosition;
@@ -345,6 +351,7 @@ namespace Builder
             {
                 DCLBuilderObjectSelector.OnDraggingObjectEnd += OnObjectDragEnd;
                 DCLBuilderObjectSelector.OnSelectedObject += OnObjectSelected;
+                DCLBuilderObjectSelector.OnNoObjectSelected += OnNoObjectSelected;
                 DCLBuilderGizmoManager.OnGizmoTransformObjectEnd += OnGizmoTransformObjectEnded;
                 DCLBuilderEntity.OnEntityShapeUpdated += ProcessEntityBoundaries;
                 DCLBuilderEntity.OnEntityTransformUpdated += ProcessEntityBoundaries;
@@ -358,6 +365,7 @@ namespace Builder
             isGameObjectActive = false;
             DCLBuilderObjectSelector.OnDraggingObjectEnd -= OnObjectDragEnd;
             DCLBuilderObjectSelector.OnSelectedObject -= OnObjectSelected;
+            DCLBuilderObjectSelector.OnNoObjectSelected -= OnNoObjectSelected;
             DCLBuilderGizmoManager.OnGizmoTransformObjectEnd -= OnGizmoTransformObjectEnded;
             DCLBuilderEntity.OnEntityShapeUpdated -= ProcessEntityBoundaries;
             DCLBuilderEntity.OnEntityTransformUpdated -= ProcessEntityBoundaries;
@@ -379,13 +387,18 @@ namespace Builder
             WebInterface.ReportGizmoEvent(entity.rootEntity.scene.sceneData.id, entity.rootEntity.entityId, "gizmoSelected", gizmoType);
         }
 
+        private void OnNoObjectSelected()
+        {
+            WebInterface.ReportGizmoEvent(currentScene.sceneData.id, null, "gizmoSelected", null);
+        }
+
         private void NotifyGizmoEvent(DCLBuilderEntity entity, string gizmoType)
         {
             WebInterface.ReportGizmoEvent(
                 entity.rootEntity.scene.sceneData.id,
-                entity.rootEntity.entityId,
+                entity ? entity.rootEntity.entityId : "",
                 "gizmoDragEnded",
-                gizmoType,
+                gizmoType != null ? gizmoType : DCL.Components.DCLGizmos.Gizmo.NONE,
                 entity.gameObject.transform
             );
         }
