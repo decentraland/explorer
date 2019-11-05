@@ -87,7 +87,6 @@
 
         public static string GetBundlesAPIUrlBase(ApiEnvironment env)
         {
-            return "http://localhost:1338/";
             string envString = GetEnvString(env);
             return $"https://content-as-bundle.decentraland.{envString}/contents/";
         }
