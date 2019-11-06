@@ -1133,22 +1133,6 @@ namespace DCL.Controllers
                             var component = disposableComponents[componentId];
 
                             Debug.Log($"Waiting for: {component.ToString()}");
-                            //if (component is LoadableShape)
-                            //{
-                            //    LoadableShape shape = (LoadableShape)component;
-
-                            //    string fullUrl;
-                            //    bool found = contentProvider.TryGetContentsUrl(shape.model.src, out fullUrl);
-
-                            //    if (!found)
-                            //        fullUrl = "Not found!";
-
-
-                            //}
-                            //else
-                            //{
-                            //    Debug.Log($"Waiting for: {component.componentName}");
-                            //}
 
                             foreach (var entity in component.attachedEntities)
                             {

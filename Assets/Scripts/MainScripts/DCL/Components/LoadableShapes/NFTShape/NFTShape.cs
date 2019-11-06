@@ -74,6 +74,9 @@ namespace DCL.Components
 
         public override string ToString()
         {
+            if (model == null)
+                return base.ToString();
+
             return $"{componentName} (src = {model.src})";
         }
     }

@@ -12,6 +12,9 @@ namespace DCL.Components
 
         public override string ToString()
         {
+            if (scene == null || scene.contentProvider == null || model == null)
+                return base.ToString();
+
             string fullUrl;
 
             bool found = scene.contentProvider.TryGetContentsUrl(model.src, out fullUrl);
