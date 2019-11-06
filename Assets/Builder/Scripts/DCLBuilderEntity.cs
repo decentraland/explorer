@@ -143,6 +143,13 @@ namespace Builder
             {
                 scaleTarget = DCLTransform.model.scale;
                 StartCoroutine(ScaleAnimationRoutine(0.3f));
+
+                // We don't want animation to be running on editor
+                Animation[] entityAnimations = GetComponentsInChildren<Animation>();
+                for (int i = 0; i < entityAnimations.Length; i++)
+                {
+                    entityAnimations[i].Stop();
+                }
             }
 
             if (onShapeLoaded != null)

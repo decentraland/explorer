@@ -191,7 +191,15 @@ namespace Builder
                     float.TryParse(splitPositionStr[0], out x);
                     float.TryParse(splitPositionStr[1], out y);
                     float.TryParse(splitPositionStr[2], out z);
-                    OnSetCameraPosition?.Invoke(new Vector3(x, y, z));
+
+                    if (isPreviewMode)
+                    {
+                        DCLCharacterController.i?.SetPosition(new Vector3(x, y, z));
+                    }
+                    else
+                    {
+                        OnSetCameraPosition?.Invoke(new Vector3(x, y, z));
+                    }
                 }
             }
         }
@@ -296,12 +304,12 @@ namespace Builder
             {
                 defaultCharacterPosition = DCLCharacterController.i.transform.position;
                 DCLCharacterController.i.initialPositionAlreadySet = true;
+                DCLCharacterController.i.characterAlwaysEnabled = false;
                 DCLCharacterController.i.gameObject.SetActive(false);
             }
 
             SceneController.i?.fpsPanel.SetActive(false);
             SetCaptureKeyboardInputEnabled(false);
-            RemoveNoneBuilderGameObjects();
         }
 
         private void Start()
@@ -482,18 +490,6 @@ namespace Builder
             outOfBoundariesEventPayload.entities = outOfBoundariesEntitiesId.ToArray();
             WebInterface.SendSceneEvent<EntitiesOutOfBoundariesEventPayload>(currentScene.sceneData.id, "entitiesOutOfBoundaries", outOfBoundariesEventPayload);
             currentScene.boundariesChecker?.EvaluateEntityPosition(entity.rootEntity);
-        }
-
-        private void RemoveNoneBuilderGameObjects()
-        {
-            GameObject go = GameObject.Find("HUDController");
-            if (go) Destroy(go.gameObject);
-            go = GameObject.Find("Minimap");
-            if (go) Destroy(go.gameObject);
-            go = GameObject.Find("_AvatarHUD");
-            if (go) Destroy(go.gameObject);
-            go = GameObject.Find("_MinimapHUD");
-            if (go) Destroy(go.gameObject);
         }
     }
 }
