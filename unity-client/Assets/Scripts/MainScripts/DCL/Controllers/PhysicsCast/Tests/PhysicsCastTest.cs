@@ -101,44 +101,22 @@ public class PhysicsCast_Tests : TestsBase
         response.payload.entity = new WebInterface.HitEntityInfo();
         response.payload.entity.entityId = entities[0].entityId;
 
-        string targetEventType = "SceneEvent";
         var sceneEvent = new WebInterface.SceneEvent<WebInterface.RaycastHitFirstResponse>();
-        sceneEvent.sceneId = scene.sceneData.id;
-        sceneEvent.payload = response;
-        sceneEvent.eventType = "raycastResponse";
 
         bool eventTriggered = false;
         int responseCount = 0;
 
-        yield return TestHelpers.WaitForEventFromEngine(targetEventType, sceneEvent,
-            () =>
-            {
-                sceneController.SendSceneMessage(System.Convert.ToBase64String(sendSceneMessage.ToByteArray()));
-                sceneController.SendSceneMessage(System.Convert.ToBase64String(sendSceneMessage.ToByteArray()));
-                sceneController.SendSceneMessage(System.Convert.ToBase64String(sendSceneMessage.ToByteArray()));
-            },
+        yield return SendRaycastQueryMessage<WebInterface.RaycastHitFirstResponse, WebInterface.RaycastHitEntity>(
+            sceneEvent, response,
             (raycastResponse) =>
             {
                 responseCount++;
                 Assert.IsTrue(responseCount == 1, "This raycast query should be lossy and therefore excecuted once.");
                 Assert.IsTrue(raycastResponse != null);
-                Assert.IsTrue(raycastResponse.eventType == sceneEvent.eventType);
-                Assert.IsTrue(raycastResponse.sceneId == sceneEvent.sceneId);
-                Assert.IsTrue(raycastResponse.payload.queryId == sceneEvent.payload.queryId);
-                Assert.IsTrue(raycastResponse.payload.queryType == sceneEvent.payload.queryType);
-                Assert.IsTrue(raycastResponse.payload.payload.ray.distance == sceneEvent.payload.payload.ray.distance);
-                Assert.IsTrue(raycastResponse.payload.payload.ray.direction == sceneEvent.payload.payload.ray.direction);
-                Assert.IsTrue(raycastResponse.payload.payload.ray.origin == sceneEvent.payload.payload.ray.origin);
                 Assert.IsTrue(raycastResponse.payload.payload.entity.entityId == sceneEvent.payload.payload.entity.entityId);
 
                 if (raycastResponse != null &&
-                    raycastResponse.eventType == sceneEvent.eventType &&
-                    raycastResponse.sceneId == sceneEvent.sceneId &&
-                    raycastResponse.payload.queryId == sceneEvent.payload.queryId &&
-                    raycastResponse.payload.queryType == sceneEvent.payload.queryType &&
-                    raycastResponse.payload.payload.ray.distance == sceneEvent.payload.payload.ray.distance &&
-                    raycastResponse.payload.payload.ray.direction == sceneEvent.payload.payload.ray.direction &&
-                    raycastResponse.payload.payload.ray.origin == sceneEvent.payload.payload.ray.origin &&
+                    AreSceneEventsEqual<WebInterface.RaycastHitFirstResponse, WebInterface.RaycastHitEntity>(raycastResponse, sceneEvent) &&
                     raycastResponse.payload.payload.entity.entityId == sceneEvent.payload.payload.entity.entityId)
                 {
                     eventTriggered = true;
@@ -195,43 +173,22 @@ public class PhysicsCast_Tests : TestsBase
             response.payload.entities[i].entity.entityId = entities[i].entityId;
         }
 
-        string targetEventType = "SceneEvent";
         var sceneEvent = new WebInterface.SceneEvent<WebInterface.RaycastHitAllResponse>();
-        sceneEvent.sceneId = scene.sceneData.id;
-        sceneEvent.payload = response;
-        sceneEvent.eventType = "raycastResponse";
 
         bool eventTriggered = false;
         int responseCount = 0;
 
-        yield return TestHelpers.WaitForEventFromEngine(targetEventType, sceneEvent,
-            () =>
-            {
-                sceneController.SendSceneMessage(System.Convert.ToBase64String(sendSceneMessage.ToByteArray()));
-                sceneController.SendSceneMessage(System.Convert.ToBase64String(sendSceneMessage.ToByteArray()));
-                sceneController.SendSceneMessage(System.Convert.ToBase64String(sendSceneMessage.ToByteArray()));
-            },
+        yield return SendRaycastQueryMessage<WebInterface.RaycastHitAllResponse, WebInterface.RaycastHitEntities>(
+            sceneEvent, response,
             (raycastResponse) =>
             {
                 responseCount++;
                 Assert.IsTrue(responseCount == 1, "This raycast query should be lossy and therefore excecuted once.");
                 Assert.IsTrue(raycastResponse != null);
-                Assert.IsTrue(raycastResponse.eventType == sceneEvent.eventType);
-                Assert.IsTrue(raycastResponse.sceneId == sceneEvent.sceneId);
-                Assert.IsTrue(raycastResponse.payload.queryId == sceneEvent.payload.queryId);
-                Assert.IsTrue(raycastResponse.payload.queryType == sceneEvent.payload.queryType);
-                Assert.IsTrue(raycastResponse.payload.payload.ray.distance == sceneEvent.payload.payload.ray.distance);
-                Assert.IsTrue(raycastResponse.payload.payload.ray.direction == sceneEvent.payload.payload.ray.direction);
-                Assert.IsTrue(raycastResponse.payload.payload.ray.origin == sceneEvent.payload.payload.ray.origin);
+                Assert.IsTrue(raycastResponse.payload.payload.entities.Length == ENTITIES_COUNT);
 
                 if (raycastResponse != null &&
-                    raycastResponse.eventType == sceneEvent.eventType &&
-                    raycastResponse.sceneId == sceneEvent.sceneId &&
-                    raycastResponse.payload.queryId == sceneEvent.payload.queryId &&
-                    raycastResponse.payload.queryType == sceneEvent.payload.queryType &&
-                    raycastResponse.payload.payload.ray.distance == sceneEvent.payload.payload.ray.distance &&
-                    raycastResponse.payload.payload.ray.direction == sceneEvent.payload.payload.ray.direction &&
-                    raycastResponse.payload.payload.ray.origin == sceneEvent.payload.payload.ray.origin &&
+                    AreSceneEventsEqual<WebInterface.RaycastHitAllResponse, WebInterface.RaycastHitEntities>(raycastResponse, sceneEvent) &&
                     raycastResponse.payload.payload.entities.Length == ENTITIES_COUNT)
                 {
                     for (int i = 0; i < raycastResponse.payload.payload.entities.Length; i++)
@@ -261,5 +218,56 @@ public class PhysicsCast_Tests : TestsBase
 
         Assert.IsTrue(eventTriggered);
     }
+
+    private IEnumerator SendRaycastQueryMessage<T, T2>(WebInterface.SceneEvent<T> sceneEvent, T response, System.Func<WebInterface.SceneEvent<T>, bool> OnSuccess) where T2 : WebInterface.RaycastHitInfo where T : WebInterface.RaycastResponse<T2>
+    {
+        string targetEventType = "SceneEvent";
+
+        sceneEvent.sceneId = scene.sceneData.id;
+        sceneEvent.payload = response;
+        sceneEvent.eventType = "raycastResponse";
+
+        yield return TestHelpers.WaitForEventFromEngine<WebInterface.SceneEvent<T>>(targetEventType, sceneEvent,
+            () =>
+            {
+                // Note (Zak): we send several times the same message to ensure it's
+                // only processed once (lossy messages)
+                sceneController.SendSceneMessage(System.Convert.ToBase64String(sendSceneMessage.ToByteArray()));
+                sceneController.SendSceneMessage(System.Convert.ToBase64String(sendSceneMessage.ToByteArray()));
+                sceneController.SendSceneMessage(System.Convert.ToBase64String(sendSceneMessage.ToByteArray()));
+            },
+            OnSuccess);
+    }
+
+
+
+    private bool AreSceneEventsEqual<T, T2>(WebInterface.SceneEvent<T> s1, WebInterface.SceneEvent<T> s2) where T2 : WebInterface.RaycastHitInfo where T : WebInterface.RaycastResponse<T2>
+    {
+        Assert.IsTrue(s1.eventType == s2.eventType);
+        Assert.IsTrue(s1.sceneId == s2.sceneId);
+
+        if (s1.eventType != s2.eventType ||
+            s1.sceneId != s2.sceneId)
+            return false;
+
+        return AreRaycastResponsesEqual(s1.payload, s2.payload);
+    }
+
+    private bool AreRaycastResponsesEqual<T>(WebInterface.RaycastResponse<T> r1, WebInterface.RaycastResponse<T> r2) where T : WebInterface.RaycastHitInfo
+    {
+        Assert.IsTrue(r1.queryId == r2.queryId);
+        Assert.IsTrue(r1.queryType == r2.queryType);
+        Assert.IsTrue(r1.payload.ray.distance == r2.payload.ray.distance);
+        Assert.IsTrue(r1.payload.ray.direction == r2.payload.ray.direction);
+        Assert.IsTrue(r1.payload.ray.origin == r2.payload.ray.origin);
+
+        return r1.queryId == r2.queryId &&
+               r1.queryType == r2.queryType &&
+               r1.payload.ray.distance == r2.payload.ray.distance &&
+               r1.payload.ray.direction == r2.payload.ray.direction &&
+               r1.payload.ray.origin == r2.payload.ray.origin;
+    }
+
+
 }
 
