@@ -66,6 +66,7 @@ namespace DCL
         public event ProcessDelegate OnMessageProcessInfoStart;
         public event ProcessDelegate OnMessageProcessInfoEnds;
 #endif
+        [NonSerialized]
         public List<ParcelScene> scenesSortedByDistance = new List<ParcelScene>();
         private Queue<MessagingBus.QueuedSceneMessage_Scene> sceneMessagesPool = new Queue<MessagingBus.QueuedSceneMessage_Scene>();
 
