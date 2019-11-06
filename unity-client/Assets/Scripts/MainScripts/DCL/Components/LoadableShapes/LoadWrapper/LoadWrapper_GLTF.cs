@@ -28,12 +28,24 @@ namespace DCL.Components
         [ContextMenu("Debug Load Count")]
         public void DebugLoadCount()
         {
-            Debug.Log($"promise state = {gltfPromise.state} ... waiting promises = {AssetPromiseKeeper_GLTF.i.waitingPromisesCount}");
+            float loadTime = Mathf.Min(loadFinishTime, Time.realtimeSinceStartup) - loadStartTime;
+
+            if (gltfPromise != null)
+                Debug.Log($"promise state = {gltfPromise.state} ({loadTime} load time)... waiting promises = {AssetPromiseKeeper_GLTF.i.waitingPromisesCount}");
+
+            if (abPromise != null)
+                Debug.Log($"promise state = {abPromise.state} ({loadTime} load time)... waiting promises = {AssetPromiseKeeper_AssetBundle.i.waitingPromisesCount}");
         }
+
+        float loadStartTime = 0;
+        float loadFinishTime = float.MaxValue;
 #endif
 
         public override void Load(string targetUrl, Action<LoadWrapper> OnSuccess, Action<LoadWrapper> OnFail)
         {
+#if UNITY_EDITOR
+            loadStartTime = Time.realtimeSinceStartup;
+#endif
             Assert.IsFalse(string.IsNullOrEmpty(targetUrl), "url is null!!");
 
             if (USE_GLTF_FALLBACK)
@@ -100,6 +112,10 @@ namespace DCL.Components
 
         private void OnFailWrapper(Asset loadedAsset, Action<LoadWrapper> OnFail)
         {
+#if UNITY_EDITOR
+            loadFinishTime = Time.realtimeSinceStartup;
+#endif
+
             if (VERBOSE)
             {
                 Debug.Log($"Load(): target URL -> {gltfPromise.url}. Failure!");
@@ -119,6 +135,9 @@ namespace DCL.Components
 
             this.entity.OnCleanupEvent -= OnEntityCleanup;
             this.entity.OnCleanupEvent += OnEntityCleanup;
+#if UNITY_EDITOR
+            loadFinishTime = Time.realtimeSinceStartup;
+#endif
 
             OnSuccess?.Invoke(this);
         }
