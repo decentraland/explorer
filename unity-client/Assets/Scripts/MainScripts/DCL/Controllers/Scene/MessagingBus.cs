@@ -199,11 +199,6 @@ namespace DCL
 
         private void RemoveUnreliableMessage(MessagingBus.QueuedSceneMessage message)
         {
-            // Note (Zak): Right now it's not necessary to check if this key exists
-            // within the dictionary, because this is the only place were it's 
-            // removed and it's called *only* when processing a message, so we
-            // know it's there. In the future, if we think this is slowing down
-            // things, we could remove it. 
             if (unreliableMessages.ContainsKey(message.unreliableMessageKey))
                 unreliableMessages.Remove(message.unreliableMessageKey);
         }

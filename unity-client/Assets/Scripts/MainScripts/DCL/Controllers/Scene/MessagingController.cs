@@ -32,6 +32,7 @@ namespace DCL
 
     public class MessagingController : IDisposable
     {
+        const char SEPARATOR = '_';
         public enum QueueState
         {
             Init,
@@ -169,8 +170,9 @@ namespace DCL
 
         private void GetEntityIdAndClassIdFromTag(string tag, out int classId)
         {
-            int lastSeparator = tag.LastIndexOf('_');
-            classId = System.Convert.ToInt32(tag.Substring(lastSeparator + 1));
+            int lastSeparator = tag.LastIndexOf(SEPARATOR);
+            if (!int.TryParse(tag.Substring(lastSeparator + 1), out classId))
+                Debug.LogError("Couldn't parse classId string to int");
         }
 
         private string FormatQueueId(string sceneId, string tag)
