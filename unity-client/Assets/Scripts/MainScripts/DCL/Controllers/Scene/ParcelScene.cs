@@ -1117,5 +1117,58 @@ namespace DCL.Controllers
             SceneController.i.SendSceneReady(sceneData.id);
             RefreshName();
         }
+
+#if UNITY_EDITOR
+        [ContextMenu("Get Waiting Components Debug Info")]
+        public void GetWaitingComponentsDebugInfo()
+        {
+            switch (state)
+            {
+                case State.WAITING_FOR_COMPONENTS:
+
+                    foreach (string componentId in disposableNotReady)
+                    {
+                        if (disposableComponents.ContainsKey(componentId))
+                        {
+                            var component = disposableComponents[componentId];
+
+                            Debug.Log($"Waiting for: {component.ToString()}");
+                            //if (component is LoadableShape)
+                            //{
+                            //    LoadableShape shape = (LoadableShape)component;
+
+                            //    string fullUrl;
+                            //    bool found = contentProvider.TryGetContentsUrl(shape.model.src, out fullUrl);
+
+                            //    if (!found)
+                            //        fullUrl = "Not found!";
+
+
+                            //}
+                            //else
+                            //{
+                            //    Debug.Log($"Waiting for: {component.componentName}");
+                            //}
+
+                            foreach (var entity in component.attachedEntities)
+                            {
+                                Debug.Log($"This shape is attached to {entity.entityId} entity. Click here for highlight it.", entity.gameObject);
+                            }
+                        }
+                        else
+                        {
+                            Debug.Log($"Waiting for missing component? id: {componentId}");
+                        }
+                    }
+
+                    break;
+
+                default:
+                    Debug.Log("This scene is not waiting for any components. Its current state is " + state);
+                    break;
+            }
+        }
+#endif
+
     }
 }
