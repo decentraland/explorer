@@ -36,8 +36,8 @@ namespace DCL
         internal static string ASSET_BUNDLE_FOLDER_NAME = "AssetBundles";
         internal static string ASSET_BUNDLES_PATH_ROOT = Application.dataPath + "/../" + ASSET_BUNDLE_FOLDER_NAME + "/";
 
-        private static bool deleteDownloadPathAfterFinished = true;
-        private static bool skipUploadedGltfs = true;
+        internal static bool deleteDownloadPathAfterFinished = true;
+        internal static bool skipUploadedGltfs = true;
 
         internal static string finalAssetBundlePath = "";
         internal static string finalDownloadedPath = "";
@@ -375,7 +375,7 @@ namespace DCL
 
             delayedCall = () =>
             {
-                if (Time.realtimeSinceStartup - time < .5f)
+                if (Time.realtimeSinceStartup - time < 2.0f)
                     return;
 
                 EditorApplication.update -= delayedCall;
