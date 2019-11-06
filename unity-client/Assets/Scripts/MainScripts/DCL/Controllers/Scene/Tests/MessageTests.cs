@@ -32,8 +32,6 @@ namespace Tests
         {
             yield return InitScene();
 
-            sceneController.deferredMessagesDecoding = false;
-
             var entity = TestHelpers.CreateSceneEntity(scene);
 
             yield return null;
