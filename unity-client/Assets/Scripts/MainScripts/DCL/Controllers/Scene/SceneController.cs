@@ -36,7 +36,14 @@ namespace DCL
         public Vector2Int debugSceneCoords;
         public bool ignoreGlobalScenes = false;
         public bool msgStepByStep = false;
+
         public bool deferredMessagesDecoding = false;
+        Queue<string> payloadsToDecode = new Queue<string>();
+        const float MAX_TIME_FOR_DECODE = 0.1f;
+        const float MIN_TIME_FOR_DECODE = 0.001f;
+        float maxTimeForDecode = MAX_TIME_FOR_DECODE;
+        float secsPerThousandMsgs = 0.01f;
+
 
         #region BENCHMARK_EVENTS
 
@@ -439,10 +446,10 @@ namespace DCL
 
         public string SendSceneMessage(string payload)
         {
-            return SendSceneMessage(payload, true);
+            return SendSceneMessage(payload, deferredMessagesDecoding);
         }
 
-        public string SendSceneMessage(string payload, bool enqueue)
+        private string SendSceneMessage(string payload, bool enqueue)
         {
             string[] chunks = payload.Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
             int count = chunks.Length;
@@ -450,7 +457,7 @@ namespace DCL
 
             for (int i = 0; i < count; i++)
             {
-                if (deferredMessagesDecoding && RenderingController.i.renderingEnabled && enqueue)
+                if (RenderingController.i.renderingEnabled && enqueue)
                 {
                     payloadsToDecode.Enqueue(chunks[i]);
                 }
@@ -492,11 +499,6 @@ namespace DCL
             return "";
         }
 
-        Queue<string> payloadsToDecode = new Queue<string>();
-        const float MAX_TIME_FOR_DECODE = 0.1f;
-        const float MIN_TIME_FOR_DECODE = 0.001f;
-        float maxTimeForDecode = MAX_TIME_FOR_DECODE;
-        float secsPerThousandMsgs = 0.01f;
         private IEnumerator DeferredDecoding()
         {
             float lastTimeDecoded = Time.unscaledTime;
