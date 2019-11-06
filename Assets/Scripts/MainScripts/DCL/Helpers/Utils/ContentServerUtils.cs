@@ -88,7 +88,7 @@
         public static string GetBundlesAPIUrlBase(ApiEnvironment env)
         {
             string envString = GetEnvString(env);
-            return $"https://content-as-bundle.decentraland.{envString}/contents/";
+            return $"https://content-as-bundle.decentraland.zone/contents/";
         }
     }
 }

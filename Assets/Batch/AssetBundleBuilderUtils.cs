@@ -20,7 +20,9 @@ namespace DCL
         public static void DumpMuseum()
         {
             AssetBundleBuilder.environment = ContentServerUtils.ApiEnvironment.ORG;
-            AssetBundleBuilder.DumpArea(new List<Vector2Int>() { new Vector2Int(13, 75) });
+            AssetBundleBuilder.skipUploadedGltfs = false;
+            var zoneArray = GetCenteredZoneArray(new Vector2Int(13, 75), new Vector2Int(2, 2));
+            AssetBundleBuilder.DumpArea(zoneArray);
         }
 
         [MenuItem("AssetBundleBuilder/Dump Zone 64,-64")]
