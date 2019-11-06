@@ -1221,6 +1221,7 @@ namespace DCL.Helpers
         public static SceneController InitializeSceneController(bool usesWebServer = false)
         {
             var sceneController = UnityEngine.Object.FindObjectOfType<SceneController>();
+            sceneController.deferredMessagesDecoding = false;
 
             if (sceneController != null && sceneController.componentFactory == null)
             {
@@ -1297,11 +1298,13 @@ namespace DCL.Helpers
             {
                 OnIterationStart?.Invoke();
 
-                var messageObject = JsonUtility.FromJson<T>(lastMessageFromEnginePayload);
+                if (!string.IsNullOrEmpty(lastMessageFromEnginePayload))
+                {
+                    var messageObject = JsonUtility.FromJson<T>(lastMessageFromEnginePayload);
 
-                if (OnSuccess != null)
-                    return OnSuccess.Invoke(messageObject);
-
+                    if (OnSuccess != null)
+                        return OnSuccess.Invoke(messageObject);
+                }
                 return false;
             }, 2f);
         }

@@ -582,6 +582,7 @@ namespace DCL
                 OnMessageProcessInfoStart?.Invoke(sceneId, method);
 #endif
                 OnMessageProcessStart?.Invoke(method);
+
                 switch (method)
                 {
                     case MessagingTypes.ENTITY_CREATE:

@@ -12,9 +12,19 @@ using Google.Protobuf;
 public class PhysicsCast_Tests : TestsBase
 {
     const int ENTITIES_COUNT = 3;
-    PB_RayQuery raycastQuery = new PB_RayQuery();
-
+    PB_RayQuery raycastQuery;
+    PB_Query query;
+    PB_SendSceneMessage sendSceneMessage;
     Vector3 startPos = new Vector3(5, 5, 15);
+    bool alreadyInitialized = false;
+
+    protected override IEnumerator InitScene(bool usesWebServer = false, bool spawnCharController = true, bool spawnTestScene = true, bool spawnUIScene = true, bool debugMode = false)
+    {
+        if (!alreadyInitialized)
+            yield return base.InitScene(usesWebServer, spawnCharController, spawnTestScene, spawnUIScene, debugMode);
+
+        alreadyInitialized = true;
+    }
 
     void InstantiateEntityWithShape(Vector3 pos, Vector3 scale, out DecentralandEntity entity, out BoxShape shape)
     {
@@ -28,13 +38,12 @@ public class PhysicsCast_Tests : TestsBase
         TestHelpers.SetEntityTransform(scene, entity, pos, Quaternion.identity, scale);
     }
 
-    private IEnumerator BaseRaycastTest(string queryType)
+    private void ConfigureRaycastQuery(string queryType)
     {
-        yield return base.InitScene();
-
         DCLCharacterController.i.SetPosition(startPos);
 
-        raycastQuery.QueryId = "123456";
+        raycastQuery = new PB_RayQuery();
+        raycastQuery.QueryId = "123456" + queryType;
         raycastQuery.QueryType = queryType;
         raycastQuery.Ray = new PB_Ray();
         raycastQuery.Ray.Direction = new PB_Vector3();
@@ -46,12 +55,22 @@ public class PhysicsCast_Tests : TestsBase
         raycastQuery.Ray.Origin.X = startPos.x;
         raycastQuery.Ray.Origin.Y = startPos.y;
         raycastQuery.Ray.Origin.Z = startPos.z;
+
+        query = new PB_Query();
+        query.QueryId = "raycast";
+        query.Payload = System.Convert.ToBase64String(raycastQuery.ToByteArray());
+
+        sendSceneMessage = new PB_SendSceneMessage();
+        sendSceneMessage.Query = query;
+        sendSceneMessage.SceneId = this.scene.sceneData.id;
     }
 
     [UnityTest]
     public IEnumerator HitFirst()
     {
-        yield return BaseRaycastTest("HitFirst");
+        yield return InitScene();
+
+        ConfigureRaycastQuery("HitFirst");
 
         List<DecentralandEntity> entities = new List<DecentralandEntity>();
         Vector3 pos = new Vector3(5, 0, 10);
@@ -89,14 +108,19 @@ public class PhysicsCast_Tests : TestsBase
         sceneEvent.eventType = "raycastResponse";
 
         bool eventTriggered = false;
+        int responseCount = 0;
 
         yield return TestHelpers.WaitForEventFromEngine(targetEventType, sceneEvent,
             () =>
             {
-                sceneController.ParseQuery("raycast", System.Convert.ToBase64String(raycastQuery.ToByteArray()), scene.sceneData.id);
+                sceneController.SendSceneMessage(System.Convert.ToBase64String(sendSceneMessage.ToByteArray()));
+                sceneController.SendSceneMessage(System.Convert.ToBase64String(sendSceneMessage.ToByteArray()));
+                sceneController.SendSceneMessage(System.Convert.ToBase64String(sendSceneMessage.ToByteArray()));
             },
             (raycastResponse) =>
             {
+                responseCount++;
+                Assert.IsTrue(responseCount == 1, "This raycast query should be lossy and therefore excecuted once.");
                 Assert.IsTrue(raycastResponse != null);
                 Assert.IsTrue(raycastResponse.eventType == sceneEvent.eventType);
                 Assert.IsTrue(raycastResponse.sceneId == sceneEvent.sceneId);
@@ -130,7 +154,9 @@ public class PhysicsCast_Tests : TestsBase
     [UnityTest]
     public IEnumerator HitAll()
     {
-        yield return BaseRaycastTest("HitAll");
+        yield return InitScene();
+
+        ConfigureRaycastQuery("HitAll");
 
         List<DecentralandEntity> entities = new List<DecentralandEntity>();
         Vector3 pos = new Vector3(5, 0, 10);
@@ -176,14 +202,19 @@ public class PhysicsCast_Tests : TestsBase
         sceneEvent.eventType = "raycastResponse";
 
         bool eventTriggered = false;
+        int responseCount = 0;
 
         yield return TestHelpers.WaitForEventFromEngine(targetEventType, sceneEvent,
             () =>
             {
-                sceneController.ParseQuery("raycast", System.Convert.ToBase64String(raycastQuery.ToByteArray()), scene.sceneData.id);
+                sceneController.SendSceneMessage(System.Convert.ToBase64String(sendSceneMessage.ToByteArray()));
+                sceneController.SendSceneMessage(System.Convert.ToBase64String(sendSceneMessage.ToByteArray()));
+                sceneController.SendSceneMessage(System.Convert.ToBase64String(sendSceneMessage.ToByteArray()));
             },
             (raycastResponse) =>
             {
+                responseCount++;
+                Assert.IsTrue(responseCount == 1, "This raycast query should be lossy and therefore excecuted once.");
                 Assert.IsTrue(raycastResponse != null);
                 Assert.IsTrue(raycastResponse.eventType == sceneEvent.eventType);
                 Assert.IsTrue(raycastResponse.sceneId == sceneEvent.sceneId);
