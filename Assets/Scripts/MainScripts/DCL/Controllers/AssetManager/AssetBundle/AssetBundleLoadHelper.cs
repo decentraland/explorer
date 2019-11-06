@@ -226,6 +226,7 @@ public static class AssetBundleLoadHelper
 #if UNITY_EDITOR
         container.GetComponentsInChildren<Renderer>().ToList().ForEach(ResetShader);
 #endif
+        container.transform.position = Vector3.one * 5000;
         OnComplete?.Invoke(container);
         yield break;
     }
