@@ -455,6 +455,20 @@ namespace DCL.Helpers
             return gltfShape;
         }
 
+        public static BoxShape CreateEntityWithBoxShape(ParcelScene scene, Vector3 pos, Vector3 scale, out DecentralandEntity entity)
+        {
+            BoxShape shape = TestHelpers.InstantiateEntityWithShape<BoxShape, BoxShape.Model>(
+                scene,
+                DCL.Models.CLASS_ID.BOX_SHAPE,
+                Vector3.zero,
+                out entity,
+                new BoxShape.Model() { });
+
+            TestHelpers.SetEntityTransform(scene, entity, pos, Quaternion.identity, scale);
+
+            return shape;
+        }
+
         public static BoxShape CreateEntityWithBoxShape(ParcelScene scene, Vector3 position,
             BoxShape.Model model = null)
         {

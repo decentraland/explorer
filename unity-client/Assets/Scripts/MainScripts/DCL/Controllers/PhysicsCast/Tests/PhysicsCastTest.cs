@@ -78,9 +78,7 @@ public class PhysicsCast_Tests : TestsBase
         for (int i = 0; i < ENTITIES_COUNT; i++)
         {
             DecentralandEntity entity;
-            BoxShape shape;
-
-            InstantiateEntityWithShape(pos, new Vector3(5, 10, 1), out entity, out shape);
+            BoxShape shape = TestHelpers.CreateEntityWithBoxShape(scene, pos, new Vector3(5, 10, 1), out entity);
             yield return shape.routine;
 
             DCL.CollidersManager.i.ConfigureColliders(entity.meshRootGameObject, true, false, entity);
@@ -142,9 +140,7 @@ public class PhysicsCast_Tests : TestsBase
         for (int i = 0; i < ENTITIES_COUNT; i++)
         {
             DecentralandEntity entity;
-            BoxShape shape;
-
-            InstantiateEntityWithShape(pos, new Vector3(5, 10, 1), out entity, out shape);
+            BoxShape shape = TestHelpers.CreateEntityWithBoxShape(scene, pos, new Vector3(5, 10, 1), out entity);
             yield return shape.routine;
 
             DCL.CollidersManager.i.ConfigureColliders(entity.meshRootGameObject, true, false, entity);
