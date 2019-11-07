@@ -40,7 +40,7 @@ public static class MaterialCachingHelper
 
 public static class AssetBundleLoadHelper
 {
-    static bool VERBOSE = true;
+    static bool VERBOSE = false;
 
     static Dictionary<string, AssetBundle> cachedBundles = new Dictionary<string, AssetBundle>();
     static Dictionary<string, AssetBundle> cachedBundlesWithDeps = new Dictionary<string, AssetBundle>();
@@ -88,25 +88,29 @@ public static class AssetBundleLoadHelper
 
         if (downloadingBundle.Contains(url))
         {
+            yield return new WaitUntil(() => !downloadingBundle.Contains(url), 20);
+            Debug.Log($"Waiting too long for {url}?");
             yield return new WaitUntil(() => !downloadingBundle.Contains(url));
             yield break;
         }
 
-        UnityWebRequest depmapRequest = UnityWebRequest.Get(url);
-        downloadingBundle.Add(url);
-        yield return depmapRequest.SendWebRequest();
-
-        if (depmapRequest.isHttpError || depmapRequest.isNetworkError)
+        using (UnityWebRequest depmapRequest = UnityWebRequest.Get(url))
         {
-            failedRequests.Add(url);
+            downloadingBundle.Add(url);
+            yield return depmapRequest.SendWebRequest();
+
+            if (depmapRequest.isHttpError || depmapRequest.isNetworkError)
+            {
+                failedRequests.Add(url);
+                downloadingBundle.Remove(url);
+                yield break;
+            }
+
+            AssetDependencyMap map = JsonUtility.FromJson<AssetDependencyMap>(depmapRequest.downloadHandler.text);
+
+            dependenciesMap.Add(hash, new List<string>(map.dependencies));
             downloadingBundle.Remove(url);
-            yield break;
         }
-
-        AssetDependencyMap map = JsonUtility.FromJson<AssetDependencyMap>(depmapRequest.downloadHandler.text);
-
-        dependenciesMap.Add(hash, new List<string>(map.dependencies));
-        downloadingBundle.Remove(url);
     }
 
 
@@ -121,13 +125,29 @@ public static class AssetBundleLoadHelper
         {
             if (downloadingBundle.Contains(url))
             {
+                yield return new WaitUntil(() => !downloadingBundle.Contains(url), 20);
+                Debug.Log($"Waiting too long for {url}?");
                 yield return new WaitUntil(() => !downloadingBundle.Contains(url));
                 yield break;
             }
 
             downloadingBundle.Add(url);
 
-            yield return assetBundleRequest.SendWebRequest();
+            var asyncOp = assetBundleRequest.SendWebRequest();
+            float progress = 0;
+
+            while (!asyncOp.isDone)
+            {
+                if (VERBOSE)
+                {
+                    if (asyncOp.progress != progress)
+                    {
+                        Debug.Log("Progress for " + url + " = " + asyncOp.progress);
+                        progress = asyncOp.progress;
+                    }
+                }
+                yield return null;
+            }
 
             if (assetBundleRequest.isHttpError || assetBundleRequest.isNetworkError)
             {
