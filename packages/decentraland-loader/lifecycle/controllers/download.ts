@@ -3,7 +3,6 @@ import { future, IFuture } from 'fp-future'
 import { ILand, IScene, ParcelInfoResponse } from 'shared/types'
 import { jsonFetch } from 'atomicHelpers/jsonFetch'
 import { createLogger } from 'shared/logger'
-import { getServerConfigurations } from 'config'
 
 const emptyScenes = require('./emptyScenes.json')
 
@@ -81,7 +80,7 @@ export class SceneDataDownloadManager {
     return {
       sceneId: sceneId,
       baseUrl: this.options.contentServer + '/contents/',
-      baseUrlBundles: getServerConfigurations().contentAsBundle + '/',
+      baseUrlBundles: this.options.contentServerBundles + '/',
       name: 'Empty parcel',
       scene: {
         display: { title: 'Empty parcel' },
