@@ -12,6 +12,7 @@ public static class AssetBundleLoadHelper
 
     static Dictionary<string, AssetBundle> cachedBundles = new Dictionary<string, AssetBundle>();
     static Dictionary<string, AssetBundle> cachedBundlesWithDeps = new Dictionary<string, AssetBundle>();
+    static Dictionary<AssetBundle, List<string>> bundleToMainAssets = new Dictionary<AssetBundle, List<string>>();
 
     static Dictionary<string, List<string>> dependenciesMap = new Dictionary<string, List<string>>();
     static HashSet<string> failedRequests = new HashSet<string>();
@@ -20,6 +21,18 @@ public static class AssetBundleLoadHelper
     static List<string> downloadingBundleWithDeps = new List<string>();
 
     static Dictionary<string, Object> loadedAssets = new Dictionary<string, Object>();
+
+    static Dictionary<string, int> loadOrderByExtension = new Dictionary<string, int>()
+    {
+        { "png", 0 },
+        { "jpg", 1 },
+        { "mat", 2 },
+        { "ltf", 3 },
+        { "glb", 4 }
+    };
+
+    static float maxLoadBudgetTime = 0.032f;
+    static float currentLoadBudgetTime = 0;
 
     [System.Serializable]
     public class AssetDependencyMap
@@ -60,93 +73,110 @@ public static class AssetBundleLoadHelper
         downloadingBundle.Remove(url);
     }
 
+
+
+
     public static IEnumerator GetAssetBundle(string url)
     {
         if (failedRequests.Contains(url) || cachedBundles.ContainsKey(url))
             yield break;
 
-        UnityWebRequest assetBundleRequest = UnityWebRequestAssetBundle.GetAssetBundle(url);
-
-        if (downloadingBundle.Contains(url))
+        using (UnityWebRequest assetBundleRequest = UnityWebRequestAssetBundle.GetAssetBundle(url))
         {
-            yield return new WaitUntil(() => !downloadingBundle.Contains(url));
-            yield break;
-        }
-
-        downloadingBundle.Add(url);
-
-        yield return assetBundleRequest.SendWebRequest();
-
-        if (assetBundleRequest.isHttpError || assetBundleRequest.isNetworkError)
-        {
-            failedRequests.Add(url);
-            downloadingBundle.Remove(url);
-            Debug.LogWarning("AssetBundle request fail! " + url);
-            yield break;
-        }
-
-        if (!cachedBundles.ContainsKey(url))
-        {
-            AssetBundle assetBundle = DownloadHandlerAssetBundle.GetContent(assetBundleRequest);
-            string[] assets = assetBundle.GetAllAssetNames();
-            List<string> assetsToLoad = new List<string>();
-
-            if (assetBundle != null)
+            if (downloadingBundle.Contains(url))
             {
-                foreach (string asset in assets)
-                {
-                    bool isTexture = asset.EndsWith("jpg") || asset.EndsWith("png");
-
-                    if (isTexture)
-                    {
-                        assetsToLoad.Add(asset);
-                    }
-                }
-
-                foreach (string asset in assets)
-                {
-                    bool isMaterial = asset.EndsWith("mat");
-
-                    if (isMaterial)
-                    {
-                        assetsToLoad.Add(asset);
-                    }
-                }
-
-                foreach (string asset in assets)
-                {
-                    bool isModel = asset.EndsWith("glb") || asset.EndsWith("gltf");
-                    if (isModel)
-                    {
-                        assetsToLoad.Add(asset);
-                    }
-                }
-
-                foreach (string asset in assets)
-                {
-                    if (!assetsToLoad.Contains(asset))
-                        assetsToLoad.Add(asset);
-                }
-
-                foreach (string asset in assetsToLoad)
-                {
-                    if (!loadedAssets.ContainsKey(asset))
-                    {
-                        loadedAssets.Add(asset, assetBundle.LoadAsset(asset));
-                    }
-                }
-
-                cachedBundles[url] = assetBundle;
-                yield return null;
+                yield return new WaitUntil(() => !downloadingBundle.Contains(url));
+                yield break;
             }
-            else
+
+            downloadingBundle.Add(url);
+
+            yield return assetBundleRequest.SendWebRequest();
+
+            if (assetBundleRequest.isHttpError || assetBundleRequest.isNetworkError)
             {
                 failedRequests.Add(url);
+                downloadingBundle.Remove(url);
+                Debug.LogWarning("AssetBundle request fail! " + url);
+                yield break;
             }
-        }
 
-        assetBundleRequest.Dispose();
-        downloadingBundle.Remove(url);
+            if (!cachedBundles.ContainsKey(url))
+            {
+                AssetBundle assetBundle = DownloadHandlerAssetBundle.GetContent(assetBundleRequest);
+
+                if (assetBundle != null)
+                {
+                    string[] assets = assetBundle.GetAllAssetNames();
+                    List<string> assetsToLoad = new List<string>();
+                    assetsToLoad = assets.OrderBy(
+                        (x) =>
+                        {
+                            string ext = x.Substring(x.Length - 3);
+
+                            if (loadOrderByExtension.ContainsKey(ext))
+                                return loadOrderByExtension[ext];
+                            else
+                                return 99;
+                        }).ToList();
+
+                    foreach (string asset in assetsToLoad)
+                    {
+                        if (!loadedAssets.ContainsKey(asset))
+                        {
+                            float time = Time.realtimeSinceStartup;
+
+#if UNITY_EDITOR
+                            if (VERBOSE)
+                                Debug.Log("loading asset = " + asset);
+#endif
+
+                            loadedAssets.Add(asset, assetBundle.LoadAsset(asset));
+#if UNITY_EDITOR
+                            if (VERBOSE)
+                            {
+                                if (asset.EndsWith("mat"))
+                                {
+                                    Texture tex = (loadedAssets[asset] as Material).GetTexture("_BaseMap");
+
+                                    if (tex != null)
+                                        Debug.Log("material has texture " + tex.name);
+                                    else
+                                        Debug.Log("no texture!!!");
+                                }
+                            }
+#endif
+                            if (asset.EndsWith("glb") || asset.EndsWith("gltf"))
+                            {
+                                if (!bundleToMainAssets.ContainsKey(assetBundle))
+                                    bundleToMainAssets.Add(assetBundle, new List<string>(1));
+
+                                bundleToMainAssets[assetBundle].Add(asset);
+                            }
+
+                            if (RenderingController.i.renderingEnabled)
+                            {
+                                currentLoadBudgetTime += Time.realtimeSinceStartup - time;
+
+                                if (currentLoadBudgetTime > maxLoadBudgetTime)
+                                {
+                                    currentLoadBudgetTime = 0;
+                                    yield return null;
+                                }
+                            }
+                        }
+                    }
+
+                    cachedBundles[url] = assetBundle;
+                }
+                else
+                {
+                    failedRequests.Add(url);
+                }
+            }
+
+            downloadingBundle.Remove(url);
+        }
     }
 
 
@@ -200,25 +230,13 @@ public static class AssetBundleLoadHelper
 
     public static IEnumerator InstantiateAssetBundle(AssetBundle bundle, System.Action<GameObject> OnComplete)
     {
-        string[] assetNames = bundle.GetAllAssetNames();
-        string targetAsset = null;
-
-        for (int i = 0; i < assetNames.Length; i++)
-        {
-            string asset = assetNames[i];
-
-            if (asset.Contains("glb") || asset.Contains("gltf"))
-            {
-                targetAsset = asset;
-                break;
-            }
-        }
-
-        if (string.IsNullOrEmpty(targetAsset) || !loadedAssets.ContainsKey(targetAsset))
+        if (!bundleToMainAssets.ContainsKey(bundle))
         {
             Debug.Log("target asset not found?");
             yield break;
         }
+
+        string targetAsset = bundleToMainAssets[bundle][0];
 
         GameObject container = Object.Instantiate(loadedAssets[targetAsset] as GameObject);
 

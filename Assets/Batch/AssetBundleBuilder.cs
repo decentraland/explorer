@@ -195,7 +195,7 @@ namespace DCL
                 throw new Exception("MappingsAPIData is null?");
             }
 
-            AssetDatabase.Refresh();
+            AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport | ImportAssetOptions.ForceUpdate | ImportAssetOptions.ImportRecursive);
 
             MappingPair[] rawContents = parcelInfoApiData.data[0].content.contents;
 
@@ -210,7 +210,7 @@ namespace DCL
             contentProviderAB.BakeHashes();
 
             string[] bufferExtensions = { ".bin" };
-            string[] textureExtensions = { ".jpg", ".png" };
+            string[] textureExtensions = { ".jpg", ".png", ".jpeg", ".tga", ".gif", ".bmp", ".psd", ".tiff", ".iff" };
             string[] gltfExtensions = { ".glb", ".gltf" };
 
             var stringToAB = new Dictionary<string, AssetBundle>();
@@ -240,7 +240,7 @@ namespace DCL
                     pathsToTag.Add(fullPathToTag, hash);
             }
 
-            AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
+            AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport | ImportAssetOptions.ForceUpdate | ImportAssetOptions.ImportRecursive);
             AssetDatabase.SaveAssets();
 
             foreach (var kvp in pathsToTag)
@@ -263,9 +263,7 @@ namespace DCL
                 {
                     if (CheckContentUrlExists(contentProviderAB, hashToGltfPair, gltfHash))
                     {
-                        if (VERBOSE)
-                            Debug.Log("Skipping existing gltf: " + gltfHash);
-
+                        Debug.Log("Skipping existing gltf: " + gltfHash);
                         continue;
                     }
                 }
@@ -320,7 +318,7 @@ namespace DCL
                 //NOTE(Brian): Finally, load the gLTF. The GLTFImporter will use the PersistentAssetCache to resolve the external dependencies.
                 string path = DownloadAsset(contentProvider, hashToGltfPair, gltfHash, gltfHash + "/");
 
-                AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
+                AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport | ImportAssetOptions.ForceUpdate | ImportAssetOptions.ImportRecursive);
                 AssetDatabase.SaveAssets();
 
                 if (path != null)
@@ -379,6 +377,7 @@ namespace DCL
                     return;
 
                 EditorApplication.update -= delayedCall;
+                AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport | ImportAssetOptions.ForceUpdate | ImportAssetOptions.ImportRecursive);
                 AssetDatabase.SaveAssets();
 
                 var manifest = BuildPipeline.BuildAssetBundles(finalAssetBundlePath, BuildAssetBundleOptions.UncompressedAssetBundle | BuildAssetBundleOptions.ForceRebuildAssetBundle, BuildTarget.WebGL);
@@ -445,7 +444,7 @@ namespace DCL
                 OnBundleBuildFinish?.Invoke(0);
             };
 
-            AssetDatabase.Refresh();
+            AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport | ImportAssetOptions.ForceUpdate | ImportAssetOptions.ImportRecursive);
             EditorApplication.update += delayedCall;
         }
 
