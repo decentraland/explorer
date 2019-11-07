@@ -112,9 +112,7 @@ namespace Builder
 
                 if (file.EndsWith(".glb") || file.EndsWith(".gltf"))
                 {
-                    AssetPromise_GLTF gltfPromise = new AssetPromise_GLTF(currentScene.contentProvider, file);
-                    gltfPromise.settings.visibleFlags = AssetPromise_GLTF.VisibleFlags.INVISIBLE;
-                    gltfPromise.settings.forceNewInstance = false;
+                    AssetPromise_PrefetchGLTF gltfPromise = new AssetPromise_PrefetchGLTF(currentScene.contentProvider, file);
                     AssetPromiseKeeper_GLTF.i.Keep(gltfPromise);
                 }
             }

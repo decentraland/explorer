@@ -30,6 +30,7 @@ namespace Builder
         }
 
         private DCLBuilderSelectionCollider[] meshColliders;
+        private Animation[] meshAnimations;
         private Action onShapeLoaded;
 
         private bool isTransformComponentSet;
@@ -47,6 +48,9 @@ namespace Builder
 
             entity.OnTransformChange -= OnTransformUpdated;
             entity.OnTransformChange += OnTransformUpdated;
+
+            DCLBuilderBridge.OnPreviewModeChanged -= OnPreviewModeChanged;
+            DCLBuilderBridge.OnPreviewModeChanged += OnPreviewModeChanged;
 
             isTransformComponentSet = false;
             isShapeComponentSet = false;
@@ -131,12 +135,21 @@ namespace Builder
         {
             rootEntity.OnShapeUpdated -= OnShapeUpdated;
             rootEntity.OnTransformChange -= OnTransformUpdated;
+            DCLBuilderBridge.OnPreviewModeChanged -= OnPreviewModeChanged;
         }
 
         private void OnShapeUpdated(DecentralandEntity entity)
         {
             isShapeComponentSet = true;
             OnEntityShapeUpdated?.Invoke(this);
+
+            // We don't want animation to be running on editor
+            meshAnimations = GetComponentsInChildren<Animation>();
+            for (int i = 0; i < meshAnimations.Length; i++)
+            {
+                meshAnimations[i].Stop();
+                meshAnimations[i].clip?.SampleAnimation(meshAnimations[i].gameObject, 0);
+            }
             ProcessEntityShape(entity);
 
             if (hasGizmoComponent)
@@ -144,12 +157,6 @@ namespace Builder
                 scaleTarget = DCLTransform.model.scale;
                 StartCoroutine(ScaleAnimationRoutine(0.3f));
 
-                // We don't want animation to be running on editor
-                Animation[] entityAnimations = GetComponentsInChildren<Animation>();
-                for (int i = 0; i < entityAnimations.Length; i++)
-                {
-                    entityAnimations[i].Stop();
-                }
             }
 
             if (onShapeLoaded != null)
@@ -180,6 +187,31 @@ namespace Builder
             }
 
             OnEntityTransformUpdated?.Invoke(this);
+        }
+
+        private void OnPreviewModeChanged(bool isPreview)
+        {
+            if (isPreview)
+            {
+                if (meshAnimations != null)
+                {
+                    for (int i = 0; i < meshAnimations.Length; i++)
+                    {
+                        meshAnimations[i].Play();
+                    }
+                }
+            }
+            else
+            {
+                if (meshAnimations != null)
+                {
+                    for (int i = 0; i < meshAnimations.Length; i++)
+                    {
+                        meshAnimations[i].Stop();
+                        meshAnimations[i].clip?.SampleAnimation(meshAnimations[i].gameObject, 0);
+                    }
+                }
+            }
         }
 
         private void ProcessEntityShape(DecentralandEntity entity)
