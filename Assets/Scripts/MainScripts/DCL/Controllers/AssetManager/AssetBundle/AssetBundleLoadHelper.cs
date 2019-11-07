@@ -4,11 +4,43 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityGLTF.Cache;
 using WaitUntil = DCL.WaitUntil;
+
+public static class MaterialCachingHelper
+{
+    public static void UseCachedMaterials(GameObject obj)
+    {
+        foreach (var rend in obj.GetComponentsInChildren<Renderer>(true))
+        {
+            var matList = new List<Material>(1);
+
+            foreach (var mat in rend.sharedMaterials)
+            {
+                string crc = mat.ComputeCRC() + mat.name;
+
+                RefCountedMaterialData refCountedMat;
+
+                if (!PersistentAssetCache.MaterialCacheByCRC.ContainsKey(crc))
+                {
+                    mat.enableInstancing = true;
+                    PersistentAssetCache.MaterialCacheByCRC.Add(crc, new RefCountedMaterialData(crc, mat));
+                }
+
+                refCountedMat = PersistentAssetCache.MaterialCacheByCRC[crc];
+                refCountedMat.IncreaseRefCount();
+
+                matList.Add(refCountedMat.material);
+            }
+
+            rend.sharedMaterials = matList.ToArray();
+        }
+    }
+}
 
 public static class AssetBundleLoadHelper
 {
-    static bool VERBOSE = false;
+    static bool VERBOSE = true;
 
     static Dictionary<string, AssetBundle> cachedBundles = new Dictionary<string, AssetBundle>();
     static Dictionary<string, AssetBundle> cachedBundlesWithDeps = new Dictionary<string, AssetBundle>();
@@ -26,9 +58,13 @@ public static class AssetBundleLoadHelper
     {
         { "png", 0 },
         { "jpg", 1 },
-        { "mat", 2 },
-        { "ltf", 3 },
-        { "glb", 4 }
+        { "peg", 2 },
+        { "bmp", 3 },
+        { "psd", 4 },
+        { "iff", 5 },
+        { "mat", 6 },
+        { "ltf", 7 },
+        { "glb", 8 }
     };
 
     static float maxLoadBudgetTime = 0.032f;
@@ -238,7 +274,15 @@ public static class AssetBundleLoadHelper
 
         string targetAsset = bundleToMainAssets[bundle][0];
 
+        if (!loadedAssets.ContainsKey(targetAsset))
+        {
+            Debug.Log("target asset not loaded?");
+            yield break;
+        }
+
         GameObject container = Object.Instantiate(loadedAssets[targetAsset] as GameObject);
+
+        MaterialCachingHelper.UseCachedMaterials(container);
 
         container.name = targetAsset;
 #if UNITY_EDITOR

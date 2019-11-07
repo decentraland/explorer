@@ -80,39 +80,51 @@ namespace DCL
             }
 
             List<string> sceneCidsList = sceneCids.ToList();
-            Debug.Log($"Building {sceneCidsList.Count} scenes...");
 
-            startTime = Time.realtimeSinceStartup;
-
-            finalAssetBundlePath = ASSET_BUNDLES_PATH_ROOT;
-            finalDownloadedPath = DOWNLOADED_PATH_ROOT;
-            finalDownloadedAssetDbPath = DOWNLOADED_ASSET_DB_PATH_ROOT;
-
-            InitializeDirectory(finalDownloadedPath);
-            OnBundleBuildFinish = (errorCode) => { Debug.Log($"Conversion finished. [Time:{Time.realtimeSinceStartup - startTime}]"); OnFinish?.Invoke(errorCode); };
-
-            foreach (var v in sceneCidsList)
-            {
-                ExportSceneToAssetBundles_Internal(v);
-            }
-
-            BuildAssetBundles();
+            DumpSceneList(sceneCidsList, OnFinish);
         }
-
         internal static void DumpScene(string cid, Action<int> OnFinish = null)
         {
+            DumpSceneList(new List<string> { cid }, OnFinish);
+        }
+
+        static void DumpSceneList(List<string> sceneCidsList, System.Action<int> OnFinish)
+        {
+            Debug.Log($"Building {sceneCidsList.Count} scenes...");
             startTime = Time.realtimeSinceStartup;
 
             finalAssetBundlePath = ASSET_BUNDLES_PATH_ROOT;
             finalDownloadedPath = DOWNLOADED_PATH_ROOT;
             finalDownloadedAssetDbPath = DOWNLOADED_ASSET_DB_PATH_ROOT;
 
-            OnBundleBuildFinish = (errorCode) => { Debug.Log($"Conversion finished. [Time:{Time.realtimeSinceStartup - startTime}]"); OnFinish?.Invoke(errorCode); };
             InitializeDirectory(finalDownloadedPath);
-            ExportSceneToAssetBundles_Internal(cid);
-            BuildAssetBundles();
-        }
+            OnBundleBuildFinish = (errorCode) => { Debug.Log($"Conversion finished. [Time:{Time.realtimeSinceStartup - startTime}]"); OnFinish?.Invoke(errorCode); };
 
+            float timer = Time.realtimeSinceStartup;
+
+            EditorApplication.update = () =>
+            {
+                if (Time.realtimeSinceStartup - timer < 1f)
+                    return;
+
+                timer = Time.realtimeSinceStartup;
+
+                if (sceneCidsList.Count > 0)
+                {
+                    ExportSceneToAssetBundles_Internal(sceneCidsList[0]);
+                    sceneCidsList.RemoveAt(0);
+                    AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport | ImportAssetOptions.ForceUpdate | ImportAssetOptions.ImportRecursive);
+                    return;
+                }
+
+                if (!Directory.Exists(finalAssetBundlePath))
+                    Directory.CreateDirectory(finalAssetBundlePath);
+
+                BuildAssetBundles();
+
+                EditorApplication.update = null;
+            };
+        }
 
         public static void ExportSceneToAssetBundles()
         {
@@ -174,6 +186,8 @@ namespace DCL
 
         internal static void ExportSceneToAssetBundles_Internal(string sceneCid)
         {
+            Caching.ClearCache();
+
             if (string.IsNullOrEmpty(sceneCid))
                 throw new ArgumentException($"invalid sceneCid! -- cid: {sceneCid}");
 
@@ -364,88 +378,71 @@ namespace DCL
 
         internal static void BuildAssetBundles()
         {
-            if (!Directory.Exists(finalAssetBundlePath))
-                Directory.CreateDirectory(finalAssetBundlePath);
+            AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport | ImportAssetOptions.ForceUpdate | ImportAssetOptions.ImportRecursive);
+            AssetDatabase.SaveAssets();
 
-            EditorApplication.CallbackFunction delayedCall = null;
+            var manifest = BuildPipeline.BuildAssetBundles(finalAssetBundlePath, BuildAssetBundleOptions.ChunkBasedCompression | BuildAssetBundleOptions.ForceRebuildAssetBundle, BuildTarget.WebGL);
 
-            float time = Time.realtimeSinceStartup;
-
-            delayedCall = () =>
+            if (manifest == null)
             {
-                if (Time.realtimeSinceStartup - time < 2.0f)
-                    return;
+                OnBundleBuildFinish?.Invoke(2);
+                throw new Exception("Error generating asset bundle!");
+            }
 
-                EditorApplication.update -= delayedCall;
-                AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport | ImportAssetOptions.ForceUpdate | ImportAssetOptions.ImportRecursive);
-                AssetDatabase.SaveAssets();
+            string[] assetBundles = manifest.GetAllAssetBundles();
+            string[] assetBundlePaths = new string[assetBundles.Length];
 
-                var manifest = BuildPipeline.BuildAssetBundles(finalAssetBundlePath, BuildAssetBundleOptions.UncompressedAssetBundle | BuildAssetBundleOptions.ForceRebuildAssetBundle, BuildTarget.WebGL);
+            Debug.Log($"Total generated asset bundles: {assetBundles.Length}");
 
-                if (manifest == null)
-                {
-                    OnBundleBuildFinish?.Invoke(2);
-                    throw new Exception("Error generating asset bundle!");
-                }
+            GenerateDependencyMaps(manifest);
 
-                string[] assetBundles = manifest.GetAllAssetBundles();
-                string[] assetBundlePaths = new string[assetBundles.Length];
+            for (int i = 0; i < assetBundles.Length; i++)
+            {
+                if (string.IsNullOrEmpty(assetBundles[i]))
+                    continue;
 
-                Debug.Log($"Total generated asset bundles: {assetBundles.Length}");
+                Debug.Log($"#{i} Generated asset bundle name: {assetBundles[i]}");
 
-                GenerateDependencyMaps(manifest);
+                //NOTE(Brian): This is done for correctness sake, rename files to preserve the hash upper-case
+                hashLowercaseToHashProper.TryGetValue(assetBundles[i], out string hashWithUppercase);
 
-                for (int i = 0; i < assetBundles.Length; i++)
-                {
-                    if (string.IsNullOrEmpty(assetBundles[i]))
-                        continue;
+                string oldPath = finalAssetBundlePath + assetBundles[i];
+                string path = finalAssetBundlePath + hashWithUppercase;
 
-                    Debug.Log($"#{i} Generated asset bundle name: {assetBundles[i]}");
+                string oldPathMf = finalAssetBundlePath + assetBundles[i] + ".manifest";
 
-                    //NOTE(Brian): This is done for correctness sake, rename files to preserve the hash upper-case
-                    hashLowercaseToHashProper.TryGetValue(assetBundles[i], out string hashWithUppercase);
+                File.Move(oldPath, path);
+                File.Delete(oldPathMf);
 
-                    string oldPath = finalAssetBundlePath + assetBundles[i];
-                    string path = finalAssetBundlePath + hashWithUppercase;
+                assetBundlePaths[i] = path;
+            }
 
-                    string oldPathMf = finalAssetBundlePath + assetBundles[i] + ".manifest";
+            try
+            {
+                File.Delete(finalAssetBundlePath + ASSET_BUNDLE_FOLDER_NAME);
+                File.Delete(finalAssetBundlePath + ASSET_BUNDLE_FOLDER_NAME + ".manifest");
+            }
+            catch (Exception e)
+            {
+                Debug.LogError("Error trying to delete AssetBundleManifest root files!\n" + e.Message);
+            }
 
-                    File.Move(oldPath, path);
-                    File.Delete(oldPathMf);
-
-                    assetBundlePaths[i] = path;
-                }
-
+            if (deleteDownloadPathAfterFinished)
+            {
                 try
                 {
-                    File.Delete(finalAssetBundlePath + ASSET_BUNDLE_FOLDER_NAME);
-                    File.Delete(finalAssetBundlePath + ASSET_BUNDLE_FOLDER_NAME + ".manifest");
+                    if (Directory.Exists(finalDownloadedPath))
+                        Directory.Delete(finalDownloadedPath, true);
+
+                    AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError("Error trying to delete AssetBundleManifest root files!\n" + e.Message);
+                    Debug.LogError("Error trying to delete Assets downloaded path!\n" + e.Message);
                 }
+            }
 
-                if (deleteDownloadPathAfterFinished)
-                {
-                    try
-                    {
-                        if (Directory.Exists(finalDownloadedPath))
-                            Directory.Delete(finalDownloadedPath, true);
-
-                        AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
-                    }
-                    catch (Exception e)
-                    {
-                        Debug.LogError("Error trying to delete Assets downloaded path!\n" + e.Message);
-                    }
-                }
-
-                OnBundleBuildFinish?.Invoke(0);
-            };
-
-            AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport | ImportAssetOptions.ForceUpdate | ImportAssetOptions.ImportRecursive);
-            EditorApplication.update += delayedCall;
+            OnBundleBuildFinish?.Invoke(0);
         }
 
         /// <summary>
