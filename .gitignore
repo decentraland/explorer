@@ -1,4 +1,16 @@
-
+# =============== #
+# Unity generated #
+# =============== #
+Temp/
+Library/
+*.cache
+/obj/
+[Bb]uild/
+TestResults/
+AssetBundles/
+Assets/InitTestScene*.unity
+Assets/InitTestScene*.unity.meta
+**/CurrentTestImages/
 
 # ===================================== #
 # Visual Studio / MonoDevelop / Rider   #
