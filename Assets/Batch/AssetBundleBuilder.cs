@@ -104,16 +104,17 @@ namespace DCL
 
             EditorApplication.update = () =>
             {
-                if (Time.realtimeSinceStartup - timer < 1f)
+                //NOTE(Brian): We have to check this because the ImportAsset for GLTFs is not synchronous, and must execute some delayed calls
+                //             after the import asset finished. Therefore, we have to make sure those calls finished before continuing.
+                if (!GLTFImporter.finishedImporting || Time.realtimeSinceStartup - timer > 60)
                     return;
-
-                timer = Time.realtimeSinceStartup;
 
                 if (sceneCidsList.Count > 0)
                 {
                     ExportSceneToAssetBundles_Internal(sceneCidsList[0]);
                     sceneCidsList.RemoveAt(0);
                     AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport | ImportAssetOptions.ForceUpdate | ImportAssetOptions.ImportRecursive);
+                    timer = Time.realtimeSinceStartup;
                     return;
                 }
 
