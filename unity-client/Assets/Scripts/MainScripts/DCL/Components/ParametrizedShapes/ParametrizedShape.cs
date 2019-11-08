@@ -44,6 +44,11 @@ namespace DCL.Components
                 CollidersManager.i.ConfigureColliders(entity.meshRootGameObject, model.withCollisions, false, entity);
                 collisionsDirty = false;
             }
+
+            if (entity.meshesInfo.meshFilters.Length > 0 && entity.meshesInfo.meshFilters[0].sharedMesh != currentMesh)
+            {
+                entity.meshesInfo.meshFilters[0].sharedMesh = currentMesh;
+            }
         }
 
         void OnShapeAttached(DecentralandEntity entity)
@@ -57,10 +62,10 @@ namespace DCL.Components
                 currentMesh = GenerateGeometry();
 
             UpdateRenderer(entity);
-            
+
             MeshFilter meshFilter = entity.meshRootGameObject.AddComponent<MeshFilter>();
             MeshRenderer meshRenderer = entity.meshRootGameObject.AddComponent<MeshRenderer>();
-            entity.meshesInfo.renderers = new Renderer[]{meshRenderer};
+            entity.meshesInfo.renderers = new Renderer[] { meshRenderer };
             entity.meshesInfo.currentShape = this;
 
             meshFilter.sharedMesh = currentMesh;
@@ -74,7 +79,7 @@ namespace DCL.Components
                 transition.fadeThickness = 20;
                 transition.OnDidFinishLoading(finalMaterial);
 
-                transition.onFinishedLoading += () => {entity.OnShapeUpdated?.Invoke(entity);};
+                transition.onFinishedLoading += () => { entity.OnShapeUpdated?.Invoke(entity); };
             }
             else
             {
@@ -126,7 +131,7 @@ namespace DCL.Components
                         UpdateRenderer(entity);
 
                         entity.OnShapeUpdated?.Invoke(entity);
-                    }                    
+                    }
                 }
             }
 

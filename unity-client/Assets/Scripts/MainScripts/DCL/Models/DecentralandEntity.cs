@@ -22,15 +22,26 @@ namespace DCL.Models
                 set
                 {
                     meshRootGameObjectValue = value;
-                    renderers = meshRootGameObjectValue?.GetComponentsInChildren<Renderer>(true);
+
+                    UpdateRenderersCollection();
                 }
             }
 
             public BaseShape currentShape;
             public Renderer[] renderers;
+            public MeshFilter[] meshFilters;
             public List<Collider> colliders = new List<Collider>();
 
             GameObject meshRootGameObjectValue;
+
+            public void UpdateRenderersCollection()
+            {
+                if (meshRootGameObjectValue != null)
+                {
+                    renderers = meshRootGameObjectValue.GetComponentsInChildren<Renderer>(true);
+                    meshFilters = meshRootGameObjectValue.GetComponentsInChildren<MeshFilter>(true);
+                }
+            }
 
             public void CleanReferences()
             {
@@ -55,7 +66,7 @@ namespace DCL.Models
 
         public GameObject gameObject;
         public string entityId;
-        public MeshesInfo meshesInfo = new MeshesInfo();
+        public MeshesInfo meshesInfo;
         public GameObject meshRootGameObject => meshesInfo.meshRootGameObject;
         public Renderer[] renderers => meshesInfo.renderers;
 
@@ -70,6 +81,12 @@ namespace DCL.Models
         const string MESH_GAMEOBJECT_NAME = "Mesh";
 
         bool isReleased = false;
+
+        public DecentralandEntity()
+        {
+            meshesInfo = new MeshesInfo();
+            OnShapeUpdated += (entity) => meshesInfo.UpdateRenderersCollection();
+        }
 
         private void AddChild(DecentralandEntity entity)
         {
