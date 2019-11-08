@@ -250,6 +250,7 @@ namespace Builder
             }
             gameObject.transform.localScale = scaleTarget;
             isScalingAnimation = false;
+            OnEntityTransformUpdated?.Invoke(this);
         }
     }
 }
