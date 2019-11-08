@@ -57,13 +57,17 @@ namespace DCL
             foreach (Vector2Int v in coords)
             {
                 string url = ContentServerUtils.GetScenesAPIUrl(environment, v.x, v.y, 0, 0);
+
                 UnityWebRequest w = UnityWebRequest.Get(url);
                 w.SendWebRequest();
 
-                while (w.isDone == false) { }
+                while (!w.isDone) { }
 
                 if (!w.WebRequestSucceded())
-                    throw new Exception($"Request error! Parcels couldn't be fetched! -- {w.error}");
+                {
+                    Debug.LogWarning($"Request error! Parcels couldn't be fetched! -- {w.error}");
+                    continue;
+                }
 
                 ScenesAPIData scenesApiData = JsonUtility.FromJson<ScenesAPIData>(w.downloadHandler.text);
 
@@ -72,17 +76,14 @@ namespace DCL
 
                 foreach (var data in scenesApiData.data)
                 {
-                    if (!sceneCids.Contains(data.root_cid))
-                    {
-                        sceneCids.Add(data.root_cid);
-                    }
+                    sceneCids.Add(data.root_cid);
                 }
             }
 
             List<string> sceneCidsList = sceneCids.ToList();
-
             DumpSceneList(sceneCidsList, OnFinish);
         }
+
         internal static void DumpScene(string cid, Action<int> OnFinish = null)
         {
             DumpSceneList(new List<string> { cid }, OnFinish);
@@ -276,6 +277,16 @@ namespace DCL
 
                 if (skipUploadedGltfs)
                 {
+                    if (File.Exists(finalAssetBundlePath + gltfHash))
+                    {
+                        Debug.Log("Skipping existing gltf in AB folder: " + gltfHash);
+
+                        if (!hashLowercaseToHashProper.ContainsKey(gltfHash.ToLower()))
+                            hashLowercaseToHashProper.Add(gltfHash.ToLower(), gltfHash);
+
+                        continue;
+                    }
+
                     if (CheckContentUrlExists(contentProviderAB, hashToGltfPair, gltfHash))
                     {
                         Debug.Log("Skipping existing gltf: " + gltfHash);
@@ -405,17 +416,24 @@ namespace DCL
                 Debug.Log($"#{i} Generated asset bundle name: {assetBundles[i]}");
 
                 //NOTE(Brian): This is done for correctness sake, rename files to preserve the hash upper-case
-                hashLowercaseToHashProper.TryGetValue(assetBundles[i], out string hashWithUppercase);
+                if (hashLowercaseToHashProper.TryGetValue(assetBundles[i], out string hashWithUppercase))
+                {
+                    string oldPath = finalAssetBundlePath + assetBundles[i];
+                    string path = finalAssetBundlePath + hashWithUppercase;
+                    File.Move(oldPath, path);
+                    assetBundlePaths[i] = path;
+                }
 
-                string oldPath = finalAssetBundlePath + assetBundles[i];
-                string path = finalAssetBundlePath + hashWithUppercase;
+                try
+                {
+                    string oldPathMf = finalAssetBundlePath + assetBundles[i] + ".manifest";
+                    File.Delete(oldPathMf);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogWarning("Error! " + e.Message);
+                }
 
-                string oldPathMf = finalAssetBundlePath + assetBundles[i] + ".manifest";
-
-                File.Move(oldPath, path);
-                File.Delete(oldPathMf);
-
-                assetBundlePaths[i] = path;
             }
 
             try
