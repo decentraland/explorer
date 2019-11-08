@@ -32,7 +32,7 @@ namespace Builder
         public static event SetGridResolutionDelegate OnSetGridResolution;
         public static System.Action<ParcelScene> OnSceneChanged;
         public static System.Action<string> OnBuilderSelectEntity;
-        public static System.Action<string> OnBuilderDeselectEntity;
+        public static System.Action OnBuilderDeselectEntity;
 
         private MouseCatcher mouseCatcher;
         private ParcelScene currentScene;
@@ -255,9 +255,9 @@ namespace Builder
             OnBuilderSelectEntity?.Invoke(entityId);
         }
 
-        public void DeselectBuilderEntity(string entityId)
+        public void DeselectBuilderEntity()
         {
-            OnBuilderDeselectEntity?.Invoke(entityId);
+            OnBuilderDeselectEntity?.Invoke();
         }
 
         public void GetCameraTargetBuilder(string id)

@@ -216,12 +216,9 @@ namespace Builder
             }
         }
 
-        private void OnBuilderDeselectEntity(string entityId)
+        private void OnBuilderDeselectEntity()
         {
-            if (selectedEntity && selectedEntity.rootEntity.entityId == entityId)
-            {
-                Deselect();
-            }
+            Deselect();
         }
 
         private bool CanSelect(DCLBuilderEntity entity)

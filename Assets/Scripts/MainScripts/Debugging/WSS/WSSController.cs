@@ -318,7 +318,7 @@ namespace DCL
                                 GetBuilderBridge()?.PreloadFile(msg.payload);
                                 break;
                             case "DeselectBuilderEntity":
-                                GetBuilderBridge()?.PreloadFile(msg.payload);
+                                GetBuilderBridge()?.DeselectBuilderEntity();
                                 break;
                             case "AddWearableToCatalog":
                                 CatalogController.i.AddWearableToCatalog(msg.payload);
