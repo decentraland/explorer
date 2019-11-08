@@ -179,9 +179,6 @@ namespace UnityGLTF
                     }
                 }
 
-                AssetDatabase.Refresh();
-                AssetDatabase.SaveAssets();
-
                 if (_importMaterials)
                 {
                     var materials = SimplifyMaterials(renderers);
@@ -294,7 +291,6 @@ namespace UnityGLTF
                             }
 
                             AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport | ImportAssetOptions.ForceUpdate | ImportAssetOptions.ImportRecursive);
-                            AssetDatabase.SaveAssets();
                         }
                     }
 
