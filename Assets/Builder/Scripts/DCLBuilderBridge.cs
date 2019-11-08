@@ -9,6 +9,8 @@ using DCL.Components;
 using DCL.Helpers;
 using DCL.Configuration;
 using Builder.Gizmos;
+using UnityEngine.Rendering.LWRP;
+using UnityEngine.Rendering;
 
 namespace Builder
 {
@@ -292,6 +294,8 @@ namespace Builder
 
         private void Awake()
         {
+            SetupRendererPipeline();
+
             mouseCatcher = InitialSceneReferences.i?.mouseCatcher;
             if (mouseCatcher != null)
             {
@@ -488,6 +492,18 @@ namespace Builder
             outOfBoundariesEventPayload.entities = outOfBoundariesEntitiesId.ToArray();
             WebInterface.SendSceneEvent<EntitiesOutOfBoundariesEventPayload>(currentScene.sceneData.id, "entitiesOutOfBoundaries", outOfBoundariesEventPayload);
             currentScene.boundariesChecker?.EvaluateEntityPosition(entity.rootEntity);
+        }
+
+        private void SetupRendererPipeline()
+        {
+            LightweightRenderPipelineAsset lwrpa = ScriptableObject.Instantiate(GraphicsSettings.renderPipelineAsset) as LightweightRenderPipelineAsset;
+
+            if (lwrpa != null)
+            {
+                lwrpa.shadowDepthBias = 3;
+                lwrpa.shadowDistance = 80f;
+                GraphicsSettings.renderPipelineAsset = lwrpa;
+            }
         }
     }
 }
