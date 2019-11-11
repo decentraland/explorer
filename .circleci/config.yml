@@ -63,13 +63,13 @@ jobs:
           at: /tmp/explorer
 
       - run:
+          name: Get the hash of source files
+          command: |
+            find unity-client/Assets -type f \( -exec shasum "$PWD"/{} \; \) | sort > .unitysources-checksum
+      - run:
           name: Copy unity-client to working directory
           command: |
             cp -r /tmp/explorer/unity-client/* .
-      - run:
-          name: Get the hash of source files
-          command: |
-            find Assets -type f \( -exec shasum "$PWD"/{} \; \) | sort > .unitysources-checksum
       - restore_cache:
           name: Restore decentraland-renderer if exists
           keys:
