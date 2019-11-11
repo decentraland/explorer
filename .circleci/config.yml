@@ -63,7 +63,6 @@ jobs:
           name: Install differences in node_modules
           command: |
             npm i
-            git checkout -- package-lock.json
       - save_cache:
           name: Store node_modules cache
           paths:
