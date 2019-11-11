@@ -42,7 +42,7 @@ jobs:
 
       # persist to workspace to use in downstream jobs
       - persist_to_workspace:
-          root: .
+          root: /tmp
           paths:
             - kernel
             - unity-client
@@ -50,10 +50,10 @@ jobs:
   build-kernel:
     docker:
       - image: circleci/node:10-browsers
-    working_directory: /tmp/explorer/kernel
+    working_directory: /tmp/kernel
     steps:
       - attach_workspace:
-          at: /tmp/explorer
+          at: /tmp
 
       - restore_cache:
           name: Restoring node_modules
@@ -146,13 +146,17 @@ jobs:
       - image: decentraland/renderer-build
         environment:
           - BUILD_TARGET: WebGL
-          - BUILD_PATH: /tmp/explorer/unity-client/Builds/unity
+          - BUILD_PATH: /tmp/explorer/Builds/unity
           - BUILD_NAME: unity
-    working_directory: /tmp/explorer/unity-client
+    working_directory: /tmp/explorer
     steps:
       - attach_workspace:
-          at: /tmp/explorer
+          at: /tmp
 
+      - run:
+          name: Copy unity-client dir to working directory
+          command: |
+            cp -r /tmp/unity-client $CICLE_WORKING_DIRECTORY
       - run:
           name: Get the hash of source files
           command: |
