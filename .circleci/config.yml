@@ -390,8 +390,13 @@ workflows:
   build-deploy:
     jobs:
       - checkout
-      - build-unity
-      - build-kernel
+
+      - build-unity:
+          requires:
+            - checkout
+      - build-kernel:
+          requires:
+            - checkout
 
       # explorer master + pr branch jobs (deploy to dev + pr dev)
       - deploy-dev:
