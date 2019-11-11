@@ -1,49 +1,167 @@
 version: 2
 jobs:
-  build-test:
+  build:
+    docker:
+      - image: circleci/node:10-browsers
+        environment:
+          # avoid automatic download of LFS files
+          GIT_LFS_SKIP_SMUDGE: 1
+
+    working_directory: /tmp/explorer
+    steps:
+      # Install lfs
+      - run:
+          name: 'Install git-lfs'
+          command: |
+            mkdir -p ~/.ssh
+            ssh-keyscan -H github.com >> ~/.ssh/known_hosts
+            curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
+            sudo apt-get update && sudo apt-get install -y git-lfs=2.7.2
+            ssh git@github.com git-lfs-authenticate decentraland/explorer.git download
+            git lfs install
+      # checkout the actual code
+      - checkout
+
+      # restore cached lfs
+      - restore_cache:
+          name: Restore large files from github's lfs repo
+          keys:
+            - gitlfs-{{ .Branch }}
+            - gitlfs
+      - shell:
+          name: Pull Git LFS files, retry until done
+          command: |
+            while true; do git reset --hard HEAD && git clean -fd && git lfs pull && break; done
+      - save_cache:
+          name: Store large files in cache
+          key: gitlfs-{{ .Branch }}
+          paths:
+            - .git/lfs
+      - restore_cache:
+          name: Restoring node_modules
+          keys:
+            - v1-dependencies-{{ checksum "package-lock.json" }}
+      - run:
+          name: Install differences in node_modules
+          command: |
+            npm i
+            git checkout -- package-lock.json
+      - save_cache:
+          name: Store node_modules cache
+          paths:
+            - node_modules
+          key: v1-dependencies-{{ checksum "package-lock.json" }}
+      - run:
+          name: Run linters and checks
+          command: |
+            make lint
+            npm outdated --depth 0 || true
+      - run:
+          name: Build decentraland-ecs
+          command: |
+            make build-essentials
+            mkdir -p scene-cache
+            cd scene-cache && find . -name '*.js' | xargs -I{} cp -f -t ../public/ --parents {}; cd ..
+            find public -name *.ts | xargs shasum packages/decentraland-ecs/dist/index.d.ts static/systems/scene.system.js | sort > .compiled-scene-checksum
+      - restore_cache:
+          name: Restore cached test scenes, part I
+          keys:
+            - compiled-scenes-{{ checksum ".compiled-scene-checksum" }}
+      - run:
+          name: Restore cached test scenes, part II
+          command: |
+            touch static/systems/scene.system.js
+            cd scene-cache && find . -name '*.js' | xargs -I{} cp -f -t ../public/ --parents {}; cd ..
+            for compiled in `find public -name '*.js'`; do touch $compiled; done
+      - run:
+          name: Build scenes
+          command: |
+            make test-scenes
+      - run:
+          name: Build cache of test scenes
+          command: |
+            cd public && find . -name '*.js' | xargs -I{} cp -f -t ../scene-cache/ --parents {}; cd ..
+      - save_cache:
+          name: Store cached test scenes
+          paths:
+            - static/systems/scene.system.js
+            - scene-cache
+          key: compiled-scenes-{{ checksum ".compiled-scene-checksum" }}
+      - run:
+          name: Run tests
+          command: |
+            make test-ci
+            npx codecov
+      - store_artifacts:
+          name: Save screenshots of visual tests
+          path: test/diff
+          when: on_fail
+      - store_artifacts:
+          path: packages/decentraland-ecs/api-docs-review/decentraland-ecs.api.ts
+          when: on_fail
+      - store_artifacts:
+          path: packages/decentraland-ecs/temp/decentraland-ecs.api.ts
+          when: on_fail
+      - run:
+          name: Build deployment dist
+          command: |
+            make build-deploy
+      - save_cache:
+          name: Save the built files
+          paths:
+            - static
+          key: build-{{ .Revision }}
+      - save_cache:
+          name: Save the files required to release an SDK version
+          paths:
+            - Makefile
+            - packages
+            - scripts
+            - tsconfig.json
+            - package-lock.json
+            - package.json
+            - .git
+          key: build-sdk-{{ .Revision }}
+
+  build-unity:
     resource_class: xlarge
     docker:
       - image: decentraland/renderer-build
         environment:
           - BUILD_TARGET: WebGL
-          - BUILD_PATH: /tmp/project/Builds/unity
+          - BUILD_PATH: /tmp/explorer/Builds/unity
           - BUILD_NAME: unity
-    working_directory: /tmp/project
+    working_directory: /tmp/explorer
     steps:
       - checkout
-
       - run:
-          name: "Download LFS files"
+          name: 'Download unity LFS files'
           command: |
-            ssh git@github.com git-lfs-authenticate decentraland/unity-client.git download
+            ssh git@github.com git-lfs-authenticate decentraland/explorer.git download
             git lfs install
             git lfs fetch --all
             git lfs checkout -- .
-
-      - run:
-          name: "Extract the license key"
-          command: |
-            openssl enc -d -aes-256-cbc -md sha256 -in ./.circleci/license.zip-cipher -out ./.circleci/license.zip -k ${CIPHER_KEY}
-            cd / && unzip /tmp/project/.circleci/license.zip
-
       - run:
           name: Get the hash of source files
           command: |
-            find Assets -type f \( -exec shasum "$PWD"/{} \; \) | sort | shasum > .build-checksum
-
+            find Assets -type f \( -exec shasum "$PWD"/{} \; \) | sort > .unitysources-checksum
       - restore_cache:
-          name: Restore build
+          name: Restore decentraland-renderer if exists
           keys:
-            - unitybuild-{{ checksum ".build-checksum" }}
-
+            - unitybuild-{{ checksum ".unitysources-checksum" }}
       - run:
-          name: "Build"
+          name: 'Extract the license key for Unity'
+          command: |
+            openssl enc -d -aes-256-cbc -md sha256 -in ./.circleci/license.zip-cipher -out ./.circleci/license.zip -k ${CIPHER_KEY}
+            cd / && unzip /tmp/explorer/.circleci/license.zip
+      - run:
+          name: 'Build decentraland-renderer'
           command: |
             if [[ ! -e ${BUILD_PATH} ]] || [[ ! -n "$(ls -A ${BUILD_PATH})" ]]; then
-                chmod +x /tmp/project/build-ci.sh
+                chmod +x /tmp/explorer/build-ci.sh
                 mkdir -p ${BUILD_PATH}
-                ((cd /tmp/project && ./build-ci.sh) & echo $! > /tmp/project/build.pid &)
-                pid=`cat /tmp/project/build.pid`
+                ((cd /tmp/explorer && ./build-ci.sh) & echo $! > /tmp/explorer/build.pid &)
+                pid=`cat /tmp/explorer/build.pid`
                 while [ -e /proc/$pid -a /proc/$pid/exe ]; do
                     echo "Running Unity Build..."
                     sleep 60
@@ -51,24 +169,347 @@ jobs:
                 ls -la ${BUILD_PATH}
                 [ -n "$(ls -A ${BUILD_PATH})" ] # fail job if build folder is empty
             fi;
-
       - save_cache:
-          name: Store build
-          key: unitybuild-{{ checksum ".build-checksum" }}
+          name: Store decentraland-renderer build
+          key: unitybuild-{{ checksum ".unitysources-checksum" }}
           paths:
-            - /tmp/project/Builds/
-
+            - /tmp/explorer/Builds/
       - run:
           name: Authenticate with registry
-          command: echo "//registry.npmjs.org/:_authToken=${NPMTOKEN}" > /tmp/project/Builds/${BUILD_NAME}/.npmrc
-
+          command: echo "//registry.npmjs.org/:_authToken=${NPMTOKEN}" > /tmp/explorer/Builds/${BUILD_NAME}/.npmrc
       - run:
-          name: Publish package
+          name: Publish decentraland-renderer package
           command: |
             . .circleci/publish.sh
 
+  publish-ecs:
+    docker:
+      - image: circleci/node:10-browsers
+    working_directory: /tmp/explorer
+    steps:
+      - checkout
+      - run:
+          name: 'Install git-lfs'
+          command: |
+            mkdir -p ~/.ssh
+            ssh-keyscan -H github.com >> ~/.ssh/known_hosts
+            curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
+            sudo apt-get update && sudo apt-get install -y git-lfs=2.7.2
+            ssh git@github.com git-lfs-authenticate decentraland/explorer.git download
+            git lfs install
+      - run:
+          name: 'Download LFS files'
+          command: |
+            ssh git@github.com git-lfs-authenticate decentraland/explorer.git download
+            git lfs install
+            git lfs fetch --all
+            git lfs checkout -- .
+      - run:
+          name: Get the hash of Unity source files
+          command: |
+            find Assets -type f \( -exec shasum "$PWD"/{} \; \) | sort > .unitysources-checksum
+      - restore_cache:
+          name: Restore sdk-release files
+          keys:
+            - build-sdk-{{ .Revision }}
+      - restore_cache:
+          name: Restore node_modules
+          keys:
+            - v1-dependencies-{{ checksum "package-lock.json" }}
+      - restore_cache:
+          name: Restore built files
+          keys:
+            - build-{{ .Revision }}
+      - restore_cache:
+          name: Restore the Unity build
+          keys:
+            - unitybuild-{{ checksum ".unitysources-checksum" }}
+      - run:
+          name: Copy the exact renderer for the current working folder into static
+          command: |
+            cp /tmp/explorer/Builds/unity/Build/*.unityweb static/unity/Build/
+      - run:
+          name: Set up NPM access tokens
+          command: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
+          when: on_success
+
+      - run:
+          name: Publish a new version of decentraland-ecs
+          command: make publish
+          when: on_success
+
+  deploy-on-pr:
+    docker:
+      - image: circleci/node:10-browsers
+    working_directory: /tmp/explorer
+    steps:
+      - checkout
+      - run:
+          name: 'Install git-lfs'
+          command: |
+            mkdir -p ~/.ssh
+            ssh-keyscan -H github.com >> ~/.ssh/known_hosts
+            curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
+            sudo apt-get update && sudo apt-get install -y git-lfs=2.7.2
+            ssh git@github.com git-lfs-authenticate decentraland/explorer.git download
+            git lfs install
+      - run:
+          name: 'Download LFS files'
+          command: |
+            ssh git@github.com git-lfs-authenticate decentraland/explorer.git download
+            git lfs install
+            git lfs fetch --all
+            git lfs checkout -- .
+      - run:
+          name: Get the hash of Unity source files
+          command: |
+            find Assets -type f \( -exec shasum "$PWD"/{} \; \) | sort > .unitysources-checksum
+      - restore_cache:
+          name: Restore the kernel build
+          keys:
+            - build-{{ .Revision }}
+      - restore_cache:
+          name: Restore the Unity build
+          keys:
+            - unitybuild-{{ checksum ".unitysources-checksum" }}
+      - run:
+          name: Copy the exact renderer for the current working folder into static
+          command: |
+            cp /tmp/explorer/Builds/unity/Build/*.unityweb static/unity/Build/
+      - run: sudo apt-get -y -qq install awscli
+      - run:
+          name: Configure DEV/STG AWS Keys
+          command: |
+            aws configure set aws_access_key_id ${AWS_DEV_ACCESS_KEY_ID} && aws configure set aws_secret_access_key ${AWS_DEV_SECRET_ACCESS_KEY}
+      - run:
+          name: Deploy to S3 (.zone) under subfolder if tests pass and branch is not master
+          command: aws s3 sync static s3://explorer.decentraland.zone/branch/${CIRCLE_BRANCH} --acl public-read
+      - run:
+          name: Invalidate cloudfront cache .zone
+          command: aws configure set preview.cloudfront true && aws configure set preview.create-invalidation true && aws cloudfront create-invalidation --distribution-id E297VXIBZFXIXE --paths "/*"
+      - run:
+          name: Invalidate cloudflare cache .zone
+          command: curl "$PURGE_CACHE_ZONE"
+
+  deploy-dev:
+    docker:
+      - image: circleci/node:10-browsers
+    working_directory: /tmp/explorer
+    steps:
+      - checkout
+      - run:
+          name: 'Install git-lfs'
+          command: |
+            mkdir -p ~/.ssh
+            ssh-keyscan -H github.com >> ~/.ssh/known_hosts
+            curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
+            sudo apt-get update && sudo apt-get install -y git-lfs=2.7.2
+            ssh git@github.com git-lfs-authenticate decentraland/explorer.git download
+            git lfs install
+      - run:
+          name: 'Download LFS files'
+          command: |
+            ssh git@github.com git-lfs-authenticate decentraland/explorer.git download
+            git lfs install
+            git lfs fetch --all
+            git lfs checkout -- .
+      - run:
+          name: Get the hash of Unity source files
+          command: |
+            find Assets -type f \( -exec shasum "$PWD"/{} \; \) | sort > .unitysources-checksum
+      - restore_cache:
+          name: Restore the kernel build
+          keys:
+            - build-{{ .Revision }}
+      - restore_cache:
+          name: Restore the Unity build
+          keys:
+            - unitybuild-{{ checksum ".unitysources-checksum" }}
+      - run:
+          name: Copy the exact renderer for the current working folder into static
+          command: |
+            cp /tmp/explorer/Builds/unity/Build/*.unityweb static/unity/Build/
+      - run: sudo apt-get -y -qq install awscli
+      - run:
+          name: Configure DEV/STG AWS Keys
+          command: |
+            aws configure set aws_access_key_id ${AWS_DEV_ACCESS_KEY_ID} && aws configure set aws_secret_access_key ${AWS_DEV_SECRET_ACCESS_KEY}
+      - run:
+          name: Deploy to S3 (.zone) if tests pass and branch is master
+          command: aws s3 sync static s3://explorer.decentraland.zone/ --acl public-read
+      - run:
+          name: Invalidate cloudfront cache .zone
+          command: aws configure set preview.cloudfront true && aws configure set preview.create-invalidation true && aws cloudfront create-invalidation --distribution-id E297VXIBZFXIXE --paths "/*"
+      - run:
+          name: Invalidate cloudflare cache .zone
+          command: curl "$PURGE_CACHE_ZONE"
+
+  deploy-stg:
+    docker:
+      - image: circleci/node:10-browsers
+    working_directory: /tmp/explorer
+    steps:
+      - checkout
+      - run:
+          name: 'Install git-lfs'
+          command: |
+            mkdir -p ~/.ssh
+            ssh-keyscan -H github.com >> ~/.ssh/known_hosts
+            curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
+            sudo apt-get update && sudo apt-get install -y git-lfs=2.7.2
+            ssh git@github.com git-lfs-authenticate decentraland/explorer.git download
+            git lfs install
+      - run:
+          name: 'Download LFS files'
+          command: |
+            ssh git@github.com git-lfs-authenticate decentraland/explorer.git download
+            git lfs install
+            git lfs fetch --all
+            git lfs checkout -- .
+      - run:
+          name: Get the hash of Unity source files
+          command: |
+            find Assets -type f \( -exec shasum "$PWD"/{} \; \) | sort > .unitysources-checksum
+      - restore_cache:
+          name: Restore the kernel build
+          keys:
+            - build-{{ .Revision }}
+      - restore_cache:
+          name: Restore the Unity build
+          keys:
+            - unitybuild-{{ checksum ".unitysources-checksum" }}
+      - run:
+          name: Copy the exact renderer for the current working folder into static
+          command: |
+            cp /tmp/explorer/Builds/unity/Build/*.unityweb static/unity/Build/
+      - run: sudo apt-get -y -qq install awscli
+      - run:
+          name: Configure DEV/STG AWS Keys
+          command: |
+            aws configure set aws_access_key_id ${AWS_DEV_ACCESS_KEY_ID} && aws configure set aws_secret_access_key ${AWS_DEV_SECRET_ACCESS_KEY}
+      - run:
+          name: Deploy to .today
+          command: |
+            aws s3 sync static s3://explorer.decentraland.today/ --exclude "tags/*" --acl public-read
+      - run:
+          name: Invalidate cloudfront cache .today
+          command: aws configure set preview.cloudfront true && aws configure set preview.create-invalidation true && aws cloudfront create-invalidation --distribution-id E315GYHDRD7XX6 --paths "/*"
+      - run:
+          name: Invalidate cloudflare cache .today
+          command: curl "$PURGE_CACHE_TODAY"
+
+  deploy-prd:
+    docker:
+      - image: circleci/node:10-browsers
+    working_directory: /tmp/explorer
+    steps:
+      - checkout
+      - run:
+          name: 'Install git-lfs'
+          command: |
+            mkdir -p ~/.ssh
+            ssh-keyscan -H github.com >> ~/.ssh/known_hosts
+            curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
+            sudo apt-get update && sudo apt-get install -y git-lfs=2.7.2
+            ssh git@github.com git-lfs-authenticate decentraland/explorer.git download
+            git lfs install
+      - run:
+          name: 'Download LFS files'
+          command: |
+            ssh git@github.com git-lfs-authenticate decentraland/explorer.git download
+            git lfs install
+            git lfs fetch --all
+            git lfs checkout -- .
+      - run:
+          name: Get the hash of Unity source files
+          command: |
+            find Assets -type f \( -exec shasum "$PWD"/{} \; \) | sort > .unitysources-checksum
+      - restore_cache:
+          name: Restore the kernel build
+          keys:
+            - build-{{ .Revision }}
+      - restore_cache:
+          name: Restore the Unity build
+          keys:
+            - unitybuild-{{ checksum ".unitysources-checksum" }}
+      - run:
+          name: Copy the exact renderer for the current working folder into static
+          command: |
+            cp /tmp/explorer/Builds/unity/Build/*.unityweb static/unity/Build/
+      - run: sudo apt-get -y -qq install awscli
+      - run:
+          name: Configure PRD AWS Keys
+          command: |
+            aws configure set aws_access_key_id ${AWS_PRD_ACCESS_KEY_ID} && aws configure set aws_secret_access_key ${AWS_PRD_SECRET_ACCESS_KEY}
+      - run:
+          name: Deploy to .org
+          command: |
+            aws s3 sync static s3://explorer.decentraland.org/ --exclude "tags/*" --acl public-read
+      - run:
+          name: Invalidate cloudfront cache .org
+          command: aws configure set preview.cloudfront true && aws configure set preview.create-invalidation true && aws cloudfront create-invalidation --distribution-id E253JP8V3Y9YUI --paths "/*"
+      - run:
+          name: Invalidate cloudflare cache .org
+          command: curl "$PURGE_CACHE_ORG"
+
 workflows:
   version: 2
-  build:
+  build-deploy:
     jobs:
-      - build-test
+      - build-unity
+      - build
+
+      # explorer master + pr branch jobs (deploy to dev + pr dev)
+      - deploy-dev:
+          requires:
+            - build-unity
+            - build
+          filters:
+            branches:
+              only: master
+      - deploy-on-pr:
+          requires:
+            - build-unity
+            - build
+          filters:
+            branches:
+              ignore:
+                - master
+                - staging
+                - release
+      - hold-ecs:
+          type: approval
+          requires:
+            - build-unity
+            - build
+          filters:
+            branches:
+              ignore: /(.*)/ # on branch: master we don't want to hold, but publish after the build is done
+            tags:
+              only: /^\d+\.\d+\.\d(.*)/ # npm tag + latest
+      - publish-ecs:
+          requires:
+            - build # on master we don't hold, but publish to next right after the build is done
+            - build-unity
+            - hold-ecs # on tags we wait until there's an approval
+          filters:
+            branches:
+              only: master # next
+            tags:
+              only: /^\d+\.\d+\.\d(.*)/ # npm tag + latest
+
+      - deploy-stg:
+          requires:
+            - build
+            - build-unity
+          filters:
+            branches:
+              only: staging
+
+      - deploy-prd:
+          requires:
+            - build
+            - build-unity
+          filters:
+            branches:
+              only: release
