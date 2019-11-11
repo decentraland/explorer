@@ -31,9 +31,7 @@ namespace DCL
             AssetBundleBuilder.environment = ContentServerUtils.ApiEnvironment.ZONE;
             AssetBundleBuilder.skipUploadedGltfs = true;
             var zoneArray = GetCenteredZoneArray(new Vector2Int(55, -70), new Vector2Int(15, 15));
-            AssetBundleBuilder.DumpArea(zoneArray, (error) =>
-            {
-            });
+            AssetBundleBuilder.DumpArea(new Vector2Int(55, -70), new Vector2Int(15, 15));
         }
 
         [MenuItem("AssetBundleBuilder/Dump Org 0,0")]

@@ -50,6 +50,36 @@ namespace DCL
 
         static float startTime;
 
+        internal static void DumpArea(Vector2Int coords, Vector2Int size, Action<int> OnFinish = null)
+        {
+            HashSet<string> sceneCids = new HashSet<string>();
+
+            string url = ContentServerUtils.GetScenesAPIUrl(environment, coords.x, coords.y, size.x, size.y);
+
+            UnityWebRequest w = UnityWebRequest.Get(url);
+            w.SendWebRequest();
+
+            while (!w.isDone) { }
+
+            if (!w.WebRequestSucceded())
+            {
+                throw new Exception($"Request error! Parcels couldn't be fetched! -- {w.error}");
+            }
+
+            ScenesAPIData scenesApiData = JsonUtility.FromJson<ScenesAPIData>(w.downloadHandler.text);
+
+            Assert.IsTrue(scenesApiData != null, "Invalid response from ScenesAPI");
+            Assert.IsTrue(scenesApiData.data != null, "Invalid response from ScenesAPI");
+
+            foreach (var data in scenesApiData.data)
+            {
+                sceneCids.Add(data.root_cid);
+            }
+
+            List<string> sceneCidsList = sceneCids.ToList();
+            DumpSceneList(sceneCidsList, OnFinish);
+        }
+
         internal static void DumpArea(List<Vector2Int> coords, Action<int> OnFinish = null)
         {
             HashSet<string> sceneCids = new HashSet<string>();
@@ -112,25 +142,33 @@ namespace DCL
 
             EditorApplication.update = () =>
             {
-                //NOTE(Brian): We have to check this because the ImportAsset for GLTFs is not synchronous, and must execute some delayed calls
-                //             after the import asset finished. Therefore, we have to make sure those calls finished before continuing.
-                if (!GLTFImporter.finishedImporting || Time.realtimeSinceStartup - timer > 60)
-                    return;
-
-                if (sceneCidsList.Count > 0)
+                try
                 {
-                    ExportSceneToAssetBundles_Internal(sceneCidsList[0]);
-                    sceneCidsList.RemoveAt(0);
-                    timer = Time.realtimeSinceStartup;
-                    return;
+                    //NOTE(Brian): We have to check this because the ImportAsset for GLTFs is not synchronous, and must execute some delayed calls
+                    //             after the import asset finished. Therefore, we have to make sure those calls finished before continuing.
+                    if (!GLTFImporter.finishedImporting || Time.realtimeSinceStartup - timer > 60)
+                        return;
+
+                    if (sceneCidsList.Count > 0)
+                    {
+                        ExportSceneToAssetBundles_Internal(sceneCidsList[0]);
+                        sceneCidsList.RemoveAt(0);
+                        timer = Time.realtimeSinceStartup;
+                        return;
+                    }
+
+                    if (!Directory.Exists(finalAssetBundlePath))
+                        Directory.CreateDirectory(finalAssetBundlePath);
+
+                    BuildAssetBundles();
+
+                    EditorApplication.update = null;
                 }
-
-                if (!Directory.Exists(finalAssetBundlePath))
-                    Directory.CreateDirectory(finalAssetBundlePath);
-
-                BuildAssetBundles();
-
-                EditorApplication.update = null;
+                catch (Exception e)
+                {
+                    Debug.LogError(e.Message);
+                    Exit(1);
+                }
             };
         }
 
@@ -157,7 +195,7 @@ namespace DCL
                     DumpScene(sceneCid[0], Exit);
                     return;
                 }
-
+                else
                 if (AssetBundleBuilderUtils.ParseOption(CLI_BUILD_PARCELS_RANGE_SYNTAX, 4, out string[] xywh))
                 {
                     if (xywh == null)
@@ -178,11 +216,17 @@ namespace DCL
                         throw new ArgumentException("Invalid parcelsXYWH argument! Please use -parcelsXYWH x y w h to establish the desired parcels range to process.");
                     }
 
-                    var zoneArray = AssetBundleBuilderUtils.GetBottomLeftZoneArray(new Vector2Int(x, y), new Vector2Int(w, h));
+                    if (w > 10 || h > 10 || w < 0 || h < 0)
+                    {
+                        throw new ArgumentException("Invalid parcelsXYWH argument! Please don't use negative width/height values, and ensure any given width/height doesn't exceed 10.");
+                    }
 
-                    DumpArea(zoneArray, Exit);
-
+                    DumpArea(new Vector2Int(x, y), new Vector2Int(w, h), Exit);
                     return;
+                }
+                else
+                {
+                    throw new ArgumentException("Invalid arguments! You must pass -parcelsXYWH or -sceneCid for dump to work!");
                 }
             }
             catch (Exception e)
@@ -354,8 +398,8 @@ namespace DCL
                             Stream stream = File.OpenRead(realOutputPath);
                             string relativePath = GetRelativePathTo(hashToGltfPair[gltfHash].file, mappingPair.file);
 
-                            //NOTE(Brian): This cache will be used by the GLTF importer when seeking streams. This way the importer will
-                            //             consume the asset bundle dependencies instead of trying to create new streams.
+                            // NOTE(Brian): This cache will be used by the GLTF importer when seeking streams. This way the importer will
+                            //              consume the asset bundle dependencies instead of trying to create new streams.
                             PersistentAssetCache.StreamCacheByUri[relativePath] = new RefCountedStreamData(relativePath, stream);
                         }
                     }
@@ -434,17 +478,17 @@ namespace DCL
 
                 Debug.Log($"#{i} Generated asset bundle name: {assetBundles[i]}");
 
-                //NOTE(Brian): This is done for correctness sake, rename files to preserve the hash upper-case
-                if (hashLowercaseToHashProper.TryGetValue(assetBundles[i], out string hashWithUppercase))
-                {
-                    string oldPath = finalAssetBundlePath + assetBundles[i];
-                    string path = finalAssetBundlePath + hashWithUppercase;
-                    File.Move(oldPath, path);
-                    assetBundlePaths[i] = path;
-                }
-
                 try
                 {
+                    //NOTE(Brian): This is done for correctness sake, rename files to preserve the hash upper-case
+                    if (hashLowercaseToHashProper.TryGetValue(assetBundles[i], out string hashWithUppercase))
+                    {
+                        string oldPath = finalAssetBundlePath + assetBundles[i];
+                        string path = finalAssetBundlePath + hashWithUppercase;
+                        File.Move(oldPath, path);
+                        assetBundlePaths[i] = path;
+                    }
+
                     string oldPathMf = finalAssetBundlePath + assetBundles[i] + ".manifest";
                     File.Delete(oldPathMf);
                 }
@@ -452,7 +496,6 @@ namespace DCL
                 {
                     Debug.LogWarning("Error! " + e.Message);
                 }
-
             }
 
             try
