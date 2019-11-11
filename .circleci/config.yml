@@ -156,7 +156,7 @@ jobs:
       - run:
           name: Copy unity-client to working directory
           command: |
-            cp -r /tmp/explorer/unity-client $CIRCLE_WORKING_DIRECTORY
+            cp -r /tmp/explorer/unity-client/* .
       - run:
           name: Get the hash of source files
           command: |
@@ -171,7 +171,7 @@ jobs:
             openssl enc -d -aes-256-cbc -md sha256 -in $CIRCLE_WORKING_DIRECTORY/.circleci/license.zip-cipher -out $CIRCLE_WORKING_DIRECTORY/.circleci/license.zip -k ${CIPHER_KEY}
             cd / && unzip $CIRCLE_WORKING_DIRECTORY/.circleci/license.zip
       - run:
-          name: "Build decentraland-renderer"
+          name: Build decentraland-renderer
           command: |
             if [[ ! -e ${BUILD_PATH} ]] || [[ ! -n "$(ls -A ${BUILD_PATH})" ]]; then
                 chmod +x /tmp/explorer/unity-client/build-ci.sh
