@@ -395,7 +395,7 @@ workflows:
             - checkout
       - build-kernel:
           requires:
-            - checkout
+            - build-unity
 
       # explorer master + pr branch jobs (deploy to dev + pr dev)
       - deploy-dev:
