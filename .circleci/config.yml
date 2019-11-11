@@ -44,6 +44,7 @@ jobs:
       - persist_to_workspace:
           root: .
           paths:
+            - .git
             - .circleci
             - kernel
             - unity-client
@@ -106,6 +107,12 @@ jobs:
           command: |
             . .circleci/publish.sh
 
+      # persist to workspace to use in downstream jobs
+      - persist_to_workspace:
+          root: .
+          paths:
+            - Builds
+
   build-kernel:
     docker:
       - image: circleci/node:10-browsers
@@ -127,6 +134,10 @@ jobs:
           paths:
             - node_modules
           key: v1-dependencies-{{ checksum "package-lock.json" }}
+      - run:
+          name: Copy renderer to static build dir
+          command: |
+            cp /tmp/explorer/Builds/unity/Build/*.unityweb static/unity/Build/
       - run:
           name: Run linters and checks
           command: |
@@ -199,6 +210,12 @@ jobs:
             - .git
           key: build-sdk-{{ .Revision }}
 
+      # persist to workspace to use in downstream jobs
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+
   publish-ecs:
     docker:
       - image: circleci/node:10-browsers
@@ -249,22 +266,6 @@ jobs:
       - attach_workspace:
           at: /tmp/explorer
 
-      - run:
-          name: Get the hash of Unity source files
-          command: |
-            find Assets -type f \( -exec shasum "$PWD"/{} \; \) | sort > .unitysources-checksum
-      - restore_cache:
-          name: Restore the kernel build
-          keys:
-            - build-{{ .Revision }}
-      - restore_cache:
-          name: Restore the Unity build
-          keys:
-            - unitybuild-{{ checksum ".unitysources-checksum" }}
-      - run:
-          name: Copy the exact renderer for the current working folder into static
-          command: |
-            cp /tmp/explorer/unity-client/Builds/unity/Build/*.unityweb kernel/static/unity/Build/
       - run: sudo apt-get -y -qq install awscli
       - run:
           name: Configure DEV/STG AWS Keys
