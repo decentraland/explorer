@@ -26,18 +26,6 @@ public class PhysicsCast_Tests : TestsBase
         alreadyInitialized = true;
     }
 
-    void InstantiateEntityWithShape(Vector3 pos, Vector3 scale, out DecentralandEntity entity, out BoxShape shape)
-    {
-        shape = TestHelpers.InstantiateEntityWithShape<BoxShape, BoxShape.Model>(
-            scene,
-            DCL.Models.CLASS_ID.BOX_SHAPE,
-            Vector3.zero,
-            out entity,
-            new BoxShape.Model() { });
-
-        TestHelpers.SetEntityTransform(scene, entity, pos, Quaternion.identity, scale);
-    }
-
     private void ConfigureRaycastQuery(string queryType)
     {
         DCLCharacterController.i.SetPosition(startPos);
