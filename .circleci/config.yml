@@ -146,7 +146,7 @@ jobs:
       - image: decentraland/renderer-build
         environment:
           - BUILD_TARGET: WebGL
-          - BUILD_PATH: /tmp/explorer/Builds/unity
+          - BUILD_PATH: /tmp/explorer/unity-client/Builds/unity
           - BUILD_NAME: unity
     working_directory: /tmp/explorer/unity-client
     steps:
@@ -162,15 +162,15 @@ jobs:
           keys:
             - unitybuild-{{ checksum ".unitysources-checksum" }}
       - run:
-          name: "Extract the license key for Unity"
+          name: Extract the license key for Unity
           command: |
-            openssl enc -d -aes-256-cbc -md sha256 -in ./.circleci/license.zip-cipher -out ./.circleci/license.zip -k ${CIPHER_KEY}
-            cd / && unzip /tmp/explorer/.circleci/license.zip
+            openssl enc -d -aes-256-cbc -md sha256 -in $CIRCLE_WORKING_DIRECTORY/.circleci/license.zip-cipher -out $CIRCLE_WORKING_DIRECTORY/.circleci/license.zip -k ${CIPHER_KEY}
+            cd / && unzip $CIRCLE_WORKING_DIRECTORY/.circleci/license.zip
       - run:
           name: "Build decentraland-renderer"
           command: |
             if [[ ! -e ${BUILD_PATH} ]] || [[ ! -n "$(ls -A ${BUILD_PATH})" ]]; then
-                chmod +x /tmp/explorer/build-ci.sh
+                chmod +x /tmp/explorer/unity-client/build-ci.sh
                 mkdir -p ${BUILD_PATH}
                 ((cd /tmp/explorer && ./build-ci.sh) & echo $! > /tmp/explorer/build.pid &)
                 pid=`cat /tmp/explorer/build.pid`
