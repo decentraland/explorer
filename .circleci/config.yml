@@ -48,6 +48,64 @@ jobs:
             - kernel
             - unity-client
 
+  build-unity:
+    resource_class: xlarge
+    docker:
+      - image: decentraland/renderer-build
+        environment:
+          - BUILD_TARGET: WebGL
+          - BUILD_PATH: /tmp/explorer/Builds/unity
+          - BUILD_NAME: unity
+    working_directory: /tmp/explorer
+    steps:
+      - attach_workspace:
+          at: /tmp/explorer
+
+      - run:
+          name: Copy unity-client to working directory
+          command: |
+            cp -r /tmp/explorer/unity-client/* .
+      - run:
+          name: Get the hash of source files
+          command: |
+            find Assets -type f \( -exec shasum "$PWD"/{} \; \) | sort > .unitysources-checksum
+      - restore_cache:
+          name: Restore decentraland-renderer if exists
+          keys:
+            - unitybuild-{{ checksum ".unitysources-checksum" }}
+      - run:
+          name: Extract the license key for Unity
+          command: |
+            openssl enc -d -aes-256-cbc -md sha256 -in $CIRCLE_WORKING_DIRECTORY/.circleci/license.zip-cipher -out $CIRCLE_WORKING_DIRECTORY/.circleci/license.zip -k ${CIPHER_KEY}
+            cd / && unzip $CIRCLE_WORKING_DIRECTORY/.circleci/license.zip
+      - run:
+          name: Build decentraland-renderer
+          command: |
+            if [[ ! -e ${BUILD_PATH} ]] || [[ ! -n "$(ls -A ${BUILD_PATH})" ]]; then
+                chmod +x $CIRCLE_WORKING_DIRECTORY/build-ci.sh
+                mkdir -p ${BUILD_PATH}
+                ((cd /tmp/explorer && ./build-ci.sh) & echo $! > /tmp/explorer/build.pid &)
+                pid=`cat /tmp/explorer/build.pid`
+                while [ -e /proc/$pid -a /proc/$pid/exe ]; do
+                    echo "Running Unity Build..."
+                    sleep 60
+                done
+                ls -la ${BUILD_PATH}
+                [ -n "$(ls -A ${BUILD_PATH})" ] # fail job if build folder is empty
+            fi;
+      - save_cache:
+          name: Store decentraland-renderer build
+          key: unitybuild-{{ checksum ".unitysources-checksum" }}
+          paths:
+            - /tmp/explorer/Builds/
+      - run:
+          name: Authenticate with registry
+          command: echo "//registry.npmjs.org/:_authToken=${NPMTOKEN}" > /tmp/explorer/Builds/${BUILD_NAME}/.npmrc
+      - run:
+          name: Publish decentraland-renderer package
+          command: |
+            . .circleci/publish.sh
+
   build-kernel:
     docker:
       - image: circleci/node:10-browsers
@@ -141,64 +199,6 @@ jobs:
             - .git
           key: build-sdk-{{ .Revision }}
 
-  build-unity:
-    resource_class: xlarge
-    docker:
-      - image: decentraland/renderer-build
-        environment:
-          - BUILD_TARGET: WebGL
-          - BUILD_PATH: /tmp/explorer/Builds/unity
-          - BUILD_NAME: unity
-    working_directory: /tmp/explorer
-    steps:
-      - attach_workspace:
-          at: /tmp/explorer
-
-      - run:
-          name: Copy unity-client to working directory
-          command: |
-            cp -r /tmp/explorer/unity-client/* .
-      - run:
-          name: Get the hash of source files
-          command: |
-            find Assets -type f \( -exec shasum "$PWD"/{} \; \) | sort > .unitysources-checksum
-      - restore_cache:
-          name: Restore decentraland-renderer if exists
-          keys:
-            - unitybuild-{{ checksum ".unitysources-checksum" }}
-      - run:
-          name: Extract the license key for Unity
-          command: |
-            openssl enc -d -aes-256-cbc -md sha256 -in $CIRCLE_WORKING_DIRECTORY/.circleci/license.zip-cipher -out $CIRCLE_WORKING_DIRECTORY/.circleci/license.zip -k ${CIPHER_KEY}
-            cd / && unzip $CIRCLE_WORKING_DIRECTORY/.circleci/license.zip
-      - run:
-          name: Build decentraland-renderer
-          command: |
-            if [[ ! -e ${BUILD_PATH} ]] || [[ ! -n "$(ls -A ${BUILD_PATH})" ]]; then
-                chmod +x $CIRCLE_WORKING_DIRECTORY/build-ci.sh
-                mkdir -p ${BUILD_PATH}
-                ((cd /tmp/explorer && ./build-ci.sh) & echo $! > /tmp/explorer/build.pid &)
-                pid=`cat /tmp/explorer/build.pid`
-                while [ -e /proc/$pid -a /proc/$pid/exe ]; do
-                    echo "Running Unity Build..."
-                    sleep 60
-                done
-                ls -la ${BUILD_PATH}
-                [ -n "$(ls -A ${BUILD_PATH})" ] # fail job if build folder is empty
-            fi;
-      - save_cache:
-          name: Store decentraland-renderer build
-          key: unitybuild-{{ checksum ".unitysources-checksum" }}
-          paths:
-            - /tmp/explorer/Builds/
-      - run:
-          name: Authenticate with registry
-          command: echo "//registry.npmjs.org/:_authToken=${NPMTOKEN}" > /tmp/explorer/Builds/${BUILD_NAME}/.npmrc
-      - run:
-          name: Publish decentraland-renderer package
-          command: |
-            . .circleci/publish.sh
-
   publish-ecs:
     docker:
       - image: circleci/node:10-browsers
@@ -244,10 +244,11 @@ jobs:
   deploy-on-pr:
     docker:
       - image: circleci/node:10-browsers
-    working_directory: /tmp/explorer
+    working_directory: /tmp/explorer/kernel
     steps:
       - attach_workspace:
           at: /tmp/explorer
+
       - run:
           name: Get the hash of Unity source files
           command: |
