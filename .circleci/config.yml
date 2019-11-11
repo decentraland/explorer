@@ -1,6 +1,6 @@
 version: 2
 jobs:
-  build:
+  checkout:
     docker:
       - image: circleci/node:10-browsers
         environment:
@@ -9,9 +9,9 @@ jobs:
 
     working_directory: /tmp/explorer
     steps:
-      # Install lfs
+      # install lfs
       - run:
-          name: 'Install git-lfs'
+          name: "Install git-lfs"
           command: |
             mkdir -p ~/.ssh
             ssh-keyscan -H github.com >> ~/.ssh/known_hosts
@@ -19,6 +19,7 @@ jobs:
             sudo apt-get update && sudo apt-get install -y git-lfs=2.7.2
             ssh git@github.com git-lfs-authenticate decentraland/explorer.git download
             git lfs install
+
       # checkout the actual code
       - checkout
 
@@ -28,15 +29,32 @@ jobs:
           keys:
             - gitlfs-{{ .Branch }}
             - gitlfs
-      - shell:
-          name: Pull Git LFS files, retry until done
+      - run:
+          name: "Download LFS files"
           command: |
-            while true; do git reset --hard HEAD && git clean -fd && git lfs pull && break; done
+            git lfs fetch --all
+            git lfs checkout -- .
       - save_cache:
           name: Store large files in cache
           key: gitlfs-{{ .Branch }}
           paths:
             - .git/lfs
+
+      # persist to workspace to use in downstream jobs
+      - persist_to_workspace:
+          root: .
+          paths:
+            - kernel
+            - unity-client
+
+  build-kernel:
+    docker:
+      - image: circleci/node:10-browsers
+    working_directory: /tmp/explorer/kernel
+    steps:
+      - attach_workspace:
+          at: /tmp/explorer
+
       - restore_cache:
           name: Restoring node_modules
           keys:
@@ -131,16 +149,11 @@ jobs:
           - BUILD_TARGET: WebGL
           - BUILD_PATH: /tmp/explorer/Builds/unity
           - BUILD_NAME: unity
-    working_directory: /tmp/explorer
+    working_directory: /tmp/explorer/unity-client
     steps:
-      - checkout
-      - run:
-          name: 'Download unity LFS files'
-          command: |
-            ssh git@github.com git-lfs-authenticate decentraland/explorer.git download
-            git lfs install
-            git lfs fetch --all
-            git lfs checkout -- .
+      - attach_workspace:
+          at: /tmp/explorer
+
       - run:
           name: Get the hash of source files
           command: |
@@ -150,12 +163,12 @@ jobs:
           keys:
             - unitybuild-{{ checksum ".unitysources-checksum" }}
       - run:
-          name: 'Extract the license key for Unity'
+          name: "Extract the license key for Unity"
           command: |
             openssl enc -d -aes-256-cbc -md sha256 -in ./.circleci/license.zip-cipher -out ./.circleci/license.zip -k ${CIPHER_KEY}
             cd / && unzip /tmp/explorer/.circleci/license.zip
       - run:
-          name: 'Build decentraland-renderer'
+          name: "Build decentraland-renderer"
           command: |
             if [[ ! -e ${BUILD_PATH} ]] || [[ ! -n "$(ls -A ${BUILD_PATH})" ]]; then
                 chmod +x /tmp/explorer/build-ci.sh
@@ -185,25 +198,11 @@ jobs:
   publish-ecs:
     docker:
       - image: circleci/node:10-browsers
-    working_directory: /tmp/explorer
+    working_directory: /tmp/explorer/kernel
     steps:
-      - checkout
-      - run:
-          name: 'Install git-lfs'
-          command: |
-            mkdir -p ~/.ssh
-            ssh-keyscan -H github.com >> ~/.ssh/known_hosts
-            curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
-            sudo apt-get update && sudo apt-get install -y git-lfs=2.7.2
-            ssh git@github.com git-lfs-authenticate decentraland/explorer.git download
-            git lfs install
-      - run:
-          name: 'Download LFS files'
-          command: |
-            ssh git@github.com git-lfs-authenticate decentraland/explorer.git download
-            git lfs install
-            git lfs fetch --all
-            git lfs checkout -- .
+      - attach_workspace:
+          at: /tmp/explorer
+
       - run:
           name: Get the hash of Unity source files
           command: |
@@ -243,23 +242,8 @@ jobs:
       - image: circleci/node:10-browsers
     working_directory: /tmp/explorer
     steps:
-      - checkout
-      - run:
-          name: 'Install git-lfs'
-          command: |
-            mkdir -p ~/.ssh
-            ssh-keyscan -H github.com >> ~/.ssh/known_hosts
-            curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
-            sudo apt-get update && sudo apt-get install -y git-lfs=2.7.2
-            ssh git@github.com git-lfs-authenticate decentraland/explorer.git download
-            git lfs install
-      - run:
-          name: 'Download LFS files'
-          command: |
-            ssh git@github.com git-lfs-authenticate decentraland/explorer.git download
-            git lfs install
-            git lfs fetch --all
-            git lfs checkout -- .
+      - attach_workspace:
+          at: /tmp/explorer
       - run:
           name: Get the hash of Unity source files
           command: |
@@ -275,7 +259,7 @@ jobs:
       - run:
           name: Copy the exact renderer for the current working folder into static
           command: |
-            cp /tmp/explorer/Builds/unity/Build/*.unityweb static/unity/Build/
+            cp /tmp/explorer/unity-client/Builds/unity/Build/*.unityweb kernel/static/unity/Build/
       - run: sudo apt-get -y -qq install awscli
       - run:
           name: Configure DEV/STG AWS Keys
@@ -283,7 +267,7 @@ jobs:
             aws configure set aws_access_key_id ${AWS_DEV_ACCESS_KEY_ID} && aws configure set aws_secret_access_key ${AWS_DEV_SECRET_ACCESS_KEY}
       - run:
           name: Deploy to S3 (.zone) under subfolder if tests pass and branch is not master
-          command: aws s3 sync static s3://explorer.decentraland.zone/branch/${CIRCLE_BRANCH} --acl public-read
+          command: aws s3 sync kernel/static s3://explorer.decentraland.zone/branch/${CIRCLE_BRANCH} --acl public-read
       - run:
           name: Invalidate cloudfront cache .zone
           command: aws configure set preview.cloudfront true && aws configure set preview.create-invalidation true && aws cloudfront create-invalidation --distribution-id E297VXIBZFXIXE --paths "/*"
@@ -296,23 +280,6 @@ jobs:
       - image: circleci/node:10-browsers
     working_directory: /tmp/explorer
     steps:
-      - checkout
-      - run:
-          name: 'Install git-lfs'
-          command: |
-            mkdir -p ~/.ssh
-            ssh-keyscan -H github.com >> ~/.ssh/known_hosts
-            curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
-            sudo apt-get update && sudo apt-get install -y git-lfs=2.7.2
-            ssh git@github.com git-lfs-authenticate decentraland/explorer.git download
-            git lfs install
-      - run:
-          name: 'Download LFS files'
-          command: |
-            ssh git@github.com git-lfs-authenticate decentraland/explorer.git download
-            git lfs install
-            git lfs fetch --all
-            git lfs checkout -- .
       - run:
           name: Get the hash of Unity source files
           command: |
@@ -349,23 +316,6 @@ jobs:
       - image: circleci/node:10-browsers
     working_directory: /tmp/explorer
     steps:
-      - checkout
-      - run:
-          name: 'Install git-lfs'
-          command: |
-            mkdir -p ~/.ssh
-            ssh-keyscan -H github.com >> ~/.ssh/known_hosts
-            curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
-            sudo apt-get update && sudo apt-get install -y git-lfs=2.7.2
-            ssh git@github.com git-lfs-authenticate decentraland/explorer.git download
-            git lfs install
-      - run:
-          name: 'Download LFS files'
-          command: |
-            ssh git@github.com git-lfs-authenticate decentraland/explorer.git download
-            git lfs install
-            git lfs fetch --all
-            git lfs checkout -- .
       - run:
           name: Get the hash of Unity source files
           command: |
@@ -403,23 +353,6 @@ jobs:
       - image: circleci/node:10-browsers
     working_directory: /tmp/explorer
     steps:
-      - checkout
-      - run:
-          name: 'Install git-lfs'
-          command: |
-            mkdir -p ~/.ssh
-            ssh-keyscan -H github.com >> ~/.ssh/known_hosts
-            curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
-            sudo apt-get update && sudo apt-get install -y git-lfs=2.7.2
-            ssh git@github.com git-lfs-authenticate decentraland/explorer.git download
-            git lfs install
-      - run:
-          name: 'Download LFS files'
-          command: |
-            ssh git@github.com git-lfs-authenticate decentraland/explorer.git download
-            git lfs install
-            git lfs fetch --all
-            git lfs checkout -- .
       - run:
           name: Get the hash of Unity source files
           command: |
@@ -456,32 +389,36 @@ workflows:
   version: 2
   build-deploy:
     jobs:
+      - checkout
       - build-unity
-      - build
+      - build-kernel
 
       # explorer master + pr branch jobs (deploy to dev + pr dev)
       - deploy-dev:
           requires:
             - build-unity
-            - build
+            - build-kernel
           filters:
             branches:
               only: master
+
       - deploy-on-pr:
           requires:
             - build-unity
-            - build
+            - build-kernel
           filters:
             branches:
               ignore:
                 - master
                 - staging
                 - release
+
+      # ecs publishing
       - hold-ecs:
           type: approval
           requires:
             - build-unity
-            - build
+            - build-kernel
           filters:
             branches:
               ignore: /(.*)/ # on branch: master we don't want to hold, but publish after the build is done
@@ -489,8 +426,8 @@ workflows:
               only: /^\d+\.\d+\.\d(.*)/ # npm tag + latest
       - publish-ecs:
           requires:
-            - build # on master we don't hold, but publish to next right after the build is done
             - build-unity
+            - build-kernel # on master we don't hold, but publish to next right after the build is done
             - hold-ecs # on tags we wait until there's an approval
           filters:
             branches:
@@ -498,18 +435,19 @@ workflows:
             tags:
               only: /^\d+\.\d+\.\d(.*)/ # npm tag + latest
 
+      # standard env deployments
       - deploy-stg:
           requires:
-            - build
             - build-unity
+            - build-kernel
           filters:
             branches:
               only: staging
 
       - deploy-prd:
           requires:
-            - build
             - build-unity
+            - build-kernel
           filters:
             branches:
               only: release
