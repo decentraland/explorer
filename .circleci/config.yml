@@ -175,7 +175,7 @@ jobs:
           name: Build decentraland-renderer
           command: |
             if [[ ! -e ${BUILD_PATH} ]] || [[ ! -n "$(ls -A ${BUILD_PATH})" ]]; then
-                chmod +x /tmp/explorer/unity-client/build-ci.sh
+                chmod +x $CIRCLE_WORKING_DIRECTORY/build-ci.sh
                 mkdir -p ${BUILD_PATH}
                 ((cd /tmp/explorer && ./build-ci.sh) & echo $! > /tmp/explorer/build.pid &)
                 pid=`cat /tmp/explorer/build.pid`
