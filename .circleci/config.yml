@@ -42,7 +42,7 @@ jobs:
 
       # persist to workspace to use in downstream jobs
       - persist_to_workspace:
-          root: /tmp
+          root: .
           paths:
             - kernel
             - unity-client
@@ -50,10 +50,10 @@ jobs:
   build-kernel:
     docker:
       - image: circleci/node:10-browsers
-    working_directory: /tmp/kernel
+    working_directory: /tmp/explorer/kernel
     steps:
       - attach_workspace:
-          at: /tmp
+          at: /tmp/explorer
 
       - restore_cache:
           name: Restoring node_modules
@@ -151,12 +151,12 @@ jobs:
     working_directory: /tmp/explorer
     steps:
       - attach_workspace:
-          at: /tmp
+          at: /tmp/explorer
 
       - run:
-          name: Copy unity-client dir to working directory
+          name: Copy unity-client to working directory
           command: |
-            cp -r /tmp/unity-client $CICLE_WORKING_DIRECTORY
+            cp -r /tmp/explorer/unity-client $CIRCLE_WORKING_DIRECTORY
       - run:
           name: Get the hash of source files
           command: |
