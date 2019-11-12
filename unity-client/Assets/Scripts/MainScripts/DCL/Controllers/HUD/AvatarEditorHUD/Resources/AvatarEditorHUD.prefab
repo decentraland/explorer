@@ -1305,7 +1305,7 @@ MonoBehaviour:
     focus: 1
   - toggle: {fileID: 4514556114190625523}
     canvas: {fileID: 3150290543118789798}
-    enabledByDefault: 1
+    enabledByDefault: 0
     focus: 1
   - toggle: {fileID: 3661532843323438586}
     canvas: {fileID: 3150290542294892066}
@@ -1345,7 +1345,7 @@ MonoBehaviour:
     focus: 1
   - toggle: {fileID: 353136691737030669}
     canvas: {fileID: 2103479320851936187}
-    enabledByDefault: 1
+    enabledByDefault: 0
     focus: 1
   - toggle: {fileID: 353136691492418267}
     canvas: {fileID: 7156231023982252930}
@@ -8657,7 +8657,7 @@ PrefabInstance:
     - target: {fileID: 5176895287733378623, guid: 7d2f70c1de2924a44bbd79ddad5f3d1b,
         type: 3}
       propertyPath: m_Value
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1885194522706077625, guid: 7d2f70c1de2924a44bbd79ddad5f3d1b,
         type: 3}
@@ -8844,7 +8844,7 @@ PrefabInstance:
     - target: {fileID: 5176895287733378623, guid: 7d2f70c1de2924a44bbd79ddad5f3d1b,
         type: 3}
       propertyPath: m_Value
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1885194522706077625, guid: 7d2f70c1de2924a44bbd79ddad5f3d1b,
         type: 3}
@@ -10134,7 +10134,7 @@ PrefabInstance:
     - target: {fileID: 5176895287733378623, guid: 7d2f70c1de2924a44bbd79ddad5f3d1b,
         type: 3}
       propertyPath: m_Value
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1885194522706077625, guid: 7d2f70c1de2924a44bbd79ddad5f3d1b,
         type: 3}
