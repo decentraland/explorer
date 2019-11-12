@@ -130,10 +130,6 @@ jobs:
             - node_modules
           key: v1-dependencies-{{ checksum "package-lock.json" }}
       - run:
-          name: Copy renderer to static build dir
-          command: |
-            cp /tmp/explorer/unity-client/Builds/unity/Build/*.unityweb static/unity/Build/
-      - run:
           name: Run linters and checks
           command: |
             make lint
