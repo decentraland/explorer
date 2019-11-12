@@ -241,7 +241,7 @@ jobs:
             aws configure set aws_access_key_id ${AWS_DEV_ACCESS_KEY_ID} && aws configure set aws_secret_access_key ${AWS_DEV_SECRET_ACCESS_KEY}
       - run:
           name: Deploy to S3 (.zone) under subfolder if tests pass and branch is not master
-          command: aws s3 sync kernel/static s3://explorer.decentraland.zone/branch/${CIRCLE_BRANCH} --acl public-read
+          command: aws s3 sync static s3://explorer.decentraland.zone/branch/${CIRCLE_BRANCH} --acl public-read
       - run:
           name: Invalidate cloudfront cache .zone
           command: aws configure set preview.cloudfront true && aws configure set preview.create-invalidation true && aws cloudfront create-invalidation --distribution-id E297VXIBZFXIXE --paths "/*"
