@@ -99,7 +99,7 @@ jobs:
       - persist_to_workspace:
           root: /tmp/explorer
           paths:
-            - unity-client
+            - unity-client/Builds/unity/Build
 
   build-kernel:
     docker:
@@ -191,7 +191,8 @@ jobs:
       - persist_to_workspace:
           root: /tmp/explorer
           paths:
-            - kernel
+            - kernel/static
+            - kernel/dist
 
   build:
     docker:
@@ -208,7 +209,7 @@ jobs:
       - persist_to_workspace:
           root: /tmp/explorer
           paths:
-            - kernel
+            - kernel/static/unity/Build
 
   publish-ecs:
     docker:
