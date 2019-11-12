@@ -80,7 +80,7 @@ jobs:
             if [[ ! -e ${BUILD_PATH} ]] || [[ ! -n "$(ls -A ${BUILD_PATH})" ]]; then
                 chmod +x $CIRCLE_WORKING_DIRECTORY/build-ci.sh
                 mkdir -p ${BUILD_PATH}
-                ((cd /tmp/explorer && ./build-ci.sh) & echo $! > /tmp/explorer/build.pid &)
+                (./build-ci.sh & echo $! > /tmp/explorer/build.pid &)
                 pid=`cat /tmp/explorer/build.pid`
                 while [ -e /proc/$pid -a /proc/$pid/exe ]; do
                     echo "Running Unity Build..."
