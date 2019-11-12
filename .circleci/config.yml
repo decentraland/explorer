@@ -97,9 +97,9 @@ jobs:
 
       # persist to workspace to use in downstream jobs
       - persist_to_workspace:
-          root: /tmp/explorer/unity-client
+          root: /
           paths:
-            - Builds
+            - {{ BUILD_PATH }}
 
   build-kernel:
     docker:
