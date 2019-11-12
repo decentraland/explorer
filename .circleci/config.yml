@@ -115,7 +115,7 @@ jobs:
       - restore_cache:
           name: Restore built files
           keys:
-            - kernel-built-{{ checksum "../.kernelsources-checksum" }}
+            - kernel-build-{{ checksum "../.kernelsources-checksum" }}
       - restore_cache:
           name: Restoring node_modules
           keys:
@@ -183,8 +183,10 @@ jobs:
       - save_cache:
           name: Save the built files
           paths:
-            - static
-          key: kernel-built-{{ checksum "../.kernelsources-checksum" }}
+            - static/dist
+            - static/loader
+            - static/systems
+          key: kernel-build-{{ checksum "../.kernelsources-checksum" }}
       # persist to workspace to use in downstream jobs
       - persist_to_workspace:
           root: /tmp/explorer/kernel
