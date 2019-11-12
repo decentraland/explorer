@@ -37,7 +37,15 @@ import { worldRunningObservable, isWorldRunning } from '../world/worldState'
 type Timestamp = number
 type PeerAlias = string
 
-const MORDOR_POSITION: Position = [1000 * parcelLimits.parcelSize, 1000, 1000 * parcelLimits.parcelSize, 0, 0, 0, 0]
+export const MORDOR_POSITION: Position = [
+  1000 * parcelLimits.parcelSize,
+  1000,
+  1000 * parcelLimits.parcelSize,
+  0,
+  0,
+  0,
+  0
+]
 
 export class PeerTrackingInfo {
   public position: Position | null = null
@@ -483,9 +491,7 @@ export async function connect(userId: string, network: ETHEREUM_NETWORK, auth: A
   }, 1000)
 
   context.worldRunningObserver = worldRunningObservable.add(isRunning => {
-    if (!isRunning) {
-      sendToMordor()
-    }
+    onWorldRunning(isRunning)
   })
 
   context.positionObserver = positionObservable.add((obj: Readonly<PositionReport>) => {
@@ -518,9 +524,15 @@ export async function connect(userId: string, network: ETHEREUM_NETWORK, auth: A
   return context
 }
 
-export function sendToMordor() {
-  if (context && context.worldInstanceConnection && context.currentPosition) {
-    context.worldInstanceConnection.sendParcelUpdateMessage(context.currentPosition, MORDOR_POSITION)
+export function onWorldRunning(isRunning: boolean, _context: Context | null = context) {
+  if (!isRunning) {
+    sendToMordor(_context)
+  }
+}
+
+export function sendToMordor(_context: Context | null = context) {
+  if (_context && _context.worldInstanceConnection && _context.currentPosition) {
+    _context.worldInstanceConnection.sendParcelUpdateMessage(_context.currentPosition, MORDOR_POSITION)
   }
 }
 
