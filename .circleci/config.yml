@@ -99,7 +99,7 @@ jobs:
       - persist_to_workspace:
           root: /
           paths:
-            - {{ BUILD_PATH }}
+            - /tmp/explorer/unity-client/Builds/unity
 
   build-kernel:
     docker:
