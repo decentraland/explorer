@@ -188,8 +188,7 @@ jobs:
           name: Save the built files
           paths:
             - static
-          key:
-            - kernel-built-{{ checksum "../.kernelsources-checksum" }}
+          key: kernel-built-{{ checksum "../.kernelsources-checksum" }}
       # persist to workspace to use in downstream jobs
       - persist_to_workspace:
           root: /tmp/explorer/kernel
