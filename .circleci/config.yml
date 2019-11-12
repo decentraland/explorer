@@ -68,7 +68,7 @@ jobs:
       - restore_cache:
           name: Restore decentraland-renderer if exists
           keys:
-            - unitybuild-{{ checksum "../.unitysources-checksum" }}
+            - unity-build-{{ checksum "../.unitysources-checksum" }}
       - run:
           name: Extract the license key for Unity
           command: |
@@ -91,7 +91,7 @@ jobs:
             fi;
       - save_cache:
           name: Store decentraland-renderer build
-          key: unitybuild-{{ checksum ".unitysources-checksum" }}
+          key: unity-build-{{ checksum ".unitysources-checksum" }}
           paths:
             - /tmp/explorer/unity-client/Builds/
 
