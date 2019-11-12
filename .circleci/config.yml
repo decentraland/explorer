@@ -55,30 +55,25 @@ jobs:
       - image: decentraland/renderer-build
         environment:
           - BUILD_TARGET: WebGL
-          - BUILD_PATH: /tmp/explorer/Builds/unity
+          - BUILD_PATH: /tmp/explorer/unity-client/Builds/unity
           - BUILD_NAME: unity
-    working_directory: /tmp/explorer
+    working_directory: /tmp/explorer/unity-client
     steps:
       - attach_workspace:
-          at: /tmp/explorer
-
+          at: /tmp/explorer/unity-client
       - run:
           name: Get the hash of source files
           command: |
-            find unity-client/Assets -type f \( -exec shasum "$PWD"/{} \; \) | sort > .unitysources-checksum
-      - run:
-          name: Copy unity-client to working directory
-          command: |
-            cp -r /tmp/explorer/unity-client/* .
+            find Assets -type f \( -exec shasum "$PWD"/{} \; \) | sort > ../.unitysources-checksum
       - restore_cache:
           name: Restore decentraland-renderer if exists
           keys:
-            - unitybuild-{{ checksum ".unitysources-checksum" }}
+            - unitybuild-{{ checksum "../.unitysources-checksum" }}
       - run:
           name: Extract the license key for Unity
           command: |
             openssl enc -d -aes-256-cbc -md sha256 -in $CIRCLE_WORKING_DIRECTORY/.circleci/license.zip-cipher -out $CIRCLE_WORKING_DIRECTORY/.circleci/license.zip -k ${CIPHER_KEY}
-            cd / && unzip $CIRCLE_WORKING_DIRECTORY/.circleci/license.zip
+            cd / && unzip $CIRCLE_WORKING_DIRECTORY/../.circleci/license.zip
       - run:
           name: Build decentraland-renderer
           command: |
@@ -98,18 +93,11 @@ jobs:
           name: Store decentraland-renderer build
           key: unitybuild-{{ checksum ".unitysources-checksum" }}
           paths:
-            - /tmp/explorer/Builds/
-      - run:
-          name: Authenticate with registry
-          command: echo "//registry.npmjs.org/:_authToken=${NPMTOKEN}" > /tmp/explorer/Builds/${BUILD_NAME}/.npmrc
-      - run:
-          name: Publish decentraland-renderer package
-          command: |
-            . .circleci/publish.sh
+            - /tmp/explorer/unity-client/Builds/
 
       # persist to workspace to use in downstream jobs
       - persist_to_workspace:
-          root: .
+          root: /tmp/explorer/unity-client
           paths:
             - Builds
 
@@ -120,7 +108,14 @@ jobs:
     steps:
       - attach_workspace:
           at: /tmp/explorer
-
+      - run:
+          name: Get the hash of source files
+          command: |
+            find packages -type f \( -exec shasum "$PWD"/{} \; \) | sort > ../.kernelsources-checksum
+      - restore_cache:
+          name: Restore built files
+          keys:
+            - kernel-built-{{ checksum "../.kernelsources-checksum" }}
       - restore_cache:
           name: Restoring node_modules
           keys:
@@ -137,7 +132,7 @@ jobs:
       - run:
           name: Copy renderer to static build dir
           command: |
-            cp /tmp/explorer/Builds/unity/Build/*.unityweb static/unity/Build/
+            cp /tmp/explorer/unity-client/Builds/unity/Build/*.unityweb static/unity/Build/
       - run:
           name: Run linters and checks
           command: |
@@ -180,10 +175,6 @@ jobs:
             make test-ci
             npx codecov
       - store_artifacts:
-          name: Save screenshots of visual tests
-          path: test/diff
-          when: on_fail
-      - store_artifacts:
           path: packages/decentraland-ecs/api-docs-review/decentraland-ecs.api.ts
           when: on_fail
       - store_artifacts:
@@ -197,24 +188,30 @@ jobs:
           name: Save the built files
           paths:
             - static
-          key: build-{{ .Revision }}
-      - save_cache:
-          name: Save the files required to release an SDK version
-          paths:
-            - Makefile
-            - packages
-            - scripts
-            - tsconfig.json
-            - package-lock.json
-            - package.json
-            - .git
-          key: build-sdk-{{ .Revision }}
-
+          key:
+            - kernel-built-{{ checksum "../.kernelsources-checksum" }}
       # persist to workspace to use in downstream jobs
       - persist_to_workspace:
-          root: .
+          root: /tmp/explorer/kernel
           paths:
             - .
+
+  build:
+    docker:
+      - image: circleci/node:10-browsers
+    working_directory: /tmp/explorer
+    steps:
+      - attach_workspace:
+          at: /tmp/explorer
+      - run:
+          name: Copy renderer to kernel
+          command: |
+            cp /tmp/explorer/unity-client/Builds/unity/Build/*.unityweb /tmp/explorer/kernel/static/unity/Build/
+      # persist to workspace to use in downstream jobs
+      - persist_to_workspace:
+          root: /tmp/explorer/kernel/static/unity
+          paths:
+            - Build
 
   publish-ecs:
     docker:
@@ -223,36 +220,10 @@ jobs:
     steps:
       - attach_workspace:
           at: /tmp/explorer
-
-      - run:
-          name: Get the hash of Unity source files
-          command: |
-            find Assets -type f \( -exec shasum "$PWD"/{} \; \) | sort > .unitysources-checksum
-      - restore_cache:
-          name: Restore sdk-release files
-          keys:
-            - build-sdk-{{ .Revision }}
-      - restore_cache:
-          name: Restore node_modules
-          keys:
-            - v1-dependencies-{{ checksum "package-lock.json" }}
-      - restore_cache:
-          name: Restore built files
-          keys:
-            - build-{{ .Revision }}
-      - restore_cache:
-          name: Restore the Unity build
-          keys:
-            - unitybuild-{{ checksum ".unitysources-checksum" }}
-      - run:
-          name: Copy the exact renderer for the current working folder into static
-          command: |
-            cp /tmp/explorer/Builds/unity/*.unityweb static/unity/Build/
       - run:
           name: Set up NPM access tokens
           command: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
           when: on_success
-
       - run:
           name: Publish a new version of decentraland-ecs
           command: make publish
@@ -284,24 +255,11 @@ jobs:
   deploy-dev:
     docker:
       - image: circleci/node:10-browsers
-    working_directory: /tmp/explorer
+    working_directory: /tmp/explorer/kernel
     steps:
-      - run:
-          name: Get the hash of Unity source files
-          command: |
-            find Assets -type f \( -exec shasum "$PWD"/{} \; \) | sort > .unitysources-checksum
-      - restore_cache:
-          name: Restore the kernel build
-          keys:
-            - build-{{ .Revision }}
-      - restore_cache:
-          name: Restore the Unity build
-          keys:
-            - unitybuild-{{ checksum ".unitysources-checksum" }}
-      - run:
-          name: Copy the exact renderer for the current working folder into static
-          command: |
-            cp /tmp/explorer/Builds/unity/Build/*.unityweb static/unity/Build/
+      - attach_workspace:
+          at: /tmp/explorer
+
       - run: sudo apt-get -y -qq install awscli
       - run:
           name: Configure DEV/STG AWS Keys
@@ -320,24 +278,10 @@ jobs:
   deploy-stg:
     docker:
       - image: circleci/node:10-browsers
-    working_directory: /tmp/explorer
+    working_directory: /tmp/explorer/kernel
     steps:
-      - run:
-          name: Get the hash of Unity source files
-          command: |
-            find Assets -type f \( -exec shasum "$PWD"/{} \; \) | sort > .unitysources-checksum
-      - restore_cache:
-          name: Restore the kernel build
-          keys:
-            - build-{{ .Revision }}
-      - restore_cache:
-          name: Restore the Unity build
-          keys:
-            - unitybuild-{{ checksum ".unitysources-checksum" }}
-      - run:
-          name: Copy the exact renderer for the current working folder into static
-          command: |
-            cp /tmp/explorer/Builds/unity/Build/*.unityweb static/unity/Build/
+      - attach_workspace:
+          at: /tmp/explorer
       - run: sudo apt-get -y -qq install awscli
       - run:
           name: Configure DEV/STG AWS Keys
@@ -357,24 +301,10 @@ jobs:
   deploy-prd:
     docker:
       - image: circleci/node:10-browsers
-    working_directory: /tmp/explorer
+    working_directory: /tmp/explorer/kernel
     steps:
-      - run:
-          name: Get the hash of Unity source files
-          command: |
-            find Assets -type f \( -exec shasum "$PWD"/{} \; \) | sort > .unitysources-checksum
-      - restore_cache:
-          name: Restore the kernel build
-          keys:
-            - build-{{ .Revision }}
-      - restore_cache:
-          name: Restore the Unity build
-          keys:
-            - unitybuild-{{ checksum ".unitysources-checksum" }}
-      - run:
-          name: Copy the exact renderer for the current working folder into static
-          command: |
-            cp /tmp/explorer/Builds/unity/Build/*.unityweb static/unity/Build/
+      - attach_workspace:
+          at: /tmp/explorer
       - run: sudo apt-get -y -qq install awscli
       - run:
           name: Configure PRD AWS Keys
@@ -402,21 +332,24 @@ workflows:
             - checkout
       - build-kernel:
           requires:
+            - checkout
+
+      - build:
+          requires:
+            - build-kernel
             - build-unity
 
       # explorer master + pr branch jobs (deploy to dev + pr dev)
       - deploy-dev:
           requires:
-            - build-unity
-            - build-kernel
+            - build
           filters:
             branches:
               only: master
 
       - deploy-on-pr:
           requires:
-            - build-unity
-            - build-kernel
+            - build
           filters:
             branches:
               ignore:
@@ -428,8 +361,7 @@ workflows:
       - hold-ecs:
           type: approval
           requires:
-            - build-unity
-            - build-kernel
+            - build
           filters:
             branches:
               ignore: /(.*)/ # on branch: master we don't want to hold, but publish after the build is done
@@ -437,8 +369,7 @@ workflows:
               only: /^\d+\.\d+\.\d(.*)/ # npm tag + latest
       - publish-ecs:
           requires:
-            - build-unity
-            - build-kernel # on master we don't hold, but publish to next right after the build is done
+            - build
             - hold-ecs # on tags we wait until there's an approval
           filters:
             branches:
@@ -449,16 +380,14 @@ workflows:
       # standard env deployments
       - deploy-stg:
           requires:
-            - build-unity
-            - build-kernel
+            - build
           filters:
             branches:
               only: staging
 
       - deploy-prd:
           requires:
-            - build-unity
-            - build-kernel
+            - build
           filters:
             branches:
               only: release
