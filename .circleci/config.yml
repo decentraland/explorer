@@ -42,7 +42,7 @@ jobs:
 
       # persist to workspace to use in downstream jobs
       - persist_to_workspace:
-          root: .
+          root: /tmp/explorer
           paths:
             - .git
             - .circleci
@@ -97,9 +97,9 @@ jobs:
 
       # persist to workspace to use in downstream jobs
       - persist_to_workspace:
-          root: /tmp/explorer/unity-client/Builds
+          root: /tmp/explorer
           paths:
-            - unity
+            - unity-client
 
   build-kernel:
     docker:
@@ -189,9 +189,9 @@ jobs:
           key: kernel-build-{{ checksum "../.kernelsources-checksum" }}
       # persist to workspace to use in downstream jobs
       - persist_to_workspace:
-          root: /tmp/explorer/kernel
+          root: /tmp/explorer
           paths:
-            - .
+            - kernel
 
   build:
     docker:
@@ -206,9 +206,9 @@ jobs:
             cp /tmp/explorer/unity-client/Builds/unity/Build/*.unityweb /tmp/explorer/kernel/static/unity/Build/
       # persist to workspace to use in downstream jobs
       - persist_to_workspace:
-          root: /tmp/explorer/kernel/static/unity
+          root: /tmp/explorer
           paths:
-            - Build
+            - kernel
 
   publish-ecs:
     docker:
