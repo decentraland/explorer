@@ -72,7 +72,7 @@ jobs:
       - run:
           name: Extract the license key for Unity
           command: |
-            openssl enc -d -aes-256-cbc -md sha256 -in $CIRCLE_WORKING_DIRECTORY/.circleci/license.zip-cipher -out $CIRCLE_WORKING_DIRECTORY/.circleci/license.zip -k ${CIPHER_KEY}
+            openssl enc -d -aes-256-cbc -md sha256 -in /tmp/explorer/.circleci/license.zip-cipher -out /tmp/explorer/.circleci/license.zip -k ${CIPHER_KEY}
             cd / && unzip /tmp/explorer/.circleci/license.zip
       - run:
           name: Build decentraland-renderer
