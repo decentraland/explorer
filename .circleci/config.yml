@@ -91,7 +91,7 @@ jobs:
             fi;
       - save_cache:
           name: Store decentraland-renderer build
-          key: unity-build-{{ checksum ".unitysources-checksum" }}
+          key: unity-build-{{ checksum "../unitysources-checksum" }}
           paths:
             - /tmp/explorer/unity-client/Builds/
 
