@@ -60,7 +60,7 @@ jobs:
     working_directory: /tmp/explorer/unity-client
     steps:
       - attach_workspace:
-          at: /tmp/explorer/unity-client
+          at: /tmp/explorer
       - run:
           name: Get the hash of source files
           command: |
