@@ -24,7 +24,7 @@ namespace DCL
             AssetBundleBuilder.DumpArea(zoneArray);
         }
 
-        [MenuItem("AssetBundleBuilder/Dump Zone 64,-64")]
+        [MenuItem("Decentraland/Asset Bundle Builder/Dump Zone 64,-64")]
         public static void DumpZoneArea()
         {
             AssetBundleBuilder.environment = ContentServerUtils.ApiEnvironment.ORG;
@@ -52,7 +52,7 @@ namespace DCL
             list[index].Invoke((x) => ChainCall(list, index + 1));
         }
 
-        [MenuItem("AssetBundleBuilder/Dump Org 0,0")]
+        [MenuItem("Decentraland/Asset Bundle Builder/Dump Org 0,0")]
         public static void DumpEverything()
         {
             AssetBundleBuilder.skipUploadedGltfs = true;
@@ -60,7 +60,7 @@ namespace DCL
             AssetBundleBuilder.DumpArea(zoneArray);
         }
 
-        [MenuItem("AssetBundleBuilder/Only Build Bundles")]
+        [MenuItem("Decentraland/Asset Bundle Builder/Only Build Bundles")]
         public static void OnlyBuildBundles()
         {
             AssetBundleBuilder.finalAssetBundlePath = AssetBundleBuilder.ASSET_BUNDLES_PATH_ROOT;
