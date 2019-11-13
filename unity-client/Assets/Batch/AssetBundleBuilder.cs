@@ -38,7 +38,7 @@ namespace DCL
         internal static string ASSET_BUNDLES_PATH_ROOT = Application.dataPath + "/../" + ASSET_BUNDLE_FOLDER_NAME + "/";
 
         internal static bool deleteDownloadPathAfterFinished = true;
-        internal static bool skipUploadedGltfs = true;
+        internal static bool skipAlreadyBuiltBundles = true;
 
         internal static string finalAssetBundlePath = "";
         internal static string finalDownloadedPath = "";
@@ -177,11 +177,11 @@ namespace DCL
         {
             try
             {
-                skipUploadedGltfs = true;
+                skipAlreadyBuiltBundles = true;
                 deleteDownloadPathAfterFinished = true;
 
                 if (AssetBundleBuilderUtils.ParseOption(CLI_ALWAYS_BUILD_SYNTAX, 0, out string[] noargs))
-                    skipUploadedGltfs = false;
+                    skipAlreadyBuiltBundles = false;
 
                 if (AssetBundleBuilderUtils.ParseOption(CLI_KEEP_BUNDLES_SYNTAX, 0, out string[] noargs2))
                     deleteDownloadPathAfterFinished = false;
@@ -309,14 +309,27 @@ namespace DCL
                 //NOTE(Brian): try to get an AB before getting the original texture, so we bind the dependencies correctly
                 string fullPathToTag = DownloadAsset(contentProvider, hashToTexturePair, hash, hash + "/");
 
-                AssetDatabase.Refresh();
+                string fileExt = Path.GetExtension(hashToTexturePair[hash].file);
+                string assetPath = hash + "/" + hash + fileExt;
+
+                AssetDatabase.ImportAsset(finalDownloadedAssetDbPath + assetPath, ImportAssetOptions.ForceUpdate);
                 AssetDatabase.SaveAssets();
 
-                string fileExt = Path.GetExtension(hashToTexturePair[hash].file);
-                string metaPath = finalDownloadedPath + hash + "/" + hash + fileExt + ".meta";
+                string metaPath = finalDownloadedPath + assetPath + ".meta";
 
+                AssetDatabase.ReleaseCachedFileHandles();
+                //NOTE(Brian): in asset bundles, all dependencies are resolved by their guid (and not the AB hash nor CRC)
+                //             So to ensure dependencies are being kept in subsequent editor runs we normalize the asset guid using
+                //             the CID.
                 string metaContent = File.ReadAllText(metaPath);
-                string result = Regex.Replace(metaContent, @"guid: \w+?\n", "guid: custom_guid\n");
+                string guid = AssetBundleBuilderUtils.GetGUID(hash);
+                string result = Regex.Replace(metaContent, @"guid: \w+?\n", $"guid: {guid}\n");
+                File.WriteAllText(metaPath, result);
+
+                AssetDatabase.ImportAsset(finalDownloadedAssetDbPath + assetPath, ImportAssetOptions.ForceUpdate);
+                AssetDatabase.SaveAssets();
+
+                Debug.Log("Downloaded texture dependency for hash " + hash + " ... force guid to: " + guid);
 
                 if (fullPathToTag != null)
                 {
@@ -347,21 +360,11 @@ namespace DCL
             {
                 string gltfHash = kvp.Key;
 
-                if (skipUploadedGltfs)
+                if (skipAlreadyBuiltBundles)
                 {
                     if (File.Exists(finalAssetBundlePath + gltfHash))
                     {
                         Debug.Log("Skipping existing gltf in AB folder: " + gltfHash);
-
-                        if (!hashLowercaseToHashProper.ContainsKey(gltfHash.ToLower()))
-                            hashLowercaseToHashProper.Add(gltfHash.ToLower(), gltfHash);
-
-                        continue;
-                    }
-
-                    if (AssetBundleBuilderUtils.CheckProviderItemExists(contentProviderAB, hashToGltfPair[gltfHash].file))
-                    {
-                        Debug.Log("Skipping existing gltf: " + gltfHash);
 
                         if (!hashLowercaseToHashProper.ContainsKey(gltfHash.ToLower()))
                             hashLowercaseToHashProper.Add(gltfHash.ToLower(), gltfHash);
@@ -467,7 +470,8 @@ namespace DCL
             string[] assetBundles = manifest.GetAllAssetBundles();
             string[] assetBundlePaths = new string[assetBundles.Length];
 
-            Debug.Log($"Total generated asset bundles: {assetBundles.Length}");
+            string finalLog = "";
+            finalLog += $"Total generated asset bundles: {assetBundles.Length}\n";
 
             AssetBundleBuilderUtils.GenerateDependencyMaps(hashLowercaseToHashProper, manifest);
 
@@ -476,7 +480,7 @@ namespace DCL
                 if (string.IsNullOrEmpty(assetBundles[i]))
                     continue;
 
-                Debug.Log($"#{i} Generated asset bundle name: {assetBundles[i]}");
+                finalLog += $"#{i} Generated asset bundle name: {assetBundles[i]}\n";
 
                 try
                 {
@@ -523,6 +527,7 @@ namespace DCL
                 }
             }
 
+            Debug.Log(finalLog);
             OnBundleBuildFinish?.Invoke(0);
         }
 

@@ -18,7 +18,7 @@ namespace DCL
         public static void DumpMuseum()
         {
             AssetBundleBuilder.environment = ContentServerUtils.ApiEnvironment.ORG;
-            AssetBundleBuilder.skipUploadedGltfs = false;
+            AssetBundleBuilder.skipAlreadyBuiltBundles = false;
             var zoneArray = AssetBundleBuilderUtils.GetCenteredZoneArray(new Vector2Int(9, 78), new Vector2Int(10, 10));
             AssetBundleBuilder.DumpArea(zoneArray);
         }
@@ -27,14 +27,16 @@ namespace DCL
         public static void DumpZoneArea()
         {
             AssetBundleBuilder.environment = ContentServerUtils.ApiEnvironment.ORG;
-            AssetBundleBuilder.skipUploadedGltfs = false;
-            AssetBundleBuilder.DumpArea(new Vector2Int(-110, -100), new Vector2Int(10, 10));
+            //AssetBundleBuilder.DumpArea(new Vector2Int(-110, -110), new Vector2Int(10, 10));
+            //AssetBundleBuilder.DumpArea(new Vector2Int(-110, -110), new Vector2Int(10, 10));
+            //AssetBundleBuilder.DumpArea(new Vector2Int(-90, -110), new Vector2Int(10, 10));
+            AssetBundleBuilder.DumpArea(new Vector2Int(-80, -110), new Vector2Int(10, 10));
         }
 
         [MenuItem("Decentraland/Asset Bundle Builder/Dump Org 0,0")]
         public static void DumpEverything()
         {
-            AssetBundleBuilder.skipUploadedGltfs = true;
+            AssetBundleBuilder.skipAlreadyBuiltBundles = true;
             var zoneArray = AssetBundleBuilderUtils.GetCenteredZoneArray(new Vector2Int(0, 0), new Vector2Int(30, 30));
             AssetBundleBuilder.DumpArea(zoneArray);
         }
