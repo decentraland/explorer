@@ -5,6 +5,7 @@ import { getCurrentUser } from '../comms/peers'
 import { SceneFailAction, SceneLoadAction, SCENE_FAIL, SCENE_LOAD, SCENE_START, SceneStartAction } from './actions'
 import { LoadingState } from './reducer'
 import { EXPERIENCE_STARTED, helpTexts, rotateHelpText, TELEPORT_TRIGGERED } from './types'
+import { lastPlayerPosition } from '../world/positionThings'
 
 const SECONDS = 1000
 
@@ -23,13 +24,17 @@ export function* trackLoadTime(action: SceneLoadAction): any {
   const result = yield race({
     load: call(function*() {
       yield take((action: AnyAction) => action.type === SCENE_START && (action as SceneStartAction).payload === sceneId)
+      return true
     }),
     fail: call(function*() {
       yield take((action: AnyAction) => action.type === SCENE_FAIL && (action as SceneFailAction).payload === sceneId)
+      return true
     })
   })
   const user = yield select(getCurrentUser)
+  const position = lastPlayerPosition
   queueTrackingEvent('SceneLoadTimes', {
+    position: { ...position },
     elapsed: new Date().getTime() - start,
     success: !!result.load,
     sceneId,
