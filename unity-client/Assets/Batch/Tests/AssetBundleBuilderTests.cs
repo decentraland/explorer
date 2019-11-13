@@ -56,4 +56,10 @@ public class ParseOptionShould
         }
     }
 
+    [Test]
+    public void CIDtoMD5Test()
+    {
+        Assert.AreEqual("d3b55cc7e3367537c1670ecebb1ccb05", DCL.AssetBundleBuilderUtils.GetGUID("QmWVcyTEzSEBKC7hzq6doiTWnopZ6DdqJMqufx6gXwFnTS"));
+    }
+
 }

@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
+using System.Text;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -197,6 +199,16 @@ namespace DCL
             return null;
         }
 
-
+        public static MD5 md5 = new MD5CryptoServiceProvider();
+        public static string GetGUID(string cid)
+        {
+            byte[] data = md5.ComputeHash(Encoding.UTF8.GetBytes(cid));
+            StringBuilder sBuilder = new StringBuilder();
+            for (int i = 0; i < data.Length; i++)
+            {
+                sBuilder.Append(data[i].ToString("x2"));
+            }
+            return sBuilder.ToString();
+        }
     }
 }
