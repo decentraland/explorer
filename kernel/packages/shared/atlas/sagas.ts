@@ -11,7 +11,7 @@ import {
   MarketDataAction,
   QuerySceneName
 } from './actions'
-import { getNameFromAtlasState, shouldLoadSceneJsonName } from './selectors'
+import { getNameFromAtlasState, getTypeFromAtlasState, shouldLoadSceneJsonName } from './selectors'
 import { FETCH_NAME_FROM_SCENE_JSON, MARKET_DATA, SUCCESS_NAME_FROM_SCENE_JSON } from './types'
 
 export function* atlasSaga(): any {
@@ -68,24 +68,46 @@ function* reportOne(action: FetchNameFromSceneJsonSuccess) {
   const atlasState = yield select(state => state.atlas)
   const parcels = action.payload.parcels
   const unity = (window as any)['unityInterface'] as any
-  unity.UpdateMinimapSceneNames(
-    parcels.map(p => {
-      const [x, y] = p.split(',').map(_ => parseInt(_, 10))
-      const name = getNameFromAtlasState(atlasState, x, y)
-      return { x, y, name }
-    })
-  )
+  const [firstX, firstY] = parcels[0].split(',').map(_ => parseInt(_, 10))
+  const name = getNameFromAtlasState(atlasState, firstX, firstY)
+  const type = getTypeFromAtlasState(atlasState, firstX, firstY)
+  unity.UpdateMinimapSceneInformation([
+    {
+      name,
+      type,
+      parcels: parcels.map(p => {
+        const [x, y] = p.split(',').map(_ => parseInt(_, 10))
+        return { x, y }
+      })
+    }
+  ])
 }
 function* reportAll(action: MarketDataAction) {
   const atlasState = yield select(state => state.atlas)
   const data = action.payload.data
-  const unity = (window as any)['unityInterface'] as any
+  const unity = (window as any)['unityInterface'] as {
+    UpdateMinimapSceneInformation: (data: { name: string; type: number; parcels: { x: number; y: number }[] }[]) => void
+  }
+  const mapByTypeAndName: Record<string, { x: number; y: number }[]> = {}
+  const typeAndNameKeys: string[] = []
+  const keyToTypeAndName: Record<string, { type: number; name: string }> = {}
+  Object.keys(data).forEach(index => {
+    const parcel = data[index]
+    const name = getNameFromAtlasState(atlasState, parcel.x, parcel.y)
+    const type = getTypeFromAtlasState(atlasState, parcel.x, parcel.y)
+    const key = `${type}_${name}`
+    if (!mapByTypeAndName[key]) {
+      mapByTypeAndName[key] = []
+      typeAndNameKeys.push(key)
+      keyToTypeAndName[key] = { type, name }
+    }
+    mapByTypeAndName[key].push({ x: parcel.x, y: parcel.y })
+  })
   unity.UpdateMinimapSceneInformation(
-    Object.keys(data).map((x: any) => ({
-      x: data[x].x,
-      y: data[x].y,
-      name: getNameFromAtlasState(atlasState, data[x].x, data[x].y),
-      type: data[x].type
+    typeAndNameKeys.map(key => ({
+      name: keyToTypeAndName[key].name,
+      type: keyToTypeAndName[key].type,
+      parcels: mapByTypeAndName[key]
     }))
   )
 }

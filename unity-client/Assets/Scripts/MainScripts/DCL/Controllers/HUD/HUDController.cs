@@ -111,31 +111,16 @@ public class HUDController : MonoBehaviour
     }
 
     [Serializable]
-    public class MinimapTileFullInfo
+    public class MinimapTileInfo
     {
-        public int x;
-        public int y;
         public string name;
         public int type;
-    }
-    [Serializable]
-    public class MinimapTileNameInfo
-    {
-        public int x;
-        public int y;
-        public string name;
+        public List<Vector2Int> parcels;
     }
 
     public void UpdateMinimapSceneInformation(string newInformation)
     {
-        List<MinimapTileFullInfo> info = JsonUtility.FromJson<List<MinimapTileFullInfo>>(newInformation);
-        Debug.Log(info);
-    }
-
-
-    public void UpdateMinimapSceneNames(string newInformation)
-    {
-        List<MinimapTileNameInfo> info = JsonUtility.FromJson<List<MinimapTileNameInfo>>(newInformation);
+        List<MinimapTileInfo> info = JsonUtility.FromJson<List<MinimapTileInfo>>(newInformation);
         Debug.Log(info);
     }
 
