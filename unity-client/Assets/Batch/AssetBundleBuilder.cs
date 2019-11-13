@@ -32,10 +32,12 @@ namespace DCL
         const string CLI_BUILD_SCENE_SYNTAX = "sceneCid";
         const string CLI_BUILD_PARCELS_RANGE_SYNTAX = "parcelsXYWH";
 
-        internal static string DOWNLOADED_ASSET_DB_PATH_ROOT = "Assets/_Downloaded/";
-        internal static string DOWNLOADED_PATH_ROOT = Application.dataPath + "/_Downloaded/";
         internal static string ASSET_BUNDLE_FOLDER_NAME = "AssetBundles";
-        internal static string ASSET_BUNDLES_PATH_ROOT = Application.dataPath + "/../" + ASSET_BUNDLE_FOLDER_NAME + "/";
+        internal static string DOWNLOADED_FOLDER_NAME = "_Downloaded";
+
+        internal static string DOWNLOADED_ASSET_DB_PATH_ROOT = "Assets/" + DOWNLOADED_FOLDER_NAME;
+        internal static string DOWNLOADED_PATH_ROOT = Application.dataPath + "/" + DOWNLOADED_FOLDER_NAME;
+        internal static string ASSET_BUNDLES_PATH_ROOT = Application.dataPath + "/../" + ASSET_BUNDLE_FOLDER_NAME;
 
         internal static bool deleteDownloadPathAfterFinished = true;
         internal static bool skipAlreadyBuiltBundles = true;
@@ -54,6 +56,7 @@ namespace DCL
         internal static void DumpArea(Vector2Int coords, Vector2Int size, Action<int> OnFinish = null)
         {
             HashSet<string> sceneCids = new HashSet<string>();
+            hashLowercaseToHashProper = new Dictionary<string, string>();
 
             string url = ContentServerUtils.GetScenesAPIUrl(environment, coords.x, coords.y, size.x, size.y);
 
@@ -132,9 +135,12 @@ namespace DCL
             Debug.Log($"Building {sceneCidsList.Count} scenes...");
             startTime = Time.realtimeSinceStartup;
 
-            finalAssetBundlePath = ASSET_BUNDLES_PATH_ROOT;
-            finalDownloadedPath = DOWNLOADED_PATH_ROOT;
-            finalDownloadedAssetDbPath = DOWNLOADED_ASSET_DB_PATH_ROOT;
+            //NOTE(Brian): To prevent UnityEditor GUID caching.
+            string downloadFolderSalt = UnityEngine.Random.Range(1000, 9999).ToString();
+
+            finalAssetBundlePath = ASSET_BUNDLES_PATH_ROOT + "/";
+            finalDownloadedPath = DOWNLOADED_PATH_ROOT + downloadFolderSalt + "/";
+            finalDownloadedAssetDbPath = DOWNLOADED_ASSET_DB_PATH_ROOT + downloadFolderSalt + "/";
 
             InitializeDirectory(finalDownloadedPath);
             OnBundleBuildFinish = (errorCode) => { Debug.Log($"Conversion finished. [Time:{Time.realtimeSinceStartup - startTime}]"); OnFinish?.Invoke(errorCode); };
@@ -161,14 +167,15 @@ namespace DCL
                     if (!Directory.Exists(finalAssetBundlePath))
                         Directory.CreateDirectory(finalAssetBundlePath);
 
-                    BuildAssetBundles();
-
                     EditorApplication.update = null;
+
+                    BuildAssetBundles();
                 }
                 catch (Exception e)
                 {
                     Debug.LogError(e.Message);
                     AssetBundleBuilderUtils.Exit(1);
+                    EditorApplication.update = null;
                 }
             };
         }
@@ -326,9 +333,6 @@ namespace DCL
                 string result = Regex.Replace(metaContent, @"guid: \w+?\n", $"guid: {guid}\n");
                 File.WriteAllText(metaPath, result);
 
-                AssetDatabase.ImportAsset(finalDownloadedAssetDbPath + assetPath, ImportAssetOptions.ForceUpdate);
-                AssetDatabase.SaveAssets();
-
                 Debug.Log("Downloaded texture dependency for hash " + hash + " ... force guid to: " + guid);
 
                 if (fullPathToTag != null)
@@ -458,6 +462,8 @@ namespace DCL
         {
             AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport | ImportAssetOptions.ForceUpdate | ImportAssetOptions.ImportRecursive);
             AssetDatabase.SaveAssets();
+
+            AssetDatabase.MoveAsset(finalDownloadedAssetDbPath, DOWNLOADED_ASSET_DB_PATH_ROOT);
 
             var manifest = BuildPipeline.BuildAssetBundles(finalAssetBundlePath, BuildAssetBundleOptions.UncompressedAssetBundle | BuildAssetBundleOptions.ForceRebuildAssetBundle, BuildTarget.WebGL);
 

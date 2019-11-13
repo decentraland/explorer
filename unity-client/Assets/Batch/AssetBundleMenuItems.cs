@@ -30,7 +30,27 @@ namespace DCL
             //AssetBundleBuilder.DumpArea(new Vector2Int(-110, -110), new Vector2Int(10, 10));
             //AssetBundleBuilder.DumpArea(new Vector2Int(-110, -110), new Vector2Int(10, 10));
             //AssetBundleBuilder.DumpArea(new Vector2Int(-90, -110), new Vector2Int(10, 10));
-            AssetBundleBuilder.DumpArea(new Vector2Int(-80, -110), new Vector2Int(10, 10));
+            //AssetBundleBuilder.DumpArea(new Vector2Int(-80, -110), new Vector2Int(10, 10));
+            DumpArea(0);
+        }
+
+        static void DumpArea(int i)
+        {
+            switch (i)
+            {
+                case 0:
+                    AssetBundleBuilder.DumpArea(new Vector2Int(-110, -100), new Vector2Int(10, 10), (x) => DumpArea(1));
+                    break;
+                case 1:
+                    AssetBundleBuilder.DumpArea(new Vector2Int(-100, -100), new Vector2Int(10, 10), (x) => DumpArea(2));
+                    break;
+                case 2:
+                    AssetBundleBuilder.DumpArea(new Vector2Int(-90, -100), new Vector2Int(10, 10), (x) => DumpArea(3));
+                    break;
+                case 3:
+                    AssetBundleBuilder.DumpArea(new Vector2Int(-80, -100), new Vector2Int(10, 10));
+                    break;
+            }
         }
 
         [MenuItem("Decentraland/Asset Bundle Builder/Dump Org 0,0")]
