@@ -1,4 +1,4 @@
-import { call, fork, put, select, take, takeEvery, takeLatest } from 'redux-saga/effects'
+import { call, fork, put, select, takeEvery, takeLatest } from 'redux-saga/effects'
 import { getServer, LifecycleManager } from '../../decentraland-loader/lifecycle/manager'
 import { SceneStart, SCENE_START } from '../loading/actions'
 import { RENDERER_INITIALIZED } from '../renderer/types'
@@ -9,11 +9,10 @@ import {
   fetchNameFromSceneJsonSuccess,
   FetchNameFromSceneJsonSuccess,
   marketData,
-  MarketDataAction,
   QuerySceneName
 } from './actions'
 import { getNameFromAtlasState, getTypeFromAtlasState, shouldLoadSceneJsonName } from './selectors'
-import { FETCH_NAME_FROM_SCENE_JSON, MARKET_DATA, SUCCESS_NAME_FROM_SCENE_JSON } from './types'
+import { AtlasState, FETCH_NAME_FROM_SCENE_JSON, SUCCESS_NAME_FROM_SCENE_JSON } from './types'
 
 export function* atlasSaga(): any {
   yield fork(fetchDistricts)
@@ -22,14 +21,13 @@ export function* atlasSaga(): any {
   yield takeEvery(SCENE_START, querySceneName)
   yield takeEvery(FETCH_NAME_FROM_SCENE_JSON, fetchName)
 
-  yield takeLatest(MARKET_DATA, reportAll)
+  yield takeLatest(RENDERER_INITIALIZED, reportAll)
   yield takeLatest(SUCCESS_NAME_FROM_SCENE_JSON, reportOne)
 }
 
 function* fetchDistricts() {
   try {
     const districts = yield call(() => fetch('https://api.decentraland.org/v1/districts').then(e => e.json()))
-    yield take(RENDERER_INITIALIZED)
     yield put(districtData(districts))
   } catch (e) {
     console.log(e)
@@ -38,7 +36,6 @@ function* fetchDistricts() {
 function* fetchTiles() {
   try {
     const tiles = yield call(() => fetch('https://api.decentraland.org/v1/tiles').then(e => e.json()))
-    yield take(RENDERER_INITIALIZED)
     yield put(marketData(tiles))
   } catch (e) {
     console.log(e)
@@ -85,9 +82,9 @@ function* reportOne(action: FetchNameFromSceneJsonSuccess) {
     }
   ])
 }
-function* reportAll(action: MarketDataAction) {
-  const atlasState = yield select(state => state.atlas)
-  const data = action.payload.data
+function* reportAll() {
+  const atlasState = (yield select(state => state.atlas)) as AtlasState
+  const data = atlasState.marketName
   const unity = (window as any)['unityInterface'] as {
     UpdateMinimapSceneInformation: (data: { name: string; type: number; parcels: { x: number; y: number }[] }[]) => void
   }
