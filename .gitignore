@@ -1,39 +1,3 @@
-# =============== #
-# Unity generated #
-# =============== #
-Temp/
-Library/
-*.cache
-/obj/
-[Bb]uild/
-TestResults/
-AssetBundles/
-Assets/InitTestScene*.unity
-Assets/InitTestScene*.unity.meta
-**/CurrentTestImages/
-
-# ===================================== #
-# Visual Studio / MonoDevelop / Rider   #
-# ===================================== #
-ExportedObj/
-.vs/
-.vscode/
-.idea/
-Assets/Plugins/Editor/JetBrains.meta
-Assets/Plugins/Editor/JetBrains/
-*.svd
-*.userprefs
-*.csproj
-*.pidb
-*.suo
-*.sln
-*.user
-*.unityproj
-*.booproj
-*.tmproj
-*.dwlt
-Assembly-UnityScript.unityProj
-
 # ============ #
 # OS generated #
 # ============ #

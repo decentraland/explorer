@@ -1,0 +1,35 @@
+{
+  "display": {
+    "title": "interactive-text",
+    "favicon": "favicon_asset"
+  },
+  "owner": "",
+  "contact": {
+    "name": "king of the bongo",
+    "email": ""
+  },
+  "main": "game.js",
+  "tags": [],
+  "scene": {
+    "parcels": ["-100,100"],
+    "base": "-100,100"
+  },
+  "spawnPoints": [
+    {
+      "name": "spawn1",
+      "default": true,
+      "position": {
+        "x": 5,
+        "y": 0,
+        "z": 5
+      }
+    }
+  ],
+  "policy": {
+    "contentRating": "E",
+    "fly": true,
+    "voiceEnabled": true,
+    "blacklist": [],
+    "teleportPosition": "5,0,5"
+  }
+}

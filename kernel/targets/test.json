@@ -1,0 +1,9 @@
+[
+  {
+    "name": "Compile tests",
+    "kind": "Webpack",
+    "file": "./test/index.ts",
+    "target": "web",
+    "coverage": true
+  }
+]
