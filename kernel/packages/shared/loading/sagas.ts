@@ -1,5 +1,8 @@
-import { call, delay, fork, put, race, select, take, takeLatest } from 'redux-saga/effects'
-import { SCENE_FAIL, SCENE_START } from './actions'
+import { AnyAction } from 'redux'
+import { call, delay, fork, put, race, select, take, takeEvery, takeLatest } from 'redux-saga/effects'
+import { queueTrackingEvent } from '../analytics'
+import { getCurrentUser } from '../comms/peers'
+import { SceneFailAction, SceneLoadAction, SCENE_FAIL, SCENE_LOAD, SCENE_START, SceneStartAction } from './actions'
 import { LoadingState } from './reducer'
 import { EXPERIENCE_STARTED, helpTexts, rotateHelpText, TELEPORT_TRIGGERED } from './types'
 
@@ -10,6 +13,28 @@ export const DELAY_BETWEEN_MESSAGES = 10 * SECONDS
 export function* loadingSaga() {
   yield fork(changeSubtext)
   yield takeLatest(TELEPORT_TRIGGERED, changeSubtext)
+
+  yield takeEvery(SCENE_LOAD, trackLoadTime)
+}
+
+export function* trackLoadTime(action: SceneLoadAction): any {
+  const start = new Date().getTime()
+  const sceneId = action.payload
+  const result = yield race({
+    load: call(function*() {
+      yield take((action: AnyAction) => action.type === SCENE_START && (action as SceneStartAction).payload === sceneId)
+    }),
+    fail: call(function*() {
+      yield take((action: AnyAction) => action.type === SCENE_FAIL && (action as SceneFailAction).payload === sceneId)
+    })
+  })
+  const user = yield select(getCurrentUser)
+  queueTrackingEvent('SceneLoadTimes', {
+    elapsed: new Date().getTime() - start,
+    success: !!result.load,
+    sceneId,
+    userId: user.userId
+  })
 }
 
 export function* changeSubtext() {
