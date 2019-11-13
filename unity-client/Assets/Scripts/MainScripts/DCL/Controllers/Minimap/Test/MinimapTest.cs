@@ -12,7 +12,8 @@ namespace Tests
         public IEnumerator MinimapCamera_Position()
         {
             InitScene();
-            var minimapCamera = new GameObject().AddComponent<MinimapCamera>();
+
+            var minimapCamera = GameObject.Instantiate(Resources.Load<GameObject>("Minimap")).GetComponentInChildren<MinimapCamera>();
             minimapCamera.transform.position = Vector3.zero;
             yield return null;
 
@@ -20,14 +21,15 @@ namespace Tests
             CommonScriptableObjects.playerUnityPosition.Set(newPos);
             yield return null;
 
-            Assert.AreEqual(newPos, minimapCamera.transform.position);
+            Assert.AreApproximatelyEqual(newPos.x, minimapCamera.transform.position.x);
+            Assert.AreApproximatelyEqual(newPos.z, minimapCamera.transform.position.z);
         }
 
         [UnityTest]
         public IEnumerator MinimapCamera_RotationNorthLocked()
         {
             InitScene();
-            var minimapCamera = new GameObject().AddComponent<MinimapCamera>();
+            var minimapCamera = GameObject.Instantiate(Resources.Load<GameObject>("Minimap")).GetComponentInChildren<MinimapCamera>();
             minimapCamera.transform.eulerAngles = Vector3.zero;
             minimapCamera.northLocked = true;
             yield return null;
@@ -43,14 +45,15 @@ namespace Tests
         public IEnumerator MinimapCamera_RotationNorthNotLocked()
         {
             InitScene();
-            var minimapCamera = new GameObject().AddComponent<MinimapCamera>();
+            var minimapCamera = GameObject.Instantiate(Resources.Load<GameObject>("Minimap")).GetComponentInChildren<MinimapCamera>();
             minimapCamera.transform.eulerAngles = Vector3.zero;
             minimapCamera.northLocked = false;
             yield return null;
 
-            var newRotation = 10f;
+            var newRotation = 50f;
             CommonScriptableObjects.playerUnityEulerAngles.Set(Vector3.up * newRotation);
             yield return null;
+
 
             Assert.AreApproximatelyEqual(minimapCamera.transform.eulerAngles.y, CommonScriptableObjects.playerUnityEulerAngles.Get().y);
         }

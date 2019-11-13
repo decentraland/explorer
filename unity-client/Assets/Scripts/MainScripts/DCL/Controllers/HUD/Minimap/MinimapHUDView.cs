@@ -4,6 +4,8 @@ using UnityEngine.UI;
 
 public class MinimapHUDView : MonoBehaviour
 {
+    public const string UNNAMED_SCENE = "Unnamed";
+    
     private const string VIEW_PATH = "MinimapHUD";
     private const string VIEW_OBJECT_NAME = "_MinimapHUD";
 
@@ -46,7 +48,7 @@ public class MinimapHUDView : MonoBehaviour
 
     internal void UpdateData(MinimapHUDModel model)
     {
-        sceneNameText.text = string.IsNullOrEmpty(model.sceneName) ? "Unnamed" : model.sceneName;
+        sceneNameText.text = string.IsNullOrEmpty(model.sceneName) ? UNNAMED_SCENE : model.sceneName;
         playerPositionText.text = model.playerPosition;
     }
 
@@ -55,8 +57,8 @@ public class MinimapHUDView : MonoBehaviour
         optionsPanel.SetActive(!optionsPanel.activeSelf);
     }
 
-    public void SetVisibility(bool visible)
+    public void SetActive(bool active)
     {
-        gameObject.SetActive(visible);
+        gameObject.SetActive(active);
     }
 }

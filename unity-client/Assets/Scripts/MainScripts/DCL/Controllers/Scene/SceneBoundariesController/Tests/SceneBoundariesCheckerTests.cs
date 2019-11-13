@@ -13,22 +13,24 @@ namespace Tests
     public class SceneBoundariesCheckerTests : TestsBase
     {
         [UnityTest]
+        [Explicit]
         public IEnumerator PShapeIsInvalidatedWhenStartingOutOfBounds()
         {
             yield return InitScene();
-            
-            string entityId = "1";
-            TestHelpers.InstantiateEntityWithShape(scene, entityId, DCL.Models.CLASS_ID.BOX_SHAPE, Vector3.zero);
-            yield return null;
 
-            Assert.IsTrue(MeshIsInvalid(scene.entities[entityId].meshesInfo));
+            yield return Assert_PShapeIsInvalidatedWhenStartingOutOfBounds();
         }
 
         [UnityTest]
         public IEnumerator PShapeIsInvalidatedWhenStartingOutOfBoundsDebugMode()
         {
-            yield return InitScene(false, true, true, true, true);
-            
+            yield return InitScene(false, true, true, true, debugMode: true);
+
+            yield return Assert_PShapeIsInvalidatedWhenStartingOutOfBounds();
+        }
+
+        IEnumerator Assert_PShapeIsInvalidatedWhenStartingOutOfBounds()
+        {
             string entityId = "1";
             TestHelpers.InstantiateEntityWithShape(scene, entityId, DCL.Models.CLASS_ID.BOX_SHAPE, Vector3.zero);
             yield return null;
@@ -37,10 +39,24 @@ namespace Tests
         }
 
         [UnityTest]
+        [Explicit]
         public IEnumerator GLTFShapeIsInvalidatedWhenStartingOutOfBounds()
         {
             yield return InitScene();
-            
+
+            yield return Assert_GLTFShapeIsInvalidatedWhenStartingOutOfBounds();
+        }
+
+        [UnityTest]
+        public IEnumerator GLTFShapeIsInvalidatedWhenStartingOutOfBoundsDebugMode()
+        {
+            yield return InitScene(false, true, true, true, debugMode: true);
+
+            yield return Assert_GLTFShapeIsInvalidatedWhenStartingOutOfBounds();
+        }
+
+        IEnumerator Assert_GLTFShapeIsInvalidatedWhenStartingOutOfBounds()
+        {
             string entityId = "1";
             TestHelpers.CreateSceneEntity(scene, entityId);
 
@@ -58,10 +74,24 @@ namespace Tests
         }
 
         [UnityTest]
+        [Explicit]
         public IEnumerator NFTShapeIsInvalidatedWhenStartingOutOfBounds()
         {
             yield return InitScene();
-            
+
+            yield return Assert_NFTShapeIsInvalidatedWhenStartingOutOfBounds();
+        }
+
+        [UnityTest]
+        public IEnumerator NFTShapeIsInvalidatedWhenStartingOutOfBoundsDebugMode()
+        {
+            yield return InitScene(false, true, true, true, debugMode: true);
+
+            yield return Assert_NFTShapeIsInvalidatedWhenStartingOutOfBounds();
+        }
+
+        IEnumerator Assert_NFTShapeIsInvalidatedWhenStartingOutOfBounds()
+        {
             string entityId = "1";
             TestHelpers.CreateSceneEntity(scene, entityId);
 
@@ -75,7 +105,7 @@ namespace Tests
             yield return component.routine;
 
             TestHelpers.SharedComponentAttach(component, scene.entities[entityId]);
-            
+
             var shapeLoader = scene.entities[entityId].gameObject.GetComponentInChildren<LoadWrapper_NFT>(true);
             yield return new WaitUntil(() => shapeLoader.alreadyLoaded);
 
@@ -83,10 +113,24 @@ namespace Tests
         }
 
         [UnityTest]
+        [Explicit]
         public IEnumerator PShapeIsInvalidatedWhenLeavingBounds()
         {
             yield return InitScene();
-            
+
+            yield return Assert_PShapeIsInvalidatedWhenLeavingBounds();
+        }
+
+        [UnityTest]
+        public IEnumerator PShapeIsInvalidatedWhenLeavingBoundsDebugMode()
+        {
+            yield return InitScene(false, true, true, true, debugMode: true);
+
+            yield return Assert_PShapeIsInvalidatedWhenLeavingBounds();
+        }
+
+        IEnumerator Assert_PShapeIsInvalidatedWhenLeavingBounds()
+        {
             string entityId = "1";
             TestHelpers.InstantiateEntityWithShape(scene, entityId, DCL.Models.CLASS_ID.BOX_SHAPE, new Vector3(8, 1, 8));
             yield return null;
@@ -101,10 +145,24 @@ namespace Tests
         }
 
         [UnityTest]
+        [Explicit]
         public IEnumerator GLTFShapeIsInvalidatedWhenLeavingBounds()
         {
             yield return InitScene();
-            
+
+            yield return Assert_GLTFShapeIsInvalidatedWhenLeavingBounds();
+        }
+
+        [UnityTest]
+        public IEnumerator GLTFShapeIsInvalidatedWhenLeavingBoundsDebugMode()
+        {
+            yield return InitScene(false, true, true, true, debugMode: true);
+
+            yield return Assert_GLTFShapeIsInvalidatedWhenLeavingBounds();
+        }
+
+        IEnumerator Assert_GLTFShapeIsInvalidatedWhenLeavingBounds()
+        {
             string entityId = "1";
             TestHelpers.CreateSceneEntity(scene, entityId);
 
@@ -127,10 +185,24 @@ namespace Tests
         }
 
         [UnityTest]
+        [Explicit]
         public IEnumerator NFTShapeIsInvalidatedWhenLeavingBounds()
         {
             yield return InitScene();
-            
+
+            yield return Assert_NFTShapeIsInvalidatedWhenLeavingBounds();
+        }
+
+        [UnityTest]
+        public IEnumerator NFTShapeIsInvalidatedWhenLeavingBoundsDebugMode()
+        {
+            yield return InitScene(false, true, true, true, debugMode: true);
+
+            yield return Assert_NFTShapeIsInvalidatedWhenLeavingBounds();
+        }
+
+        IEnumerator Assert_NFTShapeIsInvalidatedWhenLeavingBounds()
+        {
             string entityId = "1";
             TestHelpers.CreateSceneEntity(scene, entityId);
 
@@ -144,7 +216,7 @@ namespace Tests
             yield return component.routine;
 
             TestHelpers.SharedComponentAttach(component, scene.entities[entityId]);
-            
+
             var shapeLoader = scene.entities[entityId].gameObject.GetComponentInChildren<LoadWrapper_NFT>(true);
             yield return new WaitUntil(() => shapeLoader.alreadyLoaded);
 
@@ -157,10 +229,24 @@ namespace Tests
         }
 
         [UnityTest]
+        [Explicit]
         public IEnumerator PShapeIsResetWhenReenteringBounds()
         {
             yield return InitScene();
-            
+
+            yield return Assert_PShapeIsResetWhenReenteringBounds();
+        }
+
+        [UnityTest]
+        public IEnumerator PShapeIsResetWhenReenteringBoundsDebugMode()
+        {
+            yield return InitScene(false, true, true, true, debugMode: true);
+
+            yield return Assert_PShapeIsResetWhenReenteringBounds();
+        }
+
+        IEnumerator Assert_PShapeIsResetWhenReenteringBounds()
+        {
             string entityId = "1";
             TestHelpers.InstantiateEntityWithShape(scene, entityId, DCL.Models.CLASS_ID.BOX_SHAPE, new Vector3(18, 1, 18));
             yield return null;
@@ -175,10 +261,24 @@ namespace Tests
         }
 
         [UnityTest]
+        [Explicit]
         public IEnumerator GLTFShapeIsResetWhenReenteringBounds()
         {
             yield return InitScene();
-            
+
+            yield return Assert_GLTFShapeIsResetWhenReenteringBounds();
+        }
+
+        [UnityTest]
+        public IEnumerator GLTFShapeIsResetWhenReenteringBoundsDebugMode()
+        {
+            yield return InitScene(false, true, true, true, debugMode: true);
+
+            yield return Assert_GLTFShapeIsResetWhenReenteringBounds();
+        }
+
+        IEnumerator Assert_GLTFShapeIsResetWhenReenteringBounds()
+        {
             string entityId = "1";
             TestHelpers.CreateSceneEntity(scene, entityId);
 
@@ -201,10 +301,24 @@ namespace Tests
         }
 
         [UnityTest]
+        [Explicit]
         public IEnumerator NFTShapeIsResetWhenReenteringBounds()
         {
             yield return InitScene();
-            
+
+            yield return Assert_NFTShapeIsResetWhenReenteringBounds();
+        }
+
+        [UnityTest]
+        public IEnumerator NFTShapeIsResetWhenReenteringBoundsDebugMode()
+        {
+            yield return InitScene(false, true, true, true, debugMode: true);
+
+            yield return Assert_NFTShapeIsResetWhenReenteringBounds();
+        }
+
+        IEnumerator Assert_NFTShapeIsResetWhenReenteringBounds()
+        {
             string entityId = "1";
             TestHelpers.CreateSceneEntity(scene, entityId);
 
@@ -218,7 +332,7 @@ namespace Tests
             yield return component.routine;
 
             TestHelpers.SharedComponentAttach(component, scene.entities[entityId]);
-            
+
             var shapeLoader = scene.entities[entityId].gameObject.GetComponentInChildren<LoadWrapper_NFT>(true);
             yield return new WaitUntil(() => shapeLoader.alreadyLoaded);
 
@@ -231,10 +345,24 @@ namespace Tests
         }
 
         [UnityTest]
+        [Explicit]
         public IEnumerator ChildShapeIsEvaluated()
         {
             yield return InitScene();
-            
+
+            yield return Assert_ChildShapeIsEvaluated();
+        }
+
+        [UnityTest]
+        public IEnumerator ChildShapeIsEvaluatedDebugMode()
+        {
+            yield return InitScene(false, true, true, true, debugMode: true);
+
+            yield return Assert_ChildShapeIsEvaluated();
+        }
+
+        IEnumerator Assert_ChildShapeIsEvaluated()
+        {
             string entityId = "1";
             TestHelpers.InstantiateEntityWithShape(scene, entityId, DCL.Models.CLASS_ID.BOX_SHAPE, new Vector3(8, 1, 8));
             yield return null;
@@ -258,10 +386,24 @@ namespace Tests
         }
 
         [UnityTest]
+        [Explicit]
         public IEnumerator ChildShapeIsEvaluatedOnShapelessParent()
         {
             yield return InitScene();
-            
+
+            yield return Assert_ChildShapeIsEvaluatedOnShapelessParent();
+        }
+
+        [UnityTest]
+        public IEnumerator ChildShapeIsEvaluatedOnShapelessParentDebugMode()
+        {
+            yield return InitScene(false, true, true, true, debugMode: true);
+
+            yield return Assert_ChildShapeIsEvaluatedOnShapelessParent();
+        }
+
+        IEnumerator Assert_ChildShapeIsEvaluatedOnShapelessParent()
+        {
             // create shapeless parent entity
             string entityId = "1";
             TestHelpers.CreateSceneEntity(scene, entityId);
@@ -286,10 +428,24 @@ namespace Tests
         }
 
         [UnityTest]
+        [Explicit]
         public IEnumerator HeightIsEvaluated()
         {
             yield return InitScene();
-            
+
+            yield return Assert_HeightIsEvaluated();
+        }
+
+        [UnityTest]
+        public IEnumerator HeightIsEvaluatedDebugMode()
+        {
+            yield return InitScene(false, true, true, true, debugMode: true);
+
+            yield return Assert_HeightIsEvaluated();
+        }
+
+        IEnumerator Assert_HeightIsEvaluated()
+        {
             string entityId = "1";
             TestHelpers.InstantiateEntityWithShape(scene, entityId, DCL.Models.CLASS_ID.BOX_SHAPE, new Vector3(8, 5, 8));
             yield return null;
@@ -305,25 +461,25 @@ namespace Tests
 
         bool MeshIsInvalid(DecentralandEntity.MeshesInfo meshesInfo)
         {
-            if(meshesInfo.meshRootGameObject == null) return false; // It's not invalid if there's no mesh
+            if (meshesInfo.meshRootGameObject == null) return false; // It's not invalid if there's no mesh
 
-            if(SceneController.i.isDebugMode)
+            if (SceneController.i.isDebugMode)
             {
                 for (int i = 0; i < meshesInfo.renderers.Length; i++)
                 {
-                    if(meshesInfo.renderers[i].sharedMaterial.name != "InvalidMesh") return false;
+                    if (meshesInfo.renderers[i].sharedMaterial.name != "InvalidMesh") return false;
                 }
             }
             else
             {
                 for (int i = 0; i < meshesInfo.renderers.Length; i++)
                 {
-                    if(meshesInfo.renderers[i].enabled) return false;
+                    if (meshesInfo.renderers[i].enabled) return false;
                 }
 
                 for (int i = 0; i < meshesInfo.colliders.Count; i++)
                 {
-                    if(meshesInfo.colliders[i].enabled) return false;
+                    if (meshesInfo.colliders[i].enabled) return false;
                 }
             }
 

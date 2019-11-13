@@ -13,7 +13,7 @@ namespace Tests
             if (spawnCharController)
             {
                 DCLCharacterController.i.gravity = 0f;
-                TestHelpers.SetCharacterPosition(Vector3.zero);
+                TestHelpers.SetCharacterPosition(new Vector3(8f, 0f, 8f));
             }
         }
     }

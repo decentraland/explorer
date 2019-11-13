@@ -148,6 +148,7 @@ public class GLTFShape_Tests : TestsBase
 
 
     [UnityTest]
+    [Explicit]
     public IEnumerator CollisionProperty()
     {
         yield return InitScene();
@@ -269,9 +270,6 @@ public class GLTFShape_Tests : TestsBase
 
         Object.Destroy(entity.gameObject);
 
-        yield return null;
-
-        Debug.Break();
         yield return null;
     }
 }

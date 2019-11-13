@@ -20,41 +20,41 @@ namespace Tests
         public IEnumerator PerformanceLimitControllerTests()
         {
             yield return TestHelpers.UnloadAllUnityScenes();
-            var sceneController = TestHelpers.InitializeSceneController();
-            var scenesToLoad = (Resources.Load("TestJSON/SceneLoadingTest") as TextAsset).text;
 
+            yield return InitScene(spawnUIScene: false);
+            DCL.Configuration.Environment.DEBUG = true;
+            sceneController.SetDebug();
             yield return new WaitForSeconds(0.1f);
 
             sceneController.UnloadAllScenes();
-
             yield return new WaitForSeconds(0.1f);
 
+            var scenesToLoad = (Resources.Load("TestJSON/SceneLoadingTest") as TextAsset).text;
             sceneController.LoadParcelScenes(scenesToLoad);
 
             yield return new WaitForAllMessagesProcessed();
 
             var scene = sceneController.loadedScenes["0,0"];
 
-            TestHelpers.InstantiateEntityWithShape(scene, "1", DCL.Models.CLASS_ID.BOX_SHAPE, new Vector3(-3, 1, 0));
-            TestHelpers.InstantiateEntityWithShape(scene, "2", DCL.Models.CLASS_ID.SPHERE_SHAPE, new Vector3(0, 1, 0));
-            TestHelpers.InstantiateEntityWithShape(scene, "3", DCL.Models.CLASS_ID.PLANE_SHAPE, new Vector3(2, 1, 0));
-            TestHelpers.InstantiateEntityWithShape(scene, "4", DCL.Models.CLASS_ID.CONE_SHAPE, new Vector3(4, 1, 0));
-            TestHelpers.InstantiateEntityWithShape(scene, "5", DCL.Models.CLASS_ID.CYLINDER_SHAPE,
-                new Vector3(6, 1, 0));
+            TestHelpers.InstantiateEntityWithShape(scene, "1", DCL.Models.CLASS_ID.BOX_SHAPE, new Vector3(8, 1, 8));
+            TestHelpers.InstantiateEntityWithShape(scene, "2", DCL.Models.CLASS_ID.SPHERE_SHAPE, new Vector3(8, 1, 8));
+            TestHelpers.InstantiateEntityWithShape(scene, "3", DCL.Models.CLASS_ID.PLANE_SHAPE, new Vector3(8, 1, 8));
+            TestHelpers.InstantiateEntityWithShape(scene, "4", DCL.Models.CLASS_ID.CONE_SHAPE, new Vector3(8, 1, 8));
+            TestHelpers.InstantiateEntityWithShape(scene, "5", DCL.Models.CLASS_ID.CYLINDER_SHAPE, new Vector3(8, 1, 8));
 
-            TestHelpers.InstantiateEntityWithShape(scene, "6", DCL.Models.CLASS_ID.GLTF_SHAPE, new Vector3(0, 1, 6),
+            TestHelpers.InstantiateEntityWithShape(scene, "6", DCL.Models.CLASS_ID.GLTF_SHAPE, new Vector3(8, 1, 8),
                 DCL.Helpers.Utils.GetTestsAssetsPath() + "/GLB/Lantern/Lantern.glb");
             yield return null;
             LoadWrapper_GLTF gltfShape = scene.entities["6"].gameObject.GetComponentInChildren<LoadWrapper_GLTF>(true);
             yield return new WaitUntil(() => gltfShape.alreadyLoaded);
 
-            TestHelpers.InstantiateEntityWithShape(scene, "7", DCL.Models.CLASS_ID.OBJ_SHAPE, new Vector3(10, 1, 0),
+            TestHelpers.InstantiateEntityWithShape(scene, "7", DCL.Models.CLASS_ID.OBJ_SHAPE, new Vector3(8, 1, 8),
                 DCL.Helpers.Utils.GetTestsAssetsPath() + "/OBJ/teapot.obj");
             yield return null;
             LoadWrapper_OBJ objshape = scene.entities["7"].gameObject.GetComponentInChildren<LoadWrapper_OBJ>(true);
             yield return new WaitUntil(() => objshape.alreadyLoaded);
 
-            TestHelpers.InstantiateEntityWithShape(scene, "8", DCL.Models.CLASS_ID.GLTF_SHAPE, new Vector3(0, 1, 12),
+            TestHelpers.InstantiateEntityWithShape(scene, "8", DCL.Models.CLASS_ID.GLTF_SHAPE, new Vector3(8, 1, 8),
                 DCL.Helpers.Utils.GetTestsAssetsPath() + "/GLB/CesiumMan/CesiumMan.glb");
             yield return null;
             gltfShape = scene.entities["8"].gameObject.GetComponentInChildren<LoadWrapper_GLTF>(true);
@@ -62,7 +62,7 @@ namespace Tests
 
             AssertMetricsModel(scene,
                 triangles: 17521,
-                materials: 5,
+                materials: 6,
                 entities: 8,
                 meshes: 11,
                 bodies: 13,
@@ -74,7 +74,7 @@ namespace Tests
 
             AssertMetricsModel(scene,
                 triangles: 12849,
-                materials: 4,
+                materials: 5,
                 entities: 7,
                 meshes: 10,
                 bodies: 12,
@@ -97,25 +97,22 @@ namespace Tests
             Assert.AreEqual(textures, inputModel.textures, "Incorrect textures count");
         }
 
-        public IEnumerator InitializeSceneControllerAndRemoveCharacterController()
-        {
-            sceneController = TestHelpers.InitializeSceneController();
-
-            if (DCLCharacterController.i != null)
-            {
-                Object.Destroy(DCLCharacterController.i.gameObject);
-            }
-
-            yield return null;
-        }
-
         [UnityTest]
         public IEnumerator SceneLoading()
         {
-            yield return InitializeSceneControllerAndRemoveCharacterController();
+            yield return TestHelpers.UnloadAllUnityScenes();
+            yield return InitScene(spawnUIScene: false);
+            DCL.Configuration.Environment.DEBUG = true;
+            sceneController.SetDebug();
+
+            yield return null;
+
+            sceneController.UnloadAllScenes();
+            yield return null;
+
+            Assert.AreEqual(0, sceneController.loadedScenes.Count);
 
             sceneController.LoadParcelScenes((Resources.Load("TestJSON/SceneLoadingTest") as TextAsset).text);
-
             yield return new WaitForAllMessagesProcessed();
 
             string loadedSceneID = "0,0";
@@ -153,14 +150,16 @@ namespace Tests
             sceneController.UnloadScene(loadedSceneID);
 
             yield return new WaitForAllMessagesProcessed();
-
-            yield return null;
+            yield return new WaitForSeconds(3f);
 
             Assert.IsTrue(sceneController.loadedScenes.ContainsKey(loadedSceneID) == false);
 
             Assert.IsTrue(sceneRootGameObject == null, "Scene root gameobject reference is not getting destroyed.");
 
-            Assert.AreEqual(sceneEntities.Count, 0, "Every entity should be removed");
+            foreach (var entity in sceneEntities)
+            {
+                Assert.IsFalse(entity.Value.gameObject.activeInHierarchy, "Every entity should be disabled after returning to the pool");
+            }
 
             TestHelpers.ForceUnloadAllScenes(sceneController);
 
@@ -222,25 +221,31 @@ namespace Tests
         [UnityTest]
         public IEnumerator PositionParcels()
         {
-            yield return InitializeSceneControllerAndRemoveCharacterController();
-
-            var jsonMessageToLoad =
-                "{\"id\":\"xxx\",\"basePosition\":{\"x\":0,\"y\":0},\"parcels\":[{\"x\":-1,\"y\":0}, {\"x\":0,\"y\":0}, {\"x\":-1,\"y\":1}],\"baseUrl\":\"http://localhost:9991/local-ipfs/contents/\",\"contents\":[],\"owner\":\"0x0f5d2fb29fb7d3cfee444a200298f468908cc942\"}";
-
+            yield return TestHelpers.UnloadAllUnityScenes();
+            yield return InitScene(spawnUIScene: false);
             DCL.Configuration.Environment.DEBUG = true;
-
-            Assert.AreEqual(sceneController.loadedScenes.Count, 0);
             sceneController.SetDebug();
+
+            yield return null;
+
+            sceneController.UnloadAllScenes();
+            yield return null;
+
+            Assert.AreEqual(0, sceneController.loadedScenes.Count);
+
+            var jsonMessageToLoad = "{\"id\":\"xxx\",\"basePosition\":{\"x\":0,\"y\":0},\"parcels\":[{\"x\":-1,\"y\":0}, {\"x\":0,\"y\":0}, {\"x\":-1,\"y\":1}],\"baseUrl\":\"http://localhost:9991/local-ipfs/contents/\",\"contents\":[],\"owner\":\"0x0f5d2fb29fb7d3cfee444a200298f468908cc942\"}";
             sceneController.LoadParcelScenes(jsonMessageToLoad);
 
             yield return new WaitForAllMessagesProcessed();
 
-            Assert.AreEqual(sceneController.loadedScenes.Count, 1);
+            Assert.AreEqual(1, sceneController.loadedScenes.Count);
 
             var theScene = sceneController.loadedScenes["xxx"];
+            theScene.CleanBlockers();
+            yield return null;
 
-            Assert.AreEqual(theScene.sceneData.parcels.Length, 3);
-            Assert.AreEqual(theScene.transform.childCount, 3);
+            Assert.AreEqual(3, theScene.sceneData.parcels.Length);
+            Assert.AreEqual(3, theScene.transform.childCount);
 
             Assert.IsTrue(theScene.transform.GetChild(0).localPosition == new Vector3(-ParcelSettings.PARCEL_SIZE / 2,
                               DCL.Configuration.ParcelSettings.DEBUG_FLOOR_HEIGHT, ParcelSettings.PARCEL_SIZE / 2));
@@ -257,15 +262,19 @@ namespace Tests
         [UnityTest]
         public IEnumerator PositionParcels2()
         {
-            yield return InitializeSceneControllerAndRemoveCharacterController();
-
-            var jsonMessageToLoad =
-                "{\"id\":\"xxx\",\"basePosition\":{\"x\":90,\"y\":90},\"parcels\":[{\"x\":89,\"y\":90}, {\"x\":90,\"y\":90}, {\"x\":89,\"y\":91}],\"baseUrl\":\"http://localhost:9991/local-ipfs/contents/\",\"contents\":[],\"owner\":\"0x0f5d2fb29fb7d3cfee444a200298f468908cc942\"}";
-
+            yield return TestHelpers.UnloadAllUnityScenes();
+            yield return InitScene(spawnUIScene: false);
             DCL.Configuration.Environment.DEBUG = true;
+            sceneController.SetDebug();
+
+            yield return null;
+
+            sceneController.UnloadAllScenes();
+            yield return null;
 
             Assert.AreEqual(0, sceneController.loadedScenes.Count);
-            sceneController.SetDebug();
+
+            var jsonMessageToLoad = "{\"id\":\"xxx\",\"basePosition\":{\"x\":90,\"y\":90},\"parcels\":[{\"x\":89,\"y\":90}, {\"x\":90,\"y\":90}, {\"x\":89,\"y\":91}],\"baseUrl\":\"http://localhost:9991/local-ipfs/contents/\",\"contents\":[],\"owner\":\"0x0f5d2fb29fb7d3cfee444a200298f468908cc942\"}";
             sceneController.LoadParcelScenes(jsonMessageToLoad);
 
             yield return new WaitForAllMessagesProcessed();
@@ -273,6 +282,8 @@ namespace Tests
             Assert.AreEqual(1, sceneController.loadedScenes.Count);
 
             var theScene = sceneController.loadedScenes["xxx"];
+            theScene.CleanBlockers();
+            yield return null;
 
             Assert.AreEqual(3, theScene.sceneData.parcels.Length);
             Assert.AreEqual(3, theScene.transform.childCount);
@@ -301,7 +312,7 @@ namespace Tests
             string sceneId = "Test UI Scene";
             sceneController.CreateUIScene(JsonUtility.ToJson(new CreateUISceneMessage() { id = sceneId }));
 
-            GameObject sceneGo = GameObject.Find("ui scene:" + sceneId);
+            GameObject sceneGo = GameObject.Find(SceneController.UI_SCENE_PRE_ID + sceneId);
 
             GlobalScene scene = sceneController.loadedScenes[sceneId] as GlobalScene;
 
@@ -324,7 +335,7 @@ namespace Tests
 
             yield return null;
 
-            sceneGo = GameObject.Find("ui scene:" + sceneId);
+            sceneGo = GameObject.Find(SceneController.UI_SCENE_PRE_ID + sceneId);
 
             Assert.IsTrue(sceneGo != null, "scene game object not found! UIScenes must not be unloaded by distance!");
             Assert.IsTrue(sceneController.loadedScenes[sceneId] != null,
@@ -343,36 +354,6 @@ namespace Tests
         }
 
         [UnityTest]
-        public IEnumerator ParcelScene_TrackDisposables_OneGLTF()
-        {
-            yield return base.InitScene();
-            var entity = TestHelpers.CreateSceneEntity(scene);
-
-            TestHelpers.AttachGLTFShape(entity, scene, Vector3.zero, new LoadableShape.Model()
-            {
-                src = DCL.Helpers.Utils.GetTestsAssetsPath() + "/GLB/Lantern/Lantern.glb"
-            });
-
-            Assert.AreEqual(1, scene.disposableNotReadyCount);
-            scene.SetInitMessagesDone();
-            Assert.AreEqual(1, scene.disposableNotReadyCount);
-            yield return TestHelpers.WaitForGLTFLoad(entity);
-            Assert.AreEqual(0, scene.disposableNotReadyCount);
-        }
-
-        [UnityTest]
-        public IEnumerator ParcelScene_TrackDisposables_BeforeInitDone()
-        {
-            yield return base.InitScene();
-
-            TestHelpers.CreateEntityWithBoxShape(scene, Vector3.zero, true);
-            TestHelpers.CreateEntityWithBoxShape(scene, Vector3.zero, true);
-            TestHelpers.CreateEntityWithBoxShape(scene, Vector3.zero, true);
-
-            Assert.AreEqual(3, scene.disposableNotReadyCount);
-        }
-
-        [UnityTest]
         public IEnumerator ParcelScene_TrackDisposables_AfterInitDone()
         {
             yield return base.InitScene();
@@ -382,19 +363,6 @@ namespace Tests
 
             scene.SetInitMessagesDone();
 
-            Assert.AreEqual(0, scene.disposableNotReadyCount);
-        }
-
-        [UnityTest]
-        public IEnumerator ParcelScene_TrackDisposables_InstantReadyDisposable()
-        {
-            yield return base.InitScene();
-
-            var boxShape = TestHelpers.CreateEntityWithBoxShape(scene, Vector3.zero, true);
-            Assert.AreEqual(1, scene.disposableNotReadyCount);
-            scene.SetInitMessagesDone();
-            Assert.AreEqual(0,scene.disposableNotReadyCount);
-            yield return boxShape.routine;
             Assert.AreEqual(0, scene.disposableNotReadyCount);
         }
     }
