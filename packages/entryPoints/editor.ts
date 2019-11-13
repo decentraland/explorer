@@ -114,7 +114,17 @@ function bindSceneEvents() {
   unityScene.on('uuidEvent' as any, event => {
     const { type } = event.payload
 
-    if (type === 'onEntityLoading') {
+    if (type === 'gizmoSelected') {
+      evtEmitter.emit('gizmoSelected', {
+        gizmoType: event.payload['gizmoType'],
+        entityId: event.payload['entityId']
+      })
+    } else if (type === 'gizmoDragEnded') {
+      evtEmitter.emit('transform', {
+        entityId: event.payload.entityId,
+        transform: JSON.parse(event.payload.transform)
+      })
+    } else if (type === 'onEntityLoading') {
       loadingEntities.push(event.payload.entityId)
     } else if (type === 'onEntityFinishLoading') {
       let index = loadingEntities.indexOf(event.payload.entityId)
@@ -150,28 +160,15 @@ function bindSceneEvents() {
   unityScene.on('builderSceneUnloaded', e => {
     loadingEntities = []
   })
-  unityScene.on('gizmoEvent', e => {
-    if (e.type === 'gizmoSelected') {
-      evtEmitter.emit('gizmoSelected', {
-        gizmoType: e.gizmoType,
-        entityId: e.entityId !== '' ? e.entityId : null
-      })
-    } else if (e.type === 'gizmoDragEnded') {
-      evtEmitter.emit('transform', {
-        entityId: e.entityId,
-        transform: e.transform
-      })
-    }
-  })
 }
 
 namespace editor {
   /**
    * Function executed by builder which is the first function of the entry point
    */
-  export async function initEngine(container: HTMLElement, buildConfigPath: string) {
+  export async function initEngine(container: HTMLElement) {
     try {
-      await initializeUnity(container, buildConfigPath)
+      await initializeUnity(container)
       defaultLogger.log('Engine initialized.')
       initializedEngine.resolve()
     } catch (err) {
@@ -196,10 +193,6 @@ namespace editor {
     unityInterface.SelectBuilderEntity(entityId)
   }
 
-  export function deselectEntity() {
-    unityInterface.DeselectBuilderEntity()
-  }
-
   export function getDCLCanvas() {
     return document.getElementById('#canvas')
   }
@@ -215,7 +208,7 @@ namespace editor {
     } else if (unityScene) {
       const { worker } = unityScene
       if (action.payload.mappings) {
-        const scene = { ...action.payload.scene }
+        const scene = action.payload.scene
         scene._mappings = action.payload.mappings
         await renewBuilderScene(scene)
       }

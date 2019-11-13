@@ -121,6 +121,7 @@ export type LoadableParcelScene = {
   parcels: Array<{ x: number; y: number }>
   contents: Array<ContentMapping>
   baseUrl: string
+  baseUrlBundles: string
   land: ILand
 }
 
@@ -343,7 +344,6 @@ export type Notification = {
 
 export type HUDConfiguration = {
   active: boolean
-  visible: boolean
 }
 
 export function normalizeContentMappings(
@@ -388,6 +388,7 @@ export function ILandToLoadableParcelScene(land: ILand): EnvironmentData<Loadabl
           land.scene.scene.parcels.map(parseParcelPosition)) ||
         [],
       baseUrl: land.baseUrl,
+      baseUrlBundles: land.baseUrlBundles,
       contents: mappings,
       land
     }
@@ -416,6 +417,7 @@ export function ILandToLoadableParcelSceneUpdate(land: ILand): EnvironmentData<L
           land.scene.scene.parcels.map(parseParcelPosition)) ||
         [],
       baseUrl: land.baseUrl,
+      baseUrlBundles: land.baseUrlBundles,
       contents: mappings,
       land
     }

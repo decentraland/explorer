@@ -185,15 +185,6 @@ function getDefaultTLD() {
   return TLD
 }
 
-export function getExclusiveServer() {
-  if (window.location.search.match(/WEARABLE_SERVER=\w+/)) {
-    return window.location.search.match(/WEARABLE_SERVER=(\w+)/)[1]
-  }
-  return 'https://dcl-base-exclusive.now.sh/index.json'
-}
-
-export const ALL_WEARABLES = location.search.indexOf('ALL_WEARABLES') !== -1 && getDefaultTLD() !== 'org'
-
 export function getLoginConfigurationForCurrentDomain() {
   let tld: 'org' | 'zone' | 'today' = getDefaultTLD()
   // Use `.zone` auth for any localhost or other edge case
@@ -216,6 +207,8 @@ export function getServerConfigurations() {
     auth: `https://auth.decentraland.${TLDDefault}/api/v1`,
     landApi: `https://api.decentraland.${TLDDefault}/v1`,
     content: `https://content.decentraland.${TLDDefault === 'today' ? 'org' : TLDDefault}`,
+    // NOTE(Brian): We are hardcoding ".zone" here until further notice.
+    //              as the ORG endpoint isn't having permissions yet.
     contentAsBundle: `https://content-as-bundle.decentraland.zone`,
     worldInstanceUrl: `wss://world-comm.decentraland.${TLDDefault}/connect`,
     profile: `https://profile.decentraland.${TLDDefault}/api/v1`,
@@ -223,8 +216,7 @@ export function getServerConfigurations() {
     avatar: {
       snapshotStorage: `https://avatars-storage.decentraland.${TLDDefault}/`,
       server: `https://avatars-api.decentraland.${TLDDefault === 'zone' ? 'today' : TLDDefault}/`,
-      catalog: 'https://dcl-base-avatars.now.sh/index.json',
-      exclusiveCatalog: getExclusiveServer(),
+      catalog: 'https://avatar-assets.now.sh',
       contents: `https://s3.amazonaws.com/content-service.decentraland.org/`,
       presets: `https://avatars-storage.decentraland.org/mobile-avatars`
     },
