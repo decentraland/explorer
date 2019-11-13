@@ -1,8 +1,9 @@
+import { AnyAction } from 'redux'
 import { call, delay, fork, put, race, select, take, takeEvery, takeLatest } from 'redux-saga/effects'
 import { queueTrackingEvent } from '../analytics'
 import { getCurrentUser } from '../comms/peers'
 import { lastPlayerPosition } from '../world/positionThings'
-import { SceneFailAction, SceneLoadAction, SceneStartAction, SCENE_FAIL, SCENE_LOAD, SCENE_START } from './actions'
+import { SceneLoadAction, SCENE_FAIL, SCENE_LOAD, SCENE_START } from './actions'
 import { LoadingState } from './reducer'
 import { EXPERIENCE_STARTED, helpTexts, rotateHelpText, TELEPORT_TRIGGERED } from './types'
 
@@ -21,15 +22,15 @@ export function* trackLoadTime(action: SceneLoadAction): any {
   const start = new Date().getTime()
   const sceneId = action.payload
   const result = yield race({
-    load: take((action: SceneStartAction) => action.type === SCENE_START && action.payload === sceneId),
-    fail: take((action: SceneFailAction) => action.type === SCENE_FAIL && action.payload === sceneId)
+    start: take((action: AnyAction) => action.type === SCENE_START && action.payload === sceneId),
+    fail: take((action: AnyAction) => action.type === SCENE_FAIL && action.payload === sceneId)
   })
   const user = yield select(getCurrentUser)
   const position = lastPlayerPosition
   queueTrackingEvent('SceneLoadTimes', {
     position: { ...position },
     elapsed: new Date().getTime() - start,
-    success: !!result.load,
+    success: !!result.start,
     sceneId,
     userId: user.userId
   })
