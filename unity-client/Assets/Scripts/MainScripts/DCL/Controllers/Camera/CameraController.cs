@@ -61,7 +61,7 @@ public class CameraController : MonoBehaviour
     //This will likely be moved to the InputController or an equivalent class. It's simple enough to leave it for the PoC 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.P))
+        if (Input.GetKeyDown(KeyCode.V))
         {
             if (currentState == CameraState.FirstPerson)
                 currentState.Set(CameraState.ThirdPerson);
