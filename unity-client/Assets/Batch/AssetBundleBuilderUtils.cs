@@ -1,47 +1,19 @@
-﻿using System;
+using DCL.Helpers;
+using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Networking;
 
 [assembly: InternalsVisibleTo("AssetBundleBuilderTests")]
 namespace DCL
 {
+
     public static class AssetBundleBuilderUtils
     {
-        [MenuItem("AssetBundleBuilder/Dump Test Scene")]
-        public static void DumpMisc()
-        {
-            AssetBundleBuilder.ExportSceneToAssetBundles_Internal("QmbKgHPENpzGGEfagGP5BbEd7CvqXeXuuXLeMEkuswGvrK");
-        }
-
-
-        [MenuItem("AssetBundleBuilder/Dump Museum District")]
-        public static void DumpMuseum()
-        {
-            AssetBundleBuilder.environment = ContentServerUtils.ApiEnvironment.ORG;
-            AssetBundleBuilder.skipUploadedGltfs = false;
-            var zoneArray = GetCenteredZoneArray(new Vector2Int(9, 78), new Vector2Int(10, 10));
-            AssetBundleBuilder.DumpArea(zoneArray);
-        }
-
-        [MenuItem("AssetBundleBuilder/Dump Zone 64,-64")]
-        public static void DumpZoneArea()
-        {
-            AssetBundleBuilder.environment = ContentServerUtils.ApiEnvironment.ZONE;
-            AssetBundleBuilder.skipUploadedGltfs = true;
-            var zoneArray = GetCenteredZoneArray(new Vector2Int(55, -70), new Vector2Int(15, 15));
-            AssetBundleBuilder.DumpArea(new Vector2Int(55, -70), new Vector2Int(15, 15));
-        }
-
-        [MenuItem("AssetBundleBuilder/Dump Org 0,0")]
-        public static void DumpEverything()
-        {
-            AssetBundleBuilder.skipUploadedGltfs = true;
-            var zoneArray = GetCenteredZoneArray(new Vector2Int(0, 0), new Vector2Int(30, 30));
-            AssetBundleBuilder.DumpArea(zoneArray);
-        }
-
         public static List<Vector2Int> GetBottomLeftZoneArray(Vector2Int bottomLeftAnchor, Vector2Int size)
         {
             List<Vector2Int> coords = new List<Vector2Int>();
@@ -118,12 +90,113 @@ namespace DCL
             return true;
         }
 
-
-        [MenuItem("AssetBundleBuilder/Only Build Bundles")]
-        public static void OnlyBuildBundles()
+        internal static void Exit(int errorCode = 0)
         {
-            AssetBundleBuilder.finalAssetBundlePath = AssetBundleBuilder.ASSET_BUNDLES_PATH_ROOT;
-            BuildPipeline.BuildAssetBundles(AssetBundleBuilder.finalAssetBundlePath, BuildAssetBundleOptions.UncompressedAssetBundle | BuildAssetBundleOptions.ForceRebuildAssetBundle, BuildTarget.WebGL);
+            Debug.Log($"Process finished with code {errorCode}");
+
+            if (Application.isBatchMode)
+                EditorApplication.Exit(errorCode);
         }
+
+        internal static void MarkForAssetBundleBuild(string path, string abName)
+        {
+            string assetPath = path.Substring(path.IndexOf("Assets"));
+            assetPath = Path.ChangeExtension(assetPath, null);
+
+            assetPath = assetPath.Substring(0, assetPath.Length - 1);
+            AssetImporter a = AssetImporter.GetAtPath(assetPath);
+            a.SetAssetBundleNameAndVariant(abName, "");
+        }
+
+
+        /// <summary>
+        /// This dumps .depmap files
+        /// </summary>
+        /// <param name="manifest"></param>
+        internal static void GenerateDependencyMaps(Dictionary<string, string> hashLowercaseToHashProper, AssetBundleManifest manifest)
+        {
+            string[] assetBundles = manifest.GetAllAssetBundles();
+
+            for (int i = 0; i < assetBundles.Length; i++)
+            {
+                if (string.IsNullOrEmpty(assetBundles[i]))
+                    continue;
+
+                var depMap = new AssetDependencyMap();
+                string[] deps = manifest.GetAllDependencies(assetBundles[i]);
+
+                if (deps.Length > 0)
+                {
+                    depMap.dependencies = deps.Select((x) =>
+                    {
+                        if (hashLowercaseToHashProper.ContainsKey(x))
+                            return hashLowercaseToHashProper[x];
+                        else
+                            return x;
+
+                    }).ToArray();
+                }
+
+                string json = JsonUtility.ToJson(depMap);
+                string finalFilename = assetBundles[i];
+
+                hashLowercaseToHashProper.TryGetValue(assetBundles[i], out finalFilename);
+                File.WriteAllText(AssetBundleBuilder.finalAssetBundlePath + finalFilename + ".depmap", json);
+            }
+        }
+        internal static bool CheckProviderItemExists(DCL.ContentProvider contentProvider, string fileName)
+        {
+            string finalUrl = contentProvider.GetContentsUrl(fileName);
+            return CheckUrlExists(finalUrl);
+        }
+
+        internal static bool CheckUrlExists(string url)
+        {
+            bool result = false;
+
+            using (UnityWebRequest req = UnityWebRequest.Get(url))
+            {
+                req.SendWebRequest();
+
+                while (req.downloadedBytes > 0) { }
+
+                if (req.WebRequestSucceded())
+                    result = true;
+
+                req.Abort();
+            }
+
+            return result;
+        }
+
+        internal static Texture2D GetTextureFromAssetBundle(string hash)
+        {
+            string url = ContentServerUtils.GetBundlesAPIUrlBase(AssetBundleBuilder.environment) + hash;
+
+            using (UnityWebRequest assetBundleRequest = UnityWebRequestAssetBundle.GetAssetBundle(url))
+            {
+                var asyncOp = assetBundleRequest.SendWebRequest();
+
+                while (!asyncOp.isDone) { }
+
+                if (assetBundleRequest.isHttpError || assetBundleRequest.isNetworkError)
+                {
+                    Debug.LogWarning("AssetBundle request fail! " + url);
+                    return null;
+                }
+
+                AssetBundle assetBundle = DownloadHandlerAssetBundle.GetContent(assetBundleRequest);
+
+                if (assetBundle != null)
+                {
+                    Texture2D[] txs = assetBundle.LoadAllAssets<Texture2D>();
+                    return txs[0];
+                }
+            }
+
+            return null;
+        }
+
+
     }
 }

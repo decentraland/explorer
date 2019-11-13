@@ -1,4 +1,4 @@
-﻿using DCL.Helpers;
+using DCL.Helpers;
 using GLTF.Schema;
 using System;
 using System.Collections.Generic;
@@ -16,14 +16,14 @@ using ScenesAPIData = DCL.ContentServerUtils.ScenesAPIData;
 
 namespace DCL
 {
+    [System.Serializable]
+    public class AssetDependencyMap
+    {
+        public string[] dependencies;
+    }
+
     public static class AssetBundleBuilder
     {
-        [System.Serializable]
-        public class AssetDependencyMap
-        {
-            public string[] dependencies;
-        }
-
         static bool VERBOSE = false;
 
         const string CLI_ALWAYS_BUILD_SYNTAX = "alwaysBuild";
@@ -167,7 +167,7 @@ namespace DCL
                 catch (Exception e)
                 {
                     Debug.LogError(e.Message);
-                    Exit(1);
+                    AssetBundleBuilderUtils.Exit(1);
                 }
             };
         }
@@ -192,7 +192,7 @@ namespace DCL
                         throw new ArgumentException("Invalid sceneCid argument! Please use -sceneCid <id> to establish the desired id to process.");
                     }
 
-                    DumpScene(sceneCid[0], Exit);
+                    DumpScene(sceneCid[0], AssetBundleBuilderUtils.Exit);
                     return;
                 }
                 else
@@ -221,7 +221,7 @@ namespace DCL
                         throw new ArgumentException("Invalid parcelsXYWH argument! Please don't use negative width/height values, and ensure any given width/height doesn't exceed 10.");
                     }
 
-                    DumpArea(new Vector2Int(x, y), new Vector2Int(w, h), Exit);
+                    DumpArea(new Vector2Int(x, y), new Vector2Int(w, h), AssetBundleBuilderUtils.Exit);
                     return;
                 }
                 else
@@ -232,7 +232,7 @@ namespace DCL
             catch (Exception e)
             {
                 Debug.LogError(e.Message);
-                Exit(1);
+                AssetBundleBuilderUtils.Exit(1);
             }
         }
 
@@ -291,6 +291,7 @@ namespace DCL
             foreach (var kvp in hashToBufferPair)
             {
                 string hash = kvp.Key;
+
                 var result = DownloadAsset(contentProvider, hashToBufferPair, hash, hash + "/");
 
                 if (result == null)
@@ -305,16 +306,21 @@ namespace DCL
                 string hash = kvp.Key;
 
                 //NOTE(Brian): try to get an AB before getting the original texture, so we bind the dependencies correctly
-                string fullPathToTag = DownloadAsset(contentProvider, hashToTexturePair, hash, hash + "/");
+                string fullPath = DownloadAsset(contentProvider, hashToTexturePair, hash, hash + "/");
 
-                if (fullPathToTag != null)
+                if (fullPath == null)
                 {
-                    pathsToTag.Add(fullPathToTag, hash);
+                    throw new Exception("Failed to get texture dependencies! failing asset: " + hash);
                 }
-                else
-                {
-                    throw new Exception("Failed to get textre dependencies! failing asset: " + hash);
-                }
+
+                //if (fullPathToTag != null)
+                //{
+                //    pathsToTag.Add(fullPathToTag, hash);
+                //}
+                //else
+                //{
+                //    throw new Exception("Failed to get textre dependencies! failing asset: " + hash);
+                //}
             }
 
             AssetDatabase.Refresh();
@@ -322,7 +328,7 @@ namespace DCL
 
             foreach (var kvp in pathsToTag)
             {
-                MarkForAssetBundleBuild(kvp.Key, kvp.Value);
+                AssetBundleBuilderUtils.MarkForAssetBundleBuild(kvp.Key, kvp.Value);
             }
 
             GLTFImporter.OnGLTFRootIsConstructed -= FixGltfDependencyPaths;
@@ -348,7 +354,7 @@ namespace DCL
                         continue;
                     }
 
-                    if (CheckContentUrlExists(contentProviderAB, hashToGltfPair, gltfHash))
+                    if (AssetBundleBuilderUtils.CheckProviderItemExists(contentProviderAB, hashToGltfPair[gltfHash].file))
                     {
                         Debug.Log("Skipping existing gltf: " + gltfHash);
 
@@ -368,22 +374,7 @@ namespace DCL
 
                     if (endsWithTextureExtensions)
                     {
-                        string fileExt = Path.GetExtension(mappingPair.file);
-                        string realOutputPath = finalDownloadedPath + mappingPair.hash + "/" + mappingPair.hash + fileExt;
-
-                        if (File.Exists(realOutputPath))
-                        {
-                            string outputPath = finalDownloadedAssetDbPath + mappingPair.hash + "/" + mappingPair.hash + fileExt;
-                            Texture2D t2d = AssetDatabase.LoadAssetAtPath<Texture2D>(outputPath);
-
-                            if (t2d != null)
-                            {
-                                string relativePath = GetRelativePathTo(hashToGltfPair[gltfHash].file, mappingPair.file);
-                                //NOTE(Brian): This cache will be used by the GLTF importer when seeking textures. This way the importer will
-                                //             consume the asset bundle dependencies instead of trying to create new textures.
-                                PersistentAssetCache.ImageCacheByUri[relativePath] = new RefCountedTextureData(relativePath, t2d);
-                            }
-                        }
+                        RetrieveAndInjectTexture(hashToGltfPair, gltfHash, mappingPair);
                     }
 
                     bool endsWithBufferExtensions = bufferExtensions.Any((x) => mappingPair.file.ToLower().EndsWith(x));
@@ -424,7 +415,7 @@ namespace DCL
 
             foreach (var kvp in pathsToTag)
             {
-                MarkForAssetBundleBuild(kvp.Key, kvp.Value);
+                AssetBundleBuilderUtils.MarkForAssetBundleBuild(kvp.Key, kvp.Value);
             }
 
             foreach (var s in streamsToDispose)
@@ -433,30 +424,34 @@ namespace DCL
             }
         }
 
-        static void Exit(int errorCode = 0)
+        private static void RetrieveAndInjectTexture(Dictionary<string, MappingPair> hashToGltfPair, string gltfHash, MappingPair mappingPair)
         {
-            Debug.Log($"Process finished with code {errorCode}");
+            string fileExt = Path.GetExtension(mappingPair.file);
+            string realOutputPath = finalDownloadedPath + mappingPair.hash + "/" + mappingPair.hash + fileExt;
+            Texture2D t2d = null;
 
-            if (Application.isBatchMode)
-                EditorApplication.Exit(errorCode);
+            if (File.Exists(realOutputPath))
+            {
+                string outputPath = finalDownloadedAssetDbPath + mappingPair.hash + "/" + mappingPair.hash + fileExt;
+                t2d = AssetDatabase.LoadAssetAtPath<Texture2D>(outputPath);
+            }
+
+            if (t2d != null)
+            {
+                string relativePath = GetRelativePathTo(hashToGltfPair[gltfHash].file, mappingPair.file);
+                //NOTE(Brian): This cache will be used by the GLTF importer when seeking textures. This way the importer will
+                //             consume the asset bundle dependencies instead of trying to create new textures.
+                PersistentAssetCache.ImageCacheByUri[relativePath] = new RefCountedTextureData(relativePath, t2d);
+            }
         }
 
-        static void MarkForAssetBundleBuild(string path, string abName)
-        {
-            string assetPath = path.Substring(path.IndexOf("Assets"));
-            assetPath = Path.ChangeExtension(assetPath, null);
-
-            assetPath = assetPath.Substring(0, assetPath.Length - 1);
-            AssetImporter a = AssetImporter.GetAtPath(assetPath);
-            a.SetAssetBundleNameAndVariant(abName, "");
-        }
 
         internal static void BuildAssetBundles()
         {
             AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport | ImportAssetOptions.ForceUpdate | ImportAssetOptions.ImportRecursive);
             AssetDatabase.SaveAssets();
 
-            var manifest = BuildPipeline.BuildAssetBundles(finalAssetBundlePath, BuildAssetBundleOptions.UncompressedAssetBundle, BuildTarget.WebGL);
+            var manifest = BuildPipeline.BuildAssetBundles(finalAssetBundlePath, BuildAssetBundleOptions.UncompressedAssetBundle | BuildAssetBundleOptions.ForceRebuildAssetBundle, BuildTarget.WebGL);
 
             if (manifest == null)
             {
@@ -469,7 +464,7 @@ namespace DCL
 
             Debug.Log($"Total generated asset bundles: {assetBundles.Length}");
 
-            GenerateDependencyMaps(manifest);
+            AssetBundleBuilderUtils.GenerateDependencyMaps(hashLowercaseToHashProper, manifest);
 
             for (int i = 0; i < assetBundles.Length; i++)
             {
@@ -526,56 +521,6 @@ namespace DCL
             OnBundleBuildFinish?.Invoke(0);
         }
 
-        /// <summary>
-        /// This dumps .depmap files
-        /// </summary>
-        /// <param name="manifest"></param>
-        private static void GenerateDependencyMaps(AssetBundleManifest manifest)
-        {
-            string[] assetBundles = manifest.GetAllAssetBundles();
-
-            for (int i = 0; i < assetBundles.Length; i++)
-            {
-                if (string.IsNullOrEmpty(assetBundles[i]))
-                    continue;
-
-                var depMap = new AssetDependencyMap();
-                string[] deps = manifest.GetAllDependencies(assetBundles[i]);
-
-                if (deps.Length == 0)
-                    continue;
-
-                depMap.dependencies = deps.Select((x) =>
-                {
-                    if (hashLowercaseToHashProper.ContainsKey(x))
-                        return hashLowercaseToHashProper[x];
-                    else
-                        return x;
-
-                }).ToArray();
-
-                string json = JsonUtility.ToJson(depMap);
-                string finalFilename = assetBundles[i];
-
-                hashLowercaseToHashProper.TryGetValue(assetBundles[i], out finalFilename);
-                File.WriteAllText(finalAssetBundlePath + finalFilename + ".depmap", json);
-            }
-        }
-
-        private static bool CheckContentUrlExists(DCL.ContentProvider contentProvider, Dictionary<string, MappingPair> filteredPairs, string hash)
-        {
-            string finalUrl = contentProvider.GetContentsUrl(filteredPairs[hash].file);
-
-            UnityWebRequest req = UnityWebRequest.Head(finalUrl);
-            req.SendWebRequest();
-
-            while (req.isDone == false) { }
-
-            if (req.WebRequestSucceded())
-                return true;
-
-            return false;
-        }
 
         private static string DownloadAsset(DCL.ContentProvider contentProvider, Dictionary<string, MappingPair> filteredPairs, string hash, string additionalPath = "")
         {
@@ -598,6 +543,7 @@ namespace DCL
 
                 return finalDownloadedPath + additionalPath;
             }
+
             UnityWebRequest req;
 
             int retryCount = 5;
