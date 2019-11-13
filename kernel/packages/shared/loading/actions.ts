@@ -9,8 +9,6 @@ export const signalSceneStart = (sceneId: string) => action(SCENE_START, sceneId
 export const signalSceneFail = (sceneId: string) => action(SCENE_FAIL, sceneId)
 
 export type SceneLoadAction = ReturnType<typeof signalSceneLoad>
-export type SceneStartAction = ReturnType<typeof signalSceneStart>
-export type SceneFailAction = ReturnType<typeof signalSceneFail>
 
 declare var global: any
 
