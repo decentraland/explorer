@@ -33,6 +33,22 @@ public class MinimapHUDController : IDisposable, IHUD
         UpdateSceneName(MinimapMetadata.GetMetadata().GetTile(current.x, current.y)?.name);
     }
 
+    public void PartialSceneInfoUpdate(Vector2Int coordinate, string newSceneName)
+    {
+        if (VERBOSE)
+        {
+            Debug.Log($"Updating {coordinate.x},{coordinate.y} to {newSceneName}");
+        }
+    }
+
+    public void PartialSceneInfoUpdate(Vector2Int coordinate, string newSceneName, MinimapMetadata.TileType type)
+    {
+        if (VERBOSE)
+        {
+            Debug.Log($"Updating {coordinate.x},{coordinate.y} to {newSceneName} (tyle type: {type})");
+        }
+    }
+
     public void UpdateData(MinimapHUDModel model)
     {
         this.model = model;

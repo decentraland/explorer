@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class HUDController : MonoBehaviour
@@ -109,20 +110,49 @@ public class HUDController : MonoBehaviour
         avatarEditorHud?.SetVisibility(configuration.active && configuration.visible);
     }
 
+    [Serializable]
+    public class MinimapTileFullInfo
+    {
+        public int x;
+        public int y;
+        public string name;
+        public int type;
+    }
+    [Serializable]
+    public class MinimapTileNameInfo
+    {
+        public int x;
+        public int y;
+        public string name;
+    }
+
+    public void UpdateMinimapSceneInformation(string newInformation)
+    {
+        List<MinimapTileFullInfo> info = JsonUtility.FromJson<List<MinimapTileFullInfo>>(newInformation);
+        Debug.Log(info);
+    }
+
+
+    public void UpdateMinimapSceneNames(string newInformation)
+    {
+        List<MinimapTileNameInfo> info = JsonUtility.FromJson<List<MinimapTileNameInfo>>(newInformation);
+        Debug.Log(info);
+    }
+
     private void UpdateAvatarHUD()
     {
         avatarHud?.UpdateData(new AvatarHUDModel()
         {
             name = ownUserProfile.userName,
-            mail =  ownUserProfile.email,
+            mail = ownUserProfile.email,
             avatarPic = ownUserProfile.faceSnapshot
         });
     }
 
     private void OnDestroy()
     {
-    if (ownUserProfile != null)
-        ownUserProfile.OnUpdate -= OwnUserProfileUpdated;
+        if (ownUserProfile != null)
+            ownUserProfile.OnUpdate -= OwnUserProfileUpdated;
         if (avatarHud != null)
         {
             avatarHud.OnEditAvatarPressed -= ShowAvatarEditor;
