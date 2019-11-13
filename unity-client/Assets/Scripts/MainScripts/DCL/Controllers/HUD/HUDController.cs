@@ -121,7 +121,13 @@ public class HUDController : MonoBehaviour
     public void UpdateMinimapSceneInformation(string newInformation)
     {
         List<MinimapTileInfo> info = JsonUtility.FromJson<List<MinimapTileInfo>>(newInformation);
-        Debug.Log(info);
+        foreach (var datum in info)
+        {
+            foreach (var parcel in datum.parcels)
+            {
+                // Something like minimapHud.ProcessNewParcelData(parcel, datum.name, datum.type);
+            }
+        }
     }
 
     private void UpdateAvatarHUD()

@@ -1,6 +1,7 @@
-import { call, fork, put, select, takeEvery, takeLatest } from 'redux-saga/effects'
+import { call, fork, put, select, take, takeEvery, takeLatest } from 'redux-saga/effects'
 import { getServer, LifecycleManager } from '../../decentraland-loader/lifecycle/manager'
 import { SceneStart, SCENE_START } from '../loading/actions'
+import { RENDERER_INITIALIZED } from '../renderer/types'
 import {
   districtData,
   fetchNameFromSceneJson,
@@ -28,6 +29,7 @@ export function* atlasSaga(): any {
 function* fetchDistricts() {
   try {
     const districts = yield call(() => fetch('https://api.decentraland.org/v1/districts').then(e => e.json()))
+    yield take(RENDERER_INITIALIZED)
     yield put(districtData(districts))
   } catch (e) {
     console.log(e)
@@ -36,6 +38,7 @@ function* fetchDistricts() {
 function* fetchTiles() {
   try {
     const tiles = yield call(() => fetch('https://api.decentraland.org/v1/tiles').then(e => e.json()))
+    yield take(RENDERER_INITIALIZED)
     yield put(marketData(tiles))
   } catch (e) {
     console.log(e)
