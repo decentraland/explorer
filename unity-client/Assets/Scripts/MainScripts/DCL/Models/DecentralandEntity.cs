@@ -43,6 +43,13 @@ namespace DCL.Models
                 }
             }
 
+            public void UpdateMesh(Meshes newMesh, int meshFilterIndex = 0)
+            {
+                if (meshFilters.Length == 0 || meshFilters[meshFilterIndex].sharedMesh == newMesh) return;
+
+                meshFilters[meshFilterIndex].sharedMesh = newMesh;
+            }
+
             public void CleanReferences()
             {
                 meshRootGameObject = null;
@@ -60,7 +67,7 @@ namespace DCL.Models
 
         public Dictionary<CLASS_ID_COMPONENT, BaseComponent> components = new Dictionary<CLASS_ID_COMPONENT, BaseComponent>();
 
-        // HACK: (Zak) will be removed when we separate each 
+        // HACK: (Zak) will be removed when we separate each
         // uuid component as a different class id
         public Dictionary<string, UUIDComponent> uuidComponents = new Dictionary<string, UUIDComponent>();
 
@@ -157,7 +164,7 @@ namespace DCL.Models
             {
                 int childCount = gameObject.transform.childCount;
 
-                // Destroy any other children 
+                // Destroy any other children
                 for (int i = 0; i < childCount; i++)
                 {
                     Utils.SafeDestroy(gameObject.transform.GetChild(i).gameObject);

@@ -45,10 +45,7 @@ namespace DCL.Components
                 collisionsDirty = false;
             }
 
-            if (entity.meshesInfo.meshFilters.Length > 0 && entity.meshesInfo.meshFilters[0].sharedMesh != currentMesh)
-            {
-                entity.meshesInfo.meshFilters[0].sharedMesh = currentMesh;
-            }
+            entity.meshesInfo.UpdateMesh(currentMesh);
         }
 
         void OnShapeAttached(DecentralandEntity entity)
