@@ -12,7 +12,7 @@ namespace DCL.Components
 {
     public class LoadWrapper_GLTF : LoadWrapper
     {
-        static readonly bool USE_LOCAL_HOST = false;
+        static readonly bool USE_LOCAL_HOST = true;
         static readonly bool USE_GLTF_FALLBACK = false;
         static readonly bool VERBOSE = false;
 

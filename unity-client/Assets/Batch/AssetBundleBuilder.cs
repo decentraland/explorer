@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -306,21 +307,25 @@ namespace DCL
                 string hash = kvp.Key;
 
                 //NOTE(Brian): try to get an AB before getting the original texture, so we bind the dependencies correctly
-                string fullPath = DownloadAsset(contentProvider, hashToTexturePair, hash, hash + "/");
+                string fullPathToTag = DownloadAsset(contentProvider, hashToTexturePair, hash, hash + "/");
 
-                if (fullPath == null)
+                AssetDatabase.Refresh();
+                AssetDatabase.SaveAssets();
+
+                string fileExt = Path.GetExtension(hashToTexturePair[hash].file);
+                string metaPath = finalDownloadedPath + hash + "/" + hash + fileExt + ".meta";
+
+                string metaContent = File.ReadAllText(metaPath);
+                string result = Regex.Replace(metaContent, @"guid: \w+?\n", "guid: custom_guid\n");
+
+                if (fullPathToTag != null)
+                {
+                    pathsToTag.Add(fullPathToTag, hash);
+                }
+                else
                 {
                     throw new Exception("Failed to get texture dependencies! failing asset: " + hash);
                 }
-
-                //if (fullPathToTag != null)
-                //{
-                //    pathsToTag.Add(fullPathToTag, hash);
-                //}
-                //else
-                //{
-                //    throw new Exception("Failed to get textre dependencies! failing asset: " + hash);
-                //}
             }
 
             AssetDatabase.Refresh();
@@ -568,6 +573,7 @@ namespace DCL
                 Directory.CreateDirectory(outputPathDir);
 
             File.WriteAllBytes(outputPath, req.downloadHandler.data);
+
 
             if (!hashLowercaseToHashProper.ContainsKey(hashLowercase))
                 hashLowercaseToHashProper.Add(hashLowercase, hash);
