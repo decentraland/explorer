@@ -43,7 +43,10 @@ function initializeAnalytics() {
   const TLD = getTLD()
   switch (TLD) {
     case 'org':
-      return initialize('1plAT9a2wOOgbPCrTaU8rgGUMzgUTJtU')
+      if (window.location.host === 'explorer.decentraland.org') {
+        return initialize('1plAT9a2wOOgbPCrTaU8rgGUMzgUTJtU')
+      }
+      return initialize('a4h4BC4dL1v7FhIQKKuPHEdZIiNRDVhc')
     case 'today':
       return initialize('a4h4BC4dL1v7FhIQKKuPHEdZIiNRDVhc')
     case 'zone':
