@@ -33,7 +33,7 @@ references:
     <<: *base_kernel_env
     steps:
       - <<: *attach_root
-      - run: export $DEPLOY_VARS
+      - run: export $(echo $DEPLOY_VARS)
       - run: echo test $TEST and test2 $TEST2
       - run: sudo apt-get -y -qq install awscli
       - run:
