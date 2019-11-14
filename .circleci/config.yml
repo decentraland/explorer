@@ -5,7 +5,7 @@ references:
   .workspace_kernel: &workspace_kernel /tmp/explorer/kernel
   .workspace_unity: &workspace_unity /tmp/explorer/unity
 
-  .attach_workspace: &attach_root
+  .attach_root: &attach_root
     attach_workspace:
       at: *workspace_root
 
@@ -88,7 +88,7 @@ jobs:
           - BUILD_PATH: /tmp/explorer/unity-client/Builds/unity
           - BUILD_NAME: unity
     steps:
-      - <<: *attach_workspace
+      - <<: *attach_root
       - run:
           name: Get the hash of source files
           command: |
@@ -132,7 +132,7 @@ jobs:
   build-kernel:
     <<: *base_kernel_env
     steps:
-      - <<: *attach_workspace
+      - <<: *attach_root
       - run:
           name: Get the hash of source files
           command: |
@@ -224,7 +224,7 @@ jobs:
       - <<: *image_kernel
     working_directory: /tmp/explorer
     steps:
-      - <<: *attach_workspace
+      - <<: *attach_root
       - run:
           name: Copy renderer to kernel
           command: |
@@ -242,7 +242,7 @@ jobs:
         environment:
           - BUILD_PATH: /tmp/explorer/unity-client/Builds/unity
     steps:
-      - <<: *attach_workspace
+      - <<: *attach_root
       - run:
           name: Set up NPM access tokens
           command: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
@@ -254,7 +254,7 @@ jobs:
   publish-ecs:
     <<: *base_kernel_env
     steps:
-      - <<: *attach_workspace
+      - <<: *attach_root
       - run:
           name: Set up NPM access tokens
           command: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
@@ -271,7 +271,7 @@ jobs:
   deploy-on-pr:
     <<: *base_kernel_env
     steps:
-      - <<: *attach_workspace
+      - <<: *attach_root
       - run: sudo apt-get -y -qq install awscli
       - run:
           name: Configure DEV/STG AWS Keys
@@ -290,7 +290,7 @@ jobs:
   deploy-dev:
     <<: *base_kernel_env
     steps:
-      - <<: *attach_workspace
+      - <<: *attach_root
       - run: sudo apt-get -y -qq install awscli
       - run:
           name: Configure DEV/STG AWS Keys
@@ -309,7 +309,7 @@ jobs:
   deploy-stg:
     <<: *base_kernel_env
     steps:
-      - <<: *attach_workspace
+      - <<: *attach_root
       - run: sudo apt-get -y -qq install awscli
       - run:
           name: Configure DEV/STG AWS Keys
@@ -329,7 +329,7 @@ jobs:
   deploy-prd:
     <<: *base_kernel_env
     steps:
-      - <<: *attach_workspace
+      - <<: *attach_root
       - run: sudo apt-get -y -qq install awscli
       - run:
           name: Configure PRD AWS Keys
