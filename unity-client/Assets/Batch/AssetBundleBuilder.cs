@@ -1,4 +1,4 @@
-using DCL.Helpers;
+﻿using DCL.Helpers;
 using GLTF.Schema;
 using System;
 using System.Collections.Generic;
@@ -333,12 +333,11 @@ namespace DCL
                 string result = Regex.Replace(metaContent, @"guid: \w+?\n", $"guid: {guid}\n");
                 File.WriteAllText(metaPath, result);
 
-                Debug.Log($"Downloaded texture dependency for hash {hash} ... force guid to: {guid}");
-
-                AssetDatabase.Refresh();
+                AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
                 AssetDatabase.SaveAssets();
 
-                Debug.Log($"According to the AssetDatabase, the guid is now {AssetDatabase.AssetPathToGUID(finalDownloadedAssetDbPath + assetPath)}");
+                string assetDbGuid = AssetDatabase.AssetPathToGUID(finalDownloadedAssetDbPath + assetPath);
+                Debug.Log($"Downloaded texture dependency for hash {hash} ... force guid to: {guid} ... verified guid is: {assetDbGuid}");
 
                 if (fullPathToTag != null)
                 {
@@ -350,7 +349,7 @@ namespace DCL
                 }
             }
 
-            AssetDatabase.Refresh();
+            AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
             AssetDatabase.SaveAssets();
 
             foreach (var kvp in pathsToTag)
