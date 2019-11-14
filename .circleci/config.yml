@@ -33,7 +33,7 @@ references:
     <<: *base_kernel_env
     steps:
       - <<: *attach_root
-      - run: echo test `eval $TEST` and test2 $(eval $TEST2)
+      - run: echo test `printenv $TEST` and test2 $(printenv $TEST2)
       - run: sudo apt-get -y -qq install awscli
       - run:
           name: Configure AWS Keys
