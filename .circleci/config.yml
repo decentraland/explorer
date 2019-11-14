@@ -29,15 +29,33 @@ references:
       tags:
         only: /^\d+\.\d+\.\d(.*)/ # npm tag + latest
 
+  .deploy-env: &deploy_env
+    <<: *base_kernel_env
+    steps:
+      - <<: *attach_root
+      - run: sudo apt-get -y -qq install awscli
+      - run:
+          name: Configure AWS Keys
+          command: |
+            aws configure set aws_access_key_id ${AWS_ACCESS_KEY_ID} && aws configure set aws_secret_access_key ${AWS_SECRET_ACCESS_KEY}
+      - run:
+          name: Deploy to S3
+          command: aws s3 sync static $S3_URL --acl public-read
+      - run:
+          name: Invalidate cloudfront cache
+          command: aws configure set preview.cloudfront true && aws configure set preview.create-invalidation true && aws cloudfront create-invalidation --distribution-id $CLOUD_FRONT_DISTRIBUTION_ID --paths "/*"
+      - run:
+          name: Invalidate cloudflare cache
+          command: curl "$PURGE_CACHE_KEY"
+
 jobs:
   checkout:
+    <<: *working_directory_root
     docker:
       - <<: *image_kernel
         environment:
           # avoid automatic download of LFS files
           GIT_LFS_SKIP_SMUDGE: 1
-
-    working_directory: /tmp/explorer
     steps:
       # install lfs
       - run:
@@ -71,7 +89,7 @@ jobs:
 
       # persist to workspace to use in downstream jobs
       - persist_to_workspace:
-          root: /tmp/explorer
+          root: *workspace_root
           paths:
             - .git
             - .circleci
@@ -79,8 +97,8 @@ jobs:
             - unity-client
 
   build-unity:
-    resource_class: xlarge
     <<: *working_directory_unity
+    resource_class: xlarge
     docker:
       - image: decentraland/renderer-build
         environment:
@@ -125,7 +143,7 @@ jobs:
 
       # persist to workspace to use in downstream jobs
       - persist_to_workspace:
-          root: /tmp/explorer
+          root: *workspace_root
           paths:
             - unity-client/Builds/unity/Build
 
@@ -212,9 +230,10 @@ jobs:
             - static/loader
             - static/systems
           key: kernel-build-{{ checksum "../.kernelsources-checksum" }}
+
       # persist to workspace to use in downstream jobs
       - persist_to_workspace:
-          root: /tmp/explorer
+          root: *workspace_root
           paths:
             - kernel/static
             - kernel/dist
@@ -229,9 +248,10 @@ jobs:
           name: Copy renderer to kernel
           command: |
             cp /tmp/explorer/unity-client/Builds/unity/Build/*.unityweb /tmp/explorer/kernel/static/unity/Build/
+
       # persist to workspace to use in downstream jobs
       - persist_to_workspace:
-          root: /tmp/explorer
+          root: *workspace_root
           paths:
             - kernel/static/unity/Build
 
@@ -269,23 +289,14 @@ jobs:
           when: on_success
 
   deploy-on-pr:
-    <<: *base_kernel_env
-    steps:
-      - <<: *attach_root
-      - run: sudo apt-get -y -qq install awscli
-      - run:
-          name: Configure DEV/STG AWS Keys
-          command: |
-            aws configure set aws_access_key_id ${AWS_DEV_ACCESS_KEY_ID} && aws configure set aws_secret_access_key ${AWS_DEV_SECRET_ACCESS_KEY}
-      - run:
-          name: Deploy to S3 (.zone) under subfolder if tests pass and branch is not master
-          command: aws s3 sync static s3://explorer.decentraland.zone/branch/${CIRCLE_BRANCH} --acl public-read
-      - run:
-          name: Invalidate cloudfront cache .zone
-          command: aws configure set preview.cloudfront true && aws configure set preview.create-invalidation true && aws cloudfront create-invalidation --distribution-id E297VXIBZFXIXE --paths "/*"
-      - run:
-          name: Invalidate cloudflare cache .zone
-          command: curl "$PURGE_CACHE_ZONE"
+    <<: *deploy_env
+    docker:
+      - environment:
+          AWS_ACCESS_KEY_ID: $AWS_DEV_ACCESS_KEY_ID
+          AWS_SECRET_ACCESS_KEY: $AWS_DEV_SECRET_ACCESS_KEY
+          S3_URL: s3://explorer.decentraland.zone/branch/${CIRCLE_BRANCH}
+          CLOUD_FRONT_DISTRIBUTION_ID: E297VXIBZFXIXE
+          PURGE_CACHE_KEY: $PURGE_CACHE_ZONE
 
   deploy-dev:
     <<: *base_kernel_env
@@ -368,23 +379,6 @@ workflows:
             - build-kernel
             - build-unity
 
-      # explorer master + pr branch jobs (deploy to dev + pr dev)
-      - deploy-dev:
-          requires:
-            - package
-          filters:
-            branches:
-              only: master
-
-      - deploy-on-pr:
-          requires:
-            - package
-          filters:
-            branches:
-              ignore:
-                - master
-                - staging
-                - release
       - publish-renderer:
           requires:
             - package
@@ -409,17 +403,31 @@ workflows:
             tags:
               only: /^\d+\.\d+\.\d(.*)/ # npm tag + latest
 
-      # standard env deployments
+      # deployments
+      - deploy-dev:
+          requires:
+            - package
+          filters:
+            branches:
+              only: master
       - deploy-stg:
           requires:
             - package
           filters:
             branches:
               only: staging
-
       - deploy-prd:
           requires:
             - package
           filters:
             branches:
               only: release
+      - deploy-on-pr:
+          requires:
+            - package
+          filters:
+            branches:
+              ignore:
+                - master
+                - staging
+                - release
