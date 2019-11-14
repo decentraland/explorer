@@ -291,7 +291,8 @@ jobs:
   deploy-on-pr:
     <<: *deploy_env
     docker:
-      - environment:
+      - <<: *image_kernel
+        environment:
           AWS_ACCESS_KEY_ID: $AWS_DEV_ACCESS_KEY_ID
           AWS_SECRET_ACCESS_KEY: $AWS_DEV_SECRET_ACCESS_KEY
           S3_URL: s3://explorer.decentraland.zone/branch/${CIRCLE_BRANCH}
