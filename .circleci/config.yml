@@ -210,7 +210,7 @@ jobs:
           paths:
             - kernel/static/unity/Build
 
-  decentraland-renderer:
+  publish-renderer:
     docker:
       - image: circleci/node:10-browsers
         environment:
@@ -374,7 +374,7 @@ workflows:
                 - master
                 - staging
                 - release
-      - decentraland-renderer:
+      - publish-renderer:
           requires:
             - package
 
