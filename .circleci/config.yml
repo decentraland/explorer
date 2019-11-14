@@ -411,24 +411,24 @@ workflows:
       #         only: /^\d+\.\d+\.\d(.*)/ # npm tag + latest
 
       # deployments
-      - deploy-dev:
-          requires:
-            - package
-          filters:
-            branches:
-              only: master
-      - deploy-stg:
-          requires:
-            - package
-          filters:
-            branches:
-              only: staging
-      - deploy-prd:
-          requires:
-            - package
-          filters:
-            branches:
-              only: release
+      # - deploy-dev:
+      #     requires:
+      #       - package
+      #     filters:
+      #       branches:
+      #         only: master
+      # - deploy-stg:
+      #     requires:
+      #       - package
+      #     filters:
+      #       branches:
+      #         only: staging
+      # - deploy-prd:
+      #     requires:
+      #       - package
+      #     filters:
+      #       branches:
+      #         only: release
       - deploy-on-pr:
           # requires:
           #   - package
