@@ -33,7 +33,7 @@ references:
     <<: *base_kernel_env
     steps:
       - <<: *attach_root
-      - run: echo test $TEST and test2 $TEST2
+      - run: echo test `eval $TEST` and test2 $(eval $TEST2)
       - run: sudo apt-get -y -qq install awscli
       - run:
           name: Configure AWS Keys
@@ -362,7 +362,6 @@ jobs:
           command: curl "$PURGE_CACHE_ORG"
 
 workflows:
-  version: 2
   build-deploy:
     jobs:
       - checkout:
