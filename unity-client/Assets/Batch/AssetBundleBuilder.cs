@@ -519,6 +519,7 @@ namespace DCL
             {
                 string outputPath = finalDownloadedAssetDbPath + mappingPair.hash + "/" + mappingPair.hash + fileExt;
                 t2d = AssetDatabase.LoadAssetAtPath<Texture2D>(outputPath);
+                Debug.Log($"injecting texture dependency. guid: {AssetDatabase.AssetPathToGUID(outputPath)}");
             }
 
             if (t2d != null)
