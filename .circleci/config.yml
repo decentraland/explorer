@@ -34,6 +34,7 @@ references:
     steps:
       - <<: *attach_root
       - run: export $(echo $DEPLOY_VARS)
+      - run: echo $DEPLOY_VARS
       - run: echo test $TEST and test2 $TEST2
       - run: sudo apt-get -y -qq install awscli
       - run:
@@ -367,47 +368,47 @@ workflows:
   version: 2
   build-deploy:
     jobs:
-      - checkout:
-          <<: *all_branches_and_tags
+      # - checkout:
+      #     <<: *all_branches_and_tags
 
-      - build-unity:
-          <<: *all_branches_and_tags
-          requires:
-            - checkout
-      - build-kernel:
-          <<: *all_branches_and_tags
-          requires:
-            - checkout
+      # - build-unity:
+      #     <<: *all_branches_and_tags
+      #     requires:
+      #       - checkout
+      # - build-kernel:
+      #     <<: *all_branches_and_tags
+      #     requires:
+      #       - checkout
 
-      - package:
-          <<: *all_branches_and_tags
-          requires:
-            - build-kernel
-            - build-unity
+      # - package:
+      #     <<: *all_branches_and_tags
+      #     requires:
+      #       - build-kernel
+      #       - build-unity
 
-      - publish-renderer:
-          requires:
-            - package
+      # - publish-renderer:
+      #     requires:
+      #       - package
 
-      # ecs publishing
-      - hold-ecs:
-          type: approval
-          requires:
-            - package
-          filters:
-            branches:
-              ignore: /(.*)/ # on branch: master we don't want to hold, but publish after the build is done
-            tags:
-              only: /^\d+\.\d+\.\d(.*)/ # npm tag + latest
-      - publish-ecs:
-          requires:
-            - package
-            - hold-ecs # on tags we wait until there's an approval
-          filters:
-            branches:
-              only: master # next
-            tags:
-              only: /^\d+\.\d+\.\d(.*)/ # npm tag + latest
+      # # ecs publishing
+      # - hold-ecs:
+      #     type: approval
+      #     requires:
+      #       - package
+      #     filters:
+      #       branches:
+      #         ignore: /(.*)/ # on branch: master we don't want to hold, but publish after the build is done
+      #       tags:
+      #         only: /^\d+\.\d+\.\d(.*)/ # npm tag + latest
+      # - publish-ecs:
+      #     requires:
+      #       - package
+      #       - hold-ecs # on tags we wait until there's an approval
+      #     filters:
+      #       branches:
+      #         only: master # next
+      #       tags:
+      #         only: /^\d+\.\d+\.\d(.*)/ # npm tag + latest
 
       # deployments
       - deploy-dev:
@@ -429,8 +430,8 @@ workflows:
             branches:
               only: release
       - deploy-on-pr:
-          requires:
-            - package
+          # requires:
+          #   - package
           filters:
             branches:
               ignore:
