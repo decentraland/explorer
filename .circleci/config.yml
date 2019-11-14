@@ -29,28 +29,6 @@ references:
       tags:
         only: /^\d+\.\d+\.\d(.*)/ # npm tag + latest
 
-  .deploy-env: &deploy_env
-    <<: *base_kernel_env
-    steps:
-      - <<: *attach_root
-      - run: export $(echo $DEPLOY_VARS)
-      - run: echo $DEPLOY_VARS
-      - run: echo test $TEST and test2 $TEST2
-      - run: sudo apt-get -y -qq install awscli
-      - run:
-          name: Configure AWS Keys
-          command: |
-            aws configure set aws_access_key_id ${AWS_ACCESS_KEY_ID} && aws configure set aws_secret_access_key ${AWS_SECRET_ACCESS_KEY}
-      - run:
-          name: Deploy to S3
-          command: aws s3 sync static $S3_URL --acl public-read
-      - run:
-          name: Invalidate cloudfront cache
-          command: aws configure set preview.cloudfront true && aws configure set preview.create-invalidation true && aws cloudfront create-invalidation --distribution-id $CLOUD_FRONT_DISTRIBUTION_ID --paths "/*"
-      - run:
-          name: Invalidate cloudflare cache
-          command: curl "$PURGE_CACHE_KEY"
-
 jobs:
   checkout:
     <<: *working_directory_root
@@ -292,18 +270,23 @@ jobs:
           when: on_success
 
   deploy-on-pr:
-    <<: *deploy_env
-    docker:
-      - <<: *image_kernel
-        environment:
-          DEPLOY_VARS: >-
-            TEST=$CIRCLE_BRANCH
-            TEST2=$CIRCLE_BRANCH
-            AWS_ACCESS_KEY_ID=$AWS_DEV_ACCESS_KEY_ID
-            AWS_SECRET_ACCESS_KEY=$AWS_DEV_SECRET_ACCESS_KEY
-            S3_URL=s3://explorer.decentraland.zone/branch/$CIRCLE_BRANCH
-            CLOUD_FRONT_DISTRIBUTION_ID=E297VXIBZFXIXE
-            PURGE_CACHE_KEY=$PURGE_CACHE_ZONE
+    <<: *base_kernel_env
+    steps:
+      - <<: *attach_root
+      - run: sudo apt-get -y -qq install awscli
+      - run:
+          name: Configure DEV/STG AWS Keys
+          command: |
+            aws configure set aws_access_key_id ${AWS_DEV_ACCESS_KEY_ID} && aws configure set aws_secret_access_key ${AWS_DEV_SECRET_ACCESS_KEY}
+      - run:
+          name: Deploy to S3 (.zone) under subfolder if tests pass and branch is not master
+          command: aws s3 sync static s3://explorer.decentraland.zone/branch/${CIRCLE_BRANCH} --acl public-read
+      - run:
+          name: Invalidate cloudfront cache .zone
+          command: aws configure set preview.cloudfront true && aws configure set preview.create-invalidation true && aws cloudfront create-invalidation --distribution-id E297VXIBZFXIXE --paths "/*"
+      - run:
+          name: Invalidate cloudflare cache .zone
+          command: curl "$PURGE_CACHE_ZONE"
 
   deploy-dev:
     <<: *base_kernel_env
@@ -368,70 +351,70 @@ workflows:
   version: 2
   build-deploy:
     jobs:
-      # - checkout:
-      #     <<: *all_branches_and_tags
+      - checkout:
+          <<: *all_branches_and_tags
 
-      # - build-unity:
-      #     <<: *all_branches_and_tags
-      #     requires:
-      #       - checkout
-      # - build-kernel:
-      #     <<: *all_branches_and_tags
-      #     requires:
-      #       - checkout
+      - build-unity:
+          <<: *all_branches_and_tags
+          requires:
+            - checkout
+      - build-kernel:
+          <<: *all_branches_and_tags
+          requires:
+            - checkout
 
-      # - package:
-      #     <<: *all_branches_and_tags
-      #     requires:
-      #       - build-kernel
-      #       - build-unity
+      - package:
+          <<: *all_branches_and_tags
+          requires:
+            - build-kernel
+            - build-unity
 
-      # - publish-renderer:
-      #     requires:
-      #       - package
+      - publish-renderer:
+          requires:
+            - package
 
-      # # ecs publishing
-      # - hold-ecs:
-      #     type: approval
-      #     requires:
-      #       - package
-      #     filters:
-      #       branches:
-      #         ignore: /(.*)/ # on branch: master we don't want to hold, but publish after the build is done
-      #       tags:
-      #         only: /^\d+\.\d+\.\d(.*)/ # npm tag + latest
-      # - publish-ecs:
-      #     requires:
-      #       - package
-      #       - hold-ecs # on tags we wait until there's an approval
-      #     filters:
-      #       branches:
-      #         only: master # next
-      #       tags:
-      #         only: /^\d+\.\d+\.\d(.*)/ # npm tag + latest
+      # ecs publishing
+      - hold-ecs:
+          type: approval
+          requires:
+            - package
+          filters:
+            branches:
+              ignore: /(.*)/ # on branch: master we don't want to hold, but publish after the build is done
+            tags:
+              only: /^\d+\.\d+\.\d(.*)/ # npm tag + latest
+      - publish-ecs:
+          requires:
+            - package
+            - hold-ecs # on tags we wait until there's an approval
+          filters:
+            branches:
+              only: master # next
+            tags:
+              only: /^\d+\.\d+\.\d(.*)/ # npm tag + latest
 
       # deployments
-      # - deploy-dev:
-      #     requires:
-      #       - package
-      #     filters:
-      #       branches:
-      #         only: master
-      # - deploy-stg:
-      #     requires:
-      #       - package
-      #     filters:
-      #       branches:
-      #         only: staging
-      # - deploy-prd:
-      #     requires:
-      #       - package
-      #     filters:
-      #       branches:
-      #         only: release
+      - deploy-dev:
+          requires:
+            - package
+          filters:
+            branches:
+              only: master
+      - deploy-stg:
+          requires:
+            - package
+          filters:
+            branches:
+              only: staging
+      - deploy-prd:
+          requires:
+            - package
+          filters:
+            branches:
+              only: release
       - deploy-on-pr:
-          # requires:
-          #   - package
+          requires:
+            - package
           filters:
             branches:
               ignore:
