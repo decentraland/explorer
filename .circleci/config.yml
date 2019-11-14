@@ -193,7 +193,7 @@ jobs:
             - kernel/static
             - kernel/dist
 
-  build:
+  package:
     docker:
       - image: circleci/node:10-browsers
     working_directory: /tmp/explorer
@@ -352,7 +352,7 @@ workflows:
           requires:
             - checkout
 
-      - build:
+      - package:
           requires:
             - build-kernel
             - build-unity
@@ -360,14 +360,14 @@ workflows:
       # explorer master + pr branch jobs (deploy to dev + pr dev)
       - deploy-dev:
           requires:
-            - build
+            - package
           filters:
             branches:
               only: master
 
       - deploy-on-pr:
           requires:
-            - build
+            - package
           filters:
             branches:
               ignore:
@@ -376,13 +376,13 @@ workflows:
                 - release
       - decentraland-renderer:
           requires:
-            - build
+            - package
 
       # ecs publishing
       - hold-ecs:
           type: approval
           requires:
-            - build
+            - package
           filters:
             branches:
               ignore: /(.*)/ # on branch: master we don't want to hold, but publish after the build is done
@@ -390,7 +390,7 @@ workflows:
               only: /^\d+\.\d+\.\d(.*)/ # npm tag + latest
       - publish-ecs:
           requires:
-            - build
+            - package
             - hold-ecs # on tags we wait until there's an approval
           filters:
             branches:
@@ -401,14 +401,14 @@ workflows:
       # standard env deployments
       - deploy-stg:
           requires:
-            - build
+            - package
           filters:
             branches:
               only: staging
 
       - deploy-prd:
           requires:
-            - build
+            - package
           filters:
             branches:
               only: release
