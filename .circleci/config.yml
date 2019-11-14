@@ -1,8 +1,38 @@
-version: 2
+version: 2.0
+
+references:
+  .workspace_root: &workspace_root /tmp/explorer
+  .workspace_kernel: &workspace_kernel /tmp/explorer/kernel
+  .workspace_unity: &workspace_unity /tmp/explorer/unity
+
+  .attach_workspace: &attach_root
+    attach_workspace:
+      at: *workspace_root
+
+  .image_kernel: &image_kernel
+    image: circleci/node:10-browsers
+
+  .working_directory_root: &working_directory_root
+    working_directory: /tmp/explorer
+  .working_directory_unity: &working_directory_unity
+    working_directory: /tmp/explorer/unity-client
+
+  .base_kernel_env: &base_kernel_env
+    docker:
+      - *image_kernel
+    working_directory: /tmp/explorer/kernel
+
+  .all_branches_and_tags: &all_branches_and_tags
+    filters:
+      branches:
+        only: /(.*)/
+      tags:
+        only: /^\d+\.\d+\.\d(.*)/ # npm tag + latest
+
 jobs:
   checkout:
     docker:
-      - image: circleci/node:10-browsers
+      - *image_kernel
         environment:
           # avoid automatic download of LFS files
           GIT_LFS_SKIP_SMUDGE: 1
@@ -50,16 +80,15 @@ jobs:
 
   build-unity:
     resource_class: xlarge
+    <<: *working_directory_unity
     docker:
       - image: decentraland/renderer-build
         environment:
           - BUILD_TARGET: WebGL
           - BUILD_PATH: /tmp/explorer/unity-client/Builds/unity
           - BUILD_NAME: unity
-    working_directory: /tmp/explorer/unity-client
     steps:
-      - attach_workspace:
-          at: /tmp/explorer
+      - *attach_workspace
       - run:
           name: Get the hash of source files
           command: |
@@ -101,12 +130,9 @@ jobs:
             - unity-client/Builds/unity/Build
 
   build-kernel:
-    docker:
-      - image: circleci/node:10-browsers
-    working_directory: /tmp/explorer/kernel
+    <<: *base_kernel_env
     steps:
-      - attach_workspace:
-          at: /tmp/explorer
+      - *attach_workspace
       - run:
           name: Get the hash of source files
           command: |
@@ -195,11 +221,10 @@ jobs:
 
   package:
     docker:
-      - image: circleci/node:10-browsers
+      - *image_kernel
     working_directory: /tmp/explorer
     steps:
-      - attach_workspace:
-          at: /tmp/explorer
+      - *attach_workspace
       - run:
           name: Copy renderer to kernel
           command: |
@@ -211,14 +236,13 @@ jobs:
             - kernel/static/unity/Build
 
   publish-renderer:
+    <<: *working_directory_unity
     docker:
-      - image: circleci/node:10-browsers
+      - *image_kernel
         environment:
           - BUILD_PATH: /tmp/explorer/unity-client/Builds/unity
-    working_directory: /tmp/explorer/unity-client
     steps:
-      - attach_workspace:
-          at: /tmp/explorer
+      - *attach_workspace
       - run:
           name: Set up NPM access tokens
           command: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
@@ -228,12 +252,9 @@ jobs:
           command: /tmp/explorer/.circleci/publish.sh
 
   publish-ecs:
-    docker:
-      - image: circleci/node:10-browsers
-    working_directory: /tmp/explorer/kernel
+    <<: *base_kernel_env
     steps:
-      - attach_workspace:
-          at: /tmp/explorer
+      - *attach_workspace
       - run:
           name: Set up NPM access tokens
           command: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
@@ -248,13 +269,9 @@ jobs:
           when: on_success
 
   deploy-on-pr:
-    docker:
-      - image: circleci/node:10-browsers
-    working_directory: /tmp/explorer/kernel
+    <<: *base_kernel_env
     steps:
-      - attach_workspace:
-          at: /tmp/explorer
-
+      - *attach_workspace
       - run: sudo apt-get -y -qq install awscli
       - run:
           name: Configure DEV/STG AWS Keys
@@ -271,13 +288,9 @@ jobs:
           command: curl "$PURGE_CACHE_ZONE"
 
   deploy-dev:
-    docker:
-      - image: circleci/node:10-browsers
-    working_directory: /tmp/explorer/kernel
+    <<: *base_kernel_env
     steps:
-      - attach_workspace:
-          at: /tmp/explorer
-
+      - *attach_workspace
       - run: sudo apt-get -y -qq install awscli
       - run:
           name: Configure DEV/STG AWS Keys
@@ -294,12 +307,9 @@ jobs:
           command: curl "$PURGE_CACHE_ZONE"
 
   deploy-stg:
-    docker:
-      - image: circleci/node:10-browsers
-    working_directory: /tmp/explorer/kernel
+    <<: *base_kernel_env
     steps:
-      - attach_workspace:
-          at: /tmp/explorer
+      - *attach_workspace
       - run: sudo apt-get -y -qq install awscli
       - run:
           name: Configure DEV/STG AWS Keys
@@ -317,12 +327,9 @@ jobs:
           command: curl "$PURGE_CACHE_TODAY"
 
   deploy-prd:
-    docker:
-      - image: circleci/node:10-browsers
-    working_directory: /tmp/explorer/kernel
+    <<: *base_kernel_env
     steps:
-      - attach_workspace:
-          at: /tmp/explorer
+      - *attach_workspace
       - run: sudo apt-get -y -qq install awscli
       - run:
           name: Configure PRD AWS Keys
@@ -344,38 +351,22 @@ workflows:
   build-deploy:
     jobs:
       - checkout:
-          filters:
-            branches:
-              only: /(.*)/
-            tags:
-              only: /^\d+\.\d+\.\d(.*)/ # npm tag + latest
+          <<: *all_branches_and_tags
 
       - build-unity:
+          <<: *all_branches_and_tags
           requires:
             - checkout
-          filters:
-            branches:
-              only: /(.*)/
-            tags:
-              only: /^\d+\.\d+\.\d(.*)/ # npm tag + latest
       - build-kernel:
+          <<: *all_branches_and_tags
           requires:
             - checkout
-          filters:
-            branches:
-              only: /(.*)/
-            tags:
-              only: /^\d+\.\d+\.\d(.*)/ # npm tag + latest
 
       - package:
+          <<: *all_branches_and_tags
           requires:
             - build-kernel
             - build-unity
-          filters:
-            branches:
-              only: /(.*)/
-            tags:
-              only: /^\d+\.\d+\.\d(.*)/ # npm tag + latest
 
       # explorer master + pr branch jobs (deploy to dev + pr dev)
       - deploy-dev:
