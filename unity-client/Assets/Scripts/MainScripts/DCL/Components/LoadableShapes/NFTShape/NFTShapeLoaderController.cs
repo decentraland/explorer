@@ -186,7 +186,7 @@ public class NFTShapeLoaderController : MonoBehaviour
             yield return Utils.FetchTexture(thumbnailImageURL, (downloadedTex) =>
             {
                 nftImageTexture = downloadedTex;
-                SetFrameImage();
+                UpdateFrameImage();
             });
         }
 
@@ -198,7 +198,7 @@ public class NFTShapeLoaderController : MonoBehaviour
             {
                 nftImageTexture = downloadedTex;
                 foundDCLImage = true;
-                SetFrameImage(resizeFrameMesh: true);
+                UpdateFrameImage(resizeFrameMesh: true);
             });
         }
 
@@ -208,14 +208,14 @@ public class NFTShapeLoaderController : MonoBehaviour
             yield return Utils.FetchTexture(previewImageURL, (downloadedTex) =>
             {
                 nftImageTexture = downloadedTex;
-                SetFrameImage(resizeFrameMesh: true);
+                UpdateFrameImage(resizeFrameMesh: true);
             });
         }
 
         OnLoadingAssetSuccess?.Invoke();
     }
 
-    void SetFrameImage(bool resizeFrameMesh = false)
+    void UpdateFrameImage(bool resizeFrameMesh = false)
     {
         if (nftImageTexture == null) return;
 
