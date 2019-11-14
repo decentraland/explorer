@@ -33,7 +33,8 @@ references:
     <<: *base_kernel_env
     steps:
       - <<: *attach_root
-      - run: echo test `printenv $TEST` and test2 $(printenv $TEST2)
+      - run: export $DEPLOY_VARS
+      - run: echo test $TEST and test2 $TEST2
       - run: sudo apt-get -y -qq install awscli
       - run:
           name: Configure AWS Keys
@@ -294,13 +295,14 @@ jobs:
     docker:
       - <<: *image_kernel
         environment:
-          TEST: CIRCLE_BRANCH
-          TEST2: CIRCLE_BRANCH
-          AWS_ACCESS_KEY_ID: $AWS_DEV_ACCESS_KEY_ID
-          AWS_SECRET_ACCESS_KEY: $AWS_DEV_SECRET_ACCESS_KEY
-          S3_URL: s3://explorer.decentraland.zone/branch/${CIRCLE_BRANCH}
-          CLOUD_FRONT_DISTRIBUTION_ID: E297VXIBZFXIXE
-          PURGE_CACHE_KEY: $PURGE_CACHE_ZONE
+          DEPLOY_VARS: >-
+            TEST=$CIRCLE_BRANCH
+            TEST2=$CIRCLE_BRANCH
+            AWS_ACCESS_KEY_ID=$AWS_DEV_ACCESS_KEY_ID
+            AWS_SECRET_ACCESS_KEY=$AWS_DEV_SECRET_ACCESS_KEY
+            S3_URL=s3://explorer.decentraland.zone/branch/$CIRCLE_BRANCH
+            CLOUD_FRONT_DISTRIBUTION_ID=E297VXIBZFXIXE
+            PURGE_CACHE_KEY=$PURGE_CACHE_ZONE
 
   deploy-dev:
     <<: *base_kernel_env
