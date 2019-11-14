@@ -3,7 +3,7 @@ version: 2.0
 references:
   .workspace_root: &workspace_root /tmp/explorer
   .workspace_kernel: &workspace_kernel /tmp/explorer/kernel
-  .workspace_unity: &workspace_unity /tmp/explorer/unity
+  .workspace_unity: &workspace_unity /tmp/explorer/unity-client
 
   .attach_root: &attach_root
     attach_workspace:
@@ -13,14 +13,14 @@ references:
     image: circleci/node:10-browsers
 
   .working_directory_root: &working_directory_root
-    working_directory: /tmp/explorer
+    working_directory: *workspace_root
   .working_directory_unity: &working_directory_unity
-    working_directory: /tmp/explorer/unity-client
+    working_directory: *workspace_unity
 
   .base_kernel_env: &base_kernel_env
     docker:
       - <<: *image_kernel
-    working_directory: /tmp/explorer/kernel
+    working_directory: *workspace_kernel
 
   .all_branches_and_tags: &all_branches_and_tags
     filters:
@@ -220,9 +220,9 @@ jobs:
             - kernel/dist
 
   package:
+    <<: *working_directory_root
     docker:
       - <<: *image_kernel
-    working_directory: /tmp/explorer
     steps:
       - <<: *attach_root
       - run:
