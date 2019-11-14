@@ -33,6 +33,7 @@ references:
     <<: *base_kernel_env
     steps:
       - <<: *attach_root
+      - run: echo test $TEST and test2 $TEST2
       - run: sudo apt-get -y -qq install awscli
       - run:
           name: Configure AWS Keys
@@ -102,9 +103,9 @@ jobs:
     docker:
       - image: decentraland/renderer-build
         environment:
-          - BUILD_TARGET: WebGL
-          - BUILD_PATH: /tmp/explorer/unity-client/Builds/unity
-          - BUILD_NAME: unity
+          BUILD_TARGET: WebGL
+          BUILD_PATH: /tmp/explorer/unity-client/Builds/unity
+          BUILD_NAME: unity
     steps:
       - <<: *attach_root
       - run:
@@ -260,7 +261,7 @@ jobs:
     docker:
       - <<: *image_kernel
         environment:
-          - BUILD_PATH: /tmp/explorer/unity-client/Builds/unity
+          BUILD_PATH: /tmp/explorer/unity-client/Builds/unity
     steps:
       - <<: *attach_root
       - run:
@@ -293,6 +294,8 @@ jobs:
     docker:
       - <<: *image_kernel
         environment:
+          TEST: $CIRCLE_BRANCH
+          TEST2: ${CIRCLE_BRANCH}
           AWS_ACCESS_KEY_ID: $AWS_DEV_ACCESS_KEY_ID
           AWS_SECRET_ACCESS_KEY: $AWS_DEV_SECRET_ACCESS_KEY
           S3_URL: s3://explorer.decentraland.zone/branch/${CIRCLE_BRANCH}
