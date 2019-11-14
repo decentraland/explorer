@@ -43,7 +43,7 @@ namespace DCL.Models
                 }
             }
 
-            public void UpdateMesh(Meshes newMesh, int meshFilterIndex = 0)
+            public void UpdateMesh(Mesh newMesh, int meshFilterIndex = 0)
             {
                 if (meshFilters.Length == 0 || meshFilters[meshFilterIndex].sharedMesh == newMesh) return;
 
