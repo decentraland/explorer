@@ -333,7 +333,12 @@ namespace DCL
                 string result = Regex.Replace(metaContent, @"guid: \w+?\n", $"guid: {guid}\n");
                 File.WriteAllText(metaPath, result);
 
-                Debug.Log("Downloaded texture dependency for hash " + hash + " ... force guid to: " + guid);
+                Debug.Log($"Downloaded texture dependency for hash {hash} ... force guid to: {guid}");
+
+                AssetDatabase.Refresh();
+                AssetDatabase.SaveAssets();
+
+                Debug.Log($"According to the AssetDatabase, the guid is now {AssetDatabase.AssetPathToGUID(finalDownloadedAssetDbPath + assetPath)}");
 
                 if (fullPathToTag != null)
                 {
