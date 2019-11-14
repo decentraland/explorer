@@ -24,7 +24,8 @@ public class MinimapParcelsView : MonoBehaviour
     {
         SetupIcons();
         playerCoords.OnChange += OnCharacterSetPosition;
-        minimapmetadata.OnChange += MinimapMetadataChange;
+        minimapmetadata.OnTileUpdated += TileUpdated;
+        minimapmetadata.OnTileRemoved += TileRemoved;
         DrawParcels(Vector2Int.zero);
     }
 
@@ -44,6 +45,7 @@ public class MinimapParcelsView : MonoBehaviour
             }
         }
     }
+
     public void OnCharacterSetPosition(Vector2Int newCoords, Vector2Int oldCoords)
     {
         DrawParcels(newCoords);
@@ -58,12 +60,16 @@ public class MinimapParcelsView : MonoBehaviour
             int x = newCoords.x + keyValuePair.Key.Item1;
             int y = newCoords.y + keyValuePair.Key.Item2;
             var tile = minimapmetadata.GetTile(x, y);
-
             keyValuePair.Value.material.SetColor(_BaseColor, tile?.color ?? Color.grey);
         }
     }
 
-    private void MinimapMetadataChange(MinimapMetadata instance)
+    private void TileUpdated((int,int) pos, MinimapMetadata.Tile tile)
+    {
+        DrawParcels(playerCoords.Get());
+    }
+
+    private void TileRemoved((int,int) pos)
     {
         DrawParcels(playerCoords.Get());
     }
@@ -76,6 +82,7 @@ public class MinimapParcelsView : MonoBehaviour
     private void OnDestroy()
     {
         playerCoords.OnChange -= OnCharacterSetPosition;
-        minimapmetadata.OnChange -= MinimapMetadataChange;
+        minimapmetadata.OnTileUpdated -= TileUpdated;
+        minimapmetadata.OnTileRemoved -= TileRemoved;
     }
 }

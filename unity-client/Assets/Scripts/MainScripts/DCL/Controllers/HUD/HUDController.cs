@@ -110,26 +110,6 @@ public class HUDController : MonoBehaviour
         avatarEditorHud?.SetVisibility(configuration.active && configuration.visible);
     }
 
-    [Serializable]
-    public class MinimapTileInfo
-    {
-        public string name;
-        public int type;
-        public List<Vector2Int> parcels;
-    }
-
-    public void UpdateMinimapSceneInformation(string newInformation)
-    {
-        List<MinimapTileInfo> info = JsonUtility.FromJson<List<MinimapTileInfo>>(newInformation);
-        foreach (var datum in info)
-        {
-            foreach (var parcel in datum.parcels)
-            {
-                // Something like minimapHud.ProcessNewParcelData(parcel, datum.name, datum.type);
-            }
-        }
-    }
-
     private void UpdateAvatarHUD()
     {
         avatarHud?.UpdateData(new AvatarHUDModel()
