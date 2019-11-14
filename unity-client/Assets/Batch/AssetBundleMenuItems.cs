@@ -23,15 +23,32 @@ namespace DCL
             AssetBundleBuilder.DumpArea(zoneArray);
         }
 
-        [MenuItem("Decentraland/Asset Bundle Builder/Dump Zone -110,-110")]
-        public static void DumpZoneArea()
+        [MenuItem("Decentraland/HashTest")]
+        public static void GetHash()
+        {
+            string path2 = AssetDatabase.GUIDToAssetPath("4c57f36c839cb644eb8299a298e7bed9");
+            Debug.Log("path2 = " + path2);
+            AssetDatabase.DeleteAsset(path2);
+            path2 = AssetDatabase.GUIDToAssetPath("4c57f36c839cb644eb8299a298e7bed9");
+            Debug.Log("path2 = " + path2);
+        }
+
+        [MenuItem("Decentraland/Asset Bundle Builder/Prepare Zone -110,-110")]
+        public static void PrepZoneArea()
         {
             AssetBundleBuilder.environment = ContentServerUtils.ApiEnvironment.ORG;
-            AssetBundleBuilder.DumpArea(new Vector2Int(-110, -110), new Vector2Int(10, 10));
+            AssetBundleBuilder.DumpAreaTextures(new Vector2Int(-110, -110), new Vector2Int(1, 1));
+
             //AssetBundleBuilder.DumpArea(new Vector2Int(-110, -110), new Vector2Int(10, 10));
             //AssetBundleBuilder.DumpArea(new Vector2Int(-90, -110), new Vector2Int(10, 10));
             //AssetBundleBuilder.DumpArea(new Vector2Int(-80, -110), new Vector2Int(10, 10));
             //DumpArea(0);
+        }
+        [MenuItem("Decentraland/Asset Bundle Builder/Dump Zone -110,-110")]
+        public static void DumpZoneArea()
+        {
+            AssetBundleBuilder.environment = ContentServerUtils.ApiEnvironment.ORG;
+            AssetBundleBuilder.DumpArea(new Vector2Int(-110, -110), new Vector2Int(1, 1));
         }
 
         static void DumpArea(int i)

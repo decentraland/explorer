@@ -1,4 +1,5 @@
 using DCL.Helpers;
+using GLTF.Schema;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -8,7 +9,9 @@ using System.Security.Cryptography;
 using System.Text;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Assertions;
 using UnityEngine.Networking;
+using static DCL.ContentServerUtils;
 
 [assembly: InternalsVisibleTo("AssetBundleBuilderTests")]
 namespace DCL
@@ -210,5 +213,199 @@ namespace DCL
             }
             return sBuilder.ToString();
         }
+
+        public static HashSet<string> GetSceneCids(Vector2Int coords, Vector2Int size)
+        {
+            HashSet<string> sceneCids = new HashSet<string>();
+
+            string url = ContentServerUtils.GetScenesAPIUrl(AssetBundleBuilder.environment, coords.x, coords.y, size.x, size.y);
+
+            UnityWebRequest w = UnityWebRequest.Get(url);
+            w.SendWebRequest();
+
+            while (!w.isDone) { }
+
+            if (!w.WebRequestSucceded())
+            {
+                throw new Exception($"Request error! Parcels couldn't be fetched! -- {w.error}");
+            }
+
+            ScenesAPIData scenesApiData = JsonUtility.FromJson<ScenesAPIData>(w.downloadHandler.text);
+
+            Assert.IsTrue(scenesApiData != null, "Invalid response from ScenesAPI");
+            Assert.IsTrue(scenesApiData.data != null, "Invalid response from ScenesAPI");
+
+            foreach (var data in scenesApiData.data)
+            {
+                sceneCids.Add(data.root_cid);
+            }
+
+            return sceneCids;
+        }
+
+        public static HashSet<string> GetScenesCids(List<Vector2Int> coords)
+        {
+            HashSet<string> sceneCids = new HashSet<string>();
+
+            foreach (Vector2Int v in coords)
+            {
+                string url = ContentServerUtils.GetScenesAPIUrl(AssetBundleBuilder.environment, v.x, v.y, 0, 0);
+
+                UnityWebRequest w = UnityWebRequest.Get(url);
+                w.SendWebRequest();
+
+                while (!w.isDone) { }
+
+                if (!w.WebRequestSucceded())
+                {
+                    Debug.LogWarning($"Request error! Parcels couldn't be fetched! -- {w.error}");
+                    continue;
+                }
+
+                ScenesAPIData scenesApiData = JsonUtility.FromJson<ScenesAPIData>(w.downloadHandler.text);
+
+                Assert.IsTrue(scenesApiData != null, "Invalid response from ScenesAPI");
+                Assert.IsTrue(scenesApiData.data != null, "Invalid response from ScenesAPI");
+
+                foreach (var data in scenesApiData.data)
+                {
+                    sceneCids.Add(data.root_cid);
+                }
+            }
+
+            return sceneCids;
+        }
+
+        public static MappingsAPIData GetSceneMappingsData(string sceneCid)
+        {
+            string url = GetMappingsAPIUrl(AssetBundleBuilder.environment, sceneCid);
+            UnityWebRequest w = UnityWebRequest.Get(url);
+            w.SendWebRequest();
+
+            while (w.isDone == false) { }
+
+            if (!w.WebRequestSucceded())
+                throw new Exception($"Request error! mappings couldn't be fetched for scene {sceneCid}! -- {w.error}");
+
+            MappingsAPIData parcelInfoApiData = JsonUtility.FromJson<MappingsAPIData>(w.downloadHandler.text);
+
+            if (parcelInfoApiData.data.Length == 0 || parcelInfoApiData.data == null)
+            {
+                throw new Exception("MappingsAPIData is null?");
+            }
+
+            return parcelInfoApiData;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="pairsToSearch"></param>
+        /// <param name="extensions"></param>
+        /// <returns>A dictionary that maps hashes to mapping pairs</returns>
+        public static Dictionary<string, MappingPair> FilterExtensions(MappingPair[] pairsToSearch, string[] extensions)
+        {
+            var result = new Dictionary<string, MappingPair>();
+
+            for (int i = 0; i < pairsToSearch.Length; i++)
+            {
+                MappingPair mappingPair = pairsToSearch[i];
+
+                bool hasExtension = extensions.Any((x) => mappingPair.file.ToLower().EndsWith(x));
+
+                if (hasExtension)
+                {
+                    if (!result.ContainsKey(mappingPair.hash))
+                    {
+                        result.Add(mappingPair.hash, mappingPair);
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        public static void FixGltfDependencyPaths(GLTFRoot gltfRoot)
+        {
+            GLTFRoot root = gltfRoot;
+
+            if (root != null)
+            {
+                if (root.Images != null)
+                {
+                    foreach (GLTFImage image in root.Images)
+                    {
+                        if (!string.IsNullOrEmpty(image.Uri))
+                        {
+                            bool isBase64 = URIHelper.IsBase64Uri(image.Uri);
+
+                            if (!isBase64)
+                            {
+                                image.Uri = image.Uri.Replace('/', Path.DirectorySeparatorChar);
+                            }
+                        }
+                    }
+                }
+
+                if (root.Buffers != null)
+                {
+                    foreach (GLTFBuffer buffer in root.Buffers)
+                    {
+                        if (!string.IsNullOrEmpty(buffer.Uri))
+                        {
+                            bool isBase64 = URIHelper.IsBase64Uri(buffer.Uri);
+
+                            if (!isBase64)
+                            {
+                                buffer.Uri = buffer.Uri.Replace('/', Path.DirectorySeparatorChar);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Gets the relative path ("..\..\to_file_or_dir") of another file or directory (to) in relation to the current file/dir (from)
+        /// </summary>
+        /// <param name="to"></param>
+        /// <param name="from"></param>
+        /// <returns></returns>
+        public static string GetRelativePathTo(string from, string to)
+        {
+            var fromPath = Path.GetFullPath(from);
+            var toPath = Path.GetFullPath(to);
+
+            var fromUri = new Uri(fromPath);
+            var toUri = new Uri(toPath);
+
+            var relativeUri = fromUri.MakeRelativeUri(toUri);
+            var relativePath = Uri.UnescapeDataString(relativeUri.ToString());
+
+            return relativePath.Replace('/', Path.DirectorySeparatorChar);
+        }
+
+        public static void InitializeDirectory(string path, bool deleteIfExists)
+        {
+            try
+            {
+                if (deleteIfExists)
+                {
+                    if (Directory.Exists(path))
+                        Directory.Delete(path, true);
+                }
+
+
+                if (!Directory.Exists(path))
+                    Directory.CreateDirectory(path);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"Exception trying to clean up folder. Continuing anyways.\n{e.Message}");
+            }
+        }
+
+
     }
 }
