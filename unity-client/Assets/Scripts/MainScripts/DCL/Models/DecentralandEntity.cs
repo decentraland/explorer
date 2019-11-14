@@ -43,13 +43,6 @@ namespace DCL.Models
                 }
             }
 
-            public void UpdateMesh(Mesh newMesh, int meshFilterIndex = 0)
-            {
-                if (meshFilters.Length == 0 || meshFilters[meshFilterIndex].sharedMesh == newMesh) return;
-
-                meshFilters[meshFilterIndex].sharedMesh = newMesh;
-            }
-
             public void CleanReferences()
             {
                 meshRootGameObject = null;

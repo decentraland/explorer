@@ -45,7 +45,10 @@ namespace DCL.Components
                 collisionsDirty = false;
             }
 
-            entity.meshesInfo.UpdateMesh(currentMesh);
+            if (entity.meshesInfo.meshFilters.Length > 0 && entity.meshesInfo.meshFilters[0].sharedMesh != currentMesh)
+            {
+                entity.meshesInfo.meshFilters[0].sharedMesh = currentMesh;
+            }
         }
 
         void OnShapeAttached(DecentralandEntity entity)
@@ -57,8 +60,6 @@ namespace DCL.Components
 
             if (currentMesh == null)
                 currentMesh = GenerateGeometry();
-
-            UpdateRenderer(entity);
 
             MeshFilter meshFilter = entity.meshRootGameObject.AddComponent<MeshFilter>();
             MeshRenderer meshRenderer = entity.meshRootGameObject.AddComponent<MeshRenderer>();
