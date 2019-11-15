@@ -5,6 +5,7 @@ using DCL.Helpers;
 
 public class MinimapMetadataController : MonoBehaviour
 {
+    private MinimapMetadata minimapMetadata => MinimapMetadata.GetMetadata();
     public static MinimapMetadataController i { get; private set; }
 
     [Serializable]
@@ -18,7 +19,7 @@ public class MinimapMetadataController : MonoBehaviour
     public void Awake()
     {
         i = this;
-        MinimapMetadata.GetMetadata().Clear();
+        minimapMetadata.Clear();
     }
 
     public void UpdateMinimapSceneInformation(string scenesInfoJson)
@@ -28,7 +29,7 @@ public class MinimapMetadataController : MonoBehaviour
         {
             foreach (var parcel in scene.parcels)
             {
-                MinimapMetadata.GetMetadata().SetTile(parcel.x, parcel.y, new MinimapMetadata.Tile(scene.type, scene.name));
+                minimapMetadata.SetTile(parcel.x, parcel.y, new MinimapMetadata.Tile(scene.type, scene.name));
             }
         }
     }
