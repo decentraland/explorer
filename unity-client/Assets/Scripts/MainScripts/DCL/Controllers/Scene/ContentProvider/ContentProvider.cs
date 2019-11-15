@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using MappingPair = DCL.ContentServerUtils.MappingPair;
+using System.IO;
 
 namespace DCL
 {
@@ -36,6 +37,12 @@ namespace DCL
             contents = new List<MappingPair>(toCopy.contents);
             fileToHash = new Dictionary<string, string>(toCopy.fileToHash);
         }
+        public ContentProvider(string serverBaseUrl, List<MappingPair> mappings)
+        {
+            baseUrl = serverBaseUrl;
+            contents = new List<MappingPair>(mappings);
+            BakeHashes();
+        }
 
         public MappingPair GetMappingForHash(string hash)
         {
@@ -45,6 +52,43 @@ namespace DCL
             }
 
             return contents.FirstOrDefault((x) => x.hash == hash);
+        }
+
+        public string GetLowercaseHashWithExtension(string file)
+        {
+            var hash = GetHashForFile(file);
+            var extension = Path.GetExtension(file);
+            return hash.ToLowerInvariant() + extension;
+        }
+
+        public string GetHashForFile(string file)
+        {
+            if (contents == null)
+            {
+                return null;
+            }
+
+            var result = contents.FirstOrDefault((x) => x.file == file);
+            if (result == null)
+            {
+                return null;
+            }
+            return result.hash;
+        }
+
+        public string GetLowercaseHashForFile(string file)
+        {
+            if (contents == null)
+            {
+                return null;
+            }
+
+            var result = contents.FirstOrDefault((x) => x.file == file);
+            if (result == null)
+            {
+                return null;
+            }
+            return result.hash.ToLowerInvariant();
         }
 
         public void BakeHashes()
@@ -71,7 +115,7 @@ namespace DCL
 
                 if (VERBOSE)
                 {
-                    Debug.Log($"found file = {m.file} ... hash = {m.hash}\nfull url = {baseUrl}\\{m.hash}");
+                    Debug.Log($"found file = {m.file} ... hash = {m.hash}\nfull url = {baseUrl}/{m.hash}");
                 }
             }
         }

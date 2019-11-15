@@ -39,6 +39,12 @@
         {
             public string file;
             public string hash;
+
+            public MappingPair(string _file, string _hash)
+            {
+                file = _file;
+                hash = _hash;
+            }
         }
 
         public enum ApiEnvironment
