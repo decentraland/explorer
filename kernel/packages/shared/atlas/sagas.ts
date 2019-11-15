@@ -77,7 +77,7 @@ function* reportOne(action: FetchNameFromSceneJsonSuccess) {
       type,
       parcels: parcels.map(p => {
         const [x, y] = p.split(',').map(_ => parseInt(_, 10))
-        return { x, y }
+        return [x, y]
       })
     }
   ])
@@ -86,9 +86,9 @@ function* reportAll() {
   const atlasState = (yield select(state => state.atlas)) as AtlasState
   const data = atlasState.marketName
   const unity = (window as any)['unityInterface'] as {
-    UpdateMinimapSceneInformation: (data: { name: string; type: number; parcels: { x: number; y: number }[] }[]) => void
+    UpdateMinimapSceneInformation: (data: { name: string; type: number; parcels: number[][] }[]) => void
   }
-  const mapByTypeAndName: Record<string, { x: number; y: number }[]> = {}
+  const mapByTypeAndName: Record<string, number[][]> = {}
   const typeAndNameKeys: string[] = []
   const keyToTypeAndName: Record<string, { type: number; name: string }> = {}
   Object.keys(data).forEach(index => {
@@ -101,7 +101,7 @@ function* reportAll() {
       typeAndNameKeys.push(key)
       keyToTypeAndName[key] = { type, name }
     }
-    mapByTypeAndName[key].push({ x: parcel.x, y: parcel.y })
+    mapByTypeAndName[key].push([parcel.x, parcel.y])
   })
   unity.UpdateMinimapSceneInformation(
     typeAndNameKeys

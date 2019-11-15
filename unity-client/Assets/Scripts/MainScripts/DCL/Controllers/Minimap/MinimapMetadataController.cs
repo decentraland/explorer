@@ -13,7 +13,7 @@ public class MinimapMetadataController : MonoBehaviour
     {
         public string name;
         public int type;
-        public List<Vector2Int> parcels;
+        public List<int[]> parcels;
     }
 
     public void Awake()
@@ -34,8 +34,8 @@ public class MinimapMetadataController : MonoBehaviour
         {
             foreach (var parcel in scene.parcels)
             {
-                Debug.Log($"Set Tile: \n {parcel.x},{parcel.y}  {scene.type} {scene.name}");
-                minimapMetadata.SetTile(parcel.x, parcel.y, new MinimapMetadata.Tile(scene.type, scene.name));
+                Debug.Log($"Set Tile: \n {parcel[0]},{parcel[1]}  {scene.type} {scene.name}");
+                minimapMetadata.SetTile(parcel[0], parcel[1], new MinimapMetadata.Tile(scene.type, scene.name));
             }
         }
     }
