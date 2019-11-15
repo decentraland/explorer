@@ -24,13 +24,13 @@ public class MinimapMetadataController : MonoBehaviour
 
     public void UpdateMinimapSceneInformation(string scenesInfoJson)
     {
-        Debug.Log($"Received: \n {scenesInfoJson}");
         
         var scenesInfo = Utils.ParseJsonArray<MinimapSceneInfo[]>(scenesInfoJson);
         foreach (var scene in scenesInfo)
         {
             foreach (var parcel in scene.parcels)
             {
+                Debug.Log($"Set Tile: \n {parcel.x},{parcel.y}  {scene.type} {scene.name}");
                 minimapMetadata.SetTile(parcel.x, parcel.y, new MinimapMetadata.Tile(scene.type, scene.name));
             }
         }
