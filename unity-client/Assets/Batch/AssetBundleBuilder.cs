@@ -216,10 +216,23 @@ namespace DCL
                 string guid = AssetBundleBuilderUtils.GetGUID(hash);
                 string result = Regex.Replace(metaContent, @"guid: \w+?\n", $"guid: {guid}\n");
 
-                File.WriteAllText(metaPath, result);
+                File.Delete(metaPath);
 
-                var importer = AssetImporter.GetAtPath(finalDownloadedAssetDbPath + assetPath);
-                importer.SaveAndReimport();
+                File.Copy(finalDownloadedPath + assetPath, finalDownloadedPath + "tmp");
+                AssetDatabase.DeleteAsset(finalDownloadedPath + assetPath);
+                File.Delete(finalDownloadedPath + assetPath);
+
+                AssetDatabase.Refresh();
+                AssetDatabase.SaveAssets();
+
+                File.Copy(finalDownloadedPath + "tmp", finalDownloadedPath + assetPath);
+                File.WriteAllText(metaPath, result);
+                File.Delete(finalDownloadedPath + "tmp");
+
+                AssetDatabase.Refresh();
+                AssetDatabase.SaveAssets();
+
+                Debug.Log($"content = {File.ReadAllText(metaPath)}");
 
                 Debug.Log("guid should be " + guid);
                 Debug.Log("guid is " + AssetDatabase.AssetPathToGUID(finalDownloadedAssetDbPath + assetPath));
