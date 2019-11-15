@@ -88,7 +88,7 @@ public class MinimapMetadata : ScriptableObject
 
 public static class MinimapLiteral
 {
-    private static readonly Dictionary<MinimapMetadata.TileType, string> TileColorMapping = new Dictionary<MinimapMetadata.TileType, string>()
+    private static readonly Dictionary<MinimapMetadata.TileType, string> tileColorMapping = new Dictionary<MinimapMetadata.TileType, string>()
     {
         { MinimapMetadata.TileType.MyParcel, "#ff9990" },//Color on MktPlace #ff9990
         { MinimapMetadata.TileType.MyParcelsOnSale, "#ff9990" },//Color on MktPlace #ec5159
@@ -106,12 +106,25 @@ public static class MinimapLiteral
         { MinimapMetadata.TileType.Loading, "#110e13" }
     };
 
+    private static readonly Dictionary<string, Color> cachedHTMLToColorMapping = new Dictionary<string, Color>();
+
     public static bool TryGetTileColor(MinimapMetadata.TileType type, out Color color)
     {
         color = Color.black;
-        if(!TileColorMapping.ContainsKey(type))
+        if(!tileColorMapping.ContainsKey(type))
             return false;
 
-        return !ColorUtility.TryParseHtmlString(TileColorMapping[type], out color);
+        var htmlColor = tileColorMapping[type];
+        if (!cachedHTMLToColorMapping.ContainsKey(htmlColor))
+        {
+            if(!ColorUtility.TryParseHtmlString(tileColorMapping[type], out Color newColor))
+            {
+                return false;
+            }
+            cachedHTMLToColorMapping.Add(htmlColor, newColor);
+        }
+
+        color = cachedHTMLToColorMapping[htmlColor];
+        return true;
     }
 }
