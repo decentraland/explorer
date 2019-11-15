@@ -2,6 +2,8 @@ using DCL;
 using NUnit.Framework;
 using System.Collections.Generic;
 using System.IO;
+using UnityEditor;
+using UnityEngine;
 using MappingPair = DCL.ContentServerUtils.MappingPair;
 
 public class AssetBundleIntegrationTest
@@ -68,6 +70,9 @@ public class AssetBundleIntegrationTest
     {
         BundleBuilder.GenerateTextureAssetBundles(MultipleTextureContent);
         BundleBuilder.CleanupWorkingDir();
+        BundleBuilder.InitializeFilesystemFolders();
+        BundleBuilder.GenerateGLTFAssetBundle(PineContent, PINE_FILE);
+        FileAssert.Exists(Path.Combine(BundleBuilder.ASSET_BUNDLE_OUTPUT_FOLDER, PINE_HASH.ToLowerInvariant()));
     }
 
     [Test]
@@ -78,6 +83,24 @@ public class AssetBundleIntegrationTest
     [Test]
     public void EnsureGUIDsAreCorrectlyReferenced()
     {
+        var assetBundle = BundleBuilder.GenerateTextureAssetBundle(PineContent, PINE_TEXTURE);
+        BundleBuilder.CleanupWorkingDir();
+        BundleBuilder.InitializeFilesystemFolders();
+        File.Copy(
+            Path.Combine(BundleBuilder.ASSET_BUNDLE_OUTPUT_FOLDER, assetBundle + ".manifest"),
+            Path.Combine(BundleBuilder.ASSET_BUNDLE_RELATIVE_WORKING_DIR, assetBundle + ".manifest")
+        );
+        File.Copy(
+            Path.Combine(BundleBuilder.ASSET_BUNDLE_OUTPUT_FOLDER, assetBundle),
+            Path.Combine(BundleBuilder.ASSET_BUNDLE_RELATIVE_WORKING_DIR, assetBundle)
+        );
+        AssetDatabase.Refresh();
+        AssetDatabase.ImportAsset(
+            Path.Combine(BundleBuilder.ASSET_BUNDLE_RELATIVE_WORKING_DIR, assetBundle + ".manifest")
+        );
+        AssetDatabase.Refresh();
+        Debug.Log(AssetDatabase.GetAllAssetPaths());
+        Debug.Log(AssetDatabase.FindAssets(assetBundle));
     }
 
     [Test]
@@ -121,6 +144,6 @@ public class AssetBundleIntegrationTest
     [TearDown]
     public void RemoveTemporaryFolders()
     {
-        BundleBuilder.CleanupFilesystem();
+        BundleBuilder.CleanupWorkingDir();
     }
 }

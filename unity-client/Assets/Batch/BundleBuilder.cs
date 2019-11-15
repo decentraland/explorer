@@ -1,13 +1,19 @@
 using DCL.Helpers;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.NetworkInformation;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
+using System.Threading;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Networking;
+using UnityGLTF;
+using UnityGLTF.Cache;
 
 namespace DCL
 {
@@ -41,11 +47,14 @@ namespace DCL
         internal static string[] TEXTURE_EXTENSIONS = { ".jpg", ".png", ".jpeg", ".tga", ".gif", ".bmp", ".psd", ".tiff", ".iff" };
         internal static string[] GLTF_EXTENSIONS = { ".glb", ".gltf" };
 
+        /**
+         * Generates any tagged-for-export asset bundle
+         */
         public static string[] GenerateAllAssetBundles()
         {
             var manifest = BuildPipeline.BuildAssetBundles(
                 ASSET_BUNDLE_OUTPUT_FOLDER,
-                BuildAssetBundleOptions.UncompressedAssetBundle
+                BuildAssetBundleOptions.ChunkBasedCompression
                 | BuildAssetBundleOptions.DeterministicAssetBundle
                 | BuildAssetBundleOptions.StrictMode,
                 BuildTarget.WebGL
@@ -53,6 +62,114 @@ namespace DCL
 
             CleanupExtraGeneratedBundles();
             return manifest.GetAllAssetBundles();
+        }
+
+        /**
+         * Generate a GLTF Asset Bundle
+         */
+        public static string GenerateGLTFAssetBundle(ContentProvider contentProvider, string file)
+        {
+            DownloadAll(contentProvider);
+
+            var modelFile = PrepareGLTFAssetBundle(contentProvider, file);
+            var hash = contentProvider.GetLowercaseHashForFile(file);
+            Thread.Yield();
+            var retry = 50;
+
+            while (!GLTFImporter.finishedImporting || retry > 0)
+            {
+                Thread.Yield();
+                retry--;
+            }
+
+            var assetImporter = AssetImporter.GetAtPath(modelFile);
+            assetImporter.SetAssetBundleNameAndVariant(hash, "");
+
+            return modelFile;
+        }
+
+        public static string PrepareGLTFAssetBundle(ContentProvider contentProvider, string file)
+        {
+            GLTFImporter.OnGLTFRootIsConstructed -= AssetBundleBuilderUtils.FixGltfDependencyPaths;
+            GLTFImporter.OnGLTFRootIsConstructed += AssetBundleBuilderUtils.FixGltfDependencyPaths;
+
+            PersistentAssetCache.ImageCacheByUri.Clear();
+            PersistentAssetCache.StreamCacheByUri.Clear();
+
+            var textures = FilterOnlyAssetsWithExtension(contentProvider, TEXTURE_EXTENSIONS);
+            foreach (var texture in textures)
+            {
+                RetrieveAndInjectTexture(contentProvider.GetLowercaseHashForFile(texture), texture, file);
+            }
+
+            var buffers = FilterOnlyAssetsWithExtension(contentProvider, BUFFER_EXTENSIONS);
+            foreach (var buffer in buffers)
+            {
+                RetrieveAndInjectBuffer(contentProvider.GetLowercaseHashForFile(buffer), buffer, file);
+            }
+
+            var modelFile = CopyContentIntoWorkingFolder(contentProvider, file);
+
+            AssetDatabase.Refresh();
+            AssetDatabase.SaveAssets();
+
+            return modelFile;
+        }
+
+        /**
+         * Retrieve a texture from the built folder, inject it into the Persistent Asset Cache
+         */
+        public static void RetrieveAndInjectTexture(string hash, string filename, string gltfFilename)
+        {
+            var bundlePath = CopyBuiltAssetBundle(hash);
+            var workingPath = GetWorkingPathForBundle(hash);
+            if (!File.Exists(bundlePath))
+            {
+                throw new Exception($"Could not find bundle for texture {filename} and hash {hash}");
+            }
+
+            AssetDatabase.ImportAsset(workingPath);
+            Thread.Yield();
+            var retry = 5;
+
+            Texture2D t2d = AssetDatabase.LoadAssetAtPath<Texture2D>(workingPath);
+            while (t2d == null && retry > 0)
+            {
+                AssetDatabase.Refresh();
+                Thread.Yield();
+                t2d = AssetDatabase.LoadAssetAtPath<Texture2D>(workingPath);
+                Thread.Yield();
+                retry--;
+            }
+
+            Debug.Log($"injecting texture dependency {bundlePath}. guid: {AssetDatabase.AssetPathToGUID(workingPath)}");
+
+            if (t2d != null)
+            {
+                string relativePath = AssetBundleBuilderUtils.GetRelativePathTo(gltfFilename, filename);
+                Debug.Log($"Mapping: {relativePath} -> {bundlePath}");
+                //NOTE(Brian): This cache will be used by the GLTF importer when seeking textures. This way the importer will
+                //             consume the asset bundle dependencies instead of trying to create new textures.
+                PersistentAssetCache.ImageCacheByUri[relativePath] = new RefCountedTextureData(relativePath, t2d);
+            }
+            else
+            {
+                throw new Exception($"Impossible to resolve: {gltfFilename} -> {bundlePath}");
+            }
+        }
+
+        /**
+         * Retrieve a buffer from the downloads folder, inject it into the Persistent Asset Cache
+         */
+        public static void RetrieveAndInjectBuffer(string hash, string filename, string gltfFilename)
+        {
+            var filePath = CopyContentIntoWorkingFolder(hash);
+            Stream stream = File.OpenRead(filePath);
+            string relativePath = AssetBundleBuilderUtils.GetRelativePathTo(gltfFilename, filename);
+
+            // NOTE(Brian): This cache will be used by the GLTF importer when seeking streams. This way the importer will
+            //              consume the asset bundle dependencies instead of trying to create new streams.
+            PersistentAssetCache.StreamCacheByUri[relativePath] = new RefCountedStreamData(relativePath, stream);
         }
 
         /**
@@ -69,18 +186,24 @@ namespace DCL
             return GenerateAllAssetBundles();
         }
 
+        /**
+         * Only build a single texture
+         */
         public static string GenerateTextureAssetBundle(ContentProvider contentProvider, string file)
         {
             PrepareTextureAssetBundle(contentProvider, file);
             var assetBundles = GenerateAllAssetBundles();
-            Assert.IsTrue(assetBundles.Length == 1);
+            if (assetBundles.Length > 1)
+            {
+                var arrayAsString = assetBundles.Aggregate("", (current, next) => (current.Length > 0) ? current + ", " + next : next);
+                throw new Exception($"Expected a length of 1, found {assetBundles.Length}: {arrayAsString}");
+            }
             return assetBundles[0];
         }
 
         public static void PrepareTextureAssetBundle(ContentProvider contentProvider, string file)
         {
             var metaFilePath = ImportTextureAsset(contentProvider, file);
-
             var assetImporter = AssetImporter.GetAtPath(metaFilePath.Substring(0, metaFilePath.LastIndexOf('.')));
             assetImporter.SetAssetBundleNameAndVariant(contentProvider.GetLowercaseHashForFile(file), "");
         }
@@ -101,6 +224,10 @@ namespace DCL
             string metaContent = File.ReadAllText(metaFilePath);
             string guid = AssetBundleBuilderUtils.GetGUID(contentProvider.GetHashForFile(file));
             string result = Regex.Replace(metaContent, @"guid: \w+?\n", $"guid: {guid}\n");
+            if (VERBOSE)
+            {
+                Debug.Log($"Replacing GUID: {file} => {guid}");
+            }
             File.WriteAllText(metaFilePath, result);
 
             AssetDatabase.Refresh();
@@ -125,6 +252,16 @@ namespace DCL
             return CopyContentIntoWorkingFolder(contentProvider, file);
         }
 
+        public static List<string> DownloadAll(ContentProvider contentProvider)
+        {
+            var result = new List<string>();
+            foreach (var mapping in contentProvider.contents)
+            {
+                result.Add(DownloadRawContent(contentProvider, mapping.file));
+            }
+            return result;
+        }
+
         /**
          * Downloads a file into TEMP_DOWNLOAD_FOLDER
          */
@@ -136,17 +273,16 @@ namespace DCL
             string outputPath = Path.Combine(TEMP_DOWNLOAD_FOLDER, lowercaseHash + fileExt);
             string outputPathDir = Path.GetDirectoryName(outputPath);
 
-            if (VERBOSE_DOWNLOAD)
-            {
-                Debug.Log("Downloading " + file + "(" + hash + ") to " + outputPath);
-            }
-
             if (File.Exists(outputPath))
             {
                 if (VERBOSE_DOWNLOAD)
                     Debug.Log("Skipping already downloaded asset: " + outputPath);
 
                 return outputPath;
+            }
+            if (VERBOSE_DOWNLOAD)
+            {
+                Debug.Log("Downloading " + file + "(" + hash + ") to " + outputPath);
             }
 
             UnityWebRequest req;
@@ -185,6 +321,12 @@ namespace DCL
             );
         }
 
+        public static string GetWorkingPathForBundle(string hash)
+        {
+            return Path.Combine(ASSET_BUNDLE_RELATIVE_WORKING_DIR, hash);
+        }
+
+
         public static string CopyContentIntoWorkingFolder(ContentProvider contentProvider, string file)
         {
             var hashedFilename = contentProvider.GetLowercaseHashWithExtension(file);
@@ -192,6 +334,23 @@ namespace DCL
             var target = Path.Combine(ASSET_BUNDLE_WORKING_DIR, hashedFilename);
             if (!File.Exists(target))
                 File.Copy(downloadedPath, target);
+            return target;
+        }
+        public static string CopyContentIntoWorkingFolder(string hashedFilename)
+        {
+            var downloadedPath = Path.Combine(TEMP_DOWNLOAD_FOLDER, hashedFilename);
+            var target = Path.Combine(ASSET_BUNDLE_WORKING_DIR, hashedFilename);
+            if (!File.Exists(target))
+                File.Copy(downloadedPath, target);
+            return target;
+        }
+
+        public static string CopyBuiltAssetBundle(string hash)
+        {
+            var bundlePath = Path.Combine(ASSET_BUNDLE_OUTPUT_FOLDER, hash);
+            var target = Path.Combine(ASSET_BUNDLE_WORKING_DIR, hash);
+            if (!File.Exists(target))
+                File.Copy(bundlePath, target);
             return target;
         }
 
