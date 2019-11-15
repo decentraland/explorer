@@ -18,6 +18,8 @@ public class MinimapParcelsView : MonoBehaviour
     private Vector3Variable playerUnityToWorldOffset => CommonScriptableObjects.playerUnityToWorldOffset;
     private MinimapMetadata minimapmetadata => MinimapMetadata.GetMetadata();
 
+    private Vector3Variable.Change unityWorldOffsetDelegate;
+
     public static int _BaseColor = Shader.PropertyToID("_BaseColor");
 
     private void Start()
@@ -26,6 +28,10 @@ public class MinimapParcelsView : MonoBehaviour
         playerCoords.OnChange += OnCharacterSetPosition;
         minimapmetadata.OnTileUpdated += TileUpdated;
         minimapmetadata.OnTileRemoved += TileRemoved;
+
+        unityWorldOffsetDelegate = (current,  previous) => Recenter();
+        playerUnityToWorldOffset.OnChange += unityWorldOffsetDelegate;
+
         DrawParcels(Vector2Int.zero);
     }
 
@@ -64,12 +70,12 @@ public class MinimapParcelsView : MonoBehaviour
         }
     }
 
-    private void TileUpdated((int,int) pos, MinimapMetadata.Tile tile)
+    private void TileUpdated((int, int) pos, MinimapMetadata.Tile tile)
     {
         DrawParcels(playerCoords.Get());
     }
 
-    private void TileRemoved((int,int) pos)
+    private void TileRemoved((int, int) pos)
     {
         DrawParcels(playerCoords.Get());
     }
@@ -84,5 +90,6 @@ public class MinimapParcelsView : MonoBehaviour
         playerCoords.OnChange -= OnCharacterSetPosition;
         minimapmetadata.OnTileUpdated -= TileUpdated;
         minimapmetadata.OnTileRemoved -= TileRemoved;
+        playerUnityToWorldOffset.OnChange -= unityWorldOffsetDelegate;
     }
 }
