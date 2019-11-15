@@ -1,5 +1,4 @@
 import { fork } from 'redux-saga/effects'
-import { atlasSaga } from '../atlas/sagas'
 import { Auth } from '../auth/Auth'
 import { authSaga } from '../auth/sagas'
 import { loadingSaga } from '../loading/sagas'
@@ -10,7 +9,6 @@ import { metricSaga } from './metricSaga'
 
 export function createRootSaga(auth: Auth) {
   return function* rootSaga() {
-    yield fork(atlasSaga)
     yield fork(authSaga(auth))
     yield fork(passportSaga)
     yield fork(rendererSaga)

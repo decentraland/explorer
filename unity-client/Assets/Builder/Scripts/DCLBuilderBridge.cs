@@ -375,7 +375,7 @@ namespace Builder
             if (go) Destroy(go.gameObject);
             go = FindObjectOfType<MinimapHUDView>();
             if (go) Destroy(go.gameObject);
-            go = FindObjectOfType<MinimapMetadataController>();
+            go = FindObjectOfType<MinimapMetadataRetriever>();
             if (go && go.transform.parent) Destroy(go.transform.parent.gameObject);
         }
 

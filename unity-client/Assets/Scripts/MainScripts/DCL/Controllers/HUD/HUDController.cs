@@ -1,3 +1,5 @@
+using System;
+using System.Collections;
 using UnityEngine;
 
 public class HUDController : MonoBehaviour
@@ -112,15 +114,15 @@ public class HUDController : MonoBehaviour
         avatarHud?.UpdateData(new AvatarHUDModel()
         {
             name = ownUserProfile.userName,
-            mail = ownUserProfile.email,
+            mail =  ownUserProfile.email,
             avatarPic = ownUserProfile.faceSnapshot
         });
     }
 
     private void OnDestroy()
     {
-        if (ownUserProfile != null)
-            ownUserProfile.OnUpdate -= OwnUserProfileUpdated;
+    if (ownUserProfile != null)
+        ownUserProfile.OnUpdate -= OwnUserProfileUpdated;
         if (avatarHud != null)
         {
             avatarHud.OnEditAvatarPressed -= ShowAvatarEditor;
