@@ -11,7 +11,7 @@ import {
   marketData,
   QuerySceneName
 } from './actions'
-import { getNameFromAtlasState, getTypeFromAtlasState, shouldLoadSceneJsonName, EMPTY_PARCEL_NAME } from './selectors'
+import { getNameFromAtlasState, getTypeFromAtlasState, shouldLoadSceneJsonName } from './selectors'
 import { AtlasState, FETCH_NAME_FROM_SCENE_JSON, SUCCESS_NAME_FROM_SCENE_JSON } from './types'
 
 export function* atlasSaga(): any {
@@ -104,12 +104,10 @@ function* reportAll() {
     mapByTypeAndName[key].push([parcel.x, parcel.y])
   })
   unity.UpdateMinimapSceneInformation(
-    typeAndNameKeys
-      .map(key => ({
-        name: keyToTypeAndName[key].name,
-        type: keyToTypeAndName[key].type,
-        parcels: mapByTypeAndName[key]
-      }))
-      .filter(v => v.name !== EMPTY_PARCEL_NAME)
+    typeAndNameKeys.map(key => ({
+      name: keyToTypeAndName[key].name,
+      type: keyToTypeAndName[key].type,
+      parcels: mapByTypeAndName[key]
+    }))
   )
 }
