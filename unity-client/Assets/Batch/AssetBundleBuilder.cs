@@ -194,6 +194,7 @@ namespace DCL
             foreach (var kvp in hashToTexturePair)
             {
                 string hash = kvp.Key;
+
                 Debug.Log("dumping hash " + hash);
                 //NOTE(Brian): try to get an AB before getting the original texture, so we bind the dependencies correctly
                 string fullPathToTag = DownloadAsset(contentProvider, hashToTexturePair, hash, hash + "/");
@@ -207,16 +208,21 @@ namespace DCL
                 string metaPath = finalDownloadedPath + assetPath + ".meta";
 
                 AssetDatabase.ReleaseCachedFileHandles();
+
                 //NOTE(Brian): in asset bundles, all dependencies are resolved by their guid (and not the AB hash nor CRC)
                 //             So to ensure dependencies are being kept in subsequent editor runs we normalize the asset guid using
                 //             the CID.
                 string metaContent = File.ReadAllText(metaPath);
                 string guid = AssetBundleBuilderUtils.GetGUID(hash);
                 string result = Regex.Replace(metaContent, @"guid: \w+?\n", $"guid: {guid}\n");
+
                 File.WriteAllText(metaPath, result);
 
-                AssetDatabase.ImportAsset(finalDownloadedAssetDbPath + assetPath, ImportAssetOptions.ForceUpdate);
-                AssetDatabase.SaveAssets();
+                var importer = AssetImporter.GetAtPath(finalDownloadedAssetDbPath + assetPath);
+                importer.SaveAndReimport();
+
+                Debug.Log("guid should be " + guid);
+                Debug.Log("guid is " + AssetDatabase.AssetPathToGUID(finalDownloadedAssetDbPath + assetPath));
 
                 if (fullPathToTag != null)
                 {
