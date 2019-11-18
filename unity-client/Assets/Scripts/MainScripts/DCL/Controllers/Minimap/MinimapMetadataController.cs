@@ -9,7 +9,7 @@ public class MinimapMetadataController : MonoBehaviour
     public static MinimapMetadataController i { get; private set; }
 
     [Serializable]
-    private class MinimapSceneInfo
+    public class MinimapSceneInfo
     {
         public string name;
         public int type;
