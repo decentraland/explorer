@@ -31,12 +31,9 @@ public class MinimapMetadataController : MonoBehaviour
 
     public void UpdateMinimapSceneInformation(string scenesInfoJson)
     {
-        Debug.Log("received information");
-        Debug.Log(scenesInfoJson);
-
-        //var scenesInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<MinimapSceneInfo[]>(scenesInfoJson);
-        var scenesInfo = Utils.ParseJsonArray<MinimapSceneInfo[]>(scenesInfoJson);
-        Debug.Log("parsed information");
+        Debug.Log("1");
+        var scenesInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<MinimapSceneInfo[]>(scenesInfoJson);
+        //var scenesInfo = Utils.ParseJsonArray<MinimapSceneInfo[]>(scenesInfoJson);
         foreach (var scene in scenesInfo)
         {
             foreach (var parcel in scene.parcels)
