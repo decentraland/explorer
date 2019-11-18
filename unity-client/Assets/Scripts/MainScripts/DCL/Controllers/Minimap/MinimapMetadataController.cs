@@ -9,11 +9,18 @@ public class MinimapMetadataController : MonoBehaviour
     public static MinimapMetadataController i { get; private set; }
 
     [Serializable]
+    public class MyVectorInt
+    {
+        public int x;
+        public int y;
+    }
+    
+    [Serializable]
     public class MinimapSceneInfo
     {
         public string name;
         public int type;
-        public List<Vector2Int> parcels;
+        public List<MyVectorInt> parcels;
     }
 
     public void Awake()
