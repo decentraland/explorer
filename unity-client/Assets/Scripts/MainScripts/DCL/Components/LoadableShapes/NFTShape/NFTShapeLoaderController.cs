@@ -185,8 +185,7 @@ public class NFTShapeLoaderController : MonoBehaviour
         {
             yield return Utils.FetchTexture(thumbnailImageURL, (downloadedTex) =>
             {
-                nftImageTexture = downloadedTex;
-                UpdateFrameImage();
+                SetFrameImage(downloadedTex);
             });
         }
 
@@ -196,9 +195,8 @@ public class NFTShapeLoaderController : MonoBehaviour
         {
             yield return Utils.FetchTexture(dclImageURL, (downloadedTex) =>
             {
-                nftImageTexture = downloadedTex;
                 foundDCLImage = true;
-                UpdateFrameImage(resizeFrameMesh: true);
+                SetFrameImage(downloadedTex, resizeFrameMesh: true);
             });
         }
 
@@ -207,27 +205,28 @@ public class NFTShapeLoaderController : MonoBehaviour
         {
             yield return Utils.FetchTexture(previewImageURL, (downloadedTex) =>
             {
-                nftImageTexture = downloadedTex;
-                UpdateFrameImage(resizeFrameMesh: true);
+                SetFrameImage(downloadedTex, resizeFrameMesh: true);
             });
         }
 
         OnLoadingAssetSuccess?.Invoke();
     }
 
-    void UpdateFrameImage(bool resizeFrameMesh = false)
+    void SetFrameImage(Texture newTexture, bool resizeFrameMesh = false)
     {
-        if (nftImageTexture == null) return;
+        if (newTexture == null) return;
+
+        nftImageTexture = newTexture;
 
         meshRenderer.GetPropertyBlock(imageMaterialPropertyBlock, 0);
-        imageMaterialPropertyBlock.SetTexture(BASEMAP_SHADER_PROPERTY, nftImageTexture);
+        imageMaterialPropertyBlock.SetTexture(BASEMAP_SHADER_PROPERTY, newTexture);
         imageMaterialPropertyBlock.SetColor(COLOR_SHADER_PROPERTY, Color.white);
         meshRenderer.SetPropertyBlock(imageMaterialPropertyBlock, 0);
 
         if (resizeFrameMesh)
         {
-            Vector3 newScale = new Vector3(nftImageTexture.width / NFTDataFetchingSettings.NORMALIZED_DIMENSIONS.x,
-                                            nftImageTexture.height / NFTDataFetchingSettings.NORMALIZED_DIMENSIONS.y, 1f);
+            Vector3 newScale = new Vector3(newTexture.width / NFTDataFetchingSettings.NORMALIZED_DIMENSIONS.x,
+                                            newTexture.height / NFTDataFetchingSettings.NORMALIZED_DIMENSIONS.y, 1f);
 
             meshRenderer.transform.localScale = newScale;
         }
@@ -265,5 +264,13 @@ public class NFTShapeLoaderController : MonoBehaviour
 
         if (noiseIsFractal)
             frameMaterial.EnableKeyword("FRACTAL");
+    }
+
+    void OnDestroy()
+    {
+        if (nftImageTexture != null)
+        {
+            UnityEngine.Object.Destroy(nftImageTexture);
+        }
     }
 }
