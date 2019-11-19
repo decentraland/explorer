@@ -320,30 +320,29 @@ namespace DCL.Controllers
             float heightLimit = metricsController.GetLimits().sceneHeight;
             if (height > heightLimit) return false;
 
+            int noThresholdZCoordinate = Mathf.FloorToInt(worldPosition.z / ParcelSettings.PARCEL_SIZE);
+            int noThresholdXCoordinate = Mathf.FloorToInt(worldPosition.x / ParcelSettings.PARCEL_SIZE);
+
             // We check the target world position
-            Vector2Int targetCoordinate = new Vector2Int(Mathf.FloorToInt(worldPosition.x / ParcelSettings.PARCEL_SIZE), Mathf.FloorToInt(worldPosition.z / ParcelSettings.PARCEL_SIZE));
+            Vector2Int targetCoordinate = new Vector2Int(noThresholdXCoordinate, noThresholdZCoordinate);
             if (parcels.Contains(targetCoordinate)) return true;
 
             // We need to check using a threshold from the target point, in order to cover correctly the parcel "border/edge" positions
 
             // We check the east-threshold position
-            targetCoordinate.Set(Mathf.FloorToInt((worldPosition.x + ParcelSettings.PARCEL_BOUNDARIES_THRESHOLD) / ParcelSettings.PARCEL_SIZE),
-                                Mathf.FloorToInt(worldPosition.z / ParcelSettings.PARCEL_SIZE));
+            targetCoordinate.Set(Mathf.FloorToInt((worldPosition.x + ParcelSettings.PARCEL_BOUNDARIES_THRESHOLD) / ParcelSettings.PARCEL_SIZE), noThresholdZCoordinate);
             if (parcels.Contains(targetCoordinate)) return true;
 
             // We check the south-threshold position
-            targetCoordinate.Set(Mathf.FloorToInt(worldPosition.x / ParcelSettings.PARCEL_SIZE),
-                                Mathf.FloorToInt((worldPosition.z - ParcelSettings.PARCEL_BOUNDARIES_THRESHOLD) / ParcelSettings.PARCEL_SIZE));
+            targetCoordinate.Set(noThresholdXCoordinate, Mathf.FloorToInt((worldPosition.z - ParcelSettings.PARCEL_BOUNDARIES_THRESHOLD) / ParcelSettings.PARCEL_SIZE));
             if (parcels.Contains(targetCoordinate)) return true;
 
             // We check the west-threshold position
-            targetCoordinate.Set(Mathf.FloorToInt((worldPosition.x - ParcelSettings.PARCEL_BOUNDARIES_THRESHOLD) / ParcelSettings.PARCEL_SIZE),
-                                 Mathf.FloorToInt(worldPosition.z / ParcelSettings.PARCEL_SIZE));
+            targetCoordinate.Set(Mathf.FloorToInt((worldPosition.x - ParcelSettings.PARCEL_BOUNDARIES_THRESHOLD) / ParcelSettings.PARCEL_SIZE), noThresholdZCoordinate);
             if (parcels.Contains(targetCoordinate)) return true;
 
             // We check the north-threshold position
-            targetCoordinate.Set(Mathf.FloorToInt(worldPosition.x / ParcelSettings.PARCEL_SIZE),
-                                 Mathf.FloorToInt((worldPosition.z + ParcelSettings.PARCEL_BOUNDARIES_THRESHOLD) / ParcelSettings.PARCEL_SIZE));
+            targetCoordinate.Set(noThresholdXCoordinate, Mathf.FloorToInt((worldPosition.z + ParcelSettings.PARCEL_BOUNDARIES_THRESHOLD) / ParcelSettings.PARCEL_SIZE));
             if (parcels.Contains(targetCoordinate)) return true;
 
             return false;
@@ -444,8 +443,8 @@ namespace DCL.Controllers
 
         void RemoveAllEntities(bool instant = false)
         {
-            //NOTE(Brian): We need to remove only the rootEntities. 
-            //             If we don't, duplicated entities will get removed when destroying 
+            //NOTE(Brian): We need to remove only the rootEntities.
+            //             If we don't, duplicated entities will get removed when destroying
             //             recursively, making this more complicated than it should.
             List<DecentralandEntity> rootEntities = new List<DecentralandEntity>();
 
@@ -592,7 +591,7 @@ namespace DCL.Controllers
             DCLComponentFactory factory = ownerController.componentFactory;
             Assert.IsNotNull(factory, "Factory is null?");
 
-            // HACK: (Zak) will be removed when we separate each      
+            // HACK: (Zak) will be removed when we separate each
             // uuid component as a different class id
             if (classId == CLASS_ID_COMPONENT.UUID_CALLBACK)
             {
@@ -670,7 +669,7 @@ namespace DCL.Controllers
             return newComponent;
         }
 
-        // HACK: (Zak) will be removed when we separate each 
+        // HACK: (Zak) will be removed when we separate each
         // uuid component as a different class id
         public UUIDComponent EntityUUIDComponentUpdate(DecentralandEntity entity, string type,
             string componentJson)
@@ -922,7 +921,7 @@ namespace DCL.Controllers
             }
         }
 
-        // HACK: (Zak) will be removed when we separate each 
+        // HACK: (Zak) will be removed when we separate each
         // uuid component as a different class id
         private void RemoveUUIDComponentType<T>(DecentralandEntity entity, string type)
             where T : UUIDComponent
