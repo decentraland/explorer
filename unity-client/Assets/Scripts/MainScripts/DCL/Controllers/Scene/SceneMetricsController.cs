@@ -228,6 +228,7 @@ namespace DCL
                 if (mf != null && mf.sharedMesh != null)
                 {
                     model.bodies++;
+
                     //The array is a list of triangles that contains indices into the vertex array. The size of the triangle array must always be a multiple of 3. 
                     //Vertices can be shared by simply indexing into the same vertex.
                     model.triangles += mf.sharedMesh.triangles.Length / 3;
