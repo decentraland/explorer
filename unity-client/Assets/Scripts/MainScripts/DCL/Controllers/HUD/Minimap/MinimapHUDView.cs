@@ -4,8 +4,6 @@ using UnityEngine.UI;
 
 public class MinimapHUDView : MonoBehaviour
 {
-    public const string UNNAMED_SCENE = "Unnamed";
-    
     private const string VIEW_PATH = "MinimapHUD";
     private const string VIEW_OBJECT_NAME = "_MinimapHUD";
 
@@ -22,7 +20,7 @@ public class MinimapHUDView : MonoBehaviour
     [SerializeField] private Button addBookmarkButton;
 
     [SerializeField] private Button reportSceneButton;
-    
+
     [SerializeField] private MinimapZoom minimapZoom;
 
     private MinimapHUDController controller;
@@ -48,7 +46,7 @@ public class MinimapHUDView : MonoBehaviour
 
     internal void UpdateData(MinimapHUDModel model)
     {
-        sceneNameText.text = string.IsNullOrEmpty(model.sceneName) ? UNNAMED_SCENE : model.sceneName;
+        sceneNameText.text = string.IsNullOrEmpty(model.sceneName) ? "Unnamed" : model.sceneName;
         playerPositionText.text = model.playerPosition;
     }
 
@@ -57,8 +55,8 @@ public class MinimapHUDView : MonoBehaviour
         optionsPanel.SetActive(!optionsPanel.activeSelf);
     }
 
-    public void SetActive(bool active)
+    public void SetVisibility(bool visible)
     {
-        gameObject.SetActive(active);
+        gameObject.SetActive(visible);
     }
 }
