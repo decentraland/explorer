@@ -33,21 +33,11 @@ namespace DCL
             Debug.Log("path2 = " + path2);
         }
 
-        [MenuItem("Decentraland/Asset Bundle Builder/Prepare Zone -110,-110")]
-        public static void PrepZoneArea()
-        {
-            AssetBundleBuilder.environment = ContentServerUtils.ApiEnvironment.ORG;
-            AssetBundleBuilder.DumpAreaTextures(new Vector2Int(-110, -110), new Vector2Int(1, 1));
-
-            //AssetBundleBuilder.DumpArea(new Vector2Int(-110, -110), new Vector2Int(10, 10));
-            //AssetBundleBuilder.DumpArea(new Vector2Int(-90, -110), new Vector2Int(10, 10));
-            //AssetBundleBuilder.DumpArea(new Vector2Int(-80, -110), new Vector2Int(10, 10));
-            //DumpArea(0);
-        }
         [MenuItem("Decentraland/Asset Bundle Builder/Dump Zone -110,-110")]
         public static void DumpZoneArea()
         {
             AssetBundleBuilder.environment = ContentServerUtils.ApiEnvironment.ORG;
+            AssetBundleBuilder.deleteDownloadPathAfterFinished = false;
             AssetBundleBuilder.DumpArea(new Vector2Int(-110, -110), new Vector2Int(1, 1));
         }
 

@@ -54,61 +54,6 @@ namespace DCL
 
         static float startTime;
 
-        public static void PrepareScene()
-        {
-            try
-            {
-                if (AssetBundleBuilderUtils.ParseOption(CLI_BUILD_SCENE_SYNTAX, 1, out string[] sceneCid))
-                {
-                    if (sceneCid == null || string.IsNullOrEmpty(sceneCid[0]))
-                    {
-                        throw new ArgumentException("Invalid sceneCid argument! Please use -sceneCid <id> to establish the desired id to process.");
-                    }
-
-                    DumpTexturesFromScene(sceneCid[0], AssetBundleBuilderUtils.Exit);
-                    return;
-                }
-                else
-                if (AssetBundleBuilderUtils.ParseOption(CLI_BUILD_PARCELS_RANGE_SYNTAX, 4, out string[] xywh))
-                {
-                    if (xywh == null)
-                    {
-                        throw new ArgumentException("Invalid parcelsXYWH argument! Please use -parcelsXYWH x y w h to establish the desired parcels range to process.");
-                    }
-
-                    int x, y, w, h;
-                    bool parseSuccess = false;
-
-                    parseSuccess |= int.TryParse(xywh[0], out x);
-                    parseSuccess |= int.TryParse(xywh[1], out y);
-                    parseSuccess |= int.TryParse(xywh[2], out w);
-                    parseSuccess |= int.TryParse(xywh[3], out h);
-
-                    if (!parseSuccess)
-                    {
-                        throw new ArgumentException("Invalid parcelsXYWH argument! Please use -parcelsXYWH x y w h to establish the desired parcels range to process.");
-                    }
-
-                    if (w > 10 || h > 10 || w < 0 || h < 0)
-                    {
-                        throw new ArgumentException("Invalid parcelsXYWH argument! Please don't use negative width/height values, and ensure any given width/height doesn't exceed 10.");
-                    }
-
-                    DumpAreaTextures(new Vector2Int(x, y), new Vector2Int(w, h), AssetBundleBuilderUtils.Exit);
-                    return;
-                }
-                else
-                {
-                    throw new ArgumentException("Invalid arguments! You must pass -parcelsXYWH or -sceneCid for dump to work!");
-                }
-            }
-            catch (Exception e)
-            {
-                Debug.LogError(e.Message);
-                AssetBundleBuilderUtils.Exit(1);
-            }
-        }
-
         public static void ExportSceneToAssetBundles()
         {
             try
@@ -256,6 +201,8 @@ namespace DCL
 
         internal static void ExportSceneToAssetBundles_Internal(string sceneCid)
         {
+            DownloadSceneTextures(sceneCid);
+
             MappingsAPIData parcelInfoApiData = AssetBundleBuilderUtils.GetSceneMappingsData(sceneCid);
 
             AssetDatabase.Refresh();
@@ -505,29 +452,6 @@ namespace DCL
             };
         }
 
-        static void DumpTexturesFromSceneList(List<string> sceneCidsList, System.Action<int> OnFinish)
-        {
-            if (sceneCidsList == null || sceneCidsList.Count == 0)
-            {
-                Debug.LogError("Scene list is null or count == 0!");
-                OnFinish?.Invoke(1);
-                return;
-            }
-
-            Debug.Log($"Preparing {sceneCidsList.Count} scenes...");
-            startTime = Time.realtimeSinceStartup;
-
-            InitializeDirectoryPaths(true);
-
-            foreach (string sceneCid in sceneCidsList)
-            {
-                Debug.Log("preparing... " + sceneCid);
-                DownloadSceneTextures(sceneCid);
-            }
-
-            OnFinish?.Invoke(0);
-        }
-
         private static void RetrieveAndInjectTexture(Dictionary<string, MappingPair> hashToGltfPair, string gltfHash, MappingPair mappingPair)
         {
             string fileExt = Path.GetExtension(mappingPair.file);
@@ -625,22 +549,9 @@ namespace DCL
             DumpSceneList(sceneCidsList, OnFinish);
         }
 
-        internal static void DumpAreaTextures(Vector2Int coords, Vector2Int size, Action<int> OnFinish = null)
-        {
-            HashSet<string> sceneCids = AssetBundleBuilderUtils.GetSceneCids(coords, size);
-
-            List<string> sceneCidsList = sceneCids.ToList();
-            DumpTexturesFromSceneList(sceneCidsList, OnFinish);
-        }
-
         internal static void DumpScene(string cid, Action<int> OnFinish = null)
         {
             DumpSceneList(new List<string> { cid }, OnFinish);
-        }
-
-        internal static void DumpTexturesFromScene(string cid, Action<int> OnFinish = null)
-        {
-            DumpTexturesFromSceneList(new List<string> { cid }, OnFinish);
         }
 
         static void InitializeDirectoryPaths(bool deleteIfExists)
