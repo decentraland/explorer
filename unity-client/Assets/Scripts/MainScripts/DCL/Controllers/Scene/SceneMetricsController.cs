@@ -260,7 +260,7 @@ namespace DCL
             model.meshes++;
             isDirty = true;
 
-            if (VERBOSE) { Debug.Log("Mesh name = " + mesh.name + " ... tri count = " + (mesh.triangles.Length)); }
+            if (VERBOSE) { Debug.Log("Mesh name = " + mesh.name + " ... tri count = " + (mesh.triangles.Length / 3)); }
 
             ;
         }
