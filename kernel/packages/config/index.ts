@@ -84,6 +84,8 @@ export const PREVIEW: boolean = !!(global as any).preview
 export const EDITOR: boolean = !!(global as any).isEditor
 export const WORLD_EXPLORER = !EDITOR && !PREVIEW
 
+export const OPEN_AVATAR_EDITOR = location.search.indexOf('OPEN_AVATAR_EDITOR') !== -1 && WORLD_EXPLORER
+
 export const STATIC_WORLD = location.search.indexOf('STATIC_WORLD') !== -1 || !!(global as any).staticWorld || EDITOR
 
 // Development
@@ -186,8 +188,8 @@ function getDefaultTLD() {
 }
 
 export function getExclusiveServer() {
-  if (window.location.search.match(/WEARABLE_SERVER=\w+/)) {
-    return window.location.search.match(/WEARABLE_SERVER=(\w+)/)[1]
+  if (window.location.search.match(/TEST_WEARABLES/)) {
+    return 'https://dcl-exclusive-test.now.sh/index.json'
   }
   return 'https://dcl-base-exclusive.now.sh/index.json'
 }

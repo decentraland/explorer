@@ -10,7 +10,7 @@ public class WearableController
     private const string MATERIAL_FILTER_SKIN = "skin";
 
     public readonly WearableItem wearable;
-    private AssetPromise_GLTF promise;
+    protected AssetPromise_GLTF promise;
     private readonly string bodyShapeType;
 
     public string id => wearable.id;
