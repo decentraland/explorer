@@ -204,18 +204,12 @@ namespace DCL.Helpers
         {
             entityCounter++;
             string id = $"{entityCounter}";
-            return scene.CreateEntity(id, JsonUtility.ToJson(new DCL.Models.CreateEntityMessage
-            {
-                id = id
-            }));
+            return scene.CreateEntity(id);
         }
 
         public static void CreateSceneEntity(ParcelScene scene, string id)
         {
-            scene.CreateEntity(id, JsonUtility.ToJson(new DCL.Models.CreateEntityMessage
-            {
-                id = id
-            }));
+            scene.CreateEntity(id);
         }
 
         public static void RemoveSceneEntity(ParcelScene scene, string id)
@@ -238,13 +232,7 @@ namespace DCL.Helpers
                 : (int)classId;
             string componentInstanceId = GetComponentUniqueId(scene, typeof(T).Name, componentClassId, entity.entityId);
 
-            return scene.EntityComponentCreateOrUpdate(JsonUtility.ToJson(new EntityComponentCreateMessage
-            {
-                entityId = entity.entityId,
-                name = componentInstanceId,
-                classId = componentClassId,
-                json = JsonUtility.ToJson(model)
-            }), out CleanableYieldInstruction routine) as T;
+            return scene.EntityComponentCreateOrUpdate(entity.entityId, componentInstanceId, componentClassId, JsonUtility.ToJson(model), out CleanableYieldInstruction routine) as T;
         }
 
         public static Coroutine EntityComponentUpdate<T, K>(T component, K model = null)
@@ -265,20 +253,12 @@ namespace DCL.Helpers
 
         public static void SetEntityParent(ParcelScene scene, DecentralandEntity child, DecentralandEntity parent)
         {
-            scene.SetEntityParent(JsonUtility.ToJson(new SetEntityParentMessage
-            {
-                entityId = child.entityId,
-                parentId = parent.entityId
-            }));
+            scene.SetEntityParent(child.entityId, parent.entityId);
         }
 
         public static void SetEntityParent(ParcelScene scene, string childEntityId, string parentEntityId)
         {
-            scene.SetEntityParent(JsonUtility.ToJson(new SetEntityParentMessage
-            {
-                entityId = childEntityId,
-                parentId = parentEntityId
-            }));
+            scene.SetEntityParent(childEntityId, parentEntityId);
         }
 
         public static DCLTexture CreateDCLTexture(ParcelScene scene,
@@ -308,11 +288,7 @@ namespace DCL.Helpers
                 model = new K();
             }
 
-            component.scene.SharedComponentUpdate(JsonUtility.ToJson(new DCL.Models.SharedComponentUpdateMessage
-            {
-                id = component.id,
-                json = JsonUtility.ToJson(model)
-            }));
+            component.scene.SharedComponentUpdate(component.id, JsonUtility.ToJson(model));
 
             return component.routine;
         }
@@ -330,31 +306,18 @@ namespace DCL.Helpers
 
             string uniqueId = GetComponentUniqueId(scene, "material", (int)id, "-shared-" + disposableIdCounter);
 
-            T result = scene.SharedComponentCreate(JsonUtility.ToJson(new DCL.Models.SharedComponentCreateMessage
-            {
-                classId = (int)id,
-                id = uniqueId,
-                name = "material"
-            })) as T;
+            T result = scene.SharedComponentCreate(uniqueId, "material", (int)id) as T;
 
             Assert.IsNotNull(result, "class-id mismatch!");
 
-            scene.SharedComponentUpdate(JsonUtility.ToJson(new DCL.Models.SharedComponentUpdateMessage
-            {
-                id = uniqueId,
-                json = JsonUtility.ToJson(model)
-            }));
+            scene.SharedComponentUpdate(uniqueId, JsonUtility.ToJson(model));
 
             return result;
         }
 
-        public static void SharedComponentAttach(BaseDisposable component, DecentralandEntity entity)
+        public static void SharedComponentAttach(BaseDisposable component, DecentralandEntity entity, string name)
         {
-            entity.scene.SharedComponentAttach(JsonUtility.ToJson(new DCL.Models.SharedComponentAttachMessage
-            {
-                entityId = entity.entityId,
-                id = component.id
-            }));
+            entity.scene.SharedComponentAttach(entity.entityId, component.id, name);
         }
 
         public static void SetEntityTransform(ParcelScene scene, DecentralandEntity entity, DCLTransform.Model model)
@@ -369,18 +332,14 @@ namespace DCL.Helpers
 
         public static void SetEntityTransform(ParcelScene scene, DecentralandEntity entity, Vector3 position, Quaternion rotation, Vector3 scale)
         {
-            scene.EntityComponentCreateOrUpdate(JsonUtility.ToJson(new EntityComponentCreateMessage
-            {
-                entityId = entity.entityId,
-                name = "",
-                classId = (int)CLASS_ID_COMPONENT.TRANSFORM,
-                json = JsonUtility.ToJson(new DCLTransform.Model
+            scene.EntityComponentCreateOrUpdate(entity.entityId, "", (int)CLASS_ID_COMPONENT.TRANSFORM,
+                JsonUtility.ToJson(new DCLTransform.Model
                 {
                     position = position,
                     rotation = rotation,
                     scale = scale
-                })
-            }), out CleanableYieldInstruction routine);
+                }),
+                out CleanableYieldInstruction routine);
         }
 
         public static TextShape InstantiateEntityWithTextShape(ParcelScene scene, Vector3 position, TextShape.Model model)
@@ -402,7 +361,7 @@ namespace DCL.Helpers
             GLTFShape gltfShape = SharedComponentCreate<GLTFShape, GLTFShape.Model>(scene, CLASS_ID.GLTF_SHAPE, model);
 
             SetEntityTransform(scene, entity, position, Quaternion.identity, Vector3.one);
-            SharedComponentAttach(gltfShape, entity);
+            SharedComponentAttach(gltfShape, entity, "gltfShape");
             return gltfShape;
         }
 
@@ -502,7 +461,7 @@ namespace DCL.Helpers
 
             DecentralandEntity entity = CreateSceneEntity(scene);
             T shape = SharedComponentCreate<T, K>(scene, classId, model);
-            SharedComponentAttach(shape, entity);
+            SharedComponentAttach(shape, entity, "");
             SetEntityTransform(scene, entity, position, Quaternion.identity, Vector3.one);
             return shape;
         }
@@ -514,7 +473,7 @@ namespace DCL.Helpers
                 out entity);
             BasicMaterial material =
                 SharedComponentCreate<BasicMaterial, BasicMaterial.Model>(scene, CLASS_ID.BASIC_MATERIAL, model);
-            SharedComponentAttach(material, entity);
+            SharedComponentAttach(material, entity, "");
             return material;
         }
 
@@ -525,7 +484,7 @@ namespace DCL.Helpers
                 out entity);
             PBRMaterial material =
                 SharedComponentCreate<PBRMaterial, PBRMaterial.Model>(scene, CLASS_ID.PBR_MATERIAL, model);
-            SharedComponentAttach(material, entity);
+            SharedComponentAttach(material, entity, "");
             return material;
         }
 
@@ -588,25 +547,19 @@ namespace DCL.Helpers
         {
             InstantiateEntityWithShape(scene, entityId, DCL.Models.CLASS_ID.BOX_SHAPE, position);
 
-            scene.SharedComponentCreate(JsonUtility.ToJson(new DCL.Models.SharedComponentCreateMessage
-            {
-                classId = (int)DCL.Models.CLASS_ID.BASIC_MATERIAL,
-                id = materialComponentID,
-                name = "material"
-            }));
+            scene.SharedComponentCreate(
+                materialComponentID,
+                "material",
+                (int)DCL.Models.CLASS_ID.BASIC_MATERIAL);
 
-            scene.SharedComponentUpdate(JsonUtility.ToJson(new DCL.Models.SharedComponentUpdateMessage
-            {
-                id = materialComponentID,
-                json = JsonUtility.ToJson(basicMaterial)
-            }));
+            scene.SharedComponentUpdate(
+                materialComponentID,
+                JsonUtility.ToJson(basicMaterial));
 
-            scene.SharedComponentAttach(JsonUtility.ToJson(new DCL.Models.SharedComponentAttachMessage
-            {
-                entityId = entityId,
-                id = materialComponentID,
-                name = "material"
-            }));
+            scene.SharedComponentAttach(
+                entityId,
+                materialComponentID,
+                "material");
         }
 
 
@@ -615,25 +568,19 @@ namespace DCL.Helpers
         {
             InstantiateEntityWithShape(scene, entityId, DCL.Models.CLASS_ID.BOX_SHAPE, position);
 
-            scene.SharedComponentCreate(JsonUtility.ToJson(new DCL.Models.SharedComponentCreateMessage
-            {
-                classId = (int)DCL.Models.CLASS_ID.PBR_MATERIAL,
-                id = materialComponentID,
-                name = "material"
-            }));
+            scene.SharedComponentCreate(
+                materialComponentID,
+                "material",
+                (int)DCL.Models.CLASS_ID.PBR_MATERIAL);
 
-            scene.SharedComponentUpdate(JsonUtility.ToJson(new DCL.Models.SharedComponentUpdateMessage
-            {
-                id = materialComponentID,
-                json = JsonUtility.ToJson(pbrMaterial)
-            }));
+            scene.SharedComponentUpdate(
+                materialComponentID,
+                JsonUtility.ToJson(pbrMaterial));
 
-            scene.SharedComponentAttach(JsonUtility.ToJson(new DCL.Models.SharedComponentAttachMessage
-            {
-                entityId = entityId,
-                id = materialComponentID,
-                name = "material"
-            }));
+            scene.SharedComponentAttach(
+                entityId,
+                materialComponentID,
+                "material");
         }
 
         public static string GetComponentUniqueId(ParcelScene scene, string salt, int classId, string entityId)
@@ -653,37 +600,24 @@ namespace DCL.Helpers
         {
             string componentId = GetComponentUniqueId(scene, "shape", (int)classId, entityId);
 
-            scene.SharedComponentCreate(JsonUtility.ToJson(new DCL.Models.SharedComponentCreateMessage
-            {
-                classId = (int)classId,
-                id = componentId,
-                name = "shape"
-            }));
+            scene.SharedComponentCreate(
+                componentId,
+                "shape",
+                (int)classId);
 
-            scene.SharedComponentUpdate(JsonUtility.ToJson(new DCL.Models.SharedComponentUpdateMessage
-            {
-                id = componentId,
-                json = model
-            }));
+            scene.SharedComponentUpdate(
+                componentId,
+                model);
 
-            scene.SharedComponentAttach(JsonUtility.ToJson(new DCL.Models.SharedComponentAttachMessage
-            {
-                entityId = entityId,
-                id = componentId,
-                name = "shape"
-            }));
+            scene.SharedComponentAttach(entityId, componentId, "shape");
 
             return componentId;
         }
 
         public static void UpdateShape(ParcelScene scene, string componentId, string model)
         {
-            scene.SharedComponentUpdate(
-                JsonUtility.ToJson(new DCL.Models.SharedComponentUpdateMessage
-                {
-                    id = componentId,
-                    json = model
-                }));
+            CleanableYieldInstruction yieldInstruction = null;
+            scene.SharedComponentUpdate(componentId, model, out yieldInstruction);
         }
 
         static object GetRandomValueForType(Type t)
@@ -820,7 +754,7 @@ namespace DCL.Helpers
             }
 
             // Attach 1st component to entity
-            TestHelpers.SharedComponentAttach(component, entity);
+            TestHelpers.SharedComponentAttach(component, entity, "");
 
             Assert.IsTrue(entity.GetSharedComponent(componentType) != null);
             Assert.AreEqual(component, entity.GetSharedComponent(componentType));
@@ -833,7 +767,7 @@ namespace DCL.Helpers
                 yield return component2.routine;
             }
 
-            TestHelpers.SharedComponentAttach(component2, entity);
+            TestHelpers.SharedComponentAttach(component2, entity, "");
 
             Assert.IsTrue(entity.GetSharedComponent(componentType) != null);
             Assert.AreEqual(component2, entity.GetSharedComponent(componentType));
@@ -863,11 +797,9 @@ namespace DCL.Helpers
 
             yield return SharedComponentUpdate(component, generatedModel);
 
-            scene.SharedComponentUpdate(JsonUtility.ToJson(new DCL.Models.SharedComponentUpdateMessage
-            {
-                id = component.id,
-                json = "{}"
-            }));
+            CleanableYieldInstruction yieldInstruction = null;
+            scene.SharedComponentUpdate(component.id, "{}", out yieldInstruction);
+            yield return yieldInstruction;
 
             yield return component.routine;
 
@@ -984,11 +916,7 @@ namespace DCL.Helpers
                 Assert.IsTrue(onPointerEventCollider.enabled == renderers[i].enabled);
             }
 
-            entity.scene.EntityComponentRemove(JsonUtility.ToJson(new EntityComponentRemoveMessage
-            {
-                entityId = entity.entityId,
-                name = onClickComponent.name,
-            }));
+            entity.scene.EntityComponentRemove(entity.entityId, onClickComponent.name);
             yield return null;
         }
 
@@ -1155,7 +1083,7 @@ namespace DCL.Helpers
                 callback(eventTriggered);
         }
 
-        // Simulates a mouse click by throwing a ray over a given object and checks 
+        // Simulates a mouse click by throwing a ray over a given object and checks
         // if that object is the first one that the ray pass through
         public static bool TestUIClick(Canvas canvas, RectTransform rectT)
         {

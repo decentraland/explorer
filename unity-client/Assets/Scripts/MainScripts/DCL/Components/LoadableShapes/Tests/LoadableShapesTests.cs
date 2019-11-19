@@ -91,7 +91,7 @@ namespace Tests
             NFTShape component = TestHelpers.SharedComponentCreate<NFTShape, NFTShape.Model>(scene, CLASS_ID.NFT_SHAPE, componentModel);
             yield return component.routine;
 
-            TestHelpers.SharedComponentAttach(component, entity);
+            TestHelpers.SharedComponentAttach(component, entity, "");
 
             Assert.IsTrue(entity.meshRootGameObject != null, "entity mesh object should already exist as the NFTShape already initialized");
 
@@ -272,7 +272,7 @@ namespace Tests
 
             DecentralandEntity entity = TestHelpers.CreateSceneEntity(scene);
 
-            TestHelpers.SetEntityTransform(scene, entity, new DCLTransform.Model { position = new Vector3(8, 1, 8)});
+            TestHelpers.SetEntityTransform(scene, entity, new DCLTransform.Model { position = new Vector3(8, 1, 8) });
 
             // set first GLTF
             string gltfId1 = TestHelpers.CreateAndSetShape(scene, entity.entityId, DCL.Models.CLASS_ID.GLTF_SHAPE,
@@ -313,18 +313,18 @@ namespace Tests
             TestHelpers.CreateSceneEntity(scene, entityId);
             var entity = scene.entities[entityId];
 
-            TestHelpers.SetEntityTransform(scene, entity, new DCLTransform.Model { position = new Vector3(8, 1, 8)});
+            TestHelpers.SetEntityTransform(scene, entity, new DCLTransform.Model { position = new Vector3(8, 1, 8) });
 
             yield return null;
-            
+
             // Create shape component
             var shapeModel = new LoadableShape<LoadWrapper_GLTF, LoadableShape.Model>.Model();
             shapeModel.src = Utils.GetTestsAssetsPath() + "/GLB/PalmTree_01.glb";
-            
+
             var shapeComponent = TestHelpers.SharedComponentCreate<LoadableShape<LoadWrapper_GLTF, LoadableShape.Model>, LoadableShape<LoadWrapper_GLTF, LoadableShape.Model>.Model>(scene, CLASS_ID.GLTF_SHAPE, shapeModel);
             yield return shapeComponent.routine;
 
-            TestHelpers.SharedComponentAttach(shapeComponent, entity);
+            TestHelpers.SharedComponentAttach(shapeComponent, entity, "");
 
             var shapeLoader = entity.gameObject.GetComponentInChildren<LoadWrapper_GLTF>(true);
             yield return new WaitUntil(() => shapeLoader.alreadyLoaded);
@@ -341,7 +341,7 @@ namespace Tests
             TestHelpers.CreateSceneEntity(scene, entityId);
             var entity = scene.entities[entityId];
 
-            TestHelpers.SetEntityTransform(scene, entity, new DCLTransform.Model { position = new Vector3(8, 1, 8)});
+            TestHelpers.SetEntityTransform(scene, entity, new DCLTransform.Model { position = new Vector3(8, 1, 8) });
 
             yield return null;
 
@@ -352,7 +352,7 @@ namespace Tests
             var shapeComponent = TestHelpers.SharedComponentCreate<LoadableShape<LoadWrapper_GLTF, LoadableShape.Model>, LoadableShape<LoadWrapper_GLTF, LoadableShape.Model>.Model>(scene, CLASS_ID.GLTF_SHAPE, shapeModel);
             yield return shapeComponent.routine;
 
-            TestHelpers.SharedComponentAttach(shapeComponent, entity);
+            TestHelpers.SharedComponentAttach(shapeComponent, entity, "");
 
             var shapeLoader = entity.gameObject.GetComponentInChildren<LoadWrapper_GLTF>(true);
             yield return new WaitUntil(() => shapeLoader.alreadyLoaded);
@@ -369,18 +369,18 @@ namespace Tests
             TestHelpers.CreateSceneEntity(scene, entityId);
             var entity = scene.entities[entityId];
 
-            TestHelpers.SetEntityTransform(scene, entity, new DCLTransform.Model { position = new Vector3(8, 1, 8)});
+            TestHelpers.SetEntityTransform(scene, entity, new DCLTransform.Model { position = new Vector3(8, 1, 8) });
 
             yield return null;
-            
+
             // Create shape component
             var shapeModel = new LoadableShape<LoadWrapper_NFT, NFTShape.Model>.Model();
             shapeModel.src = "ethereum://0x06012c8cf97BEaD5deAe237070F9587f8E7A266d/558536";
-            
+
             var shapeComponent = TestHelpers.SharedComponentCreate<LoadableShape<LoadWrapper_NFT, NFTShape.Model>, LoadableShape<LoadWrapper_NFT, NFTShape.Model>.Model>(scene, CLASS_ID.NFT_SHAPE, shapeModel);
             yield return shapeComponent.routine;
 
-            TestHelpers.SharedComponentAttach(shapeComponent, entity);
+            TestHelpers.SharedComponentAttach(shapeComponent, entity, "");
 
             var shapeLoader = entity.gameObject.GetComponentInChildren<LoadWrapper_NFT>(true);
             yield return new WaitUntil(() => shapeLoader.alreadyLoaded);
@@ -397,7 +397,7 @@ namespace Tests
             TestHelpers.CreateSceneEntity(scene, entityId);
             var entity = scene.entities[entityId];
 
-            TestHelpers.SetEntityTransform(scene, entity, new DCLTransform.Model { position = new Vector3(8, 1, 8)});
+            TestHelpers.SetEntityTransform(scene, entity, new DCLTransform.Model { position = new Vector3(8, 1, 8) });
 
             yield return null;
 
@@ -408,7 +408,7 @@ namespace Tests
             var shapeComponent = TestHelpers.SharedComponentCreate<LoadableShape<LoadWrapper_NFT, NFTShape.Model>, LoadableShape<LoadWrapper_NFT, NFTShape.Model>.Model>(scene, CLASS_ID.NFT_SHAPE, shapeModel);
             yield return shapeComponent.routine;
 
-            TestHelpers.SharedComponentAttach(shapeComponent, entity);
+            TestHelpers.SharedComponentAttach(shapeComponent, entity, "");
 
             var shapeLoader = entity.gameObject.GetComponentInChildren<LoadWrapper_NFT>(true);
             yield return new WaitUntil(() => shapeLoader.alreadyLoaded);

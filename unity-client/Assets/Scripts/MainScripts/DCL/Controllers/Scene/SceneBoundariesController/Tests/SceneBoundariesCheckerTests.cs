@@ -104,7 +104,7 @@ namespace Tests
             NFTShape component = TestHelpers.SharedComponentCreate<NFTShape, NFTShape.Model>(scene, CLASS_ID.NFT_SHAPE, componentModel);
             yield return component.routine;
 
-            TestHelpers.SharedComponentAttach(component, scene.entities[entityId]);
+            TestHelpers.SharedComponentAttach(component, scene.entities[entityId], "");
 
             var shapeLoader = scene.entities[entityId].gameObject.GetComponentInChildren<LoadWrapper_NFT>(true);
             yield return new WaitUntil(() => shapeLoader.alreadyLoaded);
@@ -215,7 +215,7 @@ namespace Tests
             NFTShape component = TestHelpers.SharedComponentCreate<NFTShape, NFTShape.Model>(scene, CLASS_ID.NFT_SHAPE, componentModel);
             yield return component.routine;
 
-            TestHelpers.SharedComponentAttach(component, scene.entities[entityId]);
+            TestHelpers.SharedComponentAttach(component, scene.entities[entityId], "");
 
             var shapeLoader = scene.entities[entityId].gameObject.GetComponentInChildren<LoadWrapper_NFT>(true);
             yield return new WaitUntil(() => shapeLoader.alreadyLoaded);
@@ -331,7 +331,7 @@ namespace Tests
             NFTShape component = TestHelpers.SharedComponentCreate<NFTShape, NFTShape.Model>(scene, CLASS_ID.NFT_SHAPE, componentModel);
             yield return component.routine;
 
-            TestHelpers.SharedComponentAttach(component, scene.entities[entityId]);
+            TestHelpers.SharedComponentAttach(component, scene.entities[entityId], "");
 
             var shapeLoader = scene.entities[entityId].gameObject.GetComponentInChildren<LoadWrapper_NFT>(true);
             yield return new WaitUntil(() => shapeLoader.alreadyLoaded);

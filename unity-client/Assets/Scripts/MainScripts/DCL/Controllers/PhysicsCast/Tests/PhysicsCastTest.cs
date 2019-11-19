@@ -8,6 +8,7 @@ using UnityEngine;
 using UnityEngine.TestTools;
 using DCL.Interface;
 using Google.Protobuf;
+using System.Linq;
 
 public class PhysicsCast_Tests : TestsBase
 {
@@ -65,9 +66,10 @@ public class PhysicsCast_Tests : TestsBase
 
         for (int i = 0; i < ENTITIES_COUNT; i++)
         {
-            DecentralandEntity entity;
-            BoxShape shape = TestHelpers.CreateEntityWithBoxShape(scene, pos, new Vector3(5, 10, 1), out entity);
+            BoxShape shape = TestHelpers.CreateEntityWithBoxShape(scene, pos);
             yield return shape.routine;
+
+            DecentralandEntity entity = shape.attachedEntities.First();
 
             DCL.CollidersManager.i.ConfigureColliders(entity.meshRootGameObject, true, false, entity);
 
@@ -127,9 +129,10 @@ public class PhysicsCast_Tests : TestsBase
 
         for (int i = 0; i < ENTITIES_COUNT; i++)
         {
-            DecentralandEntity entity;
-            BoxShape shape = TestHelpers.CreateEntityWithBoxShape(scene, pos, new Vector3(5, 10, 1), out entity);
+            BoxShape shape = TestHelpers.CreateEntityWithBoxShape(scene, pos);
             yield return shape.routine;
+
+            DecentralandEntity entity = shape.attachedEntities.First();
 
             DCL.CollidersManager.i.ConfigureColliders(entity.meshRootGameObject, true, false, entity);
 

@@ -312,7 +312,7 @@ namespace Tests
             string sceneId = "Test UI Scene";
             sceneController.CreateUIScene(JsonUtility.ToJson(new CreateUISceneMessage() { id = sceneId }));
 
-            GameObject sceneGo = GameObject.Find(SceneController.UI_SCENE_PRE_ID + sceneId);
+            GameObject sceneGo = GameObject.Find("ui scene:" + sceneId);
 
             GlobalScene scene = sceneController.loadedScenes[sceneId] as GlobalScene;
 
@@ -335,7 +335,7 @@ namespace Tests
 
             yield return null;
 
-            sceneGo = GameObject.Find(SceneController.UI_SCENE_PRE_ID + sceneId);
+            sceneGo = GameObject.Find("ui scene:" + sceneId);
 
             Assert.IsTrue(sceneGo != null, "scene game object not found! UIScenes must not be unloaded by distance!");
             Assert.IsTrue(sceneController.loadedScenes[sceneId] != null,

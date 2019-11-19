@@ -432,8 +432,8 @@ namespace DCL.Controllers
 
         void RemoveAllEntities(bool instant = false)
         {
-            //NOTE(Brian): We need to remove only the rootEntities. 
-            //             If we don't, duplicated entities will get removed when destroying 
+            //NOTE(Brian): We need to remove only the rootEntities.
+            //             If we don't, duplicated entities will get removed when destroying
             //             recursively, making this more complicated than it should.
             List<DecentralandEntity> rootEntities = new List<DecentralandEntity>();
 
@@ -580,7 +580,7 @@ namespace DCL.Controllers
             DCLComponentFactory factory = ownerController.componentFactory;
             Assert.IsNotNull(factory, "Factory is null?");
 
-            // HACK: (Zak) will be removed when we separate each      
+            // HACK: (Zak) will be removed when we separate each
             // uuid component as a different class id
             if (classId == CLASS_ID_COMPONENT.UUID_CALLBACK)
             {
@@ -658,7 +658,7 @@ namespace DCL.Controllers
             return newComponent;
         }
 
-        // HACK: (Zak) will be removed when we separate each 
+        // HACK: (Zak) will be removed when we separate each
         // uuid component as a different class id
         public UUIDComponent EntityUUIDComponentUpdate(DecentralandEntity entity, string type,
             string componentJson)
@@ -910,7 +910,7 @@ namespace DCL.Controllers
             }
         }
 
-        // HACK: (Zak) will be removed when we separate each 
+        // HACK: (Zak) will be removed when we separate each
         // uuid component as a different class id
         private void RemoveUUIDComponentType<T>(DecentralandEntity entity, string type)
             where T : UUIDComponent

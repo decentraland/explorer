@@ -29,15 +29,14 @@ namespace Tests
                 "When the character is inside the scene, the UIScreenSpaceShape should be visible");
 
             // Update canvas visibility value manually
-            screenSpaceShape = scene.SharedComponentUpdate(JsonUtility.ToJson(new SharedComponentUpdateMessage
-            {
-                id = screenSpaceShape.id,
-                json = JsonUtility.ToJson(new UIScreenSpace.Model
+            DCL.CleanableYieldInstruction yieldInstruction = null;
+            screenSpaceShape = scene.SharedComponentUpdate(screenSpaceShape.id,
+                JsonUtility.ToJson(new UIScreenSpace.Model
                 {
                     visible = false
-                })
-            })) as UIScreenSpace;
+                }), out yieldInstruction) as UIScreenSpace;
 
+            yield return yieldInstruction;
             yield return screenSpaceShape.routine;
 
             // Check visibility
@@ -45,16 +44,12 @@ namespace Tests
                 "When the UIScreenSpaceShape is explicitly updated as 'invisible', its canvas shouldn't be visible");
 
             // Re-enable visibility
-            screenSpaceShape = scene.SharedComponentUpdate(JsonUtility.ToJson(new SharedComponentUpdateMessage
+            screenSpaceShape = scene.SharedComponentUpdate(screenSpaceShape.id, JsonUtility.ToJson(new UIScreenSpace.Model
             {
-                id = screenSpaceShape.id,
-                json = JsonUtility.ToJson(new UIScreenSpace.Model
-                {
-                    visible = true
-                })
-            })) as UIScreenSpace;
+                visible = true
+            }), out yieldInstruction) as UIScreenSpace;
+            yield return yieldInstruction;
 
-            
             TestHelpers.SetCharacterPosition(Vector3.zero);
 
             yield return screenSpaceShape.routine;

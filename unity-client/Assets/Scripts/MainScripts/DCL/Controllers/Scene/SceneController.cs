@@ -13,7 +13,6 @@ namespace DCL
 {
     public class SceneController : MonoBehaviour, IMessageHandler
     {
-        public static string UI_SCENE_PRE_ID = "UI Scene - ";
         public static SceneController i { get; private set; }
 
         public bool startDecentralandAutomatically = true;
@@ -38,6 +37,14 @@ namespace DCL
         public bool ignoreGlobalScenes = false;
         public bool msgStepByStep = false;
 
+        public bool deferredMessagesDecoding = false;
+        Queue<string> payloadsToDecode = new Queue<string>();
+        const float MAX_TIME_FOR_DECODE = 0.1f;
+        const float MIN_TIME_FOR_DECODE = 0.001f;
+        float maxTimeForDecode = MAX_TIME_FOR_DECODE;
+        float secsPerThousandMsgs = 0.01f;
+
+
         #region BENCHMARK_EVENTS
 
         //NOTE(Brian): For performance reasons, these events may need to be removed for production.
@@ -55,10 +62,11 @@ namespace DCL
         public static Action OnDebugModeSet;
 
 #if UNITY_EDITOR
-        public delegate void ProcessDelegate(string sceneId, string method, string payload);
+        public delegate void ProcessDelegate(string sceneId, string method);
         public event ProcessDelegate OnMessageProcessInfoStart;
         public event ProcessDelegate OnMessageProcessInfoEnds;
 #endif
+        [System.NonSerialized]
         public List<ParcelScene> scenesSortedByDistance = new List<ParcelScene>();
         private Queue<MessagingBus.QueuedSceneMessage_Scene> sceneMessagesPool = new Queue<MessagingBus.QueuedSceneMessage_Scene>();
 
@@ -115,14 +123,14 @@ namespace DCL
 
             ParcelScene.parcelScenesCleaner.Start();
 
-            StartCoroutine(DeferredDecoding());
+            if (deferredMessagesDecoding)
+                StartCoroutine(DeferredDecoding());
         }
 
         void OnDestroy()
         {
             ParcelScene.parcelScenesCleaner.Stop();
         }
-
         private void Update()
         {
             InputController.i.Update();
@@ -163,7 +171,7 @@ namespace DCL
 
             if (!loadedScenes.ContainsKey(uiSceneId))
             {
-                var newGameObject = new GameObject(UI_SCENE_PRE_ID + uiSceneId);
+                var newGameObject = new GameObject("UI Scene - " + uiSceneId);
 
                 var newScene = newGameObject.AddComponent<GlobalScene>();
                 newScene.ownerController = this;
@@ -439,12 +447,12 @@ namespace DCL
 
         public string SendSceneMessage(string payload)
         {
-            return SendSceneMessage(payload, true);
+            return SendSceneMessage(payload, deferredMessagesDecoding);
         }
 
-        public string SendSceneMessage(string payload, bool enqueue)
+        private string SendSceneMessage(string payload, bool enqueue)
         {
-            string[] chunks = payload.Split(new char[] { '\n' });
+            string[] chunks = payload.Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
             int count = chunks.Length;
             string lastBusId = null;
 
@@ -465,28 +473,33 @@ namespace DCL
 
         private string DecodeAndEnqueue(string payload)
         {
+            OnMessageDecodeStart?.Invoke("Misc");
+
             string sceneId;
             string message;
-            string tag;
-            string busId = "none";
+            string messageTag;
+            PB_SendSceneMessage sendSceneMessage;
 
-            if (!DecodePayloadChunk(payload, out sceneId, out message, out tag))
+            if (!MessageDecoder.DecodePayloadChunk(payload, out sceneId, out message, out messageTag, out sendSceneMessage))
             {
                 return null;
             }
 
-            var queuedMessage = DecodeSceneMessage(sceneId, message, tag);
+            MessagingBus.QueuedSceneMessage_Scene queuedMessage;
 
-            busId = EnqueueMessage(queuedMessage);
+            if (sceneMessagesPool.Count > 0)
+                queuedMessage = sceneMessagesPool.Dequeue();
+            else
+                queuedMessage = new MessagingBus.QueuedSceneMessage_Scene();
 
-            return busId;
+            MessageDecoder.DecodeSceneMessage(sceneId, message, messageTag, sendSceneMessage, ref queuedMessage);
+            EnqueueMessage(queuedMessage);
+
+            OnMessageDecodeEnds?.Invoke("Misc");
+
+            return "";
         }
 
-        Queue<string> payloadsToDecode = new Queue<string>();
-        const float MAX_TIME_FOR_DECODE = 0.05f;
-        const float MIN_TIME_FOR_DECODE = 0.016f;
-        float maxTimeForDecode = MAX_TIME_FOR_DECODE;
-        float secsPerThousandMsgs = 0.01f;
         private IEnumerator DeferredDecoding()
         {
             float lastTimeDecoded = Time.unscaledTime;
@@ -503,7 +516,7 @@ namespace DCL
                     {
                         yield return null;
                         maxTimeForDecode = Mathf.Clamp(MIN_TIME_FOR_DECODE + (float)payloadsToDecode.Count / 1000.0f * secsPerThousandMsgs, MIN_TIME_FOR_DECODE, MAX_TIME_FOR_DECODE);
-                        lastTimeDecoded = Time.unscaledTime;
+                        lastTimeDecoded = Time.realtimeSinceStartup;
                     }
                 }
                 else
@@ -513,63 +526,6 @@ namespace DCL
                 }
             }
         }
-
-        private bool DecodePayloadChunk(string chunk, out string sceneId, out string message, out string tag)
-        {
-            OnMessageDecodeStart?.Invoke("Misc");
-
-            sceneId = message = tag = null;
-
-            var separatorPosition = chunk.IndexOf('\t');
-
-            if (separatorPosition == -1)
-            {
-                OnMessageDecodeEnds?.Invoke("Misc");
-
-                return false;
-            }
-
-            sceneId = chunk.Substring(0, separatorPosition);
-
-            var lastPosition = separatorPosition + 1;
-            separatorPosition = chunk.IndexOf('\t', lastPosition);
-
-            message = chunk.Substring(lastPosition, separatorPosition - lastPosition);
-            lastPosition = separatorPosition + 1;
-
-            separatorPosition = chunk.IndexOf('\t', lastPosition);
-
-            message += '\t' + chunk.Substring(lastPosition, separatorPosition - lastPosition);
-            lastPosition = separatorPosition + 1;
-
-            tag = chunk.Substring(lastPosition);
-
-            OnMessageDecodeEnds?.Invoke("Misc");
-
-            return true;
-        }
-
-        private MessagingBus.QueuedSceneMessage_Scene DecodeSceneMessage(string sceneId, string message, string tag)
-        {
-            MessagingBus.QueuedSceneMessage_Scene queuedMessage;
-
-            if (sceneMessagesPool.Count > 0)
-                queuedMessage = sceneMessagesPool.Dequeue();
-            else
-                queuedMessage = new MessagingBus.QueuedSceneMessage_Scene();
-
-            queuedMessage.type = MessagingBus.QueuedSceneMessage.Type.SCENE_MESSAGE;
-            queuedMessage.sceneId = sceneId;
-            queuedMessage.message = message;
-            queuedMessage.tag = tag;
-
-            OnMessageDecodeStart?.Invoke("Misc");
-            queuedMessage = SceneMessageUtilities.DecodeSceneMessage(sceneId, message, tag);
-            OnMessageDecodeEnds?.Invoke("Misc");
-
-            return queuedMessage;
-        }
-
 
         private string EnqueueMessage(MessagingBus.QueuedSceneMessage_Scene queuedMessage)
         {
@@ -587,6 +543,7 @@ namespace DCL
             busId = MessagingControllersManager.i.Enqueue(scene, queuedMessage);
 
             return busId;
+
         }
 
         public bool ProcessMessage(MessagingBus.QueuedSceneMessage_Scene msgObject, out CleanableYieldInstruction yieldInstruction)
@@ -594,12 +551,12 @@ namespace DCL
             string sceneId = msgObject.sceneId;
             string tag = msgObject.tag;
             string method = msgObject.method;
-            string payload = msgObject.payload;
+            DCL.Interface.PB_SendSceneMessage payload = msgObject.payload;
 
             yieldInstruction = null;
 
-            bool res = false;
             ParcelScene scene;
+            bool res = false;
 
             if (loadedScenes.TryGetValue(sceneId, out scene))
             {
@@ -608,80 +565,78 @@ namespace DCL
                 {
                     if (scene is GlobalScene && ignoreGlobalScenes)
                     {
-                        sceneMessagesPool.Enqueue(msgObject);
                         return false;
                     }
 
                     if (scene.sceneData.basePosition.ToString() != debugSceneCoords.ToString())
                     {
-                        sceneMessagesPool.Enqueue(msgObject);
                         return false;
                     }
                 }
 #endif
                 if (!scene.gameObject.activeInHierarchy)
                 {
-                    res = true;
+                    return true;
                 }
-                else
+
+#if UNITY_EDITOR
+                OnMessageProcessInfoStart?.Invoke(sceneId, method);
+#endif
+                OnMessageProcessStart?.Invoke(method);
+
+                switch (method)
                 {
-#if UNITY_EDITOR
-                    OnMessageProcessInfoStart?.Invoke(sceneId, method, payload);
-#endif
-                    OnMessageProcessStart?.Invoke(method);
-                    switch (method)
-                    {
-                        case MessagingTypes.ENTITY_CREATE:
-                            scene.CreateEntity(tag, payload);
-                            break;
-                        case MessagingTypes.ENTITY_REPARENT:
-                            scene.SetEntityParent(payload);
-                            break;
+                    case MessagingTypes.ENTITY_CREATE:
+                        scene.CreateEntity(tag);
+                        break;
+                    case MessagingTypes.ENTITY_REPARENT:
+                        scene.SetEntityParent(payload.SetEntityParent.EntityId, payload.SetEntityParent.ParentId);
+                        break;
 
-                        //NOTE(Brian): EntityComponent messages
-                        case MessagingTypes.ENTITY_COMPONENT_CREATE_OR_UPDATE:
-                            scene.EntityComponentCreateOrUpdate(payload, out yieldInstruction);
-                            break;
-                        case MessagingTypes.ENTITY_COMPONENT_DESTROY:
-                            scene.EntityComponentRemove(payload);
-                            break;
+                    //NOTE(Brian): EntityComponent messages
+                    case MessagingTypes.ENTITY_COMPONENT_CREATE_OR_UPDATE:
+                        scene.EntityComponentCreateOrUpdate(payload.UpdateEntityComponent.EntityId, payload.UpdateEntityComponent.Name, payload.UpdateEntityComponent.ClassId, payload.UpdateEntityComponent.Data, out yieldInstruction);
+                        break;
+                    case MessagingTypes.ENTITY_COMPONENT_DESTROY:
+                        scene.EntityComponentRemove(payload.ComponentRemoved.EntityId, payload.ComponentRemoved.Name);
+                        break;
 
-                        //NOTE(Brian): SharedComponent messages
-                        case MessagingTypes.SHARED_COMPONENT_ATTACH:
-                            scene.SharedComponentAttach(payload);
-                            break;
-                        case MessagingTypes.SHARED_COMPONENT_CREATE:
-                            scene.SharedComponentCreate(payload);
-                            break;
-                        case MessagingTypes.SHARED_COMPONENT_DISPOSE:
-                            scene.SharedComponentDispose(payload);
-                            break;
-                        case MessagingTypes.SHARED_COMPONENT_UPDATE:
-                            scene.SharedComponentUpdate(payload, out yieldInstruction);
-                            break;
-                        case MessagingTypes.ENTITY_DESTROY:
-                            scene.RemoveEntity(tag);
-                            break;
-                        case MessagingTypes.INIT_DONE:
-                            scene.SetInitMessagesDone();
-                            break;
-                        case MessagingTypes.QUERY:
-                            ParseQuery(payload, scene.sceneData.id);
-                            break;
-                        default:
-                            Debug.LogError($"Unknown method {method}");
-                            return true;
-                    }
-
-                    OnMessageProcessEnds?.Invoke(method);
-
-#if UNITY_EDITOR
-                    OnMessageProcessInfoEnds?.Invoke(sceneId, method, payload);
-#endif
-
-                    res = true;
+                    //NOTE(Brian): SharedComponent messages
+                    case MessagingTypes.SHARED_COMPONENT_ATTACH:
+                        scene.SharedComponentAttach(payload.AttachEntityComponent.EntityId, payload.AttachEntityComponent.Id, payload.AttachEntityComponent.Name);
+                        break;
+                    case MessagingTypes.SHARED_COMPONENT_CREATE:
+                        scene.SharedComponentCreate(payload.ComponentCreated.Id, payload.ComponentCreated.Name, payload.ComponentCreated.Classid);
+                        break;
+                    case MessagingTypes.SHARED_COMPONENT_DISPOSE:
+                        scene.SharedComponentDispose(payload.ComponentDisposed.Id);
+                        break;
+                    case MessagingTypes.SHARED_COMPONENT_UPDATE:
+                        scene.SharedComponentUpdate(payload.ComponentUpdated.Id, payload.ComponentUpdated.Json, out yieldInstruction);
+                        break;
+                    case MessagingTypes.ENTITY_DESTROY:
+                        scene.RemoveEntity(tag);
+                        break;
+                    case MessagingTypes.INIT_DONE:
+                        scene.SetInitMessagesDone();
+                        break;
+                    case MessagingTypes.QUERY:
+                        ParseQuery(payload.Query.QueryId, payload.Query.Payload, scene.sceneData.id);
+                        break;
+                    default:
+                        Debug.LogError($"Unknown method {method}");
+                        return true;
                 }
+
+                OnMessageProcessEnds?.Invoke(method);
+
+#if UNITY_EDITOR
+                OnMessageProcessInfoEnds?.Invoke(sceneId, method);
+#endif
+
+                res = true;
             }
+
             else
             {
                 res = false;
@@ -708,10 +663,11 @@ namespace DCL
             return worldPosition - Utils.GridToWorldPosition(scene.sceneData.basePosition.x, scene.sceneData.basePosition.y);
         }
 
-        public void ParseQuery(string payload, string sceneId)
+        public void ParseQuery(string queryId, string payload, string sceneId)
         {
             QueryMessage query = new QueryMessage();
-            query.FromJSON(payload);
+
+            MessageDecoder.DecodeQueryMessage(queryId, payload, ref query);
 
             ParcelScene scene = loadedScenes[sceneId];
 

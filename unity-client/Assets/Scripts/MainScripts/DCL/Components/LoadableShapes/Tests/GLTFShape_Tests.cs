@@ -165,7 +165,7 @@ public class GLTFShape_Tests : TestsBase
         var shapeComponent = TestHelpers.SharedComponentCreate<LoadableShape<LoadWrapper_GLTF, LoadableShape.Model>, LoadableShape<LoadWrapper_GLTF, LoadableShape.Model>.Model>(scene, CLASS_ID.GLTF_SHAPE, shapeModel);
         yield return shapeComponent.routine;
 
-        TestHelpers.SharedComponentAttach(shapeComponent, entity);
+        TestHelpers.SharedComponentAttach(shapeComponent, entity, "");
 
         var shapeLoader = entity.gameObject.GetComponentInChildren<LoadWrapper_GLTF>(true);
         yield return new WaitUntil(() => shapeLoader.alreadyLoaded);
@@ -190,7 +190,7 @@ public class GLTFShape_Tests : TestsBase
         var shapeComponent = TestHelpers.SharedComponentCreate<LoadableShape<LoadWrapper_GLTF, LoadableShape.Model>, LoadableShape<LoadWrapper_GLTF, LoadableShape.Model>.Model>(scene, CLASS_ID.GLTF_SHAPE, shapeModel);
         yield return shapeComponent.routine;
 
-        TestHelpers.SharedComponentAttach(shapeComponent, entity);
+        TestHelpers.SharedComponentAttach(shapeComponent, entity, "");
 
         var shapeLoader = entity.gameObject.GetComponentInChildren<LoadWrapper_GLTF>(true);
         yield return new WaitUntil(() => shapeLoader.alreadyLoaded);
