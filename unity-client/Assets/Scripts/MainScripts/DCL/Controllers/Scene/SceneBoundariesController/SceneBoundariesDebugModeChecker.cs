@@ -40,8 +40,10 @@ namespace DCL.Controllers
 
         const string WIREFRAME_PREFAB_NAME = "Prefabs/WireframeCubeMesh";
         const string INVALID_MESH_MATERIAL_NAME = "Materials/InvalidMesh";
+        const string INVALID_SUBMESH_MATERIAL_NAME = "Materials/InvalidSubMesh";
 
         Material invalidMeshMaterial;
+        Material invalidSubMeshMaterial;
         Dictionary<GameObject, InvalidMeshInfo> invalidMeshesInfo = new Dictionary<GameObject, InvalidMeshInfo>();
         HashSet<Renderer> invalidSubmeshes = new HashSet<Renderer>();
 
@@ -49,6 +51,7 @@ namespace DCL.Controllers
         {
             invalidMeshesInfo = new Dictionary<GameObject, InvalidMeshInfo>();
             invalidMeshMaterial = Resources.Load(INVALID_MESH_MATERIAL_NAME) as Material;
+            invalidSubMeshMaterial = Resources.Load(INVALID_SUBMESH_MATERIAL_NAME) as Material;
         }
 
         protected override bool AreSubmeshesInsideBoundaries(DecentralandEntity entity)
@@ -115,17 +118,22 @@ namespace DCL.Controllers
                 // Save original materials
                 invalidMeshInfo.originalMaterials.Add(entityRenderers[i], entityRenderers[i].sharedMaterial);
 
-                entityRenderers[i].sharedMaterial = invalidMeshMaterial;
-
                 if (invalidSubmeshes.Contains(entityRenderers[i]))
                 {
-                    // Wireframe that shows the boundaries to the dev (We don't use the GameObject.Instantiate(prefab, parent) 
+                    // Wireframe that shows the boundaries to the dev (We don't use the GameObject.Instantiate(prefab, parent)
                     // overload because we need to set the position and scale before parenting, to deal with scaled objects)
                     GameObject wireframeObject = GameObject.Instantiate(Resources.Load<GameObject>(WIREFRAME_PREFAB_NAME));
                     wireframeObject.transform.position = entityRenderers[i].bounds.center;
                     wireframeObject.transform.localScale = entityRenderers[i].bounds.size * 1.01f;
                     wireframeObject.transform.SetParent(entity.gameObject.transform);
+
+                    entityRenderers[i].sharedMaterial = invalidSubMeshMaterial;
+
                     invalidMeshInfo.wireframeObjects.Add(wireframeObject);
+                }
+                else
+                {
+                    entityRenderers[i].sharedMaterial = invalidMeshMaterial;
                 }
             }
 
