@@ -12,6 +12,10 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
+using System.Text;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.IO;
+using Google.Protobuf;
 
 namespace DCL.Helpers
 {
@@ -332,14 +336,28 @@ namespace DCL.Helpers
 
         public static void SetEntityTransform(ParcelScene scene, DecentralandEntity entity, Vector3 position, Quaternion rotation, Vector3 scale)
         {
-            scene.EntityComponentCreateOrUpdate(entity.entityId, "", (int)CLASS_ID_COMPONENT.TRANSFORM,
-                JsonUtility.ToJson(new DCLTransform.Model
-                {
-                    position = position,
-                    rotation = rotation,
-                    scale = scale
-                }),
-                out CleanableYieldInstruction routine);
+            var transform = new PB_Transform();
+
+            transform.Position = new PB_Vector3();
+            transform.Position.X = position.x;
+            transform.Position.Y = position.y;
+            transform.Position.Z = position.z;
+
+            transform.Rotation = new PB_Quaternion();
+            transform.Rotation.X = rotation.x;
+            transform.Rotation.Y = rotation.y;
+            transform.Rotation.Z = rotation.z;
+            transform.Rotation.W = rotation.z;
+
+            transform.Scale = new PB_Vector3();
+            transform.Scale.X = scale.x;
+            transform.Scale.Y = scale.y;
+            transform.Scale.Z = scale.z;
+
+            string base64TransformModel;
+            base64TransformModel = Convert.ToBase64String(transform.ToByteArray());
+
+            scene.EntityComponentCreateOrUpdate(entity.entityId, "transform", (int)CLASS_ID_COMPONENT.TRANSFORM, base64TransformModel, out CleanableYieldInstruction routine);
         }
 
         public static TextShape InstantiateEntityWithTextShape(ParcelScene scene, Vector3 position, TextShape.Model model)
