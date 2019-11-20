@@ -410,13 +410,13 @@ namespace Tests
 
             yield return mat.routine;
 
-            TestHelpers.SharedComponentAttach(mat, entity, "");
+            TestHelpers.SharedComponentAttach(mat, entity);
 
             SphereShape shape = TestHelpers.SharedComponentCreate<SphereShape, SphereShape.Model>(scene,
                 CLASS_ID.SPHERE_SHAPE,
                 new SphereShape.Model { });
 
-            TestHelpers.SharedComponentAttach(shape, entity, "");
+            TestHelpers.SharedComponentAttach(shape, entity);
 
             Assert.IsTrue(entity.meshRootGameObject != null);
             Assert.IsTrue(entity.meshRootGameObject.GetComponent<MeshRenderer>() != null);
@@ -451,7 +451,7 @@ namespace Tests
 
             yield return mat.routine;
 
-            TestHelpers.SharedComponentAttach(mat, entity, "");
+            TestHelpers.SharedComponentAttach(mat, entity);
 
             SphereShape shape = TestHelpers.SharedComponentCreate<SphereShape, SphereShape.Model>(scene,
                 CLASS_ID.SPHERE_SHAPE,
@@ -459,7 +459,7 @@ namespace Tests
 
             yield return shape.routine;
 
-            TestHelpers.SharedComponentAttach(shape, entity, "");
+            TestHelpers.SharedComponentAttach(shape, entity);
 
             Assert.IsTrue(entity.meshRootGameObject != null);
             Assert.IsTrue(entity.meshRootGameObject.GetComponent<MeshRenderer>() != null);

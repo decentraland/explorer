@@ -28,7 +28,7 @@ public class NFTShape_Tests : TestsBase
         NFTShape component = TestHelpers.SharedComponentCreate<NFTShape, NFTShape.Model>(scene, CLASS_ID.NFT_SHAPE, componentModel);
         yield return component.routine;
 
-        TestHelpers.SharedComponentAttach(component, entity, "");
+        TestHelpers.SharedComponentAttach(component, entity);
 
         Assert.IsTrue(entity.meshRootGameObject != null, "entity mesh object should already exist as the NFTShape already initialized");
 
@@ -76,7 +76,7 @@ public class NFTShape_Tests : TestsBase
         var shapeComponent = TestHelpers.SharedComponentCreate<LoadableShape<LoadWrapper_NFT, NFTShape.Model>, LoadableShape<LoadWrapper_NFT, NFTShape.Model>.Model>(scene, CLASS_ID.NFT_SHAPE, shapeModel);
         yield return shapeComponent.routine;
 
-        TestHelpers.SharedComponentAttach(shapeComponent, entity, "");
+        TestHelpers.SharedComponentAttach(shapeComponent, entity);
 
         var shapeLoader = entity.gameObject.GetComponentInChildren<LoadWrapper_NFT>(true);
         yield return new WaitUntil(() => shapeLoader.alreadyLoaded);
@@ -101,7 +101,7 @@ public class NFTShape_Tests : TestsBase
         var shapeComponent = TestHelpers.SharedComponentCreate<LoadableShape<LoadWrapper_NFT, NFTShape.Model>, LoadableShape<LoadWrapper_NFT, NFTShape.Model>.Model>(scene, CLASS_ID.NFT_SHAPE, shapeModel);
         yield return shapeComponent.routine;
 
-        TestHelpers.SharedComponentAttach(shapeComponent, entity, "");
+        TestHelpers.SharedComponentAttach(shapeComponent, entity);
 
         var shapeLoader = entity.gameObject.GetComponentInChildren<LoadWrapper_NFT>(true);
         yield return new WaitUntil(() => shapeLoader.alreadyLoaded);

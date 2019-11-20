@@ -259,7 +259,7 @@ namespace Tests
             BaseShape shapeComponent = TestHelpers.SharedComponentCreate<BoxShape, BaseShape.Model>(scene, CLASS_ID.BOX_SHAPE, shapeModel);
             yield return shapeComponent.routine;
 
-            TestHelpers.SharedComponentAttach(shapeComponent, entity, "");
+            TestHelpers.SharedComponentAttach(shapeComponent, entity);
 
             yield return TestHelpers.TestShapeCollision(shapeComponent, shapeModel, entity);
 
@@ -272,7 +272,7 @@ namespace Tests
             shapeComponent = TestHelpers.SharedComponentCreate<SphereShape, BaseShape.Model>(scene, CLASS_ID.SPHERE_SHAPE, shapeModel);
             yield return shapeComponent.routine;
 
-            TestHelpers.SharedComponentAttach(shapeComponent, entity, "");
+            TestHelpers.SharedComponentAttach(shapeComponent, entity);
 
             yield return TestHelpers.TestShapeCollision(shapeComponent, shapeModel, entity);
 
@@ -285,7 +285,7 @@ namespace Tests
             shapeComponent = TestHelpers.SharedComponentCreate<ConeShape, BaseShape.Model>(scene, CLASS_ID.CONE_SHAPE, shapeModel);
             yield return shapeComponent.routine;
 
-            TestHelpers.SharedComponentAttach(shapeComponent, entity, "");
+            TestHelpers.SharedComponentAttach(shapeComponent, entity);
 
             yield return TestHelpers.TestShapeCollision(shapeComponent, shapeModel, entity);
 
@@ -298,7 +298,7 @@ namespace Tests
             shapeComponent = TestHelpers.SharedComponentCreate<CylinderShape, BaseShape.Model>(scene, CLASS_ID.CYLINDER_SHAPE, shapeModel);
             yield return shapeComponent.routine;
 
-            TestHelpers.SharedComponentAttach(shapeComponent, entity, "");
+            TestHelpers.SharedComponentAttach(shapeComponent, entity);
 
             yield return TestHelpers.TestShapeCollision(shapeComponent, shapeModel, entity);
 
@@ -311,7 +311,7 @@ namespace Tests
             shapeComponent = TestHelpers.SharedComponentCreate<PlaneShape, BaseShape.Model>(scene, CLASS_ID.PLANE_SHAPE, shapeModel);
             yield return shapeComponent.routine;
 
-            TestHelpers.SharedComponentAttach(shapeComponent, entity, "");
+            TestHelpers.SharedComponentAttach(shapeComponent, entity);
 
             yield return TestHelpers.TestShapeCollision(shapeComponent, shapeModel, entity);
 
@@ -338,7 +338,7 @@ namespace Tests
             BaseShape shapeComponent = TestHelpers.SharedComponentCreate<BoxShape, BaseShape.Model>(scene, CLASS_ID.BOX_SHAPE, shapeModel);
             yield return shapeComponent.routine;
 
-            TestHelpers.SharedComponentAttach(shapeComponent, entity, "");
+            TestHelpers.SharedComponentAttach(shapeComponent, entity);
 
             yield return TestHelpers.TestShapeVisibility(shapeComponent, shapeModel, entity);
 
@@ -351,7 +351,7 @@ namespace Tests
             shapeComponent = TestHelpers.SharedComponentCreate<SphereShape, BaseShape.Model>(scene, CLASS_ID.SPHERE_SHAPE, shapeModel);
             yield return shapeComponent.routine;
 
-            TestHelpers.SharedComponentAttach(shapeComponent, entity, "");
+            TestHelpers.SharedComponentAttach(shapeComponent, entity);
 
             yield return TestHelpers.TestShapeVisibility(shapeComponent, shapeModel, entity);
 
@@ -364,7 +364,7 @@ namespace Tests
             shapeComponent = TestHelpers.SharedComponentCreate<ConeShape, BaseShape.Model>(scene, CLASS_ID.CONE_SHAPE, shapeModel);
             yield return shapeComponent.routine;
 
-            TestHelpers.SharedComponentAttach(shapeComponent, entity, "");
+            TestHelpers.SharedComponentAttach(shapeComponent, entity);
 
             yield return TestHelpers.TestShapeVisibility(shapeComponent, shapeModel, entity);
 
@@ -377,7 +377,7 @@ namespace Tests
             shapeComponent = TestHelpers.SharedComponentCreate<CylinderShape, BaseShape.Model>(scene, CLASS_ID.CYLINDER_SHAPE, shapeModel);
             yield return shapeComponent.routine;
 
-            TestHelpers.SharedComponentAttach(shapeComponent, entity, "");
+            TestHelpers.SharedComponentAttach(shapeComponent, entity);
 
             yield return TestHelpers.TestShapeVisibility(shapeComponent, shapeModel, entity);
 
@@ -390,7 +390,7 @@ namespace Tests
             shapeComponent = TestHelpers.SharedComponentCreate<PlaneShape, BaseShape.Model>(scene, CLASS_ID.PLANE_SHAPE, shapeModel);
             yield return shapeComponent.routine;
 
-            TestHelpers.SharedComponentAttach(shapeComponent, entity, "");
+            TestHelpers.SharedComponentAttach(shapeComponent, entity);
 
             yield return TestHelpers.TestShapeVisibility(shapeComponent, shapeModel, entity);
 

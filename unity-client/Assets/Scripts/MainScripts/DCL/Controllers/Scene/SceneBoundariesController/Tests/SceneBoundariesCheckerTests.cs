@@ -104,7 +104,7 @@ namespace Tests
             NFTShape component = TestHelpers.SharedComponentCreate<NFTShape, NFTShape.Model>(scene, CLASS_ID.NFT_SHAPE, componentModel);
             yield return component.routine;
 
-            TestHelpers.SharedComponentAttach(component, scene.entities[entityId], "");
+            TestHelpers.SharedComponentAttach(component, scene.entities[entityId]);
 
             var shapeLoader = scene.entities[entityId].gameObject.GetComponentInChildren<LoadWrapper_NFT>(true);
             yield return new WaitUntil(() => shapeLoader.alreadyLoaded);
@@ -181,6 +181,9 @@ namespace Tests
             // Move object to surpass the scene boundaries
             TestHelpers.SetEntityTransform(scene, scene.entities[entityId], new DCLTransform.Model { position = new Vector3(18, 1, 18) });
 
+            // Debug.Break();
+            // yield return null;
+
             Assert.IsTrue(MeshIsInvalid(scene.entities[entityId].meshesInfo));
         }
 
@@ -215,7 +218,7 @@ namespace Tests
             NFTShape component = TestHelpers.SharedComponentCreate<NFTShape, NFTShape.Model>(scene, CLASS_ID.NFT_SHAPE, componentModel);
             yield return component.routine;
 
-            TestHelpers.SharedComponentAttach(component, scene.entities[entityId], "");
+            TestHelpers.SharedComponentAttach(component, scene.entities[entityId]);
 
             var shapeLoader = scene.entities[entityId].gameObject.GetComponentInChildren<LoadWrapper_NFT>(true);
             yield return new WaitUntil(() => shapeLoader.alreadyLoaded);
@@ -331,7 +334,7 @@ namespace Tests
             NFTShape component = TestHelpers.SharedComponentCreate<NFTShape, NFTShape.Model>(scene, CLASS_ID.NFT_SHAPE, componentModel);
             yield return component.routine;
 
-            TestHelpers.SharedComponentAttach(component, scene.entities[entityId], "");
+            TestHelpers.SharedComponentAttach(component, scene.entities[entityId]);
 
             var shapeLoader = scene.entities[entityId].gameObject.GetComponentInChildren<LoadWrapper_NFT>(true);
             yield return new WaitUntil(() => shapeLoader.alreadyLoaded);
