@@ -20,7 +20,7 @@ namespace Tests
         {
             yield return base.InitScene();
 
-            DCLCharacterController.i.gravity = 0f;
+            DCLCharacterController.i.PauseGravity();
             DCLCharacterController.i.characterController.enabled = false;
             DCLCharacterController.i.Teleport(JsonConvert.SerializeObject(new
             {
@@ -39,7 +39,7 @@ namespace Tests
         {
             yield return InitScene();
 
-            DCLCharacterController.i.gravity = 0f;
+            DCLCharacterController.i.ResumeGravity();
             DCLCharacterController.i.characterController.enabled = false;
             DCLCharacterController.i.Teleport(JsonConvert.SerializeObject(new
             {
@@ -140,7 +140,7 @@ namespace Tests
         {
             yield return InitScene();
 
-            DCLCharacterController.i.gravity = 0f;
+            DCLCharacterController.i.PauseGravity();
             DCLCharacterController.i.characterController.enabled = false;
             DCLCharacterController.i.Teleport(JsonConvert.SerializeObject(new
             {
@@ -159,7 +159,7 @@ namespace Tests
         {
             yield return InitScene();
 
-            DCLCharacterController.i.gravity = 0f;
+            DCLCharacterController.i.PauseGravity();
 
             var newEulerAngle = 10f;
             DCLCharacterController.i.GetType().GetField("aimingHorizontalDeltaAngle", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(DCLCharacterController.i, newEulerAngle);
@@ -174,8 +174,7 @@ namespace Tests
         {
             yield return base.InitScene();
 
-            float originalGravity = DCLCharacterController.i.gravity;
-            DCLCharacterController.i.gravity = 0f;
+            DCLCharacterController.i.PauseGravity();
             DCLCharacterController.i.Teleport(JsonConvert.SerializeObject(new
             {
                 x = 2f,
@@ -196,7 +195,7 @@ namespace Tests
             Assert.IsTrue(Vector3.Distance(platformTransform.position, new Vector3(2f, 1f, 8f)) < 0.1f);
 
             // enable character gravity
-            DCLCharacterController.i.gravity = originalGravity;
+            DCLCharacterController.i.ResumeGravity();
 
             // Let the character *fall* onto the platform
             yield return new WaitForSeconds(2f);
@@ -239,8 +238,7 @@ namespace Tests
         {
             yield return base.InitScene();
 
-            float originalGravity = DCLCharacterController.i.gravity;
-            DCLCharacterController.i.gravity = 0f;
+            DCLCharacterController.i.PauseGravity();
             DCLCharacterController.i.Teleport(JsonConvert.SerializeObject(new
             {
                 x = 5f,
@@ -261,7 +259,7 @@ namespace Tests
             Assert.IsTrue(Vector3.Distance(platformTransform.position, new Vector3(8f, 1f, 8f)) < 0.1f);
 
             // enable character gravity
-            DCLCharacterController.i.gravity = originalGravity;
+            DCLCharacterController.i.ResumeGravity();
 
             // Let the character *fall* onto the platform
             yield return new WaitForSeconds(2f);
@@ -359,8 +357,7 @@ namespace Tests
         {
             yield return base.InitScene();
 
-            float originalGravity = DCLCharacterController.i.gravity;
-            DCLCharacterController.i.gravity = 0f;
+            DCLCharacterController.i.PauseGravity();
             DCLCharacterController.i.Teleport(JsonConvert.SerializeObject(new
             {
                 x = 5f,
@@ -381,7 +378,7 @@ namespace Tests
             Assert.IsTrue(Vector3.Distance(platformTransform.position, new Vector3(8f, 1f, 8f)) < 0.1f);
 
             // enable character gravity
-            DCLCharacterController.i.gravity = originalGravity;
+            DCLCharacterController.i.ResumeGravity();
 
             // Let the character *fall* onto the platform
             yield return new WaitForSeconds(2f);

@@ -14,7 +14,6 @@ public class DCLCharacterController : MonoBehaviour
         public Vector3? cameraTarget;
     }
 
-
     public static DCLCharacterController i { get; private set; }
 
     [Header("Aiming")]
@@ -77,6 +76,7 @@ public class DCLCharacterController : MonoBehaviour
     float lastUngroundedTime = 0f;
     float lastJumpButtonPressedTime = 0f;
     float lastMovementReportTime;
+    float originalGravity;
     Vector3 velocity = Vector3.zero;
     Vector2 aimingInput;
     Vector2 movementInput;
@@ -104,6 +104,8 @@ public class DCLCharacterController : MonoBehaviour
         }
 
         i = this;
+
+        originalGravity = gravity;
 
         CommonScriptableObjects.playerUnityPosition.Set(Vector3.zero);
         CommonScriptableObjects.playerCoords.Set(Vector2Int.zero);
@@ -266,7 +268,7 @@ public class DCLCharacterController : MonoBehaviour
         {
             DetectInput();
 
-            // Rotation            
+            // Rotation
             Vector3 transformRotation = (transform.rotation * Quaternion.Euler(0f, aimingHorizontalDeltaAngle, 0f)).eulerAngles;
             Vector3 cameraRotation = (cameraTransform.localRotation * Quaternion.Euler(-aimingVerticalDeltaAngle, 0f, 0f)).eulerAngles;
             Vector3 eulerRotation = new Vector3(cameraRotation.x, transformRotation.y, 0f);
@@ -460,7 +462,7 @@ public class DCLCharacterController : MonoBehaviour
         reportPosition.y += cameraTransform.localPosition.y;
 
         //NOTE(Brian): We have to wait for a Teleport before sending the ReportPosition, because if not ReportPosition events will be sent
-        //             When the spawn point is being selected / scenes being prepared to be sent and the Kernel gets crazy. 
+        //             When the spawn point is being selected / scenes being prepared to be sent and the Kernel gets crazy.
 
         //             The race conditions that can arise from not having this flag can result in:
         //                  - Scenes not being sent for loading, making ActivateRenderer never being sent, only in WSS mode.
@@ -469,5 +471,16 @@ public class DCLCharacterController : MonoBehaviour
             DCL.Interface.WebInterface.ReportPosition(reportPosition, compositeRotation, playerHeight);
 
         lastMovementReportTime = DCLTime.realtimeSinceStartup;
+    }
+
+    public void PauseGravity()
+    {
+        gravity = 0f;
+        velocity.y = 0f;
+    }
+
+    public void ResumeGravity()
+    {
+        gravity = originalGravity;
     }
 }
