@@ -16,7 +16,7 @@ public class PhysicsCast_Tests : TestsBase
     PB_RayQuery raycastQuery;
     PB_Query query;
     PB_SendSceneMessage sendSceneMessage;
-    Vector3 startPos = new Vector3(5, 5, 15);
+    Vector3 startPos = new Vector3(5, 2, 15);
     bool alreadyInitialized = false;
 
     protected override IEnumerator InitScene(bool usesWebServer = false, bool spawnCharController = true, bool spawnTestScene = true, bool spawnUIScene = true, bool debugMode = false)
@@ -70,6 +70,9 @@ public class PhysicsCast_Tests : TestsBase
             yield return shape.routine;
 
             DecentralandEntity entity = shape.attachedEntities.First();
+
+            TestHelpers.SetEntityTransform(scene, entity, pos, Quaternion.identity, new Vector3(5, 10, 1));
+            yield return null;
 
             DCL.CollidersManager.i.ConfigureColliders(entity.meshRootGameObject, true, false, entity);
 
@@ -134,6 +137,9 @@ public class PhysicsCast_Tests : TestsBase
 
             DecentralandEntity entity = shape.attachedEntities.First();
 
+            TestHelpers.SetEntityTransform(scene, entity, pos, Quaternion.identity, new Vector3(5, 10, 1));
+            yield return null;
+
             DCL.CollidersManager.i.ConfigureColliders(entity.meshRootGameObject, true, false, entity);
 
             entities.Add(entity);
@@ -170,8 +176,11 @@ public class PhysicsCast_Tests : TestsBase
             (raycastResponse) =>
             {
                 responseCount++;
+
                 Assert.IsTrue(responseCount == 1, "This raycast query should be lossy and therefore excecuted once.");
+
                 Assert.IsTrue(raycastResponse != null);
+
                 Assert.IsTrue(raycastResponse.payload.payload.entities.Length == ENTITIES_COUNT);
 
                 if (raycastResponse != null &&
@@ -225,8 +234,6 @@ public class PhysicsCast_Tests : TestsBase
             },
             OnSuccess);
     }
-
-
 
     private bool AreSceneEventsEqual<T, T2>(WebInterface.SceneEvent<T> s1, WebInterface.SceneEvent<T> s2) where T2 : WebInterface.RaycastHitInfo where T : WebInterface.RaycastResponse<T2>
     {

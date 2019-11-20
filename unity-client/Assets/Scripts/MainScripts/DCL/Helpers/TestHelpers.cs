@@ -1220,10 +1220,13 @@ namespace DCL.Helpers
             {
                 OnIterationStart?.Invoke();
 
-                var messageObject = JsonUtility.FromJson<T>(lastMessageFromEnginePayload);
+                if (!string.IsNullOrEmpty(lastMessageFromEnginePayload) && lastMessageFromEngineType == targetMessageType)
+                {
+                    var messageObject = JsonUtility.FromJson<T>(lastMessageFromEnginePayload);
 
-                if (OnSuccess != null)
-                    return OnSuccess.Invoke(messageObject);
+                    if (OnSuccess != null)
+                        return OnSuccess.Invoke(messageObject);
+                }
 
                 return false;
             }, 2f);
