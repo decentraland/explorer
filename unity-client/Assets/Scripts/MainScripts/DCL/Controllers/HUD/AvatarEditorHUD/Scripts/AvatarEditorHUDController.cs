@@ -24,6 +24,9 @@ public class AvatarEditorHUDController : IDisposable, IHUD
 
     public AvatarEditorHUDController(UserProfile userProfile, WearableDictionary catalog)
     {
+        this.userProfile = userProfile;
+        this.catalog = catalog;
+
         view = AvatarEditorHUDView.Create(this);
 
         skinColorList = Resources.Load<ColorList>("SkinTone");
@@ -31,12 +34,10 @@ public class AvatarEditorHUDController : IDisposable, IHUD
         eyeColorList = Resources.Load<ColorList>("EyeColor");
         view.SetColors(skinColorList.colors, hairColorList.colors, eyeColorList.colors);
 
-        this.catalog = catalog;
         ProcessCatalog(this.catalog);
         this.catalog.OnAdded += AddWearable;
         this.catalog.OnRemoved += RemoveWearable;
 
-        this.userProfile = userProfile;
         LoadUserProfile(userProfile);
         this.userProfile.OnUpdate += LoadUserProfile;
     }
@@ -231,6 +232,7 @@ public class AvatarEditorHUDController : IDisposable, IHUD
     private void ProcessCatalog(WearableDictionary catalog)
     {
         wearablesByCategory.Clear();
+        view.RemoveAllWearables();
         using (var iterator = catalog.GetEnumerator())
         {
             while (iterator.MoveNext())
@@ -252,7 +254,7 @@ public class AvatarEditorHUDController : IDisposable, IHUD
             wearablesByCategory.Add(wearable.category, new List<WearableItem>());
         }
         wearablesByCategory[wearable.category].Add(wearable);
-        view.AddWearable(wearable);
+        view.AddWearable(wearable, !wearable.tags.Contains("base-wearable"));
     }
 
     private void RemoveWearable(string id, WearableItem wearable)
@@ -267,7 +269,7 @@ public class AvatarEditorHUDController : IDisposable, IHUD
                 }
             }
         }
-        view.RemoveWearable(wearable);
+        view.RemoveWearable(wearable, !wearable.tags.Contains("base-wearable"));
     }
 
     public void RandomizeWearables()

@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
+[assembly: InternalsVisibleTo("AvatarEditorHUDTests")]
 public class ItemSelector : MonoBehaviour
 {
     [SerializeField]
@@ -12,7 +14,7 @@ public class ItemSelector : MonoBehaviour
 
     public event System.Action<string> OnItemClicked;
 
-    private Dictionary<string, ItemToggle> itemToggles = new Dictionary<string, ItemToggle>();
+    internal Dictionary<string, ItemToggle> itemToggles = new Dictionary<string, ItemToggle>();
 
     private string currentBodyShape;
 
@@ -56,8 +58,18 @@ public class ItemSelector : MonoBehaviour
         if (toggle == null) return;
 
         itemToggles.Remove(itemID);
-        Destroy(toggle);
+        Destroy(toggle.gameObject);
     }
+
+    public void RemoveAllItemToggle()
+    {
+        var gameObjects = itemToggles.Values.Select(x => x.gameObject).ToArray();
+        itemToggles.Clear();
+        for (var i = gameObjects.Length - 1; i >= 0; i--)
+        {
+            Destroy(gameObjects[i]);
+        }
+    } 
 
     public void SetBodyShape(string bodyShape)
     {
@@ -83,13 +95,15 @@ public class ItemSelector : MonoBehaviour
     public void Select(string itemID)
     {
         ItemToggle toggle = GetItemToggleByID(itemID);
-        toggle.selected = true;
+        if(toggle != null)
+            toggle.selected = true;
     }
 
     public void Unselect(string itemID)
     {
         ItemToggle toggle = GetItemToggleByID(itemID);
-        toggle.selected = false;
+        if(toggle != null)
+            toggle.selected = false;
     }
 
     public void UnselectAll()
