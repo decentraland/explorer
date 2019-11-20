@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
@@ -12,6 +13,7 @@ using UnityGLTF.Cache;
 using MappingPair = DCL.ContentServerUtils.MappingPair;
 using MappingsAPIData = DCL.ContentServerUtils.MappingsAPIData;
 
+[assembly: InternalsVisibleTo("AssetBundleBuilderEditorTests")]
 namespace DCL
 {
     [System.Serializable]
@@ -164,7 +166,7 @@ namespace DCL
                 File.Delete(metaPath);
 
                 File.Copy(finalDownloadedPath + assetPath, finalDownloadedPath + "tmp");
-                AssetDatabase.DeleteAsset(finalDownloadedPath + assetPath);
+                AssetDatabase.DeleteAsset(finalDownloadedAssetDbPath + assetPath);
                 File.Delete(finalDownloadedPath + assetPath);
 
                 AssetDatabase.Refresh();
@@ -177,10 +179,10 @@ namespace DCL
                 AssetDatabase.Refresh();
                 AssetDatabase.SaveAssets();
 
-                Debug.Log($"content = {File.ReadAllText(metaPath)}");
+                //Debug.Log($"content = {File.ReadAllText(metaPath)}");
 
-                Debug.Log("guid should be " + guid);
-                Debug.Log("guid is " + AssetDatabase.AssetPathToGUID(finalDownloadedAssetDbPath + assetPath));
+                //Debug.Log("guid should be " + guid);
+                //Debug.Log("guid is " + AssetDatabase.AssetPathToGUID(finalDownloadedAssetDbPath + assetPath));
 
                 if (fullPathToTag != null)
                 {
@@ -201,30 +203,48 @@ namespace DCL
 
         internal static void ExportSceneToAssetBundles_Internal(string sceneCid)
         {
-            DownloadSceneTextures(sceneCid);
-
             MappingsAPIData parcelInfoApiData = AssetBundleBuilderUtils.GetSceneMappingsData(sceneCid);
 
             AssetDatabase.Refresh();
 
             MappingPair[] rawContents = parcelInfoApiData.data[0].content.contents;
 
-            var contentProvider = new DCL.ContentProvider();
-            contentProvider.contents = new List<MappingPair>(rawContents);
-            contentProvider.baseUrl = ContentServerUtils.GetContentAPIUrlBase(environment);
-            contentProvider.BakeHashes();
-
-            var contentProviderAB = new DCL.ContentProvider();
-            contentProviderAB.contents = new List<MappingPair>(rawContents);
-            contentProviderAB.baseUrl = ContentServerUtils.GetBundlesAPIUrlBase(environment);
-            contentProviderAB.BakeHashes();
-
-            var stringToAB = new Dictionary<string, AssetBundle>();
-
             var hashToGltfPair = AssetBundleBuilderUtils.FilterExtensions(rawContents, gltfExtensions);
             var hashToBufferPair = AssetBundleBuilderUtils.FilterExtensions(rawContents, bufferExtensions);
 
             Dictionary<string, string> pathsToTag = new Dictionary<string, string>();
+
+            bool shouldAbortBecauseAllBundlesExist = true;
+
+            if (skipAlreadyBuiltBundles)
+            {
+                foreach (var kvp in hashToGltfPair)
+                {
+                    string gltfHash = kvp.Key;
+
+                    if (!File.Exists(finalAssetBundlePath + gltfHash))
+                    {
+                        shouldAbortBecauseAllBundlesExist = false;
+                    }
+                }
+            }
+            else
+            {
+                shouldAbortBecauseAllBundlesExist = false;
+            }
+
+            if (shouldAbortBecauseAllBundlesExist)
+            {
+                Debug.Log("All assets in this scene were already generated!. Skipping.");
+                return;
+            }
+
+            DownloadSceneTextures(sceneCid);
+
+            var contentProvider = new DCL.ContentProvider();
+            contentProvider.contents = new List<MappingPair>(rawContents);
+            contentProvider.baseUrl = ContentServerUtils.GetContentAPIUrlBase(environment);
+            contentProvider.BakeHashes();
 
             //NOTE(Brian): Prepare buffers. We should prepare all the dependencies in this phase.
             foreach (var kvp in hashToBufferPair)
@@ -332,8 +352,9 @@ namespace DCL
 
             if (manifest == null)
             {
+                Debug.LogError("Error generating asset bundle!");
                 OnBundleBuildFinish?.Invoke(2);
-                throw new Exception("Error generating asset bundle!");
+                return;
             }
 
             string[] assetBundles = manifest.GetAllAssetBundles();
@@ -446,7 +467,7 @@ namespace DCL
                 catch (Exception e)
                 {
                     Debug.LogError(e.Message);
-                    AssetBundleBuilderUtils.Exit(1);
+                    OnFinish?.Invoke(1);
                     EditorApplication.update = null;
                 }
             };
@@ -462,7 +483,7 @@ namespace DCL
             {
                 string outputPath = finalDownloadedAssetDbPath + mappingPair.hash + "/" + mappingPair.hash + fileExt;
                 t2d = AssetDatabase.LoadAssetAtPath<Texture2D>(outputPath);
-                Debug.Log($"injecting texture dependency. guid: {AssetDatabase.AssetPathToGUID(outputPath)}");
+                //Debug.Log($"injecting texture dependency. guid: {AssetDatabase.AssetPathToGUID(outputPath)}");
             }
 
             if (t2d != null)

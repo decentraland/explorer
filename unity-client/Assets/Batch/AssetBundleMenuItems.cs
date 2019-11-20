@@ -1,6 +1,8 @@
+using System.IO;
 using System.Runtime.CompilerServices;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Networking;
 
 [assembly: InternalsVisibleTo("AssetBundleBuilderTests")]
 namespace DCL
@@ -37,8 +39,26 @@ namespace DCL
         public static void DumpZoneArea()
         {
             AssetBundleBuilder.environment = ContentServerUtils.ApiEnvironment.ORG;
-            AssetBundleBuilder.deleteDownloadPathAfterFinished = false;
             AssetBundleBuilder.DumpArea(new Vector2Int(-110, -110), new Vector2Int(1, 1));
+            //DumpAreaToMax(10, -120);
+        }
+
+        static void DumpAreaToMax(int x, int y)
+        {
+            if (x >= 140 || y >= 140)
+                return;
+
+            Debug.Log($"--DumpAreaToMax {x}, {y}");
+            int nextX = x + 10;
+            int nextY = y;
+
+            if (nextX > 130)
+            {
+                nextX = -130;
+                nextY = y + 10;
+            }
+
+            AssetBundleBuilder.DumpArea(new Vector2Int(x, y), new Vector2Int(10, 10), (error) => DumpAreaToMax(nextX, nextY));
         }
 
         static void DumpArea(int i)
@@ -73,6 +93,71 @@ namespace DCL
         {
             AssetBundleBuilder.finalAssetBundlePath = AssetBundleBuilder.ASSET_BUNDLES_PATH_ROOT;
             BuildPipeline.BuildAssetBundles(AssetBundleBuilder.finalAssetBundlePath, BuildAssetBundleOptions.UncompressedAssetBundle | BuildAssetBundleOptions.ForceRebuildAssetBundle, BuildTarget.WebGL);
+        }
+
+        [MenuItem("Decentraland/Asset Bundle Builder/Evaluate Dependency")]
+        public static void EvaluateDependency()
+        {
+            Caching.ClearCache();
+
+            if (Directory.Exists(AssetBundleBuilder.ASSET_BUNDLES_PATH_ROOT))
+                Directory.Delete(AssetBundleBuilder.ASSET_BUNDLES_PATH_ROOT, true);
+
+            if (Directory.Exists(AssetBundleBuilder.DOWNLOADED_PATH_ROOT))
+                Directory.Delete(AssetBundleBuilder.DOWNLOADED_PATH_ROOT, true);
+
+            AssetDatabase.Refresh();
+
+            AssetBundleBuilder.DumpArea(new Vector2Int(-110, -110), new Vector2Int(1, 1), EvaluateDependencyAfterBuild);
+        }
+
+        static void EvaluateDependencyAfterBuild(int error)
+        {
+            if (error != 0)
+            {
+                Debug.LogError("Error != 0");
+                return;
+            }
+
+            UnityWebRequest reqDependency = UnityWebRequestAssetBundle.GetAssetBundle(AssetBundleBuilder.ASSET_BUNDLES_PATH_ROOT + "/QmYACL8SnbXEonXQeRHdWYbfm8vxvaFAWnsLHUaDG4ABp5");
+
+            reqDependency.SendWebRequest();
+
+            while (!reqDependency.isDone) { };
+
+            AssetBundle abDependency = DownloadHandlerAssetBundle.GetContent(reqDependency);
+
+            abDependency.LoadAllAssets();
+
+            UnityWebRequest reqMain = UnityWebRequestAssetBundle.GetAssetBundle(AssetBundleBuilder.ASSET_BUNDLES_PATH_ROOT + "/QmNS4K7GaH63T9rhAfkrra7ADLXSEeco8FTGknkPnAVmKM");
+
+            reqMain.SendWebRequest();
+
+            while (!reqMain.isDone) { };
+
+            AssetBundle abMain = DownloadHandlerAssetBundle.GetContent(reqMain);
+
+            Material[] mats = abMain.LoadAllAssets<Material>();
+
+            bool hasMap = false;
+
+            foreach (var mat in mats)
+            {
+                if (mat.name.ToLowerInvariant().Contains("mini town"))
+                    hasMap = mat.GetTexture("_BaseMap") != null;
+            }
+
+            abMain.Unload(true);
+            abDependency.Unload(true);
+
+            if (hasMap)
+            {
+                Debug.Log("Dependency has been generated correctly!");
+            }
+            else
+            {
+                Debug.Log("Dependency has NOT been generated correctly!");
+            }
         }
     }
 }
