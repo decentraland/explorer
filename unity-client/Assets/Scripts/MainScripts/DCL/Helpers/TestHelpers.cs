@@ -336,12 +336,7 @@ namespace DCL.Helpers
                 model = new K();
             }
 
-            // component.scene.SharedComponentUpdate(component.id, JsonUtility.ToJson(model));
-            component.scene.SharedComponentUpdate(component.id, JsonUtility.ToJson(new DCL.Models.SharedComponentUpdateMessage
-            {
-                id = component.id,
-                json = JsonUtility.ToJson(model)
-            }));
+            component.scene.SharedComponentUpdate(component.id, JsonUtility.ToJson(model));
 
             return component.routine;
         }
@@ -609,11 +604,9 @@ namespace DCL.Helpers
                 (int)DCL.Models.CLASS_ID.BASIC_MATERIAL
             );
 
-            scene.SharedComponentUpdate(materialComponentID, JsonUtility.ToJson(new DCL.Models.SharedComponentUpdateMessage
-            {
-                id = materialComponentID,
-                json = JsonUtility.ToJson(basicMaterial)
-            }));
+            scene.SharedComponentUpdate(
+                materialComponentID,
+                JsonUtility.ToJson(basicMaterial));
 
             scene.SharedComponentAttach(
                 entityId,
@@ -621,7 +614,6 @@ namespace DCL.Helpers
                 "material"
             );
         }
-
 
         public static void InstantiateEntityWithMaterial(ParcelScene scene, string entityId, Vector3 position,
             PBRMaterial.Model pbrMaterial, string materialComponentID = "a-material")
@@ -634,11 +626,9 @@ namespace DCL.Helpers
                 (int)DCL.Models.CLASS_ID.PBR_MATERIAL
             );
 
-            scene.SharedComponentUpdate(materialComponentID, JsonUtility.ToJson(new DCL.Models.SharedComponentUpdateMessage
-            {
-                id = materialComponentID,
-                json = JsonUtility.ToJson(pbrMaterial)
-            }));
+            scene.SharedComponentUpdate(
+                materialComponentID,
+                JsonUtility.ToJson(pbrMaterial));
 
             scene.SharedComponentAttach(
                 entityId,

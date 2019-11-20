@@ -181,9 +181,6 @@ namespace Tests
             // Move object to surpass the scene boundaries
             TestHelpers.SetEntityTransform(scene, scene.entities[entityId], new DCLTransform.Model { position = new Vector3(18, 1, 18) });
 
-            // Debug.Break();
-            // yield return null;
-
             Assert.IsTrue(MeshIsInvalid(scene.entities[entityId].meshesInfo));
         }
 

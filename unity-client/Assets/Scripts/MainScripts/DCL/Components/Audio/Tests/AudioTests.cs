@@ -67,11 +67,7 @@ namespace Tests
                     (int)DCL.Models.CLASS_ID.AUDIO_CLIP
              ) as DCLAudioClip;
 
-            scene.SharedComponentUpdate(audioClipId, JsonUtility.ToJson(new DCL.Models.SharedComponentUpdateMessage
-            {
-                id = audioClipId,
-                json = JsonUtility.ToJson(model)
-            }));
+            scene.SharedComponentUpdate(audioClipId, JsonUtility.ToJson(model));
 
             yield return audioClip.routine;
 
@@ -217,11 +213,7 @@ namespace Tests
             // 3. Update component with missing values
             componentModel = new DCLAudioClip.Model { };
 
-            scene.SharedComponentUpdate(audioClip.id, JsonUtility.ToJson(new DCL.Models.SharedComponentUpdateMessage
-            {
-                id = audioClip.id,
-                json = JsonUtility.ToJson(componentModel)
-            }));
+            scene.SharedComponentUpdate(audioClip.id, JsonUtility.ToJson(componentModel));
 
             yield return audioClip.routine;
 

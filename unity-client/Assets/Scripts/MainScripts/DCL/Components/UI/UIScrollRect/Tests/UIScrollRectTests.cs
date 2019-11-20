@@ -185,15 +185,11 @@ namespace Tests
             yield return uiContainerRectShape.routine;
 
             // Update UIContainerRectShape properties
-            uiContainerRectShape = scene.SharedComponentUpdate(uiContainerRectShapeId, JsonUtility.ToJson(new SharedComponentUpdateMessage
+            uiContainerRectShape = scene.SharedComponentUpdate(uiContainerRectShapeId, JsonUtility.ToJson(new UIContainerRect.Model
             {
-                id = uiContainerRectShapeId,
-                json = JsonUtility.ToJson(new UIContainerRect.Model
-                {
-                    parentComponent = screenSpaceShape.id,
-                    width = new UIValue(50, UIValue.Unit.PERCENT),
-                    height = new UIValue(30, UIValue.Unit.PERCENT)
-                })
+                parentComponent = screenSpaceShape.id,
+                width = new UIValue(50, UIValue.Unit.PERCENT),
+                height = new UIValue(30, UIValue.Unit.PERCENT)
             })) as UIContainerRect;
 
             yield return uiContainerRectShape.routine;
