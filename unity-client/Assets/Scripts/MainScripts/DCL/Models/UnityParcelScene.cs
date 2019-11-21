@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -26,7 +26,7 @@ namespace DCL.Models
             public string id;
             public string baseUrl;
 
-            public List<ContentProvider.MappingPair> contents;
+            public List<ContentServerUtils.MappingPair> contents;
 
             public Vector2Int basePosition;
             public Vector2Int[] parcels;
