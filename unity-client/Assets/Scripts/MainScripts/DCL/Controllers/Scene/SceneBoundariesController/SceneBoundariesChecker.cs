@@ -46,14 +46,38 @@ namespace DCL.Controllers
                 if (loadWrapper != null && !loadWrapper.alreadyLoaded) return;
             }
 
-            // GLTF models may have several child renderers with different positions and different bounds
+            EvaluateMeshBounds(entity);
+        }
+
+        void EvaluateMeshBounds(DecentralandEntity entity)
+        {
             Bounds meshBounds = Utils.BuildMergedBounds(entity.meshesInfo.renderers);
 
+            // 1st check (full mesh AABB)
             bool isInsideBoundaries = scene.IsInsideSceneBoundaries(meshBounds);
+
+            // 2nd check (submeshes AABB)
+            if (!isInsideBoundaries)
+            {
+                isInsideBoundaries = AreSubmeshesInsideBoundaries(entity);
+            }
 
             UpdateEntityMeshesValidState(entity, isInsideBoundaries, meshBounds);
 
             UpdateEntityCollidersValidState(entity, isInsideBoundaries);
+        }
+
+        protected virtual bool AreSubmeshesInsideBoundaries(DecentralandEntity entity)
+        {
+            for (int i = 0; i < entity.meshesInfo.renderers.Length; i++)
+            {
+                if (!scene.IsInsideSceneBoundaries(entity.meshesInfo.renderers[i].bounds))
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         protected virtual void UpdateEntityMeshesValidState(DecentralandEntity entity, bool isInsideBoundaries, Bounds meshBounds)
@@ -67,7 +91,7 @@ namespace DCL.Controllers
             }
         }
 
-        void UpdateEntityCollidersValidState(DecentralandEntity entity, bool isInsideBoundaries)
+        protected virtual void UpdateEntityCollidersValidState(DecentralandEntity entity, bool isInsideBoundaries)
         {
             int collidersCount = entity.meshesInfo.colliders.Count;
             if (collidersCount > 0 && isInsideBoundaries != entity.meshesInfo.colliders[0].enabled && entity.meshesInfo.currentShape.HasCollisions())
