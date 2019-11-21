@@ -2,48 +2,39 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.Networking;
 
 [assembly: InternalsVisibleTo("AssetBundleBuilderTests")]
 namespace DCL
 {
     public static class AssetBundleMenuItems
     {
-        [MenuItem("Decentraland/Asset Bundle Builder/Dump Test Scene")]
-        public static void DumpMisc()
-        {
-            AssetBundleBuilder.ExportSceneToAssetBundles_Internal("QmbKgHPENpzGGEfagGP5BbEd7CvqXeXuuXLeMEkuswGvrK");
-        }
-
-
         [MenuItem("Decentraland/Asset Bundle Builder/Dump Museum District")]
         public static void DumpMuseum()
         {
-            AssetBundleBuilder.environment = ContentServerUtils.ApiEnvironment.ORG;
-            AssetBundleBuilder.skipAlreadyBuiltBundles = false;
+            var builder = new AssetBundleBuilder();
+            builder.environment = ContentServerUtils.ApiEnvironment.ORG;
+            builder.skipAlreadyBuiltBundles = false;
             var zoneArray = AssetBundleBuilderUtils.GetCenteredZoneArray(new Vector2Int(9, 78), new Vector2Int(10, 10));
-            AssetBundleBuilder.DumpArea(zoneArray);
+            builder.DumpArea(zoneArray);
         }
 
-        [MenuItem("Decentraland/HashTest")]
-        public static void GetHash()
+        [MenuItem("Decentraland/Asset Bundle Builder/Dump World Borders")]
+        public static void DumpBorderArea()
         {
-            string path2 = AssetDatabase.GUIDToAssetPath("4c57f36c839cb644eb8299a298e7bed9");
-            Debug.Log("path2 = " + path2);
-            AssetDatabase.DeleteAsset(path2);
-            path2 = AssetDatabase.GUIDToAssetPath("4c57f36c839cb644eb8299a298e7bed9");
-            Debug.Log("path2 = " + path2);
+            var builder = new AssetBundleBuilder();
+            builder.environment = ContentServerUtils.ApiEnvironment.ORG;
+            builder.DumpArea(new Vector2Int(-150, -150), new Vector2Int(10, 5));
         }
 
         [MenuItem("Decentraland/Asset Bundle Builder/Dump Zone -110,-110")]
         public static void DumpZoneArea()
         {
-            AssetBundleBuilder.environment = ContentServerUtils.ApiEnvironment.ORG;
-            AssetBundleBuilder.DumpArea(new Vector2Int(-110, -110), new Vector2Int(1, 1));
-            //DumpAreaToMax(10, -120);
+            var builder = new AssetBundleBuilder();
+            builder.environment = ContentServerUtils.ApiEnvironment.ORG;
+            builder.DumpArea(new Vector2Int(-110, -110), new Vector2Int(1, 1));
         }
 
-        static void DumpAreaToMax(int x, int y)
+        static void DumpAreaToMax(AssetBundleBuilder builder, int x, int y)
         {
             if (x >= 140 || y >= 140)
                 return;
@@ -58,41 +49,23 @@ namespace DCL
                 nextY = y + 10;
             }
 
-            AssetBundleBuilder.DumpArea(new Vector2Int(x, y), new Vector2Int(10, 10), (error) => DumpAreaToMax(nextX, nextY));
+            builder.DumpArea(new Vector2Int(x, y), new Vector2Int(10, 10), (error) => DumpAreaToMax(builder, nextX, nextY));
         }
 
-        static void DumpArea(int i)
-        {
-            switch (i)
-            {
-                case 0:
-                    AssetBundleBuilder.DumpArea(new Vector2Int(-110, -100), new Vector2Int(10, 10), (x) => DumpArea(1));
-                    break;
-                case 1:
-                    AssetBundleBuilder.DumpArea(new Vector2Int(-100, -100), new Vector2Int(10, 10), (x) => DumpArea(2));
-                    break;
-                case 2:
-                    AssetBundleBuilder.DumpArea(new Vector2Int(-90, -100), new Vector2Int(10, 10), (x) => DumpArea(3));
-                    break;
-                case 3:
-                    AssetBundleBuilder.DumpArea(new Vector2Int(-80, -100), new Vector2Int(10, 10));
-                    break;
-            }
-        }
 
         [MenuItem("Decentraland/Asset Bundle Builder/Dump Org 0,0")]
-        public static void DumpEverything()
+        public static void DumpCenterPlaza()
         {
-            AssetBundleBuilder.skipAlreadyBuiltBundles = true;
+            var builder = new AssetBundleBuilder();
+            builder.skipAlreadyBuiltBundles = true;
             var zoneArray = AssetBundleBuilderUtils.GetCenteredZoneArray(new Vector2Int(0, 0), new Vector2Int(30, 30));
-            AssetBundleBuilder.DumpArea(zoneArray);
+            builder.DumpArea(zoneArray);
         }
 
         [MenuItem("Decentraland/Asset Bundle Builder/Only Build Bundles")]
         public static void OnlyBuildBundles()
         {
-            AssetBundleBuilder.finalAssetBundlePath = AssetBundleBuilder.ASSET_BUNDLES_PATH_ROOT;
-            BuildPipeline.BuildAssetBundles(AssetBundleBuilder.finalAssetBundlePath, BuildAssetBundleOptions.UncompressedAssetBundle | BuildAssetBundleOptions.ForceRebuildAssetBundle, BuildTarget.WebGL);
+            BuildPipeline.BuildAssetBundles(AssetBundleBuilderConfig.ASSET_BUNDLES_PATH_ROOT, BuildAssetBundleOptions.UncompressedAssetBundle | BuildAssetBundleOptions.ForceRebuildAssetBundle, BuildTarget.WebGL);
         }
 
         [MenuItem("Decentraland/Asset Bundle Builder/Evaluate Dependency")]
@@ -100,43 +73,30 @@ namespace DCL
         {
             Caching.ClearCache();
 
-            if (Directory.Exists(AssetBundleBuilder.ASSET_BUNDLES_PATH_ROOT))
-                Directory.Delete(AssetBundleBuilder.ASSET_BUNDLES_PATH_ROOT, true);
+            if (Directory.Exists(AssetBundleBuilderConfig.ASSET_BUNDLES_PATH_ROOT))
+                Directory.Delete(AssetBundleBuilderConfig.ASSET_BUNDLES_PATH_ROOT, true);
 
-            if (Directory.Exists(AssetBundleBuilder.DOWNLOADED_PATH_ROOT))
-                Directory.Delete(AssetBundleBuilder.DOWNLOADED_PATH_ROOT, true);
+            if (Directory.Exists(AssetBundleBuilderConfig.DOWNLOADED_PATH_ROOT))
+                Directory.Delete(AssetBundleBuilderConfig.DOWNLOADED_PATH_ROOT, true);
 
             AssetDatabase.Refresh();
 
-            AssetBundleBuilder.DumpArea(new Vector2Int(-110, -110), new Vector2Int(1, 1), EvaluateDependencyAfterBuild);
+            var builder = new AssetBundleBuilder();
+            builder.DumpArea(new Vector2Int(-110, -110), new Vector2Int(1, 1), EvaluateDependencyAfterBuild);
         }
 
-        static void EvaluateDependencyAfterBuild(int error)
+        static void EvaluateDependencyAfterBuild(AssetBundleBuilder.ErrorCodes error)
         {
-            if (error != 0)
+            if (error != AssetBundleBuilder.ErrorCodes.SUCCESS)
             {
-                Debug.LogError("Error != 0");
+                Debug.LogError($"Error: {error}");
                 return;
             }
 
-            UnityWebRequest reqDependency = UnityWebRequestAssetBundle.GetAssetBundle(AssetBundleBuilder.ASSET_BUNDLES_PATH_ROOT + "/QmYACL8SnbXEonXQeRHdWYbfm8vxvaFAWnsLHUaDG4ABp5");
-
-            reqDependency.SendWebRequest();
-
-            while (!reqDependency.isDone) { };
-
-            AssetBundle abDependency = DownloadHandlerAssetBundle.GetContent(reqDependency);
-
+            AssetBundle abDependency = AssetBundle.LoadFromFile(AssetBundleBuilderConfig.ASSET_BUNDLES_PATH_ROOT + "/QmYACL8SnbXEonXQeRHdWYbfm8vxvaFAWnsLHUaDG4ABp5");
             abDependency.LoadAllAssets();
 
-            UnityWebRequest reqMain = UnityWebRequestAssetBundle.GetAssetBundle(AssetBundleBuilder.ASSET_BUNDLES_PATH_ROOT + "/QmNS4K7GaH63T9rhAfkrra7ADLXSEeco8FTGknkPnAVmKM");
-
-            reqMain.SendWebRequest();
-
-            while (!reqMain.isDone) { };
-
-            AssetBundle abMain = DownloadHandlerAssetBundle.GetContent(reqMain);
-
+            AssetBundle abMain = AssetBundle.LoadFromFile(AssetBundleBuilderConfig.ASSET_BUNDLES_PATH_ROOT + "/QmNS4K7GaH63T9rhAfkrra7ADLXSEeco8FTGknkPnAVmKM");
             Material[] mats = abMain.LoadAllAssets<Material>();
 
             bool hasMap = false;

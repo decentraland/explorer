@@ -103,6 +103,32 @@ namespace DCL
                 EditorApplication.Exit(errorCode);
         }
 
+        public static void DeleteFile(string path)
+        {
+            try
+            {
+                File.Delete(path);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"Error trying to delete file {path}!\n{e.Message}");
+            }
+        }
+
+        public static void DeleteDirectory(string path)
+        {
+            try
+            {
+                if (Directory.Exists(path))
+                    Directory.Delete(path, true);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"Error trying to delete directory {path}!\n{e.Message}");
+            }
+        }
+
+
         internal static void MarkForAssetBundleBuild(string path, string abName)
         {
             string assetPath = path.Substring(path.IndexOf("Assets"));
@@ -114,41 +140,7 @@ namespace DCL
         }
 
 
-        /// <summary>
-        /// This dumps .depmap files
-        /// </summary>
-        /// <param name="manifest"></param>
-        internal static void GenerateDependencyMaps(Dictionary<string, string> hashLowercaseToHashProper, AssetBundleManifest manifest)
-        {
-            string[] assetBundles = manifest.GetAllAssetBundles();
 
-            for (int i = 0; i < assetBundles.Length; i++)
-            {
-                if (string.IsNullOrEmpty(assetBundles[i]))
-                    continue;
-
-                var depMap = new AssetDependencyMap();
-                string[] deps = manifest.GetAllDependencies(assetBundles[i]);
-
-                if (deps.Length > 0)
-                {
-                    depMap.dependencies = deps.Select((x) =>
-                    {
-                        if (hashLowercaseToHashProper.ContainsKey(x))
-                            return hashLowercaseToHashProper[x];
-                        else
-                            return x;
-
-                    }).ToArray();
-                }
-
-                string json = JsonUtility.ToJson(depMap);
-                string finalFilename = assetBundles[i];
-
-                hashLowercaseToHashProper.TryGetValue(assetBundles[i], out finalFilename);
-                File.WriteAllText(AssetBundleBuilder.finalAssetBundlePath + finalFilename + ".depmap", json);
-            }
-        }
         internal static bool CheckProviderItemExists(DCL.ContentProvider contentProvider, string fileName)
         {
             string finalUrl = contentProvider.GetContentsUrl(fileName);
@@ -174,9 +166,9 @@ namespace DCL
             return result;
         }
 
-        internal static Texture2D GetTextureFromAssetBundle(string hash)
+        internal static Texture2D GetTextureFromAssetBundle(ApiEnvironment environment, string hash)
         {
-            string url = ContentServerUtils.GetBundlesAPIUrlBase(AssetBundleBuilder.environment) + hash;
+            string url = ContentServerUtils.GetBundlesAPIUrlBase(environment) + hash;
 
             using (UnityWebRequest assetBundleRequest = UnityWebRequestAssetBundle.GetAssetBundle(url))
             {
@@ -214,11 +206,11 @@ namespace DCL
             return sBuilder.ToString();
         }
 
-        public static HashSet<string> GetSceneCids(Vector2Int coords, Vector2Int size)
+        public static HashSet<string> GetSceneCids(ApiEnvironment environment, Vector2Int coords, Vector2Int size)
         {
             HashSet<string> sceneCids = new HashSet<string>();
 
-            string url = ContentServerUtils.GetScenesAPIUrl(AssetBundleBuilder.environment, coords.x, coords.y, size.x, size.y);
+            string url = GetScenesAPIUrl(environment, coords.x, coords.y, size.x, size.y);
 
             UnityWebRequest w = UnityWebRequest.Get(url);
             w.SendWebRequest();
@@ -243,13 +235,13 @@ namespace DCL
             return sceneCids;
         }
 
-        public static HashSet<string> GetScenesCids(List<Vector2Int> coords)
+        public static HashSet<string> GetScenesCids(ApiEnvironment environment, List<Vector2Int> coords)
         {
             HashSet<string> sceneCids = new HashSet<string>();
 
             foreach (Vector2Int v in coords)
             {
-                string url = ContentServerUtils.GetScenesAPIUrl(AssetBundleBuilder.environment, v.x, v.y, 0, 0);
+                string url = GetScenesAPIUrl(environment, v.x, v.y, 0, 0);
 
                 UnityWebRequest w = UnityWebRequest.Get(url);
                 w.SendWebRequest();
@@ -276,9 +268,9 @@ namespace DCL
             return sceneCids;
         }
 
-        public static MappingsAPIData GetSceneMappingsData(string sceneCid)
+        public static MappingsAPIData GetSceneMappingsData(ApiEnvironment environment, string sceneCid)
         {
-            string url = GetMappingsAPIUrl(AssetBundleBuilder.environment, sceneCid);
+            string url = GetMappingsAPIUrl(environment, sceneCid);
             UnityWebRequest w = UnityWebRequest.Get(url);
             w.SendWebRequest();
 
