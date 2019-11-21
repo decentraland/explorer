@@ -190,10 +190,14 @@ function ensureTeleportAnimation() {
 
 const CHUNK_SIZE = 500
 
-function* chunkGenerator(
+export function* chunkGenerator(
   parcelChunkSize: number,
   info: { name: string; type: number; parcels: { x: number; y: number }[] }[]
 ) {
+  if (parcelChunkSize < 1) {
+    throw Error(`parcel chunk size (${parcelChunkSize}) cannot be less than 1`)
+  }
+
   // flatten scene data into parcels
   const parcels = info.reduce(
     (parcels, elem, index) =>
