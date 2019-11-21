@@ -61,7 +61,7 @@ namespace Tests
             yield return new WaitUntil(() => gltfShape.alreadyLoaded);
 
             AssertMetricsModel(scene,
-                triangles: 17521,
+                triangles: 23853,
                 materials: 6,
                 entities: 8,
                 meshes: 11,
@@ -73,7 +73,7 @@ namespace Tests
             yield return null;
 
             AssertMetricsModel(scene,
-                triangles: 12849,
+                triangles: 19181,
                 materials: 5,
                 entities: 7,
                 meshes: 10,
