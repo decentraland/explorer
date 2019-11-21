@@ -17,7 +17,7 @@ import defaultLogger from '../logger'
 
 declare const window: {
   unityInterface: {
-    UpdateMinimapSceneInformation: (data: { name: string; type: number; parcels: number[][] }[]) => void
+    UpdateMinimapSceneInformation: (data: { name: string; type: number; parcels: { x: number; y: number }[] }[]) => void
   }
 }
 
@@ -83,7 +83,7 @@ function* reportOne(action: FetchNameFromSceneJsonSuccess) {
       type,
       parcels: parcels.map(p => {
         const [x, y] = p.split(',').map(_ => parseInt(_, 10))
-        return [x, y]
+        return { x, y }
       })
     }
   ])
@@ -91,7 +91,7 @@ function* reportOne(action: FetchNameFromSceneJsonSuccess) {
 function* reportAll() {
   const atlasState = (yield select(state => state.atlas)) as AtlasState
   const data = atlasState.marketName
-  const mapByTypeAndName: Record<string, number[][]> = {}
+  const mapByTypeAndName: Record<string, { x: number; y: number }[]> = {}
   const typeAndNameKeys: string[] = []
   const keyToTypeAndName: Record<string, { type: number; name: string }> = {}
   Object.keys(data).forEach(index => {
@@ -104,7 +104,7 @@ function* reportAll() {
       typeAndNameKeys.push(key)
       keyToTypeAndName[key] = { type, name }
     }
-    mapByTypeAndName[key].push([parcel.x, parcel.y])
+    mapByTypeAndName[key].push({ x: parcel.x, y: parcel.y })
   })
   window.unityInterface.UpdateMinimapSceneInformation(
     typeAndNameKeys.map(key => ({

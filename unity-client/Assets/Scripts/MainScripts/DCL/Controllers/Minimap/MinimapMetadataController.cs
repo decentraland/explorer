@@ -13,7 +13,7 @@ public class MinimapMetadataController : MonoBehaviour
     {
         public string name;
         public int type;
-        public List<int[]> parcels;
+        public List<Vector2Int> parcels;
     }
 
     public void Awake()
@@ -24,14 +24,12 @@ public class MinimapMetadataController : MonoBehaviour
 
     public void UpdateMinimapSceneInformation(string scenesInfoJson)
     {
-        var scenesInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<MinimapSceneInfo[]>(scenesInfoJson);
-        //var scenesInfo = Utils.ParseJsonArray<MinimapSceneInfo[]>(scenesInfoJson);
+        var scenesInfo = Utils.ParseJsonArray<MinimapSceneInfo[]>(scenesInfoJson);
         foreach (var scene in scenesInfo)
         {
             foreach (var parcel in scene.parcels)
             {
-                Debug.Log($"Set Tile: \n {parcel[0]},{parcel[1]}  {scene.type} {scene.name}");
-                minimapMetadata.SetTile(parcel[0], parcel[1], new MinimapMetadata.Tile(scene.type, scene.name));
+                minimapMetadata.SetTile(parcel.x, parcel.y, new MinimapMetadata.Tile(scene.type, scene.name));
             }
         }
     }
