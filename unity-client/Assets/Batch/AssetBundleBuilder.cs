@@ -401,9 +401,11 @@ namespace DCL
             InitializeDirectoryPaths(false);
 
             float timer = Time.realtimeSinceStartup;
-            bool shouldGenerateAssetBundles = false;
+            bool shouldGenerateAssetBundles = true;
 
-            EditorApplication.update = () =>
+            EditorApplication.CallbackFunction updateLoop = null;
+
+            updateLoop = () =>
             {
                 try
                 {
@@ -430,7 +432,7 @@ namespace DCL
                     if (!Directory.Exists(finalAssetBundlePath))
                         Directory.CreateDirectory(finalAssetBundlePath);
 
-                    EditorApplication.update = null;
+                    EditorApplication.update -= updateLoop;
 
                     if (shouldGenerateAssetBundles)
                     {
@@ -455,9 +457,11 @@ namespace DCL
                 {
                     Debug.LogError(e.Message);
                     OnFinish?.Invoke(ErrorCodes.UNDEFINED);
-                    EditorApplication.update = null;
+                    EditorApplication.update -= updateLoop;
                 }
             };
+
+            EditorApplication.update += updateLoop;
         }
 
         private void FixupFilenames(string[] assetBundles)

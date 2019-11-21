@@ -1,4 +1,3 @@
-using System.IO;
 using System.Runtime.CompilerServices;
 using UnityEditor;
 using UnityEngine;
@@ -66,58 +65,6 @@ namespace DCL
         public static void OnlyBuildBundles()
         {
             BuildPipeline.BuildAssetBundles(AssetBundleBuilderConfig.ASSET_BUNDLES_PATH_ROOT, BuildAssetBundleOptions.UncompressedAssetBundle | BuildAssetBundleOptions.ForceRebuildAssetBundle, BuildTarget.WebGL);
-        }
-
-        [MenuItem("Decentraland/Asset Bundle Builder/Evaluate Dependency")]
-        public static void EvaluateDependency()
-        {
-            Caching.ClearCache();
-
-            if (Directory.Exists(AssetBundleBuilderConfig.ASSET_BUNDLES_PATH_ROOT))
-                Directory.Delete(AssetBundleBuilderConfig.ASSET_BUNDLES_PATH_ROOT, true);
-
-            if (Directory.Exists(AssetBundleBuilderConfig.DOWNLOADED_PATH_ROOT))
-                Directory.Delete(AssetBundleBuilderConfig.DOWNLOADED_PATH_ROOT, true);
-
-            AssetDatabase.Refresh();
-
-            var builder = new AssetBundleBuilder();
-            builder.DumpArea(new Vector2Int(-110, -110), new Vector2Int(1, 1), EvaluateDependencyAfterBuild);
-        }
-
-        static void EvaluateDependencyAfterBuild(AssetBundleBuilder.ErrorCodes error)
-        {
-            if (error != AssetBundleBuilder.ErrorCodes.SUCCESS)
-            {
-                Debug.LogError($"Error: {error}");
-                return;
-            }
-
-            AssetBundle abDependency = AssetBundle.LoadFromFile(AssetBundleBuilderConfig.ASSET_BUNDLES_PATH_ROOT + "/QmYACL8SnbXEonXQeRHdWYbfm8vxvaFAWnsLHUaDG4ABp5");
-            abDependency.LoadAllAssets();
-
-            AssetBundle abMain = AssetBundle.LoadFromFile(AssetBundleBuilderConfig.ASSET_BUNDLES_PATH_ROOT + "/QmNS4K7GaH63T9rhAfkrra7ADLXSEeco8FTGknkPnAVmKM");
-            Material[] mats = abMain.LoadAllAssets<Material>();
-
-            bool hasMap = false;
-
-            foreach (var mat in mats)
-            {
-                if (mat.name.ToLowerInvariant().Contains("mini town"))
-                    hasMap = mat.GetTexture("_BaseMap") != null;
-            }
-
-            abMain.Unload(true);
-            abDependency.Unload(true);
-
-            if (hasMap)
-            {
-                Debug.Log("Dependency has been generated correctly!");
-            }
-            else
-            {
-                Debug.Log("Dependency has NOT been generated correctly!");
-            }
         }
     }
 }
