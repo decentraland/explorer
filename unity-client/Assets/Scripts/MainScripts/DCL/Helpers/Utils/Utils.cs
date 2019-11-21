@@ -355,5 +355,19 @@ namespace DCL.Helpers
             }
             return false;
         }
+
+        public static T ParseJsonArray<T>(string jsonArray) where T : IEnumerable => DummyJsonUtilityFromArray<T>.GetFromJsonArray(jsonArray);
+
+        [Serializable]
+        private class DummyJsonUtilityFromArray<T> where T : IEnumerable //UnityEngine.JsonUtility is really fast but cannot deserialize json arrays
+        {
+            [SerializeField] private T value;
+
+            public static T GetFromJsonArray(string jsonArray)
+            {
+                string newJson = $"{{ \"value\": {jsonArray}}}";
+                return JsonUtility.FromJson<DummyJsonUtilityFromArray<T>>(newJson).value;
+            }
+        }
     }
 }
