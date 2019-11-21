@@ -12,8 +12,10 @@ namespace DCL.Components
 {
     public class LoadWrapper_GLTF : LoadWrapper
     {
-        static readonly bool USE_LOCAL_HOST = false;
-        static readonly bool USE_GLTF_FALLBACK = false;
+        public static bool useCustomContentServerUrl = false;
+        public static string customContentServerUrl;
+        public static bool useGltfFallback = false;
+
         static readonly bool VERBOSE = false;
 
         public GameObject container;
@@ -48,7 +50,7 @@ namespace DCL.Components
 #endif
             Assert.IsFalse(string.IsNullOrEmpty(targetUrl), "url is null!!");
 
-            if (USE_GLTF_FALLBACK)
+            if (useGltfFallback)
                 LoadAssetBundle(targetUrl, OnSuccess, (x) => LoadGltf(targetUrl, OnSuccess, OnFail));
             else
                 LoadAssetBundle(targetUrl, OnSuccess, OnFail);
@@ -64,7 +66,13 @@ namespace DCL.Components
                     Debug.Log("Forgetting not null promise...");
             }
 
-            string bundlesBaseUrl = USE_LOCAL_HOST ? "http://localhost:1338/" : entity.scene.sceneData.baseUrlBundles;
+            string bundlesBaseUrl = useCustomContentServerUrl ? customContentServerUrl : entity.scene.sceneData.baseUrlBundles;
+
+            if (string.IsNullOrEmpty(bundlesBaseUrl))
+            {
+                OnFail?.Invoke(this);
+                return;
+            }
 
             abPromise = new AssetPromise_AssetBundle(entity.scene.contentProvider, bundlesBaseUrl, targetUrl);
             abPromise.settings.parent = transform;
