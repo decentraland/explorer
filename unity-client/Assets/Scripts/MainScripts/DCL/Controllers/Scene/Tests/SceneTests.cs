@@ -304,15 +304,16 @@ namespace Tests
         [UnityTest]
         public IEnumerator CreateUIScene()
         {
-            yield return base.InitScene();
+            yield return InitScene();
 
             // Position character inside parcel (0,0)
             TestHelpers.SetCharacterPosition(Vector3.zero);
 
+            string sceneGameObjectNamePrefix = "UI Scene - ";
             string sceneId = "Test UI Scene";
             sceneController.CreateUIScene(JsonUtility.ToJson(new CreateUISceneMessage() { id = sceneId }));
 
-            GameObject sceneGo = GameObject.Find("ui scene:" + sceneId);
+            GameObject sceneGo = GameObject.Find(sceneGameObjectNamePrefix + sceneId);
 
             GlobalScene scene = sceneController.loadedScenes[sceneId] as GlobalScene;
 
@@ -329,13 +330,12 @@ namespace Tests
 
             yield return null;
 
-
             // Position character inside parcel (0,0)
             TestHelpers.SetCharacterPosition(new Vector3(100f, 0f, 100f));
 
             yield return null;
 
-            sceneGo = GameObject.Find("ui scene:" + sceneId);
+            sceneGo = GameObject.Find(sceneGameObjectNamePrefix + sceneId);
 
             Assert.IsTrue(sceneGo != null, "scene game object not found! UIScenes must not be unloaded by distance!");
             Assert.IsTrue(sceneController.loadedScenes[sceneId] != null,
