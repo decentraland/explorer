@@ -29,32 +29,14 @@ namespace DCL
             { "glb", 8 }
         };
 
-        readonly protected string url;
-        readonly protected string baseUrl;
-        readonly protected ContentProvider provider = null;
-
+        readonly protected string contentUrl;
+        readonly protected string hash;
         protected object id = null;
 
-        public class Settings
+        public AssetPromise_AssetBundle(string contentUrl, string hash)
         {
-            public Shader shaderOverride;
-
-            public Transform parent;
-            public Vector3? initialLocalPosition;
-            public Quaternion? initialLocalRotation;
-            public Vector3? initialLocalScale;
-            public bool forceNewInstance;
-        }
-
-        public Settings settings = new Settings();
-
-
-
-        public AssetPromise_AssetBundle(ContentProvider provider, string baseUrl, string url)
-        {
-            this.provider = provider;
-            this.url = url;
-            this.baseUrl = baseUrl;
+            this.contentUrl = contentUrl;
+            this.hash = hash;
         }
 
         protected override void AddToLibrary()
@@ -67,21 +49,13 @@ namespace DCL
         internal override object GetId()
         {
             if (id == null)
-                id = ComputeId(provider, url);
+                id = ComputeId(contentUrl);
 
             return id;
         }
 
-        private string ComputeId(ContentProvider provider, string url)
+        private string ComputeId(string url)
         {
-            if (provider.contents != null)
-            {
-                if (provider.TryGetContentsUrl_Raw(url, out string finalUrl))
-                {
-                    return finalUrl;
-                }
-            }
-
             return url;
         }
 
@@ -105,8 +79,7 @@ namespace DCL
             {
                 foreach (string dep in AssetBundleLoadHelper.dependenciesMap[hash])
                 {
-                    string finalUrl = baseUrl + dep;
-                    var promise = new AssetPromise_AssetBundle(provider, baseUrl, finalUrl);
+                    var promise = new AssetPromise_AssetBundle(baseUrl, hash);
                     AssetPromiseKeeper_AssetBundle.i.Keep(promise);
                     yield return promise;
                 }
@@ -157,9 +130,17 @@ namespace DCL
                     if (VERBOSE)
                         Debug.Log("loading asset = " + assetName);
 #endif
+                    string ext = assetName.Substring(assetName.Length - 3);
+
+                    UnityEngine.Object loadedAsset = assetBundle.LoadAsset(assetName);
 
                     if (!asset.assetsByName.ContainsKey(assetName))
                         asset.assetsByName.Add(assetName, assetBundle.LoadAsset(assetName));
+
+                    if (!asset.assetsByExtension.ContainsKey(ext))
+                        asset.assetsByExtension.Add(ext, new List<UnityEngine.Object>());
+
+                    asset.assetsByExtension[ext].Add(loadedAsset);
 
                     //loadedAssets.Add(asset, assetBundle.LoadAsset(asset));
                     //#if UNITY_EDITOR
@@ -203,11 +184,9 @@ namespace DCL
 
         protected override void OnLoad(Action OnSuccess, Action OnFail)
         {
-            string lowerCaseUrl = url.ToLower();
-            string hash = provider.fileToHash[lowerCaseUrl];
-            string finalUrl = baseUrl + hash;
+            string finalUrl = contentUrl + hash;
 
-            CoroutineStarter.Start(LoadAssetBundleWithDeps(baseUrl, hash, OnSuccess, OnFail));
+            CoroutineStarter.Start(LoadAssetBundleWithDeps(contentUrl, hash, OnSuccess, OnFail));
 
             //using (UnityWebRequest assetBundleRequest = UnityWebRequestAssetBundle.GetAssetBundle(url))
             //{
@@ -249,7 +228,7 @@ namespace DCL
 
     public class AssetPromise_AssetBundle : AssetPromise_AssetBundle<Asset_AssetBundle>
     {
-        public AssetPromise_AssetBundle(ContentProvider provider, string baseUrl, string url) : base(provider, baseUrl, url)
+        public AssetPromise_AssetBundle(string baseUrl, string hash) : base(baseUrl, hash)
         {
         }
     }

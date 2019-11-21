@@ -10,7 +10,7 @@ namespace DCL
         public string assetBundleAssetName;
 
         public Dictionary<string, Object> assetsByName = new Dictionary<string, Object>();
-        public Dictionary<string, Object> assetsByExtension = new Dictionary<string, Object>();
+        public Dictionary<string, List<Object>> assetsByExtension = new Dictionary<string, List<Object>>();
 
         public Asset_AssetBundle()
         {

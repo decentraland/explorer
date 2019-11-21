@@ -16,22 +16,27 @@ namespace DCL
 
         public override bool Contains(object id)
         {
-            throw new System.NotImplementedException();
+            return masterAssets.ContainsKey(id);
         }
 
         public override bool Contains(Asset_AssetBundle asset)
         {
-            throw new System.NotImplementedException();
+            return masterAssets.ContainsKey(asset.id);
         }
 
         public override Asset_AssetBundle Get(object id)
         {
-            throw new System.NotImplementedException();
+            if (Contains(id))
+            {
+                return masterAssets[id];
+            }
+
+            return null;
         }
 
         public override void Release(Asset_AssetBundle asset)
         {
-            throw new System.NotImplementedException();
+
         }
     }
 }

@@ -21,7 +21,7 @@ namespace DCL.Components
         public GameObject container;
 
         AssetPromise_GLTF gltfPromise;
-        AssetPromise_AssetBundle abPromise;
+        AssetPromise_AssetBundleModel abPromise;
 
         string assetDirectoryPath;
 
@@ -59,7 +59,7 @@ namespace DCL.Components
         {
             if (abPromise != null)
             {
-                AssetPromiseKeeper_AssetBundle.i.Forget(abPromise);
+                AssetPromiseKeeper_AssetBundleModel.i.Forget(abPromise);
 
                 if (VERBOSE)
                     Debug.Log("Forgetting not null promise...");
@@ -73,13 +73,13 @@ namespace DCL.Components
                 return;
             }
 
-            abPromise = new AssetPromise_AssetBundle(entity.scene.contentProvider, bundlesBaseUrl, targetUrl);
+            abPromise = new AssetPromise_AssetBundleModel(bundlesBaseUrl, targetUrl);
             abPromise.settings.parent = transform;
 
             abPromise.OnSuccessEvent += (x) => OnSuccessWrapper(x, OnSuccess);
             abPromise.OnFailEvent += (x) => OnFailWrapper(x, OnFail);
 
-            AssetPromiseKeeper_AssetBundle.i.Keep(abPromise);
+            AssetPromiseKeeper_AssetBundleModel.i.Keep(abPromise);
         }
 
         void LoadGltf(string targetUrl, Action<LoadWrapper> OnSuccess, Action<LoadWrapper> OnFail)
@@ -158,7 +158,7 @@ namespace DCL.Components
         {
             this.entity.OnCleanupEvent -= OnEntityCleanup;
             AssetPromiseKeeper_GLTF.i.Forget(gltfPromise);
-            AssetPromiseKeeper_AssetBundle.i.Forget(abPromise);
+            AssetPromiseKeeper_AssetBundleModel.i.Forget(abPromise);
         }
 
         public void OnDestroy()

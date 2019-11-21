@@ -1,4 +1,4 @@
-﻿using DCL.Helpers;
+using DCL.Helpers;
 using System;
 using System.Collections;
 using UnityEngine;
@@ -7,7 +7,19 @@ namespace DCL
 {
     public class AssetPromise_AssetBundleModel : AssetPromise_AssetBundle<Asset_AssetBundleModel>
     {
-        public AssetPromise_AssetBundleModel(ContentProvider provider, string baseUrl, string url) : base(provider, baseUrl, url)
+        public class Settings
+        {
+            public Shader shaderOverride;
+
+            public Transform parent;
+            public Vector3? initialLocalPosition;
+            public Quaternion? initialLocalRotation;
+            public Vector3? initialLocalScale;
+            public bool forceNewInstance;
+        }
+
+        public Settings settings = new Settings();
+        public AssetPromise_AssetBundleModel(string baseUrl, string url) : base(baseUrl, url)
         {
         }
 
@@ -18,20 +30,11 @@ namespace DCL
 
         IEnumerator OnLoadCoroutine(Action OnSuccess, Action OnFail)
         {
-            string lowerCaseUrl = url.ToLower();
-
-            if (!provider.fileToHash.ContainsKey(lowerCaseUrl))
-            {
-                Debug.Log("targetUrl not found?... " + url);
-                OnFail?.Invoke();
-                yield break;
-            }
-
-            string hash = provider.fileToHash[lowerCaseUrl];
+            string lowerCaseUrl = contentUrl.ToLower();
 
             GameObject container = null;
 
-            yield return AssetBundleLoadHelper.FetchAssetBundleWithDependencies(baseUrl, hash, (go) => { container = go; });
+            yield return AssetBundleLoadHelper.FetchAssetBundleWithDependencies(contentUrl, hash, (go) => { container = go; });
 
             if (container == null)
                 OnFail?.Invoke();
@@ -50,7 +53,7 @@ namespace DCL
         {
             Transform assetTransform = asset.container.transform;
 
-            asset.container.name = "AB: " + url;
+            asset.container.name = "AB: " + contentUrl;
 
             if (settings.parent != null)
             {

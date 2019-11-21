@@ -1,10 +1,9 @@
-﻿using DCL;
+using DCL;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class APK_AB_InteractiveTest : MonoBehaviour
 {
-    ContentProvider_Dummy provider;
     AssetPromiseKeeper_AssetBundleModel keeper;
     AssetLibrary_AssetBundleModel library;
 
@@ -12,17 +11,13 @@ public class APK_AB_InteractiveTest : MonoBehaviour
 
     void Start()
     {
-        provider = new ContentProvider_Dummy();
         library = new AssetLibrary_AssetBundleModel();
         keeper = new AssetPromiseKeeper_AssetBundleModel(library);
     }
 
     void Generate(string url, string hash)
     {
-        AssetPromise_AssetBundleModel promise = new AssetPromise_AssetBundleModel(provider, "http://localhost:1338/", url);
-
-        if (!provider.fileToHash.ContainsKey(url.ToLower()))
-            provider.fileToHash.Add(url.ToLower(), hash);
+        AssetPromise_AssetBundleModel promise = new AssetPromise_AssetBundleModel("http://localhost:1338/", url);
 
         Vector3 pos = Vector3.zero;
         pos.x = Random.Range(-10, 10);
