@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Collections;
+﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace DCL
@@ -103,6 +103,9 @@ namespace DCL
 
         public AssetPromiseType Forget(AssetPromiseType promise)
         {
+            if (promise == null)
+                return null;
+
             if (promise.state == AssetPromiseState.IDLE_AND_EMPTY)
             {
                 CleanPromise(promise);

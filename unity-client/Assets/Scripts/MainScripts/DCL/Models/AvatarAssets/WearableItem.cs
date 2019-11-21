@@ -1,7 +1,8 @@
-﻿using System;
+﻿using DCL;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using DCL;
+using MappingPair = DCL.ContentServerUtils.MappingPair;
 
 [System.Serializable]
 public class WearableItem : Item
@@ -9,13 +10,13 @@ public class WearableItem : Item
     public static string bodyShapeCategory = "body_shape";
     public static string baseWearableTag = "base-wearable";
     public static string nftWearableTag = "exclusive";
-    
+
     [Serializable]
     public class Representation
     {
         public string[] bodyShapes;
         public string mainFile;
-        public ContentProvider.MappingPair[] contents;
+        public MappingPair[] contents;
         public string[] overrideHides;
         public string[] overrideReplaces;
     }
@@ -85,7 +86,7 @@ public class WearableItem : Item
     {
         var representation = GetRepresentation(bodyShapeType);
 
-        if (representation?.overrideReplaces == null || representation.overrideReplaces.Length == 0) 
+        if (representation?.overrideReplaces == null || representation.overrideReplaces.Length == 0)
             return replaces;
 
         return representation.overrideReplaces;
