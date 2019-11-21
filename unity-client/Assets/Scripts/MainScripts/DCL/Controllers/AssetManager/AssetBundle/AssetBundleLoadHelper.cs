@@ -46,7 +46,7 @@ public static class AssetBundleLoadHelper
     static Dictionary<string, AssetBundle> cachedBundlesWithDeps = new Dictionary<string, AssetBundle>();
     static Dictionary<AssetBundle, List<string>> bundleToMainAssets = new Dictionary<AssetBundle, List<string>>();
 
-    static Dictionary<string, List<string>> dependenciesMap = new Dictionary<string, List<string>>();
+    public static Dictionary<string, List<string>> dependenciesMap = new Dictionary<string, List<string>>();
     static HashSet<string> failedRequests = new HashSet<string>();
 
     static List<string> downloadingBundle = new List<string>();
@@ -113,139 +113,10 @@ public static class AssetBundleLoadHelper
         }
     }
 
+
+
+
     public static IEnumerator GetAssetBundle(string url)
-    {
-        if (failedRequests.Contains(url))
-            yield break;
-
-        if (!cachedBundles.ContainsKey(url))
-        {
-            using (UnityWebRequest assetBundleRequest = UnityWebRequestAssetBundle.GetAssetBundle(url))
-            {
-                if (downloadingBundle.Contains(url))
-                {
-                    yield return new WaitUntil(() => !downloadingBundle.Contains(url), 20);
-                    Debug.Log($"Waiting too long for {url}?");
-                    yield return new WaitUntil(() => !downloadingBundle.Contains(url));
-                    yield break;
-                }
-
-                downloadingBundle.Add(url);
-
-                var asyncOp = assetBundleRequest.SendWebRequest();
-                float progress = 0;
-
-                while (!asyncOp.isDone)
-                {
-                    if (VERBOSE)
-                    {
-                        if (asyncOp.progress != progress)
-                        {
-                            Debug.Log("Progress for " + url + " = " + asyncOp.progress);
-                            progress = asyncOp.progress;
-                        }
-                    }
-                    yield return null;
-                }
-
-                if (assetBundleRequest.isHttpError || assetBundleRequest.isNetworkError)
-                {
-                    failedRequests.Add(url);
-                    downloadingBundle.Remove(url);
-                    Debug.LogWarning("AssetBundle request fail! " + url);
-                    yield break;
-                }
-
-                AssetBundle assetBundle = DownloadHandlerAssetBundle.GetContent(assetBundleRequest);
-                cachedBundles[url] = assetBundle;
-                downloadingBundle.Remove(url);
-            }
-        }
-
-        if (cachedBundles.ContainsKey(url))
-        {
-            AssetBundle assetBundle = cachedBundles[url];
-
-            string[] assets = assetBundle.GetAllAssetNames();
-
-            List<string> assetsToLoad = new List<string>();
-
-            assetsToLoad = assets.OrderBy(
-                (x) =>
-                {
-                    string ext = x.Substring(x.Length - 3);
-
-                    if (loadOrderByExtension.ContainsKey(ext))
-                        return loadOrderByExtension[ext];
-                    else
-                        return 99;
-                }).ToList();
-
-
-            foreach (string asset in assetsToLoad)
-            {
-                float time = Time.realtimeSinceStartup;
-
-
-                if (!loadedAssets.ContainsKey(asset))
-                {
-                    loadedAssets.Add(asset, assetBundle.LoadAsset(asset));
-
-#if UNITY_EDITOR
-                    if (VERBOSE)
-                        Debug.Log($"loading asset = {asset} of type {loadedAssets[asset].GetType().Name}");
-#endif
-                    yield return null;
-                }
-                else
-                {
-                    loadedAssets[asset] = assetBundle.LoadAsset(asset);
-#if UNITY_EDITOR
-                    if (VERBOSE)
-                        Debug.Log($"loading asset = {asset} of type {loadedAssets[asset].GetType().Name} 2");
-#endif
-                    yield return null;
-                }
-#if UNITY_EDITOR
-                if (VERBOSE)
-                {
-                    if (asset.EndsWith("mat"))
-                    {
-                        Texture tex = (loadedAssets[asset] as Material).GetTexture("_BaseMap");
-
-                        if (tex != null)
-                            Debug.Log("material has texture " + tex.name);
-                        else
-                            Debug.Log("no texture!!!");
-                    }
-                }
-#endif
-                if (asset.EndsWith("glb") || asset.EndsWith("gltf"))
-                {
-                    if (!bundleToMainAssets.ContainsKey(assetBundle))
-                        bundleToMainAssets.Add(assetBundle, new List<string>(1));
-
-                    bundleToMainAssets[assetBundle].Add(asset);
-                }
-
-                if (RenderingController.i.renderingEnabled)
-                {
-                    currentLoadBudgetTime += Time.realtimeSinceStartup - time;
-
-                    if (currentLoadBudgetTime > maxLoadBudgetTime)
-                    {
-                        currentLoadBudgetTime = 0;
-                        yield return null;
-                    }
-                }
-            }
-        }
-    }
-
-
-
-
-    public static IEnumerator GetAssetBundle2(string url)
     {
         if (failedRequests.Contains(url) || cachedBundles.ContainsKey(url))
             yield break;
@@ -317,7 +188,6 @@ public static class AssetBundleLoadHelper
 #endif
 
                             loadedAssets.Add(asset, assetBundle.LoadAsset(asset));
-                            yield return null;
 #if UNITY_EDITOR
                             if (VERBOSE)
                             {
@@ -397,8 +267,8 @@ public static class AssetBundleLoadHelper
             }
         }
 
-        //if (!cachedBundles.ContainsKey(url))
-        yield return GetAssetBundle(url);
+        if (!cachedBundles.ContainsKey(url))
+            yield return GetAssetBundle(url);
 
         if (!cachedBundles.TryGetValue(url, out mainAssetBundle))
         {
@@ -432,7 +302,7 @@ public static class AssetBundleLoadHelper
 
         GameObject container = Object.Instantiate(loadedAssets[targetAsset] as GameObject);
 
-        //MaterialCachingHelper.UseCachedMaterials(container);
+        MaterialCachingHelper.UseCachedMaterials(container);
 
         container.name = targetAsset;
 #if UNITY_EDITOR

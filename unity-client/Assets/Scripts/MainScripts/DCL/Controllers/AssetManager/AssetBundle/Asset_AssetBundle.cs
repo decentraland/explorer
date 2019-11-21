@@ -1,16 +1,19 @@
-﻿using UnityEngine;
+using System.Collections.Generic;
+using UnityEngine;
 
 namespace DCL
 {
+
     public class Asset_AssetBundle : Asset
     {
-        public GameObject container;
         public AssetBundle ownerAssetBundle;
         public string assetBundleAssetName;
 
+        public Dictionary<string, Object> assetsByName = new Dictionary<string, Object>();
+        public Dictionary<string, Object> assetsByExtension = new Dictionary<string, Object>();
+
         public Asset_AssetBundle()
         {
-            container = new GameObject("AssetBundle");
         }
 
         public override object Clone()
@@ -19,10 +22,15 @@ namespace DCL
             return result;
         }
 
+        public virtual void Show(bool useMaterialTransition, System.Action OnFinish)
+        {
+            OnFinish?.Invoke();
+        }
+
         public override void Cleanup()
         {
-            if (container != null)
-                Object.Destroy(container);
+            if (ownerAssetBundle)
+                ownerAssetBundle.Unload(true);
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace DCL
+namespace DCL
 {
     public class AssetPromiseKeeper_AssetBundle : AssetPromiseKeeper<Asset_AssetBundle, AssetLibrary_AssetBundle, AssetPromise_AssetBundle>
     {

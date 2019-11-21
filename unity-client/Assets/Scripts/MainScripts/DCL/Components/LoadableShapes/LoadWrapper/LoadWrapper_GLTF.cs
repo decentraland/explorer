@@ -25,7 +25,6 @@ namespace DCL.Components
 
         string assetDirectoryPath;
 
-
 #if UNITY_EDITOR
         [ContextMenu("Debug Load Count")]
         public void DebugLoadCount()

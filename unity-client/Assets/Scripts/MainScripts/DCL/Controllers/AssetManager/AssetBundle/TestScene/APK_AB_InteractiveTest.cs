@@ -5,21 +5,21 @@ using UnityEngine;
 public class APK_AB_InteractiveTest : MonoBehaviour
 {
     ContentProvider_Dummy provider;
-    AssetPromiseKeeper_AssetBundle keeper;
-    AssetLibrary_AssetBundle library;
+    AssetPromiseKeeper_AssetBundleModel keeper;
+    AssetLibrary_AssetBundleModel library;
 
-    List<AssetPromise_AssetBundle> promiseList = new List<AssetPromise_AssetBundle>();
+    List<AssetPromise_AssetBundleModel> promiseList = new List<AssetPromise_AssetBundleModel>();
 
     void Start()
     {
         provider = new ContentProvider_Dummy();
-        library = new AssetLibrary_AssetBundle();
-        keeper = new AssetPromiseKeeper_AssetBundle(library);
+        library = new AssetLibrary_AssetBundleModel();
+        keeper = new AssetPromiseKeeper_AssetBundleModel(library);
     }
 
     void Generate(string url, string hash)
     {
-        AssetPromise_AssetBundle promise = new AssetPromise_AssetBundle(provider, "http://localhost:1338/", url);
+        AssetPromise_AssetBundleModel promise = new AssetPromise_AssetBundleModel(provider, "http://localhost:1338/", url);
 
         if (!provider.fileToHash.ContainsKey(url.ToLower()))
             provider.fileToHash.Add(url.ToLower(), hash);
