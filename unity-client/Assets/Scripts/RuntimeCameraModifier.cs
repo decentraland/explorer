@@ -18,6 +18,11 @@ public class RuntimeCameraModifier : MonoBehaviour
     public Slider depthSlider;
     public Text depthText;
 
+    public float foVMin;
+    public float foVMax;
+    public Slider foVSlider;
+    public Text foVText;
+
     private void Start()
     {
         canvas.enabled = cameraState == CameraController.CameraState.ThirdPerson;
@@ -28,16 +33,9 @@ public class RuntimeCameraModifier : MonoBehaviour
 
         depthSlider.onValueChanged.AddListener(DepthChanged);
         depthSlider.value = Mathf.InverseLerp(depthMin, depthMax, config.Get().offset.z);
-    }
 
-    private void DepthChanged(float value)
-    {
-        var realValue = Mathf.Lerp(depthMin, depthMax, value);
-        depthText.text = realValue.ToString();
-        config.Set(new ThirdPersonCameraConfig()
-        {
-            offset = Vector3.Scale(config.Get().offset, new Vector3(1, 1, 0)) + (Vector3.forward * realValue)
-        });
+        foVSlider.onValueChanged.AddListener(FoVChanged);
+        foVSlider.value = Mathf.InverseLerp(foVMin, foVMax, config.Get().fieldOfView);
     }
 
     private void HeightChanged(float value)
@@ -46,7 +44,33 @@ public class RuntimeCameraModifier : MonoBehaviour
         heightText.text = realValue.ToString();
         config.Set(new ThirdPersonCameraConfig()
         {
-            offset = Vector3.Scale(config.Get().offset, new Vector3(1, 0, 1)) + (Vector3.up * realValue)
+            offset = Vector3.Scale(config.Get().offset, new Vector3(1, 0, 1)) + (Vector3.up * realValue),
+            transitionTime = config.Get().transitionTime,
+            fieldOfView = config.Get().fieldOfView,
+        });
+    }
+
+    private void DepthChanged(float value)
+    {
+        var realValue = Mathf.Lerp(depthMin, depthMax, value);
+        depthText.text = realValue.ToString();
+        config.Set(new ThirdPersonCameraConfig()
+        {
+            offset = Vector3.Scale(config.Get().offset, new Vector3(1, 1, 0)) + (Vector3.forward * realValue),
+            transitionTime = config.Get().transitionTime,
+            fieldOfView = config.Get().fieldOfView,
+        });
+    }
+
+    private void FoVChanged(float value)
+    {
+        var realValue = Mathf.Lerp(foVMin, foVMax, value);
+        foVText.text = realValue.ToString();
+        config.Set(new ThirdPersonCameraConfig()
+        {
+            offset = config.Get().offset,
+            transitionTime = config.Get().transitionTime,
+            fieldOfView = realValue,
         });
     }
 }

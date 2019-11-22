@@ -11,7 +11,7 @@ public class CameraController : MonoBehaviour
         ThirdPerson
     }
 
-    [SerializeField] internal Transform cameraTransform;
+    [SerializeField] internal Camera mainCamera;
     [SerializeField] internal CameraStateSO currentState;
     [SerializeField] internal FirstPersonCameraConfigSO firstPersonConfig;
     [SerializeField] internal ThirdPersonCameraConfigSO thirdPersonConfig;
@@ -38,8 +38,8 @@ public class CameraController : MonoBehaviour
     {
         cameraSetups = new Dictionary<CameraState, CameraSetup>()
         {
-            { CameraState.FirstPerson, CameraSetupFactory.CreateCameraSetup(CameraState.FirstPerson, cameraTransform, firstPersonConfig) },
-            { CameraState.ThirdPerson, CameraSetupFactory.CreateCameraSetup(CameraState.ThirdPerson, cameraTransform, thirdPersonConfig) },
+            { CameraState.FirstPerson, CameraSetupFactory.CreateCameraSetup(CameraState.FirstPerson, mainCamera, firstPersonConfig) },
+            { CameraState.ThirdPerson, CameraSetupFactory.CreateCameraSetup(CameraState.ThirdPerson, mainCamera, thirdPersonConfig) },
         };
     }
 
@@ -68,22 +68,23 @@ public class CameraController : MonoBehaviour
             else
                 currentState.Set(CameraState.FirstPerson);
         }
+        currentSetup?.Update(Time.deltaTime);
     }
 }
 
 public static class CameraSetupFactory
 {
-    public static CameraSetup CreateCameraSetup<T>(CameraController.CameraState cameraState, Transform cameraTransform, T config)
+    public static CameraSetup CreateCameraSetup<T>(CameraController.CameraState cameraState, Camera mainCamera, T config)
     {
         switch (cameraState)
         {
             case CameraController.CameraState.FirstPerson:
                 if (config is BaseVariable<FirstPersonCameraConfig> firstPersonConfig)
-                    return new FirstPersonCameraSetup(cameraTransform, firstPersonConfig);
+                    return new FirstPersonCameraSetup(mainCamera, firstPersonConfig);
                 break;
             case CameraController.CameraState.ThirdPerson:
                 if (config is BaseVariable<ThirdPersonCameraConfig> thirdPersonConfig)
-                    return new ThirdPersonCameraSetup(cameraTransform, thirdPersonConfig);
+                    return new ThirdPersonCameraSetup(mainCamera, thirdPersonConfig);
                 break;
         }
         return null;

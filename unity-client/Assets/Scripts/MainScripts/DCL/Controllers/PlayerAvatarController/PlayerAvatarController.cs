@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using DCL;
 using UnityEngine;
 
@@ -7,6 +8,8 @@ public class PlayerAvatarController : MonoBehaviour
     public AvatarRenderer avatarRenderer;
     private UserProfile userProfile => UserProfile.GetOwnUserProfile();
     [SerializeField] CameraStateSO cameraState;
+    [SerializeField] ThirdPersonCameraConfigSO thirdPersonConfig;
+    [SerializeField] FirstPersonCameraConfigSO firstPersonConfig;
 
     private void Awake()
     {
@@ -20,13 +23,21 @@ public class PlayerAvatarController : MonoBehaviour
         switch (current)
         {
             case CameraController.CameraState.ThirdPerson:
+                StopAllCoroutines();
                 avatarRenderer.SetVisibility(true);
                 break;
             case CameraController.CameraState.FirstPerson:
             default:
-                avatarRenderer.SetVisibility(false);
+                StopAllCoroutines();
+                StartCoroutine(SetVisibility(firstPersonConfig.Get().transitionTime, false));
                 break;
         }
+    }
+
+    private IEnumerator SetVisibility(float delay, bool visibility)
+    {
+        yield return new WaitForSeconds(delay);
+        avatarRenderer.SetVisibility(visibility);
     }
 
     private void OnUserProfileOnUpdate(UserProfile profile)

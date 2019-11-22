@@ -48,24 +48,24 @@ namespace Camera_Test
         public void CreateFirstPersonSetupCorrectly()
         {
             var config = ScriptableObject.CreateInstance<FirstPersonCameraConfigSO>();
-            var dummyTransform = new GameObject("_dummyTransform").transform;
+            var dummyCamera = new GameObject("_dummyCamera").AddComponent<Camera>();
 
-            var cameraSetup = (FirstPersonCameraSetup)CameraSetupFactory.CreateCameraSetup(CameraController.CameraState.FirstPerson, dummyTransform, config);
+            var cameraSetup = (FirstPersonCameraSetup)CameraSetupFactory.CreateCameraSetup(CameraController.CameraState.FirstPerson, dummyCamera, config);
 
             Assert.AreEqual(config, cameraSetup.configuration);
-            Assert.AreEqual(dummyTransform, cameraSetup.cameraTransform);
+            Assert.AreEqual(dummyCamera, cameraSetup.camera);
         }
         
         [Test]
         public void CreateThirdPersonSetupCorrectly()
         {
             var config = ScriptableObject.CreateInstance<ThirdPersonCameraConfigSO>();
-            var dummyTransform = new GameObject("_dummyTransform").transform;
+            var dummyCamera = new GameObject("_dummyCamera").AddComponent<Camera>();
 
-            var cameraSetup = (ThirdPersonCameraSetup)CameraSetupFactory.CreateCameraSetup(CameraController.CameraState.ThirdPerson, dummyTransform, config);
+            var cameraSetup = (ThirdPersonCameraSetup)CameraSetupFactory.CreateCameraSetup(CameraController.CameraState.ThirdPerson, dummyCamera, config);
 
             Assert.AreEqual(config, cameraSetup.configuration);
-            Assert.AreEqual(dummyTransform, cameraSetup.cameraTransform);
+            Assert.AreEqual(dummyCamera, cameraSetup.camera);
         }
     }
 
@@ -84,37 +84,37 @@ namespace Camera_Test
         public void NotModifyTheTransformWithoutActivation()
         {
             config.Set(new FirstPersonCameraConfig() { yOffset = 10 });
-            var dummyTransform = new GameObject("_dummyTransform").transform;
-            dummyTransform.position = Vector3.up * 1.5f;
+            var dummyCamera = new GameObject("_dummyCamera").AddComponent<Camera>();
+            dummyCamera.transform.position = Vector3.up * 1.5f;
 
-            var cameraSetup = new FirstPersonCameraSetup(dummyTransform, config);
+            var cameraSetup = new FirstPersonCameraSetup(dummyCamera, config);
 
-            Assert.AreEqual(Vector3.up * 1.5f, dummyTransform.position);
+            Assert.AreEqual(Vector3.up * 1.5f, dummyCamera.transform.position);
         }
 
         [Test]
         public void ModifyTheTransformOnActivation()
         {
             config.Set(new FirstPersonCameraConfig() { yOffset = 10 });
-            var dummyTransform = new GameObject("_dummyTransform").transform;
+            var dummyCamera = new GameObject("_dummyCamera").AddComponent<Camera>();
 
-            var cameraSetup = new FirstPersonCameraSetup(dummyTransform, config);
+            var cameraSetup = new FirstPersonCameraSetup(dummyCamera, config);
             cameraSetup.Activate();
 
-            Assert.AreEqual(config.Get().yOffset, dummyTransform.position.y);
+            Assert.AreEqual(config.Get().yOffset, dummyCamera.transform.position.y);
         }
 
         [Test]
         public void ReactToChangesInConfig()
         {
             config.Set(new FirstPersonCameraConfig() { yOffset = 10 });
-            var dummyTransform = new GameObject("_dummyTransform").transform;
-            var cameraSetup = new FirstPersonCameraSetup(dummyTransform, config);
+            var dummyCamera = new GameObject("_dummyCamera").AddComponent<Camera>();
+            var cameraSetup = new FirstPersonCameraSetup(dummyCamera, config);
             cameraSetup.Activate();
 
             config.Set(new FirstPersonCameraConfig() { yOffset = 77 });
 
-            Assert.AreEqual(config.Get().yOffset, dummyTransform.position.y);
+            Assert.AreEqual(config.Get().yOffset, dummyCamera.transform.position.y);
         }
     }
 
@@ -133,37 +133,37 @@ namespace Camera_Test
         public void NotModifyTheTransformWithoutActivation()
         {
             config.Set(new ThirdPersonCameraConfig() { offset = Vector3.one * 3 });
-            var dummyTransform = new GameObject("_dummyTransform").transform;
-            dummyTransform.position = Vector3.up * 1.5f;
+            var dummyCamera = new GameObject("_dummyCamera").AddComponent<Camera>();
+            dummyCamera.transform.position = Vector3.up * 1.5f;
 
-            var cameraSetup = new ThirdPersonCameraSetup(dummyTransform, config);
+            var cameraSetup = new ThirdPersonCameraSetup(dummyCamera, config);
 
-            Assert.AreNotEqual(config.Get().offset, dummyTransform.position);
+            Assert.AreNotEqual(config.Get().offset, dummyCamera.transform.position);
         }
 
         [Test]
         public void ModifyTheTransformOnActivation()
         {
             config.Set(new ThirdPersonCameraConfig() { offset = Vector3.one * 3 });
-            var dummyTransform = new GameObject("_dummyTransform").transform;
+            var dummyCamera = new GameObject("_dummyCamera").AddComponent<Camera>();
 
-            var cameraSetup = new ThirdPersonCameraSetup(dummyTransform, config);
+            var cameraSetup = new ThirdPersonCameraSetup(dummyCamera, config);
             cameraSetup.Activate();
 
-            Assert.AreEqual(config.Get().offset, dummyTransform.position);
+            Assert.AreEqual(config.Get().offset, dummyCamera.transform.position);
         }
 
         [Test]
         public void ReactToChangesInConfig()
         {
             config.Set(new ThirdPersonCameraConfig() { offset = Vector3.one * 3 });
-            var dummyTransform = new GameObject("_dummyTransform").transform;
-            var cameraSetup = new ThirdPersonCameraSetup(dummyTransform, config);
+            var dummyCamera = new GameObject("_dummyCamera").AddComponent<Camera>();
+            var cameraSetup = new ThirdPersonCameraSetup(dummyCamera, config);
             cameraSetup.Activate();
 
             config.Set(new ThirdPersonCameraConfig() { offset = Vector3.one * 6 });
 
-            Assert.AreEqual(config.Get().offset, dummyTransform.position);
+            Assert.AreEqual(config.Get().offset, dummyCamera.transform.position);
         }
     }
 }

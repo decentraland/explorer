@@ -14,3 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   value:
     offset: {x: 0, y: 2, z: -2}
+    transitionTime: 0.5

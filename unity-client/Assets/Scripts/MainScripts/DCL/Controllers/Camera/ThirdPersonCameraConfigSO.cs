@@ -8,4 +8,6 @@ public class ThirdPersonCameraConfigSO : BaseVariable<ThirdPersonCameraConfig> {
 public class ThirdPersonCameraConfig
 {
     public Vector3 offset;
+    public float transitionTime;
+    public float fieldOfView = 60;
 }

@@ -14,3 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   value:
     yOffset: 0.875
+    transitionTime: 0.5
+    fieldOfView: 60

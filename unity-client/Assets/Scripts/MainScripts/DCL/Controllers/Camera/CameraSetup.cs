@@ -7,16 +7,18 @@ public abstract class CameraSetup
 {
     public abstract void Activate();
     public abstract void Deactivate();
+
+    public abstract void Update(float deltaTimeInSecs);
 }
 
 public abstract class CameraSetup<TConfig> : CameraSetup, IDisposable
 {
-    internal Transform cameraTransform;
+    internal Camera camera;
     internal BaseVariable<TConfig> configuration;
 
-    public CameraSetup(Transform cameraTransform, BaseVariable<TConfig> configuration)
+    public CameraSetup( Camera camera, BaseVariable<TConfig> configuration)
     {
-        this.cameraTransform = cameraTransform;
+        this.camera = camera;
         this.configuration = configuration;
     }
 
@@ -39,6 +41,6 @@ public abstract class CameraSetup<TConfig> : CameraSetup, IDisposable
         configuration.OnChange -= OnConfigChanged;
         CleanUp();
     }
-    
+
     protected abstract void CleanUp();
 }

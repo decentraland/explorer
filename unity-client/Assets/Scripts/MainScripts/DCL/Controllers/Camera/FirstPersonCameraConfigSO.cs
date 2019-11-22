@@ -8,4 +8,6 @@ public class FirstPersonCameraConfigSO : BaseVariable<FirstPersonCameraConfig> {
 public class FirstPersonCameraConfig
 {
     public float yOffset;
+    public float transitionTime;
+    public float fieldOfView;
 }
