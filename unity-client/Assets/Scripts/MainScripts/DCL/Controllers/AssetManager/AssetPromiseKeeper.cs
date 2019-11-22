@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -136,10 +136,11 @@ namespace DCL
         }
 
         Queue<AssetPromise<AssetType>> blockedPromisesQueue = new Queue<AssetPromise<AssetType>>();
+        public bool useBlockedPromisesQueue = false;
 
         private void OnRequestCompleted(AssetPromise<AssetType> promise)
         {
-            if (RenderingController.i != null && RenderingController.i.renderingEnabled)
+            if (useBlockedPromisesQueue)
             {
                 blockedPromisesQueue.Enqueue(promise);
             }

@@ -1,4 +1,4 @@
-﻿using DCL;
+using DCL;
 using DCL.Interface;
 using UnityEngine;
 using UnityGLTF;
@@ -28,6 +28,11 @@ public class RenderingController : MonoBehaviour
         PointerEventsController.renderingIsDisabled = true;
         InputController.renderingIsDisabled = true;
         GLTFSceneImporter.renderingIsDisabled = true;
+
+        AssetPromiseKeeper_GLTF.i.useBlockedPromisesQueue = false;
+        AssetPromiseKeeper_AssetBundle.i.useBlockedPromisesQueue = false;
+        AssetPromiseKeeper_AssetBundleModel.i.useBlockedPromisesQueue = false;
+
         DCLCharacterController.i.SetEnabled(false);
 
         OnRenderingStateChanged?.Invoke(renderingEnabled);
@@ -47,6 +52,10 @@ public class RenderingController : MonoBehaviour
         PointerEventsController.renderingIsDisabled = false;
         InputController.renderingIsDisabled = false;
         DCLCharacterController.i.SetEnabled(true);
+
+        AssetPromiseKeeper_GLTF.i.useBlockedPromisesQueue = true;
+        AssetPromiseKeeper_AssetBundle.i.useBlockedPromisesQueue = true;
+        AssetPromiseKeeper_AssetBundleModel.i.useBlockedPromisesQueue = true;
 
         OnRenderingStateChanged?.Invoke(renderingEnabled);
 

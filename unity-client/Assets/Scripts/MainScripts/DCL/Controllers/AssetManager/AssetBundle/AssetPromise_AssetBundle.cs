@@ -14,6 +14,7 @@ namespace DCL
         public static bool VERBOSE = false;
         static float maxLoadBudgetTime = 0.032f;
         static float currentLoadBudgetTime = 0;
+        public static bool limitTimeBudget = false;
 
 
         static Dictionary<string, int> loadOrderByExtension = new Dictionary<string, int>()
@@ -85,7 +86,7 @@ namespace DCL
                 }
             }
 
-            yield return LoadAssetBundle("", OnSuccess, OnFail);
+            yield return LoadAssetBundle(baseUrl + hash, OnSuccess, OnFail);
         }
 
         IEnumerator LoadAssetBundle(string finalUrl, Action OnSuccess, Action OnFail)
@@ -165,7 +166,7 @@ namespace DCL
                     //    bundleToMainAssets[assetBundle].Add(asset);
                     //}
 
-                    if (RenderingController.i.renderingEnabled)
+                    if (limitTimeBudget)
                     {
                         currentLoadBudgetTime += Time.realtimeSinceStartup - time;
 
@@ -180,6 +181,8 @@ namespace DCL
                 asset.ownerAssetBundle = assetBundle;
                 asset.assetBundleAssetName = assetBundle.name;
             }
+
+            OnSuccess?.Invoke();
         }
 
         protected override void OnLoad(Action OnSuccess, Action OnFail)

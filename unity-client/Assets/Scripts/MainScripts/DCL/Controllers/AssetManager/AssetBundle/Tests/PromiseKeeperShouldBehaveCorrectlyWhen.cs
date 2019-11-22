@@ -9,88 +9,28 @@ namespace AssetPromiseKeeper_AssetBundle_Tests
 {
     public class PromiseKeeperShouldBehaveCorrectlyWhen : TestsBase
     {
-        [UnityTest]
-        public IEnumerator AnyAssetIsDestroyedWhileLoading()
+        const string TEST_AB_FILENAME = "QmYACL8SnbXEonXQeRHdWYbfm8vxvaFAWnsLHUaDG4ABp5";
+
+        [UnitySetUp]
+        public IEnumerator SetUp()
         {
-            yield return base.InitScene();
-
-            var library = new AssetLibrary_AssetBundle();
-            var keeper = new AssetPromiseKeeper_AssetBundle(library);
-
-            string url = Utils.GetTestsAssetsPath() + "/GLB/Lantern/Lantern.glb";
-            AssetPromise_AssetBundle prom = new AssetPromise_AssetBundle(Utils.GetTestsAssetsPath(), url);
-
-            bool calledFail = false;
-
-            prom.OnFailEvent +=
-                (x) =>
-                {
-                    calledFail = true;
-                };
-
-            keeper.Keep(prom);
-            yield return null;
-
-            //Object.Destroy(prom.asset.container);
-            yield return prom;
-
-            Assert.IsTrue(prom != null);
-            Assert.IsTrue(prom.asset == null);
-            Assert.IsTrue(calledFail);
+            Caching.ClearCache();
+            Resources.UnloadUnusedAssets();
+            yield break;
         }
-
-        [UnityTest]
-        public IEnumerator ForgetIsCalledWhileAssetIsBeingReused()
-        {
-            yield return base.InitScene();
-
-            var library = new AssetLibrary_AssetBundle();
-            var keeper = new AssetPromiseKeeper_AssetBundle(library);
-
-            string url = Utils.GetTestsAssetsPath() + "/GLB/Lantern/Lantern.glb";
-            AssetPromise_AssetBundle prom = new AssetPromise_AssetBundle(Utils.GetTestsAssetsPath(), url);
-            bool calledFail = false;
-
-            keeper.Keep(prom);
-            yield return prom;
-
-            //prom.asset.container.name = "First GLTF";
-
-            var prom2 = new AssetPromise_AssetBundle(Utils.GetTestsAssetsPath(), url);
-
-            prom2.OnFailEvent +=
-                (x) =>
-                {
-                    calledFail = true;
-                };
-
-            keeper.Keep(prom2);
-            //GameObject container = prom2.asset.container;
-            keeper.Forget(prom2);
-
-            yield return prom2;
-
-            Assert.IsTrue(prom2 != null);
-            Assert.IsTrue(calledFail);
-            Assert.IsTrue(prom2.asset == null, "Asset shouldn't exist after Forget!");
-            //Assert.IsTrue(container != null, "Container should be pooled!");
-
-            //PoolableObject po = container.GetComponentInChildren<PoolableObject>(true);
-
-            // Assert.IsTrue(po.isInsidePool, "Asset should be inside pool!");
-        }
-
 
         [UnityTest]
         public IEnumerator KeepAndForgetIsCalledInSingleFrameWhenLoadingAsset()
         {
-            yield return base.InitScene();
+            //yield return base.InitScene();
 
             var library = new AssetLibrary_AssetBundle();
             var keeper = new AssetPromiseKeeper_AssetBundle(library);
 
-            string url = Utils.GetTestsAssetsPath() + "/GLB/Lantern/Lantern.glb";
-            var prom = new AssetPromise_AssetBundle(Utils.GetTestsAssetsPath(), url);
+            string baseUrl = Utils.GetTestsAssetsPath() + "/AssetBundles/";
+            string url = TEST_AB_FILENAME;
+
+            var prom = new AssetPromise_AssetBundle(baseUrl, url);
             bool calledSuccess = false;
             bool calledFail = false;
 
@@ -115,18 +55,20 @@ namespace AssetPromiseKeeper_AssetBundle_Tests
             Assert.IsTrue(prom.asset == null);
             Assert.IsFalse(calledSuccess);
             Assert.IsTrue(calledFail);
+            yield break;
         }
 
         [UnityTest]
         public IEnumerator KeepAndForgetIsCalledInSingleFrameWhenReusingAsset()
         {
-            yield return base.InitScene();
+            //yield return base.InitScene();
 
             var library = new AssetLibrary_AssetBundle();
             var keeper = new AssetPromiseKeeper_AssetBundle(library);
 
-            string url = Utils.GetTestsAssetsPath() + "/GLB/Lantern/Lantern.glb";
-            var prom = new AssetPromise_AssetBundle(Utils.GetTestsAssetsPath(), url);
+            string baseUrl = Utils.GetTestsAssetsPath() + "/AssetBundles/";
+            string url = TEST_AB_FILENAME;
+            var prom = new AssetPromise_AssetBundle(baseUrl, url);
             Asset_AssetBundle loadedAsset = null;
 
             prom.OnSuccessEvent +=
@@ -149,19 +91,22 @@ namespace AssetPromiseKeeper_AssetBundle_Tests
         [UnityTest]
         public IEnumerator AnyAssetIsLoadedAndThenUnloaded()
         {
-            yield return base.InitScene();
+            //yield return base.InitScene();
 
             var library = new AssetLibrary_AssetBundle();
             var keeper = new AssetPromiseKeeper_AssetBundle(library);
 
-            string url = Utils.GetTestsAssetsPath() + "/GLB/Lantern/Lantern.glb";
-            var prom = new AssetPromise_AssetBundle(Utils.GetTestsAssetsPath(), url);
+            string baseUrl = Utils.GetTestsAssetsPath() + "/AssetBundles/";
+            string url = TEST_AB_FILENAME;
+
+            var prom = new AssetPromise_AssetBundle(baseUrl, url);
             Asset_AssetBundle loadedAsset = null;
 
 
             prom.OnSuccessEvent +=
                 (x) =>
                 {
+                    Debug.Log("success!");
                     loadedAsset = x;
                 };
 
@@ -182,8 +127,6 @@ namespace AssetPromiseKeeper_AssetBundle_Tests
 
             Assert.IsTrue(prom.state == AssetPromiseState.IDLE_AND_EMPTY);
 
-            yield return MemoryManager.i.CleanupPoolsIfNeeded(forceCleanup: true);
-
             Assert.IsTrue(!library.Contains(loadedAsset.id));
             Assert.AreEqual(0, library.masterAssets.Count);
         }
@@ -191,13 +134,14 @@ namespace AssetPromiseKeeper_AssetBundle_Tests
         [UnityTest]
         public IEnumerator ForgetIsCalledWhileAssetIsBeingLoaded()
         {
-            yield return base.InitScene();
+            //yield return base.InitScene();
 
             var library = new AssetLibrary_AssetBundle();
             var keeper = new AssetPromiseKeeper_AssetBundle(library);
 
-            string url = Utils.GetTestsAssetsPath() + "/GLB/Lantern/Lantern.glb";
-            var prom = new AssetPromise_AssetBundle(Utils.GetTestsAssetsPath(), url);
+            string baseUrl = Utils.GetTestsAssetsPath() + "/AssetBundles/";
+            string url = TEST_AB_FILENAME;
+            var prom = new AssetPromise_AssetBundle(baseUrl, url);
             Asset_AssetBundle asset = null;
             prom.OnSuccessEvent += (x) => { asset = x; };
 
@@ -209,7 +153,7 @@ namespace AssetPromiseKeeper_AssetBundle_Tests
 
             Assert.AreEqual(AssetPromiseState.IDLE_AND_EMPTY, prom.state);
 
-            var prom2 = new AssetPromise_AssetBundle(Utils.GetTestsAssetsPath(), url);
+            var prom2 = new AssetPromise_AssetBundle(baseUrl, url);
 
             keeper.Keep(prom2);
 
@@ -219,9 +163,7 @@ namespace AssetPromiseKeeper_AssetBundle_Tests
 
             keeper.Forget(prom2);
 
-            yield return MemoryManager.i.CleanupPoolsIfNeeded(forceCleanup: true);
-
-            Assert.IsTrue(asset == null);
+            Assert.IsTrue(asset.ownerAssetBundle == null);
             Assert.IsTrue(!library.Contains(asset));
             Assert.AreEqual(0, library.masterAssets.Count);
         }
@@ -229,23 +171,24 @@ namespace AssetPromiseKeeper_AssetBundle_Tests
         [UnityTest]
         public IEnumerator ManyPromisesWithTheSameURLAreLoaded()
         {
-            yield return InitScene();
+            //yield return InitScene();
 
             var library = new AssetLibrary_AssetBundle();
             var keeper = new AssetPromiseKeeper_AssetBundle(library);
 
-            string url = Utils.GetTestsAssetsPath() + "/GLB/Lantern/Lantern.glb";
+            string baseUrl = Utils.GetTestsAssetsPath() + "/AssetBundles/";
+            string url = TEST_AB_FILENAME;
 
             string id = "1";
-            var prom = new AssetPromise_AssetBundle(Utils.GetTestsAssetsPath(), url);
+            var prom = new AssetPromise_AssetBundle(baseUrl, url);
             Asset_AssetBundle asset = null;
             prom.OnSuccessEvent += (x) => { asset = x; };
 
-            var prom2 = new AssetPromise_AssetBundle(Utils.GetTestsAssetsPath(), url);
+            var prom2 = new AssetPromise_AssetBundle(baseUrl, url);
             Asset_AssetBundle asset2 = null;
             prom2.OnSuccessEvent += (x) => { asset2 = x; };
 
-            var prom3 = new AssetPromise_AssetBundle(Utils.GetTestsAssetsPath(), url);
+            var prom3 = new AssetPromise_AssetBundle(baseUrl, url);
             Asset_AssetBundle asset3 = null;
             prom3.OnSuccessEvent += (x) => { asset3 = x; };
 
@@ -270,9 +213,10 @@ namespace AssetPromiseKeeper_AssetBundle_Tests
             Assert.IsTrue(asset3.id == asset.id);
             Assert.IsTrue(asset2.id == asset3.id);
 
-            Assert.IsTrue(asset != asset2);
-            Assert.IsTrue(asset != asset3);
-            Assert.IsTrue(asset2 != asset3);
+            //NOTE(Brian): We expect them to be the same asset because AssetBundle non-gameObject assets are shared, as opposed to instanced.
+            Assert.IsTrue(asset == asset2);
+            Assert.IsTrue(asset == asset3);
+            Assert.IsTrue(asset2 == asset3);
 
             Assert.IsTrue(library.Contains(asset));
             Assert.AreEqual(1, library.masterAssets.Count);

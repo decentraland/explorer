@@ -1,8 +1,6 @@
 using DCL;
 using DCL.Helpers;
 using System.Collections;
-using System.Text.RegularExpressions;
-using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.TestTools;
 
@@ -18,24 +16,22 @@ namespace AssetPromiseKeeper_AssetBundle_Tests
             var library = new AssetLibrary_AssetBundle();
             var keeper = new AssetPromiseKeeper_AssetBundle(library);
 
-            //NOTE(Brian): Expect the 404 error
-            LogAssert.Expect(LogType.Error, new Regex("^*.?404"));
+            string url = "non_existing_url.glb";
+            string baseUrl = Utils.GetTestsAssetsPath() + "AssetBundles/";
 
-            string url = Utils.GetTestsAssetsPath() + "/non_existing_url.glb";
-
-            AssetPromise_AssetBundle prom = new AssetPromise_AssetBundle(Utils.GetTestsAssetsPath(), url);
+            AssetPromise_AssetBundle prom = new AssetPromise_AssetBundle(baseUrl, url);
             Asset_AssetBundle asset = null;
             bool failEventCalled1 = false;
             prom.OnSuccessEvent += (x) => { asset = x; };
             prom.OnFailEvent += (x) => { failEventCalled1 = true; };
 
-            AssetPromise_AssetBundle prom2 = new AssetPromise_AssetBundle(Utils.GetTestsAssetsPath(), url);
+            AssetPromise_AssetBundle prom2 = new AssetPromise_AssetBundle(baseUrl, url);
             Asset_AssetBundle asset2 = null;
             bool failEventCalled2 = false;
             prom2.OnSuccessEvent += (x) => { asset2 = x; };
             prom2.OnFailEvent += (x) => { failEventCalled2 = true; };
 
-            AssetPromise_AssetBundle prom3 = new AssetPromise_AssetBundle(Utils.GetTestsAssetsPath(), url);
+            AssetPromise_AssetBundle prom3 = new AssetPromise_AssetBundle(baseUrl, url);
             Asset_AssetBundle asset3 = null;
             bool failEventCalled3 = false;
             prom3.OnSuccessEvent += (x) => { asset3 = x; };

@@ -6,6 +6,7 @@ namespace DCL
 
     public class Asset_AssetBundle : Asset
     {
+        public int referenceCount = 0;
         public AssetBundle ownerAssetBundle;
         public string assetBundleAssetName;
 
@@ -30,7 +31,10 @@ namespace DCL
         public override void Cleanup()
         {
             if (ownerAssetBundle)
+            {
                 ownerAssetBundle.Unload(true);
+                ownerAssetBundle = null;
+            }
         }
     }
 }

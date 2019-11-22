@@ -10,6 +10,8 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
 {
     public class AnyAssetPromiseShould : TestsBase
     {
+        const string TEST_AB_FILENAME = "QmYACL8SnbXEonXQeRHdWYbfm8vxvaFAWnsLHUaDG4ABp5";
+
         [UnityTest]
         public IEnumerator BeSetupCorrectlyAfterLoad()
         {
@@ -18,8 +20,10 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
             var library = new AssetLibrary_AssetBundleModel();
             var keeper = new AssetPromiseKeeper_AssetBundleModel(library);
 
-            string url = Utils.GetTestsAssetsPath() + "/GLB/Lantern/Lantern.glb";
-            var prom = new AssetPromise_AssetBundleModel(scene.contentProvider, null, url);
+            string baseUrl = Utils.GetTestsAssetsPath() + "AssetBundles/";
+            string url = TEST_AB_FILENAME;
+
+            var prom = new AssetPromise_AssetBundleModel(baseUrl, url);
             Asset_AssetBundleModel loadedAsset = null;
 
 
@@ -67,8 +71,9 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
             var library = new AssetLibrary_AssetBundleModel();
             var keeper = new AssetPromiseKeeper_AssetBundleModel(library);
 
-            string url = Utils.GetTestsAssetsPath() + "/GLB/Lantern/Lantern.glb";
-            var prom = new AssetPromise_AssetBundleModel(scene.contentProvider, null, url);
+            string baseUrl = Utils.GetTestsAssetsPath() + "AssetBundles/";
+            string url = TEST_AB_FILENAME;
+            var prom = new AssetPromise_AssetBundleModel(baseUrl, url);
             prom.settings.forceNewInstance = false;
             keeper.Keep(prom);
             yield return prom;
@@ -86,10 +91,12 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
 
             var poolableComponents = new List<PoolableObject>();
 
-            string url = Utils.GetTestsAssetsPath() + "/GLB/Lantern/Lantern.glb";
+            string baseUrl = Utils.GetTestsAssetsPath() + "AssetBundles/";
+            string url = TEST_AB_FILENAME;
+
             for (int i = 0; i < 10; i++)
             {
-                var prom = new AssetPromise_AssetBundleModel(scene.contentProvider, null, url);
+                var prom = new AssetPromise_AssetBundleModel(baseUrl, url);
                 prom.settings.forceNewInstance = false;
                 keeper.Keep(prom);
                 yield return prom;
@@ -107,8 +114,10 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
             var library = new AssetLibrary_AssetBundleModel();
             var keeper = new AssetPromiseKeeper_AssetBundleModel(library);
 
-            string url = Utils.GetTestsAssetsPath() + "/GLB/Lantern/Lantern.glb";
-            var prom = new AssetPromise_AssetBundleModel(scene.contentProvider, null, url);
+            string baseUrl = Utils.GetTestsAssetsPath() + "AssetBundles/";
+            string url = TEST_AB_FILENAME;
+
+            var prom = new AssetPromise_AssetBundleModel(baseUrl, url);
             prom.settings.forceNewInstance = true;
             keeper.Keep(prom);
             yield return prom;
@@ -126,10 +135,12 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
 
             var poolableComponents = new List<PoolableObject>();
 
-            string url = Utils.GetTestsAssetsPath() + "/GLB/Lantern/Lantern.glb";
+            string baseUrl = Utils.GetTestsAssetsPath() + "AssetBundles/";
+            string url = TEST_AB_FILENAME;
+
             for (int i = 0; i < 10; i++)
             {
-                var prom = new AssetPromise_AssetBundleModel(scene.contentProvider, null, url);
+                var prom = new AssetPromise_AssetBundleModel(baseUrl, url);
                 prom.settings.forceNewInstance = true;
                 keeper.Keep(prom);
                 yield return prom;

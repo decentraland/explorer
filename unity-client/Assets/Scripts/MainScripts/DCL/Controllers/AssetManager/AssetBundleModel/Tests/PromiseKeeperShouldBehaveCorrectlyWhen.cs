@@ -9,6 +9,7 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
 {
     public class PromiseKeeperShouldBehaveCorrectlyWhen : TestsBase
     {
+        const string TEST_AB_FILENAME = "QmYACL8SnbXEonXQeRHdWYbfm8vxvaFAWnsLHUaDG4ABp5";
         [UnityTest]
         public IEnumerator AnyAssetIsDestroyedWhileLoading()
         {
@@ -17,8 +18,10 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
             var library = new AssetLibrary_AssetBundleModel();
             var keeper = new AssetPromiseKeeper_AssetBundleModel(library);
 
-            string url = Utils.GetTestsAssetsPath() + "/GLB/Lantern/Lantern.glb";
-            AssetPromise_AssetBundleModel prom = new AssetPromise_AssetBundleModel(scene.contentProvider, null, url);
+            string baseUrl = Utils.GetTestsAssetsPath() + "AssetBundles/";
+            string url = TEST_AB_FILENAME;
+
+            AssetPromise_AssetBundleModel prom = new AssetPromise_AssetBundleModel(baseUrl, url);
 
             bool calledFail = false;
 
@@ -47,8 +50,10 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
             var library = new AssetLibrary_AssetBundleModel();
             var keeper = new AssetPromiseKeeper_AssetBundleModel(library);
 
-            string url = Utils.GetTestsAssetsPath() + "/GLB/Lantern/Lantern.glb";
-            AssetPromise_AssetBundleModel prom = new AssetPromise_AssetBundleModel(scene.contentProvider, null, url);
+            string baseUrl = Utils.GetTestsAssetsPath() + "AssetBundles/";
+            string url = TEST_AB_FILENAME;
+
+            AssetPromise_AssetBundleModel prom = new AssetPromise_AssetBundleModel(baseUrl, url);
             bool calledFail = false;
 
             keeper.Keep(prom);
@@ -56,7 +61,7 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
 
             prom.asset.container.name = "First GLTF";
 
-            AssetPromise_AssetBundleModel prom2 = new AssetPromise_AssetBundleModel(scene.contentProvider, null, url);
+            AssetPromise_AssetBundleModel prom2 = new AssetPromise_AssetBundleModel(baseUrl, url);
 
             prom2.OnFailEvent +=
                 (x) =>
@@ -89,8 +94,9 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
             var library = new AssetLibrary_AssetBundleModel();
             var keeper = new AssetPromiseKeeper_AssetBundleModel(library);
 
-            string url = Utils.GetTestsAssetsPath() + "/GLB/Lantern/Lantern.glb";
-            AssetPromise_AssetBundleModel prom = new AssetPromise_AssetBundleModel(scene.contentProvider, null, url);
+            string baseUrl = Utils.GetTestsAssetsPath() + "AssetBundles/";
+            string url = TEST_AB_FILENAME;
+            AssetPromise_AssetBundleModel prom = new AssetPromise_AssetBundleModel(baseUrl, url);
             bool calledSuccess = false;
             bool calledFail = false;
 
@@ -125,8 +131,9 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
             var library = new AssetLibrary_AssetBundleModel();
             var keeper = new AssetPromiseKeeper_AssetBundleModel(library);
 
-            string url = Utils.GetTestsAssetsPath() + "/GLB/Lantern/Lantern.glb";
-            AssetPromise_AssetBundleModel prom = new AssetPromise_AssetBundleModel(scene.contentProvider, null, url);
+            string baseUrl = Utils.GetTestsAssetsPath() + "AssetBundles/";
+            string url = TEST_AB_FILENAME;
+            AssetPromise_AssetBundleModel prom = new AssetPromise_AssetBundleModel(baseUrl, url);
             Asset_AssetBundleModel loadedAsset = null;
 
             prom.OnSuccessEvent +=
@@ -154,8 +161,9 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
             var library = new AssetLibrary_AssetBundleModel();
             var keeper = new AssetPromiseKeeper_AssetBundleModel(library);
 
-            string url = Utils.GetTestsAssetsPath() + "/GLB/Lantern/Lantern.glb";
-            AssetPromise_AssetBundleModel prom = new AssetPromise_AssetBundleModel(scene.contentProvider, null, url);
+            string baseUrl = Utils.GetTestsAssetsPath() + "AssetBundles/";
+            string url = TEST_AB_FILENAME;
+            AssetPromise_AssetBundleModel prom = new AssetPromise_AssetBundleModel(baseUrl, url);
             Asset_AssetBundleModel loadedAsset = null;
 
 
@@ -196,8 +204,9 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
             var library = new AssetLibrary_AssetBundleModel();
             var keeper = new AssetPromiseKeeper_AssetBundleModel(library);
 
-            string url = Utils.GetTestsAssetsPath() + "/GLB/Lantern/Lantern.glb";
-            AssetPromise_AssetBundleModel prom = new AssetPromise_AssetBundleModel(scene.contentProvider, null, url);
+            string baseUrl = Utils.GetTestsAssetsPath() + "AssetBundles/";
+            string url = TEST_AB_FILENAME;
+            AssetPromise_AssetBundleModel prom = new AssetPromise_AssetBundleModel(baseUrl, url);
             Asset_AssetBundleModel asset = null;
             prom.OnSuccessEvent += (x) => { asset = x; };
 
@@ -209,7 +218,7 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
 
             Assert.AreEqual(AssetPromiseState.IDLE_AND_EMPTY, prom.state);
 
-            AssetPromise_AssetBundleModel prom2 = new AssetPromise_AssetBundleModel(scene.contentProvider, null, url);
+            AssetPromise_AssetBundleModel prom2 = new AssetPromise_AssetBundleModel(baseUrl, url);
 
             keeper.Keep(prom2);
 
@@ -234,18 +243,19 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
             var library = new AssetLibrary_AssetBundleModel();
             var keeper = new AssetPromiseKeeper_AssetBundleModel(library);
 
-            string url = Utils.GetTestsAssetsPath() + "/GLB/Lantern/Lantern.glb";
+            string baseUrl = Utils.GetTestsAssetsPath() + "AssetBundles/";
+            string url = TEST_AB_FILENAME;
 
             string id = "1";
-            AssetPromise_AssetBundleModel prom = new AssetPromise_AssetBundleModel(scene.contentProvider, null, url);
+            AssetPromise_AssetBundleModel prom = new AssetPromise_AssetBundleModel(baseUrl, url);
             Asset_AssetBundleModel asset = null;
             prom.OnSuccessEvent += (x) => { asset = x; };
 
-            AssetPromise_AssetBundleModel prom2 = new AssetPromise_AssetBundleModel(scene.contentProvider, null, url);
+            AssetPromise_AssetBundleModel prom2 = new AssetPromise_AssetBundleModel(baseUrl, url);
             Asset_AssetBundleModel asset2 = null;
             prom2.OnSuccessEvent += (x) => { asset2 = x; };
 
-            AssetPromise_AssetBundleModel prom3 = new AssetPromise_AssetBundleModel(scene.contentProvider, null, url);
+            AssetPromise_AssetBundleModel prom3 = new AssetPromise_AssetBundleModel(baseUrl, url);
             Asset_AssetBundleModel asset3 = null;
             prom3.OnSuccessEvent += (x) => { asset3 = x; };
 
