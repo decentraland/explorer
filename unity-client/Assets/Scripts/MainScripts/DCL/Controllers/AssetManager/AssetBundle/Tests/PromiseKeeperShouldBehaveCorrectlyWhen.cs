@@ -9,10 +9,11 @@ namespace AssetPromiseKeeper_AssetBundle_Tests
 {
     public class PromiseKeeperShouldBehaveCorrectlyWhen : TestsBase
     {
-        const string TEST_AB_FILENAME = "QmYACL8SnbXEonXQeRHdWYbfm8vxvaFAWnsLHUaDG4ABp5";
+        readonly static string TEST_AB_FILENAME = "QmYACL8SnbXEonXQeRHdWYbfm8vxvaFAWnsLHUaDG4ABp5";
+        readonly static string BASE_URL = Utils.GetTestsAssetsPath() + "/AssetBundles/";
 
-        [UnitySetUp]
-        public IEnumerator SetUp()
+        [UnityTearDown]
+        public IEnumerator TearDown()
         {
             Caching.ClearCache();
             Resources.UnloadUnusedAssets();
@@ -22,15 +23,10 @@ namespace AssetPromiseKeeper_AssetBundle_Tests
         [UnityTest]
         public IEnumerator KeepAndForgetIsCalledInSingleFrameWhenLoadingAsset()
         {
-            //yield return base.InitScene();
-
             var library = new AssetLibrary_AssetBundle();
             var keeper = new AssetPromiseKeeper_AssetBundle(library);
 
-            string baseUrl = Utils.GetTestsAssetsPath() + "/AssetBundles/";
-            string url = TEST_AB_FILENAME;
-
-            var prom = new AssetPromise_AssetBundle(baseUrl, url);
+            var prom = new AssetPromise_AssetBundle(BASE_URL, TEST_AB_FILENAME);
             bool calledSuccess = false;
             bool calledFail = false;
 
@@ -61,14 +57,10 @@ namespace AssetPromiseKeeper_AssetBundle_Tests
         [UnityTest]
         public IEnumerator KeepAndForgetIsCalledInSingleFrameWhenReusingAsset()
         {
-            //yield return base.InitScene();
-
             var library = new AssetLibrary_AssetBundle();
             var keeper = new AssetPromiseKeeper_AssetBundle(library);
 
-            string baseUrl = Utils.GetTestsAssetsPath() + "/AssetBundles/";
-            string url = TEST_AB_FILENAME;
-            var prom = new AssetPromise_AssetBundle(baseUrl, url);
+            var prom = new AssetPromise_AssetBundle(BASE_URL, TEST_AB_FILENAME);
             Asset_AssetBundle loadedAsset = null;
 
             prom.OnSuccessEvent +=
@@ -91,15 +83,10 @@ namespace AssetPromiseKeeper_AssetBundle_Tests
         [UnityTest]
         public IEnumerator AnyAssetIsLoadedAndThenUnloaded()
         {
-            //yield return base.InitScene();
-
             var library = new AssetLibrary_AssetBundle();
             var keeper = new AssetPromiseKeeper_AssetBundle(library);
 
-            string baseUrl = Utils.GetTestsAssetsPath() + "/AssetBundles/";
-            string url = TEST_AB_FILENAME;
-
-            var prom = new AssetPromise_AssetBundle(baseUrl, url);
+            var prom = new AssetPromise_AssetBundle(BASE_URL, TEST_AB_FILENAME);
             Asset_AssetBundle loadedAsset = null;
 
 
@@ -134,14 +121,10 @@ namespace AssetPromiseKeeper_AssetBundle_Tests
         [UnityTest]
         public IEnumerator ForgetIsCalledWhileAssetIsBeingLoaded()
         {
-            //yield return base.InitScene();
-
             var library = new AssetLibrary_AssetBundle();
             var keeper = new AssetPromiseKeeper_AssetBundle(library);
 
-            string baseUrl = Utils.GetTestsAssetsPath() + "/AssetBundles/";
-            string url = TEST_AB_FILENAME;
-            var prom = new AssetPromise_AssetBundle(baseUrl, url);
+            var prom = new AssetPromise_AssetBundle(BASE_URL, TEST_AB_FILENAME);
             Asset_AssetBundle asset = null;
             prom.OnSuccessEvent += (x) => { asset = x; };
 
@@ -153,7 +136,7 @@ namespace AssetPromiseKeeper_AssetBundle_Tests
 
             Assert.AreEqual(AssetPromiseState.IDLE_AND_EMPTY, prom.state);
 
-            var prom2 = new AssetPromise_AssetBundle(baseUrl, url);
+            var prom2 = new AssetPromise_AssetBundle(BASE_URL, TEST_AB_FILENAME);
 
             keeper.Keep(prom2);
 
@@ -171,24 +154,19 @@ namespace AssetPromiseKeeper_AssetBundle_Tests
         [UnityTest]
         public IEnumerator ManyPromisesWithTheSameURLAreLoaded()
         {
-            //yield return InitScene();
-
             var library = new AssetLibrary_AssetBundle();
             var keeper = new AssetPromiseKeeper_AssetBundle(library);
 
-            string baseUrl = Utils.GetTestsAssetsPath() + "/AssetBundles/";
-            string url = TEST_AB_FILENAME;
-
             string id = "1";
-            var prom = new AssetPromise_AssetBundle(baseUrl, url);
+            var prom = new AssetPromise_AssetBundle(BASE_URL, TEST_AB_FILENAME);
             Asset_AssetBundle asset = null;
             prom.OnSuccessEvent += (x) => { asset = x; };
 
-            var prom2 = new AssetPromise_AssetBundle(baseUrl, url);
+            var prom2 = new AssetPromise_AssetBundle(BASE_URL, TEST_AB_FILENAME);
             Asset_AssetBundle asset2 = null;
             prom2.OnSuccessEvent += (x) => { asset2 = x; };
 
-            var prom3 = new AssetPromise_AssetBundle(baseUrl, url);
+            var prom3 = new AssetPromise_AssetBundle(BASE_URL, TEST_AB_FILENAME);
             Asset_AssetBundle asset3 = null;
             prom3.OnSuccessEvent += (x) => { asset3 = x; };
 
