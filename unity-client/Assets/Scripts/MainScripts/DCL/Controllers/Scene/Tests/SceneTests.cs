@@ -19,65 +19,68 @@ namespace Tests
         [UnityTest]
         public IEnumerator PerformanceLimitControllerTests()
         {
-            yield return TestHelpers.UnloadAllUnityScenes();
-            var sceneController = TestHelpers.InitializeSceneController();
+            yield return InitScene();
+            DCL.Configuration.Environment.DEBUG = true;
+
+            sceneController.SetDebug();
+            yield return new WaitForSeconds(0.1f);
+
+            yield return new WaitForSeconds(0.1f);
+
             var scenesToLoad = (Resources.Load("TestJSON/SceneLoadingTest") as TextAsset).text;
-
-            yield return new WaitForSeconds(0.1f);
-
-            sceneController.UnloadAllScenes();
-
-            yield return new WaitForSeconds(0.1f);
-
             sceneController.LoadParcelScenes(scenesToLoad);
 
             yield return new WaitForAllMessagesProcessed();
 
             var scene = sceneController.loadedScenes["0,0"];
 
-            TestHelpers.InstantiateEntityWithShape(scene, "1", DCL.Models.CLASS_ID.BOX_SHAPE, new Vector3(-3, 1, 0));
-            TestHelpers.InstantiateEntityWithShape(scene, "2", DCL.Models.CLASS_ID.SPHERE_SHAPE, new Vector3(0, 1, 0));
-            TestHelpers.InstantiateEntityWithShape(scene, "3", DCL.Models.CLASS_ID.PLANE_SHAPE, new Vector3(2, 1, 0));
-            TestHelpers.InstantiateEntityWithShape(scene, "4", DCL.Models.CLASS_ID.CONE_SHAPE, new Vector3(4, 1, 0));
-            TestHelpers.InstantiateEntityWithShape(scene, "5", DCL.Models.CLASS_ID.CYLINDER_SHAPE,
-                new Vector3(6, 1, 0));
+            var lanternEntity = TestHelpers.CreateSceneEntity(scene);
+            var lanternShape = TestHelpers.AttachGLTFShape(lanternEntity, scene, new Vector3(8, 1, 8), new LoadableShape.Model()
+            {
+                src = DCL.Helpers.Utils.GetTestsAssetsPath() + "/GLB/Lantern/Lantern.glb"
+            });
+            yield return TestHelpers.WaitForGLTFLoad(lanternEntity);
 
-            TestHelpers.InstantiateEntityWithShape(scene, "6", DCL.Models.CLASS_ID.GLTF_SHAPE, new Vector3(0, 1, 6),
-                DCL.Helpers.Utils.GetTestsAssetsPath() + "/GLB/Lantern/Lantern.glb");
-            yield return null;
-            LoadWrapper_GLTF gltfShape = scene.entities["6"].gameObject.GetComponentInChildren<LoadWrapper_GLTF>(true);
-            yield return new WaitUntil(() => gltfShape.alreadyLoaded);
+            var cesiumManEntity = TestHelpers.CreateSceneEntity(scene);
+            var cesiumManShape = TestHelpers.AttachGLTFShape(cesiumManEntity, scene, new Vector3(8, 1, 8), new LoadableShape.Model()
+            {
+                src = DCL.Helpers.Utils.GetTestsAssetsPath() + "/GLB/CesiumMan/CesiumMan.glb"
+            });
+            yield return TestHelpers.WaitForGLTFLoad(cesiumManEntity);
 
-            TestHelpers.InstantiateEntityWithShape(scene, "7", DCL.Models.CLASS_ID.OBJ_SHAPE, new Vector3(10, 1, 0),
-                DCL.Helpers.Utils.GetTestsAssetsPath() + "/OBJ/teapot.obj");
+            TestHelpers.RemoveSceneEntity(scene, lanternEntity);
             yield return null;
-            LoadWrapper_OBJ objshape = scene.entities["7"].gameObject.GetComponentInChildren<LoadWrapper_OBJ>(true);
-            yield return new WaitUntil(() => objshape.alreadyLoaded);
 
-            TestHelpers.InstantiateEntityWithShape(scene, "8", DCL.Models.CLASS_ID.GLTF_SHAPE, new Vector3(0, 1, 12),
-                DCL.Helpers.Utils.GetTestsAssetsPath() + "/GLB/CesiumMan/CesiumMan.glb");
-            yield return null;
-            gltfShape = scene.entities["8"].gameObject.GetComponentInChildren<LoadWrapper_GLTF>(true);
-            yield return new WaitUntil(() => gltfShape.alreadyLoaded);
+            TestHelpers.DetachSharedComponent(scene, cesiumManEntity.entityId, cesiumManShape.id);
+            cesiumManShape = TestHelpers.AttachGLTFShape(cesiumManEntity, scene, new Vector3(8, 1, 8), new LoadableShape.Model()
+            {
+                src = DCL.Helpers.Utils.GetTestsAssetsPath() + "/GLB/Lantern/Lantern.glb"
+            });
+            yield return TestHelpers.WaitForGLTFLoad(cesiumManEntity);
+
+            TestHelpers.InstantiateEntityWithShape(scene, "1", DCL.Models.CLASS_ID.BOX_SHAPE, new Vector3(8, 1, 8));
+            TestHelpers.InstantiateEntityWithShape(scene, "2", DCL.Models.CLASS_ID.SPHERE_SHAPE, new Vector3(8, 1, 8));
 
             AssertMetricsModel(scene,
-                triangles: 17521,
-                materials: 5,
-                entities: 8,
-                meshes: 11,
-                bodies: 13,
+                triangles: 7026,
+                materials: 2,
+                entities: 3,
+                meshes: 5,
+                bodies: 5,
                 textures: 0);
 
-            TestHelpers.RemoveSceneEntity(scene, "8");
+            TestHelpers.RemoveSceneEntity(scene, "1");
+            TestHelpers.RemoveSceneEntity(scene, "2");
+            TestHelpers.RemoveSceneEntity(scene, cesiumManEntity);
 
             yield return null;
 
             AssertMetricsModel(scene,
-                triangles: 12849,
-                materials: 4,
-                entities: 7,
-                meshes: 10,
-                bodies: 12,
+                triangles: 0,
+                materials: 0,
+                entities: 0,
+                meshes: 0,
+                bodies: 0,
                 textures: 0);
 
             sceneController.UnloadAllScenes();
@@ -393,7 +396,7 @@ namespace Tests
             var boxShape = TestHelpers.CreateEntityWithBoxShape(scene, Vector3.zero, true);
             Assert.AreEqual(1, scene.disposableNotReadyCount);
             scene.SetInitMessagesDone();
-            Assert.AreEqual(0,scene.disposableNotReadyCount);
+            Assert.AreEqual(0, scene.disposableNotReadyCount);
             yield return boxShape.routine;
             Assert.AreEqual(0, scene.disposableNotReadyCount);
         }
