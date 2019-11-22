@@ -178,8 +178,15 @@ public class DCLCharacterController : MonoBehaviour
 
     public void SetEulerRotation(Vector3 eulerRotation)
     {
-        transform.rotation = Quaternion.Euler(0f, eulerRotation.y, 0f);
         cameraTransform.localRotation = Quaternion.Euler(eulerRotation.x, 0f, 0f);
+        if (!Input.GetMouseButton(1))
+        {
+            transform.rotation = Quaternion.Euler(0f, eulerRotation.y, 0f);
+        }
+        else
+        {
+            transform.Find("CameraPivot").transform.localEulerAngles += Vector3.up * -aimingHorizontalDeltaAngle ;
+        }
     }
 
     public void Teleport(string teleportPayload)
@@ -260,6 +267,11 @@ public class DCLCharacterController : MonoBehaviour
         else if (previouslyGrounded && !isJumping)
         {
             lastUngroundedTime = Time.time;
+        }
+
+        if ( Input.GetMouseButtonUp(1))
+        {
+            transform.Find("CameraPivot").transform.localEulerAngles = Vector3.zero;
         }
 
         if (Cursor.lockState == CursorLockMode.Locked)
