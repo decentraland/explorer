@@ -263,6 +263,21 @@ public class AvatarEditorHUDView : MonoBehaviour
 
     public void CleanUp()
     {
+        if (wearableGridPairs != null)
+        {
+            int nPairs = wearableGridPairs.Length;
+            for (int i = 0; i < nPairs; i++)
+            {
+                var itemSelector = wearableGridPairs[i].selector;
+                if (itemSelector != null) itemSelector.OnItemClicked -= controller.WearableClicked;
+            }
+        }
+
+        if (collectiblesItemSelector != null) collectiblesItemSelector.OnItemClicked -= controller.WearableClicked;
+        if (skinColorSelector != null) skinColorSelector.OnColorChanged -= controller.SkinColorClicked;
+        if (eyeColorSelector != null) eyeColorSelector.OnColorChanged -= controller.EyesColorClicked;
+        if (hairColorSelector != null) hairColorSelector.OnColorChanged -= controller.HairColorClicked;
+
         Destroy(gameObject);
     }
 }
