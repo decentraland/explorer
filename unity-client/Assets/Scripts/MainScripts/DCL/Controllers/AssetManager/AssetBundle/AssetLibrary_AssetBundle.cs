@@ -8,11 +8,10 @@ namespace DCL
 
         public override void Add(Asset_AssetBundle asset)
         {
-            if (asset == null)
+            if (asset == null || masterAssets.ContainsKey(asset.id))
                 return;
 
-            if (!masterAssets.ContainsKey(asset.id))
-                masterAssets.Add(asset.id, asset);
+            masterAssets.Add(asset.id, asset);
         }
 
         public override void Cleanup()
@@ -34,24 +33,22 @@ namespace DCL
 
         public override Asset_AssetBundle Get(object id)
         {
-            if (Contains(id))
-            {
-                masterAssets[id].referenceCount++;
-                return masterAssets[id];
-            }
+            if (!Contains(id))
+                return null;
 
-            return null;
+            masterAssets[id].referenceCount++;
+            return masterAssets[id];
         }
 
         public override void Release(Asset_AssetBundle asset)
         {
             asset.referenceCount--;
 
-            if (asset.referenceCount == 0)
-            {
-                asset.Cleanup();
-                masterAssets.Remove(asset.id);
-            }
+            if (asset.referenceCount != 0)
+                return;
+
+            asset.Cleanup();
+            masterAssets.Remove(asset.id);
         }
     }
 }
