@@ -229,7 +229,6 @@ namespace DCL
             EntityMetrics entityMetrics = new EntityMetrics();
 
             int visualMeshRawTriangles = 0;
-            int colliderMeshRawTriangles = 0;
 
             //NOTE(Brian): If this proves to be too slow we can spread it with a Coroutine spooler.
             MeshFilter[] meshFilters = entity.meshesInfo.meshFilters;
@@ -250,13 +249,11 @@ namespace DCL
                 }
             }
 
-            colliderMeshRawTriangles = GetEntityCollidersRawTriangleCount(entity);
-
             CalculateMaterials(entity, entityMetrics);
 
             //The array is a list of triangles that contains indices into the vertex array. The size of the triangle array must always be a multiple of 3. 
             //Vertices can be shared by simply indexing into the same vertex.
-            entityMetrics.triangles = (visualMeshRawTriangles + colliderMeshRawTriangles) / 3;
+            entityMetrics.triangles = visualMeshRawTriangles / 3;
             entityMetrics.bodies = entity.meshesInfo.meshFilters.Length;
 
             model.materials = uniqueMaterialsRefCount.Count;
@@ -312,30 +309,6 @@ namespace DCL
                     }
                 }
             }
-        }
-
-        int GetEntityCollidersRawTriangleCount(DecentralandEntity entity)
-        {
-            int rawTrianglesCount = 0;
-
-            var colliderList = entity.meshesInfo.colliders;
-
-            for (int i = 0; i < colliderList.Count; i++)
-            {
-                Collider col = colliderList[i];
-                MeshCollider meshCollider = col as MeshCollider;
-
-                if (meshCollider != null)
-                {
-                    rawTrianglesCount += meshCollider.sharedMesh.triangles.Length;
-                }
-                else if (col is BoxCollider)
-                {
-                    rawTrianglesCount += 12;
-                }
-            }
-
-            return rawTrianglesCount;
         }
 
         void AddMesh(EntityMetrics entityMetrics, Mesh mesh)
