@@ -336,19 +336,19 @@ namespace DCL.Controllers
             coordinateMax.x = Mathf.FloorToInt((worldPosition.x + ParcelSettings.PARCEL_BOUNDARIES_THRESHOLD) / ParcelSettings.PARCEL_SIZE);
             coordinateMax.y = Mathf.FloorToInt((worldPosition.z + ParcelSettings.PARCEL_BOUNDARIES_THRESHOLD) / ParcelSettings.PARCEL_SIZE);
 
-            // We check the east-threshold position
+            // We check the east/north-threshold position
             targetCoordinate.Set(coordinateMax.x, coordinateMax.y);
             if (parcels.Contains(targetCoordinate)) return true;
 
-            // We check the south-threshold position
+            // We check the east/south-threshold position
             targetCoordinate.Set(coordinateMax.x, coordinateMin.y);
             if (parcels.Contains(targetCoordinate)) return true;
 
-            // We check the west-threshold position
+            // We check the west/north-threshold position
             targetCoordinate.Set(coordinateMin.x, coordinateMax.y);
             if (parcels.Contains(targetCoordinate)) return true;
 
-            // We check the north-threshold position
+            // We check the west/south-threshold position
             targetCoordinate.Set(coordinateMin.x, coordinateMin.y);
             if (parcels.Contains(targetCoordinate)) return true;
 
