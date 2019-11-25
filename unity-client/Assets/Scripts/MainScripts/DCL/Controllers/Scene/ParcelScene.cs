@@ -330,19 +330,23 @@ namespace DCL.Controllers
             // We need to check using a threshold from the target point, in order to cover correctly the parcel "border/edge" positions
 
             // We check the east-threshold position
-            targetCoordinate.Set(Mathf.FloorToInt((worldPosition.x + ParcelSettings.PARCEL_BOUNDARIES_THRESHOLD) / ParcelSettings.PARCEL_SIZE), noThresholdZCoordinate);
+            targetCoordinate.Set(Mathf.FloorToInt((worldPosition.x + ParcelSettings.PARCEL_BOUNDARIES_THRESHOLD) / ParcelSettings.PARCEL_SIZE),
+                Mathf.FloorToInt((worldPosition.z + ParcelSettings.PARCEL_BOUNDARIES_THRESHOLD) / ParcelSettings.PARCEL_SIZE));
             if (parcels.Contains(targetCoordinate)) return true;
 
             // We check the south-threshold position
-            targetCoordinate.Set(noThresholdXCoordinate, Mathf.FloorToInt((worldPosition.z - ParcelSettings.PARCEL_BOUNDARIES_THRESHOLD) / ParcelSettings.PARCEL_SIZE));
+            targetCoordinate.Set(Mathf.FloorToInt((worldPosition.x + ParcelSettings.PARCEL_BOUNDARIES_THRESHOLD) / ParcelSettings.PARCEL_SIZE),
+                Mathf.FloorToInt((worldPosition.z - ParcelSettings.PARCEL_BOUNDARIES_THRESHOLD) / ParcelSettings.PARCEL_SIZE));
             if (parcels.Contains(targetCoordinate)) return true;
 
             // We check the west-threshold position
-            targetCoordinate.Set(Mathf.FloorToInt((worldPosition.x - ParcelSettings.PARCEL_BOUNDARIES_THRESHOLD) / ParcelSettings.PARCEL_SIZE), noThresholdZCoordinate);
+            targetCoordinate.Set(Mathf.FloorToInt((worldPosition.x - ParcelSettings.PARCEL_BOUNDARIES_THRESHOLD) / ParcelSettings.PARCEL_SIZE),
+                Mathf.FloorToInt((worldPosition.z + ParcelSettings.PARCEL_BOUNDARIES_THRESHOLD) / ParcelSettings.PARCEL_SIZE));
             if (parcels.Contains(targetCoordinate)) return true;
 
             // We check the north-threshold position
-            targetCoordinate.Set(noThresholdXCoordinate, Mathf.FloorToInt((worldPosition.z + ParcelSettings.PARCEL_BOUNDARIES_THRESHOLD) / ParcelSettings.PARCEL_SIZE));
+            targetCoordinate.Set(Mathf.FloorToInt((worldPosition.x - ParcelSettings.PARCEL_BOUNDARIES_THRESHOLD) / ParcelSettings.PARCEL_SIZE),
+                Mathf.FloorToInt((worldPosition.z - ParcelSettings.PARCEL_BOUNDARIES_THRESHOLD) / ParcelSettings.PARCEL_SIZE));
             if (parcels.Contains(targetCoordinate)) return true;
 
             return false;
