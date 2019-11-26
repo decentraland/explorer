@@ -254,7 +254,7 @@ public class AvatarEditorHUDController : IDisposable, IHUD
             wearablesByCategory.Add(wearable.category, new List<WearableItem>());
         }
         wearablesByCategory[wearable.category].Add(wearable);
-        view.AddWearable(wearable, !wearable.tags.Contains("base-wearable"));
+        view.AddWearable(wearable);
     }
 
     private void RemoveWearable(string id, WearableItem wearable)
@@ -269,7 +269,7 @@ public class AvatarEditorHUDController : IDisposable, IHUD
                 }
             }
         }
-        view.RemoveWearable(wearable, !wearable.tags.Contains("base-wearable"));
+        view.RemoveWearable(wearable);
     }
 
     public void RandomizeWearables()

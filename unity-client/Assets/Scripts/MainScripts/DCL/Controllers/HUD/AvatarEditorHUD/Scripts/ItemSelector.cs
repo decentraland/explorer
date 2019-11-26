@@ -32,14 +32,14 @@ public class ItemSelector : MonoBehaviour
         if (itemToggles.ContainsKey(item.id)) return;
 
         ItemToggle newToggle;
-        if (item.tags.Contains(WearableItem.nftWearableTag))
+        if (item.IsCollectible())
         {
-            newToggle = itemToggleFactory.CreateItemToggleFromType(WearableItem.nftWearableTag, itemContainer); // TODO: use enum
+            newToggle = itemToggleFactory.CreateItemToggleFromType(WearableLiterals.Tags.EXCLUSIVE, itemContainer); // TODO: use enum
             newToggle.transform.SetAsFirstSibling();
         }
         else
         {
-            newToggle = itemToggleFactory.CreateItemToggleFromType(WearableItem.baseWearableTag, itemContainer);
+            newToggle = itemToggleFactory.CreateItemToggleFromType(WearableLiterals.Tags.BASE_WEARABLE, itemContainer);
         }
 
         newToggle.Initialize(item, false);

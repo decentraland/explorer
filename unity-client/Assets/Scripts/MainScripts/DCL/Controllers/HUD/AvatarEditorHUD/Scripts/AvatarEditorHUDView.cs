@@ -118,7 +118,7 @@ public class AvatarEditorHUDView : MonoBehaviour
     {
         for (int i = 0; i < wearableGridPairs.Length; i++)
         {
-            if (wearableGridPairs[i].categoryFilter == WearableItem.bodyShapeCategory)
+            if (wearableGridPairs[i].categoryFilter == WearableLiterals.Categories.BODY_SHAPE)
             {
                 wearableGridPairs[i].selector.UnselectAll();
                 wearableGridPairs[i].selector.Select(bodyShape.id);
@@ -169,7 +169,7 @@ public class AvatarEditorHUDView : MonoBehaviour
     {
         for (int i = 0; i < wearableGridPairs.Length; i++)
         {
-            if (wearableGridPairs[i].categoryFilter != WearableItem.bodyShapeCategory)
+            if (wearableGridPairs[i].categoryFilter != WearableLiterals.Categories.BODY_SHAPE)
             {
                 wearableGridPairs[i].selector.UnselectAll();
             }
@@ -190,7 +190,7 @@ public class AvatarEditorHUDView : MonoBehaviour
         loadingPanel.SetActive(active);
     }
 
-    public void AddWearable(WearableItem wearableItem, bool isCollectible)
+    public void AddWearable(WearableItem wearableItem)
     {
         if (wearableItem == null) return;
 
@@ -201,13 +201,13 @@ public class AvatarEditorHUDView : MonoBehaviour
         }
 
         selectorsByCategory[wearableItem.category].AddItemToggle(wearableItem);
-        if (isCollectible)
+        if (wearableItem.IsCollectible())
         {
             collectiblesItemSelector.AddItemToggle(wearableItem);
         }
     }
 
-    public void RemoveWearable(WearableItem wearableItem, bool isCollectible)
+    public void RemoveWearable(WearableItem wearableItem)
     {
         if (wearableItem == null) return;
 
@@ -218,7 +218,7 @@ public class AvatarEditorHUDView : MonoBehaviour
         }
 
         selectorsByCategory[wearableItem.category].RemoveItemToggle(wearableItem.id);
-        if(isCollectible)
+        if(wearableItem.IsCollectible())
             collectiblesItemSelector.RemoveItemToggle(wearableItem.id);
     }
 
