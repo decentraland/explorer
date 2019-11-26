@@ -55,6 +55,19 @@ namespace DCL.Models
                 renderers = null;
                 colliders.Clear();
             }
+
+            public void UpdateExistingMeshAtIndex(Mesh mesh, uint meshFilterIndex = 0)
+            {
+                if (meshFilters != null && meshFilters.Length > meshFilterIndex)
+                {
+                    meshFilters[meshFilterIndex].sharedMesh = mesh;
+                    OnUpdated?.Invoke();
+                }
+                else
+                {
+                    Debug.LogError($"MeshFilter index {meshFilterIndex} out of bounds - MeshesInfo.UpdateExistingMesh failed");
+                }
+            }
         }
 
         public ParcelScene scene;
