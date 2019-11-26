@@ -1,5 +1,4 @@
 using DCL;
-using DCL.Helpers;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -7,31 +6,8 @@ using UnityEngine.TestTools;
 
 namespace AssetPromiseKeeper_AssetBundle_Tests
 {
-    public class PromiseKeeperShouldBehaveCorrectlyWhen
+    public class PromiseKeeperShouldBehaveCorrectlyWhen : AssetBundle_TestsBase
     {
-        readonly static string TEST_AB_FILENAME = "QmYACL8SnbXEonXQeRHdWYbfm8vxvaFAWnsLHUaDG4ABp5";
-        readonly static string BASE_URL = Utils.GetTestsAssetsPath() + "/AssetBundles/";
-
-        AssetLibrary_AssetBundle library;
-        AssetPromiseKeeper_AssetBundle keeper;
-
-        [UnitySetUp]
-        public IEnumerator SetUp()
-        {
-            library = new AssetLibrary_AssetBundle();
-            keeper = new AssetPromiseKeeper_AssetBundle(library);
-            yield break;
-        }
-
-        [UnityTearDown]
-        public IEnumerator TearDown()
-        {
-            library.Cleanup();
-            Caching.ClearCache();
-            Resources.UnloadUnusedAssets();
-            yield break;
-        }
-
         [UnityTest]
         public IEnumerator KeepAndForgetIsCalledInSingleFrameWhenLoadingAsset()
         {

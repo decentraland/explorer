@@ -1,5 +1,4 @@
 using DCL;
-using DCL.Helpers;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,22 +7,13 @@ using UnityEngine.TestTools;
 
 namespace AssetPromiseKeeper_AssetBundleModel_Tests
 {
-    public class AnyAssetPromiseShould
+    public class AnyAssetPromiseShould : AssetBundleModel_TestsBase
     {
-        const string TEST_AB_FILENAME = "QmYACL8SnbXEonXQeRHdWYbfm8vxvaFAWnsLHUaDG4ABp5";
-
         [UnityTest]
         public IEnumerator BeSetupCorrectlyAfterLoad()
         {
-            var library = new AssetLibrary_AssetBundleModel();
-            var keeper = new AssetPromiseKeeper_AssetBundleModel(library);
-
-            string baseUrl = Utils.GetTestsAssetsPath() + "/AssetBundles/";
-            string url = TEST_AB_FILENAME;
-
-            var prom = new AssetPromise_AssetBundleModel(baseUrl, url);
+            var prom = new AssetPromise_AssetBundleModel(BASE_URL, TEST_AB_FILENAME);
             Asset_AssetBundleModel loadedAsset = null;
-
 
             prom.OnSuccessEvent +=
                 (x) =>
@@ -65,12 +55,7 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
         [UnityTest]
         public IEnumerator ForceNewInstanceIsOff()
         {
-            var library = new AssetLibrary_AssetBundleModel();
-            var keeper = new AssetPromiseKeeper_AssetBundleModel(library);
-
-            string baseUrl = Utils.GetTestsAssetsPath() + "/AssetBundles/";
-            string url = TEST_AB_FILENAME;
-            var prom = new AssetPromise_AssetBundleModel(baseUrl, url);
+            var prom = new AssetPromise_AssetBundleModel(BASE_URL, TEST_AB_FILENAME);
             prom.settings.forceNewInstance = false;
             keeper.Keep(prom);
             yield return prom;
@@ -82,17 +67,11 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
         [UnityTest]
         public IEnumerator ForceNewInstanceIsOffMultipleTimes()
         {
-            var library = new AssetLibrary_AssetBundleModel();
-            var keeper = new AssetPromiseKeeper_AssetBundleModel(library);
-
             var poolableComponents = new List<PoolableObject>();
-
-            string baseUrl = Utils.GetTestsAssetsPath() + "/AssetBundles/";
-            string url = TEST_AB_FILENAME;
 
             for (int i = 0; i < 10; i++)
             {
-                var prom = new AssetPromise_AssetBundleModel(baseUrl, url);
+                var prom = new AssetPromise_AssetBundleModel(BASE_URL, TEST_AB_FILENAME);
                 prom.settings.forceNewInstance = false;
                 keeper.Keep(prom);
                 yield return prom;
@@ -106,13 +85,7 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
         [UnityTest]
         public IEnumerator ForceNewInstanceIsOn()
         {
-            var library = new AssetLibrary_AssetBundleModel();
-            var keeper = new AssetPromiseKeeper_AssetBundleModel(library);
-
-            string baseUrl = Utils.GetTestsAssetsPath() + "/AssetBundles/";
-            string url = TEST_AB_FILENAME;
-
-            var prom = new AssetPromise_AssetBundleModel(baseUrl, url);
+            var prom = new AssetPromise_AssetBundleModel(BASE_URL, TEST_AB_FILENAME);
             prom.settings.forceNewInstance = true;
             keeper.Keep(prom);
             yield return prom;
@@ -124,17 +97,11 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
         [UnityTest]
         public IEnumerator ForceNewInstanceIsOnMultipleTimes()
         {
-            var library = new AssetLibrary_AssetBundleModel();
-            var keeper = new AssetPromiseKeeper_AssetBundleModel(library);
-
             var poolableComponents = new List<PoolableObject>();
-
-            string baseUrl = Utils.GetTestsAssetsPath() + "/AssetBundles/";
-            string url = TEST_AB_FILENAME;
 
             for (int i = 0; i < 10; i++)
             {
-                var prom = new AssetPromise_AssetBundleModel(baseUrl, url);
+                var prom = new AssetPromise_AssetBundleModel(BASE_URL, TEST_AB_FILENAME);
                 prom.settings.forceNewInstance = true;
                 keeper.Keep(prom);
                 yield return prom;
