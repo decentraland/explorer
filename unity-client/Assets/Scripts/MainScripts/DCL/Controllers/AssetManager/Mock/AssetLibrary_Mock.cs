@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace DCL
@@ -13,10 +13,12 @@ namespace DCL
 
         public Dictionary<object, RefCountedMockAsset> masterAssets = new Dictionary<object, RefCountedMockAsset>();
 
-        public override void Add(Asset_Mock asset)
+        public override bool Add(Asset_Mock asset)
         {
             if (!masterAssets.ContainsKey(asset.id))
                 masterAssets.Add(asset.id, new RefCountedMockAsset() { referenceCount = 0, asset = asset });
+
+            return true;
         }
 
         public override bool Contains(object id)

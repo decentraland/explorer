@@ -124,9 +124,10 @@ namespace DCL
             asset.Show(settings.visibleFlags == VisibleFlags.VISIBLE_WITH_TRANSITION, OnSuccess);
         }
 
-        protected override void AddToLibrary()
+        protected override bool AddToLibrary()
         {
-            library.Add(asset);
+            if (!library.Add(asset))
+                return false;
 
             if (asset.visible)
             {
@@ -142,8 +143,12 @@ namespace DCL
                 {
                     asset = library.Get(asset.id);
                 }
+
+                //NOTE(Brian): Call again this method because we are replacing the asset.
                 OnBeforeLoadOrReuse();
             }
+
+            return true;
         }
 
         private string ComputeId(ContentProvider provider, string url)

@@ -118,10 +118,17 @@ namespace DCL
 
         private void OnLoadSuccess()
         {
-            AddToLibrary();
-            OnAfterLoadOrReuse();
-            state = AssetPromiseState.FINISHED;
-            CallAndClearEvents(isSuccess: true);
+            if (AddToLibrary())
+            {
+                OnAfterLoadOrReuse();
+                state = AssetPromiseState.FINISHED;
+                CallAndClearEvents(isSuccess: true);
+            }
+            else
+            {
+                state = AssetPromiseState.FINISHED;
+                OnLoadFailure();
+            }
         }
 
         private void OnLoadFailure()
@@ -130,9 +137,9 @@ namespace DCL
             Cleanup();
         }
 
-        protected virtual void AddToLibrary()
+        protected virtual bool AddToLibrary()
         {
-            library.Add(asset);
+            return library.Add(asset);
         }
 
         internal void Unload()

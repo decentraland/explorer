@@ -27,8 +27,9 @@ namespace DCL
             { "psd", 4 },
             { "iff", 5 },
             { "mat", 6 },
-            { "ltf", 7 },
-            { "glb", 8 }
+            { "nim", 7 },
+            { "ltf", 8 },
+            { "glb", 9 }
         };
 
         readonly protected string contentUrl;
@@ -41,11 +42,13 @@ namespace DCL
             this.hash = hash;
         }
 
-        protected override void AddToLibrary()
+        protected override bool AddToLibrary()
         {
-            library.Add(asset);
+            if (!library.Add(asset))
+                return false;
+
             asset = library.Get(asset.id);
-            OnBeforeLoadOrReuse();
+            return true;
         }
 
         internal override object GetId()

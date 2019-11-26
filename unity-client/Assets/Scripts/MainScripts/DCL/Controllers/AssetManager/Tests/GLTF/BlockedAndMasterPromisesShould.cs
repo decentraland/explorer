@@ -1,4 +1,4 @@
-﻿using DCL;
+using DCL;
 using DCL.Helpers;
 using System.Collections;
 using System.Text.RegularExpressions;

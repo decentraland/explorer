@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace DCL
@@ -15,12 +15,12 @@ namespace DCL
             masterAssets.Remove(pool.id);
         }
 
-        public override void Add(Asset_GLTF asset)
+        public override bool Add(Asset_GLTF asset)
         {
             if (asset == null)
             {
                 Debug.LogError("asset == null? This shouldn't happen");
-                return;
+                return false;
             }
 
             if (!masterAssets.ContainsKey(asset.id))
@@ -30,6 +30,11 @@ namespace DCL
 
             pool.OnCleanup -= OnPoolRemoved;
             pool.OnCleanup += OnPoolRemoved;
+
+            if (asset.container == null)
+                return false;
+
+            return true;
         }
 
         public override Asset_GLTF Get(object id)

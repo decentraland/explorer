@@ -1,7 +1,6 @@
 using DCL;
 using DCL.Helpers;
 using System.Collections;
-using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.TestTools;
@@ -18,7 +17,7 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
             var library = new AssetLibrary_AssetBundleModel();
             var keeper = new AssetPromiseKeeper_AssetBundleModel(library);
 
-            string baseUrl = Utils.GetTestsAssetsPath() + "AssetBundles/";
+            string baseUrl = Utils.GetTestsAssetsPath() + "/AssetBundles/";
             string url = TEST_AB_FILENAME;
             GameObject parent = new GameObject("parent");
 
@@ -69,10 +68,10 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
             var keeper = new AssetPromiseKeeper_AssetBundleModel(library);
 
             //NOTE(Brian): Expect the 404 error
-            LogAssert.Expect(LogType.Error, new Regex("^*.?404"));
+            //LogAssert.Expect(LogType.Error, new Regex("^*.?404"));
 
             string url = "non_existing_url.glb";
-            string baseUrl = Utils.GetTestsAssetsPath() + "AssetBundles/";
+            string baseUrl = Utils.GetTestsAssetsPath() + "/AssetBundles/";
 
             AssetPromise_AssetBundleModel prom = new AssetPromise_AssetBundleModel(baseUrl, url);
             Asset_AssetBundleModel asset = null;

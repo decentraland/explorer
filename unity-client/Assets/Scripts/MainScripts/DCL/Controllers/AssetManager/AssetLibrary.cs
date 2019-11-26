@@ -1,4 +1,4 @@
-﻿namespace DCL
+namespace DCL
 {
     /// <summary>
     /// An AssetLibrary has a collection of Assets, and it handles caching and storing of "master assets".
@@ -11,7 +11,7 @@
         where AssetType : Asset
     {
 
-        public abstract void Add(AssetType asset);
+        public abstract bool Add(AssetType asset);
 
         public abstract AssetType Get(object id);
 

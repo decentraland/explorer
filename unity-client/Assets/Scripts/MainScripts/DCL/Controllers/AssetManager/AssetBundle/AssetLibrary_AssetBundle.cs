@@ -6,12 +6,13 @@ namespace DCL
     {
         public Dictionary<object, Asset_AssetBundle> masterAssets = new Dictionary<object, Asset_AssetBundle>();
 
-        public override void Add(Asset_AssetBundle asset)
+        public override bool Add(Asset_AssetBundle asset)
         {
             if (asset == null || masterAssets.ContainsKey(asset.id))
-                return;
+                return true;
 
             masterAssets.Add(asset.id, asset);
+            return true;
         }
 
         public override void Cleanup()

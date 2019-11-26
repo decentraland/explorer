@@ -18,7 +18,7 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
             var library = new AssetLibrary_AssetBundleModel();
             var keeper = new AssetPromiseKeeper_AssetBundleModel(library);
 
-            string baseUrl = Utils.GetTestsAssetsPath() + "AssetBundles/";
+            string baseUrl = Utils.GetTestsAssetsPath() + "/AssetBundles/";
             string url = TEST_AB_FILENAME;
 
             var prom = new AssetPromise_AssetBundleModel(baseUrl, url);
@@ -68,7 +68,7 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
             var library = new AssetLibrary_AssetBundleModel();
             var keeper = new AssetPromiseKeeper_AssetBundleModel(library);
 
-            string baseUrl = Utils.GetTestsAssetsPath() + "AssetBundles/";
+            string baseUrl = Utils.GetTestsAssetsPath() + "/AssetBundles/";
             string url = TEST_AB_FILENAME;
             var prom = new AssetPromise_AssetBundleModel(baseUrl, url);
             prom.settings.forceNewInstance = false;
@@ -87,7 +87,7 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
 
             var poolableComponents = new List<PoolableObject>();
 
-            string baseUrl = Utils.GetTestsAssetsPath() + "AssetBundles/";
+            string baseUrl = Utils.GetTestsAssetsPath() + "/AssetBundles/";
             string url = TEST_AB_FILENAME;
 
             for (int i = 0; i < 10; i++)
@@ -109,7 +109,7 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
             var library = new AssetLibrary_AssetBundleModel();
             var keeper = new AssetPromiseKeeper_AssetBundleModel(library);
 
-            string baseUrl = Utils.GetTestsAssetsPath() + "AssetBundles/";
+            string baseUrl = Utils.GetTestsAssetsPath() + "/AssetBundles/";
             string url = TEST_AB_FILENAME;
 
             var prom = new AssetPromise_AssetBundleModel(baseUrl, url);
@@ -129,7 +129,7 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
 
             var poolableComponents = new List<PoolableObject>();
 
-            string baseUrl = Utils.GetTestsAssetsPath() + "AssetBundles/";
+            string baseUrl = Utils.GetTestsAssetsPath() + "/AssetBundles/";
             string url = TEST_AB_FILENAME;
 
             for (int i = 0; i < 10; i++)

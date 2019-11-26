@@ -54,14 +54,26 @@ namespace DCL
 
         public override void Cleanup()
         {
-            GameObject.Destroy(container);
+            Debug.Log("cleanup call");
+            Object.Destroy(container);
             base.Cleanup();
         }
 
         public override void Show(bool useMaterialTransition, System.Action OnFinish)
         {
-            assetBundleAssetName = container.name;
+            if (container == null)
+            {
+                OnFinish?.Invoke();
+                return;
+            }
+
             CoroutineStarter.Start(ShowCoroutine(OnFinish));
+        }
+
+        public void Hide()
+        {
+            container.transform.parent = null;
+            container.transform.position = Vector3.one * 5000;
         }
 
         public IEnumerator ShowCoroutine(System.Action OnFinish)

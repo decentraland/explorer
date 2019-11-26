@@ -13,12 +13,12 @@ namespace DCL
             masterAssets.Remove(pool.id);
         }
 
-        public override void Add(Asset_AssetBundleModel asset)
+        public override bool Add(Asset_AssetBundleModel asset)
         {
-            if (asset == null)
+            if (asset == null || asset.container == null)
             {
-                Debug.LogError("asset == null? This shouldn't happen");
-                return;
+                Debug.LogWarning("asset == null or asset.container == null? This shouldn't happen.");
+                return false;
             }
 
             if (!masterAssets.ContainsKey(asset.id))
@@ -28,6 +28,7 @@ namespace DCL
 
             pool.OnCleanup -= OnPoolRemoved;
             pool.OnCleanup += OnPoolRemoved;
+            return true;
         }
 
         public override Asset_AssetBundleModel Get(object id)
