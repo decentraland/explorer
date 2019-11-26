@@ -7,7 +7,6 @@ using UnityGLTF.Cache;
 
 namespace DCL
 {
-
     public static class MaterialCachingHelper
     {
         public static void UseCachedMaterials(GameObject obj)
@@ -51,6 +50,12 @@ namespace DCL
         {
             alreadyInstantiated = false;
             container = new GameObject("AB Container");
+        }
+
+        public override void Cleanup()
+        {
+            GameObject.Destroy(container);
+            base.Cleanup();
         }
 
         public override void Show(bool useMaterialTransition, System.Action OnFinish)

@@ -8,15 +8,13 @@ using UnityEngine.TestTools;
 
 namespace AssetPromiseKeeper_AssetBundleModel_Tests
 {
-    public class AnyAssetPromiseShould : TestsBase
+    public class AnyAssetPromiseShould
     {
         const string TEST_AB_FILENAME = "QmYACL8SnbXEonXQeRHdWYbfm8vxvaFAWnsLHUaDG4ABp5";
 
         [UnityTest]
         public IEnumerator BeSetupCorrectlyAfterLoad()
         {
-            yield return base.InitScene();
-
             var library = new AssetLibrary_AssetBundleModel();
             var keeper = new AssetPromiseKeeper_AssetBundleModel(library);
 
@@ -67,7 +65,6 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
         [UnityTest]
         public IEnumerator ForceNewInstanceIsOff()
         {
-            yield return InitScene();
             var library = new AssetLibrary_AssetBundleModel();
             var keeper = new AssetPromiseKeeper_AssetBundleModel(library);
 
@@ -78,14 +75,13 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
             keeper.Keep(prom);
             yield return prom;
 
-            //var poolableObjectComponent = prom.asset.container.GetComponentInChildren<PoolableObject>();
-            //Assert.IsNotNull(poolableObjectComponent);
+            var poolableObjectComponent = prom.asset.container.GetComponentInChildren<PoolableObject>();
+            Assert.IsNotNull(poolableObjectComponent);
         }
 
         [UnityTest]
         public IEnumerator ForceNewInstanceIsOffMultipleTimes()
         {
-            yield return InitScene();
             var library = new AssetLibrary_AssetBundleModel();
             var keeper = new AssetPromiseKeeper_AssetBundleModel(library);
 
@@ -100,7 +96,7 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
                 prom.settings.forceNewInstance = false;
                 keeper.Keep(prom);
                 yield return prom;
-                //poolableComponents.Add(prom.asset.container.GetComponentInChildren<PoolableObject>());
+                poolableComponents.Add(prom.asset.container.GetComponentInChildren<PoolableObject>());
                 keeper.Forget(prom);
             }
 
@@ -110,7 +106,6 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
         [UnityTest]
         public IEnumerator ForceNewInstanceIsOn()
         {
-            yield return InitScene();
             var library = new AssetLibrary_AssetBundleModel();
             var keeper = new AssetPromiseKeeper_AssetBundleModel(library);
 
@@ -122,14 +117,13 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
             keeper.Keep(prom);
             yield return prom;
 
-            //var poolableObjectComponent = prom.asset.container.GetComponentInChildren<PoolableObject>();
-            //Assert.IsNull(poolableObjectComponent);
+            var poolableObjectComponent = prom.asset.container.GetComponentInChildren<PoolableObject>();
+            Assert.IsNull(poolableObjectComponent);
         }
 
         [UnityTest]
         public IEnumerator ForceNewInstanceIsOnMultipleTimes()
         {
-            yield return InitScene();
             var library = new AssetLibrary_AssetBundleModel();
             var keeper = new AssetPromiseKeeper_AssetBundleModel(library);
 
@@ -144,7 +138,7 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
                 prom.settings.forceNewInstance = true;
                 keeper.Keep(prom);
                 yield return prom;
-                //poolableComponents.Add(prom.asset.container.GetComponentInChildren<PoolableObject>());
+                poolableComponents.Add(prom.asset.container.GetComponentInChildren<PoolableObject>());
                 keeper.Forget(prom);
             }
 

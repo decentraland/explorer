@@ -3,7 +3,6 @@ using UnityEngine;
 
 namespace DCL
 {
-
     public class Asset_AssetBundle : Asset
     {
         public int referenceCount = 0;
@@ -14,7 +13,7 @@ namespace DCL
         public Dictionary<string, List<Object>> assetsByExtension = new Dictionary<string, List<Object>>();
 
         public List<T> GetAssetsByExtensions<T>(params string[] extensions)
-            where T : UnityEngine.Object
+            where T : Object
         {
             var goList = new List<T>(2);
 
@@ -53,6 +52,12 @@ namespace DCL
         public virtual void Show(bool useMaterialTransition, System.Action OnFinish)
         {
             OnFinish?.Invoke();
+        }
+
+        public void CancelShow()
+        {
+            //if (showCoroutine != null)
+            //    CoroutineStarter.Stop(showCoroutine);
         }
 
         public override void Cleanup()

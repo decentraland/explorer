@@ -7,14 +7,12 @@ using UnityEngine.TestTools;
 
 namespace AssetPromiseKeeper_AssetBundleModel_Tests
 {
-    public class PromiseKeeperShouldBehaveCorrectlyWhen : TestsBase
+    public class PromiseKeeperShouldBehaveCorrectlyWhen
     {
         const string TEST_AB_FILENAME = "QmYACL8SnbXEonXQeRHdWYbfm8vxvaFAWnsLHUaDG4ABp5";
         [UnityTest]
         public IEnumerator AnyAssetIsDestroyedWhileLoading()
         {
-            yield return base.InitScene();
-
             var library = new AssetLibrary_AssetBundleModel();
             var keeper = new AssetPromiseKeeper_AssetBundleModel(library);
 
@@ -45,8 +43,6 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
         [UnityTest]
         public IEnumerator ForgetIsCalledWhileAssetIsBeingReused()
         {
-            yield return base.InitScene();
-
             var library = new AssetLibrary_AssetBundleModel();
             var keeper = new AssetPromiseKeeper_AssetBundleModel(library);
 
@@ -89,8 +85,6 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
         [UnityTest]
         public IEnumerator KeepAndForgetIsCalledInSingleFrameWhenLoadingAsset()
         {
-            yield return base.InitScene();
-
             var library = new AssetLibrary_AssetBundleModel();
             var keeper = new AssetPromiseKeeper_AssetBundleModel(library);
 
@@ -121,13 +115,12 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
             Assert.IsTrue(prom.asset == null);
             Assert.IsFalse(calledSuccess);
             Assert.IsTrue(calledFail);
+            yield break;
         }
 
         [UnityTest]
         public IEnumerator KeepAndForgetIsCalledInSingleFrameWhenReusingAsset()
         {
-            yield return base.InitScene();
-
             var library = new AssetLibrary_AssetBundleModel();
             var keeper = new AssetPromiseKeeper_AssetBundleModel(library);
 
@@ -156,8 +149,6 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
         [UnityTest]
         public IEnumerator AnyAssetIsLoadedAndThenUnloaded()
         {
-            yield return base.InitScene();
-
             var library = new AssetLibrary_AssetBundleModel();
             var keeper = new AssetPromiseKeeper_AssetBundleModel(library);
 
@@ -199,8 +190,6 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
         [UnityTest]
         public IEnumerator ForgetIsCalledWhileAssetIsBeingLoaded()
         {
-            yield return base.InitScene();
-
             var library = new AssetLibrary_AssetBundleModel();
             var keeper = new AssetPromiseKeeper_AssetBundleModel(library);
 
@@ -238,8 +227,6 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
         [UnityTest]
         public IEnumerator ManyPromisesWithTheSameURLAreLoaded()
         {
-            yield return InitScene();
-
             var library = new AssetLibrary_AssetBundleModel();
             var keeper = new AssetPromiseKeeper_AssetBundleModel(library);
 

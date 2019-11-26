@@ -16,6 +16,8 @@ namespace DCL
         static float currentLoadBudgetTime = 0;
         public static bool limitTimeBudget = false;
 
+        Coroutine loadCoroutine;
+
         static Dictionary<string, int> loadOrderByExtension = new Dictionary<string, int>()
         {
             { "png", 0 },
@@ -61,6 +63,16 @@ namespace DCL
 
         protected override void OnCancelLoading()
         {
+            if (loadCoroutine != null)
+            {
+                CoroutineStarter.Stop(loadCoroutine);
+                loadCoroutine = null;
+            }
+
+            if (asset != null)
+            {
+                asset.CancelShow();
+            }
         }
 
         protected override void OnAfterLoadOrReuse()
@@ -135,7 +147,7 @@ namespace DCL
                     UnityEngine.Object loadedAsset = assetBundle.LoadAsset(assetName);
 
                     if (!asset.assetsByName.ContainsKey(assetName))
-                        asset.assetsByName.Add(assetName, assetBundle.LoadAsset(assetName));
+                        asset.assetsByName.Add(assetName, loadedAsset);
 
                     if (!asset.assetsByExtension.ContainsKey(ext))
                         asset.assetsByExtension.Add(ext, new List<UnityEngine.Object>());
@@ -186,7 +198,7 @@ namespace DCL
 
         protected override void OnLoad(Action OnSuccess, Action OnFail)
         {
-            CoroutineStarter.Start(LoadAssetBundleWithDeps(contentUrl, hash, OnSuccess, OnFail));
+            loadCoroutine = CoroutineStarter.Start(LoadAssetBundleWithDeps(contentUrl, hash, OnSuccess, OnFail));
         }
     }
 

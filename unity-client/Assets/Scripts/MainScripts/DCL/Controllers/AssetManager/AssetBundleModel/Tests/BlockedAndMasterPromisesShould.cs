@@ -8,15 +8,13 @@ using UnityEngine.TestTools;
 
 namespace AssetPromiseKeeper_AssetBundleModel_Tests
 {
-    public class BlockedAndMasterPromisesShould : TestsBase
+    public class BlockedAndMasterPromisesShould
     {
         const string TEST_AB_FILENAME = "QmYACL8SnbXEonXQeRHdWYbfm8vxvaFAWnsLHUaDG4ABp5";
 
         [UnityTest]
         public IEnumerator SucceedWhenMastersParentIsDestroyed()
         {
-            yield return base.InitScene();
-
             var library = new AssetLibrary_AssetBundleModel();
             var keeper = new AssetPromiseKeeper_AssetBundleModel(library);
 
@@ -67,8 +65,6 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
         [UnityTest]
         public IEnumerator FailCorrectlyWhenGivenWrongURL()
         {
-            yield return base.InitScene();
-
             var library = new AssetLibrary_AssetBundleModel();
             var keeper = new AssetPromiseKeeper_AssetBundleModel(library);
 

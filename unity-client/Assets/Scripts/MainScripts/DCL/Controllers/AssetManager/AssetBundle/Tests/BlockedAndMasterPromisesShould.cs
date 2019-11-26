@@ -6,13 +6,11 @@ using UnityEngine.TestTools;
 
 namespace AssetPromiseKeeper_AssetBundle_Tests
 {
-    public class BlockedAndMasterPromisesShould : TestsBase
+    public class BlockedAndMasterPromisesShould
     {
         [UnityTest]
         public IEnumerator FailCorrectlyWhenGivenWrongURL()
         {
-            yield return base.InitScene();
-
             var library = new AssetLibrary_AssetBundle();
             var keeper = new AssetPromiseKeeper_AssetBundle(library);
 
