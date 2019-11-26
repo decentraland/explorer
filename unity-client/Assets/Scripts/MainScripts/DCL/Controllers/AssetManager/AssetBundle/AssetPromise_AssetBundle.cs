@@ -16,7 +16,6 @@ namespace DCL
         static float currentLoadBudgetTime = 0;
         public static bool limitTimeBudget = false;
 
-
         static Dictionary<string, int> loadOrderByExtension = new Dictionary<string, int>()
         {
             { "png", 0 },
@@ -44,7 +43,7 @@ namespace DCL
         {
             library.Add(asset);
             asset = library.Get(asset.id);
-            ApplySettings_LoadStart();
+            OnBeforeLoadOrReuse();
         }
 
         internal override object GetId()
@@ -64,15 +63,15 @@ namespace DCL
         {
         }
 
-        protected override void ApplySettings_LoadFinished()
+        protected override void OnAfterLoadOrReuse()
         {
         }
 
-        protected override void ApplySettings_LoadStart()
+        protected override void OnBeforeLoadOrReuse()
         {
         }
 
-        IEnumerator LoadAssetBundleWithDeps(string baseUrl, string hash, Action OnSuccess, Action OnFail)
+        protected IEnumerator LoadAssetBundleWithDeps(string baseUrl, string hash, Action OnSuccess, Action OnFail)
         {
             yield return AssetBundleLoadHelper.GetDepMap(baseUrl, hash);
 
@@ -187,45 +186,7 @@ namespace DCL
 
         protected override void OnLoad(Action OnSuccess, Action OnFail)
         {
-            string finalUrl = contentUrl + hash;
-
             CoroutineStarter.Start(LoadAssetBundleWithDeps(contentUrl, hash, OnSuccess, OnFail));
-
-            //using (UnityWebRequest assetBundleRequest = UnityWebRequestAssetBundle.GetAssetBundle(url))
-            //{
-            //    if (downloadingBundle.Contains(url))
-            //    {
-            //        yield return new WaitUntil(() => !downloadingBundle.Contains(url), 20);
-            //        Debug.Log($"Waiting too long for {url}?");
-            //        yield return new WaitUntil(() => !downloadingBundle.Contains(url));
-            //        yield break;
-            //    }
-
-            //    downloadingBundle.Add(url);
-
-            //    var asyncOp = assetBundleRequest.SendWebRequest();
-            //    float progress = 0;
-
-            //    while (!asyncOp.isDone)
-            //    {
-            //        if (VERBOSE)
-            //        {
-            //            if (asyncOp.progress != progress)
-            //            {
-            //                Debug.Log("Progress for " + url + " = " + asyncOp.progress);
-            //                progress = asyncOp.progress;
-            //            }
-            //        }
-            //        yield return null;
-            //    }
-
-            //    if (assetBundleRequest.isHttpError || assetBundleRequest.isNetworkError)
-            //    {
-            //        failedRequests.Add(url);
-            //        downloadingBundle.Remove(url);
-            //        Debug.LogWarning("AssetBundle request fail! " + url);
-            //        yield break;
-            //    }
         }
     }
 

@@ -70,11 +70,11 @@ namespace DCL
             this.library = library;
         }
 
-        protected override void ApplySettings_LoadStart()
+        protected override void OnBeforeLoadOrReuse()
         {
         }
 
-        protected override void ApplySettings_LoadFinished()
+        protected override void OnAfterLoadOrReuse()
         {
         }
     }

@@ -7,36 +7,7 @@ using UnityEngine.Networking;
 using UnityGLTF.Cache;
 using WaitUntil = DCL.WaitUntil;
 
-public static class MaterialCachingHelper
-{
-    public static void UseCachedMaterials(GameObject obj)
-    {
-        foreach (var rend in obj.GetComponentsInChildren<Renderer>(true))
-        {
-            var matList = new List<Material>(1);
 
-            foreach (var mat in rend.sharedMaterials)
-            {
-                string crc = mat.ComputeCRC() + mat.name;
-
-                RefCountedMaterialData refCountedMat;
-
-                if (!PersistentAssetCache.MaterialCacheByCRC.ContainsKey(crc))
-                {
-                    mat.enableInstancing = true;
-                    PersistentAssetCache.MaterialCacheByCRC.Add(crc, new RefCountedMaterialData(crc, mat));
-                }
-
-                refCountedMat = PersistentAssetCache.MaterialCacheByCRC[crc];
-                refCountedMat.IncreaseRefCount();
-
-                matList.Add(refCountedMat.material);
-            }
-
-            rend.sharedMaterials = matList.ToArray();
-        }
-    }
-}
 
 public static class AssetBundleLoadHelper
 {

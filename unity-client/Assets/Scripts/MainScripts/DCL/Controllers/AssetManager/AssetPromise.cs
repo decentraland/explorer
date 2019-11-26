@@ -79,7 +79,7 @@ namespace DCL
 
                 if (asset != null)
                 {
-                    ApplySettings_LoadStart();
+                    OnBeforeLoadOrReuse();
                     OnReuse(OnReuseFinished);
                 }
                 else
@@ -92,7 +92,7 @@ namespace DCL
 
             // NOTE(Brian): Get new library element
             asset = new AssetType();
-            ApplySettings_LoadStart();
+            OnBeforeLoadOrReuse();
             asset.id = id;
 
             OnLoad(OnLoadSuccess, OnLoadFailure);
@@ -108,9 +108,9 @@ namespace DCL
             OnFinish?.Invoke();
         }
 
-        protected void OnReuseFinished()
+        private void OnReuseFinished()
         {
-            ApplySettings_LoadFinished();
+            OnAfterLoadOrReuse();
             state = AssetPromiseState.FINISHED;
             CallAndClearEvents();
         }
@@ -119,7 +119,7 @@ namespace DCL
         private void OnLoadSuccess()
         {
             AddToLibrary();
-            ApplySettings_LoadFinished();
+            OnAfterLoadOrReuse();
             state = AssetPromiseState.FINISHED;
             CallAndClearEvents(isSuccess: true);
         }
@@ -168,8 +168,8 @@ namespace DCL
 
         protected abstract void OnCancelLoading();
         protected abstract void OnLoad(Action OnSuccess, Action OnFail);
-        protected abstract void ApplySettings_LoadStart();
-        protected abstract void ApplySettings_LoadFinished();
+        protected abstract void OnBeforeLoadOrReuse();
+        protected abstract void OnAfterLoadOrReuse();
         internal abstract object GetId();
     }
 }

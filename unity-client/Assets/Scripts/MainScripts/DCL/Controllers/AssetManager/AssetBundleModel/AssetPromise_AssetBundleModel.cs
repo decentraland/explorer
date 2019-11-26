@@ -1,6 +1,5 @@
 using DCL.Helpers;
 using System;
-using System.Collections;
 using UnityEngine;
 
 namespace DCL
@@ -19,37 +18,52 @@ namespace DCL
         }
 
         public Settings settings = new Settings();
-        public AssetPromise_AssetBundleModel(string baseUrl, string url) : base(baseUrl, url)
+        public AssetPromise_AssetBundleModel(string contentUrl, string hash) : base(contentUrl, hash)
         {
         }
 
         protected override void OnLoad(Action OnSuccess, Action OnFail)
         {
-            CoroutineStarter.Start(OnLoadCoroutine(OnSuccess, OnFail));
+            CoroutineStarter.Start(base.LoadAssetBundleWithDeps(contentUrl, hash, () => OnSuccessInternal(OnSuccess), OnFail));
         }
 
-        IEnumerator OnLoadCoroutine(Action OnSuccess, Action OnFail)
+        protected override void OnReuse(Action OnSuccess)
         {
-            string lowerCaseUrl = contentUrl.ToLower();
-
-            GameObject container = null;
-
-            yield return AssetBundleLoadHelper.FetchAssetBundleWithDependencies(contentUrl, hash, (go) => { container = go; });
-
-            if (container == null)
-                OnFail?.Invoke();
-            else
-            {
-                asset.assetBundleAssetName = container.name;
-
-                container.transform.parent = asset.container.transform;
-                container.transform.ResetLocalTRS();
-
-                OnSuccess?.Invoke();
-            }
+            OnSuccessInternal(OnSuccess);
         }
 
-        protected override void ApplySettings_LoadStart()
+        void OnSuccessInternal(Action OnSuccess)
+        {
+            asset.Show(true, OnSuccess);
+        }
+
+        protected override void OnAfterLoadOrReuse()
+        {
+            base.OnAfterLoadOrReuse();
+        }
+
+        //IEnumerator OnLoadCoroutine(Action OnSuccess, Action OnFail)
+        //{
+        //    string lowerCaseUrl = contentUrl.ToLower();
+
+        //    GameObject container = null;
+
+        //    yield return AssetBundleLoadHelper.FetchAssetBundleWithDependencies(contentUrl, hash, (go) => { container = go; });
+
+        //    if (container == null)
+        //        OnFail?.Invoke();
+        //    else
+        //    {
+        //        asset.assetBundleAssetName = container.name;
+
+        //        container.transform.parent = asset.container.transform;
+        //        container.transform.ResetLocalTRS();
+
+        //        OnSuccess?.Invoke();
+        //    }
+        //}
+
+        protected override void OnBeforeLoadOrReuse()
         {
             Transform assetTransform = asset.container.transform;
 

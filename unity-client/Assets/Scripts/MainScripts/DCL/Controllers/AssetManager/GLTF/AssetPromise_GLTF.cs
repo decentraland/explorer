@@ -1,4 +1,4 @@
-﻿using DCL.Helpers;
+using DCL.Helpers;
 using UnityEngine;
 using UnityGLTF;
 
@@ -44,7 +44,7 @@ namespace DCL
             assetDirectoryPath = URIHelper.GetDirectoryName(url);
         }
 
-        protected override void ApplySettings_LoadStart()
+        protected override void OnBeforeLoadOrReuse()
         {
             Transform assetTransform = asset.container.transform;
 
@@ -72,7 +72,7 @@ namespace DCL
             }
         }
 
-        protected override void ApplySettings_LoadFinished()
+        protected override void OnAfterLoadOrReuse()
         {
             if (settings.visibleFlags == VisibleFlags.INVISIBLE)
             {
@@ -142,7 +142,7 @@ namespace DCL
                 {
                     asset = library.Get(asset.id);
                 }
-                ApplySettings_LoadStart();
+                OnBeforeLoadOrReuse();
             }
         }
 
