@@ -894,7 +894,7 @@ MonoBehaviour:
   heightSlider: {fileID: 991177616}
   heightText: {fileID: 891333630}
   depthMin: -1
-  depthMax: -3
+  depthMax: -6
   depthSlider: {fileID: 1103675343}
   depthText: {fileID: 306562566}
   foVMin: 30
