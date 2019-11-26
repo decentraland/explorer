@@ -25,14 +25,38 @@ namespace Tests
             sceneController.SetDebug();
             yield return new WaitForSeconds(0.1f);
 
-            yield return new WaitForSeconds(0.1f);
-
             var scenesToLoad = (Resources.Load("TestJSON/SceneLoadingTest") as TextAsset).text;
             sceneController.LoadParcelScenes(scenesToLoad);
 
             yield return new WaitForAllMessagesProcessed();
 
             var scene = sceneController.loadedScenes["0,0"];
+
+            var coneShape = TestHelpers.SharedComponentCreate<ConeShape, ConeShape.Model>(scene, DCL.Models.CLASS_ID.CONE_SHAPE, new ConeShape.Model()
+            {
+                radiusTop = 1,
+                radiusBottom = 0
+            });
+
+            var planeShape = TestHelpers.SharedComponentCreate<PlaneShape, PlaneShape.Model>(scene, DCL.Models.CLASS_ID.PLANE_SHAPE, new PlaneShape.Model()
+            {
+                height = 1.5f,
+                width = 1
+            });
+
+
+            var shapeEntity = TestHelpers.CreateSceneEntity(scene);
+            TestHelpers.SetEntityTransform(scene, shapeEntity, Vector3.one, Quaternion.identity, Vector3.one);
+            TestHelpers.SharedComponentAttach(coneShape, shapeEntity);
+
+            TestHelpers.UpdateShape(scene, coneShape.id, JsonUtility.ToJson(new ConeShape.Model()
+            {
+                segmentsRadial = 180,
+                segmentsHeight = 1.5f
+            }));
+
+            TestHelpers.DetachSharedComponent(scene, shapeEntity.entityId, coneShape.id);
+            TestHelpers.SharedComponentAttach(planeShape, shapeEntity);
 
             var lanternEntity = TestHelpers.CreateSceneEntity(scene);
             var lanternShape = TestHelpers.AttachGLTFShape(lanternEntity, scene, new Vector3(8, 1, 8), new LoadableShape.Model()
@@ -62,11 +86,11 @@ namespace Tests
             TestHelpers.InstantiateEntityWithShape(scene, "2", DCL.Models.CLASS_ID.SPHERE_SHAPE, new Vector3(8, 1, 8));
 
             AssertMetricsModel(scene,
-                triangles: 7026,
+                triangles: 6214,
                 materials: 2,
-                entities: 3,
-                meshes: 5,
-                bodies: 5,
+                entities: 4,
+                meshes: 6,
+                bodies: 6,
                 textures: 0);
 
             TestHelpers.RemoveSceneEntity(scene, "1");
@@ -76,11 +100,11 @@ namespace Tests
             yield return null;
 
             AssertMetricsModel(scene,
-                triangles: 0,
-                materials: 0,
-                entities: 0,
-                meshes: 0,
-                bodies: 0,
+                triangles: 4,
+                materials: 1,
+                entities: 1,
+                meshes: 1,
+                bodies: 1,
                 textures: 0);
 
             sceneController.UnloadAllScenes();
