@@ -54,7 +54,6 @@ namespace DCL
 
         public override void Cleanup()
         {
-            Debug.Log("cleanup call");
             Object.Destroy(container);
             base.Cleanup();
         }

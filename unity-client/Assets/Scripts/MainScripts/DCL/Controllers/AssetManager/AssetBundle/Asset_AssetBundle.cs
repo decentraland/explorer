@@ -56,8 +56,6 @@ namespace DCL
 
         public void CancelShow()
         {
-            //if (showCoroutine != null)
-            //    CoroutineStarter.Stop(showCoroutine);
         }
 
         public override void Cleanup()

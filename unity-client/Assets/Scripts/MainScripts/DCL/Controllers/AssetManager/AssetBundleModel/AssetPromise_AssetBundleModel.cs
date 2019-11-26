@@ -42,27 +42,6 @@ namespace DCL
             base.OnAfterLoadOrReuse();
         }
 
-        //IEnumerator OnLoadCoroutine(Action OnSuccess, Action OnFail)
-        //{
-        //    string lowerCaseUrl = contentUrl.ToLower();
-
-        //    GameObject container = null;
-
-        //    yield return AssetBundleLoadHelper.FetchAssetBundleWithDependencies(contentUrl, hash, (go) => { container = go; });
-
-        //    if (container == null)
-        //        OnFail?.Invoke();
-        //    else
-        //    {
-        //        asset.assetBundleAssetName = container.name;
-
-        //        container.transform.parent = asset.container.transform;
-        //        container.transform.ResetLocalTRS();
-
-        //        OnSuccess?.Invoke();
-        //    }
-        //}
-
         protected override void OnBeforeLoadOrReuse()
         {
             Transform assetTransform = asset.container.transform;

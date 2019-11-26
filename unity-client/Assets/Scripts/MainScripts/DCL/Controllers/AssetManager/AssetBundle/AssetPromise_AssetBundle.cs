@@ -157,29 +157,6 @@ namespace DCL
 
                     asset.assetsByExtension[ext].Add(loadedAsset);
 
-                    //loadedAssets.Add(asset, assetBundle.LoadAsset(asset));
-                    //#if UNITY_EDITOR
-                    //                        if (VERBOSE)
-                    //                        {
-                    //                            if (asset.EndsWith("mat"))
-                    //                            {
-                    //                                Texture tex = (loadedAssets[asset] as Material).GetTexture("_BaseMap");
-
-                    //                                if (tex != null)
-                    //                                    Debug.Log("material has texture " + tex.name);
-                    //                                else
-                    //                                    Debug.Log("no texture!!!");
-                    //                            }
-                    //                        }
-                    //#endif
-                    //if (asset.EndsWith("glb") || asset.EndsWith("gltf"))
-                    //{
-                    //    if (!bundleToMainAssets.ContainsKey(assetBundle))
-                    //        bundleToMainAssets.Add(assetBundle, new List<string>(1));
-
-                    //    bundleToMainAssets[assetBundle].Add(asset);
-                    //}
-
                     if (limitTimeBudget)
                     {
                         currentLoadBudgetTime += Time.realtimeSinceStartup - time;
