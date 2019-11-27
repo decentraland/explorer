@@ -169,6 +169,7 @@ namespace Tests
             DCL.Configuration.Environment.DEBUG = true;
             sceneController.SetDebug();
 
+            sceneController.UnloadAllScenes();
             yield return null;
 
             Assert.AreEqual(0, sceneController.loadedScenes.Count);
@@ -282,6 +283,7 @@ namespace Tests
             DCL.Configuration.Environment.DEBUG = true;
             sceneController.SetDebug();
 
+            sceneController.UnloadAllScenes();
             yield return null;
 
             Assert.AreEqual(0, sceneController.loadedScenes.Count);
@@ -319,6 +321,7 @@ namespace Tests
             DCL.Configuration.Environment.DEBUG = true;
             sceneController.SetDebug();
 
+            sceneController.UnloadAllScenes();
             yield return null;
 
             Assert.AreEqual(0, sceneController.loadedScenes.Count);
