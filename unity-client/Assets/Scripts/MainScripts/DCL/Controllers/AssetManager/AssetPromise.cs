@@ -47,7 +47,7 @@ namespace DCL
             CallAndClearEvents(false);
         }
 
-        void CallAndClearEvents(bool isSuccess = true)
+        protected void CallAndClearEvents(bool isSuccess = true)
         {
             if (asset == null)
             {

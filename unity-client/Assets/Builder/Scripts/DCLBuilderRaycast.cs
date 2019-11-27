@@ -6,34 +6,30 @@ namespace Builder
 {
     public class DCLBuilderRaycast : MonoBehaviour
     {
+        public const string LAYER_GIZMOS = "Gizmo";
+        public const string LAYER_SELECTION = "Selection";
+
         public Camera builderCamera;
 
         private const float RAYCAST_MAX_DISTANCE = 10000f;
 
         public LayerMask defaultMask { get; private set; }
         public LayerMask gizmoMask { get; private set; }
-        public int selectionLayer { get; private set; }
-        public int defaultLayer { get; private set; }
 
         private Plane groundPlane;
-        private Plane hitPlane;
-
-        private ParcelScene currentScene;
-        private bool isGameObjectActive = false;
+        private Plane entityHitPlane;
 
         private void Awake()
         {
-            defaultMask = LayerMask.GetMask(OnPointerEventColliders.COLLIDER_LAYER) | LayerMask.GetMask("Selection");
-            gizmoMask = LayerMask.GetMask("Gizmo");
-            selectionLayer = LayerMask.NameToLayer("Selection");
-            defaultLayer = LayerMask.NameToLayer(OnPointerEventColliders.COLLIDER_LAYER);
+            defaultMask = LayerMask.GetMask(DCLBuilderSelectionCollider.LAYER_BUILDER_POINTER_CLICK);
+            gizmoMask = LayerMask.GetMask(LAYER_GIZMOS);
 
             groundPlane = new Plane(Vector3.up, Vector3.zero);
         }
 
         public void SetEntityHitPlane(float height)
         {
-            hitPlane = new Plane(Vector3.up, new Vector3(0, height, 0));
+            entityHitPlane = new Plane(Vector3.up, new Vector3(0, height, 0));
         }
 
         public bool Raycast(Vector3 mousePosition, LayerMask mask, out RaycastHit hitInfo, bool checkGizmo = false)
@@ -67,6 +63,11 @@ namespace Builder
         public bool RaycastToGround(Vector3 mousePosition, out Vector3 hitPosition)
         {
             Ray ray = GetMouseRay(mousePosition);
+            return RaycastToGround(ray, out hitPosition);
+        }
+
+        public bool RaycastToGround(Ray ray, out Vector3 hitPosition)
+        {
             float enter = 0.0f;
 
             if (groundPlane.Raycast(ray, out enter))
@@ -83,32 +84,12 @@ namespace Builder
             Ray ray = GetMouseRay(mousePosition);
             float enter = 0.0f;
 
-            if (hitPlane.Raycast(ray, out enter))
+            if (entityHitPlane.Raycast(ray, out enter))
             {
                 return ray.GetPoint(enter);
             }
 
             return Vector3.zero;
-        }
-
-        private void OnEnable()
-        {
-            if (!isGameObjectActive)
-            {
-                DCLBuilderBridge.OnSceneChanged += OnSceneChanged;
-            }
-            isGameObjectActive = true;
-        }
-
-        private void OnDisable()
-        {
-            isGameObjectActive = false;
-            DCLBuilderBridge.OnSceneChanged -= OnSceneChanged;
-        }
-
-        private void OnSceneChanged(ParcelScene scene)
-        {
-            currentScene = scene;
         }
     }
 }

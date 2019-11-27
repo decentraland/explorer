@@ -26,12 +26,12 @@ namespace DCL
         }
 
         public Settings settings = new Settings();
-        string assetDirectoryPath;
+        protected string assetDirectoryPath;
         public string url { get; private set; }
 
         public bool useIdForMockedMappings => SceneController.i == null || SceneController.i.isDebugMode || SceneController.i.isWssDebugMode;
 
-        ContentProvider provider = null;
+        protected ContentProvider provider = null;
         GLTFComponent gltfComponent = null;
         object id = null;
 
