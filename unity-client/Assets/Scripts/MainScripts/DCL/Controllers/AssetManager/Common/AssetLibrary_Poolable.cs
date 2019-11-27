@@ -22,9 +22,9 @@ namespace DCL
 
         public override bool Add(AssetType asset)
         {
-            if (asset == null)
+            if (asset == null || asset.container == null)
             {
-                Debug.LogError("asset == null? This shouldn't happen");
+                Debug.LogWarning("asset or asset.container == null? This shouldn't happen");
                 return false;
             }
 

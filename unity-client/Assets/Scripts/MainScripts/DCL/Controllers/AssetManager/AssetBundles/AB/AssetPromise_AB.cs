@@ -86,7 +86,7 @@ namespace DCL
                 foreach (string dep in AssetBundleLoadHelper.dependenciesMap[hash])
                 {
                     var promise = new AssetPromise_AB(baseUrl, hash);
-                    AssetPromiseKeeper_AssetBundle.i.Keep(promise);
+                    AssetPromiseKeeper_AB.i.Keep(promise);
                     yield return promise;
                 }
             }

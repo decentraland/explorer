@@ -1,4 +1,4 @@
-using DCL;
+﻿using DCL;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -6,7 +6,7 @@ using UnityEngine.TestTools;
 
 namespace AssetPromiseKeeper_AssetBundle_Tests
 {
-    public class PromiseKeeperShouldBehaveCorrectlyWhen : AssetBundle_TestsBase
+    public class PromiseKeeperShouldBehaveCorrectlyWhen : AB_TestsBase
     {
         [UnityTest]
         public IEnumerator KeepAndForgetIsCalledInSingleFrameWhenLoadingAsset()

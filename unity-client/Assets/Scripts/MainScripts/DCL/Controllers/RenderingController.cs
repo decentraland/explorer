@@ -30,7 +30,7 @@ public class RenderingController : MonoBehaviour
         GLTFSceneImporter.renderingIsDisabled = true;
 
         AssetPromiseKeeper_GLTF.i.useBlockedPromisesQueue = false;
-        AssetPromiseKeeper_AssetBundle.i.useBlockedPromisesQueue = false;
+        AssetPromiseKeeper_AB.i.useBlockedPromisesQueue = false;
         AssetPromiseKeeper_AB_GameObject.i.useBlockedPromisesQueue = false;
 
         DCLCharacterController.i.SetEnabled(false);
@@ -54,7 +54,7 @@ public class RenderingController : MonoBehaviour
         DCLCharacterController.i.SetEnabled(true);
 
         AssetPromiseKeeper_GLTF.i.useBlockedPromisesQueue = true;
-        AssetPromiseKeeper_AssetBundle.i.useBlockedPromisesQueue = true;
+        AssetPromiseKeeper_AB.i.useBlockedPromisesQueue = true;
         AssetPromiseKeeper_AB_GameObject.i.useBlockedPromisesQueue = true;
 
         OnRenderingStateChanged?.Invoke(renderingEnabled);

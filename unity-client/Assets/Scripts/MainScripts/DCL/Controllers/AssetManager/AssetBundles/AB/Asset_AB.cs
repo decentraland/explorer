@@ -49,10 +49,10 @@ namespace DCL
             return result;
         }
 
-        public virtual void Show(bool useMaterialTransition, System.Action OnFinish)
-        {
-            OnFinish?.Invoke();
-        }
+        //public virtual void Show(System.Action OnFinish)
+        //{
+        //    OnFinish?.Invoke();
+        //}
 
         public void CancelShow()
         {

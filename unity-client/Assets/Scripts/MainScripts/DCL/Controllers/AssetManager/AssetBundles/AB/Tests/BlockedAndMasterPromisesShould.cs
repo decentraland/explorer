@@ -5,7 +5,7 @@ using UnityEngine.TestTools;
 
 namespace AssetPromiseKeeper_AssetBundle_Tests
 {
-    public class BlockedAndMasterPromisesShould : AssetBundle_TestsBase
+    public class BlockedAndMasterPromisesShould : AB_TestsBase
     {
         [UnityTest]
         public IEnumerator FailCorrectlyWhenGivenWrongURL()

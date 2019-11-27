@@ -8,26 +8,25 @@ namespace DCL
 
     public class Asset_AB_GameObject : Asset_WithPoolableContainer
     {
-        //NOTE(Brian): Asegurarme de que cuando se cleanupea se propague a los demas siempre usando el AssetPromiseKeeper_AssetBundle
-        //             Si tenemos assets trackeados en ambos keepers van a haber problemas.
-        AssetPromise_AB ownerPromise;
+        internal AssetPromise_AB ownerPromise;
         public override GameObject container { get; set; }
-        public bool alreadyInstantiated;
+        public bool isInstantiated;
 
         public Asset_AB_GameObject()
         {
-            alreadyInstantiated = false;
+            isInstantiated = false;
             container = new GameObject("AB Container");
         }
 
         public override void Cleanup()
         {
+            AssetPromiseKeeper_AB.i.Forget(ownerPromise);
             Object.Destroy(container);
         }
 
         public void Show(System.Action OnFinish)
         {
-            if (container == null)
+            if (container == null || ownerPromise == null || ownerPromise.state != AssetPromiseState.FINISHED)
             {
                 OnFinish?.Invoke();
                 return;
@@ -60,10 +59,10 @@ namespace DCL
 
         public IEnumerator InstantiateABGameObjects(AssetBundle bundle)
         {
-            if (alreadyInstantiated)
+            if (isInstantiated)
                 yield break;
 
-            alreadyInstantiated = true;
+            isInstantiated = true;
             var goList = ownerPromise.asset.GetAssetsByExtensions<GameObject>("glb", "ltf");
 
             for (int i = 0; i < goList.Count; i++)

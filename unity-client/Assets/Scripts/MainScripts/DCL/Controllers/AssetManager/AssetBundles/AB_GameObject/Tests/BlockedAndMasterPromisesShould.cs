@@ -1,4 +1,4 @@
-﻿using DCL;
+using DCL;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -6,7 +6,7 @@ using UnityEngine.TestTools;
 
 namespace AssetPromiseKeeper_AssetBundleModel_Tests
 {
-    public class BlockedAndMasterPromisesShould : AssetBundleModel_TestsBase
+    public class BlockedAndMasterPromisesShould : AB_GameObject_TestsBase
     {
         [UnityTest]
         public IEnumerator SucceedWhenMastersParentIsDestroyed()

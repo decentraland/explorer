@@ -6,7 +6,7 @@ using UnityEngine.TestTools;
 
 namespace AssetPromiseKeeper_AssetBundleModel_Tests
 {
-    public class PromiseKeeperShouldBehaveCorrectlyWhen : AssetBundleModel_TestsBase
+    public class PromiseKeeperShouldBehaveCorrectlyWhen : AB_GameObject_TestsBase
     {
         [UnityTest]
         public IEnumerator AnyAssetIsDestroyedWhileLoading()
@@ -128,7 +128,6 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
             AssetPromise_AB_GameObject prom = new AssetPromise_AB_GameObject(BASE_URL, TEST_AB_FILENAME);
             Asset_AB_GameObject loadedAsset = null;
 
-
             prom.OnSuccessEvent +=
                 (x) =>
                 {
@@ -142,7 +141,7 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
             yield return prom;
 
             Assert.IsTrue(loadedAsset != null);
-            //Assert.IsTrue(loadedAsset.isLoaded);
+            Assert.IsTrue(loadedAsset.isInstantiated);
             Assert.IsTrue(library.Contains(loadedAsset));
             Assert.AreEqual(1, library.masterAssets.Count);
 

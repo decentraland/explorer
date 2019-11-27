@@ -127,7 +127,7 @@ namespace DCL
             else
             {
                 state = AssetPromiseState.FINISHED;
-                OnLoadFailure();
+                CallAndClearEvents(isSuccess: false);
             }
         }
 

@@ -7,7 +7,7 @@ using UnityEngine.TestTools;
 
 namespace AssetPromiseKeeper_AssetBundleModel_Tests
 {
-    public class AnyAssetPromiseShould : AssetBundleModel_TestsBase
+    public class AnyAssetPromiseShould : AB_GameObject_TestsBase
     {
         [UnityTest]
         public IEnumerator BeSetupCorrectlyAfterLoad()
