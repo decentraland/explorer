@@ -230,7 +230,7 @@ namespace Tests
         [UnityTest]
         public IEnumerator SeveralParcelsFromJSON()
         {
-            yield return InitUnityScene("MainTest");
+            yield return InitScene();
 
             sceneController = TestHelpers.InitializeSceneController();
 
