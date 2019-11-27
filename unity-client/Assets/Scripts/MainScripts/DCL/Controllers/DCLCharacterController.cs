@@ -176,18 +176,30 @@ public class DCLCharacterController : MonoBehaviour
         lastPosition = transform.position;
     }
 
-    private Coroutine resetCameraCoroutine;
     public void SetEulerRotation(Vector3 eulerRotation)
     {
-        cameraTransform.localRotation = Quaternion.Euler(eulerRotation.x, 0f, 0f);
         if (!Input.GetMouseButton(1))
         {
+            cameraTransform.localRotation = Quaternion.Euler(eulerRotation.x, 0f, 0f);
             transform.rotation = Quaternion.Euler(0f, eulerRotation.y, 0f);
         }
         else
         {
-            var current = transform.Find("CameraPivot").transform.localEulerAngles;
-            transform.Find("CameraPivot").transform.localRotation = Quaternion.Euler( 0f, current.y - aimingHorizontalDeltaAngle, 0f);
+            Transform cameraPivot = transform.Find("CameraPivot"); 
+            var current = cameraPivot.transform.localEulerAngles;
+            var xValue = current.x - aimingVerticalDeltaAngle;
+            while (xValue < 0) xValue += 360;
+            var lowerClamp = 45;
+            var higherClamp = 360 - lowerClamp;
+            if (xValue > lowerClamp)
+            {
+                if (xValue < higherClamp)
+                {
+                    xValue = (xValue - lowerClamp) < (higherClamp - xValue) ? lowerClamp : higherClamp;
+                }
+            }
+            cameraPivot.localRotation = Quaternion.Euler( xValue, current.y - aimingHorizontalDeltaAngle, 0f);
+            cameraTransform.LookAt(cameraPivot.transform.position + Vector3.up * 1);
         }
     }
 
