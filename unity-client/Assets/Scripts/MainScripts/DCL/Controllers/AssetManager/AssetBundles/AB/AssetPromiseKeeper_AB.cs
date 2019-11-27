@@ -2,9 +2,8 @@ namespace DCL
 {
     public class AssetPromiseKeeper_AB : AssetPromiseKeeper<Asset_AB, AssetLibrary_AB, AssetPromise_AB>
     {
-        public AssetPromiseKeeper_AB(AssetLibrary_AB library) : base(library)
+        public AssetPromiseKeeper_AB() : base(new AssetLibrary_AB())
         {
-            library = new AssetLibrary_AB();
         }
     }
 

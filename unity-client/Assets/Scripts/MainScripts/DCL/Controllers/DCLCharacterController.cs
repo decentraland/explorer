@@ -104,7 +104,7 @@ public class DCLCharacterController : MonoBehaviour
         }
 
         i = this;
-
+        
         CommonScriptableObjects.playerUnityPosition.Set(Vector3.zero);
         CommonScriptableObjects.playerCoords.Set(Vector2Int.zero);
         CommonScriptableObjects.playerUnityEulerAngles.Set(Vector3.zero);

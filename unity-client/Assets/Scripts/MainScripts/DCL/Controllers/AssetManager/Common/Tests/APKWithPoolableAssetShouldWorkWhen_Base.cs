@@ -1,17 +1,108 @@
-﻿using DCL;
-using System.Collections;
+﻿using System.Collections;
+using DCL;
 using UnityEngine;
-using UnityEngine.Assertions;
+using DCL.Helpers;
 using UnityEngine.TestTools;
+using UnityEngine.Assertions;
 
-namespace AssetPromiseKeeper_AssetBundle_Tests
+namespace AssetPromiseKeeper_Tests
 {
-    public class PromiseKeeperShouldBehaveCorrectlyWhen : AB_TestsBase
+
+
+    public abstract class APKWithPoolableAssetShouldWorkWhen_Base<APKType, AssetPromiseType, AssetType, AssetLibraryType> : TestsBase
+        where AssetPromiseType : AssetPromise<AssetType>
+        where AssetType : Asset_WithPoolableContainer, new()
+        where AssetLibraryType : AssetLibrary_Poolable<AssetType>, new()
+        where APKType : AssetPromiseKeeper<AssetType, AssetLibraryType, AssetPromiseType>, new()
     {
+        protected APKType keeper;
+
+        [UnitySetUp]
+        protected IEnumerator SetUp()
+        {
+            keeper = new APKType();
+            yield break;
+        }
+
+
+        [UnityTearDown]
+        protected IEnumerator TearDown()
+        {
+            PoolManager.i.Cleanup();
+            keeper.Cleanup();
+            Caching.ClearCache();
+            Resources.UnloadUnusedAssets();
+            yield break;
+        }
+
+
+        protected abstract AssetPromiseType CreatePromise();
+
+
+        [UnityTest]
+        public IEnumerator ForgetIsCalledWhileAssetIsBeingReused()
+        {
+            AssetPromiseType prom = CreatePromise();
+            bool calledFail = false;
+
+            keeper.Keep(prom);
+            yield return prom;
+
+            prom.asset.container.name = "First GLTF";
+
+            AssetPromiseType prom2 = CreatePromise();
+
+            prom2.OnFailEvent +=
+                (x) =>
+                {
+                    calledFail = true;
+                };
+
+            keeper.Keep(prom2);
+            GameObject container = prom2.asset.container;
+            keeper.Forget(prom2);
+
+            yield return prom2;
+
+            Assert.IsTrue(prom2 != null);
+            Assert.IsTrue(calledFail);
+            Assert.IsTrue(prom2.asset == null, "Asset shouldn't exist after Forget!");
+            Assert.IsTrue(container != null, "Container should be pooled!");
+
+            PoolableObject po = container.GetComponentInChildren<PoolableObject>(true);
+
+            Assert.IsTrue(po.isInsidePool, "Asset should be inside pool!");
+        }
+
+
+        [UnityTest]
+        public IEnumerator AnyAssetIsDestroyedWhileLoading()
+        {
+            AssetPromiseType prom = CreatePromise();
+
+            bool calledFail = false;
+
+            prom.OnFailEvent +=
+                (x) =>
+                {
+                    calledFail = true;
+                };
+
+            keeper.Keep(prom);
+            yield return null;
+
+            Object.Destroy(prom.asset.container);
+            yield return prom;
+
+            Assert.IsTrue(prom != null);
+            Assert.IsTrue(prom.asset == null);
+            Assert.IsTrue(calledFail);
+        }
+
         [UnityTest]
         public IEnumerator KeepAndForgetIsCalledInSingleFrameWhenLoadingAsset()
         {
-            var prom = new AssetPromise_AB(BASE_URL, TEST_AB_FILENAME);
+            var prom = CreatePromise();
             bool calledSuccess = false;
             bool calledFail = false;
 
@@ -36,16 +127,14 @@ namespace AssetPromiseKeeper_AssetBundle_Tests
             Assert.IsTrue(prom.asset == null);
             Assert.IsFalse(calledSuccess);
             Assert.IsTrue(calledFail);
-
-            keeper.library.Cleanup();
             yield break;
         }
 
         [UnityTest]
         public IEnumerator KeepAndForgetIsCalledInSingleFrameWhenReusingAsset()
         {
-            var prom = new AssetPromise_AB(BASE_URL, TEST_AB_FILENAME);
-            Asset_AB loadedAsset = null;
+            var prom = CreatePromise();
+            AssetType loadedAsset = null;
 
             prom.OnSuccessEvent +=
                 (x) =>
@@ -61,16 +150,14 @@ namespace AssetPromiseKeeper_AssetBundle_Tests
             keeper.Forget(prom);
 
             Assert.IsTrue(prom.asset == null);
-            keeper.library.Cleanup();
-
         }
 
 
         [UnityTest]
         public IEnumerator AnyAssetIsLoadedAndThenUnloaded()
         {
-            var prom = new AssetPromise_AB(BASE_URL, TEST_AB_FILENAME);
-            Asset_AB loadedAsset = null;
+            var prom = CreatePromise();
+            AssetType loadedAsset = null;
 
 
             prom.OnSuccessEvent +=
@@ -99,15 +186,13 @@ namespace AssetPromiseKeeper_AssetBundle_Tests
 
             Assert.IsTrue(!keeper.library.Contains(loadedAsset.id));
             Assert.AreEqual(0, keeper.library.masterAssets.Count);
-            keeper.library.Cleanup();
-
         }
 
         [UnityTest]
         public IEnumerator ForgetIsCalledWhileAssetIsBeingLoaded()
         {
-            var prom = new AssetPromise_AB(BASE_URL, TEST_AB_FILENAME);
-            Asset_AB asset = null;
+            var prom = CreatePromise();
+            AssetType asset = null;
             prom.OnSuccessEvent += (x) => { asset = x; };
 
             keeper.Keep(prom);
@@ -118,7 +203,7 @@ namespace AssetPromiseKeeper_AssetBundle_Tests
 
             Assert.AreEqual(AssetPromiseState.IDLE_AND_EMPTY, prom.state);
 
-            var prom2 = new AssetPromise_AB(BASE_URL, TEST_AB_FILENAME);
+            var prom2 = CreatePromise();
 
             keeper.Keep(prom2);
 
@@ -128,7 +213,7 @@ namespace AssetPromiseKeeper_AssetBundle_Tests
 
             keeper.Forget(prom2);
 
-            Assert.IsTrue(asset.ownerAssetBundle == null);
+            Assert.IsTrue(asset.container == null);
             Assert.IsTrue(!keeper.library.Contains(asset));
             Assert.AreEqual(0, keeper.library.masterAssets.Count);
         }
@@ -136,16 +221,16 @@ namespace AssetPromiseKeeper_AssetBundle_Tests
         [UnityTest]
         public IEnumerator ManyPromisesWithTheSameURLAreLoaded()
         {
-            var prom = new AssetPromise_AB(BASE_URL, TEST_AB_FILENAME);
-            Asset_AB asset = null;
+            var prom = CreatePromise();
+            AssetType asset = null;
             prom.OnSuccessEvent += (x) => { asset = x; };
 
-            var prom2 = new AssetPromise_AB(BASE_URL, TEST_AB_FILENAME);
-            Asset_AB asset2 = null;
+            var prom2 = CreatePromise();
+            AssetType asset2 = null;
             prom2.OnSuccessEvent += (x) => { asset2 = x; };
 
-            var prom3 = new AssetPromise_AB(BASE_URL, TEST_AB_FILENAME);
-            Asset_AB asset3 = null;
+            var prom3 = CreatePromise();
+            AssetType asset3 = null;
             prom3.OnSuccessEvent += (x) => { asset3 = x; };
 
             keeper.Keep(prom);

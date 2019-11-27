@@ -15,8 +15,7 @@ namespace AssetPromiseKeeper_GLTF_Tests
         {
             yield return base.InitScene();
 
-            var library = new AssetLibrary_GLTF();
-            var keeper = new AssetPromiseKeeper_GLTF(library);
+            var keeper = new AssetPromiseKeeper_GLTF();
 
             string url = Utils.GetTestsAssetsPath() + "/GLB/Lantern/Lantern.glb";
             GameObject parent = new GameObject("parent");
@@ -57,8 +56,8 @@ namespace AssetPromiseKeeper_GLTF_Tests
             Assert.IsTrue(prom2.asset != null);
             Assert.IsTrue(prom3.asset != null);
 
-            Assert.IsTrue(library.Contains(prom.asset));
-            Assert.AreEqual(1, library.masterAssets.Count);
+            Assert.IsTrue(keeper.library.Contains(prom.asset));
+            Assert.AreEqual(1, keeper.library.masterAssets.Count);
         }
 
         [UnityTest]
@@ -66,8 +65,7 @@ namespace AssetPromiseKeeper_GLTF_Tests
         {
             yield return base.InitScene();
 
-            var library = new AssetLibrary_GLTF();
-            var keeper = new AssetPromiseKeeper_GLTF(library);
+            var keeper = new AssetPromiseKeeper_GLTF();
 
             //NOTE(Brian): Expect the 404 error
             LogAssert.Expect(LogType.Error, new Regex("^*.?404"));
@@ -112,8 +110,8 @@ namespace AssetPromiseKeeper_GLTF_Tests
             Assert.IsFalse(asset2 != null);
             Assert.IsFalse(asset3 != null);
 
-            Assert.IsFalse(library.Contains(asset));
-            Assert.AreNotEqual(1, library.masterAssets.Count);
+            Assert.IsFalse(keeper.library.Contains(asset));
+            Assert.AreNotEqual(1, keeper.library.masterAssets.Count);
         }
     }
 }

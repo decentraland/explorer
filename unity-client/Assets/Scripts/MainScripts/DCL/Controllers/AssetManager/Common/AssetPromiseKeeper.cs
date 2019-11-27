@@ -35,7 +35,7 @@ namespace DCL
             }
         }
 
-        internal AssetLibraryType library;
+        public AssetLibraryType library;
 
         //NOTE(Brian): All waiting promises. Only used for cleanup and to keep count.
         List<AssetPromiseType> waitingPromises = new List<AssetPromiseType>(100);

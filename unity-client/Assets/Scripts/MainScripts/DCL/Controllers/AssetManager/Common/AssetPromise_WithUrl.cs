@@ -12,6 +12,9 @@ namespace DCL
             this.hash = hash;
         }
 
+        public AssetPromise_WithUrl()
+        {}
+
         protected override void OnAfterLoadOrReuse()
         {
         }

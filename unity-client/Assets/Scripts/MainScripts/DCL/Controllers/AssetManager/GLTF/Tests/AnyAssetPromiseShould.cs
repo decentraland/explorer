@@ -15,8 +15,7 @@ namespace AssetPromiseKeeper_GLTF_Tests
         {
             yield return base.InitScene();
 
-            var library = new AssetLibrary_GLTF();
-            var keeper = new AssetPromiseKeeper_GLTF(library);
+            var keeper = new AssetPromiseKeeper_GLTF();
 
             string url = Utils.GetTestsAssetsPath() + "/GLB/Lantern/Lantern.glb";
             AssetPromise_GLTF prom = new AssetPromise_GLTF(scene.contentProvider, url);
@@ -56,16 +55,15 @@ namespace AssetPromiseKeeper_GLTF_Tests
             Assert.AreEqual(initialScale.ToString(), loadedAsset.container.transform.localScale.ToString(), "initial scale not set correctly!");
 
             Assert.IsTrue(loadedAsset != null);
-            Assert.IsTrue(library.Contains(loadedAsset));
-            Assert.AreEqual(1, library.masterAssets.Count);
+            Assert.IsTrue(keeper.library.Contains(loadedAsset));
+            Assert.AreEqual(1, keeper.library.masterAssets.Count);
         }
 
         [UnityTest]
         public IEnumerator ForceNewInstanceIsOff()
         {
             yield return InitScene();
-            var library = new AssetLibrary_GLTF();
-            var keeper = new AssetPromiseKeeper_GLTF(library);
+            var keeper = new AssetPromiseKeeper_GLTF();
 
             string url = Utils.GetTestsAssetsPath() + "/GLB/Lantern/Lantern.glb";
             AssetPromise_GLTF prom = new AssetPromise_GLTF(scene.contentProvider, url);
@@ -81,8 +79,7 @@ namespace AssetPromiseKeeper_GLTF_Tests
         public IEnumerator ForceNewInstanceIsOffMultipleTimes()
         {
             yield return InitScene();
-            var library = new AssetLibrary_GLTF();
-            var keeper = new AssetPromiseKeeper_GLTF(library);
+            var keeper = new AssetPromiseKeeper_GLTF();
 
             var poolableComponents = new List<PoolableObject>();
 
@@ -104,8 +101,7 @@ namespace AssetPromiseKeeper_GLTF_Tests
         public IEnumerator ForceNewInstanceIsOn()
         {
             yield return InitScene();
-            var library = new AssetLibrary_GLTF();
-            var keeper = new AssetPromiseKeeper_GLTF(library);
+            var keeper = new AssetPromiseKeeper_GLTF();
 
             string url = Utils.GetTestsAssetsPath() + "/GLB/Lantern/Lantern.glb";
             AssetPromise_GLTF prom = new AssetPromise_GLTF(scene.contentProvider, url);
@@ -121,8 +117,7 @@ namespace AssetPromiseKeeper_GLTF_Tests
         public IEnumerator ForceNewInstanceIsOnMultipleTimes()
         {
             yield return InitScene();
-            var library = new AssetLibrary_GLTF();
-            var keeper = new AssetPromiseKeeper_GLTF(library);
+            var keeper = new AssetPromiseKeeper_GLTF();
 
             var poolableComponents = new List<PoolableObject>();
 

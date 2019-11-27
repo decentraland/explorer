@@ -50,8 +50,8 @@ namespace AssetPromiseKeeper_AssetBundle_Tests
             Assert.IsFalse(asset2 != null);
             Assert.IsFalse(asset3 != null);
 
-            Assert.IsFalse(library.Contains(asset));
-            Assert.AreNotEqual(1, library.masterAssets.Count);
+            Assert.IsFalse(keeper.library.Contains(asset));
+            Assert.AreNotEqual(1, keeper.library.masterAssets.Count);
         }
     }
 }

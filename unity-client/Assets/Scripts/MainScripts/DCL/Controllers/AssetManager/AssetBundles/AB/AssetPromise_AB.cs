@@ -8,7 +8,7 @@ using UnityEngine.Networking;
 
 namespace DCL
 {
-    public class AssetPromise_AB : AssetPromise<Asset_AB>
+    public class AssetPromise_AB : AssetPromise_WithUrl<Asset_AB>
     {
         public static bool VERBOSE = false;
         static float maxLoadBudgetTime = 0.032f;
@@ -31,15 +31,12 @@ namespace DCL
             { "glb", 9 }
         };
 
-        readonly protected string contentUrl;
-        readonly protected string hash;
-        protected object id = null;
-
-        public AssetPromise_AB(string contentUrl, string hash)
+        public AssetPromise_AB(string contentUrl, string hash) : base(contentUrl, hash)
         {
-            this.contentUrl = contentUrl;
-            this.hash = hash;
         }
+
+        public AssetPromise_AB() 
+        {}
 
         protected override bool AddToLibrary()
         {

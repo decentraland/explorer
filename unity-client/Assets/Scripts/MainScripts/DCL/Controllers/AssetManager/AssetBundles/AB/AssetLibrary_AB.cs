@@ -1,55 +1,7 @@
-using System.Collections.Generic;
-
 namespace DCL
 {
-    public class AssetLibrary_AB : AssetLibrary<Asset_AB>
+    public class AssetLibrary_AB : AssetLibrary_RefCounted<Asset_AB>
     {
-        public Dictionary<object, Asset_AB> masterAssets = new Dictionary<object, Asset_AB>();
 
-        public override bool Add(Asset_AB asset)
-        {
-            if (asset == null || masterAssets.ContainsKey(asset.id))
-                return true;
-
-            masterAssets.Add(asset.id, asset);
-            return true;
-        }
-
-        public override void Cleanup()
-        {
-        }
-
-        public override bool Contains(object id)
-        {
-            return masterAssets.ContainsKey(id);
-        }
-
-        public override bool Contains(Asset_AB asset)
-        {
-            if (asset == null)
-                return false;
-
-            return masterAssets.ContainsKey(asset.id);
-        }
-
-        public override Asset_AB Get(object id)
-        {
-            if (!Contains(id))
-                return null;
-
-            masterAssets[id].referenceCount++;
-            return masterAssets[id];
-        }
-
-        public override void Release(Asset_AB asset)
-        {
-            asset.referenceCount--;
-
-            if (asset.referenceCount != 0)
-                return;
-
-            asset.Cleanup();
-            masterAssets.Remove(asset.id);
-        }
     }
 }
