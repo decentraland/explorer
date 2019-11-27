@@ -18,7 +18,8 @@
         "WaitForSecondsCache",
         "ContentProvider",
         "LoadersController",
-        "AvatarAssets"
+        "AvatarAssets",
+        "Camera"
     ],
     "optionalUnityReferences": [],
     "includePlatforms": [],

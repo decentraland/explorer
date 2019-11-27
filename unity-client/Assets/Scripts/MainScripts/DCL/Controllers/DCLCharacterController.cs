@@ -176,16 +176,18 @@ public class DCLCharacterController : MonoBehaviour
         lastPosition = transform.position;
     }
 
+    public CameraStateSO cameraState;
     public void SetEulerRotation(Vector3 eulerRotation)
     {
-        if (!Input.GetMouseButton(1))
+        Transform cameraPivot = transform.Find("CameraPivot"); 
+        if(cameraState.Get() == CameraController.CameraState.FirstPerson || Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.D))
         {
+            cameraPivot.transform.localRotation = Quaternion.identity;
             cameraTransform.localRotation = Quaternion.Euler(eulerRotation.x, 0f, 0f);
             transform.rotation = Quaternion.Euler(0f, eulerRotation.y, 0f);
         }
         else
         {
-            Transform cameraPivot = transform.Find("CameraPivot"); 
             var current = cameraPivot.transform.localEulerAngles;
             var xValue = current.x - aimingVerticalDeltaAngle;
             while (xValue < 0) xValue += 360;
@@ -281,11 +283,6 @@ public class DCLCharacterController : MonoBehaviour
         else if (previouslyGrounded && !isJumping)
         {
             lastUngroundedTime = Time.time;
-        }
-
-        if ( Input.GetMouseButtonUp(1))
-        {
-            transform.Find("CameraPivot").transform.localEulerAngles = Vector3.zero;
         }
 
         if (Cursor.lockState == CursorLockMode.Locked)

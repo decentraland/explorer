@@ -908,6 +908,7 @@ MonoBehaviour:
   - {fileID: 4006684685008884183}
   - {fileID: 5573513284280885161}
   - {fileID: 86483995696960499}
+  currentButton: {fileID: 0}
 --- !u!1 &991177614
 GameObject:
   m_ObjectHideFlags: 0
@@ -3052,6 +3053,7 @@ MonoBehaviour:
   groundLayers:
     serializedVersion: 2
     m_Bits: 1025
+  cameraState: {fileID: 11400000, guid: a1d723a8c6d6c4b42b6ccee9ce73a09c, type: 2}
 --- !u!143 &113901082
 CharacterController:
   m_ObjectHideFlags: 0
