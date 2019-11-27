@@ -11,7 +11,7 @@ namespace AssetPromiseKeeper_AssetBundle_Tests
         [UnityTest]
         public IEnumerator KeepAndForgetIsCalledInSingleFrameWhenLoadingAsset()
         {
-            var prom = new AssetPromise_AssetBundle(BASE_URL, TEST_AB_FILENAME);
+            var prom = new AssetPromise_AB(BASE_URL, TEST_AB_FILENAME);
             bool calledSuccess = false;
             bool calledFail = false;
 
@@ -44,8 +44,8 @@ namespace AssetPromiseKeeper_AssetBundle_Tests
         [UnityTest]
         public IEnumerator KeepAndForgetIsCalledInSingleFrameWhenReusingAsset()
         {
-            var prom = new AssetPromise_AssetBundle(BASE_URL, TEST_AB_FILENAME);
-            Asset_AssetBundle loadedAsset = null;
+            var prom = new AssetPromise_AB(BASE_URL, TEST_AB_FILENAME);
+            Asset_AB loadedAsset = null;
 
             prom.OnSuccessEvent +=
                 (x) =>
@@ -69,8 +69,8 @@ namespace AssetPromiseKeeper_AssetBundle_Tests
         [UnityTest]
         public IEnumerator AnyAssetIsLoadedAndThenUnloaded()
         {
-            var prom = new AssetPromise_AssetBundle(BASE_URL, TEST_AB_FILENAME);
-            Asset_AssetBundle loadedAsset = null;
+            var prom = new AssetPromise_AB(BASE_URL, TEST_AB_FILENAME);
+            Asset_AB loadedAsset = null;
 
 
             prom.OnSuccessEvent +=
@@ -106,8 +106,8 @@ namespace AssetPromiseKeeper_AssetBundle_Tests
         [UnityTest]
         public IEnumerator ForgetIsCalledWhileAssetIsBeingLoaded()
         {
-            var prom = new AssetPromise_AssetBundle(BASE_URL, TEST_AB_FILENAME);
-            Asset_AssetBundle asset = null;
+            var prom = new AssetPromise_AB(BASE_URL, TEST_AB_FILENAME);
+            Asset_AB asset = null;
             prom.OnSuccessEvent += (x) => { asset = x; };
 
             keeper.Keep(prom);
@@ -118,7 +118,7 @@ namespace AssetPromiseKeeper_AssetBundle_Tests
 
             Assert.AreEqual(AssetPromiseState.IDLE_AND_EMPTY, prom.state);
 
-            var prom2 = new AssetPromise_AssetBundle(BASE_URL, TEST_AB_FILENAME);
+            var prom2 = new AssetPromise_AB(BASE_URL, TEST_AB_FILENAME);
 
             keeper.Keep(prom2);
 
@@ -137,16 +137,16 @@ namespace AssetPromiseKeeper_AssetBundle_Tests
         public IEnumerator ManyPromisesWithTheSameURLAreLoaded()
         {
             string id = "1";
-            var prom = new AssetPromise_AssetBundle(BASE_URL, TEST_AB_FILENAME);
-            Asset_AssetBundle asset = null;
+            var prom = new AssetPromise_AB(BASE_URL, TEST_AB_FILENAME);
+            Asset_AB asset = null;
             prom.OnSuccessEvent += (x) => { asset = x; };
 
-            var prom2 = new AssetPromise_AssetBundle(BASE_URL, TEST_AB_FILENAME);
-            Asset_AssetBundle asset2 = null;
+            var prom2 = new AssetPromise_AB(BASE_URL, TEST_AB_FILENAME);
+            Asset_AB asset2 = null;
             prom2.OnSuccessEvent += (x) => { asset2 = x; };
 
-            var prom3 = new AssetPromise_AssetBundle(BASE_URL, TEST_AB_FILENAME);
-            Asset_AssetBundle asset3 = null;
+            var prom3 = new AssetPromise_AB(BASE_URL, TEST_AB_FILENAME);
+            Asset_AB asset3 = null;
             prom3.OnSuccessEvent += (x) => { asset3 = x; };
 
             keeper.Keep(prom);

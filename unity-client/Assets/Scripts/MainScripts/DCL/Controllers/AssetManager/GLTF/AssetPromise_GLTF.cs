@@ -1,37 +1,17 @@
-using DCL.Helpers;
-using UnityEngine;
 using UnityGLTF;
 
 namespace DCL
 {
     public class AssetPromise_GLTF : AssetPromise<Asset_GLTF>
     {
-        public enum VisibleFlags
-        {
-            INVISIBLE,
-            VISIBLE_WITHOUT_TRANSITION,
-            VISIBLE_WITH_TRANSITION
-        }
-
-        public class Settings
-        {
-            public VisibleFlags visibleFlags = VisibleFlags.VISIBLE_WITH_TRANSITION;
-            public Shader shaderOverride;
-
-            public Transform parent;
-            public Vector3? initialLocalPosition;
-            public Quaternion? initialLocalRotation;
-            public Vector3? initialLocalScale;
-            public bool forceNewInstance;
-        }
-
-        public Settings settings = new Settings();
+        public AssetPromiseSettings_Rendering settings = new AssetPromiseSettings_Rendering();
         string assetDirectoryPath;
+
+        ContentProvider provider = null;
         public string url { get; private set; }
 
         public bool useIdForMockedMappings => SceneController.i == null || SceneController.i.isDebugMode || SceneController.i.isWssDebugMode;
 
-        ContentProvider provider = null;
         GLTFComponent gltfComponent = null;
         object id = null;
 
@@ -46,43 +26,13 @@ namespace DCL
 
         protected override void OnBeforeLoadOrReuse()
         {
-            Transform assetTransform = asset.container.transform;
-
             asset.container.name = "GLTF: " + url;
-
-            if (settings.parent != null)
-            {
-                assetTransform.SetParent(settings.parent, false);
-                assetTransform.ResetLocalTRS();
-            }
-
-            if (settings.initialLocalPosition.HasValue)
-            {
-                assetTransform.localPosition = settings.initialLocalPosition.Value;
-            }
-
-            if (settings.initialLocalRotation.HasValue)
-            {
-                assetTransform.localRotation = settings.initialLocalRotation.Value;
-            }
-
-            if (settings.initialLocalScale.HasValue)
-            {
-                assetTransform.localScale = settings.initialLocalScale.Value;
-            }
+            settings.ApplyBeforeLoad(asset.container.transform);
         }
 
         protected override void OnAfterLoadOrReuse()
         {
-            if (settings.visibleFlags == VisibleFlags.INVISIBLE)
-            {
-                Renderer[] renderers = asset.container.GetComponentsInChildren<Renderer>(true);
-                for (int i = 0; i < renderers.Length; i++)
-                {
-                    Renderer renderer = renderers[i];
-                    renderer.enabled = false;
-                }
-            }
+            settings.ApplyAfterLoad(asset.container.transform);
         }
 
         internal override object GetId()
@@ -99,8 +49,8 @@ namespace DCL
 
             GLTFComponent.Settings tmpSettings = new GLTFComponent.Settings()
             {
-                useVisualFeedback = settings.visibleFlags == VisibleFlags.VISIBLE_WITH_TRANSITION,
-                initialVisibility = settings.visibleFlags != VisibleFlags.INVISIBLE,
+                useVisualFeedback = settings.visibleFlags == AssetPromiseSettings_Rendering.VisibleFlags.VISIBLE_WITH_TRANSITION,
+                initialVisibility = settings.visibleFlags != AssetPromiseSettings_Rendering.VisibleFlags.INVISIBLE,
                 shaderOverride = settings.shaderOverride
             };
 
@@ -121,7 +71,7 @@ namespace DCL
         protected override void OnReuse(System.Action OnSuccess)
         {
             //NOTE(Brian):  Show the asset using the simple gradient feedback.
-            asset.Show(settings.visibleFlags == VisibleFlags.VISIBLE_WITH_TRANSITION, OnSuccess);
+            asset.Show(settings.visibleFlags == AssetPromiseSettings_Rendering.VisibleFlags.VISIBLE_WITH_TRANSITION, OnSuccess);
         }
 
         protected override bool AddToLibrary()

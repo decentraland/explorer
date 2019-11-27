@@ -12,20 +12,20 @@ namespace AssetPromiseKeeper_AssetBundle_Tests
         {
             string url = "non_existing_url.glb";
 
-            AssetPromise_AssetBundle prom = new AssetPromise_AssetBundle(BASE_URL, url);
-            Asset_AssetBundle asset = null;
+            AssetPromise_AB prom = new AssetPromise_AB(BASE_URL, url);
+            Asset_AB asset = null;
             bool failEventCalled1 = false;
             prom.OnSuccessEvent += (x) => { asset = x; };
             prom.OnFailEvent += (x) => { failEventCalled1 = true; };
 
-            AssetPromise_AssetBundle prom2 = new AssetPromise_AssetBundle(BASE_URL, url);
-            Asset_AssetBundle asset2 = null;
+            AssetPromise_AB prom2 = new AssetPromise_AB(BASE_URL, url);
+            Asset_AB asset2 = null;
             bool failEventCalled2 = false;
             prom2.OnSuccessEvent += (x) => { asset2 = x; };
             prom2.OnFailEvent += (x) => { failEventCalled2 = true; };
 
-            AssetPromise_AssetBundle prom3 = new AssetPromise_AssetBundle(BASE_URL, url);
-            Asset_AssetBundle asset3 = null;
+            AssetPromise_AB prom3 = new AssetPromise_AB(BASE_URL, url);
+            Asset_AB asset3 = null;
             bool failEventCalled3 = false;
             prom3.OnSuccessEvent += (x) => { asset3 = x; };
             prom3.OnFailEvent += (x) => { failEventCalled3 = true; };

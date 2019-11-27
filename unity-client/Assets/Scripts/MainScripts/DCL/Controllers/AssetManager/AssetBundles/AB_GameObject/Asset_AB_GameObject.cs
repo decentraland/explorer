@@ -1,52 +1,20 @@
 using DCL.Helpers;
 using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityGLTF.Cache;
 
 namespace DCL
 {
-    public static class MaterialCachingHelper
+
+    public class Asset_AB_GameObject : Asset_WithPoolableContainer
     {
-        public static void UseCachedMaterials(GameObject obj)
-        {
-            if (obj == null)
-                return;
-
-            foreach (var rend in obj.GetComponentsInChildren<Renderer>(true))
-            {
-                var matList = new List<Material>(1);
-
-                foreach (var mat in rend.sharedMaterials)
-                {
-                    string crc = mat.ComputeCRC() + mat.name;
-
-                    RefCountedMaterialData refCountedMat;
-
-                    if (!PersistentAssetCache.MaterialCacheByCRC.ContainsKey(crc))
-                    {
-                        mat.enableInstancing = true;
-                        PersistentAssetCache.MaterialCacheByCRC.Add(crc, new RefCountedMaterialData(crc, mat));
-                    }
-
-                    refCountedMat = PersistentAssetCache.MaterialCacheByCRC[crc];
-                    refCountedMat.IncreaseRefCount();
-
-                    matList.Add(refCountedMat.material);
-                }
-
-                rend.sharedMaterials = matList.ToArray();
-            }
-        }
-    }
-
-    public class Asset_AssetBundleModel : Asset_AssetBundle
-    {
-        public GameObject container;
+        //NOTE(Brian): Asegurarme de que cuando se cleanupea se propague a los demas siempre usando el AssetPromiseKeeper_AssetBundle
+        //             Si tenemos assets trackeados en ambos keepers van a haber problemas.
+        AssetPromise_AB ownerPromise;
+        public override GameObject container { get; set; }
         public bool alreadyInstantiated;
 
-        public Asset_AssetBundleModel()
+        public Asset_AB_GameObject()
         {
             alreadyInstantiated = false;
             container = new GameObject("AB Container");
@@ -55,10 +23,9 @@ namespace DCL
         public override void Cleanup()
         {
             Object.Destroy(container);
-            base.Cleanup();
         }
 
-        public override void Show(bool useMaterialTransition, System.Action OnFinish)
+        public void Show(System.Action OnFinish)
         {
             if (container == null)
             {
@@ -77,7 +44,7 @@ namespace DCL
 
         public IEnumerator ShowCoroutine(System.Action OnFinish)
         {
-            yield return InstantiateABGameObjects(ownerAssetBundle);
+            yield return InstantiateABGameObjects(ownerPromise.asset.ownerAssetBundle);
             yield return OptimizeMaterials();
 
             //TODO(Brian): search for GameObject asset and instantiate it.
@@ -97,7 +64,7 @@ namespace DCL
                 yield break;
 
             alreadyInstantiated = true;
-            var goList = GetAssetsByExtensions<GameObject>("glb", "ltf");
+            var goList = ownerPromise.asset.GetAssetsByExtensions<GameObject>("glb", "ltf");
 
             for (int i = 0; i < goList.Count; i++)
             {
@@ -105,7 +72,7 @@ namespace DCL
 
                 MaterialCachingHelper.UseCachedMaterials(assetBundleModelGO);
 
-                assetBundleModelGO.name = assetBundleAssetName;
+                assetBundleModelGO.name = ownerPromise.asset.assetBundleAssetName;
 #if UNITY_EDITOR
                 assetBundleModelGO.GetComponentsInChildren<Renderer>().ToList().ForEach(ResetShader);
 #endif

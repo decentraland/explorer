@@ -1,7 +1,10 @@
-﻿namespace DCL
+namespace DCL
 {
     public class Asset_Mock : Asset
     {
+        public override void Cleanup()
+        {
+        }
     }
 
     public class AssetPromiseKeeper_Mock : AssetPromiseKeeper<Asset_Mock, AssetLibrary_Mock, AssetPromise_Mock>

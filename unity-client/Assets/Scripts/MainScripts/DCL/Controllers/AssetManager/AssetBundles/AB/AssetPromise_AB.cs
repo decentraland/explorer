@@ -8,8 +8,7 @@ using UnityEngine.Networking;
 
 namespace DCL
 {
-    public class AssetPromise_AssetBundle<T> : AssetPromise<T>
-        where T : Asset_AssetBundle, new()
+    public class AssetPromise_AB : AssetPromise<Asset_AB>
     {
         public static bool VERBOSE = false;
         static float maxLoadBudgetTime = 0.032f;
@@ -36,7 +35,7 @@ namespace DCL
         readonly protected string hash;
         protected object id = null;
 
-        public AssetPromise_AssetBundle(string contentUrl, string hash)
+        public AssetPromise_AB(string contentUrl, string hash)
         {
             this.contentUrl = contentUrl;
             this.hash = hash;
@@ -53,15 +52,7 @@ namespace DCL
 
         internal override object GetId()
         {
-            if (id == null)
-                id = ComputeId(contentUrl);
-
-            return id;
-        }
-
-        private string ComputeId(string url)
-        {
-            return url;
+            return hash;
         }
 
         protected override void OnCancelLoading()
@@ -94,7 +85,7 @@ namespace DCL
             {
                 foreach (string dep in AssetBundleLoadHelper.dependenciesMap[hash])
                 {
-                    var promise = new AssetPromise_AssetBundle(baseUrl, hash);
+                    var promise = new AssetPromise_AB(baseUrl, hash);
                     AssetPromiseKeeper_AssetBundle.i.Keep(promise);
                     yield return promise;
                 }
@@ -105,6 +96,7 @@ namespace DCL
 
         IEnumerator LoadAssetBundle(string finalUrl, Action OnSuccess, Action OnFail)
         {
+            Debug.Log("req = " + finalUrl);
             using (UnityWebRequest assetBundleRequest = UnityWebRequestAssetBundle.GetAssetBundle(finalUrl))
             {
                 yield return assetBundleRequest.SendWebRequest();
@@ -171,6 +163,7 @@ namespace DCL
 
                 asset.ownerAssetBundle = assetBundle;
                 asset.assetBundleAssetName = assetBundle.name;
+                Debug.Log("Loading bundle... " + assetBundle.name);
             }
 
             OnSuccess?.Invoke();
@@ -179,13 +172,6 @@ namespace DCL
         protected override void OnLoad(Action OnSuccess, Action OnFail)
         {
             loadCoroutine = CoroutineStarter.Start(LoadAssetBundleWithDeps(contentUrl, hash, OnSuccess, OnFail));
-        }
-    }
-
-    public class AssetPromise_AssetBundle : AssetPromise_AssetBundle<Asset_AssetBundle>
-    {
-        public AssetPromise_AssetBundle(string baseUrl, string hash) : base(baseUrl, hash)
-        {
         }
     }
 }

@@ -4,20 +4,20 @@ using UnityEngine;
 
 public class APK_AB_InteractiveTest : MonoBehaviour
 {
-    AssetPromiseKeeper_AssetBundleModel keeper;
-    AssetLibrary_AssetBundleModel library;
+    AssetPromiseKeeper_AB_GameObject keeper;
+    AssetLibrary_AB_GameObject library;
 
-    List<AssetPromise_AssetBundleModel> promiseList = new List<AssetPromise_AssetBundleModel>();
+    List<AssetPromise_AB_GameObject> promiseList = new List<AssetPromise_AB_GameObject>();
 
     void Start()
     {
-        library = new AssetLibrary_AssetBundleModel();
-        keeper = new AssetPromiseKeeper_AssetBundleModel(library);
+        library = new AssetLibrary_AB_GameObject();
+        keeper = new AssetPromiseKeeper_AB_GameObject(library);
     }
 
     void Generate(string url, string hash)
     {
-        AssetPromise_AssetBundleModel promise = new AssetPromise_AssetBundleModel("http://localhost:1338/", url);
+        AssetPromise_AB_GameObject promise = new AssetPromise_AB_GameObject("http://localhost:1338/", url);
 
         Vector3 pos = Vector3.zero;
         pos.x = Random.Range(-10, 10);

@@ -1,4 +1,4 @@
-using DCL;
+﻿using DCL;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -13,14 +13,14 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
         {
             GameObject parent = new GameObject("parent");
 
-            AssetPromise_AssetBundleModel prom = new AssetPromise_AssetBundleModel(BASE_URL, TEST_AB_FILENAME);
+            AssetPromise_AB_GameObject prom = new AssetPromise_AB_GameObject(BASE_URL, TEST_AB_FILENAME);
             prom.settings.parent = parent.transform;
 
-            AssetPromise_AssetBundleModel prom2 = new AssetPromise_AssetBundleModel(BASE_URL, TEST_AB_FILENAME);
+            AssetPromise_AB_GameObject prom2 = new AssetPromise_AB_GameObject(BASE_URL, TEST_AB_FILENAME);
             bool failEventCalled2 = false;
             prom2.OnFailEvent += (x) => { failEventCalled2 = true; };
 
-            AssetPromise_AssetBundleModel prom3 = new AssetPromise_AssetBundleModel(BASE_URL, TEST_AB_FILENAME);
+            AssetPromise_AB_GameObject prom3 = new AssetPromise_AB_GameObject(BASE_URL, TEST_AB_FILENAME);
             bool failEventCalled3 = false;
             prom3.OnFailEvent += (x) => { failEventCalled3 = true; };
 
@@ -56,28 +56,28 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
         [UnityTest]
         public IEnumerator FailCorrectlyWhenGivenWrongURL()
         {
-            var library = new AssetLibrary_AssetBundleModel();
-            var keeper = new AssetPromiseKeeper_AssetBundleModel(library);
+            var library = new AssetLibrary_AB_GameObject();
+            var keeper = new AssetPromiseKeeper_AB_GameObject(library);
 
             //NOTE(Brian): Expect the 404 error
             //LogAssert.Expect(LogType.Error, new Regex("^*.?404"));
 
             string url = "non_existing_url.glb";
 
-            AssetPromise_AssetBundleModel prom = new AssetPromise_AssetBundleModel(BASE_URL, url);
-            Asset_AssetBundleModel asset = null;
+            AssetPromise_AB_GameObject prom = new AssetPromise_AB_GameObject(BASE_URL, url);
+            Asset_AB_GameObject asset = null;
             bool failEventCalled1 = false;
             prom.OnSuccessEvent += (x) => { asset = x; };
             prom.OnFailEvent += (x) => { failEventCalled1 = true; };
 
-            AssetPromise_AssetBundleModel prom2 = new AssetPromise_AssetBundleModel(BASE_URL, url);
-            Asset_AssetBundleModel asset2 = null;
+            AssetPromise_AB_GameObject prom2 = new AssetPromise_AB_GameObject(BASE_URL, url);
+            Asset_AB_GameObject asset2 = null;
             bool failEventCalled2 = false;
             prom2.OnSuccessEvent += (x) => { asset2 = x; };
             prom2.OnFailEvent += (x) => { failEventCalled2 = true; };
 
-            AssetPromise_AssetBundleModel prom3 = new AssetPromise_AssetBundleModel(BASE_URL, url);
-            Asset_AssetBundleModel asset3 = null;
+            AssetPromise_AB_GameObject prom3 = new AssetPromise_AB_GameObject(BASE_URL, url);
+            Asset_AB_GameObject asset3 = null;
             bool failEventCalled3 = false;
             prom3.OnSuccessEvent += (x) => { asset3 = x; };
             prom3.OnFailEvent += (x) => { failEventCalled3 = true; };

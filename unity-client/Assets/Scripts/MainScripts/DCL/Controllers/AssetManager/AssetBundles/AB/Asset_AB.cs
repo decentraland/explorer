@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace DCL
 {
-    public class Asset_AssetBundle : Asset
+    public class Asset_AB : Asset
     {
         public int referenceCount = 0;
         public AssetBundle ownerAssetBundle;
@@ -39,13 +39,13 @@ namespace DCL
             return goList;
         }
 
-        public Asset_AssetBundle()
+        public Asset_AB()
         {
         }
 
         public override object Clone()
         {
-            Asset_AssetBundle result = this.MemberwiseClone() as Asset_AssetBundle;
+            Asset_AB result = this.MemberwiseClone() as Asset_AB;
             return result;
         }
 
@@ -62,6 +62,10 @@ namespace DCL
         {
             if (ownerAssetBundle)
             {
+                Debug.Log("Unloading bundle... " + assetBundleAssetName);
+                assetsByName = null;
+                assetsByExtension = null;
+
                 ownerAssetBundle.Unload(true);
                 ownerAssetBundle = null;
             }

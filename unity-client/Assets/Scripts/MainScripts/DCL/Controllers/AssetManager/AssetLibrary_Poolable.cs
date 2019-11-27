@@ -3,9 +3,16 @@ using UnityEngine;
 
 namespace DCL
 {
-    public class AssetLibrary_AssetBundleModel : AssetLibrary<Asset_AssetBundleModel>
+    public class AssetLibrary_Poolable<AssetType> : AssetLibrary<AssetType>
+        where AssetType : Asset_WithPoolableContainer
     {
-        public Dictionary<object, Asset_AssetBundleModel> masterAssets = new Dictionary<object, Asset_AssetBundleModel>();
+        IPooledObjectInstantiator instantiator;
+        public Dictionary<object, AssetType> masterAssets = new Dictionary<object, AssetType>();
+
+        public AssetLibrary_Poolable(IPooledObjectInstantiator instantiator)
+        {
+            this.instantiator = instantiator;
+        }
 
         private void OnPoolRemoved(Pool pool)
         {
@@ -13,29 +20,33 @@ namespace DCL
             masterAssets.Remove(pool.id);
         }
 
-        public override bool Add(Asset_AssetBundleModel asset)
+        public override bool Add(AssetType asset)
         {
-            if (asset == null || asset.container == null)
+            if (asset == null)
             {
-                Debug.LogWarning("asset == null or asset.container == null? This shouldn't happen.");
+                Debug.LogError("asset == null? This shouldn't happen");
                 return false;
             }
 
             if (!masterAssets.ContainsKey(asset.id))
                 masterAssets.Add(asset.id, asset);
 
-            Pool pool = PoolManager.i.AddPool(asset.id, asset.container);
+            Pool pool = PoolManager.i.AddPool(asset.id, asset.container, instantiator);
 
             pool.OnCleanup -= OnPoolRemoved;
             pool.OnCleanup += OnPoolRemoved;
+
+            if (asset.container == null)
+                return false;
+
             return true;
         }
 
-        public override Asset_AssetBundleModel Get(object id)
+        public override AssetType Get(object id)
         {
             if (Contains(id))
             {
-                Asset_AssetBundleModel clone = masterAssets[id].Clone() as Asset_AssetBundleModel;
+                AssetType clone = masterAssets[id].Clone() as AssetType;
 
                 if (PoolManager.i.ContainsPool(clone.id))
                 {
@@ -53,15 +64,15 @@ namespace DCL
             return null;
         }
 
-        public Asset_AssetBundleModel GetCopyFromOriginal(object id)
+        public AssetType GetCopyFromOriginal(object id)
         {
             if (Contains(id))
             {
-                Asset_AssetBundleModel clone = masterAssets[id].Clone() as Asset_AssetBundleModel;
+                AssetType clone = masterAssets[id].Clone() as AssetType;
 
                 if (PoolManager.i.ContainsPool(clone.id))
                 {
-                    clone.container = PoolManager.i.GetPool(id).Instantiate().gameObject;
+                    clone.container = PoolManager.i.GetPool(id).InstantiateAsOriginal();
                 }
                 else
                 {
@@ -75,7 +86,7 @@ namespace DCL
             return null;
         }
 
-        public override void Release(Asset_AssetBundleModel asset)
+        public override void Release(AssetType asset)
         {
             if (asset == null)
             {
@@ -94,7 +105,7 @@ namespace DCL
             return masterAssets.ContainsKey(id);
         }
 
-        public override bool Contains(Asset_AssetBundleModel asset)
+        public override bool Contains(AssetType asset)
         {
             if (asset == null)
                 return false;
@@ -104,6 +115,11 @@ namespace DCL
 
         public override void Cleanup()
         {
+            foreach (var kvp in masterAssets)
+            {
+                kvp.Value.Cleanup();
+            }
+
             masterAssets.Clear();
         }
     }

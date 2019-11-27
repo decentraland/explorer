@@ -12,8 +12,8 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
         [UnityTest]
         public IEnumerator BeSetupCorrectlyAfterLoad()
         {
-            var prom = new AssetPromise_AssetBundleModel(BASE_URL, TEST_AB_FILENAME);
-            Asset_AssetBundleModel loadedAsset = null;
+            var prom = new AssetPromise_AB_GameObject(BASE_URL, TEST_AB_FILENAME);
+            Asset_AB_GameObject loadedAsset = null;
 
             prom.OnSuccessEvent +=
                 (x) =>
@@ -55,7 +55,7 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
         [UnityTest]
         public IEnumerator ForceNewInstanceIsOff()
         {
-            var prom = new AssetPromise_AssetBundleModel(BASE_URL, TEST_AB_FILENAME);
+            var prom = new AssetPromise_AB_GameObject(BASE_URL, TEST_AB_FILENAME);
             prom.settings.forceNewInstance = false;
             keeper.Keep(prom);
             yield return prom;
@@ -71,7 +71,7 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
 
             for (int i = 0; i < 10; i++)
             {
-                var prom = new AssetPromise_AssetBundleModel(BASE_URL, TEST_AB_FILENAME);
+                var prom = new AssetPromise_AB_GameObject(BASE_URL, TEST_AB_FILENAME);
                 prom.settings.forceNewInstance = false;
                 keeper.Keep(prom);
                 yield return prom;
@@ -85,7 +85,7 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
         [UnityTest]
         public IEnumerator ForceNewInstanceIsOn()
         {
-            var prom = new AssetPromise_AssetBundleModel(BASE_URL, TEST_AB_FILENAME);
+            var prom = new AssetPromise_AB_GameObject(BASE_URL, TEST_AB_FILENAME);
             prom.settings.forceNewInstance = true;
             keeper.Keep(prom);
             yield return prom;
@@ -101,7 +101,7 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
 
             for (int i = 0; i < 10; i++)
             {
-                var prom = new AssetPromise_AssetBundleModel(BASE_URL, TEST_AB_FILENAME);
+                var prom = new AssetPromise_AB_GameObject(BASE_URL, TEST_AB_FILENAME);
                 prom.settings.forceNewInstance = true;
                 keeper.Keep(prom);
                 yield return prom;

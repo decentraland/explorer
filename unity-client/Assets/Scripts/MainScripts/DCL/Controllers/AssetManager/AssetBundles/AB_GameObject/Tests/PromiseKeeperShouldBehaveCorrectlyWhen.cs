@@ -11,7 +11,7 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
         [UnityTest]
         public IEnumerator AnyAssetIsDestroyedWhileLoading()
         {
-            AssetPromise_AssetBundleModel prom = new AssetPromise_AssetBundleModel(BASE_URL, TEST_AB_FILENAME);
+            AssetPromise_AB_GameObject prom = new AssetPromise_AB_GameObject(BASE_URL, TEST_AB_FILENAME);
 
             bool calledFail = false;
 
@@ -35,7 +35,7 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
         [UnityTest]
         public IEnumerator ForgetIsCalledWhileAssetIsBeingReused()
         {
-            AssetPromise_AssetBundleModel prom = new AssetPromise_AssetBundleModel(BASE_URL, TEST_AB_FILENAME);
+            AssetPromise_AB_GameObject prom = new AssetPromise_AB_GameObject(BASE_URL, TEST_AB_FILENAME);
             bool calledFail = false;
 
             keeper.Keep(prom);
@@ -43,7 +43,7 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
 
             prom.asset.container.name = "First GLTF";
 
-            AssetPromise_AssetBundleModel prom2 = new AssetPromise_AssetBundleModel(BASE_URL, TEST_AB_FILENAME);
+            AssetPromise_AB_GameObject prom2 = new AssetPromise_AB_GameObject(BASE_URL, TEST_AB_FILENAME);
 
             prom2.OnFailEvent +=
                 (x) =>
@@ -71,7 +71,7 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
         [UnityTest]
         public IEnumerator KeepAndForgetIsCalledInSingleFrameWhenLoadingAsset()
         {
-            AssetPromise_AssetBundleModel prom = new AssetPromise_AssetBundleModel(BASE_URL, TEST_AB_FILENAME);
+            AssetPromise_AB_GameObject prom = new AssetPromise_AB_GameObject(BASE_URL, TEST_AB_FILENAME);
             bool calledSuccess = false;
             bool calledFail = false;
 
@@ -102,8 +102,8 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
         [UnityTest]
         public IEnumerator KeepAndForgetIsCalledInSingleFrameWhenReusingAsset()
         {
-            AssetPromise_AssetBundleModel prom = new AssetPromise_AssetBundleModel(BASE_URL, TEST_AB_FILENAME);
-            Asset_AssetBundleModel loadedAsset = null;
+            AssetPromise_AB_GameObject prom = new AssetPromise_AB_GameObject(BASE_URL, TEST_AB_FILENAME);
+            Asset_AB_GameObject loadedAsset = null;
 
             prom.OnSuccessEvent +=
                 (x) =>
@@ -125,8 +125,8 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
         [UnityTest]
         public IEnumerator AnyAssetIsLoadedAndThenUnloaded()
         {
-            AssetPromise_AssetBundleModel prom = new AssetPromise_AssetBundleModel(BASE_URL, TEST_AB_FILENAME);
-            Asset_AssetBundleModel loadedAsset = null;
+            AssetPromise_AB_GameObject prom = new AssetPromise_AB_GameObject(BASE_URL, TEST_AB_FILENAME);
+            Asset_AB_GameObject loadedAsset = null;
 
 
             prom.OnSuccessEvent +=
@@ -161,8 +161,8 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
         [UnityTest]
         public IEnumerator ForgetIsCalledWhileAssetIsBeingLoaded()
         {
-            AssetPromise_AssetBundleModel prom = new AssetPromise_AssetBundleModel(BASE_URL, TEST_AB_FILENAME);
-            Asset_AssetBundleModel asset = null;
+            AssetPromise_AB_GameObject prom = new AssetPromise_AB_GameObject(BASE_URL, TEST_AB_FILENAME);
+            Asset_AB_GameObject asset = null;
             prom.OnSuccessEvent += (x) => { asset = x; };
 
             keeper.Keep(prom);
@@ -173,7 +173,7 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
 
             Assert.AreEqual(AssetPromiseState.IDLE_AND_EMPTY, prom.state);
 
-            AssetPromise_AssetBundleModel prom2 = new AssetPromise_AssetBundleModel(BASE_URL, TEST_AB_FILENAME);
+            AssetPromise_AB_GameObject prom2 = new AssetPromise_AB_GameObject(BASE_URL, TEST_AB_FILENAME);
 
             keeper.Keep(prom2);
 
@@ -193,16 +193,16 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
         [UnityTest]
         public IEnumerator ManyPromisesWithTheSameURLAreLoaded()
         {
-            AssetPromise_AssetBundleModel prom = new AssetPromise_AssetBundleModel(BASE_URL, TEST_AB_FILENAME);
-            Asset_AssetBundleModel asset = null;
+            AssetPromise_AB_GameObject prom = new AssetPromise_AB_GameObject(BASE_URL, TEST_AB_FILENAME);
+            Asset_AB_GameObject asset = null;
             prom.OnSuccessEvent += (x) => { asset = x; };
 
-            AssetPromise_AssetBundleModel prom2 = new AssetPromise_AssetBundleModel(BASE_URL, TEST_AB_FILENAME);
-            Asset_AssetBundleModel asset2 = null;
+            AssetPromise_AB_GameObject prom2 = new AssetPromise_AB_GameObject(BASE_URL, TEST_AB_FILENAME);
+            Asset_AB_GameObject asset2 = null;
             prom2.OnSuccessEvent += (x) => { asset2 = x; };
 
-            AssetPromise_AssetBundleModel prom3 = new AssetPromise_AssetBundleModel(BASE_URL, TEST_AB_FILENAME);
-            Asset_AssetBundleModel asset3 = null;
+            AssetPromise_AB_GameObject prom3 = new AssetPromise_AB_GameObject(BASE_URL, TEST_AB_FILENAME);
+            Asset_AB_GameObject asset3 = null;
             prom3.OnSuccessEvent += (x) => { asset3 = x; };
 
             keeper.Keep(prom);

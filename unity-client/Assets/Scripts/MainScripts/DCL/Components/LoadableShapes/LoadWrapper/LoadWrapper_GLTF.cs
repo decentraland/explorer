@@ -21,7 +21,7 @@ namespace DCL.Components
         public GameObject container;
 
         AssetPromise_GLTF gltfPromise;
-        AssetPromise_AssetBundleModel abPromise;
+        AssetPromise_AB_GameObject abPromise;
 
         string assetDirectoryPath;
 
@@ -59,7 +59,7 @@ namespace DCL.Components
         {
             if (abPromise != null)
             {
-                AssetPromiseKeeper_AssetBundleModel.i.Forget(abPromise);
+                AssetPromiseKeeper_AB_GameObject.i.Forget(abPromise);
 
                 if (VERBOSE)
                     Debug.Log("Forgetting not null promise...");
@@ -73,13 +73,13 @@ namespace DCL.Components
                 return;
             }
 
-            abPromise = new AssetPromise_AssetBundleModel(bundlesBaseUrl, targetUrl);
+            abPromise = new AssetPromise_AB_GameObject(bundlesBaseUrl, targetUrl);
             abPromise.settings.parent = transform;
 
             abPromise.OnSuccessEvent += (x) => OnSuccessWrapper(x, OnSuccess);
             abPromise.OnFailEvent += (x) => OnFailWrapper(x, OnFail);
 
-            AssetPromiseKeeper_AssetBundleModel.i.Keep(abPromise);
+            AssetPromiseKeeper_AB_GameObject.i.Keep(abPromise);
         }
 
         void LoadGltf(string targetUrl, Action<LoadWrapper> OnSuccess, Action<LoadWrapper> OnFail)
@@ -101,14 +101,14 @@ namespace DCL.Components
 
             if (initialVisibility == false)
             {
-                gltfPromise.settings.visibleFlags = AssetPromise_GLTF.VisibleFlags.INVISIBLE;
+                gltfPromise.settings.visibleFlags = AssetPromiseSettings_Rendering.VisibleFlags.INVISIBLE;
             }
             else
             {
                 if (useVisualFeedback)
-                    gltfPromise.settings.visibleFlags = AssetPromise_GLTF.VisibleFlags.VISIBLE_WITH_TRANSITION;
+                    gltfPromise.settings.visibleFlags = AssetPromiseSettings_Rendering.VisibleFlags.VISIBLE_WITH_TRANSITION;
                 else
-                    gltfPromise.settings.visibleFlags = AssetPromise_GLTF.VisibleFlags.VISIBLE_WITHOUT_TRANSITION;
+                    gltfPromise.settings.visibleFlags = AssetPromiseSettings_Rendering.VisibleFlags.VISIBLE_WITHOUT_TRANSITION;
             }
 
             gltfPromise.OnSuccessEvent += (x) => OnSuccessWrapper(x, OnSuccess);
@@ -158,7 +158,7 @@ namespace DCL.Components
         {
             this.entity.OnCleanupEvent -= OnEntityCleanup;
             AssetPromiseKeeper_GLTF.i.Forget(gltfPromise);
-            AssetPromiseKeeper_AssetBundleModel.i.Forget(abPromise);
+            AssetPromiseKeeper_AB_GameObject.i.Forget(abPromise);
         }
 
         public void OnDestroy()

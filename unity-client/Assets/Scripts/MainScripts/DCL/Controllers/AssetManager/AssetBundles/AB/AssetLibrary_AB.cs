@@ -2,11 +2,11 @@ using System.Collections.Generic;
 
 namespace DCL
 {
-    public class AssetLibrary_AssetBundle : AssetLibrary<Asset_AssetBundle>
+    public class AssetLibrary_AB : AssetLibrary<Asset_AB>
     {
-        public Dictionary<object, Asset_AssetBundle> masterAssets = new Dictionary<object, Asset_AssetBundle>();
+        public Dictionary<object, Asset_AB> masterAssets = new Dictionary<object, Asset_AB>();
 
-        public override bool Add(Asset_AssetBundle asset)
+        public override bool Add(Asset_AB asset)
         {
             if (asset == null || masterAssets.ContainsKey(asset.id))
                 return true;
@@ -24,7 +24,7 @@ namespace DCL
             return masterAssets.ContainsKey(id);
         }
 
-        public override bool Contains(Asset_AssetBundle asset)
+        public override bool Contains(Asset_AB asset)
         {
             if (asset == null)
                 return false;
@@ -32,7 +32,7 @@ namespace DCL
             return masterAssets.ContainsKey(asset.id);
         }
 
-        public override Asset_AssetBundle Get(object id)
+        public override Asset_AB Get(object id)
         {
             if (!Contains(id))
                 return null;
@@ -41,7 +41,7 @@ namespace DCL
             return masterAssets[id];
         }
 
-        public override void Release(Asset_AssetBundle asset)
+        public override void Release(Asset_AB asset)
         {
             asset.referenceCount--;
 

@@ -1,24 +1,24 @@
-using DCL;
+﻿using DCL;
 using DCL.Helpers;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace AssetPromiseKeeper_AssetBundleModel_Tests
+namespace AssetPromiseKeeper_AssetBundle_Tests
 {
-    public class AssetBundleModel_TestsBase
+    public class AssetBundle_TestsBase
     {
         protected readonly static string TEST_AB_FILENAME = "QmYACL8SnbXEonXQeRHdWYbfm8vxvaFAWnsLHUaDG4ABp5";
         protected readonly static string BASE_URL = Utils.GetTestsAssetsPath() + "/AssetBundles/";
 
-        protected AssetLibrary_AssetBundleModel library;
-        protected AssetPromiseKeeper_AssetBundleModel keeper;
+        protected AssetLibrary_AB library;
+        protected AssetPromiseKeeper_AssetBundle keeper;
 
         [UnitySetUp]
         public IEnumerator SetUp()
         {
-            library = new AssetLibrary_AssetBundleModel();
-            keeper = new AssetPromiseKeeper_AssetBundleModel(library);
+            library = new AssetLibrary_AB();
+            keeper = new AssetPromiseKeeper_AssetBundle(library);
             yield break;
         }
 
