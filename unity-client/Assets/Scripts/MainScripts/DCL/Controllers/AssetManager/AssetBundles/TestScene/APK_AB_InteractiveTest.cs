@@ -5,14 +5,11 @@ using UnityEngine;
 public class APK_AB_InteractiveTest : MonoBehaviour
 {
     AssetPromiseKeeper_AB_GameObject keeper;
-    AssetLibrary_AB_GameObject library;
-
     List<AssetPromise_AB_GameObject> promiseList = new List<AssetPromise_AB_GameObject>();
 
     void Start()
     {
-        library = new AssetLibrary_AB_GameObject();
-        keeper = new AssetPromiseKeeper_AB_GameObject(library);
+        keeper = new AssetPromiseKeeper_AB_GameObject();
     }
 
     void Generate(string url, string hash)

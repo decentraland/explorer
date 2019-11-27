@@ -49,19 +49,13 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
             Assert.IsTrue(prom2.asset != null);
             Assert.IsTrue(prom3.asset != null);
 
-            Assert.IsTrue(library.Contains(prom.asset));
-            Assert.AreEqual(1, library.masterAssets.Count);
+            Assert.IsTrue(keeper.library.Contains(prom.asset));
+            Assert.AreEqual(1, keeper.library.masterAssets.Count);
         }
 
         [UnityTest]
         public IEnumerator FailCorrectlyWhenGivenWrongURL()
         {
-            var library = new AssetLibrary_AB_GameObject();
-            var keeper = new AssetPromiseKeeper_AB_GameObject(library);
-
-            //NOTE(Brian): Expect the 404 error
-            //LogAssert.Expect(LogType.Error, new Regex("^*.?404"));
-
             string url = "non_existing_url.glb";
 
             AssetPromise_AB_GameObject prom = new AssetPromise_AB_GameObject(BASE_URL, url);
@@ -102,8 +96,8 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
             Assert.IsFalse(asset2 != null);
             Assert.IsFalse(asset3 != null);
 
-            Assert.IsFalse(library.Contains(asset));
-            Assert.AreNotEqual(1, library.masterAssets.Count);
+            Assert.IsFalse(keeper.library.Contains(asset));
+            Assert.AreNotEqual(1, keeper.library.masterAssets.Count);
         }
     }
 }

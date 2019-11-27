@@ -142,8 +142,8 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
 
             Assert.IsTrue(loadedAsset != null);
             Assert.IsTrue(loadedAsset.isInstantiated);
-            Assert.IsTrue(library.Contains(loadedAsset));
-            Assert.AreEqual(1, library.masterAssets.Count);
+            Assert.IsTrue(keeper.library.Contains(loadedAsset));
+            Assert.AreEqual(1, keeper.library.masterAssets.Count);
 
             keeper.Forget(prom);
 
@@ -153,8 +153,8 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
 
             yield return MemoryManager.i.CleanupPoolsIfNeeded(forceCleanup: true);
 
-            Assert.IsTrue(!library.Contains(loadedAsset.id));
-            Assert.AreEqual(0, library.masterAssets.Count);
+            Assert.IsTrue(!keeper.library.Contains(loadedAsset.id));
+            Assert.AreEqual(0, keeper.library.masterAssets.Count);
         }
 
         [UnityTest]
@@ -185,8 +185,8 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
             yield return MemoryManager.i.CleanupPoolsIfNeeded(forceCleanup: true);
 
             Assert.IsTrue(asset.container == null);
-            Assert.IsTrue(!library.Contains(asset));
-            Assert.AreEqual(0, library.masterAssets.Count);
+            Assert.IsTrue(!keeper.library.Contains(asset));
+            Assert.AreEqual(0, keeper.library.masterAssets.Count);
         }
 
         [UnityTest]
@@ -229,8 +229,8 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
             Assert.IsTrue(asset != asset3);
             Assert.IsTrue(asset2 != asset3);
 
-            Assert.IsTrue(library.Contains(asset));
-            Assert.AreEqual(1, library.masterAssets.Count);
+            Assert.IsTrue(keeper.library.Contains(asset));
+            Assert.AreEqual(1, keeper.library.masterAssets.Count);
         }
     }
 }

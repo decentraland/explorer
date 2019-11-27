@@ -48,8 +48,8 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
             Assert.AreEqual(initialScale.ToString(), loadedAsset.container.transform.localScale.ToString(), "initial scale not set correctly!");
 
             Assert.IsTrue(loadedAsset != null);
-            Assert.IsTrue(library.Contains(loadedAsset));
-            Assert.AreEqual(1, library.masterAssets.Count);
+            Assert.IsTrue(keeper.library.Contains(loadedAsset));
+            Assert.AreEqual(1, keeper.library.masterAssets.Count);
         }
 
         [UnityTest]
