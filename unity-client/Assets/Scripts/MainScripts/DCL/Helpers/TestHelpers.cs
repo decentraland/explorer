@@ -90,7 +90,8 @@ namespace DCL.Helpers
 
         protected virtual IEnumerator InitScene(bool usesWebServer = false, bool spawnCharController = true, bool spawnTestScene = true, bool spawnUIScene = true, bool debugMode = false)
         {
-            yield return InitUnityScene("MainTest");
+            if (SceneController.i == null)
+                yield return InitUnityScene("MainTest");
 
             if (debugMode)
                 SceneController.i.SetDebug();
