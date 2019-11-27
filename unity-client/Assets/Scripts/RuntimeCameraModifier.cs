@@ -24,6 +24,7 @@ public class RuntimeCameraModifier : MonoBehaviour
     public Text foVText;
 
     public Button[] presetButtons;
+    public Button currentButton;
     private ThirdPersonCameraConfigSO[] presetConfigs;
     private ThirdPersonCameraConfigSO currentPresetConfig;
 
@@ -34,11 +35,20 @@ public class RuntimeCameraModifier : MonoBehaviour
         {
             presetConfigs[i] = ScriptableObject.CreateInstance<ThirdPersonCameraConfigSO>();
             presetConfigs[i].Set(config);
-            if (currentPresetConfig == null) currentPresetConfig = presetConfigs[i];
+            if (currentPresetConfig == null)
+            {
+                currentPresetConfig = presetConfigs[i];
+                currentButton = presetButtons[i];
+                currentButton.image.color = Color.green;
+            }
             int index = i;
             presetButtons[i].onClick.AddListener(() =>
             {
                 currentPresetConfig = presetConfigs[index];
+                if(currentButton != null)
+                    currentButton.image.color = Color.white;
+                currentButton = presetButtons[index];
+                currentButton.image.color = Color.green;
                 UpdateSliders();
                 UpdateRealConfig();
             });
