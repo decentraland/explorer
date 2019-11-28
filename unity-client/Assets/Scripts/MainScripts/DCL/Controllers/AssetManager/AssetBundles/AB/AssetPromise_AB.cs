@@ -11,11 +11,14 @@ namespace DCL
     public class AssetPromise_AB : AssetPromise_WithUrl<Asset_AB>
     {
         public static bool VERBOSE = false;
+
         static float maxLoadBudgetTime = 0.032f;
         static float currentLoadBudgetTime = 0;
         public static bool limitTimeBudget = false;
 
         Coroutine loadCoroutine;
+        static HashSet<string> failedRequestUrls = new HashSet<string>();
+
 
         static Dictionary<string, int> loadOrderByExtension = new Dictionary<string, int>()
         {
@@ -91,8 +94,15 @@ namespace DCL
             yield return LoadAssetBundle(baseUrl + hash, OnSuccess, OnFail);
         }
 
+
         IEnumerator LoadAssetBundle(string finalUrl, Action OnSuccess, Action OnFail)
         {
+            if (failedRequestUrls.Contains(finalUrl))
+            {
+                OnFail?.Invoke();
+                yield break;
+            }
+
             using (UnityWebRequest assetBundleRequest = UnityWebRequestAssetBundle.GetAssetBundle(finalUrl))
             {
                 yield return assetBundleRequest.SendWebRequest();
@@ -100,7 +110,10 @@ namespace DCL
                 if (!assetBundleRequest.WebRequestSucceded())
                 {
                     Debug.Log($"request failed? {assetBundleRequest.error} ... {finalUrl}");
+                    assetBundleRequest.Abort();
                     OnFail?.Invoke();
+
+                    failedRequestUrls.Add(finalUrl);
                     yield break;
                 }
 
@@ -109,12 +122,16 @@ namespace DCL
                 if (assetBundle == null)
                 {
                     Debug.Log("ab == null?");
+                    assetBundleRequest.Abort();
                     OnFail?.Invoke();
+
+                    failedRequestUrls.Add(finalUrl);
                     yield break;
                 }
 
                 string[] assets = assetBundle.GetAllAssetNames();
                 List<string> assetsToLoad = new List<string>();
+
                 assetsToLoad = assets.OrderBy(
                     (x) =>
                     {

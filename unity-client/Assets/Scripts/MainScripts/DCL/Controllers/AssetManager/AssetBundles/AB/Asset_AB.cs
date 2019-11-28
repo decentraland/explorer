@@ -49,11 +49,6 @@ namespace DCL
             return result;
         }
 
-        //public virtual void Show(System.Action OnFinish)
-        //{
-        //    OnFinish?.Invoke();
-        //}
-
         public void CancelShow()
         {
         }
@@ -62,7 +57,6 @@ namespace DCL
         {
             if (ownerAssetBundle)
             {
-                Debug.Log("Unloading bundle... " + assetBundleAssetName);
                 assetsByName = null;
                 assetsByExtension = null;
 
