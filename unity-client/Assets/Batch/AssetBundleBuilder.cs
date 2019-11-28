@@ -163,7 +163,7 @@ namespace DCL
         }
 
 
-        internal void DumpSceneTextures(MappingPair[] rawContents)
+        private void DumpSceneTextures(MappingPair[] rawContents)
         {
             var hashToTexturePair = AssetBundleBuilderUtils.FilterExtensions(rawContents, AssetBundleBuilderConfig.textureExtensions);
 
@@ -238,8 +238,58 @@ namespace DCL
             }
         }
 
+        public bool DownloadAndConvertAssets(MappingPair[] rawContents)
+        {
+            startTime = Time.realtimeSinceStartup;
 
-        internal bool DumpSceneAssets(MappingPair[] rawContents)
+            InitializeDirectoryPaths(false);
+
+            float timer = Time.realtimeSinceStartup;
+            bool shouldGenerateAssetBundles = true;
+            EditorApplication.CallbackFunction updateLoop = null;
+
+            updateLoop = () =>
+            {
+                try
+                {
+                    //NOTE(Brian): We have to check this because the ImportAsset for GLTFs is not synchronous, and must execute some delayed calls
+                    //             after the import asset finished. Therefore, we have to make sure those calls finished before continuing.
+                    if (!GLTFImporter.finishedImporting || Time.realtimeSinceStartup - timer > 60)
+                        return;
+
+                    AssetDatabase.Refresh();
+
+                    PopulateLowercaseMappings(rawContents);
+
+                    shouldGenerateAssetBundles |= DumpSceneAssets(rawContents);
+
+                    if (!Directory.Exists(finalAssetBundlePath))
+                        Directory.CreateDirectory(finalAssetBundlePath);
+
+                    EditorApplication.update -= updateLoop;
+
+                    if (shouldGenerateAssetBundles)
+                    {
+                        AssetBundleManifest manifest;
+
+                        if (BuildAssetBundles(out manifest))
+                        {
+                            FixupFilenames(manifest.GetAllAssetBundles());
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError(e.Message);
+                    EditorApplication.update -= updateLoop;
+                }
+            };
+
+            EditorApplication.update += updateLoop;
+            return true;
+        }
+
+        private bool DumpSceneAssets(MappingPair[] rawContents)
         {
             var hashToGltfPair = AssetBundleBuilderUtils.FilterExtensions(rawContents, AssetBundleBuilderConfig.gltfExtensions);
             var hashToBufferPair = AssetBundleBuilderUtils.FilterExtensions(rawContents, AssetBundleBuilderConfig.bufferExtensions);
