@@ -14,7 +14,6 @@ namespace Tests
 {
     public class CharacterControllerTests : TestsBase
     {
-        // TODO: Find a way to run this test on Unity Cloud Build, even though it passes locally, it fails on timeout in Unity Cloud Build
         [UnityTest]
         public IEnumerator CharacterTeleportReposition()
         {
@@ -412,7 +411,7 @@ namespace Tests
 
             // Accelerate platform
             lerpTime = 0f;
-            lerpSpeed = 10f;
+            lerpSpeed = 15f;
             initialRotation = platformTransform.rotation;
             targetRotation = Quaternion.Euler(0, 360f, 0f);
             while (lerpTime < 1f)
