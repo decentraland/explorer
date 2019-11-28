@@ -99,7 +99,6 @@ namespace DCL
             }
 
             PoolManager.i.Release(asset.container);
-            masterAssets.Remove(asset.id);
         }
 
         public override bool Contains(object id)

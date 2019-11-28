@@ -146,6 +146,9 @@ namespace DCL
 
                 foreach (string assetName in assetsToLoad)
                 {
+                    if (asset == null)
+                        break;
+
                     float time = Time.realtimeSinceStartup;
 
 #if UNITY_EDITOR
