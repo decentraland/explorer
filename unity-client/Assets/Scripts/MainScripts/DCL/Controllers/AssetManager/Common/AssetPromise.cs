@@ -76,7 +76,7 @@ namespace DCL
 
         internal virtual void Load()
         {
-            if (state == AssetPromiseState.LOADING)
+            if (state == AssetPromiseState.LOADING || state == AssetPromiseState.FINISHED)
                 return;
 
             object id = GetId();
