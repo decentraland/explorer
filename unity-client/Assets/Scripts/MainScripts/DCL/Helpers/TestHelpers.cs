@@ -678,12 +678,7 @@ namespace DCL.Helpers
 
         public static void UpdateShape(ParcelScene scene, string componentId, string model)
         {
-            scene.SharedComponentUpdate(componentId,
-                JsonUtility.ToJson(new DCL.Models.SharedComponentUpdateMessage
-                {
-                    id = componentId,
-                    json = model
-                }));
+            scene.SharedComponentUpdate(componentId, model);
         }
 
         static object GetRandomValueForType(Type t)
