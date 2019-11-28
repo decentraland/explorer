@@ -46,11 +46,12 @@ namespace AvatarEditorHUD_Tests
             controller = new AvatarEditorHUDController_Mock(userProfile, catalog);
         }
 
-        [TearDown]
+        // If we do the cleanup after every test, some tests fail on a null reference exception because AvatarEditorHUDView.loadingPanel gets destroyed.
+        /*[TearDown]
         public void TearDown()
         {
             controller.CleanUp();
-        }
+        }*/
 
         [Test]
         public void AutofillMandatoryCategoriesIfNotProvided()
