@@ -6,6 +6,7 @@ namespace DCL
     public enum AssetPromiseState
     {
         IDLE_AND_EMPTY,
+        WAITING,
         LOADING,
         FINISHED
     }
@@ -33,7 +34,7 @@ namespace DCL
         public event Action<AssetType> OnSuccessEvent;
         public event Action<AssetType> OnFailEvent;
 
-        public override bool keepWaiting { get { return state == AssetPromiseState.LOADING; } }
+        public override bool keepWaiting { get { return state == AssetPromiseState.LOADING || state == AssetPromiseState.WAITING; } }
 
         public void ClearEvents()
         {
@@ -45,6 +46,15 @@ namespace DCL
         {
             OnPreFinishEvent = null;
             CallAndClearEvents(false);
+        }
+
+        internal void SetWaitingState()
+        {
+            //TODO(Brian): This is made to make the promises yielding not return automatically when the promise is blocked.
+            //
+            //             Managing the blocked promises handling entirely in the AssetPromiseKeeper is coupling the code too much.
+            //             It's better to have a "WaitForPromise" method here and lighten the APK logic a bit. For now this makes the trick.
+            state = AssetPromiseState.WAITING;
         }
 
         void CallAndClearEvents(bool isSuccess = true)
@@ -66,12 +76,11 @@ namespace DCL
 
         internal virtual void Load()
         {
-            if (state != AssetPromiseState.IDLE_AND_EMPTY)
+            if (state == AssetPromiseState.LOADING)
                 return;
 
             object id = GetId();
             state = AssetPromiseState.LOADING;
-
             // NOTE(Brian): Get existent library element
             if (library.Contains(id))
             {
@@ -112,7 +121,7 @@ namespace DCL
         {
             OnAfterLoadOrReuse();
             state = AssetPromiseState.FINISHED;
-            CallAndClearEvents();
+            CallAndClearEvents(isSuccess: true);
         }
 
 
@@ -126,8 +135,7 @@ namespace DCL
             }
             else
             {
-                state = AssetPromiseState.FINISHED;
-                CallAndClearEvents(isSuccess: false);
+                OnLoadFailure();
             }
         }
 

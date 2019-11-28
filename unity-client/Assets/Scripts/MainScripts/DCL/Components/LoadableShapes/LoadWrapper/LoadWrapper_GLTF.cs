@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -73,7 +73,15 @@ namespace DCL.Components
                 return;
             }
 
-            abPromise = new AssetPromise_AB_GameObject(bundlesBaseUrl, targetUrl);
+            entity.scene.contentProvider.TryGetContentsUrl_Raw(targetUrl, out string hash);
+
+            //if (hash.ToLower() != "qmxkgvfoafwnpdn1zqgkjbrnxtwwbtybdgsdl6lf7tcae2")
+            //{
+            //    OnFail?.Invoke(this);
+            //    return;
+            //}
+
+            abPromise = new AssetPromise_AB_GameObject(bundlesBaseUrl, hash);
             abPromise.settings.parent = transform;
 
             abPromise.OnSuccessEvent += (x) => OnSuccessWrapper(x, OnSuccess);
@@ -125,7 +133,10 @@ namespace DCL.Components
 
             if (VERBOSE)
             {
-                Debug.Log($"Load(): target URL -> {gltfPromise.url}. Failure!");
+                if (gltfPromise != null)
+                    Debug.Log($"Load(): target URL -> {gltfPromise.url}. Failure!");
+                else
+                    Debug.Log($"Load(): target URL -> {abPromise.hash}. Failure!");
             }
 
             OnFail?.Invoke(this);
@@ -135,7 +146,10 @@ namespace DCL.Components
         {
             if (VERBOSE)
             {
-                Debug.Log($"Load(): target URL -> {gltfPromise.url}. Success!");
+                if (gltfPromise != null)
+                    Debug.Log($"Load(): target URL -> {gltfPromise.url}. Success!");
+                else
+                    Debug.Log($"Load(): target URL -> {abPromise.hash}. Success!");
             }
 
             alreadyLoaded = true;

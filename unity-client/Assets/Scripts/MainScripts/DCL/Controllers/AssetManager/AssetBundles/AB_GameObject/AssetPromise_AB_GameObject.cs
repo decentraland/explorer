@@ -17,8 +17,6 @@ namespace DCL
         {
         }
 
-        public AssetPromise_AB_GameObject() { }
-
         protected override void OnLoad(Action OnSuccess, Action OnFail)
         {
             loadingCoroutine = CoroutineStarter.Start(LoadingCoroutine(OnSuccess, OnFail));

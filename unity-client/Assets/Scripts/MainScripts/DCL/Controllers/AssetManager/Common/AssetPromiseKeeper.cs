@@ -83,7 +83,7 @@ namespace DCL
                 masterToBlockedPromises[id].Add(promise);
 
                 blockedPromises.Add(promise);
-
+                promise.SetWaitingState();
                 return promise;
             }
 
@@ -106,7 +106,7 @@ namespace DCL
             if (promise == null)
                 return null;
 
-            if (promise.state == AssetPromiseState.IDLE_AND_EMPTY)
+            if (promise.state != AssetPromiseState.LOADING)
             {
                 CleanPromise(promise);
                 return promise;
@@ -230,7 +230,7 @@ namespace DCL
                 {
                     var blockedPromise = iterator.Current;
 
-                    if (blockedPromise.state == AssetPromiseState.IDLE_AND_EMPTY)
+                    if (blockedPromise.state == AssetPromiseState.WAITING)
                         blockedPromisesToLoad.Add(blockedPromise);
 
                     blockedPromises.Remove(blockedPromise);

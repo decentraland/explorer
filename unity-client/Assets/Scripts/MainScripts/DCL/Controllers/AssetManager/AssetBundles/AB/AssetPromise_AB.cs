@@ -35,14 +35,14 @@ namespace DCL
         {
         }
 
-        public AssetPromise_AB() 
-        {}
 
         protected override bool AddToLibrary()
         {
             if (!library.Add(asset))
+            {
+                Debug.Log("add to library fail?");
                 return false;
-
+            }
             asset = library.Get(asset.id);
             return true;
         }
@@ -82,7 +82,7 @@ namespace DCL
             {
                 foreach (string dep in AssetBundleLoadHelper.dependenciesMap[hash])
                 {
-                    var promise = new AssetPromise_AB(baseUrl, hash);
+                    var promise = new AssetPromise_AB(baseUrl, dep);
                     AssetPromiseKeeper_AB.i.Keep(promise);
                     yield return promise;
                 }
@@ -93,13 +93,13 @@ namespace DCL
 
         IEnumerator LoadAssetBundle(string finalUrl, Action OnSuccess, Action OnFail)
         {
-            Debug.Log("req = " + finalUrl);
             using (UnityWebRequest assetBundleRequest = UnityWebRequestAssetBundle.GetAssetBundle(finalUrl))
             {
                 yield return assetBundleRequest.SendWebRequest();
 
                 if (!assetBundleRequest.WebRequestSucceded())
                 {
+                    Debug.Log($"request failed? {assetBundleRequest.error} ... {finalUrl}");
                     OnFail?.Invoke();
                     yield break;
                 }
@@ -108,6 +108,7 @@ namespace DCL
 
                 if (assetBundle == null)
                 {
+                    Debug.Log("ab == null?");
                     OnFail?.Invoke();
                     yield break;
                 }
@@ -160,7 +161,6 @@ namespace DCL
 
                 asset.ownerAssetBundle = assetBundle;
                 asset.assetBundleAssetName = assetBundle.name;
-                Debug.Log("Loading bundle... " + assetBundle.name);
             }
 
             OnSuccess?.Invoke();
