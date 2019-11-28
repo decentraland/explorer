@@ -6,7 +6,7 @@ namespace Tests
 {
     public class UITestsBase : TestsBase
     {
-        protected override IEnumerator InitScene(bool usesWebServer = false, bool spawnCharController = true, bool spawnTestScene = true, bool spawnUIScene = true, bool debugMode = false)
+        protected override IEnumerator InitScene(bool usesWebServer = false, bool spawnCharController = true, bool spawnTestScene = true, bool spawnUIScene = true, bool debugMode = false, bool reloadUnityScene = true)
         {
             yield return base.InitScene(usesWebServer, spawnCharController, spawnTestScene, spawnUIScene, debugMode);
 

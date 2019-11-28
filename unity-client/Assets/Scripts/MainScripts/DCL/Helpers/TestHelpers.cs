@@ -32,7 +32,7 @@ namespace DCL.Helpers
 
     public class VisualTestsBase : TestsBase
     {
-        protected override IEnumerator InitScene(bool usesWebServer = false, bool spawnCharController = true, bool spawnTestScene = true, bool spawnUIScene = true, bool debugMode = false)
+        protected override IEnumerator InitScene(bool usesWebServer = false, bool spawnCharController = true, bool spawnTestScene = true, bool spawnUIScene = true, bool debugMode = false, bool reloadUnityScene = true)
         {
             yield return InitUnityScene("MainVisualTest");
 
@@ -88,10 +88,12 @@ namespace DCL.Helpers
             }
         }
 
-        protected virtual IEnumerator InitScene(bool usesWebServer = false, bool spawnCharController = true, bool spawnTestScene = true, bool spawnUIScene = true, bool debugMode = false)
+        protected virtual IEnumerator InitScene(bool usesWebServer = false, bool spawnCharController = true, bool spawnTestScene = true, bool spawnUIScene = true, bool debugMode = false, bool reloadUnityScene = true)
         {
-            if (SceneController.i == null)
+            if (SceneController.i == null || reloadUnityScene)
+            {
                 yield return InitUnityScene("MainTest");
+            }
 
             if (debugMode)
                 SceneController.i.SetDebug();

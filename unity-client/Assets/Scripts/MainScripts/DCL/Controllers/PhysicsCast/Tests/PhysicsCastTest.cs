@@ -19,10 +19,10 @@ public class PhysicsCast_Tests : TestsBase
     Vector3 startPos = new Vector3(5, 2, 15);
     bool alreadyInitialized = false;
 
-    protected override IEnumerator InitScene(bool usesWebServer = false, bool spawnCharController = true, bool spawnTestScene = true, bool spawnUIScene = true, bool debugMode = false)
+    protected override IEnumerator InitScene(bool usesWebServer = false, bool spawnCharController = true, bool spawnTestScene = true, bool spawnUIScene = true, bool debugMode = false, bool reloadUnityScene = true)
     {
         if (!alreadyInitialized)
-            yield return base.InitScene(usesWebServer, spawnCharController, spawnTestScene, spawnUIScene, debugMode);
+            yield return base.InitScene(usesWebServer, spawnCharController, spawnTestScene, spawnUIScene, debugMode, reloadUnityScene);
 
         alreadyInitialized = true;
     }

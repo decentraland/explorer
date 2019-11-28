@@ -19,7 +19,7 @@ namespace Tests
         [UnityTest]
         public IEnumerator CreateUIScene()
         {
-            yield return InitScene();
+            yield return InitScene(reloadUnityScene: false);
 
             // Position character inside parcel (0,0)
             TestHelpers.SetCharacterPosition(Vector3.zero);
@@ -63,7 +63,7 @@ namespace Tests
         [UnityTest]
         public IEnumerator ParcelScene_TrackDisposables_AfterInitDone()
         {
-            yield return InitScene();
+            yield return InitScene(reloadUnityScene: false);
             TestHelpers.CreateEntityWithBoxShape(scene, Vector3.zero, true);
             TestHelpers.CreateEntityWithBoxShape(scene, Vector3.zero, true);
             TestHelpers.CreateEntityWithBoxShape(scene, Vector3.zero, true);
@@ -76,7 +76,7 @@ namespace Tests
         [UnityTest]
         public IEnumerator ParcelScene_TrackDisposables_Empty()
         {
-            yield return InitScene();
+            yield return InitScene(reloadUnityScene: false);
 
             Assert.AreEqual(0, scene.disposableNotReadyCount);
         }
@@ -84,7 +84,7 @@ namespace Tests
         [UnityTest]
         public IEnumerator PerformanceLimitControllerTests()
         {
-            yield return InitScene();
+            yield return InitScene(reloadUnityScene: false);
             DCL.Configuration.Environment.DEBUG = true;
 
             sceneController.SetDebug();
@@ -165,7 +165,7 @@ namespace Tests
         [UnityTest]
         public IEnumerator SceneLoading()
         {
-            yield return InitScene(spawnUIScene: false);
+            yield return InitScene(spawnUIScene: false, reloadUnityScene: false);
             DCL.Configuration.Environment.DEBUG = true;
             sceneController.SetDebug();
 
@@ -193,7 +193,8 @@ namespace Tests
             yield return InitScene(usesWebServer: false,
                                    spawnCharController: true,
                                    spawnTestScene: false,
-                                   spawnUIScene: false);
+                                   spawnUIScene: false,
+                                   reloadUnityScene: false);
 
             sceneController.LoadParcelScenes((Resources.Load("TestJSON/SceneLoadingTest") as TextAsset).text);
 
@@ -231,7 +232,7 @@ namespace Tests
         [UnityTest]
         public IEnumerator SeveralParcelsFromJSON()
         {
-            yield return InitScene();
+            yield return InitScene(reloadUnityScene: false);
 
             sceneController = TestHelpers.InitializeSceneController();
 
@@ -279,7 +280,7 @@ namespace Tests
         [UnityTest]
         public IEnumerator PositionParcels()
         {
-            yield return InitScene(spawnUIScene: false);
+            yield return InitScene(spawnUIScene: false, reloadUnityScene: false);
             DCL.Configuration.Environment.DEBUG = true;
             sceneController.SetDebug();
 
@@ -317,7 +318,7 @@ namespace Tests
         [UnityTest]
         public IEnumerator PositionParcels2()
         {
-            yield return InitScene(spawnUIScene: false);
+            yield return InitScene(spawnUIScene: false, reloadUnityScene: false);
             DCL.Configuration.Environment.DEBUG = true;
             sceneController.SetDebug();
 
