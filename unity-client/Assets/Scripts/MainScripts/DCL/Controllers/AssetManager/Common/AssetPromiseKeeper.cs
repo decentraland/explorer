@@ -106,7 +106,7 @@ namespace DCL
             if (promise == null)
                 return null;
 
-            if (promise.state != AssetPromiseState.LOADING)
+            if (promise.state == AssetPromiseState.IDLE_AND_EMPTY || promise.state == AssetPromiseState.WAITING)
             {
                 CleanPromise(promise);
                 return promise;

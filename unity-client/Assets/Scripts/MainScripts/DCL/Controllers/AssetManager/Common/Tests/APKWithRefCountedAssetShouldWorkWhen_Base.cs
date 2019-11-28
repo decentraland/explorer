@@ -110,7 +110,7 @@ namespace AssetPromiseKeeper_Tests
 
             keeper.Keep(prom);
 
-            Assert.IsTrue(prom.state == AssetPromiseState.LOADING);
+            Assert.AreEqual(AssetPromiseState.LOADING, prom.state);
 
             yield return prom;
 
@@ -123,7 +123,7 @@ namespace AssetPromiseKeeper_Tests
 
             yield return prom;
 
-            Assert.IsTrue(prom.state == AssetPromiseState.IDLE_AND_EMPTY);
+            Assert.AreEqual(AssetPromiseState.IDLE_AND_EMPTY, prom.state);
 
             Assert.IsTrue(!keeper.library.Contains(loadedAsset.id));
             Assert.AreEqual(0, keeper.library.masterAssets.Count);
