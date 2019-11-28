@@ -382,6 +382,8 @@ namespace Tests
             var transformModel = new DCLTransform.Model { position = new Vector3(18, 1, 18) };
             TestHelpers.SetEntityTransform(scene, scene.entities[entityId], transformModel);
 
+            // yield return null;
+
             Assert.IsTrue(MeshIsInvalid(scene.entities[childEntityId].meshesInfo));
         }
 
@@ -467,7 +469,7 @@ namespace Tests
             {
                 for (int i = 0; i < meshesInfo.renderers.Length; i++)
                 {
-                    if (meshesInfo.renderers[i].sharedMaterial.name != "InvalidMesh") return false;
+                    if (meshesInfo.renderers[i].sharedMaterial.name != "InvalidSubMesh") return false;
                 }
             }
             else
