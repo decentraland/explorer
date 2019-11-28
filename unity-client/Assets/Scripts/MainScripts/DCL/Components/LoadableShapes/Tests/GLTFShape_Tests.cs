@@ -147,6 +147,8 @@ public class GLTFShape_Tests : TestsBase
 
 
 
+    // NOTE: Since every deployed scene carries compiled core code of the sdk at the moment of deploying, most of them have GLTFs default 'withCollisions' value
+    // different than the new default value, that's why we are forcing the colliders to be ON on EVERY GLTF until that gets fixed, and that's why this test fails.
     [UnityTest]
     [Explicit]
     public IEnumerator CollisionProperty()
