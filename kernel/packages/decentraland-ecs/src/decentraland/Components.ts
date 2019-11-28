@@ -808,7 +808,7 @@ export class OnAnimationEnd extends OnUUIDEvent<'onAnimationEnd'> {
 }
 
 /**
- * @beta
+ * @internal
  */
 @Component('engine.smartItem', CLASS_ID.SMART_ITEM)
 export class SmartItem extends ObservableComponent { }
