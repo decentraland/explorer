@@ -79,11 +79,11 @@ namespace DCL
 
         protected IEnumerator LoadAssetBundleWithDeps(string baseUrl, string hash, Action OnSuccess, Action OnFail)
         {
-            yield return AssetBundleLoadHelper.GetDepMap(baseUrl, hash);
+            yield return DependencyMapLoadHelper.GetDepMap(baseUrl, hash);
 
-            if (AssetBundleLoadHelper.dependenciesMap.ContainsKey(hash))
+            if (DependencyMapLoadHelper.dependenciesMap.ContainsKey(hash))
             {
-                foreach (string dep in AssetBundleLoadHelper.dependenciesMap[hash])
+                foreach (string dep in DependencyMapLoadHelper.dependenciesMap[hash])
                 {
                     var promise = new AssetPromise_AB(baseUrl, dep);
                     AssetPromiseKeeper_AB.i.Keep(promise);
