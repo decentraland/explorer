@@ -1,9 +1,9 @@
-using System.Collections;
 using DCL;
-using UnityEngine;
 using DCL.Helpers;
-using UnityEngine.TestTools;
+using System.Collections;
+using UnityEngine;
 using UnityEngine.Assertions;
+using UnityEngine.TestTools;
 
 namespace AssetPromiseKeeper_Tests
 {
@@ -156,7 +156,6 @@ namespace AssetPromiseKeeper_Tests
 
             keeper.Forget(prom2);
 
-            //Assert.IsTrue(asset.ownerAssetBundle == null);
             Assert.IsTrue(!keeper.library.Contains(asset));
             Assert.AreEqual(0, keeper.library.masterAssets.Count);
         }
@@ -172,7 +171,7 @@ namespace AssetPromiseKeeper_Tests
             AssetType asset2 = null;
             prom2.OnSuccessEvent += (x) => { asset2 = x; };
 
-            var prom3 =  CreatePromise();
+            var prom3 = CreatePromise();
             AssetType asset3 = null;
             prom3.OnSuccessEvent += (x) => { asset3 = x; };
 

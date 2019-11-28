@@ -1,18 +1,31 @@
+using AssetPromiseKeeper_Tests;
 using DCL;
+using DCL.Helpers;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.TestTools;
 
-namespace AssetPromiseKeeper_AssetBundleModel_Tests
+namespace AssetPromiseKeeper_AssetBundle_GameObject_Tests
 {
-    public class AnyAssetPromiseShould : AB_GameObject_TestsBase
+    public class AnyAssetPromiseShould : TestsBase_APK<AssetPromiseKeeper_AB_GameObject,
+                                                AssetPromise_AB_GameObject,
+                                                Asset_AB_GameObject,
+                                                AssetLibrary_AB_GameObject>
     {
+        protected AssetPromise_AB_GameObject CreatePromise(string hash = null)
+        {
+            string contentUrl = Utils.GetTestsAssetsPath() + "/AssetBundles/";
+            hash = hash ?? "QmNS4K7GaH63T9rhAfkrra7ADLXSEeco8FTGknkPnAVmKM";
+            var prom = new AssetPromise_AB_GameObject(contentUrl, hash);
+            return prom;
+        }
+
         [UnityTest]
         public IEnumerator BeSetupCorrectlyAfterLoad()
         {
-            var prom = new AssetPromise_AB_GameObject(BASE_URL, TEST_AB_FILENAME);
+            var prom = CreatePromise();
             Asset_AB_GameObject loadedAsset = null;
 
             prom.OnSuccessEvent +=
@@ -55,7 +68,7 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
         [UnityTest]
         public IEnumerator ForceNewInstanceIsOff()
         {
-            var prom = new AssetPromise_AB_GameObject(BASE_URL, TEST_AB_FILENAME);
+            var prom = CreatePromise();
             prom.settings.forceNewInstance = false;
             keeper.Keep(prom);
             yield return prom;
@@ -71,7 +84,7 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
 
             for (int i = 0; i < 10; i++)
             {
-                var prom = new AssetPromise_AB_GameObject(BASE_URL, TEST_AB_FILENAME);
+                var prom = CreatePromise();
                 prom.settings.forceNewInstance = false;
                 keeper.Keep(prom);
                 yield return prom;
@@ -85,7 +98,7 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
         [UnityTest]
         public IEnumerator ForceNewInstanceIsOn()
         {
-            var prom = new AssetPromise_AB_GameObject(BASE_URL, TEST_AB_FILENAME);
+            var prom = CreatePromise();
             prom.settings.forceNewInstance = true;
             keeper.Keep(prom);
             yield return prom;
@@ -101,7 +114,7 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
 
             for (int i = 0; i < 10; i++)
             {
-                var prom = new AssetPromise_AB_GameObject(BASE_URL, TEST_AB_FILENAME);
+                var prom = CreatePromise();
                 prom.settings.forceNewInstance = true;
                 keeper.Keep(prom);
                 yield return prom;

@@ -1,43 +1,21 @@
-﻿using System.Collections;
 using DCL;
+using System.Collections;
 using UnityEngine;
-using DCL.Helpers;
-using UnityEngine.TestTools;
 using UnityEngine.Assertions;
+using UnityEngine.TestTools;
 
 namespace AssetPromiseKeeper_Tests
 {
 
+    public abstract class APKWithPoolableAssetShouldWorkWhen_Base<APKType, AssetPromiseType, AssetType, AssetLibraryType>
+                        : TestsBase_APK<APKType, AssetPromiseType, AssetType, AssetLibraryType>
 
-    public abstract class APKWithPoolableAssetShouldWorkWhen_Base<APKType, AssetPromiseType, AssetType, AssetLibraryType> : TestsBase
         where AssetPromiseType : AssetPromise<AssetType>
         where AssetType : Asset_WithPoolableContainer, new()
         where AssetLibraryType : AssetLibrary_Poolable<AssetType>, new()
         where APKType : AssetPromiseKeeper<AssetType, AssetLibraryType, AssetPromiseType>, new()
     {
-        protected APKType keeper;
-
-        [UnitySetUp]
-        protected IEnumerator SetUp()
-        {
-            keeper = new APKType();
-            yield break;
-        }
-
-
-        [UnityTearDown]
-        protected IEnumerator TearDown()
-        {
-            PoolManager.i.Cleanup();
-            keeper.Cleanup();
-            Caching.ClearCache();
-            Resources.UnloadUnusedAssets();
-            yield break;
-        }
-
-
         protected abstract AssetPromiseType CreatePromise();
-
 
         [UnityTest]
         public IEnumerator ForgetIsCalledWhileAssetIsBeingReused()
@@ -60,12 +38,16 @@ namespace AssetPromiseKeeper_Tests
 
             keeper.Keep(prom2);
             GameObject container = prom2.asset.container;
+            bool wasLoadingWhenForgotten = prom2.state == AssetPromiseState.LOADING;
             keeper.Forget(prom2);
 
             yield return prom2;
 
             Assert.IsTrue(prom2 != null);
-            Assert.IsTrue(calledFail);
+
+            if (wasLoadingWhenForgotten)
+                Assert.IsTrue(calledFail);
+
             Assert.IsTrue(prom2.asset == null, "Asset shouldn't exist after Forget!");
             Assert.IsTrue(container != null, "Container should be pooled!");
 
@@ -74,6 +56,41 @@ namespace AssetPromiseKeeper_Tests
             Assert.IsTrue(po.isInsidePool, "Asset should be inside pool!");
         }
 
+
+        [UnityTest]
+        public IEnumerator AnyAssetIsLoadedAndThenUnloaded()
+        {
+            var prom = CreatePromise();
+            AssetType loadedAsset = null;
+
+
+            prom.OnSuccessEvent +=
+                (x) =>
+                {
+                    Debug.Log("success!");
+                    loadedAsset = x;
+                };
+
+            keeper.Keep(prom);
+
+            Assert.IsTrue(prom.state == AssetPromiseState.LOADING);
+
+            yield return prom;
+
+            Assert.IsTrue(loadedAsset != null);
+            //Assert.IsTrue(loadedAsset.isLoaded);
+            Assert.IsTrue(keeper.library.Contains(loadedAsset));
+            Assert.AreEqual(1, keeper.library.masterAssets.Count);
+
+            keeper.Forget(prom);
+
+            yield return prom;
+
+            Assert.IsTrue(prom.state == AssetPromiseState.IDLE_AND_EMPTY);
+
+            Assert.IsTrue(!keeper.library.Contains(loadedAsset.id));
+            Assert.AreEqual(0, keeper.library.masterAssets.Count);
+        }
 
         [UnityTest]
         public IEnumerator AnyAssetIsDestroyedWhileLoading()
@@ -97,6 +114,82 @@ namespace AssetPromiseKeeper_Tests
             Assert.IsTrue(prom != null);
             Assert.IsTrue(prom.asset == null);
             Assert.IsTrue(calledFail);
+        }
+
+        [UnityTest]
+        public IEnumerator ForgetIsCalledWhileAssetIsBeingLoaded()
+        {
+            var prom = CreatePromise();
+            AssetType asset = null;
+            prom.OnSuccessEvent += (x) => { asset = x; };
+
+            keeper.Keep(prom);
+
+            yield return new WaitForSeconds(0.5f);
+
+            keeper.Forget(prom);
+
+            Assert.AreEqual(AssetPromiseState.IDLE_AND_EMPTY, prom.state);
+
+            var prom2 = CreatePromise();
+
+            keeper.Keep(prom2);
+
+            yield return prom2;
+
+            Assert.AreEqual(AssetPromiseState.FINISHED, prom2.state);
+
+            keeper.Forget(prom2);
+
+            yield return MemoryManager.i.CleanupPoolsIfNeeded(true);
+
+            Assert.IsTrue(asset.container == null);
+            Assert.IsTrue(!keeper.library.Contains(asset));
+            Assert.AreEqual(0, keeper.library.masterAssets.Count);
+        }
+
+        [UnityTest]
+        public IEnumerator ManyPromisesWithTheSameURLAreLoaded()
+        {
+            var prom = CreatePromise();
+            AssetType asset = null;
+            prom.OnSuccessEvent += (x) => { asset = x; };
+
+            var prom2 = CreatePromise();
+            AssetType asset2 = null;
+            prom2.OnSuccessEvent += (x) => { asset2 = x; };
+
+            var prom3 = CreatePromise();
+            AssetType asset3 = null;
+            prom3.OnSuccessEvent += (x) => { asset3 = x; };
+
+            keeper.Keep(prom);
+            keeper.Keep(prom2);
+            keeper.Keep(prom3);
+
+            Assert.AreEqual(3, keeper.waitingPromisesCount);
+
+            yield return prom;
+            yield return new WaitForSeconds(2.0f);
+
+            Assert.IsTrue(asset != null);
+            Assert.IsTrue(asset2 != null);
+            Assert.IsTrue(asset3 != null);
+
+            Assert.AreEqual(AssetPromiseState.FINISHED, prom.state);
+            Assert.AreEqual(AssetPromiseState.FINISHED, prom2.state);
+            Assert.AreEqual(AssetPromiseState.FINISHED, prom3.state);
+
+            Assert.IsTrue(asset2.id == asset.id);
+            Assert.IsTrue(asset3.id == asset.id);
+            Assert.IsTrue(asset2.id == asset3.id);
+
+            Assert.IsTrue(asset != asset2);
+            Assert.IsTrue(asset != asset3);
+            Assert.IsTrue(asset2 != asset3);
+
+            Assert.IsTrue(keeper.library.Contains(asset));
+            Assert.AreEqual(1, keeper.library.masterAssets.Count);
         }
 
         [UnityTest]
@@ -150,117 +243,6 @@ namespace AssetPromiseKeeper_Tests
             keeper.Forget(prom);
 
             Assert.IsTrue(prom.asset == null);
-        }
-
-
-        [UnityTest]
-        public IEnumerator AnyAssetIsLoadedAndThenUnloaded()
-        {
-            var prom = CreatePromise();
-            AssetType loadedAsset = null;
-
-
-            prom.OnSuccessEvent +=
-                (x) =>
-                {
-                    Debug.Log("success!");
-                    loadedAsset = x;
-                };
-
-            keeper.Keep(prom);
-
-            Assert.IsTrue(prom.state == AssetPromiseState.LOADING);
-
-            yield return prom;
-
-            Assert.IsTrue(loadedAsset != null);
-            //Assert.IsTrue(loadedAsset.isLoaded);
-            Assert.IsTrue(keeper.library.Contains(loadedAsset));
-            Assert.AreEqual(1, keeper.library.masterAssets.Count);
-
-            keeper.Forget(prom);
-
-            yield return prom;
-
-            Assert.IsTrue(prom.state == AssetPromiseState.IDLE_AND_EMPTY);
-
-            Assert.IsTrue(!keeper.library.Contains(loadedAsset.id));
-            Assert.AreEqual(0, keeper.library.masterAssets.Count);
-        }
-
-        [UnityTest]
-        public IEnumerator ForgetIsCalledWhileAssetIsBeingLoaded()
-        {
-            var prom = CreatePromise();
-            AssetType asset = null;
-            prom.OnSuccessEvent += (x) => { asset = x; };
-
-            keeper.Keep(prom);
-
-            yield return new WaitForSeconds(0.5f);
-
-            keeper.Forget(prom);
-
-            Assert.AreEqual(AssetPromiseState.IDLE_AND_EMPTY, prom.state);
-
-            var prom2 = CreatePromise();
-
-            keeper.Keep(prom2);
-
-            yield return prom2;
-
-            Assert.AreEqual(AssetPromiseState.FINISHED, prom2.state);
-
-            keeper.Forget(prom2);
-
-            Assert.IsTrue(asset.container == null);
-            Assert.IsTrue(!keeper.library.Contains(asset));
-            Assert.AreEqual(0, keeper.library.masterAssets.Count);
-        }
-
-        [UnityTest]
-        public IEnumerator ManyPromisesWithTheSameURLAreLoaded()
-        {
-            var prom = CreatePromise();
-            AssetType asset = null;
-            prom.OnSuccessEvent += (x) => { asset = x; };
-
-            var prom2 = CreatePromise();
-            AssetType asset2 = null;
-            prom2.OnSuccessEvent += (x) => { asset2 = x; };
-
-            var prom3 = CreatePromise();
-            AssetType asset3 = null;
-            prom3.OnSuccessEvent += (x) => { asset3 = x; };
-
-            keeper.Keep(prom);
-            keeper.Keep(prom2);
-            keeper.Keep(prom3);
-
-            Assert.AreEqual(3, keeper.waitingPromisesCount);
-
-            yield return prom;
-            yield return new WaitForSeconds(2.0f);
-
-            Assert.IsTrue(asset != null);
-            Assert.IsTrue(asset2 != null);
-            Assert.IsTrue(asset3 != null);
-
-            Assert.AreEqual(AssetPromiseState.FINISHED, prom.state);
-            Assert.AreEqual(AssetPromiseState.FINISHED, prom2.state);
-            Assert.AreEqual(AssetPromiseState.FINISHED, prom3.state);
-
-            Assert.IsTrue(asset2.id == asset.id);
-            Assert.IsTrue(asset3.id == asset.id);
-            Assert.IsTrue(asset2.id == asset3.id);
-
-            //NOTE(Brian): We expect them to be the same asset because AssetBundle non-gameObject assets are shared, as opposed to instanced.
-            Assert.IsTrue(asset == asset2);
-            Assert.IsTrue(asset == asset3);
-            Assert.IsTrue(asset2 == asset3);
-
-            Assert.IsTrue(keeper.library.Contains(asset));
-            Assert.AreEqual(1, keeper.library.masterAssets.Count);
         }
     }
 }

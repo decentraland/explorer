@@ -1,26 +1,41 @@
+using AssetPromiseKeeper_Tests;
 using DCL;
+using DCL.Helpers;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.TestTools;
 
-namespace AssetPromiseKeeper_AssetBundleModel_Tests
+namespace AssetPromiseKeeper_AssetBundle_GameObject_Tests
 {
-    public class BlockedAndMasterPromisesShould : AB_GameObject_TestsBase
+    public class BlockedAndMasterPromisesShould : TestsBase_APK<AssetPromiseKeeper_AB_GameObject,
+                                                AssetPromise_AB_GameObject,
+                                                Asset_AB_GameObject,
+                                                AssetLibrary_AB_GameObject>
     {
+        protected AssetPromise_AB_GameObject CreatePromise(string hash = null)
+        {
+            string contentUrl = Utils.GetTestsAssetsPath() + "/AssetBundles/";
+            hash = hash ?? "QmNS4K7GaH63T9rhAfkrra7ADLXSEeco8FTGknkPnAVmKM";
+            var prom = new AssetPromise_AB_GameObject(contentUrl, hash);
+            return prom;
+        }
+
         [UnityTest]
         public IEnumerator SucceedWhenMastersParentIsDestroyed()
         {
+            //NOTE(Brian): If this test fails, you should ensure that OnSilentForget is implemented properly.
+            //             OnSilentForget should unparent and hide the container to ensure blocked promises finish correctly.
             GameObject parent = new GameObject("parent");
 
-            AssetPromise_AB_GameObject prom = new AssetPromise_AB_GameObject(BASE_URL, TEST_AB_FILENAME);
+            var prom = CreatePromise();
             prom.settings.parent = parent.transform;
 
-            AssetPromise_AB_GameObject prom2 = new AssetPromise_AB_GameObject(BASE_URL, TEST_AB_FILENAME);
+            var prom2 = CreatePromise();
             bool failEventCalled2 = false;
             prom2.OnFailEvent += (x) => { failEventCalled2 = true; };
 
-            AssetPromise_AB_GameObject prom3 = new AssetPromise_AB_GameObject(BASE_URL, TEST_AB_FILENAME);
+            var prom3 = CreatePromise();
             bool failEventCalled3 = false;
             prom3.OnFailEvent += (x) => { failEventCalled3 = true; };
 
@@ -56,21 +71,21 @@ namespace AssetPromiseKeeper_AssetBundleModel_Tests
         [UnityTest]
         public IEnumerator FailCorrectlyWhenGivenWrongURL()
         {
-            string url = "non_existing_url.glb";
+            string invalidHash = "Qm_InVaLiD_hAsH";
 
-            AssetPromise_AB_GameObject prom = new AssetPromise_AB_GameObject(BASE_URL, url);
+            var prom = CreatePromise(invalidHash);
             Asset_AB_GameObject asset = null;
             bool failEventCalled1 = false;
             prom.OnSuccessEvent += (x) => { asset = x; };
             prom.OnFailEvent += (x) => { failEventCalled1 = true; };
 
-            AssetPromise_AB_GameObject prom2 = new AssetPromise_AB_GameObject(BASE_URL, url);
+            var prom2 = CreatePromise(invalidHash);
             Asset_AB_GameObject asset2 = null;
             bool failEventCalled2 = false;
             prom2.OnSuccessEvent += (x) => { asset2 = x; };
             prom2.OnFailEvent += (x) => { failEventCalled2 = true; };
 
-            AssetPromise_AB_GameObject prom3 = new AssetPromise_AB_GameObject(BASE_URL, url);
+            var prom3 = CreatePromise(invalidHash);
             Asset_AB_GameObject asset3 = null;
             bool failEventCalled3 = false;
             prom3.OnSuccessEvent += (x) => { asset3 = x; };

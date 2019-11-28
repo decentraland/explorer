@@ -17,11 +17,11 @@ namespace DCL
         {
         }
 
-        public AssetPromise_AB_GameObject () {}
+        public AssetPromise_AB_GameObject() { }
 
         protected override void OnLoad(Action OnSuccess, Action OnFail)
         {
-            loadingCoroutine = CoroutineStarter.Start( LoadingCoroutine(OnSuccess, OnFail) );
+            loadingCoroutine = CoroutineStarter.Start(LoadingCoroutine(OnSuccess, OnFail));
         }
 
         protected override bool AddToLibrary()
@@ -43,7 +43,7 @@ namespace DCL
             }
 
             //NOTE(Brian): Call again this method because we are replacing the asset.
-            OnBeforeLoadOrReuse();
+            settings.ApplyBeforeLoad(asset.container.transform);
 
             return true;
         }
@@ -76,18 +76,18 @@ namespace DCL
             subPromise.OnSuccessEvent += (x) => success = true;
             asset.ownerPromise = subPromise;
             AssetPromiseKeeper_AB.i.Keep(subPromise);
-            
+
             yield return subPromise;
 
             if (success)
             {
                 yield return InstantiateABGameObjects(subPromise.asset.ownerAssetBundle);
 
-                if ( subPromise.asset == null || subPromise.asset.ownerAssetBundle == null || asset.container == null )
+                if (subPromise.asset == null || subPromise.asset.ownerAssetBundle == null || asset.container == null)
                     success = false;
             }
-            
-            if (success) 
+
+            if (success)
             {
                 OnSuccess?.Invoke();
             }

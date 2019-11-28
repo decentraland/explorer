@@ -1,4 +1,4 @@
-﻿namespace DCL
+namespace DCL
 {
     public class AssetPromiseKeeper_GLTF : AssetPromiseKeeper<Asset_GLTF, AssetLibrary_GLTF, AssetPromise_GLTF>
     {

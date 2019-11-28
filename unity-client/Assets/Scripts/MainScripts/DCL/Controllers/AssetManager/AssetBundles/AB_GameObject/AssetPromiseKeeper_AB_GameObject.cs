@@ -8,6 +8,11 @@ namespace DCL
         public AssetPromiseKeeper_AB_GameObject() : base(new AssetLibrary_AB_GameObject())
         {
         }
+        protected override void OnSilentForget(AssetPromise_AB_GameObject promise)
+        {
+            promise.asset.Hide();
+        }
+
     }
 
 }

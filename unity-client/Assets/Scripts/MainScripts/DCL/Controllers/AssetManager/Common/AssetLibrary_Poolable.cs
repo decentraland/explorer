@@ -44,24 +44,22 @@ namespace DCL
 
         public override AssetType Get(object id)
         {
-            if (Contains(id))
+            if (!Contains(id))
+                return null;
+
+            AssetType clone = masterAssets[id].Clone() as AssetType;
+
+            if (PoolManager.i.ContainsPool(clone.id))
             {
-                AssetType clone = masterAssets[id].Clone() as AssetType;
-
-                if (PoolManager.i.ContainsPool(clone.id))
-                {
-                    clone.container = PoolManager.i.Get(clone.id).gameObject;
-                }
-                else
-                {
-                    Debug.LogError("Pool was removed and AssetLibrary didn't notice?!");
-                    return null;
-                }
-
-                return clone;
+                clone.container = PoolManager.i.Get(clone.id).gameObject;
+            }
+            else
+            {
+                Debug.LogError("Pool was removed and AssetLibrary didn't notice?!");
+                return null;
             }
 
-            return null;
+            return clone;
         }
 
         public AssetType GetCopyFromOriginal(object id)
@@ -88,6 +86,12 @@ namespace DCL
 
         public override void Release(AssetType asset)
         {
+            if (!Contains(asset))
+            {
+                Debug.LogError("ERROR: Trying to release an asset not added to this library!");
+                return;
+            }
+
             if (asset == null)
             {
                 Debug.LogError("ERROR: Trying to release null asset");
@@ -95,6 +99,7 @@ namespace DCL
             }
 
             PoolManager.i.Release(asset.container);
+            masterAssets.Remove(asset.id);
         }
 
         public override bool Contains(object id)
