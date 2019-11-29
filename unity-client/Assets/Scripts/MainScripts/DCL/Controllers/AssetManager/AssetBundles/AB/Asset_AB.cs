@@ -15,7 +15,7 @@ namespace DCL
         public List<T> GetAssetsByExtensions<T>(params string[] extensions)
             where T : Object
         {
-            var goList = new List<T>(2);
+            var goList = new List<T>();
 
             for (int i1 = 0; i1 < extensions.Length; i1++)
             {
