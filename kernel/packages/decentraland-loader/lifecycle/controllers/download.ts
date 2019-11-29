@@ -29,7 +29,7 @@ export class SceneDataDownloadManager {
   sceneIdToLandData: Map<string, IFuture<ILand | null>> = new Map()
   rootIdToLandData: Map<string, IFuture<ILand | null>> = new Map()
 
-  constructor(public options: { contentServer: string }) {
+  constructor(public options: { contentServer: string; contentServerBundles: string }) {
     // stub
   }
 
@@ -40,23 +40,28 @@ export class SceneDataDownloadManager {
     const promised = future<string | null>()
     this.positionToSceneId.set(pos, promised)
     const nw = pos.split(',').map($ => parseInt($, 10))
-    const responseContent = await fetch(
-      this.options.contentServer + `/scenes?x1=${nw[0]}&x2=${nw[0]}&y1=${nw[1]}&y2=${nw[1]}`
-    )
 
-    if (!responseContent.ok) {
-      error(`Error in ${this.options.contentServer}/scenes response!`, responseContent)
-      const ret = new Error(`Error in ${this.options.contentServer}/scenes response!`)
-      promised.reject(ret)
-      throw ret
-    } else {
-      const contents = (await responseContent.json()) as SceneMappingResponse
-      if (!contents.data.length) {
+    try {
+      const responseContent = await fetch(
+        this.options.contentServer + `/scenes?x1=${nw[0]}&x2=${nw[0]}&y1=${nw[1]}&y2=${nw[1]}`
+      )
+      if (!responseContent.ok) {
+        error(`Error in ${this.options.contentServer}/scenes response!`, responseContent)
         promised.resolve(null)
         return null
+      } else {
+        const contents = (await responseContent.json()) as SceneMappingResponse
+        if (!contents.data.length) {
+          promised.resolve(null)
+          return null
+        }
+        this.setSceneRoots(contents)
       }
-      this.setSceneRoots(contents)
+    } catch (e) {
+      promised.resolve(null)
+      return null
     }
+
     return promised
   }
 
@@ -80,6 +85,7 @@ export class SceneDataDownloadManager {
     return {
       sceneId: sceneId,
       baseUrl: this.options.contentServer + '/contents/',
+      baseUrlBundles: this.options.contentServerBundles + '/',
       name: 'Empty parcel',
       scene: {
         display: { title: 'Empty parcel' },
@@ -150,6 +156,7 @@ export class SceneDataDownloadManager {
     }
 
     const baseUrl = this.options.contentServer + '/contents/'
+    const baseUrlBundles = this.options.contentServerBundles + '/'
 
     const scene = (await jsonFetch(baseUrl + sceneJsonMapping.hash)) as IScene
 
@@ -158,8 +165,9 @@ export class SceneDataDownloadManager {
     }
 
     const data: ILand = {
-      sceneId: sceneId,
+      sceneId,
       baseUrl,
+      baseUrlBundles,
       name: scene.name,
       scene,
       mappingsResponse: content.content
