@@ -2,6 +2,7 @@ using DCL.Helpers;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -15,7 +16,6 @@ namespace DCL
         static float maxLoadBudgetTime = 0.032f;
         static float currentLoadBudgetTime = 0;
         public static bool limitTimeBudget = false;
-
         Coroutine loadCoroutine;
         static HashSet<string> failedRequestUrls = new HashSet<string>();
 
@@ -29,8 +29,8 @@ namespace DCL
             { "psd", 4 },
             { "iff", 5 },
             { "mat", 6 },
-            { "nim", 7 },
-            { "ltf", 8 },
+            { "anim", 7 },
+            { "gltf", 8 },
             { "glb", 9 }
         };
 
@@ -135,7 +135,7 @@ namespace DCL
                 assetsToLoad = assets.OrderBy(
                     (x) =>
                     {
-                        string ext = x.Substring(x.Length - 3);
+                        string ext = Path.GetExtension(x);//x.Substring(x.Length - 3);
 
                         if (loadOrderByExtension.ContainsKey(ext))
                             return loadOrderByExtension[ext];
@@ -155,7 +155,7 @@ namespace DCL
                     if (VERBOSE)
                         Debug.Log("loading asset = " + assetName);
 #endif
-                    string ext = assetName.Substring(assetName.Length - 3);
+                    string ext = Path.GetExtension(assetName);
 
                     UnityEngine.Object loadedAsset = assetBundle.LoadAsset(assetName);
 

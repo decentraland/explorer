@@ -12,7 +12,7 @@ namespace DCL.Components
 {
     public class LoadWrapper_GLTF : LoadWrapper
     {
-        static readonly bool VERBOSE = false;
+        static readonly bool VERBOSE = true;
         public static bool useCustomContentServerUrl = false;
         public static string customContentServerUrl;
         public static bool useGltfFallback = true;
@@ -74,12 +74,6 @@ namespace DCL.Components
 
             entity.scene.contentProvider.TryGetContentsUrl_Raw(targetUrl, out string hash);
 
-            //if (hash.ToLower() != "qmxkgvfoafwnpdn1zqgkjbrnxtwwbtybdgsdl6lf7tcae2")
-            //{
-            //    OnFail?.Invoke(this);
-            //    return;
-            //}
-
             abPromise = new AssetPromise_AB_GameObject(bundlesBaseUrl, hash);
             abPromise.settings.parent = transform;
 
@@ -100,10 +94,6 @@ namespace DCL.Components
             }
 
             gltfPromise = new AssetPromise_GLTF(entity.scene.contentProvider, targetUrl);
-
-            if (VERBOSE)
-                Debug.Log($"Load(): target URL -> {targetUrl},  url -> {gltfPromise.url}, directory path -> {assetDirectoryPath}");
-
             gltfPromise.settings.parent = transform;
 
             if (initialVisibility == false)
@@ -133,9 +123,9 @@ namespace DCL.Components
             if (VERBOSE)
             {
                 if (gltfPromise != null)
-                    Debug.Log($"Load(): target URL -> {gltfPromise.url}. Failure!");
+                    Debug.Log($"GLTF Load(): target URL -> {gltfPromise.GetId()}. Failure!");
                 else
-                    Debug.Log($"Load(): target URL -> {abPromise.hash}. Failure!");
+                    Debug.Log($"AB Load(): target URL -> {abPromise.hash}. Failure!");
             }
 
             OnFail?.Invoke(this);
@@ -146,9 +136,9 @@ namespace DCL.Components
             if (VERBOSE)
             {
                 if (gltfPromise != null)
-                    Debug.Log($"Load(): target URL -> {gltfPromise.url}. Success!");
+                    Debug.Log($"GLTF Load(): target URL -> {gltfPromise.GetId()}. Success!");
                 else
-                    Debug.Log($"Load(): target URL -> {abPromise.hash}. Success!");
+                    Debug.Log($"AB Load(): target URL -> {abPromise.hash}. Success!");
             }
 
             alreadyLoaded = true;
