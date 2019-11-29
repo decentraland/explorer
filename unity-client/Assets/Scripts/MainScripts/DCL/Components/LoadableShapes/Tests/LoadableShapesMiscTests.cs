@@ -8,7 +8,7 @@ using UnityEngine;
 using UnityEngine.TestTools;
 using UnityGLTF;
 
-public class LoadableShapesTests : TestsBase
+public class LoadableShapesMiscTests : TestsBase
 {
     [UnityTest]
     public IEnumerator OBJShapeUpdate()

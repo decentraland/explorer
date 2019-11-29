@@ -13,28 +13,30 @@ namespace Tests
 {
     public class MaterialTransitionControllerTests : TestsBase
     {
-        ParcelScene scene;
-        SceneController sceneController;
+        // ParcelScene scene;
+        // SceneController sceneController;
 
-        IEnumerator InitScene()
-        {
-            yield return TestHelpers.UnloadAllUnityScenes();
+        // IEnumerator InitScene()
+        // {
+        //     yield return base.InitScene();
+        //     DCL.Configuration.Environment.DEBUG = true;
+        //     sceneController.SetDebug();
 
-            sceneController = TestHelpers.InitializeSceneController();
-            var scenesToLoad = (Resources.Load("TestJSON/SceneLoadingTest") as TextAsset).text;
+        //     sceneController = TestHelpers.InitializeSceneController();
+        //     var scenesToLoad = (Resources.Load("TestJSON/SceneLoadingTest") as TextAsset).text;
 
-            yield return new WaitForSeconds(.1f);
+        //     yield return new WaitForSeconds(.1f);
 
-            sceneController.UnloadAllScenes();
+        //     // sceneController.UnloadAllScenes();
 
-            yield return new WaitForSeconds(.1f);
+        //     // yield return new WaitForSeconds(.1f);
 
-            sceneController.LoadParcelScenes(scenesToLoad);
+        //     sceneController.LoadParcelScenes(scenesToLoad);
 
-            yield return new WaitForAllMessagesProcessed();
+        //     yield return new WaitForAllMessagesProcessed();
 
-            scene = sceneController.loadedScenes["0,0"];
-        }
+        //     scene = sceneController.loadedScenes["0,0"];
+        // }
 
         [UnityTest]
         public IEnumerator MaterialTransitionWithGLTF()
@@ -50,10 +52,6 @@ namespace Tests
             Assert.IsTrue(hologramShader != null, "Hologram shader == null??");
 
             DecentralandEntity entity = null;
-
-            // Character controller is needed due to using of mainCamera in GLTFComponent.TestDistance
-            var characterController = (GameObject.Instantiate(Resources.Load("Prefabs/CharacterController") as GameObject)).GetComponent<DCLCharacterController>();
-            characterController.gravity = 0f;
 
             GLTFShape shape = TestHelpers.InstantiateEntityWithShape<GLTFShape, GLTFShape.Model>
             (scene,
