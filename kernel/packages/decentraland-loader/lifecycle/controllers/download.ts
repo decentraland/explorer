@@ -160,9 +160,9 @@ export class SceneDataDownloadManager {
     }
 
     const data: ILand = {
-      sceneId: sceneId,
-      baseUrl: baseUrl,
-      baseUrlBundles: baseUrlBundles,
+      sceneId,
+      baseUrl,
+      baseUrlBundles,
       name: scene.name,
       scene,
       mappingsResponse: content.content

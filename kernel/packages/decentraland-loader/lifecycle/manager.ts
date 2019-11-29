@@ -56,7 +56,7 @@ export async function initParcelSceneWorker() {
 
   server.notify('Lifecycle.initialize', {
     contentServer: DEBUG ? resolveUrl(document.location.origin, '/local-ipfs') : getServerConfigurations().content,
-    contentServerBundles: DEBUG ? null : getServerConfigurations().contentAsBundle,
+    contentServerBundles: DEBUG ? '' : getServerConfigurations().contentAsBundle,
     lineOfSightRadius: parcelLimits.visibleRadius,
     secureRadius: parcelLimits.secureRadius,
     emptyScenes: ENABLE_EMPTY_SCENES && !(globalThis as any)['isRunningTests']
