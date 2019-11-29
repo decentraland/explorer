@@ -12,7 +12,7 @@ namespace DCL.Components
 {
     public class LoadWrapper_GLTF : LoadWrapper
     {
-        static readonly bool VERBOSE = true;
+        static readonly bool VERBOSE = false;
         public static bool useCustomContentServerUrl = false;
         public static string customContentServerUrl;
         public static bool useGltfFallback = true;
