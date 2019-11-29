@@ -133,7 +133,7 @@ namespace DCL
         }
         private void Update()
         {
-            InputController.i.Update();
+            InputController_Legacy.i.Update();
 
             PrioritizeMessageControllerList();
 

@@ -6,17 +6,17 @@ using DCL.Interface;
 namespace DCL
 {
 
-    public class InputController
+    public class InputController_Legacy
     {
         public static bool renderingIsDisabled = true;
-        private static InputController instance = null;
+        private static InputController_Legacy instance = null;
 
-        public static InputController i
+        public static InputController_Legacy i
         {
             get
             {
                 if (instance == null)
-                    instance = new InputController();
+                    instance = new InputController_Legacy();
 
                 return instance;
             }
@@ -45,7 +45,7 @@ namespace DCL
         private Dictionary<WebInterface.ACTION_BUTTON, List<Action<WebInterface.ACTION_BUTTON, EVENT, bool>>> listeners = new Dictionary<WebInterface.ACTION_BUTTON, List<Action<WebInterface.ACTION_BUTTON, EVENT, bool>>>();
         private List<BUTTON_MAP> buttonsMap = new List<BUTTON_MAP>();
 
-        private InputController()
+        private InputController_Legacy()
         {
             buttonsMap.Add(new BUTTON_MAP() { type = BUTTON_TYPE.MOUSE, buttonNum = 0, buttonId = WebInterface.ACTION_BUTTON.POINTER, useRaycast = true });
             buttonsMap.Add(new BUTTON_MAP() { type = BUTTON_TYPE.KEYBOARD, buttonNum = (int)KeyCode.E, buttonId = WebInterface.ACTION_BUTTON.PRIMARY, useRaycast = true });
