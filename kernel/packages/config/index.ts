@@ -92,7 +92,12 @@ export const STATIC_WORLD = location.search.indexOf('STATIC_WORLD') !== -1 || !!
 export const ENABLE_WEB3 = location.search.indexOf('ENABLE_WEB3') !== -1 || !!(global as any).enableWeb3
 export const ENV_OVERRIDE = location.search.indexOf('ENV') !== -1
 export const USE_LOCAL_COMMS = location.search.indexOf('LOCAL_COMMS') !== -1 || PREVIEW
-export const DEBUG = location.search.indexOf('DEBUG_MODE') !== -1 || !!(global as any).mocha || PREVIEW || EDITOR
+export const DEBUG =
+  location.search.indexOf('DEBUG_MODE') !== -1 ||
+  location.search.indexOf('DEBUG_LOG') !== -1 ||
+  !!(global as any).mocha ||
+  PREVIEW ||
+  EDITOR
 export const DEBUG_ANALYTICS = location.search.indexOf('DEBUG_ANALYTICS') !== -1
 export const DEBUG_MOBILE = location.search.indexOf('DEBUG_MOBILE') !== -1
 export const DEBUG_MESSAGES = location.search.indexOf('DEBUG_MESSAGES') !== -1
@@ -189,9 +194,9 @@ function getDefaultTLD() {
 
 export function getExclusiveServer() {
   if (window.location.search.match(/TEST_WEARABLES/)) {
-    return 'https://dcl-exclusive-test.now.sh/index.json'
+    return 'https://dcl-wearables-dev.now.sh/index.json'
   }
-  return 'https://dcl-base-exclusive.now.sh/index.json'
+  return 'https://dcl-wearables.now.sh/index.json'
 }
 
 export const ALL_WEARABLES = location.search.indexOf('ALL_WEARABLES') !== -1 && getDefaultTLD() !== 'org'
@@ -225,8 +230,7 @@ export function getServerConfigurations() {
     avatar: {
       snapshotStorage: `https://avatars-storage.decentraland.${TLDDefault}/`,
       server: `https://avatars-api.decentraland.${TLDDefault === 'zone' ? 'today' : TLDDefault}/`,
-      catalog: 'https://dcl-base-avatars.now.sh/index.json',
-      exclusiveCatalog: getExclusiveServer(),
+      catalog: getExclusiveServer(),
       contents: `https://s3.amazonaws.com/content-service.decentraland.org/`,
       presets: `https://avatars-storage.decentraland.org/mobile-avatars`
     },

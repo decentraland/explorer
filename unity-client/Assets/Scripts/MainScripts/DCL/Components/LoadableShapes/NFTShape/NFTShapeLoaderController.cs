@@ -57,6 +57,8 @@ public class NFTShapeLoaderController : MonoBehaviour
     int BASEMAP_SHADER_PROPERTY = Shader.PropertyToID("_BaseMap");
     int COLOR_SHADER_PROPERTY = Shader.PropertyToID("_BaseColor");
 
+    Texture nftImageTexture;
+
     bool VERBOSE = false;
 
     void Awake()
@@ -214,6 +216,8 @@ public class NFTShapeLoaderController : MonoBehaviour
     {
         if (newTexture == null) return;
 
+        nftImageTexture = newTexture;
+
         meshRenderer.GetPropertyBlock(imageMaterialPropertyBlock, 0);
         imageMaterialPropertyBlock.SetTexture(BASEMAP_SHADER_PROPERTY, newTexture);
         imageMaterialPropertyBlock.SetColor(COLOR_SHADER_PROPERTY, Color.white);
@@ -260,5 +264,13 @@ public class NFTShapeLoaderController : MonoBehaviour
 
         if (noiseIsFractal)
             frameMaterial.EnableKeyword("FRACTAL");
+    }
+
+    void OnDestroy()
+    {
+        if (nftImageTexture != null)
+        {
+            UnityEngine.Object.Destroy(nftImageTexture);
+        }
     }
 }

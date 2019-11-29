@@ -7,10 +7,6 @@ using MappingPair = DCL.ContentServerUtils.MappingPair;
 [System.Serializable]
 public class WearableItem : Item
 {
-    public static string bodyShapeCategory = "body_shape";
-    public static string baseWearableTag = "base-wearable";
-    public static string nftWearableTag = "exclusive";
-
     [Serializable]
     public class Representation
     {
@@ -100,6 +96,11 @@ public class WearableItem : Item
             return hides;
 
         return representation.overrideHides;
+    }
+
+    public bool IsCollectible()
+    {
+        return !tags.Contains(WearableLiterals.Tags.BASE_WEARABLE);
     }
 }
 
