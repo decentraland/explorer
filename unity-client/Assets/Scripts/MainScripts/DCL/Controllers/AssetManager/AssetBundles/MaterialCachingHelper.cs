@@ -11,9 +11,11 @@ namespace DCL
             if (obj == null)
                 return;
 
+            var matList = new List<Material>(1);
+
             foreach (var rend in obj.GetComponentsInChildren<Renderer>(true))
             {
-                var matList = new List<Material>(1);
+                matList.Clear();
 
                 foreach (var mat in rend.sharedMaterials)
                 {
