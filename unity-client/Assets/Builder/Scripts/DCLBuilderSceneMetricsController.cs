@@ -9,6 +9,7 @@ namespace Builder
         public DCLBuilderSceneMetricsController(ParcelScene sceneOwner) : base(sceneOwner)
         {
             Enable();
+            isDirty = true;
         }
 
         protected override void OnEntityAdded(DecentralandEntity e)
@@ -26,7 +27,6 @@ namespace Builder
             {
                 SubstractMetrics(e);
                 model.entities = entitiesMetrics.Count;
-                isDirty = true;
             }
         }
 
@@ -37,7 +37,11 @@ namespace Builder
             {
                 AddOrReplaceMetrics(entity);
                 model.entities = entitiesMetrics.Count;
-                isDirty = true;
+            }
+            else
+            {
+                SubstractMetrics(entity);
+                model.entities = entitiesMetrics.Count;
             }
         }
     }
