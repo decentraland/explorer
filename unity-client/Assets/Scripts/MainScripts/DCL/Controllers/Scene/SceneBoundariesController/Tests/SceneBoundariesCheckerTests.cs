@@ -50,7 +50,7 @@ namespace Tests
         [UnityTest]
         public IEnumerator GLTFShapeIsInvalidatedWhenStartingOutOfBoundsDebugMode()
         {
-            yield return InitScene(false, true, true, true, debugMode: true);
+            yield return InitScene(false, true, true, true, true, false);
 
             yield return Assert_GLTFShapeIsInvalidatedWhenStartingOutOfBounds();
         }
