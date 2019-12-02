@@ -99,7 +99,7 @@ namespace Tests
             Assert.IsTrue(sceneController.loadedScenes.ContainsKey(loadedSceneID));
 
             var scene = sceneController.loadedScenes[loadedSceneID];
-            
+
             var coneShape = TestHelpers.SharedComponentCreate<ConeShape, ConeShape.Model>(scene, DCL.Models.CLASS_ID.CONE_SHAPE, new ConeShape.Model()
             {
                 radiusTop = 1,
