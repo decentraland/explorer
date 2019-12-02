@@ -6,24 +6,12 @@ namespace DCL
     {
         public AssetPromise_PrefetchGLTF(ContentProvider provider, string url) : base(provider, url)
         {
-            settings.visibleFlags = VisibleFlags.INVISIBLE;
+            settings.visibleFlags = AssetPromiseSettings_Rendering.VisibleFlags.INVISIBLE;
         }
 
-        protected override void ApplySettings_LoadStart()
+        protected override void OnBeforeLoadOrReuse()
         {
-            Transform assetTransform = asset.container.transform;
-
             asset.container.name = "GLTF: " + url;
-        }
-
-        protected override void ApplySettings_LoadFinished()
-        {
-            Renderer[] renderers = asset.container.GetComponentsInChildren<Renderer>(true);
-            for (int i = 0; i < renderers.Length; i++)
-            {
-                Renderer renderer = renderers[i];
-                renderer.enabled = false;
-            }
         }
 
         internal override object GetId()
@@ -46,9 +34,10 @@ namespace DCL
             asset.Show(false, OnSuccess);
         }
 
-        protected override void AddToLibrary()
+        protected override bool AddToLibrary()
         {
             library.Add(asset);
+            return true;
         }
 
         internal override void Load()
