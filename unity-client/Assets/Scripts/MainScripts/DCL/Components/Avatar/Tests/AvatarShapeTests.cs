@@ -108,12 +108,13 @@ namespace Tests
             yield return InitScene();
             AvatarTestHelpers.CreateTestCatalog();
             AvatarShape avatar = AvatarTestHelpers.CreateAvatar(scene, "Maiqel Yacson", "TestAvatar.json");
-
             yield return new DCL.WaitUntil(() => avatar.everythingIsLoaded, 20);
+
+            avatar.transform.position = new Vector3(13, 0, 4);
 
             RectTransform rt = avatar.avatarName.uiContainer.GetComponent<RectTransform>();
 
-            Assert.IsTrue((int)Mathf.Abs(rt.sizeDelta.x) == 86 && (int)Mathf.Abs(rt.sizeDelta.y) == 22, $"Avatar name dimensions are incorrect!. Current: {rt.sizeDelta}");
+            Assert.IsTrue((int)Mathf.Abs(rt.sizeDelta.x) == 190 && (int)Mathf.Abs(rt.sizeDelta.y) == 40, $"Avatar name dimensions are incorrect!. Current: {rt.sizeDelta}");
         }
 
         [UnityTest]
