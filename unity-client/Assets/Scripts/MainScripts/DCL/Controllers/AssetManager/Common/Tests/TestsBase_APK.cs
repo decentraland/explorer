@@ -17,6 +17,7 @@ namespace AssetPromiseKeeper_Tests
         [UnitySetUp]
         protected virtual IEnumerator SetUp()
         {
+            MemoryManager.i.Initialize();
             keeper = new APKType();
             yield break;
         }
