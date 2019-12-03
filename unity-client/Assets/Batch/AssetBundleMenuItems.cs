@@ -1,6 +1,10 @@
+using DCL.Helpers;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Networking;
+using static DCL.ContentServerUtils;
 
 [assembly: InternalsVisibleTo("AssetBundleBuilderTests")]
 namespace DCL
@@ -23,6 +27,14 @@ namespace DCL
             var builder = new AssetBundleBuilder();
             builder.environment = ContentServerUtils.ApiEnvironment.ORG;
             builder.DumpArea(new Vector2Int(-150, -150), new Vector2Int(10, 5));
+        }
+
+        [MenuItem("AssetBundleBuilder/Dump All Wearables")]
+        public static void DumpBaseAvatars()
+        {
+            var avatarItemList = GetAvatarMappingList("https://dcl-wearables.now.sh/index.json");
+            var builder = new AssetBundleBuilder();
+            builder.DownloadAndConvertAssets(avatarItemList);
         }
 
         [MenuItem("Decentraland/Asset Bundle Builder/Dump Zone -110,-110")]
@@ -65,6 +77,43 @@ namespace DCL
         public static void OnlyBuildBundles()
         {
             BuildPipeline.BuildAssetBundles(AssetBundleBuilderConfig.ASSET_BUNDLES_PATH_ROOT, BuildAssetBundleOptions.UncompressedAssetBundle | BuildAssetBundleOptions.ForceRebuildAssetBundle, BuildTarget.WebGL);
+        }
+
+        public class WearableItemArray
+        {
+            public List<WearableItem> data;
+        }
+
+        public static MappingPair[] GetAvatarMappingList(string url)
+        {
+            List<MappingPair> coords = new List<MappingPair>();
+
+            UnityWebRequest w = UnityWebRequest.Get(url);
+            w.SendWebRequest();
+
+            while (!w.isDone) {
+                // TODO: yield this thread?
+            }
+
+            if (!w.WebRequestSucceded())
+            {
+                Debug.LogWarning($"Request error! Parcels couldn't be fetched! -- {w.error}");
+                return null;
+            }
+
+            var avatarApiData = JsonUtility.FromJson<WearableItemArray>("{\"data\":" + w.downloadHandler.text + "}");
+
+            foreach (var avatar in avatarApiData.data)
+            {
+                foreach (var representation in avatar.representations)
+                {
+                    foreach (var datum in representation.contents)
+                    {
+                        coords.Add(datum);
+                    }
+                }
+            }
+            return coords.ToArray();
         }
     }
 }
