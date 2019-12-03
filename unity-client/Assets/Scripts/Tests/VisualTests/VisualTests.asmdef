@@ -1,16 +1,33 @@
 {
     "name": "VisualTests",
     "references": [
-        "MainScripts",
-        "Configuration",
-        "CoroutineHelpers",
-        "Utils"
+        "GUID:e555144732b726c4cba5b0f6337fea75",
+        "GUID:cc6bfabbfe87b7949aa248893f89ce37",
+        "GUID:760a1d365aad58044916992b072cf2a6",
+        "GUID:b1087c5731ff68448a0a9c625bb7e52d"
     ],
     "optionalUnityReferences": [
         "TestAssemblies"
     ],
     "includePlatforms": [],
-    "excludePlatforms": [],
+    "excludePlatforms": [
+        "Android",
+        "Editor",
+        "iOS",
+        "LinuxStandalone32",
+        "LinuxStandalone64",
+        "LinuxStandaloneUniversal",
+        "Lumin",
+        "macOSStandalone",
+        "PS4",
+        "Switch",
+        "tvOS",
+        "WSA",
+        "WebGL",
+        "WindowsStandalone32",
+        "WindowsStandalone64",
+        "XboxOne"
+    ],
     "allowUnsafeCode": false,
     "overrideReferences": false,
     "precompiledReferences": [],

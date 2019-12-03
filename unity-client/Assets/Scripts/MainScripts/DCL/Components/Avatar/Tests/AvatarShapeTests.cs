@@ -137,7 +137,8 @@ namespace Tests
         }
     }
 
-    public class AvatarShapeVisualTests : VisualTestsBase
+    // Visual tests are disabled until we fix the resolution issue
+    /* public class AvatarShapeVisualTests : VisualTestsBase
     {
         [UnityTest]
         [VisualTest]
@@ -195,5 +196,5 @@ namespace Tests
 
             yield return VisualTestHelpers.TakeSnapshot();
         }
-    }
+    } */
 }
