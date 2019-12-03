@@ -150,42 +150,7 @@ namespace Tests
         public IEnumerator AudioComponentMissingValuesGetDefaultedOnUpdate()
         {
             yield return InitScene();
-
-            DecentralandEntity entity = TestHelpers.CreateSceneEntity(scene);
-
-            // 1. Create component with non-default configs
-            DCLAudioSource.Model componentModel = new DCLAudioSource.Model()
-            {
-                audioClipId = "audioClipTest",
-                playing = false,
-                volume = 0.3f,
-                loop = true,
-                pitch = 0.8f
-            };
-
-            DCLAudioSource audioSourceComponent =
-                TestHelpers.EntityComponentCreate<DCLAudioSource, DCLAudioSource.Model>(scene, entity, componentModel);
-
-            // 2. Check configured values
-            Assert.AreEqual(0.3f, audioSourceComponent.model.volume);
-            Assert.AreEqual(0.8f, audioSourceComponent.model.pitch);
-
-            // 3. Update component with missing values
-            componentModel = new DCLAudioSource.Model()
-            {
-                audioClipId = "audioClipTest",
-                playing = false,
-                loop = false
-            };
-
-            scene.EntityComponentUpdate(entity, CLASS_ID_COMPONENT.AUDIO_SOURCE, JsonUtility.ToJson(componentModel));
-
-            // 4. Check changed values
-            Assert.IsFalse(audioSourceComponent.model.loop);
-
-            // 5. Check defaulted values
-            Assert.AreEqual(1f, audioSourceComponent.model.volume);
-            Assert.AreEqual(1f, audioSourceComponent.model.pitch);
+            yield return TestHelpers.TestEntityComponentDefaultsOnUpdate<DCLAudioSource.Model, DCLAudioSource>(scene);
         }
 
         [UnityTest]
