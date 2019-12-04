@@ -156,7 +156,7 @@ namespace Tests
         [UnityTest]
         public IEnumerator GLTFShapeIsInvalidatedWhenLeavingBoundsDebugMode()
         {
-            yield return InitScene(false, true, true, true, debugMode: true);
+            yield return InitScene(debugMode: true, reloadUnityScene: false);
 
             yield return Assert_GLTFShapeIsInvalidatedWhenLeavingBounds();
         }
