@@ -1,31 +1,33 @@
 ﻿using UnityEngine;
 using DCL.Controllers;
 using Builder.Gizmos;
+using System.Collections.Generic;
 
 namespace Builder
 {
     public class DCLBuilderObjectSelector : MonoBehaviour
     {
+        const float MAX_SECS_FOR_CLICK = 0.25f;
+
         public DCLBuilderRaycast builderRaycast;
         public DCLBuilderGizmoManager gizmosManager;
 
-        public delegate void DragDelegate(DCLBuilderEntity entity, Vector3 position);
         public delegate void EntitySelectedDelegate(DCLBuilderEntity entity, string gizmoType);
         public delegate void EntityDeselectedDelegate(DCLBuilderEntity entity);
 
         public static event EntitySelectedDelegate OnSelectedObject;
         public static event EntityDeselectedDelegate OnDeselectedObject;
         public static event System.Action OnNoObjectSelected;
-        public static event DragDelegate OnDraggingObjectStart;
-        public static event DragDelegate OnDraggingObject;
-        public static event DragDelegate OnDraggingObjectEnd;
+        public static event System.Action<List<DCLBuilderEntity>> OnSelectedObjectListChanged;
+        public static event System.Action<DCLBuilderEntity, Vector3> OnEntityPressed;
 
-        private DCLBuilderEntity selectedEntity = null;
+        private List<DCLBuilderEntity> selectedEntities = new List<DCLBuilderEntity>();
+        private EntityPressedInfo entityEnqueueForDeselectInfo = new EntityPressedInfo();
+        private bool isDirty = false;
 
-        private DragInfo dragInfo = new DragInfo();
         private float groundClickTime = 0;
 
-        private float snapFactorPosition = 0;
+        private bool isMultiSelectionEnabled = false;
 
         private bool isGameObjectActive = false;
 
@@ -51,10 +53,11 @@ namespace Builder
                 DCLBuilderInput.OnMouseUp += OnMouseUp;
                 DCLBuilderBridge.OnResetObject += OnResetObject;
                 DCLBuilderBridge.OnEntityRemoved += OnEntityRemoved;
-                DCLBuilderBridge.OnSetGridResolution += OnSetGridResolution;
                 DCLBuilderBridge.OnSceneChanged += OnSceneChanged;
                 DCLBuilderBridge.OnBuilderSelectEntity += OnBuilderSelectEntity;
                 DCLBuilderBridge.OnBuilderDeselectEntity += OnBuilderDeselectEntity;
+                DCLBuilderBridge.OnSetKeyDown += OnBuilderKeyDown;
+                DCLBuilderBridge.OnSetKeyUp += OnBuilderKeyUp;
             }
             isGameObjectActive = true;
         }
@@ -67,10 +70,11 @@ namespace Builder
             DCLBuilderInput.OnMouseUp -= OnMouseUp;
             DCLBuilderBridge.OnResetObject -= OnResetObject;
             DCLBuilderBridge.OnEntityRemoved -= OnEntityRemoved;
-            DCLBuilderBridge.OnSetGridResolution -= OnSetGridResolution;
             DCLBuilderBridge.OnSceneChanged -= OnSceneChanged;
             DCLBuilderBridge.OnBuilderSelectEntity -= OnBuilderSelectEntity;
             DCLBuilderBridge.OnBuilderDeselectEntity -= OnBuilderDeselectEntity;
+            DCLBuilderBridge.OnSetKeyDown -= OnBuilderKeyDown;
+            DCLBuilderBridge.OnSetKeyUp -= OnBuilderKeyUp;
         }
 
         private void Update()
@@ -78,6 +82,12 @@ namespace Builder
             if (!gizmosManager.isTransformingObject)
             {
                 CheckGizmoHover(Input.mousePosition);
+            }
+
+            if (isDirty)
+            {
+                isDirty = false;
+                OnSelectedObjectListChanged?.Invoke(selectedEntities);
             }
         }
 
@@ -91,29 +101,34 @@ namespace Builder
                     DCLBuilderGizmoAxis gizmosAxis = hit.collider.gameObject.GetComponent<DCLBuilderGizmoAxis>();
                     if (gizmosAxis != null)
                     {
-                        gizmosManager.OnBeginDrag(gizmosAxis, selectedEntity);
+                        for (int i = 0; i < selectedEntities.Count; i++)
+                        {
+                            gizmosManager.OnBeginDrag(gizmosAxis, selectedEntities[i]);
+                        }
                     }
                     else
                     {
                         var builderSelectionCollider = hit.collider.gameObject.GetComponent<DCLBuilderSelectionCollider>();
+                        DCLBuilderEntity pressedEntity = null;
+
                         if (builderSelectionCollider != null)
                         {
-                            dragInfo.entity = builderSelectionCollider.ownerEntity;
+                            pressedEntity = builderSelectionCollider.ownerEntity;
                         }
 
-                        if (dragInfo.entity != null)
+                        if (pressedEntity != null)
                         {
-                            if (CanSelect(dragInfo.entity))
+                            if (CanSelect(pressedEntity))
                             {
-                                if (dragInfo.entity != selectedEntity)
+                                if (selectedEntities.Contains(pressedEntity))
                                 {
-                                    Select(dragInfo.entity);
+                                    EnqueueEntityForDeselect(pressedEntity, hit.point);
                                 }
-
-                                dragInfo.isDraggingObject = true;
-                                builderRaycast.SetEntityHitPlane(hit.point.y);
-                                dragInfo.hitToEntityOffset = dragInfo.entity.transform.position - hit.point;
-                                OnDraggingObjectStart?.Invoke(dragInfo.entity, dragInfo.entity.transform.position);
+                                else
+                                {
+                                    OnPressedEntity(pressedEntity, hit.point);
+                                }
+                                OnEntityPressed?.Invoke(pressedEntity, hit.point);
                             }
                         }
                     }
@@ -130,26 +145,27 @@ namespace Builder
         {
             if (buttonId == 0)
             {
-                if (dragInfo.isDraggingObject && dragInfo.entity != null)
-                {
-                    OnDraggingObjectEnd?.Invoke(dragInfo.entity, dragInfo.entity.transform.position);
-                }
-
-                dragInfo.isDraggingObject = false;
-                dragInfo.entity = null;
-
                 if (gizmosManager.isTransformingObject)
                 {
                     gizmosManager.OnEndDrag();
                 }
 
-                if (groundClickTime != 0 && (Time.unscaledTime - groundClickTime) < 0.25f)
+                if (entityEnqueueForDeselectInfo.pressedEntity != null)
                 {
-                    if (selectedEntity != null)
+                    if ((Time.unscaledTime - entityEnqueueForDeselectInfo.pressedTime) < MAX_SECS_FOR_CLICK)
+                    {
+                        OnPressedEntity(entityEnqueueForDeselectInfo.pressedEntity, entityEnqueueForDeselectInfo.hitPoint);
+                    }
+                }
+                entityEnqueueForDeselectInfo.pressedEntity = null;
+
+                if (groundClickTime != 0 && (Time.unscaledTime - groundClickTime) < MAX_SECS_FOR_CLICK)
+                {
+                    if (selectedEntities != null)
                     {
                         OnNoObjectSelected?.Invoke();
                     }
-                    Deselect();
+                    DeselectAll();
                 }
                 groundClickTime = 0;
             }
@@ -164,34 +180,22 @@ namespace Builder
                 {
                     UpdateGizmoAxis(mousePosition);
                 }
-                else if (dragInfo.isDraggingObject && dragInfo.entity != null && hasMouseMoved)
-                {
-                    DragObject(dragInfo.entity, mousePosition);
-                }
             }
-        }
-
-        private void OnSetGridResolution(float position, float rotation, float scale)
-        {
-            snapFactorPosition = position;
         }
 
         private void OnResetObject()
         {
-            if (selectedEntity != null)
+            for (int i = 0; i < selectedEntities.Count; i++)
             {
-                selectedEntity.transform.localRotation = Quaternion.identity;
+                selectedEntities[i].transform.localRotation = Quaternion.identity;
             }
         }
 
         private void OnEntityRemoved(DCLBuilderEntity entity)
         {
-            if (selectedEntity == entity)
+            if (selectedEntities.Contains(entity))
             {
-                Deselect();
-                dragInfo.isDraggingObject = false;
-                dragInfo.entity = null;
-                OnNoObjectSelected?.Invoke();
+                Deselect(entity);
             }
         }
 
@@ -206,7 +210,7 @@ namespace Builder
             if (currentScene && currentScene.entities.ContainsKey(entityId))
             {
                 DCLBuilderEntity entity = currentScene.entities[entityId].gameObject.GetComponent<DCLBuilderEntity>();
-                if (entity && !dragInfo.isDraggingObject && !gizmosManager.isTransformingObject && CanSelect(entity))
+                if (entity && !gizmosManager.isTransformingObject && CanSelect(entity))
                 {
                     entity.SetOnShapeLoaded(() =>
                     {
@@ -218,7 +222,23 @@ namespace Builder
 
         private void OnBuilderDeselectEntity()
         {
-            Deselect();
+            DeselectAll();
+        }
+
+        private void OnBuilderKeyDown(KeyCode keyCode)
+        {
+            if (keyCode == KeyCode.LeftShift)
+            {
+                isMultiSelectionEnabled = true;
+            }
+        }
+
+        private void OnBuilderKeyUp(KeyCode keyCode)
+        {
+            if (keyCode == KeyCode.LeftShift)
+            {
+                isMultiSelectionEnabled = false;
+            }
         }
 
         private bool CanSelect(DCLBuilderEntity entity)
@@ -228,53 +248,41 @@ namespace Builder
 
         private void Select(DCLBuilderEntity entity)
         {
-            Deselect();
-            if (entity != null)
+            if (entity != null && !selectedEntities.Contains(entity))
             {
-                selectedEntity = entity;
-                selectedEntity.SetSelectLayer();
+                selectedEntities.Add(entity);
+                entity.SetSelectLayer();
 
                 OnSelectedObject?.Invoke(entity, gizmosManager.GetSelectedGizmo());
+                isDirty = true;
             }
         }
 
         private void Deselect(DCLBuilderEntity entity)
         {
-            if (selectedEntity == entity)
+            if (selectedEntities.Contains(entity))
             {
                 OnDeselectedObject?.Invoke(entity);
                 if (entity != null)
                 {
                     entity.SetDefaultLayer();
                 }
-                selectedEntity = null;
+                selectedEntities.Remove(entity);
             }
+
+            if (selectedEntities.Count == 0)
+            {
+                OnNoObjectSelected?.Invoke();
+            }
+            isDirty = true;
         }
 
-        private void Deselect()
+        private void DeselectAll()
         {
-            if (selectedEntity != null)
+            for (int i = selectedEntities.Count - 1; i >= 0; i--)
             {
-                Deselect(selectedEntity);
+                Deselect(selectedEntities[i]);
             }
-        }
-
-        private void DragObject(DCLBuilderEntity entity, Vector3 mousePosition)
-        {
-            Vector3 hitPosition = builderRaycast.RaycastToEntityHitPlane(mousePosition);
-            Vector3 newPosition = hitPosition + dragInfo.hitToEntityOffset;
-            newPosition.y = entity.transform.position.y;
-
-            if (snapFactorPosition > 0)
-            {
-                newPosition.x = newPosition.x - (newPosition.x % snapFactorPosition);
-                newPosition.z = newPosition.z - (newPosition.z % snapFactorPosition);
-            }
-
-            entity.transform.position = newPosition;
-            boundariesChecker?.EvaluateEntityPosition(selectedEntity.rootEntity);
-
-            OnDraggingObject?.Invoke(entity, newPosition);
         }
 
         private void UpdateGizmoAxis(Vector3 mousePosition)
@@ -283,7 +291,10 @@ namespace Builder
             if (gizmosManager.RaycastHit(builderRaycast.GetMouseRay(mousePosition), out hit))
             {
                 gizmosManager.OnDrag(hit, mousePosition);
-                boundariesChecker?.EvaluateEntityPosition(selectedEntity.rootEntity);
+                for (int i = 0; i < selectedEntities.Count; i++)
+                {
+                    boundariesChecker?.EvaluateEntityPosition(selectedEntities[i].rootEntity);
+                }
             }
         }
 
@@ -303,15 +314,48 @@ namespace Builder
 
         private void OnPreviewModeChanged(bool isPreview)
         {
-            Deselect();
+            DeselectAll();
             gameObject.SetActive(!isPreview);
         }
 
-        private class DragInfo
+        private void EnqueueEntityForDeselect(DCLBuilderEntity pressedEntity, Vector3 hitPoint)
         {
-            public DCLBuilderEntity entity = null;
-            public bool isDraggingObject = false;
-            public Vector3 hitToEntityOffset = Vector3.zero;
+            entityEnqueueForDeselectInfo.pressedEntity = pressedEntity;
+            entityEnqueueForDeselectInfo.pressedTime = Time.unscaledTime;
+            entityEnqueueForDeselectInfo.hitPoint = hitPoint;
+        }
+
+        private void OnPressedEntity(DCLBuilderEntity pressedEntity, Vector3 hitPoint)
+        {
+            if (CanSelect(pressedEntity))
+            {
+                if (isMultiSelectionEnabled)
+                {
+                    if (!selectedEntities.Contains(pressedEntity))
+                    {
+                        Select(pressedEntity);
+                    }
+                    else
+                    {
+                        Deselect(pressedEntity);
+                    }
+                }
+                else
+                {
+                    DeselectAll();
+                    Select(pressedEntity);
+                }
+
+                OnSelectedObjectListChanged?.Invoke(selectedEntities);
+                isDirty = false;
+            }
+        }
+
+        private class EntityPressedInfo
+        {
+            public DCLBuilderEntity pressedEntity;
+            public float pressedTime;
+            public Vector3 hitPoint;
         }
     }
 }

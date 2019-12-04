@@ -32,6 +32,7 @@ namespace Builder
 
 #if UNITY_EDITOR
             EditorKeyDownEvent();
+            EditorKeyUpEvent();
 #endif
         }
 
@@ -92,21 +93,33 @@ namespace Builder
 
         private void EditorKeyDownEvent()
         {
-            if (Input.GetKeyDown(KeyCode.UpArrow))
+            if (Input.GetKey(KeyCode.UpArrow))
             {
                 SendMessageToBridge("OnBuilderKeyDown", "UpArrow");
             }
-            if (Input.GetKeyDown(KeyCode.DownArrow))
+            if (Input.GetKey(KeyCode.DownArrow))
             {
                 SendMessageToBridge("OnBuilderKeyDown", "DownArrow");
             }
-            if (Input.GetKeyDown(KeyCode.LeftArrow))
+            if (Input.GetKey(KeyCode.LeftArrow))
             {
                 SendMessageToBridge("OnBuilderKeyDown", "LeftArrow");
             }
-            if (Input.GetKeyDown(KeyCode.RightArrow))
+            if (Input.GetKey(KeyCode.RightArrow))
             {
                 SendMessageToBridge("OnBuilderKeyDown", "RightArrow");
+            }
+            if (Input.GetKey(KeyCode.LeftShift))
+            {
+                SendMessageToBridge("OnBuilderKeyDown", "LeftShift");
+            }
+        }
+
+        private void EditorKeyUpEvent()
+        {
+            if (Input.GetKeyUp(KeyCode.LeftShift))
+            {
+                SendMessageToBridge("OnBuilderKeyUp", "LeftShift");
             }
         }
 

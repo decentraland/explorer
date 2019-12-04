@@ -30,7 +30,8 @@ namespace Builder
         public static System.Action<Vector3> OnSetCameraPosition;
         public static System.Action<float, float> OnSetCameraRotation;
         public static System.Action OnResetCameraZoom;
-        public static System.Action<KeyCode> OnSetArrowKeyDown;
+        public static System.Action<KeyCode> OnSetKeyDown;
+        public static System.Action<KeyCode> OnSetKeyUp;
         public static event SetGridResolutionDelegate OnSetGridResolution;
         public static System.Action<ParcelScene> OnSceneChanged;
         public static System.Action<string> OnBuilderSelectEntity;
@@ -247,10 +248,19 @@ namespace Builder
 
         public void OnBuilderKeyDown(string key)
         {
-            KeyCode arrowKey;
-            if (System.Enum.TryParse(key, false, out arrowKey))
+            KeyCode keyCode;
+            if (System.Enum.TryParse(key, false, out keyCode))
             {
-                OnSetArrowKeyDown?.Invoke(arrowKey);
+                OnSetKeyDown?.Invoke(keyCode);
+            }
+        }
+
+        public void OnBuilderKeyUp(string key)
+        {
+            KeyCode keyCode;
+            if (System.Enum.TryParse(key, false, out keyCode))
+            {
+                OnSetKeyUp?.Invoke(keyCode);
             }
         }
 
@@ -366,7 +376,8 @@ namespace Builder
         {
             if (!isGameObjectActive)
             {
-                DCLBuilderObjectSelector.OnDraggingObjectEnd += OnObjectDragEnd;
+                DCLBuilderObjectDragger.OnDraggingObjectEnd += OnObjectDragEnd;
+                DCLBuilderObjectDragger.OnDraggingObject += OnObjectDrag;
                 DCLBuilderObjectSelector.OnSelectedObject += OnObjectSelected;
                 DCLBuilderObjectSelector.OnNoObjectSelected += OnNoObjectSelected;
                 DCLBuilderGizmoManager.OnGizmoTransformObjectEnd += OnGizmoTransformObjectEnded;
@@ -380,7 +391,8 @@ namespace Builder
         private void OnDisable()
         {
             isGameObjectActive = false;
-            DCLBuilderObjectSelector.OnDraggingObjectEnd -= OnObjectDragEnd;
+            DCLBuilderObjectDragger.OnDraggingObjectEnd -= OnObjectDragEnd;
+            DCLBuilderObjectDragger.OnDraggingObject -= OnObjectDrag;
             DCLBuilderObjectSelector.OnSelectedObject -= OnObjectSelected;
             DCLBuilderObjectSelector.OnNoObjectSelected -= OnNoObjectSelected;
             DCLBuilderGizmoManager.OnGizmoTransformObjectEnd -= OnGizmoTransformObjectEnded;
@@ -392,6 +404,11 @@ namespace Builder
         private void OnObjectDragEnd(DCLBuilderEntity entity, Vector3 position)
         {
             NotifyGizmoEvent(entity, DCLGizmos.Gizmo.NONE);
+        }
+
+        private void OnObjectDrag(DCLBuilderEntity entity, Vector3 position)
+        {
+            currentScene.boundariesChecker?.EvaluateEntityPosition(entity.rootEntity);
         }
 
         private void OnGizmoTransformObjectEnded(DCLBuilderEntity entity, Vector3 position, string gizmoType)
