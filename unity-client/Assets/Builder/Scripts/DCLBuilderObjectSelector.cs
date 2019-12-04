@@ -126,7 +126,7 @@ namespace Builder
                                 }
                                 else
                                 {
-                                    OnPressedEntity(pressedEntity, hit.point);
+                                    ProcessEntityPressed(pressedEntity, hit.point);
                                 }
                                 OnEntityPressed?.Invoke(pressedEntity, hit.point);
                             }
@@ -154,7 +154,7 @@ namespace Builder
                 {
                     if ((Time.unscaledTime - entityEnqueueForDeselectInfo.pressedTime) < MAX_SECS_FOR_CLICK)
                     {
-                        OnPressedEntity(entityEnqueueForDeselectInfo.pressedEntity, entityEnqueueForDeselectInfo.hitPoint);
+                        ProcessEntityPressed(entityEnqueueForDeselectInfo.pressedEntity, entityEnqueueForDeselectInfo.hitPoint);
                     }
                 }
                 entityEnqueueForDeselectInfo.pressedEntity = null;
@@ -325,7 +325,7 @@ namespace Builder
             entityEnqueueForDeselectInfo.hitPoint = hitPoint;
         }
 
-        private void OnPressedEntity(DCLBuilderEntity pressedEntity, Vector3 hitPoint)
+        private void ProcessEntityPressed(DCLBuilderEntity pressedEntity, Vector3 hitPoint)
         {
             if (CanSelect(pressedEntity))
             {

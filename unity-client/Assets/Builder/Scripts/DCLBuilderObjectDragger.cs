@@ -14,7 +14,7 @@ namespace Builder
         public static event DragDelegate OnDraggingObject;
         public static event DragDelegate OnDraggingObjectEnd;
 
-        private List<SelectedEntityInfo> selectedEntitiesInfo = new List<SelectedEntityInfo>();
+        private List<DCLBuilderEntity> selectedEntities;
         private DCLBuilderEntity targetEntity;
         private Vector3 targetOffset;
 
@@ -47,36 +47,33 @@ namespace Builder
 
         private void OnSelectedObjectListChanged(List<DCLBuilderEntity> selectedEntities)
         {
-            Vector3 defaultOffset = Vector3.zero;
-            selectedEntitiesInfo.Clear();
-            for (int i = 0; i < selectedEntities.Count; i++)
-            {
-                selectedEntitiesInfo.Add(new SelectedEntityInfo() { entity = selectedEntities[i], offset = defaultOffset });
-            }
+            this.selectedEntities = selectedEntities;
         }
 
         private void OnSelectedObjectPressed(DCLBuilderEntity entity, Vector3 hitPoint)
         {
-            for (int i = 0; i < selectedEntitiesInfo.Count; i++)
+            if (selectedEntities != null)
             {
-                selectedEntitiesInfo[i].offset = selectedEntitiesInfo[i].entity.transform.position - entity.transform.position;
-                OnDraggingObjectStart?.Invoke(selectedEntitiesInfo[i].entity, selectedEntitiesInfo[i].entity.transform.position);
-            }
+                for (int i = 0; i < selectedEntities.Count; i++)
+                {
+                    OnDraggingObjectStart?.Invoke(selectedEntities[i], selectedEntities[i].transform.position);
+                }
 
-            targetEntity = entity;
-            targetOffset = entity.transform.position - hitPoint;
-            builderRaycast.SetEntityHitPlane(hitPoint.y);
+                targetEntity = entity;
+                targetOffset = entity.transform.position - hitPoint;
+                builderRaycast.SetEntityHitPlane(hitPoint.y);
+            }
         }
 
         private void OnMouseUp(int buttonId, Vector3 mousePosition)
         {
-            if (buttonId == 0)
+            if (buttonId == 0 && selectedEntities != null)
             {
                 if (targetEntity != null)
                 {
-                    for (int i = 0; i < selectedEntitiesInfo.Count; i++)
+                    for (int i = 0; i < selectedEntities.Count; i++)
                     {
-                        OnDraggingObjectEnd?.Invoke(selectedEntitiesInfo[i].entity, selectedEntitiesInfo[i].entity.transform.position);
+                        OnDraggingObjectEnd?.Invoke(selectedEntities[i], selectedEntities[i].transform.position);
                     }
                 }
                 targetEntity = null;
@@ -85,7 +82,7 @@ namespace Builder
 
         private void OnMouseDrag(int buttonId, Vector3 mousePosition, float axisX, float axisY)
         {
-            if (buttonId == 0)
+            if (buttonId == 0 && selectedEntities != null)
             {
                 bool hasMouseMoved = (axisX != 0 || axisY != 0);
                 if (targetEntity != null && hasMouseMoved)
@@ -107,23 +104,22 @@ namespace Builder
                 targetPosition.z = targetPosition.z - (targetPosition.z % snapFactorPosition);
             }
 
-            for (int i = 0; i < selectedEntitiesInfo.Count; i++)
+            Vector3 moveAmount = targetPosition - targetEntity.transform.position;
+            targetEntity.transform.position = targetPosition;
+
+            for (int i = 0; i < selectedEntities.Count; i++)
             {
-                Vector3 entityNewPosition = targetPosition + selectedEntitiesInfo[i].offset;
-                selectedEntitiesInfo[i].entity.transform.position = entityNewPosition;
-                OnDraggingObject?.Invoke(selectedEntitiesInfo[i].entity, selectedEntitiesInfo[i].entity.transform.position);
+                if (selectedEntities[i] != targetEntity)
+                {
+                    selectedEntities[i].transform.position = selectedEntities[i].transform.position + moveAmount;
+                }
+                OnDraggingObject?.Invoke(selectedEntities[i], selectedEntities[i].transform.position);
             }
         }
 
         private void OnSetGridResolution(float position, float rotation, float scale)
         {
             snapFactorPosition = position;
-        }
-
-        class SelectedEntityInfo
-        {
-            public DCLBuilderEntity entity;
-            public Vector3 offset;
         }
     }
 }
