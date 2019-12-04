@@ -114,7 +114,7 @@ namespace Tests
             yield return uiContainerRectShape2.routine;
 
             // Update UIContainerRectShape parent to the previous container
-            scene.SharedComponentUpdate(uiContainerRectShape.id, JsonUtility.ToJson(new UIContainerRect.Model
+            scene.SharedComponentUpdate(uiContainerRectShape2.id, JsonUtility.ToJson(new UIContainerRect.Model
             {
                 parentComponent = uiContainerRectShape.id,
             }));
