@@ -10,7 +10,7 @@ namespace DCL
         private const float MIN_TIME_BETWEEN_UNLOAD_ASSETS = 10.0f;
         private float lastTimeUnloadUnusedAssets = 0;
 
-        public override void Initialize()
+        public void Initialize()
         {
             CoroutineStarter.Start(AutoCleanup());
         }

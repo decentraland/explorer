@@ -14,12 +14,5 @@ namespace DCL
                 return instance;
             }
         }
-
-        public virtual void Initialize()
-        {
-            //NOTE(Brian): You have to call this doing Singleton.i.Initialize().
-            //             This by itself triggers the getter and creates the instance.
-            //             Sorry for the "clever" code.
-        }
     }
 }
