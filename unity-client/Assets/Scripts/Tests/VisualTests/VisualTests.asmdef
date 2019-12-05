@@ -9,10 +9,8 @@
     "optionalUnityReferences": [
         "TestAssemblies"
     ],
-    "includePlatforms": [],
-    "excludePlatforms": [
+    "includePlatforms": [
         "Android",
-        "Editor",
         "iOS",
         "LinuxStandalone32",
         "LinuxStandalone64",
@@ -28,6 +26,7 @@
         "WindowsStandalone64",
         "XboxOne"
     ],
+    "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,
     "precompiledReferences": [],

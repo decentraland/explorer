@@ -47,8 +47,9 @@ namespace AvatarEditorHUD_Tests
         }
 
         [TearDown]
-        public void TearDown()
+        public override void TearDown()
         {
+            base.TearDown();
             controller.CleanUp();
         }
 

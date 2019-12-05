@@ -123,7 +123,7 @@ public class PhysicsCast_Tests : TestsBase
     [UnityTest]
     public IEnumerator HitAll()
     {
-        yield return InitScene();
+        yield return InitScene(reloadUnityScene: false);
 
         ConfigureRaycastQuery("HitAll");
 
