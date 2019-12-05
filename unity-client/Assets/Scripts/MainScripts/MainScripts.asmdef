@@ -17,7 +17,6 @@
         "ScriptableObjects",
         "WaitForSecondsCache",
         "ContentProvider",
-        "LoadersController",
         "AvatarAssets"
     ],
     "optionalUnityReferences": [],
