@@ -183,7 +183,10 @@ namespace Builder
             {
                 gameObject.transform.localScale = Vector3.zero;
                 StartCoroutine(ScaleAnimationRoutine(0.3f));
-
+            }
+            else if (isTransformComponentSet)
+            {
+                gameObject.transform.localScale = scaleTarget;
             }
 
             if (onShapeLoaded != null)
