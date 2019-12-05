@@ -8,7 +8,7 @@ using UnityEngine.TestTools;
 using NUnit.Framework;
 using System.Collections;
 
-namespace SceneBoundariesChecker
+namespace SceneBoundariesCheckerTests
 {
     public class SceneBoundariesCheckerTests : TestsBase
     {
