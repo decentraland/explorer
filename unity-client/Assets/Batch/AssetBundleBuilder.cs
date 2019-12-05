@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
@@ -13,7 +12,6 @@ using UnityGLTF.Cache;
 using MappingPair = DCL.ContentServerUtils.MappingPair;
 using MappingsAPIData = DCL.ContentServerUtils.MappingsAPIData;
 
-[assembly: InternalsVisibleTo("AssetBundleBuilderEditorTests")]
 namespace DCL
 {
     public static class AssetBundleBuilderConfig
@@ -50,7 +48,7 @@ namespace DCL
 
         private const int ASSET_REQUEST_RETRY_COUNT = 5;
 
-        Dictionary<string, string> hashLowercaseToHashProper = new Dictionary<string, string>();
+        public Dictionary<string, string> hashLowercaseToHashProper = new Dictionary<string, string>();
 
         internal ContentServerUtils.ApiEnvironment environment = ContentServerUtils.ApiEnvironment.ORG;
 
@@ -192,7 +190,7 @@ namespace DCL
                 //             So to ensure dependencies are being kept in subsequent editor runs we normalize the asset guid using
                 //             the CID.
                 string metaContent = File.ReadAllText(metaPath);
-                string guid = AssetBundleBuilderUtils.GetGUID(hash);
+                string guid = AssetBundleBuilderUtils.CidToGuid(hash);
                 string result = Regex.Replace(metaContent, @"guid: \w+?\n", $"guid: {guid}\n");
 
                 //NOTE(Brian): We must do this hack in order to the new guid to be added to the AssetDatabase
@@ -238,58 +236,9 @@ namespace DCL
             }
         }
 
-        public bool DownloadAndConvertAssets(MappingPair[] rawContents)
-        {
-            startTime = Time.realtimeSinceStartup;
 
-            InitializeDirectoryPaths(false);
 
-            float timer = Time.realtimeSinceStartup;
-            bool shouldGenerateAssetBundles = true;
-            EditorApplication.CallbackFunction updateLoop = null;
-
-            updateLoop = () =>
-            {
-                try
-                {
-                    //NOTE(Brian): We have to check this because the ImportAsset for GLTFs is not synchronous, and must execute some delayed calls
-                    //             after the import asset finished. Therefore, we have to make sure those calls finished before continuing.
-                    if (!GLTFImporter.finishedImporting || Time.realtimeSinceStartup - timer > 60)
-                        return;
-
-                    AssetDatabase.Refresh();
-
-                    PopulateLowercaseMappings(rawContents);
-
-                    shouldGenerateAssetBundles |= DumpSceneAssets(rawContents);
-
-                    if (!Directory.Exists(finalAssetBundlePath))
-                        Directory.CreateDirectory(finalAssetBundlePath);
-
-                    EditorApplication.update -= updateLoop;
-
-                    if (shouldGenerateAssetBundles)
-                    {
-                        AssetBundleManifest manifest;
-
-                        if (BuildAssetBundles(out manifest))
-                        {
-                            FixupFilenames(manifest.GetAllAssetBundles());
-                        }
-                    }
-                }
-                catch (Exception e)
-                {
-                    Debug.LogError(e.Message);
-                    EditorApplication.update -= updateLoop;
-                }
-            };
-
-            EditorApplication.update += updateLoop;
-            return true;
-        }
-
-        private bool DumpSceneAssets(MappingPair[] rawContents)
+        private bool DumpAssets(MappingPair[] rawContents)
         {
             var hashToGltfPair = AssetBundleBuilderUtils.FilterExtensions(rawContents, AssetBundleBuilderConfig.gltfExtensions);
             var hashToBufferPair = AssetBundleBuilderUtils.FilterExtensions(rawContents, AssetBundleBuilderConfig.bufferExtensions);
@@ -336,8 +285,8 @@ namespace DCL
                 }
             }
 
-            GLTFImporter.OnGLTFRootIsConstructed -= AssetBundleBuilderUtils.FixGltfDependencyPaths;
-            GLTFImporter.OnGLTFRootIsConstructed += AssetBundleBuilderUtils.FixGltfDependencyPaths;
+            GLTFImporter.OnGLTFRootIsConstructed -= AssetBundleBuilderUtils.FixGltfRootInvalidUriCharacters;
+            GLTFImporter.OnGLTFRootIsConstructed += AssetBundleBuilderUtils.FixGltfRootInvalidUriCharacters;
 
             List<Stream> streamsToDispose = new List<Stream>();
 
@@ -433,25 +382,19 @@ namespace DCL
             return true;
         }
 
-        void ConvertScenesToAssetBundles(List<string> sceneCidsList, System.Action<ErrorCodes> OnFinish)
+        public bool DownloadAndConvertAssets(MappingPair[] rawContents, System.Action<ErrorCodes> OnFinish = null)
         {
             if (OnFinish == null)
                 OnFinish = CleanAndExit;
 
-            if (sceneCidsList == null || sceneCidsList.Count == 0)
-            {
-                Debug.LogError("Scene list is null or count == 0! Maybe this sector lacks scenes or content requests failed?");
-                OnFinish?.Invoke(ErrorCodes.SCENE_LIST_NULL);
-                return;
-            }
-
-            Debug.Log($"Building {sceneCidsList.Count} scenes...");
             startTime = Time.realtimeSinceStartup;
 
             InitializeDirectoryPaths(false);
+            PopulateLowercaseMappings(rawContents);
 
             float timer = Time.realtimeSinceStartup;
             bool shouldGenerateAssetBundles = true;
+            bool assetsAlreadyDumped = false;
 
             EditorApplication.CallbackFunction updateLoop = null;
 
@@ -464,23 +407,16 @@ namespace DCL
                     if (!GLTFImporter.finishedImporting || Time.realtimeSinceStartup - timer > 60)
                         return;
 
-                    if (sceneCidsList.Count > 0)
+                    AssetDatabase.Refresh();
+
+                    if (!assetsAlreadyDumped)
                     {
-                        MappingsAPIData parcelInfoApiData = AssetBundleBuilderUtils.GetSceneMappingsData(environment, sceneCidsList[0]);
-                        AssetDatabase.Refresh();
+                        shouldGenerateAssetBundles |= DumpAssets(rawContents);
+                        assetsAlreadyDumped = true;
 
-                        MappingPair[] rawContents = parcelInfoApiData.data[0].content.contents;
-
-                        PopulateLowercaseMappings(rawContents);
-
-                        shouldGenerateAssetBundles |= DumpSceneAssets(rawContents);
-                        sceneCidsList.RemoveAt(0);
-                        timer = Time.realtimeSinceStartup;
+                        //NOTE(Brian): return in order to wait for GLTFImporter.finishedImporting flag, as it will set asynchronously.
                         return;
                     }
-
-                    if (!Directory.Exists(finalAssetBundlePath))
-                        Directory.CreateDirectory(finalAssetBundlePath);
 
                     EditorApplication.update -= updateLoop;
 
@@ -490,7 +426,7 @@ namespace DCL
 
                         if (BuildAssetBundles(out manifest))
                         {
-                            FixupFilenames(manifest.GetAllAssetBundles());
+                            CleanAssetBundleFolder(manifest.GetAllAssetBundles());
                             OnFinish?.Invoke(ErrorCodes.SUCCESS);
                         }
                         else
@@ -512,36 +448,42 @@ namespace DCL
             };
 
             EditorApplication.update += updateLoop;
+            return true;
         }
 
-        private void FixupFilenames(string[] assetBundles)
+        void ConvertScenesToAssetBundles(List<string> sceneCidsList, System.Action<ErrorCodes> OnFinish = null)
         {
-            for (int i = 0; i < assetBundles.Length; i++)
+            if (OnFinish == null)
+                OnFinish = CleanAndExit;
+
+            if (sceneCidsList == null || sceneCidsList.Count == 0)
             {
-                if (string.IsNullOrEmpty(assetBundles[i]))
-                    continue;
-
-                try
-                {
-                    //NOTE(Brian): This is done for correctness sake, rename files to preserve the hash upper-case
-                    if (hashLowercaseToHashProper.TryGetValue(assetBundles[i], out string hashWithUppercase))
-                    {
-                        string oldPath = finalAssetBundlePath + assetBundles[i];
-                        string path = finalAssetBundlePath + hashWithUppercase;
-                        File.Move(oldPath, path);
-                    }
-
-                    string oldPathMf = finalAssetBundlePath + assetBundles[i] + ".manifest";
-                    File.Delete(oldPathMf);
-                }
-                catch (Exception e)
-                {
-                    Debug.LogWarning("Error! " + e.Message);
-                }
+                Debug.LogError("Scene list is null or count == 0! Maybe this sector lacks scenes or content requests failed?");
+                OnFinish?.Invoke(ErrorCodes.SCENE_LIST_NULL);
+                return;
             }
+
+            Debug.Log($"Building {sceneCidsList.Count} scenes...");
+
+            List<MappingPair> rawContents = new List<MappingPair>();
+
+            foreach (var sceneCid in sceneCidsList)
+            {
+                MappingsAPIData parcelInfoApiData = AssetBundleBuilderUtils.GetSceneMappingsData(environment, sceneCidsList[0]);
+                rawContents.AddRange(parcelInfoApiData.data[0].content.contents);
+            }
+
+            DownloadAndConvertAssets(rawContents.ToArray(), OnFinish);
         }
 
-        private void PopulateLowercaseMappings(MappingPair[] rawContents)
+        private void CleanAssetBundleFolder(string[] assetBundles)
+        {
+            AssetBundleBuilderUtils.CleanAssetBundleFolder(finalAssetBundlePath, assetBundles, hashLowercaseToHashProper);
+        }
+
+
+
+        internal void PopulateLowercaseMappings(MappingPair[] rawContents)
         {
             //NOTE(Brian): Prepare gltfs gathering its dependencies first and filling the importer's static cache.
             foreach (var content in rawContents)
@@ -553,31 +495,31 @@ namespace DCL
             }
         }
 
-        private void RetrieveAndInjectTexture(Dictionary<string, MappingPair> hashToGltfPair, string gltfHash, MappingPair mappingPair)
+        private void RetrieveAndInjectTexture(Dictionary<string, MappingPair> hashToGltfPair, string gltfHash, MappingPair textureMappingPair)
         {
-            string fileExt = Path.GetExtension(mappingPair.file);
-            string realOutputPath = finalDownloadedPath + mappingPair.hash + "/" + mappingPair.hash + fileExt;
+            string fileExt = Path.GetExtension(textureMappingPair.file);
+            string realOutputPath = finalDownloadedPath + textureMappingPair.hash + "/" + textureMappingPair.hash + fileExt;
             Texture2D t2d = null;
 
             if (File.Exists(realOutputPath))
             {
-                string outputPath = finalDownloadedAssetDbPath + mappingPair.hash + "/" + mappingPair.hash + fileExt;
+                string outputPath = finalDownloadedAssetDbPath + textureMappingPair.hash + "/" + textureMappingPair.hash + fileExt;
                 t2d = AssetDatabase.LoadAssetAtPath<Texture2D>(outputPath);
             }
 
             if (t2d != null)
             {
-                string relativePath = AssetBundleBuilderUtils.GetRelativePathTo(hashToGltfPair[gltfHash].file, mappingPair.file);
+                string relativePath = AssetBundleBuilderUtils.GetRelativePathTo(hashToGltfPair[gltfHash].file, textureMappingPair.file);
                 //NOTE(Brian): This cache will be used by the GLTF importer when seeking textures. This way the importer will
                 //             consume the asset bundle dependencies instead of trying to create new textures.
                 PersistentAssetCache.ImageCacheByUri[relativePath] = new RefCountedTextureData(relativePath, t2d);
             }
         }
 
-        private void RetrieveAndInjectBuffer(string gltfFilePath, MappingPair contentPair, string contentFilePath)
+        private void RetrieveAndInjectBuffer(string gltfFilePath, MappingPair bufferMappingPair, string contentFilePath)
         {
-            string fileExt = Path.GetExtension(contentPair.file);
-            string realOutputPath = finalDownloadedPath + contentPair.hash + "/" + contentPair.hash + fileExt;
+            string fileExt = Path.GetExtension(bufferMappingPair.file);
+            string realOutputPath = finalDownloadedPath + bufferMappingPair.hash + "/" + bufferMappingPair.hash + fileExt;
 
             if (File.Exists(realOutputPath))
             {
@@ -600,7 +542,6 @@ namespace DCL
             string outputPathDir = Path.GetDirectoryName(outputPath);
 
             string finalUrl = baseUrl + hash;
-            string hashLowercase = hash.ToLowerInvariant();
 
             if (VERBOSE)
                 Debug.Log("checking against " + outputPath);
@@ -665,16 +606,17 @@ namespace DCL
             ConvertScenesToAssetBundles(new List<string> { cid }, OnFinish);
         }
 
-        private void InitializeDirectoryPaths(bool deleteIfExists)
+        internal void InitializeDirectoryPaths(bool deleteIfExists)
         {
             finalAssetBundlePath = AssetBundleBuilderConfig.ASSET_BUNDLES_PATH_ROOT + "/";
             finalDownloadedPath = AssetBundleBuilderConfig.DOWNLOADED_PATH_ROOT + "/";
             finalDownloadedAssetDbPath = AssetBundleBuilderConfig.DOWNLOADED_ASSET_DB_PATH_ROOT + "/";
 
             AssetBundleBuilderUtils.InitializeDirectory(finalDownloadedPath, deleteIfExists);
+            AssetBundleBuilderUtils.InitializeDirectory(finalAssetBundlePath, deleteIfExists);
         }
 
-        private void CleanupWorkingFolders()
+        internal void CleanupWorkingFolders()
         {
             AssetBundleBuilderUtils.DeleteFile(finalAssetBundlePath + AssetBundleBuilderConfig.ASSET_BUNDLE_FOLDER_NAME);
             AssetBundleBuilderUtils.DeleteFile(finalAssetBundlePath + AssetBundleBuilderConfig.ASSET_BUNDLE_FOLDER_NAME + ".manifest");

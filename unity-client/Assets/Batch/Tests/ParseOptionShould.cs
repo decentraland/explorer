@@ -2,7 +2,7 @@ using NUnit.Framework;
 
 public class ParseOptionShould
 {
-    readonly string[] args = new string[] { "-unityRandomOption", "-testOption", "arg1", "arg2", "-garbage", "-garbage2" };
+    readonly static string[] args = new string[] { "-unityRandomOption", "-testOption", "arg1", "arg2", "-garbage", "-garbage2" };
 
     [Test]
     public void FailWhenNoOptionsAreFound()
@@ -23,36 +23,37 @@ public class ParseOptionShould
     }
 
     [Test]
-    public void NotCrashWhenInvalidArgsAreGiven()
+    [TestCase(null, null, -1)]
+    [TestCase(null, "asdasdasd", -1)]
+    [TestCase(null, "asdasdasd", int.MaxValue)]
+    public void NotCrashWhenInvalidArgsAreGiven(string[] rawArgsList, string optionName, int expectedArgsQty)
     {
-        Assert.IsFalse(DCL.AssetBundleBuilderUtils.ParseOptionExplicit(null, null, -1, out string[] test5));
-        Assert.IsFalse(DCL.AssetBundleBuilderUtils.ParseOptionExplicit(null, "asdasdsad", -1, out string[] test6));
-        Assert.IsFalse(DCL.AssetBundleBuilderUtils.ParseOptionExplicit(null, "asdasdsad", int.MaxValue, out string[] test7));
+        Assert.IsFalse(DCL.AssetBundleBuilderUtils.ParseOptionExplicit(rawArgsList, optionName, expectedArgsQty, out _));
     }
 
     [Test]
     public void SucceedWhenOptionsAreFound()
     {
-        Assert.IsTrue(DCL.AssetBundleBuilderUtils.ParseOptionExplicit(args, "testOption", 0, out string[] test2));
-        Assert.IsTrue(test2 == null);
+        Assert.IsTrue(DCL.AssetBundleBuilderUtils.ParseOptionExplicit(args, "testOption", 0, out string[] test));
+        Assert.IsTrue(test == null);
     }
 
     [Test]
     public void SucceedExtractingArguments()
     {
-        if (DCL.AssetBundleBuilderUtils.ParseOptionExplicit(args, "testOption", 1, out string[] test3))
+        if (DCL.AssetBundleBuilderUtils.ParseOptionExplicit(args, "testOption", 1, out string[] test))
         {
-            Assert.IsTrue(test3 != null);
-            Assert.IsTrue(test3.Length == 1);
-            Assert.IsTrue(test3[0] == "arg1");
+            Assert.IsTrue(test != null);
+            Assert.IsTrue(test.Length == 1);
+            Assert.IsTrue(test[0] == "arg1");
         }
 
-        if (DCL.AssetBundleBuilderUtils.ParseOptionExplicit(args, "testOption", 2, out string[] test4))
+        if (DCL.AssetBundleBuilderUtils.ParseOptionExplicit(args, "testOption", 2, out string[] test2))
         {
-            Assert.IsTrue(test4 != null);
-            Assert.IsTrue(test4.Length == 2);
-            Assert.IsTrue(test4[0] == "arg1");
-            Assert.IsTrue(test4[1] == "arg2");
+            Assert.IsTrue(test2 != null);
+            Assert.IsTrue(test2.Length == 2);
+            Assert.IsTrue(test2[0] == "arg1");
+            Assert.IsTrue(test2[1] == "arg2");
         }
     }
 }

@@ -17,22 +17,15 @@ namespace DCL
             var builder = new AssetBundleBuilder();
             builder.environment = ContentServerUtils.ApiEnvironment.ORG;
             builder.skipAlreadyBuiltBundles = false;
-            var zoneArray = AssetBundleBuilderUtils.GetCenteredZoneArray(new Vector2Int(9, 78), new Vector2Int(10, 10));
+            var zoneArray = AssetBundleBuilderUtils.GetCenteredZoneArray(new Vector2Int(13, 75), new Vector2Int(2, 2));
             builder.DumpArea(zoneArray);
         }
 
-        [MenuItem("Decentraland/Asset Bundle Builder/Dump World Borders")]
-        public static void DumpBorderArea()
-        {
-            var builder = new AssetBundleBuilder();
-            builder.environment = ContentServerUtils.ApiEnvironment.ORG;
-            builder.DumpArea(new Vector2Int(-150, -150), new Vector2Int(10, 5));
-        }
-
-        [MenuItem("AssetBundleBuilder/Dump All Wearables")]
+        [MenuItem("Decentraland/Asset Bundle Builder/Dump All Wearables")]
         public static void DumpBaseAvatars()
         {
             var avatarItemList = GetAvatarMappingList("https://dcl-wearables.now.sh/index.json");
+
             var builder = new AssetBundleBuilder();
             builder.DownloadAndConvertAssets(avatarItemList);
         }
@@ -44,7 +37,6 @@ namespace DCL
             builder.environment = ContentServerUtils.ApiEnvironment.ORG;
             builder.DumpArea(new Vector2Int(-110, -110), new Vector2Int(1, 1));
         }
-
         static void DumpAreaToMax(AssetBundleBuilder builder, int x, int y)
         {
             if (x >= 140 || y >= 140)
@@ -86,14 +78,12 @@ namespace DCL
 
         public static MappingPair[] GetAvatarMappingList(string url)
         {
-            List<MappingPair> coords = new List<MappingPair>();
+            List<MappingPair> mappingPairs = new List<MappingPair>();
 
             UnityWebRequest w = UnityWebRequest.Get(url);
             w.SendWebRequest();
 
-            while (!w.isDone) {
-                // TODO: yield this thread?
-            }
+            while (!w.isDone) { }
 
             if (!w.WebRequestSucceded())
             {
@@ -109,11 +99,12 @@ namespace DCL
                 {
                     foreach (var datum in representation.contents)
                     {
-                        coords.Add(datum);
+                        mappingPairs.Add(datum);
                     }
                 }
             }
-            return coords.ToArray();
+
+            return mappingPairs.ToArray();
         }
     }
 }

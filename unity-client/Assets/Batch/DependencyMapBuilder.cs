@@ -47,7 +47,11 @@ namespace DCL
                 string finalFilename = assetBundles[i];
 
                 hashLowercaseToHashProper.TryGetValue(assetBundles[i], out finalFilename);
-                File.WriteAllText(path + finalFilename + ".depmap", json);
+
+                if (!string.IsNullOrEmpty(finalFilename))
+                {
+                    File.WriteAllText(path + finalFilename + ".depmap", json);
+                }
             }
         }
     }

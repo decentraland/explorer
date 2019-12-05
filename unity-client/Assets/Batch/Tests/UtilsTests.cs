@@ -1,73 +1,27 @@
 using DCL;
 using NUnit.Framework;
-using System.Collections;
 using System.IO;
-using UnityEditor;
-using UnityEngine;
-using UnityEngine.TestTools;
 
 public class UtilsTests
 {
     [Test]
-    public void CIDtoMD5Test()
+    public void CIDtoGuidTest()
     {
-        Assert.AreEqual("d3b55cc7e3367537c1670ecebb1ccb05", DCL.AssetBundleBuilderUtils.GetGUID("QmWVcyTEzSEBKC7hzq6doiTWnopZ6DdqJMqufx6gXwFnTS"));
+        Assert.AreEqual("d3b55cc7e3367537c1670ecebb1ccb05", DCL.AssetBundleBuilderUtils.CidToGuid("QmWVcyTEzSEBKC7hzq6doiTWnopZ6DdqJMqufx6gXwFnTS"));
     }
 
-    [UnityTest]
-    public IEnumerator EvaluateDependency()
+    [Test]
+    [TestCase("..|FenceStoneLarge_01|file1.png", "models/Fountain_01/Fountain_01.glb", "models/FenceStoneLarge_01/file1.png")]
+    [TestCase("file1.png", "models/Fountain_01/Fountain_01.glb", "models/Fountain_01/file1.png")]
+    [TestCase("..|LampPost_01|file1.png", "models/Fountain_01/Fountain_01.glb", "models/LampPost_01/file1.png")]
+    [TestCase("..|FenceStonePillarTall_01|file1.png", "models/Fountain_01/Fountain_01.glb", "models/FenceStonePillarTall_01/file1.png")]
+    [TestCase("..|Grass_02|file1.png", "models/Fountain_01/Fountain_01.glb", "models/Grass_02/file1.png")]
+    [TestCase("..|FloorBaseGrass_01|Floor_Grass01.png.png", "models/Fountain_01/Fountain_01.glb", "models/FloorBaseGrass_01/Floor_Grass01.png.png")]
+    [TestCase("..|FenceStonePillar_01|file1.png", "models/Fountain_01/Fountain_01.glb", "models/FenceStonePillar_01/file1.png")]
+    public void GetRelativePathToTest(string expected, string from, string to)
     {
-        Caching.ClearCache();
-
-        if (Directory.Exists(AssetBundleBuilderConfig.ASSET_BUNDLES_PATH_ROOT))
-            Directory.Delete(AssetBundleBuilderConfig.ASSET_BUNDLES_PATH_ROOT, true);
-
-        if (Directory.Exists(AssetBundleBuilderConfig.DOWNLOADED_PATH_ROOT))
-            Directory.Delete(AssetBundleBuilderConfig.DOWNLOADED_PATH_ROOT, true);
-
-        AssetDatabase.Refresh();
-
-        var builder = new AssetBundleBuilder();
-        bool finished = false;
-
-        System.Action<AssetBundleBuilder.ErrorCodes> onFinish = (x) => { finished = true; };
-
-        builder.DumpArea(new Vector2Int(-110, -110), new Vector2Int(1, 1), onFinish);
-
-        yield return new WaitUntil(() => finished == true);
-
-        EvaluateDependencyAfterBuild();
-    }
-
-    void EvaluateDependencyAfterBuild()
-    {
-        AssetBundle abDependency = AssetBundle.LoadFromFile(AssetBundleBuilderConfig.ASSET_BUNDLES_PATH_ROOT + "/QmYACL8SnbXEonXQeRHdWYbfm8vxvaFAWnsLHUaDG4ABp5");
-        abDependency.LoadAllAssets();
-
-        AssetBundle abMain = AssetBundle.LoadFromFile(AssetBundleBuilderConfig.ASSET_BUNDLES_PATH_ROOT + "/QmNS4K7GaH63T9rhAfkrra7ADLXSEeco8FTGknkPnAVmKM");
-        Material[] mats = abMain.LoadAllAssets<Material>();
-
-        bool hasMap = false;
-
-        foreach (var mat in mats)
-        {
-            if (mat.name.ToLowerInvariant().Contains("mini town"))
-                hasMap = mat.GetTexture("_BaseMap") != null;
-        }
-
-        abMain.Unload(true);
-        abDependency.Unload(true);
-
-        if (hasMap)
-        {
-            Debug.Log("Dependency has been generated correctly!");
-        }
-        else
-        {
-            Debug.Log("Dependency has NOT been generated correctly!");
-        }
-
-        Assert.IsTrue(hasMap);
+        expected = expected.Replace('|', Path.DirectorySeparatorChar);
+        Assert.AreEqual(expected, AssetBundleBuilderUtils.GetRelativePathTo(from, to));
     }
 
 }

@@ -195,7 +195,7 @@ namespace DCL
         }
 
         public static MD5 md5 = new MD5CryptoServiceProvider();
-        public static string GetGUID(string cid)
+        public static string CidToGuid(string cid)
         {
             byte[] data = md5.ComputeHash(Encoding.UTF8.GetBytes(cid));
             StringBuilder sBuilder = new StringBuilder();
@@ -317,40 +317,43 @@ namespace DCL
             return result;
         }
 
-        public static void FixGltfDependencyPaths(GLTFRoot gltfRoot)
+        public static void FixGltfRootInvalidUriCharacters(GLTFRoot gltfRoot)
         {
+            if (gltfRoot == null)
+            {
+                Debug.LogError("FixGltfRootInvalidUriCharacters >>> gltfRoot is null!");
+                return;
+            }
+
             GLTFRoot root = gltfRoot;
 
-            if (root != null)
+            if (root.Images != null)
             {
-                if (root.Images != null)
+                foreach (GLTFImage image in root.Images)
                 {
-                    foreach (GLTFImage image in root.Images)
+                    if (!string.IsNullOrEmpty(image.Uri))
                     {
-                        if (!string.IsNullOrEmpty(image.Uri))
-                        {
-                            bool isBase64 = URIHelper.IsBase64Uri(image.Uri);
+                        bool isBase64 = URIHelper.IsBase64Uri(image.Uri);
 
-                            if (!isBase64)
-                            {
-                                image.Uri = image.Uri.Replace('/', Path.DirectorySeparatorChar);
-                            }
+                        if (!isBase64)
+                        {
+                            image.Uri = image.Uri.Replace('/', Path.DirectorySeparatorChar);
                         }
                     }
                 }
+            }
 
-                if (root.Buffers != null)
+            if (root.Buffers != null)
+            {
+                foreach (GLTFBuffer buffer in root.Buffers)
                 {
-                    foreach (GLTFBuffer buffer in root.Buffers)
+                    if (!string.IsNullOrEmpty(buffer.Uri))
                     {
-                        if (!string.IsNullOrEmpty(buffer.Uri))
-                        {
-                            bool isBase64 = URIHelper.IsBase64Uri(buffer.Uri);
+                        bool isBase64 = URIHelper.IsBase64Uri(buffer.Uri);
 
-                            if (!isBase64)
-                            {
-                                buffer.Uri = buffer.Uri.Replace('/', Path.DirectorySeparatorChar);
-                            }
+                        if (!isBase64)
+                        {
+                            buffer.Uri = buffer.Uri.Replace('/', Path.DirectorySeparatorChar);
                         }
                     }
                 }
@@ -375,7 +378,11 @@ namespace DCL
             var relativeUri = fromUri.MakeRelativeUri(toUri);
             var relativePath = Uri.UnescapeDataString(relativeUri.ToString());
 
-            return relativePath.Replace('/', Path.DirectorySeparatorChar);
+            string result = relativePath.Replace('/', Path.DirectorySeparatorChar);
+
+            Debug.Log($"GetRelativePath To ... from {from} ... to {to} ... result {result}");
+
+            return result;
         }
 
         public static void InitializeDirectory(string path, bool deleteIfExists)
@@ -388,7 +395,6 @@ namespace DCL
                         Directory.Delete(path, true);
                 }
 
-
                 if (!Directory.Exists(path))
                     Directory.CreateDirectory(path);
             }
@@ -398,6 +404,31 @@ namespace DCL
             }
         }
 
+        public static void CleanAssetBundleFolder(string pathToSearch, string[] assetBundlesList, Dictionary<string, string> lowerToUpperDictionary)
+        {
+            for (int i = 0; i < assetBundlesList.Length; i++)
+            {
+                if (string.IsNullOrEmpty(assetBundlesList[i]))
+                    continue;
 
+                try
+                {
+                    //NOTE(Brian): This is done for correctness sake, rename files to preserve the hash upper-case
+                    if (lowerToUpperDictionary.TryGetValue(assetBundlesList[i], out string hashWithUppercase))
+                    {
+                        string oldPath = pathToSearch + assetBundlesList[i];
+                        string path = pathToSearch + hashWithUppercase;
+                        File.Move(oldPath, path);
+                    }
+
+                    string oldPathMf = pathToSearch + assetBundlesList[i] + ".manifest";
+                    File.Delete(oldPathMf);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogWarning("Error! " + e.Message);
+                }
+            }
+        }
     }
 }
