@@ -1,4 +1,4 @@
-﻿using GLTF;
+using GLTF;
 using GLTF.Schema;
 
 using System;
@@ -1029,17 +1029,6 @@ namespace UnityGLTF
 
                     case GLTFAnimationChannelPath.weights:
                         // TODO: add support for blend shapes/morph targets
-
-                        // var primitives = channel.Target.Node.Value.Mesh.Value.Primitives;
-                        // var targetCount = primitives[0].Targets.Count;
-                        // for (int primitiveIndex = 0; primitiveIndex < primitives.Count; primitiveIndex++)
-                        // {
-                        //  for (int targetIndex = 0; targetIndex < targetCount; targetIndex++)
-                        //  {
-                        //
-                        //      //clip.SetCurve(primitiveObjPath, typeof(SkinnedMeshRenderer), "blendShape." + targetIndex, curves[targetIndex]);
-                        //  }
-                        // }
                         break;
 
                     default:
