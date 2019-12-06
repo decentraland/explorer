@@ -380,8 +380,6 @@ namespace DCL
 
             string result = relativePath.Replace('/', Path.DirectorySeparatorChar);
 
-            Debug.Log($"GetRelativePath To ... from {from} ... to {to} ... result {result}");
-
             return result;
         }
 
