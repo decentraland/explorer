@@ -180,6 +180,7 @@ namespace DCL
                 string assetPath = hash + "/" + hash + fileExt;
 
                 AssetDatabase.ImportAsset(finalDownloadedAssetDbPath + assetPath, ImportAssetOptions.ForceUpdate);
+
                 AssetDatabase.SaveAssets();
 
                 string metaPath = finalDownloadedPath + assetPath + ".meta";
@@ -404,7 +405,7 @@ namespace DCL
                 {
                     //NOTE(Brian): We have to check this because the ImportAsset for GLTFs is not synchronous, and must execute some delayed calls
                     //             after the import asset finished. Therefore, we have to make sure those calls finished before continuing.
-                    if (!GLTFImporter.finishedImporting || Time.realtimeSinceStartup - timer > 60)
+                    if (!GLTFImporter.finishedImporting && Time.realtimeSinceStartup - timer < 60)
                         return;
 
                     AssetDatabase.Refresh();
@@ -413,6 +414,7 @@ namespace DCL
                     {
                         shouldGenerateAssetBundles |= DumpAssets(rawContents);
                         assetsAlreadyDumped = true;
+                        timer = Time.realtimeSinceStartup;
 
                         //NOTE(Brian): return in order to wait for GLTFImporter.finishedImporting flag, as it will set asynchronously.
                         return;
