@@ -1,14 +1,15 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.Serialization;
 
-public enum DCLAction_OneTime
+public enum DCLAction_Trigger
 {
     //Remember to explicitly assign the value to each entry so we minimize issues with serialization + conflicts
     Jump = 1,
     CameraChange = 100,
 }
 
-public enum DCLAction_InTime
+public enum DCLAction_Hold
 {
     //Remember to explicitly assign the value to each entry so we minimize issues with serialization + conflicts
     Sprint = 1,
@@ -26,28 +27,28 @@ public enum DCLAction_Measurable
 
 public class InputController : MonoBehaviour
 {
-    public InputAction_OneTime[] oneTimeActions;
-    public InputAction_InTime[] inTimeActions;
+    [FormerlySerializedAs("oneTimeActions")] public InputAction_Trigger[] triggerTimeActions;
+    [FormerlySerializedAs("inTimeActions")] public InputAction_Hold[] holdActions;
     public InputAction_Measurable[] measurableActions;
 
     private void Update()
     {
-        Update_OneTime();
-        Update_InTime();
+        Update_Trigger();
+        Update_Hold();
         Update_Measurable();
     }
 
-    public void Update_OneTime()
+    public void Update_Trigger()
     {
-        for (var i = 0; i < oneTimeActions.Length; i++)
+        for (var i = 0; i < triggerTimeActions.Length; i++)
         {
-            var action = oneTimeActions[i];
+            var action = triggerTimeActions[i];
             switch (action.GetDCLAction())
             {
-                case DCLAction_OneTime.Jump:
+                case DCLAction_Trigger.Jump:
                     InputProcessor.FromKey( action, KeyCode.Space, InputProcessor.Modifier.NeedsPointerLocked);
                     break;
-                case DCLAction_OneTime.CameraChange:
+                case DCLAction_Trigger.CameraChange:
                     InputProcessor.FromKey( action, KeyCode.V, InputProcessor.Modifier.NeedsPointerLocked);
                     break;
                 default:
@@ -56,17 +57,17 @@ public class InputController : MonoBehaviour
         }
     }
 
-    private void Update_InTime()
+    private void Update_Hold()
     {
-        for (var i = 0; i < inTimeActions.Length; i++)
+        for (var i = 0; i < holdActions.Length; i++)
         {
-            var action = inTimeActions[i];
+            var action = holdActions[i];
             switch (action.GetDCLAction())
             {
-                case DCLAction_InTime.Sprint:
+                case DCLAction_Hold.Sprint:
                     InputProcessor.FromKey( action, KeyCode.LeftShift, InputProcessor.Modifier.NeedsPointerLocked);
                     break;
-                case DCLAction_InTime.FreeCameraMode:
+                case DCLAction_Hold.FreeCameraMode:
                     InputProcessor.FromKey( action, KeyCode.T, InputProcessor.Modifier.NeedsPointerLocked);
                     break;
                 default:
@@ -121,21 +122,21 @@ public static class InputProcessor
         return true;
     }
 
-    public static void FromKey(InputAction_OneTime action, KeyCode key, Modifier modifiers = Modifier.None)
+    public static void FromKey(InputAction_Trigger action, KeyCode key, Modifier modifiers = Modifier.None)
     {
         if (!PassModifiers(modifiers)) return;
 
         if (Input.GetKeyDown(key)) action.RaiseOnTriggered();
     }
 
-    public static void FromMouseButton(InputAction_OneTime action, int mouseButtonIdx, Modifier modifiers = Modifier.None)
+    public static void FromMouseButton(InputAction_Trigger action, int mouseButtonIdx, Modifier modifiers = Modifier.None)
     {
         if (!PassModifiers(modifiers)) return;
 
         if (Input.GetMouseButton(mouseButtonIdx)) action.RaiseOnTriggered();
     }
 
-    public static void FromKey(InputAction_InTime action, KeyCode key, Modifier modifiers = Modifier.None)
+    public static void FromKey(InputAction_Hold action, KeyCode key, Modifier modifiers = Modifier.None)
     {
         if (!PassModifiers(modifiers)) return;
 
@@ -143,7 +144,7 @@ public static class InputProcessor
         if (Input.GetKeyUp(key)) action.RaiseOnFinished();
     }
 
-    public static void FromMouse(InputAction_InTime action, int mouseButtonIdx, Modifier modifiers = Modifier.None)
+    public static void FromMouse(InputAction_Hold action, int mouseButtonIdx, Modifier modifiers = Modifier.None)
     {
         if (!PassModifiers(modifiers)) return;
 

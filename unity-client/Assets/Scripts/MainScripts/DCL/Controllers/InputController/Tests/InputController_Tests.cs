@@ -5,14 +5,14 @@ using UnityEngine.TestTools;
 
 namespace InputController_Tests
 {
-    public class InputAction_OneTime_Should
+    public class InputAction_Trigger_Should
     {
-        private InputAction_OneTime action;
+        private InputAction_Trigger action;
 
         [SetUp]
         public void SetUp()
         {
-            action = ScriptableObject.CreateInstance<InputAction_OneTime>();
+            action = ScriptableObject.CreateInstance<InputAction_Trigger>();
         }
 
         [Test]
@@ -50,20 +50,20 @@ namespace InputController_Tests
         [Test]
         public void ReturnDCLActionProperly()
         {
-            action.dclAction = DCLAction_OneTime.Jump;
+            action.dclAction = DCLAction_Trigger.Jump;
 
-            Assert.AreEqual(DCLAction_OneTime.Jump, action.GetDCLAction());
+            Assert.AreEqual(DCLAction_Trigger.Jump, action.GetDCLAction());
         }
     }
 
-    public class InputAction_InTime_Should
+    public class InputAction_Hold_Should
     {
-        private InputAction_InTime action;
+        private InputAction_Hold action;
 
         [SetUp]
         public void SetUp()
         {
-            action = ScriptableObject.CreateInstance<InputAction_InTime>();
+            action = ScriptableObject.CreateInstance<InputAction_Hold>();
         }
 
         [Test]
@@ -112,9 +112,9 @@ namespace InputController_Tests
         [Test]
         public void ReturnDCLActionProperly()
         {
-            action.dclAction = DCLAction_InTime.Sprint;
+            action.dclAction = DCLAction_Hold.Sprint;
 
-            Assert.AreEqual(DCLAction_InTime.Sprint, action.GetDCLAction());
+            Assert.AreEqual(DCLAction_Hold.Sprint, action.GetDCLAction());
         }
     }
 

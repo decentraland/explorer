@@ -52,14 +52,14 @@ public class DCLCharacterController : MonoBehaviour
     bool reEnablingGameObject = false;
 
     [Header("InputActions")]
-    public InputAction_OneTime jumpAction;
-    public InputAction_InTime sprintAction;
+    public InputAction_Trigger jumpAction;
+    public InputAction_Hold sprintAction;
     public InputAction_Measurable characterXAxis;
     public InputAction_Measurable characterYAxis;
 
-    private InputAction_OneTime.Triggered jumpDelegate;
-    private InputAction_InTime.Started sprintStartedDelegate;
-    private InputAction_InTime.Finished sprintFinishedDelegate;
+    private InputAction_Trigger.Triggered jumpDelegate;
+    private InputAction_Hold.Started sprintStartedDelegate;
+    private InputAction_Hold.Finished sprintFinishedDelegate;
 
     private Vector3NullableVariable characterForward => CommonScriptableObjects.characterForward;
 

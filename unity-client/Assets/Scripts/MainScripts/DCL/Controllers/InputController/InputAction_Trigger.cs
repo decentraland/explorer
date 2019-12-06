@@ -1,13 +1,13 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "InputAction_OneTime", menuName = "InputActions/OneTime")]
-public class InputAction_OneTime : ScriptableObject
+[CreateAssetMenu(fileName = "InputAction_Trigger", menuName = "InputActions/Trigger")]
+public class InputAction_Trigger : ScriptableObject
 {
-    public delegate void Triggered(DCLAction_OneTime action);
+    public delegate void Triggered(DCLAction_Trigger action);
     public event Triggered OnTriggered;
 
-    [SerializeField] internal DCLAction_OneTime dclAction;
-    public DCLAction_OneTime GetDCLAction() => dclAction;
+    [SerializeField] internal DCLAction_Trigger dclAction;
+    public DCLAction_Trigger GetDCLAction() => dclAction;
 
     private int triggeredInFrame = -1;
 
@@ -39,15 +39,15 @@ public class InputAction_OneTime : ScriptableObject
             Resources.UnloadAsset(this);
     }
 
-    [UnityEditor.CustomEditor(typeof(InputAction_OneTime), true)]
-    internal class InputAction_OneTimeEditor : UnityEditor.Editor
+    [UnityEditor.CustomEditor(typeof(InputAction_Trigger), true)]
+    internal class InputAction_TriggerEditor : UnityEditor.Editor
     {
         public override void OnInspectorGUI()
         {
             DrawDefaultInspector();
             if (Application.isPlaying && GUILayout.Button("Raise OnChange"))
             {
-                ((InputAction_OneTime)target).RaiseOnTriggered();
+                ((InputAction_Trigger)target).RaiseOnTriggered();
             }
         }
     }

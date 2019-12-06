@@ -1,16 +1,16 @@
 using System;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "InputAction_InTime", menuName = "InputActions/InTime")]
-public class InputAction_InTime : ScriptableObject
+[CreateAssetMenu(fileName = "InputAction_Hold", menuName = "InputActions/Hold")]
+public class InputAction_Hold : ScriptableObject
 {
-    public delegate void Started(DCLAction_InTime action);
-    public delegate void Finished(DCLAction_InTime action);
+    public delegate void Started(DCLAction_Hold action);
+    public delegate void Finished(DCLAction_Hold action);
     public event Started OnStarted;
     public event Finished OnFinished;
 
-    [SerializeField] internal DCLAction_InTime dclAction;
-    public DCLAction_InTime GetDCLAction() => dclAction;
+    [SerializeField] internal DCLAction_Hold dclAction;
+    public DCLAction_Hold GetDCLAction() => dclAction;
 
     public bool isOn { get; private set; }
 
@@ -43,19 +43,19 @@ public class InputAction_InTime : ScriptableObject
             Resources.UnloadAsset(this);
     }
 
-    [UnityEditor.CustomEditor(typeof(InputAction_InTime), true)]
-    internal class InputAction_InTimeEditor : UnityEditor.Editor
+    [UnityEditor.CustomEditor(typeof(InputAction_Hold), true)]
+    internal class InputAction_HoldEditor : UnityEditor.Editor
     {
         public override void OnInspectorGUI()
         {
             DrawDefaultInspector();
             if (Application.isPlaying && GUILayout.Button("Raise OnStarted"))
             {
-                ((InputAction_InTime)target).RaiseOnStarted();
+                ((InputAction_Hold)target).RaiseOnStarted();
             }
             if (Application.isPlaying && GUILayout.Button("Raise OnFinished"))
             {
-                ((InputAction_InTime)target).RaiseOnFinished();
+                ((InputAction_Hold)target).RaiseOnFinished();
             }
         }
     }
