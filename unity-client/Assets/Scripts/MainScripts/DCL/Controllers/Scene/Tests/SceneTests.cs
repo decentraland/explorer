@@ -60,6 +60,11 @@ namespace Tests
             yield return null;
         }
 
+        [NUnit.Framework.TearDown]
+        public override void TearDown()
+        {
+        }
+
         [UnityTest]
         public IEnumerator ParcelScene_TrackDisposables_AfterInitDone()
         {
