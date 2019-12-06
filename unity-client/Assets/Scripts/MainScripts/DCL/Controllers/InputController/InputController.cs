@@ -27,8 +27,8 @@ public enum DCLAction_Measurable
 
 public class InputController : MonoBehaviour
 {
-    [FormerlySerializedAs("oneTimeActions")] public InputAction_Trigger[] triggerTimeActions;
-    [FormerlySerializedAs("inTimeActions")] public InputAction_Hold[] holdActions;
+    public InputAction_Trigger[] triggerTimeActions;
+    public InputAction_Hold[] holdActions;
     public InputAction_Measurable[] measurableActions;
 
     private void Update()
