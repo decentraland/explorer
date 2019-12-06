@@ -21,11 +21,6 @@ public class DCLCharacterController : MonoBehaviour
 
     public DCLCharacterPosition characterPosition;
 
-    [SerializeField]
-    private AudioListener audioListener;
-
-    Transform cameraTransformValue;
-
     [Header("Collisions")]
     public LayerMask groundLayers;
 
@@ -70,7 +65,6 @@ public class DCLCharacterController : MonoBehaviour
 
     public static System.Action<DCLCharacterPosition> OnCharacterMoved;
     public static System.Action<DCLCharacterPosition> OnPositionSet;
-    private Quaternion targetRotation;
 
     void Awake()
     {
@@ -202,8 +196,6 @@ public class DCLCharacterController : MonoBehaviour
 
     public void SetEnabled(bool enabled)
     {
-        if (audioListener)
-            audioListener.enabled = enabled;
         this.enabled = enabled;
     }
 
@@ -265,6 +257,7 @@ public class DCLCharacterController : MonoBehaviour
                     velocity += (-transform.forward * speed);
 
                 transform.forward = characterForward.Get().Value;
+                CommonScriptableObjects.playerUnityEulerAngles.Set(transform.eulerAngles);
             }
         }
 

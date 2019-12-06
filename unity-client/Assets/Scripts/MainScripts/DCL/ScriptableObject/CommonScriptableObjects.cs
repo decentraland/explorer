@@ -21,7 +21,7 @@ public static class CommonScriptableObjects
     public static FloatVariable minimapZoom => GetOrLoad(ref minimapZoomValue, "ScriptableObjects/MinimapZoom");
 
     private static Vector3NullableVariable characterForwardValue;
-    public static Vector3NullableVariable characterForward=> GetOrLoad(ref characterForwardValue , "ScriptableObjects/CharacterForward");
+    public static Vector3NullableVariable characterForward => GetOrLoad(ref characterForwardValue , "ScriptableObjects/CharacterForward");
 
     private static Vector3Variable cameraForwardValue;
     public static Vector3Variable cameraForward => GetOrLoad(ref cameraForwardValue , "ScriptableObjects/CameraForward");

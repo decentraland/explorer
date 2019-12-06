@@ -117,9 +117,9 @@ public class CameraController : MonoBehaviour
         }
     }
 
-    public void SetRotation(string teleportPayload)
+    public void SetRotation(string setRotationPayload)
     {
-        var payload = Utils.FromJsonWithNulls<SetRotationPayload>(teleportPayload);
+        var payload = Utils.FromJsonWithNulls<SetRotationPayload>(setRotationPayload);
         var eulerDir = Vector3.zero;
         if (payload.cameraTarget.HasValue)
         {

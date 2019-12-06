@@ -1,5 +1,3 @@
-using System;
-using Microsoft.SqlServer.Server;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "InputAction_OneTime", menuName = "InputActions/OneTime")]
@@ -12,7 +10,6 @@ public class InputAction_OneTime : ScriptableObject
     public DCLAction_OneTime GetDCLAction() => dclAction;
 
     private int triggeredInFrame = -1;
-    private InputActionResolver_OneTime[] resolvers;
 
     public bool WasTriggeredThisFrame()
     {
@@ -58,52 +55,4 @@ public class InputAction_OneTime : ScriptableObject
 
     #endregion
 
-}
-
-internal abstract class InputActionResolver_OneTime
-{
-    protected readonly InputAction_OneTime oneTimeAction;
-
-    public InputActionResolver_OneTime(InputAction_OneTime oneTimeAction)
-    {
-        this.oneTimeAction = oneTimeAction;
-    }
-
-    public abstract void UpdateTime(float deltaTime);
-}
-
-internal class KeyboardInputActionResolver_OneTime : InputActionResolver_OneTime
-{
-    private readonly KeyCode keyCode;
-
-    public KeyboardInputActionResolver_OneTime(InputAction_OneTime oneTimeAction, KeyCode keyCode) : base(oneTimeAction)
-    {
-        this.keyCode = keyCode;
-    }
-
-    public override void UpdateTime(float deltaTime)
-    {
-        if (Input.GetKeyDown(keyCode))
-        {
-            oneTimeAction.RaiseOnTriggered();
-        }
-    }
-}
-
-internal class MouseButtonInputActionResolver_OneTime : InputActionResolver_OneTime
-{
-    private readonly int mouseButtonIndex;
-
-    public MouseButtonInputActionResolver_OneTime(InputAction_OneTime oneTimeAction, int mouseButtonIndex) : base(oneTimeAction)
-    {
-        this.mouseButtonIndex = mouseButtonIndex;
-    }
-
-    public override void UpdateTime(float deltaTime)
-    {
-        if (Input.GetMouseButtonDown(mouseButtonIndex))
-        {
-            oneTimeAction.RaiseOnTriggered();
-        }
-    }
 }
