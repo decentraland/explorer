@@ -30,7 +30,7 @@ public class CameraController : MonoBehaviour
     [SerializeField] internal InputAction_OneTime cameraChangeAction;
     [SerializeField] internal InputAction_InTime freeCameraModeAction;
 
-    private Dictionary<CameraMode, CinemachineVirtualCameraBase> cachedModeToVirtualCamera;
+    internal Dictionary<CameraMode, CinemachineVirtualCameraBase> cachedModeToVirtualCamera;
 
     private Vector3NullableVariable characterForward => CommonScriptableObjects.characterForward;
     private Vector3Variable cameraForward => CommonScriptableObjects.cameraForward;
@@ -61,18 +61,18 @@ public class CameraController : MonoBehaviour
         playerUnityToWorldOffset.OnChange += PrecisionChanged;
 
         SetFreeCameraModeActive(false);
-        UpdateCameraMode(currentMode);
+        SetCameraMode(currentMode);
     }
 
     private void OnCameraChangeAction(DCLAction_OneTime action)
     {
         if (currentMode == CameraMode.FirstPerson)
-            UpdateCameraMode(CameraMode.ThirdPerson);
+            SetCameraMode(CameraMode.ThirdPerson);
         else
-            UpdateCameraMode(CameraMode.FirstPerson);
+            SetCameraMode(CameraMode.FirstPerson);
     }
 
-    private void UpdateCameraMode(CameraMode newMode)
+    internal void SetCameraMode(CameraMode newMode)
     {
         cachedModeToVirtualCamera[currentMode].gameObject.SetActive(false);
         currentMode = newMode;

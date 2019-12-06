@@ -7,7 +7,7 @@ public class InputAction_Measurable : ScriptableObject
     public delegate void ValueChanged(DCLAction_Measurable action, float value);
     public event ValueChanged OnValueChanged;
 
-    [SerializeField] private DCLAction_Measurable dclAction;
+    [SerializeField] internal DCLAction_Measurable dclAction;
     public DCLAction_Measurable GetDCLAction() => dclAction;
 
     [SerializeField] private float currentValue = 0;

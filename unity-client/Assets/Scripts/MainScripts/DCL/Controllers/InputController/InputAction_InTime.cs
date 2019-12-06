@@ -9,7 +9,7 @@ public class InputAction_InTime : ScriptableObject
     public event Started OnStarted;
     public event Finished OnFinished;
 
-    [SerializeField] private DCLAction_InTime dclAction;
+    [SerializeField] internal DCLAction_InTime dclAction;
     public DCLAction_InTime GetDCLAction() => dclAction;
 
     public bool isOn { get; private set; }

@@ -6,7 +6,7 @@ public class InputAction_OneTime : ScriptableObject
     public delegate void Triggered(DCLAction_OneTime action);
     public event Triggered OnTriggered;
 
-    [SerializeField] private DCLAction_OneTime dclAction;
+    [SerializeField] internal DCLAction_OneTime dclAction;
     public DCLAction_OneTime GetDCLAction() => dclAction;
 
     private int triggeredInFrame = -1;
