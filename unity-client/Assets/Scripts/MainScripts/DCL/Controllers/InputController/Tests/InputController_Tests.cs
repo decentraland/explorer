@@ -50,9 +50,9 @@ namespace InputController_Tests
         [Test]
         public void ReturnDCLActionProperly()
         {
-            action.dclAction = DCLAction_Trigger.Jump;
+            action.dclAction = DCLAction_Trigger.CameraChange;
 
-            Assert.AreEqual(DCLAction_Trigger.Jump, action.GetDCLAction());
+            Assert.AreEqual(DCLAction_Trigger.CameraChange, action.GetDCLAction());
         }
     }
 

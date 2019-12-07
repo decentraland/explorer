@@ -609,10 +609,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d1d0821bf5c3e3f47ba67e483803236d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  aimingHorizontalSpeed: 300
-  aimingVerticalSpeed: 300
-  aimingVerticalMinimumAngle: -89
-  aimingVerticalMaximumAngle: 89
   minimumYPosition: 0
   groundCheckExtraDistance: 0.25
   gravity: -55
@@ -620,11 +616,10 @@ MonoBehaviour:
   movementSpeed: 8
   runningSpeedMultiplier: 2
   movingPlatformAllowedPosDelta: 1.1
-  audioListener: {fileID: 0}
   groundLayers:
     serializedVersion: 2
     m_Bits: 1025
-  jumpAction: {fileID: 11400000, guid: ecf4c07ac005f844cb535f6c6d5d5f46, type: 2}
+  jumpAction: {fileID: 11400000, guid: 8eddef1fc072ec845aeb62f5e1041b52, type: 2}
   sprintAction: {fileID: 11400000, guid: 0cfb8d150b7d6934d856665cf924d01d, type: 2}
   characterXAxis: {fileID: 11400000, guid: 44c3c5f07adca334696adae7b81c1869, type: 2}
   characterYAxis: {fileID: 11400000, guid: d1bc201cd2f5a1d4b8f721ccc29d2c0f, type: 2}
@@ -659,7 +654,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   avatarRenderer: {fileID: 8727652042400483852}
-  cameraState: {fileID: 11400000, guid: a1d723a8c6d6c4b42b6ccee9ce73a09c, type: 2}
 --- !u!1 &7570314869756664852
 GameObject:
   m_ObjectHideFlags: 0

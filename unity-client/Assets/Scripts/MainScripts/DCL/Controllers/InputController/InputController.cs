@@ -5,7 +5,6 @@ using UnityEngine.Serialization;
 public enum DCLAction_Trigger
 {
     //Remember to explicitly assign the value to each entry so we minimize issues with serialization + conflicts
-    Jump = 1,
     CameraChange = 100,
 }
 
@@ -13,6 +12,7 @@ public enum DCLAction_Hold
 {
     //Remember to explicitly assign the value to each entry so we minimize issues with serialization + conflicts
     Sprint = 1,
+    Jump = 2,
     FreeCameraMode = 101,
 }
 
@@ -45,9 +45,6 @@ public class InputController : MonoBehaviour
             var action = triggerTimeActions[i];
             switch (action.GetDCLAction())
             {
-                case DCLAction_Trigger.Jump:
-                    InputProcessor.FromKey( action, KeyCode.Space, InputProcessor.Modifier.NeedsPointerLocked);
-                    break;
                 case DCLAction_Trigger.CameraChange:
                     InputProcessor.FromKey( action, KeyCode.V, InputProcessor.Modifier.NeedsPointerLocked);
                     break;
@@ -66,6 +63,9 @@ public class InputController : MonoBehaviour
             {
                 case DCLAction_Hold.Sprint:
                     InputProcessor.FromKey( action, KeyCode.LeftShift, InputProcessor.Modifier.NeedsPointerLocked);
+                    break;
+                case DCLAction_Hold.Jump:
+                    InputProcessor.FromKey( action, KeyCode.Space, InputProcessor.Modifier.NeedsPointerLocked);
                     break;
                 case DCLAction_Hold.FreeCameraMode:
                     InputProcessor.FromKey( action, KeyCode.T, InputProcessor.Modifier.NeedsPointerLocked);

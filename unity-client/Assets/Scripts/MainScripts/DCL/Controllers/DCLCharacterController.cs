@@ -52,12 +52,13 @@ public class DCLCharacterController : MonoBehaviour
     bool reEnablingGameObject = false;
 
     [Header("InputActions")]
-    public InputAction_Trigger jumpAction;
+    public InputAction_Hold jumpAction;
     public InputAction_Hold sprintAction;
     public InputAction_Measurable characterXAxis;
     public InputAction_Measurable characterYAxis;
 
-    private InputAction_Trigger.Triggered jumpDelegate;
+    private InputAction_Hold.Started jumpStartedDelegate;
+    private InputAction_Hold.Finished jumpFinishedDelegate;
     private InputAction_Hold.Started sprintStartedDelegate;
     private InputAction_Hold.Finished sprintFinishedDelegate;
 
@@ -95,19 +96,18 @@ public class DCLCharacterController : MonoBehaviour
 
     private void SuscribeToInput()
     {
-        jumpDelegate = (action) =>
+        jumpStartedDelegate = (action) =>
         {
-            if (isGrounded)
-            {
-                lastJumpButtonPressedTime = Time.time;
-                jumpButtonPressed = true;
-            }
+            lastJumpButtonPressedTime = Time.time;
+            jumpButtonPressed = true;
         };
+        jumpFinishedDelegate = (action) => jumpButtonPressed = false;
+        jumpAction.OnStarted += jumpStartedDelegate;
+        jumpAction.OnFinished += jumpFinishedDelegate;
+        
         sprintStartedDelegate = (action) => isSprinting = true;
         sprintFinishedDelegate = (action) => isSprinting = false;
-
         sprintAction.OnStarted += sprintStartedDelegate;
-        jumpAction.OnTriggered += jumpDelegate;
         sprintAction.OnFinished += sprintFinishedDelegate;
     }
 
@@ -133,8 +133,9 @@ public class DCLCharacterController : MonoBehaviour
     void OnDestroy()
     {
         characterPosition.OnPrecisionAdjust -= OnPrecisionAdjust;
+        jumpAction.OnStarted -= jumpStartedDelegate;
+        jumpAction.OnFinished -= jumpFinishedDelegate;
         sprintAction.OnStarted -= sprintStartedDelegate;
-        jumpAction.OnTriggered -= jumpDelegate;
         sprintAction.OnFinished -= sprintFinishedDelegate;
     }
 
@@ -261,18 +262,11 @@ public class DCLCharacterController : MonoBehaviour
             }
         }
 
-        if (jumpButtonPressed)
+        if (jumpButtonPressed && (Time.time - lastJumpButtonPressedTime < 0.15f)) // almost-grounded jump button press allowed time
         {
-            if (Time.time - lastJumpButtonPressedTime < 0.15f) // almost-grounded jump button press allowed time
+            if (isGrounded || (Time.time - lastUngroundedTime) < 0.1f) // just-left-ground jump allowed time
             {
-                if (isGrounded || (Time.time - lastUngroundedTime) < 0.1f) // just-left-ground jump allowed time
-                {
-                    Jump();
-                }
-            }
-            else
-            {
-                jumpButtonPressed = false;
+                Jump();
             }
         }
 
