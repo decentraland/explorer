@@ -26,11 +26,11 @@ namespace Builder.Gizmos
 
         public override bool RaycastHit(Ray ray, out Vector3 hitPoint)
         {
-            float enter = 0.0f;
+            float raycastHitDistance = 0.0f;
 
-            if (raycastPlane.Raycast(ray, out enter))
+            if (raycastPlane.Raycast(ray, out raycastHitDistance))
             {
-                hitPoint = ray.GetPoint(enter);
+                hitPoint = ray.GetPoint(raycastHitDistance);
                 return true;
             }
             hitPoint = Vector3.zero;
