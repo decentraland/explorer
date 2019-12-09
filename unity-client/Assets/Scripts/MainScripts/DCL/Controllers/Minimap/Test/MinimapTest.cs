@@ -13,7 +13,7 @@ namespace Tests
         {
             InitScene();
 
-            var minimapCamera = GameObject.Instantiate(Resources.Load<GameObject>("Minimap")).GetComponentInChildren<MinimapCamera>();
+            var minimapCamera = InstantiateMinimapCam();
             minimapCamera.transform.position = Vector3.zero;
             yield return null;
 
@@ -29,7 +29,8 @@ namespace Tests
         public IEnumerator MinimapCamera_RotationNorthLocked()
         {
             InitScene();
-            var minimapCamera = GameObject.Instantiate(Resources.Load<GameObject>("Minimap")).GetComponentInChildren<MinimapCamera>();
+
+            var minimapCamera = InstantiateMinimapCam();
             minimapCamera.transform.eulerAngles = Vector3.zero;
             minimapCamera.northLocked = true;
             yield return null;
@@ -45,7 +46,8 @@ namespace Tests
         public IEnumerator MinimapCamera_RotationNorthNotLocked()
         {
             InitScene();
-            var minimapCamera = GameObject.Instantiate(Resources.Load<GameObject>("Minimap")).GetComponentInChildren<MinimapCamera>();
+
+            var minimapCamera = InstantiateMinimapCam();
             minimapCamera.transform.eulerAngles = Vector3.zero;
             minimapCamera.northLocked = false;
             yield return null;
@@ -56,6 +58,14 @@ namespace Tests
 
 
             Assert.AreApproximatelyEqual(minimapCamera.transform.eulerAngles.y, CommonScriptableObjects.playerUnityEulerAngles.Get().y);
+        }
+
+        MinimapCamera InstantiateMinimapCam()
+        {
+            GameObject minimapGameObject = GameObject.Instantiate(Resources.Load<GameObject>("Minimap"));
+            var minimapCamera = minimapGameObject.GetComponentInChildren<MinimapCamera>();
+
+            return minimapCamera;
         }
     }
 }
