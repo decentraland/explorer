@@ -11,7 +11,7 @@ namespace Tests
         [UnityTest]
         public IEnumerator MinimapCamera_Position()
         {
-            InitScene();
+            yield return InitScene();
 
             var minimapCamera = InstantiateMinimapCam();
             minimapCamera.transform.position = Vector3.zero;
@@ -28,7 +28,7 @@ namespace Tests
         [UnityTest]
         public IEnumerator MinimapCamera_RotationNorthLocked()
         {
-            InitScene();
+            yield return InitScene();
 
             var minimapCamera = InstantiateMinimapCam();
             minimapCamera.transform.eulerAngles = Vector3.zero;
@@ -45,7 +45,7 @@ namespace Tests
         [UnityTest]
         public IEnumerator MinimapCamera_RotationNorthNotLocked()
         {
-            InitScene();
+            yield return InitScene();
 
             var minimapCamera = InstantiateMinimapCam();
             minimapCamera.transform.eulerAngles = Vector3.zero;
