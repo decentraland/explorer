@@ -10,6 +10,106 @@ using System.Text.RegularExpressions;
 
 namespace DCL.Components
 {
+    public class RendereableAssetLoader
+    {
+        public static bool VERBOSE = false;
+
+        public bool useCustomContentServerUrl = false;
+        public string customContentServerUrl;
+        public bool useGltfFallback = true;
+
+        public AssetPromiseSettings_Rendering settings;
+
+        public GameObject loadedAsset { get; protected set; }
+
+        string bundlesContentUrl;
+        ContentProvider contentProvider;
+
+        AssetPromise_GLTF gltfPromise;
+        AssetPromise_AB_GameObject abPromise;
+
+
+        public RendereableAssetLoader(ContentProvider contentProvider, string bundlesContentUrl)
+        {
+            this.contentProvider = contentProvider;
+            this.bundlesContentUrl = bundlesContentUrl;
+        }
+
+        public void Load(string targetUrl, Action<GameObject> OnSuccess, Action OnFail)
+        {
+            Assert.IsFalse(string.IsNullOrEmpty(targetUrl), "url is null!!");
+
+            if (useGltfFallback)
+                LoadAssetBundle(targetUrl, OnSuccess, () => LoadGltf(targetUrl, OnSuccess, OnFail));
+            else
+                LoadAssetBundle(targetUrl, OnSuccess, OnFail);
+        }
+
+        public void Unload()
+        {
+            AssetPromiseKeeper_GLTF.i.Forget(gltfPromise);
+            AssetPromiseKeeper_AB_GameObject.i.Forget(abPromise);
+        }
+
+        void LoadAssetBundle(string targetUrl, Action<GameObject> OnSuccess, Action OnFail)
+        {
+            if (abPromise != null)
+            {
+                AssetPromiseKeeper_AB_GameObject.i.Forget(abPromise);
+
+                if (VERBOSE)
+                    Debug.Log("Forgetting not null promise...");
+            }
+
+            string bundlesBaseUrl = useCustomContentServerUrl ? customContentServerUrl : bundlesContentUrl;
+
+            if (string.IsNullOrEmpty(bundlesBaseUrl))
+            {
+                OnFail?.Invoke();
+                return;
+            }
+
+            contentProvider.TryGetContentsUrl_Raw(targetUrl, out string hash);
+
+            abPromise = new AssetPromise_AB_GameObject(bundlesBaseUrl, hash);
+            abPromise.settings = this.settings;
+
+            abPromise.OnSuccessEvent += (x) => OnSuccessWrapper(x, OnSuccess);
+            abPromise.OnFailEvent += (x) => OnFailWrapper(x, OnFail);
+
+            AssetPromiseKeeper_AB_GameObject.i.Keep(abPromise);
+        }
+
+        void LoadGltf(string targetUrl, Action<GameObject> OnSuccess, Action OnFail)
+        {
+            if (gltfPromise != null)
+            {
+                AssetPromiseKeeper_GLTF.i.Forget(gltfPromise);
+
+                if (VERBOSE)
+                    Debug.Log("Forgetting not null promise...");
+            }
+
+            gltfPromise = new AssetPromise_GLTF(contentProvider, targetUrl);
+            gltfPromise.settings = this.settings;
+
+            gltfPromise.OnSuccessEvent += (x) => OnSuccessWrapper(x, OnSuccess);
+            gltfPromise.OnFailEvent += (x) => OnFailWrapper(x, OnFail);
+
+            AssetPromiseKeeper_GLTF.i.Keep(gltfPromise);
+        }
+
+        private void OnFailWrapper(Asset_WithPoolableContainer loadedAsset, Action OnFail)
+        {
+            OnFail?.Invoke();
+        }
+
+        private void OnSuccessWrapper(Asset_WithPoolableContainer loadedAsset, Action<GameObject> OnSuccess)
+        {
+            OnSuccess?.Invoke(loadedAsset.container);
+        }
+    }
+
     public class LoadWrapper_GLTF : LoadWrapper
     {
         static readonly bool VERBOSE = false;
