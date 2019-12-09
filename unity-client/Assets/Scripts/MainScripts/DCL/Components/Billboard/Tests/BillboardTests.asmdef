@@ -2,7 +2,8 @@
     "name": "BillboardTests",
     "references": [
         "MainScripts",
-        "TestHelpers"
+        "TestHelpers",
+        "ScriptableObjects"
     ],
     "optionalUnityReferences": [
         "TestAssemblies"
