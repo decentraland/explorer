@@ -693,9 +693,7 @@ namespace DCL.Helpers
 
             yield return SharedComponentUpdate(component, generatedModel);
 
-            CleanableYieldInstruction yieldInstruction = null;
-            scene.SharedComponentUpdate(component.id, "{}", out yieldInstruction);
-            yield return yieldInstruction;
+            yield return TestHelpers.SharedComponentUpdate(component, new TModel());
 
             yield return component.routine;
 
@@ -863,7 +861,6 @@ namespace DCL.Helpers
 
             yield return null;
         }
-
 
         public static IEnumerator TestUIClickEventPropagation(string sceneId, string eventUuid, RectTransform uiObject, System.Action<bool> callback)
         {
