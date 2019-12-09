@@ -5,6 +5,7 @@ using DCL.Models;
 using DCL.Helpers;
 using UnityEngine;
 using UnityEngine.TestTools;
+using System.Linq;
 using NUnit.Framework;
 using System.Collections;
 
@@ -31,11 +32,10 @@ namespace SceneBoundariesCheckerTests
 
         IEnumerator Assert_PShapeIsInvalidatedWhenStartingOutOfBounds()
         {
-            string entityId = "1";
-            TestHelpers.InstantiateEntityWithShape(scene, entityId, DCL.Models.CLASS_ID.BOX_SHAPE, Vector3.zero);
+            var boxShape = TestHelpers.CreateEntityWithBoxShape(scene, new Vector3(20, 2, 20));
             yield return null;
 
-            Assert.IsTrue(MeshIsInvalid(scene.entities[entityId].meshesInfo));
+            Assert.IsTrue(MeshIsInvalid(boxShape.attachedEntities.First().meshesInfo));
         }
 
         [UnityTest]
