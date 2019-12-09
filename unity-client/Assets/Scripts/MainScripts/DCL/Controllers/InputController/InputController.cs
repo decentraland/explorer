@@ -46,7 +46,8 @@ public class InputController : MonoBehaviour
             switch (action.GetDCLAction())
             {
                 case DCLAction_Trigger.CameraChange:
-                    InputProcessor.FromKey( action, KeyCode.V, InputProcessor.Modifier.NeedsPointerLocked);
+                    //Disable until the fine-tuning is ready
+                    //InputProcessor.FromKey( action, KeyCode.V, InputProcessor.Modifier.NeedsPointerLocked);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -68,7 +69,8 @@ public class InputController : MonoBehaviour
                     InputProcessor.FromKey( action, KeyCode.Space, InputProcessor.Modifier.NeedsPointerLocked);
                     break;
                 case DCLAction_Hold.FreeCameraMode:
-                    InputProcessor.FromKey( action, KeyCode.T, InputProcessor.Modifier.NeedsPointerLocked);
+                    //Disable until the fine-tuning is ready
+                    //InputProcessor.FromKey( action, KeyCode.T, InputProcessor.Modifier.NeedsPointerLocked);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
