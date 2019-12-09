@@ -379,8 +379,6 @@ namespace SceneBoundariesCheckerTests
             var transformModel = new DCLTransform.Model { position = new Vector3(18, 1, 18) };
             TestHelpers.SetEntityTransform(scene, scene.entities[entityId], transformModel);
 
-            // yield return null;
-
             Assert.IsTrue(MeshIsInvalid(scene.entities[childEntityId].meshesInfo));
         }
 
