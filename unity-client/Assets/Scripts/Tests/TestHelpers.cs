@@ -75,9 +75,9 @@ namespace DCL.Helpers
             return scene.CreateEntity(id);
         }
 
-        public static void CreateSceneEntity(ParcelScene scene, string id)
+        public static DecentralandEntity CreateSceneEntity(ParcelScene scene, string id)
         {
-            scene.CreateEntity(id);
+            return scene.CreateEntity(id);
         }
 
         public static void RemoveSceneEntity(ParcelScene scene, string id)
