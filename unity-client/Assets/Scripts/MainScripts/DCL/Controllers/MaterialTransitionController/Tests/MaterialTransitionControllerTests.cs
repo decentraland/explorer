@@ -13,35 +13,12 @@ namespace Tests
 {
     public class MaterialTransitionControllerTests : TestsBase
     {
-        // ParcelScene scene;
-        // SceneController sceneController;
-
-        // IEnumerator InitScene()
-        // {
-        //     yield return base.InitScene();
-        //     DCL.Configuration.Environment.DEBUG = true;
-        //     sceneController.SetDebug();
-
-        //     sceneController = TestHelpers.InitializeSceneController();
-        //     var scenesToLoad = (Resources.Load("TestJSON/SceneLoadingTest") as TextAsset).text;
-
-        //     yield return new WaitForSeconds(.1f);
-
-        //     // sceneController.UnloadAllScenes();
-
-        //     // yield return new WaitForSeconds(.1f);
-
-        //     sceneController.LoadParcelScenes(scenesToLoad);
-
-        //     yield return new WaitForAllMessagesProcessed();
-
-        //     scene = sceneController.loadedScenes["0,0"];
-        // }
-
         [UnityTest]
         public IEnumerator MaterialTransitionWithGLTF()
         {
             yield return InitScene();
+            DCL.Configuration.Environment.DEBUG = true;
+            sceneController.SetDebug();
 
             var entity1 = TestHelpers.CreateSceneEntity(scene);
 
@@ -107,7 +84,9 @@ namespace Tests
         [UnityTest]
         public IEnumerator MaterialTransitionWithParametrizableMeshes()
         {
-            yield return InitScene();
+            yield return InitScene(reloadUnityScene: false);
+            DCL.Configuration.Environment.DEBUG = true;
+            sceneController.SetDebug();
 
             var entity1 = TestHelpers.CreateSceneEntity(scene);
 
