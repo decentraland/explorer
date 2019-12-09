@@ -612,7 +612,7 @@ namespace DCL.Interface
                 TransformPayload payload = new TransformPayload();
                 payload.position = entityTransform.position;
                 payload.rotation = entityTransform.rotation;
-                payload.scale = entityTransform.localScale;
+                payload.scale = entityTransform.lossyScale;
 
                 onGizmoEventPayload.transform = payload;
             }

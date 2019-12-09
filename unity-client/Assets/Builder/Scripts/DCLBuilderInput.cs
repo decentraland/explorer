@@ -113,6 +113,20 @@ namespace Builder
             {
                 SendMessageToBridge("OnBuilderKeyDown", "LeftShift");
             }
+
+
+            if (Input.GetKeyDown(KeyCode.W))
+            {
+                SendMessageToBridge("SelectGizmo", DCL.Components.DCLGizmos.Gizmo.MOVE);
+            }
+            if (Input.GetKeyDown(KeyCode.R))
+            {
+                SendMessageToBridge("SelectGizmo", DCL.Components.DCLGizmos.Gizmo.ROTATE);
+            }
+            if (Input.GetKeyDown(KeyCode.S))
+            {
+                SendMessageToBridge("SelectGizmo", DCL.Components.DCLGizmos.Gizmo.SCALE);
+            }
         }
 
         private void EditorKeyUpEvent()

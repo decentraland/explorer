@@ -381,6 +381,7 @@ namespace Builder
                 DCLBuilderObjectSelector.OnSelectedObject += OnObjectSelected;
                 DCLBuilderObjectSelector.OnNoObjectSelected += OnNoObjectSelected;
                 DCLBuilderGizmoManager.OnGizmoTransformObjectEnd += OnGizmoTransformObjectEnded;
+                DCLBuilderGizmoManager.OnGizmoTransformObject += OnGizmoTransformObject;
                 DCLBuilderEntity.OnEntityShapeUpdated += ProcessEntityBoundaries;
                 DCLBuilderEntity.OnEntityTransformUpdated += ProcessEntityBoundaries;
                 RenderingController.i.OnRenderingStateChanged += OnRenderingStateChanged;
@@ -396,6 +397,7 @@ namespace Builder
             DCLBuilderObjectSelector.OnSelectedObject -= OnObjectSelected;
             DCLBuilderObjectSelector.OnNoObjectSelected -= OnNoObjectSelected;
             DCLBuilderGizmoManager.OnGizmoTransformObjectEnd -= OnGizmoTransformObjectEnded;
+            DCLBuilderGizmoManager.OnGizmoTransformObject -= OnGizmoTransformObject;
             DCLBuilderEntity.OnEntityShapeUpdated -= ProcessEntityBoundaries;
             DCLBuilderEntity.OnEntityTransformUpdated -= ProcessEntityBoundaries;
             RenderingController.i.OnRenderingStateChanged -= OnRenderingStateChanged;
@@ -414,6 +416,11 @@ namespace Builder
         private void OnGizmoTransformObjectEnded(DCLBuilderEntity entity, Vector3 position, string gizmoType)
         {
             NotifyGizmoEvent(entity, gizmoType);
+        }
+
+        private void OnGizmoTransformObject(DCLBuilderEntity entity, Vector3 position, string gizmoType)
+        {
+            currentScene.boundariesChecker?.EvaluateEntityPosition(entity.rootEntity);
         }
 
         private void OnObjectSelected(DCLBuilderEntity entity, string gizmoType)

@@ -183,7 +183,6 @@ namespace Builder
             {
                 gameObject.transform.localScale = Vector3.zero;
                 StartCoroutine(ScaleAnimationRoutine(0.3f));
-
             }
 
             if (onShapeLoaded != null)
@@ -195,8 +194,9 @@ namespace Builder
 
         private void OnTransformUpdated(DCLTransform.Model transformModel)
         {
-            gameObject.transform.localPosition = transformModel.position;
-            gameObject.transform.localRotation = transformModel.rotation;
+            //NOTE: there is no parenting entities in editor mode so we can set properties in world space
+            gameObject.transform.position = transformModel.position;
+            gameObject.transform.rotation = transformModel.rotation;
 
             if (isScalingAnimation)
             {

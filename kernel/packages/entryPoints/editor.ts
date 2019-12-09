@@ -295,6 +295,10 @@ namespace editor {
   export function onKeyDown(key: string) {
     unityInterface.OnBuilderKeyDown(key)
   }
+
+  export function onKeyUp(key: string) {
+    unityInterface.OnBuilderKeyUp(key)
+  }
 }
 
 global.editor = editor

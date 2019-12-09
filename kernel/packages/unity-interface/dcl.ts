@@ -383,6 +383,9 @@ export const unityInterface = {
   },
   DeselectBuilderEntity() {
     this.SendBuilderMessage('DeselectBuilderEntity')
+  },
+  OnBuilderKeyUp(key: string) {
+    this.SendBuilderMessage('OnBuilderKeyUp', key)
   }
 }
 
