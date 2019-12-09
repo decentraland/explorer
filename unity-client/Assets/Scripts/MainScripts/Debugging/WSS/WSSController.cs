@@ -100,6 +100,7 @@ namespace DCL
         public SceneController sceneController;
         public DCLCharacterController characterController;
         private Builder.DCLBuilderBridge builderBridge = null;
+        public CameraController cameraController;
 
         [System.NonSerialized]
         public static Queue<DCLWebSocketService.Message> queuedMessages = new Queue<DCLWebSocketService.Message>();
@@ -253,6 +254,9 @@ namespace DCL
                                 break;
                             case "Teleport":
                                 characterController.Teleport(msg.payload);
+                                break;
+                            case "SetRotation":
+                                cameraController.SetRotation(msg.payload);
                                 break;
                             case "Reset":
                                 sceneController.UnloadAllScenesQueued();
