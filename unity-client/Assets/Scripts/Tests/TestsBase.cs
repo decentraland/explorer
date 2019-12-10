@@ -7,6 +7,7 @@ using System;
 using System.Collections;
 using System.Reflection;
 using UnityEngine;
+using UnityEngine.TestTools;
 using UnityEngine.SceneManagement;
 
 public class TestsBase
@@ -14,10 +15,11 @@ public class TestsBase
     protected SceneController sceneController;
     protected ParcelScene scene;
 
-    [NUnit.Framework.TearDown]
-    public virtual void TearDown()
+    [UnityTearDown]
+    public virtual IEnumerator TearDown()
     {
         AssetPromiseKeeper_GLTF.i.Cleanup();
+        yield return null;
     }
 
     protected IEnumerator InitUnityScene(string sceneName = null)
@@ -100,39 +102,6 @@ public class TestsBase
     protected IEnumerator WaitForUICanvasUpdate()
     {
         yield break;
-    }
-
-    protected Vector2 CalculateAlignedAnchoredPosition(Rect parentRect, Rect elementRect, string vAlign = "center", string hAlign = "center")
-    {
-        Vector2 result = Vector2.zero;
-
-        switch (vAlign)
-        {
-            case "top":
-                result.y = -elementRect.height / 2;
-                break;
-            case "bottom":
-                result.y = -(parentRect.height - elementRect.height / 2);
-                break;
-            default: // center
-                result.y = -parentRect.height / 2;
-                break;
-        }
-
-        switch (hAlign)
-        {
-            case "left":
-                result.x = elementRect.width / 2;
-                break;
-            case "right":
-                result.x = (parentRect.width - elementRect.width / 2);
-                break;
-            default: // center
-                result.x = parentRect.width / 2;
-                break;
-        }
-
-        return result;
     }
 
     public static T Reflection_GetStaticField<T>(Type baseType, string fieldName)
