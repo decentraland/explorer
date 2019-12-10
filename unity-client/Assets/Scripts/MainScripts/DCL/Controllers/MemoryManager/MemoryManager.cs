@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -10,7 +10,7 @@ namespace DCL
         private const float MIN_TIME_BETWEEN_UNLOAD_ASSETS = 10.0f;
         private float lastTimeUnloadUnusedAssets = 0;
 
-        void Start()
+        public void Initialize()
         {
             CoroutineStarter.Start(AutoCleanup());
         }
@@ -36,8 +36,11 @@ namespace DCL
 
         private bool NeedsCleanup(Pool pool, bool forceCleanup = false)
         {
+            if (forceCleanup)
+                return true;
+
             bool timeout = DCLTime.realtimeSinceStartup - pool.lastGetTime >= TIME_TO_POOL_CLEANUP;
-            return (timeout || forceCleanup) && pool.activeCount == 0;
+            return timeout && pool.activeCount == 0;
         }
 
         public IEnumerator CleanupPoolsIfNeeded(bool forceCleanup = false)

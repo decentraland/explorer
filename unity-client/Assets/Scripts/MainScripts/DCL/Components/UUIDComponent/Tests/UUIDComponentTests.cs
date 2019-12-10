@@ -268,7 +268,7 @@ namespace Tests
         [UnityTest]
         public IEnumerator OnClickComponentInitializesWithGLTFShapeAsynchronously()
         {
-            yield return InitScene();
+            yield return InitScene(reloadUnityScene: false);
 
             string entityId = "1";
             TestHelpers.CreateSceneEntity(scene, entityId);
@@ -574,7 +574,7 @@ namespace Tests
             yield return TestHelpers.WaitForEventFromEngine(targetEventType, sceneEvent,
             () =>
                 {
-                    DCL.InputController.i.RaiseEvent(WebInterface.ACTION_BUTTON.POINTER, DCL.InputController.EVENT.BUTTON_DOWN, true);
+                    DCL.InputController_Legacy.i.RaiseEvent(WebInterface.ACTION_BUTTON.POINTER, DCL.InputController_Legacy.EVENT.BUTTON_DOWN, true);
                 },
                 (pointerEvent) =>
                 {
@@ -633,7 +633,7 @@ namespace Tests
             yield return TestHelpers.WaitForEventFromEngine(targetEventType, sceneEvent,
                 () =>
                 {
-                    DCL.InputController.i.RaiseEvent(WebInterface.ACTION_BUTTON.POINTER, DCL.InputController.EVENT.BUTTON_DOWN, true);
+                    DCL.InputController_Legacy.i.RaiseEvent(WebInterface.ACTION_BUTTON.POINTER, DCL.InputController_Legacy.EVENT.BUTTON_DOWN, true);
                 },
                 (pointerEvent) =>
                 {
@@ -690,12 +690,12 @@ namespace Tests
             sceneEvent.eventType = "uuidEvent";
             bool eventTriggered = false;
 
-            DCL.InputController.i.RaiseEvent(WebInterface.ACTION_BUTTON.POINTER, DCL.InputController.EVENT.BUTTON_DOWN, true);
+            DCL.InputController_Legacy.i.RaiseEvent(WebInterface.ACTION_BUTTON.POINTER, DCL.InputController_Legacy.EVENT.BUTTON_DOWN, true);
 
             yield return TestHelpers.WaitForEventFromEngine(targetEventType, sceneEvent,
                 () =>
                 {
-                    DCL.InputController.i.RaiseEvent(WebInterface.ACTION_BUTTON.POINTER, DCL.InputController.EVENT.BUTTON_UP, true);
+                    DCL.InputController_Legacy.i.RaiseEvent(WebInterface.ACTION_BUTTON.POINTER, DCL.InputController_Legacy.EVENT.BUTTON_UP, true);
                 },
                 (pointerEvent) =>
                 {

@@ -254,7 +254,8 @@ export const unityInterface = {
     const theY = y <= 0 ? 2 : y
 
     ensureTeleportAnimation()
-    gameInstance.SendMessage('CharacterController', 'Teleport', JSON.stringify({ x, y: theY, z, cameraTarget }))
+    gameInstance.SendMessage('CharacterController', 'Teleport', JSON.stringify({ x, y: theY, z }))
+    gameInstance.SendMessage('CameraController', 'SetRotation', JSON.stringify({ x, y: theY, z, cameraTarget }))
   },
   /** Tells the engine which scenes to load */
   LoadParcelScenes(parcelsToLoad: LoadableParcelScene[]) {
@@ -730,6 +731,7 @@ export async function loadPreviewScene() {
       name: scene.name,
       sceneId: 'previewScene',
       baseUrl: location.toString().replace(/\?[^\n]+/g, ''),
+      baseUrlBundles: '',
       scene,
       mappingsResponse: mappingsResponse
     }

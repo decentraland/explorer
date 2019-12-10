@@ -1,11 +1,11 @@
-﻿using System.Collections;
+using System.Collections;
 using UnityEngine;
 
 namespace DCL
 {
-    public class Asset_GLTF : Asset
+    public class Asset_GLTF : Asset_WithPoolableContainer
     {
-        public GameObject container;
+        public override GameObject container { get; set; }
         public string name;
         public bool visible = true;
 
@@ -35,7 +35,6 @@ namespace DCL
             container.transform.parent = null;
             container.transform.position = Vector3.one * 1000;
         }
-
 
         public void CancelShow()
         {
@@ -71,7 +70,7 @@ namespace DCL
 
         public IEnumerator ShowCoroutine(System.Action OnFinish)
         {
-            //NOTE(Brian): This fixes seeing the object in the scene 0,0 for a frame
+            // NOTE(Brian): This fixes seeing the object in the scene 0,0 for a frame
             yield return new WaitForSeconds(Random.Range(0, 0.05f));
 
             // NOTE(Brian): This GameObject can be removed by distance after the delay
