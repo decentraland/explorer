@@ -42,7 +42,7 @@ namespace AvatarEditorHUD_Tests
 
             });
 
-            catalog = AvatarTestHelpers.CreateTestCatalog();
+            catalog = AvatarTestHelpers.CreateTestCatalogLocal();
             controller = new AvatarEditorHUDController_Mock(userProfile, catalog);
         }
 
