@@ -17,7 +17,7 @@ namespace AvatarEditorHUD_Tests
         [UnitySetUp]
         private IEnumerator SetUp()
         {
-            yield return InitScene();
+            yield return InitScene(false, false, false, false, false);
 
             userProfile = ScriptableObject.CreateInstance<UserProfile>();
             userProfile.UpdateData(new UserProfileModel()
