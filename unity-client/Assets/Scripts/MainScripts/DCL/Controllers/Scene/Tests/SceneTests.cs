@@ -60,9 +60,10 @@ namespace Tests
             yield return null;
         }
 
-        [NUnit.Framework.TearDown]
-        public override void TearDown()
+        [UnityTearDown]
+        public override IEnumerator TearDown()
         {
+            return null;
         }
 
         [UnityTest]
