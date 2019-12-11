@@ -9,6 +9,7 @@ namespace DCL.Components
     {
         Rigidbody rigidBody;
         OnPointerEventColliders pointerEventColliders;
+        bool beingHovered;
 
         public override void Setup(ParcelScene scene, DecentralandEntity entity, string uuid, string type)
         {
@@ -32,8 +33,8 @@ namespace DCL.Components
         {
             if (!entity.meshRootGameObject) return;
 
-            // we add a rigidbody to the entity's gameobject to have a 
-            // reference to the entity itself on the RaycastHit 
+            // we add a rigidbody to the entity's gameobject to have a
+            // reference to the entity itself on the RaycastHit
             // so we don't need to search for the parents in order to get
             // the OnPointerEventComponent reference
             if (gameObject.GetComponent<Rigidbody>() == null)
@@ -51,6 +52,24 @@ namespace DCL.Components
         void OnComponentUpdated(DecentralandEntity e)
         {
             Initialize();
+        }
+
+        public void SetHoverState(bool isHovered, float hoverDistance = 0f)
+        {
+            if (beingHovered == isHovered) return;
+
+            beingHovered = isHovered;
+
+            if (beingHovered)
+            {
+                // Display toast
+                Debug.Log("HOVER", transform);
+            }
+            else
+            {
+                // Hide toast
+                Debug.Log("UN-HOVER", transform);
+            }
         }
 
         void OnDestroy()

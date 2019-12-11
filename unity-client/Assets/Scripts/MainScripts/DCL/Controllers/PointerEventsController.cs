@@ -7,19 +7,11 @@ namespace DCL
 {
     public class PointerEventsController : Singleton<PointerEventsController>
     {
-        private LayerMask layerMaskTarget;
-        private static int characterControllerLayer => 1 << LayerMask.NameToLayer("CharacterController");
-
         public static bool renderingIsDisabled = true;
         private OnPointerUpComponent pointerUpEvent;
         private IRaycastHandler raycastHandler = new RaycastHandler();
         private Camera charCamera;
         private bool isTesting = false;
-
-        public PointerEventsController()
-        {
-            layerMaskTarget = 1 << LayerMask.NameToLayer("OnPointerEvent");
-        }
 
         public void Initialize(bool isTesting = false)
         {
@@ -40,7 +32,7 @@ namespace DCL
             }
         }
 
-        private Ray GetRayFromCamera()
+        public Ray GetRayFromCamera()
         {
             return charCamera.ScreenPointToRay(new Vector3(Screen.width / 2, Screen.height / 2, 0));
         }
@@ -57,8 +49,8 @@ namespace DCL
                         return;
                 }
 
-                var pointerEventLayer = layerMaskTarget & (~characterControllerLayer); //Ensure characterController is being filtered
-                var globalLayer = ~layerMaskTarget & (~characterControllerLayer); //Ensure characterController is being filtered
+                var pointerEventLayer = Configuration.LayerMasks.physicsCastLayerMaskWithoutCharacter; //Ensure characterController is being filtered
+                var globalLayer = ~Configuration.LayerMasks.physicsCastLayerMask & (~Configuration.LayerMasks.characterControllerLayer); //Ensure characterController is being filtered
 
                 if (evt == InputController_Legacy.EVENT.BUTTON_DOWN)
                 {
