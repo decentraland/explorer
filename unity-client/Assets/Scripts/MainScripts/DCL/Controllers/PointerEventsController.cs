@@ -1,4 +1,4 @@
-using DCL.Components;
+﻿using DCL.Components;
 using DCL.Helpers;
 using DCL.Interface;
 using UnityEngine;
@@ -23,7 +23,6 @@ namespace DCL
 
         public void Initialize(bool isTesting = false)
         {
-            Debug.Log("isTesting = " + isTesting);
             this.isTesting = isTesting;
 
             InputController_Legacy.i.AddListener(WebInterface.ACTION_BUTTON.POINTER, OnButtonEvent);
