@@ -41,7 +41,6 @@ namespace DCL
             if (this.model == null)
             {
                 ResetAvatar();
-                isLoading = false;
                 this.OnSuccessCallback?.Invoke();
                 return;
             }
