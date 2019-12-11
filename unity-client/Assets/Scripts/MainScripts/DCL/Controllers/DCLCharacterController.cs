@@ -1,4 +1,4 @@
-﻿using DCL;
+using DCL;
 using DCL.Configuration;
 using DCL.Helpers;
 using UnityEngine;
@@ -115,27 +115,31 @@ public class DCLCharacterController : MonoBehaviour
         sprintAction.OnFinished += sprintFinishedDelegate;
     }
 
-    // To keep the character always active, just in case
-    void OnDisable()
-    {
-        if (characterAlwaysEnabled && !reEnablingGameObject && SceneController.i != null)
-            SceneController.i.StartCoroutine(ReEnableGameObject()); // gameObject cannot start the routine as it's being deactivated
-    }
+    //Coroutine reenableCoroutine;
+    //// To keep the character always active, just in case
+    //void OnDisable()
+    //{
+    //    if (characterAlwaysEnabled && !reEnablingGameObject)
+    //        reenableCoroutine = CoroutineStarter.Start(ReEnableGameObject()); // gameObject cannot start the routine as it's being deactivated
+    //}
 
-    IEnumerator ReEnableGameObject()
-    {
-        reEnablingGameObject = true;
+    //IEnumerator ReEnableGameObject()
+    //{
+    //    reEnablingGameObject = true;
 
-        yield return null;
+    //    yield return null;
 
-        gameObject.SetActive(true);
-        ResetGround();
+    //    gameObject.SetActive(true);
+    //    ResetGround();
 
-        reEnablingGameObject = false;
-    }
+    //    reEnablingGameObject = false;
+    //}
 
     void OnDestroy()
     {
+        //if (reenableCoroutine != null && CoroutineStarter.i)
+        //    CoroutineStarter.Stop(reenableCoroutine);
+
         characterPosition.OnPrecisionAdjust -= OnPrecisionAdjust;
         jumpAction.OnStarted -= jumpStartedDelegate;
         jumpAction.OnFinished -= jumpFinishedDelegate;
