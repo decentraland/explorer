@@ -22,7 +22,7 @@ namespace AvatarShape_Tests
         [UnitySetUp]
         private IEnumerator SetUp()
         {
-            yield return InitScene(false, false, false, false, false);
+            yield return InitScene(false, false, spawnTestScene: true, false, false);
 
             avatarModel = new AvatarModel()
             {
