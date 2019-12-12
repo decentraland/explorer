@@ -115,31 +115,8 @@ public class DCLCharacterController : MonoBehaviour
         sprintAction.OnFinished += sprintFinishedDelegate;
     }
 
-    //Coroutine reenableCoroutine;
-    //// To keep the character always active, just in case
-    //void OnDisable()
-    //{
-    //    if (characterAlwaysEnabled && !reEnablingGameObject)
-    //        reenableCoroutine = CoroutineStarter.Start(ReEnableGameObject()); // gameObject cannot start the routine as it's being deactivated
-    //}
-
-    //IEnumerator ReEnableGameObject()
-    //{
-    //    reEnablingGameObject = true;
-
-    //    yield return null;
-
-    //    gameObject.SetActive(true);
-    //    ResetGround();
-
-    //    reEnablingGameObject = false;
-    //}
-
     void OnDestroy()
     {
-        //if (reenableCoroutine != null && CoroutineStarter.i)
-        //    CoroutineStarter.Stop(reenableCoroutine);
-
         characterPosition.OnPrecisionAdjust -= OnPrecisionAdjust;
         jumpAction.OnStarted -= jumpStartedDelegate;
         jumpAction.OnFinished -= jumpFinishedDelegate;
