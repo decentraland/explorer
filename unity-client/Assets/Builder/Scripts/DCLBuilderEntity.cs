@@ -250,6 +250,17 @@ namespace Builder
                     }
                 }
             }
+
+            if (meshColliders != null)
+            {
+                for (int i = 0; i < meshColliders.Length; i++)
+                {
+                    if (meshColliders[i] != null)
+                    {
+                        meshColliders[i].gameObject.SetActive(!isPreview);
+                    }
+                }
+            }
         }
 
         private void ProcessEntityShape(DecentralandEntity entity)
