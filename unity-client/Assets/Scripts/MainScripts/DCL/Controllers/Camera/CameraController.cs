@@ -1,8 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using Cinemachine;
 using DCL.Helpers;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class CameraController : MonoBehaviour
@@ -40,11 +40,13 @@ public class CameraController : MonoBehaviour
     internal InputAction_Hold.Started freeCameraModeStartedDelegate;
     internal InputAction_Hold.Finished freeCameraModeFinishedDelegate;
 
+    [SerializeField] private InputAction_Measurable characterYAxis;
+
     internal CameraMode currentMode = CameraMode.FirstPerson;
 
     private void Awake()
     {
-        cachedModeToVirtualCamera =  cameraModes.ToDictionary(x => x.cameraMode, x => x.virtualCamera);
+        cachedModeToVirtualCamera = cameraModes.ToDictionary(x => x.cameraMode, x => x.virtualCamera);
         using (var iterator = cachedModeToVirtualCamera.GetEnumerator())
         {
             while (iterator.MoveNext())
@@ -67,9 +69,15 @@ public class CameraController : MonoBehaviour
     private void OnCameraChangeAction(DCLAction_Trigger action)
     {
         if (currentMode == CameraMode.FirstPerson)
+        {
             SetCameraMode(CameraMode.ThirdPerson);
+            cursor.SetActive(false);
+        }
         else
+        {
             SetCameraMode(CameraMode.FirstPerson);
+            cursor.SetActive(true);
+        }
     }
 
     internal void SetCameraMode(CameraMode newMode)
@@ -90,6 +98,8 @@ public class CameraController : MonoBehaviour
         transform.position += newValue - oldValue;
     }
 
+    public float rotationLerpSpeed = 10;
+    public GameObject cursor;
     private void Update()
     {
         cameraForward.Set(cameraTransform.forward);
@@ -108,10 +118,14 @@ public class CameraController : MonoBehaviour
                     characterForward.Set(xzPlaneForward);
                     break;
                 case CameraMode.ThirdPerson:
-                    if (!characterForward.HasValue())
-                        characterForward.Set(xzPlaneForward);
-                    var lerpedForward = Vector3.Slerp(characterForward.Get().Value, xzPlaneForward, 5 * Time.deltaTime);
-                    characterForward.Set(lerpedForward);
+                    if (characterYAxis.GetValue() != 0f)
+                    {
+                        if (!characterForward.HasValue())
+                            characterForward.Set(xzPlaneForward);
+
+                        var lerpedForward = Vector3.Slerp(characterForward.Get().Value, xzPlaneForward, rotationLerpSpeed * Time.deltaTime);
+                        characterForward.Set(lerpedForward);
+                    }
                     break;
             }
         }
