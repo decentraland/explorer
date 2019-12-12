@@ -5,20 +5,20 @@ Shader "DCL/Toon Shader"
 		_BaseMap ("Base (RGB)", 2D) = "white" {}
 		_MatCap ("MatCap (RGB)", 2D) = "white" {}
 		_BaseColor ("Color", Color) = (0, 0, 0, 0)
-		_EmissionColor ("Emission Color", Color) = (0, 0, 0, 0)
+		_EmissionMap ("Emission Map (RGB)", 2D) = "black" {}
+		[HDR] _EmissionColor ("Emission Color", Color) = (0, 0, 0, 0)
+		_Cutoff("AlphaCutout", Range(0.0, 1.0)) = 0.5
+
 		[HideInInspector] _AlphaClip("__clip", Float) = 0.0
 		[HideInInspector] _SrcBlend("__src", Float) = 1.0
 		[HideInInspector] _DstBlend("__dst", Float) = 0.0
 		[HideInInspector] _ZWrite("__zw", Float) = 1.0
 		[HideInInspector] _Cull("__cull", Float) = 2.0
-		[Toggle(_EMISSION)] _EnableEmission ("Enable Emission", Float) = 0
-		[Toggle(_ALPHATEST_ON)] _EnableAlphaTest ("Enable AlphaTest", Float) = 0
-		_Cutoff("AlphaCutout", Range(0.0, 1.0)) = 0.5
 	}
 	
 	Subshader
 	{
-		Tags { "RenderType"="Opaque" "RenderPipeline" = "LightweightPipeline"}
+		Tags { "RenderPipeline"="LightweightPipeline" }
 		Blend [_SrcBlend][_DstBlend]
 		ZWrite [_ZWrite]
 		Cull [_Cull]
@@ -43,9 +43,17 @@ Shader "DCL/Toon Shader"
 				float2 cap	: TEXCOORD1;
 				UNITY_FOG_COORDS(2)
 			};
-				
+
 			uniform float4 _BaseMap_ST;
 				
+			uniform sampler2D _BaseMap;
+			uniform sampler2D _MatCap;
+            uniform sampler2D _EmissionMap;
+
+			fixed4 _BaseColor;
+			float4 _EmissionColor;
+			float _Cutoff;
+
 			v2f vert (appdata_base v)
 			{
 				v2f o;
@@ -61,36 +69,30 @@ Shader "DCL/Toon Shader"
 				return o;
 			}
 				
-			uniform sampler2D _BaseMap;
-			uniform sampler2D _MatCap;
-
-			fixed4 _BaseColor;
-			float4 _EmissionColor; // NOTE(Brian): just added this to prevent gltf warning
-				
 			fixed4 frag (v2f i) : COLOR
 			{
 				fixed4 tex = tex2D(_BaseMap, i.uv) * _BaseColor;
 				fixed4 matcap = tex2D(_MatCap, i.cap);
 
 				#ifdef _ALPHATEST_ON
-					clip(tex.a - _AlphaClipThreshold);
+					clip(tex.a - _Cutoff);
 				#endif
 
-				#ifndef UNITY_COLORSPACE_GAMMA
+				#ifdef UNITY_COLORSPACE_GAMMA
+					matcap.rgb = tex.rgb + (mc.rgb * 2.0) - 1.0;
+				#else
 					// perform the blending operation in gamma space to get the same result in linear space
 					tex.rgb = LinearToGammaSpace(tex.rgb);
 					matcap.rgb = LinearToGammaSpace(matcap.rgb);
 					matcap *= 2.0;
 					matcap = saturate(tex + matcap - 1.0);
 					matcap.rgb = GammaToLinearSpace(matcap.rgb);
-				#else
-					matcap.rgb = tex.rgb + (mc.rgb * 2.0) - 1.0;
 				#endif
 
 				#ifdef _EMISSION
-					matcap += _EmissionColor;
+					matcap.rgb += (tex2D(_EmissionMap, i.uv) * _EmissionColor).rgb;
 				#endif
-
+                matcap.a = tex.a;
 				UNITY_APPLY_FOG(i.fogCoord, matcap);
 				return matcap;
 
