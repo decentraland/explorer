@@ -47,6 +47,10 @@ public class CatalogController : MonoBehaviour
             case "wearable":
                 {
                     WearableItem wearableItem = JsonUtility.FromJson<WearableItem>(payload);
+                    if (wearableItem.IsCollectible())
+                    {
+                        FillInfoWithContent(wearableItem);
+                    }
                     wearableCatalog.Add(wearableItem.id, wearableItem);
                     break;
                 }
@@ -61,6 +65,34 @@ public class CatalogController : MonoBehaviour
                     break;
                 }
         }
+    }
+
+    private void FillInfoWithContent(WearableItem wearableItem)
+    {
+
+        switch (Random.Range(0, 3))
+        {
+            case 0:
+                wearableItem.rarity = "rare";
+                break;
+            case 1:
+                wearableItem.rarity = "epic";
+                break;
+            case 2:
+                wearableItem.rarity = "legendary";
+                break;
+        }
+
+        wearableItem.title = "title";
+        wearableItem.subtitle = "subtitle";
+        wearableItem.level = Random.Range(1,11);
+        wearableItem.creatorName = "Alex";
+        wearableItem.creatorSnapshotUrl = wearableItem.baseUrl + wearableItem.thumbnail;
+        wearableItem.rating = Random.Range(0f, 5f);
+        wearableItem.description = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum";
+        wearableItem.mintedTotal = Random.Range(1000, 5001);
+        wearableItem.mintedAt = Random.Range(1, wearableItem.mintedTotal);
+
     }
 
     public void AddWearablesToCatalog(string payload)
