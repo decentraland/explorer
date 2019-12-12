@@ -12,6 +12,7 @@ namespace DCL
 
         public static bool renderingIsDisabled = true;
         private OnPointerUpComponent pointerUpEvent;
+        private RaycastHitInfo lastPointerDownEventHitInfo;
         private IRaycastHandler raycastHandler = new RaycastHandler();
         private Camera charCamera;
         private bool isTesting = false;
@@ -79,11 +80,7 @@ namespace DCL
                     // Raycast for global pointer events
                     RaycastResultInfo raycastInfoGlobalLayer = raycastHandler.Raycast(ray, charCamera.farClipPlane, globalLayer, null);
 
-                    bool isOnClickComponentBlocked =
-                        raycastInfoGlobalLayer.hitInfo != null
-                        && raycastInfoPointerEventLayer.hitInfo != null
-                        && raycastInfoGlobalLayer.hitInfo.hit.distance <= raycastInfoPointerEventLayer.hitInfo.hit.distance
-                        && raycastInfoGlobalLayer.hitInfo.collider.entityId != raycastInfoPointerEventLayer.hitInfo.collider.entityId;
+                    bool isOnClickComponentBlocked = IsBlockingOnClick(raycastInfoPointerEventLayer.hitInfo, raycastInfoGlobalLayer.hitInfo);
 
                     if (!isOnClickComponentBlocked && raycastInfoPointerEventLayer.hitInfo.hit.rigidbody)
                     {
@@ -93,6 +90,7 @@ namespace DCL
                         go.GetComponentInChildren<OnPointerDownComponent>()?.Report(buttonId, ray, raycastInfoPointerEventLayer.hitInfo.hit);
 
                         pointerUpEvent = go.GetComponentInChildren<OnPointerUpComponent>();
+                        lastPointerDownEventHitInfo = raycastInfoPointerEventLayer.hitInfo;
                     }
 
                     string sceneId = SceneController.i.GetCurrentScene(DCLCharacterController.i.characterPosition);
@@ -128,13 +126,10 @@ namespace DCL
                         // Raycast for pointer event components
                         RaycastResultInfo raycastInfoPointerEventLayer = raycastHandler.Raycast(ray, charCamera.farClipPlane, pointerEventLayer, null);
 
-                        bool isOnClickComponentBlocked =
-                            raycastInfoGlobalLayer.hitInfo != null
-                            && raycastInfoPointerEventLayer.hitInfo != null
-                            && raycastInfoGlobalLayer.hitInfo.hit.distance <= raycastInfoPointerEventLayer.hitInfo.hit.distance
-                            && raycastInfoGlobalLayer.hitInfo.collider.entityId != raycastInfoPointerEventLayer.hitInfo.collider.entityId;
+                        bool isOnClickComponentBlocked = IsBlockingOnClick(raycastInfoPointerEventLayer.hitInfo, raycastInfoGlobalLayer.hitInfo);
+                        bool isSameEntityThatWasPressed = AreCollidersFromSameEntity(raycastInfoPointerEventLayer.hitInfo, lastPointerDownEventHitInfo);
 
-                        if (!isOnClickComponentBlocked)
+                        if (!isOnClickComponentBlocked && isSameEntityThatWasPressed)
                         {
                             bool isHitInfoValid = raycastInfoPointerEventLayer.hitInfo.hit.collider != null;
                             pointerUpEvent.Report(buttonId, ray, raycastInfoPointerEventLayer.hitInfo.hit, isHitInfoValid);
@@ -163,6 +158,34 @@ namespace DCL
                         DCL.Interface.WebInterface.ReportGlobalPointerUpEvent(buttonId, raycastInfoGlobalLayer.ray, Vector3.zero, Vector3.zero, 0, sceneId);
                     }
                 }
+            }
+        }
+
+        bool IsBlockingOnClick(RaycastHitInfo targetOnClickHit, RaycastHitInfo potentialBlockerHit)
+        {
+            return
+                potentialBlockerHit != null // Does a potential blocker hit exist?
+                && targetOnClickHit != null // Was a target entity with a pointer event component hit?
+                && potentialBlockerHit.hit.distance <= targetOnClickHit.hit.distance // Is potential blocker nearer than target entity?
+                && !AreCollidersFromSameEntity(potentialBlockerHit, targetOnClickHit); // Does potential blocker belong to other entity rather than target entity?
+        }
+
+        bool AreCollidersFromSameEntity(RaycastHitInfo hitInfo, RaycastHitInfo otherHitInfo)
+        {
+            // If both entities has OnClick/PointerEvent component
+            if (hitInfo.hit.rigidbody && otherHitInfo.hit.rigidbody)
+            {
+                return hitInfo.hit.rigidbody == otherHitInfo.hit.rigidbody;
+            }
+            // If only one of them has OnClick/PointerEvent component
+            else if ((hitInfo.hit.rigidbody && !otherHitInfo.hit.rigidbody) || (!hitInfo.hit.rigidbody && otherHitInfo.hit.rigidbody))
+            {
+                return false;
+            }
+            // None of them has OnClick/PointerEvent component
+            else
+            {
+                return hitInfo.collider.entityId == otherHitInfo.collider.entityId;
             }
         }
     }
