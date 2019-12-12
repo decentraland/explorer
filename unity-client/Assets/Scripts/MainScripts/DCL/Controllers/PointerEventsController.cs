@@ -2,16 +2,21 @@ using DCL.Components;
 using DCL.Helpers;
 using UnityEngine;
 using DCL.Interface;
+using System.Collections;
 
 namespace DCL
 {
     public class PointerEventsController : Singleton<PointerEventsController>
     {
         public static bool renderingIsDisabled = true;
-        private OnPointerUpComponent pointerUpEvent;
-        private IRaycastHandler raycastHandler = new RaycastHandler();
-        private Camera charCamera;
-        private bool isTesting = false;
+
+        bool isTesting = false;
+        OnPointerUpComponent pointerUpEvent;
+        IRaycastHandler raycastHandler = new RaycastHandler();
+        Camera charCamera;
+        OnPointerEventComponent lastHoveredObject = null;
+        OnPointerEventComponent newHoveredObject = null;
+        Coroutine hoverInteractiveObjectsRoutine;
 
         public void Initialize(bool isTesting = false)
         {
@@ -22,14 +27,63 @@ namespace DCL
             InputController_Legacy.i.AddListener(WebInterface.ACTION_BUTTON.SECONDARY, OnButtonEvent);
 
             RetrieveCamera();
+
+            if (hoverInteractiveObjectsRoutine == null)
+                hoverInteractiveObjectsRoutine = SceneController.i.StartCoroutine(HoverInteractiveObjects());
         }
 
-        private void RetrieveCamera()
+        IEnumerator HoverInteractiveObjects()
+        {
+            RaycastHit hitInfo;
+
+            while (true)
+            {
+                if (RenderingController.i.renderingEnabled)
+                {
+                    if (Physics.Raycast(PointerEventsController.i.GetRayFromCamera(), out hitInfo, Mathf.Infinity, Configuration.LayerMasks.physicsCastLayerMaskWithoutCharacter))
+                    {
+                        newHoveredObject = hitInfo.collider.GetComponentInParent<OnPointerEventComponent>();
+
+                        if (newHoveredObject != lastHoveredObject)
+                        {
+                            if (newHoveredObject != null)
+                            {
+                                UnhoverLastHoveredObject();
+
+                                newHoveredObject.SetHoverState(true, hitInfo.distance);
+
+                                lastHoveredObject = newHoveredObject;
+                            }
+                            else
+                            {
+                                UnhoverLastHoveredObject();
+                            }
+                        }
+                    }
+                    else
+                    {
+                        UnhoverLastHoveredObject();
+                    }
+                }
+
+                yield return null;
+            }
+        }
+
+        void RetrieveCamera()
         {
             if (charCamera == null)
             {
                 charCamera = Camera.main;
             }
+        }
+
+        void UnhoverLastHoveredObject()
+        {
+            if (lastHoveredObject == null) return;
+
+            lastHoveredObject.SetHoverState(false);
+            lastHoveredObject = null;
         }
 
         public Ray GetRayFromCamera()
