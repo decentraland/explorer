@@ -1,7 +1,7 @@
 ﻿using DCL.Components;
 using DCL.Helpers;
-using UnityEngine;
 using DCL.Interface;
+using UnityEngine;
 
 namespace DCL
 {
@@ -30,6 +30,13 @@ namespace DCL
             InputController_Legacy.i.AddListener(WebInterface.ACTION_BUTTON.SECONDARY, OnButtonEvent);
 
             RetrieveCamera();
+        }
+
+        public void Cleanup()
+        {
+            InputController_Legacy.i.RemoveListener(WebInterface.ACTION_BUTTON.POINTER, OnButtonEvent);
+            InputController_Legacy.i.RemoveListener(WebInterface.ACTION_BUTTON.PRIMARY, OnButtonEvent);
+            InputController_Legacy.i.RemoveListener(WebInterface.ACTION_BUTTON.SECONDARY, OnButtonEvent);
         }
 
         private void RetrieveCamera()
@@ -113,20 +120,20 @@ namespace DCL
                     Ray ray;
                     ray = GetRayFromCamera();
 
-                    // Raycast for pointer event components
-                    RaycastResultInfo raycastInfoPointerEventLayer = raycastHandler.Raycast(ray, charCamera.farClipPlane, pointerEventLayer, null);
-
                     // Raycast for global pointer events
                     RaycastResultInfo raycastInfoGlobalLayer = raycastHandler.Raycast(ray, charCamera.farClipPlane, globalLayer, null);
 
-                    bool isOnClickComponentBlocked =
-                        raycastInfoGlobalLayer.hitInfo != null
-                        && raycastInfoPointerEventLayer.hitInfo != null
-                        && raycastInfoGlobalLayer.hitInfo.hit.distance <= raycastInfoPointerEventLayer.hitInfo.hit.distance
-                        && raycastInfoGlobalLayer.hitInfo.collider.entityId != raycastInfoPointerEventLayer.hitInfo.collider.entityId;
-
                     if (pointerUpEvent != null)
                     {
+                        // Raycast for pointer event components
+                        RaycastResultInfo raycastInfoPointerEventLayer = raycastHandler.Raycast(ray, charCamera.farClipPlane, pointerEventLayer, null);
+
+                        bool isOnClickComponentBlocked =
+                            raycastInfoGlobalLayer.hitInfo != null
+                            && raycastInfoPointerEventLayer.hitInfo != null
+                            && raycastInfoGlobalLayer.hitInfo.hit.distance <= raycastInfoPointerEventLayer.hitInfo.hit.distance
+                            && raycastInfoGlobalLayer.hitInfo.collider.entityId != raycastInfoPointerEventLayer.hitInfo.collider.entityId;
+
                         if (!isOnClickComponentBlocked)
                         {
                             bool isHitInfoValid = raycastInfoPointerEventLayer.hitInfo.hit.collider != null;
