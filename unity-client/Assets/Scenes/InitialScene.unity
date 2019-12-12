@@ -223,6 +223,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 114754758112584508, guid: b387035aa46399445bdc7951a41d5213,
+        type: 3}
+      propertyPath: debugScenes
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: b387035aa46399445bdc7951a41d5213, type: 3}
 --- !u!114 &322303338 stripped
@@ -461,36 +466,6 @@ PrefabInstance:
       propertyPath: m_Follow
       value: 
       objectReference: {fileID: 6922703132371683184}
-    - target: {fileID: 1526003882666009685, guid: bc570f5e94906eb47814191e0beaee7a,
-        type: 3}
-      propertyPath: m_LocalPosition.x
-      value: -0.80036104
-      objectReference: {fileID: 0}
-    - target: {fileID: 1526003882666009685, guid: bc570f5e94906eb47814191e0beaee7a,
-        type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 1.8401191
-      objectReference: {fileID: 0}
-    - target: {fileID: 1526003882666009685, guid: bc570f5e94906eb47814191e0beaee7a,
-        type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 1.369813
-      objectReference: {fileID: 0}
-    - target: {fileID: 4359508754600413924, guid: bc570f5e94906eb47814191e0beaee7a,
-        type: 3}
-      propertyPath: m_LocalPosition.x
-      value: -0.80036104
-      objectReference: {fileID: 0}
-    - target: {fileID: 4359508754600413924, guid: bc570f5e94906eb47814191e0beaee7a,
-        type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 1.8401191
-      objectReference: {fileID: 0}
-    - target: {fileID: 4359508754600413924, guid: bc570f5e94906eb47814191e0beaee7a,
-        type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 1.369813
-      objectReference: {fileID: 0}
     - target: {fileID: 4346516745184911389, guid: bc570f5e94906eb47814191e0beaee7a,
         type: 3}
       propertyPath: cursor
@@ -632,8 +607,8 @@ MonoBehaviour:
   baseUrlCustom: 
   environment: 0
   startInCoords: {x: 64, y: -64}
-  forceLocalComms: 1
-  debugPanelMode: 2
+  forceLocalComms: 0
+  debugPanelMode: 0
 --- !u!4 &1444882337
 Transform:
   m_ObjectHideFlags: 0
