@@ -1,6 +1,5 @@
-﻿using System;
+using System;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 public enum DCLAction_Trigger
 {
@@ -47,7 +46,7 @@ public class InputController : MonoBehaviour
             {
                 case DCLAction_Trigger.CameraChange:
                     //Disable until the fine-tuning is ready
-                    //InputProcessor.FromKey( action, KeyCode.V, InputProcessor.Modifier.NeedsPointerLocked);
+                    InputProcessor.FromKey(action, KeyCode.V, InputProcessor.Modifier.NeedsPointerLocked);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -63,14 +62,14 @@ public class InputController : MonoBehaviour
             switch (action.GetDCLAction())
             {
                 case DCLAction_Hold.Sprint:
-                    InputProcessor.FromKey( action, KeyCode.LeftShift, InputProcessor.Modifier.NeedsPointerLocked);
+                    InputProcessor.FromKey(action, KeyCode.LeftShift, InputProcessor.Modifier.NeedsPointerLocked);
                     break;
                 case DCLAction_Hold.Jump:
-                    InputProcessor.FromKey( action, KeyCode.Space, InputProcessor.Modifier.NeedsPointerLocked);
+                    InputProcessor.FromKey(action, KeyCode.Space, InputProcessor.Modifier.NeedsPointerLocked);
                     break;
                 case DCLAction_Hold.FreeCameraMode:
                     //Disable until the fine-tuning is ready
-                    //InputProcessor.FromKey( action, KeyCode.T, InputProcessor.Modifier.NeedsPointerLocked);
+                    InputProcessor.FromKey(action, KeyCode.T, InputProcessor.Modifier.NeedsPointerLocked);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -86,16 +85,16 @@ public class InputController : MonoBehaviour
             switch (action.GetDCLAction())
             {
                 case DCLAction_Measurable.CharacterXAxis:
-                    InputProcessor.FromAxis( action, "Horizontal", InputProcessor.Modifier.NeedsPointerLocked);
+                    InputProcessor.FromAxis(action, "Horizontal", InputProcessor.Modifier.NeedsPointerLocked);
                     break;
                 case DCLAction_Measurable.CharacterYAxis:
-                    InputProcessor.FromAxis( action, "Vertical", InputProcessor.Modifier.NeedsPointerLocked);
+                    InputProcessor.FromAxis(action, "Vertical", InputProcessor.Modifier.NeedsPointerLocked);
                     break;
                 case DCLAction_Measurable.CameraXAxis:
-                    InputProcessor.FromAxis( action, "Mouse X", InputProcessor.Modifier.NeedsPointerLocked);
+                    InputProcessor.FromAxis(action, "Mouse X", InputProcessor.Modifier.NeedsPointerLocked);
                     break;
                 case DCLAction_Measurable.CameraYAxis:
-                    InputProcessor.FromAxis( action, "Mouse Y", InputProcessor.Modifier.NeedsPointerLocked);
+                    InputProcessor.FromAxis(action, "Mouse Y", InputProcessor.Modifier.NeedsPointerLocked);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
