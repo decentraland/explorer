@@ -18,6 +18,24 @@ import { RaycastHitEntity, RaycastHitEntities } from './PhysicsCast'
 // This number is defined in the protocol ECS.SetEntityParent.3
 const ROOT_ENTITY_ID = '0'
 
+const dirtyLegend: { [key: number]: string } = {
+  0: "`dirty` is not a flag, but don't send anything because nothing changed",
+  1: '`dirty` is not actually a flag in components. Use sameJSON comparison',
+  10: "Damn, it's the same JSON but it's dirty? we're in trouble",
+  11: "It's dirty, and we know it",
+  100: "It's not dirty, and we know it.",
+  101: "In deep shit. It's dirty, and we don't know it."
+}
+
+const loggedCases: Record<string, number> = {}
+function logDifferenceAlgorithm(caseNumber: number) {
+  const caseStr = caseNumber + ''
+  loggedCases[caseStr] = (loggedCases[caseStr] ? loggedCases[caseStr] : 0) + 1
+  if (loggedCases[caseStr] % 10000 == 0) {
+    console.log(`Diff [${caseStr}]: ${loggedCases[caseStr]} (${dirtyLegend[caseNumber]})`)
+  }
+}
+
 export class DecentralandSynchronizationSystem implements ISystem {
   cachedComponents: Record<string, Record<string, string>> = {}
   engine!: Engine
@@ -82,11 +100,11 @@ export class DecentralandSynchronizationSystem implements ISystem {
         this.dcl.setParent(entityId, parent.uuid)
       }
 
-      // This creates a cache dictionary to avoid send redundant information to
+      // This creates a cache dictionary to avoid sending redundant information to
       // the engine in order to avoid unnecessary work in the main thread.
       this.cachedComponents[entityId] = {}
 
-      // this iterator sends the current components of te engine at the moment
+      // this iterator sends the current components of the engine at the moment
       // of addition
       for (let componentName in entity.components) {
         const component = entity.components[componentName]
@@ -139,15 +157,52 @@ export class DecentralandSynchronizationSystem implements ISystem {
         const component = entity.components[componentName]
         const classId = getComponentClassId(component)
 
+        /**
+         * The management of these objects is controversial at least.
+         *
+         * This seems to suggest one JSON.stringify per transform per entity at least.
+         *
+         * We'll try to refactor it by first:
+         *
+         * - Trying to reuse the "dirty" flag
+         * - Check if all the decorators for field, method, and others are correctly setting this dirty flag.
+         *
+         * Might be problematic if it is set from both the renderer and the engine
+         */
+
         if (classId !== null && !isDisposableComponent(component)) {
           const componentJson: string = JSON.stringify(component)
 
-          if (this.cachedComponents[entityId][componentName] !== componentJson) {
-            // Send the updated component
-            this.dcl.updateEntityComponent(entity.uuid, componentName, classId, componentJson)
+          const isDirty = component.dirty === undefined
+          const isSameJSON = this.cachedComponents[entityId][componentName] === componentJson
 
-            // Update the cached copy of the sent component
-            this.cachedComponents[entityId][componentName] = componentJson
+          if (component.dirty === undefined) {
+            if (isSameJSON) {
+              // Case 0: `dirty` is not a flag, but don't send anything because nothing changed
+              logDifferenceAlgorithm(0)
+            } else {
+              // Case 1: `dirty` is not actually a flag in components. Use sameJSON comparison
+              logDifferenceAlgorithm(1)
+              this.sendUpdateEntityComponent(entity, component, componentName, classId, componentJson, entityId)
+            }
+          } else if (isDirty) {
+            if (isSameJSON) {
+              // Case 10: Damn, it's the same JSON but it's dirty? we're in trouble
+              logDifferenceAlgorithm(10)
+            } else {
+              // Case 11: It's dirty, and we know it
+              logDifferenceAlgorithm(11)
+              this.sendUpdateEntityComponent(entity, component, componentName, classId, componentJson, entityId)
+            }
+          } else {
+            if (isSameJSON) {
+              // Case 100: It's not dirty, and we know it.
+              logDifferenceAlgorithm(101)
+            } else {
+              // Case 101: In deep shit. It's dirty, and we don't know it.
+              logDifferenceAlgorithm(101)
+              this.sendUpdateEntityComponent(entity, component, componentName, classId, componentJson, entityId)
+            }
           }
         }
       }
@@ -160,6 +215,21 @@ export class DecentralandSynchronizationSystem implements ISystem {
         component.dirty = false
       }
     }
+  }
+
+  private sendUpdateEntityComponent(
+    entity: IEntity,
+    component: any,
+    componentName: string,
+    classId: number,
+    componentJson: string,
+    entityId: string
+  ) {
+    component.dirty = false
+
+    this.dcl.updateEntityComponent(entity.uuid, componentName, classId, componentJson)
+    // Update the cached copy of the sent component
+    this.cachedComponents[entityId][componentName] = componentJson
   }
 
   /**
