@@ -49,7 +49,7 @@ import {
 import { processServerProfile } from './transformations/processServerProfile'
 import { profileToRendererFormat } from './transformations/profileToRendererFormat'
 import { ensureServerFormat } from './transformations/profileToServerFormat'
-import { Avatar, Catalog, Profile, WearableId, Wearable } from './types'
+import { Avatar, Catalog, Profile, WearableId, Wearable, Collection } from './types'
 import { Action } from 'redux'
 
 const isActionFor = (type: string, userId: string) => (action: any) =>
@@ -115,9 +115,16 @@ function takeLatestById<T extends Action>(
   })
 }
 
+function overrideBaseUrl(wearable: Wearable) {
+  return { ...wearable, baseUrl: 'https://content.decentraland.org/contents/' }
+}
+
 export function* initialLoad() {
   try {
-    const catalog = yield call(fetchCatalog, getServerConfigurations().avatar.catalog)
+    const collections: Collection[] = yield call(fetchCatalog, getServerConfigurations().avatar.catalog)
+    const catalog = collections
+      .reduce((flatten, collection) => flatten.concat(collection.wearables), [] as Wearable[])
+      .map(overrideBaseUrl)
     const baseAvatars = catalog.filter((_: Wearable) => !_.tags.includes('exclusive'))
     const baseExclusive = catalog.filter((_: Wearable) => _.tags.includes('exclusive'))
     if (!(yield select(isInitialized))) {
