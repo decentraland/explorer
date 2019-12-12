@@ -33,6 +33,13 @@ public static class WearableLiterals
         public const string MALE = "dcl://base-avatars/BaseMale";
     }
 
+    public static class NFTRarity
+    {
+        public const string RARE = "rare";
+        public const string EPIC = "epic";
+        public const string LEGENDARY = "legendary";
+    }
+
     public static class DefaultWearables
     {
         private static readonly Dictionary<(string, string), string> defaultWearables = new Dictionary<(string, string), string>()

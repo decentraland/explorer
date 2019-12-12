@@ -34,12 +34,12 @@ public class ItemSelector : MonoBehaviour
         ItemToggle newToggle;
         if (item.IsCollectible())
         {
-            newToggle = itemToggleFactory.CreateItemToggleFromType(WearableLiterals.Tags.EXCLUSIVE, itemContainer); // TODO: use enum
+            newToggle = itemToggleFactory.CreateItemToggleFromRarity(item.rarity, itemContainer);
             newToggle.transform.SetAsFirstSibling();
         }
         else
         {
-            newToggle = itemToggleFactory.CreateItemToggleFromType(WearableLiterals.Tags.BASE_WEARABLE, itemContainer);
+            newToggle = itemToggleFactory.CreateBaseWearable(itemContainer);
         }
 
         newToggle.Initialize(item, false);

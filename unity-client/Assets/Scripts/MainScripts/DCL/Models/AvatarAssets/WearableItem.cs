@@ -1,4 +1,4 @@
-using DCL;
+﻿using DCL;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,6 +24,19 @@ public class WearableItem : Item
     public string thumbnail;
     public string[] hides;
     public string[] replaces;
+
+    //This fields are temporary, once Kernel is finished we must move them to wherever they are placed
+    public string title;
+    public string subtitle;
+    public int level;
+    public string rarity;
+    public string creatorName;
+    public string creatorSnapshotUrl;
+    public float rating;
+    public string description;
+    public int mintedAt;
+    public int mintedTotal;
+    
 
     public Representation GetRepresentation(string bodyShapeType)
     {

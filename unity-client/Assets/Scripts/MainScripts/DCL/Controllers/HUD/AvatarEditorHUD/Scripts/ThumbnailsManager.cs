@@ -12,6 +12,8 @@ public static class ThumbnailsManager
 
     public static void RequestThumbnail(string url, Action<Sprite> callback)
     {
+        if (url == null) return;
+        
         if (loadedSprites.ContainsKey(url))
         {
             callback?.Invoke(loadedSprites[url]);
@@ -31,7 +33,7 @@ public static class ThumbnailsManager
 
     public static void CancelRequest(string url, Action<Sprite> callback)
     {
-        if (waitingCallbacks.ContainsKey(url))
+        if (url != null && waitingCallbacks.ContainsKey(url))
         {
             waitingCallbacks[url].Remove(callback);
         }
