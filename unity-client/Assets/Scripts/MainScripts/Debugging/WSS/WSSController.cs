@@ -240,6 +240,9 @@ namespace DCL
                             case "SetSceneDebugPanel":
                                 sceneController.SetSceneDebugPanel();
                                 break;
+                            case "SetFPSPanelVisible":
+                                sceneController.SetFPSPanelVisible(msg.payload == "true");
+                                break;
                             case "SetEngineDebugPanel":
                                 sceneController.SetEngineDebugPanel();
                                 break;

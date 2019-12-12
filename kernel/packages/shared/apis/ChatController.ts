@@ -2,7 +2,7 @@
 import { Vector3Component } from 'atomicHelpers/landHelpers'
 import { uuid } from 'atomicHelpers/math'
 import { parseParcelPosition, worldToGrid } from 'atomicHelpers/parcelScenePositions'
-import { parcelLimits } from 'config'
+import { parcelLimits, SHOW_FPS_COUNTER } from 'config'
 import { APIOptions, exposeMethod, registerAPI } from 'decentraland-rpc/lib/host'
 import { EngineAPI } from 'shared/apis/EngineAPI'
 import { ExposableAPI } from 'shared/apis/ExposableAPI'
@@ -19,6 +19,7 @@ import {
 import { AvatarMessage, AvatarMessageType } from 'shared/comms/types'
 import { IChatCommand, MessageEntry } from 'shared/types'
 import { teleportObservable } from 'shared/world/positionThings'
+import { unityInterface } from 'unity-interface/dcl'
 
 const userPose: { [key: string]: Vector3Component } = {}
 avatarMessageObservable.add((pose: AvatarMessage) => {
@@ -29,6 +30,9 @@ avatarMessageObservable.add((pose: AvatarMessage) => {
     delete userPose[pose.uuid]
   }
 })
+const fpsConfiguration = {
+  visible: SHOW_FPS_COUNTER
+}
 
 export interface IChatController {
   /**
@@ -185,6 +189,17 @@ export class ChatController extends ExposableAPI implements IChatController {
         isCommand: true,
         sender: 'Decentraland',
         message: strings ? `Players around you:\n${strings}` : 'No other players are near to your location'
+      }
+    })
+
+    this.addChatCommand('showfps', 'Show FPS counter', message => {
+      fpsConfiguration.visible = !fpsConfiguration.visible
+      unityInterface.SetFPSPanelVisible(fpsConfiguration.visible)
+      return {
+        id: uuid(),
+        isCommand: true,
+        sender: 'Decentraland',
+        message: 'Toggling FPS counter'
       }
     })
 
