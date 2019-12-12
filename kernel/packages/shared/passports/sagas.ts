@@ -281,11 +281,13 @@ function dropIndexFromExclusives(exclusive: string) {
 }
 
 export async function fetchInventoryItemsByAddress(address: string) {
-  const result = await fetch(getServerConfigurations().wearablesApi + '/address/' + address)
+  const result = await fetch(`${getServerConfigurations().wearablesApi}/addresses/${address}/wearables?fields=id`)
   if (!result.ok) {
     throw new Error('Unable to fetch inventory for address ' + address)
   }
-  return (await result.json()).inventory
+  const inventory: { id: string }[] = await result.json()
+
+  return inventory.map(wearable => wearable.id)
 }
 
 export function* handleSaveAvatar(saveAvatar: SaveAvatarRequest) {
