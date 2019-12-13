@@ -19,7 +19,6 @@ import {
 import { AvatarMessage, AvatarMessageType } from 'shared/comms/types'
 import { IChatCommand, MessageEntry } from 'shared/types'
 import { teleportObservable } from 'shared/world/positionThings'
-import { unityInterface } from 'unity-interface/dcl'
 
 const userPose: { [key: string]: Vector3Component } = {}
 avatarMessageObservable.add((pose: AvatarMessage) => {
@@ -192,9 +191,10 @@ export class ChatController extends ExposableAPI implements IChatController {
       }
     })
 
-    this.addChatCommand('showfps', 'Show FPS counter', message => {
+    this.addChatCommand('showfps', 'Show FPS counter', (message: any) => {
       fpsConfiguration.visible = !fpsConfiguration.visible
-      unityInterface.SetFPSPanelVisible(fpsConfiguration.visible)
+      const unityWindow: any = window
+      unityWindow.unityInterface.SetFPSPanelVisible(fpsConfiguration.visible)
       return {
         id: uuid(),
         isCommand: true,
