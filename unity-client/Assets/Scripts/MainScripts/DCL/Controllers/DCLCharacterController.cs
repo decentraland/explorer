@@ -3,6 +3,7 @@ using DCL.Configuration;
 using DCL.Helpers;
 using UnityEngine;
 using System.Collections;
+using Cinemachine;
 
 public class DCLCharacterController : MonoBehaviour
 {
@@ -126,7 +127,9 @@ public class DCLCharacterController : MonoBehaviour
 
     void OnPrecisionAdjust(DCLCharacterPosition charPos)
     {
+        Vector3 oldPos = this.transform.position;
         this.transform.position = charPos.unityPosition;
+        CinemachineCore.Instance.GetActiveBrain(0).ActiveVirtualCamera.OnTargetObjectWarped(transform, transform.position - oldPos);
     }
 
     public void SetPosition(Vector3 newPosition)
