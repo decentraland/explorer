@@ -67,6 +67,7 @@ namespace DCL
 
                 var pointerEventLayer = layerMaskTarget & (~characterControllerLayer); //Ensure characterController is being filtered
                 var globalLayer = ~layerMaskTarget & (~characterControllerLayer); //Ensure characterController is being filtered
+                RaycastHitInfo raycastGlobalLayerHitInfo;
 
                 if (evt == InputController_Legacy.EVENT.BUTTON_DOWN)
                 {
@@ -79,8 +80,9 @@ namespace DCL
 
                     // Raycast for global pointer events
                     RaycastResultInfo raycastInfoGlobalLayer = raycastHandler.Raycast(ray, charCamera.farClipPlane, globalLayer, null);
+                    raycastGlobalLayerHitInfo = raycastInfoGlobalLayer.hitInfo;
 
-                    bool isOnClickComponentBlocked = IsBlockingOnClick(raycastInfoPointerEventLayer.hitInfo, raycastInfoGlobalLayer.hitInfo);
+                    bool isOnClickComponentBlocked = IsBlockingOnClick(raycastInfoPointerEventLayer.hitInfo, raycastGlobalLayerHitInfo);
 
                     if (!isOnClickComponentBlocked && raycastInfoPointerEventLayer.hitInfo.hit.rigidbody)
                     {
@@ -95,17 +97,17 @@ namespace DCL
 
                     string sceneId = SceneController.i.GetCurrentScene(DCLCharacterController.i.characterPosition);
 
-                    if (useRaycast && raycastInfoGlobalLayer.hitInfo.isValid)
+                    if (useRaycast && raycastGlobalLayerHitInfo.isValid)
                     {
                         DCL.Interface.WebInterface.ReportGlobalPointerDownEvent(
                             buttonId,
                             raycastInfoGlobalLayer.ray,
-                            raycastInfoGlobalLayer.hitInfo.hit.point,
-                            raycastInfoGlobalLayer.hitInfo.hit.normal,
-                            raycastInfoGlobalLayer.hitInfo.hit.distance,
+                            raycastGlobalLayerHitInfo.hit.point,
+                            raycastGlobalLayerHitInfo.hit.normal,
+                            raycastGlobalLayerHitInfo.hit.distance,
                             sceneId,
-                            raycastInfoGlobalLayer.hitInfo.collider.entityId,
-                            raycastInfoGlobalLayer.hitInfo.collider.meshName,
+                            raycastGlobalLayerHitInfo.collider.entityId,
+                            raycastGlobalLayerHitInfo.collider.meshName,
                             isHitInfoValid: true);
                     }
                     else
@@ -120,13 +122,14 @@ namespace DCL
 
                     // Raycast for global pointer events
                     RaycastResultInfo raycastInfoGlobalLayer = raycastHandler.Raycast(ray, charCamera.farClipPlane, globalLayer, null);
+                    raycastGlobalLayerHitInfo = raycastInfoGlobalLayer.hitInfo;
 
                     if (pointerUpEvent != null)
                     {
                         // Raycast for pointer event components
                         RaycastResultInfo raycastInfoPointerEventLayer = raycastHandler.Raycast(ray, charCamera.farClipPlane, pointerEventLayer, null);
 
-                        bool isOnClickComponentBlocked = IsBlockingOnClick(raycastInfoPointerEventLayer.hitInfo, raycastInfoGlobalLayer.hitInfo);
+                        bool isOnClickComponentBlocked = IsBlockingOnClick(raycastInfoPointerEventLayer.hitInfo, raycastGlobalLayerHitInfo);
                         bool isSameEntityThatWasPressed = AreCollidersFromSameEntity(raycastInfoPointerEventLayer.hitInfo, lastPointerDownEventHitInfo);
 
                         if (!isOnClickComponentBlocked && isSameEntityThatWasPressed)
@@ -140,17 +143,17 @@ namespace DCL
 
                     string sceneId = SceneController.i.GetCurrentScene(DCLCharacterController.i.characterPosition);
 
-                    if (useRaycast && raycastInfoGlobalLayer.hitInfo.isValid)
+                    if (useRaycast && raycastGlobalLayerHitInfo.isValid)
                     {
                         DCL.Interface.WebInterface.ReportGlobalPointerUpEvent(
                             buttonId,
                             raycastInfoGlobalLayer.ray,
-                            raycastInfoGlobalLayer.hitInfo.hit.point,
-                            raycastInfoGlobalLayer.hitInfo.hit.normal,
-                            raycastInfoGlobalLayer.hitInfo.hit.distance,
+                            raycastGlobalLayerHitInfo.hit.point,
+                            raycastGlobalLayerHitInfo.hit.normal,
+                            raycastGlobalLayerHitInfo.hit.distance,
                             sceneId,
-                            raycastInfoGlobalLayer.hitInfo.collider.entityId,
-                            raycastInfoGlobalLayer.hitInfo.collider.meshName,
+                            raycastGlobalLayerHitInfo.collider.entityId,
+                            raycastGlobalLayerHitInfo.collider.meshName,
                             isHitInfoValid: true);
                     }
                     else
