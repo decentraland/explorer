@@ -1,3 +1,16 @@
+import {
+  Entity,
+  engine,
+  Transform,
+  Vector3,
+  Quaternion,
+  GLTFShape,
+  log,
+  OnClick,
+  OnPointerDown,
+  OnPointerUp
+} from 'decentraland-ecs/src'
+
 const _scene = new Entity("_scene");
 engine.addEntity(_scene);
 const transform = new Transform({
