@@ -133,5 +133,70 @@ namespace AvatarEditorHUD_Tests
 
             Assert.IsTrue(controller.myView.collectiblesItemSelector.itemToggles.ContainsKey(wearableId));
         }
+
+        [Test]
+        [TestCase(WearableLiterals.NFTRarity.RARE)]
+        [TestCase(WearableLiterals.NFTRarity.EPIC)]
+        [TestCase(WearableLiterals.NFTRarity.LEGENDARY)]
+        public void CreateNFTsButtonsByRarityCorrectly(string rarity)
+        {
+            WearableItem dummyItem = CreateDummyNFT(rarity);
+
+            var selector = controller.myView.selectorsByCategory[dummyItem.category];
+            var itemToggleObject = selector.itemToggles[dummyItem.id].gameObject;
+
+            var originalName = selector.itemToggleFactory.nftDictionary[rarity].prefab.name;
+
+            Assert.IsTrue(itemToggleObject.name.Contains(originalName)); //Comparing names because PrefabUtility.GetOutermostPrefabInstanceRoot(itemToggleObject) is returning null
+        }
+
+        [Test]
+        public void FillNFTInfoPanelCorrectly()
+        {
+            WearableItem dummyItem = CreateDummyNFT(WearableLiterals.NFTRarity.EPIC);
+
+            var itemToggle = controller.myView.selectorsByCategory[dummyItem.category].itemToggles[dummyItem.id];
+            var nftInfo = (itemToggle as NFTItemToggle)?.nftItemInfo;
+
+            Assert.NotNull(nftInfo);
+            Assert.AreEqual(dummyItem.GetName(), nftInfo.name.text);
+            Assert.AreEqual(dummyItem.description, nftInfo.description.text);
+            Assert.AreEqual($"{dummyItem.mintedAt} / {dummyItem.mintedTotal}", nftInfo.minted.text);
+        }
+
+        private WearableItem CreateDummyNFT(string rarity)
+        {
+            var dummyItem = new WearableItem()
+            {
+                id = "dummyItem",
+                rarity = rarity,
+                category = WearableLiterals.Categories.EYES,
+                description = "My Description",
+                mintedAt = 1,
+                mintedTotal = 2,
+                representations = new[]
+                {
+                    new WearableItem.Representation()
+                    {
+                        bodyShapes = new [] { WearableLiterals.BodyShapes.FEMALE, WearableLiterals.BodyShapes.MALE },
+                    }
+                },
+                tags = new [] { WearableLiterals.Tags.EXCLUSIVE },
+                i18n = new [] { new i18n() { code = "en", text = "Dummy Item" } }
+            };
+            userProfile.UpdateData(new UserProfileModel()
+            {
+                name = "name", email = "mail",
+                avatar = new AvatarModel()
+                {
+                    bodyShape = WearableLiterals.BodyShapes.FEMALE,
+                    wearables = new List<string>() { },
+                },
+                inventory = new [] { dummyItem.id }
+            });
+
+            catalog.Add(dummyItem.id, dummyItem);
+            return dummyItem;
+        }
     }
 }

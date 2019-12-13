@@ -40,11 +40,11 @@ public class NFTItemInfo : MonoBehaviour
         }
     }
 
-    [SerializeField] private TextMeshProUGUI name;
-    [SerializeField] private Image thumbnail;
-    [SerializeField] private IconToGameObjectMap[] icons;
-    [SerializeField] private TextMeshProUGUI description;
-    [SerializeField] private TextMeshProUGUI minted;
+    [SerializeField] internal TextMeshProUGUI name;
+    [SerializeField] internal Image thumbnail;
+    [SerializeField] internal IconToGameObjectMap[] icons;
+    [SerializeField] internal TextMeshProUGUI description;
+    [SerializeField] internal TextMeshProUGUI minted;
 
     private Model currentModel;
 

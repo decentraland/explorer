@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class NFTItemToggle : ItemToggle
 {
-    [SerializeField] private NFTItemInfo nftItemInfo;
+    [SerializeField] internal NFTItemInfo nftItemInfo;
     [SerializeField] private PointerOverDetector infoOver;
 
     private PointerOverDetector.Enter infoEnterDelegate; 

@@ -7,7 +7,7 @@ using UnityEngine;
 public class ItemSelector : MonoBehaviour
 {
     [SerializeField]
-    private ItemToggleFactory itemToggleFactory;
+    internal ItemToggleFactory itemToggleFactory;
 
     [SerializeField]
     private RectTransform itemContainer;

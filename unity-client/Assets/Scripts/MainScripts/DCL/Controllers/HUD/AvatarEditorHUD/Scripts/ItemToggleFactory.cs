@@ -13,7 +13,7 @@ public class ItemToggleFactory : ScriptableObject
     public ItemToggle baseWearable;
     public NftMap[] nftList;
 
-    private Dictionary<string, NftMap> nftDictionary;
+    internal Dictionary<string, NftMap> nftDictionary;
 
     public void EnsureNFTDictionary()
     {
