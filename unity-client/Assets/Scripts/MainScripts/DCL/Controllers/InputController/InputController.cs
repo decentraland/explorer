@@ -26,6 +26,8 @@ public enum DCLAction_Measurable
 
 public class InputController : MonoBehaviour
 {
+    public static bool ENABLE_THIRD_PERSON_CAMERA = false;
+
     public InputAction_Trigger[] triggerTimeActions;
     public InputAction_Hold[] holdActions;
     public InputAction_Measurable[] measurableActions;
@@ -46,7 +48,8 @@ public class InputController : MonoBehaviour
             {
                 case DCLAction_Trigger.CameraChange:
                     //Disable until the fine-tuning is ready
-                    InputProcessor.FromKey(action, KeyCode.V, InputProcessor.Modifier.NeedsPointerLocked);
+                    if (ENABLE_THIRD_PERSON_CAMERA)
+                        InputProcessor.FromKey(action, KeyCode.V, InputProcessor.Modifier.NeedsPointerLocked);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -69,7 +72,8 @@ public class InputController : MonoBehaviour
                     break;
                 case DCLAction_Hold.FreeCameraMode:
                     //Disable until the fine-tuning is ready
-                    InputProcessor.FromKey(action, KeyCode.T, InputProcessor.Modifier.NeedsPointerLocked);
+                    if (ENABLE_THIRD_PERSON_CAMERA)
+                        InputProcessor.FromKey(action, KeyCode.T, InputProcessor.Modifier.NeedsPointerLocked);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
