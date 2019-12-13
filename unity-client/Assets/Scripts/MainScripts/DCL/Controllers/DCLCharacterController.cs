@@ -59,8 +59,8 @@ public class DCLCharacterController : MonoBehaviour
     [Header("InputActions")]
     public InputAction_Hold jumpAction;
     public InputAction_Hold sprintAction;
-    public InputAction_Measurable characterXAxis;
-    public InputAction_Measurable characterYAxis;
+
+    public Vector3 moveVelocity;
 
     private InputAction_Hold.Started jumpStartedDelegate;
     private InputAction_Hold.Finished jumpFinishedDelegate;
@@ -71,6 +71,11 @@ public class DCLCharacterController : MonoBehaviour
 
     public static System.Action<DCLCharacterPosition> OnCharacterMoved;
     public static System.Action<DCLCharacterPosition> OnPositionSet;
+
+    [SerializeField] private InputAction_Measurable characterYAxis;
+    [SerializeField] private InputAction_Measurable characterXAxis;
+    private Vector3Variable cameraForward => CommonScriptableObjects.cameraForward;
+    private Vector3Variable cameraRight => CommonScriptableObjects.cameraRight;
 
     void Awake()
     {
@@ -129,7 +134,11 @@ public class DCLCharacterController : MonoBehaviour
     {
         Vector3 oldPos = this.transform.position;
         this.transform.position = charPos.unityPosition;
-        CinemachineCore.Instance.GetActiveBrain(0).ActiveVirtualCamera.OnTargetObjectWarped(transform, transform.position - oldPos);
+
+        if (CinemachineCore.Instance.BrainCount > 0)
+        {
+            CinemachineCore.Instance.GetActiveBrain(0).ActiveVirtualCamera?.OnTargetObjectWarped(transform, transform.position - oldPos);
+        }
     }
 
     public void SetPosition(Vector3 newPosition)
@@ -214,6 +223,7 @@ public class DCLCharacterController : MonoBehaviour
         velocity.y += gravity * deltaTime;
 
         bool previouslyGrounded = isGrounded;
+
         if (!isJumping || velocity.y <= 0f)
             CheckGround();
 
@@ -235,17 +245,27 @@ public class DCLCharacterController : MonoBehaviour
                 // Horizontal movement
                 var speed = movementSpeed * (isSprinting ? runningSpeedMultiplier : 1f);
 
-                if (characterXAxis.GetValue() > 0f)
-                    velocity += (transform.right * speed);
-                else if (characterXAxis.GetValue() < 0f)
-                    velocity += (-transform.right * speed);
-
-                if (characterYAxis.GetValue() > 0f)
-                    velocity += (transform.forward * speed);
-                else if (characterYAxis.GetValue() < 0f)
-                    velocity += (-transform.forward * speed);
-
                 transform.forward = characterForward.Get().Value;
+
+                var xzPlaneForward = Vector3.Scale(cameraForward.Get(), new Vector3(1, 0, 1));
+                var xzPlaneRight = Vector3.Scale(cameraRight.Get(), new Vector3(1, 0, 1));
+
+                Vector3 forwardTarget = Vector3.zero;
+
+                if (characterYAxis.GetValue() > 0)
+                    forwardTarget += xzPlaneForward;
+                if (characterYAxis.GetValue() < 0)
+                    forwardTarget -= xzPlaneForward;
+
+                if (characterXAxis.GetValue() > 0)
+                    forwardTarget += xzPlaneRight;
+                if (characterXAxis.GetValue() < 0)
+                    forwardTarget -= xzPlaneRight;
+
+                forwardTarget.Normalize();
+
+                velocity += forwardTarget * speed;
+
                 CommonScriptableObjects.playerUnityEulerAngles.Set(transform.eulerAngles);
             }
         }

@@ -34,6 +34,7 @@ public class CameraController : MonoBehaviour
 
     private Vector3NullableVariable characterForward => CommonScriptableObjects.characterForward;
     private Vector3Variable cameraForward => CommonScriptableObjects.cameraForward;
+    private Vector3Variable cameraRight => CommonScriptableObjects.cameraRight;
     private Vector3Variable cameraPosition => CommonScriptableObjects.cameraPosition;
     private Vector3Variable playerUnityToWorldOffset => CommonScriptableObjects.playerUnityToWorldOffset;
 
@@ -41,6 +42,7 @@ public class CameraController : MonoBehaviour
     internal InputAction_Hold.Finished freeCameraModeFinishedDelegate;
 
     [SerializeField] private InputAction_Measurable characterYAxis;
+    [SerializeField] private InputAction_Measurable characterXAxis;
 
     internal CameraMode currentMode = CameraMode.FirstPerson;
 
@@ -111,6 +113,7 @@ public class CameraController : MonoBehaviour
     private void Update()
     {
         cameraForward.Set(cameraTransform.forward);
+        cameraRight.Set(cameraTransform.right);
         cameraPosition.Set(cameraTransform.position);
 
         if (CinemachineCore.Instance.IsLive(freeLookCamera))
@@ -120,21 +123,45 @@ public class CameraController : MonoBehaviour
         else
         {
             var xzPlaneForward = Vector3.Scale(cameraTransform.forward, new Vector3(1, 0, 1));
+            var xzPlaneRight = Vector3.Scale(cameraTransform.right, new Vector3(1, 0, 1));
+
             switch (currentMode)
             {
                 case CameraMode.FirstPerson:
-                    characterForward.Set(xzPlaneForward);
-                    break;
-                case CameraMode.ThirdPerson:
-                    if (characterYAxis.GetValue() != 0f)
                     {
-                        if (!characterForward.HasValue())
-                            characterForward.Set(xzPlaneForward);
-
-                        var lerpedForward = Vector3.Slerp(characterForward.Get().Value, xzPlaneForward, rotationLerpSpeed * Time.deltaTime);
-                        characterForward.Set(lerpedForward);
+                        characterForward.Set(xzPlaneForward);
+                        break;
                     }
-                    break;
+                case CameraMode.ThirdPerson:
+                    {
+                        if (characterYAxis.GetValue() != 0f || characterXAxis.GetValue() != 0f)
+                        {
+                            Vector3 forwardTarget = Vector3.zero;
+
+                            if (characterYAxis.GetValue() > 0)
+                                forwardTarget += xzPlaneForward;
+                            if (characterYAxis.GetValue() < 0)
+                                forwardTarget -= xzPlaneForward;
+
+                            if (characterXAxis.GetValue() > 0)
+                                forwardTarget += xzPlaneRight;
+                            if (characterXAxis.GetValue() < 0)
+                                forwardTarget -= xzPlaneRight;
+
+                            forwardTarget.Normalize();
+
+                            if (!characterForward.HasValue())
+                            {
+                                characterForward.Set(forwardTarget);
+                            }
+                            else
+                            {
+                                var lerpedForward = Vector3.Slerp(characterForward.Get().Value, forwardTarget, rotationLerpSpeed * Time.deltaTime);
+                                characterForward.Set(lerpedForward);
+                            }
+                        }
+                        break;
+                    }
             }
         }
     }
