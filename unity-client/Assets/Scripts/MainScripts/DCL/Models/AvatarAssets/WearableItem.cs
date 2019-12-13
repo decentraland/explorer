@@ -26,16 +26,12 @@ public class WearableItem : Item
     public string[] replaces;
 
     //This fields are temporary, once Kernel is finished we must move them to wherever they are placed
-    public string title;
-    public string subtitle;
-    public int level;
     public string rarity;
-    public string creatorName;
-    public string creatorSnapshotUrl;
-    public float rating;
     public string description;
     public int mintedAt;
     public int mintedTotal;
+
+    private readonly Dictionary<string, string> cachedI18n = new Dictionary<string, string>();
     
 
     public Representation GetRepresentation(string bodyShapeType)
@@ -113,6 +109,15 @@ public class WearableItem : Item
     public bool IsCollectible()
     {
         return !tags.Contains(WearableLiterals.Tags.BASE_WEARABLE);
+    }
+
+    public string GetName(string langCode = "en")
+    {
+        if (!cachedI18n.ContainsKey(langCode))
+        {
+            cachedI18n.Add(langCode, i18n.FirstOrDefault(x => x.code == langCode)?.text);
+        }
+        return cachedI18n[langCode];
     }
 }
 

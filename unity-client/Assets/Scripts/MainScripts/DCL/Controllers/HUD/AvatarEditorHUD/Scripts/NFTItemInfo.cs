@@ -1,33 +1,38 @@
-﻿using TMPro;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class NFTItemInfo : MonoBehaviour
 {
+    [Serializable]
+    internal class IconToGameObjectMap
+    {
+        public string iconId;
+        public GameObject gameObject;
+    }
+
     public class Model
     {
-        public string title;
-        public string subtitle;
+        public string name;
         public string thumbnail;
-        public int level;
-        public string creatorName;
-        public string creatorSnapshotUrl;
-        public float rating;
+        public List<string> iconIds;
         public string description;
         public int mintedAt;
         public int mintedTotal;
 
         public static Model FromWearableItem(WearableItem wearable)
         {
+            var iconsIds = wearable.representations.SelectMany(x => x.bodyShapes).ToList();
+            iconsIds.Add(wearable.category);
+
             return new Model()
             {
-                title = wearable.title,
-                subtitle = wearable.subtitle,
+                name = wearable.GetName(),
                 thumbnail = wearable.baseUrl + wearable.thumbnail,
-                level = wearable.level,
-                creatorName = wearable.creatorName,
-                creatorSnapshotUrl = wearable.creatorSnapshotUrl,
-                rating = wearable.rating,
+                iconIds =  iconsIds,
                 description = wearable.description,
                 mintedAt = wearable.mintedAt,
                 mintedTotal = wearable.mintedTotal,
@@ -35,13 +40,9 @@ public class NFTItemInfo : MonoBehaviour
         }
     }
 
-    [SerializeField] private TextMeshProUGUI title;
-    [SerializeField] private TextMeshProUGUI subtitle;
+    [SerializeField] private TextMeshProUGUI name;
     [SerializeField] private Image thumbnail;
-    [SerializeField] private TextMeshProUGUI level;
-    [SerializeField] private TextMeshProUGUI creatorName;
-    [SerializeField] private Image creatorSnapshot;
-    [SerializeField] private TextMeshProUGUI rating;
+    [SerializeField] private IconToGameObjectMap[] icons;
     [SerializeField] private TextMeshProUGUI description;
     [SerializeField] private TextMeshProUGUI minted;
 
@@ -49,17 +50,15 @@ public class NFTItemInfo : MonoBehaviour
 
     public void SetModel(Model newModel)
     {
-        ThumbnailsManager.CancelRequest(currentModel?.creatorSnapshotUrl, UpdateCreatorSprite);
         ThumbnailsManager.CancelRequest(currentModel?.thumbnail, UpdateItemThumbnail);
         currentModel = newModel;
 
-        title.text = currentModel.title;
-        subtitle.text = currentModel.subtitle;
+        name.text = currentModel.name;
         ThumbnailsManager.RequestThumbnail(currentModel.thumbnail, UpdateItemThumbnail);
-        level.text = $"LVL {currentModel.level}";
-        creatorName.text = currentModel.creatorName;
-        ThumbnailsManager.RequestThumbnail(currentModel.creatorSnapshotUrl, UpdateCreatorSprite);
-        rating.text = currentModel.rating.ToString("0.00");
+        foreach (var icon in icons)
+        {
+            icon.gameObject.SetActive(currentModel.iconIds.Contains(icon.iconId));
+        }
         description.text = currentModel.description;
         minted.text = $"{currentModel.mintedAt} / {currentModel.mintedTotal}";
     }
@@ -67,11 +66,6 @@ public class NFTItemInfo : MonoBehaviour
     public void SetActive(bool active)
     {
         gameObject.SetActive(active);
-    }
-
-    private void UpdateCreatorSprite(Sprite sprite)
-    {
-        creatorSnapshot.sprite = sprite;
     }
 
     private void UpdateItemThumbnail(Sprite sprite)
