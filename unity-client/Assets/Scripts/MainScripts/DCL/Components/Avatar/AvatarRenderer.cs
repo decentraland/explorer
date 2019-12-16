@@ -21,7 +21,7 @@ namespace DCL
         Action OnFailCallback;
 
         private bool visibility = true;
-        
+
         internal BodyShapeController bodyShapeController;
         internal Dictionary<string, WearableController> wearablesController = new Dictionary<string, WearableController>();
         internal FacialFeatureController eyesController;
@@ -30,8 +30,10 @@ namespace DCL
 
         internal bool isLoading = false;
 
-        public void ApplyModel (AvatarModel model, Action onSuccess, Action onFail)
+        public void ApplyModel(AvatarModel model, Action onSuccess, Action onFail)
         {
+            if (this.model == model) return;
+
             this.model = model;
             this.OnSuccessCallback = onSuccess;
             isLoading = false;
@@ -82,7 +84,7 @@ namespace DCL
             }
         }
 
-        private IEnumerator LoadAvatar ()
+        private IEnumerator LoadAvatar()
         {
             if (string.IsNullOrEmpty(model.bodyShape))
             {
@@ -101,7 +103,7 @@ namespace DCL
             {
                 HideAll();
 
-                bodyShapeController = new BodyShapeController( ResolveWearable(model.bodyShape));
+                bodyShapeController = new BodyShapeController(ResolveWearable(model.bodyShape));
                 SetupDefaultFacialFeatures(bodyShapeController.bodyShapeType);
                 bodyShapeController.Load(transform, OnWearableLoadingSuccess, OnWearableLoadingFail);
             }
@@ -152,7 +154,7 @@ namespace DCL
                 bodyShapeController.SetupMouth(mouthMaterial, mainTexture, model.skinColor);
             }));
 
-            yield return new WaitUntil( () => eyesReady && eyebrowsReady && mouthReady);
+            yield return new WaitUntil(() => eyesReady && eyebrowsReady && mouthReady);
 
             SetupAnimator();
 
@@ -245,10 +247,10 @@ namespace DCL
         private void ResolveVisibility()
         {
             if (bodyShapeController == null) return;
-            
+
             HashSet<string> hiddenCategories = CreateHiddenList();
 
-            if(bodyShapeController.isReady)
+            if (bodyShapeController.isReady)
                 bodyShapeController.SetAssetRenderersEnabled(visibility && !hiddenCategories.Contains(WearableLiterals.Misc.HEAD));
 
             using (var iterator = wearablesController.GetEnumerator())
@@ -352,7 +354,7 @@ namespace DCL
                     break;
                 default:
                     //If wearable is downloading will call OnWearableLoadingSuccess(and therefore SetupDefaultMaterial) once ready
-                    if(wearable.isReady)
+                    if (wearable.isReady)
                         wearable.SetupDefaultMaterial(defaultMaterial, model.skinColor, model.hairColor);
                     break;
             }
