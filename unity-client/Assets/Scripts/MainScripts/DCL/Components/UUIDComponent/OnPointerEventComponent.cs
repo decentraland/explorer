@@ -11,12 +11,13 @@ namespace DCL.Components
         new public class Model : UUIDComponent.Model
         {
             public int buttons;
-            public string toastText;
+            public string toastText = "Interact";
             public float interactionDistance = 100f;
         }
 
         Rigidbody rigidBody;
         OnPointerEventColliders pointerEventColliders;
+        InteractionHoverCanvasController hoverCanvasController;
         bool beingHovered;
 
         public override void Setup(ParcelScene scene, DecentralandEntity entity, string uuid, string type)
@@ -24,11 +25,15 @@ namespace DCL.Components
             this.entity = entity;
             this.scene = scene;
 
-            if (this.model == null)
-                this.model = new OnPointerEventComponent.Model();
+            if (model == null)
+                model = new OnPointerEventComponent.Model();
 
-            this.model.uuid = uuid;
-            this.model.type = type;
+            model.uuid = uuid;
+            model.type = type;
+
+            GameObject hoverCanvasGameObject = Object.Instantiate(Resources.Load("Prefabs/InteractionHoverCanvas"), transform) as GameObject;
+            hoverCanvasController = hoverCanvasGameObject.GetComponent<InteractionHoverCanvasController>();
+            hoverCanvasController.Setup(GetActionButtonSprite(model.buttons), model.toastText);
 
             Initialize();
 
@@ -39,6 +44,13 @@ namespace DCL.Components
         public string GetMeshName(Collider collider)
         {
             return pointerEventColliders.GetMeshName(collider);
+        }
+
+        public Sprite GetActionButtonSprite(int actionButton)
+        {
+            // TODO: switch fetching the corresponding sprite for the needed action button
+
+            return null;
         }
 
         public void Initialize()
@@ -66,8 +78,16 @@ namespace DCL.Components
             Initialize();
         }
 
+        protected override void RemoveComponent<T>(DecentralandEntity entity)
+        {
+            Destroy(hoverCanvasController.gameObject);
+        }
+
         public void SetHoverState(bool isHovered)
         {
+            if (isHovered)
+                hoverCanvasController.UpdateSizeAndPos();
+
             if (beingHovered == isHovered) return;
 
             beingHovered = isHovered;
@@ -76,11 +96,13 @@ namespace DCL.Components
             {
                 // Display toast
                 Debug.Log("HOVER", transform);
+                hoverCanvasController.Show();
             }
             else
             {
                 // Hide toast
                 Debug.Log("UN-HOVER", transform);
+                hoverCanvasController.Hide();
             }
         }
 

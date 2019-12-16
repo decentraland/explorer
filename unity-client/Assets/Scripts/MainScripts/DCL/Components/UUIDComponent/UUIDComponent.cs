@@ -72,7 +72,7 @@ namespace DCL
             Debug.LogWarning($"Cannot remove UUIDComponent of type '{type}'.");
         }
 
-        private void RemoveComponent<T>(DecentralandEntity entity) where T : UUIDComponent
+        protected virtual void RemoveComponent<T>(DecentralandEntity entity) where T : UUIDComponent
         {
             var currentComponent = entity.gameObject.GetComponent<T>();
 
