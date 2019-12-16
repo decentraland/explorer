@@ -9,6 +9,7 @@ namespace DCL
     {
         private LayerMask layerMaskTarget;
         private static int characterControllerLayer => 1 << LayerMask.NameToLayer("CharacterController");
+        private static int characterPreviewLayer => 1 << LayerMask.NameToLayer("CharacterPreview");
 
         public static bool renderingIsDisabled = true;
         private OnPointerUpComponent pointerUpEvent;
@@ -65,8 +66,8 @@ namespace DCL
                         return;
                 }
 
-                var pointerEventLayer = layerMaskTarget & (~characterControllerLayer); //Ensure characterController is being filtered
-                var globalLayer = ~layerMaskTarget & (~characterControllerLayer); //Ensure characterController is being filtered
+                var pointerEventLayer = layerMaskTarget & (~characterControllerLayer) & (~characterPreviewLayer); //Ensure characterController is being filtered
+                var globalLayer = ~layerMaskTarget & (~characterControllerLayer) & (~characterPreviewLayer); //Ensure characterController is being filtered
 
                 if (evt == InputController_Legacy.EVENT.BUTTON_DOWN)
                 {
