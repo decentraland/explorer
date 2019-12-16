@@ -40,24 +40,25 @@ namespace DCL
             {
                 if (RenderingController.i.renderingEnabled)
                 {
-                    if (Physics.Raycast(PointerEventsController.i.GetRayFromCamera(), out hitInfo, Mathf.Infinity, Configuration.LayerMasks.physicsCastLayerMaskWithoutCharacter))
+                    // We use Physics.Raycast() instead of our raycastHandler.Raycast() as that one is slower, sometimes 2x, because it fetches info we don't need here
+                    if (Physics.Raycast(GetRayFromCamera(), out hitInfo, Mathf.Infinity, Configuration.LayerMasks.physicsCastLayerMaskWithoutCharacter))
                     {
-                        newHoveredObject = hitInfo.collider.GetComponentInParent<OnPointerEventComponent>();
+                        newHoveredObject = hitInfo.transform.GetComponentInParent<OnPointerEventComponent>();
 
-                        if (newHoveredObject != lastHoveredObject)
+                        if (newHoveredObject != null && newHoveredObject.IsAtHoverDistance(hitInfo.distance))
                         {
-                            if (newHoveredObject != null)
+                            if (newHoveredObject != lastHoveredObject)
                             {
                                 UnhoverLastHoveredObject();
 
-                                newHoveredObject.SetHoverState(true, hitInfo.distance);
+                                newHoveredObject.SetHoverState(true);
 
                                 lastHoveredObject = newHoveredObject;
                             }
-                            else
-                            {
-                                UnhoverLastHoveredObject();
-                            }
+                        }
+                        else
+                        {
+                            UnhoverLastHoveredObject();
                         }
                     }
                     else
@@ -70,20 +71,20 @@ namespace DCL
             }
         }
 
-        void RetrieveCamera()
-        {
-            if (charCamera == null)
-            {
-                charCamera = Camera.main;
-            }
-        }
-
         void UnhoverLastHoveredObject()
         {
             if (lastHoveredObject == null) return;
 
             lastHoveredObject.SetHoverState(false);
             lastHoveredObject = null;
+        }
+
+        void RetrieveCamera()
+        {
+            if (charCamera == null)
+            {
+                charCamera = Camera.main;
+            }
         }
 
         public Ray GetRayFromCamera()

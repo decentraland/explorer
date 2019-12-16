@@ -5,8 +5,16 @@ using UnityEngine;
 
 namespace DCL.Components
 {
-    public class OnPointerEventComponent : UUIDComponent
+    public class OnPointerEventComponent : UUIDComponent<OnPointerEventComponent.Model>
     {
+        [System.Serializable]
+        new public class Model : UUIDComponent.Model
+        {
+            public int buttons;
+            public string toastText;
+            public float interactionDistance = 100f;
+        }
+
         Rigidbody rigidBody;
         OnPointerEventColliders pointerEventColliders;
         bool beingHovered;
@@ -15,6 +23,10 @@ namespace DCL.Components
         {
             this.entity = entity;
             this.scene = scene;
+
+            if (this.model == null)
+                this.model = new OnPointerEventComponent.Model();
+
             this.model.uuid = uuid;
             this.model.type = type;
 
@@ -54,7 +66,7 @@ namespace DCL.Components
             Initialize();
         }
 
-        public void SetHoverState(bool isHovered, float hoverDistance = 0f)
+        public void SetHoverState(bool isHovered)
         {
             if (beingHovered == isHovered) return;
 
@@ -70,6 +82,11 @@ namespace DCL.Components
                 // Hide toast
                 Debug.Log("UN-HOVER", transform);
             }
+        }
+
+        public bool IsAtHoverDistance(float distance)
+        {
+            return distance <= model.interactionDistance;
         }
 
         void OnDestroy()

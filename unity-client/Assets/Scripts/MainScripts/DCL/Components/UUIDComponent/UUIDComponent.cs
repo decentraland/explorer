@@ -7,15 +7,25 @@ using UnityEngine;
 
 namespace DCL
 {
+    public class UUIDComponent<ModelType> : UUIDComponent where ModelType : UUIDComponent.Model, new()
+    {
+        new public ModelType model
+        {
+            get { return base.model as ModelType; }
+            set { base.model = value; }
+        }
+    }
+
     public class UUIDComponent : BaseComponent
     {
+        [System.Serializable]
         public class Model
         {
             public string type;
             public string uuid;
         }
 
-        public Model model;
+        public Model model = new Model();
 
         public virtual void Setup(ParcelScene scene, DecentralandEntity entity, string uuid, string type)
         {
