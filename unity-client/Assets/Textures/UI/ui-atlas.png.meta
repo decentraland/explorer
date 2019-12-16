@@ -296,6 +296,15 @@ TextureImporter:
   - first:
       213: 790432268931858052
     second: female-icon
+  - first:
+      213: 7595667864703430088
+    second: unique-card-background
+  - first:
+      213: -3786048695727623584
+    second: unique-card-description-bg
+  - first:
+      213: 7595667864703430088
+    second: unique-card-shadow
   externalObjects: {}
   serializedVersion: 10
   mipmaps:
@@ -2118,9 +2127,9 @@ TextureImporter:
         y: 389
         width: 32
         height: 26
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
+      alignment: 9
+      pivot: {x: 0.5000019, y: 0.55742705}
+      border: {x: 15, y: 14, z: 15, w: 11}
       outline: []
       physicsShape: []
       tessellationDetail: 0
@@ -2141,7 +2150,7 @@ TextureImporter:
         height: 32
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
+      border: {x: 17, y: 16, z: 17, w: 14}
       outline: []
       physicsShape: []
       tessellationDetail: 0
@@ -2182,7 +2191,7 @@ TextureImporter:
         width: 23
         height: 23
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -2203,7 +2212,7 @@ TextureImporter:
         width: 17
         height: 27
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -2211,6 +2220,69 @@ TextureImporter:
       bones: []
       spriteID: a4ea839ebd3954a31842c816163cc642
       internalID: 790432268931858052
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: unique-card-background
+      rect:
+        serializedVersion: 2
+        x: 503
+        y: 301
+        width: 240
+        height: 47
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 22, z: 0, w: 22}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 00b19cf9c3b1c4076a74919988ee1b4f
+      internalID: 7595667864703430088
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: unique-card-description-bg
+      rect:
+        serializedVersion: 2
+        x: 928
+        y: 298
+        width: 49
+        height: 30
+      alignment: 9
+      pivot: {x: 0.49532023, y: 0.7598572}
+      border: {x: 23, y: 22, z: 23, w: 6}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f9672354a366a4355a41a35264af55c0
+      internalID: -3786048695727623584
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: unique-card-shadow
+      rect:
+        serializedVersion: 2
+        x: 493
+        y: 236
+        width: 68
+        height: 57
+      alignment: 9
+      pivot: {x: 0.5, y: 0.559066}
+      border: {x: 33, y: 31, z: 33, w: 24}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c05f79850fc35402187fa0d7ae4f4a6d
+      internalID: 7595667864703430088
       vertices: []
       indices: 
       edges: []
