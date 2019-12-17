@@ -1,8 +1,7 @@
+using AvatarShape_Tests;
+using NUnit.Framework;
 using System.Collections;
 using System.Collections.Generic;
-using AvatarShape_Tests;
-using DCL.Helpers;
-using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 
@@ -128,16 +127,18 @@ namespace AvatarEditorHUD_Tests
                     bodyShape = WearableLiterals.BodyShapes.FEMALE,
                     wearables = new List<string>() { },
                 },
-                inventory = new []{ wearableId}
+                inventory = new[] { wearableId }
             });
 
             Assert.IsTrue(controller.myView.collectiblesItemSelector.itemToggles.ContainsKey(wearableId));
         }
 
         [Test]
-        [TestCase(WearableLiterals.NFTRarity.RARE)]
+        [TestCase(WearableLiterals.NFTRarity.SWANKY)]
         [TestCase(WearableLiterals.NFTRarity.EPIC)]
         [TestCase(WearableLiterals.NFTRarity.LEGENDARY)]
+        [TestCase(WearableLiterals.NFTRarity.MYTHIC)]
+        [TestCase(WearableLiterals.NFTRarity.UNIQUE)]
         public void CreateNFTsButtonsByRarityCorrectly(string rarity)
         {
             WearableItem dummyItem = CreateDummyNFT(rarity);
@@ -181,18 +182,19 @@ namespace AvatarEditorHUD_Tests
                         bodyShapes = new [] { WearableLiterals.BodyShapes.FEMALE, WearableLiterals.BodyShapes.MALE },
                     }
                 },
-                tags = new [] { WearableLiterals.Tags.EXCLUSIVE },
-                i18n = new [] { new i18n() { code = "en", text = "Dummy Item" } }
+                tags = new[] { WearableLiterals.Tags.EXCLUSIVE },
+                i18n = new[] { new i18n() { code = "en", text = "Dummy Item" } }
             };
             userProfile.UpdateData(new UserProfileModel()
             {
-                name = "name", email = "mail",
+                name = "name",
+                email = "mail",
                 avatar = new AvatarModel()
                 {
                     bodyShape = WearableLiterals.BodyShapes.FEMALE,
                     wearables = new List<string>() { },
                 },
-                inventory = new [] { dummyItem.id }
+                inventory = new[] { dummyItem.id }
             });
 
             catalog.Add(dummyItem.id, dummyItem);

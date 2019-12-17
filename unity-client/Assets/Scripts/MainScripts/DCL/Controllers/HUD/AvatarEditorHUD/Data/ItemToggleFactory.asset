@@ -15,12 +15,18 @@ MonoBehaviour:
   baseWearable: {fileID: 3111115372682583232, guid: da54ec2c2cb194fd28a355c63152233f,
     type: 3}
   nftList:
+  - rarity: swanky
+    prefab: {fileID: 3325800490922572695, guid: bb9dc3b0ab578493bb5ebb55d2ad088f,
+      type: 3}
   - rarity: epic
     prefab: {fileID: 3325800490922572695, guid: 1117e61fc6ea87c4f84f3babf7734f2a,
       type: 3}
   - rarity: legendary
     prefab: {fileID: 3325800490922572695, guid: 9c3acdac149f14a44922464d8592ee3f,
       type: 3}
-  - rarity: rare
-    prefab: {fileID: 3325800490922572695, guid: e3721198e4f78d7488bc09daf564832c,
+  - rarity: mythic
+    prefab: {fileID: 3325800490922572695, guid: a144335e80bbb4dec8552542e58080e8,
+      type: 3}
+  - rarity: unique
+    prefab: {fileID: 3325800490922572695, guid: 2095618ba759b45739751d01ced3888d,
       type: 3}
