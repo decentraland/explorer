@@ -17,14 +17,28 @@ public class InteractionHoverCanvasController : MonoBehaviour
         mainCamera = Camera.main;
     }
 
-    public void Setup(Sprite feedbackIconSprite, string feedbackText)
+    public void Setup(int button, string feedbackText)
     {
-        if (feedbackIconSprite != null)
-            icon.sprite = feedbackIconSprite;
-
         text.text = feedbackText;
 
+        ConfigureButtonIcon(button);
+
         Hide();
+    }
+
+    void ConfigureButtonIcon(int button)
+    {
+        // TODO: Map action buttons in the switch and enable/disable/configure the corresponding icon ui element/s
+
+        /* switch (button)
+        {
+            case 1:
+                break;
+            case 2:
+                break;
+            case 3:
+                break;
+        } */
     }
 
     public void Show()

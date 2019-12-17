@@ -10,7 +10,7 @@ namespace DCL.Components
         [System.Serializable]
         new public class Model : UUIDComponent.Model
         {
-            public int buttons;
+            public int button;
             public string toastText = "Interact";
             public float interactionDistance = 100f;
         }
@@ -33,7 +33,7 @@ namespace DCL.Components
 
             GameObject hoverCanvasGameObject = Object.Instantiate(Resources.Load("Prefabs/InteractionHoverCanvas"), transform) as GameObject;
             hoverCanvasController = hoverCanvasGameObject.GetComponent<InteractionHoverCanvasController>();
-            hoverCanvasController.Setup(GetActionButtonSprite(model.buttons), model.toastText);
+            hoverCanvasController.Setup(model.button, model.toastText);
 
             Initialize();
 
@@ -44,13 +44,6 @@ namespace DCL.Components
         public string GetMeshName(Collider collider)
         {
             return pointerEventColliders.GetMeshName(collider);
-        }
-
-        public Sprite GetActionButtonSprite(int actionButton)
-        {
-            // TODO: switch fetching the corresponding sprite for the needed action button
-
-            return null;
         }
 
         public void Initialize()
