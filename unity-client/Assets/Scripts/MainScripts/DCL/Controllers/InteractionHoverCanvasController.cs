@@ -37,8 +37,13 @@ public class InteractionHoverCanvasController : MonoBehaviour
             case WebInterface.ACTION_BUTTON.POINTER:
                 iconText.text = "";
                 iconImage.sprite = pointerDownIconSprite;
+
                 iconImage.SetNativeSize();
+                iconImage.rectTransform.anchorMin = new Vector2(0, 0);
+                iconImage.rectTransform.anchorMax = new Vector2(1, 1);
                 iconImage.rectTransform.sizeDelta = Vector2.zero;
+                iconImage.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+
                 iconImage.color = new Color(iconImage.color.r, iconImage.color.g, iconImage.color.b, 1f);
                 break;
             case WebInterface.ACTION_BUTTON.PRIMARY:
