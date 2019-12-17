@@ -28,11 +28,11 @@ namespace CameraController_Test
         }
 
         [Test]
-        [TestCase(CameraController.CameraMode.FirstPerson)]
-        [TestCase(CameraController.CameraMode.ThirdPerson)]
-        public void LiveCameraIsOn(CameraController.CameraMode cameraMode)
+        [TestCase(CameraStateBase.ModeId.FirstPerson)]
+        [TestCase(CameraStateBase.ModeId.ThirdPerson)]
+        public void LiveCameraIsOn(CameraStateBase.ModeId cameraMode)
         {
-            var vCam = cameraController.cachedModeToVirtualCamera[cameraMode];
+            CinemachineVirtualCamera vCam = null;// cameraController.cachedModeToVirtualCamera[cameraMode];
             cameraController.SetCameraMode(cameraMode);
             Assert.IsTrue(vCam.VirtualCameraGameObject.activeSelf);
         }
@@ -46,8 +46,8 @@ namespace CameraController_Test
         [TestCase(-1, 0, -1)]
         public void ReactToSetRotation(float lookAtX, float lookAtY, float lookAtZ)
         {
-            var currentVcam = (cameraController.cachedModeToVirtualCamera[cameraController.currentMode] as CinemachineVirtualCamera);
-            var pov = currentVcam.GetCinemachineComponent<CinemachinePOV>();
+            //var currentVcam = (cameraController.cachedModeToVirtualCamera[cameraController.currentMode] as CinemachineVirtualCamera);
+            CinemachinePOV pov = null;// currentVcam.GetCinemachineComponent<CinemachinePOV>();
 
             var payload = new CameraController.SetRotationPayload()
             {
@@ -73,7 +73,7 @@ namespace CameraController_Test
         [TestCase(3, 3, 3, ExpectedResult = null)]
         public IEnumerator UpdateCameraPositionSO(float posX, float posY, float posZ)
         {
-            var currentVcam = (cameraController.cachedModeToVirtualCamera[cameraController.currentMode] as CinemachineVirtualCamera);
+            CinemachineVirtualCamera currentVcam = null;//(cameraController.cachedModeToVirtualCamera[cameraController.currentMode] as CinemachineVirtualCamera);
 
             var toFollow = new GameObject("ToFollow");
             toFollow.transform.position = new Vector3(posX, posY, posZ);
@@ -90,7 +90,7 @@ namespace CameraController_Test
         [TestCase(45, 45, ExpectedResult = null)]
         public IEnumerator UpdateCameraRotationSO(float horizontalAxis, float verticalAxis)
         {
-            var currentVcam = (cameraController.cachedModeToVirtualCamera[cameraController.currentMode] as CinemachineVirtualCamera);
+            CinemachineVirtualCamera currentVcam = null;// (cameraController.cachedModeToVirtualCamera[cameraController.currentMode] as CinemachineVirtualCamera);
             var pov = currentVcam.GetCinemachineComponent<CinemachinePOV>();
             pov.m_HorizontalAxis.Value = horizontalAxis;
             pov.m_VerticalAxis.Value = verticalAxis;

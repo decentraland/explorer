@@ -456,16 +456,6 @@ PrefabInstance:
       propertyPath: m_Follow
       value: 
       objectReference: {fileID: 6922703132371683184}
-    - target: {fileID: 7607057078470864114, guid: bc570f5e94906eb47814191e0beaee7a,
-        type: 3}
-      propertyPath: m_LookAt
-      value: 
-      objectReference: {fileID: 6922703132371683184}
-    - target: {fileID: 7607057078470864114, guid: bc570f5e94906eb47814191e0beaee7a,
-        type: 3}
-      propertyPath: m_Follow
-      value: 
-      objectReference: {fileID: 6922703132371683184}
     - target: {fileID: 4346516745184911389, guid: bc570f5e94906eb47814191e0beaee7a,
         type: 3}
       propertyPath: cursor
@@ -476,6 +466,58 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 6922703132371683184}
     - target: {fileID: 1128386904, guid: bc570f5e94906eb47814191e0beaee7a, type: 3}
+      propertyPath: m_Follow
+      value: 
+      objectReference: {fileID: 6922703132371683184}
+    - target: {fileID: 1526003882666009685, guid: bc570f5e94906eb47814191e0beaee7a,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0.00000000400495
+      objectReference: {fileID: 0}
+    - target: {fileID: 1526003882666009685, guid: bc570f5e94906eb47814191e0beaee7a,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 3.6648784e-10
+      objectReference: {fileID: 0}
+    - target: {fileID: 1404322283, guid: bc570f5e94906eb47814191e0beaee7a, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.23568545
+      objectReference: {fileID: 0}
+    - target: {fileID: 1404322283, guid: bc570f5e94906eb47814191e0beaee7a, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 4.660675e-15
+      objectReference: {fileID: 0}
+    - target: {fileID: 1404322283, guid: bc570f5e94906eb47814191e0beaee7a, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 2.3248246e-14
+      objectReference: {fileID: 0}
+    - target: {fileID: 2072030609, guid: bc570f5e94906eb47814191e0beaee7a, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0.0000000039269796
+      objectReference: {fileID: 0}
+    - target: {fileID: 2072030609, guid: bc570f5e94906eb47814191e0beaee7a, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.0000000017557202
+      objectReference: {fileID: 0}
+    - target: {fileID: 573743093, guid: bc570f5e94906eb47814191e0beaee7a, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.23568545
+      objectReference: {fileID: 0}
+    - target: {fileID: 573743093, guid: bc570f5e94906eb47814191e0beaee7a, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 1.3299444e-15
+      objectReference: {fileID: 0}
+    - target: {fileID: 573743093, guid: bc570f5e94906eb47814191e0beaee7a, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 2.542301e-15
+      objectReference: {fileID: 0}
+    - target: {fileID: 3812086009540025649, guid: bc570f5e94906eb47814191e0beaee7a,
+        type: 3}
+      propertyPath: m_LookAt
+      value: 
+      objectReference: {fileID: 6922703132371683184}
+    - target: {fileID: 3812086009540025649, guid: bc570f5e94906eb47814191e0beaee7a,
+        type: 3}
       propertyPath: m_Follow
       value: 
       objectReference: {fileID: 6922703132371683184}
@@ -605,9 +647,9 @@ MonoBehaviour:
   customContentServerUrl: http://localhost:1338/
   baseUrlMode: 0
   baseUrlCustom: 
-  environment: 0
-  startInCoords: {x: 64, y: -64}
-  forceLocalComms: 0
+  environment: 4
+  startInCoords: {x: 0, y: 0}
+  forceLocalComms: 1
   debugPanelMode: 0
 --- !u!4 &1444882337
 Transform:
