@@ -93,17 +93,9 @@ namespace DCL.Components
             beingHovered = isHovered;
 
             if (beingHovered)
-            {
-                // Display toast
-                Debug.Log("HOVER", transform);
                 hoverCanvasController.Show();
-            }
             else
-            {
-                // Hide toast
-                Debug.Log("UN-HOVER", transform);
                 hoverCanvasController.Hide();
-            }
         }
 
         public bool IsAtHoverDistance(float distance)
