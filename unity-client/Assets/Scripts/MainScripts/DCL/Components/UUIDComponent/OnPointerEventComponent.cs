@@ -1,6 +1,7 @@
 using DCL.Controllers;
 using DCL.Models;
 using DCL.Helpers;
+using DCL.Interface;
 using UnityEngine;
 
 namespace DCL.Components
@@ -10,7 +11,7 @@ namespace DCL.Components
         [System.Serializable]
         new public class Model : UUIDComponent.Model
         {
-            public int button;
+            public int button = 1;
             public string toastText = "Interact";
             public float interactionDistance = 100f;
         }
@@ -30,10 +31,6 @@ namespace DCL.Components
 
             model.uuid = uuid;
             model.type = type;
-
-            GameObject hoverCanvasGameObject = Object.Instantiate(Resources.Load("Prefabs/InteractionHoverCanvas"), transform) as GameObject;
-            hoverCanvasController = hoverCanvasGameObject.GetComponent<InteractionHoverCanvasController>();
-            hoverCanvasController.Setup(model.button, model.toastText);
 
             Initialize();
 
@@ -64,6 +61,13 @@ namespace DCL.Components
             // Create OnPointerEventCollider child
             pointerEventColliders = Utils.GetOrCreateComponent<OnPointerEventColliders>(this.gameObject);
             pointerEventColliders.Initialize(entity);
+
+            if (hoverCanvasController == null)
+            {
+                GameObject hoverCanvasGameObject = Object.Instantiate(Resources.Load("Prefabs/InteractionHoverCanvas"), transform) as GameObject;
+                hoverCanvasController = hoverCanvasGameObject.GetComponent<InteractionHoverCanvasController>();
+            }
+            hoverCanvasController.Setup((WebInterface.ACTION_BUTTON)model.button, model.toastText);
         }
 
         void OnComponentUpdated(DecentralandEntity e)
