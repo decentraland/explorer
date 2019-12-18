@@ -838,5 +838,68 @@ namespace Tests
 
             Assert.IsTrue(targetEntityHit, "Target entity wasn't hit and no other entity is blocking it");
         }
+
+        [UnityTest]
+        [Explicit("Explicit until we enable the hover feedback in production")]
+        public IEnumerator OnPointerHoverFeedbackIsDisplayedCorrectly()
+        {
+            yield return InitScene();
+
+            DecentralandEntity entity;
+            BoxShape shape;
+            InstantiateEntityWithShape(out entity, out shape);
+            TestHelpers.SetEntityTransform(scene, entity, new Vector3(8, 2, 10), Quaternion.identity, new Vector3(3, 3, 3));
+            yield return shape.routine;
+
+            var OnPointerDownComponentModel = new OnPointerDownComponent.Model()
+            {
+                type = OnPointerDownComponent.NAME,
+                uuid = "pointerevent-1"
+            };
+            var component = TestHelpers.EntityComponentCreate<OnPointerDownComponent, OnPointerDownComponent.Model>(scene, entity,
+                OnPointerDownComponentModel, CLASS_ID_COMPONENT.UUID_CALLBACK);
+            Assert.IsTrue(component != null);
+
+            yield return null;
+
+            DCLCharacterController.i.PauseGravity();
+            DCLCharacterController.i.SetPosition(new Vector3(8, 1, 7f));
+
+            var cameraController = GameObject.FindObjectOfType<CameraController>();
+
+            // Rotate camera towards the interactive object
+            var cameraRotationPayload = new CameraController.SetRotationPayload()
+            {
+                x = 45, y = 0, z = 0
+            };
+            cameraController.SetRotation(JsonConvert.SerializeObject(cameraRotationPayload, Formatting.None, new JsonSerializerSettings()
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            }));
+
+            yield return null;
+
+            var hoverCanvas = entity.gameObject.GetComponentInChildren<Canvas>();
+            Assert.IsNotNull(hoverCanvas);
+
+            Assert.IsTrue(hoverCanvas.enabled);
+
+            // Rotate the camera away from the interactive object
+            cameraRotationPayload = new CameraController.SetRotationPayload()
+            {
+                x = 0, y = 0, z = 0,
+                cameraTarget = (DCLCharacterController.i.transform.position - entity.gameObject.transform.position)
+            };
+            cameraController.SetRotation(JsonConvert.SerializeObject(cameraRotationPayload, Formatting.None, new JsonSerializerSettings()
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            }));
+
+            yield return null;
+
+            Assert.IsFalse(hoverCanvas.enabled);
+
+            DCLCharacterController.i.ResumeGravity();
+        }
     }
 }
