@@ -70,7 +70,7 @@ export async function initializeUnity(
 }
 
 /**
- * Prevent unity to lock the keyboard if there are any
+ * Prevent unity from locking the keyboard when there is an
  * active element (like delighted textarea)
  */
 function preventUnityKeyboardLock() {
