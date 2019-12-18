@@ -15,6 +15,7 @@ public class InteractionHoverCanvasController : MonoBehaviour
     const string POINTER_ICON_PREFAB_PATH = "PointerButtonHoverIcon";
     const string PRIMARY_ICON_PREFAB_PATH = "PrimaryButtonHoverIcon";
     const string SECONDARY_ICON_PREFAB_PATH = "SecondaryButtonHoverIcon";
+    const string UNKNOWN_ICON_PREFAB_PATH = "UnknownButtonHoverIcon";
 
     void Awake()
     {
@@ -40,14 +41,17 @@ public class InteractionHoverCanvasController : MonoBehaviour
         string prefabPath;
         switch (button)
         {
+            case WebInterface.ACTION_BUTTON.POINTER:
+                prefabPath = POINTER_ICON_PREFAB_PATH;
+                break;
             case WebInterface.ACTION_BUTTON.PRIMARY:
                 prefabPath = PRIMARY_ICON_PREFAB_PATH;
                 break;
             case WebInterface.ACTION_BUTTON.SECONDARY:
                 prefabPath = SECONDARY_ICON_PREFAB_PATH;
                 break;
-            default: // WebInterface.ACTION_BUTTON.POINTER
-                prefabPath = POINTER_ICON_PREFAB_PATH;
+            default: // WebInterface.ACTION_BUTTON.UNKNOWN
+                prefabPath = UNKNOWN_ICON_PREFAB_PATH;
                 break;
         }
 

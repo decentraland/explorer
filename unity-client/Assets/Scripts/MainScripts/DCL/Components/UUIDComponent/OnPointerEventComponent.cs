@@ -11,9 +11,9 @@ namespace DCL.Components
         [System.Serializable]
         new public class Model : UUIDComponent.Model
         {
-            public int button = 0;
+            public int button = 3;
             public string toastText = "Interact";
-            public float interactionDistance = 100f;
+            public float interactionDistance = 4f;
         }
 
         Rigidbody rigidBody;
