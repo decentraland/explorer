@@ -11,6 +11,7 @@ namespace DCL
         public static bool renderingIsDisabled = true;
 
         bool isTesting = false;
+        bool enableInteractionHoverFeedback = false;
         RaycastHitInfo lastPointerDownEventHitInfo;
         OnPointerUpComponent pointerUpEvent;
         IRaycastHandler raycastHandler = new RaycastHandler();
@@ -29,7 +30,7 @@ namespace DCL
 
             RetrieveCamera();
 
-            if (hoverInteractiveObjectsRoutine == null)
+            if (enableInteractionHoverFeedback && hoverInteractiveObjectsRoutine == null)
                 hoverInteractiveObjectsRoutine = SceneController.i.StartCoroutine(HoverInteractiveObjects());
         }
 
