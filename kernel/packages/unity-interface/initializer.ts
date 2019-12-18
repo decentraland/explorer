@@ -82,7 +82,6 @@ function preventUnityKeyboardLock() {
           handler(e)
         }
       }, options)
-      return true
     } else {
       originalFunction.call(window, event, handler, options)
     }
