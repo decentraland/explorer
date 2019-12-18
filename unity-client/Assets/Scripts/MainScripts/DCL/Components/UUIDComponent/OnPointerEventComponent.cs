@@ -11,7 +11,7 @@ namespace DCL.Components
         [System.Serializable]
         new public class Model : UUIDComponent.Model
         {
-            public int button = 3;
+            public int button = (int)WebInterface.ACTION_BUTTON.UNKNOWN;
             public string toastText = "Interact";
             public float interactionDistance = 4f;
         }

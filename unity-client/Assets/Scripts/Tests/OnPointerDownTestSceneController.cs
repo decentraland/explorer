@@ -39,6 +39,9 @@ public class OnPointerDownTestSceneController : MonoBehaviour
         TestHelpers.EntityComponentCreate<OnClickComponent, OnClickComponent.Model>(scene, entity, OnClickComponentModel, CLASS_ID_COMPONENT.UUID_CALLBACK);
 
         scene.SetInitMessagesDone();
+
+        PointerEventsController.i.enableInteractionHoverFeedback = true;
+        PointerEventsController.i.StartInteractiveObjectsHoverRoutine();
     }
 
     protected virtual IEnumerator InitScene()
