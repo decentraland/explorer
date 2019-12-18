@@ -44,15 +44,15 @@ public class InteractionHoverCanvasController : MonoBehaviour
                 iconImage.rectTransform.sizeDelta = Vector2.zero;
                 iconImage.rectTransform.pivot = new Vector2(0.5f, 0.5f);
 
-                iconImage.color = new Color(iconImage.color.r, iconImage.color.g, iconImage.color.b, 1f);
+                iconImage.enabled = true;
                 break;
             case WebInterface.ACTION_BUTTON.PRIMARY:
                 iconText.text = "E";
-                iconImage.color = new Color(iconImage.color.r, iconImage.color.g, iconImage.color.b, 0f);
+                iconImage.enabled = false;
                 break;
             case WebInterface.ACTION_BUTTON.SECONDARY:
                 iconText.text = "F";
-                iconImage.color = new Color(iconImage.color.r, iconImage.color.g, iconImage.color.b, 0f);
+                iconImage.enabled = false;
                 break;
         }
     }
