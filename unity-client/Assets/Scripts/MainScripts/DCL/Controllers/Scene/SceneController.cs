@@ -209,9 +209,9 @@ namespace DCL
             OnDebugModeSet?.Invoke();
         }
 
-        public void SetFPSPanelVisible(bool visible)
+        public void SetFPSPanelVisible(string visible)
         {
-            fpsPanel.SetActive(visible);
+            fpsPanel.SetActive(visible == "true");
         }
 
         public void SetSceneDebugPanel()
