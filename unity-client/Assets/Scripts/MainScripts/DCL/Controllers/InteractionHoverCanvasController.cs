@@ -76,6 +76,9 @@ public class InteractionHoverCanvasController : MonoBehaviour
 
     public void UpdateSizeAndPos()
     {
+        if (mainCamera == null)
+            mainCamera = Camera.main;
+
         Vector3 screenPoint = mainCamera.WorldToViewportPoint(transform.parent.position + offset);
 
         if (screenPoint.z > 0)

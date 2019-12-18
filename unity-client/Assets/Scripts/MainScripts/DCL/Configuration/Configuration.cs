@@ -62,7 +62,7 @@ namespace DCL.Configuration
     public static class LayerMasks
     {
         public static int characterControllerLayer => 1 << LayerMask.NameToLayer("CharacterController");
-        public static LayerMask physicsCastLayerMask = 1 << LayerMask.NameToLayer("OnPointerEvent") | 1 << LayerMask.NameToLayer("Default");
+        public static LayerMask physicsCastLayerMask = 1 << LayerMask.NameToLayer("OnPointerEvent");
         public static LayerMask physicsCastLayerMaskWithoutCharacter = physicsCastLayerMask & (~(characterControllerLayer));
     }
 }
