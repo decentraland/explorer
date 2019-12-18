@@ -27,7 +27,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 163332510}
   m_LocalRotation: {x: 0.32326585, y: -0, z: -0, w: 0.9463082}
-  m_LocalPosition: {x: -0.80036104, y: 1.4923103, z: -3.564512}
+  m_LocalPosition: {x: -0.80036104, y: 1.4864261, z: -1.2749698}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1404322283}
@@ -58,7 +58,7 @@ MonoBehaviour:
   m_Follow: {fileID: 0}
   m_CommonLens: 1
   m_Lens:
-    FieldOfView: 40
+    FieldOfView: 60
     OrthographicSize: 10
     NearClipPlane: 0.1
     FarClipPlane: 5000
@@ -123,15 +123,15 @@ MonoBehaviour:
     m_RecenteringTime: 2
     m_LegacyHeadingDefinition: -1
     m_LegacyVelocityFilterStrength: -1
-  m_BindingMode: 5
-  m_SplineCurvature: 0.102
+  m_BindingMode: 4
+  m_SplineCurvature: 0.17
   m_Orbits:
   - m_Height: 5
-    m_Radius: 3
-  - m_Height: 0.7
-    m_Radius: 5.5
+    m_Radius: 2
+  - m_Height: 0.69
+    m_Radius: 3.2
   - m_Height: -2
-    m_Radius: 5
+    m_Radius: 4
   m_LegacyHeadingBias: 3.4028235e+38
   m_Rigs:
   - {fileID: 1404322284}
@@ -149,7 +149,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 44d70cc20219cd84593f67d248eafe36, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Offset: {x: 0.65, y: 0.87, z: 0}
+  m_Offset: {x: 0.49, y: -0.2, z: 0}
   m_ApplyAfter: 1
 --- !u!114 &8178417388690000508
 MonoBehaviour:
@@ -205,8 +205,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 573743092}
-  m_LocalRotation: {x: -0.23568544, y: -0.000000006801726, z: 0.0000000030410037,
-    w: 0.9718295}
+  m_LocalRotation: {x: -0.29405022, y: -0.000000008694396, z: -0.000000028260537,
+    w: 0.95579}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
@@ -242,7 +242,7 @@ MonoBehaviour:
   m_LookAt: {fileID: 0}
   m_Follow: {fileID: 0}
   m_Lens:
-    FieldOfView: 40
+    FieldOfView: 60
     OrthographicSize: 10
     NearClipPlane: 0.1
     FarClipPlane: 5000
@@ -315,8 +315,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9384ab8608cdc3d479fe89cd51eed48f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_BindingMode: 5
-  m_FollowOffset: {x: 0, y: 0.9974972, z: -5.404631}
+  m_BindingMode: 4
+  m_FollowOffset: {x: 0, y: 0.9916132, z: -3.115089}
   m_XDamping: 1
   m_YDamping: 2
   m_ZDamping: 0
@@ -368,7 +368,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4044717213e31446939f7bd49c896ea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_TrackedObjectOffset: {x: 0, y: 0, z: 0}
+  m_TrackedObjectOffset: {x: 0, y: 0.8, z: 0}
   m_LookaheadTime: 0
   m_LookaheadSmoothing: 10
   m_LookaheadIgnoreY: 0
@@ -377,9 +377,9 @@ MonoBehaviour:
   m_ScreenX: 0.5
   m_ScreenY: 0.5
   m_DeadZoneWidth: 0
-  m_DeadZoneHeight: 0.08
-  m_SoftZoneWidth: 0.4
-  m_SoftZoneHeight: 0.08
+  m_DeadZoneHeight: 0
+  m_SoftZoneWidth: 0.2
+  m_SoftZoneHeight: 0.2
   m_BiasX: 0
   m_BiasY: 0
   m_CenterOnActivate: 1
@@ -440,8 +440,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9384ab8608cdc3d479fe89cd51eed48f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_BindingMode: 5
-  m_FollowOffset: {x: 0, y: 0.9974972, z: -5.404631}
+  m_BindingMode: 4
+  m_FollowOffset: {x: 0, y: 0.9916132, z: -3.115089}
   m_XDamping: 1
   m_YDamping: 2
   m_ZDamping: 0.5
@@ -493,14 +493,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4044717213e31446939f7bd49c896ea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_TrackedObjectOffset: {x: 0, y: 0, z: 0}
+  m_TrackedObjectOffset: {x: 0, y: 0.8, z: 0}
   m_LookaheadTime: 0
   m_LookaheadSmoothing: 3
   m_LookaheadIgnoreY: 0
   m_HorizontalDamping: 0
   m_VerticalDamping: 0
   m_ScreenX: 0.5
-  m_ScreenY: 0.5
+  m_ScreenY: 0.345
   m_DeadZoneWidth: 0
   m_DeadZoneHeight: 0
   m_SoftZoneWidth: 0.4
@@ -532,8 +532,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1404322282}
-  m_LocalRotation: {x: -0.23568544, y: 0.000000006801731, z: -0.0000000030409777,
-    w: 0.9718295}
+  m_LocalRotation: {x: -0.20837183, y: -0.0000000071171757, z: -0.0000000334064, w: 0.9780497}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
@@ -569,7 +568,7 @@ MonoBehaviour:
   m_LookAt: {fileID: 0}
   m_Follow: {fileID: 0}
   m_Lens:
-    FieldOfView: 40
+    FieldOfView: 60
     OrthographicSize: 10
     NearClipPlane: 0.1
     FarClipPlane: 5000
@@ -642,10 +641,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9384ab8608cdc3d479fe89cd51eed48f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_BindingMode: 5
-  m_FollowOffset: {x: 0, y: 0.9974972, z: -5.404631}
-  m_XDamping: 1
-  m_YDamping: 1
+  m_BindingMode: 4
+  m_FollowOffset: {x: 0, y: 0.9916132, z: -3.115089}
+  m_XDamping: 0
+  m_YDamping: 2
   m_ZDamping: 1
   m_AngularDampingMode: 0
   m_PitchDamping: 0
@@ -695,7 +694,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4044717213e31446939f7bd49c896ea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_TrackedObjectOffset: {x: 0, y: 0, z: 0}
+  m_TrackedObjectOffset: {x: 0, y: 0.8, z: 0}
   m_LookaheadTime: 0
   m_LookaheadSmoothing: 3
   m_LookaheadIgnoreY: 0
@@ -704,9 +703,9 @@ MonoBehaviour:
   m_ScreenX: 0.5
   m_ScreenY: 0.5
   m_DeadZoneWidth: 0
-  m_DeadZoneHeight: 0.373
-  m_SoftZoneWidth: 0.46
-  m_SoftZoneHeight: 0.45
+  m_DeadZoneHeight: 0
+  m_SoftZoneWidth: 0.2
+  m_SoftZoneHeight: 0.2
   m_BiasX: 0
   m_BiasY: 0
   m_CenterOnActivate: 1
@@ -734,8 +733,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2072030608}
-  m_LocalRotation: {x: -0.23568544, y: 0.000000003926978, z: -0.0000000017557253,
-    w: 0.9718294}
+  m_LocalRotation: {x: -0.29405022, y: -0.000000009777668, z: -0.00000003178164, w: 0.95579}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
@@ -771,7 +769,7 @@ MonoBehaviour:
   m_LookAt: {fileID: 0}
   m_Follow: {fileID: 0}
   m_Lens:
-    FieldOfView: 40
+    FieldOfView: 60
     OrthographicSize: 10
     NearClipPlane: 0.1
     FarClipPlane: 5000
@@ -847,7 +845,7 @@ MonoBehaviour:
   m_LookAt: {fileID: 0}
   m_Follow: {fileID: 0}
   m_Lens:
-    FieldOfView: 40
+    FieldOfView: 60
     OrthographicSize: 10
     NearClipPlane: 0.1
     FarClipPlane: 5000
@@ -923,7 +921,7 @@ MonoBehaviour:
   m_LookAt: {fileID: 0}
   m_Follow: {fileID: 0}
   m_Lens:
-    FieldOfView: 40
+    FieldOfView: 60
     OrthographicSize: 10
     NearClipPlane: 0.1
     FarClipPlane: 5000
@@ -1122,7 +1120,7 @@ MonoBehaviour:
   m_Follow: {fileID: 0}
   m_CommonLens: 1
   m_Lens:
-    FieldOfView: 40
+    FieldOfView: 60
     OrthographicSize: 10
     NearClipPlane: 0.1
     FarClipPlane: 5000
@@ -1187,7 +1185,7 @@ MonoBehaviour:
     m_RecenteringTime: 2
     m_LegacyHeadingDefinition: -1
     m_LegacyVelocityFilterStrength: -1
-  m_BindingMode: 5
+  m_BindingMode: 4
   m_SplineCurvature: 0.049
   m_Orbits:
   - m_Height: 3
@@ -1302,8 +1300,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9384ab8608cdc3d479fe89cd51eed48f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_BindingMode: 5
-  m_FollowOffset: {x: 0, y: 0.2048251, z: -1.994167}
+  m_BindingMode: 4
+  m_FollowOffset: {x: 0, y: 0.4730409, z: -1.973613}
   m_XDamping: 1
   m_YDamping: 1
   m_ZDamping: 1
@@ -1355,7 +1353,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4044717213e31446939f7bd49c896ea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_TrackedObjectOffset: {x: 0, y: 0, z: 0}
+  m_TrackedObjectOffset: {x: 0, y: 1, z: 0}
   m_LookaheadTime: 0
   m_LookaheadSmoothing: 10
   m_LookaheadIgnoreY: 0
@@ -1452,8 +1450,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5902165421965975136}
-  m_LocalRotation: {x: 0.091128215, y: 0.0000000044877546, z: -4.1067083e-10, w: 0.9958392}
-  m_LocalPosition: {x: -0.15036106, y: 2.3478606, z: -3.4066088}
+  m_LocalRotation: {x: 0.036471076, y: 5.304291e-16, z: -1.9358195e-17, w: 0.99933475}
+  m_LocalPosition: {x: -0.80036104, y: 1.4864261, z: -1.2749698}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1379362891393605244}
@@ -1484,13 +1482,13 @@ Camera:
     height: 1
   near clip plane: 0.1
   far clip plane: 5000
-  field of view: 40
+  field of view: 60
   orthographic: 0
   orthographic size: 5
   m_Depth: 10
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 40759
+    m_Bits: 7991
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
@@ -1677,8 +1675,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9384ab8608cdc3d479fe89cd51eed48f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_BindingMode: 5
-  m_FollowOffset: {x: 0, y: 0.2048251, z: -1.994167}
+  m_BindingMode: 4
+  m_FollowOffset: {x: 0, y: 0.4730409, z: -1.973613}
   m_XDamping: 1
   m_YDamping: 1
   m_ZDamping: 1
@@ -1730,7 +1728,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4044717213e31446939f7bd49c896ea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_TrackedObjectOffset: {x: 0, y: 0, z: 0}
+  m_TrackedObjectOffset: {x: 0, y: 1, z: 0}
   m_LookaheadTime: 0
   m_LookaheadSmoothing: 10
   m_LookaheadIgnoreY: 0
@@ -1859,6 +1857,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cameraModeId: 0
+  fpsVirtualCam: {fileID: 3920995719202391552}
 --- !u!1 &7349231148375942488
 GameObject:
   m_ObjectHideFlags: 0
@@ -1919,7 +1918,7 @@ MonoBehaviour:
   m_LookAt: {fileID: 0}
   m_Follow: {fileID: 0}
   m_Lens:
-    FieldOfView: 40
+    FieldOfView: 60
     OrthographicSize: 10
     NearClipPlane: 0.1
     FarClipPlane: 5000
@@ -1986,10 +1985,7 @@ MonoBehaviour:
   cameraModes:
   - {fileID: 5141921647443392041}
   - {fileID: 8626957695305342742}
-  freeLookCamera: {fileID: 0}
   cameraChangeAction: {fileID: 11400000, guid: 6701d7e30ddf77c48accc629429f7e30, type: 2}
-  freeCameraModeAction: {fileID: 11400000, guid: 8ed9ec98a20364d4f96ec2f375b50e87,
-    type: 2}
   cursor: {fileID: 0}
 --- !u!114 &699965395904555009
 MonoBehaviour:
@@ -2065,8 +2061,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9384ab8608cdc3d479fe89cd51eed48f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_BindingMode: 5
-  m_FollowOffset: {x: 0, y: 0.2048251, z: -1.994167}
+  m_BindingMode: 4
+  m_FollowOffset: {x: 0, y: 0.4730409, z: -1.973613}
   m_XDamping: 1
   m_YDamping: 1
   m_ZDamping: 1
@@ -2118,7 +2114,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4044717213e31446939f7bd49c896ea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_TrackedObjectOffset: {x: 0, y: 0, z: 0}
+  m_TrackedObjectOffset: {x: 0, y: 1, z: 0}
   m_LookaheadTime: 0
   m_LookaheadSmoothing: 10
   m_LookaheadIgnoreY: 0

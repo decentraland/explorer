@@ -29,4 +29,9 @@ public class CameraStateBase : MonoBehaviour
     public virtual void OnUpdate()
     {
     }
+
+    public virtual void OnSetRotation(CameraController.SetRotationPayload payload)
+    {
+
+    }
 }

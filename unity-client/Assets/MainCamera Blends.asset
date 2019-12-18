@@ -17,7 +17,7 @@ MonoBehaviour:
     m_To: ThirdPerson_VC
     m_Blend:
       m_Style: 3
-      m_Time: 1
+      m_Time: 0.5
       m_CustomCurve:
         serializedVersion: 2
         m_Curve: []
@@ -28,7 +28,7 @@ MonoBehaviour:
     m_To: FirstPerson_VC
     m_Blend:
       m_Style: 3
-      m_Time: 2
+      m_Time: 0.5
       m_CustomCurve:
         serializedVersion: 2
         m_Curve: []

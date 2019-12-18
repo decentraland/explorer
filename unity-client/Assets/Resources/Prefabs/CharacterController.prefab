@@ -200,7 +200,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3711435650905816617}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -1.65, z: 0}
+  m_LocalPosition: {x: 0, y: -1.6, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 6922703132412175459}
@@ -439,16 +439,17 @@ MonoBehaviour:
   groundCheckExtraDistance: 0.25
   gravity: -55
   jumpForce: 12
-  movementSpeed: 8
-  runningSpeedMultiplier: 2
+  movementSpeed: 11
+  runningSpeedMultiplier: 0.36
   movingPlatformAllowedPosDelta: 1.1
   groundLayers:
     serializedVersion: 2
     m_Bits: 1025
   jumpAction: {fileID: 11400000, guid: 8eddef1fc072ec845aeb62f5e1041b52, type: 2}
   sprintAction: {fileID: 11400000, guid: 0cfb8d150b7d6934d856665cf924d01d, type: 2}
-  characterXAxis: {fileID: 11400000, guid: 44c3c5f07adca334696adae7b81c1869, type: 2}
+  moveVelocity: {x: 0, y: 0, z: 0}
   characterYAxis: {fileID: 11400000, guid: d1bc201cd2f5a1d4b8f721ccc29d2c0f, type: 2}
+  characterXAxis: {fileID: 11400000, guid: 44c3c5f07adca334696adae7b81c1869, type: 2}
 --- !u!143 &113901082
 CharacterController:
   m_ObjectHideFlags: 0
