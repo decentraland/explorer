@@ -50,12 +50,10 @@ namespace DCL.Components
 
             alreadyLoaded = false;
 
-            LoadGltf(targetUrl, OnSuccess, OnFail);
-
-            //if (useGltfFallback)
-            //    LoadAssetBundle(targetUrl, OnSuccess, (x) => LoadGltf(targetUrl, OnSuccess, OnFail));
-            //else
-            //    LoadAssetBundle(targetUrl, OnSuccess, OnFail);
+            if (useGltfFallback)
+                LoadAssetBundle(targetUrl, OnSuccess, (x) => LoadGltf(targetUrl, OnSuccess, OnFail));
+            else
+                LoadAssetBundle(targetUrl, OnSuccess, OnFail);
         }
 
         void LoadAssetBundle(string targetUrl, Action<LoadWrapper> OnSuccess, Action<LoadWrapper> OnFail)
