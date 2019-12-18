@@ -3,13 +3,12 @@ using UnityEngine;
 
 public class CameraStateTPS : CameraStateBase
 {
-    public CinemachineFreeLook tpsInteriors;
-    public CinemachineFreeLook tpsDefault;
+    public CinemachineFreeLook defaultVirtualCamera;
+
     public LayerMask roofMask;
 
     [SerializeField] private InputAction_Measurable characterYAxis;
     [SerializeField] private InputAction_Measurable characterXAxis;
-
 
     protected Vector3Variable characterPosition => CommonScriptableObjects.playerUnityPosition;
     protected Vector3NullableVariable characterForward => CommonScriptableObjects.characterForward;
@@ -22,15 +21,10 @@ public class CameraStateTPS : CameraStateBase
 
     public override void OnSelect()
     {
-        tpsInteriors.m_Transitions.m_InheritPosition = false;
-        tpsDefault.m_Transitions.m_InheritPosition = false;
-        tpsDefault.m_BindingMode = CinemachineTransposer.BindingMode.SimpleFollowWithWorldUp;
-
         if (characterForward.Get().HasValue)
         {
-            Vector3 v = characterPosition.Get() - (characterForward.Get().Value * 20);
-            tpsInteriors.transform.position = v;
-            tpsDefault.transform.position = v;
+            defaultVirtualCamera.m_XAxis.Value = Quaternion.LookRotation(characterForward.Get().Value, Vector3.up).eulerAngles.y;
+            defaultVirtualCamera.m_YAxis.Value = 0.5f;
         }
 
         base.OnSelect();
@@ -44,29 +38,10 @@ public class CameraStateTPS : CameraStateBase
 
     public override void OnUpdate()
     {
-        tpsDefault.m_BindingMode = CinemachineTransposer.BindingMode.WorldSpace;
+        defaultVirtualCamera.m_BindingMode = CinemachineTransposer.BindingMode.WorldSpace;
 
         var xzPlaneForward = Vector3.Scale(cameraTransform.forward, new Vector3(1, 0, 1));
         var xzPlaneRight = Vector3.Scale(cameraTransform.right, new Vector3(1, 0, 1));
-
-        if (Physics.SphereCast(characterPosition.Get(), 0.5f, Vector3.up * 5, out RaycastHit hitinfo, 5, roofMask) && hitinfo.normal.y < 0)
-        {
-            if (!tpsInteriors.gameObject.activeSelf)
-            {
-                tpsInteriors.m_Transitions.m_InheritPosition = true;
-                tpsInteriors.gameObject.SetActive(true);
-                tpsDefault.gameObject.SetActive(false);
-            }
-        }
-        else
-        {
-            if (!tpsDefault.gameObject.activeSelf)
-            {
-                tpsDefault.m_Transitions.m_InheritPosition = true;
-                tpsDefault.gameObject.SetActive(true);
-                tpsInteriors.gameObject.SetActive(false);
-            }
-        }
 
         if (characterYAxis.GetValue() != 0f || characterXAxis.GetValue() != 0f)
         {
@@ -86,15 +61,31 @@ public class CameraStateTPS : CameraStateBase
 
             forwardTarget.Normalize();
 
-            //if (!characterForward.HasValue())
-            //{
-            characterForward.Set(forwardTarget);
-            //}
-            //else
-            //{
-            //    var lerpedForward = Vector3.Slerp(characterForward.Get().Value, forwardTarget, rotationLerpSpeed * Time.deltaTime);
-            //    characterForward.Set(lerpedForward);
-            //}
+            if (!characterForward.HasValue())
+            {
+                characterForward.Set(forwardTarget);
+            }
+            else
+            {
+                var lerpedForward = Vector3.Slerp(characterForward.Get().Value, forwardTarget, rotationLerpSpeed * Time.deltaTime);
+                characterForward.Set(lerpedForward);
+            }
         }
+    }
+
+    public override void OnSetRotation(CameraController.SetRotationPayload payload)
+    {
+        var eulerDir = Vector3.zero;
+
+        if (payload.cameraTarget.HasValue)
+        {
+            var newPos = new Vector3(payload.x, payload.y, payload.z);
+            var cameraTarget = payload.cameraTarget.GetValueOrDefault();
+            var dirToLook = (cameraTarget - newPos);
+            eulerDir = Quaternion.LookRotation(dirToLook).eulerAngles;
+        }
+
+        defaultVirtualCamera.m_XAxis.Value = eulerDir.y;
+        defaultVirtualCamera.m_YAxis.Value = eulerDir.x;
     }
 }

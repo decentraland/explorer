@@ -35,25 +35,3 @@ MonoBehaviour:
         m_PreInfinity: 0
         m_PostInfinity: 0
         m_RotationOrder: 0
-  - m_From: ThirdPerson_Interiors_VC
-    m_To: ThirdPerson_VC
-    m_Blend:
-      m_Style: 6
-      m_Time: 1
-      m_CustomCurve:
-        serializedVersion: 2
-        m_Curve: []
-        m_PreInfinity: 0
-        m_PostInfinity: 0
-        m_RotationOrder: 0
-  - m_From: ThirdPerson_VC
-    m_To: ThirdPerson_Interiors_VC
-    m_Blend:
-      m_Style: 6
-      m_Time: 1
-      m_CustomCurve:
-        serializedVersion: 2
-        m_Curve: []
-        m_PreInfinity: 0
-        m_PostInfinity: 0
-        m_RotationOrder: 0

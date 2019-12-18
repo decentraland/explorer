@@ -47,7 +47,8 @@ public class DCLCharacterController : MonoBehaviour
     Vector2 aimingInput;
     bool isSprinting = false;
     bool isJumping = false;
-    bool isGrounded = false;
+    public bool isGrounded { get; private set; }
+
     bool supportsMovingPlatforms = true;
     Transform groundTransform;
     Vector3 lastPosition;
