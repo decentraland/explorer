@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
 using DCL.Interface;
 using TMPro;
 
@@ -9,11 +8,13 @@ public class InteractionHoverCanvasController : MonoBehaviour
     public Canvas canvas;
     public RectTransform backgroundTransform;
     public TextMeshProUGUI text;
-    public TextMeshProUGUI iconText;
-    public Image iconImage;
-    public Sprite pointerDownIconSprite;
 
     Camera mainCamera;
+    GameObject hoverIcon;
+
+    const string POINTER_ICON_PREFAB_PATH = "PointerButtonHoverIcon";
+    const string PRIMARY_ICON_PREFAB_PATH = "PrimaryButtonHoverIcon";
+    const string SECONDARY_ICON_PREFAB_PATH = "SecondaryButtonHoverIcon";
 
     void Awake()
     {
@@ -32,29 +33,25 @@ public class InteractionHoverCanvasController : MonoBehaviour
     void ConfigureIcon(WebInterface.ACTION_BUTTON button)
     {
         // When we allow for custom input key bindings this implementation will change
+
+        if (hoverIcon != null)
+            Destroy(hoverIcon);
+
+        string prefabPath;
         switch (button)
         {
-            case WebInterface.ACTION_BUTTON.POINTER:
-                iconText.text = "";
-                iconImage.sprite = pointerDownIconSprite;
-
-                iconImage.SetNativeSize();
-                iconImage.rectTransform.anchorMin = new Vector2(0, 0);
-                iconImage.rectTransform.anchorMax = new Vector2(1, 1);
-                iconImage.rectTransform.sizeDelta = Vector2.zero;
-                iconImage.rectTransform.pivot = new Vector2(0.5f, 0.5f);
-
-                iconImage.enabled = true;
-                break;
             case WebInterface.ACTION_BUTTON.PRIMARY:
-                iconText.text = "E";
-                iconImage.enabled = false;
+                prefabPath = PRIMARY_ICON_PREFAB_PATH;
                 break;
             case WebInterface.ACTION_BUTTON.SECONDARY:
-                iconText.text = "F";
-                iconImage.enabled = false;
+                prefabPath = SECONDARY_ICON_PREFAB_PATH;
+                break;
+            default: // WebInterface.ACTION_BUTTON.POINTER
+                prefabPath = POINTER_ICON_PREFAB_PATH;
                 break;
         }
+
+        hoverIcon = Object.Instantiate(Resources.Load(prefabPath), backgroundTransform) as GameObject;
     }
 
     public void Show()
