@@ -40,33 +40,36 @@ namespace DCL
 
             while (true)
             {
-                if (RenderingController.i.renderingEnabled)
+                if (!RenderingController.i.renderingEnabled)
                 {
-                    // We use Physics.Raycast() instead of our raycastHandler.Raycast() as that one is slower, sometimes 2x, because it fetches info we don't need here
-                    if (Physics.Raycast(GetRayFromCamera(), out hitInfo, Mathf.Infinity, Configuration.LayerMasks.physicsCastLayerMaskWithoutCharacter))
+                    yield return null;
+                    continue;
+                }
+
+                // We use Physics.Raycast() instead of our raycastHandler.Raycast() as that one is slower, sometimes 2x, because it fetches info we don't need here
+                if (Physics.Raycast(GetRayFromCamera(), out hitInfo, Mathf.Infinity, Configuration.LayerMasks.physicsCastLayerMaskWithoutCharacter))
+                {
+                    newHoveredObject = hitInfo.transform.GetComponentInParent<OnPointerEventComponent>();
+
+                    if (newHoveredObject != null && newHoveredObject.IsAtHoverDistance(hitInfo.distance))
                     {
-                        newHoveredObject = hitInfo.transform.GetComponentInParent<OnPointerEventComponent>();
-
-                        if (newHoveredObject != null && newHoveredObject.IsAtHoverDistance(hitInfo.distance))
-                        {
-                            if (newHoveredObject != lastHoveredObject)
-                            {
-                                UnhoverLastHoveredObject();
-
-                                newHoveredObject.SetHoverState(true);
-
-                                lastHoveredObject = newHoveredObject;
-                            }
-                        }
-                        else
+                        if (newHoveredObject != lastHoveredObject)
                         {
                             UnhoverLastHoveredObject();
+
+                            newHoveredObject.SetHoverState(true);
+
+                            lastHoveredObject = newHoveredObject;
                         }
                     }
                     else
                     {
                         UnhoverLastHoveredObject();
                     }
+                }
+                else
+                {
+                    UnhoverLastHoveredObject();
                 }
 
                 yield return null;
