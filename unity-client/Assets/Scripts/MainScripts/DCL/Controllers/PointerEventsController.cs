@@ -93,8 +93,7 @@ namespace DCL
         {
             if (lastHoveredObject == null) return;
 
-            if (newHoveredObject == null)
-                OnPointerHoverEnds?.Invoke();
+            OnPointerHoverEnds?.Invoke();
 
             lastHoveredObject.SetHoverState(false);
             lastHoveredObject = null;
