@@ -279,8 +279,11 @@ export const unityInterface = {
   SetSceneDebugPanel() {
     gameInstance.SendMessage('SceneController', 'SetSceneDebugPanel')
   },
-  SetFPSPanelVisible(visible: boolean) {
-    gameInstance.SendMessage('SceneController', 'SetFPSPanelVisible', visible ? 'true' : 'false')
+  ShowFPSPanel() {
+    gameInstance.SendMessage('SceneController', 'ShowFPSPanel')
+  },
+  HideFPSPanel() {
+    gameInstance.SendMessage('SceneController', 'HideFPSPanel')
   },
   SetEngineDebugPanel() {
     gameInstance.SendMessage('SceneController', 'SetEngineDebugPanel')
@@ -634,7 +637,7 @@ export async function initializeEngine(_gameInstance: GameInstance) {
   }
 
   if (SHOW_FPS_COUNTER) {
-    unityInterface.SetFPSPanelVisible(true)
+    unityInterface.ShowFPSPanel()
   }
 
   if (ENGINE_DEBUG_PANEL) {

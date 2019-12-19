@@ -194,7 +194,7 @@ export class ChatController extends ExposableAPI implements IChatController {
     this.addChatCommand('showfps', 'Show FPS counter', (message: any) => {
       fpsConfiguration.visible = !fpsConfiguration.visible
       const unityWindow: any = window
-      unityWindow.unityInterface.SetFPSPanelVisible(fpsConfiguration.visible)
+      fpsConfiguration.visible ? unityWindow.unityInterface.ShowFPSPanel() : unityWindow.unityInterface.HideFPSPanel()
       return {
         id: uuid(),
         isCommand: true,
