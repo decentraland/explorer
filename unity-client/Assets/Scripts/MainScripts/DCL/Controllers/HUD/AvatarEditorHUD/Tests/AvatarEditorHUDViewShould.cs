@@ -134,11 +134,11 @@ namespace AvatarEditorHUD_Tests
         }
 
         [Test]
-        [TestCase(WearableLiterals.NFTRarity.SWANKY)]
-        [TestCase(WearableLiterals.NFTRarity.EPIC)]
-        [TestCase(WearableLiterals.NFTRarity.LEGENDARY)]
-        [TestCase(WearableLiterals.NFTRarity.MYTHIC)]
-        [TestCase(WearableLiterals.NFTRarity.UNIQUE)]
+        [TestCase(WearableLiterals.ItemRarity.SWANKY)]
+        [TestCase(WearableLiterals.ItemRarity.EPIC)]
+        [TestCase(WearableLiterals.ItemRarity.LEGENDARY)]
+        [TestCase(WearableLiterals.ItemRarity.MYTHIC)]
+        [TestCase(WearableLiterals.ItemRarity.UNIQUE)]
         public void CreateNFTsButtonsByRarityCorrectly(string rarity)
         {
             WearableItem dummyItem = CreateDummyNFT(rarity);
@@ -154,7 +154,7 @@ namespace AvatarEditorHUD_Tests
         [Test]
         public void FillNFTInfoPanelCorrectly()
         {
-            WearableItem dummyItem = CreateDummyNFT(WearableLiterals.NFTRarity.EPIC);
+            WearableItem dummyItem = CreateDummyNFT(WearableLiterals.ItemRarity.EPIC);
 
             var itemToggle = controller.myView.selectorsByCategory[dummyItem.category].itemToggles[dummyItem.id];
             var nftInfo = (itemToggle as NFTItemToggle)?.nftItemInfo;
@@ -162,7 +162,7 @@ namespace AvatarEditorHUD_Tests
             Assert.NotNull(nftInfo);
             Assert.AreEqual(dummyItem.GetName(), nftInfo.name.text);
             Assert.AreEqual(dummyItem.description, nftInfo.description.text);
-            Assert.AreEqual($"{dummyItem.mintedAt} / {dummyItem.mintedTotal}", nftInfo.minted.text);
+            Assert.AreEqual($"{dummyItem.issuedId} / {dummyItem.GetIssuedCountFromRarity(dummyItem.rarity)}", nftInfo.minted.text);
         }
 
         private WearableItem CreateDummyNFT(string rarity)
@@ -173,8 +173,7 @@ namespace AvatarEditorHUD_Tests
                 rarity = rarity,
                 category = WearableLiterals.Categories.EYES,
                 description = "My Description",
-                mintedAt = 1,
-                mintedTotal = 2,
+                issuedId = 1,
                 representations = new[]
                 {
                     new WearableItem.Representation()

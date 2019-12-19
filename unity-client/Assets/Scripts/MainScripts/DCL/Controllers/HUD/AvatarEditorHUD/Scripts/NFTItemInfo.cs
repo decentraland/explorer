@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
@@ -20,8 +20,8 @@ public class NFTItemInfo : MonoBehaviour
         public string thumbnail;
         public List<string> iconIds;
         public string description;
-        public int mintedAt;
-        public int mintedTotal;
+        public int issuedId;
+        public int issuedTotal;
 
         public static Model FromWearableItem(WearableItem wearable)
         {
@@ -32,10 +32,10 @@ public class NFTItemInfo : MonoBehaviour
             {
                 name = wearable.GetName(),
                 thumbnail = wearable.baseUrl + wearable.thumbnail,
-                iconIds =  iconsIds,
+                iconIds = iconsIds,
                 description = wearable.description,
-                mintedAt = wearable.mintedAt,
-                mintedTotal = wearable.mintedTotal,
+                issuedId = wearable.issuedId,
+                issuedTotal = wearable.GetIssuedCountFromRarity(wearable.rarity)
             };
         }
     }
@@ -55,12 +55,14 @@ public class NFTItemInfo : MonoBehaviour
 
         name.text = currentModel.name;
         ThumbnailsManager.RequestThumbnail(currentModel.thumbnail, UpdateItemThumbnail);
+
         foreach (var icon in icons)
         {
             icon.gameObject.SetActive(currentModel.iconIds.Contains(icon.iconId));
         }
+
         description.text = currentModel.description;
-        minted.text = $"{currentModel.mintedAt} / {currentModel.mintedTotal}";
+        minted.text = $"{currentModel.issuedId} / {currentModel.issuedTotal}";
     }
 
     public void SetActive(bool active)

@@ -1,4 +1,4 @@
-﻿using DCL;
+using DCL;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,11 +28,11 @@ public class WearableItem : Item
     //This fields are temporary, once Kernel is finished we must move them to wherever they are placed
     public string rarity;
     public string description;
-    public int mintedAt;
-    public int mintedTotal;
+    public int issuedId;
+
 
     private readonly Dictionary<string, string> cachedI18n = new Dictionary<string, string>();
-    
+
 
     public Representation GetRepresentation(string bodyShapeType)
     {
@@ -108,7 +108,7 @@ public class WearableItem : Item
 
     public bool IsCollectible()
     {
-        return !tags.Contains(WearableLiterals.Tags.BASE_WEARABLE);
+        return !string.IsNullOrEmpty(rarity);
     }
 
     public string GetName(string langCode = "en")
@@ -119,6 +119,26 @@ public class WearableItem : Item
         }
         return cachedI18n[langCode];
     }
+
+    public int GetIssuedCountFromRarity(string rarity)
+    {
+        switch (rarity)
+        {
+            case WearableLiterals.ItemRarity.SWANKY:
+                return 5000;
+            case WearableLiterals.ItemRarity.EPIC:
+                return 500;
+            case WearableLiterals.ItemRarity.LEGENDARY:
+                return 100;
+            case WearableLiterals.ItemRarity.MYTHIC:
+                return 10;
+            case WearableLiterals.ItemRarity.UNIQUE:
+                return 1;
+        }
+
+        return int.MaxValue;
+    }
+
 }
 
 [System.Serializable]

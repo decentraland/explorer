@@ -33,7 +33,7 @@ public static class WearableLiterals
         public const string MALE = "dcl://base-avatars/BaseMale";
     }
 
-    public static class NFTRarity
+    public static class ItemRarity
     {
         public const string SWANKY = "swanky";
         public const string EPIC = "epic";
