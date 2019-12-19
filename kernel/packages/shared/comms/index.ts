@@ -248,8 +248,11 @@ export function processProfileMessage(
 
 function processNewLogin(identity: string, context: Context, fromAlias: string) {
   // TODO - turn into debug parameter - moliva - 19/12/2019
+  // @ts-ignore
   // if (identity === context.userInfo.userId && fromAlias !== getCurrentPeer()!.uuid) {
+  // @ts-ignore
   //   Session.current.then(s => s.disable()).catch(e => defaultLogger.error('error while signing out', e))
+  // @ts-ignore
   // }
 }
 
