@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 using System.Collections;
 using UnityEngine;
 
-public class OnPointerDownTestSceneController : MonoBehaviour
+public class InteractiveObjectsHoverTestSceneController : MonoBehaviour
 {
     ParcelScene scene;
 
@@ -34,7 +34,7 @@ public class OnPointerDownTestSceneController : MonoBehaviour
         var OnClickComponentModel = new OnClickComponent.Model()
         {
             type = OnClickComponent.NAME,
-            uuid = clickUuid
+            uuid = clickUuid,
         };
         TestHelpers.EntityComponentCreate<OnClickComponent, OnClickComponent.Model>(scene, entity, OnClickComponentModel, CLASS_ID_COMPONENT.UUID_CALLBACK);
 
