@@ -20,8 +20,8 @@ import {
 } from '../../packages/shared/comms/proto/broker'
 import { AuthData } from '../../packages/shared/comms/proto/comms'
 import { PositionData, ProfileData, ChatData, Category } from '../../packages/shared/comms/proto/comms'
-import { Position, CommunicationArea, Parcel, position2parcel } from 'shared/comms/utils'
-import { WorldInstanceConnection, positionHash } from 'shared/comms/worldInstanceConnection'
+import { Position, CommunicationArea, Parcel, position2parcel } from 'shared/comm-interface/utils'
+import { BrokerWorldInstanceConnection, positionHash } from 'shared/comms/worldInstanceConnection'
 import {
   Context,
   processChatMessage,
@@ -91,7 +91,7 @@ describe('Communications', function() {
     })
 
     let connection: BrokerConnection
-    let worldConn: WorldInstanceConnection
+    let worldConn: BrokerWorldInstanceConnection
     let mockWebRtc: any
     let auth: any = {
       getMessageCredentials: async (msg: string) => {
@@ -107,7 +107,7 @@ describe('Communications', function() {
     beforeEach(() => {
       webSocket = null as any
       connection = new BrokerConnection(auth, '')
-      worldConn = new WorldInstanceConnection(connection)
+      worldConn = new BrokerWorldInstanceConnection(connection)
 
       mockWebRtc = {
         addIceCandidate: sinon.stub(),
@@ -687,7 +687,7 @@ describe('Communications', function() {
       context.commRadius = 1
       context.currentPosition = [20, 20, 20, 20, 20, 20, 20] as Position
       const connection = new BrokerMock()
-      const worldConn = new WorldInstanceConnection(connection)
+      const worldConn = new BrokerWorldInstanceConnection(connection)
       worldConn.updateSubscriptions = sinon.stub()
       context.worldInstanceConnection = worldConn
 
@@ -708,7 +708,7 @@ describe('Communications', function() {
       context.commRadius = 1
       context.currentPosition = [20, 20, 20, 20, 20, 20, 20] as Position
       const connection = new BrokerMock()
-      const worldConn = new WorldInstanceConnection(connection)
+      const worldConn = new BrokerWorldInstanceConnection(connection)
       worldConn.updateSubscriptions = sinon.stub()
       context.worldInstanceConnection = worldConn
 
@@ -724,7 +724,7 @@ describe('Communications', function() {
       context.commRadius = 1
       context.currentPosition = [20, 20, 20, 20, 20, 20, 20] as Position
       const connection = new BrokerMock()
-      const worldConn = new WorldInstanceConnection(connection)
+      const worldConn = new BrokerWorldInstanceConnection(connection)
       worldConn.sendParcelUpdateMessage = sinon.stub()
       context.worldInstanceConnection = worldConn
 

@@ -27,8 +27,8 @@ import {
 } from './peers'
 import { ChatData, PositionData, ProfileData } from './proto/comms'
 import { Pose, UserInformation } from './types'
-import { CommunicationArea, Position, position2parcel, sameParcel, squareDistance } from './utils'
-import { WorldInstanceConnection } from './worldInstanceConnection'
+import { CommunicationArea, Position, position2parcel, sameParcel, squareDistance } from '../comm-interface/utils'
+import { BrokerWorldInstanceConnection } from './worldInstanceConnection'
 import { profileToRendererFormat } from 'shared/passports/transformations/profileToRendererFormat'
 import { ProfileForRenderer } from 'decentraland-ecs/src'
 import { Session } from '../session/index'
@@ -460,7 +460,7 @@ export async function connect(userId: string, network: ETHEREUM_NETWORK, auth: A
     commsBroker = new BrokerConnection(auth, url.toString())
   }
 
-  const connection = new WorldInstanceConnection(commsBroker)
+  const connection = new BrokerWorldInstanceConnection(commsBroker)
 
   await connection.connection.isConnected
 

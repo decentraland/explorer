@@ -1,9 +1,11 @@
-import { Position } from '../comms/utils'
+import { Position } from './utils'
 import { UserInformation } from '../comms/types'
 
 export interface IWorldInstanceConnection {
   // TODO - review interface for the following members - moliva - 19/12/2019
   readonly isAuthenticated: boolean
+
+  // TODO - review metrics API - moliva - 19/12/2019
   readonly ping: number
   printDebugInformation(): void
 

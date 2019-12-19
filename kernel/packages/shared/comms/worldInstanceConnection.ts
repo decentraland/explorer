@@ -13,7 +13,7 @@ import {
   TopicIdentityMessage,
   TopicIdentityFWMessage
 } from './proto/broker'
-import { Position, position2parcel } from './utils'
+import { Position, position2parcel } from '../comm-interface/utils'
 import { UserInformation } from './types'
 import { parcelLimits } from 'config'
 import { IBrokerConnection, BrokerMessage } from './IBrokerConnection'
@@ -34,7 +34,7 @@ export function positionHash(p: Position) {
   return `${x}:${z}`
 }
 
-export class WorldInstanceConnection implements IWorldInstanceConnection {
+export class BrokerWorldInstanceConnection implements IWorldInstanceConnection {
   public aliases: Record<number, string> = {}
   public positionHandler: ((fromAlias: string, positionData: PositionData) => void) | null = null
   public profileHandler: ((fromAlias: string, identity: string, profileData: ProfileData) => void) | null = null
