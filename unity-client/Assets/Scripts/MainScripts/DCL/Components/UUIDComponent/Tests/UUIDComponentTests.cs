@@ -1,4 +1,4 @@
-using DCL;
+using Cinemachine;
 using DCL.Components;
 using DCL.Helpers;
 using DCL.Interface;
@@ -8,12 +8,19 @@ using NUnit.Framework;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.TestTools;
-using Cinemachine;
 
 namespace Tests
 {
     public class UUIDComponentTests : TestsBase
     {
+        [UnitySetUp]
+        public IEnumerator SetUp()
+        {
+            yield return SetUp_SceneController(true);
+            yield return SetUp_CharacterController();
+            scene.useBoundariesChecker = false;
+        }
+
         void InstantiateEntityWithShape(out DecentralandEntity entity, out BoxShape shape)
         {
             shape = TestHelpers.InstantiateEntityWithShape<BoxShape, BoxShape.Model>(
@@ -27,8 +34,6 @@ namespace Tests
         [UnityTest]
         public IEnumerator OnClickComponentInitializesWithBasicShape()
         {
-            yield return InitScene();
-
             DecentralandEntity entity;
             BoxShape shape;
             InstantiateEntityWithShape(out entity, out shape);
@@ -59,8 +64,6 @@ namespace Tests
         [UnityTest]
         public IEnumerator OnPointerDownComponentInitializesWithBasicShape()
         {
-            yield return InitScene();
-
             DecentralandEntity entity;
             BoxShape shape;
             InstantiateEntityWithShape(out entity, out shape);
@@ -91,8 +94,6 @@ namespace Tests
         [UnityTest]
         public IEnumerator OnPointerUpComponentInitializesWithBasicShape()
         {
-            yield return InitScene();
-
             DecentralandEntity entity;
             BoxShape shape;
             InstantiateEntityWithShape(out entity, out shape);
@@ -123,8 +124,6 @@ namespace Tests
         [UnityTest]
         public IEnumerator OnClickComponentInitializesWithGLTFShape()
         {
-            yield return InitScene();
-
             string entityId = "1";
 
             TestHelpers.CreateSceneEntity(scene, entityId);
@@ -152,6 +151,7 @@ namespace Tests
                 type = OnClickComponent.NAME,
                 uuid = clickUuid
             };
+
             TestHelpers.EntityComponentCreate<OnClickComponent, OnClickComponent.Model>(scene, scene.entities[entityId],
                 OnClickComponentModel, CLASS_ID_COMPONENT.UUID_CALLBACK);
 
@@ -160,6 +160,7 @@ namespace Tests
 
             foreach (var meshFilter in scene.entities[entityId].gameObject.GetComponentsInChildren<MeshFilter>())
             {
+                Debug.Log("filter = " + meshFilter.gameObject.name);
                 var onPointerEventCollider = meshFilter.transform.Find(OnPointerEventColliders.COLLIDER_NAME);
 
                 Assert.IsTrue(onPointerEventCollider != null, "OnPointerEventCollider should exist under any rendeder");
@@ -172,8 +173,6 @@ namespace Tests
         [UnityTest]
         public IEnumerator OnPointerDownComponentInitializesWithGLTFShape()
         {
-            yield return InitScene();
-
             string entityId = "1";
 
             TestHelpers.CreateSceneEntity(scene, entityId);
@@ -221,8 +220,6 @@ namespace Tests
         [UnityTest]
         public IEnumerator OnPointerUpComponentInitializesWithGLTFShape()
         {
-            yield return InitScene();
-
             string entityId = "1";
 
             TestHelpers.CreateSceneEntity(scene, entityId);
@@ -270,8 +267,6 @@ namespace Tests
         [UnityTest]
         public IEnumerator OnClickComponentInitializesWithGLTFShapeAsynchronously()
         {
-            yield return InitScene(reloadUnityScene: false);
-
             string entityId = "1";
             TestHelpers.CreateSceneEntity(scene, entityId);
 
@@ -318,8 +313,6 @@ namespace Tests
         [UnityTest]
         public IEnumerator OnPointerDownComponentInitializesWithGLTFShapeAsynchronously()
         {
-            yield return InitScene();
-
             string entityId = "1";
             TestHelpers.CreateSceneEntity(scene, entityId);
 
@@ -366,8 +359,6 @@ namespace Tests
         [UnityTest]
         public IEnumerator OnPointerUpComponentInitializesWithGLTFShapeAsynchronously()
         {
-            yield return InitScene();
-
             string entityId = "1";
             TestHelpers.CreateSceneEntity(scene, entityId);
 
@@ -414,8 +405,6 @@ namespace Tests
         [UnityTest]
         public IEnumerator OnClickComponentInitializesAfterBasicShapeIsAdded()
         {
-            yield return InitScene();
-
             string entityId = "1";
             TestHelpers.CreateSceneEntity(scene, entityId);
 
@@ -458,8 +447,6 @@ namespace Tests
         [UnityTest]
         public IEnumerator OnPointerDownComponentInitializesAfterBasicShapeIsAdded()
         {
-            yield return InitScene();
-
             string entityId = "1";
             TestHelpers.CreateSceneEntity(scene, entityId);
 
@@ -493,13 +480,13 @@ namespace Tests
 
             Assert.AreSame(meshFilter.sharedMesh, onPointerEventCollider.GetComponent<MeshCollider>().sharedMesh,
                 "OnPointerEventCollider should have the same mesh info as the mesh renderer");
+
+            yield break;
         }
 
         [UnityTest]
         public IEnumerator OnPointerUpComponentInitializesAfterBasicShapeIsAdded()
         {
-            yield return InitScene();
-
             string entityId = "1";
             TestHelpers.CreateSceneEntity(scene, entityId);
 
@@ -533,14 +520,14 @@ namespace Tests
 
             Assert.AreSame(meshFilter.sharedMesh, onPointerEventCollider.GetComponent<MeshCollider>().sharedMesh,
                 "OnPointerEventCollider should have the same mesh info as the mesh renderer");
+
+            yield break;
         }
 
         [UnityTest]
         [Explicit("This test is failing because retrieveCamera is failing in PointerEventsController. It may be related with the new camera setup. Please check MainTest scene setup.")]
         public IEnumerator OnClickEventIsTriggered()
         {
-            yield return InitScene();
-
             DecentralandEntity entity;
             BoxShape shape;
             InstantiateEntityWithShape(out entity, out shape);
@@ -597,8 +584,6 @@ namespace Tests
         [Explicit("This test is failing because retrieveCamera is failing in PointerEventsController. It may be related with the new camera setup. Please check MainTest scene setup.")]
         public IEnumerator OnPointerDownEventIsTriggered()
         {
-            yield return InitScene();
-
             DecentralandEntity entity;
             BoxShape shape;
             InstantiateEntityWithShape(out entity, out shape);
@@ -658,8 +643,6 @@ namespace Tests
         [Explicit("This test is failing because retrieveCamera is failing in PointerEventsController. It may be related with the new camera setup. Please check MainTest scene setup.")]
         public IEnumerator OnPointerUpEventIsTriggered()
         {
-            yield return InitScene();
-
             DecentralandEntity entity;
             BoxShape shape;
             InstantiateEntityWithShape(out entity, out shape);
@@ -721,7 +704,6 @@ namespace Tests
         public IEnumerator OnPointerDownEventWhenEntityIsBehindOther()
         {
             yield return InitScene();
-
             CameraController cameraController = GameObject.FindObjectOfType<CameraController>();
 
             // Create blocking entity
@@ -753,7 +735,9 @@ namespace Tests
 
             var cameraRotationPayload = new CameraController.SetRotationPayload()
             {
-                x = 0, y = 0, z = 0,
+                x = 0,
+                y = 0,
+                z = 0,
                 cameraTarget = new Vector3(0, 0, 1)
             };
             cameraController.SetRotation(JsonConvert.SerializeObject(cameraRotationPayload, Formatting.None, new JsonSerializerSettings()

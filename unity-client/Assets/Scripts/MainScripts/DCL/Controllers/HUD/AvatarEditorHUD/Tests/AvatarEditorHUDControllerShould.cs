@@ -1,9 +1,8 @@
+using AvatarShape_Tests;
+using NUnit.Framework;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using AvatarShape_Tests;
-using DCL.Helpers;
-using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 
@@ -24,33 +23,53 @@ namespace AvatarEditorHUD_Tests
         [UnitySetUp]
         private IEnumerator SetUp()
         {
-            skinColorList = Resources.Load<ColorList>("SkinTone");
-            hairColorList = Resources.Load<ColorList>("HairColor");
-            eyeColorList = Resources.Load<ColorList>("EyeColor");
-            yield return InitScene(false, false, false, false, false);
-
-            userProfile = ScriptableObject.CreateInstance<UserProfile>();
-            userProfile.UpdateData(new UserProfileModel()
+            if (controller == null)
             {
-                name = "name",
-                email = "mail",
-                avatar = new AvatarModel()
+                skinColorList = Resources.Load<ColorList>("SkinTone");
+                hairColorList = Resources.Load<ColorList>("HairColor");
+                eyeColorList = Resources.Load<ColorList>("EyeColor");
+                //yield return InitScene(false, false, false, false, false);
+
+                userProfile = ScriptableObject.CreateInstance<UserProfile>();
+                userProfile.UpdateData(new UserProfileModel()
                 {
-                    bodyShape = WearableLiterals.BodyShapes.FEMALE,
-                    wearables = new List<string>() { },
-                }
+                    name = "name",
+                    email = "mail",
+                    avatar = new AvatarModel()
+                    {
+                        bodyShape = WearableLiterals.BodyShapes.FEMALE,
+                        wearables = new List<string>() { },
+                    }
 
-            });
+                }, false);
 
-            catalog = AvatarTestHelpers.CreateTestCatalogLocal();
-            controller = new AvatarEditorHUDController_Mock(userProfile, catalog);
+                catalog = AvatarTestHelpers.CreateTestCatalogLocal();
+                controller = new AvatarEditorHUDController_Mock(userProfile, catalog);
+            }
+            else
+            {
+                userProfile.UpdateData(new UserProfileModel()
+                {
+                    name = "name",
+                    email = "mail",
+                    avatar = new AvatarModel()
+                    {
+                        bodyShape = WearableLiterals.BodyShapes.FEMALE,
+                        wearables = new List<string>() { },
+                    }
+
+                }, false);
+
+                controller.LoadUserProfile(userProfile);
+            }
+
+            yield break;
         }
 
         [UnityTearDown]
         public override IEnumerator TearDown()
         {
-            controller.CleanUp();
-            
+            controller.UnequipAllWearables();
             return base.TearDown();
         }
 
@@ -67,7 +86,7 @@ namespace AvatarEditorHUD_Tests
                     wearables = new List<string>() { },
                 }
 
-            });
+            }, false);
 
             var categoriesEquiped = controller.myModel.wearables.Select(x => x.category).ToArray();
             foreach (string category in controller.myCategoriesThatMustHaveSelection)
@@ -95,7 +114,7 @@ namespace AvatarEditorHUD_Tests
                     },
                 }
 
-            });
+            }, false);
 
             controller.WearableClicked(WearableLiterals.BodyShapes.MALE);
 
@@ -126,7 +145,7 @@ namespace AvatarEditorHUD_Tests
                     hairColor = hairColorList.colors[0],
                     eyeColor = eyeColorList.colors[0],
                 }
-            });
+            }, false);
 
             controller = new AvatarEditorHUDController_Mock(userProfile, catalog);
 
@@ -157,7 +176,7 @@ namespace AvatarEditorHUD_Tests
                     hairColor = hairColorList.colors[0],
                     eyeColor = eyeColorList.colors[0],
                 }
-            });
+            }, false);
 
             AssertAvatarModelAgainstAvatarEditorHUDModel(userProfile.avatar, controller.myModel);
         }
@@ -266,7 +285,7 @@ namespace AvatarEditorHUD_Tests
                     hairColor = hairColorList.colors[0],
                     eyeColor = eyeColorList.colors[0],
                 }
-            });
+            }, false);
 
             controller.WearableClicked(WearableLiterals.BodyShapes.MALE);
             controller.WearableClicked("dcl://base-avatars/eyebrows_01");

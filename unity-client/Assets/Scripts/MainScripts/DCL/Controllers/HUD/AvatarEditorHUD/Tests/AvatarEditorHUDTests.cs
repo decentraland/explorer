@@ -1,8 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
 using AvatarShape_Tests;
-using DCL.Helpers;
 using NUnit.Framework;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.TestTools;
 
@@ -10,24 +9,14 @@ namespace AvatarEditorHUD_Tests
 {
     public class AvatarEditorHUDController_Mock : AvatarEditorHUDController
     {
-        public bool bypassUpdateAvatarPreview;
-
-        public AvatarEditorHUDController_Mock(UserProfile userProfile, WearableDictionary catalog, bool bypassUpdateAvatarPreview = true) : base(userProfile, catalog)
+        public AvatarEditorHUDController_Mock(UserProfile userProfile, WearableDictionary catalog, bool bypassUpdateAvatarPreview = true) : base(userProfile, catalog, bypassUpdateAvatarPreview)
         {
-            this.bypassUpdateAvatarPreview = bypassUpdateAvatarPreview;
         }
 
         public AvatarEditorHUDModel myModel => model;
         public AvatarEditorHUDView myView => view;
         public string[] myCategoriesThatMustHaveSelection => categoriesThatMustHaveSelection;
         public string[] myCategoriesToRandomize => categoriesToRandomize;
-
-        protected override void UpdateAvatarPreview()
-        {
-            if (bypassUpdateAvatarPreview) return;
-
-            base.UpdateAvatarPreview();
-        }
     }
 
     public class WearableItemsShould : TestsBase
@@ -39,7 +28,7 @@ namespace AvatarEditorHUD_Tests
         [UnitySetUp]
         public IEnumerator SetUp()
         {
-            yield return InitScene();
+            // yield return InitScene();
 
             userProfile = ScriptableObject.CreateInstance<UserProfile>();
             userProfile.UpdateData(new UserProfileModel()
@@ -50,17 +39,19 @@ namespace AvatarEditorHUD_Tests
                 {
                     bodyShape = WearableLiterals.BodyShapes.FEMALE,
                     wearables = new List<string>()
-                        { }
+                    { }
                 }
-            });
+            }, false);
 
             catalog = AvatarTestHelpers.CreateTestCatalogLocal();
             controller = new AvatarEditorHUDController_Mock(userProfile, catalog);
+            yield break;
         }
 
-        [TearDown]
-        public void TearDown()
+        [UnityTearDown]
+        public override IEnumerator TearDown()
         {
+            yield return base.TearDown();
             controller.CleanUp();
         }
 
@@ -82,7 +73,7 @@ namespace AvatarEditorHUD_Tests
             var bandanaId = "dcl://base-avatars/blue_bandana";
             var bandana = catalog.Get(bandanaId);
 
-            bandana.replaces = new [] { sunglasses.category };
+            bandana.replaces = new[] { sunglasses.category };
             controller.WearableClicked(sunglassesId);
             controller.WearableClicked(bandanaId);
 
@@ -98,7 +89,7 @@ namespace AvatarEditorHUD_Tests
             var bandanaId = "dcl://base-avatars/blue_bandana";
             var bandana = catalog.Get(bandanaId);
 
-            bandana.replaces = new [] { "NonExistentCategory" };
+            bandana.replaces = new[] { "NonExistentCategory" };
             controller.WearableClicked(sunglassesId);
             controller.WearableClicked(bandanaId);
 
@@ -114,7 +105,7 @@ namespace AvatarEditorHUD_Tests
             var bandanaId = "dcl://base-avatars/blue_bandana";
             var bandana = catalog.Get(bandanaId);
 
-            bandana.GetRepresentation(userProfile.avatar.bodyShape).overrideReplaces = new [] { sunglasses.category };
+            bandana.GetRepresentation(userProfile.avatar.bodyShape).overrideReplaces = new[] { sunglasses.category };
             controller.WearableClicked(sunglassesId);
             controller.WearableClicked(bandanaId);
 
@@ -130,7 +121,7 @@ namespace AvatarEditorHUD_Tests
             var bandanaId = "dcl://base-avatars/blue_bandana";
             var bandana = catalog.Get(bandanaId);
 
-            bandana.GetRepresentation(WearableLiterals.BodyShapes.MALE).overrideReplaces = new [] { sunglasses.category };
+            bandana.GetRepresentation(WearableLiterals.BodyShapes.MALE).overrideReplaces = new[] { sunglasses.category };
             controller.WearableClicked(sunglassesId);
             controller.WearableClicked(bandanaId);
 

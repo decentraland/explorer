@@ -128,6 +128,18 @@ namespace DCL
                 StartCoroutine(DeferredDecoding());
         }
 
+        public void Restart()
+        {
+            MessagingControllersManager.i.Cleanup();
+            MemoryManager.i.CleanupPoolsIfNeeded(true);
+            PointerEventsController.i.Cleanup();
+
+            MessagingControllersManager.i.Initialize(this);
+            MemoryManager.i.Initialize();
+            PointerEventsController.i.Initialize();
+            ParcelScene.parcelScenesCleaner.ForceCleanup();
+        }
+
         void OnDestroy()
         {
             ParcelScene.parcelScenesCleaner.Stop();
@@ -715,26 +727,28 @@ namespace DCL
                 data.id = $"(test):{data.basePosition.x},{data.basePosition.y}";
             }
 
+            if (loadedScenes.ContainsKey(data.id))
+            {
+                Debug.LogWarning($"Scene {data.id} is already loaded.");
+                return loadedScenes[data.id];
+            }
+
             var go = new GameObject();
             var newScene = go.AddComponent<ParcelScene>();
-            newScene.SetData(data);
-            newScene.InitializeDebugPlane();
             newScene.ownerController = this;
             newScene.isTestScene = true;
+            newScene.useBlockers = false;
+            newScene.SetData(data);
+
+            if (DCLCharacterController.i != null)
+                newScene.InitializeDebugPlane();
 
             scenesSortedByDistance.Add(newScene);
 
             if (!MessagingControllersManager.i.ContainsController(data.id))
                 MessagingControllersManager.i.AddController(this, data.id);
 
-            if (!loadedScenes.ContainsKey(data.id))
-            {
-                loadedScenes.Add(data.id, newScene);
-            }
-            else
-            {
-                Debug.LogWarning($"Scene {data.id} is already loaded.");
-            }
+            loadedScenes.Add(data.id, newScene);
 
             return newScene;
         }

@@ -28,7 +28,7 @@ public class TestsBase
         MemoryManager.i?.CleanupPoolsIfNeeded(true);
         PoolManager.i?.Cleanup();
         PointerEventsController.i?.Cleanup();
-        MessagingControllersManager.i?.Stop();
+        MessagingControllersManager.i?.Cleanup();
 
         Caching.ClearCache();
         Resources.UnloadUnusedAssets();
@@ -57,33 +57,61 @@ public class TestsBase
         }
     }
 
-    protected virtual IEnumerator InitScene(bool usesWebServer = false, bool spawnCharController = true, bool spawnTestScene = true, bool spawnUIScene = true, bool debugMode = false, bool reloadUnityScene = true)
+    public void SetUp_TestScene()
     {
-        yield return InitUnityScene("MainTest");
+        scene = sceneController.CreateTestScene();
+    }
+
+    public virtual IEnumerator SetUp_CharacterController()
+    {
+        if (DCLCharacterController.i == null)
+        {
+            GameObject.Instantiate(Resources.Load("Prefabs/CharacterController"));
+        }
+
+        yield return null;
+        Assert.IsTrue(DCLCharacterController.i != null);
+    }
+
+    public virtual IEnumerator SetUp_SceneController(bool debugMode = false, bool usesWebServer = false, bool spawnTestScene = true)
+    {
+        PoolManager.enablePrewarm = false;
+        sceneController = TestHelpers.InitializeSceneController(usesWebServer);
+        sceneController.deferredMessagesDecoding = false;
 
         if (debugMode)
-            SceneController.i.SetDebug();
-
-        sceneController = TestHelpers.InitializeSceneController(usesWebServer);
+            sceneController.SetDebug();
 
         yield return new WaitForSeconds(0.01f);
 
         if (spawnTestScene)
-        {
-            scene = sceneController.CreateTestScene();
+            SetUp_TestScene();
+    }
 
-            yield return null;
-        }
+    private void SetUp_UIScene()
+    {
+        string globalSceneId = "global-scene";
+
+        sceneController.CreateUIScene(
+            JsonConvert.SerializeObject(
+                new CreateUISceneMessage
+                {
+                    id = globalSceneId,
+                    baseUrl = "",
+                })
+        );
+    }
+
+
+    protected virtual IEnumerator InitScene(bool usesWebServer = false, bool spawnCharController = true, bool spawnTestScene = true, bool spawnUIScene = true, bool debugMode = false, bool reloadUnityScene = true)
+    {
+        yield return InitUnityScene("MainTest");
+
+        yield return SetUp_SceneController(debugMode, usesWebServer, spawnTestScene);
 
         if (spawnCharController)
         {
-            if (DCLCharacterController.i == null)
-            {
-                GameObject.Instantiate(Resources.Load("Prefabs/CharacterController"));
-            }
-
-            yield return null;
-            Assert.IsTrue(DCLCharacterController.i != null);
+            yield return SetUp_CharacterController();
         }
 
         var newPos = new Vector3(10, 0, 10);
@@ -92,22 +120,13 @@ public class TestsBase
 
         if (spawnUIScene)
         {
-            string globalSceneId = "global-scene";
-
-            sceneController.CreateUIScene(
-                JsonConvert.SerializeObject(
-                    new CreateUISceneMessage
-                    {
-                        id = globalSceneId,
-                        baseUrl = "",
-                    })
-            );
+            SetUp_UIScene();
         }
 
-        DCL.PointerEventsController.i.Initialize(isTesting: true);
-
-        yield return new WaitForAllMessagesProcessed();
+        PointerEventsController.i.Initialize(isTesting: true);
+        MessagingControllersManager.i.Cleanup();
     }
+
 
     protected IEnumerator WaitForUICanvasUpdate()
     {

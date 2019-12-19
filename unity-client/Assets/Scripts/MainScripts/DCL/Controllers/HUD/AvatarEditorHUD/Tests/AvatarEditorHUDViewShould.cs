@@ -1,8 +1,7 @@
+using AvatarShape_Tests;
+using NUnit.Framework;
 using System.Collections;
 using System.Collections.Generic;
-using AvatarShape_Tests;
-using DCL.Helpers;
-using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 
@@ -17,23 +16,26 @@ namespace AvatarEditorHUD_Tests
         [UnitySetUp]
         private IEnumerator SetUp()
         {
-            yield return InitScene(false, false, false, false, false);
-
-            userProfile = ScriptableObject.CreateInstance<UserProfile>();
-            userProfile.UpdateData(new UserProfileModel()
+            if (controller == null)
             {
-                name = "name",
-                email = "mail",
-                avatar = new AvatarModel()
+                userProfile = ScriptableObject.CreateInstance<UserProfile>();
+                userProfile.UpdateData(new UserProfileModel()
                 {
-                    bodyShape = WearableLiterals.BodyShapes.FEMALE,
-                    wearables = new List<string>() { },
-                }
+                    name = "name",
+                    email = "mail",
+                    avatar = new AvatarModel()
+                    {
+                        bodyShape = WearableLiterals.BodyShapes.FEMALE,
+                        wearables = new List<string>() { },
+                    }
 
-            });
+                }, false);
 
-            catalog = AvatarTestHelpers.CreateTestCatalogLocal();
-            controller = new AvatarEditorHUDController_Mock(userProfile, catalog);
+                catalog = AvatarTestHelpers.CreateTestCatalogLocal();
+                controller = new AvatarEditorHUDController_Mock(userProfile, catalog);
+            }
+
+            yield break;
         }
 
 
@@ -56,7 +58,7 @@ namespace AvatarEditorHUD_Tests
                     wearables = new List<string>() { },
                 }
 
-            });
+            }, false);
             var category = catalog.Get(wearableId).category;
 
             Assert.IsTrue(controller.myView.selectorsByCategory.ContainsKey(category));
@@ -89,7 +91,7 @@ namespace AvatarEditorHUD_Tests
                     wearables = new List<string>() { },
                 }
 
-            });
+            }, false);
             var category = catalog.Get(wearableId).category;
 
             Assert.IsTrue(controller.myView.selectorsByCategory.ContainsKey(category));
@@ -128,8 +130,8 @@ namespace AvatarEditorHUD_Tests
                     bodyShape = WearableLiterals.BodyShapes.FEMALE,
                     wearables = new List<string>() { },
                 },
-                inventory = new []{ wearableId}
-            });
+                inventory = new[] { wearableId }
+            }, false);
 
             Assert.IsTrue(controller.myView.collectiblesItemSelector.itemToggles.ContainsKey(wearableId));
         }
@@ -147,7 +149,7 @@ namespace AvatarEditorHUD_Tests
                     bodyShape = WearableLiterals.BodyShapes.MALE,
                     wearables = new List<string>() { },
                 }
-            });
+            }, false);
 
             yield return new WaitUntil(() => !controller.myView.characterPreviewController.avatarRenderer.isLoading);
             Assert.AreEqual(WearableLiterals.BodyShapes.MALE, controller.myView.characterPreviewController.avatarRenderer.bodyShapeController.wearable.id);

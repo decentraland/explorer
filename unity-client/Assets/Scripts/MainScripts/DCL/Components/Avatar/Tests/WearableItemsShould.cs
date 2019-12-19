@@ -1,9 +1,7 @@
+using DCL;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using DCL;
-using DCL.Helpers;
-using Tests;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.TestTools;
@@ -22,23 +20,27 @@ namespace AvatarShape_Tests
         [UnitySetUp]
         private IEnumerator SetUp()
         {
-            yield return InitScene(false, false, spawnTestScene: true, false, false);
+            yield return SetUp_SceneController();
+            yield return SetUp_CharacterController();
 
-            avatarModel = new AvatarModel()
+            if (avatarShape == null)
             {
-                name = " test",
-                hairColor = Color.white,
-                eyeColor = Color.white,
-                skinColor = Color.white,
-                bodyShape = WearableLiterals.BodyShapes.FEMALE,
-                wearables = new List<string>()
+                avatarModel = new AvatarModel()
                 {
-                }
-            };
-            catalog = AvatarTestHelpers.CreateTestCatalog();
-            avatarShape = AvatarTestHelpers.CreateAvatarShape(scene, avatarModel);
+                    name = " test",
+                    hairColor = Color.white,
+                    eyeColor = Color.white,
+                    skinColor = Color.white,
+                    bodyShape = WearableLiterals.BodyShapes.FEMALE,
+                    wearables = new List<string>()
+                    {
+                    }
+                };
+                catalog = AvatarTestHelpers.CreateTestCatalog();
+                avatarShape = AvatarTestHelpers.CreateAvatarShape(scene, avatarModel);
 
-            yield return new DCL.WaitUntil(() => avatarShape.everythingIsLoaded, 20);
+                yield return new DCL.WaitUntil(() => avatarShape.everythingIsLoaded, 20);
+            }
         }
 
         [UnityTest]
@@ -58,7 +60,7 @@ namespace AvatarShape_Tests
             var sunglasses = catalog.Get(SUNGLASSES_ID);
             var bandana = catalog.Get(BLUE_BANDANA_ID);
 
-            bandana.hides = new [] { sunglasses.category };
+            bandana.hides = new[] { sunglasses.category };
             avatarModel.wearables = new List<string>() { SUNGLASSES_ID, BLUE_BANDANA_ID };
             yield return avatarShape.ApplyChanges(JsonUtility.ToJson(avatarModel));
 
@@ -73,7 +75,7 @@ namespace AvatarShape_Tests
         {
             var bandana = catalog.Get(BLUE_BANDANA_ID);
 
-            bandana.hides = new [] { "NonExistentCategory" };
+            bandana.hides = new[] { "NonExistentCategory" };
             avatarModel.wearables = new List<string>() { SUNGLASSES_ID, BLUE_BANDANA_ID };
             yield return avatarShape.ApplyChanges(JsonUtility.ToJson(avatarModel));
 
@@ -89,7 +91,7 @@ namespace AvatarShape_Tests
             var sunglasses = catalog.Get(SUNGLASSES_ID);
             var bandana = catalog.Get(BLUE_BANDANA_ID);
 
-            bandana.GetRepresentation(avatarModel.bodyShape).overrideHides = new [] { sunglasses.category };
+            bandana.GetRepresentation(avatarModel.bodyShape).overrideHides = new[] { sunglasses.category };
             avatarModel.wearables = new List<string>() { SUNGLASSES_ID, BLUE_BANDANA_ID };
             yield return avatarShape.ApplyChanges(JsonUtility.ToJson(avatarModel));
 
@@ -105,7 +107,7 @@ namespace AvatarShape_Tests
             var sunglasses = catalog.Get(SUNGLASSES_ID);
             var bandana = catalog.Get(BLUE_BANDANA_ID);
 
-            bandana.GetRepresentation(WearableLiterals.BodyShapes.MALE).overrideHides = new [] { sunglasses.category };
+            bandana.GetRepresentation(WearableLiterals.BodyShapes.MALE).overrideHides = new[] { sunglasses.category };
             avatarModel.wearables = new List<string>() { SUNGLASSES_ID, BLUE_BANDANA_ID };
             yield return avatarShape.ApplyChanges(JsonUtility.ToJson(avatarModel));
 
@@ -207,7 +209,7 @@ namespace AvatarShape_Tests
         [UnityTest]
         public IEnumerator HideBodyShapeProperly()
         {
-            catalog.Get(SUNGLASSES_ID).hides = new [] { WearableLiterals.Misc.HEAD };
+            catalog.Get(SUNGLASSES_ID).hides = new[] { WearableLiterals.Misc.HEAD };
             avatarModel.wearables = new List<string>() { SUNGLASSES_ID, BLUE_BANDANA_ID };
             yield return avatarShape.ApplyChanges(JsonUtility.ToJson(avatarModel));
 
@@ -230,7 +232,7 @@ namespace AvatarShape_Tests
             wearableController.myPromise.OnSuccessEvent += gltf => wearableReady = true;
             yield return new DCL.WaitUntil(() => wearableReady);
 
-            var renderers = wearableController.myPromise.asset.container.GetComponentsInChildren<Renderer>(); 
+            var renderers = wearableController.myPromise.asset.container.GetComponentsInChildren<Renderer>();
             Assert.IsTrue(renderers.All(x => x.enabled == false));
         }
     }

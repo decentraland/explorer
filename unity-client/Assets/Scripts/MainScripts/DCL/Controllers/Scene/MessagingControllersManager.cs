@@ -1,4 +1,4 @@
-﻿using DCL.Controllers;
+using DCL.Controllers;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -42,15 +42,15 @@ namespace DCL
 
             if (mainCoroutine == null)
             {
-                mainCoroutine = SceneController.i.StartCoroutine(ProcessMessages());
+                mainCoroutine = CoroutineStarter.Start(ProcessMessages());
             }
         }
 
-        public void Stop()
+        public void Cleanup()
         {
             if (mainCoroutine != null)
             {
-                SceneController.i.StopCoroutine(mainCoroutine);
+                CoroutineStarter.Stop(mainCoroutine);
                 mainCoroutine = null;
             }
 
@@ -157,7 +157,8 @@ namespace DCL
                 prevTimeBudget = INIT_MSG_BUS_BUDGET_MAX;
                 start = Time.unscaledTime;
 
-                currentSceneId = SceneController.i.GetCurrentScene(DCLCharacterController.i.characterPosition);
+                if (SceneController.i != null && DCLCharacterController.i != null)
+                    currentSceneId = SceneController.i.GetCurrentScene(DCLCharacterController.i.characterPosition);
 
                 // When breaking this second loop, we skip a frame
                 while (true)
