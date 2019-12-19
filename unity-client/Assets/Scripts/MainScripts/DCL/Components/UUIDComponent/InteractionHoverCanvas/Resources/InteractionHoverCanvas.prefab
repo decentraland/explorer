@@ -120,9 +120,13 @@ MonoBehaviour:
   canvas: {fileID: 4700288523959264737}
   backgroundTransform: {fileID: 6432359610209792728}
   text: {fileID: 5253129788489465426}
-  iconText: {fileID: 0}
-  iconImage: {fileID: 0}
-  pointerDownIconSprite: {fileID: 8545957714173672369, guid: ad7b2afa9169b4d4ea47e951ff944b2d,
+  pointerActionIconPrefab: {fileID: 883752100616965295, guid: 4dd25573aa6f5440892c022173d6e68b,
+    type: 3}
+  primaryActionIconPrefab: {fileID: 883752100616965295, guid: a4bb797156cca415b834c054d6affeb3,
+    type: 3}
+  secondaryActionIconPrefab: {fileID: 883752100616965295, guid: e176613fd203f4bf281c28eb1a281524,
+    type: 3}
+  unknownActionIconPrefab: {fileID: 883752100616965295, guid: 7d57e6ad950144884968bd36cfa49478,
     type: 3}
 --- !u!1 &8532994694993499898
 GameObject:

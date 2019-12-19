@@ -8,14 +8,13 @@ public class InteractionHoverCanvasController : MonoBehaviour
     public Canvas canvas;
     public RectTransform backgroundTransform;
     public TextMeshProUGUI text;
+    public GameObject pointerActionIconPrefab;
+    public GameObject primaryActionIconPrefab;
+    public GameObject secondaryActionIconPrefab;
+    public GameObject unknownActionIconPrefab;
 
     Camera mainCamera;
     GameObject hoverIcon;
-
-    const string POINTER_ICON_PREFAB_PATH = "PointerButtonHoverIcon";
-    const string PRIMARY_ICON_PREFAB_PATH = "PrimaryButtonHoverIcon";
-    const string SECONDARY_ICON_PREFAB_PATH = "SecondaryButtonHoverIcon";
-    const string UNKNOWN_ICON_PREFAB_PATH = "UnknownButtonHoverIcon";
 
     void Awake()
     {
@@ -38,24 +37,21 @@ public class InteractionHoverCanvasController : MonoBehaviour
         if (hoverIcon != null)
             Destroy(hoverIcon);
 
-        string prefabPath;
         switch (button)
         {
             case WebInterface.ACTION_BUTTON.POINTER:
-                prefabPath = POINTER_ICON_PREFAB_PATH;
+                hoverIcon = Object.Instantiate(pointerActionIconPrefab, backgroundTransform);
                 break;
             case WebInterface.ACTION_BUTTON.PRIMARY:
-                prefabPath = PRIMARY_ICON_PREFAB_PATH;
+                hoverIcon = Object.Instantiate(primaryActionIconPrefab, backgroundTransform);
                 break;
             case WebInterface.ACTION_BUTTON.SECONDARY:
-                prefabPath = SECONDARY_ICON_PREFAB_PATH;
+                hoverIcon = Object.Instantiate(secondaryActionIconPrefab, backgroundTransform);
                 break;
             default: // WebInterface.ACTION_BUTTON.UNKNOWN
-                prefabPath = UNKNOWN_ICON_PREFAB_PATH;
+                hoverIcon = Object.Instantiate(unknownActionIconPrefab, backgroundTransform);
                 break;
         }
-
-        hoverIcon = Object.Instantiate(Resources.Load(prefabPath), backgroundTransform) as GameObject;
     }
 
     public void Show()
