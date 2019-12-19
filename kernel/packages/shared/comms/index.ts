@@ -34,7 +34,7 @@ import { ProfileForRenderer } from 'decentraland-ecs/src'
 // @ts-ignore
 import { Session } from '../session/index'
 import { worldRunningObservable, isWorldRunning } from '../world/worldState'
-import { IWorldInstanceConnection } from '../comms-interface/index'
+import { WorldInstanceConnection } from '../comms-interface/index'
 
 type Timestamp = number
 type PeerAlias = string
@@ -102,7 +102,7 @@ export class Context {
 
   public network: ETHEREUM_NETWORK | null
 
-  public worldInstanceConnection: IWorldInstanceConnection | null = null
+  public worldInstanceConnection: WorldInstanceConnection | null = null
 
   profileInterval?: NodeJS.Timer
   positionObserver: any
@@ -424,7 +424,7 @@ export async function connect(userId: string, network: ETHEREUM_NETWORK, auth: A
     ...user
   }
 
-  let connection: IWorldInstanceConnection
+  let connection: WorldInstanceConnection
 
   // TODO - check by config if using broker world connection or lighthouse peer - moliva - 19/12/2019
   // @ts-ignore

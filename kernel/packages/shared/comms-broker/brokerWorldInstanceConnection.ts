@@ -21,7 +21,7 @@ import { Stats } from '../comms/debug'
 import { createLogger } from 'shared/logger'
 
 import { Reporter } from '../comms/PresenceReporter'
-import { IWorldInstanceConnection } from '../comms-interface/index'
+import { WorldInstanceConnection } from '../comms-interface/index'
 
 class SendResult {
   constructor(public bytesSize: number) {}
@@ -38,7 +38,7 @@ const NOOP = () => {
   // do nothing
 }
 
-export class BrokerWorldInstanceConnection implements IWorldInstanceConnection {
+export class BrokerWorldInstanceConnection implements WorldInstanceConnection {
   aliases: Record<number, string> = {}
 
   positionHandler: (fromAlias: string, positionData: Package<Position>) => void = NOOP

@@ -3,7 +3,7 @@ import { UserInformation, Package, ChatMessage, ProfileVersion, BusMessage, Pose
 import { Stats } from '../comms/debug'
 import { ProfileForRenderer } from '../../decentraland-ecs/src/decentraland/Types'
 
-export interface IWorldInstanceConnection {
+export interface WorldInstanceConnection {
   stats: Stats | null
 
   // handlers
