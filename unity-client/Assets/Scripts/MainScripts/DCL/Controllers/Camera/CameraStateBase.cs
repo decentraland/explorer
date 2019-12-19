@@ -1,3 +1,4 @@
+using Cinemachine;
 using UnityEngine;
 public class CameraStateBase : MonoBehaviour
 {
@@ -6,6 +7,8 @@ public class CameraStateBase : MonoBehaviour
         FirstPerson,
         ThirdPerson,
     }
+
+    public CinemachineVirtualCameraBase defaultVirtualCamera;
 
     protected Transform cameraTransform;
     public ModeId cameraModeId;
@@ -33,5 +36,9 @@ public class CameraStateBase : MonoBehaviour
     public virtual void OnSetRotation(CameraController.SetRotationPayload payload)
     {
 
+    }
+    public virtual Vector3 OnGetRotation()
+    {
+        return Vector3.zero;
     }
 }

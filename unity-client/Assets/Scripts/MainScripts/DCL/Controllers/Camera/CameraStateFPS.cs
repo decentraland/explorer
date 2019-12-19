@@ -3,8 +3,6 @@ using UnityEngine;
 
 public class CameraStateFPS : CameraStateBase
 {
-    public CinemachineVirtualCameraBase fpsVirtualCam;
-
     protected Vector3Variable cameraForward => CommonScriptableObjects.cameraForward;
     protected Vector3NullableVariable characterForward => CommonScriptableObjects.characterForward;
 
@@ -16,6 +14,16 @@ public class CameraStateFPS : CameraStateBase
     {
         var xzPlaneForward = Vector3.Scale(cameraTransform.forward, new Vector3(1, 0, 1));
         characterForward.Set(xzPlaneForward);
+    }
+    public override Vector3 OnGetRotation()
+    {
+        if (defaultVirtualCamera is CinemachineVirtualCamera vcamera)
+        {
+            var pov = vcamera.GetCinemachineComponent<CinemachinePOV>();
+            return new Vector3(pov.m_VerticalAxis.Value, pov.m_HorizontalAxis.Value, 0);
+        }
+
+        return Vector3.zero;
     }
 
     public override void OnSetRotation(CameraController.SetRotationPayload payload)
@@ -30,7 +38,7 @@ public class CameraStateFPS : CameraStateBase
             eulerDir = Quaternion.LookRotation(dirToLook).eulerAngles;
         }
 
-        if (fpsVirtualCam is CinemachineVirtualCamera vcamera)
+        if (defaultVirtualCamera is CinemachineVirtualCamera vcamera)
         {
             var pov = vcamera.GetCinemachineComponent<CinemachinePOV>();
             pov.m_HorizontalAxis.Value = eulerDir.y;

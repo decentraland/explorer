@@ -1,3 +1,4 @@
+using Cinemachine;
 using DCL.Helpers;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,6 +23,7 @@ public class CameraController : MonoBehaviour
 
 
     internal CameraStateBase.ModeId currentMode = CameraStateBase.ModeId.FirstPerson;
+    public CameraStateBase currentCameraState => cachedModeToVirtualCamera[currentMode];
 
     private void Awake()
     {
@@ -62,9 +64,9 @@ public class CameraController : MonoBehaviour
 
     internal void SetCameraMode(CameraStateBase.ModeId newMode)
     {
-        cachedModeToVirtualCamera[currentMode].OnUnselect();
+        currentCameraState.OnUnselect();
         currentMode = newMode;
-        cachedModeToVirtualCamera[currentMode].OnSelect();
+        currentCameraState.OnSelect();
     }
 
     private void PrecisionChanged(Vector3 newValue, Vector3 oldValue)
@@ -78,13 +80,27 @@ public class CameraController : MonoBehaviour
         cameraRight.Set(cameraTransform.right);
         cameraPosition.Set(cameraTransform.position);
 
-        cachedModeToVirtualCamera[currentMode]?.OnUpdate();
+        currentCameraState?.OnUpdate();
     }
 
     public void SetRotation(string setRotationPayload)
     {
         var payload = Utils.FromJsonWithNulls<SetRotationPayload>(setRotationPayload);
-        cachedModeToVirtualCamera[currentMode]?.OnSetRotation(payload);
+        currentCameraState?.OnSetRotation(payload);
+    }
+
+    public Vector3 GetRotation()
+    {
+        if (currentCameraState != null)
+            return currentCameraState.OnGetRotation();
+
+        return Vector3.zero;
+    }
+
+
+    public Vector3 GetPosition()
+    {
+        return CinemachineCore.Instance.GetActiveBrain(0).ActiveVirtualCamera.State.FinalPosition;
     }
 
     private void OnDestroy()

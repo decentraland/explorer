@@ -3,9 +3,7 @@ using UnityEngine;
 
 public class CameraStateTPS : CameraStateBase
 {
-    public CinemachineFreeLook defaultVirtualCamera;
-
-    public LayerMask roofMask;
+    private CinemachineFreeLook defaultVirtualCameraAsFreeLook => defaultVirtualCamera as CinemachineFreeLook;
 
     [SerializeField] private InputAction_Measurable characterYAxis;
     [SerializeField] private InputAction_Measurable characterXAxis;
@@ -23,8 +21,8 @@ public class CameraStateTPS : CameraStateBase
     {
         if (characterForward.Get().HasValue)
         {
-            defaultVirtualCamera.m_XAxis.Value = Quaternion.LookRotation(characterForward.Get().Value, Vector3.up).eulerAngles.y;
-            defaultVirtualCamera.m_YAxis.Value = 0.5f;
+            defaultVirtualCameraAsFreeLook.m_XAxis.Value = Quaternion.LookRotation(characterForward.Get().Value, Vector3.up).eulerAngles.y;
+            defaultVirtualCameraAsFreeLook.m_YAxis.Value = 0.5f;
         }
 
         base.OnSelect();
@@ -32,7 +30,7 @@ public class CameraStateTPS : CameraStateBase
 
     public override void OnUpdate()
     {
-        defaultVirtualCamera.m_BindingMode = CinemachineTransposer.BindingMode.WorldSpace;
+        defaultVirtualCameraAsFreeLook.m_BindingMode = CinemachineTransposer.BindingMode.WorldSpace;
 
         var xzPlaneForward = Vector3.Scale(cameraTransform.forward, new Vector3(1, 0, 1));
         var xzPlaneRight = Vector3.Scale(cameraTransform.right, new Vector3(1, 0, 1));
@@ -67,6 +65,11 @@ public class CameraStateTPS : CameraStateBase
         }
     }
 
+    public override Vector3 OnGetRotation()
+    {
+        return new Vector3(defaultVirtualCameraAsFreeLook.m_YAxis.Value, defaultVirtualCameraAsFreeLook.m_XAxis.Value, 0);
+    }
+
     public override void OnSetRotation(CameraController.SetRotationPayload payload)
     {
         var eulerDir = Vector3.zero;
@@ -79,7 +82,7 @@ public class CameraStateTPS : CameraStateBase
             eulerDir = Quaternion.LookRotation(dirToLook).eulerAngles;
         }
 
-        defaultVirtualCamera.m_XAxis.Value = eulerDir.y;
-        defaultVirtualCamera.m_YAxis.Value = eulerDir.x;
+        defaultVirtualCameraAsFreeLook.m_XAxis.Value = eulerDir.y;
+        defaultVirtualCameraAsFreeLook.m_YAxis.Value = eulerDir.x;
     }
 }
