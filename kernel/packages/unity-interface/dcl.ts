@@ -372,8 +372,8 @@ export const unityInterface = {
       JSON.stringify({ position: position, rotation: rotation, scale: scale })
     )
   },
-  SelectBuilderEntity(entityId: string) {
-    this.SendBuilderMessage('SelectEntity', entityId)
+  SelectBuilderEntity(entities: string[]) {
+    this.SendBuilderMessage('SelectEntity', JSON.stringify({ entities: entities }))
   },
   ResetBuilderScene() {
     this.SendBuilderMessage('ResetBuilderScene')

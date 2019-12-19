@@ -188,19 +188,19 @@ namespace Builder
             currentScene = scene;
         }
 
-        private void OnBuilderSelectEntity(string entityId)
+        private void OnBuilderSelectEntity(string[] entities)
         {
-            if (currentScene && currentScene.entities.ContainsKey(entityId))
-            {
-                DCLBuilderEntity entity = currentScene.entities[entityId].gameObject.GetComponent<DCLBuilderEntity>();
-                if (entity && !gizmosManager.isTransformingObject && CanSelect(entity))
-                {
-                    entity.SetOnShapeLoaded(() =>
-                    {
-                        Select(entity);
-                    });
-                }
-            }
+            // if (currentScene && currentScene.entities.ContainsKey(entityId))
+            // {
+            //     DCLBuilderEntity entity = currentScene.entities[entityId].gameObject.GetComponent<DCLBuilderEntity>();
+            //     if (entity && !gizmosManager.isTransformingObject && CanSelect(entity))
+            //     {
+            //         entity.SetOnShapeLoaded(() =>
+            //         {
+            //             Select(entity);
+            //         });
+            //     }
+            // }
         }
 
         private void OnBuilderDeselectEntity()

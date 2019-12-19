@@ -191,8 +191,8 @@ namespace editor {
     unityInterface.SetBuilderGridResolution(position, rotation, scale)
   }
 
-  export function selectEntity(entityId: string) {
-    unityInterface.SelectBuilderEntity(entityId)
+  export function selectEntity(entities: string[]) {
+    unityInterface.SelectBuilderEntity(entities)
   }
 
   export function deselectEntity() {

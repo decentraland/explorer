@@ -34,7 +34,7 @@ namespace Builder
         public static System.Action<KeyCode> OnSetKeyUp;
         public static event SetGridResolutionDelegate OnSetGridResolution;
         public static System.Action<ParcelScene> OnSceneChanged;
-        public static System.Action<string> OnBuilderSelectEntity;
+        public static System.Action<string[]> OnBuilderSelectEntity;
         public static System.Action OnBuilderDeselectEntity;
 
         private MouseCatcher mouseCatcher;
@@ -97,6 +97,12 @@ namespace Builder
             public Vector3 cameraTarget;
             public string id;
         }
+
+        [System.Serializable]
+        private class SelectedEntitiesPayload
+        {
+            public string[] entities;
+        };
 
         #region "Messages from Explorer"
 
@@ -269,9 +275,10 @@ namespace Builder
             SceneController.i?.UnloadScene(sceneKey);
         }
 
-        public void SelectEntity(string entityId)
+        public void SelectEntity(string msj)
         {
-            OnBuilderSelectEntity?.Invoke(entityId);
+            SelectedEntitiesPayload payload = JsonUtility.FromJson<SelectedEntitiesPayload>(msj);
+            OnBuilderSelectEntity?.Invoke(payload.entities);
         }
 
         public void DeselectBuilderEntity()
