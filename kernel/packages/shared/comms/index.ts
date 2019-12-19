@@ -33,7 +33,7 @@ import { profileToRendererFormat } from 'shared/passports/transformations/profil
 import { ProfileForRenderer } from 'decentraland-ecs/src'
 import { Session } from '../session/index'
 import { worldRunningObservable, isWorldRunning } from '../world/worldState'
-import { IWorldInstanceConnection } from '../comm-interface/index';
+import { IWorldInstanceConnection } from '../comm-interface/index'
 
 type Timestamp = number
 type PeerAlias = string
