@@ -14,7 +14,7 @@ import {
   TopicIdentityFWMessage
 } from './proto/broker'
 import { Position, position2parcel } from '../comms-interface/utils'
-import { UserInformation, Package } from '../comms-interface/types'
+import { UserInformation, Package, ChatMessage, ProfileVersion } from '../comms-interface/types'
 import { parcelLimits } from 'config'
 import { IBrokerConnection, BrokerMessage } from './IBrokerConnection'
 import { Stats } from '../comms/debug'
@@ -35,24 +35,24 @@ export function positionHash(p: Position) {
 }
 
 export class BrokerWorldInstanceConnection implements IWorldInstanceConnection {
-  public aliases: Record<number, string> = {}
+  aliases: Record<number, string> = {}
 
-  public positionHandler: ((fromAlias: string, positionData: Package<Position>) => void) | null = null
-  public profileHandler: ((fromAlias: string, identity: string, profileData: ProfileData) => void) | null = null
-  public chatHandler: ((fromAlias: string, chatData: ChatData) => void) | null = null
-  // TODO: Once we have the correct class, change ChatData
-  public sceneMessageHandler: ((fromAlias: string, chatData: ChatData) => void) | null = null
+  positionHandler: ((fromAlias: string, positionData: Package<Position>) => void) | null = null
+  profileHandler: ((fromAlias: string, identity: string, profileData: Package<ProfileVersion>) => void) | null = null
+  chatHandler: ((fromAlias: string, chatData: Package<ChatMessage>) => void) | null = null
+  sceneMessageHandler: ((fromAlias: string, chatData: Package<ChatMessage>) => void) | null = null
 
-  public ping: number = -1
+  ping: number = -1
 
-  public fatalErrorSent = false
+  fatalErrorSent = false
 
-  public stats: Stats | null = null
+  stats: Stats | null = null
+
   private pingInterval: any = null
 
   private logger = createLogger('World: ')
 
-  constructor(public connection: IBrokerConnection) {
+  constructor(private connection: IBrokerConnection) {
     this.pingInterval = setInterval(() => {
       const msg = new PingMessage()
       msg.setType(MessageType.PING)
@@ -74,6 +74,10 @@ export class BrokerWorldInstanceConnection implements IWorldInstanceConnection {
 
   get isAuthenticated() {
     return this.connection.isAuthenticated
+  }
+
+  get isConnected() {
+    return this.connection.isConnected
   }
 
   sendPositionMessage(p: Position) {
@@ -303,7 +307,14 @@ export class BrokerWorldInstanceConnection implements IWorldInstanceConnection {
               this.stats.chat.incrementRecv(msgSize)
             }
 
-            this.chatHandler && this.chatHandler(alias, chatData)
+            this.chatHandler &&
+              this.chatHandler(alias, {
+                time: chatData.getTime(),
+                data: {
+                  id: chatData.getMessageId(),
+                  text: chatData.getText()
+                }
+              })
             break
           }
           case Category.SCENE_MESSAGE: {
@@ -314,7 +325,11 @@ export class BrokerWorldInstanceConnection implements IWorldInstanceConnection {
               this.stats.sceneComms.incrementRecv(msgSize)
             }
 
-            this.sceneMessageHandler && this.sceneMessageHandler(alias, chatData)
+            this.sceneMessageHandler &&
+              this.sceneMessageHandler(alias, {
+                time: chatData.getTime(),
+                data: { id: chatData.getMessageId(), text: chatData.getText() }
+              })
             break
           }
           default: {
@@ -358,7 +373,8 @@ export class BrokerWorldInstanceConnection implements IWorldInstanceConnection {
               this.stats.dispatchTopicDuration.stop()
               this.stats.profile.incrementRecv(msgSize)
             }
-            this.profileHandler && this.profileHandler(alias, userId, profileData)
+            this.profileHandler &&
+              this.profileHandler(alias, userId, { time: profileData.getTime(), data: profileData.getProfileVersion() })
             break
           }
           default: {

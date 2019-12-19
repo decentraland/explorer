@@ -470,9 +470,13 @@ describe('Communications', function() {
   describe('topic handlers', () => {
     it('chat handler', () => {
       const context = new Context({})
-      const chatData = new ChatData()
-      chatData.setText('text')
-      chatData.setMessageId('chat1')
+      const chatData = {
+        time: 1,
+        data: {
+          id: 'chat1',
+          text: 'text'
+        }
+      }
       processChatMessage(context, 'client2', chatData)
 
       expect(context.peerData).to.have.key('client2')
@@ -533,9 +537,10 @@ describe('Communications', function() {
       it('new profile message', () => {
         const context = new Context({})
 
-        const profileData = new ProfileData()
-        profileData.setTime(Date.now())
-        profileData.setProfileVersion('2')
+        const profileData = {
+          time: Date.now(),
+          data: '2'
+        }
 
         const info = new PeerTrackingInfo()
         sinon.spy(info, 'loadProfileIfNecessary')
@@ -560,9 +565,10 @@ describe('Communications', function() {
         sinon.spy(info, 'loadProfileIfNecessary')
         context.peerData.set('client2', info)
 
-        const profileData = new ProfileData()
-        profileData.setTime(new Date(2008).getTime())
-        profileData.setProfileVersion('2')
+        const profileData = {
+          time: new Date(2008).getTime(),
+          data: '2'
+        }
 
         processProfileMessage(context, 'client2', 'identity2', profileData)
 

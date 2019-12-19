@@ -25,8 +25,7 @@ import {
   removeById,
   setLocalProfile
 } from './peers'
-import { ChatData, ProfileData } from '../comms-broker/proto/comms'
-import { Pose, UserInformation, Package } from '../comms-interface/types'
+import { Pose, UserInformation, Package, ChatMessage, ProfileVersion } from '../comms-interface/types'
 import { CommunicationArea, Position, position2parcel, sameParcel, squareDistance } from '../comms-interface/utils'
 import { BrokerWorldInstanceConnection } from '../comms-broker/brokerWorldInstanceConnection'
 import { profileToRendererFormat } from 'shared/passports/transformations/profileToRendererFormat'
@@ -155,9 +154,8 @@ export function unsubscribeParcelSceneToCommsMessages(controller: Communications
 }
 
 // TODO: Change ChatData to the new class once it is added to the .proto
-export function processParcelSceneCommsMessage(context: Context, fromAlias: string, data: ChatData) {
-  const cid = data.getMessageId()
-  const text = data.getText()
+export function processParcelSceneCommsMessage(context: Context, fromAlias: string, data: Package<ChatMessage>) {
+  const { id: cid, text } = data.data
 
   const peer = getPeer(fromAlias)
 
@@ -203,12 +201,12 @@ function ensurePeerTrackingInfo(context: Context, alias: string): PeerTrackingIn
   return peerTrackingInfo
 }
 
-export function processChatMessage(context: Context, fromAlias: string, data: ChatData) {
-  const msgId = data.getMessageId()
+export function processChatMessage(context: Context, fromAlias: string, data: Package<ChatMessage>) {
+  const msgId = data.data.id
 
   const peerTrackingInfo = ensurePeerTrackingInfo(context, fromAlias)
   if (!peerTrackingInfo.receivedPublicChatMessages.has(msgId)) {
-    const text = data.getText()
+    const text = data.data.text
     peerTrackingInfo.receivedPublicChatMessages.add(msgId)
 
     const user = getUser(fromAlias)
@@ -225,15 +223,20 @@ export function processChatMessage(context: Context, fromAlias: string, data: Ch
   }
 }
 
-export function processProfileMessage(context: Context, fromAlias: string, identity: string, data: ProfileData) {
+export function processProfileMessage(
+  context: Context,
+  fromAlias: string,
+  identity: string,
+  data: Package<ProfileVersion>
+) {
   processNewLogin(identity, context, fromAlias)
 
-  const msgTimestamp = data.getTime()
+  const msgTimestamp = data.time
 
   const peerTrackingInfo = ensurePeerTrackingInfo(context, fromAlias)
 
   if (msgTimestamp > peerTrackingInfo.lastProfileUpdate) {
-    const profileVersion = data.getProfileVersion()
+    const profileVersion = data.data
 
     peerTrackingInfo.identity = identity
     peerTrackingInfo.loadProfileIfNecessary(profileVersion ? parseInt(profileVersion, 10) : 0)
@@ -457,18 +460,18 @@ export async function connect(userId: string, network: ETHEREUM_NETWORK, auth: A
 
   const connection = new BrokerWorldInstanceConnection(commsBroker)
 
-  await connection.connection.isConnected
+  await connection.isConnected
 
   connection.positionHandler = (alias: string, data: Package<Position>) => {
     processPositionMessage(context!, alias, data)
   }
-  connection.profileHandler = (alias: string, identity: string, data: ProfileData) => {
+  connection.profileHandler = (alias: string, identity: string, data: Package<ProfileVersion>) => {
     processProfileMessage(context!, alias, identity, data)
   }
-  connection.chatHandler = (alias: string, data: ChatData) => {
+  connection.chatHandler = (alias: string, data: Package<ChatMessage>) => {
     processChatMessage(context!, alias, data)
   }
-  connection.sceneMessageHandler = (alias: string, data: ChatData) => {
+  connection.sceneMessageHandler = (alias: string, data: Package<ChatMessage>) => {
     processParcelSceneCommsMessage(context!, alias, data)
   }
 
