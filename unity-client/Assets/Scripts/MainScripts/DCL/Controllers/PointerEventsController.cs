@@ -17,8 +17,8 @@ namespace DCL
         OnPointerUpComponent pointerUpEvent;
         IRaycastHandler raycastHandler = new RaycastHandler();
         Camera charCamera;
-        OnPointerEventComponent lastHoveredObject = null;
-        OnPointerEventComponent newHoveredObject = null;
+        OnPointerEvent lastHoveredObject = null;
+        OnPointerEvent newHoveredObject = null;
         Coroutine hoverInteractiveObjectsRoutine;
 
         public void Initialize(bool isTesting = false)
@@ -55,7 +55,7 @@ namespace DCL
                 // We use Physics.Raycast() instead of our raycastHandler.Raycast() as that one is slower, sometimes 2x, because it fetches info we don't need here
                 if (Physics.Raycast(GetRayFromCamera(), out hitInfo, Mathf.Infinity, Configuration.LayerMasks.physicsCastLayerMaskWithoutCharacter))
                 {
-                    newHoveredObject = hitInfo.transform.GetComponentInParent<OnPointerEventComponent>();
+                    newHoveredObject = hitInfo.transform.GetComponentInParent<OnPointerEvent>();
 
                     if (newHoveredObject != null && newHoveredObject.IsAtHoverDistance(hitInfo.distance))
                     {

@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace DCL.Components
 {
-    public class OnPointerEventComponent : UUIDComponent<OnPointerEventComponent.Model>
+    public class OnPointerEvent : UUIDComponent<OnPointerEvent.Model>
     {
         [System.Serializable]
         new public class Model : UUIDComponent.Model
@@ -27,7 +27,7 @@ namespace DCL.Components
             this.scene = scene;
 
             if (model == null)
-                model = new OnPointerEventComponent.Model();
+                model = new OnPointerEvent.Model();
 
             model.uuid = uuid;
             model.type = type;

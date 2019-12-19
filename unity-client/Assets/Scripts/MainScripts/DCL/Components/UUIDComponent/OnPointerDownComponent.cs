@@ -4,7 +4,7 @@ using DCL.Helpers;
 
 namespace DCL.Components
 {
-    public class OnPointerDownComponent : OnPointerEventComponent
+    public class OnPointerDownComponent : OnPointerEvent
     {
         public const string NAME = "pointerDown";
 
