@@ -137,7 +137,7 @@ export class Stats {
     defaultLogger.info('World instance: ')
 
     const connection = this.context.worldInstanceConnection!
-    connection.connection.printDebugInformation()
+    connection.printDebugInformation()
 
     if (connection.ping >= 0) {
       defaultLogger.info(`  ping: ${connection.ping} ms`)

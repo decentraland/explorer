@@ -6,6 +6,13 @@ export type BrokerMessage = {
   channel: string
 }
 
+export enum SocketReadyState {
+  CONNECTING,
+  OPEN,
+  CLOSING,
+  CLOSED
+}
+
 export interface IBrokerConnection {
   stats: Stats | null
   onMessageObservable: Observable<BrokerMessage>

@@ -21,7 +21,7 @@ import {
 import { AuthData } from '../../packages/shared/comms/proto/comms'
 import { PositionData, ProfileData, ChatData, Category } from '../../packages/shared/comms/proto/comms'
 import { Position, CommunicationArea, Parcel, position2parcel } from 'shared/comms/utils'
-import { WorldInstanceConnection, SocketReadyState, positionHash } from 'shared/comms/worldInstanceConnection'
+import { WorldInstanceConnection, positionHash } from 'shared/comms/worldInstanceConnection'
 import {
   Context,
   processChatMessage,
@@ -31,7 +31,7 @@ import {
   onPositionUpdate
 } from 'shared/comms'
 import { BrokerConnection } from 'shared/comms/BrokerConnection'
-import { IBrokerConnection, BrokerMessage } from 'shared/comms/IBrokerConnection'
+import { IBrokerConnection, BrokerMessage, SocketReadyState } from 'shared/comms/IBrokerConnection'
 import { Observable } from 'decentraland-ecs/src'
 import { TopicIdentityFWMessage } from '../../packages/shared/comms/proto/broker'
 import { onWorldRunning, MORDOR_POSITION } from '../../packages/shared/comms/index'

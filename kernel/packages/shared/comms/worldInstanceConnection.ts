@@ -20,14 +20,8 @@ import { IBrokerConnection, BrokerMessage } from './IBrokerConnection'
 import { Stats } from './debug'
 import { createLogger } from 'shared/logger'
 
-export enum SocketReadyState {
-  CONNECTING,
-  OPEN,
-  CLOSING,
-  CLOSED
-}
-
 import { Reporter } from './PresenceReporter'
+import { IWorldInstanceConnection } from '../comm-interface/index'
 
 class SendResult {
   constructor(public bytesSize: number) {}
@@ -40,7 +34,7 @@ export function positionHash(p: Position) {
   return `${x}:${z}`
 }
 
-export class WorldInstanceConnection {
+export class WorldInstanceConnection implements IWorldInstanceConnection {
   public aliases: Record<number, string> = {}
   public positionHandler: ((fromAlias: string, positionData: PositionData) => void) | null = null
   public profileHandler: ((fromAlias: string, identity: string, profileData: ProfileData) => void) | null = null
@@ -70,6 +64,14 @@ export class WorldInstanceConnection {
       }
     }, 10000)
     this.connection.onMessageObservable.add(this.handleMessage.bind(this))
+  }
+
+  printDebugInformation() {
+    this.connection.printDebugInformation()
+  }
+
+  get isAuthenticated() {
+    return this.connection.isAuthenticated
   }
 
   sendPositionMessage(p: Position) {
