@@ -1,5 +1,5 @@
 import { Observable } from '../../decentraland-ecs/src/ecs/Observable'
-import { Stats } from './debug'
+import { Stats } from '../comms/debug'
 
 export type BrokerMessage = {
   data: Uint8Array

@@ -13,15 +13,15 @@ import {
   TopicIdentityMessage,
   TopicIdentityFWMessage
 } from './proto/broker'
-import { Position, position2parcel } from '../comm-interface/utils'
-import { UserInformation } from './types'
+import { Position, position2parcel } from '../comms-interface/utils'
+import { UserInformation, Package } from '../comms-interface/types'
 import { parcelLimits } from 'config'
 import { IBrokerConnection, BrokerMessage } from './IBrokerConnection'
-import { Stats } from './debug'
+import { Stats } from '../comms/debug'
 import { createLogger } from 'shared/logger'
 
-import { Reporter } from './PresenceReporter'
-import { IWorldInstanceConnection } from '../comm-interface/index'
+import { Reporter } from '../comms/PresenceReporter'
+import { IWorldInstanceConnection } from '../comms-interface/index'
 
 class SendResult {
   constructor(public bytesSize: number) {}
@@ -36,11 +36,13 @@ export function positionHash(p: Position) {
 
 export class BrokerWorldInstanceConnection implements IWorldInstanceConnection {
   public aliases: Record<number, string> = {}
-  public positionHandler: ((fromAlias: string, positionData: PositionData) => void) | null = null
+
+  public positionHandler: ((fromAlias: string, positionData: Package<Position>) => void) | null = null
   public profileHandler: ((fromAlias: string, identity: string, profileData: ProfileData) => void) | null = null
   public chatHandler: ((fromAlias: string, chatData: ChatData) => void) | null = null
   // TODO: Once we have the correct class, change ChatData
   public sceneMessageHandler: ((fromAlias: string, chatData: ChatData) => void) | null = null
+
   public ping: number = -1
 
   public fatalErrorSent = false
@@ -278,7 +280,19 @@ export class BrokerWorldInstanceConnection implements IWorldInstanceConnection {
               this.stats.onPositionMessage(alias, positionData)
             }
 
-            this.positionHandler && this.positionHandler(alias, positionData)
+            this.positionHandler &&
+              this.positionHandler(alias, {
+                time: positionData.getTime(),
+                data: [
+                  positionData.getPositionX(),
+                  positionData.getPositionY(),
+                  positionData.getPositionZ(),
+                  positionData.getRotationX(),
+                  positionData.getRotationY(),
+                  positionData.getRotationZ(),
+                  positionData.getRotationW()
+                ]
+              })
             break
           }
           case Category.CHAT: {

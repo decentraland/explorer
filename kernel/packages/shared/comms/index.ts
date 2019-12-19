@@ -7,11 +7,11 @@ import { MessageEntry } from 'shared/types'
 import { positionObservable, PositionReport } from 'shared/world/positionThings'
 import 'webrtc-adapter'
 import { PassportAsPromise } from '../passports/PassportAsPromise'
-import { BrokerConnection } from './BrokerConnection'
+import { BrokerConnection } from '../comms-broker/BrokerConnection'
 import { ChatEvent, chatObservable } from './chat'
 import { CliBrokerConnection } from './CliBrokerConnection'
 import { Stats } from './debug'
-import { IBrokerConnection } from './IBrokerConnection'
+import { IBrokerConnection } from '../comms-broker/IBrokerConnection'
 import {
   getCurrentPeer,
   getCurrentUser,
@@ -25,15 +25,17 @@ import {
   removeById,
   setLocalProfile
 } from './peers'
-import { ChatData, PositionData, ProfileData } from './proto/comms'
-import { Pose, UserInformation } from './types'
-import { CommunicationArea, Position, position2parcel, sameParcel, squareDistance } from '../comm-interface/utils'
-import { BrokerWorldInstanceConnection } from './worldInstanceConnection'
+import { ChatData, ProfileData } from '../comms-broker/proto/comms'
+import { Pose, UserInformation, Package } from '../comms-interface/types'
+import { CommunicationArea, Position, position2parcel, sameParcel, squareDistance } from '../comms-interface/utils'
+import { BrokerWorldInstanceConnection } from '../comms-broker/brokerWorldInstanceConnection'
 import { profileToRendererFormat } from 'shared/passports/transformations/profileToRendererFormat'
 import { ProfileForRenderer } from 'decentraland-ecs/src'
+// TODO - remove ignore - moliva - 19/12/2019
+// @ts-ignore
 import { Session } from '../session/index'
 import { worldRunningObservable, isWorldRunning } from '../world/worldState'
-import { IWorldInstanceConnection } from '../comm-interface/index'
+import { IWorldInstanceConnection } from '../comms-interface/index'
 
 type Timestamp = number
 type PeerAlias = string
@@ -242,25 +244,18 @@ export function processProfileMessage(context: Context, fromAlias: string, ident
 }
 
 function processNewLogin(identity: string, context: Context, fromAlias: string) {
-  if (identity === context.userInfo.userId && fromAlias !== getCurrentPeer()!.uuid) {
-    Session.current.then(s => s.disable()).catch(e => defaultLogger.error('error while signing out', e))
-  }
+  // TODO - turn into debug parameter - moliva - 19/12/2019
+  // if (identity === context.userInfo.userId && fromAlias !== getCurrentPeer()!.uuid) {
+  //   Session.current.then(s => s.disable()).catch(e => defaultLogger.error('error while signing out', e))
+  // }
 }
 
-export function processPositionMessage(context: Context, fromAlias: string, positionData: PositionData) {
-  const msgTimestamp = positionData.getTime()
+export function processPositionMessage(context: Context, fromAlias: string, positionData: Package<Position>) {
+  const msgTimestamp = positionData.time
 
   const peerTrackingInfo = ensurePeerTrackingInfo(context, fromAlias)
   if (msgTimestamp > peerTrackingInfo.lastPositionUpdate) {
-    const p = [
-      positionData.getPositionX(),
-      positionData.getPositionY(),
-      positionData.getPositionZ(),
-      positionData.getRotationX(),
-      positionData.getRotationY(),
-      positionData.getRotationZ(),
-      positionData.getRotationW()
-    ] as Position
+    const p = positionData.data
 
     peerTrackingInfo.position = p
     peerTrackingInfo.lastPositionUpdate = msgTimestamp
@@ -464,7 +459,7 @@ export async function connect(userId: string, network: ETHEREUM_NETWORK, auth: A
 
   await connection.connection.isConnected
 
-  connection.positionHandler = (alias: string, data: PositionData) => {
+  connection.positionHandler = (alias: string, data: Package<Position>) => {
     processPositionMessage(context!, alias, data)
   }
   connection.profileHandler = (alias: string, identity: string, data: ProfileData) => {

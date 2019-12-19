@@ -17,11 +17,11 @@ import {
   Role,
   Format,
   TopicIdentityMessage
-} from '../../packages/shared/comms/proto/broker'
-import { AuthData } from '../../packages/shared/comms/proto/comms'
-import { PositionData, ProfileData, ChatData, Category } from '../../packages/shared/comms/proto/comms'
-import { Position, CommunicationArea, Parcel, position2parcel } from 'shared/comm-interface/utils'
-import { BrokerWorldInstanceConnection, positionHash } from 'shared/comms/worldInstanceConnection'
+} from '../../packages/shared/comms-broker/proto/broker'
+import { AuthData } from '../../packages/shared/comms-broker/proto/comms'
+import { PositionData, ProfileData, ChatData, Category } from '../../packages/shared/comms-broker/proto/comms'
+import { Position, CommunicationArea, Parcel, position2parcel } from 'shared/comms-interface/utils'
+import { BrokerWorldInstanceConnection, positionHash } from 'shared/comms-broker/brokerWorldInstanceConnection'
 import {
   Context,
   processChatMessage,
@@ -30,11 +30,12 @@ import {
   PeerTrackingInfo,
   onPositionUpdate
 } from 'shared/comms'
-import { BrokerConnection } from 'shared/comms/BrokerConnection'
-import { IBrokerConnection, BrokerMessage, SocketReadyState } from 'shared/comms/IBrokerConnection'
+import { BrokerConnection } from 'shared/comms-broker/BrokerConnection'
+import { IBrokerConnection, BrokerMessage, SocketReadyState } from 'shared/comms-broker/IBrokerConnection'
 import { Observable } from 'decentraland-ecs/src'
-import { TopicIdentityFWMessage } from '../../packages/shared/comms/proto/broker'
+import { TopicIdentityFWMessage } from '../../packages/shared/comms-broker/proto/broker'
 import { onWorldRunning, MORDOR_POSITION } from '../../packages/shared/comms/index'
+import { Package } from 'shared/comms-interface/types'
 
 chai.use(sinonChai)
 
@@ -481,16 +482,10 @@ describe('Communications', function() {
     describe('position handler', () => {
       it('new position', () => {
         const context = new Context({})
-        const positionData = new PositionData()
-
-        positionData.setTime(Date.now())
-        positionData.setPositionX(20)
-        positionData.setPositionY(20)
-        positionData.setPositionZ(20)
-        positionData.setRotationX(20)
-        positionData.setRotationY(20)
-        positionData.setRotationZ(20)
-        positionData.setRotationW(20)
+        const positionData: Package<Position> = {
+          time: Date.now(),
+          data: [20, 20, 20, 20, 20, 20, 20]
+        }
 
         processPositionMessage(context, 'client2', positionData)
 
@@ -505,16 +500,10 @@ describe('Communications', function() {
         info.lastPositionUpdate = Date.now()
         info.position = [20, 20, 20, 20, 20, 20, 20]
         context.peerData.set('client2', info)
-        const positionData = new PositionData()
-
-        positionData.setTime(new Date(2008).getTime())
-        positionData.setPositionX(30)
-        positionData.setPositionY(30)
-        positionData.setPositionZ(30)
-        positionData.setRotationX(30)
-        positionData.setRotationY(30)
-        positionData.setRotationZ(30)
-        positionData.setRotationW(30)
+        const positionData: Package<Position> = {
+          time: new Date(2008).getTime(),
+          data: [30, 30, 30, 30, 30, 30, 30]
+        }
 
         processPositionMessage(context, 'client2', positionData)
 

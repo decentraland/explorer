@@ -1,5 +1,5 @@
 import { Position } from './utils'
-import { UserInformation } from '../comms/types'
+import { UserInformation } from './types'
 
 export interface IWorldInstanceConnection {
   // TODO - review interface for the following members - moliva - 19/12/2019

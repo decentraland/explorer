@@ -1,8 +1,8 @@
 import { future, IFuture } from 'fp-future'
 
-import { MessageType, CoordinatorMessage, WelcomeMessage, ConnectMessage } from './proto/broker'
+import { MessageType, CoordinatorMessage, WelcomeMessage, ConnectMessage } from '../comms-broker/proto/broker'
 import { Stats } from './debug'
-import { IBrokerConnection, BrokerMessage, SocketReadyState } from './IBrokerConnection'
+import { IBrokerConnection, BrokerMessage, SocketReadyState } from '../comms-broker/IBrokerConnection'
 import { ILogger, createLogger } from 'shared/logger'
 import { Observable } from '../../decentraland-ecs/src/ecs/Observable'
 
