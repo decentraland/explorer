@@ -95,6 +95,9 @@ namespace DCL
             InputController_Legacy.i.RemoveListener(WebInterface.ACTION_BUTTON.POINTER, OnButtonEvent);
             InputController_Legacy.i.RemoveListener(WebInterface.ACTION_BUTTON.PRIMARY, OnButtonEvent);
             InputController_Legacy.i.RemoveListener(WebInterface.ACTION_BUTTON.SECONDARY, OnButtonEvent);
+
+            lastHoveredObject = null;
+            newHoveredObject = null;
         }
 
         void RetrieveCamera()
