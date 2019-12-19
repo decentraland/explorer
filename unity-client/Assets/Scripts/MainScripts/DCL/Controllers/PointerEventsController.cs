@@ -14,7 +14,7 @@ namespace DCL
 
         bool isTesting = false;
         RaycastHitInfo lastPointerDownEventHitInfo;
-        OnPointerUpComponent pointerUpEvent;
+        OnPointerUp pointerUpEvent;
         IRaycastHandler raycastHandler = new RaycastHandler();
         Camera charCamera;
         OnPointerEvent lastHoveredObject = null;
@@ -149,9 +149,9 @@ namespace DCL
                         GameObject go = raycastInfoPointerEventLayer.hitInfo.hit.rigidbody.gameObject;
 
                         go.GetComponentInChildren<OnClickComponent>()?.Report(buttonId);
-                        go.GetComponentInChildren<OnPointerDownComponent>()?.Report(buttonId, ray, raycastInfoPointerEventLayer.hitInfo.hit);
+                        go.GetComponentInChildren<OnPointerDown>()?.Report(buttonId, ray, raycastInfoPointerEventLayer.hitInfo.hit);
 
-                        pointerUpEvent = go.GetComponentInChildren<OnPointerUpComponent>();
+                        pointerUpEvent = go.GetComponentInChildren<OnPointerUp>();
                         lastPointerDownEventHitInfo = raycastInfoPointerEventLayer.hitInfo;
                     }
 

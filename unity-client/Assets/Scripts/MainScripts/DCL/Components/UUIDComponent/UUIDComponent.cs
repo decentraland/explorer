@@ -43,11 +43,11 @@ namespace DCL
                 case OnClickComponent.NAME:
                     SetUpComponent<OnClickComponent>(scene, entity, uuid, type);
                     return;
-                case OnPointerDownComponent.NAME:
-                    SetUpComponent<OnPointerDownComponent>(scene, entity, uuid, type);
+                case OnPointerDown.NAME:
+                    SetUpComponent<OnPointerDown>(scene, entity, uuid, type);
                     return;
-                case OnPointerUpComponent.NAME:
-                    SetUpComponent<OnPointerUpComponent>(scene, entity, uuid, type);
+                case OnPointerUp.NAME:
+                    SetUpComponent<OnPointerUp>(scene, entity, uuid, type);
                     return;
             }
 
@@ -61,11 +61,11 @@ namespace DCL
                 case OnClickComponent.NAME:
                     RemoveComponent<OnClickComponent>(entity);
                     break;
-                case OnPointerDownComponent.NAME:
-                    RemoveComponent<OnPointerDownComponent>(entity);
+                case OnPointerDown.NAME:
+                    RemoveComponent<OnPointerDown>(entity);
                     break;
-                case OnPointerUpComponent.NAME:
-                    RemoveComponent<OnPointerUpComponent>(entity);
+                case OnPointerUp.NAME:
+                    RemoveComponent<OnPointerUp>(entity);
                     break;
             }
 
