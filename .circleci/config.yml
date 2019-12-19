@@ -139,7 +139,9 @@ jobs:
           when: on_success
       - run:
           name: Publish a debug version of decentraland-renderer
-          command: /tmp/explorer/.circleci/debug-publish.sh
+          command: |
+            chmod +x /tmp/explorer/.circleci/debug-publish.sh
+            /tmp/explorer/.circleci/debug-publish.sh
       - store_artifacts:
           name: Store logs
           path: /tmp/buildlog.txt
