@@ -372,20 +372,14 @@ export const unityInterface = {
       JSON.stringify({ position: position, rotation: rotation, scale: scale })
     )
   },
-  SelectBuilderEntity(entities: string[]) {
-    this.SendBuilderMessage('SelectEntity', JSON.stringify({ entities: entities }))
+  SetBuilderSelectedEntities(entities: string[]) {
+    this.SendBuilderMessage('SetSelectedEntities', JSON.stringify({ entities: entities }))
   },
   ResetBuilderScene() {
     this.SendBuilderMessage('ResetBuilderScene')
   },
   OnBuilderKeyDown(key: string) {
     this.SendBuilderMessage('OnBuilderKeyDown', key)
-  },
-  DeselectBuilderEntity() {
-    this.SendBuilderMessage('DeselectBuilderEntity')
-  },
-  OnBuilderKeyUp(key: string) {
-    this.SendBuilderMessage('OnBuilderKeyUp', key)
   }
 }
 

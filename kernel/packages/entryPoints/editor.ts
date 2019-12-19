@@ -160,6 +160,11 @@ function bindSceneEvents() {
         entityId: e.entityId,
         transform: e.transform
       })
+    } else if (e.type === 'gizmoDeselected') {
+      evtEmitter.emit('gizmoDeselected', {
+        gizmoType: e.gizmoType,
+        entityId: e.entityId !== '' ? e.entityId : null
+      })
     }
   })
 }
@@ -191,12 +196,8 @@ namespace editor {
     unityInterface.SetBuilderGridResolution(position, rotation, scale)
   }
 
-  export function selectEntity(entities: string[]) {
-    unityInterface.SelectBuilderEntity(entities)
-  }
-
-  export function deselectEntity() {
-    unityInterface.DeselectBuilderEntity()
+  export function setSelectedEntities(entities: string[]) {
+    unityInterface.SetBuilderSelectedEntities(entities)
   }
 
   export function getDCLCanvas() {
@@ -273,11 +274,11 @@ namespace editor {
     unityInterface.SetCameraRotationBuilder(alpha, beta)
   }
 
-  export function getLoadingEntity() {
+  export function getLoadingEntities() {
     if (loadingEntities.length === 0) {
       return null
     } else {
-      return loadingEntities[0]
+      return loadingEntities
     }
   }
 
@@ -294,10 +295,6 @@ namespace editor {
 
   export function onKeyDown(key: string) {
     unityInterface.OnBuilderKeyDown(key)
-  }
-
-  export function onKeyUp(key: string) {
-    unityInterface.OnBuilderKeyUp(key)
   }
 }
 

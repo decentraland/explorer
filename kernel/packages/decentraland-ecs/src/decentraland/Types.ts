@@ -315,7 +315,7 @@ export interface IEvents {
   }
 
   /** For gizmos */
-  gizmoEvent: GizmoDragEndEvent | GizmoSelectedEvent
+  gizmoEvent: GizmoDragEndEvent | GizmoSelectedEvent | GizmoDeselectedEvent
 
   // @internal
   externalAction: {
@@ -338,6 +338,13 @@ export type GizmoDragEndEvent = {
 /** @public */
 export type GizmoSelectedEvent = {
   type: 'gizmoSelected'
+  gizmoType: 'MOVE' | 'ROTATE' | 'SCALE' | 'NONE'
+  entityId: string
+}
+
+/** @public */
+export type GizmoDeselectedEvent = {
+  type: 'gizmoDeselected'
   gizmoType: 'MOVE' | 'ROTATE' | 'SCALE' | 'NONE'
   entityId: string
 }

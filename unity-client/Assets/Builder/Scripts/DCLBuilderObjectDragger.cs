@@ -1,4 +1,4 @@
-﻿using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,17 +8,15 @@ namespace Builder
     {
         public DCLBuilderRaycast builderRaycast;
 
-        public delegate void DragDelegate(DCLBuilderEntity entity, Vector3 position);
-
-        public static event DragDelegate OnDraggingObjectStart;
-        public static event DragDelegate OnDraggingObject;
-        public static event DragDelegate OnDraggingObjectEnd;
+        public static event Action OnDraggingObjectStart;
+        public static event Action OnDraggingObject;
+        public static event Action OnDraggingObjectEnd;
 
         private List<DCLBuilderEntity> selectedEntities;
         private Vector3 targetOffset;
+        private Vector3 initialHitPoint;
         private Transform selectedEntitiesParent;
         private bool isDragging = false;
-
 
         private float snapFactorPosition = 0;
 
@@ -51,20 +49,19 @@ namespace Builder
         {
             this.selectedEntitiesParent = selectionParent;
             this.selectedEntities = selectedEntities;
+            if (isDragging)
+            {
+                targetOffset = selectedEntitiesParent.position - initialHitPoint;
+            }
         }
 
         private void OnEntityPressed(DCLBuilderEntity entity, Vector3 hitPoint)
         {
             if (selectedEntities != null)
             {
-                if (OnDraggingObjectStart != null)
-                {
-                    for (int i = 0; i < selectedEntities.Count; i++)
-                    {
-                        OnDraggingObjectStart.Invoke(selectedEntities[i], selectedEntities[i].transform.position);
-                    }
-                }
+                OnDraggingObjectStart?.Invoke();
 
+                initialHitPoint = hitPoint;
                 targetOffset = selectedEntitiesParent.position - hitPoint;
                 builderRaycast.SetEntityHitPlane(hitPoint.y);
                 isDragging = true;
@@ -77,10 +74,7 @@ namespace Builder
             {
                 if (isDragging && OnDraggingObjectEnd != null)
                 {
-                    for (int i = 0; i < selectedEntities.Count; i++)
-                    {
-                        OnDraggingObjectEnd.Invoke(selectedEntities[i], selectedEntities[i].transform.position);
-                    }
+                    OnDraggingObjectEnd?.Invoke();
                 }
                 isDragging = false;
             }
@@ -113,13 +107,7 @@ namespace Builder
             Vector3 moveAmount = targetPosition - selectedEntitiesParent.transform.position;
             selectedEntitiesParent.transform.position = targetPosition;
 
-            if (OnDraggingObject != null)
-            {
-                for (int i = 0; i < selectedEntities.Count; i++)
-                {
-                    OnDraggingObject.Invoke(selectedEntities[i], selectedEntities[i].transform.position);
-                }
-            }
+            OnDraggingObject?.Invoke();
         }
 
         private void OnSetGridResolution(float position, float rotation, float scale)

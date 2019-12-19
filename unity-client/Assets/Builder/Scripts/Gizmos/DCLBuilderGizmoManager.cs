@@ -6,12 +6,11 @@ namespace Builder.Gizmos
 {
     public class DCLBuilderGizmoManager : MonoBehaviour
     {
-        public delegate void GizmoTransformDelegate(DCLBuilderEntity entity, Vector3 position, string gizmoType);
+        public delegate void GizmoTransformDelegate(string gizmoType);
 
         public static event GizmoTransformDelegate OnGizmoTransformObjectStart;
         public static event GizmoTransformDelegate OnGizmoTransformObject;
         public static event GizmoTransformDelegate OnGizmoTransformObjectEnd;
-        public static event Action OnGizmoTransformEnd;
 
         public DCLBuilderRaycast builderRaycast;
 
@@ -58,38 +57,19 @@ namespace Builder.Gizmos
             activeGizmo = hittedAxis.GetGizmo();
             activeGizmo.OnBeginDrag(hittedAxis, selectedEntitiesParent);
 
-            if (OnGizmoTransformObjectStart != null)
-            {
-                for (int i = 0; i < selectedEntities.Count; i++)
-                {
-                    OnGizmoTransformObjectStart.Invoke(selectedEntities[i], selectedEntities[i].transform.position, activeGizmo.GetGizmoType());
-                }
-            }
+            OnGizmoTransformObjectStart?.Invoke(activeGizmo.GetGizmoType());
         }
 
         private void OnDrag(Vector3 hitPoint, Vector2 mousePosition)
         {
             activeGizmo.OnDrag(hitPoint, mousePosition);
-            if (OnGizmoTransformObject != null)
-            {
-                for (int i = 0; i < selectedEntities.Count; i++)
-                {
-                    OnGizmoTransformObject.Invoke(selectedEntities[i], selectedEntities[i].transform.position, activeGizmo.GetGizmoType());
-                }
-            }
-            OnGizmoTransformEnd?.Invoke();
+            OnGizmoTransformObject?.Invoke(activeGizmo.GetGizmoType());
         }
 
         private void OnEndDrag()
         {
             activeGizmo.OnEndDrag();
-            if (OnGizmoTransformObjectEnd != null)
-            {
-                for (int i = 0; i < selectedEntities.Count; i++)
-                {
-                    OnGizmoTransformObjectEnd.Invoke(selectedEntities[i], selectedEntities[i].transform.position, activeGizmo.GetGizmoType());
-                }
-            }
+            OnGizmoTransformObjectEnd?.Invoke(activeGizmo.GetGizmoType());
             isTransformingObject = false;
         }
 
@@ -260,7 +240,7 @@ namespace Builder.Gizmos
             if (buttonId == 0)
             {
                 bool hasMouseMoved = (axisX != 0 || axisY != 0);
-                if (isTransformingObject)
+                if (isTransformingObject && hasMouseMoved)
                 {
                     Vector3 hit;
                     if (RaycastHit(builderRaycast.GetMouseRay(mousePosition), out hit))

@@ -16,6 +16,8 @@ namespace Builder
         public delegate void EntityDeselectedDelegate(DCLBuilderEntity entity);
         public delegate void EntitySelectedListChangedDelegate(Transform selectionParent, List<DCLBuilderEntity> selectedEntities);
 
+        public static event EntitySelectedDelegate OnMarkObjectSelected;
+        public static event EntitySelectedDelegate OnMarkObjectDeselected;
         public static event EntitySelectedDelegate OnSelectedObject;
         public static event EntityDeselectedDelegate OnDeselectedObject;
         public static event System.Action OnNoObjectSelected;
@@ -25,14 +27,13 @@ namespace Builder
 
         public Transform selectedEntitiesParent { private set; get; }
 
+        private Dictionary<string, DCLBuilderEntity> entities = new Dictionary<string, DCLBuilderEntity>();
         private List<DCLBuilderEntity> selectedEntities = new List<DCLBuilderEntity>();
         private EntityPressedInfo entityEnqueueForDeselectInfo = new EntityPressedInfo();
-        private SelectionPositionInfo selectionPositionInfo = new SelectionPositionInfo();
         private bool isDirty = false;
+        private bool isSelectionTransformed = false;
 
         private float groundClickTime = 0;
-
-        private bool isMultiSelectionEnabled = false;
 
         private bool isGameObjectActive = false;
 
@@ -57,13 +58,15 @@ namespace Builder
                 DCLBuilderInput.OnMouseDown += OnMouseDown;
                 DCLBuilderInput.OnMouseUp += OnMouseUp;
                 DCLBuilderBridge.OnResetObject += OnResetObject;
+                DCLBuilderBridge.OnEntityAdded += OnEntityAdded;
                 DCLBuilderBridge.OnEntityRemoved += OnEntityRemoved;
                 DCLBuilderBridge.OnSceneChanged += OnSceneChanged;
                 DCLBuilderBridge.OnBuilderSelectEntity += OnBuilderSelectEntity;
                 DCLBuilderBridge.OnBuilderDeselectEntity += OnBuilderDeselectEntity;
-                DCLBuilderBridge.OnSetKeyDown += OnBuilderKeyDown;
-                DCLBuilderBridge.OnSetKeyUp += OnBuilderKeyUp;
-                DCLBuilderGizmoManager.OnGizmoTransformEnd += OnGizmoTransformEnded;
+                DCLBuilderGizmoManager.OnGizmoTransformObject += OnGizmoTransform;
+                DCLBuilderGizmoManager.OnGizmoTransformObjectEnd += OnGizmoTransformEnded;
+                DCLBuilderObjectDragger.OnDraggingObject += OnObjectsDrag;
+                DCLBuilderObjectDragger.OnDraggingObjectEnd += OnObjectsDragEnd;
             }
             isGameObjectActive = true;
         }
@@ -74,13 +77,15 @@ namespace Builder
             DCLBuilderInput.OnMouseDown -= OnMouseDown;
             DCLBuilderInput.OnMouseUp -= OnMouseUp;
             DCLBuilderBridge.OnResetObject -= OnResetObject;
+            DCLBuilderBridge.OnEntityAdded -= OnEntityAdded;
             DCLBuilderBridge.OnEntityRemoved -= OnEntityRemoved;
             DCLBuilderBridge.OnSceneChanged -= OnSceneChanged;
             DCLBuilderBridge.OnBuilderSelectEntity -= OnBuilderSelectEntity;
             DCLBuilderBridge.OnBuilderDeselectEntity -= OnBuilderDeselectEntity;
-            DCLBuilderBridge.OnSetKeyDown -= OnBuilderKeyDown;
-            DCLBuilderBridge.OnSetKeyUp -= OnBuilderKeyUp;
-            DCLBuilderGizmoManager.OnGizmoTransformEnd -= OnGizmoTransformEnded;
+            DCLBuilderGizmoManager.OnGizmoTransformObject -= OnGizmoTransform;
+            DCLBuilderGizmoManager.OnGizmoTransformObjectEnd -= OnGizmoTransformEnded;
+            DCLBuilderObjectDragger.OnDraggingObject -= OnObjectsDrag;
+            DCLBuilderObjectDragger.OnDraggingObjectEnd -= OnObjectsDragEnd;
         }
 
         private void Update()
@@ -90,6 +95,10 @@ namespace Builder
                 isDirty = false;
                 SelectionParentReset();
                 OnSelectedObjectListChanged?.Invoke(selectedEntitiesParent, selectedEntities);
+                if (selectedEntities.Count == 0)
+                {
+                    OnNoObjectSelected?.Invoke();
+                }
             }
         }
 
@@ -127,7 +136,6 @@ namespace Builder
                                 {
                                     ProcessEntityPressed(pressedEntity, hit.point);
                                 }
-                                SelectionParentReset();
                                 OnEntityPressed?.Invoke(pressedEntity, hit.point);
                             }
                         }
@@ -174,11 +182,23 @@ namespace Builder
             }
         }
 
+        private void OnEntityAdded(DCLBuilderEntity entity)
+        {
+            if (!entities.ContainsKey(entity.rootEntity.entityId))
+            {
+                entities.Add(entity.rootEntity.entityId, entity);
+            }
+        }
+
         private void OnEntityRemoved(DCLBuilderEntity entity)
         {
             if (selectedEntities.Contains(entity))
             {
                 Deselect(entity);
+            }
+            if (entities.ContainsKey(entity.rootEntity.entityId))
+            {
+                entities.Remove(entity.rootEntity.entityId);
             }
         }
 
@@ -188,50 +208,96 @@ namespace Builder
             currentScene = scene;
         }
 
-        private void OnBuilderSelectEntity(string[] entities)
+        private void OnBuilderSelectEntity(string[] entitiesId)
         {
-            // if (currentScene && currentScene.entities.ContainsKey(entityId))
-            // {
-            //     DCLBuilderEntity entity = currentScene.entities[entityId].gameObject.GetComponent<DCLBuilderEntity>();
-            //     if (entity && !gizmosManager.isTransformingObject && CanSelect(entity))
-            //     {
-            //         entity.SetOnShapeLoaded(() =>
-            //         {
-            //             Select(entity);
-            //         });
-            //     }
-            // }
-        }
+            List<DCLBuilderEntity> entitiesToDeselect = new List<DCLBuilderEntity>(selectedEntities);
 
-        private void OnBuilderDeselectEntity()
-        {
-            DeselectAll();
-        }
-
-        private void OnBuilderKeyDown(KeyCode keyCode)
-        {
-            if (keyCode == KeyCode.LeftShift)
+            for (int i = 0; i < entitiesId.Length; i++)
             {
-                isMultiSelectionEnabled = true;
+                if (entities.ContainsKey(entitiesId[i]))
+                {
+                    DCLBuilderEntity entity = entities[entitiesId[i]];
+                    if (!SelectionParentHasChild(entity.transform))
+                    {
+                        Select(entity);
+                    }
+                    else
+                    {
+                        entitiesToDeselect.Remove(entity);
+                    }
+                }
+            }
+
+            for (int i = 0; i < entitiesToDeselect.Count; i++)
+            {
+                Deselect(entitiesToDeselect[i]);
             }
         }
 
-        private void OnBuilderKeyUp(KeyCode keyCode)
+        private void OnBuilderDeselectEntity(string entityId)
         {
-            if (keyCode == KeyCode.LeftShift)
+            if (string.IsNullOrEmpty(entityId))
             {
-                isMultiSelectionEnabled = false;
+                DeselectAll();
+            }
+            else
+            {
+                if (entities.ContainsKey(entityId))
+                {
+                    Deselect(entities[entityId]);
+                }
             }
         }
 
-        private void OnGizmoTransformEnded()
+        private void OnGizmoTransform(string gizmoType)
         {
-            SelectionParentReset();
+            isSelectionTransformed = true;
+        }
+
+        private void OnGizmoTransformEnded(string gizmoType)
+        {
+            if (isSelectionTransformed)
+            {
+                Debug.Log("SelectionParentReset OnGizmoTransformEnded");
+                SelectionParentReset();
+            }
+            isSelectionTransformed = false;
+        }
+
+        private void OnObjectsDrag()
+        {
+            isSelectionTransformed = true;
+        }
+
+        private void OnObjectsDragEnd()
+        {
+            if (isSelectionTransformed)
+            {
+                Debug.Log("SelectionParentReset OnObjectsDragEnd");
+                SelectionParentReset();
+            }
+            isSelectionTransformed = false;
         }
 
         private bool CanSelect(DCLBuilderEntity entity)
         {
             return entity.hasGizmoComponent;
+        }
+
+        private void MarkSelected(DCLBuilderEntity entity)
+        {
+            if (entity != null)
+            {
+                OnMarkObjectSelected?.Invoke(entity, gizmosManager.GetSelectedGizmo());
+            }
+        }
+
+        private void MarkDeselected(DCLBuilderEntity entity)
+        {
+            if (entity != null)
+            {
+                OnMarkObjectDeselected?.Invoke(entity, gizmosManager.GetSelectedGizmo());
+            }
         }
 
         private void Select(DCLBuilderEntity entity)
@@ -262,11 +328,6 @@ namespace Builder
             {
                 selectedEntities.Remove(entity);
             }
-
-            if (selectedEntities.Count == 0)
-            {
-                OnNoObjectSelected?.Invoke();
-            }
             isDirty = true;
         }
 
@@ -296,22 +357,7 @@ namespace Builder
         {
             if (CanSelect(pressedEntity))
             {
-                if (isMultiSelectionEnabled)
-                {
-                    if (!selectedEntities.Contains(pressedEntity))
-                    {
-                        Select(pressedEntity);
-                    }
-                    else
-                    {
-                        Deselect(pressedEntity);
-                    }
-                }
-                else
-                {
-                    DeselectAll();
-                    Select(pressedEntity);
-                }
+                MarkSelected(pressedEntity);
             }
         }
 
@@ -322,14 +368,41 @@ namespace Builder
 
         private void SelectionParentReset()
         {
-            var positionInfo = SelectionParentCalcPosition();
-            selectedEntitiesParent.position = positionInfo.selectionParentPosition;
+            if (selectedEntitiesParent.childCount == 0)
+            {
+                return;
+            }
+
+            Transform entitiyTransform = selectedEntitiesParent.GetChild(0);
+            Vector3 min = entitiyTransform.position;
+            Vector3 max = entitiyTransform.position;
+
+            List<Transform> children = new List<Transform>(selectedEntitiesParent.childCount);
+
+            children.Add(entitiyTransform);
+            SelectionParentRemoveEntity(entitiyTransform);
+
+            for (int i = selectedEntitiesParent.childCount - 1; i >= 0; i--)
+            {
+                entitiyTransform = selectedEntitiesParent.GetChild(i);
+                if (entitiyTransform.position.x < min.x) min.x = entitiyTransform.position.x;
+                if (entitiyTransform.position.y < min.y) min.y = entitiyTransform.position.y;
+                if (entitiyTransform.position.z < min.z) min.z = entitiyTransform.position.z;
+                if (entitiyTransform.position.x > max.x) max.x = entitiyTransform.position.x;
+                if (entitiyTransform.position.y > max.y) max.y = entitiyTransform.position.y;
+                if (entitiyTransform.position.z > max.z) max.z = entitiyTransform.position.z;
+
+                children.Add(entitiyTransform);
+                SelectionParentRemoveEntity(entitiyTransform);
+            }
+
+            selectedEntitiesParent.position = min + (max - min) * 0.5f;
             selectedEntitiesParent.localScale = Vector3.one;
             selectedEntitiesParent.rotation = Quaternion.identity;
 
-            for (int i = 0; i < positionInfo.selectionChildren.Count; i++)
+            for (int i = 0; i < children.Count; i++)
             {
-                SelectionParentAddEntity(positionInfo.selectionChildren[i]);
+                SelectionParentAddEntity(children[i]);
             }
         }
 
@@ -361,38 +434,9 @@ namespace Builder
             }
         }
 
-        private SelectionPositionInfo SelectionParentCalcPosition()
+        private bool SelectionParentHasChild(Transform transform)
         {
-            selectionPositionInfo.ClearChildren();
-            if (selectedEntitiesParent.childCount == 0)
-            {
-                selectionPositionInfo.selectionParentPosition = Vector3.one;
-                return selectionPositionInfo;
-            }
-
-            Transform entitiyTransform = selectedEntitiesParent.GetChild(0);
-            Vector3 min = entitiyTransform.position;
-            Vector3 max = entitiyTransform.position;
-
-            selectionPositionInfo.AddTransform(entitiyTransform);
-            entitiyTransform.SetParent(currentScene.transform, true);
-
-            for (int i = selectedEntitiesParent.childCount - 1; i >= 0; i--)
-            {
-                entitiyTransform = selectedEntitiesParent.GetChild(i);
-                if (entitiyTransform.position.x < min.x) min.x = entitiyTransform.position.x;
-                if (entitiyTransform.position.y < min.y) min.y = entitiyTransform.position.y;
-                if (entitiyTransform.position.z < min.z) min.z = entitiyTransform.position.z;
-                if (entitiyTransform.position.x > max.x) max.x = entitiyTransform.position.x;
-                if (entitiyTransform.position.y > max.y) max.y = entitiyTransform.position.y;
-                if (entitiyTransform.position.z > max.z) max.z = entitiyTransform.position.z;
-
-                selectionPositionInfo.AddTransform(entitiyTransform);
-                SelectionParentRemoveEntity(entitiyTransform);
-            }
-
-            selectionPositionInfo.selectionParentPosition = min + (max - min) * 0.5f;
-            return selectionPositionInfo;
+            return transform.parent == selectedEntitiesParent;
         }
 
         private class EntityPressedInfo
@@ -400,22 +444,6 @@ namespace Builder
             public DCLBuilderEntity pressedEntity;
             public float pressedTime;
             public Vector3 hitPoint;
-        }
-
-        private class SelectionPositionInfo
-        {
-            public Vector3 selectionParentPosition;
-            public List<Transform> selectionChildren = new List<Transform>();
-
-            public void AddTransform(Transform transform)
-            {
-                selectionChildren.Add(transform);
-            }
-
-            public void ClearChildren()
-            {
-                selectionChildren.Clear();
-            }
         }
     }
 }

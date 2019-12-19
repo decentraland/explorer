@@ -307,8 +307,8 @@ namespace DCL
                             case "UnloadBuilderScene":
                                 GetBuilderBridge()?.UnloadBuilderScene(msg.payload);
                                 break;
-                            case "SelectEntity":
-                                GetBuilderBridge()?.SelectEntity(msg.payload);
+                            case "SetSelectedEntities":
+                                GetBuilderBridge()?.SetSelectedEntities(msg.payload);
                                 break;
                             case "GetCameraTargetBuilder":
                                 GetBuilderBridge()?.GetCameraTargetBuilder(msg.payload);
@@ -317,7 +317,7 @@ namespace DCL
                                 GetBuilderBridge()?.PreloadFile(msg.payload);
                                 break;
                             case "DeselectBuilderEntity":
-                                GetBuilderBridge()?.DeselectBuilderEntity();
+                                GetBuilderBridge()?.DeselectBuilderEntity(msg.payload);
                                 break;
                             case "AddWearableToCatalog":
                                 CatalogController.i.AddWearableToCatalog(msg.payload);
