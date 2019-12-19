@@ -248,12 +248,12 @@ export function processProfileMessage(
 
 function processNewLogin(identity: string, context: Context, fromAlias: string) {
   // TODO - turn into debug parameter - moliva - 19/12/2019
-  // @ts-ignore
-  // if (identity === context.userInfo.userId && fromAlias !== getCurrentPeer()!.uuid) {
-  // @ts-ignore
-  //   Session.current.then(s => s.disable()).catch(e => defaultLogger.error('error while signing out', e))
-  // @ts-ignore
-  // }
+  const debug = true
+  if (!debug) {
+    if (identity === context.userInfo.userId && fromAlias !== getCurrentPeer()!.uuid) {
+      Session.current.then(s => s.disable()).catch(e => defaultLogger.error('error while signing out', e))
+    }
+  }
 }
 
 export function processPositionMessage(context: Context, fromAlias: string, positionData: Package<Position>) {
@@ -427,8 +427,9 @@ export async function connect(userId: string, network: ETHEREUM_NETWORK, auth: A
   let connection: WorldInstanceConnection
 
   // TODO - check by config if using broker world connection or lighthouse peer - moliva - 19/12/2019
-  // @ts-ignore
-  if (true) {
+  const useBroker = true
+
+  if (useBroker) {
     let commsBroker: IBrokerConnection
     if (USE_LOCAL_COMMS) {
       let location = document.location.toString()
@@ -469,6 +470,8 @@ export async function connect(userId: string, network: ETHEREUM_NETWORK, auth: A
     await instance.isConnected
 
     connection = instance
+  } else {
+    connection = {} as any
   }
 
   connection.positionHandler = (alias: string, data: Package<Position>) => {
