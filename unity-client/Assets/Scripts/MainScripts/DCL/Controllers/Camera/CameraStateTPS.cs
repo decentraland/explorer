@@ -30,12 +30,6 @@ public class CameraStateTPS : CameraStateBase
         base.OnSelect();
     }
 
-    public override void OnUnselect()
-    {
-        base.OnUnselect();
-    }
-
-
     public override void OnUpdate()
     {
         defaultVirtualCamera.m_BindingMode = CinemachineTransposer.BindingMode.WorldSpace;

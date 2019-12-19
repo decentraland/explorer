@@ -11,15 +11,6 @@ public class CameraStateFPS : CameraStateBase
     float localCameraDistForward;
     float localCameraDistY;
     bool hasLocalCameraUnselectValues = false;
-    public override void OnSelect()
-    {
-        base.OnSelect();
-    }
-
-    public override void OnUnselect()
-    {
-        base.OnUnselect();
-    }
 
     public override void OnUpdate()
     {

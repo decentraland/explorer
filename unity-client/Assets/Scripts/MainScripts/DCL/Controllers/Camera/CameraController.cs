@@ -72,8 +72,6 @@ public class CameraController : MonoBehaviour
         transform.position += newValue - oldValue;
     }
 
-    public GameObject cursor;
-
     private void Update()
     {
         cameraForward.Set(cameraTransform.forward);
