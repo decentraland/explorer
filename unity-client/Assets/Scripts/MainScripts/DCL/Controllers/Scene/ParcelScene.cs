@@ -612,8 +612,8 @@ namespace DCL.Controllers
                 {
                     switch (type)
                     {
-                        case OnClickComponent.NAME:
-                            newComponent = Utils.GetOrCreateComponent<OnClickComponent>(entity.gameObject);
+                        case OnClick.NAME:
+                            newComponent = Utils.GetOrCreateComponent<OnClick>(entity.gameObject);
                             break;
                         case OnPointerDown.NAME:
                             newComponent = Utils.GetOrCreateComponent<OnPointerDown>(entity.gameObject);
@@ -956,8 +956,8 @@ namespace DCL.Controllers
                         entity.meshesInfo.currentShape.DetachFrom(entity);
                     }
                     return;
-                case OnClickComponent.NAME:
-                    RemoveUUIDComponentType<OnClickComponent>(entity, componentName);
+                case OnClick.NAME:
+                    RemoveUUIDComponentType<OnClick>(entity, componentName);
                     return;
                 case OnPointerDown.NAME:
                     RemoveUUIDComponentType<OnPointerDown>(entity, componentName);

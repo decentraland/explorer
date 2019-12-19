@@ -36,12 +36,12 @@ namespace Tests
             yield return shape.routine;
 
             string onPointerId = "pointerevent-1";
-            var OnClickComponentModel = new OnClickComponent.Model()
+            var OnClickComponentModel = new OnClick.Model()
             {
-                type = OnClickComponent.NAME,
+                type = OnClick.NAME,
                 uuid = onPointerId
             };
-            var component = TestHelpers.EntityComponentCreate<OnClickComponent, OnClickComponent.Model>(scene, entity,
+            var component = TestHelpers.EntityComponentCreate<OnClick, OnClick.Model>(scene, entity,
                 OnClickComponentModel, CLASS_ID_COMPONENT.UUID_CALLBACK);
 
             Assert.IsTrue(entity.gameObject.GetComponent<Rigidbody>() != null,
@@ -147,12 +147,12 @@ namespace Tests
                 "'GLTFScene' child object with 'InstantiatedGLTF' component should exist if the GLTF was loaded correctly");
 
             string clickUuid = "pointerevent-1";
-            var OnClickComponentModel = new OnClickComponent.Model()
+            var OnClickComponentModel = new OnClick.Model()
             {
-                type = OnClickComponent.NAME,
+                type = OnClick.NAME,
                 uuid = clickUuid
             };
-            TestHelpers.EntityComponentCreate<OnClickComponent, OnClickComponent.Model>(scene, scene.entities[entityId],
+            TestHelpers.EntityComponentCreate<OnClick, OnClick.Model>(scene, scene.entities[entityId],
                 OnClickComponentModel, CLASS_ID_COMPONENT.UUID_CALLBACK);
 
             Assert.IsTrue(scene.entities[entityId].gameObject.GetComponent<Rigidbody>() != null,
@@ -286,12 +286,12 @@ namespace Tests
                 }));
 
             string clickUuid = "pointerevent-1";
-            var OnClickComponentModel = new OnClickComponent.Model()
+            var OnClickComponentModel = new OnClick.Model()
             {
-                type = OnClickComponent.NAME,
+                type = OnClick.NAME,
                 uuid = clickUuid
             };
-            TestHelpers.EntityComponentCreate<OnClickComponent, OnClickComponent.Model>(scene, scene.entities[entityId],
+            TestHelpers.EntityComponentCreate<OnClick, OnClick.Model>(scene, scene.entities[entityId],
                 OnClickComponentModel, CLASS_ID_COMPONENT.UUID_CALLBACK);
 
             LoadWrapper_GLTF gltfShape = scene.entities[entityId].gameObject.GetComponentInChildren<LoadWrapper_GLTF>();
@@ -420,13 +420,13 @@ namespace Tests
             TestHelpers.CreateSceneEntity(scene, entityId);
 
             string clickUuid = "pointerevent-1";
-            var OnClickComponentModel = new OnClickComponent.Model()
+            var OnClickComponentModel = new OnClick.Model()
             {
-                type = OnClickComponent.NAME,
+                type = OnClick.NAME,
                 uuid = clickUuid
             };
 
-            var component = TestHelpers.EntityComponentCreate<OnClickComponent, OnClickComponent.Model>(scene, scene.entities[entityId],
+            var component = TestHelpers.EntityComponentCreate<OnClick, OnClick.Model>(scene, scene.entities[entityId],
                 OnClickComponentModel, CLASS_ID_COMPONENT.UUID_CALLBACK);
 
             Assert.IsTrue(component != null, "component is null?");
@@ -551,12 +551,12 @@ namespace Tests
             yield return shape.routine;
 
             string onPointerId = "pointerevent-1";
-            var OnClickComponentModel = new OnClickComponent.Model()
+            var OnClickComponentModel = new OnClick.Model()
             {
-                type = OnClickComponent.NAME,
+                type = OnClick.NAME,
                 uuid = onPointerId
             };
-            var component = TestHelpers.EntityComponentCreate<OnClickComponent, OnClickComponent.Model>(scene, entity,
+            var component = TestHelpers.EntityComponentCreate<OnClick, OnClick.Model>(scene, entity,
                 OnClickComponentModel, CLASS_ID_COMPONENT.UUID_CALLBACK);
 
             Assert.IsTrue(component != null);

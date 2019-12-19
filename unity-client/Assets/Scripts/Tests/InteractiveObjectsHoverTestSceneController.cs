@@ -31,12 +31,12 @@ public class InteractiveObjectsHoverTestSceneController : MonoBehaviour
         TestHelpers.SetEntityTransform(scene, entity, new Vector3(8, -1, 8), Quaternion.identity, new Vector3(0.5f, 0.5f, 0.5f));
 
         string clickUuid = "pointerevent-1";
-        var OnClickComponentModel = new OnClickComponent.Model()
+        var OnClickComponentModel = new OnClick.Model()
         {
-            type = OnClickComponent.NAME,
+            type = OnClick.NAME,
             uuid = clickUuid,
         };
-        TestHelpers.EntityComponentCreate<OnClickComponent, OnClickComponent.Model>(scene, entity, OnClickComponentModel, CLASS_ID_COMPONENT.UUID_CALLBACK);
+        TestHelpers.EntityComponentCreate<OnClick, OnClick.Model>(scene, entity, OnClickComponentModel, CLASS_ID_COMPONENT.UUID_CALLBACK);
 
         scene.SetInitMessagesDone();
 

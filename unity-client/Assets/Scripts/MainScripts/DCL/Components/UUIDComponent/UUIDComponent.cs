@@ -40,8 +40,8 @@ namespace DCL
         {
             switch (type)
             {
-                case OnClickComponent.NAME:
-                    SetUpComponent<OnClickComponent>(scene, entity, uuid, type);
+                case OnClick.NAME:
+                    SetUpComponent<OnClick>(scene, entity, uuid, type);
                     return;
                 case OnPointerDown.NAME:
                     SetUpComponent<OnPointerDown>(scene, entity, uuid, type);
@@ -58,8 +58,8 @@ namespace DCL
         {
             switch (type)
             {
-                case OnClickComponent.NAME:
-                    RemoveComponent<OnClickComponent>(entity);
+                case OnClick.NAME:
+                    RemoveComponent<OnClick>(entity);
                     break;
                 case OnPointerDown.NAME:
                     RemoveComponent<OnPointerDown>(entity);
