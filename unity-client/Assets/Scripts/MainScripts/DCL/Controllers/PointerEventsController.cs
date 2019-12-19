@@ -9,6 +9,8 @@ namespace DCL
     public class PointerEventsController : Singleton<PointerEventsController>
     {
         public static bool renderingIsDisabled = true;
+        public static System.Action OnPointerHoverStarts;
+        public static System.Action OnPointerHoverEnds;
 
         public bool enableInteractionHoverFeedback = false;
 
@@ -61,12 +63,17 @@ namespace DCL
                     {
                         if (newHoveredObject != lastHoveredObject)
                         {
+                            if (lastHoveredObject == null)
+                                OnPointerHoverStarts?.Invoke();
+
                             UnhoverLastHoveredObject();
 
                             newHoveredObject.SetHoverState(true);
 
                             lastHoveredObject = newHoveredObject;
                         }
+
+                        newHoveredObject = null;
                     }
                     else
                     {
@@ -85,6 +92,9 @@ namespace DCL
         void UnhoverLastHoveredObject()
         {
             if (lastHoveredObject == null) return;
+
+            if (newHoveredObject == null)
+                OnPointerHoverEnds?.Invoke();
 
             lastHoveredObject.SetHoverState(false);
             lastHoveredObject = null;

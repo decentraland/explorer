@@ -183,11 +183,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 459277714506075702}
+  - component: {fileID: 6951061604460230438}
   - component: {fileID: 9181947731163035974}
   - component: {fileID: 5007038104802326215}
-  - component: {fileID: 2613776573403563318}
   m_Layer: 15
-  m_Name: Canvas
+  m_Name: CursorCanvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -213,6 +213,21 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!114 &6951061604460230438
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2501719626486131353}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 540103fef3d544d57b39014004869c72, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cursorImage: {fileID: 1974042199901077761}
+  normalCursor: {fileID: 21300000, guid: 463541cd13ac34ce992618e04bc5dc9f, type: 3}
+  hoverCursor: {fileID: 21300000, guid: f89f754c892ba4e8faa6b3390ff07e16, type: 3}
 --- !u!223 &9181947731163035974
 Canvas:
   m_ObjectHideFlags: 0
@@ -256,23 +271,6 @@ MonoBehaviour:
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
---- !u!114 &2613776573403563318
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2501719626486131353}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 1301386320, guid: f70555f144d8491a825f0804e09c671c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_IgnoreReversedGraphics: 1
-  m_BlockingObjects: 0
-  m_BlockingMask:
-    serializedVersion: 2
-    m_Bits: 4294967295
 --- !u!1 &3711435650905816617
 GameObject:
   m_ObjectHideFlags: 0
@@ -513,7 +511,7 @@ RectTransform:
   m_GameObject: {fileID: 5681386639572467701}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.25, y: 0.25, z: 1}
   m_Children: []
   m_Father: {fileID: 459277714506075702}
   m_RootOrder: 0
@@ -521,7 +519,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 10, y: 10}
+  m_SizeDelta: {x: 96, y: 96}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4452105078079750113
 CanvasRenderer:
@@ -551,7 +549,7 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
-  m_Sprite: {fileID: 21300000, guid: 7ce868210b7b346d4af5b1e35b220466, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 463541cd13ac34ce992618e04bc5dc9f, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -572,7 +570,6 @@ GameObject:
   - component: {fileID: 110551818}
   - component: {fileID: 113901082}
   - component: {fileID: 8548425888172674288}
-  - component: {fileID: 3387454264005512827}
   m_Layer: 15
   m_Name: CharacterController
   m_TagString: Player
@@ -655,18 +652,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   avatarRenderer: {fileID: 8727652042400483852}
---- !u!114 &3387454264005512827
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6922703132412175462}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 31d8abdc7cc724847a3e405981121e19, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &7570314869756664852
 GameObject:
   m_ObjectHideFlags: 0
