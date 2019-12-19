@@ -25,7 +25,7 @@ import {
   removeById,
   setLocalProfile
 } from './peers'
-import { Pose, UserInformation, Package, ChatMessage, ProfileVersion } from '../comms-interface/types'
+import { Pose, UserInformation, Package, ChatMessage, ProfileVersion, BusMessage } from '../comms-interface/types'
 import { CommunicationArea, Position, position2parcel, sameParcel, squareDistance } from '../comms-interface/utils'
 import { BrokerWorldInstanceConnection } from '../comms-broker/brokerWorldInstanceConnection'
 import { profileToRendererFormat } from 'shared/passports/transformations/profileToRendererFormat'
@@ -424,46 +424,52 @@ export async function connect(userId: string, network: ETHEREUM_NETWORK, auth: A
     ...user
   }
 
-  let commsBroker: IBrokerConnection
+  let connection: IWorldInstanceConnection
 
-  if (USE_LOCAL_COMMS) {
-    let location = document.location.toString()
-    if (location.indexOf('#') > -1) {
-      location = location.substring(0, location.indexOf('#')) // drop fragment identifier
+  // TODO - check by config if using broker world connection or lighthouse peer - moliva - 19/12/2019
+  // @ts-ignore
+  if (true) {
+    let commsBroker: IBrokerConnection
+    if (USE_LOCAL_COMMS) {
+      let location = document.location.toString()
+      if (location.indexOf('#') > -1) {
+        location = location.substring(0, location.indexOf('#')) // drop fragment identifier
+      }
+      const commsUrl = location.replace(/^http/, 'ws') // change protocol to ws
+
+      const url = new URL(commsUrl)
+      const qs = new URLSearchParams({
+        identity: btoa(userId)
+      })
+      url.search = qs.toString()
+
+      defaultLogger.log('Using WebSocket comms: ' + url.href)
+      commsBroker = new CliBrokerConnection(url.href)
+    } else {
+      const coordinatorURL = getServerConfigurations().worldInstanceUrl
+      const body = `GET:${coordinatorURL}`
+      const credentials = await auth.getMessageCredentials(body)
+
+      const qs = new URLSearchParams({
+        signature: credentials['x-signature'],
+        identity: credentials['x-identity'],
+        timestamp: credentials['x-timestamp'],
+        'access-token': credentials['x-access-token']
+      })
+
+      const url = new URL(coordinatorURL)
+      defaultLogger.log('Using Remote comms: ' + url)
+
+      url.search = qs.toString()
+
+      commsBroker = new BrokerConnection(auth, url.toString())
     }
-    const commsUrl = location.replace(/^http/, 'ws') // change protocol to ws
 
-    const url = new URL(commsUrl)
-    const qs = new URLSearchParams({
-      identity: btoa(userId)
-    })
-    url.search = qs.toString()
+    const instance = new BrokerWorldInstanceConnection(commsBroker)
+    await instance.isConnected
 
-    defaultLogger.log('Using WebSocket comms: ' + url.href)
-    commsBroker = new CliBrokerConnection(url.href)
-  } else {
-    const coordinatorURL = getServerConfigurations().worldInstanceUrl
-    const body = `GET:${coordinatorURL}`
-    const credentials = await auth.getMessageCredentials(body)
-
-    const qs = new URLSearchParams({
-      signature: credentials['x-signature'],
-      identity: credentials['x-identity'],
-      timestamp: credentials['x-timestamp'],
-      'access-token': credentials['x-access-token']
-    })
-
-    const url = new URL(coordinatorURL)
-    defaultLogger.log('Using Remote comms: ' + url)
-
-    url.search = qs.toString()
-
-    commsBroker = new BrokerConnection(auth, url.toString())
+    connection = instance
   }
-
-  const connection = new BrokerWorldInstanceConnection(commsBroker)
-
-  await connection.isConnected
 
   connection.positionHandler = (alias: string, data: Package<Position>) => {
     processPositionMessage(context!, alias, data)
@@ -474,7 +480,7 @@ export async function connect(userId: string, network: ETHEREUM_NETWORK, auth: A
   connection.chatHandler = (alias: string, data: Package<ChatMessage>) => {
     processChatMessage(context!, alias, data)
   }
-  connection.sceneMessageHandler = (alias: string, data: Package<ChatMessage>) => {
+  connection.sceneMessageHandler = (alias: string, data: Package<BusMessage>) => {
     processParcelSceneCommsMessage(context!, alias, data)
   }
 
@@ -483,7 +489,6 @@ export async function connect(userId: string, network: ETHEREUM_NETWORK, auth: A
 
   if (commConfigurations.debug) {
     connection.stats = context.stats
-    commsBroker.stats = context.stats
   }
 
   context.profileInterval = setInterval(() => {

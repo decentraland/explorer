@@ -103,3 +103,5 @@ export type ChatMessage = {
   id: string
   text: string
 }
+
+export type BusMessage = ChatMessage

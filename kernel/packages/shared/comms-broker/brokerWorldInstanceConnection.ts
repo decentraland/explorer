@@ -14,7 +14,7 @@ import {
   TopicIdentityFWMessage
 } from './proto/broker'
 import { Position, position2parcel } from '../comms-interface/utils'
-import { UserInformation, Package, ChatMessage, ProfileVersion } from '../comms-interface/types'
+import { UserInformation, Package, ChatMessage, ProfileVersion, BusMessage } from '../comms-interface/types'
 import { parcelLimits } from 'config'
 import { IBrokerConnection, BrokerMessage } from './IBrokerConnection'
 import { Stats } from '../comms/debug'
@@ -34,19 +34,23 @@ export function positionHash(p: Position) {
   return `${x}:${z}`
 }
 
+const NOOP = () => {
+  // do nothing
+}
+
 export class BrokerWorldInstanceConnection implements IWorldInstanceConnection {
   aliases: Record<number, string> = {}
 
-  positionHandler: ((fromAlias: string, positionData: Package<Position>) => void) | null = null
-  profileHandler: ((fromAlias: string, identity: string, profileData: Package<ProfileVersion>) => void) | null = null
-  chatHandler: ((fromAlias: string, chatData: Package<ChatMessage>) => void) | null = null
-  sceneMessageHandler: ((fromAlias: string, chatData: Package<ChatMessage>) => void) | null = null
+  positionHandler: (fromAlias: string, positionData: Package<Position>) => void = NOOP
+  profileHandler: (fromAlias: string, identity: string, profileData: Package<ProfileVersion>) => void = NOOP
+  chatHandler: (fromAlias: string, chatData: Package<ChatMessage>) => void = NOOP
+  sceneMessageHandler: (fromAlias: string, chatData: Package<BusMessage>) => void = NOOP
 
   ping: number = -1
 
   fatalErrorSent = false
 
-  stats: Stats | null = null
+  _stats: Stats | null = null
 
   private pingInterval: any = null
 
@@ -72,6 +76,11 @@ export class BrokerWorldInstanceConnection implements IWorldInstanceConnection {
     this.connection.printDebugInformation()
   }
 
+  set stats(_stats: Stats) {
+    this._stats = _stats
+    this.connection.stats = _stats
+  }
+
   get isAuthenticated() {
     return this.connection.isAuthenticated
   }
@@ -95,8 +104,8 @@ export class BrokerWorldInstanceConnection implements IWorldInstanceConnection {
     d.setRotationW(p[6])
 
     const r = this.sendTopicMessage(false, topic, d)
-    if (this.stats) {
-      this.stats.position.incrementSent(1, r.bytesSize)
+    if (this._stats) {
+      this._stats.position.incrementSent(1, r.bytesSize)
     }
   }
 
@@ -115,8 +124,8 @@ export class BrokerWorldInstanceConnection implements IWorldInstanceConnection {
     d.setRotationW(newPosition[6])
 
     const r = this.sendTopicMessage(false, topic, d)
-    if (this.stats) {
-      this.stats.position.incrementSent(1, r.bytesSize)
+    if (this._stats) {
+      this._stats.position.incrementSent(1, r.bytesSize)
     }
   }
 
@@ -129,8 +138,8 @@ export class BrokerWorldInstanceConnection implements IWorldInstanceConnection {
     userProfile.version && d.setProfileVersion('' + userProfile.version)
 
     const r = this.sendTopicIdentityMessage(true, topic, d)
-    if (this.stats) {
-      this.stats.profile.incrementSent(1, r.bytesSize)
+    if (this._stats) {
+      this._stats.profile.incrementSent(1, r.bytesSize)
     }
   }
 
@@ -143,8 +152,8 @@ export class BrokerWorldInstanceConnection implements IWorldInstanceConnection {
     userProfile.version && d.setProfileVersion('' + userProfile.version)
 
     const r = this.sendTopicIdentityMessage(true, topic, d)
-    if (this.stats) {
-      this.stats.profile.incrementSent(1, r.bytesSize)
+    if (this._stats) {
+      this._stats.profile.incrementSent(1, r.bytesSize)
     }
   }
 
@@ -160,8 +169,8 @@ export class BrokerWorldInstanceConnection implements IWorldInstanceConnection {
 
     const r = this.sendTopicMessage(true, topic, d)
 
-    if (this.stats) {
-      this.stats.sceneComms.incrementSent(1, r.bytesSize)
+    if (this._stats) {
+      this._stats.sceneComms.incrementSent(1, r.bytesSize)
     }
   }
 
@@ -176,8 +185,8 @@ export class BrokerWorldInstanceConnection implements IWorldInstanceConnection {
 
     const r = this.sendTopicMessage(true, topic, d)
 
-    if (this.stats) {
-      this.stats.chat.incrementSent(1, r.bytesSize)
+    if (this._stats) {
+      this._stats.chat.incrementSent(1, r.bytesSize)
     }
   }
 
@@ -242,15 +251,15 @@ export class BrokerWorldInstanceConnection implements IWorldInstanceConnection {
 
     switch (msgType) {
       case MessageType.UNKNOWN_MESSAGE_TYPE: {
-        if (this.stats) {
-          this.stats.others.incrementRecv(msgSize)
+        if (this._stats) {
+          this._stats.others.incrementRecv(msgSize)
         }
         this.logger.log('unsupported message')
         break
       }
       case MessageType.TOPIC_FW: {
-        if (this.stats) {
-          this.stats.topic.incrementRecv(msgSize)
+        if (this._stats) {
+          this._stats.topic.incrementRecv(msgSize)
         }
         let dataMessage: TopicFWMessage
         try {
@@ -278,10 +287,10 @@ export class BrokerWorldInstanceConnection implements IWorldInstanceConnection {
           case Category.POSITION: {
             const positionData = PositionData.deserializeBinary(body)
 
-            if (this.stats) {
-              this.stats.dispatchTopicDuration.stop()
-              this.stats.position.incrementRecv(msgSize)
-              this.stats.onPositionMessage(alias, positionData)
+            if (this._stats) {
+              this._stats.dispatchTopicDuration.stop()
+              this._stats.position.incrementRecv(msgSize)
+              this._stats.onPositionMessage(alias, positionData)
             }
 
             this.positionHandler &&
@@ -302,9 +311,9 @@ export class BrokerWorldInstanceConnection implements IWorldInstanceConnection {
           case Category.CHAT: {
             const chatData = ChatData.deserializeBinary(body)
 
-            if (this.stats) {
-              this.stats.dispatchTopicDuration.stop()
-              this.stats.chat.incrementRecv(msgSize)
+            if (this._stats) {
+              this._stats.dispatchTopicDuration.stop()
+              this._stats.chat.incrementRecv(msgSize)
             }
 
             this.chatHandler &&
@@ -320,9 +329,9 @@ export class BrokerWorldInstanceConnection implements IWorldInstanceConnection {
           case Category.SCENE_MESSAGE: {
             const chatData = ChatData.deserializeBinary(body)
 
-            if (this.stats) {
-              this.stats.dispatchTopicDuration.stop()
-              this.stats.sceneComms.incrementRecv(msgSize)
+            if (this._stats) {
+              this._stats.dispatchTopicDuration.stop()
+              this._stats.sceneComms.incrementRecv(msgSize)
             }
 
             this.sceneMessageHandler &&
@@ -340,8 +349,8 @@ export class BrokerWorldInstanceConnection implements IWorldInstanceConnection {
         break
       }
       case MessageType.TOPIC_IDENTITY_FW: {
-        if (this.stats) {
-          this.stats.topic.incrementRecv(msgSize)
+        if (this._stats) {
+          this._stats.topic.incrementRecv(msgSize)
         }
         let dataMessage: TopicIdentityFWMessage
         try {
@@ -369,9 +378,9 @@ export class BrokerWorldInstanceConnection implements IWorldInstanceConnection {
         switch (category) {
           case Category.PROFILE: {
             const profileData = ProfileData.deserializeBinary(body)
-            if (this.stats) {
-              this.stats.dispatchTopicDuration.stop()
-              this.stats.profile.incrementRecv(msgSize)
+            if (this._stats) {
+              this._stats.dispatchTopicDuration.stop()
+              this._stats.profile.incrementRecv(msgSize)
             }
             this.profileHandler &&
               this.profileHandler(alias, userId, { time: profileData.getTime(), data: profileData.getProfileVersion() })
@@ -393,8 +402,8 @@ export class BrokerWorldInstanceConnection implements IWorldInstanceConnection {
           break
         }
 
-        if (this.stats) {
-          this.stats.ping.incrementRecv(msgSize)
+        if (this._stats) {
+          this._stats.ping.incrementRecv(msgSize)
         }
 
         this.ping = Date.now() - pingMessage.getTime()
@@ -402,8 +411,8 @@ export class BrokerWorldInstanceConnection implements IWorldInstanceConnection {
         break
       }
       default: {
-        if (this.stats) {
-          this.stats.others.incrementRecv(msgSize)
+        if (this._stats) {
+          this._stats.others.incrementRecv(msgSize)
         }
         this.logger.log('ignoring message with type', msgType)
         break
@@ -413,8 +422,8 @@ export class BrokerWorldInstanceConnection implements IWorldInstanceConnection {
 
   private sendMessage(reliable: boolean, topicMessage: Message) {
     const bytes = topicMessage.serializeBinary()
-    if (this.stats) {
-      this.stats.topic.incrementSent(1, bytes.length)
+    if (this._stats) {
+      this._stats.topic.incrementSent(1, bytes.length)
     }
     if (reliable) {
       if (!this.connection.hasReliableChannel) {

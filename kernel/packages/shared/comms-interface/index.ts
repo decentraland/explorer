@@ -1,7 +1,17 @@
 import { Position } from './utils'
-import { UserInformation } from './types'
+import { UserInformation, Package, ChatMessage, ProfileVersion, BusMessage, Pose } from './types'
+import { Stats } from '../comms/debug'
+import { ProfileForRenderer } from '../../decentraland-ecs/src/decentraland/Types'
 
 export interface IWorldInstanceConnection {
+  stats: Stats | null
+
+  // handlers
+  sceneMessageHandler: (alias: string, data: Package<BusMessage>) => void
+  chatHandler: (alias: string, data: Package<ChatMessage>) => void
+  profileHandler: (alias: string, identity: string, data: Package<ProfileVersion>) => void
+  positionHandler: (alias: string, data: Package<Position>) => void
+
   // TODO - review interface for the following members - moliva - 19/12/2019
   readonly isAuthenticated: boolean
 
@@ -11,6 +21,13 @@ export interface IWorldInstanceConnection {
 
   close(): void
 
+  sendInitialMessage(userInfo: {
+    userId?: string | undefined
+    version?: number | undefined
+    status?: string | undefined
+    pose?: Pose | undefined
+    profile?: ProfileForRenderer | undefined
+  }): void
   sendProfileMessage(currentPosition: Position, userInfo: UserInformation): void
   sendPositionMessage(p: Position): void
   sendParcelUpdateMessage(currentPosition: Position, p: Position): void
