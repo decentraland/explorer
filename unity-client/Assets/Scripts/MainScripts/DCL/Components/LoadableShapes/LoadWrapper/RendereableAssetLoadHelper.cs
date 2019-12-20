@@ -8,9 +8,9 @@ namespace DCL.Components
     {
         public static bool VERBOSE = false;
 
-        public bool useCustomContentServerUrl = false;
-        public string customContentServerUrl;
-        public bool useGltfFallback = true;
+        public static bool useCustomContentServerUrl = false;
+        public static string customContentServerUrl;
+        public static bool useGltfFallback = true;
 
         public AssetPromiseSettings_Rendering settings;
 
