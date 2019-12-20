@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class ItemToggleFactory : ScriptableObject
@@ -45,7 +45,7 @@ public class ItemToggleFactory : ScriptableObject
         if (!nftDictionary.ContainsKey(rarity))
         {
 #if UNITY_EDITOR
-            Debug.LogError("Notification of rarity " + rarity + " can't be instantiated because it does not exist in the factory!");
+            Debug.LogError("Item toggle of rarity " + rarity + " can't be instantiated because it does not exist in the factory!");
 #endif
             return CreateBaseWearable(parent);
         }
