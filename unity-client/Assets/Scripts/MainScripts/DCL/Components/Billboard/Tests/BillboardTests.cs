@@ -1,9 +1,8 @@
 using DCL;
 using DCL.Helpers;
-using DCL.Models;
-using NUnit.Framework;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Assertions;
 using UnityEngine.TestTools;
 
 namespace Tests
@@ -35,12 +34,18 @@ namespace Tests
         {
             yield return InitScene();
 
+            DCLCharacterController.i.PauseGravity();
+
             yield return CreateComponent(x: true, y: true, z: true);
+
+            yield return null;
 
             Transform entityTransform = scene.entities[entityId].gameObject.transform;
             Vector3 lookAt = GetLookAtVector(billboard.model, entityTransform);
 
-            Assert.IsTrue(entityTransform.forward == lookAt, "Wrong model data! y should be true.");
+            Assert.AreApproximatelyEqual(lookAt.x, entityTransform.forward.x, "billboard entity forward vector should be the same as the calculated one");
+            Assert.AreApproximatelyEqual(lookAt.y, entityTransform.forward.y, "billboard entity forward vector should be the same as the calculated one");
+            Assert.AreApproximatelyEqual(lookAt.z, entityTransform.forward.z, "billboard entity forward vector should be the same as the calculated one");
 
             var billboardModel = new Billboard.Model()
             {
@@ -51,8 +56,8 @@ namespace Tests
 
             yield return TestHelpers.EntityComponentUpdate<Billboard, Billboard.Model>(billboard, billboardModel);
 
-            lookAt = GetLookAtVector(billboard.model, entityTransform);
-            Assert.IsTrue(entityTransform.forward == lookAt, "Wrong model data! y should be true.");
+            lookAt = GetLookAtVector(billboardModel, entityTransform);
+            Assert.IsTrue(entityTransform.forward == lookAt, "billboard entity forward vector should be the same as the calculated one");
 
             billboardModel = new Billboard.Model()
             {
@@ -63,16 +68,16 @@ namespace Tests
 
             yield return TestHelpers.EntityComponentUpdate<Billboard, Billboard.Model>(billboard, billboardModel);
 
-            lookAt = GetLookAtVector(billboard.model, entityTransform);
-            Assert.IsTrue(entityTransform.forward == lookAt, "Wrong model data! y should be true.");
+            lookAt = GetLookAtVector(billboardModel, entityTransform);
+            Assert.IsTrue(entityTransform.forward == lookAt, "billboard entity forward vector should be the same as the calculated one");
 
             yield return null;
         }
 
         IEnumerator CreateComponent(bool x, bool y, bool z)
         {
-            TestHelpers.CreateSceneEntity(scene, entityId);
-
+            var entity = TestHelpers.CreateSceneEntity(scene, entityId);
+            TestHelpers.SetEntityTransform(scene, entity, Vector3.one, Quaternion.identity, Vector3.one);
             yield return null;
 
             var billboardModel = new Billboard.Model()
@@ -100,6 +105,8 @@ namespace Tests
             {
                 lookAtDir.Normalize();
 
+                // Note (Zak): Model x,y,z are axis that we want to enable/disable
+                // while lookAtDir x,y,z are the components of the look-at vector
                 if (!model.x || model.z)
                     lookAtDir.y = entityTransform.forward.y;
                 if (!model.y)
@@ -108,7 +115,5 @@ namespace Tests
 
             return lookAtDir.normalized;
         }
-
-
     }
 }

@@ -5,7 +5,10 @@
         "UnityGLTFAssembly",
         "CoroutineHelpers",
         "WebInterface",
-        "Utils"
+        "Utils",
+        "TestHelpers",
+        "Cinemachine",
+        "Camera"
     ],
     "optionalUnityReferences": [
         "TestAssemblies"

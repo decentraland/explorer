@@ -104,14 +104,14 @@ namespace DCL.Helpers
             t.ForceUpdateRectTransforms();
         }
 
-        public static void InverseTreeTraversal<TComponent>(Action<TComponent> action, Transform startTransform)
+        public static void InverseTransformChildTraversal<TComponent>(Action<TComponent> action, Transform startTransform)
             where TComponent : Component
         {
             Assert.IsTrue(startTransform != null, "startTransform must not be null");
 
             foreach (Transform t in startTransform)
             {
-                InverseTreeTraversal(action, t);
+                InverseTransformChildTraversal(action, t);
             }
 
             var component = startTransform.GetComponent<TComponent>();
@@ -331,6 +331,12 @@ namespace DCL.Helpers
                 (int)Mathf.Floor(worldPosition.z / ParcelSettings.PARCEL_SIZE)
             );
         }
+
+        public static string GetTestAssetsPathRaw()
+        {
+            return Application.dataPath + "/../TestResources";
+        }
+
         public static string GetTestsAssetsPath(bool useWebServerPath = false)
         {
             if (useWebServerPath)
@@ -339,7 +345,7 @@ namespace DCL.Helpers
             }
             else
             {
-                var uri = new System.Uri(Application.dataPath + "/../TestResources");
+                var uri = new System.Uri(GetTestAssetsPathRaw());
                 var converted = uri.AbsoluteUri;
                 return converted;
             }

@@ -91,6 +91,7 @@ namespace DCL.Interface
             POINTER,
             PRIMARY,
             SECONDARY,
+            UNKNOWN
         }
 
         [System.Serializable]
@@ -232,11 +233,6 @@ namespace DCL.Interface
         }
 
         [System.Serializable]
-        public class OnGizmoEvent : UUIDEvent<OnGizmoEventPayload>
-        {
-        };
-
-        [System.Serializable]
         public class TransformPayload
         {
             public Vector3 position = Vector3.zero;
@@ -250,7 +246,7 @@ namespace DCL.Interface
             public string type;
             public string gizmoType;
             public string entityId;
-            public string transform;
+            public TransformPayload transform;
         }
 
         public class OnSendScreenshot
@@ -372,7 +368,7 @@ namespace DCL.Interface
         private static OnFocusEvent onFocusEvent = new OnFocusEvent();
         private static OnBlurEvent onBlurEvent = new OnBlurEvent();
         private static OnEnterEvent onEnterEvent = new OnEnterEvent();
-        private static OnGizmoEvent onGizmoEvent = new OnGizmoEvent();
+        private static OnGizmoEventPayload onGizmoEventPayload = new OnGizmoEventPayload();
         private static OnSendScreenshot onSendScreenshot = new OnSendScreenshot();
         private static OnPointerEventPayload onPointerEventPayload = new OnPointerEventPayload();
         private static OnGlobalPointerEventPayload onGlobalPointerEventPayload = new OnGlobalPointerEventPayload();
@@ -606,27 +602,23 @@ namespace DCL.Interface
         }
 
 
-        public static void ReportGizmoEvent(string sceneId, string uuid, string type, string gizmoType, Transform entityTransform = null)
+        public static void ReportGizmoEvent(string sceneId, string entityId, string type, string gizmoType, Transform entityTransform = null)
         {
-            if (string.IsNullOrEmpty(uuid))
-            {
-                return;
-            }
+            onGizmoEventPayload.type = type;
+            onGizmoEventPayload.gizmoType = gizmoType;
+            onGizmoEventPayload.entityId = entityId;
 
-            onGizmoEvent.uuid = uuid;
-            onGizmoEvent.payload.type = type;
-            onGizmoEvent.payload.gizmoType = gizmoType;
-            onGizmoEvent.payload.entityId = uuid;
             if (entityTransform != null)
             {
                 TransformPayload payload = new TransformPayload();
                 payload.position = entityTransform.position;
                 payload.rotation = entityTransform.rotation;
                 payload.scale = entityTransform.localScale;
-                onGizmoEvent.payload.transform = JsonUtility.ToJson(payload);
+
+                onGizmoEventPayload.transform = payload;
             }
 
-            SendSceneEvent(sceneId, "uuidEvent", onGizmoEvent);
+            SendSceneEvent(sceneId, "gizmoEvent", onGizmoEventPayload);
         }
 
         public static void ReportMousePosition(Vector3 mousePosition, string id)

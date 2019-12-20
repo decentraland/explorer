@@ -1,8 +1,9 @@
-﻿using DCL;
+using DCL;
 using DCL.Configuration;
 using DCL.Helpers;
 using UnityEngine;
 using System.Collections;
+using Cinemachine;
 
 public class DCLCharacterController : MonoBehaviour
 {
@@ -28,6 +29,9 @@ public class DCLCharacterController : MonoBehaviour
     public bool initialPositionAlreadySet = false;
 
     [System.NonSerialized]
+    public bool characterAlwaysEnabled = true;
+
+    [System.NonSerialized]
     public CharacterController characterController;
 
     new Rigidbody rigidbody;
@@ -38,11 +42,13 @@ public class DCLCharacterController : MonoBehaviour
     float lastUngroundedTime = 0f;
     float lastJumpButtonPressedTime = 0f;
     float lastMovementReportTime;
+    float originalGravity;
     Vector3 velocity = Vector3.zero;
     Vector2 aimingInput;
     bool isSprinting = false;
     bool isJumping = false;
-    bool isGrounded = false;
+    public bool isGrounded { get; private set; }
+
     bool supportsMovingPlatforms = true;
     Transform groundTransform;
     Vector3 lastPosition;
@@ -54,8 +60,8 @@ public class DCLCharacterController : MonoBehaviour
     [Header("InputActions")]
     public InputAction_Hold jumpAction;
     public InputAction_Hold sprintAction;
-    public InputAction_Measurable characterXAxis;
-    public InputAction_Measurable characterYAxis;
+
+    public Vector3 moveVelocity;
 
     private InputAction_Hold.Started jumpStartedDelegate;
     private InputAction_Hold.Finished jumpFinishedDelegate;
@@ -67,6 +73,11 @@ public class DCLCharacterController : MonoBehaviour
     public static System.Action<DCLCharacterPosition> OnCharacterMoved;
     public static System.Action<DCLCharacterPosition> OnPositionSet;
 
+    [SerializeField] private InputAction_Measurable characterYAxis;
+    [SerializeField] private InputAction_Measurable characterXAxis;
+    private Vector3Variable cameraForward => CommonScriptableObjects.cameraForward;
+    private Vector3Variable cameraRight => CommonScriptableObjects.cameraRight;
+
     void Awake()
     {
         if (i != null)
@@ -76,9 +87,9 @@ public class DCLCharacterController : MonoBehaviour
         }
 
         i = this;
+        originalGravity = gravity;
 
         SuscribeToInput();
-
         CommonScriptableObjects.playerUnityPosition.Set(Vector3.zero);
         CommonScriptableObjects.playerCoords.Set(Vector2Int.zero);
         CommonScriptableObjects.playerUnityEulerAngles.Set(Vector3.zero);
@@ -104,30 +115,11 @@ public class DCLCharacterController : MonoBehaviour
         jumpFinishedDelegate = (action) => jumpButtonPressed = false;
         jumpAction.OnStarted += jumpStartedDelegate;
         jumpAction.OnFinished += jumpFinishedDelegate;
-        
+
         sprintStartedDelegate = (action) => isSprinting = true;
         sprintFinishedDelegate = (action) => isSprinting = false;
         sprintAction.OnStarted += sprintStartedDelegate;
         sprintAction.OnFinished += sprintFinishedDelegate;
-    }
-
-    // To keep the character always active, just in case
-    void OnDisable()
-    {
-        if (!reEnablingGameObject && SceneController.i != null)
-            SceneController.i.StartCoroutine(ReEnableGameObject()); // gameObject cannot start the routine as it's being deactivated
-    }
-
-    IEnumerator ReEnableGameObject()
-    {
-        reEnablingGameObject = true;
-
-        yield return null;
-
-        gameObject.SetActive(true);
-        ResetGround();
-
-        reEnablingGameObject = false;
     }
 
     void OnDestroy()
@@ -141,7 +133,13 @@ public class DCLCharacterController : MonoBehaviour
 
     void OnPrecisionAdjust(DCLCharacterPosition charPos)
     {
+        Vector3 oldPos = this.transform.position;
         this.transform.position = charPos.unityPosition;
+
+        if (CinemachineCore.Instance.BrainCount > 0)
+        {
+            CinemachineCore.Instance.GetActiveBrain(0).ActiveVirtualCamera?.OnTargetObjectWarped(transform, transform.position - oldPos);
+        }
     }
 
     public void SetPosition(Vector3 newPosition)
@@ -226,6 +224,7 @@ public class DCLCharacterController : MonoBehaviour
         velocity.y += gravity * deltaTime;
 
         bool previouslyGrounded = isGrounded;
+
         if (!isJumping || velocity.y <= 0f)
             CheckGround();
 
@@ -247,17 +246,27 @@ public class DCLCharacterController : MonoBehaviour
                 // Horizontal movement
                 var speed = movementSpeed * (isSprinting ? runningSpeedMultiplier : 1f);
 
-                if (characterXAxis.GetValue() > 0f)
-                    velocity += (transform.right * speed);
-                else if (characterXAxis.GetValue() < 0f)
-                    velocity += (-transform.right * speed);
-
-                if (characterYAxis.GetValue() > 0f)
-                    velocity += (transform.forward * speed);
-                else if (characterYAxis.GetValue() < 0f)
-                    velocity += (-transform.forward * speed);
-
                 transform.forward = characterForward.Get().Value;
+
+                var xzPlaneForward = Vector3.Scale(cameraForward.Get(), new Vector3(1, 0, 1));
+                var xzPlaneRight = Vector3.Scale(cameraRight.Get(), new Vector3(1, 0, 1));
+
+                Vector3 forwardTarget = Vector3.zero;
+
+                if (characterYAxis.GetValue() > 0)
+                    forwardTarget += xzPlaneForward;
+                if (characterYAxis.GetValue() < 0)
+                    forwardTarget -= xzPlaneForward;
+
+                if (characterXAxis.GetValue() > 0)
+                    forwardTarget += xzPlaneRight;
+                if (characterXAxis.GetValue() < 0)
+                    forwardTarget -= xzPlaneRight;
+
+                forwardTarget.Normalize();
+
+                velocity += forwardTarget * speed;
+
                 CommonScriptableObjects.playerUnityEulerAngles.Set(transform.eulerAngles);
             }
         }
@@ -403,10 +412,10 @@ public class DCLCharacterController : MonoBehaviour
 
         var reportPosition = characterPosition.worldPosition + (Vector3.up * height);
         var compositeRotation = Quaternion.LookRotation(transform.forward);
-        var playerHeight =  height + (characterController.height / 2);
+        var playerHeight = height + (characterController.height / 2);
 
         //NOTE(Brian): We have to wait for a Teleport before sending the ReportPosition, because if not ReportPosition events will be sent
-        //             When the spawn point is being selected / scenes being prepared to be sent and the Kernel gets crazy. 
+        //             When the spawn point is being selected / scenes being prepared to be sent and the Kernel gets crazy.
 
         //             The race conditions that can arise from not having this flag can result in:
         //                  - Scenes not being sent for loading, making ActivateRenderer never being sent, only in WSS mode.
@@ -415,5 +424,16 @@ public class DCLCharacterController : MonoBehaviour
             DCL.Interface.WebInterface.ReportPosition(reportPosition, compositeRotation, playerHeight);
 
         lastMovementReportTime = DCLTime.realtimeSinceStartup;
+    }
+
+    public void PauseGravity()
+    {
+        gravity = 0f;
+        velocity.y = 0f;
+    }
+
+    public void ResumeGravity()
+    {
+        gravity = originalGravity;
     }
 }
