@@ -251,6 +251,12 @@ namespace DCL
                             case "SetSceneDebugPanel":
                                 sceneController.SetSceneDebugPanel();
                                 break;
+                            case "ShowFPSPanel":
+                                sceneController.ShowFPSPanel();
+                                break;
+                            case "HideFPSPanel":
+                                sceneController.HideFPSPanel();
+                                break;
                             case "SetEngineDebugPanel":
                                 sceneController.SetEngineDebugPanel();
                                 break;
