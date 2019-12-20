@@ -322,9 +322,11 @@ describe('Communications', function() {
         it('receive profile data message', () => {
           worldConn.profileHandler = sinon.stub()
 
+          const time = Date.now()
+
           const body = new ProfileData()
           body.setCategory(Category.PROFILE)
-          body.setTime(Date.now())
+          body.setTime(time)
 
           const bodyEncoded = body.serializeBinary()
 
@@ -336,15 +338,16 @@ describe('Communications', function() {
 
           const e = { data: msg.serializeBinary() }
           channel.onmessage(e)
-          expect(worldConn.profileHandler).to.have.been.calledWith('1', 'id', body)
+          expect(worldConn.profileHandler).to.have.been.calledWith('1', 'id', { time, data: '' })
         })
 
         it('receive chat data message', () => {
           worldConn.chatHandler = sinon.stub()
 
+          const time = Date.now()
           const body = new ChatData()
           body.setCategory(Category.CHAT)
-          body.setTime(Date.now())
+          body.setTime(time)
 
           const bodyEncoded = body.serializeBinary()
 
@@ -355,7 +358,7 @@ describe('Communications', function() {
 
           const e = { data: msg.serializeBinary() }
           channel.onmessage(e)
-          expect(worldConn.chatHandler).to.have.been.calledWith('1', body)
+          expect(worldConn.chatHandler).to.have.been.calledWith('1', { time, data: { id: '', text: '' } })
         })
 
         it('receive ping message', () => {
