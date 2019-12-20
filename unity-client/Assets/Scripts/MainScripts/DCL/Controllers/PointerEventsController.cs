@@ -12,7 +12,7 @@ namespace DCL
         public static System.Action OnPointerHoverStarts;
         public static System.Action OnPointerHoverEnds;
 
-        public bool enableInteractionHoverFeedback = false;
+        public bool enableInteractionHoverFeedback = true;
 
         bool isTesting = false;
         RaycastHitInfo lastPointerDownEventHitInfo;
