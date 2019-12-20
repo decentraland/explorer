@@ -303,8 +303,9 @@ describe('Communications', function() {
           worldConn.positionHandler = sinon.stub()
 
           const body = new PositionData()
+          const time = Date.now()
           body.setCategory(Category.POSITION)
-          body.setTime(Date.now())
+          body.setTime(time)
 
           const bodyEncoded = body.serializeBinary()
 
@@ -315,7 +316,7 @@ describe('Communications', function() {
 
           const e = { data: msg.serializeBinary() }
           channel.onmessage(e)
-          expect(worldConn.positionHandler).to.have.been.calledWith('1', body)
+          expect(worldConn.positionHandler).to.have.been.calledWith('1', { time, data: [0, 0, 0, 0, 0, 0, 0] })
         })
 
         it('receive profile data message', () => {
