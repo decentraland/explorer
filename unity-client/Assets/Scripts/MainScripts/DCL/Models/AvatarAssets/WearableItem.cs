@@ -19,7 +19,10 @@ public class WearableItem : Item
     public Representation[] representations;
     public string category;
     public string[] tags;
+
     public string baseUrl;
+    public string baseUrlBundles;
+
     public i18n[] i18n;
     public string thumbnail;
     public string[] hides;

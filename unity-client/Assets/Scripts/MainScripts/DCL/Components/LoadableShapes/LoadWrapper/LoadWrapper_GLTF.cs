@@ -10,245 +10,40 @@ using System.Text.RegularExpressions;
 
 namespace DCL.Components
 {
-    public class RendereableAssetLoader
-    {
-        public static bool VERBOSE = false;
-
-        public bool useCustomContentServerUrl = false;
-        public string customContentServerUrl;
-        public bool useGltfFallback = true;
-
-        public AssetPromiseSettings_Rendering settings;
-
-        public GameObject loadedAsset { get; protected set; }
-
-        string bundlesContentUrl;
-        ContentProvider contentProvider;
-
-        AssetPromise_GLTF gltfPromise;
-        AssetPromise_AB_GameObject abPromise;
-
-
-        public RendereableAssetLoader(ContentProvider contentProvider, string bundlesContentUrl)
-        {
-            this.contentProvider = contentProvider;
-            this.bundlesContentUrl = bundlesContentUrl;
-        }
-
-        public void Load(string targetUrl, Action<GameObject> OnSuccess, Action OnFail)
-        {
-            Assert.IsFalse(string.IsNullOrEmpty(targetUrl), "url is null!!");
-
-            if (useGltfFallback)
-                LoadAssetBundle(targetUrl, OnSuccess, () => LoadGltf(targetUrl, OnSuccess, OnFail));
-            else
-                LoadAssetBundle(targetUrl, OnSuccess, OnFail);
-        }
-
-        public void Unload()
-        {
-            AssetPromiseKeeper_GLTF.i.Forget(gltfPromise);
-            AssetPromiseKeeper_AB_GameObject.i.Forget(abPromise);
-        }
-
-        void LoadAssetBundle(string targetUrl, Action<GameObject> OnSuccess, Action OnFail)
-        {
-            if (abPromise != null)
-            {
-                AssetPromiseKeeper_AB_GameObject.i.Forget(abPromise);
-
-                if (VERBOSE)
-                    Debug.Log("Forgetting not null promise...");
-            }
-
-            string bundlesBaseUrl = useCustomContentServerUrl ? customContentServerUrl : bundlesContentUrl;
-
-            if (string.IsNullOrEmpty(bundlesBaseUrl))
-            {
-                OnFail?.Invoke();
-                return;
-            }
-
-            contentProvider.TryGetContentsUrl_Raw(targetUrl, out string hash);
-
-            abPromise = new AssetPromise_AB_GameObject(bundlesBaseUrl, hash);
-            abPromise.settings = this.settings;
-
-            abPromise.OnSuccessEvent += (x) => OnSuccessWrapper(x, OnSuccess);
-            abPromise.OnFailEvent += (x) => OnFailWrapper(x, OnFail);
-
-            AssetPromiseKeeper_AB_GameObject.i.Keep(abPromise);
-        }
-
-        void LoadGltf(string targetUrl, Action<GameObject> OnSuccess, Action OnFail)
-        {
-            if (gltfPromise != null)
-            {
-                AssetPromiseKeeper_GLTF.i.Forget(gltfPromise);
-
-                if (VERBOSE)
-                    Debug.Log("Forgetting not null promise...");
-            }
-
-            gltfPromise = new AssetPromise_GLTF(contentProvider, targetUrl);
-            gltfPromise.settings = this.settings;
-
-            gltfPromise.OnSuccessEvent += (x) => OnSuccessWrapper(x, OnSuccess);
-            gltfPromise.OnFailEvent += (x) => OnFailWrapper(x, OnFail);
-
-            AssetPromiseKeeper_GLTF.i.Keep(gltfPromise);
-        }
-
-        private void OnFailWrapper(Asset_WithPoolableContainer loadedAsset, Action OnFail)
-        {
-            OnFail?.Invoke();
-        }
-
-        private void OnSuccessWrapper(Asset_WithPoolableContainer loadedAsset, Action<GameObject> OnSuccess)
-        {
-            OnSuccess?.Invoke(loadedAsset.container);
-        }
-    }
 
     public class LoadWrapper_GLTF : LoadWrapper
     {
         static readonly bool VERBOSE = false;
-        public static bool useCustomContentServerUrl = false;
-        public static string customContentServerUrl;
-        public static bool useGltfFallback = true;
-
-        public GameObject container;
-
-        AssetPromise_GLTF gltfPromise;
-        AssetPromise_AB_GameObject abPromise;
-
-        string assetDirectoryPath;
+        RendereableAssetLoadHelper loadHelper;
 
 #if UNITY_EDITOR
         [ContextMenu("Debug Load Count")]
         public void DebugLoadCount()
         {
-            float loadTime = Mathf.Min(loadFinishTime, Time.realtimeSinceStartup) - loadStartTime;
-
-            if (gltfPromise != null)
-                Debug.Log($"promise state = {gltfPromise.state} ({loadTime} load time)... waiting promises = {AssetPromiseKeeper_GLTF.i.waitingPromisesCount}");
-
-            if (abPromise != null)
-                Debug.Log($"promise state = {abPromise.state} ({loadTime} load time)... waiting promises = {AssetPromiseKeeper_AB.i.waitingPromisesCount}");
+            loadHelper?.DebugLoadCount();
         }
-
-        float loadStartTime = 0;
-        float loadFinishTime = float.MaxValue;
 #endif
 
         public override void Load(string targetUrl, Action<LoadWrapper> OnSuccess, Action<LoadWrapper> OnFail)
         {
-#if UNITY_EDITOR
-            loadStartTime = Time.realtimeSinceStartup;
-#endif
             Assert.IsFalse(string.IsNullOrEmpty(targetUrl), "url is null!!");
+            loadHelper = new RendereableAssetLoadHelper(this.entity.scene.contentProvider, entity.scene.sceneData.baseUrlBundles);
 
-            if (useGltfFallback)
-                LoadAssetBundle(targetUrl, OnSuccess, (x) => LoadGltf(targetUrl, OnSuccess, OnFail));
-            else
-                LoadAssetBundle(targetUrl, OnSuccess, OnFail);
+            loadHelper.OnSuccessEvent += (x) => OnSuccessWrapper(OnSuccess);
+            loadHelper.OnFailEvent += () => OnFailWrapper(OnSuccess);
+            loadHelper.Load(targetUrl);
         }
 
-        void LoadAssetBundle(string targetUrl, Action<LoadWrapper> OnSuccess, Action<LoadWrapper> OnFail)
+        private void OnFailWrapper(Action<LoadWrapper> OnFail)
         {
-            if (abPromise != null)
-            {
-                AssetPromiseKeeper_AB_GameObject.i.Forget(abPromise);
-
-                if (VERBOSE)
-                    Debug.Log("Forgetting not null promise...");
-            }
-
-            string bundlesBaseUrl = useCustomContentServerUrl ? customContentServerUrl : entity.scene.sceneData.baseUrlBundles;
-
-            if (string.IsNullOrEmpty(bundlesBaseUrl))
-            {
-                OnFail?.Invoke(this);
-                return;
-            }
-
-            entity.scene.contentProvider.TryGetContentsUrl_Raw(targetUrl, out string hash);
-
-            abPromise = new AssetPromise_AB_GameObject(bundlesBaseUrl, hash);
-            abPromise.settings.parent = transform;
-
-            abPromise.OnSuccessEvent += (x) => OnSuccessWrapper(x, OnSuccess);
-            abPromise.OnFailEvent += (x) => OnFailWrapper(x, OnFail);
-
-            AssetPromiseKeeper_AB_GameObject.i.Keep(abPromise);
-        }
-
-        void LoadGltf(string targetUrl, Action<LoadWrapper> OnSuccess, Action<LoadWrapper> OnFail)
-        {
-            if (gltfPromise != null)
-            {
-                AssetPromiseKeeper_GLTF.i.Forget(gltfPromise);
-
-                if (VERBOSE)
-                    Debug.Log("Forgetting not null promise...");
-            }
-
-            gltfPromise = new AssetPromise_GLTF(entity.scene.contentProvider, targetUrl);
-            gltfPromise.settings.parent = transform;
-
-            if (initialVisibility == false)
-            {
-                gltfPromise.settings.visibleFlags = AssetPromiseSettings_Rendering.VisibleFlags.INVISIBLE;
-            }
-            else
-            {
-                if (useVisualFeedback)
-                    gltfPromise.settings.visibleFlags = AssetPromiseSettings_Rendering.VisibleFlags.VISIBLE_WITH_TRANSITION;
-                else
-                    gltfPromise.settings.visibleFlags = AssetPromiseSettings_Rendering.VisibleFlags.VISIBLE_WITHOUT_TRANSITION;
-            }
-
-            gltfPromise.OnSuccessEvent += (x) => OnSuccessWrapper(x, OnSuccess);
-            gltfPromise.OnFailEvent += (x) => OnFailWrapper(x, OnFail);
-
-            AssetPromiseKeeper_GLTF.i.Keep(gltfPromise);
-        }
-
-        private void OnFailWrapper(Asset loadedAsset, Action<LoadWrapper> OnFail)
-        {
-#if UNITY_EDITOR
-            loadFinishTime = Time.realtimeSinceStartup;
-#endif
-
-            if (VERBOSE)
-            {
-                if (gltfPromise != null)
-                    Debug.Log($"GLTF Load(): target URL -> {gltfPromise.GetId()}. Failure!");
-                else
-                    Debug.Log($"AB Load(): target URL -> {abPromise.hash}. Failure!");
-            }
-
             OnFail?.Invoke(this);
         }
 
-        private void OnSuccessWrapper(Asset loadedAsset, Action<LoadWrapper> OnSuccess)
+        private void OnSuccessWrapper(Action<LoadWrapper> OnSuccess)
         {
-            if (VERBOSE)
-            {
-                if (gltfPromise != null)
-                    Debug.Log($"GLTF Load(): target URL -> {gltfPromise.GetId()}. Success!");
-                else
-                    Debug.Log($"AB Load(): target URL -> {abPromise.hash}. Success!");
-            }
-
             alreadyLoaded = true;
-
             this.entity.OnCleanupEvent -= OnEntityCleanup;
             this.entity.OnCleanupEvent += OnEntityCleanup;
-#if UNITY_EDITOR
-            loadFinishTime = Time.realtimeSinceStartup;
-#endif
-
             OnSuccess?.Invoke(this);
         }
 
@@ -259,9 +54,8 @@ namespace DCL.Components
 
         public override void Unload()
         {
+            loadHelper.Unload();
             this.entity.OnCleanupEvent -= OnEntityCleanup;
-            AssetPromiseKeeper_GLTF.i.Forget(gltfPromise);
-            AssetPromiseKeeper_AB_GameObject.i.Forget(abPromise);
         }
 
         public void OnDestroy()

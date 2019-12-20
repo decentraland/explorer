@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using DCL;
+using DCL.Components;
 using DCL.Controllers;
 using DCL.Helpers;
 using DCL.Models;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using UnityEngine;
 using UnityGLTF;
 
@@ -46,11 +47,11 @@ namespace AvatarShape_Tests
             return model;
         }
     }
-    
+
     class AvatarRenderer_Mock : AvatarRenderer
     {
         public static Dictionary<string, WearableController_Mock> GetWearableMockControllers(AvatarRenderer renderer) => GetWearableControllers(renderer).ToDictionary(x => x.Key, x => new WearableController_Mock(x.Value));
-        
+
         public static Dictionary<string, WearableController> GetWearableControllers(AvatarRenderer renderer)
         {
             var avatarRendererMock = new GameObject("Temp").AddComponent<AvatarRenderer_Mock>();
@@ -100,7 +101,7 @@ namespace AvatarShape_Tests
 
         public Renderer[] myAssetRenderers => assetRenderers;
         public GameObject myAssetContainer => assetContainer;
-        public AssetPromise_GLTF myPromise => promise;
+        public RendereableAssetLoadHelper myLoader => loader;
     }
 
     class BodyShapeController_Mock : BodyShapeController
