@@ -16,7 +16,7 @@ namespace AvatarEditorHUD_Tests
         [UnitySetUp]
         private IEnumerator SetUp()
         {
-            yield return InitScene();
+            yield return InitScene(false, false, false, false, false);
 
             userProfile = ScriptableObject.CreateInstance<UserProfile>();
             userProfile.UpdateData(new UserProfileModel()
@@ -31,7 +31,7 @@ namespace AvatarEditorHUD_Tests
 
             });
 
-            catalog = AvatarTestHelpers.CreateTestCatalog();
+            catalog = AvatarTestHelpers.CreateTestCatalogLocal();
             controller = new AvatarEditorHUDController_Mock(userProfile, catalog);
         }
 
@@ -184,6 +184,7 @@ namespace AvatarEditorHUD_Tests
                 tags = new[] { WearableLiterals.Tags.EXCLUSIVE },
                 i18n = new[] { new i18n() { code = "en", text = "Dummy Item" } }
             };
+
             userProfile.UpdateData(new UserProfileModel()
             {
                 name = "name",
