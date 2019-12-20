@@ -119,9 +119,16 @@ function overrideBaseUrl(wearable: Wearable) {
   return { ...wearable, baseUrl: 'https://content.decentraland.org/contents/' }
 }
 
+declare const window: any
+
 export function* initialLoad() {
   try {
-    const collections: Collection[] = yield call(fetchCatalog, getServerConfigurations().avatar.catalog)
+    let collections: Collection[]
+    if (window.location.search.match(/TEST_WEARABLES/)) {
+      collections = [{ id: 'all', wearables: yield call(fetchCatalog, getServerConfigurations().avatar.catalog) }]
+    } else {
+      collections = yield call(fetchCatalog, getServerConfigurations().avatar.catalog)
+    }
     const catalog = collections
       .reduce((flatten, collection) => flatten.concat(collection.wearables), [] as Wearable[])
       .map(overrideBaseUrl)
@@ -214,8 +221,6 @@ export async function fetchCatalog(url: string) {
   }
   return request.json()
 }
-
-declare var window: any
 
 export function sendWearablesCatalog(catalog: Catalog) {
   window['unityInterface'].AddWearablesToCatalog(catalog)
