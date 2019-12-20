@@ -36,7 +36,6 @@ namespace Builder
         public static event SetGridResolutionDelegate OnSetGridResolution;
         public static System.Action<ParcelScene> OnSceneChanged;
         public static System.Action<string[]> OnBuilderSelectEntity;
-        public static System.Action<string> OnBuilderDeselectEntity;
 
         private MouseCatcher mouseCatcher;
         private ParcelScene currentScene;
@@ -53,6 +52,7 @@ namespace Builder
         private EntitiesOutOfBoundariesEventPayload outOfBoundariesEventPayload = new EntitiesOutOfBoundariesEventPayload();
         private static OnEntityLoadingEvent onGetLoadingEntity = new OnEntityLoadingEvent();
         private static ReportCameraTargetPosition onReportCameraTarget = new ReportCameraTargetPosition();
+        private static GizmosEventPayload onGizmoEventPayload = new GizmosEventPayload();
 
         [System.Serializable]
         private class MousePayload
@@ -106,6 +106,23 @@ namespace Builder
         private class SelectedEntitiesPayload
         {
             public string[] entities = null;
+        };
+
+        [System.Serializable]
+        private class GizmosEventPayload
+        {
+            [System.Serializable]
+            public class TransformPayload
+            {
+                public string entityId = string.Empty;
+                public Vector3 position = Vector3.zero;
+                public Quaternion rotation = Quaternion.identity;
+                public Vector3 scale = Vector3.one;
+            }
+            public string[] entities = null;
+            public TransformPayload[] transforms = null;
+            public string gizmoType = DCLGizmos.Gizmo.NONE;
+            public string type = string.Empty;
         };
 
         #region "Messages from Explorer"
@@ -291,12 +308,6 @@ namespace Builder
             OnBuilderSelectEntity?.Invoke(payload.entities);
         }
 
-        public void DeselectBuilderEntity(string entityId)
-        {
-            if (LOG_MESSAGES) Debug.Log($"RECEIVE: DeselectBuilderEntity {entityId}");
-            OnBuilderDeselectEntity?.Invoke(entityId);
-        }
-
         public void GetCameraTargetBuilder(string id)
         {
             if (LOG_MESSAGES) Debug.Log($"RECEIVE: GetCameraTargetBuilder {id}");
@@ -411,7 +422,6 @@ namespace Builder
                 DCLBuilderObjectDragger.OnDraggingObjectEnd += OnObjectDragEnd;
                 DCLBuilderObjectDragger.OnDraggingObject += OnObjectDrag;
                 DCLBuilderObjectSelector.OnMarkObjectSelected += OnObjectSelected;
-                DCLBuilderObjectSelector.OnMarkObjectDeselected += OnObjectDeselected;
                 DCLBuilderObjectSelector.OnNoObjectSelected += OnNoObjectSelected;
                 DCLBuilderObjectSelector.OnSelectedObjectListChanged += OnSelectionChanged;
                 DCLBuilderGizmoManager.OnGizmoTransformObjectEnd += OnGizmoTransformObjectEnded;
@@ -429,7 +439,6 @@ namespace Builder
             DCLBuilderObjectDragger.OnDraggingObjectEnd -= OnObjectDragEnd;
             DCLBuilderObjectDragger.OnDraggingObject -= OnObjectDrag;
             DCLBuilderObjectSelector.OnMarkObjectSelected -= OnObjectSelected;
-            DCLBuilderObjectSelector.OnMarkObjectDeselected -= OnObjectDeselected;
             DCLBuilderObjectSelector.OnNoObjectSelected -= OnNoObjectSelected;
             DCLBuilderObjectSelector.OnSelectedObjectListChanged -= OnSelectionChanged;
             DCLBuilderGizmoManager.OnGizmoTransformObjectEnd -= OnGizmoTransformObjectEnded;
@@ -443,10 +452,7 @@ namespace Builder
         {
             if (selectedEntities != null && entitiesMoved)
             {
-                for (int i = 0; i < selectedEntities.Count; i++)
-                {
-                    NotifyGizmoEvent(selectedEntities[i], DCLGizmos.Gizmo.NONE);
-                }
+                NotifyGizmosTransformEvent(selectedEntities, DCLGizmos.Gizmo.NONE);
             }
             entitiesMoved = false;
         }
@@ -461,10 +467,7 @@ namespace Builder
         {
             if (selectedEntities != null && entitiesMoved)
             {
-                for (int i = 0; i < selectedEntities.Count; i++)
-                {
-                    NotifyGizmoEvent(selectedEntities[i], gizmoType);
-                }
+                NotifyGizmosTransformEvent(selectedEntities, gizmoType);
             }
             entitiesMoved = false;
         }
@@ -477,20 +480,12 @@ namespace Builder
 
         private void OnObjectSelected(DCLBuilderEntity entity, string gizmoType)
         {
-            if (LOG_MESSAGES) Debug.Log($"SEND: gizmoSelected {entity.rootEntity.entityId} {gizmoType}");
-            WebInterface.ReportGizmoEvent(entity.rootEntity.scene.sceneData.id, entity.rootEntity.entityId, "gizmoSelected", gizmoType);
-        }
-
-        private void OnObjectDeselected(DCLBuilderEntity entity, string gizmoType)
-        {
-            if (LOG_MESSAGES) Debug.Log($"SEND: gizmoDeselected {entity.rootEntity.entityId} {gizmoType}");
-            WebInterface.ReportGizmoEvent(entity.rootEntity.scene.sceneData.id, entity.rootEntity.entityId, "gizmoDeselected", gizmoType);
+            NotifyGizmosSelectedEvent(entity, gizmoType);
         }
 
         private void OnNoObjectSelected()
         {
-            if (LOG_MESSAGES) Debug.Log($"SEND: gizmoSelected NONE");
-            WebInterface.ReportGizmoEvent(currentScene.sceneData.id, null, "gizmoSelected", null);
+            NotifyGizmosSelectedEvent(null, DCLGizmos.Gizmo.NONE);
         }
 
         private void OnSelectionChanged(Transform selectionParent, List<DCLBuilderEntity> selectedEntitiesList)
@@ -498,16 +493,36 @@ namespace Builder
             selectedEntities = selectedEntitiesList;
         }
 
-        private void NotifyGizmoEvent(DCLBuilderEntity entity, string gizmoType)
+        private void NotifyGizmosTransformEvent(List<DCLBuilderEntity> entities, string gizmoType)
         {
-            if (LOG_MESSAGES) Debug.Log($"SEND: gizmoDragEnded {entity.rootEntity.entityId} {gizmoType}");
-            WebInterface.ReportGizmoEvent(
-                entity.rootEntity.scene.sceneData.id,
-                entity ? entity.rootEntity.entityId : "",
-                "gizmoDragEnded",
-                gizmoType != null ? gizmoType : DCL.Components.DCLGizmos.Gizmo.NONE,
-                entity.gameObject.transform
-            );
+            onGizmoEventPayload.type = "gizmoDragEnded";
+            onGizmoEventPayload.entities = null;
+            onGizmoEventPayload.gizmoType = gizmoType != null ? gizmoType : DCLGizmos.Gizmo.NONE;
+            onGizmoEventPayload.transforms = new GizmosEventPayload.TransformPayload[selectedEntities.Count];
+
+            for (int i = 0; i < entities.Count; i++)
+            {
+                onGizmoEventPayload.transforms[i] = new GizmosEventPayload.TransformPayload()
+                {
+                    entityId = entities[i].rootEntity.entityId,
+                    position = entities[i].transform.position,
+                    rotation = entities[i].transform.rotation,
+                    scale = entities[i].transform.lossyScale
+                };
+            }
+            if (LOG_MESSAGES) Debug.Log($"SEND: NotifyGizmosTransformEvent {JsonUtility.ToJson(onGizmoEventPayload)}");
+            WebInterface.SendSceneEvent(currentScene.sceneData.id, "gizmoEvent", onGizmoEventPayload);
+        }
+
+        private void NotifyGizmosSelectedEvent(DCLBuilderEntity entity, string gizmoType)
+        {
+            onGizmoEventPayload.type = "gizmoSelected";
+            onGizmoEventPayload.entities = entity ? new string[] { entity.rootEntity.entityId } : null;
+            onGizmoEventPayload.gizmoType = gizmoType != null ? gizmoType : DCLGizmos.Gizmo.NONE;
+            onGizmoEventPayload.transforms = null;
+
+            if (LOG_MESSAGES) Debug.Log($"SEND: NotifyGizmosSelectedEvent {JsonUtility.ToJson(onGizmoEventPayload)}");
+            WebInterface.SendSceneEvent(currentScene.sceneData.id, "gizmoEvent", onGizmoEventPayload);
         }
 
         private IEnumerator TakeScreenshotRoutine(string id)

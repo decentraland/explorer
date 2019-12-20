@@ -17,7 +17,6 @@ namespace Builder
         public delegate void EntitySelectedListChangedDelegate(Transform selectionParent, List<DCLBuilderEntity> selectedEntities);
 
         public static event EntitySelectedDelegate OnMarkObjectSelected;
-        public static event EntitySelectedDelegate OnMarkObjectDeselected;
         public static event EntitySelectedDelegate OnSelectedObject;
         public static event EntityDeselectedDelegate OnDeselectedObject;
         public static event System.Action OnNoObjectSelected;
@@ -62,7 +61,6 @@ namespace Builder
                 DCLBuilderBridge.OnEntityRemoved += OnEntityRemoved;
                 DCLBuilderBridge.OnSceneChanged += OnSceneChanged;
                 DCLBuilderBridge.OnBuilderSelectEntity += OnBuilderSelectEntity;
-                DCLBuilderBridge.OnBuilderDeselectEntity += OnBuilderDeselectEntity;
                 DCLBuilderGizmoManager.OnGizmoTransformObject += OnGizmoTransform;
                 DCLBuilderGizmoManager.OnGizmoTransformObjectEnd += OnGizmoTransformEnded;
                 DCLBuilderObjectDragger.OnDraggingObject += OnObjectsDrag;
@@ -81,7 +79,6 @@ namespace Builder
             DCLBuilderBridge.OnEntityRemoved -= OnEntityRemoved;
             DCLBuilderBridge.OnSceneChanged -= OnSceneChanged;
             DCLBuilderBridge.OnBuilderSelectEntity -= OnBuilderSelectEntity;
-            DCLBuilderBridge.OnBuilderDeselectEntity -= OnBuilderDeselectEntity;
             DCLBuilderGizmoManager.OnGizmoTransformObject -= OnGizmoTransform;
             DCLBuilderGizmoManager.OnGizmoTransformObjectEnd -= OnGizmoTransformEnded;
             DCLBuilderObjectDragger.OnDraggingObject -= OnObjectsDrag;
@@ -164,7 +161,6 @@ namespace Builder
 
                 if (groundClickTime != 0 && (Time.unscaledTime - groundClickTime) < MAX_SECS_FOR_CLICK)
                 {
-                    DeselectAll();
                     if (selectedEntities != null)
                     {
                         OnNoObjectSelected?.Invoke();
@@ -234,21 +230,6 @@ namespace Builder
             }
         }
 
-        private void OnBuilderDeselectEntity(string entityId)
-        {
-            if (string.IsNullOrEmpty(entityId))
-            {
-                DeselectAll();
-            }
-            else
-            {
-                if (entities.ContainsKey(entityId))
-                {
-                    Deselect(entities[entityId]);
-                }
-            }
-        }
-
         private void OnGizmoTransform(string gizmoType)
         {
             isSelectionTransformed = true;
@@ -258,7 +239,6 @@ namespace Builder
         {
             if (isSelectionTransformed)
             {
-                Debug.Log("SelectionParentReset OnGizmoTransformEnded");
                 SelectionParentReset();
             }
             isSelectionTransformed = false;
@@ -273,7 +253,6 @@ namespace Builder
         {
             if (isSelectionTransformed)
             {
-                Debug.Log("SelectionParentReset OnObjectsDragEnd");
                 SelectionParentReset();
             }
             isSelectionTransformed = false;
@@ -289,14 +268,6 @@ namespace Builder
             if (entity != null)
             {
                 OnMarkObjectSelected?.Invoke(entity, gizmosManager.GetSelectedGizmo());
-            }
-        }
-
-        private void MarkDeselected(DCLBuilderEntity entity)
-        {
-            if (entity != null)
-            {
-                OnMarkObjectDeselected?.Invoke(entity, gizmosManager.GetSelectedGizmo());
             }
         }
 

@@ -239,15 +239,6 @@ namespace DCL.Interface
             public Vector3 scale = Vector3.one;
         }
 
-        [System.Serializable]
-        public class OnGizmoEventPayload
-        {
-            public string type;
-            public string gizmoType;
-            public string entityId;
-            public TransformPayload transform;
-        }
-
         public class OnSendScreenshot
         {
             public string id;
@@ -367,7 +358,6 @@ namespace DCL.Interface
         private static OnFocusEvent onFocusEvent = new OnFocusEvent();
         private static OnBlurEvent onBlurEvent = new OnBlurEvent();
         private static OnEnterEvent onEnterEvent = new OnEnterEvent();
-        private static OnGizmoEventPayload onGizmoEventPayload = new OnGizmoEventPayload();
         private static OnSendScreenshot onSendScreenshot = new OnSendScreenshot();
         private static OnPointerEventPayload onPointerEventPayload = new OnPointerEventPayload();
         private static OnGlobalPointerEventPayload onGlobalPointerEventPayload = new OnGlobalPointerEventPayload();
@@ -598,26 +588,6 @@ namespace DCL.Interface
         public static void PreloadFinished(string sceneId)
         {
             SendMessage("PreloadFinished", sceneId);
-        }
-
-
-        public static void ReportGizmoEvent(string sceneId, string entityId, string type, string gizmoType, Transform entityTransform = null)
-        {
-            onGizmoEventPayload.type = type;
-            onGizmoEventPayload.gizmoType = gizmoType;
-            onGizmoEventPayload.entityId = entityId;
-
-            if (entityTransform != null)
-            {
-                TransformPayload payload = new TransformPayload();
-                payload.position = entityTransform.position;
-                payload.rotation = entityTransform.rotation;
-                payload.scale = entityTransform.lossyScale;
-
-                onGizmoEventPayload.transform = payload;
-            }
-
-            SendSceneEvent(sceneId, "gizmoEvent", onGizmoEventPayload);
         }
 
         public static void ReportMousePosition(Vector3 mousePosition, string id)

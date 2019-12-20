@@ -153,17 +153,11 @@ function bindSceneEvents() {
     if (e.type === 'gizmoSelected') {
       evtEmitter.emit('gizmoSelected', {
         gizmoType: e.gizmoType,
-        entityId: e.entityId !== '' ? e.entityId : null
+        entities: e.entities
       })
     } else if (e.type === 'gizmoDragEnded') {
       evtEmitter.emit('transform', {
-        entityId: e.entityId,
-        transform: e.transform
-      })
-    } else if (e.type === 'gizmoDeselected') {
-      evtEmitter.emit('gizmoDeselected', {
-        gizmoType: e.gizmoType,
-        entityId: e.entityId !== '' ? e.entityId : null
+        transforms: e.transforms
       })
     }
   })
