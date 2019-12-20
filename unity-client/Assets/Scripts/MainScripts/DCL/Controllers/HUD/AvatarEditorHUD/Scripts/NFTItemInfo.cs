@@ -24,6 +24,16 @@ public class NFTItemInfo : MonoBehaviour
         public int issuedId;
         public int issuedTotal;
 
+        public bool Equals(Model other)
+        {
+            return name == other.name
+                && thumbnail == other.thumbnail
+                && iconIds.SequenceEqual(other.iconIds)
+                && description == other.description
+                && issuedId == other.issuedId
+                && issuedTotal == other.issuedTotal;
+        }
+
         public static Model FromWearableItem(WearableItem wearable)
         {
             var iconsIds = wearable.representations.SelectMany(x => x.bodyShapes).ToList();
@@ -51,6 +61,9 @@ public class NFTItemInfo : MonoBehaviour
 
     public void SetModel(Model newModel)
     {
+        if (newModel.Equals(currentModel))
+            return;
+
         ThumbnailsManager.CancelRequest(currentModel?.thumbnail, UpdateItemThumbnail);
         currentModel = newModel;
 

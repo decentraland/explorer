@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -12,8 +12,9 @@ public static class ThumbnailsManager
 
     public static void RequestThumbnail(string url, Action<Sprite> callback)
     {
-        if (url == null) return;
-        
+        if (string.IsNullOrEmpty(url))
+            return;
+
         if (loadedSprites.ContainsKey(url))
         {
             callback?.Invoke(loadedSprites[url]);
