@@ -51,7 +51,7 @@ namespace DCL
                 {
                     newHoveredObject = hitInfo.transform.GetComponentInParent<OnPointerEvent>();
 
-                    if (newHoveredObject != null && newHoveredObject.IsAtHoverDistance(hitInfo.distance))
+                    if (newHoveredObject != null && newHoveredObject.IsAtHoverDistance((DCLCharacterController.i.transform.position - newHoveredObject.transform.position).magnitude))
                     {
                         if (newHoveredObject != lastHoveredObject)
                         {
