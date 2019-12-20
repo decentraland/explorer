@@ -24,15 +24,11 @@ public class CursorController : MonoBehaviour
     {
         cursorImage.sprite = normalCursor;
         cursorImage.SetNativeSize();
-
-        Debug.Log("SWITCH TO NORMAL CURSOR");
     }
 
     void SetHoverCursor()
     {
         cursorImage.sprite = hoverCursor;
         cursorImage.SetNativeSize();
-
-        Debug.Log("SWITCH TO HOVER CURSOR");
     }
 }
