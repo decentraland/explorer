@@ -1,3 +1,4 @@
+using DCL.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -61,8 +62,19 @@ public class NFTItemInfo : MonoBehaviour
             icon.gameObject.SetActive(currentModel.iconIds.Contains(icon.iconId));
         }
 
-        description.text = currentModel.description;
+        if (!string.IsNullOrEmpty(currentModel.description))
+            description.text = currentModel.description;
+        else
+            description.text = "No description.";
+
         minted.text = $"{currentModel.issuedId} / {currentModel.issuedTotal}";
+
+        Utils.InverseTransformChildTraversal<LayoutGroup>((x) =>
+        {
+            RectTransform rt = x.transform as RectTransform;
+            rt.ForceUpdateRectTransforms();
+            LayoutRebuilder.ForceRebuildLayoutImmediate(rt);
+        }, transform);
     }
 
     public void SetActive(bool active)

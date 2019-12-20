@@ -127,7 +127,7 @@ public class WearableItem : Item
             case WearableLiterals.ItemRarity.SWANKY:
                 return 5000;
             case WearableLiterals.ItemRarity.EPIC:
-                return 500;
+                return 1000;
             case WearableLiterals.ItemRarity.LEGENDARY:
                 return 100;
             case WearableLiterals.ItemRarity.MYTHIC:

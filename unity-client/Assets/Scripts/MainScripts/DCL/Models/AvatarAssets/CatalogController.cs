@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class CatalogController : MonoBehaviour
 {
+    public static bool VERBOSE = false;
     public static CatalogController i { get; private set; }
 
     private static ItemDictionary itemCatalogValue;
@@ -42,15 +43,15 @@ public class CatalogController : MonoBehaviour
     public void AddWearableToCatalog(string payload)
     {
         Item item = JsonUtility.FromJson<Item>(payload);
+
+        if (VERBOSE)
+            Debug.Log("add wearable: " + payload);
+
         switch (item.type)
         {
             case "wearable":
                 {
                     WearableItem wearableItem = JsonUtility.FromJson<WearableItem>(payload);
-                    if (wearableItem.IsCollectible())
-                    {
-                        FillInfoWithContent(wearableItem);
-                    }
                     wearableCatalog.Add(wearableItem.id, wearableItem);
                     break;
                 }
@@ -65,27 +66,6 @@ public class CatalogController : MonoBehaviour
                     break;
                 }
         }
-    }
-
-    private void FillInfoWithContent(WearableItem wearableItem)
-    {
-
-        switch (Random.Range(0, 3))
-        {
-            case 0:
-                wearableItem.rarity = "rare";
-                break;
-            case 1:
-                wearableItem.rarity = "epic";
-                break;
-            case 2:
-                wearableItem.rarity = "legendary";
-                break;
-        }
-
-        wearableItem.description = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum";
-        wearableItem.issuedId = Random.Range(1, 5000);
-
     }
 
     public void AddWearablesToCatalog(string payload)
