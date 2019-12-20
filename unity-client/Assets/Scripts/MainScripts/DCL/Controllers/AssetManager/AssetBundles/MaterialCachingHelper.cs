@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityGLTF.Cache;
@@ -30,7 +30,7 @@ namespace DCL
 
                     if (!PersistentAssetCache.MaterialCacheByCRC.ContainsKey(crc))
                     {
-                        //mat.enableInstancing = true;
+                        mat.enableInstancing = true;
                         PersistentAssetCache.MaterialCacheByCRC.Add(crc, new RefCountedMaterialData(crc, mat));
                     }
 
