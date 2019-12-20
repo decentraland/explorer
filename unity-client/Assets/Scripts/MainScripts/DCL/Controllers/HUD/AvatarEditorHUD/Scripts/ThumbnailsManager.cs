@@ -34,7 +34,7 @@ public static class ThumbnailsManager
 
     public static void CancelRequest(string url, Action<Sprite> callback)
     {
-        if (url != null && waitingCallbacks.ContainsKey(url))
+        if (!string.IsNullOrEmpty(url) && waitingCallbacks.ContainsKey(url))
         {
             waitingCallbacks[url].Remove(callback);
         }

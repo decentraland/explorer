@@ -61,7 +61,10 @@ public class NFTItemInfo : MonoBehaviour
 
     public void SetModel(Model newModel)
     {
-        if (newModel.Equals(currentModel))
+        if (newModel == null)
+            return;
+
+        if (currentModel != null && newModel.Equals(currentModel))
             return;
 
         ThumbnailsManager.CancelRequest(currentModel?.thumbnail, UpdateItemThumbnail);
