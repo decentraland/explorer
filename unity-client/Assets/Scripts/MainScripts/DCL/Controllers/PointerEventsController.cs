@@ -12,8 +12,6 @@ namespace DCL
         public static System.Action OnPointerHoverStarts;
         public static System.Action OnPointerHoverEnds;
 
-        public bool enableInteractionHoverFeedback = true;
-
         bool isTesting = false;
         RaycastHitInfo lastPointerDownEventHitInfo;
         OnPointerUp pointerUpEvent;
@@ -33,13 +31,7 @@ namespace DCL
 
             RetrieveCamera();
 
-            StartInteractiveObjectsHoverRoutine();
-        }
-
-        public void StartInteractiveObjectsHoverRoutine()
-        {
-            if (enableInteractionHoverFeedback && hoverInteractiveObjectsRoutine == null)
-                hoverInteractiveObjectsRoutine = SceneController.i.StartCoroutine(HoverInteractiveObjects());
+            hoverInteractiveObjectsRoutine = SceneController.i.StartCoroutine(HoverInteractiveObjects());
         }
 
         IEnumerator HoverInteractiveObjects()

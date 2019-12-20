@@ -17,9 +17,6 @@ namespace Tests
         {
             yield return InitScene();
 
-            PointerEventsController.i.enableInteractionHoverFeedback = true;
-            PointerEventsController.i.StartInteractiveObjectsHoverRoutine();
-
             DecentralandEntity entity;
             BoxShape shape;
 
