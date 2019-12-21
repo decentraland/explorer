@@ -1,7 +1,6 @@
 import { Position } from './utils'
-import { UserInformation, Package, ChatMessage, ProfileVersion, BusMessage, Pose } from './types'
+import { UserInformation, Package, ChatMessage, ProfileVersion, BusMessage } from './types'
 import { Stats } from '../comms/debug'
-import { ProfileForRenderer } from '../../decentraland-ecs/src/decentraland/Types'
 
 export interface WorldInstanceConnection {
   stats: Stats | null
@@ -21,19 +20,13 @@ export interface WorldInstanceConnection {
 
   close(): void
 
-  sendInitialMessage(userInfo: {
-    userId?: string | undefined
-    version?: number | undefined
-    status?: string | undefined
-    pose?: Pose | undefined
-    profile?: ProfileForRenderer | undefined
-  }): void
-  sendProfileMessage(currentPosition: Position, userInfo: UserInformation): void
-  sendPositionMessage(p: Position): void
-  sendParcelUpdateMessage(currentPosition: Position, p: Position): void
-  sendParcelSceneCommsMessage(cid: string, message: string): void
-  sendChatMessage(currentPosition: Position, messageId: string, text: string): void
+  sendInitialMessage(userInfo: Partial<UserInformation>): Promise<void>
+  sendProfileMessage(currentPosition: Position, userInfo: UserInformation): Promise<void>
+  sendPositionMessage(p: Position): Promise<void>
+  sendParcelUpdateMessage(currentPosition: Position, p: Position): Promise<void>
+  sendParcelSceneCommsMessage(cid: string, message: string): Promise<void>
+  sendChatMessage(currentPosition: Position, messageId: string, text: string): Promise<void>
 
   // TODO - review if we want to change this to other interface - moliva - 19/12/2019
-  updateSubscriptions(topics: string): void
+  updateSubscriptions(topics: string[]): Promise<void>
 }

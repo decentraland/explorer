@@ -89,7 +89,7 @@ export class BrokerWorldInstanceConnection implements WorldInstanceConnection {
     return this.connection.isConnected
   }
 
-  sendPositionMessage(p: Position) {
+  async sendPositionMessage(p: Position) {
     const topic = positionHash(p)
 
     const d = new PositionData()
@@ -109,7 +109,7 @@ export class BrokerWorldInstanceConnection implements WorldInstanceConnection {
     }
   }
 
-  sendParcelUpdateMessage(current: Position, newPosition: Position) {
+  async sendParcelUpdateMessage(current: Position, newPosition: Position) {
     const topic = positionHash(current)
 
     const d = new PositionData()
@@ -129,7 +129,7 @@ export class BrokerWorldInstanceConnection implements WorldInstanceConnection {
     }
   }
 
-  sendProfileMessage(p: Position, userProfile: UserInformation) {
+  async sendProfileMessage(p: Position, userProfile: UserInformation) {
     const topic = positionHash(p)
 
     const d = new ProfileData()
@@ -143,7 +143,7 @@ export class BrokerWorldInstanceConnection implements WorldInstanceConnection {
     }
   }
 
-  sendInitialMessage(userProfile: UserInformation) {
+  async sendInitialMessage(userProfile: UserInformation) {
     const topic = userProfile.userId!
 
     const d = new ProfileData()
@@ -157,7 +157,7 @@ export class BrokerWorldInstanceConnection implements WorldInstanceConnection {
     }
   }
 
-  sendParcelSceneCommsMessage(sceneId: string, message: string) {
+  async sendParcelSceneCommsMessage(sceneId: string, message: string) {
     const topic = sceneId
 
     // TODO: create its own class once we get the .proto file
@@ -174,7 +174,7 @@ export class BrokerWorldInstanceConnection implements WorldInstanceConnection {
     }
   }
 
-  sendChatMessage(p: Position, messageId: string, text: string) {
+  async sendChatMessage(p: Position, messageId: string, text: string) {
     const topic = positionHash(p)
 
     const d = new ChatData()
@@ -212,21 +212,21 @@ export class BrokerWorldInstanceConnection implements WorldInstanceConnection {
     return this.sendMessage(reliable, message)
   }
 
-  updateSubscriptions(rawTopics: string) {
+  async updateSubscriptions(rawTopics: string[]) {
     if (!this.connection.hasReliableChannel) {
       if (!this.fatalErrorSent) {
         this.fatalErrorSent = true
         throw new Error('trying to send topic subscription message but reliable channel is not ready')
       } else {
-        return
+        return Promise.reject()
       }
     }
-    rawTopics.split(' ').map(_ => Reporter.subscribe(_))
+    rawTopics.map(_ => Reporter.subscribe(_))
     const subscriptionMessage = new SubscriptionMessage()
     subscriptionMessage.setType(MessageType.SUBSCRIPTION)
     subscriptionMessage.setFormat(Format.PLAIN)
     // TODO: use TextDecoder instead of Buffer, it is a native browser API, works faster
-    subscriptionMessage.setTopics(Buffer.from(rawTopics, 'utf8'))
+    subscriptionMessage.setTopics(Buffer.from(rawTopics.join(' '), 'utf8'))
     const bytes = subscriptionMessage.serializeBinary()
     this.connection.sendReliable(bytes)
   }

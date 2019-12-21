@@ -401,7 +401,7 @@ describe('Communications', function() {
         })
 
         it('topic subscriptions', () => {
-          worldConn.updateSubscriptions('topic1 topic2')
+          worldConn.updateSubscriptions(['topic1', 'topic2'])
           expect(connection.reliableDataChannel!.send).to.have.been.calledWithMatch((bytes: Uint8Array) => {
             const msg = SubscriptionMessage.deserializeBinary(bytes)
             expect(msg.getType()).to.equal(MessageType.SUBSCRIPTION)
@@ -692,12 +692,12 @@ describe('Communications', function() {
 
       onPositionUpdate(context, [0, 0, 0, 0, 0, 0, 0])
 
-      expect(worldConn.updateSubscriptions).to.have.been.calledWithMatch((rawTopics: string) => {
-        expect(rawTopics.split(' ')).to.have.length(1)
+      expect(worldConn.updateSubscriptions).to.have.been.calledWithMatch((rawTopics: string[]) => {
+        expect(rawTopics).to.have.length(1)
         return true
       })
-      expect(worldConn.updateSubscriptions).to.have.been.calledWithMatch((rawTopics: string) => {
-        expect(rawTopics.split(' ')).to.have.length(1)
+      expect(worldConn.updateSubscriptions).to.have.been.calledWithMatch((rawTopics: string[]) => {
+        expect(rawTopics).to.have.length(1)
         return true
       })
     })

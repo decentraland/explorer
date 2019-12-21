@@ -1,5 +1,12 @@
 import { saveToLocalStorage } from 'atomicHelpers/localStorage'
-import { commConfigurations, ETHEREUM_NETWORK, getServerConfigurations, parcelLimits, USE_LOCAL_COMMS } from 'config'
+import {
+  commConfigurations,
+  ETHEREUM_NETWORK,
+  getServerConfigurations,
+  parcelLimits,
+  USE_LOCAL_COMMS,
+  COMMS_V2
+} from 'config'
 import { CommunicationsController } from 'shared/apis/CommunicationsController'
 import { Auth } from 'shared/auth/Auth'
 import { defaultLogger } from 'shared/logger'
@@ -35,6 +42,8 @@ import { ProfileForRenderer } from 'decentraland-ecs/src'
 import { Session } from '../session/index'
 import { worldRunningObservable, isWorldRunning } from '../world/worldState'
 import { WorldInstanceConnection } from '../comms-interface/index'
+import { LighthouseWorldInstanceConnection } from './v2/LighthouseWorldInstanceConnection'
+const katalyst = require('decentraland-katalyst-peer')
 
 type Timestamp = number
 type PeerAlias = string
@@ -324,7 +333,7 @@ export function onPositionUpdate(context: Context, p: Position) {
     (parcelSceneCommsTopics.length ? ' ' + parcelSceneCommsTopics : '')
 
   if (topics !== previousTopics) {
-    worldConnection.updateSubscriptions(topics)
+    worldConnection.updateSubscriptions(topics.split(' '))
     previousTopics = topics
   }
 
@@ -426,10 +435,7 @@ export async function connect(userId: string, network: ETHEREUM_NETWORK, auth: A
 
   let connection: WorldInstanceConnection
 
-  // TODO - check by config if using broker world connection or lighthouse peer - moliva - 19/12/2019
-  const useBroker = true
-
-  if (useBroker) {
+  if (!COMMS_V2) {
     let commsBroker: IBrokerConnection
     if (USE_LOCAL_COMMS) {
       let location = document.location.toString()
@@ -471,7 +477,8 @@ export async function connect(userId: string, network: ETHEREUM_NETWORK, auth: A
 
     connection = instance
   } else {
-    connection = {} as any
+    const peer = new katalyst.Peer('http://localhost:9000', 'peer')
+    connection = new LighthouseWorldInstanceConnection(peer)
   }
 
   connection.positionHandler = (alias: string, data: Package<Position>) => {
@@ -528,8 +535,8 @@ export async function connect(userId: string, network: ETHEREUM_NETWORK, auth: A
     }
   }, 100)
 
-  connection.updateSubscriptions(userId)
-  connection.sendInitialMessage(userInfo)
+  await connection.updateSubscriptions([userId])
+  await connection.sendInitialMessage(userInfo)
 
   return context
 }
