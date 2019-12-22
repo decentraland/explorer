@@ -1,8 +1,9 @@
 import { WorldInstanceConnection } from '../../comms-interface/index'
 import { Stats } from '../debug'
 import { Package, BusMessage, ChatMessage, ProfileVersion, UserInformation } from '../../comms-interface/types'
-import { Position } from '../../comms-interface/utils'
+import { Position, positionHash } from '../../comms-interface/utils'
 import { Peer } from 'decentraland-katalyst-peer'
+import defaultLogger from '../../logger'
 
 const NOOP = () => {
   // do nothing
@@ -20,9 +21,27 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
 
   ping: number = -1
 
-  // @ts-ignore
   constructor(private peer: Peer) {
-    // nothing to do here
+    peer.callback = (sender, room, payload) => {
+      switch (payload.type) {
+        case 'profile': {
+          this.profileHandler(sender, payload.data.user, payload)
+          break
+        }
+        case 'chat': {
+          this.chatHandler(sender, payload)
+          break
+        }
+        case 'position': {
+          this.positionHandler(sender, payload)
+          break
+        }
+        default: {
+          defaultLogger.warn(`message with unknown type received ${payload.type}`)
+          break
+        }
+      }
+    }
   }
 
   printDebugInformation() {
@@ -38,11 +57,23 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
   }
 
   async sendProfileMessage(currentPosition: Position, userInfo: UserInformation) {
-    // TODO - implement this - moliva - 20/12/2019
+    const topic = positionHash(currentPosition)
+
+    await this.peer.sendMessage(topic, {
+      type: 'profile',
+      time: Date.now(),
+      data: { version: userInfo.version, user: userInfo.userId }
+    })
   }
 
   async sendPositionMessage(p: Position) {
-    // TODO - implement this - moliva - 20/12/2019
+    const topic = positionHash(p)
+
+    await this.peer.sendMessage(topic, {
+      type: 'position',
+      time: Date.now(),
+      data: [p[0], p[1], p[2], p[3], p[4], p[5], p[6]]
+    })
   }
 
   async sendParcelUpdateMessage(currentPosition: Position, p: Position) {
@@ -54,7 +85,13 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
   }
 
   async sendChatMessage(currentPosition: Position, messageId: string, text: string) {
-    // TODO - implement this - moliva - 20/12/2019
+    const topic = positionHash(currentPosition)
+
+    await this.peer.sendMessage(topic, {
+      type: 'chat',
+      time: Date.now(),
+      data: { id: messageId, text }
+    })
   }
 
   async updateSubscriptions(rooms: string[]) {

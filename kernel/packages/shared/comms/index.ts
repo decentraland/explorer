@@ -36,9 +36,7 @@ import { Pose, UserInformation, Package, ChatMessage, ProfileVersion, BusMessage
 import { CommunicationArea, Position, position2parcel, sameParcel, squareDistance } from '../comms-interface/utils'
 import { BrokerWorldInstanceConnection } from '../comms-broker/brokerWorldInstanceConnection'
 import { profileToRendererFormat } from 'shared/passports/transformations/profileToRendererFormat'
-import { ProfileForRenderer } from 'decentraland-ecs/src'
-// TODO - remove ignore - moliva - 19/12/2019
-// @ts-ignore
+import { ProfileForRenderer, uuid } from 'decentraland-ecs/src'
 import { Session } from '../session/index'
 import { worldRunningObservable, isWorldRunning } from '../world/worldState'
 import { WorldInstanceConnection } from '../comms-interface/index'
@@ -144,13 +142,17 @@ function getParcelSceneSubscriptions(): string[] {
 
 export function sendPublicChatMessage(messageId: string, text: string) {
   if (context && context.currentPosition && context.worldInstanceConnection) {
-    context.worldInstanceConnection.sendChatMessage(context.currentPosition, messageId, text)
+    context.worldInstanceConnection
+      .sendChatMessage(context.currentPosition, messageId, text)
+      .catch(e => defaultLogger.warn(`error while sending message `, e))
   }
 }
 
 export function sendParcelSceneCommsMessage(cid: string, message: string) {
   if (context && context.currentPosition && context.worldInstanceConnection) {
-    context.worldInstanceConnection.sendParcelSceneCommsMessage(cid, message)
+    context.worldInstanceConnection
+      .sendParcelSceneCommsMessage(cid, message)
+      .catch(e => defaultLogger.warn(`error while sending message `, e))
   }
 }
 
@@ -245,7 +247,7 @@ export function processProfileMessage(
   const peerTrackingInfo = ensurePeerTrackingInfo(context, fromAlias)
 
   if (msgTimestamp > peerTrackingInfo.lastProfileUpdate) {
-    const profileVersion = data.data
+    const profileVersion = data.data.version
 
     peerTrackingInfo.identity = identity
     peerTrackingInfo.loadProfileIfNecessary(profileVersion ? parseInt(profileVersion, 10) : 0)
@@ -319,7 +321,9 @@ export function onPositionUpdate(context: Context, p: Position) {
 
     currentParcelTopics = rawTopics.join(' ')
     if (context.currentPosition) {
-      worldConnection.sendParcelUpdateMessage(context.currentPosition, p)
+      worldConnection
+        .sendParcelUpdateMessage(context.currentPosition, p)
+        .catch(e => defaultLogger.warn(`error while sending message `, e))
     }
   }
 
@@ -333,7 +337,9 @@ export function onPositionUpdate(context: Context, p: Position) {
     (parcelSceneCommsTopics.length ? ' ' + parcelSceneCommsTopics : '')
 
   if (topics !== previousTopics) {
-    worldConnection.updateSubscriptions(topics.split(' '))
+    worldConnection
+      .updateSubscriptions(topics.split(' '))
+      .catch(e => defaultLogger.warn(`error while updating subscriptions`, e))
     previousTopics = topics
   }
 
@@ -341,7 +347,7 @@ export function onPositionUpdate(context: Context, p: Position) {
   const now = new Date().getTime()
   if (now - lastNetworkUpdatePosition > 100) {
     lastNetworkUpdatePosition = now
-    worldConnection.sendPositionMessage(p)
+    worldConnection.sendPositionMessage(p).catch(e => defaultLogger.warn(`error while sending message `, e))
   }
 }
 
@@ -477,7 +483,8 @@ export async function connect(userId: string, network: ETHEREUM_NETWORK, auth: A
 
     connection = instance
   } else {
-    const peer = new katalyst.Peer('http://localhost:9000', 'peer')
+    // TODO - parameterize lighthouse url - moliva - 22/12/2019
+    const peer = new katalyst.Peer('http://localhost:9000', 'peer-' + uuid())
     connection = new LighthouseWorldInstanceConnection(peer)
   }
 
@@ -503,7 +510,9 @@ export async function connect(userId: string, network: ETHEREUM_NETWORK, auth: A
 
   context.profileInterval = setInterval(() => {
     if (context && context.currentPosition && context.worldInstanceConnection) {
-      context.worldInstanceConnection.sendProfileMessage(context.currentPosition, context.userInfo)
+      context.worldInstanceConnection
+        .sendProfileMessage(context.currentPosition, context.userInfo)
+        .catch(e => defaultLogger.warn(`error while sending message `, e))
     }
   }, 1000)
 
@@ -549,7 +558,9 @@ export function onWorldRunning(isRunning: boolean, _context: Context | null = co
 
 export function sendToMordor(_context: Context | null = context) {
   if (_context && _context.worldInstanceConnection && _context.currentPosition) {
-    _context.worldInstanceConnection.sendParcelUpdateMessage(_context.currentPosition, MORDOR_POSITION)
+    _context.worldInstanceConnection
+      .sendParcelUpdateMessage(_context.currentPosition, MORDOR_POSITION)
+      .catch(e => defaultLogger.warn(`error while sending message `, e))
   }
 }
 

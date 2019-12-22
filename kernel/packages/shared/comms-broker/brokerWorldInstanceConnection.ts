@@ -13,9 +13,8 @@ import {
   TopicIdentityMessage,
   TopicIdentityFWMessage
 } from './proto/broker'
-import { Position, position2parcel } from '../comms-interface/utils'
+import { Position, positionHash } from '../comms-interface/utils'
 import { UserInformation, Package, ChatMessage, ProfileVersion, BusMessage } from '../comms-interface/types'
-import { parcelLimits } from 'config'
 import { IBrokerConnection, BrokerMessage } from './IBrokerConnection'
 import { Stats } from '../comms/debug'
 import { createLogger } from 'shared/logger'
@@ -25,13 +24,6 @@ import { WorldInstanceConnection } from '../comms-interface/index'
 
 class SendResult {
   constructor(public bytesSize: number) {}
-}
-
-export function positionHash(p: Position) {
-  const parcel = position2parcel(p)
-  const x = (parcel.x + parcelLimits.maxParcelX) >> 2
-  const z = (parcel.z + parcelLimits.maxParcelZ) >> 2
-  return `${x}:${z}`
 }
 
 const NOOP = () => {
@@ -295,6 +287,7 @@ export class BrokerWorldInstanceConnection implements WorldInstanceConnection {
 
             this.positionHandler &&
               this.positionHandler(alias, {
+                type: 'position',
                 time: positionData.getTime(),
                 data: [
                   positionData.getPositionX(),
@@ -318,6 +311,7 @@ export class BrokerWorldInstanceConnection implements WorldInstanceConnection {
 
             this.chatHandler &&
               this.chatHandler(alias, {
+                type: 'chat',
                 time: chatData.getTime(),
                 data: {
                   id: chatData.getMessageId(),
@@ -336,6 +330,7 @@ export class BrokerWorldInstanceConnection implements WorldInstanceConnection {
 
             this.sceneMessageHandler &&
               this.sceneMessageHandler(alias, {
+                type: 'chat',
                 time: chatData.getTime(),
                 data: { id: chatData.getMessageId(), text: chatData.getText() }
               })
@@ -383,7 +378,11 @@ export class BrokerWorldInstanceConnection implements WorldInstanceConnection {
               this._stats.profile.incrementRecv(msgSize)
             }
             this.profileHandler &&
-              this.profileHandler(alias, userId, { time: profileData.getTime(), data: profileData.getProfileVersion() })
+              this.profileHandler(alias, userId, {
+                type: 'profile',
+                time: profileData.getTime(),
+                data: { user: userId, version: profileData.getProfileVersion() }
+              })
             break
           }
           default: {

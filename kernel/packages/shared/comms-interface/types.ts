@@ -93,11 +93,15 @@ export type PoseInformation = {
 }
 
 export type Package<T> = {
+  type: 'profile' | 'chat' | 'position'
   time: number
   data: T
 }
 
-export type ProfileVersion = string
+export type ProfileVersion = {
+  version: string
+  user: string // TODO - remove this from here or ensure authenticity - moliva - 22/12/2019
+}
 
 export type ChatMessage = {
   id: string
