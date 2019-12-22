@@ -53,7 +53,16 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
   }
 
   async sendInitialMessage(userInfo: Partial<UserInformation>) {
-    // TODO - implement this - moliva - 20/12/2019
+    const topic = userInfo.userId!
+
+    await this.peer.sendMessage(topic, {
+      type: 'profile',
+      time: Date.now(),
+      data: {
+        version: userInfo.version,
+        user: userInfo.userId
+      }
+    })
   }
 
   async sendProfileMessage(currentPosition: Position, userInfo: UserInformation) {
@@ -77,11 +86,23 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
   }
 
   async sendParcelUpdateMessage(currentPosition: Position, p: Position) {
-    // TODO - implement this - moliva - 20/12/2019
+    const topic = positionHash(currentPosition)
+
+    await this.peer.sendMessage(topic, {
+      type: 'position',
+      time: Date.now(),
+      data: [p[0], p[1], p[2], p[3], p[4], p[5], p[6]]
+    })
   }
 
-  async sendParcelSceneCommsMessage(cid: string, message: string) {
-    // TODO - implement this - moliva - 20/12/2019
+  async sendParcelSceneCommsMessage(sceneId: string, message: string) {
+    const topic = sceneId
+
+    await this.peer.sendMessage(topic, {
+      type: 'chat',
+      time: Date.now(),
+      data: { id: sceneId, text: message }
+    })
   }
 
   async sendChatMessage(currentPosition: Position, messageId: string, text: string) {
