@@ -1,4 +1,4 @@
-﻿using DCL.Components;
+using DCL.Components;
 using DCL.Configuration;
 using DCL.Helpers;
 using DCL.Models;
@@ -588,7 +588,7 @@ namespace DCL.Controllers
                     entity.gameObject.transform.localRotation = DCLTransform.model.rotation;
                     entity.gameObject.transform.localScale = DCLTransform.model.scale;
 
-                    boundariesChecker.EvaluateEntityPosition(entity);
+                    //boundariesChecker.EvaluateEntityPosition(entity);
                 }
 
                 return null;
