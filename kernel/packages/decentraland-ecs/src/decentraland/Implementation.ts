@@ -15,8 +15,29 @@ import {
 import { DecentralandInterface } from './Types'
 import { RaycastHitEntity, RaycastHitEntities } from './PhysicsCast'
 
+const SAFE_INEFFICIENT_COMPARE = false
+const DEBUG_SYNC_SYSTEM = false
+
 // This number is defined in the protocol ECS.SetEntityParent.3
 const ROOT_ENTITY_ID = '0'
+
+const BAD_HIT = 'BAD: JSON cache is a hit, but `dirty` was true.'
+const GOOD_MISS = 'GOOD: JSON cache is a hit, and `dirty` was false.'
+const GOOD_HIT = 'GOOD: JSON cache is different, and `dirty` was true.'
+const BAD_MISS = 'BAD: JSON cache is different, but `dirty` was false.'
+const UNDEFINED_HIT = "`dirty` is not a flag, but don't send anything because nothing changed"
+const UNDEFINED_MISS = '`dirty` is not actually a flag in components. Use sameJSON comparison'
+
+const loggedCases: Record<string, number> = {}
+function logDifferenceAlgorithm(caseStr: string) {
+  if (!DEBUG_SYNC_SYSTEM) {
+    return
+  }
+  loggedCases[caseStr] = (loggedCases[caseStr] ? loggedCases[caseStr] : 0) + 1
+  if (loggedCases[caseStr] % 10000 == 0) {
+    console.log(`Diff [${caseStr}]: ${loggedCases[caseStr]}`)
+  }
+}
 
 export class DecentralandSynchronizationSystem implements ISystem {
   cachedComponents: Record<string, Record<string, string>> = {}
@@ -82,11 +103,11 @@ export class DecentralandSynchronizationSystem implements ISystem {
         this.dcl.setParent(entityId, parent.uuid)
       }
 
-      // This creates a cache dictionary to avoid send redundant information to
+      // This creates a cache dictionary to avoid sending redundant information to
       // the engine in order to avoid unnecessary work in the main thread.
       this.cachedComponents[entityId] = {}
 
-      // this iterator sends the current components of te engine at the moment
+      // this iterator sends the current components of the engine at the moment
       // of addition
       for (let componentName in entity.components) {
         const component = entity.components[componentName]
@@ -139,16 +160,10 @@ export class DecentralandSynchronizationSystem implements ISystem {
         const component = entity.components[componentName]
         const classId = getComponentClassId(component)
 
-        if (classId !== null && !isDisposableComponent(component)) {
-          const componentJson: string = JSON.stringify(component)
-
-          if (this.cachedComponents[entityId][componentName] !== componentJson) {
-            // Send the updated component
-            this.dcl.updateEntityComponent(entity.uuid, componentName, classId, componentJson)
-
-            // Update the cached copy of the sent component
-            this.cachedComponents[entityId][componentName] = componentJson
-          }
+        if (SAFE_INEFFICIENT_COMPARE) {
+          this.inefficientCompare(entity, entityId, component, componentName, classId)
+        } else {
+          this.efficientCompare(entity, entityId, component, componentName, classId)
         }
       }
     }
@@ -160,6 +175,59 @@ export class DecentralandSynchronizationSystem implements ISystem {
         component.dirty = false
       }
     }
+  }
+
+  private efficientCompare(entity: IEntity, entityId: string, component: any, componentName: string, classId: any) {
+    if (classId !== null && !isDisposableComponent(component) && component.dirty) {
+      this.sendUpdateEntityComponent(entity, component, componentName, classId, JSON.stringify(component), entityId)
+    }
+  }
+  private inefficientCompare(entity: IEntity, entityId: string, component: any, componentName: string, classId: any) {
+    if (classId !== null && !isDisposableComponent(component)) {
+      const componentJson: string = JSON.stringify(component)
+
+      const isDirty = component.dirty === undefined
+      const isSameJSON = this.cachedComponents[entityId][componentName] === componentJson
+
+      if (component.dirty === undefined) {
+        if (isSameJSON) {
+          logDifferenceAlgorithm(UNDEFINED_MISS)
+        } else {
+          logDifferenceAlgorithm(UNDEFINED_HIT)
+          this.sendUpdateEntityComponent(entity, component, componentName, classId, componentJson, entityId)
+        }
+      } else if (isDirty) {
+        if (isSameJSON) {
+          logDifferenceAlgorithm(BAD_MISS)
+        } else {
+          logDifferenceAlgorithm(GOOD_MISS)
+          this.sendUpdateEntityComponent(entity, component, componentName, classId, componentJson, entityId)
+        }
+      } else {
+        if (isSameJSON) {
+          logDifferenceAlgorithm(GOOD_HIT)
+        } else {
+          logDifferenceAlgorithm(BAD_HIT)
+          this.sendUpdateEntityComponent(entity, component, componentName, classId, componentJson, entityId)
+        }
+      }
+    }
+  }
+
+  private sendUpdateEntityComponent(
+    entity: IEntity,
+    component: any,
+    componentName: string,
+    classId: number,
+    componentJson: string,
+    entityId: string
+  ) {
+    component.dirty = false
+
+    // Update the cached copy of the sent component
+    this.cachedComponents[entityId][componentName] = componentJson
+
+    this.dcl.updateEntityComponent(entity.uuid, componentName, classId, componentJson)
   }
 
   /**
