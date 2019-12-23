@@ -389,7 +389,9 @@ namespace DCL.Controllers
             newEntity.scene = this;
 
             newEntity.OnCleanupEvent += po.OnCleanup;
-            newEntity.OnShapeUpdated += boundariesChecker.EvaluateEntityPosition;
+
+            if (CHECK_BOUNDARIES_ON_TRANSFORM_UPDATE)
+                newEntity.OnShapeUpdated += boundariesChecker.EvaluateEntityPosition;
 
             entities.Add(tmpCreateEntityMessage.id, newEntity);
 
