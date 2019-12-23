@@ -104,7 +104,7 @@ namespace Builder
             if (buttonId == 0)
             {
                 RaycastHit hit;
-                if (builderRaycast.Raycast(mousePosition, builderRaycast.defaultMask, out hit, true))
+                if (builderRaycast.Raycast(mousePosition, builderRaycast.defaultMask | builderRaycast.gizmoMask, out hit, CompareSelectionHit))
                 {
                     DCLBuilderGizmoAxis gizmosAxis = hit.collider.gameObject.GetComponent<DCLBuilderGizmoAxis>();
                     if (gizmosAxis != null)
@@ -125,7 +125,7 @@ namespace Builder
                         {
                             if (CanSelect(pressedEntity))
                             {
-                                if (selectedEntities.Contains(pressedEntity))
+                                if (SelectionParentHasChild(pressedEntity.transform))
                                 {
                                     EnqueueEntityForDeselect(pressedEntity, hit.point);
                                 }
@@ -408,6 +408,54 @@ namespace Builder
         private bool SelectionParentHasChild(Transform transform)
         {
             return transform.parent == selectedEntitiesParent;
+        }
+
+        private RaycastHit CompareSelectionHit(RaycastHit[] hits)
+        {
+            RaycastHit closestHit = hits[0];
+            bool isHitASelectedObject = IsEntityHitAndSelected(closestHit);
+
+            if (IsGizmoHit(closestHit)) // Gizmos has always priority
+            {
+                return closestHit;
+            }
+
+            RaycastHit hit;
+            for (int i = 1; i < hits.Length; i++)
+            {
+                hit = hits[i];
+                if (IsGizmoHit(hit)) // Gizmos has always priority
+                {
+                    return hit;
+                }
+
+                if (hit.distance < closestHit.distance)
+                {
+                    isHitASelectedObject = IsEntityHitAndSelected(hit);
+                    closestHit = hit;
+                }
+                else if (hit.distance == closestHit.distance && !isHitASelectedObject)
+                {
+                    isHitASelectedObject = IsEntityHitAndSelected(hit);
+                    closestHit = hit;
+                }
+            }
+            return closestHit;
+        }
+
+        private bool IsGizmoHit(RaycastHit hit)
+        {
+            return hit.collider.gameObject.GetComponent<DCLBuilderGizmoAxis>() != null;
+        }
+
+        private bool IsEntityHitAndSelected(RaycastHit hit)
+        {
+            var collider = hit.collider.gameObject.GetComponent<DCLBuilderSelectionCollider>();
+            if (collider != null)
+            {
+                return SelectionParentHasChild(collider.ownerEntity.transform);
+            }
+            return false;
         }
 
         private class EntityPressedInfo
