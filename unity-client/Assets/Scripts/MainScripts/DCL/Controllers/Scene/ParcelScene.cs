@@ -14,6 +14,7 @@ namespace DCL.Controllers
 {
     public class ParcelScene : MonoBehaviour, ICleanable
     {
+        public static bool CHECK_BOUNDARIES_ON_TRANSFORM_UPDATE = false;
         public static bool VERBOSE = false;
         enum State
         {
@@ -588,7 +589,8 @@ namespace DCL.Controllers
                     entity.gameObject.transform.localRotation = DCLTransform.model.rotation;
                     entity.gameObject.transform.localScale = DCLTransform.model.scale;
 
-                    //boundariesChecker.EvaluateEntityPosition(entity);
+                    if (CHECK_BOUNDARIES_ON_TRANSFORM_UPDATE)
+                        boundariesChecker.EvaluateEntityPosition(entity);
                 }
 
                 return null;
