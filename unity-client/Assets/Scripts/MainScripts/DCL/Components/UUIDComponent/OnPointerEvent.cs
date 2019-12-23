@@ -8,7 +8,7 @@ namespace DCL.Components
 {
     public class OnPointerEvent : UUIDComponent<OnPointerEvent.Model>
     {
-        public static bool enableInteractionHoverFeedback = true;
+        public static bool enableInteractionHoverFeedback = false;
 
         [System.Serializable]
         new public class Model : UUIDComponent.Model
