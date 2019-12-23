@@ -3,11 +3,13 @@ import { Stats } from '../debug'
 import { Package, BusMessage, ChatMessage, ProfileVersion, UserInformation } from '../../comms-interface/types'
 import { Position, positionHash } from '../../comms-interface/utils'
 import { Peer } from 'decentraland-katalyst-peer'
-import defaultLogger from '../../logger'
+import { createLogger } from 'shared/logger'
 
 const NOOP = () => {
   // do nothing
 }
+
+const logger = createLogger('Lighthouse: ')
 
 export class LighthouseWorldInstanceConnection implements WorldInstanceConnection {
   stats: Stats | null = null
@@ -37,7 +39,7 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
           break
         }
         default: {
-          defaultLogger.warn(`message with unknown type received ${payload.type}`)
+          logger.warn(`message with unknown type received ${payload.type}`)
           break
         }
       }
@@ -58,10 +60,7 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
     await this.peer.sendMessage(topic, {
       type: 'profile',
       time: Date.now(),
-      data: {
-        version: userInfo.version,
-        user: userInfo.userId
-      }
+      data: { version: userInfo.version, user: userInfo.userId }
     })
   }
 
