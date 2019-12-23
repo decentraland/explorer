@@ -40,6 +40,7 @@ namespace Builder
         private MouseCatcher mouseCatcher;
         private ParcelScene currentScene;
         private CameraController cameraController;
+        private CursorController cursorController;
         private Vector3 defaultCharacterPosition;
 
         private bool isPreviewMode = false;
@@ -359,6 +360,7 @@ namespace Builder
             SetupRendererPipeline();
 
             cameraController = Object.FindObjectOfType<CameraController>();
+            cursorController = Object.FindObjectOfType<CursorController>();
             mouseCatcher = InitialSceneReferences.i?.mouseCatcher;
             if (mouseCatcher != null)
             {
@@ -376,6 +378,10 @@ namespace Builder
             if (cameraController)
             {
                 cameraController.gameObject.SetActive(false);
+            }
+            if (cursorController)
+            {
+                cursorController.gameObject.SetActive(false);
             }
 
             SceneController.i?.fpsPanel.SetActive(false);
@@ -573,6 +579,10 @@ namespace Builder
             if (cameraController)
             {
                 cameraController.gameObject.SetActive(isPreviewMode);
+            }
+            if (cursorController)
+            {
+                cursorController.gameObject.SetActive(isPreviewMode);
             }
             SetCaptureKeyboardInputEnabled(isPreview);
         }
