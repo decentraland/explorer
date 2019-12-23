@@ -9,6 +9,18 @@ namespace DCL
     {
         public static float timeBudgetMax = 0.003f;
         public static float timeBudget = 0;
+
+        public static string ComputeCRC(Material mat)
+        {
+            //NOTE(Brian): Workaround fix until we solve the CRC issue with our materials.
+            if (mat.name.Contains("Mini Town MAT"))
+            {
+                return mat.name;
+            }
+
+            return mat.ComputeCRC() + mat.name;
+        }
+
         public static IEnumerator UseCachedMaterials(GameObject obj)
         {
             if (obj == null)
@@ -24,7 +36,7 @@ namespace DCL
                 {
                     float elapsedTime = Time.realtimeSinceStartup;
 
-                    string crc = mat.ComputeCRC() + mat.name;
+                    string crc = ComputeCRC(mat);
 
                     RefCountedMaterialData refCountedMat;
 
@@ -36,7 +48,6 @@ namespace DCL
 
                     refCountedMat = PersistentAssetCache.MaterialCacheByCRC[crc];
                     refCountedMat.IncreaseRefCount();
-
 
                     matList.Add(refCountedMat.material);
 
