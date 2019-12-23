@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityGLTF.Cache;
@@ -13,7 +13,7 @@ namespace DCL
         public static string ComputeCRC(Material mat)
         {
             //NOTE(Brian): Workaround fix until we solve the CRC issue with our materials.
-            if (mat.name.Contains("Mini Town MAT"))
+            if (mat.name.Contains("Mini Town_MAT"))
             {
                 return mat.name;
             }
@@ -42,7 +42,6 @@ namespace DCL
 
                     if (!PersistentAssetCache.MaterialCacheByCRC.ContainsKey(crc))
                     {
-                        mat.enableInstancing = true;
                         PersistentAssetCache.MaterialCacheByCRC.Add(crc, new RefCountedMaterialData(crc, mat));
                     }
 
