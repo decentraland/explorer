@@ -65,6 +65,8 @@ public class InteractionHoverCanvasController : MonoBehaviour
 
     void CalculateMeshCenteredPos(DCLTransform.Model transformModel = null)
     {
+        if (!canvas.enabled) return;
+
         if (entity.meshesInfo.renderers == null || entity.meshesInfo.renderers.Length == 0)
         {
             meshCenteredPos = transform.parent.position;
