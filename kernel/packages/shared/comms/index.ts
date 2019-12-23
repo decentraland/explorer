@@ -192,11 +192,10 @@ export function persistCurrentUser(changes: Partial<UserInformation>): Readonly<
   receiveUserData(localProfileUUID, peer.user)
 
   const user = peer.user
-  if (!context) {
-    throw new Error('persistCurrentUser before initialization')
-  }
-  if (user) {
-    context.userInfo = user
+  if (context) {
+    if (user) {
+      context.userInfo = user
+    }
   }
 
   return peer.user
@@ -483,8 +482,7 @@ export async function connect(userId: string, network: ETHEREUM_NETWORK, auth: A
 
     connection = instance
   } else {
-    // TODO - parameterize lighthouse url - moliva - 22/12/2019
-    const peer = new katalyst.Peer('http://localhost:9000', 'peer-' + uuid())
+    const peer = new katalyst.Peer(getServerConfigurations().comms.lighthouseUrl, 'peer-' + uuid())
     connection = new LighthouseWorldInstanceConnection(peer)
   }
 

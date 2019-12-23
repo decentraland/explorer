@@ -14,7 +14,7 @@ import './apis/index'
 import { connect, disconnect } from './comms'
 import { persistCurrentUser } from './comms/index'
 import { isMobile } from './comms/mobile'
-import { localProfileUUID } from './comms/peers'
+import { setLocalProfile } from './comms/peers'
 import './events'
 import { ReportFatalError } from './loading/ReportFatalError'
 import {
@@ -137,6 +137,23 @@ export async function initShared(): Promise<Session | undefined> {
     return session
   }
 
+  // initialize profile
+  console['group']('connect#profile')
+  if (!PREVIEW) {
+    const profile = await PassportAsPromise(userId)
+    setLocalProfile(userId, {
+      userId,
+      version: profile.version,
+      profile: profileToRendererFormat(profile)
+    })
+    persistCurrentUser({
+      userId,
+      version: profile.version,
+      profile: profileToRendererFormat(profile)
+    })
+  }
+  console['groupEnd']()
+
   console['group']('connect#comms')
   store.dispatch(establishingComms())
   const maxAttemps = 5
@@ -153,7 +170,7 @@ export async function initShared(): Promise<Session | undefined> {
       }
       break
     } catch (e) {
-      if (e.message.startsWith('Communications link')) {
+      if (e.message && e.message.startsWith('Communications link')) {
         if (i >= maxAttemps) {
           // max number of attemps reached => rethrow error
           defaultLogger.info(`Max number of attemps reached (${maxAttemps}), unsuccessful connection`)
@@ -166,24 +183,13 @@ export async function initShared(): Promise<Session | undefined> {
         }
       } else {
         // not a comms issue per se => rethrow error
+        defaultLogger.error(`error while trying to establish communications `, e)
         disconnect()
         throw e
       }
     }
   }
   store.dispatch(commsEstablished())
-  console['groupEnd']()
-
-  // initialize profile
-  console['group']('connect#profile')
-  if (!PREVIEW) {
-    const profile = await PassportAsPromise(localProfileUUID!)
-    persistCurrentUser({
-      userId: localProfileUUID!,
-      version: profile.version,
-      profile: profileToRendererFormat(profile)
-    })
-  }
   console['groupEnd']()
 
   return session
