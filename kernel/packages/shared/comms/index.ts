@@ -41,7 +41,8 @@ import { Session } from '../session/index'
 import { worldRunningObservable, isWorldRunning } from '../world/worldState'
 import { WorldInstanceConnection } from '../comms-interface/index'
 import { LighthouseWorldInstanceConnection } from './v2/LighthouseWorldInstanceConnection'
-const katalyst = require('decentraland-katalyst-peer')
+
+const { Peer } = require('decentraland-katalyst-peer')
 
 type Timestamp = number
 type PeerAlias = string
@@ -482,7 +483,7 @@ export async function connect(userId: string, network: ETHEREUM_NETWORK, auth: A
 
     connection = instance
   } else {
-    const peer = new katalyst.Peer(getServerConfigurations().comms.lighthouseUrl, 'peer-' + uuid())
+    const peer = new Peer(getServerConfigurations().comms.lighthouseUrl, 'peer-' + uuid())
     connection = new LighthouseWorldInstanceConnection(peer)
   }
 
