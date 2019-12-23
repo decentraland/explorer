@@ -8,7 +8,7 @@ namespace DCL.Components
 {
     public class OnPointerEvent : UUIDComponent<OnPointerEvent.Model>
     {
-        public static bool enableInteractionHoverFeedback = false;
+        public static bool enableInteractionHoverFeedback = true;
 
         [System.Serializable]
         new public class Model : UUIDComponent.Model
@@ -69,7 +69,7 @@ namespace DCL.Components
                 GameObject hoverCanvasGameObject = Object.Instantiate(Resources.Load("InteractionHoverCanvas"), transform) as GameObject;
                 hoverCanvasController = hoverCanvasGameObject.GetComponent<InteractionHoverCanvasController>();
             }
-            hoverCanvasController.Setup((WebInterface.ACTION_BUTTON)model.button, model.toastText);
+            hoverCanvasController.Setup((WebInterface.ACTION_BUTTON)model.button, model.toastText, entity);
         }
 
         void OnComponentUpdated(DecentralandEntity e)
