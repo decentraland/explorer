@@ -29,7 +29,7 @@ public class ItemToggle : UIButton, IPointerEnterHandler, IPointerExitHandler
         }
     }
 
-    private new void Awake()
+    protected new virtual void Awake()
     {
         base.Awake();
 
@@ -47,16 +47,19 @@ public class ItemToggle : UIButton, IPointerEnterHandler, IPointerExitHandler
         warningPanel.SetActive(false);
     }
 
-    public void Initialize(WearableItem w, bool isSelected)
+    public virtual void Initialize(WearableItem w, bool isSelected)
     {
-        if (wearableItem != null)
-        {
-            ThumbnailsManager.CancelRequest(w.baseUrl + w.thumbnail, OnThumbnailReady);
-        }
-
         wearableItem = w;
         selected = isSelected;
-        ThumbnailsManager.RequestThumbnail(w.baseUrl + w.thumbnail, OnThumbnailReady);
+
+        if (!string.IsNullOrEmpty(w.thumbnail))
+        {
+            if (wearableItem != null)
+            {
+                ThumbnailsManager.CancelRequest(w.baseUrl + w.thumbnail, OnThumbnailReady);
+            }
+            ThumbnailsManager.RequestThumbnail(w.baseUrl + w.thumbnail, OnThumbnailReady);
+        }
     }
 
 

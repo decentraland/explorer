@@ -107,6 +107,7 @@ export const DEBUG_REDUX = location.search.indexOf('DEBUG_REDUX') !== -1
 export const DISABLE_AUTH = location.search.indexOf('DISABLE_AUTH') !== -1 || DEBUG
 export const ENGINE_DEBUG_PANEL = location.search.indexOf('ENGINE_DEBUG_PANEL') !== -1
 export const SCENE_DEBUG_PANEL = location.search.indexOf('SCENE_DEBUG_PANEL') !== -1 && !ENGINE_DEBUG_PANEL
+export const SHOW_FPS_COUNTER = location.search.indexOf('SHOW_FPS_COUNTER') !== -1 || DEBUG
 
 export namespace commConfigurations {
   export const debug = true
@@ -196,7 +197,7 @@ export function getExclusiveServer() {
   if (window.location.search.match(/TEST_WEARABLES/)) {
     return 'https://dcl-wearables-dev.now.sh/index.json'
   }
-  return 'https://dcl-wearables.now.sh/index.json'
+  return 'https://wearable-api.decentraland.org/v2/collections'
 }
 
 export const ALL_WEARABLES = location.search.indexOf('ALL_WEARABLES') !== -1 && getDefaultTLD() !== 'org'
@@ -226,7 +227,7 @@ export function getServerConfigurations() {
     contentAsBundle: `https://content-as-bundle.decentraland.zone`,
     worldInstanceUrl: `wss://world-comm.decentraland.${TLDDefault}/connect`,
     profile: `https://profile.decentraland.${TLDDefault}/api/v1`,
-    wearablesApi: `https://wearable-api.decentraland.org/v1`,
+    wearablesApi: `https://wearable-api.decentraland.org/v2`,
     avatar: {
       snapshotStorage: `https://avatars-storage.decentraland.${TLDDefault}/`,
       server: `https://avatars-api.decentraland.${TLDDefault === 'zone' ? 'today' : TLDDefault}/`,

@@ -127,7 +127,8 @@ namespace DCL
 
         [Header("Kernel Misc Settings")]
         public bool forceLocalComms = true;
-
+        public bool allWearables = false;
+        public bool testWearables = false;
         public DebugPanel debugPanelMode = DebugPanel.Off;
 
 
@@ -189,6 +190,16 @@ namespace DCL
                     debugString += "LOCAL_COMMS&";
                 }
 
+                if (allWearables)
+                {
+                    debugString += "ALL_WEARABLES&";
+                }
+
+                if (testWearables)
+                {
+                    debugString += "TEST_WEARABLES&";
+                }
+
                 string debugPanelString = "";
 
                 if (debugPanelMode == DebugPanel.Engine)
@@ -239,6 +250,12 @@ namespace DCL
                                 break;
                             case "SetSceneDebugPanel":
                                 sceneController.SetSceneDebugPanel();
+                                break;
+                            case "ShowFPSPanel":
+                                sceneController.ShowFPSPanel();
+                                break;
+                            case "HideFPSPanel":
+                                sceneController.HideFPSPanel();
                                 break;
                             case "SetEngineDebugPanel":
                                 sceneController.SetEngineDebugPanel();
