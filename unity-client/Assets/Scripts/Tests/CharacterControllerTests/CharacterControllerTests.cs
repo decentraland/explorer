@@ -1,11 +1,8 @@
 ﻿using DCL.Helpers;
-using DCL.Models;
 using DCL.Components;
 using DCL.Configuration;
 using Newtonsoft.Json;
 using System.Collections;
-using System.Reflection;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.TestTools;
@@ -14,13 +11,12 @@ namespace Tests
 {
     public class CharacterControllerTests : TestsBase
     {
-        // TODO: Find a way to run this test on Unity Cloud Build, even though it passes locally, it fails on timeout in Unity Cloud Build
         [UnityTest]
         public IEnumerator CharacterTeleportReposition()
         {
             yield return base.InitScene();
 
-            DCLCharacterController.i.gravity = 0f;
+            DCLCharacterController.i.PauseGravity();
             DCLCharacterController.i.characterController.enabled = false;
             DCLCharacterController.i.Teleport(JsonConvert.SerializeObject(new
             {
@@ -39,7 +35,7 @@ namespace Tests
         {
             yield return InitScene();
 
-            DCLCharacterController.i.gravity = 0f;
+            DCLCharacterController.i.ResumeGravity();
             DCLCharacterController.i.characterController.enabled = false;
             DCLCharacterController.i.Teleport(JsonConvert.SerializeObject(new
             {
@@ -140,7 +136,7 @@ namespace Tests
         {
             yield return InitScene();
 
-            DCLCharacterController.i.gravity = 0f;
+            DCLCharacterController.i.PauseGravity();
             DCLCharacterController.i.characterController.enabled = false;
             DCLCharacterController.i.Teleport(JsonConvert.SerializeObject(new
             {
@@ -159,10 +155,10 @@ namespace Tests
         {
             yield return InitScene();
 
-            DCLCharacterController.i.gravity = 0f;
+            DCLCharacterController.i.PauseGravity();
 
             var newEulerAngle = 10f;
-            DCLCharacterController.i.GetType().GetField("aimingHorizontalDeltaAngle", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(DCLCharacterController.i, newEulerAngle);
+            CommonScriptableObjects.characterForward.Set(Quaternion.Euler(new Vector3(0, newEulerAngle, 0)) * Vector3.forward);
             Cursor.lockState = CursorLockMode.Locked;
             yield return new WaitForSeconds(0.1f);
 
@@ -174,8 +170,7 @@ namespace Tests
         {
             yield return base.InitScene();
 
-            float originalGravity = DCLCharacterController.i.gravity;
-            DCLCharacterController.i.gravity = 0f;
+            DCLCharacterController.i.PauseGravity();
             DCLCharacterController.i.Teleport(JsonConvert.SerializeObject(new
             {
                 x = 2f,
@@ -196,7 +191,7 @@ namespace Tests
             Assert.IsTrue(Vector3.Distance(platformTransform.position, new Vector3(2f, 1f, 8f)) < 0.1f);
 
             // enable character gravity
-            DCLCharacterController.i.gravity = originalGravity;
+            DCLCharacterController.i.ResumeGravity();
 
             // Let the character *fall* onto the platform
             yield return new WaitForSeconds(2f);
@@ -239,8 +234,7 @@ namespace Tests
         {
             yield return base.InitScene();
 
-            float originalGravity = DCLCharacterController.i.gravity;
-            DCLCharacterController.i.gravity = 0f;
+            DCLCharacterController.i.PauseGravity();
             DCLCharacterController.i.Teleport(JsonConvert.SerializeObject(new
             {
                 x = 5f,
@@ -261,7 +255,7 @@ namespace Tests
             Assert.IsTrue(Vector3.Distance(platformTransform.position, new Vector3(8f, 1f, 8f)) < 0.1f);
 
             // enable character gravity
-            DCLCharacterController.i.gravity = originalGravity;
+            DCLCharacterController.i.ResumeGravity();
 
             // Let the character *fall* onto the platform
             yield return new WaitForSeconds(2f);
@@ -359,8 +353,7 @@ namespace Tests
         {
             yield return base.InitScene();
 
-            float originalGravity = DCLCharacterController.i.gravity;
-            DCLCharacterController.i.gravity = 0f;
+            DCLCharacterController.i.PauseGravity();
             DCLCharacterController.i.Teleport(JsonConvert.SerializeObject(new
             {
                 x = 5f,
@@ -381,7 +374,7 @@ namespace Tests
             Assert.IsTrue(Vector3.Distance(platformTransform.position, new Vector3(8f, 1f, 8f)) < 0.1f);
 
             // enable character gravity
-            DCLCharacterController.i.gravity = originalGravity;
+            DCLCharacterController.i.ResumeGravity();
 
             // Let the character *fall* onto the platform
             yield return new WaitForSeconds(2f);
@@ -415,7 +408,7 @@ namespace Tests
 
             // Accelerate platform
             lerpTime = 0f;
-            lerpSpeed = 10f;
+            lerpSpeed = 15f;
             initialRotation = platformTransform.rotation;
             targetRotation = Quaternion.Euler(0, 360f, 0f);
             while (lerpTime < 1f)

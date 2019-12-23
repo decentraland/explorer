@@ -46,7 +46,7 @@ namespace Builder
 
         private DCLBuilderSelectionCollider[] meshColliders;
         private Animation[] meshAnimations;
-        private Action onShapeLoaded;
+        private Action OnShapeLoaded;
 
         private bool isTransformComponentSet;
         private bool isShapeComponentSet;
@@ -102,11 +102,13 @@ namespace Builder
             int selectionLayer = LayerMask.NameToLayer(DCLBuilderRaycast.LAYER_SELECTION);
             if (rootEntity.meshesInfo != null)
             {
+                Renderer renderer;
                 for (int i = 0; i < rootEntity.meshesInfo.renderers.Length; i++)
                 {
-                    if (rootEntity.meshesInfo.renderers[i])
+                    renderer = rootEntity.meshesInfo.renderers[i];
+                    if (renderer)
                     {
-                        rootEntity.meshesInfo.renderers[i].gameObject.layer = selectionLayer;
+                        renderer.gameObject.layer = selectionLayer;
                     }
                 }
             }
@@ -117,11 +119,13 @@ namespace Builder
             int selectionLayer = 0;
             if (rootEntity.meshesInfo != null && rootEntity.meshesInfo.renderers != null)
             {
+                Renderer renderer;
                 for (int i = 0; i < rootEntity.meshesInfo.renderers.Length; i++)
                 {
-                    if (rootEntity.meshesInfo.renderers[i])
+                    renderer = rootEntity.meshesInfo.renderers[i];
+                    if (renderer)
                     {
-                        rootEntity.meshesInfo.renderers[i].gameObject.layer = selectionLayer;
+                        renderer.gameObject.layer = selectionLayer;
                     }
                 }
             }
@@ -141,11 +145,11 @@ namespace Builder
         {
             if (HasShape())
             {
-                if (onShapeLoad != null) onShapeLoad();
+                if (OnShapeLoaded != null) onShapeLoad();
             }
             else
             {
-                onShapeLoaded = onShapeLoad;
+                OnShapeLoaded = onShapeLoad;
             }
         }
 
@@ -184,11 +188,15 @@ namespace Builder
                 gameObject.transform.localScale = Vector3.zero;
                 StartCoroutine(ScaleAnimationRoutine(0.3f));
             }
-
-            if (onShapeLoaded != null)
+            else if (isTransformComponentSet)
             {
-                onShapeLoaded();
-                onShapeLoaded = null;
+                gameObject.transform.localScale = scaleTarget;
+            }
+
+            if (OnShapeLoaded != null)
+            {
+                OnShapeLoaded();
+                OnShapeLoaded = null;
             }
         }
 
@@ -240,6 +248,17 @@ namespace Builder
                             meshAnimations[i].Stop();
                             meshAnimations[i].clip?.SampleAnimation(meshAnimations[i].gameObject, 0);
                         }
+                    }
+                }
+            }
+
+            if (meshColliders != null)
+            {
+                for (int i = 0; i < meshColliders.Length; i++)
+                {
+                    if (meshColliders[i] != null)
+                    {
+                        meshColliders[i].gameObject.SetActive(!isPreview);
                     }
                 }
             }

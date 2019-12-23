@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using DCL.Helpers;
 
 namespace Builder
 {
@@ -36,9 +37,7 @@ namespace Builder
 
             outlineRawImage = new GameObject("BuilderOutlineRawImage").AddComponent<RawImage>();
             outlineRawImage.transform.SetParent(outlineCanvas.transform);
-            outlineRawImage.transform.localPosition = Vector3.zero;
-            outlineRawImage.transform.localRotation = Quaternion.identity;
-            outlineRawImage.transform.localScale = Vector3.one;
+            outlineRawImage.transform.ResetLocalTRS();
 
             outlineRawImage.rectTransform.sizeDelta = new Vector2(outlineCanvas.pixelRect.width, outlineCanvas.pixelRect.height);
             outlineRawImage.raycastTarget = false;

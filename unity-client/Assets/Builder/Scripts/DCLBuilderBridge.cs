@@ -39,6 +39,7 @@ namespace Builder
 
         private MouseCatcher mouseCatcher;
         private ParcelScene currentScene;
+        private CameraController cameraController;
         private Vector3 defaultCharacterPosition;
 
         private bool isPreviewMode = false;
@@ -256,7 +257,20 @@ namespace Builder
 
                     if (isPreviewMode)
                     {
-                        DCLCharacterController.i?.SetEulerRotation(new Vector3(pitch * Mathf.Rad2Deg, yaw * Mathf.Rad2Deg, 0));
+                        if (DCLCharacterController.i != null)
+                        {
+                            DCLCharacterController.i.transform.rotation = Quaternion.Euler(0f, yaw * Mathf.Rad2Deg, 0f);
+                        }
+                        if (cameraController)
+                        {
+                            var cameraRotation = new CameraController.SetRotationPayload()
+                            {
+                                x = pitch * Mathf.Rad2Deg,
+                                y = 0,
+                                z = 0
+                            };
+                            cameraController.SetRotation(JsonUtility.ToJson(cameraRotation));
+                        }
                     }
                     else
                     {
@@ -344,6 +358,7 @@ namespace Builder
         {
             SetupRendererPipeline();
 
+            cameraController = Object.FindObjectOfType<CameraController>();
             mouseCatcher = InitialSceneReferences.i?.mouseCatcher;
             if (mouseCatcher != null)
             {
@@ -356,6 +371,11 @@ namespace Builder
                 DCLCharacterController.i.initialPositionAlreadySet = true;
                 DCLCharacterController.i.characterAlwaysEnabled = false;
                 DCLCharacterController.i.gameObject.SetActive(false);
+            }
+
+            if (cameraController)
+            {
+                cameraController.gameObject.SetActive(false);
             }
 
             SceneController.i?.fpsPanel.SetActive(false);
@@ -549,6 +569,10 @@ namespace Builder
             {
                 mouseCatcher.enabled = isPreview;
                 if (!isPreview) mouseCatcher.UnlockCursor();
+            }
+            if (cameraController)
+            {
+                cameraController.gameObject.SetActive(isPreviewMode);
             }
             SetCaptureKeyboardInputEnabled(isPreview);
         }

@@ -1,7 +1,9 @@
 {
     "name": "BillboardTests",
     "references": [
-        "MainScripts"
+        "MainScripts",
+        "TestHelpers",
+        "ScriptableObjects"
     ],
     "optionalUnityReferences": [
         "TestAssemblies"
@@ -12,5 +14,6 @@
     "overrideReferences": false,
     "precompiledReferences": [],
     "autoReferenced": true,
-    "defineConstraints": []
+    "defineConstraints": [],
+    "versionDefines": []
 }

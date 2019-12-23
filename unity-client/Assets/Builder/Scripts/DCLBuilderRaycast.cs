@@ -81,11 +81,11 @@ namespace Builder
 
         public bool RaycastToGround(Ray ray, out Vector3 hitPosition)
         {
-            float enter = 0.0f;
+            float raycastDistance = 0.0f;
 
-            if (groundPlane.Raycast(ray, out enter))
+            if (groundPlane.Raycast(ray, out raycastDistance))
             {
-                hitPosition = ray.GetPoint(enter);
+                hitPosition = ray.GetPoint(raycastDistance);
                 return true;
             }
             hitPosition = Vector3.zero;
@@ -95,11 +95,11 @@ namespace Builder
         public Vector3 RaycastToEntityHitPlane(Vector3 mousePosition)
         {
             Ray ray = GetMouseRay(mousePosition);
-            float enter = 0.0f;
+            float raycastDistance = 0.0f;
 
-            if (entityHitPlane.Raycast(ray, out enter))
+            if (entityHitPlane.Raycast(ray, out raycastDistance))
             {
-                return ray.GetPoint(enter);
+                return ray.GetPoint(raycastDistance);
             }
 
             return Vector3.zero;

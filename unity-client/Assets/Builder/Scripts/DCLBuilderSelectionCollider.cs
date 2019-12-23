@@ -19,7 +19,7 @@ namespace Builder
 
             Transform t = gameObject.transform;
             t.SetParent(renderer.transform);
-            Utils.ResetLocalTRS(t);
+            t.ResetLocalTRS();
 
             var meshCollider = gameObject.AddComponent<MeshCollider>();
 
