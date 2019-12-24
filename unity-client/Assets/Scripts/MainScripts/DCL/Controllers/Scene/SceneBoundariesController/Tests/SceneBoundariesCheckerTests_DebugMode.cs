@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using UnityEngine.TestTools;
 
 namespace SceneBoundariesCheckerTests
@@ -6,9 +6,9 @@ namespace SceneBoundariesCheckerTests
     public class SceneBoundariesCheckerTests_DebugMode : TestsBase
     {
         [UnitySetUp]
-        public IEnumerator SetUp()
+        protected override IEnumerator SetUp()
         {
-            yield return SetUp_SceneController(true);
+            yield return SetUp_SceneController(debugMode: true);
             yield return SetUp_CharacterController();
         }
 

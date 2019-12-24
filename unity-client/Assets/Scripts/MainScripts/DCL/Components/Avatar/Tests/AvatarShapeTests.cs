@@ -1,7 +1,7 @@
-﻿using DCL;
+using AvatarShape_Tests;
+using DCL;
 using DCL.Helpers;
 using System.Collections;
-using AvatarShape_Tests;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.TestTools;
@@ -30,8 +30,6 @@ namespace Tests
         [UnityTest]
         public IEnumerator DestroyWhileLoading()
         {
-            yield return InitScene();
-
             AvatarTestHelpers.CreateTestCatalog();
             AvatarShape avatar = AvatarTestHelpers.CreateAvatarShape(scene, "Abortit", "TestAvatar.json");
 
@@ -50,8 +48,6 @@ namespace Tests
         [UnityTest]
         public IEnumerator MaterialsSetCorrectly()
         {
-            yield return InitScene();
-
             AvatarTestHelpers.CreateTestCatalog();
             AvatarShape avatar = AvatarTestHelpers.CreateAvatarShape(scene, "Joan Darteis", "TestAvatar.json");
             yield return new DCL.WaitUntil(() => avatar.everythingIsLoaded, 20);
@@ -63,7 +59,6 @@ namespace Tests
         [UnityTest]
         public IEnumerator NameBackgroundHasCorrectSize()
         {
-            yield return InitScene();
             AvatarTestHelpers.CreateTestCatalog();
             AvatarShape avatar = AvatarTestHelpers.CreateAvatarShape(scene, "Maiqel Yacson", "TestAvatar.json");
             yield return new DCL.WaitUntil(() => avatar.everythingIsLoaded, 20);
@@ -78,8 +73,6 @@ namespace Tests
         [UnityTest]
         public IEnumerator WhenTwoAvatarsLoadAtTheSameTimeTheyHaveProperMaterials()
         {
-            yield return InitScene();
-
             //NOTE(Brian): Avatars must be equal to share their meshes.
             AvatarTestHelpers.CreateTestCatalog();
             AvatarShape avatar = AvatarTestHelpers.CreateAvatarShape(scene, "Naicholas Keig", "TestAvatar.json");

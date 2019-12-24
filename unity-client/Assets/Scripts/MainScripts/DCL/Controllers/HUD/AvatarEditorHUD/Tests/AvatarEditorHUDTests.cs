@@ -26,10 +26,8 @@ namespace AvatarEditorHUD_Tests
         private WearableDictionary catalog;
 
         [UnitySetUp]
-        public IEnumerator SetUp()
+        protected override IEnumerator SetUp()
         {
-            // yield return InitScene();
-
             userProfile = ScriptableObject.CreateInstance<UserProfile>();
             userProfile.UpdateData(new UserProfileModel()
             {
@@ -49,7 +47,7 @@ namespace AvatarEditorHUD_Tests
         }
 
         [UnityTearDown]
-        public override IEnumerator TearDown()
+        protected override IEnumerator TearDown()
         {
             yield return base.TearDown();
             controller.CleanUp();

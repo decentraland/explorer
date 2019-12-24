@@ -2,9 +2,9 @@ using DCL.Components;
 using DCL.Configuration;
 using DCL.Helpers;
 using Newtonsoft.Json;
+using NUnit.Framework;
 using System.Collections;
 using UnityEngine;
-using UnityEngine.Assertions;
 using UnityEngine.TestTools;
 
 namespace Tests
@@ -69,6 +69,8 @@ namespace Tests
         }
 
         [UnityTest]
+        [Explicit]
+        [Category("Explicit")]
         public IEnumerator CharacterIsNotParentedOnWorldReposition()
         {
             yield return InitScene();
@@ -211,8 +213,8 @@ namespace Tests
 
             // check positions
             Assert.IsTrue(Vector3.Distance(platformTransform.position, targetPosition) < 0.1f);
-            Assert.AreApproximatelyEqual(DCLCharacterController.i.transform.position.x, targetPosition.x, 0.5f);
-            Assert.AreApproximatelyEqual(DCLCharacterController.i.transform.position.z, targetPosition.z, 0.5f);
+            UnityEngine.Assertions.Assert.AreApproximatelyEqual(DCLCharacterController.i.transform.position.x, targetPosition.x, 0.5f);
+            UnityEngine.Assertions.Assert.AreApproximatelyEqual(DCLCharacterController.i.transform.position.z, targetPosition.z, 0.5f);
         }
 
         [UnityTest]
@@ -276,8 +278,8 @@ namespace Tests
             // check positions
             Assert.IsTrue(Vector3.Distance(platformTransform.rotation.eulerAngles, targetRotation.eulerAngles) < 0.1f);
 
-            Assert.AreApproximatelyEqual(DCLCharacterController.i.transform.position.x, 11f, 0.5f);
-            Assert.AreApproximatelyEqual(DCLCharacterController.i.transform.position.z, 11f, 0.5f);
+            UnityEngine.Assertions.Assert.AreApproximatelyEqual(DCLCharacterController.i.transform.position.x, 11f, 0.5f);
+            UnityEngine.Assertions.Assert.AreApproximatelyEqual(DCLCharacterController.i.transform.position.z, 11f, 0.5f);
 
             // remove platform and check character parent
             TestHelpers.RemoveSceneEntity(scene, platformEntityId);

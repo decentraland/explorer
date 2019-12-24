@@ -19,8 +19,6 @@ namespace Tests
         [UnityTest]
         public IEnumerator CreateUIScene()
         {
-            yield return InitScene();
-
             // Position character inside parcel (0,0)
             TestHelpers.SetCharacterPosition(Vector3.zero);
 
@@ -60,10 +58,9 @@ namespace Tests
             yield return null;
         }
 
-        [UnityTest]
-        public IEnumerator ParcelScene_TrackDisposables_AfterInitDone()
+        [Test]
+        public void ParcelScene_TrackDisposables_AfterInitDone()
         {
-            yield return InitScene(reloadUnityScene: false);
             TestHelpers.CreateEntityWithBoxShape(scene, Vector3.zero, true);
             TestHelpers.CreateEntityWithBoxShape(scene, Vector3.zero, true);
             TestHelpers.CreateEntityWithBoxShape(scene, Vector3.zero, true);
@@ -73,18 +70,15 @@ namespace Tests
             Assert.AreEqual(0, scene.disposableNotReadyCount);
         }
 
-        [UnityTest]
-        public IEnumerator ParcelScene_TrackDisposables_Empty()
+        [Test]
+        public void ParcelScene_TrackDisposables_Empty()
         {
-            yield return InitScene(reloadUnityScene: false);
-
             Assert.AreEqual(0, scene.disposableNotReadyCount);
         }
 
         [UnityTest]
         public IEnumerator PerformanceLimitControllerTests()
         {
-            yield return InitScene(reloadUnityScene: false);
             DCL.Configuration.Environment.DEBUG = true;
 
             sceneController.SetDebug();
@@ -195,7 +189,6 @@ namespace Tests
         [UnityTest]
         public IEnumerator SceneLoading()
         {
-            yield return InitScene(spawnUIScene: false, reloadUnityScene: false);
             DCL.Configuration.Environment.DEBUG = true;
             sceneController.SetDebug();
 
@@ -262,8 +255,6 @@ namespace Tests
         [UnityTest]
         public IEnumerator SeveralParcelsFromJSON()
         {
-            yield return InitScene(reloadUnityScene: false);
-
             sceneController = TestHelpers.InitializeSceneController();
 
             string severalParcelsJson = (Resources.Load("TestJSON/TestSceneSeveralParcels") as TextAsset).text;
@@ -310,7 +301,6 @@ namespace Tests
         [UnityTest]
         public IEnumerator PositionParcels()
         {
-            yield return InitScene(spawnUIScene: false, reloadUnityScene: false);
             DCL.Configuration.Environment.DEBUG = true;
             sceneController.SetDebug();
 
@@ -384,9 +374,11 @@ namespace Tests
         }
 
         [UnityTest]
+        [Explicit]
+        [Category("Explicit")]
         public IEnumerator ParcelScene_TrackDisposables_OneGLTF()
         {
-            yield return InitScene(reloadUnityScene: false);
+
             var entity = TestHelpers.CreateSceneEntity(scene);
 
             TestHelpers.AttachGLTFShape(entity, scene, Vector3.zero, new LoadableShape.Model()
@@ -401,10 +393,12 @@ namespace Tests
             Assert.AreEqual(0, scene.disposableNotReadyCount);
         }
 
-        [UnityTest]
-        public IEnumerator ParcelScene_TrackDisposables_BeforeInitDone()
+        [Test]
+        [Explicit]
+        [Category("Explicit")]
+        public void ParcelScene_TrackDisposables_BeforeInitDone()
         {
-            yield return InitScene(reloadUnityScene: false);
+
 
             TestHelpers.CreateEntityWithBoxShape(scene, Vector3.zero, true);
             TestHelpers.CreateEntityWithBoxShape(scene, Vector3.zero, true);
@@ -414,10 +408,10 @@ namespace Tests
         }
 
         [UnityTest]
+        [Explicit]
+        [Category("Explicit")]
         public IEnumerator ParcelScene_TrackDisposables_InstantReadyDisposable()
         {
-            yield return InitScene(reloadUnityScene: false);
-
             var boxShape = TestHelpers.CreateEntityWithBoxShape(scene, Vector3.zero, true);
             Assert.AreEqual(1, scene.disposableNotReadyCount);
             scene.SetInitMessagesDone();

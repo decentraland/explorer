@@ -21,7 +21,7 @@ namespace AvatarEditorHUD_Tests
         private ColorList eyeColorList;
 
         [UnitySetUp]
-        private IEnumerator SetUp()
+        protected override IEnumerator SetUp()
         {
             if (controller == null)
             {
@@ -67,7 +67,7 @@ namespace AvatarEditorHUD_Tests
         }
 
         [UnityTearDown]
-        public override IEnumerator TearDown()
+        protected override IEnumerator TearDown()
         {
             controller.UnequipAllWearables();
             return base.TearDown();

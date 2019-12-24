@@ -11,10 +11,12 @@ namespace CameraController_Test
         private CameraController cameraController;
 
         [UnitySetUp]
-        public IEnumerator SetUp()
+        protected override IEnumerator SetUp()
         {
-            yield return InitScene(spawnCharController: true);
-            cameraController = GameObject.Instantiate(Resources.Load<GameObject>("CameraController")).GetComponent<CameraController>();
+            yield return base.SetUp();
+
+            if (cameraController == null)
+                cameraController = GameObject.Instantiate(Resources.Load<GameObject>("CameraController")).GetComponent<CameraController>();
         }
 
         [Test]

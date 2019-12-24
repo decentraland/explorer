@@ -1,7 +1,5 @@
-﻿using System.Collections;
-using System.Reflection;
-using DCL.Helpers;
 using NUnit.Framework;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.TestTools;
 
@@ -9,10 +7,10 @@ namespace Tests
 {
     public class NotificationHudTests : TestsBase
     {
-        [UnityTest]
-        public IEnumerator NotificationHud_Creation()
+        [Test]
+        protected void NotificationHud_Creation()
         {
-            yield return InitScene();
+
             var controller = new NotificationHUDController();
             var views = GameObject.FindObjectsOfType<NotificationHUDView>();
 
@@ -23,10 +21,10 @@ namespace Tests
             Assert.AreEqual(view, controller.view);
         }
 
-        [UnityTest]
-        public IEnumerator NotificationHud_ModelDefaulted()
+        [Test]
+        public void NotificationHud_ModelDefaulted()
         {
-            yield return InitScene();
+
             var controller = new NotificationHUDController();
 
             Assert.IsNotNull(controller.model);
@@ -37,7 +35,7 @@ namespace Tests
         [UnityTest]
         public IEnumerator NotificationHud_ShowNotification()
         {
-            yield return InitScene();
+
             var controller = new NotificationHUDController();
 
             NotificationModel model = new NotificationModel()
@@ -65,7 +63,7 @@ namespace Tests
         [UnityTest]
         public IEnumerator NotificationHud_ShowSeveralNotifications()
         {
-            yield return InitScene();
+
             var controller = new NotificationHUDController();
 
             NotificationModel model = new NotificationModel()
@@ -97,7 +95,7 @@ namespace Tests
         [UnityTest]
         public IEnumerator NotificationHud_ShowTimedNotification()
         {
-            yield return InitScene();
+
             var controller = new NotificationHUDController();
 
             NotificationModel model = new NotificationModel()

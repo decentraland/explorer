@@ -12,7 +12,7 @@ namespace Tests
     public class MaterialsTests : TestsBase
     {
         [UnitySetUp]
-        public IEnumerator SetUp()
+        protected override IEnumerator SetUp()
         {
             yield return SetUp_SceneController(true, false);
             yield return SetUp_CharacterController();

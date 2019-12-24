@@ -11,7 +11,7 @@ namespace Tests
     public class ParametrizedShapesTests : TestsBase
     {
         [UnitySetUp]
-        public IEnumerator SetUp()
+        protected override IEnumerator SetUp()
         {
             yield return SetUp_SceneController();
         }

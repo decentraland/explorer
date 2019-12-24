@@ -76,6 +76,9 @@ namespace DCL
         [System.NonSerialized]
         public bool isWssDebugMode;
 
+        [System.NonSerialized]
+        public bool prewarmSceneMessagesPool = true;
+
         public bool hasPendingMessages => MessagingControllersManager.i.pendingMessagesCount > 0;
 
         public string GlobalSceneId
@@ -94,13 +97,7 @@ namespace DCL
             if (i != null)
             {
                 Utils.SafeDestroy(this);
-
                 return;
-            }
-
-            for (int i = 0; i < 100000; i++)
-            {
-                sceneMessagesPool.Enqueue(new MessagingBus.QueuedSceneMessage_Scene());
             }
 
             i = this;
@@ -128,6 +125,17 @@ namespace DCL
                 StartCoroutine(DeferredDecoding());
         }
 
+        void Start()
+        {
+            if (prewarmSceneMessagesPool)
+            {
+                for (int i = 0; i < 100000; i++)
+                {
+                    sceneMessagesPool.Enqueue(new MessagingBus.QueuedSceneMessage_Scene());
+                }
+            }
+        }
+
         public void Restart()
         {
             MessagingControllersManager.i.Cleanup();
@@ -144,6 +152,7 @@ namespace DCL
         {
             ParcelScene.parcelScenesCleaner.Stop();
         }
+
         private void Update()
         {
             InputController_Legacy.i.Update();

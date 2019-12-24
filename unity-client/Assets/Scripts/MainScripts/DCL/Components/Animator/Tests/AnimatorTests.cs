@@ -1,4 +1,4 @@
-﻿using DCL.Components;
+using DCL.Components;
 using DCL.Helpers;
 using DCL.Models;
 using Newtonsoft.Json;
@@ -15,8 +15,6 @@ namespace Tests
         [UnityTest]
         public IEnumerator CreateAnimationComponent()
         {
-            yield return InitScene();
-
             DecentralandEntity entity = TestHelpers.CreateSceneEntity(scene);
 
             Assert.IsTrue(entity.gameObject.GetComponentInChildren<UnityGLTF.InstantiatedGLTFObject>() == null,
@@ -65,8 +63,6 @@ namespace Tests
         [UnityTest]
         public IEnumerator DCLAnimatorResetAnimation()
         {
-            yield return InitScene();
-
             GLTFShape gltfShape = TestHelpers.CreateEntityWithGLTFShape(scene, Vector3.zero,
                 new LoadableShape.Model
                 {
@@ -133,8 +129,6 @@ namespace Tests
         [UnityTest]
         public IEnumerator DCLAnimatorResetAllAnimations()
         {
-            yield return InitScene();
-
             var gltfShape = TestHelpers.CreateEntityWithGLTFShape(scene, Vector3.zero,
                 new LoadableShape.Model
                 {
@@ -194,15 +188,12 @@ namespace Tests
         [UnityTest]
         public IEnumerator AnimationComponentMissingValuesGetDefaultedOnUpdate()
         {
-            yield return InitScene();
             yield return TestHelpers.TestEntityComponentDefaultsOnUpdate<DCLAnimator.Model, DCLAnimator>(scene);
         }
 
         [UnityTest]
         public IEnumerator UpdateAnimationComponent()
         {
-            yield return InitScene();
-
             DecentralandEntity entity = TestHelpers.CreateSceneEntity(scene);
 
             Assert.IsTrue(entity.gameObject.GetComponentInChildren<UnityGLTF.InstantiatedGLTFObject>() == null,
@@ -252,10 +243,10 @@ namespace Tests
         }
 
         [UnityTest]
+        [Explicit]
+        [Category("Explicit")]
         public IEnumerator AnimationStartsAutomaticallyWithNoDCLAnimator()
         {
-            yield return InitScene();
-
             // GLTFShape without DCLAnimator
             DecentralandEntity entity = TestHelpers.CreateSceneEntity(scene);
 
@@ -318,8 +309,6 @@ namespace Tests
         [UnityTest]
         public IEnumerator NonSkeletalAnimationsSupport()
         {
-            yield return InitScene();
-
             DecentralandEntity entity = TestHelpers.CreateSceneEntity(scene);
 
             TestHelpers.SetEntityTransform(scene, entity, new Vector3(8, 2, 8), Quaternion.identity, Vector3.one);

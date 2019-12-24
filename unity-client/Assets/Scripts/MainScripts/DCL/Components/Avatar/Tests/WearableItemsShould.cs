@@ -18,7 +18,7 @@ namespace AvatarShape_Tests
         private AvatarShape avatarShape;
 
         [UnitySetUp]
-        private IEnumerator SetUp()
+        protected override IEnumerator SetUp()
         {
             yield return SetUp_SceneController();
             yield return SetUp_CharacterController();

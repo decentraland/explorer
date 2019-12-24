@@ -15,9 +15,18 @@ public class TestsBase
 {
     protected SceneController sceneController;
     protected ParcelScene scene;
+    protected CameraController cameraController;
+
+    [UnitySetUp]
+    protected virtual IEnumerator SetUp()
+    {
+        yield return SetUp_SceneController();
+        yield return SetUp_CharacterController();
+    }
+
 
     [UnityTearDown]
-    public virtual IEnumerator TearDown()
+    protected virtual IEnumerator TearDown()
     {
         yield return null;
 
@@ -73,11 +82,17 @@ public class TestsBase
         Assert.IsTrue(DCLCharacterController.i != null);
     }
 
+    public virtual void SetUp_Camera()
+    {
+        GameObject.Instantiate(Resources.Load<GameObject>("CameraController")).GetComponent<CameraController>();
+    }
+
     public virtual IEnumerator SetUp_SceneController(bool debugMode = false, bool usesWebServer = false, bool spawnTestScene = true)
     {
         PoolManager.enablePrewarm = false;
         sceneController = TestHelpers.InitializeSceneController(usesWebServer);
         sceneController.deferredMessagesDecoding = false;
+        sceneController.prewarmSceneMessagesPool = false;
 
         if (debugMode)
             sceneController.SetDebug();
@@ -124,7 +139,6 @@ public class TestsBase
         }
 
         PointerEventsController.i.Initialize(isTesting: true);
-        MessagingControllersManager.i.Cleanup();
     }
 
 

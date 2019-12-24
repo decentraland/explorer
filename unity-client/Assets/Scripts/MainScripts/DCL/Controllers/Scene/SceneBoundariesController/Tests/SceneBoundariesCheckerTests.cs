@@ -1,4 +1,5 @@
 using DCL.Models;
+using NUnit.Framework;
 using System.Collections;
 using UnityEngine.TestTools;
 
@@ -7,13 +8,6 @@ namespace SceneBoundariesCheckerTests
 
     public class SceneBoundariesCheckerTests : TestsBase
     {
-        [UnitySetUp]
-        public IEnumerator SetUp()
-        {
-            yield return SetUp_SceneController(false);
-            yield return SetUp_CharacterController();
-        }
-
         [UnityTest]
         public IEnumerator PShapeIsInvalidatedWhenStartingOutOfBounds()
         {
@@ -27,6 +21,8 @@ namespace SceneBoundariesCheckerTests
         }
 
         [UnityTest]
+        [Category("Explicit")]
+        [Explicit("Too slow")]
         public IEnumerator NFTShapeIsInvalidatedWhenStartingOutOfBounds()
         {
             yield return SBC_Asserts.NFTShapeIsInvalidatedWhenStartingOutOfBounds(scene);
@@ -49,6 +45,8 @@ namespace SceneBoundariesCheckerTests
 
 
         [UnityTest]
+        [Category("Explicit")]
+        [Explicit("Too slow")]
         public IEnumerator NFTShapeIsInvalidatedWhenLeavingBounds()
         {
             yield return SBC_Asserts.NFTShapeIsInvalidatedWhenLeavingBounds(scene);
@@ -72,6 +70,8 @@ namespace SceneBoundariesCheckerTests
 
 
         [UnityTest]
+        [Category("Explicit")]
+        [Explicit("Too slow")]
         public IEnumerator NFTShapeIsResetWhenReenteringBounds()
         {
             yield return SBC_Asserts.NFTShapeIsResetWhenReenteringBounds(scene);

@@ -14,30 +14,34 @@ namespace AvatarEditorHUD_Tests
         private WearableDictionary catalog;
 
         [UnitySetUp]
-        private IEnumerator SetUp()
+        protected override IEnumerator SetUp()
         {
             if (controller == null)
             {
-                userProfile = ScriptableObject.CreateInstance<UserProfile>();
-                userProfile.UpdateData(new UserProfileModel()
-                {
-                    name = "name",
-                    email = "mail",
-                    avatar = new AvatarModel()
-                    {
-                        bodyShape = WearableLiterals.BodyShapes.FEMALE,
-                        wearables = new List<string>() { },
-                    }
-
-                }, false);
-
-                catalog = AvatarTestHelpers.CreateTestCatalogLocal();
-                controller = new AvatarEditorHUDController_Mock(userProfile, catalog);
+                Setup_AvaterEditorHUDController();
             }
 
             yield break;
         }
 
+        private void Setup_AvaterEditorHUDController()
+        {
+            userProfile = ScriptableObject.CreateInstance<UserProfile>();
+            userProfile.UpdateData(new UserProfileModel()
+            {
+                name = "name",
+                email = "mail",
+                avatar = new AvatarModel()
+                {
+                    bodyShape = WearableLiterals.BodyShapes.FEMALE,
+                    wearables = new List<string>() { },
+                }
+
+            }, false);
+
+            catalog = AvatarTestHelpers.CreateTestCatalogLocal();
+            controller = new AvatarEditorHUDController_Mock(userProfile, catalog);
+        }
 
         [Test]
         [TestCase("dcl://base-avatars/f_african_leggins", WearableLiterals.BodyShapes.FEMALE)]

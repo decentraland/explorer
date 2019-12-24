@@ -1,4 +1,4 @@
-using Cinemachine;
+using DCL;
 using DCL.Components;
 using DCL.Helpers;
 using DCL.Interface;
@@ -14,10 +14,11 @@ namespace Tests
     public class UUIDComponentTests : TestsBase
     {
         [UnitySetUp]
-        public IEnumerator SetUp()
+        protected override IEnumerator SetUp()
         {
-            yield return SetUp_SceneController(true);
-            yield return SetUp_CharacterController();
+            SetUp_Camera();
+            yield return base.SetUp();
+            PointerEventsController.i.Initialize(isTesting: true);
             scene.useBoundariesChecker = false;
         }
 
@@ -526,6 +527,7 @@ namespace Tests
 
         [UnityTest]
         [Explicit("This test is failing because retrieveCamera is failing in PointerEventsController. It may be related with the new camera setup. Please check MainTest scene setup.")]
+        [Category("Explicit")]
         public IEnumerator OnClickEventIsTriggered()
         {
             DecentralandEntity entity;
@@ -582,6 +584,7 @@ namespace Tests
 
         [UnityTest]
         [Explicit("This test is failing because retrieveCamera is failing in PointerEventsController. It may be related with the new camera setup. Please check MainTest scene setup.")]
+        [Category("Explicit")]
         public IEnumerator OnPointerDownEventIsTriggered()
         {
             DecentralandEntity entity;
@@ -641,6 +644,7 @@ namespace Tests
 
         [UnityTest]
         [Explicit("This test is failing because retrieveCamera is failing in PointerEventsController. It may be related with the new camera setup. Please check MainTest scene setup.")]
+        [Category("Explicit")]
         public IEnumerator OnPointerUpEventIsTriggered()
         {
             DecentralandEntity entity;
@@ -703,8 +707,11 @@ namespace Tests
         [UnityTest]
         public IEnumerator OnPointerDownEventWhenEntityIsBehindOther()
         {
-            yield return InitScene();
             CameraController cameraController = GameObject.FindObjectOfType<CameraController>();
+            cameraController.SetCameraMode(CameraStateBase.ModeId.FirstPerson);
+            cameraController.currentCameraState.defaultVirtualCamera.Follow = DCLCharacterController.i.transform;
+
+            Assert.IsNotNull(cameraController, "camera is null?");
 
             // Create blocking entity
             DecentralandEntity blockingEntity;
@@ -729,9 +736,6 @@ namespace Tests
                 y = 2f,
                 z = 1f
             }));
-
-            CinemachineVirtualCamera camMode = cameraController.GetComponentInChildren<CinemachineVirtualCamera>();
-            camMode.Follow = DCLCharacterController.i.transform;
 
             var cameraRotationPayload = new CameraController.SetRotationPayload()
             {
@@ -793,6 +797,7 @@ namespace Tests
 
             Assert.IsTrue(!targetEntityHit, "Target entity was hit but other entity was blocking it");
 
+
             // Move character in front of target entity and rotate camera
             DCLCharacterController.i.SetPosition(new Vector3(3, 2, 6));
             cameraRotationPayload.cameraTarget = new Vector3(0, 0, -1);
@@ -820,15 +825,15 @@ namespace Tests
                     return true;
                 });
 
+            yield return null;
             Assert.IsTrue(targetEntityHit, "Target entity wasn't hit and no other entity is blocking it");
         }
 
         [UnityTest]
         [Explicit("Explicit until we enable the hover feedback in production")]
+        [Category("Explicit")]
         public IEnumerator OnPointerHoverFeedbackIsDisplayedCorrectly()
         {
-            yield return InitScene();
-
             DecentralandEntity entity;
             BoxShape shape;
             InstantiateEntityWithShape(out entity, out shape);
