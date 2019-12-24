@@ -140,6 +140,9 @@ namespace DCL
 
             for (int i = 0; i < renderer.sharedMaterials.Length; i++)
             {
+                if (renderer == null || renderer.sharedMaterials[i] == null)
+                    continue;
+
                 renderer.sharedMaterials[i].shader = Shader.Find(renderer.sharedMaterials[i].shader.name);
             }
         }
