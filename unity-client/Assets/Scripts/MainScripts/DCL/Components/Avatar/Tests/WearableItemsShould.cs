@@ -1,9 +1,9 @@
 using DCL;
+using NUnit.Framework;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.Assertions;
 using UnityEngine.TestTools;
 
 namespace AvatarShape_Tests
@@ -44,6 +44,8 @@ namespace AvatarShape_Tests
         }
 
         [UnityTest]
+        [Explicit("Test taking too long")]
+        [Category("Explicit")]
         public IEnumerator BeVisibleByDefault()
         {
             avatarModel.wearables = new List<string>() { SUNGLASSES_ID };
@@ -55,6 +57,8 @@ namespace AvatarShape_Tests
         }
 
         [UnityTest]
+        [Explicit("Test taking too long")]
+        [Category("Explicit")]
         public IEnumerator BeHiddenByGeneralHides()
         {
             var sunglasses = catalog.Get(SUNGLASSES_ID);
@@ -71,6 +75,8 @@ namespace AvatarShape_Tests
         }
 
         [UnityTest]
+        [Explicit("Test taking too long")]
+        [Category("Explicit")]
         public IEnumerator NotBeHiddenByWrongGeneralHides()
         {
             var bandana = catalog.Get(BLUE_BANDANA_ID);
@@ -86,6 +92,8 @@ namespace AvatarShape_Tests
         }
 
         [UnityTest]
+        [Explicit("Test taking too long")]
+        [Category("Explicit")]
         public IEnumerator BeHiddenByOverrideHides()
         {
             var sunglasses = catalog.Get(SUNGLASSES_ID);
@@ -102,6 +110,8 @@ namespace AvatarShape_Tests
         }
 
         [UnityTest]
+        [Explicit("Test taking too long")]
+        [Category("Explicit")]
         public IEnumerator NotBeHiddenByOverrideHides()
         {
             var sunglasses = catalog.Get(SUNGLASSES_ID);
@@ -118,6 +128,8 @@ namespace AvatarShape_Tests
         }
 
         [UnityTest]
+        [Explicit("Test taking too long")]
+        [Category("Explicit")]
         public IEnumerator BeUnequipedProperly()
         {
             avatarModel.wearables = new List<string>() { SUNGLASSES_ID };
@@ -131,6 +143,8 @@ namespace AvatarShape_Tests
         }
 
         [UnityTest]
+        [Explicit("Test taking too long")]
+        [Category("Explicit")]
         public IEnumerator BeUnequipedProperlyMultipleTimes()
         {
             List<GameObject> containers = new List<GameObject>();
@@ -149,6 +163,8 @@ namespace AvatarShape_Tests
         }
 
         [UnityTest]
+        [Explicit("Test taking too long")]
+        [Category("Explicit")]
         public IEnumerator SetTheCorrectMaterial()
         {
             avatarModel = AvatarTestHelpers.GetTestAvatarModel("test", "TestAvatar.json");
@@ -168,6 +184,8 @@ namespace AvatarShape_Tests
         }
 
         [UnityTest]
+        [Explicit("Test taking too long")]
+        [Category("Explicit")]
         public IEnumerator SetTheCorrectMaterialWhenLoadingMultipleTimes()
         {
             avatarModel = AvatarTestHelpers.GetTestAvatarModel("test", "TestAvatar.json");
@@ -193,6 +211,8 @@ namespace AvatarShape_Tests
         }
 
         [UnityTest]
+        [Explicit("Test taking too long")]
+        [Category("Explicit")]
         public IEnumerator BeRetrievedWithoutPoolableObject()
         {
             avatarModel.wearables = new List<string>() { SUNGLASSES_ID, BLUE_BANDANA_ID };
@@ -207,6 +227,8 @@ namespace AvatarShape_Tests
         }
 
         [UnityTest]
+        [Explicit("Test taking too long")]
+        [Category("Explicit")]
         public IEnumerator HideBodyShapeProperly()
         {
             catalog.Get(SUNGLASSES_ID).hides = new[] { WearableLiterals.Misc.HEAD };
@@ -221,6 +243,8 @@ namespace AvatarShape_Tests
         }
 
         [UnityTest]
+        [Explicit("Test taking too long")]
+        [Category("Explicit")]
         public IEnumerator BeHiddenUntilWholeAvatarIsReady()
         {
             avatarModel.wearables = new List<string>() { SUNGLASSES_ID, BLUE_BANDANA_ID };

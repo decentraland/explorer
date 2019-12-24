@@ -7,8 +7,14 @@ namespace Tests
 {
     public class NotificationHudTests : TestsBase
     {
+        protected override IEnumerator SetUp()
+        {
+            sceneInitialized = false;
+            return base.SetUp();
+        }
+
         [Test]
-        protected void NotificationHud_Creation()
+        public void NotificationHud_Creation()
         {
 
             var controller = new NotificationHUDController();
@@ -63,7 +69,6 @@ namespace Tests
         [UnityTest]
         public IEnumerator NotificationHud_ShowSeveralNotifications()
         {
-
             var controller = new NotificationHUDController();
 
             NotificationModel model = new NotificationModel()
@@ -89,7 +94,7 @@ namespace Tests
             yield return null;
 
             Notification[] notifications = GameObject.FindObjectsOfType<Notification>();
-            Assert.AreEqual(notifications.Length, 2);
+            Assert.AreEqual(2, notifications.Length);
         }
 
         [UnityTest]

@@ -13,6 +13,7 @@ namespace Tests
     {
         protected override IEnumerator SetUp()
         {
+            sceneInitialized = false;
             return base.SetUp();
         }
 
@@ -66,7 +67,7 @@ namespace Tests
 
             yield return null;
 
-            Assert.AreEqual(cursorController.cursorImage.sprite, cursorController.hoverCursor);
+            Assert.AreEqual(cursorController.hoverCursor, cursorController.cursorImage.sprite);
 
             // Rotate the camera away from the interactive object
             cameraRotationPayload = new CameraController.SetRotationPayload()

@@ -21,6 +21,8 @@ namespace AvatarEditorHUD_Tests
                 Setup_AvatarEditorHUDController();
             }
 
+            controller.UnequipAllWearables();
+
             yield break;
         }
 
@@ -96,6 +98,7 @@ namespace AvatarEditorHUD_Tests
                 }
 
             }, false);
+
             var category = catalog.Get(wearableId).category;
 
             Assert.IsTrue(controller.myView.selectorsByCategory.ContainsKey(category));
@@ -204,7 +207,7 @@ namespace AvatarEditorHUD_Tests
                 inventory = new[] { dummyItem.id }
             }, false);
 
-            catalog.Clear();
+            catalog.Remove(dummyItem.id);
             catalog.Add(dummyItem.id, dummyItem);
             return dummyItem;
         }

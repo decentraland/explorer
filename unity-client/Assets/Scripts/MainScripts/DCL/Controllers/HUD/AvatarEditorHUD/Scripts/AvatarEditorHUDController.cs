@@ -26,7 +26,6 @@ public class AvatarEditorHUDController : IDisposable, IHUD
     public AvatarEditorHUDController(UserProfile userProfile, WearableDictionary catalog, bool bypassUpdateAvatarPreview = false)
     {
         this.userProfile = userProfile;
-        this.catalog = catalog;
         this.bypassUpdateAvatarPreview = bypassUpdateAvatarPreview;
 
         view = AvatarEditorHUDView.Create(this);
@@ -36,12 +35,25 @@ public class AvatarEditorHUDController : IDisposable, IHUD
         eyeColorList = Resources.Load<ColorList>("EyeColor");
         view.SetColors(skinColorList.colors, hairColorList.colors, eyeColorList.colors);
 
-        ProcessCatalog(this.catalog);
-        this.catalog.OnAdded += AddWearable;
-        this.catalog.OnRemoved += RemoveWearable;
+        SetCatalog(catalog);
 
         LoadUserProfile(userProfile);
         this.userProfile.OnUpdate += LoadUserProfile;
+    }
+
+    public void SetCatalog(WearableDictionary catalog)
+    {
+        if (this.catalog != null)
+        {
+            this.catalog.OnAdded -= AddWearable;
+            this.catalog.OnRemoved -= RemoveWearable;
+        }
+
+        this.catalog = catalog;
+
+        ProcessCatalog(this.catalog);
+        this.catalog.OnAdded += AddWearable;
+        this.catalog.OnRemoved += RemoveWearable;
     }
 
     public void LoadUserProfile(UserProfile userProfile)
@@ -271,6 +283,7 @@ public class AvatarEditorHUDController : IDisposable, IHUD
         {
             wearablesByCategory.Add(wearable.category, new List<WearableItem>());
         }
+
         wearablesByCategory[wearable.category].Add(wearable);
         view.AddWearable(wearable);
     }

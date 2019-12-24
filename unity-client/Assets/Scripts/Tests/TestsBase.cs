@@ -13,7 +13,7 @@ using UnityEngine.TestTools;
 
 public class TestsBase
 {
-    private static bool sceneInitialized = false;
+    protected static bool sceneInitialized = false;
     protected SceneController sceneController;
     protected ParcelScene scene;
     protected CameraController cameraController;
