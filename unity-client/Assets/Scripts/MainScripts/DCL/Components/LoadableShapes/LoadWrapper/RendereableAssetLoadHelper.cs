@@ -12,7 +12,7 @@ namespace DCL.Components
         public static string customContentServerUrl;
         public static bool useGltfFallback = true;
 
-        public AssetPromiseSettings_Rendering settings;
+        public AssetPromiseSettings_Rendering settings = new AssetPromiseSettings_Rendering();
 
         public GameObject loadedAsset { get; protected set; }
 
@@ -152,7 +152,7 @@ namespace DCL.Components
                     Debug.Log($"AB Load(): target URL -> {abPromise.hash}. Success!");
             }
 
-
+            this.loadedAsset = loadedAsset.container;
             OnSuccess?.Invoke(loadedAsset.container);
             ClearEvents();
         }

@@ -29,6 +29,20 @@ namespace DCL.Components
             Assert.IsFalse(string.IsNullOrEmpty(targetUrl), "url is null!!");
             loadHelper = new RendereableAssetLoadHelper(this.entity.scene.contentProvider, entity.scene.sceneData.baseUrlBundles);
 
+            loadHelper.settings.parent = transform;
+
+            if (initialVisibility == false)
+            {
+                loadHelper.settings.visibleFlags = AssetPromiseSettings_Rendering.VisibleFlags.INVISIBLE;
+            }
+            else
+            {
+                if (useVisualFeedback)
+                    loadHelper.settings.visibleFlags = AssetPromiseSettings_Rendering.VisibleFlags.VISIBLE_WITH_TRANSITION;
+                else
+                    loadHelper.settings.visibleFlags = AssetPromiseSettings_Rendering.VisibleFlags.VISIBLE_WITHOUT_TRANSITION;
+            }
+
             loadHelper.OnSuccessEvent += (x) => OnSuccessWrapper(OnSuccess);
             loadHelper.OnFailEvent += () => OnFailWrapper(OnSuccess);
             loadHelper.Load(targetUrl);
