@@ -1,7 +1,8 @@
 import { Component, ObservableComponent } from '../ecs/Component'
 import { IEvents } from './Types'
 import { uuidEventSystem } from './Systems'
-import { CLASS_ID, OnUUIDEvent } from './Components'
+import { CLASS_ID, OnUUIDEvent, OnPointerUUIDEvent } from './Components'
+import { ActionButton } from './Input'
 
 /**
  * @public
@@ -57,24 +58,6 @@ export class OnBlur extends OnUUIDEvent<'onBlur'> {
 /**
  * @public
  */
-@Component('engine.onClick', CLASS_ID.UUID_CALLBACK)
-export class OnClick extends OnUUIDEvent<'onClick'> {
-  @ObservableComponent.readonly
-  readonly type: string = 'onClick'
-
-  constructor(callback: (event: IEvents['onClick']) => void) {
-    super(callback)
-    // This injection is necessary ONLY in events that are ALWAYS turned on and are
-    // not assignable to entities. Like events for the UI elements
-
-    // TODO(Brian): This will be removed when UI gets back to the entity parenting.
-    uuidEventSystem.handlerMap[this.uuid] = this
-  }
-}
-
-/**
- * @public
- */
 @Component('engine.onEnter', CLASS_ID.UUID_CALLBACK)
 export class OnEnter extends OnUUIDEvent<'onEnter'> {
   @ObservableComponent.readonly
@@ -109,18 +92,60 @@ export class OnChanged extends OnUUIDEvent<'onChange'> {
 /**
  * @public
  */
-@Component('engine.pointerDown', CLASS_ID.UUID_CALLBACK)
-export class OnPointerDown extends OnUUIDEvent<'pointerDown'> {
+@Component('engine.onClick', CLASS_ID.UUID_CALLBACK)
+export class OnClick extends OnPointerUUIDEvent<'onClick'> {
   @ObservableComponent.readonly
-  readonly type: string = 'pointerDown'
+  readonly type: string = 'onClick'
 
-  constructor(callback: (event: IEvents['pointerDown']) => void) {
+  constructor(callback: (event: IEvents['onClick']) => void, showPointerFeeback?: boolean, button?: ActionButton, hoverText?: string, interactionDistance?: number) {
     super(callback)
     // This injection is necessary ONLY in events that are ALWAYS turned on and are
     // not assignable to entities. Like events for the UI elements
 
     // TODO(Brian): This will be removed when UI gets back to the entity parenting.
     uuidEventSystem.handlerMap[this.uuid] = this
+
+    if(showPointerFeeback)
+      this.showPointerFeedback = showPointerFeeback;
+
+    if(button)
+      this.button = button;
+
+    if(hoverText)
+      this.pointerFeedbackText = hoverText;
+
+    if(interactionDistance)
+      this.interactionDistance = interactionDistance;
+  }
+}
+
+/**
+ * @public
+ */
+@Component('engine.pointerDown', CLASS_ID.UUID_CALLBACK)
+export class OnPointerDown extends OnPointerUUIDEvent<'pointerDown'> {
+  @ObservableComponent.readonly
+  readonly type: string = 'pointerDown'
+
+  constructor(callback: (event: IEvents['pointerDown']) => void, showPointerFeeback?: boolean, button?: ActionButton, hoverText?: string, interactionDistance?: number) {
+    super(callback)
+    // This injection is necessary ONLY in events that are ALWAYS turned on and are
+    // not assignable to entities. Like events for the UI elements
+
+    // TODO(Brian): This will be removed when UI gets back to the entity parenting.
+    uuidEventSystem.handlerMap[this.uuid] = this
+
+    if(showPointerFeeback)
+      this.showPointerFeedback = showPointerFeeback;
+
+    if(button)
+      this.button = button;
+
+    if(hoverText)
+      this.pointerFeedbackText = hoverText;
+
+    if(interactionDistance)
+      this.interactionDistance = interactionDistance;
   }
 }
 

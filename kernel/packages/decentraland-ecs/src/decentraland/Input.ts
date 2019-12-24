@@ -14,7 +14,8 @@ export type InputEventKind = 'BUTTON_DOWN' | 'BUTTON_UP'
 export enum ActionButton {
   POINTER = 'POINTER',
   PRIMARY = 'PRIMARY',
-  SECONDARY = 'SECONDARY'
+  SECONDARY = 'SECONDARY',
+  UNKNOWN = 'UNKNOWN'
 }
 
 /** @public */
@@ -95,6 +96,10 @@ export class Input {
     [ActionButton.SECONDARY]: {
       BUTTON_DOWN: [],
       BUTTON_UP: []
+    },
+    [ActionButton.UNKNOWN]: {
+      BUTTON_DOWN: [],
+      BUTTON_UP: []
     }
   }
 
@@ -106,6 +111,9 @@ export class Input {
       BUTTON_DOWN: false
     },
     [ActionButton.SECONDARY]: {
+      BUTTON_DOWN: false
+    },
+    [ActionButton.UNKNOWN]: {
       BUTTON_DOWN: false
     }
   }
