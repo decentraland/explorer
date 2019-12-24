@@ -18,13 +18,13 @@ namespace AvatarEditorHUD_Tests
         {
             if (controller == null)
             {
-                Setup_AvaterEditorHUDController();
+                Setup_AvatarEditorHUDController();
             }
 
             yield break;
         }
 
-        private void Setup_AvaterEditorHUDController()
+        private void Setup_AvatarEditorHUDController()
         {
             userProfile = ScriptableObject.CreateInstance<UserProfile>();
             userProfile.UpdateData(new UserProfileModel()
@@ -204,6 +204,7 @@ namespace AvatarEditorHUD_Tests
                 inventory = new[] { dummyItem.id }
             }, false);
 
+            catalog.Clear();
             catalog.Add(dummyItem.id, dummyItem);
             return dummyItem;
         }

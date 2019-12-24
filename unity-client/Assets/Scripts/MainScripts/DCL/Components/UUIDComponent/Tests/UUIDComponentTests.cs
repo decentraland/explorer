@@ -16,7 +16,6 @@ namespace Tests
         [UnitySetUp]
         protected override IEnumerator SetUp()
         {
-            SetUp_Camera();
             yield return base.SetUp();
             PointerEventsController.i.Initialize(isTesting: true);
             scene.useBoundariesChecker = false;

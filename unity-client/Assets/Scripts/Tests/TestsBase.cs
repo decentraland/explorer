@@ -13,6 +13,7 @@ using UnityEngine.TestTools;
 
 public class TestsBase
 {
+    private static bool sceneInitialized = false;
     protected SceneController sceneController;
     protected ParcelScene scene;
     protected CameraController cameraController;
@@ -20,6 +21,13 @@ public class TestsBase
     [UnitySetUp]
     protected virtual IEnumerator SetUp()
     {
+        if (!sceneInitialized)
+        {
+            yield return InitUnityScene("MainTest");
+            sceneInitialized = true;
+        }
+
+        SetUp_Camera();
         yield return SetUp_SceneController();
         yield return SetUp_CharacterController();
     }
@@ -84,7 +92,10 @@ public class TestsBase
 
     public virtual void SetUp_Camera()
     {
-        GameObject.Instantiate(Resources.Load<GameObject>("CameraController")).GetComponent<CameraController>();
+        cameraController = GameObject.FindObjectOfType<CameraController>();
+
+        if (cameraController == null)
+            cameraController = GameObject.Instantiate(Resources.Load<GameObject>("CameraController")).GetComponent<CameraController>();
     }
 
     public virtual IEnumerator SetUp_SceneController(bool debugMode = false, bool usesWebServer = false, bool spawnTestScene = true)

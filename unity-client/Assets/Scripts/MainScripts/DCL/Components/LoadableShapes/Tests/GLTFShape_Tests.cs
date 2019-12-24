@@ -219,7 +219,7 @@ public class GLTFShape_Tests : TestsBase
     [Test]
     [Explicit]
     [Category("Explicit")]
-    protected void OnReadyWithoutAttachInstantlyCalled()
+    public void OnReadyWithoutAttachInstantlyCalled()
     {
 
 

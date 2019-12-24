@@ -23,7 +23,6 @@ public class PhysicsCast_Tests : TestsBase
     [UnitySetUp]
     protected override IEnumerator SetUp()
     {
-        SetUp_Camera();
         yield return base.SetUp();
         PointerEventsController.i.Initialize(isTesting: true);
         scene.useBoundariesChecker = false;
@@ -57,6 +56,8 @@ public class PhysicsCast_Tests : TestsBase
     }
 
     [UnityTest]
+    [Explicit]
+    [Category("Explicit")]
     public IEnumerator HitFirst()
     {
         ConfigureRaycastQuery("HitFirst");
@@ -121,6 +122,8 @@ public class PhysicsCast_Tests : TestsBase
     }
 
     [UnityTest]
+    [Explicit]
+    [Category("Explicit")]
     public IEnumerator HitAll()
     {
         ConfigureRaycastQuery("HitAll");

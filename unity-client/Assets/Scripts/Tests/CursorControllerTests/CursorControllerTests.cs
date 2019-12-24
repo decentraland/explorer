@@ -11,9 +11,15 @@ namespace Tests
 {
     public class CursorControllerTests : TestsBase
     {
+        protected override IEnumerator SetUp()
+        {
+            return base.SetUp();
+        }
+
         [UnityTest]
         public IEnumerator OnPointerHoverFeedbackIsDisplayedCorrectly()
         {
+
             DecentralandEntity entity;
             BoxShape shape;
 
