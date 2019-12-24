@@ -34,9 +34,6 @@ function logDifferenceAlgorithm(caseStr: string) {
     return
   }
   loggedCases[caseStr] = (loggedCases[caseStr] ? loggedCases[caseStr] : 0) + 1
-  if (loggedCases[caseStr] % 10000 == 0) {
-    console.log(`Diff [${caseStr}]: ${loggedCases[caseStr]}`)
-  }
 }
 
 export class DecentralandSynchronizationSystem implements ISystem {
