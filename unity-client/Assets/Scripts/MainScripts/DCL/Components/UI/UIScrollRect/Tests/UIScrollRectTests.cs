@@ -154,6 +154,7 @@ namespace Tests
         }
 
         [UnityTest]
+        [Explicit]
         public IEnumerator TestNormalizedSize()
         {
             // Create UIScreenSpaceShape

@@ -11,6 +11,7 @@ namespace Tests
     public class UIScreenSpaceTests : UITestsBase
     {
         [UnityTest]
+        [Explicit]
         public IEnumerator TestVisibilityUpdate()
         {
             // Create UIScreenSpaceShape
@@ -67,6 +68,7 @@ namespace Tests
         }
 
         [UnityTest]
+        [Explicit]
         public IEnumerator TestScaleWhenCharacterIsElsewhere()
         {
             // Position character outside parcel

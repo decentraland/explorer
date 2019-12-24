@@ -1,4 +1,4 @@
-using DCL;
+﻿using DCL;
 using DCL.Components;
 using DCL.Configuration;
 using DCL.Controllers;
@@ -398,8 +398,6 @@ namespace Tests
         [Category("Explicit")]
         public void ParcelScene_TrackDisposables_BeforeInitDone()
         {
-
-
             TestHelpers.CreateEntityWithBoxShape(scene, Vector3.zero, true);
             TestHelpers.CreateEntityWithBoxShape(scene, Vector3.zero, true);
             TestHelpers.CreateEntityWithBoxShape(scene, Vector3.zero, true);

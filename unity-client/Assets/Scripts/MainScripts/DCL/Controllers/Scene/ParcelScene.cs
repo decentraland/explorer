@@ -41,7 +41,7 @@ namespace DCL.Controllers
         public int disposableNotReadyCount => disposableNotReady.Count;
 
         [System.NonSerialized]
-        public bool useBoundariesChecker = true;
+        public bool useBoundariesChecker = false;
 
         [System.NonSerialized]
         public bool useBlockers = true;
@@ -401,7 +401,7 @@ namespace DCL.Controllers
 
             newEntity.OnCleanupEvent += po.OnCleanup;
 
-            if (useBoundariesChecker)
+            if (useBoundariesChecker || SceneController.i.isDebugMode)
                 newEntity.OnShapeUpdated += boundariesChecker.EvaluateEntityPosition;
 
             entities.Add(tmpCreateEntityMessage.id, newEntity);
@@ -602,7 +602,7 @@ namespace DCL.Controllers
                     entity.gameObject.transform.localRotation = DCLTransform.model.rotation;
                     entity.gameObject.transform.localScale = DCLTransform.model.scale;
 
-                    if (useBoundariesChecker)
+                    if (useBoundariesChecker || SceneController.i.isDebugMode)
                         boundariesChecker.EvaluateEntityPosition(entity);
                 }
 
