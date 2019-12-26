@@ -9,7 +9,7 @@ import { EventDispatcher } from 'decentraland-rpc/lib/common/core/EventDispatche
 import { IFuture } from 'fp-future'
 import { Empty } from 'google-protobuf/google/protobuf/empty_pb'
 import { gridToWorld } from '../atomicHelpers/parcelScenePositions'
-import { DEBUG, EDITOR, ENGINE_DEBUG_PANEL, playerConfigurations, SCENE_DEBUG_PANEL } from '../config'
+import { DEBUG, EDITOR, ENGINE_DEBUG_PANEL, playerConfigurations, SCENE_DEBUG_PANEL, SHOW_FPS_COUNTER } from '../config'
 import { Quaternion, ReadOnlyQuaternion, ReadOnlyVector3, Vector3 } from '../decentraland-ecs/src/decentraland/math'
 import { IEventNames, IEvents, ProfileForRenderer } from '../decentraland-ecs/src/decentraland/Types'
 import { sceneLifeCycleObservable } from '../decentraland-loader/lifecycle/controllers/scene'
@@ -75,6 +75,7 @@ import { positionObservable, teleportObservable } from '../shared/world/position
 import { hudWorkerUrl, SceneWorker } from '../shared/world/SceneWorker'
 import { ensureUiApis } from '../shared/world/uiSceneInitializer'
 import { worldRunningObservable } from '../shared/world/worldState'
+import { getEmail } from '../shared/auth/selectors'
 
 const rendererVersion = require('decentraland-renderer')
 window['console'].log('Renderer version: ' + rendererVersion)
@@ -166,6 +167,10 @@ const browserInterface = {
 
   ReportBuilderCameraTarget(data: { id: string; cameraTarget: ReadOnlyVector3 }) {
     futures[data.id].resolve(data.cameraTarget)
+  },
+
+  EditAvatarClicked() {
+    delightedSurvey()
   }
 }
 
@@ -173,6 +178,21 @@ export function setLoadingScreenVisible(shouldShow: boolean) {
   document.getElementById('overlay')!.style.display = shouldShow ? 'block' : 'none'
   document.getElementById('load-messages-wrapper')!.style.display = shouldShow ? 'block' : 'none'
   document.getElementById('progress-bar')!.style.display = shouldShow ? 'block' : 'none'
+}
+
+function delightedSurvey() {
+  const { analytics, delighted, globalStore } = global
+  if (analytics && delighted && globalStore) {
+    const email = getEmail(global.globalStore.getState())
+    const payload = {
+      email: email,
+      properties: {
+        anonymous_id: analytics && analytics.user ? analytics.user().anonymousId() : null
+      }
+    }
+
+    delighted.survey(payload)
+  }
 }
 
 function ensureTeleportAnimation() {
@@ -186,6 +206,7 @@ function ensureTeleportAnimation() {
     'style',
     'background: #151419 url(images/teleport.gif) no-repeat center !important; background-size: 194px 257px !important;'
   )
+  delightedSurvey()
 }
 
 const CHUNK_SIZE = 500
@@ -278,6 +299,12 @@ export const unityInterface = {
   },
   SetSceneDebugPanel() {
     gameInstance.SendMessage('SceneController', 'SetSceneDebugPanel')
+  },
+  ShowFPSPanel() {
+    gameInstance.SendMessage('SceneController', 'ShowFPSPanel')
+  },
+  HideFPSPanel() {
+    gameInstance.SendMessage('SceneController', 'HideFPSPanel')
   },
   SetEngineDebugPanel() {
     gameInstance.SendMessage('SceneController', 'SetEngineDebugPanel')
@@ -373,17 +400,14 @@ export const unityInterface = {
       JSON.stringify({ position: position, rotation: rotation, scale: scale })
     )
   },
-  SelectBuilderEntity(entityId: string) {
-    this.SendBuilderMessage('SelectEntity', entityId)
+  SetBuilderSelectedEntities(entities: string[]) {
+    this.SendBuilderMessage('SetSelectedEntities', JSON.stringify({ entities: entities }))
   },
   ResetBuilderScene() {
     this.SendBuilderMessage('ResetBuilderScene')
   },
   OnBuilderKeyDown(key: string) {
     this.SendBuilderMessage('OnBuilderKeyDown', key)
-  },
-  DeselectBuilderEntity() {
-    this.SendBuilderMessage('DeselectBuilderEntity')
   }
 }
 
@@ -630,6 +654,10 @@ export async function initializeEngine(_gameInstance: GameInstance) {
     unityInterface.SetSceneDebugPanel()
   }
 
+  if (SHOW_FPS_COUNTER) {
+    unityInterface.ShowFPSPanel()
+  }
+
   if (ENGINE_DEBUG_PANEL) {
     unityInterface.SetEngineDebugPanel()
   }
@@ -641,7 +669,7 @@ export async function initializeEngine(_gameInstance: GameInstance) {
     onMessage(type: string, message: any) {
       if (type in browserInterface) {
         // tslint:disable-next-line:semicolon
-        ;(browserInterface as any)[type](message)
+        ; (browserInterface as any)[type](message)
       } else {
         defaultLogger.info(`Unknown message (did you forget to add ${type} to unity-interface/dcl.ts?)`, message)
       }

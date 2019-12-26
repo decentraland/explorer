@@ -1,6 +1,5 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -25,20 +24,23 @@ public class ItemToggle : UIButton, IPointerEnterHandler, IPointerExitHandler
         set
         {
             selectedValue = value;
-            selectionHighlight.enabled = selectedValue;
+
+            if (selectionHighlight != null)
+                selectionHighlight.enabled = selectedValue;
         }
     }
 
-    private new void Awake()
+    protected new virtual void Awake()
     {
         base.Awake();
 
-        Application.quitting += () =>
-        {
-            OnClicked = null;
-        };
-
+        Application.quitting += Cleanup;
         warningPanel.SetActive(false);
+    }
+
+    void Cleanup()
+    {
+        OnClicked = null;
     }
 
     protected override void OnClick()
@@ -47,7 +49,7 @@ public class ItemToggle : UIButton, IPointerEnterHandler, IPointerExitHandler
         warningPanel.SetActive(false);
     }
 
-    public void Initialize(WearableItem w, bool isSelected)
+    public virtual void Initialize(WearableItem w, bool isSelected)
     {
         wearableItem = w;
         selected = isSelected;
@@ -88,6 +90,8 @@ public class ItemToggle : UIButton, IPointerEnterHandler, IPointerExitHandler
 
     private void OnDestroy()
     {
+        Application.quitting -= Cleanup;
+
         if (wearableItem != null)
         {
             ThumbnailsManager.CancelRequest(wearableItem.baseUrl + wearableItem.thumbnail, OnThumbnailReady);

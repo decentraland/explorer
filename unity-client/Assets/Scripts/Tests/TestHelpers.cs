@@ -787,12 +787,12 @@ namespace DCL.Helpers
 
             Assert.IsTrue(renderers.Length > 0);
 
-            var onClickComponentModel = new OnClickComponent.Model()
+            var onClickComponentModel = new OnClick.Model()
             {
-                type = OnClickComponent.NAME,
+                type = OnClick.NAME,
                 uuid = "onClick"
             };
-            var onClickComponent = TestHelpers.EntityComponentCreate<OnClickComponent, OnClickComponent.Model>(entity.scene, entity, onClickComponentModel, CLASS_ID_COMPONENT.UUID_CALLBACK);
+            var onClickComponent = TestHelpers.EntityComponentCreate<OnClick, OnClick.Model>(entity.scene, entity, onClickComponentModel, CLASS_ID_COMPONENT.UUID_CALLBACK);
             yield return onClickComponent.routine;
 
             Collider onPointerEventCollider;
@@ -1024,6 +1024,7 @@ namespace DCL.Helpers
 
             if (sceneController != null && sceneController.componentFactory == null)
             {
+                ForceUnloadAllScenes(sceneController);
                 Utils.SafeDestroy(sceneController);
                 sceneController = null;
             }
@@ -1032,6 +1033,10 @@ namespace DCL.Helpers
             {
                 GameObject GO = GameObject.Instantiate(Resources.Load("Prefabs/SceneController") as GameObject);
                 sceneController = GO.GetComponent<SceneController>();
+            }
+            else
+            {
+                sceneController.Restart();
             }
 
             if (usesWebServer)
@@ -1049,6 +1054,10 @@ namespace DCL.Helpers
             }
 
             Configuration.ParcelSettings.VISUAL_LOADING_ENABLED = false;
+
+            sceneController.deferredMessagesDecoding = false;
+            sceneController.prewarmSceneMessagesPool = false;
+
             ForceUnloadAllScenes(sceneController);
 
             return sceneController;
