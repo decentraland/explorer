@@ -28,7 +28,6 @@ namespace AvatarEditorHUD_Tests
                 skinColorList = Resources.Load<ColorList>("SkinTone");
                 hairColorList = Resources.Load<ColorList>("HairColor");
                 eyeColorList = Resources.Load<ColorList>("EyeColor");
-                //yield return InitScene(false, false, false, false, false);
 
                 userProfile = ScriptableObject.CreateInstance<UserProfile>();
                 userProfile.UpdateData(new UserProfileModel()

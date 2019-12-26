@@ -54,7 +54,6 @@ public class CharacterPreviewController : MonoBehaviour
 
     private IEnumerator UpdateModelRoutine(AvatarModel newModel, Action onDone)
     {
-        Debug.Log("updating model...");
         bool avatarDone = false;
         bool avatarFailed = false;
         avatarRenderer.ApplyModel(newModel, () => avatarDone = true, () => avatarFailed = true);
