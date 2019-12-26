@@ -89,7 +89,7 @@ namespace DCL
         LoadParcelScenesMessage loadParcelScenesMessage = new LoadParcelScenesMessage();
         string globalSceneId = "";
 
-        const float SORT_MESSAGE_CONTROLLER_TIME = 0.25f;
+        const float SORT_MESSAGE_CONTROLLER_TIME = 0.5f;
         float lastTimeMessageControllerSorted = 0;
 
         void Awake()
@@ -123,6 +123,15 @@ namespace DCL
 
             if (deferredMessagesDecoding)
                 StartCoroutine(DeferredDecoding());
+
+            DCLCharacterController.OnCharacterMoved += SetPositionDirty;
+        }
+
+        bool positionDirty = true;
+
+        private void SetPositionDirty(DCLCharacterPosition obj)
+        {
+            positionDirty = true;
         }
 
         void Start()
@@ -150,6 +159,7 @@ namespace DCL
 
         void OnDestroy()
         {
+            DCLCharacterController.OnCharacterMoved -= SetPositionDirty;
             ParcelScene.parcelScenesCleaner.Stop();
         }
 
@@ -164,12 +174,19 @@ namespace DCL
 
         private void PrioritizeMessageControllerList(bool force = false)
         {
-            if (force || DCLTime.realtimeSinceStartup - lastTimeMessageControllerSorted >= SORT_MESSAGE_CONTROLLER_TIME)
+            bool sortTimeout = Time.realtimeSinceStartup - lastTimeMessageControllerSorted >= SORT_MESSAGE_CONTROLLER_TIME;
+            bool positionDirty = this.positionDirty || !RenderingController.i.renderingEnabled;
+
+            if (force || (sortTimeout && positionDirty))
             {
-                lastTimeMessageControllerSorted = DCLTime.realtimeSinceStartup;
+                positionDirty = false;
+                lastTimeMessageControllerSorted = Time.realtimeSinceStartup;
                 scenesSortedByDistance.Sort(SceneMessagingSortByDistance);
+                OnSortScenes?.Invoke();
             }
         }
+
+        public event System.Action OnSortScenes;
 
         private int SceneMessagingSortByDistance(ParcelScene sceneA, ParcelScene sceneB)
         {
