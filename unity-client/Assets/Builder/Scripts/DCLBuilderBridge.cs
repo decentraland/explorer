@@ -51,6 +51,8 @@ namespace Builder
 
         private bool isGameObjectActive = false;
 
+        private Coroutine screenshotCoroutine = null;
+
         private EntitiesOutOfBoundariesEventPayload outOfBoundariesEventPayload = new EntitiesOutOfBoundariesEventPayload();
         private static OnEntityLoadingEvent onGetLoadingEntity = new OnEntityLoadingEvent();
         private static ReportCameraTargetPosition onReportCameraTarget = new ReportCameraTargetPosition();
@@ -201,7 +203,11 @@ namespace Builder
         public void TakeScreenshot(string id)
         {
             if (LOG_MESSAGES) Debug.Log($"RECEIVE: TakeScreenshot {id}");
-            StartCoroutine(TakeScreenshotRoutine(id));
+            if (screenshotCoroutine != null)
+            {
+                StopCoroutine(screenshotCoroutine);
+            }
+            screenshotCoroutine = StartCoroutine(TakeScreenshotRoutine(id));
         }
 
         public void ResetBuilderScene()
