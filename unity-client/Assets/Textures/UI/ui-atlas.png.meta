@@ -311,6 +311,9 @@ TextureImporter:
   - first:
       213: 7595667864703430088
     second: mouse-icon
+  - first:
+      213: 6488135825053477424
+    second: interactive-icon
   externalObjects: {}
   serializedVersion: 10
   mipmaps:
@@ -2310,6 +2313,27 @@ TextureImporter:
       bones: []
       spriteID: f3d4e7741febd433c9adbc6bfe68a0a2
       internalID: 7595667864703430088
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: interactive-icon
+      rect:
+        serializedVersion: 2
+        x: 171
+        y: 251
+        width: 26
+        height: 28
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cbf8e90346f0e4b50a12187861c1f22e
+      internalID: 6488135825053477424
       vertices: []
       indices: 
       edges: []
