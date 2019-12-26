@@ -308,6 +308,9 @@ TextureImporter:
   - first:
       213: 7025982016299592833
     second: key-binding-bg
+  - first:
+      213: 7595667864703430088
+    second: mouse-icon
   externalObjects: {}
   serializedVersion: 10
   mipmaps:
@@ -2286,6 +2289,27 @@ TextureImporter:
       bones: []
       spriteID: 74cd8f49f063f4e7ab1d2590390d196b
       internalID: 7025982016299592833
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: mouse-icon
+      rect:
+        serializedVersion: 2
+        x: 130
+        y: 251
+        width: 26
+        height: 36
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f3d4e7741febd433c9adbc6bfe68a0a2
+      internalID: 7595667864703430088
       vertices: []
       indices: 
       edges: []
