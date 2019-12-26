@@ -45,7 +45,6 @@ public class TestsBase
         MemoryManager.i?.CleanupPoolsIfNeeded(true);
         PoolManager.i?.Cleanup();
         PointerEventsController.i?.Cleanup();
-        MessagingControllersManager.i?.Cleanup();
 
         Caching.ClearCache();
         Resources.UnloadUnusedAssets();
@@ -88,6 +87,7 @@ public class TestsBase
 
         yield return null;
         Assert.IsTrue(DCLCharacterController.i != null);
+        DCLCharacterController.i.characterController.enabled = true;
     }
 
     public virtual void SetUp_Camera()
@@ -102,13 +102,11 @@ public class TestsBase
     {
         PoolManager.enablePrewarm = false;
         sceneController = TestHelpers.InitializeSceneController(usesWebServer);
-        sceneController.deferredMessagesDecoding = false;
-        sceneController.prewarmSceneMessagesPool = false;
 
         if (debugMode)
             sceneController.SetDebug();
 
-        yield return new WaitForSeconds(0.01f);
+        yield return null;
 
         if (spawnTestScene)
             SetUp_TestScene();

@@ -1,9 +1,9 @@
 using DCL;
+using NUnit.Framework;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.Assertions;
 using UnityEngine.TestTools;
 
 namespace AvatarShape_Tests
@@ -42,6 +42,8 @@ namespace AvatarShape_Tests
         }
 
         [UnityTest]
+        [Category("Explicit")]
+        [Explicit("Test too slow")]
         public IEnumerator ProcessVisibilityTrueWhenSetBeforeLoading()
         {
             //Clean hides/replaces to avoid interferences
@@ -59,6 +61,8 @@ namespace AvatarShape_Tests
         }
 
         [UnityTest]
+        [Category("Explicit")]
+        [Explicit("Test too slow")]
         public IEnumerator ProcessVisibilityFalseWhenSetBeforeLoading()
         {
             //Clean hides/replaces to avoid interferences
@@ -76,6 +80,8 @@ namespace AvatarShape_Tests
         }
 
         [UnityTest]
+        [Category("Explicit")]
+        [Explicit("Test too slow")]
         public IEnumerator ProcessVisibilityTrueWhenSetWhileLoading()
         {
             //Clean hides/replaces to avoid interferences
@@ -93,6 +99,8 @@ namespace AvatarShape_Tests
         }
 
         [UnityTest]
+        [Category("Explicit")]
+        [Explicit("Test too slow")]
         public IEnumerator ProcessVisibilityFalseWhenSetWhileLoading()
         {
             //Clean hides/replaces to avoid interferences
@@ -111,6 +119,8 @@ namespace AvatarShape_Tests
 
 
         [UnityTest]
+        [Category("Explicit")]
+        [Explicit("Test too slow")]
         public IEnumerator ProcessVisibilityTrueWhenSetAfterLoading()
         {
             //Clean hides/replaces to avoid interferences
@@ -128,6 +138,8 @@ namespace AvatarShape_Tests
         }
 
         [UnityTest]
+        [Category("Explicit")]
+        [Explicit("Test too slow")]
         public IEnumerator ProcessVisibilityFalseWhenSetAfterLoading()
         {
             //Clean hides/replaces to avoid interferences

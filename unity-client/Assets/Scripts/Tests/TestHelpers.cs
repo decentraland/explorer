@@ -1054,7 +1054,9 @@ namespace DCL.Helpers
             }
 
             Configuration.ParcelSettings.VISUAL_LOADING_ENABLED = false;
+
             sceneController.deferredMessagesDecoding = false;
+            sceneController.prewarmSceneMessagesPool = false;
 
             ForceUnloadAllScenes(sceneController);
 

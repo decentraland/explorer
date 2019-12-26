@@ -1,3 +1,4 @@
+using NUnit.Framework;
 using System.Collections;
 using UnityEngine.TestTools;
 
@@ -29,6 +30,8 @@ namespace SceneBoundariesCheckerTests
         }
 
         [UnityTest]
+        [Explicit("Test taking too long")]
+        [Category("Explicit")]
         public IEnumerator NFTShapeIsInvalidatedWhenStartingOutOfBoundsDebugMode()
         {
             sceneController.isDebugMode = true;
@@ -51,6 +54,8 @@ namespace SceneBoundariesCheckerTests
             sceneController.isDebugMode = false;
         }
         [UnityTest]
+        [Explicit("Test taking too long")]
+        [Category("Explicit")]
         public IEnumerator NFTShapeIsInvalidatedWhenLeavingBoundsDebugMode()
         {
             sceneController.isDebugMode = true;
@@ -66,6 +71,8 @@ namespace SceneBoundariesCheckerTests
         }
 
         [UnityTest]
+        [Explicit("Test taking too long")]
+        [Category("Explicit")]
         public IEnumerator NFTShapeIsResetWhenReenteringBoundsDebugMode()
         {
             sceneController.isDebugMode = true;

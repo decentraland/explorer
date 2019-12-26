@@ -1,4 +1,4 @@
-﻿using DCL;
+using DCL;
 using DCL.Components;
 using DCL.Configuration;
 using DCL.Controllers;
@@ -16,6 +16,25 @@ namespace Tests
 {
     public class SceneTests : TestsBase
     {
+        [UnitySetUp]
+        protected override IEnumerator SetUp()
+        {
+            if (!sceneInitialized)
+            {
+                yield return InitUnityScene("MainTest");
+                sceneInitialized = true;
+            }
+
+            SetUp_Camera();
+            yield return SetUp_SceneController(debugMode: true, false, false);
+            yield return SetUp_CharacterController();
+
+            DCL.Configuration.Environment.DEBUG = true;
+
+            sceneController.SetDebug();
+            yield return null;
+        }
+
         [UnityTest]
         public IEnumerator CreateUIScene()
         {
@@ -61,6 +80,7 @@ namespace Tests
         [Test]
         public void ParcelScene_TrackDisposables_AfterInitDone()
         {
+            SetUp_TestScene();
             TestHelpers.CreateEntityWithBoxShape(scene, Vector3.zero, true);
             TestHelpers.CreateEntityWithBoxShape(scene, Vector3.zero, true);
             TestHelpers.CreateEntityWithBoxShape(scene, Vector3.zero, true);
@@ -73,16 +93,14 @@ namespace Tests
         [Test]
         public void ParcelScene_TrackDisposables_Empty()
         {
+            SetUp_TestScene();
             Assert.AreEqual(0, scene.disposableNotReadyCount);
         }
 
         [UnityTest]
         public IEnumerator PerformanceLimitControllerTests()
         {
-            DCL.Configuration.Environment.DEBUG = true;
-
-            sceneController.SetDebug();
-            yield return null;
+            yield return new WaitForAllMessagesProcessed();
 
             var scenesToLoad = (Resources.Load("TestJSON/SceneLoadingTest") as TextAsset).text;
             sceneController.LoadParcelScenes(scenesToLoad);
@@ -189,12 +207,6 @@ namespace Tests
         [UnityTest]
         public IEnumerator SceneLoading()
         {
-            DCL.Configuration.Environment.DEBUG = true;
-            sceneController.SetDebug();
-
-            sceneController.UnloadAllScenes();
-            yield return null;
-
             Assert.AreEqual(0, sceneController.loadedScenes.Count);
 
             sceneController.LoadParcelScenes((Resources.Load("TestJSON/SceneLoadingTest") as TextAsset).text);
@@ -213,12 +225,6 @@ namespace Tests
         [UnityTest]
         public IEnumerator SceneUnloading()
         {
-            yield return InitScene(usesWebServer: false,
-                                   spawnCharController: true,
-                                   spawnTestScene: false,
-                                   spawnUIScene: false,
-                                   reloadUnityScene: false);
-
             sceneController.LoadParcelScenes((Resources.Load("TestJSON/SceneLoadingTest") as TextAsset).text);
 
             yield return new WaitForAllMessagesProcessed();
@@ -255,8 +261,6 @@ namespace Tests
         [UnityTest]
         public IEnumerator SeveralParcelsFromJSON()
         {
-            sceneController = TestHelpers.InitializeSceneController();
-
             string severalParcelsJson = (Resources.Load("TestJSON/TestSceneSeveralParcels") as TextAsset).text;
 
             //Not really elegant, but does the trick
@@ -301,12 +305,6 @@ namespace Tests
         [UnityTest]
         public IEnumerator PositionParcels()
         {
-            DCL.Configuration.Environment.DEBUG = true;
-            sceneController.SetDebug();
-
-            sceneController.UnloadAllScenes();
-            yield return null;
-
             Assert.AreEqual(0, sceneController.loadedScenes.Count);
 
             var jsonMessageToLoad = "{\"id\":\"xxx\",\"basePosition\":{\"x\":0,\"y\":0},\"parcels\":[{\"x\":-1,\"y\":0}, {\"x\":0,\"y\":0}, {\"x\":-1,\"y\":1}],\"baseUrl\":\"http://localhost:9991/local-ipfs/contents/\",\"contents\":[],\"owner\":\"0x0f5d2fb29fb7d3cfee444a200298f468908cc942\"}";
@@ -338,13 +336,6 @@ namespace Tests
         [UnityTest]
         public IEnumerator PositionParcels2()
         {
-            yield return InitScene(spawnUIScene: false, reloadUnityScene: false);
-            DCL.Configuration.Environment.DEBUG = true;
-            sceneController.SetDebug();
-
-            sceneController.UnloadAllScenes();
-            yield return null;
-
             Assert.AreEqual(0, sceneController.loadedScenes.Count);
 
             var jsonMessageToLoad = "{\"id\":\"xxx\",\"basePosition\":{\"x\":90,\"y\":90},\"parcels\":[{\"x\":89,\"y\":90}, {\"x\":90,\"y\":90}, {\"x\":89,\"y\":91}],\"baseUrl\":\"http://localhost:9991/local-ipfs/contents/\",\"contents\":[],\"owner\":\"0x0f5d2fb29fb7d3cfee444a200298f468908cc942\"}";
@@ -378,12 +369,12 @@ namespace Tests
         [Category("Explicit")]
         public IEnumerator ParcelScene_TrackDisposables_OneGLTF()
         {
-
+            SetUp_TestScene();
             var entity = TestHelpers.CreateSceneEntity(scene);
 
             TestHelpers.AttachGLTFShape(entity, scene, Vector3.zero, new LoadableShape.Model()
             {
-                src = DCL.Helpers.Utils.GetTestsAssetsPath() + "/GLB/Lantern/Lantern.glb"
+                src = Utils.GetTestsAssetsPath() + "/GLB/Lantern/Lantern.glb"
             });
 
             Assert.AreEqual(1, scene.disposableNotReadyCount);
@@ -398,6 +389,7 @@ namespace Tests
         [Category("Explicit")]
         public void ParcelScene_TrackDisposables_BeforeInitDone()
         {
+            SetUp_TestScene();
             TestHelpers.CreateEntityWithBoxShape(scene, Vector3.zero, true);
             TestHelpers.CreateEntityWithBoxShape(scene, Vector3.zero, true);
             TestHelpers.CreateEntityWithBoxShape(scene, Vector3.zero, true);
@@ -410,6 +402,7 @@ namespace Tests
         [Category("Explicit")]
         public IEnumerator ParcelScene_TrackDisposables_InstantReadyDisposable()
         {
+            SetUp_TestScene();
             var boxShape = TestHelpers.CreateEntityWithBoxShape(scene, Vector3.zero, true);
             Assert.AreEqual(1, scene.disposableNotReadyCount);
             scene.SetInitMessagesDone();

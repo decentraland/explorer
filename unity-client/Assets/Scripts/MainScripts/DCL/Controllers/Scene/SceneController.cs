@@ -148,12 +148,14 @@ namespace DCL
         public void Restart()
         {
             MessagingControllersManager.i.Cleanup();
-            MemoryManager.i.CleanupPoolsIfNeeded(true);
-            PointerEventsController.i.Cleanup();
-
             MessagingControllersManager.i.Initialize(this);
+
+            MemoryManager.i.CleanupPoolsIfNeeded(true);
             MemoryManager.i.Initialize();
+
+            PointerEventsController.i.Cleanup();
             PointerEventsController.i.Initialize();
+
             ParcelScene.parcelScenesCleaner.ForceCleanup();
         }
 
