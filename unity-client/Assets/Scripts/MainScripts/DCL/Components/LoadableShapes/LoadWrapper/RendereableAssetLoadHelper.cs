@@ -6,11 +6,19 @@ namespace DCL.Components
 {
     public class RendereableAssetLoadHelper
     {
+        public enum LoadingType
+        {
+            ASSET_BUNDLE_WITH_GLTF_FALLBACK,
+            ASSET_BUNDLE_ONLY,
+            GLTF_ONLY
+        }
+
         public static bool VERBOSE = false;
 
         public static bool useCustomContentServerUrl = false;
         public static string customContentServerUrl;
-        public static bool useGltfFallback = true;
+
+        public static LoadingType loadingType = LoadingType.GLTF_ONLY;
 
         public AssetPromiseSettings_Rendering settings = new AssetPromiseSettings_Rendering();
 
@@ -67,11 +75,19 @@ namespace DCL.Components
 #if UNITY_EDITOR
             loadStartTime = Time.realtimeSinceStartup;
 #endif
+            switch (loadingType)
+            {
+                case LoadingType.ASSET_BUNDLE_WITH_GLTF_FALLBACK:
+                    LoadAssetBundle(targetUrl, OnSuccessEvent, () => LoadGltf(targetUrl, OnSuccessEvent, OnFailEvent));
+                    break;
+                case LoadingType.ASSET_BUNDLE_ONLY:
+                    LoadAssetBundle(targetUrl, OnSuccessEvent, OnFailEvent);
+                    break;
+                case LoadingType.GLTF_ONLY:
+                    LoadGltf(targetUrl, OnSuccessEvent, OnFailEvent);
+                    break;
+            }
 
-            if (useGltfFallback)
-                LoadAssetBundle(targetUrl, OnSuccessEvent, () => LoadGltf(targetUrl, OnSuccessEvent, OnFailEvent));
-            else
-                LoadAssetBundle(targetUrl, OnSuccessEvent, OnFailEvent);
         }
 
         public void Unload()
