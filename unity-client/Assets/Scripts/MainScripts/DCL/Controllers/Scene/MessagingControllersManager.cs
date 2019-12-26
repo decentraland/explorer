@@ -70,6 +70,8 @@ namespace DCL
             int count = scenesSortedByDistance.Count;   // we need to retrieve list count everytime because it
                                                         // may change after a yield return
 
+            string currentSceneId = null;
+
             if (SceneController.i != null && DCLCharacterController.i != null)
                 currentSceneId = SceneController.i.GetCurrentScene(DCLCharacterController.i.characterPosition);
 
@@ -97,7 +99,7 @@ namespace DCL
             sortedControllersCount = sortedControllers.Count;
         }
 
-        public void Stop()
+        public void Cleanup()
         {
             if (mainCoroutine != null)
             {
