@@ -269,7 +269,7 @@ namespace Builder.Gizmos
         {
             if (IsGizmoActive())
             {
-                if (selectedEntities.Count == 0)
+                if (selectedEntities == null || selectedEntities.Count == 0)
                 {
                     HideGizmo();
                 }

@@ -32,7 +32,6 @@ namespace Builder
 
 #if UNITY_EDITOR
             EditorKeyDownEvent();
-            EditorKeyUpEvent();
 #endif
         }
 
@@ -126,14 +125,6 @@ namespace Builder
             if (Input.GetKeyDown(KeyCode.S))
             {
                 SendMessageToBridge("SelectGizmo", DCL.Components.DCLGizmos.Gizmo.SCALE);
-            }
-        }
-
-        private void EditorKeyUpEvent()
-        {
-            if (Input.GetKeyUp(KeyCode.LeftShift))
-            {
-                SendMessageToBridge("OnBuilderKeyUp", "LeftShift");
             }
         }
 
