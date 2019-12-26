@@ -45,11 +45,10 @@ public class WearableController
 
         loader = new RendereableAssetLoadHelper(provider, wearable.baseUrlBundles);
 
-
         loader.settings.forceNewInstance = true;
         loader.settings.initialLocalPosition = Vector3.up * 0.75f;
         loader.settings.visibleFlags = AssetPromiseSettings_Rendering.VisibleFlags.INVISIBLE;
-
+        loader.settings.parent = parent;
 
         loader.OnSuccessEvent += (x) =>
         {
@@ -58,7 +57,6 @@ public class WearableController
         };
 
         loader.OnFailEvent += () => onFail.Invoke(this);
-        loader.settings.parent = parent;
 
         loader.Load(representation.mainFile);
     }
