@@ -32,10 +32,6 @@ public class InteractionHoverCanvasController : MonoBehaviour
 
         ConfigureIcon(button);
 
-        entity.OnTransformChange -= CalculateMeshCenteredPos;
-        entity.OnTransformChange += CalculateMeshCenteredPos;
-        CalculateMeshCenteredPos();
-
         Hide();
     }
 
@@ -63,6 +59,17 @@ public class InteractionHoverCanvasController : MonoBehaviour
         }
     }
 
+    public void Show()
+    {
+        canvas.enabled = true;
+    }
+
+    public void Hide()
+    {
+        canvas.enabled = false;
+    }
+
+    // This method will be used when we apply a "loose aim" for the 3rd person camera
     void CalculateMeshCenteredPos(DCLTransform.Model transformModel = null)
     {
         if (!canvas.enabled) return;
@@ -83,24 +90,7 @@ public class InteractionHoverCanvasController : MonoBehaviour
         }
     }
 
-    public void Show()
-    {
-        canvas.enabled = true;
-    }
-
-    public void Hide()
-    {
-        canvas.enabled = false;
-    }
-
-    void LateUpdate()
-    {
-        if (!canvas.enabled) return;
-
-        CalculateMeshCenteredPos();
-        UpdateSizeAndPos();
-    }
-
+    // This method will be used when we apply a "loose aim" for the 3rd person camera
     public void UpdateSizeAndPos()
     {
         if (mainCamera == null)
