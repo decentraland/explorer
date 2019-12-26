@@ -111,14 +111,8 @@ jobs:
             if [[ -e /tmp/explorer/unity-client/testlog/log.txt ]]; then
                 exit 0
             elif [[ -e ${BUILD_PATH} ]] && [[ -n "$(ls -A ${BUILD_PATH})" ]]; then # Negated condition with regards to renderer: If it doesn't exist, then fail!
-                (bash ./test-ci.sh & echo $! > /tmp/explorer/test.pid &)
-                pid=`cat /tmp/explorer/test.pid`
-                while [ -e /proc/$pid -a /proc/$pid/exe ]; do
-                    echo "Running Unity test..."
-                    sleep 60
-                    tail -f /tmp/explorer/unity-client/testlog/log.txt &
-                    wait -n $pid
-                done
+                bash ./test-ci.sh
+                exit $?
             else exit 1
             fi;
       - save_cache:

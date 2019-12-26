@@ -35,3 +35,5 @@ elif [ $UNITY_EXIT_CODE -eq 3 ]; then
 else
   echo "Unexpected exit code $UNITY_EXIT_CODE";
 fi
+
+exit $UNITY_EXIT_CODE;

@@ -19,8 +19,7 @@ ${UNITY_EXECUTABLE:-xvfb-run --auto-servernum --server-args='-screen 0 640x480x2
   -testPlatform playmode \
   -testResults /tmp/explorer/unity-client/testlog/results.xml \
   -logFile /tmp/explorer/unity-client/testlog/log.txt \
-  -batchmode \
-  -quit
+  -batchmode
 
 UNITY_EXIT_CODE=$?
 
@@ -33,3 +32,5 @@ elif [ $UNITY_EXIT_CODE -eq 3 ]; then
 else
   echo "Unexpected exit code $UNITY_EXIT_CODE";
 fi
+
+exit $UNITY_EXIT_CODE
