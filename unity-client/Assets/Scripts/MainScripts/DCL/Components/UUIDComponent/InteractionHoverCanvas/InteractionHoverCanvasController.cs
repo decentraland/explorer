@@ -6,7 +6,6 @@ using TMPro;
 
 public class InteractionHoverCanvasController : MonoBehaviour
 {
-    public Vector3 offset = new Vector2(0f, 50f);
     public Canvas canvas;
     public RectTransform backgroundTransform;
     public TextMeshProUGUI text;
@@ -105,7 +104,7 @@ public class InteractionHoverCanvasController : MonoBehaviour
             float height = canvasRect.rect.height;
             screenPoint.Scale(new Vector3(width, height, 0));
 
-            ((RectTransform)backgroundTransform).anchoredPosition = screenPoint + offset;
+            ((RectTransform)backgroundTransform).anchoredPosition = screenPoint;
         }
     }
 }
