@@ -42,7 +42,7 @@ namespace DCL
         public Dictionary<string, MessagingBus> messagingBuses = new Dictionary<string, MessagingBus>();
         public IMessageHandler messageHandler;
         public string debugTag;
-        public bool sleeping;
+        public bool enabled = false;
 
         private QueueState currentQueueState
         {
@@ -70,13 +70,13 @@ namespace DCL
             StartBus(MessagingBusId.UI);
         }
 
-        public void RefreshSleepingState()
+        public void RefreshEnabledState()
         {
-            if (sleeping)
+            if (!enabled)
                 return;
 
             if (uiBus.pendingMessagesCount == 0 && initBus.pendingMessagesCount == 0 && systemBus.pendingMessagesCount == 0)
-                sleeping = true;
+                enabled = false;
         }
 
         private MessagingBus AddMessageBus(string id, float budgetMin, float budgetMax)

@@ -199,7 +199,7 @@ namespace DCL
                 }
 
                 if (owner != null)
-                    owner.sleeping = false;
+                    owner.enabled = true;
             }
         }
 

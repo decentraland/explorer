@@ -35,6 +35,13 @@ namespace DCL
 
         public bool isRunning { get { return mainCoroutine != null; } }
 
+        private List<MessagingController> sortedControllers = new List<MessagingController>();
+        private int sortedControllersCount = 0;
+
+        private MessagingController globalController = null;
+        private MessagingController uiSceneController = null;
+        private MessagingController currentSceneController = null;
+
         public void Initialize(IMessageHandler messageHandler)
         {
             throttler = new MessageThrottlingController();
@@ -56,8 +63,6 @@ namespace DCL
                 messagingControllers.TryGetValue(currentSceneId, out currentSceneController);
         }
 
-        List<MessagingController> sortedControllers = new List<MessagingController>();
-        int sortedControllersCount = 0;
         private void OnSortScenes()
         {
             List<ParcelScene> scenesSortedByDistance = SceneController.i.scenesSortedByDistance;
@@ -80,7 +85,7 @@ namespace DCL
                     if (!messagingControllers.ContainsKey(controllerId))
                         continue;
 
-                    if (messagingControllers[controllerId].sleeping)
+                    if (!messagingControllers[controllerId].enabled)
                         continue;
 
                     sortedControllers.Add(messagingControllers[controllerId]);
@@ -89,8 +94,6 @@ namespace DCL
 
             sortedControllersCount = sortedControllers.Count;
         }
-
-
 
         public void Stop()
         {
@@ -117,11 +120,6 @@ namespace DCL
         {
             return messagingControllers.ContainsKey(sceneId);
         }
-
-        MessagingController globalController = null;
-        MessagingController uiSceneController = null;
-        MessagingController currentSceneController = null;
-
 
         public void AddController(IMessageHandler messageHandler, string sceneId, bool isGlobal = false)
         {
@@ -216,7 +214,7 @@ namespace DCL
                 {
                     //-------------------------------------------------------------------------------------------
                     // Global scene UI
-                    if (uiSceneController != null && !uiSceneController.sleeping)
+                    if (uiSceneController != null && uiSceneController.enabled)
                     {
                         processedBus = true;
                         if (ProcessBus(uiSceneController.uiBus, ref prevTimeBudget, out yieldReturn))
@@ -225,7 +223,7 @@ namespace DCL
 
                     //-------------------------------------------------------------------------------------------
                     // Global Controller INIT
-                    if (globalController != null && !globalController.sleeping)
+                    if (globalController != null && globalController.enabled)
                     {
                         processedBus = true;
                         if (ProcessBus(globalController.initBus, ref prevTimeBudget, out yieldReturn))
@@ -234,7 +232,7 @@ namespace DCL
 
                     //-------------------------------------------------------------------------------------------
                     // Global scene INIT
-                    if (uiSceneController != null && !uiSceneController.sleeping)
+                    if (uiSceneController != null && uiSceneController.enabled)
                     {
                         processedBus = true;
                         if (ProcessBus(uiSceneController.initBus, ref prevTimeBudget, out yieldReturn))
@@ -243,7 +241,7 @@ namespace DCL
 
                     //-------------------------------------------------------------------------------------------
                     // Current Scene INIT, UI and SYSTEM
-                    if (currentSceneController != null && !currentSceneController.sleeping)
+                    if (currentSceneController != null && currentSceneController.enabled)
                     {
                         processedBus = true;
                         if (ProcessBus(currentSceneController.initBus, ref prevTimeBudget, out yieldReturn))
@@ -296,7 +294,7 @@ namespace DCL
 
                     //-------------------------------------------------------------------------------------------
                     // Global scene SYSTEM
-                    if (uiSceneController != null && !uiSceneController.sleeping)
+                    if (uiSceneController != null && uiSceneController.enabled)
                     {
                         processedBus = true;
                         if (ProcessBus(uiSceneController.systemBus, ref prevTimeBudget, out yieldReturn))
@@ -350,7 +348,7 @@ namespace DCL
 
                 bool queueResult = bus.ProcessQueue(timeBudget, out yieldReturn);
 
-                bus.owner?.RefreshSleepingState();
+                bus.owner?.RefreshEnabledState();
 
                 if (queueResult)
                     return true;
