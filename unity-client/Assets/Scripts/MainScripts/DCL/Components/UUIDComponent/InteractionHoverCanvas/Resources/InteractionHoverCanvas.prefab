@@ -56,6 +56,7 @@ GameObject:
   - component: {fileID: 1894431656888850275}
   - component: {fileID: 4700288523959264737}
   - component: {fileID: 4594205623192029240}
+  - component: {fileID: 4672070199564005208}
   m_Layer: 5
   m_Name: InteractionHoverCanvas
   m_TagString: Untagged
@@ -128,6 +129,28 @@ MonoBehaviour:
     type: 3}
   unknownActionIconPrefab: {fileID: 883752100616965295, guid: 7d57e6ad950144884968bd36cfa49478,
     type: 3}
+--- !u!114 &4672070199564005208
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6724603896333122190}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 1980459831, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_UiScaleMode: 1
+  m_ReferencePixelsPerUnit: 100
+  m_ScaleFactor: 1
+  m_ReferenceResolution: {x: 800, y: 600}
+  m_ScreenMatchMode: 0
+  m_MatchWidthOrHeight: 0
+  m_PhysicalUnit: 3
+  m_FallbackScreenDPI: 96
+  m_DefaultSpriteDPI: 96
+  m_DynamicPixelsPerUnit: 1
 --- !u!1 &8532994694993499898
 GameObject:
   m_ObjectHideFlags: 0
