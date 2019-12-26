@@ -483,7 +483,18 @@ export async function connect(userId: string, network: ETHEREUM_NETWORK, auth: A
 
     connection = instance
   } else {
-    const peer = new Peer(getServerConfigurations().comms.lighthouseUrl, 'peer-' + uuid())
+    const peer = new Peer(
+      getServerConfigurations().comms.lighthouseUrl,
+      'peer-' + uuid(),
+      () => {
+        // noop
+      },
+      {
+        connectionConfig: {
+          iceServers: commConfigurations.iceServers
+        }
+      }
+    )
     connection = new LighthouseWorldInstanceConnection(peer)
   }
 
