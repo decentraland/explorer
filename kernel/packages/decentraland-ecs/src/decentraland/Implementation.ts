@@ -33,6 +33,10 @@ function logDifferenceAlgorithm(caseStr: string) {
   if (!DEBUG_SYNC_SYSTEM) {
     return
   }
+  if (caseStr === BAD_HIT || caseStr === BAD_MISS || caseStr === UNDEFINED_HIT || caseStr === UNDEFINED_MISS) {
+    // tslint:disable-next-line:no-console
+    console.log('Error!' + caseStr, new Error().stack)
+  }
   loggedCases[caseStr] = (loggedCases[caseStr] ? loggedCases[caseStr] : 0) + 1
 }
 
