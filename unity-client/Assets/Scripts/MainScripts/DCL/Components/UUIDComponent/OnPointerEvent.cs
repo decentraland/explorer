@@ -23,16 +23,15 @@ namespace DCL.Components
         InteractionHoverCanvasController hoverCanvasController;
         bool beingHovered;
 
-        public override void Setup(ParcelScene scene, DecentralandEntity entity, string uuid, string type)
+        public override void Setup(ParcelScene scene, DecentralandEntity entity, UUIDComponent.Model model)
         {
             this.entity = entity;
             this.scene = scene;
 
             if (model == null)
                 model = new OnPointerEvent.Model();
-
-            model.uuid = uuid;
-            model.type = type;
+            else
+                this.model = (OnPointerEvent.Model)model;
 
             Initialize();
 
@@ -69,6 +68,7 @@ namespace DCL.Components
                 GameObject hoverCanvasGameObject = Object.Instantiate(Resources.Load("InteractionHoverCanvas"), transform) as GameObject;
                 hoverCanvasController = hoverCanvasGameObject.GetComponent<InteractionHoverCanvasController>();
             }
+
             hoverCanvasController.Setup((WebInterface.ACTION_BUTTON)model.button, model.toastText, entity);
         }
 

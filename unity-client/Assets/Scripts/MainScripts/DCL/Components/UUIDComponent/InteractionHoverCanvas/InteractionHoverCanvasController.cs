@@ -41,6 +41,7 @@ public class InteractionHoverCanvasController : MonoBehaviour
 
     void ConfigureIcon(WebInterface.ACTION_BUTTON button)
     {
+        Debug.Log("instantiating action button: " + (int)button);
         // When we allow for custom input key bindings this implementation will change
 
         if (hoverIcon != null)

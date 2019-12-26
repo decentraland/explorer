@@ -608,7 +608,7 @@ namespace DCL.Controllers
             {
                 string type = "";
 
-                UUIDComponent.Model model = JsonUtility.FromJson<UUIDComponent.Model>(createEntityComponentMessage.json);
+                OnPointerEvent.Model model = JsonUtility.FromJson<OnPointerEvent.Model>(createEntityComponentMessage.json);
 
                 type = model.type;
 
