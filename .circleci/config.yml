@@ -419,7 +419,7 @@ workflows:
             - build-unity
           filters:
             branches:
-              only: /(master)|(release)|(staging)|(feat\/runtest)/
+              only: /(.*)/
       - build-kernel:
           <<: *all_branches_and_tags
           requires:
