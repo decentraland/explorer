@@ -326,7 +326,7 @@ TextureImporter:
     externalNormalMap: 0
     heightScale: 0.25
     normalMapFilter: 0
-  isReadable: 0
+  isReadable: 1
   streamingMipmaps: 0
   streamingMipmapsPriority: 0
   grayScaleToAlpha: 0
@@ -2273,13 +2273,13 @@ TextureImporter:
       name: key-binding-bg
       rect:
         serializedVersion: 2
-        x: 379
-        y: 448
-        width: 22
-        height: 22
+        x: 793
+        y: 349
+        width: 46
+        height: 46
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
-      border: {x: 10, y: 10, z: 10, w: 10}
+      border: {x: 21, y: 21, z: 21, w: 21}
       outline: []
       physicsShape: []
       tessellationDetail: 0
