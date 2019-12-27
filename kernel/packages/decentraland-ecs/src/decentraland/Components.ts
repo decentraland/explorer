@@ -805,6 +805,17 @@ export class OnPointerUUIDEvent<T extends keyof IEvents> extends OnUUIDEvent<T> 
 
   @ObservableComponent.field
   showPointerFeedback: boolean = true
+
+  toJSON() {
+    return {
+            uuid: this.uuid,
+            type: this.type,
+            button: this.button,
+            pointerFeedbackText: this.pointerFeedbackText,
+            interactionDistance: this.interactionDistance,
+            showPointerFeedback: this.showPointerFeedback
+            }
+  }
 }
 
 /**

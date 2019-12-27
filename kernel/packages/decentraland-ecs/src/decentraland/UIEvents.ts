@@ -105,7 +105,7 @@ export class OnClick extends OnPointerUUIDEvent<'onClick'> {
     // TODO(Brian): This will be removed when UI gets back to the entity parenting.
     uuidEventSystem.handlerMap[this.uuid] = this
 
-    if(showPointerFeeback)
+    if(showPointerFeeback != undefined && showPointerFeeback != null)
       this.showPointerFeedback = showPointerFeeback;
 
     if(button)
@@ -135,7 +135,7 @@ export class OnPointerDown extends OnPointerUUIDEvent<'pointerDown'> {
     // TODO(Brian): This will be removed when UI gets back to the entity parenting.
     uuidEventSystem.handlerMap[this.uuid] = this
 
-    if(showPointerFeeback)
+    if(showPointerFeeback != undefined && showPointerFeeback != null)
       this.showPointerFeedback = showPointerFeeback;
 
     if(button)
