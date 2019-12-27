@@ -26,6 +26,15 @@ namespace DCL.Components
 
         public override void Load(string targetUrl, Action<LoadWrapper> OnSuccess, Action<LoadWrapper> OnFail)
         {
+            if (loadHelper != null)
+            {
+                loadHelper.Unload();
+
+                if (VERBOSE)
+                    Debug.Log("Forgetting not null loader...");
+            }
+
+            alreadyLoaded = false;
             Assert.IsFalse(string.IsNullOrEmpty(targetUrl), "url is null!!");
             loadHelper = new RendereableAssetLoadHelper(this.entity.scene.contentProvider, entity.scene.sceneData.baseUrlBundles);
 
@@ -50,6 +59,7 @@ namespace DCL.Components
 
         private void OnFailWrapper(Action<LoadWrapper> OnFail)
         {
+            alreadyLoaded = true;
             OnFail?.Invoke(this);
         }
 
