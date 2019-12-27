@@ -100,7 +100,7 @@ namespace Builder
         public void SetSelectLayer()
         {
             int selectionLayer = LayerMask.NameToLayer(DCLBuilderRaycast.LAYER_SELECTION);
-            if (rootEntity.meshesInfo != null)
+            if (rootEntity.meshesInfo != null && rootEntity.meshesInfo.renderers != null)
             {
                 Renderer renderer;
                 for (int i = 0; i < rootEntity.meshesInfo.renderers.Length; i++)
