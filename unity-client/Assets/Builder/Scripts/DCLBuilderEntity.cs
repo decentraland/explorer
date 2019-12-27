@@ -172,13 +172,13 @@ namespace Builder
 
             // We don't want animation to be running on editor
             meshAnimations = GetComponentsInChildren<Animation>();
-            for (int i = 0; i < meshAnimations.Length; i++)
+            if (hasSmartItemComponent)
             {
-                meshAnimations[i].Stop();
-                if (!hasSmartItemComponent)
-                {
-                    meshAnimations[i].clip?.SampleAnimation(meshAnimations[i].gameObject, 0);
-                }
+                DefaultAnimationStop();
+            }
+            else
+            {
+                DefaultAnimationSample(0);
             }
             ProcessEntityShape(entity);
 
@@ -231,24 +231,11 @@ namespace Builder
             {
                 if (isPreview)
                 {
-                    if (meshAnimations != null)
-                    {
-                        for (int i = 0; i < meshAnimations.Length; i++)
-                        {
-                            meshAnimations[i].Play();
-                        }
-                    }
+                    DefaultAnimationPlay();
                 }
                 else
                 {
-                    if (meshAnimations != null)
-                    {
-                        for (int i = 0; i < meshAnimations.Length; i++)
-                        {
-                            meshAnimations[i].Stop();
-                            meshAnimations[i].clip?.SampleAnimation(meshAnimations[i].gameObject, 0);
-                        }
-                    }
+                    DefaultAnimationSample(0);
                 }
             }
 
@@ -315,6 +302,40 @@ namespace Builder
                     }
                 }
                 meshColliders = null;
+            }
+        }
+
+        private void DefaultAnimationStop()
+        {
+            if (meshAnimations != null)
+            {
+                for (int i = 0; i < meshAnimations.Length; i++)
+                {
+                    meshAnimations[i].Stop();
+                }
+            }
+        }
+
+        private void DefaultAnimationSample(float time)
+        {
+            if (meshAnimations != null)
+            {
+                for (int i = 0; i < meshAnimations.Length; i++)
+                {
+                    meshAnimations[i].Stop();
+                    meshAnimations[i].clip?.SampleAnimation(meshAnimations[i].gameObject, time);
+                }
+            }
+        }
+
+        private void DefaultAnimationPlay()
+        {
+            if (meshAnimations != null)
+            {
+                for (int i = 0; i < meshAnimations.Length; i++)
+                {
+                    meshAnimations[i].Play();
+                }
             }
         }
     }
