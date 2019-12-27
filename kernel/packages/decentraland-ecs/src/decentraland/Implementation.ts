@@ -187,7 +187,7 @@ export class DecentralandSynchronizationSystem implements ISystem {
     if (classId !== null && !isDisposableComponent(component)) {
       const componentJson: string = JSON.stringify(component)
 
-      const isDirty = component.dirty === undefined
+      const isDirty = component.dirty
       const isSameJSON = this.cachedComponents[entityId][componentName] === componentJson
 
       if (component.dirty === undefined) {
