@@ -24,6 +24,7 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
   ping: number = -1
 
   constructor(private peer: Peer) {
+    logger.info(`connected peer as `, peer.nickname)
     peer.callback = (sender, room, payload) => {
       switch (payload.type) {
         case 'profile': {

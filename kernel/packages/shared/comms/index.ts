@@ -483,8 +483,10 @@ export async function connect(userId: string, network: ETHEREUM_NETWORK, auth: A
 
     connection = instance
   } else {
+    const { lighthouseUrl } = getServerConfigurations().comms
+    defaultLogger.log('Using Remote lighthouse service: ', lighthouseUrl)
     const peer = new Peer(
-      getServerConfigurations().comms.lighthouseUrl,
+      lighthouseUrl,
       'peer-' + uuid(),
       () => {
         // noop
