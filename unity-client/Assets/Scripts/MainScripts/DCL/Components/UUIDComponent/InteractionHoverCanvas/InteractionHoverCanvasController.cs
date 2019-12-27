@@ -19,6 +19,11 @@ public class InteractionHoverCanvasController : MonoBehaviour
     Vector3 meshCenteredPos;
     DecentralandEntity entity;
 
+    const string ACTION_BUTTON_POINTER = "POINTER";
+    const string ACTION_BUTTON_PRIMARY = "PRIMARY";
+    const string ACTION_BUTTON_SECONDARY = "SECONDARY";
+    const string ACTION_BUTTON_UNKNOWN = "UNKNOWN";
+
     void Awake()
     {
         mainCamera = Camera.main;
@@ -47,13 +52,13 @@ public class InteractionHoverCanvasController : MonoBehaviour
 
         switch (button)
         {
-            case "POINTER":
+            case ACTION_BUTTON_POINTER:
                 hoverIcon = Object.Instantiate(pointerActionIconPrefab, backgroundTransform);
                 break;
-            case "PRIMARY":
+            case ACTION_BUTTON_PRIMARY:
                 hoverIcon = Object.Instantiate(primaryActionIconPrefab, backgroundTransform);
                 break;
-            case "SECONDARY":
+            case ACTION_BUTTON_SECONDARY:
                 hoverIcon = Object.Instantiate(secondaryActionIconPrefab, backgroundTransform);
                 break;
             default: // WebInterface.ACTION_BUTTON.UNKNOWN
@@ -84,6 +89,8 @@ public class InteractionHoverCanvasController : MonoBehaviour
 
     public void Show()
     {
+        if (!enabled) return;
+
         canvas.enabled = true;
     }
 

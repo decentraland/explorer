@@ -16,6 +16,7 @@ namespace DCL.Components
             public string button = WebInterface.ACTION_BUTTON.UNKNOWN.ToString();
             public string toastText = "Interact";
             public float interactionDistance = 4f;
+            public bool showPointerFeedback = true;
         }
 
         Rigidbody rigidBody;
@@ -70,6 +71,7 @@ namespace DCL.Components
             }
 
             hoverCanvasController.Setup(model.button, model.toastText, entity);
+            hoverCanvasController.enabled = model.showPointerFeedback;
         }
 
         void OnComponentUpdated(DecentralandEntity e)
