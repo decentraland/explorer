@@ -14,7 +14,7 @@ namespace DCL.Components
         new public class Model : UUIDComponent.Model
         {
             public string button = WebInterface.ACTION_BUTTON.UNKNOWN.ToString();
-            public string toastText = "Interact";
+            public string pointerFeedbackText = "Interact";
             public float interactionDistance = 4f;
             public bool showPointerFeedback = true;
         }
@@ -70,7 +70,7 @@ namespace DCL.Components
                 hoverCanvasController = hoverCanvasGameObject.GetComponent<InteractionHoverCanvasController>();
             }
 
-            hoverCanvasController.Setup(model.button, model.toastText, entity);
+            hoverCanvasController.Setup(model.button, model.pointerFeedbackText, entity);
             hoverCanvasController.enabled = model.showPointerFeedback;
         }
 
