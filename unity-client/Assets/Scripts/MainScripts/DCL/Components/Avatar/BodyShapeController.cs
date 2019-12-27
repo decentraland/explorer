@@ -26,6 +26,8 @@ public class BodyShapeController : WearableController
 
         assetContainer.transform);
 
+        createdAnimation.cullingType = AnimationCullingType.BasedOnRenderers;
+
         return createdAnimation;
     }
 
