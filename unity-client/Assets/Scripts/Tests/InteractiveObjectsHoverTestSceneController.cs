@@ -37,7 +37,7 @@ public class InteractiveObjectsHoverTestSceneController : MonoBehaviour
         {
             type = OnClick.NAME,
             uuid = "pointerevent-1",
-            button = (int)this.button
+            button = this.button.ToString()
         };
         var onClickComponent = TestHelpers.EntityComponentCreate<OnClick, OnClick.Model>(scene, entity, onClickComponentModel, CLASS_ID_COMPONENT.UUID_CALLBACK);
 

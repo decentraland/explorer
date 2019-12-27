@@ -1,7 +1,6 @@
 ﻿using DCL.Models;
 using DCL.Components;
 using UnityEngine;
-using DCL.Interface;
 using TMPro;
 
 public class InteractionHoverCanvasController : MonoBehaviour
@@ -25,7 +24,7 @@ public class InteractionHoverCanvasController : MonoBehaviour
         mainCamera = Camera.main;
     }
 
-    public void Setup(WebInterface.ACTION_BUTTON button, string feedbackText, DecentralandEntity entity)
+    public void Setup(string button, string feedbackText, DecentralandEntity entity)
     {
         text.text = feedbackText;
         this.entity = entity;
@@ -39,9 +38,8 @@ public class InteractionHoverCanvasController : MonoBehaviour
         Hide();
     }
 
-    void ConfigureIcon(WebInterface.ACTION_BUTTON button)
+    void ConfigureIcon(string button)
     {
-        Debug.Log("instantiating action button: " + (int)button);
         // When we allow for custom input key bindings this implementation will change
 
         if (hoverIcon != null)
@@ -49,13 +47,13 @@ public class InteractionHoverCanvasController : MonoBehaviour
 
         switch (button)
         {
-            case WebInterface.ACTION_BUTTON.POINTER:
+            case "POINTER":
                 hoverIcon = Object.Instantiate(pointerActionIconPrefab, backgroundTransform);
                 break;
-            case WebInterface.ACTION_BUTTON.PRIMARY:
+            case "PRIMARY":
                 hoverIcon = Object.Instantiate(primaryActionIconPrefab, backgroundTransform);
                 break;
-            case WebInterface.ACTION_BUTTON.SECONDARY:
+            case "SECONDARY":
                 hoverIcon = Object.Instantiate(secondaryActionIconPrefab, backgroundTransform);
                 break;
             default: // WebInterface.ACTION_BUTTON.UNKNOWN

@@ -13,7 +13,7 @@ namespace DCL.Components
         [System.Serializable]
         new public class Model : UUIDComponent.Model
         {
-            public int button = (int)WebInterface.ACTION_BUTTON.UNKNOWN;
+            public string button = WebInterface.ACTION_BUTTON.UNKNOWN.ToString();
             public string toastText = "Interact";
             public float interactionDistance = 4f;
         }
@@ -69,7 +69,7 @@ namespace DCL.Components
                 hoverCanvasController = hoverCanvasGameObject.GetComponent<InteractionHoverCanvasController>();
             }
 
-            hoverCanvasController.Setup((WebInterface.ACTION_BUTTON)model.button, model.toastText, entity);
+            hoverCanvasController.Setup(model.button, model.toastText, entity);
         }
 
         void OnComponentUpdated(DecentralandEntity e)
