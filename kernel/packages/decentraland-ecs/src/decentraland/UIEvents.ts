@@ -105,17 +105,21 @@ export class OnClick extends OnPointerUUIDEvent<'onClick'> {
     // TODO(Brian): This will be removed when UI gets back to the entity parenting.
     uuidEventSystem.handlerMap[this.uuid] = this
 
-    if(showPointerFeeback != undefined && showPointerFeeback != null)
-      this.showPointerFeedback = showPointerFeeback;
+    if (showPointerFeeback !== undefined) {
+      this.showPointerFeedback = showPointerFeeback
+    }
 
-    if(button)
-      this.button = button;
+    if (button) {
+      this.button = button
+    }
 
-    if(hoverText)
-      this.pointerFeedbackText = hoverText;
+    if (hoverText) {
+      this.pointerFeedbackText = hoverText
+    }
 
-    if(interactionDistance)
-      this.interactionDistance = interactionDistance;
+    if (interactionDistance) {
+      this.interactionDistance = interactionDistance
+    }
   }
 }
 
@@ -135,17 +139,21 @@ export class OnPointerDown extends OnPointerUUIDEvent<'pointerDown'> {
     // TODO(Brian): This will be removed when UI gets back to the entity parenting.
     uuidEventSystem.handlerMap[this.uuid] = this
 
-    if(showPointerFeeback != undefined && showPointerFeeback != null)
-      this.showPointerFeedback = showPointerFeeback;
+    if (showPointerFeeback !== undefined) {
+      this.showPointerFeedback = showPointerFeeback
+    }
 
-    if(button)
-      this.button = button;
+    if (button) {
+      this.button = button
+    }
 
-    if(hoverText)
-      this.pointerFeedbackText = hoverText;
+    if (hoverText) {
+      this.pointerFeedbackText = hoverText
+    }
 
-    if(interactionDistance)
-      this.interactionDistance = interactionDistance;
+    if (interactionDistance) {
+      this.interactionDistance = interactionDistance
+    }
   }
 }
 

@@ -808,13 +808,13 @@ export class OnPointerUUIDEvent<T extends keyof IEvents> extends OnUUIDEvent<T> 
 
   toJSON() {
     return {
-            uuid: this.uuid,
-            type: this.type,
-            button: this.button,
-            pointerFeedbackText: this.pointerFeedbackText,
-            interactionDistance: this.interactionDistance,
-            showPointerFeedback: this.showPointerFeedback
-            }
+      uuid: this.uuid,
+      type: this.type,
+      button: this.button,
+      pointerFeedbackText: this.pointerFeedbackText,
+      interactionDistance: this.interactionDistance,
+      showPointerFeedback: this.showPointerFeedback
+    }
   }
 }
 
