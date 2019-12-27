@@ -1,4 +1,4 @@
-import { Entity, GLTFShape, engine, Vector3, Transform, AnimationState, Animator } from 'decentraland-ecs/src'
+import { Entity, GLTFShape, engine, Vector3, Transform, AnimationState, Animator, ActionButton } from 'decentraland-ecs/src'
 import { OnClick } from 'decentraland-ecs/src/decentraland/UIEvents'
 
 // Add Shark
@@ -30,7 +30,7 @@ clipSwim.play()
 shark.addComponent(
   new OnClick(e => {
     clipBite.playing = !clipBite.playing
-  })
+  }, true, ActionButton.PRIMARY, "click!", 10)
 )
 
 // Add shark to engine
