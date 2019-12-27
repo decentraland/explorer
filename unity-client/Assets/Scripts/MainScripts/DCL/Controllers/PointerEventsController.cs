@@ -48,7 +48,7 @@ namespace DCL
 
         void Update()
         {
-            if (!RenderingController.i.renderingEnabled) return;
+            if (!RenderingController.i.renderingEnabled || charCamera == null) return;
 
             // We use Physics.Raycast() instead of our raycastHandler.Raycast() as that one is slower, sometimes 2x, because it fetches info we don't need here
             if (Physics.Raycast(GetRayFromCamera(), out hitInfo, Mathf.Infinity, Configuration.LayerMasks.physicsCastLayerMaskWithoutCharacter))
