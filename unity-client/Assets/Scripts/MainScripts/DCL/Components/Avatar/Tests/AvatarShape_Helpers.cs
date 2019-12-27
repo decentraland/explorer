@@ -27,13 +27,22 @@ namespace AvatarShape_Tests
 
         public static WearableDictionary CreateTestCatalogLocal()
         {
-            string file = "TestCatalogLocal.json";
+            string file = "TestCatalog.json";
             var catalogJson = File.ReadAllText(Utils.GetTestAssetsPathRaw() + $"/Avatar/{file}"); //Utils.GetTestAssetPath returns an URI not compatible with the really convenient File.ReadAllText
             var wearables = Newtonsoft.Json.JsonConvert.DeserializeObject<WearableItem_Dummy[]>(catalogJson); // JsonUtility cannot deserialize jsons whose root is an array
+
             foreach (var wearableItem in wearables)
             {
                 wearableItem.baseUrl = Utils.GetTestsAssetsPath() + "/Avatar/Assets/";
+
+                foreach (var rep in wearableItem.representations)
+                {
+                    rep.contents = rep.contents.Select((x) => { x.hash = x.file; return x; }).ToArray();
+                }
+
+                wearableItem.thumbnail = "";
             }
+
             CatalogController.wearableCatalog.Clear();
             CatalogController.wearableCatalog.Add(wearables.Select(x => new KeyValuePair<string, WearableItem>(x.id, x)).ToArray());
 
