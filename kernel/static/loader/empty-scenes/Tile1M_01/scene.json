@@ -12,9 +12,9 @@
   "tags": [],
   "scene": {
     "parcels": [
-      "0,0"
+      "47,-11"
     ],
-    "base": "0,0"
+    "base": "47,-11"
   },
   "communications": {
     "type": "webrtc",
