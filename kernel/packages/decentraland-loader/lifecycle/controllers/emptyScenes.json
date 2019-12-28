@@ -1,35 +1,35 @@
 [
   {
     "file": "bin/01.js",
-    "hash": "QmZrX7SJLwoJdtTCKiwsKecoBWNvngf3rCBDxB1X4WqUS4"
+    "hash": "QmPbUTAFUc9iequVhNSskRLyRXX5DtWHYZAjkuXed6r1dS"
   },
   {
     "file": "bin/02.js",
-    "hash": "QmYqjWoadpRwYyVTR3gt1LDXScTrTZ6kxEwBHi8K5PKNcu"
+    "hash": "QmZGuUShmuvMJ74YxNFKqHGW8jtMgJiUbH2sJ6Xj5o7Fde"
   },
   {
     "file": "bin/03.js",
-    "hash": "QmdLJY5nd5bKAdzvwLu54xVeRC42qnnih51yjNQTEWetCz"
+    "hash": "QmcxYJiHU2XmELXXBkBCtknCA2PRRrJ6JvUq1xgCJdZhBd"
   },
   {
     "file": "bin/04.js",
-    "hash": "QmPQyQhcVRj1RwLNzBTzhwMYh3ZsSMGNG3TgCdHTuZoYAK"
+    "hash": "QmdR5hwNmXfSmusvs8soeZxW4YivqxArMzv6ucWTm5Xvve"
   },
   {
     "file": "bin/05.js",
-    "hash": "QmcRqHdgGSm5LL1RMvfBL1qPg4qqzsh3WcHmmfkBDFaWtA"
+    "hash": "QmYjVgEooBibkp7hTDjWNQcKBjthkkJ5PAVr8JpFwP6KuA"
   },
   {
     "file": "bin/06.js",
-    "hash": "QmZaB9YjUpACbmWgqVbTbKeacjrjK56YpWHqKCgNt6ZraX"
+    "hash": "QmTHyKEyrceiCk4dCccKnoCTog4aesQt2grcb9b2AnNL8J"
   },
   {
     "file": "bin/07.js",
-    "hash": "QmSwBYZXaS4y1yPFUxwVk1tHXd53eVxhscUogk3L1gU1PL"
+    "hash": "QmUAxycp1WozeFRe8hQV7e48XqHq91ugrtfkQvpBr8h4eL"
   },
   {
     "file": "bin/08.js",
-    "hash": "QmdX3e3Ymn9Ru4U6megSJAYe3qVcoBtSWF55pZxL2948gw"
+    "hash": "QmUbG8e1CBPsK6s9KxvAjWafgnjAkSu9374hjNkhK9qfiZ"
   },
   {
     "file": "bin/09.js",
@@ -46,6 +46,10 @@
   {
     "file": "bin/12.js",
     "hash": "QmUGXhSzkcKqoaZUR1udmJtEbwELRZEJvrcJgcPrZzuHFu"
+  },
+  {
+    "file": "bin/game.js",
+    "hash": "QmPbUTAFUc9iequVhNSskRLyRXX5DtWHYZAjkuXed6r1dS"
   },
   {
     "file": "models/Bush_01/Bush_01.glb",
