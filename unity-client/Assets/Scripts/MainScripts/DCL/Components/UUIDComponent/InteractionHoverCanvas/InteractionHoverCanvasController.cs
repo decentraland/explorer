@@ -5,7 +5,6 @@ using TMPro;
 
 public class InteractionHoverCanvasController : MonoBehaviour
 {
-    public Vector3 offset = new Vector2(0f, 50f);
     public Canvas canvas;
     public RectTransform backgroundTransform;
     public TextMeshProUGUI text;
@@ -36,10 +35,6 @@ public class InteractionHoverCanvasController : MonoBehaviour
 
         ConfigureIcon(button);
 
-        entity.OnTransformChange -= CalculateMeshCenteredPos;
-        entity.OnTransformChange += CalculateMeshCenteredPos;
-        CalculateMeshCenteredPos();
-
         Hide();
     }
 
@@ -67,6 +62,17 @@ public class InteractionHoverCanvasController : MonoBehaviour
         }
     }
 
+    public void Show()
+    {
+        canvas.enabled = true;
+    }
+
+    public void Hide()
+    {
+        canvas.enabled = false;
+    }
+
+    // This method will be used when we apply a "loose aim" for the 3rd person camera
     void CalculateMeshCenteredPos(DCLTransform.Model transformModel = null)
     {
         if (!canvas.enabled) return;
@@ -87,26 +93,7 @@ public class InteractionHoverCanvasController : MonoBehaviour
         }
     }
 
-    public void Show()
-    {
-        if (!enabled) return;
-
-        canvas.enabled = true;
-    }
-
-    public void Hide()
-    {
-        canvas.enabled = false;
-    }
-
-    void LateUpdate()
-    {
-        if (!canvas.enabled) return;
-
-        CalculateMeshCenteredPos();
-        UpdateSizeAndPos();
-    }
-
+    // This method will be used when we apply a "loose aim" for the 3rd person camera
     public void UpdateSizeAndPos()
     {
         if (mainCamera == null)
@@ -121,7 +108,7 @@ public class InteractionHoverCanvasController : MonoBehaviour
             float height = canvasRect.rect.height;
             screenPoint.Scale(new Vector3(width, height, 0));
 
-            ((RectTransform)backgroundTransform).anchoredPosition = screenPoint + offset;
+            ((RectTransform)backgroundTransform).anchoredPosition = screenPoint;
         }
     }
 }

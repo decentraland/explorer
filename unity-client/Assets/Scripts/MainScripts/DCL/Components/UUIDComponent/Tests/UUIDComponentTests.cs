@@ -829,8 +829,6 @@ namespace Tests
         }
 
         [UnityTest]
-        [Explicit("Explicit until we enable the hover feedback in production")]
-        [Category("Explicit")]
         public IEnumerator OnPointerHoverFeedbackIsDisplayedCorrectly()
         {
             DecentralandEntity entity;

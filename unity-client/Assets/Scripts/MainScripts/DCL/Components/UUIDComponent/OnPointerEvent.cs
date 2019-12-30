@@ -88,9 +88,6 @@ namespace DCL.Components
         {
             if (!enableInteractionHoverFeedback) return;
 
-            if (isHovered)
-                hoverCanvasController.UpdateSizeAndPos();
-
             if (beingHovered == isHovered) return;
 
             beingHovered = isHovered;
