@@ -87,87 +87,88 @@ namespace Builder
 
         private void Update()
         {
-            if (isDirty)
+            if (!isDirty)
             {
-                isDirty = false;
-                SelectionParentReset();
-                OnSelectedObjectListChanged?.Invoke(selectedEntitiesParent, selectedEntities);
-                if (selectedEntities.Count == 0)
-                {
-                    OnNoObjectSelected?.Invoke();
-                }
+                return;
+            }
+            isDirty = false;
+            SelectionParentReset();
+            OnSelectedObjectListChanged?.Invoke(selectedEntitiesParent, selectedEntities);
+            if (selectedEntities.Count == 0)
+            {
+                OnNoObjectSelected?.Invoke();
             }
         }
 
         private void OnMouseDown(int buttonId, Vector3 mousePosition)
         {
-            if (buttonId == 0)
+            if (buttonId != 0)
             {
-                RaycastHit hit;
-                if (builderRaycast.Raycast(mousePosition, builderRaycast.defaultMask | builderRaycast.gizmoMask, out hit, CompareSelectionHit))
+                return;
+            }
+
+            RaycastHit hit;
+            if (builderRaycast.Raycast(mousePosition, builderRaycast.defaultMask | builderRaycast.gizmoMask, out hit, CompareSelectionHit))
+            {
+                DCLBuilderGizmoAxis gizmosAxis = hit.collider.gameObject.GetComponent<DCLBuilderGizmoAxis>();
+                if (gizmosAxis != null)
                 {
-                    DCLBuilderGizmoAxis gizmosAxis = hit.collider.gameObject.GetComponent<DCLBuilderGizmoAxis>();
-                    if (gizmosAxis != null)
-                    {
-                        OnGizmosAxisPressed?.Invoke(gizmosAxis);
-                    }
-                    else
-                    {
-                        var builderSelectionCollider = hit.collider.gameObject.GetComponent<DCLBuilderSelectionCollider>();
-                        DCLBuilderEntity pressedEntity = null;
-
-                        if (builderSelectionCollider != null)
-                        {
-                            pressedEntity = builderSelectionCollider.ownerEntity;
-                        }
-
-                        if (pressedEntity != null)
-                        {
-                            if (CanSelect(pressedEntity))
-                            {
-                                if (SelectionParentHasChild(pressedEntity.transform))
-                                {
-                                    EnqueueEntityForDeselect(pressedEntity, hit.point);
-                                }
-                                else
-                                {
-                                    ProcessEntityPressed(pressedEntity, hit.point);
-                                }
-                                OnEntityPressed?.Invoke(pressedEntity, hit.point);
-                            }
-                        }
-                    }
-                    groundClickTime = 0;
+                    OnGizmosAxisPressed?.Invoke(gizmosAxis);
                 }
                 else
                 {
-                    groundClickTime = Time.unscaledTime;
+                    var builderSelectionCollider = hit.collider.gameObject.GetComponent<DCLBuilderSelectionCollider>();
+                    DCLBuilderEntity pressedEntity = null;
+
+                    if (builderSelectionCollider != null)
+                    {
+                        pressedEntity = builderSelectionCollider.ownerEntity;
+                    }
+
+                    if (pressedEntity != null && CanSelect(pressedEntity))
+                    {
+                        if (SelectionParentHasChild(pressedEntity.transform))
+                        {
+                            EnqueueEntityForDeselect(pressedEntity, hit.point);
+                        }
+                        else
+                        {
+                            ProcessEntityPressed(pressedEntity, hit.point);
+                        }
+                        OnEntityPressed?.Invoke(pressedEntity, hit.point);
+                    }
                 }
+                groundClickTime = 0;
+            }
+            else
+            {
+                groundClickTime = Time.unscaledTime;
             }
         }
 
         private void OnMouseUp(int buttonId, Vector3 mousePosition)
         {
-            if (buttonId == 0)
+            if (buttonId != 0)
             {
-                if (entityEnqueueForDeselectInfo.pressedEntity != null)
-                {
-                    if ((Time.unscaledTime - entityEnqueueForDeselectInfo.pressedTime) < MAX_SECS_FOR_CLICK)
-                    {
-                        ProcessEntityPressed(entityEnqueueForDeselectInfo.pressedEntity, entityEnqueueForDeselectInfo.hitPoint);
-                    }
-                }
-                entityEnqueueForDeselectInfo.pressedEntity = null;
-
-                if (groundClickTime != 0 && (Time.unscaledTime - groundClickTime) < MAX_SECS_FOR_CLICK)
-                {
-                    if (selectedEntities != null)
-                    {
-                        OnNoObjectSelected?.Invoke();
-                    }
-                }
-                groundClickTime = 0;
+                return;
             }
+            if (entityEnqueueForDeselectInfo.pressedEntity != null)
+            {
+                if ((Time.unscaledTime - entityEnqueueForDeselectInfo.pressedTime) < MAX_SECS_FOR_CLICK)
+                {
+                    ProcessEntityPressed(entityEnqueueForDeselectInfo.pressedEntity, entityEnqueueForDeselectInfo.hitPoint);
+                }
+            }
+            entityEnqueueForDeselectInfo.pressedEntity = null;
+
+            if (groundClickTime != 0 && (Time.unscaledTime - groundClickTime) < MAX_SECS_FOR_CLICK)
+            {
+                if (selectedEntities != null)
+                {
+                    OnNoObjectSelected?.Invoke();
+                }
+            }
+            groundClickTime = 0;
         }
 
         private void OnResetObject()
@@ -265,26 +266,29 @@ namespace Builder
 
         private void MarkSelected(DCLBuilderEntity entity)
         {
-            if (entity != null)
+            if (entity == null)
             {
-                OnMarkObjectSelected?.Invoke(entity, gizmosManager.GetSelectedGizmo());
+                return;
             }
+            OnMarkObjectSelected?.Invoke(entity, gizmosManager.GetSelectedGizmo());
         }
 
         private void Select(DCLBuilderEntity entity)
         {
-            if (entity != null)
+            if (entity == null)
             {
-                if (!selectedEntities.Contains(entity))
-                {
-                    selectedEntities.Add(entity);
-                }
-                SelectionParentAddEntity(entity);
-                entity.SetSelectLayer();
-
-                OnSelectedObject?.Invoke(entity, gizmosManager.GetSelectedGizmo());
-                isDirty = true;
+                return;
             }
+
+            if (!selectedEntities.Contains(entity))
+            {
+                selectedEntities.Add(entity);
+            }
+            SelectionParentAddEntity(entity);
+            entity.SetSelectLayer();
+
+            OnSelectedObject?.Invoke(entity, gizmosManager.GetSelectedGizmo());
+            isDirty = true;
         }
 
         private void Deselect(DCLBuilderEntity entity)

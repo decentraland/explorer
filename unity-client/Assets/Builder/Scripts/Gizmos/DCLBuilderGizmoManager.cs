@@ -226,12 +226,14 @@ namespace Builder.Gizmos
 
         private void OnMouseUp(int buttonId, Vector3 mousePosition)
         {
+            if (!isTransformingObject)
+            {
+                return;
+            }
+
             if (buttonId == 0)
             {
-                if (isTransformingObject)
-                {
-                    OnEndDrag();
-                }
+                OnEndDrag();
             }
         }
 

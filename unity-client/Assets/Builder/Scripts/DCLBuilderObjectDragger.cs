@@ -72,7 +72,7 @@ namespace Builder
         {
             if (buttonId == 0 && selectedEntities != null)
             {
-                if (isDragging && OnDraggingObjectEnd != null)
+                if (isDragging)
                 {
                     OnDraggingObjectEnd?.Invoke();
                 }

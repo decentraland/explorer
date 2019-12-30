@@ -99,34 +99,38 @@ namespace Builder
 
         public void SetSelectLayer()
         {
-            int selectionLayer = LayerMask.NameToLayer(DCLBuilderRaycast.LAYER_SELECTION);
-            if (rootEntity.meshesInfo != null && rootEntity.meshesInfo.renderers != null)
+            if (rootEntity.meshesInfo == null || rootEntity.meshesInfo.renderers == null)
             {
-                Renderer renderer;
-                for (int i = 0; i < rootEntity.meshesInfo.renderers.Length; i++)
+                return;
+            }
+
+            int selectionLayer = LayerMask.NameToLayer(DCLBuilderRaycast.LAYER_SELECTION);
+            Renderer renderer;
+            for (int i = 0; i < rootEntity.meshesInfo.renderers.Length; i++)
+            {
+                renderer = rootEntity.meshesInfo.renderers[i];
+                if (renderer)
                 {
-                    renderer = rootEntity.meshesInfo.renderers[i];
-                    if (renderer)
-                    {
-                        renderer.gameObject.layer = selectionLayer;
-                    }
+                    renderer.gameObject.layer = selectionLayer;
                 }
             }
         }
 
         public void SetDefaultLayer()
         {
-            int selectionLayer = 0;
-            if (rootEntity.meshesInfo != null && rootEntity.meshesInfo.renderers != null)
+            if (rootEntity.meshesInfo == null || rootEntity.meshesInfo.renderers == null)
             {
-                Renderer renderer;
-                for (int i = 0; i < rootEntity.meshesInfo.renderers.Length; i++)
+                return;
+            }
+
+            int selectionLayer = 0;
+            Renderer renderer;
+            for (int i = 0; i < rootEntity.meshesInfo.renderers.Length; i++)
+            {
+                renderer = rootEntity.meshesInfo.renderers[i];
+                if (renderer)
                 {
-                    renderer = rootEntity.meshesInfo.renderers[i];
-                    if (renderer)
-                    {
-                        renderer.gameObject.layer = selectionLayer;
-                    }
+                    renderer.gameObject.layer = selectionLayer;
                 }
             }
         }
@@ -145,7 +149,7 @@ namespace Builder
         {
             if (HasShape())
             {
-                if (OnShapeLoaded != null) onShapeLoad();
+                if (onShapeLoad != null) onShapeLoad();
             }
             else
             {
@@ -239,16 +243,7 @@ namespace Builder
                 }
             }
 
-            if (meshColliders != null)
-            {
-                for (int i = 0; i < meshColliders.Length; i++)
-                {
-                    if (meshColliders[i] != null)
-                    {
-                        meshColliders[i].gameObject.SetActive(!isPreview);
-                    }
-                }
-            }
+            SetCollidersActive(!isPreview);
         }
 
         private void ProcessEntityShape(DecentralandEntity entity)
@@ -302,6 +297,20 @@ namespace Builder
                     }
                 }
                 meshColliders = null;
+            }
+        }
+
+        private void SetCollidersActive(bool active)
+        {
+            if (meshColliders != null)
+            {
+                for (int i = 0; i < meshColliders.Length; i++)
+                {
+                    if (meshColliders[i] != null)
+                    {
+                        meshColliders[i].gameObject.SetActive(active);
+                    }
+                }
             }
         }
 

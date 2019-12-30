@@ -53,10 +53,8 @@ namespace Builder
 
         private Coroutine screenshotCoroutine = null;
 
-        private EntitiesOutOfBoundariesEventPayload outOfBoundariesEventPayload = new EntitiesOutOfBoundariesEventPayload();
-        private static OnEntityLoadingEvent onGetLoadingEntity = new OnEntityLoadingEvent();
-        private static ReportCameraTargetPosition onReportCameraTarget = new ReportCameraTargetPosition();
-        private static GizmosEventPayload onGizmoEventPayload = new GizmosEventPayload();
+        private DCLBuilderWebInterface builderWebInterface = new DCLBuilderWebInterface();
+
 
         [System.Serializable]
         private class MousePayload
@@ -67,24 +65,6 @@ namespace Builder
         }
 
         [System.Serializable]
-        private class EntityLoadingPayload
-        {
-            public string type;
-            public string entityId;
-        }
-
-        [System.Serializable]
-        private class OnEntityLoadingEvent : DCL.Interface.WebInterface.UUIDEvent<EntityLoadingPayload>
-        {
-        };
-
-        [System.Serializable]
-        private class EntitiesOutOfBoundariesEventPayload
-        {
-            public string[] entities;
-        };
-
-        [System.Serializable]
         private class SetGridResolutionPayload
         {
             public float position = 0;
@@ -93,40 +73,9 @@ namespace Builder
         }
 
         [System.Serializable]
-        public class BuilderSceneStartEvent
-        {
-            public string sceneId;
-            public string eventType = "builderSceneStart";
-        }
-
-        [System.Serializable]
-        private class ReportCameraTargetPosition
-        {
-            public Vector3 cameraTarget;
-            public string id;
-        }
-
-        [System.Serializable]
         private class SelectedEntitiesPayload
         {
             public string[] entities = null;
-        };
-
-        [System.Serializable]
-        private class GizmosEventPayload
-        {
-            [System.Serializable]
-            public class TransformPayload
-            {
-                public string entityId = string.Empty;
-                public Vector3 position = Vector3.zero;
-                public Quaternion rotation = Quaternion.identity;
-                public Vector3 scale = Vector3.one;
-            }
-            public string[] entities = null;
-            public TransformPayload[] transforms = null;
-            public string gizmoType = DCLGizmos.Gizmo.NONE;
-            public string type = string.Empty;
         };
 
         #region "Messages from Explorer"
@@ -337,10 +286,7 @@ namespace Builder
             if (builderRaycast.RaycastToGround(builderCamera.ScreenPointToRay(new Vector3(Screen.width * 0.5f, Screen.height * 0.5f, builderCamera.nearClipPlane)),
                 out targetPosition))
             {
-                onReportCameraTarget.cameraTarget = targetPosition;
-                onReportCameraTarget.id = id;
-                if (LOG_MESSAGES) Debug.Log($"SEND: ReportBuilderCameraTarget {targetPosition}");
-                WebInterface.SendMessage("ReportBuilderCameraTarget", onReportCameraTarget);
+                builderWebInterface.SendCameraTargetPosition(targetPosition, id);
             }
         }
 
@@ -397,8 +343,7 @@ namespace Builder
         private void Start()
         {
             SetCurrentScene();
-            if (LOG_MESSAGES) Debug.Log($"SEND: BuilderSceneStartEvent {currentScene.sceneData.id}");
-            WebInterface.SendMessage("SceneEvent", new BuilderSceneStartEvent() { sceneId = currentScene.sceneData.id });
+            builderWebInterface.SendBuilderSceneStart(currentScene.sceneData.id);
         }
 
         private void Update()
@@ -419,11 +364,7 @@ namespace Builder
 
                 entity.OnShapeUpdated += OnEntityShapeUpdated;
 
-                onGetLoadingEntity.uuid = entity.entityId;
-                onGetLoadingEntity.payload.entityId = entity.entityId;
-                onGetLoadingEntity.payload.type = "onEntityLoading";
-                if (LOG_MESSAGES) Debug.Log($"SEND: OnEntityLoadingEvent {entity.entityId}");
-                WebInterface.SendSceneEvent(currentScene.sceneData.id, "uuidEvent", onGetLoadingEntity);
+                builderWebInterface.SendEntityStartLoad(entity);
             }
         }
 
@@ -440,11 +381,7 @@ namespace Builder
         {
             entity.OnShapeUpdated -= OnEntityShapeUpdated;
 
-            onGetLoadingEntity.uuid = entity.entityId;
-            onGetLoadingEntity.payload.entityId = entity.entityId;
-            onGetLoadingEntity.payload.type = "onEntityFinishLoading";
-            if (LOG_MESSAGES) Debug.Log($"SEND: onEntityFinishLoading {entity.entityId}");
-            WebInterface.SendSceneEvent(currentScene.sceneData.id, "uuidEvent", onGetLoadingEntity);
+            builderWebInterface.SendEntityFinishLoad(entity);
         }
 
         private void OnEnable()
@@ -527,34 +464,12 @@ namespace Builder
 
         private void NotifyGizmosTransformEvent(List<DCLBuilderEntity> entities, string gizmoType)
         {
-            onGizmoEventPayload.type = "gizmoDragEnded";
-            onGizmoEventPayload.entities = null;
-            onGizmoEventPayload.gizmoType = gizmoType != null ? gizmoType : DCLGizmos.Gizmo.NONE;
-            onGizmoEventPayload.transforms = new GizmosEventPayload.TransformPayload[selectedEntities.Count];
-
-            for (int i = 0; i < entities.Count; i++)
-            {
-                onGizmoEventPayload.transforms[i] = new GizmosEventPayload.TransformPayload()
-                {
-                    entityId = entities[i].rootEntity.entityId,
-                    position = entities[i].transform.position,
-                    rotation = entities[i].transform.rotation,
-                    scale = entities[i].transform.lossyScale
-                };
-            }
-            if (LOG_MESSAGES) Debug.Log($"SEND: NotifyGizmosTransformEvent {JsonUtility.ToJson(onGizmoEventPayload)}");
-            WebInterface.SendSceneEvent(currentScene.sceneData.id, "gizmoEvent", onGizmoEventPayload);
+            builderWebInterface.SendEntitiesTransform(entities, gizmoType, currentScene.sceneData.id);
         }
 
         private void NotifyGizmosSelectedEvent(DCLBuilderEntity entity, string gizmoType)
         {
-            onGizmoEventPayload.type = "gizmoSelected";
-            onGizmoEventPayload.entities = entity ? new string[] { entity.rootEntity.entityId } : null;
-            onGizmoEventPayload.gizmoType = gizmoType != null ? gizmoType : DCLGizmos.Gizmo.NONE;
-            onGizmoEventPayload.transforms = null;
-
-            if (LOG_MESSAGES) Debug.Log($"SEND: NotifyGizmosSelectedEvent {JsonUtility.ToJson(onGizmoEventPayload)}");
-            WebInterface.SendSceneEvent(currentScene.sceneData.id, "gizmoEvent", onGizmoEventPayload);
+            builderWebInterface.SendEntitySelected(entity, gizmoType);
         }
 
         private IEnumerator TakeScreenshotRoutine(string id)
@@ -649,9 +564,7 @@ namespace Builder
 
         private void SendOutOfBoundariesEntities()
         {
-            outOfBoundariesEventPayload.entities = outOfBoundariesEntitiesId.ToArray();
-            if (LOG_MESSAGES) Debug.Log($"SEND: entitiesOutOfBoundaries {outOfBoundariesEventPayload.entities.Length}");
-            WebInterface.SendSceneEvent<EntitiesOutOfBoundariesEventPayload>(currentScene.sceneData.id, "entitiesOutOfBoundaries", outOfBoundariesEventPayload);
+            builderWebInterface.SendEntitiesOutOfBoundaries(outOfBoundariesEntitiesId.ToArray(), currentScene.sceneData.id);
         }
 
         private void EvaluateSelectedEntitiesPosition()
