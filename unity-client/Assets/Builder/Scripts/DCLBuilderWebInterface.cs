@@ -103,14 +103,12 @@ namespace Builder
             WebInterface.SendMessage("ReportBuilderCameraTarget", onReportCameraTarget);
         }
 
-        public void SendEntitySelected(DCLBuilderEntity entity, string gizmoType)
+        public void SendEntitySelected(DCLBuilderEntity entity, string gizmoType, string sceneId)
         {
             onGizmoEventPayload.type = "gizmoSelected";
             onGizmoEventPayload.entities = entity ? new string[] { entity.rootEntity.entityId } : null;
             onGizmoEventPayload.gizmoType = gizmoType != null ? gizmoType : DCLGizmos.Gizmo.NONE;
             onGizmoEventPayload.transforms = null;
-
-            string sceneId = entity.rootEntity.scene.sceneData.id;
 
             if (LOG_MESSAGES) Debug.Log($"SEND: NotifyGizmosSelectedEvent {JsonUtility.ToJson(onGizmoEventPayload)}");
             WebInterface.SendSceneEvent(sceneId, "gizmoEvent", onGizmoEventPayload);

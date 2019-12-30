@@ -469,7 +469,7 @@ namespace Builder
 
         private void NotifyGizmosSelectedEvent(DCLBuilderEntity entity, string gizmoType)
         {
-            builderWebInterface.SendEntitySelected(entity, gizmoType);
+            builderWebInterface.SendEntitySelected(entity, gizmoType, currentScene.sceneData.id);
         }
 
         private IEnumerator TakeScreenshotRoutine(string id)
