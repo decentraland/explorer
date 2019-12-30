@@ -867,7 +867,7 @@ namespace Tests
 
             yield return null;
 
-            var hoverCanvas = entity.gameObject.GetComponentInChildren<Canvas>();
+            var hoverCanvas = PointerEventsController.i.GetComponentInChildren<Canvas>();
             Assert.IsNotNull(hoverCanvas);
 
             Assert.IsTrue(hoverCanvas.enabled);
