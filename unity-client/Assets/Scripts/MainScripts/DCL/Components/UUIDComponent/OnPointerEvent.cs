@@ -30,7 +30,7 @@ namespace DCL.Components
             this.scene = scene;
 
             if (model == null)
-                model = new OnPointerEvent.Model();
+                this.model = new OnPointerEvent.Model();
             else
                 this.model = (OnPointerEvent.Model)model;
 

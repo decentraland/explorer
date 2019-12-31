@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 using NUnit.Framework;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.TestTools;
 
 namespace Tests
@@ -867,7 +868,7 @@ namespace Tests
 
             yield return null;
 
-            var hoverCanvas = PointerEventsController.i.GetComponentInChildren<Canvas>();
+            var hoverCanvas = PointerEventsController.i.GetComponentInChildren<InteractionHoverCanvasController>().canvas;
             Assert.IsNotNull(hoverCanvas);
 
             Assert.IsTrue(hoverCanvas.enabled);
@@ -886,6 +887,123 @@ namespace Tests
             }));
 
             yield return null;
+
+            Assert.IsFalse(hoverCanvas.enabled);
+
+            DCLCharacterController.i.ResumeGravity();
+        }
+
+        [UnityTest]
+        [Explicit("This test can't be run until we refactor UUIDComponents to have their own unique CLASS_ID_COMPONENT")]
+        [Category("Explicit")]
+        public IEnumerator OnPointerHoverFeedbackPropertiesAreAppliedCorrectly()
+        {
+            DecentralandEntity entity;
+            BoxShape shape;
+            InstantiateEntityWithShape(out entity, out shape);
+            TestHelpers.SetEntityTransform(scene, entity, new Vector3(8, 2, 10), Quaternion.identity, new Vector3(3, 3, 3));
+            yield return shape.routine;
+
+            var onPointerDownModel = new OnPointerDown.Model()
+            {
+                type = OnPointerDown.NAME,
+                uuid = "pointerevent-1"
+            };
+            var component = TestHelpers.EntityComponentCreate<OnPointerDown, OnPointerDown.Model>(scene, entity,
+                onPointerDownModel, CLASS_ID_COMPONENT.UUID_CALLBACK);
+            Assert.IsTrue(component != null);
+
+            yield return null;
+
+            DCLCharacterController.i.PauseGravity();
+            DCLCharacterController.i.SetPosition(new Vector3(8, 1, 7f));
+
+            var cameraController = GameObject.FindObjectOfType<CameraController>();
+
+            // Rotate camera towards the interactive object
+            var cameraRotationPayload = new CameraController.SetRotationPayload()
+            {
+                x = 45,
+                y = 0,
+                z = 0
+            };
+            cameraController.SetRotation(JsonConvert.SerializeObject(cameraRotationPayload, Formatting.None, new JsonSerializerSettings()
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            }));
+
+            yield return null;
+
+            var hoverCanvasController = PointerEventsController.i.GetComponentInChildren<InteractionHoverCanvasController>();
+            Assert.IsNotNull(hoverCanvasController);
+            Assert.IsTrue(hoverCanvasController.canvas.enabled);
+
+            // Check default properties
+            Assert.AreEqual(hoverCanvasController.GetComponentInChildren<Image>().name, "UnknownButtonHoverIcon(Clone)");
+            Assert.AreEqual("Interact", hoverCanvasController.text.text);
+            yield return null;
+
+            onPointerDownModel.button = "PRIMARY";
+            onPointerDownModel.pointerFeedbackText = "Click!";
+            yield return TestHelpers.EntityComponentUpdate<OnPointerDown, OnPointerDown.Model>(component, onPointerDownModel);
+
+            yield return null;
+
+            Assert.AreEqual(hoverCanvasController.GetComponentInChildren<Image>().name, "PrimaryButtonHoverIcon(Clone)");
+            Assert.AreEqual("Click!", hoverCanvasController.text.text);
+
+            DCLCharacterController.i.ResumeGravity();
+        }
+
+        [UnityTest]
+        [Explicit("This test can't be run until we refactor UUIDComponents to have their own unique CLASS_ID_COMPONENT")]
+        [Category("Explicit")]
+        public IEnumerator OnPointerHoverDistanceIsAppliedCorrectly()
+        {
+            DecentralandEntity entity;
+            BoxShape shape;
+            InstantiateEntityWithShape(out entity, out shape);
+            TestHelpers.SetEntityTransform(scene, entity, new Vector3(8, 2, 10), Quaternion.identity, new Vector3(3, 3, 3));
+            yield return shape.routine;
+
+            var onPointerDownModel = new OnPointerDown.Model()
+            {
+                type = OnPointerDown.NAME,
+                uuid = "pointerevent-1"
+            };
+            var component = TestHelpers.EntityComponentCreate<OnPointerDown, OnPointerDown.Model>(scene, entity,
+                onPointerDownModel, CLASS_ID_COMPONENT.UUID_CALLBACK);
+            Assert.IsTrue(component != null);
+
+            yield return null;
+
+            DCLCharacterController.i.PauseGravity();
+            DCLCharacterController.i.SetPosition(new Vector3(8, 1, 7));
+
+            var cameraController = GameObject.FindObjectOfType<CameraController>();
+
+            // Rotate camera towards the interactive object
+            var cameraRotationPayload = new CameraController.SetRotationPayload()
+            {
+                x = 45,
+                y = 0,
+                z = 0
+            };
+            cameraController.SetRotation(JsonConvert.SerializeObject(cameraRotationPayload, Formatting.None, new JsonSerializerSettings()
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            }));
+
+            yield return null;
+
+            var hoverCanvas = PointerEventsController.i.GetComponentInChildren<InteractionHoverCanvasController>().canvas;
+            Assert.IsNotNull(hoverCanvas);
+
+            Assert.IsTrue(hoverCanvas.enabled);
+            yield return null;
+
+            onPointerDownModel.interactionDistance = 1f;
+            yield return TestHelpers.EntityComponentUpdate<OnPointerDown, OnPointerDown.Model>(component, onPointerDownModel);
 
             Assert.IsFalse(hoverCanvas.enabled);
 
