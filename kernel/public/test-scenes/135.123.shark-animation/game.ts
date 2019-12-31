@@ -30,7 +30,7 @@ clipSwim.play()
 shark.addComponent(
   new OnClick(e => {
     clipBite.playing = !clipBite.playing
-  }, true, ActionButton.PRIMARY, "click!", 10)
+  }, ActionButton.PRIMARY, true, "click!", 10)
 )
 
 // Add shark to engine

@@ -97,7 +97,7 @@ export class OnClick extends OnPointerUUIDEvent<'onClick'> {
   @ObservableComponent.readonly
   readonly type: string = 'onClick'
 
-  constructor(callback: (event: IEvents['onClick']) => void, showPointerFeeback?: boolean, button?: ActionButton, hoverText?: string, interactionDistance?: number) {
+  constructor(callback: (event: IEvents['onClick']) => void, button?: ActionButton, showPointerFeeback?: boolean, hoverText?: string, interactionDistance?: number) {
     super(callback)
     // This injection is necessary ONLY in events that are ALWAYS turned on and are
     // not assignable to entities. Like events for the UI elements
@@ -131,7 +131,7 @@ export class OnPointerDown extends OnPointerUUIDEvent<'pointerDown'> {
   @ObservableComponent.readonly
   readonly type: string = 'pointerDown'
 
-  constructor(callback: (event: IEvents['pointerDown']) => void, showPointerFeeback?: boolean, button?: ActionButton, hoverText?: string, interactionDistance?: number) {
+  constructor(callback: (event: IEvents['pointerDown']) => void, button?: ActionButton, showPointerFeeback?: boolean, hoverText?: string, interactionDistance?: number) {
     super(callback)
     // This injection is necessary ONLY in events that are ALWAYS turned on and are
     // not assignable to entities. Like events for the UI elements
@@ -165,7 +165,7 @@ export class OnPointerUp extends OnPointerUUIDEvent<'pointerUp'> {
   @ObservableComponent.readonly
   readonly type: string = 'pointerUp'
 
-  constructor(callback: (event: IEvents['pointerUp']) => void, showPointerFeeback?: boolean, button?: ActionButton, hoverText?: string, interactionDistance?: number) {
+  constructor(callback: (event: IEvents['pointerUp']) => void, button?: ActionButton, showPointerFeeback?: boolean, hoverText?: string, interactionDistance?: number) {
     super(callback)
     // This injection is necessary ONLY in events that are ALWAYS turned on and are
     // not assignable to entities. Like events for the UI elements
