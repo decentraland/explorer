@@ -894,8 +894,6 @@ namespace Tests
         }
 
         [UnityTest]
-        [Explicit("This test can't be run until we refactor UUIDComponents to have their own unique CLASS_ID_COMPONENT")]
-        [Category("Explicit")]
         public IEnumerator OnPointerHoverFeedbackPropertiesAreAppliedCorrectly()
         {
             DecentralandEntity entity;
@@ -945,7 +943,10 @@ namespace Tests
 
             onPointerDownModel.button = "PRIMARY";
             onPointerDownModel.pointerFeedbackText = "Click!";
-            yield return TestHelpers.EntityComponentUpdate<OnPointerDown, OnPointerDown.Model>(component, onPointerDownModel);
+
+            // we can't use TestHelpers.EntityComponentUpdate() to update UUIDComponents until we separate every UUIComponent to their own new CLASS_ID_COMPONENT
+            component = TestHelpers.EntityComponentCreate<OnPointerDown, OnPointerDown.Model>(scene, entity,
+                onPointerDownModel, CLASS_ID_COMPONENT.UUID_CALLBACK);
 
             yield return null;
 
@@ -956,8 +957,6 @@ namespace Tests
         }
 
         [UnityTest]
-        [Explicit("This test can't be run until we refactor UUIDComponents to have their own unique CLASS_ID_COMPONENT")]
-        [Category("Explicit")]
         public IEnumerator OnPointerHoverDistanceIsAppliedCorrectly()
         {
             DecentralandEntity entity;
@@ -1003,7 +1002,9 @@ namespace Tests
             yield return null;
 
             onPointerDownModel.interactionDistance = 1f;
-            yield return TestHelpers.EntityComponentUpdate<OnPointerDown, OnPointerDown.Model>(component, onPointerDownModel);
+            // we can't use TestHelpers.EntityComponentUpdate() to update UUIDComponents until we separate every UUIComponent to their own new CLASS_ID_COMPONENT
+            component = TestHelpers.EntityComponentCreate<OnPointerDown, OnPointerDown.Model>(scene, entity,
+                onPointerDownModel, CLASS_ID_COMPONENT.UUID_CALLBACK);
 
             Assert.IsFalse(hoverCanvas.enabled);
 
