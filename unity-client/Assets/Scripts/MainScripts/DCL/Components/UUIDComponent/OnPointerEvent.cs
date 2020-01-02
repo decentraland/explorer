@@ -13,10 +13,10 @@ namespace DCL.Components
         [System.Serializable]
         new public class Model : UUIDComponent.Model
         {
-            public string button = WebInterface.ACTION_BUTTON.UNKNOWN.ToString();
-            public string pointerFeedbackText = "Interact";
-            public float interactionDistance = 4f;
-            public bool showPointerFeedback = true;
+            public string button = WebInterface.ACTION_BUTTON.ANY.ToString();
+            public string hoverText = "Interact";
+            public float distance = 4f;
+            public bool showFeeback = true;
         }
 
         Rigidbody rigidBody;
@@ -69,8 +69,8 @@ namespace DCL.Components
                 hoverCanvasController = hoverCanvasGameObject.GetComponent<InteractionHoverCanvasController>();
             }
 
-            hoverCanvasController.Setup(model.button, model.pointerFeedbackText, entity);
-            hoverCanvasController.enabled = model.showPointerFeedback;
+            hoverCanvasController.enabled = model.showFeeback;
+            hoverCanvasController.Setup(model.button, model.hoverText, entity);
         }
 
         void OnComponentUpdated(DecentralandEntity e)
@@ -92,7 +92,7 @@ namespace DCL.Components
 
         public bool IsAtHoverDistance(float distance)
         {
-            return distance <= model.interactionDistance;
+            return distance <= model.distance;
         }
 
         void OnDestroy()

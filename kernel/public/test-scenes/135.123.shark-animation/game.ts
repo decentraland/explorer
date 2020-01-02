@@ -1,5 +1,5 @@
-import { Entity, GLTFShape, engine, Vector3, Transform, AnimationState, Animator, ActionButton } from 'decentraland-ecs/src'
-import { OnClick } from 'decentraland-ecs/src/decentraland/UIEvents'
+import { Entity, GLTFShape, engine, Vector3, Transform, AnimationState, Animator, ActionButton } from '../../../packages/decentraland-ecs/src'
+import { OnClick } from '../../../packages/decentraland-ecs/src/decentraland/UIEvents'
 
 // Add Shark
 let shark = new Entity()
@@ -27,16 +27,19 @@ shark.addComponent(animator)
 clipSwim.play()
 
 // Add click interaction
-let onClickComponent = new OnClick(e => {
-  clipBite.playing = !clipBite.playing
-  UpdateOnClick()
-}, ActionButton.PRIMARY, true, "Use", 10)
+let onClickComponent = new OnClick(
+  e => {
+    clipBite.playing = !clipBite.playing
+    UpdateOnClick()
+  }, {
+    button: ActionButton.PRIMARY,
+     hoverText: "Use", distance: 10 })
 
 shark.addComponent(onClickComponent)
 
 function UpdateOnClick() {
-  onClickComponent.pointerFeedbackText = "Interact"
-  onClickComponent.button = ActionButton.SECONDARY
+  onClickComponent.hoverText = onClickComponent.hoverText == "Interact" ? "Use" : "Interact"
+  onClickComponent.button = onClickComponent.button == ActionButton.SECONDARY ? ActionButton.PRIMARY : ActionButton.SECONDARY
 }
 
 // Add shark to engine

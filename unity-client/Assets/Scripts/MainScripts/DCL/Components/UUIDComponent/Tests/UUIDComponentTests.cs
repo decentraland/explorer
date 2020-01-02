@@ -942,7 +942,7 @@ namespace Tests
             yield return null;
 
             onPointerDownModel.button = "PRIMARY";
-            onPointerDownModel.pointerFeedbackText = "Click!";
+            onPointerDownModel.hoverText = "Click!";
 
             // we can't use TestHelpers.EntityComponentUpdate() to update UUIDComponents until we separate every UUIComponent to their own new CLASS_ID_COMPONENT
             component = TestHelpers.EntityComponentCreate<OnPointerDown, OnPointerDown.Model>(scene, entity,
@@ -1001,7 +1001,7 @@ namespace Tests
             Assert.IsTrue(hoverCanvas.enabled);
             yield return null;
 
-            onPointerDownModel.interactionDistance = 1f;
+            onPointerDownModel.distance = 1f;
             // we can't use TestHelpers.EntityComponentUpdate() to update UUIDComponents until we separate every UUIComponent to their own new CLASS_ID_COMPONENT
             component = TestHelpers.EntityComponentCreate<OnPointerDown, OnPointerDown.Model>(scene, entity,
                 onPointerDownModel, CLASS_ID_COMPONENT.UUID_CALLBACK);

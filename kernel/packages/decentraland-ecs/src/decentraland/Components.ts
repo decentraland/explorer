@@ -795,25 +795,25 @@ export class OnUUIDEvent<T extends keyof IEvents> extends ObservableComponent {
  */
 export class OnPointerUUIDEvent<T extends keyof IEvents> extends OnUUIDEvent<T> {
   @ObservableComponent.field
-  button: ActionButton = ActionButton.UNKNOWN
+  button: ActionButton = ActionButton.ANY
 
   @ObservableComponent.field
-  pointerFeedbackText: string = "Interact"
+  hoverText: string = "Interact"
 
   @ObservableComponent.field
-  interactionDistance: number = 4
+  distance: number = 4
 
   @ObservableComponent.field
-  showPointerFeedback: boolean = true
+  showFeeback: boolean = true
 
   toJSON() {
     return {
       uuid: this.uuid,
       type: this.type,
       button: this.button,
-      pointerFeedbackText: this.pointerFeedbackText,
-      interactionDistance: this.interactionDistance,
-      showPointerFeedback: this.showPointerFeedback
+      hoverText: this.hoverText,
+      distance: this.distance,
+      showFeeback: this.showFeeback
     }
   }
 }

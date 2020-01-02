@@ -15,7 +15,7 @@ namespace DCL.Components
                 return;
             }
 
-            if (model.button == "UNKNOWN" || buttonId.ToString() == model.button)
+            if (model.button == "ANY" || buttonId.ToString() == model.button)
             {
                 string meshName = null;
 

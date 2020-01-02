@@ -11,7 +11,7 @@ public class InteractionHoverCanvasController : MonoBehaviour
     public GameObject pointerActionIconPrefab;
     public GameObject primaryActionIconPrefab;
     public GameObject secondaryActionIconPrefab;
-    public GameObject unknownActionIconPrefab;
+    public GameObject anyActionIconPrefab;
 
     bool isHovered = false;
     Camera mainCamera;
@@ -22,7 +22,6 @@ public class InteractionHoverCanvasController : MonoBehaviour
     const string ACTION_BUTTON_POINTER = "POINTER";
     const string ACTION_BUTTON_PRIMARY = "PRIMARY";
     const string ACTION_BUTTON_SECONDARY = "SECONDARY";
-    const string ACTION_BUTTON_UNKNOWN = "UNKNOWN";
 
     void Awake()
     {
@@ -36,7 +35,7 @@ public class InteractionHoverCanvasController : MonoBehaviour
 
         ConfigureIcon(button);
 
-        canvas.enabled = isHovered;
+        canvas.enabled = enabled && isHovered;
     }
 
     void ConfigureIcon(string button)
@@ -57,15 +56,15 @@ public class InteractionHoverCanvasController : MonoBehaviour
             case ACTION_BUTTON_SECONDARY:
                 hoverIcon = Object.Instantiate(secondaryActionIconPrefab, backgroundTransform);
                 break;
-            default: // WebInterface.ACTION_BUTTON.UNKNOWN
-                hoverIcon = Object.Instantiate(unknownActionIconPrefab, backgroundTransform);
+            default: // WebInterface.ACTION_BUTTON.ANY
+                hoverIcon = Object.Instantiate(anyActionIconPrefab, backgroundTransform);
                 break;
         }
     }
 
     public void SetHoverState(bool hoverState)
     {
-        if (hoverState == isHovered) return;
+        if (!enabled || hoverState == isHovered) return;
 
         isHovered = hoverState;
 

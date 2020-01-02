@@ -92,12 +92,24 @@ export class OnChanged extends OnUUIDEvent<'onChange'> {
 /**
  * @public
  */
+export type OnPointerUUIDEventOptions = {
+  button?: ActionButton
+  hoverText?: string
+  showFeeback?: boolean
+  distance?: number
+}
+
+/**
+ * @public
+ */
 @Component('engine.onClick', CLASS_ID.UUID_CALLBACK)
 export class OnClick extends OnPointerUUIDEvent<'onClick'> {
   @ObservableComponent.readonly
   readonly type: string = 'onClick'
 
-  constructor(callback: (event: IEvents['onClick']) => void, button?: ActionButton, showPointerFeeback?: boolean, hoverText?: string, interactionDistance?: number) {
+  constructor(callback: (event: IEvents['onClick']) => void);
+  constructor(callback: (event: IEvents['onClick']) => void, options: OnPointerUUIDEventOptions);
+  constructor(callback: (event: IEvents['onClick']) => void, options?: any) {
     super(callback)
     // This injection is necessary ONLY in events that are ALWAYS turned on and are
     // not assignable to entities. Like events for the UI elements
@@ -105,20 +117,20 @@ export class OnClick extends OnPointerUUIDEvent<'onClick'> {
     // TODO(Brian): This will be removed when UI gets back to the entity parenting.
     uuidEventSystem.handlerMap[this.uuid] = this
 
-    if (showPointerFeeback !== undefined) {
-      this.showPointerFeedback = showPointerFeeback
-    }
+    if(options) {
+      this.showFeeback = options.showFeeback === false ? false : true
 
-    if (button) {
-      this.button = button
-    }
+      if (options.button) {
+        this.button = options.button
+      }
 
-    if (hoverText) {
-      this.pointerFeedbackText = hoverText
-    }
+      if (options.hoverText) {
+        this.hoverText = options.hoverText
+      }
 
-    if (interactionDistance) {
-      this.interactionDistance = interactionDistance
+      if (options.distance) {
+        this.distance = options.distance
+      }
     }
   }
 }
@@ -131,7 +143,9 @@ export class OnPointerDown extends OnPointerUUIDEvent<'pointerDown'> {
   @ObservableComponent.readonly
   readonly type: string = 'pointerDown'
 
-  constructor(callback: (event: IEvents['pointerDown']) => void, button?: ActionButton, showPointerFeeback?: boolean, hoverText?: string, interactionDistance?: number) {
+  constructor(callback: (event: IEvents['pointerDown']) => void);
+  constructor(callback: (event: IEvents['pointerDown']) => void, options: OnPointerUUIDEventOptions);
+  constructor(callback: (event: IEvents['pointerDown']) => void, options?: OnPointerUUIDEventOptions) {
     super(callback)
     // This injection is necessary ONLY in events that are ALWAYS turned on and are
     // not assignable to entities. Like events for the UI elements
@@ -139,20 +153,20 @@ export class OnPointerDown extends OnPointerUUIDEvent<'pointerDown'> {
     // TODO(Brian): This will be removed when UI gets back to the entity parenting.
     uuidEventSystem.handlerMap[this.uuid] = this
 
-    if (showPointerFeeback !== undefined) {
-      this.showPointerFeedback = showPointerFeeback
-    }
+    if(options) {
+      this.showFeeback = options.showFeeback === false ? false : true
 
-    if (button) {
-      this.button = button
-    }
+      if (options.button) {
+        this.button = options.button
+      }
 
-    if (hoverText) {
-      this.pointerFeedbackText = hoverText
-    }
+      if (options.hoverText) {
+        this.hoverText = options.hoverText
+      }
 
-    if (interactionDistance) {
-      this.interactionDistance = interactionDistance
+      if (options.distance) {
+        this.distance = options.distance
+      }
     }
   }
 }
@@ -165,7 +179,9 @@ export class OnPointerUp extends OnPointerUUIDEvent<'pointerUp'> {
   @ObservableComponent.readonly
   readonly type: string = 'pointerUp'
 
-  constructor(callback: (event: IEvents['pointerUp']) => void, button?: ActionButton, showPointerFeeback?: boolean, hoverText?: string, interactionDistance?: number) {
+  constructor(callback: (event: IEvents['pointerUp']) => void);
+  constructor(callback: (event: IEvents['pointerUp']) => void, options: OnPointerUUIDEventOptions);
+  constructor(callback: (event: IEvents['pointerUp']) => void, options?: OnPointerUUIDEventOptions) {
     super(callback)
     // This injection is necessary ONLY in events that are ALWAYS turned on and are
     // not assignable to entities. Like events for the UI elements
@@ -173,20 +189,20 @@ export class OnPointerUp extends OnPointerUUIDEvent<'pointerUp'> {
     // TODO(Brian): This will be removed when UI gets back to the entity parenting.
     uuidEventSystem.handlerMap[this.uuid] = this
 
-    if (showPointerFeeback !== undefined) {
-      this.showPointerFeedback = showPointerFeeback
-    }
+    if(options) {
+      this.showFeeback = options.showFeeback === false ? false : true
 
-    if (button) {
-      this.button = button
-    }
+      if (options.button) {
+        this.button = options.button
+      }
 
-    if (hoverText) {
-      this.pointerFeedbackText = hoverText
-    }
+      if (options.hoverText) {
+        this.hoverText = options.hoverText
+      }
 
-    if (interactionDistance) {
-      this.interactionDistance = interactionDistance
+      if (options.distance) {
+        this.distance = options.distance
+      }
     }
   }
 }

@@ -14,7 +14,7 @@ namespace DCL.Components
         {
             if (!enabled) return;
 
-            if (model.button == "UNKNOWN" || buttonId.ToString() == model.button)
+            if (model.button == "ANY" || buttonId.ToString() == model.button)
                 DCL.Interface.WebInterface.ReportOnClickEvent(scene.sceneData.id, model.uuid);
         }
     }
