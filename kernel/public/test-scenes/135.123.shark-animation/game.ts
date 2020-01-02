@@ -27,11 +27,17 @@ shark.addComponent(animator)
 clipSwim.play()
 
 // Add click interaction
-shark.addComponent(
-  new OnClick(e => {
-    clipBite.playing = !clipBite.playing
-  }, ActionButton.PRIMARY, true, "click!", 10)
-)
+let onClickComponent = new OnClick(e => {
+  clipBite.playing = !clipBite.playing
+  UpdateOnClick()
+}, ActionButton.PRIMARY, true, "Use", 10)
+
+shark.addComponent(onClickComponent)
+
+function UpdateOnClick() {
+  onClickComponent.pointerFeedbackText = "Interact"
+  onClickComponent.button = ActionButton.SECONDARY
+}
 
 // Add shark to engine
 engine.addEntity(shark)
