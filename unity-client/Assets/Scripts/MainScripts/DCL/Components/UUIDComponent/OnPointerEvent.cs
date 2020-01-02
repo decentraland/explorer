@@ -22,7 +22,6 @@ namespace DCL.Components
         Rigidbody rigidBody;
         OnPointerEventColliders pointerEventColliders;
         InteractionHoverCanvasController hoverCanvasController;
-        bool beingHovered;
 
         public override void Setup(ParcelScene scene, DecentralandEntity entity, UUIDComponent.Model model)
         {
@@ -84,18 +83,11 @@ namespace DCL.Components
             Destroy(hoverCanvasController.gameObject);
         }
 
-        public void SetHoverState(bool isHovered)
+        public void SetHoverState(bool hoverState)
         {
             if (!enableInteractionHoverFeedback) return;
 
-            if (beingHovered == isHovered) return;
-
-            beingHovered = isHovered;
-
-            if (beingHovered)
-                hoverCanvasController.Show();
-            else
-                hoverCanvasController.Hide();
+            hoverCanvasController.SetHoverState(hoverState);
         }
 
         public bool IsAtHoverDistance(float distance)

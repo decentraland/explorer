@@ -13,6 +13,7 @@ public class InteractionHoverCanvasController : MonoBehaviour
     public GameObject secondaryActionIconPrefab;
     public GameObject unknownActionIconPrefab;
 
+    bool isHovered = false;
     Camera mainCamera;
     GameObject hoverIcon;
     Vector3 meshCenteredPos;
@@ -35,7 +36,7 @@ public class InteractionHoverCanvasController : MonoBehaviour
 
         ConfigureIcon(button);
 
-        Hide();
+        canvas.enabled = isHovered;
     }
 
     void ConfigureIcon(string button)
@@ -62,14 +63,13 @@ public class InteractionHoverCanvasController : MonoBehaviour
         }
     }
 
-    public void Show()
+    public void SetHoverState(bool hoverState)
     {
-        canvas.enabled = true;
-    }
+        if (hoverState == isHovered) return;
 
-    public void Hide()
-    {
-        canvas.enabled = false;
+        isHovered = hoverState;
+
+        canvas.enabled = isHovered;
     }
 
     // This method will be used when we apply a "loose aim" for the 3rd person camera
