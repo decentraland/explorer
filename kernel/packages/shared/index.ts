@@ -170,7 +170,7 @@ export async function initShared(): Promise<Session | undefined> {
       }
       break
     } catch (e) {
-      if (e.message && e.message.startsWith('Communications link')) {
+      if (e.message && e.message.startsWith('error establishing comms')) {
         if (i >= maxAttemps) {
           // max number of attemps reached => rethrow error
           defaultLogger.info(`Max number of attemps reached (${maxAttemps}), unsuccessful connection`)
