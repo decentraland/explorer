@@ -1006,6 +1006,8 @@ namespace Tests
             component = TestHelpers.EntityComponentCreate<OnPointerDown, OnPointerDown.Model>(scene, entity,
                 onPointerDownModel, CLASS_ID_COMPONENT.UUID_CALLBACK);
 
+            yield return null;
+
             Assert.IsFalse(hoverCanvas.enabled);
 
             DCLCharacterController.i.ResumeGravity();
