@@ -130,7 +130,7 @@ MonoBehaviour:
     m_Radius: 2
   - m_Height: 0.69
     m_Radius: 3.2
-  - m_Height: -0.6
+  - m_Height: -0.3
     m_Radius: 4
   m_LegacyHeadingBias: 3.4028235e+38
   m_Rigs:
@@ -315,7 +315,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BindingMode: 4
-  m_FollowOffset: {x: 0, y: -0.6, z: -4}
+  m_FollowOffset: {x: 0, y: -0.3, z: -4}
   m_XDamping: 1
   m_YDamping: 2
   m_ZDamping: 0
@@ -440,7 +440,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BindingMode: 4
-  m_FollowOffset: {x: 0, y: -0.6, z: -4}
+  m_FollowOffset: {x: 0, y: -0.3, z: -4}
   m_XDamping: 1
   m_YDamping: 2
   m_ZDamping: 0.5
@@ -641,7 +641,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BindingMode: 4
-  m_FollowOffset: {x: 0, y: -0.6, z: -4}
+  m_FollowOffset: {x: 0, y: -0.3, z: -4}
   m_XDamping: 0
   m_YDamping: 2
   m_ZDamping: 1
