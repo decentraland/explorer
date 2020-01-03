@@ -937,7 +937,7 @@ namespace Tests
             Assert.IsTrue(hoverCanvasController.canvas.enabled);
 
             // Check default properties
-            Assert.AreEqual(hoverCanvasController.GetComponentInChildren<Image>().name, "UnknownButtonHoverIcon(Clone)");
+            Assert.AreEqual(hoverCanvasController.GetComponentInChildren<Image>().name, "AnyButtonHoverIcon(Clone)");
             Assert.AreEqual("Interact", hoverCanvasController.text.text);
             yield return null;
 

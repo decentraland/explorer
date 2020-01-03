@@ -80,7 +80,10 @@ namespace DCL.Components
 
         protected override void RemoveComponent<T>(DecentralandEntity entity)
         {
-            Destroy(hoverCanvasController.gameObject);
+            if (hoverCanvasController != null)
+            {
+                Destroy(hoverCanvasController.gameObject);
+            }
         }
 
         public void SetHoverState(bool hoverState)
@@ -99,7 +102,7 @@ namespace DCL.Components
         {
             entity.OnShapeUpdated -= OnComponentUpdated;
 
-            if (pointerEventColliders)
+            if (pointerEventColliders != null)
             {
                 pointerEventColliders.refCount--;
 
@@ -108,6 +111,11 @@ namespace DCL.Components
                     Destroy(rigidBody);
                     Destroy(pointerEventColliders);
                 }
+            }
+
+            if (hoverCanvasController != null)
+            {
+                Destroy(hoverCanvasController.gameObject);
             }
         }
     }
