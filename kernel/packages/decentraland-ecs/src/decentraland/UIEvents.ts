@@ -118,7 +118,7 @@ export class OnClick extends OnPointerUUIDEvent<'onClick'> {
     uuidEventSystem.handlerMap[this.uuid] = this
 
     if (options) {
-      this.showFeeback = options.showFeeback === false ? false : true
+      this.showFeeback = !(options.showFeeback === false)
 
       if (options.button) {
         this.button = options.button
@@ -145,7 +145,7 @@ export class OnPointerDown extends OnPointerUUIDEvent<'pointerDown'> {
 
   constructor(callback: (event: IEvents['pointerDown']) => void)
   constructor(callback: (event: IEvents['pointerDown']) => void, options: OnPointerUUIDEventOptions)
-  constructor(callback: (event: IEvents['pointerDown']) => void, options?: OnPointerUUIDEventOptions) {
+  constructor(callback: (event: IEvents['pointerDown']) => void, options?: any) {
     super(callback)
     // This injection is necessary ONLY in events that are ALWAYS turned on and are
     // not assignable to entities. Like events for the UI elements
@@ -154,7 +154,7 @@ export class OnPointerDown extends OnPointerUUIDEvent<'pointerDown'> {
     uuidEventSystem.handlerMap[this.uuid] = this
 
     if (options) {
-      this.showFeeback = options.showFeeback === false ? false : true
+      this.showFeeback = !(options.showFeeback === false)
 
       if (options.button) {
         this.button = options.button
@@ -181,7 +181,7 @@ export class OnPointerUp extends OnPointerUUIDEvent<'pointerUp'> {
 
   constructor(callback: (event: IEvents['pointerUp']) => void)
   constructor(callback: (event: IEvents['pointerUp']) => void, options: OnPointerUUIDEventOptions)
-  constructor(callback: (event: IEvents['pointerUp']) => void, options?: OnPointerUUIDEventOptions) {
+  constructor(callback: (event: IEvents['pointerUp']) => void, options?: any) {
     super(callback)
     // This injection is necessary ONLY in events that are ALWAYS turned on and are
     // not assignable to entities. Like events for the UI elements
@@ -190,7 +190,7 @@ export class OnPointerUp extends OnPointerUUIDEvent<'pointerUp'> {
     uuidEventSystem.handlerMap[this.uuid] = this
 
     if (options) {
-      this.showFeeback = options.showFeeback === false ? false : true
+      this.showFeeback = !(options.showFeeback === false)
 
       if (options.button) {
         this.button = options.button
