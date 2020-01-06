@@ -21,8 +21,8 @@ namespace DCL
         Camera charCamera;
         GameObject lastHoveredObject = null;
         GameObject newHoveredObject = null;
-        OnPointerEvent newHoveredEvent;
-        OnPointerEvent[] lastHoveredEvents;
+        OnPointerEvent newHoveredEvent = null;
+        OnPointerEvent[] lastHoveredEvents = null;
         RaycastHit hitInfo;
 
         void Awake()
@@ -72,16 +72,19 @@ namespace DCL
                     }
 
                     // OnPointerDown/OnClick and OnPointerUp should display their hover feedback at different moments
-                    for (int i = 0; i < lastHoveredEvents.Length; i++)
+                    if (lastHoveredEvents != null && lastHoveredEvents.Length > 0)
                     {
-                        bool eventButtonIsPressed = InputController_Legacy.i.IsPressed(lastHoveredEvents[i].GetActionButton());
+                        for (int i = 0; i < lastHoveredEvents.Length; i++)
+                        {
+                            bool eventButtonIsPressed = InputController_Legacy.i.IsPressed(lastHoveredEvents[i].GetActionButton());
 
-                        if (lastHoveredEvents[i] is OnPointerUp && eventButtonIsPressed)
-                            lastHoveredEvents[i].SetHoverState(true);
-                        else if ((lastHoveredEvents[i] is OnPointerDown || lastHoveredEvents[i] is OnClick) && !eventButtonIsPressed)
-                            lastHoveredEvents[i].SetHoverState(true);
-                        else
-                            lastHoveredEvents[i].SetHoverState(false);
+                            if (lastHoveredEvents[i] is OnPointerUp && eventButtonIsPressed)
+                                lastHoveredEvents[i].SetHoverState(true);
+                            else if ((lastHoveredEvents[i] is OnPointerDown || lastHoveredEvents[i] is OnClick) && !eventButtonIsPressed)
+                                lastHoveredEvents[i].SetHoverState(true);
+                            else
+                                lastHoveredEvents[i].SetHoverState(false);
+                        }
                     }
 
                     newHoveredObject = null;
