@@ -224,6 +224,7 @@ export function getServerConfigurations() {
     worldInstanceUrl: `wss://world-comm.decentraland.${TLDDefault}/connect`,
     comms: {
       lighthouseUrl: 'http://katalyst-comms.decentraland.zone:9000'
+      // lighthouseUrl: 'http://3.90.175.235:9000'
     },
     profile: `https://profile.decentraland.${TLDDefault}/api/v1`,
     wearablesApi: `https://wearable-api.decentraland.org/v2`,
