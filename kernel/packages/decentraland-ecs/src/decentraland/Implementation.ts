@@ -45,7 +45,6 @@ function logDifferenceAlgorithm(caseStr: string, prevJson: string, newJson: stri
       '\nNew:  ' + newJson,
       new Error().stack
     )
-  } else {
   }
   loggedCases[caseStr] = (loggedCases[caseStr] ? loggedCases[caseStr] : 0) + 1
 }
