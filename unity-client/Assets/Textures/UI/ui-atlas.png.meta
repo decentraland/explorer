@@ -314,6 +314,9 @@ TextureImporter:
   - first:
       213: 6488135825053477424
     second: interactive-icon
+  - first:
+      213: 4835314872936073942
+    second: item-toast
   externalObjects: {}
   serializedVersion: 10
   mipmaps:
@@ -1524,9 +1527,9 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 918
-        y: 419
+        y: 420
         width: 34
-        height: 35
+        height: 34
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 16, y: 16, z: 16, w: 16}
@@ -2334,6 +2337,27 @@ TextureImporter:
       bones: []
       spriteID: cbf8e90346f0e4b50a12187861c1f22e
       internalID: 6488135825053477424
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: item-toast
+      rect:
+        serializedVersion: 2
+        x: 842
+        y: 362
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 13, y: 13, z: 13, w: 13}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9c846b66839ce4763b7e94fd19996758
+      internalID: 4835314872936073942
       vertices: []
       indices: 
       edges: []
