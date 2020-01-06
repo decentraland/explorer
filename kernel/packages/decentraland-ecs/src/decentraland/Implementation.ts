@@ -164,7 +164,7 @@ export class DecentralandSynchronizationSystem implements ISystem {
         if (SAFE_INEFFICIENT_COMPARE) {
           this.inefficientCompare(entity, entityId, component, componentName, classId)
         } else {
-          this.efficientCompare(entity, entityId, component, componentName, classId)
+          this.efficientCompare(entity, component, componentName, classId)
         }
       }
     }
@@ -178,9 +178,9 @@ export class DecentralandSynchronizationSystem implements ISystem {
     }
   }
 
-  private efficientCompare(entity: IEntity, entityId: string, component: any, componentName: string, classId: any) {
+  private efficientCompare(entity: IEntity, component: any, componentName: string, classId: any) {
     if (classId !== null && !isDisposableComponent(component) && component.dirty) {
-      this.sendUpdateEntityComponent(entity, component, componentName, classId, JSON.stringify(component), entityId)
+      this.sendUpdateEntityComponent(entity, component, componentName, classId)
     }
   }
   private inefficientCompare(entity: IEntity, entityId: string, component: any, componentName: string, classId: any) {
@@ -195,40 +195,32 @@ export class DecentralandSynchronizationSystem implements ISystem {
           logDifferenceAlgorithm(UNDEFINED_MISS)
         } else {
           logDifferenceAlgorithm(UNDEFINED_HIT)
-          this.sendUpdateEntityComponent(entity, component, componentName, classId, componentJson, entityId)
+          this.sendUpdateEntityComponent(entity, component, componentName, classId)
+          // Update the cached copy of the sent component
+          this.cachedComponents[entityId][componentName] = componentJson
         }
       } else if (isDirty) {
         if (isSameJSON) {
           logDifferenceAlgorithm(BAD_MISS)
         } else {
           logDifferenceAlgorithm(GOOD_MISS)
-          this.sendUpdateEntityComponent(entity, component, componentName, classId, componentJson, entityId)
+          this.sendUpdateEntityComponent(entity, component, componentName, classId)
+          this.cachedComponents[entityId][componentName] = componentJson
         }
       } else {
         if (isSameJSON) {
           logDifferenceAlgorithm(GOOD_HIT)
         } else {
           logDifferenceAlgorithm(BAD_HIT)
-          this.sendUpdateEntityComponent(entity, component, componentName, classId, componentJson, entityId)
+          this.sendUpdateEntityComponent(entity, component, componentName, classId)
+          this.cachedComponents[entityId][componentName] = componentJson
         }
       }
     }
   }
 
-  private sendUpdateEntityComponent(
-    entity: IEntity,
-    component: any,
-    componentName: string,
-    classId: number,
-    componentJson: string,
-    entityId: string
-  ) {
-    component.dirty = false
-
-    // Update the cached copy of the sent component
-    this.cachedComponents[entityId][componentName] = componentJson
-
-    this.dcl.updateEntityComponent(entity.uuid, componentName, classId, componentJson)
+  private sendUpdateEntityComponent(entity: IEntity, component: any, componentName: string, classId: number) {
+    this.dcl.updateEntityComponent(entity.uuid, componentName, classId, JSON.stringify(component))
   }
 
   /**
