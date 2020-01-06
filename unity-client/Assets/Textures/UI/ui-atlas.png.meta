@@ -317,6 +317,9 @@ TextureImporter:
   - first:
       213: 4835314872936073942
     second: item-toast
+  - first:
+      213: 7595667864703430088
+    second: nft-stroke
   externalObjects: {}
   serializedVersion: 10
   mipmaps:
@@ -2139,9 +2142,9 @@ TextureImporter:
         y: 356
         width: 36
         height: 30
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 17, y: 16, z: 17, w: 14}
+      alignment: 9
+      pivot: {x: 0.4999983, y: 0.53145754}
+      border: {x: 17, y: 15, z: 17, w: 13}
       outline: []
       physicsShape: []
       tessellationDetail: 0
@@ -2358,6 +2361,27 @@ TextureImporter:
       bones: []
       spriteID: 9c846b66839ce4763b7e94fd19996758
       internalID: 4835314872936073942
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: nft-stroke
+      rect:
+        serializedVersion: 2
+        x: 957
+        y: 265
+        width: 36
+        height: 30
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 16, y: 14, z: 16, w: 14}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 82543d8e480864ef2bbc9340ff8f7e62
+      internalID: 7595667864703430088
       vertices: []
       indices: 
       edges: []
