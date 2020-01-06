@@ -21,21 +21,31 @@ const DEBUG_SYNC_SYSTEM = false
 // This number is defined in the protocol ECS.SetEntityParent.3
 const ROOT_ENTITY_ID = '0'
 
-const BAD_HIT = 'BAD: JSON cache is a hit, but `dirty` was true.'
-const GOOD_MISS = 'GOOD: JSON cache is a hit, and `dirty` was false.'
-const GOOD_HIT = 'GOOD: JSON cache is different, and `dirty` was true.'
-const BAD_MISS = 'BAD: JSON cache is different, but `dirty` was false.'
+const GOOD_MISS = 'GOOD: JSON are equal, and `dirty` was false.'
+const GOOD_HIT = 'GOOD: JSON are different, and `dirty` was true.'
+const BAD_HIT = 'BAD: JSON are equal, but `dirty` was false.'
+const BAD_MISS = 'BAD: JSON are different, but `dirty` was true.'
 const UNDEFINED_HIT = "`dirty` is not a flag, but don't send anything because nothing changed"
 const UNDEFINED_MISS = '`dirty` is not actually a flag in components. Use sameJSON comparison'
 
+function isSameJSON(a: string, b: string) {
+  return a === b
+}
+
 const loggedCases: Record<string, number> = {}
-function logDifferenceAlgorithm(caseStr: string) {
+function logDifferenceAlgorithm(caseStr: string, prevJson: string, newJson: string) {
   if (!DEBUG_SYNC_SYSTEM) {
     return
   }
   if (caseStr === BAD_HIT || caseStr === BAD_MISS || caseStr === UNDEFINED_HIT || caseStr === UNDEFINED_MISS) {
     // tslint:disable-next-line:no-console
-    console.log('Error!' + caseStr, new Error().stack)
+    console.log(
+      'Error! (JSONs are equal: ' + (prevJson === newJson) + '); ' + caseStr,
+      '\nPrev: ' + prevJson,
+      '\nNew:  ' + newJson,
+      new Error().stack
+    )
+  } else {
   }
   loggedCases[caseStr] = (loggedCases[caseStr] ? loggedCases[caseStr] : 0) + 1
 }
@@ -185,33 +195,23 @@ export class DecentralandSynchronizationSystem implements ISystem {
   }
   private inefficientCompare(entity: IEntity, entityId: string, component: any, componentName: string, classId: any) {
     if (classId !== null && !isDisposableComponent(component)) {
-      const componentJson: string = JSON.stringify(component)
+      const componentJson = JSON.stringify(component)
 
       const isDirty = component.dirty
-      const isSameJSON = this.cachedComponents[entityId][componentName] === componentJson
 
-      if (component.dirty === undefined) {
-        if (isSameJSON) {
-          logDifferenceAlgorithm(UNDEFINED_MISS)
+      if (isDirty) {
+        if (isSameJSON(componentJson, this.cachedComponents[entityId][componentName])) {
+          logDifferenceAlgorithm(BAD_MISS, this.cachedComponents[entityId][componentName], componentJson)
         } else {
-          logDifferenceAlgorithm(UNDEFINED_HIT)
-          this.sendUpdateEntityComponent(entity, component, componentName, classId)
-          // Update the cached copy of the sent component
-          this.cachedComponents[entityId][componentName] = componentJson
-        }
-      } else if (isDirty) {
-        if (isSameJSON) {
-          logDifferenceAlgorithm(BAD_MISS)
-        } else {
-          logDifferenceAlgorithm(GOOD_MISS)
+          logDifferenceAlgorithm(GOOD_MISS, this.cachedComponents[entityId][componentName], componentJson)
           this.sendUpdateEntityComponent(entity, component, componentName, classId)
           this.cachedComponents[entityId][componentName] = componentJson
         }
       } else {
-        if (isSameJSON) {
-          logDifferenceAlgorithm(GOOD_HIT)
+        if (isSameJSON(componentJson, this.cachedComponents[entityId][componentName])) {
+          logDifferenceAlgorithm(GOOD_HIT, this.cachedComponents[entityId][componentName], componentJson)
         } else {
-          logDifferenceAlgorithm(BAD_HIT)
+          logDifferenceAlgorithm(BAD_HIT, this.cachedComponents[entityId][componentName], componentJson)
           this.sendUpdateEntityComponent(entity, component, componentName, classId)
           this.cachedComponents[entityId][componentName] = componentJson
         }
