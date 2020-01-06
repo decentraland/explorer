@@ -3785,8 +3785,8 @@ MonoBehaviour:
   thumbnail: {fileID: 5952784045542849452}
   selectionHighlight: {fileID: 6132116786379135634}
   warningPanel: {fileID: 7623098848282149965}
-  amountContainer: {fileID: 0}
-  amountText: {fileID: 0}
+  amountContainer: {fileID: 4240830631986022007}
+  amountText: {fileID: 4120279907661310226}
   nftItemInfo: {fileID: 8469233552029382616}
   infoOver: {fileID: 9018018817539016249}
 --- !u!114 &5842010392547741850
