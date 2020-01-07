@@ -52,7 +52,10 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
   }
 
   close() {
-    // TODO - implement this - moliva - 20/12/2019
+    const rooms = this.peer.currentRooms
+    return Promise.all(
+      rooms.map(room => this.peer.leaveRoom(room.id).catch(e => logger.trace(`error while leaving room ${room.id}`, e)))
+    )
   }
 
   async sendInitialMessage(userInfo: Partial<UserInformation>) {
