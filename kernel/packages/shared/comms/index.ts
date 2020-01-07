@@ -41,6 +41,7 @@ import { Session } from '../session/index'
 import { worldRunningObservable, isWorldRunning } from '../world/worldState'
 import { WorldInstanceConnection } from '../comms-interface/index'
 import { LighthouseWorldInstanceConnection } from './v2/LighthouseWorldInstanceConnection'
+import { DEBUG_LOGIN } from '../../config/index';
 
 const { Peer } = require('decentraland-katalyst-peer')
 
@@ -258,9 +259,7 @@ export function processProfileMessage(
 }
 
 function processNewLogin(identity: string, context: Context, fromAlias: string) {
-  // TODO - turn into debug parameter - moliva - 19/12/2019
-  const debug = true
-  if (!debug) {
+  if (!DEBUG_LOGIN) {
     if (identity === context.userInfo.userId && fromAlias !== getCurrentPeer()!.uuid) {
       Session.current.then(s => s.disable()).catch(e => defaultLogger.error('error while signing out', e))
     }
