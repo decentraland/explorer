@@ -41,7 +41,7 @@ import { Session } from '../session/index'
 import { worldRunningObservable, isWorldRunning } from '../world/worldState'
 import { WorldInstanceConnection } from '../comms-interface/index'
 import { LighthouseWorldInstanceConnection } from './v2/LighthouseWorldInstanceConnection'
-import { DEBUG_LOGIN } from '../../config/index';
+import { DEBUG_LOGIN } from '../../config/index'
 
 const { Peer } = require('decentraland-katalyst-peer')
 
