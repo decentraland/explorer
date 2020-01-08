@@ -91,8 +91,15 @@ export const STATIC_WORLD = location.search.indexOf('STATIC_WORLD') !== -1 || !!
 // Development
 export const ENABLE_WEB3 = location.search.indexOf('ENABLE_WEB3') !== -1 || !!(global as any).enableWeb3
 export const ENV_OVERRIDE = location.search.indexOf('ENV') !== -1
-export const COMMS_V2 = location.search.indexOf('COMMS_V2') !== -1
+
+// Comms
 export const USE_LOCAL_COMMS = location.search.indexOf('LOCAL_COMMS') !== -1 || PREVIEW
+export const COMMS = USE_LOCAL_COMMS
+  ? 'v1:local'
+  : location.search.indexOf('COMMS') !== -1
+  ? window.location.search.match(/COMMS=(\w+:\w+)/)[1]
+  : 'v1:remote' // by default use v1:remote for now
+
 export const DEBUG =
   location.search.indexOf('DEBUG_MODE') !== -1 ||
   location.search.indexOf('DEBUG_LOG') !== -1 ||
@@ -224,7 +231,10 @@ export function getServerConfigurations() {
     contentAsBundle: `https://content-as-bundle.decentraland.zone`,
     worldInstanceUrl: `wss://world-comm.decentraland.${TLDDefault}/connect`,
     comms: {
-      lighthouseUrl: 'http://katalyst-comms.decentraland.zone:9000'
+      lighthouse: {
+        server: 'http://katalyst-comms.decentraland.zone:9000',
+        p2p: 'http://katalyst-comms.decentraland.zone:9001'
+      }
     },
     profile: `https://profile.decentraland.${TLDDefault}/api/v1`,
     wearablesApi: `https://wearable-api.decentraland.org/v2`,

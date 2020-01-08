@@ -1,12 +1,5 @@
 import { saveToLocalStorage } from 'atomicHelpers/localStorage'
-import {
-  commConfigurations,
-  ETHEREUM_NETWORK,
-  getServerConfigurations,
-  parcelLimits,
-  USE_LOCAL_COMMS,
-  COMMS_V2
-} from 'config'
+import { commConfigurations, ETHEREUM_NETWORK, getServerConfigurations, parcelLimits, COMMS, DEBUG_LOGIN } from 'config'
 import { CommunicationsController } from 'shared/apis/CommunicationsController'
 import { Auth } from 'shared/auth/Auth'
 import { defaultLogger } from 'shared/logger'
@@ -41,9 +34,13 @@ import { Session } from '../session/index'
 import { worldRunningObservable, isWorldRunning } from '../world/worldState'
 import { WorldInstanceConnection } from './interface/index'
 import { LighthouseWorldInstanceConnection } from './v2/LighthouseWorldInstanceConnection'
-import { DEBUG_LOGIN } from '../../config/index'
 
 const { Peer } = require('decentraland-katalyst-peer')
+
+export type CommsVersion = 'v1' | 'v2'
+export type CommsMode = CommsV1Mode | CommsV2Mode
+export type CommsV1Mode = 'local' | 'remote'
+export type CommsV2Mode = 'p2p' | 'server'
 
 type Timestamp = number
 type PeerAlias = string
@@ -423,6 +420,11 @@ function collectInfo(context: Context) {
   }
 }
 
+function parseCommsMode(modeString: string) {
+  const segments = modeString.split(':')
+  return segments as [CommsVersion, CommsMode]
+}
+
 export async function connect(userId: string, network: ETHEREUM_NETWORK, auth: Auth, ethAddress?: string) {
   try {
     setLocalProfile(userId, {
@@ -441,63 +443,99 @@ export async function connect(userId: string, network: ETHEREUM_NETWORK, auth: A
 
     let connection: WorldInstanceConnection
 
-    if (!COMMS_V2) {
-      let commsBroker: IBrokerConnection
-      if (USE_LOCAL_COMMS) {
-        let location = document.location.toString()
-        if (location.indexOf('#') > -1) {
-          location = location.substring(0, location.indexOf('#')) // drop fragment identifier
-        }
-        const commsUrl = location.replace(/^http/, 'ws') // change protocol to ws
+    const [version, mode] = parseCommsMode(COMMS)
+    switch (version) {
+      case 'v1': {
+        let commsBroker: IBrokerConnection
 
-        const url = new URL(commsUrl)
-        const qs = new URLSearchParams({
-          identity: btoa(userId)
-        })
-        url.search = qs.toString()
+        switch (mode) {
+          case 'local': {
+            let location = document.location.toString()
+            if (location.indexOf('#') > -1) {
+              location = location.substring(0, location.indexOf('#')) // drop fragment identifier
+            }
+            const commsUrl = location.replace(/^http/, 'ws') // change protocol to ws
 
-        defaultLogger.log('Using WebSocket comms: ' + url.href)
-        commsBroker = new CliBrokerConnection(url.href)
-      } else {
-        const coordinatorURL = getServerConfigurations().worldInstanceUrl
-        const body = `GET:${coordinatorURL}`
-        const credentials = await auth.getMessageCredentials(body)
+            const url = new URL(commsUrl)
+            const qs = new URLSearchParams({
+              identity: btoa(userId)
+            })
+            url.search = qs.toString()
 
-        const qs = new URLSearchParams({
-          signature: credentials['x-signature'],
-          identity: credentials['x-identity'],
-          timestamp: credentials['x-timestamp'],
-          'access-token': credentials['x-access-token']
-        })
+            defaultLogger.log('Using WebSocket comms: ' + url.href)
+            commsBroker = new CliBrokerConnection(url.href)
+            break
+          }
+          case 'remote': {
+            const coordinatorURL = getServerConfigurations().worldInstanceUrl
+            const body = `GET:${coordinatorURL}`
+            const credentials = await auth.getMessageCredentials(body)
 
-        const url = new URL(coordinatorURL)
-        defaultLogger.log('Using Remote comms: ' + url)
+            const qs = new URLSearchParams({
+              signature: credentials['x-signature'],
+              identity: credentials['x-identity'],
+              timestamp: credentials['x-timestamp'],
+              'access-token': credentials['x-access-token']
+            })
 
-        url.search = qs.toString()
+            const url = new URL(coordinatorURL)
+            defaultLogger.log('Using Remote comms: ' + url)
 
-        commsBroker = new BrokerConnection(auth, url.toString())
-      }
+            url.search = qs.toString()
 
-      const instance = new BrokerWorldInstanceConnection(commsBroker)
-      await instance.isConnected
-
-      connection = instance
-    } else {
-      const { lighthouseUrl } = getServerConfigurations().comms
-      defaultLogger.log('Using Remote lighthouse service: ', lighthouseUrl)
-      const peer = new Peer(
-        lighthouseUrl,
-        'peer-' + uuid(),
-        () => {
-          // noop
-        },
-        {
-          connectionConfig: {
-            iceServers: commConfigurations.iceServers
+            commsBroker = new BrokerConnection(auth, url.toString())
+            break
+          }
+          default: {
+            throw new Error(`unrecognized mode for comms v1 "${mode}"`)
           }
         }
-      )
-      connection = new LighthouseWorldInstanceConnection(peer)
+
+        const instance = new BrokerWorldInstanceConnection(commsBroker)
+        await instance.isConnected
+
+        connection = instance
+        break
+      }
+      case 'v2': {
+        const { server, p2p } = getServerConfigurations().comms.lighthouse
+
+        let lighthouseUrl
+        switch (mode) {
+          case 'server': {
+            lighthouseUrl = server
+            break
+          }
+          case 'p2p': {
+            lighthouseUrl = p2p
+            break
+          }
+          default: {
+            defaultLogger.warn(`unrecognized mode for comms v2 "${mode}", using default "p2p"`)
+            lighthouseUrl = p2p
+          }
+        }
+
+        defaultLogger.log('Using Remote lighthouse service: ', lighthouseUrl)
+
+        const peer = new Peer(
+          lighthouseUrl,
+          'peer-' + uuid(),
+          () => {
+            // noop
+          },
+          {
+            connectionConfig: {
+              iceServers: commConfigurations.iceServers
+            }
+          }
+        )
+        connection = new LighthouseWorldInstanceConnection(peer)
+        break
+      }
+      default: {
+        throw new Error(`unrecognized comms mode "${COMMS}"`)
+      }
     }
 
     connection.positionHandler = (alias: string, data: Package<Position>) => {
