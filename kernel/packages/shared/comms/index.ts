@@ -14,11 +14,11 @@ import { MessageEntry } from 'shared/types'
 import { positionObservable, PositionReport } from 'shared/world/positionThings'
 import 'webrtc-adapter'
 import { PassportAsPromise } from '../passports/PassportAsPromise'
-import { BrokerConnection } from '../comms-broker/BrokerConnection'
+import { BrokerConnection } from '../comms/v1/BrokerConnection'
 import { ChatEvent, chatObservable } from './chat'
 import { CliBrokerConnection } from './CliBrokerConnection'
 import { Stats } from './debug'
-import { IBrokerConnection } from '../comms-broker/IBrokerConnection'
+import { IBrokerConnection } from '../comms/v1/IBrokerConnection'
 import {
   getCurrentPeer,
   getCurrentUser,
@@ -32,14 +32,14 @@ import {
   removeById,
   setLocalProfile
 } from './peers'
-import { Pose, UserInformation, Package, ChatMessage, ProfileVersion, BusMessage } from '../comms-interface/types'
-import { CommunicationArea, Position, position2parcel, sameParcel, squareDistance } from '../comms-interface/utils'
-import { BrokerWorldInstanceConnection } from '../comms-broker/brokerWorldInstanceConnection'
+import { Pose, UserInformation, Package, ChatMessage, ProfileVersion, BusMessage } from './interface/types'
+import { CommunicationArea, Position, position2parcel, sameParcel, squareDistance } from './interface/utils'
+import { BrokerWorldInstanceConnection } from '../comms/v1/brokerWorldInstanceConnection'
 import { profileToRendererFormat } from 'shared/passports/transformations/profileToRendererFormat'
 import { ProfileForRenderer, uuid } from 'decentraland-ecs/src'
 import { Session } from '../session/index'
 import { worldRunningObservable, isWorldRunning } from '../world/worldState'
-import { WorldInstanceConnection } from '../comms-interface/index'
+import { WorldInstanceConnection } from './interface/index'
 import { LighthouseWorldInstanceConnection } from './v2/LighthouseWorldInstanceConnection'
 import { DEBUG_LOGIN } from '../../config/index'
 

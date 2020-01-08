@@ -1,7 +1,7 @@
-import { WorldInstanceConnection } from '../../comms-interface/index'
+import { WorldInstanceConnection } from '../interface/index'
 import { Stats } from '../debug'
-import { Package, BusMessage, ChatMessage, ProfileVersion, UserInformation } from '../../comms-interface/types'
-import { Position, positionHash } from '../../comms-interface/utils'
+import { Package, BusMessage, ChatMessage, ProfileVersion, UserInformation } from '../interface/types'
+import { Position, positionHash } from '../interface/utils'
 import { Peer } from 'decentraland-katalyst-peer'
 import { createLogger } from 'shared/logger'
 

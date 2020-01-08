@@ -1,6 +1,6 @@
 import { Position } from './utils'
 import { UserInformation, Package, ChatMessage, ProfileVersion, BusMessage } from './types'
-import { Stats } from '../comms/debug'
+import { Stats } from '../debug'
 
 export interface WorldInstanceConnection {
   stats: Stats | null

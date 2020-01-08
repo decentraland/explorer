@@ -13,14 +13,14 @@ import {
   TopicIdentityMessage,
   TopicIdentityFWMessage
 } from './proto/broker'
-import { Position, positionHash } from '../comms-interface/utils'
-import { UserInformation, Package, ChatMessage, ProfileVersion, BusMessage } from '../comms-interface/types'
+import { Position, positionHash } from '../../comms/interface/utils'
+import { UserInformation, Package, ChatMessage, ProfileVersion, BusMessage } from '../../comms/interface/types'
 import { IBrokerConnection, BrokerMessage } from './IBrokerConnection'
-import { Stats } from '../comms/debug'
+import { Stats } from '../../comms/debug'
 import { createLogger } from 'shared/logger'
 
-import { Reporter } from '../comms/PresenceReporter'
-import { WorldInstanceConnection } from '../comms-interface/index'
+import { Reporter } from '../../comms/PresenceReporter'
+import { WorldInstanceConnection } from '../../comms/interface/index'
 
 class SendResult {
   constructor(public bytesSize: number) {}

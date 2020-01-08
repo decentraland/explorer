@@ -10,7 +10,7 @@ import {
   getBlockedUsers,
   getMutedUsers
 } from 'shared/comms/peers'
-import { AvatarMessage } from 'shared/comms-interface/types'
+import { AvatarMessage } from 'shared/comms/interface/types'
 import { AVATAR_OBSERVABLE } from 'decentraland-ecs/src/decentraland/Types'
 
 export interface IProfileData {

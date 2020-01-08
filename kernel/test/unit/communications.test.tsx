@@ -17,12 +17,12 @@ import {
   Role,
   Format,
   TopicIdentityMessage
-} from '../../packages/shared/comms-broker/proto/broker'
-import { AuthData } from '../../packages/shared/comms-broker/proto/comms'
-import { PositionData, ProfileData, ChatData, Category } from '../../packages/shared/comms-broker/proto/comms'
-import { Position, CommunicationArea, Parcel, position2parcel } from 'shared/comms-interface/utils'
-import { BrokerWorldInstanceConnection } from 'shared/comms-broker/brokerWorldInstanceConnection'
-import { positionHash } from 'shared/comms-interface/utils'
+} from '../../packages/shared/comms/v1/proto/broker'
+import { AuthData } from '../../packages/shared/comms/v1/proto/comms'
+import { PositionData, ProfileData, ChatData, Category } from '../../packages/shared/comms/v1/proto/comms'
+import { Position, CommunicationArea, Parcel, position2parcel } from 'shared/comms/interface/utils'
+import { BrokerWorldInstanceConnection } from 'shared/comms/v1/brokerWorldInstanceConnection'
+import { positionHash } from 'shared/comms/interface/utils'
 import {
   Context,
   processChatMessage,
@@ -31,13 +31,13 @@ import {
   PeerTrackingInfo,
   onPositionUpdate
 } from 'shared/comms'
-import { BrokerConnection } from 'shared/comms-broker/BrokerConnection'
-import { IBrokerConnection, BrokerMessage, SocketReadyState } from 'shared/comms-broker/IBrokerConnection'
+import { BrokerConnection } from 'shared/comms/v1/BrokerConnection'
+import { IBrokerConnection, BrokerMessage, SocketReadyState } from 'shared/comms/v1/IBrokerConnection'
 import { Observable } from 'decentraland-ecs/src'
-import { TopicIdentityFWMessage } from '../../packages/shared/comms-broker/proto/broker'
+import { TopicIdentityFWMessage } from '../../packages/shared/comms/v1/proto/broker'
 import { onWorldRunning, MORDOR_POSITION } from '../../packages/shared/comms/index'
-import { Package } from 'shared/comms-interface/types'
-import { ChatMessage, ProfileVersion } from '../../packages/shared/comms-interface/types'
+import { Package } from 'shared/comms/interface/types'
+import { ChatMessage, ProfileVersion } from '../../packages/shared/comms/interface/types'
 
 chai.use(sinonChai)
 
