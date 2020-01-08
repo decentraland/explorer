@@ -1,6 +1,7 @@
 import { newId } from './helpers'
 import { EventConstructor } from './EventManager'
 import { UIValue } from './UIValue'
+import { deepEqual } from './deepEqual'
 
 const componentSymbol = '__name__symbol_'
 const componentClassIdSymbol = '__classId__symbol_'
@@ -299,7 +300,7 @@ export class ObservableComponent {
 
           this[componentSymbol] = value
 
-          if (value !== oldValue) {
+          if (!deepEqual(value, oldValue)) {
             this.dirty = true
 
             for (let i = 0; i < this.subscriptions.length; i++) {
@@ -322,7 +323,7 @@ export class ObservableComponent {
           const oldValue = this.data[propertyKey]
           this.data[propertyKey] = value
 
-          if (value !== oldValue) {
+          if (!deepEqual(value, oldValue)) {
             this.dirty = true
 
             for (let i = 0; i < this.subscriptions.length; i++) {
