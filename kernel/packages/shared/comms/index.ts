@@ -164,8 +164,8 @@ export function unsubscribeParcelSceneToCommsMessages(controller: Communications
 }
 
 // TODO: Change ChatData to the new class once it is added to the .proto
-export function processParcelSceneCommsMessage(context: Context, fromAlias: string, data: Package<ChatMessage>) {
-  const { id: cid, text } = data.data
+export function processParcelSceneCommsMessage(context: Context, fromAlias: string, message: Package<ChatMessage>) {
+  const { id: cid, text } = message.data
 
   const peer = getPeer(fromAlias)
 
@@ -210,12 +210,12 @@ function ensurePeerTrackingInfo(context: Context, alias: string): PeerTrackingIn
   return peerTrackingInfo
 }
 
-export function processChatMessage(context: Context, fromAlias: string, data: Package<ChatMessage>) {
-  const msgId = data.data.id
+export function processChatMessage(context: Context, fromAlias: string, message: Package<ChatMessage>) {
+  const msgId = message.data.id
 
   const peerTrackingInfo = ensurePeerTrackingInfo(context, fromAlias)
   if (!peerTrackingInfo.receivedPublicChatMessages.has(msgId)) {
-    const text = data.data.text
+    const text = message.data.text
     peerTrackingInfo.receivedPublicChatMessages.add(msgId)
 
     const user = getUser(fromAlias)
@@ -236,16 +236,16 @@ export function processProfileMessage(
   context: Context,
   fromAlias: string,
   identity: string,
-  data: Package<ProfileVersion>
+  message: Package<ProfileVersion>
 ) {
   processNewLogin(identity, context, fromAlias)
 
-  const msgTimestamp = data.time
+  const msgTimestamp = message.time
 
   const peerTrackingInfo = ensurePeerTrackingInfo(context, fromAlias)
 
   if (msgTimestamp > peerTrackingInfo.lastProfileUpdate) {
-    const profileVersion = data.data.version
+    const profileVersion = message.data.version
 
     peerTrackingInfo.identity = identity
     peerTrackingInfo.loadProfileIfNecessary(profileVersion ? parseInt(profileVersion, 10) : 0)
@@ -263,12 +263,12 @@ function processNewLogin(identity: string, context: Context, fromAlias: string) 
   }
 }
 
-export function processPositionMessage(context: Context, fromAlias: string, positionData: Package<Position>) {
-  const msgTimestamp = positionData.time
+export function processPositionMessage(context: Context, fromAlias: string, message: Package<Position>) {
+  const msgTimestamp = message.time
 
   const peerTrackingInfo = ensurePeerTrackingInfo(context, fromAlias)
   if (msgTimestamp > peerTrackingInfo.lastPositionUpdate) {
-    const p = positionData.data
+    const p = message.data
 
     peerTrackingInfo.position = p
     peerTrackingInfo.lastPositionUpdate = msgTimestamp
