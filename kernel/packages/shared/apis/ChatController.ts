@@ -8,6 +8,7 @@ import { EngineAPI } from 'shared/apis/EngineAPI'
 import { ExposableAPI } from 'shared/apis/ExposableAPI'
 import { sendPublicChatMessage } from 'shared/comms'
 import { ChatEvent, chatObservable } from 'shared/comms/chat'
+import { POIs } from 'shared/comms/POIs'
 import {
   addToMutedUsers,
   avatarMessageObservable,
@@ -146,7 +147,14 @@ export class ChatController extends ExposableAPI implements IChatController {
       let response = ''
 
       if (!isValid) {
-        response = 'Could not recognize the coordinates provided. Example usage: /goto 42,42'
+        if (message.trim().toLowerCase() === 'random') {
+          const target = POIs[Math.floor(Math.random() * POIs.length)]
+          const { x, y } = target
+          response = `Teleporting to "${target.name}" (${x}, ${y})...`
+          teleportObservable.notifyObservers({ x: parseInt('' + x, 10), y: parseInt('' + y, 10) })
+        } else {
+          response = 'Could not recognize the coordinates provided. Example usage: /goto 42,42'
+        }
       } else {
         const { x, y } = coordinates
 
