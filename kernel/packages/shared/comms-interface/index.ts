@@ -11,7 +11,6 @@ export interface WorldInstanceConnection {
   profileHandler: (alias: string, identity: string, data: Package<ProfileVersion>) => void
   positionHandler: (alias: string, data: Package<Position>) => void
 
-  // TODO - review interface for the following members - moliva - 19/12/2019
   readonly isAuthenticated: boolean
 
   // TODO - review metrics API - moliva - 19/12/2019
@@ -27,6 +26,5 @@ export interface WorldInstanceConnection {
   sendParcelSceneCommsMessage(cid: string, message: string): Promise<void>
   sendChatMessage(currentPosition: Position, messageId: string, text: string): Promise<void>
 
-  // TODO - review if we want to change this to other interface - moliva - 19/12/2019
   updateSubscriptions(topics: string[]): Promise<void>
 }
