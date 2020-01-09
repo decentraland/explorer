@@ -7,6 +7,7 @@ import {
   ReceiveUserDataMessage,
   ReceiveUserPoseMessage,
   ReceiveUserVisibleMessage,
+  ReceiveUserExpressionMessage,
   UserInformation,
   UserMessage,
   UserRemovedMessage,
@@ -74,6 +75,11 @@ export class AvatarEntity extends Entity {
     if (userData.profile) {
       this.loadProfile(userData.profile)
     }
+  }
+
+  setExpression(id: string, timestamp: number): void {
+    this.avatarShape.expressionTriggerId = id
+    this.avatarShape.expressionTriggerTimestamp = timestamp
   }
 
   setPose(pose: Pose): void {
@@ -164,6 +170,18 @@ function handleUserPose({ uuid, pose }: ReceiveUserPoseMessage): boolean {
   return true
 }
 
+function handleUserExpression({ uuid, expressionId, timestamp }: ReceiveUserExpressionMessage): boolean {
+  const avatar = ensureAvatar(uuid)
+
+  if (!avatar) {
+    return false
+  }
+
+  avatar.setExpression(expressionId, timestamp)
+
+  return true
+}
+
 /**
  * In some cases, like minimizing the window, the user will be invisible to the rest of the world.
  * This function handles those visible changes.
@@ -198,6 +216,8 @@ avatarMessageObservable.add(evt => {
     handleUserPose(evt)
   } else if (evt.type === AvatarMessageType.USER_VISIBLE) {
     handleUserVisible(evt)
+  } else if (evt.type === AvatarMessageType.USER_EXPRESSION) {
+    handleUserExpression(evt)
   } else if (evt.type === AvatarMessageType.USER_REMOVED) {
     handleUserRemoved(evt)
   } else if (evt.type === AvatarMessageType.USER_MUTED) {

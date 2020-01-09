@@ -261,6 +261,42 @@ export class ChatController extends ExposableAPI implements IChatController {
       }
     })
 
+    this.addChatCommand(
+      'emote',
+      'Trigger avatar animation named [expression] ("robot", "wave", or "fistpump")',
+      message => {
+        if ('string' !== typeof message) {
+          return {
+            id: uuid(),
+            isCommand: false,
+            sender: 'Decentraland',
+            message: ''
+          }
+        }
+        const expression = message
+        const validExpressions = ['robot', 'wave', 'fistpump']
+        const expressionExplainer = { robot: 'the robot dance!', wave: 'waving', fistpump: 'fist-pumping' }
+        if (!validExpressions.includes(expression)) {
+          return {
+            id: uuid(),
+            isCommand: true,
+            sender: 'Decentraland',
+            message: `Expression ${expression} is not one of ${validExpressions.map(_ => `"${_}"`).join(', ')}`
+          }
+        } else {
+          const id = uuid()
+          const chatMessage = `␐${expression} ${new Date().getTime()}`
+          sendPublicChatMessage(id, chatMessage)
+          return {
+            id: uuid(),
+            isCommand: true,
+            sender: 'Decentraland',
+            message: `You start ${expressionExplainer}`
+          }
+        }
+      }
+    )
+
     this.addChatCommand('unmute', 'Unmute [username]', message => {
       const username = message
       const currentUser = getCurrentUser()

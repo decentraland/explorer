@@ -15,7 +15,16 @@ export enum AvatarMessageType {
   USER_UNBLOCKED = 'USER_UNBLOCKED',
 
   ADD_FRIEND = 'ADD_FRIEND',
-  SHOW_WINDOW = 'SHOW_WINDOW'
+  SHOW_WINDOW = 'SHOW_WINDOW',
+
+  USER_EXPRESSION = 'USER_EXPRESSION'
+}
+
+export type ReceiveUserExpressionMessage = {
+  type: AvatarMessageType.USER_EXPRESSION
+  uuid: string
+  expressionId: string
+  timestamp: number
 }
 
 export type ReceiveUserDataMessage = {
@@ -56,6 +65,7 @@ export type AvatarMessage =
   | ReceiveUserDataMessage
   | ReceiveUserPoseMessage
   | ReceiveUserVisibleMessage
+  | ReceiveUserExpressionMessage
   | UserRemovedMessage
   | UserMessage
 
