@@ -12,8 +12,6 @@ namespace DCL
         public Material eyeMaterial;
         public Material eyebrowMaterial;
         public Material mouthMaterial;
-        public AnimationClip[] maleAnims;
-        public AnimationClip[] femaleAnims;
 
         AvatarModel model;
 
@@ -27,8 +25,14 @@ namespace DCL
         internal FacialFeatureController eyesController;
         internal FacialFeatureController eyebrowsController;
         internal FacialFeatureController mouthController;
+        AvatarAnimatorLegacy animator;
 
         internal bool isLoading = false;
+
+        private void Awake()
+        {
+            animator = GetComponent<AvatarAnimatorLegacy>();
+        }
 
         public void ApplyModel (AvatarModel model, Action onSuccess, Action onFail)
         {
@@ -101,7 +105,7 @@ namespace DCL
             {
                 HideAll();
 
-                bodyShapeController = new BodyShapeController( ResolveWearable(model.bodyShape));
+                bodyShapeController = new BodyShapeController(ResolveWearable(model.bodyShape));
                 SetupDefaultFacialFeatures(bodyShapeController.bodyShapeType);
                 bodyShapeController.Load(transform, OnWearableLoadingSuccess, OnWearableLoadingFail);
             }
@@ -154,7 +158,8 @@ namespace DCL
 
             yield return new WaitUntil( () => eyesReady && eyebrowsReady && mouthReady);
 
-            SetupAnimator();
+            SetWearableBones();
+            animator.SetExpressionValues(model.expressionTriggerId, model.expressionTriggerTimestamp);
 
             yield return null;
 
@@ -182,36 +187,11 @@ namespace DCL
             OnFailCallback?.Invoke();
         }
 
-        void SetupAnimator()
+       private void SetWearableBones()
         {
-            AvatarAnimatorLegacy animator = GetComponent<AvatarAnimatorLegacy>();
-            Animation animation = bodyShapeController.PrepareAnimation();
-            string bodyShapeType = bodyShapeController.bodyShapeType;
-
-            AnimationClip[] animArray = null;
-
-            if (bodyShapeType.Contains(WearableLiterals.BodyShapes.MALE))
-            {
-                animArray = maleAnims;
-            }
-            else if (bodyShapeType.Contains(WearableLiterals.BodyShapes.FEMALE))
-            {
-                animArray = femaleAnims;
-            }
-
-            for (int index = 0; index < animArray.Length; index++)
-            {
-                var clip = animArray[index];
-                if (animation.GetClip(clip.name) == null)
-                    animation.AddClip(clip, clip.name);
-            }
-
-            animator.target = transform;
-            animator.animation = animation;
-
             //NOTE(Brian): Set bones/rootBone of all wearables to be the same of the baseBody,
             //             so all of them are animated together.
-            var mainSkinnedRenderer = bodyShapeController.GetSkinnedMeshRenderer();
+            var mainSkinnedRenderer = bodyShapeController.skinMeshRendered;
             using (var enumerator = wearablesController.GetEnumerator())
             {
                 while (enumerator.MoveNext())
@@ -219,8 +199,6 @@ namespace DCL
                     enumerator.Current.Value.SetAnimatorBones(mainSkinnedRenderer);
                 }
             }
-
-            animator.SetIdleFrame();
         }
 
 

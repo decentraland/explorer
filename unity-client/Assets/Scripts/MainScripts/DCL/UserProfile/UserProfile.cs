@@ -150,6 +150,13 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
         OnUpdate?.Invoke(this);
     }
 
+    public void SetAvatarExpression(string id)
+    {
+        avatar.expressionTriggerId = id;
+        avatar.expressionTriggerTimestamp = DateTime.Now.Ticks;
+        OnUpdate?.Invoke(this);
+    }
+
     internal static UserProfile ownUserProfile;
 
     public static UserProfile GetOwnUserProfile()

@@ -1,3 +1,4 @@
+﻿using System;
 using UnityEngine;
 
 public class AvatarAnimatorLegacy : MonoBehaviour
@@ -8,6 +9,7 @@ public class AvatarAnimatorLegacy : MonoBehaviour
     const float WALK_TRANSITION_TIME = 0.01f;
     const float JUMP_TRANSITION_TIME = 0.01f;
     const float FALL_TRANSITION_TIME = 0.5f;
+    const float EXPRESSION_TRANSITION_TIME = 0.2f;
 
     const float AIR_EXIT_TRANSITION_TIME = 0.2f;
     const float GROUND_BLENDTREE_TRANSITION_TIME = 0.15f;
@@ -39,8 +41,12 @@ public class AvatarAnimatorLegacy : MonoBehaviour
         public float movementSpeed;
         public float verticalSpeed;
         public bool isGrounded;
+        public string expressionTriggerId;
+        public long expressionTriggerTimestamp;
     }
 
+    [SerializeField] private AnimationClipsVariable maleAnimations;
+    [SerializeField] private AnimationClipsVariable femaleAnimations;
     public new Animation animation;
     public Clips clips;
     public BlackBoard blackboard;
@@ -170,6 +176,43 @@ public class AvatarAnimatorLegacy : MonoBehaviour
         }
     }
 
+    void State_Expression(BlackBoard bb)
+    {
+        var animationInfo = animation[bb.expressionTriggerId];
+        animation.CrossFade(bb.expressionTriggerId, EXPRESSION_TRANSITION_TIME, PlayMode.StopAll);
+
+        var mustExit = Math.Abs(bb.movementSpeed) > Mathf.Epsilon || animationInfo.length - animationInfo.time < EXPRESSION_TRANSITION_TIME || !bb.isGrounded;
+        if (mustExit)
+        {
+            animation.Blend(bb.expressionTriggerId, 0, EXPRESSION_TRANSITION_TIME);
+            bb.expressionTriggerId = null;
+            if (!bb.isGrounded)
+                currentState = State_Air;
+            else
+                currentState = State_Ground;
+            Update();
+        }
+    }
+
+    public void SetExpressionValues(string expressionTriggerId, long expressionTriggerTimestamp)
+    {
+        var mustTriggerAnimation = !string.IsNullOrEmpty(expressionTriggerId) && blackboard.expressionTriggerTimestamp != expressionTriggerTimestamp;
+
+        if (!string.IsNullOrEmpty(expressionTriggerId))
+        {
+            animation.Stop(expressionTriggerId);
+        }
+        
+        blackboard.expressionTriggerId = expressionTriggerId;
+        blackboard.expressionTriggerTimestamp = expressionTriggerTimestamp;
+
+        if (mustTriggerAnimation)
+        {
+            currentState = State_Expression;
+            Update();
+        }
+    }
+
     public void Reset()
     {
         //It will set the animation to the first frame, but due to the nature of the script and its Update. It wont stop the animation from playing
@@ -179,5 +222,30 @@ public class AvatarAnimatorLegacy : MonoBehaviour
     public void SetIdleFrame()
     {
         animation.Play(clips.idle);
+    }
+
+    public void BindBodyShape(Animation animation, string bodyShapeType, Transform target)
+    {
+        this.target = target;
+        this.animation = animation;
+        AnimationClip[] animArray = null;
+
+        if (bodyShapeType.Contains(WearableLiterals.BodyShapes.MALE))
+        {
+            animArray = maleAnimations;
+        }
+        else if (bodyShapeType.Contains(WearableLiterals.BodyShapes.FEMALE))
+        {
+            animArray = femaleAnimations;
+        }
+
+        for (int index = 0; index < animArray.Length; index++)
+        {
+            var clip = animArray[index];
+            if (this.animation.GetClip(clip.name) == null)
+                this.animation.AddClip(clip, clip.name);
+        }
+
+        SetIdleFrame();
     }
 }

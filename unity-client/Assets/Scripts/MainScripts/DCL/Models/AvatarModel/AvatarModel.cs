@@ -10,6 +10,8 @@ public class AvatarModel
     public Color hairColor;
     public Color eyeColor;
     public List<string> wearables = new List<string>();
+    public string expressionTriggerId = null;
+    public long expressionTriggerTimestamp = -1;
 
     public void CopyFrom (AvatarModel other)
     {

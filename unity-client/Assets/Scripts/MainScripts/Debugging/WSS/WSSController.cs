@@ -372,6 +372,9 @@ namespace DCL
                             case "ConfigureAvatarEditorHUD":
                                 HUDController.i?.ConfigureAvatarEditorHUD(msg.payload);
                                 break;
+                            case "ConfigureExpressionsHUD":
+                                HUDController.i.ConfigureExpressionsHUD(msg.payload);
+                                break;
                             case "UpdateMinimapSceneInformation":
                                 MinimapMetadataController.i?.UpdateMinimapSceneInformation(msg.payload);
                                 break;

@@ -5,6 +5,7 @@ public enum DCLAction_Trigger
 {
     //Remember to explicitly assign the value to each entry so we minimize issues with serialization + conflicts
     CameraChange = 100,
+    OpenExpressions = 200,
 }
 
 public enum DCLAction_Hold
@@ -50,6 +51,10 @@ public class InputController : MonoBehaviour
                     //Disable until the fine-tuning is ready
                     if (ENABLE_THIRD_PERSON_CAMERA)
                         InputProcessor.FromKey(action, KeyCode.V, InputProcessor.Modifier.NeedsPointerLocked);
+                    break;
+
+                case DCLAction_Trigger.OpenExpressions:
+                    InputProcessor.FromKey(action, KeyCode.B);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

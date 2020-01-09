@@ -364,6 +364,9 @@ export const unityInterface = {
   ConfigureSettingsHUD(configuration: HUDConfiguration) {
     gameInstance.SendMessage('HUDController', 'ConfigureSettingsHUD', JSON.stringify(configuration))
   },
+  ConfigureExpressionsHUD(configuration: HUDConfiguration) {
+    gameInstance.SendMessage('HUDController', 'ConfigureExpressionsHUD', JSON.stringify(configuration))
+  },
   UpdateMinimapSceneInformation(info: { name: string; type: number; parcels: { x: number; y: number }[] }[]) {
     const chunks = chunkGenerator(CHUNK_SIZE, info)
 
@@ -436,6 +439,9 @@ export const HUD: Record<string, { configure: (config: HUDConfiguration) => void
   },
   Settings: {
     configure: unityInterface.ConfigureSettingsHUD
+  },
+  Expressions: {
+    configure: unityInterface.ConfigureExpressionsHUD
   }
 }
 
