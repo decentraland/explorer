@@ -55,6 +55,11 @@ public class AvatarHUDController : IHUD
         DCL.Interface.WebInterface.LogOut();
     }
 
+    public void ShowSettings()
+    {
+
+    }
+
     public void SetConfiguration(HUDConfiguration configuration)
     {
         SetActive(configuration.active);
