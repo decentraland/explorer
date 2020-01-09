@@ -232,8 +232,8 @@ export function getServerConfigurations() {
     worldInstanceUrl: `wss://world-comm.decentraland.${TLDDefault}/connect`,
     comms: {
       lighthouse: {
-        server: 'http://katalyst-comms.decentraland.zone:9000',
-        p2p: 'http://katalyst-comms.decentraland.zone:9001'
+        server: 'https://katalyst-comms-relay.decentraland.zone',
+        p2p: 'https://katalyst-comms-no-relay.decentraland.zone'
       }
     },
     profile: `https://profile.decentraland.${TLDDefault}/api/v1`,
