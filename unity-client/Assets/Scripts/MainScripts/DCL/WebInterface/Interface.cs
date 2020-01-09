@@ -305,6 +305,13 @@ namespace DCL.Interface
         {
         }
 
+        [System.Serializable]
+        public class SendExpressionPayload
+        {
+            public string id;
+            public long timestamps;
+        }
+
 #if UNITY_WEBGL && !UNITY_EDITOR
     /**
      * This method is called after the first render. It marks the loading of the
@@ -632,6 +639,16 @@ namespace DCL.Interface
         public static void SendPerformanceReport(string encodedFrameTimesInMS)
         {
             WebInterface.MessageFromEngine("PerformanceReport", encodedFrameTimesInMS);
+
+        }
+
+        public static void SendExpression(string expressionID, long timestamp)
+        {
+            SendMessage("TriggerExpression", new SendExpressionPayload()
+            {
+                id = expressionID,
+                timestamps = timestamp
+            });
 
         }
     }

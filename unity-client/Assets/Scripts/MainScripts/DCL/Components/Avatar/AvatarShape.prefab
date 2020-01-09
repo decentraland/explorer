@@ -454,16 +454,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 703a54a14152d5746a40188f469a0c8f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maleAnimations: {fileID: 11400000, guid: 721f65352b4fb20439aa78512bb5140d, type: 2}
-  femaleAnimations: {fileID: 11400000, guid: 639edef6ddd2bc742b67929a5496baba, type: 2}
+  maleAnimations: {fileID: 11400000, guid: 8d41ecfe34eda1c4dbbca4e7067828e1, type: 2}
+  femaleAnimations: {fileID: 11400000, guid: 8cdc64566d182664aa8e7ba44eab8eae, type: 2}
   animation: {fileID: 0}
-  clips:
+  baseClipsIds:
     idle: Idle
     walk: Walk
     run: Run
     jump: Jump
     fall: Fall
-    special: 
   blackboard:
     walkSpeedFactor: 0.5
     runSpeedFactor: 0.25

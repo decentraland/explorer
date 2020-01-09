@@ -1,10 +1,8 @@
 ﻿using System;
-using UnityEngine;
+using DCL.Interface;
 
 public class ExpressionsHUDController : IHUD, IDisposable
 {
-    private const string CURRENT_PLAYER_EXPRESSION_PATH = "OwnPlayerCurrentExpression";
-
     internal ExpressionsHUDView view;
 
     public ExpressionsHUDController()
@@ -25,7 +23,8 @@ public class ExpressionsHUDController : IHUD, IDisposable
 
     internal void ExpressionCalled(string id)
     {
-        UserProfile.GetOwnUserProfile().SetAvatarExpression(id);
-        //TODO Report to kernel
+        var timestamp = DateTime.UtcNow.Ticks;
+        UserProfile.GetOwnUserProfile().SetAvatarExpression(id, timestamp);
+        WebInterface.SendExpression(id, timestamp);
     }
 }

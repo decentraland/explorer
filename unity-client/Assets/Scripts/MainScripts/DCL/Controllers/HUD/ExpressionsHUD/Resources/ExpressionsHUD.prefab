@@ -393,11 +393,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   buttonToExpressionMap:
-  - expressionId: Waving
+  - expressionId: wave
     button: {fileID: 7429565090657569286}
-  - expressionId: DanceHipHop
+  - expressionId: fistpump
     button: {fileID: 234398039322459571}
-  - expressionId: Victory
+  - expressionId: robot
     button: {fileID: 6959363111349760724}
   showContentButton: {fileID: 3828354362020330558}
   hideContentButton: {fileID: 7369359897116190397}
