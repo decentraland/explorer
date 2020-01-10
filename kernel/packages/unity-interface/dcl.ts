@@ -79,6 +79,7 @@ import { positionObservable, teleportObservable } from '../shared/world/position
 import { hudWorkerUrl, SceneWorker } from '../shared/world/SceneWorker'
 import { ensureUiApis } from '../shared/world/uiSceneInitializer'
 import { worldRunningObservable } from '../shared/world/worldState'
+import { sendPublicChatMessage } from 'shared/comms'
 
 const rendererVersion = require('decentraland-renderer')
 window['console'].log('Renderer version: ' + rendererVersion)
@@ -143,6 +144,9 @@ const browserInterface = {
       expressionId: data.id,
       timestamp: data.timestamp
     })
+    const id = uuid()
+    const chatMessage = `␐${data.id} ${data.timestamp}`
+    sendPublicChatMessage(id, chatMessage)
   },
 
   LogOut() {
