@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using DCL.Interface;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -11,6 +12,8 @@ using UnityEngine.Networking;
 [CreateAssetMenu(fileName = "UserProfile", menuName = "UserProfile")]
 public class UserProfile : ScriptableObject //TODO Move to base variable
 {
+    static DateTime epochStart = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
     public event Action<UserProfile> OnUpdate;
 
     public string userName => model.name;
@@ -150,10 +153,12 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
         OnUpdate?.Invoke(this);
     }
 
-    public void SetAvatarExpression(string id, long timestamp)
+    public void SetAvatarExpression(string id)
     {
+        var timestamp = (long)(DateTime.UtcNow - epochStart).TotalMilliseconds;
         avatar.expressionTriggerId = id;
         avatar.expressionTriggerTimestamp = timestamp;
+        WebInterface.SendExpression(id, timestamp);
         OnUpdate?.Invoke(this);
     }
 

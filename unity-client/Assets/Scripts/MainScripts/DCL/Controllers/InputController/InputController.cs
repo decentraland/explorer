@@ -1,11 +1,16 @@
 using System;
+using System.Linq;
 using UnityEngine;
 
 public enum DCLAction_Trigger
 {
     //Remember to explicitly assign the value to each entry so we minimize issues with serialization + conflicts
     CameraChange = 100,
+
     OpenExpressions = 200,
+    Expression_Wave = 201,
+    Expression_FistPump = 202,
+    Expression_Robot = 203,
 }
 
 public enum DCLAction_Hold
@@ -50,11 +55,19 @@ public class InputController : MonoBehaviour
                 case DCLAction_Trigger.CameraChange:
                     //Disable until the fine-tuning is ready
                     if (ENABLE_THIRD_PERSON_CAMERA)
-                        InputProcessor.FromKey(action, KeyCode.V, InputProcessor.Modifier.NeedsPointerLocked);
+                        InputProcessor.FromKey(action, KeyCode.V, modifiers: InputProcessor.Modifier.NeedsPointerLocked);
                     break;
-
                 case DCLAction_Trigger.OpenExpressions:
                     InputProcessor.FromKey(action, KeyCode.B);
+                    break;
+                case DCLAction_Trigger.Expression_Wave:
+                    InputProcessor.FromKey(action, KeyCode.V , new [] { KeyCode.LeftControl });
+                    break;
+                case DCLAction_Trigger.Expression_FistPump:
+                    InputProcessor.FromKey(action, KeyCode.F, new [] { KeyCode.LeftControl });
+                    break;
+                case DCLAction_Trigger.Expression_Robot:
+                    InputProcessor.FromKey(action, KeyCode.R, new [] { KeyCode.LeftControl });
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -114,6 +127,8 @@ public class InputController : MonoBehaviour
 
 public static class InputProcessor
 {
+    private static readonly KeyCode[] MODIFIER_KEYS = new [] { KeyCode.LeftControl, KeyCode.LeftAlt, KeyCode.LeftShift };
+
     [Flags]
     public enum Modifier
     {
@@ -132,9 +147,23 @@ public static class InputProcessor
         return true;
     }
 
-    public static void FromKey(InputAction_Trigger action, KeyCode key, Modifier modifiers = Modifier.None)
+    public static void FromKey(InputAction_Trigger action, KeyCode key, KeyCode[] modifierKeys = null, Modifier modifiers = Modifier.None)
     {
         if (!PassModifiers(modifiers)) return;
+
+        for (var i = 0; i < MODIFIER_KEYS.Length; i++)
+        {
+            var keyCode = MODIFIER_KEYS[i];
+            var pressed = Input.GetKey(keyCode);
+            if (modifierKeys == null)
+            {
+                if (pressed) return;
+            }
+            else
+            {
+                if (modifierKeys.Contains(keyCode) != pressed) return;
+            }
+        }
 
         if (Input.GetKeyDown(key)) action.RaiseOnTriggered();
     }
