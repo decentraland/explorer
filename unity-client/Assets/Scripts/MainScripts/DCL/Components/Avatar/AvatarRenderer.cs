@@ -25,7 +25,7 @@ namespace DCL
         internal FacialFeatureController eyesController;
         internal FacialFeatureController eyebrowsController;
         internal FacialFeatureController mouthController;
-        AvatarAnimatorLegacy animator;
+        internal AvatarAnimatorLegacy animator;
 
         internal bool isLoading = false;
 

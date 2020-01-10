@@ -46,8 +46,8 @@ public class AvatarAnimatorLegacy : MonoBehaviour
         public long expressionTriggerTimestamp;
     }
 
-    [SerializeField] private AvatarAnimationsVariable maleAnimations;
-    [SerializeField] private AvatarAnimationsVariable femaleAnimations;
+    [SerializeField] internal AvatarAnimationsVariable maleAnimations;
+    [SerializeField] internal AvatarAnimationsVariable femaleAnimations;
     public new Animation animation;
     public BaseClipsIds baseClipsIds;
     public BlackBoard blackboard;
@@ -60,7 +60,7 @@ public class AvatarAnimatorLegacy : MonoBehaviour
     public bool useDeltaTimeInsteadOfGlobalSpeed = false;
     public float globalSpeed = 0.05f;
 
-    System.Action<BlackBoard> currentState;
+    internal System.Action<BlackBoard> currentState;
 
     Vector3 lastPosition;
     private AvatarAnimationsVariable currentAnimations;
@@ -178,7 +178,7 @@ public class AvatarAnimatorLegacy : MonoBehaviour
         }
     }
 
-    void State_Expression(BlackBoard bb)
+    internal void State_Expression(BlackBoard bb)
     {
         var animationInfo = animation[bb.expressionTriggerId];
         animation.CrossFade(bb.expressionTriggerId, EXPRESSION_TRANSITION_TIME, PlayMode.StopAll);

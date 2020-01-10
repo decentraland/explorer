@@ -15,12 +15,12 @@ public class ExpressionsHUDView : MonoBehaviour
         public Button button;
     }
 
-    [SerializeField] private ButtonToExpression[] buttonToExpressionMap;
-    [SerializeField] private Button showContentButton;
-    [SerializeField] private Button hideContentButton;
-    [SerializeField] private RectTransform content;
-    [SerializeField] private InputAction_Trigger openExpressionsAction;
-    private InputAction_Trigger.Triggered openExpressionsDelegate;
+    [SerializeField] internal ButtonToExpression[] buttonToExpressionMap;
+    [SerializeField] internal Button showContentButton;
+    [SerializeField] internal Button hideContentButton;
+    [SerializeField] internal RectTransform content;
+    [SerializeField] internal InputAction_Trigger openExpressionsAction;
+    internal InputAction_Trigger.Triggered openExpressionsDelegate;
 
     public static ExpressionsHUDView Create()
     {
@@ -44,14 +44,14 @@ public class ExpressionsHUDView : MonoBehaviour
             buttonToExpression.button.onClick.RemoveAllListeners();
             buttonToExpression.button.onClick.AddListener(() =>
                 {
-                    clickedDelegate.Invoke(buttonToExpression.expressionId);
+                    clickedDelegate?.Invoke(buttonToExpression.expressionId);
                     HideContent();
                 }
             );
         }
     }
 
-    private void ToggleContent()
+    internal void ToggleContent()
     {
         if (content.gameObject.activeSelf)
         {
@@ -63,13 +63,13 @@ public class ExpressionsHUDView : MonoBehaviour
         }
     }
 
-    private void ShowContent()
+    internal void ShowContent()
     {
         content.gameObject.SetActive(true);
         DCL.Helpers.Utils.UnlockCursor();
     }
 
-    private void HideContent()
+    internal void HideContent()
     {
         content.gameObject.SetActive(false);
         DCL.Helpers.Utils.LockCursor();
