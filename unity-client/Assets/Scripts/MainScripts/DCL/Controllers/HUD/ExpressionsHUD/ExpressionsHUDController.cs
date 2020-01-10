@@ -4,6 +4,7 @@ using DCL.Interface;
 public class ExpressionsHUDController : IHUD, IDisposable
 {
     internal ExpressionsHUDView view;
+    static DateTime epochStart = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
     public ExpressionsHUDController()
     {
@@ -23,7 +24,7 @@ public class ExpressionsHUDController : IHUD, IDisposable
 
     internal void ExpressionCalled(string id)
     {
-        var timestamp = DateTime.UtcNow.Ticks;
+        var timestamp = (long)(DateTime.UtcNow - epochStart).TotalMilliseconds;
         UserProfile.GetOwnUserProfile().SetAvatarExpression(id, timestamp);
         WebInterface.SendExpression(id, timestamp);
     }

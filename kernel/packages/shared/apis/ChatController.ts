@@ -291,7 +291,7 @@ export class ChatController extends ExposableAPI implements IChatController {
             id: uuid(),
             isCommand: true,
             sender: 'Decentraland',
-            message: `You start ${expressionExplainer}`
+            message: `You start ${expressionExplainer[expression as keyof typeof expressionExplainer]}`
           }
         }
       }
