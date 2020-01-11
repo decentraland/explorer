@@ -37,12 +37,12 @@ namespace DCL.GameSettings
 
         void OnEnable()
         {
-            DCL.Settings.i.OnQualitySettingsChanged += ApplyQualitySettings;
+            Settings.i.OnQualitySettingsChanged += ApplyQualitySettings;
         }
 
         void OnDisable()
         {
-            DCL.Settings.i.OnQualitySettingsChanged -= ApplyQualitySettings;
+            Settings.i.OnQualitySettingsChanged -= ApplyQualitySettings;
         }
 
         void ApplyQualitySettings(QualitySettings qualitySettings)
@@ -86,23 +86,6 @@ namespace DCL.GameSettings
             if (camera)
             {
                 camera.farClipPlane = qualitySettings.cameraDrawDistance;
-            }
-        }
-
-        // TODO: remove
-        void Update()
-        {
-            if (Input.GetKeyDown(KeyCode.L))
-            {
-                DCL.Settings.i.ApplyQualitySettingsPreset(0);
-            }
-            if (Input.GetKeyDown(KeyCode.M))
-            {
-                DCL.Settings.i.ApplyQualitySettingsPreset(1);
-            }
-            if (Input.GetKeyDown(KeyCode.H))
-            {
-                DCL.Settings.i.ApplyQualitySettingsPreset(2);
             }
         }
     }

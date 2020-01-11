@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: QualitySettingsData
   m_EditorClassIdentifier: 
   settings:
-  - displayName: basic
+  - displayName: BASIC
     textureQuality: 1
     antiAliasing: 1
     renderScale: 1
@@ -23,7 +23,7 @@ MonoBehaviour:
     cameraDrawDistance: 50
     bloom: 0
     colorGrading: 0
-  - displayName: medium
+  - displayName: MEDIUM
     textureQuality: 0
     antiAliasing: 2
     renderScale: 1
@@ -33,7 +33,7 @@ MonoBehaviour:
     cameraDrawDistance: 80
     bloom: 0
     colorGrading: 0
-  - displayName: high
+  - displayName: HIGH
     textureQuality: 0
     antiAliasing: 8
     renderScale: 1

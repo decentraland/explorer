@@ -51,5 +51,19 @@ namespace DCL.GameSettings
 
         [Tooltip("Enable color grading post process")]
         public bool colorGrading;
+
+        public bool Equals(QualitySettings otherSetting)
+        {
+            if (textureQuality != otherSetting.textureQuality) return false;
+            if (antiAliasing != otherSetting.antiAliasing) return false;
+            if (renderScale != otherSetting.renderScale) return false;
+            if (shadows != otherSetting.shadows) return false;
+            if (softShadows != otherSetting.softShadows) return false;
+            if (shadowResolution != otherSetting.shadowResolution) return false;
+            if (cameraDrawDistance != otherSetting.cameraDrawDistance) return false;
+            if (bloom != otherSetting.bloom) return false;
+            if (colorGrading != otherSetting.colorGrading) return false;
+            return true;
+        }
     }
 }
