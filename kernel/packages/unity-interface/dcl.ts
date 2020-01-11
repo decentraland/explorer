@@ -353,6 +353,9 @@ export const unityInterface = {
   ConfigureAvatarEditorHUD(configuration: HUDConfiguration) {
     gameInstance.SendMessage('HUDController', 'ConfigureAvatarEditorHUD', JSON.stringify(configuration))
   },
+  ConfigureSettingsHUD(configuration: HUDConfiguration) {
+    gameInstance.SendMessage('HUDController', 'ConfigureSettingsHUD', JSON.stringify(configuration))
+  },
   UpdateMinimapSceneInformation(info: { name: string; type: number; parcels: { x: number; y: number }[] }[]) {
     const chunks = chunkGenerator(CHUNK_SIZE, info)
 
@@ -422,6 +425,9 @@ export const HUD: Record<string, { configure: (config: HUDConfiguration) => void
   },
   AvatarEditor: {
     configure: unityInterface.ConfigureAvatarEditorHUD
+  },
+  Settings: {
+    configure: unityInterface.ConfigureSettingsHUD
   }
 }
 
@@ -668,7 +674,7 @@ export async function initializeEngine(_gameInstance: GameInstance) {
     onMessage(type: string, message: any) {
       if (type in browserInterface) {
         // tslint:disable-next-line:semicolon
-        ; (browserInterface as any)[type](message)
+        ;(browserInterface as any)[type](message)
       } else {
         defaultLogger.info(`Unknown message (did you forget to add ${type} to unity-interface/dcl.ts?)`, message)
       }

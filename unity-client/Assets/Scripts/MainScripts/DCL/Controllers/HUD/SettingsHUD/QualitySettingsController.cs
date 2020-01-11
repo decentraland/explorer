@@ -6,7 +6,7 @@ using System.Reflection;
 
 using UnitySettings = UnityEngine.QualitySettings;
 
-namespace DCL.GameSettings
+namespace DCL.SettingsHUD
 {
     public class QualitySettingsController : MonoBehaviour
     {
