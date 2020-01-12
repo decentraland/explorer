@@ -231,6 +231,7 @@ namespace DCL
             while (true)
             {
                 start = Time.realtimeSinceStartup;
+                prevTimeBudget = INIT_MSG_BUS_BUDGET_MAX;
                 // This loop makes sure that queues are emptied out in the correct order.
                 // Every time we're done with a queue, we call `continue` to start again processing messages in the right priority
                 // (note that the next run might be in the next frame due to the time budget).
