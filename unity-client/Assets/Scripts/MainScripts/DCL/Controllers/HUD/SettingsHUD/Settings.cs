@@ -71,7 +71,7 @@ namespace DCL
                 currentGeneralSettings = new SettingsHUD.GeneralSettings()
                 {
                     sfxVolume = 1,
-                    mouseSensitivity = 1
+                    mouseSensitivity = 0.2f
                 };
             }
         }
