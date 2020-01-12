@@ -115,7 +115,7 @@ export function* reportScenesAround() {
   }
   const data = atlasState.marketName
   const targets: Record<string, MarketEntry> = {}
-  const MAX_SCENES_AROUND = 30
+  const MAX_SCENES_AROUND = 15
   const userX = userPosition.x / parcelLimits.parcelSize
   const userY = userPosition.z / parcelLimits.parcelSize
   Object.keys(data).forEach(index => {
