@@ -205,10 +205,23 @@ namespace DCL
             }
         }
 
+        /**
+         * Calls to ProcessBus to run events from this queue. Returns true if ProcessBus returns true
+         */
+        private bool ProcessEventsFromBus(MessagingController controller, MessagingBus bus, ref float prevTimeBudget, ref IEnumerator yieldReturn)
+        {
+            if (controller.enabled)
+            {
+                if (ProcessBus(bus, ref prevTimeBudget, out yieldReturn))
+                    return true;
+            }
+            return false;
+        }
+
         IEnumerator ProcessMessages()
         {
             float prevTimeBudget;
-            IEnumerator yieldReturn;
+            IEnumerator yieldReturn = null;
             float start;
 
             while (true)
@@ -216,122 +229,76 @@ namespace DCL
                 prevTimeBudget = INIT_MSG_BUS_BUDGET_MAX;
                 start = Time.unscaledTime;
 
-                bool processedBus = false;
-
-                // When breaking this second loop, we skip a frame
                 while (true)
                 {
-                    //-------------------------------------------------------------------------------------------
-                    // Global scene UI
-                    if (uiSceneController != null && uiSceneController.enabled)
-                    {
-                        processedBus = true;
+                    // If in the previous iteration we found a corutine to run, call it
+                    if (yieldReturn != null)
+                        yield return yieldReturn;
 
-                        if (ProcessBus(uiSceneController.uiBus, ref prevTimeBudget, out yieldReturn))
-                            break;
-                    }
+                    // If we spent too much time in this loop, continue processing in the next frame by returning null
+                    if (Time.realtimeSinceStartup - start >= GLOBAL_MAX_MSG_BUDGET)
+                        yield return null;
 
-                    //-------------------------------------------------------------------------------------------
-                    // Global Controller INIT
-                    if (globalController != null && globalController.enabled)
-                    {
-                        processedBus = true;
-                        if (ProcessBus(globalController.initBus, ref prevTimeBudget, out yieldReturn))
-                            break;
-                    }
+                    // High priority buses: UI events, global initialization events, and UI initialization events
+                    if (uiSceneController != null && ProcessEventsFromBus(uiSceneController, uiSceneController.uiBus, ref prevTimeBudget, ref yieldReturn))
+                        break;
+                    if (globalController != null && ProcessEventsFromBus(globalController, globalController.initBus, ref prevTimeBudget, ref yieldReturn))
+                        break;
+                    if (uiSceneController != null && ProcessEventsFromBus(uiSceneController, uiSceneController.initBus, ref prevTimeBudget, ref yieldReturn))
+                        break;
 
-                    //-------------------------------------------------------------------------------------------
-                    // Global scene INIT
-                    if (uiSceneController != null && uiSceneController.enabled)
-                    {
-                        processedBus = true;
-                        if (ProcessBus(uiSceneController.initBus, ref prevTimeBudget, out yieldReturn))
-                            break;
-                    }
+                    // Next in priority: events for the current scene
+                    if (currentSceneController != null && ProcessEventsFromBus(currentSceneController, currentSceneController.initBus, ref prevTimeBudget, ref yieldReturn))
+                        break;
+                    if (currentSceneController != null && ProcessEventsFromBus(currentSceneController, currentSceneController.uiBus, ref prevTimeBudget, ref yieldReturn))
+                        break;
+                    if (currentSceneController != null && ProcessEventsFromBus(currentSceneController, currentSceneController.systemBus, ref prevTimeBudget, ref yieldReturn))
+                        break;
 
-                    //-------------------------------------------------------------------------------------------
-                    // Current Scene INIT, UI and SYSTEM
-                    if (currentSceneController != null && currentSceneController.enabled)
-                    {
-                        processedBus = true;
-                        if (ProcessBus(currentSceneController.initBus, ref prevTimeBudget, out yieldReturn))
-                            break;
-
-                        if (ProcessBus(currentSceneController.uiBus, ref prevTimeBudget, out yieldReturn))
-                            break;
-
-                        if (ProcessBus(currentSceneController.systemBus, ref prevTimeBudget, out yieldReturn))
-                            break;
-                    }
-
-                    //-------------------------------------------------------------------------------------------
-                    // Rest of the scenes INIT
+                    // Then: other initialization events from scenes
                     bool shouldRestart = false;
-
                     for (int i = 0; i < sortedControllersCount; i++)
                     {
-                        MessagingController msgController = sortedControllers[i];
-                        processedBus = true;
-
-                        if (ProcessBus(msgController.initBus, ref prevTimeBudget, out yieldReturn))
-                        {
+                        if (ProcessEventsFromBus(sortedControllers[i], sortedControllers[i].initBus, ref prevTimeBudget, ref yieldReturn)) { 
                             shouldRestart = true;
                             break;
                         }
                     }
-
-
                     if (shouldRestart)
                         break;
 
-                    //-------------------------------------------------------------------------------------------
-                    // Rest of the scenes UI
-
+                    // Low priority: UI events for scenes
                     for (int i = 0; i < sortedControllersCount; i++)
                     {
-                        MessagingController msgController = sortedControllers[i];
-                        processedBus = true;
-
-                        if (ProcessBus(msgController.uiBus, ref prevTimeBudget, out yieldReturn))
+                        if (ProcessEventsFromBus(sortedControllers[i], sortedControllers[i].uiBus, ref prevTimeBudget, ref yieldReturn))
                         {
                             shouldRestart = true;
                             break;
                         }
                     }
-
                     if (shouldRestart)
                         break;
 
-                    //-------------------------------------------------------------------------------------------
-                    // Global scene SYSTEM
-                    if (uiSceneController != null && uiSceneController.enabled)
-                    {
-                        processedBus = true;
-                        if (ProcessBus(uiSceneController.systemBus, ref prevTimeBudget, out yieldReturn))
-                            break;
-                    }
+                    // Lower priority: UI events for the UI scene
+                    if (uiSceneController != null && ProcessEventsFromBus(uiSceneController, uiSceneController.systemBus, ref prevTimeBudget, ref yieldReturn))
+                        break;
 
-                    //-------------------------------------------------------------------------------------------
-                    // Rest of the scenes SYSTEM
-
+                    // Lowest priority: system events for all the other scenes
+                    // TODO: Shouldn't we ignore these? After all, UI events are only enabled for the current scene
                     for (int i = 0; i < sortedControllersCount; i++)
                     {
-                        MessagingController msgController = sortedControllers[i];
-
-                        processedBus = true;
-
-                        if (ProcessBus(msgController.systemBus, ref prevTimeBudget, out yieldReturn))
+                        if (ProcessEventsFromBus(sortedControllers[i], sortedControllers[i].systemBus, ref prevTimeBudget, ref yieldReturn))
                         {
                             shouldRestart = true;
                             break;
                         }
                     }
-
-                    if (shouldRestart || Time.realtimeSinceStartup - start >= GLOBAL_MAX_MSG_BUDGET || !processedBus)
+                    if (shouldRestart)
                         break;
+
+                    // If we have not processed any messages on any bus, we're done here!
+                    yield return null;
                 }
-
-                yield return null;
             }
         }
 
