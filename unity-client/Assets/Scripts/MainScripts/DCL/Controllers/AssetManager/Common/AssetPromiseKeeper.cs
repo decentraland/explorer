@@ -153,6 +153,9 @@ namespace DCL
 
         IEnumerator ProcessBlockedPromisesQueue()
         {
+            // TODO(Brian): Bear in mind that `unscaledTime` reports the time at
+            // the begining of the frame, not the actual current time.
+            // Consider using `Time.realtimeSinceStartup`
             float start = Time.unscaledTime;
             while (true)
             {

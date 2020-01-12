@@ -209,10 +209,9 @@ namespace DCL
                 unreliableMessages.Remove(message.unreliableMessageKey);
         }
 
-        public bool ProcessQueue(float timeBudget, out IEnumerator yieldReturn)
+        public bool ProcessQueue(float timeBudget, LinkedList<Action> actionsForNextFrame)
         {
-            LinkedList<MessagingBus.QueuedSceneMessage> queue = pendingMessages;
-            yieldReturn = null;
+            LinkedList<QueuedSceneMessage> queue = pendingMessages;
 
             // Note (Zak): This check is to avoid calling DCLDCLTime.realtimeSinceStartup
             // unnecessarily because it's pretty slow in JS
@@ -267,8 +266,8 @@ namespace DCL
                         if (msgYieldInstruction != null)
                         {
                             processedMessagesCount++;
-
-                            yieldReturn = msgYieldInstruction;
+                            // TODO: Add something like
+                            // actionsForNextFrame.AddLast(() => msgYieldInstruction);
 
                             msgYieldInstruction = null;
 
