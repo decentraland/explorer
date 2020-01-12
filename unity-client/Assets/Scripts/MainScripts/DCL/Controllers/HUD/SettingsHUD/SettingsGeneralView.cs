@@ -66,7 +66,6 @@ namespace DCL.SettingsHUD
             soundToggle.onValueChanged.AddListener(isOn =>
             {
                 currentGeneralSetting.sfxVolume = isOn ? 1 : 0;
-                shouldSetAsCustom = true;
             });
 
             shadowToggle.onValueChanged.AddListener(isOn =>
@@ -95,7 +94,6 @@ namespace DCL.SettingsHUD
             {
                 currentGeneralSetting.mouseSensitivity = value;
                 mouseSensitivityValueLabel.text = value.ToString("0.0");
-                shouldSetAsCustom = true;
             });
 
             antiAliasingSlider.onValueChanged.AddListener(value =>
