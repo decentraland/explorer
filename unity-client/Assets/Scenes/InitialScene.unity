@@ -334,8 +334,8 @@ MonoBehaviour:
   customContentServerUrl: http://localhost:1338/
   baseUrlMode: 0
   baseUrlCustom: 
-  environment: 2
-  startInCoords: {x: 64, y: -64}
+  environment: 4
+  startInCoords: {x: -6, y: -20}
   forceLocalComms: 1
   allWearables: 0
   testWearables: 0

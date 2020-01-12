@@ -220,81 +220,86 @@ namespace DCL
 
         IEnumerator ProcessMessages()
         {
-            IEnumerator yieldReturn = null;
-            float prevTimeBudget = INIT_MSG_BUS_BUDGET_MAX;
-            float start = Time.unscaledTime;
 
-            // This loop makes sure that queues are emptied out in the correct order.
-            // Every time we're done with a queue, we call `continue` to start again processing messages in the right priority.
-            // `ProcessEventsFromBus`, the function called for each bus, will only process one event/task.
-            // That's a very important aspect of its interface. it would be great if we could enforce that somehow.
-            // This is important because there's a maximum budget of time alloted for this.
-            // It would be good to check if there's an alternative implementation of this,
-            // maybe we could break earlier so we don't waste time checking on empty queues?
-            while (Time.realtimeSinceStartup - start >= GLOBAL_MAX_MSG_BUDGET)
+            while (true)
             {
-                // TODO: If in the previous iteration we found a corutine to run, shouldn't we call it?
-                // What is the output `yieldReturn` parameter being used for?
-                // if (yieldReturn != null)
-                //     yield return yieldReturn;
+                IEnumerator yieldReturn = null;
+                float start = Time.unscaledTime;
+                float prevTimeBudget = INIT_MSG_BUS_BUDGET_MAX;
 
-                // High priority buses: UI events, global initialization events, and UI initialization events
-                if (ProcessEventsFromBus(uiSceneController, uiSceneController?.uiBus, ref prevTimeBudget, ref yieldReturn))
-                    continue;
-                if (ProcessEventsFromBus(globalController, globalController?.initBus, ref prevTimeBudget, ref yieldReturn))
-                    continue;
-                if (ProcessEventsFromBus(uiSceneController, uiSceneController?.initBus, ref prevTimeBudget, ref yieldReturn))
-                    continue;
-
-                // Next in priority: events for the current scene
-                if (ProcessEventsFromBus(currentSceneController, currentSceneController?.initBus, ref prevTimeBudget, ref yieldReturn))
-                    continue;
-                if (ProcessEventsFromBus(currentSceneController, currentSceneController?.uiBus, ref prevTimeBudget, ref yieldReturn))
-                    continue;
-                if (ProcessEventsFromBus(currentSceneController, currentSceneController?.systemBus, ref prevTimeBudget, ref yieldReturn))
-                    continue;
-
-                // Then: other initialization events from scenes
-                bool shouldRestart = false;
-                for (int i = 0; i < sortedControllersCount; i++)
+                // This loop makes sure that queues are emptied out in the correct order.
+                // Every time we're done with a queue, we call `continue` to start again processing messages in the right priority.
+                // `ProcessEventsFromBus`, the function called for each bus, will only process one event/task.
+                // That's a very important aspect of its interface. it would be great if we could enforce that somehow.
+                // This is important because there's a maximum budget of time alloted for this.
+                // It would be good to check if there's an alternative implementation of this,
+                // maybe we could break earlier so we don't waste time checking on empty queues?
+                while (Time.realtimeSinceStartup - start <= GLOBAL_MAX_MSG_BUDGET)
                 {
-                    if (ProcessEventsFromBus(sortedControllers[i], sortedControllers[i].initBus, ref prevTimeBudget, ref yieldReturn))
-                    {
-                        shouldRestart = true;
-                        break;
-                    }
-                }
-                if (shouldRestart)
-                    continue;
 
-                // Low priority: UI events for scenes
-                for (int i = 0; i < sortedControllersCount; i++)
-                {
-                    if (ProcessEventsFromBus(sortedControllers[i], sortedControllers[i].uiBus, ref prevTimeBudget, ref yieldReturn))
-                    {
-                        shouldRestart = true;
-                        break;
-                    }
-                }
-                if (shouldRestart)
-                    continue;
+                    // High priority buses: UI events, global initialization events, and UI initialization events
+                    if (ProcessEventsFromBus(uiSceneController, uiSceneController?.uiBus, ref prevTimeBudget, ref yieldReturn))
+                        continue;
+                    if (ProcessEventsFromBus(globalController, globalController?.initBus, ref prevTimeBudget, ref yieldReturn))
+                        continue;
+                    if (ProcessEventsFromBus(uiSceneController, uiSceneController?.initBus, ref prevTimeBudget, ref yieldReturn))
+                        continue;
 
-                // Lower priority: UI events for the UI scene
-                if (ProcessEventsFromBus(uiSceneController, uiSceneController?.systemBus, ref prevTimeBudget, ref yieldReturn))
-                    continue;
+                    // Next in priority: events for the current scene
+                    if (ProcessEventsFromBus(currentSceneController, currentSceneController?.initBus, ref prevTimeBudget, ref yieldReturn))
+                        continue;
+                    if (ProcessEventsFromBus(currentSceneController, currentSceneController?.uiBus, ref prevTimeBudget, ref yieldReturn))
+                        continue;
+                    if (ProcessEventsFromBus(currentSceneController, currentSceneController?.systemBus, ref prevTimeBudget, ref yieldReturn))
+                        continue;
 
-                // Lowest priority: system events for all the other scenes
-                // TODO: Shouldn't we ignore these? After all, UI events are only enabled for the current scene
-                for (int i = 0; i < sortedControllersCount; i++)
-                {
-                    if (ProcessEventsFromBus(sortedControllers[i], sortedControllers[i].systemBus, ref prevTimeBudget, ref yieldReturn))
+                    // Then: other initialization events from scenes
+                    bool shouldRestart = false;
+                    for (int i = 0; i < sortedControllersCount; i++)
                     {
-                        shouldRestart = true;
-                        break;
+                        if (ProcessEventsFromBus(sortedControllers[i], sortedControllers[i].initBus, ref prevTimeBudget, ref yieldReturn))
+                        {
+                            shouldRestart = true;
+                            break;
+                        }
                     }
+                    if (shouldRestart)
+                        continue;
+
+                    // Low priority: UI events for scenes
+                    for (int i = 0; i < sortedControllersCount; i++)
+                    {
+                        if (ProcessEventsFromBus(sortedControllers[i], sortedControllers[i].uiBus, ref prevTimeBudget, ref yieldReturn))
+                        {
+                            shouldRestart = true;
+                            break;
+                        }
+                    }
+                    if (shouldRestart)
+                        continue;
+
+                    // Lower priority: UI events for the UI scene
+                    if (ProcessEventsFromBus(uiSceneController, uiSceneController?.systemBus, ref prevTimeBudget, ref yieldReturn))
+                        continue;
+
+                    // Lowest priority: system events for all the other scenes
+                    // TODO: Shouldn't we ignore these? After all, UI events are only enabled for the current scene
+                    for (int i = 0; i < sortedControllersCount; i++)
+                    {
+                        if (ProcessEventsFromBus(sortedControllers[i], sortedControllers[i].systemBus, ref prevTimeBudget, ref yieldReturn))
+                        {
+                            shouldRestart = true;
+                            break;
+                        }
+                    }
+                    if (shouldRestart)
+                        continue;
+
+                    // TODO: If in the previous iteration we found a corutine to run, shouldn't we call it?
+                    // What is the output `yieldReturn` parameter being used for?
+                    // if (yieldReturn != null)
+                    //     yield return yieldReturn;
                 }
-                if (shouldRestart)
-                    continue;
 
                 yield return yieldReturn;
             }
@@ -305,9 +310,6 @@ namespace DCL
             if (bus.isRunning && bus.pendingMessagesCount > 0)
             {
                 float startTime = Time.realtimeSinceStartup;
-
-                yieldReturn = null;
-
                 float timeBudget = prevTimeBudget;
 
                 if (RenderingController.i.renderingEnabled)
