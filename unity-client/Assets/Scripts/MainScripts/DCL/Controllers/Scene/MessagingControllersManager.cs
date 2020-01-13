@@ -315,6 +315,8 @@ namespace DCL
                     }
                     if (shouldRestart)
                         continue;
+
+                    yield return null;
                 }
 
                 yield return null;
