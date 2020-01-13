@@ -33,6 +33,7 @@ avatarMessageObservable.add((pose: AvatarMessage) => {
 const fpsConfiguration = {
   visible: SHOW_FPS_COUNTER
 }
+const expressionExplainer = { robot: 'the robot dance!', wave: 'waving', fistpump: 'fist-pumping' }
 
 export interface IChatController {
   /**
@@ -265,17 +266,8 @@ export class ChatController extends ExposableAPI implements IChatController {
       'emote',
       'Trigger avatar animation named [expression] ("robot", "wave", or "fistpump")',
       message => {
-        if ('string' !== typeof message) {
-          return {
-            id: uuid(),
-            isCommand: false,
-            sender: 'Decentraland',
-            message: ''
-          }
-        }
         const expression = message
         const validExpressions = ['robot', 'wave', 'fistpump']
-        const expressionExplainer = { robot: 'the robot dance!', wave: 'waving', fistpump: 'fist-pumping' }
         if (!validExpressions.includes(expression)) {
           return {
             id: uuid(),
