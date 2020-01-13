@@ -55,12 +55,8 @@ namespace Tests
 
         public IEnumerator InitScene()
         {
-            if (!sceneInitialized)
-            {
-                yield return InitUnityScene("InitialScene");
-                GameObject.DestroyImmediate(DCL.WSSController.i.gameObject);
-                sceneInitialized = true;
-            }
+            yield return InitUnityScene("InitialScene");
+            GameObject.DestroyImmediate(DCL.WSSController.i.gameObject);
 
             SetUp_Camera();
             yield return SetUp_SceneController();
