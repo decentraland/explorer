@@ -15,7 +15,7 @@ namespace DCL.Components
         {
             public string button = WebInterface.ACTION_BUTTON.ANY.ToString();
             public string hoverText = "Interact";
-            public float distance = 4f;
+            public float distance = 10f;
             public bool showFeeback = true;
         }
 
@@ -42,6 +42,21 @@ namespace DCL.Components
         public string GetMeshName(Collider collider)
         {
             return pointerEventColliders.GetMeshName(collider);
+        }
+
+        public WebInterface.ACTION_BUTTON GetActionButton()
+        {
+            switch (model.button)
+            {
+                case "PRIMARY":
+                    return WebInterface.ACTION_BUTTON.PRIMARY;
+                case "SECONDARY":
+                    return WebInterface.ACTION_BUTTON.SECONDARY;
+                case "POINTER":
+                    return WebInterface.ACTION_BUTTON.POINTER;
+                default:
+                    return WebInterface.ACTION_BUTTON.ANY;
+            }
         }
 
         public void Initialize()

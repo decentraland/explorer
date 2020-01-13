@@ -823,13 +823,11 @@ export function updateBuilderScene(sceneData: ILand) {
   }
 }
 
-teleportObservable.add((position: { x: number; y: number }) => {
+teleportObservable.add((position: { x: number; y: number; text?: string }) => {
   // before setting the new position, show loading screen to avoid showing an empty world
   setLoadingScreenVisible(true)
-  if (document.getElementById('overlay')!.style.display === 'none') {
-    const globalStore = global['globalStore']
-    globalStore.dispatch(teleportTriggered())
-  }
+  const globalStore = global['globalStore']
+  globalStore.dispatch(teleportTriggered(position.text || `Teleporting to ${position.x}, ${position.y}`))
   delightedSurvey()
 })
 

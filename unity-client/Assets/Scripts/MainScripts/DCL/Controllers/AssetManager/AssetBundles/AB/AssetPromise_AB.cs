@@ -118,7 +118,11 @@ namespace DCL
 
             using (UnityWebRequest assetBundleRequest = UnityWebRequestAssetBundle.GetAssetBundle(finalUrl))
             {
-                yield return assetBundleRequest.SendWebRequest();
+                assetBundleRequest.SendWebRequest();
+                while (!assetBundleRequest.isDone)
+                {
+                    yield return null;
+                }
 
                 if (!assetBundleRequest.WebRequestSucceded())
                 {
@@ -132,7 +136,7 @@ namespace DCL
 
                 AssetBundle assetBundle = DownloadHandlerAssetBundle.GetContent(assetBundleRequest);
 
-                if (assetBundle == null)
+                if (assetBundle == null || asset == null)
                 {
                     assetBundleRequest.Abort();
                     OnFail?.Invoke();
