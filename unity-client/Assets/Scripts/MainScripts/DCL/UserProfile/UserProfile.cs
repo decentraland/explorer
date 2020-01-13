@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using UnityEngine;
-using UnityEngine.Networking;
 
 [assembly: InternalsVisibleTo("UserProfileTests")]
 
@@ -18,28 +16,40 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
     public AvatarModel avatar => model.avatar;
     internal Dictionary<string, int> inventory = new Dictionary<string, int>();
 
-    private Texture2D faceSnapshotValue = null;
-    public Texture2D faceSnapshot => faceSnapshotValue;
-    private Texture2D bodySnapshotValue;
-    public Texture2D bodySnapshot => bodySnapshotValue;
+    public Sprite faceSnapshot { get; private set; }
+    public Sprite bodySnapshot { get; private set; }
 
     internal UserProfileModel model = new UserProfileModel() //Empty initialization to avoid nullchecks
     {
         avatar = new AvatarModel()
     };
 
-    internal Coroutine downloadingFaceCoroutine = null;
-    internal Coroutine downloadingBodyCoroutine = null;
-
     public void UpdateData(UserProfileModel newModel, bool downloadAssets = true)
     {
-        UpdateProperties(newModel);
+        if (model?.snapshots?.face != null)
+            ThumbnailsManager.CancelRequest(model.snapshots.face, OnFaceSnapshotReady);
 
-        if (downloadAssets)
+        if (model?.snapshots?.body != null)
+            ThumbnailsManager.CancelRequest(model.snapshots.body, OnBodySnapshotReady);
+
+        model.name = newModel?.name;
+        model.email = newModel?.email;
+        model.avatar.CopyFrom(newModel?.avatar);
+        model.snapshots = newModel?.snapshots;
+        model.inventory = newModel?.inventory;
+        inventory.Clear();
+        if (model.inventory != null)
         {
-            DownloadFaceIfNeeded();
-            DownloadBodyIfNeeded();
+            inventory = model.inventory.GroupBy(x => x).ToDictionary(x => x.Key, x => x.Count());
         }
+        faceSnapshot = null;
+        bodySnapshot = null;
+
+        if (downloadAssets && model?.snapshots?.face != null)
+            ThumbnailsManager.RequestThumbnail(model.snapshots.face, OnFaceSnapshotReady);
+
+        if (downloadAssets && model?.snapshots?.body != null)
+            ThumbnailsManager.RequestThumbnail(model.snapshots.body, OnBodySnapshotReady);
 
         OnUpdate?.Invoke(this);
     }
@@ -52,97 +62,29 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
         return inventory[itemId];
     }
 
-    internal void UpdateProperties(UserProfileModel newModel)
+    private void OnFaceSnapshotReady(Sprite sprite)
     {
-        var currentFace = model.snapshots?.face;
-        var currentBody = model.snapshots?.body;
-
-        model.name = newModel?.name;
-        model.email = newModel?.email;
-        model.avatar.CopyFrom(newModel?.avatar);
-        model.snapshots = newModel?.snapshots;
-        model.inventory = newModel?.inventory;
-        inventory.Clear();
-        if (model.inventory != null)
-        {
-            inventory = model.inventory.GroupBy(x => x).ToDictionary(x => x.Key, x => x.Count());
-        }
-
-        if (model.snapshots == null || model.snapshots.face != currentFace)
-        {
-            faceSnapshotValue = null;
-        }
-
-        if (model.snapshots == null || model.snapshots.body != currentBody)
-        {
-            faceSnapshotValue = null;
-        }
-    }
-
-    internal void DownloadFaceIfNeeded()
-    {
-        if (faceSnapshot != null)
-        {
-            return;
-        }
-
-        if (downloadingFaceCoroutine != null)
-        {
-            CoroutineStarter.Stop(downloadingFaceCoroutine);
-        }
-
-        faceSnapshotValue = null;
-
-        if (model == null || string.IsNullOrEmpty(model.snapshots?.face))
-            return;
-
-        downloadingFaceCoroutine = CoroutineStarter.Start(DownloadSnapshotCoroutine(model.snapshots.face, (x) => faceSnapshotValue = x));
-    }
-
-    internal void DownloadBodyIfNeeded()
-    {
-        if (bodySnapshot != null)
-        {
-            return;
-        }
-
-        if (downloadingBodyCoroutine != null)
-        {
-            CoroutineStarter.Stop(downloadingBodyCoroutine);
-        }
-
-        bodySnapshotValue = null;
-
-        if (model == null || string.IsNullOrEmpty(model.snapshots?.body))
-            return;
-
-        downloadingBodyCoroutine = CoroutineStarter.Start(DownloadSnapshotCoroutine(model.snapshots.body, (x) => bodySnapshotValue = x));
-    }
-
-    private IEnumerator DownloadSnapshotCoroutine(string url, Action<Texture2D> successCallback)
-    {
-        UnityWebRequest www = UnityWebRequestTexture.GetTexture(url);
-
-        yield return www.SendWebRequest();
-
-        if (!www.isNetworkError && !www.isHttpError)
-        {
-            var texture = ((DownloadHandlerTexture)www.downloadHandler).texture;
-            successCallback.Invoke(texture);
-        }
-        else
-        {
-            Debug.LogError(www.error);
-        }
-
+        faceSnapshot = sprite;
         OnUpdate?.Invoke(this);
     }
 
-    public void OverrideAvatar(AvatarModel newModel, Texture2D faceSnapshot, Texture2D bodySnapshot)
+    private void OnBodySnapshotReady(Sprite sprite)
     {
+        bodySnapshot = sprite;
+        OnUpdate?.Invoke(this);
+    }
+
+    public void OverrideAvatar(AvatarModel newModel, Sprite faceSnapshot, Sprite bodySnapshot)
+    {
+        if (model?.snapshots?.face != null)
+            ThumbnailsManager.CancelRequest(model.snapshots.face, OnFaceSnapshotReady);
+
+        if (model?.snapshots?.body != null)
+            ThumbnailsManager.CancelRequest(model.snapshots.body, OnBodySnapshotReady);
+
         model.avatar.CopyFrom(newModel);
-        faceSnapshotValue = faceSnapshot;
-        bodySnapshotValue = bodySnapshot;
+        this.faceSnapshot = faceSnapshot;
+        this.bodySnapshot = bodySnapshot;
         OnUpdate?.Invoke(this);
     }
 
