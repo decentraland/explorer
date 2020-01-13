@@ -87,13 +87,13 @@ namespace DCL
         public void ApplyQualitySettings(SettingsHUD.QualitySettings settings)
         {
             currentQualitySettings = settings;
-            if (OnQualitySettingsChanged != null) OnQualitySettingsChanged(settings);
+            OnQualitySettingsChanged?.Invoke(settings);
         }
 
         public void ApplyGeneralSettings(SettingsHUD.GeneralSettings settings)
         {
             currentGeneralSettings = settings;
-            if (OnGeneralSettingsChanged != null) OnGeneralSettingsChanged(settings);
+            OnGeneralSettingsChanged?.Invoke(settings);
         }
 
         public void SaveSettings()
@@ -112,5 +112,11 @@ namespace DCL.SettingsHUD
     {
         public float sfxVolume;
         public float mouseSensitivity;
+
+        public bool Equals(GeneralSettings settings)
+        {
+            return sfxVolume == settings.sfxVolume
+                && mouseSensitivity == settings.mouseSensitivity;
+        }
     }
 }

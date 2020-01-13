@@ -496,12 +496,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d1d0821bf5c3e3f47ba67e483803236d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!20 &2010826585 stripped
-Camera:
-  m_CorrespondingSourceObject: {fileID: 2952493522718747595, guid: b0965b55b892d438da492708ea09799c,
-    type: 3}
-  m_PrefabInstance: {fileID: 326638024064006570}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &2017246370
 GameObject:
   m_ObjectHideFlags: 0
@@ -534,7 +528,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   environmentLight: {fileID: 943100645024490816}
   postProcessVolume: {fileID: 312495478}
-  camera: {fileID: 2010826585}
+  thirdPersonCamera: {fileID: 941980743}
+  firstPersonCamera: {fileID: 134299876}
 --- !u!4 &2017246372
 Transform:
   m_ObjectHideFlags: 0

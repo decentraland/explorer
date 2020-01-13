@@ -2,7 +2,7 @@
 {
     public class SettingsHUDController : IHUD
     {
-        private SettingsHUDView view;
+        public SettingsHUDView view { private set; get; }
 
         public SettingsHUDController()
         {

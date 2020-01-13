@@ -7,25 +7,25 @@ namespace DCL.SettingsHUD
 {
     public class SettingsGeneralView : MonoBehaviour
     {
-        const string TEXT_QUALITY_CUSTOM = "CUSTOM";
-        const string TEXT_OFF = "OFF";
+        public const string TEXT_QUALITY_CUSTOM = "CUSTOM";
+        public const string TEXT_OFF = "OFF";
 
-        [SerializeField] SpinBoxPresetted qualityPresetSpinBox = null;
-        [SerializeField] SpinBoxPresetted textureResSpinBox = null;
-        [SerializeField] SpinBoxPresetted shadowResSpinBox = null;
-        [SerializeField] Toggle soundToggle = null;
-        [SerializeField] Toggle colorGradingToggle = null;
-        [SerializeField] Toggle shadowToggle = null;
-        [SerializeField] Toggle softShadowToggle = null;
-        [SerializeField] Toggle bloomToggle = null;
-        [SerializeField] Slider mouseSensitivitySlider = null;
-        [SerializeField] Slider antiAliasingSlider = null;
-        [SerializeField] Slider renderingScaleSlider = null;
-        [SerializeField] Slider drawDistanceSlider = null;
-        [SerializeField] TextMeshProUGUI mouseSensitivityValueLabel = null;
-        [SerializeField] TextMeshProUGUI antiAliasingValueLabel = null;
-        [SerializeField] TextMeshProUGUI renderingScaleValueLabel = null;
-        [SerializeField] TextMeshProUGUI drawDistanceValueLabel = null;
+        public SpinBoxPresetted qualityPresetSpinBox = null;
+        public SpinBoxPresetted textureResSpinBox = null;
+        public SpinBoxPresetted shadowResSpinBox = null;
+        public Toggle soundToggle = null;
+        public Toggle colorGradingToggle = null;
+        public Toggle shadowToggle = null;
+        public Toggle softShadowToggle = null;
+        public Toggle bloomToggle = null;
+        public Slider mouseSensitivitySlider = null;
+        public Slider antiAliasingSlider = null;
+        public Slider renderingScaleSlider = null;
+        public Slider drawDistanceSlider = null;
+        public TextMeshProUGUI mouseSensitivityValueLabel = null;
+        public TextMeshProUGUI antiAliasingValueLabel = null;
+        public TextMeshProUGUI renderingScaleValueLabel = null;
+        public TextMeshProUGUI drawDistanceValueLabel = null;
 
         private DCL.SettingsHUD.QualitySettings currentQualitySetting;
         private DCL.SettingsHUD.GeneralSettings currentGeneralSetting;
@@ -98,15 +98,15 @@ namespace DCL.SettingsHUD
 
             antiAliasingSlider.onValueChanged.AddListener(value =>
             {
-                int antialisaingValue = 1 << (int)value;
-                currentQualitySetting.antiAliasing = (UnityEngine.Rendering.LWRP.MsaaQuality)antialisaingValue;
+                int antiAliasingValue = 1 << (int)value;
+                currentQualitySetting.antiAliasing = (UnityEngine.Rendering.LWRP.MsaaQuality)antiAliasingValue;
                 if (value == 0)
                 {
                     antiAliasingValueLabel.text = TEXT_OFF;
                 }
                 else
                 {
-                    antiAliasingValueLabel.text = antialisaingValue.ToString("0x");
+                    antiAliasingValueLabel.text = antiAliasingValue.ToString("0x");
                 }
                 shouldSetAsCustom = true;
             });

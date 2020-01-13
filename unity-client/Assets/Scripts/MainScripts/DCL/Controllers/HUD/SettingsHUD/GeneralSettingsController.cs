@@ -5,9 +5,9 @@ namespace DCL.SettingsHUD
 {
     public class GeneralSettingsController : MonoBehaviour
     {
-        [SerializeField] CinemachineFreeLook thirdPersonCamera;
-        [SerializeField] CinemachineVirtualCamera firstPersonCamera;
-        [SerializeField] AudioListener audioListener;
+        public CinemachineFreeLook thirdPersonCamera;
+        public CinemachineVirtualCamera firstPersonCamera;
+        public AudioListener audioListener;
 
         private CinemachinePOV povCamera;
 

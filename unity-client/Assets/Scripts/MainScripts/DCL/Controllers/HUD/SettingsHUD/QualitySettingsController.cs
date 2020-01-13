@@ -3,6 +3,7 @@ using UnityEngine.Rendering;
 using UnityEngine.Rendering.LWRP;
 using UnityEngine.Rendering.PostProcessing;
 using System.Reflection;
+using Cinemachine;
 
 using UnitySettings = UnityEngine.QualitySettings;
 
@@ -16,9 +17,10 @@ namespace DCL.SettingsHUD
         private FieldInfo lwrpaSoftShadowField = null;
         private FieldInfo lwrpaShadowResolutionField = null;
 
-        [SerializeField] Light environmentLight = null;
-        [SerializeField] PostProcessVolume postProcessVolume = null;
-        [SerializeField] new Camera camera = null;
+        public Light environmentLight = null;
+        public PostProcessVolume postProcessVolume = null;
+        public CinemachineFreeLook thirdPersonCamera = null;
+        public CinemachineVirtualCamera firstPersonCamera = null;
 
         void Awake()
         {
@@ -83,9 +85,14 @@ namespace DCL.SettingsHUD
                 }
             }
 
-            if (camera)
+            if (thirdPersonCamera)
             {
-                camera.farClipPlane = qualitySettings.cameraDrawDistance;
+                thirdPersonCamera.m_Lens.FarClipPlane = qualitySettings.cameraDrawDistance;
+            }
+
+            if (firstPersonCamera)
+            {
+                firstPersonCamera.m_Lens.FarClipPlane = qualitySettings.cameraDrawDistance;
             }
         }
     }

@@ -35,6 +35,12 @@ public class SpinBoxPresetted : MonoBehaviour
         }
     }
 
+    public string label
+    {
+        get { return textLabel.text; }
+        set { OverrideCurrentLabel(value); }
+    }
+
     void Awake()
     {
         increaseButton.onClick.AddListener(IncreaseValue);
