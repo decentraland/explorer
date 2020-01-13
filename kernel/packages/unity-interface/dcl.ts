@@ -10,7 +10,7 @@ import { EventDispatcher } from 'decentraland-rpc/lib/common/core/EventDispatche
 import { IFuture } from 'fp-future'
 import { Empty } from 'google-protobuf/google/protobuf/empty_pb'
 import { avatarMessageObservable } from 'shared/comms/peers'
-import { AvatarMessageType } from 'shared/comms/types'
+import { AvatarMessageType } from 'shared/comms/interface/types'
 import { gridToWorld } from '../atomicHelpers/parcelScenePositions'
 import { DEBUG, EDITOR, ENGINE_DEBUG_PANEL, playerConfigurations, SCENE_DEBUG_PANEL, SHOW_FPS_COUNTER } from '../config'
 import { Quaternion, ReadOnlyQuaternion, ReadOnlyVector3, Vector3 } from '../decentraland-ecs/src/decentraland/math'
