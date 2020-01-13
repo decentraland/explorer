@@ -147,10 +147,19 @@ export class ChatController extends ExposableAPI implements IChatController {
       let response = ''
 
       if (!isValid) {
-        if (message.trim().toLowerCase() === 'random') {
+        if (message.trim().toLowerCase() === 'magic') {
           const target = POIs[Math.floor(Math.random() * POIs.length)]
           const { x, y } = target
           response = `Teleporting to "${target.name}" (${x}, ${y})...`
+          teleportObservable.notifyObservers({
+            x: parseInt('' + x, 10),
+            y: parseInt('' + y, 10),
+            text: response
+          } as any)
+        } else if (message.trim().toLowerCase() === 'random') {
+          const x = Math.floor(Math.random() * 301) - 150
+          const y = Math.floor(Math.random() * 301) - 150
+          response = `Teleporting to random location (${x}, ${y})...`
           teleportObservable.notifyObservers({
             x: parseInt('' + x, 10),
             y: parseInt('' + y, 10),
