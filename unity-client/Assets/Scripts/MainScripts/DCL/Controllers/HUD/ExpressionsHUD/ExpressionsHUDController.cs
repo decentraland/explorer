@@ -4,11 +4,16 @@ using DCL.Interface;
 public class ExpressionsHUDController : IHUD, IDisposable
 {
     internal ExpressionsHUDView view;
-
+    private UserProfile ownUserProfile => UserProfile.GetOwnUserProfile();
+    private Action<UserProfile> userProfileUpdateDelegate;
+    
     public ExpressionsHUDController()
     {
         view = ExpressionsHUDView.Create();
         view.Initialize(ExpressionCalled);
+        userProfileUpdateDelegate = profile => view.UpdateAvatarTexture(profile.faceSnapshot); 
+        userProfileUpdateDelegate.Invoke(ownUserProfile);
+        ownUserProfile.OnUpdate += userProfileUpdateDelegate;
     }
 
     public void SetVisibility(bool visible)
@@ -18,6 +23,7 @@ public class ExpressionsHUDController : IHUD, IDisposable
 
     public void Dispose()
     {
+        ownUserProfile.OnUpdate -= userProfileUpdateDelegate;
         view.CleanUp();
     }
 
