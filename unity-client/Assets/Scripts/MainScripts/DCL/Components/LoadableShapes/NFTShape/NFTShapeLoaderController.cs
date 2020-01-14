@@ -59,7 +59,7 @@ public class NFTShapeLoaderController : MonoBehaviour
 
     Texture nftImageTexture;
 
-    bool VERBOSE = false;
+    bool VERBOSE = true;
 
     void Awake()
     {
@@ -174,8 +174,6 @@ public class NFTShapeLoaderController : MonoBehaviour
 
         for (int i = 0; i < currentAssetData.files.Length; i++)
         {
-            if (!currentAssetData.files[i].url.EndsWith(".png")) continue;
-
             if (currentAssetData.files[i].role == "thumbnail")
                 thumbnailImageURL = currentAssetData.files[i].url;
             else if (currentAssetData.files[i].role == "preview")
