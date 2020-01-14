@@ -221,9 +221,9 @@ namespace DCL
             if (timeBudget == 0 || !isRunning || queue.Count == 0)
                 return false;
 
-            float startTime = DCLTime.realtimeSinceStartup;
+            float startTime = Time.realtimeSinceStartup;
 
-            while (timeBudget != 0 && isRunning && queue.Count > 0 && DCLTime.realtimeSinceStartup - startTime < timeBudget)
+            while (timeBudget != 0 && isRunning && queue.Count > 0 && Time.realtimeSinceStartup - startTime < timeBudget)
             {
                 MessagingBus.QueuedSceneMessage m = queue.First.Value;
 
