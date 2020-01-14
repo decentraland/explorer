@@ -210,6 +210,10 @@ namespace DCL
             }
         }
 
+        /**
+         * Process all messages from a bus.
+         * @return true if there are still messages to run
+         */
         private bool ProcessEventsFromBus(MessagingController controller, MessagingBus bus, ref float prevTimeBudget)
         {
             if (controller != null && bus != null)
@@ -219,13 +223,23 @@ namespace DCL
             return false;
         }
 
-        private LinkedList<Action> pendingActions = new LinkedList<Action>();
+        /**
+         * These pending actions should be executed on the next frame.
+         *
+         * Currently, there are other Coroutines that are triggering them, so this is not being used.
+         *
+         * TODO: Please refactor me!
+         */
+        private readonly LinkedList<Action> pendingActions = new LinkedList<Action>();
 
         IEnumerator ProcessMessages()
         {
             float start;
             float prevTimeBudget;
 
+            /**
+             * This while(true) is because the Corutine never ends.
+             */
             while (true)
             {
                 start = Time.realtimeSinceStartup;
@@ -233,7 +247,9 @@ namespace DCL
 
                 // TODO: Process `pendingActions`
 
-                // Process through each queue. At the end of the loop, we break if no bus had messages left to process.
+                /**
+                 * This is the main message loop. It processes all the messages in each queue.
+                 */
                 while (Time.realtimeSinceStartup - start <= GLOBAL_MAX_MSG_BUDGET)
                 {
                     bool shouldRestart = false;
@@ -283,15 +299,24 @@ namespace DCL
                     if (shouldRestart)
                         continue;
 
+                    // Break if no bus returned true
                     yield return null;
                 }
                 yield return null;
             }
         }
 
+        /**
+         * Process all events from a bus.
+         * @return true if there are still pending messages to process.
+         */
         bool ProcessBus(MessagingBus bus, ref float prevTimeBudget)
         {
-            while (bus.isRunning && bus.hasPendingMessages && prevTimeBudget >= 0)
+            if (!bus.isRunning)
+            {
+                return false;
+            }
+            while (bus.hasPendingMessages && prevTimeBudget >= 0)
             {
                 float startTime = Time.realtimeSinceStartup;
                 float timeBudget = prevTimeBudget;
@@ -313,7 +338,7 @@ namespace DCL
 
                 prevTimeBudget -= Time.realtimeSinceStartup - startTime;
             }
-            return false;
+            return bus.hasPendingMessages;
         }
     }
 }
