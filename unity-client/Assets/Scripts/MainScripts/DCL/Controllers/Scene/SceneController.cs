@@ -167,6 +167,11 @@ namespace DCL
 
         private void Update()
         {
+            if (Input.GetKey(KeyCode.K))
+            {
+                MessagingControllersManager.i.Sleep();
+            }
+
             InputController_Legacy.i.Update();
 
             PrioritizeMessageControllerList();

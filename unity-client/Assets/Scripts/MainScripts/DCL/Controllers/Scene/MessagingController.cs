@@ -75,8 +75,11 @@ namespace DCL
             if (!enabled)
                 return;
 
-            if (uiBus.pendingMessagesCount == 0 && initBus.pendingMessagesCount == 0 && systemBus.pendingMessagesCount == 0)
-                enabled = false;
+            if (uiBus.pendingMessagesCount != 0) return;
+            if (initBus.pendingMessagesCount != 0) return;
+            if (systemBus.pendingMessagesCount != 0) return;
+
+            enabled = false;
         }
 
         private MessagingBus AddMessageBus(string id, float budgetMin, float budgetMax)

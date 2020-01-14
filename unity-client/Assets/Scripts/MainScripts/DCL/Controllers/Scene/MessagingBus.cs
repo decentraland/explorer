@@ -87,8 +87,8 @@ namespace DCL
         public IMessageHandler handler;
 
         public LinkedList<QueuedSceneMessage> pendingMessages = new LinkedList<QueuedSceneMessage>();
-        public bool hasPendingMessages => pendingMessages != null && pendingMessages.Count > 0;
-        public int pendingMessagesCount => pendingMessages != null ? pendingMessages.Count : 0;
+        public bool hasPendingMessages => pendingMessagesCount > 0;
+        public int pendingMessagesCount;
         public long processedMessagesCount { get; set; }
 
         public static bool renderingIsDisabled = false;
@@ -108,10 +108,7 @@ namespace DCL
         System.Text.StringBuilder stringBuilder = new System.Text.StringBuilder();
         public int unreliableMessagesReplaced = 0;
 
-        public bool isRunning
-        {
-            get; private set;
-        }
+        public bool isRunning;
 
         public float timeBudget
         {
@@ -128,6 +125,7 @@ namespace DCL
             this.budgetMin = budgetMin;
             this.budgetMax = budgetMax;
             this.owner = owner;
+            this.pendingMessagesCount = 0;
         }
 
         public void Start()
@@ -141,6 +139,8 @@ namespace DCL
 
             if (msgYieldInstruction != null)
                 msgYieldInstruction.Cleanup();
+
+            pendingMessagesCount = 0;
         }
         public void Dispose()
         {
@@ -155,6 +155,7 @@ namespace DCL
             {
                 message.isUnreliable = false;
                 pendingMessages.AddLast(message);
+                pendingMessagesCount++;
             }
             else
             {
@@ -179,6 +180,7 @@ namespace DCL
                 if (enqueued)
                 {
                     node = pendingMessages.AddLast(message);
+                    pendingMessagesCount++;
                     unreliableMessages[message.unreliableMessageKey] = node;
                 }
             }
@@ -226,7 +228,10 @@ namespace DCL
                 MessagingBus.QueuedSceneMessage m = queue.First.Value;
 
                 if (queue.First != null)
+                {
                     queue.RemoveFirst();
+                    pendingMessagesCount--;
+                }
 
                 if (m.isUnreliable)
                     RemoveUnreliableMessage(m);
