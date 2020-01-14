@@ -1,23 +1,23 @@
-import { engine, Entity, executeTask, Observable, Transform } from 'decentraland-ecs/src'
+import { engine, Entity, executeTask, Observable, Transform, EventManager } from 'decentraland-ecs/src'
 import { AvatarShape } from 'decentraland-ecs/src/decentraland/AvatarShape'
 import {
   AvatarMessage,
   AvatarMessageType,
   Pose,
   ReceiveUserDataMessage,
+  ReceiveUserExpressionMessage,
   ReceiveUserPoseMessage,
   ReceiveUserVisibleMessage,
-  ReceiveUserExpressionMessage,
   UserInformation,
   UserMessage,
   UserRemovedMessage,
   UUID
 } from 'shared/comms/interface/types'
 import { execute } from './rpc'
-import { ProfileForRenderer } from 'decentraland-ecs/src/decentraland/Types'
 
 export const avatarMessageObservable = new Observable<AvatarMessage>()
 
+declare var dcl: { updateEntityComponent: any }
 const avatarMap = new Map<string, AvatarEntity>()
 
 export class AvatarEntity extends Entity {
@@ -33,12 +33,15 @@ export class AvatarEntity extends Entity {
     this.avatarShape = avatarShape
 
     this.addComponentOrReplace(this.avatarShape)
+    this.eventManager = new EventManager()
+    this.eventManager.fireEvent
 
     // we need this component to filter the interpolator system
     this.transform = this.getComponentOrCreate(Transform)
   }
 
-  loadProfile(profile: ProfileForRenderer) {
+  loadProfile(user: Partial<UserInformation>) {
+    const { profile } = user
     if (profile) {
       const { avatar } = profile
 
@@ -51,8 +54,10 @@ export class AvatarEntity extends Entity {
       shape.skinColor = avatar.skinColor
       shape.hairColor = avatar.hairColor
       shape.eyeColor = avatar.eyeColor
+      shape.expressionTriggerId = user.expression ? user.expression.expressionType || 'idle' : 'idle'
+      shape.expressionTriggerTimestamp = user.expression ? user.expression.expressionTimestamp || 0 : 0
 
-      this.addComponentOrReplace(shape)
+      this.addComponentOrReplace((this.avatarShape = shape))
     }
     this.setVisible(true)
   }
@@ -73,13 +78,15 @@ export class AvatarEntity extends Entity {
     }
 
     if (userData.profile) {
-      this.loadProfile(userData.profile)
+      this.loadProfile(userData)
     }
   }
 
   setExpression(id: string, timestamp: number): void {
-    this.avatarShape.expressionTriggerId = id
-    this.avatarShape.expressionTriggerTimestamp = timestamp
+    const shape = this.avatarShape
+    shape.expressionTriggerId = id
+    shape.expressionTriggerTimestamp = timestamp
+    dcl.updateEntityComponent(this.uuid, 'engine.avatarShape', 56, JSON.stringify(this.avatarShape.data))
   }
 
   setPose(pose: Pose): void {

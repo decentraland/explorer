@@ -235,7 +235,7 @@ export function processChatMessage(context: Context, fromAlias: string, message:
         const [id, timestamp] = text.split(' ')
         avatarMessageObservable.notifyObservers({
           type: AvatarMessageType.USER_EXPRESSION,
-          uuid: uuid(),
+          uuid: fromAlias,
           expressionId: id.slice(1),
           timestamp: parseInt(timestamp, 10)
         })
