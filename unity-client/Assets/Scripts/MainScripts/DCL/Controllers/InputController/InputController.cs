@@ -1,6 +1,8 @@
 using System;
 using System.Linq;
+using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public enum DCLAction_Trigger
 {
@@ -55,19 +57,19 @@ public class InputController : MonoBehaviour
                 case DCLAction_Trigger.CameraChange:
                     //Disable until the fine-tuning is ready
                     if (ENABLE_THIRD_PERSON_CAMERA)
-                        InputProcessor.FromKey(action, KeyCode.V, modifiers: InputProcessor.Modifier.NeedsPointerLocked);
+                        InputProcessor.FromKey(action, KeyCode.V, modifiers: InputProcessor.Modifier.NeedsPointerLocked | InputProcessor.Modifier.FocusNotInInput);
                     break;
                 case DCLAction_Trigger.OpenExpressions:
-                    InputProcessor.FromKey(action, KeyCode.B);
+                    InputProcessor.FromKey(action, KeyCode.B, modifiers: InputProcessor.Modifier.FocusNotInInput);
                     break;
                 case DCLAction_Trigger.Expression_Wave:
-                    InputProcessor.FromKey(action, KeyCode.V , new [] { KeyCode.LeftControl });
+                    InputProcessor.FromKey(action, KeyCode.Alpha1, modifiers: InputProcessor.Modifier.FocusNotInInput);
                     break;
                 case DCLAction_Trigger.Expression_FistPump:
-                    InputProcessor.FromKey(action, KeyCode.F, new [] { KeyCode.LeftControl });
+                    InputProcessor.FromKey(action, KeyCode.Alpha2, modifiers: InputProcessor.Modifier.FocusNotInInput);
                     break;
                 case DCLAction_Trigger.Expression_Robot:
-                    InputProcessor.FromKey(action, KeyCode.R, new [] { KeyCode.LeftControl });
+                    InputProcessor.FromKey(action, KeyCode.Alpha3, modifiers: InputProcessor.Modifier.FocusNotInInput);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -135,6 +137,7 @@ public static class InputProcessor
         //Set the values as bit masks
         None = 0b0000000,
         NeedsPointerLocked = 0b0000001,
+        FocusNotInInput = 0b0000010,
     }
 
     public static bool PassModifiers(Modifier modifiers)
@@ -142,6 +145,9 @@ public static class InputProcessor
         bool result = true;
 
         if (IsModifierSet(modifiers, Modifier.NeedsPointerLocked) && Cursor.lockState != CursorLockMode.Locked)
+            return false;
+
+        if (IsModifierSet(modifiers, Modifier.FocusNotInInput) && FocusIsInInputField())
             return false;
 
         return true;
@@ -208,5 +214,14 @@ public static class InputProcessor
         int flagValue = (int)value;
 
         return (flagsValue & flagValue) != 0;
+    }
+
+    public static bool FocusIsInInputField()
+    {
+        if (EventSystem.current.currentSelectedGameObject != null && (EventSystem.current.currentSelectedGameObject.GetComponent<TMP_InputField>() != null || EventSystem.current.currentSelectedGameObject.GetComponent<UnityEngine.UI.InputField>() != null))
+        {
+            return true;
+        }
+        return false;
     }
 }
