@@ -59,7 +59,7 @@ public class NFTShapeLoaderController : MonoBehaviour
 
     Texture nftImageTexture;
 
-    bool VERBOSE = true;
+    bool VERBOSE = false;
 
     void Awake()
     {
