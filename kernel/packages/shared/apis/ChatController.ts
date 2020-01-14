@@ -8,6 +8,7 @@ import { EngineAPI } from 'shared/apis/EngineAPI'
 import { ExposableAPI } from 'shared/apis/ExposableAPI'
 import { sendPublicChatMessage } from 'shared/comms'
 import { ChatEvent, chatObservable } from 'shared/comms/chat'
+import { AvatarMessage, AvatarMessageType } from 'shared/comms/interface/types'
 import {
   addToMutedUsers,
   avatarMessageObservable,
@@ -16,10 +17,10 @@ import {
   peerMap,
   removeFromMutedUsers
 } from 'shared/comms/peers'
-import { AvatarMessage, AvatarMessageType } from 'shared/comms/interface/types'
 import { POIs } from 'shared/comms/POIs'
 import { IChatCommand, MessageEntry } from 'shared/types'
 import { teleportObservable } from 'shared/world/positionThings'
+import { expressionExplainer, isValidExpression, validExpressions } from './expressionExplainer'
 
 const userPose: { [key: string]: Vector3Component } = {}
 avatarMessageObservable.add((pose: AvatarMessage) => {
@@ -33,8 +34,6 @@ avatarMessageObservable.add((pose: AvatarMessage) => {
 const fpsConfiguration = {
   visible: SHOW_FPS_COUNTER
 }
-const expressionExplainer = { robot: 'the robot dance!', wave: 'waving', fistpump: 'fist-pumping' }
-
 export interface IChatController {
   /**
    * Send the chat message
@@ -267,8 +266,7 @@ export class ChatController extends ExposableAPI implements IChatController {
       'Trigger avatar animation named [expression] ("robot", "wave", or "fistpump")',
       message => {
         const expression = message
-        const validExpressions = ['robot', 'wave', 'fistpump']
-        if (!validExpressions.includes(expression)) {
+        if (!isValidExpression(expression)) {
           return {
             id: uuid(),
             isCommand: true,
@@ -283,7 +281,7 @@ export class ChatController extends ExposableAPI implements IChatController {
             id: uuid(),
             isCommand: true,
             sender: 'Decentraland',
-            message: `You start ${expressionExplainer[expression as keyof typeof expressionExplainer]}`
+            message: `You start ${expressionExplainer[expression]}`
           }
         }
       }
