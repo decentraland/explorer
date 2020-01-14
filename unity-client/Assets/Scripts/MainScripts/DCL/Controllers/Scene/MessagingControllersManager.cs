@@ -1,4 +1,5 @@
 using DCL.Controllers;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -197,7 +198,6 @@ namespace DCL
             }
         }
 
-
         public void UpdateThrottling()
         {
             if (pendingInitMessagesCount == 0)
@@ -210,104 +210,71 @@ namespace DCL
             }
         }
 
-        /**
-         * Calls to ProcessBus to run events from this queue. Returns true if ProcessBus returns true
-         */
-        private bool ProcessEventsFromBus(MessagingController controller, MessagingBus bus, ref float prevTimeBudget, ref IEnumerator yieldReturn)
+        private bool ProcessEventsFromBus(MessagingController controller, MessagingBus bus, ref float prevTimeBudget)
         {
-            if (controller != null && controller.enabled)
+            if (controller != null && bus != null)
             {
-                if (ProcessBus(bus, ref prevTimeBudget, out yieldReturn))
-                    return true;
+                return ProcessBus(bus, ref prevTimeBudget);
             }
             return false;
         }
 
+        private LinkedList<Action> pendingActions = new LinkedList<Action>();
+
         IEnumerator ProcessMessages()
         {
             float start;
-            float prevTimeBudget = INIT_MSG_BUS_BUDGET_MAX;
-            IEnumerator yieldReturn = null;
+            float prevTimeBudget;
+
             while (true)
             {
                 start = Time.realtimeSinceStartup;
                 prevTimeBudget = INIT_MSG_BUS_BUDGET_MAX;
-                // This loop makes sure that queues are emptied out in the correct order.
-                // Every time we're done with a queue, we call `continue` to start again processing messages in the right priority
-                // (note that the next run might be in the next frame due to the time budget).
-                // `ProcessEventsFromBus`, the function called for each bus, will only process one event/task.
-                // That's a very important aspect of its interface. it would be great if we could enforce that somehow with the type system.
-                // This is important because there's a maximum budget of time alloted for this.
-                // It would be good to check if there's an alternative implementation of this,
-                // maybe we could break earlier so we don't waste time checking on empty queues?
+
+                // TODO: Process `pendingActions`
+
+                // Process through each queue. At the end of the loop, we break if no bus had messages left to process.
                 while (Time.realtimeSinceStartup - start <= GLOBAL_MAX_MSG_BUDGET)
                 {
-                    if (yieldReturn != null)
-                    {
-                        // Commenting this line improves performance by a lot. It seems to be locking until it returns.
-                        // yield return yieldReturn;
-                        yieldReturn = null;
-                    }
                     bool shouldRestart = false;
 
-                    // Highest priority: If rendering is not activated, go straight to the init events
-                    if (!IsRenderingActivated())
-                    {
-                        // Make sure we process the init messages first
-                        if (ProcessEventsFromBus(globalController, globalController?.initBus, ref prevTimeBudget, ref yieldReturn))
-                            continue;
-                        if (ProcessEventsFromBus(uiSceneController, uiSceneController?.initBus, ref prevTimeBudget, ref yieldReturn))
-                            continue;
-                        // Then: other initialization events from scenes
-                        for (int i = 0; i < sortedControllersCount; i++)
-                        {
-                            if (ProcessEventsFromBus(sortedControllers[i], sortedControllers[i].initBus, ref prevTimeBudget, ref yieldReturn))
-                            {
-                                shouldRestart = true;
-                                break;
-                            }
-                        }
-                        if (shouldRestart)
-                            continue;
-                    }
+                    // Highest in priority: events for the current scene
+                    if (ProcessEventsFromBus(currentSceneController, currentSceneController?.initBus, ref prevTimeBudget))
+                        continue;
+                    if (ProcessEventsFromBus(currentSceneController, currentSceneController?.uiBus, ref prevTimeBudget))
+                        continue;
+                    if (ProcessEventsFromBus(currentSceneController, currentSceneController?.systemBus, ref prevTimeBudget))
+                        continue;
 
                     // High priority buses: global initialization, ui, and system buses
-                    if (ProcessEventsFromBus(globalController, globalController?.initBus, ref prevTimeBudget, ref yieldReturn))
+                    if (ProcessEventsFromBus(globalController, globalController?.initBus, ref prevTimeBudget))
                         continue;
-                    if (ProcessEventsFromBus(uiSceneController, uiSceneController?.initBus, ref prevTimeBudget, ref yieldReturn))
+                    if (ProcessEventsFromBus(globalController, globalController?.uiBus, ref prevTimeBudget))
                         continue;
-                    if (ProcessEventsFromBus(globalController, globalController?.uiBus, ref prevTimeBudget, ref yieldReturn))
+                    if (ProcessEventsFromBus(globalController, globalController?.systemBus, ref prevTimeBudget))
                         continue;
-                    if (ProcessEventsFromBus(uiSceneController, uiSceneController?.uiBus, ref prevTimeBudget, ref yieldReturn))
+                    if (ProcessEventsFromBus(uiSceneController, uiSceneController?.initBus, ref prevTimeBudget))
                         continue;
-                    if (ProcessEventsFromBus(globalController, globalController?.systemBus, ref prevTimeBudget, ref yieldReturn))
+                    if (ProcessEventsFromBus(uiSceneController, uiSceneController?.uiBus, ref prevTimeBudget))
                         continue;
-                    if (ProcessEventsFromBus(uiSceneController, uiSceneController?.systemBus, ref prevTimeBudget, ref yieldReturn))
-                        continue;
-
-                    // Next in priority: events for the current scene
-                    if (ProcessEventsFromBus(currentSceneController, currentSceneController?.initBus, ref prevTimeBudget, ref yieldReturn))
-                        continue;
-                    if (ProcessEventsFromBus(currentSceneController, currentSceneController?.uiBus, ref prevTimeBudget, ref yieldReturn))
-                        continue;
-                    if (ProcessEventsFromBus(currentSceneController, currentSceneController?.systemBus, ref prevTimeBudget, ref yieldReturn))
+                    if (ProcessEventsFromBus(uiSceneController, uiSceneController?.systemBus, ref prevTimeBudget))
                         continue;
 
 
                     // Then: events from all the rest of the scenes
                     for (int i = 0; i < sortedControllersCount; i++)
                     {
-                        if (ProcessEventsFromBus(sortedControllers[i], sortedControllers[i].initBus, ref prevTimeBudget, ref yieldReturn))
+                        if (ProcessEventsFromBus(sortedControllers[i], sortedControllers[i].initBus, ref prevTimeBudget))
                         {
                             shouldRestart = true;
                             break;
                         }
-                        if (ProcessEventsFromBus(sortedControllers[i], sortedControllers[i].uiBus, ref prevTimeBudget, ref yieldReturn))
+                        if (ProcessEventsFromBus(sortedControllers[i], sortedControllers[i].uiBus, ref prevTimeBudget))
                         {
                             shouldRestart = true;
                             break;
                         }
-                        if (ProcessEventsFromBus(sortedControllers[i], sortedControllers[i].systemBus, ref prevTimeBudget, ref yieldReturn))
+                        if (ProcessEventsFromBus(sortedControllers[i], sortedControllers[i].systemBus, ref prevTimeBudget))
                         {
                             shouldRestart = true;
                             break;
@@ -318,14 +285,13 @@ namespace DCL
 
                     yield return null;
                 }
-
                 yield return null;
             }
         }
 
-        bool ProcessBus(MessagingBus bus, ref float prevTimeBudget, out IEnumerator yieldReturn)
+        bool ProcessBus(MessagingBus bus, ref float prevTimeBudget)
         {
-            if (bus.isRunning && bus.pendingMessagesCount > 0)
+            while (bus.isRunning && bus.hasPendingMessages && prevTimeBudget >= 0)
             {
                 float startTime = Time.realtimeSinceStartup;
                 float timeBudget = prevTimeBudget;
@@ -341,26 +307,12 @@ namespace DCL
                     Debug.Log($"#{bus.processedMessagesCount} ... bus = {finalTag}, id = {bus.id}... timeBudget is zero!!!");
                 }
 
-                bool queueResult = bus.ProcessQueue(timeBudget, out yieldReturn);
+                bus.ProcessQueue(timeBudget, pendingActions);
 
                 bus.owner?.RefreshEnabledState();
 
-                if (queueResult)
-                    return true;
-
                 prevTimeBudget -= Time.realtimeSinceStartup - startTime;
-
-                if (prevTimeBudget <= 0)
-                {
-                    return true;
-                }
             }
-            else
-            {
-                yieldReturn = null;
-                return false;
-            }
-
             return false;
         }
     }

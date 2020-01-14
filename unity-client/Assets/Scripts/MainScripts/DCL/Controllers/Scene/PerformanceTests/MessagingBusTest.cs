@@ -1,5 +1,6 @@
 using DCL;
 using NUnit.Framework;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using Unity.PerformanceTesting;
@@ -53,6 +54,7 @@ namespace MessagingBusTest
         [Test, Performance]
         public void MeasureTimeToProcessThousandMessages()
         {
+            LinkedList<Action> list = new LinkedList<Action>();
             bus.Start();
             Measure.Method(() =>
             {
@@ -60,8 +62,7 @@ namespace MessagingBusTest
                 Assert.IsTrue(bus.pendingMessagesCount > 1000);
                 while (bus.processedMessagesCount < processed + 1000)
                 {
-                    System.Collections.IEnumerator yieldReturn;
-                    bus.ProcessQueue(0.1f, out yieldReturn);
+                    bus.ProcessQueue(0.1f, list);
                 }
             })
             .SetUp(() =>
