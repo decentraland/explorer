@@ -1,26 +1,31 @@
-import { Engine } from '../ecs/Engine'
-import { IEntity, ISystem, ComponentAdded, ComponentRemoved, ParentChanged } from '../ecs/IEntity'
-import { UUIDEvent, PointerEvent, RaycastResponse } from './Events'
-
 import {
   DisposableComponentCreated,
   DisposableComponentRemoved,
   DisposableComponentUpdated,
-  isDisposableComponent,
-  getComponentId,
   getComponentClassId,
+  getComponentId,
+  getComponentName,
+  isDisposableComponent,
   ObservableComponent
 } from '../ecs/Component'
-
+import { Engine } from '../ecs/Engine'
+import { ComponentAdded, ComponentRemoved, IEntity, ISystem, ParentChanged } from '../ecs/IEntity'
+import { PointerEvent, RaycastResponse, UUIDEvent } from './Events'
+import { RaycastHitEntities, RaycastHitEntity } from './PhysicsCast'
 import { DecentralandInterface } from './Types'
-import { RaycastHitEntity, RaycastHitEntities } from './PhysicsCast'
 
 // This number is defined in the protocol ECS.SetEntityParent.3
 const ROOT_ENTITY_ID = '0'
+const componentNameRE = /^(engine\.)/
 
 export class DecentralandSynchronizationSystem implements ISystem {
   cachedComponents: Record<string, Record<string, string>> = {}
   engine!: Engine
+
+  /**
+   * Store a list of disposable component's IDs that have been sent to the engine
+   */
+  private cachedDisposableIds: Record<string, boolean> = {}
 
   constructor(public dcl: DecentralandInterface) {}
 
@@ -92,7 +97,7 @@ export class DecentralandSynchronizationSystem implements ISystem {
         const component = entity.components[componentName]
         const classId = getComponentClassId(component)
 
-        if (classId !== null) {
+        if (classId !== null && componentNameRE.test(getComponentName(component))) {
           if (isDisposableComponent(component)) {
             // Send the attach component signal
             this.dcl.attachEntityComponent(entity.uuid, componentName, getComponentId(component))
@@ -136,6 +141,9 @@ export class DecentralandSynchronizationSystem implements ISystem {
       const entityId = entity.uuid
 
       for (let componentName in entity.components) {
+        if (!componentNameRE.test(componentName)) {
+          continue
+        }
         const component = entity.components[componentName]
         const classId = getComponentClassId(component)
 
@@ -155,7 +163,11 @@ export class DecentralandSynchronizationSystem implements ISystem {
 
     for (let id in this.engine.disposableComponents) {
       const component = this.engine.disposableComponents[id]
-      if (component instanceof ObservableComponent && component.dirty) {
+      if (
+        component instanceof ObservableComponent &&
+        component.dirty &&
+        componentNameRE.test(getComponentName(component))
+      ) {
         this.dcl.componentUpdated(id, JSON.stringify(component))
         component.dirty = false
       }
@@ -168,20 +180,26 @@ export class DecentralandSynchronizationSystem implements ISystem {
    * component that was added and the entity.
    */
   private componentAdded(event: ComponentAdded) {
-    if (event.entity.isAddedToEngine()) {
-      const component = event.entity.components[event.componentName]
+    if (!event.entity.isAddedToEngine()) {
+      return
+    }
+    if (componentNameRE.test(event.componentName)) {
+      return
+    }
+    if (!event.classId) {
+      return
+    }
+    const component = event.entity.components[event.componentName]
+    if (isDisposableComponent(component)) {
+      this.dcl.attachEntityComponent(event.entity.uuid, event.componentName, getComponentId(component))
+    } else {
+      const componentJson: string = JSON.stringify(component)
 
-      if (isDisposableComponent(component)) {
-        this.dcl.attachEntityComponent(event.entity.uuid, event.componentName, getComponentId(component))
-      } else if (event.classId !== null) {
-        const componentJson: string = JSON.stringify(component)
+      // Send the updated component
+      this.dcl.updateEntityComponent(event.entity.uuid, event.componentName, event.classId, componentJson)
 
-        // Send the updated component
-        this.dcl.updateEntityComponent(event.entity.uuid, event.componentName, event.classId, componentJson)
-
-        // Update the cached copy of the sent component
-        this.cachedComponents[event.entity.uuid][event.componentName] = componentJson
-      }
+      // Update the cached copy of the sent component
+      this.cachedComponents[event.entity.uuid][event.componentName] = componentJson
     }
   }
 
@@ -189,7 +207,7 @@ export class DecentralandSynchronizationSystem implements ISystem {
    * This method is called when a component is removed from an entity.
    */
   private componentRemoved(event: ComponentRemoved) {
-    if (event.entity.isAddedToEngine()) {
+    if (event.entity.isAddedToEngine() && componentNameRE.test(event.componentName)) {
       this.dcl.removeEntityComponent(event.entity.uuid, event.componentName)
 
       // Remove the cached component so we can send it again when re-adding
@@ -203,7 +221,10 @@ export class DecentralandSynchronizationSystem implements ISystem {
    * created component is fired immediatly after.
    */
   private disposableComponentCreated(event: DisposableComponentCreated) {
-    this.dcl.componentCreated(event.componentId, event.componentName, event.classId)
+    if (componentNameRE.test(event.componentName)) {
+      this.cachedDisposableIds[event.componentId] = true
+      this.dcl.componentCreated(event.componentId, event.componentName, event.classId)
+    }
   }
 
   /**
@@ -211,7 +232,10 @@ export class DecentralandSynchronizationSystem implements ISystem {
    * update cycle and once after creation.
    */
   private disposableComponentRemoved(event: DisposableComponentRemoved) {
-    this.dcl.componentDisposed(event.componentId)
+    if (this.cachedDisposableIds[event.componentId]) {
+      this.dcl.componentDisposed(event.componentId)
+      delete this.cachedDisposableIds[event.componentId]
+    }
   }
 
   /**
@@ -222,7 +246,9 @@ export class DecentralandSynchronizationSystem implements ISystem {
    * it remains attached to some entities?
    */
   private disposableComponentUpdated(event: DisposableComponentUpdated) {
-    this.dcl.componentUpdated(event.componentId, JSON.stringify(event.component))
+    if (componentNameRE.test(getComponentName(event.component))) {
+      this.dcl.componentUpdated(event.componentId, JSON.stringify(event.component))
+    }
   }
 
   /**
