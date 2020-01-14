@@ -32,4 +32,9 @@ public class PlayerAvatarController : MonoBehaviour
     {
         avatarRenderer.ApplyModel(profile.avatar, null, null);
     }
+
+    private void OnDestroy()
+    {
+        userProfile.OnUpdate -= OnUserProfileOnUpdate;
+    }
 }
