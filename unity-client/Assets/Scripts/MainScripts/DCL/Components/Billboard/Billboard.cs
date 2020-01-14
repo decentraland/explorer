@@ -40,7 +40,8 @@ namespace DCL
             DCLCharacterController.OnCharacterMoved -= OnCharacterMoved;
         }
 
-        public void Update()
+        // This runs on LateUpdate() instead of Update() to be applied AFTER the transform was moved
+        public void LateUpdate()
         {
             //NOTE(Brian): This fixes #757 (https://github.com/decentraland/unity-client/issues/757)
             //             We must find a more performant way to handle this, until that time, this is the approach.
