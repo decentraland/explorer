@@ -47,7 +47,7 @@ namespace DCL
             }
             if (!isQualitySettingsSet)
             {
-                currentQualitySettings = qualitySettingsPreset[qualitySettingsPreset.Length - 1];
+                currentQualitySettings = qualitySettingsPreset.defaultPreset;
             }
         }
 

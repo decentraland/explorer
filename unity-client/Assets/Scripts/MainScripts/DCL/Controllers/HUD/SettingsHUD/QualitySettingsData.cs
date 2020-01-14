@@ -6,6 +6,7 @@ namespace DCL.SettingsHUD
     [CreateAssetMenu(fileName = "QualitySettings", menuName = "QualitySettings")]
     public class QualitySettingsData : ScriptableObject
     {
+        [SerializeField] int defaultPresetIndex = 0;
         [SerializeField] QualitySettings[] settings = null;
 
         public QualitySettings this[int i]
@@ -14,6 +15,8 @@ namespace DCL.SettingsHUD
         }
 
         public int Length { get { return settings.Length; } }
+        public QualitySettings defaultPreset { get { return settings[defaultPresetIndex]; } }
+        public int defaultIndex { get { return defaultPresetIndex; } }
     }
 
     [Serializable]

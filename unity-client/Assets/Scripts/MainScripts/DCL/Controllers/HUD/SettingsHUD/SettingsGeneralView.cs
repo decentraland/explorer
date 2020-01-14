@@ -30,76 +30,85 @@ namespace DCL.SettingsHUD
         private DCL.SettingsHUD.QualitySettings currentQualitySetting;
         private DCL.SettingsHUD.GeneralSettings currentGeneralSetting;
 
+        private DCL.SettingsHUD.QualitySettings tempQualitySetting;
+        private DCL.SettingsHUD.GeneralSettings tempGeneralSetting;
+
         private bool shouldSetAsCustom = false;
+        private bool isDirty = false;
 
         void Awake()
         {
-            currentQualitySetting = Settings.i.qualitySettings;
-            currentGeneralSetting = Settings.i.generalSettings;
-
             qualityPresetSpinBox.onValueChanged.AddListener(value =>
             {
                 DCL.SettingsHUD.QualitySettings preset = Settings.i.qualitySettingsPresets[value];
-                currentQualitySetting = preset;
+                tempQualitySetting = preset;
                 UpdateQualitySettings();
                 shouldSetAsCustom = false;
             });
 
             textureResSpinBox.onValueChanged.AddListener(value =>
             {
-                currentQualitySetting.textureQuality = (DCL.SettingsHUD.QualitySettings.TextureQuality)value;
+                tempQualitySetting.textureQuality = (DCL.SettingsHUD.QualitySettings.TextureQuality)value;
                 shouldSetAsCustom = true;
+                isDirty = true;
             });
 
             shadowResSpinBox.onValueChanged.AddListener(value =>
             {
-                currentQualitySetting.shadowResolution = (UnityEngine.Rendering.LWRP.ShadowResolution)(256 << value);
+                tempQualitySetting.shadowResolution = (UnityEngine.Rendering.LWRP.ShadowResolution)(256 << value);
                 shouldSetAsCustom = true;
+                isDirty = true;
             });
 
             colorGradingToggle.onValueChanged.AddListener(isOn =>
             {
-                currentQualitySetting.colorGrading = isOn;
+                tempQualitySetting.colorGrading = isOn;
                 shouldSetAsCustom = true;
+                isDirty = true;
             });
 
             soundToggle.onValueChanged.AddListener(isOn =>
             {
-                currentGeneralSetting.sfxVolume = isOn ? 1 : 0;
+                tempGeneralSetting.sfxVolume = isOn ? 1 : 0;
+                isDirty = true;
             });
 
             shadowToggle.onValueChanged.AddListener(isOn =>
             {
-                currentQualitySetting.shadows = isOn;
+                tempQualitySetting.shadows = isOn;
                 if (!isOn)
                 {
                     softShadowToggle.isOn = false;
                 }
                 shouldSetAsCustom = true;
+                isDirty = true;
             });
 
             softShadowToggle.onValueChanged.AddListener(isOn =>
             {
-                currentQualitySetting.softShadows = isOn;
+                tempQualitySetting.softShadows = isOn;
                 shouldSetAsCustom = true;
+                isDirty = true;
             });
 
             bloomToggle.onValueChanged.AddListener(isOn =>
             {
-                currentQualitySetting.bloom = isOn;
+                tempQualitySetting.bloom = isOn;
                 shouldSetAsCustom = true;
+                isDirty = true;
             });
 
             mouseSensitivitySlider.onValueChanged.AddListener(value =>
             {
-                currentGeneralSetting.mouseSensitivity = value;
+                tempGeneralSetting.mouseSensitivity = value;
                 mouseSensitivityValueLabel.text = value.ToString("0.0");
+                isDirty = true;
             });
 
             antiAliasingSlider.onValueChanged.AddListener(value =>
             {
                 int antiAliasingValue = 1 << (int)value;
-                currentQualitySetting.antiAliasing = (UnityEngine.Rendering.LWRP.MsaaQuality)antiAliasingValue;
+                tempQualitySetting.antiAliasing = (UnityEngine.Rendering.LWRP.MsaaQuality)antiAliasingValue;
                 if (value == 0)
                 {
                     antiAliasingValueLabel.text = TEXT_OFF;
@@ -109,21 +118,34 @@ namespace DCL.SettingsHUD
                     antiAliasingValueLabel.text = antiAliasingValue.ToString("0x");
                 }
                 shouldSetAsCustom = true;
+                isDirty = true;
             });
 
             renderingScaleSlider.onValueChanged.AddListener(value =>
             {
-                currentQualitySetting.renderScale = value;
+                tempQualitySetting.renderScale = value;
                 renderingScaleValueLabel.text = value.ToString("0.0");
                 shouldSetAsCustom = true;
+                isDirty = true;
             });
 
             drawDistanceSlider.onValueChanged.AddListener(value =>
             {
-                currentQualitySetting.cameraDrawDistance = value;
+                tempQualitySetting.cameraDrawDistance = value;
                 drawDistanceValueLabel.text = value.ToString();
                 shouldSetAsCustom = true;
+                isDirty = true;
             });
+
+        }
+
+        void OnEnable()
+        {
+            currentQualitySetting = Settings.i.qualitySettings;
+            currentGeneralSetting = Settings.i.generalSettings;
+
+            tempQualitySetting = currentQualitySetting;
+            tempGeneralSetting = currentGeneralSetting;
 
             SetupQualityPreset(currentQualitySetting);
         }
@@ -134,6 +156,12 @@ namespace DCL.SettingsHUD
             {
                 qualityPresetSpinBox.OverrideCurrentLabel(TEXT_QUALITY_CUSTOM);
                 shouldSetAsCustom = false;
+            }
+            if (isDirty)
+            {
+                Settings.i.ApplyQualitySettings(tempQualitySetting);
+                Settings.i.ApplyGeneralSettings(tempGeneralSetting);
+                isDirty = false;
             }
         }
 
@@ -159,7 +187,7 @@ namespace DCL.SettingsHUD
 
             if (!presetIndexFound)
             {
-                currentQualitySetting = savedSetting;
+                tempQualitySetting = savedSetting;
                 UpdateQualitySettings();
             }
             else
@@ -170,24 +198,30 @@ namespace DCL.SettingsHUD
 
         void UpdateQualitySettings()
         {
-            textureResSpinBox.value = (int)currentQualitySetting.textureQuality;
-            shadowResSpinBox.value = (int)Mathf.Log((int)currentQualitySetting.shadowResolution, 2) - 8;
-            soundToggle.isOn = currentGeneralSetting.sfxVolume > 0 ? true : false;
-            colorGradingToggle.isOn = currentQualitySetting.colorGrading;
-            softShadowToggle.isOn = currentQualitySetting.softShadows;
-            shadowToggle.isOn = currentQualitySetting.shadows;
-            bloomToggle.isOn = currentQualitySetting.bloom;
-            mouseSensitivitySlider.value = currentGeneralSetting.mouseSensitivity;
-            antiAliasingSlider.value = currentQualitySetting.antiAliasing == UnityEngine.Rendering.LWRP.MsaaQuality.Disabled ? 0 : ((int)currentQualitySetting.antiAliasing >> 2) + 1;
-            renderingScaleSlider.value = currentQualitySetting.renderScale;
-            drawDistanceSlider.value = currentQualitySetting.cameraDrawDistance;
+            textureResSpinBox.value = (int)tempQualitySetting.textureQuality;
+            shadowResSpinBox.value = (int)Mathf.Log((int)tempQualitySetting.shadowResolution, 2) - 8;
+            soundToggle.isOn = tempGeneralSetting.sfxVolume > 0 ? true : false;
+            colorGradingToggle.isOn = tempQualitySetting.colorGrading;
+            softShadowToggle.isOn = tempQualitySetting.softShadows;
+            shadowToggle.isOn = tempQualitySetting.shadows;
+            bloomToggle.isOn = tempQualitySetting.bloom;
+            mouseSensitivitySlider.value = tempGeneralSetting.mouseSensitivity;
+            antiAliasingSlider.value = tempQualitySetting.antiAliasing == UnityEngine.Rendering.LWRP.MsaaQuality.Disabled ? 0 : ((int)currentQualitySetting.antiAliasing >> 2) + 1;
+            renderingScaleSlider.value = tempQualitySetting.renderScale;
+            drawDistanceSlider.value = tempQualitySetting.cameraDrawDistance;
         }
 
         public void Apply()
         {
+            Settings.i.ApplyQualitySettings(tempQualitySetting);
+            Settings.i.ApplyGeneralSettings(tempGeneralSetting);
+            Settings.i.SaveSettings();
+        }
+
+        public void OnDismiss()
+        {
             Settings.i.ApplyQualitySettings(currentQualitySetting);
             Settings.i.ApplyGeneralSettings(currentGeneralSetting);
-            Settings.i.SaveSettings();
         }
     }
 }

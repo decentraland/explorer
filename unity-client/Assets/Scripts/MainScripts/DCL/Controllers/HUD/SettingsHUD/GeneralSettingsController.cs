@@ -7,7 +7,6 @@ namespace DCL.SettingsHUD
     {
         public CinemachineFreeLook thirdPersonCamera;
         public CinemachineVirtualCamera firstPersonCamera;
-        public AudioListener audioListener;
 
         private CinemachinePOV povCamera;
 
@@ -33,7 +32,7 @@ namespace DCL.SettingsHUD
             thirdPersonCamera.m_YAxis.m_AccelTime = settings.mouseSensitivity;
             povCamera.m_HorizontalAxis.m_AccelTime = settings.mouseSensitivity;
             povCamera.m_VerticalAxis.m_AccelTime = settings.mouseSensitivity;
-            audioListener.enabled = settings.sfxVolume != 0;
+            AudioListener.volume = settings.sfxVolume;
         }
     }
 }

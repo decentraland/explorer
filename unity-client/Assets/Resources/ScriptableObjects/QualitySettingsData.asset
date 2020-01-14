@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: de20c26162ae24092b9bf5d122b2d850, type: 3}
   m_Name: QualitySettingsData
   m_EditorClassIdentifier: 
+  defaultPresetIndex: 1
   settings:
   - displayName: BASIC
     textureQuality: 1
@@ -28,18 +29,18 @@ MonoBehaviour:
     antiAliasing: 2
     renderScale: 1
     shadows: 1
-    softShadows: 0
+    softShadows: 1
     shadowResolution: 256
-    cameraDrawDistance: 80
-    bloom: 0
-    colorGrading: 0
+    cameraDrawDistance: 100
+    bloom: 1
+    colorGrading: 1
   - displayName: HIGH
     textureQuality: 0
-    antiAliasing: 8
+    antiAliasing: 4
     renderScale: 1
     shadows: 1
     softShadows: 1
-    shadowResolution: 256
+    shadowResolution: 1024
     cameraDrawDistance: 100
     bloom: 1
     colorGrading: 1
