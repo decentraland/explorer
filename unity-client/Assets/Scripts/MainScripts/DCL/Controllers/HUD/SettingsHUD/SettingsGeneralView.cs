@@ -7,7 +7,7 @@ namespace DCL.SettingsHUD
 {
     public class SettingsGeneralView : MonoBehaviour
     {
-        public const string TEXT_QUALITY_CUSTOM = "CUSTOM";
+        public const string TEXT_QUALITY_CUSTOM = "Custom";
         public const string TEXT_OFF = "OFF";
 
         public SpinBoxPresetted qualityPresetSpinBox = null;
