@@ -9,17 +9,9 @@ namespace DCL
     {
         public static bool VERBOSE = false;
 
-        private const float MAX_MSG_BUDGET = 0.010f;
-        private const float MAX_MSG_BUDGET_FOR_FAR_SCENES = 0.003f;
+        private const float MAX_GLOBAL_MSG_BUDGET = 0.006f;
+        private const float MAX_SYSTEM_MSG_BUDGET_FOR_FAR_SCENES = 0.003f;
 
-        private const float GLOBAL_MAX_MSG_BUDGET_WHEN_LOADING = 1f;
-        private const float GLOBAL_MIN_MSG_BUDGET_WHEN_LOADING = 1f;
-
-        public const float UI_MSG_BUS_BUDGET_MAX = 0.013f;
-        public const float INIT_MSG_BUS_BUDGET_MAX = 0.016f;
-        public const float SYSTEM_MSG_BUS_BUDGET_MAX = 0.013f;
-
-        public const float MSG_BUS_BUDGET_MIN = 0.00001f;
         private const float GLTF_BUDGET_MAX = 0.033f;
         private const float GLTF_BUDGET_MIN = 0.008f;
 
@@ -108,15 +100,6 @@ namespace DCL
             sortedControllersCount = sortedControllers.Count;
         }
 
-        public void Sleep()
-        {
-            if (mainCoroutine != null)
-            {
-                SceneController.i.StopCoroutine(mainCoroutine);
-                mainCoroutine = null;
-            }
-        }
-
         public void Cleanup()
         {
             if (mainCoroutine != null)
@@ -163,9 +146,9 @@ namespace DCL
             if (messagingControllers.ContainsKey(sceneId))
             {
                 // In case there is any pending message from a scene being unloaded we decrease the count accordingly
-                pendingMessagesCount -= messagingControllers[sceneId].messagingBuses[MessagingBusId.INIT].pendingMessages.Count +
-                                        messagingControllers[sceneId].messagingBuses[MessagingBusId.UI].pendingMessages.Count +
-                                        messagingControllers[sceneId].messagingBuses[MessagingBusId.SYSTEM].pendingMessages.Count;
+                pendingMessagesCount -= messagingControllers[sceneId].messagingBuses[MessagingBusId.INIT].pendingMessagesCount +
+                                        messagingControllers[sceneId].messagingBuses[MessagingBusId.UI].pendingMessagesCount +
+                                        messagingControllers[sceneId].messagingBuses[MessagingBusId.SYSTEM].pendingMessagesCount;
 
                 DisposeController(messagingControllers[sceneId]);
                 messagingControllers.Remove(sceneId);
@@ -180,10 +163,7 @@ namespace DCL
 
         public string Enqueue(ParcelScene scene, MessagingBus.QueuedSceneMessage_Scene queuedMessage)
         {
-            string busId = "";
-
-            messagingControllers[queuedMessage.sceneId].Enqueue(scene, queuedMessage, out busId);
-
+            messagingControllers[queuedMessage.sceneId].Enqueue(scene, queuedMessage, out string busId);
             return busId;
         }
 
@@ -218,7 +198,7 @@ namespace DCL
             }
         }
 
-        float timeBudgetCounter = MAX_MSG_BUDGET;
+        float timeBudgetCounter = MAX_GLOBAL_MSG_BUDGET;
 
         IEnumerator ProcessMessages()
         {
@@ -228,7 +208,7 @@ namespace DCL
             {
                 yield return null;
 
-                timeBudgetCounter = RenderingController.i.renderingEnabled ? MAX_MSG_BUDGET : float.MaxValue;
+                timeBudgetCounter = RenderingController.i.renderingEnabled ? MAX_GLOBAL_MSG_BUDGET : float.MaxValue;
                 start = Time.unscaledTime;
 
                 bool uiSceneControllerActive = uiSceneController != null && uiSceneController.enabled;
@@ -291,8 +271,8 @@ namespace DCL
                 if (shouldRestart)
                     continue;
 
-                if (timeBudgetCounter > MAX_MSG_BUDGET_FOR_FAR_SCENES)
-                    timeBudgetCounter = MAX_MSG_BUDGET_FOR_FAR_SCENES;
+                if (timeBudgetCounter > MAX_SYSTEM_MSG_BUDGET_FOR_FAR_SCENES)
+                    timeBudgetCounter = MAX_SYSTEM_MSG_BUDGET_FOR_FAR_SCENES;
 
                 for (int i = 0; i < sortedControllersCount; ++i)
                 {
@@ -310,32 +290,29 @@ namespace DCL
 
                 if (uiSceneControllerActive)
                 {
-                    if (ProcessBus(uiSceneController.systemBus))
-                        continue;
+                    ProcessBus(uiSceneController.systemBus);
                 }
             }
         }
 
         bool ProcessBus(MessagingBus bus)
         {
-            if (!bus.isRunning || bus.pendingMessagesCount <= 0)
-            {
+            if (!bus.enabled || bus.pendingMessagesCount <= 0)
                 return false;
-            }
 
             float startTime = Time.realtimeSinceStartup;
 
             float timeBudget = timeBudgetCounter;
 
+            //TODO(Brian): We should use the returning yieldReturn IEnumerator and MoveNext() it manually each frame to
+            //             account the coroutine processing into the budget. Until we do that we just skip it.
             bus.ProcessQueue(timeBudget, out _);
             bus.owner?.RefreshEnabledState();
 
             timeBudgetCounter -= Time.realtimeSinceStartup - startTime;
 
             if (timeBudgetCounter <= 0)
-            {
                 return true;
-            }
 
             return false;
         }

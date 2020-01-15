@@ -23,7 +23,7 @@ namespace MessagingBusTest
         {
             if (bus == null)
             {
-                bus = new MessagingBus("bus", dummyHandler, null, 0.1f, 1f);
+                bus = new MessagingBus("bus", dummyHandler, null);
             }
             if (nextQueueMessage == null)
             {

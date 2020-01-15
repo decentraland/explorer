@@ -1,4 +1,4 @@
-using DCL.Controllers;
+﻿using DCL.Controllers;
 using DCL.Helpers;
 using DCL.Interface;
 using DCL.Models;
@@ -183,11 +183,6 @@ namespace DCL
 
         private void Update()
         {
-            if (Input.GetKey(KeyCode.K))
-            {
-                MessagingControllersManager.i.Sleep();
-            }
-
             InputController_Legacy.i.Update();
 
             PrioritizeMessageControllerList();
