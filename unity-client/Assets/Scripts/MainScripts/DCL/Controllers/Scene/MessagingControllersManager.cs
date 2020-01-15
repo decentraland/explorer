@@ -9,15 +9,15 @@ namespace DCL
     {
         public static bool VERBOSE = false;
 
-        private const float GLOBAL_MAX_MSG_BUDGET = 0.016f;
+        private const float GLOBAL_MAX_MSG_BUDGET = 0.008f;
         private const float GLOBAL_MAX_MSG_BUDGET_WHEN_LOADING = 1f;
         private const float GLOBAL_MIN_MSG_BUDGET_WHEN_LOADING = 1f;
-        public const float UI_MSG_BUS_BUDGET_MAX = 0.013f;
-        public const float INIT_MSG_BUS_BUDGET_MAX = 0.016f;
-        public const float SYSTEM_MSG_BUS_BUDGET_MAX = 0.013f;
+        public const float UI_MSG_BUS_BUDGET_MAX = 0.006f;
+        public const float INIT_MSG_BUS_BUDGET_MAX = 0.006f;
+        public const float SYSTEM_MSG_BUS_BUDGET_MAX = 0.006f;
         public const float MSG_BUS_BUDGET_MIN = 0.00001f;
-        private const float GLTF_BUDGET_MAX = 0.033f;
-        private const float GLTF_BUDGET_MIN = 0.008f;
+        private const float GLTF_BUDGET_MAX = 0.008f;
+        private const float GLTF_BUDGET_MIN = 0.00001f;
 
         public const string GLOBAL_MESSAGING_CONTROLLER = "global_messaging_controller";
 
