@@ -1,4 +1,5 @@
 import {
+  ComponentLike,
   DisposableComponentCreated,
   DisposableComponentRemoved,
   DisposableComponentUpdated,
@@ -138,7 +139,6 @@ export class DecentralandSynchronizationSystem implements ISystem {
   private presentEntities() {
     for (let i in this.engine.entities) {
       const entity = this.engine.entities[i]
-      const entityId = entity.uuid
 
       for (let componentName in entity.components) {
         if (!componentNameRE.test(componentName)) {
@@ -148,14 +148,11 @@ export class DecentralandSynchronizationSystem implements ISystem {
         const classId = getComponentClassId(component)
 
         if (classId !== null && !isDisposableComponent(component)) {
-          const componentJson: string = JSON.stringify(component)
-
-          if (this.cachedComponents[entityId][componentName] !== componentJson) {
+          const jsonRepresentation = this.getJsonIfDirty(entity.uuid, componentName, component)
+          if (jsonRepresentation) {
             // Send the updated component
-            this.dcl.updateEntityComponent(entity.uuid, componentName, classId, componentJson)
-
-            // Update the cached copy of the sent component
-            this.cachedComponents[entityId][componentName] = componentJson
+            this.dcl.updateEntityComponent(entity.uuid, componentName, classId, jsonRepresentation)
+            this.clearDirty(entity.uuid, componentName, component, jsonRepresentation)
           }
         }
       }
@@ -256,5 +253,26 @@ export class DecentralandSynchronizationSystem implements ISystem {
    */
   private parentChanged(event: ParentChanged) {
     this.dcl.setParent(event.entity.uuid, event.parent ? event.parent.uuid : ROOT_ENTITY_ID)
+  }
+
+  private getJsonIfDirty(
+    entityId: string,
+    componentName: string,
+    component: ComponentLike | ObservableComponent
+  ): false | string {
+    if (component instanceof ObservableComponent) {
+      return component.dirty && JSON.stringify(component)
+    } else {
+      const jsonRepresentation = JSON.stringify(component)
+      return jsonRepresentation !== this.cachedComponents[entityId][componentName] && jsonRepresentation
+    }
+  }
+
+  private clearDirty(entityId: string, componentName: string, component: ComponentLike, jsonRepresentation: string) {
+    if (component instanceof ObservableComponent) {
+      component.dirty = false
+    } else {
+      this.cachedComponents[entityId][componentName] = jsonRepresentation
+    }
   }
 }
