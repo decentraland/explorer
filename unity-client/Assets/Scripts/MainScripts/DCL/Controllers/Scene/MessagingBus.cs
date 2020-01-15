@@ -196,9 +196,6 @@ namespace DCL
                 {
                     MessagingControllersManager.i.pendingInitMessagesCount++;
                 }
-
-                if (owner != null)
-                    owner.enabled = true;
             }
         }
 

@@ -94,9 +94,6 @@ namespace DCL
                     if (!messagingControllers.ContainsKey(controllerId))
                         continue;
 
-                    if (!messagingControllers[controllerId].enabled)
-                        continue;
-
                     sortedControllers.Add(messagingControllers[controllerId]);
                 }
             }
