@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   defaultPresetIndex: 1
   settings:
-  - displayName: BASIC
+  - displayName: Basic
     textureQuality: 1
     antiAliasing: 1
     renderScale: 1
@@ -24,7 +24,7 @@ MonoBehaviour:
     cameraDrawDistance: 50
     bloom: 0
     colorGrading: 0
-  - displayName: MEDIUM
+  - displayName: Medium
     textureQuality: 0
     antiAliasing: 2
     renderScale: 1
@@ -34,7 +34,7 @@ MonoBehaviour:
     cameraDrawDistance: 100
     bloom: 1
     colorGrading: 1
-  - displayName: HIGH
+  - displayName: High
     textureQuality: 0
     antiAliasing: 4
     renderScale: 1
