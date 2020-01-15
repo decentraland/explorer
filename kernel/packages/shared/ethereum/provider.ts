@@ -14,25 +14,50 @@ export const requestManager = new RequestManager(null)
 
 let providerRequested = false
 
-export async function awaitWeb3Approval() {
+export async function awaitWeb3Approval(): Promise<void> {
   if (!providerRequested) {
     providerRequested = true
     // Modern dapp browsers...
     if (window['ethereum']) {
-      try {
-        // Request account access if needed
-        await window.ethereum.enable()
-        providerFuture.resolve(window.ethereum)
-      } catch (error) {
-        // User denied account access...
-        providerFuture.resolve(new WebSocketProvider(ethereumConfigurations[ETHEREUM_NETWORK.MAINNET].wss))
+      const element = document.getElementById('eth-login')
+      if (element) {
+        element.style.display = 'block'
+        const button = document.getElementById('eth-login-confirm-button')
+
+        const response = future()
+
+        button!.onclick = async () => {
+          let result
+          try {
+            // Request account access if needed
+            await window.ethereum.enable()
+
+            result = { successful: true, provider: window.ethereum }
+          } catch (error) {
+            // User denied account access...
+            result = {
+              successful: false,
+              provider: new WebSocketProvider(ethereumConfigurations[ETHEREUM_NETWORK.MAINNET].wss)
+            }
+          }
+          response.resolve(result)
+        }
+
+        providerFuture.resolve(await response)
+
+        element.style.display = 'none'
       }
     } else if (window.web3 && window.web3.currentProvider) {
-      providerFuture.resolve(window.web3.currentProvider)
+      providerFuture.resolve({ successful: true, provider: window.web3.currentProvider })
     } else {
-      providerFuture.resolve(new WebSocketProvider(ethereumConfigurations[ETHEREUM_NETWORK.MAINNET].wss))
+      providerFuture.resolve({
+        successful: false,
+        provider: new WebSocketProvider(ethereumConfigurations[ETHEREUM_NETWORK.MAINNET].wss)
+      })
     }
   }
 
-  providerFuture.then(provider => requestManager.setProvider(provider)).catch(defaultLogger.error)
+  providerFuture.then(result => requestManager.setProvider(result.provider)).catch(defaultLogger.error)
+
+  return providerFuture
 }

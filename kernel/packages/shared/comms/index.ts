@@ -29,7 +29,7 @@ import { Pose, UserInformation, Package, ChatMessage, ProfileVersion, BusMessage
 import { CommunicationArea, Position, position2parcel, sameParcel, squareDistance } from './interface/utils'
 import { BrokerWorldInstanceConnection } from '../comms/v1/brokerWorldInstanceConnection'
 import { profileToRendererFormat } from 'shared/passports/transformations/profileToRendererFormat'
-import { ProfileForRenderer, uuid } from 'decentraland-ecs/src'
+import { ProfileForRenderer } from 'decentraland-ecs/src'
 import { Session } from '../session/index'
 import { worldRunningObservable, isWorldRunning } from '../world/worldState'
 import { WorldInstanceConnection } from './interface/index'
@@ -38,6 +38,7 @@ import { getTLD } from '../../config/index'
 import * as Long from 'long'
 
 window.Long = Long
+import { requestManager } from '../ethereum/provider'
 
 const { Peer } = require('decentraland-katalyst-peer')
 
@@ -528,14 +529,15 @@ export async function connect(userId: string, network: ETHEREUM_NETWORK, auth: A
 
         const peer = new Peer(
           lighthouseUrl,
-          'peer-' + uuid(),
+          ethAddress,
           () => {
             // noop
           },
           {
             connectionConfig: {
               iceServers: commConfigurations.iceServers
-            }
+            },
+            authHandler: (msg: string) => requestManager.personal_sign(msg, ethAddress!, '')
           }
         )
 

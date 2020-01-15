@@ -232,8 +232,10 @@ export function getServerConfigurations() {
     worldInstanceUrl: `wss://world-comm.decentraland.${TLDDefault}/connect`,
     comms: {
       lighthouse: {
-        server: 'https://katalyst-comms-relay.decentraland.zone',
-        p2p: 'https://katalyst-comms-no-relay.decentraland.zone'
+        // server: 'https://katalyst-comms-relay.decentraland.zone',
+        // p2p: 'https://katalyst-comms-no-relay.decentraland.zone'
+        server: 'http://localhost:9000',
+        p2p: 'http://localhost:9000'
       }
     },
     profile: `https://profile.decentraland.${TLDDefault}/api/v1`,
@@ -245,6 +247,7 @@ export function getServerConfigurations() {
       contents: `https://s3.amazonaws.com/content-service.decentraland.org/`,
       presets: `https://avatars-storage.decentraland.org/mobile-avatars`
     },
+    dao: TLDDefault === 'zone' ? '0x89550d8fc174b2ca216f2bd1bc20128413a2ab9d' : 'mainnetaddress',
     darApi:
       TLDDefault === 'zone' || TLDDefault === 'today'
         ? 'https://schema-api-v2.now.sh/dar'

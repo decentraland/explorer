@@ -83,7 +83,8 @@
     "tslint": "^5.14.0",
     "tslint-language-service": "^0.9.9",
     "typescript": "^3.4.5",
-    "uuid": "^3.1.0"
+    "uuid": "^3.1.0",
+    "web3x-codegen": "^4.0.6"
   },
   "dependencies": {
     "@createjs/easeljs": "^2.0.0-beta.4",
@@ -122,6 +123,7 @@
     "reselect": "^4.0.0",
     "typesafe-actions": "^4.4.2",
     "uglify-js": "^3.5.2",
+    "web3x": "^4.0.6",
     "webrtc-adapter": "^6.4.8",
     "ws": "^7.0.0"
   }

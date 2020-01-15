@@ -1,6 +1,5 @@
 import { Store } from 'redux'
 import {
-  ENABLE_WEB3,
   ETHEREUM_NETWORK,
   getLoginConfigurationForCurrentDomain,
   getTLD,
@@ -11,8 +10,7 @@ import {
 } from '../config'
 import { initialize, queueTrackingEvent, identifyUser } from './analytics'
 import './apis/index'
-import { connect, disconnect } from './comms'
-import { persistCurrentUser } from './comms/index'
+import { connect, persistCurrentUser, disconnect } from './comms'
 import { isMobile } from './comms/mobile'
 import { setLocalProfile } from './comms/peers'
 import './events'
@@ -33,10 +31,11 @@ import { PassportAsPromise } from './passports/PassportAsPromise'
 import { Session } from './session/index'
 import { RootState } from './store/rootTypes'
 import { buildStore } from './store/store'
-import { getAppNetwork, getNetworkFromTLD, initWeb3 } from './web3'
+import { getAppNetwork, initWeb3 } from './web3'
 import { initializeUrlPositionObserver } from './world/positionThings'
 import { setWorldContext } from './protocol/actions'
 import { profileToRendererFormat } from './passports/transformations/profileToRendererFormat'
+import { getUserAccount } from './ethereum/EthereumService'
 
 enum AnalyticsAccount {
   PRD = '1plAT9a2wOOgbPCrTaU8rgGUMzgUTJtU',
@@ -92,8 +91,13 @@ export async function initShared(): Promise<Session | undefined> {
   console['group']('connect#login')
   store.dispatch(loadingStarted())
 
+  let net: ETHEREUM_NETWORK = ETHEREUM_NETWORK.MAINNET
+
   if (WORLD_EXPLORER) {
     try {
+      await initWeb3()
+      net = await getAppNetwork()
+
       userId = await auth.getUserId()
       identifyUser(userId)
       session.auth = auth
@@ -114,15 +118,6 @@ export async function initShared(): Promise<Session | undefined> {
   console['groupEnd']()
 
   console['group']('connect#ethereum')
-
-  let net: ETHEREUM_NETWORK
-
-  if (ENABLE_WEB3) {
-    await initWeb3()
-    net = await getAppNetwork()
-  } else {
-    net = getNetworkFromTLD() || ETHEREUM_NETWORK.MAINNET
-  }
 
   queueTrackingEvent('Use network', { net })
 
@@ -154,6 +149,8 @@ export async function initShared(): Promise<Session | undefined> {
   }
   console['groupEnd']()
 
+  const account = await getUserAccount()
+
   console['group']('connect#comms')
   store.dispatch(establishingComms())
   const maxAttemps = 5
@@ -163,7 +160,8 @@ export async function initShared(): Promise<Session | undefined> {
       const context = await connect(
         userId,
         net,
-        auth
+        auth,
+        account
       )
       if (context !== undefined) {
         store.dispatch(setWorldContext(context))
