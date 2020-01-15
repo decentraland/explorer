@@ -93,6 +93,17 @@ namespace DCL
         const float SORT_MESSAGE_CONTROLLER_TIME = 0.5f;
         float lastTimeMessageControllerSorted = 0;
 
+        public event Action OnSortScenes;
+
+        bool positionDirty = true;
+        private static readonly int MORDOR_X = (int)EnvironmentSettings.MORDOR.x;
+        private static readonly int MORDOR_Z = (int)EnvironmentSettings.MORDOR.z;
+        private Vector2Int currentGridSceneCoordinate = new Vector2Int(MORDOR_X, MORDOR_Z);
+
+        private string currentSceneId = null;
+
+        private Vector2Int sortAuxiliaryVector = new Vector2Int(MORDOR_X, MORDOR_Z);
+
         void Awake()
         {
             if (i != null)
@@ -127,11 +138,6 @@ namespace DCL
 
             DCLCharacterController.OnCharacterMoved += SetPositionDirty;
         }
-
-        bool positionDirty = true;
-
-        private const int LOCAL_MORDOR = -123456789;
-        private Vector2Int currentGridSceneCoordinate = new Vector2Int(LOCAL_MORDOR, LOCAL_MORDOR);
         private void SetPositionDirty(DCLCharacterPosition character)
         {
             var currentX = (int)Math.Floor(character.worldPosition.x / ParcelSettings.PARCEL_SIZE);
@@ -179,14 +185,14 @@ namespace DCL
         {
             InputController_Legacy.i.Update();
 
-            AdjustStateToNewPosition();
+            PrioritizeMessageControllerList();
 
             MessagingControllersManager.i.UpdateThrottling();
         }
 
-        private void AdjustStateToNewPosition(bool forceSortControllers = false)
+        private void PrioritizeMessageControllerList(bool force = false)
         {
-            bool forceSort = forceSortControllers || !RenderingController.i.renderingEnabled;
+            bool forceSort = force || !RenderingController.i.renderingEnabled;
 
             if (forceSort || positionDirty)
             {
@@ -206,24 +212,20 @@ namespace DCL
                 OnSortScenes?.Invoke();
             }
         }
-
-        public event Action OnSortScenes;
-
-        private Vector2Int sortAssist = new Vector2Int(LOCAL_MORDOR, LOCAL_MORDOR);
         private int SceneMessagingSortByDistance(ParcelScene sceneA, ParcelScene sceneB)
         {
             if (sceneA == null || sceneA.transform == null)
-                return -LOCAL_MORDOR;
+                return int.MinValue;
             if (sceneB == null || sceneB.transform == null)
-                return LOCAL_MORDOR;
+                return int.MaxValue;
 
-            sortAssist.x = (int)sceneA.transform.position.x;
-            sortAssist.y = (int)sceneA.transform.position.z;
-            int dist1 = (sortAssist - currentGridSceneCoordinate).sqrMagnitude;
+            sortAuxiliaryVector.x = (int)sceneA.transform.position.x;
+            sortAuxiliaryVector.y = (int)sceneA.transform.position.z;
+            int dist1 = (sortAuxiliaryVector - currentGridSceneCoordinate).sqrMagnitude;
 
-            sortAssist.x = (int)sceneB.transform.position.x;
-            sortAssist.y = (int)sceneB.transform.position.z;
-            int dist2 = (sortAssist - currentGridSceneCoordinate).sqrMagnitude;
+            sortAuxiliaryVector.x = (int)sceneB.transform.position.x;
+            sortAuxiliaryVector.y = (int)sceneB.transform.position.z;
+            int dist2 = (sortAuxiliaryVector - currentGridSceneCoordinate).sqrMagnitude;
 
             return dist1 - dist2;
         }
@@ -317,8 +319,6 @@ namespace DCL
 
             return res;
         }
-
-        private string currentSceneId = null;
         public string GetCurrentScene(DCLCharacterPosition position = null)
         {
             if (position == null)
@@ -379,7 +379,7 @@ namespace DCL
                 if (!MessagingControllersManager.i.ContainsController(newScene.sceneData.id))
                     MessagingControllersManager.i.AddController(this, newScene.sceneData.id);
 
-                AdjustStateToNewPosition(forceSortControllers: true);
+                PrioritizeMessageControllerList(force: true);
 
                 if (VERBOSE)
                     Debug.Log($"{Time.frameCount} : Load parcel scene {newScene.sceneData.basePosition}");
