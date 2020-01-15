@@ -139,7 +139,7 @@ namespace DCL.Components
 
         protected virtual void ConfigureColliders(DecentralandEntity entity)
         {
-            CollidersManager.i.ConfigureColliders(entity.meshRootGameObject, model.withCollisions, true, entity);
+            CollidersManager.i.ConfigureColliders(entity.meshRootGameObject, model.withCollisions, true, entity, CalculateCollidersLayer(model));
         }
 
         protected void OnLoadFailed(LoadWrapper loadWrapper)

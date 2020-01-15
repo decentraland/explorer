@@ -53,7 +53,7 @@ namespace DCL
             if (!RenderingController.i.renderingEnabled || charCamera == null) return;
 
             // We use Physics.Raycast() instead of our raycastHandler.Raycast() as that one is slower, sometimes 2x, because it fetches info we don't need here
-            if (Physics.Raycast(GetRayFromCamera(), out hitInfo, Mathf.Infinity, Configuration.LayerMasks.physicsCastLayerMaskWithoutCharacter))
+            if (Physics.Raycast(GetRayFromCamera(), out hitInfo, Mathf.Infinity, Configuration.PhysicsLayers.physicsCastLayerMaskWithoutCharacter))
             {
                 newHoveredEvent = hitInfo.transform.GetComponentInParent<OnPointerEvent>();
 
@@ -153,8 +153,8 @@ namespace DCL
                         return;
                 }
 
-                var pointerEventLayer = Configuration.LayerMasks.physicsCastLayerMaskWithoutCharacter; //Ensure characterController is being filtered
-                var globalLayer = ~Configuration.LayerMasks.physicsCastLayerMask & (~Configuration.LayerMasks.characterControllerLayer); //Ensure characterController is being filtered
+                var pointerEventLayer = Configuration.PhysicsLayers.physicsCastLayerMaskWithoutCharacter; //Ensure characterController is being filtered
+                var globalLayer = ~Configuration.PhysicsLayers.physicsCastLayerMask & (~(1 << Configuration.PhysicsLayers.characterControllerLayer)); //Ensure characterController is being filtered
                 RaycastHitInfo raycastGlobalLayerHitInfo;
 
                 if (evt == InputController_Legacy.EVENT.BUTTON_DOWN)

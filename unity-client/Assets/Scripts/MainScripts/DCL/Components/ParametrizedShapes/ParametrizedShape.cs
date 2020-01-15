@@ -41,7 +41,7 @@ namespace DCL.Components
 
             if (collisionsDirty)
             {
-                CollidersManager.i.ConfigureColliders(entity.meshRootGameObject, model.withCollisions, false, entity);
+                CollidersManager.i.ConfigureColliders(entity.meshRootGameObject, model.withCollisions, false, entity, CalculateCollidersLayer(model));
                 collisionsDirty = false;
             }
 
