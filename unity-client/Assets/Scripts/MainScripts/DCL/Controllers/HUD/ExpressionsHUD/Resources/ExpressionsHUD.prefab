@@ -267,7 +267,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 12.7, y: 271.9}
+  m_AnchoredPosition: {x: 18, y: 271.9}
   m_SizeDelta: {x: 175.7, y: 32}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &5359035015708864343
@@ -288,7 +288,7 @@ MonoBehaviour:
     m_Top: 0
     m_Bottom: 0
   m_ChildAlignment: 4
-  m_Spacing: 10
+  m_Spacing: 20
   m_ChildForceExpandWidth: 0
   m_ChildForceExpandHeight: 0
   m_ChildControlWidth: 1
@@ -682,7 +682,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetRectTransform: {fileID: 5966592239257548843}
-  hoverScale: 1.08
+  hoverScale: 1.1
   normalScale: 1
 --- !u!1 &2829841620481656756
 GameObject:
@@ -1823,8 +1823,7 @@ MonoBehaviour:
   m_text: Emotes
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 26b03903800224f718b64e9afbc91b61, type: 2}
-  m_sharedMaterial: {fileID: -6892909264025736228, guid: 26b03903800224f718b64e9afbc91b61,
-    type: 2}
+  m_sharedMaterial: {fileID: 2100000, guid: c8f0bb3d3f89e4314ba9ae031b58d296, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
