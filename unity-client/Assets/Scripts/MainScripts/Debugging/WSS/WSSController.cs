@@ -13,14 +13,12 @@ namespace DCL
 
         private void SendMessageToWeb(string type, string message)
         {
-#if UNITY_EDITOR
             var x = new Message()
             {
                 type = type,
                 payload = message
             };
             Send(Newtonsoft.Json.JsonConvert.SerializeObject(x));
-#endif
         }
 
         public class Message
@@ -146,7 +144,6 @@ namespace DCL
 
         private void OnEnable()
         {
-#if UNITY_EDITOR
             ws = new WebSocketServer("ws://localhost:5000");
             ws.AddWebSocketService<DCLWebSocketService>("/dcl");
             ws.Start();
@@ -214,20 +211,16 @@ namespace DCL
                 Application.OpenURL(
                     $"{baseUrl}{debugString}{debugPanelString}position={startInCoords.x}%2C{startInCoords.y}&ws=ws%3A%2F%2Flocalhost%3A5000%2Fdcl");
             }
-#endif
         }
 
         private void OnDisable()
         {
-#if UNITY_EDITOR
             ws.Stop();
             ws = null;
-#endif
         }
 
         void Update()
         {
-#if UNITY_EDITOR
             lock (WSSController.queuedMessages)
             {
                 if (queuedMessagesDirty)
@@ -386,7 +379,6 @@ namespace DCL
                     queuedMessagesDirty = false;
                 }
             }
-#endif
         }
 
         private Builder.DCLBuilderBridge GetBuilderBridge()
