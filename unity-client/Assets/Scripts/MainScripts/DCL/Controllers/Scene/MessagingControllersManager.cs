@@ -32,6 +32,8 @@ namespace DCL
         public bool isRunning { get { return mainCoroutine != null; } }
 
         private List<MessagingController> sortedControllers = new List<MessagingController>();
+        private List<MessagingBus> busesToProcess = new List<MessagingBus>();
+        private int busesToProcessCount = 0;
         private int sortedControllersCount = 0;
 
         private MessagingController globalController = null;
@@ -47,7 +49,7 @@ namespace DCL
             if (!string.IsNullOrEmpty(GLOBAL_MESSAGING_CONTROLLER))
                 messagingControllers.TryGetValue(GLOBAL_MESSAGING_CONTROLLER, out globalController);
 
-            SceneController.i.OnSortScenes += RefreshScenesState;
+            SceneController.i.OnSortScenes += PopulateBusesToBeProcessed;
             DCLCharacterController.OnCharacterMoved += OnCharacterMoved;
 
             if (mainCoroutine == null)
@@ -64,7 +66,7 @@ namespace DCL
                 messagingControllers.TryGetValue(currentSceneId, out currentSceneController);
         }
 
-        public void RefreshScenesState()
+        public void PopulateBusesToBeProcessed()
         {
             List<ParcelScene> scenesSortedByDistance = SceneController.i.scenesSortedByDistance;
 
@@ -98,6 +100,57 @@ namespace DCL
             }
 
             sortedControllersCount = sortedControllers.Count;
+
+            bool uiSceneControllerActive = uiSceneController != null && uiSceneController.enabled;
+            bool globalControllerActive = globalController != null && globalController.enabled;
+            bool currentSceneControllerActive = currentSceneController != null && currentSceneController.enabled;
+
+            bool atLeastOneControllerShouldBeProcessed = uiSceneControllerActive || globalControllerActive || currentSceneControllerActive || sortedControllersCount > 0;
+
+            if (!atLeastOneControllerShouldBeProcessed)
+                return;
+
+            busesToProcess.Clear();
+            //-------------------------------------------------------------------------------------------
+            // Global scene UI
+            if (uiSceneControllerActive)
+            {
+                busesToProcess.Add(uiSceneController.uiBus);
+                busesToProcess.Add(uiSceneController.initBus);
+            }
+
+            if (globalControllerActive)
+            {
+                busesToProcess.Add(globalController.initBus);
+            }
+
+            if (currentSceneControllerActive)
+            {
+                busesToProcess.Add(currentSceneController.initBus);
+                busesToProcess.Add(currentSceneController.uiBus);
+                busesToProcess.Add(currentSceneController.systemBus);
+            }
+
+            for (int i = 0; i < sortedControllersCount; ++i)
+            {
+                MessagingController msgController = sortedControllers[i];
+
+                busesToProcess.Add(msgController.initBus);
+                busesToProcess.Add(msgController.uiBus);
+            }
+
+            for (int i = 0; i < sortedControllersCount; ++i)
+            {
+                MessagingController msgController = sortedControllers[i];
+                busesToProcess.Add(msgController.systemBus);
+            }
+
+            if (uiSceneControllerActive)
+            {
+                busesToProcess.Add(uiSceneController.systemBus);
+            }
+
+            busesToProcessCount = busesToProcess.Count;
         }
 
         public void Cleanup()
@@ -117,7 +170,7 @@ namespace DCL
                 }
             }
 
-            SceneController.i.OnSortScenes -= RefreshScenesState;
+            SceneController.i.OnSortScenes -= PopulateBusesToBeProcessed;
             DCLCharacterController.OnCharacterMoved -= OnCharacterMoved;
 
             messagingControllers.Clear();
@@ -202,95 +255,18 @@ namespace DCL
 
         IEnumerator ProcessMessages()
         {
-            float start;
-
             while (true)
             {
                 yield return null;
 
                 timeBudgetCounter = RenderingController.i.renderingEnabled ? MAX_GLOBAL_MSG_BUDGET : float.MaxValue;
-                start = Time.unscaledTime;
 
-                bool uiSceneControllerActive = uiSceneController != null && uiSceneController.enabled;
-                bool globalControllerActive = globalController != null && globalController.enabled;
-                bool currentSceneControllerActive = currentSceneController != null && currentSceneController.enabled;
-
-                bool atLeastOneControllerWasProcessed = uiSceneControllerActive || globalControllerActive || currentSceneControllerActive || sortedControllersCount > 0;
-
-                if (!atLeastOneControllerWasProcessed)
-                    continue;
-
-                //-------------------------------------------------------------------------------------------
-                // Global scene UI
-                if (uiSceneControllerActive)
+                for (int i = 0; i < busesToProcessCount; ++i)
                 {
-                    if (ProcessBus(uiSceneController.uiBus))
-                        continue;
+                    MessagingBus bus = busesToProcess[i];
 
-                    if (ProcessBus(uiSceneController.initBus))
-                        continue;
-                }
-
-                if (globalControllerActive)
-                {
-                    if (ProcessBus(globalController.initBus))
-                        continue;
-                }
-
-                if (currentSceneControllerActive)
-                {
-                    if (ProcessBus(currentSceneController.initBus))
-                        continue;
-
-                    if (ProcessBus(currentSceneController.uiBus))
-                        continue;
-
-                    if (ProcessBus(currentSceneController.systemBus))
-                        continue;
-                }
-
-                bool shouldRestart = false;
-
-                for (int i = 0; i < sortedControllersCount; ++i)
-                {
-                    MessagingController msgController = sortedControllers[i];
-
-                    if (ProcessBus(msgController.initBus))
-                    {
-                        shouldRestart = true;
+                    if (ProcessBus(bus))
                         break;
-                    }
-
-                    if (ProcessBus(msgController.uiBus))
-                    {
-                        shouldRestart = true;
-                        break;
-                    }
-                }
-
-                if (shouldRestart)
-                    continue;
-
-                if (timeBudgetCounter > MAX_SYSTEM_MSG_BUDGET_FOR_FAR_SCENES)
-                    timeBudgetCounter = MAX_SYSTEM_MSG_BUDGET_FOR_FAR_SCENES;
-
-                for (int i = 0; i < sortedControllersCount; ++i)
-                {
-                    MessagingController msgController = sortedControllers[i];
-
-                    if (ProcessBus(msgController.systemBus))
-                    {
-                        shouldRestart = true;
-                        break;
-                    }
-                }
-
-                if (shouldRestart)
-                    continue;
-
-                if (uiSceneControllerActive)
-                {
-                    ProcessBus(uiSceneController.systemBus);
                 }
             }
         }
