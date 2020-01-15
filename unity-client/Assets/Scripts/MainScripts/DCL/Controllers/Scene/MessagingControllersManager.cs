@@ -308,7 +308,7 @@ namespace DCL
                         }
                     }
 
-                    break;
+                    yield return null;
                 }
 
                 yield return null;
