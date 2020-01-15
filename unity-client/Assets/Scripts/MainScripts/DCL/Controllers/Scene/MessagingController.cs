@@ -188,10 +188,5 @@ namespace DCL
             if (!int.TryParse(tag.Substring(lastSeparator + 1), out classId))
                 Debug.LogError("Couldn't parse classId string to int");
         }
-
-        private string FormatQueueId(string sceneId, string tag)
-        {
-            return sceneId + tag;
-        }
     }
 }
