@@ -283,7 +283,7 @@ namespace DCL
             //TODO(Brian): We should use the returning yieldReturn IEnumerator and MoveNext() it manually each frame to
             //             account the coroutine processing into the budget. Until we do that we just skip it.
             bus.ProcessQueue(timeBudget, out _);
-            bus.owner?.RefreshEnabledState();
+            RefreshControllerEnabledState(bus.owner);
 
             timeBudgetCounter -= Time.realtimeSinceStartup - startTime;
 
@@ -291,6 +291,18 @@ namespace DCL
                 return true;
 
             return false;
+        }
+
+        public void RefreshControllerEnabledState(MessagingController controller)
+        {
+            if (controller == null || !controller.enabled)
+                return;
+
+            if (controller.uiBus.pendingMessagesCount != 0) return;
+            if (controller.initBus.pendingMessagesCount != 0) return;
+            if (controller.systemBus.pendingMessagesCount != 0) return;
+
+            controller.enabled = false;
         }
     }
 }

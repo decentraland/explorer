@@ -70,18 +70,6 @@ namespace DCL
             StartBus(MessagingBusId.UI);
         }
 
-        public void RefreshEnabledState()
-        {
-            if (!enabled)
-                return;
-
-            if (uiBus.pendingMessagesCount != 0) return;
-            if (initBus.pendingMessagesCount != 0) return;
-            if (systemBus.pendingMessagesCount != 0) return;
-
-            enabled = false;
-        }
-
         private MessagingBus AddMessageBus(string id)
         {
             var newMessagingBus = new MessagingBus(id, messageHandler, this);
