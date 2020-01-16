@@ -23,11 +23,6 @@ export class DecentralandSynchronizationSystem implements ISystem {
   cachedComponents: Record<string, Record<string, string>> = {}
   engine!: Engine
 
-  /**
-   * Store a list of disposable component's IDs that have been sent to the engine
-   */
-  private cachedDisposableIds: Record<string, boolean> = {}
-
   constructor(public dcl: DecentralandInterface) {}
 
   activate(engine: Engine) {
@@ -102,7 +97,6 @@ export class DecentralandSynchronizationSystem implements ISystem {
           if (isDisposableComponent(component)) {
             // Send the attach component signal
             const id = getComponentId(component)
-            this.cachedDisposableIds[id] = true
             this.dcl.attachEntityComponent(entity.uuid, componentName, id)
           } else {
             const componentJson: string = JSON.stringify(component)
@@ -221,7 +215,6 @@ export class DecentralandSynchronizationSystem implements ISystem {
    */
   private disposableComponentCreated(event: DisposableComponentCreated) {
     if (componentNameRE.test(event.componentName)) {
-      this.cachedDisposableIds[event.componentId] = true
       this.dcl.componentCreated(event.componentId, event.componentName, event.classId)
     }
   }
@@ -231,10 +224,7 @@ export class DecentralandSynchronizationSystem implements ISystem {
    * update cycle and once after creation.
    */
   private disposableComponentRemoved(event: DisposableComponentRemoved) {
-    if (this.cachedDisposableIds[event.componentId]) {
-      this.dcl.componentDisposed(event.componentId)
-      delete this.cachedDisposableIds[event.componentId]
-    }
+    this.dcl.componentDisposed(event.componentId)
   }
 
   /**
