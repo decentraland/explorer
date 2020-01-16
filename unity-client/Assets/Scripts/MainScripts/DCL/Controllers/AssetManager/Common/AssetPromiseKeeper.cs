@@ -19,7 +19,7 @@ namespace DCL
         where AssetLibraryType : AssetLibrary<AssetType>, new()
         where AssetPromiseType : AssetPromise<AssetType>
     {
-        const float PROCESS_PROMISES_TIME_BUDGET = 0.0025f;
+        const float PROCESS_PROMISES_TIME_BUDGET = 0.01f;
 
         private static AssetPromiseKeeper<AssetType, AssetLibraryType, AssetPromiseType> instance;
         public static AssetPromiseKeeper<AssetType, AssetLibraryType, AssetPromiseType> i
