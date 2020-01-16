@@ -140,10 +140,6 @@ namespace DCL
 #if UNITY_EDITOR
             SceneController.i.isWssDebugMode = true;
 #endif
-        }
-
-        private void OnEnable()
-        {
             ws = new WebSocketServer("ws://localhost:5000");
             ws.AddWebSocketService<DCLWebSocketService>("/dcl");
             ws.Start();
@@ -213,10 +209,13 @@ namespace DCL
             }
         }
 
-        private void OnDisable()
+        private void OnDestroy()
         {
-            ws.Stop();
-            ws = null;
+            if (ws != null)
+            {
+                ws.Stop();
+                ws = null;
+            }
         }
 
         void Update()

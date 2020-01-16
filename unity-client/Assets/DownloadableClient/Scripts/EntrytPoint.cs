@@ -34,8 +34,11 @@ namespace DownloadableClient
             RenderingController.i.OnRenderingStateChanged += OnRenderingStateChanged;
 
             DCL.WSSController.i.openBrowserWhenStart = true;
-            DCL.WSSController.i.baseUrlMode = DCL.WSSController.BaseUrl.LOCAL_HOST;
-            DCL.WSSController.i.forceLocalComms = true;
+            //DCL.WSSController.i.baseUrlMode = DCL.WSSController.BaseUrl.LOCAL_HOST;
+            //DCL.WSSController.i.forceLocalComms = true;
+            DCL.WSSController.i.baseUrlMode = DCL.WSSController.BaseUrl.CUSTOM;
+            DCL.WSSController.i.baseUrlCustom = "https://explorer.decentraland.zone/?";
+            DCL.WSSController.i.forceLocalComms = false;
             DCL.WSSController.i.environment = DCL.WSSController.Environment.ZONE;
             DCL.WSSController.i.debugPanelMode = DCL.WSSController.DebugPanel.Off;
 
