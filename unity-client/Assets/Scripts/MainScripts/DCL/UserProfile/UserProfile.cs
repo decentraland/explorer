@@ -35,6 +35,7 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
 
         model.name = newModel?.name;
         model.email = newModel?.email;
+        model.description = newModel?.description;
         model.avatar.CopyFrom(newModel?.avatar);
         model.snapshots = newModel?.snapshots;
         model.inventory = newModel?.inventory;
