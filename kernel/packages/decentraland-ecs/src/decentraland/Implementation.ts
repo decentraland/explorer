@@ -102,7 +102,7 @@ export class DecentralandSynchronizationSystem implements ISystem {
           if (isDisposableComponent(component)) {
             // Send the attach component signal
             const id = getComponentId(component)
-            cachedDisposableIds.push(id)
+            this.cachedDisposableIds[id] = true
             this.dcl.attachEntityComponent(entity.uuid, componentName, id)
           } else {
             const componentJson: string = JSON.stringify(component)
