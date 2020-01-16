@@ -369,6 +369,9 @@ namespace DCL
                             case "UpdateMinimapSceneInformation":
                                 MinimapMetadataController.i.UpdateMinimapSceneInformation(msg.payload);
                                 break;
+                            case "ConfigureSettingsHUD":
+                                HUDController.i.ConfigureSettingsHUD(msg.payload);
+                                break;
                             default:
                                 Debug.Log("<b><color=#FF0000>WSSController:</color></b> received an unknown message from kernel to renderer: " + msg.type);
                                 break;
