@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -106,7 +106,6 @@ namespace DCL
         public MessagingController owner;
 
         Dictionary<string, LinkedListNode<MessagingBus.QueuedSceneMessage>> unreliableMessages = new Dictionary<string, LinkedListNode<MessagingBus.QueuedSceneMessage>>();
-        System.Text.StringBuilder stringBuilder = new System.Text.StringBuilder();
         public int unreliableMessagesReplaced = 0;
 
         public bool enabled;
@@ -196,6 +195,9 @@ namespace DCL
                 {
                     MessagingControllersManager.i.pendingInitMessagesCount++;
                 }
+
+                if (owner != null)
+                    owner.enabled = true;
             }
         }
 
@@ -203,7 +205,7 @@ namespace DCL
         {
             yieldReturn = null;
 
-            // Note (Zak): This check is to avoid calling DCLDCLTime.realtimeSinceStartup
+            // Note (Zak): This check is to avoid calling Time.realtimeSinceStartup
             // unnecessarily because it's pretty slow in JS
             if (timeBudget == 0 || !enabled || pendingMessages.Count == 0)
                 return false;

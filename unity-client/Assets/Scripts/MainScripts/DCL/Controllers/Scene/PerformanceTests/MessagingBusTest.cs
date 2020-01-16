@@ -113,8 +113,10 @@ namespace MessagingBusTest
                 message = dataAsJson[i];
                 separator = message.IndexOf(' ');
                 locator = "";
+
                 if (separator != -1)
                     locator = message.Substring(0, separator);
+
                 if (locator == SEND_SCENE_MESSAGE)
                 {
                     raw = message.Substring(separator + 2, message.Length - SEND_SCENE_MESSAGE.Length - SEND_SCENE_UNUSED_CHARS);
