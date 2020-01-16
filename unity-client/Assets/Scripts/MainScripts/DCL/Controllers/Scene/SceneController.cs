@@ -1,4 +1,4 @@
-﻿using DCL.Controllers;
+using DCL.Controllers;
 using DCL.Helpers;
 using DCL.Interface;
 using DCL.Models;
@@ -386,8 +386,6 @@ namespace DCL
                 if (!MessagingControllersManager.i.ContainsController(newScene.sceneData.id))
                     MessagingControllersManager.i.AddController(this, newScene.sceneData.id);
 
-                PrioritizeMessageControllerList(force: true);
-
                 if (VERBOSE)
                     Debug.Log($"{Time.frameCount} : Load parcel scene {newScene.sceneData.basePosition}");
             }
@@ -499,9 +497,10 @@ namespace DCL
 
             MessagingControllersManager.i.ForceEnqueueToGlobal(MessagingBusId.INIT, queuedMessage);
 
+            PrioritizeMessageControllerList(force: true);
+
             if (VERBOSE)
                 Debug.Log($"{Time.frameCount} : Load parcel scene queue {decentralandSceneJSON}");
-
         }
 
         public void UpdateParcelScenes(string decentralandSceneJSON)
