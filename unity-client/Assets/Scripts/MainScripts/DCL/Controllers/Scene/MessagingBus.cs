@@ -32,7 +32,6 @@ namespace DCL
         public const string SYSTEM = "SYSTEM";
     }
 
-
     public enum QueueMode
     {
         Reliable,
@@ -197,9 +196,6 @@ namespace DCL
                 {
                     MessagingControllersManager.i.pendingInitMessagesCount++;
                 }
-
-                if (owner != null)
-                    owner.enabled = true;
             }
         }
 
@@ -259,8 +255,6 @@ namespace DCL
                         if (msgYieldInstruction != null)
                         {
                             processedMessagesCount++;
-
-                            yieldReturn = msgYieldInstruction;
 
                             msgYieldInstruction = null;
 

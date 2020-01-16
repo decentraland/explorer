@@ -42,7 +42,6 @@ namespace DCL
         public Dictionary<string, MessagingBus> messagingBuses = new Dictionary<string, MessagingBus>();
         public IMessageHandler messageHandler;
         public string debugTag;
-        public bool enabled = true;
 
         private QueueState currentQueueState
         {
@@ -178,11 +177,6 @@ namespace DCL
             int lastSeparator = tag.LastIndexOf(SEPARATOR);
             if (!int.TryParse(tag.Substring(lastSeparator + 1), out classId))
                 Debug.LogError("Couldn't parse classId string to int");
-        }
-
-        private string FormatQueueId(string sceneId, string tag)
-        {
-            return sceneId + tag;
         }
     }
 }
