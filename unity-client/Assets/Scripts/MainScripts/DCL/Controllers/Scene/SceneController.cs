@@ -1,4 +1,4 @@
-﻿using DCL.Controllers;
+using DCL.Controllers;
 using DCL.Helpers;
 using DCL.Interface;
 using DCL.Models;
@@ -576,7 +576,7 @@ namespace DCL
 
         private IEnumerator DeferredDecoding()
         {
-            float lastTimeDecoded = Time.realtimeSinceStartup;
+            float start = Time.realtimeSinceStartup;
             float maxTimeForDecode;
 
             while (true)
@@ -589,12 +589,12 @@ namespace DCL
 
                     DecodeAndEnqueue(payload);
 
-                    if (Time.realtimeSinceStartup - lastTimeDecoded < maxTimeForDecode)
+                    if (Time.realtimeSinceStartup - start < maxTimeForDecode)
                         continue;
                 }
 
                 yield return null;
-                lastTimeDecoded = Time.unscaledTime;
+                start = Time.unscaledTime;
             }
         }
 
