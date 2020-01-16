@@ -158,7 +158,6 @@ namespace DCL
             if (state == AssetPromiseState.LOADING)
             {
                 OnCancelLoading();
-                OnLoadFailure();
             }
             else if (state == AssetPromiseState.FINISHED)
             {
