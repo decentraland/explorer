@@ -271,7 +271,7 @@ export function* submitPassportToRenderer(action: PassportSuccessAction): any {
     yield call(ensureRenderer)
     yield call(ensureBaseCatalogs)
 
-    window['unityInterface'].PeerProfileReport(profileToRendererFormat(profile))
+    window['unityInterface'].AddUserProfileToCatalog(profileToRendererFormat(profile))
   }
 }
 
