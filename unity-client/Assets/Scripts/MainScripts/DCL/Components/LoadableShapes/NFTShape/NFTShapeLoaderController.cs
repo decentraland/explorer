@@ -137,7 +137,7 @@ public class NFTShapeLoaderController : MonoBehaviour
         www.SendWebRequest();
         while (!www.isDone)
         {
-            yield return null;
+            yield return new WaitForSeconds(0.01f);
         }
 
         if (!www.WebRequestSucceded())

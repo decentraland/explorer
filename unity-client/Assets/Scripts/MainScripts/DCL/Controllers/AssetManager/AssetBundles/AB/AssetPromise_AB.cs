@@ -121,7 +121,7 @@ namespace DCL
                 assetBundleRequest.SendWebRequest();
                 while (!assetBundleRequest.isDone)
                 {
-                    yield return null;
+                    yield return new WaitForSeconds(0.01f);
                 }
 
                 if (!assetBundleRequest.WebRequestSucceded())

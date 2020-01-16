@@ -126,7 +126,7 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
         www.SendWebRequest();
         while (!www.isDone)
         {
-            yield return null;
+            yield return new WaitForSeconds(0.01f);
         }
 
         if (!www.isNetworkError && !www.isHttpError)

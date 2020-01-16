@@ -60,7 +60,7 @@ public class GLTFLoadingTestController : MonoBehaviour
         uwr.SendWebRequest();
         while (!uwr.isDone)
         {
-            yield return null;
+            yield return new WaitForSeconds(0.01f);
         }
 
         if (uwr.isNetworkError)

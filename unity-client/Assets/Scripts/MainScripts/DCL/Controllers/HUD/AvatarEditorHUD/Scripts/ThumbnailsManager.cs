@@ -47,7 +47,7 @@ public static class ThumbnailsManager
         www.SendWebRequest();
         while (!www.isDone)
         {
-            yield return null;
+            yield return new WaitForSeconds(0.01f);
         }
 
         Sprite sprite;

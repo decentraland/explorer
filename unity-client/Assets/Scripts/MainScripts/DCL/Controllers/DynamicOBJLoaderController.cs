@@ -52,7 +52,7 @@ public class DynamicOBJLoaderController : MonoBehaviour
             webRequest.SendWebRequest();
             while (!webRequest.isDone)
             {
-                yield return null;
+                yield return new WaitForSeconds(0.01f);
             }
 
             if (webRequest.isNetworkError || webRequest.isHttpError)
