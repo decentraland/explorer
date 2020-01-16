@@ -12,6 +12,7 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
     public event Action<UserProfile> OnUpdate;
 
     public string userName => model.name;
+    public string description => model.description;
     public string email => model.email;
     public AvatarModel avatar => model.avatar;
     internal Dictionary<string, int> inventory = new Dictionary<string, int>();
@@ -86,6 +87,11 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
         this.faceSnapshot = faceSnapshot;
         this.bodySnapshot = bodySnapshot;
         OnUpdate?.Invoke(this);
+    }
+
+    public string[] GetInventoryItemsIds()
+    {
+        return inventory.Keys.ToArray();
     }
 
     internal static UserProfile ownUserProfile;

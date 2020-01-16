@@ -27,6 +27,7 @@ public class HUDController : MonoBehaviour
     public NotificationHUDController notificationHud { get; private set; }
     public MinimapHUDController minimapHud { get; private set; }
     public AvatarEditorHUDController avatarEditorHud { get; private set; }
+    public PlayerInfoCardHUDController playerInfoCardHudController { get; private set; }
 
     private UserProfile ownUserProfile => UserProfile.GetOwnUserProfile();
     private WearableDictionary wearableCatalog => CatalogController.wearableCatalog;
@@ -105,6 +106,17 @@ public class HUDController : MonoBehaviour
         }
 
         avatarEditorHud?.SetVisibility(configuration.active && configuration.visible);
+    }
+    
+    public void ConfigurePlayerInfoCardHUD(string configurationJson)
+    {
+        HUDConfiguration configuration = JsonUtility.FromJson<HUDConfiguration>(configurationJson);
+        if (configuration.active && playerInfoCardHudController == null)
+        {
+            playerInfoCardHudController = new PlayerInfoCardHUDController();
+        }
+
+        playerInfoCardHudController?.SetVisibility(configuration.active && configuration.visible);
     }
 
     private void UpdateAvatarHUD()
