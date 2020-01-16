@@ -1,4 +1,4 @@
-﻿using DCL.Controllers;
+using DCL.Controllers;
 using DCL.Models;
 using System;
 using System.Collections.Generic;
@@ -42,6 +42,7 @@ namespace DCL
         public Dictionary<string, MessagingBus> messagingBuses = new Dictionary<string, MessagingBus>();
         public IMessageHandler messageHandler;
         public string debugTag;
+        public bool enabled;
 
         private QueueState currentQueueState
         {

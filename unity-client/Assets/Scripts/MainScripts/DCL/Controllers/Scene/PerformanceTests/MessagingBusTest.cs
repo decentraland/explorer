@@ -60,7 +60,7 @@ namespace MessagingBusTest
                 Assert.IsTrue(bus.pendingMessagesCount > 1000);
                 while (bus.processedMessagesCount < processed + 1000)
                 {
-                    bus.ProcessQueue(0.1f);
+                    bus.ProcessQueue(0.1f, out _);
                 }
             })
             .SetUp(() =>
