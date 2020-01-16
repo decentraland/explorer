@@ -1,4 +1,4 @@
-using DCL.Controllers;
+﻿using DCL.Controllers;
 using DCL.Helpers;
 using DCL.Interface;
 using DCL.Models;
@@ -40,7 +40,7 @@ namespace DCL
 
         public bool deferredMessagesDecoding = false;
         Queue<string> payloadsToDecode = new Queue<string>();
-        const float MAX_TIME_FOR_DECODE = 0.05f;
+        const float MAX_TIME_FOR_DECODE = 0.005f;
 
 
         #region BENCHMARK_EVENTS
