@@ -179,13 +179,10 @@ export class DecentralandSynchronizationSystem implements ISystem {
     if (componentNameRE.test(event.componentName)) {
       return
     }
-    if (!event.classId) {
-      return
-    }
     const component = event.entity.components[event.componentName]
     if (isDisposableComponent(component)) {
       this.dcl.attachEntityComponent(event.entity.uuid, event.componentName, getComponentId(component))
-    } else {
+    } else if (event.classId !== null) {
       const componentJson: string = JSON.stringify(component)
 
       // Send the updated component
