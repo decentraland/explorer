@@ -530,6 +530,9 @@ export async function connect(userId: string, network: ETHEREUM_NETWORK, auth: A
             }
           }
         )
+
+        await peer.setLayer('blue')
+
         connection = new LighthouseWorldInstanceConnection(peer)
         break
       }
