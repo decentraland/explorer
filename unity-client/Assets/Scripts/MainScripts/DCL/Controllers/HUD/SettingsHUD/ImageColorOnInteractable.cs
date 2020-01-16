@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 namespace DCL.SettingsHUD
 {
-    public class ImageAlphaOnInteractable : MonoBehaviour
+    public class ImageColorOnInteractable : MonoBehaviour
     {
         [SerializeField] Selectable targetSelectable;
         [SerializeField] Graphic targetGraphic;
