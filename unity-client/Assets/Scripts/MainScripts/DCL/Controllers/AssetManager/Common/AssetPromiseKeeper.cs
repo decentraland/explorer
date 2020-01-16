@@ -151,27 +151,23 @@ namespace DCL
             }
         }
 
+        float startTime;
         IEnumerator ProcessBlockedPromisesQueue()
         {
-            float start = Time.unscaledTime;
+            startTime = Time.unscaledTime;
+
             while (true)
             {
                 while (blockedPromisesQueue.Count > 0)
                 {
                     AssetPromise<AssetType> promise = blockedPromisesQueue.Dequeue();
 
-                    ProcessBlockedPromises(promise);
+                    yield return ProcessBlockedPromisesDeferred(promise);
                     CleanPromise(promise);
-
-                    if (Time.realtimeSinceStartup - start >= PROCESS_PROMISES_TIME_BUDGET)
-                    {
-                        yield return null;
-                        start = Time.unscaledTime;
-                    }
                 }
-                yield return null;
 
-                start = Time.unscaledTime;
+                yield return null;
+                startTime = Time.unscaledTime;
             }
         }
 
@@ -192,6 +188,46 @@ namespace DCL
                 ForgetBlockedPromises(loadedPromiseId);
             else
                 LoadBlockedPromises(loadedPromiseId);
+
+            if (masterToBlockedPromises.ContainsKey(loadedPromiseId))
+                masterToBlockedPromises.Remove(loadedPromiseId);
+        }
+
+        private IEnumerator ProcessBlockedPromisesDeferred(AssetPromise<AssetType> loadedPromise)
+        {
+            object loadedPromiseId = loadedPromise.GetId();
+
+            if (!masterToBlockedPromises.ContainsKey(loadedPromiseId))
+                yield break;
+
+            if (!masterPromiseById.ContainsKey(loadedPromiseId))
+                yield break;
+
+            if (masterPromiseById[loadedPromiseId] != loadedPromise)
+                yield break;
+
+            if (loadedPromise.state != AssetPromiseState.FINISHED)
+                ForgetBlockedPromises(loadedPromiseId);
+            else
+            {
+                List<AssetPromiseType> blockedPromisesToLoad = GetBlockedPromisesToLoadForId(loadedPromiseId);
+
+                int blockedPromisesToLoadCount = blockedPromisesToLoad.Count;
+
+                for (int i = 0; i < blockedPromisesToLoadCount; i++)
+                {
+                    AssetPromiseType promise = blockedPromisesToLoad[i];
+                    promise.library = library;
+                    promise.OnPreFinishEvent += CleanPromise;
+                    promise.Load();
+
+                    if (Time.realtimeSinceStartup - startTime >= PROCESS_PROMISES_TIME_BUDGET)
+                    {
+                        yield return null;
+                        startTime = Time.unscaledTime;
+                    }
+                }
+            }
 
             if (masterToBlockedPromises.ContainsKey(loadedPromiseId))
                 masterToBlockedPromises.Remove(loadedPromiseId);
@@ -220,7 +256,7 @@ namespace DCL
             }
         }
 
-        private void LoadBlockedPromises(object loadedPromiseId)
+        private List<AssetPromiseType> GetBlockedPromisesToLoadForId(object loadedPromiseId)
         {
             List<AssetPromiseType> blockedPromisesToLoad = new List<AssetPromiseType>();
 
@@ -236,6 +272,13 @@ namespace DCL
                     blockedPromises.Remove(blockedPromise);
                 }
             }
+
+            return blockedPromisesToLoad;
+        }
+
+        private void LoadBlockedPromises(object loadedPromiseId)
+        {
+            List<AssetPromiseType> blockedPromisesToLoad = GetBlockedPromisesToLoadForId(loadedPromiseId);
 
             int blockedPromisesToLoadCount = blockedPromisesToLoad.Count;
 
