@@ -9,10 +9,9 @@ namespace DCL
     {
         public static bool VERBOSE = false;
 
-        private const float MAX_GLOBAL_MSG_BUDGET = 0.006f;
-        private const float MAX_SYSTEM_MSG_BUDGET_FOR_FAR_SCENES = 0.003f;
+        private const float MAX_GLOBAL_MSG_BUDGET = 0.01f;
 
-        private const float GLTF_BUDGET_MAX = 0.033f;
+        private const float GLTF_BUDGET_MAX = 0.015f;
         private const float GLTF_BUDGET_MIN = 0.008f;
 
         public const string GLOBAL_MESSAGING_CONTROLLER = "global_messaging_controller";
