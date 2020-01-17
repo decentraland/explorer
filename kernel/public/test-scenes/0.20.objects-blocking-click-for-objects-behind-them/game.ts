@@ -79,6 +79,7 @@ const transform5 = new Transform({
 chest.addComponentOrReplace(transform5);
 const gltfShape4 = new GLTFShape("models/Trunk_01/Trunk_01.glb");
 gltfShape4.withCollisions = true;
+gltfShape4.isPointerBlocker = false;
 gltfShape4.visible = true;
 chest.addComponentOrReplace(gltfShape4);
 

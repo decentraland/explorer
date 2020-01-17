@@ -154,7 +154,7 @@ namespace DCL
                 }
 
                 var pointerEventLayer = Configuration.PhysicsLayers.physicsCastLayerMaskWithoutCharacter; //Ensure characterController is being filtered
-                var globalLayer = ~Configuration.PhysicsLayers.physicsCastLayerMask & (~(1 << Configuration.PhysicsLayers.characterControllerLayer)); //Ensure characterController is being filtered
+                var globalLayer = ~Configuration.PhysicsLayers.physicsCastLayerMask & (~(1 << Configuration.PhysicsLayers.characterLayer)); //Ensure characterController is being filtered
                 RaycastHitInfo raycastGlobalLayerHitInfo;
 
                 if (evt == InputController_Legacy.EVENT.BUTTON_DOWN)
