@@ -94,9 +94,11 @@ namespace DCL.Components
 
         protected int CalculateCollidersLayer(Model model)
         {
-            if (!model.withCollisions && model.isPointerBlocker)
+            // We can't enable this layer changer logic until we redeploy all the builder and street scenes with the corrected 'withCollision' default in true...
+            /* if (!model.withCollisions && model.isPointerBlocker)
                 return PhysicsLayers.onPointerEventLayer;
-            else if (model.withCollisions && !model.isPointerBlocker)
+            else */
+            if (model.withCollisions && !model.isPointerBlocker)
                 return PhysicsLayers.characterOnlyLayer;
 
             return PhysicsLayers.defaultLayer;
