@@ -178,6 +178,13 @@ export async function initShared(): Promise<Session | undefined> {
         } else {
           // max number of attempts not reached => continue with loop
           store.dispatch(commsErrorRetrying(i))
+
+          if (e.message && e.message.includes('Result of validation challenge is incorrect')) {
+            const element = document.getElementById('eth-sign-advice')
+            if (element) {
+              element.style.display = 'block'
+            }
+          }
         }
       } else {
         // not a comms issue per se => rethrow error
@@ -186,6 +193,10 @@ export async function initShared(): Promise<Session | undefined> {
         throw e
       }
     }
+  }
+  const element = document.getElementById('eth-sign-advice')
+  if (element) {
+    element.style.display = 'none'
   }
   store.dispatch(commsEstablished())
   console['groupEnd']()

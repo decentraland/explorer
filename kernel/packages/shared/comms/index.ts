@@ -29,7 +29,7 @@ import { Pose, UserInformation, Package, ChatMessage, ProfileVersion, BusMessage
 import { CommunicationArea, Position, position2parcel, sameParcel, squareDistance } from './interface/utils'
 import { BrokerWorldInstanceConnection } from '../comms/v1/brokerWorldInstanceConnection'
 import { profileToRendererFormat } from 'shared/passports/transformations/profileToRendererFormat'
-import { ProfileForRenderer } from 'decentraland-ecs/src'
+import { ProfileForRenderer, uuid } from 'decentraland-ecs/src'
 import { Session } from '../session/index'
 import { worldRunningObservable, isWorldRunning } from '../world/worldState'
 import { WorldInstanceConnection } from './interface/index'
@@ -529,7 +529,7 @@ export async function connect(userId: string, network: ETHEREUM_NETWORK, auth: A
 
         const peer = new Peer(
           lighthouseUrl,
-          ethAddress,
+          ethAddress ? ethAddress : `peer-${uuid()}`,
           () => {
             // noop
           },
@@ -537,11 +537,18 @@ export async function connect(userId: string, network: ETHEREUM_NETWORK, auth: A
             connectionConfig: {
               iceServers: commConfigurations.iceServers
             },
-            authHandler: (msg: string) => requestManager.personal_sign(msg, ethAddress!, '')
+            authHandler: async (msg: string) => {
+              try {
+                return await requestManager.personal_sign(msg, ethAddress!, '')
+              } catch (e) {
+                defaultLogger.info(`error while trying to sign message from lighthouse '${msg}'`)
+              }
+            }
           }
         )
 
-        await peer.setLayer('white')
+        await peer.setLayer('gold')
+        await peer.awaitConnectionEstablished(60000)
 
         connection = new LighthouseWorldInstanceConnection(peer)
 
