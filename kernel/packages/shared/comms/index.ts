@@ -543,7 +543,6 @@ export async function connect(userId: string, network: ETHEREUM_NETWORK, auth: A
                   return await requestManager.personal_sign(msg, ethAddress, '')
                 } else {
                   return msg
-                  //   return await requestManager.personal_sign(msg, identity.pr)
                 }
               } catch (e) {
                 defaultLogger.info(`error while trying to sign message from lighthouse '${msg}'`)
