@@ -134,7 +134,11 @@ public class NFTShapeLoaderController : MonoBehaviour
         string jsonURL = $"{NFTDataFetchingSettings.DAR_API_URL}/{darURLRegistry}/asset/{darURLAsset}";
 
         UnityWebRequest www = UnityWebRequest.Get(jsonURL);
-        yield return www.SendWebRequest();
+        www.SendWebRequest();
+        while (!www.isDone)
+        {
+            yield return null;
+        }
 
         if (!www.WebRequestSucceded())
         {
@@ -170,8 +174,6 @@ public class NFTShapeLoaderController : MonoBehaviour
 
         for (int i = 0; i < currentAssetData.files.Length; i++)
         {
-            if (!currentAssetData.files[i].url.EndsWith(".png")) continue;
-
             if (currentAssetData.files[i].role == "thumbnail")
                 thumbnailImageURL = currentAssetData.files[i].url;
             else if (currentAssetData.files[i].role == "preview")

@@ -32,7 +32,6 @@ namespace DCL
         public const string SYSTEM = "SYSTEM";
     }
 
-
     public enum QueueMode
     {
         Reliable,
@@ -87,8 +86,10 @@ namespace DCL
         public IMessageHandler handler;
 
         public LinkedList<QueuedSceneMessage> pendingMessages = new LinkedList<QueuedSceneMessage>();
-        public bool hasPendingMessages => pendingMessages != null && pendingMessages.Count > 0;
-        public int pendingMessagesCount => pendingMessages != null ? pendingMessages.Count : 0;
+        public bool hasPendingMessages => pendingMessagesCount > 0;
+
+        //NOTE(Brian): This is handled manually. We aren't using pendingMessages.Count because is slow. Used heavily on critical ProcessMessages() loop.
+        public int pendingMessagesCount;
         public long processedMessagesCount { get; set; }
 
         public static bool renderingIsDisabled = false;
@@ -105,13 +106,9 @@ namespace DCL
         public MessagingController owner;
 
         Dictionary<string, LinkedListNode<MessagingBus.QueuedSceneMessage>> unreliableMessages = new Dictionary<string, LinkedListNode<MessagingBus.QueuedSceneMessage>>();
-        System.Text.StringBuilder stringBuilder = new System.Text.StringBuilder();
         public int unreliableMessagesReplaced = 0;
 
-        public bool isRunning
-        {
-            get; private set;
-        }
+        public bool enabled;
 
         public float timeBudget
         {
@@ -119,28 +116,29 @@ namespace DCL
             set => timeBudgetValue = value;
         }
 
-        public MessagingBus(string id, IMessageHandler handler, MessagingController owner, float budgetMin, float budgetMax)
+        public MessagingBus(string id, IMessageHandler handler, MessagingController owner)
         {
             Assert.IsNotNull(handler, "IMessageHandler can't be null!");
             this.handler = handler;
-            this.isRunning = false;
+            this.enabled = false;
             this.id = id;
-            this.budgetMin = budgetMin;
-            this.budgetMax = budgetMax;
             this.owner = owner;
+            this.pendingMessagesCount = 0;
         }
 
         public void Start()
         {
-            isRunning = true;
+            enabled = true;
         }
 
         public void Stop()
         {
-            isRunning = false;
+            enabled = false;
 
             if (msgYieldInstruction != null)
                 msgYieldInstruction.Cleanup();
+
+            pendingMessagesCount = 0;
         }
         public void Dispose()
         {
@@ -154,7 +152,7 @@ namespace DCL
             if (queueMode == QueueMode.Reliable)
             {
                 message.isUnreliable = false;
-                pendingMessages.AddLast(message);
+                AddReliableMessage(message);
             }
             else
             {
@@ -178,7 +176,7 @@ namespace DCL
 
                 if (enqueued)
                 {
-                    node = pendingMessages.AddLast(message);
+                    node = AddReliableMessage(message);
                     unreliableMessages[message.unreliableMessageKey] = node;
                 }
             }
@@ -203,30 +201,22 @@ namespace DCL
             }
         }
 
-        private void RemoveUnreliableMessage(MessagingBus.QueuedSceneMessage message)
-        {
-            if (unreliableMessages.ContainsKey(message.unreliableMessageKey))
-                unreliableMessages.Remove(message.unreliableMessageKey);
-        }
-
         public bool ProcessQueue(float timeBudget, out IEnumerator yieldReturn)
         {
-            LinkedList<MessagingBus.QueuedSceneMessage> queue = pendingMessages;
             yieldReturn = null;
 
-            // Note (Zak): This check is to avoid calling DCLDCLTime.realtimeSinceStartup
+            // Note (Zak): This check is to avoid calling Time.realtimeSinceStartup
             // unnecessarily because it's pretty slow in JS
-            if (timeBudget == 0 || !isRunning || queue.Count == 0)
+            if (timeBudget == 0 || !enabled || pendingMessages.Count == 0)
                 return false;
 
-            float startTime = DCLTime.realtimeSinceStartup;
+            float startTime = Time.realtimeSinceStartup;
 
-            while (timeBudget != 0 && isRunning && queue.Count > 0 && DCLTime.realtimeSinceStartup - startTime < timeBudget)
+            while (timeBudget != 0 && enabled && pendingMessages.Count > 0 && Time.realtimeSinceStartup - startTime < timeBudget)
             {
-                MessagingBus.QueuedSceneMessage m = queue.First.Value;
+                MessagingBus.QueuedSceneMessage m = pendingMessages.First.Value;
 
-                if (queue.First != null)
-                    queue.RemoveFirst();
+                RemoveFirstReliableMessage();
 
                 if (m.isUnreliable)
                     RemoveUnreliableMessage(m);
@@ -267,8 +257,6 @@ namespace DCL
                         if (msgYieldInstruction != null)
                         {
                             processedMessagesCount++;
-
-                            yieldReturn = msgYieldInstruction;
 
                             msgYieldInstruction = null;
 
@@ -318,7 +306,25 @@ namespace DCL
             }
         }
 
+        private LinkedListNode<QueuedSceneMessage> AddReliableMessage(QueuedSceneMessage message)
+        {
+            pendingMessagesCount++;
+            return pendingMessages.AddLast(message);
+        }
 
+        private void RemoveFirstReliableMessage()
+        {
+            if (pendingMessages.First != null)
+            {
+                pendingMessages.RemoveFirst();
+                pendingMessagesCount--;
+            }
+        }
+        private void RemoveUnreliableMessage(MessagingBus.QueuedSceneMessage message)
+        {
+            if (unreliableMessages.ContainsKey(message.unreliableMessageKey))
+                unreliableMessages.Remove(message.unreliableMessageKey);
+        }
         private void LogMessage(MessagingBus.QueuedSceneMessage m, MessagingBus bus, bool logType = true)
         {
             string finalTag = SceneController.i.TryToGetSceneCoordsID(bus.debugTag);

@@ -1,32 +1,20 @@
 using UnityEngine;
+using DCL.SettingsHUD;
 
 public class HUDController : MonoBehaviour
 {
-    private static HUDController instance;
+    public static HUDController i { get; private set; }
 
-    public static HUDController i
+    private void Awake()
     {
-        get
-        {
-            if (instance == null)
-            {
-                instance = FindObjectOfType<HUDController>();
-
-                if (instance == null)
-                {
-                    GameObject instanceContainer = new GameObject("HUDController");
-                    instance = instanceContainer.AddComponent<HUDController>();
-                }
-            }
-
-            return instance;
-        }
+        i = this;
     }
 
     public AvatarHUDController avatarHud { get; private set; }
     public NotificationHUDController notificationHud { get; private set; }
     public MinimapHUDController minimapHud { get; private set; }
     public AvatarEditorHUDController avatarEditorHud { get; private set; }
+    public SettingsHUDController settingsHud { get; private set; }
     public PlayerInfoCardHUDController playerInfoCardHudController { get; private set; }
 
     private UserProfile ownUserProfile => UserProfile.GetOwnUserProfile();
@@ -35,6 +23,11 @@ public class HUDController : MonoBehaviour
     private void ShowAvatarEditor()
     {
         avatarEditorHud?.SetVisibility(true);
+    }
+
+    private void ShowSettings()
+    {
+        settingsHud?.SetVisibility(true);
     }
 
     private void OwnUserProfileUpdated(UserProfile profile)
@@ -79,6 +72,7 @@ public class HUDController : MonoBehaviour
         {
             avatarHud = new AvatarHUDController();
             avatarHud.OnEditAvatarPressed += ShowAvatarEditor;
+            avatarHud.OnSettingsPressed += ShowSettings;
             ownUserProfile.OnUpdate += OwnUserProfileUpdated;
             OwnUserProfileUpdated(ownUserProfile);
         }
@@ -107,7 +101,18 @@ public class HUDController : MonoBehaviour
 
         avatarEditorHud?.SetVisibility(configuration.active && configuration.visible);
     }
-    
+
+    public void ConfigureSettingsHUD(string configurationJson)
+    {
+        HUDConfiguration configuration = JsonUtility.FromJson<HUDConfiguration>(configurationJson);
+        if (configuration.active && settingsHud == null)
+        {
+            settingsHud = new SettingsHUDController();
+        }
+
+        settingsHud?.SetVisibility(configuration.active && configuration.visible);
+    }
+
     public void ConfigurePlayerInfoCardHUD(string configurationJson)
     {
         HUDConfiguration configuration = JsonUtility.FromJson<HUDConfiguration>(configurationJson);
@@ -136,6 +141,7 @@ public class HUDController : MonoBehaviour
         if (avatarHud != null)
         {
             avatarHud.OnEditAvatarPressed -= ShowAvatarEditor;
+            avatarHud.OnSettingsPressed -= ShowSettings;
         }
 
         minimapHud?.Dispose();
