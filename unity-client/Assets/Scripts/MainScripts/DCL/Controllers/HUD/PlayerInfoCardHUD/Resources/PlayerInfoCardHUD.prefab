@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1838900411901135327}
   - component: {fileID: 5994996717070433311}
-  - component: {fileID: 5824150738217594231}
+  - component: {fileID: 741949897801864843}
   m_Layer: 5
   m_Name: AvatarPicture
   m_TagString: Untagged
@@ -45,7 +45,7 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 563613965645386547}
   m_CullTransparentMesh: 0
---- !u!114 &5824150738217594231
+--- !u!114 &741949897801864843
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -54,7 +54,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 563613965645386547}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: -98529514, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Script: {fileID: -765806418, guid: f70555f144d8491a825f0804e09c671c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
@@ -65,13 +65,15 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
-  m_Texture: {fileID: 0}
-  m_UVRect:
-    serializedVersion: 2
-    x: 0
-    y: 0
-    width: 1
-    height: 1
+  m_Sprite: {fileID: 0}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
 --- !u!1 &711253438143063192
 GameObject:
   m_ObjectHideFlags: 0
@@ -2944,7 +2946,7 @@ MonoBehaviour:
     toggle: {fileID: 7155771949739570535}
     tab: 2
   hideCardButton: {fileID: 2054052090560482885}
-  avatarPicture: {fileID: 2054052089903118762}
+  avatarPicture: {fileID: 741949897801864843}
   name: {fileID: 2054052089419740692}
   description: {fileID: 2054052090072748133}
   wearablesContainer: {fileID: 2054052089085003672}
