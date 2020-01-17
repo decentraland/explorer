@@ -24,8 +24,6 @@ function publish() {
     rm game.js index.html Build/UnityLoader.js Build/unity.json
     # Move all `.unityweb` files into the root build folder
     mv Build/* .
-    # Quickfix: Make requests async!
-    sed -i '' -e 's/headXHR.open("HEAD", meta.requestURL, false)/headXHR.open("HEAD", meta.requestURL, true)/' unity.wasm.framework.unityweb
     # Publish on npm
     npx npm publish --tag `[ "$CIRCLE_BRANCH" == "master" ] && echo "latest" || echo $TAG`
 }
