@@ -156,13 +156,6 @@ namespace DCL
                 return;
 
             Cleanup();
-            //if (state == AssetPromiseState.LOADING)
-            //{
-            //}
-            //else if (state == AssetPromiseState.FINISHED)
-            //{
-            //    Cleanup();
-            //}
         }
 
         public void Cleanup()
