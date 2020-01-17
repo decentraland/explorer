@@ -155,14 +155,14 @@ namespace DCL
             if (state == AssetPromiseState.IDLE_AND_EMPTY)
                 return;
 
-            if (state == AssetPromiseState.LOADING)
-            {
-                OnCancelLoading();
-            }
-            else if (state == AssetPromiseState.FINISHED)
-            {
-                Cleanup();
-            }
+            Cleanup();
+            //if (state == AssetPromiseState.LOADING)
+            //{
+            //}
+            //else if (state == AssetPromiseState.FINISHED)
+            //{
+            //    Cleanup();
+            //}
         }
 
         public void Cleanup()
