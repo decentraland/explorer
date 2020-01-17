@@ -8,7 +8,6 @@ public class UserProfileModel
         public string body;
     }
 
-    public string userId;
     public string name;
     public string email;
     public string description;

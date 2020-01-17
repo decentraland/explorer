@@ -5,7 +5,7 @@ public class PlayerInfoCollectibleItem : MonoBehaviour
 {
     [SerializeField] private Image thumbnail;
 
-    private WearableItem collectible;
+    internal WearableItem collectible;
 
     public void Initialize(WearableItem collectible)
     {

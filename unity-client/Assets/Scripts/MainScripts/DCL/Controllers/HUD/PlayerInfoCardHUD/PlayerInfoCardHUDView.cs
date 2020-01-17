@@ -17,30 +17,30 @@ public class PlayerInfoCardHUDView : MonoBehaviour
     }
 
     [System.Serializable]
-    private class TabsMapping
+    internal class TabsMapping
     {
         public GameObject container;
         public Toggle toggle;
         public Tabs tab;
     }
 
-    [SerializeField] private GenericFactory collectiblesFactory;
-    [SerializeField] private Canvas cardCanvas;
-    [SerializeField] private TabsMapping[] tabsMapping;
-    [SerializeField] private Button hideCardButton;
+    [SerializeField] internal GenericFactory collectiblesFactory;
+    [SerializeField] internal Canvas cardCanvas;
+    [SerializeField] internal TabsMapping[] tabsMapping;
+    [SerializeField] internal Button hideCardButton;
 
     [Space]
-    [SerializeField] private Image avatarPicture;
-    [SerializeField] private TextMeshProUGUI name;
+    [SerializeField] internal Image avatarPicture;
+    [SerializeField] internal TextMeshProUGUI name;
 
     [Header("Passport")]
-    [SerializeField] private TextMeshProUGUI description;
+    [SerializeField] internal TextMeshProUGUI description;
 
     [Header("Trade")]
     [SerializeField] private RectTransform wearablesContainer;
 
-    private readonly List<PlayerInfoCollectibleItem> playerInfoCollectibles = new List<PlayerInfoCollectibleItem>(10);
-    private UserProfile currentUserProfile;
+    internal readonly List<PlayerInfoCollectibleItem> playerInfoCollectibles = new List<PlayerInfoCollectibleItem>(10);
+    internal UserProfile currentUserProfile;
 
     public static PlayerInfoCardHUDView CreateView()
     {

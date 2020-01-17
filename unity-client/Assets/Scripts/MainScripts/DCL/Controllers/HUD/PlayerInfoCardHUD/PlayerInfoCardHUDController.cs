@@ -3,11 +3,11 @@ using UnityEngine;
 
 public class PlayerInfoCardHUDController : IHUD, IDisposable
 {
-    private const string CURRENT_PLAYER_NAME = "CurrentPlayerInfoCardName";
+    internal const string CURRENT_PLAYER_NAME = "CurrentPlayerInfoCardName";
 
-    private StringVariable currentPlayerName;
-    private PlayerInfoCardHUDView view;
-    private UserProfile currentUserProfile;
+    internal PlayerInfoCardHUDView view;
+    internal StringVariable currentPlayerName;
+    internal UserProfile currentUserProfile;
 
     public PlayerInfoCardHUDController()
     {
@@ -18,7 +18,7 @@ public class PlayerInfoCardHUDController : IHUD, IDisposable
         OnCurrentPlayerNameChanged(currentPlayerName, null);
     }
 
-    private void OnCurrentPlayerNameChanged(string current, string previous)
+    internal void OnCurrentPlayerNameChanged(string current, string previous)
     {
         if (currentUserProfile != null)
             currentUserProfile.OnUpdate -= SetUserProfile;

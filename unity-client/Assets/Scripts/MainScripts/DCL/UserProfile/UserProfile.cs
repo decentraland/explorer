@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using UnityEngine;
 
 [assembly: InternalsVisibleTo("UserProfileTests")]
+[assembly: InternalsVisibleTo("PlayerInfoCardHUDTests")]
 
 [CreateAssetMenu(fileName = "UserProfile", menuName = "UserProfile")]
 public class UserProfile : ScriptableObject //TODO Move to base variable
