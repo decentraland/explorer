@@ -928,9 +928,6 @@ namespace Tests
                 isPointerBlocker = false
             });
 
-            Debug.Break();
-            yield return null;
-
             targetEntityHit = false;
             yield return TestHelpers.WaitForEventFromEngine(targetEventType, sceneEvent,
                 () =>
