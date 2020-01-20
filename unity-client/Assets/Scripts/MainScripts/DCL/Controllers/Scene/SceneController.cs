@@ -1,4 +1,4 @@
-﻿using DCL.Controllers;
+using DCL.Controllers;
 using DCL.Helpers;
 using DCL.Interface;
 using DCL.Models;
@@ -80,7 +80,7 @@ namespace DCL
         public bool hasPendingMessages => MessagingControllersManager.i.pendingMessagesCount > 0;
 
         public string globalSceneId { get; private set; }
-        private string currentSceneId = null;
+        public string currentSceneId { get; private set; }
 
         LoadParcelScenesMessage loadParcelScenesMessage = new LoadParcelScenesMessage();
 
@@ -159,6 +159,8 @@ namespace DCL
                 if (currentScene != null && currentScene.sceneData != null)
                     currentSceneId = currentScene.sceneData.id;
 
+                CommonScriptableObjects.sceneID.Set(currentSceneId);
+
                 OnSortScenes?.Invoke();
             }
         }
@@ -209,10 +211,7 @@ namespace DCL
         private void Update()
         {
             InputController_Legacy.i.Update();
-
             TrySortScenesByDistance();
-
-            MessagingControllersManager.i.UpdateThrottling();
         }
 
 
@@ -308,6 +307,9 @@ namespace DCL
         {
             if (position == null)
             {
+                if (DCLCharacterController.i == null)
+                    return null;
+
                 position = DCLCharacterController.i.characterPosition;
             }
 
@@ -710,10 +712,10 @@ namespace DCL
         {
             if (scene == null)
             {
-                string sceneId = GetCurrentScene(DCLCharacterController.i.characterPosition);
+                string sceneId = currentSceneId;
 
                 if (!string.IsNullOrEmpty(sceneId) && loadedScenes.ContainsKey(sceneId))
-                    scene = loadedScenes[GetCurrentScene(DCLCharacterController.i.characterPosition)];
+                    scene = loadedScenes[currentSceneId];
                 else
                     return pos;
             }
