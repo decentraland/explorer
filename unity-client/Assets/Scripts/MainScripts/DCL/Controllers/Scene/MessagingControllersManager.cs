@@ -251,8 +251,6 @@ namespace DCL
         {
             while (true)
             {
-                yield return null;
-
                 timeBudgetCounter = RenderingController.i.renderingEnabled ? MAX_GLOBAL_MSG_BUDGET : float.MaxValue;
 
                 for (int i = 0; i < busesToProcessCount; ++i)
@@ -262,6 +260,8 @@ namespace DCL
                     if (ProcessBus(bus))
                         break;
                 }
+
+                yield return null;
             }
         }
 
