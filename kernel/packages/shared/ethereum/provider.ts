@@ -24,7 +24,7 @@ export async function awaitWeb3Approval(): Promise<void> {
         element.style.display = 'block'
         const button = document.getElementById('eth-login-confirm-button')
 
-        const response = future()
+        let response = future()
 
         button!.onclick = async () => {
           let result
@@ -43,9 +43,42 @@ export async function awaitWeb3Approval(): Promise<void> {
           response.resolve(result)
         }
 
-        providerFuture.resolve(await response)
+        let result
+        while (true) {
+          result = await response
+          defaultLogger.info(`result: `, result)
 
-        element.style.display = 'none'
+          element.style.display = 'none'
+
+          const button = document.getElementById('eth-relogin-confirm-button')
+
+          response = future()
+
+          button!.onclick = async () => {
+            let result
+            try {
+              // Request account access if needed
+              await window.ethereum.enable()
+
+              result = { successful: true, provider: window.ethereum }
+            } catch (error) {
+              // User denied account access...
+              result = {
+                successful: false,
+                provider: new WebSocketProvider(ethereumConfigurations[ETHEREUM_NETWORK.MAINNET].wss)
+              }
+            }
+            response.resolve(result)
+          }
+
+          if (result.successful) {
+            break
+          } else {
+            showEthConnectAdvice(true)
+          }
+        }
+        showEthConnectAdvice(false)
+        providerFuture.resolve(result)
       }
     } else if (window.web3 && window.web3.currentProvider) {
       providerFuture.resolve({ successful: true, provider: window.web3.currentProvider })
@@ -60,4 +93,11 @@ export async function awaitWeb3Approval(): Promise<void> {
   providerFuture.then(result => requestManager.setProvider(result.provider)).catch(defaultLogger.error)
 
   return providerFuture
+}
+
+function showEthConnectAdvice(show: boolean) {
+  const element = document.getElementById('eth-connect-advice')
+  if (element) {
+    element.style.display = show ? 'block' : 'none'
+  }
 }

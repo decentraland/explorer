@@ -36,6 +36,7 @@ import { initializeUrlPositionObserver } from './world/positionThings'
 import { setWorldContext } from './protocol/actions'
 import { profileToRendererFormat } from './passports/transformations/profileToRendererFormat'
 import { getUserAccount } from './ethereum/EthereumService'
+import { Account } from 'web3x/account'
 
 enum AnalyticsAccount {
   PRD = '1plAT9a2wOOgbPCrTaU8rgGUMzgUTJtU',
@@ -61,6 +62,7 @@ function initializeAnalytics() {
 }
 
 export let globalStore: Store<RootState>
+export let identity: Account
 
 export async function initShared(): Promise<Session | undefined> {
   if (WORLD_EXPLORER) {
@@ -149,7 +151,10 @@ export async function initShared(): Promise<Session | undefined> {
   }
   console['groupEnd']()
 
-  const account = await getUserAccount()
+  let account = await getUserAccount()
+  if (!account) {
+    identity = Account.create()
+  }
 
   console['group']('connect#comms')
   store.dispatch(establishingComms())
@@ -166,6 +171,9 @@ export async function initShared(): Promise<Session | undefined> {
       if (context !== undefined) {
         store.dispatch(setWorldContext(context))
       }
+
+      showEthSignAdvice(false)
+
       break
     } catch (e) {
       if (e.message && e.message.startsWith('error establishing comms')) {
@@ -173,6 +181,7 @@ export async function initShared(): Promise<Session | undefined> {
           // max number of attemps reached => rethrow error
           defaultLogger.info(`Max number of attemps reached (${maxAttemps}), unsuccessful connection`)
           disconnect()
+          showEthSignAdvice(false)
           ReportFatalError(COMMS_COULD_NOT_BE_ESTABLISHED)
           throw e
         } else {
@@ -180,26 +189,27 @@ export async function initShared(): Promise<Session | undefined> {
           store.dispatch(commsErrorRetrying(i))
 
           if (e.message && e.message.includes('Result of validation challenge is incorrect')) {
-            const element = document.getElementById('eth-sign-advice')
-            if (element) {
-              element.style.display = 'block'
-            }
+            showEthSignAdvice(true)
           }
         }
       } else {
         // not a comms issue per se => rethrow error
         defaultLogger.error(`error while trying to establish communications `, e)
         disconnect()
+        showEthSignAdvice(false)
         throw e
       }
     }
-  }
-  const element = document.getElementById('eth-sign-advice')
-  if (element) {
-    element.style.display = 'none'
   }
   store.dispatch(commsEstablished())
   console['groupEnd']()
 
   return session
+}
+
+function showEthSignAdvice(show: boolean) {
+  const element = document.getElementById('eth-sign-advice')
+  if (element) {
+    element.style.display = show ? 'block' : 'none'
+  }
 }

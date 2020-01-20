@@ -29,7 +29,7 @@ import { Pose, UserInformation, Package, ChatMessage, ProfileVersion, BusMessage
 import { CommunicationArea, Position, position2parcel, sameParcel, squareDistance } from './interface/utils'
 import { BrokerWorldInstanceConnection } from '../comms/v1/brokerWorldInstanceConnection'
 import { profileToRendererFormat } from 'shared/passports/transformations/profileToRendererFormat'
-import { ProfileForRenderer, uuid } from 'decentraland-ecs/src'
+import { ProfileForRenderer } from 'decentraland-ecs/src'
 import { Session } from '../session/index'
 import { worldRunningObservable, isWorldRunning } from '../world/worldState'
 import { WorldInstanceConnection } from './interface/index'
@@ -39,6 +39,7 @@ import * as Long from 'long'
 
 window.Long = Long
 import { requestManager } from '../ethereum/provider'
+import { identity } from '../index'
 
 const { Peer } = require('decentraland-katalyst-peer')
 
@@ -529,7 +530,7 @@ export async function connect(userId: string, network: ETHEREUM_NETWORK, auth: A
 
         const peer = new Peer(
           lighthouseUrl,
-          ethAddress ? ethAddress : `peer-${uuid()}`,
+          ethAddress ? ethAddress : identity.address.toJSON(),
           () => {
             // noop
           },
@@ -540,13 +541,18 @@ export async function connect(userId: string, network: ETHEREUM_NETWORK, auth: A
             authHandler: async (msg: string) => {
               try {
                 if (ethAddress) {
-                  return await requestManager.personal_sign(msg, ethAddress, '')
+                  const signature = await requestManager.personal_sign(msg, ethAddress, '')
+                  return signature
                 } else {
-                  return msg
+                  defaultLogger.info(`no eth address, using generated key `, identity.address)
+                  const result = identity.sign(msg)
+                  return result.signature
                 }
               } catch (e) {
                 defaultLogger.info(`error while trying to sign message from lighthouse '${msg}'`)
               }
+              // if any error occurs
+              return msg
             }
           }
         )
