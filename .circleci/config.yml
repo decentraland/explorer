@@ -161,7 +161,7 @@ jobs:
                     sleep 60
                 done
                 ls -la ${BUILD_PATH}
-                if [ -n "$(ls -A ${BUILD_PATH})" ]; do
+                if [[ -n "$(ls -A ${BUILD_PATH})" ]]; do
                     exit 1;
                 fi;
                 # Apply hot fix to take out old CachedXMLRequest
