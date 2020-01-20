@@ -902,7 +902,7 @@ namespace Tests
             sceneEvent.payload = onPointerDownEvent;
             sceneEvent.eventType = "uuidEvent";
 
-            // Check if target entity is hit behind other entity
+            // Check the target entity is not hit behind the 'isPointerBlocker' shape
             bool targetEntityHit = false;
             yield return TestHelpers.WaitForEventFromEngine(targetEventType, sceneEvent,
                 () =>
@@ -922,12 +922,13 @@ namespace Tests
 
             Assert.IsFalse(targetEntityHit, "Target entity was hit but other entity was blocking it");
 
-            // Toggle 'isPointerBlocker'
+            // Toggle 'isPointerBlocker' property
             yield return TestHelpers.SharedComponentUpdate(blockingShape, new BoxShape.Model
             {
                 isPointerBlocker = false
             });
 
+            // Check the target entity is hit behind the 'isPointerBlocker' shape now
             targetEntityHit = false;
             yield return TestHelpers.WaitForEventFromEngine(targetEventType, sceneEvent,
                 () =>
