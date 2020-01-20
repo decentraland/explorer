@@ -18,4 +18,3 @@ head -c $LOCATION_START_CUT $TARGET > $TARGET.new
 tail -c $REST_FROM_BOTTOM $TARGET >> $TARGET.new
 
 mv $TARGET.new $TARGET
-# mv $TARGET.gz $TARGET
