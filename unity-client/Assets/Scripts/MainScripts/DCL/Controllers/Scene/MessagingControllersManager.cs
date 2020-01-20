@@ -23,7 +23,6 @@ namespace DCL
         private Coroutine mainCoroutine;
 
         public bool hasPendingMessages => pendingMessagesCount > 0;
-        public MessageThrottlingController throttler;
 
         public int pendingMessagesCount;
         public int pendingInitMessagesCount;
@@ -42,8 +41,6 @@ namespace DCL
 
         public void Initialize(IMessageHandler messageHandler)
         {
-            throttler = new MessageThrottlingController();
-
             messagingControllers[GLOBAL_MESSAGING_CONTROLLER] = new MessagingController(messageHandler, GLOBAL_MESSAGING_CONTROLLER);
 
             if (!string.IsNullOrEmpty(GLOBAL_MESSAGING_CONTROLLER))
@@ -240,7 +237,7 @@ namespace DCL
         {
             if (pendingInitMessagesCount == 0)
             {
-                UnityGLTF.GLTFSceneImporter.budgetPerFrameInMilliseconds = Mathf.Clamp(throttler.currentTimeBudget, GLTF_BUDGET_MIN, GLTF_BUDGET_MAX) * 1000f;
+                UnityGLTF.GLTFSceneImporter.budgetPerFrameInMilliseconds = Mathf.Clamp(timeBudgetCounter, GLTF_BUDGET_MIN, GLTF_BUDGET_MAX) * 1000f;
             }
             else
             {
@@ -301,5 +298,6 @@ namespace DCL
 
             controller.enabled = false;
         }
+
     }
 }
