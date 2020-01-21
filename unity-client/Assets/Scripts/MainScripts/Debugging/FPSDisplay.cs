@@ -41,16 +41,12 @@ namespace DCL
                 deltas[end++] = Time.deltaTime;
                 if (end == 1000) end = 0;
                 countBetween += Time.deltaTime;
-                float extra = 1.0f - countBetween;
                 while (countBetween > 1.0f)
                 {
                     countBetween -= deltas[begin++];
                     if (begin == 1000) begin = 0;
                 }
                 float fps = end > begin ? end - begin : 1000 + end - begin;
-                if (extra > 0)
-                {
-                    // TODO: add fraction?
                 }
                 string fpsFormatted = fps.ToString("##");
                 string msFormatted = (Time.deltaTime * 1000).ToString("##");
