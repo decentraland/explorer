@@ -47,7 +47,6 @@ namespace DCL
                     if (begin == 1000) begin = 0;
                 }
                 float fps = end > begin ? end - begin : 1000 + end - begin;
-                }
                 string fpsFormatted = fps.ToString("##");
                 string msFormatted = (Time.deltaTime * 1000).ToString("##");
                 string targetText = $"Current {msFormatted} ms (fps: {fpsFormatted})";
