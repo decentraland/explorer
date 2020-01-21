@@ -38,7 +38,7 @@ namespace DCL
         public bool ignoreGlobalScenes = false;
         public bool msgStepByStep = false;
 
-        public bool deferredMessagesDecoding = false;
+        [NonSerialized] public bool deferredMessagesDecoding = false;
         Queue<string> payloadsToDecode = new Queue<string>();
         const float MAX_TIME_FOR_DECODE = 0.005f;
 
@@ -137,13 +137,13 @@ namespace DCL
             }
         }
 
+        private bool sceneSortDirty = false;
         public event Action OnSortScenes;
+
         private static readonly int MORDOR_X = (int)EnvironmentSettings.MORDOR.x;
         private static readonly int MORDOR_Z = (int)EnvironmentSettings.MORDOR.z;
         private Vector2Int currentGridSceneCoordinate = new Vector2Int(MORDOR_X, MORDOR_Z);
         private Vector2Int sortAuxiliaryVector = new Vector2Int(MORDOR_X, MORDOR_Z);
-
-        public bool sceneSortDirty = false;
 
         private void TrySortScenesByDistance(bool forceSort = false)
         {
