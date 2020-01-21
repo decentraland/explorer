@@ -441,7 +441,7 @@ function collectInfo(context: Context) {
 }
 
 function parseCommsMode(modeString: string) {
-  const segments = modeString.split(':')
+  const segments = modeString.split('-')
   return segments as [CommsVersion, CommsMode]
 }
 
@@ -550,6 +550,9 @@ export async function connect(userId: string, network: ETHEREUM_NETWORK, auth: A
             }
           }
         )
+
+        await peer.setLayer('blue')
+
         connection = new LighthouseWorldInstanceConnection(peer)
         break
       }
