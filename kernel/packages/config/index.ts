@@ -98,7 +98,9 @@ export const COMMS = USE_LOCAL_COMMS
   ? 'v1-local'
   : location.search.indexOf('COMMS') !== -1
   ? window.location.search.match(/COMMS=(\w+-\w+)/)[1]
-  : 'v1-remote' // by default use v1-remote for now
+  : getDefaultTLD() === 'zone'
+  ? 'v2-p2p' // by default use v2-p2p in zone
+  : 'v1-remote' // and v1-remote everywhere else
 
 export const DEBUG =
   location.search.indexOf('DEBUG_MODE') !== -1 ||
