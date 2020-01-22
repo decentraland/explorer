@@ -31,9 +31,6 @@ type IEngineAPI = import('shared/apis/EngineAPI').IEngineAPI
 // tslint:disable-next-line:whitespace
 type EnvironmentAPI = import('shared/apis/EnvironmentAPI').EnvironmentAPI
 
-let FPS = 30
-let fpsDirty:boolean = true
-let UPDATE_INTERVAL = 1000 / FPS
 const dataUrlRE = /^data:[^/]+\/[^;]+;base64,/
 const blobRE = /^blob:http/
 
@@ -80,10 +77,11 @@ export default class GamekitScene extends Script {
   onEventFunctions: Array<(event: any) => void> = []
   events: EntityAction[] = []
 
-  updateInterval = UPDATE_INTERVAL
   devToolsAdapter: DevToolsAdapter | null = null
 
   manualUpdate: boolean = false
+
+  updateInterval: number = 1000 / 30
 
   didStart = false
   provider: any = null
@@ -467,22 +465,24 @@ export default class GamekitScene extends Script {
           if (playerPosition !== undefined && this.scenePosition !== undefined) {
             const playerPos = playerPosition as Vector2
             const scenePos = this.scenePosition as Vector2
-            const dist = Vector2.Distance(playerPos, scenePos)
+            const distanceToPlayer = Vector2.Distance(playerPos, scenePos)
+            
+            let fps:number = 5
+            const insideScene:boolean = this.parcels.some(e => e.x === playerPos.x && e.y === playerPos.y) 
 
-            if (this.parcels.some(e => e.x === playerPos.x && e.y === playerPos.y)) {
-              FPS = 30
+            if (insideScene) {
+              fps = 30
             }
-            else if (dist > 3) {
-              FPS = 5
+            else if (distanceToPlayer <= 2) {
+              fps = 20
             }
-            else if (dist > 2) {
-              FPS = 15
+            else if (distanceToPlayer <= 3) {
+              fps = 10
             }
-            else if (dist >= 1) {
-              FPS = 20
-            }
-            this.updateInterval = 1000 / FPS
+
+            this.updateInterval = 1000 / fps
           }
+
           break
       }
     })
