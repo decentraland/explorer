@@ -456,35 +456,35 @@ export default class GamekitScene extends Script {
   private setupFpsUpdate(dcl: DecentralandInterface) {
     dcl.subscribe('positionChanged')
     dcl.onEvent(event => {
-      switch (event.type) {
-        case 'positionChanged':
-          const e = event.data as IEvents['positionChanged']
-
-          const playerPosition = worldToGrid(e.cameraPosition)
-
-          if (playerPosition !== undefined && this.scenePosition !== undefined) {
-            const playerPos = playerPosition as Vector2
-            const scenePos = this.scenePosition as Vector2
-            const distanceToPlayer = Vector2.Distance(playerPos, scenePos)
-            
-            let fps:number = 5
-            const insideScene:boolean = this.parcels.some(e => e.x === playerPos.x && e.y === playerPos.y) 
-
-            if (insideScene) {
-              fps = 30
-            }
-            else if (distanceToPlayer <= 2) {
-              fps = 20
-            }
-            else if (distanceToPlayer <= 3) {
-              fps = 10
-            }
-
-            this.updateInterval = 1000 / fps
-          }
-
-          break
+      if (event.type !== 'positionChanged') {
+        return
       }
+      
+      const e = event.data as IEvents['positionChanged']
+      const playerPosition = worldToGrid(e.cameraPosition)
+
+      if (playerPosition === undefined || this.scenePosition === undefined) {
+        return
+      }
+
+      const playerPos = playerPosition as Vector2
+      const scenePos = this.scenePosition as Vector2
+      const distanceToPlayer = Vector2.Distance(playerPos, scenePos)
+      
+      let fps:number = 5
+      const insideScene:boolean = this.parcels.some(e => e.x === playerPos.x && e.y === playerPos.y) 
+
+      if (insideScene) {
+        fps = 30
+      }
+      else if (distanceToPlayer <= 2) {
+        fps = 20
+      }
+      else if (distanceToPlayer <= 3) {
+        fps = 10
+      }
+
+      this.updateInterval = 1000 / fps
     })
   }
 
