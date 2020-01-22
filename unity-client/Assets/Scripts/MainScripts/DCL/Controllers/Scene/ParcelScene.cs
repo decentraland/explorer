@@ -1,4 +1,4 @@
-using DCL.Components;
+﻿using DCL.Components;
 using DCL.Configuration;
 using DCL.Helpers;
 using DCL.Models;
@@ -58,7 +58,7 @@ namespace DCL.Controllers
         private State state = State.NOT_READY;
         public SceneBoundariesChecker boundariesChecker { private set; get; }
 
-        BlockerHandler blockerHandler;
+        public BlockerHandler blockerHandler;
 
 
         public void Awake()
