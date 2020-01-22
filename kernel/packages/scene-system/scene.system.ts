@@ -471,17 +471,17 @@ export default class GamekitScene extends Script {
       const scenePos = this.scenePosition as Vector2
       const distanceToPlayer = Vector2.Distance(playerPos, scenePos)
       
-      let fps:number = 5
+      let fps:number = 1
       const insideScene:boolean = this.parcels.some(e => e.x === playerPos.x && e.y === playerPos.y) 
 
       if (insideScene) {
         fps = 30
-      }
-      else if (distanceToPlayer <= 2) {
+      } else if (distanceToPlayer <= 2) {
         fps = 20
-      }
-      else if (distanceToPlayer <= 3) {
+      } else if (distanceToPlayer <= 3) {
         fps = 10
+      } else if (distanceToPlayer <= 4) {
+        fps = 5
       }
 
       this.updateInterval = 1000 / fps
