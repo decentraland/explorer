@@ -11,16 +11,19 @@ import {
   ComponentCreatedPayload,
   ComponentDisposedPayload,
   ComponentUpdatedPayload,
-  QueryPayload
+  QueryPayload,
+  LoadableParcelScene
 } from 'shared/types'
-import { DecentralandInterface } from 'decentraland-ecs/src/decentraland/Types'
+import { DecentralandInterface, IEvents } from 'decentraland-ecs/src/decentraland/Types'
 import { defaultLogger } from 'shared/logger'
 
 import { customEval, getES5Context } from './sdk/sandbox'
 import { DevToolsAdapter } from './sdk/DevToolsAdapter'
 import { ScriptingTransport, ILogOpts } from 'decentraland-rpc/src/common/json-rpc/types'
-import { QueryType, CLASS_ID, Transform } from 'decentraland-ecs/src'
-import { PB_Transform, PB_Vector3, PB_Quaternion } from '../shared/proto/engineinterface_pb'
+import { QueryType, CLASS_ID, Transform, Vector2 } from 'decentraland-ecs/src'
+import { PB_Transform, PB_Vector3, PB_Quaternion, PB_DclMessage } from '../shared/proto/engineinterface_pb'
+import { worldToGrid } from 'atomicHelpers/parcelScenePositions'
+import { Vector2Component } from 'atomicHelpers/landHelpers'
 
 // tslint:disable-next-line:whitespace
 type IEngineAPI = import('shared/apis/EngineAPI').IEngineAPI
@@ -28,8 +31,9 @@ type IEngineAPI = import('shared/apis/EngineAPI').IEngineAPI
 // tslint:disable-next-line:whitespace
 type EnvironmentAPI = import('shared/apis/EnvironmentAPI').EnvironmentAPI
 
-const FPS = 30
-const UPDATE_INTERVAL = 1000 / FPS
+let FPS = 30
+let fpsDirty:boolean = true
+let UPDATE_INTERVAL = 1000 / FPS
 const dataUrlRE = /^data:[^/]+\/[^;]+;base64,/
 const blobRE = /^blob:http/
 
@@ -40,6 +44,7 @@ const pbTransform: PB_Transform = new PB_Transform()
 const pbPosition: PB_Vector3 = new PB_Vector3()
 const pbRotation: PB_Quaternion = new PB_Quaternion()
 const pbScale: PB_Vector3 = new PB_Vector3()
+
 
 function resolveMapping(mapping: string | undefined, mappingName: string, baseUrl: string) {
   let url = mappingName
@@ -82,6 +87,9 @@ export default class GamekitScene extends Script {
 
   didStart = false
   provider: any = null
+
+  scenePosition:Vector2Component = { x: 0, y: 0 }
+  parcels:Array<{ x: number; y: number }> = []
 
   constructor(transport: ScriptingTransport, opt?: ILogOpts) {
     super(transport, opt)
@@ -159,8 +167,10 @@ export default class GamekitScene extends Script {
       const url = resolveMapping(mapping && mapping.hash, mappingName, bootstrapData.baseUrl)
       const html = await fetch(url)
 
+      const fullData = bootstrapData.data as LoadableParcelScene
+
       if (html.ok) {
-        return [bootstrapData.sceneId, await html.text()] as const
+        return [fullData, await html.text()] as const
       } else {
         throw new Error(`SDK: Error while loading ${url} (${mappingName} -> ${mapping})`)
       }
@@ -184,13 +194,17 @@ export default class GamekitScene extends Script {
     this.devToolsAdapter = new DevToolsAdapter(this.devTools)
 
     try {
-      const [sceneId, source] = await this.loadProject()
+      const [sceneData, source] = await this.loadProject()
 
       if (!source) {
         throw new Error('Received empty source.')
       }
 
       const that = this
+      const sceneId = sceneData.id
+
+      this.scenePosition = sceneData.basePosition
+      this.parcels = sceneData.parcels
 
       const dcl: DecentralandInterface = {
         DEBUG: true,
@@ -415,6 +429,8 @@ export default class GamekitScene extends Script {
         })
       })
 
+      this.setupFpsUpdate(dcl)
+
       try {
         await customEval((source as any) as string, getES5Context({ dcl }))
 
@@ -437,6 +453,39 @@ export default class GamekitScene extends Script {
     } finally {
       this.didStart = true
     }
+  }
+
+  private setupFpsUpdate(dcl: DecentralandInterface) {
+    dcl.subscribe('positionChanged')
+    dcl.onEvent(event => {
+      switch (event.type) {
+        case 'positionChanged':
+          const e = event.data as IEvents['positionChanged']
+
+          const playerPosition = worldToGrid(e.cameraPosition)
+
+          if (playerPosition !== undefined && this.scenePosition !== undefined) {
+            const playerPos = playerPosition as Vector2
+            const scenePos = this.scenePosition as Vector2
+            const dist = Vector2.Distance(playerPos, scenePos)
+
+            if (this.parcels.some(e => e.x === playerPos.x && e.y === playerPos.y)) {
+              FPS = 30
+            }
+            else if (dist > 3) {
+              FPS = 5
+            }
+            else if (dist > 2) {
+              FPS = 15
+            }
+            else if (dist >= 1) {
+              FPS = 20
+            }
+            this.updateInterval = 1000 / FPS
+          }
+          break
+      }
+    })
   }
 
   update(time: number) {
