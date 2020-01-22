@@ -31,12 +31,14 @@ import { PassportAsPromise } from './passports/PassportAsPromise'
 import { Session } from './session/index'
 import { RootState } from './store/rootTypes'
 import { buildStore } from './store/store'
+//@ts-ignore
 import { getAppNetwork } from './web3'
 import { initializeUrlPositionObserver } from './world/positionThings'
 import { setWorldContext } from './protocol/actions'
 import { profileToRendererFormat } from './passports/transformations/profileToRendererFormat'
 import { getUserAccount } from './ethereum/EthereumService'
 import { Account } from 'web3x/account'
+//@ts-ignore
 import { awaitWeb3Approval } from './ethereum/provider'
 
 enum AnalyticsAccount {

@@ -40,7 +40,6 @@ import * as Long from 'long'
 window.Long = Long
 import { requestManager } from '../ethereum/provider'
 import { identity } from '../index'
-import { error } from '../../decentraland-ecs/src/ecs/helpers'
 
 const { Peer } = require('decentraland-katalyst-peer')
 
