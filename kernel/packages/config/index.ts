@@ -98,7 +98,7 @@ export const COMMS = USE_LOCAL_COMMS
   ? 'v1-local'
   : location.search.indexOf('COMMS') !== -1
   ? window.location.search.match(/COMMS=(\w+-\w+)/)[1]
-  : 'v1-remote' // by default use v1-remote for now
+  : 'v2-server' // by default
 
 export const DEBUG =
   location.search.indexOf('DEBUG_MODE') !== -1 ||
@@ -232,8 +232,10 @@ export function getServerConfigurations() {
     worldInstanceUrl: `wss://world-comm.decentraland.${TLDDefault}/connect`,
     comms: {
       lighthouse: {
-        server: 'https://katalyst-comms-relay.decentraland.zone',
-        p2p: 'https://katalyst-comms-no-relay.decentraland.zone'
+        // server: 'https://katalyst-comms-relay.decentraland.zone',
+        // p2p: 'https://katalyst-comms-no-relay.decentraland.zone'
+        server: 'http://localhost:9000',
+        p2p: 'http://localhost:9000'
       }
     },
     profile: `https://profile.decentraland.${TLDDefault}/api/v1`,

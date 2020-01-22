@@ -40,6 +40,7 @@ import * as Long from 'long'
 window.Long = Long
 import { requestManager } from '../ethereum/provider'
 import { identity } from '../index'
+import { error } from '../../decentraland-ecs/src/ecs/helpers'
 
 const { Peer } = require('decentraland-katalyst-peer')
 
@@ -632,6 +633,7 @@ export async function connect(userId: string, network: ETHEREUM_NETWORK, auth: A
 
     return context
   } catch (e) {
+    defaultLogger.error(e)
     throw new Error('error establishing comms: ' + e.message)
   }
 }

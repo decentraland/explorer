@@ -31,12 +31,13 @@ import { PassportAsPromise } from './passports/PassportAsPromise'
 import { Session } from './session/index'
 import { RootState } from './store/rootTypes'
 import { buildStore } from './store/store'
-import { getAppNetwork, initWeb3 } from './web3'
+import { getAppNetwork } from './web3'
 import { initializeUrlPositionObserver } from './world/positionThings'
 import { setWorldContext } from './protocol/actions'
 import { profileToRendererFormat } from './passports/transformations/profileToRendererFormat'
 import { getUserAccount } from './ethereum/EthereumService'
 import { Account } from 'web3x/account'
+import { awaitWeb3Approval } from './ethereum/provider'
 
 enum AnalyticsAccount {
   PRD = '1plAT9a2wOOgbPCrTaU8rgGUMzgUTJtU',
@@ -97,8 +98,10 @@ export async function initShared(): Promise<Session | undefined> {
 
   if (WORLD_EXPLORER) {
     try {
-      await initWeb3()
-      net = await getAppNetwork()
+      defaultLogger.info(`beefore init`)
+      // await awaitWeb3Approval()
+      defaultLogger.info(`after init`)
+      // net = await getAppNetwork()
 
       userId = await auth.getUserId()
       identifyUser(userId)
@@ -151,7 +154,12 @@ export async function initShared(): Promise<Session | undefined> {
   }
   console['groupEnd']()
 
-  let account = await getUserAccount()
+  let account
+  try {
+    account = await getUserAccount()
+  } catch (e) {
+    // could not get account
+  }
   if (!account) {
     identity = Account.create()
   }
