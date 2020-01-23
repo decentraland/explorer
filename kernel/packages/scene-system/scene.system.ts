@@ -440,9 +440,7 @@ export default class GamekitScene extends Script {
         })
       })
 
-      const enableFPSthrottling:boolean = sceneData.name !== 'ui'
-
-      if (enableFPSthrottling) {
+      if (sceneData.useFPSThrottling) {
         this.setupFpsThrottling(dcl)
       }
 

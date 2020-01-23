@@ -734,6 +734,7 @@ async function initializeDecentralandUI() {
     name: 'ui',
     baseUrl: location.origin,
     main: hudWorkerUrl,
+    useFPSThrottling: false,
     data: {},
     mappings: []
   })
@@ -802,7 +803,7 @@ export async function loadPreviewScene() {
 export function loadBuilderScene(sceneData: ILand) {
   unloadCurrentBuilderScene()
 
-  const parcelScene = new UnityParcelScene(ILandToLoadableParcelScene(sceneData))
+  let parcelScene = new UnityParcelScene(ILandToLoadableParcelScene(sceneData))
   currentLoadedScene = loadParcelScene(parcelScene)
 
   const target: LoadableParcelScene = { ...ILandToLoadableParcelScene(sceneData).data }
