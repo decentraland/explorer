@@ -803,7 +803,7 @@ export async function loadPreviewScene() {
 export function loadBuilderScene(sceneData: ILand) {
   unloadCurrentBuilderScene()
 
-  let parcelScene = new UnityParcelScene(ILandToLoadableParcelScene(sceneData))
+  const parcelScene = new UnityParcelScene(ILandToLoadableParcelScene(sceneData))
   currentLoadedScene = loadParcelScene(parcelScene)
 
   const target: LoadableParcelScene = { ...ILandToLoadableParcelScene(sceneData).data }
