@@ -1,4 +1,4 @@
-﻿using DCL.Components;
+using DCL.Components;
 using DCL.Configuration;
 using DCL.Helpers;
 using DCL.Models;
@@ -9,7 +9,7 @@ using Object = UnityEngine.Object;
 
 namespace DCL.Controllers
 {
-    public partial class ParcelScene : MonoBehaviour, ICleanable
+    public class ParcelScene : MonoBehaviour, ICleanable
     {
         public static bool VERBOSE = false;
         enum State
