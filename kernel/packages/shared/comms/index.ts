@@ -59,6 +59,8 @@ export const MORDOR_POSITION: Position = [
   0
 ]
 
+declare var global: any
+
 export class PeerTrackingInfo {
   public position: Position | null = null
   public identity: string | null = null
@@ -646,8 +648,6 @@ export function disconnect() {
     }
   }
 }
-
-declare var global: any
 
 global['printCommsInformation'] = function() {
   if (context) {
