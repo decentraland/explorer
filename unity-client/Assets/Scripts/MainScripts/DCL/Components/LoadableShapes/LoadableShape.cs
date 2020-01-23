@@ -1,10 +1,11 @@
-﻿using System;
+using System;
 using DCL.Controllers;
 using DCL.Helpers;
 using DCL.Models;
 using System.Collections;
 using UnityEngine;
 using Object = UnityEngine.Object;
+using System.Collections.Generic;
 
 namespace DCL.Components
 {
@@ -18,6 +19,14 @@ namespace DCL.Components
 
         public Model model = new Model();
         protected Model previousModel = new Model();
+
+        protected static Dictionary<GameObject, LoadWrapper> attachedLoaders = new Dictionary<GameObject, LoadWrapper>();
+
+        public static LoadWrapper GetLoaderForEntity(DecentralandEntity entity)
+        {
+            attachedLoaders.TryGetValue(entity.meshRootGameObject, out LoadWrapper result);
+            return result;
+        }
 
         public LoadableShape(ParcelScene scene) : base(scene)
         {
@@ -40,9 +49,10 @@ namespace DCL.Components
     }
 
     public class LoadableShape<LoadWrapperType, LoadWrapperModelType> : LoadableShape
-        where LoadWrapperType : LoadWrapper
+        where LoadWrapperType : LoadWrapper, new()
         where LoadWrapperModelType : LoadableShape.Model, new()
     {
+
         private bool isLoaded = false;
         private bool failed = false;
         private event Action<BaseDisposable> OnReadyCallbacks;
@@ -109,7 +119,19 @@ namespace DCL.Components
             {
                 isLoaded = false;
                 entity.EnsureMeshGameObject(componentName + " mesh");
-                LoadWrapperType loadableShape = entity.meshRootGameObject.GetOrCreateComponent<LoadWrapperType>();
+
+                LoadWrapperType loadableShape = null;
+
+                if (!attachedLoaders.ContainsKey(entity.meshRootGameObject))
+                {
+                    loadableShape = new LoadWrapperType();
+                    attachedLoaders.Add(entity.meshRootGameObject, loadableShape);
+                }
+                else
+                {
+                    loadableShape = GetLoaderForEntity(entity) as LoadWrapperType;
+                }
+
                 loadableShape.entity = entity;
                 loadableShape.useVisualFeedback = Configuration.ParcelSettings.VISUAL_LOADING_ENABLED;
                 loadableShape.initialVisibility = model.visible;
@@ -129,7 +151,7 @@ namespace DCL.Components
 
         void ConfigureVisibility(DecentralandEntity entity)
         {
-            var loadable = entity.meshRootGameObject.GetComponentInChildren<LoadWrapper>();
+            var loadable = GetLoaderForEntity(entity);
 
             if (loadable != null)
                 loadable.initialVisibility = model.visible;
@@ -146,11 +168,11 @@ namespace DCL.Components
         {
             if (loadWrapper != null)
             {
-                if (loadWrapper.gameObject != null)
-                    loadWrapper.gameObject.name += " - Failed loading";
+                if (loadWrapper.entity.gameObject != null)
+                    loadWrapper.entity.gameObject.name += " - Failed loading";
 
                 MaterialTransitionController[] transitionController =
-                    loadWrapper.GetComponentsInChildren<MaterialTransitionController>(true);
+                    loadWrapper.entity.gameObject.GetComponentsInChildren<MaterialTransitionController>(true);
 
                 for (int i = 0; i < transitionController.Length; i++)
                 {
@@ -183,7 +205,6 @@ namespace DCL.Components
 
             ConfigureColliders(entity);
 
-            entity.OnComponentUpdated?.Invoke(loadWrapper);
             entity.OnShapeUpdated?.Invoke(entity);
 
             OnReadyCallbacks?.Invoke(this);
@@ -194,7 +215,7 @@ namespace DCL.Components
         {
             if (entity == null || entity.meshRootGameObject == null) return;
 
-            LoadWrapper loadWrapper = entity.meshRootGameObject.GetComponent<LoadWrapper>();
+            LoadWrapper loadWrapper = GetLoaderForEntity(entity);
 
             loadWrapper?.Unload();
 
