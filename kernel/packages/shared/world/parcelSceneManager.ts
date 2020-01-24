@@ -86,7 +86,7 @@ export async function enableParcelSceneLoading(options: EnableParcelSceneLoading
     globalSignalSceneLoad(sceneId)
     // create the worker if don't exist
     if (!getSceneWorkerBySceneID(sceneId)) {
-      let parcelScene = new options.parcelSceneClass(ILandToLoadableParcelScene(parcelSceneToStart))
+      const parcelScene = new options.parcelSceneClass(ILandToLoadableParcelScene(parcelSceneToStart))
       parcelScene.data.useFPSThrottling = true
       loadParcelScene(parcelScene)
     }
