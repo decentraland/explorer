@@ -25,7 +25,7 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
   ping: number = -1
 
   constructor(private peer: Peer) {
-    logger.info(`connected peer as `, peer.nickname)
+    logger.info(`connected peer as `, peer.peerId)
     peer.callback = (sender, room, payload) => {
       switch (payload.type) {
         case 'profile': {
@@ -34,6 +34,10 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
         }
         case 'chat': {
           this.chatHandler(sender, payload)
+          break
+        }
+        case 'scene': {
+          this.sceneMessageHandler(sender, payload)
           break
         }
         case 'position': {
@@ -115,7 +119,7 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
     const topic = sceneId
 
     await this.peer.sendMessage(topic, {
-      type: 'chat',
+      type: 'scene',
       time: Date.now(),
       data: { id: sceneId, text: message }
     })
