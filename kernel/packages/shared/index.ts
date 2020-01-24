@@ -31,13 +31,11 @@ import { PassportAsPromise } from './passports/PassportAsPromise'
 import { Session } from './session/index'
 import { RootState } from './store/rootTypes'
 import { buildStore } from './store/store'
-//@ts-ignore
 import { getAppNetwork } from './web3'
 import { initializeUrlPositionObserver } from './world/positionThings'
 import { setWorldContext } from './protocol/actions'
 import { profileToRendererFormat } from './passports/transformations/profileToRendererFormat'
-//@ts-ignore
-import { awaitWeb3Approval, requestManager, providerFuture } from './ethereum/provider'
+import { awaitWeb3Approval, providerFuture } from './ethereum/provider'
 import { createIdentity } from 'eth-crypto'
 import { Authenticator, AuthIdentity } from './crypto/Authenticator'
 import { Eth } from 'web3x/eth'
@@ -69,33 +67,36 @@ function initializeAnalytics() {
 
 export let globalStore: Store<RootState>
 export let identity: AuthIdentity
+export let node: string
 
 async function createAuthIdentity() {
   const ephemeral = createIdentity()
 
   const result = await providerFuture
+  const ephemeralLifespanMinutes = 30 * 24 * 60 // 1 month
 
-  let identity
+  let address
+  let signer
   if (result.successful) {
     const eth = Eth.fromCurrentProvider()!
     const account = (await eth.getAccounts())[0]
-    const address = account.toJSON()
 
-    identity = await Authenticator.initializeAuthChain(address, ephemeral, 5, message =>
-      new Personal(eth.provider).sign(message, account, '')
-    )
+    address = account.toJSON()
+    signer = (message: string) => new Personal(eth.provider).sign(message, account, '')
   } else {
     const account: Account = result.localIdentity
 
-    identity = await Authenticator.initializeAuthChain(
-      account.address.toJSON(),
-      ephemeral,
-      5,
-      async message => account.sign(message).signature
-    )
+    address = account.address.toJSON()
+    signer = async (message: string) => account.sign(message).signature
   }
 
+  const identity = await Authenticator.initializeAuthChain(address, ephemeral, ephemeralLifespanMinutes, signer)
+
   return identity
+}
+
+async function pickKatalystNode() {
+  return 'http://localhost:7070'
 }
 
 export async function initShared(): Promise<Session | undefined> {
@@ -129,6 +130,7 @@ export async function initShared(): Promise<Session | undefined> {
 
   let net: ETHEREUM_NETWORK = ETHEREUM_NETWORK.MAINNET
 
+  let account
   if (WORLD_EXPLORER) {
     try {
       defaultLogger.info(`beefore init`)
@@ -137,7 +139,11 @@ export async function initShared(): Promise<Session | undefined> {
       defaultLogger.info(`after init`)
       net = await getAppNetwork()
 
-      userId = await auth.getUserId()
+      account = await providerFuture
+
+      identity = await createAuthIdentity()
+
+      userId = identity.address
       identifyUser(userId)
       session.auth = auth
     } catch (e) {
@@ -148,12 +154,10 @@ export async function initShared(): Promise<Session | undefined> {
     }
   } else {
     defaultLogger.log(`Using test user.`)
-    userId = 'email|5cdd68572d5f842a16d6cc17'
+    userId = '0x0000000000000000000000000000000000000000'
   }
 
-  const account = await providerFuture
-
-  identity = await createAuthIdentity()
+  node = await pickKatalystNode()
 
   defaultLogger.log(`User ${userId} logged in`)
   store.dispatch(authSuccessful())
@@ -178,7 +182,7 @@ export async function initShared(): Promise<Session | undefined> {
   // initialize profile
   console['group']('connect#profile')
   if (!PREVIEW) {
-    const profile = await PassportAsPromise(userId)
+    const profile = await PassportAsPromise(identity.address)
     setLocalProfile(userId, {
       userId,
       version: profile.version,
@@ -199,7 +203,7 @@ export async function initShared(): Promise<Session | undefined> {
     try {
       defaultLogger.info(`Attempt number ${i}...`)
       const context = await connect(
-        userId,
+        identity.address,
         net,
         auth,
         account

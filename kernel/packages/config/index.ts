@@ -227,8 +227,9 @@ export function getServerConfigurations() {
   return {
     auth: `https://auth.decentraland.${TLDDefault}/api/v1`,
     landApi: `https://api.decentraland.${TLDDefault}/v1`,
-    content: `https://content.decentraland.${TLDDefault === 'today' ? 'org' : TLDDefault}`,
-    contentAsBundle: `https://content-assets-as-bundle.decentraland.org`,
+    // content: `https://content.decentraland.${TLDDefault === 'today' ? 'org' : TLDDefault}`,
+    content: `http://localhost:7070/contentv2`,
+    contentAsBundle: ``, // TODO - add proper asset bundle url when ready - moliva - 24/01/2020
     worldInstanceUrl: `wss://world-comm.decentraland.${TLDDefault}/connect`,
     comms: {
       lighthouse: {
@@ -238,8 +239,10 @@ export function getServerConfigurations() {
         p2p: 'http://localhost:9000'
       }
     },
-    profile: `https://profile.decentraland.${TLDDefault}/api/v1`,
-    wearablesApi: `https://wearable-api.decentraland.org/v2`,
+    // profile: `https://profile.decentraland.${TLDDefault}/api/v1`,
+    profile: `http://localhost:7070/profile`,
+    // wearablesApi: `https://wearables-api.decentraland.org/v2`,
+    wearablesApi: `http://localhost:7070/wearables`,
     avatar: {
       snapshotStorage: `https://avatars-storage.decentraland.${TLDDefault}/`,
       server: `https://avatars-api.decentraland.${TLDDefault === 'zone' ? 'today' : TLDDefault}/`,

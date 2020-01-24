@@ -114,7 +114,7 @@ export class Authenticator {
       ephemeralIdentity,
       expiration,
       authChain,
-      address: ethAddress
+      address: ethAddress.toLocaleLowerCase()
     }
   }
 

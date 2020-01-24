@@ -116,8 +116,8 @@ function takeLatestById<T extends Action>(
 }
 
 function overrideBaseUrl(wearable: Wearable) {
-  return { ...wearable, baseUrl: 'https://content.decentraland.org/contents/'
-  , baseUrlBundles: 'https://content-assets-as-bundle.decentraland.org/' }
+  // return { ...wearable, baseUrl: 'https://content.decentraland.org/contents/', baseUrlBundles: '' }
+  return { ...wearable, baseUrl: 'http://localhost:7070/contentv2/contents/', baseUrlBundles: '' } // TODO - add proper asset bundle url when ready - moliva - 24/01/2020
 }
 
 declare const window: any
@@ -150,33 +150,44 @@ export function* handleFetchProfile(action: PassportRequestAction): any {
   try {
     const serverUrl = yield select(getProfileDownloadServer)
     const accessToken = yield select(getAccessToken)
-    const profile = yield call(profileServerRequest, serverUrl, userId, accessToken)
-    const currentId = yield select(getCurrentUserId)
-    if (currentId === userId) {
-      profile.email = yield select(getEmail)
-    }
-    if (ALL_WEARABLES) {
-      profile.inventory = (yield select(getExclusiveCatalog)).map((_: Wearable) => _.id)
-    } else {
-      if (profile.ethAddress) {
-        yield put(inventoryRequest(userId, profile.ethAddress))
-        const inventoryResult = yield race({
-          success: take(isActionFor(INVENTORY_SUCCESS, userId)),
-          failure: take(isActionFor(INVENTORY_FAILURE, userId))
-        })
-        if (inventoryResult.failure) {
-          defaultLogger.error(`Unable to fetch inventory for ${userId}:`, inventoryResult.failure)
-        } else {
-          profile.inventory = (inventoryResult.success as InventorySuccess).payload.inventory.map(
-            dropIndexFromExclusives
-          )
-        }
-      } else {
-        profile.inventory = []
+    const profiles: { avatars: object[] } = yield call(profileServerRequest, serverUrl, userId, accessToken)
+    if (profiles.avatars.length !== 0) {
+      const profile: any = profiles.avatars[0]
+      const currentId = yield select(getCurrentUserId)
+      if (currentId === userId) {
+        profile.email = yield select(getEmail)
       }
+      if (ALL_WEARABLES) {
+        profile.inventory = (yield select(getExclusiveCatalog)).map((_: Wearable) => _.id)
+      } else {
+        if (profile.ethAddress) {
+          yield put(inventoryRequest(userId, profile.ethAddress))
+          const inventoryResult = yield race({
+            success: take(isActionFor(INVENTORY_SUCCESS, userId)),
+            failure: take(isActionFor(INVENTORY_FAILURE, userId))
+          })
+          if (inventoryResult.failure) {
+            defaultLogger.error(`Unable to fetch inventory for ${userId}:`, inventoryResult.failure)
+          } else {
+            profile.inventory = (inventoryResult.success as InventorySuccess).payload.inventory.map(
+              dropIndexFromExclusives
+            )
+          }
+        } else {
+          profile.inventory = []
+        }
+      }
+      const passport = yield call(processServerProfile, userId, profile)
+      yield put(passportSuccess(userId, passport))
+    } else {
+      const randomizedUserProfile = yield call(generateRandomUserProfile, userId)
+      const currentId = yield select(getCurrentUserId)
+      if (currentId === userId) {
+        randomizedUserProfile.email = yield select(getEmail)
+      }
+      yield put(inventorySuccess(userId, randomizedUserProfile.inventory))
+      yield put(passportRandom(userId, randomizedUserProfile))
     }
-    const passport = yield call(processServerProfile, userId, profile)
-    yield put(passportSuccess(userId, passport))
   } catch (error) {
     const randomizedUserProfile = yield call(generateRandomUserProfile, userId)
     const currentId = yield select(getCurrentUserId)
@@ -190,11 +201,7 @@ export function* handleFetchProfile(action: PassportRequestAction): any {
 
 export async function profileServerRequest(serverUrl: string, userId: string, accessToken: string) {
   try {
-    const request = await fetch(`${serverUrl}/profile/${userId}`, {
-      headers: {
-        Authorization: 'Bearer ' + accessToken
-      }
-    })
+    const request = await fetch(`${serverUrl}/${userId}`)
     if (!request.ok) {
       throw new Error('Profile not found')
     }
@@ -266,14 +273,9 @@ export function* sendLoadProfile(profile: Profile) {
   window['unityInterface'].LoadProfile(profileToRendererFormat(profile))
 }
 
-export function fetchCurrentProfile(accessToken: string, uuid: string) {
-  const authHeader = {
-    headers: {
-      Authorization: 'Bearer ' + accessToken
-    }
-  }
-  const request = `${getServerConfigurations().profile}/profile${uuid ? '/' + uuid : ''}`
-  return fetch(request, authHeader)
+export function fetchCurrentProfile(uuid: string) {
+  const request = `${getServerConfigurations().profile}/${uuid}`
+  return fetch(request)
 }
 
 export function* handleFetchInventory(action: InventoryRequest) {
