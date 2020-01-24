@@ -82,7 +82,19 @@ async function createAuthIdentity() {
     const account = (await eth.getAccounts())[0]
 
     address = account.toJSON()
-    signer = (message: string) => new Personal(eth.provider).sign(message, account, '')
+    signer = async (message: string) => {
+      let result
+      while (!result) {
+        try {
+          result = await new Personal(eth.provider).sign(message, account, '')
+        } catch (e) {
+          if (e.message && e.message.includes('User denied message signature')) {
+            showEthSignAdvice(true)
+          }
+        }
+      }
+      return result
+    }
   } else {
     const account: Account = result.localIdentity
 
@@ -182,7 +194,7 @@ export async function initShared(): Promise<Session | undefined> {
   // initialize profile
   console['group']('connect#profile')
   if (!PREVIEW) {
-    const profile = await PassportAsPromise(identity.address)
+    const profile = await PassportAsPromise(userId)
     setLocalProfile(userId, {
       userId,
       version: profile.version,
@@ -227,10 +239,6 @@ export async function initShared(): Promise<Session | undefined> {
         } else {
           // max number of attempts not reached => continue with loop
           store.dispatch(commsErrorRetrying(i))
-
-          if (e.message && e.message.includes('Result of validation challenge is incorrect')) {
-            showEthSignAdvice(true)
-          }
         }
       } else {
         // not a comms issue per se => rethrow error

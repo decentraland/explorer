@@ -73,14 +73,12 @@ export async function fetchKatalystNodes() {
   defaultLogger.info(`accounts: `, accounts)
 
   defaultLogger.info(`eth: `, eth)
-  const contract = new Katalyst(eth!, contractAddress)
+  const contract = new Katalyst(eth, contractAddress)
 
+  // @ts-ignore
   const count = await contract.methods.katalystCount().call()
-  console.log(`Katalyst nodes count: ${count}`)
-
+  // @ts-ignore
   const ids = await contract.methods.katalystIds(0).call()
-  console.log(`Katalyst node ids: ${ids}`)
-
+  // @ts-ignore
   const url = await contract.methods.katalystById(ids).call()
-  console.log(`Katalyst node URL: ${JSON.stringify(url)}`)
 }
