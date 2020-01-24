@@ -118,20 +118,6 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
     await this.sendData(topic, chatMessage, PeerMessageTypes.reliable)
   }
 
-  private async sendData(topic: string, messageData: MessageData, type: PeerMessageType = PeerMessageTypes.unreliable) {
-    await this.peer.sendMessage(topic, createCommsMessage(messageData).serializeBinary())
-  }
-
-  private async sendPositionData(p: Position, topic: string) {
-    const positionData = createPositionData(p)
-    await this.sendData(topic, positionData)
-  }
-
-  private async sendProfileData(userInfo: UserInformation, topic: string) {
-    const profileData = createProfileData(userInfo)
-    await this.sendData(topic, profileData)
-  }
-
   async updateSubscriptions(rooms: string[]) {
     const currentRooms = this.peer.currentRooms
     const joining = rooms.map(room => {
@@ -149,6 +135,20 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
       }
     })
     return Promise.all([...joining, ...leaving]).then(NOOP)
+  }
+
+  private async sendData(topic: string, messageData: MessageData, type: PeerMessageType = PeerMessageTypes.unreliable) {
+    await this.peer.sendMessage(topic, createCommsMessage(messageData).serializeBinary())
+  }
+
+  private async sendPositionData(p: Position, topic: string) {
+    const positionData = createPositionData(p)
+    await this.sendData(topic, positionData)
+  }
+
+  private async sendProfileData(userInfo: UserInformation, topic: string) {
+    const profileData = createProfileData(userInfo)
+    await this.sendData(topic, profileData)
   }
 }
 
