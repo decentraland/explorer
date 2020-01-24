@@ -436,8 +436,6 @@ export default class GamekitScene extends Script {
         })
       })
 
-      this.onLog(`useFPSThrottling for scene ${sceneData.name} is ${sceneData.useFPSThrottling}`)
-
       if (sceneData.useFPSThrottling === true) {
         this.parcels = fullData.parcels
         if (this.parcels !== undefined) {
