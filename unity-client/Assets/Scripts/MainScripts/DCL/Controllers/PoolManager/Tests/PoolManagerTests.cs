@@ -42,13 +42,13 @@ namespace Tests
             Assert.IsNotNull(po1, "Poolable object instance shouldn't be null.");
             po1.gameObject.SetActive(true);
 
-            Assert.IsTrue(po1.isActiveAndEnabled, "Poolable object should be alive.");
+            Assert.IsTrue(po1.gameObject.activeSelf, "Poolable object should be alive.");
 
             PoolableObject po2 = PoolManager.i.Get(id);
             Assert.IsNotNull(po2, "Poolable object instance shouldn't be null.");
             po2.gameObject.SetActive(true);
 
-            Assert.IsTrue(po2.isActiveAndEnabled, "Poolable object should be alive.");
+            Assert.IsTrue(po2.gameObject.activeSelf, "Poolable object should be alive.");
 
             pool = PoolManager.i.GetPool(id);
             Assert.IsNotNull(pool, "Pool instance shouldn't be null.");

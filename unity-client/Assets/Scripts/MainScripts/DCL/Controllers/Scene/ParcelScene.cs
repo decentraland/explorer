@@ -185,22 +185,23 @@ namespace DCL.Controllers
                 Vector2Int pos = parcels[i];
 
                 PoolableObject blocker = PoolManager.i.Get(PARCEL_BLOCKER_POOL_NAME);
+                Transform blockerTransform = blocker.gameObject.transform;
 
-                blocker.transform.SetParent(this.transform, false);
-                blocker.transform.position = DCLCharacterController.i.characterPosition.WorldToUnityPosition(Utils.GridToWorldPosition(pos.x, pos.y)) + (Vector3.up * blockerPrefab.transform.localPosition.y) + new Vector3(ParcelSettings.PARCEL_SIZE / 2, 0, ParcelSettings.PARCEL_SIZE / 2);
+                blockerTransform.SetParent(this.transform, false);
+                blockerTransform.position = DCLCharacterController.i.characterPosition.WorldToUnityPosition(Utils.GridToWorldPosition(pos.x, pos.y)) + (Vector3.up * blockerPrefab.transform.localPosition.y) + new Vector3(ParcelSettings.PARCEL_SIZE / 2, 0, ParcelSettings.PARCEL_SIZE / 2);
 
                 float sceneHeight = metricsController.GetLimits().sceneHeight;
 
-                auxVec.x = blocker.transform.position.x;
+                auxVec.x = blockerTransform.position.x;
                 auxVec.y = sceneHeight / 2;
-                auxVec.z = blocker.transform.position.z;
+                auxVec.z = blockerTransform.position.z;
 
-                blocker.transform.position = auxVec;
+                blockerTransform.position = auxVec;
 
                 auxVec.x = ParcelSettings.PARCEL_SIZE;
                 auxVec.y = sceneHeight;
                 auxVec.z = ParcelSettings.PARCEL_SIZE;
-                blocker.transform.localScale = auxVec;
+                blockerTransform.localScale = auxVec;
 
                 blockers.Add(blocker);
             }

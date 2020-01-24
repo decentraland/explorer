@@ -3,10 +3,11 @@ using UnityEngine;
 
 namespace DCL
 {
-    public class PoolableObject : MonoBehaviour
+    public class PoolableObject
     {
         public Pool pool;
         public LinkedListNode<PoolableObject> node;
+        public GameObject gameObject;
 
         public bool isInsidePool { get { return node == null; } }
 
@@ -42,12 +43,12 @@ namespace DCL
             Release();
         }
 
-        void OnDestroy()
-        {
-            if (pool != null)
-            {
-                pool.RemoveFromPool(this);
-            }
-        }
+        //void OnDestroy()
+        //{
+        //    if (pool != null)
+        //    {
+        //        pool.RemoveFromPool(this);
+        //    }
+        //}
     }
 }

@@ -154,11 +154,13 @@ namespace DCL
 
         private PoolableObject SetupPoolableObject(GameObject gameObject, bool active = false)
         {
-            if (gameObject.GetComponent<PoolableObject>() != null)
+            if (PoolManager.i.poolables.ContainsKey(gameObject))
                 return null;
 
-            PoolableObject poolable = gameObject.AddComponent<PoolableObject>();
+            PoolableObject poolable = new PoolableObject();
             poolable.pool = this;
+            poolable.gameObject = gameObject;
+            PoolManager.i.poolables.Add(gameObject, poolable);
 
             if (!active)
             {
@@ -211,7 +213,7 @@ namespace DCL
                 return;
             }
 
-            PoolableObject obj = gameObject.GetComponent<PoolableObject>();
+            PoolableObject obj = PoolManager.i.GetPoolable(gameObject);
 
             if (obj != null)
             {
@@ -230,6 +232,7 @@ namespace DCL
             if (activeObjects.Contains(poolable))
                 activeObjects.Remove(poolable);
 
+            PoolManager.i.poolables.Remove(poolable.gameObject);
 #if UNITY_EDITOR
             RefreshName();
 #endif
@@ -241,13 +244,13 @@ namespace DCL
 
             while (inactiveObjects.Count > 0)
             {
-                Object.Destroy(inactiveObjects.First.Value);
+                PoolManager.i.poolables.Remove(inactiveObjects.First.Value.gameObject);
                 inactiveObjects.RemoveFirst();
             }
 
             while (activeObjects.Count > 0)
             {
-                Object.Destroy(activeObjects.First.Value);
+                PoolManager.i.poolables.Remove(activeObjects.First.Value.gameObject);
                 activeObjects.RemoveFirst();
             }
 
@@ -301,9 +304,8 @@ namespace DCL
         public static bool FindPoolInGameObject(GameObject gameObject, out Pool pool)
         {
             pool = null;
-            var poolable = gameObject.GetComponentInChildren<PoolableObject>(true);
 
-            if (poolable != null)
+            if (PoolManager.i.poolables.TryGetValue(gameObject, out PoolableObject poolable))
             {
                 if (poolable.pool.activeObjects.Contains(poolable))
                 {

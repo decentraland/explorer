@@ -68,7 +68,7 @@ namespace AssetPromiseKeeper_GLTF_Tests
             keeper.Keep(prom);
             yield return prom;
 
-            var poolableObjectComponent = prom.asset.container.GetComponentInChildren<PoolableObject>();
+            var poolableObjectComponent = PoolManager.i.GetPoolable(prom.asset.container);
             Assert.IsNotNull(poolableObjectComponent);
         }
 
@@ -86,7 +86,7 @@ namespace AssetPromiseKeeper_GLTF_Tests
                 prom.settings.forceNewInstance = false;
                 keeper.Keep(prom);
                 yield return prom;
-                poolableComponents.Add(prom.asset.container.GetComponentInChildren<PoolableObject>());
+                poolableComponents.Add(PoolManager.i.GetPoolable(prom.asset.container));
                 keeper.Forget(prom);
             }
 
@@ -105,7 +105,7 @@ namespace AssetPromiseKeeper_GLTF_Tests
             keeper.Keep(prom);
             yield return prom;
 
-            var poolableObjectComponent = prom.asset.container.GetComponentInChildren<PoolableObject>();
+            var poolableObjectComponent = PoolManager.i.GetPoolable(prom.asset.container);
             Assert.IsNull(poolableObjectComponent);
         }
 
@@ -124,7 +124,7 @@ namespace AssetPromiseKeeper_GLTF_Tests
                 prom.settings.forceNewInstance = true;
                 keeper.Keep(prom);
                 yield return prom;
-                poolableComponents.Add(prom.asset.container.GetComponentInChildren<PoolableObject>());
+                poolableComponents.Add(PoolManager.i.GetPoolable(prom.asset.container));
                 keeper.Forget(prom);
             }
 

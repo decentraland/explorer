@@ -1,16 +1,23 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 namespace DCL
 {
-
-
     public class PoolManager : Singleton<PoolManager>
     {
         public const int DEFAULT_PREWARM_COUNT = 100;
         public static bool enablePrewarm = true;
 
         public Dictionary<object, Pool> pools = new Dictionary<object, Pool>();
+        public Dictionary<GameObject, PoolableObject> poolables = new Dictionary<GameObject, PoolableObject>();
+
+        public PoolableObject GetPoolable(GameObject gameObject)
+        {
+            if (poolables.ContainsKey(gameObject))
+                return poolables[gameObject];
+
+            return null;
+        }
 
         GameObject container
         {
@@ -20,7 +27,10 @@ namespace DCL
                 return containerValue;
             }
 
-            set { containerValue = value; }
+            set
+            {
+                containerValue = value;
+            }
         }
 
         GameObject containerValue = null;
@@ -123,9 +133,9 @@ namespace DCL
                 return false;
             }
 
-            var poolableObject = gameObject.GetComponent<PoolableObject>();
 
-            if (poolableObject)
+
+            if (poolables.TryGetValue(gameObject, out PoolableObject poolableObject))
             {
                 poolableObject.Release();
             }
