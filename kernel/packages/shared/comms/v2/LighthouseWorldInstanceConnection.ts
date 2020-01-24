@@ -138,7 +138,7 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
   }
 
   private async sendData(topic: string, messageData: MessageData, type: PeerMessageType = PeerMessageTypes.unreliable) {
-    await this.peer.sendMessage(topic, createCommsMessage(messageData).serializeBinary())
+    await this.peer.sendMessage(topic, createCommsMessage(messageData).serializeBinary(), type)
   }
 
   private async sendPositionData(p: Position, topic: string) {
