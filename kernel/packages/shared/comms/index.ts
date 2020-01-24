@@ -37,9 +37,11 @@ import { LighthouseWorldInstanceConnection } from './v2/LighthouseWorldInstanceC
 import { getTLD } from '../../config/index'
 import * as Long from 'long'
 
-window.Long = Long
-import { requestManager } from '../ethereum/provider'
 import { identity } from '../index'
+import { Authenticator } from '../crypto/Authenticator'
+
+declare const window: any
+window.Long = Long
 
 const { Peer } = require('decentraland-katalyst-peer')
 
@@ -435,11 +437,11 @@ function parseCommsMode(modeString: string) {
   return segments as [CommsVersion, CommsMode]
 }
 
-export async function connect(userId: string, network: ETHEREUM_NETWORK, auth: Auth, ethAddress?: string) {
+export async function connect(userId: string, network: ETHEREUM_NETWORK, auth: Auth, account: any) {
   try {
     setLocalProfile(userId, {
-      ...getUserProfile(),
-      publicKey: ethAddress || null
+      ...getUserProfile()
+      // publicKey: account || null
     })
 
     const user = getCurrentUser()
@@ -530,7 +532,7 @@ export async function connect(userId: string, network: ETHEREUM_NETWORK, auth: A
 
         const peer = new Peer(
           lighthouseUrl,
-          ethAddress ? ethAddress : identity.address.toJSON(),
+          identity.address,
           () => {
             // noop
           },
@@ -540,19 +542,12 @@ export async function connect(userId: string, network: ETHEREUM_NETWORK, auth: A
             },
             authHandler: async (msg: string) => {
               try {
-                if (ethAddress) {
-                  const signature = await requestManager.personal_sign(msg, ethAddress, '')
-                  return signature
-                } else {
-                  defaultLogger.info(`no eth address, using generated key `, identity.address)
-                  const result = identity.sign(msg)
-                  return result.signature
-                }
+                return Authenticator.signPayload(identity, msg)
               } catch (e) {
                 defaultLogger.info(`error while trying to sign message from lighthouse '${msg}'`)
               }
               // if any error occurs
-              return msg
+              return identity
             }
           }
         )

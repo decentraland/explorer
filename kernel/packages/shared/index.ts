@@ -36,10 +36,13 @@ import { getAppNetwork } from './web3'
 import { initializeUrlPositionObserver } from './world/positionThings'
 import { setWorldContext } from './protocol/actions'
 import { profileToRendererFormat } from './passports/transformations/profileToRendererFormat'
-import { getUserAccount } from './ethereum/EthereumService'
-import { Account } from 'web3x/account'
 //@ts-ignore
-import { awaitWeb3Approval } from './ethereum/provider'
+import { awaitWeb3Approval, requestManager, providerFuture } from './ethereum/provider'
+import { createIdentity } from 'eth-crypto'
+import { Authenticator, AuthIdentity } from './crypto/Authenticator'
+import { Eth } from 'web3x/eth'
+import { Personal } from 'web3x/personal/personal'
+import { Account } from 'web3x/account'
 
 enum AnalyticsAccount {
   PRD = '1plAT9a2wOOgbPCrTaU8rgGUMzgUTJtU',
@@ -65,7 +68,35 @@ function initializeAnalytics() {
 }
 
 export let globalStore: Store<RootState>
-export let identity: Account
+export let identity: AuthIdentity
+
+async function createAuthIdentity() {
+  const ephemeral = createIdentity()
+
+  const result = await providerFuture
+
+  let identity
+  if (result.successful) {
+    const eth = Eth.fromCurrentProvider()!
+    const account = (await eth.getAccounts())[0]
+    const address = account.toJSON()
+
+    identity = await Authenticator.initializeAuthChain(address, ephemeral, 5, message =>
+      new Personal(eth.provider).sign(message, account, '')
+    )
+  } else {
+    const account: Account = result.localIdentity
+
+    identity = await Authenticator.initializeAuthChain(
+      account.address.toJSON(),
+      ephemeral,
+      5,
+      async message => account.sign(message).signature
+    )
+  }
+
+  return identity
+}
 
 export async function initShared(): Promise<Session | undefined> {
   if (WORLD_EXPLORER) {
@@ -101,9 +132,10 @@ export async function initShared(): Promise<Session | undefined> {
   if (WORLD_EXPLORER) {
     try {
       defaultLogger.info(`beefore init`)
-      // await awaitWeb3Approval()
+      await awaitWeb3Approval()
+
       defaultLogger.info(`after init`)
-      // net = await getAppNetwork()
+      net = await getAppNetwork()
 
       userId = await auth.getUserId()
       identifyUser(userId)
@@ -118,6 +150,10 @@ export async function initShared(): Promise<Session | undefined> {
     defaultLogger.log(`Using test user.`)
     userId = 'email|5cdd68572d5f842a16d6cc17'
   }
+
+  const account = await providerFuture
+
+  identity = await createAuthIdentity()
 
   defaultLogger.log(`User ${userId} logged in`)
   store.dispatch(authSuccessful())
@@ -155,16 +191,6 @@ export async function initShared(): Promise<Session | undefined> {
     })
   }
   console['groupEnd']()
-
-  let account
-  try {
-    account = await getUserAccount()
-  } catch (e) {
-    // could not get account
-  }
-  if (!account) {
-    identity = Account.create()
-  }
 
   console['group']('connect#comms')
   store.dispatch(establishingComms())
