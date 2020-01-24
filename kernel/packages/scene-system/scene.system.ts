@@ -211,11 +211,7 @@ export default class GamekitScene extends Script {
       const that = this
       
       const fullData = sceneData.data as LoadableParcelScene
-      
       const sceneId = fullData.id
-
-      this.parcels = fullData.parcels
-      this.scenePosition = this.calculateSceneCenter(fullData.parcels)
 
       const dcl: DecentralandInterface = {
         DEBUG: true,
@@ -440,8 +436,14 @@ export default class GamekitScene extends Script {
         })
       })
 
-      if (sceneData.useFPSThrottling) {
-        this.setupFpsThrottling(dcl)
+      this.onLog(`useFPSThrottling for scene ${sceneData.name} is ${sceneData.useFPSThrottling}`)
+
+      if (sceneData.useFPSThrottling === true) {
+        this.parcels = fullData.parcels
+        if (this.parcels !== undefined) {
+          this.scenePosition = this.calculateSceneCenter(this.parcels)
+          this.setupFpsThrottling(dcl)
+        }
       }
 
       try {
