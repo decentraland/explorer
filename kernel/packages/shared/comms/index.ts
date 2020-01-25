@@ -43,6 +43,10 @@ import { Session } from '../session/index'
 import { worldRunningObservable, isWorldRunning } from '../world/worldState'
 import { WorldInstanceConnection } from './interface/index'
 import { LighthouseWorldInstanceConnection } from './v2/LighthouseWorldInstanceConnection'
+import { getTLD } from '../../config/index'
+import * as Long from 'long'
+
+window.Long = Long
 
 const { Peer } = require('decentraland-katalyst-peer')
 
@@ -63,6 +67,8 @@ export const MORDOR_POSITION: Position = [
   0,
   0
 ]
+
+declare var global: any
 
 export class PeerTrackingInfo {
   public position: Position | null = null
@@ -276,7 +282,9 @@ export function processProfileMessage(
 }
 
 function processNewLogin(identity: string, context: Context, fromAlias: string) {
-  if (!DEBUG_LOGIN) {
+  // TODO - check this issue - moliva - 23/01/2020
+  const checkTodo = false
+  if (checkTodo && !DEBUG_LOGIN) {
     if (identity === context.userInfo.userId && fromAlias !== getCurrentPeer()!.uuid) {
       Session.current.then(s => s.disable()).catch(e => defaultLogger.error('error while signing out', e))
     }
@@ -463,7 +471,7 @@ export async function connect(userId: string, network: ETHEREUM_NETWORK, auth: A
 
     let connection: WorldInstanceConnection
 
-    const [version, mode] = parseCommsMode(COMMS)
+    const [version, mode] = parseCommsMode(getTLD() === 'zone' ? 'v2-p2p' : COMMS)
     switch (version) {
       case 'v1': {
         let commsBroker: IBrokerConnection
@@ -551,9 +559,12 @@ export async function connect(userId: string, network: ETHEREUM_NETWORK, auth: A
           }
         )
 
-        await peer.setLayer('blue')
+        await peer.setLayer('green')
 
         connection = new LighthouseWorldInstanceConnection(peer)
+
+        global.__DEBUG_PEER = peer
+
         break
       }
       default: {
@@ -659,8 +670,6 @@ export function disconnect() {
     }
   }
 }
-
-declare var global: any
 
 global['printCommsInformation'] = function() {
   if (context) {
