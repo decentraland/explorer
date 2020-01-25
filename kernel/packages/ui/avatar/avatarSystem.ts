@@ -1,4 +1,4 @@
-import { engine, Entity, executeTask, Observable, Transform } from 'decentraland-ecs/src'
+import { Component, engine, Entity, log, Observable, ProfileForRenderer, Transform } from 'decentraland-ecs/src'
 import { AvatarShape } from 'decentraland-ecs/src/decentraland/AvatarShape'
 import {
   AvatarMessage,
@@ -7,208 +7,170 @@ import {
   ReceiveUserDataMessage,
   ReceiveUserPoseMessage,
   ReceiveUserVisibleMessage,
-  UserInformation,
-  UserMessage,
   UserRemovedMessage,
-  UUID
+  UserMessage
 } from 'shared/comms/interface/types'
-import { execute } from './rpc'
-import { ProfileForRenderer } from 'decentraland-ecs/src/decentraland/Types'
 
 export const avatarMessageObservable = new Observable<AvatarMessage>()
 
-const avatarMap = new Map<string, AvatarEntity>()
-
-export class AvatarEntity extends Entity {
+@Component('AvatarState')
+class AvatarState {
   blocked = false
   muted = false
   visible = true
-
-  readonly transform: Transform
-  avatarShape!: AvatarShape
-
-  constructor(uuid?: string, avatarShape = new AvatarShape()) {
-    super(uuid)
-    this.avatarShape = avatarShape
-
-    this.addComponentOrReplace(this.avatarShape)
-
-    // we need this component to filter the interpolator system
-    this.transform = this.getComponentOrCreate(Transform)
-  }
-
-  loadProfile(profile: ProfileForRenderer) {
-    if (profile) {
-      const { avatar } = profile
-
-      const shape = new AvatarShape()
-      shape.id = profile.userId
-      shape.name = profile.name
-
-      shape.bodyShape = avatar.bodyShape
-      shape.wearables = avatar.wearables
-      shape.skinColor = avatar.skinColor
-      shape.hairColor = avatar.hairColor
-      shape.eyeColor = avatar.eyeColor
-
-      this.addComponentOrReplace(shape)
-    }
-    this.setVisible(true)
-  }
-
-  setBlocked(blocked: boolean, muted: boolean): void {
-    this.blocked = blocked
-    this.muted = muted
-  }
-
-  setVisible(visible: boolean): void {
-    this.visible = visible
-    this.updateVisibility()
-  }
-
-  setUserData(userData: Partial<UserInformation>): void {
-    if (userData.pose) {
-      this.setPose(userData.pose)
-    }
-
-    if (userData.profile) {
-      this.loadProfile(userData.profile)
-    }
-  }
-
-  setPose(pose: Pose): void {
-    const [x, y, z, Qx, Qy, Qz, Qw] = pose
-
-    this.transform.position.set(x, y, z)
-    this.transform.rotation.set(Qx, Qy, Qz, Qw)
-  }
-
-  public remove() {
-    if (this.isAddedToEngine()) {
-      engine.removeEntity(this)
-      avatarMap.delete(this.uuid)
-    }
-  }
-
-  private updateVisibility() {
-    const visible = this.visible && !this.blocked
-    if (!visible && this.isAddedToEngine()) {
-      this.remove()
-    } else if (visible && !this.isAddedToEngine()) {
-      engine.addEntity(this)
-    }
-  }
 }
 
-/**
- * For every UUID, ensures synchronously that an avatar exists in the local state.
- * Returns the AvatarEntity instance
- * @param uuid
- */
-function ensureAvatar(uuid: UUID): AvatarEntity {
-  let avatar = avatarMap.get(uuid)
+@Component('AvatarSceneStatus')
+class AvatarSceneStatus {
+  pendingMessages: AvatarMessage[] = []
+  avatarMap = new Map<string, Entity>()
+}
 
-  if (avatar) {
+const globalAvatarContainer = new Entity()
+engine.addEntity(globalAvatarContainer)
+const status = new AvatarSceneStatus()
+globalAvatarContainer.addComponent(status)
+
+avatarMessageObservable.add(evt => {
+  status.pendingMessages.push(evt)
+})
+
+export class AvatarSystem {
+  update() {
+    const avatarSceneStatus = globalAvatarContainer.getComponent(AvatarSceneStatus)
+    const pendings = avatarSceneStatus.pendingMessages
+
+    for (let message of pendings) {
+      switch (message.type) {
+        case AvatarMessageType.USER_DATA:
+          this.handleUserData(avatarSceneStatus, message)
+          break
+        case AvatarMessageType.USER_POSE:
+          this.handleUserPose(avatarSceneStatus, message)
+          break
+        case AvatarMessageType.USER_VISIBLE:
+          this.handleUserVisible(avatarSceneStatus, message)
+          break
+        case AvatarMessageType.USER_REMOVED:
+          this.handleUserRemoved(avatarSceneStatus, message)
+          break
+        case AvatarMessageType.USER_BLOCKED:
+        case AvatarMessageType.USER_UNBLOCKED:
+          this.handleBlockedMessages(avatarSceneStatus, message)
+          break
+        case AvatarMessageType.SHOW_WINDOW:
+          // handleShowWindow(avatarSceneStatus, message)
+          break
+      }
+    }
+
+    // Clear array after we're done
+    pendings.length = 0
+  }
+
+  handleUserData(avatarStatus: AvatarSceneStatus, message: ReceiveUserDataMessage) {
+    if (!message.data) {
+      log(`Error: received a message with userdata but no data was provided for avatar ${message.uuid}`)
+      return
+    }
+    const avatarEntity = this.ensureAvatar(avatarStatus, message.uuid)
+    if (message.data.profile) {
+      this.setAvatarInfo(avatarEntity, message.data.profile)
+    }
+    if (message.data.pose) {
+      this.setUserPose(avatarEntity, message.data.pose)
+    }
+    this.checkVisibility(avatarEntity)
+  }
+
+  handleUserPose(avatarStatus: AvatarSceneStatus, message: ReceiveUserPoseMessage) {
+    const avatarEntity = this.ensureAvatar(avatarStatus, message.uuid)
+    this.setUserPose(avatarEntity, message.pose)
+  }
+
+  handleUserVisible(avatarStatus: AvatarSceneStatus, message: ReceiveUserVisibleMessage) {
+    const avatarEntity = this.ensureAvatar(avatarStatus, message.uuid)
+    this.setVisible(avatarEntity, message.visible)
+  }
+
+  handleUserRemoved(avatarStatus: AvatarSceneStatus, message: UserRemovedMessage) {
+    const avatar = this.ensureAvatar(avatarStatus, message.uuid)
+    avatarStatus.avatarMap.delete(message.uuid)
+    engine.removeEntity(avatar)
+  }
+
+  handleBlockedMessages(avatarStatus: AvatarSceneStatus, message: UserMessage) {
+    const avatar = this.ensureAvatar(avatarStatus, message.uuid)
+    const state = avatar.getComponent(AvatarState)
+    if (message.type === AvatarMessageType.USER_BLOCKED) {
+      state.blocked = true
+      this.checkVisibility(avatar)
+    }
+    if (message.type === AvatarMessageType.USER_UNBLOCKED) {
+      state.blocked = false
+      this.checkVisibility(avatar)
+    }
+  }
+
+  ensureAvatar(avatarState: AvatarSceneStatus, uuid: string) {
+    let avatar = avatarState.avatarMap.get(uuid)
+    if (avatar) {
+      return avatar
+    }
+    avatar = new Entity(uuid)
+    avatar.getComponentOrCreate(Transform)
+    avatar.getComponentOrCreate(AvatarState)
+    avatar.getComponentOrCreate(AvatarShape)
+    avatarState.avatarMap.set(uuid, avatar)
     return avatar
   }
 
-  avatar = new AvatarEntity(uuid)
-  avatarMap.set(uuid, avatar)
+  setAvatarInfo(avatarEntity: Entity, profile: ProfileForRenderer) {
+    const avatarShape = avatarEntity.getComponent(AvatarShape)
+    avatarShape.id = profile.userId
+    avatarShape.name = profile.name
+    avatarShape.bodyShape = profile.avatar.bodyShape
+    avatarShape.wearables = profile.avatar.wearables
+    avatarShape.skinColor = profile.avatar.skinColor
+    avatarShape.hairColor = profile.avatar.hairColor
+    avatarShape.eyeColor = profile.avatar.eyeColor
+  }
 
-  executeTask(hideBlockedUsers)
+  setUserPose(avatarEntity: Entity, pose: Pose) {
+    const transform = avatarEntity.getComponent(Transform)
+    const [x, y, z, Qx, Qy, Qz, Qw] = pose
 
-  return avatar
-}
+    transform.position.set(x, y, z)
+    transform.rotation.set(Qx, Qy, Qz, Qw)
+  }
 
-async function getBlockedUsers(): Promise<Array<string>> {
-  return execute('SocialController', 'getBlockedUsers', [])
-}
+  setBlocked(avatarEntity: Entity, blocked: boolean, muted: boolean): void {
+    const state = avatarEntity.getComponent(AvatarState)
+    state.blocked = blocked
+    state.muted = muted
 
-async function getMutedUsers(): Promise<Array<string>> {
-  return execute('SocialController', 'getMutedUsers', [])
-}
+    this.checkVisibility(avatarEntity)
+  }
 
-/**
- * Unblocks the users that are not in that list.
- */
-async function hideBlockedUsers(): Promise<void> {
-  const blockedUsers = await getBlockedUsers()
-  const mutedUsers = await getMutedUsers()
+  setVisible(avatarEntity: Entity, visible: boolean): void {
+    const state = avatarEntity.getComponent(AvatarState)
+    state.visible = visible
 
-  avatarMap.forEach((avatar, uuid) => {
-    const blocked = blockedUsers.includes(uuid)
-    const muted = blocked || mutedUsers.includes(uuid)
-    avatar.setBlocked(blocked, muted)
-  })
-}
+    this.checkVisibility(avatarEntity)
+  }
 
-function handleUserData(message: ReceiveUserDataMessage): void {
-  const avatar = ensureAvatar(message.uuid)
-
-  if (avatar) {
-    const userData = message.data
-
-    avatar.setUserData(userData)
+  checkVisibility(avatarEntity: Entity) {
+    const state = avatarEntity.getComponent(AvatarState)
+    if (state.visible && !state.blocked) {
+      if (!avatarEntity.isAddedToEngine()) {
+        engine.addEntity(avatarEntity)
+      }
+    } else {
+      if (avatarEntity.isAddedToEngine()) {
+        engine.removeEntity(avatarEntity)
+      }
+    }
   }
 }
 
-function handleUserPose({ uuid, pose }: ReceiveUserPoseMessage): boolean {
-  const avatar = ensureAvatar(uuid)
-
-  if (!avatar) {
-    return false
-  }
-
-  avatar.setPose(pose)
-
-  return true
-}
-
-/**
- * In some cases, like minimizing the window, the user will be invisible to the rest of the world.
- * This function handles those visible changes.
- */
-function handleUserVisible({ uuid, visible }: ReceiveUserVisibleMessage): void {
-  const avatar = ensureAvatar(uuid)
-
-  if (avatar) {
-    avatar.setVisible(visible)
-  }
-}
-
-function handleUserRemoved({ uuid }: UserRemovedMessage): void {
-  const avatar = avatarMap.get(uuid)
-  if (avatar) {
-    avatar.remove()
-  }
-}
-
-function handleShowWindow({ uuid }: UserMessage): void {
-  // noop
-}
-
-function handleMutedBlockedMessages({ uuid }: UserMessage): void {
-  executeTask(hideBlockedUsers)
-}
-
-avatarMessageObservable.add(evt => {
-  if (evt.type === AvatarMessageType.USER_DATA) {
-    handleUserData(evt)
-  } else if (evt.type === AvatarMessageType.USER_POSE) {
-    handleUserPose(evt)
-  } else if (evt.type === AvatarMessageType.USER_VISIBLE) {
-    handleUserVisible(evt)
-  } else if (evt.type === AvatarMessageType.USER_REMOVED) {
-    handleUserRemoved(evt)
-  } else if (evt.type === AvatarMessageType.USER_MUTED) {
-    handleMutedBlockedMessages(evt)
-  } else if (evt.type === AvatarMessageType.USER_BLOCKED) {
-    handleMutedBlockedMessages(evt)
-  } else if (evt.type === AvatarMessageType.USER_UNMUTED) {
-    handleMutedBlockedMessages(evt)
-  } else if (evt.type === AvatarMessageType.USER_UNBLOCKED) {
-    handleMutedBlockedMessages(evt)
-  } else if (evt.type === AvatarMessageType.SHOW_WINDOW) {
-    handleShowWindow(evt)
-  }
-})
+engine.addSystem(new AvatarSystem())
