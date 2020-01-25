@@ -124,6 +124,11 @@ public class HUDController : MonoBehaviour
         expressionsHud?.SetVisibility(configuration.active && configuration.visible);
     }
 
+    public void TriggerSelfUserExpression(string id)
+    {
+        expressionsHud?.ExpressionCalled(id);
+    }
+
     private void UpdateAvatarHUD()
     {
         avatarHud?.UpdateData(new AvatarHUDModel()

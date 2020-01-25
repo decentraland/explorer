@@ -21,6 +21,7 @@ import { POIs } from 'shared/comms/POIs'
 import { IChatCommand, MessageEntry } from 'shared/types'
 import { teleportObservable } from 'shared/world/positionThings'
 import { expressionExplainer, isValidExpression, validExpressions } from './expressionExplainer'
+import { unityInterface } from 'unity-interface/dcl'
 
 const userPose: { [key: string]: Vector3Component } = {}
 avatarMessageObservable.add((pose: AvatarMessage) => {
@@ -275,8 +276,10 @@ export class ChatController extends ExposableAPI implements IChatController {
           }
         } else {
           const id = uuid()
-          const chatMessage = `␐${expression} ${new Date().getTime()}`
+          const time = new Date().getTime()
+          const chatMessage = `␐${expression} ${time}`
           sendPublicChatMessage(id, chatMessage)
+          unityInterface.TriggerSelfUserExpression(expression)
           return {
             id: uuid(),
             isCommand: true,

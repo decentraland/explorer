@@ -27,7 +27,7 @@ public class ExpressionsHUDController : IHUD, IDisposable
         view.CleanUp();
     }
 
-    internal void ExpressionCalled(string id)
+    public void ExpressionCalled(string id)
     {
         UserProfile.GetOwnUserProfile().SetAvatarExpression(id);
     }

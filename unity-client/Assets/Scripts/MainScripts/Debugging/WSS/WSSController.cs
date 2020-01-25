@@ -381,6 +381,9 @@ namespace DCL
                             case "ConfigureSettingsHUD":
                                 HUDController.i.ConfigureSettingsHUD(msg.payload);
                                 break;
+                            case "TriggerSelfUserExpression":
+                                HUDController.i.TriggerSelfUserExpression(msg.payload);
+                                break;
                             default:
                                 Debug.Log("<b><color=#FF0000>WSSController:</color></b> received an unknown message from kernel to renderer: " + msg.type);
                                 break;
