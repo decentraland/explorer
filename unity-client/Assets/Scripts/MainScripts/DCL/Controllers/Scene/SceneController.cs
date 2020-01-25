@@ -77,12 +77,10 @@ namespace DCL
         [System.NonSerialized]
         public bool prewarmSceneMessagesPool = true;
 
-        public bool hasPendingMessages => MessagingControllersManager.i.pendingMessagesCount > 0;
+        public bool HasPendingMessages => MessagingControllersManager.i.pendingMessagesCount > 0;
 
-        public string globalSceneId { get; private set; }
-        public string currentSceneId { get; private set; }
-
-        LoadParcelScenesMessage loadParcelScenesMessage = new LoadParcelScenesMessage();
+        public string GlobalSceneId { get; private set; }
+        public string CurrentSceneId { get; private set; }
 
         bool positionDirty = true;
 
@@ -163,15 +161,15 @@ namespace DCL
                         scene = iterator.Current;
                         characterIsInsideScene = scene.IsInsideSceneBoundaries(DCLCharacterController.i.characterPosition);
 
-                        if (scene.sceneData.id != globalSceneId && characterIsInsideScene)
+                        if (scene.sceneData.id != GlobalSceneId && characterIsInsideScene)
                         {
-                            currentSceneId = scene.sceneData.id;
+                            CurrentSceneId = scene.sceneData.id;
                             break;
                         }
                     }
                 }
 
-                CommonScriptableObjects.sceneID.Set(currentSceneId);
+                CommonScriptableObjects.sceneID.Set(CurrentSceneId);
 
                 OnSortScenes?.Invoke();
             }
@@ -255,10 +253,10 @@ namespace DCL
 
                 loadedScenes.Add(uiSceneId, newScene);
 
-                globalSceneId = uiSceneId;
+                GlobalSceneId = uiSceneId;
 
-                if (!MessagingControllersManager.i.ContainsController(globalSceneId))
-                    MessagingControllersManager.i.AddController(this, globalSceneId, isGlobal: true);
+                if (!MessagingControllersManager.i.ContainsController(GlobalSceneId))
+                    MessagingControllersManager.i.AddController(this, GlobalSceneId, isGlobal: true);
 
                 if (VERBOSE)
                 {
@@ -690,10 +688,10 @@ namespace DCL
         {
             if (scene == null)
             {
-                string sceneId = currentSceneId;
+                string sceneId = CurrentSceneId;
 
                 if (!string.IsNullOrEmpty(sceneId) && loadedScenes.ContainsKey(sceneId))
-                    scene = loadedScenes[currentSceneId];
+                    scene = loadedScenes[CurrentSceneId];
                 else
                     return pos;
             }

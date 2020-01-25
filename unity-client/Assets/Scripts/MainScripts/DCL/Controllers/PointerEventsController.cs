@@ -183,7 +183,7 @@ namespace DCL
                         lastPointerDownEventHitInfo = raycastInfoPointerEventLayer.hitInfo;
                     }
 
-                    string sceneId = SceneController.i.currentSceneId;
+                    string sceneId = SceneController.i.CurrentSceneId;
 
                     if (useRaycast && raycastGlobalLayerHitInfo.isValid)
                     {
@@ -229,7 +229,7 @@ namespace DCL
                         pointerUpEvent = null;
                     }
 
-                    string sceneId = SceneController.i.currentSceneId;
+                    string sceneId = SceneController.i.CurrentSceneId;
 
                     if (useRaycast && raycastGlobalLayerHitInfo.isValid)
                     {

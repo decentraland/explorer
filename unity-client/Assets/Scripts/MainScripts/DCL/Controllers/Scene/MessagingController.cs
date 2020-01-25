@@ -42,13 +42,8 @@ namespace DCL
         public Dictionary<string, MessagingBus> messagingBuses = new Dictionary<string, MessagingBus>();
         public IMessageHandler messageHandler;
         public string debugTag;
-        public bool enabled = true;
 
-        private QueueState currentQueueState
-        {
-            get;
-            set;
-        }
+        private QueueState CurrentQueueState { get; set; }
 
         public readonly MessagingBus initBus;
         public readonly MessagingBus systemBus;
@@ -59,12 +54,13 @@ namespace DCL
             this.debugTag = debugTag;
             this.messageHandler = messageHandler;
 
-            //TODO(Brian): This is too hacky, most of the controllers won't be using this system. Refactor this in the future.
+            // TODO(Brian): This is too hacky, most of the controllers won't be using this system. Refactor this in the future.
+            // TODO(Brian, 2020/Jan/25): Explain this assertion better -^
             uiBus = AddMessageBus(MessagingBusId.UI);
             initBus = AddMessageBus(MessagingBusId.INIT);
             systemBus = AddMessageBus(MessagingBusId.SYSTEM);
 
-            currentQueueState = QueueState.Init;
+            CurrentQueueState = QueueState.Init;
 
             StartBus(MessagingBusId.INIT);
             StartBus(MessagingBusId.UI);
@@ -72,8 +68,10 @@ namespace DCL
 
         private MessagingBus AddMessageBus(string id)
         {
-            var newMessagingBus = new MessagingBus(id, messageHandler, this);
-            newMessagingBus.debugTag = debugTag;
+            var newMessagingBus = new MessagingBus(id, messageHandler, this)
+            {
+                debugTag = debugTag
+            };
 
             messagingBuses.Add(id, newMessagingBus);
             return newMessagingBus;
@@ -97,8 +95,7 @@ namespace DCL
 
         public void Stop()
         {
-            using (var iterator = messagingBuses.GetEnumerator())
-            {
+            using (var iterator = messagingBuses.GetEnumerator()) {
                 while (iterator.MoveNext())
                 {
                     iterator.Current.Value.Stop();
@@ -124,16 +121,14 @@ namespace DCL
 
         public void Enqueue(ParcelScene scene, MessagingBus.QueuedSceneMessage_Scene queuedMessage, out string busId)
         {
-            busId = "";
-
             QueueMode queueMode = QueueMode.Reliable;
 
             // If current scene is the Global Scene, the bus id should be UI
-            if (scene && scene.sceneData.id == SceneController.i.globalSceneId)
+            if (scene && scene.sceneData.id == SceneController.i.GlobalSceneId)
             {
                 busId = MessagingBusId.UI;
             }
-            else if (currentQueueState == MessagingController.QueueState.Init)
+            else if (CurrentQueueState == QueueState.Init)
             {
                 busId = MessagingBusId.INIT;
             }
@@ -145,11 +140,9 @@ namespace DCL
             // Check if the message type is an UpdateEntityComponent 
             if (queuedMessage.method == MessagingTypes.ENTITY_COMPONENT_CREATE_OR_UPDATE)
             {
-                int classId = 0;
-
                 // We need to extract the entityId and the classId from the tag.
                 // The tag format is "entityId_classId", i.e: "E1_2". 
-                GetEntityIdAndClassIdFromTag(queuedMessage.tag, out classId);
+                GetEntityIdAndClassIdFromTag(queuedMessage.tag, out int classId);
 
                 // If it is a transform update, the queue mode is Lossy
                 if (classId == (int)CLASS_ID_COMPONENT.TRANSFORM)
@@ -167,7 +160,7 @@ namespace DCL
                 // When a INIT DONE message is enqueued, the next messages should be 
                 // enqueued in SYSTEM message bus, but we don't process them until 
                 // scene started has been processed
-                currentQueueState = MessagingController.QueueState.Systems;
+                CurrentQueueState = QueueState.Systems;
             }
 
             messagingBuses[busId].Enqueue(queuedMessage, queueMode);
