@@ -28,6 +28,9 @@ namespace DCL
 
         internal bool isLoading = false;
 
+        private Coroutine loadCoroutine;
+        private List<Coroutine> faceCoroutines = new List<Coroutine>();
+
         public void ApplyModel(AvatarModel model, Action onSuccess, Action onFail)
         {
             this.model = model;
@@ -35,7 +38,8 @@ namespace DCL
             isLoading = false;
             this.OnFailCallback = onFail;
 
-            StopAllCoroutines();
+            StopLoadingCoroutines();
+
             if (this.model == null)
             {
                 ResetAvatar();
@@ -44,13 +48,31 @@ namespace DCL
             }
 
             isLoading = true;
-            StartCoroutine(LoadAvatar());
+            loadCoroutine = CoroutineStarter.Start(LoadAvatar());
+        }
+
+        void StopLoadingCoroutines()
+        {
+            if (loadCoroutine != null)
+                CoroutineStarter.Stop(loadCoroutine);
+
+            foreach (var coroutine in faceCoroutines)
+            {
+                if (coroutine == null)
+                    continue;
+
+                CoroutineStarter.Stop(coroutine);
+            }
+
+            faceCoroutines.Clear();
+            loadCoroutine = null;
         }
 
         public void ResetAvatar()
         {
             bodyShapeController?.CleanUp();
             bodyShapeController = null;
+
             using (var iterator = wearablesController.GetEnumerator())
             {
                 while (iterator.MoveNext())
@@ -133,22 +155,27 @@ namespace DCL
             bool eyebrowsReady = false;
             bool mouthReady = false;
 
-            StartCoroutine(eyesController?.FetchTextures((mainTexture, maskTexture) =>
+            var eyeCoroutine = CoroutineStarter.Start(eyesController?.FetchTextures((mainTexture, maskTexture) =>
             {
                 eyesReady = true;
                 bodyShapeController.SetupEyes(eyeMaterial, mainTexture, maskTexture, model.eyeColor);
             }));
-            StartCoroutine(eyebrowsController?.FetchTextures((mainTexture, maskTexture) =>
+
+            var eyebrowCoroutine = CoroutineStarter.Start(eyebrowsController?.FetchTextures((mainTexture, maskTexture) =>
             {
                 eyebrowsReady = true;
                 bodyShapeController.SetupEyebrows(eyebrowMaterial, mainTexture, model.hairColor);
             }));
 
-            StartCoroutine(mouthController?.FetchTextures((mainTexture, maskTexture) =>
+            var mouthCoroutine = CoroutineStarter.Start(mouthController?.FetchTextures((mainTexture, maskTexture) =>
             {
                 mouthReady = true;
                 bodyShapeController.SetupMouth(mouthMaterial, mainTexture, model.skinColor);
             }));
+
+            faceCoroutines.Add(eyeCoroutine);
+            faceCoroutines.Add(eyebrowCoroutine);
+            faceCoroutines.Add(mouthCoroutine);
 
             yield return new WaitUntil(() => eyesReady && eyebrowsReady && mouthReady);
 
@@ -310,6 +337,7 @@ namespace DCL
 
         protected virtual void OnDestroy()
         {
+            CoroutineStarter.Stop(loadCoroutine);
             ResetAvatar();
         }
 
