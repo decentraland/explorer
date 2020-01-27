@@ -63,7 +63,7 @@ namespace DCL
 
         public void PopulateBusesToBeProcessed()
         {
-            string currentSceneId = SceneController.i.CurrentSceneId;
+            string currentSceneId = SceneController.i.currentSceneId;
             List<ParcelScene> scenesSortedByDistance = SceneController.i.scenesSortedByDistance;
 
             int count = scenesSortedByDistance.Count;   // we need to retrieve list count everytime because it

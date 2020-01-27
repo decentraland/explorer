@@ -77,10 +77,10 @@ namespace DCL
         [System.NonSerialized]
         public bool prewarmSceneMessagesPool = true;
 
-        public bool HasPendingMessages => MessagingControllersManager.i.pendingMessagesCount > 0;
+        public bool hasPendingMessages => MessagingControllersManager.i.pendingMessagesCount > 0;
 
-        public string GlobalSceneId { get; private set; }
-        public string CurrentSceneId { get; private set; }
+        public string globalSceneId { get; private set; }
+        public string currentSceneId { get; private set; }
 
         bool positionDirty = true;
 
@@ -161,15 +161,15 @@ namespace DCL
                         scene = iterator.Current;
                         characterIsInsideScene = scene.IsInsideSceneBoundaries(DCLCharacterController.i.characterPosition);
 
-                        if (scene.sceneData.id != GlobalSceneId && characterIsInsideScene)
+                        if (scene.sceneData.id != globalSceneId && characterIsInsideScene)
                         {
-                            CurrentSceneId = scene.sceneData.id;
+                            currentSceneId = scene.sceneData.id;
                             break;
                         }
                     }
                 }
 
-                CommonScriptableObjects.sceneID.Set(CurrentSceneId);
+                CommonScriptableObjects.sceneID.Set(currentSceneId);
 
                 OnSortScenes?.Invoke();
             }
@@ -253,10 +253,10 @@ namespace DCL
 
                 loadedScenes.Add(uiSceneId, newScene);
 
-                GlobalSceneId = uiSceneId;
+                globalSceneId = uiSceneId;
 
-                if (!MessagingControllersManager.i.ContainsController(GlobalSceneId))
-                    MessagingControllersManager.i.AddController(this, GlobalSceneId, isGlobal: true);
+                if (!MessagingControllersManager.i.ContainsController(globalSceneId))
+                    MessagingControllersManager.i.AddController(this, globalSceneId, isGlobal: true);
 
                 if (VERBOSE)
                 {
@@ -688,10 +688,10 @@ namespace DCL
         {
             if (scene == null)
             {
-                string sceneId = CurrentSceneId;
+                string sceneId = currentSceneId;
 
                 if (!string.IsNullOrEmpty(sceneId) && loadedScenes.ContainsKey(sceneId))
-                    scene = loadedScenes[CurrentSceneId];
+                    scene = loadedScenes[currentSceneId];
                 else
                     return pos;
             }
