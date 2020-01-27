@@ -116,7 +116,7 @@ export async function initShared(): Promise<Session | undefined> {
     await initializeAnalytics()
   }
 
-  const { store, startSagas, auth } = buildStore({
+  const { store, startSagas } = buildStore({
     ...getLoginConfigurationForCurrentDomain(),
     ephemeralKeyTTL: 24 * 60 * 60 * 1000
   })
@@ -145,10 +145,8 @@ export async function initShared(): Promise<Session | undefined> {
   let account
   if (WORLD_EXPLORER) {
     try {
-      defaultLogger.info(`beefore init`)
       await awaitWeb3Approval()
 
-      defaultLogger.info(`after init`)
       net = await getAppNetwork()
 
       account = await providerFuture
@@ -157,7 +155,6 @@ export async function initShared(): Promise<Session | undefined> {
 
       userId = identity.address
       identifyUser(userId)
-      session.auth = auth
     } catch (e) {
       defaultLogger.error(e)
       console['groupEnd']()
@@ -217,7 +214,6 @@ export async function initShared(): Promise<Session | undefined> {
       const context = await connect(
         identity.address,
         net,
-        auth,
         account
       )
       if (context !== undefined) {

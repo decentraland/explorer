@@ -1,13 +1,11 @@
 import { saveToLocalStorage } from 'atomicHelpers/localStorage'
 import { commConfigurations, ETHEREUM_NETWORK, getServerConfigurations, parcelLimits, COMMS, DEBUG_LOGIN } from 'config'
 import { CommunicationsController } from 'shared/apis/CommunicationsController'
-import { Auth } from 'shared/auth/Auth'
 import { defaultLogger } from 'shared/logger'
 import { MessageEntry } from 'shared/types'
 import { positionObservable, PositionReport } from 'shared/world/positionThings'
 import 'webrtc-adapter'
 import { PassportAsPromise } from '../passports/PassportAsPromise'
-import { BrokerConnection } from '../comms/v1/BrokerConnection'
 import { ChatEvent, chatObservable } from './chat'
 import { CliBrokerConnection } from './CliBrokerConnection'
 import { Stats } from './debug'
@@ -437,7 +435,7 @@ function parseCommsMode(modeString: string) {
   return segments as [CommsVersion, CommsMode]
 }
 
-export async function connect(userId: string, network: ETHEREUM_NETWORK, auth: Auth, account: any) {
+export async function connect(userId: string, network: ETHEREUM_NETWORK, account: any) {
   try {
     setLocalProfile(userId, {
       ...getUserProfile()
@@ -476,26 +474,6 @@ export async function connect(userId: string, network: ETHEREUM_NETWORK, auth: A
 
             defaultLogger.log('Using WebSocket comms: ' + url.href)
             commsBroker = new CliBrokerConnection(url.href)
-            break
-          }
-          case 'remote': {
-            const coordinatorURL = getServerConfigurations().worldInstanceUrl
-            const body = `GET:${coordinatorURL}`
-            const credentials = await auth.getMessageCredentials(body)
-
-            const qs = new URLSearchParams({
-              signature: credentials['x-signature'],
-              identity: credentials['x-identity'],
-              timestamp: credentials['x-timestamp'],
-              'access-token': credentials['x-access-token']
-            })
-
-            const url = new URL(coordinatorURL)
-            defaultLogger.log('Using Remote comms: ' + url)
-
-            url.search = qs.toString()
-
-            commsBroker = new BrokerConnection(auth, url.toString())
             break
           }
           default: {

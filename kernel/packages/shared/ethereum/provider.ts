@@ -47,7 +47,6 @@ export async function awaitWeb3Approval(): Promise<void> {
         let result
         while (true) {
           result = await response
-          defaultLogger.info(`result: `, result)
 
           element.style.display = 'none'
 

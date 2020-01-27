@@ -2,7 +2,6 @@ import { getFromLocalStorage, saveToLocalStorage } from 'atomicHelpers/localStor
 import { call, fork, put, race, select, take, takeEvery, takeLatest, cancel, ForkEffect } from 'redux-saga/effects'
 import { NotificationType } from 'shared/types'
 import { getServerConfigurations, ALL_WEARABLES } from '../../config'
-import { getAccessToken, getCurrentUserId, getEmail } from '../auth/selectors'
 import defaultLogger from '../logger'
 import { isInitialized } from '../renderer/selectors'
 import { RENDERER_INITIALIZED } from '../renderer/types'
@@ -51,6 +50,10 @@ import { profileToRendererFormat } from './transformations/profileToRendererForm
 import { ensureServerFormat } from './transformations/profileToServerFormat'
 import { Avatar, Catalog, Profile, WearableId, Wearable, Collection } from './types'
 import { Action } from 'redux'
+import { identity } from '../index'
+import { AuthIdentity } from '../crypto/Authenticator'
+
+export const getCurrentUserId = () => identity.address
 
 const isActionFor = (type: string, userId: string) => (action: any) =>
   action.type === type && action.payload.userId === userId
@@ -116,7 +119,6 @@ function takeLatestById<T extends Action>(
 }
 
 function overrideBaseUrl(wearable: Wearable) {
-  // return { ...wearable, baseUrl: 'https://content.decentraland.org/contents/', baseUrlBundles: '' }
   return { ...wearable, baseUrl: 'http://localhost:7070/contentv2/contents/', baseUrlBundles: '' } // TODO - add proper asset bundle url when ready - moliva - 24/01/2020
 }
 
@@ -147,15 +149,15 @@ export function* initialLoad() {
 
 export function* handleFetchProfile(action: PassportRequestAction): any {
   const userId = action.payload.userId
+  const email = ''
   try {
     const serverUrl = yield select(getProfileDownloadServer)
-    const accessToken = yield select(getAccessToken)
-    const profiles: { avatars: object[] } = yield call(profileServerRequest, serverUrl, userId, accessToken)
+    const profiles: { avatars: object[] } = yield call(profileServerRequest, serverUrl, userId)
     if (profiles.avatars.length !== 0) {
       const profile: any = profiles.avatars[0]
       const currentId = yield select(getCurrentUserId)
       if (currentId === userId) {
-        profile.email = yield select(getEmail)
+        profile.email = email
       }
       if (ALL_WEARABLES) {
         profile.inventory = (yield select(getExclusiveCatalog)).map((_: Wearable) => _.id)
@@ -178,12 +180,13 @@ export function* handleFetchProfile(action: PassportRequestAction): any {
         }
       }
       const passport = yield call(processServerProfile, userId, profile)
+      defaultLogger.info(`passport: `, passport)
       yield put(passportSuccess(userId, passport))
     } else {
       const randomizedUserProfile = yield call(generateRandomUserProfile, userId)
       const currentId = yield select(getCurrentUserId)
       if (currentId === userId) {
-        randomizedUserProfile.email = yield select(getEmail)
+        randomizedUserProfile.email = email
       }
       yield put(inventorySuccess(userId, randomizedUserProfile.inventory))
       yield put(passportRandom(userId, randomizedUserProfile))
@@ -192,14 +195,14 @@ export function* handleFetchProfile(action: PassportRequestAction): any {
     const randomizedUserProfile = yield call(generateRandomUserProfile, userId)
     const currentId = yield select(getCurrentUserId)
     if (currentId === userId) {
-      randomizedUserProfile.email = yield select(getEmail)
+      randomizedUserProfile.email = email
     }
     yield put(inventorySuccess(userId, randomizedUserProfile.inventory))
     yield put(passportRandom(userId, randomizedUserProfile))
   }
 }
 
-export async function profileServerRequest(serverUrl: string, userId: string, accessToken: string) {
+export async function profileServerRequest(serverUrl: string, userId: string) {
   try {
     const request = await fetch(`${serverUrl}/${userId}`)
     if (!request.ok) {
@@ -273,11 +276,6 @@ export function* sendLoadProfile(profile: Profile) {
   window['unityInterface'].LoadProfile(profileToRendererFormat(profile))
 }
 
-export function fetchCurrentProfile(uuid: string) {
-  const request = `${getServerConfigurations().profile}/${uuid}`
-  return fetch(request)
-}
-
 export function* handleFetchInventory(action: InventoryRequest) {
   const { userId, ethAddress } = action.payload
   try {
@@ -309,7 +307,8 @@ export function* handleSaveAvatar(saveAvatar: SaveAvatarRequest) {
   const userId = saveAvatar.payload.userId ? saveAvatar.payload.userId : yield select(getCurrentUserId)
   try {
     const currentVersion = (yield select(getProfile, userId)).version || 0
-    const accessToken = yield select(getAccessToken)
+    // @ts-ignore
+    // const accessToken = yield select(getAccessToken)
     const url = getServerConfigurations().profile + '/profile/' + userId + '/avatar'
     const profile = saveAvatar.payload.profile
     const result = yield call(modifyAvatar, {
@@ -317,7 +316,7 @@ export function* handleSaveAvatar(saveAvatar: SaveAvatarRequest) {
       method: 'PUT',
       userId,
       currentVersion,
-      accessToken,
+      identity,
       profile
     })
     const { version } = result
@@ -329,21 +328,23 @@ export function* handleSaveAvatar(saveAvatar: SaveAvatarRequest) {
 }
 
 /**
- * @TODO (eordano, 16/Sep/2019): Upgrade the avatar schema on Profile Server
+ * TODO - change payload to match content server v3 - moliva - 27/01/2020
  */
 export async function modifyAvatar(params: {
   url: string
   method: string
   currentVersion: number
   userId: string
-  accessToken: string
+  identity: AuthIdentity
   profile: { avatar: Avatar; face: string; body: string }
 }) {
-  const { url, method, currentVersion, profile, accessToken } = params
+  // @ts-ignore
+  const { url, method, currentVersion, profile, identity } = params
   const { face, avatar, body } = profile
   const snapshots = await saveSnapshots(
-    getServerConfigurations().profile + '/profile/' + params.userId,
-    accessToken,
+    getServerConfigurations().content + '/entity/profile/' + params.userId,
+    '',
+    // identity,
     face,
     body
   )
@@ -352,10 +353,7 @@ export async function modifyAvatar(params: {
   const payload = JSON.stringify(ensureServerFormat(avatarData, currentVersion))
   const options = {
     method,
-    body: payload,
-    headers: {
-      Authorization: 'Bearer ' + accessToken
-    }
+    body: payload
   }
 
   const response = await fetch(url, options)
