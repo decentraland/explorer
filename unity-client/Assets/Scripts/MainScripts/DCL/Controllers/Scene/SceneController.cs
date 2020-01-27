@@ -38,12 +38,9 @@ namespace DCL
         public bool ignoreGlobalScenes = false;
         public bool msgStepByStep = false;
 
-        public bool deferredMessagesDecoding = false;
+        [NonSerialized] public bool deferredMessagesDecoding = false;
         Queue<string> payloadsToDecode = new Queue<string>();
-        const float MAX_TIME_FOR_DECODE = 0.1f;
-        const float MIN_TIME_FOR_DECODE = 0.001f;
-        float maxTimeForDecode = MAX_TIME_FOR_DECODE;
-        float secsPerThousandMsgs = 0.01f;
+        const float MAX_TIME_FOR_DECODE = 0.005f;
 
 
         #region BENCHMARK_EVENTS
@@ -82,27 +79,13 @@ namespace DCL
 
         public bool hasPendingMessages => MessagingControllersManager.i.pendingMessagesCount > 0;
 
-        public string GlobalSceneId
-        {
-            get { return globalSceneId; }
-        }
+        public string globalSceneId { get; private set; }
+        public string currentSceneId { get; private set; }
 
         LoadParcelScenesMessage loadParcelScenesMessage = new LoadParcelScenesMessage();
-        string globalSceneId = "";
-
-        const float SORT_MESSAGE_CONTROLLER_TIME = 0.5f;
-        float lastTimeMessageControllerSorted = 0;
-
-        public event Action OnSortScenes;
 
         bool positionDirty = true;
-        private static readonly int MORDOR_X = (int)EnvironmentSettings.MORDOR.x;
-        private static readonly int MORDOR_Z = (int)EnvironmentSettings.MORDOR.z;
-        private Vector2Int currentGridSceneCoordinate = new Vector2Int(MORDOR_X, MORDOR_Z);
 
-        private string currentSceneId = null;
-
-        private Vector2Int sortAuxiliaryVector = new Vector2Int(MORDOR_X, MORDOR_Z);
 
         void Awake()
         {
@@ -148,9 +131,61 @@ namespace DCL
 
             if (positionDirty)
             {
+                sceneSortDirty = true;
                 currentGridSceneCoordinate.x = currentX;
                 currentGridSceneCoordinate.y = currentY;
             }
+        }
+
+        private bool sceneSortDirty = false;
+        public event Action OnSortScenes;
+
+        private static readonly int MORDOR_X = (int)EnvironmentSettings.MORDOR.x;
+        private static readonly int MORDOR_Z = (int)EnvironmentSettings.MORDOR.z;
+        private Vector2Int currentGridSceneCoordinate = new Vector2Int(MORDOR_X, MORDOR_Z);
+        private Vector2Int sortAuxiliaryVector = new Vector2Int(MORDOR_X, MORDOR_Z);
+
+        private void TrySortScenesByDistance(bool forceSort = false)
+        {
+            if (forceSort || sceneSortDirty)
+            {
+                sceneSortDirty = false;
+
+                scenesSortedByDistance.Sort(SortScenesByDistanceMethod);
+
+                using (var iterator = scenesSortedByDistance.GetEnumerator())
+                {
+                    ParcelScene scene;
+                    bool characterIsInsideScene;
+
+                    while (iterator.MoveNext())
+                    {
+                        scene = iterator.Current;
+                        characterIsInsideScene = scene.IsInsideSceneBoundaries(DCLCharacterController.i.characterPosition);
+
+                        if (scene.sceneData.id != globalSceneId && characterIsInsideScene)
+                        {
+                            currentSceneId = scene.sceneData.id;
+                            break;
+                        }
+                    }
+                }
+
+                CommonScriptableObjects.sceneID.Set(currentSceneId);
+
+                OnSortScenes?.Invoke();
+            }
+        }
+
+        private int SortScenesByDistanceMethod(ParcelScene sceneA, ParcelScene sceneB)
+        {
+            sortAuxiliaryVector = sceneA.sceneData.basePosition - currentGridSceneCoordinate;
+            int dist1 = sortAuxiliaryVector.sqrMagnitude;
+
+            sortAuxiliaryVector = sceneB.sceneData.basePosition - currentGridSceneCoordinate;
+            int dist2 = sortAuxiliaryVector.sqrMagnitude;
+
+            return dist1 - dist2;
         }
 
         void Start()
@@ -187,59 +222,14 @@ namespace DCL
         private void Update()
         {
             InputController_Legacy.i.Update();
-
-            PrioritizeMessageControllerList();
-
-            MessagingControllersManager.i.UpdateThrottling();
-        }
-
-        private void PrioritizeMessageControllerList(bool force = false)
-        {
-            bool forceSort = force || !RenderingController.i.renderingEnabled;
-
-            if (forceSort || positionDirty)
-            {
-                positionDirty = false;
-                lastTimeMessageControllerSorted = Time.realtimeSinceStartup;
-                scenesSortedByDistance.Sort(SceneMessagingSortByDistance);
-
-                ParcelScene currentScene = scenesSortedByDistance.Any()
-                    ? scenesSortedByDistance.First(scene => scene.sceneData != null && !scene.isPersistent)
-                    : null;
-
-                if (currentScene != null && currentScene.sceneData != null)
-                {
-                    currentSceneId = currentScene.sceneData.id;
-                }
-
-                OnSortScenes?.Invoke();
-            }
-        }
-        private int SceneMessagingSortByDistance(ParcelScene sceneA, ParcelScene sceneB)
-        {
-            if (sceneA == null || sceneA.transform == null)
-                return int.MinValue;
-            if (sceneB == null || sceneB.transform == null)
-                return int.MaxValue;
-
-            sortAuxiliaryVector.x = (int)sceneA.transform.position.x;
-            sortAuxiliaryVector.y = (int)sceneA.transform.position.z;
-            int dist1 = (sortAuxiliaryVector - currentGridSceneCoordinate).sqrMagnitude;
-
-            sortAuxiliaryVector.x = (int)sceneB.transform.position.x;
-            sortAuxiliaryVector.y = (int)sceneB.transform.position.z;
-            int dist2 = (sortAuxiliaryVector - currentGridSceneCoordinate).sqrMagnitude;
-
-            return dist1 - dist2;
+            TrySortScenesByDistance();
         }
 
         public void CreateUIScene(string json)
         {
 #if UNITY_EDITOR
             if (debugScenes && ignoreGlobalScenes)
-            {
                 return;
-            }
 #endif
             CreateUISceneMessage uiScene = SafeFromJson<CreateUISceneMessage>(json);
 
@@ -260,6 +250,7 @@ namespace DCL
                     basePosition = new Vector2Int(0, 0),
                     baseUrl = uiScene.baseUrl
                 };
+
                 newScene.SetData(data);
 
                 loadedScenes.Add(uiSceneId, newScene);
@@ -322,34 +313,6 @@ namespace DCL
 
             return res;
         }
-        public string GetCurrentScene(DCLCharacterPosition position = null)
-        {
-            if (position == null)
-            {
-                position = DCLCharacterController.i.characterPosition;
-            }
-
-            if (!positionDirty && currentSceneId != null)
-            {
-                return currentSceneId;
-            }
-
-            using (var iterator = loadedScenes.GetEnumerator())
-            {
-                while (iterator.MoveNext())
-                {
-                    ParcelScene scene = iterator.Current.Value;
-
-                    if (scene.sceneData.id != globalSceneId)
-                    {
-                        if (scene.IsInsideSceneBoundaries(position))
-                            return scene.sceneData.id;
-                    }
-                }
-            }
-
-            return null;
-        }
 
         public void LoadParcelScenesExecute(string decentralandSceneJSON)
         {
@@ -359,10 +322,17 @@ namespace DCL
             scene = SafeFromJson<LoadParcelScenesMessage.UnityParcelScene>(decentralandSceneJSON);
             OnMessageDecodeEnds?.Invoke(MessagingTypes.SCENE_LOAD);
 
-            if (scene == null || scene.id == null)
-                return;
+            if (scene == null || scene.id == null) return;
 
             var sceneToLoad = scene;
+
+#if UNITY_EDITOR
+            if (debugScenes && sceneToLoad.basePosition.ToString() != debugSceneCoords.ToString())
+            {
+                SendSceneReady(sceneToLoad.id);
+                return;
+            }
+#endif
 
             OnMessageProcessStart?.Invoke(MessagingTypes.SCENE_LOAD);
 
@@ -392,7 +362,6 @@ namespace DCL
 
             OnMessageProcessEnds?.Invoke(MessagingTypes.SCENE_LOAD);
         }
-
 
         public void UpdateParcelScenesExecute(string decentralandSceneJSON)
         {
@@ -491,13 +460,16 @@ namespace DCL
         public void LoadParcelScenes(string decentralandSceneJSON)
         {
             var queuedMessage = new MessagingBus.QueuedSceneMessage()
-            { type = MessagingBus.QueuedSceneMessage.Type.LOAD_PARCEL, message = decentralandSceneJSON };
+            {
+                type = MessagingBus.QueuedSceneMessage.Type.LOAD_PARCEL,
+                message = decentralandSceneJSON
+            };
 
             OnMessageWillQueue?.Invoke(MessagingTypes.SCENE_LOAD);
 
             MessagingControllersManager.i.ForceEnqueueToGlobal(MessagingBusId.INIT, queuedMessage);
 
-            PrioritizeMessageControllerList(force: true);
+            TrySortScenesByDistance(forceSort: true);
 
             if (VERBOSE)
                 Debug.Log($"{Time.frameCount} : Load parcel scene queue {decentralandSceneJSON}");
@@ -570,6 +542,7 @@ namespace DCL
                 queuedMessage = new MessagingBus.QueuedSceneMessage_Scene();
 
             MessageDecoder.DecodeSceneMessage(sceneId, message, messageTag, sendSceneMessage, ref queuedMessage);
+
             EnqueueMessage(queuedMessage);
 
             OnMessageDecodeEnds?.Invoke("Misc");
@@ -579,28 +552,25 @@ namespace DCL
 
         private IEnumerator DeferredDecoding()
         {
-            float lastTimeDecoded = Time.realtimeSinceStartup;
+            float start = Time.realtimeSinceStartup;
+            float maxTimeForDecode;
 
             while (true)
             {
+                maxTimeForDecode = RenderingController.i.renderingEnabled ? MAX_TIME_FOR_DECODE : float.MaxValue;
+
                 if (payloadsToDecode.Count > 0)
                 {
                     string payload = payloadsToDecode.Dequeue();
 
                     DecodeAndEnqueue(payload);
 
-                    if (Time.realtimeSinceStartup - lastTimeDecoded >= maxTimeForDecode)
-                    {
-                        yield return null;
-                        maxTimeForDecode = Mathf.Clamp(MIN_TIME_FOR_DECODE + (float)payloadsToDecode.Count / 1000.0f * secsPerThousandMsgs, MIN_TIME_FOR_DECODE, MAX_TIME_FOR_DECODE);
-                        lastTimeDecoded = Time.realtimeSinceStartup;
-                    }
+                    if (Time.realtimeSinceStartup - start < maxTimeForDecode)
+                        continue;
                 }
-                else
-                {
-                    yield return null;
-                    lastTimeDecoded = Time.unscaledTime;
-                }
+
+                yield return null;
+                start = Time.unscaledTime;
             }
         }
 
@@ -638,17 +608,9 @@ namespace DCL
             if (loadedScenes.TryGetValue(sceneId, out scene))
             {
 #if UNITY_EDITOR
-                if (debugScenes)
+                if (debugScenes && scene is GlobalScene && ignoreGlobalScenes)
                 {
-                    if (scene is GlobalScene && ignoreGlobalScenes)
-                    {
-                        return false;
-                    }
-
-                    if (scene.sceneData.basePosition.ToString() != debugSceneCoords.ToString())
-                    {
-                        return false;
-                    }
+                    return false;
                 }
 #endif
                 if (!scene.gameObject.activeInHierarchy)
@@ -728,10 +690,10 @@ namespace DCL
         {
             if (scene == null)
             {
-                string sceneId = GetCurrentScene(DCLCharacterController.i.characterPosition);
+                string sceneId = currentSceneId;
 
                 if (!string.IsNullOrEmpty(sceneId) && loadedScenes.ContainsKey(sceneId))
-                    scene = loadedScenes[GetCurrentScene(DCLCharacterController.i.characterPosition)];
+                    scene = loadedScenes[currentSceneId];
                 else
                     return pos;
             }
