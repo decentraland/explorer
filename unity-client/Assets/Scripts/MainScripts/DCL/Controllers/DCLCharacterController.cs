@@ -410,7 +410,7 @@ public class DCLCharacterController : MonoBehaviour
         float height = 0.875f;
 
         var reportPosition = characterPosition.worldPosition + (Vector3.up * height);
-        var compositeRotation = Quaternion.LookRotation(cameraForward.Get());
+        var compositeRotation = cameraForward != Vector3.zero ? Quaternion.LookRotation(cameraForward.Get()) : Quaternion.identity;
         var playerHeight = height + (characterController.height / 2);
 
         //NOTE(Brian): We have to wait for a Teleport before sending the ReportPosition, because if not ReportPosition events will be sent

@@ -20,8 +20,6 @@ namespace DCL
         Action OnSuccessCallback;
         Action OnFailCallback;
 
-        private bool visibility = true;
-        
         internal BodyShapeController bodyShapeController;
         internal Dictionary<string, WearableController> wearablesController = new Dictionary<string, WearableController>();
         internal FacialFeatureController eyesController;
@@ -30,7 +28,7 @@ namespace DCL
 
         internal bool isLoading = false;
 
-        public void ApplyModel (AvatarModel model, Action onSuccess, Action onFail)
+        public void ApplyModel(AvatarModel model, Action onSuccess, Action onFail)
         {
             this.model = model;
             this.OnSuccessCallback = onSuccess;
@@ -82,7 +80,7 @@ namespace DCL
             }
         }
 
-        private IEnumerator LoadAvatar ()
+        private IEnumerator LoadAvatar()
         {
             if (string.IsNullOrEmpty(model.bodyShape))
             {
@@ -101,7 +99,7 @@ namespace DCL
             {
                 HideAll();
 
-                bodyShapeController = new BodyShapeController( ResolveWearable(model.bodyShape));
+                bodyShapeController = new BodyShapeController(ResolveWearable(model.bodyShape));
                 SetupDefaultFacialFeatures(bodyShapeController.bodyShapeType);
                 bodyShapeController.Load(transform, OnWearableLoadingSuccess, OnWearableLoadingFail);
             }
@@ -152,7 +150,9 @@ namespace DCL
                 bodyShapeController.SetupMouth(mouthMaterial, mainTexture, model.skinColor);
             }));
 
-            yield return new WaitUntil( () => eyesReady && eyebrowsReady && mouthReady);
+            yield return new WaitUntil(() => eyesReady && eyebrowsReady && mouthReady);
+
+            isLoading = false;
 
             SetupAnimator();
 
@@ -163,7 +163,6 @@ namespace DCL
             yield return null;
             ResolveVisibility();
 
-            isLoading = false;
             OnSuccessCallback?.Invoke();
         }
 
@@ -245,11 +244,11 @@ namespace DCL
         private void ResolveVisibility()
         {
             if (bodyShapeController == null) return;
-            
+
             HashSet<string> hiddenCategories = CreateHiddenList();
 
-            if(bodyShapeController.isReady)
-                bodyShapeController.SetAssetRenderersEnabled(visibility && !hiddenCategories.Contains(WearableLiterals.Misc.HEAD));
+            if (bodyShapeController.isReady)
+                bodyShapeController.SetAssetRenderersEnabled(!hiddenCategories.Contains(WearableLiterals.Misc.HEAD));
 
             using (var iterator = wearablesController.GetEnumerator())
             {
@@ -259,7 +258,7 @@ namespace DCL
                     if (wearableController.isReady)
                     {
                         var wearable = wearableController.wearable;
-                        wearableController.SetAssetRenderersEnabled(visibility && !hiddenCategories.Contains(wearable.category));
+                        wearableController.SetAssetRenderersEnabled(!hiddenCategories.Contains(wearable.category));
                     }
                 }
             }
@@ -294,9 +293,10 @@ namespace DCL
 
         public void SetVisibility(bool newVisibility)
         {
-            if (visibility == newVisibility) return;
-            visibility = newVisibility;
-            ResolveVisibility();
+            //NOTE(Brian): Avatar being loaded needs the renderer.enabled as false until the loading finishes.
+            //             So we can' manipulate the values because it'd show an incomplete avatar. Its easier to just deactivate the gameObject.
+            if (gameObject.activeSelf != newVisibility)
+                gameObject.SetActive(newVisibility);
         }
 
         private void HideAll()
@@ -352,7 +352,7 @@ namespace DCL
                     break;
                 default:
                     //If wearable is downloading will call OnWearableLoadingSuccess(and therefore SetupDefaultMaterial) once ready
-                    if(wearable.isReady)
+                    if (wearable.isReady)
                         wearable.SetupDefaultMaterial(defaultMaterial, model.skinColor, model.hairColor);
                     break;
             }
