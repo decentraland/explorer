@@ -1,9 +1,9 @@
+using DCL.Interface;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
-using DCL.Interface;
 
 namespace DCL
 {
@@ -85,10 +85,10 @@ namespace DCL
 
         public IMessageHandler handler;
 
-        public bool hasPendingMessages => PendingMessagesCount > 0;
+        public bool hasPendingMessages => pendingMessagesCount > 0;
 
-        public int ProcessedMessagesCount { get; private set; }
-        public int PendingMessagesCount { get; private set; }
+        public int processedMessagesCount { get; private set; }
+        public int pendingMessagesCount { get; private set; }
 
         private readonly LinkedList<QueuedSceneMessage> pendingMessages = new LinkedList<QueuedSceneMessage>();
 
@@ -112,7 +112,7 @@ namespace DCL
             this.id = id;
             this.owner = owner;
 
-            PendingMessagesCount = 0;
+            pendingMessagesCount = 0;
             enabled = true;
         }
 
@@ -243,7 +243,7 @@ namespace DCL
 
                         if (msgYieldInstruction != null)
                         {
-                            ProcessedMessagesCount++;
+                            processedMessagesCount++;
 
                             msgYieldInstruction = null;
 
@@ -283,7 +283,7 @@ namespace DCL
 
         public void OnMessageProcessed()
         {
-            ProcessedMessagesCount++;
+            processedMessagesCount++;
             MessagingControllersManager.i.pendingMessagesCount--;
 
             if (id == MessagingBusId.INIT)
@@ -295,7 +295,7 @@ namespace DCL
 
         private LinkedListNode<QueuedSceneMessage> AddReliableMessage(QueuedSceneMessage message)
         {
-            PendingMessagesCount++;
+            pendingMessagesCount++;
             return pendingMessages.AddLast(message);
         }
 
@@ -304,7 +304,7 @@ namespace DCL
             if (pendingMessages.First != null)
             {
                 pendingMessages.RemoveFirst();
-                PendingMessagesCount--;
+                pendingMessagesCount--;
             }
         }
         private void RemoveUnreliableMessage(QueuedSceneMessage message)
@@ -318,11 +318,11 @@ namespace DCL
 
             if (logType)
             {
-                Debug.Log($"#{bus.ProcessedMessagesCount} ... bus = {finalTag}, id = {bus.id}... processing msg... type = {m.type}... message = {m.message}");
+                Debug.Log($"#{bus.processedMessagesCount} ... bus = {finalTag}, id = {bus.id}... processing msg... type = {m.type}... message = {m.message}");
             }
             else
             {
-                Debug.Log($"#{bus.ProcessedMessagesCount} ... Bus = {finalTag}, id = {bus.id}... processing msg... {m.message}");
+                Debug.Log($"#{bus.processedMessagesCount} ... Bus = {finalTag}, id = {bus.id}... processing msg... {m.message}");
             }
         }
 

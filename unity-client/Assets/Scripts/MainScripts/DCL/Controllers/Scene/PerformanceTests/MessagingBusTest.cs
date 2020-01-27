@@ -56,9 +56,9 @@ namespace MessagingBusTest
             bus.Start();
             Measure.Method(() =>
             {
-                var processed = bus.ProcessedMessagesCount;
-                Assert.IsTrue(bus.PendingMessagesCount > 1000);
-                while (bus.ProcessedMessagesCount < processed + 1000)
+                var processed = bus.processedMessagesCount;
+                Assert.IsTrue(bus.pendingMessagesCount > 1000);
+                while (bus.processedMessagesCount < processed + 1000)
                 {
                     bus.ProcessQueue(0.1f, out _);
                 }

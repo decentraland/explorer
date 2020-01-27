@@ -185,7 +185,7 @@ namespace DCL
                                 if (!messagesReplaced.ContainsKey(key))
                                     messagesReplaced[key] = 0;
 
-                                pendingMessagesCount[key] += bus.PendingMessagesCount;
+                                pendingMessagesCount[key] += bus.pendingMessagesCount;
                                 messagesReplaced[key] += bus.unreliableMessagesReplaced;
                             }
                         }

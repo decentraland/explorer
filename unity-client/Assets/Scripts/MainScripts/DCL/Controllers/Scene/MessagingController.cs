@@ -43,7 +43,7 @@ namespace DCL
         public IMessageHandler messageHandler;
         public string debugTag;
 
-        private QueueState CurrentQueueState { get; set; }
+        private QueueState currentQueueState { get; set; }
 
         public readonly MessagingBus initBus;
         public readonly MessagingBus systemBus;
@@ -60,7 +60,7 @@ namespace DCL
             initBus = AddMessageBus(MessagingBusId.INIT);
             systemBus = AddMessageBus(MessagingBusId.SYSTEM);
 
-            CurrentQueueState = QueueState.Init;
+            currentQueueState = QueueState.Init;
 
             StartBus(MessagingBusId.INIT);
             StartBus(MessagingBusId.UI);
@@ -95,7 +95,8 @@ namespace DCL
 
         public void Stop()
         {
-            using (var iterator = messagingBuses.GetEnumerator()) {
+            using (var iterator = messagingBuses.GetEnumerator())
+            {
                 while (iterator.MoveNext())
                 {
                     iterator.Current.Value.Stop();
@@ -128,7 +129,7 @@ namespace DCL
             {
                 busId = MessagingBusId.UI;
             }
-            else if (CurrentQueueState == QueueState.Init)
+            else if (currentQueueState == QueueState.Init)
             {
                 busId = MessagingBusId.INIT;
             }
@@ -160,7 +161,7 @@ namespace DCL
                 // When a INIT DONE message is enqueued, the next messages should be 
                 // enqueued in SYSTEM message bus, but we don't process them until 
                 // scene started has been processed
-                CurrentQueueState = QueueState.Systems;
+                currentQueueState = QueueState.Systems;
             }
 
             messagingBuses[busId].Enqueue(queuedMessage, queueMode);

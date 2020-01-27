@@ -21,13 +21,13 @@ namespace DCL
 
         private Coroutine mainCoroutine;
 
-        public bool HasPendingMessages => pendingMessagesCount > 0;
+        public bool hasPendingMessages => pendingMessagesCount > 0;
 
         public int pendingMessagesCount;
         public int pendingInitMessagesCount;
         public long processedInitMessagesCount;
 
-        public bool IsRunning { get { return mainCoroutine != null; } }
+        public bool isRunning { get { return mainCoroutine != null; } }
 
         private readonly List<MessagingController> sortedControllers = new List<MessagingController>();
         private readonly List<MessagingBus> busesToProcess = new List<MessagingBus>();
@@ -181,9 +181,9 @@ namespace DCL
             if (messagingControllers.ContainsKey(sceneId))
             {
                 // In case there is any pending message from a scene being unloaded we decrease the count accordingly
-                pendingMessagesCount -= messagingControllers[sceneId].messagingBuses[MessagingBusId.INIT].PendingMessagesCount +
-                                        messagingControllers[sceneId].messagingBuses[MessagingBusId.UI].PendingMessagesCount +
-                                        messagingControllers[sceneId].messagingBuses[MessagingBusId.SYSTEM].PendingMessagesCount;
+                pendingMessagesCount -= messagingControllers[sceneId].messagingBuses[MessagingBusId.INIT].pendingMessagesCount +
+                                        messagingControllers[sceneId].messagingBuses[MessagingBusId.UI].pendingMessagesCount +
+                                        messagingControllers[sceneId].messagingBuses[MessagingBusId.SYSTEM].pendingMessagesCount;
 
                 DisposeController(messagingControllers[sceneId]);
                 messagingControllers.Remove(sceneId);
@@ -264,7 +264,7 @@ namespace DCL
          */
         bool ProcessBus(MessagingBus bus)
         {
-            if (bus.PendingMessagesCount <= 0)
+            if (bus.pendingMessagesCount <= 0)
                 return false;
 
             float startTime = Time.realtimeSinceStartup;
