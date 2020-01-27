@@ -234,8 +234,8 @@ export function getServerConfigurations() {
     comms: {
       lighthouse: {
         // server: 'https://katalyst-comms-relay.decentraland.zone',
-        // p2p: 'https://katalyst-comms-no-relay.decentraland.zone'
         server: 'http://localhost:9000',
+        // p2p: 'https://katalyst-comms-no-relay.decentraland.zone',
         p2p: 'http://localhost:9000'
       }
     },

@@ -3,6 +3,7 @@ import { setLoadingScreenVisible } from '../../unity-interface/dcl'
 import { future, IFuture } from 'fp-future'
 import { bringDownClientAndShowError } from '../loading/ReportFatalError'
 import { NEW_LOGIN } from '../loading/types'
+import { removeUserProfile } from '../comms/peers'
 
 export class Session {
   private static _instance: IFuture<Session> = future()
@@ -15,6 +16,8 @@ export class Session {
     setLoadingScreenVisible(true)
     sendToMordor()
     disconnect()
+    removeUserProfile()
+    window.location.reload()
   }
 
   disable() {
