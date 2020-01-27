@@ -241,8 +241,7 @@ export function getServerConfigurations() {
     },
     // profile: `https://profile.decentraland.${TLDDefault}/api/v1`,
     profile: `http://localhost:7070/profile`,
-    // wearablesApi: `https://wearables-api.decentraland.org/v2`,
-    wearablesApi: `http://localhost:7070/wearables`,
+    wearablesApi: `https://wearables-api.decentraland.org/v2`,
     avatar: {
       snapshotStorage: `https://avatars-storage.decentraland.${TLDDefault}/`,
       server: `https://avatars-api.decentraland.${TLDDefault === 'zone' ? 'today' : TLDDefault}/`,
