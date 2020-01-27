@@ -111,7 +111,9 @@ public class PlayerInfoCardHUDViewShould : TestsBase
         var wearable = new WearableItem()
         {
             id = rarity,
-            rarity = rarity
+            rarity = rarity,
+            tags = new string[]{},
+            category = WearableLiterals.Categories.UPPER_BODY
         };
         CatalogController.wearableCatalog.Add(rarity, wearable);
         return wearable;
