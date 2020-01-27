@@ -178,7 +178,7 @@ const ECDSA_EPHEMERAL_VALIDATOR: ValidatorType = (authority: string, authLink: A
       }
     }
   } catch (e) {
-    // console.error(e)
+    // doing nothing here
   }
   return { error: true }
 }

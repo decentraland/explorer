@@ -180,7 +180,6 @@ export function* handleFetchProfile(action: PassportRequestAction): any {
         }
       }
       const passport = yield call(processServerProfile, userId, profile)
-      defaultLogger.info(`passport: `, passport)
       yield put(passportSuccess(userId, passport))
     } else {
       const randomizedUserProfile = yield call(generateRandomUserProfile, userId)
@@ -307,8 +306,6 @@ export function* handleSaveAvatar(saveAvatar: SaveAvatarRequest) {
   const userId = saveAvatar.payload.userId ? saveAvatar.payload.userId : yield select(getCurrentUserId)
   try {
     const currentVersion = (yield select(getProfile, userId)).version || 0
-    // @ts-ignore
-    // const accessToken = yield select(getAccessToken)
     const url = getServerConfigurations().profile + '/profile/' + userId + '/avatar'
     const profile = saveAvatar.payload.profile
     const result = yield call(modifyAvatar, {

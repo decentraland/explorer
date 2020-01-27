@@ -12,7 +12,7 @@ import { initialize, queueTrackingEvent, identifyUser } from './analytics'
 import './apis/index'
 import { connect, persistCurrentUser, disconnect } from './comms'
 import { isMobile } from './comms/mobile'
-import { setLocalProfile } from './comms/peers'
+import { setLocalProfile, getUserProfile } from './comms/peers'
 import './events'
 import { ReportFatalError } from './loading/ReportFatalError'
 import {
@@ -46,6 +46,8 @@ enum AnalyticsAccount {
   PRD = '1plAT9a2wOOgbPCrTaU8rgGUMzgUTJtU',
   DEV = 'a4h4BC4dL1v7FhIQKKuPHEdZIiNRDVhc'
 }
+
+declare const window: any
 
 // TODO fill with segment keys and integrate identity server
 function initializeAnalytics() {
@@ -120,7 +122,7 @@ export async function initShared(): Promise<Session | undefined> {
     ...getLoginConfigurationForCurrentDomain(),
     ephemeralKeyTTL: 24 * 60 * 60 * 1000
   })
-  ;(window as any).globalStore = globalStore = store
+  window.globalStore = globalStore = store
 
   if (WORLD_EXPLORER) {
     startSagas()
@@ -142,19 +144,34 @@ export async function initShared(): Promise<Session | undefined> {
 
   let net: ETHEREUM_NETWORK = ETHEREUM_NETWORK.MAINNET
 
-  let account
   if (WORLD_EXPLORER) {
     try {
-      await awaitWeb3Approval()
+      const userData = getUserProfile()
 
-      net = await getAppNetwork()
+      // check that user data is stored & key is not expired
+      if (!userData || !userData.identity || new Date(userData.identity.expiration) < new Date()) {
+        await awaitWeb3Approval()
 
-      account = await providerFuture
+        net = await getAppNetwork()
 
-      identity = await createAuthIdentity()
+        identity = await createAuthIdentity()
 
-      userId = identity.address
-      identifyUser(userId)
+        userId = identity.address
+        identifyUser(userId)
+
+        setLocalProfile(userId, {
+          userId,
+          identity
+        })
+      } else {
+        identity = userData.identity
+        userId = userData.identity.address
+
+        setLocalProfile(userId, {
+          userId,
+          identity
+        })
+      }
     } catch (e) {
       defaultLogger.error(e)
       console['groupEnd']()
@@ -192,13 +209,7 @@ export async function initShared(): Promise<Session | undefined> {
   console['group']('connect#profile')
   if (!PREVIEW) {
     const profile = await PassportAsPromise(userId)
-    setLocalProfile(userId, {
-      userId,
-      version: profile.version,
-      profile: profileToRendererFormat(profile)
-    })
     persistCurrentUser({
-      userId,
       version: profile.version,
       profile: profileToRendererFormat(profile)
     })
@@ -211,11 +222,7 @@ export async function initShared(): Promise<Session | undefined> {
   for (let i = 1; ; ++i) {
     try {
       defaultLogger.info(`Attempt number ${i}...`)
-      const context = await connect(
-        identity.address,
-        net,
-        account
-      )
+      const context = await connect(identity.address)
       if (context !== undefined) {
         store.dispatch(setWorldContext(context))
       }
