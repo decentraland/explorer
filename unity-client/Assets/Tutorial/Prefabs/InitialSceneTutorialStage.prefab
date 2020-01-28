@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 6691210900768995065}
   - component: {fileID: 9095341614576501663}
   - component: {fileID: 942974508925597400}
+  - component: {fileID: 3378154938263623235}
   m_Layer: 5
   m_Name: Tooltip-Wellcome-Avatar
   m_TagString: Untagged
@@ -38,8 +39,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 167.2, y: 45.6}
-  m_SizeDelta: {x: 362.7, y: 91.2}
+  m_AnchoredPosition: {x: 193, y: 74}
+  m_SizeDelta: {x: 450, y: 134}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6691210900768995065
 CanvasRenderer:
@@ -69,8 +70,7 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
-  m_Sprite: {fileID: 6531193840763176120, guid: ad7b2afa9169b4d4ea47e951ff944b2d,
-    type: 3}
+  m_Sprite: {fileID: 21300000, guid: f4dd04f94ce034cb5a20d43fb1d377df, type: 3}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -91,8 +91,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 005cdab7f379540b0bfbbaee75b5334a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  showAnimationClip: {fileID: 0}
-  hideAnimationClip: {fileID: 0}
+  showAnimationClip: {fileID: 7400000, guid: 493df13152a6e406c8fe35a0232e582b, type: 2}
+  hideAnimationClip: {fileID: 7400000, guid: a4d65e7abb4c8437bb8831ecd74fa1e8, type: 2}
+--- !u!111 &3378154938263623235
+Animation:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 141883879163015607}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Animation: {fileID: 7400000, guid: 493df13152a6e406c8fe35a0232e582b, type: 2}
+  m_Animations:
+  - {fileID: 7400000, guid: 493df13152a6e406c8fe35a0232e582b, type: 2}
+  - {fileID: 7400000, guid: a4d65e7abb4c8437bb8831ecd74fa1e8, type: 2}
+  m_WrapMode: 0
+  m_PlayAutomatically: 1
+  m_AnimatePhysics: 0
+  m_CullingType: 0
 --- !u!1 &992928903570397781
 GameObject:
   m_ObjectHideFlags: 0
@@ -127,8 +144,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0.6, y: -13.14}
-  m_SizeDelta: {x: 337.2, y: 54.3}
+  m_AnchoredPosition: {x: 14, y: -14}
+  m_SizeDelta: {x: 374, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3944577244610894378
 CanvasRenderer:
@@ -189,12 +206,12 @@ MonoBehaviour:
   m_outlineColor:
     serializedVersion: 2
     rgba: 4278190080
-  m_fontSize: 14.55
+  m_fontSize: 13.95
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
-  m_fontSizeMin: 1
-  m_fontSizeMax: 19
+  m_fontSizeMin: 10
+  m_fontSizeMax: 14
   m_fontStyle: 0
   m_textAlignment: 513
   m_characterSpacing: 0
@@ -265,6 +282,7 @@ GameObject:
   - component: {fileID: 3196196372182951758}
   - component: {fileID: 2242293630244854338}
   - component: {fileID: 4985169814092812148}
+  - component: {fileID: 8861277621311402515}
   m_Layer: 5
   m_Name: Tooltip-MoveControlls
   m_TagString: Untagged
@@ -291,8 +309,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 174, y: -56}
-  m_SizeDelta: {x: 362.7, y: 91.20001}
+  m_AnchoredPosition: {x: 205, y: -79}
+  m_SizeDelta: {x: 450, y: 134}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3196196372182951758
 CanvasRenderer:
@@ -322,8 +340,7 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
-  m_Sprite: {fileID: 6531193840763176120, guid: ad7b2afa9169b4d4ea47e951ff944b2d,
-    type: 3}
+  m_Sprite: {fileID: 21300000, guid: f4dd04f94ce034cb5a20d43fb1d377df, type: 3}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -344,8 +361,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 005cdab7f379540b0bfbbaee75b5334a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  showAnimationClip: {fileID: 0}
-  hideAnimationClip: {fileID: 0}
+  showAnimationClip: {fileID: 7400000, guid: 493df13152a6e406c8fe35a0232e582b, type: 2}
+  hideAnimationClip: {fileID: 7400000, guid: a4d65e7abb4c8437bb8831ecd74fa1e8, type: 2}
+--- !u!111 &8861277621311402515
+Animation:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1415347442780733854}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Animation: {fileID: 7400000, guid: 493df13152a6e406c8fe35a0232e582b, type: 2}
+  m_Animations:
+  - {fileID: 7400000, guid: 493df13152a6e406c8fe35a0232e582b, type: 2}
+  - {fileID: 7400000, guid: a4d65e7abb4c8437bb8831ecd74fa1e8, type: 2}
+  m_WrapMode: 0
+  m_PlayAutomatically: 1
+  m_AnimatePhysics: 0
+  m_CullingType: 0
 --- !u!1 &1723277503629348019
 GameObject:
   m_ObjectHideFlags: 0
@@ -380,8 +414,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 7.576, y: -13.14}
-  m_SizeDelta: {x: 323.3, y: 54.26}
+  m_AnchoredPosition: {x: 14, y: -14}
+  m_SizeDelta: {x: 374, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5062161070814756483
 CanvasRenderer:
@@ -412,7 +446,7 @@ MonoBehaviour:
     m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_text: Before start navigating the world, pick your favorite look and get your
-    avatar ready for the Metaverse!
+    avatar ready to the Metaverse!
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: c0f2e4affe3f2438d9042ca1db45764f, type: 2}
   m_sharedMaterial: {fileID: 8921694724713903678, guid: c0f2e4affe3f2438d9042ca1db45764f,
@@ -441,12 +475,12 @@ MonoBehaviour:
   m_outlineColor:
     serializedVersion: 2
     rgba: 4278190080
-  m_fontSize: 15.15
+  m_fontSize: 14
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
-  m_fontSizeMin: 1
-  m_fontSizeMax: 19
+  m_fontSizeMin: 10
+  m_fontSizeMax: 14
   m_fontStyle: 0
   m_textAlignment: 513
   m_characterSpacing: 0
@@ -482,12 +516,12 @@ MonoBehaviour:
   m_margin: {x: 0, y: 0, z: 0, w: 0}
   m_textInfo:
     textComponent: {fileID: 7922073864257266146}
-    characterCount: 103
+    characterCount: 102
     spriteCount: 0
     spaceCount: 16
     wordCount: 17
     linkCount: 0
-    lineCount: 3
+    lineCount: 2
     pageCount: 1
     materialCount: 1
   m_isUsingLegacyAnimationComponent: 0
@@ -539,8 +573,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0.6, y: -13.14}
-  m_SizeDelta: {x: 337.2, y: 54.3}
+  m_AnchoredPosition: {x: 6, y: -12}
+  m_SizeDelta: {x: 370, y: 54}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8579213143396302133
 CanvasRenderer:
@@ -600,12 +634,12 @@ MonoBehaviour:
   m_outlineColor:
     serializedVersion: 2
     rgba: 4278190080
-  m_fontSize: 15.15
+  m_fontSize: 13
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
-  m_fontSizeMin: 1
-  m_fontSizeMax: 19
+  m_fontSizeMin: 10
+  m_fontSizeMax: 13
   m_fontStyle: 0
   m_textAlignment: 513
   m_characterSpacing: 0
@@ -698,8 +732,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -22.670004, y: -13.14}
-  m_SizeDelta: {x: 290.66, y: 54.3}
+  m_AnchoredPosition: {x: -30, y: -12}
+  m_SizeDelta: {x: 300, y: 54}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &525437743091384650
 CanvasRenderer:
@@ -729,8 +763,8 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
-  m_text: "Shows you other players around, scenes\u2019 name and its coordinates.
-    Try to <b>find now the exit door</b> from the tutorial scene!"
+  m_text: Shows you other players around, scenes name and its coordinates. Try to
+    <b>find now the exit door</b> from the tutorial scene!
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: c0f2e4affe3f2438d9042ca1db45764f, type: 2}
   m_sharedMaterial: {fileID: 8921694724713903678, guid: c0f2e4affe3f2438d9042ca1db45764f,
@@ -759,12 +793,12 @@ MonoBehaviour:
   m_outlineColor:
     serializedVersion: 2
     rgba: 4278190080
-  m_fontSize: 14.65
+  m_fontSize: 13
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
-  m_fontSizeMin: 1
-  m_fontSizeMax: 19
+  m_fontSizeMin: 10
+  m_fontSizeMax: 13
   m_fontStyle: 0
   m_textAlignment: 513
   m_characterSpacing: 0
@@ -800,14 +834,14 @@ MonoBehaviour:
   m_margin: {x: 0, y: 0, z: 0, w: 0}
   m_textInfo:
     textComponent: {fileID: 8447276409802047133}
-    characterCount: 120
+    characterCount: 119
     spriteCount: 0
     spaceCount: 20
     wordCount: 21
     linkCount: 0
     lineCount: 3
     pageCount: 1
-    materialCount: 2
+    materialCount: 1
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_spriteAnimator: {fileID: 0}
@@ -857,8 +891,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 28.47, y: 30.323997}
-  m_SizeDelta: {x: 281.51, y: 27.98}
+  m_AnchoredPosition: {x: 36.32, y: 36}
+  m_SizeDelta: {x: 329.44, y: 27.98}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8206020245878855394
 CanvasRenderer:
@@ -888,10 +922,10 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
-  m_text: Wellcome to Decentraland.
+  m_text: Welcome to Decentraland!
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 131598e906f4d4a048cfa339caa74472, type: 2}
-  m_sharedMaterial: {fileID: -2930943361234166642, guid: 131598e906f4d4a048cfa339caa74472,
+  m_fontAsset: {fileID: 11400000, guid: 26b03903800224f718b64e9afbc91b61, type: 2}
+  m_sharedMaterial: {fileID: -6892909264025736228, guid: 26b03903800224f718b64e9afbc91b61,
     type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
@@ -917,13 +951,13 @@ MonoBehaviour:
   m_outlineColor:
     serializedVersion: 2
     rgba: 4278190080
-  m_fontSize: 18.75
+  m_fontSize: 18
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
-  m_fontSizeMin: 18
-  m_fontSizeMax: 72
-  m_fontStyle: 1
+  m_fontSizeMin: 10
+  m_fontSizeMax: 18
+  m_fontStyle: 0
   m_textAlignment: 513
   m_characterSpacing: 0
   m_wordSpacing: 0
@@ -958,7 +992,7 @@ MonoBehaviour:
   m_margin: {x: 0, y: 0, z: 0, w: 0}
   m_textInfo:
     textComponent: {fileID: 3202672097496247576}
-    characterCount: 25
+    characterCount: 24
     spriteCount: 0
     spaceCount: 2
     wordCount: 3
@@ -1015,8 +1049,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -27.245, y: 28}
-  m_SizeDelta: {x: 281.51, y: 27.98}
+  m_AnchoredPosition: {x: -30, y: 36}
+  m_SizeDelta: {x: 300, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &732587877302805775
 CanvasRenderer:
@@ -1048,8 +1082,8 @@ MonoBehaviour:
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_text: Camera mode.
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 131598e906f4d4a048cfa339caa74472, type: 2}
-  m_sharedMaterial: {fileID: -2930943361234166642, guid: 131598e906f4d4a048cfa339caa74472,
+  m_fontAsset: {fileID: 11400000, guid: 26b03903800224f718b64e9afbc91b61, type: 2}
+  m_sharedMaterial: {fileID: -6892909264025736228, guid: 26b03903800224f718b64e9afbc91b61,
     type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
@@ -1075,13 +1109,13 @@ MonoBehaviour:
   m_outlineColor:
     serializedVersion: 2
     rgba: 4278190080
-  m_fontSize: 23.4
+  m_fontSize: 18
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
-  m_fontSizeMin: 9.1
-  m_fontSizeMax: 72
-  m_fontStyle: 1
+  m_fontSizeMin: 10
+  m_fontSizeMax: 18
+  m_fontStyle: 0
   m_textAlignment: 513
   m_characterSpacing: 0
   m_wordSpacing: 0
@@ -1151,6 +1185,7 @@ GameObject:
   - component: {fileID: 2611089517129457043}
   - component: {fileID: 8065315166429930883}
   - component: {fileID: 4574287604332835822}
+  - component: {fileID: 635527501867997938}
   m_Layer: 5
   m_Name: Tooltip-CameraMode
   m_TagString: Untagged
@@ -1177,8 +1212,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 174, y: -56}
-  m_SizeDelta: {x: 362.7, y: 91.20001}
+  m_AnchoredPosition: {x: 205, y: -79}
+  m_SizeDelta: {x: 450, y: 134}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &2611089517129457043
 CanvasRenderer:
@@ -1208,8 +1243,7 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
-  m_Sprite: {fileID: 6531193840763176120, guid: ad7b2afa9169b4d4ea47e951ff944b2d,
-    type: 3}
+  m_Sprite: {fileID: 21300000, guid: f4dd04f94ce034cb5a20d43fb1d377df, type: 3}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -1230,8 +1264,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 005cdab7f379540b0bfbbaee75b5334a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  showAnimationClip: {fileID: 0}
-  hideAnimationClip: {fileID: 0}
+  showAnimationClip: {fileID: 7400000, guid: 493df13152a6e406c8fe35a0232e582b, type: 2}
+  hideAnimationClip: {fileID: 7400000, guid: a4d65e7abb4c8437bb8831ecd74fa1e8, type: 2}
+--- !u!111 &635527501867997938
+Animation:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3594299374644358003}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Animation: {fileID: 7400000, guid: 493df13152a6e406c8fe35a0232e582b, type: 2}
+  m_Animations:
+  - {fileID: 7400000, guid: 493df13152a6e406c8fe35a0232e582b, type: 2}
+  - {fileID: 7400000, guid: a4d65e7abb4c8437bb8831ecd74fa1e8, type: 2}
+  m_WrapMode: 0
+  m_PlayAutomatically: 1
+  m_AnimatePhysics: 0
+  m_CullingType: 0
 --- !u!1 &3909937348293523109
 GameObject:
   m_ObjectHideFlags: 0
@@ -1266,8 +1317,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 156.32, y: 28}
-  m_SizeDelta: {x: 25.77, y: 30.551}
+  m_AnchoredPosition: {x: 183.6, y: 44.967}
+  m_SizeDelta: {x: 55.3, y: 59.065}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8617273373363949683
 CanvasRenderer:
@@ -1297,7 +1348,7 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
-  m_Sprite: {fileID: 21300000, guid: af3ceb136e126477f809677ea5eb67e2, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 83e1aaba99a7442649477c0de85effc2, type: 3}
   m_Type: 0
   m_PreserveAspect: 1
   m_FillCenter: 1
@@ -1340,8 +1391,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -27.245, y: 28}
-  m_SizeDelta: {x: 281.51, y: 27.98}
+  m_AnchoredPosition: {x: -30, y: 36}
+  m_SizeDelta: {x: 300, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &400782442429499716
 CanvasRenderer:
@@ -1373,8 +1424,8 @@ MonoBehaviour:
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_text: Mini-map
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 131598e906f4d4a048cfa339caa74472, type: 2}
-  m_sharedMaterial: {fileID: -2930943361234166642, guid: 131598e906f4d4a048cfa339caa74472,
+  m_fontAsset: {fileID: 11400000, guid: 26b03903800224f718b64e9afbc91b61, type: 2}
+  m_sharedMaterial: {fileID: -6892909264025736228, guid: 26b03903800224f718b64e9afbc91b61,
     type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
@@ -1400,13 +1451,13 @@ MonoBehaviour:
   m_outlineColor:
     serializedVersion: 2
     rgba: 4278190080
-  m_fontSize: 23.4
+  m_fontSize: 18
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
-  m_fontSizeMin: 9.1
-  m_fontSizeMax: 72
-  m_fontStyle: 1
+  m_fontSizeMin: 10
+  m_fontSizeMax: 18
+  m_fontStyle: 0
   m_textAlignment: 513
   m_characterSpacing: 0
   m_wordSpacing: 0
@@ -1476,6 +1527,7 @@ GameObject:
   - component: {fileID: 5082411655096122246}
   - component: {fileID: 8075148175510829741}
   - component: {fileID: 5271660113205801817}
+  - component: {fileID: 7436274429773606958}
   m_Layer: 5
   m_Name: Tooltip-MiniMap
   m_TagString: Untagged
@@ -1502,8 +1554,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 174, y: -185.4}
-  m_SizeDelta: {x: 362.7, y: 91.20001}
+  m_AnchoredPosition: {x: 205, y: -298}
+  m_SizeDelta: {x: 450, y: 134}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5082411655096122246
 CanvasRenderer:
@@ -1533,8 +1585,7 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
-  m_Sprite: {fileID: 6531193840763176120, guid: ad7b2afa9169b4d4ea47e951ff944b2d,
-    type: 3}
+  m_Sprite: {fileID: 21300000, guid: f4dd04f94ce034cb5a20d43fb1d377df, type: 3}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -1555,8 +1606,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 005cdab7f379540b0bfbbaee75b5334a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  showAnimationClip: {fileID: 0}
-  hideAnimationClip: {fileID: 0}
+  showAnimationClip: {fileID: 7400000, guid: 493df13152a6e406c8fe35a0232e582b, type: 2}
+  hideAnimationClip: {fileID: 7400000, guid: a4d65e7abb4c8437bb8831ecd74fa1e8, type: 2}
+--- !u!111 &7436274429773606958
+Animation:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5614452605267540143}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Animation: {fileID: 7400000, guid: 493df13152a6e406c8fe35a0232e582b, type: 2}
+  m_Animations:
+  - {fileID: 7400000, guid: 493df13152a6e406c8fe35a0232e582b, type: 2}
+  - {fileID: 7400000, guid: a4d65e7abb4c8437bb8831ecd74fa1e8, type: 2}
+  m_WrapMode: 0
+  m_PlayAutomatically: 1
+  m_AnimatePhysics: 0
+  m_CullingType: 0
 --- !u!1 &6432865415452728495
 GameObject:
   m_ObjectHideFlags: 0
@@ -1591,8 +1659,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 145.93, y: 3.2}
-  m_SizeDelta: {x: 46.54, y: 49.73}
+  m_AnchoredPosition: {x: 168, y: 4}
+  m_SizeDelta: {x: 68, y: 86}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4079849798811548574
 CanvasRenderer:
@@ -1622,7 +1690,7 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
-  m_Sprite: {fileID: 21300000, guid: af3ceb136e126477f809677ea5eb67e2, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 11c68b8633fb24a5990f2955ab65db2a, type: 3}
   m_Type: 0
   m_PreserveAspect: 1
   m_FillCenter: 1
@@ -1665,8 +1733,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -141.19, y: 30.324}
-  m_SizeDelta: {x: 25.77, y: 30.551}
+  m_AnchoredPosition: {x: -156, y: 34}
+  m_SizeDelta: {x: 34, y: 34}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &7254033069111296663
 CanvasRenderer:
@@ -1696,7 +1764,7 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
-  m_Sprite: {fileID: 21300000, guid: af3ceb136e126477f809677ea5eb67e2, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 086858b2f105e4026b3ce7da0b9a4b38, type: 3}
   m_Type: 0
   m_PreserveAspect: 1
   m_FillCenter: 1
@@ -1739,8 +1807,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 28.47, y: 30.323997}
-  m_SizeDelta: {x: 281.51, y: 27.98}
+  m_AnchoredPosition: {x: 36.32, y: 36}
+  m_SizeDelta: {x: 329.44, y: 27.98}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &7512210496943957656
 CanvasRenderer:
@@ -1772,8 +1840,8 @@ MonoBehaviour:
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_text: Discover the world walking around!
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 131598e906f4d4a048cfa339caa74472, type: 2}
-  m_sharedMaterial: {fileID: -2930943361234166642, guid: 131598e906f4d4a048cfa339caa74472,
+  m_fontAsset: {fileID: 11400000, guid: 26b03903800224f718b64e9afbc91b61, type: 2}
+  m_sharedMaterial: {fileID: -6892909264025736228, guid: 26b03903800224f718b64e9afbc91b61,
     type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
@@ -1799,13 +1867,13 @@ MonoBehaviour:
   m_outlineColor:
     serializedVersion: 2
     rgba: 4278190080
-  m_fontSize: 14.3
+  m_fontSize: 18
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
-  m_fontSizeMin: 9.1
-  m_fontSizeMax: 72
-  m_fontStyle: 1
+  m_fontSizeMin: 10
+  m_fontSizeMax: 18
+  m_fontStyle: 0
   m_textAlignment: 513
   m_characterSpacing: 0
   m_wordSpacing: 0
@@ -2016,8 +2084,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -141.19, y: 30.324}
-  m_SizeDelta: {x: 25.77, y: 30.551}
+  m_AnchoredPosition: {x: -156, y: 34}
+  m_SizeDelta: {x: 34, y: 34}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5620869997834037913
 CanvasRenderer:
@@ -2047,7 +2115,7 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
-  m_Sprite: {fileID: 21300000, guid: af3ceb136e126477f809677ea5eb67e2, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 086858b2f105e4026b3ce7da0b9a4b38, type: 3}
   m_Type: 0
   m_PreserveAspect: 1
   m_FillCenter: 1
