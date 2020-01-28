@@ -10,6 +10,8 @@ namespace DCL
         //Default OnPointerEvent
         public LayerMask OnPointerDownTarget = 1 << 9;
 
+        private static int lockedCursorFrame;
+
         void Update()
         {
 #if UNITY_EDITOR
@@ -20,9 +22,12 @@ namespace DCL
             }
 #endif
         }
+        
+        public static bool LockedThisFrame() => Time.frameCount == lockedCursorFrame;
 
         public void LockCursor()
         {
+            lockedCursorFrame = Time.frameCount;
             Cursor.visible = false;
             Cursor.lockState = CursorLockMode.Locked;
 

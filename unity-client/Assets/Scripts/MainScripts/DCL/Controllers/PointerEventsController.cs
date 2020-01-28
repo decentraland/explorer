@@ -114,6 +114,8 @@ namespace DCL
 
         private void ResolveGenericRaycastHandlers(IRaycastPointerHandler raycastHandlerTarget)
         {
+            if (MouseCatcher.LockedThisFrame()) return;
+            
             var mouseIsDown = Input.GetMouseButtonDown(0);
             var mouseIsUp = Input.GetMouseButtonUp(0);
             if (raycastHandlerTarget is IRaycastPointerDownHandler down)
