@@ -9,7 +9,7 @@ namespace DCL
         public AvatarName avatarName;
         public AvatarRenderer avatarRenderer;
         public AvatarMovementController avatarMovementController;
-        public GameObject minimapRepresentation;
+        [SerializeField] internal GameObject minimapRepresentation;
 
         private string currentSerialization = "";
         public AvatarModel model = new AvatarModel();
