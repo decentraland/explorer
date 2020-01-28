@@ -51,7 +51,61 @@ import { ensureServerFormat } from './transformations/profileToServerFormat'
 import { Avatar, Catalog, Profile, WearableId, Wearable, Collection } from './types'
 import { Action } from 'redux'
 import { identity } from '../index'
-import { AuthIdentity } from '../crypto/Authenticator'
+import { AuthIdentity, Authenticator, AuthLink } from '../crypto/Authenticator'
+
+const CID = require('cids')
+import { sha3 } from 'web3x/utils'
+const multihashing = require('multihashing-async')
+const toBuffer = require('blob-to-buffer')
+
+export type Timestamp = number
+export type Pointer = string
+export type ContentFileHash = string
+export type ContentFile = {
+  name: string
+  content: Buffer
+}
+export type DeployData = {
+  entityId: string
+  ethAddress?: string
+  signature?: string
+  authChain: AuthLink[]
+  files: ContentFile[]
+}
+export type ControllerEntity = {
+  id: string
+  type: string
+  pointers: string[]
+  timestamp: number
+  content?: ControllerEntityContent[]
+  metadata?: any
+}
+export type ControllerEntityContent = {
+  file: string
+  hash: string
+}
+export enum EntityType {
+  SCENE = 'scene',
+  WEARABLE = 'wearable',
+  PROFILE = 'profile'
+}
+export type EntityId = ContentFileHash
+export enum EntityField {
+  CONTENT = 'content',
+  POINTERS = 'pointers',
+  METADATA = 'metadata'
+}
+export const ENTITY_FILE_NAME = 'entity.json'
+export class Entity {
+  constructor(
+    public readonly id: EntityId,
+    public readonly type: EntityType,
+    public readonly pointers: Pointer[],
+    public readonly timestamp: Timestamp,
+    public readonly content?: Map<string, ContentFileHash>,
+    public readonly metadata?: any
+  ) {}
+}
 
 export const getCurrentUserId = () => identity.address
 
@@ -306,17 +360,16 @@ export function* handleSaveAvatar(saveAvatar: SaveAvatarRequest) {
   const userId = saveAvatar.payload.userId ? saveAvatar.payload.userId : yield select(getCurrentUserId)
   try {
     const currentVersion = (yield select(getProfile, userId)).version || 0
-    const url = getServerConfigurations().profile + '/profile/' + userId + '/avatar'
+    const url = getServerConfigurations().contentUpdate
     const profile = saveAvatar.payload.profile
     const result = yield call(modifyAvatar, {
       url,
-      method: 'PUT',
       userId,
       currentVersion,
       identity,
       profile
     })
-    const { version } = result
+    const { creationTimestamp: version } = result
     yield put(saveAvatarSuccess(userId, version, profile))
     yield put(passportRequest(userId))
   } catch (error) {
@@ -324,50 +377,200 @@ export function* handleSaveAvatar(saveAvatar: SaveAvatarRequest) {
   }
 }
 
-/**
- * TODO - change payload to match content server v3 - moliva - 27/01/2020
- */
+export class ControllerEntityFactory {
+  static maskEntity(fullEntity: Entity, fields?: EntityField[]): ControllerEntity {
+    const { id, type, timestamp } = fullEntity
+    let content: ControllerEntityContent[] | undefined = undefined
+    let metadata: any
+    let pointers: string[] = []
+    if ((!fields || fields.includes(EntityField.CONTENT)) && fullEntity.content) {
+      content = Array.from(fullEntity.content.entries()).map(([file, hash]) => ({ file, hash }))
+    }
+    if (!fields || fields.includes(EntityField.METADATA)) {
+      metadata = fullEntity.metadata
+    }
+    if ((!fields || fields.includes(EntityField.POINTERS)) && fullEntity.pointers) {
+      pointers = fullEntity.pointers
+    }
+    return { id, type, timestamp, pointers, content, metadata }
+  }
+}
+
+async function buildControllerEntityAndFile(
+  type: EntityType,
+  pointers: Pointer[],
+  timestamp: Timestamp,
+  content?: Map<string, ContentFileHash>,
+  metadata?: any
+): Promise<[ControllerEntity, ContentFile]> {
+  const [entity, file]: [Entity, ContentFile] = await buildEntityAndFile(type, pointers, timestamp, content, metadata)
+  return [ControllerEntityFactory.maskEntity(entity), file]
+}
+
+export async function buildEntityAndFile(
+  type: EntityType,
+  pointers: Pointer[],
+  timestamp: Timestamp,
+  content?: Map<string, ContentFileHash>,
+  metadata?: any
+): Promise<[Entity, ContentFile]> {
+  const entity: Entity = new Entity('temp-id', type, pointers, timestamp, content, metadata)
+  const file: ContentFile = entityToFile(entity, ENTITY_FILE_NAME)
+  const fileHash: ContentFileHash = await calculateBufferHash(file.content)
+  const entityWithCorrectId = new Entity(
+    fileHash,
+    entity.type,
+    entity.pointers,
+    entity.timestamp,
+    entity.content,
+    entity.metadata
+  )
+  return [entityWithCorrectId, file]
+}
+
+export function entityToFile(entity: Entity, fileName?: string): ContentFile {
+  let copy: any = Object.assign({}, entity)
+  copy.content =
+    !copy.content || !(copy.content instanceof Map)
+      ? copy.content
+      : Array.from(copy.content.entries()).map(([key, value]: any) => ({ file: key, hash: value }))
+  delete copy.id
+  return { name: fileName || 'name', content: Buffer.from(JSON.stringify(copy)) }
+}
+
+export async function calculateBufferHash(buffer: Buffer): Promise<string> {
+  const hash = await multihashing(buffer, 'sha2-256')
+  return new CID(0, 'dag-pb', hash).toBaseEncodedString()
+}
+
 export async function modifyAvatar(params: {
   url: string
-  method: string
   currentVersion: number
   userId: string
   identity: AuthIdentity
   profile: { avatar: Avatar; face: string; body: string }
 }) {
-  // @ts-ignore
-  const { url, method, currentVersion, profile, identity } = params
+  const { url, currentVersion, profile, identity } = params
   const { face, avatar, body } = profile
-  const snapshots = await saveSnapshots(
-    getServerConfigurations().content + '/entity/profile/' + params.userId,
-    '',
-    // identity,
-    face,
-    body
-  )
-  const avatarData: any = avatar
-  avatarData.snapshots = snapshots
-  const payload = JSON.stringify(ensureServerFormat(avatarData, currentVersion))
-  const options = {
-    method,
-    body: payload
+  const faceFile: ContentFile = await makeContentFile('./face.png', base64ToBlob(face))
+  const bodyFile: ContentFile = await makeContentFile('./body.png', base64ToBlob(body))
+
+  const faceFileHash: string = await calculateBufferHash(faceFile.content)
+  const bodyFileHash: string = await calculateBufferHash(bodyFile.content)
+
+  avatar.snapshots = {
+    face: faceFileHash,
+    body: bodyFileHash
   }
 
-  const response = await fetch(url, options)
-  return response.json()
+  const newProfile = ensureServerFormat(avatar, currentVersion)
+
+  const files = [faceFile, bodyFile]
+
+  const [data] = await buildDeployData(
+    [identity.address],
+    {
+      avatars: [newProfile]
+    },
+    files
+  )
+  return deploy(url, data)
 }
 
-async function saveSnapshots(userURL: string, accessToken: string, face: string, body: string) {
-  const data = new FormData()
-  data.append('face', base64ToBlob(face), 'face.png')
-  data.append('body', base64ToBlob(body), 'body.png')
-  return (await fetch(`${userURL}/snapshot`, {
-    method: 'POST',
-    body: data,
-    headers: {
-      Authorization: 'Bearer ' + accessToken
+export function makeContentFile(path: string, content: string | Blob): Promise<ContentFile> {
+  return new Promise((resolve, reject) => {
+    if (typeof content === 'string') {
+      const buffer = Buffer.from(content)
+      resolve({ name: path, content: buffer })
+    } else if (content instanceof Blob) {
+      toBuffer(content, (err: Error, buffer: Buffer) => {
+        if (err) reject(err)
+        resolve({ name: path, content: buffer })
+      })
+    } else {
+      reject(new Error('Unable to create ContentFile: content must be a string or a Blob'))
     }
-  })).json()
+  })
+}
+
+export async function buildDeployData(
+  pointers: Pointer[],
+  metadata: any,
+  files: ContentFile[] = [],
+  afterEntity?: ControllerEntity
+): Promise<[DeployData, ControllerEntity]> {
+  const hashes: Map<ContentFileHash, ContentFile> = await calculateHashes(files)
+  const content: Map<string, string> = new Map(Array.from(hashes.entries()).map(([hash, file]) => [file.name, hash]))
+
+  const [entity, entityFile] = await buildControllerEntityAndFile(
+    EntityType.PROFILE,
+    pointers,
+    (afterEntity ? afterEntity.timestamp : Date.now()) + 1,
+    content,
+    metadata
+  )
+
+  const body = await hashAndSignMessage(entity.id)
+  const deployData: DeployData = {
+    entityId: entity.id,
+    // Every position in the body ethAddress every position in the authLink is an slavon.
+    // 1 = ethAddress, 2 ehpemeral & signature w/ethAdrress, 3 request & signature with ephemeral
+    authChain: body,
+    files: [entityFile, ...files]
+  }
+
+  return [deployData, entity]
+}
+
+export async function hashAndSignMessage(message: string): Promise<AuthLink[]> {
+  return Authenticator.signPayload(identity, message)
+}
+
+export function createEthereumMessageHash(msg: string) {
+  let msgWithPrefix: string = `\x19Ethereum Signed Message:\n${msg.length}${msg}`
+  return sha3(msgWithPrefix)
+}
+
+export async function calculateHashes(files: ContentFile[]): Promise<Map<string, ContentFile>> {
+  const entries: Promise<[string, ContentFile]>[] = Array.from(files).map(file =>
+    calculateBufferHash(file.content).then((hash: string) => [hash, file])
+  )
+  return new Map(await Promise.all(entries))
+}
+
+export async function deploy(contentServerUrl: string, data: DeployData) {
+  const form = new FormData()
+  form.append('entityId', data.entityId)
+  convertModelToFormData(data.authChain, form, 'authChain')
+  for (let file of data.files) {
+    form.append(file.name, new Blob([file.content]), file.name)
+  }
+  const deployResponse = await fetch(`${contentServerUrl}/entities`, {
+    method: 'POST',
+    body: form
+  })
+  return deployResponse.json()
+}
+
+function convertModelToFormData(model: any, form: FormData = new FormData(), namespace = ''): FormData {
+  let formData = form || new FormData()
+  for (let propertyName in model) {
+    if (!model.hasOwnProperty(propertyName) || !model[propertyName]) continue
+    let formKey = namespace ? `${namespace}[${propertyName}]` : propertyName
+    if (model[propertyName] instanceof Date) {
+      formData.append(formKey, model[propertyName].toISOString())
+    } else if (model[propertyName] instanceof Array) {
+      model[propertyName].forEach((element: any, index: number) => {
+        const tempFormKey = `${formKey}[${index}]`
+        convertModelToFormData(element, formData, tempFormKey)
+      })
+    } else if (typeof model[propertyName] === 'object' && !(model[propertyName] instanceof File)) {
+      convertModelToFormData(model[propertyName], formData, formKey)
+    } else {
+      formData.append(formKey, model[propertyName].toString())
+    }
+  }
+  return formData
 }
 
 export function base64ToBlob(base64: string): Blob {
