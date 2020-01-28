@@ -1,4 +1,5 @@
 using DCL.Controllers;
+using DCL.Helpers;
 using DCL.Models;
 using UnityEngine;
 
@@ -21,45 +22,32 @@ namespace DCL.Components
 
         protected override void AttachShape(DecentralandEntity entity)
         {
-            if (!string.IsNullOrEmpty(model.src))
-            {
-                entity.meshesInfo.meshRootGameObject = UnityEngine.Object.Instantiate(Resources.Load("NFTShapeLoader")) as GameObject;
-
-                entity.meshRootGameObject.name = componentName + " mesh";
-                entity.meshRootGameObject.transform.SetParent(entity.gameObject.transform);
-                entity.meshRootGameObject.transform.localPosition = Vector3.zero;
-                entity.meshRootGameObject.transform.localScale = Vector3.one;
-                entity.meshRootGameObject.transform.localRotation = Quaternion.identity;
-                entity.meshesInfo.currentShape = this;
-
-                entity.OnShapeUpdated += UpdateBackgroundColor;
-
-                LoadWrapper_NFT loadableShape = null;
-
-                if (!attachedLoaders.ContainsKey(entity.meshRootGameObject))
-                {
-                    loadableShape = new LoadWrapper_NFT();
-                    attachedLoaders.Add(entity.meshRootGameObject, loadableShape);
-                }
-                else
-                {
-                    loadableShape = GetLoaderForEntity(entity) as LoadWrapper_NFT;
-                }
-
-                loadableShape.entity = entity;
-                loadableShape.initialVisibility = model.visible;
-
-                loadableShape.withCollisions = model.withCollisions;
-                loadableShape.backgroundColor = model.color;
-
-                loadableShape.Load(model.src, OnLoadCompleted, OnLoadFailed);
-            }
-            else
+            if (string.IsNullOrEmpty(model.src))
             {
 #if UNITY_EDITOR
                 Debug.LogError($"NFT SHAPE with url '{model.src}' couldn't be loaded.");
 #endif
+                return;
             }
+
+            entity.meshesInfo.meshRootGameObject = Object.Instantiate(Resources.Load("NFTShapeLoader")) as GameObject;
+
+            entity.meshRootGameObject.name = componentName + " mesh";
+            entity.meshRootGameObject.transform.SetParent(entity.gameObject.transform);
+            entity.meshRootGameObject.transform.ResetLocalTRS();
+            entity.meshesInfo.currentShape = this;
+
+            entity.OnShapeUpdated += UpdateBackgroundColor;
+
+            LoadWrapper_NFT loadableShape = GetOrAddLoaderForEntity<LoadWrapper_NFT>(entity);
+
+            loadableShape.entity = entity;
+            loadableShape.initialVisibility = model.visible;
+
+            loadableShape.withCollisions = model.withCollisions;
+            loadableShape.backgroundColor = model.color;
+
+            loadableShape.Load(model.src, OnLoadCompleted, OnLoadFailed);
         }
 
         protected override void DetachShape(DecentralandEntity entity)
