@@ -1,15 +1,17 @@
 using DCL.Helpers;
+using UnityEngine;
 
 namespace DCL.Components
 {
     public class LoadWrapper_OBJ : LoadWrapper
     {
         DynamicOBJLoaderController objLoaderComponent;
+        System.Action<LoadWrapper> OnSuccessEvent;
 
         public override void Unload()
         {
-            objLoaderComponent.OnFinishedLoadingAsset -= CallOnComponentUpdated;
-            UnityEngine.Object.Destroy(objLoaderComponent);
+            objLoaderComponent.OnFinishedLoadingAsset -= SuccessWrapper;
+            Object.Destroy(objLoaderComponent);
             entity.Cleanup();
         }
 
@@ -21,10 +23,10 @@ namespace DCL.Components
             if (objLoaderComponent == null)
                 objLoaderComponent = entity.meshRootGameObject.GetOrCreateComponent<DynamicOBJLoaderController>();
 
-            objLoaderComponent.OnFinishedLoadingAsset += CallOnComponentUpdated;
+            objLoaderComponent.OnFinishedLoadingAsset += SuccessWrapper;
+            OnSuccessEvent = OnSuccess;
 
             alreadyLoaded = false;
-            objLoaderComponent.OnFinishedLoadingAsset += () => OnSuccess(this);
             objLoaderComponent.LoadAsset(src, true);
 
             if (objLoaderComponent.loadingPlaceholder == null)
@@ -36,6 +38,12 @@ namespace DCL.Components
             {
                 objLoaderComponent.loadingPlaceholder.SetActive(true);
             }
+        }
+
+        void SuccessWrapper()
+        {
+            CallOnComponentUpdated();
+            OnSuccessEvent?.Invoke(this);
         }
 
         void CallOnComponentUpdated()

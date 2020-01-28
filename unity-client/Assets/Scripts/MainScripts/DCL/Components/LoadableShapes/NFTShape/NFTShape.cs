@@ -31,11 +31,11 @@ namespace DCL.Components
             }
 
             entity.meshesInfo.meshRootGameObject = Object.Instantiate(Resources.Load("NFTShapeLoader")) as GameObject;
+            entity.meshesInfo.currentShape = this;
 
             entity.meshRootGameObject.name = componentName + " mesh";
             entity.meshRootGameObject.transform.SetParent(entity.gameObject.transform);
             entity.meshRootGameObject.transform.ResetLocalTRS();
-            entity.meshesInfo.currentShape = this;
 
             entity.OnShapeUpdated += UpdateBackgroundColor;
 
