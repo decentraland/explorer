@@ -23,7 +23,7 @@ const delayed = (result: any) =>
     return result
   })
 
-const delayedProfile = delayed(profile)
+const delayedProfile = delayed({ avatars: [profile] })
 
 describe('fetchProfile behavior', () => {
   it('behaves normally', () => {
@@ -31,7 +31,7 @@ describe('fetchProfile behavior', () => {
       .put(passportSuccess('userId', 'passport' as any))
       .provide([
         [select(getProfileDownloadServer), 'server'],
-        [call(profileServerRequest, 'server', 'userId'), profile],
+        [call(profileServerRequest, 'server', 'userId'), { avatars: [profile] }],
         [select(getCurrentUserId), 'myid'],
         [call(processServerProfile, 'userId', profile), 'passport']
       ])
@@ -86,8 +86,8 @@ describe('fetchProfile behavior', () => {
       .provide([
         [select(getCurrentUserId), 'myid'],
         [select(getProfileDownloadServer), 'server'],
-        [call(profileServerRequest, 'server', 'user|1'), delayed(profile1)],
-        [call(profileServerRequest, 'server', 'user|2'), delayed(profile2)],
+        [call(profileServerRequest, 'server', 'user|1'), delayed({ avatars: [profile1] })],
+        [call(profileServerRequest, 'server', 'user|2'), delayed({ avatars: [profile2] })],
         [call(fetchInventoryItemsByAddress, 'eth1'), ['dcl://base-exclusive/wearable1/1']],
         [call(fetchInventoryItemsByAddress, 'eth2'), ['dcl://base-exclusive/wearable2/2']],
         [call(processServerProfile, 'user|1', profile1), 'passport1'],
@@ -114,7 +114,7 @@ describe('fetchProfile behavior', () => {
       .provide([
         [select(getCurrentUserId), 'myid'],
         [select(getProfileDownloadServer), 'server'],
-        [call(profileServerRequest, 'server', 'user|1'), delayed(profile1)],
+        [call(profileServerRequest, 'server', 'user|1'), delayed({ avatars: [profile1] })],
         [call(processServerProfile, 'user|1', profile1), 'passport1']
       ])
       .run()
