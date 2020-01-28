@@ -201,7 +201,7 @@ namespace DCL
         void OnWearableLoadingFail(WearableController wearableController)
         {
             Debug.LogError($"Avatar: {model.name}  -  Failed loading wearable: {wearableController.id}");
-            StopAllCoroutines();
+            StopLoadingCoroutines();
 
             ResetAvatar();
             isLoading = false;
@@ -337,7 +337,7 @@ namespace DCL
 
         protected virtual void OnDestroy()
         {
-            CoroutineStarter.Stop(loadCoroutine);
+            StopLoadingCoroutines();
             ResetAvatar();
         }
 
