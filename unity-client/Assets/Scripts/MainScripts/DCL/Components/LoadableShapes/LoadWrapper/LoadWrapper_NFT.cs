@@ -26,6 +26,12 @@ namespace DCL.Components
             if (loaderController == null)
                 loaderController = entity.meshRootGameObject.GetComponent<NFTShapeLoaderController>();
 
+            if (loaderController == null)
+            {
+                Debug.LogError("LoadWrapper_NFT >>> loaderController == null!");
+                return;
+            }
+
             loaderController.collider.enabled = withCollisions;
             loaderController.backgroundColor = backgroundColor;
 

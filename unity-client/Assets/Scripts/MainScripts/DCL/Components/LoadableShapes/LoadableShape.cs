@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using DCL.Controllers;
 using DCL.Helpers;
 using DCL.Models;
@@ -26,6 +26,18 @@ namespace DCL.Components
         {
             attachedLoaders.TryGetValue(entity.meshRootGameObject, out LoadWrapper result);
             return result;
+        }
+
+        public static T GetOrAddLoaderForEntity<T>(DecentralandEntity entity)
+            where T : LoadWrapper, new()
+        {
+            if (!attachedLoaders.TryGetValue(entity.meshRootGameObject, out LoadWrapper result))
+            {
+                result = new T();
+                attachedLoaders.Add(entity.meshRootGameObject, result);
+            }
+
+            return result as T;
         }
 
         public LoadableShape(ParcelScene scene) : base(scene)
@@ -120,17 +132,7 @@ namespace DCL.Components
                 isLoaded = false;
                 entity.EnsureMeshGameObject(componentName + " mesh");
 
-                LoadWrapperType loadableShape = null;
-
-                if (!attachedLoaders.ContainsKey(entity.meshRootGameObject))
-                {
-                    loadableShape = new LoadWrapperType();
-                    attachedLoaders.Add(entity.meshRootGameObject, loadableShape);
-                }
-                else
-                {
-                    loadableShape = GetLoaderForEntity(entity) as LoadWrapperType;
-                }
+                LoadWrapperType loadableShape = GetOrAddLoaderForEntity<LoadWrapperType>(entity);
 
                 loadableShape.entity = entity;
                 loadableShape.useVisualFeedback = Configuration.ParcelSettings.VISUAL_LOADING_ENABLED;
