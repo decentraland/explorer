@@ -2,7 +2,7 @@ import { ILand } from 'shared/types'
 
 const tutorialSceneContents = require('./tutorialSceneContents.json')
 
-export const TUTORIAL_SCENE_COORDS = { x: 63, y: -62 }
+export const TUTORIAL_SCENE_COORDS = { x: 200, y: 200 }
 export const TUTORIAL_SCENE_ID = 'TutorialScene'
 
 export const isTutorial = true

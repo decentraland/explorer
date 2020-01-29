@@ -3,7 +3,7 @@ import { future, IFuture } from 'fp-future'
 import { ILand, IScene, ParcelInfoResponse } from 'shared/types'
 import { jsonFetch } from 'atomicHelpers/jsonFetch'
 import { createLogger } from 'shared/logger'
-import { createTutorialILand, isTutorial, TUTORIAL_SCENE_ID } from './tutorial'
+import { createTutorialILand, isTutorial, TUTORIAL_SCENE_ID } from '../tutorial/tutorial'
 
 const emptyScenes = require('./emptyScenes.json')
 

@@ -4,7 +4,7 @@ import { Vector2Component } from 'atomicHelpers/landHelpers'
 
 import { parcelsInScope, ParcelConfigurationOptions } from '../lib/scope'
 import { ParcelLifeCycleStatus } from '../lib/parcel.status'
-import { isTutorial } from './tutorial'
+import { isTutorial } from '../tutorial/tutorial'
 
 export type ParcelSightSeeingReport = {
   sighted: string[]
@@ -35,17 +35,20 @@ export class ParcelLifeCycleController extends EventEmitter {
     }
 
     if (isTutorial) {
-      return this.reportCurrentPositionTutorial(position)
+      return this.doReportCurrentPosition(position, { ...this.config, lineOfSightRadius: 0 })
     } else {
-      return this._reportCurrentPosition(position)
+      return this.doReportCurrentPosition(position, this.config)
     }
   }
 
-  _reportCurrentPosition(position: Vector2Component): ParcelSightSeeingReport | undefined {
+  doReportCurrentPosition(
+    position: Vector2Component,
+    config: ParcelConfigurationOptions
+  ): ParcelSightSeeingReport | undefined {
     this.currentPosition = position
 
     this.isTargetPlaced = true
-    const sightedParcels = parcelsInScope(this.config.lineOfSightRadius, position)
+    const sightedParcels = parcelsInScope(config.lineOfSightRadius, position)
     const sightedParcelsSet = new Set<string>()
 
     const newlySightedParcels = sightedParcels.filter(parcel => {
@@ -53,7 +56,7 @@ export class ParcelLifeCycleController extends EventEmitter {
       return this.parcelSighted(parcel)
     })
 
-    const secureParcels = new Set(parcelsInScope(this.config.lineOfSightRadius + this.config.secureRadius, position))
+    const secureParcels = new Set(parcelsInScope(config.lineOfSightRadius + config.secureRadius, position))
 
     const currentlyPlusNewlySightedParcels = [...this.currentlySightedParcels] // this.currentlySightedParcels from t - 1 + newSightedParcels (added on this#parcelSighted)
 
@@ -67,18 +70,6 @@ export class ParcelLifeCycleController extends EventEmitter {
     this.emit('Lost sight', newlyOOSParcels)
 
     return { sighted: newlySightedParcels, lostSight: newlyOOSParcels }
-  }
-
-  reportCurrentPositionTutorial(position: Vector2Component): ParcelSightSeeingReport | undefined {
-    const lineOfSightRadius = this.config.lineOfSightRadius
-
-    this.config.lineOfSightRadius = 0
-
-    const ret = this._reportCurrentPosition(position)
-
-    this.config.lineOfSightRadius = lineOfSightRadius
-
-    return ret
   }
 
   inSight(parcel: string) {
