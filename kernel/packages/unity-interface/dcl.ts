@@ -398,6 +398,40 @@ export const unityInterface = {
       gameInstance.SendMessage('SceneController', 'UpdateMinimapSceneInformation', JSON.stringify(chunk))
     }
   },
+  TriggerAirdropDisplay() {
+    type AirdropInfo = {
+      title: string
+      subtitle: string
+      items: AirdropItem[]
+    }
+    type RarityEnum = 'swanky' | 'rare' | 'mystic' | 'legendary' | 'unique'
+    type AirdropItem = {
+      name: string
+      subtitle?: string
+      thumbnailURL: string
+      rarity: RarityEnum
+      type: 'collectible' | 'erc20'
+    }
+    const data: AirdropInfo = {
+      title: "You've found a chest!",
+      subtitle: "Click on it to see what's inside!",
+      items: [
+        {
+          name: 'Neo Glasses',
+          thumbnailURL: 'https://content.decentraland.org/contents/QmbcbFZd7qSMXkfLx1gbKMGS3j6TXBoeRbdESRYNk84GH4',
+          rarity: 'swanky',
+          type: 'collectible'
+        },
+        {
+          name: '20 MANA!',
+          thumbnailURL: 'https://content.decentraland.org/contents/QmNetfCF4mQxd88wR5Qyc3BLaaGsutg4eWadk72ecKpGKt',
+          rarity: 'rare',
+          type: 'erc20'
+        }
+      ]
+    }
+    gameInstance.SendMessage('HUDController', 'AirDroppingRequest', JSON.stringify(data))
+  },
   SelectGizmoBuilder(type: string) {
     this.SendBuilderMessage('SelectGizmo', type)
   },
