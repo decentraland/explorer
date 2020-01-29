@@ -7,6 +7,7 @@ public class HUDController : MonoBehaviour
 
     private void Awake()
     {
+        Debug.Log("hello I am the hudController");
         i = this;
     }
 
@@ -116,6 +117,7 @@ public class HUDController : MonoBehaviour
     public void ConfigurePlayerInfoCardHUD(string configurationJson)
     {
         HUDConfiguration configuration = JsonUtility.FromJson<HUDConfiguration>(configurationJson);
+        Debug.Log(configuration);
         if (configuration.active && playerInfoCardHudController == null)
         {
             playerInfoCardHudController = new PlayerInfoCardHUDController();
