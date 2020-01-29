@@ -17,9 +17,13 @@ public class ChatAndAvatarExpressionsStageController : TutorialStageController
     {
         yield return WaitIdleTime();
 
+        TutorialController.i?.SetChatVisible(true);
+
         yield return ShowTooltip(chatTooltip);
         yield return WaitIdleTime();
 
+        // TODO: show avatar expressions
+        //HUDController.i?.expressionsHud.SetVisibility(true);
         yield return ShowTooltip(avatarExpressionTooltip);
         yield return WaitIdleTime();
 

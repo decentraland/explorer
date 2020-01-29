@@ -3,8 +3,8 @@ using UnityEngine;
 
 public class TutorialController : MonoBehaviour
 {
-    public const float TOOLTIP_AUTO_HIDE_SECONDS = 2f;
-    public const float DEFAULT_STAGE_IDLE_TIME = 5f;
+    public const float TOOLTIP_AUTO_HIDE_SECONDS = 10f;
+    public const float DEFAULT_STAGE_IDLE_TIME = 20f;
 
 #if UNITY_EDITOR
     [Header("Debugging")]
@@ -36,6 +36,7 @@ public class TutorialController : MonoBehaviour
     private TutorialStageHandler initialStage;
     private int tutorialFlagMask = 0;
     private bool initialized = false;
+    private Canvas chatUIScreen = null;
 
     public void SetTutorialEnabled()
     {
@@ -44,7 +45,6 @@ public class TutorialController : MonoBehaviour
         {
             RenderingController.i.OnRenderingStateChanged += OnRenderingStateChanged;
         }
-        tutorialFlagMask = 0; // TODO: get flag from user
         CreateStagesChainOfResponsibility();
     }
 
@@ -56,11 +56,6 @@ public class TutorialController : MonoBehaviour
 #if UNITY_EDITOR
     private void Start()
     {
-        if (debugFlagStartingValue != 0)
-        {
-            tutorialFlagMask = debugFlagStartingValue;
-        }
-
         if (debugRunTutorialOnStart)
         {
             CreateStagesChainOfResponsibility();
@@ -112,6 +107,14 @@ public class TutorialController : MonoBehaviour
     {
         if (renderingEnabled && isTutorialEnabled)
         {
+            tutorialFlagMask = 0; // TODO: get flag from user profile
+
+#if UNITY_EDITOR
+            if (debugFlagStartingValue != 0)
+            {
+                tutorialFlagMask = debugFlagStartingValue;
+            }
+#endif
             if (!initialized)
             {
                 Initialize(tutorialFlagMask);
@@ -123,6 +126,7 @@ public class TutorialController : MonoBehaviour
     private void Initialize(int tutorialFlagMask)
     {
         initialized = true;
+        CacheChatScreen();
         TutorialStageHandler handler = initialStage;
         while (handler != null)
         {
@@ -131,6 +135,32 @@ public class TutorialController : MonoBehaviour
                 handler.SetUpStage();
             }
             handler = handler.nextHandler;
+        }
+    }
+
+    private void CacheChatScreen()
+    {
+        if (chatUIScreen == null)
+        {
+            using (var iterator = DCL.SceneController.i.loadedScenes.GetEnumerator())
+            {
+                while (iterator.MoveNext())
+                {
+                    if (iterator.Current.Value.isPersistent && iterator.Current.Value.uiScreenSpace != null)
+                    {
+                        chatUIScreen = iterator.Current.Value.uiScreenSpace.canvas;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    public void SetChatVisible(bool visible)
+    {
+        if (chatUIScreen != null)
+        {
+            chatUIScreen.enabled = visible;
         }
     }
 
@@ -146,7 +176,9 @@ public class TutorialController : MonoBehaviour
         nextStage = nextStage.SetNext(new GenericSceneStageHandler(TutorialFlags.ChatAndAvatarExpressions, chatAndExpressionsStage,
             () =>
             {
-                // TODO: hide chat and avatar expressions
+                SetChatVisible(false);
+                // TODO: hide avatar expressions
+                //HUDController.i?.expressionsHud.SetVisibility(false);
             }));
     }
 
