@@ -173,7 +173,11 @@ function takeLatestById<T extends Action>(
 }
 
 function overrideBaseUrl(wearable: Wearable) {
-  return { ...wearable, baseUrl: 'http://localhost:7070/contentv2/contents/', baseUrlBundles: '' } // TODO - add proper asset bundle url when ready - moliva - 24/01/2020
+  return {
+    ...wearable,
+    baseUrl: 'https://katalyst-lambdas.decentraland.zone/contentv2/contents/',
+    baseUrlBundles: 'https://content-assets-as-bundle.decentraland.org/contents/'
+  }
 }
 
 declare const window: any

@@ -229,7 +229,7 @@ export function getServerConfigurations() {
     landApi: `https://api.decentraland.${TLDDefault}/v1`,
     content: `https://katalyst-lambdas.decentraland.zone/contentv2`,
     contentUpdate: `https://katalyst-content.decentraland.zone`,
-    contentAsBundle: ``, // TODO - add proper asset bundle url when ready - moliva - 24/01/2020
+    contentAsBundle: `https://content-assets-as-bundle.decentraland.org`,
     worldInstanceUrl: `wss://world-comm.decentraland.${TLDDefault}/connect`,
     comms: {
       lighthouse: {
