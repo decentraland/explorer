@@ -52,7 +52,6 @@ let downloadManager: SceneDataDownloadManager
       })
       sceneController = new SceneLifeCycleController({ downloadManager, enabledEmpty: options.emptyScenes })
       positionController = new PositionLifecycleController(downloadManager, parcelController, sceneController)
-
       parcelController.on('Sighted', (parcels: string[]) => connector.notify('Parcel.sighted', { parcels }))
       parcelController.on('Lost sight', (parcels: string[]) => connector.notify('Parcel.lostSight', { parcels }))
 

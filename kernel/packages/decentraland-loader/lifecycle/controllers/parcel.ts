@@ -4,6 +4,7 @@ import { Vector2Component } from 'atomicHelpers/landHelpers'
 
 import { parcelsInScope, ParcelConfigurationOptions } from '../lib/scope'
 import { ParcelLifeCycleStatus } from '../lib/parcel.status'
+import { isTutorial } from './tutorial'
 
 export type ParcelSightSeeingReport = {
   sighted: string[]
@@ -32,6 +33,15 @@ export class ParcelLifeCycleController extends EventEmitter {
       // same position, no news
       return undefined
     }
+
+    if (isTutorial) {
+      return this.reportCurrentPositionTutorial(position)
+    } else {
+      return this._reportCurrentPosition(position)
+    }
+  }
+
+  _reportCurrentPosition(position: Vector2Component): ParcelSightSeeingReport | undefined {
     this.currentPosition = position
 
     this.isTargetPlaced = true
@@ -57,6 +67,18 @@ export class ParcelLifeCycleController extends EventEmitter {
     this.emit('Lost sight', newlyOOSParcels)
 
     return { sighted: newlySightedParcels, lostSight: newlyOOSParcels }
+  }
+
+  reportCurrentPositionTutorial(position: Vector2Component): ParcelSightSeeingReport | undefined {
+    const lineOfSightRadius = this.config.lineOfSightRadius
+
+    this.config.lineOfSightRadius = 0
+
+    const ret = this._reportCurrentPosition(position)
+
+    this.config.lineOfSightRadius = lineOfSightRadius
+
+    return ret
   }
 
   inSight(parcel: string) {
