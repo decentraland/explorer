@@ -18,6 +18,7 @@ import { screenSpaceUI } from './ui'
 
 declare var dcl: DecentralandInterface
 
+const MAX_CHAT_MESSAGES = 60
 const INITIAL_INPUT_TEXT_COLOR = Color4.Gray()
 const PRIMARY_TEXT_COLOR = Color4.White()
 const COMMAND_COLOR = Color4.FromHexString('#ffd7a9ff')
@@ -198,5 +199,9 @@ async function sendMsg(messageToSend: string) {
 
 function addMessage(messageEntry: MessageEntry): void {
   internalState.messages.push(messageEntry)
+  const length = internalState.messages.length
+  if (length > MAX_CHAT_MESSAGES) {
+    internalState.messages = internalState.messages.slice(length - MAX_CHAT_MESSAGES)
+  }
   createLogMessage(messagesLogStackContainer, messageEntry)
 }
