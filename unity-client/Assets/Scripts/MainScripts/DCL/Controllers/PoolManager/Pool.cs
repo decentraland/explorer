@@ -24,8 +24,8 @@ namespace DCL
 
         public IPooledObjectInstantiator instantiator;
 
-        private readonly LinkedList<PoolableObject> inactiveObjects = new LinkedList<PoolableObject>();
-        private readonly LinkedList<PoolableObject> activeObjects = new LinkedList<PoolableObject>();
+        private readonly LinkedList<PoolableObject> unusedObjects = new LinkedList<PoolableObject>();
+        private readonly LinkedList<PoolableObject> usedObjects = new LinkedList<PoolableObject>();
         private int maxPrewarmCount = 0;
         private bool initializing = true;
 
@@ -41,13 +41,13 @@ namespace DCL
         {
             get
             {
-                return inactiveObjects.Count;
+                return unusedObjects.Count;
             }
         }
 
         public int activeCount
         {
-            get { return activeObjects.Count; }
+            get { return usedObjects.Count; }
         }
 
         public Pool(string name, int maxPrewarmCount)
@@ -65,15 +65,9 @@ namespace DCL
 
         }
 
-        void OnRenderingStateChanged(bool renderingState)
+        void OnRenderingStateChanged(bool renderingEnabled)
         {
-            if (renderingState)
-            {
-                if (RenderingController.i != null)
-                    RenderingController.i.OnRenderingStateChanged -= OnRenderingStateChanged;
-
-                initializing = false;
-            }
+            initializing = !renderingEnabled;
         }
 
         public void ForcePrewarm()
@@ -84,25 +78,21 @@ namespace DCL
 
         public PoolableObject Get()
         {
-            PoolableObject poolable = null;
-
-            if (initializing || inactiveObjects.Count == 0)
+            if (initializing)
             {
-                if (RenderingController.i != null)
-                {
-                    if (!RenderingController.i.renderingEnabled)
-                    {
-                        int count = activeCount;
+                int count = activeCount;
 
-                        for (int i = inactiveCount; i < Mathf.Min(count * PREWARM_ACTIVE_MULTIPLIER, maxPrewarmCount); i++)
-                        {
-                            Instantiate();
-                        }
-                    }
+                for (int i = inactiveCount; i < Mathf.Min(count * PREWARM_ACTIVE_MULTIPLIER, maxPrewarmCount); i++)
+                {
+                    Instantiate();
                 }
+            }
+            else if (unusedObjects.Count == 0)
+            {
                 Instantiate();
             }
-            poolable = Extract();
+
+            PoolableObject poolable = Extract();
 
             EnablePoolableObject(poolable);
 
@@ -111,9 +101,9 @@ namespace DCL
 
         private PoolableObject Extract()
         {
-            PoolableObject po = inactiveObjects.First.Value;
-            inactiveObjects.RemoveFirst();
-            po.node = activeObjects.AddFirst(po);
+            PoolableObject po = unusedObjects.First.Value;
+            unusedObjects.RemoveFirst();
+            po.node = usedObjects.AddFirst(po);
 
 #if UNITY_EDITOR
             RefreshName();
@@ -123,7 +113,7 @@ namespace DCL
 
         private void Return(PoolableObject po)
         {
-            inactiveObjects.AddFirst(po);
+            unusedObjects.AddFirst(po);
             po.node.List.Remove(po.node);
             po.node = null;
 
@@ -165,12 +155,12 @@ namespace DCL
             if (!active)
             {
                 DisablePoolableObject(poolable);
-                inactiveObjects.AddFirst(poolable);
+                unusedObjects.AddFirst(poolable);
             }
             else
             {
                 EnablePoolableObject(poolable);
-                poolable.node = activeObjects.AddFirst(poolable);
+                poolable.node = usedObjects.AddFirst(poolable);
             }
 
 #if UNITY_EDITOR
@@ -195,9 +185,9 @@ namespace DCL
 
         public void ReleaseAll()
         {
-            while (activeObjects.Count > 0)
+            while (usedObjects.Count > 0)
             {
-                activeObjects.First.Value.Release();
+                usedObjects.First.Value.Release();
             }
         }
 
@@ -226,11 +216,11 @@ namespace DCL
 
         public void RemoveFromPool(PoolableObject poolable)
         {
-            if (inactiveObjects.Contains(poolable))
-                inactiveObjects.Remove(poolable);
+            if (unusedObjects.Contains(poolable))
+                unusedObjects.Remove(poolable);
 
-            if (activeObjects.Contains(poolable))
-                activeObjects.Remove(poolable);
+            if (usedObjects.Contains(poolable))
+                usedObjects.Remove(poolable);
 
             PoolManager.i.poolables.Remove(poolable.gameObject);
 #if UNITY_EDITOR
@@ -242,20 +232,20 @@ namespace DCL
         {
             ReleaseAll();
 
-            while (inactiveObjects.Count > 0)
+            while (unusedObjects.Count > 0)
             {
-                PoolManager.i.poolables.Remove(inactiveObjects.First.Value.gameObject);
-                inactiveObjects.RemoveFirst();
+                PoolManager.i.poolables.Remove(unusedObjects.First.Value.gameObject);
+                unusedObjects.RemoveFirst();
             }
 
-            while (activeObjects.Count > 0)
+            while (usedObjects.Count > 0)
             {
-                PoolManager.i.poolables.Remove(activeObjects.First.Value.gameObject);
-                activeObjects.RemoveFirst();
+                PoolManager.i.poolables.Remove(usedObjects.First.Value.gameObject);
+                usedObjects.RemoveFirst();
             }
 
-            inactiveObjects.Clear();
-            activeObjects.Clear();
+            unusedObjects.Clear();
+            usedObjects.Clear();
 
             Object.Destroy(this.original);
             Object.Destroy(this.container);
@@ -268,11 +258,16 @@ namespace DCL
 
         public void EnablePoolableObject(PoolableObject poolable)
         {
-            if (poolable.gameObject != null)
-            {
-                poolable.gameObject.SetActive(true);
-                poolable.gameObject.transform.SetParent(null);
-            }
+            GameObject go = poolable.gameObject;
+
+            if (go == null)
+                return;
+
+            if (!go.activeSelf)
+                go.SetActive(true);
+
+            if (go.transform.parent != null)
+                go.transform.SetParent(null);
 
             lastGetTime = Time.unscaledTime;
         }
@@ -283,16 +278,18 @@ namespace DCL
             if (isQuitting)
                 return;
 #endif
-            if (poolable.gameObject != null)
-            {
-                poolable.gameObject.SetActive(false);
+            if (poolable.gameObject == null)
+                return;
 
-                if (container != null && container.transform != null)
-                {
-                    poolable.gameObject.transform.SetParent(container.transform);
-                    poolable.gameObject.transform.ResetLocalTRS();
-                }
+            if (poolable.gameObject.activeSelf)
+                poolable.gameObject.SetActive(false);
+#if UNITY_EDITOR
+            if (container != null)
+            {
+                poolable.gameObject.transform.SetParent(container.transform);
+                poolable.gameObject.transform.ResetLocalTRS();
             }
+#endif
         }
 
         private void RefreshName()
@@ -307,17 +304,8 @@ namespace DCL
 
             if (PoolManager.i.poolables.TryGetValue(gameObject, out PoolableObject poolable))
             {
-                if (poolable.pool.activeObjects.Contains(poolable))
-                {
-                    pool = poolable.pool;
-                    return true;
-                }
-
-                if (poolable.pool.inactiveObjects.Contains(poolable))
-                {
-                    pool = poolable.pool;
-                    return true;
-                }
+                pool = poolable.pool;
+                return true;
             }
 
             return false;
