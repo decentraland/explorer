@@ -44,7 +44,7 @@ public class InitialStageController : TutorialStageController
         yield return ShowTooltip(minimapTooltip);
         yield return WaitIdleTime();
 
-        // NOTE: change this on teleport
+        // NOTE: finish stage on teleport
         TutorialController.i?.SetRunningStageFinished();
     }
 

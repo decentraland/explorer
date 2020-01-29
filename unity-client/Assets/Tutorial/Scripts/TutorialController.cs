@@ -140,7 +140,7 @@ public class TutorialController : MonoBehaviour
 
     private void CacheChatScreen()
     {
-        if (chatUIScreen == null)
+        if (chatUIScreen == null && DCL.SceneController.i)
         {
             using (var iterator = DCL.SceneController.i.loadedScenes.GetEnumerator())
             {
@@ -176,6 +176,7 @@ public class TutorialController : MonoBehaviour
         nextStage = nextStage.SetNext(new GenericSceneStageHandler(TutorialFlags.ChatAndAvatarExpressions, chatAndExpressionsStage,
             () =>
             {
+                HUDController.i?.avatarHud.SetVisibility(false);
                 SetChatVisible(false);
                 // TODO: hide avatar expressions
                 //HUDController.i?.expressionsHud.SetVisibility(false);
