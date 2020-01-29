@@ -18,6 +18,7 @@ import { screenSpaceUI } from './ui'
 
 declare var dcl: DecentralandInterface
 
+const MAX_CHAT_MESSAGES = 15
 const INITIAL_INPUT_TEXT_COLOR = Color4.Gray()
 const PRIMARY_TEXT_COLOR = Color4.White()
 const COMMAND_COLOR = Color4.FromHexString('#91ecffff')
@@ -33,6 +34,7 @@ dcl.onEvent(event => {
   }
 })
 
+let chatComponents: UIText[] = []
 function createLogMessage(parent: UIShape, props: { sender: string; message: string; isCommand?: boolean }) {
   const { sender, message, isCommand } = props
   const color = isCommand ? COMMAND_COLOR : PRIMARY_TEXT_COLOR
@@ -54,6 +56,15 @@ function createLogMessage(parent: UIShape, props: { sender: string; message: str
   messagesLogScrollContainer.valueY = 0
 
   return { component: messageText }
+}
+function rotateLogMessages(index: number) {
+  for (let i = MAX_CHAT_MESSAGES; i >= 0; i--) {
+    const j = i + index
+    const { sender, message, isCommand } = internalState.messages[j]
+    const messageText = chatComponents[i]
+    messageText.value = `<b>${sender}:</b> ${message}`
+    messageText.color = isCommand ? COMMAND_COLOR : PRIMARY_TEXT_COLOR
+  }
 }
 
 // -------------------------------
@@ -197,6 +208,13 @@ async function sendMsg(messageToSend: string) {
 }
 
 function addMessage(messageEntry: MessageEntry): void {
+  const length = internalState.messages.length
   internalState.messages.push(messageEntry)
-  createLogMessage(messagesLogStackContainer, messageEntry)
+  if (length > MAX_CHAT_MESSAGES) {
+    const deleteTarget = length - MAX_CHAT_MESSAGES - 1
+    delete internalState.messages[deleteTarget]
+    rotateLogMessages(length - MAX_CHAT_MESSAGES)
+  } else {
+    chatComponents.push(createLogMessage(messagesLogStackContainer, messageEntry).component)
+  }
 }
