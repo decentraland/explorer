@@ -98,7 +98,7 @@ export const COMMS = USE_LOCAL_COMMS
   ? 'v1-local'
   : location.search.indexOf('COMMS') !== -1
   ? window.location.search.match(/COMMS=(\w+-\w+)/)[1]
-  : 'v2-server' // by default
+  : 'v2-p2p' // by default
 
 export const DEBUG =
   location.search.indexOf('DEBUG_MODE') !== -1 ||

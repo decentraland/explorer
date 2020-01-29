@@ -30,7 +30,6 @@ import { Session } from '../session/index'
 import { worldRunningObservable, isWorldRunning } from '../world/worldState'
 import { WorldInstanceConnection } from './interface/index'
 import { LighthouseWorldInstanceConnection } from './v2/LighthouseWorldInstanceConnection'
-import { getTLD } from '../../config/index'
 import * as Long from 'long'
 
 import { identity } from '../index'
@@ -443,7 +442,7 @@ export async function connect(userId: string) {
 
     let connection: WorldInstanceConnection
 
-    const [version, mode] = parseCommsMode(getTLD() === 'zone' ? 'v2-p2p' : COMMS)
+    const [version, mode] = parseCommsMode(COMMS)
     switch (version) {
       case 'v1': {
         let commsBroker: IBrokerConnection
