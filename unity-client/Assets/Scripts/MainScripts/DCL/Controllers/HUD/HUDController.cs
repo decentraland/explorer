@@ -117,7 +117,7 @@ public class HUDController : MonoBehaviour
     public void ConfigurePlayerInfoCardHUD(string configurationJson)
     {
         HUDConfiguration configuration = JsonUtility.FromJson<HUDConfiguration>(configurationJson);
-        Debug.Log(configuration);
+        Debug.Log("Configure player info card" + configuration);
         if (configuration.active && playerInfoCardHudController == null)
         {
             playerInfoCardHudController = new PlayerInfoCardHUDController();
