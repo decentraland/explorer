@@ -3,12 +3,13 @@ using UnityEngine;
 
 public class TutorialController : MonoBehaviour
 {
-    public const float TOOLTIP_AUTO_HIDE_SECONDS = 10f;
-    public const float DEFAULT_STAGE_IDLE_TIME = 20f;
+    public const float TOOLTIP_AUTO_HIDE_SECONDS = 2f;
+    public const float DEFAULT_STAGE_IDLE_TIME = 5f;
 
 #if UNITY_EDITOR
     [Header("Debugging")]
     [SerializeField] int debugFlagStartingValue = 0;
+    [SerializeField] bool debugRunTutorialOnStart = false;
     [Space()]
 #endif
 
@@ -18,6 +19,8 @@ public class TutorialController : MonoBehaviour
     [SerializeField] TutorialStageController chatAndExpressionsStage = null;
 
     public static TutorialController i { private set; get; }
+
+    public bool isTutorialEnabled { private set; get; }
 
     [Flags]
     public enum TutorialFlags
@@ -34,36 +37,45 @@ public class TutorialController : MonoBehaviour
     private int tutorialFlagMask = 0;
     private bool initialized = false;
 
+    public void SetTutorialEnabled()
+    {
+        isTutorialEnabled = true;
+        if (RenderingController.i)
+        {
+            RenderingController.i.OnRenderingStateChanged += OnRenderingStateChanged;
+        }
+        tutorialFlagMask = 0; // TODO: get flag from user
+        CreateStagesChainOfResponsibility();
+    }
+
     private void Awake()
     {
         i = this;
     }
 
+#if UNITY_EDITOR
     private void Start()
     {
-        tutorialFlagMask = 0; // TODO: get flag from user
-
-#if UNITY_EDITOR
         if (debugFlagStartingValue != 0)
         {
             tutorialFlagMask = debugFlagStartingValue;
         }
-#endif
 
-        if (RenderingController.i)
+        if (debugRunTutorialOnStart)
         {
-            RenderingController.i.OnRenderingStateChanged += OnRenderingStateChanged;
+            CreateStagesChainOfResponsibility();
+            isTutorialEnabled = true;
+            if (!RenderingController.i)
+            {
+                OnRenderingStateChanged(true);
+            }
+            else
+            {
+                RenderingController.i.OnRenderingStateChanged += OnRenderingStateChanged;
+            }
         }
-
-        CreateStagesChainOfResponsibility();
-
-#if UNITY_EDITOR
-        if (!RenderingController.i)
-        {
-            OnRenderingStateChanged(true);
-        }
-#endif        
     }
+#endif        
 
     private void OnDestroy()
     {
@@ -91,14 +103,14 @@ public class TutorialController : MonoBehaviour
         runningStage = initialStage.GetHandler(tutorialFlagMask);
         if (runningStage != null)
         {
-            runningStage.OnStageStart();
             runningStage.OnStageFinish += () => runningStage = null;
+            runningStage.OnStageStart();
         }
     }
 
     private void OnRenderingStateChanged(bool renderingEnabled)
     {
-        if (renderingEnabled)
+        if (renderingEnabled && isTutorialEnabled)
         {
             if (!initialized)
             {
@@ -124,14 +136,14 @@ public class TutorialController : MonoBehaviour
 
     private void CreateStagesChainOfResponsibility()
     {
-        initialStage = new GenericSceneStageHandler(TutorialController.TutorialFlags.InitialScene, initalStage,
+        initialStage = new GenericSceneStageHandler(TutorialFlags.InitialScene, initalStage,
             () =>
             {
                 HUDController.i?.minimapHud.SetVisibility(false);
             });
 
-        var nextStage = initialStage.SetNext(new GenericSceneStageHandler(TutorialController.TutorialFlags.LoginRewardAndUserEmail, genesisPlazaStage, null));
-        nextStage = nextStage.SetNext(new GenericSceneStageHandler(TutorialController.TutorialFlags.ChatAndAvatarExpressions, chatAndExpressionsStage,
+        var nextStage = initialStage.SetNext(new GenericSceneStageHandler(TutorialFlags.LoginRewardAndUserEmail, genesisPlazaStage, null));
+        nextStage = nextStage.SetNext(new GenericSceneStageHandler(TutorialFlags.ChatAndAvatarExpressions, chatAndExpressionsStage,
             () =>
             {
                 // TODO: hide chat and avatar expressions

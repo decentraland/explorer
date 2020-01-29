@@ -378,6 +378,9 @@ namespace DCL
                             case "ConfigureSettingsHUD":
                                 HUDController.i.ConfigureSettingsHUD(msg.payload);
                                 break;
+                            case "SetTutorialEnabled":
+                                TutorialController.i?.SetTutorialEnabled();
+                                break;
                             default:
                                 Debug.Log("<b><color=#FF0000>WSSController:</color></b> received an unknown message from kernel to renderer: " + msg.type);
                                 break;
