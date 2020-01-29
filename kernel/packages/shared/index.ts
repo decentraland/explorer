@@ -69,7 +69,6 @@ function initializeAnalytics() {
 
 export let globalStore: Store<RootState>
 export let identity: AuthIdentity
-export let node: string
 
 async function createAuthIdentity() {
   const ephemeral = createIdentity()
@@ -107,10 +106,6 @@ async function createAuthIdentity() {
   const identity = await Authenticator.initializeAuthChain(address, ephemeral, ephemeralLifespanMinutes, signer)
 
   return identity
-}
-
-async function pickKatalystNode() {
-  return 'http://localhost:7070'
 }
 
 export async function initShared(): Promise<Session | undefined> {
@@ -182,8 +177,6 @@ export async function initShared(): Promise<Session | undefined> {
     defaultLogger.log(`Using test user.`)
     userId = '0x0000000000000000000000000000000000000000'
   }
-
-  node = await pickKatalystNode()
 
   defaultLogger.log(`User ${userId} logged in`)
   store.dispatch(authSuccessful())
