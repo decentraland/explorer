@@ -81,7 +81,7 @@ namespace UnityGLTF
 
         private bool alreadyDecrementedRefCount;
         private AsyncCoroutineHelper asyncCoroutineHelper;
-        private Coroutine loadingRoutine = null;
+        private CoroutineStarter.Coroutine loadingRoutine = null;
         private GLTFSceneImporter sceneImporter;
         private Camera mainCamera;
 
@@ -103,7 +103,7 @@ namespace UnityGLTF
 
             if (loadingRoutine != null)
             {
-                StopCoroutine(loadingRoutine);
+                CoroutineStarter.Stop(loadingRoutine);
             }
 
             alreadyDecrementedRefCount = false;

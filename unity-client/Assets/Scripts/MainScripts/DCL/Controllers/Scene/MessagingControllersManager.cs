@@ -20,7 +20,7 @@ namespace DCL
         public Dictionary<string, MessagingController> messagingControllers = new Dictionary<string, MessagingController>();
         private string globalSceneId = null;
 
-        private Coroutine mainCoroutine;
+        private CoroutineStarter.Coroutine mainCoroutine;
 
         public bool hasPendingMessages => pendingMessagesCount > 0;
 
@@ -50,7 +50,7 @@ namespace DCL
 
             if (mainCoroutine == null)
             {
-                mainCoroutine = SceneController.i.StartCoroutine(ProcessMessages());
+                mainCoroutine = CoroutineStarter.Start(ProcessMessages());
             }
         }
 
@@ -144,7 +144,7 @@ namespace DCL
         {
             if (mainCoroutine != null)
             {
-                SceneController.i.StopCoroutine(mainCoroutine);
+                CoroutineStarter.Stop(mainCoroutine);
                 mainCoroutine = null;
             }
 
@@ -238,7 +238,7 @@ namespace DCL
                     populateBusesDirty = false;
                 }
 
-                timeBudgetCounter = RenderingController.i.renderingEnabled ? MAX_GLOBAL_MSG_BUDGET : float.MaxValue;
+                timeBudgetCounter = RenderingController.i.renderingEnabled ? MAX_GLOBAL_MSG_BUDGET : 1;
 
                 for (int i = 0; i < busesToProcessCount; ++i)
                 {

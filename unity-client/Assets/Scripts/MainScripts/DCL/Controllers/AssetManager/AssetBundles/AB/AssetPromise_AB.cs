@@ -18,7 +18,7 @@ namespace DCL
         static float maxLoadBudgetTime = 0.032f;
         static float currentLoadBudgetTime = 0;
         public static bool limitTimeBudget = false;
-        Coroutine loadCoroutine;
+        CoroutineStarter.Coroutine loadCoroutine;
         static HashSet<string> failedRequestUrls = new HashSet<string>();
         UnityWebRequest assetBundleRequest;
 
@@ -98,8 +98,8 @@ namespace DCL
                 }
             }
 
-            if (concurrentRequests >= 25)
-                yield return new WaitUntil(() => concurrentRequests < 25);
+            if (concurrentRequests >= 5)
+                yield return new WaitUntil(() => concurrentRequests < 5);
 
             concurrentRequests++;
             mustDecrementRequest = true;

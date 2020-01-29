@@ -24,7 +24,7 @@ namespace DCL
         Queue<DecentralandEntity> entitiesMarkedForCleanup = new Queue<DecentralandEntity>();
         Queue<ParcelEntity> rootEntitiesMarkedForCleanup = new Queue<ParcelEntity>();
 
-        Coroutine removeEntitiesCoroutine;
+        CoroutineStarter.Coroutine removeEntitiesCoroutine;
 
         public void Start()
         {
@@ -34,7 +34,7 @@ namespace DCL
         public void Stop()
         {
             if (removeEntitiesCoroutine != null)
-                SceneController.i.StopCoroutine(removeEntitiesCoroutine);
+                CoroutineStarter.Stop(removeEntitiesCoroutine);
         }
 
         public void MarkForCleanup(DecentralandEntity entity)

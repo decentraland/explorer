@@ -20,7 +20,7 @@ namespace DCL
         /// <param name="done">Callback to call when the coroutine has thrown an exception or finished.
         /// The thrown exception or null is passed as the parameter.</param>
         /// <returns>The started coroutine</returns>
-        public static Coroutine StartThrowingCoroutine(
+        public static CoroutineStarter.Coroutine StartThrowingCoroutine(
             this MonoBehaviour monoBehaviour,
             IEnumerator enumerator,
             Action<Exception> done
@@ -96,10 +96,12 @@ namespace DCL
 
         public static IEnumerator WaitForAllIEnumerators(params IEnumerator[] coroutines)
         {
-            List<Coroutine> coroutineGroup = new List<Coroutine>();
+            List<IEnumerator> coroutineGroup = new List<IEnumerator>();
+
             for (int i = 0; i < coroutines.Length; i++)
             {
-                coroutineGroup.Add(CoroutineStarter.Start(coroutines[i]));
+                CoroutineStarter.Start(coroutines[i]);
+                coroutineGroup.Add(coroutines[i]);
             }
 
             int coroutineGroupCount = coroutineGroup.Count;

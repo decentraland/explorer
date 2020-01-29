@@ -28,8 +28,8 @@ namespace DCL
 
         internal bool isLoading = false;
 
-        private Coroutine loadCoroutine;
-        private List<Coroutine> faceCoroutines = new List<Coroutine>();
+        private CoroutineStarter.Coroutine loadCoroutine;
+        private List<CoroutineStarter.Coroutine> faceCoroutines = new List<CoroutineStarter.Coroutine>();
 
         public void ApplyModel(AvatarModel model, Action onSuccess, Action onFail)
         {

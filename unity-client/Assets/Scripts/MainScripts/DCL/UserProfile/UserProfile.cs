@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,8 +28,8 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
         avatar = new AvatarModel()
     };
 
-    internal Coroutine downloadingFaceCoroutine = null;
-    internal Coroutine downloadingBodyCoroutine = null;
+    internal CoroutineStarter.Coroutine downloadingFaceCoroutine = null;
+    internal CoroutineStarter.Coroutine downloadingBodyCoroutine = null;
 
     public void UpdateData(UserProfileModel newModel, bool downloadAssets = true)
     {
