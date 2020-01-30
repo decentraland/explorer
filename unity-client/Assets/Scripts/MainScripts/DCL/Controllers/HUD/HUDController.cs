@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using DCL.SettingsHUD;
 
@@ -17,6 +18,7 @@ public class HUDController : MonoBehaviour
     public SettingsHUDController settingsHud { get; private set; }
     public ExpressionsHUDController expressionsHud { get; private set; }
     public PlayerInfoCardHUDController playerInfoCardHudController { get; private set; }
+    public AirdroppingHUDController airdroppingHUDController { get; private set; }
 
     private UserProfile ownUserProfile => UserProfile.GetOwnUserProfile();
     private WearableDictionary wearableCatalog => CatalogController.wearableCatalog;
@@ -142,6 +144,64 @@ public class HUDController : MonoBehaviour
         }
 
         playerInfoCardHudController?.SetVisibility(configuration.active && configuration.visible);
+    }
+
+    //TO BE DELETED
+    //IT WILL FAKE AN AIRDROP
+    public void Update()
+    {
+        if (!Input.GetKeyDown(KeyCode.Alpha9))
+            return;
+        
+        ConfigureAirdroppingHUD(JsonUtility.ToJson(new HUDConfiguration {active = true, visible =  true}));
+
+        var items = new List<AirdroppingHUDController.ItemModel>();
+        using ( var enumerator = CatalogController.wearableCatalog.GetEnumerator())
+        {
+            int i = 0;
+            while (enumerator.MoveNext() && i < 3)
+            {
+                var item = enumerator.Current.Value;
+                if (item.IsCollectible())
+                {
+                    items.Add(new AirdroppingHUDController.ItemModel()
+                    {
+                        name = item.i18n[0].text,
+                        rarity = item.rarity,
+                        subtitle =  i % 2 == 0 ? item.rarity : "",
+                        thumbnail = item.ComposeThumbnailUrl(),
+                        type =  i % 2 == 0 ? "collectible" : "erc20"
+                    });
+                    i++;
+                }
+            }
+        }
+
+        AirdroppingRequest(JsonUtility.ToJson(
+            new AirdroppingHUDController.Model
+            {
+                id = "myId",
+                title = "You've found a chest WORKING",
+                subtitle = "Click on it to see what's inside WORKING",
+                items = items.ToArray()
+            }));
+    }
+
+    public void ConfigureAirdroppingHUD(string configurationJson)
+    {
+        HUDConfiguration configuration = JsonUtility.FromJson<HUDConfiguration>(configurationJson);
+        if (configuration.active && airdroppingHUDController == null)
+        {
+            airdroppingHUDController = new AirdroppingHUDController();
+        }
+
+        airdroppingHUDController?.SetVisibility(configuration.active && configuration.visible);
+    }
+
+    public void AirdroppingRequest(string payload)
+    {
+        var model = JsonUtility.FromJson<AirdroppingHUDController.Model>(payload);
+        airdroppingHUDController.AirdroppingRequested(model);
     }
 
     private void UpdateAvatarHUD()
