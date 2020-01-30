@@ -1,5 +1,5 @@
 import { DecentralandInterface } from 'decentraland-ecs/src/decentraland/Types'
-import { Color4 } from 'decentraland-ecs/src'
+import { Color4, engine } from 'decentraland-ecs/src'
 import { OnTextSubmit, OnBlur, OnFocus } from 'decentraland-ecs/src/decentraland/UIEvents'
 
 import {
@@ -57,13 +57,18 @@ function createLogMessage(parent: UIShape, props: { sender: string; message: str
 
   return { component: messageText }
 }
-function rotateLogMessages(index: number) {
+export function rotateLogMessages(index: number) {
   for (let i = MAX_CHAT_MESSAGES; i >= 0; i--) {
     const j = i + index
     const { sender, message, isCommand } = internalState.messages[j]
     const messageText = chatComponents[i]
     messageText.value = `<b>${sender}:</b> ${message}`
     messageText.color = isCommand ? COMMAND_COLOR : PRIMARY_TEXT_COLOR
+  }
+}
+export function dropOldLogMessages(index: number) {
+  for (let i = 0; i < index; i++) {
+    engine.disposeComponent(chatComponents[i] as any)
   }
 }
 
@@ -213,8 +218,7 @@ function addMessage(messageEntry: MessageEntry): void {
   if (length > MAX_CHAT_MESSAGES) {
     const deleteTarget = length - MAX_CHAT_MESSAGES - 1
     delete internalState.messages[deleteTarget]
-    rotateLogMessages(length - MAX_CHAT_MESSAGES)
-  } else {
-    chatComponents.push(createLogMessage(messagesLogStackContainer, messageEntry).component)
+    dropOldLogMessages(length - MAX_CHAT_MESSAGES - 1)
   }
+  chatComponents.push(createLogMessage(messagesLogStackContainer, messageEntry).component)
 }
