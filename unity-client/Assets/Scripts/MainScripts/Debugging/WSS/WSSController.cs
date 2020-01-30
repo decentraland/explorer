@@ -382,7 +382,7 @@ namespace DCL
                                 HUDController.i?.ConfigureAvatarEditorHUD(msg.payload);
                                 break;
                             case "ConfigurePlayerInfoCardHUD":
-                                HUDController.i.ConfigurePlayerInfoCardHUD(msg.payload);
+                                HUDController.i?.ConfigurePlayerInfoHUD(msg.payload);
                                 break;
                             case "UpdateMinimapSceneInformation":
                                 MinimapMetadataController.i?.UpdateMinimapSceneInformation(msg.payload);

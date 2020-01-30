@@ -2,6 +2,9 @@ import { ObservableComponent, DisposableComponent, getComponentId } from '../ecs
 import { CLASS_ID, OnUUIDEvent, Texture } from './Components'
 import { Color4 } from './math'
 import { OnTextSubmit, OnBlur, OnChanged, OnClick, OnFocus } from './UIEvents'
+
+let internalCount = { uiShapes: 0 }
+
 /**
  * @public
  */
@@ -44,6 +47,7 @@ export abstract class UIShape extends ObservableComponent {
   constructor(parent: UIShape | null) {
     super()
     if (parent) {
+      ;(this as any)['componentIdSymbol'] = internalCount.uiShapes++
       this._parent = parent
       this.data.parentComponent = getComponentId(parent as any)
     }
