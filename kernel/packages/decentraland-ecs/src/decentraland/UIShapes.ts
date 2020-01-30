@@ -1,10 +1,7 @@
-import { DisposableComponent, getComponentId, ObservableComponent } from '../ecs/Component'
+import { ObservableComponent, DisposableComponent, getComponentId } from '../ecs/Component'
 import { CLASS_ID, OnUUIDEvent, Texture } from './Components'
 import { Color4 } from './math'
-import { OnBlur, OnChanged, OnClick, OnFocus, OnTextSubmit } from './UIEvents'
-
-let internalCount = { uiShapes: 0 }
-
+import { OnTextSubmit, OnBlur, OnChanged, OnClick, OnFocus } from './UIEvents'
 /**
  * @public
  */
@@ -43,11 +40,9 @@ export abstract class UIShape extends ObservableComponent {
   isPointerBlocker: boolean = true
 
   private _parent?: UIShape
-  public componentIdSymbol: string
 
   constructor(parent: UIShape | null) {
     super()
-    this.componentIdSymbol = 'd' + internalCount.uiShapes++
     if (parent) {
       this._parent = parent
       this.data.parentComponent = getComponentId(parent as any)
