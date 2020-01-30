@@ -292,12 +292,12 @@ namespace Hbx.WebGL
         static WebGLRetinaTools()
         {
 #if BROTLISTREAM_AVALIABLE
-		    String currentPath = Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.Process);
-			String dllPath = Path.Combine(Path.Combine(Environment.CurrentDirectory, "Assets"), "Plugins");
-		    if(!currentPath.Contains(dllPath))
-		    {
-		        Environment.SetEnvironmentVariable("PATH", currentPath + Path.PathSeparator + dllPath, EnvironmentVariableTarget.Process);
-		    }
+            String currentPath = Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.Process);
+            String dllPath = Path.Combine(Path.Combine(Environment.CurrentDirectory, "Assets"), "Plugins");
+            if(!currentPath.Contains(dllPath))
+            {
+                Environment.SetEnvironmentVariable("PATH", currentPath + Path.PathSeparator + dllPath, EnvironmentVariableTarget.Process);
+            }
 #endif
             LoadSettings();
         }
@@ -332,8 +332,8 @@ namespace Hbx.WebGL
         const string JsbrExt = ".jsbr";
         const string UnitywebExt = ".unityweb";
 #if UNITY_5_6_OR_NEWER
-        const string RelFolder = "Build";
-        const string DevFolder = "Build";
+        const string RelFolder = "unity/Build";
+        const string DevFolder = "unity/Build";
         static readonly string[] SourceFileTypes = { JsExt, UnitywebExt };
         static readonly string[] ExcludeFileNames = { "asm.memory", ".asm.code", ".data", "wasm.code" };
 #else
@@ -624,11 +624,11 @@ namespace Hbx.WebGL
                 else
                 {
 #if BROTLISTREAM_AVALIABLE
-	            	using (BrotliStream decompressionStream = new BrotliStream(inputFileStream, CompressionMode.Decompress))
-					{
-						// read decompressed buffer
-						readcount = decompressionStream.Read(sourcebytes, 0, size);
-					}
+                    using (BrotliStream decompressionStream = new BrotliStream(inputFileStream, CompressionMode.Decompress))
+                    {
+                        // read decompressed buffer
+                        readcount = decompressionStream.Read(sourcebytes, 0, size);
+                    }
 #endif
                 }
                 if (readcount <= 0)
@@ -701,10 +701,10 @@ namespace Hbx.WebGL
                 else
                 {
 #if BROTLISTREAM_AVALIABLE
-	        		using (BrotliStream output = new BrotliStream(fileOutputStream, CompressionMode.Compress))
-	        		{
-	            		output.Write(sourcebytes, 0, sourcebytes.Length);
-	        		}
+                    using (BrotliStream output = new BrotliStream(fileOutputStream, CompressionMode.Compress))
+                    {
+                        output.Write(sourcebytes, 0, sourcebytes.Length);
+                    }
 #endif
                 }
 
@@ -731,7 +731,7 @@ namespace Hbx.WebGL
 #if UNITY_2017_1_OR_NEWER
             List<string> files = new List<string>();
             string[] jsfiles = Directory.GetFiles(aBuildPath, "*.js");
-            if(jsfiles.Length > 0)
+            if (jsfiles.Length > 0)
             {
                 files.Add(jsfiles[0]);
             }
@@ -841,7 +841,7 @@ namespace Hbx.WebGL
 
             // find the html and json files, these tell us the names of the files we want
             string htmlFilePath = Path.Combine(aBuildPath, "index.html");
-            if(!File.Exists(htmlFilePath))
+            if (!File.Exists(htmlFilePath))
             {
                 UnityEngine.Debug.LogError("WebGLRetinaTools: Failed to find " + htmlFilePath + " unable to Name Files As Hashes.");
                 return false;
@@ -866,7 +866,7 @@ namespace Hbx.WebGL
             // deserialise the json file
             string buildJsonSrc = File.ReadAllText(jsonFilePath);
             WebGLBuildJson buildJsonObject = JsonUtility.FromJson<WebGLBuildJson>(buildJsonSrc);
-            StringBuilder buildJsonSrcBuilder = new StringBuilder(buildJsonSrc); 
+            StringBuilder buildJsonSrcBuilder = new StringBuilder(buildJsonSrc);
 
             // rehash data url
             string newDataURL = RehashAndRenameFile(Path.Combine(codeFolder, buildJsonObject.dataUrl));
@@ -1409,7 +1409,7 @@ namespace Hbx.WebGL
 
                 replaceFillMouseString =
     @"fillMouseEventData:function (eventStruct, e, target) {
-		var devicePixelRatio = window.hbxDpr;
+        var devicePixelRatio = window.hbxDpr;
         HEAPF64[((eventStruct)>>3)]=JSEvents.tick();
         HEAP32[(((eventStruct)+(8))>>2)]=e.screenX*devicePixelRatio;
         HEAP32[(((eventStruct)+(12))>>2)]=e.screenY*devicePixelRatio;
@@ -1450,14 +1450,14 @@ namespace Hbx.WebGL
             if (slength != source.Length) _debugMessages.Add("Applied fix 01");
 
 #if UNITY_5_6_OR_NEWER
-			// fix SystemInfo screen width height 
-			string findSystemInfoString = 
+            // fix SystemInfo screen width height 
+            string findSystemInfoString =
 @"    return {
       width: screen.width ? screen.width : 0,
       height: screen.height ? screen.height : 0,
       browser: browser,";
 
-			string replaceSystemInfoString = 
+            string replaceSystemInfoString =
 @"    return {
       devicePixelRatio: window.hbxDpr,
       width: screen.width ? screen.width * this.devicePixelRatio : 0,
@@ -1495,9 +1495,9 @@ namespace Hbx.WebGL
  return Module[""canvas""].clientHeight;
 }" :
 @"function _JS_SystemInfo_GetCurrentCanvasHeight() 
-  	{
-  		return Module['canvas'].clientHeight;
-  	}";
+    {
+        return Module['canvas'].clientHeight;
+    }";
 
             string replaceGetCurrentCanvasHeightString =
 @"function _JS_SystemInfo_GetCurrentCanvasHeight() {
@@ -1516,9 +1516,9 @@ namespace Hbx.WebGL
  return Module[""canvas""].clientWidth;
 }" :
 @"function _JS_SystemInfo_GetCurrentCanvasWidth() 
-  	{
-  		return Module['canvas'].clientWidth;
-  	}";
+    {
+        return Module['canvas'].clientWidth;
+    }";
 
             string replaceGetCurrentCanvasWidthString =
 @"function _JS_SystemInfo_GetCurrentCanvasWidth() {
@@ -1636,9 +1636,9 @@ namespace Hbx.WebGL
 
 
 #if UNITY_5_6_OR_NEWER
-		//
-		// touches
-			string findTouchesString = 
+            //
+            // touches
+            string findTouchesString =
 @"for (var i in touches) {
     var t = touches[i];
     HEAP32[ptr >> 2] = t.identifier;
@@ -1665,7 +1665,7 @@ namespace Hbx.WebGL
     }
    }";
 
-			string replaceTouchesString = 
+            string replaceTouchesString =
 @" var devicePixelRatio = window.hbxDpr;
    for (var i in touches) {
     var t = touches[i];
@@ -1693,7 +1693,7 @@ namespace Hbx.WebGL
     }
    }";
             slength = source.Length;
-			source.Replace(findTouchesString, replaceTouchesString);
+            source.Replace(findTouchesString, replaceTouchesString);
             if (slength != source.Length) _debugMessages.Add("Applied fix 07");
 
 #endif
@@ -1756,48 +1756,48 @@ namespace Hbx.WebGL
 #endif
 
             if (DisableMobileCheck)
-			{
+            {
                 slength = source.Length;
-				source.Replace(findMobileCheckString, "");
+                source.Replace(findMobileCheckString, "");
                 if (slength != source.Length) _debugMessages.Add("Applied fix 09");
-			}
+            }
 
-			ApplyErrorMessageEdits(ref source);
-		}
+            ApplyErrorMessageEdits(ref source);
+        }
 
-		//
-		// Edit the UnityLoader.js error messages
-		static void ApplyErrorMessageEdits(ref StringBuilder source)
-		{
-			// mobile check, only edit this if it's not being removed
-			if(!DisableMobileCheck)
-			{
-				if(!string.IsNullOrEmpty(MobileWarningMessage))
-				{
-					source.Replace(OriginalMobileWarningMessage, MobileWarningMessage);
-				}
-			}
+        //
+        // Edit the UnityLoader.js error messages
+        static void ApplyErrorMessageEdits(ref StringBuilder source)
+        {
+            // mobile check, only edit this if it's not being removed
+            if (!DisableMobileCheck)
+            {
+                if (!string.IsNullOrEmpty(MobileWarningMessage))
+                {
+                    source.Replace(OriginalMobileWarningMessage, MobileWarningMessage);
+                }
+            }
 
-			if(!string.IsNullOrEmpty(GenericErrorMessage))
-			{
-				source.Replace(OriginalGenericErrorMessage, GenericErrorMessage);
-			}
+            if (!string.IsNullOrEmpty(GenericErrorMessage))
+            {
+                source.Replace(OriginalGenericErrorMessage, GenericErrorMessage);
+            }
 
-			if(!string.IsNullOrEmpty(UnhandledExceptionMessage))
-			{
-				source.Replace(OriginalUnhandledExceptionMessage, UnhandledExceptionMessage);
-			}
+            if (!string.IsNullOrEmpty(UnhandledExceptionMessage))
+            {
+                source.Replace(OriginalUnhandledExceptionMessage, UnhandledExceptionMessage);
+            }
 
-			if(!string.IsNullOrEmpty(OutOfMemoryMessage))
-			{
-				source.Replace(OriginalOutOfMemoryMessage, OutOfMemoryMessage);
-			}
+            if (!string.IsNullOrEmpty(OutOfMemoryMessage))
+            {
+                source.Replace(OriginalOutOfMemoryMessage, OutOfMemoryMessage);
+            }
 
-			if(!string.IsNullOrEmpty(NotEnoughMemoryMessage))
-			{
-				source.Replace(OriginalNotEnoughMemoryMessage, NotEnoughMemoryMessage);
-			}
-		}
-	}
+            if (!string.IsNullOrEmpty(NotEnoughMemoryMessage))
+            {
+                source.Replace(OriginalNotEnoughMemoryMessage, NotEnoughMemoryMessage);
+            }
+        }
+    }
 
 }
