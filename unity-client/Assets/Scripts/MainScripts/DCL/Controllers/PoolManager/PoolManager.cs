@@ -1,5 +1,6 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 namespace DCL
 {
@@ -7,6 +8,7 @@ namespace DCL
     {
         public const int DEFAULT_PREWARM_COUNT = 100;
         public static bool enablePrewarm = true;
+        public bool initializing { get; private set; }
 
         public Dictionary<object, Pool> pools = new Dictionary<object, Pool>();
         public Dictionary<GameObject, PoolableObject> poolables = new Dictionary<GameObject, PoolableObject>();
@@ -14,7 +16,9 @@ namespace DCL
         public PoolableObject GetPoolable(GameObject gameObject)
         {
             if (poolables.ContainsKey(gameObject))
+            {
                 return poolables[gameObject];
+            }
 
             return null;
         }
@@ -44,6 +48,22 @@ namespace DCL
         public PoolManager()
         {
             EnsureContainer();
+
+            if (RenderingController.i != null)
+            {
+                initializing = !RenderingController.i.renderingEnabled;
+
+                if (RenderingController.i != null)
+                    RenderingController.i.OnRenderingStateChanged += OnRenderingStateChanged;
+            }
+            else
+            {
+                initializing = false;
+            }
+        }
+        void OnRenderingStateChanged(bool renderingEnabled)
+        {
+            initializing = !renderingEnabled;
         }
 
         public Pool AddPool(object id, GameObject original, IPooledObjectInstantiator instantiator = null, int maxPrewarmCount = DEFAULT_PREWARM_COUNT)
@@ -193,6 +213,9 @@ namespace DCL
             {
                 RemovePool(idsToRemove[i]);
             }
+
+            if (RenderingController.i != null)
+                RenderingController.i.OnRenderingStateChanged -= OnRenderingStateChanged;
         }
 
         public void ReleaseAllFromPool(object id)
@@ -201,6 +224,17 @@ namespace DCL
             {
                 pools[id].ReleaseAll();
             }
+        }
+
+        public void CleanPoolableReferences()
+        {
+            foreach (var kvp in poolables)
+            {
+                if (kvp.Value.gameObject == null)
+                    kvp.Value.node.List.Remove(kvp.Value);
+            }
+
+            poolables = poolables.Where((kvp) => kvp.Value.gameObject != null).ToDictionary(p => p.Key, p => p.Value);
         }
     }
 }

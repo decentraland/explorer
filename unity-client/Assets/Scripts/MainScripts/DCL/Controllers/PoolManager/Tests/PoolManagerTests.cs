@@ -53,16 +53,16 @@ namespace Tests
             pool = PoolManager.i.GetPool(id);
             Assert.IsNotNull(pool, "Pool instance shouldn't be null.");
 
-            Assert.AreEqual(2, pool.objectsCount, "Objects count should be 2");
-            Assert.AreEqual(2, pool.activeCount, "Alive objects count should be 2");
-            Assert.AreEqual(0, pool.inactiveCount, "Inactive objects count should be 0");
+            Assert.AreEqual(2, pool.usedObjectsCount, "Alive objects count should be 2");
+            Assert.AreEqual(0, pool.unusedObjectsCount, "Inactive objects count should be 0");
 
             GameObject.Destroy(po1.gameObject);
             yield return null;
 
-            Assert.AreEqual(1, pool.objectsCount, "Objects count should be 1");
-            Assert.AreEqual(1, pool.activeCount, "Alive objects count should be 1");
-            Assert.AreEqual(0, pool.inactiveCount, "Inactive objects count should be 0");
+            PoolManager.i.CleanPoolableReferences();
+
+            Assert.AreEqual(1, pool.usedObjectsCount, "Alive objects count should be 1");
+            Assert.AreEqual(0, pool.unusedObjectsCount, "Inactive objects count should be 0");
         }
 
         [Test]
@@ -86,21 +86,18 @@ namespace Tests
             PoolableObject po3 = PoolManager.i.Get(id);
             Assert.IsNotNull(po3, "Poolable object instance shouldn't be null.");
 
-            Assert.AreEqual(3, pool.objectsCount, "Objects count should be 3");
-            Assert.AreEqual(3, pool.activeCount, "Alive objects count should be 3");
-            Assert.AreEqual(0, pool.inactiveCount, "Inactive objects count should be 0");
+            Assert.AreEqual(3, pool.usedObjectsCount, "Alive objects count should be 3");
+            Assert.AreEqual(0, pool.unusedObjectsCount, "Inactive objects count should be 0");
 
             po3.Release();
 
-            Assert.AreEqual(3, pool.objectsCount, "Objects count should be 3");
-            Assert.AreEqual(2, pool.activeCount, "Alive objects count should be 2");
-            Assert.AreEqual(1, pool.inactiveCount, "Inactive objects count should be 1");
+            Assert.AreEqual(2, pool.usedObjectsCount, "Alive objects count should be 2");
+            Assert.AreEqual(1, pool.unusedObjectsCount, "Inactive objects count should be 1");
 
             PoolManager.i.ReleaseAllFromPool(id);
 
-            Assert.AreEqual(3, pool.objectsCount, "Objects count should be 3");
-            Assert.AreEqual(0, pool.activeCount, "Alive objects count should be 0");
-            Assert.AreEqual(3, pool.inactiveCount, "Inactive objects count should be 3");
+            Assert.AreEqual(0, pool.usedObjectsCount, "Alive objects count should be 0");
+            Assert.AreEqual(3, pool.unusedObjectsCount, "Inactive objects count should be 3");
 
             PoolManager.i.RemovePool(id);
 

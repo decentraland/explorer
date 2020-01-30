@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace DCL
@@ -13,7 +13,7 @@ namespace DCL
 
         public System.Action OnRelease;
 
-        public void Release(Pool releasePool = null)
+        public void Release()
         {
             if (this == null)
             {

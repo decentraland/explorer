@@ -51,8 +51,8 @@ namespace AssetPromiseKeeper_AssetBundle_GameObject_Tests
 
             Pool pool = PoolManager.i.GetPool(loadedAsset.id);
 
-            Assert.AreEqual(0, pool.inactiveCount, "incorrect inactive objects in pool");
-            Assert.AreEqual(1, pool.activeCount, "incorrect active objects in pool");
+            Assert.AreEqual(0, pool.unusedObjectsCount, "incorrect inactive objects in pool");
+            Assert.AreEqual(1, pool.usedObjectsCount, "incorrect active objects in pool");
             Assert.IsTrue(pool.original != loadedAsset.container, "In pool, the original gameObject must NOT be the loaded asset!");
 
             //NOTE(Brian): If the following asserts fail, check that ApplySettings_LoadStart() is called from AssetPromise_GLTF.AddToLibrary() when the clone is made.
