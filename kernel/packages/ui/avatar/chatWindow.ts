@@ -1,5 +1,5 @@
 import { DecentralandInterface } from 'decentraland-ecs/src/decentraland/Types'
-import { Color4, engine } from 'decentraland-ecs/src'
+import { Color4 } from 'decentraland-ecs/src'
 import { OnTextSubmit, OnBlur, OnFocus } from 'decentraland-ecs/src/decentraland/UIEvents'
 
 import {
