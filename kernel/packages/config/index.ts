@@ -126,7 +126,7 @@ export namespace commConfigurations {
 
   export const peerTtlMs = 60000
 
-  export const maxVisiblePeers = 25
+  export const maxVisiblePeers = 50
 
   export const iceServers = [
     {
