@@ -18,10 +18,10 @@ import { screenSpaceUI } from './ui'
 
 declare var dcl: DecentralandInterface
 
-const MAX_CHAT_MESSAGES = 60
+const MAX_CHAT_MESSAGES = 15
 const INITIAL_INPUT_TEXT_COLOR = Color4.Gray()
 const PRIMARY_TEXT_COLOR = Color4.White()
-const COMMAND_COLOR = Color4.FromHexString('#91ecffff')
+const COMMAND_COLOR = Color4.FromHexString('#ffd7a9ff')
 
 // UI creators -------------------
 dcl.subscribe('MESSAGE_RECEIVED')
@@ -34,7 +34,7 @@ dcl.onEvent(event => {
   }
 })
 
-const chatComponents: UIText[] = []
+let chatComponents: UIText[] = []
 function createLogMessage(parent: UIShape, props: { sender: string; message: string; isCommand?: boolean }) {
   const { sender, message, isCommand } = props
   const color = isCommand ? COMMAND_COLOR : PRIMARY_TEXT_COLOR
