@@ -1,5 +1,5 @@
 import { DecentralandInterface } from 'decentraland-ecs/src/decentraland/Types'
-import { Color4, engine } from 'decentraland-ecs/src'
+import { Color4 } from 'decentraland-ecs/src'
 import { OnTextSubmit, OnBlur, OnFocus } from 'decentraland-ecs/src/decentraland/UIEvents'
 
 import {
@@ -35,14 +35,11 @@ dcl.onEvent(event => {
 })
 
 let chatComponents: UIText[] = []
-function createLogMessage(
-  parent: UIShape,
-  props: { sender: string; message: string; isCommand?: boolean; override?: UIText }
-) {
-  const { sender, message, isCommand, override } = props
+function createLogMessage(parent: UIShape, props: { sender: string; message: string; isCommand?: boolean }) {
+  const { sender, message, isCommand } = props
   const color = isCommand ? COMMAND_COLOR : PRIMARY_TEXT_COLOR
 
-  const messageText = override || new UIText(parent)
+  const messageText = new UIText(parent)
   messageText.color = color
   messageText.value = `<b>${sender}:</b> ${message}`
   messageText.fontSize = 14
@@ -59,6 +56,15 @@ function createLogMessage(
   messagesLogScrollContainer.valueY = 0
 
   return { component: messageText }
+}
+function rotateLogMessages(index: number) {
+  for (let i = MAX_CHAT_MESSAGES; i >= 0; i--) {
+    const j = i + index
+    const { sender, message, isCommand } = internalState.messages[j]
+    const messageText = chatComponents[i]
+    messageText.value = `<b>${sender}:</b> ${message}`
+    messageText.color = isCommand ? COMMAND_COLOR : PRIMARY_TEXT_COLOR
+  }
 }
 
 // -------------------------------
@@ -204,8 +210,11 @@ async function sendMsg(messageToSend: string) {
 function addMessage(messageEntry: MessageEntry): void {
   const length = internalState.messages.length
   internalState.messages.push(messageEntry)
-  if (length >= MAX_CHAT_MESSAGES) {
-    engine.disposeComponent(chatComponents[length % MAX_CHAT_MESSAGES] as any)
+  if (length > MAX_CHAT_MESSAGES) {
+    const deleteTarget = length - MAX_CHAT_MESSAGES - 1
+    delete internalState.messages[deleteTarget]
+    rotateLogMessages(length - MAX_CHAT_MESSAGES)
+  } else {
+    chatComponents.push(createLogMessage(messagesLogStackContainer, messageEntry).component)
   }
-  createLogMessage(messagesLogStackContainer, messageEntry)
 }

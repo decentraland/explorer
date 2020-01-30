@@ -366,6 +366,7 @@ export const unityInterface = {
     gameInstance.SendMessage('HUDController', 'ConfigureSettingsHUD', JSON.stringify(configuration))
   },
   ConfigurePlayerInfoHUD(configuration: HUDConfiguration) {
+    console.log('Sending configure: PlayerInfoHUD')
     gameInstance.SendMessage('HUDController', 'ConfigurePlayerInfoHUD', JSON.stringify(configuration))
   },
   UpdateMinimapSceneInformation(info: { name: string; type: number; parcels: { x: number; y: number }[] }[]) {
