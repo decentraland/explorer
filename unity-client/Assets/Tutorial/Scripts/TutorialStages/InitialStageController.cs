@@ -35,6 +35,7 @@ public class InitialStageController : TutorialStageController
     {
         base.OnStageFinished();
         DCLCharacterController.OnPositionSet -= OnTeleport;
+        HUDController.i?.minimapHud.SetVisibility(true);
     }
 
     private IEnumerator StageSecuence()
