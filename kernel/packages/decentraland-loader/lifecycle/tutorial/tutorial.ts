@@ -18,7 +18,17 @@ export function createTutorialILand(): ILand {
       name: 'Tutorial Scene',
       main: 'bin/game.js',
       scene: { parcels: getSceneParcelsCoords(), base: coordinates },
-      communications: { commServerUrl: '' }
+      communications: { commServerUrl: '' },
+      spawnPoints: [
+        {
+          name: 'spawnPoint',
+          position: {
+            x: 37,
+            y: 2.5,
+            z: 60.5
+          }
+        }
+      ]
     },
     mappingsResponse: {
       parcel_id: coordinates,
