@@ -333,7 +333,7 @@ export const unityInterface = {
     gameInstance.SendMessage('SceneController', 'BuilderReady')
   },
   AddUserProfileToCatalog(peerProfile: ProfileForRenderer) {
-    gameInstance.SendMessage('UserProfileController', 'AddUserProfileToCatalog', JSON.stringify(peerProfile))
+    gameInstance.SendMessage('SceneController', 'AddUserProfileToCatalog', JSON.stringify(peerProfile))
   },
   AddWearablesToCatalog(wearables: Wearable[]) {
     for (let wearable of wearables) {
