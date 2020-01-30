@@ -49,6 +49,9 @@ function CachedXMLHttpRequest() {
     return xhr.send.apply(xhr, arguments);
   }
   function revalidateCrossOriginRequest(meta, self, sendArguments) {
+    if (meta.requestURL.includes("contents/Qm")) {
+      return send.apply(self, sendArguments);
+    }
     var headXHR = new CachedXMLHttpRequest.XMLHttpRequest();
     headXHR.open("HEAD", meta.requestURL, true);
     headXHR.onload = function() {
