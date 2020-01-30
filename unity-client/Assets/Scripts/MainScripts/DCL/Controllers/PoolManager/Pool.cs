@@ -132,7 +132,7 @@ namespace DCL
             if (!active)
             {
                 DisablePoolableObject(poolable);
-                unusedObjects.AddFirst(poolable);
+                poolable.node = unusedObjects.AddFirst(poolable);
             }
             else
             {
@@ -153,14 +153,13 @@ namespace DCL
                 return;
 #endif
 
-            if (poolable == null || poolable.isInsidePool)
+            if (poolable == null || poolable.node.List == unusedObjects)
                 return;
 
             DisablePoolableObject(poolable);
 
-            unusedObjects.AddFirst(poolable);
             poolable.node.List.Remove(poolable.node);
-            poolable.node = null;
+            poolable.node = unusedObjects.AddFirst(poolable);
 
 #if UNITY_EDITOR
             RefreshName();
@@ -201,6 +200,7 @@ namespace DCL
         public void RemoveFromPool(PoolableObject poolable)
         {
             poolable.node.List.Remove(poolable);
+            poolable.node = null;
 
             PoolManager.i.poolables.Remove(poolable.gameObject);
 #if UNITY_EDITOR

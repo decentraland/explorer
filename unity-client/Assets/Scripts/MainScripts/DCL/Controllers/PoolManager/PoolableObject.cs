@@ -9,7 +9,7 @@ namespace DCL
         public LinkedListNode<PoolableObject> node;
         public GameObject gameObject;
 
-        public bool isInsidePool { get { return node == null; } }
+        public bool isInsidePool { get { return node != null; } }
 
         public System.Action OnRelease;
 
@@ -42,13 +42,5 @@ namespace DCL
             sender.OnCleanupEvent -= this.OnCleanup;
             Release();
         }
-
-        //void OnDestroy()
-        //{
-        //    if (pool != null)
-        //    {
-        //        pool.RemoveFromPool(this);
-        //    }
-        //}
     }
 }

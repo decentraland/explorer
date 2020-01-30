@@ -231,7 +231,10 @@ namespace DCL
             foreach (var kvp in poolables)
             {
                 if (kvp.Value.gameObject == null)
+                {
                     kvp.Value.node.List.Remove(kvp.Value);
+                    kvp.Value.node = null;
+                }
             }
 
             poolables = poolables.Where((kvp) => kvp.Value.gameObject != null).ToDictionary(p => p.Key, p => p.Value);
