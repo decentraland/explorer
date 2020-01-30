@@ -43,7 +43,7 @@ export abstract class UIShape extends ObservableComponent {
   isPointerBlocker: boolean = true
 
   private _parent?: UIShape
-  protected componentIdSymbol: string
+  public componentIdSymbol: string
 
   constructor(parent: UIShape | null) {
     super()
