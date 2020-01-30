@@ -12,6 +12,10 @@ namespace DCL
 
         public Dictionary<object, Pool> pools = new Dictionary<object, Pool>();
         public Dictionary<GameObject, PoolableObject> poolables = new Dictionary<GameObject, PoolableObject>();
+        public bool HasPoolable(PoolableObject poolable)
+        {
+            return poolables.ContainsValue(poolable);
+        }
 
         public PoolableObject GetPoolable(GameObject gameObject)
         {

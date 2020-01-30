@@ -153,7 +153,7 @@ namespace DCL
                 return;
 #endif
 
-            if (poolable == null || poolable.node.List == unusedObjects)
+            if (poolable == null || !PoolManager.i.HasPoolable(poolable))
                 return;
 
             DisablePoolableObject(poolable);
