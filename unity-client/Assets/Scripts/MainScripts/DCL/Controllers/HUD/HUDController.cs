@@ -114,7 +114,7 @@ public class HUDController : MonoBehaviour
         settingsHud?.SetVisibility(configuration.active && configuration.visible);
     }
 
-    public void ConfigurePlayerInfoCardHUD(string configurationJson)
+    public void ConfigurePlayerInfoHUD(string configurationJson)
     {
         HUDConfiguration configuration = JsonUtility.FromJson<HUDConfiguration>(configurationJson);
         Debug.Log("Configure player info card" + configuration);

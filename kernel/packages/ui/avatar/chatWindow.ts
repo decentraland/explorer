@@ -35,11 +35,14 @@ dcl.onEvent(event => {
 })
 
 let chatComponents: UIText[] = []
-function createLogMessage(parent: UIShape, props: { sender: string; message: string; isCommand?: boolean }) {
-  const { sender, message, isCommand } = props
+function createLogMessage(
+  parent: UIShape,
+  props: { sender: string; message: string; isCommand?: boolean; override?: UIText }
+) {
+  const { sender, message, isCommand, override } = props
   const color = isCommand ? COMMAND_COLOR : PRIMARY_TEXT_COLOR
 
-  const messageText = new UIText(parent)
+  const messageText = override || new UIText(parent)
   messageText.color = color
   messageText.value = `<b>${sender}:</b> ${message}`
   messageText.fontSize = 14
@@ -54,7 +57,6 @@ function createLogMessage(parent: UIShape, props: { sender: string; message: str
   messageText.outlineColor = Color4.Black()
 
   messagesLogScrollContainer.valueY = 0
-  chatComponents.push(messageText)
 
   return { component: messageText }
 }
@@ -200,14 +202,10 @@ async function sendMsg(messageToSend: string) {
 }
 
 function addMessage(messageEntry: MessageEntry): void {
-  internalState.messages.push(messageEntry)
-  createLogMessage(messagesLogStackContainer, messageEntry)
   const length = internalState.messages.length
-  if (length > MAX_CHAT_MESSAGES) {
-    for (let i = 0; i < length - MAX_CHAT_MESSAGES; i++) {
-      engine.disposeComponent(chatComponents[i] as any)
-    }
-    chatComponents = chatComponents.slice(length - MAX_CHAT_MESSAGES)
-    internalState.messages = internalState.messages.slice(length - MAX_CHAT_MESSAGES)
+  internalState.messages.push(messageEntry)
+  if (length >= MAX_CHAT_MESSAGES) {
+    engine.disposeComponent(chatComponents[length % MAX_CHAT_MESSAGES] as any)
   }
+  createLogMessage(messagesLogStackContainer, messageEntry)
 }
