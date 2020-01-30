@@ -332,8 +332,8 @@ namespace Hbx.WebGL
         const string JsbrExt = ".jsbr";
         const string UnitywebExt = ".unityweb";
 #if UNITY_5_6_OR_NEWER
-        const string RelFolder = "unity/Build";
-        const string DevFolder = "unity/Build";
+        const string RelFolder = "/tmp/explorer/unity-client/Builds/unity/Build";
+        const string DevFolder = "/tmp/explorer/unity-client/Builds/unity/Build";
         static readonly string[] SourceFileTypes = { JsExt, UnitywebExt };
         static readonly string[] ExcludeFileNames = { "asm.memory", ".asm.code", ".data", "wasm.code" };
 #else
