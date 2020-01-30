@@ -4,6 +4,8 @@ public class GenesisPlazaStageController : TutorialStageController
 {
     public override void OnStageStart()
     {
+        base.OnStageStart();
+
         // NOTE: we should probably remove this toast when proper system for wellcome toast is created
         ShowWellcomeToast();
 

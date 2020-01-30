@@ -8,8 +8,8 @@ public class TutorialController : MonoBehaviour
 
 #if UNITY_EDITOR
     [Header("Debugging")]
-    [SerializeField] int debugFlagStartingValue = 0;
-    [SerializeField] bool debugRunTutorialOnStart = false;
+    public int debugFlagStartingValue = 0;
+    public bool debugRunTutorialOnStart = false;
     [Space()]
 #endif
 

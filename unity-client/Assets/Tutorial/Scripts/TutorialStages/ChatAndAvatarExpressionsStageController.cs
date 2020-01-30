@@ -11,6 +11,7 @@ public class ChatAndAvatarExpressionsStageController : TutorialStageController
 
     public override void OnStageStart()
     {
+        base.OnStageStart();
         StartCoroutine(StageSecuence());
     }
 

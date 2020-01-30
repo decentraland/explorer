@@ -13,6 +13,10 @@ public class InitialStageController : TutorialStageController
 
     public override void OnStageStart()
     {
+        base.OnStageStart();
+
+        DCLCharacterController.OnPositionSet += OnTeleport;
+
         if (HUDController.i != null && HUDController.i.avatarEditorHud != null)
         {
             avatarEditorHUD = HUDController.i.avatarEditorHud;
@@ -25,6 +29,12 @@ public class InitialStageController : TutorialStageController
             avatarEditorClosed = true;
         }
         StartCoroutine(StageSecuence());
+    }
+
+    public override void OnStageFinished()
+    {
+        base.OnStageFinished();
+        DCLCharacterController.OnPositionSet -= OnTeleport;
     }
 
     private IEnumerator StageSecuence()
@@ -42,10 +52,13 @@ public class InitialStageController : TutorialStageController
 
         HUDController.i?.minimapHud.SetVisibility(true);
         yield return ShowTooltip(minimapTooltip);
-        yield return WaitIdleTime();
 
-        // NOTE: finish stage on teleport
-        TutorialController.i?.SetRunningStageFinished();
+#if UNITY_EDITOR
+        if (TutorialController.i.debugRunTutorialOnStart)
+        {
+            TutorialController.i?.SetRunningStageFinished();
+        }
+#endif      
     }
 
     private void OnAvatarEditorVisibilityChanged(bool visible)
@@ -55,5 +68,10 @@ public class InitialStageController : TutorialStageController
             avatarEditorHUD.OnVisibilityChanged -= OnAvatarEditorVisibilityChanged;
             avatarEditorClosed = true;
         }
+    }
+
+    private void OnTeleport(DCLCharacterPosition characterPosition)
+    {
+        TutorialController.i?.SetRunningStageFinished();
     }
 }
