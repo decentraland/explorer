@@ -115,8 +115,6 @@ const browserInterface = {
     if (scene) {
       const parcelScene = scene.parcelScene as UnityParcelScene
       parcelScene.emit(data.eventType as IEventNames, data.payload)
-    } else {
-      // defaultLogger.error(`SceneEvent: Scene ${data.sceneId} not found`, data)
     }
   },
 
