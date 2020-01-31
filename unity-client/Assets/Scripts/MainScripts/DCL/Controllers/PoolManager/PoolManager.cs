@@ -230,18 +230,31 @@ namespace DCL
             }
         }
 
+        List<GameObject> toRemoveAuxList = new List<GameObject>();
         public void CleanPoolableReferences()
         {
-            foreach (var kvp in poolables)
+            toRemoveAuxList.Clear();
+
+            using (var it = poolables.GetEnumerator())
             {
-                if (kvp.Value.gameObject == null)
+                while (it.MoveNext())
                 {
-                    kvp.Value.node.List.Remove(kvp.Value);
-                    kvp.Value.node = null;
+                    var kvp = it.Current;
+
+                    if (kvp.Value.gameObject == null)
+                    {
+                        kvp.Value.node?.List.Remove(kvp.Value);
+                        kvp.Value.node = null;
+                        toRemoveAuxList.Add(kvp.Key);
+                    }
                 }
             }
 
-            poolables = poolables.Where((kvp) => kvp.Value.gameObject != null).ToDictionary(p => p.Key, p => p.Value);
+            for (int i = 0; i < toRemoveAuxList.Count; i++)
+            {
+                GameObject key = toRemoveAuxList[i];
+                poolables.Remove(key);
+            }
         }
     }
 }

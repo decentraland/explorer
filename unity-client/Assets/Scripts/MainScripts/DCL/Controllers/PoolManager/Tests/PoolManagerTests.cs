@@ -65,6 +65,29 @@ namespace Tests
             Assert.AreEqual(0, pool.unusedObjectsCount, "Inactive objects count should be 0");
         }
 
+        [UnityTest]
+        public IEnumerator CleanPoolableReferences()
+        {
+            GameObject obj = new GameObject();
+            GameObject obj2 = new GameObject();
+            GameObject obj3 = new GameObject();
+
+            PoolManager.i.poolables.Add(obj, new PoolableObject() { gameObject = obj });
+            PoolManager.i.poolables.Add(obj2, new PoolableObject() { gameObject = obj2 });
+            PoolManager.i.poolables.Add(obj3, new PoolableObject() { gameObject = obj3 });
+
+            Object.Destroy(obj);
+            Object.Destroy(obj2);
+
+            yield return null;
+
+            PoolManager.i.CleanPoolableReferences();
+
+            Assert.AreEqual(1, PoolManager.i.poolables.Count);
+
+            Object.Destroy(obj3);
+        }
+
         [Test]
         public void GetPoolableObject()
         {
