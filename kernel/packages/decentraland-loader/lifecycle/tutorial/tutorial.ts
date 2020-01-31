@@ -7,11 +7,11 @@ export const TUTORIAL_SCENE_ID = 'TutorialScene'
 
 export const isTutorial = true
 
-export function createTutorialILand(): ILand {
+export function createTutorialILand(baseLocation: string): ILand {
   const coordinates = `${TUTORIAL_SCENE_COORDS.x},${TUTORIAL_SCENE_COORDS.y}`
   return {
     sceneId: TUTORIAL_SCENE_ID,
-    baseUrl: origin + '/loader/tutorial-scene/',
+    baseUrl: baseLocation + '/loader/tutorial-scene/',
     name: 'Tutorial Scene',
     baseUrlBundles: '',
     scene: {

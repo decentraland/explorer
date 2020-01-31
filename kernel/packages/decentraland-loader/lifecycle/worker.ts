@@ -12,7 +12,6 @@ import defaultLogger from 'shared/logger'
 
 const connector = new Adapter(WebWorkerTransport(self as any))
 
-
 let parcelController: ParcelLifeCycleController
 let sceneController: SceneLifeCycleController
 let positionController: PositionLifecycleController
@@ -41,10 +40,12 @@ let downloadManager: SceneDataDownloadManager
       lineOfSightRadius: number
       secureRadius: number
       emptyScenes: boolean
+      tutorialBaseURL: string
     }) => {
       downloadManager = new SceneDataDownloadManager({
         contentServer: options.contentServer,
-        contentServerBundles: options.contentServerBundles
+        contentServerBundles: options.contentServerBundles,
+        tutorialBaseURL: options.tutorialBaseURL
       })
       parcelController = new ParcelLifeCycleController({
         lineOfSightRadius: options.lineOfSightRadius,

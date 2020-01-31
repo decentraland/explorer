@@ -30,7 +30,7 @@ export class SceneDataDownloadManager {
   sceneIdToLandData: Map<string, IFuture<ILand | null>> = new Map()
   rootIdToLandData: Map<string, IFuture<ILand | null>> = new Map()
 
-  constructor(public options: { contentServer: string; contentServerBundles: string }) {
+  constructor(public options: { contentServer: string; contentServerBundles: string; tutorialBaseURL: string }) {
     // stub
   }
 
@@ -223,7 +223,7 @@ export class SceneDataDownloadManager {
       return this.sceneIdToLandData.get(TUTORIAL_SCENE_ID)!
     }
     const promised = future<ILand | null>()
-    const tutorialScene = createTutorialILand()
+    const tutorialScene = createTutorialILand(this.options.tutorialBaseURL)
     const contents = {
       data: [
         {
