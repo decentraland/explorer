@@ -80,11 +80,4 @@ public class UserProfileController : MonoBehaviour
     {
         userProfilesCatalog?.Clear();
     }
-
-    [ContextMenu("DO")]
-    public void Do()
-    {
-        AddUserProfileToCatalog(ownUserProfile.model);
-        Resources.Load<StringVariable>("CurrentPlayerInfoCardName").Set(ownUserProfile.userName);
-    }
 }

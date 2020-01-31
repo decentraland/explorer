@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using UnityEngine;
-
-[assembly: InternalsVisibleTo("UserProfileTests")]
-[assembly: InternalsVisibleTo("PlayerInfoCardHUDTests")]
 
 [CreateAssetMenu(fileName = "UserProfile", menuName = "UserProfile")]
 public class UserProfile : ScriptableObject //TODO Move to base variable
@@ -34,25 +30,34 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
         if (model?.snapshots?.body != null)
             ThumbnailsManager.CancelRequest(model.snapshots.body, OnBodySnapshotReady);
 
-        model.name = newModel?.name;
-        model.email = newModel?.email;
-        model.description = newModel?.description;
-        model.avatar.CopyFrom(newModel?.avatar);
-        model.snapshots = newModel?.snapshots;
-        model.inventory = newModel?.inventory;
         inventory.Clear();
+        faceSnapshot = null;
+        bodySnapshot = null;
+
+        if (newModel == null)
+        {
+            model = null;
+            return;
+        }
+
+        model.name = newModel.name;
+        model.email = newModel.email;
+        model.description = newModel.description;
+        model.avatar.CopyFrom(newModel.avatar);
+        model.snapshots = newModel.snapshots;
+        model.inventory = newModel.inventory;
         if (model.inventory != null)
         {
             inventory = model.inventory.GroupBy(x => x).ToDictionary(x => x.Key, x => x.Count());
         }
-        faceSnapshot = null;
-        bodySnapshot = null;
 
-        if (downloadAssets && model?.snapshots?.face != null)
-            ThumbnailsManager.RequestThumbnail(model.snapshots.face, OnFaceSnapshotReady);
-
-        if (downloadAssets && model?.snapshots?.body != null)
-            ThumbnailsManager.RequestThumbnail(model.snapshots.body, OnBodySnapshotReady);
+        if (downloadAssets && model.snapshots != null)
+        {
+            if(model.snapshots.face != null)
+                ThumbnailsManager.RequestThumbnail(model.snapshots.face, OnFaceSnapshotReady);
+            if(model.snapshots.body != null)
+                ThumbnailsManager.RequestThumbnail(model.snapshots.body, OnBodySnapshotReady);
+        }
 
         OnUpdate?.Invoke(this);
     }
@@ -79,11 +84,14 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
 
     public void OverrideAvatar(AvatarModel newModel, Sprite faceSnapshot, Sprite bodySnapshot)
     {
-        if (model?.snapshots?.face != null)
-            ThumbnailsManager.CancelRequest(model.snapshots.face, OnFaceSnapshotReady);
+        if (model?.snapshots != null)
+        {
+            if(model.snapshots.face != null)
+                ThumbnailsManager.CancelRequest(model.snapshots.face, OnFaceSnapshotReady);
 
-        if (model?.snapshots?.body != null)
-            ThumbnailsManager.CancelRequest(model.snapshots.body, OnBodySnapshotReady);
+            if(model.snapshots.body != null)
+                ThumbnailsManager.CancelRequest(model.snapshots.body, OnBodySnapshotReady);
+        }
 
         model.avatar.CopyFrom(newModel);
         this.faceSnapshot = faceSnapshot;

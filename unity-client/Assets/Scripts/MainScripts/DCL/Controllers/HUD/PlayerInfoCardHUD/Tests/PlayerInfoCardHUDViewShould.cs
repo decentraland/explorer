@@ -6,6 +6,7 @@ public class PlayerInfoCardHUDViewShould : TestsBase
 {
     private PlayerInfoCardHUDView view;
     private UserProfile userProfile;
+    protected override bool justSceneSetUp => true;
 
     protected override IEnumerator SetUp()
     {

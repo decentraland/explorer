@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using DCL.Helpers;
 using TMPro;
@@ -41,6 +42,7 @@ public class PlayerInfoCardHUDView : MonoBehaviour
 
     internal readonly List<PlayerInfoCollectibleItem> playerInfoCollectibles = new List<PlayerInfoCollectibleItem>(10);
     internal UserProfile currentUserProfile;
+    private UnityAction<bool> toggleChangedDelegate => (x) => UpdateTabs(); 
 
     public static PlayerInfoCardHUDView CreateView()
     {
@@ -49,14 +51,14 @@ public class PlayerInfoCardHUDView : MonoBehaviour
 
     public void Initialize(UnityAction cardClosedCallback)
     {
-        hideCardButton.onClick.RemoveAllListeners();
+        hideCardButton.onClick.RemoveListener(cardClosedCallback);
         hideCardButton.onClick.AddListener(cardClosedCallback);
 
         for (int index = 0; index < tabsMapping.Length; index++)
         {
             var tab = tabsMapping[index];
-            tab.toggle.onValueChanged.RemoveAllListeners();
-            tab.toggle.onValueChanged.AddListener((on) => { UpdateTabs(); });
+            tab.toggle.onValueChanged.RemoveListener(toggleChangedDelegate);
+            tab.toggle.onValueChanged.AddListener(toggleChangedDelegate);
         }
 
         for (int index = 0; index < tabsMapping.Length; index++)
