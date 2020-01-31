@@ -34,6 +34,7 @@ public class ExpressionsHotKeyController : MonoBehaviour
 
     private void ExpressionCalled(string id)
     {
+        return;
         ownUserProfile.SetAvatarExpression(id);
     }
 }

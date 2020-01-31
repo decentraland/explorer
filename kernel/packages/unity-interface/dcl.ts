@@ -19,7 +19,6 @@ import { sceneLifeCycleObservable } from '../decentraland-loader/lifecycle/contr
 import { queueTrackingEvent } from '../shared/analytics'
 import { DevTools } from '../shared/apis/DevTools'
 import { ParcelIdentity } from '../shared/apis/ParcelIdentity'
-import { getEmail } from '../shared/auth/selectors'
 import { chatObservable } from '../shared/comms/chat'
 import { aborted } from '../shared/loading/ReportFatalError'
 import { loadingScenes, teleportTriggered, unityClientLoaded } from '../shared/loading/types'
