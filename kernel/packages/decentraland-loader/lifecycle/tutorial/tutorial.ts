@@ -1,11 +1,27 @@
 import { ILand } from 'shared/types'
+import { Vector2Component } from 'atomicHelpers/landHelpers'
 
 const tutorialSceneContents = require('./tutorialSceneContents.json')
 
 export const TUTORIAL_SCENE_COORDS = { x: 200, y: 200 }
 export const TUTORIAL_SCENE_ID = 'TutorialScene'
 
-export const isTutorial = true
+let teleportCount: number = 0
+
+export function isTutorial(): boolean {
+  return teleportCount <= 1
+}
+
+export function onTutorialTeleport() {
+  teleportCount++
+}
+
+export function resolveTutorialPosition(position: Vector2Component, teleported: boolean): Vector2Component {
+  if (teleported) {
+    onTutorialTeleport()
+  }
+  return isTutorial() ? TUTORIAL_SCENE_COORDS : position
+}
 
 export function createTutorialILand(baseLocation: string): ILand {
   const coordinates = `${TUTORIAL_SCENE_COORDS.x},${TUTORIAL_SCENE_COORDS.y}`

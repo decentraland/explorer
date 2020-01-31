@@ -201,14 +201,14 @@ export class SceneDataDownloadManager {
   }
 
   async getParcelDataBySceneId(sceneId: string): Promise<ILand | null> {
-    if (isTutorial) {
+    if (isTutorial()) {
       return this.getTutorialParcelDataBySceneId()
     }
     return this.sceneIdToLandData.get(sceneId)!
   }
 
   async getParcelData(position: string): Promise<ILand | null> {
-    if (isTutorial) {
+    if (isTutorial()) {
       return this.resolveTutorialScene()
     }
     const sceneId = await this.resolveSceneSceneId(position)

@@ -34,7 +34,7 @@ export class ParcelLifeCycleController extends EventEmitter {
       return undefined
     }
 
-    if (isTutorial) {
+    if (isTutorial()) {
       return this.doReportCurrentPosition(position, { ...this.config, lineOfSightRadius: 0 })
     } else {
       return this.doReportCurrentPosition(position, this.config)
