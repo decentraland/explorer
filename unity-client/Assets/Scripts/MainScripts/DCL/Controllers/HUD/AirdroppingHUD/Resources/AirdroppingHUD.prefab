@@ -608,7 +608,7 @@ GameObject:
   - component: {fileID: 6799470568314349500}
   - component: {fileID: 4257502000095206928}
   m_Layer: 5
-  m_Name: DoneTarget
+  m_Name: NextTarget
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1934,7 +1934,7 @@ MonoBehaviour:
   m_enableAutoSizing: 1
   m_fontSizeMin: 18
   m_fontSizeMax: 18
-  m_fontStyle: 0
+  m_fontStyle: 16
   m_textAlignment: 514
   m_characterSpacing: 0
   m_wordSpacing: 0
