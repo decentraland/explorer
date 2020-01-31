@@ -4,6 +4,8 @@ using UnityEngine.EventSystems;
 
 public class TutorialTooltip : MonoBehaviour, IPointerClickHandler
 {
+    public float secondsOnScreen = 12f;
+
     [SerializeField] private AnimationClip showAnimationClip = null;
     [SerializeField] private AnimationClip hideAnimationClip = null;
 

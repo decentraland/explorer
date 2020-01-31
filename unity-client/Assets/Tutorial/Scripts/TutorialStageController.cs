@@ -20,14 +20,22 @@ public class TutorialStageController : MonoBehaviour
         }
     }
 
-    public virtual IEnumerator ShowTooltip(TutorialTooltip tooltip)
+    public virtual IEnumerator ShowTooltip(TutorialTooltip tooltip, bool autoHide = true)
     {
         if (tooltip != null)
         {
             tooltip.Show();
-            yield return WaitSeconds(TutorialController.TOOLTIP_AUTO_HIDE_SECONDS);
-            tooltip.Hide();
+            if (autoHide)
+            {
+                yield return WaitSeconds(tooltip.secondsOnScreen);
+                tooltip.Hide();
+            }
         }
+    }
+
+    public virtual void HideTooltip(TutorialTooltip tooltip)
+    {
+        tooltip.Hide();
     }
 
     public virtual IEnumerator WaitIdleTime()

@@ -10,12 +10,14 @@ public class InitialStageController : TutorialStageController
 
     private AvatarEditorHUDController avatarEditorHUD = null;
     private bool avatarEditorClosed = false;
+    private bool characterMoved = false;
 
     public override void OnStageStart()
     {
         base.OnStageStart();
 
         DCLCharacterController.OnPositionSet += OnTeleport;
+        DCLCharacterController.OnCharacterMoved += OnCharacterMove;
 
         if (HUDController.i != null && HUDController.i.avatarEditorHud != null)
         {
@@ -28,6 +30,7 @@ public class InitialStageController : TutorialStageController
         {
             avatarEditorClosed = true;
         }
+
         StartCoroutine(StageSecuence());
     }
 
@@ -35,6 +38,7 @@ public class InitialStageController : TutorialStageController
     {
         base.OnStageFinished();
         DCLCharacterController.OnPositionSet -= OnTeleport;
+        DCLCharacterController.OnCharacterMoved -= OnCharacterMove;
         HUDController.i?.minimapHud.SetVisibility(true);
     }
 
@@ -45,9 +49,21 @@ public class InitialStageController : TutorialStageController
         yield return new WaitUntil(() => avatarEditorClosed);
         yield return WaitSeconds(3);
 
-        yield return ShowTooltip(controlsTooltip);
-        yield return WaitIdleTime();
+        yield return ShowTooltip(controlsTooltip, autoHide: false);
+        characterMoved = false;
 
+#if UNITY_EDITOR
+        if (DCLCharacterController.i == null)
+        {
+            characterMoved = true;
+        }
+#endif
+
+        yield return new WaitUntil(() => characterMoved);
+        yield return WaitIdleTime();
+        HideTooltip(controlsTooltip);
+
+        yield return WaitSeconds(3);
         yield return ShowTooltip(cameraTooltip);
         yield return WaitIdleTime();
 
@@ -74,5 +90,10 @@ public class InitialStageController : TutorialStageController
     private void OnTeleport(DCLCharacterPosition characterPosition)
     {
         TutorialController.i?.SetRunningStageFinished();
+    }
+
+    private void OnCharacterMove(DCLCharacterPosition position)
+    {
+        characterMoved = true;
     }
 }

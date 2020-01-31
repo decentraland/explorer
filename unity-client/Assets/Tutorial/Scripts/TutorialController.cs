@@ -3,7 +3,6 @@ using UnityEngine;
 
 public class TutorialController : MonoBehaviour
 {
-    public const float TOOLTIP_AUTO_HIDE_SECONDS = 10f;
     public const float DEFAULT_STAGE_IDLE_TIME = 20f;
 
 #if UNITY_EDITOR
