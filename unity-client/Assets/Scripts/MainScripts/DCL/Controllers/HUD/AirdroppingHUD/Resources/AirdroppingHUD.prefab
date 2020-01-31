@@ -878,7 +878,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &3987737775956530950
 RectTransform:
   m_ObjectHideFlags: 0
@@ -917,7 +917,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &4583594482714337869
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2378,6 +2378,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 90405028502159230}
+  - component: {fileID: 3207581118090769944}
   m_Layer: 5
   m_Name: InitialScreen
   m_TagString: Untagged
@@ -2408,6 +2409,22 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!111 &3207581118090769944
+Animation:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6651695357696457158}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Animation: {fileID: 7400000, guid: 73c52706ef56947d2b5b79f5060c7939, type: 2}
+  m_Animations:
+  - {fileID: 7400000, guid: 73c52706ef56947d2b5b79f5060c7939, type: 2}
+  m_WrapMode: 0
+  m_PlayAutomatically: 1
+  m_AnimatePhysics: 0
+  m_CullingType: 0
 --- !u!1 &7550352596557205703
 GameObject:
   m_ObjectHideFlags: 0
