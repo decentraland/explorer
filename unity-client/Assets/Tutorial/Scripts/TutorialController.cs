@@ -85,7 +85,8 @@ public class TutorialController : MonoBehaviour
     {
         tutorialFlagMask |= (int)runningStage.flag;
         runningStage.OnStageFinished();
-        // TODO: update user profile
+        UserProfile.GetOwnUserProfile().SetTutorialFlag(tutorialFlagMask);
+        // TODO: send update to user profile
         StartTutorialStageIfNeeded(tutorialFlagMask);
     }
 
