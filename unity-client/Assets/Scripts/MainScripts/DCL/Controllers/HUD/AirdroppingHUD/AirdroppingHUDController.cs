@@ -1,4 +1,5 @@
 ﻿using System;
+using DCL.Interface;
 
 public class AirdroppingHUDController : IHUD, IDisposable
 {
@@ -27,7 +28,8 @@ public class AirdroppingHUDController : IHUD, IDisposable
         Hidden,
         Initial,
         SingleItem,
-        Summary
+        Summary,
+        Finish
     }
 
     private AirdroppingHUDView view;
@@ -72,6 +74,9 @@ public class AirdroppingHUDController : IHUD, IDisposable
                     currentState = State.Summary;
                 break;
             case State.Summary:
+                currentState = State.Hidden;
+                break;
+            case State.Finish:
             default:
                 currentState = State.Hidden;
                 break;
@@ -90,6 +95,10 @@ public class AirdroppingHUDController : IHUD, IDisposable
                 break;
             case State.Summary:
                 view.ShowSummaryScreen(model.items);
+                break;
+            case State.Finish:
+                WebInterface.SendUserAcceptedCollectibles(model.id);
+                MoveToNextState();
                 break;
             case State.Hidden:
             default:
