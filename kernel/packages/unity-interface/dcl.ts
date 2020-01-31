@@ -24,6 +24,7 @@ import { aborted } from '../shared/loading/ReportFatalError'
 import { loadingScenes, teleportTriggered, unityClientLoaded } from '../shared/loading/types'
 import { createLogger, defaultLogger, ILogger } from '../shared/logger'
 import { saveAvatarRequest } from '../shared/passports/actions'
+import { airdropObservable } from '../shared/apis/AirdropController'
 import { Avatar, Wearable } from '../shared/passports/types'
 import {
   PB_AttachEntityComponent,
@@ -79,6 +80,7 @@ import { hudWorkerUrl, SceneWorker } from '../shared/world/SceneWorker'
 import { ensureUiApis } from '../shared/world/uiSceneInitializer'
 import { worldRunningObservable } from '../shared/world/worldState'
 import { sendPublicChatMessage } from 'shared/comms'
+import { AirdropInfo } from '../shared/airdrops/interface'
 
 const rendererVersion = require('decentraland-renderer')
 window['console'].log('Renderer version: ' + rendererVersion)
@@ -182,6 +184,10 @@ const browserInterface = {
 
   ReportBuilderCameraTarget(data: { id: string; cameraTarget: ReadOnlyVector3 }) {
     futures[data.id].resolve(data.cameraTarget)
+  },
+
+  UserAcceptedCollectibles(data: { id: string }) {
+    airdropObservable.notifyObservers(data.id)
   },
 
   EditAvatarClicked() {
@@ -398,38 +404,7 @@ export const unityInterface = {
       gameInstance.SendMessage('SceneController', 'UpdateMinimapSceneInformation', JSON.stringify(chunk))
     }
   },
-  TriggerAirdropDisplay() {
-    type AirdropInfo = {
-      title: string
-      subtitle: string
-      items: AirdropItem[]
-    }
-    type RarityEnum = 'swanky' | 'rare' | 'mystic' | 'legendary' | 'unique'
-    type AirdropItem = {
-      name: string
-      subtitle?: string
-      thumbnailURL: string
-      rarity: RarityEnum
-      type: 'collectible' | 'erc20'
-    }
-    const data: AirdropInfo = {
-      title: "You've found a chest!",
-      subtitle: "Click on it to see what's inside!",
-      items: [
-        {
-          name: 'Neo Glasses',
-          thumbnailURL: 'https://content.decentraland.org/contents/QmbcbFZd7qSMXkfLx1gbKMGS3j6TXBoeRbdESRYNk84GH4',
-          rarity: 'swanky',
-          type: 'collectible'
-        },
-        {
-          name: '20 MANA!',
-          thumbnailURL: 'https://content.decentraland.org/contents/QmNetfCF4mQxd88wR5Qyc3BLaaGsutg4eWadk72ecKpGKt',
-          rarity: 'rare',
-          type: 'erc20'
-        }
-      ]
-    }
+  TriggerAirdropDisplay(data: AirdropInfo) {
     gameInstance.SendMessage('HUDController', 'AirDroppingRequest', JSON.stringify(data))
   },
   SelectGizmoBuilder(type: string) {
