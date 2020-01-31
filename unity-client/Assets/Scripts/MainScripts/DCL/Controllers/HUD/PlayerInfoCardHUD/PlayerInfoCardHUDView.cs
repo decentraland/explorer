@@ -42,18 +42,22 @@ public class PlayerInfoCardHUDView : MonoBehaviour
 
     internal readonly List<PlayerInfoCollectibleItem> playerInfoCollectibles = new List<PlayerInfoCollectibleItem>(10);
     internal UserProfile currentUserProfile;
-    private UnityAction<bool> toggleChangedDelegate => (x) => UpdateTabs(); 
+    private UnityAction<bool> toggleChangedDelegate => (x) => UpdateTabs();
+    private UnityAction cardClosedCallback = () => { }; 
 
     public static PlayerInfoCardHUDView CreateView()
     {
         return Instantiate(Resources.Load<GameObject>(PREFAB_PATH)).GetComponent<PlayerInfoCardHUDView>();
     }
 
+    private void Awake()
+    {
+        hideCardButton.onClick.AddListener(OnHideCardButton);
+    }
+
     public void Initialize(UnityAction cardClosedCallback)
     {
-        hideCardButton.onClick.RemoveListener(cardClosedCallback);
-        hideCardButton.onClick.AddListener(cardClosedCallback);
-
+        this.cardClosedCallback = cardClosedCallback;
         for (int index = 0; index < tabsMapping.Length; index++)
         {
             var tab = tabsMapping[index];
@@ -69,6 +73,11 @@ public class PlayerInfoCardHUDView : MonoBehaviour
                 break;
             }
         }
+    }
+
+    private void OnHideCardButton()
+    {
+        cardClosedCallback?.Invoke();
     }
 
     public void SetCardActive(bool active)
