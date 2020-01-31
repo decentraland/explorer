@@ -202,7 +202,7 @@ export function setLoadingScreenVisible(shouldShow: boolean) {
 function delightedSurvey() {
   const { analytics, delighted, globalStore } = global
   if (analytics && delighted && globalStore) {
-    const email = getEmail(global.globalStore.getState())
+    const email = ''
     const payload = {
       email: email,
       properties: {

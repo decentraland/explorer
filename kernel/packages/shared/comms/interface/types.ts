@@ -1,4 +1,5 @@
 import { ProfileForRenderer } from 'decentraland-ecs/src'
+import { AuthIdentity } from '../../crypto/Authenticator'
 
 export enum AvatarMessageType {
   // Networking related messages
@@ -93,6 +94,7 @@ export type UserInformation = {
   pose?: Pose
   expression?: AvatarExpression
   profile?: ProfileForRenderer
+  identity?: AuthIdentity
 }
 
 export type AvatarExpression = {
