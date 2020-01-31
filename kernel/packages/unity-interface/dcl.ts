@@ -397,6 +397,9 @@ export const unityInterface = {
   ConfigurePlayerInfoCardHUD(configuration: HUDConfiguration) {
     gameInstance.SendMessage('HUDController', 'ConfigurePlayerInfoCardHUD', JSON.stringify(configuration))
   },
+  ConfigureAirdroppingHUD(configuration: HUDConfiguration) {
+    gameInstance.SendMessage('HUDController', 'ConfigureAirdroppingHUD', JSON.stringify(configuration))
+  },
   UpdateMinimapSceneInformation(info: { name: string; type: number; parcels: { x: number; y: number }[] }[]) {
     const chunks = chunkGenerator(CHUNK_SIZE, info)
 
@@ -405,7 +408,7 @@ export const unityInterface = {
     }
   },
   TriggerAirdropDisplay(data: AirdropInfo) {
-    gameInstance.SendMessage('HUDController', 'AirDroppingRequest', JSON.stringify(data))
+    gameInstance.SendMessage('HUDController', 'AirdroppingRequest', JSON.stringify(data))
   },
   SelectGizmoBuilder(type: string) {
     this.SendBuilderMessage('SelectGizmo', type)
@@ -478,6 +481,9 @@ export const HUD: Record<string, { configure: (config: HUDConfiguration) => void
   },
   PlayerInfoCard: {
     configure: unityInterface.ConfigurePlayerInfoCardHUD
+  },
+  Airdropping: {
+    configure: unityInterface.ConfigureAirdroppingHUD
   }
 }
 

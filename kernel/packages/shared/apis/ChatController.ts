@@ -21,6 +21,7 @@ import { POIs } from 'shared/comms/POIs'
 import { IChatCommand, MessageEntry } from 'shared/types'
 import { teleportObservable } from 'shared/world/positionThings'
 import { expressionExplainer, isValidExpression, validExpressions } from './expressionExplainer'
+import { data as sampleDrop } from '../airdrops/sampleDrop'
 
 const userPose: { [key: string]: Vector3Component } = {}
 avatarMessageObservable.add((pose: AvatarMessage) => {
@@ -189,6 +190,17 @@ export class ChatController extends ExposableAPI implements IChatController {
         isCommand: true,
         sender: 'Decentraland',
         message: response
+      }
+    })
+
+    this.addChatCommand('airdrop', 'fake an airdrop', () => {
+      const unityWindow: any = window
+      unityWindow.unityInterface.TriggerAirdropDisplay(sampleDrop)
+      return {
+        id: uuid(),
+        isCommand: true,
+        sender: 'Decentraland',
+        message: 'Faking airdrop...'
       }
     })
 
