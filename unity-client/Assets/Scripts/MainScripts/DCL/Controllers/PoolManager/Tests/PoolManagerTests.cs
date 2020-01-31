@@ -80,13 +80,16 @@ namespace Tests
             Object.Destroy(obj2);
 
             yield return null;
-
             PoolManager.i.CleanPoolableReferences();
 
             Assert.AreEqual(1, PoolManager.i.poolables.Count);
             Assert.IsTrue(PoolManager.i.poolables[obj3].gameObject == obj3);
 
             Object.Destroy(obj3);
+            yield return null;
+            PoolManager.i.CleanPoolableReferences();
+
+            Assert.AreEqual(0, PoolManager.i.poolables.Count);
         }
 
         [Test]
