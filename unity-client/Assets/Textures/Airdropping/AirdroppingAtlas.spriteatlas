@@ -1,0 +1,60 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!687078895 &4343727234628468602
+SpriteAtlas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: AirdroppingAtlas
+  m_EditorData:
+    serializedVersion: 2
+    textureSettings:
+      serializedVersion: 2
+      anisoLevel: 1
+      compressionQuality: 50
+      maxTextureSize: 2048
+      textureCompression: 0
+      filterMode: 1
+      generateMipMaps: 0
+      readable: 0
+      crunchedCompression: 0
+      sRGB: 1
+    platformSettings: []
+    packingSettings:
+      serializedVersion: 2
+      padding: 4
+      blockOffset: 1
+      allowAlphaSplitting: 0
+      enableRotation: 1
+      enableTightPacking: 1
+    variantMultiplier: 1
+    packables:
+    - {fileID: 102900000, guid: 31b744e2267524f8db2063ae61f31f38, type: 3}
+    totalSpriteSurfaceArea: 11894
+    bindAsDefault: 1
+  m_MasterAtlas: {fileID: 0}
+  m_PackedSprites:
+  - {fileID: 21300000, guid: 482b2320bd08c47f3ad462a6618fe4da, type: 3}
+  - {fileID: 21300000, guid: 69beb9f0dc81b45c0af1fdfbe84b2385, type: 3}
+  - {fileID: 21300000, guid: 1f5b46c18551541ffab8a17af42f1a11, type: 3}
+  - {fileID: 21300000, guid: 4e705b6379f22470487eea484fce0300, type: 3}
+  - {fileID: 21300000, guid: c2933cc3e28be40bba4fe6f79b5b2e12, type: 3}
+  - {fileID: 21300000, guid: f452ece47296a44ec863e8785584cd0d, type: 3}
+  - {fileID: 21300000, guid: 72117b87f40c54013997454e8ecb5436, type: 3}
+  - {fileID: 21300000, guid: 40b9490c7d38a4478a660de9cdff3f87, type: 3}
+  - {fileID: 21300000, guid: 0b253afd78b17426c9b1dd4f3a2f9a93, type: 3}
+  - {fileID: 21300000, guid: 4fff80be69b504da396d480ceb126925, type: 3}
+  m_PackedSpriteNamesToIndex:
+  - TinyBack
+  - StarIcon
+  - UniqueCorner
+  - NFTCorner
+  - UniqueBackground
+  - ItemCellNft
+  - MainButton
+  - UniqueCardDescription
+  - ItemCell
+  - NFTBright
+  m_Tag: AirdroppingAtlas
+  m_IsVariant: 0
