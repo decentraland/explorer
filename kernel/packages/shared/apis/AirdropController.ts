@@ -1,6 +1,6 @@
 import { APIOptions, exposeMethod, registerAPI } from 'decentraland-rpc/lib/host'
 import { ExposableAPI } from './ExposableAPI'
-import { unityAirdropInterface, AirdropInfo, AirdropInput } from '../airdrops/interface'
+import { unityAirdropInterface, AirdropInput } from '../airdrops/interface'
 import { providerFuture, requestManager } from '../ethereum/provider'
 import { getUserAccount } from '../ethereum/EthereumService'
 import { Observable } from 'decentraland-ecs/src/ecs/Observable'
@@ -34,7 +34,7 @@ export class AirdropController extends ExposableAPI {
   async accepted(id: string) {
     if (this.mapIdToTargetContract[id]) {
       await providerFuture
-      const from = await getUserAccount()
+      const from = (await getUserAccount())!
       requestManager.eth_sendTransaction({
         from,
         to: this.mapIdToTargetContract[id],
