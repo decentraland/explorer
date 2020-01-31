@@ -31,7 +31,8 @@ import { PassportAsPromise } from './passports/PassportAsPromise'
 import { Session } from './session/index'
 import { RootState } from './store/rootTypes'
 import { buildStore } from './store/store'
-import { getAppNetwork } from './web3'
+// @ts-ignore
+import { getAppNetwork, fetchKatalystNodes } from './web3'
 import { initializeUrlPositionObserver } from './world/positionThings'
 import { setWorldContext } from './protocol/actions'
 import { profileToRendererFormat } from './passports/transformations/profileToRendererFormat'
@@ -41,6 +42,7 @@ import { Authenticator, AuthIdentity } from './crypto/Authenticator'
 import { Eth } from 'web3x/eth'
 import { Personal } from 'web3x/personal/personal'
 import { Account } from 'web3x/account'
+import future from 'fp-future'
 
 enum AnalyticsAccount {
   PRD = '1plAT9a2wOOgbPCrTaU8rgGUMzgUTJtU',
@@ -70,11 +72,53 @@ function initializeAnalytics() {
 export let globalStore: Store<RootState>
 export let identity: AuthIdentity
 
+function ping(url: string) {
+  const result = future()
+
+  new Promise(() => {
+    const http = new XMLHttpRequest()
+
+    let started: Date
+
+    http.onreadystatechange = () => {
+      if (http.readyState === XMLHttpRequest.OPENED) {
+        started = new Date()
+      }
+      if (http.readyState === XMLHttpRequest.DONE) {
+        const ended = new Date().getTime()
+        if (http.status >= 400) {
+          result.resolve({
+            success: false
+          })
+        } else {
+          result.resolve({
+            success: true,
+            ellapsed: ended - started.getTime(),
+            result: http.responseText
+          })
+        }
+      }
+    }
+
+    http.open('GET', url, false)
+
+    try {
+      http.send(null)
+    } catch (exception) {
+      result.resolve({
+        success: false
+      })
+    }
+  }).catch(defaultLogger.error)
+
+  return result
+}
+
 async function createAuthIdentity() {
   const ephemeral = createIdentity()
 
   const result = await providerFuture
-  const ephemeralLifespanMinutes = 30 * 24 * 60 // 1 month
+  const ephemeralLifespanMinutes = 7 * 24 * 60 // 1 week
 
   let address
   let signer
@@ -106,6 +150,10 @@ async function createAuthIdentity() {
   const identity = await Authenticator.initializeAuthChain(address, ephemeral, ephemeralLifespanMinutes, signer)
 
   return identity
+}
+
+const zip = <T>(arr: Array<T>, ...arrs: Array<Array<any>>) => {
+  return arr.map((val, i) => arrs.reduce((a, arr) => [...a, arr[i]], [val]))
 }
 
 export async function initShared(): Promise<Session | undefined> {
@@ -197,6 +245,12 @@ export async function initShared(): Promise<Session | undefined> {
   if (STATIC_WORLD) {
     return session
   }
+
+  const nodes = await fetchKatalystNodes()
+
+  const results = await Promise.all(nodes.map(node => ping(`${node.domain}/content/status`)))
+  const candidates = zip(nodes, results).filter($ => $[1].success)
+  defaultLogger.info(`candidates`, candidates)
 
   // initialize profile
   console['group']('connect#profile')
