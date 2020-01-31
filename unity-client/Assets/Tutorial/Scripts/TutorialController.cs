@@ -105,7 +105,7 @@ public class TutorialController : MonoBehaviour
 
     private int GetTutorialFlagFromUserProfile()
     {
-        return tutorialFlagMask; // TODO: get flag from user profile
+        return UserProfile.GetOwnUserProfile().tutorialFlag;
     }
 
     private void OnRenderingStateChanged(bool renderingEnabled)

@@ -16,6 +16,7 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
     public string userName => model.name;
     public string email => model.email;
     public AvatarModel avatar => model.avatar;
+    public int tutorialFlag => model.tutorialFlag;
     internal Dictionary<string, int> inventory = new Dictionary<string, int>();
 
     private Texture2D faceSnapshotValue = null;
@@ -144,6 +145,11 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
         faceSnapshotValue = faceSnapshot;
         bodySnapshotValue = bodySnapshot;
         OnUpdate?.Invoke(this);
+    }
+
+    public void SetTutorialFlag(int tutorialFlag)
+    {
+        model.tutorialFlag = tutorialFlag;
     }
 
     internal static UserProfile ownUserProfile;

@@ -18,4 +18,5 @@ public class UserProfileModel
     public AvatarModel avatar;
     public string[] inventory;
     public Snapshots snapshots = new Snapshots();
+    public int tutorialFlag;
 }
