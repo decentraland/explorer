@@ -12,6 +12,8 @@ using UnityEngine.Networking;
 [CreateAssetMenu(fileName = "UserProfile", menuName = "UserProfile")]
 public class UserProfile : ScriptableObject //TODO Move to base variable
 {
+    public const bool ENABLE_EXPRESSIONS = false;
+    
     static DateTime epochStart = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
     public event Action<UserProfile> OnUpdate;
@@ -151,6 +153,9 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
 
     public void SetAvatarExpression(string id)
     {
+        if (!ENABLE_EXPRESSIONS)
+            return;
+        
         var timestamp = (long)(DateTime.UtcNow - epochStart).TotalMilliseconds;
         avatar.expressionTriggerId = id;
         avatar.expressionTriggerTimestamp = timestamp;

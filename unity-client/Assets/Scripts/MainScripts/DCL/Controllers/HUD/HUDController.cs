@@ -115,8 +115,8 @@ public class HUDController : MonoBehaviour
 
     public void ConfigureExpressionsHUD(string configurationJson)
     {
-        //Remove to enable Expressions
-        return;
+        if(!UserProfile.ENABLE_EXPRESSIONS)
+            return;
 
         HUDConfiguration configuration = JsonUtility.FromJson<HUDConfiguration>(configurationJson);
         if (configuration.active && expressionsHud == null)

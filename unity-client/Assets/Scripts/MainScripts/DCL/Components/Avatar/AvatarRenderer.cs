@@ -217,7 +217,7 @@ namespace DCL
         {
             //NOTE(Brian): Set bones/rootBone of all wearables to be the same of the baseBody,
             //             so all of them are animated together.
-            var mainSkinnedRenderer = bodyShapeController.skinMeshRendered;
+            var mainSkinnedRenderer = bodyShapeController.skinnedMeshRenderer;
             using (var enumerator = wearablesController.GetEnumerator())
             {
                 while (enumerator.MoveNext())

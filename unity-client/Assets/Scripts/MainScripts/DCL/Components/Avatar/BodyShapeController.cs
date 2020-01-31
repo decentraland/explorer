@@ -10,12 +10,12 @@ public class BodyShapeController : WearableController
     public BodyShapeController(WearableItem wearableItem) : base(wearableItem, wearableItem?.id) { }
     protected BodyShapeController(WearableController original) : base(original) { }
 
-    public SkinnedMeshRenderer skinMeshRendered { get; private set; }
+    public SkinnedMeshRenderer skinnedMeshRenderer { get; private set; }
 
     public override void Load(Transform parent, Action<WearableController> onSuccess, Action<WearableController> onFail)
     {
         animationTarget = parent;
-        skinMeshRendered = null;
+        skinnedMeshRenderer = null;
         base.Load(parent, onSuccess, onFail);
     }
 
@@ -96,7 +96,7 @@ public class BodyShapeController : WearableController
     protected override void PrepareWearable(GameObject assetContainer)
     {
         base.PrepareWearable(assetContainer);
-        skinMeshRendered = assetContainer.GetComponentInChildren<SkinnedMeshRenderer>();
+        skinnedMeshRenderer = assetContainer.GetComponentInChildren<SkinnedMeshRenderer>();
         var animation = PrepareAnimation();
         var animator = animationTarget.GetComponent<AvatarAnimatorLegacy>();
         animator.BindBodyShape(animation, bodyShapeType, animationTarget);
