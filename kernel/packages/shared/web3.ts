@@ -56,29 +56,25 @@ export async function initWeb3(): Promise<void> {
   }
 }
 
-declare const ethereum: any
-
 export async function fetchKatalystNodes() {
   const contractAddress = Address.fromString(getServerConfigurations().dao)
   let eth = Eth.fromCurrentProvider()
 
   if (!eth) {
-    defaultLogger.info(`user denied account access to metamask, defaulting to infura mainnet node`)
-    eth = new Eth(new WebsocketProvider(ethereumConfigurations[ETHEREUM_NETWORK.MAINNET].wss))
-  } else {
-    await ethereum.enable()
+    throw new Error('Ethereum provider not set!')
   }
 
-  const accounts = await eth.getAccounts()
-  defaultLogger.info(`accounts: `, accounts)
-
-  defaultLogger.info(`eth: `, eth)
   const contract = new Katalyst(eth, contractAddress)
 
-  // @ts-ignore
-  const count = await contract.methods.katalystCount().call()
-  // @ts-ignore
-  const ids = await contract.methods.katalystIds(0).call()
-  // @ts-ignore
-  const url = await contract.methods.katalystById(ids).call()
+  const count = Number.parseInt(await contract.methods.katalystCount().call(), 10)
+
+  const nodes = []
+  for (let i = 0; i < count; ++i) {
+    const ids = await contract.methods.katalystIds(i).call()
+    const node = await contract.methods.katalystById(ids).call()
+
+    nodes.push(node)
+  }
+
+  return nodes
 }
