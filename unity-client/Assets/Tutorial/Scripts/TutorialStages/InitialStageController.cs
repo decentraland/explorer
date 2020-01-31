@@ -43,7 +43,7 @@ public class InitialStageController : TutorialStageController
         yield return ShowTooltip(wellcomeTooltip);
 
         yield return new WaitUntil(() => avatarEditorClosed);
-        yield return WaitIdleTime();
+        yield return WaitSeconds(3);
 
         yield return ShowTooltip(controlsTooltip);
         yield return WaitIdleTime();
