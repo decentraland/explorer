@@ -39,7 +39,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 193, y: 137}
+  m_AnchoredPosition: {x: 193, y: 132}
   m_SizeDelta: {x: 450, y: 134}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6691210900768995065
@@ -91,6 +91,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 005cdab7f379540b0bfbbaee75b5334a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  secondsOnScreen: 12
   showAnimationClip: {fileID: 7400000, guid: 493df13152a6e406c8fe35a0232e582b, type: 2}
   hideAnimationClip: {fileID: 7400000, guid: a4d65e7abb4c8437bb8831ecd74fa1e8, type: 2}
 --- !u!111 &5411534584502438632
@@ -144,7 +145,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -68.024956, y: -14}
+  m_AnchoredPosition: {x: -68, y: -14}
   m_SizeDelta: {x: 260.05, y: 54}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &2166310548624667501
@@ -1225,6 +1226,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 005cdab7f379540b0bfbbaee75b5334a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  secondsOnScreen: 12
   showAnimationClip: {fileID: 7400000, guid: 493df13152a6e406c8fe35a0232e582b, type: 2}
   hideAnimationClip: {fileID: 7400000, guid: a4d65e7abb4c8437bb8831ecd74fa1e8, type: 2}
 --- !u!111 &7432672033531494394
@@ -1568,6 +1570,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 005cdab7f379540b0bfbbaee75b5334a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  secondsOnScreen: 12
   showAnimationClip: {fileID: 7400000, guid: 12fe637ba0093437bbe6e52c85e64c81, type: 2}
   hideAnimationClip: {fileID: 7400000, guid: cb0242b8a8eee43f4818dcfc8e9dab1e, type: 2}
 --- !u!111 &7332491460527024219
@@ -1858,7 +1861,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 193, y: 74}
+  m_AnchoredPosition: {x: 193, y: 132}
   m_SizeDelta: {x: 450, y: 134}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5082411655096122246
@@ -1910,6 +1913,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 005cdab7f379540b0bfbbaee75b5334a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  secondsOnScreen: 12
   showAnimationClip: {fileID: 7400000, guid: 493df13152a6e406c8fe35a0232e582b, type: 2}
   hideAnimationClip: {fileID: 7400000, guid: a4d65e7abb4c8437bb8831ecd74fa1e8, type: 2}
 --- !u!111 &2634606073023056691
