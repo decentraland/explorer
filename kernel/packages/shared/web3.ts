@@ -1,11 +1,10 @@
-import { ethereumConfigurations, ETHEREUM_NETWORK, getTLD, getServerConfigurations } from '../config'
+import { ETHEREUM_NETWORK, getTLD, getServerConfigurations } from '../config'
 
 import { getUserAccount, getNetwork } from './ethereum/EthereumService'
 import { awaitWeb3Approval } from './ethereum/provider'
 import { queueTrackingEvent } from './analytics'
 import { defaultLogger } from './logger'
 
-import { WebsocketProvider } from 'web3x/providers'
 import { Address } from 'web3x/address'
 import { Eth } from 'web3x/eth'
 import { Katalyst } from './dao/contracts/Katalyst'
@@ -58,7 +57,7 @@ export async function initWeb3(): Promise<void> {
 
 export async function fetchKatalystNodes() {
   const contractAddress = Address.fromString(getServerConfigurations().dao)
-  let eth = Eth.fromCurrentProvider()
+  const eth = Eth.fromCurrentProvider()
 
   if (!eth) {
     throw new Error('Ethereum provider not set!')
