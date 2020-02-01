@@ -1,4 +1,4 @@
-using DCL.Helpers;
+﻿using DCL.Helpers;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -98,8 +98,8 @@ namespace DCL
                 }
             }
 
-            if (concurrentRequests >= 25)
-                yield return new WaitUntil(() => concurrentRequests < 25);
+            if (concurrentRequests >= 20)
+                yield return new WaitUntil(() => concurrentRequests < 20);
 
             concurrentRequests++;
             mustDecrementRequest = true;
