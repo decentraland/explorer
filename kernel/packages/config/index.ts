@@ -95,10 +95,10 @@ export const ENV_OVERRIDE = location.search.indexOf('ENV') !== -1
 // Comms
 export const USE_LOCAL_COMMS = location.search.indexOf('LOCAL_COMMS') !== -1 || PREVIEW
 export const COMMS = USE_LOCAL_COMMS
-  ? 'v1:local'
+  ? 'v1-local'
   : location.search.indexOf('COMMS') !== -1
-  ? window.location.search.match(/COMMS=(\w+:\w+)/)[1]
-  : 'v1:remote' // by default use v1:remote for now
+  ? window.location.search.match(/COMMS=(\w+-\w+)/)[1]
+  : 'v2-p2p' // by default
 
 export const DEBUG =
   location.search.indexOf('DEBUG_MODE') !== -1 ||
@@ -112,6 +112,8 @@ export const DEBUG_MESSAGES = location.search.indexOf('DEBUG_MESSAGES') !== -1
 export const DEBUG_WS_MESSAGES = location.search.indexOf('DEBUG_WS_MESSAGES') !== -1
 export const DEBUG_REDUX = location.search.indexOf('DEBUG_REDUX') !== -1
 export const DEBUG_LOGIN = location.search.indexOf('DEBUG_LOGIN') !== -1
+
+export const AWS = location.search.indexOf('AWS') !== -1
 
 export const DISABLE_AUTH = location.search.indexOf('DISABLE_AUTH') !== -1 || DEBUG
 export const ENGINE_DEBUG_PANEL = location.search.indexOf('ENGINE_DEBUG_PANEL') !== -1
@@ -227,8 +229,11 @@ export function getServerConfigurations() {
   return {
     auth: `https://auth.decentraland.${TLDDefault}/api/v1`,
     landApi: `https://api.decentraland.${TLDDefault}/v1`,
-    content: `https://content.decentraland.${TLDDefault === 'today' ? 'org' : TLDDefault}`,
-    contentAsBundle: `https://content-as-bundle.decentraland.zone`,
+    content: AWS
+      ? `https://content.decentraland.${TLDDefault === 'today' ? 'org' : TLDDefault}`
+      : `https://katalyst-lambdas.decentraland.zone/contentv2`,
+    contentUpdate: `https://katalyst-content.decentraland.zone`,
+    contentAsBundle: `https://content-assets-as-bundle.decentraland.org`,
     worldInstanceUrl: `wss://world-comm.decentraland.${TLDDefault}/connect`,
     comms: {
       lighthouse: {
@@ -236,8 +241,8 @@ export function getServerConfigurations() {
         p2p: 'https://katalyst-comms-no-relay.decentraland.zone'
       }
     },
-    profile: `https://profile.decentraland.${TLDDefault}/api/v1`,
-    wearablesApi: `https://wearable-api.decentraland.org/v2`,
+    profile: `https://katalyst-lambdas.decentraland.zone/profile`,
+    wearablesApi: `https://wearables-api.decentraland.org/v2`,
     avatar: {
       snapshotStorage: `https://avatars-storage.decentraland.${TLDDefault}/`,
       server: `https://avatars-api.decentraland.${TLDDefault === 'zone' ? 'today' : TLDDefault}/`,
@@ -245,6 +250,7 @@ export function getServerConfigurations() {
       contents: `https://s3.amazonaws.com/content-service.decentraland.org/`,
       presets: `https://avatars-storage.decentraland.org/mobile-avatars`
     },
+    dao: TLDDefault === 'zone' ? '0x89550d8fc174b2ca216f2bd1bc20128413a2ab9d' : 'mainnetaddress',
     darApi:
       TLDDefault === 'zone' || TLDDefault === 'today'
         ? 'https://schema-api-v2.now.sh/dar'
