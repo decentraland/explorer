@@ -48,12 +48,13 @@ namespace DCL
 
         public Pool(string name, int maxPrewarmCount)
         {
-            container = new GameObject("Pool - " + name);
-            this.maxPrewarmCount = maxPrewarmCount;
-
 #if UNITY_EDITOR
             Application.quitting += OnIsQuitting;
 #endif
+            if (PoolManager.USE_POOL_CONTAINERS)
+                container = new GameObject("Pool - " + name);
+
+            this.maxPrewarmCount = maxPrewarmCount;
         }
 
         public void ForcePrewarm()
@@ -89,7 +90,8 @@ namespace DCL
 
         private PoolableObject Extract()
         {
-            PoolableObject po = unusedObjects.First.Value;
+            PoolableObject po = null;
+            po = unusedObjects.First.Value;
             unusedObjects.RemoveFirst();
             po.node = usedObjects.AddFirst(po);
 
@@ -122,7 +124,7 @@ namespace DCL
         private PoolableObject SetupPoolableObject(GameObject gameObject, bool active = false)
         {
             if (PoolManager.i.poolables.ContainsKey(gameObject))
-                return null;
+                return PoolManager.i.GetPoolable(gameObject);
 
             PoolableObject poolable = new PoolableObject();
             poolable.pool = this;
@@ -228,7 +230,9 @@ namespace DCL
             usedObjects.Clear();
 
             Object.Destroy(this.original);
-            Object.Destroy(this.container);
+
+            if (PoolManager.USE_POOL_CONTAINERS)
+                Object.Destroy(this.container);
 
             OnCleanup?.Invoke(this);
         }
@@ -242,9 +246,6 @@ namespace DCL
 
             if (!go.activeSelf)
                 go.SetActive(true);
-
-            if (go.transform.parent != null)
-                go.transform.SetParent(null);
 
             lastGetTime = Time.unscaledTime;
         }
@@ -262,21 +263,27 @@ namespace DCL
 
             if (go.activeSelf)
                 go.SetActive(false);
-#if UNITY_EDITOR
-            if (container != null)
+
+            if (PoolManager.USE_POOL_CONTAINERS)
             {
-                go.transform.SetParent(container.transform);
-                go.transform.ResetLocalTRS();
+                if (container != null)
+                {
+                    go.transform.SetParent(container.transform);
+                }
             }
-#endif
+            else
+            {
+                go.transform.SetParent(null);
+            }
         }
 
+#if UNITY_EDITOR
         private void RefreshName()
         {
             if (this.container != null)
                 this.container.name = $"in: {unusedObjectsCount} out: {usedObjectsCount} id: {id}";
         }
-
+#endif
         public static bool FindPoolInGameObject(GameObject gameObject, out Pool pool)
         {
             pool = null;

@@ -6,6 +6,12 @@ namespace DCL
 {
     public class PoolManager : Singleton<PoolManager>
     {
+#if UNITY_EDITOR
+        public static bool USE_POOL_CONTAINERS = true;
+#else
+        public static bool USE_POOL_CONTAINERS = false;
+#endif
+
         public const int DEFAULT_PREWARM_COUNT = 100;
         public static bool enablePrewarm = true;
         public bool initializing { get; private set; }
@@ -81,7 +87,9 @@ namespace DCL
                 }
 
                 Pool result = GetPool(id);
+
                 result.AddToPool(original);
+
                 return result;
             }
 
@@ -90,16 +98,23 @@ namespace DCL
 
             Pool pool = new Pool(id.ToString(), maxPrewarmCount);
 
-            pool.container.transform.parent = container.transform;
-
+            pool.id = id;
             pool.original = original;
-            pool.original.name = "Original";
-            pool.original.transform.parent = pool.container.transform;
+
+            if (USE_POOL_CONTAINERS)
+            {
+                pool.container.transform.parent = container.transform;
+                pool.original.name = "Original";
+                pool.original.transform.parent = pool.container.transform;
+            }
+            else
+            {
+                pool.original.transform.parent = null;
+            }
 
             pool.original.SetActive(false);
 
             pool.instantiator = instantiator;
-            pool.id = id;
 
             pools.Add(id, pool);
 
@@ -131,6 +146,7 @@ namespace DCL
 
             if (pools.ContainsKey(id))
             {
+                Debug.Log("Will remove pool = " + id);
                 pools[id].Cleanup();
                 pools.Remove(id);
             }
