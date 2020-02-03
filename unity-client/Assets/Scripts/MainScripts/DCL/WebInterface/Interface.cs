@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+﻿﻿using UnityEngine;
 
 #if UNITY_WEBGL && !UNITY_EDITOR
 using System.Runtime.InteropServices;
@@ -303,6 +303,13 @@ namespace DCL.Interface
         [System.Serializable]
         public class RaycastHitAllResponse : RaycastResponse<RaycastHitEntities>
         {
+        }
+
+        [System.Serializable]
+        public class SendExpressionPayload
+        {
+            public string id;
+            public long timestamp;
         }
 
 #if UNITY_WEBGL && !UNITY_EDITOR
@@ -632,6 +639,16 @@ namespace DCL.Interface
         public static void SendPerformanceReport(string encodedFrameTimesInMS)
         {
             WebInterface.MessageFromEngine("PerformanceReport", encodedFrameTimesInMS);
+
+        }
+
+        public static void SendExpression(string expressionID, long timestamp)
+        {
+            SendMessage("TriggerExpression", new SendExpressionPayload()
+            {
+                id = expressionID,
+                timestamp = timestamp
+            });
 
         }
     }

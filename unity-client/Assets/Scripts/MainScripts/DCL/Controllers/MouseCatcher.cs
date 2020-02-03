@@ -2,6 +2,7 @@ using DCL.Components;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using System.Collections.Generic;
+using DCL.Helpers;
 
 namespace DCL
 {
@@ -9,8 +10,6 @@ namespace DCL
     {
         //Default OnPointerEvent
         public LayerMask OnPointerDownTarget = 1 << 9;
-
-        private static int lockedCursorFrame;
 
         void Update()
         {
@@ -22,23 +21,16 @@ namespace DCL
             }
 #endif
         }
-        
-        public static bool LockedThisFrame() => Time.frameCount == lockedCursorFrame;
 
         public void LockCursor()
         {
-            lockedCursorFrame = Time.frameCount;
-            Cursor.visible = false;
-            Cursor.lockState = CursorLockMode.Locked;
-
-            EventSystem.current.SetSelectedGameObject(null);
+            Utils.LockCursor();
         }
 
         //Externally called by the browser
         public void UnlockCursor()
         {
-            Cursor.visible = true;
-            Cursor.lockState = CursorLockMode.None;
+            Utils.UnlockCursor();
         }
 
         public void OnPointerDown(PointerEventData eventData)
