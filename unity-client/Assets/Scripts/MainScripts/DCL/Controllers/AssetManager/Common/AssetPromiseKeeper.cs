@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,7 +6,7 @@ namespace DCL
 {
     public class AssetPromiseKeeper
     {
-        public static float PROCESS_PROMISES_TIME_BUDGET = 0.005f;
+        public static float PROCESS_PROMISES_TIME_BUDGET = 0.006f;
     }
     /// <summary>
     /// The AssetPromiseKeeper is the user entry point interface.
@@ -58,7 +58,9 @@ namespace DCL
         public AssetPromiseKeeper(AssetLibraryType library)
         {
             this.library = library;
-            CoroutineStarter.Start(ProcessBlockedPromisesQueue());
+            var coroutine = CoroutineStarter.Start(ProcessBlockedPromisesQueue());
+            coroutine.priority = -1;
+            coroutine.timeBudget = AssetPromiseKeeper.PROCESS_PROMISES_TIME_BUDGET;
         }
 
         public AssetPromiseType Keep(AssetPromiseType promise)
@@ -156,20 +158,19 @@ namespace DCL
         float startTime;
         IEnumerator ProcessBlockedPromisesQueue()
         {
-            startTime = Time.unscaledTime;
-
             while (true)
             {
-                while (blockedPromisesQueue.Count > 0)
+                if (blockedPromisesQueue.Count <= 0)
                 {
-                    AssetPromise<AssetType> promise = blockedPromisesQueue.Dequeue();
-
-                    yield return ProcessBlockedPromisesDeferred(promise);
-                    CleanPromise(promise);
+                    yield return null;
+                    continue;
                 }
 
-                yield return null;
-                startTime = Time.unscaledTime;
+                AssetPromise<AssetType> promise = blockedPromisesQueue.Dequeue();
+                yield return ProcessBlockedPromisesDeferred(promise);
+                CleanPromise(promise);
+
+                yield return CoroutineStarter.BreakIfBudgetExceeded();
             }
         }
         private IEnumerator ProcessBlockedPromisesDeferred(AssetPromise<AssetType> loadedPromise)

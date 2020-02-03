@@ -12,7 +12,7 @@ namespace DCL
     {
         public AssetPromiseSettings_Rendering settings = new AssetPromiseSettings_Rendering();
         AssetPromise_AB subPromise;
-        Coroutine loadingCoroutine;
+        CoroutineStarter.Coroutine loadingCoroutine;
         List<Renderer> renderers = new List<Renderer>();
 
         public AssetPromise_AB_GameObject(string contentUrl, string hash) : base(contentUrl, hash)
@@ -21,7 +21,7 @@ namespace DCL
 
         protected override void OnLoad(Action OnSuccess, Action OnFail)
         {
-            loadingCoroutine = CoroutineStarter.Start(LoadingCoroutine(OnSuccess, OnFail));
+            loadingCoroutine = CoroutineStarter.Start(LoadingCoroutine(OnSuccess, OnFail), 1);
         }
 
         protected override bool AddToLibrary()

@@ -163,34 +163,27 @@ namespace DCL.Helpers
         static IEnumerator FetchAsset(string url, UnityWebRequest request,
             System.Action<UnityWebRequest> OnSuccess = null, System.Action<string> OnFail = null)
         {
-            if (!string.IsNullOrEmpty(url))
-            {
-                using (var webRequest = request)
-                {
-                    yield return webRequest.SendWebRequest();
-
-                    if (!WebRequestSucceded(request))
-                    {
-                        Debug.LogError(
-                            string.Format("Fetching asset failed ({0}): {1} ", request.url, webRequest.error));
-
-                        if (OnFail != null)
-                        {
-                            OnFail.Invoke(webRequest.error);
-                        }
-                    }
-                    else
-                    {
-                        if (OnSuccess != null)
-                        {
-                            OnSuccess.Invoke(webRequest);
-                        }
-                    }
-                }
-            }
-            else
+            if (string.IsNullOrEmpty(url))
             {
                 Debug.LogError(string.Format("Can't fetch asset as the url is empty!"));
+                yield break;
+            }
+
+            using (var webRequest = request)
+            {
+                yield return webRequest.SendWebRequest();
+
+                if (!WebRequestSucceded(request))
+                {
+                    Debug.LogError(
+                        string.Format("Fetching asset failed ({0}): {1} ", request.url, webRequest.error));
+
+                    OnFail?.Invoke(webRequest.error);
+                }
+                else
+                {
+                    OnSuccess?.Invoke(webRequest);
+                }
             }
         }
 
@@ -412,8 +405,12 @@ namespace DCL.Helpers
             return bounds;
         }
 
+        private static int lockedInFrame = -1;
+        public static bool LockedThisFrame() => lockedInFrame == Time.frameCount;
+
         public static void LockCursor()
         {
+            lockedInFrame = Time.frameCount;
             Cursor.visible = false;
             Cursor.lockState = CursorLockMode.Locked;
 

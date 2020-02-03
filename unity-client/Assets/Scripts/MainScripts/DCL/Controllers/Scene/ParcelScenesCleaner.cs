@@ -24,11 +24,13 @@ namespace DCL
         Queue<DecentralandEntity> entitiesMarkedForCleanup = new Queue<DecentralandEntity>();
         Queue<ParcelEntity> rootEntitiesMarkedForCleanup = new Queue<ParcelEntity>();
 
-        Coroutine removeEntitiesCoroutine;
+        CoroutineStarter.Coroutine removeEntitiesCoroutine;
 
         public void Start()
         {
             removeEntitiesCoroutine = CoroutineStarter.Start(CleanupEntitiesCoroutine());
+            removeEntitiesCoroutine.priority = 2;
+            removeEntitiesCoroutine.timeBudget = MAX_TIME_BUDGET;
         }
 
         public void Stop()
@@ -89,7 +91,6 @@ namespace DCL
         {
             while (true)
             {
-                float lastTime = Time.unscaledTime;
                 ParcelScene scene = null;
 
                 // If we have root entities queued for removal, we call Parcel Scene's RemoveEntity()
@@ -106,11 +107,7 @@ namespace DCL
                     scene = parcelEntity.scene;
                     scene.RemoveEntity(parcelEntity.entity.entityId, false);
 
-                    if (DCLTime.realtimeSinceStartup - lastTime >= MAX_TIME_BUDGET)
-                    {
-                        yield return null;
-                        lastTime = Time.unscaledTime;
-                    }
+                    yield return CoroutineStarter.BreakIfBudgetExceeded();
                 }
 
                 while (entitiesMarkedForCleanup.Count > 0)
@@ -119,11 +116,7 @@ namespace DCL
                     entity.SetParent(null);
                     entity.Cleanup();
 
-                    if (DCLTime.realtimeSinceStartup - lastTime >= MAX_TIME_BUDGET)
-                    {
-                        yield return null;
-                        lastTime = Time.unscaledTime;
-                    }
+                    yield return CoroutineStarter.BreakIfBudgetExceeded();
                 }
 
                 if (scene != null)

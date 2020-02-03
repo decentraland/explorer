@@ -34,6 +34,8 @@ public class RenderingController : MonoBehaviour
         AssetPromiseKeeper_AB_GameObject.i.useBlockedPromisesQueue = false;
         AssetPromise_AB.limitTimeBudget = false;
 
+        CoroutineStarter.enableThrottling = false;
+
         DCLCharacterController.i.SetEnabled(false);
 
         OnRenderingStateChanged?.Invoke(renderingEnabled);
@@ -61,6 +63,8 @@ public class RenderingController : MonoBehaviour
         AssetPromiseKeeper_AB_GameObject.i.useBlockedPromisesQueue = true;
 
         OnRenderingStateChanged?.Invoke(renderingEnabled);
+
+        CoroutineStarter.enableThrottling = true;
 
         WebInterface.ReportControlEvent(new WebInterface.ActivateRenderingACK());
     }

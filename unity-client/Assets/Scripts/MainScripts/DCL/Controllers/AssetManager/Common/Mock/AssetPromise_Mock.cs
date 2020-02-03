@@ -1,6 +1,5 @@
-﻿using System;
+using System;
 using System.Collections;
-using UnityEngine;
 using UnityEngine.Assertions;
 
 namespace DCL
@@ -11,7 +10,7 @@ namespace DCL
         public float loadTime;
         public object idGenerator;
         private object id;
-        Coroutine assetMockCoroutine;
+        CoroutineStarter.Coroutine assetMockCoroutine;
 
         internal override object GetId()
         {

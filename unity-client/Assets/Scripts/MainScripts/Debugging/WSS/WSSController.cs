@@ -207,7 +207,7 @@ namespace DCL
                 }
 
                 Application.OpenURL(
-                    $"{baseUrl}{debugString}{debugPanelString}position={startInCoords.x}%2C{startInCoords.y}&ws=ws%3A%2F%2Flocalhost%3A5000%2Fdcl");
+                    $"{baseUrl}{debugString}{debugPanelString}position={startInCoords.x}%2C{startInCoords.y}&ws=ws%3A%2F%2Flocalhost%3A5000%2Fdcl&AWS&STATIC_WORLD");
             }
 #endif
         }
@@ -281,6 +281,15 @@ namespace DCL
                                 break;
                             case "LoadProfile":
                                 UserProfileController.i?.LoadProfile(msg.payload);
+                                break;
+                            case "AddUserProfileToCatalog":
+                                UserProfileController.i.AddUserProfileToCatalog(msg.payload);
+                                break;
+                            case "AddUserProfilesToCatalog":
+                                UserProfileController.i.AddUserProfilesToCatalog(msg.payload);
+                                break;
+                            case "RemoveUserProfilesFromCatalog":
+                                UserProfileController.i.RemoveUserProfilesFromCatalog(msg.payload);
                                 break;
                             case "DeactivateRendering":
                                 RenderingController.i.DeactivateRendering();
@@ -371,6 +380,9 @@ namespace DCL
                                 break;
                             case "ConfigureAvatarEditorHUD":
                                 HUDController.i?.ConfigureAvatarEditorHUD(msg.payload);
+                                break;
+                            case "ConfigurePlayerInfoCardHUD":
+                                HUDController.i.ConfigurePlayerInfoCardHUD(msg.payload);
                                 break;
                             case "ConfigureExpressionsHUD":
                                 HUDController.i.ConfigureExpressionsHUD(msg.payload);

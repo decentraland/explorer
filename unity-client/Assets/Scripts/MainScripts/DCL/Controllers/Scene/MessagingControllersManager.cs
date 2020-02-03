@@ -20,7 +20,7 @@ namespace DCL
         public Dictionary<string, MessagingController> messagingControllers = new Dictionary<string, MessagingController>();
         private string globalSceneId = null;
 
-        private Coroutine mainCoroutine;
+        private CoroutineStarter.Coroutine mainCoroutine;
 
         public bool hasPendingMessages => pendingMessagesCount > 0;
 
@@ -50,7 +50,9 @@ namespace DCL
 
             if (mainCoroutine == null)
             {
-                mainCoroutine = SceneController.i.StartCoroutine(ProcessMessages());
+                mainCoroutine = CoroutineStarter.Start(ProcessMessages());
+                mainCoroutine.priority = 0;
+                mainCoroutine.timeBudget = MAX_GLOBAL_MSG_BUDGET;
             }
         }
 
@@ -144,7 +146,7 @@ namespace DCL
         {
             if (mainCoroutine != null)
             {
-                SceneController.i.StopCoroutine(mainCoroutine);
+                CoroutineStarter.Stop(mainCoroutine);
                 mainCoroutine = null;
             }
 
@@ -238,14 +240,14 @@ namespace DCL
                     populateBusesDirty = false;
                 }
 
-                timeBudgetCounter = RenderingController.i.renderingEnabled ? MAX_GLOBAL_MSG_BUDGET : float.MaxValue;
+                timeBudgetCounter = RenderingController.i.renderingEnabled ? MAX_GLOBAL_MSG_BUDGET : 1;
 
                 for (int i = 0; i < busesToProcessCount; ++i)
                 {
                     MessagingBus bus = busesToProcess[i];
 
-                    if (ProcessBus(bus))
-                        break;
+                    ProcessBus(bus);
+                    yield return CoroutineStarter.BreakIfBudgetExceeded();
                 }
 
                 if (pendingInitMessagesCount == 0)
@@ -263,26 +265,16 @@ namespace DCL
             }
         }
 
-        bool ProcessBus(MessagingBus bus)
+        void ProcessBus(MessagingBus bus)
         {
             if (!bus.enabled || bus.pendingMessagesCount <= 0)
-                return false;
-
-            float startTime = Time.realtimeSinceStartup;
-
-            float timeBudget = timeBudgetCounter;
+                return;
 
             //TODO(Brian): We should use the returning yieldReturn IEnumerator and MoveNext() it manually each frame to
             //             account the coroutine processing into the budget. Until we do that we just skip it.
-            bus.ProcessQueue(timeBudget, out _);
+            float budget = CoroutineStarter.GetRemainingBudget();
+            bus.ProcessQueue(budget, out _);
             RefreshControllerEnabledState(bus.owner);
-
-            timeBudgetCounter -= Time.realtimeSinceStartup - startTime;
-
-            if (timeBudgetCounter <= 0)
-                return true;
-
-            return false;
         }
 
         public void RefreshControllerEnabledState(MessagingController controller)

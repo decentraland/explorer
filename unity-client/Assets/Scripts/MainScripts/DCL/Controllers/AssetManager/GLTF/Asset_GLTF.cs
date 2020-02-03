@@ -10,7 +10,7 @@ namespace DCL
         public string name;
         public bool visible = true;
 
-        Coroutine showCoroutine;
+        CoroutineStarter.Coroutine showCoroutine;
 
         public Asset_GLTF()
         {
