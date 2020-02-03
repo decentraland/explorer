@@ -207,7 +207,7 @@ namespace DCL
                 }
 
                 Application.OpenURL(
-                    $"{baseUrl}{debugString}{debugPanelString}position={startInCoords.x}%2C{startInCoords.y}&ws=ws%3A%2F%2Flocalhost%3A5000%2Fdcl");
+                    $"{baseUrl}{debugString}{debugPanelString}position={startInCoords.x}%2C{startInCoords.y}&ws=ws%3A%2F%2Flocalhost%3A5000%2Fdcl&AWS&STATIC_WORLD");
             }
 #endif
         }

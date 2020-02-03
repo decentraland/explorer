@@ -12,7 +12,7 @@ namespace DCL
 
         public void Initialize()
         {
-            CoroutineStarter.Start(AutoCleanup());
+            CoroutineStarter.Start(AutoCleanup(), 10);
         }
 
         // TODO: here we'll define cleanup criteria

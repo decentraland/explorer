@@ -14,7 +14,10 @@ namespace Tests
         [UnityTest]
         public IEnumerator CoroutineStarterWorks()
         {
-            CoroutineStarter.Start(CoroutineTest1("#1"));
+            var coroutine = CoroutineStarter.Start(CoroutineBudgetTest());
+
+            coroutine.timeBudget = 0.006f;
+
             //CoroutineStarter.Start(CoroutineTest1("#2"));
             //CoroutineStarter.Start(CoroutineTest1("#3"));
             //CoroutineStarter.Start(CoroutineTest1("#4"));
@@ -22,6 +25,20 @@ namespace Tests
             //CoroutineStarter.Start(CoroutineTest1("#6"));
             //CoroutineStarter.Start(CoroutineTest2());
             yield return new WaitUntil(() => coroutineCounter == 1 /*&& coroutineEnded2*/);
+        }
+
+        public IEnumerator CoroutineBudgetTest()
+        {
+            int counter = 0;
+
+            while (counter < 1000)
+            {
+                Debug.Log("new frame " + Time.frameCount);
+                yield return CoroutineStarter.BreakIfBudgetExceeded();
+                counter++;
+            }
+
+            coroutineCounter++;
         }
 
         public IEnumerator CoroutineTest1(string argument)

@@ -28,7 +28,7 @@ public static class ThumbnailsManager
         else
         {
             waitingCallbacks.Add(url, new List<Action<Sprite>>() { callback });
-            CoroutineStarter.Start(Download(url));
+            CoroutineStarter.Start(Download(url), 100);
         }
     }
 

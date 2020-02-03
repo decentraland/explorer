@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -19,7 +19,7 @@ namespace DCL
         where AssetLibraryType : AssetLibrary<AssetType>, new()
         where AssetPromiseType : AssetPromise<AssetType>
     {
-        const float PROCESS_PROMISES_TIME_BUDGET = 0.0025f;
+        const float PROCESS_PROMISES_TIME_BUDGET = 0.006f;
 
         private static AssetPromiseKeeper<AssetType, AssetLibraryType, AssetPromiseType> instance;
         public static AssetPromiseKeeper<AssetType, AssetLibraryType, AssetPromiseType> i
@@ -56,7 +56,9 @@ namespace DCL
         public AssetPromiseKeeper(AssetLibraryType library)
         {
             this.library = library;
-            CoroutineStarter.Start(ProcessBlockedPromisesQueue());
+            var coroutine = CoroutineStarter.Start(ProcessBlockedPromisesQueue());
+            coroutine.priority = -1;
+            coroutine.timeBudget = PROCESS_PROMISES_TIME_BUDGET;
         }
 
         public AssetPromiseType Keep(AssetPromiseType promise)
@@ -153,7 +155,6 @@ namespace DCL
 
         IEnumerator ProcessBlockedPromisesQueue()
         {
-            float start = Time.unscaledTime;
             while (true)
             {
                 while (blockedPromisesQueue.Count > 0)
@@ -163,15 +164,10 @@ namespace DCL
                     ProcessBlockedPromises(promise);
                     CleanPromise(promise);
 
-                    if (Time.realtimeSinceStartup - start >= PROCESS_PROMISES_TIME_BUDGET)
-                    {
-                        yield return null;
-                        start = Time.unscaledTime;
-                    }
+                    yield return CoroutineStarter.BreakIfBudgetExceeded();
                 }
-                yield return null;
 
-                start = Time.unscaledTime;
+                yield return null;
             }
         }
 

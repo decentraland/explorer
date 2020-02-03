@@ -51,6 +51,8 @@ namespace DCL
             if (mainCoroutine == null)
             {
                 mainCoroutine = CoroutineStarter.Start(ProcessMessages());
+                mainCoroutine.priority = 0;
+                mainCoroutine.timeBudget = MAX_GLOBAL_MSG_BUDGET;
             }
         }
 
@@ -244,8 +246,8 @@ namespace DCL
                 {
                     MessagingBus bus = busesToProcess[i];
 
-                    if (ProcessBus(bus))
-                        break;
+                    ProcessBus(bus);
+                    yield return CoroutineStarter.BreakIfBudgetExceeded();
                 }
 
                 if (pendingInitMessagesCount == 0)
@@ -261,26 +263,16 @@ namespace DCL
             }
         }
 
-        bool ProcessBus(MessagingBus bus)
+        void ProcessBus(MessagingBus bus)
         {
             if (!bus.enabled || bus.pendingMessagesCount <= 0)
-                return false;
-
-            float startTime = Time.realtimeSinceStartup;
-
-            float timeBudget = timeBudgetCounter;
+                return;
 
             //TODO(Brian): We should use the returning yieldReturn IEnumerator and MoveNext() it manually each frame to
             //             account the coroutine processing into the budget. Until we do that we just skip it.
-            bus.ProcessQueue(timeBudget, out _);
+            float budget = CoroutineStarter.GetRemainingBudget();
+            bus.ProcessQueue(budget, out _);
             RefreshControllerEnabledState(bus.owner);
-
-            timeBudgetCounter -= Time.realtimeSinceStartup - startTime;
-
-            if (timeBudgetCounter <= 0)
-                return true;
-
-            return false;
         }
 
         public void RefreshControllerEnabledState(MessagingController controller)

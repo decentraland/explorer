@@ -187,6 +187,7 @@ namespace DCL
             while (usedObjects.Count > 0)
             {
                 usedObjects.First.Value.Release();
+                usedObjects.RemoveFirst();
             }
         }
 

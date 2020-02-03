@@ -38,9 +38,9 @@ namespace DCL
         public bool ignoreGlobalScenes = false;
         public bool msgStepByStep = false;
 
-        [NonSerialized] public bool deferredMessagesDecoding = false;
+        [NonSerialized] public bool deferredMessagesDecoding = true;
         Queue<string> payloadsToDecode = new Queue<string>();
-        const float MAX_TIME_FOR_DECODE = 0.005f;
+        const float MAX_TIME_FOR_DECODE = 0.006f;
 
 
         #region BENCHMARK_EVENTS
@@ -117,7 +117,11 @@ namespace DCL
             ParcelScene.parcelScenesCleaner.Start();
 
             if (deferredMessagesDecoding)
-                StartCoroutine(DeferredDecoding());
+            {
+                var defCoroutine = CoroutineStarter.Start(DeferredDecoding());
+                defCoroutine.priority = -2;
+                defCoroutine.timeBudget = MAX_TIME_FOR_DECODE;
+            }
 
             DCLCharacterController.OnCharacterMoved += SetPositionDirty;
         }
@@ -552,25 +556,15 @@ namespace DCL
 
         private IEnumerator DeferredDecoding()
         {
-            float start = Time.realtimeSinceStartup;
-            float maxTimeForDecode;
-
             while (true)
             {
-                maxTimeForDecode = RenderingController.i.renderingEnabled ? MAX_TIME_FOR_DECODE : float.MaxValue;
-
                 if (payloadsToDecode.Count > 0)
                 {
                     string payload = payloadsToDecode.Dequeue();
-
                     DecodeAndEnqueue(payload);
-
-                    if (Time.realtimeSinceStartup - start < maxTimeForDecode)
-                        continue;
                 }
 
-                yield return null;
-                start = Time.unscaledTime;
+                yield return CoroutineStarter.BreakIfBudgetExceeded();
             }
         }
 
