@@ -82,6 +82,15 @@ public class PlayerInfoCardHUDView : MonoBehaviour
 
     public void SetCardActive(bool active)
     {
+        if (active)
+        {
+            Utils.UnlockCursor();
+        }
+        else
+        {
+            Utils.LockCursor();
+        }
+
         cardCanvas.enabled = active;
     }
 
