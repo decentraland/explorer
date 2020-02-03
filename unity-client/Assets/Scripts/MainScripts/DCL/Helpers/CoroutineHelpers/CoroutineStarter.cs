@@ -36,6 +36,7 @@ public class CoroutineStarter : MonoBehaviour
     Coroutine currentRunningCoroutine;
     float currentRunningCoroutineStartTime;
     float currentRunningCoroutineRemainingTime;
+    [System.NonSerialized] public static bool enableThrottling = true;
 
     public static float GetRemainingBudget()
     {
@@ -52,10 +53,10 @@ public class CoroutineStarter : MonoBehaviour
 
     IEnumerator MainCoroutine()
     {
+        float globalStartTime = Time.unscaledTime;
+
         while (true)
         {
-            float globalStartTime = Time.realtimeSinceStartup;
-
             bool listDirty = false;
 
             if (coroutinesToAdd.Count > 0)
@@ -90,11 +91,12 @@ public class CoroutineStarter : MonoBehaviour
             {
                 RunCoroutineFrame(coroutines[i]);
 
-                if (Time.realtimeSinceStartup - globalStartTime > globalTimeBudget)
+                if (enableThrottling && Time.realtimeSinceStartup - globalStartTime > globalTimeBudget)
                     break;
             }
 
             yield return null;
+            globalStartTime = Time.unscaledTime;
         }
     }
 
@@ -155,14 +157,6 @@ public class CoroutineStarter : MonoBehaviour
             float elapsedTime = Time.realtimeSinceStartup - currentRunningCoroutineStartTime;
             currentRunningCoroutineRemainingTime = coroutine.timeBudget - elapsedTime;
 
-            if (currentYieldedObject is BreakIfBudgetExceededInstruction)
-            {
-                if (!(currentYieldedObject as BreakIfBudgetExceededInstruction).keepWaiting)
-                    break;
-
-                continue;
-            }
-
             if (ShouldSkipFrame(currentYieldedObject))
             {
                 coroutine.currentYieldInstruction = currentYieldedObject;
@@ -173,10 +167,8 @@ public class CoroutineStarter : MonoBehaviour
                 stack.Push(currentYieldedObject as IEnumerator);
             }
 
-            if (elapsedTime > coroutine.timeBudget)
-            {
+            if (elapsedTime > (enableThrottling ? coroutine.timeBudget : 2.0f))
                 break;
-            }
         }
 
         if (stack.Count == 0)
@@ -213,16 +205,11 @@ public class CoroutineStarter : MonoBehaviour
             coroutinesToRemove.Add(coroutine);
     }
 
-    public class BreakIfBudgetExceededInstruction : CustomYieldInstruction
+    //NOTE(Brian): This is placebo because any yield would evaluate the time budget.
+    //             If a Coroutine is in a tight loop and must evaluate if skipping inter-frame basis,
+    //             This object can be used through BreakIfBudgetExceeded()
+    public class BreakIfBudgetExceededInstruction
     {
-        public override bool keepWaiting
-        {
-            get
-            {
-                float elapsedTime = Time.realtimeSinceStartup - instance.currentRunningCoroutineStartTime;
-                return elapsedTime <= instance.currentRunningCoroutine.timeBudget;
-            }
-        }
     }
 
     BreakIfBudgetExceededInstruction cachedBreakIfBudgetExceededInstruction = new BreakIfBudgetExceededInstruction();

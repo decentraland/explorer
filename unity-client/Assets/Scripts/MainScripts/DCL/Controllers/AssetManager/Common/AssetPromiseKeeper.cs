@@ -157,17 +157,18 @@ namespace DCL
         {
             while (true)
             {
-                while (blockedPromisesQueue.Count > 0)
+                if (blockedPromisesQueue.Count <= 0)
                 {
-                    AssetPromise<AssetType> promise = blockedPromisesQueue.Dequeue();
-
-                    ProcessBlockedPromises(promise);
-                    CleanPromise(promise);
-
-                    yield return CoroutineStarter.BreakIfBudgetExceeded();
+                    yield return null;
+                    continue;
                 }
 
-                yield return null;
+                AssetPromise<AssetType> promise = blockedPromisesQueue.Dequeue();
+
+                ProcessBlockedPromises(promise);
+                CleanPromise(promise);
+
+                yield return CoroutineStarter.BreakIfBudgetExceeded();
             }
         }
 

@@ -558,12 +558,14 @@ namespace DCL
         {
             while (true)
             {
-                if (payloadsToDecode.Count > 0)
+                if (payloadsToDecode.Count == 0)
                 {
-                    string payload = payloadsToDecode.Dequeue();
-                    DecodeAndEnqueue(payload);
+                    yield return null;
+                    continue;
                 }
 
+                string payload = payloadsToDecode.Dequeue();
+                DecodeAndEnqueue(payload);
                 yield return CoroutineStarter.BreakIfBudgetExceeded();
             }
         }
