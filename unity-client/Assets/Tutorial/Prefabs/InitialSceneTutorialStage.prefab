@@ -1622,11 +1622,11 @@ Animation:
   serializedVersion: 3
   m_Animation: {fileID: 7400000, guid: 493df13152a6e406c8fe35a0232e582b, type: 2}
   m_Animations:
-  - {fileID: 7400000, guid: a4d65e7abb4c8437bb8831ecd74fa1e8, type: 2}
   - {fileID: 7400000, guid: 493df13152a6e406c8fe35a0232e582b, type: 2}
+  - {fileID: 7400000, guid: a4d65e7abb4c8437bb8831ecd74fa1e8, type: 2}
   m_WrapMode: 0
   m_PlayAutomatically: 1
-  m_AnimatePhysics: 1
+  m_AnimatePhysics: 0
   m_CullingType: 0
 --- !u!1 &6432865415452728495
 GameObject:
