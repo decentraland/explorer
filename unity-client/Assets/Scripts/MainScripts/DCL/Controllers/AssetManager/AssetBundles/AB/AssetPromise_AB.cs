@@ -104,8 +104,11 @@ namespace DCL
             concurrentRequests++;
             mustDecrementRequest = true;
             yield return LoadAssetBundle(baseUrl + hash, OnSuccess, OnFail);
-            concurrentRequests--;
-            mustDecrementRequest = false;
+            if (mustDecrementRequest)
+            {
+                concurrentRequests--;
+                mustDecrementRequest = false;
+            }
         }
 
         IEnumerator LoadAssetBundle(string finalUrl, Action OnSuccess, Action OnFail)
@@ -118,7 +121,21 @@ namespace DCL
 
             using (UnityWebRequest assetBundleRequest = UnityWebRequestAssetBundle.GetAssetBundle(finalUrl))
             {
-                yield return assetBundleRequest.SendWebRequest();
+                assetBundleRequest.SendWebRequest();
+
+                while (!assetBundleRequest.isDone)
+                {
+                    if (assetBundleRequest.downloadProgress > 0.75f)
+                    {
+                        if (mustDecrementRequest)
+                        {
+                            concurrentRequests--;
+                            mustDecrementRequest = false;
+                        }
+                    }
+
+                    yield return null;
+                }
 
                 if (!assetBundleRequest.WebRequestSucceded())
                 {
