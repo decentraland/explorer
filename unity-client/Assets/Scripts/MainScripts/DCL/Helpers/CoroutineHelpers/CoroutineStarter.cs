@@ -98,8 +98,8 @@ public class CoroutineStarter : MonoBehaviour
 
             // NOTE(Brian): Try to set a global budget so the end result is 30 fps.
             //              If rendering time is slow, don't care and just set 6 ms.
-            if (lastRenderTime > 0.032f)
-                globalTimeBudget = 0.032f - lastRenderTime;
+            if (lastRenderTime < 0.0333f)
+                globalTimeBudget = 0.0333f - lastRenderTime;
             else
                 globalTimeBudget = 0.006f;
 
