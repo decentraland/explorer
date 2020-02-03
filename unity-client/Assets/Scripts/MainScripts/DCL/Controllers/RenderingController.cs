@@ -1,4 +1,4 @@
-using DCL;
+﻿using DCL;
 using DCL.Interface;
 using UnityEngine;
 using UnityGLTF;
@@ -32,7 +32,6 @@ public class RenderingController : MonoBehaviour
         AssetPromiseKeeper_GLTF.i.useBlockedPromisesQueue = false;
         AssetPromiseKeeper_AB.i.useBlockedPromisesQueue = false;
         AssetPromiseKeeper_AB_GameObject.i.useBlockedPromisesQueue = false;
-        AssetPromise_AB.limitTimeBudget = false;
 
         CoroutineStarter.enableThrottling = false;
 
@@ -55,8 +54,6 @@ public class RenderingController : MonoBehaviour
         PointerEventsController.renderingIsDisabled = false;
         InputController_Legacy.renderingIsDisabled = false;
         DCLCharacterController.i.SetEnabled(true);
-
-        AssetPromise_AB.limitTimeBudget = true;
 
         AssetPromiseKeeper_GLTF.i.useBlockedPromisesQueue = true;
         AssetPromiseKeeper_AB.i.useBlockedPromisesQueue = true;

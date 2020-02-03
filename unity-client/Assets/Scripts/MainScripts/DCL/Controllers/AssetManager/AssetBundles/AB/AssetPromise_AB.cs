@@ -13,13 +13,9 @@ namespace DCL
     {
         public static bool VERBOSE = false;
 
-        public static readonly int MAX_CONCURRENT_REQUESTS = 25;
+        public static readonly int MAX_CONCURRENT_REQUESTS = 10;
         static int concurrentRequests = 0;
         bool mustDecrementRequest = false;
-
-        static readonly float maxLoadBudgetTime = 0.032f;
-        static float currentLoadBudgetTime = 0;
-        public static bool limitTimeBudget = false;
 
         CoroutineStarter.Coroutine loadCoroutine;
 
@@ -162,6 +158,7 @@ namespace DCL
                             return 99;
                     }).ToList();
 
+                yield return CoroutineStarter.BreakIfBudgetExceeded();
 
                 foreach (string assetName in assetsToLoad)
                 {
@@ -186,16 +183,7 @@ namespace DCL
 
                     asset.assetsByExtension[ext].Add(loadedAsset);
 
-                    if (limitTimeBudget)
-                    {
-                        currentLoadBudgetTime += Time.realtimeSinceStartup - time;
-
-                        if (currentLoadBudgetTime > maxLoadBudgetTime)
-                        {
-                            currentLoadBudgetTime = 0;
-                            yield return null;
-                        }
-                    }
+                    yield return CoroutineStarter.BreakIfBudgetExceeded();
                 }
             }
 
@@ -204,7 +192,7 @@ namespace DCL
 
         protected override void OnLoad(Action OnSuccess, Action OnFail)
         {
-            loadCoroutine = CoroutineStarter.Start(LoadAssetBundleWithDeps(contentUrl, hash, OnSuccess, OnFail));
+            loadCoroutine = CoroutineStarter.Start(LoadAssetBundleWithDeps(contentUrl, hash, OnSuccess, OnFail), 1);
         }
     }
 }

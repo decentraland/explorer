@@ -243,17 +243,14 @@ namespace DCL
                 promise.ForceFail();
                 Forget(promise);
 
-                if (Time.realtimeSinceStartup - startTime >= AssetPromiseKeeper.PROCESS_PROMISES_TIME_BUDGET)
-                {
-                    yield return null;
-                    startTime = Time.unscaledTime;
-                }
+                yield return CoroutineStarter.BreakIfBudgetExceeded();
             }
         }
 
+        List<AssetPromiseType> blockedPromisesToLoadAux = new List<AssetPromiseType>();
         private List<AssetPromiseType> GetBlockedPromisesToLoadForId(object loadedPromiseId)
         {
-            List<AssetPromiseType> blockedPromisesToLoad = new List<AssetPromiseType>();
+            blockedPromisesToLoadAux.Clear();
 
             using (var iterator = masterToBlockedPromises[loadedPromiseId].GetEnumerator())
             {
@@ -262,18 +259,27 @@ namespace DCL
                     var blockedPromise = iterator.Current;
 
                     if (blockedPromise.state == AssetPromiseState.WAITING)
-                        blockedPromisesToLoad.Add(blockedPromise);
+                        blockedPromisesToLoadAux.Add(blockedPromise);
 
                     blockedPromises.Remove(blockedPromise);
                 }
             }
 
-            return blockedPromisesToLoad;
+            blockedPromisesToLoadAux.Sort(PromiseSortAlgorithm);
+
+            return blockedPromisesToLoadAux;
+        }
+
+        protected virtual int PromiseSortAlgorithm(AssetPromiseType promiseA, AssetPromiseType promiseB)
+        {
+            return 0;
         }
 
         private IEnumerator LoadBlockedPromises(object loadedPromiseId)
         {
             List<AssetPromiseType> blockedPromisesToLoad = GetBlockedPromisesToLoadForId(loadedPromiseId);
+
+            yield return CoroutineStarter.BreakIfBudgetExceeded();
 
             int blockedPromisesToLoadCount = blockedPromisesToLoad.Count;
 
@@ -284,11 +290,7 @@ namespace DCL
                 promise.OnPreFinishEvent += CleanPromise;
                 promise.Load();
 
-                if (Time.realtimeSinceStartup - startTime >= AssetPromiseKeeper.PROCESS_PROMISES_TIME_BUDGET)
-                {
-                    yield return null;
-                    startTime = Time.unscaledTime;
-                }
+                yield return CoroutineStarter.BreakIfBudgetExceeded();
             }
         }
 

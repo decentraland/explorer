@@ -7,9 +7,6 @@ namespace DCL
 {
     public static class MaterialCachingHelper
     {
-        public static float timeBudgetMax = 0.003f;
-        public static float timeBudget = 0;
-
         public static string ComputeCRC(Material mat)
         {
             //NOTE(Brian): Workaround fix until we solve the CRC issue with our materials.
@@ -60,14 +57,7 @@ namespace DCL
 
                     matList.Add(refCountedMat.material);
 
-                    elapsedTime = Time.realtimeSinceStartup - elapsedTime;
-                    timeBudget -= elapsedTime;
-
-                    if (timeBudget < 0)
-                    {
-                        yield return null;
-                        timeBudget += timeBudgetMax;
-                    }
+                    yield return CoroutineStarter.BreakIfBudgetExceeded();
                 }
 
                 r.sharedMaterials = matList.ToArray();

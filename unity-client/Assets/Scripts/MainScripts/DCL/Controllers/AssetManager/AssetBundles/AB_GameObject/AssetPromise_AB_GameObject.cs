@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Linq;
 using DCL.Helpers;
@@ -70,8 +70,41 @@ namespace DCL
             AssetPromiseKeeper_AB.i.Forget(subPromise);
         }
 
+        static float nearestDistance;
+        static object nearestObject;
+        private bool TestDistance()
+        {
+            if (CommonScriptableObjects.playerUnityPosition == null)
+                return true;
+
+            Vector3 position = CommonScriptableObjects.playerUnityPosition.Get();
+
+            float dist = Vector3.Distance(position, asset.container.transform.position);
+
+            if (dist < nearestDistance)
+            {
+                nearestDistance = dist;
+                nearestObject = this;
+            }
+
+            bool result = nearestObject == this;
+
+            if (result)
+            {
+                //NOTE(Brian): Reset values so the other GLTFComponents running this coroutine compete again
+                //             for distance.
+                nearestObject = null;
+                nearestDistance = float.MaxValue;
+            }
+
+            return result;
+        }
+
         public IEnumerator LoadingCoroutine(Action OnSuccess, Action OnFail)
         {
+            Func<bool> funcTestDistance = () => TestDistance();
+            yield return new WaitUntil(funcTestDistance);
+
             subPromise = new AssetPromise_AB(contentUrl, hash);
             bool success = false;
             subPromise.OnSuccessEvent += (x) => success = true;
@@ -122,7 +155,7 @@ namespace DCL
 #endif
                 assetBundleModelGO.transform.parent = asset.container.transform;
                 assetBundleModelGO.transform.ResetLocalTRS();
-                yield return null;
+                yield return CoroutineStarter.BreakIfBudgetExceeded();
             }
 
             yield break;
