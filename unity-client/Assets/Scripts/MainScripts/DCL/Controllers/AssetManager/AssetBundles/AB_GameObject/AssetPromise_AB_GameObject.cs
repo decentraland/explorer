@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Linq;
 using DCL.Helpers;
@@ -70,7 +70,7 @@ namespace DCL
             AssetPromiseKeeper_AB.i.Forget(subPromise);
         }
 
-        static float nearestDistance;
+        static float nearestDistance = float.MaxValue;
         static object nearestObject;
         private bool TestDistance()
         {
@@ -79,7 +79,7 @@ namespace DCL
 
             Vector3 position = CommonScriptableObjects.playerUnityPosition.Get();
 
-            float dist = Vector3.Distance(position, asset.container.transform.position);
+            float dist = Vector3.Distance(position, settings.parent.position);
 
             if (dist < nearestDistance)
             {

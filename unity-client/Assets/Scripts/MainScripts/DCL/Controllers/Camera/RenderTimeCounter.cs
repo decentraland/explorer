@@ -5,7 +5,7 @@ public class RenderTimeCounter : MonoBehaviour
     public FloatVariable renderTimeVariable;
     float auxRenderTime;
 
-    public void OnPreRender()
+    public void OnPreCull()
     {
         auxRenderTime = Time.realtimeSinceStartup;
     }

@@ -245,7 +245,6 @@ namespace DCL
                 for (int i = 0; i < busesToProcessCount; ++i)
                 {
                     MessagingBus bus = busesToProcess[i];
-
                     ProcessBus(bus);
                     yield return CoroutineStarter.BreakIfBudgetExceeded();
                 }

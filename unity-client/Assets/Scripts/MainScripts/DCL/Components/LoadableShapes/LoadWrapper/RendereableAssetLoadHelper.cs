@@ -75,6 +75,7 @@ namespace DCL.Components
 #if UNITY_EDITOR
             loadStartTime = Time.realtimeSinceStartup;
 #endif
+
             switch (loadingType)
             {
                 case LoadingType.ASSET_BUNDLE_WITH_GLTF_FALLBACK:

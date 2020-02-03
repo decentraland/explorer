@@ -40,6 +40,9 @@ public class CoroutineStarter : MonoBehaviour
 
     public static float GetRemainingBudget()
     {
+        if (!enableThrottling)
+            return 1;
+
         return instance.currentRunningCoroutineRemainingTime;
     }
 
@@ -51,9 +54,11 @@ public class CoroutineStarter : MonoBehaviour
         StartCoroutine(MainCoroutine());
     }
 
+    float globalStartTime;
+    bool shouldSkipFrame = false;
     IEnumerator MainCoroutine()
     {
-        float globalStartTime = Time.unscaledTime;
+        globalStartTime = Time.unscaledTime;
 
         while (true)
         {
@@ -93,40 +98,24 @@ public class CoroutineStarter : MonoBehaviour
 
             if (enableThrottling)
             {
-                if (renderTime < 0.0333f)
-                    globalTimeBudget = 0.0333f - renderTime;
-                else
-                    globalTimeBudget = 0.006f;
+                globalTimeBudget = 0.006f;
             }
             else
             {
-                globalTimeBudget = 1.0f;
+                globalTimeBudget = .25f;
             }
-
-            Debug.Log("timeBudget: " + globalTimeBudget + " ... renderTime: " + renderTime);
 
             for (int i = 0; i < count; i++)
             {
                 RunCoroutineFrame(coroutines[i]);
-
-                if (enableThrottling && Time.realtimeSinceStartup - globalStartTime > globalTimeBudget)
-                    break;
             }
 
-            if (enableThrottling)
+            if (shouldSkipFrame)
             {
                 yield return null;
                 globalStartTime = Time.unscaledTime;
+                shouldSkipFrame = false;
             }
-            else
-            {
-                if (Time.realtimeSinceStartup - globalStartTime > globalTimeBudget)
-                {
-                    yield return null;
-                    globalStartTime = Time.unscaledTime;
-                }
-            }
-
         }
     }
 
@@ -161,10 +150,16 @@ public class CoroutineStarter : MonoBehaviour
         var stack = coroutine.stack;
 
         if (stack.Count == 0)
+        {
+            coroutinesToRemove.Add(coroutine);
             return;
+        }
 
         if (ShouldSkipFrame(coroutine.currentYieldInstruction))
+        {
+            shouldSkipFrame = true;
             return;
+        }
 
         coroutine.currentYieldInstruction = null;
 
@@ -182,7 +177,10 @@ public class CoroutineStarter : MonoBehaviour
             currentYieldedObject = currentEnumerator.Current;
 
             if (currentYieldedObject == null)
+            {
+                shouldSkipFrame = true;
                 break;
+            }
 
             float elapsedTime = Time.realtimeSinceStartup - currentRunningCoroutineStartTime;
             currentRunningCoroutineRemainingTime = coroutine.timeBudget - elapsedTime;
@@ -190,6 +188,7 @@ public class CoroutineStarter : MonoBehaviour
             if (ShouldSkipFrame(currentYieldedObject))
             {
                 coroutine.currentYieldInstruction = currentYieldedObject;
+                shouldSkipFrame = true;
                 return;
             }
             else if (currentYieldedObject is IEnumerator)
@@ -197,8 +196,11 @@ public class CoroutineStarter : MonoBehaviour
                 stack.Push(currentYieldedObject as IEnumerator);
             }
 
-            //if (elapsedTime > (enableThrottling ? coroutine.timeBudget : 2.0f))
-            //    break;
+            if (Time.realtimeSinceStartup - globalStartTime > globalTimeBudget)
+            {
+                shouldSkipFrame = true;
+                break;
+            }
         }
 
         if (stack.Count == 0)

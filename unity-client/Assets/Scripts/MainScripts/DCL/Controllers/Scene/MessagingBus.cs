@@ -254,11 +254,11 @@ namespace DCL
                             shouldLogMessage = false;
                         }
 
-                        OnMessageProcessed();
                         SceneController.i.OnMessageWillDequeue?.Invoke(messageObject.method);
 
                         if (msgYieldInstruction != null)
                         {
+                            OnMessageProcessed();
                             processedMessagesCount++;
 
                             msgYieldInstruction = null;
