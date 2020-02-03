@@ -84,6 +84,7 @@ const rendererVersion = require('decentraland-renderer')
 window['console'].log('Renderer version: ' + rendererVersion)
 
 let gameInstance!: GameInstance
+let isTheFirstLoading = true
 
 export let futures: Record<string, IFuture<any>> = {}
 
@@ -194,13 +195,14 @@ export function setLoadingScreenVisible(shouldShow: boolean) {
   document.getElementById('load-messages-wrapper')!.style.display = shouldShow ? 'block' : 'none'
   document.getElementById('progress-bar')!.style.display = shouldShow ? 'block' : 'none'
   if (!shouldShow) {
+    isTheFirstLoading = false
     stopTeleportAnimation()
   }
 }
 
 function delightedSurvey() {
   const { analytics, delighted, globalStore } = global
-  if (analytics && delighted && globalStore) {
+  if (!isTheFirstLoading && analytics && delighted && globalStore) {
     const email = ''
     const payload = {
       email: email,
@@ -715,7 +717,7 @@ export async function initializeEngine(_gameInstance: GameInstance) {
     onMessage(type: string, message: any) {
       if (type in browserInterface) {
         // tslint:disable-next-line:semicolon
-        ;(browserInterface as any)[type](message)
+        ; (browserInterface as any)[type](message)
       } else {
         defaultLogger.info(`Unknown message (did you forget to add ${type} to unity-interface/dcl.ts?)`, message)
       }
