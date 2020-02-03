@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace DCL
@@ -9,11 +9,11 @@ namespace DCL
         public LinkedListNode<PoolableObject> node;
         public GameObject gameObject;
 
-        public bool isInsidePool { get { return node == null; } }
+        public bool isInsidePool { get { return node != null; } }
 
         public System.Action OnRelease;
 
-        public void Release(Pool releasePool = null)
+        public void Release()
         {
             if (this == null)
             {
@@ -42,13 +42,5 @@ namespace DCL
             sender.OnCleanupEvent -= this.OnCleanup;
             Release();
         }
-
-        //void OnDestroy()
-        //{
-        //    if (pool != null)
-        //    {
-        //        pool.RemoveFromPool(this);
-        //    }
-        //}
     }
 }

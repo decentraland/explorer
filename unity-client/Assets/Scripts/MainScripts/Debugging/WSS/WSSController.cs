@@ -282,6 +282,15 @@ namespace DCL
                             case "LoadProfile":
                                 UserProfileController.i?.LoadProfile(msg.payload);
                                 break;
+                            case "AddUserProfileToCatalog":
+                                UserProfileController.i.AddUserProfileToCatalog(msg.payload);
+                                break;
+                            case "AddUserProfilesToCatalog":
+                                UserProfileController.i.AddUserProfilesToCatalog(msg.payload);
+                                break;
+                            case "RemoveUserProfilesFromCatalog":
+                                UserProfileController.i.RemoveUserProfilesFromCatalog(msg.payload);
+                                break;
                             case "DeactivateRendering":
                                 RenderingController.i.DeactivateRendering();
                                 break;
@@ -372,11 +381,20 @@ namespace DCL
                             case "ConfigureAvatarEditorHUD":
                                 HUDController.i?.ConfigureAvatarEditorHUD(msg.payload);
                                 break;
+                            case "ConfigurePlayerInfoCardHUD":
+                                HUDController.i.ConfigurePlayerInfoCardHUD(msg.payload);
+                                break;
+                            case "ConfigureExpressionsHUD":
+                                HUDController.i.ConfigureExpressionsHUD(msg.payload);
+                                break;
                             case "UpdateMinimapSceneInformation":
                                 MinimapMetadataController.i?.UpdateMinimapSceneInformation(msg.payload);
                                 break;
                             case "ConfigureSettingsHUD":
                                 HUDController.i.ConfigureSettingsHUD(msg.payload);
+                                break;
+                            case "TriggerSelfUserExpression":
+                                HUDController.i.TriggerSelfUserExpression(msg.payload);
                                 break;
                             default:
                                 Debug.Log("<b><color=#FF0000>WSSController:</color></b> received an unknown message from kernel to renderer: " + msg.type);

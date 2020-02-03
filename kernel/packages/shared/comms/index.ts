@@ -1,13 +1,11 @@
 import { saveToLocalStorage } from 'atomicHelpers/localStorage'
-import { commConfigurations, ETHEREUM_NETWORK, getServerConfigurations, parcelLimits, COMMS, DEBUG_LOGIN } from 'config'
+import { commConfigurations, getServerConfigurations, parcelLimits, COMMS, DEBUG_LOGIN } from 'config'
 import { CommunicationsController } from 'shared/apis/CommunicationsController'
-import { Auth } from 'shared/auth/Auth'
 import { defaultLogger } from 'shared/logger'
 import { MessageEntry } from 'shared/types'
 import { positionObservable, PositionReport } from 'shared/world/positionThings'
 import 'webrtc-adapter'
 import { PassportAsPromise } from '../passports/PassportAsPromise'
-import { BrokerConnection } from '../comms/v1/BrokerConnection'
 import { ChatEvent, chatObservable } from './chat'
 import { CliBrokerConnection } from './CliBrokerConnection'
 import { Stats } from './debug'
@@ -17,26 +15,36 @@ import {
   getCurrentUser,
   getPeer,
   getUser,
-  getUserProfile,
   localProfileUUID,
   receiveUserData,
   receiveUserPose,
   receiveUserVisible,
   removeById,
-  setLocalProfile
+  avatarMessageObservable
 } from './peers'
-import { Pose, UserInformation, Package, ChatMessage, ProfileVersion, BusMessage } from './interface/types'
+import {
+  Pose,
+  UserInformation,
+  Package,
+  ChatMessage,
+  ProfileVersion,
+  BusMessage,
+  AvatarMessageType
+} from './interface/types'
 import { CommunicationArea, Position, position2parcel, sameParcel, squareDistance } from './interface/utils'
 import { BrokerWorldInstanceConnection } from '../comms/v1/brokerWorldInstanceConnection'
 import { profileToRendererFormat } from 'shared/passports/transformations/profileToRendererFormat'
-import { ProfileForRenderer, uuid } from 'decentraland-ecs/src'
+import { ProfileForRenderer } from 'decentraland-ecs/src'
 import { Session } from '../session/index'
 import { worldRunningObservable, isWorldRunning } from '../world/worldState'
 import { WorldInstanceConnection } from './interface/index'
 import { LighthouseWorldInstanceConnection } from './v2/LighthouseWorldInstanceConnection'
-import { getTLD } from '../../config/index'
 import * as Long from 'long'
 
+import { identity } from '../index'
+import { Authenticator } from '../crypto/Authenticator'
+
+declare const window: any
 window.Long = Long
 
 const { Peer } = require('decentraland-katalyst-peer')
@@ -112,8 +120,6 @@ export class Context {
 
   public currentPosition: Position | null = null
 
-  public network: ETHEREUM_NETWORK | null
-
   public worldInstanceConnection: WorldInstanceConnection | null = null
 
   profileInterval?: NodeJS.Timer
@@ -121,9 +127,8 @@ export class Context {
   worldRunningObserver: any
   infoCollecterInterval?: NodeJS.Timer
 
-  constructor(userInfo: UserInformation, network?: ETHEREUM_NETWORK) {
+  constructor(userInfo: UserInformation) {
     this.userInfo = userInfo
-    this.network = network || null
 
     this.commRadius = commConfigurations.commRadius
   }
@@ -227,13 +232,24 @@ export function processChatMessage(context: Context, fromAlias: string, message:
     const user = getUser(fromAlias)
     if (user) {
       const displayName = user.profile && user.profile.name
-      const entry: MessageEntry = {
-        id: msgId,
-        sender: displayName || 'unknown',
-        message: text,
-        isCommand: false
+
+      if (text.startsWith('␐')) {
+        const [id, timestamp] = text.split(' ')
+        avatarMessageObservable.notifyObservers({
+          type: AvatarMessageType.USER_EXPRESSION,
+          uuid: fromAlias,
+          expressionId: id.slice(1),
+          timestamp: parseInt(timestamp, 10)
+        })
+      } else {
+        const entry: MessageEntry = {
+          id: msgId,
+          sender: displayName || 'unknown',
+          message: text,
+          isCommand: false
+        }
+        chatObservable.notifyObservers({ type: ChatEvent.MESSAGE_RECEIVED, messageEntry: entry })
       }
-      chatObservable.notifyObservers({ type: ChatEvent.MESSAGE_RECEIVED, messageEntry: entry })
     }
   }
 }
@@ -433,13 +449,8 @@ function parseCommsMode(modeString: string) {
   return segments as [CommsVersion, CommsMode]
 }
 
-export async function connect(userId: string, network: ETHEREUM_NETWORK, auth: Auth, ethAddress?: string) {
+export async function connect(userId: string) {
   try {
-    setLocalProfile(userId, {
-      ...getUserProfile(),
-      publicKey: ethAddress || null
-    })
-
     const user = getCurrentUser()
     if (!user) {
       return undefined
@@ -451,7 +462,7 @@ export async function connect(userId: string, network: ETHEREUM_NETWORK, auth: A
 
     let connection: WorldInstanceConnection
 
-    const [version, mode] = parseCommsMode(getTLD() === 'zone' ? 'v2-p2p' : COMMS)
+    const [version, mode] = parseCommsMode(COMMS)
     switch (version) {
       case 'v1': {
         let commsBroker: IBrokerConnection
@@ -472,26 +483,6 @@ export async function connect(userId: string, network: ETHEREUM_NETWORK, auth: A
 
             defaultLogger.log('Using WebSocket comms: ' + url.href)
             commsBroker = new CliBrokerConnection(url.href)
-            break
-          }
-          case 'remote': {
-            const coordinatorURL = getServerConfigurations().worldInstanceUrl
-            const body = `GET:${coordinatorURL}`
-            const credentials = await auth.getMessageCredentials(body)
-
-            const qs = new URLSearchParams({
-              signature: credentials['x-signature'],
-              identity: credentials['x-identity'],
-              timestamp: credentials['x-timestamp'],
-              'access-token': credentials['x-access-token']
-            })
-
-            const url = new URL(coordinatorURL)
-            defaultLogger.log('Using Remote comms: ' + url)
-
-            url.search = qs.toString()
-
-            commsBroker = new BrokerConnection(auth, url.toString())
             break
           }
           default: {
@@ -528,18 +519,28 @@ export async function connect(userId: string, network: ETHEREUM_NETWORK, auth: A
 
         const peer = new Peer(
           lighthouseUrl,
-          'peer-' + uuid(),
+          identity.address,
           () => {
             // noop
           },
           {
             connectionConfig: {
               iceServers: commConfigurations.iceServers
+            },
+            authHandler: async (msg: string) => {
+              try {
+                return Authenticator.signPayload(identity, msg)
+              } catch (e) {
+                defaultLogger.info(`error while trying to sign message from lighthouse '${msg}'`)
+              }
+              // if any error occurs
+              return identity
             }
           }
         )
 
-        await peer.setLayer('green')
+        await peer.awaitConnectionEstablished(60000)
+        await peer.setLayer('gold')
 
         connection = new LighthouseWorldInstanceConnection(peer)
 
@@ -565,7 +566,7 @@ export async function connect(userId: string, network: ETHEREUM_NETWORK, auth: A
       processParcelSceneCommsMessage(context!, alias, data)
     }
 
-    context = new Context(userInfo, network)
+    context = new Context(userInfo)
     context.worldInstanceConnection = connection
 
     if (commConfigurations.debug) {
@@ -613,6 +614,7 @@ export async function connect(userId: string, network: ETHEREUM_NETWORK, auth: A
 
     return context
   } catch (e) {
+    defaultLogger.error(e)
     throw new Error('error establishing comms: ' + e.message)
   }
 }

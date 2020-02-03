@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using DCL.Helpers;
@@ -35,17 +35,14 @@ namespace DCL
             private set;
         }
 
-        public int objectsCount => inactiveCount + activeCount;
+        public int objectsCount => unusedObjectsCount + usedObjectsCount;
 
-        public int inactiveCount
+        public int unusedObjectsCount
         {
-            get
-            {
-                return unusedObjects.Count;
-            }
+            get { return unusedObjects.Count; }
         }
 
-        public int activeCount
+        public int usedObjectsCount
         {
             get { return usedObjects.Count; }
         }
@@ -80,9 +77,9 @@ namespace DCL
         {
             if (initializing)
             {
-                int count = activeCount;
+                int count = usedObjectsCount;
 
-                for (int i = inactiveCount; i < Mathf.Min(count * PREWARM_ACTIVE_MULTIPLIER, maxPrewarmCount); i++)
+                for (int i = unusedObjectsCount; i < Mathf.Min(count * PREWARM_ACTIVE_MULTIPLIER, maxPrewarmCount); i++)
                 {
                     Instantiate();
                 }
@@ -295,7 +292,7 @@ namespace DCL
         private void RefreshName()
         {
             if (this.container != null)
-                this.container.name = $"in: {inactiveCount} out: {activeCount} id: {id}";
+                this.container.name = $"in: {unusedObjectsCount} out: {usedObjectsCount} id: {id}";
         }
 
         public static bool FindPoolInGameObject(GameObject gameObject, out Pool pool)
