@@ -17,8 +17,12 @@ export class AirdropController extends ExposableAPI {
   constructor(options: APIOptions) {
     super(options)
 
-    airdropObservable.add((observedAccept: string) => {
-      this.accepted(observedAccept)
+    airdropObservable.add(async (observedAccept: string) => {
+      try {
+        await this.accepted(observedAccept)
+      } catch (e) {
+        defaultLogger.error(e.stack)
+      }
     })
   }
 
@@ -28,13 +32,16 @@ export class AirdropController extends ExposableAPI {
     const id = v4()
     this.mapIdToTransactions[id] = transaction
     this.mapIdToTargetContract[id] = targetContract
-    unityInstance.TriggerAirdropDisplay({ ...data, id })
+    return unityInstance.TriggerAirdropDisplay({ ...data, id })
   }
 
   async accepted(id: string) {
     if (this.mapIdToTargetContract[id]) {
       await providerFuture
-      const from = (await getUserAccount())!
+      const from = await getUserAccount()
+      if (!from) {
+        throw new Error('invalid ethereum connection: received ' + from)
+      }
       requestManager.eth_sendTransaction({
         from,
         to: this.mapIdToTargetContract[id],
