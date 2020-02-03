@@ -60,7 +60,7 @@ public class AirdroppingHUDView : MonoBehaviour
         CleanState();
         singleItemScreen.SetActive(true);
         itemsLeft.text = itemsleft.ToString();
-        CreateItemPanel(singleItemContainer.transform, model).SetData(model.name, model.subtitle, model.thumbnail);
+        CreateItemPanel(singleItemContainer.transform, model).SetData(model.name, model.subtitle, model.thumbnailURL);
     }
 
     public void ShowSummaryScreen(AirdroppingHUDController.ItemModel[] items)
@@ -70,7 +70,7 @@ public class AirdroppingHUDView : MonoBehaviour
         for (int index = 0; index < items.Length; index++)
         {
             var item = items[index];
-            CreateItemPanel(summaryItemsContainer.transform, items[index]).SetData(item.name, item.subtitle, item.thumbnail);
+            CreateItemPanel(summaryItemsContainer.transform, items[index]).SetData(item.name, item.subtitle, item.thumbnailURL);
         }
     }
 

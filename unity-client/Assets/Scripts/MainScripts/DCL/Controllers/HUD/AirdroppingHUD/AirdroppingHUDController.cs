@@ -17,7 +17,7 @@ public class AirdroppingHUDController : IHUD, IDisposable
     public class ItemModel
     {
         public string name;
-        public string thumbnail;
+        public string thumbnailURL;
         public string type;
         public string rarity;
         public string subtitle;
