@@ -183,8 +183,8 @@ public class CoroutineStarter : MonoBehaviour
                 stack.Push(currentYieldedObject as IEnumerator);
             }
 
-            if (elapsedTime > (enableThrottling ? coroutine.timeBudget : 2.0f))
-                break;
+            //if (elapsedTime > (enableThrottling ? coroutine.timeBudget : 2.0f))
+            //    break;
         }
 
         if (stack.Count == 0)
