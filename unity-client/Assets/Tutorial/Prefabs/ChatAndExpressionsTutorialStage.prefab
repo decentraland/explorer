@@ -2545,6 +2545,7 @@ MonoBehaviour:
   avatarExpressionTooltip: {fileID: 4574287604332835822}
   gotoCommandTooltip: {fileID: 5271660113205801817}
   avatarHUDTooltip: {fileID: 8785672565975125232}
+  dailyRewardTooltip: {fileID: 6926604318404077831}
 --- !u!1 &8572451616087038427
 GameObject:
   m_ObjectHideFlags: 0

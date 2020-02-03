@@ -7,7 +7,7 @@ public class ChatAndAvatarExpressionsStageController : TutorialStageController
     [SerializeField] TutorialTooltip avatarExpressionTooltip = null;
     [SerializeField] TutorialTooltip gotoCommandTooltip = null;
     [SerializeField] TutorialTooltip avatarHUDTooltip = null;
-
+    [SerializeField] TutorialTooltip dailyRewardTooltip = null;
 
     public override void OnStageStart()
     {
@@ -34,6 +34,9 @@ public class ChatAndAvatarExpressionsStageController : TutorialStageController
 
         HUDController.i?.avatarHud.SetVisibility(true);
         yield return ShowTooltip(avatarHUDTooltip);
+        yield return WaitIdleTime();
+
+        yield return ShowTooltip(dailyRewardTooltip);
         yield return WaitIdleTime();
 
         TutorialController.i?.SetRunningStageFinished();
