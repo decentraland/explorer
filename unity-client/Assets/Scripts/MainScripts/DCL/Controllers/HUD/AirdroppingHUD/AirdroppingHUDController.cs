@@ -29,6 +29,7 @@ public class AirdroppingHUDController : IHUD, IDisposable
         Initial,
         SingleItem,
         Summary,
+        Summary_NoItems,
         Finish
     }
 
@@ -36,6 +37,7 @@ public class AirdroppingHUDController : IHUD, IDisposable
     private State currentState;
     private Model model;
     private int currentItemShown = -1;
+    private int totalItems => model?.items?.Length ?? 0;
 
     public AirdroppingHUDController()
     {
@@ -50,6 +52,12 @@ public class AirdroppingHUDController : IHUD, IDisposable
         if (model == null) return;
 
         this.model = model;
+
+        for (var i = 0; i < this.model.items.Length; i++)
+        {
+            ThumbnailsManager.PreloadThumbnail(this.model.items[i].thumbnailURL);
+        }
+
         currentState = State.Initial;
         ApplyState();
     }
@@ -66,14 +74,18 @@ public class AirdroppingHUDController : IHUD, IDisposable
         {
             case State.Initial:
                 currentItemShown = 0;
-                currentState = State.SingleItem;
+                if (currentItemShown > totalItems - 1)
+                    currentState = totalItems != 0 ? State.Summary : State.Summary_NoItems;
+                else
+                    currentState = State.SingleItem;
                 break;
             case State.SingleItem:
                 currentItemShown++;
-                if (model.items == null || currentItemShown > model.items.Length - 1)
-                    currentState = State.Summary;
+                if (currentItemShown > totalItems - 1)
+                    currentState = totalItems != 0 ? State.Summary : State.Summary_NoItems;
                 break;
             case State.Summary:
+            case State.Summary_NoItems:
                 currentState = State.Hidden;
                 break;
             case State.Finish:
@@ -95,6 +107,9 @@ public class AirdroppingHUDController : IHUD, IDisposable
                 break;
             case State.Summary:
                 view.ShowSummaryScreen(model.items);
+                break;
+            case State.Summary_NoItems:
+                view.ShowSummaryNoItemsScreen();
                 break;
             case State.Finish:
                 WebInterface.SendUserAcceptedCollectibles(model.id);

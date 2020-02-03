@@ -28,6 +28,10 @@ public class AirdroppingHUDView : MonoBehaviour
     [SerializeField] private GameObject summaryItemsContainer;
     [SerializeField] private Button summaryDoneButton;
 
+    [Header("Summary No Items Screen")]
+    [SerializeField] private GameObject summaryNoItemsScreen;
+    [SerializeField] private Button summaryNoItemsDoneButton;
+
     internal static AirdroppingHUDView Create()
     {
         return Instantiate(Resources.Load<GameObject>(VIEW_PATH)).GetComponent<AirdroppingHUDView>();
@@ -43,6 +47,9 @@ public class AirdroppingHUDView : MonoBehaviour
 
         summaryDoneButton.onClick.RemoveAllListeners();
         summaryDoneButton.onClick.AddListener(nextStateCallback);
+
+        summaryNoItemsDoneButton.onClick.RemoveAllListeners();
+        summaryNoItemsDoneButton.onClick.AddListener(nextStateCallback);
 
         CleanState();
     }
@@ -74,6 +81,12 @@ public class AirdroppingHUDView : MonoBehaviour
         }
     }
 
+    public void ShowSummaryNoItemsScreen()
+    {
+        CleanState();
+        summaryNoItemsScreen.SetActive(true);
+    }
+
     public void CleanState()
     {
         initialScreen.SetActive(false);
@@ -83,6 +96,8 @@ public class AirdroppingHUDView : MonoBehaviour
 
         summaryScreen.SetActive(false);
         summaryItemsContainer.transform.DestroyAllChild();
+
+        summaryNoItemsScreen.SetActive(false);
     }
 
     public void SetVisibility(bool active)
