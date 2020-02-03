@@ -1,9 +1,13 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace DCL
 {
+    public class AssetPromiseKeeper
+    {
+        public static float PROCESS_PROMISES_TIME_BUDGET = 0.005f;
+    }
     /// <summary>
     /// The AssetPromiseKeeper is the user entry point interface.
     /// It manages stuff like requesting something that's already being loaded, etc.
@@ -19,8 +23,6 @@ namespace DCL
         where AssetLibraryType : AssetLibrary<AssetType>, new()
         where AssetPromiseType : AssetPromise<AssetType>
     {
-        const float PROCESS_PROMISES_TIME_BUDGET = 0.01f;
-
         private static AssetPromiseKeeper<AssetType, AssetLibraryType, AssetPromiseType> instance;
         public static AssetPromiseKeeper<AssetType, AssetLibraryType, AssetPromiseType> i
         {
@@ -240,7 +242,7 @@ namespace DCL
                 promise.ForceFail();
                 Forget(promise);
 
-                if (Time.realtimeSinceStartup - startTime >= PROCESS_PROMISES_TIME_BUDGET)
+                if (Time.realtimeSinceStartup - startTime >= AssetPromiseKeeper.PROCESS_PROMISES_TIME_BUDGET)
                 {
                     yield return null;
                     startTime = Time.unscaledTime;
@@ -281,7 +283,7 @@ namespace DCL
                 promise.OnPreFinishEvent += CleanPromise;
                 promise.Load();
 
-                if (Time.realtimeSinceStartup - startTime >= PROCESS_PROMISES_TIME_BUDGET)
+                if (Time.realtimeSinceStartup - startTime >= AssetPromiseKeeper.PROCESS_PROMISES_TIME_BUDGET)
                 {
                     yield return null;
                     startTime = Time.unscaledTime;
