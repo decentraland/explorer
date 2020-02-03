@@ -45,10 +45,19 @@ public class CoroutineStarter : MonoBehaviour
 
 
     public static float globalTimeBudget = 0.01f;
-
+    private static float lastRenderTime = 0;
     public void Start()
     {
         StartCoroutine(MainCoroutine());
+    }
+
+    public void OnPreRender()
+    {
+        lastRenderTime = Time.realtimeSinceStartup;
+    }
+    public void OnPostRender()
+    {
+        lastRenderTime = Time.realtimeSinceStartup - lastRenderTime;
     }
 
     IEnumerator MainCoroutine()
@@ -86,6 +95,13 @@ public class CoroutineStarter : MonoBehaviour
 
             if (count <= 0)
                 yield return null;
+
+            // NOTE(Brian): Try to set a global budget so the end result is 30 fps.
+            //              If rendering time is slow, don't care and just set 6 ms.
+            if (lastRenderTime > 0.032f)
+                globalTimeBudget = 0.032f - lastRenderTime;
+            else
+                globalTimeBudget = 0.006f;
 
             for (int i = 0; i < count; i++)
             {
