@@ -7,7 +7,7 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "UserProfile", menuName = "UserProfile")]
 public class UserProfile : ScriptableObject //TODO Move to base variable
 {
-    public const bool ENABLE_EXPRESSIONS = true;
+    public const bool ENABLE_EXPRESSIONS = false;
     
     static DateTime epochStart = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
