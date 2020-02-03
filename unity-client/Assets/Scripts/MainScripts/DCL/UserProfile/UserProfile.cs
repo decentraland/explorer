@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using DCL.Interface;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "UserProfile", menuName = "UserProfile")]
 public class UserProfile : ScriptableObject //TODO Move to base variable
 {
-    public const bool ENABLE_EXPRESSIONS = false;
+    public const bool ENABLE_EXPRESSIONS = true;
     
     static DateTime epochStart = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
@@ -131,6 +132,8 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
 
         return ownUserProfile;
     }
+
+    public UserProfileModel CloneModel() => model.Clone();
 
 #if UNITY_EDITOR
     private void OnEnable()

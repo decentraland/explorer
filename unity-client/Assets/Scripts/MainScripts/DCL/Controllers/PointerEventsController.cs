@@ -114,7 +114,7 @@ namespace DCL
 
         private void ResolveGenericRaycastHandlers(IRaycastPointerHandler raycastHandlerTarget)
         {
-            if (MouseCatcher.LockedThisFrame()) return;
+            if (Utils.LockedThisFrame()) return;
 
             var mouseIsDown = Input.GetMouseButtonDown(0);
             var mouseIsUp = Input.GetMouseButtonUp(0);
@@ -186,7 +186,7 @@ namespace DCL
 
         void OnButtonEvent(WebInterface.ACTION_BUTTON buttonId, InputController_Legacy.EVENT evt, bool useRaycast)
         {
-            if (MouseCatcher.LockedThisFrame()) return;
+            if (Utils.LockedThisFrame()) return;
 
             if (Cursor.lockState != CursorLockMode.None && !renderingIsDisabled || this.isTesting)
             {
