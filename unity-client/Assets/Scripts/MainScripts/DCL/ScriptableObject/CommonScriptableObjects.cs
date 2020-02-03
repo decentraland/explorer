@@ -2,6 +2,9 @@ using UnityEngine;
 
 public static class CommonScriptableObjects
 {
+    private static FloatVariable renderTimeValue;
+    public static FloatVariable renderTime => GetOrLoad(ref renderTimeValue, "ScriptableObjects/RenderTime");
+
     private static Vector3Variable playerUnityPositionValue;
     public static Vector3Variable playerUnityPosition => GetOrLoad(ref playerUnityPositionValue, "ScriptableObjects/PlayerUnityPosition");
 

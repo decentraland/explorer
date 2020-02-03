@@ -1,6 +1,8 @@
 {
     "name": "CoroutineHelpers",
-    "references": [],
+    "references": [
+        "GUID:4720e174f2805c74bb7aa94cc8bb5bf8"
+    ],
     "optionalUnityReferences": [],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -8,5 +10,6 @@
     "overrideReferences": false,
     "precompiledReferences": [],
     "autoReferenced": true,
-    "defineConstraints": []
+    "defineConstraints": [],
+    "versionDefines": []
 }

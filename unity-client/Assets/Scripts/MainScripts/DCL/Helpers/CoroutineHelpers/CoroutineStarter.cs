@@ -43,21 +43,12 @@ public class CoroutineStarter : MonoBehaviour
         return instance.currentRunningCoroutineRemainingTime;
     }
 
-
-    public static float globalTimeBudget = 0.01f;
+    private static float globalTimeBudget = 0.01f;
     private static float lastRenderTime = 0;
+
     public void Start()
     {
         StartCoroutine(MainCoroutine());
-    }
-
-    public void OnPreRender()
-    {
-        lastRenderTime = Time.realtimeSinceStartup;
-    }
-    public void OnPostRender()
-    {
-        lastRenderTime = Time.realtimeSinceStartup - lastRenderTime;
     }
 
     IEnumerator MainCoroutine()
@@ -98,10 +89,21 @@ public class CoroutineStarter : MonoBehaviour
 
             // NOTE(Brian): Try to set a global budget so the end result is 30 fps.
             //              If rendering time is slow, don't care and just set 6 ms.
-            if (lastRenderTime < 0.0333f)
-                globalTimeBudget = 0.0333f - lastRenderTime;
+            float renderTime = CommonScriptableObjects.renderTime.Get();
+
+            if (enableThrottling)
+            {
+                if (renderTime < 0.0333f)
+                    globalTimeBudget = 0.0333f - renderTime;
+                else
+                    globalTimeBudget = 0.006f;
+            }
             else
-                globalTimeBudget = 0.006f;
+            {
+                globalTimeBudget = 1.0f;
+            }
+
+            Debug.Log("timeBudget: " + globalTimeBudget + " ... renderTime: " + renderTime);
 
             for (int i = 0; i < count; i++)
             {
@@ -111,8 +113,20 @@ public class CoroutineStarter : MonoBehaviour
                     break;
             }
 
-            yield return null;
-            globalStartTime = Time.unscaledTime;
+            if (enableThrottling)
+            {
+                yield return null;
+                globalStartTime = Time.unscaledTime;
+            }
+            else
+            {
+                if (Time.realtimeSinceStartup - globalStartTime > globalTimeBudget)
+                {
+                    yield return null;
+                    globalStartTime = Time.unscaledTime;
+                }
+            }
+
         }
     }
 
