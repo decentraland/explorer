@@ -13,7 +13,7 @@ namespace DCL
     {
         public static bool VERBOSE = false;
 
-        public static readonly int MAX_CONCURRENT_REQUESTS = 10;
+        public static readonly int MAX_CONCURRENT_REQUESTS = 30;
         static int concurrentRequests = 0;
         bool mustDecrementRequest = false;
 
@@ -73,7 +73,10 @@ namespace DCL
             }
 
             if (mustDecrementRequest)
+            {
                 concurrentRequests--;
+                mustDecrementRequest = false;
+            }
         }
 
         protected override void OnAfterLoadOrReuse()
@@ -99,7 +102,11 @@ namespace DCL
             }
 
             if (concurrentRequests >= MAX_CONCURRENT_REQUESTS)
+            {
+                Debug.Log("lock concurrent = " + concurrentRequests);
                 yield return new WaitUntil(() => concurrentRequests < MAX_CONCURRENT_REQUESTS);
+                Debug.Log("unlock concurrent = " + concurrentRequests);
+            }
 
             concurrentRequests++;
             mustDecrementRequest = true;
@@ -108,6 +115,7 @@ namespace DCL
             {
                 concurrentRequests--;
                 mustDecrementRequest = false;
+                Debug.Log("concurrent = " + concurrentRequests);
             }
         }
 
@@ -125,15 +133,6 @@ namespace DCL
 
                 while (!assetBundleRequest.isDone)
                 {
-                    if (assetBundleRequest.downloadProgress > 0.75f)
-                    {
-                        if (mustDecrementRequest)
-                        {
-                            concurrentRequests--;
-                            mustDecrementRequest = false;
-                        }
-                    }
-
                     yield return null;
                 }
 
