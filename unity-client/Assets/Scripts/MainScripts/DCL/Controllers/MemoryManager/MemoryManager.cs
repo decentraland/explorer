@@ -9,6 +9,7 @@ namespace DCL
         private const float TIME_TO_POOL_CLEANUP = 60.0f;
         private const float MIN_TIME_BETWEEN_UNLOAD_ASSETS = 10.0f;
         private float lastTimeUnloadUnusedAssets = 0;
+        public bool shouldCleanupPoolManager = false;
 
         public void Initialize()
         {
@@ -23,6 +24,8 @@ namespace DCL
 
         IEnumerator AutoCleanup()
         {
+            float timer = 0;
+
             while (true)
             {
                 if (NeedsMemoryCleanup())
@@ -30,7 +33,13 @@ namespace DCL
                     yield return CleanupPoolsIfNeeded();
                 }
 
-                yield return new WaitForSecondsRealtime(0.1f);
+                while (timer < 1.0f)
+                {
+                    yield return null;
+                    timer += Time.unscaledDeltaTime;
+                }
+
+                timer = 0;
             }
         }
 
@@ -73,6 +82,9 @@ namespace DCL
                     {
                         lastTimeUnloadUnusedAssets = DCLTime.realtimeSinceStartup;
                         Resources.UnloadUnusedAssets();
+
+                        if (shouldCleanupPoolManager)
+                            PoolManager.i.CleanPoolableReferences();
                     }
                 }
             }

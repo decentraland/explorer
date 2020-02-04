@@ -72,6 +72,7 @@ namespace DCL
 
                 scene = parcelEntity.scene;
                 scene.RemoveEntity(parcelEntity.entity.entityId, false);
+                MemoryManager.i.shouldCleanupPoolManager = true;
             }
 
             while (entitiesMarkedForCleanup.Count > 0)
@@ -79,12 +80,14 @@ namespace DCL
                 DecentralandEntity entity = entitiesMarkedForCleanup.Dequeue();
                 entity.SetParent(null);
                 entity.Cleanup();
+                MemoryManager.i.shouldCleanupPoolManager = true;
             }
 
             if (scene != null)
+            {
+                MemoryManager.i.shouldCleanupPoolManager = true;
                 GameObject.Destroy(scene.gameObject);
-
-            PoolManager.i.CleanPoolableReferences();
+            }
         }
 
         IEnumerator CleanupEntitiesCoroutine()
@@ -92,7 +95,6 @@ namespace DCL
             while (true)
             {
                 ParcelScene scene = null;
-
                 // If we have root entities queued for removal, we call Parcel Scene's RemoveEntity()
                 // so that the child entities end up recursively in the entitiesMarkedForCleanup queue
                 while (rootEntitiesMarkedForCleanup.Count > 0)
@@ -106,6 +108,7 @@ namespace DCL
 
                     scene = parcelEntity.scene;
                     scene.RemoveEntity(parcelEntity.entity.entityId, false);
+                    MemoryManager.i.shouldCleanupPoolManager = true;
 
                     yield return CoroutineStarter.BreakIfBudgetExceeded();
                 }
@@ -115,14 +118,16 @@ namespace DCL
                     DecentralandEntity entity = entitiesMarkedForCleanup.Dequeue();
                     entity.SetParent(null);
                     entity.Cleanup();
+                    MemoryManager.i.shouldCleanupPoolManager = true;
 
                     yield return CoroutineStarter.BreakIfBudgetExceeded();
                 }
 
                 if (scene != null)
+                {
                     GameObject.Destroy(scene.gameObject);
-
-                PoolManager.i.CleanPoolableReferences();
+                    MemoryManager.i.shouldCleanupPoolManager = true;
+                }
 
                 yield return null;
             }
