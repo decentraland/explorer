@@ -41,8 +41,6 @@ namespace DCL
 
                 foreach (var mat in r.sharedMaterials)
                 {
-                    float elapsedTime = Time.realtimeSinceStartup;
-
                     string crc = ComputeCRC(mat);
 
                     RefCountedMaterialData refCountedMat;

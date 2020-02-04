@@ -1,4 +1,4 @@
-﻿using DCL.Components;
+using DCL.Components;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -9,7 +9,8 @@ namespace DCL
     public class ComponentUpdateHandler
     {
         protected Queue<string> queue = new Queue<string>();
-        public Coroutine routine { get; protected set; }
+        public IEnumerator enumerator { get; protected set; }
+        public CoroutineStarter.Coroutine routine { get; protected set; }
 
         public WaitForComponentUpdate yieldInstruction;
         public string oldSerialization { get; protected set; }
@@ -48,7 +49,8 @@ namespace DCL
 
                     if (enumerator != null)
                     {
-                        routine = owner.GetCoroutineOwner().StartCoroutine(enumerator);
+                        this.routine = CoroutineStarter.Start(enumerator);
+                        this.enumerator = enumerator;
                     }
                 }
 
@@ -90,6 +92,7 @@ namespace DCL
             {
                 yield return enumerator;
             }
+
 #if UNITY_EDITOR
             applyChangesRunning = false;
 #endif
@@ -101,13 +104,14 @@ namespace DCL
             if (newSerialization != oldSerialization)
             {
                 if (isRoutineRunning)
-                    owner.GetCoroutineOwner().StopCoroutine(routine);
+                    CoroutineStarter.Stop(this.routine);
 
                 var enumerator = ApplyChangesWrapper(newSerialization);
 
                 if (enumerator != null)
                 {
-                    routine = owner.GetCoroutineOwner().StartCoroutine(enumerator);
+                    this.routine = CoroutineStarter.Start(enumerator);
+                    this.enumerator = enumerator;
                 }
 
                 oldSerialization = newSerialization;

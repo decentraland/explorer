@@ -9,13 +9,12 @@ namespace DCL.Components
     public interface IComponent : ICleanable
     {
         bool isRoutineRunning { get; }
-        Coroutine routine { get; }
+        IEnumerator enumerator { get; }
         string componentName { get; }
         void UpdateFromJSON(string json);
         IEnumerator ApplyChanges(string newJson);
         void RaiseOnAppliedChanges();
 
-        MonoBehaviour GetCoroutineOwner();
         ComponentUpdateHandler CreateUpdateHandler();
     }
 
@@ -48,7 +47,8 @@ namespace DCL.Components
     {
         ComponentUpdateHandler updateHandler;
         public WaitForComponentUpdate yieldInstruction => updateHandler.yieldInstruction;
-        public Coroutine routine => updateHandler.routine;
+        public IEnumerator enumerator => updateHandler.enumerator;
+        public CoroutineStarter.Coroutine routine => updateHandler.routine;
         public bool isRoutineRunning => updateHandler.isRoutineRunning;
 
         [NonSerialized] public ParcelScene scene;
@@ -75,11 +75,6 @@ namespace DCL.Components
 
         public abstract IEnumerator ApplyChanges(string newJson);
 
-        public MonoBehaviour GetCoroutineOwner()
-        {
-            return this;
-        }
-
         public virtual ComponentUpdateHandler CreateUpdateHandler()
         {
             return new ComponentUpdateHandler(this);
@@ -89,7 +84,7 @@ namespace DCL.Components
         {
             if (isRoutineRunning)
             {
-                GetCoroutineOwner().StopCoroutine(routine);
+                CoroutineStarter.Stop(routine);
             }
         }
     }

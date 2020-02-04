@@ -155,7 +155,7 @@ public class GLTFShape_Tests : TestsBase
         shapeModel.src = Utils.GetTestsAssetsPath() + "/GLB/PalmTree_01.glb";
 
         var shapeComponent = TestHelpers.SharedComponentCreate<LoadableShape<LoadWrapper_GLTF, LoadableShape.Model>, LoadableShape<LoadWrapper_GLTF, LoadableShape.Model>.Model>(scene, CLASS_ID.GLTF_SHAPE, shapeModel);
-        yield return shapeComponent.routine;
+        yield return shapeComponent.enumerator;
 
         TestHelpers.SharedComponentAttach(shapeComponent, entity);
 
@@ -180,7 +180,7 @@ public class GLTFShape_Tests : TestsBase
         shapeModel.src = Utils.GetTestsAssetsPath() + "/GLB/PalmTree_01.glb";
 
         var shapeComponent = TestHelpers.SharedComponentCreate<LoadableShape<LoadWrapper_GLTF, LoadableShape.Model>, LoadableShape<LoadWrapper_GLTF, LoadableShape.Model>.Model>(scene, CLASS_ID.GLTF_SHAPE, shapeModel);
-        yield return shapeComponent.routine;
+        yield return shapeComponent.enumerator;
 
         TestHelpers.SharedComponentAttach(shapeComponent, entity);
 

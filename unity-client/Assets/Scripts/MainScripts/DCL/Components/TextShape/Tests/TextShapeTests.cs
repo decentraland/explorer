@@ -55,7 +55,7 @@ namespace Tests
                 TestHelpers.EntityComponentCreate<TextShape, TextShape.Model>(scene, scene.entities[entityId],
                     textShapeModel);
 
-            yield return textShape.routine;
+            yield return textShape.enumerator;
 
             TextMeshPro tmpro = textShape.GetComponentInChildren<TextMeshPro>();
 
@@ -114,7 +114,7 @@ namespace Tests
                 TestHelpers.EntityComponentCreate<TextShape, TextShape.Model>(scene, scene.entities[entityId],
                     textShapeModel);
 
-            yield return textShapeComponent.routine;
+            yield return textShapeComponent.enumerator;
 
             // 2. Check configured values
             Assert.AreEqual(Color.green, textShapeComponent.model.color);
@@ -127,7 +127,7 @@ namespace Tests
             scene.EntityComponentUpdate(scene.entities[entityId], CLASS_ID_COMPONENT.TEXT_SHAPE,
                 JsonUtility.ToJson(new TextShape.Model { }));
 
-            yield return textShapeComponent.routine;
+            yield return textShapeComponent.enumerator;
 
             // 4. Check defaulted values
             Assert.AreEqual(Color.white, textShapeComponent.model.color);

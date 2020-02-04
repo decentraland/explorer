@@ -28,7 +28,7 @@ namespace Tests
                 TestHelpers.EntityComponentCreate<DCLAudioSource, DCLAudioSource.Model>(scene, scene.entities[entityId],
                     audioSourceModel);
 
-            yield return audioSource.routine;
+            yield return audioSource.enumerator;
         }
 
 
@@ -69,7 +69,7 @@ namespace Tests
 
             scene.SharedComponentUpdate(audioClipId, JsonUtility.ToJson(model));
 
-            yield return audioClip.routine;
+            yield return audioClip.enumerator;
 
             Assert.IsTrue(scene.disposableComponents.ContainsKey(audioClipId),
                 "Shared component was not created correctly!");
@@ -111,7 +111,7 @@ namespace Tests
             Assert.IsTrue(dclAudioSource != null, "DCLAudioSource Creation Failure!");
             Assert.IsTrue(unityAudioSource != null, "Unity AudioSource Creation Failure!");
 
-            yield return dclAudioSource.routine;
+            yield return dclAudioSource.enumerator;
 
             Assert.IsTrue(unityAudioSource.isPlaying, "Audio Source is not playing when it should!");
 
@@ -163,7 +163,7 @@ namespace Tests
 
             DCLAudioClip audioClip = CreateAudioClip(componentModel);
 
-            yield return audioClip.routine;
+            yield return audioClip.enumerator;
 
             // 2. Check configured values
             Assert.IsTrue(audioClip.model.loop);
@@ -175,7 +175,7 @@ namespace Tests
 
             scene.SharedComponentUpdate(audioClip.id, JsonUtility.ToJson(componentModel));
 
-            yield return audioClip.routine;
+            yield return audioClip.enumerator;
 
             // 4. Check defaulted values
             Assert.IsFalse(audioClip.model.loop);
@@ -238,7 +238,7 @@ namespace Tests
             DCLAudioClip dclAudioClip = CreateAudioClip(DCL.Helpers.Utils.GetTestsAssetsPath() + "/Audio/short_effect.ogg", true, true, 1);
             bool isOnReady = false;
             dclAudioClip.CallWhenReady((x) => { isOnReady = true; });
-            yield return dclAudioClip.routine;
+            yield return dclAudioClip.enumerator;
 
             Assert.IsTrue(isOnReady);
         }
@@ -247,7 +247,7 @@ namespace Tests
         public IEnumerator AudioClip_OnReadyAfterLoadingInstantlyCalled()
         {
             DCLAudioClip dclAudioClip = CreateAudioClip(DCL.Helpers.Utils.GetTestsAssetsPath() + "/Audio/short_effect.ogg", true, true, 1);
-            yield return dclAudioClip.routine;
+            yield return dclAudioClip.enumerator;
             bool isOnReady = false;
             dclAudioClip.CallWhenReady((x) => { isOnReady = true; });
 

@@ -40,7 +40,7 @@ namespace DCL
                 scene,
                 DCL.Models.CLASS_ID.UI_SCREEN_SPACE_SHAPE);
 
-            yield return ssshape.routine;
+            yield return ssshape.enumerator;
 
             UIInputText text = TestHelpers.SharedComponentCreate<UIInputText, UIInputText.Model>(
                 scene,
@@ -65,7 +65,7 @@ namespace DCL
                     vAlign = "top",
                 });
 
-            yield return text.routine;
+            yield return text.enumerator;
         }
     }
 }

@@ -1,7 +1,7 @@
 using DCL.Controllers;
-using DCL.Models;
 using DCL.Helpers;
 using DCL.Interface;
+using DCL.Models;
 using UnityEngine;
 
 namespace DCL.Components
@@ -82,6 +82,12 @@ namespace DCL.Components
             {
                 GameObject hoverCanvasGameObject = Object.Instantiate(Resources.Load("InteractionHoverCanvas"), PointerEventsController.i.transform) as GameObject;
                 hoverCanvasController = hoverCanvasGameObject.GetComponent<InteractionHoverCanvasController>();
+            }
+
+            if (hoverCanvasController == null || model == null)
+            {
+                Debug.Log("Hover canvas or model is null???");
+                return;
             }
 
             hoverCanvasController.enabled = model.showFeedback;

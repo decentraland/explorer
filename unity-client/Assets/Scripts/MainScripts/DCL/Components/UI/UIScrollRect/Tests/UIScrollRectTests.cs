@@ -17,11 +17,11 @@ namespace Tests
             UIScreenSpace screenSpaceShape =
                 TestHelpers.SharedComponentCreate<UIScreenSpace, UIScreenSpace.Model>(scene,
                     CLASS_ID.UI_SCREEN_SPACE_SHAPE);
-            yield return screenSpaceShape.routine;
+            yield return screenSpaceShape.enumerator;
 
             UIScrollRect scrRect =
                 TestHelpers.SharedComponentCreate<UIScrollRect, UIScrollRect.Model>(scene, CLASS_ID.UI_SLIDER_SHAPE);
-            yield return scrRect.routine;
+            yield return scrRect.enumerator;
 
             // Force a new update to pass the first apply
             yield return TestHelpers.SharedComponentUpdate(scrRect, new UIScrollRect.Model
@@ -85,11 +85,11 @@ namespace Tests
             UIScreenSpace screenSpaceShape =
                 TestHelpers.SharedComponentCreate<UIScreenSpace, UIScreenSpace.Model>(scene,
                     CLASS_ID.UI_SCREEN_SPACE_SHAPE);
-            yield return screenSpaceShape.routine;
+            yield return screenSpaceShape.enumerator;
 
             UIScrollRect scrRect =
                 TestHelpers.SharedComponentCreate<UIScrollRect, UIScrollRect.Model>(scene, CLASS_ID.UI_SLIDER_SHAPE);
-            yield return scrRect.routine;
+            yield return scrRect.enumerator;
 
             // Force a new update to pass the first apply
             yield return TestHelpers.SharedComponentUpdate(scrRect, new UIScrollRect.Model
@@ -139,7 +139,7 @@ namespace Tests
                 TestHelpers.SharedComponentCreate<UIScreenSpace, UIScreenSpace.Model>(scene,
                     CLASS_ID.UI_SCREEN_SPACE_SHAPE);
 
-            yield return screenSpaceShape.routine;
+            yield return screenSpaceShape.enumerator;
 
             Assert.IsFalse(screenSpaceShape == null);
 
@@ -162,13 +162,13 @@ namespace Tests
                 TestHelpers.SharedComponentCreate<UIScreenSpace, UIScreenSpace.Model>(scene,
                     CLASS_ID.UI_SCREEN_SPACE_SHAPE);
 
-            yield return screenSpaceShape.routine;
+            yield return screenSpaceShape.enumerator;
 
             // Create UIContainerRectShape
             UIContainerRect uiContainerRectShape = TestHelpers.SharedComponentCreate<UIContainerRect, UIContainerRect.Model>(scene,
                 CLASS_ID.UI_CONTAINER_RECT);
 
-            yield return uiContainerRectShape.routine;
+            yield return uiContainerRectShape.enumerator;
 
             // Update UIContainerRectShape properties
             yield return TestHelpers.SharedComponentUpdate(uiContainerRectShape,
@@ -179,7 +179,7 @@ namespace Tests
                     height = new UIValue(30, UIValue.Unit.PERCENT)
                 });
 
-            yield return uiContainerRectShape.routine;
+            yield return uiContainerRectShape.enumerator;
 
             UnityEngine.UI.Image image =
                 uiContainerRectShape.childHookRectTransform.GetComponent<UnityEngine.UI.Image>();

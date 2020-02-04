@@ -24,7 +24,7 @@ namespace Tests
             DCLTexture texture =
                 TestHelpers.CreateDCLTexture(scene, Utils.GetTestsAssetsPath() + "/Images/atlas.png");
 
-            yield return texture.routine;
+            yield return texture.enumerator;
 
             DecentralandEntity entity = null;
 
@@ -37,7 +37,7 @@ namespace Tests
                 },
                 out entity);
 
-            yield return matPBR.routine;
+            yield return matPBR.enumerator;
 
             {
                 Assert.IsTrue(entity.meshRootGameObject != null,
@@ -68,7 +68,7 @@ namespace Tests
 
             var materialComponent = scene.disposableComponents[materialID] as DCL.Components.PBRMaterial;
 
-            yield return materialComponent.routine;
+            yield return materialComponent.enumerator;
 
             Assert.IsTrue(materialComponent is DCL.Components.PBRMaterial, "material is PBRMaterial");
 
@@ -112,7 +112,7 @@ namespace Tests
             DCLTexture texture =
                 TestHelpers.CreateDCLTexture(scene, Utils.GetTestsAssetsPath() + "/Images/atlas.png");
 
-            yield return texture.routine;
+            yield return texture.enumerator;
 
             Color color1, color2, color3;
 
@@ -134,7 +134,7 @@ namespace Tests
                 transparencyMode = 2,
             }));
 
-            yield return materialComponent.routine;
+            yield return materialComponent.enumerator;
 
             // Check updated properties
             {
@@ -278,7 +278,7 @@ namespace Tests
                 metallic = 0.95f
             }));
 
-            yield return (scene.disposableComponents[firstMaterialID] as DCL.Components.PBRMaterial).routine;
+            yield return (scene.disposableComponents[firstMaterialID] as DCL.Components.PBRMaterial).enumerator;
 
             // Check material properties after updating them
             Assert.AreApproximatelyEqual(0.95f, firstRenderer.sharedMaterial.GetFloat("_Metallic"));
@@ -300,7 +300,7 @@ namespace Tests
             var meshRenderer = scene.entities[entityId].meshRootGameObject.GetComponent<MeshRenderer>();
             var materialComponent = scene.disposableComponents[materialID] as DCL.Components.BasicMaterial;
 
-            yield return materialComponent.routine;
+            yield return materialComponent.enumerator;
 
             Assert.IsTrue(materialComponent is DCL.Components.BasicMaterial, "material is BasicMaterial");
 
@@ -348,7 +348,7 @@ namespace Tests
             var secondMeshRenderer = scene.entities[secondEntityId].meshRootGameObject.GetComponent<MeshRenderer>();
             var materialComponent = scene.disposableComponents[materialID] as DCL.Components.BasicMaterial;
 
-            yield return materialComponent.routine;
+            yield return materialComponent.enumerator;
 
             Assert.IsTrue(materialComponent is DCL.Components.BasicMaterial, "material is BasicMaterial");
 
@@ -381,7 +381,7 @@ namespace Tests
                 DCLTexture.BabylonWrapMode.CLAMP,
                 FilterMode.Bilinear);
 
-            yield return dclTexture.routine;
+            yield return dclTexture.enumerator;
 
             BasicMaterial mat = TestHelpers.SharedComponentCreate<BasicMaterial, BasicMaterial.Model>
             (scene, CLASS_ID.BASIC_MATERIAL,
@@ -391,7 +391,7 @@ namespace Tests
                     alphaTest = 0.5f
                 });
 
-            yield return mat.routine;
+            yield return mat.enumerator;
 
             TestHelpers.SharedComponentAttach(mat, entity);
 
@@ -418,7 +418,7 @@ namespace Tests
                 DCLTexture.BabylonWrapMode.CLAMP,
                 FilterMode.Bilinear);
 
-            yield return dclTexture.routine;
+            yield return dclTexture.enumerator;
 
             PBRMaterial mat = TestHelpers.SharedComponentCreate<PBRMaterial, PBRMaterial.Model>(scene,
                 CLASS_ID.PBR_MATERIAL,
@@ -430,7 +430,7 @@ namespace Tests
                 }
             );
 
-            yield return mat.routine;
+            yield return mat.enumerator;
 
             TestHelpers.SharedComponentAttach(mat, entity);
 
@@ -438,7 +438,7 @@ namespace Tests
                 CLASS_ID.SPHERE_SHAPE,
                 new SphereShape.Model { });
 
-            yield return shape.routine;
+            yield return shape.enumerator;
 
             TestHelpers.SharedComponentAttach(shape, entity);
 
@@ -467,7 +467,7 @@ namespace Tests
             var meshRenderer = meshObject.GetComponent<MeshRenderer>();
             var materialComponent = scene.disposableComponents[materialID] as DCL.Components.BasicMaterial;
 
-            yield return materialComponent.routine;
+            yield return materialComponent.enumerator;
 
             Assert.IsTrue(materialComponent is DCL.Components.BasicMaterial, "material is BasicMaterial");
 
@@ -500,7 +500,7 @@ namespace Tests
                 alphaTest = 0.5f,
             }));
 
-            yield return materialComponent.routine;
+            yield return materialComponent.enumerator;
 
             // Check updated properties
             {
@@ -524,7 +524,7 @@ namespace Tests
                         alphaTest = 1f
                     });
 
-            yield return basicMaterialComponent.routine;
+            yield return basicMaterialComponent.enumerator;
 
             // 2. Check configured values
             Assert.AreEqual(1f, basicMaterialComponent.model.alphaTest);
@@ -533,7 +533,7 @@ namespace Tests
 
             scene.SharedComponentUpdate(basicMaterialComponent.id, JsonUtility.ToJson(new BasicMaterial.Model { }));
 
-            yield return basicMaterialComponent.routine;
+            yield return basicMaterialComponent.enumerator;
 
             // 4. Check defaulted values
             Assert.AreEqual(0.5f, basicMaterialComponent.model.alphaTest);
@@ -564,7 +564,7 @@ namespace Tests
                     specularIntensity = 3f
                 });
 
-            yield return PBRMaterialComponent.routine;
+            yield return PBRMaterialComponent.enumerator;
 
             // 2. Check configured values
             Assert.AreEqual(color1, PBRMaterialComponent.model.albedoColor);
@@ -575,7 +575,7 @@ namespace Tests
             // 3. Update component with missing values
             scene.SharedComponentUpdate(PBRMaterialComponent.id, JsonUtility.ToJson(new PBRMaterial.Model { }));
 
-            yield return PBRMaterialComponent.routine;
+            yield return PBRMaterialComponent.enumerator;
 
             // 4. Check defaulted values
             Assert.AreEqual(Color.white, PBRMaterialComponent.model.albedoColor);

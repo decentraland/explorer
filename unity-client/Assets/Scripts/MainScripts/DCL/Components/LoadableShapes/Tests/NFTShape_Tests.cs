@@ -26,7 +26,7 @@ public class NFTShape_Tests : TestsBase
         };
 
         NFTShape component = TestHelpers.SharedComponentCreate<NFTShape, NFTShape.Model>(scene, CLASS_ID.NFT_SHAPE, componentModel);
-        yield return component.routine;
+        yield return component.enumerator;
 
         TestHelpers.SharedComponentAttach(component, entity);
 
@@ -53,7 +53,7 @@ public class NFTShape_Tests : TestsBase
 
 
         var component = TestHelpers.SharedComponentCreate<NFTShape, NFTShape.Model>(scene, CLASS_ID.NFT_SHAPE);
-        yield return component.routine;
+        yield return component.enumerator;
 
         Assert.IsFalse(component == null);
 
@@ -77,7 +77,7 @@ public class NFTShape_Tests : TestsBase
         shapeModel.src = "ethereum://0x06012c8cf97BEaD5deAe237070F9587f8E7A266d/558536";
 
         var shapeComponent = TestHelpers.SharedComponentCreate<LoadableShape<LoadWrapper_NFT, NFTShape.Model>, LoadableShape<LoadWrapper_NFT, NFTShape.Model>.Model>(scene, CLASS_ID.NFT_SHAPE, shapeModel);
-        yield return shapeComponent.routine;
+        yield return shapeComponent.enumerator;
 
         TestHelpers.SharedComponentAttach(shapeComponent, entity);
 
@@ -102,7 +102,7 @@ public class NFTShape_Tests : TestsBase
         shapeModel.src = "ethereum://0x06012c8cf97BEaD5deAe237070F9587f8E7A266d/558536";
 
         var shapeComponent = TestHelpers.SharedComponentCreate<LoadableShape<LoadWrapper_NFT, NFTShape.Model>, LoadableShape<LoadWrapper_NFT, NFTShape.Model>.Model>(scene, CLASS_ID.NFT_SHAPE, shapeModel);
-        yield return shapeComponent.routine;
+        yield return shapeComponent.enumerator;
 
         TestHelpers.SharedComponentAttach(shapeComponent, entity);
 

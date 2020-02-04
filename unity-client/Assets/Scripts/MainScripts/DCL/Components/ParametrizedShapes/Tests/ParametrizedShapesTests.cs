@@ -69,7 +69,7 @@ namespace Tests
                     uvs = uvs
                 });
 
-            yield return plane.routine;
+            yield return plane.enumerator;
 
             Assert.IsTrue(entity != null);
             Assert.IsTrue(plane != null);
@@ -141,7 +141,7 @@ namespace Tests
         {
             var component =
                 TestHelpers.SharedComponentCreate<SphereShape, SphereShape.Model>(scene, CLASS_ID.SPHERE_SHAPE);
-            yield return component.routine;
+            yield return component.enumerator;
 
             Assert.IsFalse(component == null);
 
@@ -160,7 +160,7 @@ namespace Tests
         public IEnumerator ConeShapeComponentMissingValuesGetDefaultedOnUpdate()
         {
             var component = TestHelpers.SharedComponentCreate<ConeShape, ConeShape.Model>(scene, CLASS_ID.CONE_SHAPE);
-            yield return component.routine;
+            yield return component.enumerator;
 
             Assert.IsFalse(component == null);
 
@@ -180,7 +180,7 @@ namespace Tests
         {
             var component =
                 TestHelpers.SharedComponentCreate<CylinderShape, CylinderShape.Model>(scene, CLASS_ID.CYLINDER_SHAPE);
-            yield return component.routine;
+            yield return component.enumerator;
 
             Assert.IsFalse(component == null);
 
@@ -202,7 +202,7 @@ namespace Tests
         {
             var component =
                 TestHelpers.SharedComponentCreate<PlaneShape, PlaneShape.Model>(scene, CLASS_ID.PLANE_SHAPE);
-            yield return component.routine;
+            yield return component.enumerator;
 
             Assert.IsFalse(component == null);
 
@@ -231,7 +231,7 @@ namespace Tests
             // BoxShape
             BaseShape.Model shapeModel = new BoxShape.Model();
             BaseShape shapeComponent = TestHelpers.SharedComponentCreate<BoxShape, BaseShape.Model>(scene, CLASS_ID.BOX_SHAPE, shapeModel);
-            yield return shapeComponent.routine;
+            yield return shapeComponent.enumerator;
 
             TestHelpers.SharedComponentAttach(shapeComponent, entity);
 
@@ -244,7 +244,7 @@ namespace Tests
             // SphereShape
             shapeModel = new SphereShape.Model();
             shapeComponent = TestHelpers.SharedComponentCreate<SphereShape, BaseShape.Model>(scene, CLASS_ID.SPHERE_SHAPE, shapeModel);
-            yield return shapeComponent.routine;
+            yield return shapeComponent.enumerator;
 
             TestHelpers.SharedComponentAttach(shapeComponent, entity);
 
@@ -257,7 +257,7 @@ namespace Tests
             // ConeShape
             shapeModel = new ConeShape.Model();
             shapeComponent = TestHelpers.SharedComponentCreate<ConeShape, BaseShape.Model>(scene, CLASS_ID.CONE_SHAPE, shapeModel);
-            yield return shapeComponent.routine;
+            yield return shapeComponent.enumerator;
 
             TestHelpers.SharedComponentAttach(shapeComponent, entity);
 
@@ -270,7 +270,7 @@ namespace Tests
             // CylinderShape
             shapeModel = new CylinderShape.Model();
             shapeComponent = TestHelpers.SharedComponentCreate<CylinderShape, BaseShape.Model>(scene, CLASS_ID.CYLINDER_SHAPE, shapeModel);
-            yield return shapeComponent.routine;
+            yield return shapeComponent.enumerator;
 
             TestHelpers.SharedComponentAttach(shapeComponent, entity);
 
@@ -283,7 +283,7 @@ namespace Tests
             // PlaneShape
             shapeModel = new PlaneShape.Model();
             shapeComponent = TestHelpers.SharedComponentCreate<PlaneShape, BaseShape.Model>(scene, CLASS_ID.PLANE_SHAPE, shapeModel);
-            yield return shapeComponent.routine;
+            yield return shapeComponent.enumerator;
 
             TestHelpers.SharedComponentAttach(shapeComponent, entity);
 
@@ -308,7 +308,7 @@ namespace Tests
             // BoxShape
             BaseShape.Model shapeModel = new BoxShape.Model();
             BaseShape shapeComponent = TestHelpers.SharedComponentCreate<BoxShape, BaseShape.Model>(scene, CLASS_ID.BOX_SHAPE, shapeModel);
-            yield return shapeComponent.routine;
+            yield return shapeComponent.enumerator;
 
             TestHelpers.SharedComponentAttach(shapeComponent, entity);
 
@@ -321,7 +321,7 @@ namespace Tests
             // SphereShape
             shapeModel = new SphereShape.Model();
             shapeComponent = TestHelpers.SharedComponentCreate<SphereShape, BaseShape.Model>(scene, CLASS_ID.SPHERE_SHAPE, shapeModel);
-            yield return shapeComponent.routine;
+            yield return shapeComponent.enumerator;
 
             TestHelpers.SharedComponentAttach(shapeComponent, entity);
 
@@ -334,7 +334,7 @@ namespace Tests
             // ConeShape
             shapeModel = new ConeShape.Model();
             shapeComponent = TestHelpers.SharedComponentCreate<ConeShape, BaseShape.Model>(scene, CLASS_ID.CONE_SHAPE, shapeModel);
-            yield return shapeComponent.routine;
+            yield return shapeComponent.enumerator;
 
             TestHelpers.SharedComponentAttach(shapeComponent, entity);
 
@@ -347,7 +347,7 @@ namespace Tests
             // CylinderShape
             shapeModel = new CylinderShape.Model();
             shapeComponent = TestHelpers.SharedComponentCreate<CylinderShape, BaseShape.Model>(scene, CLASS_ID.CYLINDER_SHAPE, shapeModel);
-            yield return shapeComponent.routine;
+            yield return shapeComponent.enumerator;
 
             TestHelpers.SharedComponentAttach(shapeComponent, entity);
 
@@ -360,7 +360,7 @@ namespace Tests
             // PlaneShape
             shapeModel = new PlaneShape.Model();
             shapeComponent = TestHelpers.SharedComponentCreate<PlaneShape, BaseShape.Model>(scene, CLASS_ID.PLANE_SHAPE, shapeModel);
-            yield return shapeComponent.routine;
+            yield return shapeComponent.enumerator;
 
             TestHelpers.SharedComponentAttach(shapeComponent, entity);
 

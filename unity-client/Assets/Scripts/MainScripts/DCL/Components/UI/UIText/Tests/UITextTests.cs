@@ -18,13 +18,13 @@ namespace Tests
                 TestHelpers.SharedComponentCreate<UIScreenSpace, UIScreenSpace.Model>(scene,
                     CLASS_ID.UI_SCREEN_SPACE_SHAPE);
 
-            yield return screenSpaceShape.routine;
+            yield return screenSpaceShape.enumerator;
 
             // Create UITextShape
             UIText uiTextShape = TestHelpers.SharedComponentCreate<UIText, UIText.Model>(scene, CLASS_ID.UI_TEXT_SHAPE,
                 new UIText.Model { });
 
-            yield return uiTextShape.routine;
+            yield return uiTextShape.enumerator;
 
             // Check default properties are applied correctly
             Assert.IsTrue(uiTextShape.referencesContainer.transform.parent == screenSpaceShape.childHookRectTransform);
@@ -108,7 +108,7 @@ namespace Tests
                 TestHelpers.SharedComponentCreate<UIScreenSpace, UIScreenSpace.Model>(scene,
                     CLASS_ID.UI_SCREEN_SPACE_SHAPE);
 
-            yield return screenSpaceShape.routine;
+            yield return screenSpaceShape.enumerator;
 
             Assert.IsFalse(screenSpaceShape == null);
 
@@ -116,7 +116,7 @@ namespace Tests
             UIText uiTextShape = TestHelpers.SharedComponentCreate<UIText, UIText.Model>(scene, CLASS_ID.UI_TEXT_SHAPE,
                 new UIText.Model { });
 
-            yield return uiTextShape.routine;
+            yield return uiTextShape.enumerator;
 
             // Update UITextShape
             yield return TestHelpers.SharedComponentUpdate(

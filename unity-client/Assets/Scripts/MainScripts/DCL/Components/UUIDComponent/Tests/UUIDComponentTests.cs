@@ -39,7 +39,7 @@ namespace Tests
             BoxShape shape;
             InstantiateEntityWithShape(out entity, out shape);
 
-            yield return shape.routine;
+            yield return shape.enumerator;
 
             string onPointerId = "pointerevent-1";
             var OnClickComponentModel = new OnClick.Model()
@@ -69,7 +69,7 @@ namespace Tests
             BoxShape shape;
             InstantiateEntityWithShape(out entity, out shape);
 
-            yield return shape.routine;
+            yield return shape.enumerator;
 
             string onPointerId = "pointerevent-1";
             var OnPointerDownModel = new OnPointerDown.Model()
@@ -99,7 +99,7 @@ namespace Tests
             BoxShape shape;
             InstantiateEntityWithShape(out entity, out shape);
 
-            yield return shape.routine;
+            yield return shape.enumerator;
 
             string onPointerId = "pointerevent-1";
             var OnPointerUpComponentModel = new OnPointerUp.Model()
@@ -421,7 +421,7 @@ namespace Tests
 
             Assert.IsTrue(component != null, "component is null?");
 
-            yield return component.routine;
+            yield return component.enumerator;
 
             Assert.IsTrue(scene.entities[entityId].gameObject.GetComponent<Rigidbody>() == null,
                 "the root object shouldn't have a rigidbody attached until a shape is added");
@@ -537,7 +537,7 @@ namespace Tests
 
             DCLCharacterController.i.SetPosition(new Vector3(3, 2, 12));
 
-            yield return shape.routine;
+            yield return shape.enumerator;
 
             string onPointerId = "pointerevent-1";
             var OnClickComponentModel = new OnClick.Model()
@@ -594,7 +594,7 @@ namespace Tests
 
             DCLCharacterController.i.SetPosition(new Vector3(3, 2, 12));
 
-            yield return shape.routine;
+            yield return shape.enumerator;
 
             string onPointerId = "pointerevent-1";
             var OnPointerDownModel = new OnPointerDown.Model()
@@ -654,7 +654,7 @@ namespace Tests
 
             DCLCharacterController.i.SetPosition(new Vector3(3, 2, 12));
 
-            yield return shape.routine;
+            yield return shape.enumerator;
 
             string onPointerId = "pointerevent-1";
             var OnPointerUpComponentModel = new OnPointerUp.Model()
@@ -718,14 +718,14 @@ namespace Tests
             BoxShape blockingShape;
             InstantiateEntityWithShape(out blockingEntity, out blockingShape);
             TestHelpers.SetEntityTransform(scene, blockingEntity, new Vector3(3, 3, 3), Quaternion.identity, new Vector3(1, 1, 1));
-            yield return blockingShape.routine;
+            yield return blockingShape.enumerator;
 
             // Create target entity for click
             DecentralandEntity clickTargetEntity;
             BoxShape clickTargetShape;
             InstantiateEntityWithShape(out clickTargetEntity, out clickTargetShape);
             TestHelpers.SetEntityTransform(scene, clickTargetEntity, new Vector3(3, 3, 5), Quaternion.identity, new Vector3(1, 1, 1));
-            yield return clickTargetShape.routine;
+            yield return clickTargetShape.enumerator;
 
             // Set character position and camera rotation
             DCLCharacterController.i.PauseGravity();
@@ -843,14 +843,14 @@ namespace Tests
             BoxShape blockingShape;
             InstantiateEntityWithShape(out blockingEntity, out blockingShape);
             TestHelpers.SetEntityTransform(scene, blockingEntity, new Vector3(3, 3, 3), Quaternion.identity, new Vector3(1, 1, 1));
-            yield return blockingShape.routine;
+            yield return blockingShape.enumerator;
 
             // Create target entity for click
             DecentralandEntity clickTargetEntity;
             BoxShape clickTargetShape;
             InstantiateEntityWithShape(out clickTargetEntity, out clickTargetShape);
             TestHelpers.SetEntityTransform(scene, clickTargetEntity, new Vector3(3, 3, 5), Quaternion.identity, new Vector3(1, 1, 1));
-            yield return clickTargetShape.routine;
+            yield return clickTargetShape.enumerator;
 
             // Set character position and camera rotation
             DCLCharacterController.i.PauseGravity();
@@ -958,7 +958,7 @@ namespace Tests
             BoxShape shape;
             InstantiateEntityWithShape(out entity, out shape);
             TestHelpers.SetEntityTransform(scene, entity, new Vector3(8, 2, 10), Quaternion.identity, new Vector3(3, 3, 3));
-            yield return shape.routine;
+            yield return shape.enumerator;
 
             var OnPointerDownModel = new OnPointerDown.Model()
             {
@@ -1022,7 +1022,7 @@ namespace Tests
             BoxShape shape;
             InstantiateEntityWithShape(out entity, out shape);
             TestHelpers.SetEntityTransform(scene, entity, new Vector3(8, 2, 10), Quaternion.identity, new Vector3(3, 3, 3));
-            yield return shape.routine;
+            yield return shape.enumerator;
 
             var onPointerDownModel = new OnPointerDown.Model()
             {
@@ -1085,7 +1085,7 @@ namespace Tests
             BoxShape shape;
             InstantiateEntityWithShape(out entity, out shape);
             TestHelpers.SetEntityTransform(scene, entity, new Vector3(8, 2, 10), Quaternion.identity, new Vector3(3, 3, 3));
-            yield return shape.routine;
+            yield return shape.enumerator;
 
             var onPointerDownModel = new OnPointerDown.Model()
             {

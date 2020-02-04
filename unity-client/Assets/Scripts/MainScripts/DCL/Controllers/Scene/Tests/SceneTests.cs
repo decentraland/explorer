@@ -407,7 +407,7 @@ namespace Tests
             Assert.AreEqual(1, scene.disposableNotReadyCount);
             scene.SetInitMessagesDone();
             Assert.AreEqual(0, scene.disposableNotReadyCount);
-            yield return boxShape.routine;
+            yield return boxShape.enumerator;
             Assert.AreEqual(0, scene.disposableNotReadyCount);
         }
     }

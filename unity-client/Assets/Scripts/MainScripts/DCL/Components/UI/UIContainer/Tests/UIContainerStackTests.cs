@@ -18,13 +18,13 @@ namespace Tests
             UIScreenSpace screenSpaceShape =
                 TestHelpers.SharedComponentCreate<UIScreenSpace, UIScreenSpace.Model>(scene,
                     CLASS_ID.UI_SCREEN_SPACE_SHAPE);
-            yield return screenSpaceShape.routine;
+            yield return screenSpaceShape.enumerator;
 
             // Create UIContainerStack
             UIContainerStack uiContainerStack =
                 TestHelpers.SharedComponentCreate<UIContainerStack, UIContainerStack.Model>(scene,
                     CLASS_ID.UI_CONTAINER_STACK);
-            yield return uiContainerStack.routine;
+            yield return uiContainerStack.enumerator;
 
             UnityEngine.UI.Image image = uiContainerStack.referencesContainer.image;
 
@@ -75,7 +75,7 @@ namespace Tests
             UIScreenSpace screenSpaceShape =
                 TestHelpers.SharedComponentCreate<UIScreenSpace, UIScreenSpace.Model>(scene,
                     CLASS_ID.UI_SCREEN_SPACE_SHAPE);
-            yield return screenSpaceShape.routine;
+            yield return screenSpaceShape.enumerator;
 
             yield return TestHelpers.TestSharedComponentDefaultsOnUpdate<UIContainerStack.Model, UIContainerStack>(
                 scene, CLASS_ID.UI_CONTAINER_STACK);
@@ -94,7 +94,7 @@ namespace Tests
             UIScreenSpace screenSpaceShape =
                 TestHelpers.SharedComponentCreate<UIScreenSpace, UIScreenSpace.Model>(scene,
                     CLASS_ID.UI_SCREEN_SPACE_SHAPE);
-            yield return screenSpaceShape.routine;
+            yield return screenSpaceShape.enumerator;
 
             // Create UIContainerStack
             UIContainerStack uiContainerStack =
@@ -106,7 +106,7 @@ namespace Tests
                         width = new UIValue(50, UIValue.Unit.PERCENT),
                         height = new UIValue(30, UIValue.Unit.PERCENT)
                     });
-            yield return uiContainerStack.routine;
+            yield return uiContainerStack.enumerator;
 
             UnityEngine.UI.Image image = uiContainerStack.childHookRectTransform.GetComponent<UnityEngine.UI.Image>();
 
@@ -127,13 +127,13 @@ namespace Tests
             UIScreenSpace screenSpaceShape =
                 TestHelpers.SharedComponentCreate<UIScreenSpace, UIScreenSpace.Model>(scene,
                     CLASS_ID.UI_SCREEN_SPACE_SHAPE);
-            yield return screenSpaceShape.routine;
+            yield return screenSpaceShape.enumerator;
 
             // Create UIContainerStack
             UIContainerStack uiContainerStack =
                 TestHelpers.SharedComponentCreate<UIContainerStack, UIContainerStack.Model>(scene,
                     CLASS_ID.UI_CONTAINER_STACK);
-            yield return uiContainerStack.routine;
+            yield return uiContainerStack.enumerator;
 
 
             // Create 1st child object
@@ -144,7 +144,7 @@ namespace Tests
                     parentComponent = uiContainerStack.id
                 });
 
-            yield return childComponent1.routine;
+            yield return childComponent1.enumerator;
 
             Assert.IsTrue(uiContainerStack.stackContainers.ContainsKey(childComponent1.id));
             Assert.IsTrue(childComponent1.referencesContainer.transform.parent.gameObject ==
@@ -158,7 +158,7 @@ namespace Tests
                     parentComponent = uiContainerStack.id,
                 });
 
-            yield return childComponent2.routine;
+            yield return childComponent2.enumerator;
 
             Assert.IsTrue(uiContainerStack.stackContainers.ContainsKey(childComponent2.id));
             Assert.IsTrue(childComponent2.referencesContainer.transform.parent.gameObject ==
@@ -175,7 +175,7 @@ namespace Tests
             UIScreenSpace screenSpaceShape =
                 TestHelpers.SharedComponentCreate<UIScreenSpace, UIScreenSpace.Model>(scene,
                     CLASS_ID.UI_SCREEN_SPACE_SHAPE);
-            yield return screenSpaceShape.routine;
+            yield return screenSpaceShape.enumerator;
 
             // Create UIContainerStack
             UIContainerStack uiContainerStack =
@@ -187,7 +187,7 @@ namespace Tests
                         height = new UIValue(300f)
                     });
 
-            yield return uiContainerStack.routine;
+            yield return uiContainerStack.enumerator;
 
             // Check container stack was initialized correctly
             Assert.IsTrue(uiContainerStack != null);
@@ -209,7 +209,7 @@ namespace Tests
                     height = new UIValue(70f)
                 });
 
-            yield return childComponent1.routine;
+            yield return childComponent1.enumerator;
 
             // Create 2nd child object
             UIImage childComponent2 = TestHelpers.SharedComponentCreate<UIImage, UIImage.Model>(scene,
@@ -221,7 +221,7 @@ namespace Tests
                     height = new UIValue(35f)
                 });
 
-            yield return childComponent2.routine;
+            yield return childComponent2.enumerator;
 
             // Create 3rd child object
             UIInputText childComponent3 = TestHelpers.SharedComponentCreate<UIInputText, UIInputText.Model>(scene,
@@ -233,7 +233,7 @@ namespace Tests
                     height = new UIValue(50f)
                 });
 
-            yield return childComponent3.routine;
+            yield return childComponent3.enumerator;
 
             RectTransform child1RT = childComponent1.referencesContainer.transform.parent as RectTransform;
             RectTransform child2RT = childComponent2.referencesContainer.transform.parent as RectTransform;
@@ -258,13 +258,13 @@ namespace Tests
             UIScreenSpace screenSpaceShape =
                 TestHelpers.SharedComponentCreate<UIScreenSpace, UIScreenSpace.Model>(scene,
                     CLASS_ID.UI_SCREEN_SPACE_SHAPE);
-            yield return screenSpaceShape.routine;
+            yield return screenSpaceShape.enumerator;
 
             // Create UIContainerStack
             UIContainerStack uiContainerStack =
                 TestHelpers.SharedComponentCreate<UIContainerStack, UIContainerStack.Model>(scene,
                     CLASS_ID.UI_CONTAINER_STACK);
-            yield return uiContainerStack.routine;
+            yield return uiContainerStack.enumerator;
 
             yield return TestHelpers.SharedComponentUpdate(uiContainerStack,
                 new UIContainerStack.Model
@@ -294,7 +294,7 @@ namespace Tests
                     height = new UIValue(70f)
                 });
 
-            yield return childComponent1.routine;
+            yield return childComponent1.enumerator;
 
             // Create 2nd child object
             UIImage childComponent2 = TestHelpers.SharedComponentCreate<UIImage, UIImage.Model>(scene,
@@ -305,7 +305,7 @@ namespace Tests
                     width = new UIValue(75f),
                     height = new UIValue(35f)
                 });
-            yield return childComponent2.routine;
+            yield return childComponent2.enumerator;
 
             /// Create 3rd child object
             UIInputText childComponent3 = TestHelpers.SharedComponentCreate<UIInputText, UIInputText.Model>(scene,
@@ -317,7 +317,7 @@ namespace Tests
                     height = new UIValue(50f)
                 });
 
-            yield return childComponent3.routine;
+            yield return childComponent3.enumerator;
 
             RectTransform child1RT = childComponent1.referencesContainer.transform.parent as RectTransform;
             RectTransform child2RT = childComponent2.referencesContainer.transform.parent as RectTransform;
@@ -342,7 +342,7 @@ namespace Tests
             UIScreenSpace screenSpaceShape =
                 TestHelpers.SharedComponentCreate<UIScreenSpace, UIScreenSpace.Model>(scene,
                     CLASS_ID.UI_SCREEN_SPACE_SHAPE);
-            yield return screenSpaceShape.routine;
+            yield return screenSpaceShape.enumerator;
 
             // Create UIContainerStack
             UIContainerStack uiContainerStack =
@@ -354,7 +354,7 @@ namespace Tests
                         height = new UIValue(300f)
                     });
 
-            yield return uiContainerStack.routine;
+            yield return uiContainerStack.enumerator;
 
             // Create 1st child object
             UIContainerRect childComponent1 = TestHelpers.SharedComponentCreate<UIContainerRect, UIContainerRect.Model>(
@@ -366,7 +366,7 @@ namespace Tests
                     height = new UIValue(70f)
                 });
 
-            yield return childComponent1.routine;
+            yield return childComponent1.enumerator;
 
             // Create 2nd child object
             UIImage childComponent2 = TestHelpers.SharedComponentCreate<UIImage, UIImage.Model>(scene,
@@ -377,7 +377,7 @@ namespace Tests
                     width = new UIValue(75f),
                     height = new UIValue(35f)
                 });
-            yield return childComponent2.routine;
+            yield return childComponent2.enumerator;
 
             // Create 3rd child object
             UIInputText childComponent3 = TestHelpers.SharedComponentCreate<UIInputText, UIInputText.Model>(scene,
@@ -388,7 +388,7 @@ namespace Tests
                     width = new UIValue(150f),
                     height = new UIValue(50f)
                 });
-            yield return childComponent3.routine;
+            yield return childComponent3.enumerator;
 
 
             yield return TestHelpers.SharedComponentUpdate(uiContainerStack,

@@ -52,7 +52,7 @@ namespace Tests
             Assert.IsTrue(entity.gameObject.GetComponentInChildren<DCLAnimator>() != null,
                 "'GLTFScene' child object with 'DCLAnimator' component should exist if the GLTF was loaded correctly.");
 
-            yield return animator.routine;
+            yield return animator.enumerator;
 
             animator = entity.gameObject.GetComponentInChildren<DCLAnimator>();
 
@@ -98,7 +98,7 @@ namespace Tests
             LoadWrapper gltfLoader = GLTFShape.GetLoaderForEntity(entity);
             yield return new WaitUntil(() => gltfLoader.alreadyLoaded);
 
-            yield return animator.routine;
+            yield return animator.enumerator;
 
             yield return new WaitForSeconds(1.5f);
 
@@ -164,7 +164,7 @@ namespace Tests
             LoadWrapper gltfLoader = GLTFShape.GetLoaderForEntity(entity);
             yield return new WaitUntil(() => gltfLoader.alreadyLoaded);
 
-            yield return animator.routine;
+            yield return animator.enumerator;
 
             yield return new WaitForSeconds(1.5f);
 

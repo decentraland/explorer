@@ -125,7 +125,7 @@ namespace Tests
 
             Assert.IsTrue(billboard != null, "Component creation fail!");
 
-            yield return billboard.routine;
+            yield return billboard.enumerator;
         }
 
         Vector3 GetLookAtVector(Billboard.Model model, Transform entityTransform)

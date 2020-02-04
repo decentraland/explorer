@@ -19,14 +19,14 @@ namespace Tests
                 TestHelpers.SharedComponentCreate<UIScreenSpace, UIScreenSpace.Model>(scene,
                     CLASS_ID.UI_SCREEN_SPACE_SHAPE);
 
-            yield return screenSpaceShape.routine;
+            yield return screenSpaceShape.enumerator;
 
             // Create UIContainerRectShape
             UIContainerRect uiContainerRectShape =
                 TestHelpers.SharedComponentCreate<UIContainerRect, UIContainerRect.Model>(scene,
                     CLASS_ID.UI_CONTAINER_RECT);
 
-            yield return uiContainerRectShape.routine;
+            yield return uiContainerRectShape.enumerator;
 
             UnityEngine.UI.Image image = uiContainerRectShape.referencesContainer.image;
 
@@ -54,7 +54,7 @@ namespace Tests
                 vAlign = "bottom"
             })) as UIContainerRect;
 
-            yield return uiContainerRectShape.routine;
+            yield return uiContainerRectShape.enumerator;
 
             // Check updated properties are applied correctly
             Assert.AreEqual(1f, uiContainerRectShape.referencesContainer.canvasGroup.alpha);
@@ -83,20 +83,20 @@ namespace Tests
             UIScreenSpace screenSpaceShape =
                 TestHelpers.SharedComponentCreate<UIScreenSpace, UIScreenSpace.Model>(scene,
                     CLASS_ID.UI_SCREEN_SPACE_SHAPE);
-            yield return screenSpaceShape.routine;
+            yield return screenSpaceShape.enumerator;
 
             // Create UIContainerRectShape
             UIContainerRect uiContainerRectShape =
                 TestHelpers.SharedComponentCreate<UIContainerRect, UIContainerRect.Model>(scene,
                     CLASS_ID.UI_CONTAINER_RECT);
-            yield return uiContainerRectShape.routine;
+            yield return uiContainerRectShape.enumerator;
 
             // Update UIContainerRectShape parent
             scene.SharedComponentUpdate(uiContainerRectShape.id, JsonUtility.ToJson(new UIContainerRect.Model
             {
                 parentComponent = screenSpaceShape.id,
             }));
-            yield return uiContainerRectShape.routine;
+            yield return uiContainerRectShape.enumerator;
 
             // Check updated parent
             Assert.IsTrue(uiContainerRectShape.referencesContainer.transform.parent ==
@@ -106,14 +106,14 @@ namespace Tests
             UIContainerRect uiContainerRectShape2 =
                 TestHelpers.SharedComponentCreate<UIContainerRect, UIContainerRect.Model>(scene,
                     CLASS_ID.UI_CONTAINER_RECT);
-            yield return uiContainerRectShape2.routine;
+            yield return uiContainerRectShape2.enumerator;
 
             // Update UIContainerRectShape parent to the previous container
             scene.SharedComponentUpdate(uiContainerRectShape2.id, JsonUtility.ToJson(new UIContainerRect.Model
             {
                 parentComponent = uiContainerRectShape.id,
             }));
-            yield return uiContainerRectShape2.routine;
+            yield return uiContainerRectShape2.enumerator;
 
             // Check updated parent
             Assert.IsTrue(uiContainerRectShape2.referencesContainer.transform.parent ==
@@ -129,7 +129,7 @@ namespace Tests
             UIScreenSpace screenSpaceShape =
                 TestHelpers.SharedComponentCreate<UIScreenSpace, UIScreenSpace.Model>(scene,
                     CLASS_ID.UI_SCREEN_SPACE_SHAPE);
-            yield return screenSpaceShape.routine;
+            yield return screenSpaceShape.enumerator;
 
             Assert.IsFalse(screenSpaceShape == null);
 
@@ -150,13 +150,13 @@ namespace Tests
             UIScreenSpace screenSpaceShape =
                 TestHelpers.SharedComponentCreate<UIScreenSpace, UIScreenSpace.Model>(scene,
                     CLASS_ID.UI_SCREEN_SPACE_SHAPE);
-            yield return screenSpaceShape.routine;
+            yield return screenSpaceShape.enumerator;
 
             // Create UIContainerRectShape
             UIContainerRect uiContainerRectShape =
                 TestHelpers.SharedComponentCreate<UIContainerRect, UIContainerRect.Model>(scene,
                     CLASS_ID.UI_CONTAINER_RECT);
-            yield return uiContainerRectShape.routine;
+            yield return uiContainerRectShape.enumerator;
 
             // Update UIContainerRectShape properties
             uiContainerRectShape = scene.SharedComponentUpdate(uiContainerRectShape.id, JsonUtility.ToJson(new UIContainerRect.Model
@@ -165,7 +165,7 @@ namespace Tests
                 width = new UIValue(50, UIValue.Unit.PERCENT),
                 height = new UIValue(30, UIValue.Unit.PERCENT)
             })) as UIContainerRect;
-            yield return uiContainerRectShape.routine;
+            yield return uiContainerRectShape.enumerator;
 
             UnityEngine.UI.Image image =
                 uiContainerRectShape.childHookRectTransform.GetComponent<UnityEngine.UI.Image>();
@@ -187,14 +187,14 @@ namespace Tests
                 TestHelpers.SharedComponentCreate<UIScreenSpace, UIScreenSpace.Model>(scene,
                     CLASS_ID.UI_SCREEN_SPACE_SHAPE);
 
-            yield return screenSpaceShape.routine;
+            yield return screenSpaceShape.enumerator;
 
             // Create UIContainerRectShape
             UIContainerRect uiContainerRectShape =
                 TestHelpers.SharedComponentCreate<UIContainerRect, UIContainerRect.Model>(scene,
                     CLASS_ID.UI_CONTAINER_RECT);
 
-            yield return uiContainerRectShape.routine;
+            yield return uiContainerRectShape.enumerator;
 
             // Update UIContainerRectShape properties
             uiContainerRectShape = scene.SharedComponentUpdate(uiContainerRectShape.id, JsonUtility.ToJson(new UIContainerRect.Model
@@ -212,7 +212,7 @@ namespace Tests
                 onClick = "UUIDFakeEventId"
             })) as UIContainerRect;
 
-            yield return uiContainerRectShape.routine;
+            yield return uiContainerRectShape.enumerator;
 
             //------------------------------------------------------------------------
             // Test click events

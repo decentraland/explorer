@@ -18,12 +18,12 @@ namespace Tests
             UIScreenSpace screenSpaceShape =
                 TestHelpers.SharedComponentCreate<UIScreenSpace, UIScreenSpace.Model>(scene,
                     CLASS_ID.UI_SCREEN_SPACE_SHAPE);
-            yield return screenSpaceShape.routine;
+            yield return screenSpaceShape.enumerator;
 
             // Create UIImage
             UIImage uiImageShape =
                 TestHelpers.SharedComponentCreate<UIImage, UIImage.Model>(scene, CLASS_ID.UI_IMAGE_SHAPE);
-            yield return uiImageShape.routine;
+            yield return uiImageShape.enumerator;
 
             // Check default properties are applied correctly
             Assert.IsTrue(uiImageShape.referencesContainer.transform.parent == screenSpaceShape.childHookRectTransform);
@@ -42,7 +42,7 @@ namespace Tests
             // Update UIImage properties
             DCLTexture texture =
                 TestHelpers.CreateDCLTexture(scene, DCL.Helpers.Utils.GetTestsAssetsPath() + "/Images/atlas.png");
-            yield return texture.routine;
+            yield return texture.enumerator;
 
             yield return TestHelpers.SharedComponentUpdate(uiImageShape, new UIImage.Model
             {
@@ -102,7 +102,7 @@ namespace Tests
             UIScreenSpace screenSpaceShape =
                 TestHelpers.SharedComponentCreate<UIScreenSpace, UIScreenSpace.Model>(scene,
                     CLASS_ID.UI_SCREEN_SPACE_SHAPE);
-            yield return screenSpaceShape.routine;
+            yield return screenSpaceShape.enumerator;
 
             Assert.IsFalse(screenSpaceShape == null);
 
@@ -122,16 +122,16 @@ namespace Tests
             UIScreenSpace screenSpaceShape =
                 TestHelpers.SharedComponentCreate<UIScreenSpace, UIScreenSpace.Model>(scene,
                     CLASS_ID.UI_SCREEN_SPACE_SHAPE);
-            yield return screenSpaceShape.routine;
+            yield return screenSpaceShape.enumerator;
 
             Assert.IsFalse(screenSpaceShape == null);
 
             DCLTexture texture =
                 TestHelpers.CreateDCLTexture(scene, DCL.Helpers.Utils.GetTestsAssetsPath() + "/Images/atlas.png");
-            yield return texture.routine;
+            yield return texture.enumerator;
 
             UIImage uiImage = TestHelpers.SharedComponentCreate<UIImage, UIImage.Model>(scene, CLASS_ID.UI_IMAGE_SHAPE);
-            yield return uiImage.routine;
+            yield return uiImage.enumerator;
 
             string uiImageOnClickEventId = "UUIDFakeEventId";
 
@@ -162,7 +162,7 @@ namespace Tests
             UIContainerRect uiContainer =
                 TestHelpers.SharedComponentCreate<UIContainerRect, UIContainerRect.Model>(scene,
                     CLASS_ID.UI_CONTAINER_RECT);
-            yield return uiContainer.routine;
+            yield return uiContainer.enumerator;
 
             yield return TestHelpers.SharedComponentUpdate(uiContainer, new UIContainerRect.Model
             {
@@ -188,17 +188,17 @@ namespace Tests
         public IEnumerator TestOnClickOnInvisibleShapeEvent()
         {
             UIScreenSpace screenSpaceShape = TestHelpers.SharedComponentCreate<UIScreenSpace, UIScreenSpace.Model>(scene, CLASS_ID.UI_SCREEN_SPACE_SHAPE);
-            yield return screenSpaceShape.routine;
+            yield return screenSpaceShape.enumerator;
 
             Assert.IsFalse(screenSpaceShape == null);
 
             DCLTexture texture = TestHelpers.CreateDCLTexture(scene, DCL.Helpers.Utils.GetTestsAssetsPath() + "/Images/atlas.png");
-            yield return texture.routine;
+            yield return texture.enumerator;
 
             // --------------------------------------------------------------------------------------
             // Visible image that should trigger click events
             UIImage uiImage = TestHelpers.SharedComponentCreate<UIImage, UIImage.Model>(scene, CLASS_ID.UI_IMAGE_SHAPE);
-            yield return uiImage.routine;
+            yield return uiImage.enumerator;
 
             string uiImageOnClickEventId = "UUIDFakeEventId";
 
@@ -217,7 +217,7 @@ namespace Tests
             // Create an invisible image to check that it doesn't trigger click events
             // and that doesn't prevent previous image from triggering click events
             UIImage uiImage2 = TestHelpers.SharedComponentCreate<UIImage, UIImage.Model>(scene, CLASS_ID.UI_IMAGE_SHAPE);
-            yield return uiImage2.routine;
+            yield return uiImage2.enumerator;
 
             yield return TestHelpers.SharedComponentUpdate(uiImage2, new UIImage.Model
             {
@@ -240,17 +240,17 @@ namespace Tests
         public IEnumerator TestOnClickOnTransparentShapeEvent()
         {
             UIScreenSpace screenSpaceShape = TestHelpers.SharedComponentCreate<UIScreenSpace, UIScreenSpace.Model>(scene, CLASS_ID.UI_SCREEN_SPACE_SHAPE);
-            yield return screenSpaceShape.routine;
+            yield return screenSpaceShape.enumerator;
 
             Assert.IsFalse(screenSpaceShape == null);
 
             DCLTexture texture = TestHelpers.CreateDCLTexture(scene, DCL.Helpers.Utils.GetTestsAssetsPath() + "/Images/atlas.png");
-            yield return texture.routine;
+            yield return texture.enumerator;
 
             // --------------------------------------------------------------------------------------
             // Visible image that should trigger click events
             UIImage uiImage = TestHelpers.SharedComponentCreate<UIImage, UIImage.Model>(scene, CLASS_ID.UI_IMAGE_SHAPE);
-            yield return uiImage.routine;
+            yield return uiImage.enumerator;
 
             string uiImageOnClickEventId = "UUIDFakeEventId";
 
@@ -273,7 +273,7 @@ namespace Tests
             // Create an invisible image to check that it doesn't trigger click events
             // and that doesn't prevent previous image from triggering click events
             UIImage uiImage2 = TestHelpers.SharedComponentCreate<UIImage, UIImage.Model>(scene, CLASS_ID.UI_IMAGE_SHAPE);
-            yield return uiImage2.routine;
+            yield return uiImage2.enumerator;
 
             yield return TestHelpers.SharedComponentUpdate(uiImage2, new UIImage.Model
             {
@@ -304,16 +304,16 @@ namespace Tests
             UIScreenSpace screenSpaceShape =
                 TestHelpers.SharedComponentCreate<UIScreenSpace, UIScreenSpace.Model>(scene,
                     CLASS_ID.UI_SCREEN_SPACE_SHAPE);
-            yield return screenSpaceShape.routine;
+            yield return screenSpaceShape.enumerator;
 
             // Create UIImage
             UIImage uiImageShape =
                 TestHelpers.SharedComponentCreate<UIImage, UIImage.Model>(scene, CLASS_ID.UI_IMAGE_SHAPE);
-            yield return uiImageShape.routine;
+            yield return uiImageShape.enumerator;
 
             DCLTexture texture =
                 TestHelpers.CreateDCLTexture(scene, DCL.Helpers.Utils.GetTestsAssetsPath() + "/Images/atlas.png");
-            yield return texture.routine;
+            yield return texture.enumerator;
 
             // Align to right-bottom
             yield return TestHelpers.SharedComponentUpdate(uiImageShape, new UIImage.Model

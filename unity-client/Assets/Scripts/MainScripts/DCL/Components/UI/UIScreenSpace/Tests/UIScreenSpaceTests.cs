@@ -19,7 +19,7 @@ namespace Tests
                 TestHelpers.SharedComponentCreate<UIScreenSpace, UIScreenSpace.Model>(scene,
                     CLASS_ID.UI_SCREEN_SPACE_SHAPE);
 
-            yield return screenSpaceShape.routine;
+            yield return screenSpaceShape.enumerator;
 
             CanvasGroup canvasGroup = screenSpaceShape.canvas.GetComponent<CanvasGroup>();
 
@@ -47,7 +47,7 @@ namespace Tests
 
             TestHelpers.SetCharacterPosition(Vector3.zero);
 
-            yield return screenSpaceShape.routine;
+            yield return screenSpaceShape.enumerator;
 
             // Check visibility
             Assert.IsTrue(canvasGroup.alpha == 1f,
@@ -81,7 +81,7 @@ namespace Tests
                 TestHelpers.SharedComponentCreate<UIScreenSpace, UIScreenSpace.Model>(scene,
                     CLASS_ID.UI_SCREEN_SPACE_SHAPE);
 
-            yield return screenSpaceShape.routine;
+            yield return screenSpaceShape.enumerator;
 
             RectTransform canvasRectTransform = screenSpaceShape.canvas.GetComponent<RectTransform>();
 
@@ -114,7 +114,7 @@ namespace Tests
                 TestHelpers.SharedComponentCreate<UIScreenSpace, UIScreenSpace.Model>(scene,
                     CLASS_ID.UI_SCREEN_SPACE_SHAPE);
 
-            yield return screenSpaceShape.routine;
+            yield return screenSpaceShape.enumerator;
 
             Assert.IsFalse(scene.isPersistent);
             Assert.IsTrue(screenSpaceShape.childHookRectTransform.GetComponent<UnityEngine.UI.RectMask2D>() != null);
@@ -134,7 +134,7 @@ namespace Tests
                 TestHelpers.SharedComponentCreate<UIScreenSpace, UIScreenSpace.Model>(scene,
                     CLASS_ID.UI_SCREEN_SPACE_SHAPE);
 
-            yield return screenSpaceShape.routine;
+            yield return screenSpaceShape.enumerator;
 
             Assert.IsTrue(scene.isPersistent);
             Assert.IsTrue(screenSpaceShape.childHookRectTransform.GetComponent<UnityEngine.UI.RectMask2D>() == null);
