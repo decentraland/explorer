@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public class CoroutineStarter : MonoBehaviour
 {
@@ -51,7 +52,25 @@ public class CoroutineStarter : MonoBehaviour
 
     public void Start()
     {
+        Application.targetFrameRate = 35;
+        RenderPipelineManager.beginFrameRendering += BeginFrameRendering;
+        RenderPipelineManager.endFrameRendering += EndFrameRendering;
         StartCoroutine(MainCoroutine());
+    }
+
+    private void BeginFrameRendering(ScriptableRenderContext arg1, Camera[] arg2)
+    {
+        lastRenderTime = Time.realtimeSinceStartup;
+    }
+    private void EndFrameRendering(ScriptableRenderContext arg1, Camera[] arg2)
+    {
+        lastRenderTime = Time.realtimeSinceStartup - lastRenderTime;
+    }
+
+    public void OnDestroy()
+    {
+        RenderPipelineManager.beginFrameRendering -= BeginFrameRendering;
+        RenderPipelineManager.endFrameRendering -= EndFrameRendering;
     }
 
     float globalStartTime;
@@ -84,7 +103,7 @@ public class CoroutineStarter : MonoBehaviour
 
             if (listDirty)
             {
-                coroutines = coroutines.OrderBy((x) => { return x.priority; }).ToList();
+                coroutines = coroutines.OrderByDescending((x) => { return x.priority; }).ToList();
             }
 
             int count = coroutines.Count;
@@ -94,11 +113,12 @@ public class CoroutineStarter : MonoBehaviour
 
             // NOTE(Brian): Try to set a global budget so the end result is 30 fps.
             //              If rendering time is slow, don't care and just set 6 ms.
-            float renderTime = CommonScriptableObjects.renderTime.Get();
-
             if (enableThrottling)
             {
-                globalTimeBudget = 0.006f;
+                if (lastRenderTime < 0.031f)
+                    globalTimeBudget = Mathf.Max(0.031f - lastRenderTime, 0.005f);
+                else
+                    globalTimeBudget = 0.005f;
             }
             else
             {
@@ -196,7 +216,8 @@ public class CoroutineStarter : MonoBehaviour
                 stack.Push(currentYieldedObject as IEnumerator);
             }
 
-            if (Time.realtimeSinceStartup - globalStartTime > globalTimeBudget)
+            float globalElapsedTime = Time.realtimeSinceStartup - globalStartTime;
+            if (globalElapsedTime > globalTimeBudget || elapsedTime > coroutine.timeBudget)
             {
                 shouldSkipFrame = true;
                 break;
