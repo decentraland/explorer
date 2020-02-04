@@ -1,4 +1,4 @@
-using DCL.Components;
+﻿using DCL.Components;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -10,10 +10,10 @@ namespace DCL
     {
         protected Queue<string> queue = new Queue<string>();
         public IEnumerator enumerator { get; protected set; }
-        public CoroutineStarter.Coroutine routine { get; protected set; }
+        public Coroutine routine { get; protected set; }
 
         public WaitForComponentUpdate yieldInstruction;
-        public string oldSerialization { get; protected set; }
+        public string oldSerialization { get; protected set; } = null;
 
         public IComponent owner;
 
@@ -26,6 +26,7 @@ namespace DCL
         {
             this.owner = owner;
             this.routine = null;
+
             yieldInstruction = new WaitForComponentUpdate(owner);
         }
 
@@ -39,23 +40,24 @@ namespace DCL
 
         protected void HandleUpdate(string newSerialization)
         {
-            if (newSerialization != oldSerialization)
+            if (newSerialization == oldSerialization)
+                return;
+
+            queue.Enqueue(newSerialization);
+
+            if (!isRoutineRunning)
             {
-                queue.Enqueue(newSerialization);
+                var enumerator = HandleUpdateCoroutines();
 
-                if (!isRoutineRunning)
+                if (enumerator != null)
                 {
-                    var enumerator = HandleUpdateCoroutines();
-
-                    if (enumerator != null)
-                    {
-                        this.routine = CoroutineStarter.Start(enumerator);
-                        this.enumerator = enumerator;
-                    }
+                    this.routine = SceneController.i.StartCoroutine(enumerator);
+                    this.enumerator = enumerator;
                 }
-
-                oldSerialization = newSerialization;
             }
+
+            oldSerialization = newSerialization;
+
         }
 
 
@@ -98,25 +100,5 @@ namespace DCL
 #endif
             owner.RaiseOnAppliedChanges();
         }
-
-        public void HandleUpdate_Legacy(string newSerialization)
-        {
-            if (newSerialization != oldSerialization)
-            {
-                if (isRoutineRunning)
-                    CoroutineStarter.Stop(this.routine);
-
-                var enumerator = ApplyChangesWrapper(newSerialization);
-
-                if (enumerator != null)
-                {
-                    this.routine = CoroutineStarter.Start(enumerator);
-                    this.enumerator = enumerator;
-                }
-
-                oldSerialization = newSerialization;
-            }
-        }
     }
-
 }

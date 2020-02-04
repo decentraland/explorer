@@ -1,4 +1,4 @@
-﻿using DCL.Controllers;
+using DCL.Controllers;
 using DCL.Helpers;
 using DCL.Models;
 using UnityEngine;
@@ -22,6 +22,12 @@ namespace DCL.Components
 
         protected override void AttachShape(DecentralandEntity entity)
         {
+            if (model == null)
+            {
+                Debug.Log("model == null???");
+                return;
+            }
+
             if (string.IsNullOrEmpty(model.src))
             {
 #if UNITY_EDITOR

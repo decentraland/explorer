@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -224,6 +224,7 @@ namespace DCL
 
         private IEnumerator ForgetBlockedPromises(object loadedPromiseId)
         {
+            Debug.Log("Forgetting blocked promises...");
             List<AssetPromiseType> blockedPromisesToForget = new List<AssetPromiseType>();
 
             using (var iterator = masterToBlockedPromises[loadedPromiseId].GetEnumerator())
@@ -258,9 +259,7 @@ namespace DCL
                 {
                     var blockedPromise = iterator.Current;
 
-                    if (blockedPromise.state == AssetPromiseState.WAITING)
-                        blockedPromisesToLoadAux.Add(blockedPromise);
-
+                    blockedPromisesToLoadAux.Add(blockedPromise);
                     blockedPromises.Remove(blockedPromise);
                 }
             }

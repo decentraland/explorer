@@ -1,4 +1,4 @@
-using DCL.Controllers;
+﻿using DCL.Controllers;
 using DCL.Helpers;
 using DCL.Interface;
 using DCL.Models;
@@ -116,6 +116,9 @@ namespace DCL.Components
 
         public bool IsAtHoverDistance(float distance)
         {
+            if (model == null)
+                return false;
+
             return distance <= model.distance;
         }
 

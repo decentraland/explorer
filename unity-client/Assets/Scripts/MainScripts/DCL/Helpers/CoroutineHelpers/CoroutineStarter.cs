@@ -27,14 +27,13 @@ public class CoroutineStarter : MonoBehaviour
 
     public class Coroutine
     {
-        public float timeBudget = 0.01f;
+        public float timeBudget = 0.25f;
         public int priority = 0;
         internal Stack<IEnumerator> stack = new Stack<IEnumerator>();
         internal object currentYieldInstruction = null;
     }
 
     List<Coroutine> coroutines = new List<Coroutine>();
-    Coroutine currentRunningCoroutine;
     float currentRunningCoroutineStartTime;
     float currentRunningCoroutineRemainingTime;
     [System.NonSerialized] public static bool enableThrottling = true;
@@ -102,7 +101,7 @@ public class CoroutineStarter : MonoBehaviour
 
             if (listDirty)
             {
-                coroutines = coroutines.OrderByDescending((x) => { return x.priority; }).ToList();
+                coroutines = coroutines.OrderBy((x) => { return x.priority; }).ToList();
             }
 
             int count = coroutines.Count;
@@ -163,7 +162,6 @@ public class CoroutineStarter : MonoBehaviour
 
     public void RunCoroutineFrame(CoroutineStarter.Coroutine coroutine)
     {
-        currentRunningCoroutine = coroutine;
         currentRunningCoroutineStartTime = Time.realtimeSinceStartup;
 
         var stack = coroutine.stack;

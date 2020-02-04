@@ -1,4 +1,4 @@
-using DCL.Controllers;
+﻿using DCL.Controllers;
 using DCL.Models;
 using System;
 using System.Collections;
@@ -48,7 +48,7 @@ namespace DCL.Components
         ComponentUpdateHandler updateHandler;
         public WaitForComponentUpdate yieldInstruction => updateHandler.yieldInstruction;
         public IEnumerator enumerator => updateHandler.enumerator;
-        public CoroutineStarter.Coroutine routine => updateHandler.routine;
+        public Coroutine routine => updateHandler.routine;
         public bool isRoutineRunning => updateHandler.isRoutineRunning;
 
         [NonSerialized] public ParcelScene scene;
@@ -84,7 +84,7 @@ namespace DCL.Components
         {
             if (isRoutineRunning)
             {
-                CoroutineStarter.Stop(routine);
+                SceneController.i.StopCoroutine(routine);
             }
         }
     }
