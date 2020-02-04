@@ -142,6 +142,7 @@ namespace DCL
         }
 
         private bool sceneSortDirty = false;
+        private int lastSortFrame = 0;
         public event Action OnSortScenes;
 
         private static readonly int MORDOR_X = (int)EnvironmentSettings.MORDOR.x;
@@ -151,8 +152,12 @@ namespace DCL
 
         private void TrySortScenesByDistance(bool forceSort = false)
         {
+            if (lastSortFrame == Time.frameCount)
+                return;
+
             if (forceSort || sceneSortDirty)
             {
+                lastSortFrame = Time.frameCount;
                 sceneSortDirty = false;
 
                 scenesSortedByDistance.Sort(SortScenesByDistanceMethod);
@@ -473,7 +478,8 @@ namespace DCL
 
             MessagingControllersManager.i.ForceEnqueueToGlobal(MessagingBusId.INIT, queuedMessage);
 
-            TrySortScenesByDistance(forceSort: true);
+            sceneSortDirty = true;
+            TrySortScenesByDistance();
 
             if (VERBOSE)
                 Debug.Log($"{Time.frameCount} : Load parcel scene queue {decentralandSceneJSON}");
