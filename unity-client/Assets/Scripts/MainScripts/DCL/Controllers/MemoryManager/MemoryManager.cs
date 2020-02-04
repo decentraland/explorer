@@ -83,8 +83,8 @@ namespace DCL
                         lastTimeUnloadUnusedAssets = DCLTime.realtimeSinceStartup;
                         Resources.UnloadUnusedAssets();
 
-                        if (shouldCleanupPoolManager)
-                            PoolManager.i.CleanPoolableReferences();
+                        //if (shouldCleanupPoolManager)
+                        //    PoolManager.i.CleanPoolableReferences();
                     }
                 }
             }

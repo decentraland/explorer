@@ -261,6 +261,7 @@ namespace DCL
 
                     if (kvp.Value.gameObject == null)
                     {
+                        Debug.Log("Removing null gameObject from pool...");
                         kvp.Value.node?.List.Remove(kvp.Value);
                         kvp.Value.node = null;
                         toRemoveAuxList.Add(kvp.Key);
