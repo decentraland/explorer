@@ -28,7 +28,7 @@ export class AirdropController extends ExposableAPI {
 
   @exposeMethod
   async openCrate(data: AirdropInput, targetContract: string, transaction: string): Promise<void> {
-    const unityInstance: unityAirdropInterface = (window as any).unityWindow
+    const unityInstance: unityAirdropInterface = (window as any).unityInterface
     const id = v4()
     this.mapIdToTransactions[id] = transaction
     this.mapIdToTargetContract[id] = targetContract
