@@ -7,6 +7,7 @@ using UnityEngine.Networking;
 //In the future the AssetManager will do this
 public static class ThumbnailsManager
 {
+    public static bool VERBOSE = false;
     static Dictionary<string, Sprite> loadedSprites = new Dictionary<string, Sprite>();
     static Dictionary<string, List<Action<Sprite>>> waitingCallbacks = new Dictionary<string, List<Action<Sprite>>>();
 
@@ -55,7 +56,8 @@ public static class ThumbnailsManager
         }
         else
         {
-            Debug.Log($"Error downloading: {url} {www.error}");
+            if (VERBOSE)
+                Debug.Log($"Error downloading: {url} {www.error}");
             // No point on making a fancy error because this will be replaced by AssetManager. By now let's use null as fallback value.
             sprite = null;
         }
