@@ -1,7 +1,7 @@
-﻿using System;
+using DCL.Helpers;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
-using DCL.Helpers;
 
 public class MinimapMetadataController : MonoBehaviour
 {
@@ -25,8 +25,12 @@ public class MinimapMetadataController : MonoBehaviour
     public void UpdateMinimapSceneInformation(string scenesInfoJson)
     {
         var scenesInfo = Utils.ParseJsonArray<MinimapSceneInfo[]>(scenesInfoJson);
+
         foreach (var scene in scenesInfo)
         {
+            if (scene.parcels.Count > 100)
+                continue;
+
             foreach (var parcel in scene.parcels)
             {
                 minimapMetadata.SetTile(parcel.x, parcel.y, new MinimapMetadata.Tile(scene.type, scene.name));
