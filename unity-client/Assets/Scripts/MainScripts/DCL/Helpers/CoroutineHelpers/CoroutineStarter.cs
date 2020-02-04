@@ -107,8 +107,11 @@ public class CoroutineStarter : MonoBehaviour
             int count = coroutines.Count;
 
             if (count <= 0)
+            {
                 yield return null;
-
+                globalStartTime = Time.unscaledTime;
+                continue;
+            }
             // NOTE(Brian): Try to set a global budget so the end result is 30 fps.
             //              If rendering time is slow, don't care and just set 6 ms.
             if (enableThrottling)
