@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -52,7 +52,6 @@ public class CoroutineStarter : MonoBehaviour
 
     public void Start()
     {
-        Application.targetFrameRate = 35;
         RenderPipelineManager.beginFrameRendering += BeginFrameRendering;
         RenderPipelineManager.endFrameRendering += EndFrameRendering;
         StartCoroutine(MainCoroutine());
