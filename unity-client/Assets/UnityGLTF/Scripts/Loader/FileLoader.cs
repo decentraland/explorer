@@ -1,7 +1,6 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.IO;
-// using System.Threading.Tasks;
 
 namespace UnityGLTF.Loader
 {
@@ -60,6 +59,10 @@ namespace UnityGLTF.Loader
             }
 
             LoadedStream = File.OpenRead(pathToLoad);
+        }
+
+        public void Dispose()
+        {
         }
     }
 }

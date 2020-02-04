@@ -1,5 +1,6 @@
-﻿using System;
+using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -12,8 +13,15 @@ namespace UnityGLTF.Loader
 {
     public class WebRequestLoader : ILoader
     {
+        class DataContainer
+        {
+            public byte[] data;
+        }
+
         public Stream LoadedStream { get; private set; }
         public bool HasSyncLoadMethod { get; private set; }
+
+        private List<DataContainer> dataContainers = new List<DataContainer>();
 
         public delegate void WebRequestLoaderEventAction(ref string requestFileName);
         public event WebRequestLoaderEventAction OnLoadStreamStart;
@@ -61,27 +69,40 @@ namespace UnityGLTF.Loader
                 finalUrl = Path.Combine(rootUri, httpRequestPath);
             }
 
-            UnityWebRequest www = new UnityWebRequest(finalUrl, "GET", new DownloadHandlerBuffer(), null);
+            using (UnityWebRequest www = new UnityWebRequest(finalUrl, "GET", new DownloadHandlerBuffer(), null))
+            {
 
-            www.timeout = 5000;
+                www.timeout = 5000;
 #if UNITY_2017_2_OR_NEWER
-            yield return www.SendWebRequest();
+                yield return www.SendWebRequest();
 #else
             yield return www.Send();
 #endif
-            if ((int)www.responseCode >= 400)
-            {
-                Debug.LogError($"{www.responseCode} - {www.url}");
-                yield break;
-            }
+                if ((int)www.responseCode >= 400)
+                {
+                    Debug.LogError($"{www.responseCode} - {www.url}");
+                    yield break;
+                }
 
-            if (www.downloadedBytes > int.MaxValue)
-            {
-                Debug.LogError("Stream is larger than can be copied into byte array");
-                yield break;
-            }
+                if (www.downloadedBytes > int.MaxValue)
+                {
+                    Debug.LogError("Stream is larger than can be copied into byte array");
+                    yield break;
+                }
 
-            LoadedStream = new MemoryStream(www.downloadHandler.data, 0, www.downloadHandler.data.Length, true, true);
+                //NOTE(Brian): DownloadHandler.data provokes a copy of the actual data. Resulting in big GC hiccups.
+                //             https://docs.unity3d.com/ScriptReference/Networking.DownloadHandlerBuffer.html
+                DataContainer data = new DataContainer() { data = www.downloadHandler.data };
+                LoadedStream = new MemoryStream(data.data, 0, data.data.Length, true, true);
+
+                dataContainers.Add(data);
+            }
+        }
+
+
+        public void Dispose()
+        {
+            dataContainers.Clear();
         }
     }
 }

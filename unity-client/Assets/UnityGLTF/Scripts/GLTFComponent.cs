@@ -85,6 +85,7 @@ namespace UnityGLTF
         private GLTFSceneImporter sceneImporter;
         private Camera mainCamera;
 
+        ILoader loader = null;
         public WebRequestLoader.WebRequestLoaderEventAction OnWebRequestStartEvent;
         public Action OnSuccess { get { return OnFinishedLoadingAsset; } set { OnFinishedLoadingAsset = value; } }
         public Action OnFail { get { return OnFailedLoadingAsset; } set { OnFailedLoadingAsset = value; } }
@@ -200,7 +201,6 @@ namespace UnityGLTF
                 asyncCoroutineHelper = gameObject.GetComponent<AsyncCoroutineHelper>() ?? gameObject.AddComponent<AsyncCoroutineHelper>();
 
                 sceneImporter = null;
-                ILoader loader = null;
 
                 Destroy(loadedAssetRootGameObject);
 
@@ -392,6 +392,8 @@ namespace UnityGLTF
             }
 
             DecrementDownloadCount();
+            if (loader != null)
+                loader.Dispose();
         }
     }
 }

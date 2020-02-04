@@ -1,8 +1,9 @@
+using System;
 using System.Collections;
 using System.IO;
 namespace UnityGLTF.Loader
 {
-    public interface ILoader
+    public interface ILoader : IDisposable
     {
         IEnumerator LoadStream(string relativeFilePath);
 
