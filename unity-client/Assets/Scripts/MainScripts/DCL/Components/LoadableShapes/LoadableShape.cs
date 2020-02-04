@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using DCL.Controllers;
 using DCL.Helpers;
 using DCL.Models;
@@ -11,6 +11,7 @@ namespace DCL.Components
 {
     public class LoadableShape : BaseShape
     {
+        public static bool VERBOSE = false;
         [System.Serializable]
         public new class Model : BaseShape.Model
         {
@@ -144,7 +145,8 @@ namespace DCL.Components
             else
             {
 #if UNITY_EDITOR
-                Debug.LogWarning($"LoadableShape '{model.src}' not found in scene '{scene.sceneData.id}' mappings");
+                if (VERBOSE)
+                    Debug.LogWarning($"LoadableShape '{model.src}' not found in scene '{scene.sceneData.id}' mappings");
 #endif
                 failed = true;
 
