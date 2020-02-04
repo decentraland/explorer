@@ -8,29 +8,29 @@ public class AirdroppingHUDView : MonoBehaviour
 {
     private const string VIEW_PATH = "AirdroppingHUD";
 
-    [SerializeField] private GenericFactory collectiblesFactory;
-    [SerializeField] private GenericFactory erc20Factory;
+    [SerializeField] internal GenericFactory collectiblesFactory;
+    [SerializeField] internal GenericFactory erc20Factory;
 
     [Header("Initial Screen")]
-    [SerializeField] private GameObject initialScreen;
-    [SerializeField] private TextMeshProUGUI initialScreenTitle;
-    [SerializeField] private TextMeshProUGUI initialScreenSubtitle;
-    [SerializeField] private Button initialScreenDoneButton;
+    [SerializeField] internal GameObject initialScreen;
+    [SerializeField] internal TextMeshProUGUI initialScreenTitle;
+    [SerializeField] internal TextMeshProUGUI initialScreenSubtitle;
+    [SerializeField] internal Button initialScreenDoneButton;
 
     [Header("Single Item Screen")]
-    [SerializeField] private GameObject singleItemScreen;
-    [SerializeField] private GameObject singleItemContainer;
-    [SerializeField] private Button singleItemDoneButton;
-    [SerializeField] private TextMeshProUGUI itemsLeft;
+    [SerializeField] internal GameObject singleItemScreen;
+    [SerializeField] internal GameObject singleItemContainer;
+    [SerializeField] internal Button singleItemDoneButton;
+    [SerializeField] internal TextMeshProUGUI itemsLeft;
 
     [Header("Summary Screen")]
-    [SerializeField] private GameObject summaryScreen;
-    [SerializeField] private GameObject summaryItemsContainer;
-    [SerializeField] private Button summaryDoneButton;
+    [SerializeField] internal GameObject summaryScreen;
+    [SerializeField] internal GameObject summaryItemsContainer;
+    [SerializeField] internal Button summaryDoneButton;
 
     [Header("Summary No Items Screen")]
-    [SerializeField] private GameObject summaryNoItemsScreen;
-    [SerializeField] private Button summaryNoItemsDoneButton;
+    [SerializeField] internal GameObject summaryNoItemsScreen;
+    [SerializeField] internal Button summaryNoItemsDoneButton;
 
     internal static AirdroppingHUDView Create()
     {

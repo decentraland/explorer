@@ -33,11 +33,11 @@ public class AirdroppingHUDController : IHUD, IDisposable
         Finish
     }
 
-    private AirdroppingHUDView view;
-    private State currentState;
-    private Model model;
-    private int currentItemShown = -1;
-    private int totalItems => model?.items?.Length ?? 0;
+    internal AirdroppingHUDView view;
+    internal State currentState;
+    internal Model model;
+    internal int currentItemShown = -1;
+    internal int totalItems => model?.items?.Length ?? 0;
 
     public AirdroppingHUDController()
     {
@@ -73,7 +73,6 @@ public class AirdroppingHUDController : IHUD, IDisposable
         switch (currentState)
         {
             case State.Initial:
-                currentItemShown = 0;
                 if (currentItemShown > totalItems - 1)
                     currentState = totalItems != 0 ? State.Summary : State.Summary_NoItems;
                 else
@@ -100,6 +99,7 @@ public class AirdroppingHUDController : IHUD, IDisposable
         switch (currentState)
         {
             case State.Initial:
+                currentItemShown = 0;
                 view.ShowInitialScreen(model.title, model.subtitle);
                 break;
             case State.SingleItem:
@@ -130,6 +130,7 @@ public class AirdroppingHUDController : IHUD, IDisposable
 
     public void Dispose()
     {
-        UnityEngine.Object.Destroy(view.gameObject);
+        if(view != null)
+            UnityEngine.Object.Destroy(view.gameObject);
     }
 }

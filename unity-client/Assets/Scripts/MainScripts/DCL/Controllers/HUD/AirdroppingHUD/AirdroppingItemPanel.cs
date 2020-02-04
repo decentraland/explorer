@@ -4,9 +4,9 @@ using UnityEngine.UI;
 
 public class AirdroppingItemPanel : MonoBehaviour
 {
-    [SerializeField] private TextMeshProUGUI name;
-    [SerializeField] private TextMeshProUGUI subtitle;
-    [SerializeField] private Image thumbnail;
+    [SerializeField] internal TextMeshProUGUI name;
+    [SerializeField] internal TextMeshProUGUI subtitle;
+    [SerializeField] internal Image thumbnail;
 
     private string currentThumbnail;
 

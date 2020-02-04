@@ -7,6 +7,10 @@ using UnityEngine.Networking;
 //In the future the AssetManager will do this
 public static class ThumbnailsManager
 {
+    #if UNITY_EDITOR
+    public static bool bypassRequests = false;
+    #endif
+
     static Dictionary<string, Sprite> loadedSprites = new Dictionary<string, Sprite>();
     static Dictionary<string, List<Action<Sprite>>> waitingCallbacks = new Dictionary<string, List<Action<Sprite>>>();
 
@@ -17,6 +21,10 @@ public static class ThumbnailsManager
 
     public static void RequestThumbnail(string url, Action<Sprite> callback)
     {
+        #if UNITY_EDITOR
+        if (bypassRequests) return;
+        #endif
+
         if (string.IsNullOrEmpty(url))
             return;
 
