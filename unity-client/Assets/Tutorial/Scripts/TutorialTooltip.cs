@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.EventSystems;
 
 public class TutorialTooltip : MonoBehaviour, IPointerClickHandler
@@ -21,10 +20,7 @@ public class TutorialTooltip : MonoBehaviour, IPointerClickHandler
 
     public void Show()
     {
-        if (isShowing)
-        {
-            return;
-        }
+        if (isShowing) return;
 
         isShowing = true;
         gameObject.SetActive(true);
@@ -38,17 +34,13 @@ public class TutorialTooltip : MonoBehaviour, IPointerClickHandler
 
     public void Hide()
     {
-        if (!isShowing)
-        {
-            return;
-        }
+        if (!isShowing) return;
 
         isShowing = false;
         if (animator && hideAnimationClip)
         {
             animator.clip = hideAnimationClip;
             animator.Play();
-            StartCoroutine(HideAfterAnimation(hideAnimationClip.length));
         }
         else
         {
@@ -56,9 +48,9 @@ public class TutorialTooltip : MonoBehaviour, IPointerClickHandler
         }
     }
 
-    private IEnumerator HideAfterAnimation(float animationLength)
+    // Animation event
+    public void OnHideFinished()
     {
-        yield return new WaitForSeconds(animationLength);
         gameObject.SetActive(false);
     }
 

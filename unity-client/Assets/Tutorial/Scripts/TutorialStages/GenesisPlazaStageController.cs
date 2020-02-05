@@ -2,19 +2,21 @@
 
 public class GenesisPlazaStageController : TutorialStageController
 {
+    const int NOTIFICATION_DURATION = 5;
+
     public override void OnStageStart()
     {
         base.OnStageStart();
 
         // NOTE: we should probably remove this toast when proper system for wellcome toast is created
-        ShowWellcomeToast();
+        ShowWelcomeToast();
 
         TutorialController.i?.SetRunningStageFinished();
     }
 
-    private void ShowWellcomeToast()
+    private void ShowWelcomeToast()
     {
-        string notificationText = $"Wellcome, {UserProfile.GetOwnUserProfile().userName}!";
+        string notificationText = $"Welcome, {UserProfile.GetOwnUserProfile().userName}!";
         Vector2Int currentCoords = CommonScriptableObjects.playerCoords.Get();
         string parcelName = MinimapMetadata.GetMetadata().GetTile(currentCoords.x, currentCoords.y)?.name;
         if (!string.IsNullOrEmpty(parcelName))
@@ -27,7 +29,7 @@ public class GenesisPlazaStageController : TutorialStageController
             message = notificationText,
             scene = "",
             type = NotificationModel.NotificationType.GENERIC_WITHOUT_BUTTON,
-            timer = 5
+            timer = NOTIFICATION_DURATION
         };
 
         HUDController.i?.notificationHud.ShowNotification(model);
