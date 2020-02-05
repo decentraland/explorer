@@ -1,0 +1,164 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!687078895 &4343727234628468602
+SpriteAtlas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: AvatarEditorAtlas
+  m_EditorData:
+    serializedVersion: 2
+    textureSettings:
+      serializedVersion: 2
+      anisoLevel: 1
+      compressionQuality: 50
+      maxTextureSize: 2048
+      textureCompression: 0
+      filterMode: 1
+      generateMipMaps: 0
+      readable: 0
+      crunchedCompression: 0
+      sRGB: 1
+    platformSettings: []
+    packingSettings:
+      serializedVersion: 2
+      padding: 4
+      blockOffset: 1
+      allowAlphaSplitting: 0
+      enableRotation: 1
+      enableTightPacking: 1
+    variantMultiplier: 1
+    packables:
+    - {fileID: 102900000, guid: 3de514b44dbae428eb467b7790cfa76a, type: 3}
+    totalSpriteSurfaceArea: 622128
+    bindAsDefault: 1
+  m_MasterAtlas: {fileID: 0}
+  m_PackedSprites:
+  - {fileID: 21300000, guid: 482b2320bd08c47f3ad462a6618fe4da, type: 3}
+  - {fileID: 21300000, guid: bab3f150678a54b019d9ce7c38214603, type: 3}
+  - {fileID: 21300000, guid: 8a2886a0f43cf4c198cab3420b168090, type: 3}
+  - {fileID: 21300000, guid: 15af3ac0b9cb342d99bd322c2bb0abb6, type: 3}
+  - {fileID: 21300000, guid: 353eddc085a6f4ac48d14f6ec4ad2365, type: 3}
+  - {fileID: 21300000, guid: 8428c8f0751b24c599c35b8cdc0cb946, type: 3}
+  - {fileID: 21300000, guid: 69beb9f0dc81b45c0af1fdfbe84b2385, type: 3}
+  - {fileID: 21300000, guid: f7c7f8511a76547a8b3ea9e2ffa0f581, type: 3}
+  - {fileID: 21300000, guid: 24eab861af11e495294578ff5b13350a, type: 3}
+  - {fileID: 21300000, guid: 34e47e6154e5d4b64b1501b1a4304d2c, type: 3}
+  - {fileID: 21300000, guid: 9098faa1fb484414fbcc33d921b0936c, type: 3}
+  - {fileID: 21300000, guid: 1f5b46c18551541ffab8a17af42f1a11, type: 3}
+  - {fileID: 21300000, guid: c3e22372b1e7e4f8d8293dd7975b937f, type: 3}
+  - {fileID: 21300000, guid: 574dcf4393035483bb9990960d3871b0, type: 3}
+  - {fileID: 21300000, guid: 4e705b6379f22470487eea484fce0300, type: 3}
+  - {fileID: 21300000, guid: c2933cc3e28be40bba4fe6f79b5b2e12, type: 3}
+  - {fileID: 21300000, guid: 3e573ed30270f46efb17308116574f90, type: 3}
+  - {fileID: 21300000, guid: 47ee6164e57ec4a62b2856283327f6de, type: 3}
+  - {fileID: 21300000, guid: b39943a42bda94b54b62bf343c6ccc60, type: 3}
+  - {fileID: 21300000, guid: 79ec09b474780490baded40d0046577a, type: 3}
+  - {fileID: 21300000, guid: f452ece47296a44ec863e8785584cd0d, type: 3}
+  - {fileID: 21300000, guid: 0ef208f4b10814362a660904a0cfb393, type: 3}
+  - {fileID: 21300000, guid: 3870cb2564d084ee5a4aeb16182c60c9, type: 3}
+  - {fileID: 21300000, guid: 8117e84559d134796a2c7d5ae5508824, type: 3}
+  - {fileID: 21300000, guid: 44018f757e16a4e0fa4146afbc637e0b, type: 3}
+  - {fileID: 21300000, guid: ef498db56ca934a75a177457ba6a9716, type: 3}
+  - {fileID: 21300000, guid: 24af1bd5a6a664172a053a072192211d, type: 3}
+  - {fileID: 21300000, guid: 0596e0f5e2c6943fc9ac6d1b4447a9f4, type: 3}
+  - {fileID: 21300000, guid: 0559ed162dda842eaa7c9ce3203c6411, type: 3}
+  - {fileID: 21300000, guid: c1243246a4b1d47d99eaa19a7660167b, type: 3}
+  - {fileID: 21300000, guid: c0807c6619f064f6a8c220d0ce3456c1, type: 3}
+  - {fileID: 21300000, guid: 90761686924f04a49a9370c80748df0c, type: 3}
+  - {fileID: 21300000, guid: fe42d767a40da487c90fd66a62638562, type: 3}
+  - {fileID: 21300000, guid: 72117b87f40c54013997454e8ecb5436, type: 3}
+  - {fileID: 21300000, guid: 88b7c5971b22e4c84911d3e87fa73a24, type: 3}
+  - {fileID: 21300000, guid: 1bcd15b7e689c43f09c2441178c479ed, type: 3}
+  - {fileID: 21300000, guid: 80557598caccf4ac5ada5b467408ba71, type: 3}
+  - {fileID: 21300000, guid: 61560cd835ca84856ae6514bf86724da, type: 3}
+  - {fileID: 21300000, guid: 00d639195f2164d4392f97e884a6c4fa, type: 3}
+  - {fileID: 21300000, guid: 2baca36983cf74be5b19e398cd490ab6, type: 3}
+  - {fileID: 21300000, guid: 3b55ef69ce5334468959389e6de9ca33, type: 3}
+  - {fileID: 21300000, guid: 32883a7a744494f8b99647bb21a7335d, type: 3}
+  - {fileID: 21300000, guid: 145558fa7cfd4460eb73793b60bf9b4f, type: 3}
+  - {fileID: 21300000, guid: 9d6e220b2c99c4f24b6f5a3a70aade91, type: 3}
+  - {fileID: 21300000, guid: 04cebf0b41d5f4f35bfbbd5e9b64c422, type: 3}
+  - {fileID: 21300000, guid: 8ab3501b0ffc14232822ca69679b60de, type: 3}
+  - {fileID: 21300000, guid: 3d32dd9b296b04802be3449c95b25e14, type: 3}
+  - {fileID: 21300000, guid: 09476ffba54dd42ce9a1f58f26d3edfd, type: 3}
+  - {fileID: 21300000, guid: 40b9490c7d38a4478a660de9cdff3f87, type: 3}
+  - {fileID: 21300000, guid: b286913c867974449baa1f618a995e02, type: 3}
+  - {fileID: 21300000, guid: 4ed0ed5c631584a879d791f541537698, type: 3}
+  - {fileID: 21300000, guid: 149d457c3ee8d46b986e33df0b1755db, type: 3}
+  - {fileID: 21300000, guid: 3dcb6b7c186364920a13cba92f2d64ba, type: 3}
+  - {fileID: 21300000, guid: 8cdd1a9cd6d8e4619bd5d561384aec34, type: 3}
+  - {fileID: 21300000, guid: 1a9b74acbb78e43c6ab7e272d5f97283, type: 3}
+  - {fileID: 21300000, guid: f2fbff6dc0135487f8d913640ce552e7, type: 3}
+  - {fileID: 21300000, guid: 8ba67edd954414f8f959dd2a7388c013, type: 3}
+  - {fileID: 21300000, guid: 0b253afd78b17426c9b1dd4f3a2f9a93, type: 3}
+  - {fileID: 21300000, guid: e7bd725e3e9d34496885149d88b42347, type: 3}
+  - {fileID: 21300000, guid: 4fff80be69b504da396d480ceb126925, type: 3}
+  - {fileID: 21300000, guid: 665f471fbca614255abe65553496fad7, type: 3}
+  - {fileID: 21300000, guid: 710618ff9f88e4be0b74483791473c9a, type: 3}
+  m_PackedSpriteNamesToIndex:
+  - TinyBack
+  - NFTtIcon
+  - NewLabel
+  - FavIcon
+  - ColorSelected
+  - InfoIcon
+  - StarIcon
+  - AccesoriesIcon
+  - MustacheIcon
+  - NFTCard
+  - BottomIcon
+  - UniqueCorner
+  - CloseButton
+  - EarringsIcon
+  - NFTCorner
+  - UniqueBackground
+  - UniqueShadow
+  - Arrow
+  - TopIcon
+  - TiaraIcon
+  - ItemCellNft
+  - UndoIcon
+  - NFTCardDescription
+  - HairIcon
+  - FavSet
+  - UniqueDescriptionCard
+  - SaleTagIcon
+  - ItemStroke
+  - SecondaryButton
+  - LoopIcon
+  - MaskIcon
+  - TopheadIcon
+  - UniqueHighlighted
+  - MainButton
+  - RandomIcon
+  - ItemAmountBox
+  - EyesIcon
+  - ColorPicker
+  - DoneIcon
+  - BodyIcon
+  - SaleTag
+  - CollectiblesIcon
+  - HatIcon
+  - ShoesIcon
+  - ItemToast
+  - MouthICon
+  - MaleIcon
+  - EyewareIcon
+  - UniqueCardDescription
+  - SubcategoryHighlighted
+  - HeadIcon
+  - HelmetIcon
+  - SortByIcon
+  - ScrollBar
+  - EyebrowIcon
+  - MarketButton
+  - UniqueCard
+  - ItemCell
+  - FemaleIcon
+  - NFTBright
+  - WalletIcon
+  - NFTShadow
+  m_Tag: AvatarEditorAtlas
+  m_IsVariant: 0
