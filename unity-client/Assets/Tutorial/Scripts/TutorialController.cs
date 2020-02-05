@@ -13,7 +13,7 @@ public class TutorialController : MonoBehaviour
 #endif
 
     [Header("Stage Controller References")]
-    [SerializeField] TutorialStageController initalStage = null;
+    [SerializeField] TutorialStageController initialStage = null;
     [SerializeField] TutorialStageController genesisPlazaStage = null;
     [SerializeField] TutorialStageController chatAndExpressionsStage = null;
 
@@ -32,7 +32,7 @@ public class TutorialController : MonoBehaviour
 
     private TutorialStageHandler runningStage = null;
 
-    private TutorialStageHandler initialStage;
+    private TutorialStageHandler firstStage;
     private int tutorialFlagMask = 0;
     private bool initialized = false;
     private Canvas chatUIScreen = null;
@@ -69,7 +69,7 @@ public class TutorialController : MonoBehaviour
             }
         }
     }
-#endif        
+#endif
 
     private void OnDestroy()
     {
@@ -95,7 +95,7 @@ public class TutorialController : MonoBehaviour
         {
             return;
         }
-        runningStage = initialStage.GetHandler(tutorialFlagMask);
+        runningStage = firstStage.GetHandler(tutorialFlagMask);
         if (runningStage != null)
         {
             runningStage.OnStageFinish += () => runningStage = null;
@@ -103,7 +103,7 @@ public class TutorialController : MonoBehaviour
         }
     }
 
-    private int GetTutorialFlagFromUserProfile()
+    private int GetTutorialFlagFromProfile()
     {
         return UserProfile.GetOwnUserProfile().tutorialFlag;
     }
@@ -112,7 +112,7 @@ public class TutorialController : MonoBehaviour
     {
         if (renderingEnabled && isTutorialEnabled)
         {
-            tutorialFlagMask = GetTutorialFlagFromUserProfile();
+            tutorialFlagMask = GetTutorialFlagFromProfile(); // TODO: get flag from user profile
 
 #if UNITY_EDITOR
             if (debugFlagStartingValue != 0)
@@ -132,7 +132,7 @@ public class TutorialController : MonoBehaviour
     {
         initialized = true;
         CacheChatScreen();
-        TutorialStageHandler handler = initialStage;
+        TutorialStageHandler handler = firstStage;
         while (handler != null)
         {
             if (!handler.IsAlreadyFinished(tutorialFlagMask))
@@ -171,13 +171,17 @@ public class TutorialController : MonoBehaviour
 
     private void CreateStagesChainOfResponsibility()
     {
-        initialStage = new GenericSceneStageHandler(TutorialFlags.InitialScene, initalStage,
+        // 1st stage - initialStage
+        firstStage = new GenericSceneStageHandler(TutorialFlags.InitialScene, initialStage,
             () =>
             {
                 HUDController.i?.minimapHud.SetVisibility(false);
             });
 
-        var nextStage = initialStage.SetNext(new GenericSceneStageHandler(TutorialFlags.LoginRewardAndUserEmail, genesisPlazaStage, null));
+        // 2nd stage - LoginRewardAndUserEmail
+        var nextStage = firstStage.SetNext(new GenericSceneStageHandler(TutorialFlags.LoginRewardAndUserEmail, genesisPlazaStage, null));
+
+        // 3rd stage - ChatAndAvatarExpressions
         nextStage = nextStage.SetNext(new GenericSceneStageHandler(TutorialFlags.ChatAndAvatarExpressions, chatAndExpressionsStage,
             () =>
             {

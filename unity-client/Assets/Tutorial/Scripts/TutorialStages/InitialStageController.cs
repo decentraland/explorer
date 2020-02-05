@@ -7,9 +7,10 @@ public class InitialStageController : TutorialStageController
     [SerializeField] TutorialTooltip controlsTooltip = null;
     [SerializeField] TutorialTooltip cameraTooltip = null;
     [SerializeField] TutorialTooltip minimapTooltip = null;
+    [SerializeField] GameObject claimNamePanel = null;
 
     private AvatarEditorHUDController avatarEditorHUD = null;
-    private bool avatarEditorClosed = false;
+    private bool claimNamePanelClosed = false;
     private bool characterMoved = false;
 
     public override void OnStageStart()
@@ -24,11 +25,11 @@ public class InitialStageController : TutorialStageController
             avatarEditorHUD = HUDController.i.avatarEditorHud;
             avatarEditorHUD.SetVisibility(true);
             avatarEditorHUD.OnVisibilityChanged += OnAvatarEditorVisibilityChanged;
-            avatarEditorClosed = false;
+            claimNamePanelClosed = false;
         }
         else
         {
-            avatarEditorClosed = true;
+            claimNamePanelClosed = true;
         }
 
         StartCoroutine(StageSecuence());
@@ -46,7 +47,7 @@ public class InitialStageController : TutorialStageController
     {
         yield return ShowTooltip(wellcomeTooltip);
 
-        yield return new WaitUntil(() => avatarEditorClosed);
+        yield return new WaitUntil(() => claimNamePanelClosed);
         yield return WaitSeconds(3);
 
         yield return ShowTooltip(controlsTooltip, autoHide: false);
@@ -75,16 +76,17 @@ public class InitialStageController : TutorialStageController
         {
             TutorialController.i?.SetRunningStageFinished();
         }
-#endif      
+#endif
     }
 
     private void OnAvatarEditorVisibilityChanged(bool visible)
     {
+        if (visible) return;
+
         if (avatarEditorHUD != null)
-        {
             avatarEditorHUD.OnVisibilityChanged -= OnAvatarEditorVisibilityChanged;
-            avatarEditorClosed = true;
-        }
+
+        claimNamePanel.SetActive(true);
     }
 
     private void OnTeleport(DCLCharacterPosition characterPosition)
@@ -95,5 +97,19 @@ public class InitialStageController : TutorialStageController
     private void OnCharacterMove(DCLCharacterPosition position)
     {
         characterMoved = true;
+    }
+
+    public void ClaimNameButtonAction()
+    {
+        Application.OpenURL("http://avatars.decentraland.org");
+
+        ContinueAsGuestButtonAction();
+    }
+
+    public void ContinueAsGuestButtonAction()
+    {
+        claimNamePanel.SetActive(false);
+
+        claimNamePanelClosed = true;
     }
 }
