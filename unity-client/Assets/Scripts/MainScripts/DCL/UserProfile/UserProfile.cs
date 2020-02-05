@@ -16,6 +16,7 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
     public string userName => model.name;
     public string description => model.description;
     public string email => model.email;
+    public bool hasConnectedWeb3 => model.hasConnectedWeb3;
     public AvatarModel avatar => model.avatar;
     internal Dictionary<string, int> inventory = new Dictionary<string, int>();
 

@@ -47,6 +47,11 @@ public class AvatarEditorHUDView : MonoBehaviour
     [SerializeField] internal Button doneButton;
     [SerializeField] internal Button exitButton;
 
+    [Header("Marketplace")]
+    [SerializeField] internal Button goToMarketplaceButton;
+    [SerializeField] internal GameObject noWeb3Container;
+    [SerializeField] internal Button noWeb3GoToMarketplaceButton;
+    
     internal CharacterPreviewController characterPreviewController;
     private AvatarEditorHUDController controller;
     internal readonly Dictionary<string, ItemSelector> selectorsByCategory = new Dictionary<string, ItemSelector>();
@@ -68,6 +73,16 @@ public class AvatarEditorHUDView : MonoBehaviour
         exitButton.onClick.AddListener(OnExitButton);
         InitializeNavigationEvents();
         InitializeWearableChangeEvents();
+        
+        goToMarketplaceButton.onClick.RemoveAllListeners();
+        noWeb3GoToMarketplaceButton.onClick.RemoveAllListeners();
+        goToMarketplaceButton.onClick.AddListener(controller.GoToMarketplace);
+        noWeb3GoToMarketplaceButton.onClick.AddListener(controller.GoToMarketplace);
+    }
+
+    public void SetIsWeb3(bool hasWallet)
+    {
+        noWeb3Container.SetActive(!hasWallet);
     }
 
     private void InitializeNavigationEvents()

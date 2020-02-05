@@ -65,6 +65,8 @@ public class AvatarEditorHUDController : IDisposable, IHUD
         {
             return;
         }
+    
+        view.SetIsWeb3(userProfile.hasConnectedWeb3);
 
         ProcessCatalog(this.catalog);
         EquipBodyShape(bodyShape);
@@ -399,5 +401,10 @@ public class AvatarEditorHUDController : IDisposable, IHUD
     {
         LoadUserProfile(userProfile);
         SetVisibility(false);
+    }
+
+    public void GoToMarketplace()
+    {
+        Debug.Log("Calling Go to Marketplace");
     }
 }
