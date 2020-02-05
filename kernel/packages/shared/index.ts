@@ -49,6 +49,18 @@ enum AnalyticsAccount {
   DEV = 'a4h4BC4dL1v7FhIQKKuPHEdZIiNRDVhc'
 }
 
+type Layer = {
+  name: string
+  usersCount: number
+  maxUsers: number
+}
+
+type Candidate = {
+  domain: string
+  elapsed: number
+  layer: Layer
+}
+
 declare const window: any
 
 // TODO fill with segment keys and integrate identity server
@@ -72,7 +84,7 @@ function initializeAnalytics() {
 export let globalStore: Store<RootState>
 export let identity: AuthIdentity
 
-function ping(url: string) {
+function ping(url: string): Promise<{ success: boolean; elapsed?: number; result?: Layer[] }> {
   const result = future()
 
   new Promise(() => {
@@ -93,8 +105,8 @@ function ping(url: string) {
         } else {
           result.resolve({
             success: true,
-            ellapsed: ended - started.getTime(),
-            result: http.responseText
+            elapsed: ended - started.getTime(),
+            result: JSON.parse(http.responseText) as Layer[]
           })
         }
       }
@@ -152,8 +164,22 @@ async function createAuthIdentity() {
   return identity
 }
 
-const zip = <T>(arr: Array<T>, ...arrs: Array<Array<any>>) => {
-  return arr.map((val, i) => arrs.reduce((a, arr) => [...a, arr[i]], [val]))
+const zip = <T, U>(arr: Array<T>, ...arrs: Array<Array<U>>) => {
+  return arr.map((val, i) => arrs.reduce((a, arr) => [...a, arr[i]], [val] as Array<any>)) as Array<[T, U]>
+}
+
+const v = 50
+const score = ({ usersCount, maxUsers = 50 }: Layer) => {
+  if (usersCount === 0) {
+    return -v
+  }
+  if (usersCount >= maxUsers) {
+    return 0
+  }
+
+  const p = 3 / (maxUsers ? maxUsers : 50)
+
+  return v + v * Math.cos(p * (usersCount - 1))
 }
 
 export async function initShared(): Promise<Session | undefined> {
@@ -246,10 +272,28 @@ export async function initShared(): Promise<Session | undefined> {
     return session
   }
 
-  const nodes = await fetchKatalystNodes()
+  // const nodes = await fetchKatalystNodes()
+  const nodes = [
+    { domain: 'https://bot2-katalyst.decentraland.zone' },
+    { domain: 'https://bot2-katalyst.decentraland.zone' },
+    { domain: 'https://katalyst-comms-no-relay.decentraland.zone' },
+    { domain: 'https://katalyst-comms-relay.decentraland.zone' }
+  ]
 
-  const results = await Promise.all(nodes.map(node => ping(`${node.domain}/content/status`)))
-  const candidates = zip(nodes, results).filter($ => $[1].success)
+  const results = await Promise.all(nodes.map(node => ping(`${node.domain}/comms/layers`)))
+  const candidates = zip(nodes, results)
+    .reduce(
+      (
+        union: Candidate[],
+        [{ domain }, { elapsed, result, success }]: [
+          { domain: string },
+          { elapsed?: number; success: boolean; result?: Layer[] }
+        ]
+      ) => union.concat(success ? result!.map(layer => ({ domain, elapsed: elapsed!, layer })) : []),
+      new Array<Candidate>()
+    )
+    .map(candidate => ({ ...candidate, score: score(candidate.layer) }))
+
   defaultLogger.info(`candidates`, candidates)
 
   // initialize profile
