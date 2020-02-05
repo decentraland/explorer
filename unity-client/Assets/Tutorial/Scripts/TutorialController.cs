@@ -110,22 +110,21 @@ public class TutorialController : MonoBehaviour
 
     private void OnRenderingStateChanged(bool renderingEnabled)
     {
-        if (renderingEnabled && isTutorialEnabled)
-        {
-            tutorialFlagMask = GetTutorialFlagFromProfile(); // TODO: get flag from user profile
+        if (!isTutorialEnabled || !renderingEnabled) return;
+
+        tutorialFlagMask = GetTutorialFlagFromProfile(); // TODO: get flag from user profile
 
 #if UNITY_EDITOR
-            if (debugFlagStartingValue != 0)
-            {
-                tutorialFlagMask = debugFlagStartingValue;
-            }
-#endif
-            if (!initialized)
-            {
-                Initialize(tutorialFlagMask);
-            }
-            StartTutorialStageIfNeeded(tutorialFlagMask);
+        if (debugFlagStartingValue != 0)
+        {
+            tutorialFlagMask = debugFlagStartingValue;
         }
+#endif
+        if (!initialized)
+        {
+            Initialize(tutorialFlagMask);
+        }
+        StartTutorialStageIfNeeded(tutorialFlagMask);
     }
 
     private void Initialize(int tutorialFlagMask)
