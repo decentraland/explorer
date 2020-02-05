@@ -1,3 +1,4 @@
+import { getFetchContentServer } from '../shared/dao/selectors'
 declare var window: any
 
 export const performanceConfigurations = [
@@ -226,32 +227,19 @@ export const ENABLE_EMPTY_SCENES = !DEBUG || knownTLDs.includes(getTLD())
 
 export function getContentUrl() {
   const TLDDefault = getDefaultTLD()
-  const katalystHost = `https://bot2-katalyst.decentraland.${TLDDefault === 'today' ? 'org' : TLDDefault}`
-  const lambdasHost = `${katalystHost}/lambdas`
 
   return AWS
     ? `https://content.decentraland.${TLDDefault === 'today' ? 'org' : TLDDefault}`
-    : `${lambdasHost}/contentv2`
+    : getFetchContentServer(window.globalStore.getState())
 }
 
 export function getServerConfigurations() {
   const TLDDefault = getDefaultTLD()
-  const katalystHost = `https://bot2-katalyst.decentraland.${TLDDefault === 'today' ? 'org' : TLDDefault}`
-  const lambdasHost = `${katalystHost}/lambdas`
   return {
     auth: `https://auth.decentraland.${TLDDefault}/api/v1`,
     landApi: `https://api.decentraland.${TLDDefault}/v1`,
-    content: getContentUrl(),
-    contentUpdate: `${katalystHost}/content`,
     contentAsBundle: `https://content-assets-as-bundle.decentraland.org`,
     worldInstanceUrl: `wss://world-comm.decentraland.${TLDDefault}/connect`,
-    comms: {
-      lighthouse: {
-        server: `${katalystHost}/comms`,
-        p2p: `${katalystHost}/comms`
-      }
-    },
-    profile: `${lambdasHost}/profile`,
     wearablesApi: `https://wearables-api.decentraland.org/v2`,
     avatar: {
       snapshotStorage: `https://avatars-storage.decentraland.${TLDDefault}/`,

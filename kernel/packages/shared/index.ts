@@ -42,23 +42,12 @@ import { Authenticator, AuthIdentity } from './crypto/Authenticator'
 import { Eth } from 'web3x/eth'
 import { Personal } from 'web3x/personal/personal'
 import { Account } from 'web3x/account'
-import future from 'fp-future'
+import { web3initialized } from './dao/actions'
+import { realmInitialized } from './dao'
 
 enum AnalyticsAccount {
   PRD = '1plAT9a2wOOgbPCrTaU8rgGUMzgUTJtU',
   DEV = 'a4h4BC4dL1v7FhIQKKuPHEdZIiNRDVhc'
-}
-
-type Layer = {
-  name: string
-  usersCount: number
-  maxUsers: number
-}
-
-type Candidate = {
-  domain: string
-  elapsed: number
-  layer: Layer
 }
 
 declare const window: any
@@ -83,48 +72,6 @@ function initializeAnalytics() {
 
 export let globalStore: Store<RootState>
 export let identity: AuthIdentity
-
-function ping(url: string): Promise<{ success: boolean; elapsed?: number; result?: Layer[] }> {
-  const result = future()
-
-  new Promise(() => {
-    const http = new XMLHttpRequest()
-
-    let started: Date
-
-    http.onreadystatechange = () => {
-      if (http.readyState === XMLHttpRequest.OPENED) {
-        started = new Date()
-      }
-      if (http.readyState === XMLHttpRequest.DONE) {
-        const ended = new Date().getTime()
-        if (http.status >= 400) {
-          result.resolve({
-            success: false
-          })
-        } else {
-          result.resolve({
-            success: true,
-            elapsed: ended - started.getTime(),
-            result: JSON.parse(http.responseText) as Layer[]
-          })
-        }
-      }
-    }
-
-    http.open('GET', url, false)
-
-    try {
-      http.send(null)
-    } catch (exception) {
-      result.resolve({
-        success: false
-      })
-    }
-  }).catch(defaultLogger.error)
-
-  return result
-}
 
 async function createAuthIdentity() {
   const ephemeral = createIdentity()
@@ -162,24 +109,6 @@ async function createAuthIdentity() {
   const identity = await Authenticator.initializeAuthChain(address, ephemeral, ephemeralLifespanMinutes, signer)
 
   return identity
-}
-
-const zip = <T, U>(arr: Array<T>, ...arrs: Array<Array<U>>) => {
-  return arr.map((val, i) => arrs.reduce((a, arr) => [...a, arr[i]], [val] as Array<any>)) as Array<[T, U]>
-}
-
-const v = 50
-const score = ({ usersCount, maxUsers = 50 }: Layer) => {
-  if (usersCount === 0) {
-    return -v
-  }
-  if (usersCount >= maxUsers) {
-    return 0
-  }
-
-  const p = 3 / (maxUsers ? maxUsers : 50)
-
-  return v + v * Math.cos(p * (usersCount - 1))
 }
 
 export async function initShared(): Promise<Session | undefined> {
@@ -241,6 +170,7 @@ export async function initShared(): Promise<Session | undefined> {
           identity
         })
       }
+      store.dispatch(web3initialized())
     } catch (e) {
       defaultLogger.error(e)
       console['groupEnd']()
@@ -272,24 +202,6 @@ export async function initShared(): Promise<Session | undefined> {
     return session
   }
 
-  const nodes = await fetchKatalystNodes()
-
-  const results = await Promise.all(nodes.map(node => ping(`${node.domain}/comms/layers`)))
-  const candidates = zip(nodes, results)
-    .reduce(
-      (
-        union: Candidate[],
-        [{ domain }, { elapsed, result, success }]: [
-          { domain: string },
-          { elapsed?: number; success: boolean; result?: Layer[] }
-        ]
-      ) => union.concat(success ? result!.map(layer => ({ domain, elapsed: elapsed!, layer })) : []),
-      new Array<Candidate>()
-    )
-    .map(candidate => ({ ...candidate, score: score(candidate.layer) }))
-
-  defaultLogger.info(`candidates`, candidates)
-
   // initialize profile
   console['group']('connect#profile')
   if (!PREVIEW) {
@@ -300,6 +212,9 @@ export async function initShared(): Promise<Session | undefined> {
     })
   }
   console['groupEnd']()
+
+  await realmInitialized()
+  defaultLogger.info(`Using katalyst configuration: `, globalStore.getState().dao)
 
   console['group']('connect#comms')
   store.dispatch(establishingComms())
