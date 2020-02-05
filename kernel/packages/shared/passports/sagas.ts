@@ -55,6 +55,7 @@ import { AuthIdentity, Authenticator, AuthLink } from '../crypto/Authenticator'
 
 const CID = require('cids')
 import { sha3 } from 'web3x/utils'
+import { getContentUrl } from '../../config/index'
 const multihashing = require('multihashing-async')
 const toBuffer = require('blob-to-buffer')
 
@@ -175,7 +176,7 @@ function takeLatestById<T extends Action>(
 function overrideBaseUrl(wearable: Wearable) {
   return {
     ...wearable,
-    baseUrl: 'https://katalyst-lambdas.decentraland.zone/contentv2/contents/',
+    baseUrl: getContentUrl() + '/contents/',
     baseUrlBundles: 'https://content-assets-as-bundle.decentraland.org/contents/'
   }
 }

@@ -535,12 +535,18 @@ export async function connect(userId: string) {
               }
               // if any error occurs
               return identity
+            },
+            parcelGetter: () => {
+              if (context && context.currentPosition) {
+                const parcel = position2parcel(context.currentPosition)
+                return [parcel.x, parcel.z]
+              }
             }
           }
         )
 
-        await peer.setLayer('gold')
         await peer.awaitConnectionEstablished(60000)
+        await peer.setLayer('gold')
 
         connection = new LighthouseWorldInstanceConnection(peer)
 

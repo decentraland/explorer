@@ -181,7 +181,7 @@ export function getTLD() {
 
 export const knownTLDs = ['zone', 'org', 'today']
 
-function getDefaultTLD() {
+export function getDefaultTLD() {
   const TLD = getTLD()
   if (ENV_OVERRIDE) {
     return TLD
@@ -224,24 +224,34 @@ export function getLoginConfigurationForCurrentDomain() {
 
 export const ENABLE_EMPTY_SCENES = !DEBUG || knownTLDs.includes(getTLD())
 
+export function getContentUrl() {
+  const TLDDefault = getDefaultTLD()
+  const katalystHost = `https://bot2-katalyst.decentraland.${TLDDefault === 'today' ? 'org' : TLDDefault}`
+  const lambdasHost = `${katalystHost}/lambdas`
+
+  return AWS
+    ? `https://content.decentraland.${TLDDefault === 'today' ? 'org' : TLDDefault}`
+    : `${lambdasHost}/contentv2`
+}
+
 export function getServerConfigurations() {
   const TLDDefault = getDefaultTLD()
+  const katalystHost = `https://bot2-katalyst.decentraland.${TLDDefault === 'today' ? 'org' : TLDDefault}`
+  const lambdasHost = `${katalystHost}/lambdas`
   return {
     auth: `https://auth.decentraland.${TLDDefault}/api/v1`,
     landApi: `https://api.decentraland.${TLDDefault}/v1`,
-    content: AWS
-      ? `https://content.decentraland.${TLDDefault === 'today' ? 'org' : TLDDefault}`
-      : `https://katalyst-lambdas.decentraland.zone/contentv2`,
-    contentUpdate: `https://katalyst-content.decentraland.zone`,
+    content: getContentUrl(),
+    contentUpdate: `${katalystHost}/content`,
     contentAsBundle: `https://content-assets-as-bundle.decentraland.org`,
     worldInstanceUrl: `wss://world-comm.decentraland.${TLDDefault}/connect`,
     comms: {
       lighthouse: {
-        server: 'https://katalyst-comms-relay.decentraland.zone',
-        p2p: 'https://katalyst-comms-no-relay.decentraland.zone'
+        server: `${katalystHost}/comms`,
+        p2p: `${katalystHost}/comms`
       }
     },
-    profile: `https://katalyst-lambdas.decentraland.zone/profile`,
+    profile: `${lambdasHost}/profile`,
     wearablesApi: `https://wearables-api.decentraland.org/v2`,
     avatar: {
       snapshotStorage: `https://avatars-storage.decentraland.${TLDDefault}/`,
