@@ -32,7 +32,7 @@ public class InitialStageController : TutorialStageController
             claimNamePanelClosed = true;
         }
 
-        StartCoroutine(StageSecuence());
+        StartCoroutine(StageSequence());
     }
 
     public override void OnStageFinished()
@@ -43,7 +43,7 @@ public class InitialStageController : TutorialStageController
         HUDController.i?.minimapHud.SetVisibility(true);
     }
 
-    private IEnumerator StageSecuence()
+    private IEnumerator StageSequence()
     {
         yield return ShowTooltip(wellcomeTooltip);
 
