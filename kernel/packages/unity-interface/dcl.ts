@@ -186,7 +186,19 @@ const browserInterface = {
 
   EditAvatarClicked() {
     delightedSurvey()
-  }
+  },
+
+  ReportScene(sceneId: string) {
+    //TODO
+  },
+
+  ReportPlayer(username: string) {
+    //TODO
+  },
+
+  BlockPlayer(username: string) {
+    //TODO
+  },
 }
 
 export function setLoadingScreenVisible(shouldShow: boolean) {

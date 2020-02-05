@@ -40,10 +40,17 @@ public class PlayerInfoCardHUDView : MonoBehaviour
     [Header("Trade")]
     [SerializeField] private RectTransform wearablesContainer;
 
+    [Header("Block")]
+    [SerializeField] internal Button reportPlayerButton;
+    [SerializeField] internal Button blockPlayerButton;
+
+
     internal readonly List<PlayerInfoCollectibleItem> playerInfoCollectibles = new List<PlayerInfoCollectibleItem>(10);
     internal UserProfile currentUserProfile;
     private UnityAction<bool> toggleChangedDelegate => (x) => UpdateTabs();
-    private UnityAction cardClosedCallback = () => { }; 
+    private UnityAction cardClosedCallback = () => { };
+    private UnityAction reportPlayerCallback = () => { };
+    private UnityAction blockPlayerCallback = () => { };
 
     public static PlayerInfoCardHUDView CreateView()
     {
@@ -52,12 +59,17 @@ public class PlayerInfoCardHUDView : MonoBehaviour
 
     private void Awake()
     {
-        hideCardButton.onClick.AddListener(OnHideCardButton);
+        hideCardButton.onClick.AddListener(() => cardClosedCallback?.Invoke());
+        reportPlayerButton.onClick.AddListener(() => reportPlayerCallback?.Invoke());
+        blockPlayerButton.onClick.AddListener(() => blockPlayerCallback?.Invoke());
     }
 
-    public void Initialize(UnityAction cardClosedCallback)
+    public void Initialize(UnityAction cardClosedCallback, UnityAction reportPlayerCallback, UnityAction blockPlayerCallback)
     {
         this.cardClosedCallback = cardClosedCallback;
+        this.reportPlayerCallback = reportPlayerCallback;
+        this.blockPlayerCallback = blockPlayerCallback;
+
         for (int index = 0; index < tabsMapping.Length; index++)
         {
             var tab = tabsMapping[index];
@@ -73,11 +85,6 @@ public class PlayerInfoCardHUDView : MonoBehaviour
                 break;
             }
         }
-    }
-
-    private void OnHideCardButton()
-    {
-        cardClosedCallback?.Invoke();
     }
 
     public void SetCardActive(bool active)
@@ -101,7 +108,7 @@ public class PlayerInfoCardHUDView : MonoBehaviour
             tabsMapping[index].container.SetActive(tabsMapping[index].toggle.isOn);
         }
     }
-    
+
     public void SetUserProfile(UserProfile userProfile)
     {
         currentUserProfile = userProfile;

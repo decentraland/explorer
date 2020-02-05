@@ -2950,6 +2950,8 @@ MonoBehaviour:
   name: {fileID: 2054052089419740692}
   description: {fileID: 2054052090072748133}
   wearablesContainer: {fileID: 2054052089085003672}
+  reportPlayerButton: {fileID: 1594900637515709357}
+  blockPlayerButton: {fileID: 4316598916483841025}
 --- !u!1 &7387533419399660297
 GameObject:
   m_ObjectHideFlags: 0

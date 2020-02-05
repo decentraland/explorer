@@ -1,4 +1,5 @@
 ﻿using System;
+using DCL.Interface;
 using UnityEngine;
 
 public class PlayerInfoCardHUDController : IHUD, IDisposable
@@ -12,7 +13,7 @@ public class PlayerInfoCardHUDController : IHUD, IDisposable
     public PlayerInfoCardHUDController()
     {
         view = PlayerInfoCardHUDView.CreateView();
-        view.Initialize(() => {currentPlayerName.Set(null); });
+        view.Initialize(() => {currentPlayerName.Set(null);}, ReportPlayer, BlockPlayer);
         currentPlayerName = Resources.Load<StringVariable>(CURRENT_PLAYER_NAME);
         currentPlayerName.OnChange += OnCurrentPlayerNameChanged;
         OnCurrentPlayerNameChanged(currentPlayerName, null);
@@ -45,6 +46,16 @@ public class PlayerInfoCardHUDController : IHUD, IDisposable
     public void SetVisibility(bool visible)
     {
         view.SetVisibility(visible);
+    }
+
+    private void BlockPlayer()
+    {
+        WebInterface.SendBlockPlayer(currentPlayerName);
+    }
+
+    private void ReportPlayer()
+    {
+        WebInterface.SendReportPlayer(currentPlayerName);
     }
 
     public void Dispose()

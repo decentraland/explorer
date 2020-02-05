@@ -651,5 +651,20 @@ namespace DCL.Interface
             });
 
         }
+
+        public static void SendReportScene(string sceneID)
+        {
+            SendMessage("ReportScene", sceneID);
+        }
+
+        public static void SendReportPlayer(string playerName)
+        {
+            SendMessage("ReportPlayer", playerName);
+        }
+
+        public static void SendBlockPlayer(string playerName)
+        {
+            SendMessage("BlockPlayer", playerName);
+        }
     }
 }
