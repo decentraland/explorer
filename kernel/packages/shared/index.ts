@@ -202,6 +202,9 @@ export async function initShared(): Promise<Session | undefined> {
     return session
   }
 
+  await realmInitialized()
+  defaultLogger.info(`Using katalyst configuration: `, globalStore.getState().dao)
+
   // initialize profile
   console['group']('connect#profile')
   if (!PREVIEW) {
@@ -212,9 +215,6 @@ export async function initShared(): Promise<Session | undefined> {
     })
   }
   console['groupEnd']()
-
-  await realmInitialized()
-  defaultLogger.info(`Using katalyst configuration: `, globalStore.getState().dao)
 
   console['group']('connect#comms')
   store.dispatch(establishingComms())
