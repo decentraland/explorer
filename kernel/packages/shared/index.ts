@@ -272,13 +272,7 @@ export async function initShared(): Promise<Session | undefined> {
     return session
   }
 
-  // const nodes = await fetchKatalystNodes()
-  const nodes = [
-    { domain: 'https://bot2-katalyst.decentraland.zone' },
-    { domain: 'https://bot2-katalyst.decentraland.zone' },
-    { domain: 'https://katalyst-comms-no-relay.decentraland.zone' },
-    { domain: 'https://katalyst-comms-relay.decentraland.zone' }
-  ]
+  const nodes = await fetchKatalystNodes()
 
   const results = await Promise.all(nodes.map(node => ping(`${node.domain}/comms/layers`)))
   const candidates = zip(nodes, results)
