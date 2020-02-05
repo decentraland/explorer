@@ -31,7 +31,7 @@ SpriteAtlas:
     variantMultiplier: 1
     packables:
     - {fileID: 102900000, guid: 3de514b44dbae428eb467b7790cfa76a, type: 3}
-    totalSpriteSurfaceArea: 622128
+    totalSpriteSurfaceArea: 492814
     bindAsDefault: 1
   m_MasterAtlas: {fileID: 0}
   m_PackedSprites:
@@ -55,6 +55,7 @@ SpriteAtlas:
   - {fileID: 21300000, guid: 47ee6164e57ec4a62b2856283327f6de, type: 3}
   - {fileID: 21300000, guid: b39943a42bda94b54b62bf343c6ccc60, type: 3}
   - {fileID: 21300000, guid: 79ec09b474780490baded40d0046577a, type: 3}
+  - {fileID: 21300000, guid: a92acce401a3d4070908062e8d39b79a, type: 3}
   - {fileID: 21300000, guid: f452ece47296a44ec863e8785584cd0d, type: 3}
   - {fileID: 21300000, guid: 0ef208f4b10814362a660904a0cfb393, type: 3}
   - {fileID: 21300000, guid: 3870cb2564d084ee5a4aeb16182c60c9, type: 3}
@@ -118,6 +119,7 @@ SpriteAtlas:
   - Arrow
   - TopIcon
   - TiaraIcon
+  - Spinner
   - ItemCellNft
   - UndoIcon
   - NFTCardDescription
