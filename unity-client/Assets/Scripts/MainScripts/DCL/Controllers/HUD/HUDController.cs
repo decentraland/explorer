@@ -151,7 +151,8 @@ public class HUDController : MonoBehaviour
 
         if (configuration.active && welcomeHudController == null)
         {
-            welcomeHudController = new WelcomeHUDController(configuration);
+            welcomeHudController = new WelcomeHUDController();
+            welcomeHudController.Initialize(configuration);
         }
 
         welcomeHudController?.SetVisibility(configuration.active && configuration.visible);

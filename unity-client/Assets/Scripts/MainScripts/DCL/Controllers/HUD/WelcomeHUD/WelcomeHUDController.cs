@@ -5,7 +5,7 @@ using System;
 public class WelcomeHUDController : IHUD, IDisposable
 {
     //NOTE(Brian): This will be kept disabled until we get a way of getting the layout externally.
-    public const bool ENABLE_DYNAMIC_CONTENT = false;
+    public static bool ENABLE_DYNAMIC_CONTENT = false;
 
     [System.Serializable]
     public class Model : HUDConfiguration
@@ -24,23 +24,22 @@ public class WelcomeHUDController : IHUD, IDisposable
         public bool showButton;
     }
 
-    WelcomeHUDView view;
-    WelcomeHUDController.Model model;
-    public WelcomeHUDController(Model model)
+    internal WelcomeHUDView view;
+    internal WelcomeHUDController.Model model;
+
+    public void Initialize(Model model)
     {
         this.model = model;
-
-        view = WelcomeHUDView.CreateView();
 
         if (ENABLE_DYNAMIC_CONTENT)
         {
             view.Initialize(model);
-
-            if (model.showTime)
-            {
-                model.timeText += " 15 days"; //TODO(Brian): calculate time left
-            }
         }
+    }
+
+    public WelcomeHUDController()
+    {
+        view = WelcomeHUDView.CreateView();
 
         view.confirmButton.onClick.RemoveAllListeners();
         view.confirmButton.onClick.AddListener(OnConfirmPressed);
@@ -51,7 +50,7 @@ public class WelcomeHUDController : IHUD, IDisposable
         Utils.UnlockCursor();
     }
 
-    void Close()
+    internal void Close()
     {
         SetVisibility(false);
         Utils.LockCursor();
@@ -59,7 +58,9 @@ public class WelcomeHUDController : IHUD, IDisposable
 
     void OnConfirmPressed()
     {
-        WebInterface.SendChatCommand(model.buttonAction);
+        if (model != null && !string.IsNullOrEmpty(model.buttonAction))
+            WebInterface.SendChatCommand(model.buttonAction);
+
         Close();
     }
 

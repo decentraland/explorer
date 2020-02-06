@@ -20,6 +20,9 @@ public class WelcomeHUDView : MonoBehaviour
 
     public void Initialize(WelcomeHUDController.Model model)
     {
+        if (model == null)
+            return;
+
         headerText1.text = model.title;
         headerText2.text = model.timeText;
         bodyText.text = model.bodyText;
