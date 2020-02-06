@@ -651,5 +651,9 @@ namespace DCL.Interface
             });
 
         }
+        public static void ReportGoToMarketplace()
+        {
+            SendMessage("GoToMarketplace");
+        }
     }
 }

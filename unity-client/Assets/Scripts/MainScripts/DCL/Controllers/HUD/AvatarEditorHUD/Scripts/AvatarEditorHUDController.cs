@@ -405,6 +405,6 @@ public class AvatarEditorHUDController : IDisposable, IHUD
 
     public void GoToMarketplace()
     {
-        Debug.Log("Calling Go to Marketplace");
+        WebInterface.ReportGoToMarketplace();
     }
 }

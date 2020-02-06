@@ -186,6 +186,10 @@ const browserInterface = {
 
   EditAvatarClicked() {
     delightedSurvey()
+  },
+
+  GoToMarketplace() {
+    // TODO
   }
 }
 
