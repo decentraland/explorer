@@ -33,7 +33,7 @@ public class TutorialController : MonoBehaviour
     private TutorialStageHandler runningStage = null;
 
     private TutorialStageHandler firstStage;
-    private int tutorialFlagMask = 0;
+    private int tutorialFlagsMask = 0;
     private bool initialized = false;
     private Canvas chatUIScreen = null;
 
@@ -82,22 +82,22 @@ public class TutorialController : MonoBehaviour
 
     public void SetRunningStageFinished()
     {
-        tutorialFlagMask |= (int)runningStage.flag;
+        tutorialFlagsMask |= (int)runningStage.flag;
         runningStage.Finish();
 
         // TODO: send update to user profile
-        UserProfile.GetOwnUserProfile().SetTutorialFlag(tutorialFlagMask);
+        UserProfile.GetOwnUserProfile().SetTutorialFlag(tutorialFlagsMask);
 
-        StartTutorialStageIfNeeded(tutorialFlagMask);
+        StartTutorialStageIfNeeded(tutorialFlagsMask);
     }
 
-    private void StartTutorialStageIfNeeded(int tutorialFlagMask)
+    private void StartTutorialStageIfNeeded(int tutorialFlagsMask)
     {
         if (runningStage != null)
         {
             return;
         }
-        runningStage = firstStage.GetHandler(tutorialFlagMask);
+        runningStage = firstStage.GetHandler(tutorialFlagsMask);
         if (runningStage != null)
         {
             runningStage.OnStageFinish += () => runningStage = null;
@@ -114,29 +114,29 @@ public class TutorialController : MonoBehaviour
     {
         if (!isTutorialEnabled || !renderingEnabled) return;
 
-        tutorialFlagMask = GetTutorialFlagFromProfile(); // TODO: get flag from user profile
+        tutorialFlagsMask = GetTutorialFlagFromProfile(); // TODO: get flag from user profile
 
 #if UNITY_EDITOR
         if (debugFlagStartingValue != 0)
         {
-            tutorialFlagMask = debugFlagStartingValue;
+            tutorialFlagsMask = debugFlagStartingValue;
         }
 #endif
         if (!initialized)
         {
-            Initialize(tutorialFlagMask);
+            Initialize(tutorialFlagsMask);
         }
-        StartTutorialStageIfNeeded(tutorialFlagMask);
+        StartTutorialStageIfNeeded(tutorialFlagsMask);
     }
 
-    private void Initialize(int tutorialFlagMask)
+    private void Initialize(int tutorialFlagsMask)
     {
         initialized = true;
         CacheChatScreen();
         TutorialStageHandler handler = firstStage;
         while (handler != null)
         {
-            if (!handler.IsAlreadyFinished(tutorialFlagMask))
+            if (!handler.IsAlreadyFinished(tutorialFlagsMask))
             {
                 handler.SetUpStage();
             }
