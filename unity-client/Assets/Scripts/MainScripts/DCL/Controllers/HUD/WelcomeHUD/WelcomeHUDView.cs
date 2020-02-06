@@ -27,6 +27,5 @@ public class WelcomeHUDView : MonoBehaviour
 
         confirmButton.gameObject.SetActive(model.showButton);
         headerText2.gameObject.SetActive(model.showTime);
-
     }
 }

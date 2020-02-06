@@ -4,11 +4,10 @@ import { worldToGrid } from '../atomicHelpers/parcelScenePositions'
 import defaultLogger from '../shared/logger'
 import { signalRendererInitialized } from '../shared/renderer/actions'
 import { lastPlayerPosition, teleportObservable } from '../shared/world/positionThings'
-import { HUD, startUnityParcelLoading } from '../unity-interface/dcl'
+import { startUnityParcelLoading, unityInterface } from '../unity-interface/dcl'
 import { initializeUnity } from '../unity-interface/initializer'
 import { experienceStarted } from '../shared/loading/types'
-import { OPEN_AVATAR_EDITOR } from '../config/index'
-import { WelcomeHUDControllerModel } from 'shared/types'
+import { OPEN_AVATAR_EDITOR, NO_MOTD } from '../config/index'
 
 const container = document.getElementById('gameContainer')
 
@@ -18,13 +17,35 @@ if (!container) throw new Error('cannot find element #gameContainer')
 
 initializeUnity(container)
   .then(async _ => {
-    HUD.Minimap.configure({ active: true, visible: true })
-    HUD.Avatar.configure({ active: true, visible: true })
-    HUD.Notification.configure({ active: true, visible: true })
-    HUD.AvatarEditor.configure({ active: true, visible: OPEN_AVATAR_EDITOR })
-    HUD.Settings.configure({ active: true, visible: false })
-    HUD.Expressions.configure({ active: true, visible: true })
-    HUD.PlayerInfoCard.configure({ active: true, visible: true })
+    const i = unityInterface
+    
+    i.ConfigureMinimapHUD({ active: true, visible: true })
+    i.ConfigureAvatarHUD({ active: true, visible: true })
+    i.ConfigureNotificationHUD({ active: true, visible: true })
+    i.ConfigureAvatarEditorHUD({ active: true, visible: OPEN_AVATAR_EDITOR })
+    i.ConfigureSettingsHUD({ active: true, visible: false })
+    i.ConfigureExpressionsHUD({ active: true, visible: true })
+    i.ConfigurePlayerInfoCardHUD({ active: true, visible: true })
+
+    if (!NO_MOTD)
+    {
+      //NOTE(Brian): This flow is momentarily deactivated until we find out some way
+      //             of getting it externally with the sole exception of buttonAction.
+      //
+      //             For now, the HUD visuals will be hardcoded in the WelcomeHUD Unity prefab.
+      i.ConfigureWelcomeHUD({
+        active: true, 
+        visible: true, 
+        title: "",
+        timeTarget: 0,
+        timeText: "",
+        showTime: true,
+        bodyText: "",
+        buttonText: "",
+        buttonAction: "goto 10,10",
+        showButton: true,
+      })
+    }
 
     global['globalStore'].dispatch(signalRendererInitialized())
     await startUnityParcelLoading()
@@ -33,19 +54,6 @@ initializeUnity(container)
       .then($ => {
         teleportObservable.notifyObservers(worldToGrid(lastPlayerPosition))
         global['globalStore'].dispatch(experienceStarted())
-
-        HUD.Welcome.configure<WelcomeHUDControllerModel>({ 
-          active: true, 
-          visible: true, 
-          title: "Title test",
-          timeTarget: 1932,
-          timeText: "Time test",
-          showTime: true,
-          bodyText: "Body test",
-          buttonText: "Button test",
-          buttonAction: "asdsad",
-          showButton: true,
-        })
       })
       .catch(defaultLogger.error)
 

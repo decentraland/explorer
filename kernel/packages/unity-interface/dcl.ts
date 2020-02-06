@@ -64,7 +64,8 @@ import {
   QueryPayload,
   RemoveEntityPayload,
   SetEntityParentPayload,
-  UpdateEntityComponentPayload
+  UpdateEntityComponentPayload,
+  WelcomeHUDControllerModel
 } from '../shared/types'
 import { ParcelSceneAPI } from '../shared/world/ParcelSceneAPI'
 import {
@@ -398,7 +399,7 @@ export const unityInterface = {
   ConfigurePlayerInfoCardHUD(configuration: HUDConfiguration) {
     gameInstance.SendMessage('HUDController', 'ConfigurePlayerInfoCardHUD', JSON.stringify(configuration))
   },
-  ConfigureWelcomeHUD(configuration: HUDConfiguration) {
+  ConfigureWelcomeHUD(configuration: WelcomeHUDControllerModel) {
     gameInstance.SendMessage('HUDController', 'ConfigureWelcomeHUD', JSON.stringify(configuration))
   },
   UpdateMinimapSceneInformation(info: { name: string; type: number; parcels: { x: number; y: number }[] }[]) {
@@ -455,33 +456,6 @@ export const unityInterface = {
   },
   OnBuilderKeyDown(key: string) {
     this.SendBuilderMessage('OnBuilderKeyDown', key)
-  }
-}
-
-export const HUD: Record<string, { configure: <T extends HUDConfiguration>(config: T) => void }> = {
-  Minimap: {
-    configure: unityInterface.ConfigureMinimapHUD
-  },
-  Avatar: {
-    configure: unityInterface.ConfigureAvatarHUD
-  },
-  Notification: {
-    configure: unityInterface.ConfigureNotificationHUD
-  },
-  AvatarEditor: {
-    configure: unityInterface.ConfigureAvatarEditorHUD
-  },
-  Settings: {
-    configure: unityInterface.ConfigureSettingsHUD
-  },
-  Expressions: {
-    configure: unityInterface.ConfigureExpressionsHUD
-  },
-  PlayerInfoCard: {
-    configure: unityInterface.ConfigurePlayerInfoCardHUD
-  },
-  Welcome: {
-    configure: unityInterface.ConfigureWelcomeHUD
   }
 }
 
