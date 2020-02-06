@@ -193,17 +193,6 @@ export class ChatController extends ExposableAPI implements IChatController {
       }
     })
 
-    this.addChatCommand('airdrop', 'fake an airdrop', () => {
-      const unityWindow: any = window
-      unityWindow.unityInterface.TriggerAirdropDisplay(sampleDrop)
-      return {
-        id: uuid(),
-        isCommand: true,
-        sender: 'Decentraland',
-        message: 'Faking airdrop...'
-      }
-    })
-
     this.addChatCommand('players', 'Shows a list of players around you', message => {
       const users = [...peerMap.entries()]
 
