@@ -242,11 +242,7 @@ export function getServerConfigurations() {
       snapshotStorage: `https://avatars-storage.decentraland.${TLDDefault}/`,
       catalog: getExclusiveServer(),
       presets: `https://avatars-storage.decentraland.org/mobile-avatars`
-    },
-    dao:
-      TLDDefault === 'zone'
-        ? '0xadd085f2318e9678bbb18b3e0711328f902b374b'
-        : '0x4a2f10076101650f40342885b99b6b101d83c486'
+    }
   }
 }
 
@@ -258,8 +254,14 @@ export async function setNetwork(net: ETHEREUM_NETWORK) {
     network = net
     contracts = json[net]
 
+    contracts['CatalystProxy'] =
+      net === ETHEREUM_NETWORK.MAINNET
+        ? '0x4a2f10076101650f40342885b99b6b101d83c486'
+        : '0xadd085f2318e9678bbb18b3e0711328f902b374b'
+
     decentralandConfigurations = {
       contractAddress: contracts.LANDProxy,
+      dao: contracts.CatalystProxy,
       contracts: {
         serviceLocator: contracts.ServiceLocator
       },
@@ -275,6 +277,7 @@ export async function setNetwork(net: ETHEREUM_NETWORK) {
 
     decentralandConfigurations = {
       contractAddress: '',
+      dao: '',
       contracts: {
         serviceLocator: ''
       },

@@ -72,6 +72,10 @@ function initializeAnalytics() {
 export let globalStore: Store<RootState>
 export let identity: AuthIdentity
 
+export function isSessionExpired(userData: any) {
+  return !userData || !userData.identity || new Date(userData.identity.expiration) < new Date()
+}
+
 async function createAuthIdentity() {
   const ephemeral = createIdentity()
 
@@ -145,15 +149,13 @@ export async function initShared(): Promise<Session | undefined> {
     try {
       const userData = getUserProfile()
 
+      await awaitWeb3Approval()
+
       // check that user data is stored & key is not expired
-      if (!userData || !userData.identity || new Date(userData.identity.expiration) < new Date()) {
-        await awaitWeb3Approval()
-
-        net = await getAppNetwork()
-
+      if (isSessionExpired(userData)) {
         identity = await createAuthIdentity()
-
         userId = identity.address
+
         identifyUser(userId)
 
         setLocalProfile(userId, {
@@ -169,7 +171,6 @@ export async function initShared(): Promise<Session | undefined> {
           identity
         })
       }
-      store.dispatch(web3initialized())
     } catch (e) {
       defaultLogger.error(e)
       console['groupEnd']()
@@ -188,10 +189,12 @@ export async function initShared(): Promise<Session | undefined> {
 
   console['group']('connect#ethereum')
 
-  queueTrackingEvent('Use network', { net })
+  net = await getAppNetwork()
 
   // Load contracts from https://contracts.decentraland.org
   await setNetwork(net)
+  queueTrackingEvent('Use network', { net })
+  store.dispatch(web3initialized())
   console['groupEnd']()
 
   initializeUrlPositionObserver()

@@ -1,4 +1,4 @@
-import { ETHEREUM_NETWORK, getTLD, getServerConfigurations } from '../config'
+import { ETHEREUM_NETWORK, getTLD } from '../config'
 
 import { getUserAccount, getNetwork } from './ethereum/EthereumService'
 import { awaitWeb3Approval } from './ethereum/provider'
@@ -8,6 +8,7 @@ import { defaultLogger } from './logger'
 import { Address } from 'web3x/address'
 import { Eth } from 'web3x/eth'
 import { Catalyst } from './dao/contracts/Catalyst'
+import { decentralandConfigurations } from '../config/index'
 
 async function getAddress(): Promise<string | undefined> {
   try {
@@ -56,7 +57,7 @@ export async function initWeb3(): Promise<void> {
 }
 
 export async function fetchCatalystNodes() {
-  const contractAddress = Address.fromString(getServerConfigurations().dao)
+  const contractAddress = Address.fromString(decentralandConfigurations.dao)
   const eth = Eth.fromCurrentProvider()
 
   if (!eth) {
@@ -71,6 +72,15 @@ export async function fetchCatalystNodes() {
   for (let i = 0; i < count; ++i) {
     const ids = await contract.methods.catalystIds(i).call()
     const node = await contract.methods.catalystById(ids).call()
+
+    if (node.domain.startsWith('http://')) {
+      defaultLogger.warn(`Catalyst node domain using http protocol, skipping ${node.domain}`)
+      continue
+    }
+
+    if (!node.domain.startsWith('https://')) {
+      node.domain = 'https://' + node.domain
+    }
 
     nodes.push(node)
   }
