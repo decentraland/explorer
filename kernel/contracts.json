@@ -1,0 +1,10 @@
+{
+  "outputPath": "./packages/shared/dao/contracts",
+  "contracts": {
+    "Catalyst": {
+      "source": "etherscan",
+      "net": "mainnet",
+      "address": "0xcc054fab08127c19f621ab83ade5962cd10584ec"
+    }
+  }
+}

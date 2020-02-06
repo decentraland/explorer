@@ -5,9 +5,12 @@ type GameInstance = {
   SendMessage(object: string, method: string, ...args: (number | string)[]): void
 }
 
+import { uuid } from 'decentraland-ecs/src'
 import { EventDispatcher } from 'decentraland-rpc/lib/common/core/EventDispatcher'
 import { IFuture } from 'fp-future'
 import { Empty } from 'google-protobuf/google/protobuf/empty_pb'
+import { avatarMessageObservable } from 'shared/comms/peers'
+import { AvatarMessageType } from 'shared/comms/interface/types'
 import { gridToWorld } from '../atomicHelpers/parcelScenePositions'
 import {
   DEBUG,
@@ -29,6 +32,7 @@ import { aborted } from '../shared/loading/ReportFatalError'
 import { loadingScenes, teleportTriggered, unityClientLoaded } from '../shared/loading/types'
 import { createLogger, defaultLogger, ILogger } from '../shared/logger'
 import { saveAvatarRequest } from '../shared/passports/actions'
+import { airdropObservable } from '../shared/apis/AirdropController'
 import { Avatar, Wearable } from '../shared/passports/types'
 import {
   PB_AttachEntityComponent,
@@ -83,12 +87,14 @@ import { positionObservable, teleportObservable } from '../shared/world/position
 import { hudWorkerUrl, SceneWorker } from '../shared/world/SceneWorker'
 import { ensureUiApis } from '../shared/world/uiSceneInitializer'
 import { worldRunningObservable } from '../shared/world/worldState'
-import { getEmail } from '../shared/auth/selectors'
+import { sendPublicChatMessage } from 'shared/comms'
+import { AirdropInfo } from '../shared/airdrops/interface'
 
 const rendererVersion = require('decentraland-renderer')
 window['console'].log('Renderer version: ' + rendererVersion)
 
 let gameInstance!: GameInstance
+let isTheFirstLoading = true
 
 export let futures: Record<string, IFuture<any>> = {}
 
@@ -141,6 +147,18 @@ const browserInterface = {
     // stub. there is no code about this in unity side yet
   },
 
+  TriggerExpression(data: { id: string; timestamp: number }) {
+    avatarMessageObservable.notifyObservers({
+      type: AvatarMessageType.USER_EXPRESSION,
+      uuid: uuid(),
+      expressionId: data.id,
+      timestamp: data.timestamp
+    })
+    const id = uuid()
+    const chatMessage = `␐${data.id} ${data.timestamp}`
+    sendPublicChatMessage(id, chatMessage)
+  },
+
   LogOut() {
     Session.current.then(s => s.logout()).catch(e => defaultLogger.error('error while logging out', e))
   },
@@ -177,6 +195,10 @@ const browserInterface = {
     futures[data.id].resolve(data.cameraTarget)
   },
 
+  UserAcceptedCollectibles(data: { id: string }) {
+    airdropObservable.notifyObservers(data.id)
+  },
+
   EditAvatarClicked() {
     delightedSurvey()
   }
@@ -187,14 +209,15 @@ export function setLoadingScreenVisible(shouldShow: boolean) {
   document.getElementById('load-messages-wrapper')!.style.display = shouldShow ? 'block' : 'none'
   document.getElementById('progress-bar')!.style.display = shouldShow ? 'block' : 'none'
   if (!shouldShow) {
+    isTheFirstLoading = false
     stopTeleportAnimation()
   }
 }
 
 function delightedSurvey() {
   const { analytics, delighted, globalStore } = global
-  if (analytics && delighted && globalStore) {
-    const email = getEmail(global.globalStore.getState())
+  if (!isTheFirstLoading && analytics && delighted && globalStore) {
+    const email = ''
     const payload = {
       email: email,
       properties: {
@@ -340,6 +363,9 @@ export const unityInterface = {
   SetBuilderReady() {
     gameInstance.SendMessage('SceneController', 'BuilderReady')
   },
+  AddUserProfileToCatalog(peerProfile: ProfileForRenderer) {
+    gameInstance.SendMessage('SceneController', 'AddUserProfileToCatalog', JSON.stringify(peerProfile))
+  },
   AddWearablesToCatalog(wearables: Wearable[]) {
     for (let wearable of wearables) {
       gameInstance.SendMessage('SceneController', 'AddWearableToCatalog', JSON.stringify(wearable))
@@ -372,6 +398,18 @@ export const unityInterface = {
   ConfigureSettingsHUD(configuration: HUDConfiguration) {
     gameInstance.SendMessage('HUDController', 'ConfigureSettingsHUD', JSON.stringify(configuration))
   },
+  ConfigureExpressionsHUD(configuration: HUDConfiguration) {
+    gameInstance.SendMessage('HUDController', 'ConfigureExpressionsHUD', JSON.stringify(configuration))
+  },
+  TriggerSelfUserExpression(expressionId: string) {
+    gameInstance.SendMessage('HUDController', 'TriggerSelfUserExpression', expressionId)
+  },
+  ConfigurePlayerInfoCardHUD(configuration: HUDConfiguration) {
+    gameInstance.SendMessage('HUDController', 'ConfigurePlayerInfoCardHUD', JSON.stringify(configuration))
+  },
+  ConfigureAirdroppingHUD(configuration: HUDConfiguration) {
+    gameInstance.SendMessage('HUDController', 'ConfigureAirdroppingHUD', JSON.stringify(configuration))
+  },
   UpdateMinimapSceneInformation(info: { name: string; type: number; parcels: { x: number; y: number }[] }[]) {
     const chunks = chunkGenerator(CHUNK_SIZE, info)
 
@@ -381,6 +419,9 @@ export const unityInterface = {
   },
   SetTutorialEnabled() {
     gameInstance.SendMessage('TutorialController', 'SetTutorialEnabled')
+  },
+  TriggerAirdropDisplay(data: AirdropInfo) {
+    gameInstance.SendMessage('HUDController', 'AirdroppingRequest', JSON.stringify(data))
   },
   SelectGizmoBuilder(type: string) {
     this.SendBuilderMessage('SelectGizmo', type)
@@ -447,6 +488,15 @@ export const HUD: Record<string, { configure: (config: HUDConfiguration) => void
   },
   Settings: {
     configure: unityInterface.ConfigureSettingsHUD
+  },
+  Expressions: {
+    configure: unityInterface.ConfigureExpressionsHUD
+  },
+  PlayerInfoCard: {
+    configure: unityInterface.ConfigurePlayerInfoCardHUD
+  },
+  Airdropping: {
+    configure: unityInterface.ConfigureAirdroppingHUD
   }
 }
 
@@ -698,7 +748,7 @@ export async function initializeEngine(_gameInstance: GameInstance) {
     onMessage(type: string, message: any) {
       if (type in browserInterface) {
         // tslint:disable-next-line:semicolon
-        ;(browserInterface as any)[type](message)
+        ; (browserInterface as any)[type](message)
       } else {
         defaultLogger.info(`Unknown message (did you forget to add ${type} to unity-interface/dcl.ts?)`, message)
       }
@@ -750,6 +800,7 @@ async function initializeDecentralandUI() {
     name: 'ui',
     baseUrl: location.origin,
     main: hudWorkerUrl,
+    useFPSThrottling: false,
     data: {},
     mappings: []
   })

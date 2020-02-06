@@ -5,6 +5,11 @@ import { awaitWeb3Approval } from './ethereum/provider'
 import { queueTrackingEvent } from './analytics'
 import { defaultLogger } from './logger'
 
+import { Address } from 'web3x/address'
+import { Eth } from 'web3x/eth'
+import { Catalyst } from './dao/contracts/Catalyst'
+import { decentralandConfigurations } from '../config/index'
+
 async function getAddress(): Promise<string | undefined> {
   try {
     await awaitWeb3Approval()
@@ -49,4 +54,36 @@ export async function initWeb3(): Promise<void> {
     defaultLogger.log(`Identifying address ${address}`)
     queueTrackingEvent('Use web3 address', { address })
   }
+}
+
+export async function fetchCatalystNodes() {
+  const contractAddress = Address.fromString(decentralandConfigurations.dao)
+  const eth = Eth.fromCurrentProvider()
+
+  if (!eth) {
+    throw new Error('Ethereum provider not set!')
+  }
+
+  const contract = new Catalyst(eth, contractAddress)
+
+  const count = Number.parseInt(await contract.methods.catalystCount().call(), 10)
+
+  const nodes = []
+  for (let i = 0; i < count; ++i) {
+    const ids = await contract.methods.catalystIds(i).call()
+    const node = await contract.methods.catalystById(ids).call()
+
+    if (node.domain.startsWith('http://')) {
+      defaultLogger.warn(`Catalyst node domain using http protocol, skipping ${node.domain}`)
+      continue
+    }
+
+    if (!node.domain.startsWith('https://')) {
+      node.domain = 'https://' + node.domain
+    }
+
+    nodes.push(node)
+  }
+
+  return nodes
 }

@@ -25,6 +25,10 @@ export interface Avatar {
   hairColor: ColorString
   eyeColor: ColorString
   wearables: WearableId[]
+  snapshots?: {
+    face: string
+    body: string
+  }
 }
 export interface ProfileForRenderer {
   userId: string
@@ -98,6 +102,7 @@ export type PassportState = {
 export type RootPassportState = {
   passports: PassportState
 }
+
 export const INITIAL_PASSPORTS: PassportState = {
   profileServer: '',
   userInfo: {},

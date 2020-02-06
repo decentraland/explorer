@@ -6,10 +6,14 @@ namespace DCL
 {
     public class AvatarShape : BaseComponent
     {
+        private const string CURRENT_PLAYER_NAME = "CurrentPlayerInfoCardName";
+
         public AvatarName avatarName;
         public AvatarRenderer avatarRenderer;
         public AvatarMovementController avatarMovementController;
-        [SerializeField] private GameObject minimapRepresentation;
+        [SerializeField] internal GameObject minimapRepresentation;
+        [SerializeField] private RaycastPointerClickProxy clickProxy;
+        private StringVariable currentPlayerInfoCardName;
 
         private string currentSerialization = "";
         public AvatarModel model = new AvatarModel();
@@ -18,15 +22,22 @@ namespace DCL
 
         void Start()
         {
+            currentPlayerInfoCardName = Resources.Load<StringVariable>(CURRENT_PLAYER_NAME);
             SetMinimapRepresentationActive(false);
+            clickProxy.OnClick += PlayerClicked;
+        }
+
+        private void PlayerClicked()
+        {
+            currentPlayerInfoCardName.Set(model?.name);
         }
 
         void OnDestroy()
         {
+            clickProxy.OnClick -= PlayerClicked;
             if (entity != null)
                 entity.OnTransformChange = null;
         }
-
 
         public override IEnumerator ApplyChanges(string newJson)
         {
@@ -40,7 +51,7 @@ namespace DCL
                 entity.OnTransformChange += avatarMovementController.OnTransformChanged;
             }
 
-            if (currentSerialization == newJson) 
+            if (currentSerialization == newJson)
                 yield break;
 
             model = SceneController.i.SafeFromJson<AvatarModel>(newJson);
@@ -49,7 +60,11 @@ namespace DCL
 
             bool avatarDone = false;
             bool avatarFailed = false;
+
+            yield return null; //NOTE(Brian): just in case we have a Object.Destroy waiting to be resolved.
+
             avatarRenderer.ApplyModel(model, () => avatarDone = true, () => avatarFailed = true);
+
             yield return new WaitUntil(() => avatarDone || avatarFailed);
 
             avatarName.SetName(model.name);
