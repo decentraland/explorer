@@ -147,6 +147,8 @@ public class HUDController : MonoBehaviour
 
     public void ConfigureWelcomeHUD(string configurationJson)
     {
+        Debug.Log("Configure received... json = " + configurationJson);
+
         WelcomeHUDController.Model configuration = JsonUtility.FromJson<WelcomeHUDController.Model>(configurationJson);
 
         if (configuration.active && welcomeHudController == null)

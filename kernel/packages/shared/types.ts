@@ -348,6 +348,17 @@ export type HUDConfiguration = {
   visible: boolean
 }
 
+export type WelcomeHUDControllerModel = HUDConfiguration & {
+  title:string
+  timeTarget:number
+  timeText:string
+  showTime:boolean
+  bodyText:string
+  buttonText:string
+  buttonAction:string
+  showButton:boolean
+}
+
 export function normalizeContentMappings(
   mappings: Record<string, string> | Array<ContentMapping>
 ): Array<ContentMapping> {

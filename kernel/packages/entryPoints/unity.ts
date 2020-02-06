@@ -8,6 +8,7 @@ import { HUD, startUnityParcelLoading } from '../unity-interface/dcl'
 import { initializeUnity } from '../unity-interface/initializer'
 import { experienceStarted } from '../shared/loading/types'
 import { OPEN_AVATAR_EDITOR } from '../config/index'
+import { WelcomeHUDControllerModel } from 'shared/types'
 
 const container = document.getElementById('gameContainer')
 
@@ -32,8 +33,22 @@ initializeUnity(container)
       .then($ => {
         teleportObservable.notifyObservers(worldToGrid(lastPlayerPosition))
         global['globalStore'].dispatch(experienceStarted())
+
+        HUD.Welcome.configure<WelcomeHUDControllerModel>({ 
+          active: true, 
+          visible: true, 
+          title: "Title test",
+          timeTarget: 1932,
+          timeText: "Time test",
+          showTime: true,
+          bodyText: "Body test",
+          buttonText: "Button test",
+          buttonAction: "asdsad",
+          showButton: true,
+        })
       })
       .catch(defaultLogger.error)
+
     document.body.classList.remove('dcl-loading')
     ;(window as any).UnityLoader.Error.handler = (error: any) => {
       console['error'](error)

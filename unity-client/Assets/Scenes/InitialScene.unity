@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 8900000, guid: ade92094798774df4a51b327374145b8, type: 3}
   m_Sun: {fileID: 943100645024490816}
-  m_IndirectSpecularColor: {r: 0.76268536, g: 0.7965816, b: 0.830822, a: 1}
+  m_IndirectSpecularColor: {r: 0.7626854, g: 0.79658186, b: 0.8308228, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -148,7 +148,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &312495478
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -358,8 +358,8 @@ MonoBehaviour:
   customContentServerUrl: http://localhost:1338/
   baseUrlMode: 0
   baseUrlCustom: 
-  environment: 2
-  startInCoords: {x: 64, y: -64}
+  environment: 4
+  startInCoords: {x: 0, y: 0}
   forceLocalComms: 1
   allWearables: 0
   testWearables: 0
@@ -378,12 +378,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!81 &1575278529 stripped
-AudioListener:
-  m_CorrespondingSourceObject: {fileID: 8304424928999476442, guid: b0965b55b892d438da492708ea09799c,
-    type: 3}
-  m_PrefabInstance: {fileID: 326638024064006570}
-  m_PrefabAsset: {fileID: 0}
 --- !u!114 &1608366483 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 4096479600627248540, guid: b0965b55b892d438da492708ea09799c,
@@ -558,7 +552,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   thirdPersonCamera: {fileID: 941980743}
   firstPersonCamera: {fileID: 134299876}
-  audioListener: {fileID: 1575278529}
 --- !u!1001 &326638024064006570
 PrefabInstance:
   m_ObjectHideFlags: 0
