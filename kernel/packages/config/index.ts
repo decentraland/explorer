@@ -236,23 +236,17 @@ export function getContentUrl() {
 export function getServerConfigurations() {
   const TLDDefault = getDefaultTLD()
   return {
-    auth: `https://auth.decentraland.${TLDDefault}/api/v1`,
-    landApi: `https://api.decentraland.${TLDDefault}/v1`,
     contentAsBundle: `https://content-assets-as-bundle.decentraland.org`,
-    worldInstanceUrl: `wss://world-comm.decentraland.${TLDDefault}/connect`,
     wearablesApi: `https://wearables-api.decentraland.org/v2`,
     avatar: {
       snapshotStorage: `https://avatars-storage.decentraland.${TLDDefault}/`,
-      server: `https://avatars-api.decentraland.${TLDDefault === 'zone' ? 'today' : TLDDefault}/`,
       catalog: getExclusiveServer(),
-      contents: `https://s3.amazonaws.com/content-service.decentraland.org/`,
       presets: `https://avatars-storage.decentraland.org/mobile-avatars`
     },
-    dao: TLDDefault === 'zone' ? '0x89550d8fc174b2ca216f2bd1bc20128413a2ab9d' : 'mainnetaddress',
-    darApi:
-      TLDDefault === 'zone' || TLDDefault === 'today'
-        ? 'https://schema-api-v2.now.sh/dar'
-        : 'https://schema.decentraland.org/dar'
+    dao:
+      TLDDefault === 'zone'
+        ? '0xadd085f2318e9678bbb18b3e0711328f902b374b'
+        : '0x4a2f10076101650f40342885b99b6b101d83c486'
   }
 }
 

@@ -4,7 +4,7 @@ import { Layer, Realm, Candidate } from './types'
 import { RootState } from 'shared/store/rootTypes'
 import { Store } from 'redux'
 import { isRealmInitialized } from './selectors'
-import { fetchKatalystNodes } from 'shared/web3'
+import { fetchCatalystNodes } from 'shared/web3'
 
 const zip = <T, U>(arr: Array<T>, ...arrs: Array<Array<U>>) => {
   return arr.map((val, i) => arrs.reduce((a, arr) => [...a, arr[i]], [val] as Array<any>)) as Array<[T, U]>
@@ -66,8 +66,8 @@ function ping(url: string): Promise<{ success: boolean; elapsed?: number; result
   return result
 }
 
-export async function pickKatalystRealm(): Promise<Realm> {
-  const nodes = await fetchKatalystNodes()
+export async function pickCatalystRealm(): Promise<Realm> {
+  const nodes = await fetchCatalystNodes()
   if (nodes.length === 0) {
     throw new Error('no nodes are available in the DAO for the current network')
   }

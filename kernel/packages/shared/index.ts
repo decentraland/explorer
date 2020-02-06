@@ -31,8 +31,7 @@ import { PassportAsPromise } from './passports/PassportAsPromise'
 import { Session } from './session/index'
 import { RootState } from './store/rootTypes'
 import { buildStore } from './store/store'
-// @ts-ignore
-import { getAppNetwork, fetchKatalystNodes } from './web3'
+import { getAppNetwork } from './web3'
 import { initializeUrlPositionObserver } from './world/positionThings'
 import { setWorldContext } from './protocol/actions'
 import { profileToRendererFormat } from './passports/transformations/profileToRendererFormat'
@@ -203,7 +202,7 @@ export async function initShared(): Promise<Session | undefined> {
   }
 
   await realmInitialized()
-  defaultLogger.info(`Using katalyst configuration: `, globalStore.getState().dao)
+  defaultLogger.info(`Using Catalyst configuration: `, globalStore.getState().dao)
 
   // initialize profile
   console['group']('connect#profile')

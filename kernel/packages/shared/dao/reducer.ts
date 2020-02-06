@@ -1,5 +1,5 @@
 import { AnyAction } from 'redux'
-import { SET_KATALYST_REALM } from './actions'
+import { SET_CATALYST_REALM } from './actions'
 import { DaoState } from './types'
 
 export function daoReducer(state?: DaoState, action?: AnyAction): DaoState {
@@ -17,7 +17,7 @@ export function daoReducer(state?: DaoState, action?: AnyAction): DaoState {
     return state
   }
   switch (action.type) {
-    case SET_KATALYST_REALM:
+    case SET_CATALYST_REALM:
       return {
         ...state,
         initialized: true,

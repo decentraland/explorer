@@ -1,16 +1,16 @@
-import { WEB3_INITIALIZED, katalystNodeInitialized, setKatalystRealm } from './actions'
+import { WEB3_INITIALIZED, catalystRealmInitialized, setCatalystRealm } from './actions'
 import { call, put, takeEvery } from 'redux-saga/effects'
-import { pickKatalystRealm } from './index'
+import { pickCatalystRealm } from './index'
 import { Realm } from './types'
 
 export function* daoSaga(): any {
-  yield takeEvery(WEB3_INITIALIZED, loadKatalystRealm)
+  yield takeEvery(WEB3_INITIALIZED, loadCatalystRealm)
 }
 
-function* loadKatalystRealm() {
-  const realm: Realm = yield call(pickKatalystRealm)
+function* loadCatalystRealm() {
+  const realm: Realm = yield call(pickCatalystRealm)
 
-  yield put(setKatalystRealm(realm))
+  yield put(setCatalystRealm(realm))
 
-  yield put(katalystNodeInitialized())
+  yield put(catalystRealmInitialized())
 }

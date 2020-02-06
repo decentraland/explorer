@@ -54,7 +54,7 @@ import { AuthIdentity, Authenticator, AuthLink } from '../crypto/Authenticator'
 
 const CID = require('cids')
 import { sha3 } from 'web3x/utils'
-import { KATALYST_REALM_INITIALIZED } from '../dao/actions'
+import { CATALYST_REALM_INITIALIZED } from '../dao/actions'
 import { isRealmInitialized, getUpdateProfileServer } from '../dao/selectors'
 const multihashing = require('multihashing-async')
 const toBuffer = require('blob-to-buffer')
@@ -135,7 +135,7 @@ const takeLatestByUserId = (patternOrChannel: any, saga: any, ...args: any) =>
  */
 export function* passportSaga(): any {
   if (!(yield select(isRealmInitialized))) {
-    yield take(KATALYST_REALM_INITIALIZED)
+    yield take(CATALYST_REALM_INITIALIZED)
   }
   yield takeEvery(RENDERER_INITIALIZED, initialLoad)
 
