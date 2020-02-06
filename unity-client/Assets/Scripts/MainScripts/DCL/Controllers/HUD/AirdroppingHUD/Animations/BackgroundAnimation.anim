@@ -47,7 +47,7 @@ AnimationClip:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-    path: Particles1
+    path: Content/Particles1
   - curve:
       serializedVersion: 2
       m_Curve:
@@ -72,7 +72,7 @@ AnimationClip:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-    path: Rays
+    path: Content/Rays
   - curve:
       serializedVersion: 2
       m_Curve:
@@ -106,7 +106,7 @@ AnimationClip:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-    path: Particles4
+    path: Content/Particles4
   - curve:
       serializedVersion: 2
       m_Curve:
@@ -140,7 +140,7 @@ AnimationClip:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-    path: Particles3
+    path: Content/Particles3
   - curve:
       serializedVersion: 2
       m_Curve:
@@ -174,7 +174,7 @@ AnimationClip:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-    path: Particles2
+    path: Content/Particles2
   m_PositionCurves: []
   m_ScaleCurves: []
   m_FloatCurves:
@@ -212,7 +212,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_Color.r
-    path: Particles1
+    path: Content/Particles1
     classID: 114
     script: {fileID: -765806418, guid: f70555f144d8491a825f0804e09c671c, type: 3}
   - curve:
@@ -249,7 +249,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_Color.g
-    path: Particles1
+    path: Content/Particles1
     classID: 114
     script: {fileID: -765806418, guid: f70555f144d8491a825f0804e09c671c, type: 3}
   - curve:
@@ -286,7 +286,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_Color.b
-    path: Particles1
+    path: Content/Particles1
     classID: 114
     script: {fileID: -765806418, guid: f70555f144d8491a825f0804e09c671c, type: 3}
   - curve:
@@ -377,7 +377,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_Color.a
-    path: Particles1
+    path: Content/Particles1
     classID: 114
     script: {fileID: -765806418, guid: f70555f144d8491a825f0804e09c671c, type: 3}
   - curve:
@@ -414,7 +414,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_Color.r
-    path: Particles4
+    path: Content/Particles4
     classID: 114
     script: {fileID: -765806418, guid: f70555f144d8491a825f0804e09c671c, type: 3}
   - curve:
@@ -451,7 +451,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_Color.g
-    path: Particles4
+    path: Content/Particles4
     classID: 114
     script: {fileID: -765806418, guid: f70555f144d8491a825f0804e09c671c, type: 3}
   - curve:
@@ -488,7 +488,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_Color.b
-    path: Particles4
+    path: Content/Particles4
     classID: 114
     script: {fileID: -765806418, guid: f70555f144d8491a825f0804e09c671c, type: 3}
   - curve:
@@ -579,7 +579,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_Color.a
-    path: Particles4
+    path: Content/Particles4
     classID: 114
     script: {fileID: -765806418, guid: f70555f144d8491a825f0804e09c671c, type: 3}
   - curve:
@@ -625,7 +625,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_Color.r
-    path: Particles3
+    path: Content/Particles3
     classID: 114
     script: {fileID: -765806418, guid: f70555f144d8491a825f0804e09c671c, type: 3}
   - curve:
@@ -671,7 +671,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_Color.g
-    path: Particles3
+    path: Content/Particles3
     classID: 114
     script: {fileID: -765806418, guid: f70555f144d8491a825f0804e09c671c, type: 3}
   - curve:
@@ -717,7 +717,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_Color.b
-    path: Particles3
+    path: Content/Particles3
     classID: 114
     script: {fileID: -765806418, guid: f70555f144d8491a825f0804e09c671c, type: 3}
   - curve:
@@ -826,7 +826,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_Color.a
-    path: Particles3
+    path: Content/Particles3
     classID: 114
     script: {fileID: -765806418, guid: f70555f144d8491a825f0804e09c671c, type: 3}
   - curve:
@@ -872,7 +872,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_Color.r
-    path: Particles2
+    path: Content/Particles2
     classID: 114
     script: {fileID: -765806418, guid: f70555f144d8491a825f0804e09c671c, type: 3}
   - curve:
@@ -918,7 +918,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_Color.g
-    path: Particles2
+    path: Content/Particles2
     classID: 114
     script: {fileID: -765806418, guid: f70555f144d8491a825f0804e09c671c, type: 3}
   - curve:
@@ -964,7 +964,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_Color.b
-    path: Particles2
+    path: Content/Particles2
     classID: 114
     script: {fileID: -765806418, guid: f70555f144d8491a825f0804e09c671c, type: 3}
   - curve:
@@ -1064,7 +1064,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_Color.a
-    path: Particles2
+    path: Content/Particles2
     classID: 114
     script: {fileID: -765806418, guid: f70555f144d8491a825f0804e09c671c, type: 3}
   m_PPtrCurves: []
@@ -1131,7 +1131,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: localEulerAnglesRaw.x
-    path: Particles1
+    path: Content/Particles1
     classID: 224
     script: {fileID: 0}
   - curve:
@@ -1168,7 +1168,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: localEulerAnglesRaw.y
-    path: Particles1
+    path: Content/Particles1
     classID: 224
     script: {fileID: 0}
   - curve:
@@ -1205,7 +1205,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: localEulerAnglesRaw.z
-    path: Particles1
+    path: Content/Particles1
     classID: 224
     script: {fileID: 0}
   - curve:
@@ -1242,7 +1242,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_Color.r
-    path: Particles1
+    path: Content/Particles1
     classID: 114
     script: {fileID: -765806418, guid: f70555f144d8491a825f0804e09c671c, type: 3}
   - curve:
@@ -1279,7 +1279,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_Color.g
-    path: Particles1
+    path: Content/Particles1
     classID: 114
     script: {fileID: -765806418, guid: f70555f144d8491a825f0804e09c671c, type: 3}
   - curve:
@@ -1316,7 +1316,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_Color.b
-    path: Particles1
+    path: Content/Particles1
     classID: 114
     script: {fileID: -765806418, guid: f70555f144d8491a825f0804e09c671c, type: 3}
   - curve:
@@ -1407,7 +1407,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_Color.a
-    path: Particles1
+    path: Content/Particles1
     classID: 114
     script: {fileID: -765806418, guid: f70555f144d8491a825f0804e09c671c, type: 3}
   - curve:
@@ -1426,7 +1426,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: localEulerAnglesRaw.x
-    path: Rays
+    path: Content/Rays
     classID: 224
     script: {fileID: 0}
   - curve:
@@ -1445,7 +1445,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: localEulerAnglesRaw.y
-    path: Rays
+    path: Content/Rays
     classID: 224
     script: {fileID: 0}
   - curve:
@@ -1473,7 +1473,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: localEulerAnglesRaw.z
-    path: Rays
+    path: Content/Rays
     classID: 224
     script: {fileID: 0}
   - curve:
@@ -1510,7 +1510,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_Color.r
-    path: Particles4
+    path: Content/Particles4
     classID: 114
     script: {fileID: -765806418, guid: f70555f144d8491a825f0804e09c671c, type: 3}
   - curve:
@@ -1547,7 +1547,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_Color.g
-    path: Particles4
+    path: Content/Particles4
     classID: 114
     script: {fileID: -765806418, guid: f70555f144d8491a825f0804e09c671c, type: 3}
   - curve:
@@ -1584,7 +1584,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_Color.b
-    path: Particles4
+    path: Content/Particles4
     classID: 114
     script: {fileID: -765806418, guid: f70555f144d8491a825f0804e09c671c, type: 3}
   - curve:
@@ -1675,7 +1675,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_Color.a
-    path: Particles4
+    path: Content/Particles4
     classID: 114
     script: {fileID: -765806418, guid: f70555f144d8491a825f0804e09c671c, type: 3}
   - curve:
@@ -1712,7 +1712,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: localEulerAnglesRaw.x
-    path: Particles4
+    path: Content/Particles4
     classID: 224
     script: {fileID: 0}
   - curve:
@@ -1749,7 +1749,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: localEulerAnglesRaw.y
-    path: Particles4
+    path: Content/Particles4
     classID: 224
     script: {fileID: 0}
   - curve:
@@ -1786,7 +1786,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: localEulerAnglesRaw.z
-    path: Particles4
+    path: Content/Particles4
     classID: 224
     script: {fileID: 0}
   - curve:
@@ -1832,7 +1832,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_Color.r
-    path: Particles3
+    path: Content/Particles3
     classID: 114
     script: {fileID: -765806418, guid: f70555f144d8491a825f0804e09c671c, type: 3}
   - curve:
@@ -1878,7 +1878,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_Color.g
-    path: Particles3
+    path: Content/Particles3
     classID: 114
     script: {fileID: -765806418, guid: f70555f144d8491a825f0804e09c671c, type: 3}
   - curve:
@@ -1924,7 +1924,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_Color.b
-    path: Particles3
+    path: Content/Particles3
     classID: 114
     script: {fileID: -765806418, guid: f70555f144d8491a825f0804e09c671c, type: 3}
   - curve:
@@ -2033,7 +2033,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_Color.a
-    path: Particles3
+    path: Content/Particles3
     classID: 114
     script: {fileID: -765806418, guid: f70555f144d8491a825f0804e09c671c, type: 3}
   - curve:
@@ -2070,7 +2070,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: localEulerAnglesRaw.x
-    path: Particles3
+    path: Content/Particles3
     classID: 224
     script: {fileID: 0}
   - curve:
@@ -2107,7 +2107,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: localEulerAnglesRaw.y
-    path: Particles3
+    path: Content/Particles3
     classID: 224
     script: {fileID: 0}
   - curve:
@@ -2144,7 +2144,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: localEulerAnglesRaw.z
-    path: Particles3
+    path: Content/Particles3
     classID: 224
     script: {fileID: 0}
   - curve:
@@ -2190,7 +2190,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_Color.r
-    path: Particles2
+    path: Content/Particles2
     classID: 114
     script: {fileID: -765806418, guid: f70555f144d8491a825f0804e09c671c, type: 3}
   - curve:
@@ -2236,7 +2236,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_Color.g
-    path: Particles2
+    path: Content/Particles2
     classID: 114
     script: {fileID: -765806418, guid: f70555f144d8491a825f0804e09c671c, type: 3}
   - curve:
@@ -2282,7 +2282,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_Color.b
-    path: Particles2
+    path: Content/Particles2
     classID: 114
     script: {fileID: -765806418, guid: f70555f144d8491a825f0804e09c671c, type: 3}
   - curve:
@@ -2382,7 +2382,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_Color.a
-    path: Particles2
+    path: Content/Particles2
     classID: 114
     script: {fileID: -765806418, guid: f70555f144d8491a825f0804e09c671c, type: 3}
   - curve:
@@ -2419,7 +2419,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: localEulerAnglesRaw.x
-    path: Particles2
+    path: Content/Particles2
     classID: 224
     script: {fileID: 0}
   - curve:
@@ -2456,7 +2456,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: localEulerAnglesRaw.y
-    path: Particles2
+    path: Content/Particles2
     classID: 224
     script: {fileID: 0}
   - curve:
@@ -2475,7 +2475,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: localEulerAnglesRaw.z
-    path: Particles2
+    path: Content/Particles2
     classID: 224
     script: {fileID: 0}
   m_EulerEditorCurves:
@@ -2486,7 +2486,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_LocalEulerAngles.z
-    path: Particles3
+    path: Content/Particles3
     classID: 224
     script: {fileID: 0}
   - curve:
@@ -2496,7 +2496,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_LocalEulerAngles.y
-    path: Particles3
+    path: Content/Particles3
     classID: 224
     script: {fileID: 0}
   - curve:
@@ -2506,7 +2506,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_LocalEulerAngles.x
-    path: Particles3
+    path: Content/Particles3
     classID: 224
     script: {fileID: 0}
   - curve:
@@ -2516,7 +2516,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_LocalEulerAngles.z
-    path: Particles1
+    path: Content/Particles1
     classID: 224
     script: {fileID: 0}
   - curve:
@@ -2526,7 +2526,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_LocalEulerAngles.y
-    path: Particles1
+    path: Content/Particles1
     classID: 224
     script: {fileID: 0}
   - curve:
@@ -2536,7 +2536,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_LocalEulerAngles.x
-    path: Particles1
+    path: Content/Particles1
     classID: 224
     script: {fileID: 0}
   - curve:
@@ -2546,7 +2546,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_LocalEulerAngles.z
-    path: Particles4
+    path: Content/Particles4
     classID: 224
     script: {fileID: 0}
   - curve:
@@ -2556,7 +2556,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_LocalEulerAngles.y
-    path: Particles4
+    path: Content/Particles4
     classID: 224
     script: {fileID: 0}
   - curve:
@@ -2566,7 +2566,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_LocalEulerAngles.x
-    path: Particles4
+    path: Content/Particles4
     classID: 224
     script: {fileID: 0}
   - curve:
@@ -2576,7 +2576,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_LocalEulerAngles.z
-    path: Particles2
+    path: Content/Particles2
     classID: 224
     script: {fileID: 0}
   - curve:
@@ -2586,7 +2586,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_LocalEulerAngles.y
-    path: Particles2
+    path: Content/Particles2
     classID: 224
     script: {fileID: 0}
   - curve:
@@ -2596,7 +2596,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_LocalEulerAngles.x
-    path: Particles2
+    path: Content/Particles2
     classID: 224
     script: {fileID: 0}
   - curve:
@@ -2606,7 +2606,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_LocalEulerAngles.x
-    path: Rays
+    path: Content/Rays
     classID: 224
     script: {fileID: 0}
   - curve:
@@ -2616,7 +2616,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_LocalEulerAngles.y
-    path: Rays
+    path: Content/Rays
     classID: 224
     script: {fileID: 0}
   - curve:
@@ -2626,7 +2626,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_LocalEulerAngles.z
-    path: Rays
+    path: Content/Rays
     classID: 224
     script: {fileID: 0}
   m_HasGenericRootTransform: 0
