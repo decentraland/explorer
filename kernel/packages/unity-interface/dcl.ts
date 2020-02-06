@@ -151,6 +151,10 @@ const browserInterface = {
     sendPublicChatMessage(id, chatMessage)
   },
 
+  TermsOfServiceResponse(payload: string) {
+    // TODO
+  },
+
   LogOut() {
     Session.current.then(s => s.logout()).catch(e => defaultLogger.error('error while logging out', e))
   },
@@ -402,6 +406,9 @@ export const unityInterface = {
   ConfigureAirdroppingHUD(configuration: HUDConfiguration) {
     gameInstance.SendMessage('HUDController', 'ConfigureAirdroppingHUD', JSON.stringify(configuration))
   },
+  ConfigureTermsOfServiceHUD(configuration: HUDConfiguration) {
+    gameInstance.SendMessage('HUDController', 'ConfigureTermsOfServiceHUD', JSON.stringify(configuration))
+  },  
   UpdateMinimapSceneInformation(info: { name: string; type: number; parcels: { x: number; y: number }[] }[]) {
     const chunks = chunkGenerator(CHUNK_SIZE, info)
 
@@ -486,6 +493,9 @@ export const HUD: Record<string, { configure: (config: HUDConfiguration) => void
   },
   Airdropping: {
     configure: unityInterface.ConfigureAirdroppingHUD
+  },
+  TermsOfService: {
+    configure: unityInterface.ConfigureTermsOfServiceHUD
   }
 }
 

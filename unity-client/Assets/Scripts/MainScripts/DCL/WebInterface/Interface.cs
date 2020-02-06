@@ -318,6 +318,14 @@ namespace DCL.Interface
             public string id;
         }
 
+        [System.Serializable]
+        public class TermsOfServiceResponsePayload
+        {
+            public string sceneId;
+            public bool dontShowAgain;
+            public bool accepted;
+        }
+
 #if UNITY_WEBGL && !UNITY_EDITOR
     /**
      * This method is called after the first render. It marks the loading of the
@@ -651,6 +659,17 @@ namespace DCL.Interface
         {
             WebInterface.MessageFromEngine("PerformanceReport", encodedFrameTimesInMS);
 
+        }
+
+        public static void SendTermsOfServiceResponse(string sceneId, bool accepted, bool dontShowAgain)
+        {
+            var payload = new TermsOfServiceResponsePayload()
+            {
+                sceneId = sceneId,
+                accepted = accepted,
+                dontShowAgain = dontShowAgain
+            };
+            SendMessage("TermsOfServiceResponse", payload);
         }
 
         public static void SendExpression(string expressionID, long timestamp)
