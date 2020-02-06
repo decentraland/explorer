@@ -1,3 +1,4 @@
+using DCL.Helpers;
 using DCL.Interface;
 using System;
 
@@ -29,7 +30,6 @@ public class WelcomeHUDController : IHUD, IDisposable
     {
         this.model = model;
 
-
         view = WelcomeHUDView.CreateView();
 
         if (ENABLE_DYNAMIC_CONTENT)
@@ -47,11 +47,14 @@ public class WelcomeHUDController : IHUD, IDisposable
 
         view.closeButton.onClick.RemoveAllListeners();
         view.closeButton.onClick.AddListener(Close);
+
+        Utils.UnlockCursor();
     }
 
     void Close()
     {
         SetVisibility(false);
+        Utils.LockCursor();
     }
 
     void OnConfirmPressed()
