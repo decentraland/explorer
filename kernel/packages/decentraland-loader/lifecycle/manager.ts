@@ -65,8 +65,20 @@ export async function initParcelSceneWorker() {
     contentServerBundles: DEBUG ? '' : getServerConfigurations().contentAsBundle,
     lineOfSightRadius: parcelLimits.visibleRadius,
     secureRadius: parcelLimits.secureRadius,
-    emptyScenes: ENABLE_EMPTY_SCENES && !(globalThis as any)['isRunningTests']
+    emptyScenes: ENABLE_EMPTY_SCENES && !(globalThis as any)['isRunningTests'],
+    tutorialBaseURL: getTutorialBaseURL()
   })
 
   return server
+}
+
+function getTutorialBaseURL() {
+  let pathName = location.pathname.split('/')
+  if (pathName[pathName.length - 1].includes('.')) {
+    pathName.pop()
+  }
+
+  const basePath = origin + pathName.join('/')
+  if (basePath.endsWith('/')) return basePath.slice(0, -1)
+  return basePath
 }
