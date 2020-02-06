@@ -395,6 +395,7 @@ namespace DCL
                                 break;
                             case "SetTutorialEnabled":
                                 TutorialController.i?.SetTutorialEnabled();
+                                break;
                             case "TriggerSelfUserExpression":
                                 HUDController.i.TriggerSelfUserExpression(msg.payload);
                                 break;
