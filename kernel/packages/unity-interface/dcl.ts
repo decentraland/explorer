@@ -148,6 +148,13 @@ const browserInterface = {
     sendPublicChatMessage(id, chatMessage)
   },
 
+  TriggerChatCommand(data: { command: string; }) {
+    const id = uuid()
+    const chatMessage = `␐${data.command}`
+    sendPublicChatMessage(id, chatMessage)
+  },
+
+
   LogOut() {
     Session.current.then(s => s.logout()).catch(e => defaultLogger.error('error while logging out', e))
   },

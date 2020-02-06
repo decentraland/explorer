@@ -18,7 +18,15 @@ public class WelcomeHUDView : MonoBehaviour
         return Instantiate(Resources.Load<GameObject>(PREFAB_PATH)).GetComponent<WelcomeHUDView>();
     }
 
-    public void Populate()
+    public void Initialize(WelcomeHUDController.Model model)
     {
+        headerText1.text = model.title;
+        headerText2.text = model.timeText;
+        bodyText.text = model.bodyText;
+        buttonText.text = model.buttonText;
+
+        confirmButton.gameObject.SetActive(model.showButton);
+        headerText2.gameObject.SetActive(model.showTime);
+
     }
 }

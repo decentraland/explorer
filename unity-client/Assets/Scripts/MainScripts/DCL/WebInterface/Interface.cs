@@ -1,4 +1,4 @@
-﻿﻿using UnityEngine;
+using UnityEngine;
 
 #if UNITY_WEBGL && !UNITY_EDITOR
 using System.Runtime.InteropServices;
@@ -310,6 +310,12 @@ namespace DCL.Interface
         {
             public string id;
             public long timestamp;
+        }
+
+        [System.Serializable]
+        public class ChatCommandPayload
+        {
+            public string command;
         }
 
 #if UNITY_WEBGL && !UNITY_EDITOR
@@ -649,7 +655,13 @@ namespace DCL.Interface
                 id = expressionID,
                 timestamp = timestamp
             });
-
+        }
+        public static void SendChatCommand(string chatCommand)
+        {
+            SendMessage("TriggerChatCommand", new ChatCommandPayload()
+            {
+                command = chatCommand,
+            });
         }
     }
 }
