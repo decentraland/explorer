@@ -1,4 +1,5 @@
 import { getFetchContentServer } from '../shared/dao/selectors'
+const queryString = require('query-string')
 declare var window: any
 
 export const performanceConfigurations = [
@@ -93,30 +94,17 @@ export const STATIC_WORLD = location.search.indexOf('STATIC_WORLD') !== -1 || !!
 export const ENABLE_WEB3 = location.search.indexOf('ENABLE_WEB3') !== -1 || !!(global as any).enableWeb3
 export const ENV_OVERRIDE = location.search.indexOf('ENV') !== -1
 
+const qs = queryString.parse(location.search)
+
 // Comms
 export const USE_LOCAL_COMMS = location.search.indexOf('LOCAL_COMMS') !== -1 || PREVIEW
-export const COMMS = USE_LOCAL_COMMS
-  ? 'v1-local'
-  : location.search.indexOf('COMMS') !== -1
-  ? window.location.search.match(/COMMS=(\w+-\w+)/)[1]
-  : 'v2-p2p' // by default
+export const COMMS = USE_LOCAL_COMMS ? 'v1-local' : qs.COMMS ? qs.COMMS : 'v2-p2p' // by default
 
-export const FETCH_PROFILE_SERVICE =
-  location.search.indexOf('FETCH_PROFILE_SERVICE') !== -1
-    ? window.location.search.match(/FETCH_PROFILE_SERVICE=(\w+)/)[1]
-    : undefined
-export const UPDATE_CONTENT_SERVICE =
-  location.search.indexOf('UPDATE_PROFILE_SERVICE') !== -1
-    ? window.location.search.match(/UPDATE_PROFILE_SERVICE=(\w+)/)[1]
-    : undefined
-export const FETCH_CONTENT_SERVICE =
-  location.search.indexOf('FETCH_CONTENT_SERVICE') !== -1
-    ? window.location.search.match(/FETCH_CONTENT_SERVICE=(\w+)/)[1]
-    : undefined
-export const COMMS_SERVICE =
-  location.search.indexOf('COMMS_SERVICE') !== -1 ? window.location.search.match(/COMMS_SERVICE=(\w+)/)[1] : undefined
-export const LAYER =
-  location.search.indexOf('LAYER') !== -1 ? window.location.search.match(/LAYER=(\w+)/)[1] : undefined
+export const FETCH_PROFILE_SERVICE = qs.FETCH_PROFILE_SERVICE
+export const UPDATE_CONTENT_SERVICE = qs.UPDATE_CONTENT_SERVICE
+export const FETCH_CONTENT_SERVICE = qs.FETCH_CONTENT_SERVICE
+export const COMMS_SERVICE = qs.COMMS_SERVICE
+export const LAYER = qs.LAYER
 
 export const DEBUG =
   location.search.indexOf('DEBUG_MODE') !== -1 ||
