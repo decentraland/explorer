@@ -83,9 +83,11 @@ public class TutorialController : MonoBehaviour
     public void SetRunningStageFinished()
     {
         tutorialFlagMask |= (int)runningStage.flag;
-        runningStage.OnStageFinished();
-        UserProfile.GetOwnUserProfile().SetTutorialFlag(tutorialFlagMask);
+        runningStage.Finish();
+
         // TODO: send update to user profile
+        UserProfile.GetOwnUserProfile().SetTutorialFlag(tutorialFlagMask);
+
         StartTutorialStageIfNeeded(tutorialFlagMask);
     }
 
@@ -99,7 +101,7 @@ public class TutorialController : MonoBehaviour
         if (runningStage != null)
         {
             runningStage.OnStageFinish += () => runningStage = null;
-            runningStage.OnStageStart();
+            runningStage.Start();
         }
     }
 

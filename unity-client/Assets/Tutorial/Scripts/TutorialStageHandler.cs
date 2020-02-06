@@ -41,7 +41,7 @@ public abstract class TutorialStageHandler
         return (tutorialFlagMask & (int)flag) != 0;
     }
 
-    public void OnStageStart()
+    public void Start()
     {
         if (tutorialStageControllerPrefabRef == null)
         {
@@ -51,7 +51,7 @@ public abstract class TutorialStageHandler
         tutorialStageController?.OnStageStart();
     }
 
-    public void OnStageFinished()
+    public void Finish()
     {
         if (tutorialStageController)
         {
