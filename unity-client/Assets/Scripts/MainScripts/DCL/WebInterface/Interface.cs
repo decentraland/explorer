@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+﻿﻿using UnityEngine;
 
 #if UNITY_WEBGL && !UNITY_EDITOR
 using System.Runtime.InteropServices;
@@ -303,6 +303,19 @@ namespace DCL.Interface
         [System.Serializable]
         public class RaycastHitAllResponse : RaycastResponse<RaycastHitEntities>
         {
+        }
+
+        [System.Serializable]
+        public class SendExpressionPayload
+        {
+            public string id;
+            public long timestamp;
+        }
+
+        [System.Serializable]
+        public class UserAcceptedCollectiblesPayload
+        {
+            public string id;
         }
 
 #if UNITY_WEBGL && !UNITY_EDITOR
@@ -618,20 +631,35 @@ namespace DCL.Interface
             public AvatarModel avatar;
         }
 
-        public static void SendSaveAvatar(AvatarModel avatar, Texture2D faceSnapshot, Texture2D bodySnapshot)
+        public static void SendSaveAvatar(AvatarModel avatar, Sprite faceSnapshot, Sprite bodySnapshot)
         {
             var payload = new SaveAvatarPayload()
             {
                 avatar = avatar,
-                face = System.Convert.ToBase64String(faceSnapshot.EncodeToPNG()),
-                body = System.Convert.ToBase64String(bodySnapshot.EncodeToPNG())
+                face = System.Convert.ToBase64String(faceSnapshot.texture.EncodeToPNG()),
+                body = System.Convert.ToBase64String(bodySnapshot.texture.EncodeToPNG())
             };
             WebInterface.SendMessage("SaveUserAvatar", payload);
+        }
+
+        public static void SendUserAcceptedCollectibles(string airdropId)
+        {
+            WebInterface.SendMessage("UserAcceptedCollectibles", new UserAcceptedCollectiblesPayload{ id = airdropId});
         }
 
         public static void SendPerformanceReport(string encodedFrameTimesInMS)
         {
             WebInterface.MessageFromEngine("PerformanceReport", encodedFrameTimesInMS);
+
+        }
+
+        public static void SendExpression(string expressionID, long timestamp)
+        {
+            SendMessage("TriggerExpression", new SendExpressionPayload()
+            {
+                id = expressionID,
+                timestamp = timestamp
+            });
 
         }
     }
