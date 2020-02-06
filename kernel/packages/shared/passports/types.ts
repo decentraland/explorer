@@ -10,6 +10,7 @@ export interface Profile {
   avatar: Avatar
   ethAddress: string | undefined
   inventory: WearableId[]
+  blocked: string[]
   snapshots: {
     face: string
     body: string

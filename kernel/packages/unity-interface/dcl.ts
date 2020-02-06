@@ -79,6 +79,8 @@ import { hudWorkerUrl, SceneWorker } from '../shared/world/SceneWorker'
 import { ensureUiApis } from '../shared/world/uiSceneInitializer'
 import { worldRunningObservable } from '../shared/world/worldState'
 import { sendPublicChatMessage } from 'shared/comms'
+import { getProfile } from 'shared/passports/selectors'
+import { identity } from 'shared'
 
 const rendererVersion = require('decentraland-renderer')
 window['console'].log('Renderer version: ' + rendererVersion)
@@ -189,16 +191,26 @@ const browserInterface = {
   },
 
   ReportScene(sceneId: string) {
-    //TODO
+    browserInterface.OpenWebURL({ url: 'https://decentralandofficial.typeform.com/to/KzaUxh' })
   },
 
   ReportPlayer(username: string) {
-    //TODO
+    browserInterface.OpenWebURL({ url: 'https://decentralandofficial.typeform.com/to/owLkla' })
   },
 
   BlockPlayer(username: string) {
-    //TODO
-  },
+    const profile = getProfile(global.globalStore.passports, identity.address)
+
+    if (profile) {
+      for (let blockedUser of profile.blocked) {
+        if (blockedUser === username) {
+          return
+        }
+      }
+
+      saveAvatarRequest({ ...profile, blocked: [...profile.blocked, username] })
+    }
+  }
 }
 
 export function setLoadingScreenVisible(shouldShow: boolean) {

@@ -48,7 +48,7 @@ import {
 import { processServerProfile } from './transformations/processServerProfile'
 import { profileToRendererFormat } from './transformations/profileToRendererFormat'
 import { ensureServerFormat } from './transformations/profileToServerFormat'
-import { Avatar, Catalog, Profile, WearableId, Wearable, Collection } from './types'
+import { Catalog, Profile, WearableId, Wearable, Collection } from './types'
 import { Action } from 'redux'
 import { identity } from '../index'
 import { AuthIdentity, Authenticator, AuthLink } from '../crypto/Authenticator'
@@ -157,7 +157,7 @@ function takeLatestById<T extends Action>(
   keyFunction: (action: T) => string,
   saga: any,
   ...args: any
-): ForkEffect<never> {
+): ForkEffect {
   return fork(function*() {
     let lastTasks = new Map<any, any>()
     while (true) {
@@ -377,9 +377,10 @@ export async function fetchInventoryItemsByAddress(address: string) {
 export function* handleSaveAvatar(saveAvatar: SaveAvatarRequest) {
   const userId = saveAvatar.payload.userId ? saveAvatar.payload.userId : yield select(getCurrentUserId)
   try {
-    const currentVersion = (yield select(getProfile, userId)).version || 0
+    const savedProfile = yield select(getProfile, userId)
+    const currentVersion = savedProfile.version || 0
     const url = getServerConfigurations().contentUpdate
-    const profile = saveAvatar.payload.profile
+    const profile = { ...savedProfile, ...saveAvatar.payload.profile }
     const result = yield call(modifyAvatar, {
       url,
       userId,
@@ -466,24 +467,29 @@ export async function modifyAvatar(params: {
   currentVersion: number
   userId: string
   identity: AuthIdentity
-  profile: { avatar: Avatar; face: string; body: string }
+  profile: Profile
 }) {
   const { url, currentVersion, profile, identity } = params
-  const { face, avatar, body } = profile
-  const faceFile: ContentFile = await makeContentFile('./face.png', base64ToBlob(face))
-  const bodyFile: ContentFile = await makeContentFile('./body.png', base64ToBlob(body))
+  const { avatar } = profile
 
-  const faceFileHash: string = await calculateBufferHash(faceFile.content)
-  const bodyFileHash: string = await calculateBufferHash(bodyFile.content)
+  const newAvatar = { ...avatar }
 
-  avatar.snapshots = {
-    face: faceFileHash,
-    body: bodyFileHash
+  let files: ContentFile[] = []
+
+  if (avatar.snapshots && avatar.snapshots.face.startsWith('data') && avatar.snapshots.body.startsWith('data')) {
+    // replace base64 snapshots with their respective hashes
+    const faceFile: ContentFile = await makeContentFile('./face.png', base64ToBlob(avatar.snapshots.face))
+    const bodyFile: ContentFile = await makeContentFile('./body.png', base64ToBlob(avatar.snapshots.body))
+    const faceFileHash: string = await calculateBufferHash(faceFile.content)
+    const bodyFileHash: string = await calculateBufferHash(bodyFile.content)
+    newAvatar.snapshots = {
+      face: faceFileHash,
+      body: bodyFileHash
+    }
+    files = [faceFile, bodyFile]
   }
 
   const newProfile = ensureServerFormat(avatar, currentVersion)
-
-  const files = [faceFile, bodyFile]
 
   const [data] = await buildDeployData(
     [identity.address],
@@ -657,7 +663,7 @@ export function* compareInventoriesAndTriggerNotification(
   saveToDb = saveToLocalStorage
 ) {
   if (areInventoriesDifferent(oldInventory, newInventory)) {
-    const oldItemsDict = oldInventory.reduce(
+    const oldItemsDict = oldInventory.reduce<Record<WearableId, boolean>>(
       (cumm: Record<WearableId, boolean>, id: string) => ({ ...cumm, [id]: true }),
       {}
     )
