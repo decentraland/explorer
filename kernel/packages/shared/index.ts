@@ -35,7 +35,7 @@ import { getAppNetwork } from './web3'
 import { initializeUrlPositionObserver } from './world/positionThings'
 import { setWorldContext } from './protocol/actions'
 import { profileToRendererFormat } from './passports/transformations/profileToRendererFormat'
-import { awaitWeb3Approval, providerFuture } from './ethereum/provider'
+import { awaitWeb3Approval, providerFuture, isSessionExpired } from './ethereum/provider'
 import { createIdentity } from 'eth-crypto'
 import { Authenticator, AuthIdentity } from './crypto/Authenticator'
 import { Eth } from 'web3x/eth'
@@ -71,10 +71,6 @@ function initializeAnalytics() {
 
 export let globalStore: Store<RootState>
 export let identity: AuthIdentity
-
-export function isSessionExpired(userData: any) {
-  return !userData || !userData.identity || new Date(userData.identity.expiration) < new Date()
-}
 
 async function createAuthIdentity() {
   const ephemeral = createIdentity()

@@ -5,7 +5,6 @@ import { ethereumConfigurations, ETHEREUM_NETWORK } from 'config'
 import { defaultLogger } from 'shared/logger'
 import { Account } from 'web3x/account'
 import { getUserProfile } from 'shared/comms/peers'
-import { isSessionExpired } from '../index'
 
 declare var window: Window & {
   ethereum: any
@@ -108,4 +107,8 @@ function showEthConnectAdvice(show: boolean) {
   if (element) {
     element.style.display = show ? 'block' : 'none'
   }
+}
+
+export function isSessionExpired(userData: any) {
+  return !userData || !userData.identity || new Date(userData.identity.expiration) < new Date()
 }
