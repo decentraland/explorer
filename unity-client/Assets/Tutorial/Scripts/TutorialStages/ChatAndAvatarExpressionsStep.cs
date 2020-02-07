@@ -1,7 +1,7 @@
-﻿using System.Collections;
+using System.Collections;
 using UnityEngine;
 
-public class ChatAndAvatarExpressionsStageController : TutorialStageController
+public class ChatAndAvatarExpressionsStep : TutorialStep
 {
     [SerializeField] TutorialTooltip chatTooltip = null;
     [SerializeField] TutorialTooltip avatarExpressionTooltip = null;
@@ -9,13 +9,15 @@ public class ChatAndAvatarExpressionsStageController : TutorialStageController
     [SerializeField] TutorialTooltip avatarHUDTooltip = null;
     [SerializeField] TutorialTooltip dailyRewardTooltip = null;
 
-    public override void OnStageStart()
+    public override void OnStepStart()
     {
-        base.OnStageStart();
-        StartCoroutine(StageSecuence());
+        base.OnStepStart();
+        HUDController.i?.avatarHud.SetVisibility(false);
+        TutorialController.i.SetChatVisible(false);
+        HUDController.i?.expressionsHud.SetVisibility(false);
     }
 
-    private IEnumerator StageSecuence()
+    public override IEnumerator OnStepExecute()
     {
         yield return WaitIdleTime();
 
@@ -37,7 +39,5 @@ public class ChatAndAvatarExpressionsStageController : TutorialStageController
 
         yield return ShowTooltip(dailyRewardTooltip);
         yield return WaitIdleTime();
-
-        TutorialController.i?.SetRunningStageFinished();
     }
 }

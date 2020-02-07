@@ -1,8 +1,14 @@
-﻿using System;
+using DCL.Controllers;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class TutorialController : MonoBehaviour
 {
+    public static TutorialController i { private set; get; }
+
     public const float DEFAULT_STAGE_IDLE_TIME = 20f;
 
 #if UNITY_EDITOR
@@ -13,38 +19,23 @@ public class TutorialController : MonoBehaviour
 #endif
 
     [Header("Stage Controller References")]
-    [SerializeField] TutorialStageController initialStage = null;
-    [SerializeField] TutorialStageController genesisPlazaStage = null;
-    [SerializeField] TutorialStageController chatAndExpressionsStage = null;
-
-    public static TutorialController i { private set; get; }
+    [SerializeField] List<TutorialStep> steps = new List<TutorialStep>();
 
     public bool isTutorialEnabled { private set; get; }
 
-    [Flags]
-    public enum TutorialFlags
-    {
-        None = 0,
-        InitialScene = 1,
-        LoginRewardAndUserEmail = 2,
-        ChatAndAvatarExpressions = 4
-    }
+    private TutorialStep runningStep = null;
 
-    private TutorialStageHandler runningStage = null;
 
-    private TutorialStageHandler firstStage;
-    private int tutorialFlagsMask = 0;
+    private int currentTutorialStep = 0;
     private bool initialized = false;
     private Canvas chatUIScreen = null;
 
     public void SetTutorialEnabled()
     {
-        isTutorialEnabled = true;
         if (RenderingController.i)
-        {
             RenderingController.i.OnRenderingStateChanged += OnRenderingStateChanged;
-        }
-        CreateStagesChainOfResponsibility();
+
+        isTutorialEnabled = true;
     }
 
     private void Awake()
@@ -55,18 +46,18 @@ public class TutorialController : MonoBehaviour
 #if UNITY_EDITOR
     private void Start()
     {
-        if (debugRunTutorialOnStart)
+        if (!debugRunTutorialOnStart)
+            return;
+
+        isTutorialEnabled = true;
+
+        if (!RenderingController.i)
         {
-            CreateStagesChainOfResponsibility();
-            isTutorialEnabled = true;
-            if (!RenderingController.i)
-            {
-                OnRenderingStateChanged(true);
-            }
-            else
-            {
-                RenderingController.i.OnRenderingStateChanged += OnRenderingStateChanged;
-            }
+            OnRenderingStateChanged(true);
+        }
+        else
+        {
+            RenderingController.i.OnRenderingStateChanged += OnRenderingStateChanged;
         }
     }
 #endif
@@ -74,91 +65,93 @@ public class TutorialController : MonoBehaviour
     private void OnDestroy()
     {
         if (RenderingController.i)
-        {
             RenderingController.i.OnRenderingStateChanged -= OnRenderingStateChanged;
-        }
+
         i = null;
     }
 
-    public void SetRunningStageFinished()
+    private void StartTutorialFromStep(int stepId)
     {
-        tutorialFlagsMask |= (int)runningStage.flag;
-        runningStage.Finish();
+        if (!initialized)
+            Initialize();
 
-        // TODO: send update to user profile
-        UserProfile.GetOwnUserProfile().SetTutorialFlag(tutorialFlagsMask);
-
-        StartTutorialStageIfNeeded(tutorialFlagsMask);
-    }
-
-    private void StartTutorialStageIfNeeded(int tutorialFlagsMask)
-    {
-        if (runningStage != null)
-        {
+        if (runningStep != null)
             return;
-        }
-        runningStage = firstStage.GetHandler(tutorialFlagsMask);
-        if (runningStage != null)
-        {
-            runningStage.OnStageFinish += () => runningStage = null;
-            runningStage.Start();
-        }
+
+        StartCoroutine(ExecuteSteps((TutorialStep.Id)stepId));
     }
 
-    private int GetTutorialFlagFromProfile()
+    private IEnumerator ExecuteSteps(TutorialStep.Id startingStep)
     {
-        return UserProfile.GetOwnUserProfile().tutorialFlagsMask;
+        int startingStepIndex = 0;
+        for (int i = 0; i < steps.Count; i++)
+        {
+            if (steps[i].stepId == startingStep)
+            {
+                startingStepIndex = i;
+                break;
+            }
+        }
+
+        for (int i = startingStepIndex; i < steps.Count; i++)
+        {
+            runningStep = steps[i];
+            currentTutorialStep = (int)runningStep.stepId;
+
+            var stepInstance = Instantiate(runningStep);
+
+            UserProfile.GetOwnUserProfile().SetTutorialFlag(currentTutorialStep);
+
+            stepInstance.OnStepStart();
+            yield return stepInstance.OnStepExecute();
+            stepInstance.OnStepFinished();
+
+            Destroy(stepInstance);
+        }
+
+        currentTutorialStep = (int)TutorialStep.Id.FINISHED;
+        UserProfile.GetOwnUserProfile().SetTutorialFlag(currentTutorialStep);
+        runningStep = null;
+    }
+
+    private int GetTutorialStepFromProfile()
+    {
+        return UserProfile.GetOwnUserProfile().tutorialStep;
     }
 
     private void OnRenderingStateChanged(bool renderingEnabled)
     {
         if (!isTutorialEnabled || !renderingEnabled) return;
 
-        tutorialFlagsMask = GetTutorialFlagFromProfile(); // TODO: get flag from user profile
+        currentTutorialStep = GetTutorialStepFromProfile(); // TODO: get flag from user profile
 
 #if UNITY_EDITOR
         if (debugFlagStartingValue != 0)
         {
-            tutorialFlagsMask = debugFlagStartingValue;
+            currentTutorialStep = debugFlagStartingValue;
         }
 #endif
-        if (!initialized)
-        {
-            Initialize(tutorialFlagsMask);
-        }
-        StartTutorialStageIfNeeded(tutorialFlagsMask);
+        if (currentTutorialStep == (int)TutorialStep.Id.FINISHED)
+            return;
+
+        StartTutorialFromStep(currentTutorialStep);
     }
 
-    private void Initialize(int tutorialFlagsMask)
+    private void Initialize()
     {
+        if (initialized)
+            return;
+
         initialized = true;
         CacheChatScreen();
-        TutorialStageHandler handler = firstStage;
-        while (handler != null)
-        {
-            if (!handler.IsAlreadyFinished(tutorialFlagsMask))
-            {
-                handler.SetUpStage();
-            }
-            handler = handler.nextHandler;
-        }
     }
 
     private void CacheChatScreen()
     {
         if (chatUIScreen == null && DCL.SceneController.i)
         {
-            using (var iterator = DCL.SceneController.i.loadedScenes.GetEnumerator())
-            {
-                while (iterator.MoveNext())
-                {
-                    if (iterator.Current.Value.isPersistent && iterator.Current.Value.uiScreenSpace != null)
-                    {
-                        chatUIScreen = iterator.Current.Value.uiScreenSpace.canvas;
-                        break;
-                    }
-                }
-            }
+            ParcelScene uiScene = DCL.SceneController.i.loadedScenes[DCL.SceneController.i.globalSceneId];
+            chatUIScreen = uiScene.uiScreenSpace.canvas;
         }
     }
 
@@ -167,48 +160,6 @@ public class TutorialController : MonoBehaviour
         if (chatUIScreen != null)
         {
             chatUIScreen.enabled = visible;
-        }
-    }
-
-    private void CreateStagesChainOfResponsibility()
-    {
-        // 1st stage - initialStage
-        firstStage = new GenericSceneStageHandler(TutorialFlags.InitialScene, initialStage,
-            () =>
-            {
-                HUDController.i?.minimapHud.SetVisibility(false);
-            });
-
-        // 2nd stage - LoginRewardAndUserEmail
-        var nextStage = firstStage.SetNext(new GenericSceneStageHandler(TutorialFlags.LoginRewardAndUserEmail, genesisPlazaStage, null));
-
-        // 3rd stage - ChatAndAvatarExpressions
-        nextStage = nextStage.SetNext(new GenericSceneStageHandler(TutorialFlags.ChatAndAvatarExpressions, chatAndExpressionsStage,
-            () =>
-            {
-                HUDController.i?.avatarHud.SetVisibility(false);
-                SetChatVisible(false);
-                
-                HUDController.i?.expressionsHud.SetVisibility(false);
-            }));
-    }
-
-    class GenericSceneStageHandler : TutorialStageHandler
-    {
-        private TutorialFlags tutorialStageFlag;
-        private Action setupCallback;
-
-        public GenericSceneStageHandler(TutorialFlags stageFlag, TutorialStageController stage, Action setupStageCallback) : base(stage)
-        {
-            tutorialStageFlag = stageFlag;
-            setupCallback = setupStageCallback;
-        }
-
-        public override TutorialFlags flag => tutorialStageFlag;
-
-        public override void SetUpStage()
-        {
-            setupCallback?.Invoke();
         }
     }
 }

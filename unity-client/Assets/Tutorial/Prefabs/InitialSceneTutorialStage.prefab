@@ -2049,7 +2049,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d3bff574e33d44f8d94ac48045d7cf2f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  wellcomeTooltip: {fileID: 942974508925597400}
+  stepId: 1
+  welcomeTooltip: {fileID: 942974508925597400}
   controlsTooltip: {fileID: 4985169814092812148}
   cameraTooltip: {fileID: 4574287604332835822}
   minimapTooltip: {fileID: 5271660113205801817}

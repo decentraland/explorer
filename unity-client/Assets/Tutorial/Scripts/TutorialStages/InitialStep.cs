@@ -1,21 +1,26 @@
-﻿using System.Collections;
+using System.Collections;
 using UnityEngine;
+using UnityEngine.Serialization;
 
-public class InitialStageController : TutorialStageController
+public class InitialStep : TutorialStep
 {
-    [SerializeField] TutorialTooltip wellcomeTooltip = null;
+    [SerializeField] [FormerlySerializedAs("wellcomeTooltip")] TutorialTooltip welcomeTooltip = null;
     [SerializeField] TutorialTooltip controlsTooltip = null;
     [SerializeField] TutorialTooltip cameraTooltip = null;
     [SerializeField] TutorialTooltip minimapTooltip = null;
     [SerializeField] GameObject claimNamePanel = null;
 
     private AvatarEditorHUDController avatarEditorHUD = null;
+
     private bool claimNamePanelClosed = false;
     private bool characterMoved = false;
+    private bool characterTeleported = false;
 
-    public override void OnStageStart()
+    public override void OnStepStart()
     {
-        base.OnStageStart();
+        base.OnStepStart();
+
+        HUDController.i?.minimapHud.SetVisibility(false);
 
         DCLCharacterController.OnPositionSet += OnTeleport;
         DCLCharacterController.OnCharacterMoved += OnCharacterMove;
@@ -31,27 +36,26 @@ public class InitialStageController : TutorialStageController
         {
             claimNamePanelClosed = true;
         }
-
-        StartCoroutine(StageSequence());
     }
 
-    public override void OnStageFinished()
+    public override void OnStepFinished()
     {
-        base.OnStageFinished();
+        base.OnStepFinished();
         DCLCharacterController.OnPositionSet -= OnTeleport;
         DCLCharacterController.OnCharacterMoved -= OnCharacterMove;
         HUDController.i?.minimapHud.SetVisibility(true);
     }
 
-    private IEnumerator StageSequence()
+    public override IEnumerator OnStepExecute()
     {
-        yield return ShowTooltip(wellcomeTooltip);
+        yield return ShowTooltip(welcomeTooltip);
 
         yield return new WaitUntil(() => claimNamePanelClosed);
-        yield return WaitSeconds(3);
+        yield return WaitForSecondsWhenRenderingEnabled(3);
 
         yield return ShowTooltip(controlsTooltip, autoHide: false);
         characterMoved = false;
+        characterTeleported = false;
 
 #if UNITY_EDITOR
         if (DCLCharacterController.i == null)
@@ -64,7 +68,7 @@ public class InitialStageController : TutorialStageController
         yield return WaitIdleTime();
         HideTooltip(controlsTooltip);
 
-        yield return WaitSeconds(3);
+        yield return WaitForSecondsWhenRenderingEnabled(3);
         yield return ShowTooltip(cameraTooltip);
         yield return WaitIdleTime();
 
@@ -74,9 +78,12 @@ public class InitialStageController : TutorialStageController
 #if UNITY_EDITOR
         if (TutorialController.i.debugRunTutorialOnStart)
         {
-            TutorialController.i?.SetRunningStageFinished();
+            characterTeleported = true;
         }
 #endif
+
+        yield return new WaitUntil(() => characterTeleported == true);
+
     }
 
     private void OnAvatarEditorVisibilityChanged(bool visible)
@@ -91,7 +98,7 @@ public class InitialStageController : TutorialStageController
 
     private void OnTeleport(DCLCharacterPosition characterPosition)
     {
-        TutorialController.i?.SetRunningStageFinished();
+        characterTeleported = true;
     }
 
     private void OnCharacterMove(DCLCharacterPosition position)
@@ -109,7 +116,6 @@ public class InitialStageController : TutorialStageController
     public void ContinueAsGuestButtonAction()
     {
         claimNamePanel.SetActive(false);
-
         claimNamePanelClosed = true;
     }
 }

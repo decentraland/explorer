@@ -1,17 +1,15 @@
-﻿using UnityEngine;
+using UnityEngine;
 
-public class GenesisPlazaStageController : TutorialStageController
+public class GenesisPlazaStep : TutorialStep
 {
     const int NOTIFICATION_DURATION = 5;
 
-    public override void OnStageStart()
+    public override void OnStepStart()
     {
-        base.OnStageStart();
+        base.OnStepStart();
 
-        // NOTE: we should probably remove this toast when proper system for wellcome toast is created
+        // NOTE: we should probably remove this toast when proper system for welcome toast is created
         ShowWelcomeToast();
-
-        TutorialController.i?.SetRunningStageFinished();
     }
 
     private void ShowWelcomeToast()
@@ -19,6 +17,7 @@ public class GenesisPlazaStageController : TutorialStageController
         string notificationText = $"Welcome, {UserProfile.GetOwnUserProfile().userName}!";
         Vector2Int currentCoords = CommonScriptableObjects.playerCoords.Get();
         string parcelName = MinimapMetadata.GetMetadata().GetTile(currentCoords.x, currentCoords.y)?.name;
+
         if (!string.IsNullOrEmpty(parcelName))
         {
             notificationText += $" You are in {parcelName} {currentCoords.x}, {currentCoords.y}";

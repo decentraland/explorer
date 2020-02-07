@@ -15,7 +15,7 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
     public string description => model.description;
     public string email => model.email;
     public AvatarModel avatar => model.avatar;
-    public int tutorialFlagsMask => model.tutorialFlagsMask;
+    public int tutorialStep => model.tutorialFlagsMask;
     internal Dictionary<string, int> inventory = new Dictionary<string, int>();
 
     public Sprite faceSnapshot { get; private set; }

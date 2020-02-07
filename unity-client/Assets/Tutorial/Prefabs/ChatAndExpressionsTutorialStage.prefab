@@ -2541,6 +2541,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 41448174900a4438797700d8c3bd9483, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  stepId: 3
   chatTooltip: {fileID: 942974508925597400}
   avatarExpressionTooltip: {fileID: 4574287604332835822}
   gotoCommandTooltip: {fileID: 5271660113205801817}
