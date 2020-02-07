@@ -153,11 +153,12 @@ const browserInterface = {
 
   MotdConfirmClicked() {
     if ( hasWallet ) {
+      defaultLogger.log('clicked and has Wallet')
       //TODO(Brian): Teleport player to desired location
-      const id = uuid()
-      const chatMessage = `␐goto 10,10`
-      sendPublicChatMessage(id, chatMessage)
+      teleportObservable.notifyObservers({x:10, y:10})
+      ensureTeleportAnimation() //We don't want any delays
     } else {
+      defaultLogger.log('clicked and has not Wallet')
       //TODO(Brian): Open url with wallet instructions
       window.open("http://www.decentraland.org", '_blank')
     }
