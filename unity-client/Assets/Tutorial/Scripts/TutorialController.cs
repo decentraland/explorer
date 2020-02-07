@@ -188,8 +188,8 @@ public class TutorialController : MonoBehaviour
             {
                 HUDController.i?.avatarHud.SetVisibility(false);
                 SetChatVisible(false);
-                // TODO: hide avatar expressions
-                //HUDController.i?.expressionsHud.SetVisibility(false);
+                
+                HUDController.i?.expressionsHud.SetVisibility(false);
             }));
     }
 
