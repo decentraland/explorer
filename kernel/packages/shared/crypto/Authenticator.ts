@@ -28,6 +28,7 @@ export type AuthIdentity = {
   expiration: Date
   authChain: AuthChain
   address: EthAddress
+  hasConnectedWeb3?: boolean
 }
 
 export type AuditInfo = {

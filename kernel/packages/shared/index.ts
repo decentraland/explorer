@@ -106,6 +106,7 @@ async function createAuthIdentity() {
   }
 
   const identity = await Authenticator.initializeAuthChain(address, ephemeral, ephemeralLifespanMinutes, signer)
+  identity.hasConnectedWeb3 = result.successful
 
   return identity
 }
