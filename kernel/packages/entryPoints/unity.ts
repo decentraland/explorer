@@ -8,7 +8,7 @@ import { startUnityParcelLoading, unityInterface } from '../unity-interface/dcl'
 import { initializeUnity } from '../unity-interface/initializer'
 import { experienceStarted } from '../shared/loading/types'
 import { OPEN_AVATAR_EDITOR, NO_MOTD } from '../config/index'
-import { providerFuture } from './ethereum/provider'
+import { providerFuture } from 'shared/ethereum/provider'
 
 const container = document.getElementById('gameContainer')
 
