@@ -172,6 +172,7 @@ public class HUDController : MonoBehaviour
     {
         if (ownUserProfile != null)
             ownUserProfile.OnUpdate -= OwnUserProfileUpdated;
+
         if (avatarHud != null)
         {
             avatarHud.OnEditAvatarPressed -= ShowAvatarEditor;
@@ -181,6 +182,9 @@ public class HUDController : MonoBehaviour
         minimapHud?.Dispose();
         notificationHud?.Dispose();
         avatarEditorHud?.Dispose();
+        expressionsHud?.Dispose();
+        playerInfoCardHudController?.Dispose();
+        welcomeHudController?.Dispose();
     }
 
 #if UNITY_EDITOR

@@ -6,7 +6,7 @@ using UnityEngine.UI;
 public class WelcomeHUDView : MonoBehaviour
 {
     private const string PREFAB_PATH_WITH_WALLET = "WelcomeHUD";
-    private const string PREFAB_PATH_NO_WALLET = "WelcomeHUD";
+    private const string PREFAB_PATH_NO_WALLET = "WelcomeNoWalletHUD";
 
     [SerializeField] internal TextMeshProUGUI headerText1;
     [SerializeField] internal TextMeshProUGUI headerText2;
@@ -37,7 +37,5 @@ public class WelcomeHUDView : MonoBehaviour
 
         closeButton.onClick.RemoveAllListeners();
         closeButton.onClick.AddListener(OnClose);
-
-
     }
 }
