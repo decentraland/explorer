@@ -182,6 +182,12 @@ const browserInterface = {
       case 'ActivateRenderingACK': {
         if (!aborted) {
           worldRunningObservable.notifyObservers(true)
+          defaultLogger.log(`Show Welcome HUD!!!`)
+          unityInterface.ConfigureWelcomeHUD({
+            active: true, 
+            visible: true, 
+            hasWallet: hasWallet,
+          })        
         }
         break
       }

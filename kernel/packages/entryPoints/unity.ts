@@ -4,10 +4,10 @@ import { worldToGrid } from '../atomicHelpers/parcelScenePositions'
 import defaultLogger from '../shared/logger'
 import { signalRendererInitialized } from '../shared/renderer/actions'
 import { lastPlayerPosition, teleportObservable } from '../shared/world/positionThings'
-import { startUnityParcelLoading, unityInterface, hasWallet } from '../unity-interface/dcl'
+import { startUnityParcelLoading, unityInterface } from '../unity-interface/dcl'
 import { initializeUnity } from '../unity-interface/initializer'
 import { experienceStarted } from '../shared/loading/types'
-import { OPEN_AVATAR_EDITOR, NO_MOTD } from '../config/index'
+import { OPEN_AVATAR_EDITOR } from '../config/index'
 
 const container = document.getElementById('gameContainer')
 
@@ -30,17 +30,7 @@ initializeUnity(container)
     global['globalStore'].dispatch(signalRendererInitialized())
     await startUnityParcelLoading()
 
-    if (!NO_MOTD /*&& !NO_TUTORIAL*/)
-    {
 
-      console['error']('called configure!')
-      
-      i.ConfigureWelcomeHUD({
-        active: true, 
-        visible: true, 
-        hasWallet: hasWallet,
-      })
-    }
 
     _.instancedJS
       .then($ => {
