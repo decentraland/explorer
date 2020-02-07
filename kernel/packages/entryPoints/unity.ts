@@ -7,8 +7,7 @@ import { lastPlayerPosition, teleportObservable } from '../shared/world/position
 import { startUnityParcelLoading, unityInterface, hasWallet } from '../unity-interface/dcl'
 import { initializeUnity } from '../unity-interface/initializer'
 import { experienceStarted } from '../shared/loading/types'
-import { OPEN_AVATAR_EDITOR } from '../config/index'
-import { worldRunningObservable } from 'shared/world/worldState'
+import { OPEN_AVATAR_EDITOR, NO_MOTD } from '../config/index'
 
 const container = document.getElementById('gameContainer')
 
@@ -29,18 +28,13 @@ initializeUnity(container)
     i.ConfigurePlayerInfoCardHUD({ active: true, visible: true })
     i.ConfigureAirdroppingHUD({ active: true, visible: true })
 
-    worldRunningObservable.add( _ => {
-      defaultLogger.log(`Show Welcome HUD!!!`)
-      unityInterface.ConfigureWelcomeHUD({
-        active: true,
-        visible: true,
-        hasWallet: hasWallet
-      })
-    })
-
     global['globalStore'].dispatch(signalRendererInitialized())
     await startUnityParcelLoading()
 
+    if (!NO_MOTD) {
+      i.ConfigureWelcomeHUD({active: true, visible: true, hasWallet: hasWallet})
+    }
+  
     _.instancedJS
       .then($ => {
         teleportObservable.notifyObservers(worldToGrid(lastPlayerPosition))
