@@ -4,11 +4,10 @@ import { worldToGrid } from '../atomicHelpers/parcelScenePositions'
 import defaultLogger from '../shared/logger'
 import { signalRendererInitialized } from '../shared/renderer/actions'
 import { lastPlayerPosition, teleportObservable } from '../shared/world/positionThings'
-import { startUnityParcelLoading, unityInterface } from '../unity-interface/dcl'
+import { startUnityParcelLoading, unityInterface, hasWallet } from '../unity-interface/dcl'
 import { initializeUnity } from '../unity-interface/initializer'
 import { experienceStarted } from '../shared/loading/types'
 import { OPEN_AVATAR_EDITOR, NO_MOTD } from '../config/index'
-import { providerFuture } from 'shared/ethereum/provider'
 
 const container = document.getElementById('gameContainer')
 
@@ -33,8 +32,6 @@ initializeUnity(container)
 
     if (!NO_MOTD /*&& !NO_TUTORIAL*/)
     {
-      const p = await providerFuture
-      const hasWallet:boolean = p.successful
 
       console['error']('called configure!')
       
@@ -42,7 +39,6 @@ initializeUnity(container)
         active: true, 
         visible: true, 
         hasWallet: hasWallet,
-        buttonCommand: hasWallet ? "goto 10,10" : "",
       })
     }
 

@@ -80,6 +80,7 @@ import { hudWorkerUrl, SceneWorker } from '../shared/world/SceneWorker'
 import { ensureUiApis } from '../shared/world/uiSceneInitializer'
 import { worldRunningObservable } from '../shared/world/worldState'
 import { sendPublicChatMessage } from 'shared/comms'
+import { providerFuture } from 'shared/ethereum/provider'
 
 const rendererVersion = require('decentraland-renderer')
 window['console'].log('Renderer version: ' + rendererVersion)
@@ -87,6 +88,7 @@ window['console'].log('Renderer version: ' + rendererVersion)
 let gameInstance!: GameInstance
 
 export let futures: Record<string, IFuture<any>> = {}
+export let hasWallet:boolean = false
 
 const positionEvent = {
   position: Vector3.Zero(),
@@ -149,10 +151,16 @@ const browserInterface = {
     sendPublicChatMessage(id, chatMessage)
   },
 
-  TriggerChatCommand(data: { command: string }) {
-    const id = uuid()
-    const chatMessage = `␐${data.command}`
-    sendPublicChatMessage(id, chatMessage)
+  MotdConfirmClicked() {
+    if ( hasWallet ) {
+      //TODO(Brian): Teleport player to desired location
+      const id = uuid()
+      const chatMessage = `␐goto 10,10`
+      sendPublicChatMessage(id, chatMessage)
+    } else {
+      //TODO(Brian): Open url with wallet instructions
+      window.open("http://www.decentraland.org", '_blank')
+    }
   },
 
   LogOut() {
@@ -710,6 +718,10 @@ export async function initializeEngine(_gameInstance: GameInstance) {
 }
 
 export async function startUnityParcelLoading() {
+
+  const p = await providerFuture
+  hasWallet = p.successful
+
   global['globalStore'].dispatch(loadingScenes())
   await enableParcelSceneLoading({
     parcelSceneClass: UnityParcelScene,

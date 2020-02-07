@@ -350,7 +350,6 @@ export type HUDConfiguration = {
 
 export type WelcomeHUDControllerModel = HUDConfiguration & {
   hasWallet: boolean
-  buttonCommand: string
 }
 
 export function normalizeContentMappings(

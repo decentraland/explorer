@@ -33,7 +33,7 @@ public class WelcomeHUDController : IHUD, System.IDisposable
     void OnConfirmPressed()
     {
         if (model != null && !string.IsNullOrEmpty(model.buttonCommand))
-            WebInterface.SendChatCommand(model.buttonCommand);
+            WebInterface.SendMotdClick(model.buttonCommand);
 
         Close();
     }
