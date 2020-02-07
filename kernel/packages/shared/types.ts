@@ -349,14 +349,8 @@ export type HUDConfiguration = {
 }
 
 export type WelcomeHUDControllerModel = HUDConfiguration & {
-  title: string
-  timeTarget: number
-  timeText: string
-  showTime: boolean
-  bodyText: string
-  buttonText: string
-  buttonAction: string
-  showButton: boolean
+  hasWallet: boolean
+  buttonCommand: string
 }
 
 export function normalizeContentMappings(
