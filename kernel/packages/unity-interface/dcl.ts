@@ -151,7 +151,7 @@ const browserInterface = {
     sendPublicChatMessage(id, chatMessage)
   },
 
-  TermsOfServiceResponse(payload: string) {
+  TermsOfServiceResponse(sceneId: string, accepted: boolean, dontShowAgain: boolean) {
     // TODO
   },
 
