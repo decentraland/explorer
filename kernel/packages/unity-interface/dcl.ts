@@ -88,7 +88,7 @@ window['console'].log('Renderer version: ' + rendererVersion)
 let gameInstance!: GameInstance
 
 export let futures: Record<string, IFuture<any>> = {}
-export let hasWallet:boolean = false
+export let hasWallet: boolean = false
 
 const positionEvent = {
   position: Vector3.Zero(),
@@ -152,15 +152,15 @@ const browserInterface = {
   },
 
   MotdConfirmClicked() {
-    if ( hasWallet ) {
+    if (hasWallet) {
       defaultLogger.log('clicked and has Wallet')
       //TODO(Brian): Teleport player to desired location
-      teleportObservable.notifyObservers({x:10, y:10})
+      teleportObservable.notifyObservers({ x: 10, y: 10 })
       ensureTeleportAnimation() //We don't want any delays
     } else {
       defaultLogger.log('clicked and has not Wallet')
       //TODO(Brian): Open url with wallet instructions
-      window.open("http://www.decentraland.org", '_blank')
+      window.open('http://www.decentraland.org', '_blank')
     }
   },
 
@@ -184,10 +184,10 @@ const browserInterface = {
           worldRunningObservable.notifyObservers(true)
           defaultLogger.log(`Show Welcome HUD!!!`)
           unityInterface.ConfigureWelcomeHUD({
-            active: true, 
-            visible: true, 
-            hasWallet: hasWallet,
-          })        
+            active: true,
+            visible: true,
+            hasWallet: hasWallet
+          })
         }
         break
       }
@@ -725,7 +725,6 @@ export async function initializeEngine(_gameInstance: GameInstance) {
 }
 
 export async function startUnityParcelLoading() {
-
   const p = await providerFuture
   hasWallet = p.successful
 
