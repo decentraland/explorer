@@ -1,4 +1,4 @@
-﻿using DCL.Controllers;
+using DCL.Controllers;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -21,7 +21,7 @@ public class TutorialController : MonoBehaviour
     [Header("Stage Controller References")]
     [SerializeField] List<TutorialStep> steps = new List<TutorialStep>();
 
-    public bool isTutorialEnabled { private set; get; }
+    public bool isTutorialEnabled { private set; get; } = false;
 
     private TutorialStep runningStep = null;
 

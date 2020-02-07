@@ -129,6 +129,7 @@ namespace DCL
         public bool forceLocalComms = true;
         public bool allWearables = false;
         public bool testWearables = false;
+        public bool enableTutorial = false;
         public DebugPanel debugPanelMode = DebugPanel.Off;
 
 
@@ -193,6 +194,11 @@ namespace DCL
                 if (testWearables)
                 {
                     debugString += "TEST_WEARABLES&";
+                }
+
+                if (enableTutorial)
+                {
+                    debugString += "TUTORIAL_ENABLED&";
                 }
 
                 string debugPanelString = "";
