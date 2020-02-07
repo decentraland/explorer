@@ -89,11 +89,8 @@ import { hudWorkerUrl, SceneWorker } from '../shared/world/SceneWorker'
 import { ensureUiApis } from '../shared/world/uiSceneInitializer'
 import { worldRunningObservable } from '../shared/world/worldState'
 import { sendPublicChatMessage } from 'shared/comms'
-<<<<<<< HEAD
 import { providerFuture } from 'shared/ethereum/provider'
-=======
 import { AirdropInfo } from '../shared/airdrops/interface'
->>>>>>> origin/master
 
 const rendererVersion = require('decentraland-renderer')
 window['console'].log('Renderer version: ' + rendererVersion)
@@ -495,36 +492,6 @@ export const unityInterface = {
   }
 }
 
-<<<<<<< HEAD
-=======
-export const HUD: Record<string, { configure: (config: HUDConfiguration) => void }> = {
-  Minimap: {
-    configure: unityInterface.ConfigureMinimapHUD
-  },
-  Avatar: {
-    configure: unityInterface.ConfigureAvatarHUD
-  },
-  Notification: {
-    configure: unityInterface.ConfigureNotificationHUD
-  },
-  AvatarEditor: {
-    configure: unityInterface.ConfigureAvatarEditorHUD
-  },
-  Settings: {
-    configure: unityInterface.ConfigureSettingsHUD
-  },
-  Expressions: {
-    configure: unityInterface.ConfigureExpressionsHUD
-  },
-  PlayerInfoCard: {
-    configure: unityInterface.ConfigurePlayerInfoCardHUD
-  },
-  Airdropping: {
-    configure: unityInterface.ConfigureAirdroppingHUD
-  }
-}
-
->>>>>>> origin/master
 window['unityInterface'] = unityInterface
 
 ////////////////////////////////////////////////////////////////////////////////
