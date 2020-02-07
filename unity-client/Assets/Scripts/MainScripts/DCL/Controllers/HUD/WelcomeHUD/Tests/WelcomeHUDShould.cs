@@ -11,6 +11,13 @@ namespace Tests
         {
             yield return base.SetUp();
             controller = new WelcomeHUDController();
+            var model = new WelcomeHUDController.Model()
+            {
+                hasWallet = true
+            };
+
+            controller.Initialize(model);
+
         }
 
         [Test]
@@ -19,16 +26,6 @@ namespace Tests
             Assert.IsTrue(controller.view != null);
         }
 
-
-        [Test]
-        public void InitializeProperly()
-        {
-            var model = new WelcomeHUDController.Model()
-            {
-            };
-
-            controller.Initialize(model);
-        }
 
         [Test]
         public void BehaveCorrectlyAfterCloseButtonIsPressed()

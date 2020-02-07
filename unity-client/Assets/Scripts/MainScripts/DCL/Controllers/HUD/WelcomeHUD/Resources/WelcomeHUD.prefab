@@ -1521,7 +1521,7 @@ MonoBehaviour:
   bodyText: {fileID: 8770107369796237161}
   buttonText: {fileID: 7269995752444823530}
   confirmButton: {fileID: 1490051284745691936}
-  closeButton: {fileID: 0}
+  closeButton: {fileID: 916383246060685275}
 --- !u!1 &7518747613420448183
 GameObject:
   m_ObjectHideFlags: 0
