@@ -8,7 +8,6 @@ public class WelcomeHUDController : IHUD, System.IDisposable
     public class Model : HUDConfiguration
     {
         public bool hasWallet;
-        public string buttonCommand;
     }
 
     internal WelcomeHUDView view;
@@ -32,8 +31,8 @@ public class WelcomeHUDController : IHUD, System.IDisposable
 
     void OnConfirmPressed()
     {
-        if (model != null && !string.IsNullOrEmpty(model.buttonCommand))
-            WebInterface.SendMotdClick(model.buttonCommand);
+        if (model != null)
+            WebInterface.ReportMotdClicked();
 
         Close();
     }
