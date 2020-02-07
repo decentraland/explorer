@@ -27,6 +27,7 @@ initializeUnity(container)
     i.ConfigureSettingsHUD({ active: true, visible: false })
     i.ConfigureExpressionsHUD({ active: true, visible: true })
     i.ConfigurePlayerInfoCardHUD({ active: true, visible: true })
+    i.ConfigureAirdroppingHUD({ active: true, visible: true })
 
     worldRunningObservable.add( _ => {
       defaultLogger.log(`Show Welcome HUD!!!`)

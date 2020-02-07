@@ -12,7 +12,15 @@ import { Empty } from 'google-protobuf/google/protobuf/empty_pb'
 import { avatarMessageObservable } from 'shared/comms/peers'
 import { AvatarMessageType } from 'shared/comms/interface/types'
 import { gridToWorld } from '../atomicHelpers/parcelScenePositions'
-import { DEBUG, EDITOR, ENGINE_DEBUG_PANEL, playerConfigurations, SCENE_DEBUG_PANEL, SHOW_FPS_COUNTER } from '../config'
+import {
+  DEBUG,
+  EDITOR,
+  ENGINE_DEBUG_PANEL,
+  playerConfigurations,
+  SCENE_DEBUG_PANEL,
+  SHOW_FPS_COUNTER,
+  TUTORIAL_ENABLED
+} from '../config'
 import { Quaternion, ReadOnlyQuaternion, ReadOnlyVector3, Vector3 } from '../decentraland-ecs/src/decentraland/math'
 import { IEventNames, IEvents, ProfileForRenderer } from '../decentraland-ecs/src/decentraland/Types'
 import { sceneLifeCycleObservable } from '../decentraland-loader/lifecycle/controllers/scene'
@@ -24,6 +32,7 @@ import { aborted } from '../shared/loading/ReportFatalError'
 import { loadingScenes, teleportTriggered, unityClientLoaded } from '../shared/loading/types'
 import { createLogger, defaultLogger, ILogger } from '../shared/logger'
 import { saveAvatarRequest } from '../shared/passports/actions'
+import { airdropObservable } from '../shared/apis/AirdropController'
 import { Avatar, Wearable } from '../shared/passports/types'
 import {
   PB_AttachEntityComponent,
@@ -80,12 +89,17 @@ import { hudWorkerUrl, SceneWorker } from '../shared/world/SceneWorker'
 import { ensureUiApis } from '../shared/world/uiSceneInitializer'
 import { worldRunningObservable } from '../shared/world/worldState'
 import { sendPublicChatMessage } from 'shared/comms'
+<<<<<<< HEAD
 import { providerFuture } from 'shared/ethereum/provider'
+=======
+import { AirdropInfo } from '../shared/airdrops/interface'
+>>>>>>> origin/master
 
 const rendererVersion = require('decentraland-renderer')
 window['console'].log('Renderer version: ' + rendererVersion)
 
 let gameInstance!: GameInstance
+let isTheFirstLoading = true
 
 export let futures: Record<string, IFuture<any>> = {}
 export let hasWallet: boolean = false
@@ -200,6 +214,10 @@ const browserInterface = {
     futures[data.id].resolve(data.cameraTarget)
   },
 
+  UserAcceptedCollectibles(data: { id: string }) {
+    airdropObservable.notifyObservers(data.id)
+  },
+
   EditAvatarClicked() {
     delightedSurvey()
   }
@@ -210,13 +228,14 @@ export function setLoadingScreenVisible(shouldShow: boolean) {
   document.getElementById('load-messages-wrapper')!.style.display = shouldShow ? 'block' : 'none'
   document.getElementById('progress-bar')!.style.display = shouldShow ? 'block' : 'none'
   if (!shouldShow) {
+    isTheFirstLoading = false
     stopTeleportAnimation()
   }
 }
 
 function delightedSurvey() {
   const { analytics, delighted, globalStore } = global
-  if (analytics && delighted && globalStore) {
+  if (!isTheFirstLoading && analytics && delighted && globalStore) {
     const email = ''
     const payload = {
       email: email,
@@ -410,12 +429,21 @@ export const unityInterface = {
   ConfigureWelcomeHUD(configuration: WelcomeHUDControllerModel) {
     gameInstance.SendMessage('HUDController', 'ConfigureWelcomeHUD', JSON.stringify(configuration))
   },
+  ConfigureAirdroppingHUD(configuration: HUDConfiguration) {
+    gameInstance.SendMessage('HUDController', 'ConfigureAirdroppingHUD', JSON.stringify(configuration))
+  },
   UpdateMinimapSceneInformation(info: { name: string; type: number; parcels: { x: number; y: number }[] }[]) {
     const chunks = chunkGenerator(CHUNK_SIZE, info)
 
     for (const chunk of chunks) {
       gameInstance.SendMessage('SceneController', 'UpdateMinimapSceneInformation', JSON.stringify(chunk))
     }
+  },
+  SetTutorialEnabled() {
+    gameInstance.SendMessage('TutorialController', 'SetTutorialEnabled')
+  },
+  TriggerAirdropDisplay(data: AirdropInfo) {
+    gameInstance.SendMessage('HUDController', 'AirdroppingRequest', JSON.stringify(data))
   },
   SelectGizmoBuilder(type: string) {
     this.SendBuilderMessage('SelectGizmo', type)
@@ -467,6 +495,36 @@ export const unityInterface = {
   }
 }
 
+<<<<<<< HEAD
+=======
+export const HUD: Record<string, { configure: (config: HUDConfiguration) => void }> = {
+  Minimap: {
+    configure: unityInterface.ConfigureMinimapHUD
+  },
+  Avatar: {
+    configure: unityInterface.ConfigureAvatarHUD
+  },
+  Notification: {
+    configure: unityInterface.ConfigureNotificationHUD
+  },
+  AvatarEditor: {
+    configure: unityInterface.ConfigureAvatarEditorHUD
+  },
+  Settings: {
+    configure: unityInterface.ConfigureSettingsHUD
+  },
+  Expressions: {
+    configure: unityInterface.ConfigureExpressionsHUD
+  },
+  PlayerInfoCard: {
+    configure: unityInterface.ConfigurePlayerInfoCardHUD
+  },
+  Airdropping: {
+    configure: unityInterface.ConfigureAirdroppingHUD
+  }
+}
+
+>>>>>>> origin/master
 window['unityInterface'] = unityInterface
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -702,6 +760,11 @@ export async function initializeEngine(_gameInstance: GameInstance) {
   if (ENGINE_DEBUG_PANEL) {
     unityInterface.SetEngineDebugPanel()
   }
+
+  if (TUTORIAL_ENABLED) {
+    unityInterface.SetTutorialEnabled()
+  }
+
   if (!EDITOR) {
     await initializeDecentralandUI()
   }
@@ -710,7 +773,7 @@ export async function initializeEngine(_gameInstance: GameInstance) {
     onMessage(type: string, message: any) {
       if (type in browserInterface) {
         // tslint:disable-next-line:semicolon
-        ;(browserInterface as any)[type](message)
+        ; (browserInterface as any)[type](message)
       } else {
         defaultLogger.info(`Unknown message (did you forget to add ${type} to unity-interface/dcl.ts?)`, message)
       }

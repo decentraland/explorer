@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using DCL.SettingsHUD;
 
@@ -18,6 +19,7 @@ public class HUDController : MonoBehaviour
     public ExpressionsHUDController expressionsHud { get; private set; }
     public PlayerInfoCardHUDController playerInfoCardHudController { get; private set; }
     public WelcomeHUDController welcomeHudController { get; private set; }
+    public AirdroppingHUDController airdroppingHUDController { get; private set; }
 
     private UserProfile ownUserProfile => UserProfile.GetOwnUserProfile();
     private WearableDictionary wearableCatalog => CatalogController.wearableCatalog;
@@ -117,9 +119,6 @@ public class HUDController : MonoBehaviour
 
     public void ConfigureExpressionsHUD(string configurationJson)
     {
-        if (!UserProfile.ENABLE_EXPRESSIONS)
-            return;
-
         HUDConfiguration configuration = JsonUtility.FromJson<HUDConfiguration>(configurationJson);
         if (configuration.active && expressionsHud == null)
         {
@@ -156,6 +155,23 @@ public class HUDController : MonoBehaviour
         }
 
         welcomeHudController?.SetVisibility(configuration.active && configuration.visible);
+    }
+
+    public void ConfigureAirdroppingHUD(string configurationJson)
+    {
+        HUDConfiguration configuration = JsonUtility.FromJson<HUDConfiguration>(configurationJson);
+        if (configuration.active && airdroppingHUDController == null)
+        {
+            airdroppingHUDController = new AirdroppingHUDController();
+        }
+
+        airdroppingHUDController?.SetVisibility(configuration.active && configuration.visible);
+    }
+
+    public void AirdroppingRequest(string payload)
+    {
+        var model = JsonUtility.FromJson<AirdroppingHUDController.Model>(payload);
+        airdroppingHUDController.AirdroppingRequested(model);
     }
 
     private void UpdateAvatarHUD()
