@@ -12,6 +12,7 @@ import { ILand } from 'shared/types'
 import { DEBUG, parcelLimits, getServerConfigurations, ENABLE_EMPTY_SCENES } from '../../config'
 import { getFetchContentServer } from '../../shared/dao/selectors'
 import { Store } from 'redux'
+import { TUTORIAL_ENABLED } from '../../config/index'
 
 /*
  * The worker is set up on the first require of this file
@@ -66,7 +67,8 @@ export async function initParcelSceneWorker() {
     lineOfSightRadius: parcelLimits.visibleRadius,
     secureRadius: parcelLimits.secureRadius,
     emptyScenes: ENABLE_EMPTY_SCENES && !(globalThis as any)['isRunningTests'],
-    tutorialBaseURL: getTutorialBaseURL()
+    tutorialBaseURL: getTutorialBaseURL(),
+    tutorialEnabled: TUTORIAL_ENABLED
   })
 
   return server

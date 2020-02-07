@@ -1,16 +1,21 @@
 import { ILand } from 'shared/types'
 import { Vector2Component } from 'atomicHelpers/landHelpers'
-import { TUTORIAL_ENABLED } from 'config'
 
 const tutorialSceneContents = require('./tutorialSceneContents.json')
 
 export const TUTORIAL_SCENE_COORDS = { x: 200, y: 200 }
 export const TUTORIAL_SCENE_ID = 'TutorialScene'
 
+export let _tutorialEnabled = false
+
+export function setTutorialEnabled(v: boolean) {
+  _tutorialEnabled = v
+}
+
 let teleportCount: number = 0
 
 export function isTutorial(): boolean {
-  return teleportCount <= 1 && TUTORIAL_ENABLED
+  return teleportCount <= 1 && _tutorialEnabled
 }
 
 export function onTutorialTeleport() {
