@@ -24,6 +24,7 @@ import { aborted } from '../shared/loading/ReportFatalError'
 import { loadingScenes, teleportTriggered, unityClientLoaded } from '../shared/loading/types'
 import { createLogger, defaultLogger, ILogger } from '../shared/logger'
 import { saveAvatarRequest } from '../shared/passports/actions'
+import { airdropObservable } from '../shared/apis/AirdropController'
 import { Avatar, Wearable } from '../shared/passports/types'
 import {
   PB_AttachEntityComponent,
@@ -81,11 +82,13 @@ import { worldRunningObservable } from '../shared/world/worldState'
 import { sendPublicChatMessage } from 'shared/comms'
 import { getProfile } from 'shared/passports/selectors'
 import { identity } from 'shared'
+import { AirdropInfo } from '../shared/airdrops/interface'
 
 const rendererVersion = require('decentraland-renderer')
 window['console'].log('Renderer version: ' + rendererVersion)
 
 let gameInstance!: GameInstance
+let isTheFirstLoading = true
 
 export let futures: Record<string, IFuture<any>> = {}
 
@@ -186,6 +189,10 @@ const browserInterface = {
     futures[data.id].resolve(data.cameraTarget)
   },
 
+  UserAcceptedCollectibles(data: { id: string }) {
+    airdropObservable.notifyObservers(data.id)
+  },
+
   EditAvatarClicked() {
     delightedSurvey()
   },
@@ -218,13 +225,14 @@ export function setLoadingScreenVisible(shouldShow: boolean) {
   document.getElementById('load-messages-wrapper')!.style.display = shouldShow ? 'block' : 'none'
   document.getElementById('progress-bar')!.style.display = shouldShow ? 'block' : 'none'
   if (!shouldShow) {
+    isTheFirstLoading = false
     stopTeleportAnimation()
   }
 }
 
 function delightedSurvey() {
   const { analytics, delighted, globalStore } = global
-  if (analytics && delighted && globalStore) {
+  if (!isTheFirstLoading && analytics && delighted && globalStore) {
     const email = ''
     const payload = {
       email: email,
@@ -415,12 +423,18 @@ export const unityInterface = {
   ConfigurePlayerInfoCardHUD(configuration: HUDConfiguration) {
     gameInstance.SendMessage('HUDController', 'ConfigurePlayerInfoCardHUD', JSON.stringify(configuration))
   },
+  ConfigureAirdroppingHUD(configuration: HUDConfiguration) {
+    gameInstance.SendMessage('HUDController', 'ConfigureAirdroppingHUD', JSON.stringify(configuration))
+  },
   UpdateMinimapSceneInformation(info: { name: string; type: number; parcels: { x: number; y: number }[] }[]) {
     const chunks = chunkGenerator(CHUNK_SIZE, info)
 
     for (const chunk of chunks) {
       gameInstance.SendMessage('SceneController', 'UpdateMinimapSceneInformation', JSON.stringify(chunk))
     }
+  },
+  TriggerAirdropDisplay(data: AirdropInfo) {
+    gameInstance.SendMessage('HUDController', 'AirdroppingRequest', JSON.stringify(data))
   },
   SelectGizmoBuilder(type: string) {
     this.SendBuilderMessage('SelectGizmo', type)
@@ -493,6 +507,9 @@ export const HUD: Record<string, { configure: (config: HUDConfiguration) => void
   },
   PlayerInfoCard: {
     configure: unityInterface.ConfigurePlayerInfoCardHUD
+  },
+  Airdropping: {
+    configure: unityInterface.ConfigureAirdroppingHUD
   }
 }
 
