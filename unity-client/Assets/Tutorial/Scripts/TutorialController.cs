@@ -1,4 +1,4 @@
-using DCL.Controllers;
+﻿using DCL.Controllers;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -13,8 +13,8 @@ public class TutorialController : MonoBehaviour
 
 #if UNITY_EDITOR
     [Header("Debugging")]
-    public int debugFlagStartingValue = 0;
     public bool debugRunTutorialOnStart = false;
+    public TutorialStep.Id debugFlagStartingValue;
     [Space()]
 #endif
 
@@ -128,7 +128,7 @@ public class TutorialController : MonoBehaviour
 #if UNITY_EDITOR
         if (debugFlagStartingValue != 0)
         {
-            currentTutorialStep = debugFlagStartingValue;
+            currentTutorialStep = (int)debugFlagStartingValue;
         }
 #endif
         if (currentTutorialStep == (int)TutorialStep.Id.FINISHED)

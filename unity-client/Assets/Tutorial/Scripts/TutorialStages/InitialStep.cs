@@ -21,6 +21,8 @@ public class InitialStep : TutorialStep
         base.OnStepStart();
 
         HUDController.i?.minimapHud.SetVisibility(false);
+        HUDController.i?.expressionsHud.SetVisibility(false);
+        TutorialController.i.SetChatVisible(false);
 
         DCLCharacterController.OnPositionSet += OnTeleport;
         DCLCharacterController.OnCharacterMoved += OnCharacterMove;
@@ -43,7 +45,6 @@ public class InitialStep : TutorialStep
         base.OnStepFinished();
         DCLCharacterController.OnPositionSet -= OnTeleport;
         DCLCharacterController.OnCharacterMoved -= OnCharacterMove;
-        HUDController.i?.minimapHud.SetVisibility(true);
     }
 
     public override IEnumerator OnStepExecute()

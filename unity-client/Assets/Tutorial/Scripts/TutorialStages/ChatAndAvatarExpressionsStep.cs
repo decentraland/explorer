@@ -12,8 +12,8 @@ public class ChatAndAvatarExpressionsStep : TutorialStep
     public override void OnStepStart()
     {
         base.OnStepStart();
+
         HUDController.i?.avatarHud.SetVisibility(false);
-        TutorialController.i.SetChatVisible(false);
         HUDController.i?.expressionsHud.SetVisibility(false);
     }
 
