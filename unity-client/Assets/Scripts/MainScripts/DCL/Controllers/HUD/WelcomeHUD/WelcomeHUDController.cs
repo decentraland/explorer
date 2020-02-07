@@ -7,7 +7,7 @@ public class WelcomeHUDController : IHUD, System.IDisposable
     [System.Serializable]
     public class Model : HUDConfiguration
     {
-        public bool hasWallet;
+        public bool hasWallet; //TODO(Brian): Use WEB3 param in userProfile
     }
 
     internal WelcomeHUDView view;
