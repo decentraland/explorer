@@ -408,7 +408,7 @@ export const unityInterface = {
   },
   ConfigureTermsOfServiceHUD(configuration: HUDConfiguration) {
     gameInstance.SendMessage('HUDController', 'ConfigureTermsOfServiceHUD', JSON.stringify(configuration))
-  },  
+  },
   UpdateMinimapSceneInformation(info: { name: string; type: number; parcels: { x: number; y: number }[] }[]) {
     const chunks = chunkGenerator(CHUNK_SIZE, info)
 
