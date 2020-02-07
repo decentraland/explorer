@@ -7,8 +7,6 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "UserProfile", menuName = "UserProfile")]
 public class UserProfile : ScriptableObject //TODO Move to base variable
 {
-    public const bool ENABLE_EXPRESSIONS = false;
-    
     static DateTime epochStart = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
     public event Action<UserProfile> OnUpdate;
@@ -59,9 +57,9 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
 
         if (downloadAssets && model.snapshots != null)
         {
-            if(model.snapshots.face != null)
+            if (model.snapshots.face != null)
                 ThumbnailsManager.RequestThumbnail(model.snapshots.face, OnFaceSnapshotReady);
-            if(model.snapshots.body != null)
+            if (model.snapshots.body != null)
                 ThumbnailsManager.RequestThumbnail(model.snapshots.body, OnBodySnapshotReady);
         }
 
@@ -92,10 +90,10 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
     {
         if (model?.snapshots != null)
         {
-            if(model.snapshots.face != null)
+            if (model.snapshots.face != null)
                 ThumbnailsManager.CancelRequest(model.snapshots.face, OnFaceSnapshotReady);
 
-            if(model.snapshots.body != null)
+            if (model.snapshots.body != null)
                 ThumbnailsManager.CancelRequest(model.snapshots.body, OnBodySnapshotReady);
         }
 
@@ -107,9 +105,6 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
 
     public void SetAvatarExpression(string id)
     {
-        if (!ENABLE_EXPRESSIONS)
-            return;
-        
         var timestamp = (long)(DateTime.UtcNow - epochStart).TotalMilliseconds;
         avatar.expressionTriggerId = id;
         avatar.expressionTriggerTimestamp = timestamp;
