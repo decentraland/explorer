@@ -154,12 +154,12 @@ const browserInterface = {
   MotdConfirmClicked() {
     if (hasWallet) {
       defaultLogger.log('clicked and has Wallet')
-      //TODO(Brian): Teleport player to desired location
+      // TODO(Brian): Teleport player to desired location
       teleportObservable.notifyObservers({ x: 10, y: 10 })
       ensureTeleportAnimation() //We don't want any delays
     } else {
       defaultLogger.log('clicked and has not Wallet')
-      //TODO(Brian): Open url with wallet instructions
+      // TODO(Brian): Open url with wallet instructions
       window.open('http://www.decentraland.org', '_blank')
     }
   },
@@ -182,12 +182,6 @@ const browserInterface = {
       case 'ActivateRenderingACK': {
         if (!aborted) {
           worldRunningObservable.notifyObservers(true)
-          defaultLogger.log(`Show Welcome HUD!!!`)
-          unityInterface.ConfigureWelcomeHUD({
-            active: true,
-            visible: true,
-            hasWallet: hasWallet
-          })
         }
         break
       }

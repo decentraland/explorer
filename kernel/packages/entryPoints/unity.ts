@@ -4,10 +4,11 @@ import { worldToGrid } from '../atomicHelpers/parcelScenePositions'
 import defaultLogger from '../shared/logger'
 import { signalRendererInitialized } from '../shared/renderer/actions'
 import { lastPlayerPosition, teleportObservable } from '../shared/world/positionThings'
-import { startUnityParcelLoading, unityInterface } from '../unity-interface/dcl'
+import { startUnityParcelLoading, unityInterface, hasWallet } from '../unity-interface/dcl'
 import { initializeUnity } from '../unity-interface/initializer'
 import { experienceStarted } from '../shared/loading/types'
 import { OPEN_AVATAR_EDITOR } from '../config/index'
+import { worldRunningObservable } from 'shared/world/worldState'
 
 const container = document.getElementById('gameContainer')
 
@@ -27,10 +28,17 @@ initializeUnity(container)
     i.ConfigureExpressionsHUD({ active: true, visible: true })
     i.ConfigurePlayerInfoCardHUD({ active: true, visible: true })
 
+    worldRunningObservable.add( _ => {
+      defaultLogger.log(`Show Welcome HUD!!!`)
+      unityInterface.ConfigureWelcomeHUD({
+        active: true,
+        visible: true,
+        hasWallet: hasWallet
+      })
+    })
+
     global['globalStore'].dispatch(signalRendererInitialized())
     await startUnityParcelLoading()
-
-
 
     _.instancedJS
       .then($ => {
