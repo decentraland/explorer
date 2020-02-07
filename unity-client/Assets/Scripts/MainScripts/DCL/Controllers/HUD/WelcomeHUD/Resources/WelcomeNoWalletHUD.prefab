@@ -1496,7 +1496,7 @@ GameObject:
   - component: {fileID: -6954348935225576268}
   - component: {fileID: 8585819732224171084}
   m_Layer: 0
-  m_Name: WelcomeNonCryptoHUD
+  m_Name: WelcomeNoWalletHUD
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
