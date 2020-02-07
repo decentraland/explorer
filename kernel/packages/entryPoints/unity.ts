@@ -8,6 +8,7 @@ import { startUnityParcelLoading, unityInterface } from '../unity-interface/dcl'
 import { initializeUnity } from '../unity-interface/initializer'
 import { experienceStarted } from '../shared/loading/types'
 import { OPEN_AVATAR_EDITOR, NO_MOTD } from '../config/index'
+import { providerFuture } from './ethereum/provider'
 
 const container = document.getElementById('gameContainer')
 
@@ -27,28 +28,23 @@ initializeUnity(container)
     i.ConfigureExpressionsHUD({ active: true, visible: true })
     i.ConfigurePlayerInfoCardHUD({ active: true, visible: true })
 
-    if (!NO_MOTD)
+    global['globalStore'].dispatch(signalRendererInitialized())
+    await startUnityParcelLoading()
+
+    if (!NO_MOTD /*&& !NO_TUTORIAL*/)
     {
-      //NOTE(Brian): This flow is momentarily deactivated until we find out some way
-      //             of getting it externally with the sole exception of buttonAction.
-      //
-      //             For now, the HUD visuals will be hardcoded in the WelcomeHUD Unity prefab.
+      const p = await providerFuture
+      const hasWallet:boolean = p.successful
+
+      console['error']('called configure!')
+      
       i.ConfigureWelcomeHUD({
         active: true, 
         visible: true, 
-        title: "",
-        timeTarget: 0,
-        timeText: "",
-        showTime: true,
-        bodyText: "",
-        buttonText: "",
-        buttonAction: "goto 10,10",
-        showButton: true,
+        hasWallet: hasWallet,
+        buttonCommand: hasWallet ? "goto 10,10" : "",
       })
     }
-
-    global['globalStore'].dispatch(signalRendererInitialized())
-    await startUnityParcelLoading()
 
     _.instancedJS
       .then($ => {

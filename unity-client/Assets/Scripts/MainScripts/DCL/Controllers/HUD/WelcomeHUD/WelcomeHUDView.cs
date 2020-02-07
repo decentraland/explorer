@@ -1,10 +1,12 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 
 public class WelcomeHUDView : MonoBehaviour
 {
-    private const string PREFAB_PATH = "WelcomeHUD";
+    private const string PREFAB_PATH_WITH_WALLET = "WelcomeHUD";
+    private const string PREFAB_PATH_NO_WALLET = "WelcomeHUD";
 
     [SerializeField] internal TextMeshProUGUI headerText1;
     [SerializeField] internal TextMeshProUGUI headerText2;
@@ -13,22 +15,29 @@ public class WelcomeHUDView : MonoBehaviour
 
     [SerializeField] internal Button confirmButton;
     [SerializeField] internal Button closeButton;
-    public static WelcomeHUDView CreateView()
+    public static WelcomeHUDView CreateView(bool hasWallet)
     {
-        return Instantiate(Resources.Load<GameObject>(PREFAB_PATH)).GetComponent<WelcomeHUDView>();
+        GameObject prefab;
+
+        if (hasWallet)
+            prefab = Resources.Load<GameObject>(PREFAB_PATH_WITH_WALLET);
+        else
+            prefab = Resources.Load<GameObject>(PREFAB_PATH_NO_WALLET);
+
+        return Instantiate(prefab).GetComponent<WelcomeHUDView>();
     }
 
-    public void Initialize(WelcomeHUDController.Model model)
+    public void Initialize(WelcomeHUDController.Model model, UnityAction OnConfirm, UnityAction OnClose)
     {
         if (model == null)
             return;
 
-        headerText1.text = model.title;
-        headerText2.text = model.timeText;
-        bodyText.text = model.bodyText;
-        buttonText.text = model.buttonText;
+        confirmButton.onClick.RemoveAllListeners();
+        confirmButton.onClick.AddListener(OnConfirm);
 
-        confirmButton.gameObject.SetActive(model.showButton);
-        headerText2.gameObject.SetActive(model.showTime);
+        closeButton.onClick.RemoveAllListeners();
+        closeButton.onClick.AddListener(OnClose);
+
+
     }
 }
