@@ -312,12 +312,6 @@ namespace DCL.Interface
             public long timestamp;
         }
 
-        [System.Serializable]
-        public class ChatCommandPayload
-        {
-            public string command;
-        }
-
 #if UNITY_WEBGL && !UNITY_EDITOR
     /**
      * This method is called after the first render. It marks the loading of the
@@ -656,12 +650,9 @@ namespace DCL.Interface
                 timestamp = timestamp
             });
         }
-        public static void SendChatCommand(string chatCommand)
+        public static void ReportMotdClicked()
         {
-            SendMessage("TriggerChatCommand", new ChatCommandPayload()
-            {
-                command = chatCommand,
-            });
+            SendMessage("MotdConfirmClicked");
         }
     }
 }

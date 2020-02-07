@@ -7,8 +7,7 @@ public class WelcomeHUDController : IHUD, System.IDisposable
     [System.Serializable]
     public class Model : HUDConfiguration
     {
-        public bool hasWallet;
-        public string buttonCommand;
+        public bool hasWallet; //TODO(Brian): Use WEB3 param in userProfile
     }
 
     internal WelcomeHUDView view;
@@ -32,8 +31,8 @@ public class WelcomeHUDController : IHUD, System.IDisposable
 
     void OnConfirmPressed()
     {
-        if (model != null && !string.IsNullOrEmpty(model.buttonCommand))
-            WebInterface.SendChatCommand(model.buttonCommand);
+        if (model != null)
+            WebInterface.ReportMotdClicked();
 
         Close();
     }
