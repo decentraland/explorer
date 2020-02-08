@@ -89,6 +89,8 @@ import { ensureUiApis } from '../shared/world/uiSceneInitializer'
 import { worldRunningObservable } from '../shared/world/worldState'
 import { sendPublicChatMessage } from 'shared/comms'
 import { AirdropInfo } from '../shared/airdrops/interface'
+import { getProfile } from 'shared/passports/selectors'
+import { identity } from 'shared'
 
 const rendererVersion = require('decentraland-renderer')
 window['console'].log('Renderer version: ' + rendererVersion)
@@ -165,6 +167,12 @@ const browserInterface = {
 
   SaveUserAvatar(data: { face: string; body: string; avatar: Avatar }) {
     global.globalStore.dispatch(saveAvatarRequest(data))
+  },
+
+  SaveUserTutorialStep(data: { tutorialStep: number }) {
+    defaultLogger.log('tutorial stage mask updated:', data.tutorialStep)
+    const profile = getProfile(global.globalStore.getState().passports, identity.address)
+    global.globalStore.dispatch(saveAvatarRequest({ ...profile, tutorialStep: data.tutorialStep }))
   },
 
   ControlEvent({ eventType, payload }: { eventType: string; payload: any }) {

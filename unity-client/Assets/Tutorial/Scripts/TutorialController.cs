@@ -100,7 +100,7 @@ public class TutorialController : MonoBehaviour
 
             var stepInstance = Instantiate(runningStep);
 
-            UserProfile.GetOwnUserProfile().SetTutorialFlag(currentTutorialStep);
+            UserProfile.GetOwnUserProfile().SetTutorialStep(currentTutorialStep);
 
             stepInstance.OnStepStart();
             yield return stepInstance.OnStepExecute();
@@ -110,7 +110,7 @@ public class TutorialController : MonoBehaviour
         }
 
         currentTutorialStep = (int)TutorialStep.Id.FINISHED;
-        UserProfile.GetOwnUserProfile().SetTutorialFlag(currentTutorialStep);
+        UserProfile.GetOwnUserProfile().SetTutorialStep(currentTutorialStep);
         runningStep = null;
     }
 
@@ -123,7 +123,8 @@ public class TutorialController : MonoBehaviour
     {
         if (!isTutorialEnabled || !renderingEnabled) return;
 
-        currentTutorialStep = GetTutorialStepFromProfile(); // TODO: get flag from user profile
+        currentTutorialStep = GetTutorialStepFromProfile();
+        Debug.Log("tutorial stage mask fetched: " + currentTutorialStep);
 
 #if UNITY_EDITOR
         if (debugFlagStartingValue != 0)

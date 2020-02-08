@@ -17,6 +17,7 @@ export interface Profile {
   version: number
   updatedAt: number
   createdAt: number
+  tutorialStep: number
 }
 
 export interface Avatar {

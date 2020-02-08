@@ -55,6 +55,7 @@ export function processServerProfile(userId: string, receivedProfile: any): Prof
       bodyShape: fixWearableIds(receivedProfile.avatar.bodyShape),
       wearables
     },
-    inventory: receivedProfile.inventory || []
+    inventory: receivedProfile.inventory || [],
+    tutorialStep: receivedProfile.tutorialStep || 0
   }
 }

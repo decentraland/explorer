@@ -56,6 +56,7 @@ export async function generateRandomUserProfile(userId: string): Promise<Profile
     snapshots: {
       face: `${baseUrl}/face.png`,
       body: `${baseUrl}/body.png`
-    }
+    },
+    tutorialStep: 0
   }
 }

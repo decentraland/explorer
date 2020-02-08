@@ -17,6 +17,6 @@ public class UserProfileModel
     public AvatarModel avatar;
     public string[] inventory;
     public Snapshots snapshots = new Snapshots();
-    public int tutorialFlagsMask;
+    public int tutorialStep;
     public UserProfileModel Clone() => (UserProfileModel)MemberwiseClone();
 }
