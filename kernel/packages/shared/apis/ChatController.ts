@@ -35,7 +35,14 @@ avatarMessageObservable.add((pose: AvatarMessage) => {
 const fpsConfiguration = {
   visible: SHOW_FPS_COUNTER
 }
-const CAMPAIGN_PARCEL_SEQUENCE = [{x: 113, y: -7}, { x: 87, y: 18 }, { x:52, y: 2}, {x: 16, y: 83}, {x: -12, y: -39}, {x: 60, y: 115}]
+const CAMPAIGN_PARCEL_SEQUENCE = [
+  { x: 113, y: -7 },
+  { x: 87, y: 18 },
+  { x: 52, y: 2 },
+  { x: 16, y: 83 },
+  { x: -12, y: -39 },
+  { x: 60, y: 115 }
+]
 
 export interface IChatController {
   /**
