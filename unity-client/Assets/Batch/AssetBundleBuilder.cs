@@ -90,7 +90,7 @@ namespace DCL
 
             try
             {
-                if (AssetBundleBuilderUtils.ParseOption(commandLineArgs, AssetBundleBuilderConfig.CLI_SET_CUSTOM_OUTPUT_ROOT_PATH, 2, out string[] outputPath))
+                if (AssetBundleBuilderUtils.ParseOption(commandLineArgs, AssetBundleBuilderConfig.CLI_SET_CUSTOM_OUTPUT_ROOT_PATH, 1, out string[] outputPath))
                 {
                     builder.finalAssetBundlePath = outputPath[0] + "/";
                 }
@@ -391,6 +391,7 @@ namespace DCL
             }
 
             DependencyMapBuilder.Generate(finalAssetBundlePath, hashLowercaseToHashProper, manifest);
+            logBuffer += $"Generating asset bundles at path: {finalAssetBundlePath}\n";
 
             string[] assetBundles = manifest.GetAllAssetBundles();
 
