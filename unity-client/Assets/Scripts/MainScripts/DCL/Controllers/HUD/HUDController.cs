@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using DCL.SettingsHUD;
 
@@ -17,6 +18,7 @@ public class HUDController : MonoBehaviour
     public SettingsHUDController settingsHud { get; private set; }
     public ExpressionsHUDController expressionsHud { get; private set; }
     public PlayerInfoCardHUDController playerInfoCardHudController { get; private set; }
+    public AirdroppingHUDController airdroppingHUDController { get; private set; }
 
     private UserProfile ownUserProfile => UserProfile.GetOwnUserProfile();
     private WearableDictionary wearableCatalog => CatalogController.wearableCatalog;
@@ -116,9 +118,6 @@ public class HUDController : MonoBehaviour
 
     public void ConfigureExpressionsHUD(string configurationJson)
     {
-        if(!UserProfile.ENABLE_EXPRESSIONS)
-            return;
-
         HUDConfiguration configuration = JsonUtility.FromJson<HUDConfiguration>(configurationJson);
         if (configuration.active && expressionsHud == null)
         {
@@ -142,6 +141,23 @@ public class HUDController : MonoBehaviour
         }
 
         playerInfoCardHudController?.SetVisibility(configuration.active && configuration.visible);
+    }
+
+    public void ConfigureAirdroppingHUD(string configurationJson)
+    {
+        HUDConfiguration configuration = JsonUtility.FromJson<HUDConfiguration>(configurationJson);
+        if (configuration.active && airdroppingHUDController == null)
+        {
+            airdroppingHUDController = new AirdroppingHUDController();
+        }
+
+        airdroppingHUDController?.SetVisibility(configuration.active && configuration.visible);
+    }
+
+    public void AirdroppingRequest(string payload)
+    {
+        var model = JsonUtility.FromJson<AirdroppingHUDController.Model>(payload);
+        airdroppingHUDController.AirdroppingRequested(model);
     }
 
     private void UpdateAvatarHUD()
@@ -168,7 +184,7 @@ public class HUDController : MonoBehaviour
         notificationHud?.Dispose();
         avatarEditorHud?.Dispose();
     }
-    
+
 #if UNITY_EDITOR
     [ContextMenu("Trigger fake PlayerInfoCard")]
     public void TriggerFakePlayerInfoCard()
@@ -176,7 +192,7 @@ public class HUDController : MonoBehaviour
         var newModel = ownUserProfile.CloneModel();
         newModel.name = "FakePassport";
         newModel.description = "Fake Description for Testing";
-        newModel.inventory = new []
+        newModel.inventory = new[]
         {
             "dcl://halloween_2019/machete_headband_top_head",
             "dcl://halloween_2019/bee_suit_upper_body",
