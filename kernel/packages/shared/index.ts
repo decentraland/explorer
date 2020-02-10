@@ -210,7 +210,7 @@ export async function initShared(): Promise<Session | undefined> {
     const profile = await PassportAsPromise(userId)
     persistCurrentUser({
       version: profile.version,
-      profile: profileToRendererFormat(profile)
+      profile: profileToRendererFormat(profile, identity)
     })
   }
   console['groupEnd']()

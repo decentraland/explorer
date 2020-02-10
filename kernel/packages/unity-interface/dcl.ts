@@ -731,6 +731,7 @@ export async function initializeEngine(_gameInstance: GameInstance) {
   if (!EDITOR) {
     await initializeDecentralandUI()
   }
+
   return {
     unityInterface,
     onMessage(type: string, message: any) {
