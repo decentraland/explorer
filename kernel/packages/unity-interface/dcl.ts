@@ -243,7 +243,6 @@ function delightedSurvey() {
   }
 }
 
-
 const CHUNK_SIZE = 500
 
 export function* chunkGenerator(
