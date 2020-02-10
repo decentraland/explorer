@@ -1,6 +1,6 @@
+using DCL.Helpers;
 using NUnit.Framework;
 using System.Collections;
-using UnityEngine;
 
 namespace Tests
 {
@@ -30,22 +30,22 @@ namespace Tests
         [Test]
         public void BehaveCorrectlyAfterCloseButtonIsPressed()
         {
-            Assert.IsTrue(Cursor.lockState == CursorLockMode.None);
+            Assert.IsFalse(Utils.isCursorLocked);
 
             controller.view.closeButton.onClick.Invoke();
 
-            Assert.IsTrue(Cursor.lockState == CursorLockMode.Locked);
+            Assert.IsTrue(Utils.isCursorLocked);
             Assert.IsFalse(controller.view.gameObject.activeSelf);
         }
 
         [Test]
         public void BehaveCorrectlyAfterConfirmButtonIsPressed()
         {
-            Assert.IsTrue(Cursor.lockState == CursorLockMode.None);
+            Assert.IsFalse(Utils.isCursorLocked);
 
             controller.view.confirmButton.onClick.Invoke();
 
-            Assert.IsTrue(Cursor.lockState == CursorLockMode.Locked);
+            Assert.IsTrue(Utils.isCursorLocked);
             Assert.IsFalse(controller.view.gameObject.activeSelf);
         }
 
