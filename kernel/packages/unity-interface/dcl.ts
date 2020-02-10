@@ -164,14 +164,12 @@ const browserInterface = {
 
   MotdConfirmClicked() {
     if (hasWallet) {
-      defaultLogger.log('clicked and has Wallet')
       // TODO(Brian): Teleport player to desired location
       teleportObservable.notifyObservers({ x: 10, y: 10 })
       ensureTeleportAnimation() // We don't want any delays
     } else {
-      defaultLogger.log('clicked and has not Wallet')
       // TODO(Brian): Open url with wallet instructions
-      window.open('http://www.decentraland.org', '_blank')
+      window.open('https://docs.decentraland.org/blockchain-integration/ethereum-essentials/', '_blank')
     }
   },
 
