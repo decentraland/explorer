@@ -12,7 +12,7 @@ import { initialize, queueTrackingEvent, identifyUser } from './analytics'
 import './apis/index'
 import { connect, persistCurrentUser, disconnect } from './comms'
 import { isMobile } from './comms/mobile'
-import { setLocalProfile, getUserProfile } from './comms/peers'
+import { setLocalProfile, getUserProfile, removeUserProfile } from './comms/peers'
 import './events'
 import { ReportFatalError } from './loading/ReportFatalError'
 import {
@@ -43,6 +43,7 @@ import { Personal } from 'web3x/personal/personal'
 import { Account } from 'web3x/account'
 import { web3initialized } from './dao/actions'
 import { realmInitialized } from './dao'
+import { getDefaultTLD } from '../config/index'
 
 enum AnalyticsAccount {
   PRD = '1plAT9a2wOOgbPCrTaU8rgGUMzgUTJtU',
@@ -75,31 +76,38 @@ export let identity: AuthIdentity
 async function createAuthIdentity() {
   const ephemeral = createIdentity()
 
-  const result = await providerFuture
   const ephemeralLifespanMinutes = 7 * 24 * 60 // 1 week
 
   let address
   let signer
-  if (result.successful) {
-    const eth = Eth.fromCurrentProvider()!
-    const account = (await eth.getAccounts())[0]
+  if (WORLD_EXPLORER) {
+    const result = await providerFuture
+    if (result.successful) {
+      const eth = Eth.fromCurrentProvider()!
+      const account = (await eth.getAccounts())[0]
 
-    address = account.toJSON()
-    signer = async (message: string) => {
-      let result
-      while (!result) {
-        try {
-          result = await new Personal(eth.provider).sign(message, account, '')
-        } catch (e) {
-          if (e.message && e.message.includes('User denied message signature')) {
-            showEthSignAdvice(true)
+      address = account.toJSON()
+      signer = async (message: string) => {
+        let result
+        while (!result) {
+          try {
+            result = await new Personal(eth.provider).sign(message, account, '')
+          } catch (e) {
+            if (e.message && e.message.includes('User denied message signature')) {
+              showEthSignAdvice(true)
+            }
           }
         }
+        return result
       }
-      return result
+    } else {
+      const account: Account = result.localIdentity
+
+      address = account.address.toJSON()
+      signer = async (message: string) => account.sign(message).signature
     }
   } else {
-    const account: Account = result.localIdentity
+    const account = Account.create()
 
     address = account.address.toJSON()
     signer = async (message: string) => account.sign(message).signature
@@ -176,6 +184,21 @@ export async function initShared(): Promise<Session | undefined> {
   } else {
     defaultLogger.log(`Using test user.`)
     userId = '0x0000000000000000000000000000000000000000'
+    identity = await createAuthIdentity()
+  }
+
+  if (getDefaultTLD() === 'org') {
+    try {
+      const response = await fetch(`https://s7bdh0k6x3.execute-api.us-east-1.amazonaws.com/default/whitelisted_users?id=${identity.address}`)
+      if (!response.ok) {
+        throw new Error('unauthorized user')
+      }
+    } catch (e) {
+      removeUserProfile()
+      console['groupEnd']()
+      ReportFatalError(AUTH_ERROR_LOGGED_OUT)
+      throw new Error(AUTH_ERROR_LOGGED_OUT)
+    }
   }
 
   defaultLogger.log(`User ${userId} logged in`)
@@ -185,11 +208,14 @@ export async function initShared(): Promise<Session | undefined> {
 
   console['group']('connect#ethereum')
 
-  net = await getAppNetwork()
+  if (WORLD_EXPLORER) {
+    net = await getAppNetwork()
 
-  // Load contracts from https://contracts.decentraland.org
-  await setNetwork(net)
-  queueTrackingEvent('Use network', { net })
+    // Load contracts from https://contracts.decentraland.org
+    await setNetwork(net)
+    queueTrackingEvent('Use network', { net })
+  }
+
   store.dispatch(web3initialized())
   console['groupEnd']()
 
@@ -200,7 +226,10 @@ export async function initShared(): Promise<Session | undefined> {
     return session
   }
 
-  await realmInitialized()
+  if (WORLD_EXPLORER) {
+    await realmInitialized()
+  }
+
   defaultLogger.info(`Using Catalyst configuration: `, globalStore.getState().dao)
 
   // initialize profile

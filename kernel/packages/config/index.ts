@@ -1,4 +1,3 @@
-import { getFetchContentServer } from '../shared/dao/selectors'
 const queryString = require('query-string')
 declare var window: any
 
@@ -235,16 +234,14 @@ export const ENABLE_EMPTY_SCENES = !DEBUG || knownTLDs.includes(getTLD())
 export function getContentUrl() {
   const TLDDefault = getDefaultTLD()
 
-  return AWS
-    ? `https://content.decentraland.${TLDDefault === 'today' ? 'org' : TLDDefault}`
-    : getFetchContentServer(window.globalStore.getState())
+  return `https://content.decentraland.${TLDDefault === 'today' ? 'org' : TLDDefault}`
 }
 
 export function getServerConfigurations() {
   const TLDDefault = getDefaultTLD()
   return {
     contentAsBundle: `https://content-assets-as-bundle.decentraland.org`,
-    wearablesApi: `https://wearables-api.decentraland.org/v2`,
+    wearablesApi: `https://wearable-api.decentraland.org/v2`,
     avatar: {
       snapshotStorage: `https://avatars-storage.decentraland.${TLDDefault}/`,
       catalog: getExclusiveServer(),
