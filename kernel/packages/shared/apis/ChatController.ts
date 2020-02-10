@@ -182,7 +182,7 @@ export class ChatController extends ExposableAPI implements IChatController {
           teleportObservable.notifyObservers({
             x,
             y,
-            text: `Teleporting you to the next scene … and more treasure!`
+            text: `Teleporting you to the next scene… and more treasures!`
           } as any)
         } else {
           response = 'Could not recognize the coordinates provided. Example usage: /goto 42,42'
