@@ -33,7 +33,7 @@ import { loadingScenes, teleportTriggered, unityClientLoaded } from '../shared/l
 import { createLogger, defaultLogger, ILogger } from '../shared/logger'
 import { saveAvatarRequest } from '../shared/passports/actions'
 import { airdropObservable } from '../shared/apis/AirdropController'
-import { Avatar, Wearable } from '../shared/passports/types'
+import { Avatar, Wearable, Profile } from '../shared/passports/types'
 import {
   PB_AttachEntityComponent,
   PB_ComponentCreated,
@@ -108,6 +108,18 @@ const positionEvent = {
   mousePosition: Vector3.Zero()
 }
 
+enum TutorialStepId {
+  NONE = 0,
+  INITIAL_SCENE = 1,
+  GENESIS_PLAZA = 2,
+  CHAT_AND_AVATAR_EXPRESSIONS = 3,
+  FINISHED = 99,
+}
+
+function getCurrentUserProfile() : Profile | null {
+  return getProfile(global.globalStore.getState().passports, identity.address)
+}
+
 /////////////////////////////////// HANDLERS ///////////////////////////////////
 
 const browserInterface = {
@@ -170,8 +182,8 @@ const browserInterface = {
   },
 
   SaveUserTutorialStep(data: { tutorialStep: number }) {
-    defaultLogger.log('tutorial stage mask updated:', data.tutorialStep)
-    const profile = getProfile(global.globalStore.getState().passports, identity.address)
+    defaultLogger.log('tutorial stage step updated:', data.tutorialStep)
+    const profile:Profile = getCurrentUserProfile() as Profile
     global.globalStore.dispatch(saveAvatarRequest({ ...profile, tutorialStep: data.tutorialStep }))
   },
 
@@ -253,6 +265,10 @@ function ensureTeleportAnimation() {
 function stopTeleportAnimation() {
   document.getElementById('gameContainer')!.setAttribute('style', 'background: #151419')
   document.body.setAttribute('style', 'background: #151419')
+  const tutorialFinished = getCurrentUserProfile()?.tutorialStep === TutorialStepId.FINISHED
+  if ( !TUTORIAL_ENABLED || tutorialFinished ) {
+    unityInterface.ShowWelcomeNotification();
+  }
 }
 
 const CHUNK_SIZE = 500
@@ -408,6 +424,9 @@ export const unityInterface = {
   },
   ConfigureExpressionsHUD(configuration: HUDConfiguration) {
     gameInstance.SendMessage('HUDController', 'ConfigureExpressionsHUD', JSON.stringify(configuration))
+  },
+  ShowWelcomeNotification() {
+    gameInstance.SendMessage('HUDController', 'ShowWelcomeNotification')
   },
   TriggerSelfUserExpression(expressionId: string) {
     gameInstance.SendMessage('HUDController', 'TriggerSelfUserExpression', expressionId)
