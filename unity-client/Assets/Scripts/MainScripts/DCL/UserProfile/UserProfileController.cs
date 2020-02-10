@@ -18,7 +18,7 @@ public class UserProfileController : MonoBehaviour
             return userProfilesCatalogValue;
         }
     }
-    
+
     [NonSerialized] public UserProfile ownUserProfile;
 
     public void Awake()
@@ -34,7 +34,9 @@ public class UserProfileController : MonoBehaviour
             return;
         }
 
+
         ownUserProfile.UpdateData(JsonUtility.FromJson<UserProfileModel>(payload));
+        Debug.Log(ownUserProfile.userId);
     }
 
     public void AddUserProfileToCatalog(string payload)

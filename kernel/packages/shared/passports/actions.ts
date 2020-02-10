@@ -1,5 +1,5 @@
 import { action } from 'typesafe-actions'
-import { Profile, Wearable, Catalog, WearableId, Avatar } from './types'
+import { Profile, Wearable, Catalog, WearableId } from './types'
 
 export const PASSPORT_REQUEST = '[Request] Passport fetch'
 export const PASSPORT_SUCCESS = '[Success] Passport fetch'

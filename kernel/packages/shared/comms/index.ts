@@ -44,6 +44,7 @@ import * as Long from 'long'
 import { identity } from '../index'
 import { Authenticator } from '../crypto/Authenticator'
 import { getCommsServer, getLayer } from '../dao/selectors'
+import { getProfile } from 'shared/passports/selectors'
 
 declare const window: any
 window.Long = Long
@@ -224,6 +225,7 @@ function ensurePeerTrackingInfo(context: Context, alias: string): PeerTrackingIn
 
 export function processChatMessage(context: Context, fromAlias: string, message: Package<ChatMessage>) {
   const msgId = message.data.id
+  const profile = getProfile(global.globalStore.getState(), identity.address)
 
   const peerTrackingInfo = ensurePeerTrackingInfo(context, fromAlias)
   if (!peerTrackingInfo.receivedPublicChatMessages.has(msgId)) {
@@ -249,7 +251,9 @@ export function processChatMessage(context: Context, fromAlias: string, message:
           message: text,
           isCommand: false
         }
-        chatObservable.notifyObservers({ type: ChatEvent.MESSAGE_RECEIVED, messageEntry: entry })
+        if (!profile!.blocked.includes(user.userId!)) {
+          chatObservable.notifyObservers({ type: ChatEvent.MESSAGE_RECEIVED, messageEntry: entry })
+        }
       }
     }
   }

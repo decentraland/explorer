@@ -13,7 +13,7 @@ public class PlayerInfoCardHUDController : IHUD, IDisposable
     public PlayerInfoCardHUDController()
     {
         view = PlayerInfoCardHUDView.CreateView();
-        view.Initialize(() => {currentPlayerName.Set(null);}, ReportPlayer, BlockPlayer);
+        view.Initialize(() => { currentPlayerName.Set(null); }, ReportPlayer, BlockPlayer);
         currentPlayerName = Resources.Load<StringVariable>(CURRENT_PLAYER_NAME);
         currentPlayerName.OnChange += OnCurrentPlayerNameChanged;
         OnCurrentPlayerNameChanged(currentPlayerName, null);
@@ -50,7 +50,8 @@ public class PlayerInfoCardHUDController : IHUD, IDisposable
 
     private void BlockPlayer()
     {
-        WebInterface.SendBlockPlayer(currentPlayerName);
+        Debug.Log(currentUserProfile.userId);
+        WebInterface.SendBlockPlayer(currentUserProfile.userId);
     }
 
     private void ReportPlayer()
@@ -60,7 +61,7 @@ public class PlayerInfoCardHUDController : IHUD, IDisposable
 
     public void Dispose()
     {
-        if (currentUserProfile != null) 
+        if (currentUserProfile != null)
             currentUserProfile.OnUpdate -= SetUserProfile;
 
         if (currentPlayerName != null)

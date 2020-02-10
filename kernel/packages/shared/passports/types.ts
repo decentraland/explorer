@@ -11,13 +11,7 @@ export interface Profile {
   ethAddress: string | undefined
   inventory: WearableId[]
   blocked: string[]
-  snapshots: {
-    face: string
-    body: string
-  }
   version: number
-  updatedAt: number
-  createdAt: number
 }
 
 export interface Avatar {
@@ -26,11 +20,12 @@ export interface Avatar {
   hairColor: ColorString
   eyeColor: ColorString
   wearables: WearableId[]
-  snapshots?: {
+  snapshots: {
     face: string
     body: string
   }
 }
+
 export interface ProfileForRenderer {
   userId: string
   name: string
@@ -44,8 +39,6 @@ export interface ProfileForRenderer {
     body: string
   }
   version: number
-  updatedAt: number
-  createdAt: number
 }
 
 export interface AvatarForRenderer {

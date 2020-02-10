@@ -8,11 +8,12 @@ using UnityEngine;
 public class UserProfile : ScriptableObject //TODO Move to base variable
 {
     public const bool ENABLE_EXPRESSIONS = false;
-    
+
     static DateTime epochStart = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
     public event Action<UserProfile> OnUpdate;
 
+    public string userId => model.userId;
     public string userName => model.name;
     public string description => model.description;
     public string email => model.email;
@@ -45,6 +46,7 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
             return;
         }
 
+        model.userId = newModel.userId;
         model.name = newModel.name;
         model.email = newModel.email;
         model.description = newModel.description;
@@ -58,9 +60,9 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
 
         if (downloadAssets && model.snapshots != null)
         {
-            if(model.snapshots.face != null)
+            if (model.snapshots.face != null)
                 ThumbnailsManager.RequestThumbnail(model.snapshots.face, OnFaceSnapshotReady);
-            if(model.snapshots.body != null)
+            if (model.snapshots.body != null)
                 ThumbnailsManager.RequestThumbnail(model.snapshots.body, OnBodySnapshotReady);
         }
 
@@ -91,10 +93,10 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
     {
         if (model?.snapshots != null)
         {
-            if(model.snapshots.face != null)
+            if (model.snapshots.face != null)
                 ThumbnailsManager.CancelRequest(model.snapshots.face, OnFaceSnapshotReady);
 
-            if(model.snapshots.body != null)
+            if (model.snapshots.body != null)
                 ThumbnailsManager.CancelRequest(model.snapshots.body, OnBodySnapshotReady);
         }
 
@@ -108,7 +110,7 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
     {
         if (!ENABLE_EXPRESSIONS)
             return;
-        
+
         var timestamp = (long)(DateTime.UtcNow - epochStart).TotalMilliseconds;
         avatar.expressionTriggerId = id;
         avatar.expressionTriggerTimestamp = timestamp;

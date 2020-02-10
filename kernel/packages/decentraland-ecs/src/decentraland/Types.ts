@@ -415,6 +415,4 @@ export type ProfileForRenderer = {
     body: string
   }
   version: number
-  updatedAt: number
-  createdAt: number
 }

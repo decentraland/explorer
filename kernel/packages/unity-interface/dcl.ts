@@ -129,7 +129,8 @@ const browserInterface = {
   },
 
   OpenWebURL(data: { url: string }) {
-    window.open(data.url, '_blank')
+    const tab = window.open('about:blank', '_blank')
+    tab.location.href = data.url
   },
 
   PerformanceReport(samples: string) {
@@ -205,17 +206,18 @@ const browserInterface = {
     browserInterface.OpenWebURL({ url: 'https://decentralandofficial.typeform.com/to/owLkla' })
   },
 
-  BlockPlayer(username: string) {
-    const profile = getProfile(global.globalStore.passports, identity.address)
+  BlockPlayer(data: { userId: string }) {
+    const profile = getProfile(global.globalStore.getState(), identity.address)
+    defaultLogger.info('blocking user', profile)
 
     if (profile) {
       for (let blockedUser of profile.blocked) {
-        if (blockedUser === username) {
+        if (blockedUser === data.userId) {
           return
         }
       }
 
-      saveAvatarRequest({ ...profile, blocked: [...profile.blocked, username] })
+      global.globalStore.dispatch(saveAvatarRequest({ ...profile, blocked: [...profile.blocked, data.userId] }))
     }
   }
 }
@@ -313,6 +315,7 @@ export const unityInterface = {
     gameInstance.SendMessage('SceneController', 'SetDebug')
   },
   LoadProfile(profile: ProfileForRenderer) {
+    defaultLogger.info('!', profile)
     gameInstance.SendMessage('SceneController', 'LoadProfile', JSON.stringify(profile))
   },
   CreateUIScene(data: { id: string; baseUrl: string }) {

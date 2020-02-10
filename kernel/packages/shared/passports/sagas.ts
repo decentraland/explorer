@@ -478,20 +478,27 @@ export async function modifyAvatar(params: {
 
   let files: ContentFile[] = []
 
-  if (avatar.snapshots && avatar.snapshots.face.startsWith('data') && avatar.snapshots.body.startsWith('data')) {
-    // replace base64 snapshots with their respective hashes
-    const faceFile: ContentFile = await makeContentFile('./face.png', base64ToBlob(avatar.snapshots.face))
-    const bodyFile: ContentFile = await makeContentFile('./body.png', base64ToBlob(avatar.snapshots.body))
-    const faceFileHash: string = await calculateBufferHash(faceFile.content)
-    const bodyFileHash: string = await calculateBufferHash(bodyFile.content)
-    newAvatar.snapshots = {
-      face: faceFileHash,
-      body: bodyFileHash
+  if (avatar.snapshots) {
+    if (avatar.snapshots.face.startsWith('data') && avatar.snapshots.body.startsWith('data')) {
+      // replace base64 snapshots with their respective hashes
+      const faceFile: ContentFile = await makeContentFile('./face.png', base64ToBlob(avatar.snapshots.face))
+      const bodyFile: ContentFile = await makeContentFile('./body.png', base64ToBlob(avatar.snapshots.body))
+      const faceFileHash: string = await calculateBufferHash(faceFile.content)
+      const bodyFileHash: string = await calculateBufferHash(bodyFile.content)
+      newAvatar.snapshots = {
+        face: faceFileHash,
+        body: bodyFileHash
+      }
+      files = [faceFile, bodyFile]
+    } else {
+      newAvatar.snapshots = {
+        face: avatar.snapshots.face.split('/').pop()!,
+        body: avatar.snapshots.body.split('/').pop()!
+      }
     }
-    files = [faceFile, bodyFile]
   }
 
-  const newProfile = ensureServerFormat(avatar, currentVersion)
+  const newProfile = ensureServerFormat({ ...profile, avatar: newAvatar }, currentVersion)
 
   const [data] = await buildDeployData(
     [identity.address],

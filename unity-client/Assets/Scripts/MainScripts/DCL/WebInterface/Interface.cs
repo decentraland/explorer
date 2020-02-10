@@ -15,7 +15,7 @@ namespace DCL.Interface
      */
     public static class WebInterface
     {
-        public static bool VERBOSE = false;
+        public static bool VERBOSE = true;
         public static System.Action<string, string> OnMessageFromEngine;
 
         [System.Serializable]
@@ -316,6 +316,12 @@ namespace DCL.Interface
         public class UserAcceptedCollectiblesPayload
         {
             public string id;
+        }
+
+        [System.Serializable]
+        public class SendBlockPlayerPayload
+        {
+            public string userId;
         }
 
 #if UNITY_WEBGL && !UNITY_EDITOR
@@ -644,7 +650,7 @@ namespace DCL.Interface
 
         public static void SendUserAcceptedCollectibles(string airdropId)
         {
-            WebInterface.SendMessage("UserAcceptedCollectibles", new UserAcceptedCollectiblesPayload{ id = airdropId});
+            WebInterface.SendMessage("UserAcceptedCollectibles", new UserAcceptedCollectiblesPayload { id = airdropId });
         }
 
         public static void SendPerformanceReport(string encodedFrameTimesInMS)
@@ -673,9 +679,12 @@ namespace DCL.Interface
             SendMessage("ReportPlayer", playerName);
         }
 
-        public static void SendBlockPlayer(string playerName)
+        public static void SendBlockPlayer(string userId)
         {
-            SendMessage("BlockPlayer", playerName);
+            SendMessage("BlockPlayer", new SendBlockPlayerPayload()
+            {
+                userId = userId
+            });
         }
     }
 }
