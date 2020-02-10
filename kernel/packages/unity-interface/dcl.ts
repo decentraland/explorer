@@ -91,6 +91,7 @@ import { worldRunningObservable } from '../shared/world/worldState'
 import { sendPublicChatMessage } from 'shared/comms'
 import { providerFuture } from 'shared/ethereum/provider'
 import { AirdropInfo } from '../shared/airdrops/interface'
+import { TeleportController } from 'shared/world/TeleportController'
 
 const rendererVersion = require('decentraland-renderer')
 window['console'].log('Renderer version: ' + rendererVersion)
@@ -165,8 +166,7 @@ const browserInterface = {
   MotdConfirmClicked() {
     if (hasWallet) {
       // TODO(Brian): Teleport player to desired location
-      teleportObservable.notifyObservers({ x: 10, y: 10 })
-      ensureTeleportAnimation() // We don't want any delays
+      TeleportController.goToNext()
     } else {
       // TODO(Brian): Open url with wallet instructions
       window.open('https://docs.decentraland.org/blockchain-integration/ethereum-essentials/', '_blank')
@@ -224,7 +224,7 @@ export function setLoadingScreenVisible(shouldShow: boolean) {
   document.getElementById('progress-bar')!.style.display = shouldShow ? 'block' : 'none'
   if (!shouldShow) {
     isTheFirstLoading = false
-    stopTeleportAnimation()
+    TeleportController.stopTeleportAnimation()
   }
 }
 
@@ -243,23 +243,6 @@ function delightedSurvey() {
   }
 }
 
-function ensureTeleportAnimation() {
-  document
-    .getElementById('gameContainer')!
-    .setAttribute(
-      'style',
-      'background: #151419 url(images/teleport.gif) no-repeat center !important; background-size: 194px 257px !important;'
-    )
-  document.body.setAttribute(
-    'style',
-    'background: #151419 url(images/teleport.gif) no-repeat center !important; background-size: 194px 257px !important;'
-  )
-}
-
-function stopTeleportAnimation() {
-  document.getElementById('gameContainer')!.setAttribute('style', 'background: #151419')
-  document.body.setAttribute('style', 'background: #151419')
-}
 
 const CHUNK_SIZE = 500
 
@@ -326,7 +309,7 @@ export const unityInterface = {
   Teleport({ position: { x, y, z }, cameraTarget }: InstancedSpawnPoint) {
     const theY = y <= 0 ? 2 : y
 
-    ensureTeleportAnimation()
+    TeleportController.ensureTeleportAnimation()
     gameInstance.SendMessage('CharacterController', 'Teleport', JSON.stringify({ x, y: theY, z }))
     gameInstance.SendMessage('CameraController', 'SetRotation', JSON.stringify({ x, y: theY, z, cameraTarget }))
   },
