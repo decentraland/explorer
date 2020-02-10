@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace DCL
 {
@@ -18,6 +19,7 @@ namespace DCL
 
             lockIds.Add(id);
             lockCounter++;
+            Debug.Log($"Locking rendering activated... {lockCounter}");
         }
 
         public void Unlock(object id)
@@ -27,6 +29,7 @@ namespace DCL
 
             lockIds.Remove(id);
             lockCounter--;
+            Debug.Log($"Unlocking rendering activated... {lockCounter}");
 
             if (lockCounter == 0)
             {

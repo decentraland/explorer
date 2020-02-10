@@ -55,6 +55,7 @@ public class RenderingController : MonoBehaviour
 
         if (!lockHandler.isUnlocked)
         {
+            Debug.Log("Rendering sent, waiting for locks...!");
             lockHandler.OnUnlocked -= ActivateRendering_Internal;
             lockHandler.OnUnlocked += ActivateRendering_Internal;
             return;
