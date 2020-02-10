@@ -376,14 +376,15 @@ export async function fetchInventoryItemsByAddress(address: string) {
   return inventory.map(wearable => wearable.id)
 }
 
-
 export function* handleSaveAvatar(saveAvatar: SaveAvatarRequest) {
   const userId = saveAvatar.payload.userId ? saveAvatar.payload.userId : yield select(getCurrentUserId)
+
   try {
     const savedProfile = yield select(getProfile, userId)
     const currentVersion = savedProfile.version || 0
     const url: string = yield select(getUpdateProfileServer)
     const profile = { ...savedProfile, ...saveAvatar.payload.profile }
+  
     const result = yield call(modifyAvatar, {
       url,
       userId,
@@ -391,11 +392,16 @@ export function* handleSaveAvatar(saveAvatar: SaveAvatarRequest) {
       identity,
       profile
     })
+
     const { creationTimestamp: version } = result
+    
     yield put(saveAvatarSuccess(userId, version, profile))
     yield put(passportRequest(userId))
+  
   } catch (error) {
+  
     yield put(saveAvatarFailure(userId, 'unknown reason'))
+  
   }
 }
 
