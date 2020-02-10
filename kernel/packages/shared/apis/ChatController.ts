@@ -178,7 +178,7 @@ export class ChatController extends ExposableAPI implements IChatController {
         } else if (message.trim().toLowerCase() === 'next') {
           const current = getFromLocalStorage('launch-campaign-status') || 0
           saveToLocalStorage('launch-campaign-status', current + 1)
-          const { x, y } = CAMPAIGN_PARCEL_SEQUENCE[current]
+          const { x, y } = CAMPAIGN_PARCEL_SEQUENCE[current % CAMPAIGN_PARCEL_SEQUENCE.length]
           teleportObservable.notifyObservers({
             x,
             y,
