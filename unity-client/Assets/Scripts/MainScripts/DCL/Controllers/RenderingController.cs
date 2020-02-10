@@ -1,5 +1,4 @@
 using DCL;
-using DCL.Controllers;
 using DCL.Interface;
 using UnityEngine;
 using UnityGLTF;
@@ -85,13 +84,5 @@ public class RenderingController : MonoBehaviour
         OnRenderingStateChanged?.Invoke(renderingEnabled);
 
         WebInterface.ReportControlEvent(new WebInterface.ActivateRenderingACK());
-    }
-
-    private void CurrentSceneChange(ParcelScene.State newState)
-    {
-        if (newState == ParcelScene.State.READY)
-        {
-
-        }
     }
 }
