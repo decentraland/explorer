@@ -12,7 +12,7 @@ import { initialize, queueTrackingEvent, identifyUser } from './analytics'
 import './apis/index'
 import { connect, persistCurrentUser, disconnect } from './comms'
 import { isMobile } from './comms/mobile'
-import { setLocalProfile, getUserProfile } from './comms/peers'
+import { setLocalProfile, getUserProfile, removeUserProfile } from './comms/peers'
 import './events'
 import { ReportFatalError } from './loading/ReportFatalError'
 import {
@@ -43,6 +43,7 @@ import { Personal } from 'web3x/personal/personal'
 import { Account } from 'web3x/account'
 import { web3initialized } from './dao/actions'
 import { realmInitialized } from './dao'
+import { getDefaultTLD } from '../config/index'
 
 enum AnalyticsAccount {
   PRD = '1plAT9a2wOOgbPCrTaU8rgGUMzgUTJtU',
@@ -184,6 +185,20 @@ export async function initShared(): Promise<Session | undefined> {
     defaultLogger.log(`Using test user.`)
     userId = '0x0000000000000000000000000000000000000000'
     identity = await createAuthIdentity()
+  }
+
+  if (getDefaultTLD() === 'org') {
+    try {
+      const response = await fetch(`https://s7bdh0k6x3.execute-api.us-east-1.amazonaws.com/default/whitelisted_users?id=${identity.address}`)
+      if (!response.ok) {
+        throw new Error('unauthorized user')
+      }
+    } catch (e) {
+      removeUserProfile()
+      console['groupEnd']()
+      ReportFatalError(AUTH_ERROR_LOGGED_OUT)
+      throw new Error(AUTH_ERROR_LOGGED_OUT)
+    }
   }
 
   defaultLogger.log(`User ${userId} logged in`)

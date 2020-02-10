@@ -1,4 +1,3 @@
-import { getFetchContentServer } from '../shared/dao/selectors'
 const queryString = require('query-string')
 declare var window: any
 
@@ -125,6 +124,7 @@ export const DISABLE_AUTH = location.search.indexOf('DISABLE_AUTH') !== -1 || DE
 export const ENGINE_DEBUG_PANEL = location.search.indexOf('ENGINE_DEBUG_PANEL') !== -1
 export const SCENE_DEBUG_PANEL = location.search.indexOf('SCENE_DEBUG_PANEL') !== -1 && !ENGINE_DEBUG_PANEL
 export const SHOW_FPS_COUNTER = location.search.indexOf('SHOW_FPS_COUNTER') !== -1 || DEBUG
+export const TUTORIAL_ENABLED = WORLD_EXPLORER && location.search.indexOf('TUTORIAL_ENABLED') !== -1
 
 export namespace commConfigurations {
   export const debug = true
@@ -233,16 +233,14 @@ export const ENABLE_EMPTY_SCENES = !DEBUG || knownTLDs.includes(getTLD())
 export function getContentUrl() {
   const TLDDefault = getDefaultTLD()
 
-  return AWS
-    ? `https://content.decentraland.${TLDDefault === 'today' ? 'org' : TLDDefault}`
-    : getFetchContentServer(window.globalStore.getState())
+  return `https://content.decentraland.${TLDDefault === 'today' ? 'org' : TLDDefault}`
 }
 
 export function getServerConfigurations() {
   const TLDDefault = getDefaultTLD()
   return {
     contentAsBundle: `https://content-assets-as-bundle.decentraland.org`,
-    wearablesApi: `https://wearables-api.decentraland.org/v2`,
+    wearablesApi: `https://wearable-api.decentraland.org/v2`,
     avatar: {
       snapshotStorage: `https://avatars-storage.decentraland.${TLDDefault}/`,
       catalog: getExclusiveServer(),
