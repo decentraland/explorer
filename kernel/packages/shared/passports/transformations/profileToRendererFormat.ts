@@ -8,11 +8,13 @@ const profileDefaults = {
 }
 
 export function profileToRendererFormat(profile: Profile): ProfileForRenderer {
+  const { snapshots, ...rendererAvatar } = profile.avatar
   return {
     ...profileDefaults,
     ...profile,
+    snapshots,
     avatar: {
-      ...profile.avatar,
+      ...rendererAvatar,
       wearables: profile.avatar.wearables.filter(dropDeprecatedWearables),
       eyeColor: convertToRGBObject(profile.avatar.eyeColor),
       hairColor: convertToRGBObject(profile.avatar.hairColor),

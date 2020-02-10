@@ -39,7 +39,11 @@ export async function generateRandomUserProfile(userId: string): Promise<Profile
     skinColor: colorString(avatarJson.skin.color),
     hairColor: colorString(avatarJson.hair.color),
     eyeColor: colorString(avatarJson.eyes.color),
-    wearables: avatarJson.wearables.map(fixWearableIds)
+    wearables: avatarJson.wearables.map(fixWearableIds),
+    snapshots: {
+      face: `${baseUrl}/face.png`,
+      body: `${baseUrl}/body.png`
+    }
   }
   const name = 'Guest-' + userId.substr(2, 6)
   return {
@@ -50,13 +54,7 @@ export async function generateRandomUserProfile(userId: string): Promise<Profile
     name,
     ethAddress: 'noeth',
     description: '',
-    updatedAt: new Date().getDate(),
-    createdAt: new Date().getDate(),
     avatar: avatarV2,
-    snapshots: {
-      face: `${baseUrl}/face.png`,
-      body: `${baseUrl}/body.png`
-    },
     tutorialStep: 0
   }
 }

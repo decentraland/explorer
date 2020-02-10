@@ -10,13 +10,7 @@ export interface Profile {
   avatar: Avatar
   ethAddress: string | undefined
   inventory: WearableId[]
-  snapshots: {
-    face: string
-    body: string
-  }
   version: number
-  updatedAt: number
-  createdAt: number
   tutorialStep: number
 }
 
@@ -26,7 +20,7 @@ export interface Avatar {
   hairColor: ColorString
   eyeColor: ColorString
   wearables: WearableId[]
-  snapshots?: {
+  snapshots: {
     face: string
     body: string
   }
@@ -44,8 +38,6 @@ export interface ProfileForRenderer {
     body: string
   }
   version: number
-  updatedAt: number
-  createdAt: number
 }
 
 export interface AvatarForRenderer {

@@ -47,7 +47,7 @@ import {
 import { processServerProfile } from './transformations/processServerProfile'
 import { profileToRendererFormat } from './transformations/profileToRendererFormat'
 import { ensureServerFormat } from './transformations/profileToServerFormat'
-import { Avatar, Catalog, Profile, WearableId, Wearable, Collection } from './types'
+import { Catalog, Profile, WearableId, Wearable, Collection } from './types'
 import { Action } from 'redux'
 import { identity } from '../index'
 import { AuthIdentity, Authenticator, AuthLink } from '../crypto/Authenticator'
@@ -376,12 +376,14 @@ export async function fetchInventoryItemsByAddress(address: string) {
   return inventory.map(wearable => wearable.id)
 }
 
+
 export function* handleSaveAvatar(saveAvatar: SaveAvatarRequest) {
   const userId = saveAvatar.payload.userId ? saveAvatar.payload.userId : yield select(getCurrentUserId)
   try {
-    const currentVersion = (yield select(getProfile, userId)).version || 0
+    const savedProfile = yield select(getProfile, userId)
+    const currentVersion = savedProfile.version || 0
     const url: string = yield select(getUpdateProfileServer)
-    const profile = saveAvatar.payload.profile
+    const profile = { ...savedProfile, ...saveAvatar.payload.profile }
     const result = yield call(modifyAvatar, {
       url,
       userId,
@@ -468,25 +470,32 @@ export async function modifyAvatar(params: {
   currentVersion: number
   userId: string
   identity: AuthIdentity
-  profile: { avatar: Avatar; face: string; body: string }
+  profile: Profile
 }) {
   const { url, currentVersion, profile, identity } = params
-  const { face, avatar, body } = profile
-  const faceFile: ContentFile = await makeContentFile('./face.png', base64ToBlob(face))
-  const bodyFile: ContentFile = await makeContentFile('./body.png', base64ToBlob(body))
-
-  const faceFileHash: string = await calculateBufferHash(faceFile.content)
-  const bodyFileHash: string = await calculateBufferHash(bodyFile.content)
-
-  avatar.snapshots = {
-    face: faceFileHash,
-    body: bodyFileHash
+  const { avatar } = profile
+  const newAvatar = { ...avatar }
+  let files: ContentFile[] = []
+  if (avatar.snapshots) {
+    if (avatar.snapshots.face.startsWith('data') && avatar.snapshots.body.startsWith('data')) {
+      // replace base64 snapshots with their respective hashes
+      const faceFile: ContentFile = await makeContentFile('./face.png', base64ToBlob(avatar.snapshots.face))
+      const bodyFile: ContentFile = await makeContentFile('./body.png', base64ToBlob(avatar.snapshots.body))
+      const faceFileHash: string = await calculateBufferHash(faceFile.content)
+      const bodyFileHash: string = await calculateBufferHash(bodyFile.content)
+      newAvatar.snapshots = {
+        face: faceFileHash,
+        body: bodyFileHash
+      }
+      files = [faceFile, bodyFile]
+    } else {
+      newAvatar.snapshots = {
+        face: avatar.snapshots.face.split('/').pop()!,
+        body: avatar.snapshots.body.split('/').pop()!
+      }
+    }
   }
-
-  const newProfile = ensureServerFormat(avatar, currentVersion)
-
-  const files = [faceFile, bodyFile]
-
+  const newProfile = ensureServerFormat({ ...profile, avatar: newAvatar }, currentVersion)
   const [data] = await buildDeployData(
     [identity.address],
     {
