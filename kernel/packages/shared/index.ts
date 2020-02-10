@@ -24,7 +24,8 @@ import {
   establishingComms,
   commsEstablished,
   commsErrorRetrying,
-  notStarted
+  notStarted,
+  NEW_LOGIN
 } from './loading/types'
 import { defaultLogger } from './logger'
 import { PassportAsPromise } from './passports/PassportAsPromise'
@@ -189,7 +190,9 @@ export async function initShared(): Promise<Session | undefined> {
 
   if (WORLD_EXPLORER && getDefaultTLD() === 'org') {
     try {
-      const response = await fetch(`https://s7bdh0k6x3.execute-api.us-east-1.amazonaws.com/default/whitelisted_users?id=${identity.address}`)
+      const response = await fetch(
+        `https://s7bdh0k6x3.execute-api.us-east-1.amazonaws.com/default/whitelisted_users?id=${identity.address}`
+      )
       if (!response.ok) {
         throw new Error('unauthorized user')
       }
@@ -258,7 +261,11 @@ export async function initShared(): Promise<Session | undefined> {
 
       break
     } catch (e) {
-      if (e.message && e.message.startsWith('error establishing comms')) {
+      if (e.message && e.message.includes('is taken')) {
+        disconnect()
+        ReportFatalError(NEW_LOGIN)
+        throw e
+      } else if (e.message && e.message.startsWith('error establishing comms')) {
         if (i >= maxAttemps) {
           // max number of attemps reached => rethrow error
           defaultLogger.info(`Max number of attemps reached (${maxAttemps}), unsuccessful connection`)

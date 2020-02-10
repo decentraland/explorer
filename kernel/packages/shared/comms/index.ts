@@ -1,5 +1,5 @@
 import { saveToLocalStorage } from 'atomicHelpers/localStorage'
-import { commConfigurations, parcelLimits, COMMS, DEBUG_LOGIN } from 'config'
+import { commConfigurations, parcelLimits, COMMS } from 'config'
 import { CommunicationsController } from 'shared/apis/CommunicationsController'
 import { defaultLogger } from 'shared/logger'
 import { MessageEntry } from 'shared/types'
@@ -35,7 +35,6 @@ import { CommunicationArea, Position, position2parcel, sameParcel, squareDistanc
 import { BrokerWorldInstanceConnection } from '../comms/v1/brokerWorldInstanceConnection'
 import { profileToRendererFormat } from 'shared/passports/transformations/profileToRendererFormat'
 import { ProfileForRenderer } from 'decentraland-ecs/src'
-import { Session } from '../session/index'
 import { worldRunningObservable, isWorldRunning } from '../world/worldState'
 import { WorldInstanceConnection } from './interface/index'
 import { LighthouseWorldInstanceConnection } from './v2/LighthouseWorldInstanceConnection'
@@ -261,8 +260,6 @@ export function processProfileMessage(
   identity: string,
   message: Package<ProfileVersion>
 ) {
-  processNewLogin(identity, context, fromAlias)
-
   const msgTimestamp = message.time
 
   const peerTrackingInfo = ensurePeerTrackingInfo(context, fromAlias)
@@ -275,16 +272,6 @@ export function processProfileMessage(
 
     peerTrackingInfo.lastProfileUpdate = msgTimestamp
     peerTrackingInfo.lastUpdate = Date.now()
-  }
-}
-
-function processNewLogin(identity: string, context: Context, fromAlias: string) {
-  // TODO - check this issue - moliva - 23/01/2020
-  const checkTodo = false
-  if (checkTodo && !DEBUG_LOGIN) {
-    if (identity === context.userInfo.userId && fromAlias !== getCurrentPeer()!.uuid) {
-      Session.current.then(s => s.disable()).catch(e => defaultLogger.error('error while signing out', e))
-    }
   }
 }
 
@@ -501,7 +488,6 @@ export async function connect(userId: string) {
         const lighthouseUrl = getCommsServer(window.globalStore.getState())
 
         defaultLogger.log('Using Remote lighthouse service: ', lighthouseUrl)
-
         const peer = new Peer(
           lighthouseUrl,
           identity.address,
