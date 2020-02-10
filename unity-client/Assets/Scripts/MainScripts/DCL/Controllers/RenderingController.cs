@@ -1,4 +1,5 @@
 using DCL;
+using DCL.Controllers;
 using DCL.Interface;
 using UnityEngine;
 using UnityGLTF;
@@ -12,6 +13,8 @@ public class RenderingController : MonoBehaviour
         i = this;
     }
 
+    public LoadingLock lockHandler = new LoadingLock();
+
     public System.Action<bool> OnRenderingStateChanged;
     public bool renderingEnabled { get; private set; } = true;
 
@@ -21,6 +24,11 @@ public class RenderingController : MonoBehaviour
         if (!renderingEnabled)
             return;
 
+        DeactivateRendering_Internal();
+    }
+
+    void DeactivateRendering_Internal()
+    {
         renderingEnabled = false;
 
         DCL.Configuration.ParcelSettings.VISUAL_LOADING_ENABLED = false;
@@ -39,12 +47,26 @@ public class RenderingController : MonoBehaviour
         OnRenderingStateChanged?.Invoke(renderingEnabled);
     }
 
+
     [ContextMenu("Enable Rendering")]
     public void ActivateRendering()
     {
         if (renderingEnabled)
             return;
 
+        if (!lockHandler.isUnlocked)
+        {
+            lockHandler.OnUnlocked -= ActivateRendering_Internal;
+            lockHandler.OnUnlocked += ActivateRendering_Internal;
+            return;
+        }
+
+        ActivateRendering_Internal();
+    }
+
+    private void ActivateRendering_Internal()
+    {
+        lockHandler.OnUnlocked -= ActivateRendering_Internal;
         renderingEnabled = true;
 
         DCL.Configuration.ParcelSettings.VISUAL_LOADING_ENABLED = true;
@@ -63,5 +85,13 @@ public class RenderingController : MonoBehaviour
         OnRenderingStateChanged?.Invoke(renderingEnabled);
 
         WebInterface.ReportControlEvent(new WebInterface.ActivateRenderingACK());
+    }
+
+    private void CurrentSceneChange(ParcelScene.State newState)
+    {
+        if (newState == ParcelScene.State.READY)
+        {
+
+        }
     }
 }
