@@ -265,7 +265,10 @@ function ensureTeleportAnimation() {
 function stopTeleportAnimation() {
   document.getElementById('gameContainer')!.setAttribute('style', 'background: #151419')
   document.body.setAttribute('style', 'background: #151419')
-  const tutorialFinished = getCurrentUserProfile()?.tutorialStep === TutorialStepId.FINISHED
+
+  const profile = getCurrentUserProfile() as Profile
+  const tutorialFinished = profile.tutorialStep === TutorialStepId.FINISHED
+  
   if ( !TUTORIAL_ENABLED || tutorialFinished ) {
     unityInterface.ShowWelcomeNotification();
   }
