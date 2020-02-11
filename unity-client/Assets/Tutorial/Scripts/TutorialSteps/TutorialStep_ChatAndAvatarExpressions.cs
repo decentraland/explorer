@@ -17,6 +17,7 @@ namespace DCL.Tutorial
 
             HUDController.i?.avatarHud.SetVisibility(false);
             HUDController.i?.expressionsHud.SetVisibility(false);
+            TutorialController.i.SetChatVisible(false);
         }
 
         public override IEnumerator OnStepExecute()

@@ -45,6 +45,12 @@ namespace DCL.Tutorial
         public override void OnStepFinished()
         {
             base.OnStepFinished();
+
+            welcomeTooltip.Hide();
+            controlsTooltip.Hide();
+            cameraTooltip.Hide();
+            minimapTooltip.Hide();
+
             DCLCharacterController.OnPositionSet -= OnTeleport;
             DCLCharacterController.OnCharacterMoved -= OnCharacterMove;
         }
