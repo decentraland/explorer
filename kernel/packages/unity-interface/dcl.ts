@@ -9,9 +9,10 @@ import { uuid } from 'decentraland-ecs/src'
 import { EventDispatcher } from 'decentraland-rpc/lib/common/core/EventDispatcher'
 import { IFuture } from 'fp-future'
 import { Empty } from 'google-protobuf/google/protobuf/empty_pb'
-import { avatarMessageObservable } from 'shared/comms/peers'
+import { avatarMessageObservable, getUserProfile } from 'shared/comms/peers'
 import { AvatarMessageType } from 'shared/comms/interface/types'
 import { gridToWorld } from '../atomicHelpers/parcelScenePositions'
+import { tutorialStepId } from '../decentraland-loader/lifecycle/tutorial/tutorial'
 import {
   DEBUG,
   EDITOR,
@@ -34,7 +35,7 @@ import { loadingScenes, teleportTriggered, unityClientLoaded } from '../shared/l
 import { createLogger, defaultLogger, ILogger } from '../shared/logger'
 import { saveAvatarRequest } from '../shared/passports/actions'
 import { airdropObservable } from '../shared/apis/AirdropController'
-import { Avatar, Wearable } from '../shared/passports/types'
+import { Avatar, Wearable, Profile } from '../shared/passports/types'
 import {
   PB_AttachEntityComponent,
   PB_ComponentCreated,
@@ -90,8 +91,6 @@ import { ensureUiApis } from '../shared/world/uiSceneInitializer'
 import { worldRunningObservable } from '../shared/world/worldState'
 import { sendPublicChatMessage } from 'shared/comms'
 import { AirdropInfo } from '../shared/airdrops/interface'
-import { getProfile } from 'shared/passports/selectors'
-import { identity } from 'shared'
 
 const rendererVersion = require('decentraland-renderer')
 window['console'].log('Renderer version: ' + rendererVersion)
@@ -171,8 +170,8 @@ const browserInterface = {
   },
 
   SaveUserTutorialStep(data: { tutorialStep: number }) {
-    const profile = getProfile(global.globalStore.getState().passports, identity.address)
-
+    defaultLogger.log("saving tutorial step: ", data.tutorialStep);
+    const profile: Profile = getUserProfile().profile as Profile
     global.globalStore.dispatch(saveAvatarRequest({ ...profile, tutorialStep: data.tutorialStep }))
   },
 
@@ -254,6 +253,13 @@ function ensureTeleportAnimation() {
 function stopTeleportAnimation() {
   document.getElementById('gameContainer')!.setAttribute('style', 'background: #151419')
   document.body.setAttribute('style', 'background: #151419')
+
+  const profile = getUserProfile().profile as Profile
+  const tutorialFinished = profile.tutorialStep === tutorialStepId.FINISHED
+
+  if ( !RESET_TUTORIAL || tutorialFinished ) {
+    unityInterface.ShowWelcomeNotification();
+  }
 }
 
 const CHUNK_SIZE = 500
@@ -409,6 +415,9 @@ export const unityInterface = {
   },
   ConfigureExpressionsHUD(configuration: HUDConfiguration) {
     gameInstance.SendMessage('HUDController', 'ConfigureExpressionsHUD', JSON.stringify(configuration))
+  },
+  ShowWelcomeNotification() {
+    gameInstance.SendMessage('HUDController', 'ShowWelcomeNotification')
   },
   TriggerSelfUserExpression(expressionId: string) {
     gameInstance.SendMessage('HUDController', 'TriggerSelfUserExpression', expressionId)

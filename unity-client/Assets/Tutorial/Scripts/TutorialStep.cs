@@ -34,7 +34,7 @@ public class TutorialStep : MonoBehaviour
 
             if (autoHide)
             {
-                yield return WaitForSecondsWhenRenderingEnabled(tooltip.secondsOnScreen / 10); // TODO: REMOVE MULTIPLIER
+                yield return WaitForSecondsWhenRenderingEnabled(tooltip.secondsOnScreen);
                 tooltip.Hide();
             }
         }
@@ -47,7 +47,7 @@ public class TutorialStep : MonoBehaviour
 
     public virtual IEnumerator WaitIdleTime()
     {
-        yield return WaitForSecondsWhenRenderingEnabled(TutorialController.DEFAULT_STAGE_IDLE_TIME / 10); // TODO: REMOVE MULTIPLIER
+        yield return WaitForSecondsWhenRenderingEnabled(TutorialController.DEFAULT_STAGE_IDLE_TIME);
     }
 
     public virtual IEnumerator WaitForSecondsWhenRenderingEnabled(float seconds)

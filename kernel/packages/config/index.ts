@@ -1,5 +1,8 @@
 import { getFetchContentServer } from '../shared/dao/selectors'
 import { getUserProfile } from 'shared/comms/peers'
+import { tutorialStepId } from '../decentraland-loader/lifecycle/tutorial/tutorial'
+import defaultLogger from 'shared/logger'
+
 const queryString = require('query-string')
 declare var window: any
 
@@ -129,7 +132,8 @@ export const SHOW_FPS_COUNTER = location.search.indexOf('SHOW_FPS_COUNTER') !== 
 export const RESET_TUTORIAL = location.search.indexOf('RESET_TUTORIAL') !== -1
 
 export function tutorialEnabled() {
-  return WORLD_EXPLORER && (RESET_TUTORIAL || getUserProfile().profile.tutorialStep !== 99)
+  defaultLogger.log("loaded tutorial step: ", getUserProfile().profile.tutorialStep);
+  return WORLD_EXPLORER && (RESET_TUTORIAL || getUserProfile().profile.tutorialStep !== tutorialStepId.FINISHED)
 }
 
 export namespace commConfigurations {
