@@ -49,8 +49,8 @@ import { profileToRendererFormat } from './transformations/profileToRendererForm
 import { ensureServerFormat } from './transformations/profileToServerFormat'
 import { Avatar, Catalog, Profile, WearableId, Wearable, Collection } from './types'
 import { Action } from 'redux'
-import { identity } from '../index'
-import { AuthIdentity, Authenticator, AuthLink } from '../crypto/Authenticator'
+import { identity, ExplorerIdentity } from '../index'
+import { Authenticator, AuthLink } from 'dcl-crypto'
 
 const CID = require('cids')
 import { sha3 } from 'web3x/utils'
@@ -223,21 +223,17 @@ export function* handleFetchProfile(action: PassportRequestAction): any {
       if (ALL_WEARABLES) {
         profile.inventory = (yield select(getExclusiveCatalog)).map((_: Wearable) => _.id)
       } else {
-        if (profile.ethAddress) {
-          yield put(inventoryRequest(userId, profile.ethAddress))
-          const inventoryResult = yield race({
-            success: take(isActionFor(INVENTORY_SUCCESS, userId)),
-            failure: take(isActionFor(INVENTORY_FAILURE, userId))
-          })
-          if (inventoryResult.failure) {
-            defaultLogger.error(`Unable to fetch inventory for ${userId}:`, inventoryResult.failure)
-          } else {
-            profile.inventory = (inventoryResult.success as InventorySuccess).payload.inventory.map(
-              dropIndexFromExclusives
-            )
-          }
+        yield put(inventoryRequest(userId, userId))
+        const inventoryResult = yield race({
+          success: take(isActionFor(INVENTORY_SUCCESS, userId)),
+          failure: take(isActionFor(INVENTORY_FAILURE, userId))
+        })
+        if (inventoryResult.failure) {
+          defaultLogger.error(`Unable to fetch inventory for ${userId}:`, inventoryResult.failure)
         } else {
-          profile.inventory = []
+          profile.inventory = (inventoryResult.success as InventorySuccess).payload.inventory.map(
+            dropIndexFromExclusives
+          )
         }
       }
       const passport = yield call(processServerProfile, userId, profile)
@@ -467,7 +463,7 @@ export async function modifyAvatar(params: {
   url: string
   currentVersion: number
   userId: string
-  identity: AuthIdentity
+  identity: ExplorerIdentity
   profile: { avatar: Avatar; face: string; body: string }
 }) {
   const { url, currentVersion, profile, identity } = params
