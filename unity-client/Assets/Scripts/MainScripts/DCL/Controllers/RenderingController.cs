@@ -1,4 +1,5 @@
 using DCL;
+using DCL.Helpers;
 using DCL.Interface;
 using UnityEngine;
 using UnityGLTF;
