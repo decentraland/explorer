@@ -3,6 +3,7 @@ import { Vector3Component } from 'atomicHelpers/landHelpers'
 import { uuid } from 'atomicHelpers/math'
 import { parseParcelPosition, worldToGrid } from 'atomicHelpers/parcelScenePositions'
 import { SHOW_FPS_COUNTER } from 'config'
+import { sampleDropData } from 'shared/airdrops/sampleDrop'
 import { APIOptions, exposeMethod, registerAPI } from 'decentraland-rpc/lib/host'
 import { EngineAPI } from 'shared/apis/EngineAPI'
 import { ExposableAPI } from 'shared/apis/ExposableAPI'
@@ -272,7 +273,7 @@ export class ChatController extends ExposableAPI implements IChatController {
 
     this.addChatCommand('airdrop', 'fake an airdrop', () => {
       const unityWindow: any = window
-      unityWindow.unityInterface.TriggerAirdropDisplay(sampleDrop)
+      unityWindow.unityInterface.TriggerAirdropDisplay(sampleDropData)
       return {
         id: uuid(),
         isCommand: true,
