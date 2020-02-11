@@ -137,8 +137,7 @@ const browserInterface = {
   },
 
   OpenWebURL(data: { url: string }) {
-    const tab = window.open('about:blank', '_blank')
-    tab.location.href = data.url
+    window.open(data.url, '_blank')
   },
 
   PerformanceReport(samples: string) {
@@ -216,16 +215,25 @@ const browserInterface = {
 
   BlockPlayer(data: { userId: string }) {
     const profile = getProfile(global.globalStore.getState(), identity.address)
-    defaultLogger.info('blocking user', profile)
 
     if (profile) {
-      for (let blockedUser of profile.blocked) {
-        if (blockedUser === data.userId) {
-          return
+      if (profile.blocked) {
+        for (let blockedUser of profile.blocked) {
+          if (blockedUser === data.userId) {
+            return
+          }
         }
       }
+      global.globalStore.dispatch(saveAvatarRequest({ ...profile, blocked: [...(profile.blocked || []), data.userId] }))
+    }
+  },
 
-      global.globalStore.dispatch(saveAvatarRequest({ ...profile, blocked: [...profile.blocked, data.userId] }))
+  UnblockPlayer(data: { userId: string }) {
+    const profile = getProfile(global.globalStore.getState(), identity.address)
+
+    if (profile) {
+      const blocked = profile.blocked ? profile.blocked.filter(id => id !== data.userId) : []
+      global.globalStore.dispatch(saveAvatarRequest({ ...profile, blocked }))
     }
   }
 }
