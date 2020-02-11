@@ -6,7 +6,8 @@ import {
   PREVIEW,
   setNetwork,
   STATIC_WORLD,
-  WORLD_EXPLORER
+  WORLD_EXPLORER,
+  getDefaultTLD
 } from '../config'
 import { initialize, queueTrackingEvent, identifyUser } from './analytics'
 import './apis/index'
@@ -24,6 +25,7 @@ import {
   establishingComms,
   commsEstablished,
   commsErrorRetrying,
+  NETWORK_MISMATCH,
   notStarted
 } from './loading/types'
 import { defaultLogger } from './logger'
@@ -31,7 +33,7 @@ import { PassportAsPromise } from './passports/PassportAsPromise'
 import { Session } from './session/index'
 import { RootState } from './store/rootTypes'
 import { buildStore } from './store/store'
-import { getAppNetwork } from './web3'
+import { getAppNetwork, getNetworkFromTLD } from './web3'
 import { initializeUrlPositionObserver } from './world/positionThings'
 import { setWorldContext } from './protocol/actions'
 import { profileToRendererFormat } from './passports/transformations/profileToRendererFormat'
@@ -43,7 +45,7 @@ import { Personal } from 'web3x/personal/personal'
 import { Account } from 'web3x/account'
 import { web3initialized } from './dao/actions'
 import { realmInitialized } from './dao'
-import { getDefaultTLD } from '../config/index'
+import { getNetwork } from './ethereum/EthereumService'
 
 export type ExplorerIdentity = AuthIdentity & {
   address: string
@@ -123,6 +125,30 @@ async function createAuthIdentity() {
   return identity
 }
 
+async function checkTldVsNetwork() {
+  const web3Network = await getNetwork()
+  const web3Net = web3Network === '1' ? ETHEREUM_NETWORK.MAINNET : ETHEREUM_NETWORK.ROPSTEN
+
+  const tld = getTLD()
+  const tldNet = getNetworkFromTLD()
+
+  if (tld === 'localhost') {
+    // localhost => allow any network
+    return false
+  }
+
+  if (tldNet !== web3Net) {
+    document.getElementById('tld')!.textContent = tld
+    document.getElementById('web3Net')!.textContent = web3Net
+    document.getElementById('web3NetGoal')!.textContent = tldNet
+
+    ReportFatalError(NETWORK_MISMATCH)
+    return true
+  }
+
+  return false
+}
+
 export async function initShared(): Promise<Session | undefined> {
   if (WORLD_EXPLORER) {
     await initializeAnalytics()
@@ -156,6 +182,10 @@ export async function initShared(): Promise<Session | undefined> {
 
   if (WORLD_EXPLORER) {
     await awaitWeb3Approval()
+
+    if (await checkTldVsNetwork()) {
+      return undefined
+    }
 
     try {
       const userData = getUserProfile()
