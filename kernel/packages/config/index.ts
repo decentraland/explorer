@@ -1,7 +1,5 @@
-import { getFetchContentServer } from '../shared/dao/selectors'
 import { getUserProfile } from 'shared/comms/peers'
 import { tutorialStepId } from '../decentraland-loader/lifecycle/tutorial/tutorial'
-
 const queryString = require('query-string')
 declare var window: any
 
@@ -155,6 +153,11 @@ export namespace commConfigurations {
     },
     {
       urls: 'stun:stun4.l.google.com:19302'
+    },
+    {
+      urls: 'turn:stun.decentraland.org:3478',
+      credential: 'passworddcl',
+      username: 'usernamedcl'
     }
   ]
 }
@@ -242,16 +245,14 @@ export const ENABLE_EMPTY_SCENES = !DEBUG || knownTLDs.includes(getTLD())
 export function getContentUrl() {
   const TLDDefault = getDefaultTLD()
 
-  return AWS
-    ? `https://content.decentraland.${TLDDefault === 'today' ? 'org' : TLDDefault}`
-    : getFetchContentServer(window.globalStore.getState())
+  return `https://content.decentraland.${TLDDefault === 'today' ? 'org' : TLDDefault}`
 }
 
 export function getServerConfigurations() {
   const TLDDefault = getDefaultTLD()
   return {
     contentAsBundle: `https://content-assets-as-bundle.decentraland.org`,
-    wearablesApi: `https://wearables-api.decentraland.org/v2`,
+    wearablesApi: `https://wearable-api.decentraland.org/v2`,
     avatar: {
       snapshotStorage: `https://avatars-storage.decentraland.${TLDDefault}/`,
       catalog: getExclusiveServer(),
@@ -304,13 +305,13 @@ export async function setNetwork(net: ETHEREUM_NETWORK) {
 
 export namespace ethereumConfigurations {
   export const mainnet = {
-    wss: 'wss://mainnet.infura.io/ws',
-    http: 'https://mainnet.infura.io/',
+    wss: 'wss://mainnet.infura.io/ws/v3/074a68d50a7c4e6cb46aec204a50cbf0',
+    http: 'https://mainnet.infura.io/v3/074a68d50a7c4e6cb46aec204a50cbf0/',
     etherscan: 'https://etherscan.io'
   }
   export const ropsten = {
-    wss: 'wss://ropsten.infura.io/ws',
-    http: 'https://ropsten.infura.io/',
+    wss: 'wss://ropsten.infura.io/ws/v3/074a68d50a7c4e6cb46aec204a50cbf0',
+    http: 'https://ropsten.infura.io/v3/074a68d50a7c4e6cb46aec204a50cbf0/',
     etherscan: 'https://ropsten.etherscan.io'
   }
 }

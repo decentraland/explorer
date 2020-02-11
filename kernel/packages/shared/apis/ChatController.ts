@@ -1,7 +1,9 @@
 // tslint:disable:prefer-function-over-method
 import { Vector3Component } from 'atomicHelpers/landHelpers'
+import { getFromLocalStorage, saveToLocalStorage } from 'atomicHelpers/localStorage'
 import { uuid } from 'atomicHelpers/math'
 import { parseParcelPosition, worldToGrid } from 'atomicHelpers/parcelScenePositions'
+import { data as sampleDrop } from 'shared/airdrops/sampleDrop'
 import { parcelLimits, SHOW_FPS_COUNTER } from 'config'
 import { APIOptions, exposeMethod, registerAPI } from 'decentraland-rpc/lib/host'
 import { EngineAPI } from 'shared/apis/EngineAPI'
@@ -34,6 +36,18 @@ avatarMessageObservable.add((pose: AvatarMessage) => {
 const fpsConfiguration = {
   visible: SHOW_FPS_COUNTER
 }
+
+const CAMPAIGN_PARCEL_SEQUENCE = [
+  { x: 113, y: -7 },
+  { x: 87, y: 18 },
+  { x: 52, y: 2 },
+  { x: 16, y: 83 },
+  { x: -12, y: -39 },
+  { x: 60, y: 115 }
+]
+
+const blacklisted = ['help', 'airdrop']
+
 export interface IChatController {
   /**
    * Send the chat message
@@ -165,6 +179,15 @@ export class ChatController extends ExposableAPI implements IChatController {
             y: parseInt('' + y, 10),
             text: response
           } as any)
+        } else if (message.trim().toLowerCase() === 'next') {
+          const current = getFromLocalStorage('launch-campaign-status') || 0
+          saveToLocalStorage('launch-campaign-status', current + 1)
+          const { x, y } = CAMPAIGN_PARCEL_SEQUENCE[current % CAMPAIGN_PARCEL_SEQUENCE.length]
+          teleportObservable.notifyObservers({
+            x,
+            y,
+            text: `Teleporting you to the next scene… and more treasures!`
+          } as any)
         } else {
           response = 'Could not recognize the coordinates provided. Example usage: /goto 42,42'
         }
@@ -290,6 +313,17 @@ export class ChatController extends ExposableAPI implements IChatController {
       }
     )
 
+    this.addChatCommand('airdrop', 'fake an airdrop', () => {
+      const unityWindow: any = window
+      unityWindow.unityInterface.TriggerAirdropDisplay(sampleDrop)
+      return {
+        id: uuid(),
+        isCommand: true,
+        sender: 'Decentraland',
+        message: 'Faking airdrop...'
+      }
+    })
+
     this.addChatCommand('unmute', 'Unmute [username]', message => {
       const username = message
       const currentUser = getCurrentUser()
@@ -326,7 +360,7 @@ export class ChatController extends ExposableAPI implements IChatController {
           `\n\nYou can move with the [WASD] keys and jump with the [SPACE] key.` +
           `\n\nYou can toggle the chat with the [ENTER] key.` +
           `\n\nAvailable commands:\n${Object.keys(this.chatCommands)
-            .filter(name => name !== 'help')
+            .filter(name => !blacklisted.includes(name))
             .map(name => `\t/${name}: ${this.chatCommands[name].description}`)
             .concat('\t/help: Show this list of commands')
             .join('\n')}`
