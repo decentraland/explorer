@@ -53,10 +53,8 @@ export class TeleportController {
   }
 
   public static goTo(x: number, y: number, teleportMessage?: string): { message: string; success: boolean } {
-    let tpMessage: string = teleportMessage as string
-    if (!teleportMessage) {
-      tpMessage = `Teleporting to ${x}, ${y}...`
-    }
+    const tpMessage: string = teleportMessage ? teleportMessage : `Teleporting to ${x}, ${y}...`
+
     const insideCoords =
       x > parcelLimits.minLandCoordinateX &&
       x <= parcelLimits.maxLandCoordinateX &&
@@ -74,8 +72,8 @@ export class TeleportController {
 
       return { message: tpMessage, success: true }
     } else {
-      tpMessage = `Coordinates are outside of the boundaries. Limits are from ${parcelLimits.minLandCoordinateX} to ${parcelLimits.maxLandCoordinateX} for X and ${parcelLimits.minLandCoordinateY} to ${parcelLimits.maxLandCoordinateY} for Y`
-      return { message: tpMessage, success: false }
+      const errorMessage = `Coordinates are outside of the boundaries. Limits are from ${parcelLimits.minLandCoordinateX} to ${parcelLimits.maxLandCoordinateX} for X and ${parcelLimits.minLandCoordinateY} to ${parcelLimits.maxLandCoordinateY} for Y`
+      return { message: errorMessage, success: false }
     }
   }
 }

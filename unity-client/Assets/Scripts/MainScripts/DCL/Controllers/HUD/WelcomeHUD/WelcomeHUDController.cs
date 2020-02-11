@@ -18,7 +18,7 @@ public class WelcomeHUDController : IHUD, System.IDisposable
         this.model = model;
 
         view = WelcomeHUDView.CreateView(model.hasWallet);
-        view.Initialize(model, OnConfirmPressed, Close);
+        view.Initialize(OnConfirmPressed, Close);
 
         Utils.UnlockCursor();
     }

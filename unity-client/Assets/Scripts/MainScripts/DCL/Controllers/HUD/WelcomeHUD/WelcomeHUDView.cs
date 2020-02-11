@@ -27,11 +27,8 @@ public class WelcomeHUDView : MonoBehaviour
         return Instantiate(prefab).GetComponent<WelcomeHUDView>();
     }
 
-    public void Initialize(WelcomeHUDController.Model model, UnityAction OnConfirm, UnityAction OnClose)
+    public void Initialize(UnityAction OnConfirm, UnityAction OnClose)
     {
-        if (model == null)
-            return;
-
         confirmButton.onClick.RemoveAllListeners();
         confirmButton.onClick.AddListener(OnConfirm);
 

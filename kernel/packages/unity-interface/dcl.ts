@@ -165,10 +165,8 @@ const browserInterface = {
 
   MotdConfirmClicked() {
     if (hasWallet) {
-      // TODO(Brian): Teleport player to desired location
       TeleportController.goToNext()
     } else {
-      // TODO(Brian): Open url with wallet instructions
       window.open('https://docs.decentraland.org/blockchain-integration/ethereum-essentials/', '_blank')
     }
   },
