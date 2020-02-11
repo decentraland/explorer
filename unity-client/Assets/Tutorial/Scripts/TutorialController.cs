@@ -1,4 +1,4 @@
-using DCL.Controllers;
+﻿using DCL.Controllers;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -120,6 +120,7 @@ namespace DCL.Tutorial
                 runningStep.OnStepStart();
                 yield return runningStep.OnStepExecute();
                 runningStep.OnStepFinished();
+
                 Destroy(runningStep.gameObject);
             }
 
@@ -181,8 +182,9 @@ namespace DCL.Tutorial
         private int GetStepIndexFromTutorialStepId(TutorialStep.Id step)
         {
             int result = 0;
+            int stepsCount = steps.Count;
 
-            for (int i = 0; i < steps.Count; i++)
+            for (int i = 0; i < stepsCount; i++)
             {
                 if (steps[i].stepId == step)
                 {
