@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using DCL.Interface;
@@ -118,7 +118,7 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
         return inventory.Keys.ToArray();
     }
 
-    public void SetTutorialStep(int newTutorialStep)
+    public void SetTutorialStepId(int newTutorialStep)
     {
         model.tutorialStep = newTutorialStep;
 

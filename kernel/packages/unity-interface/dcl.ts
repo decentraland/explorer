@@ -9,9 +9,10 @@ import { uuid } from 'decentraland-ecs/src'
 import { EventDispatcher } from 'decentraland-rpc/lib/common/core/EventDispatcher'
 import { IFuture } from 'fp-future'
 import { Empty } from 'google-protobuf/google/protobuf/empty_pb'
-import { avatarMessageObservable } from 'shared/comms/peers'
+import { avatarMessageObservable, getUserProfile } from 'shared/comms/peers'
 import { AvatarMessageType } from 'shared/comms/interface/types'
 import { gridToWorld } from '../atomicHelpers/parcelScenePositions'
+import { tutorialStepId } from '../decentraland-loader/lifecycle/tutorial/tutorial'
 import {
   DEBUG,
   EDITOR,
@@ -19,7 +20,8 @@ import {
   playerConfigurations,
   SCENE_DEBUG_PANEL,
   SHOW_FPS_COUNTER,
-  TUTORIAL_ENABLED
+  RESET_TUTORIAL,
+  tutorialEnabled
 } from '../config'
 import { Quaternion, ReadOnlyQuaternion, ReadOnlyVector3, Vector3 } from '../decentraland-ecs/src/decentraland/math'
 import { IEventNames, IEvents, ProfileForRenderer } from '../decentraland-ecs/src/decentraland/Types'
@@ -89,8 +91,6 @@ import { ensureUiApis } from '../shared/world/uiSceneInitializer'
 import { worldRunningObservable } from '../shared/world/worldState'
 import { sendPublicChatMessage } from 'shared/comms'
 import { AirdropInfo } from '../shared/airdrops/interface'
-import { getProfile } from 'shared/passports/selectors'
-import { identity } from 'shared'
 
 const rendererVersion = require('decentraland-renderer')
 window['console'].log('Renderer version: ' + rendererVersion)
@@ -100,24 +100,14 @@ let isTheFirstLoading = true
 
 export let futures: Record<string, IFuture<any>> = {}
 
+export let unityInterface: any
+
 const positionEvent = {
   position: Vector3.Zero(),
   quaternion: Quaternion.Identity,
   rotation: Vector3.Zero(),
   playerHeight: playerConfigurations.height,
   mousePosition: Vector3.Zero()
-}
-
-enum TutorialStepId {
-  NONE = 0,
-  INITIAL_SCENE = 1,
-  GENESIS_PLAZA = 2,
-  CHAT_AND_AVATAR_EXPRESSIONS = 3,
-  FINISHED = 99,
-}
-
-function getCurrentUserProfile() : Profile | null {
-  return getProfile(global.globalStore.getState().passports, identity.address)
 }
 
 /////////////////////////////////// HANDLERS ///////////////////////////////////
@@ -182,8 +172,8 @@ const browserInterface = {
   },
 
   SaveUserTutorialStep(data: { tutorialStep: number }) {
-    defaultLogger.log('tutorial stage step updated:', data.tutorialStep)
-    const profile:Profile = getCurrentUserProfile() as Profile
+    defaultLogger.log('saving tutorial step: ', data.tutorialStep)
+    const profile: Profile = getUserProfile().profile as Profile
     global.globalStore.dispatch(saveAvatarRequest({ ...profile, tutorialStep: data.tutorialStep }))
   },
 
@@ -266,11 +256,10 @@ function stopTeleportAnimation() {
   document.getElementById('gameContainer')!.setAttribute('style', 'background: #151419')
   document.body.setAttribute('style', 'background: #151419')
 
-  const profile = getCurrentUserProfile() as Profile
-  const tutorialFinished = profile.tutorialStep === TutorialStepId.FINISHED
-  
-  if ( !TUTORIAL_ENABLED || tutorialFinished ) {
-    unityInterface.ShowWelcomeNotification();
+  const profile = getUserProfile().profile as Profile
+
+  if (!tutorialEnabled() || profile.tutorialStep !== tutorialStepId.INITIAL_SCENE) {
+    unityInterface.ShowWelcomeNotification()
   }
 }
 
@@ -318,7 +307,7 @@ export function* chunkGenerator(
   }
 }
 
-export const unityInterface = {
+unityInterface = {
   debug: false,
   SetDebug() {
     gameInstance.SendMessage('SceneController', 'SetDebug')
@@ -448,6 +437,10 @@ export const unityInterface = {
     }
   },
   SetTutorialEnabled() {
+    if (RESET_TUTORIAL) {
+      browserInterface.SaveUserTutorialStep({ tutorialStep: 0 })
+    }
+
     gameInstance.SendMessage('TutorialController', 'SetTutorialEnabled')
   },
   TriggerAirdropDisplay(data: AirdropInfo) {
@@ -766,7 +759,7 @@ export async function initializeEngine(_gameInstance: GameInstance) {
     unityInterface.SetEngineDebugPanel()
   }
 
-  if (TUTORIAL_ENABLED) {
+  if (tutorialEnabled()) {
     unityInterface.SetTutorialEnabled()
   }
 
@@ -778,7 +771,7 @@ export async function initializeEngine(_gameInstance: GameInstance) {
     onMessage(type: string, message: any) {
       if (type in browserInterface) {
         // tslint:disable-next-line:semicolon
-        ; (browserInterface as any)[type](message)
+        ;(browserInterface as any)[type](message)
       } else {
         defaultLogger.info(`Unknown message (did you forget to add ${type} to unity-interface/dcl.ts?)`, message)
       }
