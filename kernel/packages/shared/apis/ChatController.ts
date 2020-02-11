@@ -3,6 +3,7 @@ import { Vector3Component } from 'atomicHelpers/landHelpers'
 import { getFromLocalStorage, saveToLocalStorage } from 'atomicHelpers/localStorage'
 import { uuid } from 'atomicHelpers/math'
 import { parseParcelPosition, worldToGrid } from 'atomicHelpers/parcelScenePositions'
+import { data as sampleDrop } from 'shared/airdrops/sampleDrop'
 import { parcelLimits, SHOW_FPS_COUNTER } from 'config'
 import { APIOptions, exposeMethod, registerAPI } from 'decentraland-rpc/lib/host'
 import { EngineAPI } from 'shared/apis/EngineAPI'
@@ -45,10 +46,7 @@ const CAMPAIGN_PARCEL_SEQUENCE = [
   { x: 60, y: 115 }
 ]
 
-const blacklisted = [
-  'help',
-  'airdrop'
-]
+const blacklisted = ['help', 'airdrop']
 
 export interface IChatController {
   /**
