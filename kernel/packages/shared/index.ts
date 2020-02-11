@@ -47,6 +47,7 @@ import { initializeUrlPositionObserver } from './world/positionThings'
 
 export type ExplorerIdentity = AuthIdentity & {
   address: string
+  hasConnectedWeb3: boolean
 }
 
 enum AnalyticsAccount {
@@ -121,8 +122,7 @@ async function createAuthIdentity() {
   }
 
   const auth = await Authenticator.initializeAuthChain(address, ephemeral, ephemeralLifespanMinutes, signer)
-  const identity: ExplorerIdentity = { ...auth, address: address.toLocaleLowerCase() }
-  identity.hasConnectedWeb3 = hasConnectedWeb3
+  const identity: ExplorerIdentity = { ...auth, address: address.toLocaleLowerCase(), hasConnectedWeb3 }
 
   return identity
 }
