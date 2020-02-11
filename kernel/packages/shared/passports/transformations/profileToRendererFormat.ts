@@ -2,12 +2,12 @@ import { Profile } from '../types'
 import { ProfileForRenderer } from 'decentraland-ecs/src'
 import { convertToRGBObject } from './convertToRGBObject'
 import { dropDeprecatedWearables } from './processServerProfile'
-import { AuthIdentity } from '../../crypto/Authenticator'
+import { ExplorerIdentity } from 'shared'
 
-export function profileToRendererFormat(profile: Profile, identity?: AuthIdentity): ProfileForRenderer {
+export function profileToRendererFormat(profile: Profile, identity?: ExplorerIdentity): ProfileForRenderer {
   return {
     ...profile,
-    ...(identity ? { hasConnectedWeb3: identity.hasConnectedWeb3 } : {}),
+    hasConnectedWeb3: identity ? identity.hasConnectedWeb3 : false,
     avatar: {
       ...profile.avatar,
       wearables: profile.avatar.wearables.filter(dropDeprecatedWearables),
