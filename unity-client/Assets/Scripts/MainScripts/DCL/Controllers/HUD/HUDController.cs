@@ -119,9 +119,6 @@ public class HUDController : MonoBehaviour
 
     public void ConfigureExpressionsHUD(string configurationJson)
     {
-        if(!UserProfile.ENABLE_EXPRESSIONS)
-            return;
-
         HUDConfiguration configuration = JsonUtility.FromJson<HUDConfiguration>(configurationJson);
         if (configuration.active && expressionsHud == null)
         {
@@ -205,7 +202,7 @@ public class HUDController : MonoBehaviour
         notificationHud?.Dispose();
         avatarEditorHud?.Dispose();
     }
-    
+
 #if UNITY_EDITOR
     [ContextMenu("Trigger fake PlayerInfoCard")]
     public void TriggerFakePlayerInfoCard()
@@ -213,7 +210,7 @@ public class HUDController : MonoBehaviour
         var newModel = ownUserProfile.CloneModel();
         newModel.name = "FakePassport";
         newModel.description = "Fake Description for Testing";
-        newModel.inventory = new []
+        newModel.inventory = new[]
         {
             "dcl://halloween_2019/machete_headband_top_head",
             "dcl://halloween_2019/bee_suit_upper_body",
