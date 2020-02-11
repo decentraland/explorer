@@ -19,7 +19,8 @@ import {
   playerConfigurations,
   SCENE_DEBUG_PANEL,
   SHOW_FPS_COUNTER,
-  TUTORIAL_ENABLED
+  RESET_TUTORIAL,
+  tutorialEnabled
 } from '../config'
 import { Quaternion, ReadOnlyQuaternion, ReadOnlyVector3, Vector3 } from '../decentraland-ecs/src/decentraland/math'
 import { IEventNames, IEvents, ProfileForRenderer } from '../decentraland-ecs/src/decentraland/Types'
@@ -170,8 +171,8 @@ const browserInterface = {
   },
 
   SaveUserTutorialStep(data: { tutorialStep: number }) {
-    defaultLogger.log('tutorial stage mask updated:', data.tutorialStep)
     const profile = getProfile(global.globalStore.getState().passports, identity.address)
+
     global.globalStore.dispatch(saveAvatarRequest({ ...profile, tutorialStep: data.tutorialStep }))
   },
 
@@ -426,6 +427,10 @@ export const unityInterface = {
     }
   },
   SetTutorialEnabled() {
+    if(RESET_TUTORIAL) {
+      browserInterface.SaveUserTutorialStep({ tutorialStep: 0 })
+    }
+
     gameInstance.SendMessage('TutorialController', 'SetTutorialEnabled')
   },
   TriggerAirdropDisplay(data: AirdropInfo) {
@@ -744,7 +749,7 @@ export async function initializeEngine(_gameInstance: GameInstance) {
     unityInterface.SetEngineDebugPanel()
   }
 
-  if (TUTORIAL_ENABLED) {
+  if (tutorialEnabled()) {
     unityInterface.SetTutorialEnabled()
   }
 

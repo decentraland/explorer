@@ -84,7 +84,8 @@ public class TutorialController : MonoBehaviour
     private IEnumerator ExecuteSteps(TutorialStep.Id startingStep)
     {
         int startingStepIndex = 0;
-        for (int i = 0; i < steps.Count; i++)
+        int stepsCount = steps.Count;
+        for (int i = 0; i < stepsCount; i++)
         {
             if (steps[i].stepId == startingStep)
             {
@@ -93,24 +94,25 @@ public class TutorialController : MonoBehaviour
             }
         }
 
-        for (int i = startingStepIndex; i < steps.Count; i++)
+        for (int i = startingStepIndex; i < stepsCount; i++)
         {
             runningStep = steps[i];
             currentTutorialStep = (int)runningStep.stepId;
 
             var stepInstance = Instantiate(runningStep);
 
-            UserProfile.GetOwnUserProfile().SetTutorialStep(currentTutorialStep);
-
             stepInstance.OnStepStart();
             yield return stepInstance.OnStepExecute();
             stepInstance.OnStepFinished();
 
+            if (i == (stepsCount - 1))
+                currentTutorialStep = (int)TutorialStep.Id.FINISHED;
+
+            UserProfile.GetOwnUserProfile().SetTutorialStep(currentTutorialStep);
+
             Destroy(stepInstance);
         }
 
-        currentTutorialStep = (int)TutorialStep.Id.FINISHED;
-        UserProfile.GetOwnUserProfile().SetTutorialStep(currentTutorialStep);
         runningStep = null;
     }
 
@@ -124,7 +126,6 @@ public class TutorialController : MonoBehaviour
         if (!isTutorialEnabled || !renderingEnabled) return;
 
         currentTutorialStep = GetTutorialStepFromProfile();
-        Debug.Log("tutorial stage mask fetched: " + currentTutorialStep);
 
 #if UNITY_EDITOR
         if (debugFlagStartingValue != 0)

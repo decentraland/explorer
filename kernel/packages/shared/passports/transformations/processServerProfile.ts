@@ -51,6 +51,6 @@ export function processServerProfile(userId: string, receivedProfile: any): Prof
       snapshots
     },
     inventory: receivedProfile.inventory || [],
-    tutorialStep: receivedProfile.tutorialStep || 0
+    tutorialStep: receivedProfile.tutorialStep
   }
 }
