@@ -7,8 +7,6 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "UserProfile", menuName = "UserProfile")]
 public class UserProfile : ScriptableObject //TODO Move to base variable
 {
-    public const bool ENABLE_EXPRESSIONS = false;
-    
     static DateTime epochStart = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
     public event Action<UserProfile> OnUpdate;
@@ -18,6 +16,7 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
     public string email => model.email;
     public bool hasConnectedWeb3 => model.hasConnectedWeb3;
     public AvatarModel avatar => model.avatar;
+    public int tutorialStep => model.tutorialFlagsMask;
     internal Dictionary<string, int> inventory = new Dictionary<string, int>();
 
     public Sprite faceSnapshot { get; private set; }
@@ -59,9 +58,9 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
 
         if (downloadAssets && model.snapshots != null)
         {
-            if(model.snapshots.face != null)
+            if (model.snapshots.face != null)
                 ThumbnailsManager.RequestThumbnail(model.snapshots.face, OnFaceSnapshotReady);
-            if(model.snapshots.body != null)
+            if (model.snapshots.body != null)
                 ThumbnailsManager.RequestThumbnail(model.snapshots.body, OnBodySnapshotReady);
         }
 
@@ -92,10 +91,10 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
     {
         if (model?.snapshots != null)
         {
-            if(model.snapshots.face != null)
+            if (model.snapshots.face != null)
                 ThumbnailsManager.CancelRequest(model.snapshots.face, OnFaceSnapshotReady);
 
-            if(model.snapshots.body != null)
+            if (model.snapshots.body != null)
                 ThumbnailsManager.CancelRequest(model.snapshots.body, OnBodySnapshotReady);
         }
 
@@ -107,9 +106,6 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
 
     public void SetAvatarExpression(string id)
     {
-        if (!ENABLE_EXPRESSIONS)
-            return;
-        
         var timestamp = (long)(DateTime.UtcNow - epochStart).TotalMilliseconds;
         avatar.expressionTriggerId = id;
         avatar.expressionTriggerTimestamp = timestamp;
@@ -120,6 +116,11 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
     public string[] GetInventoryItemsIds()
     {
         return inventory.Keys.ToArray();
+    }
+
+    public void SetTutorialFlag(int newTutorialFlagsMask)
+    {
+        model.tutorialFlagsMask = newTutorialFlagsMask;
     }
 
     internal static UserProfile ownUserProfile;

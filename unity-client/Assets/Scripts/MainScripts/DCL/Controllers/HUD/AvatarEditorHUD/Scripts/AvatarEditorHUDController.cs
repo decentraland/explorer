@@ -23,6 +23,8 @@ public class AvatarEditorHUDController : IDisposable, IHUD
 
     protected AvatarEditorHUDView view;
 
+    public Action<bool> OnVisibilityChanged;
+
     public AvatarEditorHUDController(UserProfile userProfile, WearableDictionary catalog, bool bypassUpdateAvatarPreview = false)
     {
         this.userProfile = userProfile;
@@ -367,6 +369,7 @@ public class AvatarEditorHUDController : IDisposable, IHUD
     public void SetVisibility(bool visible)
     {
         view.SetVisibility(visible);
+        OnVisibilityChanged?.Invoke(visible);
     }
 
     public void Dispose()

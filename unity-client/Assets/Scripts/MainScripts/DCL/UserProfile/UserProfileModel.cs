@@ -17,7 +17,9 @@ public class UserProfileModel
     public AvatarModel avatar;
     public string[] inventory;
     public Snapshots snapshots = new Snapshots();
+    public UserProfileModel Clone() => (UserProfileModel) MemberwiseClone();
+
     public bool hasConnectedWeb3 = true;
 
-    public UserProfileModel Clone() => (UserProfileModel) MemberwiseClone();
+    public int tutorialFlagsMask;
 }
