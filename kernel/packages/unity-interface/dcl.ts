@@ -297,6 +297,9 @@ export function* chunkGenerator(
 
 export const unityInterface = {
   debug: false,
+  SendGenericMessage(object: string, method: string, payload: string) {
+    gameInstance.SendMessage(object, method, payload)
+  },
   SetDebug() {
     gameInstance.SendMessage('SceneController', 'SetDebug')
   },
