@@ -2,7 +2,12 @@
 import { Vector3Component } from 'atomicHelpers/landHelpers'
 import { uuid } from 'atomicHelpers/math'
 import { parseParcelPosition, worldToGrid } from 'atomicHelpers/parcelScenePositions'
+<<<<<<< HEAD
 import { SHOW_FPS_COUNTER } from 'config'
+=======
+import { data as sampleDrop } from 'shared/airdrops/sampleDrop'
+import { parcelLimits, SHOW_FPS_COUNTER } from 'config'
+>>>>>>> origin/master
 import { APIOptions, exposeMethod, registerAPI } from 'decentraland-rpc/lib/host'
 import { EngineAPI } from 'shared/apis/EngineAPI'
 import { ExposableAPI } from 'shared/apis/ExposableAPI'
@@ -34,6 +39,20 @@ avatarMessageObservable.add((pose: AvatarMessage) => {
 const fpsConfiguration = {
   visible: SHOW_FPS_COUNTER
 }
+<<<<<<< HEAD
+=======
+
+const CAMPAIGN_PARCEL_SEQUENCE = [
+  { x: 113, y: -7 },
+  { x: 87, y: 18 },
+  { x: 52, y: 2 },
+  { x: 16, y: 83 },
+  { x: -12, y: -39 },
+  { x: 60, y: 115 }
+]
+>>>>>>> origin/master
+
+const blacklisted = ['help', 'airdrop']
 
 export interface IChatController {
   /**
@@ -268,6 +287,17 @@ export class ChatController extends ExposableAPI implements IChatController {
       }
     )
 
+    this.addChatCommand('airdrop', 'fake an airdrop', () => {
+      const unityWindow: any = window
+      unityWindow.unityInterface.TriggerAirdropDisplay(sampleDrop)
+      return {
+        id: uuid(),
+        isCommand: true,
+        sender: 'Decentraland',
+        message: 'Faking airdrop...'
+      }
+    })
+
     this.addChatCommand('unmute', 'Unmute [username]', message => {
       const username = message
       const currentUser = getCurrentUser()
@@ -304,7 +334,7 @@ export class ChatController extends ExposableAPI implements IChatController {
           `\n\nYou can move with the [WASD] keys and jump with the [SPACE] key.` +
           `\n\nYou can toggle the chat with the [ENTER] key.` +
           `\n\nAvailable commands:\n${Object.keys(this.chatCommands)
-            .filter(name => name !== 'help')
+            .filter(name => !blacklisted.includes(name))
             .map(name => `\t/${name}: ${this.chatCommands[name].description}`)
             .concat('\t/help: Show this list of commands')
             .join('\n')}`
