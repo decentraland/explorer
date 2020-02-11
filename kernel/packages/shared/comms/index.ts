@@ -251,7 +251,7 @@ export function processChatMessage(context: Context, fromAlias: string, message:
           message: text,
           isCommand: false
         }
-        if (!profile!.blocked.includes(user.userId!)) {
+        if (profile && user.userId && !profile.blocked.includes(user.userId)) {
           chatObservable.notifyObservers({ type: ChatEvent.MESSAGE_RECEIVED, messageEntry: entry })
         }
       }

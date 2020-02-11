@@ -53,20 +53,16 @@ public class PlayerInfoCardHUDController : IHUD, IDisposable
 
     private void BlockPlayer()
     {
-        if (!ownUserProfile.blocked.Contains(currentUserProfile.userId))
-        {
-            ownUserProfile.blocked.Add(currentUserProfile.userId);
-        }
+        if (ownUserProfile.blocked.Contains(currentUserProfile.userId)) return;
+        ownUserProfile.blocked.Add(currentUserProfile.userId);
         view.Refresh();
         WebInterface.SendBlockPlayer(currentUserProfile.userId);
     }
 
     private void UnblockPlayer()
     {
-        if (ownUserProfile.blocked.Contains(currentUserProfile.userId))
-        {
-            ownUserProfile.blocked.Remove(currentUserProfile.userId);
-        }
+        if (!ownUserProfile.blocked.Contains(currentUserProfile.userId)) return;
+        ownUserProfile.blocked.Remove(currentUserProfile.userId);
         view.Refresh();
         WebInterface.SendUnlockPlayer(currentUserProfile.userId);
     }

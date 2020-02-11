@@ -62,9 +62,9 @@ public class PlayerInfoCardHUDView : MonoBehaviour
 
     private void Awake()
     {
-        hideCardButton.onClick.AddListener(() => cardClosedCallback?.Invoke());
-        reportPlayerButton.onClick.AddListener(() => reportPlayerCallback?.Invoke());
-        blockPlayerButton.onClick.AddListener(() => blockPlayerCallback?.Invoke());
+        hideCardButton.onClick.AddListener(cardClosedCallback);
+        reportPlayerButton.onClick.AddListener(reportPlayerCallback);
+        blockPlayerButton.onClick.AddListener(blockPlayerCallback);
         unblockPlayerButton.onClick.AddListener(() => unblockPlayerCallback?.Invoke());
     }
 
@@ -135,16 +135,10 @@ public class PlayerInfoCardHUDView : MonoBehaviour
             playerInfoCollectible.Initialize(collectible);
         }
 
-        if (IsBlocked(userProfile))
-        {
-            unblockPlayerButton.gameObject.SetActive(true);
-            blockedAvatarOverlay.gameObject.SetActive(true);
-        }
-        else
-        {
-            unblockPlayerButton.gameObject.SetActive(false);
-            blockedAvatarOverlay.gameObject.SetActive(false);
-        }
+        bool isBlocked = IsBlocked(userProfile);
+
+        unblockPlayerButton.gameObject.SetActive(isBlocked);
+        blockedAvatarOverlay.gameObject.SetActive(isBlocked);
     }
 
     public void Refresh()
@@ -169,16 +163,9 @@ public class PlayerInfoCardHUDView : MonoBehaviour
 
     internal bool IsBlocked(UserProfile userProfile)
     {
-        Debug.Log("My blocked users" + String.Join(",", ownUserProfile.blocked));
-        Debug.Log("My blocked users legth" + ownUserProfile.blocked.Count);
-
         for (int i = 0; i < ownUserProfile.blocked.Count; i++)
         {
-            if (ownUserProfile.blocked[i] == userProfile.userId)
-            {
-                Debug.Log("is blocked!" + userProfile.userId);
-                return true;
-            }
+            if (ownUserProfile.blocked[i] == userProfile.userId) return true;
         }
         return false;
     }

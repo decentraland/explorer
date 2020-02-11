@@ -15,7 +15,7 @@ namespace DCL.Interface
      */
     public static class WebInterface
     {
-        public static bool VERBOSE = true;
+        public static bool VERBOSE = false;
         public static System.Action<string, string> OnMessageFromEngine;
 
         [System.Serializable]

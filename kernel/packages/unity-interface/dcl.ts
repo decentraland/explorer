@@ -206,25 +206,31 @@ const browserInterface = {
   },
 
   ReportScene(sceneId: string) {
-    browserInterface.OpenWebURL({ url: 'https://decentralandofficial.typeform.com/to/KzaUxh' })
+    browserInterface.OpenWebURL({ url: `https://decentralandofficial.typeform.com/to/KzaUxh?sceneId=${sceneId}` })
   },
 
   ReportPlayer(username: string) {
-    browserInterface.OpenWebURL({ url: 'https://decentralandofficial.typeform.com/to/owLkla' })
+    browserInterface.OpenWebURL({ url: `https://decentralandofficial.typeform.com/to/owLkla?username=${username}` })
   },
 
   BlockPlayer(data: { userId: string }) {
     const profile = getProfile(global.globalStore.getState(), identity.address)
 
     if (profile) {
+      let blocked: string[] = [data.userId]
+
       if (profile.blocked) {
         for (let blockedUser of profile.blocked) {
           if (blockedUser === data.userId) {
             return
           }
         }
+
+        // Merge the existing array and any previously blocked users
+        blocked = [...profile.blocked, ...blocked]
       }
-      global.globalStore.dispatch(saveAvatarRequest({ ...profile, blocked: [...(profile.blocked || []), data.userId] }))
+
+      global.globalStore.dispatch(saveAvatarRequest({ ...profile, blocked }))
     }
   },
 
@@ -331,7 +337,6 @@ export const unityInterface = {
     gameInstance.SendMessage('SceneController', 'SetDebug')
   },
   LoadProfile(profile: ProfileForRenderer) {
-    defaultLogger.info('!', profile)
     gameInstance.SendMessage('SceneController', 'LoadProfile', JSON.stringify(profile))
   },
   CreateUIScene(data: { id: string; baseUrl: string }) {
