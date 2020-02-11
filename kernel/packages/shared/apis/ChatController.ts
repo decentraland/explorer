@@ -2,12 +2,7 @@
 import { Vector3Component } from 'atomicHelpers/landHelpers'
 import { uuid } from 'atomicHelpers/math'
 import { parseParcelPosition, worldToGrid } from 'atomicHelpers/parcelScenePositions'
-<<<<<<< HEAD
 import { SHOW_FPS_COUNTER } from 'config'
-=======
-import { data as sampleDrop } from 'shared/airdrops/sampleDrop'
-import { parcelLimits, SHOW_FPS_COUNTER } from 'config'
->>>>>>> origin/master
 import { APIOptions, exposeMethod, registerAPI } from 'decentraland-rpc/lib/host'
 import { EngineAPI } from 'shared/apis/EngineAPI'
 import { ExposableAPI } from 'shared/apis/ExposableAPI'
@@ -39,18 +34,6 @@ avatarMessageObservable.add((pose: AvatarMessage) => {
 const fpsConfiguration = {
   visible: SHOW_FPS_COUNTER
 }
-<<<<<<< HEAD
-=======
-
-const CAMPAIGN_PARCEL_SEQUENCE = [
-  { x: 113, y: -7 },
-  { x: 87, y: 18 },
-  { x: 52, y: 2 },
-  { x: 16, y: 83 },
-  { x: -12, y: -39 },
-  { x: 60, y: 115 }
-]
->>>>>>> origin/master
 
 const blacklisted = ['help', 'airdrop']
 
