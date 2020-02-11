@@ -397,11 +397,8 @@ export function* handleSaveAvatar(saveAvatar: SaveAvatarRequest) {
 
     yield put(saveAvatarSuccess(userId, version, profile))
     yield put(passportRequest(userId))
-
   } catch (error) {
-
     yield put(saveAvatarFailure(userId, 'unknown reason'))
-
   }
 }
 

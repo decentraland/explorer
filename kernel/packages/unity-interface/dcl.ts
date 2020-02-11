@@ -35,7 +35,7 @@ import { loadingScenes, teleportTriggered, unityClientLoaded } from '../shared/l
 import { createLogger, defaultLogger, ILogger } from '../shared/logger'
 import { saveAvatarRequest } from '../shared/passports/actions'
 import { airdropObservable } from '../shared/apis/AirdropController'
-import { Avatar, Wearable } from '../shared/passports/types'
+import { Avatar, Wearable, Profile } from '../shared/passports/types'
 import {
   PB_AttachEntityComponent,
   PB_ComponentCreated,
@@ -99,6 +99,8 @@ let gameInstance!: GameInstance
 let isTheFirstLoading = true
 
 export let futures: Record<string, IFuture<any>> = {}
+
+export let unityInterface: any
 
 const positionEvent = {
   position: Vector3.Zero(),
@@ -170,7 +172,7 @@ const browserInterface = {
   },
 
   SaveUserTutorialStep(data: { tutorialStep: number }) {
-    const profile = getUserProfile().profile
+    const profile: Profile = getUserProfile().profile as Profile
     global.globalStore.dispatch(saveAvatarRequest({ ...profile, tutorialStep: data.tutorialStep }))
   },
 
@@ -249,6 +251,16 @@ function ensureTeleportAnimation() {
   )
 }
 
+function stopTeleportAnimation() {
+  document.getElementById('gameContainer')!.setAttribute('style', 'background: #151419')
+  document.body.setAttribute('style', 'background: #151419')
+
+  const profile = getUserProfile().profile as Profile
+
+  if (!tutorialEnabled() || profile.tutorialStep !== tutorialStepId.INITIAL_SCENE) {
+    unityInterface.ShowWelcomeNotification()
+  }
+}
 const CHUNK_SIZE = 500
 
 export function* chunkGenerator(
@@ -293,7 +305,7 @@ export function* chunkGenerator(
   }
 }
 
-export const unityInterface = {
+unityInterface = {
   debug: false,
   SetDebug() {
     gameInstance.SendMessage('SceneController', 'SetDebug')
@@ -506,18 +518,6 @@ export const HUD: Record<string, { configure: (config: HUDConfiguration) => void
   },
   Airdropping: {
     configure: unityInterface.ConfigureAirdroppingHUD
-  }
-}
-
-function stopTeleportAnimation() {
-  document.getElementById('gameContainer')!.setAttribute('style', 'background: #151419')
-  document.body.setAttribute('style', 'background: #151419')
-
-  const profile = getUserProfile().profile
-  const tutorialFinished = profile.tutorialStep === tutorialStepId.FINISHED
-
-  if (!RESET_TUTORIAL || tutorialFinished) {
-    unityInterface.ShowWelcomeNotification()
   }
 }
 
@@ -769,7 +769,7 @@ export async function initializeEngine(_gameInstance: GameInstance) {
     onMessage(type: string, message: any) {
       if (type in browserInterface) {
         // tslint:disable-next-line:semicolon
-        ; (browserInterface as any)[type](message)
+        ;(browserInterface as any)[type](message)
       } else {
         defaultLogger.info(`Unknown message (did you forget to add ${type} to unity-interface/dcl.ts?)`, message)
       }
