@@ -80,6 +80,8 @@ async function createAuthIdentity() {
 
   let address
   let signer
+  let hasConnectedWeb3 = false
+
   if (WORLD_EXPLORER) {
     const result = await providerFuture
     if (result.successful) {
@@ -100,6 +102,7 @@ async function createAuthIdentity() {
         }
         return result
       }
+      hasConnectedWeb3 = true
     } else {
       const account: Account = result.localIdentity
 
@@ -114,7 +117,7 @@ async function createAuthIdentity() {
   }
 
   const identity = await Authenticator.initializeAuthChain(address, ephemeral, ephemeralLifespanMinutes, signer)
-  identity.hasConnectedWeb3 = result.successful
+  identity.hasConnectedWeb3 = hasConnectedWeb3
 
   return identity
 }
