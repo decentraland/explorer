@@ -32,6 +32,7 @@ public class PlayerInfoCardHUDView : MonoBehaviour
 
     [Space]
     [SerializeField] internal Image avatarPicture;
+    [SerializeField] internal Image blockedAvatarOverlay;
     [SerializeField] internal TextMeshProUGUI name;
 
     [Header("Passport")]
@@ -43,7 +44,7 @@ public class PlayerInfoCardHUDView : MonoBehaviour
     [Header("Block")]
     [SerializeField] internal Button reportPlayerButton;
     [SerializeField] internal Button blockPlayerButton;
-
+    [SerializeField] internal Button unblockPlayerButton;
 
     internal readonly List<PlayerInfoCollectibleItem> playerInfoCollectibles = new List<PlayerInfoCollectibleItem>(10);
     internal UserProfile currentUserProfile;
@@ -51,6 +52,8 @@ public class PlayerInfoCardHUDView : MonoBehaviour
     private UnityAction cardClosedCallback = () => { };
     private UnityAction reportPlayerCallback = () => { };
     private UnityAction blockPlayerCallback = () => { };
+    private UnityAction unblockPlayerCallback = () => { };
+    private UserProfile ownUserProfile => UserProfile.GetOwnUserProfile();
 
     public static PlayerInfoCardHUDView CreateView()
     {
@@ -62,13 +65,15 @@ public class PlayerInfoCardHUDView : MonoBehaviour
         hideCardButton.onClick.AddListener(() => cardClosedCallback?.Invoke());
         reportPlayerButton.onClick.AddListener(() => reportPlayerCallback?.Invoke());
         blockPlayerButton.onClick.AddListener(() => blockPlayerCallback?.Invoke());
+        unblockPlayerButton.onClick.AddListener(() => unblockPlayerCallback?.Invoke());
     }
 
-    public void Initialize(UnityAction cardClosedCallback, UnityAction reportPlayerCallback, UnityAction blockPlayerCallback)
+    public void Initialize(UnityAction cardClosedCallback, UnityAction reportPlayerCallback, UnityAction blockPlayerCallback, UnityAction unblockPlayerCallback)
     {
         this.cardClosedCallback = cardClosedCallback;
         this.reportPlayerCallback = reportPlayerCallback;
         this.blockPlayerCallback = blockPlayerCallback;
+        this.unblockPlayerCallback = unblockPlayerCallback;
 
         for (int index = 0; index < tabsMapping.Length; index++)
         {
@@ -129,6 +134,22 @@ public class PlayerInfoCardHUDView : MonoBehaviour
             playerInfoCollectibles.Add(playerInfoCollectible);
             playerInfoCollectible.Initialize(collectible);
         }
+
+        if (IsBlocked(userProfile))
+        {
+            unblockPlayerButton.gameObject.SetActive(true);
+            blockedAvatarOverlay.gameObject.SetActive(true);
+        }
+        else
+        {
+            unblockPlayerButton.gameObject.SetActive(false);
+            blockedAvatarOverlay.gameObject.SetActive(false);
+        }
+    }
+
+    public void Refresh()
+    {
+        SetUserProfile(currentUserProfile);
     }
 
     public void SetVisibility(bool visible)
@@ -144,5 +165,21 @@ public class PlayerInfoCardHUDView : MonoBehaviour
             playerInfoCollectibles.RemoveAt(i);
             Destroy(playerInfoCollectible.gameObject);
         }
+    }
+
+    internal bool IsBlocked(UserProfile userProfile)
+    {
+        Debug.Log("My blocked users" + String.Join(",", ownUserProfile.blocked));
+        Debug.Log("My blocked users legth" + ownUserProfile.blocked.Count);
+
+        for (int i = 0; i < ownUserProfile.blocked.Count; i++)
+        {
+            if (ownUserProfile.blocked[i] == userProfile.userId)
+            {
+                Debug.Log("is blocked!" + userProfile.userId);
+                return true;
+            }
+        }
+        return false;
     }
 }

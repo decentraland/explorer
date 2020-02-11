@@ -9,15 +9,18 @@ public class PlayerInfoCardHUDController : IHUD, IDisposable
     internal PlayerInfoCardHUDView view;
     internal StringVariable currentPlayerName;
     internal UserProfile currentUserProfile;
+    private UserProfile ownUserProfile => UserProfile.GetOwnUserProfile();
+
 
     public PlayerInfoCardHUDController()
     {
         view = PlayerInfoCardHUDView.CreateView();
-        view.Initialize(() => { currentPlayerName.Set(null); }, ReportPlayer, BlockPlayer);
+        view.Initialize(() => { currentPlayerName.Set(null); }, ReportPlayer, BlockPlayer, UnblockPlayer);
         currentPlayerName = Resources.Load<StringVariable>(CURRENT_PLAYER_NAME);
         currentPlayerName.OnChange += OnCurrentPlayerNameChanged;
         OnCurrentPlayerNameChanged(currentPlayerName, null);
     }
+
 
     internal void OnCurrentPlayerNameChanged(string current, string previous)
     {
@@ -50,8 +53,22 @@ public class PlayerInfoCardHUDController : IHUD, IDisposable
 
     private void BlockPlayer()
     {
-        Debug.Log(currentUserProfile.userId);
+        if (!ownUserProfile.blocked.Contains(currentUserProfile.userId))
+        {
+            ownUserProfile.blocked.Add(currentUserProfile.userId);
+        }
+        view.Refresh();
         WebInterface.SendBlockPlayer(currentUserProfile.userId);
+    }
+
+    private void UnblockPlayer()
+    {
+        if (ownUserProfile.blocked.Contains(currentUserProfile.userId))
+        {
+            ownUserProfile.blocked.Remove(currentUserProfile.userId);
+        }
+        view.Refresh();
+        WebInterface.SendUnlockPlayer(currentUserProfile.userId);
     }
 
     private void ReportPlayer()

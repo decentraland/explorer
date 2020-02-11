@@ -324,6 +324,12 @@ namespace DCL.Interface
             public string userId;
         }
 
+        [System.Serializable]
+        public class SendUnblockPlayerPayload
+        {
+            public string userId;
+        }
+
 #if UNITY_WEBGL && !UNITY_EDITOR
     /**
      * This method is called after the first render. It marks the loading of the
@@ -682,6 +688,14 @@ namespace DCL.Interface
         public static void SendBlockPlayer(string userId)
         {
             SendMessage("BlockPlayer", new SendBlockPlayerPayload()
+            {
+                userId = userId
+            });
+        }
+
+        public static void SendUnlockPlayer(string userId)
+        {
+            SendMessage("UnblockPlayer", new SendUnblockPlayerPayload()
             {
                 userId = userId
             });

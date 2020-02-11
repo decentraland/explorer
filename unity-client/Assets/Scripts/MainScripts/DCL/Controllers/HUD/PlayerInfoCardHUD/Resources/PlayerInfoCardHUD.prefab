@@ -355,7 +355,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &9149008386924039455
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2595,7 +2595,7 @@ MonoBehaviour:
   m_material: {fileID: 0}
   m_sharedMaterial: {fileID: 0}
   m_isDefaultMaterial: 0
-  m_padding: 0
+  m_padding: 1.25
   m_canvasRenderer: {fileID: 3053309029937434370}
   m_TextComponent: {fileID: 2054052090072748133}
   m_materialReferenceIndex: 1
@@ -2775,7 +2775,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &8226704908970016637
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3365,11 +3365,13 @@ MonoBehaviour:
     tab: 2
   hideCardButton: {fileID: 2054052090560482885}
   avatarPicture: {fileID: 741949897801864843}
+  blockedAvatarOverlay: {fileID: 4774460956804247699}
   name: {fileID: 2054052089419740692}
   description: {fileID: 2054052090072748133}
   wearablesContainer: {fileID: 2054052089085003672}
   reportPlayerButton: {fileID: 1594900637515709357}
   blockPlayerButton: {fileID: 4316598916483841025}
+  unblockPlayerButton: {fileID: 8689335085089407264}
 --- !u!1 &7387533419399660297
 GameObject:
   m_ObjectHideFlags: 0

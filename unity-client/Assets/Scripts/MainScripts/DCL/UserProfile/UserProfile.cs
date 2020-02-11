@@ -15,6 +15,7 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
     public string userName => model.name;
     public string description => model.description;
     public string email => model.email;
+    public List<string> blocked => model.blocked;
     public AvatarModel avatar => model.avatar;
     public int tutorialStep => model.tutorialFlagsMask;
     internal Dictionary<string, int> inventory = new Dictionary<string, int>();
@@ -52,6 +53,7 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
         model.avatar.CopyFrom(newModel.avatar);
         model.snapshots = newModel.snapshots;
         model.inventory = newModel.inventory;
+        model.blocked = newModel.blocked;
         if (model.inventory != null)
         {
             inventory = model.inventory.GroupBy(x => x).ToDictionary(x => x.Key, x => x.Count());
