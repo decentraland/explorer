@@ -1,4 +1,9 @@
+import { Authenticator, AuthIdentity } from 'dcl-crypto'
+import { createIdentity } from 'eth-crypto'
 import { Store } from 'redux'
+import { Account } from 'web3x/account'
+import { Eth } from 'web3x/eth'
+import { Personal } from 'web3x/personal/personal'
 import {
   ETHEREUM_NETWORK,
   getLoginConfigurationForCurrentDomain,
@@ -8,47 +13,43 @@ import {
   STATIC_WORLD,
   WORLD_EXPLORER
 } from '../config'
-import { initialize, queueTrackingEvent, identifyUser } from './analytics'
+import { getDefaultTLD } from '../config/index'
+import { identifyUser, initialize, queueTrackingEvent } from './analytics'
 import './apis/index'
-import { connect, persistCurrentUser, disconnect } from './comms'
+import { connect, disconnect, persistCurrentUser } from './comms'
+import { ConnectionEstablishmentError, IdTakenError } from './comms/interface/types'
 import { isMobile } from './comms/mobile'
-import { setLocalProfile, getUserProfile, removeUserProfile } from './comms/peers'
+import { getUserProfile, removeUserProfile, setLocalProfile } from './comms/peers'
+import { realmInitialized } from './dao'
+import { web3initialized } from './dao/actions'
+import { awaitWeb3Approval, isSessionExpired, providerFuture } from './ethereum/provider'
 import './events'
 import { ReportFatalError } from './loading/ReportFatalError'
 import {
-  AUTH_ERROR_LOGGED_OUT,
-  COMMS_COULD_NOT_BE_ESTABLISHED,
-  MOBILE_NOT_SUPPORTED,
-  loadingStarted,
   authSuccessful,
-  establishingComms,
-  commsEstablished,
+  AUTH_ERROR_LOGGED_OUT,
   commsErrorRetrying,
-  notStarted,
-  NEW_LOGIN
+  commsEstablished,
+  COMMS_COULD_NOT_BE_ESTABLISHED,
+  establishingComms,
+  loadingStarted,
+  MOBILE_NOT_SUPPORTED,
+  NEW_LOGIN,
+  notStarted
 } from './loading/types'
 import { defaultLogger } from './logger'
 import { PassportAsPromise } from './passports/PassportAsPromise'
+import { profileToRendererFormat } from './passports/transformations/profileToRendererFormat'
+import { setWorldContext } from './protocol/actions'
 import { Session } from './session/index'
 import { RootState } from './store/rootTypes'
 import { buildStore } from './store/store'
 import { getAppNetwork } from './web3'
 import { initializeUrlPositionObserver } from './world/positionThings'
-import { setWorldContext } from './protocol/actions'
-import { profileToRendererFormat } from './passports/transformations/profileToRendererFormat'
-import { awaitWeb3Approval, providerFuture, isSessionExpired } from './ethereum/provider'
-import { createIdentity } from 'eth-crypto'
-import { Authenticator, AuthIdentity } from 'dcl-crypto'
-import { Eth } from 'web3x/eth'
-import { Personal } from 'web3x/personal/personal'
-import { Account } from 'web3x/account'
-import { web3initialized } from './dao/actions'
-import { realmInitialized } from './dao'
-import { getDefaultTLD } from '../config/index'
-import { IdTakenError, ConnectionEstablishmentError } from './comms/interface/types'
 
 export type ExplorerIdentity = AuthIdentity & {
   address: string
+  hasConnectedWeb3: boolean
 }
 
 enum AnalyticsAccount {
@@ -86,6 +87,8 @@ async function createAuthIdentity() {
 
   let address
   let signer
+  let hasConnectedWeb3 = false
+
   if (WORLD_EXPLORER) {
     const result = await providerFuture
     if (result.successful) {
@@ -106,6 +109,7 @@ async function createAuthIdentity() {
         }
         return result
       }
+      hasConnectedWeb3 = true
     } else {
       const account: Account = result.localIdentity
 
@@ -120,7 +124,7 @@ async function createAuthIdentity() {
   }
 
   const auth = await Authenticator.initializeAuthChain(address, ephemeral, ephemeralLifespanMinutes, signer)
-  const identity: ExplorerIdentity = { ...auth, address: address.toLocaleLowerCase() }
+  const identity: ExplorerIdentity = { ...auth, address: address.toLocaleLowerCase(), hasConnectedWeb3 }
 
   return identity
 }
@@ -247,7 +251,7 @@ export async function initShared(): Promise<Session | undefined> {
     const profile = await PassportAsPromise(userId)
     persistCurrentUser({
       version: profile.version,
-      profile: profileToRendererFormat(profile)
+      profile: profileToRendererFormat(profile, identity)
     })
   }
   console['groupEnd']()

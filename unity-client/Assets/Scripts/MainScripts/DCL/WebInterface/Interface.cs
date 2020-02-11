@@ -1,4 +1,4 @@
-﻿﻿using UnityEngine;
+using UnityEngine;
 
 #if UNITY_WEBGL && !UNITY_EDITOR
 using System.Runtime.InteropServices;
@@ -316,6 +316,12 @@ namespace DCL.Interface
         public class UserAcceptedCollectiblesPayload
         {
             public string id;
+        }
+
+        [System.Serializable]
+        public class OpenURLPayload
+        {
+            public string url;
         }
 
 #if UNITY_WEBGL && !UNITY_EDITOR
@@ -660,7 +666,16 @@ namespace DCL.Interface
                 id = expressionID,
                 timestamp = timestamp
             });
+        }
 
+        public static void ReportMotdClicked()
+        {
+            SendMessage("MotdConfirmClicked");
+        }
+
+        public static void OpenURL(string url)
+        {
+            SendMessage("OpenWebURL", new OpenURLPayload {url = url});
         }
     }
 }
