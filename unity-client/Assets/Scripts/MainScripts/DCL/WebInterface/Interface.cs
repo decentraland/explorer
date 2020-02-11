@@ -318,6 +318,12 @@ namespace DCL.Interface
             public string id;
         }
 
+        [System.Serializable]
+        public class OpenURLPayload
+        {
+            public string url;
+        }
+
 #if UNITY_WEBGL && !UNITY_EDITOR
     /**
      * This method is called after the first render. It marks the loading of the
@@ -660,11 +666,11 @@ namespace DCL.Interface
                 id = expressionID,
                 timestamp = timestamp
             });
-
         }
-        public static void SendGoToMarketplace()
+
+        public static void OpenURL(string url)
         {
-            SendMessage("GoToMarketplace");
+            SendMessage("OpenWebURL", new OpenURLPayload {url = url});
         }
     }
 }

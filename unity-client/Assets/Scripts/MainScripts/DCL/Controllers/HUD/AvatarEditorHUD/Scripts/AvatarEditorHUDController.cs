@@ -408,6 +408,6 @@ public class AvatarEditorHUDController : IDisposable, IHUD
 
     public void GoToMarketplace()
     {
-        WebInterface.SendGoToMarketplace();
+        WebInterface.OpenURL("https://market.decentraland.org/browse?section=wearables");
     }
 }

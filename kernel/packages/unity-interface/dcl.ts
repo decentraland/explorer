@@ -201,10 +201,6 @@ const browserInterface = {
 
   EditAvatarClicked() {
     delightedSurvey()
-  },
-
-  GoToMarketplace() {
-    window.open('https://market.decentraland.org/browse?section=wearables', '_blank')
   }
 }
 

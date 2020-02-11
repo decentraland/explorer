@@ -50,6 +50,7 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
         model.description = newModel.description;
         model.avatar.CopyFrom(newModel.avatar);
         model.snapshots = newModel.snapshots;
+        model.hasConnectedWeb3 = newModel.hasConnectedWeb3;
         model.inventory = newModel.inventory;
         if (model.inventory != null)
         {
