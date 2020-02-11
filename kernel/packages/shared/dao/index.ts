@@ -1,6 +1,6 @@
 import defaultLogger from '../logger'
 import future from 'fp-future'
-import { Layer, Realm, Candidate } from './types'
+import { Layer, Realm, Candidate, CatalystLayers } from './types'
 import { RootState } from 'shared/store/rootTypes'
 import { Store } from 'redux'
 import { isRealmInitialized } from './selectors'
@@ -24,7 +24,7 @@ const score = ({ usersCount, maxUsers = 50 }: Layer) => {
   return v + v * Math.cos(p * (usersCount - 1))
 }
 
-function ping(url: string): Promise<{ success: boolean; elapsed?: number; result?: Layer[] }> {
+function ping(url: string): Promise<{ success: boolean; elapsed?: number; result?: CatalystLayers }> {
   const result = future()
 
   new Promise(() => {
@@ -66,36 +66,50 @@ function ping(url: string): Promise<{ success: boolean; elapsed?: number; result
   return result
 }
 
-export async function pickCatalystRealm(): Promise<Realm> {
+export async function fecthCatalystRealms(): Promise<Candidate[]> {
   const nodes = await fetchCatalystNodes()
   if (nodes.length === 0) {
     throw new Error('no nodes are available in the DAO for the current network')
   }
 
-  const results = await Promise.all(nodes.map(node => ping(`${node.domain}/comms/layers`)))
-  if (results.filter($ => $.success).length === 0) {
+  const results = await Promise.all(nodes.map(node => ping(`${node.domain}/comms/status?includeLayers=true`)))
+
+  const successfulResults = results.filter($ => $.success)
+
+  if (successfulResults.length === 0) {
     throw new Error('no node responded')
   }
 
-  const candidates = zip(nodes, results)
-    .reduce(
-      (
-        union: Candidate[],
-        [{ domain }, { elapsed, result, success }]: [
-          { domain: string },
-          { elapsed?: number; success: boolean; result?: Layer[] }
-        ]
-      ) => union.concat(success ? result!.map(layer => ({ domain, elapsed: elapsed!, layer })) : []),
-      new Array<Candidate>()
-    )
-    .map(candidate => ({ ...candidate, score: score(candidate.layer) }))
+  return zip(nodes, successfulResults).reduce(
+    (
+      union: Candidate[],
+      [{ domain }, { elapsed, result, success }]: [
+        { domain: string },
+        { elapsed?: number; success: boolean; result?: CatalystLayers }
+      ]
+    ) =>
+      union.concat(
+        success
+          ? result!.layers.map(layer => ({
+              catalystName: result!.name,
+              domain,
+              elapsed: elapsed!,
+              layer,
+              score: score(layer)
+            }))
+          : []
+      ),
+    new Array<Candidate>()
+  )
+}
 
+export function pickCatalystRealm(candidates: Candidate[]): Realm {
   const sorted = candidates.sort((c1, c2) => {
     const diff = c2.score - c1.score
     return diff === 0 ? c1.elapsed - c2.elapsed : diff
   })
 
-  return { domain: sorted[0].domain, layer: sorted[0].layer.name }
+  return { catalystName: sorted[0].catalystName, domain: sorted[0].domain, layer: sorted[0].layer.name }
 }
 
 export async function realmInitialized(): Promise<void> {

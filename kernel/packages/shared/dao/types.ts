@@ -4,14 +4,22 @@ export type Layer = {
   maxUsers: number
 }
 
+export type CatalystLayers = {
+  name: string
+  layers: Layer[]
+}
+
 export type Candidate = {
   domain: string
+  catalystName: string
   elapsed: number
+  score: number
   layer: Layer
 }
 
 export type Realm = {
   domain: string
+  catalystName: string
   layer: string
 }
 
@@ -22,6 +30,8 @@ export type DaoState = {
   updateContentServer: string
   commsServer: string
   layer: string
+  realm: Realm | undefined
+  candidates: Candidate[]
 }
 
 export type RootDaoState = {

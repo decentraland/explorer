@@ -2,10 +2,17 @@ import { WorldInstanceConnection } from '../interface/index'
 import { Stats } from '../debug'
 import { Package, BusMessage, ChatMessage, ProfileVersion, UserInformation, PackageType } from '../interface/types'
 import { Position, positionHash } from '../interface/utils'
-import { Peer } from 'decentraland-katalyst-peer'
 import { createLogger } from 'shared/logger'
 import { PeerMessageTypes, PeerMessageType } from 'decentraland-katalyst-peer/src/messageTypes'
+import { Peer as PeerType, PacketCallback } from 'decentraland-katalyst-peer/src/Peer'
 import { ChatData, CommsMessage, ProfileData, SceneData, PositionData } from './proto/comms_pb'
+import { Realm } from 'shared/dao/types'
+
+import * as Long from 'long'
+declare const window: any
+window.Long = Long
+
+const { Peer } = require('decentraland-katalyst-peer')
 
 const NOOP = () => {
   // do nothing
@@ -22,6 +29,8 @@ const commsMessageType: PeerMessageType = {
   optimistic: true
 }
 
+declare var global: any
+
 export class LighthouseWorldInstanceConnection implements WorldInstanceConnection {
   stats: Stats | null = null
 
@@ -34,40 +43,59 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
 
   ping: number = -1
 
-  constructor(private peer: Peer) {
-    logger.info(`connected peer as `, peer.peerId)
-    peer.callback = (sender, room, payload) => {
-      const commsMessage = CommsMessage.deserializeBinary(payload)
+  private peer: PeerType
 
-      switch (commsMessage.getDataCase()) {
-        case CommsMessage.DataCase.CHAT_DATA:
-          this.chatHandler(sender, createPackage(commsMessage, 'chat', mapToPackageChat(commsMessage.getChatData()!)))
-          break
-        case CommsMessage.DataCase.POSITION_DATA:
-          this.positionHandler(
-            sender,
-            createPackage(commsMessage, 'position', mapToPositionMessage(commsMessage.getPositionData()!))
-          )
-          break
-        case CommsMessage.DataCase.SCENE_DATA:
-          this.sceneMessageHandler(
-            sender,
-            createPackage(commsMessage, 'chat', mapToPackageScene(commsMessage.getSceneData()!))
-          )
-          break
-        case CommsMessage.DataCase.PROFILE_DATA:
-          this.profileHandler(
-            sender,
-            commsMessage.getProfileData()!.getUserId(),
-            createPackage(commsMessage, 'profile', mapToPackageProfile(commsMessage.getProfileData()!))
-          )
-          break
-        default: {
-          logger.warn(`message with unknown type received ${commsMessage.getDataCase()}`)
-          break
-        }
+  private peerCallback: PacketCallback = (sender, room, payload) => {
+    const commsMessage = CommsMessage.deserializeBinary(payload)
+
+    switch (commsMessage.getDataCase()) {
+      case CommsMessage.DataCase.CHAT_DATA:
+        this.chatHandler(sender, createPackage(commsMessage, 'chat', mapToPackageChat(commsMessage.getChatData()!)))
+        break
+      case CommsMessage.DataCase.POSITION_DATA:
+        this.positionHandler(
+          sender,
+          createPackage(commsMessage, 'position', mapToPositionMessage(commsMessage.getPositionData()!))
+        )
+        break
+      case CommsMessage.DataCase.SCENE_DATA:
+        this.sceneMessageHandler(
+          sender,
+          createPackage(commsMessage, 'chat', mapToPackageScene(commsMessage.getSceneData()!))
+        )
+        break
+      case CommsMessage.DataCase.PROFILE_DATA:
+        this.profileHandler(
+          sender,
+          commsMessage.getProfileData()!.getUserId(),
+          createPackage(commsMessage, 'profile', mapToPackageProfile(commsMessage.getProfileData()!))
+        )
+        break
+      default: {
+        logger.warn(`message with unknown type received ${commsMessage.getDataCase()}`)
+        break
       }
     }
+  }
+
+  constructor(private peerId: string, private realm: Realm, private lighthouseUrl: string, private peerConfig: any) {
+    //This assignment is to "definetly initialize" peer
+    this.peer = this.initializePeer()
+  }
+
+  private initializePeer() {
+    this.peer = this.createPeer()
+    global.__DEBUG_PEER = this.peer
+    return this.peer
+  }
+
+  async connectPeer() {
+    await this.peer.awaitConnectionEstablished(60000)
+    await this.peer.setLayer(this.realm.layer)
+  }
+
+  private createPeer(): PeerType {
+    return new Peer(this.lighthouseUrl, this.peerId, this.peerCallback, this.peerConfig)
   }
 
   printDebugInformation() {
@@ -76,9 +104,10 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
 
   close() {
     const rooms = this.peer.currentRooms
+    const disposePeer = (_: any) => this.peer.dispose()
     return Promise.all(
       rooms.map(room => this.peer.leaveRoom(room.id).catch(e => logger.trace(`error while leaving room ${room.id}`, e)))
-    )
+    ).then(disposePeer, disposePeer)
   }
 
   async sendInitialMessage(userInfo: Partial<UserInformation>) {

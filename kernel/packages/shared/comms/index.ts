@@ -38,17 +38,12 @@ import { ProfileForRenderer } from 'decentraland-ecs/src'
 import { Session } from '../session/index'
 import { worldRunningObservable, isWorldRunning } from '../world/worldState'
 import { WorldInstanceConnection } from './interface/index'
+
 import { LighthouseWorldInstanceConnection } from './v2/LighthouseWorldInstanceConnection'
-import * as Long from 'long'
 
 import { identity } from '../index'
 import { Authenticator } from 'dcl-crypto'
-import { getCommsServer, getLayer } from '../dao/selectors'
-
-declare const window: any
-window.Long = Long
-
-const { Peer } = require('decentraland-katalyst-peer')
+import { getCommsServer, getRealm } from '../dao/selectors'
 
 export type CommsVersion = 'v1' | 'v2'
 export type CommsMode = CommsV1Mode | CommsV2Mode
@@ -69,6 +64,7 @@ export const MORDOR_POSITION: Position = [
 ]
 
 declare var global: any
+declare const window: any
 
 export class PeerTrackingInfo {
   public position: Position | null = null
@@ -499,43 +495,38 @@ export async function connect(userId: string) {
       }
       case 'v2': {
         const lighthouseUrl = getCommsServer(window.globalStore.getState())
+        const realm = getRealm(window.globalStore.getState())
+
+        const peerConfig = {
+          connectionConfig: {
+            iceServers: commConfigurations.iceServers
+          },
+          authHandler: async (msg: string) => {
+            try {
+              return Authenticator.signPayload(identity, msg)
+            } catch (e) {
+              defaultLogger.info(`error while trying to sign message from lighthouse '${msg}'`)
+            }
+            // if any error occurs
+            return identity
+          },
+          parcelGetter: () => {
+            if (context && context.currentPosition) {
+              const parcel = position2parcel(context.currentPosition)
+              return [parcel.x, parcel.z]
+            }
+          }
+        }
 
         defaultLogger.log('Using Remote lighthouse service: ', lighthouseUrl)
 
-        const peer = new Peer(
-          lighthouseUrl,
+        const lighthouseConnection = (connection = new LighthouseWorldInstanceConnection(
           identity.address,
-          () => {
-            // noop
-          },
-          {
-            connectionConfig: {
-              iceServers: commConfigurations.iceServers
-            },
-            authHandler: async (msg: string) => {
-              try {
-                return Authenticator.signPayload(identity, msg)
-              } catch (e) {
-                defaultLogger.info(`error while trying to sign message from lighthouse '${msg}'`)
-              }
-              // if any error occurs
-              return identity
-            },
-            parcelGetter: () => {
-              if (context && context.currentPosition) {
-                const parcel = position2parcel(context.currentPosition)
-                return [parcel.x, parcel.z]
-              }
-            }
-          }
-        )
-
-        await peer.awaitConnectionEstablished(60000)
-        await peer.setLayer(getLayer(window.globalStore.getState()))
-
-        connection = new LighthouseWorldInstanceConnection(peer)
-
-        global.__DEBUG_PEER = peer
+          realm!,
+          lighthouseUrl,
+          peerConfig
+        ))
+        await lighthouseConnection.connectPeer()
 
         break
       }
