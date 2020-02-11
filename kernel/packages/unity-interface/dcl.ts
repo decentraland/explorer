@@ -100,6 +100,8 @@ let isTheFirstLoading = true
 
 export let futures: Record<string, IFuture<any>> = {}
 
+export let unityInterface: any
+
 const positionEvent = {
   position: Vector3.Zero(),
   quaternion: Quaternion.Identity,
@@ -170,7 +172,7 @@ const browserInterface = {
   },
 
   SaveUserTutorialStep(data: { tutorialStep: number }) {
-    defaultLogger.log("saving tutorial step: ", data.tutorialStep);
+    defaultLogger.log('saving tutorial step: ', data.tutorialStep)
     const profile: Profile = getUserProfile().profile as Profile
     global.globalStore.dispatch(saveAvatarRequest({ ...profile, tutorialStep: data.tutorialStep }))
   },
@@ -255,9 +257,9 @@ function stopTeleportAnimation() {
   document.body.setAttribute('style', 'background: #151419')
 
   const profile = getUserProfile().profile as Profile
-  
-  if ( !tutorialEnabled() || profile.tutorialStep !== tutorialStepId.INITIAL_SCENE ) {
-    unityInterface.ShowWelcomeNotification();
+
+  if (!tutorialEnabled() || profile.tutorialStep !== tutorialStepId.INITIAL_SCENE) {
+    unityInterface.ShowWelcomeNotification()
   }
 }
 
@@ -305,7 +307,7 @@ export function* chunkGenerator(
   }
 }
 
-export const unityInterface = {
+unityInterface = {
   debug: false,
   SetDebug() {
     gameInstance.SendMessage('SceneController', 'SetDebug')
@@ -435,7 +437,7 @@ export const unityInterface = {
     }
   },
   SetTutorialEnabled() {
-    if(RESET_TUTORIAL) {
+    if (RESET_TUTORIAL) {
       browserInterface.SaveUserTutorialStep({ tutorialStep: 0 })
     }
 
@@ -769,7 +771,7 @@ export async function initializeEngine(_gameInstance: GameInstance) {
     onMessage(type: string, message: any) {
       if (type in browserInterface) {
         // tslint:disable-next-line:semicolon
-        ; (browserInterface as any)[type](message)
+        ;(browserInterface as any)[type](message)
       } else {
         defaultLogger.info(`Unknown message (did you forget to add ${type} to unity-interface/dcl.ts?)`, message)
       }
