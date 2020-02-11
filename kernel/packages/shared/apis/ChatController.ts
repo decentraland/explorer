@@ -46,7 +46,8 @@ const CAMPAIGN_PARCEL_SEQUENCE = [
 ]
 
 const blacklisted = [
-  'help'
+  'help',
+  'airdrop'
 ]
 
 export interface IChatController {
@@ -313,6 +314,17 @@ export class ChatController extends ExposableAPI implements IChatController {
         }
       }
     )
+
+    this.addChatCommand('airdrop', 'fake an airdrop', () => {	
+      const unityWindow: any = window	
+      unityWindow.unityInterface.TriggerAirdropDisplay(sampleDrop)	
+      return {	
+        id: uuid(),	
+        isCommand: true,	
+        sender: 'Decentraland',	
+        message: 'Faking airdrop...'	
+      }	
+    })	
 
     this.addChatCommand('unmute', 'Unmute [username]', message => {
       const username = message
