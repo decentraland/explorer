@@ -29,7 +29,8 @@ import {
   ChatMessage,
   ProfileVersion,
   BusMessage,
-  AvatarMessageType
+  AvatarMessageType,
+  ConnectionEstablishmentError
 } from './interface/types'
 import { CommunicationArea, Position, position2parcel, sameParcel, squareDistance } from './interface/utils'
 import { BrokerWorldInstanceConnection } from '../comms/v1/brokerWorldInstanceConnection'
@@ -43,6 +44,7 @@ import * as Long from 'long'
 import { identity } from '../index'
 import { Authenticator } from '../crypto/Authenticator'
 import { getCommsServer, getLayer } from '../dao/selectors'
+import { IdTakenError, UnknownCommsModeError } from './interface/types'
 
 declare const window: any
 window.Long = Long
@@ -474,7 +476,7 @@ export async function connect(userId: string) {
             break
           }
           default: {
-            throw new Error(`unrecognized mode for comms v1 "${mode}"`)
+            throw new UnknownCommsModeError(`unrecognized mode for comms v1 "${mode}"`)
           }
         }
 
@@ -592,7 +594,11 @@ export async function connect(userId: string) {
     return context
   } catch (e) {
     defaultLogger.error(e)
-    throw new Error('error establishing comms: ' + e.message)
+    if (e.message && e.message.includes('is taken')) {
+      throw new IdTakenError(e.message)
+    } else {
+      throw new ConnectionEstablishmentError(e.message)
+    }
   }
 }
 

@@ -45,6 +45,7 @@ import { Account } from 'web3x/account'
 import { web3initialized } from './dao/actions'
 import { realmInitialized } from './dao'
 import { getDefaultTLD } from '../config/index'
+import { IdTakenError, ConnectionEstablishmentError } from './comms/interface/types'
 
 enum AnalyticsAccount {
   PRD = '1plAT9a2wOOgbPCrTaU8rgGUMzgUTJtU',
@@ -261,11 +262,11 @@ export async function initShared(): Promise<Session | undefined> {
 
       break
     } catch (e) {
-      if (e.message && e.message.includes('is taken')) {
+      if (e instanceof IdTakenError) {
         disconnect()
         ReportFatalError(NEW_LOGIN)
         throw e
-      } else if (e.message && e.message.startsWith('error establishing comms')) {
+      } else if (e instanceof ConnectionEstablishmentError) {
         if (i >= maxAttemps) {
           // max number of attemps reached => rethrow error
           defaultLogger.info(`Max number of attemps reached (${maxAttemps}), unsuccessful connection`)
