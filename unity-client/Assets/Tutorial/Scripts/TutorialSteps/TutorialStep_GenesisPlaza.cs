@@ -5,9 +5,9 @@ namespace DCL.Tutorial
         public override void OnStepStart()
         {
             base.OnStepStart();
+            HUDController.i?.minimapHud.SetVisibility(true);
             HUDController.i?.expressionsHud.SetVisibility(false);
             TutorialController.i.SetChatVisible(false);
-            HUDController.i?.ShowWelcomeNotification();
         }
     }
 }

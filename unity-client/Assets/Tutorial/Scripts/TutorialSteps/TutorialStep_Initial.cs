@@ -60,7 +60,7 @@ namespace DCL.Tutorial
             welcomeTooltip.Show();
 
             yield return new WaitUntil(() => claimNamePanelClosed);
-            yield return WaitForSecondsWhenRenderingEnabled(3);
+            yield return WaitForSecondsCache.Get(3);
 
             controlsTooltip.Show(autoHide: false);
             characterMoved = false;
@@ -77,7 +77,7 @@ namespace DCL.Tutorial
             yield return WaitIdleTime();
             controlsTooltip.Hide();
 
-            yield return WaitForSecondsWhenRenderingEnabled(3);
+            yield return WaitForSecondsCache.Get(3);
             cameraTooltip.Show();
             yield return WaitIdleTime();
 

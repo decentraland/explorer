@@ -198,7 +198,7 @@ namespace DCL
 
                 if (enableTutorial)
                 {
-                    debugString += "TUTORIAL_ENABLED&";
+                    debugString += "TUTORIAL_RESET&";
                 }
 
                 string debugPanelString = "";
@@ -410,6 +410,9 @@ namespace DCL
                                 break;
                             case "AirdroppingRequest":
                                 HUDController.i.AirdroppingRequest(msg.payload);
+                                break;
+                            case "ShowWelcomeNotification":
+                                HUDController.i.ShowWelcomeNotification();
                                 break;
                             default:
                                 Debug.Log("<b><color=#FF0000>WSSController:</color></b> received an unknown message from kernel to renderer: " + msg.type);

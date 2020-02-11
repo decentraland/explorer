@@ -255,9 +255,8 @@ function stopTeleportAnimation() {
   document.body.setAttribute('style', 'background: #151419')
 
   const profile = getUserProfile().profile as Profile
-  const tutorialFinished = profile.tutorialStep === tutorialStepId.FINISHED
-
-  if ( !RESET_TUTORIAL || tutorialFinished ) {
+  
+  if ( !tutorialEnabled() || profile.tutorialStep !== tutorialStepId.INITIAL_SCENE ) {
     unityInterface.ShowWelcomeNotification();
   }
 }

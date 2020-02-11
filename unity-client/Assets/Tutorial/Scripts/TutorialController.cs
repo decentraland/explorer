@@ -139,7 +139,7 @@ namespace DCL.Tutorial
             if (!isTutorialEnabled || !renderingEnabled) return;
 
             currentTutorialStepId = (TutorialStep.Id)GetTutorialStepFromProfile();
-            Debug.Log("tutorial stage mask fetched: " + currentTutorialStepId);
+            Debug.Log("Tutorial stage step fetched: " + currentTutorialStepId);
 
 #if UNITY_EDITOR
             if (debugFlagStartingValue != 0)

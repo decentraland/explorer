@@ -28,15 +28,11 @@ namespace DCL.Tutorial
             yield break;
         }
 
+        WaitForSeconds waitForIdleTime = new WaitForSeconds(TutorialController.DEFAULT_STAGE_IDLE_TIME);
+
         public virtual IEnumerator WaitIdleTime()
         {
-            yield return WaitForSecondsWhenRenderingEnabled(TutorialController.DEFAULT_STAGE_IDLE_TIME);
-        }
-
-        public virtual IEnumerator WaitForSecondsWhenRenderingEnabled(float seconds)
-        {
-            yield return new WaitUntil(() => RenderingController.i.renderingEnabled);
-            yield return new WaitForSeconds(seconds);
+            yield return waitForIdleTime;
         }
 
     }
