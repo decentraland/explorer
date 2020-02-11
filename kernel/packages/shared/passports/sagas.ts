@@ -49,8 +49,8 @@ import { profileToRendererFormat } from './transformations/profileToRendererForm
 import { ensureServerFormat } from './transformations/profileToServerFormat'
 import { Catalog, Profile, WearableId, Wearable, Collection } from './types'
 import { Action } from 'redux'
-import { identity } from '../index'
-import { AuthIdentity, Authenticator, AuthLink } from '../crypto/Authenticator'
+import { identity, ExplorerIdentity } from '../index'
+import { Authenticator, AuthLink } from 'dcl-crypto'
 
 const CID = require('cids')
 import { sha3 } from 'web3x/utils'
@@ -464,7 +464,7 @@ export async function modifyAvatar(params: {
   url: string
   currentVersion: number
   userId: string
-  identity: AuthIdentity
+  identity: ExplorerIdentity
   profile: Profile
 }) {
   const { url, currentVersion, profile, identity } = params
