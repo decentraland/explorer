@@ -38,7 +38,7 @@ import { setWorldContext } from './protocol/actions'
 import { profileToRendererFormat } from './passports/transformations/profileToRendererFormat'
 import { awaitWeb3Approval, providerFuture, isSessionExpired } from './ethereum/provider'
 import { createIdentity } from 'eth-crypto'
-import { Authenticator, AuthIdentity } from './crypto/Authenticator'
+import { Authenticator, AuthIdentity } from 'dcl-crypto'
 import { Eth } from 'web3x/eth'
 import { Personal } from 'web3x/personal/personal'
 import { Account } from 'web3x/account'
@@ -46,6 +46,10 @@ import { web3initialized } from './dao/actions'
 import { realmInitialized } from './dao'
 import { getDefaultTLD } from '../config/index'
 import { IdTakenError, ConnectionEstablishmentError } from './comms/interface/types'
+
+export type ExplorerIdentity = AuthIdentity & {
+  address: string
+}
 
 enum AnalyticsAccount {
   PRD = '1plAT9a2wOOgbPCrTaU8rgGUMzgUTJtU',
@@ -73,7 +77,7 @@ function initializeAnalytics() {
 }
 
 export let globalStore: Store<RootState>
-export let identity: AuthIdentity
+export let identity: ExplorerIdentity
 
 async function createAuthIdentity() {
   const ephemeral = createIdentity()
@@ -115,7 +119,8 @@ async function createAuthIdentity() {
     signer = async (message: string) => account.sign(message).signature
   }
 
-  const identity = await Authenticator.initializeAuthChain(address, ephemeral, ephemeralLifespanMinutes, signer)
+  const auth = await Authenticator.initializeAuthChain(address, ephemeral, ephemeralLifespanMinutes, signer)
+  const identity: ExplorerIdentity = { ...auth, address: address.toLocaleLowerCase() }
 
   return identity
 }
