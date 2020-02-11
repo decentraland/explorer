@@ -324,6 +324,12 @@ namespace DCL.Interface
             public int tutorialStep;
         }
 
+        [System.Serializable]
+        public class OpenWebURLPayload
+        {
+            public string url;
+        }
+
 #if UNITY_WEBGL && !UNITY_EDITOR
     /**
      * This method is called after the first render. It marks the loading of the
@@ -656,6 +662,11 @@ namespace DCL.Interface
         public static void SaveUserTutorialStep(int newTutorialStep)
         {
             WebInterface.SendMessage("SaveUserTutorialStep", new TutorialStepPayload() { tutorialStep = newTutorialStep });
+        }
+
+        public static void OpenWebURL(string targetURL)
+        {
+            WebInterface.SendMessage("OpenWebURL", new OpenWebURLPayload() { url = targetURL });
         }
 
         public static void SendPerformanceReport(string encodedFrameTimesInMS)

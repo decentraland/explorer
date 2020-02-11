@@ -1,6 +1,6 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.Serialization;
+using DCL.Interface;
 
 namespace DCL.Tutorial
 {
@@ -12,11 +12,12 @@ namespace DCL.Tutorial
         [SerializeField] TutorialTooltip minimapTooltip = null;
         [SerializeField] GameObject claimNamePanel = null;
 
-        private AvatarEditorHUDController avatarEditorHUD = null;
+        const string CLAIM_NAME_URL = "http://avatars.decentraland.org";
 
-        private bool claimNamePanelClosed = false;
-        private bool characterMoved = false;
-        private bool characterTeleported = false;
+        AvatarEditorHUDController avatarEditorHUD = null;
+        bool claimNamePanelClosed = false;
+        bool characterMoved = false;
+        bool characterTeleported = false;
 
         public override void OnStepStart()
         {
@@ -118,7 +119,7 @@ namespace DCL.Tutorial
 
         public void ClaimNameButtonAction()
         {
-            Application.OpenURL("http://avatars.decentraland.org");
+            WebInterface.OpenWebURL(CLAIM_NAME_URL);
 
             ContinueAsGuestButtonAction();
         }
