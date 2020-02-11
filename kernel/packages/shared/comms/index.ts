@@ -30,7 +30,7 @@ import {
   ProfileVersion,
   BusMessage,
   AvatarMessageType,
-  ConnectionEstablishmentError
+  ConnectionEstablishmentError, IdTakenError, UnknownCommsModeError
 } from './interface/types'
 import { CommunicationArea, Position, position2parcel, sameParcel, squareDistance } from './interface/utils'
 import { BrokerWorldInstanceConnection } from '../comms/v1/brokerWorldInstanceConnection'
@@ -44,7 +44,6 @@ import * as Long from 'long'
 import { identity } from '../index'
 import { Authenticator } from '../crypto/Authenticator'
 import { getCommsServer, getLayer } from '../dao/selectors'
-import { IdTakenError, UnknownCommsModeError } from './interface/types'
 
 declare const window: any
 window.Long = Long
