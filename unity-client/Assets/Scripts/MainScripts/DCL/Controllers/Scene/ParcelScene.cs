@@ -32,7 +32,6 @@ namespace DCL.Controllers
 
         public event System.Action<DecentralandEntity> OnEntityAdded;
         public event System.Action<DecentralandEntity> OnEntityRemoved;
-        public event System.Action<State> OnStateChange;
         public ContentProvider contentProvider;
         public int disposableNotReadyCount => disposableNotReady.Count;
 
@@ -50,9 +49,6 @@ namespace DCL.Controllers
 
         [System.NonSerialized]
         public bool unloadWithDistance = true;
-
-        [System.NonSerialized]
-        public bool lockRendering = true;
 
         public static ParcelScenesCleaner parcelScenesCleaner = new ParcelScenesCleaner();
 
@@ -141,8 +137,7 @@ namespace DCL.Controllers
 
             if (data.id == SceneController.i.currentSceneId)
             {
-                lockRendering = true;
-                RenderingController.i.lockHandler.Lock(this);
+                RenderingController.i.renderingActivatedAckLock.AddLock(this);
             }
 
 #if UNITY_EDITOR
@@ -1091,8 +1086,7 @@ namespace DCL.Controllers
             if (useBlockers)
                 blockerHandler.CleanBlockers();
 
-            if (lockRendering)
-                RenderingController.i.lockHandler.Unlock(this);
+            RenderingController.i.renderingActivatedAckLock.RemoveLock(this);
 
             SceneController.i.SendSceneReady(sceneData.id);
             RefreshName();

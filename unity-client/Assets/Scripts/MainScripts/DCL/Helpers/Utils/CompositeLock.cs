@@ -1,40 +1,43 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace DCL
+namespace DCL.Helpers
 {
-    public class LoadingLock
+    public class CompositeLock
     {
-        public event System.Action OnUnlocked;
+        public static bool VERBOSE = true;
+        public event System.Action OnAllLocksRemoved;
 
         int lockCounter = 0;
         HashSet<object> lockIds = new HashSet<object>();
 
         public bool isUnlocked => lockCounter == 0;
 
-        public void Lock(object id)
+        public void AddLock(object id)
         {
             if (lockIds.Contains(id))
                 return;
 
             lockIds.Add(id);
             lockCounter++;
-            Debug.Log($"Locking rendering activated... {lockCounter}");
+
+            if (VERBOSE)
+                Debug.Log($"Lock added... {lockCounter}");
         }
 
-        public void Unlock(object id)
+        public void RemoveLock(object id)
         {
             if (!lockIds.Contains(id))
                 return;
 
             lockIds.Remove(id);
             lockCounter--;
-            Debug.Log($"Unlocking rendering activated... {lockCounter}");
+
+            if (VERBOSE)
+                Debug.Log($"Locking removed... {lockCounter}");
 
             if (lockCounter == 0)
-            {
-                OnUnlocked?.Invoke();
-            }
+                OnAllLocksRemoved?.Invoke();
         }
     }
 }
