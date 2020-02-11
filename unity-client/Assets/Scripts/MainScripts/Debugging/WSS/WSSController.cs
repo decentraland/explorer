@@ -400,7 +400,7 @@ namespace DCL
                                 HUDController.i.ConfigureSettingsHUD(msg.payload);
                                 break;
                             case "SetTutorialEnabled":
-                                TutorialController.i?.SetTutorialEnabled();
+                                DCL.Tutorial.TutorialController.i?.SetTutorialEnabled();
                                 break;
                             case "TriggerSelfUserExpression":
                                 HUDController.i.TriggerSelfUserExpression(msg.payload);
