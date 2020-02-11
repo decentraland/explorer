@@ -35,7 +35,7 @@ import { loadingScenes, teleportTriggered, unityClientLoaded } from '../shared/l
 import { createLogger, defaultLogger, ILogger } from '../shared/logger'
 import { saveAvatarRequest } from '../shared/passports/actions'
 import { airdropObservable } from '../shared/apis/AirdropController'
-import { Avatar, Wearable, Profile } from '../shared/passports/types'
+import { Avatar, Wearable } from '../shared/passports/types'
 import {
   PB_AttachEntityComponent,
   PB_ComponentCreated,
@@ -170,8 +170,7 @@ const browserInterface = {
   },
 
   SaveUserTutorialStep(data: { tutorialStep: number }) {
-    defaultLogger.log("saving tutorial step: ", data.tutorialStep);
-    const profile: Profile = getUserProfile().profile as Profile
+    const profile = getUserProfile().profile
     global.globalStore.dispatch(saveAvatarRequest({ ...profile, tutorialStep: data.tutorialStep }))
   },
 
@@ -248,18 +247,6 @@ function ensureTeleportAnimation() {
     'style',
     'background: #151419 url(images/teleport.gif) no-repeat center !important; background-size: 194px 257px !important;'
   )
-}
-
-function stopTeleportAnimation() {
-  document.getElementById('gameContainer')!.setAttribute('style', 'background: #151419')
-  document.body.setAttribute('style', 'background: #151419')
-
-  const profile = getUserProfile().profile as Profile
-  const tutorialFinished = profile.tutorialStep === tutorialStepId.FINISHED
-
-  if ( !RESET_TUTORIAL || tutorialFinished ) {
-    unityInterface.ShowWelcomeNotification();
-  }
 }
 
 const CHUNK_SIZE = 500
@@ -436,7 +423,7 @@ export const unityInterface = {
     }
   },
   SetTutorialEnabled() {
-    if(RESET_TUTORIAL) {
+    if (RESET_TUTORIAL) {
       browserInterface.SaveUserTutorialStep({ tutorialStep: 0 })
     }
 
@@ -519,6 +506,18 @@ export const HUD: Record<string, { configure: (config: HUDConfiguration) => void
   },
   Airdropping: {
     configure: unityInterface.ConfigureAirdroppingHUD
+  }
+}
+
+function stopTeleportAnimation() {
+  document.getElementById('gameContainer')!.setAttribute('style', 'background: #151419')
+  document.body.setAttribute('style', 'background: #151419')
+
+  const profile = getUserProfile().profile
+  const tutorialFinished = profile.tutorialStep === tutorialStepId.FINISHED
+
+  if (!RESET_TUTORIAL || tutorialFinished) {
+    unityInterface.ShowWelcomeNotification()
   }
 }
 
