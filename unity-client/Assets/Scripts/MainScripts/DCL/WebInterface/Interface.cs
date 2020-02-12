@@ -1,4 +1,4 @@
-﻿﻿using UnityEngine;
+using UnityEngine;
 
 #if UNITY_WEBGL && !UNITY_EDITOR
 using System.Runtime.InteropServices;
@@ -328,6 +328,12 @@ namespace DCL.Interface
         public class SendUnblockPlayerPayload
         {
             public string userId;
+        }
+
+        [System.Serializable]
+        public class OpenURLPayload
+        {
+            public string url;
         }
 
 #if UNITY_WEBGL && !UNITY_EDITOR
@@ -672,7 +678,16 @@ namespace DCL.Interface
                 id = expressionID,
                 timestamp = timestamp
             });
+        }
 
+        public static void ReportMotdClicked()
+        {
+            SendMessage("MotdConfirmClicked");
+        }
+
+        public static void OpenURL(string url)
+        {
+            SendMessage("OpenWebURL", new OpenURLPayload { url = url });
         }
 
         public static void SendReportScene(string sceneID)
