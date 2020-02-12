@@ -119,7 +119,7 @@ namespace DCL.Tutorial
 
         public void ClaimNameButtonAction()
         {
-            WebInterface.OpenWebURL(CLAIM_NAME_URL);
+            WebInterface.OpenURL(CLAIM_NAME_URL);
 
             ContinueAsGuestButtonAction();
         }

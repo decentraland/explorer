@@ -121,6 +121,7 @@ export const DEBUG_REDUX = location.search.indexOf('DEBUG_REDUX') !== -1
 export const DEBUG_LOGIN = location.search.indexOf('DEBUG_LOGIN') !== -1
 
 export const AWS = location.search.indexOf('AWS') !== -1
+export const NO_MOTD = location.search.indexOf('NO_MOTD') !== -1
 
 export const DISABLE_AUTH = location.search.indexOf('DISABLE_AUTH') !== -1 || DEBUG
 export const ENGINE_DEBUG_PANEL = location.search.indexOf('ENGINE_DEBUG_PANEL') !== -1
@@ -242,10 +243,8 @@ export function getLoginConfigurationForCurrentDomain() {
 
 export const ENABLE_EMPTY_SCENES = !DEBUG || knownTLDs.includes(getTLD())
 
-export function getContentUrl() {
-  const TLDDefault = getDefaultTLD()
-
-  return `https://content.decentraland.${TLDDefault === 'today' ? 'org' : TLDDefault}`
+export function getWearablesSafeURL() {
+  return 'https://content.decentraland.org'
 }
 
 export function getServerConfigurations() {
