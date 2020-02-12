@@ -103,7 +103,15 @@ namespace DCL.Tutorial
             if (avatarEditorHUD != null)
                 avatarEditorHUD.OnVisibilityChanged -= OnAvatarEditorVisibilityChanged;
 
-            claimNamePanel.SetActive(true);
+            if (!UserProfile.GetOwnUserProfile().hasClaimedName)
+            {
+                claimNamePanel.SetActive(true);
+            }
+            else
+            {
+                claimNamePanel.SetActive(false);
+                claimNamePanelClosed = true;
+            }
         }
 
         private void OnTeleport(DCLCharacterPosition characterPosition)

@@ -15,6 +15,7 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
     public string description => model.description;
     public string email => model.email;
     public bool hasConnectedWeb3 => model.hasConnectedWeb3;
+    public bool hasClaimedName => model.hasClaimedName;
     public AvatarModel avatar => model.avatar;
     public int tutorialStep => model.tutorialStep;
     internal Dictionary<string, int> inventory = new Dictionary<string, int>();
@@ -46,6 +47,7 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
         }
 
         model.tutorialStep = newModel.tutorialStep;
+        model.hasClaimedName = newModel.hasClaimedName;
         model.name = newModel.name;
         model.email = newModel.email;
         model.description = newModel.description;
