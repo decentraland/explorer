@@ -326,6 +326,12 @@ namespace DCL.Interface
             public bool accepted;
         }
 
+        [System.Serializable]
+        public class OpenURLPayload
+        {
+            public string url;
+        }
+
 #if UNITY_WEBGL && !UNITY_EDITOR
     /**
      * This method is called after the first render. It marks the loading of the
@@ -680,9 +686,15 @@ namespace DCL.Interface
                 timestamp = timestamp
             });
         }
+
         public static void ReportMotdClicked()
         {
             SendMessage("MotdConfirmClicked");
+        }
+
+        public static void OpenURL(string url)
+        {
+            SendMessage("OpenWebURL", new OpenURLPayload {url = url});
         }
     }
 }
