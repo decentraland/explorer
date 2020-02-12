@@ -52,6 +52,7 @@ export async function generateRandomUserProfile(userId: string): Promise<Profile
     inventory: [],
     version: 0,
     name,
+    hasClaimedName: false,
     ethAddress: 'noeth',
     description: '',
     avatar: avatarV2,
