@@ -1,4 +1,4 @@
-﻿﻿using UnityEngine;
+using UnityEngine;
 
 #if UNITY_WEBGL && !UNITY_EDITOR
 using System.Runtime.InteropServices;
@@ -322,6 +322,20 @@ namespace DCL.Interface
         public class TutorialStepPayload
         {
             public int tutorialStep;
+        }
+
+        [System.Serializable]
+        public class TermsOfServiceResponsePayload
+        {
+            public string sceneId;
+            public bool dontShowAgain;
+            public bool accepted;
+        }
+
+        [System.Serializable]
+        public class OpenURLPayload
+        {
+            public string url;
         }
 
         [System.Serializable]
@@ -674,6 +688,17 @@ namespace DCL.Interface
             WebInterface.MessageFromEngine("PerformanceReport", encodedFrameTimesInMS);
         }
 
+        public static void SendTermsOfServiceResponse(string sceneId, bool accepted, bool dontShowAgain)
+        {
+            var payload = new TermsOfServiceResponsePayload()
+            {
+                sceneId = sceneId,
+                accepted = accepted,
+                dontShowAgain = dontShowAgain
+            };
+            SendMessage("TermsOfServiceResponse", payload);
+        }
+
         public static void SendExpression(string expressionID, long timestamp)
         {
             SendMessage("TriggerExpression", new SendExpressionPayload()
@@ -681,7 +706,16 @@ namespace DCL.Interface
                 id = expressionID,
                 timestamp = timestamp
             });
+        }
 
+        public static void ReportMotdClicked()
+        {
+            SendMessage("MotdConfirmClicked");
+        }
+
+        public static void OpenURL(string url)
+        {
+            SendMessage("OpenWebURL", new OpenURLPayload { url = url });
         }
     }
 }
