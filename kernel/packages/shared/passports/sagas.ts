@@ -179,7 +179,7 @@ function overrideBaseUrl(wearable: Wearable) {
   return {
     ...wearable,
     baseUrl: getWearablesSafeURL() + '/contents/',
-    baseUrlBundles: getServerConfigurations().contentAsBundle + '/contents/'
+    baseUrlBundles: getServerConfigurations().contentAsBundle + '/'
   }
 }
 
