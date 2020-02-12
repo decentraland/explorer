@@ -61,18 +61,17 @@ export function queueTrackingEvent(eventName: string, eventData: any) {
 function startTracking() {
   if (trackingQueue.length > 0) {
     tracking = true
-    track(trackingQueue.shift()!)
+    setTimeout(() => {
+      while (trackingQueue.length) {
+        sendTrack(trackingQueue.shift()!)
+      }
+      tracking = false
+    }, 15000)
   }
 }
 
-function track({ name, data }: SegmentEvent) {
-  window.analytics.track(name, data, {}, () => {
-    if (trackingQueue.length === 0) {
-      tracking = false
-      return
-    }
-    track(trackingQueue.shift()!)
-  })
+function sendTrack({ name, data }: SegmentEvent) {
+  window.analytics.track(name, data, {})
 }
 
 function hookObservables() {
