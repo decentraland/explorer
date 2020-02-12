@@ -704,7 +704,7 @@ namespace DCL.Interface
 
         public static void OpenURL(string url)
         {
-            SendMessage("OpenWebURL", new OpenURLPayload {url = url});
+            SendMessage("OpenWebURL", new OpenURLPayload { url = url });
         }
     }
 }
