@@ -416,6 +416,7 @@ namespace DCL
                                 break;
                             case "ShowWelcomeNotification":
                                 HUDController.i.ShowWelcomeNotification();
+                                break;
                             case "ConfigureTermsOfServiceHUD":
                                 HUDController.i.ConfigureTermsOfServiceHUD(msg.payload);
                                 break;
