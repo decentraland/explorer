@@ -1,7 +1,7 @@
-using DCL.Controllers;
-using DCL.Models;
+﻿using DCL.Controllers;
 using DCL.Helpers;
 using DCL.Interface;
+using DCL.Models;
 using UnityEngine;
 
 namespace DCL.Components
@@ -115,7 +115,8 @@ namespace DCL.Components
 
         void OnDestroy()
         {
-            entity.OnShapeUpdated -= OnComponentUpdated;
+            if (entity != null)
+                entity.OnShapeUpdated -= OnComponentUpdated;
 
             if (pointerEventColliders != null)
             {
