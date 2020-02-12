@@ -32,8 +32,16 @@ export type DaoState = {
   layer: string
   realm: Realm | undefined
   candidates: Candidate[]
+  commsStatus: CommsStatus
 }
 
 export type RootDaoState = {
   dao: DaoState
+}
+
+export type CommsState = 'initial' | 'connecting' | 'connected' | 'error'
+
+export type CommsStatus = {
+  status: CommsState
+  connectedPeers: number
 }

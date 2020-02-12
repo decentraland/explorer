@@ -46,6 +46,12 @@ import { LighthouseWorldInstanceConnection } from './v2/LighthouseWorldInstanceC
 import { identity } from '../index'
 import { Authenticator } from 'dcl-crypto'
 import { getCommsServer, getRealm } from '../dao/selectors'
+import { Realm } from 'shared/dao/types'
+import { Store } from 'redux'
+import { RootState } from 'shared/store/rootTypes'
+import { store } from 'shared/store/store'
+import { deepEqual } from 'atomicHelpers/deepEqual'
+import { setCatalystRealmCommsStatus } from 'shared/dao/actions'
 
 export type CommsVersion = 'v1' | 'v2'
 export type CommsMode = CommsV1Mode | CommsV2Mode
@@ -171,6 +177,13 @@ export function subscribeParcelSceneToCommsMessages(controller: CommunicationsCo
 
 export function unsubscribeParcelSceneToCommsMessages(controller: CommunicationsController) {
   scenesSubscribedToCommsEvents.delete(controller)
+}
+
+async function changeConnectionRealm(realm: Realm, url: string) {
+  defaultLogger.log('Changing connection realm to ', JSON.stringify(realm), { url })
+  if (context && context.worldInstanceConnection) {
+    context.worldInstanceConnection.changeRealm(realm, url)
+  }
 }
 
 // TODO: Change ChatData to the new class once it is added to the .proto
@@ -436,6 +449,17 @@ function parseCommsMode(modeString: string) {
   return segments as [CommsVersion, CommsMode]
 }
 
+function subscribeToRealmChange(store: Store<RootState>) {
+  let currentRealm: Realm | undefined = getRealm(store.getState())
+  store.subscribe(() => {
+    const previousRealm = currentRealm
+    currentRealm = getRealm(store.getState())
+    if (currentRealm && !deepEqual(previousRealm, currentRealm)) {
+      changeConnectionRealm(currentRealm, getCommsServer(store.getState()))
+    }
+  })
+}
+
 export async function connect(userId: string) {
   try {
     const user = getCurrentUser()
@@ -484,8 +508,9 @@ export async function connect(userId: string) {
         break
       }
       case 'v2': {
-        const lighthouseUrl = getCommsServer(window.globalStore.getState())
-        const realm = getRealm(window.globalStore.getState())
+        const store: Store<RootState> = window.globalStore
+        const lighthouseUrl = getCommsServer(store.getState())
+        const realm = getRealm(store.getState())
 
         const peerConfig = {
           connectionConfig: {
@@ -514,7 +539,8 @@ export async function connect(userId: string) {
           identity.address,
           realm!,
           lighthouseUrl,
-          peerConfig
+          peerConfig,
+          status => store.dispatch(setCatalystRealmCommsStatus(status))
         ))
         await lighthouseConnection.connectPeer()
 
@@ -540,6 +566,8 @@ export async function connect(userId: string) {
 
     context = new Context(userInfo)
     context.worldInstanceConnection = connection
+
+    subscribeToRealmChange(store)
 
     if (commConfigurations.debug) {
       connection.stats = context.stats

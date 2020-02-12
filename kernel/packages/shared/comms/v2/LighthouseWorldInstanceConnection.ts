@@ -2,11 +2,11 @@ import { WorldInstanceConnection } from '../interface/index'
 import { Stats } from '../debug'
 import { Package, BusMessage, ChatMessage, ProfileVersion, UserInformation, PackageType } from '../interface/types'
 import { Position, positionHash } from '../interface/utils'
-import { createLogger } from 'shared/logger'
+import defaultLogger, { createLogger } from 'shared/logger'
 import { PeerMessageTypes, PeerMessageType } from 'decentraland-katalyst-peer/src/messageTypes'
 import { Peer as PeerType, PacketCallback } from 'decentraland-katalyst-peer/src/Peer'
 import { ChatData, CommsMessage, ProfileData, SceneData, PositionData } from './proto/comms_pb'
-import { Realm } from 'shared/dao/types'
+import { Realm, CommsStatus } from 'shared/dao/types'
 
 import * as Long from 'long'
 declare const window: any
@@ -78,20 +78,56 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
     }
   }
 
-  constructor(private peerId: string, private realm: Realm, private lighthouseUrl: string, private peerConfig: any) {
+  constructor(
+    private peerId: string,
+    private realm: Realm,
+    private lighthouseUrl: string,
+    private peerConfig: any,
+    private statusHandler: (status: CommsStatus) => void
+  ) {
     //This assignment is to "definetly initialize" peer
     this.peer = this.initializePeer()
   }
 
   private initializePeer() {
+    //@ts-ignore
+    this.statusHandler({ status: 'connecting', connectedPeers: this.connectedPeersCount() })
     this.peer = this.createPeer()
     global.__DEBUG_PEER = this.peer
     return this.peer
   }
 
+  private connectedPeersCount(): number {
+    //@ts-ignore
+    return this.peer ? this.peer.connectedCount() : 0
+  }
+
   async connectPeer() {
-    await this.peer.awaitConnectionEstablished(60000)
-    await this.peer.setLayer(this.realm.layer)
+    try {
+      await this.peer.awaitConnectionEstablished(60000)
+      await this.peer.setLayer(this.realm.layer)
+    } catch (e) {
+      defaultLogger.error('Error while connecting to layer', e)
+      this.statusHandler({ status: 'error', connectedPeers: this.connectedPeersCount() })
+      throw e
+    }
+    this.statusHandler({ status: 'connected', connectedPeers: this.connectedPeersCount() })
+  }
+
+  public async changeRealm(realm: Realm, url: string) {
+    this.statusHandler({ status: 'connecting', connectedPeers: this.connectedPeersCount() })
+    let rooms: string[] = []
+    if (this.peer) {
+      rooms = this.peer.currentRooms.map(it => it.id)
+      await this.cleanUpPeer()
+    }
+
+    this.realm = realm
+    this.lighthouseUrl = url
+
+    this.initializePeer()
+    await this.connectPeer()
+    await this.updateSubscriptions(rooms)
   }
 
   private createPeer(): PeerType {
@@ -103,11 +139,17 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
   }
 
   close() {
+    return this.cleanUpPeer()
+  }
+
+  private async cleanUpPeer() {
     const rooms = this.peer.currentRooms
-    const disposePeer = (_: any) => this.peer.dispose()
-    return Promise.all(
+
+    await Promise.all(
       rooms.map(room => this.peer.leaveRoom(room.id).catch(e => logger.trace(`error while leaving room ${room.id}`, e)))
-    ).then(disposePeer, disposePeer)
+    )
+
+    return this.peer.dispose()
   }
 
   async sendInitialMessage(userInfo: Partial<UserInformation>) {

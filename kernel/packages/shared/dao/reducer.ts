@@ -1,5 +1,10 @@
 import { AnyAction } from 'redux'
-import { SET_CATALYST_REALM, INIT_CATALYST_REALM, SET_CATALYST_CANDIDATES } from './actions'
+import {
+  SET_CATALYST_REALM,
+  INIT_CATALYST_REALM,
+  SET_CATALYST_CANDIDATES,
+  SET_CATALYST_REALM_COMMS_STATUS
+} from './actions'
 import { DaoState, Candidate, Realm } from './types'
 import {
   FETCH_PROFILE_SERVICE,
@@ -8,21 +13,12 @@ import {
   COMMS_SERVICE,
   REALM as REALM_QUERY
 } from '../../config/index'
+import { getRealmFromString } from '.'
 
 function getConfiguredRealm(candidates: Candidate[]) {
   if (REALM_QUERY) {
-    const parts = REALM_QUERY.split('-')
-    if (parts.length == 2) {
-      return realmFor(parts[0], parts[1], candidates)
-    }
+    return getRealmFromString(REALM_QUERY, candidates)
   }
-}
-
-function realmFor(name: string, layer: string, candidates: Candidate[]): Realm | undefined {
-  const candidate = candidates.find(it => it.catalystName === name && it.layer.name === layer)
-  return candidate
-    ? { catalystName: candidate.catalystName, domain: candidate.domain, layer: candidate.layer.name }
-    : undefined
 }
 
 export function daoReducer(state?: DaoState, action?: AnyAction): DaoState {
@@ -35,7 +31,8 @@ export function daoReducer(state?: DaoState, action?: AnyAction): DaoState {
       commsServer: '',
       layer: '',
       realm: undefined,
-      candidates: []
+      candidates: [],
+      commsStatus: { status: 'initial', connectedPeers: 0 }
     }
   }
   if (!action) {
@@ -60,6 +57,11 @@ export function daoReducer(state?: DaoState, action?: AnyAction): DaoState {
       return {
         ...state,
         ...realmProperties(action.payload, !!action.payload.configOverride)
+      }
+    case SET_CATALYST_REALM_COMMS_STATUS:
+      return {
+        ...state,
+        commsStatus: action.payload ? action.payload : { status: 'initial', connectedPeers: 0 }
       }
     default:
       return state

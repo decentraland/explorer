@@ -3,8 +3,9 @@ import future from 'fp-future'
 import { Layer, Realm, Candidate, CatalystLayers } from './types'
 import { RootState } from 'shared/store/rootTypes'
 import { Store } from 'redux'
-import { isRealmInitialized } from './selectors'
+import { isRealmInitialized, getCatalystCandidates, getCatalystRealmCommsStatus } from './selectors'
 import { fetchCatalystNodes } from 'shared/web3'
+import { setCatalystRealm } from './actions'
 
 const zip = <T, U>(arr: Array<T>, ...arrs: Array<Array<U>>) => {
   return arr.map((val, i) => arrs.reduce((a, arr) => [...a, arr[i]], [val] as Array<any>)) as Array<[T, U]>
@@ -126,6 +127,59 @@ export async function realmInitialized(): Promise<void> {
       if (initialized) {
         unsubscribe()
         return resolve()
+      }
+    })
+  })
+}
+
+export function getRealmFromString(realmString: string, candidates: Candidate[]) {
+  const parts = realmString.split('-')
+  if (parts.length == 2) {
+    return realmFor(parts[0], parts[1], candidates)
+  }
+}
+
+function realmFor(name: string, layer: string, candidates: Candidate[]): Realm | undefined {
+  const candidate = candidates.find(it => it.catalystName === name && it.layer.name === layer)
+  return candidate
+    ? { catalystName: candidate.catalystName, domain: candidate.domain, layer: candidate.layer.name }
+    : undefined
+}
+
+export function changeRealm(realmString: string) {
+  const store: Store<RootState> = (window as any)['globalStore']
+
+  const candidates = getCatalystCandidates(store.getState())
+
+  const realm = getRealmFromString(realmString, candidates)
+
+  if (realm) {
+    store.dispatch(setCatalystRealm(realm))
+  }
+
+  return realm
+}
+
+export async function catalystRealmConnected(): Promise<void> {
+  const store: Store<RootState> = (window as any)['globalStore']
+
+  const status = getCatalystRealmCommsStatus(store.getState())
+
+  if (status.status === 'connected') {
+    return Promise.resolve()
+  } else if (status.status === 'error') {
+    return Promise.reject('Error connecting to lighthouse')
+  }
+
+  return new Promise((resolve, reject) => {
+    const unsubscribe = store.subscribe(() => {
+      const status = getCatalystRealmCommsStatus(store.getState())
+      if (status.status === 'connected') {
+        resolve()
+        unsubscribe()
+      } else if (status.status === 'error') {
+        reject('Error connecting to lighthouse')
+        unsubscribe()
       }
     })
   })

@@ -14,3 +14,5 @@ export const getLayer = (store: RootDaoState) => (store.dao.realm ? store.dao.re
 export const getCatalystCandidates = (store: RootDaoState) => store.dao.candidates
 
 export const isRealmInitialized = (store: RootDaoState) => store.dao.initialized
+
+export const getCatalystRealmCommsStatus = (store: RootDaoState) => store.dao.commsStatus
