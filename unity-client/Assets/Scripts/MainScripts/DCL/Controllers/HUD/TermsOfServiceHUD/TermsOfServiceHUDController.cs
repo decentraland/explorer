@@ -66,7 +66,7 @@ public class TermsOfServiceHUDController : IHUD, IDisposable
     private void OpenContactEmail()
     {
         if (!string.IsNullOrEmpty(model.emailContactURL))
-            Application.OpenURL($"mailto:{model.emailContactURL}");
+            WebInterface.OpenURL($"mailto:{model.emailContactURL}");
     }
 
     public void SetVisibility(bool visible)
