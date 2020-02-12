@@ -31,28 +31,28 @@ public class PlayerInfoCardHUDView : MonoBehaviour
     [SerializeField] internal Button hideCardButton;
 
     [Space]
-    [SerializeField] internal Image avatarPicture;
+    [SerializeField]
+    internal Image avatarPicture;
     [SerializeField] internal Image blockedAvatarOverlay;
     [SerializeField] internal TextMeshProUGUI name;
 
     [Header("Passport")]
-    [SerializeField] internal TextMeshProUGUI description;
+    [SerializeField]
+    internal TextMeshProUGUI description;
 
     [Header("Trade")]
-    [SerializeField] private RectTransform wearablesContainer;
+    [SerializeField]
+    private RectTransform wearablesContainer;
 
     [Header("Block")]
-    [SerializeField] internal Button reportPlayerButton;
+    [SerializeField]
+    internal Button reportPlayerButton;
     [SerializeField] internal Button blockPlayerButton;
     [SerializeField] internal Button unblockPlayerButton;
 
     internal readonly List<PlayerInfoCollectibleItem> playerInfoCollectibles = new List<PlayerInfoCollectibleItem>(10);
     internal UserProfile currentUserProfile;
     private UnityAction<bool> toggleChangedDelegate => (x) => UpdateTabs();
-    private UnityAction cardClosedCallback = () => { };
-    private UnityAction reportPlayerCallback = () => { };
-    private UnityAction blockPlayerCallback = () => { };
-    private UnityAction unblockPlayerCallback = () => { };
     private UserProfile ownUserProfile => UserProfile.GetOwnUserProfile();
 
     public static PlayerInfoCardHUDView CreateView()
@@ -60,20 +60,19 @@ public class PlayerInfoCardHUDView : MonoBehaviour
         return Instantiate(Resources.Load<GameObject>(PREFAB_PATH)).GetComponent<PlayerInfoCardHUDView>();
     }
 
-    private void Awake()
-    {
-        hideCardButton.onClick.AddListener(cardClosedCallback);
-        reportPlayerButton.onClick.AddListener(reportPlayerCallback);
-        blockPlayerButton.onClick.AddListener(blockPlayerCallback);
-        unblockPlayerButton.onClick.AddListener(() => unblockPlayerCallback?.Invoke());
-    }
-
     public void Initialize(UnityAction cardClosedCallback, UnityAction reportPlayerCallback, UnityAction blockPlayerCallback, UnityAction unblockPlayerCallback)
     {
-        this.cardClosedCallback = cardClosedCallback;
-        this.reportPlayerCallback = reportPlayerCallback;
-        this.blockPlayerCallback = blockPlayerCallback;
-        this.unblockPlayerCallback = unblockPlayerCallback;
+        hideCardButton.onClick.RemoveAllListeners();
+        hideCardButton.onClick.AddListener(cardClosedCallback);
+
+        reportPlayerButton.onClick.RemoveAllListeners();
+        reportPlayerButton.onClick.AddListener(reportPlayerCallback);
+
+        reportPlayerButton.onClick.RemoveAllListeners();
+        reportPlayerButton.onClick.AddListener(blockPlayerCallback);
+
+        unblockPlayerButton.onClick.RemoveAllListeners();
+        unblockPlayerButton.onClick.AddListener(unblockPlayerCallback);
 
         for (int index = 0; index < tabsMapping.Length; index++)
         {
@@ -135,15 +134,13 @@ public class PlayerInfoCardHUDView : MonoBehaviour
             playerInfoCollectible.Initialize(collectible);
         }
 
-        bool isBlocked = IsBlocked(userProfile);
-
-        unblockPlayerButton.gameObject.SetActive(isBlocked);
-        blockedAvatarOverlay.gameObject.SetActive(isBlocked);
+        SetIsBlocked(IsBlocked(userProfile.userId));
     }
 
-    public void Refresh()
+    public void SetIsBlocked(bool isBlocked)
     {
-        SetUserProfile(currentUserProfile);
+        unblockPlayerButton.gameObject.SetActive(isBlocked);
+        blockedAvatarOverlay.gameObject.SetActive(isBlocked);
     }
 
     public void SetVisibility(bool visible)
@@ -161,11 +158,11 @@ public class PlayerInfoCardHUDView : MonoBehaviour
         }
     }
 
-    internal bool IsBlocked(UserProfile userProfile)
+    internal bool IsBlocked(string userId)
     {
         for (int i = 0; i < ownUserProfile.blocked.Count; i++)
         {
-            if (ownUserProfile.blocked[i] == userProfile.userId) return true;
+            if (ownUserProfile.blocked[i] == userId) return true;
         }
         return false;
     }
