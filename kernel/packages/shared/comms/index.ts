@@ -30,7 +30,9 @@ import {
   ProfileVersion,
   BusMessage,
   AvatarMessageType,
-  ConnectionEstablishmentError, IdTakenError, UnknownCommsModeError
+  ConnectionEstablishmentError,
+  IdTakenError,
+  UnknownCommsModeError
 } from './interface/types'
 import { CommunicationArea, Position, position2parcel, sameParcel, squareDistance } from './interface/utils'
 import { BrokerWorldInstanceConnection } from '../comms/v1/brokerWorldInstanceConnection'
@@ -251,7 +253,7 @@ export function processChatMessage(context: Context, fromAlias: string, message:
           message: text,
           isCommand: false
         }
-        if (profile && user.userId && !profile.blocked.includes(user.userId)) {
+        if (profile && user.userId && profile.blocked && !profile.blocked.includes(user.userId)) {
           chatObservable.notifyObservers({ type: ChatEvent.MESSAGE_RECEIVED, messageEntry: entry })
         }
       }
