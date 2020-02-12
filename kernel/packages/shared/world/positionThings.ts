@@ -25,9 +25,14 @@ export type PositionReport = {
   playerHeight: number
 }
 
+export type TeleportEventInfo = {
+  source: ReadOnlyVector2
+  destination: ReadOnlyVector2
+}
+
 export const positionObservable = new Observable<Readonly<PositionReport>>()
 
-export const teleportObservable = new Observable<ReadOnlyVector2>()
+export const teleportObservable = new Observable<TeleportEventInfo>()
 
 export const lastPlayerPosition = new Vector3()
 

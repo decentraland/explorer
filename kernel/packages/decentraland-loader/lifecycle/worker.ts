@@ -10,6 +10,9 @@ import { SceneDataDownloadManager } from './controllers/download'
 import { ILand, InstancedSpawnPoint } from 'shared/types'
 import defaultLogger from 'shared/logger'
 import { setTutorialEnabled } from './tutorial/tutorial'
+import { SceneDataDownloadManager_Tutorial, ParcelLifeCycleController_Tutorial, PositionLifecycleController_Tutorial } from './tutorial/download'
+import { teleportObservable } from 'shared/world/positionThings'
+import { ReadOnlyVector2 } from 'decentraland-ecs/src'
 
 const connector = new Adapter(WebWorkerTransport(self as any))
 
@@ -17,6 +20,69 @@ let parcelController: ParcelLifeCycleController
 let sceneController: SceneLifeCycleController
 let positionController: PositionLifecycleController
 let downloadManager: SceneDataDownloadManager
+
+enum LifecycleFsmState
+{
+  NONE = 0,
+  DEFAULT = 1,
+  TUTORIAL = 2,
+}
+
+class LifecycleOptions
+{
+  public contentServer: string = ""
+  public contentServerBundles: string = ""
+  public lineOfSightRadius: number = 0
+  public secureRadius: number = 0
+  public emptyScenes: boolean = false
+  public tutorialBaseURL: string = ""
+  public tutorialEnabled: boolean = false
+}
+
+export class LifecycleFSM
+{
+  public state:LifecycleFsmState = LifecycleFsmState.DEFAULT
+
+  public options?:LifecycleOptions
+
+  public setState( state:LifecycleFsmState ) : void 
+  {
+    const options:LifecycleOptions = this.options as LifecycleOptions
+
+    switch (state)
+    {
+      case LifecycleFsmState.DEFAULT:
+        downloadManager = new SceneDataDownloadManager({
+          contentServer: options.contentServer,
+          contentServerBundles: options.contentServerBundles,
+          tutorialBaseURL: options.tutorialBaseURL
+        })
+        parcelController = new ParcelLifeCycleController({
+          lineOfSightRadius: options.lineOfSightRadius,
+          secureRadius: options.secureRadius
+        })
+        sceneController = new SceneLifeCycleController({ downloadManager, enabledEmpty: options.emptyScenes })
+        positionController = new PositionLifecycleController(downloadManager, parcelController, sceneController)
+  
+        break
+      case LifecycleFsmState.TUTORIAL:
+        downloadManager = new SceneDataDownloadManager_Tutorial({
+          contentServer: options.contentServer,
+          contentServerBundles: options.contentServerBundles,
+          tutorialBaseURL: options.tutorialBaseURL
+        })
+        parcelController = new ParcelLifeCycleController_Tutorial({
+          lineOfSightRadius: options.lineOfSightRadius,
+          secureRadius: options.secureRadius
+        })
+        sceneController = new SceneLifeCycleController({ downloadManager, enabledEmpty: options.emptyScenes })
+        positionController = new PositionLifecycleController_Tutorial(downloadManager, parcelController, sceneController)
+        break
+    }
+  }
+}
+
+const fsm:LifecycleFSM = new LifecycleFSM()
 
 /**
  * Hook all the events to the connector.
@@ -35,28 +101,17 @@ let downloadManager: SceneDataDownloadManager
 {
   connector.on(
     'Lifecycle.initialize',
-    (options: {
-      contentServer: string
-      contentServerBundles: string
-      lineOfSightRadius: number
-      secureRadius: number
-      emptyScenes: boolean
-      tutorialBaseURL: string
-      tutorialEnabled: boolean
-    }) => {
+    (options: LifecycleOptions) => {
       setTutorialEnabled(options.tutorialEnabled)
 
-      downloadManager = new SceneDataDownloadManager({
-        contentServer: options.contentServer,
-        contentServerBundles: options.contentServerBundles,
-        tutorialBaseURL: options.tutorialBaseURL
-      })
-      parcelController = new ParcelLifeCycleController({
-        lineOfSightRadius: options.lineOfSightRadius,
-        secureRadius: options.secureRadius
-      })
-      sceneController = new SceneLifeCycleController({ downloadManager, enabledEmpty: options.emptyScenes })
-      positionController = new PositionLifecycleController(downloadManager, parcelController, sceneController)
+      fsm.options = options
+      fsm.setState( options.tutorialEnabled ? LifecycleFsmState.TUTORIAL : LifecycleFsmState.DEFAULT )
+
+      teleportObservable.add( (v2:ReadOnlyVector2) => 
+      {
+        
+      } )
+
       parcelController.on('Sighted', (parcels: string[]) => connector.notify('Parcel.sighted', { parcels }))
       parcelController.on('Lost sight', (parcels: string[]) => connector.notify('Parcel.lostSight', { parcels }))
 

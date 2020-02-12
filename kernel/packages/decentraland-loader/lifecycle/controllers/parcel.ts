@@ -4,7 +4,6 @@ import { Vector2Component } from 'atomicHelpers/landHelpers'
 
 import { parcelsInScope, ParcelConfigurationOptions } from '../lib/scope'
 import { ParcelLifeCycleStatus } from '../lib/parcel.status'
-import { isTutorial } from '../tutorial/tutorial'
 
 export type ParcelSightSeeingReport = {
   sighted: string[]
@@ -34,11 +33,7 @@ export class ParcelLifeCycleController extends EventEmitter {
       return undefined
     }
 
-    if (isTutorial()) {
-      return this.doReportCurrentPosition(position, { ...this.config, lineOfSightRadius: 0 })
-    } else {
-      return this.doReportCurrentPosition(position, this.config)
-    }
+    return this.doReportCurrentPosition(position, this.config)
   }
 
   doReportCurrentPosition(
