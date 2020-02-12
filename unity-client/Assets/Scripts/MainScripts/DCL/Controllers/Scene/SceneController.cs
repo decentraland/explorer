@@ -1,4 +1,4 @@
-using DCL.Controllers;
+﻿using DCL.Controllers;
 using DCL.Helpers;
 using DCL.Interface;
 using DCL.Models;
@@ -545,6 +545,8 @@ namespace DCL
 
             EnqueueMessage(queuedMessage);
 
+            Debug.Log($"Enqueuing msg for scene {sceneId} ... method = {message}");
+
             OnMessageDecodeEnds?.Invoke("Misc");
 
             return "";
@@ -600,6 +602,8 @@ namespace DCL
             string method = msgObject.method;
             DCL.Interface.PB_SendSceneMessage payload = msgObject.payload;
 
+            Debug.Log($"Processing msg for scene {sceneId} ... method = {method}");
+
             yieldInstruction = null;
 
             ParcelScene scene;
@@ -617,6 +621,7 @@ namespace DCL
                 {
                     return true;
                 }
+
 
 #if UNITY_EDITOR
                 OnMessageProcessInfoStart?.Invoke(sceneId, method);

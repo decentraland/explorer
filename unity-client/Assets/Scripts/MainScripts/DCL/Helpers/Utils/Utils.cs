@@ -167,6 +167,8 @@ namespace DCL.Helpers
             {
                 using (var webRequest = request)
                 {
+                    webRequest.timeout = 30;
+
                     yield return webRequest.SendWebRequest();
 
                     if (!WebRequestSucceded(request))

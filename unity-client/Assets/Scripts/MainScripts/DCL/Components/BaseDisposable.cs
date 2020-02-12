@@ -1,4 +1,4 @@
-﻿using DCL.Models;
+using DCL.Models;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -11,7 +11,9 @@ namespace DCL.Components
         public virtual string componentName => GetType().Name;
         public string id;
 
-        ComponentUpdateHandler updateHandler;
+        protected Action<BaseDisposable> OnReadyCallbacks;
+
+        protected ComponentUpdateHandler updateHandler;
         public WaitForComponentUpdate yieldInstruction => updateHandler.yieldInstruction;
         public Coroutine routine => updateHandler.routine;
         public bool isRoutineRunning => updateHandler.isRoutineRunning;
@@ -19,8 +21,6 @@ namespace DCL.Components
         public event System.Action<DecentralandEntity> OnAttach;
         public event System.Action<DecentralandEntity> OnDetach;
         public event Action<BaseDisposable> OnAppliedChanges;
-
-        private string oldSerialization = null;
 
         public DCL.Controllers.ParcelScene scene { get; }
         public HashSet<DecentralandEntity> attachedEntities = new HashSet<DecentralandEntity>();
@@ -40,6 +40,9 @@ namespace DCL.Components
         public virtual void RaiseOnAppliedChanges()
         {
             OnAppliedChanges?.Invoke(this);
+
+            OnReadyCallbacks?.Invoke(this);
+            OnReadyCallbacks = null;
         }
 
 
@@ -117,10 +120,18 @@ namespace DCL.Components
             }
         }
 
-        public virtual void CallWhenReady(Action<BaseDisposable> callback)
+        public virtual void CallWhenReady(Action<IComponent> callback)
         {
-            //By default there's no initialization process and we call back as soon as we get the suscription
-            callback.Invoke(this);
+            bool applyChangesIsRunning = updateHandler.isRoutineRunning;
+
+            if (!applyChangesIsRunning)
+            {
+                callback.Invoke(this);
+            }
+            else
+            {
+                OnReadyCallbacks += callback;
+            }
         }
     }
 }

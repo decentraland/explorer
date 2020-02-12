@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using DCL.Controllers;
 using DCL.Helpers;
 using DCL.Models;
@@ -67,7 +67,6 @@ namespace DCL.Components
 
         private bool isLoaded = false;
         private bool failed = false;
-        private event Action<BaseDisposable> OnReadyCallbacks;
         public System.Action<DecentralandEntity> OnEntityShapeUpdated;
         new public LoadWrapperModelType model
         {
@@ -223,10 +222,12 @@ namespace DCL.Components
 
             entity.meshesInfo.CleanReferences();
         }
-
-        public override void CallWhenReady(Action<BaseDisposable> callback)
+        public override void CallWhenReady(Action<IComponent> callback)
         {
-            if (attachedEntities.Count == 0 || isLoaded || failed)
+            bool shapeIsReady = attachedEntities.Count == 0 || isLoaded || failed;
+            bool applyChangesIsRunning = updateHandler.isRoutineRunning;
+
+            if (shapeIsReady && !applyChangesIsRunning)
             {
                 callback.Invoke(this);
             }

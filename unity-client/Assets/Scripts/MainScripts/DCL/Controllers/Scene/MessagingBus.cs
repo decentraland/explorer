@@ -54,7 +54,7 @@ namespace DCL
 
     public class MessagingBus : IDisposable
     {
-        public static bool VERBOSE = false;
+        public static bool VERBOSE = true;
 
         public class QueuedSceneMessage
         {

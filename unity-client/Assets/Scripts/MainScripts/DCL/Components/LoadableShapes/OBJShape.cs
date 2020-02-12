@@ -1,4 +1,3 @@
-﻿using System;
 using DCL.Controllers;
 
 namespace DCL.Components
@@ -7,11 +6,6 @@ namespace DCL.Components
     {
         public OBJShape(ParcelScene scene) : base(scene)
         {
-        }
-
-        public override void CallWhenReady(Action<BaseDisposable> callback)
-        {
-            callback.Invoke(this);
         }
     }
 }

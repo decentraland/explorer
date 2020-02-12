@@ -33,7 +33,7 @@ namespace DCL.Controllers
         public event System.Action<DecentralandEntity> OnEntityAdded;
         public event System.Action<DecentralandEntity> OnEntityRemoved;
         public ContentProvider contentProvider;
-        public int disposableNotReadyCount => disposableNotReady.Count;
+        public int componentNotReadyCount => componentNotReady.Count;
 
         [System.NonSerialized]
         public bool useBoundariesChecker = false;
@@ -52,7 +52,7 @@ namespace DCL.Controllers
 
         public static ParcelScenesCleaner parcelScenesCleaner = new ParcelScenesCleaner();
 
-        private readonly List<string> disposableNotReady = new List<string>();
+        private readonly List<IComponent> componentNotReady = new List<IComponent>();
         private bool flaggedToUnload = false;
         private bool isReleased = false;
         private State state = State.NOT_READY;
@@ -100,8 +100,8 @@ namespace DCL.Controllers
                     break;
                 case State.WAITING_FOR_COMPONENTS:
 
-                    if (disposableComponents != null && disposableComponents.Count > 0)
-                        this.name = gameObject.name = $"scene:{prettyName} - left to ready:{disposableComponents.Count - disposableNotReadyCount}/{disposableComponents.Count}";
+                    if (componentNotReadyCount > 0)
+                        this.name = gameObject.name = $"scene:{prettyName} - left to ready:{componentNotReadyCount}";
                     else
                         this.name = gameObject.name = $"scene:{prettyName} - no components. waiting...";
 
@@ -369,7 +369,8 @@ namespace DCL.Controllers
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             else
             {
-                Debug.LogError($"Couldn't remove entity with ID: {tmpRemoveEntityMessage.id} as it doesn't exist.");
+                if (VERBOSE)
+                    Debug.LogWarning($"Couldn't remove entity with ID: {tmpRemoveEntityMessage.id} as it doesn't exist.");
             }
 #endif
         }
@@ -623,8 +624,14 @@ namespace DCL.Controllers
                 }
             }
 
-            if (newComponent != null && newComponent.isRoutineRunning)
-                yieldInstruction = newComponent.yieldInstruction;
+            if (newComponent != null)
+            {
+                if (newComponent.isRoutineRunning)
+                    yieldInstruction = newComponent.yieldInstruction;
+
+                if (state != State.READY)
+                    componentNotReady.Add(newComponent);
+            }
 
             return newComponent;
         }
@@ -824,9 +831,7 @@ namespace DCL.Controllers
                 disposableComponents.Add(sharedComponentCreatedMessage.id, newComponent);
 
                 if (state != State.READY)
-                {
-                    disposableNotReady.Add(id);
-                }
+                    componentNotReady.Add(newComponent);
             }
 
             return newComponent;
@@ -942,7 +947,7 @@ namespace DCL.Controllers
             sharedComponentUpdatedMessage.id = id;
             SceneController.i.OnMessageDecodeEnds?.Invoke("ComponentUpdated");
 
-            BaseDisposable disposableComponent = null;
+            BaseDisposable disposableComponent;
 
             if (disposableComponents.TryGetValue(sharedComponentUpdatedMessage.id, out disposableComponent))
             {
@@ -1009,19 +1014,19 @@ namespace DCL.Controllers
             return decentralandEntity;
         }
 
-        private void OnDisposableReady(BaseDisposable disposable)
+        private void OnComponentReady(IComponent component)
         {
             if (isReleased)
                 return;
 
-            disposableNotReady.Remove(disposable.id);
+            componentNotReady.Remove(component);
 
             if (VERBOSE)
             {
-                Debug.Log($"{sceneData.basePosition} Disposable objects left... {disposableNotReady.Count}");
+                Debug.Log($"{sceneData.basePosition} components left... {componentNotReady.Count}");
             }
 
-            if (disposableNotReady.Count == 0)
+            if (componentNotReady.Count == 0)
             {
                 SetSceneReady();
             }
@@ -1043,17 +1048,15 @@ namespace DCL.Controllers
             state = State.WAITING_FOR_COMPONENTS;
             RefreshName();
 
-            if (disposableNotReadyCount > 0)
+            if (componentNotReadyCount > 0)
             {
-                //NOTE(Brian): Here, we have to split the iterations. If not, we will get repeated calls of
-                //             SetSceneReady(), as the disposableNotReady count is 1 and gets to 0
-                //             in each OnDisposableReady() call.
+                List<IComponent> toCallWhenReady = new List<IComponent>(componentNotReady);
 
-                using (var iterator = disposableComponents.GetEnumerator())
+                using (var iterator = toCallWhenReady.GetEnumerator())
                 {
                     while (iterator.MoveNext())
                     {
-                        disposableComponents[iterator.Current.Value.id].CallWhenReady(OnDisposableReady);
+                        iterator.Current.CallWhenReady(OnComponentReady);
                     }
                 }
             }
@@ -1066,14 +1069,10 @@ namespace DCL.Controllers
         private void SetSceneReady()
         {
             if (state == State.READY)
-            {
                 return;
-            }
 
             if (VERBOSE)
-            {
                 Debug.Log($"{sceneData.basePosition} Scene Ready!");
-            }
 
             state = State.READY;
 
@@ -1091,26 +1090,20 @@ namespace DCL.Controllers
             switch (state)
             {
                 case State.WAITING_FOR_COMPONENTS:
-
-                    foreach (string componentId in disposableNotReady)
+                    foreach (IComponent component in componentNotReady)
                     {
-                        if (disposableComponents.ContainsKey(componentId))
+                        Debug.Log($"Waiting for: {component.ToString()}");
+
+                        var disposable = component as BaseDisposable;
+
+                        if (disposable != null)
                         {
-                            var component = disposableComponents[componentId];
-
-                            Debug.Log($"Waiting for: {component.ToString()}");
-
-                            foreach (var entity in component.attachedEntities)
+                            foreach (var entity in disposable.attachedEntities)
                             {
                                 Debug.Log($"This shape is attached to {entity.entityId} entity. Click here for highlight it.", entity.gameObject);
                             }
                         }
-                        else
-                        {
-                            Debug.Log($"Waiting for missing component? id: {componentId}");
-                        }
                     }
-
                     break;
 
                 default:

@@ -17,6 +17,8 @@ namespace DCL.Components
 
         MonoBehaviour GetCoroutineOwner();
         ComponentUpdateHandler CreateUpdateHandler();
+
+        void CallWhenReady(Action<IComponent> callback);
     }
 
     /// <summary>
@@ -46,6 +48,8 @@ namespace DCL.Components
 
     public abstract class BaseComponent : MonoBehaviour, IComponent
     {
+        protected Action<IComponent> OnReadyCallbacks;
+
         ComponentUpdateHandler updateHandler;
         public WaitForComponentUpdate yieldInstruction => updateHandler.yieldInstruction;
         public Coroutine routine => updateHandler.routine;
@@ -58,6 +62,8 @@ namespace DCL.Components
 
         public void RaiseOnAppliedChanges()
         {
+            OnReadyCallbacks?.Invoke(this);
+            OnReadyCallbacks = null;
         }
 
         public void UpdateFromJSON(string json)
@@ -67,6 +73,8 @@ namespace DCL.Components
 
         void OnEnable()
         {
+            OnReadyCallbacks = null;
+
             if (updateHandler == null)
                 updateHandler = CreateUpdateHandler();
 
@@ -83,6 +91,20 @@ namespace DCL.Components
         public virtual ComponentUpdateHandler CreateUpdateHandler()
         {
             return new ComponentUpdateHandler(this);
+        }
+
+        public virtual void CallWhenReady(Action<IComponent> callback)
+        {
+            bool applyChangesIsRunning = updateHandler.isRoutineRunning;
+
+            if (!applyChangesIsRunning)
+            {
+                callback.Invoke(this);
+            }
+            else
+            {
+                OnReadyCallbacks += callback;
+            }
         }
 
         public void Cleanup()

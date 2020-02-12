@@ -1,4 +1,4 @@
-﻿using DCL.Components;
+using DCL.Components;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -74,6 +74,7 @@ namespace DCL
                 }
             }
 
+            owner.RaiseOnAppliedChanges();
             routine = null;
         }
 
@@ -93,7 +94,6 @@ namespace DCL
 #if UNITY_EDITOR
             applyChangesRunning = false;
 #endif
-            owner.RaiseOnAppliedChanges();
         }
 
         public void HandleUpdate_Legacy(string newSerialization)
