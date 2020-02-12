@@ -589,8 +589,9 @@ namespace DCL.Controllers
 
                         if (uuidComponent != null)
                         {
-                            uuidComponent.SetForEntity(this, entity, model);
+                            uuidComponent.Setup(this, entity, model);
                             entity.uuidComponents.Add(type, uuidComponent);
+
                         }
                         else
                         {
@@ -653,7 +654,7 @@ namespace DCL.Controllers
             }
 
             UUIDComponent targetComponent = entity.uuidComponents[type];
-            targetComponent.SetForEntity(this, entity, model);
+            targetComponent.Setup(this, entity, model);
 
             return targetComponent;
         }
