@@ -9,8 +9,6 @@ namespace DCL.Tutorial
     {
         public static TutorialController i { private set; get; }
 
-        public const float DEFAULT_STAGE_IDLE_TIME = 20f;
-
 #if UNITY_EDITOR
         [Header("Debugging")]
         public bool debugRunTutorialOnStart = false;
@@ -18,17 +16,18 @@ namespace DCL.Tutorial
         [Space()]
 #endif
 
-        [Header("Stage Controller References")]
-        [SerializeField] List<TutorialStep> steps = new List<TutorialStep>();
-
+        public const float DEFAULT_STAGE_IDLE_TIME = 20f;
         public bool isTutorialEnabled { private set; get; } = false;
 
-        private TutorialStep runningStep = null;
+        [Header("Stage Controller References")]
+        [SerializeField] List<TutorialStep> steps = new List<TutorialStep>();
+        [SerializeField] GameObject emailPromptHUDGameObject;
 
-        private TutorialStep.Id currentTutorialStepId = TutorialStep.Id.NONE;
-        private int currentTutorialStepIndex = 0;
-        private bool initialized = false;
-        private Canvas chatUIScreen = null;
+        TutorialStep runningStep = null;
+        TutorialStep.Id currentTutorialStepId = TutorialStep.Id.NONE;
+        int currentTutorialStepIndex = 0;
+        bool initialized = false;
+        Canvas chatUIScreen = null;
 
         public void SetTutorialEnabled()
         {
@@ -36,6 +35,8 @@ namespace DCL.Tutorial
                 RenderingController.i.OnRenderingStateChanged += OnRenderingStateChanged;
 
             isTutorialEnabled = true;
+
+            AirdroppingHUDController.OnAirdropFinished += TriggerEmailPrompt;
         }
 
         private void Awake()
@@ -64,6 +65,8 @@ namespace DCL.Tutorial
 
         private void OnDestroy()
         {
+            AirdroppingHUDController.OnAirdropFinished -= TriggerEmailPrompt;
+
             if (RenderingController.i)
                 RenderingController.i.OnRenderingStateChanged -= OnRenderingStateChanged;
 
@@ -193,5 +196,9 @@ namespace DCL.Tutorial
             return result;
         }
 
+        void TriggerEmailPrompt()
+        {
+            emailPromptHUDGameObject.SetActive(true);
+        }
     }
 }
