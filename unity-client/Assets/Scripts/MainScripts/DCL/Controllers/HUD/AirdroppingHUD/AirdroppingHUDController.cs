@@ -116,12 +116,13 @@ public class AirdroppingHUDController : IHUD, IDisposable
                 break;
             case State.Finish:
                 WebInterface.SendUserAcceptedCollectibles(model.id);
+
+                OnAirdropFinished?.Invoke();
+
                 MoveToNextState();
                 break;
             case State.Hidden:
             default:
-                OnAirdropFinished?.Invoke();
-
                 model = null;
                 view.SetContentActive(false);
                 break;
