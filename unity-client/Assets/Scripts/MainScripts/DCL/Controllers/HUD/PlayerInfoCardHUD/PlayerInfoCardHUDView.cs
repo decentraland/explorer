@@ -68,8 +68,8 @@ public class PlayerInfoCardHUDView : MonoBehaviour
         reportPlayerButton.onClick.RemoveAllListeners();
         reportPlayerButton.onClick.AddListener(reportPlayerCallback);
 
-        reportPlayerButton.onClick.RemoveAllListeners();
-        reportPlayerButton.onClick.AddListener(blockPlayerCallback);
+        blockPlayerButton.onClick.RemoveAllListeners();
+        blockPlayerButton.onClick.AddListener(blockPlayerCallback);
 
         unblockPlayerButton.onClick.RemoveAllListeners();
         unblockPlayerButton.onClick.AddListener(unblockPlayerCallback);
