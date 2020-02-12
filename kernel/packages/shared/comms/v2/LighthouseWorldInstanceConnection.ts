@@ -143,12 +143,6 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
   }
 
   private async cleanUpPeer() {
-    const rooms = this.peer.currentRooms
-
-    await Promise.all(
-      rooms.map(room => this.peer.leaveRoom(room.id).catch(e => logger.trace(`error while leaving room ${room.id}`, e)))
-    )
-
     return this.peer.dispose()
   }
 

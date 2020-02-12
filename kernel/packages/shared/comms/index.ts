@@ -387,12 +387,7 @@ function collectInfo(context: Context) {
     const msSinceLastUpdate = now - trackingInfo.lastUpdate
 
     if (msSinceLastUpdate > commConfigurations.peerTtlMs) {
-      context.peerData.delete(peerAlias)
-      removeById(peerAlias)
-
-      if (context.stats) {
-        context.stats.onPeerRemoved(peerAlias)
-      }
+      removePeer(context, peerAlias)
 
       continue
     }
@@ -441,6 +436,14 @@ function collectInfo(context: Context) {
     context.stats.visiblePeersCount = visiblePeers.length
     context.stats.trackingPeersCount = context.peerData.size
     context.stats.collectInfoDuration.stop()
+  }
+}
+
+function removePeer(context: Context, peerAlias: string) {
+  context.peerData.delete(peerAlias)
+  removeById(peerAlias)
+  if (context.stats) {
+    context.stats.onPeerRemoved(peerAlias)
   }
 }
 
