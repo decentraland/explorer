@@ -204,6 +204,10 @@ export class BrokerWorldInstanceConnection implements WorldInstanceConnection {
     return this.sendMessage(reliable, message)
   }
 
+  async changeRealm(realm: Realm, url: string) {
+    return
+  }
+
   async updateSubscriptions(rawTopics: string[]) {
     if (!this.connection.hasReliableChannel) {
       if (!this.fatalErrorSent) {
@@ -443,9 +447,5 @@ export class BrokerWorldInstanceConnection implements WorldInstanceConnection {
       this.connection.sendUnreliable(bytes)
     }
     return new SendResult(bytes.length)
-  }
-
-  public async changeRealm(realm: Realm, url: string) {
-    return
   }
 }

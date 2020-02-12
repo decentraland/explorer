@@ -182,7 +182,7 @@ export function unsubscribeParcelSceneToCommsMessages(controller: Communications
 async function changeConnectionRealm(realm: Realm, url: string) {
   defaultLogger.log('Changing connection realm to ', JSON.stringify(realm), { url })
   if (context && context.worldInstanceConnection) {
-    context.worldInstanceConnection.changeRealm(realm, url)
+    await context.worldInstanceConnection.changeRealm(realm, url)
   }
 }
 
@@ -458,7 +458,10 @@ function subscribeToRealmChange(store: Store<RootState>) {
     const previousRealm = currentRealm
     currentRealm = getRealm(store.getState())
     if (currentRealm && !deepEqual(previousRealm, currentRealm)) {
-      changeConnectionRealm(currentRealm, getCommsServer(store.getState()))
+      const NOOP = () => {
+        // do nothing
+      }
+      changeConnectionRealm(currentRealm, getCommsServer(store.getState())).then(NOOP, defaultLogger.error)
     }
   })
 }

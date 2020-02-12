@@ -182,7 +182,7 @@ export class ChatController extends ExposableAPI implements IChatController {
       let response = ''
       if (realm) {
         response = `Changing to Realm ${realm.catalystName}-${realm.layer}...`
-        //TODO: This status should be shown in the chat window
+        // TODO: This status should be shown in the chat window
         catalystRealmConnected().then(
           () => defaultLogger.log('Sucessfully connected to realm', realm),
           () => defaultLogger.log('Error joining realm', realm)

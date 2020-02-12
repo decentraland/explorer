@@ -92,12 +92,12 @@ export async function fecthCatalystRealms(): Promise<Candidate[]> {
       union.concat(
         success
           ? result!.layers.map(layer => ({
-              catalystName: result!.name,
-              domain,
-              elapsed: elapsed!,
-              layer,
-              score: score(layer)
-            }))
+            catalystName: result!.name,
+            domain,
+            elapsed: elapsed!,
+            layer,
+            score: score(layer)
+          }))
           : []
       ),
     new Array<Candidate>()
@@ -134,7 +134,7 @@ export async function realmInitialized(): Promise<void> {
 
 export function getRealmFromString(realmString: string, candidates: Candidate[]) {
   const parts = realmString.split('-')
-  if (parts.length == 2) {
+  if (parts.length === 2) {
     return realmFor(parts[0], parts[1], candidates)
   }
 }
