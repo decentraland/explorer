@@ -17,6 +17,7 @@ import {
 import { identifyUser, initialize, queueTrackingEvent } from './analytics'
 import './apis/index'
 import { connect, disconnect, persistCurrentUser } from './comms'
+import { ConnectionEstablishmentError, IdTakenError } from './comms/interface/types'
 import { isMobile } from './comms/mobile'
 import { getUserProfile, removeUserProfile, setLocalProfile } from './comms/peers'
 import { realmInitialized } from './dao'
@@ -35,6 +36,7 @@ import {
   loadingStarted,
   MOBILE_NOT_SUPPORTED,
   NETWORK_MISMATCH,
+  NEW_LOGIN,
   notStarted
 } from './loading/types'
 import { defaultLogger } from './logger'
@@ -299,7 +301,11 @@ export async function initShared(): Promise<Session | undefined> {
 
       break
     } catch (e) {
-      if (e.message && e.message.startsWith('error establishing comms')) {
+      if (e instanceof IdTakenError) {
+        disconnect()
+        ReportFatalError(NEW_LOGIN)
+        throw e
+      } else if (e instanceof ConnectionEstablishmentError) {
         if (i >= maxAttemps) {
           // max number of attemps reached => rethrow error
           defaultLogger.info(`Max number of attemps reached (${maxAttemps}), unsuccessful connection`)
