@@ -420,6 +420,8 @@ unityInterface = {
     gameInstance.SendMessage('HUDController', 'ConfigurePlayerInfoCardHUD', JSON.stringify(configuration))
   },
   ConfigureWelcomeHUD(configuration: WelcomeHUDControllerModel) {
+    if (tutorialEnabled()) return
+
     gameInstance.SendMessage('HUDController', 'ConfigureWelcomeHUD', JSON.stringify(configuration))
   },
   ConfigureAirdroppingHUD(configuration: HUDConfiguration) {
