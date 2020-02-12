@@ -17,6 +17,6 @@ public class EmailPromptHUDController : MonoBehaviour
 
     public void SaveEmail()
     {
-
+        // TODO AFTER HAVING THE REWARD ON TUTORIAL
     }
 }
