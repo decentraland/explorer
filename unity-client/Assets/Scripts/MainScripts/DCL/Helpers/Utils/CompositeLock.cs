@@ -5,7 +5,7 @@ namespace DCL.Helpers
 {
     public class CompositeLock
     {
-        public static bool VERBOSE = true;
+        public static bool VERBOSE = false;
         public event System.Action OnAllLocksRemoved;
 
         int lockCounter = 0;
