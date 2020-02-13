@@ -89,17 +89,17 @@ export async function fecthCatalystRealms(): Promise<Candidate[]> {
         { elapsed?: number; success: boolean; result?: CatalystLayers }
       ]
     ) =>
-      union.concat(
-        success
-          ? result!.layers.map(layer => ({
-            catalystName: result!.name,
-            domain,
-            elapsed: elapsed!,
-            layer,
-            score: score(layer)
-          }))
-          : []
-      ),
+      success
+        ? union.concat(
+            result!.layers.map(layer => ({
+              catalystName: result!.name,
+              domain,
+              elapsed: elapsed!,
+              layer,
+              score: score(layer)
+            }))
+          )
+        : union,
     new Array<Candidate>()
   )
 }
@@ -183,4 +183,48 @@ export async function catalystRealmConnected(): Promise<void> {
       }
     })
   })
+}
+
+export function initial() {
+  let lastTime: number = performance.now()
+
+  let previousPosition: string | null = null
+  const gridPosition = Vector2.Zero()
+
+  function updateUrlPosition(cameraVector: ReadOnlyVector3) {
+    // Update position in URI every second
+    if (performance.now() - lastTime > 1000) {
+      worldToGrid(cameraVector, gridPosition)
+      const currentPosition = `${gridPosition.x | 0},${gridPosition.y | 0}`
+
+      if (previousPosition !== currentPosition) {
+        const stateObj = { position: currentPosition }
+        previousPosition = currentPosition
+
+        const q = qs.parse(location.search)
+        q.position = currentPosition
+
+        history.replaceState(stateObj, 'position', `?${qs.stringify(q)}`)
+      }
+
+      lastTime = performance.now()
+    }
+  }
+
+  positionObservable.add(event => {
+    updateUrlPosition(event.position)
+  })
+
+  if (lastPlayerPosition.equalsToFloats(0, 0, 0)) {
+    // LOAD INITIAL POSITION IF SET TO ZERO
+    const query = qs.parse(location.search)
+
+    if (query.position) {
+      const parcelCoords = query.position.split(',')
+      gridToWorld(parseFloat(parcelCoords[0]), parseFloat(parcelCoords[1]), lastPlayerPosition)
+    } else {
+      lastPlayerPosition.x = Math.round(Math.random() * 10) - 5
+      lastPlayerPosition.z = 0
+    }
+  }
 }

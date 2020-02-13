@@ -452,15 +452,15 @@ function parseCommsMode(modeString: string) {
   return segments as [CommsVersion, CommsMode]
 }
 
+const NOOP = () => {
+  // do nothing
+}
 function subscribeToRealmChange(store: Store<RootState>) {
   let currentRealm: Realm | undefined = getRealm(store.getState())
   store.subscribe(() => {
     const previousRealm = currentRealm
     currentRealm = getRealm(store.getState())
     if (currentRealm && !deepEqual(previousRealm, currentRealm)) {
-      const NOOP = () => {
-        // do nothing
-      }
       changeConnectionRealm(currentRealm, getCommsServer(store.getState())).then(NOOP, defaultLogger.error)
     }
   })

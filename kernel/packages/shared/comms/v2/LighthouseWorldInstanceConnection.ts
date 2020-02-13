@@ -190,35 +190,38 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
   }
 
   private peerCallback: PacketCallback = (sender, room, payload) => {
-    const commsMessage = CommsMessage.deserializeBinary(payload)
-
-    switch (commsMessage.getDataCase()) {
-      case CommsMessage.DataCase.CHAT_DATA:
-        this.chatHandler(sender, createPackage(commsMessage, 'chat', mapToPackageChat(commsMessage.getChatData()!)))
-        break
-      case CommsMessage.DataCase.POSITION_DATA:
-        this.positionHandler(
-          sender,
-          createPackage(commsMessage, 'position', mapToPositionMessage(commsMessage.getPositionData()!))
-        )
-        break
-      case CommsMessage.DataCase.SCENE_DATA:
-        this.sceneMessageHandler(
-          sender,
-          createPackage(commsMessage, 'chat', mapToPackageScene(commsMessage.getSceneData()!))
-        )
-        break
-      case CommsMessage.DataCase.PROFILE_DATA:
-        this.profileHandler(
-          sender,
-          commsMessage.getProfileData()!.getUserId(),
-          createPackage(commsMessage, 'profile', mapToPackageProfile(commsMessage.getProfileData()!))
-        )
-        break
-      default: {
-        logger.warn(`message with unknown type received ${commsMessage.getDataCase()}`)
-        break
+    try {
+      const commsMessage = CommsMessage.deserializeBinary(payload)
+      switch (commsMessage.getDataCase()) {
+        case CommsMessage.DataCase.CHAT_DATA:
+          this.chatHandler(sender, createPackage(commsMessage, 'chat', mapToPackageChat(commsMessage.getChatData()!)))
+          break
+        case CommsMessage.DataCase.POSITION_DATA:
+          this.positionHandler(
+            sender,
+            createPackage(commsMessage, 'position', mapToPositionMessage(commsMessage.getPositionData()!))
+          )
+          break
+        case CommsMessage.DataCase.SCENE_DATA:
+          this.sceneMessageHandler(
+            sender,
+            createPackage(commsMessage, 'chat', mapToPackageScene(commsMessage.getSceneData()!))
+          )
+          break
+        case CommsMessage.DataCase.PROFILE_DATA:
+          this.profileHandler(
+            sender,
+            commsMessage.getProfileData()!.getUserId(),
+            createPackage(commsMessage, 'profile', mapToPackageProfile(commsMessage.getProfileData()!))
+          )
+          break
+        default: {
+          logger.warn(`message with unknown type received ${commsMessage.getDataCase()}`)
+          break
+        }
       }
+    } catch (e) {
+      logger.error(`Error processing received message from ${sender}. Topic: ${room}`, e)
     }
   }
 }
