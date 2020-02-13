@@ -50,8 +50,8 @@ import { Realm } from 'shared/dao/types'
 import { Store } from 'redux'
 import { RootState } from 'shared/store/rootTypes'
 import { store } from 'shared/store/store'
-import { deepEqual } from 'atomicHelpers/deepEqual'
 import { setCatalystRealmCommsStatus } from 'shared/dao/actions'
+import { observeRealmChange } from 'shared/dao'
 
 export type CommsVersion = 'v1' | 'v2'
 export type CommsMode = CommsV1Mode | CommsV2Mode
@@ -456,14 +456,9 @@ const NOOP = () => {
   // do nothing
 }
 function subscribeToRealmChange(store: Store<RootState>) {
-  let currentRealm: Realm | undefined = getRealm(store.getState())
-  store.subscribe(() => {
-    const previousRealm = currentRealm
-    currentRealm = getRealm(store.getState())
-    if (currentRealm && !deepEqual(previousRealm, currentRealm)) {
-      changeConnectionRealm(currentRealm, getCommsServer(store.getState())).then(NOOP, defaultLogger.error)
-    }
-  })
+  observeRealmChange(store, (previousRealm, currentRealm) =>
+    changeConnectionRealm(currentRealm, getCommsServer(store.getState())).then(NOOP, defaultLogger.error)
+  )
 }
 
 export async function connect(userId: string) {
