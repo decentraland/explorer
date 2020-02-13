@@ -87,10 +87,8 @@ namespace DCL
         private int lastSortFrame = 0;
         public event Action OnSortScenes;
 
-        private static readonly int MORDOR_X = (int)EnvironmentSettings.MORDOR.x;
-        private static readonly int MORDOR_Z = (int)EnvironmentSettings.MORDOR.z;
-        private Vector2Int currentGridSceneCoordinate = new Vector2Int(MORDOR_X, MORDOR_Z);
-        private Vector2Int sortAuxiliaryVector = new Vector2Int(MORDOR_X, MORDOR_Z);
+        private Vector2Int currentGridSceneCoordinate = new Vector2Int(EnvironmentSettings.MORDOR_SCALAR, EnvironmentSettings.MORDOR_SCALAR);
+        private Vector2Int sortAuxiliaryVector = new Vector2Int(EnvironmentSettings.MORDOR_SCALAR, EnvironmentSettings.MORDOR_SCALAR);
 
         void Awake()
         {
