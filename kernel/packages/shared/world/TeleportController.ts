@@ -58,7 +58,7 @@ export class TeleportController {
         const calculateCloseUsers = (origin: Parcel) => {
           let close = 0
           usersParcels.forEach(parcel => {
-            if (distanceSquared(origin, parcel) <= 3) {
+            if (distanceSquared(origin, parcel) <= 9) {
               close += 1
             }
           })
