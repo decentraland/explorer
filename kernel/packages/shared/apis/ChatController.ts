@@ -21,6 +21,8 @@ import {
 import { IChatCommand, MessageEntry } from 'shared/types'
 import { TeleportController } from 'shared/world/TeleportController'
 import { expressionExplainer, isValidExpression, validExpressions } from './expressionExplainer'
+import { changeRealm, catalystRealmConnected } from 'shared/dao'
+import defaultLogger from 'shared/logger'
 
 const userPose: { [key: string]: Vector3Component } = {}
 avatarMessageObservable.add((pose: AvatarMessage) => {
@@ -157,12 +159,38 @@ export class ChatController extends ExposableAPI implements IChatController {
           response = TeleportController.goToRandom().message
         } else if (message.trim().toLowerCase() === 'next') {
           response = TeleportController.goToNext().message
+        } else if (message.trim().toLowerCase() === 'crowd') {
+          response = TeleportController.goToCrowd().message
         } else {
           response = 'Could not recognize the coordinates provided. Example usage: /goto 42,42'
         }
       } else {
         const { x, y } = coordinates
         response = TeleportController.goTo(x, y).message
+      }
+
+      return {
+        id: uuid(),
+        isCommand: true,
+        sender: 'Decentraland',
+        message: response
+      }
+    })
+
+    this.addChatCommand('changerealm', 'Changes communications realms', message => {
+      const realmString = message.trim()
+      const realm = changeRealm(realmString)
+
+      let response = ''
+      if (realm) {
+        response = `Changing to Realm ${realm.catalystName}-${realm.layer}...`
+        // TODO: This status should be shown in the chat window
+        catalystRealmConnected().then(
+          () => defaultLogger.log('Sucessfully connected to realm', realm),
+          () => defaultLogger.log('Error joining realm', realm)
+        )
+      } else {
+        response = `Couldn't find realm ${realmString}`
       }
 
       return {
