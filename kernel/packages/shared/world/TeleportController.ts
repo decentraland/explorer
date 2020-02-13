@@ -4,6 +4,7 @@ import { POIs } from 'shared/comms/POIs'
 import { parcelLimits } from 'config'
 import { fetchLayerUsersParcels } from 'shared/comms'
 import { Parcel } from 'shared/comms/interface/utils'
+import defaultLogger from 'shared/logger'
 
 const CAMPAIGN_PARCEL_SEQUENCE = [
   { x: 113, y: -7 },
@@ -14,6 +15,9 @@ const CAMPAIGN_PARCEL_SEQUENCE = [
   { x: 60, y: 115 }
 ]
 
+const NOOP = () => {
+  // do nothing
+}
 export class TeleportController {
   public static ensureTeleportAnimation() {
     document
@@ -42,16 +46,16 @@ export class TeleportController {
 
   public static goToCrowd(): { message: string; success: boolean } {
     const message: string = `Teleporting to a crowd of people in current realm...`
-    ;(async function() {
+    const promise = (async function() {
       const usersParcels = await fetchLayerUsersParcels()
       if (usersParcels.length > 0) {
-        function distanceSquared(parcel1: Parcel, parcel2: Parcel) {
+        const distanceSquared = (parcel1: Parcel, parcel2: Parcel) => {
           const xDiff = parcel1.x - parcel2.x
           const zDiff = parcel1.z - parcel2.z
           return xDiff * xDiff + zDiff * zDiff
         }
 
-        function calculateCloseUsers(origin: Parcel) {
+        const calculateCloseUsers = (origin: Parcel) => {
           let close = 0
           usersParcels.forEach(parcel => {
             if (distanceSquared(origin, parcel) <= 3) {
@@ -62,13 +66,15 @@ export class TeleportController {
           return close
         }
 
-        //Sorting from most close users
+        // Sorting from most close users
         const target = usersParcels.sort(
           (parcel1, parcel2) => calculateCloseUsers(parcel2) - calculateCloseUsers(parcel1)
         )[0]
         TeleportController.goTo(target.x, target.z, message)
       }
     })()
+
+    promise.then(NOOP, e => defaultLogger.log('Error teleporting to crowd', e))
 
     return { message, success: true }
   }
