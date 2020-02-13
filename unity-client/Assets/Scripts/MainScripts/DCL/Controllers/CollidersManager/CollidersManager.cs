@@ -120,8 +120,6 @@ namespace DCL
         {
             if (meshGameObject == null) return;
 
-            Debug.Log("configuring colliders for entity: " + entity);
-
             if (entity != null)
                 entity.meshesInfo.colliders.Clear();
 
