@@ -213,6 +213,6 @@ export function initializeUrlRealmObserver() {
 
     q.realm = realmString
 
-    history.replaceState({ realm: realmString }, 'position', `?${qs.stringify(q)}`)
+    history.replaceState({ realm: realmString }, '', `?${qs.stringify(q)}`)
   })
 }
