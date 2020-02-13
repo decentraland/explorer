@@ -175,7 +175,7 @@ export class ChatController extends ExposableAPI implements IChatController {
       }
     })
 
-    this.addChatCommand('gotoRealm', 'Changes communications realms', message => {
+    this.addChatCommand('changerealm', 'Changes communications realms', message => {
       const realmString = message.trim()
       const realm = changeRealm(realmString)
 
