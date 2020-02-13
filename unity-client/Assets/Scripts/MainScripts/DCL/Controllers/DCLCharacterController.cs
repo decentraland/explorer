@@ -75,6 +75,7 @@ public class DCLCharacterController : MonoBehaviour
 
     [SerializeField] private InputAction_Measurable characterYAxis;
     [SerializeField] private InputAction_Measurable characterXAxis;
+    [SerializeField] private Transform rotationTransform;
     private Vector3Variable cameraForward => CommonScriptableObjects.cameraForward;
     private Vector3Variable cameraRight => CommonScriptableObjects.cameraRight;
 
@@ -245,7 +246,7 @@ public class DCLCharacterController : MonoBehaviour
                 // Horizontal movement
                 var speed = movementSpeed * (isSprinting ? runningSpeedMultiplier : 1f);
 
-                transform.forward = characterForward.Get().Value;
+                rotationTransform.forward = characterForward.Get().Value;
 
                 var xzPlaneForward = Vector3.Scale(cameraForward.Get(), new Vector3(1, 0, 1));
                 var xzPlaneRight = Vector3.Scale(cameraRight.Get(), new Vector3(1, 0, 1));
@@ -266,7 +267,7 @@ public class DCLCharacterController : MonoBehaviour
 
                 velocity += forwardTarget * speed;
 
-                CommonScriptableObjects.playerUnityEulerAngles.Set(transform.eulerAngles);
+                CommonScriptableObjects.playerUnityEulerAngles.Set(rotationTransform.eulerAngles);
             }
         }
 
@@ -366,10 +367,10 @@ public class DCLCharacterController : MonoBehaviour
 
         Ray ray = new Ray(transform.position, Vector3.down * rayMagnitude);
         if (!CastGroundCheckingRay(ray, Vector3.zero, out hitInfo, rayMagnitude) // center
-            && !CastGroundCheckingRay(ray, transform.forward, out hitInfo, rayMagnitude) // forward
-            && !CastGroundCheckingRay(ray, transform.right, out hitInfo, rayMagnitude) // right
-            && !CastGroundCheckingRay(ray, -transform.forward, out hitInfo, rayMagnitude) // back
-            && !CastGroundCheckingRay(ray, -transform.right, out hitInfo, rayMagnitude)) // left
+            && !CastGroundCheckingRay(ray, rotationTransform.forward, out hitInfo, rayMagnitude) // forward
+            && !CastGroundCheckingRay(ray, rotationTransform.right, out hitInfo, rayMagnitude) // right
+            && !CastGroundCheckingRay(ray, -rotationTransform.forward, out hitInfo, rayMagnitude) // back
+            && !CastGroundCheckingRay(ray, -rotationTransform.right, out hitInfo, rayMagnitude)) // left
         {
             return null;
         }
