@@ -134,7 +134,9 @@ const browserInterface = {
       const parcelScene = scene.parcelScene as UnityParcelScene
       parcelScene.emit(data.eventType as IEventNames, data.payload)
     } else {
-      defaultLogger.error(`SceneEvent: Scene ${data.sceneId} not found`, data)
+      if (data.eventType !== 'metricsUpdate') {
+        defaultLogger.error(`SceneEvent: Scene ${data.sceneId} not found`, data)
+      }
     }
   },
 
@@ -161,6 +163,10 @@ const browserInterface = {
     const id = uuid()
     const chatMessage = `␐${data.id} ${data.timestamp}`
     sendPublicChatMessage(id, chatMessage)
+  },
+
+  TermsOfServiceResponse(sceneId: string, accepted: boolean, dontShowAgain: boolean) {
+    // TODO
   },
 
   MotdConfirmClicked() {
@@ -287,6 +293,9 @@ export function* chunkGenerator(
 
 export const unityInterface = {
   debug: false,
+  SendGenericMessage(object: string, method: string, payload: string) {
+    gameInstance.SendMessage(object, method, payload)
+  },
   SetDebug() {
     gameInstance.SendMessage('SceneController', 'SetDebug')
   },
@@ -406,6 +415,9 @@ export const unityInterface = {
   },
   ConfigureAirdroppingHUD(configuration: HUDConfiguration) {
     gameInstance.SendMessage('HUDController', 'ConfigureAirdroppingHUD', JSON.stringify(configuration))
+  },
+  ConfigureTermsOfServiceHUD(configuration: HUDConfiguration) {
+    gameInstance.SendMessage('HUDController', 'ConfigureTermsOfServiceHUD', JSON.stringify(configuration))
   },
   UpdateMinimapSceneInformation(info: { name: string; type: number; parcels: { x: number; y: number }[] }[]) {
     const chunks = chunkGenerator(CHUNK_SIZE, info)
