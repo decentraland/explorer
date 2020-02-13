@@ -666,8 +666,8 @@ export async function fetchLayerUsersParcels(): Promise<Parcel[]> {
   if (realm && realm.layer && commsUrl) {
     const layerUsersResponse = await fetch(`${commsUrl}/layers/${realm.layer}/users`)
     if (layerUsersResponse.ok) {
-      const layerUsers = await layerUsersResponse.json()
-      return layerUsers.map((it: LayerUserInfo) => new Parcel(it.parcel[0], it.parcel[1]))
+      const layerUsers: LayerUserInfo[] = await layerUsersResponse.json()
+      return layerUsers.filter(it => it.parcel).map(it => new Parcel(it.parcel![0], it.parcel![1]))
     }
   }
 

@@ -21,7 +21,7 @@ export type LayerUserInfo = {
   userId: string
   peerId: string
   protocolVersion: number
-  parcel: [number, number]
+  parcel?: [number, number]
 }
 
 export type Realm = {
