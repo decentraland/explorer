@@ -159,6 +159,8 @@ export class ChatController extends ExposableAPI implements IChatController {
           response = TeleportController.goToRandom().message
         } else if (message.trim().toLowerCase() === 'next') {
           response = TeleportController.goToNext().message
+        } else if (message.trim().toLowerCase() === 'crowd') {
+          response = TeleportController.goToCrowd().message
         } else {
           response = 'Could not recognize the coordinates provided. Example usage: /goto 42,42'
         }

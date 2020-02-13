@@ -34,7 +34,7 @@ import {
   IdTakenError,
   UnknownCommsModeError
 } from './interface/types'
-import { CommunicationArea, Position, position2parcel, sameParcel, squareDistance } from './interface/utils'
+import { CommunicationArea, Position, position2parcel, sameParcel, squareDistance, Parcel } from './interface/utils'
 import { BrokerWorldInstanceConnection } from '../comms/v1/brokerWorldInstanceConnection'
 import { profileToRendererFormat } from 'shared/passports/transformations/profileToRendererFormat'
 import { ProfileForRenderer } from 'decentraland-ecs/src'
@@ -46,7 +46,7 @@ import { LighthouseWorldInstanceConnection } from './v2/LighthouseWorldInstanceC
 import { identity } from '../index'
 import { Authenticator } from 'dcl-crypto'
 import { getCommsServer, getRealm } from '../dao/selectors'
-import { Realm } from 'shared/dao/types'
+import { Realm, LayerUserInfo } from 'shared/dao/types'
 import { Store } from 'redux'
 import { RootState } from 'shared/store/rootTypes'
 import { store } from 'shared/store/store'
@@ -656,6 +656,22 @@ export function disconnect() {
       context.worldInstanceConnection.close()
     }
   }
+}
+
+export async function fetchLayerUsersParcels(): Promise<Parcel[]> {
+  const store: Store<RootState> = window.globalStore
+  const realm = getRealm(store.getState())
+  const commsUrl = getCommsServer(store.getState())
+
+  if (realm && realm.layer && commsUrl) {
+    const layerUsersResponse = await fetch(`${commsUrl}/layers/${realm.layer}/users`)
+    if (layerUsersResponse.ok) {
+      const layerUsers = await layerUsersResponse.json()
+      return layerUsers.map((it: LayerUserInfo) => new Parcel(it.parcel[0], it.parcel[1]))
+    }
+  }
+
+  return []
 }
 
 global['printCommsInformation'] = function() {

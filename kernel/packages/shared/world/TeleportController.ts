@@ -2,6 +2,8 @@ import { teleportObservable } from 'shared/world/positionThings'
 import { getFromLocalStorage, saveToLocalStorage } from 'atomicHelpers/localStorage'
 import { POIs } from 'shared/comms/POIs'
 import { parcelLimits } from 'config'
+import { fetchLayerUsersParcels } from 'shared/comms'
+import { Parcel } from 'shared/comms/interface/utils'
 
 const CAMPAIGN_PARCEL_SEQUENCE = [
   { x: 113, y: -7 },
@@ -36,6 +38,39 @@ export class TeleportController {
     const { x, y } = target
     const tpMessage: string = `Teleporting to "${target.name}" (${x}, ${y})...`
     return TeleportController.goTo(parseInt('' + x, 10), parseInt('' + y, 10), tpMessage)
+  }
+
+  public static goToCrowd(): { message: string; success: boolean } {
+    const message: string = `Teleporting to a crowd of people in current realm...`
+    ;(async function() {
+      const usersParcels = await fetchLayerUsersParcels()
+      if (usersParcels.length > 0) {
+        function distanceSquared(parcel1: Parcel, parcel2: Parcel) {
+          const xDiff = parcel1.x - parcel2.x
+          const zDiff = parcel1.z - parcel2.z
+          return xDiff * xDiff + zDiff * zDiff
+        }
+
+        function calculateCloseUsers(origin: Parcel) {
+          let close = 0
+          usersParcels.forEach(parcel => {
+            if (distanceSquared(origin, parcel) <= 3) {
+              close += 1
+            }
+          })
+
+          return close
+        }
+
+        //Sorting from most close users
+        const target = usersParcels.sort(
+          (parcel1, parcel2) => calculateCloseUsers(parcel2) - calculateCloseUsers(parcel1)
+        )[0]
+        TeleportController.goTo(target.x, target.z, message)
+      }
+    })()
+
+    return { message, success: true }
   }
 
   public static goToRandom(): { message: string; success: boolean } {
