@@ -1,7 +1,7 @@
 import { getFromLocalStorage, saveToLocalStorage } from 'atomicHelpers/localStorage'
 import { call, fork, put, race, select, take, takeEvery, takeLatest, cancel, ForkEffect } from 'redux-saga/effects'
 import { NotificationType } from 'shared/types'
-import { getServerConfigurations, ALL_WEARABLES, getContentUrl } from '../../config'
+import { getServerConfigurations, ALL_WEARABLES, getWearablesSafeURL } from '../../config'
 import defaultLogger from '../logger'
 import { isInitialized } from '../renderer/selectors'
 import { RENDERER_INITIALIZED } from '../renderer/types'
@@ -49,8 +49,8 @@ import { profileToRendererFormat } from './transformations/profileToRendererForm
 import { ensureServerFormat } from './transformations/profileToServerFormat'
 import { Avatar, Catalog, Profile, WearableId, Wearable, Collection } from './types'
 import { Action } from 'redux'
-import { identity } from '../index'
-import { AuthIdentity, Authenticator, AuthLink } from '../crypto/Authenticator'
+import { identity, ExplorerIdentity } from '../index'
+import { Authenticator, AuthLink } from 'dcl-crypto'
 
 const CID = require('cids')
 import { sha3 } from 'web3x/utils'
@@ -178,8 +178,8 @@ function takeLatestById<T extends Action>(
 function overrideBaseUrl(wearable: Wearable) {
   return {
     ...wearable,
-    baseUrl: getContentUrl() + '/contents/',
-    baseUrlBundles: getServerConfigurations().contentAsBundle + '/contents/'
+    baseUrl: getWearablesSafeURL() + '/contents/',
+    baseUrlBundles: getServerConfigurations().contentAsBundle + '/'
   }
 }
 
@@ -342,7 +342,7 @@ export function* sendLoadProfile(profile: Profile) {
   while (!(yield select(baseCatalogsLoaded))) {
     yield take(CATALOG_LOADED)
   }
-  window['unityInterface'].LoadProfile(profileToRendererFormat(profile))
+  window['unityInterface'].LoadProfile(profileToRendererFormat(profile, identity))
 }
 
 export function* handleFetchInventory(action: InventoryRequest) {
@@ -463,7 +463,7 @@ export async function modifyAvatar(params: {
   url: string
   currentVersion: number
   userId: string
-  identity: AuthIdentity
+  identity: ExplorerIdentity
   profile: { avatar: Avatar; face: string; body: string }
 }) {
   const { url, currentVersion, profile, identity } = params

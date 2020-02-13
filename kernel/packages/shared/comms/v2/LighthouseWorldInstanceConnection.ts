@@ -2,10 +2,17 @@ import { WorldInstanceConnection } from '../interface/index'
 import { Stats } from '../debug'
 import { Package, BusMessage, ChatMessage, ProfileVersion, UserInformation, PackageType } from '../interface/types'
 import { Position, positionHash } from '../interface/utils'
-import { Peer } from 'decentraland-katalyst-peer'
-import { createLogger } from 'shared/logger'
+import defaultLogger, { createLogger } from 'shared/logger'
 import { PeerMessageTypes, PeerMessageType } from 'decentraland-katalyst-peer/src/messageTypes'
+import { Peer as PeerType, PacketCallback } from 'decentraland-katalyst-peer/src/Peer'
 import { ChatData, CommsMessage, ProfileData, SceneData, PositionData } from './proto/comms_pb'
+import { Realm, CommsStatus } from 'shared/dao/types'
+
+import * as Long from 'long'
+declare const window: any
+window.Long = Long
+
+const { Peer } = require('decentraland-katalyst-peer')
 
 const NOOP = () => {
   // do nothing
@@ -14,6 +21,15 @@ const NOOP = () => {
 const logger = createLogger('Lighthouse: ')
 
 type MessageData = ChatData | ProfileData | SceneData | PositionData
+
+const commsMessageType: PeerMessageType = {
+  name: 'sceneComms',
+  ttl: 10,
+  expirationTime: 10 * 1000,
+  optimistic: true
+}
+
+declare var global: any
 
 export class LighthouseWorldInstanceConnection implements WorldInstanceConnection {
   stats: Stats | null = null
@@ -27,40 +43,45 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
 
   ping: number = -1
 
-  constructor(private peer: Peer) {
-    logger.info(`connected peer as `, peer.peerId)
-    peer.callback = (sender, room, payload) => {
-      const commsMessage = CommsMessage.deserializeBinary(payload)
+  private peer: PeerType
 
-      switch (commsMessage.getDataCase()) {
-        case CommsMessage.DataCase.CHAT_DATA:
-          this.chatHandler(sender, createPackage(commsMessage, 'chat', mapToPackageChat(commsMessage.getChatData()!)))
-          break
-        case CommsMessage.DataCase.POSITION_DATA:
-          this.positionHandler(
-            sender,
-            createPackage(commsMessage, 'position', mapToPositionMessage(commsMessage.getPositionData()!))
-          )
-          break
-        case CommsMessage.DataCase.SCENE_DATA:
-          this.sceneMessageHandler(
-            sender,
-            createPackage(commsMessage, 'chat', mapToPackageScene(commsMessage.getSceneData()!))
-          )
-          break
-        case CommsMessage.DataCase.PROFILE_DATA:
-          this.profileHandler(
-            sender,
-            commsMessage.getProfileData()!.getUserId(),
-            createPackage(commsMessage, 'profile', mapToPackageProfile(commsMessage.getProfileData()!))
-          )
-          break
-        default: {
-          logger.warn(`message with unknown type received ${commsMessage.getDataCase()}`)
-          break
-        }
-      }
+  constructor(
+    private peerId: string,
+    private realm: Realm,
+    private lighthouseUrl: string,
+    private peerConfig: any,
+    private statusHandler: (status: CommsStatus) => void
+  ) {
+    // This assignment is to "definetly initialize" peer
+    this.peer = this.initializePeer()
+  }
+
+  async connectPeer() {
+    try {
+      await this.peer.awaitConnectionEstablished(60000)
+      await this.peer.setLayer(this.realm.layer)
+    } catch (e) {
+      defaultLogger.error('Error while connecting to layer', e)
+      this.statusHandler({ status: 'error', connectedPeers: this.connectedPeersCount() })
+      throw e
     }
+    this.statusHandler({ status: 'connected', connectedPeers: this.connectedPeersCount() })
+  }
+
+  public async changeRealm(realm: Realm, url: string) {
+    this.statusHandler({ status: 'connecting', connectedPeers: this.connectedPeersCount() })
+    let rooms: string[] = []
+    if (this.peer) {
+      rooms = this.peer.currentRooms.map(it => it.id)
+      await this.cleanUpPeer()
+    }
+
+    this.realm = realm
+    this.lighthouseUrl = url
+
+    this.initializePeer()
+    await this.connectPeer()
+    await this.updateSubscriptions(rooms)
   }
 
   printDebugInformation() {
@@ -68,34 +89,31 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
   }
 
   close() {
-    const rooms = this.peer.currentRooms
-    return Promise.all(
-      rooms.map(room => this.peer.leaveRoom(room.id).catch(e => logger.trace(`error while leaving room ${room.id}`, e)))
-    )
+    return this.cleanUpPeer()
   }
 
   async sendInitialMessage(userInfo: Partial<UserInformation>) {
     const topic = userInfo.userId!
 
-    await this.sendProfileData(userInfo, topic, "initialProfile")
+    await this.sendProfileData(userInfo, topic, 'initialProfile')
   }
 
   async sendProfileMessage(currentPosition: Position, userInfo: UserInformation) {
     const topic = positionHash(currentPosition)
 
-    await this.sendProfileData(userInfo, topic, "profile")
+    await this.sendProfileData(userInfo, topic, 'profile')
   }
 
   async sendPositionMessage(p: Position) {
     const topic = positionHash(p)
 
-    await this.sendPositionData(p, topic, "position")
+    await this.sendPositionData(p, topic, 'position')
   }
 
   async sendParcelUpdateMessage(currentPosition: Position, p: Position) {
     const topic = positionHash(currentPosition)
 
-    await this.sendPositionData(p, topic, "parcelUpdate")
+    await this.sendPositionData(p, topic, 'parcelUpdate')
   }
 
   async sendParcelSceneCommsMessage(sceneId: string, message: string) {
@@ -105,7 +123,7 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
     sceneData.setSceneId(sceneId)
     sceneData.setText(message)
 
-    await this.sendData(topic, sceneData, PeerMessageTypes.reliable("sceneComms"))
+    await this.sendData(topic, sceneData, commsMessageType)
   }
 
   async sendChatMessage(currentPosition: Position, messageId: string, text: string) {
@@ -115,7 +133,7 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
     chatMessage.setMessageId(messageId)
     chatMessage.setText(text)
 
-    await this.sendData(topic, chatMessage, PeerMessageTypes.reliable("chat"))
+    await this.sendData(topic, chatMessage, PeerMessageTypes.reliable('chat'))
   }
 
   async updateSubscriptions(rooms: string[]) {
@@ -149,6 +167,62 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
   private async sendProfileData(userInfo: UserInformation, topic: string, typeName: string) {
     const profileData = createProfileData(userInfo)
     await this.sendData(topic, profileData, PeerMessageTypes.unreliable(typeName))
+  }
+
+  private initializePeer() {
+    this.statusHandler({ status: 'connecting', connectedPeers: this.connectedPeersCount() })
+    this.peer = this.createPeer()
+    global.__DEBUG_PEER = this.peer
+    return this.peer
+  }
+
+  private connectedPeersCount(): number {
+    // @ts-ignore
+    return this.peer ? this.peer.connectedCount() : 0
+  }
+
+  private createPeer(): PeerType {
+    return new Peer(this.lighthouseUrl, this.peerId, this.peerCallback, this.peerConfig)
+  }
+
+  private async cleanUpPeer() {
+    return this.peer.dispose()
+  }
+
+  private peerCallback: PacketCallback = (sender, room, payload) => {
+    try {
+      const commsMessage = CommsMessage.deserializeBinary(payload)
+      switch (commsMessage.getDataCase()) {
+        case CommsMessage.DataCase.CHAT_DATA:
+          this.chatHandler(sender, createPackage(commsMessage, 'chat', mapToPackageChat(commsMessage.getChatData()!)))
+          break
+        case CommsMessage.DataCase.POSITION_DATA:
+          this.positionHandler(
+            sender,
+            createPackage(commsMessage, 'position', mapToPositionMessage(commsMessage.getPositionData()!))
+          )
+          break
+        case CommsMessage.DataCase.SCENE_DATA:
+          this.sceneMessageHandler(
+            sender,
+            createPackage(commsMessage, 'chat', mapToPackageScene(commsMessage.getSceneData()!))
+          )
+          break
+        case CommsMessage.DataCase.PROFILE_DATA:
+          this.profileHandler(
+            sender,
+            commsMessage.getProfileData()!.getUserId(),
+            createPackage(commsMessage, 'profile', mapToPackageProfile(commsMessage.getProfileData()!))
+          )
+          break
+        default: {
+          logger.warn(`message with unknown type received ${commsMessage.getDataCase()}`)
+          break
+        }
+      }
+    } catch (e) {
+      logger.error(`Error processing received message from ${sender}. Topic: ${room}`, e)
+    }
   }
 }
 

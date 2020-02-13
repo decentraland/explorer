@@ -393,6 +393,9 @@ namespace DCL
                             case "ConfigureExpressionsHUD":
                                 HUDController.i.ConfigureExpressionsHUD(msg.payload);
                                 break;
+                            case "ConfigureWelcomeHUD":
+                                HUDController.i.ConfigureWelcomeHUD(msg.payload);
+                                break;
                             case "UpdateMinimapSceneInformation":
                                 MinimapMetadataController.i?.UpdateMinimapSceneInformation(msg.payload);
                                 break;
@@ -410,6 +413,12 @@ namespace DCL
                                 break;
                             case "AirdroppingRequest":
                                 HUDController.i.AirdroppingRequest(msg.payload);
+                                break;
+                            case "ConfigureTermsOfServiceHUD":
+                                HUDController.i.ConfigureTermsOfServiceHUD(msg.payload);
+                                break;
+                            case "ShowTermsOfServices":
+                                HUDController.i.ShowTermsOfServices(msg.payload);
                                 break;
                             default:
                                 Debug.Log("<b><color=#FF0000>WSSController:</color></b> received an unknown message from kernel to renderer: " + msg.type);

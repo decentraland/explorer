@@ -103,7 +103,7 @@ export const FETCH_PROFILE_SERVICE = qs.FETCH_PROFILE_SERVICE
 export const UPDATE_CONTENT_SERVICE = qs.UPDATE_CONTENT_SERVICE
 export const FETCH_CONTENT_SERVICE = qs.FETCH_CONTENT_SERVICE
 export const COMMS_SERVICE = qs.COMMS_SERVICE
-export const LAYER = qs.LAYER
+export const REALM = qs.realm
 
 export const DEBUG =
   location.search.indexOf('DEBUG_MODE') !== -1 ||
@@ -119,6 +119,7 @@ export const DEBUG_REDUX = location.search.indexOf('DEBUG_REDUX') !== -1
 export const DEBUG_LOGIN = location.search.indexOf('DEBUG_LOGIN') !== -1
 
 export const AWS = location.search.indexOf('AWS') !== -1
+export const NO_MOTD = location.search.indexOf('NO_MOTD') !== -1
 
 export const DISABLE_AUTH = location.search.indexOf('DISABLE_AUTH') !== -1 || DEBUG
 export const ENGINE_DEBUG_PANEL = location.search.indexOf('ENGINE_DEBUG_PANEL') !== -1
@@ -146,6 +147,11 @@ export namespace commConfigurations {
     },
     {
       urls: 'stun:stun4.l.google.com:19302'
+    },
+    {
+      urls: 'turn:stun.decentraland.org:3478',
+      credential: 'passworddcl',
+      username: 'usernamedcl'
     }
   ]
 }
@@ -230,10 +236,8 @@ export function getLoginConfigurationForCurrentDomain() {
 
 export const ENABLE_EMPTY_SCENES = !DEBUG || knownTLDs.includes(getTLD())
 
-export function getContentUrl() {
-  const TLDDefault = getDefaultTLD()
-
-  return `https://content.decentraland.${TLDDefault === 'today' ? 'org' : TLDDefault}`
+export function getWearablesSafeURL() {
+  return 'https://content.decentraland.org'
 }
 
 export function getServerConfigurations() {
@@ -293,13 +297,13 @@ export async function setNetwork(net: ETHEREUM_NETWORK) {
 
 export namespace ethereumConfigurations {
   export const mainnet = {
-    wss: 'wss://mainnet.infura.io/ws',
-    http: 'https://mainnet.infura.io/',
+    wss: 'wss://mainnet.infura.io/ws/v3/074a68d50a7c4e6cb46aec204a50cbf0',
+    http: 'https://mainnet.infura.io/v3/074a68d50a7c4e6cb46aec204a50cbf0/',
     etherscan: 'https://etherscan.io'
   }
   export const ropsten = {
-    wss: 'wss://ropsten.infura.io/ws',
-    http: 'https://ropsten.infura.io/',
+    wss: 'wss://ropsten.infura.io/ws/v3/074a68d50a7c4e6cb46aec204a50cbf0',
+    http: 'https://ropsten.infura.io/v3/074a68d50a7c4e6cb46aec204a50cbf0/',
     etherscan: 'https://ropsten.etherscan.io'
   }
 }
