@@ -87,10 +87,6 @@ namespace Tests
             }));
 
             yield return null;
-            yield return null;
-            yield return null;
-            yield return null;
-            yield return null;
 
             Assert.AreEqual(cursorController.cursorImage.sprite, cursorController.normalCursor);
 
