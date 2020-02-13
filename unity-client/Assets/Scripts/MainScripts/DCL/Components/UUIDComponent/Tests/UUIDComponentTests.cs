@@ -788,7 +788,6 @@ namespace Tests
                 },
                 (pointerEvent) =>
                 {
-                    Debug.Log("entered here?");
                     if (pointerEvent.eventType == "uuidEvent" &&
                         pointerEvent.payload.uuid == onPointerId &&
                         pointerEvent.payload.payload.hit.entityId == clickTargetEntity.entityId)
@@ -799,7 +798,6 @@ namespace Tests
                 });
 
             yield return null;
-            Debug.Break();
             Assert.IsTrue(targetEntityHit, "Target entity wasn't hit and no other entity is blocking it");
         }
 
