@@ -25,11 +25,7 @@ export function* metaSaga(): any {
 
 function checkExplorerVersion(config: MetaConfiguration) {
   const currentBuildNumber = buildNumber
-  defaultLogger.info(`Current build number: `, buildNumber)
-  if (currentBuildNumber < config.explorer.minBuildNumber) {
-    // force client to reload from server
-    window.location.reload(true)
-  }
+  defaultLogger.info(`Current build number: `, currentBuildNumber)
 }
 
 async function fetchMetaConfiguration() {
