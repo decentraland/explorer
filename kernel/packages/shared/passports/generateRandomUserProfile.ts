@@ -2,7 +2,7 @@ import { Profile } from './types'
 import { getFetchProfileServer, getFetchContentServer } from 'shared/dao/selectors'
 import { Store } from 'redux'
 
-declare const window: Window & { store: Store }
+declare const window: Window & { globalStore: Store }
 
 function randomBetween(min: number, max: number) {
   return Math.floor(Math.random() * (max - min + 1) + min)
@@ -10,7 +10,7 @@ function randomBetween(min: number, max: number) {
 
 export async function generateRandomUserProfile(userId: string): Promise<Profile> {
   const _number = randomBetween(1, 160)
-  const profileUrl = `${getFetchProfileServer(window.store.getState())}/default${_number}`
+  const profileUrl = `${getFetchProfileServer(window.globalStore.getState())}/default${_number}`
 
   let profile: any | undefined = undefined
   try {
@@ -27,7 +27,7 @@ export async function generateRandomUserProfile(userId: string): Promise<Profile
   }
 
   if (!profile) {
-    profile = backupProfile(getFetchContentServer(window.store.getState()))
+    profile = backupProfile(getFetchContentServer(window.globalStore.getState()))
   }
 
   profile.name = 'Guest-' + userId.substr(2, 6)
