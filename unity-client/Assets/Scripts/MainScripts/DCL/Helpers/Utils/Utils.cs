@@ -235,10 +235,11 @@ namespace DCL.Helpers
             System.Action<UnityWebRequest> OnSuccessInternal =
                 (request) =>
                 {
-                    if (OnSuccess != null)
-                    {
-                        OnSuccess.Invoke(DownloadHandlerTexture.GetContent(request));
-                    }
+                    var texture = DownloadHandlerTexture.GetContent(request);
+                    texture.Compress(false);
+                    texture.Apply(false, true);
+
+                    OnSuccess?.Invoke(texture);
                 };
 
             yield return FetchAsset(textureURL, UnityWebRequestTexture.GetTexture(textureURL), OnSuccessInternal);

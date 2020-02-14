@@ -1,6 +1,6 @@
+using DCL.Helpers;
 using System.Collections;
 using System.Linq;
-using DCL.Helpers;
 using UnityEngine;
 
 public class FacialFeatureController

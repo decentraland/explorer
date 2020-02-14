@@ -731,7 +731,7 @@ namespace UnityGLTF
 
         protected virtual IEnumerator ConstructUnityTexture(byte[] buffer, bool markGpuOnly, bool linear, GLTFImage image, int imageCacheIndex)
         {
-            Texture2D texture = new Texture2D(0, 0, TextureFormat.RGBA32, true, linear);
+            Texture2D texture = new Texture2D(0, 0, TextureFormat.DXT5, true, linear);
 
             //  NOTE: the second parameter of LoadImage() marks non-readable, but we can't mark it until after we call Apply()
             texture.LoadImage(buffer, markGpuOnly);
