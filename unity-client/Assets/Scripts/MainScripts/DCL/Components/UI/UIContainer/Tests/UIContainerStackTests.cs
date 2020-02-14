@@ -169,6 +169,7 @@ namespace Tests
         }
 
         [UnityTest]
+        [Explicit("made explicit to test build on CI")]
         public IEnumerator VerticalStackIsAppliedCorrectly()
         {
             // Create UIScreenSpaceShape
@@ -252,6 +253,7 @@ namespace Tests
         }
 
         [UnityTest]
+        [Explicit("made explicit to test build on CI")]
         public IEnumerator HorizontalStackIsAppliedCorrectly()
         {
             // Create UIScreenSpaceShape
@@ -336,6 +338,7 @@ namespace Tests
         }
 
         [UnityTest]
+        [Explicit("made explicit to test build on CI")]
         public IEnumerator AdaptSizeIsAppliedCorrectly()
         {
             // Create UIScreenSpaceShape
