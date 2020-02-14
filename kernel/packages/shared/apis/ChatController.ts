@@ -21,7 +21,7 @@ import {
 import { IChatCommand, MessageEntry } from 'shared/types'
 import { TeleportController } from 'shared/world/TeleportController'
 import { expressionExplainer, isValidExpression, validExpressions } from './expressionExplainer'
-import { changeRealm, catalystRealmConnected } from 'shared/dao'
+import { changeRealm, catalystRealmConnected, changeToCrowdedRealm } from 'shared/dao'
 import defaultLogger from 'shared/logger'
 
 const userPose: { [key: string]: Vector3Component } = {}
@@ -179,18 +179,35 @@ export class ChatController extends ExposableAPI implements IChatController {
 
     this.addChatCommand('changerealm', 'Changes communications realms', message => {
       const realmString = message.trim()
-      const realm = changeRealm(realmString)
-
       let response = ''
-      if (realm) {
-        response = `Changing to Realm ${realm.catalystName}-${realm.layer}...`
-        // TODO: This status should be shown in the chat window
-        catalystRealmConnected().then(
-          () => defaultLogger.log('Sucessfully connected to realm', realm),
-          () => defaultLogger.log('Error joining realm', realm)
+
+      if (realmString === 'crowd') {
+        response = `Changing to realm that is crowded nearby...`
+
+        changeToCrowdedRealm().then(
+          ([changed, realm]) => {
+            // TODO: This status should be shown in the chat window
+            if (changed) {
+              defaultLogger.log('Sucessfully changed to realm', realm)
+            } else {
+              defaultLogger.log('Already on most crowded realm')
+            }
+          },
+          e => defaultLogger.error('Error getting to crowded realm', e)
         )
       } else {
-        response = `Couldn't find realm ${realmString}`
+        const realm = changeRealm(realmString)
+
+        if (realm) {
+          response = `Changing to Realm ${realm.catalystName}-${realm.layer}...`
+          // TODO: This status should be shown in the chat window
+          catalystRealmConnected().then(
+            () => defaultLogger.log('Sucessfully connected to realm', realm),
+            e => defaultLogger.error('Error joining realm', realm, e)
+          )
+        } else {
+          response = `Couldn't find realm ${realmString}`
+        }
       }
 
       return {

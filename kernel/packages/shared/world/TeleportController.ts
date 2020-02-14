@@ -3,7 +3,7 @@ import { getFromLocalStorage, saveToLocalStorage } from 'atomicHelpers/localStor
 import { POIs } from 'shared/comms/POIs'
 import { parcelLimits } from 'config'
 import { fetchLayerUsersParcels } from 'shared/comms'
-import { Parcel } from 'shared/comms/interface/utils'
+import { ParcelArray, countParcelsCloseTo } from 'shared/comms/interface/utils'
 import defaultLogger from 'shared/logger'
 
 const CAMPAIGN_PARCEL_SEQUENCE = [
@@ -48,29 +48,14 @@ export class TeleportController {
     const message: string = `Teleporting to a crowd of people in current realm...`
     const promise = (async function() {
       const usersParcels = await fetchLayerUsersParcels()
+
       if (usersParcels.length > 0) {
-        const distanceSquared = (parcel1: Parcel, parcel2: Parcel) => {
-          const xDiff = parcel1.x - parcel2.x
-          const zDiff = parcel1.z - parcel2.z
-          return xDiff * xDiff + zDiff * zDiff
-        }
-
-        const calculateCloseUsers = (origin: Parcel) => {
-          let close = 0
-          usersParcels.forEach(parcel => {
-            if (distanceSquared(origin, parcel) <= 9) {
-              close += 1
-            }
-          })
-
-          return close
-        }
-
         // Sorting from most close users
-        const target = usersParcels.sort(
-          (parcel1, parcel2) => calculateCloseUsers(parcel2) - calculateCloseUsers(parcel1)
-        )[0]
-        TeleportController.goTo(target.x, target.z, message)
+        const target = usersParcels
+          .map(it => [it, countParcelsCloseTo(it, usersParcels)] as [ParcelArray, number])
+          .sort(([_, score1], [__, score2]) => score2 - score1)[0][0]
+
+        TeleportController.goTo(target[0], target[1], message)
       }
     })()
 
