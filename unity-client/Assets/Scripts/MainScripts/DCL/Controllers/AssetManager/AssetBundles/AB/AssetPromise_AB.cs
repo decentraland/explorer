@@ -180,6 +180,20 @@ namespace DCL
 
                     asset.assetsByExtension[ext].Add(loadedAsset);
 
+                    //Debug.Log($"Loading from assetbundle: {loadedAsset.GetType().FullName} ext: {ext}");
+
+                    //if (loadedAsset is GameObject assetGo)
+                    //{
+                    //    foreach (var obj in assetGo.GetComponentsInChildren<MonoBehaviour>(true))
+                    //    {
+                    //        Debug.Log("component is " + obj.GetType().FullName);
+                    //    }
+                    //}
+                    //else if (loadedAsset is Material mat)
+                    //{
+                    //    Debug.Log("Shader hashcode = " + mat.shader.GetHashCode());
+                    //}
+
                     if (limitTimeBudget)
                     {
                         currentLoadBudgetTime += Time.realtimeSinceStartup - time;

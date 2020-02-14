@@ -125,6 +125,8 @@ namespace DCL
                 yield return null;
             }
 
+            subPromise.asset.ownerAssetBundle.Unload(false);
+
             yield break;
         }
 
