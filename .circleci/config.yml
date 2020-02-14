@@ -215,7 +215,6 @@ jobs:
           name: Set env
           command: |
             echo 'export const buildNumber = '$CIRCLE_BUILD_NUM > /tmp/explorer/kernel/packages/shared/meta/env.ts
-            cat /tmp/explorer/kernel/packages/shared/meta/env.ts
       - run:
           name: Build decentraland-ecs
           command: |
