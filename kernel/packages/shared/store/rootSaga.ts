@@ -6,7 +6,7 @@ import { rootProtocolSaga } from '../protocol/sagas'
 import { rendererSaga } from '../renderer/sagas'
 import { metricSaga } from './metricSaga'
 import { daoSaga } from '../dao/sagas'
-import { metaSaga } from '../meta/sagas';
+import { metaSaga } from '../meta/sagas'
 
 export function createRootSaga() {
   return function* rootSaga() {
