@@ -1,5 +1,5 @@
 import { ReportFatalError } from 'shared/loading/ReportFatalError'
-import { FAILED_FETCHING_UNITY } from 'shared/loading/types'
+import { NOT_INVITED, AUTH_ERROR_LOGGED_OUT, FAILED_FETCHING_UNITY } from 'shared/loading/types'
 import { worldToGrid } from '../atomicHelpers/parcelScenePositions'
 import { NO_MOTD, OPEN_AVATAR_EDITOR } from '../config/index'
 import { experienceStarted } from '../shared/loading/types'
@@ -27,7 +27,7 @@ initializeUnity(container)
     i.ConfigureExpressionsHUD({ active: true, visible: true })
     i.ConfigurePlayerInfoCardHUD({ active: true, visible: true })
     i.ConfigureAirdroppingHUD({ active: true, visible: true })
-    i.ConfigureTermsOfServiceHUD({ active: true, visible: false })
+    i.ConfigureTermsOfServiceHUD({ active: true, visible: true })
 
     global['globalStore'].dispatch(signalRendererInitialized())
     await startUnityParcelLoading()
@@ -50,14 +50,12 @@ initializeUnity(container)
     }
   })
   .catch(err => {
-    if (err.message.includes('Authentication error')) {
-      // TODO - add some feedback here before reloading - moliva - 22/10/2019
-      window.location.reload()
-    }
-
-    console['error']('Error loading Unity')
-    console['error'](err)
     document.body.classList.remove('dcl-loading')
-
-    ReportFatalError(FAILED_FETCHING_UNITY)
+    if (err.message === AUTH_ERROR_LOGGED_OUT || err.message === NOT_INVITED) {
+      ReportFatalError(NOT_INVITED)
+    } else {
+      console['error']('Error loading Unity')
+      console['error'](err)
+      ReportFatalError(FAILED_FETCHING_UNITY)
+    }
   })
