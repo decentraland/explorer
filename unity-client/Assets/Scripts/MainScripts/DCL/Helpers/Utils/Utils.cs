@@ -229,16 +229,13 @@ namespace DCL.Helpers
                 OnFailInternal);
         }
 
-        public static IEnumerator FetchTexture(string textureURL, Action<Texture> OnSuccess)
+        public static IEnumerator FetchTexture(string textureURL, Action<Texture2D> OnSuccess)
         {
             //NOTE(Brian): This closure is called when the download is a success.
             System.Action<UnityWebRequest> OnSuccessInternal =
                 (request) =>
                 {
                     var texture = DownloadHandlerTexture.GetContent(request);
-                    texture.Compress(false);
-                    texture.Apply(false, true);
-
                     OnSuccess?.Invoke(texture);
                 };
 

@@ -84,7 +84,7 @@ namespace DCL
             {
                 yield return InstantiateABGameObjects(subPromise.asset.ownerAssetBundle);
 
-                if (subPromise.asset == null || subPromise.asset.ownerAssetBundle == null || asset.container == null)
+                if (subPromise.asset == null || asset.container == null)
                     success = false;
             }
 
@@ -125,7 +125,7 @@ namespace DCL
                 yield return null;
             }
 
-            subPromise.asset.ownerAssetBundle.Unload(false);
+            bundle.Unload(false);
 
             yield break;
         }

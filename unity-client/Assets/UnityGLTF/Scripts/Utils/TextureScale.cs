@@ -15,7 +15,7 @@ namespace UnityGLTF
             RenderTexture.active = rt;
             Graphics.Blit(source, rt);
 
-            Texture2D nTex = new Texture2D(newWidth, newHeight, TextureFormat.DXT5, true);
+            Texture2D nTex = new Texture2D(newWidth, newHeight);
             nTex.ReadPixels(new Rect(0, 0, newWidth, newWidth), 0, 0);
             nTex.Apply();
 
