@@ -37,7 +37,6 @@ export type DaoState = {
   fetchContentServer: string
   updateContentServer: string
   commsServer: string
-  layer: string
   realm: Realm | undefined
   candidates: Candidate[]
   commsStatus: CommsStatus
