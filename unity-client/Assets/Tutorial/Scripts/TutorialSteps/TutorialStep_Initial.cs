@@ -12,7 +12,7 @@ namespace DCL.Tutorial
         [SerializeField] TutorialTooltip minimapTooltip = null;
         [SerializeField] GameObject claimNamePanel = null;
 
-        const string CLAIM_NAME_URL = "http://avatars.decentraland.org";
+        const string CLAIM_NAME_URL = "http://avatars.decentraland.org/?redirect_after_claim=https://explorer.decentraland.org";
 
         AvatarEditorHUDController avatarEditorHUD = null;
         bool claimNamePanelClosed = false;
@@ -127,7 +127,8 @@ namespace DCL.Tutorial
 
         public void ClaimNameButtonAction()
         {
-            WebInterface.OpenURL(CLAIM_NAME_URL);
+            // This updates the current tab, without opening a new one
+            Application.OpenURL(CLAIM_NAME_URL);
 
             ContinueAsGuestButtonAction();
         }
