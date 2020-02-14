@@ -1065,7 +1065,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetRectTransform: {fileID: 487610079711947160}
-  hoverScale: 1.01
+  hoverScale: 1.02
   normalScale: 1
 --- !u!1 &3073583394034477279
 GameObject:
