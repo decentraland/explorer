@@ -39,6 +39,8 @@ function ping(url: string): Promise<{ success: boolean; elapsed?: number; result
 
     let started: Date
 
+    http.timeout = 5000
+
     http.onreadystatechange = () => {
       if (http.readyState === XMLHttpRequest.OPENED) {
         started = new Date()
@@ -59,7 +61,7 @@ function ping(url: string): Promise<{ success: boolean; elapsed?: number; result
       }
     }
 
-    http.open('GET', url, false)
+    http.open('GET', url, true)
 
     try {
       http.send(null)
@@ -79,7 +81,7 @@ export async function fecthCatalystRealms(): Promise<Candidate[]> {
     throw new Error('no nodes are available in the DAO for the current network')
   }
 
-  return await fetchCatalystStatuses(nodes)
+  return fetchCatalystStatuses(nodes)
 }
 
 async function fetchCatalystStatuses(nodes: { domain: string }[]) {
@@ -199,8 +201,9 @@ export async function changeToCrowdedRealm(): Promise<[boolean, Realm]> {
     if (candidate.layer.usersParcels) {
       let closePeople = countParcelsCloseTo(currentPosition, candidate.layer.usersParcels, 4)
       // If it is the realm of the player, we substract 1 to not count ourselves
-      if (candidate.catalystName === currentRealm.catalystName && candidate.layer.name === currentRealm.layer)
+      if (candidate.catalystName === currentRealm.catalystName && candidate.layer.name === currentRealm.layer) {
         closePeople -= 1
+      }
 
       if (closePeople > crowdedRealm.closePeople) {
         crowdedRealm = {

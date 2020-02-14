@@ -159,7 +159,7 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
     if (this.peer.currentRooms.some(it => it.id === topic)) {
       await this.peer.sendMessage(topic, createCommsMessage(messageData).serializeBinary(), type)
     } else {
-      //TODO: We may want to queue some messages
+      // TODO: We may want to queue some messages
       defaultLogger.warn('Tried to send a message to a topic that the peer is not subscribed to: ' + topic)
     }
   }
