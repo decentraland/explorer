@@ -1,6 +1,7 @@
 using DCL.Controllers;
 using DCL.Helpers;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.UI;
@@ -155,8 +156,12 @@ namespace DCL.Components
         public UIReferencesContainer referencesContainer;
         public RectTransform childHookRectTransform;
 
+        public LinkedList<UIShape> uiTree;
+        public LinkedListNode<UIShape> uiTreeNode;
+
         public Model model = new Model();
-        protected UIShape parentUIComponent;
+
+        public UIShape parentUIComponent { get; private set; }
 
         public UIShape(ParcelScene scene) : base(scene)
         {
@@ -212,14 +217,99 @@ namespace DCL.Components
 
             referencesContainer.owner = this;
 
+            ConfigureUITreeNode();
+
             return referencesContainer as T;
+        }
+
+        void ConfigureUITreeNode()
+        {
+            if (parentUIComponent == null || uiTree == null)
+            {
+                uiTree = new LinkedList<UIShape>();
+                uiTreeNode = uiTree.AddLast(this);
+            }
+            else if (parentUIComponent.uiTree != null)
+            {
+                uiTree = parentUIComponent.uiTree;
+                uiTreeNode = uiTree.AddAfter(parentUIComponent.uiTreeNode, this);
+            }
         }
 
         public virtual void RefreshAll()
         {
-            RefreshDCLLayoutRecursively();
-            FixMaxStretchRecursively();
-            RefreshDCLLayoutRecursively_Internal(refreshSize: false, refreshAlignmentAndPosition: true);
+            // RefreshDCLLayoutRecursively();
+            // FixMaxStretchRecursively();
+            // RefreshDCLLayoutRecursively_Internal(refreshSize: false, refreshAlignmentAndPosition: true);
+
+            if (uiTree == null) return;
+
+            // int uiTreeCount = uiTree.Count;
+            // bool finishedTraversing = uiTreeCount == 0;
+            // var currentNode = uiTree.Last;
+            // while (!finishedTraversing)
+            // {
+            //     if (currentNode.Value.referencesContainer.owner != null)
+            //     {
+            //         currentNode.Value.referencesContainer.owner.RefreshDCLLayout(true, true);
+            //         currentNode.Value.referencesContainer.rectTransform.SetToMaxStretch();
+            //         currentNode.Value.referencesContainer.owner.RefreshDCLLayout(false, true);
+            //     }
+
+            //     if (currentNode != null)
+            //         currentNode = currentNode.Previous;
+            //     else
+            //         finishedTraversing = true;
+            // }
+
+            // 1 - Fully RefreshDCLLayout
+            int uiTreeCount = uiTree.Count;
+            bool finishedTraversing = uiTreeCount == 0;
+            var currentNode = uiTree.Last;
+            while (!finishedTraversing)
+            {
+                if (currentNode.Value.referencesContainer.owner != null)
+                {
+                    currentNode.Value.referencesContainer.owner.RefreshDCLLayout(true, true);
+                }
+
+                if (currentNode.Previous != null)
+                    currentNode = currentNode.Previous;
+                else
+                    finishedTraversing = true;
+            }
+
+            // 2 - Fix max stretch
+            finishedTraversing = uiTreeCount == 0;
+            currentNode = uiTree.Last;
+            while (!finishedTraversing)
+            {
+                if (currentNode.Value.referencesContainer.owner != null)
+                {
+                    currentNode.Value.referencesContainer.rectTransform.SetToMaxStretch();
+                }
+
+                if (currentNode.Previous != null)
+                    currentNode = currentNode.Previous;
+                else
+                    finishedTraversing = true;
+            }
+
+            // 3 - RefreshDCLLayout (Alignment and position only)
+            finishedTraversing = uiTreeCount == 0;
+            currentNode = uiTree.Last;
+            while (!finishedTraversing)
+            {
+                if (currentNode.Value.referencesContainer.owner != null)
+                {
+                    currentNode.Value.referencesContainer.owner.RefreshDCLLayout(false, true);
+                }
+
+                if (currentNode.Previous != null)
+                    currentNode = currentNode.Previous;
+                else
+                    finishedTraversing = true;
+            }
         }
 
         public virtual void RefreshDCLLayout(bool refreshSize = true, bool refreshAlignmentAndPosition = true)
@@ -431,6 +521,8 @@ namespace DCL.Components
 
         public override void Dispose()
         {
+            uiTree.Remove(uiTreeNode);
+
             if (childHookRectTransform)
                 Utils.SafeDestroy(childHookRectTransform.gameObject);
 
