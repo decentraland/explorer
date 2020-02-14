@@ -289,8 +289,11 @@ public class AvatarEditorHUDView : MonoBehaviour
             for (int i = 0; i < nPairs; i++)
             {
                 var itemSelector = wearableGridPairs[i].selector;
-                if (itemSelector != null) itemSelector.OnItemClicked -= controller.WearableClicked;
-                if (itemSelector != null) itemSelector.OnSellClicked -= controller.SellCollectible;
+                if (itemSelector != null)
+                {
+                    itemSelector.OnItemClicked -= controller.WearableClicked;
+                    itemSelector.OnSellClicked -= controller.SellCollectible;
+                }
             }
         }
 
