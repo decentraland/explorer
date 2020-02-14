@@ -20,7 +20,6 @@ import {
   INVENTORY_SUCCESS,
   notifyNewInventoryItem,
   NOTIFY_NEW_INVENTORY_ITEM,
-  passportRandom,
   PassportRandomAction,
   passportRequest,
   PassportRequestAction,
