@@ -56,4 +56,12 @@ public static class DependencyMapLoadHelper
             downloadingDepmap.Remove(url);
         }
     }
+
+    internal static void OnCancelLoading(string contentUrl, string hash)
+    {
+        string url = contentUrl + hash + ".depmap";
+
+        if (downloadingDepmap.Contains(url))
+            downloadingDepmap.Remove(url);
+    }
 }

@@ -24,6 +24,8 @@ namespace DCL
         Coroutine loadCoroutine;
         static HashSet<string> failedRequestUrls = new HashSet<string>();
 
+        List<AssetPromise_AB> dependencyPromises = new List<AssetPromise_AB>();
+        UnityWebRequest assetBundleRequest;
 
         static Dictionary<string, int> loadOrderByExtension = new Dictionary<string, int>()
         {
@@ -63,6 +65,8 @@ namespace DCL
 
         protected override void OnCancelLoading()
         {
+            DependencyMapLoadHelper.OnCancelLoading(contentUrl, hash);
+
             if (loadCoroutine != null)
             {
                 CoroutineStarter.Stop(loadCoroutine);
@@ -73,6 +77,18 @@ namespace DCL
             {
                 asset.CancelShow();
             }
+
+            if (assetBundleRequest != null && !assetBundleRequest.isDone)
+            {
+                assetBundleRequest.Abort();
+                assetBundleRequest.Dispose();
+                assetBundleRequest = null;
+            }
+
+            for (int i = 0; i < dependencyPromises.Count; i++)
+                dependencyPromises[i].Unload();
+
+            dependencyPromises.Clear();
 
             UnregisterConcurrentRequest();
         }
@@ -95,6 +111,7 @@ namespace DCL
                 {
                     var promise = new AssetPromise_AB(baseUrl, dep);
                     AssetPromiseKeeper_AB.i.Keep(promise);
+                    dependencyPromises.Add(promise);
                     yield return promise;
                 }
             }
@@ -114,17 +131,21 @@ namespace DCL
                 yield break;
             }
 
-            using (UnityWebRequest assetBundleRequest = UnityWebRequestAssetBundle.GetAssetBundle(finalUrl))
+            using (assetBundleRequest = UnityWebRequestAssetBundle.GetAssetBundle(finalUrl))
             {
                 yield return assetBundleRequest.SendWebRequest();
+
+                //NOTE(Brian): For some reason, another coroutine iteration can be triggered after Cleanup().
+                //             So assetBundleRequest can be null here.
+                if (assetBundleRequest == null)
+                    yield break;
 
                 if (!assetBundleRequest.WebRequestSucceded())
                 {
                     Debug.Log($"request failed? {assetBundleRequest.error} ... {finalUrl}");
+                    failedRequestUrls.Add(finalUrl);
                     assetBundleRequest.Abort();
                     OnFail?.Invoke();
-
-                    failedRequestUrls.Add(finalUrl);
                     yield break;
                 }
 
@@ -159,6 +180,11 @@ namespace DCL
 
                 foreach (string assetName in assetsToLoad)
                 {
+                    //NOTE(Brian): For some reason, another coroutine iteration can be triggered after Cleanup().
+                    //             To handle this case we exit using this.
+                    if (loadCoroutine == null)
+                        yield break;
+
                     if (asset == null)
                         break;
 
