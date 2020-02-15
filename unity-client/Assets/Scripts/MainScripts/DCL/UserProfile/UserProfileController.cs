@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 public class UserProfileController : MonoBehaviour
@@ -34,9 +34,7 @@ public class UserProfileController : MonoBehaviour
             return;
         }
 
-
         ownUserProfile.UpdateData(JsonUtility.FromJson<UserProfileModel>(payload));
-        Debug.Log(ownUserProfile.userId);
     }
 
     public void AddUserProfileToCatalog(string payload)
