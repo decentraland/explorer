@@ -27,7 +27,7 @@ public class CharacterPreviewController : MonoBehaviour
 
     private System.Collections.Generic.Dictionary<CameraFocus, Transform> cameraFocusLookUp;
 
-    public Camera camera;
+    public new Camera camera;
     public AvatarRenderer avatarRenderer;
 
     public Transform defaultEditingTemplate;
@@ -50,7 +50,6 @@ public class CharacterPreviewController : MonoBehaviour
 
     public void UpdateModel(AvatarModel newModel, Action onDone)
     {
-        RenderingController.i.renderingActivatedAckLock.AddLock(this);
         StartCoroutine(UpdateModelRoutine(newModel, onDone));
     }
 

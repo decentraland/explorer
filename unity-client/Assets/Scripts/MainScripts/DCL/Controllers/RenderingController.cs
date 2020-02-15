@@ -26,6 +26,7 @@ public class RenderingController : MonoBehaviour
         DeactivateRendering_Internal();
     }
 
+
     void DeactivateRendering_Internal()
     {
         renderingEnabled = false;
@@ -44,8 +45,6 @@ public class RenderingController : MonoBehaviour
         DCLCharacterController.i.SetEnabled(false);
 
         OnRenderingStateChanged?.Invoke(renderingEnabled);
-
-        renderingActivatedAckLock.AddLock(this);
     }
 
 

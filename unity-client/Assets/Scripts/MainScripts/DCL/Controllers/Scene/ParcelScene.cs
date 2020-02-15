@@ -32,6 +32,8 @@ namespace DCL.Controllers
 
         public event System.Action<DecentralandEntity> OnEntityAdded;
         public event System.Action<DecentralandEntity> OnEntityRemoved;
+        public event System.Action<ParcelScene> OnSceneReady;
+
         public ContentProvider contentProvider;
         public int disposableNotReadyCount => disposableNotReady.Count;
 
@@ -134,11 +136,6 @@ namespace DCL.Controllers
 
             if (DCLCharacterController.i != null)
                 gameObject.transform.position = DCLCharacterController.i.characterPosition.WorldToUnityPosition(Utils.GridToWorldPosition(data.basePosition.x, data.basePosition.y));
-
-            if (data.id == SceneController.i.currentSceneId)
-            {
-                RenderingController.i.renderingActivatedAckLock.AddLock(this);
-            }
 
 #if UNITY_EDITOR
             //NOTE(Brian): Don't generate parcel blockers if debugScenes is active and is not the desired scene.
@@ -1080,25 +1077,20 @@ namespace DCL.Controllers
         private void SetSceneReady()
         {
             if (state == State.READY)
-            {
                 return;
-            }
 
             if (VERBOSE)
-            {
                 Debug.Log($"{sceneData.basePosition} Scene Ready!");
-            }
 
             state = State.READY;
 
             if (useBlockers)
                 blockerHandler.CleanBlockers();
 
-            if (SceneController.i.currentSceneId == sceneData.id)
-                RenderingController.i.renderingActivatedAckLock.RemoveLock(RenderingController.i);
-
             SceneController.i.SendSceneReady(sceneData.id);
             RefreshName();
+
+            OnSceneReady?.Invoke(this);
         }
 
 #if UNITY_EDITOR
