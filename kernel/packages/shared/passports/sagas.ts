@@ -20,7 +20,6 @@ import {
   INVENTORY_SUCCESS,
   notifyNewInventoryItem,
   NOTIFY_NEW_INVENTORY_ITEM,
-  passportRandom,
   PassportRandomAction,
   passportRequest,
   PassportRequestAction,
@@ -47,7 +46,7 @@ import {
 import { processServerProfile } from './transformations/processServerProfile'
 import { profileToRendererFormat } from './transformations/profileToRendererFormat'
 import { ensureServerFormat } from './transformations/profileToServerFormat'
-import { Avatar, Catalog, Profile, WearableId, Wearable, Collection } from './types'
+import { Catalog, Profile, WearableId, Wearable, Collection } from './types'
 import { Action } from 'redux'
 import { identity, ExplorerIdentity } from '../index'
 import { Authenticator, AuthLink } from 'dcl-crypto'
@@ -211,51 +210,46 @@ export function* initialLoad() {
 export function* handleFetchProfile(action: PassportRequestAction): any {
   const userId = action.payload.userId
   const email = ''
+
+  const currentId = yield select(getCurrentUserId)
+  let profile: any
   try {
     const serverUrl = yield select(getProfileDownloadServer)
     const profiles: { avatars: object[] } = yield call(profileServerRequest, serverUrl, userId)
+
     if (profiles.avatars.length !== 0) {
-      const profile: any = profiles.avatars[0]
-      const currentId = yield select(getCurrentUserId)
-      if (currentId === userId) {
-        profile.email = email
-      }
-      if (ALL_WEARABLES) {
-        profile.inventory = (yield select(getExclusiveCatalog)).map((_: Wearable) => _.id)
-      } else {
-        yield put(inventoryRequest(userId, userId))
-        const inventoryResult = yield race({
-          success: take(isActionFor(INVENTORY_SUCCESS, userId)),
-          failure: take(isActionFor(INVENTORY_FAILURE, userId))
-        })
-        if (inventoryResult.failure) {
-          defaultLogger.error(`Unable to fetch inventory for ${userId}:`, inventoryResult.failure)
-        } else {
-          profile.inventory = (inventoryResult.success as InventorySuccess).payload.inventory.map(
-            dropIndexFromExclusives
-          )
-        }
-      }
-      const passport = yield call(processServerProfile, userId, profile)
-      yield put(passportSuccess(userId, passport))
-    } else {
-      const randomizedUserProfile = yield call(generateRandomUserProfile, userId)
-      const currentId = yield select(getCurrentUserId)
-      if (currentId === userId) {
-        randomizedUserProfile.email = email
-      }
-      yield put(inventorySuccess(userId, randomizedUserProfile.inventory))
-      yield put(passportRandom(userId, randomizedUserProfile))
+      profile = profiles.avatars[0]
     }
   } catch (error) {
-    const randomizedUserProfile = yield call(generateRandomUserProfile, userId)
-    const currentId = yield select(getCurrentUserId)
-    if (currentId === userId) {
-      randomizedUserProfile.email = email
-    }
-    yield put(inventorySuccess(userId, randomizedUserProfile.inventory))
-    yield put(passportRandom(userId, randomizedUserProfile))
+    defaultLogger.warn(`Error requesting profile for ${userId}, `, error)
   }
+
+  if (!profile) {
+    defaultLogger.info(`Profile for ${userId} not found, generating random profile`)
+    profile = yield call(generateRandomUserProfile, userId)
+  }
+
+  if (currentId === userId) {
+    profile.email = email
+  }
+
+  if (ALL_WEARABLES) {
+    profile.inventory = (yield select(getExclusiveCatalog)).map((_: Wearable) => _.id)
+  } else {
+    yield put(inventoryRequest(userId, userId))
+    const inventoryResult = yield race({
+      success: take(isActionFor(INVENTORY_SUCCESS, userId)),
+      failure: take(isActionFor(INVENTORY_FAILURE, userId))
+    })
+    if (inventoryResult.failure) {
+      defaultLogger.error(`Unable to fetch inventory for ${userId}:`, inventoryResult.failure)
+    } else {
+      profile.inventory = (inventoryResult.success as InventorySuccess).payload.inventory.map(dropIndexFromExclusives)
+    }
+  }
+
+  const passport = yield call(processServerProfile, userId, profile)
+  yield put(passportSuccess(userId, passport))
 }
 
 export async function profileServerRequest(serverUrl: string, userId: string) {
@@ -374,10 +368,13 @@ export async function fetchInventoryItemsByAddress(address: string) {
 
 export function* handleSaveAvatar(saveAvatar: SaveAvatarRequest) {
   const userId = saveAvatar.payload.userId ? saveAvatar.payload.userId : yield select(getCurrentUserId)
+
   try {
-    const currentVersion = (yield select(getProfile, userId)).version || 0
+    const savedProfile = yield select(getProfile, userId)
+    const currentVersion = savedProfile.version || 0
     const url: string = yield select(getUpdateProfileServer)
-    const profile = saveAvatar.payload.profile
+    const profile = { ...savedProfile, ...saveAvatar.payload.profile }
+
     const result = yield call(modifyAvatar, {
       url,
       userId,
@@ -385,7 +382,9 @@ export function* handleSaveAvatar(saveAvatar: SaveAvatarRequest) {
       identity,
       profile
     })
+
     const { creationTimestamp: version } = result
+
     yield put(saveAvatarSuccess(userId, version, profile))
     yield put(passportRequest(userId))
   } catch (error) {
@@ -464,25 +463,33 @@ export async function modifyAvatar(params: {
   currentVersion: number
   userId: string
   identity: ExplorerIdentity
-  profile: { avatar: Avatar; face: string; body: string }
+  profile: Profile
 }) {
   const { url, currentVersion, profile, identity } = params
-  const { face, avatar, body } = profile
-  const faceFile: ContentFile = await makeContentFile('./face.png', base64ToBlob(face))
-  const bodyFile: ContentFile = await makeContentFile('./body.png', base64ToBlob(body))
-
-  const faceFileHash: string = await calculateBufferHash(faceFile.content)
-  const bodyFileHash: string = await calculateBufferHash(bodyFile.content)
-
-  avatar.snapshots = {
-    face: faceFileHash,
-    body: bodyFileHash
+  const { avatar } = profile
+  const newAvatar = { ...avatar }
+  let files: ContentFile[] = []
+  const snapshots = avatar.snapshots || (profile as any).snapshots
+  if (snapshots) {
+    if (snapshots.face.startsWith('data') && snapshots.body.startsWith('data')) {
+      // replace base64 snapshots with their respective hashes
+      const faceFile: ContentFile = await makeContentFile('./face.png', base64ToBlob(snapshots.face))
+      const bodyFile: ContentFile = await makeContentFile('./body.png', base64ToBlob(snapshots.body))
+      const faceFileHash: string = await calculateBufferHash(faceFile.content)
+      const bodyFileHash: string = await calculateBufferHash(bodyFile.content)
+      newAvatar.snapshots = {
+        face: faceFileHash,
+        body: bodyFileHash
+      }
+      files = [faceFile, bodyFile]
+    } else {
+      newAvatar.snapshots = {
+        face: snapshots.face.split('/').pop()!,
+        body: snapshots.body.split('/').pop()!
+      }
+    }
   }
-
-  const newProfile = ensureServerFormat(avatar, currentVersion)
-
-  const files = [faceFile, bodyFile]
-
+  const newProfile = ensureServerFormat({ ...profile, avatar: newAvatar }, currentVersion)
   const [data] = await buildDeployData(
     [identity.address],
     {
