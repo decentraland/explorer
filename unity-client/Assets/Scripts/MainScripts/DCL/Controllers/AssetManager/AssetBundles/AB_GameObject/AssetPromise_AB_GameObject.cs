@@ -13,7 +13,6 @@ namespace DCL
         public AssetPromiseSettings_Rendering settings = new AssetPromiseSettings_Rendering();
         AssetPromise_AB subPromise;
         Coroutine loadingCoroutine;
-        List<GameObject> instancedGOs = new List<GameObject>();
         List<Renderer> renderers = new List<Renderer>();
 
         public AssetPromise_AB_GameObject(string contentUrl, string hash) : base(contentUrl, hash)
@@ -75,8 +74,8 @@ namespace DCL
 
             AssetPromiseKeeper_AB.i.Forget(subPromise);
 
-            for (int i = 0; i < instancedGOs.Count; i++)
-                GameObject.Destroy(instancedGOs[i]);
+            if (asset != null)
+                GameObject.Destroy(asset.container);
         }
 
         public IEnumerator LoadingCoroutine(Action OnSuccess, Action OnFail)
@@ -122,7 +121,6 @@ namespace DCL
                     break;
 
                 GameObject assetBundleModelGO = UnityEngine.Object.Instantiate(goList[i]);
-                instancedGOs.Add(assetBundleModelGO);
                 renderers.AddRange(assetBundleModelGO.GetComponentsInChildren<Renderer>(true));
 
                 //NOTE(Brian): Renderers are enabled in settings.ApplyAfterLoad
