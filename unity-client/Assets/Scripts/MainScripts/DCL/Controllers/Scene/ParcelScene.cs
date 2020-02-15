@@ -366,11 +366,14 @@ namespace DCL.Controllers
             if (entities.ContainsKey(tmpRemoveEntityMessage.id))
             {
                 DecentralandEntity entity = entities[tmpRemoveEntityMessage.id];
+
                 if (!entity.markedForCleanup)
                 {
                     // This will also cleanup its children
                     CleanUpEntityRecursively(entity, removeImmediatelyFromEntitiesList);
                 }
+
+                entities.Remove(tmpRemoveEntityMessage.id);
             }
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             else
@@ -569,16 +572,20 @@ namespace DCL.Controllers
 
                 if (!entity.uuidComponents.ContainsKey(type))
                 {
+                    //NOTE(Brian): We have to contain it in a gameObject or it will be pooled with the components attached.
+                    var go = new GameObject("UUID Component");
+                    go.transform.SetParent(entity.gameObject.transform, false);
+
                     switch (type)
                     {
                         case OnClick.NAME:
-                            newComponent = Utils.GetOrCreateComponent<OnClick>(entity.gameObject);
+                            newComponent = Utils.GetOrCreateComponent<OnClick>(go);
                             break;
                         case OnPointerDown.NAME:
-                            newComponent = Utils.GetOrCreateComponent<OnPointerDown>(entity.gameObject);
+                            newComponent = Utils.GetOrCreateComponent<OnPointerDown>(go);
                             break;
                         case OnPointerUp.NAME:
-                            newComponent = Utils.GetOrCreateComponent<OnPointerUp>(entity.gameObject);
+                            newComponent = Utils.GetOrCreateComponent<OnPointerUp>(go);
                             break;
                     }
 
@@ -588,8 +595,9 @@ namespace DCL.Controllers
 
                         if (uuidComponent != null)
                         {
-                            uuidComponent.SetForEntity(this, entity, model);
+                            uuidComponent.Setup(this, entity, model);
                             entity.uuidComponents.Add(type, uuidComponent);
+
                         }
                         else
                         {
@@ -652,7 +660,7 @@ namespace DCL.Controllers
             }
 
             UUIDComponent targetComponent = entity.uuidComponents[type];
-            targetComponent.SetForEntity(this, entity, model);
+            targetComponent.Setup(this, entity, model);
 
             return targetComponent;
         }
