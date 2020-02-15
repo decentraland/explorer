@@ -1,4 +1,4 @@
-using DCL.Components;
+﻿using DCL.Components;
 using DCL.Configuration;
 using DCL.Helpers;
 using DCL.Models;
@@ -12,7 +12,7 @@ namespace DCL.Controllers
     public class ParcelScene : MonoBehaviour, ICleanable
     {
         public static bool VERBOSE = false;
-        enum State
+        public enum State
         {
             NOT_READY,
             WAITING_FOR_INIT_MESSAGES,
@@ -53,7 +53,6 @@ namespace DCL.Controllers
         public static ParcelScenesCleaner parcelScenesCleaner = new ParcelScenesCleaner();
 
         private readonly List<string> disposableNotReady = new List<string>();
-        private bool flaggedToUnload = false;
         private bool isReleased = false;
         public bool isReady => state == State.READY;
         private State state = State.NOT_READY;
@@ -65,6 +64,7 @@ namespace DCL.Controllers
         public void Awake()
         {
             state = State.NOT_READY;
+
             blockerHandler = new BlockerHandler();
 
             if (DCLCharacterController.i)
@@ -134,6 +134,11 @@ namespace DCL.Controllers
 
             if (DCLCharacterController.i != null)
                 gameObject.transform.position = DCLCharacterController.i.characterPosition.WorldToUnityPosition(Utils.GridToWorldPosition(data.basePosition.x, data.basePosition.y));
+
+            if (data.id == SceneController.i.currentSceneId)
+            {
+                RenderingController.i.renderingActivatedAckLock.AddLock(this);
+            }
 
 #if UNITY_EDITOR
             //NOTE(Brian): Don't generate parcel blockers if debugScenes is active and is not the desired scene.
@@ -361,11 +366,14 @@ namespace DCL.Controllers
             if (entities.ContainsKey(tmpRemoveEntityMessage.id))
             {
                 DecentralandEntity entity = entities[tmpRemoveEntityMessage.id];
+
                 if (!entity.markedForCleanup)
                 {
                     // This will also cleanup its children
                     CleanUpEntityRecursively(entity, removeImmediatelyFromEntitiesList);
                 }
+
+                entities.Remove(tmpRemoveEntityMessage.id);
             }
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             else
@@ -564,16 +572,20 @@ namespace DCL.Controllers
 
                 if (!entity.uuidComponents.ContainsKey(type))
                 {
+                    //NOTE(Brian): We have to contain it in a gameObject or it will be pooled with the components attached.
+                    var go = new GameObject("UUID Component");
+                    go.transform.SetParent(entity.gameObject.transform, false);
+
                     switch (type)
                     {
                         case OnClick.NAME:
-                            newComponent = Utils.GetOrCreateComponent<OnClick>(entity.gameObject);
+                            newComponent = Utils.GetOrCreateComponent<OnClick>(go);
                             break;
                         case OnPointerDown.NAME:
-                            newComponent = Utils.GetOrCreateComponent<OnPointerDown>(entity.gameObject);
+                            newComponent = Utils.GetOrCreateComponent<OnPointerDown>(go);
                             break;
                         case OnPointerUp.NAME:
-                            newComponent = Utils.GetOrCreateComponent<OnPointerUp>(entity.gameObject);
+                            newComponent = Utils.GetOrCreateComponent<OnPointerUp>(go);
                             break;
                     }
 
@@ -583,8 +595,9 @@ namespace DCL.Controllers
 
                         if (uuidComponent != null)
                         {
-                            uuidComponent.SetForEntity(this, entity, model);
+                            uuidComponent.Setup(this, entity, model);
                             entity.uuidComponents.Add(type, uuidComponent);
+
                         }
                         else
                         {
@@ -647,7 +660,7 @@ namespace DCL.Controllers
             }
 
             UUIDComponent targetComponent = entity.uuidComponents[type];
-            targetComponent.SetForEntity(this, entity, model);
+            targetComponent.Setup(this, entity, model);
 
             return targetComponent;
         }

@@ -50,6 +50,7 @@ public class CharacterPreviewController : MonoBehaviour
 
     public void UpdateModel(AvatarModel newModel, Action onDone)
     {
+        RenderingController.i.renderingActivatedAckLock.AddLock(this);
         StartCoroutine(UpdateModelRoutine(newModel, onDone));
     }
 
@@ -66,6 +67,7 @@ public class CharacterPreviewController : MonoBehaviour
         }
 
         onDone?.Invoke();
+        RenderingController.i.renderingActivatedAckLock.RemoveLock(this);
     }
 
     private void SetLayerRecursively(GameObject gameObject, int layer)
