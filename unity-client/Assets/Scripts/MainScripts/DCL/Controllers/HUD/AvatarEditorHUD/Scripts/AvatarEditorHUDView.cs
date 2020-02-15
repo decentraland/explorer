@@ -53,7 +53,7 @@ public class AvatarEditorHUDView : MonoBehaviour
     [SerializeField] internal GameObject noWeb3Container;
     [SerializeField] internal Button noWeb3GoToMarketplaceButton;
 
-    public CharacterPreviewController characterPreviewController;
+    internal CharacterPreviewController characterPreviewController;
     private AvatarEditorHUDController controller;
     internal readonly Dictionary<string, ItemSelector> selectorsByCategory = new Dictionary<string, ItemSelector>();
 
