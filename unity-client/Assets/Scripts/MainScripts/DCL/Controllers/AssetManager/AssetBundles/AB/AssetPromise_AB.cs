@@ -63,8 +63,6 @@ namespace DCL
 
         protected override void OnCancelLoading()
         {
-            DependencyMapLoadHelper.OnCancelLoading(contentUrl, hash);
-
             if (loadCoroutine != null)
             {
                 CoroutineStarter.Stop(loadCoroutine);
@@ -74,13 +72,6 @@ namespace DCL
             if (asset != null)
             {
                 asset.CancelShow();
-            }
-
-            if (assetBundleRequest != null && !assetBundleRequest.isDone)
-            {
-                assetBundleRequest.Abort();
-                assetBundleRequest.Dispose();
-                assetBundleRequest = null;
             }
 
             UnregisterConcurrentRequest();
