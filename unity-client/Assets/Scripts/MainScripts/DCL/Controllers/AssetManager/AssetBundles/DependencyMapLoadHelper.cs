@@ -20,6 +20,16 @@ public static class DependencyMapLoadHelper
         public string[] dependencies;
     }
 
+    public static void OnCancelLoading(string baseUrl, string hash)
+    {
+        string url = baseUrl + hash + ".depmap";
+
+        if (downloadingDepmap.Contains(url))
+        {
+            downloadingDepmap.Remove(url);
+        }
+    }
+
     public static IEnumerator GetDepMap(string baseUrl, string hash)
     {
         string url = baseUrl + hash + ".depmap";

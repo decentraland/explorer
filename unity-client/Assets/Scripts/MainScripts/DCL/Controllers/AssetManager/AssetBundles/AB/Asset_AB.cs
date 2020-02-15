@@ -47,6 +47,7 @@ namespace DCL
 
         public void CancelShow()
         {
+            Cleanup();
         }
 
         public override void Cleanup()

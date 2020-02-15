@@ -63,6 +63,8 @@ namespace DCL
 
         protected override void OnCancelLoading()
         {
+            DependencyMapLoadHelper.OnCancelLoading(contentUrl, hash);
+
             if (loadCoroutine != null)
             {
                 CoroutineStarter.Stop(loadCoroutine);
@@ -72,6 +74,13 @@ namespace DCL
             if (asset != null)
             {
                 asset.CancelShow();
+            }
+
+            if (assetBundleRequest != null && !assetBundleRequest.isDone)
+            {
+                assetBundleRequest.Abort();
+                assetBundleRequest.Dispose();
+                assetBundleRequest = null;
             }
 
             UnregisterConcurrentRequest();
@@ -106,6 +115,8 @@ namespace DCL
             UnregisterConcurrentRequest();
         }
 
+        UnityWebRequest assetBundleRequest;
+
         IEnumerator LoadAssetBundle(string finalUrl, Action OnSuccess, Action OnFail)
         {
             if (failedRequestUrls.Contains(finalUrl))
@@ -114,7 +125,7 @@ namespace DCL
                 yield break;
             }
 
-            using (UnityWebRequest assetBundleRequest = UnityWebRequestAssetBundle.GetAssetBundle(finalUrl))
+            using (assetBundleRequest = UnityWebRequestAssetBundle.GetAssetBundle(finalUrl))
             {
                 yield return assetBundleRequest.SendWebRequest();
 
@@ -179,20 +190,6 @@ namespace DCL
                         asset.assetsByExtension.Add(ext, new List<UnityEngine.Object>());
 
                     asset.assetsByExtension[ext].Add(loadedAsset);
-
-                    //Debug.Log($"Loading from assetbundle: {loadedAsset.GetType().FullName} ext: {ext}");
-
-                    //if (loadedAsset is GameObject assetGo)
-                    //{
-                    //    foreach (var obj in assetGo.GetComponentsInChildren<MonoBehaviour>(true))
-                    //    {
-                    //        Debug.Log("component is " + obj.GetType().FullName);
-                    //    }
-                    //}
-                    //else if (loadedAsset is Material mat)
-                    //{
-                    //    Debug.Log("Shader hashcode = " + mat.shader.GetHashCode());
-                    //}
 
                     if (limitTimeBudget)
                     {
