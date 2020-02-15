@@ -18,9 +18,9 @@ public class NFTItemToggle : ItemToggle
         OnHideAllInfos += HideInfo;
 
         HideInfo();
-        infoButton.onClick.AddListener(ToggleInfo);
-        closeInfoButton.onClick.AddListener(HideInfo);
-        sellButton.onClick.AddListener(CallOnSellClicked);
+        infoButton?.onClick?.AddListener(ToggleInfo);
+        closeInfoButton?.onClick?.AddListener(HideInfo);
+        sellButton?.onClick?.AddListener(CallOnSellClicked);
     }
 
     public override void Initialize(WearableItem w, bool isSelected, int amount)

@@ -72,10 +72,10 @@ namespace DCL
                 loadingCoroutine = null;
             }
 
-            AssetPromiseKeeper_AB.i.Forget(subPromise);
-
             if (asset != null)
                 GameObject.Destroy(asset.container);
+
+            AssetPromiseKeeper_AB.i.Forget(subPromise);
         }
 
         public IEnumerator LoadingCoroutine(Action OnSuccess, Action OnFail)
