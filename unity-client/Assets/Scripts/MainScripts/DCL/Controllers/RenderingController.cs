@@ -37,6 +37,8 @@ public class RenderingController : MonoBehaviour
         DCLCharacterController.i.SetEnabled(false);
 
         OnRenderingStateChanged?.Invoke(renderingEnabled);
+
+        renderingActivatedAckLock.AddLock(this);
     }
 
     [ContextMenu("Enable Rendering")]

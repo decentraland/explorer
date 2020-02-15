@@ -55,6 +55,7 @@ namespace DCL.Controllers
         private readonly List<string> disposableNotReady = new List<string>();
         private bool flaggedToUnload = false;
         private bool isReleased = false;
+        public bool isReady => state == State.READY;
         private State state = State.NOT_READY;
         public SceneBoundariesChecker boundariesChecker { private set; get; }
 
@@ -1079,6 +1080,9 @@ namespace DCL.Controllers
 
             if (useBlockers)
                 blockerHandler.CleanBlockers();
+
+            if (SceneController.i.currentSceneId == sceneData.id)
+                RenderingController.i.renderingActivatedAckLock.RemoveLock(RenderingController.i);
 
             SceneController.i.SendSceneReady(sceneData.id);
             RefreshName();

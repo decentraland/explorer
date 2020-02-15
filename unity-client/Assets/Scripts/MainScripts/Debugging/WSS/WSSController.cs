@@ -198,7 +198,7 @@ namespace DCL
 
                 if (enableTutorial)
                 {
-                    debugString += "TUTORIAL_ENABLED&";
+                    debugString += "RESET_TUTORIAL&";
                 }
 
                 string debugPanelString = "";

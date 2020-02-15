@@ -38,6 +38,7 @@ public class CharacterPreviewController : MonoBehaviour
 
     private void Awake()
     {
+        RenderingController.i.renderingActivatedAckLock.AddLock(this);
         cameraFocusLookUp = new System.Collections.Generic.Dictionary<CameraFocus, Transform>()
         {
             { CameraFocus.DefaultEditing, defaultEditingTemplate },
