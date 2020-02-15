@@ -82,7 +82,7 @@ namespace DCL
 
             if (success)
             {
-                yield return InstantiateABGameObjects(subPromise.asset.ownerAssetBundle);
+                yield return InstantiateABGameObjects();
 
                 if (subPromise.asset == null || asset.container == null)
                     success = false;
@@ -99,7 +99,7 @@ namespace DCL
         }
 
 
-        public IEnumerator InstantiateABGameObjects(AssetBundle bundle)
+        public IEnumerator InstantiateABGameObjects()
         {
             var goList = subPromise.asset.GetAssetsByExtensions<GameObject>("glb", "ltf");
             renderers.Clear();
@@ -125,7 +125,8 @@ namespace DCL
                 yield return null;
             }
 
-            bundle.Unload(false);
+            if (subPromise.asset.ownerAssetBundle != null)
+                subPromise.asset.ownerAssetBundle.Unload(false);
 
             yield break;
         }
