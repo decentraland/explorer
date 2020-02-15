@@ -5,6 +5,7 @@ export type Catalog = Wearable[]
 export interface Profile {
   userId: string
   name: string
+  hasClaimedName: boolean
   description: string
   email: string
   avatar: Avatar
@@ -12,6 +13,7 @@ export interface Profile {
   inventory: WearableId[]
   blocked: string[]
   version: number
+  tutorialStep: number
 }
 
 export interface Avatar {

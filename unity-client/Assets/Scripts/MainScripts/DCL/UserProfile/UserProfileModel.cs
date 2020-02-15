@@ -26,4 +26,6 @@ public class UserProfileModel
 
     public int tutorialFlagsMask;
     public List<string> blocked;
+    public int tutorialStep;
+    public bool hasClaimedName = false;
 }

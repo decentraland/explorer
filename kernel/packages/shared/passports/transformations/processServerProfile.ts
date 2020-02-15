@@ -39,6 +39,7 @@ export function processServerProfile(userId: string, receivedProfile: any): Prof
     userId,
     email: receivedProfile.email || '',
     name: receivedProfile.name || name,
+    hasClaimedName: !!receivedProfile.name,
     description: receivedProfile.description || '',
     ethAddress: userId || 'noeth',
     version: receivedProfile.avatar.version || 1,
@@ -51,6 +52,7 @@ export function processServerProfile(userId: string, receivedProfile: any): Prof
       snapshots
     },
     inventory: receivedProfile.inventory || [],
-    blocked: receivedProfile.blocked
+    blocked: receivedProfile.blocked,
+    tutorialStep: receivedProfile.tutorialStep
   }
 }

@@ -368,11 +368,13 @@ export async function fetchInventoryItemsByAddress(address: string) {
 
 export function* handleSaveAvatar(saveAvatar: SaveAvatarRequest) {
   const userId = saveAvatar.payload.userId ? saveAvatar.payload.userId : yield select(getCurrentUserId)
+
   try {
     const savedProfile = yield select(getProfile, userId)
     const currentVersion = savedProfile.version || 0
     const url: string = yield select(getUpdateProfileServer)
     const profile = { ...savedProfile, ...saveAvatar.payload.profile }
+
     const result = yield call(modifyAvatar, {
       url,
       userId,
@@ -380,7 +382,9 @@ export function* handleSaveAvatar(saveAvatar: SaveAvatarRequest) {
       identity,
       profile
     })
+
     const { creationTimestamp: version } = result
+
     yield put(saveAvatarSuccess(userId, version, profile))
     yield put(passportRequest(userId))
   } catch (error) {
@@ -468,11 +472,13 @@ export async function modifyAvatar(params: {
 
   let files: ContentFile[] = []
 
-  if (avatar.snapshots) {
-    if (avatar.snapshots.face.startsWith('data') && avatar.snapshots.body.startsWith('data')) {
+  const snapshots = avatar.snapshots || (profile as any).snapshots
+  if (snapshots) {
+    if (snapshots.face && snapshots.face.startsWith('data') && snapshots.body && snapshots.body.startsWith('data')) {
       // replace base64 snapshots with their respective hashes
-      const faceFile: ContentFile = await makeContentFile('./face.png', base64ToBlob(avatar.snapshots.face))
-      const bodyFile: ContentFile = await makeContentFile('./body.png', base64ToBlob(avatar.snapshots.body))
+      const faceFile: ContentFile = await makeContentFile('./face.png', base64ToBlob(snapshots.face))
+      const bodyFile: ContentFile = await makeContentFile('./body.png', base64ToBlob(snapshots.body))
+
       const faceFileHash: string = await calculateBufferHash(faceFile.content)
       const bodyFileHash: string = await calculateBufferHash(bodyFile.content)
       newAvatar.snapshots = {
@@ -482,12 +488,11 @@ export async function modifyAvatar(params: {
       files = [faceFile, bodyFile]
     } else {
       newAvatar.snapshots = {
-        face: avatar.snapshots.face.split('/').pop()!,
-        body: avatar.snapshots.body.split('/').pop()!
+        face: snapshots.face.split('/').pop()!,
+        body: snapshots.body.split('/').pop()!
       }
     }
   }
-
   const newProfile = ensureServerFormat({ ...profile, avatar: newAvatar }, currentVersion)
 
   const [data] = await buildDeployData(
