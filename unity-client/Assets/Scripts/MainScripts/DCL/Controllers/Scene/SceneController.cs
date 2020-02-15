@@ -163,6 +163,14 @@ namespace DCL
                 }
             }
 
+            if (!string.IsNullOrEmpty(currentSceneId))
+            {
+                if (TryGetScene(currentSceneId, out ParcelScene scene) && scene.isReady)
+                {
+                    RenderingController.i.renderingActivatedAckLock.RemoveLock(this);
+                }
+            }
+
             CommonScriptableObjects.sceneID.Set(currentSceneId);
 
             OnSortScenes?.Invoke();
