@@ -162,7 +162,9 @@ export class ChatController extends ExposableAPI implements IChatController {
         } else if (message.trim().toLowerCase() === 'crowd') {
           response = `Teleporting to a crowd of people in current realm...`
 
-          TeleportController.goToCrowd().then(({ message, success }) => this.notifyStatusTroughChat(message))
+          TeleportController.goToCrowd().then(({ message, success }) => this.notifyStatusTroughChat(message), () => {
+            // Do nothing. This is handled inside controller
+          })
         } else {
           response = 'Could not recognize the coordinates provided. Example usage: /goto 42,42'
         }
