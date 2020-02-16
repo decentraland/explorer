@@ -197,22 +197,24 @@ export async function changeToCrowdedRealm(): Promise<[boolean, Realm]> {
 
   let crowdedRealm: RealmPeople = { realm: currentRealm, closePeople: 0 }
 
-  candidates.forEach(candidate => {
-    if (candidate.layer.usersParcels) {
-      let closePeople = countParcelsCloseTo(currentPosition, candidate.layer.usersParcels, 4)
-      // If it is the realm of the player, we substract 1 to not count ourselves
-      if (candidate.catalystName === currentRealm.catalystName && candidate.layer.name === currentRealm.layer) {
-        closePeople -= 1
-      }
+  candidates
+    .filter(it => it.layer.usersParcels && it.layer.usersParcels.length > 0 && it.layer.usersCount < it.layer.maxUsers)
+    .forEach(candidate => {
+      if (candidate.layer.usersParcels) {
+        let closePeople = countParcelsCloseTo(currentPosition, candidate.layer.usersParcels, 4)
+        // If it is the realm of the player, we substract 1 to not count ourselves
+        if (candidate.catalystName === currentRealm.catalystName && candidate.layer.name === currentRealm.layer) {
+          closePeople -= 1
+        }
 
-      if (closePeople > crowdedRealm.closePeople) {
-        crowdedRealm = {
-          realm: candidateToRealm(candidate),
-          closePeople
+        if (closePeople > crowdedRealm.closePeople) {
+          crowdedRealm = {
+            realm: candidateToRealm(candidate),
+            closePeople
+          }
         }
       }
-    }
-  })
+    })
 
   if (!deepEqual(crowdedRealm.realm, currentRealm)) {
     store.dispatch(setCatalystRealm(crowdedRealm.realm))

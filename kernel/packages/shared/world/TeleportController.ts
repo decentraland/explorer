@@ -1,9 +1,10 @@
-import { teleportObservable } from 'shared/world/positionThings'
+import { teleportObservable, lastPlayerPosition } from 'shared/world/positionThings'
 import { getFromLocalStorage, saveToLocalStorage } from 'atomicHelpers/localStorage'
 import { POIs } from 'shared/comms/POIs'
 import { parcelLimits } from 'config'
 import { fetchLayerUsersParcels } from 'shared/comms'
 import { ParcelArray, countParcelsCloseTo } from 'shared/comms/interface/utils'
+import { worldToGrid } from 'atomicHelpers/parcelScenePositions'
 import defaultLogger from 'shared/logger'
 
 const CAMPAIGN_PARCEL_SEQUENCE = [
@@ -15,9 +16,6 @@ const CAMPAIGN_PARCEL_SEQUENCE = [
   { x: 60, y: 115 }
 ]
 
-const NOOP = () => {
-  // do nothing
-}
 export class TeleportController {
   public static ensureTeleportAnimation() {
     document
@@ -44,24 +42,35 @@ export class TeleportController {
     return TeleportController.goTo(parseInt('' + x, 10), parseInt('' + y, 10), tpMessage)
   }
 
-  public static goToCrowd(): { message: string; success: boolean } {
-    const message: string = `Teleporting to a crowd of people in current realm...`
-    const promise = (async function() {
-      const usersParcels = await fetchLayerUsersParcels()
+  public static async goToCrowd(): Promise<{ message: string; success: boolean }> {
+    try {
+      let usersParcels = await fetchLayerUsersParcels()
+
+      const currentParcel = worldToGrid(lastPlayerPosition)
+
+      usersParcels = usersParcels.filter(it => currentParcel.x !== it[0] && currentParcel.y !== it[1])
 
       if (usersParcels.length > 0) {
         // Sorting from most close users
-        const target = usersParcels
+        const [target, closeUsers] = usersParcels
           .map(it => [it, countParcelsCloseTo(it, usersParcels)] as [ParcelArray, number])
-          .sort(([_, score1], [__, score2]) => score2 - score1)[0][0]
+          .sort(([_, score1], [__, score2]) => score2 - score1)[0]
 
-        TeleportController.goTo(target[0], target[1], message)
+        return TeleportController.goTo(
+          target[0],
+          target[1],
+          `Found a parcel with ${closeUsers} user(s) nearby: ${target[0]},${target[1]}. Teleporting...`
+        )
+      } else {
+        return { message: 'There seems to be no users in other parcels at the current realm. Could not teleport.', success: false }
       }
-    })()
-
-    promise.then(NOOP, e => defaultLogger.log('Error teleporting to crowd', e))
-
-    return { message, success: true }
+    } catch (e) {
+      defaultLogger.error('Error while trying to teleport to crowd', e)
+      return {
+        message: 'Could not teleport to crowd! Could not get information about other users in the realm',
+        success: false
+      }
+    }
   }
 
   public static goToRandom(): { message: string; success: boolean } {

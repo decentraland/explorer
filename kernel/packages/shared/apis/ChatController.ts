@@ -160,7 +160,9 @@ export class ChatController extends ExposableAPI implements IChatController {
         } else if (message.trim().toLowerCase() === 'next') {
           response = TeleportController.goToNext().message
         } else if (message.trim().toLowerCase() === 'crowd') {
-          response = TeleportController.goToCrowd().message
+          response = `Teleporting to a crowd of people in current realm...`
+
+          TeleportController.goToCrowd().then(({ message, success }) => this.notifyStatusTroughChat(message))
         } else {
           response = 'Could not recognize the coordinates provided. Example usage: /goto 42,42'
         }
@@ -188,12 +190,17 @@ export class ChatController extends ExposableAPI implements IChatController {
           ([changed, realm]) => {
             // TODO: This status should be shown in the chat window
             if (changed) {
-              defaultLogger.log('Sucessfully changed to realm', realm)
+              this.notifyStatusTroughChat(
+                `Found a crowded realm to join. Welcome to the realm ${realm.catalystName}-${realm.layer}!`
+              )
             } else {
-              defaultLogger.log('Already on most crowded realm')
+              this.notifyStatusTroughChat(`Could not join realm. Maybe the realm is full?`)
             }
           },
-          e => defaultLogger.error('Error getting to crowded realm', e)
+          e => {
+            this.notifyStatusTroughChat(`Could not join realm. Please join another realm to ensure communications.`)
+            defaultLogger.error(`Error joining realm ${realmString}`, e)
+          }
         )
       } else {
         const realm = changeRealm(realmString)
@@ -202,8 +209,16 @@ export class ChatController extends ExposableAPI implements IChatController {
           response = `Changing to Realm ${realm.catalystName}-${realm.layer}...`
           // TODO: This status should be shown in the chat window
           catalystRealmConnected().then(
-            () => defaultLogger.log('Sucessfully connected to realm', realm),
-            e => defaultLogger.error('Error joining realm', realm, e)
+            () =>
+              this.notifyStatusTroughChat(
+                `Changed realm successfuly. Welcome to the realm ${realm.catalystName}-${realm.layer}!`
+              ),
+            e => {
+              this.notifyStatusTroughChat(
+                `Could not join realm. Maybe the realm is full? Please join another realm to ensure communications.`
+              )
+              defaultLogger.error('Error joining crowded realm', e)
+            }
           )
         } else {
           response = `Couldn't find realm ${realmString}`
@@ -367,6 +382,19 @@ export class ChatController extends ExposableAPI implements IChatController {
             .map(name => `\t/${name}: ${this.chatCommands[name].description}`)
             .concat('\t/help: Show this list of commands')
             .join('\n')}`
+      }
+    })
+  }
+
+  // @internal
+  private notifyStatusTroughChat(status: string) {
+    chatObservable.notifyObservers({
+      type: ChatEvent.MESSAGE_RECEIVED,
+      messageEntry: {
+        id: uuid(),
+        isCommand: true,
+        sender: 'Decentraland',
+        message: status
       }
     })
   }
