@@ -15,9 +15,15 @@ namespace DCL.Tutorial
         const string CLAIM_NAME_URL = "http://avatars.decentraland.org/?redirect_after_claim=https://explorer.decentraland.org";
 
         AvatarEditorHUDController avatarEditorHUD = null;
+        MouseCatcher mouseCatcher;
         bool claimNamePanelClosed = false;
         bool characterMoved = false;
         bool characterTeleported = false;
+
+        void Awake()
+        {
+            mouseCatcher = FindObjectOfType<MouseCatcher>();
+        }
 
         public override void OnStepStart()
         {
@@ -32,6 +38,8 @@ namespace DCL.Tutorial
 
             if (HUDController.i != null && HUDController.i.avatarEditorHud != null)
             {
+                mouseCatcher.UnlockCursor();
+
                 avatarEditorHUD = HUDController.i.avatarEditorHud;
                 avatarEditorHUD.SetVisibility(true);
                 avatarEditorHUD.OnVisibilityChanged += OnAvatarEditorVisibilityChanged;
