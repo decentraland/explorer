@@ -12,7 +12,7 @@ namespace DCL.Tutorial
         [SerializeField] TutorialTooltip minimapTooltip = null;
         [SerializeField] GameObject claimNamePanel = null;
 
-        const string CLAIM_NAME_URL = "http://avatars.decentraland.zone/?redirect_after_claim=https://explorer.decentraland.zone/branch/test/tutorialClaimNameFlow/index.html";
+        const string CLAIM_NAME_URL = "http://avatars.decentraland.zone/avatar/?redirect_after_claim=https://explorer.decentraland.zone/branch/test/tutorialClaimNameFlow/index.html";
 
         AvatarEditorHUDController avatarEditorHUD = null;
         bool claimNamePanelClosed = false;
