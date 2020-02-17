@@ -45,8 +45,6 @@ namespace DCL
 
                     if (nameToShader.ContainsKey(shaderName))
                     {
-                        //Debug.Log("recycling shader " + shaderName);
-                        //Object.DestroyImmediate(mat.shader, true);
                         mat.shader = nameToShader[shaderName];
                     }
                     else
