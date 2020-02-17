@@ -353,6 +353,9 @@ TextureImporter:
   - first:
       213: 5392484295003101810
     second: SecondaryButton
+  - first:
+      213: 6438661715621639179
+    second: ChatBg
   externalObjects: {}
   serializedVersion: 10
   mipmaps:
@@ -411,7 +414,7 @@ TextureImporter:
   platformSettings:
   - serializedVersion: 2
     buildTarget: DefaultTexturePlatform
-    maxTextureSize: 1024
+    maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
     textureCompression: 0
@@ -422,7 +425,7 @@ TextureImporter:
     androidETC2FallbackOverride: 0
   - serializedVersion: 2
     buildTarget: Standalone
-    maxTextureSize: 1024
+    maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
     textureCompression: 0
@@ -433,7 +436,7 @@ TextureImporter:
     androidETC2FallbackOverride: 0
   - serializedVersion: 2
     buildTarget: WebGL
-    maxTextureSize: 1024
+    maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
     textureCompression: 0
@@ -912,7 +915,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 726
-        y: 420
+        y: 446
         width: 33
         height: 32
       alignment: 0
@@ -1163,10 +1166,10 @@ TextureImporter:
       name: sign-out-icon
       rect:
         serializedVersion: 2
-        x: 165
-        y: 403
-        width: 30
-        height: 30
+        x: 164
+        y: 402
+        width: 31
+        height: 31
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
