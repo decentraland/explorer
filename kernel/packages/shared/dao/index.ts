@@ -128,11 +128,6 @@ export function pickCatalystRealm(candidates: Candidate[]): Realm {
     })
 
   if (sorted.length === 0 && candidates.length > 0) {
-    // This error is highly unlikely, but it could eventually happen. We may want to keep retrying or refreshing.
-    // For now, we refresh the whole explorer.
-
-    location.reload()
-
     throw new Error('No available realm found!')
   }
 
