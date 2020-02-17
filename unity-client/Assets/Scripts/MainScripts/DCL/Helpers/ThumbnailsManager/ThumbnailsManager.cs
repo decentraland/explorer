@@ -133,6 +133,7 @@ public static class ThumbnailsManager
             loadedSprites.Remove(url);
             if (sprite != null)
             {
+                UnityEngine.Object.Destroy(sprite.texture);
                 UnityEngine.Object.Destroy(sprite);
             }
         }
