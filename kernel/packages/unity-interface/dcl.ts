@@ -187,7 +187,8 @@ const browserInterface = {
   },
 
   SaveUserAvatar({ face, body, avatar }: { face: string; body: string; avatar: Avatar }) {
-    global.globalStore.dispatch(saveAvatarRequest({ avatar: { ...avatar, snapshots: { face, body } } }))
+    const profile: Profile = getUserProfile().profile as Profile
+    global.globalStore.dispatch(saveAvatarRequest({ ...profile, avatar: { ...avatar, snapshots: { face, body } } }))
   },
 
   SaveUserTutorialStep(data: { tutorialStep: number }) {

@@ -475,23 +475,24 @@ export async function modifyAvatar(params: {
 
   const snapshots = avatar.snapshots || (profile as any).snapshots
   if (snapshots) {
-    if (snapshots.face && snapshots.face.startsWith('data') && snapshots.body && snapshots.body.startsWith('data')) {
+    if (snapshots.face.includes('://') && snapshots.body.includes('://')) {
+      newAvatar.snapshots = {
+        face: snapshots.face.split('/').pop()!,
+        body: snapshots.body.split('/').pop()!
+      }
+    } else {
       // replace base64 snapshots with their respective hashes
       const faceFile: ContentFile = await makeContentFile('./face.png', base64ToBlob(snapshots.face))
       const bodyFile: ContentFile = await makeContentFile('./body.png', base64ToBlob(snapshots.body))
 
       const faceFileHash: string = await calculateBufferHash(faceFile.content)
       const bodyFileHash: string = await calculateBufferHash(bodyFile.content)
+
       newAvatar.snapshots = {
         face: faceFileHash,
         body: bodyFileHash
       }
       files = [faceFile, bodyFile]
-    } else {
-      newAvatar.snapshots = {
-        face: snapshots.face.split('/').pop()!,
-        body: snapshots.body.split('/').pop()!
-      }
     }
   }
   const newProfile = ensureServerFormat({ ...profile, avatar: newAvatar }, currentVersion)
