@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using DCL.Interface;
+using DCL.Helpers;
 
 namespace DCL.Tutorial
 {
@@ -15,15 +16,11 @@ namespace DCL.Tutorial
         const string CLAIM_NAME_URL = "http://avatars.decentraland.org/avatar/?redirect_after_claim=https://explorer.decentraland.org";
 
         AvatarEditorHUDController avatarEditorHUD = null;
-        MouseCatcher mouseCatcher;
+
         bool claimNamePanelClosed = false;
         bool characterMoved = false;
         bool characterTeleported = false;
 
-        void Awake()
-        {
-            mouseCatcher = FindObjectOfType<MouseCatcher>();
-        }
 
         public override void OnStepStart()
         {
@@ -38,7 +35,7 @@ namespace DCL.Tutorial
 
             if (HUDController.i != null && HUDController.i.avatarEditorHud != null)
             {
-                mouseCatcher.UnlockCursor();
+                Utils.UnlockCursor();
 
                 avatarEditorHUD = HUDController.i.avatarEditorHud;
                 avatarEditorHUD.SetVisibility(true);
