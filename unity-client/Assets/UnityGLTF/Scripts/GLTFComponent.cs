@@ -392,8 +392,6 @@ namespace UnityGLTF
             }
 
             DecrementDownloadCount();
-            if (loader != null)
-                loader.Dispose();
         }
     }
 }
