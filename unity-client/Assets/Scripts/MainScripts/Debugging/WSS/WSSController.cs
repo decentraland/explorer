@@ -1,4 +1,4 @@
-using DCL.Components;
+﻿using DCL.Components;
 using DCL.Interface;
 using System.Collections.Generic;
 using UnityEngine;
@@ -129,6 +129,7 @@ namespace DCL
         public bool forceLocalComms = true;
         public bool allWearables = false;
         public bool testWearables = false;
+        public bool enableTutorial = false;
         public DebugPanel debugPanelMode = DebugPanel.Off;
 
 
@@ -193,6 +194,11 @@ namespace DCL
                 if (testWearables)
                 {
                     debugString += "TEST_WEARABLES&";
+                }
+
+                if (enableTutorial)
+                {
+                    debugString += "RESET_TUTORIAL&";
                 }
 
                 string debugPanelString = "";
@@ -387,14 +393,35 @@ namespace DCL
                             case "ConfigureExpressionsHUD":
                                 HUDController.i.ConfigureExpressionsHUD(msg.payload);
                                 break;
+                            case "ConfigureWelcomeHUD":
+                                HUDController.i.ConfigureWelcomeHUD(msg.payload);
+                                break;
                             case "UpdateMinimapSceneInformation":
                                 MinimapMetadataController.i?.UpdateMinimapSceneInformation(msg.payload);
                                 break;
                             case "ConfigureSettingsHUD":
                                 HUDController.i.ConfigureSettingsHUD(msg.payload);
                                 break;
+                            case "SetTutorialEnabled":
+                                DCL.Tutorial.TutorialController.i?.SetTutorialEnabled();
+                                break;
                             case "TriggerSelfUserExpression":
                                 HUDController.i.TriggerSelfUserExpression(msg.payload);
+                                break;
+                            case "ConfigureAirdroppingHUD":
+                                HUDController.i.ConfigureAirdroppingHUD(msg.payload);
+                                break;
+                            case "AirdroppingRequest":
+                                HUDController.i.AirdroppingRequest(msg.payload);
+                                break;
+                            case "ShowWelcomeNotification":
+                                HUDController.i.ShowWelcomeNotification();
+                                break;
+                            case "ConfigureTermsOfServiceHUD":
+                                HUDController.i.ConfigureTermsOfServiceHUD(msg.payload);
+                                break;
+                            case "ShowTermsOfServices":
+                                HUDController.i.ShowTermsOfServices(msg.payload);
                                 break;
                             default:
                                 Debug.Log("<b><color=#FF0000>WSSController:</color></b> received an unknown message from kernel to renderer: " + msg.type);

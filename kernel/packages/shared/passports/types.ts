@@ -5,18 +5,15 @@ export type Catalog = Wearable[]
 export interface Profile {
   userId: string
   name: string
+  hasClaimedName: boolean
   description: string
   email: string
   avatar: Avatar
   ethAddress: string | undefined
   inventory: WearableId[]
-  snapshots: {
-    face: string
-    body: string
-  }
+  blocked: string[]
   version: number
-  updatedAt: number
-  createdAt: number
+  tutorialStep: number
 }
 
 export interface Avatar {
@@ -25,11 +22,12 @@ export interface Avatar {
   hairColor: ColorString
   eyeColor: ColorString
   wearables: WearableId[]
-  snapshots?: {
+  snapshots: {
     face: string
     body: string
   }
 }
+
 export interface ProfileForRenderer {
   userId: string
   name: string
@@ -43,8 +41,6 @@ export interface ProfileForRenderer {
     body: string
   }
   version: number
-  updatedAt: number
-  createdAt: number
 }
 
 export interface AvatarForRenderer {
@@ -102,6 +98,7 @@ export type PassportState = {
 export type RootPassportState = {
   passports: PassportState
 }
+
 export const INITIAL_PASSPORTS: PassportState = {
   profileServer: '',
   userInfo: {},

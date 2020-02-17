@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using DCL.SettingsHUD;
 
@@ -17,6 +18,9 @@ public class HUDController : MonoBehaviour
     public SettingsHUDController settingsHud { get; private set; }
     public ExpressionsHUDController expressionsHud { get; private set; }
     public PlayerInfoCardHUDController playerInfoCardHudController { get; private set; }
+    public WelcomeHUDController welcomeHudController { get; private set; }
+    public AirdroppingHUDController airdroppingHUDController { get; private set; }
+    public TermsOfServiceHUDController termsOfServiceHUDController { get; private set; }
 
     private UserProfile ownUserProfile => UserProfile.GetOwnUserProfile();
     private WearableDictionary wearableCatalog => CatalogController.wearableCatalog;
@@ -116,9 +120,6 @@ public class HUDController : MonoBehaviour
 
     public void ConfigureExpressionsHUD(string configurationJson)
     {
-        if(!UserProfile.ENABLE_EXPRESSIONS)
-            return;
-
         HUDConfiguration configuration = JsonUtility.FromJson<HUDConfiguration>(configurationJson);
         if (configuration.active && expressionsHud == null)
         {
@@ -144,6 +145,77 @@ public class HUDController : MonoBehaviour
         playerInfoCardHudController?.SetVisibility(configuration.active && configuration.visible);
     }
 
+    public void ConfigureWelcomeHUD(string configurationJson)
+    {
+        WelcomeHUDController.Model configuration = JsonUtility.FromJson<WelcomeHUDController.Model>(configurationJson);
+
+        if (configuration.active && welcomeHudController == null)
+        {
+            welcomeHudController = new WelcomeHUDController();
+            welcomeHudController.Initialize(configuration);
+        }
+
+        welcomeHudController?.SetVisibility(configuration.active && configuration.visible);
+    }
+
+    public void ConfigureAirdroppingHUD(string configurationJson)
+    {
+        HUDConfiguration configuration = JsonUtility.FromJson<HUDConfiguration>(configurationJson);
+        if (configuration.active && airdroppingHUDController == null)
+        {
+            airdroppingHUDController = new AirdroppingHUDController();
+        }
+
+        airdroppingHUDController?.SetVisibility(configuration.active && configuration.visible);
+    }
+
+    const int NOTIFICATION_DURATION = 5;
+
+    public void ShowWelcomeNotification()
+    {
+        string notificationText = $"Welcome, {UserProfile.GetOwnUserProfile().userName}!";
+        Vector2Int currentCoords = CommonScriptableObjects.playerCoords.Get();
+        string parcelName = MinimapMetadata.GetMetadata().GetTile(currentCoords.x, currentCoords.y)?.name;
+
+        if (!string.IsNullOrEmpty(parcelName))
+        {
+            notificationText += $" You are in {parcelName} {currentCoords.x}, {currentCoords.y}";
+        }
+
+        NotificationModel model = new NotificationModel()
+        {
+            message = notificationText,
+            scene = "",
+            type = NotificationModel.NotificationType.GENERIC_WITHOUT_BUTTON,
+            timer = NOTIFICATION_DURATION
+        };
+
+        notificationHud.ShowNotification(model);
+    }
+
+    public void AirdroppingRequest(string payload)
+    {
+        var model = JsonUtility.FromJson<AirdroppingHUDController.Model>(payload);
+        airdroppingHUDController.AirdroppingRequested(model);
+    }
+
+    public void ConfigureTermsOfServiceHUD(string configurationJson)
+    {
+        HUDConfiguration configuration = JsonUtility.FromJson<HUDConfiguration>(configurationJson);
+        if (configuration.active && termsOfServiceHUDController == null)
+        {
+            termsOfServiceHUDController = new TermsOfServiceHUDController();
+        }
+
+        termsOfServiceHUDController?.SetVisibility(configuration.active && configuration.visible);
+    }
+
+    public void ShowTermsOfServices(string payload)
+    {
+        var model = JsonUtility.FromJson<TermsOfServiceHUDController.Model>(payload);
+        termsOfServiceHUDController?.ShowTermsOfService(model);
+    }
+
     private void UpdateAvatarHUD()
     {
         avatarHud?.UpdateData(new AvatarHUDModel()
@@ -158,6 +230,7 @@ public class HUDController : MonoBehaviour
     {
         if (ownUserProfile != null)
             ownUserProfile.OnUpdate -= OwnUserProfileUpdated;
+
         if (avatarHud != null)
         {
             avatarHud.OnEditAvatarPressed -= ShowAvatarEditor;
@@ -167,8 +240,11 @@ public class HUDController : MonoBehaviour
         minimapHud?.Dispose();
         notificationHud?.Dispose();
         avatarEditorHud?.Dispose();
+        expressionsHud?.Dispose();
+        playerInfoCardHudController?.Dispose();
+        welcomeHudController?.Dispose();
     }
-    
+
 #if UNITY_EDITOR
     [ContextMenu("Trigger fake PlayerInfoCard")]
     public void TriggerFakePlayerInfoCard()
@@ -176,7 +252,7 @@ public class HUDController : MonoBehaviour
         var newModel = ownUserProfile.CloneModel();
         newModel.name = "FakePassport";
         newModel.description = "Fake Description for Testing";
-        newModel.inventory = new []
+        newModel.inventory = new[]
         {
             "dcl://halloween_2019/machete_headband_top_head",
             "dcl://halloween_2019/bee_suit_upper_body",

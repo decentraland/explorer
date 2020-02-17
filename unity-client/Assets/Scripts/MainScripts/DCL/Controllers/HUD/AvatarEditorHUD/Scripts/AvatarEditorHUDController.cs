@@ -23,6 +23,8 @@ public class AvatarEditorHUDController : IDisposable, IHUD
 
     protected AvatarEditorHUDView view;
 
+    public Action<bool> OnVisibilityChanged;
+
     public AvatarEditorHUDController(UserProfile userProfile, WearableDictionary catalog, bool bypassUpdateAvatarPreview = false)
     {
         this.userProfile = userProfile;
@@ -65,6 +67,8 @@ public class AvatarEditorHUDController : IDisposable, IHUD
         {
             return;
         }
+    
+        view.SetIsWeb3(userProfile.hasConnectedWeb3);
 
         ProcessCatalog(this.catalog);
         EquipBodyShape(bodyShape);
@@ -365,6 +369,7 @@ public class AvatarEditorHUDController : IDisposable, IHUD
     public void SetVisibility(bool visible)
     {
         view.SetVisibility(visible);
+        OnVisibilityChanged?.Invoke(visible);
     }
 
     public void Dispose()
@@ -399,5 +404,15 @@ public class AvatarEditorHUDController : IDisposable, IHUD
     {
         LoadUserProfile(userProfile);
         SetVisibility(false);
+    }
+
+    public void GoToMarketplace()
+    {
+        WebInterface.OpenURL("https://market.decentraland.org/browse?section=wearables");
+    }
+
+    public void SellCollectible(string collectibleId)
+    {
+        WebInterface.OpenURL("https://market.decentraland.org/account");
     }
 }

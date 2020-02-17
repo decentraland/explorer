@@ -1,5 +1,5 @@
 import { ProfileForRenderer } from 'decentraland-ecs/src'
-import { AuthIdentity } from '../../crypto/Authenticator'
+import { AuthIdentity } from 'dcl-crypto'
 
 export enum AvatarMessageType {
   // Networking related messages
@@ -128,3 +128,19 @@ export type ChatMessage = {
 }
 
 export type BusMessage = ChatMessage
+
+export class IdTakenError extends Error {
+  constructor(message: string) {
+    super(message)
+  }
+}
+export class ConnectionEstablishmentError extends Error {
+  constructor(message: string) {
+    super(message)
+  }
+}
+export class UnknownCommsModeError extends Error {
+  constructor(message: string) {
+    super(message)
+  }
+}

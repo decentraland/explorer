@@ -1,6 +1,5 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -13,15 +12,8 @@ namespace UnityGLTF.Loader
 {
     public class WebRequestLoader : ILoader
     {
-        class DataContainer
-        {
-            public byte[] data;
-        }
-
         public Stream LoadedStream { get; private set; }
         public bool HasSyncLoadMethod { get; private set; }
-
-        private List<DataContainer> dataContainers = new List<DataContainer>();
 
         public delegate void WebRequestLoaderEventAction(ref string requestFileName);
         public event WebRequestLoaderEventAction OnLoadStreamStart;
@@ -69,40 +61,31 @@ namespace UnityGLTF.Loader
                 finalUrl = Path.Combine(rootUri, httpRequestPath);
             }
 
-            using (UnityWebRequest www = new UnityWebRequest(finalUrl, "GET", new DownloadHandlerBuffer(), null))
-            {
+            UnityWebRequest www = new UnityWebRequest(finalUrl, "GET", new DownloadHandlerBuffer(), null);
 
-                www.timeout = 5000;
+            www.timeout = 5000;
 #if UNITY_2017_2_OR_NEWER
-                yield return www.SendWebRequest();
+            yield return www.SendWebRequest();
 #else
             yield return www.Send();
 #endif
-                if ((int)www.responseCode >= 400)
-                {
-                    Debug.LogError($"{www.responseCode} - {www.url}");
-                    yield break;
-                }
-
-                if (www.downloadedBytes > int.MaxValue)
-                {
-                    Debug.LogError("Stream is larger than can be copied into byte array");
-                    yield break;
-                }
-
-                //NOTE(Brian): DownloadHandler.data provokes a copy of the actual data. Resulting in big GC hiccups.
-                //             https://docs.unity3d.com/ScriptReference/Networking.DownloadHandlerBuffer.html
-                DataContainer data = new DataContainer() { data = www.downloadHandler.data };
-                LoadedStream = new MemoryStream(data.data, 0, data.data.Length, true, true);
-
-                dataContainers.Add(data);
+            if ((int)www.responseCode >= 400)
+            {
+                Debug.LogError($"{www.responseCode} - {www.url}");
+                yield break;
             }
-        }
 
+            if (www.downloadedBytes > int.MaxValue)
+            {
+                Debug.LogError("Stream is larger than can be copied into byte array");
+                yield break;
+            }
 
-        public void Dispose()
-        {
-            dataContainers.Clear();
+            //NOTE(Brian): Caution, www.downloadHandler.data returns a COPY of the data, if accessed twice,
+            //             2 copies will be performed for the entire file (and then discarded by GC, introducing hiccups).
+            //             The correct fix is by using DownloadHandler.ReceiveData. But this is in version > 2019.3.
+            byte[] data = www.downloadHandler.data;
+            LoadedStream = new MemoryStream(data, 0, data.Length, true, true);
         }
     }
 }

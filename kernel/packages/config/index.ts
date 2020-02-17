@@ -1,3 +1,6 @@
+import { getUserProfile } from 'shared/comms/peers'
+import { tutorialStepId } from '../decentraland-loader/lifecycle/tutorial/tutorial'
+const queryString = require('query-string')
 declare var window: any
 
 export const performanceConfigurations = [
@@ -92,13 +95,17 @@ export const STATIC_WORLD = location.search.indexOf('STATIC_WORLD') !== -1 || !!
 export const ENABLE_WEB3 = location.search.indexOf('ENABLE_WEB3') !== -1 || !!(global as any).enableWeb3
 export const ENV_OVERRIDE = location.search.indexOf('ENV') !== -1
 
+const qs = queryString.parse(location.search)
+
 // Comms
 export const USE_LOCAL_COMMS = location.search.indexOf('LOCAL_COMMS') !== -1 || PREVIEW
-export const COMMS = USE_LOCAL_COMMS
-  ? 'v1-local'
-  : location.search.indexOf('COMMS') !== -1
-  ? window.location.search.match(/COMMS=(\w+-\w+)/)[1]
-  : 'v2-p2p' // by default
+export const COMMS = USE_LOCAL_COMMS ? 'v1-local' : qs.COMMS ? qs.COMMS : 'v2-p2p' // by default
+
+export const FETCH_PROFILE_SERVICE = qs.FETCH_PROFILE_SERVICE
+export const UPDATE_CONTENT_SERVICE = qs.UPDATE_CONTENT_SERVICE
+export const FETCH_CONTENT_SERVICE = qs.FETCH_CONTENT_SERVICE
+export const COMMS_SERVICE = qs.COMMS_SERVICE
+export const REALM = qs.realm
 
 export const DEBUG =
   location.search.indexOf('DEBUG_MODE') !== -1 ||
@@ -114,11 +121,22 @@ export const DEBUG_REDUX = location.search.indexOf('DEBUG_REDUX') !== -1
 export const DEBUG_LOGIN = location.search.indexOf('DEBUG_LOGIN') !== -1
 
 export const AWS = location.search.indexOf('AWS') !== -1
+export const NO_MOTD = location.search.indexOf('NO_MOTD') !== -1
 
 export const DISABLE_AUTH = location.search.indexOf('DISABLE_AUTH') !== -1 || DEBUG
 export const ENGINE_DEBUG_PANEL = location.search.indexOf('ENGINE_DEBUG_PANEL') !== -1
 export const SCENE_DEBUG_PANEL = location.search.indexOf('SCENE_DEBUG_PANEL') !== -1 && !ENGINE_DEBUG_PANEL
 export const SHOW_FPS_COUNTER = location.search.indexOf('SHOW_FPS_COUNTER') !== -1 || DEBUG
+export const RESET_TUTORIAL = location.search.indexOf('RESET_TUTORIAL') !== -1
+export const NO_TUTORIAL = location.search.indexOf('NO_TUTORIAL') !== -1
+
+export function tutorialEnabled() {
+  return (
+    !NO_TUTORIAL &&
+    WORLD_EXPLORER &&
+    (RESET_TUTORIAL || getUserProfile().profile.tutorialStep !== tutorialStepId.FINISHED)
+  )
+}
 
 export namespace commConfigurations {
   export const debug = true
@@ -140,6 +158,11 @@ export namespace commConfigurations {
     },
     {
       urls: 'stun:stun4.l.google.com:19302'
+    },
+    {
+      urls: 'turn:stun.decentraland.org:3478',
+      credential: 'passworddcl',
+      username: 'usernamedcl'
     }
   ]
 }
@@ -181,7 +204,7 @@ export function getTLD() {
 
 export const knownTLDs = ['zone', 'org', 'today']
 
-function getDefaultTLD() {
+export function getDefaultTLD() {
   const TLD = getTLD()
   if (ENV_OVERRIDE) {
     return TLD
@@ -224,37 +247,23 @@ export function getLoginConfigurationForCurrentDomain() {
 
 export const ENABLE_EMPTY_SCENES = !DEBUG || knownTLDs.includes(getTLD())
 
+export function getWearablesSafeURL() {
+  return 'https://content.decentraland.org'
+}
+
 export function getServerConfigurations() {
   const TLDDefault = getDefaultTLD()
   return {
-    auth: `https://auth.decentraland.${TLDDefault}/api/v1`,
-    landApi: `https://api.decentraland.${TLDDefault}/v1`,
-    content: AWS
-      ? `https://content.decentraland.${TLDDefault === 'today' ? 'org' : TLDDefault}`
-      : `https://bot1-katalyst.decentraland.zone/lambdas/contentv2`,
-    contentUpdate: `https://katalyst-content.decentraland.zone`,
     contentAsBundle: `https://content-assets-as-bundle.decentraland.org`,
-    worldInstanceUrl: `wss://world-comm.decentraland.${TLDDefault}/connect`,
-    comms: {
-      lighthouse: {
-        server: 'https://katalyst-comms-relay.decentraland.zone',
-        p2p: 'https://katalyst-comms-no-relay.decentraland.zone'
-      }
-    },
-    profile: `https://katalyst-lambdas.decentraland.zone/profile`,
-    wearablesApi: `https://wearables-api.decentraland.org/v2`,
+    wearablesApi: `https://wearable-api.decentraland.org/v2`,
+    explorerConfiguration: `https://explorer-config.decentraland.${
+      TLDDefault === 'today' ? 'org' : TLDDefault
+    }.s3.amazonaws.com/configuration.json`,
     avatar: {
       snapshotStorage: `https://avatars-storage.decentraland.${TLDDefault}/`,
-      server: `https://avatars-api.decentraland.${TLDDefault === 'zone' ? 'today' : TLDDefault}/`,
       catalog: getExclusiveServer(),
-      contents: `https://s3.amazonaws.com/content-service.decentraland.org/`,
       presets: `https://avatars-storage.decentraland.org/mobile-avatars`
-    },
-    dao: TLDDefault === 'zone' ? '0x89550d8fc174b2ca216f2bd1bc20128413a2ab9d' : 'mainnetaddress',
-    darApi:
-      TLDDefault === 'zone' || TLDDefault === 'today'
-        ? 'https://schema-api-v2.now.sh/dar'
-        : 'https://schema.decentraland.org/dar'
+    }
   }
 }
 
@@ -266,8 +275,14 @@ export async function setNetwork(net: ETHEREUM_NETWORK) {
     network = net
     contracts = json[net]
 
+    contracts['CatalystProxy'] =
+      net === ETHEREUM_NETWORK.MAINNET
+        ? '0x4a2f10076101650f40342885b99b6b101d83c486'
+        : '0xadd085f2318e9678bbb18b3e0711328f902b374b'
+
     decentralandConfigurations = {
       contractAddress: contracts.LANDProxy,
+      dao: contracts.CatalystProxy,
       contracts: {
         serviceLocator: contracts.ServiceLocator
       },
@@ -283,6 +298,7 @@ export async function setNetwork(net: ETHEREUM_NETWORK) {
 
     decentralandConfigurations = {
       contractAddress: '',
+      dao: '',
       contracts: {
         serviceLocator: ''
       },
@@ -295,13 +311,13 @@ export async function setNetwork(net: ETHEREUM_NETWORK) {
 
 export namespace ethereumConfigurations {
   export const mainnet = {
-    wss: 'wss://mainnet.infura.io/ws',
-    http: 'https://mainnet.infura.io/',
+    wss: 'wss://mainnet.infura.io/ws/v3/074a68d50a7c4e6cb46aec204a50cbf0',
+    http: 'https://mainnet.infura.io/v3/074a68d50a7c4e6cb46aec204a50cbf0/',
     etherscan: 'https://etherscan.io'
   }
   export const ropsten = {
-    wss: 'wss://ropsten.infura.io/ws',
-    http: 'https://ropsten.infura.io/',
+    wss: 'wss://ropsten.infura.io/ws/v3/074a68d50a7c4e6cb46aec204a50cbf0',
+    http: 'https://ropsten.infura.io/v3/074a68d50a7c4e6cb46aec204a50cbf0/',
     etherscan: 'https://ropsten.etherscan.io'
   }
 }

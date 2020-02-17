@@ -1,7 +1,7 @@
 import { getFromLocalStorage, saveToLocalStorage } from 'atomicHelpers/localStorage'
 import { call, fork, put, race, select, take, takeEvery, takeLatest, cancel, ForkEffect } from 'redux-saga/effects'
 import { NotificationType } from 'shared/types'
-import { getServerConfigurations, ALL_WEARABLES } from '../../config'
+import { getServerConfigurations, ALL_WEARABLES, getWearablesSafeURL } from '../../config'
 import defaultLogger from '../logger'
 import { isInitialized } from '../renderer/selectors'
 import { RENDERER_INITIALIZED } from '../renderer/types'
@@ -20,7 +20,6 @@ import {
   INVENTORY_SUCCESS,
   notifyNewInventoryItem,
   NOTIFY_NEW_INVENTORY_ITEM,
-  passportRandom,
   PassportRandomAction,
   passportRequest,
   PassportRequestAction,
@@ -33,7 +32,6 @@ import {
   SaveAvatarRequest,
   saveAvatarSuccess,
   SAVE_AVATAR_REQUEST,
-  setProfileServer,
   InventorySuccess
 } from './actions'
 import { generateRandomUserProfile } from './generateRandomUserProfile'
@@ -48,13 +46,16 @@ import {
 import { processServerProfile } from './transformations/processServerProfile'
 import { profileToRendererFormat } from './transformations/profileToRendererFormat'
 import { ensureServerFormat } from './transformations/profileToServerFormat'
-import { Avatar, Catalog, Profile, WearableId, Wearable, Collection } from './types'
+import { Catalog, Profile, WearableId, Wearable, Collection } from './types'
 import { Action } from 'redux'
-import { identity } from '../index'
-import { AuthIdentity, Authenticator, AuthLink } from '../crypto/Authenticator'
+import { identity, ExplorerIdentity } from '../index'
+import { Authenticator, AuthLink } from 'dcl-crypto'
 
 const CID = require('cids')
 import { sha3 } from 'web3x/utils'
+import { CATALYST_REALM_INITIALIZED } from '../dao/actions'
+import { isRealmInitialized, getUpdateProfileServer } from '../dao/selectors'
+import { getUserProfile } from '../comms/peers'
 const multihashing = require('multihashing-async')
 const toBuffer = require('blob-to-buffer')
 
@@ -133,7 +134,9 @@ const takeLatestByUserId = (patternOrChannel: any, saga: any, ...args: any) =>
  * It's *very* important for the renderer to never receive a passport with items that have not been loaded into the catalog.
  */
 export function* passportSaga(): any {
-  yield put(setProfileServer(getServerConfigurations().profile))
+  if (!(yield select(isRealmInitialized))) {
+    yield take(CATALYST_REALM_INITIALIZED)
+  }
   yield takeEvery(RENDERER_INITIALIZED, initialLoad)
 
   yield takeLatest(ADD_CATALOG, handleAddCatalog)
@@ -156,7 +159,7 @@ function takeLatestById<T extends Action>(
   keyFunction: (action: T) => string,
   saga: any,
   ...args: any
-): ForkEffect<never> {
+): ForkEffect {
   return fork(function*() {
     let lastTasks = new Map<any, any>()
     while (true) {
@@ -175,8 +178,8 @@ function takeLatestById<T extends Action>(
 function overrideBaseUrl(wearable: Wearable) {
   return {
     ...wearable,
-    baseUrl: 'https://katalyst-lambdas.decentraland.zone/contentv2/contents/',
-    baseUrlBundles: 'https://content-assets-as-bundle.decentraland.org/contents/'
+    baseUrl: getWearablesSafeURL() + '/contents/',
+    baseUrlBundles: getServerConfigurations().contentAsBundle + '/'
   }
 }
 
@@ -193,8 +196,8 @@ export function* initialLoad() {
     const catalog = collections
       .reduce((flatten, collection) => flatten.concat(collection.wearables), [] as Wearable[])
       .map(overrideBaseUrl)
-    const baseAvatars = catalog.filter((_: Wearable) => !_.tags.includes('exclusive'))
-    const baseExclusive = catalog.filter((_: Wearable) => _.tags.includes('exclusive'))
+    const baseAvatars = catalog.filter((_: Wearable) => _.tags && !_.tags.includes('exclusive'))
+    const baseExclusive = catalog.filter((_: Wearable) => _.tags && _.tags.includes('exclusive'))
     if (!(yield select(isInitialized))) {
       yield take(RENDERER_INITIALIZED)
     }
@@ -208,55 +211,54 @@ export function* initialLoad() {
 export function* handleFetchProfile(action: PassportRequestAction): any {
   const userId = action.payload.userId
   const email = ''
+
+  const currentId = yield select(getCurrentUserId)
+  let profile: any
   try {
     const serverUrl = yield select(getProfileDownloadServer)
     const profiles: { avatars: object[] } = yield call(profileServerRequest, serverUrl, userId)
+
     if (profiles.avatars.length !== 0) {
-      const profile: any = profiles.avatars[0]
-      const currentId = yield select(getCurrentUserId)
-      if (currentId === userId) {
-        profile.email = email
-      }
-      if (ALL_WEARABLES) {
-        profile.inventory = (yield select(getExclusiveCatalog)).map((_: Wearable) => _.id)
-      } else {
-        if (profile.ethAddress) {
-          yield put(inventoryRequest(userId, profile.ethAddress))
-          const inventoryResult = yield race({
-            success: take(isActionFor(INVENTORY_SUCCESS, userId)),
-            failure: take(isActionFor(INVENTORY_FAILURE, userId))
-          })
-          if (inventoryResult.failure) {
-            defaultLogger.error(`Unable to fetch inventory for ${userId}:`, inventoryResult.failure)
-          } else {
-            profile.inventory = (inventoryResult.success as InventorySuccess).payload.inventory.map(
-              dropIndexFromExclusives
-            )
-          }
-        } else {
-          profile.inventory = []
-        }
-      }
-      const passport = yield call(processServerProfile, userId, profile)
-      yield put(passportSuccess(userId, passport))
-    } else {
-      const randomizedUserProfile = yield call(generateRandomUserProfile, userId)
-      const currentId = yield select(getCurrentUserId)
-      if (currentId === userId) {
-        randomizedUserProfile.email = email
-      }
-      yield put(inventorySuccess(userId, randomizedUserProfile.inventory))
-      yield put(passportRandom(userId, randomizedUserProfile))
+      profile = profiles.avatars[0]
     }
   } catch (error) {
-    const randomizedUserProfile = yield call(generateRandomUserProfile, userId)
-    const currentId = yield select(getCurrentUserId)
-    if (currentId === userId) {
-      randomizedUserProfile.email = email
-    }
-    yield put(inventorySuccess(userId, randomizedUserProfile.inventory))
-    yield put(passportRandom(userId, randomizedUserProfile))
+    defaultLogger.warn(`Error requesting profile for ${userId}, `, error)
   }
+
+  const userInfo = getUserProfile()
+  if (!profile && userInfo && userInfo.userId && currentId === userInfo.userId && userInfo.profile) {
+    defaultLogger.info(`Recover profile from local storage`)
+    profile = yield call(
+      ensureServerFormat,
+      { ...userInfo.profile, avatar: { ...userInfo.profile.avatar, snapshots: userInfo.profile.snapshots } },
+      userInfo.version || 0
+    )
+  }
+
+  if (!profile) {
+    defaultLogger.info(`Profile for ${userId} not found, generating random profile`)
+    profile = yield call(generateRandomUserProfile, userId)
+  }
+
+  if (currentId === userId) {
+    profile.email = email
+  }
+
+  if (!ALL_WEARABLES) {
+    yield put(inventoryRequest(userId, userId))
+    const inventoryResult = yield race({
+      success: take(isActionFor(INVENTORY_SUCCESS, userId)),
+      failure: take(isActionFor(INVENTORY_FAILURE, userId))
+    })
+    if (inventoryResult.failure) {
+      defaultLogger.error(`Unable to fetch inventory for ${userId}:`, inventoryResult.failure)
+    } else {
+      profile.inventory = (inventoryResult.success as InventorySuccess).payload.inventory.map(dropIndexFromExclusives)
+    }
+  }
+
+  const passport = yield call(processServerProfile, userId, profile)
+  yield put(passportSuccess(userId, passport))
 }
 
 export async function profileServerRequest(serverUrl: string, userId: string) {
@@ -343,7 +345,7 @@ export function* sendLoadProfile(profile: Profile) {
   while (!(yield select(baseCatalogsLoaded))) {
     yield take(CATALOG_LOADED)
   }
-  window['unityInterface'].LoadProfile(profileToRendererFormat(profile))
+  window['unityInterface'].LoadProfile(profileToRendererFormat(profile, identity))
 }
 
 export function* handleFetchInventory(action: InventoryRequest) {
@@ -375,20 +377,28 @@ export async function fetchInventoryItemsByAddress(address: string) {
 
 export function* handleSaveAvatar(saveAvatar: SaveAvatarRequest) {
   const userId = saveAvatar.payload.userId ? saveAvatar.payload.userId : yield select(getCurrentUserId)
+
   try {
-    const currentVersion = (yield select(getProfile, userId)).version || 0
-    const url = getServerConfigurations().contentUpdate
-    const profile = saveAvatar.payload.profile
-    const result = yield call(modifyAvatar, {
-      url,
-      userId,
-      currentVersion,
-      identity,
-      profile
-    })
-    const { creationTimestamp: version } = result
-    yield put(saveAvatarSuccess(userId, version, profile))
-    yield put(passportRequest(userId))
+    const savedProfile = yield select(getProfile, userId)
+    const currentVersion = savedProfile.version || 0
+    const url: string = yield select(getUpdateProfileServer)
+    const profile = { ...savedProfile, ...saveAvatar.payload.profile }
+
+    // only update profile if wallet is connected
+    if (identity.hasConnectedWeb3) {
+      const result = yield call(modifyAvatar, {
+        url,
+        userId,
+        currentVersion,
+        identity,
+        profile
+      })
+
+      const { creationTimestamp: version } = result
+
+      yield put(saveAvatarSuccess(userId, version, profile))
+      yield put(passportRequest(userId))
+    }
   } catch (error) {
     yield put(saveAvatarFailure(userId, 'unknown reason'))
   }
@@ -464,25 +474,39 @@ export async function modifyAvatar(params: {
   url: string
   currentVersion: number
   userId: string
-  identity: AuthIdentity
-  profile: { avatar: Avatar; face: string; body: string }
+  identity: ExplorerIdentity
+  profile: Profile
 }) {
   const { url, currentVersion, profile, identity } = params
-  const { face, avatar, body } = profile
-  const faceFile: ContentFile = await makeContentFile('./face.png', base64ToBlob(face))
-  const bodyFile: ContentFile = await makeContentFile('./body.png', base64ToBlob(body))
+  const { avatar } = profile
 
-  const faceFileHash: string = await calculateBufferHash(faceFile.content)
-  const bodyFileHash: string = await calculateBufferHash(bodyFile.content)
+  const newAvatar = { ...avatar }
 
-  avatar.snapshots = {
-    face: faceFileHash,
-    body: bodyFileHash
+  let files: ContentFile[] = []
+
+  const snapshots = avatar.snapshots || (profile as any).snapshots
+  if (snapshots) {
+    if (snapshots.face.includes('://') && snapshots.body.includes('://')) {
+      newAvatar.snapshots = {
+        face: snapshots.face.split('/').pop()!,
+        body: snapshots.body.split('/').pop()!
+      }
+    } else {
+      // replace base64 snapshots with their respective hashes
+      const faceFile: ContentFile = await makeContentFile('./face.png', base64ToBlob(snapshots.face))
+      const bodyFile: ContentFile = await makeContentFile('./body.png', base64ToBlob(snapshots.body))
+
+      const faceFileHash: string = await calculateBufferHash(faceFile.content)
+      const bodyFileHash: string = await calculateBufferHash(bodyFile.content)
+
+      newAvatar.snapshots = {
+        face: faceFileHash,
+        body: bodyFileHash
+      }
+      files = [faceFile, bodyFile]
+    }
   }
-
-  const newProfile = ensureServerFormat(avatar, currentVersion)
-
-  const files = [faceFile, bodyFile]
+  const newProfile = ensureServerFormat({ ...profile, avatar: newAvatar }, currentVersion)
 
   const [data] = await buildDeployData(
     [identity.address],
@@ -656,7 +680,7 @@ export function* compareInventoriesAndTriggerNotification(
   saveToDb = saveToLocalStorage
 ) {
   if (areInventoriesDifferent(oldInventory, newInventory)) {
-    const oldItemsDict = oldInventory.reduce(
+    const oldItemsDict = oldInventory.reduce<Record<WearableId, boolean>>(
       (cumm: Record<WearableId, boolean>, id: string) => ({ ...cumm, [id]: true }),
       {}
     )

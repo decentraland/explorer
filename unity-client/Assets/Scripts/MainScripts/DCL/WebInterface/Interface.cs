@@ -1,4 +1,4 @@
-﻿﻿using UnityEngine;
+using UnityEngine;
 
 #if UNITY_WEBGL && !UNITY_EDITOR
 using System.Runtime.InteropServices;
@@ -310,6 +310,44 @@ namespace DCL.Interface
         {
             public string id;
             public long timestamp;
+        }
+
+        [System.Serializable]
+        public class UserAcceptedCollectiblesPayload
+        {
+            public string id;
+        }
+
+        [System.Serializable]
+        public class SendBlockPlayerPayload
+        {
+            public string userId;
+        }
+
+        [System.Serializable]
+        public class SendUnblockPlayerPayload
+        {
+            public string userId;
+        }
+
+        [System.Serializable]
+        public class TutorialStepPayload
+        {
+            public int tutorialStep;
+        }
+
+        [System.Serializable]
+        public class TermsOfServiceResponsePayload
+        {
+            public string sceneId;
+            public bool dontShowAgain;
+            public bool accepted;
+        }
+
+        [System.Serializable]
+        public class OpenURLPayload
+        {
+            public string url;
         }
 
 #if UNITY_WEBGL && !UNITY_EDITOR
@@ -633,13 +671,33 @@ namespace DCL.Interface
                 face = System.Convert.ToBase64String(faceSnapshot.texture.EncodeToPNG()),
                 body = System.Convert.ToBase64String(bodySnapshot.texture.EncodeToPNG())
             };
-            WebInterface.SendMessage("SaveUserAvatar", payload);
+            SendMessage("SaveUserAvatar", payload);
+        }
+
+        public static void SendUserAcceptedCollectibles(string airdropId)
+        {
+            SendMessage("UserAcceptedCollectibles", new UserAcceptedCollectiblesPayload { id = airdropId });
+        }
+
+        public static void SaveUserTutorialStep(int newTutorialStep)
+        {
+            SendMessage("SaveUserTutorialStep", new TutorialStepPayload() { tutorialStep = newTutorialStep });
         }
 
         public static void SendPerformanceReport(string encodedFrameTimesInMS)
         {
-            WebInterface.MessageFromEngine("PerformanceReport", encodedFrameTimesInMS);
+            MessageFromEngine("PerformanceReport", encodedFrameTimesInMS);
+        }
 
+        public static void SendTermsOfServiceResponse(string sceneId, bool accepted, bool dontShowAgain)
+        {
+            var payload = new TermsOfServiceResponsePayload()
+            {
+                sceneId = sceneId,
+                accepted = accepted,
+                dontShowAgain = dontShowAgain
+            };
+            SendMessage("TermsOfServiceResponse", payload);
         }
 
         public static void SendExpression(string expressionID, long timestamp)
@@ -649,7 +707,42 @@ namespace DCL.Interface
                 id = expressionID,
                 timestamp = timestamp
             });
+        }
 
+        public static void ReportMotdClicked()
+        {
+            SendMessage("MotdConfirmClicked");
+        }
+
+        public static void OpenURL(string url)
+        {
+            SendMessage("OpenWebURL", new OpenURLPayload { url = url });
+        }
+
+        public static void SendReportScene(string sceneID)
+        {
+            SendMessage("ReportScene", sceneID);
+        }
+
+        public static void SendReportPlayer(string playerName)
+        {
+            SendMessage("ReportPlayer", playerName);
+        }
+
+        public static void SendBlockPlayer(string userId)
+        {
+            SendMessage("BlockPlayer", new SendBlockPlayerPayload()
+            {
+                userId = userId
+            });
+        }
+
+        public static void SendUnlockPlayer(string userId)
+        {
+            SendMessage("UnblockPlayer", new SendUnblockPlayerPayload()
+            {
+                userId = userId
+            });
         }
     }
 }

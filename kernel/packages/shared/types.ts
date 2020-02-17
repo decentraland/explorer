@@ -25,7 +25,8 @@ export interface MessageDict {
 
 export type UserData = {
   displayName: string
-  publicKey: string
+  publicKey: string | null
+  hasConnectedWeb3: boolean
   userId: string
 }
 
@@ -346,6 +347,10 @@ export type Notification = {
 export type HUDConfiguration = {
   active: boolean
   visible: boolean
+}
+
+export type WelcomeHUDControllerModel = HUDConfiguration & {
+  hasWallet: boolean
 }
 
 export function normalizeContentMappings(

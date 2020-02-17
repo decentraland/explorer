@@ -222,16 +222,14 @@ namespace DCL.Helpers
                 OnFailInternal);
         }
 
-        public static IEnumerator FetchTexture(string textureURL, Action<Texture> OnSuccess)
+        public static IEnumerator FetchTexture(string textureURL, Action<Texture2D> OnSuccess)
         {
             //NOTE(Brian): This closure is called when the download is a success.
             System.Action<UnityWebRequest> OnSuccessInternal =
                 (request) =>
                 {
-                    if (OnSuccess != null)
-                    {
-                        OnSuccess.Invoke(DownloadHandlerTexture.GetContent(request));
-                    }
+                    var texture = DownloadHandlerTexture.GetContent(request);
+                    OnSuccess?.Invoke(texture);
                 };
 
             yield return FetchAsset(textureURL, UnityWebRequestTexture.GetTexture(textureURL), OnSuccessInternal);
@@ -408,8 +406,12 @@ namespace DCL.Helpers
         private static int lockedInFrame = -1;
         public static bool LockedThisFrame() => lockedInFrame == Time.frameCount;
 
+        //NOTE(Brian): Made as an independent flag because the CI doesn't work well with the Cursor.lockState check.
+        public static bool isCursorLocked = false;
+
         public static void LockCursor()
         {
+            isCursorLocked = true;
             lockedInFrame = Time.frameCount;
             Cursor.visible = false;
             Cursor.lockState = CursorLockMode.Locked;
@@ -419,8 +421,17 @@ namespace DCL.Helpers
 
         public static void UnlockCursor()
         {
+            isCursorLocked = false;
             Cursor.visible = true;
             Cursor.lockState = CursorLockMode.None;
+        }
+
+        public static void DestroyAllChild(this Transform transform)
+        {
+            foreach (Transform child in transform)
+            {
+                UnityEngine.Object.Destroy(child.gameObject);
+            }
         }
     }
 }

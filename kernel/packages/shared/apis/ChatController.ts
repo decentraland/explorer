@@ -2,7 +2,8 @@
 import { Vector3Component } from 'atomicHelpers/landHelpers'
 import { uuid } from 'atomicHelpers/math'
 import { parseParcelPosition, worldToGrid } from 'atomicHelpers/parcelScenePositions'
-import { parcelLimits, SHOW_FPS_COUNTER } from 'config'
+import { SHOW_FPS_COUNTER } from 'config'
+import { sampleDropData } from 'shared/airdrops/sampleDrop'
 import { APIOptions, exposeMethod, registerAPI } from 'decentraland-rpc/lib/host'
 import { EngineAPI } from 'shared/apis/EngineAPI'
 import { ExposableAPI } from 'shared/apis/ExposableAPI'
@@ -17,10 +18,11 @@ import {
   peerMap,
   removeFromMutedUsers
 } from 'shared/comms/peers'
-import { POIs } from 'shared/comms/POIs'
 import { IChatCommand, MessageEntry } from 'shared/types'
-import { teleportObservable } from 'shared/world/positionThings'
+import { TeleportController } from 'shared/world/TeleportController'
 import { expressionExplainer, isValidExpression, validExpressions } from './expressionExplainer'
+import { changeRealm, catalystRealmConnected, changeToCrowdedRealm } from 'shared/dao'
+import defaultLogger from 'shared/logger'
 
 const userPose: { [key: string]: Vector3Component } = {}
 avatarMessageObservable.add((pose: AvatarMessage) => {
@@ -31,9 +33,13 @@ avatarMessageObservable.add((pose: AvatarMessage) => {
     delete userPose[pose.uuid]
   }
 })
+
 const fpsConfiguration = {
   visible: SHOW_FPS_COUNTER
 }
+
+const blacklisted = ['help', 'airdrop']
+
 export interface IChatController {
   /**
    * Send the chat message
@@ -148,39 +154,76 @@ export class ChatController extends ExposableAPI implements IChatController {
 
       if (!isValid) {
         if (message.trim().toLowerCase() === 'magic') {
-          const target = POIs[Math.floor(Math.random() * POIs.length)]
-          const { x, y } = target
-          response = `Teleporting to "${target.name}" (${x}, ${y})...`
-          teleportObservable.notifyObservers({
-            x: parseInt('' + x, 10),
-            y: parseInt('' + y, 10),
-            text: response
-          } as any)
+          response = TeleportController.goToMagic().message
         } else if (message.trim().toLowerCase() === 'random') {
-          const x = Math.floor(Math.random() * 301) - 150
-          const y = Math.floor(Math.random() * 301) - 150
-          response = `Teleporting to random location (${x}, ${y})...`
-          teleportObservable.notifyObservers({
-            x: parseInt('' + x, 10),
-            y: parseInt('' + y, 10),
-            text: response
-          } as any)
+          response = TeleportController.goToRandom().message
+        } else if (message.trim().toLowerCase() === 'next') {
+          response = TeleportController.goToNext().message
+        } else if (message.trim().toLowerCase() === 'crowd') {
+          response = `Teleporting to a crowd of people in current realm...`
+
+          TeleportController.goToCrowd().then(({ message, success }) => this.notifyStatusTroughChat(message), () => {
+            // Do nothing. This is handled inside controller
+          })
         } else {
           response = 'Could not recognize the coordinates provided. Example usage: /goto 42,42'
         }
       } else {
         const { x, y } = coordinates
+        response = TeleportController.goTo(x, y).message
+      }
 
-        if (
-          parcelLimits.minLandCoordinateX <= x &&
-          x <= parcelLimits.maxLandCoordinateX &&
-          parcelLimits.minLandCoordinateY <= y &&
-          y <= parcelLimits.maxLandCoordinateY
-        ) {
-          response = `Teleporting to ${x}, ${y}...`
-          teleportObservable.notifyObservers({ x, y, text: response } as any)
+      return {
+        id: uuid(),
+        isCommand: true,
+        sender: 'Decentraland',
+        message: response
+      }
+    })
+
+    this.addChatCommand('changerealm', 'Changes communications realms', message => {
+      const realmString = message.trim()
+      let response = ''
+
+      if (realmString === 'crowd') {
+        response = `Changing to realm that is crowded nearby...`
+
+        changeToCrowdedRealm().then(
+          ([changed, realm]) => {
+            // TODO: This status should be shown in the chat window
+            if (changed) {
+              this.notifyStatusTroughChat(
+                `Found a crowded realm to join. Welcome to the realm ${realm.catalystName}-${realm.layer}!`
+              )
+            } else {
+              this.notifyStatusTroughChat(`Could not join realm. Maybe the realm is full?`)
+            }
+          },
+          e => {
+            this.notifyStatusTroughChat(`Could not join realm. Please join another realm to ensure communications.`)
+            defaultLogger.error(`Error joining realm ${realmString}`, e)
+          }
+        )
+      } else {
+        const realm = changeRealm(realmString)
+
+        if (realm) {
+          response = `Changing to Realm ${realm.catalystName}-${realm.layer}...`
+          // TODO: This status should be shown in the chat window
+          catalystRealmConnected().then(
+            () =>
+              this.notifyStatusTroughChat(
+                `Changed realm successfuly. Welcome to the realm ${realm.catalystName}-${realm.layer}!`
+              ),
+            e => {
+              this.notifyStatusTroughChat(
+                `Could not join realm. Maybe the realm is full? Please join another realm to ensure communications.`
+              )
+              defaultLogger.error('Error joining crowded realm', e)
+            }
+          )
         } else {
-          response = `Coordinates are outside of the boundaries. Limits are from ${parcelLimits.minLandCoordinateX} to ${parcelLimits.maxLandCoordinateX} for X and ${parcelLimits.minLandCoordinateY} to ${parcelLimits.maxLandCoordinateY} for Y`
+          response = `Couldn't find realm ${realmString}`
         }
       }
 
@@ -290,6 +333,17 @@ export class ChatController extends ExposableAPI implements IChatController {
       }
     )
 
+    this.addChatCommand('airdrop', 'fake an airdrop', () => {
+      const unityWindow: any = window
+      unityWindow.unityInterface.TriggerAirdropDisplay(sampleDropData)
+      return {
+        id: uuid(),
+        isCommand: true,
+        sender: 'Decentraland',
+        message: 'Faking airdrop...'
+      }
+    })
+
     this.addChatCommand('unmute', 'Unmute [username]', message => {
       const username = message
       const currentUser = getCurrentUser()
@@ -326,10 +380,23 @@ export class ChatController extends ExposableAPI implements IChatController {
           `\n\nYou can move with the [WASD] keys and jump with the [SPACE] key.` +
           `\n\nYou can toggle the chat with the [ENTER] key.` +
           `\n\nAvailable commands:\n${Object.keys(this.chatCommands)
-            .filter(name => name !== 'help')
+            .filter(name => !blacklisted.includes(name))
             .map(name => `\t/${name}: ${this.chatCommands[name].description}`)
             .concat('\t/help: Show this list of commands')
             .join('\n')}`
+      }
+    })
+  }
+
+  // @internal
+  private notifyStatusTroughChat(status: string) {
+    chatObservable.notifyObservers({
+      type: ChatEvent.MESSAGE_RECEIVED,
+      messageEntry: {
+        id: uuid(),
+        isCommand: true,
+        sender: 'Decentraland',
+        message: status
       }
     })
   }

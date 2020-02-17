@@ -1,5 +1,5 @@
 import { saveToLocalStorage } from 'atomicHelpers/localStorage'
-import { commConfigurations, getServerConfigurations, parcelLimits, COMMS, DEBUG_LOGIN } from 'config'
+import { commConfigurations, parcelLimits, COMMS } from 'config'
 import { CommunicationsController } from 'shared/apis/CommunicationsController'
 import { defaultLogger } from 'shared/logger'
 import { MessageEntry } from 'shared/types'
@@ -29,25 +29,30 @@ import {
   ChatMessage,
   ProfileVersion,
   BusMessage,
-  AvatarMessageType
+  AvatarMessageType,
+  ConnectionEstablishmentError,
+  IdTakenError,
+  UnknownCommsModeError
 } from './interface/types'
-import { CommunicationArea, Position, position2parcel, sameParcel, squareDistance } from './interface/utils'
+import { CommunicationArea, Position, position2parcel, sameParcel, squareDistance, ParcelArray } from './interface/utils'
 import { BrokerWorldInstanceConnection } from '../comms/v1/brokerWorldInstanceConnection'
 import { profileToRendererFormat } from 'shared/passports/transformations/profileToRendererFormat'
 import { ProfileForRenderer } from 'decentraland-ecs/src'
-import { Session } from '../session/index'
 import { worldRunningObservable, isWorldRunning } from '../world/worldState'
 import { WorldInstanceConnection } from './interface/index'
+
 import { LighthouseWorldInstanceConnection } from './v2/LighthouseWorldInstanceConnection'
-import * as Long from 'long'
 
 import { identity } from '../index'
-import { Authenticator } from '../crypto/Authenticator'
-
-declare const window: any
-window.Long = Long
-
-const { Peer } = require('decentraland-katalyst-peer')
+import { Authenticator } from 'dcl-crypto'
+import { getCommsServer, getRealm } from '../dao/selectors'
+import { Realm, LayerUserInfo } from 'shared/dao/types'
+import { Store } from 'redux'
+import { RootState } from 'shared/store/rootTypes'
+import { store } from 'shared/store/store'
+import { setCatalystRealmCommsStatus } from 'shared/dao/actions'
+import { observeRealmChange } from 'shared/dao'
+import { getProfile } from 'shared/passports/selectors'
 
 export type CommsVersion = 'v1' | 'v2'
 export type CommsMode = CommsV1Mode | CommsV2Mode
@@ -68,6 +73,7 @@ export const MORDOR_POSITION: Position = [
 ]
 
 declare var global: any
+declare const window: any
 
 export class PeerTrackingInfo {
   public position: Position | null = null
@@ -174,6 +180,13 @@ export function unsubscribeParcelSceneToCommsMessages(controller: Communications
   scenesSubscribedToCommsEvents.delete(controller)
 }
 
+async function changeConnectionRealm(realm: Realm, url: string) {
+  defaultLogger.log('Changing connection realm to ', JSON.stringify(realm), { url })
+  if (context && context.worldInstanceConnection) {
+    await context.worldInstanceConnection.changeRealm(realm, url)
+  }
+}
+
 // TODO: Change ChatData to the new class once it is added to the .proto
 export function processParcelSceneCommsMessage(context: Context, fromAlias: string, message: Package<ChatMessage>) {
   const { id: cid, text } = message.data
@@ -223,6 +236,7 @@ function ensurePeerTrackingInfo(context: Context, alias: string): PeerTrackingIn
 
 export function processChatMessage(context: Context, fromAlias: string, message: Package<ChatMessage>) {
   const msgId = message.data.id
+  const profile = getProfile(global.globalStore.getState(), identity.address)
 
   const peerTrackingInfo = ensurePeerTrackingInfo(context, fromAlias)
   if (!peerTrackingInfo.receivedPublicChatMessages.has(msgId)) {
@@ -248,7 +262,9 @@ export function processChatMessage(context: Context, fromAlias: string, message:
           message: text,
           isCommand: false
         }
-        chatObservable.notifyObservers({ type: ChatEvent.MESSAGE_RECEIVED, messageEntry: entry })
+        if (profile && user.userId && profile.blocked && !profile.blocked.includes(user.userId)) {
+          chatObservable.notifyObservers({ type: ChatEvent.MESSAGE_RECEIVED, messageEntry: entry })
+        }
       }
     }
   }
@@ -260,8 +276,6 @@ export function processProfileMessage(
   identity: string,
   message: Package<ProfileVersion>
 ) {
-  processNewLogin(identity, context, fromAlias)
-
   const msgTimestamp = message.time
 
   const peerTrackingInfo = ensurePeerTrackingInfo(context, fromAlias)
@@ -274,16 +288,6 @@ export function processProfileMessage(
 
     peerTrackingInfo.lastProfileUpdate = msgTimestamp
     peerTrackingInfo.lastUpdate = Date.now()
-  }
-}
-
-function processNewLogin(identity: string, context: Context, fromAlias: string) {
-  // TODO - check this issue - moliva - 23/01/2020
-  const checkTodo = false
-  if (checkTodo && !DEBUG_LOGIN) {
-    if (identity === context.userInfo.userId && fromAlias !== getCurrentPeer()!.uuid) {
-      Session.current.then(s => s.disable()).catch(e => defaultLogger.error('error while signing out', e))
-    }
   }
 }
 
@@ -387,12 +391,7 @@ function collectInfo(context: Context) {
     const msSinceLastUpdate = now - trackingInfo.lastUpdate
 
     if (msSinceLastUpdate > commConfigurations.peerTtlMs) {
-      context.peerData.delete(peerAlias)
-      removeById(peerAlias)
-
-      if (context.stats) {
-        context.stats.onPeerRemoved(peerAlias)
-      }
+      removePeer(context, peerAlias)
 
       continue
     }
@@ -444,9 +443,26 @@ function collectInfo(context: Context) {
   }
 }
 
+function removePeer(context: Context, peerAlias: string) {
+  context.peerData.delete(peerAlias)
+  removeById(peerAlias)
+  if (context.stats) {
+    context.stats.onPeerRemoved(peerAlias)
+  }
+}
+
 function parseCommsMode(modeString: string) {
   const segments = modeString.split('-')
   return segments as [CommsVersion, CommsMode]
+}
+
+const NOOP = () => {
+  // do nothing
+}
+function subscribeToRealmChange(store: Store<RootState>) {
+  observeRealmChange(store, (previousRealm, currentRealm) =>
+    changeConnectionRealm(currentRealm, getCommsServer(store.getState())).then(NOOP, defaultLogger.error)
+  )
 }
 
 export async function connect(userId: string) {
@@ -486,7 +502,7 @@ export async function connect(userId: string) {
             break
           }
           default: {
-            throw new Error(`unrecognized mode for comms v1 "${mode}"`)
+            throw new UnknownCommsModeError(`unrecognized mode for comms v1 "${mode}"`)
           }
         }
 
@@ -497,54 +513,41 @@ export async function connect(userId: string) {
         break
       }
       case 'v2': {
-        const { server, p2p } = getServerConfigurations().comms.lighthouse
+        const store: Store<RootState> = window.globalStore
+        const lighthouseUrl = getCommsServer(store.getState())
+        const realm = getRealm(store.getState())
 
-        let lighthouseUrl
-        switch (mode) {
-          case 'server': {
-            lighthouseUrl = server
-            break
-          }
-          case 'p2p': {
-            lighthouseUrl = p2p
-            break
-          }
-          default: {
-            defaultLogger.warn(`unrecognized mode for comms v2 "${mode}", using default "p2p"`)
-            lighthouseUrl = p2p
+        const peerConfig = {
+          connectionConfig: {
+            iceServers: commConfigurations.iceServers
+          },
+          authHandler: async (msg: string) => {
+            try {
+              return Authenticator.signPayload(identity, msg)
+            } catch (e) {
+              defaultLogger.info(`error while trying to sign message from lighthouse '${msg}'`)
+            }
+            // if any error occurs
+            return identity
+          },
+          parcelGetter: () => {
+            if (context && context.currentPosition) {
+              const parcel = position2parcel(context.currentPosition)
+              return [parcel.x, parcel.z]
+            }
           }
         }
 
         defaultLogger.log('Using Remote lighthouse service: ', lighthouseUrl)
 
-        const peer = new Peer(
-          lighthouseUrl,
+        const lighthouseConnection = (connection = new LighthouseWorldInstanceConnection(
           identity.address,
-          () => {
-            // noop
-          },
-          {
-            connectionConfig: {
-              iceServers: commConfigurations.iceServers
-            },
-            authHandler: async (msg: string) => {
-              try {
-                return Authenticator.signPayload(identity, msg)
-              } catch (e) {
-                defaultLogger.info(`error while trying to sign message from lighthouse '${msg}'`)
-              }
-              // if any error occurs
-              return identity
-            }
-          }
-        )
-
-        await peer.awaitConnectionEstablished(60000)
-        await peer.setLayer('gold')
-
-        connection = new LighthouseWorldInstanceConnection(peer)
-
-        global.__DEBUG_PEER = peer
+          realm!,
+          lighthouseUrl,
+          peerConfig,
+          status => store.dispatch(setCatalystRealmCommsStatus(status))
+        ))
+        await lighthouseConnection.connectPeer()
 
         break
       }
@@ -568,6 +571,8 @@ export async function connect(userId: string) {
 
     context = new Context(userInfo)
     context.worldInstanceConnection = connection
+
+    subscribeToRealmChange(store)
 
     if (commConfigurations.debug) {
       connection.stats = context.stats
@@ -615,7 +620,11 @@ export async function connect(userId: string) {
     return context
   } catch (e) {
     defaultLogger.error(e)
-    throw new Error('error establishing comms: ' + e.message)
+    if (e.message && e.message.includes('is taken')) {
+      throw new IdTakenError(e.message)
+    } else {
+      throw new ConnectionEstablishmentError(e.message)
+    }
   }
 }
 
@@ -651,6 +660,22 @@ export function disconnect() {
       context.worldInstanceConnection.close()
     }
   }
+}
+
+export async function fetchLayerUsersParcels(): Promise<ParcelArray[]> {
+  const store: Store<RootState> = window.globalStore
+  const realm = getRealm(store.getState())
+  const commsUrl = getCommsServer(store.getState())
+
+  if (realm && realm.layer && commsUrl) {
+    const layerUsersResponse = await fetch(`${commsUrl}/layers/${realm.layer}/users`)
+    if (layerUsersResponse.ok) {
+      const layerUsers: LayerUserInfo[] = await layerUsersResponse.json()
+      return layerUsers.filter(it => it.parcel).map(it => it.parcel!)
+    }
+  }
+
+  return []
 }
 
 global['printCommsInformation'] = function() {

@@ -251,6 +251,8 @@ namespace DCL
             if (!go.activeSelf)
                 go.SetActive(true);
 
+            go.transform.ResetLocalTRS();
+
             lastGetTime = Time.unscaledTime;
         }
 
