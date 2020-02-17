@@ -45,8 +45,6 @@ namespace DCL
 
                     if (nameToShader.ContainsKey(shaderName))
                     {
-                        //Debug.Log("recycling shader " + shaderName);
-                        //Object.DestroyImmediate(mat.shader, true);
                         mat.shader = nameToShader[shaderName];
                     }
                     else
@@ -64,9 +62,6 @@ namespace DCL
                         var materialCopy = new Material(mat);
                         PersistentAssetCache.MaterialCacheByCRC.Add(crc, new RefCountedMaterialData(crc, materialCopy));
                     }
-
-                    //Debug.Log("Will reutilize material!");
-                    //Object.DestroyImmediate(mat, true);
 
                     refCountedMat = PersistentAssetCache.MaterialCacheByCRC[crc];
                     refCountedMat.IncreaseRefCount();
