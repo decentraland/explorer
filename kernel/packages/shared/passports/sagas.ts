@@ -55,6 +55,7 @@ const CID = require('cids')
 import { sha3 } from 'web3x/utils'
 import { CATALYST_REALM_INITIALIZED } from '../dao/actions'
 import { isRealmInitialized, getUpdateProfileServer } from '../dao/selectors'
+import { getUserProfile } from '../comms/peers'
 const multihashing = require('multihashing-async')
 const toBuffer = require('blob-to-buffer')
 
@@ -222,6 +223,16 @@ export function* handleFetchProfile(action: PassportRequestAction): any {
     }
   } catch (error) {
     defaultLogger.warn(`Error requesting profile for ${userId}, `, error)
+  }
+
+  if (!profile) {
+    defaultLogger.info(`Recover profile from local storage`)
+    const userInfo = getUserProfile()
+    profile = yield call(
+      ensureServerFormat,
+      { ...userInfo.profile, avatar: { ...userInfo.profile.avatar, snapshots: userInfo.profile.snapshots } },
+      userInfo.version || 0
+    )
   }
 
   if (!profile) {
