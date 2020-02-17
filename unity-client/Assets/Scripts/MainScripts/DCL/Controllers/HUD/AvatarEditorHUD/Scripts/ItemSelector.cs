@@ -65,11 +65,11 @@ public class ItemSelector : MonoBehaviour
 
     public void RemoveAllItemToggle()
     {
-        var gameObjects = itemToggles.Values.Select(x => x.gameObject).ToArray();
+        var toggles = itemToggles.Values.ToArray();
         itemToggles.Clear();
-        for (var i = gameObjects.Length - 1; i >= 0; i--)
+        for (var i = toggles.Length - 1; i >= 0; i--)
         {
-            Destroy(gameObjects[i]);
+            Destroy(toggles[i].gameObject);
         }
     } 
 
