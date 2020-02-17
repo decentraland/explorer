@@ -127,7 +127,7 @@ export function pickCatalystRealm(candidates: Candidate[]): Realm {
       return diff === 0 ? c1.elapsed - c2.elapsed : diff
     })
 
-  if (sorted.length === 0) {
+  if (sorted.length === 0 && candidates.length > 0) {
     // This error is highly unlikely, but it could eventually happen. We may want to keep retrying or refreshing.
     // For now, we refresh the whole explorer.
 
