@@ -1,4 +1,4 @@
-using DCL.Components;
+﻿using DCL.Components;
 using DCL.Configuration;
 using DCL.Helpers;
 using DCL.Models;
@@ -12,7 +12,7 @@ namespace DCL.Controllers
     public class ParcelScene : MonoBehaviour, ICleanable
     {
         public static bool VERBOSE = false;
-        enum State
+        public enum State
         {
             NOT_READY,
             WAITING_FOR_INIT_MESSAGES,
@@ -32,6 +32,8 @@ namespace DCL.Controllers
 
         public event System.Action<DecentralandEntity> OnEntityAdded;
         public event System.Action<DecentralandEntity> OnEntityRemoved;
+        public event System.Action<ParcelScene> OnSceneReady;
+
         public ContentProvider contentProvider;
         public int disposableNotReadyCount => disposableNotReady.Count;
 
@@ -53,8 +55,8 @@ namespace DCL.Controllers
         public static ParcelScenesCleaner parcelScenesCleaner = new ParcelScenesCleaner();
 
         private readonly List<string> disposableNotReady = new List<string>();
-        private bool flaggedToUnload = false;
         private bool isReleased = false;
+        public bool isReady => state == State.READY;
         private State state = State.NOT_READY;
         public SceneBoundariesChecker boundariesChecker { private set; get; }
 
@@ -64,6 +66,7 @@ namespace DCL.Controllers
         public void Awake()
         {
             state = State.NOT_READY;
+
             blockerHandler = new BlockerHandler();
 
             if (DCLCharacterController.i)
@@ -1074,14 +1077,10 @@ namespace DCL.Controllers
         private void SetSceneReady()
         {
             if (state == State.READY)
-            {
                 return;
-            }
 
             if (VERBOSE)
-            {
                 Debug.Log($"{sceneData.basePosition} Scene Ready!");
-            }
 
             state = State.READY;
 
@@ -1090,6 +1089,8 @@ namespace DCL.Controllers
 
             SceneController.i.SendSceneReady(sceneData.id);
             RefreshName();
+
+            OnSceneReady?.Invoke(this);
         }
 
 #if UNITY_EDITOR

@@ -27,7 +27,7 @@ public class CharacterPreviewController : MonoBehaviour
 
     private System.Collections.Generic.Dictionary<CameraFocus, Transform> cameraFocusLookUp;
 
-    public Camera camera;
+    public new Camera camera;
     public AvatarRenderer avatarRenderer;
 
     public Transform defaultEditingTemplate;
@@ -38,6 +38,7 @@ public class CharacterPreviewController : MonoBehaviour
 
     private void Awake()
     {
+        RenderingController.i.renderingActivatedAckLock.AddLock(this);
         cameraFocusLookUp = new System.Collections.Generic.Dictionary<CameraFocus, Transform>()
         {
             { CameraFocus.DefaultEditing, defaultEditingTemplate },
@@ -65,6 +66,7 @@ public class CharacterPreviewController : MonoBehaviour
         }
 
         onDone?.Invoke();
+        RenderingController.i.renderingActivatedAckLock.RemoveLock(this);
     }
 
     private void SetLayerRecursively(GameObject gameObject, int layer)

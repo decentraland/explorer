@@ -7,9 +7,9 @@ using UnityEngine.Networking;
 //In the future the AssetManager will do this
 public static class ThumbnailsManager
 {
-    #if UNITY_EDITOR
+#if UNITY_EDITOR
     public static bool bypassRequests = false;
-    #endif
+#endif
 
     static Dictionary<string, Coroutine> downloadingCoroutines = new Dictionary<string, Coroutine>();
     static Dictionary<string, int> spritesUses = new Dictionary<string, int>();
@@ -23,9 +23,9 @@ public static class ThumbnailsManager
 
     public static void GetThumbnail(string url, Action<Sprite> callback)
     {
-        #if UNITY_EDITOR
+#if UNITY_EDITOR
         if (bypassRequests) return;
-        #endif
+#endif
 
         if (string.IsNullOrEmpty(url))
             return;
@@ -42,7 +42,7 @@ public static class ThumbnailsManager
             waitingCallbacks.Add(url, new List<Action<Sprite>>());
         }
 
-        if(callback != null)
+        if (callback != null)
             waitingCallbacks[url].Add(callback);
 
         if (!downloadingCoroutines.ContainsKey(url))
@@ -75,6 +75,8 @@ public static class ThumbnailsManager
         if (!www.isNetworkError && !www.isHttpError)
         {
             var texture = ((DownloadHandlerTexture)www.downloadHandler).texture;
+            texture.Compress(false);
+            texture.Apply(false, true);
             sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), Vector2.zero);
             AddOrUpdateSprite(url, sprite);
         }
