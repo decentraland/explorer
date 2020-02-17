@@ -234,7 +234,6 @@ export function* handleFetchProfile(action: PassportRequestAction): any {
   }
 
   if (ALL_WEARABLES) {
-    profile.inventory = (yield select(getExclusiveCatalog)).map((_: Wearable) => _.id)
   } else {
     yield put(inventoryRequest(userId, userId))
     const inventoryResult = yield race({
