@@ -131,7 +131,11 @@ export const RESET_TUTORIAL = location.search.indexOf('RESET_TUTORIAL') !== -1
 export const NO_TUTORIAL = location.search.indexOf('NO_TUTORIAL') !== -1
 
 export function tutorialEnabled() {
-  return !NO_TUTORIAL && WORLD_EXPLORER && (RESET_TUTORIAL || getUserProfile().profile.tutorialStep !== tutorialStepId.FINISHED)
+  return (
+    !NO_TUTORIAL &&
+    WORLD_EXPLORER &&
+    (RESET_TUTORIAL || getUserProfile().profile.tutorialStep !== tutorialStepId.FINISHED)
+  )
 }
 
 export namespace commConfigurations {
@@ -252,7 +256,7 @@ export function getServerConfigurations() {
   return {
     contentAsBundle: `https://content-assets-as-bundle.decentraland.org`,
     wearablesApi: `https://wearable-api.decentraland.org/v2`,
-    explorerConfiguration: `https://explorer-config.decentraland.${
+    explorerConfiguration: `http://explorer-config.decentraland.${
       TLDDefault === 'today' ? 'org' : TLDDefault
     }.s3.amazonaws.com/configuration.json`,
     avatar: {
