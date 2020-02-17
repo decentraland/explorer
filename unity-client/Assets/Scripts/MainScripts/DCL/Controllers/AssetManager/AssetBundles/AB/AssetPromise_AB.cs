@@ -108,12 +108,19 @@ namespace DCL
 
             yield return DependencyMapLoadHelper.WaitUntilDepMapIsResolved(hash);
 
-            foreach (string dep in DependencyMapLoadHelper.dependenciesMap[hash])
+            if (DependencyMapLoadHelper.dependenciesMap.ContainsKey(hash))
             {
-                var promise = new AssetPromise_AB(baseUrl, dep);
-                AssetPromiseKeeper_AB.i.Keep(promise);
-                dependencyPromises.Add(promise);
-                yield return promise;
+                using (var it = DependencyMapLoadHelper.dependenciesMap[hash].GetEnumerator())
+                {
+                    while (it.MoveNext())
+                    {
+                        var dep = it.Current;
+                        var promise = new AssetPromise_AB(baseUrl, dep);
+                        AssetPromiseKeeper_AB.i.Keep(promise);
+                        dependencyPromises.Add(promise);
+                        yield return promise;
+                    }
+                }
             }
 
             yield return WaitForConcurrentRequestsSlot();
