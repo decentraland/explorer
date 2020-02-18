@@ -6,6 +6,8 @@ import { defaultLogger } from 'shared/logger'
 import { Account } from 'web3x/account'
 import { getUserProfile } from 'shared/comms/peers'
 import { getTLD } from '../../config/index'
+import { getUserAccount } from './EthereumService'
+import { removeUserProfile } from '../comms/peers'
 
 declare var window: Window & {
   ethereum: any
@@ -22,11 +24,16 @@ export async function awaitWeb3Approval(): Promise<void> {
     providerRequested = true
     // Modern dapp browsers...
     if (window['ethereum']) {
-      const userData = getUserProfile()
+      await removeSessionIfNotValid()
+
+      // TODO - look for user id matching account - moliva - 18/02/2020
+      let userData = getUserProfile()
+
       if (!isSessionExpired(userData)) {
         providerFuture.resolve({ successful: true, provider: window.ethereum })
       } else {
         window['ethereum'].autoRefreshOnNetworkChange = false
+
         const element = document.getElementById('eth-login')
         if (element) {
           element.style.display = 'block'
@@ -86,6 +93,8 @@ export async function awaitWeb3Approval(): Promise<void> {
         }
       }
     } else if (window.web3 && window.web3.currentProvider) {
+      await removeSessionIfNotValid()
+
       // legacy providers (don't need for confirmation)
       providerFuture.resolve({ successful: true, provider: window.web3.currentProvider })
     } else {
@@ -101,6 +110,20 @@ export async function awaitWeb3Approval(): Promise<void> {
   providerFuture.then(result => requestManager.setProvider(result.provider)).catch(defaultLogger.error)
 
   return providerFuture
+}
+
+/**
+ * Remove local session if persisted account does not match with one or ephemeral key is expired
+ */
+async function removeSessionIfNotValid() {
+  const account = await getUserAccount()
+
+  // TODO - look for user id matching account - moliva - 18/02/2020
+  let userData = getUserProfile()
+
+  if ((userData && userData.userId !== account) || isSessionExpired(userData)) {
+    removeUserProfile()
+  }
 }
 
 function createProvider() {
