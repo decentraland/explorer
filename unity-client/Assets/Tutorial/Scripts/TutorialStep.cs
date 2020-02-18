@@ -29,10 +29,12 @@ namespace DCL.Tutorial
         }
 
         WaitForSeconds waitForIdleTime = new WaitForSeconds(TutorialController.DEFAULT_STAGE_IDLE_TIME);
+        WaitUntil waitForRendererEnabled = new WaitUntil(() => RenderingController.i.renderingEnabled);
 
         public virtual IEnumerator WaitIdleTime()
         {
             yield return waitForIdleTime;
+            yield return waitForRendererEnabled;
         }
 
     }
