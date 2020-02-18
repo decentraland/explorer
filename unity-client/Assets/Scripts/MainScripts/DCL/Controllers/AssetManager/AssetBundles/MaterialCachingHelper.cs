@@ -28,21 +28,6 @@ namespace DCL
             return mat.ComputeCRC().ToString();
         }
 
-        public static string ComputeShaderHash(Material mat)
-        {
-            var keywords = mat.shaderKeywords.OrderBy(x => x).ToArray();
-            StringBuilder result = new StringBuilder(100);
-
-            result.Append(mat.shader.name);
-
-            for (int i = 0; i < keywords.Length; i++)
-            {
-                result.Append(keywords[i]);
-            }
-
-            return result.ToString();
-        }
-
         public static IEnumerator Process(List<Renderer> renderers, bool enableRenderers = true, Mode cachingFlags = Mode.CACHE_EVERYTHING)
         {
             if (renderers == null)
@@ -70,20 +55,19 @@ namespace DCL
 
                     float elapsedTime = Time.realtimeSinceStartup;
 
-                    if ((int)(cachingFlags & Mode.CACHE_SHADERS) == 1)
+                    if ((cachingFlags & Mode.CACHE_SHADERS) != 0)
                     {
-                        string shaderHash = ComputeShaderHash(mat);
+                        string shaderHash = mat.shader.name;
 
                         if (!shaderByHash.ContainsKey(shaderHash))
                         {
-                            Debug.Log("Add new shader to bucket... hash: " + shaderHash);
-                            shaderByHash.Add(shaderHash, Object.Instantiate(mat.shader));
+                            shaderByHash.Add(shaderHash, Shader.Find(mat.shader.name));
                         }
 
                         mat.shader = shaderByHash[shaderHash];
                     }
 
-                    if ((int)(cachingFlags & Mode.CACHE_MATERIALS) == 1)
+                    if ((cachingFlags & Mode.CACHE_MATERIALS) != 0)
                     {
                         string hash = ComputeHash(mat);
 
@@ -93,8 +77,38 @@ namespace DCL
                         {
                             //NOTE(Brian): Have to copy material because will be unloaded later.
                             var materialCopy = new Material(mat);
+
+                            foreach (var k in mat.shaderKeywords)
+                                materialCopy.EnableKeyword(k);
+#if UNITY_EDITOR
+                            //NOTE(Brian): _Surface is only used by the material inspector. If we don't modify this
+                            //             the inspector overrides the _ALPHABLEND_ON and the material turns opaque.
+                            //             This is confusing when debugging.
+                            if (materialCopy.IsKeywordEnabled("_ALPHABLEND_ON"))
+                                materialCopy.SetFloat("_Surface", 1);
+                            else
+                                materialCopy.SetFloat("_Surface", 0);
+#endif
                             PersistentAssetCache.MaterialCacheByCRC.Add(hash, new RefCountedMaterialData(hash, materialCopy));
                         }
+
+                        //string keywords = "";
+                        //var keywordsArray = mat.shaderKeywords;
+
+                        //for (int i3 = 0; i3 < keywordsArray.Length; i3++)
+                        //{
+                        //    keywords += keywordsArray[i3] + ",";
+                        //}
+
+                        //string keywords2 = "";
+                        //var keywordsArray2 = PersistentAssetCache.MaterialCacheByCRC[hash].material.shaderKeywords;
+
+                        //for (int i3 = 0; i3 < keywordsArray2.Length; i3++)
+                        //{
+                        //    keywords2 += keywordsArray2[i3] + ",";
+                        //}
+
+                        //Debug.Log($"Reusing material for renderer {r.gameObject.name} hash: {hash}... keywords original mat: {keywords} ... keywords cached mat: {keywords2}", r.gameObject);
 
                         refCountedMat = PersistentAssetCache.MaterialCacheByCRC[hash];
                         refCountedMat.IncreaseRefCount();
