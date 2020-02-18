@@ -147,7 +147,7 @@ namespace DCL.Tutorial
                 currentTutorialStepId = debugFlagStartingValue;
             }
 #endif
-            if (currentTutorialStepId == TutorialStep.Id.FINISHED)
+            if (currentTutorialStepId == TutorialStep.Id.FINISHED || runningStep != null)
                 return;
 
             StartTutorialFromStep(currentTutorialStepId);
