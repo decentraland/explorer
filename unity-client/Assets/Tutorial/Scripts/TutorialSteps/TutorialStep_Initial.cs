@@ -26,6 +26,7 @@ namespace DCL.Tutorial
         {
             base.OnStepStart();
 
+            HUDController.i?.avatarHud.SetVisibility(false);
             HUDController.i?.minimapHud.SetVisibility(false);
             HUDController.i?.expressionsHud.SetVisibility(false);
             TutorialController.i.SetChatVisible(false);
