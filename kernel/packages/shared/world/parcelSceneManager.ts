@@ -15,7 +15,8 @@ import { worldRunningObservable } from './worldState'
 export type EnableParcelSceneLoadingOptions = {
   parcelSceneClass: { new (x: EnvironmentData<LoadableParcelScene>): ParcelSceneAPI }
   preloadScene: (parcelToLoad: ILand) => Promise<any>
-  onPositionSettled?: (spawnPoint: InstancedSpawnPoint) => void
+  onPositionSettled?: () => void
+  onSpawnPoint?: (spawnPoint: InstancedSpawnPoint) => void
   onLoadParcelScenes?(x: ILand[]): void
   onUnloadParcelScenes?(x: ILand[]): void
   onPositionUnsettled?(): void
@@ -130,9 +131,15 @@ export async function enableParcelSceneLoading(options: EnableParcelSceneLoading
     }
   })
 
+  ret.on('Position.setSpawnPoint', async (opts: { spawnPoint: InstancedSpawnPoint }) => {
+    if (options.onSpawnPoint) {
+      options.onSpawnPoint(opts.spawnPoint)
+    }
+  })
+
   ret.on('Position.settled', async (opts: { spawnPoint: InstancedSpawnPoint }) => {
     if (options.onPositionSettled) {
-      options.onPositionSettled(opts.spawnPoint)
+      options.onPositionSettled()
     }
   })
 

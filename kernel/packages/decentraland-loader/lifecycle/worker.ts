@@ -60,8 +60,11 @@ let downloadManager: SceneDataDownloadManager
       parcelController.on('Sighted', (parcels: string[]) => connector.notify('Parcel.sighted', { parcels }))
       parcelController.on('Lost sight', (parcels: string[]) => connector.notify('Parcel.lostSight', { parcels }))
 
-      positionController.on('Settled Position', (spawnPoint: InstancedSpawnPoint) => {
-        connector.notify('Position.settled', { spawnPoint })
+      positionController.on('Settled Position', () => {
+        connector.notify('Position.settled')
+      })
+      positionController.on('Picked spawnpoint', (spawnPoint: InstancedSpawnPoint) => {
+        connector.notify('Position.setSpawnPoint', { spawnPoint })
       })
       positionController.on('Unsettled Position', () => {
         connector.notify('Position.unsettled')

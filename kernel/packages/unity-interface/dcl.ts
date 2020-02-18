@@ -828,9 +828,11 @@ export async function startUnityParcelLoading() {
         unityInterface.UnloadScene($.sceneId)
       })
     },
-    onPositionSettled: spawnPoint => {
+    onSpawnPoint: spawnPoint => {
+      unityInterface.Teleport(spawnPoint)
+    },
+    onPositionSettled: () => {
       if (!aborted) {
-        unityInterface.Teleport(spawnPoint)
         unityInterface.ActivateRendering()
       }
     },

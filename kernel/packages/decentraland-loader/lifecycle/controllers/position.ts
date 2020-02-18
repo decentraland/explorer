@@ -32,21 +32,8 @@ export class PositionLifecycleController extends EventEmitter {
 
   private async doReportCurrentPosition(position: Vector2Component, teleported: boolean) {
     let resolvedPosition = position
-    if (teleported) {
-      const land = await this.downloadManager.getParcelData(`${position.x},${position.y}`)
-      if (land) {
-        const spawnPoint = pickWorldSpawnpoint(land)
-        resolvedPosition = worldToGrid(spawnPoint.position)
-        this.queueTrackingEvent('Scene Spawn', { parcel: land.scene.scene.base, spawnpoint: spawnPoint.position })
-
-        this.currentSpawnpoint = spawnPoint
-      } else {
-        this.currentSpawnpoint = { position: gridToWorld(position.x, position.y) }
-      }
-    }
 
     const parcels = this.parcelController.reportCurrentPosition(resolvedPosition)
-
     if (parcels) {
       const newlySightedScenes = await this.sceneController.reportSightedParcels(parcels.sighted, parcels.lostSight)
 
@@ -58,6 +45,18 @@ export class PositionLifecycleController extends EventEmitter {
     if (teleported) {
       this.positionSettled = false
       this.emit('Unsettled Position')
+      const land = await this.downloadManager.getParcelData(`${position.x},${position.y}`)
+
+      if (land) {
+        const spawnPoint = pickWorldSpawnpoint(land)
+        resolvedPosition = worldToGrid(spawnPoint.position)
+        this.queueTrackingEvent('Scene Spawn', { parcel: land.scene.scene.base, spawnpoint: spawnPoint.position })
+
+        this.currentSpawnpoint = spawnPoint
+      } else {
+        this.currentSpawnpoint = { position: gridToWorld(position.x, position.y) }
+      }
+      this.emit('Picked spawnpoint', this.currentSpawnpoint)
     }
 
     this.checkPositionSettlement()
@@ -76,7 +75,9 @@ export class PositionLifecycleController extends EventEmitter {
 
   private checkPositionSettlement() {
     if (!this.positionSettled) {
-      const settling = this.currentlySightedScenes.every($ => this.sceneController.isRenderable($))
+      const settling =
+        this.currentlySightedScenes.length > 0 &&
+        this.currentlySightedScenes.every($ => this.sceneController.isRenderable($))
 
       if (settling) {
         this.positionSettled = settling
