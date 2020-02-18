@@ -131,7 +131,11 @@ export const RESET_TUTORIAL = location.search.indexOf('RESET_TUTORIAL') !== -1
 export const NO_TUTORIAL = location.search.indexOf('NO_TUTORIAL') !== -1
 
 export function tutorialEnabled() {
-  return !NO_TUTORIAL && WORLD_EXPLORER && (RESET_TUTORIAL || getUserProfile().profile.tutorialStep !== tutorialStepId.FINISHED)
+  return (
+    !NO_TUTORIAL &&
+    WORLD_EXPLORER &&
+    (RESET_TUTORIAL || getUserProfile().profile.tutorialStep !== tutorialStepId.FINISHED)
+  )
 }
 
 export namespace commConfigurations {
@@ -277,8 +281,10 @@ export async function setNetwork(net: ETHEREUM_NETWORK) {
         : '0xadd085f2318e9678bbb18b3e0711328f902b374b'
 
     decentralandConfigurations = {
+      ...contracts,
       contractAddress: contracts.LANDProxy,
       dao: contracts.CatalystProxy,
+      ens: contracts.CatalystProxy,
       contracts: {
         serviceLocator: contracts.ServiceLocator
       },
