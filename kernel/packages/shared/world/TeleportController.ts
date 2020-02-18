@@ -40,7 +40,7 @@ export class TeleportController {
     const profile = getUserProfile().profile as Profile
 
     if (!tutorialEnabled() || profile.tutorialStep !== tutorialStepId.INITIAL_SCENE) {
-      ;(window as any)['unityInterface'].ShowWelcomeNotification()
+      (window as any)['unityInterface'].ShowWelcomeNotification()
     }
   }
 
