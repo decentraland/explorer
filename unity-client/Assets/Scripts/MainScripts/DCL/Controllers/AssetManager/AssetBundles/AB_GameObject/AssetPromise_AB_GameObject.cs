@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Linq;
 using DCL.Helpers;
@@ -124,7 +124,7 @@ namespace DCL
                 renderers.AddRange(assetBundleModelGO.GetComponentsInChildren<Renderer>(true));
 
                 //NOTE(Brian): Renderers are enabled in settings.ApplyAfterLoad
-                yield return MaterialCachingHelper.UseCachedMaterials(renderers, enableRenderers: false);
+                yield return MaterialCachingHelper.Process(renderers, enableRenderers: false, settings.cachingFlags);
 
                 assetBundleModelGO.name = subPromise.asset.assetBundleAssetName;
 #if UNITY_EDITOR
