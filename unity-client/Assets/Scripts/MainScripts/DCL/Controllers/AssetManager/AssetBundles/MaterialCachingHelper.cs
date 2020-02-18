@@ -78,8 +78,6 @@ namespace DCL
                             //NOTE(Brian): Have to copy material because will be unloaded later.
                             var materialCopy = new Material(mat);
 
-                            foreach (var k in mat.shaderKeywords)
-                                materialCopy.EnableKeyword(k);
 #if UNITY_EDITOR
                             //NOTE(Brian): _Surface is only used by the material inspector. If we don't modify this
                             //             the inspector overrides the _ALPHABLEND_ON and the material turns opaque.
@@ -89,26 +87,14 @@ namespace DCL
                             else
                                 materialCopy.SetFloat("_Surface", 0);
 #endif
+
+                            if (materialCopy.IsKeywordEnabled("_ALPHABLEND_ON"))
+                                materialCopy.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
+                            else
+                                materialCopy.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Geometry;
+
                             PersistentAssetCache.MaterialCacheByCRC.Add(hash, new RefCountedMaterialData(hash, materialCopy));
                         }
-
-                        //string keywords = "";
-                        //var keywordsArray = mat.shaderKeywords;
-
-                        //for (int i3 = 0; i3 < keywordsArray.Length; i3++)
-                        //{
-                        //    keywords += keywordsArray[i3] + ",";
-                        //}
-
-                        //string keywords2 = "";
-                        //var keywordsArray2 = PersistentAssetCache.MaterialCacheByCRC[hash].material.shaderKeywords;
-
-                        //for (int i3 = 0; i3 < keywordsArray2.Length; i3++)
-                        //{
-                        //    keywords2 += keywordsArray2[i3] + ",";
-                        //}
-
-                        //Debug.Log($"Reusing material for renderer {r.gameObject.name} hash: {hash}... keywords original mat: {keywords} ... keywords cached mat: {keywords2}", r.gameObject);
 
                         refCountedMat = PersistentAssetCache.MaterialCacheByCRC[hash];
                         refCountedMat.IncreaseRefCount();
