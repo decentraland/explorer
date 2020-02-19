@@ -25,7 +25,6 @@ export async function awaitWeb3Approval(): Promise<void> {
     // Modern dapp browsers...
     if (window['ethereum']) {
       await removeSessionIfNotValid()
-      registerEthereumChanges()
 
       // TODO - look for user id matching account - moliva - 18/02/2020
       let userData = getUserProfile()
@@ -46,9 +45,17 @@ export async function awaitWeb3Approval(): Promise<void> {
             let result
             try {
               // Request account access if needed
-              await window.ethereum.enable()
+              const accounts: string[] | undefined = await window.ethereum.enable()
 
-              result = { successful: true, provider: window.ethereum }
+              if (accounts && accounts.length > 0) {
+                result = { successful: true, provider: window.ethereum }
+              } else {
+                // whether accounts is undefined or empty array => provider not enabled
+                result = {
+                  successful: false,
+                  provider: createProvider()
+                }
+              }
             } catch (error) {
               // User denied account access...
               result = {
@@ -73,12 +80,20 @@ export async function awaitWeb3Approval(): Promise<void> {
               let result
               try {
                 // Request account access if needed
-                await window.ethereum.enable()
+                const accounts: string[] | undefined = await window.ethereum.enable()
 
-                result = { successful: true, provider: window.ethereum }
+                if (accounts && accounts.length > 0) {
+                  result = { successful: true, provider: window.ethereum }
+                } else {
+                  // whether accounts is undefined or empty array => provider not enabled
+                  result = {
+                    successful: false,
+                    provider: createProvider()
+                  }
+                }
               } catch (error) {
                 // User denied account access, need to retry...
-                result = { successful: false }
+                result = { successful: false, provider: createProvider() }
               }
               response.resolve(result)
             }
@@ -93,6 +108,8 @@ export async function awaitWeb3Approval(): Promise<void> {
           providerFuture.resolve(result)
         }
       }
+
+      registerProviderChanges()
     } else if (window.web3 && window.web3.currentProvider) {
       await removeSessionIfNotValid()
 
@@ -130,7 +147,7 @@ async function removeSessionIfNotValid() {
 /**
  * Register to any change in the configuration of the wallet to reload the app and avoid wallet changes in-game.
  */
-function registerEthereumChanges() {
+function registerProviderChanges() {
   if (window.ethereum && typeof window.ethereum.on === 'function') {
     window.ethereum.on('accountsChanged', (accounts: string[]) => location.reload())
     window.ethereum.on('networkChanged', (networkId: string) => location.reload())
