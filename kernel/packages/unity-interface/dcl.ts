@@ -268,6 +268,13 @@ const browserInterface = {
       const blocked = profile.blocked ? profile.blocked.filter(id => id !== data.userId) : []
       global.globalStore.dispatch(saveAvatarRequest({ ...profile, blocked }))
     }
+  },
+
+  ReportUserEmail(data: { userEmail: string }) {
+    const profile = getUserProfile().profile
+    if (profile) {
+      window.analytics.identify(profile.userId, { email: data.userEmail })
+    }
   }
 }
 
