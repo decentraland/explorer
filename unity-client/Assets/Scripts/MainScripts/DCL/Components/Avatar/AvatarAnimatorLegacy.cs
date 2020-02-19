@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 public class AvatarAnimatorLegacy : MonoBehaviour
 {
@@ -48,6 +46,7 @@ public class AvatarAnimatorLegacy : MonoBehaviour
 
     [SerializeField] internal AvatarAnimationsVariable maleAnimations;
     [SerializeField] internal AvatarAnimationsVariable femaleAnimations;
+
     public new Animation animation;
     public BaseClipsIds baseClipsIds;
     public BlackBoard blackboard;
@@ -60,10 +59,12 @@ public class AvatarAnimatorLegacy : MonoBehaviour
     internal System.Action<BlackBoard> currentState;
 
     Vector3 lastPosition;
-    private AvatarAnimationsVariable currentAnimations;
+    AvatarAnimationsVariable currentAnimations;
+    public bool isOwnPlayer = false;
 
     void Start()
     {
+        isOwnPlayer = DCLCharacterController.i.transform == transform.parent;
         currentState = State_Init;
     }
 
@@ -79,7 +80,7 @@ public class AvatarAnimatorLegacy : MonoBehaviour
 
     void UpdateInterface()
     {
-        Vector3 flattenedVelocity = DCLCharacterController.i.velocity;
+        Vector3 flattenedVelocity = target.position - lastPosition;
 
         //NOTE(Brian): Vertical speed
         float verticalVelocity = flattenedVelocity.y;
@@ -87,7 +88,10 @@ public class AvatarAnimatorLegacy : MonoBehaviour
 
         flattenedVelocity.y = 0;
 
-        blackboard.movementSpeed = flattenedVelocity.magnitude / 70;
+        if (isOwnPlayer && DCLCharacterController.i.velocity.x == 0f && DCLCharacterController.i.velocity.z == 0f)
+            blackboard.movementSpeed = 0f;
+        else
+            blackboard.movementSpeed = flattenedVelocity.magnitude;
 
         Vector3 rayOffset = Vector3.up * RAY_OFFSET_LENGTH;
         //NOTE(Brian): isGrounded?
