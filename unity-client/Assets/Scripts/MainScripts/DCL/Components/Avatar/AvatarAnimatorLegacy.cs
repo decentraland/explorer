@@ -60,7 +60,7 @@ public class AvatarAnimatorLegacy : MonoBehaviour
 
     Vector3 lastPosition;
     AvatarAnimationsVariable currentAnimations;
-    public bool isOwnPlayer = false;
+    bool isOwnPlayer = false;
 
     void Start()
     {
