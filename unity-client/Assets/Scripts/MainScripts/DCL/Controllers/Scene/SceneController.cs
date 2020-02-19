@@ -124,6 +124,8 @@ namespace DCL
                 StartCoroutine(DeferredDecoding());
 
             DCLCharacterController.OnCharacterMoved += SetPositionDirty;
+
+            Utils.UnlockCursor();
         }
 
         private void SetPositionDirty(DCLCharacterPosition character)
