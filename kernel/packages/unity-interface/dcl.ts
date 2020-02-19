@@ -273,7 +273,11 @@ const browserInterface = {
   ReportUserEmail(data: { userEmail: string }) {
     const profile = getUserProfile().profile
     if (profile) {
-      window.analytics.identify(profile.userId, { email: data.userEmail })
+      if (hasWallet) {
+        window.analytics.identify(profile.userId, { email: data.userEmail })
+      } else {
+        window.analytics.identify({ email: data.userEmail })
+      }
     }
   }
 }
