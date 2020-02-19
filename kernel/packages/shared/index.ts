@@ -200,8 +200,6 @@ export async function initShared(): Promise<Session | undefined> {
         identity = await createAuthIdentity()
         userId = identity.address
 
-        identifyUser(userId)
-
         setLocalProfile(userId, {
           userId,
           identity
@@ -220,6 +218,10 @@ export async function initShared(): Promise<Session | undefined> {
       console['groupEnd']()
       ReportFatalError(AUTH_ERROR_LOGGED_OUT)
       throw e
+    }
+
+    if (identity.hasConnectedWeb3) {
+      identifyUser(userId)
     }
   } else {
     defaultLogger.log(`Using test user.`)
