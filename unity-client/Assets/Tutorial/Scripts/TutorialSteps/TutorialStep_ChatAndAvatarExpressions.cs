@@ -75,7 +75,6 @@ namespace DCL.Tutorial
             {
                 isWelcomeHudVisible = true;
                 hasWelcomeHudPop = true;
-                Utils.UnlockCursor();
                 HUDController.i.welcomeHudController.SetVisibility(true);
             }
             yield return new WaitUntil(() => !isWelcomeHudVisible);

@@ -61,5 +61,13 @@ public class WelcomeHUDController : IHUD, System.IDisposable
     public void SetVisibility(bool visible)
     {
         view.gameObject.SetActive(visible);
+        if (visible)
+        {
+            Utils.UnlockCursor();
+        }
+        else
+        {
+            Utils.LockCursor();
+        }
     }
 }
