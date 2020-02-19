@@ -284,6 +284,7 @@ export async function initShared(): Promise<Session | undefined> {
       profile = { ...profile, name: names[0], hasClaimedName: true, version: (profile.version || 0) + 1 }
 
       if (names && names.length > 0) {
+        defaultLogger.info(`Found missing claimed name '${names[0]}' for profile ${userId}, consolidating profile... `)
         store.dispatch(saveAvatarRequest(profile))
       }
     }
