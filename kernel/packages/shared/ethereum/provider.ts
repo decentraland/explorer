@@ -25,6 +25,7 @@ export async function awaitWeb3Approval(): Promise<void> {
     // Modern dapp browsers...
     if (window['ethereum']) {
       await removeSessionIfNotValid()
+      registerEthereumChanges()
 
       // TODO - look for user id matching account - moliva - 18/02/2020
       let userData = getUserProfile()
@@ -123,6 +124,17 @@ async function removeSessionIfNotValid() {
 
   if ((userData && userData.userId !== account) || isSessionExpired(userData)) {
     removeUserProfile()
+  }
+}
+
+/**
+ * Register to any change in the configuration of the wallet to reload the app and avoid wallet changes in-game.
+ */
+function registerEthereumChanges() {
+  if (window.ethereum && typeof window.ethereum.on === 'function') {
+    window.ethereum.on('accountsChanged', (accounts: string[]) => location.reload())
+    window.ethereum.on('networkChanged', (networkId: string) => location.reload())
+    window.ethereum.on('close', (code: number, reason: string) => location.reload())
   }
 }
 
