@@ -120,31 +120,30 @@ async function fetchCatalystStatuses(nodes: { domain: string }[]) {
 }
 
 export function pickCatalystRealm(candidates: Candidate[]): Realm {
-  const fullLayersByDomain: Record<string, number> = {}
+  const usersByDomain: Record<string, number> = {}
 
   candidates.forEach(it => {
-    if (!fullLayersByDomain[it.domain]) {
-      fullLayersByDomain[it.domain] = 0
+    if (!usersByDomain[it.domain]) {
+      usersByDomain[it.domain] = 0
     }
 
-    if (it.layer.usersCount >= it.layer.maxUsers) {
-      fullLayersByDomain[it.domain] += 1
-    }
+    usersByDomain[it.domain] += it.layer.usersCount
   })
 
   const sorted = candidates
     .filter(it => it.layer.usersCount < it.layer.maxUsers)
     .sort((c1, c2) => {
       const elapsedDiff = c1.elapsed - c2.elapsed
-      const fullLayersDiff = fullLayersByDomain[c1.domain] - fullLayersByDomain[c2.domain]
-      const diff = c2.score - c1.score
-      return Math.abs(elapsedDiff) > 1000
-        ? elapsedDiff // If the latency difference is greater than 1000, we consider that as the main factor
-        : Math.abs(fullLayersDiff) > 0
-        ? fullLayersDiff // If one of the candidates has more full layers than the other, we prioritize the one with less full layers
-        : diff === 0 
-        ? elapsedDiff // If the candidates have the same score by users, we consider the latency again
-        : diff // If not, we consider the score by users
+      const usersDiff = usersByDomain[c1.domain] - usersByDomain[c2.domain]
+      const scoreDiff = c2.score - c1.score
+
+      return Math.abs(elapsedDiff) > 1500
+        ? elapsedDiff // If the latency difference is greater than 1500, we consider that as the main factor
+        : scoreDiff !== 0
+        ? scoreDiff // If there's score difference, we consider that
+        : usersDiff !== 0
+        ? usersDiff // If the score is the same (as when they are empty)
+        : elapsedDiff // If the candidates have the same score by users, we consider the latency again
     })
 
   if (sorted.length === 0 && candidates.length > 0) {
