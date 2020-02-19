@@ -1,5 +1,5 @@
 import { WebSocketProvider, RequestManager } from 'eth-connect'
-import { future } from 'fp-future'
+import { future, IFuture } from 'fp-future'
 
 import { ethereumConfigurations, ETHEREUM_NETWORK } from 'config'
 import { defaultLogger } from 'shared/logger'
@@ -18,6 +18,33 @@ export const providerFuture = future()
 export const requestManager = new RequestManager(null)
 
 let providerRequested = false
+
+function processLoginAttempt(response: IFuture<{ successful: boolean; provider: any }>) {
+  return async () => {
+    let result
+    try {
+      // Request account access if needed
+      const accounts: string[] | undefined = await window.ethereum.enable()
+
+      if (accounts && accounts.length > 0) {
+        result = { successful: true, provider: window.ethereum }
+      } else {
+        // whether accounts is undefined or empty array => provider not enabled
+        result = {
+          successful: false,
+          provider: createProvider()
+        }
+      }
+    } catch (error) {
+      // User denied account access...
+      result = {
+        successful: false,
+        provider: createProvider()
+      }
+    }
+    response.resolve(result)
+  }
+}
 
 export async function awaitWeb3Approval(): Promise<void> {
   if (!providerRequested) {
@@ -41,30 +68,7 @@ export async function awaitWeb3Approval(): Promise<void> {
 
           let response = future()
 
-          button!.onclick = async () => {
-            let result
-            try {
-              // Request account access if needed
-              const accounts: string[] | undefined = await window.ethereum.enable()
-
-              if (accounts && accounts.length > 0) {
-                result = { successful: true, provider: window.ethereum }
-              } else {
-                // whether accounts is undefined or empty array => provider not enabled
-                result = {
-                  successful: false,
-                  provider: createProvider()
-                }
-              }
-            } catch (error) {
-              // User denied account access...
-              result = {
-                successful: false,
-                provider: createProvider()
-              }
-            }
-            response.resolve(result)
-          }
+          button!.onclick = processLoginAttempt(response)
 
           let result
           while (true) {
@@ -76,27 +80,7 @@ export async function awaitWeb3Approval(): Promise<void> {
 
             response = future()
 
-            button!.onclick = async () => {
-              let result
-              try {
-                // Request account access if needed
-                const accounts: string[] | undefined = await window.ethereum.enable()
-
-                if (accounts && accounts.length > 0) {
-                  result = { successful: true, provider: window.ethereum }
-                } else {
-                  // whether accounts is undefined or empty array => provider not enabled
-                  result = {
-                    successful: false,
-                    provider: createProvider()
-                  }
-                }
-              } catch (error) {
-                // User denied account access, need to retry...
-                result = { successful: false, provider: createProvider() }
-              }
-              response.resolve(result)
-            }
+            button!.onclick = processLoginAttempt(response)
 
             if (result.successful) {
               break
