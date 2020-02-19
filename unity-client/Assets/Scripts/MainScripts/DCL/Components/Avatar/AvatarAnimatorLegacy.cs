@@ -77,10 +77,10 @@ public class AvatarAnimatorLegacy : MonoBehaviour
         currentState?.Invoke(blackboard);
     }
 
-
     void UpdateInterface()
     {
-        Vector3 flattenedVelocity = target.position - lastPosition;
+        Vector3 velocityTargetPosition = (isOwnPlayer ? DCLCharacterController.i.transform.localPosition : target.position);
+        Vector3 flattenedVelocity = velocityTargetPosition - lastPosition;
 
         //NOTE(Brian): Vertical speed
         float verticalVelocity = flattenedVelocity.y;
@@ -88,10 +88,7 @@ public class AvatarAnimatorLegacy : MonoBehaviour
 
         flattenedVelocity.y = 0;
 
-        if (isOwnPlayer && DCLCharacterController.i.velocity.x == 0f && DCLCharacterController.i.velocity.z == 0f)
-            blackboard.movementSpeed = 0f;
-        else
-            blackboard.movementSpeed = flattenedVelocity.magnitude;
+        blackboard.movementSpeed = flattenedVelocity.magnitude;
 
         Vector3 rayOffset = Vector3.up * RAY_OFFSET_LENGTH;
         //NOTE(Brian): isGrounded?
@@ -104,10 +101,8 @@ public class AvatarAnimatorLegacy : MonoBehaviour
         Debug.DrawRay(target.transform.position + rayOffset, Vector3.down * (RAY_OFFSET_LENGTH - ELEVATION_OFFSET), blackboard.isGrounded ? Color.green : Color.red);
 #endif
 
-        lastPosition = target.position;
+        lastPosition = velocityTargetPosition;
     }
-
-
 
     void State_Init(BlackBoard bb)
     {
