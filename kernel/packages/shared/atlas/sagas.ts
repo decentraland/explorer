@@ -96,6 +96,9 @@ function* reportOne(action: FetchNameFromSceneJsonSuccess) {
 
 export function* checkAndReportAround() {
   const userPosition = lastPlayerPosition
+  if (!userPosition) {
+    return
+  }
   let lastReport = yield select(state => state.atlas.lastReportPosition)
   const TRIGGER_DISTANCE = 10 * parcelLimits.parcelSize
   if (
