@@ -6,8 +6,8 @@ import { defaultLogger } from 'shared/logger'
 import { Account } from 'web3x/account'
 import { getUserProfile } from 'shared/comms/peers'
 import { getTLD } from '../../config/index'
-import { getUserAccount } from './EthereumService'
 import { removeUserProfile } from '../comms/peers'
+import { Eth } from 'web3x/eth'
 
 declare var window: Window & {
   ethereum: any
@@ -140,4 +140,19 @@ function showEthConnectAdvice(show: boolean) {
 
 export function isSessionExpired(userData: any) {
   return !userData || !userData.identity || new Date(userData.identity.expiration) < new Date()
+}
+
+export async function getUserAccount(): Promise<string | undefined> {
+  try {
+    const eth = Eth.fromCurrentProvider()!
+    const accounts = await eth.getAccounts()
+
+    if (!accounts || accounts.length === 0) {
+      return undefined
+    }
+
+    return accounts[0].toJSON().toLocaleLowerCase()
+  } catch (error) {
+    throw new Error(`Could not access eth_accounts: "${error.message}"`)
+  }
 }
