@@ -79,7 +79,7 @@ public class AvatarAnimatorLegacy : MonoBehaviour
 
     void UpdateInterface()
     {
-        Vector3 flattenedVelocity = target.position - lastPosition;
+        Vector3 flattenedVelocity = DCLCharacterController.i.velocity;
 
         //NOTE(Brian): Vertical speed
         float verticalVelocity = flattenedVelocity.y;
@@ -87,7 +87,7 @@ public class AvatarAnimatorLegacy : MonoBehaviour
 
         flattenedVelocity.y = 0;
 
-        blackboard.movementSpeed = flattenedVelocity.magnitude;
+        blackboard.movementSpeed = flattenedVelocity.magnitude / 70;
 
         Vector3 rayOffset = Vector3.up * RAY_OFFSET_LENGTH;
         //NOTE(Brian): isGrounded?

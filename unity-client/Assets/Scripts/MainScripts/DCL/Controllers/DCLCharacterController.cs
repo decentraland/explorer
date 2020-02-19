@@ -34,6 +34,9 @@ public class DCLCharacterController : MonoBehaviour
     [System.NonSerialized]
     public CharacterController characterController;
 
+    [System.NonSerialized]
+    public Vector3 velocity;
+
     new Rigidbody rigidbody;
     new Collider collider;
 
@@ -43,7 +46,6 @@ public class DCLCharacterController : MonoBehaviour
     float lastJumpButtonPressedTime = 0f;
     float lastMovementReportTime;
     float originalGravity;
-    Vector3 velocity = Vector3.zero;
     Vector2 aimingInput;
     bool isSprinting = false;
     bool isJumping = false;
