@@ -26,9 +26,11 @@ const score = ({ usersCount, maxUsers = 50 }: Layer) => {
     return -10 * v
   }
 
-  const p = 3 / (maxUsers ? maxUsers : 50)
+  const phase = - Math.PI / 1.8
 
-  return v + v * Math.cos(p * (usersCount - 1))
+  const period = Math.PI / (0.67 * (maxUsers ? maxUsers : 50))
+
+  return v + v * Math.cos(phase + period * (usersCount))
 }
 
 function ping(url: string): Promise<{ success: boolean; elapsed?: number; result?: CatalystLayers }> {
@@ -46,16 +48,23 @@ function ping(url: string): Promise<{ success: boolean; elapsed?: number; result
         started = new Date()
       }
       if (http.readyState === XMLHttpRequest.DONE) {
-        const ended = new Date().getTime()
-        if (http.status >= 400) {
+        try {
+          const ended = new Date().getTime()
+          if (http.status !== 200) {
+            result.resolve({
+              success: false
+            })
+          } else {
+            result.resolve({
+              success: true,
+              elapsed: ended - started.getTime(),
+              result: JSON.parse(http.responseText) as Layer[]
+            })
+          }
+        } catch (e) {
+          defaultLogger.error('Error fetching status of Catalyst server', e)
           result.resolve({
             success: false
-          })
-        } else {
-          result.resolve({
-            success: true,
-            elapsed: ended - started.getTime(),
-            result: JSON.parse(http.responseText) as Layer[]
           })
         }
       }
@@ -86,11 +95,8 @@ export async function fecthCatalystRealms(): Promise<Candidate[]> {
 
 async function fetchCatalystStatuses(nodes: { domain: string }[]) {
   const results = await Promise.all(nodes.map(node => ping(`${node.domain}/comms/status?includeLayers=true`)))
-  const successfulResults = results.filter($ => $.success)
-  if (successfulResults.length === 0) {
-    throw new Error('no node responded')
-  }
-  return zip(nodes, successfulResults).reduce(
+
+  return zip(nodes, results).reduce(
     (
       union: Candidate[],
       [{ domain }, { elapsed, result, success }]: [
