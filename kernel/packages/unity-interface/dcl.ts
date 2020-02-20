@@ -190,7 +190,7 @@ const browserInterface = {
   SaveUserAvatar({ face, body, avatar }: { face: string; body: string; avatar: Avatar }) {
     const profile: Profile = getUserProfile().profile as Profile
     profile.avatar = avatar
-    profile.avatar.snapshots.face = face 
+    profile.avatar.snapshots.face = face
     profile.avatar.snapshots.body = body
     global.globalStore.dispatch(saveAvatarRequest(profile))
   },

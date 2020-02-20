@@ -268,7 +268,7 @@ export async function initShared(): Promise<Session | undefined> {
   console['group']('connect#profile')
   if (!PREVIEW) {
     let profile = await PassportAsPromise(userId)
-    let profileDirty:boolean = false
+    let profileDirty: boolean = false
     if (!profile.hasClaimedName) {
       const names = await fetchOwnedENS(ethereumConfigurations[net].names, userId)
 
@@ -280,12 +280,12 @@ export async function initShared(): Promise<Session | undefined> {
         profileDirty = true
       }
     }
-    
+
     const localTutorialStep = getUserProfile().profile.tutorialStep
 
     if (localTutorialStep !== profile.tutorialStep) {
       let finalTutorialStep = Math.max(localTutorialStep, profile.tutorialStep)
-      profile = { ...profile, tutorialStep:finalTutorialStep }
+      profile = { ...profile, tutorialStep: finalTutorialStep }
       profileDirty = true
     }
 
