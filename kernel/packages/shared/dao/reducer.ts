@@ -4,7 +4,8 @@ import {
   INIT_CATALYST_REALM,
   SET_CATALYST_CANDIDATES,
   SET_CATALYST_REALM_COMMS_STATUS,
-  MARK_CATALYST_REALM_FULL
+  MARK_CATALYST_REALM_FULL,
+  SET_ADDED_CATALYST_CANDIDATES
 } from './actions'
 import { DaoState, Candidate, Realm } from './types'
 import { FETCH_PROFILE_SERVICE, FETCH_CONTENT_SERVICE, UPDATE_CONTENT_SERVICE, COMMS_SERVICE } from '../../config/index'
@@ -31,6 +32,11 @@ export function daoReducer(state?: DaoState, action?: AnyAction): DaoState {
       return {
         ...state,
         candidates: action.payload
+      }
+    case SET_ADDED_CATALYST_CANDIDATES:
+      return {
+        ...state,
+        addedCandidates: action.payload
       }
     case INIT_CATALYST_REALM: {
       return {
