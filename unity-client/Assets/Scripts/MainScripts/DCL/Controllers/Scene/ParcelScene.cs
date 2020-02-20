@@ -227,6 +227,7 @@ namespace DCL.Controllers
                 if (entities.Count > 0)
                 {
                     this.gameObject.transform.position = EnvironmentSettings.MORDOR;
+                    this.gameObject.SetActive(false);
 
                     RemoveAllEntities();
                 }
