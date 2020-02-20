@@ -9,3 +9,5 @@ export const getAddedServers = (store: RootMetaState): string[] => {
 
   return config.servers.added
 }
+
+export const isMetaConfigurationInitiazed = (store: RootMetaState): boolean => store.meta.initialized

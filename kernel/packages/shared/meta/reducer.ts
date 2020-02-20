@@ -1,12 +1,13 @@
 import { AnyAction } from 'redux'
 import { META_CONFIGURATION_INITIALIZED } from './actions'
-import { MetaConfigurationState } from './types'
+import { MetaState } from './types'
 
 const initialState = {
+  initialized: false,
   config: {}
 }
 
-export function metaReducer(state?: MetaConfigurationState, action?: AnyAction): MetaConfigurationState {
+export function metaReducer(state?: MetaState, action?: AnyAction): MetaState {
   if (!state) {
     return initialState
   }
@@ -17,6 +18,7 @@ export function metaReducer(state?: MetaConfigurationState, action?: AnyAction):
     case META_CONFIGURATION_INITIALIZED:
       return {
         ...state,
+        initialized: true,
         config: action.payload
       }
     default:

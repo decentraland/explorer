@@ -7,20 +7,7 @@ import {
   MARK_CATALYST_REALM_FULL
 } from './actions'
 import { DaoState, Candidate, Realm } from './types'
-import {
-  FETCH_PROFILE_SERVICE,
-  FETCH_CONTENT_SERVICE,
-  UPDATE_CONTENT_SERVICE,
-  COMMS_SERVICE,
-  REALM as REALM_QUERY
-} from '../../config/index'
-import { getRealmFromString } from '.'
-
-function getConfiguredRealm(candidates: Candidate[]) {
-  if (REALM_QUERY) {
-    return getRealmFromString(REALM_QUERY, candidates)
-  }
-}
+import { FETCH_PROFILE_SERVICE, FETCH_CONTENT_SERVICE, UPDATE_CONTENT_SERVICE, COMMS_SERVICE } from '../../config/index'
 
 export function daoReducer(state?: DaoState, action?: AnyAction): DaoState {
   if (!state) {
@@ -32,6 +19,7 @@ export function daoReducer(state?: DaoState, action?: AnyAction): DaoState {
       commsServer: '',
       realm: undefined,
       candidates: [],
+      addedCandidates: [],
       commsStatus: { status: 'initial', connectedPeers: 0 }
     }
   }
@@ -45,12 +33,10 @@ export function daoReducer(state?: DaoState, action?: AnyAction): DaoState {
         candidates: action.payload
       }
     case INIT_CATALYST_REALM: {
-      const configuredRealm = getConfiguredRealm(state.candidates)
-      const realm = configuredRealm ? configuredRealm : action.payload
       return {
         ...state,
         initialized: true,
-        ...ensureProfileDao(realmProperties(realm), state.candidates)
+        ...ensureProfileDao(realmProperties(action.payload), state.candidates)
       }
     }
     case SET_CATALYST_REALM:
@@ -104,6 +90,6 @@ function ensureProfileDao(state: Partial<DaoState>, candidates: Candidate[]) {
   return {
     ...state,
     profileServer: FETCH_PROFILE_SERVICE ? FETCH_PROFILE_SERVICE : domain + '/lambdas/profile',
-    fetchContentServer: FETCH_CONTENT_SERVICE ? FETCH_CONTENT_SERVICE : domain + '/lambdas/contentv2'
+    updateContentServer: UPDATE_CONTENT_SERVICE ? UPDATE_CONTENT_SERVICE : domain + '/content'
   }
 }

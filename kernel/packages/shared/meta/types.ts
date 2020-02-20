@@ -8,10 +8,11 @@ export type MetaConfiguration = {
   }
 }
 
-export type MetaConfigurationState = {
+export type MetaState = {
+  initialized: boolean
   config: Partial<MetaConfiguration>
 }
 
 export type RootMetaState = {
-  meta: MetaConfigurationState
+  meta: MetaState
 }
