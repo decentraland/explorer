@@ -1,4 +1,4 @@
-﻿using DCL.Controllers;
+using DCL.Controllers;
 using DCL.Helpers;
 using DCL.Interface;
 using DCL.Models;
@@ -435,8 +435,6 @@ namespace DCL
 
             if (MessagingControllersManager.i.ContainsController(sceneKey))
                 MessagingControllersManager.i.RemoveController(sceneKey);
-
-            Debug.Log("Unload scene..");
         }
 
         public void UnloadParcelSceneExecute(string sceneKey)
