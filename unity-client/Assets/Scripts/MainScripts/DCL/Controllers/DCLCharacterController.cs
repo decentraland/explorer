@@ -122,6 +122,14 @@ public class DCLCharacterController : MonoBehaviour
         sprintAction.OnFinished += sprintFinishedDelegate;
     }
 
+    // We can't allow the character to be disabled
+    void OnDisable()
+    {
+        ResetGround();
+
+        gameObject.SetActive(true);
+    }
+
     void OnDestroy()
     {
         characterPosition.OnPrecisionAdjust -= OnPrecisionAdjust;
