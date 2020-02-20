@@ -170,6 +170,8 @@ public class DCLCharacterController : MonoBehaviour
 
     public void Teleport(string teleportPayload)
     {
+        ResetGround();
+
         var payload = Utils.FromJsonWithNulls<Vector3>(teleportPayload);
 
         var newPosition = new Vector3(payload.x, payload.y, payload.z);
