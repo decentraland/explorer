@@ -50,13 +50,13 @@ export function daoReducer(state?: DaoState, action?: AnyAction): DaoState {
       return {
         ...state,
         initialized: true,
-        ...realmProperties(realm)
+        ...ensureProfileDao(realmProperties(realm), state.candidates)
       }
     }
     case SET_CATALYST_REALM:
       return {
         ...state,
-        ...realmProperties(action.payload, !!action.payload.configOverride)
+        ...ensureProfileDao(realmProperties(action.payload, !!action.payload.configOverride), state.candidates)
       }
     case SET_CATALYST_REALM_COMMS_STATUS:
       return {
@@ -78,7 +78,7 @@ export function daoReducer(state?: DaoState, action?: AnyAction): DaoState {
       return state
   }
 }
-function realmProperties(realm: Realm, configOverride: boolean = true) {
+function realmProperties(realm: Realm, configOverride: boolean = true): Partial<DaoState> {
   const domain = realm.domain
   return {
     profileServer: FETCH_PROFILE_SERVICE && configOverride ? FETCH_PROFILE_SERVICE : domain + '/lambdas/profile',
@@ -86,5 +86,24 @@ function realmProperties(realm: Realm, configOverride: boolean = true) {
     updateContentServer: UPDATE_CONTENT_SERVICE && configOverride ? UPDATE_CONTENT_SERVICE : domain + '/content',
     commsServer: COMMS_SERVICE && configOverride ? COMMS_SERVICE : domain + '/comms',
     realm
+  }
+}
+
+function randomIn<T>(array: T[]) {
+  return array[Math.floor(Math.random() * array.length)]
+}
+
+function ensureProfileDao(state: Partial<DaoState>, candidates: Candidate[]) {
+  // if current realm is in dao => return current state
+  if (state.realm && candidates.some(candidate => candidate.domain === state.realm!.domain)) {
+    return state
+  }
+
+  // otherwise => override fetch & update profile server to maintain consistency
+  const { domain } = randomIn(candidates)
+  return {
+    ...state,
+    profileServer: FETCH_PROFILE_SERVICE ? FETCH_PROFILE_SERVICE : domain + '/lambdas/profile',
+    fetchContentServer: FETCH_CONTENT_SERVICE ? FETCH_CONTENT_SERVICE : domain + '/lambdas/contentv2'
   }
 }

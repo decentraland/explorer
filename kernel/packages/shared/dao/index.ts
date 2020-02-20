@@ -93,7 +93,7 @@ export async function fecthCatalystRealms(): Promise<Candidate[]> {
   return fetchCatalystStatuses(nodes)
 }
 
-async function fetchCatalystStatuses(nodes: { domain: string }[]) {
+export async function fetchCatalystStatuses(nodes: { domain: string }[]) {
   const results = await Promise.all(nodes.map(node => ping(`${node.domain}/comms/status?includeLayers=true`)))
 
   return zip(nodes, results).reduce(
