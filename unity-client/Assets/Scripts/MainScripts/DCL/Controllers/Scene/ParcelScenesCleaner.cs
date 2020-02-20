@@ -42,10 +42,13 @@ namespace DCL
             if (!entity.markedForCleanup)
             {
                 entity.markedForCleanup = true;
-                entity.gameObject.SetActive(false);
+
+                if (entity.gameObject != null)
+                    entity.gameObject.SetActive(false);
 
 #if UNITY_EDITOR
-                entity.gameObject.name += "-MARKED-FOR-CLEANUP";
+                if (entity.gameObject != null)
+                    entity.gameObject.name += "-MARKED-FOR-CLEANUP";
 #endif
 
                 entitiesMarkedForCleanup.Enqueue(entity);
