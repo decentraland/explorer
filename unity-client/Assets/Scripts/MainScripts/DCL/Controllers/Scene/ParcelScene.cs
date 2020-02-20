@@ -1,4 +1,4 @@
-﻿using DCL.Components;
+using DCL.Components;
 using DCL.Configuration;
 using DCL.Helpers;
 using DCL.Models;
@@ -367,6 +367,7 @@ namespace DCL.Controllers
             SceneController.i.OnMessageDecodeEnds?.Invoke("RemoveEntity");
             if (entities.ContainsKey(tmpRemoveEntityMessage.id))
             {
+                Debug.Log("removing entity " + tmpRemoveEntityMessage.id);
                 DecentralandEntity entity = entities[tmpRemoveEntityMessage.id];
 
                 if (!entity.markedForCleanup)

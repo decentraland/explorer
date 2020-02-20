@@ -103,6 +103,7 @@ public class DCLCharacterController : MonoBehaviour
         SceneController.OnDebugModeSet += () => supportsMovingPlatforms = true;
 
         lastPosition = transform.position;
+        transform.parent = null;
     }
 
     private void SuscribeToInput()
@@ -297,7 +298,6 @@ public class DCLCharacterController : MonoBehaviour
         if (isOnMovingPlatform)
         {
             lastLocalGroundPosition = groundTransform.InverseTransformPoint(transform.position);
-            Debug.Log($"lastLocal = {lastLocalGroundPosition}");
         }
     }
 
@@ -316,7 +316,7 @@ public class DCLCharacterController : MonoBehaviour
 
     public void ResetGround()
     {
-        if (groundTransform == null)
+        if (!isOnMovingPlatform)
             return;
 
         isOnMovingPlatform = false;
@@ -327,6 +327,9 @@ public class DCLCharacterController : MonoBehaviour
     Vector3 lastLocalGroundPosition;
     void CheckGround()
     {
+        if (groundTransform == null)
+            ResetGround();
+
         if (isOnMovingPlatform)
         {
             //NOTE(Brian): This should move the character with the moving platform
@@ -355,13 +358,16 @@ public class DCLCharacterController : MonoBehaviour
             {
                 groundTransform = transformHit;
             }
-
-            groundLastPosition = groundTransform.position;
-            groundLastRotation = groundTransform.rotation;
         }
         else
         {
             ResetGround();
+        }
+
+        if (groundTransform != null)
+        {
+            groundLastPosition = groundTransform.position;
+            groundLastRotation = groundTransform.rotation;
         }
 
         isGrounded = groundTransform != null && groundTransform.gameObject.activeInHierarchy;
