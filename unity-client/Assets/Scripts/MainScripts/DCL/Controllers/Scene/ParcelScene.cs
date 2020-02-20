@@ -81,6 +81,10 @@ namespace DCL.Controllers
                 boundariesChecker = new SceneBoundariesChecker(this);
         }
 
+        void OnDisable()
+        {
+            metricsController.Disable();
+        }
 
         private void Update()
         {
