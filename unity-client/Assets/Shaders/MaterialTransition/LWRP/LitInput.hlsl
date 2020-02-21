@@ -15,6 +15,9 @@ half _Smoothness;
 half _Metallic;
 half _BumpScale;
 half _OcclusionStrength;
+float _CullYPlane;
+half _FadeThickness;
+half _FadeDirection;
 CBUFFER_END
 
 TEXTURE2D(_OcclusionMap);       SAMPLER(sampler_OcclusionMap);
