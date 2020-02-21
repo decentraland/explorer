@@ -1,4 +1,4 @@
-﻿using GLTF;
+using GLTF;
 using GLTF.Schema;
 
 using System;
@@ -1674,6 +1674,27 @@ namespace UnityGLTF
 
             Material material = materialCacheData.GetContents(primitive.Attributes.ContainsKey(SemanticProperties.COLOR_0));
 
+            //NOTE(Brian): This is to move the rendering of opaque animated stuff on top of the queue, so the SRP batcher
+            //             can group all the draw calls.
+            if (material.renderQueue != (int)RenderQueue.Transparent)
+            {
+                if (renderer is SkinnedMeshRenderer)
+                {
+                    if (material.renderQueue == (int)RenderQueue.Geometry)
+                        material.renderQueue = (int)RenderQueue.Geometry - 500;
+                    else if (material.renderQueue == (int)RenderQueue.AlphaTest)
+                        material.renderQueue = (int)RenderQueue.AlphaTest - 500;
+                }
+                else
+                {
+                    int crcBucket = material.ComputeCRC() % 500;
+                    if (material.renderQueue == (int)RenderQueue.Geometry)
+                        material.renderQueue = (int)RenderQueue.Geometry + crcBucket;
+                    else if (material.renderQueue == (int)RenderQueue.AlphaTest)
+                        material.renderQueue = (int)RenderQueue.AlphaTest + crcBucket;
+                }
+            }
+
             if (matController != null)
             {
                 matController.OnDidFinishLoading(material);
@@ -2194,6 +2215,10 @@ namespace UnityGLTF
             for (int i = 0; i < 2; i++)
             {
                 string materialCRC = material[i].ComputeCRC().ToString() + material[i].name;
+
+                //NOTE(Brian): Just enable these keywords so the SRP batcher batches more stuff.
+                material[i].EnableKeyword("_EMISSION");
+                material[i].EnableKeyword("_NORMALMAP");
 
                 if (!addMaterialsToPersistentCaching)
                 {

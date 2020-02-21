@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -69,7 +69,8 @@ namespace DCL
 
                     if ((cachingFlags & Mode.CACHE_MATERIALS) != 0)
                     {
-                        string hash = ComputeHash(mat);
+                        int crc = mat.ComputeCRC();
+                        string hash = crc.ToString();
 
                         RefCountedMaterialData refCountedMat;
 
@@ -91,7 +92,22 @@ namespace DCL
                             if (materialCopy.IsKeywordEnabled("_ALPHABLEND_ON"))
                                 materialCopy.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
                             else
-                                materialCopy.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Geometry;
+                            {
+                                int crcBucket = crc % 500;
+
+                                //NOTE(Brian): This is to move the rendering of animated stuff on top of the queue, so the SRP batcher
+                                //             can group all the draw calls.
+                                if (r is SkinnedMeshRenderer)
+                                    materialCopy.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Geometry - 500;
+                                else
+                                {
+                                    materialCopy.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Geometry + crcBucket;
+                                }
+                            }
+
+                            //NOTE(Brian): Just enable these keywords so the SRP batcher batches more stuff.
+                            materialCopy.EnableKeyword("_EMISSION");
+                            materialCopy.EnableKeyword("_NORMALMAP");
 
                             PersistentAssetCache.MaterialCacheByCRC.Add(hash, new RefCountedMaterialData(hash, materialCopy));
                         }
