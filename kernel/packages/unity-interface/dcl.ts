@@ -517,6 +517,10 @@ unityInterface = {
   TriggerAirdropDisplay(data: AirdropInfo) {
     gameInstance.SendMessage('HUDController', 'AirdroppingRequest', JSON.stringify(data))
   },
+  TriggerTreasureHuntNextScenePopup() {
+    if (tutorialEnabled()) return
+    gameInstance.SendMessage('NextTreasureScenePopUpHUD', 'Show')
+  },
   SelectGizmoBuilder(type: string) {
     this.SendBuilderMessage('SelectGizmo', type)
   },
