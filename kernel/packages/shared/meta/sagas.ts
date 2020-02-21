@@ -11,7 +11,8 @@ const DEFAULT_META_CONFIGURATION: MetaConfiguration = {
   },
   servers: {
     added: [],
-    denied: []
+    denied: [],
+    contentWhitelist: []
   }
 }
 

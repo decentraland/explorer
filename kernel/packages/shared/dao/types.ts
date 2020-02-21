@@ -39,6 +39,7 @@ export type DaoState = {
   commsServer: string
   realm: Realm | undefined
   candidates: Candidate[]
+  contentWhitelist: Candidate[]
   addedCandidates: Candidate[]
   commsStatus: CommsStatus
 }

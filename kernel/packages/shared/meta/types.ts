@@ -5,6 +5,7 @@ export type MetaConfiguration = {
   servers: {
     added: string[]
     denied: string[]
+    contentWhitelist: string[]
   }
 }
 
