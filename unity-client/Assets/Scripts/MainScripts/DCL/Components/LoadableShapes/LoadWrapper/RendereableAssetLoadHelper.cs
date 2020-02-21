@@ -135,7 +135,9 @@ namespace DCL.Components
                     Debug.Log("Forgetting not null promise...");
             }
 
-            gltfPromise = new AssetPromise_GLTF(contentProvider, targetUrl);
+            contentProvider.TryGetContentsUrl_Raw(targetUrl, out string hash);
+
+            gltfPromise = new AssetPromise_GLTF(contentProvider, targetUrl, hash);
             gltfPromise.settings = this.settings;
 
             gltfPromise.OnSuccessEvent += (x) => OnSuccessWrapper(x, OnSuccess);
