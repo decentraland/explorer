@@ -289,6 +289,10 @@ const browserInterface = {
         window.analytics.identify({ email: data.userEmail })
       }
     }
+  },
+
+  GoToNextTreasureScene() {
+    TeleportController.goToNext()
   }
 }
 

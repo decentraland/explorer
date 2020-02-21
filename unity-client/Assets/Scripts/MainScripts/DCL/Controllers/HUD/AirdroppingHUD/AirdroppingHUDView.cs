@@ -1,4 +1,7 @@
+#define TREASURE_HUNT
+
 using DCL.Helpers;
+using DCL.Interface;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
@@ -23,6 +26,7 @@ public class AirdroppingHUDView : MonoBehaviour
     [SerializeField] internal GameObject singleItemScreen;
     [SerializeField] internal GameObject singleItemContainer;
     [SerializeField] internal Button singleItemDoneButton;
+    [SerializeField] internal GameObject itemsLeftContainer;
     [SerializeField] internal TextMeshProUGUI itemsLeft;
 
     [Header("Summary Screen")]
@@ -33,6 +37,7 @@ public class AirdroppingHUDView : MonoBehaviour
     [Header("Summary No Items Screen")]
     [SerializeField] internal GameObject summaryNoItemsScreen;
     [SerializeField] internal Button summaryNoItemsDoneButton;
+    [SerializeField] internal Button summaryNoItemsCancelButton;
 
     internal static AirdroppingHUDView Create()
     {
@@ -51,7 +56,19 @@ public class AirdroppingHUDView : MonoBehaviour
         summaryDoneButton.onClick.AddListener(nextStateCallback);
 
         summaryNoItemsDoneButton.onClick.RemoveAllListeners();
+
+#if !TREASURE_HUNT
         summaryNoItemsDoneButton.onClick.AddListener(nextStateCallback);
+#else
+        summaryNoItemsDoneButton.onClick.AddListener(() =>
+        {
+            WebInterface.GoToNextTreasureHuntScene();
+            nextStateCallback?.Invoke();
+        });
+#endif
+
+        summaryNoItemsCancelButton?.onClick.RemoveAllListeners();
+        summaryNoItemsCancelButton?.onClick.AddListener(nextStateCallback);
 
         CleanState();
     }
@@ -68,6 +85,7 @@ public class AirdroppingHUDView : MonoBehaviour
     {
         CleanState();
         singleItemScreen.SetActive(true);
+        itemsLeftContainer.SetActive(true);
         itemsLeft.text = itemsleft.ToString();
         CreateItemPanel(singleItemContainer.transform, model).SetData(model.name, model.subtitle, model.thumbnailURL);
     }
@@ -87,6 +105,7 @@ public class AirdroppingHUDView : MonoBehaviour
     {
         CleanState();
         summaryNoItemsScreen.SetActive(true);
+        itemsLeftContainer.SetActive(false);
     }
 
     public void CleanState()

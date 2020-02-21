@@ -758,5 +758,10 @@ namespace DCL.Interface
                 userEmail = email
             });
         }
+
+        public static void GoToNextTreasureHuntScene()
+        {
+            SendMessage("GoToNextTreasureScene");
+        }
     }
 }
