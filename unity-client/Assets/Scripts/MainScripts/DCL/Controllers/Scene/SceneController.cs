@@ -236,6 +236,11 @@ namespace DCL
             RenderingController.i.OnRenderingStateChanged -= OnRenderingStateChange;
             DCLCharacterController.OnCharacterMoved -= SetPositionDirty;
             ParcelScene.parcelScenesCleaner.Stop();
+
+            if (i == this)
+            {
+                i = null;
+            }
         }
 
         private void Update()
