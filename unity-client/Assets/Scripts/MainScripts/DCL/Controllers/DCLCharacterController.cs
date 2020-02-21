@@ -128,7 +128,7 @@ public class DCLCharacterController : MonoBehaviour
     {
         if (!RenderingController.i.activatedRenderingBefore) return;
 
-        SceneController.i.StartCoroutine(ReActivateCharacter());
+        SceneController.i?.StartCoroutine(ReActivateCharacter());
     }
 
     IEnumerator ReActivateCharacter()
