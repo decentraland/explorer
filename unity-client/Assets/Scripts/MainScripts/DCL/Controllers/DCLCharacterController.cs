@@ -278,9 +278,7 @@ public class DCLCharacterController : MonoBehaviour
 
         bool movingPlatformMovedTooMuch = Vector3.Distance(lastPosition, transform.position) > movingPlatformAllowedPosDelta;
 
-        if (isOnMovingPlatform
-            && !characterPosition.RepositionedWorldLastFrame()
-            && movingPlatformMovedTooMuch)
+        if (isOnMovingPlatform && !characterPosition.RepositionedWorldLastFrame() && movingPlatformMovedTooMuch)
         {
             ResetGround();
             // As the character has already been moved faster-than-we-want, we reposition it
@@ -303,22 +301,18 @@ public class DCLCharacterController : MonoBehaviour
 
     void Jump()
     {
-        if (isJumping)
-        {
-            return;
-        }
+        if (isJumping) return;
 
         isJumping = true;
         isGrounded = false;
+
+        ResetGround();
 
         velocity.y = jumpForce;
     }
 
     public void ResetGround()
     {
-        if (!isOnMovingPlatform)
-            return;
-
         isOnMovingPlatform = false;
         groundTransform = null;
         movingPlatformSpeed = 0;
