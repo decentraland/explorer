@@ -51,7 +51,7 @@ public class AirdroppingHUDView_Should : TestsBase
             subtitle = "subtitle",
             type = "collectible",
             thumbnailURL = "url"
-        }, 1);
+        }, 1, 1);
 
         AirdroppingItemPanel itemPanel = view.singleItemContainer.GetComponentInChildren<AirdroppingItemPanel>();
 
@@ -65,7 +65,7 @@ public class AirdroppingHUDView_Should : TestsBase
     [Test]
     public void ShowSummaryScreenProperly()
     {
-        view.ShowSummaryScreen(new []
+        view.ShowSummaryScreen(new[]
         {
             new AirdroppingHUDController.ItemModel()
             {

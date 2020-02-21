@@ -108,7 +108,8 @@ public class AirdroppingHUDController : IHUD, IDisposable
                 view.ShowInitialScreen(model.title, model.subtitle);
                 break;
             case State.SingleItem:
-                view.ShowItemScreen(model.items[currentItemShown], model.items.Length - (currentItemShown + 1));
+                int itemsCount = model.items.Length;
+                view.ShowItemScreen(model.items[currentItemShown], itemsCount - (currentItemShown + 1), itemsCount);
                 break;
             case State.Summary:
                 view.ShowSummaryScreen(model.items);

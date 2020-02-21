@@ -81,11 +81,11 @@ public class AirdroppingHUDView : MonoBehaviour
         initialScreenSubtitle.text = subtitle;
     }
 
-    public void ShowItemScreen(AirdroppingHUDController.ItemModel model, int itemsleft)
+    public void ShowItemScreen(AirdroppingHUDController.ItemModel model, int itemsleft, int itemsCount)
     {
         CleanState();
         singleItemScreen.SetActive(true);
-        itemsLeftContainer.SetActive(true);
+        itemsLeftContainer.SetActive(itemsCount > 1);
         itemsLeft.text = itemsleft.ToString();
         CreateItemPanel(singleItemContainer.transform, model).SetData(model.name, model.subtitle, model.thumbnailURL);
     }
