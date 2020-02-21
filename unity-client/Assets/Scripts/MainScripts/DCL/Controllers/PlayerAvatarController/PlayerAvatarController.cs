@@ -1,4 +1,4 @@
-﻿using DCL;
+using DCL;
 using UnityEngine;
 
 public class PlayerAvatarController : MonoBehaviour
