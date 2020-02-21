@@ -42,7 +42,7 @@ SubShader
     sampler2D _LeftTex;
     half4 _LeftTex_HDR;
     CBUFFER_END
-
+      
 
     float3 RotateAroundYInDegrees (float3 vertex, float degrees)
     {
