@@ -8,7 +8,7 @@ import { APIOptions, exposeMethod, registerAPI } from 'decentraland-rpc/lib/host
 import { EngineAPI } from 'shared/apis/EngineAPI'
 import { ExposableAPI } from 'shared/apis/ExposableAPI'
 import { sendPublicChatMessage } from 'shared/comms'
-import { ChatEvent, chatObservable } from 'shared/comms/chat'
+import { ChatEvent, chatObservable, notifyStatusTroughChat } from 'shared/comms/chat'
 import { AvatarMessage, AvatarMessageType } from 'shared/comms/interface/types'
 import {
   addToMutedUsers,
@@ -21,7 +21,7 @@ import {
 import { IChatCommand, MessageEntry } from 'shared/types'
 import { TeleportController } from 'shared/world/TeleportController'
 import { expressionExplainer, isValidExpression, validExpressions } from './expressionExplainer'
-import { changeRealm, catalystRealmConnected } from 'shared/dao'
+import { changeRealm, catalystRealmConnected, changeToCrowdedRealm } from 'shared/dao'
 import defaultLogger from 'shared/logger'
 
 const userPose: { [key: string]: Vector3Component } = {}
@@ -160,7 +160,11 @@ export class ChatController extends ExposableAPI implements IChatController {
         } else if (message.trim().toLowerCase() === 'next') {
           response = TeleportController.goToNext().message
         } else if (message.trim().toLowerCase() === 'crowd') {
-          response = TeleportController.goToCrowd().message
+          response = `Teleporting to a crowd of people in current realm...`
+
+          TeleportController.goToCrowd().then(({ message, success }) => notifyStatusTroughChat(message), () => {
+            // Do nothing. This is handled inside controller
+          })
         } else {
           response = 'Could not recognize the coordinates provided. Example usage: /goto 42,42'
         }
@@ -179,18 +183,49 @@ export class ChatController extends ExposableAPI implements IChatController {
 
     this.addChatCommand('changerealm', 'Changes communications realms', message => {
       const realmString = message.trim()
-      const realm = changeRealm(realmString)
-
       let response = ''
-      if (realm) {
-        response = `Changing to Realm ${realm.catalystName}-${realm.layer}...`
-        // TODO: This status should be shown in the chat window
-        catalystRealmConnected().then(
-          () => defaultLogger.log('Sucessfully connected to realm', realm),
-          () => defaultLogger.log('Error joining realm', realm)
+
+      if (realmString === 'crowd') {
+        response = `Changing to realm that is crowded nearby...`
+
+        changeToCrowdedRealm().then(
+          ([changed, realm]) => {
+            if (changed) {
+              notifyStatusTroughChat(
+                `Found a crowded realm to join. Welcome to the realm ${realm.catalystName}-${realm.layer}!`
+              )
+            } else {
+              notifyStatusTroughChat(`Already on most crowded realm for location. Nothing changed.`)
+            }
+          },
+          e => {
+            const cause = e === 'realm-full' ? ' The requested realm is full.' : ''
+            notifyStatusTroughChat("Could not join realm." + cause)
+            defaultLogger.error(`Error joining crowded realm ${realmString}`, e)
+          }
         )
       } else {
-        response = `Couldn't find realm ${realmString}`
+        const realm = changeRealm(realmString)
+
+        if (realm) {
+          response = `Changing to Realm ${realm.catalystName}-${realm.layer}...`
+          // TODO: This status should be shown in the chat window
+          catalystRealmConnected().then(
+            () =>
+              notifyStatusTroughChat(
+                `Changed realm successfuly. Welcome to the realm ${realm.catalystName}-${realm.layer}!`
+              ),
+            e => {
+              const cause = e === 'realm-full' ? ' The requested realm is full.' : ''
+              notifyStatusTroughChat(
+                "Could not join realm." + cause
+              )
+              defaultLogger.error('Error joining realm', e)
+            }
+          )
+        } else {
+          response = `Couldn't find realm ${realmString}`
+        }
       }
 
       return {

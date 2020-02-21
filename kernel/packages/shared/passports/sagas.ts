@@ -55,6 +55,7 @@ const CID = require('cids')
 import { sha3 } from 'web3x/utils'
 import { CATALYST_REALM_INITIALIZED } from '../dao/actions'
 import { isRealmInitialized, getUpdateProfileServer } from '../dao/selectors'
+import { getUserProfile } from '../comms/peers'
 const multihashing = require('multihashing-async')
 const toBuffer = require('blob-to-buffer')
 
@@ -158,7 +159,7 @@ function takeLatestById<T extends Action>(
   keyFunction: (action: T) => string,
   saga: any,
   ...args: any
-): ForkEffect<never> {
+): ForkEffect {
   return fork(function*() {
     let lastTasks = new Map<any, any>()
     while (true) {
@@ -195,8 +196,8 @@ export function* initialLoad() {
     const catalog = collections
       .reduce((flatten, collection) => flatten.concat(collection.wearables), [] as Wearable[])
       .map(overrideBaseUrl)
-    const baseAvatars = catalog.filter((_: Wearable) => !_.tags.includes('exclusive'))
-    const baseExclusive = catalog.filter((_: Wearable) => _.tags.includes('exclusive'))
+    const baseAvatars = catalog.filter((_: Wearable) => _.tags && !_.tags.includes('exclusive'))
+    const baseExclusive = catalog.filter((_: Wearable) => _.tags && _.tags.includes('exclusive'))
     if (!(yield select(isInitialized))) {
       yield take(RENDERER_INITIALIZED)
     }
@@ -224,6 +225,16 @@ export function* handleFetchProfile(action: PassportRequestAction): any {
     defaultLogger.warn(`Error requesting profile for ${userId}, `, error)
   }
 
+  const userInfo = getUserProfile()
+  if (!profile && userInfo && userInfo.userId && userId === userInfo.userId && userInfo.profile) {
+    defaultLogger.info(`Recover profile from local storage`)
+    profile = yield call(
+      ensureServerFormat,
+      { ...userInfo.profile, avatar: { ...userInfo.profile.avatar, snapshots: userInfo.profile.snapshots } },
+      userInfo.version || 0
+    )
+  }
+
   if (!profile) {
     defaultLogger.info(`Profile for ${userId} not found, generating random profile`)
     profile = yield call(generateRandomUserProfile, userId)
@@ -233,9 +244,7 @@ export function* handleFetchProfile(action: PassportRequestAction): any {
     profile.email = email
   }
 
-  if (ALL_WEARABLES) {
-    profile.inventory = (yield select(getExclusiveCatalog)).map((_: Wearable) => _.id)
-  } else {
+  if (!ALL_WEARABLES) {
     yield put(inventoryRequest(userId, userId))
     const inventoryResult = yield race({
       success: take(isActionFor(INVENTORY_SUCCESS, userId)),
@@ -375,18 +384,21 @@ export function* handleSaveAvatar(saveAvatar: SaveAvatarRequest) {
     const url: string = yield select(getUpdateProfileServer)
     const profile = { ...savedProfile, ...saveAvatar.payload.profile }
 
-    const result = yield call(modifyAvatar, {
-      url,
-      userId,
-      currentVersion,
-      identity,
-      profile
-    })
+    // only update profile if wallet is connected
+    if (identity.hasConnectedWeb3) {
+      const result = yield call(modifyAvatar, {
+        url,
+        userId,
+        currentVersion,
+        identity,
+        profile
+      })
 
-    const { creationTimestamp: version } = result
+      const { creationTimestamp: version } = result
 
-    yield put(saveAvatarSuccess(userId, version, profile))
-    yield put(passportRequest(userId))
+      yield put(saveAvatarSuccess(userId, version, profile))
+      yield put(passportRequest(userId))
+    }
   } catch (error) {
     yield put(saveAvatarFailure(userId, 'unknown reason'))
   }
@@ -467,29 +479,35 @@ export async function modifyAvatar(params: {
 }) {
   const { url, currentVersion, profile, identity } = params
   const { avatar } = profile
+
   const newAvatar = { ...avatar }
+
   let files: ContentFile[] = []
+
   const snapshots = avatar.snapshots || (profile as any).snapshots
   if (snapshots) {
-    if (snapshots.face.startsWith('data') && snapshots.body.startsWith('data')) {
+    if (snapshots.face.includes('://') && snapshots.body.includes('://')) {
+      newAvatar.snapshots = {
+        face: snapshots.face.split('/').pop()!,
+        body: snapshots.body.split('/').pop()!
+      }
+    } else {
       // replace base64 snapshots with their respective hashes
       const faceFile: ContentFile = await makeContentFile('./face.png', base64ToBlob(snapshots.face))
       const bodyFile: ContentFile = await makeContentFile('./body.png', base64ToBlob(snapshots.body))
+
       const faceFileHash: string = await calculateBufferHash(faceFile.content)
       const bodyFileHash: string = await calculateBufferHash(bodyFile.content)
+
       newAvatar.snapshots = {
         face: faceFileHash,
         body: bodyFileHash
       }
       files = [faceFile, bodyFile]
-    } else {
-      newAvatar.snapshots = {
-        face: snapshots.face.split('/').pop()!,
-        body: snapshots.body.split('/').pop()!
-      }
     }
   }
   const newProfile = ensureServerFormat({ ...profile, avatar: newAvatar }, currentVersion)
+
   const [data] = await buildDeployData(
     [identity.address],
     {
@@ -662,7 +680,7 @@ export function* compareInventoriesAndTriggerNotification(
   saveToDb = saveToLocalStorage
 ) {
   if (areInventoriesDifferent(oldInventory, newInventory)) {
-    const oldItemsDict = oldInventory.reduce(
+    const oldItemsDict = oldInventory.reduce<Record<WearableId, boolean>>(
       (cumm: Record<WearableId, boolean>, id: string) => ({ ...cumm, [id]: true }),
       {}
     )

@@ -11,9 +11,11 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
 
     public event Action<UserProfile> OnUpdate;
 
+    public string userId => model.userId;
     public string userName => model.name;
     public string description => model.description;
     public string email => model.email;
+    public List<string> blocked => model.blocked;
     public bool hasConnectedWeb3 => model.hasConnectedWeb3;
     public bool hasClaimedName => model.hasClaimedName;
     public AvatarModel avatar => model.avatar;
@@ -30,11 +32,8 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
 
     public void UpdateData(UserProfileModel newModel, bool downloadAssets = true)
     {
-        if (model?.snapshots?.face != null)
-            ThumbnailsManager.CancelRequest(model.snapshots.face, OnFaceSnapshotReady);
-
-        if (model?.snapshots?.body != null)
-            ThumbnailsManager.CancelRequest(model.snapshots.body, OnBodySnapshotReady);
+        ForgetThumbnail(model?.snapshots?.face, OnFaceSnapshotReady);
+        ForgetThumbnail(model?.snapshots?.body, OnBodySnapshotReady);
 
         inventory.Clear();
         faceSnapshot = null;
@@ -46,6 +45,7 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
             return;
         }
 
+        model.userId = newModel.userId;
         model.tutorialStep = newModel.tutorialStep;
         model.hasClaimedName = newModel.hasClaimedName;
         model.name = newModel.name;
@@ -55,6 +55,7 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
         model.snapshots = newModel.snapshots;
         model.hasConnectedWeb3 = newModel.hasConnectedWeb3;
         model.inventory = newModel.inventory;
+        model.blocked = newModel.blocked;
         if (model.inventory != null)
         {
             inventory = model.inventory.GroupBy(x => x).ToDictionary(x => x.Key, x => x.Count());
@@ -62,10 +63,8 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
 
         if (downloadAssets && model.snapshots != null)
         {
-            if (model.snapshots.face != null)
-                ThumbnailsManager.RequestThumbnail(model.snapshots.face, OnFaceSnapshotReady);
-            if (model.snapshots.body != null)
-                ThumbnailsManager.RequestThumbnail(model.snapshots.body, OnBodySnapshotReady);
+            GetThumbnail(model.snapshots.face, OnFaceSnapshotReady);
+            GetThumbnail(model.snapshots.body, OnBodySnapshotReady);
         }
 
         OnUpdate?.Invoke(this);
@@ -95,11 +94,8 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
     {
         if (model?.snapshots != null)
         {
-            if (model.snapshots.face != null)
-                ThumbnailsManager.CancelRequest(model.snapshots.face, OnFaceSnapshotReady);
-
-            if (model.snapshots.body != null)
-                ThumbnailsManager.CancelRequest(model.snapshots.body, OnBodySnapshotReady);
+            ForgetThumbnail(model.snapshots.face, OnFaceSnapshotReady);
+            ForgetThumbnail(model.snapshots.body, OnBodySnapshotReady);
         }
 
         model.avatar.CopyFrom(newModel);
@@ -157,4 +153,18 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
             Resources.UnloadAsset(this);
     }
 #endif
+
+    private void GetThumbnail(string url, Action<Sprite> callback)
+    {
+        if (string.IsNullOrEmpty(url))
+            return;
+        ThumbnailsManager.GetThumbnail(url, callback);
+    }
+
+    private void ForgetThumbnail(string url, Action<Sprite> callback)
+    {
+        if (string.IsNullOrEmpty(url))
+            return;
+        ThumbnailsManager.ForgetThumbnail(url, callback);
+    }
 }

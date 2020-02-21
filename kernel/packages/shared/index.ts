@@ -6,7 +6,6 @@ import { Eth } from 'web3x/eth'
 import { Personal } from 'web3x/personal/personal'
 import {
   ETHEREUM_NETWORK,
-  getDefaultTLD,
   getLoginConfigurationForCurrentDomain,
   getTLD,
   PREVIEW,
@@ -19,8 +18,8 @@ import './apis/index'
 import { connect, disconnect, persistCurrentUser } from './comms'
 import { ConnectionEstablishmentError, IdTakenError } from './comms/interface/types'
 import { isMobile } from './comms/mobile'
-import { getUserProfile, removeUserProfile, setLocalProfile } from './comms/peers'
-import { realmInitialized, initializeUrlRealmObserver } from './dao'
+import { getUserProfile, setLocalProfile } from './comms/peers'
+import { initializeUrlRealmObserver, realmInitialized } from './dao'
 import { web3initialized } from './dao/actions'
 import { getNetwork } from './ethereum/EthereumService'
 import { awaitWeb3Approval, isSessionExpired, providerFuture } from './ethereum/provider'
@@ -48,6 +47,9 @@ import { RootState } from './store/rootTypes'
 import { buildStore } from './store/store'
 import { getAppNetwork, getNetworkFromTLD } from './web3'
 import { initializeUrlPositionObserver } from './world/positionThings'
+import { saveAvatarRequest } from './passports/actions'
+import { ethereumConfigurations } from 'config'
+import { tutorialStepId } from 'decentraland-loader/lifecycle/tutorial/tutorial'
 
 export type ExplorerIdentity = AuthIdentity & {
   address: string
@@ -201,8 +203,6 @@ export async function initShared(): Promise<Session | undefined> {
         identity = await createAuthIdentity()
         userId = identity.address
 
-        identifyUser(userId)
-
         setLocalProfile(userId, {
           userId,
           identity
@@ -222,25 +222,14 @@ export async function initShared(): Promise<Session | undefined> {
       ReportFatalError(AUTH_ERROR_LOGGED_OUT)
       throw e
     }
+
+    if (identity.hasConnectedWeb3) {
+      identifyUser(userId)
+    }
   } else {
     defaultLogger.log(`Using test user.`)
     userId = '0x0000000000000000000000000000000000000000'
     identity = await createAuthIdentity()
-  }
-
-  if (WORLD_EXPLORER && getDefaultTLD() === 'org') {
-    try {
-      const response = await fetch(
-        `https://s7bdh0k6x3.execute-api.us-east-1.amazonaws.com/default/whitelisted_users?id=${identity.address}`
-      )
-      if (!response.ok) {
-        throw new Error('unauthorized user')
-      }
-    } catch (e) {
-      removeUserProfile()
-      console['groupEnd']()
-      throw new Error(AUTH_ERROR_LOGGED_OUT)
-    }
   }
 
   defaultLogger.log(`User ${userId} logged in`)
@@ -259,6 +248,7 @@ export async function initShared(): Promise<Session | undefined> {
   }
 
   store.dispatch(web3initialized())
+
   console['groupEnd']()
 
   initializeUrlPositionObserver()
@@ -278,7 +268,34 @@ export async function initShared(): Promise<Session | undefined> {
   // initialize profile
   console['group']('connect#profile')
   if (!PREVIEW) {
-    const profile = await PassportAsPromise(userId)
+    let profile = await PassportAsPromise(userId)
+    let profileDirty: boolean = false
+    if (!profile.hasClaimedName) {
+      const names = await fetchOwnedENS(ethereumConfigurations[net].names, userId)
+
+      // patch profile to readd missing name
+      profile = { ...profile, name: names[0], hasClaimedName: true, version: (profile.version || 0) + 1 }
+
+      if (names && names.length > 0) {
+        defaultLogger.info(`Found missing claimed name '${names[0]}' for profile ${userId}, consolidating profile... `)
+        profileDirty = true
+      }
+    }
+
+    const localTutorialStep = getUserProfile().profile
+      ? getUserProfile().profile.tutorialStep
+      : tutorialStepId.INITIAL_SCENE
+
+    if (localTutorialStep !== profile.tutorialStep) {
+      let finalTutorialStep = Math.max(localTutorialStep, profile.tutorialStep)
+      profile = { ...profile, tutorialStep: finalTutorialStep }
+      profileDirty = true
+    }
+
+    if (profileDirty) {
+      store.dispatch(saveAvatarRequest(profile))
+    }
+
     persistCurrentUser({
       version: profile.version,
       profile: profileToRendererFormat(profile, identity)
@@ -336,5 +353,50 @@ function showEthSignAdvice(show: boolean) {
   const element = document.getElementById('eth-sign-advice')
   if (element) {
     element.style.display = show ? 'block' : 'none'
+  }
+}
+
+const query = `
+  query GetNameByBeneficiary($beneficiary: String) {
+    nfts(where: { owner: $beneficiary, category: ens }) {
+      ens {
+        labelHash
+        beneficiary
+        caller
+        subdomain
+        createdAt
+      }
+    }
+  }`
+
+const opts = (ethAddress: string) => ({
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ query, variables: { beneficiary: ethAddress.toLowerCase() } })
+})
+
+export async function fetchOwnedENS(theGraphBaseUrl: string, ethAddress: string): Promise<string[]> {
+  const totalAttempts = 5
+  for (let attempt = 0; attempt < totalAttempts; attempt++) {
+    try {
+      const response = await fetch(theGraphBaseUrl, opts(ethAddress))
+      if (response.ok) {
+        const jsonResponse: GraphResponse = await response.json()
+        return jsonResponse.data.nfts.map(nft => nft.ens.subdomain)
+      }
+    } catch (error) {
+      defaultLogger.warn(`Could not retrieve ENS for address ${ethAddress}. Try ${attempt} of ${totalAttempts}.`, error)
+    }
+  }
+  return []
+}
+
+type GraphResponse = {
+  data: {
+    nfts: {
+      ens: {
+        subdomain: string
+      }
+    }[]
   }
 }

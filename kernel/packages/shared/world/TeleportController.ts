@@ -1,4 +1,4 @@
-import { teleportObservable } from 'shared/world/positionThings'
+import { teleportObservable, lastPlayerPosition } from 'shared/world/positionThings'
 import { getFromLocalStorage, saveToLocalStorage } from 'atomicHelpers/localStorage'
 import { POIs } from 'shared/comms/POIs'
 import { parcelLimits, tutorialEnabled } from 'config'
@@ -6,21 +6,61 @@ import { getUserProfile } from 'shared/comms/peers'
 import { Profile } from 'shared/passports/types'
 import { tutorialStepId } from 'decentraland-loader/lifecycle/tutorial/tutorial'
 import { fetchLayerUsersParcels } from 'shared/comms'
-import { Parcel } from 'shared/comms/interface/utils'
+import { ParcelArray, countParcelsCloseTo } from 'shared/comms/interface/utils'
+import { worldToGrid } from 'atomicHelpers/parcelScenePositions'
 import defaultLogger from 'shared/logger'
 
 const CAMPAIGN_PARCEL_SEQUENCE = [
-  { x: 113, y: -7 },
-  { x: 87, y: 18 },
+  { x: -3, y: -33 },
+  { x: 61, y: -27 },
+  { x: 36, y: 46 },
+  { x: 72, y: -9 },
+  { x: -37, y: 57 },
+  { x: -75, y: 73 },
+  { x: -71, y: -38 },
+  { x: 59, y: 133 },
+  { x: -40, y: 49 },
+  { x: 52, y: 10 },
+  { x: -9, y: 73 },
+  { x: -49, y: -41 },
   { x: 52, y: 2 },
-  { x: 16, y: 83 },
   { x: -12, y: -39 },
-  { x: 60, y: 115 }
+  { x: 87, y: 18 },
+  { x: 67, y: -21 },
+  { x: -34, y: -37 },
+  { x: 58, y: 2 },
+  { x: -15, y: -22 },
+  { x: 57, y: 8 },
+  { x: 52, y: 16 },
+  { x: -71, y: -71 },
+  { x: -129, y: -141 },
+  { x: 105, y: -21 },
+  { x: -25, y: 103 },
+  { x: -55, y: 1 },
+  { x: -5, y: -16 },
+  { x: -49, y: -49 },
+  { x: 113, y: -7 },
+  { x: 52, y: -71 },
+  { x: 43, y: 54 },
+  { x: 63, y: 2 },
+  { x: 28, y: 45 },
+  { x: 137, y: 34 },
+  { x: 12, y: 46 },
+  { x: -43, y: 57 },
+  { x: -134, y: -121 },
+  { x: 16, y: 83 },
+  { x: -11, y: -30 },
+  { x: 60, y: 115 },
+  { x: -40, y: 33 },
+  { x: -55, y: 143 },
+  { x: -148, y: -35 },
+  { x: -75, y: 65 },
+  { x: -47, y: 57 },
+  { x: -35, y: -41 },
+  { x: 24, y: -124 },
+  { x: -109, y: -89 }
 ]
 
-const NOOP = () => {
-  // do nothing
-}
 export class TeleportController {
   public static ensureTeleportAnimation() {
     document
@@ -53,39 +93,40 @@ export class TeleportController {
     return TeleportController.goTo(parseInt('' + x, 10), parseInt('' + y, 10), tpMessage)
   }
 
-  public static goToCrowd(): { message: string; success: boolean } {
-    const message: string = `Teleporting to a crowd of people in current realm...`
-    const promise = (async function() {
-      const usersParcels = await fetchLayerUsersParcels()
+  public static async goToCrowd(): Promise<{ message: string; success: boolean }> {
+    try {
+      let usersParcels = await fetchLayerUsersParcels()
+
+      const currentParcel = worldToGrid(lastPlayerPosition)
+
+      usersParcels = usersParcels.filter(
+        it => isInsideParcelLimits(it[0], it[1]) && currentParcel.x !== it[0] && currentParcel.y !== it[1]
+      )
+
       if (usersParcels.length > 0) {
-        const distanceSquared = (parcel1: Parcel, parcel2: Parcel) => {
-          const xDiff = parcel1.x - parcel2.x
-          const zDiff = parcel1.z - parcel2.z
-          return xDiff * xDiff + zDiff * zDiff
-        }
-
-        const calculateCloseUsers = (origin: Parcel) => {
-          let close = 0
-          usersParcels.forEach(parcel => {
-            if (distanceSquared(origin, parcel) <= 9) {
-              close += 1
-            }
-          })
-
-          return close
-        }
-
         // Sorting from most close users
-        const target = usersParcels.sort(
-          (parcel1, parcel2) => calculateCloseUsers(parcel2) - calculateCloseUsers(parcel1)
-        )[0]
-        TeleportController.goTo(target.x, target.z, message)
+        const [target, closeUsers] = usersParcels
+          .map(it => [it, countParcelsCloseTo(it, usersParcels)] as [ParcelArray, number])
+          .sort(([_, score1], [__, score2]) => score2 - score1)[0]
+
+        return TeleportController.goTo(
+          target[0],
+          target[1],
+          `Found a parcel with ${closeUsers} user(s) nearby: ${target[0]},${target[1]}. Teleporting...`
+        )
+      } else {
+        return {
+          message: 'There seems to be no users in other parcels at the current realm. Could not teleport.',
+          success: false
+        }
       }
-    })()
-
-    promise.then(NOOP, e => defaultLogger.log('Error teleporting to crowd', e))
-
-    return { message, success: true }
+    } catch (e) {
+      defaultLogger.error('Error while trying to teleport to crowd', e)
+      return {
+        message: 'Could not teleport to crowd! Could not get information about other users in the realm',
+        success: false
+      }
+    }
   }
 
   public static goToRandom(): { message: string; success: boolean } {
@@ -105,13 +146,7 @@ export class TeleportController {
   public static goTo(x: number, y: number, teleportMessage?: string): { message: string; success: boolean } {
     const tpMessage: string = teleportMessage ? teleportMessage : `Teleporting to ${x}, ${y}...`
 
-    const insideCoords =
-      x > parcelLimits.minLandCoordinateX &&
-      x <= parcelLimits.maxLandCoordinateX &&
-      y > parcelLimits.minLandCoordinateY &&
-      y <= parcelLimits.maxLandCoordinateY
-
-    if (insideCoords) {
+    if (isInsideParcelLimits(x, y)) {
       teleportObservable.notifyObservers({
         x: x,
         y: y,
@@ -126,4 +161,13 @@ export class TeleportController {
       return { message: errorMessage, success: false }
     }
   }
+}
+
+function isInsideParcelLimits(x: number, y: number) {
+  return (
+    x > parcelLimits.minLandCoordinateX &&
+    x <= parcelLimits.maxLandCoordinateX &&
+    y > parcelLimits.minLandCoordinateY &&
+    y <= parcelLimits.maxLandCoordinateY
+  )
 }

@@ -1,4 +1,4 @@
-using GLTF;
+﻿using GLTF;
 using GLTF.Schema;
 
 using System;
@@ -731,12 +731,16 @@ namespace UnityGLTF
 
         protected virtual IEnumerator ConstructUnityTexture(byte[] buffer, bool markGpuOnly, bool linear, GLTFImage image, int imageCacheIndex)
         {
-            Texture2D texture = new Texture2D(0, 0, TextureFormat.RGBA32, true, linear);
+            Texture2D texture = new Texture2D(0, 0, TextureFormat.ARGB32, true, linear);
 
             //  NOTE: the second parameter of LoadImage() marks non-readable, but we can't mark it until after we call Apply()
             texture.LoadImage(buffer, markGpuOnly);
             texture = CheckAndReduceTextureSize(texture);
 
+#if !UNITY_EDITOR
+            //NOTE(Brian): This breaks importing in editor mode
+            texture.Compress(false);
+#endif
             _assetCache.ImageCache[imageCacheIndex] = texture;
 
             if (ShouldYieldOnTimeout())
@@ -2390,6 +2394,10 @@ namespace UnityGLTF
                         unityTexture.filterMode = desiredFilterMode;
                         unityTexture.wrapMode = desiredWrapMode;
 
+#if !UNITY_EDITOR
+                        // NOTE(Brian): This breaks importing in edit mode, so only enable it for runtime.
+                        unityTexture.Apply(false, true);
+#endif
                         _assetCache.TextureCache[textureIndex].CachedTexture = new RefCountedTextureData(image.Uri, unityTexture);
                     }
                     else
@@ -2439,7 +2447,6 @@ namespace UnityGLTF
                 Vector2 temp = ext.Offset;
                 temp = new Vector2(temp.x, -temp.y);
                 mat.SetTextureOffset(texName, temp);
-
                 mat.SetTextureScale(texName, ext.Scale);
             }
         }

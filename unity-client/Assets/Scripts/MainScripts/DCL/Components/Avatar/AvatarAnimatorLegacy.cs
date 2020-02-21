@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+using System;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 public class AvatarAnimatorLegacy : MonoBehaviour
 {
@@ -48,6 +46,7 @@ public class AvatarAnimatorLegacy : MonoBehaviour
 
     [SerializeField] internal AvatarAnimationsVariable maleAnimations;
     [SerializeField] internal AvatarAnimationsVariable femaleAnimations;
+
     public new Animation animation;
     public BaseClipsIds baseClipsIds;
     public BlackBoard blackboard;
@@ -57,16 +56,15 @@ public class AvatarAnimatorLegacy : MonoBehaviour
     public AnimationCurve runBlendtreeCurve;
     public AnimationCurve idleBlendtreeCurve;
 
-    public bool useDeltaTimeInsteadOfGlobalSpeed = false;
-    public float globalSpeed = 0.05f;
-
     internal System.Action<BlackBoard> currentState;
 
     Vector3 lastPosition;
-    private AvatarAnimationsVariable currentAnimations;
+    AvatarAnimationsVariable currentAnimations;
+    bool isOwnPlayer = false;
 
     void Start()
     {
+        isOwnPlayer = DCLCharacterController.i.transform == transform.parent;
         currentState = State_Init;
     }
 
@@ -79,10 +77,10 @@ public class AvatarAnimatorLegacy : MonoBehaviour
         currentState?.Invoke(blackboard);
     }
 
-
     void UpdateInterface()
     {
-        Vector3 flattenedVelocity = target.position - lastPosition;
+        Vector3 velocityTargetPosition = target.position;
+        Vector3 flattenedVelocity = velocityTargetPosition - lastPosition;
 
         //NOTE(Brian): Vertical speed
         float verticalVelocity = flattenedVelocity.y;
@@ -90,7 +88,10 @@ public class AvatarAnimatorLegacy : MonoBehaviour
 
         flattenedVelocity.y = 0;
 
-        blackboard.movementSpeed = flattenedVelocity.magnitude;
+        if (isOwnPlayer)
+            blackboard.movementSpeed = flattenedVelocity.magnitude - DCLCharacterController.i.movingPlatformSpeed;
+        else
+            blackboard.movementSpeed = flattenedVelocity.magnitude;
 
         Vector3 rayOffset = Vector3.up * RAY_OFFSET_LENGTH;
         //NOTE(Brian): isGrounded?
@@ -103,10 +104,8 @@ public class AvatarAnimatorLegacy : MonoBehaviour
         Debug.DrawRay(target.transform.position + rayOffset, Vector3.down * (RAY_OFFSET_LENGTH - ELEVATION_OFFSET), blackboard.isGrounded ? Color.green : Color.red);
 #endif
 
-        lastPosition = target.position;
+        lastPosition = velocityTargetPosition;
     }
-
-
 
     void State_Init(BlackBoard bb)
     {
@@ -120,16 +119,9 @@ public class AvatarAnimatorLegacy : MonoBehaviour
         }
     }
 
-
-
     void State_Ground(BlackBoard bb)
     {
-        float dt;
-
-        if (useDeltaTimeInsteadOfGlobalSpeed)
-            dt = Time.deltaTime;
-        else
-            dt = globalSpeed;
+        float dt = Time.deltaTime;
 
         animation[baseClipsIds.run].normalizedSpeed = bb.movementSpeed / dt * bb.runSpeedFactor;
         animation[baseClipsIds.walk].normalizedSpeed = bb.movementSpeed / dt * bb.walkSpeedFactor;

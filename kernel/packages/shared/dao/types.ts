@@ -2,6 +2,7 @@ export type Layer = {
   name: string
   usersCount: number
   maxUsers: number
+  usersParcels?: [number, number][]
 }
 
 export type CatalystLayers = {
@@ -45,7 +46,7 @@ export type RootDaoState = {
   dao: DaoState
 }
 
-export type CommsState = 'initial' | 'connecting' | 'connected' | 'error'
+export type CommsState = 'initial' | 'connecting' | 'connected' | 'error' | 'realm-full'
 
 export type CommsStatus = {
   status: CommsState

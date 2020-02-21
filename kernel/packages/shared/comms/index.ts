@@ -6,7 +6,7 @@ import { MessageEntry } from 'shared/types'
 import { positionObservable, PositionReport } from 'shared/world/positionThings'
 import 'webrtc-adapter'
 import { PassportAsPromise } from '../passports/PassportAsPromise'
-import { ChatEvent, chatObservable } from './chat'
+import { ChatEvent, chatObservable, notifyStatusTroughChat } from './chat'
 import { CliBrokerConnection } from './CliBrokerConnection'
 import { Stats } from './debug'
 import { IBrokerConnection } from '../comms/v1/IBrokerConnection'
@@ -34,7 +34,14 @@ import {
   IdTakenError,
   UnknownCommsModeError
 } from './interface/types'
-import { CommunicationArea, Position, position2parcel, sameParcel, squareDistance, Parcel } from './interface/utils'
+import {
+  CommunicationArea,
+  Position,
+  position2parcel,
+  sameParcel,
+  squareDistance,
+  ParcelArray
+} from './interface/utils'
 import { BrokerWorldInstanceConnection } from '../comms/v1/brokerWorldInstanceConnection'
 import { profileToRendererFormat } from 'shared/passports/transformations/profileToRendererFormat'
 import { ProfileForRenderer } from 'decentraland-ecs/src'
@@ -45,13 +52,15 @@ import { LighthouseWorldInstanceConnection } from './v2/LighthouseWorldInstanceC
 
 import { identity } from '../index'
 import { Authenticator } from 'dcl-crypto'
-import { getCommsServer, getRealm } from '../dao/selectors'
+import { getCommsServer, getRealm, getCatalystCandidates } from '../dao/selectors'
 import { Realm, LayerUserInfo } from 'shared/dao/types'
 import { Store } from 'redux'
 import { RootState } from 'shared/store/rootTypes'
 import { store } from 'shared/store/store'
-import { setCatalystRealmCommsStatus } from 'shared/dao/actions'
-import { observeRealmChange } from 'shared/dao'
+import { setCatalystRealmCommsStatus, setCatalystRealm, markCatalystRealmFull } from 'shared/dao/actions'
+import { observeRealmChange, pickCatalystRealm } from 'shared/dao'
+import { getProfile } from 'shared/passports/selectors'
+import { Profile } from 'shared/passports/types'
 
 export type CommsVersion = 'v1' | 'v2'
 export type CommsMode = CommsV1Mode | CommsV2Mode
@@ -235,6 +244,7 @@ function ensurePeerTrackingInfo(context: Context, alias: string): PeerTrackingIn
 
 export function processChatMessage(context: Context, fromAlias: string, message: Package<ChatMessage>) {
   const msgId = message.data.id
+  const profile = getProfile(global.globalStore.getState(), identity.address)
 
   const peerTrackingInfo = ensurePeerTrackingInfo(context, fromAlias)
   if (!peerTrackingInfo.receivedPublicChatMessages.has(msgId)) {
@@ -260,10 +270,16 @@ export function processChatMessage(context: Context, fromAlias: string, message:
           message: text,
           isCommand: false
         }
-        chatObservable.notifyObservers({ type: ChatEvent.MESSAGE_RECEIVED, messageEntry: entry })
+        if (profile && user.userId && !isBlocked(profile, user.userId)) {
+          chatObservable.notifyObservers({ type: ChatEvent.MESSAGE_RECEIVED, messageEntry: entry })
+        }
       }
     }
   }
+}
+
+function isBlocked(profile: Profile, userId: string): boolean {
+  return profile.blocked && profile.blocked.includes(userId)
 }
 
 export function processProfileMessage(
@@ -536,19 +552,37 @@ export async function connect(userId: string) {
 
         defaultLogger.log('Using Remote lighthouse service: ', lighthouseUrl)
 
-        const lighthouseConnection = (connection = new LighthouseWorldInstanceConnection(
+        connection = new LighthouseWorldInstanceConnection(
           identity.address,
           realm!,
           lighthouseUrl,
           peerConfig,
-          status => store.dispatch(setCatalystRealmCommsStatus(status))
-        ))
-        await lighthouseConnection.connectPeer()
+          status => {
+            store.dispatch(setCatalystRealmCommsStatus(status))
+            if (status.status === 'realm-full') {
+              handleFullLayer()
+            }
+          }
+        )
 
         break
       }
       default: {
         throw new Error(`unrecognized comms mode "${COMMS}"`)
+      }
+    }
+
+    subscribeToRealmChange(store)
+
+    context = new Context(userInfo)
+    context.worldInstanceConnection = connection
+
+    try {
+      await connection.connectPeer()
+    } catch (e) {
+      // Do nothing if layer is full. This will be handled by status handler
+      if (!(e.responseJson && e.responseJson.status === 'layer_is_full')) {
+        throw e
       }
     }
 
@@ -564,11 +598,6 @@ export async function connect(userId: string) {
     connection.sceneMessageHandler = (alias: string, data: Package<BusMessage>) => {
       processParcelSceneCommsMessage(context!, alias, data)
     }
-
-    context = new Context(userInfo)
-    context.worldInstanceConnection = connection
-
-    subscribeToRealmChange(store)
 
     if (commConfigurations.debug) {
       connection.stats = context.stats
@@ -610,9 +639,6 @@ export async function connect(userId: string) {
       }
     }, 100)
 
-    await connection.updateSubscriptions([userId])
-    await connection.sendInitialMessage(userInfo)
-
     return context
   } catch (e) {
     defaultLogger.error(e)
@@ -622,6 +648,25 @@ export async function connect(userId: string) {
       throw new ConnectionEstablishmentError(e.message)
     }
   }
+}
+
+function handleFullLayer() {
+  const store: Store<RootState> = window.globalStore
+  const realm = getRealm(store.getState())
+
+  if (realm) {
+    store.dispatch(markCatalystRealmFull(realm))
+  }
+
+  const candidates = getCatalystCandidates(store.getState())
+
+  const otherRealm = pickCatalystRealm(candidates)
+
+  notifyStatusTroughChat(
+    `Joining realm ${otherRealm.catalystName}-${otherRealm.layer} since the previously requested was full`
+  )
+
+  store.dispatch(setCatalystRealm(otherRealm))
 }
 
 export function onWorldRunning(isRunning: boolean, _context: Context | null = context) {
@@ -658,7 +703,7 @@ export function disconnect() {
   }
 }
 
-export async function fetchLayerUsersParcels(): Promise<Parcel[]> {
+export async function fetchLayerUsersParcels(): Promise<ParcelArray[]> {
   const store: Store<RootState> = window.globalStore
   const realm = getRealm(store.getState())
   const commsUrl = getCommsServer(store.getState())
@@ -667,7 +712,7 @@ export async function fetchLayerUsersParcels(): Promise<Parcel[]> {
     const layerUsersResponse = await fetch(`${commsUrl}/layers/${realm.layer}/users`)
     if (layerUsersResponse.ok) {
       const layerUsers: LayerUserInfo[] = await layerUsersResponse.json()
-      return layerUsers.filter(it => it.parcel).map(it => new Parcel(it.parcel![0], it.parcel![1]))
+      return layerUsers.filter(it => it.parcel).map(it => it.parcel!)
     }
   }
 

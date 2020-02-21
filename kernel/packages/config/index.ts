@@ -131,7 +131,15 @@ export const RESET_TUTORIAL = location.search.indexOf('RESET_TUTORIAL') !== -1
 export const NO_TUTORIAL = location.search.indexOf('NO_TUTORIAL') !== -1
 
 export function tutorialEnabled() {
-  return !NO_TUTORIAL && WORLD_EXPLORER && (RESET_TUTORIAL || getUserProfile().profile.tutorialStep !== tutorialStepId.FINISHED)
+  return (
+    !NO_TUTORIAL &&
+    WORLD_EXPLORER &&
+    (RESET_TUTORIAL || getUserProfile().profile.tutorialStep !== tutorialStepId.FINISHED)
+  )
+}
+
+export function tutorialSceneEnabled() {
+  return tutorialEnabled() && (RESET_TUTORIAL || getUserProfile().profile.tutorialStep === tutorialStepId.INITIAL_SCENE)
 }
 
 export namespace commConfigurations {
@@ -252,6 +260,9 @@ export function getServerConfigurations() {
   return {
     contentAsBundle: `https://content-assets-as-bundle.decentraland.org`,
     wearablesApi: `https://wearable-api.decentraland.org/v2`,
+    explorerConfiguration: `https://explorer-config.decentraland.${
+      TLDDefault === 'today' ? 'org' : TLDDefault
+    }/configuration.json`,
     avatar: {
       snapshotStorage: `https://avatars-storage.decentraland.${TLDDefault}/`,
       catalog: getExclusiveServer(),
@@ -274,8 +285,10 @@ export async function setNetwork(net: ETHEREUM_NETWORK) {
         : '0xadd085f2318e9678bbb18b3e0711328f902b374b'
 
     decentralandConfigurations = {
+      ...contracts,
       contractAddress: contracts.LANDProxy,
       dao: contracts.CatalystProxy,
+      ens: contracts.CatalystProxy,
       contracts: {
         serviceLocator: contracts.ServiceLocator
       },
@@ -306,12 +319,14 @@ export namespace ethereumConfigurations {
   export const mainnet = {
     wss: 'wss://mainnet.infura.io/ws/v3/074a68d50a7c4e6cb46aec204a50cbf0',
     http: 'https://mainnet.infura.io/v3/074a68d50a7c4e6cb46aec204a50cbf0/',
-    etherscan: 'https://etherscan.io'
+    etherscan: 'https://etherscan.io',
+    names: 'https://api.thegraph.com/subgraphs/name/decentraland/marketplace'
   }
   export const ropsten = {
     wss: 'wss://ropsten.infura.io/ws/v3/074a68d50a7c4e6cb46aec204a50cbf0',
     http: 'https://ropsten.infura.io/v3/074a68d50a7c4e6cb46aec204a50cbf0/',
-    etherscan: 'https://ropsten.etherscan.io'
+    etherscan: 'https://ropsten.etherscan.io',
+    names: 'https://api.thegraph.com/subgraphs/name/decentraland/marketplace-ropsten'
   }
 }
 

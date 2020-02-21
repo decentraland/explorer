@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using DCL.Interface;
+using DCL.Helpers;
 
 namespace DCL.Tutorial
 {
@@ -12,17 +13,20 @@ namespace DCL.Tutorial
         [SerializeField] TutorialTooltip minimapTooltip = null;
         [SerializeField] GameObject claimNamePanel = null;
 
-        const string CLAIM_NAME_URL = "http://avatars.decentraland.org/?redirect_after_claim=https://explorer.decentraland.org";
+        const string CLAIM_NAME_URL = "http://avatars.decentraland.org/claim/?redirect_after_claim=https://explorer.decentraland.org";
 
         AvatarEditorHUDController avatarEditorHUD = null;
+
         bool claimNamePanelClosed = false;
         bool characterMoved = false;
         bool characterTeleported = false;
+
 
         public override void OnStepStart()
         {
             base.OnStepStart();
 
+            HUDController.i?.avatarHud.SetVisibility(false);
             HUDController.i?.minimapHud.SetVisibility(false);
             HUDController.i?.expressionsHud.SetVisibility(false);
             TutorialController.i.SetChatVisible(false);
@@ -32,6 +36,8 @@ namespace DCL.Tutorial
 
             if (HUDController.i != null && HUDController.i.avatarEditorHud != null)
             {
+                Utils.UnlockCursor();
+
                 avatarEditorHUD = HUDController.i.avatarEditorHud;
                 avatarEditorHUD.SetVisibility(true);
                 avatarEditorHUD.OnVisibilityChanged += OnAvatarEditorVisibilityChanged;
@@ -58,7 +64,7 @@ namespace DCL.Tutorial
 
         public override IEnumerator OnStepExecute()
         {
-            welcomeTooltip.Show();
+            yield return welcomeTooltip.ShowAndHideRoutine();
 
             yield return new WaitUntil(() => claimNamePanelClosed);
             yield return WaitForSecondsCache.Get(3);
@@ -79,11 +85,11 @@ namespace DCL.Tutorial
             controlsTooltip.Hide();
 
             yield return WaitForSecondsCache.Get(3);
-            cameraTooltip.Show();
+            yield return cameraTooltip.ShowAndHideRoutine();
             yield return WaitIdleTime();
 
             HUDController.i?.minimapHud.SetVisibility(true);
-            minimapTooltip.Show();
+            yield return minimapTooltip.ShowAndHideRoutine();
 
 #if UNITY_EDITOR
             if (TutorialController.i.debugRunTutorialOnStart)

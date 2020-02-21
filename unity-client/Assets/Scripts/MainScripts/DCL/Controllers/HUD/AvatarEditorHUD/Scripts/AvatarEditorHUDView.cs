@@ -52,7 +52,7 @@ public class AvatarEditorHUDView : MonoBehaviour
     [SerializeField] internal Button web3GoToMarketplaceButton;
     [SerializeField] internal GameObject noWeb3Container;
     [SerializeField] internal Button noWeb3GoToMarketplaceButton;
-    
+
     internal CharacterPreviewController characterPreviewController;
     private AvatarEditorHUDController controller;
     internal readonly Dictionary<string, ItemSelector> selectorsByCategory = new Dictionary<string, ItemSelector>();
@@ -97,14 +97,17 @@ public class AvatarEditorHUDView : MonoBehaviour
 
         characterPreviewRotation.OnHorizontalRotation += characterPreviewController.Rotate;
     }
+
     private void InitializeNavigationInfo(AvatarEditorNavigationInfo current)
     {
         current.Initialize();
+
         current.toggle.isOn = current.enabledByDefault;
-        current.canvas.enabled = current.enabledByDefault;
+
+        current.canvas.gameObject.SetActive(current.enabledByDefault);
         current.toggle.onValueChanged.AddListener((on) =>
         {
-            current.canvas.enabled = @on;
+            current.canvas.gameObject.SetActive(@on);
             characterPreviewController.SetFocus(current.focus);
         });
     }

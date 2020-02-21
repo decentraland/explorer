@@ -9,10 +9,12 @@ import { uuid } from 'decentraland-ecs/src'
 import { EventDispatcher } from 'decentraland-rpc/lib/common/core/EventDispatcher'
 import { IFuture } from 'fp-future'
 import { Empty } from 'google-protobuf/google/protobuf/empty_pb'
-import { sendPublicChatMessage } from 'shared/comms'
+import { identity } from 'shared'
+import { sendPublicChatMessage, persistCurrentUser } from 'shared/comms'
 import { AvatarMessageType } from 'shared/comms/interface/types'
 import { avatarMessageObservable, getUserProfile } from 'shared/comms/peers'
 import { providerFuture } from 'shared/ethereum/provider'
+import { getProfile } from 'shared/passports/selectors'
 import { TeleportController } from 'shared/world/TeleportController'
 import { gridToWorld } from '../atomicHelpers/parcelScenePositions'
 import {
@@ -93,6 +95,7 @@ import { positionObservable, teleportObservable } from '../shared/world/position
 import { hudWorkerUrl, SceneWorker } from '../shared/world/SceneWorker'
 import { ensureUiApis } from '../shared/world/uiSceneInitializer'
 import { worldRunningObservable } from '../shared/world/worldState'
+import { profileToRendererFormat } from 'shared/passports/transformations/profileToRendererFormat'
 
 const rendererVersion = require('decentraland-renderer')
 window['console'].log('Renderer version: ' + rendererVersion)
@@ -176,7 +179,7 @@ const browserInterface = {
     if (hasWallet) {
       TeleportController.goToNext()
     } else {
-      window.open('https://docs.decentraland.org/blockchain-integration/ethereum-essentials/', '_blank')
+      window.open('https://docs.decentraland.org/get-a-wallet/', '_blank')
     }
   },
 
@@ -184,13 +187,23 @@ const browserInterface = {
     Session.current.then(s => s.logout()).catch(e => defaultLogger.error('error while logging out', e))
   },
 
-  SaveUserAvatar(data: { face: string; body: string; avatar: Avatar }) {
-    global.globalStore.dispatch(saveAvatarRequest(data))
+  SaveUserAvatar({ face, body, avatar }: { face: string; body: string; avatar: Avatar }) {
+    const profile: Profile = getUserProfile().profile as Profile
+    profile.avatar = avatar
+    profile.avatar.snapshots.face = face
+    profile.avatar.snapshots.body = body
+    global.globalStore.dispatch(saveAvatarRequest(profile))
   },
 
   SaveUserTutorialStep(data: { tutorialStep: number }) {
     const profile: Profile = getUserProfile().profile as Profile
-    global.globalStore.dispatch(saveAvatarRequest({ ...profile, tutorialStep: data.tutorialStep }))
+    profile.tutorialStep = data.tutorialStep
+    global.globalStore.dispatch(saveAvatarRequest(profile))
+
+    persistCurrentUser({
+      version: profile.version,
+      profile: profileToRendererFormat(profile, identity)
+    })
   },
 
   ControlEvent({ eventType, payload }: { eventType: string; payload: any }) {
@@ -227,6 +240,55 @@ const browserInterface = {
 
   EditAvatarClicked() {
     delightedSurvey()
+  },
+
+  ReportScene(sceneId: string) {
+    browserInterface.OpenWebURL({ url: `https://decentralandofficial.typeform.com/to/KzaUxh?sceneId=${sceneId}` })
+  },
+
+  ReportPlayer(username: string) {
+    browserInterface.OpenWebURL({ url: `https://decentralandofficial.typeform.com/to/owLkla?username=${username}` })
+  },
+
+  BlockPlayer(data: { userId: string }) {
+    const profile = getProfile(global.globalStore.getState(), identity.address)
+
+    if (profile) {
+      let blocked: string[] = [data.userId]
+
+      if (profile.blocked) {
+        for (let blockedUser of profile.blocked) {
+          if (blockedUser === data.userId) {
+            return
+          }
+        }
+
+        // Merge the existing array and any previously blocked users
+        blocked = [...profile.blocked, ...blocked]
+      }
+
+      global.globalStore.dispatch(saveAvatarRequest({ ...profile, blocked }))
+    }
+  },
+
+  UnblockPlayer(data: { userId: string }) {
+    const profile = getProfile(global.globalStore.getState(), identity.address)
+
+    if (profile) {
+      const blocked = profile.blocked ? profile.blocked.filter(id => id !== data.userId) : []
+      global.globalStore.dispatch(saveAvatarRequest({ ...profile, blocked }))
+    }
+  },
+
+  ReportUserEmail(data: { userEmail: string }) {
+    const profile = getUserProfile().profile
+    if (profile) {
+      if (hasWallet) {
+        window.analytics.identify(profile.userId, { email: data.userEmail })
+      } else {
+        window.analytics.identify({ email: data.userEmail })
+      }
+    }
   }
 }
 
@@ -251,7 +313,11 @@ function delightedSurvey() {
       }
     }
 
-    delighted.survey(payload)
+    try {
+      delighted.survey(payload)
+    } catch (error) {
+      defaultLogger.error('Delighted error: ' + error.message, error)
+    }
   }
 }
 
@@ -422,8 +488,6 @@ unityInterface = {
     gameInstance.SendMessage('HUDController', 'ConfigurePlayerInfoCardHUD', JSON.stringify(configuration))
   },
   ConfigureWelcomeHUD(configuration: WelcomeHUDControllerModel) {
-    if (tutorialEnabled()) return
-
     gameInstance.SendMessage('HUDController', 'ConfigureWelcomeHUD', JSON.stringify(configuration))
   },
   ConfigureAirdroppingHUD(configuration: HUDConfiguration) {

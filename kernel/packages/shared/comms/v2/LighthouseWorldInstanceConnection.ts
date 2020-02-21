@@ -60,12 +60,15 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
     try {
       await this.peer.awaitConnectionEstablished(60000)
       await this.peer.setLayer(this.realm.layer)
+      this.statusHandler({ status: 'connected', connectedPeers: this.connectedPeersCount() })
     } catch (e) {
       defaultLogger.error('Error while connecting to layer', e)
-      this.statusHandler({ status: 'error', connectedPeers: this.connectedPeersCount() })
+      this.statusHandler({
+        status: e.responseJson && e.responseJson.status === 'layer_is_full' ? 'realm-full' : 'error',
+        connectedPeers: this.connectedPeersCount()
+      })
       throw e
     }
-    this.statusHandler({ status: 'connected', connectedPeers: this.connectedPeersCount() })
   }
 
   public async changeRealm(realm: Realm, url: string) {
@@ -156,7 +159,12 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
   }
 
   private async sendData(topic: string, messageData: MessageData, type: PeerMessageType) {
-    await this.peer.sendMessage(topic, createCommsMessage(messageData).serializeBinary(), type)
+    if (this.peer.currentRooms.some(it => it.id === topic)) {
+      await this.peer.sendMessage(topic, createCommsMessage(messageData).serializeBinary(), type)
+    } else {
+      // TODO: We may want to queue some messages
+      defaultLogger.warn('Tried to send a message to a topic that the peer is not subscribed to: ' + topic)
+    }
   }
 
   private async sendPositionData(p: Position, topic: string, typeName: string) {
@@ -172,12 +180,15 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
   private initializePeer() {
     this.statusHandler({ status: 'connecting', connectedPeers: this.connectedPeersCount() })
     this.peer = this.createPeer()
+    // @ts-ignore
+    this.peer.log = () => {
+      // DO NOTHING
+    }
     global.__DEBUG_PEER = this.peer
     return this.peer
   }
 
   private connectedPeersCount(): number {
-    // @ts-ignore
     return this.peer ? this.peer.connectedCount() : 0
   }
 
