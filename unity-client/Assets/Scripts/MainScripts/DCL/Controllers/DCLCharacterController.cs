@@ -123,15 +123,6 @@ public class DCLCharacterController : MonoBehaviour
         sprintAction.OnFinished += sprintFinishedDelegate;
     }
 
-    IEnumerator ReActivateCharacter()
-    {
-        ResetGround();
-
-        yield return null;
-
-        gameObject.SetActive(true);
-    }
-
     void OnDestroy()
     {
         characterPosition.OnPrecisionAdjust -= OnPrecisionAdjust;
