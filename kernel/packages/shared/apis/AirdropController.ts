@@ -42,11 +42,13 @@ export class AirdropController extends ExposableAPI {
       if (!from) {
         throw new Error('invalid ethereum connection: received ' + from)
       }
-      requestManager.eth_sendTransaction({
+      await requestManager.eth_sendTransaction({
         from,
         to: this.mapIdToTargetContract[id],
         data: this.mapIdToTransactions[id]
       })
+      const unityInterface = (window as any).unityInterface
+      unityInterface.TriggerTreasureHuntNextScenePopup()
     } else {
       defaultLogger.warn('Received accept of an invalid id')
     }
