@@ -1,4 +1,5 @@
 ﻿using DCL.Controllers;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -20,6 +21,8 @@ namespace DCL.Tutorial
         [Header("Stage Controller References")]
         [SerializeField] List<TutorialStep> steps = new List<TutorialStep>();
         [SerializeField] GameObject emailPromptHUDGameObject;
+
+        public event Action OnTutorialFinished;
 
         TutorialStep runningStep = null;
         TutorialStep.Id currentTutorialStepId = TutorialStep.Id.NONE;
@@ -126,6 +129,7 @@ namespace DCL.Tutorial
             currentTutorialStepId = TutorialStep.Id.FINISHED;
             UserProfile.GetOwnUserProfile().SetTutorialStepId((int)currentTutorialStepId);
             runningStep = null;
+            OnTutorialFinished?.Invoke();
         }
 
         private int GetTutorialStepFromProfile()

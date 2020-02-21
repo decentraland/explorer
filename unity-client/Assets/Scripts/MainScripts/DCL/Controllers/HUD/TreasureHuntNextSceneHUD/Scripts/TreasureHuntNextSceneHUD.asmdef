@@ -1,0 +1,17 @@
+{
+    "name": "TreasureHuntNextSceneHUD",
+    "references": [
+        "GUID:4973650d2444c4561a15d50f24d91cd9",
+        "GUID:1de3566cccb280f4a982c59ad0d08c96",
+        "GUID:8e14059e964ca49aeb55d0e7b2b14c3c"
+    ],
+    "optionalUnityReferences": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": []
+}
