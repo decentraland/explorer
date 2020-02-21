@@ -1168,6 +1168,7 @@ GameObject:
   - component: {fileID: 1497594712235200409}
   - component: {fileID: 149667054365166906}
   - component: {fileID: 5379553226302859619}
+  - component: {fileID: 8124912053317509545}
   m_Layer: 5
   m_Name: Link
   m_TagString: Untagged
@@ -1222,7 +1223,8 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
-  m_text: Check out the amazing Scenes you can explore
+  m_text: <link="https://decentraland.org/blog/announcements/decentraland-launch/">Check
+    out the amazing Scenes you can explore</link>
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: c0f2e4affe3f2438d9042ca1db45764f, type: 2}
   m_sharedMaterial: {fileID: 8921694724713903678, guid: c0f2e4affe3f2438d9042ca1db45764f,
@@ -1296,7 +1298,7 @@ MonoBehaviour:
     spriteCount: 0
     spaceCount: 7
     wordCount: 8
-    linkCount: 0
+    linkCount: 1
     lineCount: 1
     pageCount: 1
     materialCount: 1
@@ -1329,6 +1331,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_HorizontalFit: 0
   m_VerticalFit: 2
+--- !u!114 &8124912053317509545
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4613491741866299363}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 591d1e4c3a3424900a8e71d025368d9f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &6110592229427086369
 GameObject:
   m_ObjectHideFlags: 0
