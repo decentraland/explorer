@@ -1,3 +1,4 @@
+using System.Text;
 using UnityEngine;
 
 namespace DCL.Helpers
@@ -5,11 +6,13 @@ namespace DCL.Helpers
 
     public static class SRPBatchingHelper
     {
-        public static void OptimizeMaterial(Renderer renderer, Material material, int crc)
+        static StringBuilder tmpStrBuilder = new StringBuilder(500);
+        public static void OptimizeMaterial(Renderer renderer, Material material)
         {
             //NOTE(Brian): Just enable these keywords so the SRP batcher batches more stuff.
             material.EnableKeyword("_EMISSION");
             material.EnableKeyword("_NORMALMAP");
+            material.enableInstancing = true;
 
             int baseQueue;
 
@@ -21,20 +24,26 @@ namespace DCL.Helpers
                 baseQueue = (int)UnityEngine.Rendering.RenderQueue.Geometry;
 
             UnityEngine.Rendering.CullMode cullMode = (UnityEngine.Rendering.CullMode)material.GetFloat("_Cull");
-            int crcBucket = crc % 500;
+            int _ZWrite = (int)material.GetFloat("_ZWrite");
+            int _SrcBlend = (int)material.GetFloat("_SrcBlend");
+            int _DstBlend = (int)material.GetFloat("_DstBlend");
 
-            switch (cullMode)
+            var kw = material.shaderKeywords;
+
+            tmpStrBuilder.Clear();
+
+            for (int i = 0; i < kw.Length; i++)
             {
-                case UnityEngine.Rendering.CullMode.Off:
-                    crcBucket += 500;
-                    break;
-                case UnityEngine.Rendering.CullMode.Front:
-                    crcBucket += 1000;
-                    break;
-                case UnityEngine.Rendering.CullMode.Back:
-                    crcBucket += 1500;
-                    break;
+                tmpStrBuilder.Append(kw[i]);
             }
+
+            tmpStrBuilder.Append(cullMode.ToString());
+            tmpStrBuilder.Append(_ZWrite.ToString());
+            tmpStrBuilder.Append(_SrcBlend.ToString());
+            tmpStrBuilder.Append(_DstBlend.ToString());
+
+            int crc = Shader.PropertyToID(tmpStrBuilder.ToString());
+            int crcBucket = Mathf.Abs(crc) % 500;
 
             //NOTE(Brian): This is to move the rendering of animated stuff on top of the queue, so the SRP batcher
             //             can group all the draw calls.
