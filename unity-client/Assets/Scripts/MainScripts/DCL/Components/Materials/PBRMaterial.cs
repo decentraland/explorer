@@ -1,4 +1,4 @@
-﻿using DCL.Controllers;
+using DCL.Controllers;
 using DCL.Helpers;
 using DCL.Models;
 using System.Collections;
@@ -224,6 +224,7 @@ namespace DCL.Components
                 material.name = name;
 
                 material.enableInstancing = true;
+
             }
         }
 
@@ -264,6 +265,8 @@ namespace DCL.Components
                 }
 
                 meshRenderer.sharedMaterial = material;
+                SRPBatchingHelper.OptimizeMaterial(meshRenderer, material, material.ComputeCRC());
+
             }
         }
 
