@@ -105,7 +105,6 @@ namespace Tests
                 Assert.AreApproximatelyEqual(1.0f, materialComponent.material.GetFloat("_EnvironmentReflections"));
                 Assert.AreApproximatelyEqual(1.0f, materialComponent.material.GetFloat("_SpecularHighlights"));
                 Assert.AreApproximatelyEqual(.0f, materialComponent.material.GetFloat("_AlphaClip"));
-                Assert.AreEqual((int)UnityEngine.Rendering.RenderQueue.Geometry, materialComponent.material.renderQueue);
             }
 
             // Update material
