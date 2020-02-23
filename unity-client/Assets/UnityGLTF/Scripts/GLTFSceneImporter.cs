@@ -1688,7 +1688,7 @@ namespace UnityGLTF
             int crcBucket = material.ComputeCRC() % 500;
 
             //NOTE(Brian): This is to move the rendering of animated stuff on top of the queue, so the SRP batcher
-            //             can group all the draw calls.
+            //             can group all the draw calls...
             if (renderer is SkinnedMeshRenderer)
             {
                 material.renderQueue = baseQueue - 500;
