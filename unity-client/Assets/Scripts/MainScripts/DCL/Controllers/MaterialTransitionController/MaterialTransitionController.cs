@@ -95,7 +95,8 @@ public class MaterialTransitionController : MonoBehaviour
 
     void UpdateCullYValueHologram()
     {
-        hologramMaterialCopy.SetFloat(ShaderId_CullYPlane, currentCullYPlane);
+        if (hologramMaterialCopy != null)
+            hologramMaterialCopy.SetFloat(ShaderId_CullYPlane, currentCullYPlane);
     }
 
 
