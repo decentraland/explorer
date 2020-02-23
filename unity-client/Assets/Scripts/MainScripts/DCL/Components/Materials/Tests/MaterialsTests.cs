@@ -154,7 +154,6 @@ namespace Tests
                 Assert.AreApproximatelyEqual(0.4f, materialComponent.material.GetFloat("_EnvironmentReflections"));
                 Assert.AreApproximatelyEqual(2.0f, materialComponent.material.GetFloat("_SpecularHighlights"));
                 Assert.AreApproximatelyEqual(.0f, materialComponent.material.GetFloat("_AlphaClip"));
-                Assert.AreEqual((int)UnityEngine.Rendering.RenderQueue.Transparent, materialComponent.material.renderQueue);
                 Assert.AreEqual((int)UnityEngine.Rendering.BlendMode.SrcAlpha,
                     materialComponent.material.GetInt("_SrcBlend"));
                 Assert.AreEqual((int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha,
