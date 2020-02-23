@@ -5,7 +5,7 @@ using System.Text;
 using UnityEngine;
 using UnityGLTF.Cache;
 
-namespace DCL
+namespace DCL.Helpers
 {
     public static class MaterialCachingHelper
     {
@@ -88,29 +88,7 @@ namespace DCL
                             else
                                 materialCopy.SetFloat("_Surface", 0);
 #endif
-                            int baseQueue = 0;
-
-                            if (materialCopy.IsKeywordEnabled("_ALPHABLEND_ON"))
-                                baseQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
-                            else
-                                baseQueue = (int)UnityEngine.Rendering.RenderQueue.Geometry;
-
-                            int crcBucket = crc % 500;
-
-                            //NOTE(Brian): This is to move the rendering of animated stuff on top of the queue, so the SRP batcher
-                            //             can group all the draw calls.
-                            if (r is SkinnedMeshRenderer)
-                            {
-                                materialCopy.renderQueue = baseQueue - 500;
-                            }
-                            else
-                            {
-                                materialCopy.renderQueue = baseQueue + crcBucket;
-                            }
-
-                            //NOTE(Brian): Just enable these keywords so the SRP batcher batches more stuff.
-                            materialCopy.EnableKeyword("_EMISSION");
-                            materialCopy.EnableKeyword("_NORMALMAP");
+                            SRPBatchingHelper.OptimizeMaterial(r, materialCopy, crc);
 
                             PersistentAssetCache.MaterialCacheByCRC.Add(hash, new RefCountedMaterialData(hash, materialCopy));
                         }

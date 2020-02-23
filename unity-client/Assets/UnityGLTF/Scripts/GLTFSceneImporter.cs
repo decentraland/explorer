@@ -1674,33 +1674,7 @@ namespace UnityGLTF
 
             Material material = materialCacheData.GetContents(primitive.Attributes.ContainsKey(SemanticProperties.COLOR_0));
 
-            int baseQueue = 0;
-
-            //NOTE(Brian): Just enable these keywords so the SRP batcher batches more stuff.
-            material.EnableKeyword("_EMISSION");
-            material.EnableKeyword("_NORMALMAP");
-
-            //NOTE(Brian): This is to move the rendering of opaque animated stuff on top of the queue, so the SRP batcher
-            //             can group all the draw calls.
-            if (material.renderQueue == (int)RenderQueue.Geometry)
-                baseQueue = (int)RenderQueue.Geometry;
-            else if (material.renderQueue == (int)RenderQueue.AlphaTest)
-                baseQueue = (int)RenderQueue.AlphaTest;
-            else if (material.renderQueue == (int)RenderQueue.Transparent)
-                baseQueue = (int)RenderQueue.Transparent;
-
-            int crcBucket = material.ComputeCRC() % 500;
-
-            //NOTE(Brian): This is to move the rendering of animated stuff on top of the queue, so the SRP batcher
-            //             can group all the draw calls...
-            if (renderer is SkinnedMeshRenderer)
-            {
-                material.renderQueue = baseQueue - 500;
-            }
-            else
-            {
-                material.renderQueue = baseQueue + crcBucket;
-            }
+            DCL.Helpers.SRPBatchingHelper.OptimizeMaterial(renderer, material, material.ComputeCRC());
 
             if (matController != null)
             {
