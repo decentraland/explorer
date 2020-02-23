@@ -1676,6 +1676,10 @@ namespace UnityGLTF
 
             int baseQueue = 0;
 
+            //NOTE(Brian): Just enable these keywords so the SRP batcher batches more stuff.
+            material.EnableKeyword("_EMISSION");
+            material.EnableKeyword("_NORMALMAP");
+
             //NOTE(Brian): This is to move the rendering of opaque animated stuff on top of the queue, so the SRP batcher
             //             can group all the draw calls.
             if (material.renderQueue == (int)RenderQueue.Geometry)
@@ -2217,11 +2221,7 @@ namespace UnityGLTF
 
             for (int i = 0; i < 2; i++)
             {
-                string materialCRC = material[i].ComputeCRC().ToString() + material[i].name;
-
-                //NOTE(Brian): Just enable these keywords so the SRP batcher batches more stuff.
-                material[i].EnableKeyword("_EMISSION");
-                material[i].EnableKeyword("_NORMALMAP");
+                string materialCRC = material[i].ComputeCRC().ToString();
 
                 if (!addMaterialsToPersistentCaching)
                 {

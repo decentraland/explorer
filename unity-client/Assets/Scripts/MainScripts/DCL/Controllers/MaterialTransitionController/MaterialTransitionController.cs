@@ -27,7 +27,9 @@ public class MaterialTransitionController : MonoBehaviour
     [System.NonSerialized] public System.Action onFinishedLoading;
 
     static Material hologramMaterial;
+
     List<Material> loadingMaterialCopies;
+    Material hologramMaterialCopy;
 
     public Material[] finalMaterials;
 
@@ -93,7 +95,7 @@ public class MaterialTransitionController : MonoBehaviour
 
     void UpdateCullYValueHologram()
     {
-        hologramMaterial.SetFloat(ShaderId_CullYPlane, currentCullYPlane);
+        hologramMaterialCopy.SetFloat(ShaderId_CullYPlane, currentCullYPlane);
     }
 
 
@@ -146,7 +148,8 @@ public class MaterialTransitionController : MonoBehaviour
         if (hologramMaterial == null)
             hologramMaterial = Resources.Load("Materials/HologramMaterial") as Material;
 
-        placeholderRenderer.sharedMaterials = new Material[] { hologramMaterial };
+        hologramMaterialCopy = new Material(hologramMaterial);
+        placeholderRenderer.sharedMaterials = new Material[] { hologramMaterialCopy };
     }
 
 
@@ -191,7 +194,6 @@ public class MaterialTransitionController : MonoBehaviour
 
                     if (currentCullYPlane <= lowerYRendererBounds + 0.1f)
                     {
-                        //targetRendererValue.SetPropertyBlock(null);
                         DestroyPlaceholder();
                         state = State.FINISHED;
                     }
@@ -202,7 +204,6 @@ public class MaterialTransitionController : MonoBehaviour
             case State.FINISHED:
                 {
                     onFinishedLoading?.Invoke();
-
                     Destroy(this);
                     break;
                 }
@@ -228,6 +229,9 @@ public class MaterialTransitionController : MonoBehaviour
 
     void DestroyPlaceholder()
     {
+        Destroy(hologramMaterialCopy);
+        hologramMaterialCopy = null;
+
         if (placeholder != null)
         {
             Destroy(placeholder);
