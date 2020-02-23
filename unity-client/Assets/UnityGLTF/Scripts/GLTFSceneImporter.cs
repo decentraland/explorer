@@ -1674,25 +1674,28 @@ namespace UnityGLTF
 
             Material material = materialCacheData.GetContents(primitive.Attributes.ContainsKey(SemanticProperties.COLOR_0));
 
+            int baseQueue = 0;
+
             //NOTE(Brian): This is to move the rendering of opaque animated stuff on top of the queue, so the SRP batcher
             //             can group all the draw calls.
-            if (material.renderQueue != (int)RenderQueue.Transparent)
+            if (material.renderQueue == (int)RenderQueue.Geometry)
+                baseQueue = (int)RenderQueue.Geometry;
+            else if (material.renderQueue == (int)RenderQueue.AlphaTest)
+                baseQueue = (int)RenderQueue.AlphaTest;
+            else if (material.renderQueue == (int)RenderQueue.Transparent)
+                baseQueue = (int)RenderQueue.Transparent;
+
+            int crcBucket = material.ComputeCRC() % 500;
+
+            //NOTE(Brian): This is to move the rendering of animated stuff on top of the queue, so the SRP batcher
+            //             can group all the draw calls.
+            if (renderer is SkinnedMeshRenderer)
             {
-                if (renderer is SkinnedMeshRenderer)
-                {
-                    if (material.renderQueue == (int)RenderQueue.Geometry)
-                        material.renderQueue = (int)RenderQueue.Geometry - 500;
-                    else if (material.renderQueue == (int)RenderQueue.AlphaTest)
-                        material.renderQueue = (int)RenderQueue.AlphaTest - 500;
-                }
-                else
-                {
-                    int crcBucket = material.ComputeCRC() % 500;
-                    if (material.renderQueue == (int)RenderQueue.Geometry)
-                        material.renderQueue = (int)RenderQueue.Geometry + crcBucket;
-                    else if (material.renderQueue == (int)RenderQueue.AlphaTest)
-                        material.renderQueue = (int)RenderQueue.AlphaTest + crcBucket;
-                }
+                material.renderQueue = baseQueue - 500;
+            }
+            else
+            {
+                material.renderQueue = baseQueue + crcBucket;
             }
 
             if (matController != null)
