@@ -201,7 +201,7 @@ namespace Builder
 
         private void OnSceneChanged(ParcelScene scene)
         {
-            boundariesChecker = scene.boundariesChecker;
+            boundariesChecker = DCL.Controllers.SceneBoundariesChecker.i;
             currentScene = scene;
         }
 

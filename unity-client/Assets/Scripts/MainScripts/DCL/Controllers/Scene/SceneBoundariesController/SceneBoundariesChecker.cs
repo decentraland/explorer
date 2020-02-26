@@ -2,21 +2,66 @@ using DCL.Components;
 using DCL.Helpers;
 using DCL.Models;
 using UnityEngine;
+using System.Collections.Generic;
 
 namespace DCL.Controllers
 {
-    public class SceneBoundariesChecker
+    public class SceneBoundariesChecker : MonoBehaviour
     {
-        protected ParcelScene scene;
+        public static SceneBoundariesChecker i { get; private set; }
 
-        public SceneBoundariesChecker(ParcelScene ownerScene)
+        protected HashSet<DecentralandEntity> entitiesToCheck = new HashSet<DecentralandEntity>();
+        List<DecentralandEntity> removedEntitiesToCheck = new List<DecentralandEntity>();
+        float timeBetweenChecks = 1f;
+        float lastChecktTime;
+
+        protected virtual void Awake()
         {
-            scene = ownerScene;
+            if (i != null)
+            {
+                Utils.SafeDestroy(gameObject);
+                return;
+            }
+
+            i = this;
+        }
+
+        void LateUpdate()
+        {
+            if (Time.realtimeSinceStartup - lastChecktTime < timeBetweenChecks) return;
+
+            lastChecktTime = Time.realtimeSinceStartup;
+
+            foreach (var entity in entitiesToCheck)
+            {
+                if (MessagingControllersManager.i.timeBudgetCounter <= 0f) break;
+
+                float startTime = Time.realtimeSinceStartup;
+
+                EvaluateEntityPosition(entity);
+                removedEntitiesToCheck.Add(entity);
+
+                float finishTime = Time.realtimeSinceStartup;
+                MessagingControllersManager.i.timeBudgetCounter -= (finishTime - startTime);
+            }
+
+            foreach (var entity in removedEntitiesToCheck)
+            {
+                entitiesToCheck.Remove(entity);
+            }
+            removedEntitiesToCheck.Clear();
+        }
+
+        public void AddEntity(DecentralandEntity entity)
+        {
+            if (!SceneController.i.useBoundariesChecker) return;
+
+            entitiesToCheck.Add(entity);
         }
 
         public void EvaluateEntityPosition(DecentralandEntity entity)
         {
-            if (entity == null || !scene.entities.ContainsValue(entity)) return;
+            if (entity == null || entity.scene == null) return;
 
             // Recursively evaluate entity children as well, we need to check this up front because this entity may not have meshes of its own, but the children may.
             if (entity.children.Count > 0)
@@ -53,7 +98,7 @@ namespace DCL.Controllers
             Bounds meshBounds = Utils.BuildMergedBounds(entity.meshesInfo.renderers);
 
             // 1st check (full mesh AABB)
-            bool isInsideBoundaries = scene.IsInsideSceneBoundaries(meshBounds);
+            bool isInsideBoundaries = entity.scene.IsInsideSceneBoundaries(meshBounds);
 
             // 2nd check (submeshes AABB)
             if (!isInsideBoundaries)
@@ -70,7 +115,7 @@ namespace DCL.Controllers
         {
             for (int i = 0; i < entity.meshesInfo.renderers.Length; i++)
             {
-                if (!scene.IsInsideSceneBoundaries(entity.meshesInfo.renderers[i].bounds))
+                if (!entity.scene.IsInsideSceneBoundaries(entity.meshesInfo.renderers[i].bounds))
                 {
                     return false;
                 }

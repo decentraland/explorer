@@ -21,6 +21,8 @@ namespace DCL
 
         [FormerlySerializedAs("factoryManifest")]
         public DCLComponentFactory componentFactory;
+        public GameObject sceneBoundariesCheckerPrefab;
+        public GameObject sceneBoundariesCheckerDebugPrefab;
 
         public HashSet<string> readyScenes = new HashSet<string>();
         public Dictionary<string, ParcelScene> loadedScenes = new Dictionary<string, ParcelScene>();
@@ -77,6 +79,9 @@ namespace DCL
         [System.NonSerialized]
         public bool prewarmSceneMessagesPool = true;
 
+        [System.NonSerialized]
+        public bool useBoundariesChecker = true;
+
         public bool hasPendingMessages => MessagingControllersManager.i.pendingMessagesCount > 0;
 
         public string globalSceneId { get; private set; }
@@ -108,6 +113,14 @@ namespace DCL
 
             Debug.unityLogger.logEnabled = false;
 #endif
+
+            if (useBoundariesChecker)
+            {
+                // if (isDebugMode)
+                //     Instantiate(sceneBoundariesCheckerDebugPrefab);
+                // else
+                Instantiate(sceneBoundariesCheckerPrefab);
+            }
 
             MessagingControllersManager.i.Initialize(this);
             MemoryManager.i.Initialize();
@@ -298,6 +311,13 @@ namespace DCL
 
             isDebugMode = true;
             fpsPanel.SetActive(true);
+
+            if (useBoundariesChecker)
+            {
+                DestroyImmediate(SceneBoundariesChecker.i.gameObject);
+
+                Instantiate(sceneBoundariesCheckerDebugPrefab);
+            }
 
             OnDebugModeSet?.Invoke();
         }
