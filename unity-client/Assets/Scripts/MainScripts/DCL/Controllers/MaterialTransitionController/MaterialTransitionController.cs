@@ -50,7 +50,6 @@ public class MaterialTransitionController : MonoBehaviour
 
     public GameObject placeholder { get; private set; }
     public Renderer placeholderRenderer { get; private set; }
-    //static MaterialPropertyBlock placeholderPropertyBlock;
 
     float lowerYRendererBounds;
     float topYRendererBounds;
@@ -73,12 +72,6 @@ public class MaterialTransitionController : MonoBehaviour
         }
 
         targetRenderer.sharedMaterials = finalMaterials;
-
-        //EnsurePlaceholderPropertyBlock();
-
-        //targetRenderer.GetPropertyBlock(placeholderPropertyBlock);
-        //placeholderPropertyBlock.SetFloat(ShaderId_CullYPlane, currentCullYPlane);
-        //targetRenderer.SetPropertyBlock(placeholderPropertyBlock);
     }
 
     void UpdateCullYValue()
