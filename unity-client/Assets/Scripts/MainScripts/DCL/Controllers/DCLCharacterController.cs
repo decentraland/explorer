@@ -123,23 +123,6 @@ public class DCLCharacterController : MonoBehaviour
         sprintAction.OnFinished += sprintFinishedDelegate;
     }
 
-    // We can't allow the character to be disabled
-    void OnDisable()
-    {
-        if (!RenderingController.i.activatedRenderingBefore) return;
-
-        SceneController.i.StartCoroutine(ReActivateCharacter());
-    }
-
-    IEnumerator ReActivateCharacter()
-    {
-        ResetGround();
-
-        yield return null;
-
-        gameObject.SetActive(true);
-    }
-
     void OnDestroy()
     {
         characterPosition.OnPrecisionAdjust -= OnPrecisionAdjust;

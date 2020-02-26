@@ -4,23 +4,12 @@ import {
   INIT_CATALYST_REALM,
   SET_CATALYST_CANDIDATES,
   SET_CATALYST_REALM_COMMS_STATUS,
-  MARK_CATALYST_REALM_FULL
+  MARK_CATALYST_REALM_FULL,
+  SET_ADDED_CATALYST_CANDIDATES,
+  SET_CONTENT_WHITELIST
 } from './actions'
 import { DaoState, Candidate, Realm } from './types'
-import {
-  FETCH_PROFILE_SERVICE,
-  FETCH_CONTENT_SERVICE,
-  UPDATE_CONTENT_SERVICE,
-  COMMS_SERVICE,
-  REALM as REALM_QUERY
-} from '../../config/index'
-import { getRealmFromString } from '.'
-
-function getConfiguredRealm(candidates: Candidate[]) {
-  if (REALM_QUERY) {
-    return getRealmFromString(REALM_QUERY, candidates)
-  }
-}
+import { FETCH_PROFILE_SERVICE, FETCH_CONTENT_SERVICE, UPDATE_CONTENT_SERVICE, COMMS_SERVICE, FETCH_META_CONTENT_SERVICE } from '../../config/index'
 
 export function daoReducer(state?: DaoState, action?: AnyAction): DaoState {
   if (!state) {
@@ -28,10 +17,13 @@ export function daoReducer(state?: DaoState, action?: AnyAction): DaoState {
       initialized: false,
       profileServer: '',
       fetchContentServer: '',
+      fetchMetaContentServer: '',
       updateContentServer: '',
       commsServer: '',
       realm: undefined,
       candidates: [],
+      addedCandidates: [],
+      contentWhitelist: [],
       commsStatus: { status: 'initial', connectedPeers: 0 }
     }
   }
@@ -44,19 +36,36 @@ export function daoReducer(state?: DaoState, action?: AnyAction): DaoState {
         ...state,
         candidates: action.payload
       }
+    case SET_ADDED_CATALYST_CANDIDATES:
+      return {
+        ...state,
+        addedCandidates: action.payload
+      }
+    case SET_CONTENT_WHITELIST:
+      return {
+        ...state,
+        contentWhitelist: action.payload
+      }
     case INIT_CATALYST_REALM: {
-      const configuredRealm = getConfiguredRealm(state.candidates)
-      const realm = configuredRealm ? configuredRealm : action.payload
       return {
         ...state,
         initialized: true,
-        ...realmProperties(realm)
+        ...ensureProfileDao(
+          ensureContentWhitelist(realmProperties(action.payload), state.contentWhitelist),
+          state.candidates
+        )
       }
     }
     case SET_CATALYST_REALM:
       return {
         ...state,
-        ...realmProperties(action.payload, !!action.payload.configOverride)
+        ...ensureProfileDao(
+          ensureContentWhitelist(
+            realmProperties(action.payload, !!action.payload.configOverride),
+            state.contentWhitelist
+          ),
+          state.candidates
+        )
       }
     case SET_CATALYST_REALM_COMMS_STATUS:
       return {
@@ -78,13 +87,61 @@ export function daoReducer(state?: DaoState, action?: AnyAction): DaoState {
       return state
   }
 }
-function realmProperties(realm: Realm, configOverride: boolean = true) {
+function realmProperties(realm: Realm, configOverride: boolean = true): Partial<DaoState> {
   const domain = realm.domain
   return {
     profileServer: FETCH_PROFILE_SERVICE && configOverride ? FETCH_PROFILE_SERVICE : domain + '/lambdas/profile',
     fetchContentServer: FETCH_CONTENT_SERVICE && configOverride ? FETCH_CONTENT_SERVICE : domain + '/lambdas/contentv2',
+    fetchMetaContentServer: FETCH_META_CONTENT_SERVICE && configOverride ? FETCH_META_CONTENT_SERVICE : domain + '/lambdas/contentv2',
     updateContentServer: UPDATE_CONTENT_SERVICE && configOverride ? UPDATE_CONTENT_SERVICE : domain + '/content',
     commsServer: COMMS_SERVICE && configOverride ? COMMS_SERVICE : domain + '/comms',
     realm
   }
+}
+
+function ensureContentWhitelist(state: Partial<DaoState>, contentWhitelist: Candidate[]): Partial<DaoState> {
+  // if current realm is in whitelist => return current state
+  if (state.realm && contentWhitelist.some(candidate => candidate.domain === state.realm!.domain)) {
+    return state
+  }
+
+  // otherwise => override fetch content server to optimize performance
+  const { domain } = contentWhitelist[0]
+  return {
+    ...state,
+    fetchContentServer: FETCH_CONTENT_SERVICE ? FETCH_CONTENT_SERVICE : domain + '/lambdas/contentv2'
+  }
+}
+
+function ensureProfileDao(state: Partial<DaoState>, daoCandidates: Candidate[]) {
+  // if current realm is in dao => return current state
+  if (state.realm && daoCandidates.some(candidate => candidate.domain === state.realm!.domain)) {
+    return state
+  }
+
+  // else if fetch content server is in dao => override fetch & update profile server to use that same one
+  let domain: string
+
+  const fetchContentDomain = getContentDomain(state)
+  if (daoCandidates.some(candidate => candidate.domain === fetchContentDomain)) {
+    domain = fetchContentDomain
+  } else {
+    // otherwise => override fetch & update profile server to maintain consistency
+    domain = daoCandidates[0].domain
+  }
+
+  return {
+    ...state,
+    profileServer: FETCH_PROFILE_SERVICE ? FETCH_PROFILE_SERVICE : domain + '/lambdas/profile',
+    updateContentServer: UPDATE_CONTENT_SERVICE ? UPDATE_CONTENT_SERVICE : domain + '/content'
+  }
+}
+
+function getContentDomain(state: Partial<DaoState>) {
+  if (!state.fetchContentServer) {
+    return ''
+  }
+
+  const service = state.fetchContentServer
+  return service.substring(0, service.length - '/lambdas/contentv2'.length)
 }
