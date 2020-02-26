@@ -65,6 +65,7 @@ namespace DCL.Components
                 material.mainTexture = null;
             }
 
+            material.EnableKeyword("_ALPHATEST_ON");
             material.SetInt("_ZWrite", 1);
             material.SetFloat(_AlphaClip, 1);
             material.SetFloat("_Cutoff", model.alphaTest);

@@ -222,8 +222,6 @@ namespace DCL.Components
 
                 material = new Material(Utils.EnsureResourcesMaterial(MATERIAL_RESOURCES_PATH + name));
                 material.name = name;
-
-                material.enableInstancing = false;
             }
         }
 
