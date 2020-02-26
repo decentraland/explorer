@@ -67,13 +67,12 @@ namespace DCL.Helpers
                 material.SetFloat(ShaderUtils._EnvironmentReflections, 1);
             }
 
+            //NOTE(Brian): This guarantees grouping calls by same shader keywords. Needed to take advantage of SRP batching.
             string appendedKeywords = string.Join("", material.shaderKeywords);
             int crc = Shader.PropertyToID(appendedKeywords);
 
             if (!crcToQueue.ContainsKey(crc))
                 crcToQueue.Add(crc, crcToQueue.Count + 1);
-
-            int offset = ((cullMode + 1) * 100) + (zWrite * 100);
 
             //NOTE(Brian): This is to move the rendering of animated stuff on top of the queue, so the SRP batcher
             //             can group all the draw calls.
@@ -83,7 +82,10 @@ namespace DCL.Helpers
             }
             else
             {
-                material.renderQueue = baseQueue + crcToQueue[crc] + offset;
+                //NOTE(Brian): we use 0, 100, 200 to group calls by culling mode (must group them or batches will break).
+                int queueOffset = (cullMode + 1) * 100;
+
+                material.renderQueue = baseQueue + crcToQueue[crc] + queueOffset;
             }
         }
     }
