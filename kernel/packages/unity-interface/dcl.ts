@@ -10,7 +10,7 @@ import { EventDispatcher } from 'decentraland-rpc/lib/common/core/EventDispatche
 import { IFuture } from 'fp-future'
 import { Empty } from 'google-protobuf/google/protobuf/empty_pb'
 import { identity } from 'shared'
-import { sendPublicChatMessage } from 'shared/comms'
+import { sendPublicChatMessage, persistCurrentUser } from 'shared/comms'
 import { AvatarMessageType } from 'shared/comms/interface/types'
 import { avatarMessageObservable, getUserProfile } from 'shared/comms/peers'
 import { providerFuture } from 'shared/ethereum/provider'
@@ -95,6 +95,7 @@ import { positionObservable, teleportObservable } from '../shared/world/position
 import { hudWorkerUrl, SceneWorker } from '../shared/world/SceneWorker'
 import { ensureUiApis } from '../shared/world/uiSceneInitializer'
 import { worldRunningObservable } from '../shared/world/worldState'
+import { profileToRendererFormat } from 'shared/passports/transformations/profileToRendererFormat'
 
 const rendererVersion = require('decentraland-renderer')
 window['console'].log('Renderer version: ' + rendererVersion)
@@ -186,14 +187,22 @@ const browserInterface = {
     Session.current.then(s => s.logout()).catch(e => defaultLogger.error('error while logging out', e))
   },
 
-  SaveUserAvatar({ face, body, avatar }: { face: string; body: string; avatar: Avatar }) {
+  SaveUserAvatar(changes: { face: string; body: string; avatar: Avatar }) {
+    const { face, body, avatar } = changes
     const profile: Profile = getUserProfile().profile as Profile
-    global.globalStore.dispatch(saveAvatarRequest({ ...profile, avatar: { ...avatar, snapshots: { face, body } } }))
+    const updated = { ...profile, avatar: { ...avatar, snapshots: { face, body } } }
+    global.globalStore.dispatch(saveAvatarRequest(updated))
   },
 
   SaveUserTutorialStep(data: { tutorialStep: number }) {
     const profile: Profile = getUserProfile().profile as Profile
-    global.globalStore.dispatch(saveAvatarRequest({ ...profile, tutorialStep: data.tutorialStep }))
+    profile.tutorialStep = data.tutorialStep
+    global.globalStore.dispatch(saveAvatarRequest(profile))
+
+    persistCurrentUser({
+      version: profile.version,
+      profile: profileToRendererFormat(profile, identity)
+    })
   },
 
   ControlEvent({ eventType, payload }: { eventType: string; payload: any }) {
