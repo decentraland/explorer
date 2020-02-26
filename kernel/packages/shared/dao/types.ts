@@ -49,7 +49,7 @@ export type RootDaoState = {
   dao: DaoState
 }
 
-export type CommsState = 'initial' | 'connecting' | 'connected' | 'error' | 'realm-full'
+export type CommsState = 'initial' | 'connecting' | 'connected' | 'error' | 'realm-full' | 'reconnection-error'
 
 export type CommsStatus = {
   status: CommsState

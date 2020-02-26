@@ -6,7 +6,8 @@ import {
   SET_CATALYST_REALM_COMMS_STATUS,
   MARK_CATALYST_REALM_FULL,
   SET_ADDED_CATALYST_CANDIDATES,
-  SET_CONTENT_WHITELIST
+  SET_CONTENT_WHITELIST,
+  MARK_CATALYST_REALM_CONNECTION_ERROR
 } from './actions'
 import { DaoState, Candidate, Realm } from './types'
 import {
@@ -84,6 +85,17 @@ export function daoReducer(state?: DaoState, action?: AnyAction): DaoState {
         candidates: state.candidates.map(it => {
           if (it.catalystName === action.payload.catalystName && it.layer.name === action.payload.layer) {
             return { ...it, layer: { ...it.layer, usersCount: it.layer.maxUsers } }
+          } else {
+            return it
+          }
+        })
+      }
+    case MARK_CATALYST_REALM_CONNECTION_ERROR:
+      return {
+        ...state,
+        candidates: state.candidates.map(it => {
+          if (it.catalystName === action.payload.catalystName) {
+            return { ...it, layer: { ...it.layer, elapsed: Number.MAX_SAFE_INTEGER } }
           } else {
             return it
           }
