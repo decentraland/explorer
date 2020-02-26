@@ -1,4 +1,4 @@
-﻿using DCL.Controllers;
+using DCL.Controllers;
 using DCL.Helpers;
 using DCL.Models;
 using System.Collections;
@@ -108,6 +108,7 @@ namespace DCL.Components
                     matTransition.PopulateLoadingMaterialWithFinalMaterial();
                 }
 
+                SRPBatchingHelper.OptimizeMaterial(meshRenderer, material);
                 meshRenderer.sharedMaterial = material;
             }
         }

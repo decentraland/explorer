@@ -223,8 +223,7 @@ namespace DCL.Components
                 material = new Material(Utils.EnsureResourcesMaterial(MATERIAL_RESOURCES_PATH + name));
                 material.name = name;
 
-                material.enableInstancing = true;
-
+                material.enableInstancing = false;
             }
         }
 
@@ -265,7 +264,7 @@ namespace DCL.Components
                 }
 
                 meshRenderer.sharedMaterial = material;
-                SRPBatchingHelper.OptimizeMaterial(meshRenderer, material, material.ComputeCRC());
+                SRPBatchingHelper.OptimizeMaterial(meshRenderer, material);
 
             }
         }

@@ -88,7 +88,7 @@ namespace DCL.Helpers
                             else
                                 materialCopy.SetFloat("_Surface", 0);
 #endif
-                            SRPBatchingHelper.OptimizeMaterial(r, materialCopy, crc);
+                            SRPBatchingHelper.OptimizeMaterial(r, materialCopy);
 
                             PersistentAssetCache.MaterialCacheByCRC.Add(hash, new RefCountedMaterialData(hash, materialCopy));
                         }

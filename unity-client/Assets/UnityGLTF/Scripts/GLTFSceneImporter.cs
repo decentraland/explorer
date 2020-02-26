@@ -1674,7 +1674,7 @@ namespace UnityGLTF
 
             Material material = materialCacheData.GetContents(primitive.Attributes.ContainsKey(SemanticProperties.COLOR_0));
 
-            DCL.Helpers.SRPBatchingHelper.OptimizeMaterial(renderer, material, material.ComputeCRC());
+            DCL.Helpers.SRPBatchingHelper.OptimizeMaterial(renderer, material);
 
             if (matController != null)
             {
