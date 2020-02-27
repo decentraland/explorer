@@ -151,7 +151,7 @@ export namespace commConfigurations {
 
   export const peerTtlMs = 60000
 
-  export const maxVisiblePeers = 25
+  export const maxVisiblePeers = qs.MAX_VISIBLE_PEERS ? parseInt(qs.MAX_VISIBLE_PEERS, 10) : 25
 
   export const autoChangeRealmInterval = qs.AUTO_CHANGE_INTERVAL ? parseInt(qs.AUTO_CHANGE_INTERVAL, 10) * 1000 : 40000
 
