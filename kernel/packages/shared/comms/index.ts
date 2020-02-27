@@ -6,7 +6,7 @@ import { MessageEntry } from 'shared/types'
 import { positionObservable, PositionReport } from 'shared/world/positionThings'
 import 'webrtc-adapter'
 import { PassportAsPromise } from '../passports/PassportAsPromise'
-import { ChatEvent, chatObservable, notifyStatusTroughChat } from './chat'
+import { ChatEvent, chatObservable, notifyStatusThroughChat } from './chat'
 import { CliBrokerConnection } from './CliBrokerConnection'
 import { Stats } from './debug'
 import { IBrokerConnection } from '../comms/v1/IBrokerConnection'
@@ -740,7 +740,7 @@ function handleFullLayer() {
 
   const otherRealm = pickCatalystRealm(candidates)
 
-  notifyStatusTroughChat(
+  notifyStatusThroughChat(
     `Joining realm ${otherRealm.catalystName}-${otherRealm.layer} since the previously requested was full`
   )
 
