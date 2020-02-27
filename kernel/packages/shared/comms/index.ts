@@ -1,5 +1,5 @@
 import { saveToLocalStorage } from 'atomicHelpers/localStorage'
-import { commConfigurations, parcelLimits, COMMS } from 'config'
+import { commConfigurations, parcelLimits, COMMS, AUTO_CHANGE_REALM } from 'config'
 import { CommunicationsController } from 'shared/apis/CommunicationsController'
 import { defaultLogger } from 'shared/logger'
 import { MessageEntry } from 'shared/types'
@@ -58,7 +58,7 @@ import { Store } from 'redux'
 import { RootState } from 'shared/store/rootTypes'
 import { store } from 'shared/store/store'
 import { setCatalystRealmCommsStatus, setCatalystRealm, markCatalystRealmFull } from 'shared/dao/actions'
-import { observeRealmChange, pickCatalystRealm } from 'shared/dao'
+import { observeRealmChange, pickCatalystRealm, changeToCrowdedRealm } from 'shared/dao'
 import { getProfile } from 'shared/passports/selectors'
 import { Profile } from 'shared/passports/types'
 
@@ -140,6 +140,8 @@ export class Context {
   positionObserver: any
   worldRunningObserver: any
   infoCollecterInterval?: NodeJS.Timer
+
+  timeToChangeRealm: number = Date.now() + commConfigurations.autoChangeRealmInterval
 
   constructor(userInfo: UserInformation) {
     this.userInfo = userInfo
@@ -458,10 +460,33 @@ function collectInfo(context: Context) {
     }
   }
 
+  checkAutochangeRealm(visiblePeers, context, now)
+
   if (context.stats) {
     context.stats.visiblePeersCount = visiblePeers.length
     context.stats.trackingPeersCount = context.peerData.size
     context.stats.collectInfoDuration.stop()
+  }
+}
+
+function checkAutochangeRealm(visiblePeers: ProcessingPeerInfo[], context: Context, now: number) {
+  if (AUTO_CHANGE_REALM) {
+    if (visiblePeers.length > 0) {
+      context.timeToChangeRealm = now + commConfigurations.autoChangeRealmInterval
+    } else if (now > context.timeToChangeRealm) {
+      context.timeToChangeRealm = now + commConfigurations.autoChangeRealmInterval
+      defaultLogger.log('Changing to crowded realm because there is no people around')
+      changeToCrowdedRealm().then(
+        ([changed, realm]) => {
+          if (changed) {
+            defaultLogger.log('Successfully changed to realm', realm)
+          } else {
+            defaultLogger.log('No crowded realm found')
+          }
+        },
+        error => defaultLogger.warn('Error trying to change realm', error)
+      )
+    }
   }
 }
 
