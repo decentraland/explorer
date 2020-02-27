@@ -723,7 +723,7 @@ function handleReconnectionError() {
     ? `Lost connection to ${realmString(realm)}, joining realm ${realmString(otherRealm)} instead`
     : `Joining realm ${realmString(otherRealm)} instead`
 
-  notifyStatusTroughChat(notificationMessage)
+  notifyStatusThroughChat(notificationMessage)
 
   store.dispatch(setCatalystRealm(otherRealm))
 }
