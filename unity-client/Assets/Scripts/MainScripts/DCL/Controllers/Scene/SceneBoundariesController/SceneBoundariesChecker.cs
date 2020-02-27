@@ -11,7 +11,7 @@ namespace DCL.Controllers
         public static SceneBoundariesChecker i { get; private set; }
 
         protected HashSet<DecentralandEntity> entitiesToCheck = new HashSet<DecentralandEntity>();
-        List<DecentralandEntity> removedEntitiesToCheck = new List<DecentralandEntity>();
+        HashSet<DecentralandEntity> removedEntitiesToCheck = new HashSet<DecentralandEntity>();
         float timeBetweenChecks = 1f;
         float lastChecktTime;
 
@@ -45,6 +45,7 @@ namespace DCL.Controllers
                 MessagingControllersManager.i.timeBudgetCounter -= (finishTime - startTime);
             }
 
+            // As we can't modify the hashset while traversing it, we keep track of the entities that should be removed afterwards
             foreach (var entity in removedEntitiesToCheck)
             {
                 entitiesToCheck.Remove(entity);
