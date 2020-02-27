@@ -153,7 +153,7 @@ export namespace commConfigurations {
 
   export const maxVisiblePeers = 25
 
-  export const autoChangeRealmInterval = qs.AUTO_CHANGE_INTERVAL ? parseInt(qs.AUTO_CHANGE_INTERVAL) * 1000 : 40000
+  export const autoChangeRealmInterval = qs.AUTO_CHANGE_INTERVAL ? parseInt(qs.AUTO_CHANGE_INTERVAL, 10) * 1000 : 40000
 
   export const iceServers = [
     {

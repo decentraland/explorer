@@ -143,6 +143,8 @@ export class Context {
 
   timeToChangeRealm: number = Date.now() + commConfigurations.autoChangeRealmInterval
 
+  positionUpdatesPaused: boolean = false
+
   constructor(userInfo: UserInformation) {
     this.userInfo = userInfo
 
@@ -193,13 +195,13 @@ export function unsubscribeParcelSceneToCommsMessages(controller: Communications
 async function changeConnectionRealm(realm: Realm, url: string) {
   defaultLogger.log('Changing connection realm to ', JSON.stringify(realm), { url })
   if (context && context.worldInstanceConnection) {
-    positionUpdatesPaused = true
+    context.positionUpdatesPaused = true
     try {
       removeAllPeers(context)
       await sendToMordorAsync()
       await context.worldInstanceConnection.changeRealm(realm, url)
     } finally {
-      positionUpdatesPaused = false
+      context.positionUpdatesPaused = false
     }
   }
 }
@@ -337,8 +339,6 @@ let previousTopics = ''
 
 let lastNetworkUpdatePosition = new Date().getTime()
 
-let positionUpdatesPaused = false
-
 export function onPositionUpdate(context: Context, p: Position) {
   const worldConnection = context.worldInstanceConnection
 
@@ -368,7 +368,7 @@ export function onPositionUpdate(context: Context, p: Position) {
     }
 
     currentParcelTopics = rawTopics.join(' ')
-    if (context.currentPosition && !positionUpdatesPaused) {
+    if (context.currentPosition && !context.positionUpdatesPaused) {
       worldConnection
         .sendParcelUpdateMessage(context.currentPosition, p)
         .catch(e => defaultLogger.warn(`error while sending message `, e))
@@ -393,7 +393,7 @@ export function onPositionUpdate(context: Context, p: Position) {
 
   context.currentPosition = p
   const now = new Date().getTime()
-  if (now - lastNetworkUpdatePosition > 100 && !positionUpdatesPaused) {
+  if (now - lastNetworkUpdatePosition > 100 && !context.positionUpdatesPaused) {
     lastNetworkUpdatePosition = now
     worldConnection.sendPositionMessage(p).catch(e => defaultLogger.warn(`error while sending message `, e))
   }
