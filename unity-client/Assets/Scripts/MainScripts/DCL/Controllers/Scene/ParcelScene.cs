@@ -336,7 +336,9 @@ namespace DCL.Controllers
             newEntity.scene = this;
 
             newEntity.OnCleanupEvent += po.OnCleanup;
-            newEntity.OnShapeUpdated += SceneBoundariesChecker.i.AddEntity;
+
+            if (SceneController.i.useBoundariesChecker)
+                newEntity.OnShapeUpdated += SceneController.i.boundariesChecker.AddEntity;
 
             entities.Add(tmpCreateEntityMessage.id, newEntity);
 
@@ -538,7 +540,7 @@ namespace DCL.Controllers
                     entity.gameObject.transform.localRotation = DCLTransform.model.rotation;
                     entity.gameObject.transform.localScale = DCLTransform.model.scale;
 
-                    SceneBoundariesChecker.i.AddEntity(entity);
+                    SceneController.i.boundariesChecker?.AddEntity(entity);
                 }
 
                 return null;

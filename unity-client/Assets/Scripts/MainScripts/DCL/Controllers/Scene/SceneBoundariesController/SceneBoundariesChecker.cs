@@ -3,54 +3,58 @@ using DCL.Helpers;
 using DCL.Models;
 using UnityEngine;
 using System.Collections.Generic;
+using System.Collections;
 
 namespace DCL.Controllers
 {
-    public class SceneBoundariesChecker : MonoBehaviour
+    public class SceneBoundariesChecker
     {
-        public static SceneBoundariesChecker i { get; private set; }
-
-        protected HashSet<DecentralandEntity> entitiesToCheck = new HashSet<DecentralandEntity>();
-        HashSet<DecentralandEntity> removedEntitiesToCheck = new HashSet<DecentralandEntity>();
+        HashSet<DecentralandEntity> entitiesToCheck = new HashSet<DecentralandEntity>();
+        HashSet<DecentralandEntity> checkedEntities = new HashSet<DecentralandEntity>();
+        Coroutine entitiesCheckRoutine = null;
         float timeBetweenChecks = 1f;
         float lastChecktTime;
 
-        protected virtual void Awake()
+        public SceneBoundariesChecker()
         {
-            if (i != null)
-            {
-                Utils.SafeDestroy(gameObject);
-                return;
-            }
-
-            i = this;
+            entitiesCheckRoutine = SceneController.i.StartCoroutine(CheckEntities());
         }
 
-        void LateUpdate()
+        IEnumerator CheckEntities()
         {
-            if (Time.realtimeSinceStartup - lastChecktTime < timeBetweenChecks) return;
-
-            lastChecktTime = Time.realtimeSinceStartup;
-
-            foreach (var entity in entitiesToCheck)
+            while (true)
             {
-                if (MessagingControllersManager.i.timeBudgetCounter <= 0f) break;
+                if (Time.realtimeSinceStartup - lastChecktTime < timeBetweenChecks) yield return null;
 
-                float startTime = Time.realtimeSinceStartup;
+                foreach (var entity in entitiesToCheck)
+                {
+                    if (MessagingControllersManager.i.timeBudgetCounter <= 0f) break;
 
-                EvaluateEntityPosition(entity);
-                removedEntitiesToCheck.Add(entity);
+                    float startTime = Time.realtimeSinceStartup;
+                    lastChecktTime = startTime;
 
-                float finishTime = Time.realtimeSinceStartup;
-                MessagingControllersManager.i.timeBudgetCounter -= (finishTime - startTime);
+                    EvaluateEntityPosition(entity);
+                    checkedEntities.Add(entity);
+
+                    float finishTime = Time.realtimeSinceStartup;
+                    MessagingControllersManager.i.timeBudgetCounter -= (finishTime - startTime);
+                }
+
+                // As we can't modify the hashset while traversing it, we keep track of the entities that should be removed afterwards
+                foreach (var entity in checkedEntities)
+                {
+                    entitiesToCheck.Remove(entity);
+                }
+                checkedEntities.Clear();
+
+                yield return null;
             }
+        }
 
-            // As we can't modify the hashset while traversing it, we keep track of the entities that should be removed afterwards
-            foreach (var entity in removedEntitiesToCheck)
-            {
-                entitiesToCheck.Remove(entity);
-            }
-            removedEntitiesToCheck.Clear();
+        public void Stop()
+        {
+            if (entitiesCheckRoutine != null)
+                SceneController.i.StopCoroutine(entitiesCheckRoutine);
         }
 
         public void AddEntity(DecentralandEntity entity)

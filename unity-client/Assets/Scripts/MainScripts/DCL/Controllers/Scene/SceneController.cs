@@ -21,8 +21,6 @@ namespace DCL
 
         [FormerlySerializedAs("factoryManifest")]
         public DCLComponentFactory componentFactory;
-        public GameObject sceneBoundariesCheckerPrefab;
-        public GameObject sceneBoundariesCheckerDebugPrefab;
 
         public HashSet<string> readyScenes = new HashSet<string>();
         public Dictionary<string, ParcelScene> loadedScenes = new Dictionary<string, ParcelScene>();
@@ -86,6 +84,7 @@ namespace DCL
 
         public string globalSceneId { get; private set; }
         public string currentSceneId { get; private set; }
+        public SceneBoundariesChecker boundariesChecker { get; private set; }
 
         private bool sceneSortDirty = false;
         private bool positionDirty = true;
@@ -114,13 +113,7 @@ namespace DCL
             Debug.unityLogger.logEnabled = false;
 #endif
 
-            if (useBoundariesChecker)
-            {
-                // if (isDebugMode)
-                //     Instantiate(sceneBoundariesCheckerDebugPrefab);
-                // else
-                Instantiate(sceneBoundariesCheckerPrefab);
-            }
+            InitializeSceneBoundariesChecker();
 
             MessagingControllersManager.i.Initialize(this);
             MemoryManager.i.Initialize();
@@ -137,6 +130,19 @@ namespace DCL
                 StartCoroutine(DeferredDecoding());
 
             DCLCharacterController.OnCharacterMoved += SetPositionDirty;
+        }
+
+        void InitializeSceneBoundariesChecker()
+        {
+            if (!useBoundariesChecker) return;
+
+            if (boundariesChecker != null)
+                boundariesChecker.Stop();
+
+            if (isDebugMode)
+                boundariesChecker = new SceneBoundariesDebugModeChecker();
+            else
+                boundariesChecker = new SceneBoundariesChecker();
         }
 
         private void SetPositionDirty(DCLCharacterPosition character)
@@ -312,12 +318,7 @@ namespace DCL
             isDebugMode = true;
             fpsPanel.SetActive(true);
 
-            if (useBoundariesChecker)
-            {
-                DestroyImmediate(SceneBoundariesChecker.i.gameObject);
-
-                Instantiate(sceneBoundariesCheckerDebugPrefab);
-            }
+            InitializeSceneBoundariesChecker();
 
             OnDebugModeSet?.Invoke();
         }

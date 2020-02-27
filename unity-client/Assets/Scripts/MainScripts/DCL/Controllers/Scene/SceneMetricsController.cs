@@ -278,13 +278,13 @@ namespace DCL
         void CalculateMaterials(DecentralandEntity entity, EntityMetrics entityMetrics)
         {
             //get boundaries checker if in debug cause it may have swap meshes materials
-            var debugBoundariesChecker = SceneBoundariesChecker.i as SceneBoundariesDebugModeChecker;
+            var debugBoundariesChecker = SceneController.i.boundariesChecker as SceneBoundariesDebugModeChecker;
 
             //can we count materials directly from the mesh renderers?
             bool isInValidPosition = debugBoundariesChecker == null
                 || (debugBoundariesChecker != null && debugBoundariesChecker.WasEntityInAValidPosition(entity));
 
-            isInValidPosition |= !SceneBoundariesChecker.i.enabled;
+            isInValidPosition |= !SceneController.i.useBoundariesChecker;
 
             if (isInValidPosition)
             {
