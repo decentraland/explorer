@@ -191,7 +191,14 @@ export function unsubscribeParcelSceneToCommsMessages(controller: Communications
 async function changeConnectionRealm(realm: Realm, url: string) {
   defaultLogger.log('Changing connection realm to ', JSON.stringify(realm), { url })
   if (context && context.worldInstanceConnection) {
-    await context.worldInstanceConnection.changeRealm(realm, url)
+    positionUpdatesPaused = true
+    try {
+      removeAllPeers(context)
+      await sendToMordorAsync()
+      await context.worldInstanceConnection.changeRealm(realm, url)
+    } finally {
+      positionUpdatesPaused = false
+    }
   }
 }
 
@@ -327,6 +334,9 @@ let currentParcelTopics = ''
 let previousTopics = ''
 
 let lastNetworkUpdatePosition = new Date().getTime()
+
+let positionUpdatesPaused = false
+
 export function onPositionUpdate(context: Context, p: Position) {
   const worldConnection = context.worldInstanceConnection
 
@@ -356,7 +366,7 @@ export function onPositionUpdate(context: Context, p: Position) {
     }
 
     currentParcelTopics = rawTopics.join(' ')
-    if (context.currentPosition) {
+    if (context.currentPosition && !positionUpdatesPaused) {
       worldConnection
         .sendParcelUpdateMessage(context.currentPosition, p)
         .catch(e => defaultLogger.warn(`error while sending message `, e))
@@ -381,7 +391,7 @@ export function onPositionUpdate(context: Context, p: Position) {
 
   context.currentPosition = p
   const now = new Date().getTime()
-  if (now - lastNetworkUpdatePosition > 100) {
+  if (now - lastNetworkUpdatePosition > 100 && !positionUpdatesPaused) {
     lastNetworkUpdatePosition = now
     worldConnection.sendPositionMessage(p).catch(e => defaultLogger.warn(`error while sending message `, e))
   }
@@ -452,6 +462,12 @@ function collectInfo(context: Context) {
     context.stats.visiblePeersCount = visiblePeers.length
     context.stats.trackingPeersCount = context.peerData.size
     context.stats.collectInfoDuration.stop()
+  }
+}
+
+function removeAllPeers(context: Context) {
+  for (const alias of context.peerData.keys()) {
+    removePeer(context, alias)
   }
 }
 
@@ -676,10 +692,12 @@ export function onWorldRunning(isRunning: boolean, _context: Context | null = co
 }
 
 export function sendToMordor(_context: Context | null = context) {
+  sendToMordorAsync().catch(e => defaultLogger.warn(`error while sending message `, e))
+}
+
+async function sendToMordorAsync(_context: Context | null = context) {
   if (_context && _context.worldInstanceConnection && _context.currentPosition) {
-    _context.worldInstanceConnection
-      .sendParcelUpdateMessage(_context.currentPosition, MORDOR_POSITION)
-      .catch(e => defaultLogger.warn(`error while sending message `, e))
+    await _context.worldInstanceConnection.sendParcelUpdateMessage(_context.currentPosition, MORDOR_POSITION)
   }
 }
 
