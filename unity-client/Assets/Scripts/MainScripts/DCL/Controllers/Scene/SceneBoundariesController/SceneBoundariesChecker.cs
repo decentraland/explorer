@@ -27,7 +27,7 @@ namespace DCL.Controllers
         {
             while (true)
             {
-                if (Time.realtimeSinceStartup - lastChecktTime < timeBetweenChecks) yield return null;
+                if (timeBetweenChecks > 0 && Time.realtimeSinceStartup - lastChecktTime < timeBetweenChecks) yield return null;
 
                 foreach (var entity in entitiesToCheck)
                 {
