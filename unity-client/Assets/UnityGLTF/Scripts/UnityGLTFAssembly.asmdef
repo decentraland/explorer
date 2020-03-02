@@ -3,7 +3,9 @@
     "references": [
         "CoroutineHelpers",
         "MaterialTransitionController",
-        "ILoader"
+        "ILoader",
+        "Utils",
+        "SRPBatchingHelper"
     ],
     "optionalUnityReferences": [],
     "includePlatforms": [],

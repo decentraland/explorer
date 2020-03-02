@@ -110,10 +110,9 @@ jobs:
           command: |
             if [[ -e /tmp/explorer/unity-client/testlog/log.txt ]]; then
                 exit 0
-            elif [[ -e ${BUILD_PATH} ]] && [[ -n "$(ls -A ${BUILD_PATH})" ]]; then # Negated condition with regards to renderer: If it doesn't exist, then fail!
+            else
                 bash ./test-ci.sh
                 exit $?
-            else exit 1
             fi;
       - save_cache:
           name: Store test results
@@ -415,6 +414,7 @@ workflows:
           <<: *all_branches_and_tags
           requires:
             - run-unity-tests
+            - checkout
           filters:
             branches:
               only: /(.*)/
