@@ -20,6 +20,7 @@ namespace DCL.Controllers
             entitiesCheckRoutine = SceneController.i.StartCoroutine(CheckEntities());
         }
 
+        // TODO: Improve MessagingControllersManager.i.timeBudgetCounter usage once we have the centralized budget controller for our immortal coroutines
         IEnumerator CheckEntities()
         {
             while (true)
