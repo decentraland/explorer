@@ -20,6 +20,7 @@ namespace DCL.Controllers
         public SceneBoundariesChecker()
         {
             entitiesCheckRoutine = SceneController.i.StartCoroutine(CheckEntities());
+            lastChecktTime = Time.realtimeSinceStartup;
         }
 
         // TODO: Improve MessagingControllersManager.i.timeBudgetCounter usage once we have the centralized budget controller for our immortal coroutines
@@ -34,7 +35,6 @@ namespace DCL.Controllers
                     if (MessagingControllersManager.i.timeBudgetCounter <= 0f) break;
 
                     float startTime = Time.realtimeSinceStartup;
-                    lastChecktTime = startTime;
 
                     EvaluateEntityPosition(entity);
                     checkedEntities.Add(entity);
@@ -49,6 +49,8 @@ namespace DCL.Controllers
                     entitiesToCheck.Remove(entity);
                 }
                 checkedEntities.Clear();
+
+                lastChecktTime = Time.realtimeSinceStartup;
 
                 yield return null;
             }
