@@ -721,7 +721,7 @@ function handleReconnectionError() {
 
   const notificationMessage = realm
     ? `Lost connection to ${realmString(realm)}, joining realm ${realmString(otherRealm)} instead`
-    : `Joining realm ${realmString(otherRealm)} instead`
+    : `Joining realm ${realmString(otherRealm)}`
 
   notifyStatusThroughChat(notificationMessage)
 
