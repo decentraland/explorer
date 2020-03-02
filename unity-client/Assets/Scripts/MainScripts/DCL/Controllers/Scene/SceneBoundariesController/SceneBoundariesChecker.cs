@@ -28,29 +28,33 @@ namespace DCL.Controllers
         {
             while (true)
             {
-                if (timeBetweenChecks > 0 && Time.realtimeSinceStartup - lastChecktTime < timeBetweenChecks) yield return null;
-
-                foreach (var entity in entitiesToCheck)
+                float elapsedTime = Time.realtimeSinceStartup - lastChecktTime;
+                if (elapsedTime >= timeBetweenChecks)
                 {
-                    if (MessagingControllersManager.i.timeBudgetCounter <= 0f) break;
+                    // Debug.Log("elapsed time: " + elapsedTime);
 
-                    float startTime = Time.realtimeSinceStartup;
+                    foreach (var entity in entitiesToCheck)
+                    {
+                        if (MessagingControllersManager.i.timeBudgetCounter <= 0f) break;
 
-                    EvaluateEntityPosition(entity);
-                    checkedEntities.Add(entity);
+                        float startTime = Time.realtimeSinceStartup;
 
-                    float finishTime = Time.realtimeSinceStartup;
-                    MessagingControllersManager.i.timeBudgetCounter -= (finishTime - startTime);
+                        EvaluateEntityPosition(entity);
+                        checkedEntities.Add(entity);
+
+                        float finishTime = Time.realtimeSinceStartup;
+                        MessagingControllersManager.i.timeBudgetCounter -= (finishTime - startTime);
+                    }
+
+                    // As we can't modify the hashset while traversing it, we keep track of the entities that should be removed afterwards
+                    foreach (var entity in checkedEntities)
+                    {
+                        entitiesToCheck.Remove(entity);
+                    }
+                    checkedEntities.Clear();
+
+                    lastChecktTime = Time.realtimeSinceStartup;
                 }
-
-                // As we can't modify the hashset while traversing it, we keep track of the entities that should be removed afterwards
-                foreach (var entity in checkedEntities)
-                {
-                    entitiesToCheck.Remove(entity);
-                }
-                checkedEntities.Clear();
-
-                lastChecktTime = Time.realtimeSinceStartup;
 
                 yield return null;
             }
