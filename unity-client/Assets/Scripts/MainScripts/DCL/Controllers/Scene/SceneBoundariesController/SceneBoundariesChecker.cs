@@ -9,10 +9,12 @@ namespace DCL.Controllers
 {
     public class SceneBoundariesChecker
     {
+        [System.NonSerialized]
+        public float timeBetweenChecks = 1f;
+
         HashSet<DecentralandEntity> entitiesToCheck = new HashSet<DecentralandEntity>();
         HashSet<DecentralandEntity> checkedEntities = new HashSet<DecentralandEntity>();
         Coroutine entitiesCheckRoutine = null;
-        float timeBetweenChecks = 1f;
         float lastChecktTime;
 
         public SceneBoundariesChecker()
