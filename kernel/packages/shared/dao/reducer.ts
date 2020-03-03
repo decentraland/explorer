@@ -9,7 +9,7 @@ import {
   SET_CONTENT_WHITELIST,
   MARK_CATALYST_REALM_CONNECTION_ERROR
 } from './actions'
-import { DaoState, Candidate, Realm } from './types'
+import { DaoState, Candidate, Realm, ServerConnectionStatus } from './types'
 import {
   FETCH_PROFILE_SERVICE,
   FETCH_CONTENT_SERVICE,
@@ -95,7 +95,10 @@ export function daoReducer(state?: DaoState, action?: AnyAction): DaoState {
         ...state,
         candidates: state.candidates.map(it => {
           if (it.catalystName === action.payload.catalystName) {
-            return { ...it, layer: { ...it.layer, elapsed: Number.MAX_SAFE_INTEGER } }
+            return {
+              ...it,
+              layer: { ...it.layer, elapsed: Number.MAX_SAFE_INTEGER, status: ServerConnectionStatus.UNREACHABLE }
+            }
           } else {
             return it
           }
