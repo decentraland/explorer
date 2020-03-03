@@ -1,5 +1,4 @@
 using DCL.Components;
-using DCL.Helpers;
 using DCL.Models;
 using UnityEngine;
 using System.Collections.Generic;
@@ -121,7 +120,7 @@ namespace DCL.Controllers
 
         void EvaluateMeshBounds(DecentralandEntity entity)
         {
-            Bounds meshBounds = Utils.BuildMergedBounds(entity.meshesInfo.renderers);
+            Bounds meshBounds = entity.meshesInfo.mergedBounds;
 
             // 1st check (full mesh AABB)
             bool isInsideBoundaries = entity.scene.IsInsideSceneBoundaries(meshBounds);

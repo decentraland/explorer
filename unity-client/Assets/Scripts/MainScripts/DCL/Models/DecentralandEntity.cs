@@ -35,6 +35,27 @@ namespace DCL.Models
             public MeshFilter[] meshFilters;
             public List<Collider> colliders = new List<Collider>();
 
+            Vector3 lastPosition;
+            Vector3 lastScale;
+            Quaternion lastRotation;
+            Bounds _mergedBounds;
+            public Bounds mergedBounds
+            {
+                get
+                {
+                    if (meshRootGameObject.transform.position != lastPosition ||
+                        meshRootGameObject.transform.localScale != lastScale ||
+                        meshRootGameObject.transform.rotation != lastRotation)
+                        RecalculateBounds();
+
+                    return _mergedBounds;
+                }
+                set
+                {
+                    _mergedBounds = value;
+                }
+            }
+
             GameObject meshRootGameObjectValue;
 
             public void UpdateRenderersCollection()
@@ -43,8 +64,22 @@ namespace DCL.Models
                 {
                     renderers = meshRootGameObjectValue.GetComponentsInChildren<Renderer>(true);
                     meshFilters = meshRootGameObjectValue.GetComponentsInChildren<MeshFilter>(true);
+
+                    RecalculateBounds();
+
                     OnUpdated?.Invoke();
                 }
+            }
+
+            public void RecalculateBounds()
+            {
+                if (renderers == null || renderers.Length == 0) return;
+
+                lastPosition = meshRootGameObject.transform.position;
+                lastScale = meshRootGameObject.transform.localScale;
+                lastRotation = meshRootGameObject.transform.rotation;
+
+                _mergedBounds = Utils.BuildMergedBounds(renderers);
             }
 
             public void CleanReferences()
