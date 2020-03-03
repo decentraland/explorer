@@ -32,7 +32,6 @@ import { IEventNames, IEvents, ProfileForRenderer } from '../decentraland-ecs/sr
 import { sceneLifeCycleObservable } from '../decentraland-loader/lifecycle/controllers/scene'
 import { AirdropInfo } from '../shared/airdrops/interface'
 import { queueTrackingEvent } from '../shared/analytics'
-import { airdropObservable } from '../shared/apis/AirdropController'
 import { DevTools } from '../shared/apis/DevTools'
 import { ParcelIdentity } from '../shared/apis/ParcelIdentity'
 import { chatObservable } from '../shared/comms/chat'
@@ -234,7 +233,8 @@ const browserInterface = {
   },
 
   UserAcceptedCollectibles(data: { id: string }) {
-    airdropObservable.notifyObservers(data.id)
+    // Here, we should have "airdropObservable.notifyObservers(data.id)".
+    // It's disabled because of security reasons.
   },
 
   EditAvatarClicked() {
@@ -510,7 +510,7 @@ unityInterface = {
     gameInstance.SendMessage('TutorialController', 'SetTutorialEnabled')
   },
   TriggerAirdropDisplay(data: AirdropInfo) {
-    gameInstance.SendMessage('HUDController', 'AirdroppingRequest', JSON.stringify(data))
+    // Disabled for security reasons
   },
   SelectGizmoBuilder(type: string) {
     this.SendBuilderMessage('SelectGizmo', type)
