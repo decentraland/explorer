@@ -311,7 +311,7 @@ function delightedSurvey() {
   const profile = getUserProfile().profile as Profile | null
   if (!isTheFirstLoading && analytics && delighted && profile) {
     const payload = {
-      email: profile.email || profile.ethAddress,
+      email: profile.email || (profile.ethAddress + '@dcl.gg'),
       name: profile.name || 'Guest',
       properties: {
         ethAddress: profile.ethAddress,
