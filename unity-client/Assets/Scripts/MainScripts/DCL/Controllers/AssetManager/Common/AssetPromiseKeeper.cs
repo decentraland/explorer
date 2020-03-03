@@ -53,7 +53,26 @@ namespace DCL
         //NOTE(Brian): Master promise id -> blocked promises HashSet
         Dictionary<object, HashSet<AssetPromiseType>> masterToBlockedPromises = new Dictionary<object, HashSet<AssetPromiseType>>(100);
 
+        public bool IsBlocked(AssetPromiseType promise)
+        {
+            return blockedPromises.Contains(promise);
+        }
 
+        public string GetMasterState(AssetPromiseType promise)
+        {
+            object promiseId = promise.GetId();
+
+            if (!masterToBlockedPromises.ContainsKey(promiseId))
+                return "Master not found";
+
+            if (!masterToBlockedPromises[promiseId].Contains(promise))
+                return "Promise is not blocked???";
+
+            if (!masterPromiseById.ContainsKey(promiseId))
+                return "not registered as master?";
+
+            return $"master state = {masterPromiseById[promiseId].state}";
+        }
 
         public AssetPromiseKeeper(AssetLibraryType library)
         {
@@ -139,37 +158,32 @@ namespace DCL
             return promise;
         }
 
-        Queue<AssetPromise<AssetType>> blockedPromisesQueue = new Queue<AssetPromise<AssetType>>();
-        public bool useBlockedPromisesQueue = false;
+        Queue<AssetPromise<AssetType>> toResolveBlockedPromisesQueue = new Queue<AssetPromise<AssetType>>();
 
-        private void OnRequestCompleted(AssetPromise<AssetType> promise)
+        private void OnRequestCompleted(AssetPromise<AssetType> loadedPromise)
         {
-            if (useBlockedPromisesQueue)
+            if (!masterToBlockedPromises.ContainsKey(loadedPromise.GetId()))
             {
-                blockedPromisesQueue.Enqueue(promise);
+                CleanPromise(loadedPromise);
+                return;
             }
-            else
-            {
-                ProcessBlockedPromises(promise);
-                CleanPromise(promise);
-            }
+
+            toResolveBlockedPromisesQueue.Enqueue(loadedPromise);
         }
 
-        float startTime;
         IEnumerator ProcessBlockedPromisesQueue()
         {
             while (true)
             {
-                if (blockedPromisesQueue.Count <= 0)
+                if (toResolveBlockedPromisesQueue.Count <= 0)
                 {
                     yield return null;
                     continue;
                 }
 
-                AssetPromise<AssetType> promise = blockedPromisesQueue.Dequeue();
+                AssetPromise<AssetType> promise = toResolveBlockedPromisesQueue.Dequeue();
                 yield return ProcessBlockedPromisesDeferred(promise);
                 CleanPromise(promise);
-
                 yield return CoroutineStarter.BreakIfBudgetExceeded();
             }
         }
@@ -181,50 +195,22 @@ namespace DCL
                 || !masterPromiseById.ContainsKey(loadedPromiseId)
                 || masterPromiseById[loadedPromiseId] != loadedPromise)
             {
+                Debug.Log($"Early exit for some reason for id {loadedPromiseId}");
                 yield break;
             }
 
-            if (loadedPromise.state != AssetPromiseState.FINISHED)
-                yield return ForgetBlockedPromises(loadedPromiseId);
-            else
-                yield return LoadBlockedPromises(loadedPromiseId);
-
-            if (masterToBlockedPromises.ContainsKey(loadedPromiseId))
-                masterToBlockedPromises.Remove(loadedPromiseId);
-        }
-        private void ProcessBlockedPromises(AssetPromise<AssetType> loadedPromise)
-        {
-            object loadedPromiseId = loadedPromise.GetId();
-
-            if (!masterToBlockedPromises.ContainsKey(loadedPromiseId)
-                || !masterPromiseById.ContainsKey(loadedPromiseId)
-                || masterPromiseById[loadedPromiseId] != loadedPromise)
-            {
-                return;
-            }
 
             if (loadedPromise.state != AssetPromiseState.FINISHED)
-            {
-                var enumerator = ForgetBlockedPromises(loadedPromiseId);
-                //NOTE(Brian): This sync execution approach will not work for nested IEnumerator yields. Be careful.
-                while (enumerator.MoveNext()) { }
-            }
+                yield return ForgetBlockedPromises(loadedPromiseId, sync: false);
             else
-            {
-                var enumerator = LoadBlockedPromises(loadedPromiseId);
-                //NOTE(Brian): This sync execution approach will not work for nested IEnumerator yields. Be careful.
-                while (enumerator.MoveNext()) { }
-            }
+                yield return LoadBlockedPromises(loadedPromiseId, sync: false);
 
             if (masterToBlockedPromises.ContainsKey(loadedPromiseId))
                 masterToBlockedPromises.Remove(loadedPromiseId);
         }
 
-
-
-        private IEnumerator ForgetBlockedPromises(object loadedPromiseId)
+        private IEnumerator ForgetBlockedPromises(object loadedPromiseId, bool sync)
         {
-            Debug.Log("Forgetting blocked promises...");
             List<AssetPromiseType> blockedPromisesToForget = new List<AssetPromiseType>();
 
             using (var iterator = masterToBlockedPromises[loadedPromiseId].GetEnumerator())
@@ -244,16 +230,18 @@ namespace DCL
                 promise.ForceFail();
                 Forget(promise);
 
-                yield return CoroutineStarter.BreakIfBudgetExceeded();
+                if (!sync)
+                {
+                    yield return CoroutineStarter.BreakIfBudgetExceeded();
+                }
             }
         }
 
-        List<AssetPromiseType> blockedPromisesToLoadAux = new List<AssetPromiseType>();
-        private List<AssetPromiseType> GetBlockedPromisesToLoadForId(object loadedPromiseId)
+        private List<AssetPromiseType> GetBlockedPromisesToLoadForId(object masterPromiseId)
         {
-            blockedPromisesToLoadAux.Clear();
+            var blockedPromisesToLoadAux = new List<AssetPromiseType>();
 
-            using (var iterator = masterToBlockedPromises[loadedPromiseId].GetEnumerator())
+            using (var iterator = masterToBlockedPromises[masterPromiseId].GetEnumerator())
             {
                 while (iterator.MoveNext())
                 {
@@ -274,11 +262,13 @@ namespace DCL
             return 0;
         }
 
-        private IEnumerator LoadBlockedPromises(object loadedPromiseId)
+        private IEnumerator LoadBlockedPromises(object loadedPromiseId, bool sync)
         {
             List<AssetPromiseType> blockedPromisesToLoad = GetBlockedPromisesToLoadForId(loadedPromiseId);
 
-            yield return CoroutineStarter.BreakIfBudgetExceeded();
+            if (!sync)
+                yield return CoroutineStarter.BreakIfBudgetExceeded();
+
 
             int blockedPromisesToLoadCount = blockedPromisesToLoad.Count;
 
@@ -289,7 +279,10 @@ namespace DCL
                 promise.OnPreFinishEvent += CleanPromise;
                 promise.Load();
 
-                yield return CoroutineStarter.BreakIfBudgetExceeded();
+                if (!sync)
+                {
+                    yield return CoroutineStarter.BreakIfBudgetExceeded();
+                }
             }
         }
 
@@ -319,10 +312,11 @@ namespace DCL
 
         public void Cleanup()
         {
-            blockedPromises.Clear();
-            masterToBlockedPromises.Clear();
+            blockedPromises = new List<AssetPromiseType>();
+            masterToBlockedPromises = new Dictionary<object, HashSet<AssetPromiseType>>();
 
             int waitingPromisesCount = waitingPromises.Count;
+
             for (int i = 0; i < waitingPromisesCount; i++)
             {
                 waitingPromises[i].Cleanup();
@@ -333,8 +327,8 @@ namespace DCL
                 kvp.Value.Cleanup();
             }
 
-            masterPromiseById.Clear();
-            waitingPromises.Clear();
+            masterPromiseById = new Dictionary<object, AssetPromiseType>();
+            waitingPromises = new List<AssetPromiseType>();
             library.Cleanup();
         }
 

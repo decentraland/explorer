@@ -1,4 +1,5 @@
 using DCL.Helpers;
+using UnityEngine;
 using UnityGLTF;
 
 namespace DCL

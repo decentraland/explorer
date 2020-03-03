@@ -53,7 +53,7 @@ public class InteractiveObjectsHoverTestSceneController : MonoBehaviour
 
         TestHelpers.InitializeSceneController(false);
 
-        yield return new WaitForSeconds(0.01f);
+        yield return new UnityEngine.WaitForSeconds(0.01f);
 
         scene = SceneController.i.CreateTestScene();
         yield return null;

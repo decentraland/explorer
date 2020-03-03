@@ -272,7 +272,6 @@ namespace UnityGLTF
                     IncrementDownloadCount();
 
                     state = State.DOWNLOADING;
-
                     yield return sceneImporter.LoadScene(-1);
 
                     state = State.COMPLETED;

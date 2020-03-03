@@ -113,6 +113,24 @@ namespace DCL
         }
     }
 
+    // CoroutineStarter compatible WaitForSeconds
+    public class WaitForSeconds : CustomYieldInstruction
+    {
+        float waitTime;
+        public WaitForSeconds(float waitTimeInSeconds)
+        {
+            waitTime = Time.realtimeSinceStartup + waitTimeInSeconds;
+        }
+
+        public override bool keepWaiting
+        {
+            get
+            {
+                return Time.realtimeSinceStartup < waitTime;
+            }
+        }
+    }
+
     // Suspends the coroutine execution until the supplied delegate evaluates to true or the timeout is reached.
     public class WaitUntil : CustomYieldInstruction
     {

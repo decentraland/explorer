@@ -71,7 +71,7 @@ namespace DCL
         public IEnumerator ShowCoroutine(System.Action OnFinish)
         {
             // NOTE(Brian): This fixes seeing the object in the scene 0,0 for a frame
-            yield return new WaitForSeconds(Random.Range(0, 0.05f));
+            yield return new DCL.WaitForSeconds(0.05f);
 
             // NOTE(Brian): This GameObject can be removed by distance after the delay
             if (container == null)
