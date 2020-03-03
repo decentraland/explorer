@@ -239,19 +239,6 @@ export function getExclusiveServer() {
 
 export const ALL_WEARABLES = location.search.indexOf('ALL_WEARABLES') !== -1 && getDefaultTLD() !== 'org'
 
-export function getLoginConfigurationForCurrentDomain() {
-  let tld: 'org' | 'zone' | 'today' = getDefaultTLD()
-  // Use `.zone` auth for any localhost or other edge case
-  if ((tld as any) !== 'org' && (tld as any) !== 'zone' && (tld as any) !== 'today') {
-    tld = 'zone'
-  }
-  return {
-    clientId: loginConfig[tld].client_id,
-    domain: loginConfig[tld].domain,
-    redirectUri: window.location.origin + '/' + (ENV_OVERRIDE ? '?ENV=' + getTLD() : '')
-  }
-}
-
 export const ENABLE_EMPTY_SCENES = !DEBUG || knownTLDs.includes(getTLD())
 
 export function getWearablesSafeURL() {
