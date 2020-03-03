@@ -225,11 +225,6 @@ namespace DCL.Helpers
                     }
                 };
 
-#if UNITY_EDITOR
-            //NOTE(Brian): This solves 'Streaming of 'mpeg' on this platform is not supported' error.
-            url = url.Replace("https", "http");
-#endif
-
             var req = UnityWebRequestMultimedia.GetAudioClip(url, audioType);
 
             yield return FetchAsset(url, req, OnSuccessInternal,
