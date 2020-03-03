@@ -1,4 +1,5 @@
 using DCL;
+using DCL.Controllers;
 using DCL.Helpers;
 using DCL.Interface;
 using UnityEngine;
@@ -16,6 +17,7 @@ public class RenderingController : MonoBehaviour
 
     public System.Action<bool> OnRenderingStateChanged;
     public bool renderingEnabled { get; private set; } = true;
+    public bool activatedRenderingBefore { get; private set; } = false;
 
     [ContextMenu("Disable Rendering")]
     public void DeactivateRendering()
@@ -25,7 +27,6 @@ public class RenderingController : MonoBehaviour
 
         DeactivateRendering_Internal();
     }
-
 
     void DeactivateRendering_Internal()
     {
@@ -57,7 +58,6 @@ public class RenderingController : MonoBehaviour
 
         if (!renderingActivatedAckLock.isUnlocked)
         {
-            Debug.Log("Rendering sent, waiting for locks...!");
             renderingActivatedAckLock.OnAllLocksRemoved -= ActivateRendering_Internal;
             renderingActivatedAckLock.OnAllLocksRemoved += ActivateRendering_Internal;
             return;
@@ -70,6 +70,12 @@ public class RenderingController : MonoBehaviour
     {
         renderingActivatedAckLock.OnAllLocksRemoved -= ActivateRendering_Internal;
         renderingEnabled = true;
+
+        if (!activatedRenderingBefore)
+        {
+            Utils.UnlockCursor();
+            activatedRenderingBefore = true;
+        }
 
         DCL.Configuration.ParcelSettings.VISUAL_LOADING_ENABLED = true;
         MessagingBus.renderingIsDisabled = false;
@@ -85,6 +91,8 @@ public class RenderingController : MonoBehaviour
         OnRenderingStateChanged?.Invoke(renderingEnabled);
 
         CoroutineStarter.enableThrottling = true;
+        MemoryManager.i.CleanupPoolsIfNeeded(true);
+        ParcelScene.parcelScenesCleaner.ForceCleanup();
 
         WebInterface.ReportControlEvent(new WebInterface.ActivateRenderingACK());
     }

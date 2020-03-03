@@ -35,10 +35,13 @@ export type DaoState = {
   initialized: boolean
   profileServer: string
   fetchContentServer: string
+  fetchMetaContentServer: string
   updateContentServer: string
   commsServer: string
   realm: Realm | undefined
   candidates: Candidate[]
+  contentWhitelist: Candidate[]
+  addedCandidates: Candidate[]
   commsStatus: CommsStatus
 }
 
@@ -46,7 +49,7 @@ export type RootDaoState = {
   dao: DaoState
 }
 
-export type CommsState = 'initial' | 'connecting' | 'connected' | 'error'
+export type CommsState = 'initial' | 'connecting' | 'connected' | 'error' | 'realm-full'
 
 export type CommsStatus = {
   status: CommsState

@@ -37,17 +37,19 @@ let downloadManager: SceneDataDownloadManager
     'Lifecycle.initialize',
     (options: {
       contentServer: string
+      metaContentServer: string
       contentServerBundles: string
       lineOfSightRadius: number
       secureRadius: number
       emptyScenes: boolean
       tutorialBaseURL: string
-      tutorialEnabled: boolean
+      tutorialSceneEnabled: boolean
     }) => {
-      setTutorialEnabled(options.tutorialEnabled)
+      setTutorialEnabled(options.tutorialSceneEnabled)
 
       downloadManager = new SceneDataDownloadManager({
         contentServer: options.contentServer,
+        metaContentServer: options.metaContentServer,
         contentServerBundles: options.contentServerBundles,
         tutorialBaseURL: options.tutorialBaseURL
       })

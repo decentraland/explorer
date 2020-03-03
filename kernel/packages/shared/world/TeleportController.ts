@@ -11,12 +11,54 @@ import { worldToGrid } from 'atomicHelpers/parcelScenePositions'
 import defaultLogger from 'shared/logger'
 
 const CAMPAIGN_PARCEL_SEQUENCE = [
-  { x: 113, y: -7 },
-  { x: 87, y: 18 },
+  { x: -3, y: -33 },
+  { x: 72, y: -9 },
+  { x: -55, y: 143 },
+  { x: 58, y: 2 },
+  { x: 61, y: -27 },
+  { x: -49, y: -41 },
+  { x: 36, y: 46 },
+  { x: -71, y: -38 },
+  { x: -129, y: -141 },
   { x: 52, y: 2 },
-  { x: 16, y: 83 },
+  { x: -37, y: 57 },
+  { x: 59, y: 133 },
+  { x: 57, y: 8 },
+  { x: -40, y: -49 },
   { x: -12, y: -39 },
-  { x: 60, y: 115 }
+  { x: -9, y: 73 },
+  { x: 87, y: 18 },
+  { x: 67, y: -21 },
+  { x: -75, y: 73 },
+  { x: -15, y: -22 },
+  { x: -32, y: -44 },
+  { x: 52, y: 16 },
+  { x: -71, y: -71 },
+  { x: -55, y: 1 },
+  { x: -25, y: 103 },
+  { x: 52, y: 10 },
+  { x: 12, y: 46 },
+  { x: -5, y: -16 },
+  { x: 105, y: -21 },
+  { x: -11, y: -30 },
+  { x: -49, y: -49 },
+  { x: 113, y: -7 },
+  { x: 52, y: -71 },
+  { x: -43, y: 53 },
+  { x: 63, y: 2 },
+  { x: -134, y: -121 },
+  { x: 28, y: 45 },
+  { x: 137, y: 34 },
+  { x: -43, y: 57 },
+  { x: 16, y: 83 },
+  { x: 60, y: 115 },
+  { x: -40, y: 33 },
+  { x: -69, y: 77 },
+  { x: -48, y: 58 },
+  { x: -35, y: -42 },
+  { x: 24, y: -124 },
+  { x: -148, y: -35 },
+  { x: -109, y: -89 }
 ]
 
 export class TeleportController {
@@ -57,7 +99,9 @@ export class TeleportController {
 
       const currentParcel = worldToGrid(lastPlayerPosition)
 
-      usersParcels = usersParcels.filter(it => currentParcel.x !== it[0] && currentParcel.y !== it[1])
+      usersParcels = usersParcels.filter(
+        it => isInsideParcelLimits(it[0], it[1]) && currentParcel.x !== it[0] && currentParcel.y !== it[1]
+      )
 
       if (usersParcels.length > 0) {
         // Sorting from most close users
@@ -71,7 +115,10 @@ export class TeleportController {
           `Found a parcel with ${closeUsers} user(s) nearby: ${target[0]},${target[1]}. Teleporting...`
         )
       } else {
-        return { message: 'There seems to be no users in other parcels at the current realm. Could not teleport.', success: false }
+        return {
+          message: 'There seems to be no users in other parcels at the current realm. Could not teleport.',
+          success: false
+        }
       }
     } catch (e) {
       defaultLogger.error('Error while trying to teleport to crowd', e)
@@ -99,13 +146,7 @@ export class TeleportController {
   public static goTo(x: number, y: number, teleportMessage?: string): { message: string; success: boolean } {
     const tpMessage: string = teleportMessage ? teleportMessage : `Teleporting to ${x}, ${y}...`
 
-    const insideCoords =
-      x > parcelLimits.minLandCoordinateX &&
-      x <= parcelLimits.maxLandCoordinateX &&
-      y > parcelLimits.minLandCoordinateY &&
-      y <= parcelLimits.maxLandCoordinateY
-
-    if (insideCoords) {
+    if (isInsideParcelLimits(x, y)) {
       teleportObservable.notifyObservers({
         x: x,
         y: y,
@@ -120,4 +161,13 @@ export class TeleportController {
       return { message: errorMessage, success: false }
     }
   }
+}
+
+function isInsideParcelLimits(x: number, y: number) {
+  return (
+    x > parcelLimits.minLandCoordinateX &&
+    x <= parcelLimits.maxLandCoordinateX &&
+    y > parcelLimits.minLandCoordinateY &&
+    y <= parcelLimits.maxLandCoordinateY
+  )
 }

@@ -10,7 +10,7 @@ import { EventDispatcher } from 'decentraland-rpc/lib/common/core/EventDispatche
 import { IFuture } from 'fp-future'
 import { Empty } from 'google-protobuf/google/protobuf/empty_pb'
 import { identity } from 'shared'
-import { sendPublicChatMessage } from 'shared/comms'
+import { sendPublicChatMessage, persistCurrentUser } from 'shared/comms'
 import { AvatarMessageType } from 'shared/comms/interface/types'
 import { avatarMessageObservable, getUserProfile } from 'shared/comms/peers'
 import { providerFuture } from 'shared/ethereum/provider'
@@ -32,7 +32,6 @@ import { IEventNames, IEvents, ProfileForRenderer } from '../decentraland-ecs/sr
 import { sceneLifeCycleObservable } from '../decentraland-loader/lifecycle/controllers/scene'
 import { AirdropInfo } from '../shared/airdrops/interface'
 import { queueTrackingEvent } from '../shared/analytics'
-import { airdropObservable } from '../shared/apis/AirdropController'
 import { DevTools } from '../shared/apis/DevTools'
 import { ParcelIdentity } from '../shared/apis/ParcelIdentity'
 import { chatObservable } from '../shared/comms/chat'
@@ -95,6 +94,7 @@ import { positionObservable, teleportObservable } from '../shared/world/position
 import { hudWorkerUrl, SceneWorker } from '../shared/world/SceneWorker'
 import { ensureUiApis } from '../shared/world/uiSceneInitializer'
 import { worldRunningObservable } from '../shared/world/worldState'
+import { profileToRendererFormat } from 'shared/passports/transformations/profileToRendererFormat'
 
 const rendererVersion = require('decentraland-renderer')
 window['console'].log('Renderer version: ' + rendererVersion)
@@ -178,7 +178,7 @@ const browserInterface = {
     if (hasWallet) {
       TeleportController.goToNext()
     } else {
-      window.open('https://docs.decentraland.org/blockchain-integration/ethereum-essentials/', '_blank')
+      window.open('https://docs.decentraland.org/get-a-wallet/', '_blank')
     }
   },
 
@@ -186,14 +186,22 @@ const browserInterface = {
     Session.current.then(s => s.logout()).catch(e => defaultLogger.error('error while logging out', e))
   },
 
-  SaveUserAvatar({ face, body, avatar }: { face: string; body: string; avatar: Avatar }) {
+  SaveUserAvatar(changes: { face: string; body: string; avatar: Avatar }) {
+    const { face, body, avatar } = changes
     const profile: Profile = getUserProfile().profile as Profile
-    global.globalStore.dispatch(saveAvatarRequest({ ...profile, avatar: { ...avatar, snapshots: { face, body } } }))
+    const updated = { ...profile, avatar: { ...avatar, snapshots: { face, body } } }
+    global.globalStore.dispatch(saveAvatarRequest(updated))
   },
 
   SaveUserTutorialStep(data: { tutorialStep: number }) {
     const profile: Profile = getUserProfile().profile as Profile
-    global.globalStore.dispatch(saveAvatarRequest({ ...profile, tutorialStep: data.tutorialStep }))
+    profile.tutorialStep = data.tutorialStep
+    global.globalStore.dispatch(saveAvatarRequest(profile))
+
+    persistCurrentUser({
+      version: profile.version,
+      profile: profileToRendererFormat(profile, identity)
+    })
   },
 
   ControlEvent({ eventType, payload }: { eventType: string; payload: any }) {
@@ -225,7 +233,8 @@ const browserInterface = {
   },
 
   UserAcceptedCollectibles(data: { id: string }) {
-    airdropObservable.notifyObservers(data.id)
+    // Here, we should have "airdropObservable.notifyObservers(data.id)".
+    // It's disabled because of security reasons.
   },
 
   EditAvatarClicked() {
@@ -268,6 +277,17 @@ const browserInterface = {
       const blocked = profile.blocked ? profile.blocked.filter(id => id !== data.userId) : []
       global.globalStore.dispatch(saveAvatarRequest({ ...profile, blocked }))
     }
+  },
+
+  ReportUserEmail(data: { userEmail: string }) {
+    const profile = getUserProfile().profile
+    if (profile) {
+      if (hasWallet) {
+        window.analytics.identify(profile.userId, { email: data.userEmail })
+      } else {
+        window.analytics.identify({ email: data.userEmail })
+      }
+    }
   }
 }
 
@@ -275,7 +295,7 @@ export function setLoadingScreenVisible(shouldShow: boolean) {
   document.getElementById('overlay')!.style.display = shouldShow ? 'block' : 'none'
   document.getElementById('load-messages-wrapper')!.style.display = shouldShow ? 'block' : 'none'
   document.getElementById('progress-bar')!.style.display = shouldShow ? 'block' : 'none'
-  if (!shouldShow) {
+  if (!shouldShow && !EDITOR) {
     isTheFirstLoading = false
     TeleportController.stopTeleportAnimation()
   }
@@ -467,8 +487,6 @@ unityInterface = {
     gameInstance.SendMessage('HUDController', 'ConfigurePlayerInfoCardHUD', JSON.stringify(configuration))
   },
   ConfigureWelcomeHUD(configuration: WelcomeHUDControllerModel) {
-    if (tutorialEnabled()) return
-
     gameInstance.SendMessage('HUDController', 'ConfigureWelcomeHUD', JSON.stringify(configuration))
   },
   ConfigureAirdroppingHUD(configuration: HUDConfiguration) {
@@ -492,7 +510,7 @@ unityInterface = {
     gameInstance.SendMessage('TutorialController', 'SetTutorialEnabled')
   },
   TriggerAirdropDisplay(data: AirdropInfo) {
-    gameInstance.SendMessage('HUDController', 'AirdroppingRequest', JSON.stringify(data))
+    // Disabled for security reasons
   },
   SelectGizmoBuilder(type: string) {
     this.SendBuilderMessage('SelectGizmo', type)

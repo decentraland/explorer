@@ -1,3 +1,4 @@
+using DCL.Helpers;
 using UnityGLTF;
 
 namespace DCL
@@ -15,10 +16,11 @@ namespace DCL
         GLTFComponent gltfComponent = null;
         object id = null;
 
-        public AssetPromise_GLTF(ContentProvider provider, string url)
+        public AssetPromise_GLTF(ContentProvider provider, string url, string hash = null)
         {
             this.provider = provider;
             this.url = url.Substring(url.LastIndexOf('/') + 1);
+            this.id = hash ?? url;
             // We separate the directory path of the GLB and its file name, to be able to use the directory path when 
             // fetching relative assets like textures in the ParseGLTFWebRequestedFile() event call
             assetDirectoryPath = URIHelper.GetDirectoryName(url);
@@ -27,7 +29,7 @@ namespace DCL
         protected override void OnBeforeLoadOrReuse()
         {
 #if UNITY_EDITOR
-            asset.container.name = "GLTF: " + url;
+            asset.container.name = "GLTF: " + this.id;
 #endif
             settings.ApplyBeforeLoad(asset.container.transform);
         }
@@ -39,9 +41,6 @@ namespace DCL
 
         internal override object GetId()
         {
-            if (id == null)
-                id = ComputeId(provider, url);
-
             return id;
         }
 
@@ -53,7 +52,8 @@ namespace DCL
             {
                 useVisualFeedback = settings.visibleFlags == AssetPromiseSettings_Rendering.VisibleFlags.VISIBLE_WITH_TRANSITION,
                 initialVisibility = settings.visibleFlags != AssetPromiseSettings_Rendering.VisibleFlags.INVISIBLE,
-                shaderOverride = settings.shaderOverride
+                shaderOverride = settings.shaderOverride,
+                addMaterialsToPersistentCaching = (settings.cachingFlags & MaterialCachingHelper.Mode.CACHE_MATERIALS) != 0
             };
 
             tmpSettings.OnWebRequestStartEvent += ParseGLTFWebRequestedFile;
@@ -100,19 +100,6 @@ namespace DCL
             //NOTE(Brian): Call again this method because we are replacing the asset.
             OnBeforeLoadOrReuse();
             return true;
-        }
-
-        private string ComputeId(ContentProvider provider, string url)
-        {
-            if (provider.contents != null && !useIdForMockedMappings)
-            {
-                if (provider.TryGetContentsUrl_Raw(url, out string finalUrl))
-                {
-                    return finalUrl;
-                }
-            }
-
-            return url;
         }
 
         protected override void OnCancelLoading()

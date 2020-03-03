@@ -111,11 +111,15 @@ namespace DCL.Components
 
             if (string.IsNullOrEmpty(bundlesBaseUrl))
             {
-                OnFail?.Invoke();
+                OnFailWrapper(null, OnFail);
                 return;
             }
 
-            contentProvider.TryGetContentsUrl_Raw(targetUrl, out string hash);
+            if (!contentProvider.TryGetContentsUrl_Raw(targetUrl, out string hash))
+            {
+                OnFailWrapper(null, OnFail);
+                return;
+            }
 
             abPromise = new AssetPromise_AB_GameObject(bundlesBaseUrl, hash);
             abPromise.settings = this.settings;
@@ -136,7 +140,13 @@ namespace DCL.Components
                     Debug.Log("Forgetting not null promise...");
             }
 
-            gltfPromise = new AssetPromise_GLTF(contentProvider, targetUrl);
+            if (!contentProvider.TryGetContentsUrl_Raw(targetUrl, out string hash))
+            {
+                OnFailWrapper(null, OnFail);
+                return;
+            }
+
+            gltfPromise = new AssetPromise_GLTF(contentProvider, targetUrl, hash);
             gltfPromise.settings = this.settings;
 
             gltfPromise.OnSuccessEvent += (x) => OnSuccessWrapper(x, OnSuccess);

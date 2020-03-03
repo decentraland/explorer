@@ -1,4 +1,4 @@
-﻿using DCL.Components;
+using DCL.Components;
 using DCL.Configuration;
 using DCL.Helpers;
 using DCL.Models;
@@ -81,6 +81,10 @@ namespace DCL.Controllers
                 boundariesChecker = new SceneBoundariesChecker(this);
         }
 
+        void OnDisable()
+        {
+            metricsController.Disable();
+        }
 
         private void Update()
         {
@@ -227,6 +231,7 @@ namespace DCL.Controllers
                 if (entities.Count > 0)
                 {
                     this.gameObject.transform.position = EnvironmentSettings.MORDOR;
+                    this.gameObject.SetActive(false);
 
                     RemoveAllEntities();
                 }

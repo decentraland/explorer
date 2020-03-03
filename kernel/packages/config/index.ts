@@ -104,8 +104,11 @@ export const COMMS = USE_LOCAL_COMMS ? 'v1-local' : qs.COMMS ? qs.COMMS : 'v2-p2
 export const FETCH_PROFILE_SERVICE = qs.FETCH_PROFILE_SERVICE
 export const UPDATE_CONTENT_SERVICE = qs.UPDATE_CONTENT_SERVICE
 export const FETCH_CONTENT_SERVICE = qs.FETCH_CONTENT_SERVICE
+export const FETCH_META_CONTENT_SERVICE = qs.FETCH_META_CONTENT_SERVICE
 export const COMMS_SERVICE = qs.COMMS_SERVICE
 export const REALM = qs.realm
+
+export const AUTO_CHANGE_REALM = location.search.indexOf('AUTO_CHANGE_REALM') !== -1
 
 export const DEBUG =
   location.search.indexOf('DEBUG_MODE') !== -1 ||
@@ -138,13 +141,19 @@ export function tutorialEnabled() {
   )
 }
 
+export function tutorialSceneEnabled() {
+  return tutorialEnabled() && (RESET_TUTORIAL || getUserProfile().profile.tutorialStep === tutorialStepId.INITIAL_SCENE)
+}
+
 export namespace commConfigurations {
   export const debug = true
   export const commRadius = 4
 
   export const peerTtlMs = 60000
 
-  export const maxVisiblePeers = 25
+  export const maxVisiblePeers = qs.MAX_VISIBLE_PEERS ? parseInt(qs.MAX_VISIBLE_PEERS, 10) : 25
+
+  export const autoChangeRealmInterval = qs.AUTO_CHANGE_INTERVAL ? parseInt(qs.AUTO_CHANGE_INTERVAL, 10) * 1000 : 40000
 
   export const iceServers = [
     {
@@ -258,7 +267,7 @@ export function getServerConfigurations() {
     wearablesApi: `https://wearable-api.decentraland.org/v2`,
     explorerConfiguration: `https://explorer-config.decentraland.${
       TLDDefault === 'today' ? 'org' : TLDDefault
-    }.s3.amazonaws.com/configuration.json`,
+    }/configuration.json`,
     avatar: {
       snapshotStorage: `https://avatars-storage.decentraland.${TLDDefault}/`,
       catalog: getExclusiveServer(),
@@ -281,8 +290,10 @@ export async function setNetwork(net: ETHEREUM_NETWORK) {
         : '0xadd085f2318e9678bbb18b3e0711328f902b374b'
 
     decentralandConfigurations = {
+      ...contracts,
       contractAddress: contracts.LANDProxy,
       dao: contracts.CatalystProxy,
+      ens: contracts.CatalystProxy,
       contracts: {
         serviceLocator: contracts.ServiceLocator
       },
@@ -313,12 +324,14 @@ export namespace ethereumConfigurations {
   export const mainnet = {
     wss: 'wss://mainnet.infura.io/ws/v3/074a68d50a7c4e6cb46aec204a50cbf0',
     http: 'https://mainnet.infura.io/v3/074a68d50a7c4e6cb46aec204a50cbf0/',
-    etherscan: 'https://etherscan.io'
+    etherscan: 'https://etherscan.io',
+    names: 'https://api.thegraph.com/subgraphs/name/decentraland/marketplace'
   }
   export const ropsten = {
     wss: 'wss://ropsten.infura.io/ws/v3/074a68d50a7c4e6cb46aec204a50cbf0',
     http: 'https://ropsten.infura.io/v3/074a68d50a7c4e6cb46aec204a50cbf0/',
-    etherscan: 'https://ropsten.etherscan.io'
+    etherscan: 'https://ropsten.etherscan.io',
+    names: 'https://api.thegraph.com/subgraphs/name/decentraland/marketplace-ropsten'
   }
 }
 
