@@ -187,8 +187,7 @@ export const loginConfig = {
   zone: {
     domain: 'dcl-test.auth0.com',
     client_id: 'lTUEMnFpYb0aiUKeIRPbh7pBxKM6sccx'
-  },
-  audience: 'decentraland.org'
+  }
 }
 
 // take address from http://contracts.decentraland.org/addresses.json
@@ -249,8 +248,7 @@ export function getLoginConfigurationForCurrentDomain() {
   return {
     clientId: loginConfig[tld].client_id,
     domain: loginConfig[tld].domain,
-    redirectUri: window.location.origin + '/' + (ENV_OVERRIDE ? '?ENV=' + getTLD() : ''),
-    audience: loginConfig.audience
+    redirectUri: window.location.origin + '/' + (ENV_OVERRIDE ? '?ENV=' + getTLD() : '')
   }
 }
 

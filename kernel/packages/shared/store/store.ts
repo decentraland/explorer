@@ -12,7 +12,6 @@ export const buildStore = (config: {
   clientId: string
   domain: string
   redirectUri: string
-  audience: string
 }) => {
   const sagaMiddleware = createSagaMiddleware()
   const composeEnhancers = (DEBUG_REDUX && (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__) || compose
