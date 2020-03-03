@@ -29,6 +29,8 @@ namespace SceneBoundariesCheckerTests
         }
 
         [UnityTest]
+        [Explicit("Test taking too long")]
+        [Category("Explicit")]
         public IEnumerator NFTShapeIsInvalidatedWhenStartingOutOfBounds()
         {
             yield return SBC_Asserts.NFTShapeIsInvalidatedWhenStartingOutOfBounds(scene);
@@ -47,6 +49,8 @@ namespace SceneBoundariesCheckerTests
         }
 
         [UnityTest]
+        [Explicit("Test taking too long")]
+        [Category("Explicit")]
         public IEnumerator NFTShapeIsInvalidatedWhenLeavingBounds()
         {
             yield return SBC_Asserts.NFTShapeIsInvalidatedWhenLeavingBounds(scene);
@@ -65,6 +69,8 @@ namespace SceneBoundariesCheckerTests
         }
 
         [UnityTest]
+        [Explicit("Test taking too long")]
+        [Category("Explicit")]
         public IEnumerator NFTShapeIsResetWhenReenteringBounds()
         {
             yield return SBC_Asserts.NFTShapeIsResetWhenReenteringBounds(scene);

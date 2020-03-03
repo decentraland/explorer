@@ -338,7 +338,7 @@ namespace DCL.Controllers
             newEntity.OnCleanupEvent += po.OnCleanup;
 
             if (SceneController.i.useBoundariesChecker)
-                newEntity.OnShapeUpdated += SceneController.i.boundariesChecker.AddEntity;
+                newEntity.OnShapeUpdated += SceneController.i.boundariesChecker.AddEntityToBeChecked;
 
             entities.Add(tmpCreateEntityMessage.id, newEntity);
 
@@ -364,8 +364,15 @@ namespace DCL.Controllers
                     CleanUpEntityRecursively(entity, removeImmediatelyFromEntitiesList);
                 }
 
+                if (SceneController.i.useBoundariesChecker)
+                {
+                    entity.OnShapeUpdated -= SceneController.i.boundariesChecker.AddEntityToBeChecked;
+                    SceneController.i.boundariesChecker.RemoveEntityToBeChecked(entity);
+                }
+
                 entities.Remove(tmpRemoveEntityMessage.id);
             }
+
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             else
             {
@@ -373,8 +380,6 @@ namespace DCL.Controllers
             }
 #endif
         }
-
-
 
         void CleanUpEntityRecursively(DecentralandEntity entity, bool removeImmediatelyFromEntitiesList)
         {
@@ -540,7 +545,7 @@ namespace DCL.Controllers
                     entity.gameObject.transform.localRotation = DCLTransform.model.rotation;
                     entity.gameObject.transform.localScale = DCLTransform.model.scale;
 
-                    SceneController.i.boundariesChecker?.AddEntity(entity);
+                    SceneController.i.boundariesChecker?.AddEntityToBeChecked(entity);
                 }
 
                 return null;

@@ -15,12 +15,12 @@ namespace DCL.Controllers
         HashSet<DecentralandEntity> entitiesToCheck = new HashSet<DecentralandEntity>();
         HashSet<DecentralandEntity> checkedEntities = new HashSet<DecentralandEntity>();
         Coroutine entitiesCheckRoutine = null;
-        float lastChecktTime;
+        float lastCheckTime;
 
         public SceneBoundariesChecker()
         {
-            entitiesCheckRoutine = SceneController.i.StartCoroutine(CheckEntities());
-            lastChecktTime = Time.realtimeSinceStartup;
+            entitiesCheckRoutine = CoroutineStarter.Start(CheckEntities());
+            lastCheckTime = Time.realtimeSinceStartup;
         }
 
         // TODO: Improve MessagingControllersManager.i.timeBudgetCounter usage once we have the centralized budget controller for our immortal coroutines
@@ -28,30 +28,37 @@ namespace DCL.Controllers
         {
             while (true)
             {
-                float elapsedTime = Time.realtimeSinceStartup - lastChecktTime;
-                if (timeBetweenChecks <= 0f || elapsedTime >= timeBetweenChecks)
+                float elapsedTime = Time.realtimeSinceStartup - lastCheckTime;
+                if (entitiesToCheck.Count > 0 && (timeBetweenChecks <= 0f || elapsedTime >= timeBetweenChecks))
                 {
-                    foreach (var entity in entitiesToCheck)
+                    using (var iterator = entitiesToCheck.GetEnumerator())
                     {
-                        if (MessagingControllersManager.i.timeBudgetCounter <= 0f) break;
+                        while (iterator.MoveNext())
+                        {
+                            if (MessagingControllersManager.i.timeBudgetCounter <= 0f) break;
 
-                        float startTime = Time.realtimeSinceStartup;
+                            float startTime = Time.realtimeSinceStartup;
 
-                        EvaluateEntityPosition(entity);
-                        checkedEntities.Add(entity);
+                            EvaluateEntityPosition(iterator.Current);
+                            checkedEntities.Add(iterator.Current);
 
-                        float finishTime = Time.realtimeSinceStartup;
-                        MessagingControllersManager.i.timeBudgetCounter -= (finishTime - startTime);
+                            float finishTime = Time.realtimeSinceStartup;
+                            MessagingControllersManager.i.timeBudgetCounter -= (finishTime - startTime);
+                        }
                     }
 
                     // As we can't modify the hashset while traversing it, we keep track of the entities that should be removed afterwards
-                    foreach (var entity in checkedEntities)
+                    using (var iterator = checkedEntities.GetEnumerator())
                     {
-                        entitiesToCheck.Remove(entity);
+                        while (iterator.MoveNext())
+                        {
+                            entitiesToCheck.Remove(iterator.Current);
+                        }
                     }
+
                     checkedEntities.Clear();
 
-                    lastChecktTime = Time.realtimeSinceStartup;
+                    lastCheckTime = Time.realtimeSinceStartup;
                 }
 
                 yield return null;
@@ -61,14 +68,21 @@ namespace DCL.Controllers
         public void Stop()
         {
             if (entitiesCheckRoutine != null)
-                SceneController.i.StopCoroutine(entitiesCheckRoutine);
+                CoroutineStarter.Stop(entitiesCheckRoutine);
         }
 
-        public void AddEntity(DecentralandEntity entity)
+        public void AddEntityToBeChecked(DecentralandEntity entity)
         {
             if (!SceneController.i.useBoundariesChecker) return;
 
             entitiesToCheck.Add(entity);
+        }
+
+        public void RemoveEntityToBeChecked(DecentralandEntity entity)
+        {
+            if (!SceneController.i.useBoundariesChecker) return;
+
+            entitiesToCheck.Remove(entity);
         }
 
         public void EvaluateEntityPosition(DecentralandEntity entity)
