@@ -8,6 +8,7 @@ namespace SceneBoundariesCheckerTests
 
     public class SceneBoundariesCheckerTests : TestsBase
     {
+        [UnitySetUp]
         protected override IEnumerator SetUp()
         {
             yield return base.SetUp();

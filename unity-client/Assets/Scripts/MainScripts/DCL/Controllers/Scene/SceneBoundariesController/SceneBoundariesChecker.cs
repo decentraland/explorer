@@ -29,10 +29,8 @@ namespace DCL.Controllers
             while (true)
             {
                 float elapsedTime = Time.realtimeSinceStartup - lastChecktTime;
-                if (elapsedTime >= timeBetweenChecks)
+                if (timeBetweenChecks <= 0f || elapsedTime >= timeBetweenChecks)
                 {
-                    // Debug.Log("elapsed time: " + elapsedTime);
-
                     foreach (var entity in entitiesToCheck)
                     {
                         if (MessagingControllersManager.i.timeBudgetCounter <= 0f) break;

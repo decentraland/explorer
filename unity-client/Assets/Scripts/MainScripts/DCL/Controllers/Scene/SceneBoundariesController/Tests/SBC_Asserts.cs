@@ -175,6 +175,7 @@ namespace SceneBoundariesCheckerTests
             TestHelpers.SetEntityTransform(scene, scene.entities[entityId], transformModel);
 
             yield return null;
+            yield return null;
 
             Assert.IsTrue(MeshIsInvalid(scene.entities[childEntityId].meshesInfo));
         }

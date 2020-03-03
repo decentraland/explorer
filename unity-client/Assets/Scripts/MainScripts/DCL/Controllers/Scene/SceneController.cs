@@ -140,9 +140,14 @@ namespace DCL
                 boundariesChecker.Stop();
 
             if (isDebugMode)
+            {
                 boundariesChecker = new SceneBoundariesDebugModeChecker();
+                boundariesChecker.timeBetweenChecks = 0f;
+            }
             else
+            {
                 boundariesChecker = new SceneBoundariesChecker();
+            }
         }
 
         private void SetPositionDirty(DCLCharacterPosition character)
