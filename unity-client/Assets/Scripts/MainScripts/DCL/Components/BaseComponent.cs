@@ -1,4 +1,4 @@
-﻿using DCL.Controllers;
+using DCL.Controllers;
 using DCL.Models;
 using System;
 using System.Collections;
@@ -9,7 +9,7 @@ namespace DCL.Components
     public interface IComponent : ICleanable
     {
         bool isRoutineRunning { get; }
-        IEnumerator enumerator { get; }
+        Coroutine routine { get; }
         string componentName { get; }
         void UpdateFromJSON(string json);
         IEnumerator ApplyChanges(string newJson);
@@ -47,7 +47,6 @@ namespace DCL.Components
     {
         ComponentUpdateHandler updateHandler;
         public WaitForComponentUpdate yieldInstruction => updateHandler.yieldInstruction;
-        public IEnumerator enumerator => updateHandler.enumerator;
         public Coroutine routine => updateHandler.routine;
         public bool isRoutineRunning => updateHandler.isRoutineRunning;
 

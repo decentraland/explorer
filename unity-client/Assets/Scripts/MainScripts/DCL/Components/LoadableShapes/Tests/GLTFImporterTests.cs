@@ -14,7 +14,7 @@ public class GLTFImporterTests : TestsBase
         string src = Utils.GetTestsAssetsPath() + path;
         DecentralandEntity entity = null;
         GLTFShape gltfShape = TestHelpers.CreateEntityWithGLTFShape(scene, Vector3.zero, src, out entity);
-        yield return gltfShape.enumerator;
+        yield return gltfShape.routine;
         yield return new WaitForSeconds(4);
 
         if (OnFinishLoading != null)

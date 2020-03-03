@@ -20,7 +20,7 @@ namespace Tests
                 DCLTexture.BabylonWrapMode.CLAMP,
                 FilterMode.Bilinear);
 
-            yield return dclTexture.enumerator;
+            yield return dclTexture.routine;
 
             Assert.IsTrue(dclTexture.texture != null, "Texture didn't load correctly?");
             Assert.IsTrue(dclTexture.unityWrap == TextureWrapMode.Clamp, "Bad wrap mode!");
@@ -55,7 +55,7 @@ namespace Tests
             DCLTexture dclTexture = TestHelpers.CreateDCLTexture(scene, DCL.Helpers.Utils.GetTestsAssetsPath() + "/Images/avatar.png");
             bool isOnReady = false;
             dclTexture.CallWhenReady((x) => { isOnReady = true; });
-            yield return dclTexture.enumerator;
+            yield return dclTexture.routine;
 
             Assert.IsTrue(isOnReady);
         }
@@ -64,7 +64,7 @@ namespace Tests
         public IEnumerator Texture_OnReadyAfterLoadingInstantlyCalled()
         {
             DCLTexture dclTexture = TestHelpers.CreateDCLTexture(scene, DCL.Helpers.Utils.GetTestsAssetsPath() + "/Images/avatar.png");
-            yield return dclTexture.enumerator;
+            yield return dclTexture.routine;
 
             bool isOnReady = false;
             dclTexture.CallWhenReady((x) => { isOnReady = true; });

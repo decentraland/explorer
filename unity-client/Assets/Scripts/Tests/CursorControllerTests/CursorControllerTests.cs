@@ -31,7 +31,7 @@ namespace Tests
                 new BoxShape.Model() { });
 
             TestHelpers.SetEntityTransform(scene, entity, new Vector3(8, 2, 10), Quaternion.identity, new Vector3(3, 3, 3));
-            yield return shape.enumerator;
+            yield return shape.routine;
 
             var OnPointerDownModel = new OnPointerDown.Model()
             {

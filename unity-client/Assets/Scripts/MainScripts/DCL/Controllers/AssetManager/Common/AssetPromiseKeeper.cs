@@ -158,7 +158,7 @@ namespace DCL
             return promise;
         }
 
-        Queue<AssetPromise<AssetType>> toResolveBlockedPromisesQueue = new Queue<AssetPromise<AssetType>>();
+        Queue<AssetPromiseType> toResolveBlockedPromisesQueue = new Queue<AssetPromiseType>();
 
         private void OnRequestCompleted(AssetPromise<AssetType> loadedPromise)
         {
@@ -168,7 +168,7 @@ namespace DCL
                 return;
             }
 
-            toResolveBlockedPromisesQueue.Enqueue(loadedPromise);
+            toResolveBlockedPromisesQueue.Enqueue(loadedPromise as AssetPromiseType);
         }
 
         IEnumerator ProcessBlockedPromisesQueue()
@@ -181,13 +181,13 @@ namespace DCL
                     continue;
                 }
 
-                AssetPromise<AssetType> promise = toResolveBlockedPromisesQueue.Dequeue();
+                AssetPromiseType promise = toResolveBlockedPromisesQueue.Dequeue();
                 yield return ProcessBlockedPromisesDeferred(promise);
                 CleanPromise(promise);
                 yield return CoroutineStarter.BreakIfBudgetExceeded();
             }
         }
-        private IEnumerator ProcessBlockedPromisesDeferred(AssetPromise<AssetType> loadedPromise)
+        private IEnumerator ProcessBlockedPromisesDeferred(AssetPromiseType loadedPromise)
         {
             object loadedPromiseId = loadedPromise.GetId();
 
@@ -195,7 +195,7 @@ namespace DCL
                 || !masterPromiseById.ContainsKey(loadedPromiseId)
                 || masterPromiseById[loadedPromiseId] != loadedPromise)
             {
-                Debug.Log($"Early exit for some reason for id {loadedPromiseId}");
+                Debug.LogWarning($"Early exit for some reason for id {loadedPromiseId}");
                 yield break;
             }
 

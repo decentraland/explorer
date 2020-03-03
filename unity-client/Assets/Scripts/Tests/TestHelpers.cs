@@ -121,7 +121,7 @@ namespace DCL.Helpers
                 , out _) as T;
         }
 
-        public static IEnumerator EntityComponentUpdate<T, K>(T component, K model = null)
+        public static Coroutine EntityComponentUpdate<T, K>(T component, K model = null)
             where T : BaseComponent
             where K : class, new()
         {
@@ -134,7 +134,7 @@ namespace DCL.Helpers
 
             component.scene.EntityComponentUpdate(component.entity, classId, JsonUtility.ToJson(model));
 
-            return component.enumerator;
+            return component.routine;
         }
 
         public static void SetEntityParent(ParcelScene scene, DecentralandEntity child, DecentralandEntity parent)
@@ -165,7 +165,7 @@ namespace DCL.Helpers
             );
         }
 
-        public static IEnumerator SharedComponentUpdate<T, K>(T component, K model = null)
+        public static Coroutine SharedComponentUpdate<T, K>(T component, K model = null)
             where T : BaseDisposable
             where K : class, new()
         {
@@ -176,7 +176,7 @@ namespace DCL.Helpers
 
             component.scene.SharedComponentUpdate(component.id, JsonUtility.ToJson(model));
 
-            return component.enumerator;
+            return component.routine;
         }
 
         public static T SharedComponentCreate<T, K>(ParcelScene scene, CLASS_ID id, K model = null)
@@ -609,18 +609,18 @@ namespace DCL.Helpers
             DecentralandEntity e = CreateSceneEntity(scene);
             TComponent component = EntityComponentCreate<TComponent, TModel>(scene, e, generatedModel);
 
-            if (component.enumerator != null)
+            if (component.routine != null)
             {
-                yield return component.enumerator;
+                yield return component.routine;
             }
 
             int id = (int)scene.ownerController.componentFactory.GetIdForType<TComponent>();
 
             scene.EntityComponentUpdate(e, (CLASS_ID_COMPONENT)id, "{}");
 
-            if (component.enumerator != null)
+            if (component.routine != null)
             {
-                yield return component.enumerator;
+                yield return component.routine;
             }
 
             CompareWithDefaultedInstance<TModel, TComponent>(component);
@@ -637,9 +637,9 @@ namespace DCL.Helpers
 
             var component = SharedComponentCreate<TComponent, TModel>(scene, classId);
 
-            if (component.enumerator != null)
+            if (component.routine != null)
             {
-                yield return component.enumerator;
+                yield return component.routine;
             }
 
             Type componentType = typeof(TComponent);
@@ -658,9 +658,9 @@ namespace DCL.Helpers
             // Assign 2nd component to same entity
             var component2 = SharedComponentCreate<TComponent, TModel>(scene, classId);
 
-            if (component2.enumerator != null)
+            if (component2.routine != null)
             {
-                yield return component2.enumerator;
+                yield return component2.routine;
             }
 
             TestHelpers.SharedComponentAttach(component2, entity);
@@ -677,9 +677,9 @@ namespace DCL.Helpers
         {
             TComponent component = TestHelpers.SharedComponentCreate<TComponent, TModel>(scene, id);
 
-            if (component.enumerator != null)
+            if (component.routine != null)
             {
-                yield return component.enumerator;
+                yield return component.routine;
             }
 
             TModel generatedModel = new TModel();
@@ -695,7 +695,7 @@ namespace DCL.Helpers
 
             yield return TestHelpers.SharedComponentUpdate(component, new TModel());
 
-            yield return component.enumerator;
+            yield return component.routine;
 
             CompareWithDefaultedInstance<TModel, TComponent>(component);
 
@@ -709,7 +709,7 @@ namespace DCL.Helpers
             // make sure the shape is collidable first
             shapeModel.withCollisions = true;
             SharedComponentUpdate(shapeComponent, shapeModel);
-            yield return shapeComponent.enumerator;
+            yield return shapeComponent.routine;
 
             // check every collider is enabled
             Assert.IsTrue(entity.meshesInfo.colliders.Count > 0);
@@ -722,7 +722,7 @@ namespace DCL.Helpers
             // update collision property with 'false'
             shapeModel.withCollisions = false;
             SharedComponentUpdate(shapeComponent, shapeModel);
-            yield return shapeComponent.enumerator;
+            yield return shapeComponent.routine;
 
             // check colliders correct behaviour
             for (int i = 0; i < entity.meshesInfo.colliders.Count; i++)
@@ -733,7 +733,7 @@ namespace DCL.Helpers
             // update collision property with 'true' again
             shapeModel.withCollisions = true;
             SharedComponentUpdate(shapeComponent, shapeModel);
-            yield return shapeComponent.enumerator;
+            yield return shapeComponent.routine;
 
             // check colliders correct behaviour
             for (int i = 0; i < entity.meshesInfo.colliders.Count; i++)
@@ -794,7 +794,7 @@ namespace DCL.Helpers
                 uuid = "onClick"
             };
             var onClickComponent = TestHelpers.EntityComponentCreate<OnClick, OnClick.Model>(entity.scene, entity, onClickComponentModel, CLASS_ID_COMPONENT.UUID_CALLBACK);
-            yield return onClickComponent.enumerator;
+            yield return onClickComponent.routine;
 
             Collider onPointerEventCollider;
             for (int i = 0; i < renderers.Length; i++)
@@ -821,7 +821,7 @@ namespace DCL.Helpers
             where TComponentModel : UIShape.Model, new()
         {
             UIScreenSpace parentElement = TestHelpers.SharedComponentCreate<UIScreenSpace, UIScreenSpace.Model>(scene, CLASS_ID.UI_SCREEN_SPACE_SHAPE);
-            yield return parentElement.enumerator;
+            yield return parentElement.routine;
 
             // make canvas invisible
             yield return SharedComponentUpdate(parentElement, new UIScreenSpace.Model { visible = false });
@@ -835,7 +835,7 @@ namespace DCL.Helpers
                         width = new UIValue(100f),
                         height = new UIValue(100f)
                     });
-            yield return targetUIElement.enumerator;
+            yield return targetUIElement.routine;
 
             RectTransform uiCanvasRectTransform = parentElement.childHookRectTransform.GetComponentInParent<RectTransform>();
             Assert.AreEqual(uiCanvasRectTransform.rect.width / 2, targetUIElement.referencesContainer.layoutElementRT.anchoredPosition.x);

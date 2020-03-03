@@ -1,4 +1,4 @@
-﻿using DCL.Models;
+using DCL.Models;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -13,7 +13,6 @@ namespace DCL.Components
 
         ComponentUpdateHandler updateHandler;
         public WaitForComponentUpdate yieldInstruction => updateHandler.yieldInstruction;
-        public IEnumerator enumerator => updateHandler.enumerator;
         public Coroutine routine => updateHandler.routine;
         public bool isRoutineRunning => updateHandler.isRoutineRunning;
 

@@ -15,8 +15,11 @@ namespace DCL
 
         protected override int PromiseSortAlgorithm(AssetPromise_GLTF promiseA, AssetPromise_GLTF promiseB)
         {
-            float distance1 = Vector3.Distance(promiseA.asset.container.transform.position, CommonScriptableObjects.playerUnityPosition.Get());
-            float distance2 = Vector3.Distance(promiseB.asset.container.transform.position, CommonScriptableObjects.playerUnityPosition.Get());
+            Vector3 targetA = promiseA.settings.parent != null ? promiseA.settings.parent.position : promiseA.asset.container.transform.position;
+            Vector3 targetB = promiseB.settings.parent != null ? promiseB.settings.parent.position : promiseB.asset.container.transform.position;
+
+            float distance1 = Vector3.Distance(targetA, CommonScriptableObjects.playerUnityPosition.Get());
+            float distance2 = Vector3.Distance(targetB, CommonScriptableObjects.playerUnityPosition.Get());
 
             return (int)distance2 - (int)distance1;
         }

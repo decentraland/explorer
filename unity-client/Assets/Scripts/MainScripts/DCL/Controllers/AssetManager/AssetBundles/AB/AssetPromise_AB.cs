@@ -1,4 +1,4 @@
-﻿using DCL.Helpers;
+using DCL.Helpers;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -150,7 +150,7 @@ namespace DCL
 
             if (!assetBundleRequest.WebRequestSucceded())
             {
-                Debug.Log($"request failed? {assetBundleRequest.error} ... {finalUrl}");
+                Debug.Log($"Request failed? {assetBundleRequest.error} ... {finalUrl}");
                 failedRequestUrls.Add(finalUrl);
                 assetBundleRequest.Abort();
                 assetBundleRequest = null;

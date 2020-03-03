@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -246,8 +246,6 @@ public class CoroutineStarter : MonoBehaviour
 
     public static void Stop(Coroutine coroutine)
     {
-        EnsureInstance();
-
         if (coroutinesToAdd.Contains(coroutine))
         {
             coroutinesToAdd.Remove(coroutine);

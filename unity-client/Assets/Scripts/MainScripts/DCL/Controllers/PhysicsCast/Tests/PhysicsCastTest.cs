@@ -68,7 +68,7 @@ public class PhysicsCast_Tests : TestsBase
         for (int i = 0; i < ENTITIES_COUNT; i++)
         {
             BoxShape shape = TestHelpers.CreateEntityWithBoxShape(scene, pos);
-            yield return shape.enumerator;
+            yield return shape.routine;
 
             DecentralandEntity entity = shape.attachedEntities.First();
 
@@ -134,7 +134,7 @@ public class PhysicsCast_Tests : TestsBase
         for (int i = 0; i < ENTITIES_COUNT; i++)
         {
             BoxShape shape = TestHelpers.CreateEntityWithBoxShape(scene, pos);
-            yield return shape.enumerator;
+            yield return shape.routine;
 
             DecentralandEntity entity = shape.attachedEntities.First();
 

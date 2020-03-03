@@ -23,7 +23,7 @@ namespace Tests
                 scene,
                 DCL.Models.CLASS_ID.UI_SCREEN_SPACE_SHAPE);
 
-            yield return ssshape.enumerator;
+            yield return ssshape.routine;
 
             if (mockCamera == null)
             {
@@ -57,7 +57,7 @@ namespace Tests
 
                 });
 
-            yield return textInput.enumerator;
+            yield return textInput.routine;
             yield return null;
         }
 

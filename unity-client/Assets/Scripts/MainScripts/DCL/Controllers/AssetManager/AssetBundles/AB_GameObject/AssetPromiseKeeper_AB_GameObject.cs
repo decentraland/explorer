@@ -16,6 +16,9 @@ namespace DCL
 
         protected override int PromiseSortAlgorithm(AssetPromise_AB_GameObject promiseA, AssetPromise_AB_GameObject promiseB)
         {
+            if (promiseA == null || promiseB == null || promiseA.asset == null || promiseB.asset == null)
+                return 0;
+
             float distance1 = Vector3.Distance(promiseA.asset.container.transform.position, CommonScriptableObjects.playerUnityPosition.Get());
             float distance2 = Vector3.Distance(promiseB.asset.container.transform.position, CommonScriptableObjects.playerUnityPosition.Get());
 

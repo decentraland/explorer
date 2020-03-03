@@ -87,7 +87,8 @@ namespace DCL
 
             Vector3 position = CommonScriptableObjects.playerUnityPosition.Get();
 
-            float dist = Vector3.Distance(position, settings.parent.position);
+            Vector3 target = settings.parent != null ? settings.parent.position : asset.container.transform.position;
+            float dist = Vector3.Distance(position, target);
 
             if (dist < nearestDistance)
             {
