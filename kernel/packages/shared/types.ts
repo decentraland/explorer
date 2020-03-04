@@ -2,7 +2,7 @@ import { parseParcelPosition } from 'atomicHelpers/parcelScenePositions'
 import { Vector3Component } from '../atomicHelpers/landHelpers'
 import { QueryType } from 'decentraland-ecs/src/decentraland/PhysicsCast'
 
-export { Avatar, Profile, ColorString, WearableId, Wearable } from './passports/types'
+export { Avatar, Profile, ColorString, WearableId, Wearable } from './profiles/types'
 
 export type MappingsResponse = {
   parcel_id: string

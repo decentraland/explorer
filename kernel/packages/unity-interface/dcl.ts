@@ -14,7 +14,7 @@ import { sendPublicChatMessage, persistCurrentUser } from 'shared/comms'
 import { AvatarMessageType } from 'shared/comms/interface/types'
 import { avatarMessageObservable, getUserProfile } from 'shared/comms/peers'
 import { providerFuture } from 'shared/ethereum/provider'
-import { getProfile } from 'shared/passports/selectors'
+import { getProfile } from 'shared/profiles/selectors'
 import { TeleportController } from 'shared/world/TeleportController'
 import { gridToWorld } from '../atomicHelpers/parcelScenePositions'
 import {
@@ -39,8 +39,8 @@ import { chatObservable } from '../shared/comms/chat'
 import { aborted } from '../shared/loading/ReportFatalError'
 import { loadingScenes, teleportTriggered, unityClientLoaded } from '../shared/loading/types'
 import { createLogger, defaultLogger, ILogger } from '../shared/logger'
-import { saveAvatarRequest } from '../shared/passports/actions'
-import { Avatar, Profile, Wearable } from '../shared/passports/types'
+import { saveProfileRequest } from '../shared/profiles/actions'
+import { Avatar, Profile, Wearable } from '../shared/profiles/types'
 import {
   PB_AttachEntityComponent,
   PB_ComponentCreated,
@@ -95,7 +95,7 @@ import { positionObservable, teleportObservable } from '../shared/world/position
 import { hudWorkerUrl, SceneWorker } from '../shared/world/SceneWorker'
 import { ensureUiApis } from '../shared/world/uiSceneInitializer'
 import { worldRunningObservable } from '../shared/world/worldState'
-import { profileToRendererFormat } from 'shared/passports/transformations/profileToRendererFormat'
+import { profileToRendererFormat } from 'shared/profiles/transformations/profileToRendererFormat'
 
 const rendererVersion = require('decentraland-renderer')
 window['console'].log('Renderer version: ' + rendererVersion)
@@ -191,13 +191,13 @@ const browserInterface = {
     const { face, body, avatar } = changes
     const profile: Profile = getUserProfile().profile as Profile
     const updated = { ...profile, avatar: { ...avatar, snapshots: { face, body } } }
-    global.globalStore.dispatch(saveAvatarRequest(updated))
+    global.globalStore.dispatch(saveProfileRequest(updated))
   },
 
   SaveUserTutorialStep(data: { tutorialStep: number }) {
     const profile: Profile = getUserProfile().profile as Profile
     profile.tutorialStep = data.tutorialStep
-    global.globalStore.dispatch(saveAvatarRequest(profile))
+    global.globalStore.dispatch(saveProfileRequest(profile))
 
     persistCurrentUser({
       version: profile.version,
@@ -271,7 +271,7 @@ const browserInterface = {
         blocked = [...profile.blocked, ...blocked]
       }
 
-      global.globalStore.dispatch(saveAvatarRequest({ ...profile, blocked }))
+      global.globalStore.dispatch(saveProfileRequest({ ...profile, blocked }))
     }
   },
 
@@ -280,7 +280,7 @@ const browserInterface = {
 
     if (profile) {
       const blocked = profile.blocked ? profile.blocked.filter(id => id !== data.userId) : []
-      global.globalStore.dispatch(saveAvatarRequest({ ...profile, blocked }))
+      global.globalStore.dispatch(saveProfileRequest({ ...profile, blocked }))
     }
   },
 

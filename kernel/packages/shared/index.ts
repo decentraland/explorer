@@ -30,14 +30,14 @@ import {
   notStarted
 } from './loading/types'
 import { defaultLogger } from './logger'
-import { PassportAsPromise } from './passports/PassportAsPromise'
-import { profileToRendererFormat } from './passports/transformations/profileToRendererFormat'
+import { ProfileAsPromise } from './profiles/PassportAsPromise'
+import { profileToRendererFormat } from './profiles/transformations/profileToRendererFormat'
 import { setWorldContext } from './protocol/actions'
 import { Session } from './session/index'
 import { buildStore } from './store/store'
 import { getAppNetwork, getNetworkFromTLD, fetchOwnedENS } from './web3'
 import { initializeUrlPositionObserver } from './world/positionThings'
-import { saveAvatarRequest } from './passports/actions'
+import { saveProfileRequest } from './profiles/actions'
 import { ethereumConfigurations } from 'config'
 import { tutorialStepId } from 'decentraland-loader/lifecycle/tutorial/tutorial'
 
@@ -153,7 +153,7 @@ export async function initShared(): Promise<Session | undefined> {
 
   // initialize profile
   console['group']('connect#profile')
-  let profile = await PassportAsPromise(userId)
+  let profile = await ProfileAsPromise(userId)
 
   if (!PREVIEW) {
     let profileDirty: boolean = false
@@ -181,7 +181,7 @@ export async function initShared(): Promise<Session | undefined> {
     }
 
     if (profileDirty) {
-      store.dispatch(saveAvatarRequest(profile))
+      store.dispatch(saveProfileRequest(profile))
     }
   }
 
