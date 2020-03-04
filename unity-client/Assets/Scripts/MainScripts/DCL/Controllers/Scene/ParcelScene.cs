@@ -67,7 +67,8 @@ namespace DCL.Controllers
         {
             state = State.NOT_READY;
 
-            blockerHandler = new BlockerHandler();
+            if (useBlockers)
+                blockerHandler = new BlockerHandler();
 
             if (DCLCharacterController.i)
                 DCLCharacterController.i.characterPosition.OnPrecisionAdjust += OnPrecisionAdjust;
@@ -84,6 +85,11 @@ namespace DCL.Controllers
         void OnDisable()
         {
             metricsController.Disable();
+        }
+
+        private void OnDestroy()
+        {
+            blockerHandler?.CleanBlockers();
         }
 
         private void Update()
@@ -149,8 +155,7 @@ namespace DCL.Controllers
                 return;
             }
 #endif
-            if (useBlockers)
-                blockerHandler.SetupBlockers(data.parcels, metricsController.GetLimits().sceneHeight, this.transform);
+            blockerHandler?.SetupBlockers(parcels, metricsController.GetLimits().sceneHeight, this.transform);
 
             if (isTestScene)
                 SetSceneReady();
@@ -1090,8 +1095,7 @@ namespace DCL.Controllers
 
             state = State.READY;
 
-            if (useBlockers)
-                blockerHandler.CleanBlockers();
+            blockerHandler?.CleanBlockers();
 
             SceneController.i.SendSceneReady(sceneData.id);
             RefreshName();
