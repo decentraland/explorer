@@ -11,11 +11,8 @@ import { worldToGrid } from 'atomicHelpers/parcelScenePositions'
 import { lastPlayerPosition } from 'shared/world/positionThings'
 import { countParcelsCloseTo, ParcelArray } from 'shared/comms/interface/utils'
 import { CatalystNode } from '../types'
+import { zip } from './zip'
 const qs: any = require('query-string')
-
-const zip = <T, U>(arr: Array<T>, ...arrs: Array<Array<U>>) => {
-  return arr.map((val, i) => arrs.reduce((a, arr) => [...a, arr[i]], [val] as Array<any>)) as Array<[T, U]>
-}
 
 const v = 50
 const score = ({ usersCount, maxUsers = 50 }: Layer) => {
