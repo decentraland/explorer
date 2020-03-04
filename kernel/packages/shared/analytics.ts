@@ -10,7 +10,7 @@ import { AvatarMessageType } from './comms/interface/types'
 import { positionObservable } from './world/positionThings'
 import { uuid } from '../decentraland-ecs/src/ecs/helpers'
 
-declare var window: any
+declare const window: Window & { analytics: SegmentAnalytics.AnalyticsJS }
 
 export type SegmentEvent = {
   name: string
