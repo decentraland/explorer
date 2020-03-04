@@ -14,13 +14,22 @@ export type LoadingState = {
   helpText: number
   pendingScenes: number
 }
+export const DEBUG_LOADING = false
+
 export function loadingReducer(state?: LoadingState, action?: AnyAction) {
+  if (DEBUG_LOADING) {
+    // tslint:disable:no-console
+    console.log(state && state.pendingScenes, action)
+  }
+
   if (!state) {
     return { status: NOT_STARTED, helpText: 0, pendingScenes: 0 }
   }
+
   if (!action) {
     return state
   }
+
   if (action.type === SCENE_LOAD) {
     return { ...state, pendingScenes: state.pendingScenes + 1 }
   }
@@ -34,7 +43,7 @@ export function loadingReducer(state?: LoadingState, action?: AnyAction) {
     return { ...state, status: action.type }
   }
   if (action.type === TELEPORT_TRIGGERED) {
-    return { ...state, helpText: action.payload }
+    return { ...state, pendingScenes: 0, helpText: action.payload }
   }
   if (action.type === ROTATE_HELP_TEXT) {
     const newValue = state.helpText + 1

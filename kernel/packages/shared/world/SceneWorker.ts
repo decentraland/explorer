@@ -10,9 +10,9 @@ import { EnvironmentAPI } from 'shared/apis/EnvironmentAPI'
 import { Vector3, Quaternion, Vector2 } from 'decentraland-ecs/src/decentraland/math'
 import { PositionReport, positionObservable } from './positionThings'
 import { Observer, Observable } from 'decentraland-ecs/src'
-import { sceneLifeCycleObservable } from '../../decentraland-loader/lifecycle/controllers/scene'
 import { worldRunningObservable, isWorldRunning } from './worldState'
 import { ParcelSceneAPI } from './ParcelSceneAPI'
+import { sceneLifeCycleObservable } from 'shared/sceneLifeCycleObservable'
 
 // tslint:disable-next-line:whitespace
 type EngineAPI = import('../apis/EngineAPI').EngineAPI

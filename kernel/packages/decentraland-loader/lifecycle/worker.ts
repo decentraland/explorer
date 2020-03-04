@@ -1,22 +1,30 @@
-// Entry point for the Lifecycle Worker.
-// This doesn't execute on the main thread, so it's a "server" in terms of decentraland-rpc
-
+import { SceneInfoState } from 'decentraland-loader/store/sceneInfo/types'
+import { RootState } from 'decentraland-loader/store/state'
+import { defaultLogger } from 'shared/logger'
 import { WebWorkerTransport } from 'decentraland-rpc'
+import { applyMiddleware, compose, createStore, Middleware } from 'redux'
+import createSagaMiddleware from 'redux-saga'
+import {
+  bootstrapAt,
+  LoaderAction,
+  LOAD_SCENE,
+  processUserTeleport,
+  PROCESS_PARCEL_SIGHT_CHANGE,
+  PROCESS_USER_TELEPORT,
+  startScene,
+  START_RENDERING,
+  START_SCENE,
+  STOP_SCENE,
+  STORE_RESOLVED_SCENE_ENTITY,
+  processUserMovement,
+  PROCESS_USER_MOVEMENT
+} from '../store/actions'
+import { rootReducer } from '../store/reducer'
+import { rootSaga } from '../store/saga'
 import { Adapter } from './lib/adapter'
-import { ParcelLifeCycleController } from './controllers/parcel'
-import { SceneLifeCycleController, SceneLifeCycleStatusReport } from './controllers/scene'
-import { PositionLifecycleController } from './controllers/position'
-import { SceneDataDownloadManager } from './controllers/download'
-import { ILand, InstancedSpawnPoint } from 'shared/types'
-import defaultLogger from 'shared/logger'
-import { setTutorialEnabled } from './tutorial/tutorial'
 
+const DEBUG_WORKER_LOADER = false
 const connector = new Adapter(WebWorkerTransport(self as any))
-
-let parcelController: ParcelLifeCycleController
-let sceneController: SceneLifeCycleController
-let positionController: PositionLifecycleController
-let downloadManager: SceneDataDownloadManager
 
 /**
  * Hook all the events to the connector.
@@ -45,62 +53,95 @@ let downloadManager: SceneDataDownloadManager
       tutorialBaseURL: string
       tutorialSceneEnabled: boolean
     }) => {
-      setTutorialEnabled(options.tutorialSceneEnabled)
+      const sagaMiddleware = createSagaMiddleware()
 
-      downloadManager = new SceneDataDownloadManager({
-        contentServer: options.contentServer,
-        metaContentServer: options.metaContentServer,
-        contentServerBundles: options.contentServerBundles,
-        tutorialBaseURL: options.tutorialBaseURL
-      })
-      parcelController = new ParcelLifeCycleController({
-        lineOfSightRadius: options.lineOfSightRadius,
-        secureRadius: options.secureRadius
-      })
-      sceneController = new SceneLifeCycleController({ downloadManager, enabledEmpty: options.emptyScenes })
-      positionController = new PositionLifecycleController(downloadManager, parcelController, sceneController)
-      parcelController.on('Sighted', (parcels: string[]) => connector.notify('Parcel.sighted', { parcels }))
-      parcelController.on('Lost sight', (parcels: string[]) => connector.notify('Parcel.lostSight', { parcels }))
-
-      positionController.on('Settled Position', (spawnPoint: InstancedSpawnPoint) => {
-        connector.notify('Position.settled', { spawnPoint })
-      })
-      positionController.on('Unsettled Position', () => {
-        connector.notify('Position.unsettled')
-      })
-      positionController.on('Tracking Event', (event: { name: string; data: any }) =>
-        connector.notify('Event.track', event)
+      const workerInteractionsMiddleware: Middleware<any, RootState> = api => (next: any) => (action: LoaderAction) => {
+        switch (action.type) {
+          case START_SCENE:
+            break
+          case LOAD_SCENE:
+            connector.notify('Scene.shouldStart', { sceneId: action.payload })
+            break
+          case STOP_SCENE:
+            connector.notify('Scene.shouldUnload', { sceneId: action.payload })
+            break
+          case START_RENDERING:
+            const spawnPoint = api.getState().position.spawnTarget
+            connector.notify('Position.settled', {
+              spawnPoint
+            })
+            break
+          case PROCESS_USER_TELEPORT:
+            connector.notify('Position.unsettled')
+            break
+          case PROCESS_PARCEL_SIGHT_CHANGE:
+            connector.notify('Sighted', api.getState().sightInfo.recentlySighted)
+            connector.notify('Lost sight', api.getState().sightInfo.recentlyLostSight)
+            break
+          case STORE_RESOLVED_SCENE_ENTITY:
+            connector.notify('Scene.dataResponse', {
+              data: action.payload.sceneEntity
+            })
+            connector.notify('Scene.shouldPrefetch', { sceneId: action.payload.sceneEntity.id })
+        }
+        try {
+          if (DEBUG_WORKER_LOADER && action.type !== PROCESS_USER_MOVEMENT) {
+            defaultLogger.info(action.type, api.getState())
+          }
+          return next(action)
+        } catch (e) {
+          defaultLogger.error('Could not execute action', action, e.stack)
+        }
+      }
+      const store = createStore(
+        rootReducer,
+        rootReducer(undefined, bootstrapAt('0,0', options)),
+        compose(applyMiddleware(sagaMiddleware, workerInteractionsMiddleware))
       )
-
-      sceneController.on('Start scene', sceneId => {
-        connector.notify('Scene.shouldStart', { sceneId })
-      })
-      sceneController.on('Preload scene', sceneId => {
-        connector.notify('Scene.shouldPrefetch', { sceneId })
-      })
-      sceneController.on('Unload scene', sceneId => {
-        connector.notify('Scene.shouldUnload', { sceneId })
-      })
+      sagaMiddleware.run(rootSaga)
 
       connector.on('User.setPosition', (opt: { position: { x: number; y: number }; teleported: boolean }) => {
-        positionController.reportCurrentPosition(opt.position, opt.teleported).catch(e => {
-          defaultLogger.error(`error while resolving new scenes around`, e)
-        })
+        if (opt.teleported) {
+          store.dispatch(processUserTeleport(`${opt.position.x},${opt.position.y}`))
+        } else {
+          if (store.getState().position.isRendering) {
+            store.dispatch(processUserMovement(opt.position))
+          }
+        }
       })
 
-      connector.on('Scene.dataRequest', async (data: { sceneId: string }) =>
-        connector.notify('Scene.dataResponse', {
-          data: (await downloadManager.getParcelDataBySceneId(data.sceneId)) as ILand
-        })
-      )
+      connector.on('Scene.dataRequest', async (data: { sceneId: string }) => {
+        if (store.getState().sceneInfo.sceneIdToSceneJson[data.sceneId]) {
+          connector.notify('Scene.dataResponse', {
+            data: buildILand(store.getState().sceneInfo, data.sceneId)
+          })
+        } else {
+          const check = () =>
+            setTimeout(() => {
+              if (store.getState().sceneInfo.sceneIdToSceneJson[data.sceneId]) {
+                connector.notify('Scene.dataResponse', {
+                  data: buildILand(store.getState().sceneInfo, data.sceneId)
+                })
+              } else {
+                defaultLogger.error('Warning! no data found for ', data.sceneId)
+                check()
+              }
+            }, 1000)
+          check()
+        }
+      })
 
       connector.on('Scene.prefetchDone', (opt: { sceneId: string }) => {
-        sceneController.reportDataLoaded(opt.sceneId)
+        // store.dispatch(startScene(opt.sceneId))
       })
-
-      connector.on('Scene.status', (data: SceneLifeCycleStatusReport) => {
-        sceneController.reportStatus(data.sceneId, data.status)
+      connector.on('Scene.status', (opt: { sceneId: string; status: 'failed' | 'started' }) => {
+        // if opt.status === 'failed' set to empty scene or a failure scene
+        store.dispatch(startScene(opt.sceneId))
       })
     }
   )
+}
+
+function buildILand(sceneInfo: SceneInfoState, sceneId: string) {
+  return sceneInfo.sceneIdToSceneJson[sceneId]
 }

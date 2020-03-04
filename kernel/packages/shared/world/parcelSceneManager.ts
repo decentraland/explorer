@@ -2,7 +2,7 @@ import { worldToGrid } from 'atomicHelpers/parcelScenePositions'
 import { Vector2 } from 'decentraland-ecs/src/decentraland/math'
 import { initParcelSceneWorker } from 'decentraland-loader/lifecycle/manager'
 import { ScriptingTransport } from 'decentraland-rpc/lib/common/json-rpc/types'
-import { sceneLifeCycleObservable } from '../../decentraland-loader/lifecycle/controllers/scene'
+import { sceneLifeCycleObservable } from 'shared/sceneLifeCycleObservable'
 import { queueTrackingEvent } from '../analytics'
 import { globalSignalSceneFail, globalSignalSceneLoad, globalSignalSceneStart } from '../loading/actions'
 import { clearForegroundTimeout, setForegroundTimeout } from '../timers/index'
@@ -72,7 +72,6 @@ export async function enableParcelSceneLoading(options: EnableParcelSceneLoading
 
   ret.on('Scene.shouldPrefetch', async (opts: { sceneId: string }) => {
     const parcelSceneToLoad = await ret.getParcelData(opts.sceneId)
-
     // start and await prefetch
     await options.preloadScene(parcelSceneToLoad)
 
@@ -114,7 +113,7 @@ export async function enableParcelSceneLoading(options: EnableParcelSceneLoading
         globalSignalSceneFail(sceneId)
         ret.notify('Scene.status', { sceneId, status: 'failed' })
       }
-    }, 90000)
+    }, 30000)
   })
 
   ret.on('Scene.shouldUnload', async (opts: { sceneId: string }) => {

@@ -6,23 +6,22 @@ global.isEditor = window.isEditor = true
 
 import { EventEmitter } from 'events'
 import future, { IFuture } from 'fp-future'
-
-import { loadedSceneWorkers } from '../shared/world/parcelSceneManager'
-import { IScene, normalizeContentMappings, ILand } from '../shared/types'
-import { SceneWorker } from '../shared/world/SceneWorker'
-import { initializeUnity } from '../unity-interface/initializer'
-import {
-  UnityParcelScene,
-  loadBuilderScene,
-  updateBuilderScene,
-  futures,
-  unloadCurrentBuilderScene,
-  unityInterface
-} from '../unity-interface/dcl'
-import defaultLogger from '../shared/logger'
-import { uuid } from '../decentraland-ecs/src/ecs/helpers'
+import { sceneLifeCycleObservable } from 'shared/sceneLifeCycleObservable'
 import { Vector3 } from '../decentraland-ecs/src/decentraland/math'
-import { sceneLifeCycleObservable } from '../decentraland-loader/lifecycle/controllers/scene'
+import { uuid } from '../decentraland-ecs/src/ecs/helpers'
+import defaultLogger from '../shared/logger'
+import { ILand, IScene, normalizeContentMappings } from '../shared/types'
+import { loadedSceneWorkers } from '../shared/world/parcelSceneManager'
+import { SceneWorker } from '../shared/world/SceneWorker'
+import {
+  futures,
+  loadBuilderScene,
+  unityInterface,
+  UnityParcelScene,
+  unloadCurrentBuilderScene,
+  updateBuilderScene
+} from '../unity-interface/dcl'
+import { initializeUnity } from '../unity-interface/initializer'
 
 const evtEmitter = new EventEmitter()
 const initializedEngine = future<void>()

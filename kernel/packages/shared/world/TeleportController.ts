@@ -4,7 +4,6 @@ import { POIs } from 'shared/comms/POIs'
 import { parcelLimits, tutorialEnabled } from 'config'
 import { getUserProfile } from 'shared/comms/peers'
 import { Profile } from 'shared/passports/types'
-import { tutorialStepId } from 'decentraland-loader/lifecycle/tutorial/tutorial'
 import { fetchLayerUsersParcels } from 'shared/comms'
 import { ParcelArray, countParcelsCloseTo } from 'shared/comms/interface/utils'
 import { worldToGrid } from 'atomicHelpers/parcelScenePositions'
@@ -61,6 +60,8 @@ const CAMPAIGN_PARCEL_SEQUENCE = [
   { x: -109, y: -89 }
 ]
 
+export const TUTORIAL_INITIAL_SCENE = 1
+
 export class TeleportController {
   public static ensureTeleportAnimation() {
     document
@@ -81,7 +82,7 @@ export class TeleportController {
 
     const profile = getUserProfile().profile as Profile
 
-    if (!tutorialEnabled() || profile.tutorialStep !== tutorialStepId.INITIAL_SCENE) {
+    if (!tutorialEnabled() || profile.tutorialStep !== TUTORIAL_INITIAL_SCENE) {
       (window as any)['unityInterface'].ShowWelcomeNotification()
     }
   }

@@ -1,3 +1,4 @@
+import { ethereumConfigurations } from 'config'
 import { Authenticator, AuthIdentity } from 'dcl-crypto'
 import { createIdentity } from 'eth-crypto'
 import { Store } from 'redux'
@@ -31,17 +32,16 @@ import {
   notStarted
 } from './loading/types'
 import { defaultLogger } from './logger'
+import { saveAvatarRequest } from './passports/actions'
 import { PassportAsPromise } from './passports/PassportAsPromise'
 import { profileToRendererFormat } from './passports/transformations/profileToRendererFormat'
 import { setWorldContext } from './protocol/actions'
 import { Session } from './session/index'
 import { RootState } from './store/rootTypes'
 import { buildStore } from './store/store'
+import { tutorialStepId } from './tutorial/steps'
 import { getAppNetwork, getNetworkFromTLD } from './web3'
 import { initializeUrlPositionObserver } from './world/positionThings'
-import { saveAvatarRequest } from './passports/actions'
-import { ethereumConfigurations } from 'config'
-import { tutorialStepId } from 'decentraland-loader/lifecycle/tutorial/tutorial'
 
 export type ExplorerIdentity = AuthIdentity & {
   address: string

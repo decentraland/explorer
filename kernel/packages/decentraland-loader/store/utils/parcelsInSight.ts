@@ -1,9 +1,9 @@
-import { Vector2Component } from 'atomicHelpers/landHelpers'
-
-export interface ParcelConfigurationOptions {
-  lineOfSightRadius: number
-  secureRadius: number
+type Vector2Component = {
+  x: number
+  y: number
 }
+
+const LINE_OF_SIGHT_RADIUS = 4
 
 export function squareAndSum(a: number, b: number) {
   return a * a + b * b
@@ -11,19 +11,19 @@ export function squareAndSum(a: number, b: number) {
 
 const cachedDeltas: { [limit: number]: Vector2Component[] } = {}
 
-export function parcelsInScope(lineOfSightRadius: number, position: Vector2Component): string[] {
+export function parcelsInSight(position: Vector2Component): string[] {
   const result: string[] = []
-  if (!cachedDeltas[lineOfSightRadius]) {
-    cachedDeltas[lineOfSightRadius] = []
+  if (!cachedDeltas[LINE_OF_SIGHT_RADIUS]) {
+    cachedDeltas[LINE_OF_SIGHT_RADIUS] = []
   }
-  let length = cachedDeltas[lineOfSightRadius].length
+  let length = cachedDeltas[LINE_OF_SIGHT_RADIUS].length
   if (!length) {
-    calculateCachedDeltas(lineOfSightRadius)
-    length = cachedDeltas[lineOfSightRadius].length
+    calculateCachedDeltas(LINE_OF_SIGHT_RADIUS)
+    length = cachedDeltas[LINE_OF_SIGHT_RADIUS].length
   }
   for (let i = 0; i < length; i++) {
     result.push(
-      `${position.x + cachedDeltas[lineOfSightRadius][i].x},${position.y + cachedDeltas[lineOfSightRadius][i].y}`
+      `${position.x + cachedDeltas[LINE_OF_SIGHT_RADIUS][i].x},${position.y + cachedDeltas[LINE_OF_SIGHT_RADIUS][i].y}`
     )
   }
   return result

@@ -1,5 +1,5 @@
 import { getUserProfile } from 'shared/comms/peers'
-import { tutorialStepId } from '../decentraland-loader/lifecycle/tutorial/tutorial'
+import { tutorialStepId } from 'shared/tutorial/steps'
 const queryString = require('query-string')
 declare var window: any
 

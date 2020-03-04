@@ -10,11 +10,14 @@ import { EventDispatcher } from 'decentraland-rpc/lib/common/core/EventDispatche
 import { IFuture } from 'fp-future'
 import { Empty } from 'google-protobuf/google/protobuf/empty_pb'
 import { identity } from 'shared'
-import { sendPublicChatMessage, persistCurrentUser } from 'shared/comms'
+import { persistCurrentUser, sendPublicChatMessage } from 'shared/comms'
 import { AvatarMessageType } from 'shared/comms/interface/types'
 import { avatarMessageObservable, getUserProfile } from 'shared/comms/peers'
 import { providerFuture } from 'shared/ethereum/provider'
 import { getProfile } from 'shared/passports/selectors'
+import { profileToRendererFormat } from 'shared/passports/transformations/profileToRendererFormat'
+import { sceneLifeCycleObservable } from 'shared/sceneLifeCycleObservable'
+import { tutorialStepId } from 'shared/tutorial/steps'
 import { TeleportController } from 'shared/world/TeleportController'
 import { gridToWorld } from '../atomicHelpers/parcelScenePositions'
 import {
@@ -29,8 +32,6 @@ import {
 } from '../config'
 import { Quaternion, ReadOnlyQuaternion, ReadOnlyVector3, Vector3 } from '../decentraland-ecs/src/decentraland/math'
 import { IEventNames, IEvents, ProfileForRenderer } from '../decentraland-ecs/src/decentraland/Types'
-import { sceneLifeCycleObservable } from '../decentraland-loader/lifecycle/controllers/scene'
-import { tutorialStepId } from '../decentraland-loader/lifecycle/tutorial/tutorial'
 import { AirdropInfo } from '../shared/airdrops/interface'
 import { queueTrackingEvent } from '../shared/analytics'
 import { DevTools } from '../shared/apis/DevTools'
@@ -95,7 +96,6 @@ import { positionObservable, teleportObservable } from '../shared/world/position
 import { hudWorkerUrl, SceneWorker } from '../shared/world/SceneWorker'
 import { ensureUiApis } from '../shared/world/uiSceneInitializer'
 import { worldRunningObservable } from '../shared/world/worldState'
-import { profileToRendererFormat } from 'shared/passports/transformations/profileToRendererFormat'
 
 const rendererVersion = require('decentraland-renderer')
 window['console'].log('Renderer version: ' + rendererVersion)
@@ -311,7 +311,7 @@ function delightedSurvey() {
   const profile = getUserProfile().profile as Profile | null
   if (!isTheFirstLoading && analytics && delighted && profile) {
     const payload = {
-      email: profile.email || (profile.ethAddress + '@dcl.gg'),
+      email: profile.email || profile.ethAddress + '@dcl.gg',
       name: profile.name || 'Guest',
       properties: {
         ethAddress: profile.ethAddress,
@@ -818,7 +818,7 @@ export async function initializeEngine(_gameInstance: GameInstance) {
     onMessage(type: string, message: any) {
       if (type in browserInterface) {
         // tslint:disable-next-line:semicolon
-        ; (browserInterface as any)[type](message)
+        ;(browserInterface as any)[type](message)
       } else {
         defaultLogger.info(`Unknown message (did you forget to add ${type} to unity-interface/dcl.ts?)`, message)
       }

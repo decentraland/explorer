@@ -5,15 +5,15 @@ declare var window: any
 global['preview'] = window['preview'] = true
 global['enableWeb3'] = window['enableWeb3']
 
-import { initializeUnity } from '../unity-interface/initializer'
-import { loadPreviewScene, unityInterface } from '../unity-interface/dcl'
-import { DEBUG_WS_MESSAGES } from '../config'
-import defaultLogger from 'shared/logger'
 import { future, IFuture } from 'fp-future'
+import defaultLogger from 'shared/logger'
+import { signalRendererInitialized } from 'shared/renderer/actions'
+import { sceneLifeCycleObservable } from 'shared/sceneLifeCycleObservable'
 import { ILand } from 'shared/types'
 import { pickWorldSpawnpoint } from 'shared/world/positionThings'
-import { sceneLifeCycleObservable } from 'decentraland-loader/lifecycle/controllers/scene'
-import { signalRendererInitialized } from 'shared/renderer/actions'
+import { DEBUG_WS_MESSAGES } from '../config'
+import { loadPreviewScene, unityInterface } from '../unity-interface/dcl'
+import { initializeUnity } from '../unity-interface/initializer'
 
 // Remove the 'dcl-loading' class, used until JS loads.
 document.body.classList.remove('dcl-loading')

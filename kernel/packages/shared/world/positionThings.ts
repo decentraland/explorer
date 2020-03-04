@@ -86,7 +86,16 @@ export function initializeUrlPositionObserver() {
  *
  * @param land Scene on which the player is spawning
  */
-export function pickWorldSpawnpoint(land: ILand): InstancedSpawnPoint {
+export function pickWorldSpawnpoint(land: {
+  scene: {
+    scene: { base: string; parcels: string[] }
+    spawnPoints?: {
+      position: { x: number | number[]; y: number | number[]; z: number | number[] }
+      cameraTarget?: any
+      default?: boolean
+    }[]
+  }
+}): InstancedSpawnPoint {
   const pick = pickSpawnpoint(land)
 
   const spawnpoint = pick || { position: { x: 0, y: 0, z: 0 } }
@@ -106,7 +115,15 @@ export function pickWorldSpawnpoint(land: ILand): InstancedSpawnPoint {
   }
 }
 
-function pickSpawnpoint(land: ILand): InstancedSpawnPoint | undefined {
+function pickSpawnpoint(land: {
+  scene: {
+    spawnPoints?: {
+      position: { x: number | number[]; y: number | number[]; z: number | number[] }
+      cameraTarget?: any
+      default?: boolean
+    }[]
+  }
+}): InstancedSpawnPoint | undefined {
   if (!land.scene || !land.scene.spawnPoints || land.scene.spawnPoints.length === 0) {
     return undefined
   }
