@@ -56,43 +56,18 @@ namespace Tests
             Assert.AreEqual(2, pool.usedObjectsCount, "Alive objects count should be 2");
             Assert.AreEqual(0, pool.unusedObjectsCount, "Inactive objects count should be 0");
 
-            GameObject.Destroy(po1.gameObject);
             po1.Release();
-
             yield return null;
 
             Assert.AreEqual(1, pool.usedObjectsCount, "Alive objects count should be 1");
+            Assert.AreEqual(1, pool.unusedObjectsCount, "Inactive objects count should be 1");
+
+            PoolManager.i.Cleanup();
+
+            Assert.AreEqual(0, pool.usedObjectsCount, "Alive objects count should be 0");
             Assert.AreEqual(0, pool.unusedObjectsCount, "Inactive objects count should be 0");
         }
 
-        [UnityTest]
-        public IEnumerator CleanPoolableReferences()
-        {
-            GameObject obj = new GameObject();
-            GameObject obj2 = new GameObject();
-            GameObject obj3 = new GameObject();
-
-            PoolManager.i.poolables.Add(obj, new PoolableObject() { gameObject = obj });
-            PoolManager.i.poolables.Add(obj2, new PoolableObject() { gameObject = obj2 });
-            PoolManager.i.poolables.Add(obj3, new PoolableObject() { gameObject = obj3 });
-
-            Object.Destroy(obj);
-            Object.Destroy(obj2);
-
-            yield return null;
-            PoolManager.i.GetPoolable(obj).Release();
-            PoolManager.i.GetPoolable(obj2).Release();
-
-            Assert.AreEqual(1, PoolManager.i.poolables.Count);
-            Assert.IsTrue(PoolManager.i.poolables[obj3].gameObject == obj3);
-
-            Object.Destroy(obj3);
-            PoolManager.i.poolables[obj3].Release();
-            yield return null;
-
-
-            Assert.AreEqual(0, PoolManager.i.poolables.Count);
-        }
 
         [Test]
         public void GetPoolableObject()

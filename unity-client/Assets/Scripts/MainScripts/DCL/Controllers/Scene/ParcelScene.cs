@@ -67,9 +67,6 @@ namespace DCL.Controllers
         {
             state = State.NOT_READY;
 
-            if (useBlockers)
-                blockerHandler = new BlockerHandler();
-
             if (DCLCharacterController.i)
                 DCLCharacterController.i.characterPosition.OnPrecisionAdjust += OnPrecisionAdjust;
 
@@ -143,6 +140,9 @@ namespace DCL.Controllers
             {
                 parcels.Add(sceneData.parcels[i]);
             }
+
+            if (useBlockers)
+                blockerHandler = new BlockerHandler();
 
             if (DCLCharacterController.i != null)
                 gameObject.transform.position = DCLCharacterController.i.characterPosition.WorldToUnityPosition(Utils.GridToWorldPosition(data.basePosition.x, data.basePosition.y));

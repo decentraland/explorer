@@ -79,7 +79,11 @@ namespace DCL.Controllers
                     Transform blockerTransform = blockerPoolable.gameObject.transform;
 
                     blockerTransform.SetParent(parent, false);
-                    blockerTransform.position = DCLCharacterController.i.characterPosition.WorldToUnityPosition(Utils.GridToWorldPosition(pos.x, pos.y));
+
+                    if (DCLCharacterController.i != null)
+                        blockerTransform.position = DCLCharacterController.i.characterPosition.WorldToUnityPosition(Utils.GridToWorldPosition(pos.x, pos.y));
+                    else
+                        blockerTransform.position = Utils.GridToWorldPosition(pos.x, pos.y);
 
                     auxPosVec.x = blockerTransform.position.x + centerOffset;
                     auxPosVec.z = blockerTransform.position.z + centerOffset;
