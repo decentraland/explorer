@@ -21,7 +21,7 @@ namespace DCL
 
         protected override void OnLoad(Action OnSuccess, Action OnFail)
         {
-            loadingCoroutine = CoroutineStarter.Start(LoadingCoroutine(OnSuccess, OnFail));
+            CoroutineStarter.Start(LoadingCoroutine(OnSuccess, OnFail));
         }
 
         protected override bool AddToLibrary()
@@ -78,8 +78,42 @@ namespace DCL
             AssetPromiseKeeper_AB.i.Forget(subPromise);
         }
 
+        static float nearestDistance = float.MaxValue;
+        static object nearestObject;
+        private bool TestDistance()
+        {
+            if (CommonScriptableObjects.playerUnityPosition == null)
+                return true;
+
+            Vector3 position = CommonScriptableObjects.playerUnityPosition.Get();
+
+            Vector3 target = settings.parent != null ? settings.parent.position : asset.container.transform.position;
+            float dist = Vector3.Distance(position, target);
+
+            if (dist < nearestDistance)
+            {
+                nearestDistance = dist;
+                nearestObject = this;
+            }
+
+            bool result = nearestObject == this;
+
+            if (result)
+            {
+                //NOTE(Brian): Reset values so the other promises running this coroutine compete again
+                //             for distance.
+                nearestObject = null;
+                nearestDistance = float.MaxValue;
+            }
+
+            return result;
+        }
+
         public IEnumerator LoadingCoroutine(Action OnSuccess, Action OnFail)
         {
+            Func<bool> funcTestDistance = () => TestDistance();
+            yield return new WaitUntil(funcTestDistance);
+
             subPromise = new AssetPromise_AB(contentUrl, hash);
             bool success = false;
             subPromise.OnSuccessEvent += (x) => success = true;

@@ -220,6 +220,11 @@ namespace DCL
             }
         }
 
+        protected virtual int PromiseSortAlgorithm(AssetPromiseType promiseA, AssetPromiseType promiseB)
+        {
+            return 0;
+        }
+
         private void LoadBlockedPromises(object loadedPromiseId)
         {
             List<AssetPromiseType> blockedPromisesToLoad = new List<AssetPromiseType>();
