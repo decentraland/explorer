@@ -1,4 +1,4 @@
-﻿using DCL.Components;
+using DCL.Components;
 using System;
 using System.Collections;
 using System.IO;
@@ -27,6 +27,7 @@ namespace UnityGLTF
             public bool? useVisualFeedback;
             public bool? initialVisibility;
             public Shader shaderOverride;
+            public bool addMaterialsToPersistentCaching;
             public WebRequestLoader.WebRequestLoaderEventAction OnWebRequestStartEvent;
         }
 
@@ -34,6 +35,7 @@ namespace UnityGLTF
         public bool Multithreaded = false;
         public bool UseStream = false;
         public bool UseVisualFeedback = true;
+        private bool addMaterialsToPersistentCaching = true;
 
         public int MaximumLod = 300;
         public int Timeout = 8;
@@ -139,6 +141,8 @@ namespace UnityGLTF
             {
                 OnWebRequestStartEvent = settings.OnWebRequestStartEvent;
             }
+
+            this.addMaterialsToPersistentCaching = settings.addMaterialsToPersistentCaching;
         }
 
         private void OnFail_Internal(Exception obj)
@@ -251,6 +255,7 @@ namespace UnityGLTF
                     sceneImporter.CustomShaderName = shaderOverride ? shaderOverride.name : null;
                     sceneImporter.LoadingTextureMaterial = LoadingTextureMaterial;
                     sceneImporter.initialVisibility = initialVisibility;
+                    sceneImporter.addMaterialsToPersistentCaching = addMaterialsToPersistentCaching;
 
                     float time = Time.realtimeSinceStartup;
 
@@ -318,6 +323,7 @@ namespace UnityGLTF
                 Debug.Log("couldn't load GLTF because url is empty");
             }
 
+            CoroutineStarter.Stop(loadingRoutine);
             loadingRoutine = null;
             Destroy(loadingPlaceholder);
             Destroy(this);
@@ -385,6 +391,7 @@ namespace UnityGLTF
 
             if (!alreadyLoadedAsset && loadingRoutine != null)
             {
+                CoroutineStarter.Stop(loadingRoutine);
                 OnFail_Internal(null);
                 return;
             }

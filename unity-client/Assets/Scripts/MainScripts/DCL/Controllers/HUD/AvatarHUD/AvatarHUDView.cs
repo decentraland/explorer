@@ -2,6 +2,7 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using DCL.Interface;
 using Image = UnityEngine.UI.Image;
 
 [assembly: InternalsVisibleTo("AvatarHUDTests")]
@@ -15,7 +16,7 @@ public class AvatarHUDView : MonoBehaviour
     [SerializeField] private GameObject loadingAvatar;
 
     [Header("Minimized UI")]
-    [SerializeField] private RawImage topAvatarPic;
+    [SerializeField] internal Image topAvatarPic;
 
     [SerializeField] private Button toggleExpandButton;
 
@@ -37,6 +38,9 @@ public class AvatarHUDView : MonoBehaviour
     [Header("Sign Out")]
     [SerializeField] private Button signOutButton;
 
+    [Header("FAQ")]
+    [SerializeField] private Button faqButton;
+
     private AvatarHUDController controller;
 
     private void Initialize(AvatarHUDController controller)
@@ -53,6 +57,11 @@ public class AvatarHUDView : MonoBehaviour
 
         settingsButton.onClick.AddListener(controller.ShowSettings);
         settingsButton.onClick.AddListener(controller.ToggleExpanded);
+
+        faqButton.onClick.AddListener(() =>
+        {
+            WebInterface.OpenURL("https://docs.decentraland.org/decentraland/faq/");
+        });
     }
 
     internal static AvatarHUDView Create(AvatarHUDController controller)
@@ -64,8 +73,8 @@ public class AvatarHUDView : MonoBehaviour
 
     internal void UpdateData(AvatarHUDModel model)
     {
-        topAvatarPic.texture = model.avatarPic;
-        loadingAvatar.SetActive(topAvatarPic.texture == null);
+        topAvatarPic.sprite = model.avatarPic;
+        loadingAvatar.SetActive(topAvatarPic.sprite == null);
         nameText.text = model.name;
         mailText.text = model.mail;
         newWearableNotificationText.text = model.newWearables.ToString();

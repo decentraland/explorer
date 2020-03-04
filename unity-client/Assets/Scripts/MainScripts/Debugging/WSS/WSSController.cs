@@ -1,4 +1,4 @@
-using DCL.Components;
+﻿using DCL.Components;
 using DCL.Interface;
 using System.Collections.Generic;
 using UnityEngine;
@@ -127,6 +127,7 @@ namespace DCL
         public bool forceLocalComms = true;
         public bool allWearables = false;
         public bool testWearables = false;
+        public bool enableTutorial = false;
         public DebugPanel debugPanelMode = DebugPanel.Off;
 
 
@@ -191,6 +192,11 @@ namespace DCL
                 if (testWearables)
                 {
                     debugString += "TEST_WEARABLES&";
+                }
+
+                if (enableTutorial)
+                {
+                    debugString += "RESET_TUTORIAL&";
                 }
 
                 string debugPanelString = "";
@@ -274,7 +280,16 @@ namespace DCL
                                 sceneController.CreateUIScene(msg.payload);
                                 break;
                             case "LoadProfile":
-                                UserProfileController.i.LoadProfile(msg.payload);
+                                UserProfileController.i?.LoadProfile(msg.payload);
+                                break;
+                            case "AddUserProfileToCatalog":
+                                UserProfileController.i.AddUserProfileToCatalog(msg.payload);
+                                break;
+                            case "AddUserProfilesToCatalog":
+                                UserProfileController.i.AddUserProfilesToCatalog(msg.payload);
+                                break;
+                            case "RemoveUserProfilesFromCatalog":
+                                UserProfileController.i.RemoveUserProfilesFromCatalog(msg.payload);
                                 break;
                             case "DeactivateRendering":
                                 RenderingController.i.DeactivateRendering();
@@ -340,37 +355,67 @@ namespace DCL
                                 GetBuilderBridge()?.PreloadFile(msg.payload);
                                 break;
                             case "AddWearableToCatalog":
-                                CatalogController.i.AddWearableToCatalog(msg.payload);
+                                CatalogController.i?.AddWearableToCatalog(msg.payload);
                                 break;
                             case "AddWearablesToCatalog":
-                                CatalogController.i.AddWearablesToCatalog(msg.payload);
+                                CatalogController.i?.AddWearablesToCatalog(msg.payload);
                                 break;
                             case "RemoveWearablesFromCatalog":
-                                CatalogController.i.RemoveWearablesFromCatalog(msg.payload);
+                                CatalogController.i?.RemoveWearablesFromCatalog(msg.payload);
                                 break;
                             case "ClearWearableCatalog":
-                                CatalogController.i.ClearWearableCatalog();
+                                CatalogController.i?.ClearWearableCatalog();
                                 break;
                             case "ShowNewWearablesNotification":
-                                HUDController.i.ShowNewWearablesNotification(msg.payload);
+                                HUDController.i?.ShowNewWearablesNotification(msg.payload);
                                 break;
                             case "ConfigureMinimapHUD":
-                                HUDController.i.ConfigureMinimapHUD(msg.payload);
+                                HUDController.i?.ConfigureMinimapHUD(msg.payload);
                                 break;
                             case "ConfigureAvatarHUD":
-                                HUDController.i.ConfigureAvatarHUD(msg.payload);
+                                HUDController.i?.ConfigureAvatarHUD(msg.payload);
                                 break;
                             case "ConfigureNotificationHUD":
-                                HUDController.i.ConfigureNotificationHUD(msg.payload);
+                                HUDController.i?.ConfigureNotificationHUD(msg.payload);
                                 break;
                             case "ConfigureAvatarEditorHUD":
-                                HUDController.i.ConfigureAvatarEditorHUD(msg.payload);
+                                HUDController.i?.ConfigureAvatarEditorHUD(msg.payload);
+                                break;
+                            case "ConfigurePlayerInfoCardHUD":
+                                HUDController.i.ConfigurePlayerInfoCardHUD(msg.payload);
+                                break;
+                            case "ConfigureExpressionsHUD":
+                                HUDController.i.ConfigureExpressionsHUD(msg.payload);
+                                break;
+                            case "ConfigureWelcomeHUD":
+                                HUDController.i.ConfigureWelcomeHUD(msg.payload);
                                 break;
                             case "UpdateMinimapSceneInformation":
-                                MinimapMetadataController.i.UpdateMinimapSceneInformation(msg.payload);
+                                MinimapMetadataController.i?.UpdateMinimapSceneInformation(msg.payload);
                                 break;
                             case "ConfigureSettingsHUD":
                                 HUDController.i.ConfigureSettingsHUD(msg.payload);
+                                break;
+                            case "SetTutorialEnabled":
+                                DCL.Tutorial.TutorialController.i?.SetTutorialEnabled();
+                                break;
+                            case "TriggerSelfUserExpression":
+                                HUDController.i.TriggerSelfUserExpression(msg.payload);
+                                break;
+                            case "ConfigureAirdroppingHUD":
+                                HUDController.i.ConfigureAirdroppingHUD(msg.payload);
+                                break;
+                            case "AirdroppingRequest":
+                                HUDController.i.AirdroppingRequest(msg.payload);
+                                break;
+                            case "ShowWelcomeNotification":
+                                HUDController.i.ShowWelcomeNotification();
+                                break;
+                            case "ConfigureTermsOfServiceHUD":
+                                HUDController.i.ConfigureTermsOfServiceHUD(msg.payload);
+                                break;
+                            case "ShowTermsOfServices":
+                                HUDController.i.ShowTermsOfServices(msg.payload);
                                 break;
                             default:
                                 Debug.Log("<b><color=#FF0000>WSSController:</color></b> received an unknown message from kernel to renderer: " + msg.type);

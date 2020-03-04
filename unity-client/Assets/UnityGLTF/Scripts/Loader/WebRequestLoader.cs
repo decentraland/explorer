@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.IO;
 using UnityEngine;
@@ -64,12 +64,11 @@ namespace UnityGLTF.Loader
             UnityWebRequest www = new UnityWebRequest(finalUrl, "GET", new DownloadHandlerBuffer(), null);
 
             www.timeout = 5000;
-
-            www.SendWebRequest();
-            while (!www.isDone)
-            {
-                yield return null;
-            }
+#if UNITY_2017_2_OR_NEWER
+            yield return www.SendWebRequest();
+#else
+            yield return www.Send();
+#endif
             if ((int)www.responseCode >= 400)
             {
                 Debug.LogError($"{www.responseCode} - {www.url}");
@@ -82,7 +81,11 @@ namespace UnityGLTF.Loader
                 yield break;
             }
 
-            LoadedStream = new MemoryStream(www.downloadHandler.data, 0, www.downloadHandler.data.Length, true, true);
+            //NOTE(Brian): Caution, www.downloadHandler.data returns a COPY of the data, if accessed twice,
+            //             2 copies will be performed for the entire file (and then discarded by GC, introducing hiccups).
+            //             The correct fix is by using DownloadHandler.ReceiveData. But this is in version > 2019.3.
+            byte[] data = www.downloadHandler.data;
+            LoadedStream = new MemoryStream(data, 0, data.Length, true, true);
         }
     }
 }

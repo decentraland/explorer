@@ -1,4 +1,5 @@
 using DCL.Components;
+using DCL.Configuration;
 using DCL.Controllers;
 using DCL.Interface;
 using DCL.Models;
@@ -97,27 +98,27 @@ namespace DCL.Helpers
             int componentClassId = classId == CLASS_ID_COMPONENT.NONE
                 ? (int)scene.ownerController.componentFactory.GetIdForType<T>()
                 : (int)classId;
+
             string componentInstanceId = GetComponentUniqueId(scene, typeof(T).Name, componentClassId, entity.entityId);
+
+            string data;
 
             if (classId == CLASS_ID_COMPONENT.TRANSFORM)
             {
                 PB_Transform transf = GetPBTransformFromModelJson(JsonUtility.ToJson(model));
-
-                return scene.EntityComponentCreateOrUpdate(
-                    entity.entityId,
-                    componentInstanceId,
-                    componentClassId,
-                    System.Convert.ToBase64String(transf.ToByteArray())
-                , out CleanableYieldInstruction routine) as T;
-
+                data = System.Convert.ToBase64String(transf.ToByteArray());
             }
             else
-                return scene.EntityComponentCreateOrUpdate(
+            {
+                data = JsonUtility.ToJson(model);
+            }
+
+            return scene.EntityComponentCreateOrUpdate(
                     entity.entityId,
                     componentInstanceId,
                     componentClassId,
-                    JsonUtility.ToJson(model)
-                , out CleanableYieldInstruction routine) as T;
+                    data
+                , out _) as T;
         }
 
         public static Coroutine EntityComponentUpdate<T, K>(T component, K model = null)
@@ -796,14 +797,13 @@ namespace DCL.Helpers
             yield return onClickComponent.routine;
 
             Collider onPointerEventCollider;
-            int onPointerEventLayer = LayerMask.NameToLayer(OnPointerEventColliders.COLLIDER_LAYER);
             for (int i = 0; i < renderers.Length; i++)
             {
                 Assert.IsTrue(renderers[i].transform.childCount > 0, "OnClick collider should exist as this mesh's child");
 
                 onPointerEventCollider = renderers[i].transform.GetChild(0).GetComponent<Collider>();
                 Assert.IsTrue(onPointerEventCollider != null);
-                Assert.IsTrue(onPointerEventCollider.gameObject.layer == onPointerEventLayer);
+                Assert.IsTrue(onPointerEventCollider.gameObject.layer == PhysicsLayers.onPointerEventLayer);
 
                 // check the onClick collide enabled state is the same as the renderer's state
                 Assert.IsTrue(onPointerEventCollider.enabled == renderers[i].enabled);
@@ -1169,7 +1169,7 @@ namespace DCL.Helpers
 
         public static IEnumerator WaitForGLTFLoad(DecentralandEntity entity)
         {
-            LoadWrapper_GLTF wrapper = entity.gameObject.GetComponentInChildren<LoadWrapper_GLTF>(true);
+            LoadWrapper_GLTF wrapper = GLTFShape.GetLoaderForEntity(entity) as LoadWrapper_GLTF;
             return new WaitUntil(() => wrapper.alreadyLoaded);
         }
     }

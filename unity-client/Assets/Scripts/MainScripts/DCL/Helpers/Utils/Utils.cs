@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using DCL.Configuration;
 using UnityEngine;
 using UnityEngine.Assertions;
+using UnityEngine.EventSystems;
 using UnityEngine.Networking;
 
 namespace DCL.Helpers
@@ -166,11 +167,7 @@ namespace DCL.Helpers
             {
                 using (var webRequest = request)
                 {
-                    webRequest.SendWebRequest();
-                    while (!webRequest.isDone)
-                    {
-                        yield return null;
-                    }
+                    yield return webRequest.SendWebRequest();
 
                     if (!WebRequestSucceded(request))
                     {
@@ -206,15 +203,15 @@ namespace DCL.Helpers
                 {
                     if (OnSuccess != null)
                     {
+                        bool supported = true;
+#if UNITY_EDITOR
+                        supported = audioType != AudioType.MPEG;
+#endif
                         AudioClip ac = null;
-                        try //In Editor we cannot decode MPEG and it's interrupting the flow
-                        {
+
+                        if (supported)
                             ac = DownloadHandlerAudioClip.GetContent(request);
-                        }
-                        catch (Exception e)
-                        {
-                            Debug.LogError(e);
-                        }
+
                         OnSuccess.Invoke(ac);
                     }
                 };
@@ -228,20 +225,20 @@ namespace DCL.Helpers
                     }
                 };
 
-            yield return FetchAsset(url, UnityWebRequestMultimedia.GetAudioClip(url, audioType), OnSuccessInternal,
+            var req = UnityWebRequestMultimedia.GetAudioClip(url, audioType);
+
+            yield return FetchAsset(url, req, OnSuccessInternal,
                 OnFailInternal);
         }
 
-        public static IEnumerator FetchTexture(string textureURL, Action<Texture> OnSuccess)
+        public static IEnumerator FetchTexture(string textureURL, Action<Texture2D> OnSuccess)
         {
             //NOTE(Brian): This closure is called when the download is a success.
             System.Action<UnityWebRequest> OnSuccessInternal =
                 (request) =>
                 {
-                    if (OnSuccess != null)
-                    {
-                        OnSuccess.Invoke(DownloadHandlerTexture.GetContent(request));
-                    }
+                    var texture = DownloadHandlerTexture.GetContent(request);
+                    OnSuccess?.Invoke(texture);
                 };
 
             yield return FetchAsset(textureURL, UnityWebRequestTexture.GetTexture(textureURL), OnSuccessInternal);
@@ -413,6 +410,37 @@ namespace DCL.Helpers
             }
 
             return bounds;
+        }
+
+        private static int lockedInFrame = -1;
+        public static bool LockedThisFrame() => lockedInFrame == Time.frameCount;
+
+        //NOTE(Brian): Made as an independent flag because the CI doesn't work well with the Cursor.lockState check.
+        public static bool isCursorLocked = false;
+
+        public static void LockCursor()
+        {
+            isCursorLocked = true;
+            lockedInFrame = Time.frameCount;
+            Cursor.visible = false;
+            Cursor.lockState = CursorLockMode.Locked;
+
+            EventSystem.current.SetSelectedGameObject(null);
+        }
+
+        public static void UnlockCursor()
+        {
+            isCursorLocked = false;
+            Cursor.visible = true;
+            Cursor.lockState = CursorLockMode.None;
+        }
+
+        public static void DestroyAllChild(this Transform transform)
+        {
+            foreach (Transform child in transform)
+            {
+                UnityEngine.Object.Destroy(child.gameObject);
+            }
         }
     }
 }

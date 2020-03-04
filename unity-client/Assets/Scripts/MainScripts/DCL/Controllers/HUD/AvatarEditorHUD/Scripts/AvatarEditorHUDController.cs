@@ -23,6 +23,8 @@ public class AvatarEditorHUDController : IDisposable, IHUD
 
     protected AvatarEditorHUDView view;
 
+    public Action<bool> OnVisibilityChanged;
+
     public AvatarEditorHUDController(UserProfile userProfile, WearableDictionary catalog, bool bypassUpdateAvatarPreview = false)
     {
         this.userProfile = userProfile;
@@ -65,6 +67,8 @@ public class AvatarEditorHUDController : IDisposable, IHUD
         {
             return;
         }
+    
+        view.SetIsWeb3(userProfile.hasConnectedWeb3);
 
         ProcessCatalog(this.catalog);
         EquipBodyShape(bodyShape);
@@ -177,29 +181,35 @@ public class AvatarEditorHUDController : IDisposable, IHUD
 
     private void EquipHairColor(Color color)
     {
-        if (hairColorList.colors.Any(x => x.AproxComparison(color)))
+        var colorToSet = color;
+        if (!hairColorList.colors.Any(x => x.AproxComparison(colorToSet)))
         {
-            model.hairColor = color;
-            view.SelectHairColor(model.hairColor);
+            colorToSet = hairColorList.colors[hairColorList.defaultColor];
         }
+        model.hairColor = colorToSet;
+        view.SelectHairColor(model.hairColor);
     }
 
     private void EquipEyesColor(Color color)
     {
-        if (eyeColorList.colors.Any(x => x.AproxComparison(color)))
+        var colorToSet = color;
+        if (!eyeColorList.colors.Any(x => x.AproxComparison(color)))
         {
-            model.eyesColor = color;
-            view.SelectEyeColor(model.eyesColor);
+            colorToSet = eyeColorList.colors[eyeColorList.defaultColor];
         }
+        model.eyesColor = colorToSet;
+        view.SelectEyeColor(model.eyesColor);
     }
 
     private void EquipSkinColor(Color color)
     {
-        if (skinColorList.colors.Any(x => x.AproxComparison(color)))
+        var colorToSet = color;
+        if (!skinColorList.colors.Any(x => x.AproxComparison(colorToSet)))
         {
-            model.skinColor = color;
-            view.SelectSkinColor(model.skinColor);
+            colorToSet = skinColorList.colors[skinColorList.defaultColor];
         }
+        model.skinColor = colorToSet;
+        view.SelectSkinColor(model.skinColor);
     }
 
     private void EquipBodyShape(WearableItem bodyShape)
@@ -365,6 +375,7 @@ public class AvatarEditorHUDController : IDisposable, IHUD
     public void SetVisibility(bool visible)
     {
         view.SetVisibility(visible);
+        OnVisibilityChanged?.Invoke(visible);
     }
 
     public void Dispose()
@@ -386,7 +397,7 @@ public class AvatarEditorHUDController : IDisposable, IHUD
         SetVisibility(configuration.active);
     }
 
-    public void SaveAvatar(Texture2D faceSnapshot, Texture2D bodySnapshot)
+    public void SaveAvatar(Sprite faceSnapshot, Sprite bodySnapshot)
     {
         var avatarModel = model.ToAvatarModel();
         WebInterface.SendSaveAvatar(avatarModel, faceSnapshot, bodySnapshot);
@@ -399,5 +410,18 @@ public class AvatarEditorHUDController : IDisposable, IHUD
     {
         LoadUserProfile(userProfile);
         SetVisibility(false);
+    }
+
+    public void GoToMarketplace()
+    {
+        if(userProfile.hasConnectedWeb3)
+            WebInterface.OpenURL("https://market.decentraland.org/browse?section=wearables");
+        else
+            WebInterface.OpenURL("https://docs.decentraland.org/get-a-wallet");
+    }
+
+    public void SellCollectible(string collectibleId)
+    {
+        WebInterface.OpenURL("https://market.decentraland.org/account");
     }
 }

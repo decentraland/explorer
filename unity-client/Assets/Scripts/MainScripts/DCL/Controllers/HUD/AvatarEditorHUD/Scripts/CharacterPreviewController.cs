@@ -15,7 +15,7 @@ public class CharacterPreviewController : MonoBehaviour
     private const float CAMERA_TRANSITION_TIME = 0.5f;
     private static int CHARACTER_PREVIEW_LAYER => LayerMask.NameToLayer("CharacterPreview");
 
-    public delegate void OnSnapshotsReady(Texture2D face, Texture2D body);
+    public delegate void OnSnapshotsReady(Sprite face, Sprite body);
 
     public enum CameraFocus
     {
@@ -27,7 +27,7 @@ public class CharacterPreviewController : MonoBehaviour
 
     private System.Collections.Generic.Dictionary<CameraFocus, Transform> cameraFocusLookUp;
 
-    public Camera camera;
+    public new Camera camera;
     public AvatarRenderer avatarRenderer;
 
     public Transform defaultEditingTemplate;
@@ -49,7 +49,7 @@ public class CharacterPreviewController : MonoBehaviour
 
     public void UpdateModel(AvatarModel newModel, Action onDone)
     {
-        StartCoroutine(UpdateModelRoutine(newModel, onDone));
+        CoroutineStarter.Start(UpdateModelRoutine(newModel, onDone));
     }
 
     private IEnumerator UpdateModelRoutine(AvatarModel newModel, Action onDone)
@@ -90,12 +90,12 @@ public class CharacterPreviewController : MonoBehaviour
         SetFocus(CameraFocus.FaceSnapshot, false);
         avatarAnimator.Reset();
         yield return null;
-        Texture2D face = Snapshot(SNAPSHOT_FACE_WIDTH_RES, SNAPSHOT_FACE_HEIGHT_RES);
+        Sprite face = Snapshot(SNAPSHOT_FACE_WIDTH_RES, SNAPSHOT_FACE_HEIGHT_RES);
 
         SetFocus(CameraFocus.BodySnapshot, false);
         avatarAnimator.Reset();
         yield return null;
-        Texture2D body = Snapshot(SNAPSHOT_BODY_WIDTH_RES, SNAPSHOT_BODY_HEIGHT_RES);
+        Sprite body = Snapshot(SNAPSHOT_BODY_WIDTH_RES, SNAPSHOT_BODY_HEIGHT_RES);
 
         SetFocus(CameraFocus.DefaultEditing, false);
 
@@ -103,7 +103,7 @@ public class CharacterPreviewController : MonoBehaviour
         callback?.Invoke(face, body);
     }
 
-    private Texture2D Snapshot(int width, int height)
+    private Sprite Snapshot(int width, int height)
     {
         RenderTexture rt = new RenderTexture(width * SUPERSAMPLING, height * SUPERSAMPLING, 32);
         camera.targetTexture = rt;
@@ -113,7 +113,7 @@ public class CharacterPreviewController : MonoBehaviour
         screenShot.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0);
         screenShot.Apply();
 
-        return screenShot;
+        return Sprite.Create(screenShot, new Rect(0, 0, screenShot.width, screenShot.height), Vector2.zero);
     }
 
     private Coroutine cameraTransitionCoroutine;

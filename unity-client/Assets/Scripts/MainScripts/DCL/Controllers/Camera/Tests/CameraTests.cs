@@ -60,6 +60,9 @@ namespace CameraController_Test
             RenderingController.i.DeactivateRendering();
             Assert.IsFalse(cameraController.cameraTransform.gameObject.activeSelf);
 
+            yield return null;
+
+            RenderingController.i.renderingActivatedAckLock.RemoveAllLocks();
             RenderingController.i.ActivateRendering();
             Assert.IsTrue(cameraController.cameraTransform.gameObject.activeSelf);
             yield break;

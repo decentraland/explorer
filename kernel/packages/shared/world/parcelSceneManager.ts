@@ -87,6 +87,7 @@ export async function enableParcelSceneLoading(options: EnableParcelSceneLoading
     // create the worker if don't exist
     if (!getSceneWorkerBySceneID(sceneId)) {
       const parcelScene = new options.parcelSceneClass(ILandToLoadableParcelScene(parcelSceneToStart))
+      parcelScene.data.useFPSThrottling = true
       loadParcelScene(parcelScene)
     }
 
@@ -113,7 +114,7 @@ export async function enableParcelSceneLoading(options: EnableParcelSceneLoading
         globalSignalSceneFail(sceneId)
         ret.notify('Scene.status', { sceneId, status: 'failed' })
       }
-    }, 60000)
+    }, 90000)
   })
 
   ret.on('Scene.shouldUnload', async (opts: { sceneId: string }) => {

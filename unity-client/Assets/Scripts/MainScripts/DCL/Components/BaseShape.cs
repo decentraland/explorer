@@ -1,3 +1,4 @@
+using DCL.Configuration;
 using DCL.Controllers;
 using DCL.Models;
 using UnityEngine;
@@ -10,6 +11,7 @@ namespace DCL.Components
         public class Model
         {
             public bool withCollisions = true;
+            public bool isPointerBlocker = true;
             public bool visible = true;
         }
 
@@ -31,15 +33,6 @@ namespace DCL.Components
         public override void DetachFrom(DecentralandEntity entity, System.Type overridenAttachedType = null)
         {
             if (!attachedEntities.Contains(entity)) return;
-
-            if (DCLCharacterController.i != null)
-            {
-                // In case the character controller has been parented to this entity's mesh
-                if (entity.meshRootGameObject != null && DCLCharacterController.i.transform.parent == entity.meshRootGameObject.transform)
-                {
-                    DCLCharacterController.i.ResetGround();
-                }
-            }
 
             // We do this instead of OnDetach += because it is required to run after every OnDetach listener
             entity.meshesInfo.currentShape = null;
@@ -75,7 +68,6 @@ namespace DCL.Components
                 meshRenderers = meshGameObject.GetComponentsInChildren<Renderer>(true);
 
             Collider onPointerEventCollider;
-            int onClickLayer = LayerMask.NameToLayer(OnPointerEventColliders.COLLIDER_LAYER);
 
             for (var i = 0; i < meshRenderers.Length; i++)
             {
@@ -85,10 +77,22 @@ namespace DCL.Components
                 {
                     onPointerEventCollider = meshRenderers[i].transform.GetChild(0).GetComponent<Collider>();
 
-                    if (onPointerEventCollider != null && onPointerEventCollider.gameObject.layer == onClickLayer)
+                    if (onPointerEventCollider != null && onPointerEventCollider.gameObject.layer == PhysicsLayers.onPointerEventLayer)
                         onPointerEventCollider.enabled = shouldBeVisible;
                 }
             }
+        }
+
+        protected int CalculateCollidersLayer(Model model)
+        {
+            // We can't enable this layer changer logic until we redeploy all the builder and street scenes with the corrected 'withCollision' default in true...
+            /* if (!model.withCollisions && model.isPointerBlocker)
+                return PhysicsLayers.onPointerEventLayer;
+            else */
+            if (model.withCollisions && !model.isPointerBlocker)
+                return PhysicsLayers.characterOnlyLayer;
+
+            return PhysicsLayers.defaultLayer;
         }
     }
 }

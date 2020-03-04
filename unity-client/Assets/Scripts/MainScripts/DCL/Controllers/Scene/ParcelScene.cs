@@ -12,7 +12,7 @@ namespace DCL.Controllers
     public class ParcelScene : MonoBehaviour, ICleanable
     {
         public static bool VERBOSE = false;
-        enum State
+        public enum State
         {
             NOT_READY,
             WAITING_FOR_INIT_MESSAGES,
@@ -20,7 +20,6 @@ namespace DCL.Controllers
             READY,
         }
 
-        private const string PARCEL_BLOCKER_PREFAB = "Prefabs/ParcelBlocker";
         private const int ENTITY_POOL_PREWARM_COUNT = 2000;
 
         public Dictionary<string, DecentralandEntity> entities = new Dictionary<string, DecentralandEntity>();
@@ -33,6 +32,8 @@ namespace DCL.Controllers
 
         public event System.Action<DecentralandEntity> OnEntityAdded;
         public event System.Action<DecentralandEntity> OnEntityRemoved;
+        public event System.Action<ParcelScene> OnSceneReady;
+
         public ContentProvider contentProvider;
         public int disposableNotReadyCount => disposableNotReady.Count;
 
@@ -53,29 +54,20 @@ namespace DCL.Controllers
 
         public static ParcelScenesCleaner parcelScenesCleaner = new ParcelScenesCleaner();
 
-        private readonly List<PoolableObject> blockers = new List<PoolableObject>();
         private readonly List<string> disposableNotReady = new List<string>();
-        private bool flaggedToUnload = false;
         private bool isReleased = false;
+        public bool isReady => state == State.READY;
         private State state = State.NOT_READY;
         public SceneBoundariesChecker boundariesChecker { private set; get; }
 
-        private static GameObject blockerPrefab;
+        public BlockerHandler blockerHandler;
+
 
         public void Awake()
         {
             state = State.NOT_READY;
 
-            if (blockerPrefab == null)
-                blockerPrefab = Resources.Load<GameObject>(PARCEL_BLOCKER_PREFAB);
-
-            // We need to manually create the Pool for empty game objects if it doesn't exist
-            if (!PoolManager.i.ContainsPool(PARCEL_BLOCKER_POOL_NAME))
-            {
-                GameObject go = Instantiate(blockerPrefab);
-                Pool pool = PoolManager.i.AddPool(PARCEL_BLOCKER_POOL_NAME, go);
-                pool.ForcePrewarm();
-            }
+            blockerHandler = new BlockerHandler();
 
             if (DCLCharacterController.i)
                 DCLCharacterController.i.characterPosition.OnPrecisionAdjust += OnPrecisionAdjust;
@@ -89,6 +81,10 @@ namespace DCL.Controllers
                 boundariesChecker = new SceneBoundariesChecker(this);
         }
 
+        void OnDisable()
+        {
+            metricsController.Disable();
+        }
 
         private void Update()
         {
@@ -154,56 +150,10 @@ namespace DCL.Controllers
             }
 #endif
             if (useBlockers)
-                SetupBlockers(data.parcels);
+                blockerHandler.SetupBlockers(data.parcels, metricsController.GetLimits().sceneHeight, this.transform);
 
             if (isTestScene)
                 SetSceneReady();
-        }
-
-        public void CleanBlockers()
-        {
-            int count = blockers.Count;
-
-            for (int i = 0; i < count; i++)
-            {
-                blockers[i].Release();
-            }
-
-            blockers.Clear();
-        }
-
-        const string PARCEL_BLOCKER_POOL_NAME = "ParcelBlocker";
-        Vector3 auxVec = new Vector3();
-
-        private void SetupBlockers(Vector2Int[] parcels)
-        {
-            CleanBlockers();
-
-            int parcelsLength = parcels.Length;
-            for (int i = 0; i < parcelsLength; i++)
-            {
-                Vector2Int pos = parcels[i];
-
-                PoolableObject blocker = PoolManager.i.Get(PARCEL_BLOCKER_POOL_NAME);
-
-                blocker.transform.SetParent(this.transform, false);
-                blocker.transform.position = DCLCharacterController.i.characterPosition.WorldToUnityPosition(Utils.GridToWorldPosition(pos.x, pos.y)) + (Vector3.up * blockerPrefab.transform.localPosition.y) + new Vector3(ParcelSettings.PARCEL_SIZE / 2, 0, ParcelSettings.PARCEL_SIZE / 2);
-
-                float sceneHeight = metricsController.GetLimits().sceneHeight;
-
-                auxVec.x = blocker.transform.position.x;
-                auxVec.y = sceneHeight / 2;
-                auxVec.z = blocker.transform.position.z;
-
-                blocker.transform.position = auxVec;
-
-                auxVec.x = ParcelSettings.PARCEL_SIZE;
-                auxVec.y = sceneHeight;
-                auxVec.z = ParcelSettings.PARCEL_SIZE;
-                blocker.transform.localScale = auxVec;
-
-                blockers.Add(blocker);
-            }
         }
 
         void OnPrecisionAdjust(DCLCharacterPosition position)
@@ -281,6 +231,7 @@ namespace DCL.Controllers
                 if (entities.Count > 0)
                 {
                     this.gameObject.transform.position = EnvironmentSettings.MORDOR;
+                    this.gameObject.SetActive(false);
 
                     RemoveAllEntities();
                 }
@@ -417,11 +368,14 @@ namespace DCL.Controllers
             if (entities.ContainsKey(tmpRemoveEntityMessage.id))
             {
                 DecentralandEntity entity = entities[tmpRemoveEntityMessage.id];
+
                 if (!entity.markedForCleanup)
                 {
                     // This will also cleanup its children
                     CleanUpEntityRecursively(entity, removeImmediatelyFromEntitiesList);
                 }
+
+                entities.Remove(tmpRemoveEntityMessage.id);
             }
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             else
@@ -620,16 +574,20 @@ namespace DCL.Controllers
 
                 if (!entity.uuidComponents.ContainsKey(type))
                 {
+                    //NOTE(Brian): We have to contain it in a gameObject or it will be pooled with the components attached.
+                    var go = new GameObject("UUID Component");
+                    go.transform.SetParent(entity.gameObject.transform, false);
+
                     switch (type)
                     {
                         case OnClick.NAME:
-                            newComponent = Utils.GetOrCreateComponent<OnClick>(entity.gameObject);
+                            newComponent = Utils.GetOrCreateComponent<OnClick>(go);
                             break;
                         case OnPointerDown.NAME:
-                            newComponent = Utils.GetOrCreateComponent<OnPointerDown>(entity.gameObject);
+                            newComponent = Utils.GetOrCreateComponent<OnPointerDown>(go);
                             break;
                         case OnPointerUp.NAME:
-                            newComponent = Utils.GetOrCreateComponent<OnPointerUp>(entity.gameObject);
+                            newComponent = Utils.GetOrCreateComponent<OnPointerUp>(go);
                             break;
                     }
 
@@ -639,8 +597,9 @@ namespace DCL.Controllers
 
                         if (uuidComponent != null)
                         {
-                            uuidComponent.SetForEntity(this, entity, model);
+                            uuidComponent.Setup(this, entity, model);
                             entity.uuidComponents.Add(type, uuidComponent);
+
                         }
                         else
                         {
@@ -703,7 +662,7 @@ namespace DCL.Controllers
             }
 
             UUIDComponent targetComponent = entity.uuidComponents[type];
-            targetComponent.SetForEntity(this, entity, model);
+            targetComponent.Setup(this, entity, model);
 
             return targetComponent;
         }
@@ -951,6 +910,7 @@ namespace DCL.Controllers
             if (component != null)
             {
                 Utils.SafeDestroy(component);
+                entity.uuidComponents.Remove(type);
             }
         }
 
@@ -1123,22 +1083,20 @@ namespace DCL.Controllers
         private void SetSceneReady()
         {
             if (state == State.READY)
-            {
                 return;
-            }
 
             if (VERBOSE)
-            {
                 Debug.Log($"{sceneData.basePosition} Scene Ready!");
-            }
 
             state = State.READY;
 
             if (useBlockers)
-                CleanBlockers();
+                blockerHandler.CleanBlockers();
 
             SceneController.i.SendSceneReady(sceneData.id);
             RefreshName();
+
+            OnSceneReady?.Invoke(this);
         }
 
 #if UNITY_EDITOR

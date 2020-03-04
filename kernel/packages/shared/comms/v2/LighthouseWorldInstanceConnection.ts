@@ -1,15 +1,35 @@
 import { WorldInstanceConnection } from '../interface/index'
 import { Stats } from '../debug'
-import { Package, BusMessage, ChatMessage, ProfileVersion, UserInformation } from '../interface/types'
+import { Package, BusMessage, ChatMessage, ProfileVersion, UserInformation, PackageType } from '../interface/types'
 import { Position, positionHash } from '../interface/utils'
-import { Peer } from 'decentraland-katalyst-peer'
-import { createLogger } from 'shared/logger'
+import defaultLogger, { createLogger } from 'shared/logger'
+import { PeerMessageTypes, PeerMessageType } from 'decentraland-katalyst-peer/src/messageTypes'
+import { Peer as PeerType, PacketCallback } from 'decentraland-katalyst-peer/src/Peer'
+import { ChatData, CommsMessage, ProfileData, SceneData, PositionData } from './proto/comms_pb'
+import { Realm, CommsStatus } from 'shared/dao/types'
+
+import * as Long from 'long'
+declare const window: any
+window.Long = Long
+
+const { Peer } = require('decentraland-katalyst-peer')
 
 const NOOP = () => {
   // do nothing
 }
 
 const logger = createLogger('Lighthouse: ')
+
+type MessageData = ChatData | ProfileData | SceneData | PositionData
+
+const commsMessageType: PeerMessageType = {
+  name: 'sceneComms',
+  ttl: 10,
+  expirationTime: 10 * 1000,
+  optimistic: true
+}
+
+declare var global: any
 
 export class LighthouseWorldInstanceConnection implements WorldInstanceConnection {
   stats: Stats | null = null
@@ -23,28 +43,48 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
 
   ping: number = -1
 
-  constructor(private peer: Peer) {
-    logger.info(`connected peer as `, peer.nickname)
-    peer.callback = (sender, room, payload) => {
-      switch (payload.type) {
-        case 'profile': {
-          this.profileHandler(sender, payload.data.user, payload)
-          break
-        }
-        case 'chat': {
-          this.chatHandler(sender, payload)
-          break
-        }
-        case 'position': {
-          this.positionHandler(sender, payload)
-          break
-        }
-        default: {
-          logger.warn(`message with unknown type received ${payload.type}`)
-          break
-        }
-      }
+  private peer: PeerType
+
+  constructor(
+    private peerId: string,
+    private realm: Realm,
+    private lighthouseUrl: string,
+    private peerConfig: any,
+    private statusHandler: (status: CommsStatus) => void
+  ) {
+    // This assignment is to "definetly initialize" peer
+    this.peer = this.initializePeer()
+  }
+
+  async connectPeer() {
+    try {
+      await this.peer.awaitConnectionEstablished(60000)
+      await this.peer.setLayer(this.realm.layer)
+      this.statusHandler({ status: 'connected', connectedPeers: this.connectedPeersCount() })
+    } catch (e) {
+      defaultLogger.error('Error while connecting to layer', e)
+      this.statusHandler({
+        status: e.responseJson && e.responseJson.status === 'layer_is_full' ? 'realm-full' : 'error',
+        connectedPeers: this.connectedPeersCount()
+      })
+      throw e
     }
+  }
+
+  public async changeRealm(realm: Realm, url: string) {
+    this.statusHandler({ status: 'connecting', connectedPeers: this.connectedPeersCount() })
+    let rooms: string[] = []
+    if (this.peer) {
+      rooms = this.peer.currentRooms.map(it => it.id)
+      await this.cleanUpPeer()
+    }
+
+    this.realm = realm
+    this.lighthouseUrl = url
+
+    this.initializePeer()
+    await this.connectPeer()
+    await this.updateSubscriptions(rooms)
   }
 
   printDebugInformation() {
@@ -52,70 +92,51 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
   }
 
   close() {
-    const rooms = this.peer.currentRooms
-    return Promise.all(
-      rooms.map(room => this.peer.leaveRoom(room.id).catch(e => logger.trace(`error while leaving room ${room.id}`, e)))
-    )
+    return this.cleanUpPeer()
   }
 
   async sendInitialMessage(userInfo: Partial<UserInformation>) {
     const topic = userInfo.userId!
 
-    await this.peer.sendMessage(topic, {
-      type: 'profile',
-      time: Date.now(),
-      data: { version: userInfo.version, user: userInfo.userId }
-    })
+    await this.sendProfileData(userInfo, topic, 'initialProfile')
   }
 
   async sendProfileMessage(currentPosition: Position, userInfo: UserInformation) {
     const topic = positionHash(currentPosition)
 
-    await this.peer.sendMessage(topic, {
-      type: 'profile',
-      time: Date.now(),
-      data: { version: userInfo.version, user: userInfo.userId }
-    })
+    await this.sendProfileData(userInfo, topic, 'profile')
   }
 
   async sendPositionMessage(p: Position) {
     const topic = positionHash(p)
 
-    await this.peer.sendMessage(topic, {
-      type: 'position',
-      time: Date.now(),
-      data: [p[0], p[1], p[2], p[3], p[4], p[5], p[6]]
-    })
+    await this.sendPositionData(p, topic, 'position')
   }
 
   async sendParcelUpdateMessage(currentPosition: Position, p: Position) {
     const topic = positionHash(currentPosition)
 
-    await this.peer.sendMessage(topic, {
-      type: 'position',
-      time: Date.now(),
-      data: [p[0], p[1], p[2], p[3], p[4], p[5], p[6]]
-    })
+    await this.sendPositionData(p, topic, 'parcelUpdate')
   }
 
   async sendParcelSceneCommsMessage(sceneId: string, message: string) {
     const topic = sceneId
 
-    await this.peer.sendMessage(topic, {
-      type: 'chat',
-      time: Date.now(),
-      data: { id: sceneId, text: message }
-    })
+    const sceneData = new SceneData()
+    sceneData.setSceneId(sceneId)
+    sceneData.setText(message)
+
+    await this.sendData(topic, sceneData, commsMessageType)
   }
 
   async sendChatMessage(currentPosition: Position, messageId: string, text: string) {
     const topic = positionHash(currentPosition)
 
-    await this.peer.sendMessage(topic, {
-      type: 'chat',
-      time: Date.now(),
-      data: { id: messageId, text }
-    })
+    const chatMessage = new ChatData()
+    chatMessage.setMessageId(messageId)
+    chatMessage.setText(text)
+
+    await this.sendData(topic, chatMessage, PeerMessageTypes.reliable('chat'))
   }
 
   async updateSubscriptions(rooms: string[]) {
@@ -136,4 +157,159 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
     })
     return Promise.all([...joining, ...leaving]).then(NOOP)
   }
+
+  private async sendData(topic: string, messageData: MessageData, type: PeerMessageType) {
+    if (this.peer.currentRooms.some(it => it.id === topic)) {
+      await this.peer.sendMessage(topic, createCommsMessage(messageData).serializeBinary(), type)
+    } else {
+      // TODO: We may want to queue some messages
+      defaultLogger.warn('Tried to send a message to a topic that the peer is not subscribed to: ' + topic)
+    }
+  }
+
+  private async sendPositionData(p: Position, topic: string, typeName: string) {
+    const positionData = createPositionData(p)
+    await this.sendData(topic, positionData, PeerMessageTypes.unreliable(typeName))
+  }
+
+  private async sendProfileData(userInfo: UserInformation, topic: string, typeName: string) {
+    const profileData = createProfileData(userInfo)
+    await this.sendData(topic, profileData, PeerMessageTypes.unreliable(typeName))
+  }
+
+  private initializePeer() {
+    this.statusHandler({ status: 'connecting', connectedPeers: this.connectedPeersCount() })
+    this.peer = this.createPeer()
+    // @ts-ignore
+    this.peer.log = () => {
+      // DO NOTHING
+    }
+    global.__DEBUG_PEER = this.peer
+    return this.peer
+  }
+
+  private connectedPeersCount(): number {
+    return this.peer ? this.peer.connectedCount() : 0
+  }
+
+  private createPeer(): PeerType {
+    if (this.peerConfig.statusHandler) {
+      logger.warn(`Overriding peer config status handler from client!`)
+    }
+    this.peerConfig.statusHandler = (status: string) => {
+      if (status === 'reconnection-error') {
+        this.statusHandler({ status, connectedPeers: this.connectedPeersCount() })
+      }
+    }
+    return new Peer(this.lighthouseUrl, this.peerId, this.peerCallback, this.peerConfig)
+  }
+
+  private async cleanUpPeer() {
+    return this.peer.dispose()
+  }
+
+  private peerCallback: PacketCallback = (sender, room, payload) => {
+    try {
+      const commsMessage = CommsMessage.deserializeBinary(payload)
+      switch (commsMessage.getDataCase()) {
+        case CommsMessage.DataCase.CHAT_DATA:
+          this.chatHandler(sender, createPackage(commsMessage, 'chat', mapToPackageChat(commsMessage.getChatData()!)))
+          break
+        case CommsMessage.DataCase.POSITION_DATA:
+          this.positionHandler(
+            sender,
+            createPackage(commsMessage, 'position', mapToPositionMessage(commsMessage.getPositionData()!))
+          )
+          break
+        case CommsMessage.DataCase.SCENE_DATA:
+          this.sceneMessageHandler(
+            sender,
+            createPackage(commsMessage, 'chat', mapToPackageScene(commsMessage.getSceneData()!))
+          )
+          break
+        case CommsMessage.DataCase.PROFILE_DATA:
+          this.profileHandler(
+            sender,
+            commsMessage.getProfileData()!.getUserId(),
+            createPackage(commsMessage, 'profile', mapToPackageProfile(commsMessage.getProfileData()!))
+          )
+          break
+        default: {
+          logger.warn(`message with unknown type received ${commsMessage.getDataCase()}`)
+          break
+        }
+      }
+    } catch (e) {
+      logger.error(`Error processing received message from ${sender}. Topic: ${room}`, e)
+    }
+  }
+}
+
+function createPackage<T>(commsMessage: CommsMessage, type: PackageType, data: T): Package<T> {
+  return {
+    time: commsMessage.getTime(),
+    type,
+    data
+  }
+}
+
+function mapToPositionMessage(positionData: PositionData): Position {
+  return [
+    positionData.getPositionX(),
+    positionData.getPositionY(),
+    positionData.getPositionZ(),
+    positionData.getRotationX(),
+    positionData.getRotationY(),
+    positionData.getRotationZ(),
+    positionData.getRotationW()
+  ]
+}
+
+function mapToPackageChat(chatData: ChatData) {
+  return {
+    id: chatData.getMessageId(),
+    text: chatData.getText()
+  }
+}
+
+function mapToPackageScene(sceneData: SceneData) {
+  return {
+    id: sceneData.getSceneId(),
+    text: sceneData.getText()
+  }
+}
+
+function mapToPackageProfile(profileData: ProfileData) {
+  return { user: profileData.getUserId(), version: profileData.getProfileVersion() }
+}
+
+function createProfileData(userInfo: UserInformation) {
+  const profileData = new ProfileData()
+  profileData.setProfileVersion(userInfo.version ? userInfo.version.toString() : '')
+  profileData.setUserId(userInfo.userId ? userInfo.userId : '')
+  return profileData
+}
+
+function createPositionData(p: Position) {
+  const positionData = new PositionData()
+  positionData.setPositionX(p[0])
+  positionData.setPositionY(p[1])
+  positionData.setPositionZ(p[2])
+  positionData.setRotationX(p[3])
+  positionData.setRotationY(p[4])
+  positionData.setRotationZ(p[5])
+  positionData.setRotationW(p[6])
+  return positionData
+}
+
+function createCommsMessage(data: MessageData) {
+  const commsMessage = new CommsMessage()
+  commsMessage.setTime(Date.now())
+
+  if (data instanceof ChatData) commsMessage.setChatData(data)
+  if (data instanceof SceneData) commsMessage.setSceneData(data)
+  if (data instanceof ProfileData) commsMessage.setProfileData(data)
+  if (data instanceof PositionData) commsMessage.setPositionData(data)
+
+  return commsMessage
 }

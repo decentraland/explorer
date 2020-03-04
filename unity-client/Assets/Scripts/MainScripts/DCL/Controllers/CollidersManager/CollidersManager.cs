@@ -1,4 +1,5 @@
-﻿using DCL.Components;
+using DCL.Components;
+using DCL.Configuration;
 using DCL.Models;
 using System.Collections.Generic;
 using UnityEngine;
@@ -38,8 +39,8 @@ namespace DCL
 
         void AddOrUpdateColliderInfo(Collider collider, ColliderInfo info)
         {
-            // Note (Zak): This could be achieved in one line 
-            // just by doing colliderInfo[collider] = info; 
+            // Note (Zak): This could be achieved in one line
+            // just by doing colliderInfo[collider] = info;
             // but nobody likes it that way... :'(
             if (colliderInfo.ContainsKey(collider))
                 colliderInfo[collider] = info;
@@ -53,7 +54,7 @@ namespace DCL
                 colliderInfo.Remove(collider);
         }
 
-        void AddOrUpdateEntityCollider(DecentralandEntity entity, Collider collider)
+        public void AddOrUpdateEntityCollider(DecentralandEntity entity, Collider collider)
         {
             if (!collidersByEntity.ContainsKey(entity))
                 collidersByEntity.Add(entity, new List<Collider>());
@@ -64,9 +65,9 @@ namespace DCL
                 collidersList.Add(collider);
 
             ColliderInfo info = new ColliderInfo();
-            info.entityId = entity.entityId;
-            info.meshName = collider.transform.parent.name;
-            info.sceneId = entity.scene.sceneData.id;
+            info.entity = entity;
+            info.meshName = collider.transform.parent != null ? collider.transform.parent.name : "";
+            info.scene = entity.scene;
             AddOrUpdateColliderInfo(collider, info);
 
             // Note (Zak): avoid adding the event multiple times
@@ -95,15 +96,17 @@ namespace DCL
             RemoveAllEntityColliders((DecentralandEntity)dispatcher);
         }
 
-        public bool GetInfo(Collider collider, out ColliderInfo info)
+        public bool GetColliderInfo(Collider collider, out ColliderInfo info)
         {
-            if (colliderInfo.ContainsKey(collider))
+            if (collider != null && colliderInfo.ContainsKey(collider))
             {
                 info = colliderInfo[collider];
                 return true;
             }
             else
+            {
                 info = new ColliderInfo();
+            }
 
             return false;
         }
@@ -113,15 +116,18 @@ namespace DCL
             ConfigureColliders(entity.meshRootGameObject, hasCollision, filterByColliderName, entity);
         }
 
-        public void ConfigureColliders(GameObject meshGameObject, bool hasCollision, bool filterByColliderName = false, DecentralandEntity entity = null)
+        public void ConfigureColliders(GameObject meshGameObject, bool hasCollision, bool filterByColliderName = false, DecentralandEntity entity = null, int colliderLayer = -1)
         {
             if (meshGameObject == null) return;
 
-            if(entity != null)
+            if (entity != null)
                 entity.meshesInfo.colliders.Clear();
 
+            if (colliderLayer == -1)
+                colliderLayer = DCL.Configuration.PhysicsLayers.defaultLayer;
+
             Collider collider;
-            int onClickLayer = LayerMask.NameToLayer(OnPointerEventColliders.COLLIDER_LAYER); // meshes can have a child collider for the OnClick that should be ignored
+            int onClickLayer = PhysicsLayers.onPointerEventLayer; // meshes can have a child collider for the OnClick that should be ignored
             MeshFilter[] meshFilters = meshGameObject.GetComponentsInChildren<MeshFilter>(true);
 
             for (int i = 0; i < meshFilters.Length; i++)
@@ -133,12 +139,12 @@ namespace DCL
                     if (!meshFilters[i].transform.parent.name.ToLower().Contains("_collider")) continue;
 
                     // we remove the Renderer of the '_collider' object, as its true renderer is in another castle
-                    GameObject.Destroy(meshFilters[i].GetComponent<Renderer>());
+                    Object.Destroy(meshFilters[i].GetComponent<Renderer>());
                 }
 
                 collider = meshFilters[i].GetComponent<Collider>();
 
-                //HACK(Pravus): Hack to bring back compatibility with old builder scenes that have withCollision = false in the JS code.    
+                //HACK(Pravus): Hack to bring back compatibility with old builder scenes that have withCollision = false in the JS code.
                 //              Remove when we fix this changing the property name or something similar.
                 bool shouldCreateCollider = hasCollision || filterByColliderName;
 
@@ -156,9 +162,10 @@ namespace DCL
 
                 if (collider != null)
                 {
+                    collider.gameObject.layer = colliderLayer;
                     collider.enabled = shouldCreateCollider;
 
-                    if(entity != null)
+                    if (entity != null)
                         entity.meshesInfo.colliders.Add(collider);
                 }
             }

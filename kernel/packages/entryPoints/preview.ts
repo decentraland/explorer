@@ -6,13 +6,14 @@ global['preview'] = window['preview'] = true
 global['enableWeb3'] = window['enableWeb3']
 
 import { initializeUnity } from '../unity-interface/initializer'
-import { loadPreviewScene, HUD } from '../unity-interface/dcl'
+import { loadPreviewScene, unityInterface } from '../unity-interface/dcl'
 import { DEBUG_WS_MESSAGES } from '../config'
 import defaultLogger from 'shared/logger'
 import { future, IFuture } from 'fp-future'
 import { ILand } from 'shared/types'
 import { pickWorldSpawnpoint } from 'shared/world/positionThings'
 import { sceneLifeCycleObservable } from 'decentraland-loader/lifecycle/controllers/scene'
+import { signalRendererInitialized } from 'shared/renderer/actions'
 
 // Remove the 'dcl-loading' class, used until JS loads.
 document.body.classList.remove('dcl-loading')
@@ -76,9 +77,13 @@ function sceneRenderable() {
 
 initializeUnity(container)
   .then(async ret => {
-    HUD.Minimap.configure({ active: true, visible: true })
-    HUD.Notification.configure({ active: true, visible: true })
-    HUD.Settings.configure({ active: true, visible: false })
+    const i = unityInterface
+    i.ConfigureMinimapHUD({ active: true, visible: true })
+    i.ConfigureNotificationHUD({ active: true, visible: true })
+    i.ConfigureSettingsHUD({ active: true, visible: false })
+    i.ConfigureAirdroppingHUD({ active: true, visible: true })
+
+    global['globalStore'].dispatch(signalRendererInitialized())
 
     const renderable = sceneRenderable()
 

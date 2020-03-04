@@ -129,8 +129,8 @@ namespace DCL
                 }
             }
 
-            CleanPromise(promise);
             promise.Unload();
+            CleanPromise(promise);
 
             return promise;
         }

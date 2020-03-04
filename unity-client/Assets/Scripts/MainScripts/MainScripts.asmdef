@@ -18,7 +18,10 @@
         "WaitForSecondsCache",
         "ContentProvider",
         "AvatarAssets",
-        "InputController"
+        "InputController",
+        "GenericPointers",
+        "MaterialCachingHelper",
+        "SRPBatchingHelper"
     ],
     "optionalUnityReferences": [],
     "includePlatforms": [],

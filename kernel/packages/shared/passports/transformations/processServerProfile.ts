@@ -1,6 +1,6 @@
 import { Profile, WearableId } from '../types'
 import { colorString } from './colorString'
-import { getServerConfigurations } from 'config'
+import { tutorialStepId } from 'decentraland-loader/lifecycle/tutorial/tutorial'
 
 export function fixWearableIds(wearableId: string) {
   return wearableId.replace('/male_body', '/BaseMale').replace('/female_body', '/BaseFemale')
@@ -23,43 +23,42 @@ export function noExclusiveMismatches(inventory: WearableId[]) {
   }
 }
 export function processServerProfile(userId: string, receivedProfile: any): Profile {
-  const name =
-    receivedProfile.name ||
-    'Guest-' +
-      Math.random()
-        .toFixed(6)
-        .substr(2)
+  const name = receivedProfile.name || 'Guest-' + userId.substr(2, 6)
   const wearables = receivedProfile.avatar.wearables
     .map(fixWearableIds)
     .filter(dropDeprecatedWearables)
     .filter(noExclusiveMismatches(receivedProfile.inventory))
-  const snapshots = receivedProfile.snapshots ||
-    (receivedProfile.avatar && receivedProfile.avatar.snapshots) || {
-      face: getServerConfigurations().avatar.snapshotStorage + userId + `/face.png`,
-      body: getServerConfigurations().avatar.snapshotStorage + userId + `/body.png`
-    }
-  snapshots.face = snapshots.face.replace('|', '%7C')
-  snapshots.body = snapshots.body.replace('|', '%7C')
+  const snapshots = receivedProfile.avatar ? receivedProfile.avatar.snapshots : {}
+  const eyeColor = flattenColorIfNecessary(receivedProfile.avatar.eyes.color)
+  const hairColor = flattenColorIfNecessary(receivedProfile.avatar.hair.color)
+  const skinColor = flattenColorIfNecessary(receivedProfile.avatar.skin.color)
   return {
-    userId: userId,
-    email: receivedProfile.email || name.toLowerCase(),
+    userId,
+    email: receivedProfile.email || '',
     name: receivedProfile.name || name,
+    hasClaimedName: !!receivedProfile.name,
     description: receivedProfile.description || '',
-    createdAt: new Date(receivedProfile.createdAt).getTime(),
-    ethAddress: receivedProfile.ethAddress || 'noeth',
-    updatedAt:
-      typeof receivedProfile.updatedAt === 'string'
-        ? new Date(receivedProfile.updatedAt).getTime()
-        : receivedProfile.updatedAt,
-    snapshots,
+    ethAddress: userId || 'noeth',
     version: receivedProfile.avatar.version || 1,
     avatar: {
-      eyeColor: colorString(receivedProfile.avatar.eyes.color),
-      hairColor: colorString(receivedProfile.avatar.hair.color),
-      skinColor: colorString(receivedProfile.avatar.skin.color),
+      eyeColor: colorString(eyeColor),
+      hairColor: colorString(hairColor),
+      skinColor: colorString(skinColor),
       bodyShape: fixWearableIds(receivedProfile.avatar.bodyShape),
-      wearables
+      wearables,
+      snapshots
     },
-    inventory: receivedProfile.inventory || []
+    inventory: receivedProfile.inventory || [],
+    blocked: receivedProfile.blocked,
+    tutorialStep: receivedProfile.tutorialStep || tutorialStepId.INITIAL_SCENE
   }
+}
+
+/**
+ * Flattens the object with a color field to avoid having two nested color fields when profile comess messed from server.
+ *
+ * @param objectWithColor object to flatten if need be
+ */
+function flattenColorIfNecessary(objectWithColor: any) {
+  return objectWithColor.color ? objectWithColor.color : objectWithColor
 }

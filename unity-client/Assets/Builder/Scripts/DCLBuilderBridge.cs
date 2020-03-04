@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using DCL;
@@ -96,7 +96,7 @@ namespace Builder
 
                 if (file.EndsWith(".glb") || file.EndsWith(".gltf"))
                 {
-                    AssetPromise_PrefetchGLTF gltfPromise = new AssetPromise_PrefetchGLTF(currentScene.contentProvider, file);
+                    AssetPromise_PrefetchGLTF gltfPromise = new AssetPromise_PrefetchGLTF(currentScene.contentProvider, file, hash);
                     AssetPromiseKeeper_GLTF.i.Keep(gltfPromise);
                 }
             }
@@ -309,6 +309,8 @@ namespace Builder
 
         private void Awake()
         {
+            // NOTE: we need to set the quality settings before renderer pipeline is copy and modified
+            SetupQualitySettings();
             SetupRendererPipeline();
 
             cameraController = Object.FindObjectOfType<CameraController>();
@@ -486,25 +488,23 @@ namespace Builder
         {
             isPreviewMode = isPreview;
             OnPreviewModeChanged?.Invoke(isPreview);
+
             if (DCLCharacterController.i)
             {
                 DCLCharacterController.i.SetPosition(defaultCharacterPosition);
                 DCLCharacterController.i.gameObject.SetActive(isPreview);
                 DCLCharacterController.i.ResetGround();
             }
+
             if (mouseCatcher != null)
             {
                 mouseCatcher.enabled = isPreview;
                 if (!isPreview) mouseCatcher.UnlockCursor();
             }
-            if (cameraController)
-            {
-                cameraController.gameObject.SetActive(isPreviewMode);
-            }
-            if (cursorController)
-            {
-                cursorController.gameObject.SetActive(isPreviewMode);
-            }
+
+            cameraController?.gameObject.SetActive(isPreviewMode);
+            cursorController?.gameObject.SetActive(isPreviewMode);
+
             SetCaptureKeyboardInputEnabled(isPreview);
         }
 
@@ -588,6 +588,23 @@ namespace Builder
                 lwrpa.shadowDistance = 80f;
                 GraphicsSettings.renderPipelineAsset = lwrpa;
             }
+        }
+
+        private void SetupQualitySettings()
+        {
+            DCL.SettingsHUD.QualitySettings settings = new DCL.SettingsHUD.QualitySettings()
+            {
+                textureQuality = DCL.SettingsHUD.QualitySettings.TextureQuality.FullRes,
+                antiAliasing = UnityEngine.Rendering.LWRP.MsaaQuality._2x,
+                renderScale = 1,
+                shadows = true,
+                softShadows = true,
+                shadowResolution = UnityEngine.Rendering.LWRP.ShadowResolution._256,
+                cameraDrawDistance = 100,
+                bloom = true,
+                colorGrading = true
+            };
+            Settings.i.ApplyQualitySettings(settings);
         }
     }
 }

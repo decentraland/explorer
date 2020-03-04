@@ -1,8 +1,7 @@
 import { getFromLocalStorage, saveToLocalStorage } from 'atomicHelpers/localStorage'
 import { call, fork, put, race, select, take, takeEvery, takeLatest, cancel, ForkEffect } from 'redux-saga/effects'
 import { NotificationType } from 'shared/types'
-import { getServerConfigurations, ALL_WEARABLES } from '../../config'
-import { getAccessToken, getCurrentUserId, getEmail } from '../auth/selectors'
+import { getServerConfigurations, ALL_WEARABLES, getWearablesSafeURL } from '../../config'
 import defaultLogger from '../logger'
 import { isInitialized } from '../renderer/selectors'
 import { RENDERER_INITIALIZED } from '../renderer/types'
@@ -21,7 +20,6 @@ import {
   INVENTORY_SUCCESS,
   notifyNewInventoryItem,
   NOTIFY_NEW_INVENTORY_ITEM,
-  passportRandom,
   PassportRandomAction,
   passportRequest,
   PassportRequestAction,
@@ -34,7 +32,6 @@ import {
   SaveAvatarRequest,
   saveAvatarSuccess,
   SAVE_AVATAR_REQUEST,
-  setProfileServer,
   InventorySuccess
 } from './actions'
 import { generateRandomUserProfile } from './generateRandomUserProfile'
@@ -49,8 +46,72 @@ import {
 import { processServerProfile } from './transformations/processServerProfile'
 import { profileToRendererFormat } from './transformations/profileToRendererFormat'
 import { ensureServerFormat } from './transformations/profileToServerFormat'
-import { Avatar, Catalog, Profile, WearableId, Wearable, Collection } from './types'
+import { Catalog, Profile, WearableId, Wearable, Collection } from './types'
 import { Action } from 'redux'
+import { identity, ExplorerIdentity } from '../index'
+import { Authenticator, AuthLink } from 'dcl-crypto'
+
+const CID = require('cids')
+import { sha3 } from 'web3x/utils'
+import { CATALYST_REALM_INITIALIZED } from '../dao/actions'
+import { isRealmInitialized, getUpdateProfileServer } from '../dao/selectors'
+import { getUserProfile } from '../comms/peers'
+import { WORLD_EXPLORER } from '../../config/index'
+import { backupProfile } from 'shared/passports/generateRandomUserProfile'
+import { getTutorialBaseURL } from '../location'
+const multihashing = require('multihashing-async')
+const toBuffer = require('blob-to-buffer')
+
+export type Timestamp = number
+export type Pointer = string
+export type ContentFileHash = string
+export type ContentFile = {
+  name: string
+  content: Buffer
+}
+export type DeployData = {
+  entityId: string
+  ethAddress?: string
+  signature?: string
+  authChain: AuthLink[]
+  files: ContentFile[]
+}
+export type ControllerEntity = {
+  id: string
+  type: string
+  pointers: string[]
+  timestamp: number
+  content?: ControllerEntityContent[]
+  metadata?: any
+}
+export type ControllerEntityContent = {
+  file: string
+  hash: string
+}
+export enum EntityType {
+  SCENE = 'scene',
+  WEARABLE = 'wearable',
+  PROFILE = 'profile'
+}
+export type EntityId = ContentFileHash
+export enum EntityField {
+  CONTENT = 'content',
+  POINTERS = 'pointers',
+  METADATA = 'metadata'
+}
+export const ENTITY_FILE_NAME = 'entity.json'
+export class Entity {
+  constructor(
+    public readonly id: EntityId,
+    public readonly type: EntityType,
+    public readonly pointers: Pointer[],
+    public readonly timestamp: Timestamp,
+    public readonly content?: Map<string, ContentFileHash>,
+    public readonly metadata?: any
+  ) {}
+}
+
+export const getCurrentUserId = () => identity.address
 
 const isActionFor = (type: string, userId: string) => (action: any) =>
   action.type === type && action.payload.userId === userId
@@ -76,7 +137,9 @@ const takeLatestByUserId = (patternOrChannel: any, saga: any, ...args: any) =>
  * It's *very* important for the renderer to never receive a passport with items that have not been loaded into the catalog.
  */
 export function* passportSaga(): any {
-  yield put(setProfileServer(getServerConfigurations().profile))
+  if (!(yield select(isRealmInitialized))) {
+    yield take(CATALYST_REALM_INITIALIZED)
+  }
   yield takeEvery(RENDERER_INITIALIZED, initialLoad)
 
   yield takeLatest(ADD_CATALOG, handleAddCatalog)
@@ -99,7 +162,7 @@ function takeLatestById<T extends Action>(
   keyFunction: (action: T) => string,
   saga: any,
   ...args: any
-): ForkEffect<never> {
+): ForkEffect {
   return fork(function*() {
     let lastTasks = new Map<any, any>()
     while (true) {
@@ -116,85 +179,111 @@ function takeLatestById<T extends Action>(
 }
 
 function overrideBaseUrl(wearable: Wearable) {
-  return { ...wearable, baseUrl: 'https://content.decentraland.org/contents/'
-  , baseUrlBundles: 'https://content-as-bundle.decentraland.zone/' }
+  return {
+    ...wearable,
+    baseUrl: getWearablesSafeURL() + '/contents/',
+    baseUrlBundles: getServerConfigurations().contentAsBundle + '/'
+  }
 }
 
 declare const window: any
 
 export function* initialLoad() {
-  try {
-    let collections: Collection[]
-    if (window.location.search.match(/TEST_WEARABLES/)) {
-      collections = [{ id: 'all', wearables: yield call(fetchCatalog, getServerConfigurations().avatar.catalog) }]
-    } else {
-      collections = yield call(fetchCatalog, getServerConfigurations().avatar.catalog)
+  if (WORLD_EXPLORER) {
+    try {
+      let collections: Collection[]
+      if (window.location.search.match(/TEST_WEARABLES/)) {
+        collections = [{ id: 'all', wearables: yield call(fetchCatalog, getServerConfigurations().avatar.catalog) }]
+      } else {
+        collections = yield call(fetchCatalog, getServerConfigurations().avatar.catalog)
+      }
+      const catalog = collections
+        .reduce((flatten, collection) => flatten.concat(collection.wearables), [] as Wearable[])
+        .map(overrideBaseUrl)
+      const baseAvatars = catalog.filter((_: Wearable) => _.tags && !_.tags.includes('exclusive'))
+      const baseExclusive = catalog.filter((_: Wearable) => _.tags && _.tags.includes('exclusive'))
+      if (!(yield select(isInitialized))) {
+        yield take(RENDERER_INITIALIZED)
+      }
+      yield put(addCatalog('base-avatars', baseAvatars))
+      yield put(addCatalog('base-exclusive', baseExclusive))
+    } catch (error) {
+      defaultLogger.error('[FATAL]: Could not load catalog!', error)
     }
-    const catalog = collections
-      .reduce((flatten, collection) => flatten.concat(collection.wearables), [] as Wearable[])
-      .map(overrideBaseUrl)
-    const baseAvatars = catalog.filter((_: Wearable) => !_.tags.includes('exclusive'))
-    const baseExclusive = catalog.filter((_: Wearable) => _.tags.includes('exclusive'))
-    if (!(yield select(isInitialized))) {
-      yield take(RENDERER_INITIALIZED)
+  } else {
+    let baseCatalog = []
+    try {
+      const response = yield fetch(getTutorialBaseURL() + '/default-profile/basecatalog.json')
+      baseCatalog = yield response.json()
+    } catch (e) {
+      defaultLogger.warn(`Could not load base catalog`)
     }
-    yield put(addCatalog('base-avatars', baseAvatars))
-    yield put(addCatalog('base-exclusive', baseExclusive))
-  } catch (error) {
-    defaultLogger.error('[FATAL]: Could not load catalog!', error)
+    yield put(addCatalog('base-avatars', baseCatalog))
+    yield put(addCatalog('base-exclusive', []))
   }
 }
 
 export function* handleFetchProfile(action: PassportRequestAction): any {
   const userId = action.payload.userId
-  try {
-    const serverUrl = yield select(getProfileDownloadServer)
-    const accessToken = yield select(getAccessToken)
-    const profile = yield call(profileServerRequest, serverUrl, userId, accessToken)
-    const currentId = yield select(getCurrentUserId)
-    if (currentId === userId) {
-      profile.email = yield select(getEmail)
-    }
-    if (ALL_WEARABLES) {
-      profile.inventory = (yield select(getExclusiveCatalog)).map((_: Wearable) => _.id)
-    } else {
-      if (profile.ethAddress) {
-        yield put(inventoryRequest(userId, profile.ethAddress))
-        const inventoryResult = yield race({
-          success: take(isActionFor(INVENTORY_SUCCESS, userId)),
-          failure: take(isActionFor(INVENTORY_FAILURE, userId))
-        })
-        if (inventoryResult.failure) {
-          defaultLogger.error(`Unable to fetch inventory for ${userId}:`, inventoryResult.failure)
-        } else {
-          profile.inventory = (inventoryResult.success as InventorySuccess).payload.inventory.map(
-            dropIndexFromExclusives
-          )
-        }
-      } else {
-        profile.inventory = []
+  const email = ''
+
+  const currentId = yield select(getCurrentUserId)
+  let profile: any
+  if (WORLD_EXPLORER) {
+    try {
+      const serverUrl = yield select(getProfileDownloadServer)
+      const profiles: { avatars: object[] } = yield call(profileServerRequest, serverUrl, userId)
+
+      if (profiles.avatars.length !== 0) {
+        profile = profiles.avatars[0]
       }
+    } catch (error) {
+      defaultLogger.warn(`Error requesting profile for ${userId}, `, error)
     }
-    const passport = yield call(processServerProfile, userId, profile)
-    yield put(passportSuccess(userId, passport))
-  } catch (error) {
-    const randomizedUserProfile = yield call(generateRandomUserProfile, userId)
-    const currentId = yield select(getCurrentUserId)
-    if (currentId === userId) {
-      randomizedUserProfile.email = yield select(getEmail)
+
+    const userInfo = getUserProfile()
+    if (!profile && userInfo && userInfo.userId && userId === userInfo.userId && userInfo.profile) {
+      defaultLogger.info(`Recover profile from local storage`)
+      profile = yield call(
+        ensureServerFormat,
+        { ...userInfo.profile, avatar: { ...userInfo.profile.avatar, snapshots: userInfo.profile.snapshots } },
+        userInfo.version || 0
+      )
     }
-    yield put(inventorySuccess(userId, randomizedUserProfile.inventory))
-    yield put(passportRandom(userId, randomizedUserProfile))
+
+    if (!profile) {
+      defaultLogger.info(`Profile for ${userId} not found, generating random profile`)
+      profile = yield call(generateRandomUserProfile, userId)
+    }
+  } else {
+    const baseUrl = yield call(getTutorialBaseURL)
+    profile = yield call(backupProfile, baseUrl + '/default-profile/snapshots', userId)
   }
+
+  if (currentId === userId) {
+    profile.email = email
+  }
+
+  if (!ALL_WEARABLES && WORLD_EXPLORER) {
+    yield put(inventoryRequest(userId, userId))
+    const inventoryResult = yield race({
+      success: take(isActionFor(INVENTORY_SUCCESS, userId)),
+      failure: take(isActionFor(INVENTORY_FAILURE, userId))
+    })
+    if (inventoryResult.failure) {
+      defaultLogger.error(`Unable to fetch inventory for ${userId}:`, inventoryResult.failure)
+    } else {
+      profile.inventory = (inventoryResult.success as InventorySuccess).payload.inventory.map(dropIndexFromExclusives)
+    }
+  }
+
+  const passport = yield call(processServerProfile, userId, profile)
+  yield put(passportSuccess(userId, passport))
 }
 
-export async function profileServerRequest(serverUrl: string, userId: string, accessToken: string) {
+export async function profileServerRequest(serverUrl: string, userId: string) {
   try {
-    const request = await fetch(`${serverUrl}/profile/${userId}`, {
-      headers: {
-        Authorization: 'Bearer ' + accessToken
-      }
-    })
+    const request = await fetch(`${serverUrl}/${userId}`)
     if (!request.ok) {
       throw new Error('Profile not found')
     }
@@ -242,20 +331,33 @@ export function handleNewInventoryItem() {
   })
 }
 
+export function* ensureRenderer() {
+  while (!(yield select(isInitialized))) {
+    yield take(RENDERER_INITIALIZED)
+  }
+}
+
+export function* ensureBaseCatalogs() {
+  while (!(yield select(baseCatalogsLoaded))) {
+    yield take(CATALOG_LOADED)
+  }
+}
+
 export function* submitPassportToRenderer(action: PassportSuccessAction): any {
+  const profile = { ...action.payload.profile }
   if ((yield select(getCurrentUserId)) === action.payload.userId) {
-    if (!(yield select(isInitialized))) {
-      yield take(RENDERER_INITIALIZED)
-    }
-    while (!(yield select(baseCatalogsLoaded))) {
-      yield take(CATALOG_LOADED)
-    }
-    const profile = { ...action.payload.profile }
+    yield call(ensureRenderer)
+    yield call(ensureBaseCatalogs)
     // FIXIT - need to have this duplicated here, as the inventory won't be used if not - moliva - 17/12/2019
     if (ALL_WEARABLES) {
       profile.inventory = (yield select(getExclusiveCatalog)).map((_: Wearable) => _.id)
     }
     yield call(sendLoadProfile, profile)
+  } else {
+    yield call(ensureRenderer)
+    yield call(ensureBaseCatalogs)
+
+    window['unityInterface'].AddUserProfileToCatalog(profileToRendererFormat(profile))
   }
 }
 
@@ -263,17 +365,7 @@ export function* sendLoadProfile(profile: Profile) {
   while (!(yield select(baseCatalogsLoaded))) {
     yield take(CATALOG_LOADED)
   }
-  window['unityInterface'].LoadProfile(profileToRendererFormat(profile))
-}
-
-export function fetchCurrentProfile(accessToken: string, uuid: string) {
-  const authHeader = {
-    headers: {
-      Authorization: 'Bearer ' + accessToken
-    }
-  }
-  const request = `${getServerConfigurations().profile}/profile${uuid ? '/' + uuid : ''}`
-  return fetch(request, authHeader)
+  window['unityInterface'].LoadProfile(profileToRendererFormat(profile, identity))
 }
 
 export function* handleFetchInventory(action: InventoryRequest) {
@@ -294,6 +386,9 @@ function dropIndexFromExclusives(exclusive: string) {
 }
 
 export async function fetchInventoryItemsByAddress(address: string) {
+  if (!WORLD_EXPLORER) {
+    return []
+  }
   const result = await fetch(`${getServerConfigurations().wearablesApi}/addresses/${address}/wearables?fields=id`)
   if (!result.ok) {
     throw new Error('Unable to fetch inventory for address ' + address)
@@ -305,72 +400,241 @@ export async function fetchInventoryItemsByAddress(address: string) {
 
 export function* handleSaveAvatar(saveAvatar: SaveAvatarRequest) {
   const userId = saveAvatar.payload.userId ? saveAvatar.payload.userId : yield select(getCurrentUserId)
+
   try {
-    const currentVersion = (yield select(getProfile, userId)).version || 0
-    const accessToken = yield select(getAccessToken)
-    const url = getServerConfigurations().profile + '/profile/' + userId + '/avatar'
-    const profile = saveAvatar.payload.profile
-    const result = yield call(modifyAvatar, {
-      url,
-      method: 'PUT',
-      userId,
-      currentVersion,
-      accessToken,
-      profile
-    })
-    const { version } = result
-    yield put(saveAvatarSuccess(userId, version, profile))
-    yield put(passportRequest(userId))
+    const savedProfile = yield select(getProfile, userId)
+    const currentVersion = savedProfile.version || 0
+    const url: string = yield select(getUpdateProfileServer)
+    const profile = { ...savedProfile, ...saveAvatar.payload.profile }
+
+    // only update profile if wallet is connected
+    if (identity.hasConnectedWeb3) {
+      const result = yield call(modifyAvatar, {
+        url,
+        userId,
+        currentVersion,
+        identity,
+        profile
+      })
+
+      const { creationTimestamp: version } = result
+
+      yield put(saveAvatarSuccess(userId, version, profile))
+      yield put(passportRequest(userId))
+    }
   } catch (error) {
     yield put(saveAvatarFailure(userId, 'unknown reason'))
   }
 }
 
-/**
- * @TODO (eordano, 16/Sep/2019): Upgrade the avatar schema on Profile Server
- */
-export async function modifyAvatar(params: {
-  url: string
-  method: string
-  currentVersion: number
-  userId: string
-  accessToken: string
-  profile: { avatar: Avatar; face: string; body: string }
-}) {
-  const { url, method, currentVersion, profile, accessToken } = params
-  const { face, avatar, body } = profile
-  const snapshots = await saveSnapshots(
-    getServerConfigurations().profile + '/profile/' + params.userId,
-    accessToken,
-    face,
-    body
-  )
-  const avatarData: any = avatar
-  avatarData.snapshots = snapshots
-  const payload = JSON.stringify(ensureServerFormat(avatarData, currentVersion))
-  const options = {
-    method,
-    body: payload,
-    headers: {
-      Authorization: 'Bearer ' + accessToken
+export class ControllerEntityFactory {
+  static maskEntity(fullEntity: Entity, fields?: EntityField[]): ControllerEntity {
+    const { id, type, timestamp } = fullEntity
+    let content: ControllerEntityContent[] | undefined = undefined
+    let metadata: any
+    let pointers: string[] = []
+    if ((!fields || fields.includes(EntityField.CONTENT)) && fullEntity.content) {
+      content = Array.from(fullEntity.content.entries()).map(([file, hash]) => ({ file, hash }))
     }
+    if (!fields || fields.includes(EntityField.METADATA)) {
+      metadata = fullEntity.metadata
+    }
+    if ((!fields || fields.includes(EntityField.POINTERS)) && fullEntity.pointers) {
+      pointers = fullEntity.pointers
+    }
+    return { id, type, timestamp, pointers, content, metadata }
   }
-
-  const response = await fetch(url, options)
-  return response.json()
 }
 
-async function saveSnapshots(userURL: string, accessToken: string, face: string, body: string) {
-  const data = new FormData()
-  data.append('face', base64ToBlob(face), 'face.png')
-  data.append('body', base64ToBlob(body), 'body.png')
-  return (await fetch(`${userURL}/snapshot`, {
-    method: 'POST',
-    body: data,
-    headers: {
-      Authorization: 'Bearer ' + accessToken
+async function buildControllerEntityAndFile(
+  type: EntityType,
+  pointers: Pointer[],
+  timestamp: Timestamp,
+  content?: Map<string, ContentFileHash>,
+  metadata?: any
+): Promise<[ControllerEntity, ContentFile]> {
+  const [entity, file]: [Entity, ContentFile] = await buildEntityAndFile(type, pointers, timestamp, content, metadata)
+  return [ControllerEntityFactory.maskEntity(entity), file]
+}
+
+export async function buildEntityAndFile(
+  type: EntityType,
+  pointers: Pointer[],
+  timestamp: Timestamp,
+  content?: Map<string, ContentFileHash>,
+  metadata?: any
+): Promise<[Entity, ContentFile]> {
+  const entity: Entity = new Entity('temp-id', type, pointers, timestamp, content, metadata)
+  const file: ContentFile = entityToFile(entity, ENTITY_FILE_NAME)
+  const fileHash: ContentFileHash = await calculateBufferHash(file.content)
+  const entityWithCorrectId = new Entity(
+    fileHash,
+    entity.type,
+    entity.pointers,
+    entity.timestamp,
+    entity.content,
+    entity.metadata
+  )
+  return [entityWithCorrectId, file]
+}
+
+export function entityToFile(entity: Entity, fileName?: string): ContentFile {
+  let copy: any = Object.assign({}, entity)
+  copy.content =
+    !copy.content || !(copy.content instanceof Map)
+      ? copy.content
+      : Array.from(copy.content.entries()).map(([key, value]: any) => ({ file: key, hash: value }))
+  delete copy.id
+  return { name: fileName || 'name', content: Buffer.from(JSON.stringify(copy)) }
+}
+
+export async function calculateBufferHash(buffer: Buffer): Promise<string> {
+  const hash = await multihashing(buffer, 'sha2-256')
+  return new CID(0, 'dag-pb', hash).toBaseEncodedString()
+}
+
+export async function modifyAvatar(params: {
+  url: string
+  currentVersion: number
+  userId: string
+  identity: ExplorerIdentity
+  profile: Profile
+}) {
+  const { url, currentVersion, profile, identity } = params
+  const { avatar } = profile
+
+  const newAvatar = { ...avatar }
+
+  let files: ContentFile[] = []
+
+  const snapshots = avatar.snapshots || (profile as any).snapshots
+  if (snapshots) {
+    if (snapshots.face.includes('://') && snapshots.body.includes('://')) {
+      newAvatar.snapshots = {
+        face: snapshots.face.split('/').pop()!,
+        body: snapshots.body.split('/').pop()!
+      }
+    } else {
+      // replace base64 snapshots with their respective hashes
+      const faceFile: ContentFile = await makeContentFile('./face.png', base64ToBlob(snapshots.face))
+      const bodyFile: ContentFile = await makeContentFile('./body.png', base64ToBlob(snapshots.body))
+
+      const faceFileHash: string = await calculateBufferHash(faceFile.content)
+      const bodyFileHash: string = await calculateBufferHash(bodyFile.content)
+
+      newAvatar.snapshots = {
+        face: faceFileHash,
+        body: bodyFileHash
+      }
+      files = [faceFile, bodyFile]
     }
-  })).json()
+  }
+  const newProfile = ensureServerFormat({ ...profile, avatar: newAvatar }, currentVersion)
+
+  const [data] = await buildDeployData(
+    [identity.address],
+    {
+      avatars: [newProfile]
+    },
+    files
+  )
+  return deploy(url, data)
+}
+
+export function makeContentFile(path: string, content: string | Blob): Promise<ContentFile> {
+  return new Promise((resolve, reject) => {
+    if (typeof content === 'string') {
+      const buffer = Buffer.from(content)
+      resolve({ name: path, content: buffer })
+    } else if (content instanceof Blob) {
+      toBuffer(content, (err: Error, buffer: Buffer) => {
+        if (err) reject(err)
+        resolve({ name: path, content: buffer })
+      })
+    } else {
+      reject(new Error('Unable to create ContentFile: content must be a string or a Blob'))
+    }
+  })
+}
+
+export async function buildDeployData(
+  pointers: Pointer[],
+  metadata: any,
+  files: ContentFile[] = [],
+  afterEntity?: ControllerEntity
+): Promise<[DeployData, ControllerEntity]> {
+  const hashes: Map<ContentFileHash, ContentFile> = await calculateHashes(files)
+  const content: Map<string, string> = new Map(Array.from(hashes.entries()).map(([hash, file]) => [file.name, hash]))
+
+  const [entity, entityFile] = await buildControllerEntityAndFile(
+    EntityType.PROFILE,
+    pointers,
+    (afterEntity ? afterEntity.timestamp : Date.now()) + 1,
+    content,
+    metadata
+  )
+
+  const body = await hashAndSignMessage(entity.id)
+  const deployData: DeployData = {
+    entityId: entity.id,
+    // Every position in the body ethAddress every position in the authLink is an slavon.
+    // 1 = ethAddress, 2 ehpemeral & signature w/ethAdrress, 3 request & signature with ephemeral
+    authChain: body,
+    files: [entityFile, ...files]
+  }
+
+  return [deployData, entity]
+}
+
+export async function hashAndSignMessage(message: string): Promise<AuthLink[]> {
+  return Authenticator.signPayload(identity, message)
+}
+
+export function createEthereumMessageHash(msg: string) {
+  let msgWithPrefix: string = `\x19Ethereum Signed Message:\n${msg.length}${msg}`
+  return sha3(msgWithPrefix)
+}
+
+export async function calculateHashes(files: ContentFile[]): Promise<Map<string, ContentFile>> {
+  const entries: Promise<[string, ContentFile]>[] = Array.from(files).map(file =>
+    calculateBufferHash(file.content).then((hash: string) => [hash, file])
+  )
+  return new Map(await Promise.all(entries))
+}
+
+export async function deploy(contentServerUrl: string, data: DeployData) {
+  const form = new FormData()
+  form.append('entityId', data.entityId)
+  convertModelToFormData(data.authChain, form, 'authChain')
+  for (let file of data.files) {
+    form.append(file.name, new Blob([file.content]), file.name)
+  }
+  const deployResponse = await fetch(`${contentServerUrl}/entities`, {
+    method: 'POST',
+    body: form
+  })
+  return deployResponse.json()
+}
+
+function convertModelToFormData(model: any, form: FormData = new FormData(), namespace = ''): FormData {
+  let formData = form || new FormData()
+  for (let propertyName in model) {
+    if (!model.hasOwnProperty(propertyName) || !model[propertyName]) continue
+    let formKey = namespace ? `${namespace}[${propertyName}]` : propertyName
+    if (model[propertyName] instanceof Date) {
+      formData.append(formKey, model[propertyName].toISOString())
+    } else if (model[propertyName] instanceof Array) {
+      model[propertyName].forEach((element: any, index: number) => {
+        const tempFormKey = `${formKey}[${index}]`
+        convertModelToFormData(element, formData, tempFormKey)
+      })
+    } else if (typeof model[propertyName] === 'object' && !(model[propertyName] instanceof File)) {
+      convertModelToFormData(model[propertyName], formData, formKey)
+    } else {
+      formData.append(formKey, model[propertyName].toString())
+    }
+  }
+  return formData
 }
 
 export function base64ToBlob(base64: string): Blob {
@@ -439,7 +703,7 @@ export function* compareInventoriesAndTriggerNotification(
   saveToDb = saveToLocalStorage
 ) {
   if (areInventoriesDifferent(oldInventory, newInventory)) {
-    const oldItemsDict = oldInventory.reduce(
+    const oldItemsDict = oldInventory.reduce<Record<WearableId, boolean>>(
       (cumm: Record<WearableId, boolean>, id: string) => ({ ...cumm, [id]: true }),
       {}
     )

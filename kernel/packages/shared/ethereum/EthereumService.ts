@@ -5,7 +5,7 @@ import { defaultLogger } from 'shared/logger'
 import { RPCSendableMessage } from 'shared/types'
 import { getERC20 } from './ERC20'
 import { getERC721 } from './ERC721'
-import { requestManager } from './provider'
+import { requestManager, getUserAccount as getUserAccountPrime } from './provider'
 
 export interface MessageDict {
   [key: string]: string
@@ -46,17 +46,7 @@ function isWhitelistedRPC(msg: RPCSendableMessage) {
 }
 
 export async function getUserAccount(): Promise<string | undefined> {
-  try {
-    const publicKeys = await requestManager.eth_accounts()
-
-    if (!publicKeys || publicKeys.length === 0) {
-      return undefined
-    }
-
-    return publicKeys[0]
-  } catch (error) {
-    throw new Error(`Could not access eth_accounts: "${error.message}"`)
-  }
+  return getUserAccountPrime()
 }
 
 export async function getNetwork(): Promise<string> {

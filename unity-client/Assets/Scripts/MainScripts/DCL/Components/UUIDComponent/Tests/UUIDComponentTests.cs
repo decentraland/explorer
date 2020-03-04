@@ -7,8 +7,8 @@ using Newtonsoft.Json;
 using NUnit.Framework;
 using System.Collections;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.TestTools;
+using UnityEngine.UI;
 
 namespace Tests
 {
@@ -50,10 +50,9 @@ namespace Tests
             var component = TestHelpers.EntityComponentCreate<OnClick, OnClick.Model>(scene, entity,
                 OnClickComponentModel, CLASS_ID_COMPONENT.UUID_CALLBACK);
 
-            Assert.IsTrue(entity.gameObject.GetComponent<Rigidbody>() != null,
-                "the root object should have a rigidbody attached to detect its children collisions for the OnClick functionality");
+            var componentGO = component.gameObject;
 
-            var meshFilter = entity.gameObject.GetComponentInChildren<MeshFilter>();
+            var meshFilter = component.entity.gameObject.GetComponentInChildren<MeshFilter>();
             var onPointerEventCollider = meshFilter.transform.Find(OnPointerEventColliders.COLLIDER_NAME);
 
             Assert.IsTrue(onPointerEventCollider != null, "OnPointerEventCollider should exist under any rendeder");
@@ -77,11 +76,9 @@ namespace Tests
                 type = "pointerUp",
                 uuid = onPointerId
             };
+
             var component = TestHelpers.EntityComponentCreate<OnPointerDown, OnPointerDown.Model>(scene, entity,
                 OnPointerDownModel, CLASS_ID_COMPONENT.UUID_CALLBACK);
-
-            Assert.IsTrue(entity.gameObject.GetComponent<Rigidbody>() != null,
-                "the root object should have a rigidbody attached to detect its children collisions for the OnPointerDown functionality");
 
             var meshFilter = entity.gameObject.GetComponentInChildren<MeshFilter>();
             var onPointerEventCollider = meshFilter.transform.Find(OnPointerEventColliders.COLLIDER_NAME);
@@ -110,9 +107,6 @@ namespace Tests
             var component = TestHelpers.EntityComponentCreate<OnPointerUp, OnPointerUp.Model>(scene, entity,
                 OnPointerUpComponentModel, CLASS_ID_COMPONENT.UUID_CALLBACK);
 
-            Assert.IsTrue(entity.gameObject.GetComponent<Rigidbody>() != null,
-                "the root object should have a rigidbody attached to detect its children collisions for the OnPointerUp functionality");
-
             var meshFilter = entity.gameObject.GetComponentInChildren<MeshFilter>();
             var onPointerEventCollider = meshFilter.transform.Find(OnPointerEventColliders.COLLIDER_NAME);
 
@@ -139,7 +133,7 @@ namespace Tests
                     src = DCL.Helpers.Utils.GetTestsAssetsPath() + "/GLB/Lantern/Lantern.glb"
                 }));
 
-            LoadWrapper_GLTF gltfShape = scene.entities[entityId].gameObject.GetComponentInChildren<LoadWrapper_GLTF>();
+            LoadWrapper gltfShape = GLTFShape.GetLoaderForEntity(scene.entities[entityId]);
             yield return new DCL.WaitUntil(() => gltfShape.alreadyLoaded, 7f);
 
             Assert.IsTrue(
@@ -153,15 +147,13 @@ namespace Tests
                 uuid = clickUuid
             };
 
-            TestHelpers.EntityComponentCreate<OnClick, OnClick.Model>(scene, scene.entities[entityId],
+            var component = TestHelpers.EntityComponentCreate<OnClick, OnClick.Model>(scene, scene.entities[entityId],
                 OnClickComponentModel, CLASS_ID_COMPONENT.UUID_CALLBACK);
 
-            Assert.IsTrue(scene.entities[entityId].gameObject.GetComponent<Rigidbody>() != null,
-                "the root object should have a rigidbody attached to detect its children collisions for the OnClick functionality");
+            var componentGO = component.gameObject;
 
-            foreach (var meshFilter in scene.entities[entityId].gameObject.GetComponentsInChildren<MeshFilter>())
+            foreach (var meshFilter in componentGO.GetComponentsInChildren<MeshFilter>())
             {
-                Debug.Log("filter = " + meshFilter.gameObject.name);
                 var onPointerEventCollider = meshFilter.transform.Find(OnPointerEventColliders.COLLIDER_NAME);
 
                 Assert.IsTrue(onPointerEventCollider != null, "OnPointerEventCollider should exist under any rendeder");
@@ -188,7 +180,7 @@ namespace Tests
                     src = DCL.Helpers.Utils.GetTestsAssetsPath() + "/GLB/Lantern/Lantern.glb"
                 }));
 
-            LoadWrapper_GLTF gltfShape = scene.entities[entityId].gameObject.GetComponentInChildren<LoadWrapper_GLTF>();
+            LoadWrapper gltfShape = GLTFShape.GetLoaderForEntity(scene.entities[entityId]);
             yield return new DCL.WaitUntil(() => gltfShape.alreadyLoaded, 7f);
 
             Assert.IsTrue(
@@ -201,11 +193,9 @@ namespace Tests
                 type = "pointerDown",
                 uuid = clickUuid
             };
-            TestHelpers.EntityComponentCreate<OnPointerDown, OnPointerDown.Model>(scene, scene.entities[entityId],
-                OnPointerDownModel, CLASS_ID_COMPONENT.UUID_CALLBACK);
 
-            Assert.IsTrue(scene.entities[entityId].gameObject.GetComponent<Rigidbody>() != null,
-                "the root object should have a rigidbody attached to detect its children collisions for the OnPointerDown functionality");
+            var component = TestHelpers.EntityComponentCreate<OnPointerDown, OnPointerDown.Model>(scene, scene.entities[entityId],
+                OnPointerDownModel, CLASS_ID_COMPONENT.UUID_CALLBACK);
 
             foreach (var meshFilter in scene.entities[entityId].gameObject.GetComponentsInChildren<MeshFilter>())
             {
@@ -235,7 +225,7 @@ namespace Tests
                     src = DCL.Helpers.Utils.GetTestsAssetsPath() + "/GLB/Lantern/Lantern.glb"
                 }));
 
-            LoadWrapper_GLTF gltfShape = scene.entities[entityId].gameObject.GetComponentInChildren<LoadWrapper_GLTF>();
+            LoadWrapper gltfShape = GLTFShape.GetLoaderForEntity(scene.entities[entityId]);
             yield return new DCL.WaitUntil(() => gltfShape.alreadyLoaded, 7f);
 
             Assert.IsTrue(
@@ -248,11 +238,9 @@ namespace Tests
                 type = "pointerUp",
                 uuid = clickUuid
             };
-            TestHelpers.EntityComponentCreate<OnPointerUp, OnPointerUp.Model>(scene, scene.entities[entityId],
-                OnPointerUpComponentModel, CLASS_ID_COMPONENT.UUID_CALLBACK);
 
-            Assert.IsTrue(scene.entities[entityId].gameObject.GetComponent<Rigidbody>() != null,
-                "the root object should have a rigidbody attached to detect its children collisions for the OnPointerDown functionality");
+            var component = TestHelpers.EntityComponentCreate<OnPointerUp, OnPointerUp.Model>(scene, scene.entities[entityId],
+                OnPointerUpComponentModel, CLASS_ID_COMPONENT.UUID_CALLBACK);
 
             foreach (var meshFilter in scene.entities[entityId].gameObject.GetComponentsInChildren<MeshFilter>())
             {
@@ -287,18 +275,16 @@ namespace Tests
                 type = OnClick.NAME,
                 uuid = clickUuid
             };
-            TestHelpers.EntityComponentCreate<OnClick, OnClick.Model>(scene, scene.entities[entityId],
+
+            var uuidComponent = TestHelpers.EntityComponentCreate<OnClick, OnClick.Model>(scene, scene.entities[entityId],
                 OnClickComponentModel, CLASS_ID_COMPONENT.UUID_CALLBACK);
 
-            LoadWrapper_GLTF gltfShape = scene.entities[entityId].gameObject.GetComponentInChildren<LoadWrapper_GLTF>();
+            LoadWrapper gltfShape = GLTFShape.GetLoaderForEntity(scene.entities[entityId]);
             yield return new DCL.WaitUntil(() => gltfShape.alreadyLoaded, 7f);
 
             Assert.IsTrue(
                 scene.entities[entityId].gameObject.GetComponentInChildren<UnityGLTF.InstantiatedGLTFObject>() != null,
                 "'GLTFScene' child object with 'InstantiatedGLTF' component should exist if the GLTF was loaded correctly");
-
-            Assert.IsTrue(scene.entities[entityId].gameObject.GetComponent<Rigidbody>() != null,
-                "the root object should have a rigidbody attached to detect its children collisions for the OnClick functionality");
 
             foreach (var meshFilter in scene.entities[entityId].gameObject.GetComponentsInChildren<MeshFilter>())
             {
@@ -336,15 +322,12 @@ namespace Tests
             TestHelpers.EntityComponentCreate<OnPointerDown, OnPointerDown.Model>(scene, scene.entities[entityId],
                 OnPointerDownModel, CLASS_ID_COMPONENT.UUID_CALLBACK);
 
-            LoadWrapper_GLTF gltfShape = scene.entities[entityId].gameObject.GetComponentInChildren<LoadWrapper_GLTF>();
+            LoadWrapper gltfShape = GLTFShape.GetLoaderForEntity(scene.entities[entityId]);
             yield return new DCL.WaitUntil(() => gltfShape.alreadyLoaded, 7f);
 
             Assert.IsTrue(
                 scene.entities[entityId].gameObject.GetComponentInChildren<UnityGLTF.InstantiatedGLTFObject>() != null,
                 "'GLTFScene' child object with 'InstantiatedGLTF' component should exist if the GLTF was loaded correctly");
-
-            Assert.IsTrue(scene.entities[entityId].gameObject.GetComponent<Rigidbody>() != null,
-                "the root object should have a rigidbody attached to detect its children collisions for the OnPointerDown functionality");
 
             foreach (var meshFilter in scene.entities[entityId].gameObject.GetComponentsInChildren<MeshFilter>())
             {
@@ -379,18 +362,16 @@ namespace Tests
                 type = "pointerUp",
                 uuid = clickUuid
             };
-            TestHelpers.EntityComponentCreate<OnPointerUp, OnPointerUp.Model>(scene, scene.entities[entityId],
+
+            var component = TestHelpers.EntityComponentCreate<OnPointerUp, OnPointerUp.Model>(scene, scene.entities[entityId],
                 OnPointerUpModel, CLASS_ID_COMPONENT.UUID_CALLBACK);
 
-            LoadWrapper_GLTF gltfShape = scene.entities[entityId].gameObject.GetComponentInChildren<LoadWrapper_GLTF>();
+            LoadWrapper gltfShape = GLTFShape.GetLoaderForEntity(scene.entities[entityId]);
             yield return new DCL.WaitUntil(() => gltfShape.alreadyLoaded, 7f);
 
             Assert.IsTrue(
                 scene.entities[entityId].gameObject.GetComponentInChildren<UnityGLTF.InstantiatedGLTFObject>() != null,
                 "'GLTFScene' child object with 'InstantiatedGLTF' component should exist if the GLTF was loaded correctly");
-
-            Assert.IsTrue(scene.entities[entityId].gameObject.GetComponent<Rigidbody>() != null,
-                "the root object should have a rigidbody attached to detect its children collisions for the OnPointerUp functionality");
 
             foreach (var meshFilter in scene.entities[entityId].gameObject.GetComponentsInChildren<MeshFilter>())
             {
@@ -423,20 +404,17 @@ namespace Tests
 
             yield return component.routine;
 
-            Assert.IsTrue(scene.entities[entityId].gameObject.GetComponent<Rigidbody>() == null,
+            Assert.IsTrue(component.gameObject.GetComponent<Rigidbody>() == null,
                 "the root object shouldn't have a rigidbody attached until a shape is added");
 
-            Assert.IsTrue(scene.entities[entityId].gameObject.transform.Find(OnPointerEventColliders.COLLIDER_NAME) == null,
+            Assert.IsTrue(component.gameObject.transform.Find(OnPointerEventColliders.COLLIDER_NAME) == null,
                 "the OnPointerEventCollider object shouldn't exist until a shape is added");
 
             TestHelpers.CreateAndSetShape(scene, entityId, DCL.Models.CLASS_ID.BOX_SHAPE,
                 JsonConvert.SerializeObject(new BoxShape.Model { })
             );
 
-            Assert.IsTrue(scene.entities[entityId].gameObject.GetComponent<Rigidbody>() != null,
-                "the root object should have a rigidbody attached to detect its children collisions for the OnClick functionality");
-
-            var meshFilter = scene.entities[entityId].gameObject.GetComponentInChildren<MeshFilter>();
+            var meshFilter = component.entity.gameObject.GetComponentInChildren<MeshFilter>();
             var onPointerEventCollider = meshFilter.transform.Find(OnPointerEventColliders.COLLIDER_NAME);
 
             Assert.IsTrue(onPointerEventCollider != null, "OnPointerEventCollider should exist under any rendeder");
@@ -458,10 +436,10 @@ namespace Tests
                 uuid = clickUuid
             };
 
-            TestHelpers.EntityComponentCreate<OnPointerDown, OnPointerDown.Model>(scene, scene.entities[entityId],
+            var uuidComponent = TestHelpers.EntityComponentCreate<OnPointerDown, OnPointerDown.Model>(scene, scene.entities[entityId],
                 OnPointerDownModel, CLASS_ID_COMPONENT.UUID_CALLBACK);
 
-            Assert.IsTrue(scene.entities[entityId].gameObject.GetComponent<Rigidbody>() == null,
+            Assert.IsTrue(uuidComponent.gameObject.GetComponent<Rigidbody>() == null,
                 "the root object shouldn't have a rigidbody attached until a shape is added");
 
             Assert.IsTrue(scene.entities[entityId].gameObject.transform.Find(OnPointerEventColliders.COLLIDER_NAME) == null,
@@ -470,9 +448,6 @@ namespace Tests
             TestHelpers.CreateAndSetShape(scene, entityId, DCL.Models.CLASS_ID.BOX_SHAPE,
                 JsonConvert.SerializeObject(new BoxShape.Model { })
             );
-
-            Assert.IsTrue(scene.entities[entityId].gameObject.GetComponent<Rigidbody>() != null,
-                "the root object should have a rigidbody attached to detect its children collisions for the OnPointerDown functionality");
 
             var meshFilter = scene.entities[entityId].gameObject.GetComponentInChildren<MeshFilter>();
             var onPointerEventCollider = meshFilter.transform.Find(OnPointerEventColliders.COLLIDER_NAME);
@@ -498,10 +473,10 @@ namespace Tests
                 uuid = clickUuid
             };
 
-            TestHelpers.EntityComponentCreate<OnPointerUp, OnPointerUp.Model>(scene, scene.entities[entityId],
+            var component = TestHelpers.EntityComponentCreate<OnPointerUp, OnPointerUp.Model>(scene, scene.entities[entityId],
                 OnPointerUpComponentModel, CLASS_ID_COMPONENT.UUID_CALLBACK);
 
-            Assert.IsTrue(scene.entities[entityId].gameObject.GetComponent<Rigidbody>() == null,
+            Assert.IsTrue(component.gameObject.GetComponent<Rigidbody>() == null,
                 "the root object shouldn't have a rigidbody attached until a shape is added");
 
             Assert.IsTrue(scene.entities[entityId].gameObject.transform.Find(OnPointerEventColliders.COLLIDER_NAME) == null,
@@ -510,9 +485,6 @@ namespace Tests
             TestHelpers.CreateAndSetShape(scene, entityId, DCL.Models.CLASS_ID.BOX_SHAPE,
                 JsonConvert.SerializeObject(new BoxShape.Model { })
             );
-
-            Assert.IsTrue(scene.entities[entityId].gameObject.GetComponent<Rigidbody>() != null,
-                "the root object should have a rigidbody attached to detect its children collisions for the OnPointerUp functionality");
 
             var meshFilter = scene.entities[entityId].gameObject.GetComponentInChildren<MeshFilter>();
             var onPointerEventCollider = meshFilter.transform.Find(OnPointerEventColliders.COLLIDER_NAME);
@@ -830,56 +802,46 @@ namespace Tests
         }
 
         [UnityTest]
-        public IEnumerator OnPointerHoverFeedbackIsDisplayedCorrectly()
+        public IEnumerator OnPointerDownEventAndPointerBlockerShape()
         {
-            DecentralandEntity entity;
-            BoxShape shape;
-            InstantiateEntityWithShape(out entity, out shape);
-            TestHelpers.SetEntityTransform(scene, entity, new Vector3(8, 2, 10), Quaternion.identity, new Vector3(3, 3, 3));
-            yield return shape.routine;
+            CameraController cameraController = GameObject.FindObjectOfType<CameraController>();
+            cameraController.SetCameraMode(CameraStateBase.ModeId.FirstPerson);
+            cameraController.currentCameraState.defaultVirtualCamera.Follow = DCLCharacterController.i.transform;
 
-            var OnPointerDownModel = new OnPointerDown.Model()
-            {
-                type = OnPointerDown.NAME,
-                uuid = "pointerevent-1"
-            };
-            var component = TestHelpers.EntityComponentCreate<OnPointerDown, OnPointerDown.Model>(scene, entity,
-                OnPointerDownModel, CLASS_ID_COMPONENT.UUID_CALLBACK);
-            Assert.IsTrue(component != null);
+            Assert.IsNotNull(cameraController, "camera is null?");
 
-            yield return null;
+            // Create blocking entity
+            DecentralandEntity blockingEntity;
+            BoxShape blockingShape;
+            InstantiateEntityWithShape(out blockingEntity, out blockingShape);
+            TestHelpers.SetEntityTransform(scene, blockingEntity, new Vector3(3, 3, 3), Quaternion.identity, new Vector3(1, 1, 1));
 
+            yield return blockingShape.routine;
+
+            // Create target entity for click
+            DecentralandEntity clickTargetEntity;
+            BoxShape clickTargetShape;
+            InstantiateEntityWithShape(out clickTargetEntity, out clickTargetShape);
+            TestHelpers.SetEntityTransform(scene, clickTargetEntity, new Vector3(3, 3, 5), Quaternion.identity, new Vector3(1, 1, 1));
+
+            yield return clickTargetShape.routine;
+
+            // Set character position and camera rotation
             DCLCharacterController.i.PauseGravity();
-            DCLCharacterController.i.SetPosition(new Vector3(8, 1, 7f));
-
-            var cameraController = GameObject.FindObjectOfType<CameraController>();
-
-            // Rotate camera towards the interactive object
-            var cameraRotationPayload = new CameraController.SetRotationPayload()
+            DCLCharacterController.i.characterController.enabled = false;
+            DCLCharacterController.i.Teleport(JsonConvert.SerializeObject(new
             {
-                x = 45,
-                y = 0,
-                z = 0
-            };
-            cameraController.SetRotation(JsonConvert.SerializeObject(cameraRotationPayload, Formatting.None, new JsonSerializerSettings()
-            {
-                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+                x = 3f,
+                y = 2f,
+                z = 1f
             }));
 
-            yield return null;
-
-            var hoverCanvas = PointerEventsController.i.GetComponentInChildren<InteractionHoverCanvasController>().canvas;
-            Assert.IsNotNull(hoverCanvas);
-
-            Assert.IsTrue(hoverCanvas.enabled);
-
-            // Rotate the camera away from the interactive object
-            cameraRotationPayload = new CameraController.SetRotationPayload()
+            var cameraRotationPayload = new CameraController.SetRotationPayload()
             {
                 x = 0,
                 y = 0,
                 z = 0,
-                cameraTarget = (DCLCharacterController.i.transform.position - entity.gameObject.transform.position)
+                cameraTarget = new Vector3(0, 0, 1)
             };
             cameraController.SetRotation(JsonConvert.SerializeObject(cameraRotationPayload, Formatting.None, new JsonSerializerSettings()
             {
@@ -888,10 +850,87 @@ namespace Tests
 
             yield return null;
 
-            Assert.IsFalse(hoverCanvas.enabled);
+            // Create pointer down component and add it to target entity
+            string onPointerId = "pointerevent-1";
+            var OnPointerDownModel = new OnPointerDown.Model()
+            {
+                type = OnPointerDown.NAME,
+                uuid = onPointerId
+            };
 
-            DCLCharacterController.i.ResumeGravity();
+            var component = TestHelpers.EntityComponentCreate<OnPointerDown, OnPointerDown.Model>(scene, clickTargetEntity,
+                OnPointerDownModel, CLASS_ID_COMPONENT.UUID_CALLBACK);
+
+            yield return component.routine;
+
+            Assert.IsTrue(component != null);
+            Assert.IsTrue(clickTargetEntity != null);
+            Assert.IsTrue(component.entity != null);
+
+            string targetEventType = "SceneEvent";
+
+            var onPointerDownEvent = new WebInterface.OnPointerDownEvent();
+            onPointerDownEvent.uuid = onPointerId;
+            onPointerDownEvent.payload = new WebInterface.OnPointerEventPayload();
+            onPointerDownEvent.payload.hit = new WebInterface.OnPointerEventPayload.Hit();
+            onPointerDownEvent.payload.hit.entityId = component.entity.entityId;
+            onPointerDownEvent.payload.hit.meshName = component.name;
+
+            var sceneEvent = new WebInterface.SceneEvent<WebInterface.OnPointerDownEvent>();
+            sceneEvent.sceneId = scene.sceneData.id;
+            sceneEvent.payload = onPointerDownEvent;
+            sceneEvent.eventType = "uuidEvent";
+
+            // Check the target entity is not hit behind the 'isPointerBlocker' shape
+            bool targetEntityHit = false;
+            yield return TestHelpers.WaitForEventFromEngine(targetEventType, sceneEvent,
+                () =>
+                {
+                    DCL.InputController_Legacy.i.RaiseEvent(WebInterface.ACTION_BUTTON.POINTER, DCL.InputController_Legacy.EVENT.BUTTON_DOWN, true);
+                },
+                (pointerEvent) =>
+                {
+                    if (pointerEvent.eventType == "uuidEvent" &&
+                        pointerEvent.payload.uuid == onPointerId &&
+                        pointerEvent.payload.payload.hit.entityId == clickTargetEntity.entityId)
+                    {
+                        targetEntityHit = true;
+                    }
+                    return true;
+                });
+
+            Assert.IsFalse(targetEntityHit, "Target entity was hit but other entity was blocking it");
+
+            // Toggle 'isPointerBlocker' property
+            yield return TestHelpers.SharedComponentUpdate(blockingShape, new BoxShape.Model
+            {
+                isPointerBlocker = false
+            });
+
+            // Check the target entity is hit behind the 'isPointerBlocker' shape now
+            targetEntityHit = false;
+            yield return TestHelpers.WaitForEventFromEngine(targetEventType, sceneEvent,
+                () =>
+                {
+                    DCL.InputController_Legacy.i.RaiseEvent(WebInterface.ACTION_BUTTON.POINTER, DCL.InputController_Legacy.EVENT.BUTTON_DOWN, true);
+                },
+                (pointerEvent) =>
+                {
+                    if (pointerEvent.eventType == "uuidEvent" &&
+                        pointerEvent.payload.uuid == onPointerId &&
+                        pointerEvent.payload.payload.hit.entityId == clickTargetEntity.entityId)
+                    {
+                        targetEntityHit = true;
+                    }
+                    return true;
+                });
+
+            yield return null;
+
+            Assert.IsTrue(targetEntityHit, "Target entity wasn't hit and no other entity is blocking it");
         }
+
+
 
         [UnityTest]
         public IEnumerator OnPointerHoverFeedbackPropertiesAreAppliedCorrectly()

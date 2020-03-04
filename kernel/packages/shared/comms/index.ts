@@ -1,14 +1,12 @@
 import { saveToLocalStorage } from 'atomicHelpers/localStorage'
-import { commConfigurations, ETHEREUM_NETWORK, getServerConfigurations, parcelLimits, COMMS, DEBUG_LOGIN } from 'config'
+import { commConfigurations, parcelLimits, COMMS, AUTO_CHANGE_REALM } from 'config'
 import { CommunicationsController } from 'shared/apis/CommunicationsController'
-import { Auth } from 'shared/auth/Auth'
 import { defaultLogger } from 'shared/logger'
 import { MessageEntry } from 'shared/types'
 import { positionObservable, PositionReport } from 'shared/world/positionThings'
 import 'webrtc-adapter'
 import { PassportAsPromise } from '../passports/PassportAsPromise'
-import { BrokerConnection } from '../comms/v1/BrokerConnection'
-import { ChatEvent, chatObservable } from './chat'
+import { ChatEvent, chatObservable, notifyStatusThroughChat } from './chat'
 import { CliBrokerConnection } from './CliBrokerConnection'
 import { Stats } from './debug'
 import { IBrokerConnection } from '../comms/v1/IBrokerConnection'
@@ -17,25 +15,57 @@ import {
   getCurrentUser,
   getPeer,
   getUser,
-  getUserProfile,
   localProfileUUID,
   receiveUserData,
   receiveUserPose,
   receiveUserVisible,
   removeById,
-  setLocalProfile
+  avatarMessageObservable
 } from './peers'
-import { Pose, UserInformation, Package, ChatMessage, ProfileVersion, BusMessage } from './interface/types'
-import { CommunicationArea, Position, position2parcel, sameParcel, squareDistance } from './interface/utils'
+import {
+  Pose,
+  UserInformation,
+  Package,
+  ChatMessage,
+  ProfileVersion,
+  BusMessage,
+  AvatarMessageType,
+  ConnectionEstablishmentError,
+  IdTakenError,
+  UnknownCommsModeError
+} from './interface/types'
+import {
+  CommunicationArea,
+  Position,
+  position2parcel,
+  sameParcel,
+  squareDistance,
+  ParcelArray
+} from './interface/utils'
 import { BrokerWorldInstanceConnection } from '../comms/v1/brokerWorldInstanceConnection'
 import { profileToRendererFormat } from 'shared/passports/transformations/profileToRendererFormat'
-import { ProfileForRenderer, uuid } from 'decentraland-ecs/src'
-import { Session } from '../session/index'
+import { ProfileForRenderer } from 'decentraland-ecs/src'
 import { worldRunningObservable, isWorldRunning } from '../world/worldState'
 import { WorldInstanceConnection } from './interface/index'
+
 import { LighthouseWorldInstanceConnection } from './v2/LighthouseWorldInstanceConnection'
 
-const { Peer } = require('decentraland-katalyst-peer')
+import { identity } from '../index'
+import { Authenticator } from 'dcl-crypto'
+import { getCommsServer, getRealm, getAllCatalystCandidates } from '../dao/selectors'
+import { Realm, LayerUserInfo } from 'shared/dao/types'
+import { Store } from 'redux'
+import { RootState } from 'shared/store/rootTypes'
+import { store } from 'shared/store/store'
+import {
+  setCatalystRealmCommsStatus,
+  setCatalystRealm,
+  markCatalystRealmFull,
+  markCatalystRealmConnectionError
+} from 'shared/dao/actions'
+import { observeRealmChange, pickCatalystRealm, changeToCrowdedRealm } from 'shared/dao'
+import { getProfile } from 'shared/passports/selectors'
+import { Profile } from 'shared/passports/types'
 
 export type CommsVersion = 'v1' | 'v2'
 export type CommsMode = CommsV1Mode | CommsV2Mode
@@ -54,6 +84,9 @@ export const MORDOR_POSITION: Position = [
   0,
   0
 ]
+
+declare var global: any
+declare const window: any
 
 export class PeerTrackingInfo {
   public position: Position | null = null
@@ -106,8 +139,6 @@ export class Context {
 
   public currentPosition: Position | null = null
 
-  public network: ETHEREUM_NETWORK | null
-
   public worldInstanceConnection: WorldInstanceConnection | null = null
 
   profileInterval?: NodeJS.Timer
@@ -115,9 +146,12 @@ export class Context {
   worldRunningObserver: any
   infoCollecterInterval?: NodeJS.Timer
 
-  constructor(userInfo: UserInformation, network?: ETHEREUM_NETWORK) {
+  timeToChangeRealm: number = Date.now() + commConfigurations.autoChangeRealmInterval
+
+  positionUpdatesPaused: boolean = false
+
+  constructor(userInfo: UserInformation) {
     this.userInfo = userInfo
-    this.network = network || null
 
     this.commRadius = commConfigurations.commRadius
   }
@@ -161,6 +195,20 @@ export function subscribeParcelSceneToCommsMessages(controller: CommunicationsCo
 
 export function unsubscribeParcelSceneToCommsMessages(controller: CommunicationsController) {
   scenesSubscribedToCommsEvents.delete(controller)
+}
+
+async function changeConnectionRealm(realm: Realm, url: string) {
+  defaultLogger.log('Changing connection realm to ', JSON.stringify(realm), { url })
+  if (context && context.worldInstanceConnection) {
+    context.positionUpdatesPaused = true
+    try {
+      removeAllPeers(context)
+      await sendToMordorAsync()
+      await context.worldInstanceConnection.changeRealm(realm, url)
+    } finally {
+      context.positionUpdatesPaused = false
+    }
+  }
 }
 
 // TODO: Change ChatData to the new class once it is added to the .proto
@@ -212,6 +260,7 @@ function ensurePeerTrackingInfo(context: Context, alias: string): PeerTrackingIn
 
 export function processChatMessage(context: Context, fromAlias: string, message: Package<ChatMessage>) {
   const msgId = message.data.id
+  const profile = getProfile(global.globalStore.getState(), identity.address)
 
   const peerTrackingInfo = ensurePeerTrackingInfo(context, fromAlias)
   if (!peerTrackingInfo.receivedPublicChatMessages.has(msgId)) {
@@ -221,15 +270,32 @@ export function processChatMessage(context: Context, fromAlias: string, message:
     const user = getUser(fromAlias)
     if (user) {
       const displayName = user.profile && user.profile.name
-      const entry: MessageEntry = {
-        id: msgId,
-        sender: displayName || 'unknown',
-        message: text,
-        isCommand: false
+
+      if (text.startsWith('␐')) {
+        const [id, timestamp] = text.split(' ')
+        avatarMessageObservable.notifyObservers({
+          type: AvatarMessageType.USER_EXPRESSION,
+          uuid: fromAlias,
+          expressionId: id.slice(1),
+          timestamp: parseInt(timestamp, 10)
+        })
+      } else {
+        const entry: MessageEntry = {
+          id: msgId,
+          sender: displayName || 'unknown',
+          message: text,
+          isCommand: false
+        }
+        if (profile && user.userId && !isBlocked(profile, user.userId)) {
+          chatObservable.notifyObservers({ type: ChatEvent.MESSAGE_RECEIVED, messageEntry: entry })
+        }
       }
-      chatObservable.notifyObservers({ type: ChatEvent.MESSAGE_RECEIVED, messageEntry: entry })
     }
   }
+}
+
+function isBlocked(profile: Profile, userId: string): boolean {
+  return profile.blocked && profile.blocked.includes(userId)
 }
 
 export function processProfileMessage(
@@ -238,8 +304,6 @@ export function processProfileMessage(
   identity: string,
   message: Package<ProfileVersion>
 ) {
-  processNewLogin(identity, context, fromAlias)
-
   const msgTimestamp = message.time
 
   const peerTrackingInfo = ensurePeerTrackingInfo(context, fromAlias)
@@ -252,14 +316,6 @@ export function processProfileMessage(
 
     peerTrackingInfo.lastProfileUpdate = msgTimestamp
     peerTrackingInfo.lastUpdate = Date.now()
-  }
-}
-
-function processNewLogin(identity: string, context: Context, fromAlias: string) {
-  if (!DEBUG_LOGIN) {
-    if (identity === context.userInfo.userId && fromAlias !== getCurrentPeer()!.uuid) {
-      Session.current.then(s => s.disable()).catch(e => defaultLogger.error('error while signing out', e))
-    }
   }
 }
 
@@ -287,6 +343,7 @@ let currentParcelTopics = ''
 let previousTopics = ''
 
 let lastNetworkUpdatePosition = new Date().getTime()
+
 export function onPositionUpdate(context: Context, p: Position) {
   const worldConnection = context.worldInstanceConnection
 
@@ -316,7 +373,7 @@ export function onPositionUpdate(context: Context, p: Position) {
     }
 
     currentParcelTopics = rawTopics.join(' ')
-    if (context.currentPosition) {
+    if (context.currentPosition && !context.positionUpdatesPaused) {
       worldConnection
         .sendParcelUpdateMessage(context.currentPosition, p)
         .catch(e => defaultLogger.warn(`error while sending message `, e))
@@ -341,7 +398,7 @@ export function onPositionUpdate(context: Context, p: Position) {
 
   context.currentPosition = p
   const now = new Date().getTime()
-  if (now - lastNetworkUpdatePosition > 100) {
+  if (now - lastNetworkUpdatePosition > 100 && !context.positionUpdatesPaused) {
     lastNetworkUpdatePosition = now
     worldConnection.sendPositionMessage(p).catch(e => defaultLogger.warn(`error while sending message `, e))
   }
@@ -363,12 +420,7 @@ function collectInfo(context: Context) {
     const msSinceLastUpdate = now - trackingInfo.lastUpdate
 
     if (msSinceLastUpdate > commConfigurations.peerTtlMs) {
-      context.peerData.delete(peerAlias)
-      removeById(peerAlias)
-
-      if (context.stats) {
-        context.stats.onPeerRemoved(peerAlias)
-      }
+      removePeer(context, peerAlias)
 
       continue
     }
@@ -413,6 +465,8 @@ function collectInfo(context: Context) {
     }
   }
 
+  checkAutochangeRealm(visiblePeers, context, now)
+
   if (context.stats) {
     context.stats.visiblePeersCount = visiblePeers.length
     context.stats.trackingPeersCount = context.peerData.size
@@ -420,18 +474,57 @@ function collectInfo(context: Context) {
   }
 }
 
+function checkAutochangeRealm(visiblePeers: ProcessingPeerInfo[], context: Context, now: number) {
+  if (AUTO_CHANGE_REALM) {
+    if (visiblePeers.length > 0) {
+      context.timeToChangeRealm = now + commConfigurations.autoChangeRealmInterval
+    } else if (now > context.timeToChangeRealm) {
+      context.timeToChangeRealm = now + commConfigurations.autoChangeRealmInterval
+      defaultLogger.log('Changing to crowded realm because there is no people around')
+      changeToCrowdedRealm().then(
+        ([changed, realm]) => {
+          if (changed) {
+            defaultLogger.log('Successfully changed to realm', realm)
+          } else {
+            defaultLogger.log('No crowded realm found')
+          }
+        },
+        error => defaultLogger.warn('Error trying to change realm', error)
+      )
+    }
+  }
+}
+
+function removeAllPeers(context: Context) {
+  for (const alias of context.peerData.keys()) {
+    removePeer(context, alias)
+  }
+}
+
+function removePeer(context: Context, peerAlias: string) {
+  context.peerData.delete(peerAlias)
+  removeById(peerAlias)
+  if (context.stats) {
+    context.stats.onPeerRemoved(peerAlias)
+  }
+}
+
 function parseCommsMode(modeString: string) {
-  const segments = modeString.split(':')
+  const segments = modeString.split('-')
   return segments as [CommsVersion, CommsMode]
 }
 
-export async function connect(userId: string, network: ETHEREUM_NETWORK, auth: Auth, ethAddress?: string) {
-  try {
-    setLocalProfile(userId, {
-      ...getUserProfile(),
-      publicKey: ethAddress || null
-    })
+const NOOP = () => {
+  // do nothing
+}
+function subscribeToRealmChange(store: Store<RootState>) {
+  observeRealmChange(store, (previousRealm, currentRealm) =>
+    changeConnectionRealm(currentRealm, getCommsServer(store.getState())).then(NOOP, defaultLogger.error)
+  )
+}
 
+export async function connect(userId: string) {
+  try {
     const user = getCurrentUser()
     if (!user) {
       return undefined
@@ -466,28 +559,8 @@ export async function connect(userId: string, network: ETHEREUM_NETWORK, auth: A
             commsBroker = new CliBrokerConnection(url.href)
             break
           }
-          case 'remote': {
-            const coordinatorURL = getServerConfigurations().worldInstanceUrl
-            const body = `GET:${coordinatorURL}`
-            const credentials = await auth.getMessageCredentials(body)
-
-            const qs = new URLSearchParams({
-              signature: credentials['x-signature'],
-              identity: credentials['x-identity'],
-              timestamp: credentials['x-timestamp'],
-              'access-token': credentials['x-access-token']
-            })
-
-            const url = new URL(coordinatorURL)
-            defaultLogger.log('Using Remote comms: ' + url)
-
-            url.search = qs.toString()
-
-            commsBroker = new BrokerConnection(auth, url.toString())
-            break
-          }
           default: {
-            throw new Error(`unrecognized mode for comms v1 "${mode}"`)
+            throw new UnknownCommsModeError(`unrecognized mode for comms v1 "${mode}"`)
           }
         }
 
@@ -498,43 +571,71 @@ export async function connect(userId: string, network: ETHEREUM_NETWORK, auth: A
         break
       }
       case 'v2': {
-        const { server, p2p } = getServerConfigurations().comms.lighthouse
+        const store: Store<RootState> = window.globalStore
+        const lighthouseUrl = getCommsServer(store.getState())
+        const realm = getRealm(store.getState())
 
-        let lighthouseUrl
-        switch (mode) {
-          case 'server': {
-            lighthouseUrl = server
-            break
-          }
-          case 'p2p': {
-            lighthouseUrl = p2p
-            break
-          }
-          default: {
-            defaultLogger.warn(`unrecognized mode for comms v2 "${mode}", using default "p2p"`)
-            lighthouseUrl = p2p
+        const peerConfig = {
+          connectionConfig: {
+            iceServers: commConfigurations.iceServers
+          },
+          authHandler: async (msg: string) => {
+            try {
+              return Authenticator.signPayload(identity, msg)
+            } catch (e) {
+              defaultLogger.info(`error while trying to sign message from lighthouse '${msg}'`)
+            }
+            // if any error occurs
+            return identity
+          },
+          parcelGetter: () => {
+            if (context && context.currentPosition) {
+              const parcel = position2parcel(context.currentPosition)
+              return [parcel.x, parcel.z]
+            }
           }
         }
 
         defaultLogger.log('Using Remote lighthouse service: ', lighthouseUrl)
 
-        const peer = new Peer(
+        connection = new LighthouseWorldInstanceConnection(
+          identity.address,
+          realm!,
           lighthouseUrl,
-          'peer-' + uuid(),
-          () => {
-            // noop
-          },
-          {
-            connectionConfig: {
-              iceServers: commConfigurations.iceServers
+          peerConfig,
+          status => {
+            store.dispatch(setCatalystRealmCommsStatus(status))
+            switch (status.status) {
+              case 'realm-full': {
+                handleFullLayer()
+                break
+              }
+              case 'reconnection-error': {
+                handleReconnectionError()
+                break
+              }
             }
           }
         )
-        connection = new LighthouseWorldInstanceConnection(peer)
+
         break
       }
       default: {
         throw new Error(`unrecognized comms mode "${COMMS}"`)
+      }
+    }
+
+    subscribeToRealmChange(store)
+
+    context = new Context(userInfo)
+    context.worldInstanceConnection = connection
+
+    try {
+      await connection.connectPeer()
+    } catch (e) {
+      // Do nothing if layer is full. This will be handled by status handler
+      if (!(e.responseJson && e.responseJson.status === 'layer_is_full')) {
+        throw e
       }
     }
 
@@ -550,9 +651,6 @@ export async function connect(userId: string, network: ETHEREUM_NETWORK, auth: A
     connection.sceneMessageHandler = (alias: string, data: Package<BusMessage>) => {
       processParcelSceneCommsMessage(context!, alias, data)
     }
-
-    context = new Context(userInfo, network)
-    context.worldInstanceConnection = connection
 
     if (commConfigurations.debug) {
       connection.stats = context.stats
@@ -594,13 +692,59 @@ export async function connect(userId: string, network: ETHEREUM_NETWORK, auth: A
       }
     }, 100)
 
-    await connection.updateSubscriptions([userId])
-    await connection.sendInitialMessage(userInfo)
-
     return context
   } catch (e) {
-    throw new Error('error establishing comms: ' + e.message)
+    defaultLogger.error(e)
+    if (e.message && e.message.includes('is taken')) {
+      throw new IdTakenError(e.message)
+    } else {
+      throw new ConnectionEstablishmentError(e.message)
+    }
   }
+}
+
+function realmString(realm: Realm) {
+  return realm.catalystName + '-' + realm.layer
+}
+
+function handleReconnectionError() {
+  const store: Store<RootState> = window.globalStore
+  const realm = getRealm(store.getState())
+
+  if (realm) {
+    store.dispatch(markCatalystRealmConnectionError(realm))
+  }
+
+  const candidates = getAllCatalystCandidates(store.getState())
+
+  const otherRealm = pickCatalystRealm(candidates)
+
+  const notificationMessage = realm
+    ? `Lost connection to ${realmString(realm)}, joining realm ${realmString(otherRealm)} instead`
+    : `Joining realm ${realmString(otherRealm)}`
+
+  notifyStatusThroughChat(notificationMessage)
+
+  store.dispatch(setCatalystRealm(otherRealm))
+}
+
+function handleFullLayer() {
+  const store: Store<RootState> = window.globalStore
+  const realm = getRealm(store.getState())
+
+  if (realm) {
+    store.dispatch(markCatalystRealmFull(realm))
+  }
+
+  const candidates = getAllCatalystCandidates(store.getState())
+
+  const otherRealm = pickCatalystRealm(candidates)
+
+  notifyStatusThroughChat(
+    `Joining realm ${otherRealm.catalystName}-${otherRealm.layer} since the previously requested was full`
+  )
+
+  store.dispatch(setCatalystRealm(otherRealm))
 }
 
 export function onWorldRunning(isRunning: boolean, _context: Context | null = context) {
@@ -610,10 +754,12 @@ export function onWorldRunning(isRunning: boolean, _context: Context | null = co
 }
 
 export function sendToMordor(_context: Context | null = context) {
+  sendToMordorAsync().catch(e => defaultLogger.warn(`error while sending message `, e))
+}
+
+async function sendToMordorAsync(_context: Context | null = context) {
   if (_context && _context.worldInstanceConnection && _context.currentPosition) {
-    _context.worldInstanceConnection
-      .sendParcelUpdateMessage(_context.currentPosition, MORDOR_POSITION)
-      .catch(e => defaultLogger.warn(`error while sending message `, e))
+    await _context.worldInstanceConnection.sendParcelUpdateMessage(_context.currentPosition, MORDOR_POSITION)
   }
 }
 
@@ -637,7 +783,21 @@ export function disconnect() {
   }
 }
 
-declare var global: any
+export async function fetchLayerUsersParcels(): Promise<ParcelArray[]> {
+  const store: Store<RootState> = window.globalStore
+  const realm = getRealm(store.getState())
+  const commsUrl = getCommsServer(store.getState())
+
+  if (realm && realm.layer && commsUrl) {
+    const layerUsersResponse = await fetch(`${commsUrl}/layers/${realm.layer}/users`)
+    if (layerUsersResponse.ok) {
+      const layerUsers: LayerUserInfo[] = await layerUsersResponse.json()
+      return layerUsers.filter(it => it.parcel).map(it => it.parcel!)
+    }
+  }
+
+  return []
+}
 
 global['printCommsInformation'] = function() {
   if (context) {

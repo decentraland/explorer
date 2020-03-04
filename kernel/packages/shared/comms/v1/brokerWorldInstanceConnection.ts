@@ -19,8 +19,8 @@ import { IBrokerConnection, BrokerMessage } from './IBrokerConnection'
 import { Stats } from '../../comms/debug'
 import { createLogger } from 'shared/logger'
 
-import { Reporter } from '../../comms/PresenceReporter'
 import { WorldInstanceConnection } from '../../comms/interface/index'
+import { Realm } from 'shared/dao/types'
 
 class SendResult {
   constructor(public bytesSize: number) {}
@@ -62,6 +62,10 @@ export class BrokerWorldInstanceConnection implements WorldInstanceConnection {
       }
     }, 10000)
     this.connection.onMessageObservable.add(this.handleMessage.bind(this))
+  }
+
+  async connectPeer() {
+    return
   }
 
   printDebugInformation() {
@@ -204,6 +208,10 @@ export class BrokerWorldInstanceConnection implements WorldInstanceConnection {
     return this.sendMessage(reliable, message)
   }
 
+  async changeRealm(realm: Realm, url: string) {
+    return
+  }
+
   async updateSubscriptions(rawTopics: string[]) {
     if (!this.connection.hasReliableChannel) {
       if (!this.fatalErrorSent) {
@@ -213,7 +221,6 @@ export class BrokerWorldInstanceConnection implements WorldInstanceConnection {
         return Promise.reject()
       }
     }
-    rawTopics.map(_ => Reporter.subscribe(_))
     const subscriptionMessage = new SubscriptionMessage()
     subscriptionMessage.setType(MessageType.SUBSCRIPTION)
     subscriptionMessage.setFormat(Format.PLAIN)
@@ -273,7 +280,6 @@ export class BrokerWorldInstanceConnection implements WorldInstanceConnection {
 
         const aliasNum = dataMessage.getFromAlias()
         const alias = aliasNum.toString()
-        if (this.aliases[aliasNum]) Reporter.reportSeen(this.aliases[aliasNum])
         const category = dataHeader.getCategory()
         switch (category) {
           case Category.POSITION: {
@@ -367,7 +373,6 @@ export class BrokerWorldInstanceConnection implements WorldInstanceConnection {
 
         const alias = dataMessage.getFromAlias().toString()
         const userId = atob(dataMessage.getIdentity_asB64())
-        Reporter.reportSeen(userId)
         this.aliases[dataMessage.getFromAlias()] = userId
         const category = dataHeader.getCategory()
         switch (category) {

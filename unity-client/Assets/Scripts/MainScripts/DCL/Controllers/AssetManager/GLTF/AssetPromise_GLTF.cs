@@ -1,3 +1,4 @@
+using DCL.Helpers;
 using UnityGLTF;
 
 namespace DCL
@@ -15,10 +16,11 @@ namespace DCL
         GLTFComponent gltfComponent = null;
         object id = null;
 
-        public AssetPromise_GLTF(ContentProvider provider, string url)
+        public AssetPromise_GLTF(ContentProvider provider, string url, string hash = null)
         {
             this.provider = provider;
             this.url = url.Substring(url.LastIndexOf('/') + 1);
+            this.id = hash ?? url;
             // We separate the directory path of the GLB and its file name, to be able to use the directory path when 
             // fetching relative assets like textures in the ParseGLTFWebRequestedFile() event call
             assetDirectoryPath = URIHelper.GetDirectoryName(url);
@@ -26,7 +28,9 @@ namespace DCL
 
         protected override void OnBeforeLoadOrReuse()
         {
-            asset.container.name = "GLTF: " + url;
+#if UNITY_EDITOR
+            asset.container.name = "GLTF: " + this.id;
+#endif
             settings.ApplyBeforeLoad(asset.container.transform);
         }
 
@@ -37,9 +41,6 @@ namespace DCL
 
         internal override object GetId()
         {
-            if (id == null)
-                id = ComputeId(provider, url);
-
             return id;
         }
 
@@ -51,7 +52,8 @@ namespace DCL
             {
                 useVisualFeedback = settings.visibleFlags == AssetPromiseSettings_Rendering.VisibleFlags.VISIBLE_WITH_TRANSITION,
                 initialVisibility = settings.visibleFlags != AssetPromiseSettings_Rendering.VisibleFlags.INVISIBLE,
-                shaderOverride = settings.shaderOverride
+                shaderOverride = settings.shaderOverride,
+                addMaterialsToPersistentCaching = (settings.cachingFlags & MaterialCachingHelper.Mode.CACHE_MATERIALS) != 0
             };
 
             tmpSettings.OnWebRequestStartEvent += ParseGLTFWebRequestedFile;
@@ -79,39 +81,25 @@ namespace DCL
             if (!library.Add(asset))
                 return false;
 
-            if (asset.visible)
-            {
-                //NOTE(Brian): If the asset did load "in world" add it to library and then Get it immediately
-                //             So it keeps being there. As master gltfs can't be in the world.
-                //
-                //             ApplySettings will reposition the newly Get asset to the proper coordinates.
-                if (settings.forceNewInstance)
-                {
-                    asset = (library as AssetLibrary_GLTF).GetCopyFromOriginal(asset.id);
-                }
-                else
-                {
-                    asset = library.Get(asset.id);
-                }
+            if (!asset.visible)
+                return true;
 
-                //NOTE(Brian): Call again this method because we are replacing the asset.
-                OnBeforeLoadOrReuse();
+            //NOTE(Brian): If the asset did load "in world" add it to library and then Get it immediately
+            //             So it keeps being there. As master gltfs can't be in the world.
+            //
+            //             ApplySettings will reposition the newly Get asset to the proper coordinates.
+            if (settings.forceNewInstance)
+            {
+                asset = (library as AssetLibrary_GLTF).GetCopyFromOriginal(asset.id);
+            }
+            else
+            {
+                asset = library.Get(asset.id);
             }
 
+            //NOTE(Brian): Call again this method because we are replacing the asset.
+            OnBeforeLoadOrReuse();
             return true;
-        }
-
-        private string ComputeId(ContentProvider provider, string url)
-        {
-            if (provider.contents != null && !useIdForMockedMappings)
-            {
-                if (provider.TryGetContentsUrl_Raw(url, out string finalUrl))
-                {
-                    return finalUrl;
-                }
-            }
-
-            return url;
         }
 
         protected override void OnCancelLoading()

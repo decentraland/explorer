@@ -1,44 +1,70 @@
-﻿using System;
-using System.Collections;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
+using DCL.Interface;
 using UnityEngine;
-using UnityEngine.Networking;
-
-[assembly: InternalsVisibleTo("UserProfileTests")]
 
 [CreateAssetMenu(fileName = "UserProfile", menuName = "UserProfile")]
 public class UserProfile : ScriptableObject //TODO Move to base variable
 {
+    static DateTime epochStart = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
     public event Action<UserProfile> OnUpdate;
 
+    public string userId => model.userId;
     public string userName => model.name;
+    public string description => model.description;
     public string email => model.email;
+    public List<string> blocked => model.blocked;
+    public bool hasConnectedWeb3 => model.hasConnectedWeb3;
+    public bool hasClaimedName => model.hasClaimedName;
     public AvatarModel avatar => model.avatar;
+    public int tutorialStep => model.tutorialStep;
     internal Dictionary<string, int> inventory = new Dictionary<string, int>();
 
-    private Texture2D faceSnapshotValue = null;
-    public Texture2D faceSnapshot => faceSnapshotValue;
-    private Texture2D bodySnapshotValue;
-    public Texture2D bodySnapshot => bodySnapshotValue;
+    public Sprite faceSnapshot { get; private set; }
+    public Sprite bodySnapshot { get; private set; }
 
     internal UserProfileModel model = new UserProfileModel() //Empty initialization to avoid nullchecks
     {
         avatar = new AvatarModel()
     };
 
-    internal Coroutine downloadingFaceCoroutine = null;
-    internal Coroutine downloadingBodyCoroutine = null;
-
     public void UpdateData(UserProfileModel newModel, bool downloadAssets = true)
     {
-        UpdateProperties(newModel);
+        ForgetThumbnail(model?.snapshots?.face, OnFaceSnapshotReady);
+        ForgetThumbnail(model?.snapshots?.body, OnBodySnapshotReady);
 
-        if (downloadAssets)
+        inventory.Clear();
+        faceSnapshot = null;
+        bodySnapshot = null;
+
+        if (newModel == null)
         {
-            DownloadFaceIfNeeded();
-            DownloadBodyIfNeeded();
+            model = null;
+            return;
+        }
+
+        model.userId = newModel.userId;
+        model.tutorialStep = newModel.tutorialStep;
+        model.hasClaimedName = newModel.hasClaimedName;
+        model.name = newModel.name;
+        model.email = newModel.email;
+        model.description = newModel.description;
+        model.avatar.CopyFrom(newModel.avatar);
+        model.snapshots = newModel.snapshots;
+        model.hasConnectedWeb3 = newModel.hasConnectedWeb3;
+        model.inventory = newModel.inventory;
+        model.blocked = newModel.blocked;
+        if (model.inventory != null)
+        {
+            inventory = model.inventory.GroupBy(x => x).ToDictionary(x => x.Key, x => x.Count());
+        }
+
+        if (downloadAssets && model.snapshots != null)
+        {
+            GetThumbnail(model.snapshots.face, OnFaceSnapshotReady);
+            GetThumbnail(model.snapshots.body, OnBodySnapshotReady);
         }
 
         OnUpdate?.Invoke(this);
@@ -52,102 +78,51 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
         return inventory[itemId];
     }
 
-    internal void UpdateProperties(UserProfileModel newModel)
+    private void OnFaceSnapshotReady(Sprite sprite)
     {
-        var currentFace = model.snapshots?.face;
-        var currentBody = model.snapshots?.body;
-
-        model.name = newModel?.name;
-        model.email = newModel?.email;
-        model.avatar.CopyFrom(newModel?.avatar);
-        model.snapshots = newModel?.snapshots;
-        model.inventory = newModel?.inventory;
-        inventory.Clear();
-        if (model.inventory != null)
-        {
-            inventory = model.inventory.GroupBy(x => x).ToDictionary(x => x.Key, x => x.Count());
-        }
-
-        if (model.snapshots == null || model.snapshots.face != currentFace)
-        {
-            faceSnapshotValue = null;
-        }
-
-        if (model.snapshots == null || model.snapshots.body != currentBody)
-        {
-            faceSnapshotValue = null;
-        }
-    }
-
-    internal void DownloadFaceIfNeeded()
-    {
-        if (faceSnapshot != null)
-        {
-            return;
-        }
-
-        if (downloadingFaceCoroutine != null)
-        {
-            CoroutineStarter.Stop(downloadingFaceCoroutine);
-        }
-
-        faceSnapshotValue = null;
-
-        if (model == null || string.IsNullOrEmpty(model.snapshots?.face))
-            return;
-
-        downloadingFaceCoroutine = CoroutineStarter.Start(DownloadSnapshotCoroutine(model.snapshots.face, (x) => faceSnapshotValue = x));
-    }
-
-    internal void DownloadBodyIfNeeded()
-    {
-        if (bodySnapshot != null)
-        {
-            return;
-        }
-
-        if (downloadingBodyCoroutine != null)
-        {
-            CoroutineStarter.Stop(downloadingBodyCoroutine);
-        }
-
-        bodySnapshotValue = null;
-
-        if (model == null || string.IsNullOrEmpty(model.snapshots?.body))
-            return;
-
-        downloadingBodyCoroutine = CoroutineStarter.Start(DownloadSnapshotCoroutine(model.snapshots.body, (x) => bodySnapshotValue = x));
-    }
-
-    private IEnumerator DownloadSnapshotCoroutine(string url, Action<Texture2D> successCallback)
-    {
-        UnityWebRequest www = UnityWebRequestTexture.GetTexture(url);
-
-        www.SendWebRequest();
-        while (!www.isDone)
-        {
-            yield return null;
-        }
-
-        if (!www.isNetworkError && !www.isHttpError)
-        {
-            var texture = ((DownloadHandlerTexture)www.downloadHandler).texture;
-            successCallback.Invoke(texture);
-        }
-        else
-        {
-            Debug.LogError(www.error);
-        }
-
+        faceSnapshot = sprite;
         OnUpdate?.Invoke(this);
     }
 
-    public void OverrideAvatar(AvatarModel newModel, Texture2D faceSnapshot, Texture2D bodySnapshot)
+    private void OnBodySnapshotReady(Sprite sprite)
     {
+        bodySnapshot = sprite;
+        OnUpdate?.Invoke(this);
+    }
+
+    public void OverrideAvatar(AvatarModel newModel, Sprite faceSnapshot, Sprite bodySnapshot)
+    {
+        if (model?.snapshots != null)
+        {
+            ForgetThumbnail(model.snapshots.face, OnFaceSnapshotReady);
+            ForgetThumbnail(model.snapshots.body, OnBodySnapshotReady);
+        }
+
         model.avatar.CopyFrom(newModel);
-        faceSnapshotValue = faceSnapshot;
-        bodySnapshotValue = bodySnapshot;
+        this.faceSnapshot = faceSnapshot;
+        this.bodySnapshot = bodySnapshot;
         OnUpdate?.Invoke(this);
+    }
+
+    public void SetAvatarExpression(string id)
+    {
+        var timestamp = (long)(DateTime.UtcNow - epochStart).TotalMilliseconds;
+        avatar.expressionTriggerId = id;
+        avatar.expressionTriggerTimestamp = timestamp;
+        WebInterface.SendExpression(id, timestamp);
+        OnUpdate?.Invoke(this);
+    }
+
+    public string[] GetInventoryItemsIds()
+    {
+        return inventory.Keys.ToArray();
+    }
+
+    public void SetTutorialStepId(int newTutorialStep)
+    {
+        model.tutorialStep = newTutorialStep;
+
+        WebInterface.SaveUserTutorialStep(newTutorialStep);
     }
 
     internal static UserProfile ownUserProfile;
@@ -161,6 +136,8 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
 
         return ownUserProfile;
     }
+
+    public UserProfileModel CloneModel() => model.Clone();
 
 #if UNITY_EDITOR
     private void OnEnable()
@@ -176,4 +153,18 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
             Resources.UnloadAsset(this);
     }
 #endif
+
+    private void GetThumbnail(string url, Action<Sprite> callback)
+    {
+        if (string.IsNullOrEmpty(url))
+            return;
+        ThumbnailsManager.GetThumbnail(url, callback);
+    }
+
+    private void ForgetThumbnail(string url, Action<Sprite> callback)
+    {
+        if (string.IsNullOrEmpty(url))
+            return;
+        ThumbnailsManager.ForgetThumbnail(url, callback);
+    }
 }

@@ -5,14 +5,33 @@ type GameInstance = {
   SendMessage(object: string, method: string, ...args: (number | string)[]): void
 }
 
+import { uuid } from 'decentraland-ecs/src'
 import { EventDispatcher } from 'decentraland-rpc/lib/common/core/EventDispatcher'
 import { IFuture } from 'fp-future'
 import { Empty } from 'google-protobuf/google/protobuf/empty_pb'
+import { identity } from 'shared'
+import { sendPublicChatMessage, persistCurrentUser } from 'shared/comms'
+import { AvatarMessageType } from 'shared/comms/interface/types'
+import { avatarMessageObservable, getUserProfile } from 'shared/comms/peers'
+import { providerFuture } from 'shared/ethereum/provider'
+import { getProfile } from 'shared/passports/selectors'
+import { TeleportController } from 'shared/world/TeleportController'
 import { gridToWorld } from '../atomicHelpers/parcelScenePositions'
-import { DEBUG, EDITOR, ENGINE_DEBUG_PANEL, playerConfigurations, SCENE_DEBUG_PANEL, SHOW_FPS_COUNTER } from '../config'
+import {
+  DEBUG,
+  EDITOR,
+  ENGINE_DEBUG_PANEL,
+  playerConfigurations,
+  RESET_TUTORIAL,
+  SCENE_DEBUG_PANEL,
+  SHOW_FPS_COUNTER,
+  tutorialEnabled
+} from '../config'
 import { Quaternion, ReadOnlyQuaternion, ReadOnlyVector3, Vector3 } from '../decentraland-ecs/src/decentraland/math'
 import { IEventNames, IEvents, ProfileForRenderer } from '../decentraland-ecs/src/decentraland/Types'
 import { sceneLifeCycleObservable } from '../decentraland-loader/lifecycle/controllers/scene'
+import { tutorialStepId } from '../decentraland-loader/lifecycle/tutorial/tutorial'
+import { AirdropInfo } from '../shared/airdrops/interface'
 import { queueTrackingEvent } from '../shared/analytics'
 import { DevTools } from '../shared/apis/DevTools'
 import { ParcelIdentity } from '../shared/apis/ParcelIdentity'
@@ -21,7 +40,7 @@ import { aborted } from '../shared/loading/ReportFatalError'
 import { loadingScenes, teleportTriggered, unityClientLoaded } from '../shared/loading/types'
 import { createLogger, defaultLogger, ILogger } from '../shared/logger'
 import { saveAvatarRequest } from '../shared/passports/actions'
-import { Avatar, Wearable } from '../shared/passports/types'
+import { Avatar, Profile, Wearable } from '../shared/passports/types'
 import {
   PB_AttachEntityComponent,
   PB_ComponentCreated,
@@ -61,7 +80,8 @@ import {
   QueryPayload,
   RemoveEntityPayload,
   SetEntityParentPayload,
-  UpdateEntityComponentPayload
+  UpdateEntityComponentPayload,
+  WelcomeHUDControllerModel
 } from '../shared/types'
 import { ParcelSceneAPI } from '../shared/world/ParcelSceneAPI'
 import {
@@ -75,14 +95,18 @@ import { positionObservable, teleportObservable } from '../shared/world/position
 import { hudWorkerUrl, SceneWorker } from '../shared/world/SceneWorker'
 import { ensureUiApis } from '../shared/world/uiSceneInitializer'
 import { worldRunningObservable } from '../shared/world/worldState'
-import { getEmail } from '../shared/auth/selectors'
+import { profileToRendererFormat } from 'shared/passports/transformations/profileToRendererFormat'
 
 const rendererVersion = require('decentraland-renderer')
 window['console'].log('Renderer version: ' + rendererVersion)
 
 let gameInstance!: GameInstance
+let isTheFirstLoading = true
 
 export let futures: Record<string, IFuture<any>> = {}
+export let hasWallet: boolean = false
+
+export let unityInterface: any
 
 const positionEvent = {
   position: Vector3.Zero(),
@@ -116,7 +140,9 @@ const browserInterface = {
       const parcelScene = scene.parcelScene as UnityParcelScene
       parcelScene.emit(data.eventType as IEventNames, data.payload)
     } else {
-      defaultLogger.error(`SceneEvent: Scene ${data.sceneId} not found`, data)
+      if (data.eventType !== 'metricsUpdate') {
+        defaultLogger.error(`SceneEvent: Scene ${data.sceneId} not found`, data)
+      }
     }
   },
 
@@ -133,12 +159,54 @@ const browserInterface = {
     // stub. there is no code about this in unity side yet
   },
 
+  TriggerExpression(data: { id: string; timestamp: number }) {
+    avatarMessageObservable.notifyObservers({
+      type: AvatarMessageType.USER_EXPRESSION,
+      uuid: uuid(),
+      expressionId: data.id,
+      timestamp: data.timestamp
+    })
+    const id = uuid()
+    const chatMessage = `␐${data.id} ${data.timestamp}`
+    sendPublicChatMessage(id, chatMessage)
+  },
+
+  TermsOfServiceResponse(sceneId: string, accepted: boolean, dontShowAgain: boolean) {
+    // TODO
+  },
+
+  MotdConfirmClicked() {
+    if (hasWallet) {
+      TeleportController.goToNext()
+    } else {
+      window.open('https://docs.decentraland.org/get-a-wallet/', '_blank')
+    }
+  },
+
   LogOut() {
     Session.current.then(s => s.logout()).catch(e => defaultLogger.error('error while logging out', e))
   },
 
-  SaveUserAvatar(data: { face: string; body: string; avatar: Avatar }) {
-    global.globalStore.dispatch(saveAvatarRequest(data))
+  SaveUserAvatar(changes: { face: string; body: string; avatar: Avatar }) {
+    const { face, body, avatar } = changes
+    const profile: Profile = getUserProfile().profile as Profile
+    const updated = { ...profile, avatar: { ...avatar, snapshots: { face, body } } }
+    global.globalStore.dispatch(saveAvatarRequest(updated))
+  },
+
+  SaveUserTutorialStep(data: { tutorialStep: number }) {
+    const profile: Profile = getUserProfile().profile as Profile
+    profile.tutorialStep = data.tutorialStep
+    global.globalStore.dispatch(saveAvatarRequest(profile))
+
+    persistCurrentUser({
+      version: profile.version,
+      profile: profileToRendererFormat(profile, identity)
+    })
+
+    if (data.tutorialStep === tutorialStepId.FINISHED) {
+      delightedSurvey()
+    }
   },
 
   ControlEvent({ eventType, payload }: { eventType: string; payload: any }) {
@@ -169,8 +237,62 @@ const browserInterface = {
     futures[data.id].resolve(data.cameraTarget)
   },
 
+  UserAcceptedCollectibles(data: { id: string }) {
+    // Here, we should have "airdropObservable.notifyObservers(data.id)".
+    // It's disabled because of security reasons.
+  },
+
   EditAvatarClicked() {
     delightedSurvey()
+  },
+
+  ReportScene(sceneId: string) {
+    browserInterface.OpenWebURL({ url: `https://decentralandofficial.typeform.com/to/KzaUxh?sceneId=${sceneId}` })
+  },
+
+  ReportPlayer(username: string) {
+    browserInterface.OpenWebURL({ url: `https://decentralandofficial.typeform.com/to/owLkla?username=${username}` })
+  },
+
+  BlockPlayer(data: { userId: string }) {
+    const profile = getProfile(global.globalStore.getState(), identity.address)
+
+    if (profile) {
+      let blocked: string[] = [data.userId]
+
+      if (profile.blocked) {
+        for (let blockedUser of profile.blocked) {
+          if (blockedUser === data.userId) {
+            return
+          }
+        }
+
+        // Merge the existing array and any previously blocked users
+        blocked = [...profile.blocked, ...blocked]
+      }
+
+      global.globalStore.dispatch(saveAvatarRequest({ ...profile, blocked }))
+    }
+  },
+
+  UnblockPlayer(data: { userId: string }) {
+    const profile = getProfile(global.globalStore.getState(), identity.address)
+
+    if (profile) {
+      const blocked = profile.blocked ? profile.blocked.filter(id => id !== data.userId) : []
+      global.globalStore.dispatch(saveAvatarRequest({ ...profile, blocked }))
+    }
+  },
+
+  ReportUserEmail(data: { userEmail: string }) {
+    const profile = getUserProfile().profile
+    if (profile) {
+      if (hasWallet) {
+        window.analytics.identify(profile.userId, { email: data.userEmail })
+      } else {
+        window.analytics.identify({ email: data.userEmail })
+      }
+    }
   }
 }
 
@@ -178,42 +300,31 @@ export function setLoadingScreenVisible(shouldShow: boolean) {
   document.getElementById('overlay')!.style.display = shouldShow ? 'block' : 'none'
   document.getElementById('load-messages-wrapper')!.style.display = shouldShow ? 'block' : 'none'
   document.getElementById('progress-bar')!.style.display = shouldShow ? 'block' : 'none'
-  if (!shouldShow) {
-    stopTeleportAnimation()
+  if (!shouldShow && !EDITOR) {
+    isTheFirstLoading = false
+    TeleportController.stopTeleportAnimation()
   }
 }
 
 function delightedSurvey() {
-  const { analytics, delighted, globalStore } = global
-  if (analytics && delighted && globalStore) {
-    const email = getEmail(global.globalStore.getState())
+  const { analytics, delighted } = global
+  const profile = getUserProfile().profile as Profile | null
+  if (!isTheFirstLoading && analytics && delighted && profile) {
     const payload = {
-      email: email,
+      email: profile.email || (profile.ethAddress + '@dcl.gg'),
+      name: profile.name || 'Guest',
       properties: {
+        ethAddress: profile.ethAddress,
         anonymous_id: analytics && analytics.user ? analytics.user().anonymousId() : null
       }
     }
 
-    delighted.survey(payload)
+    try {
+      delighted.survey(payload)
+    } catch (error) {
+      defaultLogger.error('Delighted error: ' + error.message, error)
+    }
   }
-}
-
-function ensureTeleportAnimation() {
-  document
-    .getElementById('gameContainer')!
-    .setAttribute(
-      'style',
-      'background: #151419 url(images/teleport.gif) no-repeat center !important; background-size: 194px 257px !important;'
-    )
-  document.body.setAttribute(
-    'style',
-    'background: #151419 url(images/teleport.gif) no-repeat center !important; background-size: 194px 257px !important;'
-  )
-}
-
-function stopTeleportAnimation() {
-  document.getElementById('gameContainer')!.setAttribute('style', 'background: #151419')
-  document.body.setAttribute('style', 'background: #151419')
 }
 
 const CHUNK_SIZE = 500
@@ -260,8 +371,11 @@ export function* chunkGenerator(
   }
 }
 
-export const unityInterface = {
+unityInterface = {
   debug: false,
+  SendGenericMessage(object: string, method: string, payload: string) {
+    gameInstance.SendMessage(object, method, payload)
+  },
   SetDebug() {
     gameInstance.SendMessage('SceneController', 'SetDebug')
   },
@@ -281,7 +395,7 @@ export const unityInterface = {
   Teleport({ position: { x, y, z }, cameraTarget }: InstancedSpawnPoint) {
     const theY = y <= 0 ? 2 : y
 
-    ensureTeleportAnimation()
+    TeleportController.ensureTeleportAnimation()
     gameInstance.SendMessage('CharacterController', 'Teleport', JSON.stringify({ x, y: theY, z }))
     gameInstance.SendMessage('CameraController', 'SetRotation', JSON.stringify({ x, y: theY, z, cameraTarget }))
   },
@@ -332,6 +446,9 @@ export const unityInterface = {
   SetBuilderReady() {
     gameInstance.SendMessage('SceneController', 'BuilderReady')
   },
+  AddUserProfileToCatalog(peerProfile: ProfileForRenderer) {
+    gameInstance.SendMessage('SceneController', 'AddUserProfileToCatalog', JSON.stringify(peerProfile))
+  },
   AddWearablesToCatalog(wearables: Wearable[]) {
     for (let wearable of wearables) {
       gameInstance.SendMessage('SceneController', 'AddWearableToCatalog', JSON.stringify(wearable))
@@ -364,12 +481,43 @@ export const unityInterface = {
   ConfigureSettingsHUD(configuration: HUDConfiguration) {
     gameInstance.SendMessage('HUDController', 'ConfigureSettingsHUD', JSON.stringify(configuration))
   },
+  ConfigureExpressionsHUD(configuration: HUDConfiguration) {
+    gameInstance.SendMessage('HUDController', 'ConfigureExpressionsHUD', JSON.stringify(configuration))
+  },
+  ShowWelcomeNotification() {
+    gameInstance.SendMessage('HUDController', 'ShowWelcomeNotification')
+  },
+  TriggerSelfUserExpression(expressionId: string) {
+    gameInstance.SendMessage('HUDController', 'TriggerSelfUserExpression', expressionId)
+  },
+  ConfigurePlayerInfoCardHUD(configuration: HUDConfiguration) {
+    gameInstance.SendMessage('HUDController', 'ConfigurePlayerInfoCardHUD', JSON.stringify(configuration))
+  },
+  ConfigureWelcomeHUD(configuration: WelcomeHUDControllerModel) {
+    gameInstance.SendMessage('HUDController', 'ConfigureWelcomeHUD', JSON.stringify(configuration))
+  },
+  ConfigureAirdroppingHUD(configuration: HUDConfiguration) {
+    gameInstance.SendMessage('HUDController', 'ConfigureAirdroppingHUD', JSON.stringify(configuration))
+  },
+  ConfigureTermsOfServiceHUD(configuration: HUDConfiguration) {
+    gameInstance.SendMessage('HUDController', 'ConfigureTermsOfServiceHUD', JSON.stringify(configuration))
+  },
   UpdateMinimapSceneInformation(info: { name: string; type: number; parcels: { x: number; y: number }[] }[]) {
     const chunks = chunkGenerator(CHUNK_SIZE, info)
 
     for (const chunk of chunks) {
       gameInstance.SendMessage('SceneController', 'UpdateMinimapSceneInformation', JSON.stringify(chunk))
     }
+  },
+  SetTutorialEnabled() {
+    if (RESET_TUTORIAL) {
+      browserInterface.SaveUserTutorialStep({ tutorialStep: 0 })
+    }
+
+    gameInstance.SendMessage('TutorialController', 'SetTutorialEnabled')
+  },
+  TriggerAirdropDisplay(data: AirdropInfo) {
+    // Disabled for security reasons
   },
   SelectGizmoBuilder(type: string) {
     this.SendBuilderMessage('SelectGizmo', type)
@@ -418,24 +566,6 @@ export const unityInterface = {
   },
   OnBuilderKeyDown(key: string) {
     this.SendBuilderMessage('OnBuilderKeyDown', key)
-  }
-}
-
-export const HUD: Record<string, { configure: (config: HUDConfiguration) => void }> = {
-  Minimap: {
-    configure: unityInterface.ConfigureMinimapHUD
-  },
-  Avatar: {
-    configure: unityInterface.ConfigureAvatarHUD
-  },
-  Notification: {
-    configure: unityInterface.ConfigureNotificationHUD
-  },
-  AvatarEditor: {
-    configure: unityInterface.ConfigureAvatarEditorHUD
-  },
-  Settings: {
-    configure: unityInterface.ConfigureSettingsHUD
   }
 }
 
@@ -674,15 +804,21 @@ export async function initializeEngine(_gameInstance: GameInstance) {
   if (ENGINE_DEBUG_PANEL) {
     unityInterface.SetEngineDebugPanel()
   }
+
+  if (tutorialEnabled()) {
+    unityInterface.SetTutorialEnabled()
+  }
+
   if (!EDITOR) {
     await initializeDecentralandUI()
   }
+
   return {
     unityInterface,
     onMessage(type: string, message: any) {
       if (type in browserInterface) {
         // tslint:disable-next-line:semicolon
-        ;(browserInterface as any)[type](message)
+        ; (browserInterface as any)[type](message)
       } else {
         defaultLogger.info(`Unknown message (did you forget to add ${type} to unity-interface/dcl.ts?)`, message)
       }
@@ -691,6 +827,9 @@ export async function initializeEngine(_gameInstance: GameInstance) {
 }
 
 export async function startUnityParcelLoading() {
+  const p = await providerFuture
+  hasWallet = p.successful
+
   global['globalStore'].dispatch(loadingScenes())
   await enableParcelSceneLoading({
     parcelSceneClass: UnityParcelScene,
@@ -734,6 +873,7 @@ async function initializeDecentralandUI() {
     name: 'ui',
     baseUrl: location.origin,
     main: hudWorkerUrl,
+    useFPSThrottling: false,
     data: {},
     mappings: []
   })
@@ -836,7 +976,6 @@ teleportObservable.add((position: { x: number; y: number; text?: string }) => {
   setLoadingScreenVisible(true)
   const globalStore = global['globalStore']
   globalStore.dispatch(teleportTriggered(position.text || `Teleporting to ${position.x}, ${position.y}`))
-  delightedSurvey()
 })
 
 worldRunningObservable.add(isRunning => {

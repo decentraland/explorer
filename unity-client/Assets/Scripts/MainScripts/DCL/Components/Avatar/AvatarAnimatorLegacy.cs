@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class AvatarAnimatorLegacy : MonoBehaviour
@@ -8,6 +9,7 @@ public class AvatarAnimatorLegacy : MonoBehaviour
     const float WALK_TRANSITION_TIME = 0.01f;
     const float JUMP_TRANSITION_TIME = 0.01f;
     const float FALL_TRANSITION_TIME = 0.5f;
+    const float EXPRESSION_TRANSITION_TIME = 0.2f;
 
     const float AIR_EXIT_TRANSITION_TIME = 0.2f;
     const float GROUND_BLENDTREE_TRANSITION_TIME = 0.15f;
@@ -21,14 +23,13 @@ public class AvatarAnimatorLegacy : MonoBehaviour
     const float MAX_VELOCITY = 6.25f;
 
     [System.Serializable]
-    public class Clips
+    public class BaseClipsIds
     {
         public string idle;
         public string walk;
         public string run;
         public string jump;
         public string fall;
-        public string special; //TODO(Brian): Not implemented yet
     }
 
     [System.Serializable]
@@ -39,10 +40,15 @@ public class AvatarAnimatorLegacy : MonoBehaviour
         public float movementSpeed;
         public float verticalSpeed;
         public bool isGrounded;
+        public string expressionTriggerId;
+        public long expressionTriggerTimestamp;
     }
 
+    [SerializeField] internal AvatarAnimationsVariable maleAnimations;
+    [SerializeField] internal AvatarAnimationsVariable femaleAnimations;
+
     public new Animation animation;
-    public Clips clips;
+    public BaseClipsIds baseClipsIds;
     public BlackBoard blackboard;
     public Transform target;
 
@@ -50,15 +56,15 @@ public class AvatarAnimatorLegacy : MonoBehaviour
     public AnimationCurve runBlendtreeCurve;
     public AnimationCurve idleBlendtreeCurve;
 
-    public bool useDeltaTimeInsteadOfGlobalSpeed = false;
-    public float globalSpeed = 0.05f;
-
-    System.Action<BlackBoard> currentState;
+    internal System.Action<BlackBoard> currentState;
 
     Vector3 lastPosition;
+    AvatarAnimationsVariable currentAnimations;
+    bool isOwnPlayer = false;
 
     void Start()
     {
+        isOwnPlayer = DCLCharacterController.i.transform == transform.parent;
         currentState = State_Init;
     }
 
@@ -71,10 +77,10 @@ public class AvatarAnimatorLegacy : MonoBehaviour
         currentState?.Invoke(blackboard);
     }
 
-
     void UpdateInterface()
     {
-        Vector3 flattenedVelocity = target.position - lastPosition;
+        Vector3 velocityTargetPosition = target.position;
+        Vector3 flattenedVelocity = velocityTargetPosition - lastPosition;
 
         //NOTE(Brian): Vertical speed
         float verticalVelocity = flattenedVelocity.y;
@@ -82,7 +88,10 @@ public class AvatarAnimatorLegacy : MonoBehaviour
 
         flattenedVelocity.y = 0;
 
-        blackboard.movementSpeed = flattenedVelocity.magnitude;
+        if (isOwnPlayer)
+            blackboard.movementSpeed = flattenedVelocity.magnitude - DCLCharacterController.i.movingPlatformSpeed;
+        else
+            blackboard.movementSpeed = flattenedVelocity.magnitude;
 
         Vector3 rayOffset = Vector3.up * RAY_OFFSET_LENGTH;
         //NOTE(Brian): isGrounded?
@@ -95,10 +104,8 @@ public class AvatarAnimatorLegacy : MonoBehaviour
         Debug.DrawRay(target.transform.position + rayOffset, Vector3.down * (RAY_OFFSET_LENGTH - ELEVATION_OFFSET), blackboard.isGrounded ? Color.green : Color.red);
 #endif
 
-        lastPosition = target.position;
+        lastPosition = velocityTargetPosition;
     }
-
-
 
     void State_Init(BlackBoard bb)
     {
@@ -112,19 +119,12 @@ public class AvatarAnimatorLegacy : MonoBehaviour
         }
     }
 
-
-
     void State_Ground(BlackBoard bb)
     {
-        float dt;
+        float dt = Time.deltaTime;
 
-        if (useDeltaTimeInsteadOfGlobalSpeed)
-            dt = Time.deltaTime;
-        else
-            dt = globalSpeed;
-
-        animation[clips.run].normalizedSpeed = bb.movementSpeed / dt * bb.runSpeedFactor;
-        animation[clips.walk].normalizedSpeed = bb.movementSpeed / dt * bb.walkSpeedFactor;
+        animation[baseClipsIds.run].normalizedSpeed = bb.movementSpeed / dt * bb.runSpeedFactor;
+        animation[baseClipsIds.walk].normalizedSpeed = bb.movementSpeed / dt * bb.walkSpeedFactor;
 
         float normalizedSpeed = bb.movementSpeed / dt / MAX_VELOCITY;
 
@@ -139,9 +139,9 @@ public class AvatarAnimatorLegacy : MonoBehaviour
         runWeight /= weightSum;
         walkWeight /= weightSum;
 
-        animation.Blend(clips.idle, idleWeight, GROUND_BLENDTREE_TRANSITION_TIME);
-        animation.Blend(clips.run, runWeight, GROUND_BLENDTREE_TRANSITION_TIME);
-        animation.Blend(clips.walk, walkWeight, GROUND_BLENDTREE_TRANSITION_TIME);
+        animation.Blend(baseClipsIds.idle, idleWeight, GROUND_BLENDTREE_TRANSITION_TIME);
+        animation.Blend(baseClipsIds.run, runWeight, GROUND_BLENDTREE_TRANSITION_TIME);
+        animation.Blend(baseClipsIds.walk, walkWeight, GROUND_BLENDTREE_TRANSITION_TIME);
 
         if (!bb.isGrounded)
         {
@@ -154,18 +154,54 @@ public class AvatarAnimatorLegacy : MonoBehaviour
     {
         if (bb.verticalSpeed > 0)
         {
-            animation.CrossFade(clips.jump, JUMP_TRANSITION_TIME, PlayMode.StopAll);
+            animation.CrossFade(baseClipsIds.jump, JUMP_TRANSITION_TIME, PlayMode.StopAll);
         }
         else
         {
-            animation.CrossFade(clips.fall, FALL_TRANSITION_TIME, PlayMode.StopAll);
+            animation.CrossFade(baseClipsIds.fall, FALL_TRANSITION_TIME, PlayMode.StopAll);
         }
 
         if (bb.isGrounded)
         {
-            animation.Blend(clips.jump, 0, AIR_EXIT_TRANSITION_TIME);
-            animation.Blend(clips.fall, 0, AIR_EXIT_TRANSITION_TIME);
+            animation.Blend(baseClipsIds.jump, 0, AIR_EXIT_TRANSITION_TIME);
+            animation.Blend(baseClipsIds.fall, 0, AIR_EXIT_TRANSITION_TIME);
             currentState = State_Ground;
+            Update();
+        }
+    }
+
+    internal void State_Expression(BlackBoard bb)
+    {
+        var animationInfo = animation[bb.expressionTriggerId];
+        animation.CrossFade(bb.expressionTriggerId, EXPRESSION_TRANSITION_TIME, PlayMode.StopAll);
+
+        var mustExit = Math.Abs(bb.movementSpeed) > Mathf.Epsilon || animationInfo.length - animationInfo.time < EXPRESSION_TRANSITION_TIME || !bb.isGrounded;
+        if (mustExit)
+        {
+            animation.Blend(bb.expressionTriggerId, 0, EXPRESSION_TRANSITION_TIME);
+            bb.expressionTriggerId = null;
+            if (!bb.isGrounded)
+                currentState = State_Air;
+            else
+                currentState = State_Ground;
+            Update();
+        }
+    }
+
+    public void SetExpressionValues(string expressionTriggerId, long expressionTriggerTimestamp)
+    {
+        var mustTriggerAnimation = !string.IsNullOrEmpty(expressionTriggerId) && blackboard.expressionTriggerTimestamp != expressionTriggerTimestamp;
+
+        blackboard.expressionTriggerId = expressionTriggerId;
+        blackboard.expressionTriggerTimestamp = expressionTriggerTimestamp;
+
+        if (mustTriggerAnimation)
+        {
+            if (!string.IsNullOrEmpty(expressionTriggerId))
+            {
+                animation.Stop(expressionTriggerId);
+            }
+            currentState = State_Expression;
             Update();
         }
     }
@@ -178,6 +214,30 @@ public class AvatarAnimatorLegacy : MonoBehaviour
 
     public void SetIdleFrame()
     {
-        animation.Play(clips.idle);
+        animation.Play(baseClipsIds.idle);
+    }
+
+    public void BindBodyShape(Animation animation, string bodyShapeType, Transform target)
+    {
+        this.target = target;
+        this.animation = animation;
+
+        if (bodyShapeType.Contains(WearableLiterals.BodyShapes.MALE))
+        {
+            currentAnimations = maleAnimations;
+        }
+        else if (bodyShapeType.Contains(WearableLiterals.BodyShapes.FEMALE))
+        {
+            currentAnimations = femaleAnimations;
+        }
+
+        for (var i = 0; i < currentAnimations.Get().Length; i++)
+        {
+            var animationToId = currentAnimations.Get()[i];
+            if (this.animation.GetClip(animationToId.id) == null)
+                this.animation.AddClip(animationToId.clip, animationToId.id);
+        }
+
+        SetIdleFrame();
     }
 }

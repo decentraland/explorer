@@ -1,10 +1,12 @@
 import { ProfileForRenderer } from 'decentraland-ecs/src'
+import { AuthIdentity } from 'dcl-crypto'
 
 export enum AvatarMessageType {
   // Networking related messages
   USER_DATA = 'USER_DATA',
   USER_POSE = 'USER_POSE',
   USER_VISIBLE = 'USER_VISIBLE',
+  USER_EXPRESSION = 'USER_EXPRESSION',
   USER_REMOVED = 'USER_REMOVED',
   SET_LOCAL_UUID = 'SET_LOCAL_UUID',
 
@@ -16,6 +18,13 @@ export enum AvatarMessageType {
 
   ADD_FRIEND = 'ADD_FRIEND',
   SHOW_WINDOW = 'SHOW_WINDOW'
+}
+
+export type ReceiveUserExpressionMessage = {
+  type: AvatarMessageType.USER_EXPRESSION
+  uuid: string
+  expressionId: string
+  timestamp: number
 }
 
 export type ReceiveUserDataMessage = {
@@ -56,6 +65,7 @@ export type AvatarMessage =
   | ReceiveUserDataMessage
   | ReceiveUserPoseMessage
   | ReceiveUserVisibleMessage
+  | ReceiveUserExpressionMessage
   | UserRemovedMessage
   | UserMessage
 
@@ -82,7 +92,14 @@ export type UserInformation = {
   version?: number
   status?: string
   pose?: Pose
+  expression?: AvatarExpression
   profile?: ProfileForRenderer
+  identity?: AuthIdentity
+}
+
+export type AvatarExpression = {
+  expressionType?: string
+  expressionTimestamp?: number
 }
 
 // The order is [X,Y,Z,Qx,Qy,Qz,Qw]
@@ -92,8 +109,10 @@ export type PoseInformation = {
   v: Pose
 }
 
+export type PackageType = 'profile' | 'chat' | 'position'
+
 export type Package<T> = {
-  type: 'profile' | 'chat' | 'position'
+  type: PackageType
   time: number
   data: T
 }
@@ -109,3 +128,19 @@ export type ChatMessage = {
 }
 
 export type BusMessage = ChatMessage
+
+export class IdTakenError extends Error {
+  constructor(message: string) {
+    super(message)
+  }
+}
+export class ConnectionEstablishmentError extends Error {
+  constructor(message: string) {
+    super(message)
+  }
+}
+export class UnknownCommsModeError extends Error {
+  constructor(message: string) {
+    super(message)
+  }
+}

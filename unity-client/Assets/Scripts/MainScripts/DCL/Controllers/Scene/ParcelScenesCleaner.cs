@@ -34,7 +34,7 @@ namespace DCL
         public void Stop()
         {
             if (removeEntitiesCoroutine != null)
-                SceneController.i.StopCoroutine(removeEntitiesCoroutine);
+                CoroutineStarter.Stop(removeEntitiesCoroutine);
         }
 
         public void MarkForCleanup(DecentralandEntity entity)
@@ -42,6 +42,15 @@ namespace DCL
             if (!entity.markedForCleanup)
             {
                 entity.markedForCleanup = true;
+
+                if (entity.gameObject != null)
+                    entity.gameObject.SetActive(false);
+
+#if UNITY_EDITOR
+                if (entity.gameObject != null)
+                    entity.gameObject.name += "-MARKED-FOR-CLEANUP";
+#endif
+
                 entitiesMarkedForCleanup.Enqueue(entity);
             }
         }
@@ -81,6 +90,8 @@ namespace DCL
 
             if (scene != null)
                 GameObject.Destroy(scene.gameObject);
+
+            PoolManager.i.CleanPoolableReferences();
         }
 
         IEnumerator CleanupEntitiesCoroutine()
@@ -126,6 +137,8 @@ namespace DCL
 
                 if (scene != null)
                     GameObject.Destroy(scene.gameObject);
+
+                PoolManager.i.CleanPoolableReferences();
 
                 yield return null;
             }

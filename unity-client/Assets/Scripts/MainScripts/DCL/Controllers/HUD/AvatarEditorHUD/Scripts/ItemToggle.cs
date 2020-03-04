@@ -8,6 +8,8 @@ using UnityEngine.UI;
 public class ItemToggle : UIButton, IPointerEnterHandler, IPointerExitHandler
 {
     public event System.Action<ItemToggle> OnClicked;
+    public event System.Action<ItemToggle> OnSellClicked;
+
     public WearableItem wearableItem { get; private set; }
 
     public Image thumbnail;
@@ -18,6 +20,8 @@ public class ItemToggle : UIButton, IPointerEnterHandler, IPointerExitHandler
 
     private bool selectedValue;
 
+    private string loadedThumbnailURL;
+    
     //Todo change this for a confirmation popup or implement it in a more elegant way
     public static Func<WearableItem, List<WearableItem>> getEquippedWearablesReplacedByFunc;
 
@@ -27,23 +31,21 @@ public class ItemToggle : UIButton, IPointerEnterHandler, IPointerExitHandler
         set
         {
             selectedValue = value;
-
-            if (selectionHighlight != null)
-                selectionHighlight.enabled = selectedValue;
+            SetSelection(selectedValue);
         }
+    }
+
+    protected virtual void SetSelection(bool isSelected)
+    {
+        if (selectionHighlight != null)
+            selectionHighlight.enabled = isSelected;
     }
 
     protected new virtual void Awake()
     {
         base.Awake();
 
-        Application.quitting += Cleanup;
         warningPanel.SetActive(false);
-    }
-
-    void Cleanup()
-    {
-        OnClicked = null;
     }
 
     protected override void OnClick()
@@ -54,21 +56,15 @@ public class ItemToggle : UIButton, IPointerEnterHandler, IPointerExitHandler
 
     public virtual void Initialize(WearableItem w, bool isSelected, int amount)
     {
+        ForgetThumbnail();
         wearableItem = w;
         selected = isSelected;
         amountContainer.gameObject.SetActive(amount > 1);
         amountText.text = $"x{amount.ToString()}";
 
-        if (!string.IsNullOrEmpty(w.thumbnail))
-        {
-            if (wearableItem != null)
-            {
-                ThumbnailsManager.CancelRequest(w.baseUrl + w.thumbnail, OnThumbnailReady);
-            }
-            ThumbnailsManager.RequestThumbnail(w.baseUrl + w.thumbnail, OnThumbnailReady);
-        }
+        if(gameObject.activeInHierarchy)
+            GetThumbnail();
     }
-
 
     public void OnPointerEnter(PointerEventData eventData)
     {
@@ -93,13 +89,43 @@ public class ItemToggle : UIButton, IPointerEnterHandler, IPointerExitHandler
         thumbnail.sprite = sprite;
     }
 
-    protected virtual void OnDestroy()
+    private void OnEnable()
     {
-        Application.quitting -= Cleanup;
+        GetThumbnail();
+    }
 
-        if (wearableItem != null)
+    private void OnDisable()
+    {
+        ForgetThumbnail();
+    }
+
+    protected  virtual void OnDestroy()
+    {
+        OnClicked = null;
+    }
+
+    protected void CallOnSellClicked()
+    {
+        OnSellClicked?.Invoke(this);
+    }
+    
+    private void GetThumbnail()
+    {
+        var url = wearableItem?.ComposeThumbnailUrl();
+
+        ForgetThumbnail();
+
+        if (wearableItem != null && !string.IsNullOrEmpty(url))
         {
-            ThumbnailsManager.CancelRequest(wearableItem.baseUrl + wearableItem.thumbnail, OnThumbnailReady);
+            loadedThumbnailURL = url;
+            ThumbnailsManager.GetThumbnail(url, OnThumbnailReady);
         }
+    }
+    
+    private void ForgetThumbnail()
+    {
+        if(!string.IsNullOrEmpty(loadedThumbnailURL))
+            ThumbnailsManager.ForgetThumbnail(loadedThumbnailURL, OnThumbnailReady);
+        loadedThumbnailURL = null;
     }
 }

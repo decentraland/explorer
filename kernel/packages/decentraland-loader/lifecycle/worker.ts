@@ -9,6 +9,7 @@ import { PositionLifecycleController } from './controllers/position'
 import { SceneDataDownloadManager } from './controllers/download'
 import { ILand, InstancedSpawnPoint } from 'shared/types'
 import defaultLogger from 'shared/logger'
+import { setTutorialEnabled } from './tutorial/tutorial'
 
 const connector = new Adapter(WebWorkerTransport(self as any))
 
@@ -36,14 +37,21 @@ let downloadManager: SceneDataDownloadManager
     'Lifecycle.initialize',
     (options: {
       contentServer: string
+      metaContentServer: string
       contentServerBundles: string
       lineOfSightRadius: number
       secureRadius: number
       emptyScenes: boolean
+      tutorialBaseURL: string
+      tutorialSceneEnabled: boolean
     }) => {
+      setTutorialEnabled(options.tutorialSceneEnabled)
+
       downloadManager = new SceneDataDownloadManager({
         contentServer: options.contentServer,
-        contentServerBundles: options.contentServerBundles
+        metaContentServer: options.metaContentServer,
+        contentServerBundles: options.contentServerBundles,
+        tutorialBaseURL: options.tutorialBaseURL
       })
       parcelController = new ParcelLifeCycleController({
         lineOfSightRadius: options.lineOfSightRadius,
@@ -51,7 +59,6 @@ let downloadManager: SceneDataDownloadManager
       })
       sceneController = new SceneLifeCycleController({ downloadManager, enabledEmpty: options.emptyScenes })
       positionController = new PositionLifecycleController(downloadManager, parcelController, sceneController)
-
       parcelController.on('Sighted', (parcels: string[]) => connector.notify('Parcel.sighted', { parcels }))
       parcelController.on('Lost sight', (parcels: string[]) => connector.notify('Parcel.lostSight', { parcels }))
 

@@ -110,10 +110,9 @@ jobs:
           command: |
             if [[ -e /tmp/explorer/unity-client/testlog/log.txt ]]; then
                 exit 0
-            elif [[ -e ${BUILD_PATH} ]] && [[ -n "$(ls -A ${BUILD_PATH})" ]]; then # Negated condition with regards to renderer: If it doesn't exist, then fail!
+            else
                 bash ./test-ci.sh
                 exit $?
-            else exit 1
             fi;
       - save_cache:
           name: Store test results
@@ -161,7 +160,10 @@ jobs:
                     sleep 60
                 done
                 ls -la ${BUILD_PATH}
-                [ -n "$(ls -A ${BUILD_PATH})" ] # fail job if build folder is empty
+                [ -n "$(ls -A ${BUILD_PATH})" ];
+                # Apply hot fix to take out old CachedXMLRequest
+                apt-get install bc
+                cd /tmp/explorer/unity-client/Builds/unity/Build && ../../../../.circleci/hotpatch.sh unity.wasm.framework.unityweb
             fi;
       - save_cache:
           name: Store decentraland-renderer build
@@ -208,6 +210,10 @@ jobs:
           command: |
             make lint
             npm outdated --depth 0 || true
+      - run:
+          name: Set env
+          command: |
+            echo 'export const buildNumber = '$CIRCLE_BUILD_NUM > /tmp/explorer/kernel/packages/shared/meta/env.ts
       - run:
           name: Build decentraland-ecs
           command: |
@@ -404,45 +410,29 @@ workflows:
       - checkout:
           <<: *all_branches_and_tags
 
-      - build-unity:
-          <<: *all_branches_and_tags
-          requires:
-            - checkout
-          filters:
-            branches:
-              only: /(.*)/
-            tags:
-              only: /^\d+\.\d+\.\d(.*)/ # npm tag + latest
       - run-unity-tests:
           <<: *all_branches_and_tags
           requires:
-            - build-unity
-          filters:
-            branches:
-              only: /(.*)/
+            - checkout
+      - build-unity:
+          <<: *all_branches_and_tags
+          requires:
+            - run-unity-tests
+            - checkout
+
       - build-kernel:
           <<: *all_branches_and_tags
           requires:
             - checkout
-          filters:
-            branches:
-              only: /(.*)/
-            tags:
-              only: /^\d+\.\d+\.\d(.*)/ # npm tag + latest
 
       - package:
           <<: *all_branches_and_tags
           requires:
             - build-kernel
             - build-unity
-            - run-unity-tests
-          filters:
-            branches:
-              only: /(.*)/
-            tags:
-              only: /^\d+\.\d+\.\d(.*)/ # npm tag + latest
 
       - publish-renderer:
+          <<: *all_branches_and_tags
           requires:
             - package
 

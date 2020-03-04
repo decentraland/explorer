@@ -6,11 +6,13 @@ import { SceneDataDownloadManager } from './download'
 import { worldToGrid, gridToWorld } from '../../../atomicHelpers/parcelScenePositions'
 import { pickWorldSpawnpoint } from 'shared/world/positionThings'
 import { InstancedSpawnPoint } from 'shared/types'
+import { isTutorial, resolveTutorialPosition } from '../tutorial/tutorial'
 
 export class PositionLifecycleController extends EventEmitter {
   private positionSettled: boolean = false
   private currentlySightedScenes: string[] = []
   private currentSpawnpoint?: InstancedSpawnPoint
+  private currentPosition: Vector2Component | null = null
 
   constructor(
     private downloadManager: SceneDataDownloadManager,
@@ -22,7 +24,21 @@ export class PositionLifecycleController extends EventEmitter {
   }
 
   async reportCurrentPosition(position: Vector2Component, teleported: boolean) {
+    if (isTutorial()) {
+      await this.reportCurrentPositionTutorial(position, teleported)
+    } else {
+      await this.doReportCurrentPosition(position, teleported)
+    }
+  }
+
+  private async doReportCurrentPosition(position: Vector2Component, teleported: boolean) {
+    if (this.currentPosition && this.currentPosition.x === position.x && this.currentPosition.y === position.y) {
+      return
+    }
+
     let resolvedPosition = position
+    this.currentPosition = resolvedPosition
+
     if (teleported) {
       const land = await this.downloadManager.getParcelData(`${position.x},${position.y}`)
       if (land) {
@@ -40,7 +56,6 @@ export class PositionLifecycleController extends EventEmitter {
 
     if (parcels) {
       const newlySightedScenes = await this.sceneController.reportSightedParcels(parcels.sighted, parcels.lostSight)
-
       if (!this.eqSet(this.currentlySightedScenes, newlySightedScenes.sighted)) {
         this.currentlySightedScenes = newlySightedScenes.sighted
       }
@@ -52,6 +67,11 @@ export class PositionLifecycleController extends EventEmitter {
     }
 
     this.checkPositionSettlement()
+  }
+
+  private async reportCurrentPositionTutorial(position: Vector2Component, teleported: boolean) {
+    const tutorialParcelCoords = resolveTutorialPosition(position, teleported)
+    await this.doReportCurrentPosition(tutorialParcelCoords, teleported)
   }
 
   private eqSet(as: Array<any>, bs: Array<any>) {

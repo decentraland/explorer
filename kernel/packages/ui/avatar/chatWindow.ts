@@ -18,9 +18,9 @@ import { screenSpaceUI } from './ui'
 
 declare var dcl: DecentralandInterface
 
-const INITIAL_INPUT_TEXT_COLOR = Color4.Gray()
+const INITIAL_INPUT_TEXT_COLOR = Color4.White()
 const PRIMARY_TEXT_COLOR = Color4.White()
-const COMMAND_COLOR = Color4.FromHexString('#ffd7a9ff')
+const COMMAND_COLOR = Color4.FromHexString('#80ffe5ff')
 
 // UI creators -------------------
 dcl.subscribe('MESSAGE_RECEIVED')
@@ -45,7 +45,7 @@ function createLogMessage(parent: UIShape, props: { sender: string; message: str
   messageText.hAlign = 'left'
   messageText.vTextAlign = 'top'
   messageText.hTextAlign = 'left'
-  messageText.width = '350px'
+  messageText.width = '350px'//330
   messageText.adaptWidth = false
   messageText.adaptHeight = true
   messageText.textWrapping = true
@@ -71,8 +71,8 @@ chatContainer.name = 'chat-container'
 chatContainer.color = Color4.Clear()
 chatContainer.vAlign = 'bottom'
 chatContainer.hAlign = 'left'
-chatContainer.width = '400px'
-chatContainer.height = '300px'
+chatContainer.width = '380px'
+chatContainer.height = '250px'
 chatContainer.positionX = 10
 chatContainer.positionY = 10
 chatContainer.thickness = 0
@@ -81,17 +81,18 @@ const chatInnerTopContainer = new UIContainerRect(chatContainer)
 chatInnerTopContainer.color = Color4.Clear()
 chatInnerTopContainer.name = 'inner-top-container'
 chatInnerTopContainer.vAlign = 'top'
-chatInnerTopContainer.hAlign = 'center'
+chatInnerTopContainer.hAlign = 'left'
 chatInnerTopContainer.width = '100%'
-chatInnerTopContainer.height = '84%'
+chatInnerTopContainer.height = '82.5%'
 
 const messagesLogScrollContainer = new UIScrollRect(chatInnerTopContainer)
 messagesLogScrollContainer.name = 'messages-log-scroll-container'
 messagesLogScrollContainer.vAlign = 'top'
-messagesLogScrollContainer.hAlign = 'center'
+messagesLogScrollContainer.hAlign = 'left'
 messagesLogScrollContainer.width = '100%'
 messagesLogScrollContainer.height = '90%'
-messagesLogScrollContainer.positionY = '-10px'
+messagesLogScrollContainer.positionY = '-8px'//6
+messagesLogScrollContainer.positionX = -5
 messagesLogScrollContainer.valueY = 1
 messagesLogScrollContainer.isVertical = false
 messagesLogScrollContainer.isHorizontal = false
@@ -101,18 +102,18 @@ const messagesLogStackContainer = new UIContainerStack(messagesLogScrollContaine
 messagesLogStackContainer.name = 'messages-log-stack-container'
 messagesLogStackContainer.vAlign = 'bottom'
 messagesLogStackContainer.hAlign = 'center'
-messagesLogStackContainer.width = '90%'
-messagesLogStackContainer.height = '100%'
-messagesLogStackContainer.spacing = 10
-messagesLogStackContainer.positionX = '-10px'
+messagesLogStackContainer.width = '100%'//100
+messagesLogStackContainer.height = '100%'//90
+messagesLogStackContainer.spacing = 5//inter message
+messagesLogStackContainer.positionX = 4//position about the box
 
 const textInputContainer = new UIContainerRect(chatContainer)
 textInputContainer.color = Color4.Clear()
 textInputContainer.name = 'input-text-container'
 textInputContainer.vAlign = 'bottom'
-textInputContainer.hAlign = 'center'
-textInputContainer.width = '100%'
-textInputContainer.height = '15%'
+textInputContainer.hAlign = 'left'
+textInputContainer.width = '100%'//90
+textInputContainer.height = '16%'//20
 
 const textInput = new UIInputText(textInputContainer)
 textInput.name = 'input-text'
@@ -122,8 +123,8 @@ textInput.background = Color4.Clear()
 textInput.focusedBackground = Color4.Clear()
 textInput.placeholder = 'Press enter and start talking...'
 textInput.fontSize = 14
-textInput.width = '90%'
-textInput.height = '100%'
+textInput.width = '90%'//90
+textInput.height = '16%'//18
 textInput.thickness = 0
 textInput.vAlign = 'center'
 textInput.hAlign = 'center'

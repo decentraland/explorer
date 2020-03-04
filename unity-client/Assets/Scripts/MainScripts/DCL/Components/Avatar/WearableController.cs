@@ -1,5 +1,6 @@
 using DCL;
 using DCL.Components;
+using DCL.Helpers;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -24,6 +25,8 @@ public class WearableController
 
     List<Material> materials = null;
 
+    private bool bonesRetargeted = false;
+
     public WearableController(WearableItem wearableItem, string bodyShapeType)
     {
         this.wearable = wearableItem;
@@ -38,8 +41,10 @@ public class WearableController
         assetRenderers = original.assetRenderers;
     }
 
-    public void Load(Transform parent, Action<WearableController> onSuccess, Action<WearableController> onFail)
+    public virtual void Load(Transform parent, Action<WearableController> onSuccess, Action<WearableController> onFail)
     {
+        bonesRetargeted = false;
+
         var representation = wearable.GetRepresentation(bodyShapeType);
         var provider = wearable.GetContentProvider(bodyShapeType);
 
@@ -47,12 +52,13 @@ public class WearableController
 
         loader.settings.forceNewInstance = true;
         loader.settings.initialLocalPosition = Vector3.up * 0.75f;
+        loader.settings.cachingFlags = MaterialCachingHelper.Mode.CACHE_SHADERS;
         loader.settings.visibleFlags = AssetPromiseSettings_Rendering.VisibleFlags.INVISIBLE;
         loader.settings.parent = parent;
 
         loader.OnSuccessEvent += (x) =>
         {
-            assetRenderers = x.GetComponentsInChildren<Renderer>();
+            PrepareWearable(x);
             onSuccess.Invoke(this);
         };
 
@@ -77,12 +83,15 @@ public class WearableController
 
     public void SetAnimatorBones(SkinnedMeshRenderer skinnedMeshRenderer)
     {
+        if (bonesRetargeted) return;
+
         SkinnedMeshRenderer[] skinnedRenderers = assetContainer.GetComponentsInChildren<SkinnedMeshRenderer>();
         for (int i1 = 0; i1 < skinnedRenderers.Length; i1++)
         {
             skinnedRenderers[i1].rootBone = skinnedMeshRenderer.rootBone;
             skinnedRenderers[i1].bones = skinnedMeshRenderer.bones;
         }
+        bonesRetargeted = true;
     }
 
     public void CleanUp()
@@ -112,5 +121,10 @@ public class WearableController
         {
             Object.Destroy(materials[i]);
         }
+    }
+
+    protected virtual void PrepareWearable(GameObject assetContainer)
+    {
+        assetRenderers = assetContainer.GetComponentsInChildren<Renderer>();
     }
 }

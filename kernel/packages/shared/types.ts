@@ -25,7 +25,8 @@ export interface MessageDict {
 
 export type UserData = {
   displayName: string
-  publicKey: string
+  publicKey: string | null
+  hasConnectedWeb3: boolean
   userId: string
 }
 
@@ -180,6 +181,7 @@ export type EnvironmentData<T> = {
   main: string
   baseUrl: string
   mappings: Array<ContentMapping>
+  useFPSThrottling: boolean
   data: T
 }
 
@@ -347,6 +349,10 @@ export type HUDConfiguration = {
   visible: boolean
 }
 
+export type WelcomeHUDControllerModel = HUDConfiguration & {
+  hasWallet: boolean
+}
+
 export function normalizeContentMappings(
   mappings: Record<string, string> | Array<ContentMapping>
 ): Array<ContentMapping> {
@@ -377,6 +383,7 @@ export function ILandToLoadableParcelScene(land: ILand): EnvironmentData<Loadabl
     baseUrl: land.baseUrl,
     name: land.scene.name,
     main: land.scene.main,
+    useFPSThrottling: false,
     mappings,
     data: {
       id: land.sceneId,
@@ -406,6 +413,7 @@ export function ILandToLoadableParcelSceneUpdate(land: ILand): EnvironmentData<L
     baseUrl: land.baseUrl,
     name: land.scene.name,
     main: land.scene.main,
+    useFPSThrottling: false,
     mappings,
     data: {
       id: land.sceneId,
@@ -425,4 +433,8 @@ export function ILandToLoadableParcelSceneUpdate(land: ILand): EnvironmentData<L
   }
 
   return ret
+}
+
+export type CatalystNode = {
+  domain: string
 }

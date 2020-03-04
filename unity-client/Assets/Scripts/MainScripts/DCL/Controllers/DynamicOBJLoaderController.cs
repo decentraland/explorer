@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -25,20 +25,20 @@ public class DynamicOBJLoaderController : MonoBehaviour
 
     public void LoadAsset(string url = "", bool loadEvenIfAlreadyLoaded = false)
     {
-        if (!alreadyLoadedAsset || loadEvenIfAlreadyLoaded)
+        if (alreadyLoadedAsset && !loadEvenIfAlreadyLoaded)
+            return;
+
+        if (!string.IsNullOrEmpty(url))
         {
-            if (!string.IsNullOrEmpty(url))
-            {
-                OBJUrl = url;
-            }
-
-            if (loadingRoutine != null)
-            {
-                StopCoroutine(loadingRoutine);
-            }
-
-            loadingRoutine = StartCoroutine(LoadAssetCoroutine());
+            OBJUrl = url;
         }
+
+        if (loadingRoutine != null)
+        {
+            StopCoroutine(loadingRoutine);
+        }
+
+        loadingRoutine = StartCoroutine(LoadAssetCoroutine());
     }
 
     IEnumerator LoadAssetCoroutine()
@@ -49,11 +49,7 @@ public class DynamicOBJLoaderController : MonoBehaviour
 
             UnityWebRequest webRequest = UnityWebRequest.Get(OBJUrl);
 
-            webRequest.SendWebRequest();
-            while (!webRequest.isDone)
-            {
-                yield return null;
-            }
+            yield return webRequest.SendWebRequest();
 
             if (webRequest.isNetworkError || webRequest.isHttpError)
             {
@@ -66,11 +62,7 @@ public class DynamicOBJLoaderController : MonoBehaviour
                 loadedOBJGameObject.transform.SetParent(transform);
                 loadedOBJGameObject.transform.localPosition = Vector3.zero;
 
-                if (OnFinishedLoadingAsset != null)
-                {
-                    OnFinishedLoadingAsset();
-                }
-
+                OnFinishedLoadingAsset?.Invoke();
                 alreadyLoadedAsset = true;
             }
         }

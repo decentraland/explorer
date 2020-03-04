@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
@@ -13,6 +12,7 @@ public class ItemSelector : MonoBehaviour
     private RectTransform itemContainer;
 
     public event System.Action<string> OnItemClicked;
+    public event System.Action<string> OnSellClicked;
 
     internal Dictionary<string, ItemToggle> itemToggles = new Dictionary<string, ItemToggle>();
 
@@ -44,6 +44,7 @@ public class ItemSelector : MonoBehaviour
 
         newToggle.Initialize(item, false, amount);
         newToggle.OnClicked += ToggleClicked;
+        newToggle.OnSellClicked += SellClicked;
         itemToggles.Add(item.id, newToggle);
 
         bool active = string.IsNullOrEmpty(currentBodyShape) || item.SupportsBodyShape(currentBodyShape);
@@ -63,13 +64,16 @@ public class ItemSelector : MonoBehaviour
 
     public void RemoveAllItemToggle()
     {
-        var gameObjects = itemToggles.Values.Select(x => x.gameObject).ToArray();
-        itemToggles.Clear();
-        for (var i = gameObjects.Length - 1; i >= 0; i--)
+        using (var it = itemToggles.GetEnumerator())
         {
-            Destroy(gameObjects[i]);
+            while (it.MoveNext())
+            {
+                Destroy(it.Current.Value.gameObject);
+            }
         }
-    } 
+
+        itemToggles.Clear();
+    }
 
     public void SetBodyShape(string bodyShape)
     {
@@ -95,14 +99,14 @@ public class ItemSelector : MonoBehaviour
     public void Select(string itemID)
     {
         ItemToggle toggle = GetItemToggleByID(itemID);
-        if(toggle != null)
+        if (toggle != null)
             toggle.selected = true;
     }
 
     public void Unselect(string itemID)
     {
         ItemToggle toggle = GetItemToggleByID(itemID);
-        if(toggle != null)
+        if (toggle != null)
             toggle.selected = false;
     }
 
@@ -120,6 +124,11 @@ public class ItemSelector : MonoBehaviour
     private void ToggleClicked(ItemToggle toggle)
     {
         OnItemClicked?.Invoke(toggle.wearableItem.id);
+    }
+
+    private void SellClicked(ItemToggle toggle)
+    {
+        OnSellClicked?.Invoke(toggle.wearableItem.id);
     }
 
     private ItemToggle GetItemToggleByID(string itemID)

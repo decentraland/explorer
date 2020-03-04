@@ -220,8 +220,9 @@ namespace AvatarShape_Tests
 
             var sunglassesAssetContainer = AvatarRenderer_Mock.GetWearableController(avatarShape.avatarRenderer, SUNGLASSES_ID)?.myAssetContainer;
             var bandanaAssetContainer = AvatarRenderer_Mock.GetWearableController(avatarShape.avatarRenderer, BLUE_BANDANA_ID)?.myAssetContainer;
-            var sunglassesPoolableObject = sunglassesAssetContainer.GetComponentInChildren<PoolableObject>();
-            var bandanaPoolableObject = bandanaAssetContainer.GetComponentInChildren<PoolableObject>();
+
+            var sunglassesPoolableObject = PoolManager.i.GetPoolable(sunglassesAssetContainer);
+            var bandanaPoolableObject = PoolManager.i.GetPoolable(bandanaAssetContainer);
             Assert.IsNull(sunglassesPoolableObject);
             Assert.IsNull(bandanaPoolableObject);
         }
@@ -247,17 +248,37 @@ namespace AvatarShape_Tests
         [Category("Explicit")]
         public IEnumerator BeHiddenUntilWholeAvatarIsReady()
         {
-            avatarModel.wearables = new List<string>() { SUNGLASSES_ID, BLUE_BANDANA_ID };
+            avatarShape.avatarRenderer.ResetAvatar();
+            yield return null; //NOTE(Brian): Must wait a frame in order to all gameObjects finishes destroying.
 
+            avatarModel.wearables = new List<string>() { SUNGLASSES_ID, BLUE_BANDANA_ID };
             avatarShape.avatarRenderer.ApplyModel(avatarModel, null, null);
 
-            bool wearableReady = false;
-            var wearableController = AvatarRenderer_Mock.GetWearableController(avatarShape.avatarRenderer, SUNGLASSES_ID);
-            wearableController.myLoader.OnSuccessEvent += gltf => wearableReady = true;
-            yield return new DCL.WaitUntil(() => wearableReady);
+            while (avatarShape.avatarRenderer.isLoading)
+            {
+                AssertAllAvatarRenderers(false);
+                yield return null;
+            }
 
-            var renderers = wearableController.myLoader.loadedAsset.GetComponentsInChildren<Renderer>();
-            Assert.IsTrue(renderers.All(x => x.enabled == false));
+            AssertAllAvatarRenderers(true);
+        }
+
+        private void AssertAllAvatarRenderers(bool shouldBeEnabled)
+        {
+            Renderer[] renderers = avatarShape.avatarRenderer.GetComponentsInChildren<Renderer>(true);
+            foreach (var r in renderers)
+            {
+                if (r.gameObject == avatarShape.minimapRepresentation)
+                    continue;
+
+                if (r.enabled)
+                {
+                    if (shouldBeEnabled)
+                        Assert.IsTrue(r.enabled, "All renderers should be enabled on cleanup!");
+                    else
+                        Assert.IsTrue(!r.enabled, "All renderers should be disabled on cleanup!");
+                }
+            }
         }
     }
 }
