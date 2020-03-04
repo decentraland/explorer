@@ -18,9 +18,12 @@ namespace DCL
 
         public Dictionary<object, Pool> pools = new Dictionary<object, Pool>();
         public Dictionary<GameObject, PoolableObject> poolables = new Dictionary<GameObject, PoolableObject>();
+        public HashSet<PoolableObject> poolableValues = new HashSet<PoolableObject>();
+
         public bool HasPoolable(PoolableObject poolable)
         {
-            return poolables.ContainsValue(poolable);
+            //NOTE(Brian): The only poolableValues use is this. Using ContainsValue in a Dictionary is slow as hell.
+            return poolableValues.Contains(poolable);
         }
 
         public PoolableObject GetPoolable(GameObject gameObject)
@@ -258,6 +261,7 @@ namespace DCL
 
                     if (kvp.Value.gameObject == null)
                     {
+                        Debug.Log("Removing null gameObject from pool...");
                         kvp.Value.node?.List.Remove(kvp.Value);
                         kvp.Value.node = null;
                         toRemoveAuxList.Add(kvp.Key);
