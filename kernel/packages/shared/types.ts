@@ -438,3 +438,13 @@ export function ILandToLoadableParcelSceneUpdate(land: ILand): EnvironmentData<L
 export type CatalystNode = {
   domain: string
 }
+
+export type GraphResponse = {
+  data: {
+    nfts: {
+      ens: {
+        subdomain: string
+      }
+    }[]
+  }
+}

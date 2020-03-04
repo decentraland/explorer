@@ -4,7 +4,7 @@ import { Account } from 'web3x/account'
 import { Eth } from 'web3x/eth'
 import { Personal } from 'web3x/personal/personal'
 import { ETHEREUM_NETWORK, getTLD, PREVIEW, setNetwork, STATIC_WORLD, WORLD_EXPLORER } from '../config'
-import { identifyUser, initialize, queueTrackingEvent } from './analytics'
+import { identifyUser, queueTrackingEvent, initializeAnalytics } from './analytics'
 import './apis/index'
 import { connect, disconnect, persistCurrentUser } from './comms'
 import { ConnectionEstablishmentError, IdTakenError } from './comms/interface/types'
@@ -35,7 +35,7 @@ import { profileToRendererFormat } from './passports/transformations/profileToRe
 import { setWorldContext } from './protocol/actions'
 import { Session } from './session/index'
 import { buildStore } from './store/store'
-import { getAppNetwork, getNetworkFromTLD } from './web3'
+import { getAppNetwork, getNetworkFromTLD, fetchOwnedENS } from './web3'
 import { initializeUrlPositionObserver } from './world/positionThings'
 import { saveAvatarRequest } from './passports/actions'
 import { ethereumConfigurations } from 'config'
@@ -246,77 +246,6 @@ function showEthSignAdvice(show: boolean) {
   const element = document.getElementById('eth-sign-advice')
   if (element) {
     element.style.display = show ? 'block' : 'none'
-  }
-}
-
-const query = `
-  query GetNameByBeneficiary($beneficiary: String) {
-    nfts(where: { owner: $beneficiary, category: ens }) {
-      ens {
-        labelHash
-        beneficiary
-        caller
-        subdomain
-        createdAt
-      }
-    }
-  }`
-
-const opts = (ethAddress: string) => ({
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ query, variables: { beneficiary: ethAddress.toLowerCase() } })
-})
-
-export async function fetchOwnedENS(theGraphBaseUrl: string, ethAddress: string): Promise<string[]> {
-  const totalAttempts = 5
-  for (let attempt = 0; attempt < totalAttempts; attempt++) {
-    try {
-      const response = await fetch(theGraphBaseUrl, opts(ethAddress))
-      if (response.ok) {
-        const jsonResponse: GraphResponse = await response.json()
-        return jsonResponse.data.nfts.map(nft => nft.ens.subdomain)
-      }
-    } catch (error) {
-      defaultLogger.warn(`Could not retrieve ENS for address ${ethAddress}. Try ${attempt} of ${totalAttempts}.`, error)
-    }
-  }
-  return []
-}
-
-type GraphResponse = {
-  data: {
-    nfts: {
-      ens: {
-        subdomain: string
-      }
-    }[]
-  }
-}
-
-enum AnalyticsAccount {
-  PRD = '1plAT9a2wOOgbPCrTaU8rgGUMzgUTJtU',
-  DEV = 'a4h4BC4dL1v7FhIQKKuPHEdZIiNRDVhc'
-}
-
-// TODO fill with segment keys and integrate identity server
-function initializeAnalytics() {
-  const TLD = getTLD()
-  switch (TLD) {
-    case 'org':
-      if (
-        globalThis.location.host === 'play.decentraland.org' ||
-        globalThis.location.host === 'explorer.decentraland.org'
-      ) {
-        return initialize(AnalyticsAccount.PRD)
-      }
-      return initialize(AnalyticsAccount.DEV)
-    case 'today':
-      return initialize(AnalyticsAccount.DEV)
-    case 'zone':
-      return initialize(AnalyticsAccount.DEV)
-    default:
-      return initialize(AnalyticsAccount.DEV)
   }
 }
 
