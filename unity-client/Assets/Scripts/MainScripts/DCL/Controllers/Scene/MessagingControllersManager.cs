@@ -226,7 +226,7 @@ namespace DCL
             }
         }
 
-        float timeBudgetCounter = MAX_GLOBAL_MSG_BUDGET;
+        public float timeBudgetCounter = MAX_GLOBAL_MSG_BUDGET;
 
         IEnumerator ProcessMessages()
         {
