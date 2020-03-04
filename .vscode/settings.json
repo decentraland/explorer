@@ -3,6 +3,9 @@
   "prettier.ignorePath": ".prettierignore",
   "editor.tabSize": 2,
   "files.exclude": {
+    "**/*.js": {
+      "when": "$(basename).ts"
+    },
     "**/*.*.meta": true,
     "**/*.3DS": true,
     "**/*.3ds": true,
@@ -64,7 +67,7 @@
     "build/": true,
     "library/": true,
     "obj/": true,
-    "temp/": true,
+    "temp/": true
   },
   "files.associations": {
     "*.jslib": "javascript",
