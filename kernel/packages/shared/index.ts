@@ -4,15 +4,7 @@ import { Store } from 'redux'
 import { Account } from 'web3x/account'
 import { Eth } from 'web3x/eth'
 import { Personal } from 'web3x/personal/personal'
-import {
-  ETHEREUM_NETWORK,
-  getLoginConfigurationForCurrentDomain,
-  getTLD,
-  PREVIEW,
-  setNetwork,
-  STATIC_WORLD,
-  WORLD_EXPLORER
-} from '../config'
+import { ETHEREUM_NETWORK, getTLD, PREVIEW, setNetwork, STATIC_WORLD, WORLD_EXPLORER } from '../config'
 import { identifyUser, initialize, queueTrackingEvent } from './analytics'
 import './apis/index'
 import { connect, disconnect, persistCurrentUser } from './comms'
@@ -162,15 +154,10 @@ export async function initShared(): Promise<Session | undefined> {
     await initializeAnalytics()
   }
 
-  const { store, startSagas } = buildStore({
-    ...getLoginConfigurationForCurrentDomain(),
-    ephemeralKeyTTL: 24 * 60 * 60 * 1000
-  })
+  const { store, startSagas } = buildStore()
   window.globalStore = globalStore = store
 
-  if (WORLD_EXPLORER) {
-    startSagas()
-  }
+  startSagas()
 
   if (isMobile()) {
     ReportFatalError(MOBILE_NOT_SUPPORTED)
@@ -228,8 +215,13 @@ export async function initShared(): Promise<Session | undefined> {
     }
   } else {
     defaultLogger.log(`Using test user.`)
-    userId = '0x0000000000000000000000000000000000000000'
     identity = await createAuthIdentity()
+    userId = identity.address
+
+    setLocalProfile(userId, {
+      userId,
+      identity
+    })
   }
 
   defaultLogger.log(`User ${userId} logged in`)
@@ -254,22 +246,17 @@ export async function initShared(): Promise<Session | undefined> {
   initializeUrlPositionObserver()
   initializeUrlRealmObserver()
 
-  // DCL Servers connections/requests after this
-  if (STATIC_WORLD) {
-    return session
-  }
-
-  if (WORLD_EXPLORER) {
-    await realmInitialized()
-  }
+  await realmInitialized()
 
   defaultLogger.info(`Using Catalyst configuration: `, globalStore.getState().dao)
 
   // initialize profile
   console['group']('connect#profile')
+  let profile = await PassportAsPromise(userId)
+
   if (!PREVIEW) {
-    let profile = await PassportAsPromise(userId)
     let profileDirty: boolean = false
+
     if (!profile.hasClaimedName) {
       const names = await fetchOwnedENS(ethereumConfigurations[net].names, userId)
 
@@ -295,13 +282,18 @@ export async function initShared(): Promise<Session | undefined> {
     if (profileDirty) {
       store.dispatch(saveAvatarRequest(profile))
     }
-
-    persistCurrentUser({
-      version: profile.version,
-      profile: profileToRendererFormat(profile, identity)
-    })
   }
+
+  persistCurrentUser({
+    version: profile.version,
+    profile: profileToRendererFormat(profile, identity)
+  })
   console['groupEnd']()
+
+  // DCL Servers connections/requests after this
+  if (STATIC_WORLD) {
+    return session
+  }
 
   console['group']('connect#comms')
   store.dispatch(establishingComms())

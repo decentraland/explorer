@@ -30,9 +30,9 @@ import {
 import { Quaternion, ReadOnlyQuaternion, ReadOnlyVector3, Vector3 } from '../decentraland-ecs/src/decentraland/math'
 import { IEventNames, IEvents, ProfileForRenderer } from '../decentraland-ecs/src/decentraland/Types'
 import { sceneLifeCycleObservable } from '../decentraland-loader/lifecycle/controllers/scene'
+import { tutorialStepId } from '../decentraland-loader/lifecycle/tutorial/tutorial'
 import { AirdropInfo } from '../shared/airdrops/interface'
 import { queueTrackingEvent } from '../shared/analytics'
-import { airdropObservable } from '../shared/apis/AirdropController'
 import { DevTools } from '../shared/apis/DevTools'
 import { ParcelIdentity } from '../shared/apis/ParcelIdentity'
 import { chatObservable } from '../shared/comms/chat'
@@ -203,6 +203,10 @@ const browserInterface = {
       version: profile.version,
       profile: profileToRendererFormat(profile, identity)
     })
+
+    if (data.tutorialStep === tutorialStepId.FINISHED) {
+      delightedSurvey()
+    }
   },
 
   ControlEvent({ eventType, payload }: { eventType: string; payload: any }) {
@@ -234,7 +238,8 @@ const browserInterface = {
   },
 
   UserAcceptedCollectibles(data: { id: string }) {
-    airdropObservable.notifyObservers(data.id)
+    // Here, we should have "airdropObservable.notifyObservers(data.id)".
+    // It's disabled because of security reasons.
   },
 
   EditAvatarClicked() {
@@ -295,19 +300,21 @@ export function setLoadingScreenVisible(shouldShow: boolean) {
   document.getElementById('overlay')!.style.display = shouldShow ? 'block' : 'none'
   document.getElementById('load-messages-wrapper')!.style.display = shouldShow ? 'block' : 'none'
   document.getElementById('progress-bar')!.style.display = shouldShow ? 'block' : 'none'
-  if (!shouldShow) {
+  if (!shouldShow && !EDITOR) {
     isTheFirstLoading = false
     TeleportController.stopTeleportAnimation()
   }
 }
 
 function delightedSurvey() {
-  const { analytics, delighted, globalStore } = global
-  if (!isTheFirstLoading && analytics && delighted && globalStore) {
-    const email = ''
+  const { analytics, delighted } = global
+  const profile = getUserProfile().profile as Profile | null
+  if (!isTheFirstLoading && analytics && delighted && profile) {
     const payload = {
-      email: email,
+      email: profile.email || (profile.ethAddress + '@dcl.gg'),
+      name: profile.name || 'Guest',
       properties: {
+        ethAddress: profile.ethAddress,
         anonymous_id: analytics && analytics.user ? analytics.user().anonymousId() : null
       }
     }
@@ -510,7 +517,7 @@ unityInterface = {
     gameInstance.SendMessage('TutorialController', 'SetTutorialEnabled')
   },
   TriggerAirdropDisplay(data: AirdropInfo) {
-    gameInstance.SendMessage('HUDController', 'AirdroppingRequest', JSON.stringify(data))
+    // Disabled for security reasons
   },
   SelectGizmoBuilder(type: string) {
     this.SendBuilderMessage('SelectGizmo', type)
@@ -811,7 +818,7 @@ export async function initializeEngine(_gameInstance: GameInstance) {
     onMessage(type: string, message: any) {
       if (type in browserInterface) {
         // tslint:disable-next-line:semicolon
-        ;(browserInterface as any)[type](message)
+        ; (browserInterface as any)[type](message)
       } else {
         defaultLogger.info(`Unknown message (did you forget to add ${type} to unity-interface/dcl.ts?)`, message)
       }
@@ -969,7 +976,6 @@ teleportObservable.add((position: { x: number; y: number; text?: string }) => {
   setLoadingScreenVisible(true)
   const globalStore = global['globalStore']
   globalStore.dispatch(teleportTriggered(position.text || `Teleporting to ${position.x}, ${position.y}`))
-  delightedSurvey()
 })
 
 worldRunningObservable.add(isRunning => {

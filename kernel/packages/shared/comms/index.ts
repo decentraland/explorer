@@ -1,12 +1,12 @@
 import { saveToLocalStorage } from 'atomicHelpers/localStorage'
-import { commConfigurations, parcelLimits, COMMS } from 'config'
+import { commConfigurations, parcelLimits, COMMS, AUTO_CHANGE_REALM } from 'config'
 import { CommunicationsController } from 'shared/apis/CommunicationsController'
 import { defaultLogger } from 'shared/logger'
 import { MessageEntry } from 'shared/types'
 import { positionObservable, PositionReport } from 'shared/world/positionThings'
 import 'webrtc-adapter'
 import { PassportAsPromise } from '../passports/PassportAsPromise'
-import { ChatEvent, chatObservable, notifyStatusTroughChat } from './chat'
+import { ChatEvent, chatObservable, notifyStatusThroughChat } from './chat'
 import { CliBrokerConnection } from './CliBrokerConnection'
 import { Stats } from './debug'
 import { IBrokerConnection } from '../comms/v1/IBrokerConnection'
@@ -57,8 +57,13 @@ import { Realm, LayerUserInfo } from 'shared/dao/types'
 import { Store } from 'redux'
 import { RootState } from 'shared/store/rootTypes'
 import { store } from 'shared/store/store'
-import { setCatalystRealmCommsStatus, setCatalystRealm, markCatalystRealmFull } from 'shared/dao/actions'
-import { observeRealmChange, pickCatalystRealm } from 'shared/dao'
+import {
+  setCatalystRealmCommsStatus,
+  setCatalystRealm,
+  markCatalystRealmFull,
+  markCatalystRealmConnectionError
+} from 'shared/dao/actions'
+import { observeRealmChange, pickCatalystRealm, changeToCrowdedRealm } from 'shared/dao'
 import { getProfile } from 'shared/passports/selectors'
 import { Profile } from 'shared/passports/types'
 
@@ -141,6 +146,10 @@ export class Context {
   worldRunningObserver: any
   infoCollecterInterval?: NodeJS.Timer
 
+  timeToChangeRealm: number = Date.now() + commConfigurations.autoChangeRealmInterval
+
+  positionUpdatesPaused: boolean = false
+
   constructor(userInfo: UserInformation) {
     this.userInfo = userInfo
 
@@ -191,7 +200,14 @@ export function unsubscribeParcelSceneToCommsMessages(controller: Communications
 async function changeConnectionRealm(realm: Realm, url: string) {
   defaultLogger.log('Changing connection realm to ', JSON.stringify(realm), { url })
   if (context && context.worldInstanceConnection) {
-    await context.worldInstanceConnection.changeRealm(realm, url)
+    context.positionUpdatesPaused = true
+    try {
+      removeAllPeers(context)
+      await sendToMordorAsync()
+      await context.worldInstanceConnection.changeRealm(realm, url)
+    } finally {
+      context.positionUpdatesPaused = false
+    }
   }
 }
 
@@ -327,6 +343,7 @@ let currentParcelTopics = ''
 let previousTopics = ''
 
 let lastNetworkUpdatePosition = new Date().getTime()
+
 export function onPositionUpdate(context: Context, p: Position) {
   const worldConnection = context.worldInstanceConnection
 
@@ -356,7 +373,7 @@ export function onPositionUpdate(context: Context, p: Position) {
     }
 
     currentParcelTopics = rawTopics.join(' ')
-    if (context.currentPosition) {
+    if (context.currentPosition && !context.positionUpdatesPaused) {
       worldConnection
         .sendParcelUpdateMessage(context.currentPosition, p)
         .catch(e => defaultLogger.warn(`error while sending message `, e))
@@ -381,7 +398,7 @@ export function onPositionUpdate(context: Context, p: Position) {
 
   context.currentPosition = p
   const now = new Date().getTime()
-  if (now - lastNetworkUpdatePosition > 100) {
+  if (now - lastNetworkUpdatePosition > 100 && !context.positionUpdatesPaused) {
     lastNetworkUpdatePosition = now
     worldConnection.sendPositionMessage(p).catch(e => defaultLogger.warn(`error while sending message `, e))
   }
@@ -448,10 +465,39 @@ function collectInfo(context: Context) {
     }
   }
 
+  checkAutochangeRealm(visiblePeers, context, now)
+
   if (context.stats) {
     context.stats.visiblePeersCount = visiblePeers.length
     context.stats.trackingPeersCount = context.peerData.size
     context.stats.collectInfoDuration.stop()
+  }
+}
+
+function checkAutochangeRealm(visiblePeers: ProcessingPeerInfo[], context: Context, now: number) {
+  if (AUTO_CHANGE_REALM) {
+    if (visiblePeers.length > 0) {
+      context.timeToChangeRealm = now + commConfigurations.autoChangeRealmInterval
+    } else if (now > context.timeToChangeRealm) {
+      context.timeToChangeRealm = now + commConfigurations.autoChangeRealmInterval
+      defaultLogger.log('Changing to crowded realm because there is no people around')
+      changeToCrowdedRealm().then(
+        ([changed, realm]) => {
+          if (changed) {
+            defaultLogger.log('Successfully changed to realm', realm)
+          } else {
+            defaultLogger.log('No crowded realm found')
+          }
+        },
+        error => defaultLogger.warn('Error trying to change realm', error)
+      )
+    }
+  }
+}
+
+function removeAllPeers(context: Context) {
+  for (const alias of context.peerData.keys()) {
+    removePeer(context, alias)
   }
 }
 
@@ -559,8 +605,15 @@ export async function connect(userId: string) {
           peerConfig,
           status => {
             store.dispatch(setCatalystRealmCommsStatus(status))
-            if (status.status === 'realm-full') {
-              handleFullLayer()
+            switch (status.status) {
+              case 'realm-full': {
+                handleFullLayer()
+                break
+              }
+              case 'reconnection-error': {
+                handleReconnectionError()
+                break
+              }
             }
           }
         )
@@ -650,6 +703,31 @@ export async function connect(userId: string) {
   }
 }
 
+function realmString(realm: Realm) {
+  return realm.catalystName + '-' + realm.layer
+}
+
+function handleReconnectionError() {
+  const store: Store<RootState> = window.globalStore
+  const realm = getRealm(store.getState())
+
+  if (realm) {
+    store.dispatch(markCatalystRealmConnectionError(realm))
+  }
+
+  const candidates = getAllCatalystCandidates(store.getState())
+
+  const otherRealm = pickCatalystRealm(candidates)
+
+  const notificationMessage = realm
+    ? `Lost connection to ${realmString(realm)}, joining realm ${realmString(otherRealm)} instead`
+    : `Joining realm ${realmString(otherRealm)}`
+
+  notifyStatusThroughChat(notificationMessage)
+
+  store.dispatch(setCatalystRealm(otherRealm))
+}
+
 function handleFullLayer() {
   const store: Store<RootState> = window.globalStore
   const realm = getRealm(store.getState())
@@ -662,7 +740,7 @@ function handleFullLayer() {
 
   const otherRealm = pickCatalystRealm(candidates)
 
-  notifyStatusTroughChat(
+  notifyStatusThroughChat(
     `Joining realm ${otherRealm.catalystName}-${otherRealm.layer} since the previously requested was full`
   )
 
@@ -676,10 +754,12 @@ export function onWorldRunning(isRunning: boolean, _context: Context | null = co
 }
 
 export function sendToMordor(_context: Context | null = context) {
+  sendToMordorAsync().catch(e => defaultLogger.warn(`error while sending message `, e))
+}
+
+async function sendToMordorAsync(_context: Context | null = context) {
   if (_context && _context.worldInstanceConnection && _context.currentPosition) {
-    _context.worldInstanceConnection
-      .sendParcelUpdateMessage(_context.currentPosition, MORDOR_POSITION)
-      .catch(e => defaultLogger.warn(`error while sending message `, e))
+    await _context.worldInstanceConnection.sendParcelUpdateMessage(_context.currentPosition, MORDOR_POSITION)
   }
 }
 

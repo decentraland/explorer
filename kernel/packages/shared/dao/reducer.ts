@@ -6,10 +6,17 @@ import {
   SET_CATALYST_REALM_COMMS_STATUS,
   MARK_CATALYST_REALM_FULL,
   SET_ADDED_CATALYST_CANDIDATES,
-  SET_CONTENT_WHITELIST
+  SET_CONTENT_WHITELIST,
+  MARK_CATALYST_REALM_CONNECTION_ERROR
 } from './actions'
-import { DaoState, Candidate, Realm } from './types'
-import { FETCH_PROFILE_SERVICE, FETCH_CONTENT_SERVICE, UPDATE_CONTENT_SERVICE, COMMS_SERVICE, FETCH_META_CONTENT_SERVICE } from '../../config/index'
+import { DaoState, Candidate, Realm, ServerConnectionStatus } from './types'
+import {
+  FETCH_PROFILE_SERVICE,
+  FETCH_CONTENT_SERVICE,
+  UPDATE_CONTENT_SERVICE,
+  COMMS_SERVICE,
+  FETCH_META_CONTENT_SERVICE
+} from '../../config/index'
 
 export function daoReducer(state?: DaoState, action?: AnyAction): DaoState {
   if (!state) {
@@ -83,6 +90,20 @@ export function daoReducer(state?: DaoState, action?: AnyAction): DaoState {
           }
         })
       }
+    case MARK_CATALYST_REALM_CONNECTION_ERROR:
+      return {
+        ...state,
+        candidates: state.candidates.map(it => {
+          if (it.catalystName === action.payload.catalystName) {
+            return {
+              ...it,
+              layer: { ...it.layer, elapsed: Number.MAX_SAFE_INTEGER, status: ServerConnectionStatus.UNREACHABLE }
+            }
+          } else {
+            return it
+          }
+        })
+      }
     default:
       return state
   }
@@ -92,7 +113,8 @@ function realmProperties(realm: Realm, configOverride: boolean = true): Partial<
   return {
     profileServer: FETCH_PROFILE_SERVICE && configOverride ? FETCH_PROFILE_SERVICE : domain + '/lambdas/profile',
     fetchContentServer: FETCH_CONTENT_SERVICE && configOverride ? FETCH_CONTENT_SERVICE : domain + '/lambdas/contentv2',
-    fetchMetaContentServer: FETCH_META_CONTENT_SERVICE && configOverride ? FETCH_META_CONTENT_SERVICE : domain + '/lambdas/contentv2',
+    fetchMetaContentServer:
+      FETCH_META_CONTENT_SERVICE && configOverride ? FETCH_META_CONTENT_SERVICE : domain + '/lambdas/contentv2',
     updateContentServer: UPDATE_CONTENT_SERVICE && configOverride ? UPDATE_CONTENT_SERVICE : domain + '/content',
     commsServer: COMMS_SERVICE && configOverride ? COMMS_SERVICE : domain + '/comms',
     realm
@@ -102,6 +124,10 @@ function realmProperties(realm: Realm, configOverride: boolean = true): Partial<
 function ensureContentWhitelist(state: Partial<DaoState>, contentWhitelist: Candidate[]): Partial<DaoState> {
   // if current realm is in whitelist => return current state
   if (state.realm && contentWhitelist.some(candidate => candidate.domain === state.realm!.domain)) {
+    return state
+  }
+
+  if (contentWhitelist.length === 0) {
     return state
   }
 
@@ -116,6 +142,10 @@ function ensureContentWhitelist(state: Partial<DaoState>, contentWhitelist: Cand
 function ensureProfileDao(state: Partial<DaoState>, daoCandidates: Candidate[]) {
   // if current realm is in dao => return current state
   if (state.realm && daoCandidates.some(candidate => candidate.domain === state.realm!.domain)) {
+    return state
+  }
+
+  if (daoCandidates.length === 0) {
     return state
   }
 

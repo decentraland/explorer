@@ -108,6 +108,8 @@ export const FETCH_META_CONTENT_SERVICE = qs.FETCH_META_CONTENT_SERVICE
 export const COMMS_SERVICE = qs.COMMS_SERVICE
 export const REALM = qs.realm
 
+export const AUTO_CHANGE_REALM = location.search.indexOf('AUTO_CHANGE_REALM') !== -1
+
 export const DEBUG =
   location.search.indexOf('DEBUG_MODE') !== -1 ||
   location.search.indexOf('DEBUG_LOG') !== -1 ||
@@ -149,7 +151,9 @@ export namespace commConfigurations {
 
   export const peerTtlMs = 60000
 
-  export const maxVisiblePeers = 25
+  export const maxVisiblePeers = qs.MAX_VISIBLE_PEERS ? parseInt(qs.MAX_VISIBLE_PEERS, 10) : 25
+
+  export const autoChangeRealmInterval = qs.AUTO_CHANGE_INTERVAL ? parseInt(qs.AUTO_CHANGE_INTERVAL, 10) * 1000 : 40000
 
   export const iceServers = [
     {
@@ -183,8 +187,7 @@ export const loginConfig = {
   zone: {
     domain: 'dcl-test.auth0.com',
     client_id: 'lTUEMnFpYb0aiUKeIRPbh7pBxKM6sccx'
-  },
-  audience: 'decentraland.org'
+  }
 }
 
 // take address from http://contracts.decentraland.org/addresses.json
@@ -235,20 +238,6 @@ export function getExclusiveServer() {
 }
 
 export const ALL_WEARABLES = location.search.indexOf('ALL_WEARABLES') !== -1 && getDefaultTLD() !== 'org'
-
-export function getLoginConfigurationForCurrentDomain() {
-  let tld: 'org' | 'zone' | 'today' = getDefaultTLD()
-  // Use `.zone` auth for any localhost or other edge case
-  if ((tld as any) !== 'org' && (tld as any) !== 'zone' && (tld as any) !== 'today') {
-    tld = 'zone'
-  }
-  return {
-    clientId: loginConfig[tld].client_id,
-    domain: loginConfig[tld].domain,
-    redirectUri: window.location.origin + '/' + (ENV_OVERRIDE ? '?ENV=' + getTLD() : ''),
-    audience: loginConfig.audience
-  }
-}
 
 export const ENABLE_EMPTY_SCENES = !DEBUG || knownTLDs.includes(getTLD())
 
