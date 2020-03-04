@@ -66,6 +66,7 @@ import {
 import { observeRealmChange, pickCatalystRealm, changeToCrowdedRealm } from 'shared/dao'
 import { getProfile } from 'shared/passports/selectors'
 import { Profile } from 'shared/passports/types'
+import { realmToString } from '../dao/utils/realmToString'
 
 export type CommsVersion = 'v1' | 'v2'
 export type CommsMode = CommsV1Mode | CommsV2Mode
@@ -703,10 +704,6 @@ export async function connect(userId: string) {
   }
 }
 
-function realmString(realm: Realm) {
-  return realm.catalystName + '-' + realm.layer
-}
-
 function handleReconnectionError() {
   const store: Store<RootState> = window.globalStore
   const realm = getRealm(store.getState())
@@ -720,8 +717,8 @@ function handleReconnectionError() {
   const otherRealm = pickCatalystRealm(candidates)
 
   const notificationMessage = realm
-    ? `Lost connection to ${realmString(realm)}, joining realm ${realmString(otherRealm)} instead`
-    : `Joining realm ${realmString(otherRealm)}`
+    ? `Lost connection to ${realmToString(realm)}, joining realm ${realmToString(otherRealm)} instead`
+    : `Joining realm ${realmToString(otherRealm)}`
 
   notifyStatusThroughChat(notificationMessage)
 

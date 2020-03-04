@@ -12,6 +12,7 @@ import { lastPlayerPosition } from 'shared/world/positionThings'
 import { countParcelsCloseTo, ParcelArray } from 'shared/comms/interface/utils'
 import { CatalystNode } from '../types'
 import { zip } from './zip'
+import { realmToString } from './utils/realmToString'
 const qs: any = require('query-string')
 
 const v = 50
@@ -170,10 +171,6 @@ export function getRealmFromString(realmString: string, candidates: Candidate[])
   if (parts.length === 2) {
     return realmFor(parts[0], parts[1], candidates)
   }
-}
-
-function realmToString(realm: Realm) {
-  return `${realm.catalystName}-${realm.layer}`
 }
 
 function candidateToRealm(candidate: Candidate) {
