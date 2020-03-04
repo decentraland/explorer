@@ -90,8 +90,6 @@ namespace DCL
 
             if (scene != null)
                 GameObject.Destroy(scene.gameObject);
-
-            PoolManager.i.CleanPoolableReferences();
         }
 
         IEnumerator CleanupEntitiesCoroutine()
@@ -137,8 +135,6 @@ namespace DCL
 
                 if (scene != null)
                     GameObject.Destroy(scene.gameObject);
-
-                PoolManager.i.CleanPoolableReferences();
 
                 yield return null;
             }

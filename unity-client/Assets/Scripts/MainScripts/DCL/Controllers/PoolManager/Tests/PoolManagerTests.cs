@@ -57,9 +57,9 @@ namespace Tests
             Assert.AreEqual(0, pool.unusedObjectsCount, "Inactive objects count should be 0");
 
             GameObject.Destroy(po1.gameObject);
-            yield return null;
+            po1.Release();
 
-            PoolManager.i.CleanPoolableReferences();
+            yield return null;
 
             Assert.AreEqual(1, pool.usedObjectsCount, "Alive objects count should be 1");
             Assert.AreEqual(0, pool.unusedObjectsCount, "Inactive objects count should be 0");
@@ -80,14 +80,16 @@ namespace Tests
             Object.Destroy(obj2);
 
             yield return null;
-            PoolManager.i.CleanPoolableReferences();
+            PoolManager.i.GetPoolable(obj).Release();
+            PoolManager.i.GetPoolable(obj2).Release();
 
             Assert.AreEqual(1, PoolManager.i.poolables.Count);
             Assert.IsTrue(PoolManager.i.poolables[obj3].gameObject == obj3);
 
             Object.Destroy(obj3);
+            PoolManager.i.poolables[obj3].Release();
             yield return null;
-            PoolManager.i.CleanPoolableReferences();
+
 
             Assert.AreEqual(0, PoolManager.i.poolables.Count);
         }

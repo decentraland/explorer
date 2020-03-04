@@ -247,33 +247,5 @@ namespace DCL
                 pools[id].ReleaseAll();
             }
         }
-
-        List<GameObject> toRemoveAuxList = new List<GameObject>();
-        public void CleanPoolableReferences()
-        {
-            toRemoveAuxList.Clear();
-
-            using (var it = poolables.GetEnumerator())
-            {
-                while (it.MoveNext())
-                {
-                    var kvp = it.Current;
-
-                    if (kvp.Value.gameObject == null)
-                    {
-                        Debug.Log("Removing null gameObject from pool... " + kvp.Value.pool.container.name);
-                        kvp.Value.node?.List.Remove(kvp.Value);
-                        kvp.Value.node = null;
-                        toRemoveAuxList.Add(kvp.Key);
-                    }
-                }
-            }
-
-            for (int i = 0; i < toRemoveAuxList.Count; i++)
-            {
-                GameObject key = toRemoveAuxList[i];
-                poolables.Remove(key);
-            }
-        }
     }
 }
