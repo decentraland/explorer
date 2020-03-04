@@ -10,6 +10,7 @@ import {
 import { Observable } from 'decentraland-ecs/src/ecs/Observable'
 import { ILand } from 'shared/types'
 import { InstancedSpawnPoint } from '../types'
+import { tutorialEnabled, WORLD_EXPLORER } from 'config'
 
 declare var location: any
 declare var history: any
@@ -66,7 +67,13 @@ export function initializeUrlPositionObserver() {
   })
 
   if (lastPlayerPosition.equalsToFloats(0, 0, 0)) {
-    // LOAD INITIAL POSITION IF SET TO ZERO
+    // Load tutorial if needed
+    if (tutorialEnabled() && WORLD_EXPLORER) {
+      gridToWorld(200, 200, lastPlayerPosition)
+      return
+    }
+
+    // Otherwise load 0,0
     const query = qs.parse(location.search)
 
     if (query.position) {

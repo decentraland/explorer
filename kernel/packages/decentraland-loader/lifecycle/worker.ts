@@ -82,7 +82,9 @@ const connector = new Adapter(WebWorkerTransport(self as any))
             connector.notify('Scene.dataResponse', {
               data: action.payload.sceneEntity
             })
-            connector.notify('Scene.shouldPrefetch', { sceneId: action.payload.sceneEntity.id })
+            connector.notify('Scene.shouldPrefetch', {
+              sceneId: action.payload.sceneEntity.id
+            })
         }
         try {
           if (DEBUG_WORKER_LOADER && action.type !== PROCESS_USER_MOVEMENT) {
@@ -95,10 +97,11 @@ const connector = new Adapter(WebWorkerTransport(self as any))
       }
       const store = createStore(
         rootReducer,
-        rootReducer(undefined, bootstrapAt('0,0', options)),
+        rootReducer(undefined),
         compose(applyMiddleware(sagaMiddleware, workerInteractionsMiddleware))
       )
       sagaMiddleware.run(rootSaga)
+      store.dispatch(bootstrapAt(options.tutorialSceneEnabled ? '200,200' : '0,0', options))
 
       connector.on('User.setPosition', (opt: { position: { x: number; y: number }; teleported: boolean }) => {
         if (opt.teleported) {

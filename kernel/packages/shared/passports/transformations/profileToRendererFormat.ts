@@ -1,8 +1,8 @@
-import { Profile } from '../types'
 import { ProfileForRenderer } from 'decentraland-ecs/src'
+import { ExplorerIdentity } from 'shared'
+import { Profile } from '../types'
 import { convertToRGBObject } from './convertToRGBObject'
 import { dropDeprecatedWearables } from './processServerProfile'
-import { ExplorerIdentity } from 'shared'
 
 const profileDefaults = {
   tutorialStep: 0

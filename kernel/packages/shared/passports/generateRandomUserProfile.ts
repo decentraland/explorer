@@ -1,7 +1,8 @@
 import { Profile } from './types'
 import { getFetchProfileServer, getFetchContentServer } from 'shared/dao/selectors'
 import { Store } from 'redux'
-import { tutorialStepId } from 'decentraland-loader/lifecycle/tutorial/tutorial'
+import { WORLD_EXPLORER } from 'config'
+import { tutorialStepId } from 'shared/tutorial/steps'
 
 declare const window: Window & { globalStore: Store }
 
@@ -32,7 +33,7 @@ export async function generateRandomUserProfile(userId: string): Promise<Profile
   }
 
   profile.name = 'Guest-' + userId.substr(2, 6)
-  profile.tutorialStep = tutorialStepId.INITIAL_SCENE
+  profile.tutorialStep = WORLD_EXPLORER ? tutorialStepId.INITIAL_SCENE : tutorialStepId.FINISHED
 
   return profile
 }

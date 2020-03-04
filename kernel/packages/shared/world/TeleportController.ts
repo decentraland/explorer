@@ -1,7 +1,7 @@
 import { teleportObservable, lastPlayerPosition } from 'shared/world/positionThings'
 import { getFromLocalStorage, saveToLocalStorage } from 'atomicHelpers/localStorage'
 import { POIs } from 'shared/comms/POIs'
-import { parcelLimits, tutorialEnabled } from 'config'
+import { parcelLimits, tutorialEnabled, WORLD_EXPLORER } from 'config'
 import { getUserProfile } from 'shared/comms/peers'
 import { Profile } from 'shared/passports/types'
 import { fetchLayerUsersParcels } from 'shared/comms'
@@ -82,8 +82,8 @@ export class TeleportController {
 
     const profile = getUserProfile().profile as Profile
 
-    if (!tutorialEnabled() || profile.tutorialStep !== TUTORIAL_INITIAL_SCENE) {
-      (window as any)['unityInterface'].ShowWelcomeNotification()
+    if ((WORLD_EXPLORER && !tutorialEnabled()) || profile.tutorialStep !== TUTORIAL_INITIAL_SCENE) {
+      ;(window as any)['unityInterface'].ShowWelcomeNotification()
     }
   }
 
