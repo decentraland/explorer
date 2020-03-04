@@ -8,10 +8,12 @@ import { signalRendererInitialized } from '../shared/renderer/actions'
 import { lastPlayerPosition, teleportObservable } from '../shared/world/positionThings'
 import { hasWallet, startUnityParcelLoading, unityInterface } from '../unity-interface/dcl'
 import { initializeUnity } from '../unity-interface/initializer'
+import { Store } from 'redux'
+import { RootState } from 'shared/store/rootTypes'
 
 const container = document.getElementById('gameContainer')
 
-declare var global: any
+declare const globalThis: { UnityLoader: any; globalStore: Store<RootState> }
 
 if (!container) throw new Error('cannot find element #gameContainer')
 
@@ -29,22 +31,23 @@ initializeUnity(container)
     i.ConfigureAirdroppingHUD({ active: true, visible: true })
     i.ConfigureTermsOfServiceHUD({ active: true, visible: true })
 
-    global['globalStore'].dispatch(signalRendererInitialized())
+    globalThis.globalStore.dispatch(signalRendererInitialized())
+
     await startUnityParcelLoading()
 
     if (!NO_MOTD) {
-      i.ConfigureWelcomeHUD({ active: false, visible: !tutorialEnabled(), hasWallet: hasWallet })
+      i.ConfigureWelcomeHUD({ active: false, visible: !tutorialEnabled(), hasWallet })
     }
 
     _.instancedJS
-      .then($ => {
+      .then(() => {
         teleportObservable.notifyObservers(worldToGrid(lastPlayerPosition))
-        global['globalStore'].dispatch(experienceStarted())
+        globalThis.globalStore.dispatch(experienceStarted())
       })
       .catch(defaultLogger.error)
 
     document.body.classList.remove('dcl-loading')
-    ;(window as any).UnityLoader.Error.handler = (error: any) => {
+    globalThis.UnityLoader.Error.handler = (error: any) => {
       console['error'](error)
       ReportFatalError(error.message)
     }
@@ -54,8 +57,7 @@ initializeUnity(container)
     if (err.message === AUTH_ERROR_LOGGED_OUT || err.message === NOT_INVITED) {
       ReportFatalError(NOT_INVITED)
     } else {
-      console['error']('Error loading Unity')
-      console['error'](err)
+      console['error']('Error loading Unity', err)
       ReportFatalError(FAILED_FETCHING_UNITY)
     }
   })

@@ -1,4 +1,5 @@
 import { action } from 'typesafe-actions'
+import { Store } from 'redux'
 import {
   ExecutionLifecycleEvent,
   COMMS_COULD_NOT_BE_ESTABLISHED,
@@ -8,10 +9,11 @@ import {
   NEW_LOGIN,
   NETWORK_MISMATCH
 } from './types'
+import { RootState } from 'shared/store/rootTypes'
+
+declare const globalThis: { globalStore: Store<RootState>; ReportFatalError: (event: ExecutionLifecycleEvent) => void }
 
 export let aborted = false
-
-declare var global: any
 
 export function bringDownClientAndShowError(event: ExecutionLifecycleEvent) {
   if (aborted) {
@@ -46,7 +48,7 @@ export function bringDownClientAndShowError(event: ExecutionLifecycleEvent) {
 
 export function ReportFatalError(event: ExecutionLifecycleEvent) {
   bringDownClientAndShowError(event)
-  global['globalStore'] && global['globalStore'].dispatch(action(event))
+  globalThis.globalStore && globalThis.globalStore.dispatch(action(event))
 }
 
-global.ReportFatalError = ReportFatalError
+globalThis.ReportFatalError = ReportFatalError
