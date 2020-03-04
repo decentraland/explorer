@@ -42,6 +42,8 @@ namespace DCL.Components
             {
                 OnUIGlobalVisibilityToggleChanged += UpdateCanvasVisibility;
             }
+
+            ConfigureUITreeNode();
         }
 
         public override void AttachTo(DecentralandEntity entity, System.Type overridenAttachedType = null)

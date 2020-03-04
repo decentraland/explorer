@@ -120,6 +120,8 @@ namespace DCL.Helpers
             if (component != null)
             {
                 action.Invoke(component);
+
+                // Debug.Log("InverseTransformChildTraversal", startTransform);
             }
         }
 
