@@ -4,6 +4,7 @@ using DCL.Helpers;
 using DCL.Models;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -14,10 +15,12 @@ namespace DCL.Components
         static bool VERBOSE = false;
 
         const string GLOBAL_VISIBILITY_TOGGLE_PATH = "GlobalVisibilityToggle";
-        public Canvas canvas;
 
-        private static bool globalVisibilityToggleValue = true;
-        private static bool globalVisibilityToggle
+        public Canvas canvas;
+        public LinkedList<UIReferencesContainer> uiTree;
+
+        static bool globalVisibilityToggleValue = true;
+        static bool globalVisibilityToggle
         {
             get => globalVisibilityToggleValue;
             set
@@ -27,11 +30,11 @@ namespace DCL.Components
             }
         }
 
-        private static Action OnUIGlobalVisibilityToggleChanged = () => { };
-        private static Toggle toggle;
+        static Action OnUIGlobalVisibilityToggleChanged = () => { };
+        static Toggle toggle;
 
-        private DCLCharacterPosition currentCharacterPosition;
-        private CanvasGroup canvasGroup;
+        DCLCharacterPosition currentCharacterPosition;
+        CanvasGroup canvasGroup;
 
         public UIScreenSpace(ParcelScene scene) : base(scene)
         {
@@ -206,6 +209,12 @@ namespace DCL.Components
             }
         }
 
+        protected override void ConfigureUITreeNode()
+        {
+            Debug.Log("CREATING NEW TREE");
+
+            uiTree = new LinkedList<UIReferencesContainer>();
+        }
 
         private void CreateGlobalVisibilityToggle()
         {

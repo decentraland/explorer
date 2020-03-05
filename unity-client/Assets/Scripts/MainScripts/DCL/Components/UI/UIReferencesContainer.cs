@@ -1,4 +1,4 @@
-using System.Diagnostics.Tracing;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
@@ -22,6 +22,9 @@ namespace DCL.Components
 
         [Tooltip("Children of this UI object will reparent to this rectTransform.")]
         public RectTransform childHookRectTransform;
+
+        public LinkedList<UIReferencesContainer> uiTree;
+        public LinkedListNode<UIReferencesContainer> uiTreeNode;
 
         bool VERBOSE = false;
 

@@ -29,7 +29,7 @@ namespace DCL.Components
 
         public override string referencesContainerPrefabName => "UIContainerRect";
 
-        public Dictionary<string, GameObject> stackContainers = new Dictionary<string, GameObject>();
+        public Dictionary<string, UIReferencesContainer> stackContainers = new Dictionary<string, UIReferencesContainer>();
 
         HorizontalOrVerticalLayoutGroup layoutGroup;
 
@@ -86,11 +86,11 @@ namespace DCL.Components
                 return;
             }
 
-            GameObject stackContainer = null;
+            UIReferencesContainer stackContainer = null;
 
             if (!stackContainers.ContainsKey(childComponent.id))
             {
-                stackContainer = Object.Instantiate(Resources.Load("UIContainerStackChild")) as GameObject;
+                stackContainer = (Object.Instantiate(Resources.Load("UIContainerStackChild")) as GameObject).GetComponent<UIReferencesContainer>();
 #if UNITY_EDITOR
                 stackContainer.name = "UIContainerStackChild - " + childComponent.id;
 #endif
@@ -100,6 +100,9 @@ namespace DCL.Components
                 childComponent.referencesContainer.transform.SetParent(stackContainer.transform, false);
                 stackContainer.transform.SetParent(referencesContainer.childHookRectTransform, false);
                 stackContainer.transform.SetSiblingIndex(oldSiblingIndex);
+
+                stackContainer.uiTree = referencesContainer.uiTree;
+                stackContainer.uiTreeNode = referencesContainer.uiTree.AddAfter(referencesContainer.uiTreeNode, stackContainer);
             }
             else
             {
@@ -132,9 +135,14 @@ namespace DCL.Components
 
             if (stackContainers.ContainsKey(childComponent.id))
             {
-                Object.Destroy(stackContainers[childComponent.id]);
                 stackContainers[childComponent.id].transform.SetParent(null);
                 stackContainers[childComponent.id].name += "- Detached";
+
+                if (stackContainers[childComponent.id].uiTreeNode != null)
+                    referencesContainer.uiTree.Remove(stackContainers[childComponent.id].uiTreeNode);
+
+                Object.Destroy(stackContainers[childComponent.id]);
+
                 stackContainers.Remove(childComponent.id);
             }
 

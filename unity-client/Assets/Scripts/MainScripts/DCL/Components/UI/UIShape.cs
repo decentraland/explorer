@@ -156,9 +156,6 @@ namespace DCL.Components
         public UIReferencesContainer referencesContainer;
         public RectTransform childHookRectTransform;
 
-        public LinkedList<UIShape> uiTree;
-        public LinkedListNode<UIShape> uiTreeNode;
-
         public Model model = new Model();
 
         public UIShape parentUIComponent { get; private set; }
@@ -216,31 +213,35 @@ namespace DCL.Components
             return referencesContainer as T;
         }
 
-        protected void ConfigureUITreeNode()
+        protected virtual void ConfigureUITreeNode()
         {
-            if (this is UIScreenSpace)
-            {
-                Debug.Log("CREATING NEW TREE");
-
-                uiTree = new LinkedList<UIShape>();
-                uiTreeNode = uiTree.AddLast(this);
-            }
-            else if (parentUIComponent != null && parentUIComponent.uiTree != null)
+            if (parentUIComponent != null)
             {
                 Debug.Log(referencesContainer.gameObject.name + " USING PARENT TREE FROM " + parentUIComponent.childHookRectTransform.parent.name, childHookRectTransform.parent);
 
-                if (uiTree != null)
+                if (referencesContainer.uiTree != null)
                 {
                     Debug.Log("RELEASING PREVIOUS TREE");
-                    uiTree.Remove(uiTreeNode);
+                    referencesContainer.uiTree.Remove(referencesContainer.uiTreeNode);
                 }
 
-                uiTree = parentUIComponent.uiTree;
-                uiTreeNode = uiTree.AddAfter(parentUIComponent.uiTreeNode, this);
+                if (parentUIComponent is UIScreenSpace)
+                {
+                    referencesContainer.uiTree = (parentUIComponent as UIScreenSpace).uiTree;
+
+                    // referencesContainer.uiTreeNode = referencesContainer.uiTree.AddFirst(referencesContainer);
+                    referencesContainer.uiTreeNode = referencesContainer.uiTree.AddLast(referencesContainer);
+                }
+                else if (parentUIComponent.referencesContainer.uiTree != null)
+                {
+                    referencesContainer.uiTree = parentUIComponent.referencesContainer.uiTree;
+
+                    referencesContainer.uiTreeNode = referencesContainer.uiTree.AddAfter(parentUIComponent.referencesContainer.uiTreeNode, referencesContainer); // TODO: IS THIS ENOUGHT TO DEAL WITH THE INTERMEDIARY REFERENCES CONTAINER INTRODUCED BY THE STACK CONTAINER??
+                }
             }
             else
             {
-                Debug.Log("DIDN'T SET TREE: " + parentUIComponent.uiTree);
+                Debug.Log("DIDN'T SET TREE: " + parentUIComponent.referencesContainer.uiTree);
             }
         }
 
@@ -252,49 +253,37 @@ namespace DCL.Components
             FixMaxStretchRecursively();
             RefreshDCLLayoutRecursively_Internal(refreshSize: false, refreshAlignmentAndPosition: true); */
 
-            if (uiTree == null)
+            if (referencesContainer.uiTree == null)
             {
                 Debug.Log("uiTree is null", referencesContainer.transform);
                 return;
             }
 
             // 1 - Fully RefreshDCLLayout
-            TraverseUITree((referencesContainer) => referencesContainer.owner.RefreshDCLLayout(true, true));
+            TraverseUITree((referencesContainer) => referencesContainer.owner?.RefreshDCLLayout(true, true));
 
             // 2 - Fix max stretch
             TraverseUITree((referencesContainer) => referencesContainer.rectTransform.SetToMaxStretch());
 
             // 3 - RefreshDCLLayout (Alignment and position only)
-            TraverseUITree((referencesContainer) => referencesContainer.owner.RefreshDCLLayout(false, true));
-
+            TraverseUITree((referencesContainer) => referencesContainer.owner?.RefreshDCLLayout(false, true));
 
 
             // Debug.Log("Inversed Tree:");
-            TraverseUITree((referencesContainer) => Debug.Log(referencesContainer.childHookRectTransform.parent.name, referencesContainer.childHookRectTransform.parent));
+            TraverseUITree((referencesContainer) => Debug.Log(referencesContainer.transform.name, referencesContainer.transform));
         }
 
         void TraverseUITree(System.Action<UIReferencesContainer> callback)
         {
-            int uiTreeCount = uiTree.Count;
+            int uiTreeCount = referencesContainer.uiTree.Count;
             bool finishedTraversing = uiTreeCount == 0;
-            var currentNode = uiTree.Last;
+            var currentNode = referencesContainer.uiTree.Last;
+
+            if ((currentNode == null || currentNode.Value == null) && currentNode.Previous == null) return;
 
             while (!finishedTraversing)
             {
-                if (currentNode == null || currentNode.Value.referencesContainer == null)
-                {
-                    if (currentNode.Previous != null)
-                        currentNode = currentNode.Previous;
-                    else
-                        finishedTraversing = true;
-
-                    continue;
-                }
-
-                if (currentNode.Value.referencesContainer.owner != null)
-                {
-                    callback(currentNode.Value.referencesContainer);
-                }
+                callback(currentNode.Value);
 
                 if (currentNode.Previous != null)
                     currentNode = currentNode.Previous;
@@ -375,7 +364,7 @@ namespace DCL.Components
                         x.owner.RefreshDCLLayout(refreshSize, refreshAlignmentAndPosition);
                     }
                 },
-                rootParent.referencesContainer.transform);
+                rootParent.referencesContainer.transform, true);
         }
 
         public void FixMaxStretchRecursively()
@@ -392,10 +381,10 @@ namespace DCL.Components
                         x.rectTransform.SetToMaxStretch();
                     }
                 },
-                rootParent.referencesContainer.transform);
+                rootParent.referencesContainer.transform, true);
         }
 
-        protected bool ReparentComponent(RectTransform targetTransform, string targetParent)
+        protected virtual bool ReparentComponent(RectTransform targetTransform, string targetParent)
         {
             Debug.Log("REPARENT COMPONENT");
 
@@ -521,7 +510,7 @@ namespace DCL.Components
 
         public override void Dispose()
         {
-            uiTree.Remove(uiTreeNode);
+            referencesContainer.uiTree.Remove(referencesContainer.uiTreeNode);
 
             if (childHookRectTransform)
                 Utils.SafeDestroy(childHookRectTransform.gameObject);
