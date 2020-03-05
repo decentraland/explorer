@@ -1,5 +1,5 @@
-declare var window: any
-declare var global: any
+declare const globalThis: UnityInterfaceContainer &
+  StoreContainer & { analytics: any; delighted: any } & { messages: (e: any) => void }
 
 type GameInstance = {
   SendMessage(object: string, method: string, ...args: (number | string)[]): void
@@ -96,6 +96,7 @@ import { hudWorkerUrl, SceneWorker } from '../shared/world/SceneWorker'
 import { ensureUiApis } from '../shared/world/uiSceneInitializer'
 import { worldRunningObservable } from '../shared/world/worldState'
 import { profileToRendererFormat } from 'shared/profiles/transformations/profileToRendererFormat'
+import { StoreContainer } from '../shared/store/rootTypes'
 
 const rendererVersion = require('decentraland-renderer')
 window['console'].log('Renderer version: ' + rendererVersion)
@@ -191,13 +192,13 @@ const browserInterface = {
     const { face, body, avatar } = changes
     const profile: Profile = getUserProfile().profile as Profile
     const updated = { ...profile, avatar: { ...avatar, snapshots: { face, body } } }
-    global.globalStore.dispatch(saveProfileRequest(updated))
+    globalThis.globalStore.dispatch(saveProfileRequest(updated))
   },
 
   SaveUserTutorialStep(data: { tutorialStep: number }) {
     const profile: Profile = getUserProfile().profile as Profile
     profile.tutorialStep = data.tutorialStep
-    global.globalStore.dispatch(saveProfileRequest(profile))
+    globalThis.globalStore.dispatch(saveProfileRequest(profile))
 
     persistCurrentUser({
       version: profile.version,
@@ -255,7 +256,7 @@ const browserInterface = {
   },
 
   BlockPlayer(data: { userId: string }) {
-    const profile = getProfile(global.globalStore.getState(), identity.address)
+    const profile = getProfile(globalThis.globalStore.getState(), identity.address)
 
     if (profile) {
       let blocked: string[] = [data.userId]
@@ -271,16 +272,16 @@ const browserInterface = {
         blocked = [...profile.blocked, ...blocked]
       }
 
-      global.globalStore.dispatch(saveProfileRequest({ ...profile, blocked }))
+      globalThis.globalStore.dispatch(saveProfileRequest({ ...profile, blocked }))
     }
   },
 
   UnblockPlayer(data: { userId: string }) {
-    const profile = getProfile(global.globalStore.getState(), identity.address)
+    const profile = getProfile(globalThis.globalStore.getState(), identity.address)
 
     if (profile) {
       const blocked = profile.blocked ? profile.blocked.filter(id => id !== data.userId) : []
-      global.globalStore.dispatch(saveProfileRequest({ ...profile, blocked }))
+      globalThis.globalStore.dispatch(saveProfileRequest({ ...profile, blocked }))
     }
   },
 
@@ -307,7 +308,7 @@ export function setLoadingScreenVisible(shouldShow: boolean) {
 }
 
 function delightedSurvey() {
-  const { analytics, delighted } = global
+  const { analytics, delighted } = globalThis
   const profile = getUserProfile().profile as Profile | null
   if (!isTheFirstLoading && analytics && delighted && profile) {
     const payload = {
@@ -569,7 +570,7 @@ unityInterface = {
   }
 }
 
-window['unityInterface'] = unityInterface
+globalThis.unityInterface = unityInterface
 
 export type UnityInterfaceContainer = {
   unityInterface: typeof unityInterface
@@ -788,7 +789,7 @@ export class UnityParcelScene extends UnityScene<LoadableParcelScene> {
 export async function initializeEngine(_gameInstance: GameInstance) {
   gameInstance = _gameInstance
 
-  global['globalStore'].dispatch(unityClientLoaded())
+  globalThis.globalStore.dispatch(unityClientLoaded())
   setLoadingScreenVisible(true)
 
   unityInterface.DeactivateRendering()
@@ -834,7 +835,7 @@ export async function startUnityParcelLoading() {
   const p = await providerFuture
   hasWallet = p.successful
 
-  global['globalStore'].dispatch(loadingScenes())
+  globalThis.globalStore.dispatch(loadingScenes())
   await enableParcelSceneLoading({
     parcelSceneClass: UnityParcelScene,
     preloadScene: async _land => {
@@ -978,7 +979,7 @@ export function updateBuilderScene(sceneData: ILand) {
 teleportObservable.add((position: { x: number; y: number; text?: string }) => {
   // before setting the new position, show loading screen to avoid showing an empty world
   setLoadingScreenVisible(true)
-  const globalStore = global['globalStore']
+  const globalStore = globalThis.globalStore
   globalStore.dispatch(teleportTriggered(position.text || `Teleporting to ${position.x}, ${position.y}`))
 })
 
@@ -988,7 +989,7 @@ worldRunningObservable.add(isRunning => {
   }
 })
 
-window['messages'] = (e: any) => chatObservable.notifyObservers(e)
+globalThis.messages = (e: any) => chatObservable.notifyObservers(e)
 
 document.addEventListener('pointerlockchange', e => {
   if (!document.pointerLockElement) {
