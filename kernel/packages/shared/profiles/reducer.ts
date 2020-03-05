@@ -1,7 +1,6 @@
 import { AnyAction } from 'redux'
 import { ProfileState, INITIAL_PROFILES } from './types'
 import {
-  SET_PROFILE_SERVER,
   ADD_CATALOG,
   AddCatalogAction,
   CATALOG_LOADED,
@@ -84,11 +83,6 @@ export function profileReducer(state?: ProfileState, action?: AnyAction): Profil
             data: inventoryAction.payload.inventory
           }
         }
-      }
-    case SET_PROFILE_SERVER:
-      return {
-        ...state,
-        profileServer: action.payload.url
       }
     case PROFILE_REQUEST:
       return {

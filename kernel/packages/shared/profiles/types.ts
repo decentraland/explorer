@@ -84,7 +84,6 @@ export type WearableId = string
 export type ColorString = string
 
 export type ProfileState = {
-  profileServer: string
   userInfo: {
     [key: string]: { status: 'loading' | 'error'; data: any } | { status: 'ok'; data: Profile }
   }
@@ -101,7 +100,6 @@ export type RootProfileState = {
 }
 
 export const INITIAL_PROFILES: ProfileState = {
-  profileServer: '',
   userInfo: {},
   userInventory: {},
   catalogs: {}
