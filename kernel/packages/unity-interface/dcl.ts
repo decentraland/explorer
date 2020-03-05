@@ -1,10 +1,3 @@
-declare const globalThis: UnityInterfaceContainer &
-  StoreContainer & { analytics: any; delighted: any } & { messages: (e: any) => void }
-
-type GameInstance = {
-  SendMessage(object: string, method: string, ...args: (number | string)[]): void
-}
-
 import { uuid } from 'decentraland-ecs/src'
 import { EventDispatcher } from 'decentraland-rpc/lib/common/core/EventDispatcher'
 import { IFuture } from 'fp-future'
@@ -30,17 +23,17 @@ import {
 import { Quaternion, ReadOnlyQuaternion, ReadOnlyVector3, Vector3 } from '../decentraland-ecs/src/decentraland/math'
 import { IEventNames, IEvents, ProfileForRenderer } from '../decentraland-ecs/src/decentraland/Types'
 import { sceneLifeCycleObservable } from '../decentraland-loader/lifecycle/controllers/scene'
-import { tutorialStepId } from '../decentraland-loader/lifecycle/tutorial/tutorial'
-import { AirdropInfo } from '../shared/airdrops/interface'
-import { queueTrackingEvent } from '../shared/analytics'
-import { DevTools } from '../shared/apis/DevTools'
-import { ParcelIdentity } from '../shared/apis/ParcelIdentity'
-import { chatObservable } from '../shared/comms/chat'
-import { aborted } from '../shared/loading/ReportFatalError'
-import { loadingScenes, teleportTriggered, unityClientLoaded } from '../shared/loading/types'
-import { createLogger, defaultLogger, ILogger } from '../shared/logger'
-import { saveProfileRequest } from '../shared/profiles/actions'
-import { Avatar, Profile, Wearable } from '../shared/profiles/types'
+import { tutorialStepId } from 'decentraland-loader/lifecycle/tutorial/tutorial'
+import { AirdropInfo } from 'shared/airdrops/interface'
+import { queueTrackingEvent } from 'shared/analytics'
+import { DevTools } from 'shared/apis/DevTools'
+import { ParcelIdentity } from 'shared/apis/ParcelIdentity'
+import { chatObservable } from 'shared/comms/chat'
+import { aborted } from 'shared/loading/ReportFatalError'
+import { loadingScenes, teleportTriggered, unityClientLoaded } from 'shared/loading/types'
+import { createLogger, defaultLogger, ILogger } from 'shared/logger'
+import { saveProfileRequest } from 'shared/profiles/actions'
+import { Avatar, Profile, Wearable } from 'shared/profiles/types'
 import {
   PB_AttachEntityComponent,
   PB_ComponentCreated,
@@ -57,8 +50,8 @@ import {
   PB_UpdateEntityComponent,
   PB_Vector3
 } from '../shared/proto/engineinterface_pb'
-import { Session } from '../shared/session'
-import { getPerformanceInfo } from '../shared/session/getPerformanceInfo'
+import { Session } from 'shared/session'
+import { getPerformanceInfo } from 'shared/session/getPerformanceInfo'
 import {
   AttachEntityComponentPayload,
   ComponentCreatedPayload,
@@ -82,21 +75,28 @@ import {
   SetEntityParentPayload,
   UpdateEntityComponentPayload,
   WelcomeHUDControllerModel
-} from '../shared/types'
-import { ParcelSceneAPI } from '../shared/world/ParcelSceneAPI'
+} from 'shared/types'
+import { ParcelSceneAPI } from 'shared/world/ParcelSceneAPI'
 import {
   enableParcelSceneLoading,
   getParcelSceneID,
   getSceneWorkerBySceneID,
   loadParcelScene,
   stopParcelSceneWorker
-} from '../shared/world/parcelSceneManager'
-import { positionObservable, teleportObservable } from '../shared/world/positionThings'
-import { hudWorkerUrl, SceneWorker } from '../shared/world/SceneWorker'
-import { ensureUiApis } from '../shared/world/uiSceneInitializer'
-import { worldRunningObservable } from '../shared/world/worldState'
+} from 'shared/world/parcelSceneManager'
+import { positionObservable, teleportObservable } from 'shared/world/positionThings'
+import { hudWorkerUrl, SceneWorker } from 'shared/world/SceneWorker'
+import { ensureUiApis } from 'shared/world/uiSceneInitializer'
+import { worldRunningObservable } from 'shared/world/worldState'
 import { profileToRendererFormat } from 'shared/profiles/transformations/profileToRendererFormat'
-import { StoreContainer } from '../shared/store/rootTypes'
+import { StoreContainer } from 'shared/store/rootTypes'
+
+declare const globalThis: UnityInterfaceContainer &
+  StoreContainer & { analytics: any; delighted: any } & { messages: (e: any) => void }
+
+type GameInstance = {
+  SendMessage(object: string, method: string, ...args: (number | string)[]): void
+}
 
 const rendererVersion = require('decentraland-renderer')
 window['console'].log('Renderer version: ' + rendererVersion)
