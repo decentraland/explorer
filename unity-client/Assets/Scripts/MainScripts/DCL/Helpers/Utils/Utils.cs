@@ -120,9 +120,6 @@ namespace DCL.Helpers
             if (component != null)
             {
                 action.Invoke(component);
-
-                if (debug)
-                    Debug.Log("InverseTransformChildTraversal", startTransform);
             }
         }
 
@@ -144,7 +141,6 @@ namespace DCL.Helpers
                 ForwardTransformChildTraversal(action, t);
             }
         }
-
 
         public static T GetOrCreateComponent<T>(this GameObject gameObject) where T : UnityEngine.Component
         {

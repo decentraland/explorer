@@ -217,60 +217,30 @@ namespace DCL.Components
         {
             if (parentUIComponent != null)
             {
-                Debug.Log(referencesContainer.gameObject.name + " USING PARENT TREE FROM " + parentUIComponent.childHookRectTransform.parent.name, childHookRectTransform.parent);
-
                 if (referencesContainer.uiTree != null)
-                {
-                    Debug.Log("RELEASING PREVIOUS TREE");
                     referencesContainer.uiTree.Remove(referencesContainer.uiTreeNode);
-                }
 
                 if (parentUIComponent is UIScreenSpace)
                 {
                     referencesContainer.uiTree = (parentUIComponent as UIScreenSpace).uiTree;
-
-                    // referencesContainer.uiTreeNode = referencesContainer.uiTree.AddFirst(referencesContainer);
                     referencesContainer.uiTreeNode = referencesContainer.uiTree.AddLast(referencesContainer);
                 }
                 else if (parentUIComponent.referencesContainer.uiTree != null)
                 {
                     referencesContainer.uiTree = parentUIComponent.referencesContainer.uiTree;
-
                     referencesContainer.uiTreeNode = referencesContainer.uiTree.AddAfter(parentUIComponent.referencesContainer.uiTreeNode, referencesContainer); // TODO: IS THIS ENOUGHT TO DEAL WITH THE INTERMEDIARY REFERENCES CONTAINER INTRODUCED BY THE STACK CONTAINER??
                 }
-            }
-            else
-            {
-                Debug.Log("DIDN'T SET TREE: " + parentUIComponent.referencesContainer.uiTree);
             }
         }
 
         public virtual void RefreshAll()
         {
-            Debug.Log("REFRESH ALL");
-
-            /* RefreshDCLLayoutRecursively();
+            RefreshDCLLayoutRecursively();
             FixMaxStretchRecursively();
-            RefreshDCLLayoutRecursively_Internal(refreshSize: false, refreshAlignmentAndPosition: true); */
+            RefreshDCLLayoutRecursively_Internal(refreshSize: false, refreshAlignmentAndPosition: true);
 
-            if (referencesContainer.uiTree == null)
-            {
-                Debug.Log("uiTree is null", referencesContainer.transform);
-                return;
-            }
-
-            // 1 - Fully RefreshDCLLayout
-            TraverseUITree((referencesContainer) => referencesContainer.owner?.RefreshDCLLayout(true, true));
-
-            // 2 - Fix max stretch
-            TraverseUITree((referencesContainer) => referencesContainer.rectTransform.SetToMaxStretch());
-
-            // 3 - RefreshDCLLayout (Alignment and position only)
-            TraverseUITree((referencesContainer) => referencesContainer.owner?.RefreshDCLLayout(false, true));
-
-
-            // Debug.Log("Inversed Tree:");
-            TraverseUITree((referencesContainer) => Debug.Log(referencesContainer.transform.name, referencesContainer.transform));
+            // // Debug.Log("Inversed Tree:");
+            // TraverseUITree((referencesContainer) => Debug.Log(referencesContainer.transform.name, referencesContainer.transform));
         }
 
         void TraverseUITree(System.Action<UIReferencesContainer> callback)
@@ -352,7 +322,8 @@ namespace DCL.Components
         public void RefreshDCLLayoutRecursively_Internal(bool refreshSize = true,
             bool refreshAlignmentAndPosition = true)
         {
-            UIShape rootParent = GetRootParent();
+            TraverseUITree((referencesContainer) => referencesContainer.owner?.RefreshDCLLayout(refreshSize, refreshAlignmentAndPosition));
+            /* UIShape rootParent = GetRootParent();
 
             Assert.IsTrue(rootParent != null, "root parent must never be null");
 
@@ -364,12 +335,18 @@ namespace DCL.Components
                         x.owner.RefreshDCLLayout(refreshSize, refreshAlignmentAndPosition);
                     }
                 },
-                rootParent.referencesContainer.transform, true);
+                rootParent.referencesContainer.transform, true); */
         }
 
         public void FixMaxStretchRecursively()
         {
-            UIShape rootParent = GetRootParent();
+            TraverseUITree((referencesContainer) =>
+            {
+                if (referencesContainer.owner != null)
+                    referencesContainer.rectTransform.SetToMaxStretch();
+            });
+
+            /* UIShape rootParent = GetRootParent();
 
             Assert.IsTrue(rootParent != null, "root parent must never be null");
 
@@ -381,23 +358,15 @@ namespace DCL.Components
                         x.rectTransform.SetToMaxStretch();
                     }
                 },
-                rootParent.referencesContainer.transform, true);
+                rootParent.referencesContainer.transform, true); */
         }
 
         protected virtual bool ReparentComponent(RectTransform targetTransform, string targetParent)
         {
-            Debug.Log("REPARENT COMPONENT");
-
             bool targetParentExists = !string.IsNullOrEmpty(targetParent) &&
                                       scene.disposableComponents.ContainsKey(targetParent);
 
-            if (targetParentExists && parentUIComponent == scene.disposableComponents[targetParent])
-            {
-                // ConfigureUITreeNode();
-                return false;
-            }
-
-            Debug.Log("REPARENT COMPONENT - 2");
+            if (targetParentExists && parentUIComponent == scene.disposableComponents[targetParent]) return false;
 
             if (parentUIComponent != null)
             {
@@ -424,8 +393,6 @@ namespace DCL.Components
             targetTransform.SetParent(parentUIComponent.childHookRectTransform, false);
 
             ConfigureUITreeNode();
-
-            Debug.Log("REPARENT COMPONENT - 3");
 
             return true;
         }
