@@ -448,3 +448,5 @@ export type GraphResponse = {
     }[]
   }
 }
+
+export type AnalyticsContainer = { analytics: SegmentAnalytics.AnalyticsJS }
