@@ -57,38 +57,44 @@ namespace Builder
 
         private void OnEntityPressed(DCLBuilderEntity entity, Vector3 hitPoint)
         {
-            if (selectedEntities != null)
+            if (selectedEntities == null || !selectedEntities.Contains(entity))
             {
-                OnDraggingObjectStart?.Invoke();
-
-                initialHitPoint = hitPoint;
-                targetOffset = selectedEntitiesParent.position - hitPoint;
-                builderRaycast.SetEntityHitPlane(hitPoint.y);
-                isDragging = true;
+                return;
             }
+
+            OnDraggingObjectStart?.Invoke();
+
+            initialHitPoint = hitPoint;
+            targetOffset = selectedEntitiesParent.position - hitPoint;
+            builderRaycast.SetEntityHitPlane(hitPoint.y);
+            isDragging = true;
         }
 
         private void OnMouseUp(int buttonId, Vector3 mousePosition)
         {
-            if (buttonId == 0 && selectedEntities != null)
+            if (buttonId != 0)
             {
-                if (isDragging)
-                {
-                    OnDraggingObjectEnd?.Invoke();
-                }
-                isDragging = false;
+                return;
             }
+
+            if (isDragging && selectedEntities != null)
+            {
+                OnDraggingObjectEnd?.Invoke();
+            }
+            isDragging = false;
         }
 
         private void OnMouseDrag(int buttonId, Vector3 mousePosition, float axisX, float axisY)
         {
-            if (buttonId == 0 && selectedEntities != null)
+            if (buttonId != 0 || selectedEntities == null)
             {
-                bool hasMouseMoved = (axisX != 0 || axisY != 0);
-                if (isDragging && hasMouseMoved)
-                {
-                    DragTargetEntity(mousePosition);
-                }
+                return;
+            }
+
+            bool hasMouseMoved = (axisX != 0 || axisY != 0);
+            if (isDragging && hasMouseMoved)
+            {
+                DragTargetEntity(mousePosition);
             }
         }
 
