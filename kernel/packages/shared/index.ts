@@ -40,6 +40,7 @@ import { initializeUrlPositionObserver } from './world/positionThings'
 import { saveProfileRequest } from './profiles/actions'
 import { ethereumConfigurations } from 'config'
 import { tutorialStepId } from 'decentraland-loader/lifecycle/tutorial/tutorial'
+import { ENABLE_WEB3 } from '../config/index'
 
 declare const globalThis: any
 
@@ -76,10 +77,10 @@ export async function initShared(): Promise<Session | undefined> {
 
   let net: ETHEREUM_NETWORK = ETHEREUM_NETWORK.MAINNET
 
-  if (WORLD_EXPLORER) {
+  if (ENABLE_WEB3) {
     await awaitWeb3Approval()
 
-    if (await checkTldVsNetwork()) {
+    if (WORLD_EXPLORER && (await checkTldVsNetwork())) {
       return undefined
     }
 
@@ -258,7 +259,7 @@ async function createAuthIdentity() {
   let signer
   let hasConnectedWeb3 = false
 
-  if (WORLD_EXPLORER) {
+  if (ENABLE_WEB3) {
     const result = await providerFuture
     if (result.successful) {
       const eth = Eth.fromCurrentProvider()!
