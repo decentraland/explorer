@@ -1,19 +1,17 @@
 import { ReportFatalError } from 'shared/loading/ReportFatalError'
-import { NOT_INVITED, AUTH_ERROR_LOGGED_OUT, FAILED_FETCHING_UNITY } from 'shared/loading/types'
+import { experienceStarted, NOT_INVITED, AUTH_ERROR_LOGGED_OUT, FAILED_FETCHING_UNITY } from 'shared/loading/types'
 import { worldToGrid } from '../atomicHelpers/parcelScenePositions'
 import { NO_MOTD, OPEN_AVATAR_EDITOR, tutorialEnabled } from '../config/index'
-import { experienceStarted } from '../shared/loading/types'
-import defaultLogger from '../shared/logger'
-import { signalRendererInitialized } from '../shared/renderer/actions'
-import { lastPlayerPosition, teleportObservable } from '../shared/world/positionThings'
+import defaultLogger from 'shared/logger'
+import { signalRendererInitialized } from 'shared/renderer/actions'
+import { lastPlayerPosition, teleportObservable } from 'shared/world/positionThings'
+import { StoreContainer } from 'shared/store/rootTypes'
 import { hasWallet, startUnityParcelLoading, unityInterface } from '../unity-interface/dcl'
 import { initializeUnity } from '../unity-interface/initializer'
-import { Store } from 'redux'
-import { RootState } from 'shared/store/rootTypes'
 
 const container = document.getElementById('gameContainer')
 
-declare const globalThis: { UnityLoader: any; globalStore: Store<RootState> }
+declare const globalThis: { UnityLoader: any } & StoreContainer
 
 if (!container) throw new Error('cannot find element #gameContainer')
 

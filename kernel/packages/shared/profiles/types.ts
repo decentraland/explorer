@@ -105,10 +105,6 @@ export const INITIAL_PROFILES: ProfileState = {
   catalogs: {}
 }
 
-export type UnityInterfaceContainer = {
-  unityInterface: any
-}
-
 export type Timestamp = number
 export type Pointer = string
 export type ContentFileHash = string

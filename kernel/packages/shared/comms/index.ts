@@ -55,7 +55,7 @@ import { Authenticator } from 'dcl-crypto'
 import { getCommsServer, getRealm, getAllCatalystCandidates } from '../dao/selectors'
 import { Realm, LayerUserInfo } from 'shared/dao/types'
 import { Store } from 'redux'
-import { RootState } from 'shared/store/rootTypes'
+import { RootState, StoreContainer } from 'shared/store/rootTypes'
 import { store } from 'shared/store/store'
 import {
   setCatalystRealmCommsStatus,
@@ -67,7 +67,6 @@ import { observeRealmChange, pickCatalystRealm, changeToCrowdedRealm } from 'sha
 import { getProfile } from 'shared/profiles/selectors'
 import { Profile } from 'shared/profiles/types'
 import { realmToString } from '../dao/utils/realmToString'
-import { StoreContainer } from '../store/rootTypes'
 
 export type CommsVersion = 'v1' | 'v2'
 export type CommsMode = CommsV1Mode | CommsV2Mode
