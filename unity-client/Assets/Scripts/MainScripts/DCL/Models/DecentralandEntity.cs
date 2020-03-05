@@ -35,24 +35,28 @@ namespace DCL.Models
             public MeshFilter[] meshFilters;
             public List<Collider> colliders = new List<Collider>();
 
-            Vector3 lastPosition;
-            Vector3 lastScale;
-            Quaternion lastRotation;
-            Bounds _mergedBounds;
+            Vector3 lastBoundsCalculationPosition;
+            Vector3 lastBoundsCalculationScale;
+            Quaternion lastBoundsCalculationRotation;
+            Bounds mergedBoundsValue;
             public Bounds mergedBounds
             {
                 get
                 {
-                    if (meshRootGameObject.transform.position != lastPosition ||
-                        meshRootGameObject.transform.localScale != lastScale ||
-                        meshRootGameObject.transform.rotation != lastRotation)
+                    if (meshRootGameObject.transform.position != lastBoundsCalculationPosition)
+                    {
+                        mergedBoundsValue.center += meshRootGameObject.transform.position - lastBoundsCalculationPosition;
+                        lastBoundsCalculationPosition = meshRootGameObject.transform.position;
+                    }
+
+                    if (meshRootGameObject.transform.lossyScale != lastBoundsCalculationScale || meshRootGameObject.transform.rotation != lastBoundsCalculationRotation)
                         RecalculateBounds();
 
-                    return _mergedBounds;
+                    return mergedBoundsValue;
                 }
                 set
                 {
-                    _mergedBounds = value;
+                    mergedBoundsValue = value;
                 }
             }
 
@@ -75,11 +79,11 @@ namespace DCL.Models
             {
                 if (renderers == null || renderers.Length == 0) return;
 
-                lastPosition = meshRootGameObject.transform.position;
-                lastScale = meshRootGameObject.transform.localScale;
-                lastRotation = meshRootGameObject.transform.rotation;
+                lastBoundsCalculationPosition = meshRootGameObject.transform.position;
+                lastBoundsCalculationScale = meshRootGameObject.transform.lossyScale;
+                lastBoundsCalculationRotation = meshRootGameObject.transform.rotation;
 
-                _mergedBounds = Utils.BuildMergedBounds(renderers);
+                mergedBoundsValue = Utils.BuildMergedBounds(renderers);
             }
 
             public void CleanReferences()
