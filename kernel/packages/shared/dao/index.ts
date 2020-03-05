@@ -11,7 +11,7 @@ import { worldToGrid } from 'atomicHelpers/parcelScenePositions'
 import { lastPlayerPosition } from 'shared/world/positionThings'
 import { countParcelsCloseTo, ParcelArray } from 'shared/comms/interface/utils'
 import { CatalystNode } from '../types'
-import { zip } from './zip'
+import { zip } from './utils/zip'
 import { realmToString } from './utils/realmToString'
 const qs: any = require('query-string')
 

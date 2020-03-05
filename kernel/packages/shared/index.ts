@@ -30,7 +30,7 @@ import {
   notStarted
 } from './loading/types'
 import { defaultLogger } from './logger'
-import { ProfileAsPromise } from './profiles/PassportAsPromise'
+import { ProfileAsPromise } from './profiles/ProfileAsPromise'
 import { profileToRendererFormat } from './profiles/transformations/profileToRendererFormat'
 import { setWorldContext } from './protocol/actions'
 import { Session } from './session/index'
