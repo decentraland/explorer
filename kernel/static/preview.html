@@ -302,11 +302,13 @@
     .network-warning-button {
       position: absolute;
       right: 20px;
-      top: 25%;
+      top: 50%;
+
+      transform: translate(-50%, -50%);
 
       color: white;
 
-      font-size: 1rem;
+      font-size: 1.5rem;
       font-weight: 600;
       cursor: pointer;
 
@@ -363,7 +365,7 @@
     <div id="network-warning" class="network-warning-bar">
       <div class="network-warning-title"><strong>Warning:</strong> you’re running on the Ethereum Mainnet.</div>
       <div class="network-warning-description">Blockchain transactions in this network have a cost and real consequences. We recommend you use the <strong>Ropsten</strong> test network instead.</div>
-      <button class="network-warning-button" onclick="document.getElementById('network-warning').style.display = 'none';">x</button>
+      <button class="network-warning-button" onclick="document.getElementById('network-warning').style.display = 'none';">⨯</button>
     </div>
 
     <div id="gameContainer"></div>
