@@ -84,6 +84,10 @@ export async function initShared(): Promise<Session | undefined> {
       return undefined
     }
 
+    if (PREVIEW && ETHEREUM_NETWORK.MAINNET === (await getNetworkValue())) {
+      showNetworkWarning()
+    }
+
     try {
       const userData = getUserProfile()
 
@@ -299,9 +303,14 @@ async function createAuthIdentity() {
   return identity
 }
 
-async function checkTldVsNetwork() {
+async function getNetworkValue() {
   const web3Network = await getNetwork()
   const web3Net = web3Network === '1' ? ETHEREUM_NETWORK.MAINNET : ETHEREUM_NETWORK.ROPSTEN
+  return web3Net
+}
+
+async function checkTldVsNetwork() {
+  const web3Net = await getNetworkValue()
 
   const tld = getTLD()
   const tldNet = getNetworkFromTLD()
@@ -321,4 +330,11 @@ async function checkTldVsNetwork() {
   }
 
   return false
+}
+
+function showNetworkWarning() {
+  const element = document.getElementById('network-warning')
+  if (element) {
+    element.style.display = 'block'
+  }
 }
