@@ -2,7 +2,7 @@ import { parseParcelPosition } from 'atomicHelpers/parcelScenePositions'
 import { Vector3Component } from '../atomicHelpers/landHelpers'
 import { QueryType } from 'decentraland-ecs/src/decentraland/PhysicsCast'
 
-export { Avatar, Profile, ColorString, WearableId, Wearable } from './passports/types'
+export { Avatar, Profile, ColorString, WearableId, Wearable } from './profiles/types'
 
 export type MappingsResponse = {
   parcel_id: string
@@ -340,8 +340,8 @@ export type Notification = {
   message: string
   buttonMessage: string
   timer: number // in seconds
-  scene: string
-  externalCallbackID: string
+  scene?: string
+  externalCallbackID?: string
 }
 
 export type HUDConfiguration = {
@@ -438,3 +438,15 @@ export function ILandToLoadableParcelSceneUpdate(land: ILand): EnvironmentData<L
 export type CatalystNode = {
   domain: string
 }
+
+export type GraphResponse = {
+  data: {
+    nfts: {
+      ens: {
+        subdomain: string
+      }
+    }[]
+  }
+}
+
+export type AnalyticsContainer = { analytics: SegmentAnalytics.AnalyticsJS }
