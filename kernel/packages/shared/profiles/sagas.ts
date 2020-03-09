@@ -312,7 +312,6 @@ function* sendLoadProfile(profile: Profile) {
     yield take(CATALOG_LOADED)
   }
   const rendererFormat = profileToRendererFormat(profile, identity)
-  defaultLogger.info(`profile#renderer`, rendererFormat)
   globalThis.unityInterface.LoadProfile(rendererFormat)
 }
 
