@@ -269,14 +269,7 @@ namespace DCL
                 }
             }
 
-            blockedPromisesToLoadAux.Sort(PromiseSortAlgorithm);
-
             return blockedPromisesToLoadAux;
-        }
-
-        protected virtual int PromiseSortAlgorithm(AssetPromiseType promiseA, AssetPromiseType promiseB)
-        {
-            return 0;
         }
 
         private IEnumerator LoadBlockedPromises(object loadedPromiseId)
