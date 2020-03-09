@@ -72,6 +72,7 @@ namespace Builder
 
         private void OnMouseUp(int buttonId, Vector3 mousePosition)
         {
+            // NOTE: only process mouse's left button press
             if (buttonId != 0)
             {
                 return;
@@ -86,6 +87,7 @@ namespace Builder
 
         private void OnMouseDrag(int buttonId, Vector3 mousePosition, float axisX, float axisY)
         {
+            // NOTE: only process if mouse's left button is pressed and if there is any entity selected
             if (buttonId != 0 || selectedEntities == null)
             {
                 return;
