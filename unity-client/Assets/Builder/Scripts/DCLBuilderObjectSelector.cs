@@ -7,7 +7,7 @@ namespace Builder
 {
     public class DCLBuilderObjectSelector : MonoBehaviour
     {
-        const float MAX_SECS_FOR_CLICK = 0.25f;
+        const float DRAGGING_THRESHOLD_TIME = 0.25f;
 
         public DCLBuilderRaycast builderRaycast;
         public DCLBuilderGizmoManager gizmosManager;
@@ -148,7 +148,7 @@ namespace Builder
             if (lastPressedEntityInfo.pressedEntity != null)
             {
                 // NOTE: we only process entity as selected if we are not considering that user was holding mouse button to rotate the camera
-                if ((Time.unscaledTime - lastPressedEntityInfo.pressedTime) < MAX_SECS_FOR_CLICK)
+                if ((Time.unscaledTime - lastPressedEntityInfo.pressedTime) < DRAGGING_THRESHOLD_TIME)
                 {
                     ProcessEntityPressed(lastPressedEntityInfo.pressedEntity, lastPressedEntityInfo.hitPoint);
                 }
@@ -156,7 +156,7 @@ namespace Builder
             lastPressedEntityInfo.pressedEntity = null;
 
             // NOTE: deselect all entities if the user click on the ground and it wasn't holding the mouse left button
-            if (groundClickTime != 0 && (Time.unscaledTime - groundClickTime) < MAX_SECS_FOR_CLICK)
+            if (groundClickTime != 0 && (Time.unscaledTime - groundClickTime) < DRAGGING_THRESHOLD_TIME)
             {
                 if (selectedEntities != null)
                 {
