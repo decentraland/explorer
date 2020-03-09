@@ -13,7 +13,7 @@ export interface Profile {
   ethAddress: string | undefined
   inventory: WearableId[]
   blocked: string[]
-  snapshots: {
+  snapshots?: {
     face: string
     body: string
   }
