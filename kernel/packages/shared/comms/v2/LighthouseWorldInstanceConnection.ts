@@ -198,8 +198,6 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
       }
     }
 
-    this.peerConfig.logLevel = this.peerConfig.logLevel ?? 'DEBUG'
-
     return new Peer(this.lighthouseUrl, this.peerId, this.peerCallback, this.peerConfig)
   }
 
@@ -216,11 +214,8 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
           break
         case CommsMessage.DataCase.POSITION_DATA:
           const positionMessage = mapToPositionMessage(commsMessage.getPositionData()!)
-          this.peer.setPeerPosition(sender, [positionMessage[0], positionMessage[1], positionMessage[2]])
-          this.positionHandler(
-            sender,
-            createPackage(commsMessage, 'position', positionMessage)
-          )
+          this.peer.setPeerPosition(sender, positionMessage.slice(0, 3))
+          this.positionHandler(sender, createPackage(commsMessage, 'position', positionMessage))
           break
         case CommsMessage.DataCase.SCENE_DATA:
           this.sceneMessageHandler(

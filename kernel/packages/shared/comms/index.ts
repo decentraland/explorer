@@ -592,10 +592,11 @@ export async function connect(userId: string) {
             // if any error occurs
             return identity
           },
+          logLevel: 'NONE',
           positionConfig: {
             selfPosition: () => {
               if (context && context.currentPosition) {
-                return [context.currentPosition[0], context.currentPosition[1], context.currentPosition[2]]
+                return context.currentPosition.slice(0, 3)
               }
             }
           }
