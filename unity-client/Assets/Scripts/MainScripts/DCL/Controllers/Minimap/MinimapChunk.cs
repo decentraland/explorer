@@ -51,17 +51,17 @@ namespace DCL
             if (viewport == null)
                 return;
 
-            Vector3 myLeftTop = rt.TransformPoint(new Vector3(rt.rect.xMin, rt.rect.yMin));
-            Vector3 myRightBottom = rt.TransformPoint(new Vector3(rt.rect.xMax, rt.rect.yMax));
+            Vector3 myMinCoords = rt.TransformPoint(new Vector3(rt.rect.xMin, rt.rect.yMin));
+            Vector3 myMaxCoords = rt.TransformPoint(new Vector3(rt.rect.xMax, rt.rect.yMax));
 
-            Vector3 viewLeftTop = viewport.TransformPoint(new Vector3(viewport.rect.xMin, viewport.rect.yMin));
-            Vector3 viewRightBottom = viewport.TransformPoint(new Vector3(viewport.rect.xMax, viewport.rect.yMax));
+            Vector3 viewMinCoords = viewport.TransformPoint(new Vector3(viewport.rect.xMin, viewport.rect.yMin));
+            Vector3 viewMaxCoords = viewport.TransformPoint(new Vector3(viewport.rect.xMax, viewport.rect.yMax));
 
-            Rect viewportRect = new Rect(viewLeftTop, viewRightBottom - viewLeftTop);
+            Rect viewportRect = new Rect(viewMinCoords, viewMaxCoords - viewMinCoords);
             viewportRect.min -= Vector2.one * size;
             viewportRect.max += Vector2.one * size;
 
-            Rect myRect = new Rect(myLeftTop, myRightBottom - myLeftTop);
+            Rect myRect = new Rect(myMinCoords, myMaxCoords - myMinCoords);
 
             bool visible = viewportRect.Overlaps(myRect);
 

@@ -1,4 +1,4 @@
-﻿using TMPro;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -21,20 +21,20 @@ public class MinimapHUDView : MonoBehaviour
 
     [SerializeField] private Button reportSceneButton;
 
-    [SerializeField] private MinimapZoom minimapZoom;
-
-    private MinimapHUDController controller;
+    public RectTransform mapRenderContainer;
 
     private void Initialize(MinimapHUDController controller)
     {
-        this.controller = controller;
         gameObject.name = VIEW_OBJECT_NAME;
         optionsPanel.SetActive(false);
 
         optionsButton.onClick.AddListener(controller.ToggleOptions);
         addBookmarkButton.onClick.AddListener(controller.AddBookmark);
         reportSceneButton.onClick.AddListener(controller.ReportScene);
-        minimapZoom.OnZoom += (relativeZoom) => controller.AddZoomDelta(relativeZoom);
+
+        var renderer = FindObjectOfType<MinimapParcelsView>();
+        renderer.atlas.SetViewport(mapRenderContainer);
+        renderer.transform.SetParent(mapRenderContainer);
     }
 
     internal static MinimapHUDView Create(MinimapHUDController controller)

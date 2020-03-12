@@ -11,7 +11,7 @@ namespace DCL
         private readonly int PARCEL_SIZE = 20;
         private readonly Vector3 CENTER_OFFSET = new Vector3(1, -0.5f);
 
-        public RectTransform viewport;
+        [SerializeField] private RectTransform viewport;
         public GameObject container;
         Dictionary<Vector2Int, MinimapChunk> chunks = new Dictionary<Vector2Int, MinimapChunk>();
 
@@ -38,7 +38,20 @@ namespace DCL
             CenterToTile(new Vector2Int(-10, 10));
         }
 
-        public void CenterToTile(Vector2Int tilePosition)
+        public void SetViewport(RectTransform reference)
+        {
+            Vector3 refMin = reference.TransformPoint(new Vector3(reference.rect.xMin, reference.rect.yMin));
+            Vector3 refMax = reference.TransformPoint(new Vector3(reference.rect.xMax, reference.rect.yMax));
+
+            Vector3 targetMin = viewport.InverseTransformPoint(refMin);
+            Vector3 targetMax = viewport.InverseTransformPoint(refMax);
+
+            viewport.pivot = Vector2.zero;
+            viewport.anchoredPosition = targetMin;
+            viewport.sizeDelta = targetMax - targetMin;
+        }
+
+        public void CenterToTile(Vector2 tilePosition)
         {
             Vector3 center = viewport.transform.TransformPoint(viewport.rect.center);
             Vector3 delta = center - container.transform.TransformPoint(GetTilePosition(tilePosition.x, tilePosition.y));

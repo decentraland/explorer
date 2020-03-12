@@ -1274,7 +1274,7 @@ MonoBehaviour:
   optionsPanel: {fileID: 9172043143630568996}
   addBookmarkButton: {fileID: 9217961843191164369}
   reportSceneButton: {fileID: 7331797177246822788}
-  minimapZoom: {fileID: 3608841161462443413}
+  mapRenderContainer: {fileID: 5111283870554404647}
 --- !u!1 &4665053653492846095
 GameObject:
   m_ObjectHideFlags: 0
@@ -1963,7 +1963,6 @@ GameObject:
   m_Component:
   - component: {fileID: 7368721439090438775}
   - component: {fileID: 4899902887333415860}
-  - component: {fileID: 3608841161462443413}
   m_Layer: 5
   m_Name: Minimap
   m_TagString: Untagged
@@ -1998,19 +1997,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7964506045839736466}
   m_CullTransparentMesh: 0
---- !u!114 &3608841161462443413
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7964506045839736466}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fa50800d09f194fb9a8d2b019c176344, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  sensitivity: -1.5
 --- !u!1 &8295293324485087332
 GameObject:
   m_ObjectHideFlags: 0

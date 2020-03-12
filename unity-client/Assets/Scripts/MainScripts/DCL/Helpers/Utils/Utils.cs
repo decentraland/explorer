@@ -352,6 +352,13 @@ namespace DCL.Helpers
                 (int)Mathf.Floor(worldPosition.z / ParcelSettings.PARCEL_SIZE)
             );
         }
+        public static Vector2 WorldToGridPositionUnclamped(Vector3 worldPosition)
+        {
+            return new Vector2(
+                worldPosition.x / ParcelSettings.PARCEL_SIZE,
+                worldPosition.z / ParcelSettings.PARCEL_SIZE
+            );
+        }
 
         public static string GetTestAssetsPathRaw()
         {

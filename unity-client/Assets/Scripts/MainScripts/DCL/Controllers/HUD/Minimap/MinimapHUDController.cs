@@ -1,5 +1,5 @@
-﻿using System;
 using DCL.Interface;
+using System;
 using UnityEngine;
 
 public class MinimapHUDController : IDisposable, IHUD
