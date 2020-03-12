@@ -191,7 +191,7 @@ namespace DCL
             {
                 if (TryGetScene(currentSceneId, out ParcelScene scene) && scene.isReady)
                 {
-                    RenderingController.i.renderingActivatedAckLock.RemoveLock(this);
+                    CommonScriptableObjects.rendererState.RemoveLock(this);
                 }
             }
 
@@ -222,14 +222,14 @@ namespace DCL
             }
 
             if (!debugScenes)
-                RenderingController.i.OnRenderingStateChanged += OnRenderingStateChange;
+                CommonScriptableObjects.rendererState.OnChange += OnRenderingStateChange;
         }
 
-        private void OnRenderingStateChange(bool enabled)
+        private void OnRenderingStateChange(bool enabled, bool prevState)
         {
             if (!enabled)
             {
-                RenderingController.i.renderingActivatedAckLock.AddLock(this);
+                CommonScriptableObjects.rendererState.AddLock(this);
             }
         }
 
@@ -237,7 +237,7 @@ namespace DCL
         {
             if (scene.sceneData.id == currentSceneId)
             {
-                RenderingController.i.renderingActivatedAckLock.RemoveLock(this);
+                CommonScriptableObjects.rendererState.RemoveLock(this);
             }
         }
 
@@ -257,7 +257,7 @@ namespace DCL
 
         void OnDestroy()
         {
-            RenderingController.i.OnRenderingStateChanged -= OnRenderingStateChange;
+            CommonScriptableObjects.rendererState.OnChange -= OnRenderingStateChange;
             DCLCharacterController.OnCharacterMoved -= SetPositionDirty;
             ParcelScene.parcelScenesCleaner.Stop();
         }
@@ -555,7 +555,7 @@ namespace DCL
 
             for (int i = 0; i < count; i++)
             {
-                if (RenderingController.i.renderingEnabled && enqueue)
+                if (CommonScriptableObjects.rendererState.Get() && enqueue)
                 {
                     payloadsToDecode.Enqueue(chunks[i]);
                 }
@@ -605,7 +605,7 @@ namespace DCL
 
             while (true)
             {
-                maxTimeForDecode = RenderingController.i.renderingEnabled ? MAX_TIME_FOR_DECODE : float.MaxValue;
+                maxTimeForDecode = CommonScriptableObjects.rendererState.Get() ? MAX_TIME_FOR_DECODE : float.MaxValue;
 
                 if (payloadsToDecode.Count > 0)
                 {

@@ -32,6 +32,9 @@ public static class CommonScriptableObjects
     public static Vector3Variable cameraRight => GetOrLoad(ref cameraRightValue, "ScriptableObjects/CameraRight");
     private static Vector3Variable cameraRightValue;
 
+    public static RendererState rendererState => GetOrLoad(ref rendererStateValue, "ScriptableObjects/RendererState");
+    private static RendererState rendererStateValue;
+
     private static T GetOrLoad<T>(ref T variable, string path) where T : Object
     {
         if (variable == null)

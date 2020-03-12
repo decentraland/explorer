@@ -6,23 +6,26 @@ using UnityEngine;
 using UnityGLTF;
 public class RenderingController : MonoBehaviour
 {
-    public static RenderingController i { get; private set; }
-
-    public void Awake()
-    {
-        i = this;
-    }
-
     public CompositeLock renderingActivatedAckLock = new CompositeLock();
 
-    public System.Action<bool> OnRenderingStateChanged;
-    public bool renderingEnabled { get; private set; } = true;
-    public bool activatedRenderingBefore { get; private set; } = false;
+    private bool activatedRenderingBefore { get; set; } = false;
+
+    void Awake()
+    {
+        CommonScriptableObjects.rendererState.OnLockAdded += AddLock;
+        CommonScriptableObjects.rendererState.OnLockRemoved += RemoveLock;
+    }
+
+    void OnDestroy()
+    {
+        CommonScriptableObjects.rendererState.OnLockAdded -= AddLock;
+        CommonScriptableObjects.rendererState.OnLockRemoved -= RemoveLock;
+    }
 
     [ContextMenu("Disable Rendering")]
     public void DeactivateRendering()
     {
-        if (!renderingEnabled)
+        if (!CommonScriptableObjects.rendererState.Get())
             return;
 
         DeactivateRendering_Internal();
@@ -30,8 +33,6 @@ public class RenderingController : MonoBehaviour
 
     void DeactivateRendering_Internal()
     {
-        renderingEnabled = false;
-
         DCL.Configuration.ParcelSettings.VISUAL_LOADING_ENABLED = false;
         MessagingBus.renderingIsDisabled = true;
         PointerEventsController.renderingIsDisabled = true;
@@ -45,14 +46,14 @@ public class RenderingController : MonoBehaviour
 
         DCLCharacterController.i.SetEnabled(false);
 
-        OnRenderingStateChanged?.Invoke(renderingEnabled);
+        CommonScriptableObjects.rendererState.Set(false);
     }
 
 
     [ContextMenu("Enable Rendering")]
     public void ActivateRendering()
     {
-        if (renderingEnabled)
+        if (CommonScriptableObjects.rendererState.Get())
             return;
 
         if (!renderingActivatedAckLock.isUnlocked)
@@ -68,7 +69,6 @@ public class RenderingController : MonoBehaviour
     private void ActivateRendering_Internal()
     {
         renderingActivatedAckLock.OnAllLocksRemoved -= ActivateRendering_Internal;
-        renderingEnabled = true;
 
         if (!activatedRenderingBefore)
         {
@@ -89,11 +89,21 @@ public class RenderingController : MonoBehaviour
         AssetPromiseKeeper_AB.i.useBlockedPromisesQueue = true;
         AssetPromiseKeeper_AB_GameObject.i.useBlockedPromisesQueue = true;
 
-        OnRenderingStateChanged?.Invoke(renderingEnabled);
+        CommonScriptableObjects.rendererState.Set(true);
 
         MemoryManager.i.CleanupPoolsIfNeeded(true);
         ParcelScene.parcelScenesCleaner.ForceCleanup();
 
         WebInterface.ReportControlEvent(new WebInterface.ActivateRenderingACK());
+    }
+
+    private void AddLock(object id)
+    {
+        renderingActivatedAckLock.AddLock(id);
+    }
+
+    private void RemoveLock(object id)
+    {
+        renderingActivatedAckLock.RemoveLock(id);
     }
 }

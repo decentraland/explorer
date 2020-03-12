@@ -80,7 +80,7 @@ namespace DCL.Controllers
 
         private void Update()
         {
-            if (state == State.READY && RenderingController.i.renderingEnabled)
+            if (state == State.READY && CommonScriptableObjects.rendererState.Get())
                 SendMetricsEvent();
         }
 
@@ -216,7 +216,7 @@ namespace DCL.Controllers
             if (DCLCharacterController.i)
                 DCLCharacterController.i.characterPosition.OnPrecisionAdjust -= OnPrecisionAdjust;
 
-            if (!RenderingController.i.renderingEnabled)
+            if (!CommonScriptableObjects.rendererState.Get())
             {
                 RemoveAllEntitiesImmediate();
             }
