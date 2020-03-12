@@ -5,24 +5,21 @@ using UnityEngine.UI;
 
 namespace DCL
 {
-    public class MinimapChunk : MonoBehaviour
+    public class MapChunk : MonoBehaviour
     {
-        public Vector2Int center;
-        public Vector2Int size;
-        public int tileSize;
-        RawImage targetImage;
+        public RawImage targetImage;
 
+        [System.NonSerialized]
+        public Vector2Int center;
+        [System.NonSerialized]
+        public Vector2Int size;
+        [System.NonSerialized]
+        public int tileSize;
         [System.NonSerialized]
         public RectTransform viewport;
 
         private RectTransform rt;
         private bool isLoadingOrLoaded = false;
-
-        void Start()
-        {
-            rt = transform as RectTransform;
-            targetImage = GetComponent<RawImage>();
-        }
 
         public IEnumerator Load()
         {
@@ -51,11 +48,16 @@ namespace DCL
             if (viewport == null)
                 return;
 
+            if (rt == null)
+                rt = transform as RectTransform;
+
             Vector3 myMinCoords = rt.TransformPoint(new Vector3(rt.rect.xMin, rt.rect.yMin));
             Vector3 myMaxCoords = rt.TransformPoint(new Vector3(rt.rect.xMax, rt.rect.yMax));
 
             Vector3 viewMinCoords = viewport.TransformPoint(new Vector3(viewport.rect.xMin, viewport.rect.yMin));
             Vector3 viewMaxCoords = viewport.TransformPoint(new Vector3(viewport.rect.xMax, viewport.rect.yMax));
+
+            float size = (myMaxCoords - myMinCoords).magnitude;
 
             Rect viewportRect = new Rect(viewMinCoords, viewMaxCoords - viewMinCoords);
             viewportRect.min -= Vector2.one * size;

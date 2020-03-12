@@ -1,4 +1,4 @@
-using TMPro;
+﻿using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -32,9 +32,10 @@ public class MinimapHUDView : MonoBehaviour
         addBookmarkButton.onClick.AddListener(controller.AddBookmark);
         reportSceneButton.onClick.AddListener(controller.ReportScene);
 
-        var renderer = FindObjectOfType<MinimapParcelsView>();
+        var renderer = FindObjectOfType<MapRenderer>();
         renderer.atlas.SetViewport(mapRenderContainer);
         renderer.transform.SetParent(mapRenderContainer);
+        renderer.transform.SetAsFirstSibling();
     }
 
     internal static MinimapHUDView Create(MinimapHUDController controller)

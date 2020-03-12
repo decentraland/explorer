@@ -89,6 +89,7 @@ public class DCLCharacterPosition
 
             OnPrecisionAdjust?.Invoke(this);
 
+            CommonScriptableObjects.playerWorldPosition.Set(worldPositionValue);
             CommonScriptableObjects.playerUnityToWorldOffset.Set(offset);
         }
     }

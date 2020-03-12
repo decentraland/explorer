@@ -11,9 +11,9 @@ GameObject:
   - component: {fileID: 2587778077368963932}
   - component: {fileID: 5055123019118676077}
   - component: {fileID: 2624685348986118793}
-  - component: {fileID: 5520226268775877141}
+  - component: {fileID: 1602209809153025936}
   m_Layer: 0
-  m_Name: Minimap Chunk
+  m_Name: Map Chunk
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -73,7 +73,7 @@ MonoBehaviour:
     y: 0
     width: 1
     height: 1
---- !u!114 &5520226268775877141
+--- !u!114 &1602209809153025936
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -85,6 +85,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 004e57dda8568cb418864fd1052461ea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  center: {x: 0, y: 0}
-  size: {x: 0, y: 0}
-  tileSize: 0
+  targetImage: {fileID: 2624685348986118793}
