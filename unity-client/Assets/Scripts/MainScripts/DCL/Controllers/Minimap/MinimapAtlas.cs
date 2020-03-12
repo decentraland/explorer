@@ -1,6 +1,5 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace DCL
 {
@@ -39,18 +38,35 @@ namespace DCL
             CenterToTile(new Vector2Int(-10, 10));
         }
 
-        public void CullChunks()
-        {
-
-        }
-
         public void CenterToTile(Vector2Int tilePosition)
         {
             Vector3 center = viewport.transform.TransformPoint(viewport.rect.center);
-            //Vector3 center = viewport.transform.position;
             Vector3 delta = center - container.transform.TransformPoint(GetTilePosition(tilePosition.x, tilePosition.y));
 
             container.transform.position += delta;
+            UpdateCulling();
+        }
+
+        private void UpdateCulling()
+        {
+            using (var it = chunks.GetEnumerator())
+            {
+                while (it.MoveNext())
+                {
+                    it.Current.Value.UpdateCulling();
+                }
+            }
+        }
+
+        Vector3 lastPos;
+        private void Update()
+        {
+            if (lastPos != container.transform.position)
+            {
+                UpdateCulling();
+            }
+
+            lastPos = container.transform.position;
         }
 
         void Start()
@@ -60,15 +76,19 @@ namespace DCL
 
             int xTile = 0, yTile = 0;
 
+            GameObject chunkPrefab = Resources.Load("Minimap Chunk") as GameObject;
+
             for (int x = WORLD_PARCELS_OFFSET_MIN.x; x <= WORLD_PARCELS_OFFSET_MAX.x; x += tileCoverageX)
             {
                 for (int y = WORLD_PARCELS_OFFSET_MIN.y; y <= WORLD_PARCELS_OFFSET_MAX.y; y += tileCoverageY)
                 {
-                    var go = new GameObject($"Chunk {xTile}, {yTile}");
-                    var chunk = go.AddComponent<MinimapChunk>();
-                    go.AddComponent<RawImage>();
+                    var chunk = Object.Instantiate(chunkPrefab).GetComponent<MinimapChunk>();
+
+#if UNITY_EDITOR
+                    chunk.gameObject.name = $"Chunk {xTile}, {yTile}";
+#endif
                     chunk.transform.parent = container.transform;
-                    go.transform.localPosition = new Vector3(xTile * CHUNK_SIZE.x, yTile * CHUNK_SIZE.y, 0) / container.transform.localScale.x;
+                    chunk.transform.localPosition = new Vector3(xTile * CHUNK_SIZE.x, yTile * CHUNK_SIZE.y, 0) / container.transform.localScale.x;
 
                     //NOTE(Brian): Configure chunk with proper params
                     chunk.center.x = x;
@@ -76,6 +96,8 @@ namespace DCL
                     chunk.size.x = CHUNK_SIZE.x;
                     chunk.size.y = CHUNK_SIZE.y;
                     chunk.tileSize = PARCEL_SIZE;
+
+                    chunk.viewport = viewport;
 
                     chunks[new Vector2Int(xTile, yTile)] = chunk;
                     yTile++;
