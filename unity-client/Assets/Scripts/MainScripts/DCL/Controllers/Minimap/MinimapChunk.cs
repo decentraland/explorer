@@ -22,6 +22,7 @@ namespace DCL
             yield return Utils.FetchTexture(url, (x) => result = x);
 
             result.filterMode = FilterMode.Trilinear;
+            result.wrapMode = TextureWrapMode.Clamp;
             result.anisoLevel = 16;
             ((Texture2D)result).Apply(true, true);
 
