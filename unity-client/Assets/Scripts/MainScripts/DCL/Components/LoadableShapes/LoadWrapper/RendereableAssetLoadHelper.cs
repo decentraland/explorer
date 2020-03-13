@@ -53,7 +53,7 @@ namespace DCL.Components
 
             if (gltfPromise != null)
             {
-                result = $"promise state = {gltfPromise.state} ({loadTime} load time)... waiting promises = {AssetPromiseKeeper_GLTF.i.waitingPromisesCount}";
+                result = $"GLTF -> promise state = {gltfPromise.state} ({loadTime} load time)... waiting promises = {AssetPromiseKeeper_GLTF.i.waitingPromisesCount}";
 
                 if (gltfPromise.state == AssetPromiseState.WAITING)
                 {
@@ -63,7 +63,7 @@ namespace DCL.Components
 
             if (abPromise != null)
             {
-                result = $"promise state = {abPromise.state} ({loadTime} load time)... waiting promises = {AssetPromiseKeeper_AB.i.waitingPromisesCount}";
+                result = $"ASSET BUNDLE -> promise state = {abPromise.ToString()} ({loadTime} load time)... waiting promises = {AssetPromiseKeeper_AB.i.waitingPromisesCount}";
             }
 
             return result;
@@ -116,7 +116,7 @@ namespace DCL.Components
                 AssetPromiseKeeper_AB_GameObject.i.Forget(abPromise);
 
                 if (VERBOSE)
-                    Debug.Log("Forgetting not null promise...");
+                    Debug.Log("Forgetting not null promise..." + targetUrl);
             }
 
             string bundlesBaseUrl = useCustomContentServerUrl ? customContentServerUrl : bundlesContentUrl;
@@ -149,7 +149,7 @@ namespace DCL.Components
                 AssetPromiseKeeper_GLTF.i.Forget(gltfPromise);
 
                 if (VERBOSE)
-                    Debug.Log("Forgetting not null promise...");
+                    Debug.Log("Forgetting not null promise... " + targetUrl);
             }
 
             if (!contentProvider.TryGetContentsUrl_Raw(targetUrl, out string hash))
