@@ -206,6 +206,7 @@ namespace DCL
                 yield break;
             }
 
+            masterPromiseById.Remove(loadedPromiseId);
 
             if (loadedPromise.state != AssetPromiseState.FINISHED)
                 yield return ForgetBlockedPromises(loadedPromiseId);
