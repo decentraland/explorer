@@ -14,7 +14,7 @@ namespace DCL
         public AvatarRenderer avatarRenderer;
         public AvatarMovementController avatarMovementController;
         [SerializeField] internal GameObject minimapRepresentation;
-        [SerializeField] private OnPointerDown onPointerDown;
+        [SerializeField] private AvatarOnPointerDown onPointerDown;
         private StringVariable currentPlayerInfoCardName;
 
         private string currentSerialization = "";
