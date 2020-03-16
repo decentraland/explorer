@@ -18,9 +18,13 @@ namespace AssetPromiseKeeper_Mock_Tests
 
             var promList = new List<AssetPromise_Mock>();
 
-            AssetPromise_Mock mischievousPromise = new AssetPromise_Mock();
+            var mischievousPromise = new AssetPromise_Mock();
             mischievousPromise.idGenerator = id;
             mischievousPromise.loadTime = 0.01f;
+
+            var mischievousPromise2 = new AssetPromise_Mock();
+            mischievousPromise2.idGenerator = id;
+            mischievousPromise2.loadTime = 0.01f;
 
             for (int i = 0; i < 49; i++)
             {
@@ -39,8 +43,11 @@ namespace AssetPromiseKeeper_Mock_Tests
                 if (i == 25)
                 {
                     keeper.Keep(mischievousPromise);
+                    keeper.Keep(mischievousPromise2);
                     yield return new DCL.WaitUntil(() => mischievousPromise.keepWaiting == false, 2.0f);
+                    yield return new DCL.WaitUntil(() => mischievousPromise2.keepWaiting == false, 2.0f);
                     Assert.IsFalse(mischievousPromise.keepWaiting, "While blocked promises are being resolved, new promises enqueued with the same id should solve correctly! Make sure masterPromiseById is cleaned up when the master promise finishes loading.");
+                    Assert.IsFalse(mischievousPromise2.keepWaiting, "While blocked promises are being resolved, new promises enqueued with the same id should solve correctly! Make sure masterPromiseById is cleaned up when the master promise finishes loading.");
                 }
             }
         }

@@ -206,12 +206,18 @@ namespace DCL
                 yield break;
             }
 
-            masterPromiseById.Remove(loadedPromiseId);
+            while (masterToBlockedPromises[loadedPromiseId].Count > 0)
+            {
+                if (loadedPromise.state != AssetPromiseState.FINISHED)
+                    yield return ForgetBlockedPromises(loadedPromiseId);
+                else
+                    yield return LoadBlockedPromises(loadedPromiseId);
 
-            if (loadedPromise.state != AssetPromiseState.FINISHED)
-                yield return ForgetBlockedPromises(loadedPromiseId);
-            else
-                yield return LoadBlockedPromises(loadedPromiseId);
+                var enumerator = SkipFrameIfOverBudget();
+
+                if (enumerator != null)
+                    yield return enumerator;
+            }
 
             if (masterToBlockedPromises.ContainsKey(loadedPromiseId))
                 masterToBlockedPromises.Remove(loadedPromiseId);
@@ -288,7 +294,7 @@ namespace DCL
             {
                 AssetPromiseType promise = blockedPromisesToLoad[i];
                 promise.library = library;
-                promise.OnPreFinishEvent += CleanPromise;
+                CleanPromise(promise);
                 promise.Load();
 
                 enumerator = SkipFrameIfOverBudget();
