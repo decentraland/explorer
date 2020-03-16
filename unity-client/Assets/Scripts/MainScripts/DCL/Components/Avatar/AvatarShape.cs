@@ -60,7 +60,6 @@ namespace DCL
             if (newJson == "{}")
                 yield break;
 
-
             if (entity != null && entity.OnTransformChange == null)
             {
                 entity.OnTransformChange += avatarMovementController.OnTransformChanged;

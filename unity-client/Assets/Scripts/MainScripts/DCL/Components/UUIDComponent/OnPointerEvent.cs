@@ -90,7 +90,7 @@ namespace DCL.Components
 
         public void SetHoverState(bool hoverState)
         {
-            if (!enableInteractionHoverFeedback) return;
+            if (!enableInteractionHoverFeedback || !enabled) return;
 
             hoverCanvasController.SetHoverState(hoverState);
         }

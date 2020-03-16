@@ -8,6 +8,16 @@ namespace DCL.Components
     {
         public event System.Action OnPointerDownReport;
 
+        void Awake()
+        {
+            CommonScriptableObjects.playerInfoCardVisibleState.OnChange += ReEnableOnInfoCardClosed;
+        }
+
+        void OnDestroy()
+        {
+            CommonScriptableObjects.playerInfoCardVisibleState.OnChange -= ReEnableOnInfoCardClosed;
+        }
+
         public override void Report(WebInterface.ACTION_BUTTON buttonId, Ray ray, HitInfo hit)
         {
             if (!enabled) return;
@@ -16,8 +26,18 @@ namespace DCL.Components
             {
                 base.Report(buttonId, ray, hit);
 
+                SetHoverState(false);
+                enabled = false;
+
                 OnPointerDownReport?.Invoke();
             }
+        }
+
+        void ReEnableOnInfoCardClosed(bool newState, bool prevState)
+        {
+            if (enabled || newState) return;
+
+            enabled = true;
         }
     }
 }
