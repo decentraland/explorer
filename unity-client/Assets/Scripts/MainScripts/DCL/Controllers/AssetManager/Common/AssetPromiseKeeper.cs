@@ -163,7 +163,9 @@ namespace DCL
 
         private void OnRequestCompleted(AssetPromise<AssetType> loadedPromise)
         {
-            if (!masterToBlockedPromises.ContainsKey(loadedPromise.GetId()))
+            object id = loadedPromise.GetId();
+
+            if (!masterToBlockedPromises.ContainsKey(id) || !masterPromiseById.ContainsKey(id))
             {
                 CleanPromise(loadedPromise);
                 return;
@@ -198,11 +200,15 @@ namespace DCL
         {
             object loadedPromiseId = loadedPromise.GetId();
 
-            if (!masterToBlockedPromises.ContainsKey(loadedPromiseId)
-                || !masterPromiseById.ContainsKey(loadedPromiseId)
-                || masterPromiseById[loadedPromiseId] != loadedPromise)
+            if (!masterToBlockedPromises.ContainsKey(loadedPromiseId))
+                yield break;
+
+            if (!masterPromiseById.ContainsKey(loadedPromiseId))
+                yield break;
+
+            if (masterPromiseById[loadedPromiseId] != loadedPromise)
             {
-                Debug.LogWarning($"Early exit for some reason for id {loadedPromiseId}");
+                Debug.LogWarning($"Unexpected issue: masterPromiseById promise isn't the same as loaded promise? id: {loadedPromiseId} (can be harmless)");
                 yield break;
             }
 
@@ -212,12 +218,21 @@ namespace DCL
             while (masterToBlockedPromises.ContainsKey(loadedPromiseId) &&
                    masterToBlockedPromises[loadedPromiseId].Count > 0)
             {
-                if (loadedPromise.state != AssetPromiseState.FINISHED)
-                    yield return ForgetBlockedPromises(loadedPromiseId);
-                else
-                    yield return LoadBlockedPromises(loadedPromiseId);
+                List<AssetPromiseType> blockedPromises = GetBlockedPromisesToLoadForId(loadedPromiseId);
 
                 var enumerator = SkipFrameIfOverBudget();
+
+                if (enumerator != null)
+                    yield return enumerator;
+
+                CleanPromise(loadedPromise);
+
+                if (loadedPromise.state != AssetPromiseState.FINISHED)
+                    yield return ForceFailPromiseList(blockedPromises);
+                else
+                    yield return LoadPromisesList(blockedPromises);
+
+                enumerator = SkipFrameIfOverBudget();
 
                 if (enumerator != null)
                     yield return enumerator;
@@ -236,35 +251,6 @@ namespace DCL
                 startTime = Time.unscaledTime;
             }
         }
-
-        private IEnumerator ForgetBlockedPromises(object loadedPromiseId)
-        {
-            List<AssetPromiseType> blockedPromisesToForget = new List<AssetPromiseType>();
-
-            using (var iterator = masterToBlockedPromises[loadedPromiseId].GetEnumerator())
-            {
-                while (iterator.MoveNext())
-                {
-                    var blockedPromise = iterator.Current;
-                    blockedPromisesToForget.Add(blockedPromise);
-                }
-            }
-
-            int blockedPromisesToForgetCount = blockedPromisesToForget.Count;
-
-            for (int i = 0; i < blockedPromisesToForgetCount; i++)
-            {
-                var promise = blockedPromisesToForget[i];
-                promise.ForceFail();
-                Forget(promise);
-
-                var enumerator = SkipFrameIfOverBudget();
-
-                if (enumerator != null)
-                    yield return enumerator;
-            }
-        }
-
         private List<AssetPromiseType> GetBlockedPromisesToLoadForId(object masterPromiseId)
         {
             var blockedPromisesToLoadAux = new List<AssetPromiseType>();
@@ -283,25 +269,36 @@ namespace DCL
             return blockedPromisesToLoadAux;
         }
 
-        private IEnumerator LoadBlockedPromises(object loadedPromiseId)
+        private IEnumerator ForceFailPromiseList(List<AssetPromiseType> promises)
         {
-            List<AssetPromiseType> blockedPromisesToLoad = GetBlockedPromisesToLoadForId(loadedPromiseId);
+            int promisesCount = promises.Count;
 
-            var enumerator = SkipFrameIfOverBudget();
-
-            if (enumerator != null)
-                yield return enumerator;
-
-            int blockedPromisesToLoadCount = blockedPromisesToLoad.Count;
-
-            for (int i = 0; i < blockedPromisesToLoadCount; i++)
+            for (int i = 0; i < promisesCount; i++)
             {
-                AssetPromiseType promise = blockedPromisesToLoad[i];
+                var promise = promises[i];
+                promise.ForceFail();
+                Forget(promise);
+                CleanPromise(promise);
+
+                IEnumerator enumerator = SkipFrameIfOverBudget();
+
+                if (enumerator != null)
+                    yield return enumerator;
+            }
+        }
+
+        private IEnumerator LoadPromisesList(List<AssetPromiseType> promises)
+        {
+            int promisesCount = promises.Count;
+
+            for (int i = 0; i < promisesCount; i++)
+            {
+                AssetPromiseType promise = promises[i];
                 promise.library = library;
                 CleanPromise(promise);
                 promise.Load();
 
-                enumerator = SkipFrameIfOverBudget();
+                var enumerator = SkipFrameIfOverBudget();
 
                 if (enumerator != null)
                     yield return enumerator;

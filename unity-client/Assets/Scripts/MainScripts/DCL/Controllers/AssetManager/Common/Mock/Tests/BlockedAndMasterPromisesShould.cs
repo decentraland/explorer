@@ -1,4 +1,4 @@
-using DCL;
+﻿using DCL;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.Assertions;
@@ -91,6 +91,8 @@ namespace AssetPromiseKeeper_Mock_Tests
             yield return prom;
             yield return prom2;
             yield return prom3;
+
+            Assert.AreEqual(0, keeper.waitingPromisesCount);
 
             Assert.AreNotEqual(AssetPromiseState.FINISHED, prom.state);
             Assert.AreNotEqual(AssetPromiseState.FINISHED, prom2.state);
