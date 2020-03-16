@@ -39,25 +39,13 @@ namespace DCL
 
         public void SetViewport(RectTransform reference)
         {
-            Vector3 refMin = reference.TransformPoint(new Vector3(reference.rect.xMin, reference.rect.yMin));
-            Vector3 refMax = reference.TransformPoint(new Vector3(reference.rect.xMax, reference.rect.yMax));
-
-            Vector3 targetMin = viewport.InverseTransformPoint(refMin);
-            Vector3 targetMax = viewport.InverseTransformPoint(refMax);
-
-            viewport.anchorMin = Vector2.zero;
-            viewport.anchorMax = Vector2.zero;
-            viewport.pivot = Vector2.zero;
-            viewport.anchoredPosition = targetMin;
-            viewport.sizeDelta = targetMax - targetMin;
+            viewport = reference;
         }
 
         public Vector3 GetViewportCenter()
         {
-            Vector3 targetMin = viewport.TransformPoint(new Vector3(viewport.rect.xMin, viewport.rect.yMin));
-            Vector3 targetMax = viewport.TransformPoint(new Vector3(viewport.rect.xMin, viewport.rect.yMin));
-
-            return 0.5f * (targetMax + targetMin);
+            Vector3 globalCenter = viewport.TransformPoint(viewport.rect.center);
+            return globalCenter;
         }
 
         public void CenterToTile(Vector2 tilePosition)
@@ -117,7 +105,7 @@ namespace DCL
                     chunk.size.x = CHUNK_SIZE.x;
                     chunk.size.y = CHUNK_SIZE.y;
                     chunk.tileSize = PARCEL_SIZE;
-
+                    (chunk.transform as RectTransform).sizeDelta = new Vector2(CHUNK_SIZE.x, CHUNK_SIZE.y);
                     chunk.viewport = viewport;
 
                     chunks[new Vector2Int(xTile, yTile)] = chunk;

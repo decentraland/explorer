@@ -42,7 +42,8 @@ public class MapRenderer : MonoBehaviour
     public void UpdateMinimapAtlas(Vector2 newCoords)
     {
         atlas.CenterToTile(newCoords);
-        playerPositionIcon.transform.SetPositionAndRotation(atlas.GetViewportCenter(), Quaternion.Euler(0, 0, playerRotation.Get().y));
-
+        Vector3 f = CommonScriptableObjects.cameraForward.Get();
+        Quaternion angle = Quaternion.Euler(0, 0, Mathf.Atan2(-f.x, f.z) * Mathf.Rad2Deg);
+        playerPositionIcon.transform.SetPositionAndRotation(atlas.GetViewportCenter(), angle);
     }
 }

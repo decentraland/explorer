@@ -57,7 +57,7 @@ namespace DCL
             Vector3 viewMinCoords = viewport.TransformPoint(new Vector3(viewport.rect.xMin, viewport.rect.yMin));
             Vector3 viewMaxCoords = viewport.TransformPoint(new Vector3(viewport.rect.xMax, viewport.rect.yMax));
 
-            float size = (myMaxCoords - myMinCoords).magnitude;
+            float size = (viewMaxCoords - viewMinCoords).magnitude;
 
             Rect viewportRect = new Rect(viewMinCoords, viewMaxCoords - viewMinCoords);
             viewportRect.min -= Vector2.one * size;
@@ -65,7 +65,7 @@ namespace DCL
 
             Rect myRect = new Rect(myMinCoords, myMaxCoords - myMinCoords);
 
-            bool visible = viewportRect.Overlaps(myRect);
+            bool visible = viewportRect.Overlaps(myRect, true);
 
             targetImage.enabled = visible;
 
