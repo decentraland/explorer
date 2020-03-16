@@ -46,8 +46,8 @@ namespace AssetPromiseKeeper_Mock_Tests
                     keeper.Keep(mischievousPromise2);
                     yield return new DCL.WaitUntil(() => mischievousPromise.keepWaiting == false, 2.0f);
                     yield return new DCL.WaitUntil(() => mischievousPromise2.keepWaiting == false, 2.0f);
-                    Assert.IsFalse(mischievousPromise.keepWaiting, "While blocked promises are being resolved, new promises enqueued with the same id should solve correctly! Make sure masterPromiseById is cleaned up when the master promise finishes loading.");
-                    Assert.IsFalse(mischievousPromise2.keepWaiting, "While blocked promises are being resolved, new promises enqueued with the same id should solve correctly! Make sure masterPromiseById is cleaned up when the master promise finishes loading.");
+                    Assert.IsFalse(mischievousPromise.keepWaiting, "While blocked promises are being resolved, new promises enqueued with the same id should solve correctly!");
+                    Assert.IsFalse(mischievousPromise2.keepWaiting, "While blocked promises are being resolved, new promises enqueued with the same id should solve correctly!");
                 }
             }
         }

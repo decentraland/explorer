@@ -206,6 +206,9 @@ namespace DCL
                 yield break;
             }
 
+            //NOTE(Brian): We have to keep checking to support the case in which
+            //             new promises are enqueued while this promise ID is being
+            //             resolved.
             while (masterToBlockedPromises[loadedPromiseId].Count > 0)
             {
                 if (loadedPromise.state != AssetPromiseState.FINISHED)
