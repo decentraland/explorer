@@ -17,10 +17,14 @@ namespace DCL
         [System.NonSerialized]
         public int tileSize;
         [System.NonSerialized]
-        public RectTransform viewport;
-
+        public MapAtlas owner;
         private RectTransform rt;
         private bool isLoadingOrLoaded = false;
+
+        private void Start()
+        {
+            targetImage.color = Color.clear;
+        }
 
         public IEnumerator LoadChunkImage()
         {
@@ -42,11 +46,12 @@ namespace DCL
 
             targetImage.texture = result;
             targetImage.SetNativeSize();
+            targetImage.color = Color.white;
         }
 
         public void UpdateCulling()
         {
-            if (viewport == null)
+            if (owner == null)
                 return;
 
             if (rt == null)
@@ -55,8 +60,8 @@ namespace DCL
             Vector3 myMinCoords = rt.TransformPoint(new Vector3(rt.rect.xMin, rt.rect.yMin));
             Vector3 myMaxCoords = rt.TransformPoint(new Vector3(rt.rect.xMax, rt.rect.yMax));
 
-            Vector3 viewMinCoords = viewport.TransformPoint(new Vector3(viewport.rect.xMin, viewport.rect.yMin));
-            Vector3 viewMaxCoords = viewport.TransformPoint(new Vector3(viewport.rect.xMax, viewport.rect.yMax));
+            Vector3 viewMinCoords = owner.viewport.TransformPoint(new Vector3(owner.viewport.rect.xMin, owner.viewport.rect.yMin));
+            Vector3 viewMaxCoords = owner.viewport.TransformPoint(new Vector3(owner.viewport.rect.xMax, owner.viewport.rect.yMax));
 
 #if UNITY_EDITOR
             var rtWorldRect = new Rect(myMinCoords.x, myMinCoords.y, myMaxCoords.x - myMinCoords.x, myMaxCoords.y - myMinCoords.y);

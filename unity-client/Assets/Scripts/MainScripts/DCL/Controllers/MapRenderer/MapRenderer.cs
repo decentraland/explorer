@@ -73,7 +73,6 @@ namespace DCL
             Quaternion playerAngle = Quaternion.Euler(0, 0, Mathf.Atan2(-f.x, f.z) * Mathf.Rad2Deg);
 
             var gridPosition = this.playerGridPosition;
-            playerPositionIcon.transform.SetParent(atlas.container.transform);
             playerPositionIcon.transform.localPosition = MapUtils.GetTileToLocalPosition(gridPosition.x, gridPosition.y);
             playerPositionIcon.transform.rotation = playerAngle;
 
