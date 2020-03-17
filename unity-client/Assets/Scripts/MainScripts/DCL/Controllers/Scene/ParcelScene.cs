@@ -68,6 +68,7 @@ namespace DCL.Controllers
             metricsController.Enable();
 
             CommonScriptableObjects.rendererState.OnChange += OnRenderingStateChanged;
+            OnRenderingStateChanged(CommonScriptableObjects.rendererState.Get(), false);
         }
 
         void OnDisable()

@@ -222,7 +222,10 @@ namespace DCL
             }
 
             if (!debugScenes)
+            {
                 CommonScriptableObjects.rendererState.OnChange += OnRenderingStateChange;
+                OnRenderingStateChange(CommonScriptableObjects.rendererState.Get(), false);
+            }
         }
 
         private void OnRenderingStateChange(bool enabled, bool prevState)

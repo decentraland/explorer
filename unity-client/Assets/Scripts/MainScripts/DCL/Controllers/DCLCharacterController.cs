@@ -106,6 +106,7 @@ public class DCLCharacterController : MonoBehaviour
         transform.parent = null;
 
         CommonScriptableObjects.rendererState.OnChange += OnRenderingStateChanged;
+        OnRenderingStateChanged(CommonScriptableObjects.rendererState.Get(), false);
     }
 
     private void SuscribeToInput()
