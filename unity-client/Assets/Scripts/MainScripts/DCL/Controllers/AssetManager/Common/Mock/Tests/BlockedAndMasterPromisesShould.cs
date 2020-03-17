@@ -1,5 +1,6 @@
-using DCL;
+﻿using DCL;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine.Assertions;
 using UnityEngine.TestTools;
 
@@ -7,6 +8,50 @@ namespace AssetPromiseKeeper_Mock_Tests
 {
     public class BlockedAndMasterPromisesShould
     {
+        [UnityTest]
+        public IEnumerator ResolveCorrectlyIfKeepIsCalledWhenBlockedPromisesAreBeingProcessed()
+        {
+            var library = new AssetLibrary_Mock();
+            var keeper = new AssetPromiseKeeper_Mock(library);
+
+            string id = "1";
+
+            var promList = new List<AssetPromise_Mock>();
+
+            var mischievousPromise = new AssetPromise_Mock();
+            mischievousPromise.idGenerator = id;
+            mischievousPromise.loadTime = 0.01f;
+
+            var mischievousPromise2 = new AssetPromise_Mock();
+            mischievousPromise2.idGenerator = id;
+            mischievousPromise2.loadTime = 0.01f;
+
+            for (int i = 0; i < 49; i++)
+            {
+                AssetPromise_Mock tmpProm = new AssetPromise_Mock();
+                tmpProm.idGenerator = id;
+                tmpProm.loadTime = 0.01f;
+                keeper.Keep(tmpProm);
+                promList.Add(tmpProm);
+            }
+
+            for (int i = 0; i < promList.Count; i++)
+            {
+                AssetPromise_Mock prom = promList[i];
+                yield return prom;
+
+                if (i == 25)
+                {
+                    keeper.Keep(mischievousPromise);
+                    keeper.Keep(mischievousPromise2);
+                    yield return new DCL.WaitUntil(() => mischievousPromise.keepWaiting == false, 2.0f);
+                    yield return new DCL.WaitUntil(() => mischievousPromise2.keepWaiting == false, 2.0f);
+                    Assert.IsFalse(mischievousPromise.keepWaiting, "While blocked promises are being resolved, new promises enqueued with the same id should solve correctly!");
+                    Assert.IsFalse(mischievousPromise2.keepWaiting, "While blocked promises are being resolved, new promises enqueued with the same id should solve correctly!");
+                }
+            }
+        }
+
         [UnityTest]
         public IEnumerator FailCorrectlyIfMasterPromiseFails()
         {
@@ -46,6 +91,8 @@ namespace AssetPromiseKeeper_Mock_Tests
             yield return prom;
             yield return prom2;
             yield return prom3;
+
+            Assert.AreEqual(0, keeper.waitingPromisesCount);
 
             Assert.AreNotEqual(AssetPromiseState.FINISHED, prom.state);
             Assert.AreNotEqual(AssetPromiseState.FINISHED, prom2.state);
