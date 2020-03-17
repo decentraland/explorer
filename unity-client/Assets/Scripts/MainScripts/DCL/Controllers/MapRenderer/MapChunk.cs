@@ -18,7 +18,7 @@ namespace DCL
         public int tileSize;
         [System.NonSerialized]
         public MapAtlas owner;
-        private RectTransform rt;
+        protected RectTransform rt;
         private bool isLoadingOrLoaded = false;
 
         private void Start()
@@ -26,7 +26,7 @@ namespace DCL
             targetImage.color = Color.clear;
         }
 
-        public IEnumerator LoadChunkImage()
+        public virtual IEnumerator LoadChunkImage()
         {
             if (isLoadingOrLoaded)
                 yield break;
