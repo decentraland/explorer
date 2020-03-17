@@ -670,15 +670,19 @@ export async function connect(userId: string) {
       }
     }, 1000)
 
-    context.analyticsInterval = setInterval(() => {
-      const connectionAnalytics = connection.analyticsData()
-      connectionAnalytics.trackedPeers = context?.peerData.keys() ? [...context?.peerData.keys()].map(it => it.slice(-6)) : []
-      connectionAnalytics.visiblePeers = context?.stats.visiblePeerIds.map((it) => it.slice(-6))
+    if (commConfigurations.sendAnalytics) {
+      context.analyticsInterval = setInterval(() => {
+        const connectionAnalytics = connection.analyticsData()
+        connectionAnalytics.trackedPeers = context?.peerData.keys()
+          ? [...context?.peerData.keys()].map(it => it.slice(-6))
+          : []
+        connectionAnalytics.visiblePeers = context?.stats.visiblePeerIds.map(it => it.slice(-6))
 
-      if (connectionAnalytics) {
-        queueTrackingEvent('Comms status', connectionAnalytics)
-      }
-    }, 30000)
+        if (connectionAnalytics) {
+          queueTrackingEvent('Comms status', connectionAnalytics)
+        }
+      }, 30000)
+    }
 
     context.worldRunningObserver = worldRunningObservable.add(isRunning => {
       onWorldRunning(isRunning)
