@@ -238,7 +238,7 @@ export class BrokerWorldInstanceConnection implements WorldInstanceConnection {
   }
 
   analyticsData() {
-    return
+    return {}
   }
 
   private handleMessage(message: BrokerMessage) {
