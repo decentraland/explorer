@@ -19,18 +19,7 @@ public class MinimapHUDView : MonoBehaviour
     [SerializeField] private Button reportSceneButton;
     [SerializeField] private MinimapZoom minimapZoom;
 
-    [Header("NavMap")]
-    [SerializeField] internal InputAction_Trigger toggleNavMapAction;
-    [SerializeField] private GameObject navMapGameObject;
-    internal InputAction_Trigger.Triggered toggleNavMapDelegate;
-
     private MinimapHUDController controller;
-
-    void Awake()
-    {
-        toggleNavMapDelegate = (x) => { ToggleNavMap(); };
-        toggleNavMapAction.OnTriggered += toggleNavMapDelegate;
-    }
 
     private void Initialize(MinimapHUDController controller)
     {
@@ -55,16 +44,6 @@ public class MinimapHUDView : MonoBehaviour
     {
         sceneNameText.text = string.IsNullOrEmpty(model.sceneName) ? "Unnamed" : model.sceneName;
         playerPositionText.text = model.playerPosition;
-    }
-
-    internal void ToggleNavMap()
-    {
-        navMapGameObject.SetActive(!navMapGameObject.activeSelf);
-
-        if (navMapGameObject.activeSelf)
-            DCL.Helpers.Utils.UnlockCursor();
-        else
-            DCL.Helpers.Utils.LockCursor();
     }
 
     public void ToggleOptions()
