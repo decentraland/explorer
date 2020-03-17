@@ -21,6 +21,7 @@ namespace DCL
             UpdateCulling();
         }
 
+        [ContextMenu("Force Update Culling")]
         private void UpdateCulling()
         {
             using (var it = chunks.GetEnumerator())
