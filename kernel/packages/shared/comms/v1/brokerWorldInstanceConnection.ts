@@ -237,6 +237,10 @@ export class BrokerWorldInstanceConnection implements WorldInstanceConnection {
     this.connection.close()
   }
 
+  analyticsData() {
+    return
+  }
+
   private handleMessage(message: BrokerMessage) {
     const msgSize = message.data.length
 
@@ -451,9 +455,5 @@ export class BrokerWorldInstanceConnection implements WorldInstanceConnection {
       this.connection.sendUnreliable(bytes)
     }
     return new SendResult(bytes.length)
-  }
-
-  analyticsData() {
-    return
   }
 }
