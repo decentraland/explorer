@@ -25,6 +25,7 @@ import {
   REPORT_SCENES_AROUND_PARCEL
 } from './types'
 import { parcelLimits } from '../../config'
+import { Vector2Component } from 'atomicHelpers/landHelpers'
 
 declare const window: {
   unityInterface: {
@@ -144,7 +145,7 @@ export function* reportScenesAroundParcel(action: ReportScenesAroundParcel) {
   yield call(reportScenes, atlasState, targets)
 }
 
-function getScenesAround(parcelCoords: { x: number; y: number }, maxScenesAround: number, atlasState: AtlasState) {
+function getScenesAround(parcelCoords: Vector2Component, maxScenesAround: number, atlasState: AtlasState) {
   const data = atlasState.marketName
   const targets: Record<string, MarketEntry> = {}
 
