@@ -673,6 +673,7 @@ export async function connect(userId: string) {
     if (commConfigurations.sendAnalytics) {
       context.analyticsInterval = setInterval(() => {
         const connectionAnalytics = connection.analyticsData()
+        // We slice the ids in order to reduce the potential event size. Eventually, we should slice all comms ids
         connectionAnalytics.trackedPeers = context?.peerData.keys()
           ? [...context?.peerData.keys()].map(it => it.slice(-6))
           : []
