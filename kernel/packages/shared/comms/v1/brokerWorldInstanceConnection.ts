@@ -452,4 +452,8 @@ export class BrokerWorldInstanceConnection implements WorldInstanceConnection {
     }
     return new SendResult(bytes.length)
   }
+
+  analyticsData() {
+    return
+  }
 }
