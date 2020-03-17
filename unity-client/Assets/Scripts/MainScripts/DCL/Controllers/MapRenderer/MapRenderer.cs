@@ -1,49 +1,88 @@
-using DCL;
 using DCL.Helpers;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class MapRenderer : MonoBehaviour
+namespace DCL
 {
-    private Vector3Variable playerWorldPosition => CommonScriptableObjects.playerWorldPosition;
-    private Vector3Variable playerRotation => CommonScriptableObjects.playerUnityEulerAngles;
-
-    public MapAtlas atlas;
-
-    public Image playerPositionIcon;
-
-    public void Start()
+    public class MapRenderer : MonoBehaviour
     {
-        playerWorldPosition.OnChange += OnCharacterMove;
-        playerRotation.OnChange += OnCharacterRotate;
-        UpdateMinimapAtlas(Vector2Int.zero);
-    }
+        public static MapRenderer i { get; private set; }
 
-    public void OnDestroy()
-    {
-        playerWorldPosition.OnChange -= OnCharacterMove;
-    }
+        private Vector3Variable playerWorldPosition => CommonScriptableObjects.playerWorldPosition;
+        private Vector3Variable playerRotation => CommonScriptableObjects.playerUnityEulerAngles;
 
-    private void OnCharacterMove(Vector3 current, Vector3 previous)
-    {
-        UpdateMinimapAtlas(Utils.WorldToGridPositionUnclamped(current));
-    }
+        public Vector3 playerGridPosition => Utils.WorldToGridPositionUnclamped(playerWorldPosition.Get());
 
-    private void OnCharacterRotate(Vector3 current, Vector3 previous)
-    {
-        UpdateMinimapAtlas(Utils.WorldToGridPositionUnclamped(playerWorldPosition.Get()));
-    }
+        public MapAtlas atlas;
 
-    public void OnCharacterSetPosition(Vector2Int newCoords, Vector2Int oldCoords)
-    {
-        UpdateMinimapAtlas(new Vector2((float)newCoords.x, (float)newCoords.y));
-    }
+        public Image playerPositionIcon;
 
-    public void UpdateMinimapAtlas(Vector2 newCoords)
-    {
-        atlas.CenterToTile(newCoords);
-        Vector3 f = CommonScriptableObjects.cameraForward.Get();
-        Quaternion angle = Quaternion.Euler(0, 0, Mathf.Atan2(-f.x, f.z) * Mathf.Rad2Deg);
-        playerPositionIcon.transform.SetPositionAndRotation(atlas.GetViewportCenter(), angle);
+        private void Awake()
+        {
+            i = this;
+        }
+
+        void Start()
+        {
+            playerWorldPosition.OnChange += OnCharacterMove;
+            playerRotation.OnChange += OnCharacterRotate;
+        }
+
+        public void OnDestroy()
+        {
+            playerWorldPosition.OnChange -= OnCharacterMove;
+            playerRotation.OnChange -= OnCharacterRotate;
+        }
+
+        private void OnCharacterMove(Vector3 current, Vector3 previous)
+        {
+            UpdateRendering(Utils.WorldToGridPositionUnclamped(current));
+        }
+
+        private void OnCharacterRotate(Vector3 current, Vector3 previous)
+        {
+            UpdateRendering(Utils.WorldToGridPositionUnclamped(playerWorldPosition.Get()));
+        }
+
+        public void OnCharacterSetPosition(Vector2Int newCoords, Vector2Int oldCoords)
+        {
+            UpdateRendering(new Vector2((float)newCoords.x, (float)newCoords.y));
+        }
+
+        public void UpdateRendering(Vector2 newCoords)
+        {
+            UpdateBackgroundLayer(newCoords);
+            UpdateSelectionLayer();
+            UpdateOverlayLayer();
+        }
+
+        void UpdateBackgroundLayer(Vector2 newCoords)
+        {
+            atlas.CenterToTile(newCoords);
+        }
+
+        void UpdateSelectionLayer()
+        {
+            //TODO(Brian): Build and place here the scene highlight if applicable.
+        }
+
+        void UpdateOverlayLayer()
+        {
+            //NOTE(Brian): Player icon
+            Vector3 f = CommonScriptableObjects.cameraForward.Get();
+            Quaternion playerAngle = Quaternion.Euler(0, 0, Mathf.Atan2(-f.x, f.z) * Mathf.Rad2Deg);
+
+            var gridPosition = this.playerGridPosition;
+            playerPositionIcon.transform.SetParent(atlas.container.transform);
+            playerPositionIcon.transform.localPosition = MapUtils.GetTileToLocalPosition(gridPosition.x, gridPosition.y);
+            playerPositionIcon.transform.rotation = playerAngle;
+
+            //TODO(Brian): Update POI icons, avatar icons, etc.
+        }
+
+        public Vector3 GetViewportCenter()
+        {
+            return atlas.viewport.TransformPoint(atlas.viewport.rect.center);
+        }
     }
 }

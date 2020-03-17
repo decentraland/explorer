@@ -1,3 +1,4 @@
+using DCL.Helpers;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -5,53 +6,16 @@ namespace DCL
 {
     public class MapAtlas : MonoBehaviour
     {
-        private readonly Vector2Int WORLD_PARCELS_OFFSET_MIN = new Vector2Int(-150, -150);
-        private readonly Vector2Int WORLD_PARCELS_OFFSET_MAX = new Vector2Int(175, 175); //NOTE(Brian): We use 175 instead of 150 to make the chunks look even.
-        private readonly Vector2Int CHUNK_SIZE = new Vector2Int(1020, 1020);
-        private readonly int PARCEL_SIZE = 20;
-        private readonly Vector3 CENTER_OFFSET = new Vector3(1, -0.5f);
-
         public RectTransform viewport;
         public GameObject container;
         Dictionary<Vector2Int, MapChunk> chunks = new Dictionary<Vector2Int, MapChunk>();
 
         public GameObject mapChunkPrefab;
 
-        public Vector2Int GetTileFromLocalPosition(Vector3 position)
-        {
-            return new Vector2Int((int)(position.x / PARCEL_SIZE) + WORLD_PARCELS_OFFSET_MIN.x, (int)(position.y / PARCEL_SIZE) + WORLD_PARCELS_OFFSET_MIN.y);
-        }
-
-        public Vector3 GetTilePosition(float x, float y)
-        {
-            x -= WORLD_PARCELS_OFFSET_MIN.x;
-            y -= WORLD_PARCELS_OFFSET_MIN.y;
-
-            Vector3 result = new Vector3(x * PARCEL_SIZE, y * PARCEL_SIZE, 0) + CENTER_OFFSET;
-            return result;
-        }
-
-        [ContextMenu("Center to -10,10")]
-        public void CenterTo00()
-        {
-            CenterToTile(new Vector2Int(-10, 10));
-        }
-
-        public void SetViewport(RectTransform reference)
-        {
-            viewport = reference;
-        }
-
-        public Vector3 GetViewportCenter()
-        {
-            Vector3 globalCenter = viewport.TransformPoint(viewport.rect.center);
-            return globalCenter;
-        }
-
         public void CenterToTile(Vector2 tilePosition)
         {
             Vector3 center = viewport.transform.TransformPoint(viewport.rect.center);
-            Vector3 delta = center - container.transform.TransformPoint(GetTilePosition(tilePosition.x, tilePosition.y));
+            Vector3 delta = center - container.transform.TransformPoint(MapUtils.GetTileToLocalPosition(tilePosition.x, tilePosition.y));
 
             container.transform.position += delta;
             UpdateCulling();
@@ -68,27 +32,21 @@ namespace DCL
             }
         }
 
-        Vector3 lastPos;
-        private void Update()
+        private void Start()
         {
-            if (lastPos != container.transform.position)
-            {
-                UpdateCulling();
-            }
-
-            lastPos = container.transform.position;
+            InitializeChunks();
         }
 
-        void Start()
+        void InitializeChunks()
         {
-            int tileCoverageX = CHUNK_SIZE.x / PARCEL_SIZE;
-            int tileCoverageY = CHUNK_SIZE.y / PARCEL_SIZE;
+            int tileCoverageX = MapUtils.CHUNK_SIZE.x / MapUtils.PARCEL_SIZE;
+            int tileCoverageY = MapUtils.CHUNK_SIZE.y / MapUtils.PARCEL_SIZE;
 
             int xTile = 0, yTile = 0;
 
-            for (int x = WORLD_PARCELS_OFFSET_MIN.x; x <= WORLD_PARCELS_OFFSET_MAX.x; x += tileCoverageX)
+            for (int x = MapUtils.WORLD_PARCELS_OFFSET_MIN.x; x <= MapUtils.WORLD_PARCELS_OFFSET_MAX.x; x += tileCoverageX)
             {
-                for (int y = WORLD_PARCELS_OFFSET_MIN.y; y <= WORLD_PARCELS_OFFSET_MAX.y; y += tileCoverageY)
+                for (int y = MapUtils.WORLD_PARCELS_OFFSET_MIN.y; y <= MapUtils.WORLD_PARCELS_OFFSET_MAX.y; y += tileCoverageY)
                 {
                     var chunk = Object.Instantiate(mapChunkPrefab).GetComponent<MapChunk>();
 
@@ -97,15 +55,15 @@ namespace DCL
 #endif
                     chunk.transform.SetParent(container.transform);
                     chunk.transform.localScale = Vector3.one;
-                    chunk.transform.localPosition = new Vector3(xTile * CHUNK_SIZE.x, yTile * CHUNK_SIZE.y, 0);
+                    chunk.transform.localPosition = new Vector3(xTile * MapUtils.CHUNK_SIZE.x, yTile * MapUtils.CHUNK_SIZE.y, 0);
 
                     //NOTE(Brian): Configure chunk with proper params
                     chunk.center.x = x;
                     chunk.center.y = y;
-                    chunk.size.x = CHUNK_SIZE.x;
-                    chunk.size.y = CHUNK_SIZE.y;
-                    chunk.tileSize = PARCEL_SIZE;
-                    (chunk.transform as RectTransform).sizeDelta = new Vector2(CHUNK_SIZE.x, CHUNK_SIZE.y);
+                    chunk.size.x = MapUtils.CHUNK_SIZE.x;
+                    chunk.size.y = MapUtils.CHUNK_SIZE.y;
+                    chunk.tileSize = MapUtils.PARCEL_SIZE;
+                    (chunk.transform as RectTransform).sizeDelta = new Vector2(MapUtils.CHUNK_SIZE.x, MapUtils.CHUNK_SIZE.y);
                     chunk.viewport = viewport;
 
                     chunks[new Vector2Int(xTile, yTile)] = chunk;

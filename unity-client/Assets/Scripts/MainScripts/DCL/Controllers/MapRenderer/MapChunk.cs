@@ -7,6 +7,7 @@ namespace DCL
 {
     public class MapChunk : MonoBehaviour
     {
+        const string MAP_API_BASE = "https://api.decentraland.org/v1/map.png";
         public RawImage targetImage;
 
         [System.NonSerialized]
@@ -21,14 +22,14 @@ namespace DCL
         private RectTransform rt;
         private bool isLoadingOrLoaded = false;
 
-        public IEnumerator Load()
+        public IEnumerator LoadChunkImage()
         {
             if (isLoadingOrLoaded)
                 yield break;
 
             isLoadingOrLoaded = true;
 
-            string url = $"https://api.decentraland.org/v1/map.png?center={center.x},{center.y}&width={size.x}&height={size.y}&size={tileSize}";
+            string url = $"{MAP_API_BASE}?center={center.x},{center.y}&width={size.x}&height={size.y}&size={tileSize}";
 
             Texture result = null;
 
@@ -70,7 +71,7 @@ namespace DCL
             targetImage.enabled = visible;
 
             if (!isLoadingOrLoaded && visible)
-                CoroutineStarter.Start(Load());
+                CoroutineStarter.Start(LoadChunkImage());
         }
     }
 }

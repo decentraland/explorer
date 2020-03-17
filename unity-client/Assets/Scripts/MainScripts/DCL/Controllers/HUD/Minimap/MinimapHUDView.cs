@@ -1,4 +1,5 @@
-﻿using TMPro;
+using DCL;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -21,7 +22,9 @@ public class MinimapHUDView : MonoBehaviour
 
     [SerializeField] private Button reportSceneButton;
 
+    [Header("Map Renderer")]
     public RectTransform mapRenderContainer;
+    public RectTransform mapViewport;
 
     private void Initialize(MinimapHUDController controller)
     {
@@ -33,7 +36,7 @@ public class MinimapHUDView : MonoBehaviour
         reportSceneButton.onClick.AddListener(controller.ReportScene);
 
         var renderer = FindObjectOfType<MapRenderer>();
-        renderer.atlas.SetViewport(mapRenderContainer);
+        renderer.atlas.viewport = mapViewport;
         renderer.transform.SetParent(mapRenderContainer);
         renderer.transform.SetAsFirstSibling();
     }
