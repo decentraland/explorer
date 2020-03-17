@@ -5,7 +5,8 @@
         "MaterialTransitionController",
         "ILoader",
         "Utils",
-        "SRPBatchingHelper"
+        "SRPBatchingHelper",
+        "ScriptableObjects"
     ],
     "optionalUnityReferences": [],
     "includePlatforms": [],

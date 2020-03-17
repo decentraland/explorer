@@ -66,6 +66,8 @@ namespace DCL.Controllers
 
             metricsController = new SceneMetricsController(this);
             metricsController.Enable();
+
+            CommonScriptableObjects.rendererState.OnChange += OnRenderingStateChanged;
         }
 
         void OnDisable()
@@ -76,6 +78,7 @@ namespace DCL.Controllers
         private void OnDestroy()
         {
             blockerHandler?.CleanBlockers();
+            CommonScriptableObjects.rendererState.OnChange -= OnRenderingStateChanged;
         }
 
         private void Update()
@@ -1094,6 +1097,14 @@ namespace DCL.Controllers
             RefreshName();
 
             OnSceneReady?.Invoke(this);
+        }
+
+        void OnRenderingStateChanged(bool isEnable, bool prevState)
+        {
+            if (isEnable)
+            {
+                parcelScenesCleaner.ForceCleanup();
+            }
         }
 
 #if UNITY_EDITOR
