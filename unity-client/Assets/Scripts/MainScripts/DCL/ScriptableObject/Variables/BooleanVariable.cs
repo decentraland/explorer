@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 [CreateAssetMenu(fileName = "BooleanVariable", menuName = "BooleanVariable")]
 public class BooleanVariable : BaseVariable<bool>
