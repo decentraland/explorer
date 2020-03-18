@@ -8,28 +8,17 @@ namespace Tests
 {
     public class MapRendererShould : TestsBase
     {
-        protected override bool justSceneSetUp => true;
         [UnitySetUp]
         protected override IEnumerator SetUp()
         {
-            bool initMapRenderer = false;
+            yield return InitUnityScene("MainTest");
 
-            if (!sceneInitialized)
-            {
-                initMapRenderer = true;
-            }
-
-            yield return base.SetUp();
-
-            if (initMapRenderer)
-            {
-                Object.Instantiate(Resources.Load("Map Renderer"));
-                MapRenderer.i.atlas.mapChunkPrefab = (GameObject)Resources.Load("Map Chunk Mock");
-                var go = new GameObject("Viewport");
-                var rt = go.AddComponent<RectTransform>();
-                rt.sizeDelta = Vector2.one * 100;
-                MapRenderer.i.atlas.viewport = rt;
-            }
+            Object.Instantiate(Resources.Load("Map Renderer"));
+            MapRenderer.i.atlas.mapChunkPrefab = (GameObject)Resources.Load("Map Chunk Mock");
+            var go = new GameObject("Viewport");
+            var rt = go.AddComponent<RectTransform>();
+            rt.sizeDelta = Vector2.one * 100;
+            MapRenderer.i.atlas.viewport = rt;
 
             yield return null;
         }
