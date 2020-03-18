@@ -32,8 +32,14 @@ public static class CommonScriptableObjects
     private static Vector3Variable cameraPositionValue;
     public static Vector3Variable cameraPosition => GetOrLoad(ref cameraPositionValue, "ScriptableObjects/CameraPosition");
 
-    public static Vector3Variable cameraRight => GetOrLoad(ref cameraRightValue, "ScriptableObjects/CameraRight");
     private static Vector3Variable cameraRightValue;
+    public static Vector3Variable cameraRight => GetOrLoad(ref cameraRightValue, "ScriptableObjects/CameraRight");
+
+    private static BooleanVariable playerInfoCardVisibleStateValue;
+    public static BooleanVariable playerInfoCardVisibleState => GetOrLoad(ref playerInfoCardVisibleStateValue, "ScriptableObjects/PlayerInfoCardVisibleState");
+
+    public static RendererState rendererState => GetOrLoad(ref rendererStateValue, "ScriptableObjects/RendererState");
+    private static RendererState rendererStateValue;
 
     private static T GetOrLoad<T>(ref T variable, string path) where T : Object
     {
