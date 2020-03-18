@@ -70,7 +70,7 @@ namespace DCL.Components
 
         public override string ToString()
         {
-            return $"LoadWrapper_GLTF ... {loadHelper.ToString()}";
+            return $"LoadWrapper ... {loadHelper.ToString()}";
         }
     }
 }
