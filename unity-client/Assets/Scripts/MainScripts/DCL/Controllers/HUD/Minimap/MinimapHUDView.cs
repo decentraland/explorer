@@ -1,7 +1,6 @@
 ﻿using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using DCL.Helpers;
 
 public class MinimapHUDView : MonoBehaviour
 {
@@ -20,6 +19,8 @@ public class MinimapHUDView : MonoBehaviour
     [SerializeField] private MinimapZoom minimapZoom;
 
     private MinimapHUDController controller;
+
+    public static System.Action<MinimapHUDModel> OnUpdateData;
 
     private void Initialize(MinimapHUDController controller)
     {
@@ -44,6 +45,8 @@ public class MinimapHUDView : MonoBehaviour
     {
         sceneNameText.text = string.IsNullOrEmpty(model.sceneName) ? "Unnamed" : model.sceneName;
         playerPositionText.text = model.playerPosition;
+
+        OnUpdateData?.Invoke(model);
     }
 
     public void ToggleOptions()

@@ -18,6 +18,8 @@ public class NavmapView : MonoBehaviour
 
         toggleNavMapDelegate = (x) => { ToggleNavMap(); };
         toggleNavMapAction.OnTriggered += toggleNavMapDelegate;
+
+        MinimapHUDView.OnUpdateData += UpdateCurrentSceneData;
     }
 
     void ToggleNavMap()
@@ -28,5 +30,11 @@ public class NavmapView : MonoBehaviour
             Utils.UnlockCursor();
         else
             Utils.LockCursor();
+    }
+
+    void UpdateCurrentSceneData(MinimapHUDModel model)
+    {
+        currentSceneNameText.text = string.IsNullOrEmpty(model.sceneName) ? "Unnamed" : model.sceneName;
+        currentSceneCoordsText.text = model.playerPosition;
     }
 }
