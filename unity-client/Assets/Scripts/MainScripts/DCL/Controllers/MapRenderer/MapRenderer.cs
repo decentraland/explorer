@@ -9,7 +9,7 @@ namespace DCL
         public static MapRenderer i { get; private set; }
 
         private Vector3Variable playerWorldPosition => CommonScriptableObjects.playerWorldPosition;
-        private Vector3Variable playerRotation => CommonScriptableObjects.playerUnityEulerAngles;
+        private Vector3Variable playerRotation => CommonScriptableObjects.cameraForward;
 
         public Vector3 playerGridPosition => Utils.WorldToGridPositionUnclamped(playerWorldPosition.Get());
 

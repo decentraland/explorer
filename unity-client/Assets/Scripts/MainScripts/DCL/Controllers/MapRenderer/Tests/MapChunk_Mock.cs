@@ -6,7 +6,10 @@ namespace DCL
     {
         public override IEnumerator LoadChunkImage()
         {
-            return base.LoadChunkImage();
+            if (isLoadingOrLoaded)
+                yield break;
+
+            isLoadingOrLoaded = true;
         }
     }
 }

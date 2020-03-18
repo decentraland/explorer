@@ -19,7 +19,7 @@ namespace DCL
         [System.NonSerialized]
         public MapAtlas owner;
         protected RectTransform rt;
-        private bool isLoadingOrLoaded = false;
+        protected bool isLoadingOrLoaded = false;
 
         private void Start()
         {

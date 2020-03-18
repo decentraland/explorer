@@ -14,6 +14,16 @@ namespace DCL
         public GameObject mapChunkPrefab;
         private bool chunksInitialized = false;
 
+        public MapChunk GetChunk(int x, int y)
+        {
+            if (chunks.TryGetValue(new Vector2Int(x, y), out MapChunk value))
+            {
+                return value;
+            }
+
+            return null;
+        }
+
         public void CenterToTile(Vector2 tilePosition)
         {
             if (viewport == null)

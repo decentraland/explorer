@@ -35,10 +35,15 @@ public class MinimapHUDView : MonoBehaviour
         addBookmarkButton.onClick.AddListener(controller.AddBookmark);
         reportSceneButton.onClick.AddListener(controller.ReportScene);
 
-        var renderer = FindObjectOfType<MapRenderer>();
-        renderer.atlas.viewport = mapViewport;
-        renderer.transform.SetParent(mapRenderContainer);
-        renderer.transform.SetAsFirstSibling();
+
+        var renderer = MapRenderer.i;
+
+        if (renderer != null)
+        {
+            renderer.atlas.viewport = mapViewport;
+            renderer.transform.SetParent(mapRenderContainer);
+            renderer.transform.SetAsFirstSibling();
+        }
     }
 
     internal static MinimapHUDView Create(MinimapHUDController controller)
