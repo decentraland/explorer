@@ -37,7 +37,7 @@ namespace DCL
         }
 
         [ContextMenu("Force Update Culling")]
-        private void UpdateCulling()
+        public void UpdateCulling()
         {
             using (var it = chunks.GetEnumerator())
             {

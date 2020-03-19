@@ -8,14 +8,14 @@ namespace Tests
 {
     public class NavmapTests : TestsBase
     {
-        NavmapView navmapView;
+        DCL.NavmapView navmapView;
 
         [UnitySetUp]
         protected override IEnumerator SetUp()
         {
             yield return base.SetUp();
 
-            navmapView = GameObject.FindObjectOfType<NavmapView>();
+            navmapView = GameObject.FindObjectOfType<DCL.NavmapView>();
         }
 
         [UnityTest]

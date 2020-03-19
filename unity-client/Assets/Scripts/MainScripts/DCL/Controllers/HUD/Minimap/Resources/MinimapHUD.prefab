@@ -1274,7 +1274,8 @@ MonoBehaviour:
   optionsPanel: {fileID: 9172043143630568996}
   addBookmarkButton: {fileID: 9217961843191164369}
   reportSceneButton: {fileID: 7331797177246822788}
-  mapRenderContainer: {fileID: 5111283870554404647}
+  minimapZoom: {fileID: 0}
+  mapRenderContainer: {fileID: 7368721439090438775}
   mapViewport: {fileID: 7368721439090438775}
 --- !u!1 &4665053653492846095
 GameObject:
