@@ -66,6 +66,9 @@ namespace DCL.Controllers
 
             metricsController = new SceneMetricsController(this);
             metricsController.Enable();
+
+            CommonScriptableObjects.rendererState.OnChange += OnRenderingStateChanged;
+            OnRenderingStateChanged(CommonScriptableObjects.rendererState.Get(), false);
         }
 
         void OnDisable()
@@ -76,11 +79,12 @@ namespace DCL.Controllers
         private void OnDestroy()
         {
             blockerHandler?.CleanBlockers();
+            CommonScriptableObjects.rendererState.OnChange -= OnRenderingStateChanged;
         }
 
         private void Update()
         {
-            if (state == State.READY && RenderingController.i.renderingEnabled)
+            if (state == State.READY && CommonScriptableObjects.rendererState.Get())
                 SendMetricsEvent();
         }
 
@@ -216,7 +220,7 @@ namespace DCL.Controllers
             if (DCLCharacterController.i)
                 DCLCharacterController.i.characterPosition.OnPrecisionAdjust -= OnPrecisionAdjust;
 
-            if (!RenderingController.i.renderingEnabled)
+            if (!CommonScriptableObjects.rendererState.Get())
             {
                 RemoveAllEntitiesImmediate();
             }
@@ -1096,6 +1100,14 @@ namespace DCL.Controllers
             OnSceneReady?.Invoke(this);
         }
 
+        void OnRenderingStateChanged(bool isEnable, bool prevState)
+        {
+            if (isEnable)
+            {
+                parcelScenesCleaner.ForceCleanup();
+            }
+        }
+
 #if UNITY_EDITOR
         [ContextMenu("Get Waiting Components Debug Info")]
         public void GetWaitingComponentsDebugInfo()
@@ -1114,7 +1126,16 @@ namespace DCL.Controllers
 
                             foreach (var entity in component.attachedEntities)
                             {
-                                Debug.Log($"This shape is attached to {entity.entityId} entity. Click here for highlight it.", entity.gameObject);
+                                var loader = LoadableShape.GetLoaderForEntity(entity);
+
+                                string loadInfo = "No loader";
+
+                                if (loader != null)
+                                {
+                                    loadInfo = loader.ToString();
+                                }
+
+                                Debug.Log($"This shape is attached to {entity.entityId} entity. Click here for highlight it.\nLoading info: {loadInfo}", entity.gameObject);
                             }
                         }
                         else
