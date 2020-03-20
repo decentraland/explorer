@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<< HEAD:unity-client/Assets/Scripts/MainScripts/DCL/Controllers/MapRenderer/MapChunk.cs.meta
+guid: 004e57dda8568cb418864fd1052461ea
+=======
 guid: 05640a8bde6741d41a6ebe3bafb81f51
+>>>>>>> origin/master:unity-client/Assets/Scripts/MainScripts/DCL/Controllers/MapRenderer/MapUtils.cs.meta
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
