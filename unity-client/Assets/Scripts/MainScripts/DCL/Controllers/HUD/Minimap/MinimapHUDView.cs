@@ -17,9 +17,6 @@ public class MinimapHUDView : MonoBehaviour
     [SerializeField] private GameObject optionsPanel;
     [SerializeField] private Button addBookmarkButton;
     [SerializeField] private Button reportSceneButton;
-    [SerializeField] private MinimapZoom minimapZoom;
-
-    private MinimapHUDController controller;
 
     [Header("Map Renderer")]
     public RectTransform mapRenderContainer;
