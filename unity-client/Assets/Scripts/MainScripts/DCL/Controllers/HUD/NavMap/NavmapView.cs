@@ -16,6 +16,7 @@ namespace DCL
 
         RectTransform minimapViewport;
         Transform mapRendererMinimapParent;
+        Vector3 atlasOriginalPosition;
 
         void Start()
         {
@@ -40,6 +41,7 @@ namespace DCL
 
                 minimapViewport = MapRenderer.i.atlas.viewport;
                 mapRendererMinimapParent = MapRenderer.i.transform.parent;
+                atlasOriginalPosition = MapRenderer.i.atlas.chunksParent.transform.localPosition;
 
                 MapRenderer.i.atlas.viewport = scrollRect.viewport;
                 MapRenderer.i.transform.SetParent(scrollRect.content);
@@ -51,8 +53,11 @@ namespace DCL
             {
                 Utils.LockCursor();
 
+                scrollRect.StopMovement();
+
                 MapRenderer.i.atlas.viewport = minimapViewport;
                 MapRenderer.i.transform.SetParent(mapRendererMinimapParent);
+                MapRenderer.i.atlas.chunksParent.transform.localPosition = atlasOriginalPosition;
                 MapRenderer.i.atlas.UpdateCulling();
             }
         }
