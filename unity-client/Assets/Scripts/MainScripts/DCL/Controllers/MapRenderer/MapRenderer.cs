@@ -85,12 +85,6 @@ namespace DCL
             var gridPosition = this.playerGridPosition;
             playerPositionIcon.transform.localPosition = MapUtils.GetTileToLocalPosition(gridPosition.x, gridPosition.y);
             playerPositionIcon.transform.rotation = playerAngle;
-
-            //TODO(Brian): Update POI icons, avatar icons, etc.
-            foreach (var sceneInfo in scenesOfInterest)
-            {
-
-            }
         }
 
         public Vector3 GetViewportCenter()
