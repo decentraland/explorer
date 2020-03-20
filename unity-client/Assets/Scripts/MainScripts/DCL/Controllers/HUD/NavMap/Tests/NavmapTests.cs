@@ -2,6 +2,7 @@ using NUnit.Framework;
 using System.Collections;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.TestTools;
 
 namespace Tests
@@ -39,13 +40,13 @@ namespace Tests
 
             yield return null;
 
-            Assert.IsTrue(Reflection_GetField<GameObject>(navmapView, "scrollRectGameObject").activeSelf);
+            Assert.IsTrue(Reflection_GetField<ScrollRect>(navmapView, "scrollRect").gameObject.activeSelf);
 
             action.RaiseOnTriggered();
 
             yield return null;
 
-            Assert.IsFalse(Reflection_GetField<GameObject>(navmapView, "scrollRectGameObject").activeSelf);
+            Assert.IsFalse(Reflection_GetField<ScrollRect>(navmapView, "scrollRect").gameObject.activeSelf);
         }
 
         [UnityTest]
