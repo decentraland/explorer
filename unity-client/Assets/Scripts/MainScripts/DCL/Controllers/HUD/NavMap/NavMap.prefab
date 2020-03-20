@@ -2991,6 +2991,7 @@ MonoBehaviour:
   toggleNavMapAction: {fileID: 11400000, guid: fc656e28ef52546e6a82e7ae7f5570b5, type: 2}
   closeButton: {fileID: 6221079439394858850}
   scrollRect: {fileID: 1040854978026124918}
+  scrollRectContentTransform: {fileID: 4562892339457273614}
   currentSceneNameText: {fileID: 2053008226568235632}
   currentSceneCoordsText: {fileID: 596729946110516120}
 --- !u!1 &7257699869532128518

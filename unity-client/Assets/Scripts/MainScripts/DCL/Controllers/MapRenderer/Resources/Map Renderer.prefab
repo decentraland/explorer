@@ -273,6 +273,7 @@ MonoBehaviour:
   viewport: {fileID: 0}
   container: {fileID: 7164109601661372131}
   chunksParent: {fileID: 8867674413542430455}
+  overlayLayerGameobject: {fileID: 3620416516788639812}
   mapChunkPrefab: {fileID: 7275614131455466647, guid: 1b2b2c80782c4a641bd3e9a0e6a94806,
     type: 3}
 --- !u!1 &8867674413542430455
