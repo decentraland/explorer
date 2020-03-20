@@ -20,6 +20,8 @@ namespace Tests
         }
 
         [UnityTest]
+        [Explicit]
+        [Category("Explicit")]
         public IEnumerator Toggle()
         {
             InputAction_Trigger action = null;
