@@ -37,9 +37,9 @@ namespace DownloadableClient
             //DCL.WSSController.i.baseUrlMode = DCL.WSSController.BaseUrl.LOCAL_HOST;
             //DCL.WSSController.i.forceLocalComms = true;
             DCL.WSSController.i.baseUrlMode = DCL.WSSController.BaseUrl.CUSTOM;
-            DCL.WSSController.i.baseUrlCustom = "https://explorer.decentraland.zone/?";
+            DCL.WSSController.i.baseUrlCustom = "https://explorer.decentraland.org/?";
             DCL.WSSController.i.forceLocalComms = false;
-            DCL.WSSController.i.environment = DCL.WSSController.Environment.ZONE;
+            DCL.WSSController.i.environment = DCL.WSSController.Environment.ORG;
             DCL.WSSController.i.debugPanelMode = DCL.WSSController.DebugPanel.Off;
 
             sceneCamera.GetComponent<AudioListener>().enabled = false;

@@ -2,7 +2,7 @@
 
 ### Requirements
 
-This build only runs in WINDOWS PCs and works with hopefully every VR device that's used running on a PC (it has been implemented using the SteamVR integration instead of brand-owned packages)
+This build only runs in WINDOWS PCs and works with hopefully every VR device (it has been implemented using the SteamVR integration instead of brand-owned packages)
 
 ### Current state
 
@@ -12,6 +12,9 @@ The current manual way of using this app is a bit clunky and annoying, and the w
 
 ### Usage instructions
 
-1. Open the DecentralandUnityClient.exe and leave it running
-2. ALT-TAB to your browser and open and authentiate into the following URL: https://play.decentraland.org/?position=0,0&ws=ws%3A%2F%2Flocalhost%3A5000%2Fdcl
-3. In the browser you can see the world loading bar (if it's not working at once, try refreshing the URL), and after a while you should see a **green "Connected"** word, at this moment you can alt-tab into the running app again and put on your headset.
+1. Download [DecentralandVRExplorer-Win64.zip]() and unzip it anywhere in your PC.
+2. Open the DecentralandUnityClient.exe and you'll see that along with the application, a browser tab will open as well
+3. The newly opened browser tab will start loading the world and sending it to the VR client. You'll be able to see a loading bar (if it doesn't work at once, try refreshing the URL)
+4. After a while you should see a **green "Connected"** word in the browser, at this moment you can alt-tab into the running app again and put on your headset.
+
+Note: if you are re-opening the application and you already have a tab running decentraland, you should close it, only 1 at a time can be opened to be used with the client.

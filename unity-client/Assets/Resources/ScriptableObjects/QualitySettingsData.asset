@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: de20c26162ae24092b9bf5d122b2d850, type: 3}
   m_Name: QualitySettingsData
   m_EditorClassIdentifier: 
-  defaultPresetIndex: 1
+  defaultPresetIndex: 2
   settings:
   - displayName: Basic
     textureQuality: 1
