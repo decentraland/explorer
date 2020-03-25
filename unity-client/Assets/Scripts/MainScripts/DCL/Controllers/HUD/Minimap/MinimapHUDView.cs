@@ -33,7 +33,6 @@ public class MinimapHUDView : MonoBehaviour
         addBookmarkButton.onClick.AddListener(controller.AddBookmark);
         reportSceneButton.onClick.AddListener(controller.ReportScene);
 
-
         var renderer = MapRenderer.i;
 
         if (renderer != null)
