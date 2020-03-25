@@ -1,4 +1,4 @@
-using DCL.Helpers;
+﻿using DCL.Helpers;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -15,7 +15,7 @@ namespace DCL
         public Vector3 playerGridPosition => Utils.WorldToGridPositionUnclamped(playerWorldPosition.Get());
 
         public MapAtlas atlas;
-
+        public Transform overlayContainer;
         public Image playerPositionIcon;
         public HashSet<MinimapMetadata.MinimapSceneInfo> scenesOfInterest = new HashSet<MinimapMetadata.MinimapSceneInfo>();
         public Dictionary<MinimapMetadata.MinimapSceneInfo, GameObject> scenesOfInterestMarkers = new Dictionary<MinimapMetadata.MinimapSceneInfo, GameObject>();
@@ -34,7 +34,35 @@ namespace DCL
 
         private void MapRenderer_OnSceneInfoUpdated(MinimapMetadata.MinimapSceneInfo sceneInfo)
         {
-            //TODO(Brian): Add markers.
+            if (scenesOfInterest.Contains(sceneInfo))
+                return;
+
+            Debug.Log($"sceneInfo name = {sceneInfo.name} ... type = {sceneInfo.type}");
+
+            if (sceneInfo.isPOI || sceneInfo.type == MinimapMetadata.TileType.Plaza)
+            {
+                scenesOfInterest.Add(sceneInfo);
+
+                GameObject go = new GameObject(sceneInfo.name);
+                go.transform.parent = overlayContainer.transform;
+
+                Vector2 centerTile = Vector2.zero;
+
+                foreach (var parcel in sceneInfo.parcels)
+                {
+                    centerTile += parcel;
+                }
+
+                centerTile /= sceneInfo.parcels.Count;
+
+                go.transform.localPosition = MapUtils.GetTileToLocalPosition(centerTile.x, centerTile.y);
+                var text = go.AddComponent<Text>();
+
+                text.text = sceneInfo.name;
+                text.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+
+                scenesOfInterestMarkers.Add(sceneInfo, go);
+            }
         }
 
         public void OnDestroy()

@@ -73,6 +73,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   atlas: {fileID: 8867674412829076673}
+  overlayContainer: {fileID: 90597117798403300}
   playerPositionIcon: {fileID: 7800080416519839540}
 --- !u!1 &3620416516788639812
 GameObject:
