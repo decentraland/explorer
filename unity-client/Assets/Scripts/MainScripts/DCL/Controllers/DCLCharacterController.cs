@@ -79,6 +79,8 @@ public class DCLCharacterController : MonoBehaviour
 
     [System.NonSerialized] public float movingPlatformSpeed;
 
+    Camera mainCam;
+
     void Awake()
     {
         if (i != null)
@@ -89,6 +91,8 @@ public class DCLCharacterController : MonoBehaviour
 
         i = this;
         originalGravity = gravity;
+
+        mainCam = Camera.main;
 
         SuscribeToInput();
         CommonScriptableObjects.playerUnityPosition.Set(Vector3.zero);
@@ -244,8 +248,8 @@ public class DCLCharacterController : MonoBehaviour
 
             transform.forward = characterForward.Get().Value;
 
-            var xzPlaneForward = Vector3.Scale(cameraForward.Get(), new Vector3(1, 0, 1));
-            var xzPlaneRight = Vector3.Scale(cameraRight.Get(), new Vector3(1, 0, 1));
+            var xzPlaneForward = Vector3.Scale(mainCam.transform.forward, new Vector3(1, 0, 1));
+            var xzPlaneRight = Vector3.Scale(mainCam.transform.right, new Vector3(1, 0, 1));
 
             Vector3 forwardTarget = Vector3.zero;
 
@@ -259,7 +263,7 @@ public class DCLCharacterController : MonoBehaviour
             if (characterXAxis.GetValue() < 0)
                 forwardTarget -= xzPlaneRight;
 
-            forwardTarget.Normalize();
+            forwardTarget.Normalize();            
 
             velocity += forwardTarget * speed;
 
