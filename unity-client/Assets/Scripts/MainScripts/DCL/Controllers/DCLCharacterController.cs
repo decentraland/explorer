@@ -92,6 +92,7 @@ public class DCLCharacterController : MonoBehaviour
 
         SuscribeToInput();
         CommonScriptableObjects.playerUnityPosition.Set(Vector3.zero);
+        CommonScriptableObjects.playerWorldPosition.Set(Vector3.zero);
         CommonScriptableObjects.playerCoords.Set(Vector2Int.zero);
         CommonScriptableObjects.playerUnityEulerAngles.Set(Vector3.zero);
 
@@ -104,6 +105,9 @@ public class DCLCharacterController : MonoBehaviour
 
         lastPosition = transform.position;
         transform.parent = null;
+
+        CommonScriptableObjects.rendererState.OnChange += OnRenderingStateChanged;
+        OnRenderingStateChanged(CommonScriptableObjects.rendererState.Get(), false);
     }
 
     private void SuscribeToInput()
@@ -130,6 +134,7 @@ public class DCLCharacterController : MonoBehaviour
         jumpAction.OnFinished -= jumpFinishedDelegate;
         sprintAction.OnStarted -= sprintStartedDelegate;
         sprintAction.OnFinished -= sprintFinishedDelegate;
+        CommonScriptableObjects.rendererState.OnChange -= OnRenderingStateChanged;
     }
 
     void OnPrecisionAdjust(DCLCharacterPosition charPos)
@@ -156,6 +161,7 @@ public class DCLCharacterController : MonoBehaviour
         transform.position = characterPosition.unityPosition;
 
         CommonScriptableObjects.playerUnityPosition.Set(characterPosition.unityPosition);
+        CommonScriptableObjects.playerWorldPosition.Set(characterPosition.worldPosition);
         CommonScriptableObjects.playerCoords.Set(Utils.WorldToGridPosition(characterPosition.worldPosition));
 
         if (Moved(lastPosition))
@@ -427,5 +433,10 @@ public class DCLCharacterController : MonoBehaviour
     public void ResumeGravity()
     {
         gravity = originalGravity;
+    }
+
+    void OnRenderingStateChanged(bool isEnable, bool prevState)
+    {
+        SetEnabled(isEnable);
     }
 }
