@@ -498,14 +498,12 @@ namespace Tests
         }
 
         [UnityTest]
-        [Explicit("This test is failing because retrieveCamera is failing in PointerEventsController. It may be related with the new camera setup. Please check MainTest scene setup.")]
-        [Category("Explicit")]
         public IEnumerator OnClickEventIsTriggered()
         {
             DecentralandEntity entity;
             BoxShape shape;
             InstantiateEntityWithShape(out entity, out shape);
-            TestHelpers.SetEntityTransform(scene, entity, new Vector3(3, 3, 3), Quaternion.identity, new Vector3(5, 5, 5));
+            TestHelpers.SetEntityTransform(scene, entity, new Vector3(9f, 1.5f, 11.0f), Quaternion.identity, new Vector3(5, 5, 5));
 
             DCLCharacterController.i.SetPosition(new Vector3(3, 2, 12));
 
@@ -555,14 +553,12 @@ namespace Tests
         }
 
         [UnityTest]
-        [Explicit("This test is failing because retrieveCamera is failing in PointerEventsController. It may be related with the new camera setup. Please check MainTest scene setup.")]
-        [Category("Explicit")]
         public IEnumerator OnPointerDownEventIsTriggered()
         {
             DecentralandEntity entity;
             BoxShape shape;
             InstantiateEntityWithShape(out entity, out shape);
-            TestHelpers.SetEntityTransform(scene, entity, new Vector3(3, 3, 3), Quaternion.identity, new Vector3(5, 5, 5));
+            TestHelpers.SetEntityTransform(scene, entity, new Vector3(9f, 1.5f, 11.0f), Quaternion.identity, new Vector3(5, 5, 5));
 
             DCLCharacterController.i.SetPosition(new Vector3(3, 2, 12));
 
@@ -615,14 +611,12 @@ namespace Tests
         }
 
         [UnityTest]
-        [Explicit("This test is failing because retrieveCamera is failing in PointerEventsController. It may be related with the new camera setup. Please check MainTest scene setup.")]
-        [Category("Explicit")]
         public IEnumerator OnPointerUpEventIsTriggered()
         {
             DecentralandEntity entity;
             BoxShape shape;
             InstantiateEntityWithShape(out entity, out shape);
-            TestHelpers.SetEntityTransform(scene, entity, new Vector3(3, 3, 3), Quaternion.identity, new Vector3(5, 5, 5));
+            TestHelpers.SetEntityTransform(scene, entity, new Vector3(9f, 1.5f, 11.0f), Quaternion.identity, new Vector3(5, 5, 5));
 
             DCLCharacterController.i.SetPosition(new Vector3(3, 2, 12));
 
