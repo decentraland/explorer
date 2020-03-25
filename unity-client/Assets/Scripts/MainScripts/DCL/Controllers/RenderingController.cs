@@ -72,7 +72,7 @@ public class RenderingController : MonoBehaviour
 
         if (!activatedRenderingBefore)
         {
-            Utils.UnlockCursor();
+            //Utils.UnlockCursor();
             activatedRenderingBefore = true;
         }
 
