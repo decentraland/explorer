@@ -6,7 +6,7 @@ This build only runs in WINDOWS PCs and works with hopefully every VR device tha
 
 ### Current state
 
-This explorer is still in a super early stage, not officially released by Decentraland, and based upon the "desktop explorer" started by Patricio Bosio at [Desktop Client](https://github.com/decentraland/explorer/tree/poc/desktop-client).
+This explorer is still in a super early stage, in slow development, not officially released by Decentraland, and based upon the "desktop explorer" branch started by Patricio Bosio at [Desktop Client](https://github.com/decentraland/explorer/tree/poc/desktop-client).
 
 The current manual way of using this app is a bit clunky and annoying, and the world interactivity is limited as the UI usage hasn't been implemented yet.
 
