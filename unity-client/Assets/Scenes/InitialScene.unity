@@ -715,11 +715,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
-    - target: {fileID: 4096479600627248540, guid: b0965b55b892d438da492708ea09799c,
-        type: 3}
-      propertyPath: cameraTransform
-      value: 
-      objectReference: {fileID: 1226931482}
     - target: {fileID: 1271431263581989332, guid: b0965b55b892d438da492708ea09799c,
         type: 3}
       propertyPath: m_LocalRotation.y
@@ -730,6 +725,11 @@ PrefabInstance:
       propertyPath: m_LocalRotation.z
       value: -0.017169068
       objectReference: {fileID: 0}
+    - target: {fileID: 4096479600627248540, guid: b0965b55b892d438da492708ea09799c,
+        type: 3}
+      propertyPath: cameraTransform
+      value: 
+      objectReference: {fileID: 1226931482}
     - target: {fileID: 326638023455565217, guid: b0965b55b892d438da492708ea09799c,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -843,7 +843,7 @@ PrefabInstance:
     - target: {fileID: 6152136595692442593, guid: b0965b55b892d438da492708ea09799c,
         type: 3}
       propertyPath: m_TagString
-      value: MainCamera
+      value: Untagged
       objectReference: {fileID: 0}
     - target: {fileID: 2952493522718747595, guid: b0965b55b892d438da492708ea09799c,
         type: 3}

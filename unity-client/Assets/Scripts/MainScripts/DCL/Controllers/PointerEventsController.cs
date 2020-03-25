@@ -54,6 +54,10 @@ namespace DCL
         {
             if (RenderingController.i == null || !RenderingController.i.renderingEnabled || charCamera == null) return;
 
+            #if UNITY_EDITOR
+            Debug.DrawRay(GetRayFromCamera().origin, GetRayFromCamera().direction * 3, Color.magenta);
+            #endif
+
             // We use Physics.Raycast() instead of our raycastHandler.Raycast() as that one is slower, sometimes 2x, because it fetches info we don't need here
             if (!Physics.Raycast(GetRayFromCamera(), out hitInfo, Mathf.Infinity, PhysicsLayers.physicsCastLayerMaskWithoutCharacter))
             {
@@ -188,7 +192,8 @@ namespace DCL
 
         public Ray GetRayFromCamera()
         {
-            return charCamera.ScreenPointToRay(new Vector3(Screen.width / 2, Screen.height / 2, 0));
+            //return charCamera.ScreenPointToRay(new Vector3(Screen.width / 2, Screen.height / 2, 0));
+            return new Ray(charCamera.transform.position, charCamera.transform.forward);
         }
 
         void OnButtonEvent(WebInterface.ACTION_BUTTON buttonId, InputController_Legacy.EVENT evt, bool useRaycast)
