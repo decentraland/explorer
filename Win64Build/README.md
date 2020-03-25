@@ -18,3 +18,10 @@ The current manual way of using this app is a bit clunky and annoying, and the w
 4. After a while you should see a **green "Connected"** word in the browser, at this moment you can alt-tab into the running app again and put on your headset.
 
 Note: if you are re-opening the application and you already have a tab running decentraland, you should close it, only 1 at a time can be opened to be used with the client.
+
+### Interactions
+
+* Movement: WASD
+* Pointing (for 3D world pointer-event interactions): headset forward-looking-direction
+* Camera rotation: headset forward-looking-direction and also the mouse input for horizontal rotations.
+* Input actions: same as in the normal explorer, Click, Right-Click, E and F.
