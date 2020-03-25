@@ -59,13 +59,14 @@ namespace DCL
 
                 scrollRect.StopMovement();
 
-
                 MapRenderer.i.atlas.viewport = minimapViewport;
                 MapRenderer.i.transform.SetParent(mapRendererMinimapParent);
                 MapRenderer.i.atlas.chunksParent.transform.localPosition = atlasOriginalPosition;
                 MapRenderer.i.atlas.UpdateCulling();
 
                 MapRenderer.i.atlas.overlayLayerGameobject.transform.SetParent(MapRenderer.i.atlas.chunksParent.transform.parent);
+
+                MapRenderer.i.UpdateRendering(Utils.WorldToGridPositionUnclamped(CommonScriptableObjects.playerWorldPosition.Get()));
             }
         }
 
