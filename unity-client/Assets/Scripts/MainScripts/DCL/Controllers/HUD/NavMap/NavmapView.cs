@@ -34,6 +34,7 @@ namespace DCL
         {
             if (MapRenderer.i == null) return;
 
+            scrollRect.StopMovement();
             scrollRect.gameObject.SetActive(!scrollRect.gameObject.activeSelf);
 
             if (scrollRect.gameObject.activeSelf)
@@ -50,14 +51,15 @@ namespace DCL
 
                 scrollRect.content = MapRenderer.i.atlas.chunksParent.transform as RectTransform;
 
-                // Reposition de player icon parent to move everything together
+                // Reposition de player icon parent to scroll everything together
                 MapRenderer.i.atlas.overlayLayerGameobject.transform.SetParent(scrollRect.content);
+
+                // Center map
+                MapRenderer.i.atlas.CenterToTile(Utils.WorldToGridPositionUnclamped(CommonScriptableObjects.playerWorldPosition));
             }
             else
             {
                 Utils.LockCursor();
-
-                scrollRect.StopMovement();
 
                 MapRenderer.i.atlas.viewport = minimapViewport;
                 MapRenderer.i.transform.SetParent(mapRendererMinimapParent);
@@ -65,6 +67,7 @@ namespace DCL
                 MapRenderer.i.atlas.UpdateCulling();
 
                 MapRenderer.i.atlas.overlayLayerGameobject.transform.SetParent(MapRenderer.i.atlas.chunksParent.transform.parent);
+                (MapRenderer.i.atlas.overlayLayerGameobject.transform as RectTransform).anchoredPosition = Vector2.zero;
 
                 MapRenderer.i.UpdateRendering(Utils.WorldToGridPositionUnclamped(CommonScriptableObjects.playerWorldPosition.Get()));
             }
