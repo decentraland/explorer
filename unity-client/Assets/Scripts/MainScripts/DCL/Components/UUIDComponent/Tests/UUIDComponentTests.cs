@@ -1,4 +1,4 @@
-using DCL;
+﻿using DCL;
 using DCL.Components;
 using DCL.Helpers;
 using DCL.Interface;
@@ -20,6 +20,14 @@ namespace Tests
             yield return base.SetUp();
             PointerEventsController.i.Initialize(isTesting: true);
             SceneController.i.useBoundariesChecker = false;
+
+            // Set character position and camera rotation
+            DCLCharacterController.i.PauseGravity();
+            DCLCharacterController.i.characterController.enabled = false;
+
+            cameraController.SetRotation(0, 0, 0, new Vector3(0, 0, 1));
+            cameraController.SetCameraMode(CameraStateBase.ModeId.FirstPerson);
+            //cameraController.currentCameraState.defaultVirtualCamera.Follow = DCLCharacterController.i.transform;
         }
 
         void InstantiateEntityWithShape(out DecentralandEntity entity, out BoxShape shape)
@@ -505,6 +513,7 @@ namespace Tests
             InstantiateEntityWithShape(out entity, out shape);
             TestHelpers.SetEntityTransform(scene, entity, new Vector3(9f, 1.5f, 11.0f), Quaternion.identity, new Vector3(5, 5, 5));
 
+            cameraController.SetRotation(0, 0, 0, new Vector3(1, 0, 0));
             DCLCharacterController.i.SetPosition(new Vector3(3, 2, 12));
 
             yield return shape.routine;
@@ -560,6 +569,7 @@ namespace Tests
             InstantiateEntityWithShape(out entity, out shape);
             TestHelpers.SetEntityTransform(scene, entity, new Vector3(9f, 1.5f, 11.0f), Quaternion.identity, new Vector3(5, 5, 5));
 
+            cameraController.SetRotation(0, 0, 0, new Vector3(1, 0, 0));
             DCLCharacterController.i.SetPosition(new Vector3(3, 2, 12));
 
             yield return shape.routine;
@@ -597,6 +607,8 @@ namespace Tests
                 },
                 (pointerEvent) =>
                 {
+                    //Debug.Log($"triggered? \npointerEvent {JsonUtility.ToJson(pointerEvent, true)}\nsceneEvent {JsonUtility.ToJson(sceneEvent, true)}");
+
                     if (pointerEvent.eventType == sceneEvent.eventType &&
                         pointerEvent.payload.uuid == sceneEvent.payload.uuid &&
                         pointerEvent.payload.payload.hit.entityId == sceneEvent.payload.payload.hit.entityId)
@@ -618,6 +630,7 @@ namespace Tests
             InstantiateEntityWithShape(out entity, out shape);
             TestHelpers.SetEntityTransform(scene, entity, new Vector3(9f, 1.5f, 11.0f), Quaternion.identity, new Vector3(5, 5, 5));
 
+            cameraController.SetRotation(0, 0, 0, new Vector3(1, 0, 0));
             DCLCharacterController.i.SetPosition(new Vector3(3, 2, 12));
 
             yield return shape.routine;
@@ -673,10 +686,6 @@ namespace Tests
         [UnityTest]
         public IEnumerator OnPointerDownEventWhenEntityIsBehindOther()
         {
-            CameraController cameraController = GameObject.FindObjectOfType<CameraController>();
-            cameraController.SetCameraMode(CameraStateBase.ModeId.FirstPerson);
-            cameraController.currentCameraState.defaultVirtualCamera.Follow = DCLCharacterController.i.transform;
-
             Assert.IsNotNull(cameraController, "camera is null?");
 
             // Create blocking entity
@@ -694,26 +703,7 @@ namespace Tests
             yield return clickTargetShape.routine;
 
             // Set character position and camera rotation
-            DCLCharacterController.i.PauseGravity();
-            DCLCharacterController.i.characterController.enabled = false;
-            DCLCharacterController.i.Teleport(JsonConvert.SerializeObject(new
-            {
-                x = 3f,
-                y = 2f,
-                z = 1f
-            }));
-
-            var cameraRotationPayload = new CameraController.SetRotationPayload()
-            {
-                x = 0,
-                y = 0,
-                z = 0,
-                cameraTarget = new Vector3(0, 0, 1)
-            };
-            cameraController.SetRotation(JsonConvert.SerializeObject(cameraRotationPayload, Formatting.None, new JsonSerializerSettings()
-            {
-                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-            }));
+            DCLCharacterController.i.SetPosition(new Vector3(3, 2, 1));
 
             yield return null;
 
@@ -766,11 +756,8 @@ namespace Tests
 
             // Move character in front of target entity and rotate camera
             DCLCharacterController.i.SetPosition(new Vector3(3, 2, 6));
-            cameraRotationPayload.cameraTarget = new Vector3(0, 0, -1);
-            cameraController.SetRotation(JsonConvert.SerializeObject(cameraRotationPayload, Formatting.None, new JsonSerializerSettings()
-            {
-                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-            }));
+            cameraController.SetRotation(0, 0, 0, new Vector3(0, 0, -1));
+
             yield return null;
 
             // Check if target entity is hit in front of the camera without being blocked
@@ -798,10 +785,6 @@ namespace Tests
         [UnityTest]
         public IEnumerator OnPointerDownEventAndPointerBlockerShape()
         {
-            CameraController cameraController = GameObject.FindObjectOfType<CameraController>();
-            cameraController.SetCameraMode(CameraStateBase.ModeId.FirstPerson);
-            cameraController.currentCameraState.defaultVirtualCamera.Follow = DCLCharacterController.i.transform;
-
             Assert.IsNotNull(cameraController, "camera is null?");
 
             // Create blocking entity
@@ -821,26 +804,7 @@ namespace Tests
             yield return clickTargetShape.routine;
 
             // Set character position and camera rotation
-            DCLCharacterController.i.PauseGravity();
-            DCLCharacterController.i.characterController.enabled = false;
-            DCLCharacterController.i.Teleport(JsonConvert.SerializeObject(new
-            {
-                x = 3f,
-                y = 2f,
-                z = 1f
-            }));
-
-            var cameraRotationPayload = new CameraController.SetRotationPayload()
-            {
-                x = 0,
-                y = 0,
-                z = 0,
-                cameraTarget = new Vector3(0, 0, 1)
-            };
-            cameraController.SetRotation(JsonConvert.SerializeObject(cameraRotationPayload, Formatting.None, new JsonSerializerSettings()
-            {
-                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-            }));
+            DCLCharacterController.i.SetPosition(new Vector3(3, 2, 1));
 
             yield return null;
 
@@ -946,22 +910,12 @@ namespace Tests
 
             yield return null;
 
-            DCLCharacterController.i.PauseGravity();
             DCLCharacterController.i.SetPosition(new Vector3(8, 1, 7f));
 
             var cameraController = GameObject.FindObjectOfType<CameraController>();
 
             // Rotate camera towards the interactive object
-            var cameraRotationPayload = new CameraController.SetRotationPayload()
-            {
-                x = 45,
-                y = 0,
-                z = 0
-            };
-            cameraController.SetRotation(JsonConvert.SerializeObject(cameraRotationPayload, Formatting.None, new JsonSerializerSettings()
-            {
-                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-            }));
+            cameraController.SetRotation(45, 0, 0);
 
             yield return null;
 
@@ -1009,22 +963,12 @@ namespace Tests
 
             yield return null;
 
-            DCLCharacterController.i.PauseGravity();
             DCLCharacterController.i.SetPosition(new Vector3(8, 1, 7));
 
             var cameraController = GameObject.FindObjectOfType<CameraController>();
 
             // Rotate camera towards the interactive object
-            var cameraRotationPayload = new CameraController.SetRotationPayload()
-            {
-                x = 45,
-                y = 0,
-                z = 0
-            };
-            cameraController.SetRotation(JsonConvert.SerializeObject(cameraRotationPayload, Formatting.None, new JsonSerializerSettings()
-            {
-                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-            }));
+            cameraController.SetRotation(45, 0, 0);
 
             yield return null;
 
