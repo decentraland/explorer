@@ -96,18 +96,18 @@ function* reportOne(action: FetchNameFromSceneJsonSuccess) {
   const type = getTypeFromAtlasState(atlasState, firstX, firstY)
   yield put(reportedScenes(parcels))
 
-  let isPOI: boolean = false
-
-  let parcelsAsV2: { x: number; y: number }[] = parcels.map(p => {
+  let isPOI:boolean = false;
+  
+  let parcelsAsV2:{x:number, y:number}[] = parcels.map(p => {
     const [x, y] = p.split(',').map(_ => parseInt(_, 10))
     return { x, y }
   })
 
-  // TODO(Brian): we will refactor this in the info plumbing PR
-  parcelsAsV2.forEach(p => {
-    CAMPAIGN_PARCEL_SEQUENCE.forEach(p2 => {
-      if (p.x === p2.x && p.y === p2.y) isPOI = true
-    })
+  //NOTE(Brian): map related flow has a vomitive approach, we have to refactor all this later
+  parcelsAsV2.forEach( p => { 
+    if ( CAMPAIGN_PARCEL_SEQUENCE.includes(p) ) { 
+      isPOI = true 
+    } 
   })
 
   window.unityInterface.UpdateMinimapSceneInformation([
@@ -183,13 +183,13 @@ function getScenesAround(parcelCoords: Vector2Component, maxScenesAround: number
 export function* reportScenes(marketplaceInfo?: AtlasState, selection?: Record<string, MarketEntry>): any {
   const atlasState = marketplaceInfo ? marketplaceInfo : ((yield select(state => state.atlas)) as AtlasState)
   const data = selection ? selection : atlasState.marketName
-
+  
   const keyToParcels: Record<string, { x: number; y: number }[]> = {}
   const keyToTypeAndName: Record<string, { type: number; name: string }> = {}
   const keyToPOI: Record<string, boolean> = {}
 
   const typeAndNameKeys: string[] = []
-
+  
   Object.keys(data).forEach(index => {
     const parcel = data[index]
     const name = getNameFromAtlasState(atlasState, parcel.x, parcel.y)
@@ -202,25 +202,18 @@ export function* reportScenes(marketplaceInfo?: AtlasState, selection?: Record<s
     }
     keyToParcels[key].push({ x: parcel.x, y: parcel.y })
 
-    // TODO(Brian): we will refactor this in the info plumbing PR
+    //NOTE(Brian): map related flow has a vomitive approach, we have to refactor all this later
     if (keyToPOI[key] === false) {
-      CAMPAIGN_PARCEL_SEQUENCE.forEach(element => {
-        if (element.x === parcel.x && element.y === parcel.y) {
-          keyToPOI[key] = true
-        }
-      })
+      keyToPOI[key] = CAMPAIGN_PARCEL_SEQUENCE.includes({x:parcel.x, y:parcel.y})
     }
   })
 
   window.unityInterface.UpdateMinimapSceneInformation(
-    typeAndNameKeys.map(
-      key =>
-        ({
-          name: keyToTypeAndName[key].name,
-          type: keyToTypeAndName[key].type,
-          parcels: keyToParcels[key],
-          isPOI: keyToPOI[key]
-        } as MinimapSceneInfo)
-    )
+    typeAndNameKeys.map(key => ({
+      name: keyToTypeAndName[key].name,
+      type: keyToTypeAndName[key].type,
+      parcels: keyToParcels[key],
+      isPOI: keyToPOI[key]
+    } as MinimapSceneInfo))
   )
 }
