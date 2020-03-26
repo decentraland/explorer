@@ -95,6 +95,17 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
     return this.cleanUpPeer()
   }
 
+  analyticsData() {
+    // For now, these are private. Next version of peer library will make them public
+    return {
+      // We slice the id in order to reduce the potential event size. Eventually, we should slice all comms ids
+      // @ts-ignore
+      connectedPeers: this.peer.fullyConnectedPeerIds().map(it => it.slice(-6)),
+      // @ts-ignore
+      stats: this.peer.stats
+    }
+  }
+
   async sendInitialMessage(userInfo: Partial<UserInformation>) {
     const topic = userInfo.userId!
 
@@ -180,10 +191,6 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
   private initializePeer() {
     this.statusHandler({ status: 'connecting', connectedPeers: this.connectedPeersCount() })
     this.peer = this.createPeer()
-    // @ts-ignore
-    this.peer.log = () => {
-      // DO NOTHING
-    }
     global.__DEBUG_PEER = this.peer
     return this.peer
   }
@@ -201,6 +208,7 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
         this.statusHandler({ status, connectedPeers: this.connectedPeersCount() })
       }
     }
+
     return new Peer(this.lighthouseUrl, this.peerId, this.peerCallback, this.peerConfig)
   }
 
@@ -216,10 +224,9 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
           this.chatHandler(sender, createPackage(commsMessage, 'chat', mapToPackageChat(commsMessage.getChatData()!)))
           break
         case CommsMessage.DataCase.POSITION_DATA:
-          this.positionHandler(
-            sender,
-            createPackage(commsMessage, 'position', mapToPositionMessage(commsMessage.getPositionData()!))
-          )
+          const positionMessage = mapToPositionMessage(commsMessage.getPositionData()!)
+          this.peer.setPeerPosition(sender, positionMessage.slice(0, 3))
+          this.positionHandler(sender, createPackage(commsMessage, 'position', positionMessage))
           break
         case CommsMessage.DataCase.SCENE_DATA:
           this.sceneMessageHandler(
