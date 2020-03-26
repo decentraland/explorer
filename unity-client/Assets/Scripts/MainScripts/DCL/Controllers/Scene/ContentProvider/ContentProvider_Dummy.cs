@@ -9,7 +9,7 @@ namespace DCL
             return !string.IsNullOrEmpty(url);
         }
 
-        public override bool TryGetContentsUrl(string url, out string result)
+        public override bool TryGetContentsUrl(string url, out string result, bool forceLowercaseURL = true)
         {
             result = url;
 

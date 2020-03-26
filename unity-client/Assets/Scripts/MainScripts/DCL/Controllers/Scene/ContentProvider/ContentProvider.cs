@@ -109,9 +109,11 @@ namespace DCL
             return null;
         }
 
-        public virtual bool TryGetContentsUrl_Raw(string url, out string result)
+        public virtual bool TryGetContentsUrl_Raw(string url, out string result, bool forceLowercaseURL = true)
         {
-            url = url.ToLower();
+            if (forceLowercaseURL)
+                url = url.ToLower();
+
             result = url;
 
 #if UNITY_EDITOR
@@ -138,9 +140,11 @@ namespace DCL
             return true;
         }
 
-        public virtual bool TryGetContentsUrl(string url, out string result)
+        public virtual bool TryGetContentsUrl(string url, out string result, bool forceLowercaseURL = true)
         {
-            url = url.ToLower();
+            if (forceLowercaseURL)
+                url = url.ToLower();
+
             result = url;
 
             if (HasTestSchema(url))
