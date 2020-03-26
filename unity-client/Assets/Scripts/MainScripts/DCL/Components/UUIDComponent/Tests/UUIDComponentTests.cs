@@ -27,7 +27,6 @@ namespace Tests
 
             cameraController.SetRotation(0, 0, 0, new Vector3(0, 0, 1));
             cameraController.SetCameraMode(CameraStateBase.ModeId.FirstPerson);
-            //cameraController.currentCameraState.defaultVirtualCamera.Follow = DCLCharacterController.i.transform;
         }
 
         void InstantiateEntityWithShape(out DecentralandEntity entity, out BoxShape shape)
