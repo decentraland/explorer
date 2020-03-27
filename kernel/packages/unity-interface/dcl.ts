@@ -321,7 +321,7 @@ const browserInterface = {
   },
 
   SetAudioStream(data: { url: string; play: boolean }) {
-    setAudioStream(data.url, data.play)
+    setAudioStream(data.url, data.play).catch(err => defaultLogger.log(err))
   }
 }
 
