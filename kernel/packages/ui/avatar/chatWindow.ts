@@ -7,7 +7,6 @@ import {
   UIText,
   UIContainerStack,
   UIContainerRect,
-  UIShape,
   UIScrollRect
 } from 'decentraland-ecs/src/decentraland/UIShapes'
 
@@ -20,8 +19,8 @@ declare var dcl: DecentralandInterface
 
 const INITIAL_INPUT_TEXT_COLOR = Color4.White()
 const PRIMARY_TEXT_COLOR = Color4.White()
-const COMMAND_COLOR = Color4.FromHexString('#80ffe5ff')
-const MAX_LOGGED_MESSAGES = 10
+const COMMAND_COLOR = '#80ffe5ff'
+const MAX_LOGGED_MESSAGES = 50
 
 // UI creators -------------------
 dcl.subscribe('MESSAGE_RECEIVED')
@@ -34,42 +33,24 @@ dcl.onEvent(event => {
   }
 })
 
-function createLogMessage(parent: UIShape, props: { sender: string; message: string; isCommand?: boolean }) {
-  const { sender, message, isCommand } = props
-  const color = isCommand ? COMMAND_COLOR : PRIMARY_TEXT_COLOR
+function createLogMessage(newMessage: MessageEntry) {
+  messageText.value = ''
+  for (let i = 0; i < internalState.messages.length; i++) {
+    const currentMessage = internalState.messages[i];
+    const color = currentMessage.isCommand ? COMMAND_COLOR : 'white'
 
-  const messageText = new UIText(parent)
-  messageText.color = color
-  messageText.value = `<b>${sender}:</b> ${message}`
-  messageText.fontSize = 14
-  messageText.vAlign = 'top'
-  messageText.hAlign = 'left'
-  messageText.vTextAlign = 'top'
-  messageText.hTextAlign = 'left'
-  messageText.width = '350px'
-  messageText.adaptWidth = false
-  messageText.adaptHeight = true
-  messageText.textWrapping = true
-  messageText.outlineColor = Color4.Black()
-
-  internalState.loggedMessages.push(messageText)
+    messageText.value += `<color=${color}><b>${currentMessage.sender}:</b> ${currentMessage.message}</color>\n`
+  }
 
   messagesLogScrollContainer.valueY = 0
 
   return { component: messageText }
 }
 
-function updateLogMessage(index: number, message: MessageEntry) {
-  if(!internalState.loggedMessages[index]) return
-
-  internalState.loggedMessages[index].value = `<b>${message.sender}:</b> ${message.message}`
-}
-
 // -------------------------------
 const internalState = {
   commandsList: [] as Array<any>,
   messages: [] as Array<any>,
-  loggedMessages: [] as Array<UIText>,
   isFocused: false,
   isSliderVisible: false
 }
@@ -150,6 +131,20 @@ textInput.onTextSubmit = new OnTextSubmit(onInputSubmit)
 
 setMaximized(isMaximized)
 
+const messageText = new UIText(messagesLogStackContainer)
+messageText.name = 'logged-message'
+messageText.color = PRIMARY_TEXT_COLOR
+messageText.fontSize = 14
+messageText.vAlign = 'top'
+messageText.hAlign = 'left'
+messageText.vTextAlign = 'top'
+messageText.hTextAlign = 'left'
+messageText.width = '350px'
+messageText.adaptWidth = false
+messageText.adaptHeight = true
+messageText.textWrapping = true
+messageText.outlineColor = Color4.Black()
+
 const instructionsMessage = {
   id: '',
   isCommand: true,
@@ -208,17 +203,12 @@ async function sendMsg(messageToSend: string) {
 }
 
 function addMessage(messageEntry: MessageEntry): void {
+  if(internalState.messages.length > MAX_LOGGED_MESSAGES) {
+    // remove oldest message
+    internalState.messages.shift()
+  }
+
   internalState.messages.push(messageEntry)
 
-  if(internalState.messages.length <= MAX_LOGGED_MESSAGES) {
-    createLogMessage(messagesLogStackContainer, messageEntry)
-  } else {
-    // remove oldest element
-    internalState.messages.shift()
-
-    // update logged messages ui text elements
-    for (let index = 0; index < MAX_LOGGED_MESSAGES; index++) {
-      updateLogMessage(index, internalState.messages[index])
-    }
-  }
+  createLogMessage(messageEntry)
 }
