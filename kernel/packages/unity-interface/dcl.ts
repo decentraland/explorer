@@ -116,6 +116,27 @@ const positionEvent = {
   mousePosition: Vector3.Zero()
 }
 
+/////////////////////////////////// AUDIO STREAMING ///////////////////////////////////
+
+const audioStreamSource = new Audio()
+
+teleportObservable.add(() => {
+  audioStreamSource.pause()
+})
+
+async function setAudioStream(url: string, play: boolean) {
+  if (play) {
+    audioStreamSource.src = url
+    try {
+      await audioStreamSource.play()
+    } catch (err) {
+      defaultLogger.log('setAudioStream: failed to play' + err)
+    }
+  } else if (audioStreamSource.src.length > 1 && url.includes(audioStreamSource.src)) {
+    audioStreamSource.pause()
+  }
+}
+
 /////////////////////////////////// HANDLERS ///////////////////////////////////
 
 const browserInterface = {
@@ -297,6 +318,10 @@ const browserInterface = {
 
   RequestScenesInfoInArea(data: { parcel: { x: number; y: number }; scenesAround: number }) {
     globalThis.globalStore.dispatch(reportScenesAroundParcel(data.parcel, data.scenesAround))
+  },
+
+  SetAudioStream(data: { url: string; play: boolean }) {
+    setAudioStream(data.url, data.play)
   }
 }
 

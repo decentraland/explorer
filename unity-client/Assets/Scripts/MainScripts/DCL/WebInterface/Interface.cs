@@ -363,6 +363,13 @@ namespace DCL.Interface
             public int scenesAround;
         }
 
+        [System.Serializable]
+        public class AudioStreamingPayload
+        {
+            public string url;
+            public bool play;
+        }
+
 #if UNITY_WEBGL && !UNITY_EDITOR
     /**
      * This method is called after the first render. It marks the loading of the
@@ -421,6 +428,7 @@ namespace DCL.Interface
         private static OnPointerEventPayload onPointerEventPayload = new OnPointerEventPayload();
         private static OnGlobalPointerEventPayload onGlobalPointerEventPayload = new OnGlobalPointerEventPayload();
         private static OnGlobalPointerEvent onGlobalPointerEvent = new OnGlobalPointerEvent();
+        private static AudioStreamingPayload onAudioStreamingEvent = new AudioStreamingPayload();
 
         public static void SendSceneEvent<T>(string sceneId, string eventType, T payload)
         {
@@ -773,6 +781,13 @@ namespace DCL.Interface
                 parcel = parcel,
                 scenesAround = maxScenesArea
             });
+        }
+
+        public static void SendAudioStreamEvent(string url, bool play)
+        {
+            onAudioStreamingEvent.url = url;
+            onAudioStreamingEvent.play = play;
+            SendMessage("SetAudioStream", onAudioStreamingEvent);
         }
     }
 }

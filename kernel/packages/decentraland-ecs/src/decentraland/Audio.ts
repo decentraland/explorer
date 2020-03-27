@@ -84,3 +84,21 @@ export class AudioSource extends ObservableComponent {
     return this
   }
 }
+
+/**
+ * @public
+ */
+@Component('engine.AudioStream', CLASS_ID.AUDIO_STREAM)
+export class AudioStream extends ObservableComponent {
+  @ObservableComponent.readonly
+  readonly url: string
+
+  @ObservableComponent.field
+  playing: boolean = false
+
+  constructor(url: string) {
+    super()
+    this.url = url
+    this.playing = true
+  }
+}
