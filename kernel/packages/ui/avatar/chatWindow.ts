@@ -33,18 +33,18 @@ dcl.onEvent(event => {
   }
 })
 
-function createLogMessage(newMessage: MessageEntry) {
-  messageText.value = ''
+function updateMessagesLog(newMessage: MessageEntry) {
+  messagesLogText.value = ''
   for (let i = 0; i < internalState.messages.length; i++) {
     const currentMessage = internalState.messages[i];
     const color = currentMessage.isCommand ? COMMAND_COLOR : 'white'
 
-    messageText.value += `<color=${color}><b>${currentMessage.sender}:</b> ${currentMessage.message}</color>\n`
+    messagesLogText.value += `<color=${color}><b>${currentMessage.sender}:</b> ${currentMessage.message}</color>\n`
   }
 
   messagesLogScrollContainer.valueY = 0
 
-  return { component: messageText }
+  return { component: messagesLogText }
 }
 
 // -------------------------------
@@ -131,19 +131,19 @@ textInput.onTextSubmit = new OnTextSubmit(onInputSubmit)
 
 setMaximized(isMaximized)
 
-const messageText = new UIText(messagesLogStackContainer)
-messageText.name = 'logged-message'
-messageText.color = PRIMARY_TEXT_COLOR
-messageText.fontSize = 14
-messageText.vAlign = 'top'
-messageText.hAlign = 'left'
-messageText.vTextAlign = 'top'
-messageText.hTextAlign = 'left'
-messageText.width = '350px'
-messageText.adaptWidth = false
-messageText.adaptHeight = true
-messageText.textWrapping = true
-messageText.outlineColor = Color4.Black()
+const messagesLogText = new UIText(messagesLogStackContainer)
+messagesLogText.name = 'logged-message'
+messagesLogText.color = PRIMARY_TEXT_COLOR
+messagesLogText.fontSize = 14
+messagesLogText.vAlign = 'top'
+messagesLogText.hAlign = 'left'
+messagesLogText.vTextAlign = 'top'
+messagesLogText.hTextAlign = 'left'
+messagesLogText.width = '350px'
+messagesLogText.adaptWidth = false
+messagesLogText.adaptHeight = true
+messagesLogText.textWrapping = true
+messagesLogText.outlineColor = Color4.Black()
 
 const instructionsMessage = {
   id: '',
@@ -210,5 +210,5 @@ function addMessage(messageEntry: MessageEntry): void {
 
   internalState.messages.push(messageEntry)
 
-  createLogMessage(messageEntry)
+  updateMessagesLog(messageEntry)
 }
