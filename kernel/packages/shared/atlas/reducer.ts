@@ -4,11 +4,11 @@ import {
   AtlasState,
   District,
   DISTRICT_DATA,
-  FAILURE_NAME_FROM_SCENE_JSON,
-  FETCH_NAME_FROM_SCENE_JSON,
+  FAILURE_DATA_FROM_SCENE_JSON,
+  FETCH_DATA_FROM_SCENE_JSON,
   MarketData,
   MARKET_DATA,
-  SUCCESS_NAME_FROM_SCENE_JSON
+  SUCCESS_DATA_FROM_SCENE_JSON
 } from './types'
 import { zip } from './zip'
 import { PayloadAction } from 'typesafe-actions'
@@ -30,7 +30,7 @@ export function atlasReducer(state?: AtlasState, action?: AnyAction) {
     return state
   }
   switch (action.type) {
-    case FETCH_NAME_FROM_SCENE_JSON:
+    case FETCH_DATA_FROM_SCENE_JSON:
       return {
         ...state,
         requestStatus: {
@@ -38,7 +38,7 @@ export function atlasReducer(state?: AtlasState, action?: AnyAction) {
           [action.payload]: 'loading'
         }
       }
-    case SUCCESS_NAME_FROM_SCENE_JSON:
+    case SUCCESS_DATA_FROM_SCENE_JSON:
       if (action.payload.name === 'interactive-text') {
         return state
       }
@@ -55,7 +55,7 @@ export function atlasReducer(state?: AtlasState, action?: AnyAction) {
           }, {})
         }
       }
-    case FAILURE_NAME_FROM_SCENE_JSON:
+    case FAILURE_DATA_FROM_SCENE_JSON:
       return {
         ...state,
         requestStatus: {

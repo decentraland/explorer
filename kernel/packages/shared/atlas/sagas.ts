@@ -6,21 +6,22 @@ import { RENDERER_INITIALIZED } from '../renderer/types'
 import { lastPlayerPosition } from '../world/positionThings'
 import {
   districtData,
-  fetchNameFromSceneJson,
-  fetchNameFromSceneJsonFailure,
-  fetchNameFromSceneJsonSuccess,
-  FetchNameFromSceneJsonSuccess,
+  fetchDataFromSceneJson,
+  fetchDataFromSceneJsonFailure,
+  fetchDataFromSceneJsonSuccess,
+  FetchDataFromSceneJsonSuccess,
   marketData,
-  QuerySceneName,
+  QuerySceneData,
   reportedScenes,
   ReportScenesAroundParcel
 } from './actions'
+import { getOwnerName, getSceneDescription } from '../../shared/selectors'
 import { getNameFromAtlasState, getTypeFromAtlasState, shouldLoadSceneJsonName } from './selectors'
 import {
   AtlasState,
-  FETCH_NAME_FROM_SCENE_JSON,
+  FETCH_DATA_FROM_SCENE_JSON,
   MarketEntry,
-  SUCCESS_NAME_FROM_SCENE_JSON,
+  SUCCESS_DATA_FROM_SCENE_JSON,
   MARKET_DATA,
   REPORT_SCENES_AROUND_PARCEL
 } from './types'
@@ -41,10 +42,10 @@ export function* atlasSaga(): any {
 
   yield takeEvery(SCENE_START, querySceneName)
   yield takeEvery(SCENE_LOAD, checkAndReportAround)
-  yield takeEvery(FETCH_NAME_FROM_SCENE_JSON, fetchName)
+  yield takeEvery(FETCH_DATA_FROM_SCENE_JSON, fetchSceneJsonData)
 
   yield takeLatest(RENDERER_INITIALIZED, reportScenesAround)
-  yield takeLatest(SUCCESS_NAME_FROM_SCENE_JSON, reportOne)
+  yield takeLatest(SUCCESS_DATA_FROM_SCENE_JSON, reportOne)
 
   yield takeLatest(REPORT_SCENES_AROUND_PARCEL, reportScenesAroundParcel)
 }
@@ -66,57 +67,68 @@ function* fetchTiles() {
   }
 }
 
-function* querySceneName(action: QuerySceneName) {
+function* querySceneName(action: QuerySceneData) {
   if (yield select(shouldLoadSceneJsonName, action.payload) !== undefined) {
-    yield put(fetchNameFromSceneJson(action.payload))
+    yield put(fetchDataFromSceneJson(action.payload))
   }
 }
 
-function* fetchName(action: SceneStart) {
+function* fetchSceneJsonData(action: SceneStart) {
   try {
-    const { name, parcels } = yield call(() => getNameFromSceneJson(action.payload))
-    yield put(fetchNameFromSceneJsonSuccess(action.payload, name, parcels))
+    const land = yield call(() => getDataFromSceneJson(action.payload))
+    yield put(fetchDataFromSceneJsonSuccess(action.payload, land))
   } catch (e) {
-    yield put(fetchNameFromSceneJsonFailure(action.payload, e))
+    yield put(fetchDataFromSceneJsonFailure(action.payload, e))
   }
 }
 
-async function getNameFromSceneJson(sceneId: string) {
+async function getDataFromSceneJson(sceneId: string) {
   const server: LifecycleManager = getServer()
 
-  const land = (await server.getParcelData(sceneId)) as any
-  return { name: land.scene.display.title, parcels: land.scene.scene.parcels }
+  const land = (await server.getParcelData(sceneId))
+  return land// { name: land.scene.display.title, parcels: land.scene.scene.parcels }
 }
 
-function* reportOne(action: FetchNameFromSceneJsonSuccess) {
+function* reportOne(action: FetchDataFromSceneJsonSuccess) {
   const atlasState = (yield select(state => state.atlas)) as AtlasState
-  const parcels = action.payload.parcels
+  const sceneJsonData = action.payload.data.sceneJsonData
+  const parcels = sceneJsonData.scene.parcels
   const [firstX, firstY] = parcels[0].split(',').map(_ => parseInt(_, 10))
+
   const name = getNameFromAtlasState(atlasState, firstX, firstY)
   const type = getTypeFromAtlasState(atlasState, firstX, firstY)
+  const owner = getOwnerName(sceneJsonData)
+  const description = getSceneDescription(sceneJsonData)
+  const navmapThumbnail = sceneJsonData.display?.navmapThumbnail || ""
+
   yield put(reportedScenes(parcels))
 
-  let isPOI:boolean = false;
-  
-  let parcelsAsV2:{x:number, y:number}[] = parcels.map(p => {
+  let isPOI: boolean = false
+
+  let parcelsAsVector2: {x: number, y: number}[] = parcels.map(p => {
     const [x, y] = p.split(',').map(_ => parseInt(_, 10))
     return { x, y }
   })
 
-  //NOTE(Brian): map related flow has a vomitive approach, we have to refactor all this later
-  parcelsAsV2.forEach( p => { 
-    if ( CAMPAIGN_PARCEL_SEQUENCE.includes(p) ) { 
-      isPOI = true 
-    } 
+  // NOTE(Brian): map related flow has a vomitive approach, we have to refactor all this later
+  parcelsAsVector2.forEach(p => {
+    if (CAMPAIGN_PARCEL_SEQUENCE.includes(p)) {
+      isPOI = true
+    }
   })
 
+  let minimapData: MinimapSceneInfo = {
+    name: name,
+    owner: owner,
+    previewImageUrl: navmapThumbnail,
+    description: description,
+    type: type,
+    parcels: parcelsAsVector2,
+    isPOI: isPOI
+  } as MinimapSceneInfo
+
   window.unityInterface.UpdateMinimapSceneInformation([
-    {
-      name,
-      type,
-      parcels: parcelsAsV2,
-      isPOI: isPOI
-    }
+    minimapData
   ])
 }
 
@@ -183,13 +195,13 @@ function getScenesAround(parcelCoords: Vector2Component, maxScenesAround: number
 export function* reportScenes(marketplaceInfo?: AtlasState, selection?: Record<string, MarketEntry>): any {
   const atlasState = marketplaceInfo ? marketplaceInfo : ((yield select(state => state.atlas)) as AtlasState)
   const data = selection ? selection : atlasState.marketName
-  
+
   const keyToParcels: Record<string, { x: number; y: number }[]> = {}
   const keyToTypeAndName: Record<string, { type: number; name: string }> = {}
   const keyToPOI: Record<string, boolean> = {}
 
   const typeAndNameKeys: string[] = []
-  
+
   Object.keys(data).forEach(index => {
     const parcel = data[index]
     const name = getNameFromAtlasState(atlasState, parcel.x, parcel.y)
@@ -202,9 +214,9 @@ export function* reportScenes(marketplaceInfo?: AtlasState, selection?: Record<s
     }
     keyToParcels[key].push({ x: parcel.x, y: parcel.y })
 
-    //NOTE(Brian): map related flow has a vomitive approach, we have to refactor all this later
+    // NOTE(Brian): map related flow has a vomitive approach, we have to refactor all this later
     if (keyToPOI[key] === false) {
-      keyToPOI[key] = CAMPAIGN_PARCEL_SEQUENCE.includes({x:parcel.x, y:parcel.y})
+      keyToPOI[key] = CAMPAIGN_PARCEL_SEQUENCE.includes({ x: parcel.x, y: parcel.y })
     }
   })
 

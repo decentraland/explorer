@@ -64,10 +64,8 @@ import {
   EnvironmentData,
   HUDConfiguration,
   ILand,
-  ILandToLoadableParcelScene,
-  ILandToLoadableParcelSceneUpdate,
   InstancedSpawnPoint,
-  IScene,
+  SceneJsonData,
   LoadableParcelScene,
   MappingsResponse,
   Notification,
@@ -91,6 +89,7 @@ import { ensureUiApis } from 'shared/world/uiSceneInitializer'
 import { worldRunningObservable } from 'shared/world/worldState'
 import { profileToRendererFormat } from 'shared/profiles/transformations/profileToRendererFormat'
 import { StoreContainer } from 'shared/store/rootTypes'
+import { ILandToLoadableParcelScene, ILandToLoadableParcelSceneUpdate } from 'shared/selectors'
 
 declare const globalThis: UnityInterfaceContainer &
   StoreContainer & { analytics: any; delighted: any } & { messages: (e: any) => void }
@@ -955,16 +954,15 @@ export async function loadPreviewScene() {
     // we load the scene to get the metadata
     // about rhe bounds and position of the scene
     // TODO(fmiras): Validate scene according to https://github.com/decentraland/proposals/blob/master/dsp/0020.mediawiki
-    const scene = (await result.json()) as IScene
+    const scene = (await result.json()) as SceneJsonData
     const mappingsFetch = await fetch('/mappings')
     const mappingsResponse = (await mappingsFetch.json()) as MappingsResponse
 
     let defaultScene: ILand = {
-      name: scene.name,
       sceneId: 'previewScene',
       baseUrl: location.toString().replace(/\?[^\n]+/g, ''),
       baseUrlBundles: '',
-      scene,
+      sceneJsonData: scene,
       mappingsResponse: mappingsResponse
     }
 

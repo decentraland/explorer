@@ -2,7 +2,7 @@ import { jsonFetch } from 'atomicHelpers/jsonFetch'
 import { future, IFuture } from 'fp-future'
 import { createLogger } from 'shared/logger'
 import { createTutorialILand, isTutorial, TUTORIAL_SCENE_ID } from '../tutorial/tutorial'
-import { ILand, IScene, ParcelInfoResponse, ContentMapping } from 'shared/types'
+import { ILand, SceneJsonData, ParcelInfoResponse, ContentMapping } from 'shared/types'
 
 const logger = createLogger('loader')
 const { error } = logger
@@ -95,18 +95,17 @@ export class SceneDataDownloadManager {
     }
   }
 
-  createFakeILand(sceneId: string, coordinates: string) {
+  createFakeILand(sceneId: string, coordinates: string): ILand {
     const sceneName = this.emptySceneNames[Math.floor(Math.random() * this.emptySceneNames.length)]
+
     return {
       sceneId: sceneId,
       baseUrl: globalThis.location.origin + '/loader/empty-scenes/contents/',
       baseUrlBundles: this.options.contentServerBundles + '/',
-      name: 'Empty parcel',
-      scene: {
+      sceneJsonData: {
         display: { title: 'Empty parcel' },
+        contact: { name: 'Decentraland' },
         owner: '',
-        contact: {},
-        name: 'Empty parcel',
         main: `bin/game.js`,
         tags: [],
         scene: { parcels: [coordinates], base: coordinates },
@@ -152,16 +151,17 @@ export class SceneDataDownloadManager {
     if (!promised.isPending) {
       return promised
     }
-    const content = mappings.data[0]
-    if (!content || !content.content || !content.content.contents) {
-      logger.info(`Resolved ${sceneId} to null -- no contents`, content)
+    const parcelInfoResponse = mappings.data[0]
+    if (!parcelInfoResponse || !parcelInfoResponse.content || !parcelInfoResponse.content.contents) {
+      logger.info(`Resolved ${sceneId} to null -- no contents`, parcelInfoResponse)
       promised.resolve(null)
       return null
     }
-    const sceneJsonMapping = content.content.contents.find($ => $.file === 'scene.json')
+
+    const sceneJsonMapping = parcelInfoResponse.content.contents.find($ => $.file === 'scene.json')
 
     if (!sceneJsonMapping) {
-      logger.info(`Resolved ${sceneId} to null -- no sceneJsonMapping`)
+      logger.info(`Resolved ${sceneId} to null -- no scene.json`)
       promised.resolve(null)
       return null
     }
@@ -169,7 +169,7 @@ export class SceneDataDownloadManager {
     const baseUrl = this.options.contentServer + '/contents/'
     const baseUrlBundles = this.options.contentServerBundles + '/'
 
-    const scene = (await jsonFetch(baseUrl + sceneJsonMapping.hash)) as IScene
+    const scene = (await jsonFetch(baseUrl + sceneJsonMapping.hash)) as SceneJsonData
 
     if (!promised.isPending) {
       return promised
@@ -179,9 +179,8 @@ export class SceneDataDownloadManager {
       sceneId,
       baseUrl,
       baseUrlBundles,
-      name: scene.name,
-      scene,
-      mappingsResponse: content.content
+      sceneJsonData: scene,
+      mappingsResponse: parcelInfoResponse.content
     }
 
     const pendingSceneData = this.sceneIdToLandData.get(sceneId) || future<ILand | null>()
