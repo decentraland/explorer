@@ -33,7 +33,7 @@ dcl.onEvent(event => {
   }
 })
 
-function updateMessagesLog(newMessage: MessageEntry) {
+function updateMessagesLog() {
   messagesLogText.value = ''
   for (let i = 0; i < internalState.messages.length; i++) {
     const currentMessage = internalState.messages[i];
@@ -210,5 +210,5 @@ function addMessage(messageEntry: MessageEntry): void {
 
   internalState.messages.push(messageEntry)
 
-  updateMessagesLog(messageEntry)
+  updateMessagesLog()
 }
