@@ -368,6 +368,7 @@ namespace DCL.Interface
         {
             public string url;
             public bool play;
+            public float volume;
         }
 
 #if UNITY_WEBGL && !UNITY_EDITOR
@@ -783,10 +784,11 @@ namespace DCL.Interface
             });
         }
 
-        public static void SendAudioStreamEvent(string url, bool play)
+        public static void SendAudioStreamEvent(string url, bool play, float volume)
         {
             onAudioStreamingEvent.url = url;
             onAudioStreamingEvent.play = play;
+            onAudioStreamingEvent.volume = volume;
             SendMessage("SetAudioStream", onAudioStreamingEvent);
         }
     }

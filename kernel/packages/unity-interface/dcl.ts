@@ -124,16 +124,24 @@ teleportObservable.add(() => {
   audioStreamSource.pause()
 })
 
-async function setAudioStream(url: string, play: boolean) {
-  if (play) {
+async function setAudioStream(url: string, play: boolean, volume: number) {
+  const isSameSrc = audioStreamSource.src.length > 1 && url.includes(audioStreamSource.src)
+  const playSrc = play && (!isSameSrc || (isSameSrc && audioStreamSource.paused))
+
+  audioStreamSource.volume = volume
+
+  if (play && !isSameSrc) {
     audioStreamSource.src = url
+  } else if (!play && isSameSrc) {
+    audioStreamSource.pause()
+  }
+
+  if (playSrc) {
     try {
       await audioStreamSource.play()
     } catch (err) {
       defaultLogger.log('setAudioStream: failed to play' + err)
     }
-  } else if (audioStreamSource.src.length > 1 && url.includes(audioStreamSource.src)) {
-    audioStreamSource.pause()
   }
 }
 
@@ -320,8 +328,8 @@ const browserInterface = {
     globalThis.globalStore.dispatch(reportScenesAroundParcel(data.parcel, data.scenesAround))
   },
 
-  SetAudioStream(data: { url: string; play: boolean }) {
-    setAudioStream(data.url, data.play).catch(err => defaultLogger.log(err))
+  SetAudioStream(data: { url: string; play: boolean; volume: number }) {
+    setAudioStream(data.url, data.play, data.volume).catch(err => defaultLogger.log(err))
   }
 }
 

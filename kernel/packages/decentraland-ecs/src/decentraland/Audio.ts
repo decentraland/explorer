@@ -96,6 +96,9 @@ export class AudioStream extends ObservableComponent {
   @ObservableComponent.field
   playing: boolean = false
 
+  @ObservableComponent.field
+  volume: number = 1
+
   constructor(url: string) {
     super()
     this.url = url

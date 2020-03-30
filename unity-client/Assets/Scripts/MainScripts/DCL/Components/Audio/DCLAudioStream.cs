@@ -10,6 +10,7 @@ namespace DCL.Components
         {
             public string url;
             public bool playing = false;
+            public float volume = 1;
         }
 
         public Model model;
@@ -17,12 +18,12 @@ namespace DCL.Components
 
         public override IEnumerator ApplyChanges(string newJson)
         {
+            Model prevModel = model;
             model = SceneController.i.SafeFromJson<Model>(newJson);
 
-            if (!string.IsNullOrEmpty(model.url))
-            {
-                UpdatePlayingState();
-            }
+            bool forceUpdate = prevModel.volume != model.volume;
+
+            UpdatePlayingState(forceUpdate);
 
             yield return null;
         }
@@ -42,10 +43,11 @@ namespace DCL.Components
 
         private bool AreCoordsInsideComponentScene(Vector2Int coords)
         {
+            if (scene == null) return false;
             return scene.parcels.Contains(coords);
         }
 
-        private void UpdatePlayingState()
+        private void UpdatePlayingState(bool forceStateUpdate)
         {
             if (gameObject.activeInHierarchy)
             {
@@ -64,32 +66,37 @@ namespace DCL.Components
                 {
                     StartStreaming();
                 }
+                else if (forceStateUpdate)
+                {
+                    if (isPlaying) StartStreaming();
+                    else StopStreaming();
+                }
             }
         }
 
         private void OnPlayerCoordsChanged(Vector2Int coords, Vector2Int prevCoords)
         {
-            UpdatePlayingState();
+            UpdatePlayingState(false);
         }
 
         private void OnRendererStateChanged(bool isEnable, bool prevState)
         {
             if (isEnable)
             {
-                UpdatePlayingState();
+                UpdatePlayingState(false);
             }
         }
 
         private void StopStreaming()
         {
             isPlaying = false;
-            Interface.WebInterface.SendAudioStreamEvent(model.url, false);
+            Interface.WebInterface.SendAudioStreamEvent(model.url, false, model.volume * AudioListener.volume);
         }
 
         private void StartStreaming()
         {
             isPlaying = true;
-            Interface.WebInterface.SendAudioStreamEvent(model.url, true);
+            Interface.WebInterface.SendAudioStreamEvent(model.url, true, model.volume * AudioListener.volume);
         }
     }
 }
