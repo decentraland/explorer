@@ -49,30 +49,32 @@ namespace DCL.Components
 
         private void UpdatePlayingState(bool forceStateUpdate)
         {
-            if (gameObject.activeInHierarchy)
+            if (!gameObject.activeInHierarchy)
             {
-                bool canPlayStream = AreCoordsInsideComponentScene(CommonScriptableObjects.playerCoords.Get()) && CommonScriptableObjects.rendererState.Get();
+                return;
+            }
 
-                bool shouldStopStream = (isPlaying && !model.playing) || (isPlaying && !canPlayStream);
-                bool shouldStartStream = !isPlaying && canPlayStream && model.playing;
+            bool canPlayStream = AreCoordsInsideComponentScene(CommonScriptableObjects.playerCoords.Get()) && CommonScriptableObjects.rendererState.Get();
 
-                if (shouldStopStream)
-                {
-                    StopStreaming();
-                    return;
-                }
+            bool shouldStopStream = (isPlaying && !model.playing) || (isPlaying && !canPlayStream);
+            bool shouldStartStream = !isPlaying && canPlayStream && model.playing;
 
-                if (shouldStartStream)
-                {
-                    StartStreaming();
-                    return;
-                }
+            if (shouldStopStream)
+            {
+                StopStreaming();
+                return;
+            }
 
-                if (forceStateUpdate)
-                {
-                    if (isPlaying) StartStreaming();
-                    else StopStreaming();
-                }
+            if (shouldStartStream)
+            {
+                StartStreaming();
+                return;
+            }
+
+            if (forceStateUpdate)
+            {
+                if (isPlaying) StartStreaming();
+                else StopStreaming();
             }
         }
 
