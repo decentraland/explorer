@@ -86,7 +86,7 @@ GameObject:
   - component: {fileID: 7910369970784231229}
   - component: {fileID: 6793099593168565602}
   m_Layer: 5
-  m_Name: DanceKey
+  m_Name: Key
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -149,8 +149,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4281676077
-  m_fontColor: {r: 0.1764706, g: 0.19215687, b: 0.20784314, a: 1}
+    rgba: 4284678399
+  m_fontColor: {r: 1, g: 0, b: 0.3882353, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -741,7 +741,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.1764706, g: 0.19215687, b: 0.20784314, a: 1}
+  m_Color: {r: 1, g: 0, b: 0.3882353, a: 1}
   m_RaycastTarget: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -1280,7 +1280,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.1764706, g: 0.19215687, b: 0.20784314, a: 1}
+  m_Color: {r: 1, g: 0, b: 0.3882353, a: 1}
   m_RaycastTarget: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -1354,7 +1354,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.1764706, g: 0.19215687, b: 0.20784314, a: 1}
+  m_Color: {r: 1, g: 0, b: 0.3882353, a: 1}
   m_RaycastTarget: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -1475,7 +1475,7 @@ Animator:
   m_GameObject: {fileID: 3976618281351183969}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: ae9b26d4f93d0415d9fa566af353f2f1, type: 2}
+  m_Controller: {fileID: 9100000, guid: b9f972f3a61734f71a7bf3fba45d34dc, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -1663,7 +1663,7 @@ Animator:
   m_GameObject: {fileID: 4493361109717490464}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: cc8fe1325785a478d88eaf78df8b71d7, type: 2}
+  m_Controller: {fileID: 9100000, guid: b9f972f3a61734f71a7bf3fba45d34dc, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -1684,7 +1684,7 @@ GameObject:
   - component: {fileID: 6484582468130374389}
   - component: {fileID: 4170528536394891916}
   m_Layer: 5
-  m_Name: WaveHandLabel
+  m_Name: Label
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2073,7 +2073,7 @@ GameObject:
   - component: {fileID: 2431604185576810780}
   - component: {fileID: 9195198183538093819}
   m_Layer: 5
-  m_Name: FistPumpKey
+  m_Name: Key
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2305,7 +2305,7 @@ GameObject:
   - component: {fileID: 8323384529793804283}
   - component: {fileID: 2429295493253578998}
   m_Layer: 5
-  m_Name: DanceLabel
+  m_Name: Label
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2368,8 +2368,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4281676077
-  m_fontColor: {r: 0.1764706, g: 0.19215687, b: 0.20784314, a: 1}
+    rgba: 4284678399
+  m_fontColor: {r: 1, g: 0, b: 0.3882353, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -2463,7 +2463,7 @@ GameObject:
   - component: {fileID: 6978153767183304794}
   - component: {fileID: 2537157707097663358}
   m_Layer: 5
-  m_Name: RaiseHandKey
+  m_Name: Key
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2663,7 +2663,7 @@ GameObject:
   - component: {fileID: 8411396906052705624}
   - component: {fileID: 5486480320601692325}
   m_Layer: 5
-  m_Name: WaveHandKey
+  m_Name: Key
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2914,7 +2914,7 @@ Animator:
   m_GameObject: {fileID: 7180080547580295838}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: d875af84a3e2f4d429e54d2d52bdfcba, type: 2}
+  m_Controller: {fileID: 9100000, guid: b9f972f3a61734f71a7bf3fba45d34dc, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -2935,7 +2935,7 @@ GameObject:
   - component: {fileID: 4200279283937512005}
   - component: {fileID: 2577410519839099042}
   m_Layer: 5
-  m_Name: RaiseHandLabel
+  m_Name: Label
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3275,7 +3275,7 @@ GameObject:
   - component: {fileID: 6917837209805884997}
   - component: {fileID: 2788786547009793668}
   m_Layer: 5
-  m_Name: FistPumpLabel
+  m_Name: Label
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
