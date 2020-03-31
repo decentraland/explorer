@@ -4,7 +4,7 @@ import { all, call, fork, put, putResolve, select, take, takeEvery } from 'redux
 import { CAMPAIGN_PARCEL_SEQUENCE } from 'shared/world/TeleportController'
 import { parcelLimits } from '../../config'
 import { getServer, LifecycleManager } from '../../decentraland-loader/lifecycle/manager'
-import { getOwnerName, getSceneDescription } from '../../shared/selectors'
+import { getOwnerNameFromJsonData, getSceneDescriptionFromJsonData } from '../../shared/selectors'
 import defaultLogger from '../logger'
 import { lastPlayerPosition } from '../world/positionThings'
 import {
@@ -42,6 +42,7 @@ function* fetchDistricts() {
     defaultLogger.log(e)
   }
 }
+
 function* fetchTiles() {
   try {
     const tiles = yield call(() => fetch('https://api.decentraland.org/v1/tiles').then(e => e.json()))
@@ -179,8 +180,8 @@ export function* reportScenes(atlas?: AtlasState, tiles?: string[]): any {
     })
 
     minimapSceneInfoResult.push({
-      owner: getOwnerName(scene.sceneJsonData),
-      description: getSceneDescription(scene.sceneJsonData),
+      owner: getOwnerNameFromJsonData(scene.sceneJsonData),
+      description: getSceneDescriptionFromJsonData(scene.sceneJsonData),
       previewImageUrl: scene.sceneJsonData?.display?.navmapThumbnail,
       name: scene.name,
       type: scene.type,

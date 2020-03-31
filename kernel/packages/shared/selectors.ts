@@ -29,14 +29,14 @@ export function ILandToLoadableParcelScene(land: ILand): EnvironmentData<Loadabl
   const ret: EnvironmentData<LoadableParcelScene> = {
     sceneId: land.sceneId,
     baseUrl: land.baseUrl,
-    name: getSceneTitle(land.sceneJsonData),
+    name: getSceneNameFromJsonData(land.sceneJsonData),
     main: land.sceneJsonData.main,
     useFPSThrottling: false,
     mappings,
     data: {
       id: land.sceneId,
       basePosition: parseParcelPosition(land.sceneJsonData.scene.base),
-      name: getSceneTitle(land.sceneJsonData),
+      name: getSceneNameFromJsonData(land.sceneJsonData),
       parcels:
         (land.sceneJsonData &&
           land.sceneJsonData.scene &&
@@ -59,14 +59,14 @@ export function ILandToLoadableParcelSceneUpdate(land: ILand): EnvironmentData<L
   const ret: EnvironmentData<LoadableParcelScene> = {
     sceneId: land.sceneId,
     baseUrl: land.baseUrl,
-    name: getSceneTitle(land.sceneJsonData),
+    name: getSceneNameFromJsonData(land.sceneJsonData),
     main: land.sceneJsonData.main,
     useFPSThrottling: false,
     mappings,
     data: {
       id: land.sceneId,
       basePosition: parseParcelPosition('0,0'),
-      name: getSceneTitle(land.sceneJsonData),
+      name: getSceneNameFromJsonData(land.sceneJsonData),
       parcels:
         (land.sceneJsonData &&
           land.sceneJsonData.scene &&
@@ -83,14 +83,14 @@ export function ILandToLoadableParcelSceneUpdate(land: ILand): EnvironmentData<L
   return ret
 }
 
-export function getOwnerName(jsonData?: SceneJsonData) {
+export function getOwnerNameFromJsonData(jsonData?: SceneJsonData) {
   return jsonData?.contact?.name || 'Unknown'
 }
 
-export function getSceneDescription(jsonData?: SceneJsonData) {
+export function getSceneDescriptionFromJsonData(jsonData?: SceneJsonData) {
   return jsonData?.display?.description || ''
 }
 
-export function getSceneTitle(jsonData?: SceneJsonData) {
+export function getSceneNameFromJsonData(jsonData?: SceneJsonData) {
   return jsonData?.display?.title || 'Unnamed'
 }

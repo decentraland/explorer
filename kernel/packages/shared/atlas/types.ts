@@ -14,7 +14,6 @@ export type AtlasState = {
   hasMarketData: boolean
   hasDistrictData: boolean
 
-  scenes: Set<MapSceneData>
   tileToScene: Record<string, MapSceneData> // '0,0' -> sceneId. Useful for mapping tile market data to actual scenes.
   idToScene: Record<string, MapSceneData> // sceneId -> MapScene
   lastReportPosition?: Vector2Component
@@ -24,7 +23,7 @@ export type MapSceneData = {
   sceneId: string
   name: string
   type: number
-  districtId: number
+  estateId: number
   sceneJsonData?: SceneJsonData
   alreadyReported: boolean
   requestStatus: undefined | 'loading' | 'ok' | 'fail'

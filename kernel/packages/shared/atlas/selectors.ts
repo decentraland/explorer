@@ -1,14 +1,15 @@
-import { PlazaNames, RootAtlasState, AtlasState, MapSceneData, MarketEntry } from './types'
-import { getSceneTitle } from 'shared/selectors'
+import { PlazaNames, RootAtlasState, AtlasState, MapSceneData, MarketEntry, MarketData } from './types'
+import { getSceneNameFromJsonData } from 'shared/selectors'
+import { SceneJsonData } from 'shared/types'
 
 export const EMPTY_PARCEL_NAME = 'Empty parcel'
 
 export function getSceneJsonName(state: RootAtlasState, sceneId: string) {
-  return getSceneTitle(state.atlas.idToScene[sceneId].sceneJsonData)
+  return getSceneNameFromJsonData(state.atlas.idToScene[sceneId].sceneJsonData)
 }
 
 export function shouldLoadSceneJsonData(state: RootAtlasState, sceneId: string) {
-  return state.atlas.idToScene[sceneId] && state.atlas.idToScene[sceneId].requestStatus === undefined
+  return state.atlas.idToScene[sceneId] === undefined || state.atlas.idToScene[sceneId].requestStatus === 'fail'
 }
 
 export function getType(state: RootAtlasState, x: number, y: number): number {
@@ -23,16 +24,23 @@ export function getMapScene(state: AtlasState, x: number, y: number): MapSceneDa
   return state.tileToScene[`${x},${y}`]
 }
 
-function getNameInternal(state: AtlasState, x: number, y: number): string {
-  const key = `${x},${y}`
+export function getSceneNameFromAtlasState(state: AtlasState, sceneJsonData?: SceneJsonData): string | undefined {
+  if (!sceneJsonData) {
+    return undefined
+  }
 
-  const sceneJsonName = getSceneTitle(getMapScene(state, x, y).sceneJsonData)
+  const sceneJsonName = getSceneNameFromJsonData(sceneJsonData)
 
-  if (sceneJsonName) {
+  if (sceneJsonName !== 'Unnamed') {
     return sceneJsonName
   }
 
-  let marketEntry: MarketEntry = state.marketData.data[key]
+  return undefined
+}
+
+export function getSceneNameFromMarketData(marketData: MarketData, x: number, y: number): string | undefined {
+  const key = `${x},${y}`
+  let marketEntry: MarketEntry = marketData.data[key]
 
   if (marketEntry) {
     if (marketEntry.name) {
@@ -45,28 +53,37 @@ function getNameInternal(state: AtlasState, x: number, y: number): string {
     }
   }
 
-  return EMPTY_PARCEL_NAME
+  return undefined
 }
 
-export function getNameFromAtlasState(state: AtlasState, x: number, y: number): string {
-  let tentativeName = getNameInternal(state, x, y)
+export function getSceneNameWithMarketAndAtlas(
+  marketData: MarketData,
+  state: AtlasState,
+  x: number,
+  y: number
+): string | undefined {
+  let tentativeName: string | undefined = getSceneNameFromAtlasState(state, getMapScene(state, x, y).sceneJsonData)
 
-  if (tentativeName === 'interactive-text') {
-    return EMPTY_PARCEL_NAME
-  }
-
-  if (tentativeName.startsWith('Road at')) {
-    return 'Road'
+  if (tentativeName === undefined) {
+    tentativeName = getSceneNameFromMarketData(marketData, x, y)
   }
 
   return tentativeName
 }
 
-export function getTypeFromAtlasState(state: AtlasState, x: number, y: number): number {
-  const key = `${x},${y}`
-  return state.tileToScene[key] ? state.tileToScene[key].type : 0
+export function postProcessSceneName(name: string | undefined): string {
+  if (name === undefined || name === 'interactive-text') {
+    return EMPTY_PARCEL_NAME
+  }
+
+  if (name.startsWith('Road at')) {
+    return 'Road'
+  }
+
+  return name
 }
 
-export function getName(state: RootAtlasState, x: number, y: number): string {
-  return getNameFromAtlasState(state.atlas, x, y)
+export function getSceneTypeFromAtlasState(state: AtlasState, x: number, y: number): number {
+  const key = `${x},${y}`
+  return state.tileToScene[key] ? state.tileToScene[key].type : 0
 }
