@@ -1,17 +1,16 @@
+import { ILand } from 'shared/types'
 import { action } from 'typesafe-actions'
+import { Vector2Component } from '../../atomicHelpers/landHelpers'
 import {
   DistrictData,
   DISTRICT_DATA,
   FAILURE_DATA_FROM_SCENE_JSON,
-  FETCH_DATA_FROM_SCENE_JSON,
   MarketData,
   MARKET_DATA,
   QUERY_DATA_FROM_SCENE_JSON,
-  SUCCESS_DATA_FROM_SCENE_JSON,
-  REPORT_SCENES_AROUND_PARCEL
+  REPORT_SCENES_AROUND_PARCEL,
+  SUCCESS_DATA_FROM_SCENE_JSON
 } from './types'
-import { Vector2Component } from '../../atomicHelpers/landHelpers'
-import { ILand } from 'shared/types'
 
 export const querySceneData = (scene: string) => action(QUERY_DATA_FROM_SCENE_JSON, scene)
 export type QuerySceneData = ReturnType<typeof querySceneData>

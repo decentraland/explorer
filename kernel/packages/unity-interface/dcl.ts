@@ -374,48 +374,6 @@ export function delightedSurvey() {
   }
 }
 
-const CHUNK_SIZE = 500
-
-export function* chunkGenerator(parcelChunkSize: number, info: MinimapSceneInfo[]) {
-  if (parcelChunkSize < 1) {
-    throw Error(`parcel chunk size (${parcelChunkSize}) cannot be less than 1`)
-  }
-
-  // flatten scene data into parcels
-  const parcels = info.reduce(
-    (parcels, elem, index) =>
-      parcels.concat(
-        elem.parcels.map(parcel => ({
-          index,
-          name: elem.name,
-          type: elem.type,
-          isPOI: elem.isPOI,
-          parcel
-        }))
-      ),
-    [] as { index: number; name: string; type: number; isPOI: boolean; parcel: { x: number; y: number } }[]
-  )
-
-  // split into chunk size + fold into scene
-  while (parcels.length > 0) {
-    const chunk = parcels
-      .splice(0, parcelChunkSize)
-      .reduce((scenes, parcel) => {
-        const scene = scenes.get(parcel.index)
-        if (scene) {
-          scene.parcels.push(parcel.parcel)
-        } else {
-          const newScene = { name: parcel.name, type: parcel.type, isPOI: parcel.isPOI, parcels: [parcel.parcel] }
-          scenes.set(parcel.index, newScene)
-        }
-        return scenes
-      }, new Map())
-      .values()
-
-    yield [...chunk]
-  }
-}
-
 export const unityInterface = {
   debug: false,
   SendGenericMessage(object: string, method: string, payload: string) {
@@ -548,11 +506,11 @@ export const unityInterface = {
     gameInstance.SendMessage('HUDController', 'ConfigureTermsOfServiceHUD', JSON.stringify(configuration))
   },
   UpdateMinimapSceneInformation(info: MinimapSceneInfo[]) {
-    const chunks = chunkGenerator(CHUNK_SIZE, info)
+    const CHUNK_SIZE = 100
 
-    for (const chunk of chunks) {
-      let jsonChunk = JSON.stringify(chunk)
-      gameInstance.SendMessage('SceneController', 'UpdateMinimapSceneInformation', jsonChunk)
+    for (let i = 0; i < info.length; i += CHUNK_SIZE) {
+      let chunk = info.slice(i, i + CHUNK_SIZE)
+      gameInstance.SendMessage('SceneController', 'UpdateMinimapSceneInformation', JSON.stringify(chunk))
     }
   },
   SetTutorialEnabled() {

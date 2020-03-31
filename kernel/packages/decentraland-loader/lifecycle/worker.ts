@@ -2,15 +2,14 @@
 // This doesn't execute on the main thread, so it's a "server" in terms of decentraland-rpc
 
 import { WebWorkerTransport } from 'decentraland-rpc'
-import { Adapter } from './lib/adapter'
-import { ParcelLifeCycleController } from './controllers/parcel'
-import { SceneLifeCycleController, SceneLifeCycleStatusReport } from './controllers/scene'
-import { PositionLifecycleController } from './controllers/position'
-import { SceneDataDownloadManager } from './controllers/download'
-import { ILand, InstancedSpawnPoint } from 'shared/types'
 import defaultLogger from 'shared/logger'
+import { ILand, InstancedSpawnPoint } from 'shared/types'
+import { SceneDataDownloadManager } from './controllers/download'
+import { ParcelLifeCycleController } from './controllers/parcel'
+import { PositionLifecycleController } from './controllers/position'
+import { SceneLifeCycleController, SceneLifeCycleStatusReport } from './controllers/scene'
+import { Adapter } from './lib/adapter'
 import { setTutorialEnabled } from './tutorial/tutorial'
-import { Vector2Component } from 'atomicHelpers/landHelpers'
 
 const connector = new Adapter(WebWorkerTransport(self as any))
 
