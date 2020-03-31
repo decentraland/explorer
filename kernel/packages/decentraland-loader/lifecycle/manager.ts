@@ -39,9 +39,9 @@ export class LifecycleManager extends TransportBasedServer {
       }
     })
 
-    this.on('Scene.idResponse', (scene: { data: string }) => {
+    this.on('Scene.idResponse', (scene: { position: string; data: string }) => {
       if (scene.data) {
-        const future = this.positionToRequest.get(scene.data)
+        const future = this.positionToRequest.get(scene.position)
 
         if (future) {
           future.resolve(scene.data)

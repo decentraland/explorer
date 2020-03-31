@@ -96,6 +96,7 @@ let downloadManager: SceneDataDownloadManager
 
       connector.on('Scene.idRequest', async (data: { position: string }) =>
         connector.notify('Scene.idResponse', {
+          position: data.position,
           data: (await downloadManager.resolveSceneSceneId(data.position)) as string
         })
       )

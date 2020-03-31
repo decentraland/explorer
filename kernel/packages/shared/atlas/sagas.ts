@@ -1,6 +1,6 @@
 import { Vector2Component } from 'atomicHelpers/landHelpers'
 import { MinimapSceneInfo } from 'decentraland-ecs/src/decentraland/Types'
-import { all, call, fork, put, putResolve, select, take, takeEvery } from 'redux-saga/effects'
+import { call, fork, put, putResolve, select, take, takeEvery } from 'redux-saga/effects'
 import { CAMPAIGN_PARCEL_SEQUENCE } from 'shared/world/TeleportController'
 import { parcelLimits } from '../../config'
 import { getServer, LifecycleManager } from '../../decentraland-loader/lifecycle/manager'
@@ -96,6 +96,16 @@ export function* checkAndReportAround() {
   }
 }
 
+function fetchIds(tilesAround: string[]) {
+  const promises: any[] = []
+
+  for (let pos of tilesAround) {
+    promises.push(fetchSceneId(pos))
+  }
+
+  return Promise.all(promises)
+}
+
 export function* reportScenesAroundParcelAction(action: ReportScenesAroundParcel) {
   let atlasState = (yield select(state => state.atlas)) as AtlasState
 
@@ -106,32 +116,19 @@ export function* reportScenesAroundParcelAction(action: ReportScenesAroundParcel
   }
 
   const tilesAround = getTilesRectFromCenter(action.payload.parcelCoord, action.payload.scenesAround)
-
-  let sceneIds: string[] = []
   let sceneIdsSet: Set<string> = new Set<string>()
-  let tasks = []
-
-  for (let pos of tilesAround) {
-    tasks.push(call(() => fetchSceneId(pos)))
-  }
 
   defaultLogger.log(`waiting for ids... ${JSON.stringify(tilesAround)}`)
-  //NOTE(Brian): get all ids in parallel
-  sceneIds = yield all(tasks)
+
+  const sceneIds: string[] = yield call(fetchIds, tilesAround)
 
   for (let id of sceneIds) {
     sceneIdsSet.add(id)
   }
 
-  tasks = []
-
   for (let id of sceneIdsSet) {
-    tasks.push(putResolve(querySceneData(id)))
+    yield putResolve(querySceneData(id))
   }
-
-  defaultLogger.log('waiting for scenes...')
-  //NOTE(Brian): wait until all querySceneData actions are resolved
-  yield all(tasks)
 
   yield call(reportScenes, atlasState, tilesAround)
 }
