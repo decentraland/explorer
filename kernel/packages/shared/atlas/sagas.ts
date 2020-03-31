@@ -100,6 +100,7 @@ export function* reportScenesAroundParcelAction(action: ReportScenesAroundParcel
   let atlasState = (yield select(state => state.atlas)) as AtlasState
 
   while (!atlasState.hasMarketData) {
+    defaultLogger.log('waiting for market data...')
     yield take(MARKET_DATA)
     atlasState = yield select(state => state.atlas)
   }
@@ -110,23 +111,25 @@ export function* reportScenesAroundParcelAction(action: ReportScenesAroundParcel
   let sceneIdsSet: Set<string> = new Set<string>()
   let tasks = []
 
-  for (let pos in tilesAround) {
+  for (let pos of tilesAround) {
     tasks.push(call(() => fetchSceneId(pos)))
   }
 
+  defaultLogger.log(`waiting for ids... ${JSON.stringify(tilesAround)}`)
   //NOTE(Brian): get all ids in parallel
   sceneIds = yield all(tasks)
 
-  for (let id in sceneIds) {
+  for (let id of sceneIds) {
     sceneIdsSet.add(id)
   }
 
   tasks = []
 
-  for (let id in sceneIdsSet) {
+  for (let id of sceneIdsSet) {
     tasks.push(putResolve(querySceneData(id)))
   }
 
+  defaultLogger.log('waiting for scenes...')
   //NOTE(Brian): wait until all querySceneData actions are resolved
   yield all(tasks)
 
@@ -138,7 +141,7 @@ function getTilesRectFromCenter(parcelCoords: Vector2Component, rectSize: number
 
   for (let x: number = parcelCoords.x - rectSize; x < parcelCoords.x + rectSize; x++) {
     for (let y: number = parcelCoords.y - rectSize; y < parcelCoords.y + rectSize; y++) {
-      result.push('${x},${y}')
+      result.push(`${x},${y}`)
     }
   }
 

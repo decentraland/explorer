@@ -4,10 +4,6 @@ import { SceneJsonData } from 'shared/types'
 
 export const EMPTY_PARCEL_NAME = 'Empty parcel'
 
-export function getSceneJsonName(state: RootAtlasState, sceneId: string) {
-  return getSceneNameFromJsonData(state.atlas.idToScene[sceneId].sceneJsonData)
-}
-
 export function shouldLoadSceneJsonData(state: RootAtlasState, sceneId: string) {
   return state.atlas.idToScene[sceneId] === undefined || state.atlas.idToScene[sceneId].requestStatus === 'fail'
 }
@@ -20,7 +16,7 @@ export function getType(state: RootAtlasState, x: number, y: number): number {
   return state.atlas.tileToScene[key] && state.atlas.tileToScene[key].type
 }
 
-export function getMapScene(state: AtlasState, x: number, y: number): MapSceneData {
+export function getMapScene(state: AtlasState, x: number, y: number): MapSceneData | undefined {
   return state.tileToScene[`${x},${y}`]
 }
 
@@ -62,7 +58,13 @@ export function getSceneNameWithMarketAndAtlas(
   x: number,
   y: number
 ): string | undefined {
-  let tentativeName: string | undefined = getSceneNameFromAtlasState(state, getMapScene(state, x, y).sceneJsonData)
+  let tentativeName: string | undefined
+
+  const mapScene = getMapScene(state, x, y)
+
+  if (mapScene) {
+    tentativeName = getSceneNameFromAtlasState(state, mapScene.sceneJsonData)
+  }
 
   if (tentativeName === undefined) {
     tentativeName = getSceneNameFromMarketData(marketData, x, y)

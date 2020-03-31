@@ -7,10 +7,6 @@ import { worldToGrid, gridToWorld } from '../../../atomicHelpers/parcelScenePosi
 import { pickWorldSpawnpoint } from 'shared/world/positionThings'
 import { InstancedSpawnPoint } from 'shared/types'
 import { isTutorial, resolveTutorialPosition } from '../tutorial/tutorial'
-import { StoreContainer } from 'shared/store/rootTypes'
-import { reportScenesAroundParcel } from 'shared/atlas/actions'
-
-declare const globalThis: StoreContainer
 
 export class PositionLifecycleController extends EventEmitter {
   private positionSettled: boolean = false
@@ -73,7 +69,6 @@ export class PositionLifecycleController extends EventEmitter {
       this.emit('Unsettled Position')
     }
 
-    globalThis.globalStore.dispatch(reportScenesAroundParcel({ x: position.x, y: position.y }, 10))
     this.checkPositionSettlement()
   }
 
