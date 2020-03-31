@@ -51,9 +51,11 @@ export class SceneDataDownloadManager {
         }
       )
     }
+
     if (this.positionToSceneId.has(pos)) {
       return this.positionToSceneId.get(pos)!
     }
+
     const promised = future<string | null>()
     this.positionToSceneId.set(pos, promised)
     const nw = pos.split(',').map($ => parseInt($, 10))

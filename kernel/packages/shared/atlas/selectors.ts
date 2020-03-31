@@ -1,62 +1,72 @@
-import { PlazaNames, RootAtlasState, AtlasState } from './types'
+import { PlazaNames, RootAtlasState, AtlasState, MapSceneData, MarketEntry } from './types'
+import { getSceneTitle } from 'shared/selectors'
 
 export const EMPTY_PARCEL_NAME = 'Empty parcel'
 
-export function getSceneJsonName(state: RootAtlasState, sceneName: string) {
-  return state.atlas.sceneNames[sceneName]
+export function getSceneJsonName(state: RootAtlasState, sceneId: string) {
+  return getSceneTitle(state.atlas.idToScene[sceneId].sceneJsonData)
 }
 
-export function shouldLoadSceneJsonName(state: RootAtlasState, sceneName: string) {
-  return state.atlas.requestStatus[sceneName] === undefined
+export function shouldLoadSceneJsonData(state: RootAtlasState, sceneId: string) {
+  return state.atlas.idToScene[sceneId] && state.atlas.idToScene[sceneId].requestStatus === undefined
 }
 
 export function getType(state: RootAtlasState, x: number, y: number): number {
   const key = `${x},${y}`
-  if (!state.atlas.marketName[key] || !state.atlas.marketName[key].type) {
+  if (!state.atlas.tileToScene[key] || !state.atlas.tileToScene[key].type) {
     return 9
   }
-  return state.atlas.marketName[key] && state.atlas.marketName[key].type
+  return state.atlas.tileToScene[key] && state.atlas.tileToScene[key].type
 }
 
-export function getName(state: RootAtlasState, x: number, y: number): string {
+export function getMapScene(state: AtlasState, x: number, y: number): MapSceneData {
+  return state.tileToScene[`${x},${y}`]
+}
+
+function getNameInternal(state: AtlasState, x: number, y: number): string {
   const key = `${x},${y}`
-  const name = state.atlas.sceneNames[key]
-    ? state.atlas.sceneNames[key]
-    : state.atlas.marketName[key] && state.atlas.marketName[key].name
-    ? state.atlas.marketName[key].name
-    : state.atlas.marketName[key] &&
-      state.atlas.marketName[key].estate_id &&
-      PlazaNames[state.atlas.marketName[key].estate_id]
-    ? PlazaNames[state.atlas.marketName[key].estate_id]
-    : EMPTY_PARCEL_NAME
-  if (name === 'interactive-text') {
+
+  const sceneJsonName = getSceneTitle(getMapScene(state, x, y).sceneJsonData)
+
+  if (sceneJsonName) {
+    return sceneJsonName
+  }
+
+  let marketEntry: MarketEntry = state.marketData.data[key]
+
+  if (marketEntry) {
+    if (marketEntry.name) {
+      return marketEntry.name
+    }
+
+    let hasEstate: boolean = marketEntry.estate_id !== undefined
+    if (hasEstate && PlazaNames[marketEntry.estate_id]) {
+      return PlazaNames[marketEntry.estate_id]
+    }
+  }
+
+  return EMPTY_PARCEL_NAME
+}
+
+export function getNameFromAtlasState(state: AtlasState, x: number, y: number): string {
+  let tentativeName = getNameInternal(state, x, y)
+
+  if (tentativeName === 'interactive-text') {
     return EMPTY_PARCEL_NAME
   }
-  if (name.startsWith('Road at')) {
+
+  if (tentativeName.startsWith('Road at')) {
     return 'Road'
   }
-  return name
+
+  return tentativeName
 }
 
 export function getTypeFromAtlasState(state: AtlasState, x: number, y: number): number {
   const key = `${x},${y}`
-  return state.marketName[key] ? state.marketName[key].type : 0
+  return state.tileToScene[key] ? state.tileToScene[key].type : 0
 }
 
-export function getNameFromAtlasState(state: AtlasState, x: number, y: number): string {
-  const key = `${x},${y}`
-  const name = state.sceneNames[key]
-    ? state.sceneNames[key]
-    : state.marketName[key] && state.marketName[key].name
-    ? state.marketName[key].name
-    : state.marketName[key] && state.marketName[key].estate_id && PlazaNames[state.marketName[key].estate_id]
-    ? PlazaNames[state.marketName[key].estate_id]
-    : EMPTY_PARCEL_NAME
-  if (name === 'interactive-text') {
-    return EMPTY_PARCEL_NAME
-  }
-  if (name.startsWith('Road at')) {
-    return 'Road'
-  }
-  return name
+export function getName(state: RootAtlasState, x: number, y: number): string {
+  return getNameFromAtlasState(state.atlas, x, y)
 }

@@ -16,9 +16,11 @@ import { ILand } from 'shared/types'
 export const querySceneData = (scene: string) => action(QUERY_DATA_FROM_SCENE_JSON, scene)
 export type QuerySceneData = ReturnType<typeof querySceneData>
 
-export const fetchDataFromSceneJson = (scene: string) => action(FETCH_DATA_FROM_SCENE_JSON, scene)
-export const fetchDataFromSceneJsonSuccess = (scene: string, data: ILand) => action(SUCCESS_DATA_FROM_SCENE_JSON, { sceneId: scene, data: data })
-export const fetchDataFromSceneJsonFailure = (scene: string, e: any) => action(FAILURE_DATA_FROM_SCENE_JSON, { sceneId: scene, error: e })
+//export const fetchDataFromSceneJson = (scene: string) => action(FETCH_DATA_FROM_SCENE_JSON, scene)
+export const fetchDataFromSceneJsonSuccess = (scene: string, data: ILand) =>
+  action(SUCCESS_DATA_FROM_SCENE_JSON, { sceneId: scene, data: data })
+export const fetchDataFromSceneJsonFailure = (scene: string, e: any) =>
+  action(FAILURE_DATA_FROM_SCENE_JSON, { sceneId: scene, error: e })
 export type FetchDataFromSceneJsonSuccess = ReturnType<typeof fetchDataFromSceneJsonSuccess>
 
 export const districtData = (districts: DistrictData) => action(DISTRICT_DATA, districts)
@@ -26,7 +28,9 @@ export const marketData = (data: MarketData) => action(MARKET_DATA, data)
 export type MarketDataAction = ReturnType<typeof marketData>
 
 export const REPORTED_SCENES_FOR_MINIMAP = 'Reporting scenes for minimap'
-export const reportedScenes = (parcels: string[], reportPosition?: Vector2Component) => action(REPORTED_SCENES_FOR_MINIMAP, { parcels, reportPosition })
+export const reportedScenes = (parcels: string[], reportPosition?: Vector2Component) =>
+  action(REPORTED_SCENES_FOR_MINIMAP, { parcels, reportPosition })
 
-export const reportScenesAroundParcel = (parcelCoord: { x: number; y: number }, scenesAround: number) => action(REPORT_SCENES_AROUND_PARCEL, { parcelCoord, scenesAround })
+export const reportScenesAroundParcel = (parcelCoord: { x: number; y: number }, rectSizeAround: number) =>
+  action(REPORT_SCENES_AROUND_PARCEL, { parcelCoord, scenesAround: rectSizeAround })
 export type ReportScenesAroundParcel = ReturnType<typeof reportScenesAroundParcel>

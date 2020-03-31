@@ -83,14 +83,14 @@ export function ILandToLoadableParcelSceneUpdate(land: ILand): EnvironmentData<L
   return ret
 }
 
-export function getOwnerName(jsonData: SceneJsonData) {
-  return jsonData.contact?.name || 'Unknown'
+export function getOwnerName(jsonData?: SceneJsonData) {
+  return jsonData?.contact?.name || 'Unknown'
 }
 
-export function getSceneDescription(jsonData: SceneJsonData) {
-  return jsonData.display?.description || ''
+export function getSceneDescription(jsonData?: SceneJsonData) {
+  return jsonData?.display?.description || ''
 }
 
-export function getSceneTitle(jsonData: SceneJsonData) {
-  return jsonData.display?.title || 'Unnamed'
+export function getSceneTitle(jsonData?: SceneJsonData) {
+  return jsonData?.display?.title || 'Unnamed'
 }

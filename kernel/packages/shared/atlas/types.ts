@@ -1,4 +1,5 @@
 import { Vector2Component } from 'atomicHelpers/landHelpers'
+import { SceneJsonData } from 'shared/types'
 
 export const UPDATE_MINIMAP_SCENE_NAME = 'Update tile name'
 export const QUERY_DATA_FROM_SCENE_JSON = '[Query] Fetch data from scene.json'
@@ -10,12 +11,23 @@ export const MARKET_DATA = '[Info] Market data downloaded'
 export const REPORT_SCENES_AROUND_PARCEL = 'Report scenes around parcel'
 
 export type AtlasState = {
-  marketName: Record<string, MarketEntry>
-  districtName: Record<string, string>
-  sceneNames: Record<string, string>
-  requestStatus: Record<string, undefined | 'loading' | 'ok' | 'fail'>
-  alreadyReported: Record<string, boolean>
+  hasMarketData: boolean
+  hasDistrictData: boolean
+
+  scenes: Set<MapSceneData>
+  tileToScene: Record<string, MapSceneData> // '0,0' -> sceneId. Useful for mapping tile market data to actual scenes.
+  idToScene: Record<string, MapSceneData> // sceneId -> MapScene
   lastReportPosition?: Vector2Component
+}
+
+export type MapSceneData = {
+  sceneId: string
+  name: string
+  type: number
+  districtId: number
+  sceneJsonData?: SceneJsonData
+  alreadyReported: boolean
+  requestStatus: undefined | 'loading' | 'ok' | 'fail'
 }
 
 export type RootAtlasState = {
@@ -26,14 +38,17 @@ export type DistrictData = {
   ok: boolean
   data: District[]
 }
+
 export type District = {
   id: string
   name: string
 }
+
 export type MarketData = {
   ok: boolean
   data: Record<string, MarketEntry>
 }
+
 export type MarketEntry = {
   x: number
   y: number

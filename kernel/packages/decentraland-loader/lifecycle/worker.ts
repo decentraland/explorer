@@ -10,6 +10,7 @@ import { SceneDataDownloadManager } from './controllers/download'
 import { ILand, InstancedSpawnPoint } from 'shared/types'
 import defaultLogger from 'shared/logger'
 import { setTutorialEnabled } from './tutorial/tutorial'
+import { Vector2Component } from 'atomicHelpers/landHelpers'
 
 const connector = new Adapter(WebWorkerTransport(self as any))
 
@@ -91,6 +92,12 @@ let downloadManager: SceneDataDownloadManager
       connector.on('Scene.dataRequest', async (data: { sceneId: string }) =>
         connector.notify('Scene.dataResponse', {
           data: (await downloadManager.getParcelDataBySceneId(data.sceneId)) as ILand
+        })
+      )
+
+      connector.on('Scene.idRequest', async (data: { position: string }) =>
+        connector.notify('Scene.idResponse', {
+          data: (await downloadManager.resolveSceneSceneId(data.position)) as string
         })
       )
 
