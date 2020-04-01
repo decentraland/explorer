@@ -116,6 +116,35 @@ const positionEvent = {
   mousePosition: Vector3.Zero()
 }
 
+/////////////////////////////////// AUDIO STREAMING ///////////////////////////////////
+
+const audioStreamSource = new Audio()
+
+teleportObservable.add(() => {
+  audioStreamSource.pause()
+})
+
+async function setAudioStream(url: string, play: boolean, volume: number) {
+  const isSameSrc = audioStreamSource.src.length > 1 && url.includes(audioStreamSource.src)
+  const playSrc = play && (!isSameSrc || (isSameSrc && audioStreamSource.paused))
+
+  audioStreamSource.volume = volume
+
+  if (play && !isSameSrc) {
+    audioStreamSource.src = url
+  } else if (!play && isSameSrc) {
+    audioStreamSource.pause()
+  }
+
+  if (playSrc) {
+    try {
+      await audioStreamSource.play()
+    } catch (err) {
+      defaultLogger.log('setAudioStream: failed to play' + err)
+    }
+  }
+}
+
 /////////////////////////////////// HANDLERS ///////////////////////////////////
 
 const browserInterface = {
@@ -205,7 +234,7 @@ const browserInterface = {
     })
 
     if (data.tutorialStep === tutorialStepId.FINISHED) {
-      delightedSurvey()
+      // we used to call delightedSurvey() here
     }
   },
 
@@ -243,7 +272,7 @@ const browserInterface = {
   },
 
   EditAvatarClicked() {
-    delightedSurvey()
+    // We used to call delightedSurvey() here
   },
 
   ReportScene(sceneId: string) {
@@ -297,6 +326,10 @@ const browserInterface = {
 
   RequestScenesInfoInArea(data: { parcel: { x: number; y: number }; scenesAround: number }) {
     globalThis.globalStore.dispatch(reportScenesAroundParcel(data.parcel, data.scenesAround))
+  },
+
+  SetAudioStream(data: { url: string; play: boolean; volume: number }) {
+    setAudioStream(data.url, data.play, data.volume).catch(err => defaultLogger.log(err))
   }
 }
 
@@ -310,10 +343,17 @@ export function setLoadingScreenVisible(shouldShow: boolean) {
   }
 }
 
-function delightedSurvey() {
+export function delightedSurvey() {
+  // tslint:disable-next-line:strict-type-predicates
+  if (typeof globalThis === 'undefined' || typeof globalThis !== 'object') {
+    return
+  }
   const { analytics, delighted } = globalThis
+  if (!analytics || !delighted) {
+    return
+  }
   const profile = getUserProfile().profile as Profile | null
-  if (!isTheFirstLoading && analytics && delighted && profile) {
+  if (!isTheFirstLoading && profile) {
     const payload = {
       email: profile.email || profile.ethAddress + '@dcl.gg',
       name: profile.name || 'Guest',

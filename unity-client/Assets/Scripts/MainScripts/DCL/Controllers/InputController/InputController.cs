@@ -9,10 +9,13 @@ public enum DCLAction_Trigger
     //Remember to explicitly assign the value to each entry so we minimize issues with serialization + conflicts
     CameraChange = 100,
 
+    ToggleNavMap = 110,
+
     OpenExpressions = 200,
     Expression_Wave = 201,
     Expression_FistPump = 202,
     Expression_Robot = 203,
+    Expression_RaiseHand = 204,
 }
 
 public enum DCLAction_Hold
@@ -59,6 +62,10 @@ public class InputController : MonoBehaviour
                     if (ENABLE_THIRD_PERSON_CAMERA)
                         InputProcessor.FromKey(action, KeyCode.V, modifiers: InputProcessor.Modifier.NeedsPointerLocked | InputProcessor.Modifier.FocusNotInInput);
                     break;
+                case DCLAction_Trigger.ToggleNavMap:
+                    InputProcessor.FromKey(action, KeyCode.M, modifiers: InputProcessor.Modifier.FocusNotInInput);
+                    InputProcessor.FromKey(action, KeyCode.Tab, modifiers: InputProcessor.Modifier.FocusNotInInput);
+                    break;
                 case DCLAction_Trigger.OpenExpressions:
                     InputProcessor.FromKey(action, KeyCode.B, modifiers: InputProcessor.Modifier.FocusNotInInput);
                     break;
@@ -70,6 +77,9 @@ public class InputController : MonoBehaviour
                     break;
                 case DCLAction_Trigger.Expression_Robot:
                     InputProcessor.FromKey(action, KeyCode.Alpha3, modifiers: InputProcessor.Modifier.FocusNotInInput);
+                    break;
+                case DCLAction_Trigger.Expression_RaiseHand:
+                    InputProcessor.FromKey(action, KeyCode.Alpha4, modifiers: InputProcessor.Modifier.FocusNotInInput);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -129,7 +139,7 @@ public class InputController : MonoBehaviour
 
 public static class InputProcessor
 {
-    private static readonly KeyCode[] MODIFIER_KEYS = new [] { KeyCode.LeftControl, KeyCode.LeftAlt, KeyCode.LeftShift };
+    private static readonly KeyCode[] MODIFIER_KEYS = new[] { KeyCode.LeftControl, KeyCode.LeftAlt, KeyCode.LeftShift };
 
     [Flags]
     public enum Modifier
