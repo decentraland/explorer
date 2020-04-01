@@ -10,6 +10,7 @@ import { PositionLifecycleController } from './controllers/position'
 import { SceneLifeCycleController, SceneLifeCycleStatusReport } from './controllers/scene'
 import { Adapter } from './lib/adapter'
 import { setTutorialEnabled } from './tutorial/tutorial'
+import { Vector2Component } from 'atomicHelpers/landHelpers'
 
 const connector = new Adapter(WebWorkerTransport(self as any))
 
@@ -94,12 +95,16 @@ let downloadManager: SceneDataDownloadManager
         })
       )
 
-      connector.on('Scene.idRequest', async (data: { position: string }) =>
-        connector.notify('Scene.idResponse', {
-          position: data.position,
-          data: (await downloadManager.resolveSceneSceneId(data.position)) as string
-        })
-      )
+      connector.on('Scene.idRequest', async (data: { center: Vector2Component; size: number }) => {
+        let scenes: string[] = (await downloadManager.resolveScenesIdRange(data.center, data.size)) as string[]
+
+        for (let scene of scenes) {
+          connector.notify('Scene.idResponse', {
+            position: data.center,
+            data: scene
+          })
+        }
+      })
 
       connector.on('Scene.prefetchDone', (opt: { sceneId: string }) => {
         sceneController.reportDataLoaded(opt.sceneId)

@@ -14,6 +14,8 @@ import { getFetchContentServer, getFetchMetaContentServer } from '../../shared/d
 import { Store } from 'redux'
 
 import { getTutorialBaseURL } from 'shared/location'
+import { Vector2Component } from 'atomicHelpers/landHelpers'
+import { getTilesRectFromCenter } from 'shared/utils'
 
 /*
  * The worker is set up on the first require of this file
@@ -60,14 +62,22 @@ export class LifecycleManager extends TransportBasedServer {
     return theFuture
   }
 
-  getSceneId(position: string) {
-    let theFuture = this.positionToRequest.get(position)
-    if (!theFuture) {
-      theFuture = future<string>()
-      this.positionToRequest.set(position, theFuture)
-      this.notify('Scene.idRequest', { position })
+  getSceneIds(center: Vector2Component, size: number): IFuture<string>[] {
+    let ids: string[] = getTilesRectFromCenter(center, size)
+    let futures: IFuture<string>[] = []
+
+    for (let id of ids) {
+      let theFuture = this.positionToRequest.get(id)
+
+      if (!theFuture) {
+        theFuture = future<string>()
+        this.positionToRequest.set(id, theFuture)
+        futures.push(theFuture)
+      }
     }
-    return theFuture
+
+    this.notify('Scene.idRequest', { center, size })
+    return futures
   }
 }
 

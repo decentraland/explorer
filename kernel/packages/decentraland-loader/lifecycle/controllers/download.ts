@@ -3,6 +3,8 @@ import { future, IFuture } from 'fp-future'
 import { createLogger } from 'shared/logger'
 import { createTutorialILand, isTutorial, TUTORIAL_SCENE_ID } from '../tutorial/tutorial'
 import { ILand, SceneJsonData, ParcelInfoResponse, ContentMapping } from 'shared/types'
+import { Vector2Component } from 'atomicHelpers/landHelpers'
+import { getTilesRectFromCenter } from 'shared/utils'
 
 const logger = createLogger('loader')
 const { error } = logger
@@ -39,6 +41,40 @@ export class SceneDataDownloadManager {
     }
   ) {
     // stub
+  }
+
+  async resolveScenesIdRange(pos: Vector2Component, size: number): Promise<string[] | null> {
+    let tilesArray: string[] = getTilesRectFromCenter(pos, size)
+    let futures: IFuture<string | null>[] = []
+    let needsFetch: boolean = false
+    let result: string[] = []
+
+    for (let tile of tilesArray) {
+      let promise: IFuture<string | null>
+
+      if (this.positionToSceneId.has(tile)) {
+        promise = this.positionToSceneId.get(tile)!
+      } else {
+        promise = future<string | null>()
+        this.positionToSceneId.set(tile, promise)
+        needsFetch = true
+      }
+
+      futures.push(promise)
+    }
+
+    if (!needsFetch) {
+      //NOTE(Brian): If all the tiles are already handled by other requests (pending or finished) then just
+      //             return
+      for (let f in futures) {
+        result.push(await f)
+      }
+      return result
+    }
+
+    //TODO(Brian): fetch ids rectangle using a single API call and resolve the futures
+
+    return result
   }
 
   async resolveSceneSceneId(pos: string): Promise<string | null> {

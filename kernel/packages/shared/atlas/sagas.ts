@@ -19,6 +19,7 @@ import {
 } from './actions'
 import { shouldLoadSceneJsonData } from './selectors'
 import { AtlasState, MapSceneData, MARKET_DATA, QUERY_DATA_FROM_SCENE_JSON, REPORT_SCENES_AROUND_PARCEL } from './types'
+import { getTilesRectFromCenter } from '../utils'
 
 declare const window: {
   unityInterface: {
@@ -73,9 +74,10 @@ async function fetchSceneJson(sceneId: string) {
   return land
 }
 
-async function fetchSceneId(position: string) {
+async function fetchSceneIds(center: Vector2Component, size: number) {
   const server: LifecycleManager = getServer()
-  const id = await server.getSceneId(position)
+  const id = await server.getSceneIds(center, size)
+  defaultLogger.log(`fetching position end! ${center} ... id = ${id}`)
   return id
 }
 
@@ -110,29 +112,21 @@ export function* reportScenesAroundParcelAction(action: ReportScenesAroundParcel
 
   defaultLogger.log(`waiting for ids... ${JSON.stringify(tilesAround)}`)
 
-  const sceneIds: string[] = yield all(tilesAround.map(tile => call(() => fetchSceneId(tile))))
+  const sceneIds: string[] = yield call(() => fetchSceneIds(action.payload.parcelCoord, action.payload.scenesAround))
 
   for (let id of sceneIds) {
     sceneIdsSet.add(id)
   }
 
+  defaultLogger.log(`waiting for scenes... ${JSON.stringify(sceneIdsSet)}`)
+
   for (let id of sceneIdsSet) {
     yield putResolve(querySceneData(id))
   }
 
+  defaultLogger.log(`end!`)
+
   yield call(reportScenes, atlasState, tilesAround)
-}
-
-function getTilesRectFromCenter(parcelCoords: Vector2Component, rectSize: number): string[] {
-  let result: string[] = []
-
-  for (let x: number = parcelCoords.x - rectSize; x < parcelCoords.x + rectSize; x++) {
-    for (let y: number = parcelCoords.y - rectSize; y < parcelCoords.y + rectSize; y++) {
-      result.push(`${x},${y}`)
-    }
-  }
-
-  return result
 }
 
 export function* reportScenes(atlas?: AtlasState, tiles?: string[]): any {
