@@ -16,7 +16,10 @@ namespace DCL
 
         public MapAtlas atlas;
         public Transform overlayContainer;
+
         public Image playerPositionIcon;
+        public MapSceneIcon scenesOfInterestIconPrefab;
+
         public HashSet<MinimapMetadata.MinimapSceneInfo> scenesOfInterest = new HashSet<MinimapMetadata.MinimapSceneInfo>();
         public Dictionary<MinimapMetadata.MinimapSceneInfo, GameObject> scenesOfInterestMarkers = new Dictionary<MinimapMetadata.MinimapSceneInfo, GameObject>();
 
@@ -32,10 +35,20 @@ namespace DCL
             playerRotation.OnChange += OnCharacterRotate;
         }
 
+        static bool DEBUG = true;
+
         private void MapRenderer_OnSceneInfoUpdated(MinimapMetadata.MinimapSceneInfo sceneInfo)
         {
-            if (!sceneInfo.isPOI)
-                return;
+            if (DEBUG)
+            {
+                if (sceneInfo.parcels.Count <= 1)
+                    return;
+            }
+            else
+            {
+                if (!sceneInfo.isPOI)
+                    return;
+            }
 
             if (scenesOfInterest.Contains(sceneInfo))
                 return;
@@ -43,8 +56,7 @@ namespace DCL
             Debug.Log($"sceneInfo name = {sceneInfo.name} ... type = {sceneInfo.type} .. json = {JsonUtility.ToJson(sceneInfo, true)}");
             scenesOfInterest.Add(sceneInfo);
 
-            GameObject go = new GameObject(sceneInfo.name);
-            go.transform.parent = overlayContainer.transform;
+            GameObject go = Object.Instantiate(scenesOfInterestIconPrefab.gameObject, overlayContainer.transform);
 
             Vector2 centerTile = Vector2.zero;
 
@@ -56,10 +68,9 @@ namespace DCL
             centerTile /= sceneInfo.parcels.Count;
 
             go.transform.localPosition = MapUtils.GetTileToLocalPosition(centerTile.x, centerTile.y);
-            var text = go.AddComponent<Text>();
 
-            text.text = sceneInfo.name;
-            text.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+            MapSceneIcon icon = go.GetComponent<MapSceneIcon>();
+            icon.title.text = sceneInfo.name;
 
             scenesOfInterestMarkers.Add(sceneInfo, go);
         }
