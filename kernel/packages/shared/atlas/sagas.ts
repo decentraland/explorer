@@ -1,6 +1,6 @@
 import { Vector2Component } from 'atomicHelpers/landHelpers'
 import { MinimapSceneInfo } from 'decentraland-ecs/src/decentraland/Types'
-import { call, fork, put, putResolve, select, take, takeEvery } from 'redux-saga/effects'
+import { call, fork, put, putResolve, select, take, takeEvery, all } from 'redux-saga/effects'
 import { CAMPAIGN_PARCEL_SEQUENCE } from 'shared/world/TeleportController'
 import { parcelLimits } from '../../config'
 import { getServer, LifecycleManager } from '../../decentraland-loader/lifecycle/manager'
@@ -96,16 +96,6 @@ export function* checkAndReportAround() {
   }
 }
 
-function fetchIds(tilesAround: string[]) {
-  const promises: any[] = []
-
-  for (let pos of tilesAround) {
-    promises.push(fetchSceneId(pos))
-  }
-
-  return Promise.all(promises)
-}
-
 export function* reportScenesAroundParcelAction(action: ReportScenesAroundParcel) {
   let atlasState = (yield select(state => state.atlas)) as AtlasState
 
@@ -120,7 +110,7 @@ export function* reportScenesAroundParcelAction(action: ReportScenesAroundParcel
 
   defaultLogger.log(`waiting for ids... ${JSON.stringify(tilesAround)}`)
 
-  const sceneIds: string[] = yield call(fetchIds, tilesAround)
+  const sceneIds: string[] = yield all(tilesAround.map(tile => call(() => fetchSceneId(tile))))
 
   for (let id of sceneIds) {
     sceneIdsSet.add(id)
