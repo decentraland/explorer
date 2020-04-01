@@ -96,5 +96,23 @@ namespace DCL
                 yTile = 0;
             }
         }
+
+        public Vector2Int GetTileCoordsFromScreenPosition(float x, float y)
+        {
+            // x -= WORLD_PARCELS_OFFSET_MIN.x;
+            // y -= WORLD_PARCELS_OFFSET_MIN.y;
+
+            // Vector2 result = new Vector2(x / PARCEL_SIZE, y / PARCEL_SIZE) + (Vector2)CENTER_OFFSET;
+            // return new Vector2Int((int)result.x, (int)result.y);
+
+            var chunksContainerRect = (chunksParent.transform as RectTransform).rect;
+            Vector3 mapMinScreenPosition = chunksContainerRect.min;
+            mapMinScreenPosition.z = 0;
+
+            Vector3 mousePosDelta = Camera.main.ScreenToWorldPoint(new Vector3(x, y, 0.1f)) - mapMinScreenPosition;
+            mousePosDelta.z = 0;
+
+            return new Vector2Int((int)(mousePosDelta.x / 10), (int)(mousePosDelta.y / 10));
+        }
     }
 }
