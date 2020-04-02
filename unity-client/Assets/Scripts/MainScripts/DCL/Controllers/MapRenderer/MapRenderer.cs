@@ -30,7 +30,6 @@ namespace DCL
 
         void Start()
         {
-            Debug.Log("suscribing");
             MinimapMetadata.GetMetadata().OnSceneInfoUpdated += MapRenderer_OnSceneInfoUpdated;
             playerWorldPosition.OnChange += OnCharacterMove;
             playerRotation.OnChange += OnCharacterRotate;
@@ -42,19 +41,20 @@ namespace DCL
         {
             if (DEBUG)
             {
-                if (sceneInfo.parcels.Count <= 1)
+                if (sceneInfo.parcels.Count <= 1 || sceneInfo.type == MinimapMetadata.TileType.Roads)
                     return;
             }
             else
             {
                 if (!sceneInfo.isPOI)
+                {
                     return;
+                }
             }
 
             if (scenesOfInterest.Contains(sceneInfo))
                 return;
 
-            Debug.Log($"sceneInfo name = {sceneInfo.name} ... type = {sceneInfo.type} .. json = {JsonUtility.ToJson(sceneInfo, true)}");
             scenesOfInterest.Add(sceneInfo);
 
             GameObject go = Object.Instantiate(scenesOfInterestIconPrefab.gameObject, overlayContainer.transform);
