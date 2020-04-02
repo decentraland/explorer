@@ -18,6 +18,7 @@ namespace DCL
         [SerializeField] TextMeshProUGUI currentSceneNameText;
         [SerializeField] TextMeshProUGUI currentSceneCoordsText;
         [SerializeField] RawImage parcelHighlightImage;
+        [SerializeField] TextMeshProUGUI highlightedParcelText;
         InputAction_Trigger.Triggered toggleNavMapDelegate;
         int parcelSizeInMap;
         RectTransform minimapViewport;
@@ -27,6 +28,8 @@ namespace DCL
         Vector3 worldmapOffset;
         Vector3 worldCoordsOriginInMap;
         Vector3[] navmapWorldspaceCorners = new Vector3[4];
+        bool cursorLockedBeforeOpening = true;
+        Vector3 mouseMapCoords;
 
         public bool isOpen
         {
@@ -39,9 +42,6 @@ namespace DCL
                 return scrollRect.gameObject.activeSelf;
             }
         }
-
-        [Header("DEBUG")]
-        public Vector3 mouseMapCoords;
 
         // TODO: Remove this bool once we finish the feature
         bool enabledInProduction = false;
@@ -90,7 +90,9 @@ namespace DCL
 
         void DrawHoveredScene()
         {
-            parcelHighlightImage.transform.position = worldCoordsOriginInMap + mouseMapCoords * parcelSizeInMap;
+            // parcelHighlightImage.transform.position = worldCoordsOriginInMap + mouseMapCoords * parcelSizeInMap;
+            parcelHighlightImage.transform.position = worldCoordsOriginInMap + mouseMapCoords * parcelSizeInMap + new Vector3(parcelSizeInMap, parcelSizeInMap, 0f) / 2;
+            highlightedParcelText.text = $"{mouseMapCoords.x}, {mouseMapCoords.y}";
 
             // ----------------------------------------------------
             // TODO: Use sceneInfo to populate scenes hover info on navmap once we can access all the scenes info
@@ -116,7 +118,9 @@ namespace DCL
 
             if (isOpen)
             {
-                Utils.UnlockCursor();
+                cursorLockedBeforeOpening = Utils.isCursorLocked;
+                if (cursorLockedBeforeOpening)
+                    Utils.UnlockCursor();
 
                 minimapViewport = MapRenderer.i.atlas.viewport;
                 mapRendererMinimapParent = MapRenderer.i.transform.parent;
@@ -136,7 +140,8 @@ namespace DCL
             }
             else
             {
-                Utils.LockCursor();
+                if (cursorLockedBeforeOpening)
+                    Utils.LockCursor();
 
                 MapRenderer.i.atlas.viewport = minimapViewport;
                 MapRenderer.i.transform.SetParent(mapRendererMinimapParent);

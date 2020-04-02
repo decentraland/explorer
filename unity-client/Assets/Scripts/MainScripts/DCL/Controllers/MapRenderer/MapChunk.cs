@@ -7,7 +7,9 @@ namespace DCL
 {
     public class MapChunk : MonoBehaviour
     {
+        const bool DRAW_DEBUG_GIZMO = false;
         const string MAP_API_BASE = "https://api.decentraland.org/v1/map.png";
+
         public RawImage targetImage;
 
         [System.NonSerialized]
@@ -64,8 +66,11 @@ namespace DCL
             Vector3 viewMaxCoords = owner.viewport.TransformPoint(new Vector3(owner.viewport.rect.xMax, owner.viewport.rect.yMax));
 
 #if UNITY_EDITOR
-            var rtWorldRect = new Rect(myMinCoords.x, myMinCoords.y, myMaxCoords.x - myMinCoords.x, myMaxCoords.y - myMinCoords.y);
-            Utils.DrawRectGizmo(rtWorldRect, Color.red, 5.0f);
+            if (DRAW_DEBUG_GIZMO)
+            {
+                var rtWorldRect = new Rect(myMinCoords.x, myMinCoords.y, myMaxCoords.x - myMinCoords.x, myMaxCoords.y - myMinCoords.y);
+                Utils.DrawRectGizmo(rtWorldRect, Color.red, 5.0f);
+            }
 #endif
             float size = (viewMaxCoords - viewMinCoords).magnitude;
 
@@ -74,7 +79,8 @@ namespace DCL
             viewportRect.max += Vector2.one * size;
 
 #if UNITY_EDITOR
-            Utils.DrawRectGizmo(viewportRect, Color.blue, 5.0f);
+            if (DRAW_DEBUG_GIZMO)
+                Utils.DrawRectGizmo(viewportRect, Color.blue, 5.0f);
 #endif
 
             Rect myRect = new Rect(myMinCoords, myMaxCoords - myMinCoords);
