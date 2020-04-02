@@ -14,7 +14,9 @@ namespace Tests
         {
             yield return InitUnityScene("MainTest");
 
-            Object.Instantiate(Resources.Load("Map Renderer"));
+            if (MapRenderer.i == null)
+                Object.Instantiate(Resources.Load("Map Renderer"));
+
             MapRenderer.i.atlas.mapChunkPrefab = (GameObject)Resources.Load("Map Chunk Mock");
             var go = new GameObject("Viewport");
             var rt = go.AddComponent<RectTransform>();
@@ -105,9 +107,9 @@ namespace Tests
 
             MapSceneIcon[] icons = MapRenderer.i.GetComponentsInChildren<MapSceneIcon>();
 
-            Assert.AreEqual(0, icons.Length, "Only 1 icon is marked as POI, but 2 icons were spawned");
+            Assert.AreEqual(1, icons.Length, "Only 1 icon is marked as POI, but 2 icons were spawned");
             Assert.AreEqual(sceneInfo.name, icons[0].title.text);
-            Assert.AreEqual(Vector3.zero, icons[0].transform.localPosition);
+            Assert.AreEqual(new Vector3(3000, 3000, 0), icons[0].transform.localPosition);
 
             yield return null;
         }

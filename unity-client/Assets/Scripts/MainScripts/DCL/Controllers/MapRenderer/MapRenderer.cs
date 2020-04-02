@@ -30,6 +30,7 @@ namespace DCL
 
         void Start()
         {
+            Debug.Log("suscribing");
             MinimapMetadata.GetMetadata().OnSceneInfoUpdated += MapRenderer_OnSceneInfoUpdated;
             playerWorldPosition.OnChange += OnCharacterMove;
             playerRotation.OnChange += OnCharacterRotate;
