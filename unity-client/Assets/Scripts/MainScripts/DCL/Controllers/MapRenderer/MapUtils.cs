@@ -23,16 +23,5 @@ namespace DCL.Helpers
             Vector3 result = new Vector3(x * PARCEL_SIZE, y * PARCEL_SIZE, 0) + CENTER_OFFSET;
             return result;
         }
-
-        // public static Vector2Int GetScreenPositionToTileCoords(float x, float y)
-        // {
-        //     // x -= WORLD_PARCELS_OFFSET_MIN.x;
-        //     // y -= WORLD_PARCELS_OFFSET_MIN.y;
-
-        //     // Vector2 result = new Vector2(x / PARCEL_SIZE, y / PARCEL_SIZE) + (Vector2)CENTER_OFFSET;
-        //     // return new Vector2Int((int)result.x, (int)result.y);
-
-
-        // }
     }
 }

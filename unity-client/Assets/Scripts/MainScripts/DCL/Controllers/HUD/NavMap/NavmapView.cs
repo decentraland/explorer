@@ -80,17 +80,13 @@ namespace DCL
         {
             parcelHighlightImage.transform.position = worldCoordsOriginInMap + mouseMapCoords * parcelSizeInMap;
 
-            // Until we get all the scenes info
-
             // ----------------------------------------------------
+            // TODO: Use sceneInfo to populate scenes hover info on navmap once we can access all the scenes info
 
             // var sceneInfo = mapMetadata.GetSceneInfo(mouseMapCoords.x, mouseMapCoords.y);
 
-            // // var sceneInfo = mapMetadata.GetSceneInfo(0, 0);
-            // // var sceneInfo = MinimapMetadata.GetMetadata().GetSceneInfo(100, 100);
-
             // if (sceneInfo == null)
-            //     Debug.Log("SCENE INFO IS NULL!!!!!");
+            //     Debug.Log($"Couldn't fetch scene info from scene {mouseMapCoords}");
             // else
             //     Debug.Log(sceneInfo.name);
         }
