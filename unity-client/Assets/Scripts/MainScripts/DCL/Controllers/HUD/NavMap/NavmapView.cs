@@ -90,7 +90,6 @@ namespace DCL
 
         void DrawHoveredScene()
         {
-            // parcelHighlightImage.transform.position = worldCoordsOriginInMap + mouseMapCoords * parcelSizeInMap;
             parcelHighlightImage.transform.position = worldCoordsOriginInMap + mouseMapCoords * parcelSizeInMap + new Vector3(parcelSizeInMap, parcelSizeInMap, 0f) / 2;
             highlightedParcelText.text = $"{mouseMapCoords.x}, {mouseMapCoords.y}";
 
