@@ -72,9 +72,8 @@ namespace DCL
             mouseMapCoords = Input.mousePosition - worldCoordsOriginInMap;
             mouseMapCoords = mouseMapCoords / parcelSizeInMap;
 
-            // NOT SURE ABOUT THE ROUNDING
-            mouseMapCoords.x = Mathf.Round(mouseMapCoords.x);
-            mouseMapCoords.y = Mathf.Round(mouseMapCoords.y);
+            mouseMapCoords.x = (int)Mathf.Floor(mouseMapCoords.x);
+            mouseMapCoords.y = (int)Mathf.Floor(mouseMapCoords.y);
         }
 
         void DrawHoveredScene()
