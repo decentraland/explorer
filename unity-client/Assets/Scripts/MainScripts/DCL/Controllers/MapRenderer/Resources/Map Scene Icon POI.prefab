@@ -10,7 +10,7 @@ PrefabInstance:
     - target: {fileID: 9031851020175058759, guid: a3d29f660ee80ca4890e504f724cc8c1,
         type: 3}
       propertyPath: m_Name
-      value: Map Scene Icon
+      value: Map Scene Icon POI
       objectReference: {fileID: 0}
     - target: {fileID: 8098144934014490349, guid: a3d29f660ee80ca4890e504f724cc8c1,
         type: 3}
@@ -157,11 +157,5 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 1599786805352816207, guid: a3d29f660ee80ca4890e504f724cc8c1,
-        type: 3}
-      propertyPath: m_Sprite
-      value: 
-      objectReference: {fileID: 7040797148217540977, guid: ad7b2afa9169b4d4ea47e951ff944b2d,
-        type: 3}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a3d29f660ee80ca4890e504f724cc8c1, type: 3}

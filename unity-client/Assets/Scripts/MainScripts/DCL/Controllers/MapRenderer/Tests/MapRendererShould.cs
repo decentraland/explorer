@@ -1,5 +1,6 @@
 using DCL;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.TestTools;
@@ -64,7 +65,6 @@ namespace Tests
             yield return null;
         }
 
-
         [UnityTest]
         public IEnumerator PerformCullingAsIntended()
         {
@@ -74,6 +74,41 @@ namespace Tests
             Assert.AreEqual("1111111111111111111111111111111100111110011111111", GetChunkStatesAsString());
             CommonScriptableObjects.playerWorldPosition.Set(new Vector3(-1000, 0, -1000));
             Assert.AreEqual("1111111111111111001111100111111111111111111111111", GetChunkStatesAsString());
+            yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator DisplayParcelOfInterestIconsProperly()
+        {
+            var sceneInfo = new MinimapMetadata.MinimapSceneInfo();
+            sceneInfo.name = "important scene";
+            sceneInfo.isPOI = true;
+            sceneInfo.parcels = new List<Vector2Int>()
+            {
+                new Vector2Int() { x = 0, y = 0 },
+                new Vector2Int() { x = 0, y = 1 },
+                new Vector2Int() { x = 1, y = 0 },
+                new Vector2Int() { x = 1, y = 1 }
+            };
+
+            MinimapMetadata.GetMetadata().AddSceneInfo(sceneInfo);
+
+            var sceneInfo2 = new MinimapMetadata.MinimapSceneInfo();
+            sceneInfo2.name = "non-important scene";
+            sceneInfo2.isPOI = false;
+            sceneInfo2.parcels = new List<Vector2Int>()
+            {
+                new Vector2Int() { x = 5, y = 0 },
+            };
+
+            MinimapMetadata.GetMetadata().AddSceneInfo(sceneInfo2);
+
+            MapSceneIcon[] icons = MapRenderer.i.GetComponentsInChildren<MapSceneIcon>();
+
+            Assert.AreEqual(0, icons.Length, "Only 1 icon is marked as POI, but 2 icons were spawned");
+            Assert.AreEqual(sceneInfo.name, icons[0].title.text);
+            Assert.AreEqual(Vector3.zero, icons[0].transform.localPosition);
+
             yield return null;
         }
 
