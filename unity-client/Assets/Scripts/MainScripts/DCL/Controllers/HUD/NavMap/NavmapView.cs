@@ -28,6 +28,18 @@ namespace DCL
         Vector3 worldCoordsOriginInMap;
         Vector3[] navmapWorldspaceCorners = new Vector3[4];
 
+        public bool isOpen
+        {
+            private set
+            {
+                scrollRect.gameObject.SetActive(value);
+            }
+            get
+            {
+                return scrollRect.gameObject.activeSelf;
+            }
+        }
+
         [Header("DEBUG")]
         public Vector3 mouseMapCoords;
 
@@ -42,7 +54,7 @@ namespace DCL
             parcelSizeInMap = (MapUtils.PARCEL_SIZE / 2);
 
             closeButton.onClick.AddListener(() => { ToggleNavMap(); });
-            scrollRect.onValueChanged.AddListener((x) => { if (scrollRect.gameObject.activeSelf) MapRenderer.i.atlas.UpdateCulling(); });
+            scrollRect.onValueChanged.AddListener((x) => { if (isOpen) MapRenderer.i.atlas.UpdateCulling(); });
 
             toggleNavMapDelegate = (x) => { ToggleNavMap(); };
             toggleNavMapAction.OnTriggered += toggleNavMapDelegate;
@@ -52,7 +64,7 @@ namespace DCL
 
         void Update()
         {
-            if (!scrollRect.gameObject.activeSelf) return;
+            if (!isOpen) return;
 
             RectTransform chunksContainerRectTransform = MapRenderer.i.atlas.chunksParent.transform as RectTransform;
             chunksContainerRectTransform.GetWorldCorners(navmapWorldspaceCorners);
@@ -100,9 +112,9 @@ namespace DCL
 #endif
 
             scrollRect.StopMovement();
-            scrollRect.gameObject.SetActive(!scrollRect.gameObject.activeSelf);
+            isOpen = !isOpen;
 
-            if (scrollRect.gameObject.activeSelf)
+            if (isOpen)
             {
                 Utils.UnlockCursor();
 
