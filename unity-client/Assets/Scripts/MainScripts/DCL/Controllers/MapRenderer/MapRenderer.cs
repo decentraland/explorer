@@ -15,6 +15,7 @@ namespace DCL
         public Vector3 playerGridPosition => Utils.WorldToGridPositionUnclamped(playerWorldPosition.Get());
 
         public MapAtlas atlas;
+        public RawImage parcelHighlightImage;
 
         public Image playerPositionIcon;
         public HashSet<MinimapMetadata.MinimapSceneInfo> scenesOfInterest = new HashSet<MinimapMetadata.MinimapSceneInfo>();

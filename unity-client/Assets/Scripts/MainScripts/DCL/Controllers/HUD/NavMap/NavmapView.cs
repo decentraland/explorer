@@ -21,8 +21,8 @@ namespace DCL
         [SerializeField] Transform scrollRectContentTransform;
         [SerializeField] TextMeshProUGUI currentSceneNameText;
         [SerializeField] TextMeshProUGUI currentSceneCoordsText;
-        [SerializeField] RawImage parcelHighlightImage;
-        [SerializeField] TextMeshProUGUI highlightedParcelText;
+        RawImage parcelHighlightImage;
+        TextMeshProUGUI highlightedParcelText;
         InputAction_Trigger.Triggered toggleNavMapDelegate;
         int parcelSizeInMap;
         RectTransform minimapViewport;
@@ -57,6 +57,8 @@ namespace DCL
             worldmapOffset = new Vector3(LEFT_BORDER_PARCELS + WORLDMAP_WIDTH_IN_PARCELS / 2, BOTTOM_BORDER_PARCELS + WORLDMAP_WIDTH_IN_PARCELS / 2, 0);
             parcelSizeInMap = (MapUtils.PARCEL_SIZE / 2);
 
+            parcelHighlightImage = MapRenderer.i.parcelHighlightImage;
+            highlightedParcelText = parcelHighlightImage.GetComponentInChildren<TextMeshProUGUI>(true);
             parcelHighlightImage.rectTransform.localScale = new Vector3(parcelHightlightScale, parcelHightlightScale, 1f);
 
             closeButton.onClick.AddListener(() => { ToggleNavMap(); });
@@ -81,7 +83,7 @@ namespace DCL
 
             UpdateMouseMapCoords();
 
-            DrawHoveredScene();
+            UpdateParcelHighlight();
         }
 
         void UpdateMouseMapCoords()
@@ -94,13 +96,13 @@ namespace DCL
             mouseMapCoords.y = (int)Mathf.Floor(mouseMapCoords.y);
         }
 
-        void DrawHoveredScene()
+        void UpdateParcelHighlight()
         {
             parcelHighlightImage.transform.position = worldCoordsOriginInMap + mouseMapCoords * parcelSizeInMap + new Vector3(parcelSizeInMap, parcelSizeInMap, 0f) / 2;
             highlightedParcelText.text = $"{mouseMapCoords.x}, {mouseMapCoords.y}";
 
             // ----------------------------------------------------
-            // TODO: Use sceneInfo to populate scenes hover info on navmap once we can access all the scenes info
+            // TODO: Use sceneInfo to highlight whole scene parcels and populate scenes hover info on navmap once we can access all the scenes info
 
             // var sceneInfo = mapMetadata.GetSceneInfo(mouseMapCoords.x, mouseMapCoords.y);
 
@@ -127,6 +129,8 @@ namespace DCL
                 if (cursorLockedBeforeOpening)
                     Utils.UnlockCursor();
 
+                parcelHighlightImage.gameObject.SetActive(true);
+
                 minimapViewport = MapRenderer.i.atlas.viewport;
                 mapRendererMinimapParent = MapRenderer.i.transform.parent;
                 atlasOriginalPosition = MapRenderer.i.atlas.chunksParent.transform.localPosition;
@@ -147,6 +151,8 @@ namespace DCL
             {
                 if (cursorLockedBeforeOpening)
                     Utils.LockCursor();
+
+                parcelHighlightImage.gameObject.SetActive(false);
 
                 MapRenderer.i.atlas.viewport = minimapViewport;
                 MapRenderer.i.transform.SetParent(mapRendererMinimapParent);
