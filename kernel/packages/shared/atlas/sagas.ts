@@ -103,11 +103,12 @@ function* reportOne(action: FetchNameFromSceneJsonSuccess) {
     return { x, y }
   })
 
-  //NOTE(Brian): map related flow has a vomitive approach, we have to refactor all this later
+  //TODO(Brian): we will refactor this in the info plumbing PR
   parcelsAsV2.forEach( p => { 
-    if ( CAMPAIGN_PARCEL_SEQUENCE.includes(p) ) { 
-      isPOI = true 
-    } 
+    CAMPAIGN_PARCEL_SEQUENCE.forEach( p2 => {
+      if ( p.x === p2.x && p.y === p2.y )
+        isPOI = true
+    }) 
   })
 
   window.unityInterface.UpdateMinimapSceneInformation([
@@ -202,9 +203,13 @@ export function* reportScenes(marketplaceInfo?: AtlasState, selection?: Record<s
     }
     keyToParcels[key].push({ x: parcel.x, y: parcel.y })
 
-    //NOTE(Brian): map related flow has a vomitive approach, we have to refactor all this later
+    //TODO(Brian): we will refactor this in the info plumbing PR
     if (keyToPOI[key] === false) {
-      keyToPOI[key] = CAMPAIGN_PARCEL_SEQUENCE.includes({x:parcel.x, y:parcel.y})
+      CAMPAIGN_PARCEL_SEQUENCE.forEach(element => {
+        if ( element.x === parcel.x && element.y === parcel.y ) {
+          keyToPOI[key] = true 
+        }
+      })
     }
   })
 
