@@ -44,7 +44,7 @@ namespace DCL
         }
 
         // TODO: Remove this bool once we finish the feature
-        bool enabledInProduction = false;
+        bool enabledInProduction = true;
 
         void Start()
         {
