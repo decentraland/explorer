@@ -98,6 +98,17 @@ namespace DCL
 
         void UpdateParcelHighlight()
         {
+            if (!CoordinatesAreInsideTheworld((int)mouseMapCoords.x, (int)mouseMapCoords.y))
+            {
+                if (parcelHighlightImage.gameObject.activeSelf)
+                    parcelHighlightImage.gameObject.SetActive(false);
+
+                return;
+            }
+
+            if (!parcelHighlightImage.gameObject.activeSelf)
+                parcelHighlightImage.gameObject.SetActive(true);
+
             parcelHighlightImage.transform.position = worldCoordsOriginInMap + mouseMapCoords * parcelSizeInMap + new Vector3(parcelSizeInMap, parcelSizeInMap, 0f) / 2;
             highlightedParcelText.text = $"{mouseMapCoords.x}, {mouseMapCoords.y}";
 
@@ -110,6 +121,11 @@ namespace DCL
             //     Debug.Log($"Couldn't fetch scene info from scene {mouseMapCoords}");
             // else
             //     Debug.Log(sceneInfo.name);
+        }
+
+        bool CoordinatesAreInsideTheworld(int xCoord, int yCoord)
+        {
+            return (Mathf.Abs(xCoord) <= WORLDMAP_WIDTH_IN_PARCELS / 2) && (Mathf.Abs(yCoord) <= WORLDMAP_WIDTH_IN_PARCELS / 2);
         }
 
         void ToggleNavMap()
@@ -128,8 +144,6 @@ namespace DCL
                 cursorLockedBeforeOpening = Utils.isCursorLocked;
                 if (cursorLockedBeforeOpening)
                     Utils.UnlockCursor();
-
-                parcelHighlightImage.gameObject.SetActive(true);
 
                 minimapViewport = MapRenderer.i.atlas.viewport;
                 mapRendererMinimapParent = MapRenderer.i.transform.parent;
