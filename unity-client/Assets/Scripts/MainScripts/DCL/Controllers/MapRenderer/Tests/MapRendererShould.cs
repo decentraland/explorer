@@ -29,41 +29,44 @@ namespace Tests
         [UnityTest]
         public IEnumerator PositionPlayerIconAsIntended()
         {
+            RectTransform rt = MapRenderer.i.playerPositionIcon.transform as RectTransform;
             CommonScriptableObjects.playerWorldPosition.Set(new Vector3(0, 0));
-            Assert.AreApproximatelyEqual(2990, MapRenderer.i.playerPositionIcon.transform.localPosition.x);
-            Assert.AreApproximatelyEqual(2990, MapRenderer.i.playerPositionIcon.transform.localPosition.y);
+            Assert.AreApproximatelyEqual(3000, rt.anchoredPosition.x);
+            Assert.AreApproximatelyEqual(3000, rt.anchoredPosition.y);
 
             CommonScriptableObjects.playerWorldPosition.Set(new Vector3(500, 0, 500));
-            Assert.AreApproximatelyEqual(3615, MapRenderer.i.playerPositionIcon.transform.localPosition.x);
-            Assert.AreApproximatelyEqual(3615, MapRenderer.i.playerPositionIcon.transform.localPosition.y);
+            Assert.AreApproximatelyEqual(3625, rt.anchoredPosition.x);
+            Assert.AreApproximatelyEqual(3625, rt.anchoredPosition.y);
 
             CommonScriptableObjects.playerWorldPosition.Set(new Vector3(-500, 0, -500));
-            Assert.AreApproximatelyEqual(2365, MapRenderer.i.playerPositionIcon.transform.localPosition.x);
-            Assert.AreApproximatelyEqual(2365, MapRenderer.i.playerPositionIcon.transform.localPosition.y);
+            Assert.AreApproximatelyEqual(2375, rt.anchoredPosition.x);
+            Assert.AreApproximatelyEqual(2375, rt.anchoredPosition.y);
 
             CommonScriptableObjects.cameraForward.Set(new Vector3(0, 0, 1));
-            Assert.AreApproximatelyEqual(0, MapRenderer.i.playerPositionIcon.transform.eulerAngles.z);
+            Assert.AreApproximatelyEqual(0, rt.eulerAngles.z);
             CommonScriptableObjects.cameraForward.Set(new Vector3(0, 0, -1));
-            Assert.AreApproximatelyEqual(180, MapRenderer.i.playerPositionIcon.transform.eulerAngles.z);
+            Assert.AreApproximatelyEqual(180, rt.eulerAngles.z);
             CommonScriptableObjects.cameraForward.Set(new Vector3(0.5f, 0, 0.5f));
-            Assert.AreApproximatelyEqual(315, MapRenderer.i.playerPositionIcon.transform.eulerAngles.z);
+            Assert.AreApproximatelyEqual(315, rt.eulerAngles.z);
             yield return null;
         }
 
         [UnityTest]
         public IEnumerator CenterAsIntended()
         {
+            Transform atlasContainerTransform = MapRenderer.i.atlas.container.transform;
+
             CommonScriptableObjects.playerWorldPosition.Set(new Vector3(0, 0, 0));
-            Assert.AreApproximatelyEqual(-1495, MapRenderer.i.atlas.container.transform.position.x);
-            Assert.AreApproximatelyEqual(-1495, MapRenderer.i.atlas.container.transform.position.y);
+            Assert.AreApproximatelyEqual(-1500, atlasContainerTransform.position.x);
+            Assert.AreApproximatelyEqual(-1500, atlasContainerTransform.position.y);
 
             CommonScriptableObjects.playerWorldPosition.Set(new Vector3(100, 0, 100));
-            Assert.AreApproximatelyEqual(-1557.5f, MapRenderer.i.atlas.container.transform.position.x);
-            Assert.AreApproximatelyEqual(-1557.5f, MapRenderer.i.atlas.container.transform.position.y);
+            Assert.AreApproximatelyEqual(-1562.5f, atlasContainerTransform.position.x);
+            Assert.AreApproximatelyEqual(-1562.5f, atlasContainerTransform.position.y);
 
             CommonScriptableObjects.playerWorldPosition.Set(new Vector3(-100, 0, -100));
-            Assert.AreApproximatelyEqual(-1432.5f, MapRenderer.i.atlas.container.transform.position.x);
-            Assert.AreApproximatelyEqual(-1432.5f, MapRenderer.i.atlas.container.transform.position.y);
+            Assert.AreApproximatelyEqual(-1437.5f, atlasContainerTransform.position.x);
+            Assert.AreApproximatelyEqual(-1437.5f, atlasContainerTransform.position.y);
             yield return null;
         }
 
@@ -109,7 +112,7 @@ namespace Tests
 
             Assert.AreEqual(1, icons.Length, "Only 1 icon is marked as POI, but 2 icons were spawned");
             Assert.AreEqual(sceneInfo.name, icons[0].title.text);
-            Assert.AreEqual(new Vector3(3000, 3000, 0), icons[0].transform.localPosition);
+            Assert.AreEqual(new Vector3(3010, 3010, 0), icons[0].transform.localPosition);
 
             yield return null;
         }
