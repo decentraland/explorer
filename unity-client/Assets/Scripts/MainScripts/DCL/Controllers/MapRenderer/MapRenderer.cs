@@ -35,22 +35,10 @@ namespace DCL
             playerRotation.OnChange += OnCharacterRotate;
         }
 
-        static bool DEBUG = true;
-
         private void MapRenderer_OnSceneInfoUpdated(MinimapMetadata.MinimapSceneInfo sceneInfo)
         {
-            if (DEBUG)
-            {
-                if (sceneInfo.parcels.Count <= 1 || sceneInfo.type == MinimapMetadata.TileType.Roads)
-                    return;
-            }
-            else
-            {
-                if (!sceneInfo.isPOI)
-                {
-                    return;
-                }
-            }
+            if (!sceneInfo.isPOI)
+                return;
 
             if (scenesOfInterest.Contains(sceneInfo))
                 return;
@@ -66,9 +54,9 @@ namespace DCL
                 centerTile += parcel;
             }
 
-            centerTile /= sceneInfo.parcels.Count;
+            centerTile /= (float)sceneInfo.parcels.Count;
 
-            go.transform.localPosition = MapUtils.GetTileToLocalPosition(centerTile.x, centerTile.y);
+            (go.transform as RectTransform).anchoredPosition = MapUtils.GetTileToLocalPosition(centerTile.x, centerTile.y);
 
             MapSceneIcon icon = go.GetComponent<MapSceneIcon>();
             icon.title.text = sceneInfo.name;
