@@ -11,6 +11,10 @@ namespace DCL
         const int BOTTOM_BORDER_PARCELS = 25;
         const int WORLDMAP_WIDTH_IN_PARCELS = 300;
 
+        [Header("Configuration")]
+        [SerializeField] float parcelHightlightScale = 1.25f;
+
+        [Header("References")]
         [SerializeField] InputAction_Trigger toggleNavMapAction;
         [SerializeField] Button closeButton;
         [SerializeField] ScrollRect scrollRect;
@@ -52,6 +56,8 @@ namespace DCL
 
             worldmapOffset = new Vector3(LEFT_BORDER_PARCELS + WORLDMAP_WIDTH_IN_PARCELS / 2, BOTTOM_BORDER_PARCELS + WORLDMAP_WIDTH_IN_PARCELS / 2, 0);
             parcelSizeInMap = (MapUtils.PARCEL_SIZE / 2);
+
+            parcelHighlightImage.rectTransform.localScale = new Vector3(parcelHightlightScale, parcelHightlightScale, 1f);
 
             closeButton.onClick.AddListener(() => { ToggleNavMap(); });
             scrollRect.onValueChanged.AddListener((x) => { if (isOpen) MapRenderer.i.atlas.UpdateCulling(); });
