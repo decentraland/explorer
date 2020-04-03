@@ -390,7 +390,7 @@ export function* chunkGenerator(parcelChunkSize: number, info: MinimapSceneInfo[
           parcel
         }))
       ),
-    [] as { index: number; name: string; type: number; isPOI:boolean; parcel: { x: number; y: number } }[]
+    [] as { index: number; name: string; type: number; isPOI: boolean; parcel: { x: number; y: number } }[]
   )
 
   // split into chunk size + fold into scene
@@ -402,7 +402,7 @@ export function* chunkGenerator(parcelChunkSize: number, info: MinimapSceneInfo[
         if (scene) {
           scene.parcels.push(parcel.parcel)
         } else {
-          const newScene = { name: parcel.name, type: parcel.type, isPOI:parcel.isPOI, parcels: [parcel.parcel] }
+          const newScene = { name: parcel.name, type: parcel.type, isPOI: parcel.isPOI, parcels: [parcel.parcel] }
           scenes.set(parcel.index, newScene)
         }
         return scenes
