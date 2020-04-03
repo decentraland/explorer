@@ -23,10 +23,6 @@ namespace DCL
         private void Awake()
         {
             i = this;
-        }
-
-        void Start()
-        {
             MinimapMetadata.GetMetadata().OnSceneInfoUpdated += MapRenderer_OnSceneInfoUpdated;
             playerWorldPosition.OnChange += OnCharacterMove;
             playerRotation.OnChange += OnCharacterRotate;
