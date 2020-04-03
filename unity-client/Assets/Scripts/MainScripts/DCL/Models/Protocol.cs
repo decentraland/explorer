@@ -14,8 +14,12 @@ namespace DCL.Models
         AUDIO_SOURCE = 201,
         GIZMOS = 203,
         BILLBOARD = 32,
+        // Should this be here?
         SMART_ITEM = 204,
-        AUDIO_STREAM = 202
+
+        AUDIO_STREAM = 202,
+
+        VIDEO_SHAPE = 150
     }
 
     public enum CLASS_ID
@@ -50,7 +54,7 @@ namespace DCL.Models
 
         TEXTURE = 68,
 
-        AUDIO_CLIP = 200
+        AUDIO_CLIP = 200,
     }
 
     public class CallMethodComponentMessage

@@ -51,15 +51,18 @@ export enum CLASS_ID {
 
   HIGHLIGHT_ENTITY = 66,
 
-  /** @deprecated */
-  SOUND = 67,
   TEXTURE = 68,
+
+  VIDEO_SHAPE = 150,
 
   AUDIO_CLIP = 200,
   AUDIO_SOURCE = 201,
   AUDIO_STREAM = 202,
   GIZMOS = 203,
-  SMART_ITEM = 204
+  SMART_ITEM = 204,
+
+  /** @deprecated */
+  SOUND = 67
 }
 
 /**

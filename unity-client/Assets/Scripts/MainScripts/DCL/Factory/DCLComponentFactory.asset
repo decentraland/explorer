@@ -40,3 +40,6 @@ MonoBehaviour:
   - classId: 202
     prefab: {fileID: 3913270564964572706, guid: 14e009e5761a74e8fa3fcfc49d32d71c,
       type: 3}
+  - classId: 150
+    prefab: {fileID: 3913270564964572706, guid: 14e009e5761a74e8fa3fcfc49d32d71c,
+      type: 3}
