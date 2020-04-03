@@ -549,7 +549,7 @@ export const unityInterface = {
 
     for (const chunk of chunks) {
       let jsonChunk = JSON.stringify(chunk)
-      gameInstance.SendMessage('SceneController', 'UpdateMinimapSceneInformation', jsonChunk)
+      gameInstance.SendMessage('MinimapMetadataController', 'UpdateMinimapSceneInformation', jsonChunk)
     }
   },
   SetTutorialEnabled() {
