@@ -21,21 +21,15 @@ namespace DCL.Components
             var previousModel = model;
             model = SceneController.i.SafeFromJson<Model>(newJson);
 
-            if (player == null && !string.IsNullOrEmpty(model.url) && (previousModel == null || previousModel.url != model.url))
+            if (!string.IsNullOrEmpty(model.url) && (previousModel == null || previousModel.url != model.url))
             {
-                if (previousModel != null && player != null)
-                {
-                    Destroy(player);
-                }
-                player = gameObject.AddComponent<VideoPlayer>();
-
-                player.playOnAwake = true;
-                player.source = VideoSource.Url;
                 player.url = model.url;
-                player.renderMode = VideoRenderMode.MaterialOverride;
-                player.targetMaterialRenderer = GetComponent<Renderer>();
-                player.targetMaterialProperty = "Mesh";
                 player.Play();
+            }
+            if (string.IsNullOrEmpty(model.url) && previousModel != null)
+            {
+                player.Stop();
+                player.url = null;
             }
             yield return null;
         }
