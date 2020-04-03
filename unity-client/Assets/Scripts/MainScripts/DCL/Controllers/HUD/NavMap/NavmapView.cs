@@ -114,13 +114,7 @@ namespace DCL
 
             // ----------------------------------------------------
             // TODO: Use sceneInfo to highlight whole scene parcels and populate scenes hover info on navmap once we can access all the scenes info
-
             // var sceneInfo = mapMetadata.GetSceneInfo(mouseMapCoords.x, mouseMapCoords.y);
-
-            // if (sceneInfo == null)
-            //     Debug.Log($"Couldn't fetch scene info from scene {mouseMapCoords}");
-            // else
-            //     Debug.Log(sceneInfo.name);
         }
 
         bool CoordinatesAreInsideTheworld(int xCoord, int yCoord)
