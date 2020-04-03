@@ -12,6 +12,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Map Scene Icon POI
       objectReference: {fileID: 0}
+    - target: {fileID: 7675226109946346179, guid: a3d29f660ee80ca4890e504f724cc8c1,
+        type: 3}
+      propertyPath: m_margin.w
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2495922858077533457, guid: a3d29f660ee80ca4890e504f724cc8c1,
         type: 3}
       propertyPath: m_Padding.m_Top
@@ -170,12 +175,17 @@ PrefabInstance:
     - target: {fileID: 4589313639104732314, guid: a3d29f660ee80ca4890e504f724cc8c1,
         type: 3}
       propertyPath: m_SizeDelta.x
-      value: 32
+      value: 16
       objectReference: {fileID: 0}
     - target: {fileID: 4589313639104732314, guid: a3d29f660ee80ca4890e504f724cc8c1,
         type: 3}
       propertyPath: m_SizeDelta.y
-      value: 32
+      value: 16
+      objectReference: {fileID: 0}
+    - target: {fileID: 4589313639104732314, guid: a3d29f660ee80ca4890e504f724cc8c1,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -1
       objectReference: {fileID: 0}
     - target: {fileID: 1599786805352816207, guid: a3d29f660ee80ca4890e504f724cc8c1,
         type: 3}
