@@ -74,8 +74,8 @@ namespace DCL
         {
             if (!isOpen) return;
 
-            RectTransform chunksContainerRectTransform = MapRenderer.i.atlas.chunksParent.transform as RectTransform;
-            chunksContainerRectTransform.GetWorldCorners(navmapWorldspaceCorners);
+            // Get the world-space corners of the map
+            (MapRenderer.i.atlas.chunksParent.transform as RectTransform).GetWorldCorners(navmapWorldspaceCorners);
 
             // Offset world coordinates origin position in map with border-parcels and worldmap amount of parcels (horizontally/vertically) / 2
             // (since the "border-parcels" outside the world are not the same amount on the 4 sides of the worldmap we can't just use the center of the rect)
@@ -88,7 +88,6 @@ namespace DCL
 
         void UpdateMouseMapCoords()
         {
-            Rect newRect = new Rect(worldCoordsOriginInMap, navmapWorldspaceCorners[2] - worldCoordsOriginInMap);
             mouseMapCoords = Input.mousePosition - worldCoordsOriginInMap;
             mouseMapCoords = mouseMapCoords / parcelSizeInMap;
 
