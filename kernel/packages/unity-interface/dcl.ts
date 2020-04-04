@@ -96,7 +96,7 @@ declare const globalThis: UnityInterfaceContainer &
   StoreContainer & { analytics: any; delighted: any } & { messages: (e: any) => void }
 
 type GameInstance = {
-  SendMessage(object: string, method: string, ...args: (number | string)[]): void
+  SendMessage(object: string, method: string, ...args: number | string[]): void
 }
 
 const rendererVersion = require('decentraland-renderer')
@@ -212,7 +212,7 @@ const browserInterface = {
     }
   },
 
-  GoTo(data: { x:number, y:number }) {
+  GoTo(data: { x: number; y: number }) {
     TeleportController.goTo(data.x, data.y)
   },
 
