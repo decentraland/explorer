@@ -13,7 +13,7 @@ namespace DCL
         [SerializeField] Transform scrollRectContentTransform;
         [SerializeField] TextMeshProUGUI currentSceneNameText;
         [SerializeField] TextMeshProUGUI currentSceneCoordsText;
-        [SerializeField] NavmapToastView toastView;
+        [SerializeField] internal NavmapToastView toastView;
 
         InputAction_Trigger.Triggered toggleNavMapDelegate;
 

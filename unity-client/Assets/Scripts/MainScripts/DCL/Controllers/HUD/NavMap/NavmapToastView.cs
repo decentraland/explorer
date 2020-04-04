@@ -9,21 +9,30 @@ namespace DCL
 {
     public class NavmapToastView : MonoBehaviour
     {
-        [SerializeField] private TextMeshProUGUI sceneTitleText;
-        [SerializeField] private TextMeshProUGUI sceneOwnerText;
-        [SerializeField] private TextMeshProUGUI sceneLocationText;
-        [SerializeField] private TextMeshProUGUI sceneDescriptionText;
-        [SerializeField] private Image scenePreviewImage;
+        [SerializeField] internal TextMeshProUGUI sceneTitleText;
+        [SerializeField] internal TextMeshProUGUI sceneOwnerText;
+        [SerializeField] internal TextMeshProUGUI sceneLocationText;
+        [SerializeField] internal TextMeshProUGUI sceneDescriptionText;
+        [SerializeField] internal Image scenePreviewImage;
 
-        [SerializeField] private Button goToButton;
-        [SerializeField] private Button closeButton;
+        [SerializeField] internal Button goToButton;
+        [SerializeField] internal Button closeButton;
 
         Vector2Int location;
+
+        private void Awake()
+        {
+            goToButton.onClick.AddListener(OnGotoClick);
+            closeButton.onClick.AddListener(OnCloseClick);
+        }
 
         public void Populate(Vector2Int coordinates, MinimapMetadata.MinimapSceneInfo sceneInfo)
         {
             if (sceneInfo == null)
+            {
+                gameObject.SetActive(false);
                 return;
+            }
 
             sceneOwnerText.gameObject.SetActive(!string.IsNullOrEmpty(sceneInfo.owner));
             sceneDescriptionText.gameObject.SetActive(!string.IsNullOrEmpty(sceneInfo.description));
@@ -31,13 +40,10 @@ namespace DCL
             sceneLocationText.text = $"{coordinates.x}, {coordinates.y}";
 
             sceneTitleText.text = sceneInfo.name;
-            sceneOwnerText.text = sceneInfo.owner;
+            sceneOwnerText.text = $"Created by: {sceneInfo.owner}";
             sceneDescriptionText.text = sceneInfo.description;
 
             location = coordinates;
-
-            goToButton.onClick.AddListener(OnGotoClick);
-            closeButton.onClick.AddListener(OnCloseClick);
 
             gameObject.SetActive(true);
 
@@ -64,6 +70,7 @@ namespace DCL
         private void OnGotoClick()
         {
             WebInterface.GoTo(location.x, location.y);
+
         }
 
         string currentImageUrl;
