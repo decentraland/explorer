@@ -681,7 +681,7 @@ export async function connect(userId: string) {
         connectionAnalytics.visiblePeers = context?.stats.visiblePeerIds.map(it => it.slice(-6))
 
         if (connectionAnalytics) {
-          queueTrackingEvent('Comms status', connectionAnalytics)
+          queueTrackingEvent('New Comms Status', connectionAnalytics)
         }
       }, 30000)
     }
