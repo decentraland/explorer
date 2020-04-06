@@ -302,9 +302,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ef622d288be40f0a6bc111fe7b34eec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  parcelHightlightScale: 1.25
   atlas: {fileID: 8867674412829076673}
   parcelHighlightImage: {fileID: 1038111123}
+  highlightedParcelText: {fileID: 842858614}
   playerPositionIcon: {fileID: 7800080416519839540}
+  parcelHighlightEnabled: 0
 --- !u!1 &3620416516788639812
 GameObject:
   m_ObjectHideFlags: 0
