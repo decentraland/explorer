@@ -31,6 +31,7 @@ namespace DCL
         MinimapMetadata mapMetadata;
         Vector3 worldmapOffset;
         Vector3 worldCoordsOriginInMap;
+        RectTransform navmapRectTransform = null;
         Vector3[] navmapWorldspaceCorners = new Vector3[4];
         bool cursorLockedBeforeOpening = true;
         Vector3 mouseMapCoords;
@@ -47,19 +48,12 @@ namespace DCL
             }
         }
 
-        // TODO: Remove this bool once we finish the feature
-        bool enabledInProduction = true;
-
         void Start()
         {
             mapMetadata = MinimapMetadata.GetMetadata();
 
             worldmapOffset = new Vector3(LEFT_BORDER_PARCELS + WORLDMAP_WIDTH_IN_PARCELS / 2, BOTTOM_BORDER_PARCELS + WORLDMAP_WIDTH_IN_PARCELS / 2, 0);
             parcelSizeInMap = (MapUtils.PARCEL_SIZE / 2);
-
-            parcelHighlightImage = MapRenderer.i.parcelHighlightImage;
-            highlightedParcelText = parcelHighlightImage.GetComponentInChildren<TextMeshProUGUI>(true);
-            parcelHighlightImage.rectTransform.localScale = new Vector3(parcelHightlightScale, parcelHightlightScale, 1f);
 
             closeButton.onClick.AddListener(() => { ToggleNavMap(); });
             scrollRect.onValueChanged.AddListener((x) => { if (isOpen) MapRenderer.i.atlas.UpdateCulling(); });
@@ -75,7 +69,7 @@ namespace DCL
             if (!isOpen) return;
 
             // Get the world-space corners of the map
-            (MapRenderer.i.atlas.chunksParent.transform as RectTransform).GetWorldCorners(navmapWorldspaceCorners);
+            navmapRectTransform.GetWorldCorners(navmapWorldspaceCorners);
 
             // Offset world coordinates origin position in map with border-parcels and worldmap amount of parcels (horizontally/vertically) / 2
             // (since the "border-parcels" outside the world are not the same amount on the 4 sides of the worldmap we can't just use the center of the rect)
@@ -125,15 +119,14 @@ namespace DCL
         {
             if (MapRenderer.i == null) return;
 
-#if !UNITY_EDITOR
-            if(!enabledInProduction) return;
-#endif
-
             scrollRect.StopMovement();
             isOpen = !isOpen;
 
             if (isOpen)
             {
+                if (navmapRectTransform == null)
+                    FetchParcelHightlightReferences();
+
                 cursorLockedBeforeOpening = Utils.isCursorLocked;
                 if (cursorLockedBeforeOpening)
                     Utils.UnlockCursor();
@@ -177,6 +170,15 @@ namespace DCL
         {
             currentSceneNameText.text = string.IsNullOrEmpty(model.sceneName) ? "Unnamed" : model.sceneName;
             currentSceneCoordsText.text = model.playerPosition;
+        }
+
+        void FetchParcelHightlightReferences()
+        {
+            navmapRectTransform = MapRenderer.i.atlas.chunksParent.transform as RectTransform;
+
+            parcelHighlightImage = MapRenderer.i.parcelHighlightImage;
+            highlightedParcelText = parcelHighlightImage.GetComponentInChildren<TextMeshProUGUI>(true);
+            parcelHighlightImage.rectTransform.localScale = new Vector3(parcelHightlightScale, parcelHightlightScale, 1f);
         }
     }
 }
