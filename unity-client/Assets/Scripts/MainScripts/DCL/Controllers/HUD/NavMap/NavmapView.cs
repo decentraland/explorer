@@ -21,9 +21,10 @@ namespace DCL
         Transform mapRendererMinimapParent;
         Vector3 atlasOriginalPosition;
 
+        public bool isToggledOn => scrollRect.gameObject.activeSelf;
+
         // TODO: Remove this bool once we finish the feature
         bool enabledInProduction = false;
-
 
         void Start()
         {
@@ -34,10 +35,16 @@ namespace DCL
             toggleNavMapAction.OnTriggered += toggleNavMapDelegate;
 
             MinimapHUDView.OnUpdateData += UpdateCurrentSceneData;
-
             CommonScriptableObjects.playerCoords.OnChange += PlayerCoords_OnChange;
 
             toastView.gameObject.SetActive(false);
+            scrollRect.gameObject.SetActive(false);
+        }
+
+        private void OnDestroy()
+        {
+            MinimapHUDView.OnUpdateData -= UpdateCurrentSceneData;
+            CommonScriptableObjects.playerCoords.OnChange -= PlayerCoords_OnChange;
         }
 
         private void PlayerCoords_OnChange(Vector2Int current, Vector2Int previous)
@@ -46,7 +53,7 @@ namespace DCL
             toastView.Populate(current, MinimapMetadata.GetMetadata().GetSceneInfo(current.x, current.y));
         }
 
-        void ToggleNavMap()
+        internal void ToggleNavMap()
         {
             if (MapRenderer.i == null) return;
 

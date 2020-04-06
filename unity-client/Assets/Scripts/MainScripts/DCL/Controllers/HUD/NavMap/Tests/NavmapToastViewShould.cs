@@ -16,7 +16,11 @@ namespace Tests
         protected override IEnumerator SetUp()
         {
             yield return base.SetUp();
-            navmapToastView = GameObject.FindObjectOfType<NavmapView>().toastView;
+            var navmapView = GameObject.FindObjectOfType<NavmapView>();
+            navmapToastView = navmapView.toastView;
+
+            if (!navmapView.isToggledOn)
+                navmapView.ToggleNavMap();
         }
 
         [Test]
