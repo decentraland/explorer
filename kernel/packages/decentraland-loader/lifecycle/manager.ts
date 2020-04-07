@@ -6,7 +6,6 @@ import { TransportBasedServer } from 'decentraland-rpc/lib/host/TransportBasedSe
 import { WebWorkerTransport } from 'decentraland-rpc/lib/common/transports/WebWorker'
 
 import { resolveUrl } from 'atomicHelpers/parseUrl'
-import { error } from 'util'
 import { ILand } from 'shared/types'
 
 import { DEBUG, parcelLimits, getServerConfigurations, ENABLE_EMPTY_SCENES, tutorialSceneEnabled } from '../../config'
@@ -14,8 +13,7 @@ import { getFetchContentServer, getFetchMetaContentServer } from '../../shared/d
 import { Store } from 'redux'
 
 import { getTutorialBaseURL } from 'shared/location'
-import { Vector2Component } from 'atomicHelpers/landHelpers'
-import { getTilesRectFromCenter } from 'shared/utils'
+import defaultLogger from 'shared/logger'
 
 /*
  * The worker is set up on the first require of this file
@@ -23,7 +21,7 @@ import { getTilesRectFromCenter } from 'shared/utils'
 const lifecycleWorkerRaw = require('raw-loader!../../../static/loader/lifecycle/worker.js')
 const lifecycleWorkerUrl = URL.createObjectURL(new Blob([lifecycleWorkerRaw]))
 const worker: Worker = new (Worker as any)(lifecycleWorkerUrl, { name: 'LifecycleWorker' })
-worker.onerror = e => error('Loader worker error', e)
+worker.onerror = e => defaultLogger.error('Loader worker error', e)
 
 export class LifecycleManager extends TransportBasedServer {
   sceneIdToRequest: Map<string, IFuture<ILand>> = new Map()
@@ -42,12 +40,10 @@ export class LifecycleManager extends TransportBasedServer {
     })
 
     this.on('Scene.idResponse', (scene: { position: string; data: string }) => {
-      if (scene.data) {
-        const future = this.positionToRequest.get(scene.position)
+      const future = this.positionToRequest.get(scene.position)
 
-        if (future) {
-          future.resolve(scene.data)
-        }
+      if (future) {
+        future.resolve(scene.data)
       }
     })
   }
@@ -62,21 +58,24 @@ export class LifecycleManager extends TransportBasedServer {
     return theFuture
   }
 
-  getSceneIds(center: Vector2Component, size: number): IFuture<string>[] {
-    let ids: string[] = getTilesRectFromCenter(center, size)
-    let futures: IFuture<string>[] = []
+  getSceneIds(sceneIds: string[]): Promise<string | null>[] {
+    const futures: IFuture<string>[] = []
+    const missing: string[] = []
 
-    for (let id of ids) {
+    for (let id of sceneIds) {
       let theFuture = this.positionToRequest.get(id)
 
       if (!theFuture) {
         theFuture = future<string>()
         this.positionToRequest.set(id, theFuture)
-        futures.push(theFuture)
+
+        missing.push(id)
       }
+
+      futures.push(theFuture)
     }
 
-    this.notify('Scene.idRequest', { center, size })
+    this.notify('Scene.idRequest', { sceneIds: missing })
     return futures
   }
 }

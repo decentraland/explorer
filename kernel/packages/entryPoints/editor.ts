@@ -74,7 +74,6 @@ async function renewBuilderScene(scene: SceneJsonData, mappings:any) {
  */
 async function getSceneData(scene: SceneJsonData, baseUrl: string, mappings:any): Promise<ILand> {
   const id = getBaseCoords(scene)
-  const publisher = '0x0'
   const contents = normalizeContentMappings(mappings || [])
 
   if (!baseUrl) {
@@ -89,7 +88,6 @@ async function getSceneData(scene: SceneJsonData, baseUrl: string, mappings:any)
     mappingsResponse: {
       contents,
       parcel_id: id,
-      publisher,
       root_cid: 'Qmtest'
     }
   }

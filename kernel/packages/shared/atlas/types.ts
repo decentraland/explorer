@@ -3,7 +3,6 @@ import { SceneJsonData } from 'shared/types'
 
 export const UPDATE_MINIMAP_SCENE_NAME = 'Update tile name'
 export const QUERY_DATA_FROM_SCENE_JSON = '[Query] Fetch data from scene.json'
-export const FETCH_DATA_FROM_SCENE_JSON = '[Request] Fetch data from scene.json'
 export const SUCCESS_DATA_FROM_SCENE_JSON = '[Success] Fetch data from scene.json'
 export const FAILURE_DATA_FROM_SCENE_JSON = '[Failure] Fetch data from scene.json'
 export const DISTRICT_DATA = '[Info] District data downloaded'

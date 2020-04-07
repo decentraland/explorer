@@ -3,10 +3,10 @@ import { future, IFuture } from 'fp-future'
 import { createLogger } from 'shared/logger'
 import { createTutorialILand, isTutorial, TUTORIAL_SCENE_ID } from '../tutorial/tutorial'
 import { ILand, SceneJsonData, ParcelInfoResponse, ContentMapping } from 'shared/types'
-import { Vector2Component } from 'atomicHelpers/landHelpers'
-import { getTilesRectFromCenter } from 'shared/utils'
+import { CatalystClient } from 'dcl-catalyst-client'
+import { EntityType } from 'dcl-catalyst-commons'
 
-const logger = createLogger('loader')
+const logger = createLogger('loader: ')
 const { error } = logger
 
 export type DeployedScene = {
@@ -24,6 +24,8 @@ function getSceneIdFromSceneMappingResponse(scene: DeployedScene) {
   return scene.root_cid
 }
 
+export type TileIdPair = [ string, string | null ]
+
 export class SceneDataDownloadManager {
   positionToSceneId: Map<string, IFuture<string | null>> = new Map()
   sceneIdToLandData: Map<string, IFuture<ILand | null>> = new Map()
@@ -31,6 +33,8 @@ export class SceneDataDownloadManager {
   emptyScenes!: Record<string, ContentMapping[]>
   emptyScenesPromise?: Promise<Record<string, ContentMapping[]>>
   emptySceneNames: string[] = []
+
+  catalyst: CatalystClient
 
   constructor(
     public options: {
@@ -40,16 +44,15 @@ export class SceneDataDownloadManager {
       tutorialBaseURL: string
     }
   ) {
-    // stub
+    this.catalyst = new CatalystClient('https://peer.decentraland.org', 'EXPLORER')
   }
 
-  async resolveScenesIdRange(pos: Vector2Component, size: number): Promise<string[] | null> {
-    let tilesArray: string[] = getTilesRectFromCenter(pos, size)
-    let futures: IFuture<string | null>[] = []
-    let needsFetch: boolean = false
-    let result: string[] = []
+  async resolveSceneSceneIds(tiles: string[]): Promise<TileIdPair[]> {
+    const futures: Promise<TileIdPair>[] = []
 
-    for (let tile of tilesArray) {
+    const missingTiles: string[] = []
+
+    for (const tile of tiles) {
       let promise: IFuture<string | null>
 
       if (this.positionToSceneId.has(tile)) {
@@ -57,24 +60,64 @@ export class SceneDataDownloadManager {
       } else {
         promise = future<string | null>()
         this.positionToSceneId.set(tile, promise)
-        needsFetch = true
+        missingTiles.push(tile)
       }
 
-      futures.push(promise)
+      futures.push(promise.then(id => ([tile, id])))
     }
 
-    if (!needsFetch) {
-      //NOTE(Brian): If all the tiles are already handled by other requests (pending or finished) then just
-      //             return
-      for (let f in futures) {
-        result.push(await f)
+    if (missingTiles.length > 0) {
+      const scenes = await this.catalyst.fetchEntitiesByPointers(EntityType.SCENE, missingTiles)
+
+      // resolve promises
+      for (const scene of scenes) {
+        for (const tile of scene.pointers) {
+          if (this.positionToSceneId.has(tile)) {
+            const promise = this.positionToSceneId.get(tile)
+            promise!.resolve(scene.id)
+          } else {
+            // if we get back a pointer/tile that was not pending => create the future and resolve
+            const promise = future<string | null>()
+            promise.resolve(scene.id)
+            this.positionToSceneId.set(tile, promise)
+          }
+        }
+
+        const sceneId = scene.id
+        const baseUrl = this.options.contentServer + '/contents/'
+        const baseUrlBundles = this.options.contentServerBundles + '/'
+
+        const content = { contents: scene.content ?? [], parcel_id: scene.metadata?.base, root_cid: scene.id }
+
+        const data: ILand = {
+          sceneId,
+          baseUrl,
+          baseUrlBundles,
+          sceneJsonData: scene.metadata,
+          mappingsResponse: content
+        }
+
+        const pendingSceneData = this.sceneIdToLandData.get(sceneId) || future<ILand | null>()
+
+        if (pendingSceneData.isPending) {
+          pendingSceneData.resolve(data)
+        }
+
+        if (!this.sceneIdToLandData.has(sceneId)) {
+          this.sceneIdToLandData.set(sceneId, pendingSceneData)
+        }
       }
-      return result
+
+      // missing tiles will correspond to empty parcels
+      for (const tile of missingTiles) {
+        const promise = this.positionToSceneId.get(tile)
+        if (promise?.isPending) {
+          promise?.resolve(null)
+        }
+      }
     }
 
-    //TODO(Brian): fetch ids rectangle using a single API call and resolve the futures
-
-    return result
+    return Promise.all(futures)
   }
 
   async resolveSceneSceneId(pos: string): Promise<string | null> {
@@ -152,9 +195,8 @@ export class SceneDataDownloadManager {
       },
       mappingsResponse: {
         parcel_id: coordinates,
-        contents: this.emptyScenes[sceneName],
         root_cid: sceneId,
-        publisher: '0x13371b17ddb77893cd19e10ffa58461396ebcc19'
+        contents: this.emptyScenes[sceneName]
       }
     }
   }

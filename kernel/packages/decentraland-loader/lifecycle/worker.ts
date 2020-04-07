@@ -4,13 +4,12 @@
 import { WebWorkerTransport } from 'decentraland-rpc'
 import defaultLogger from 'shared/logger'
 import { ILand, InstancedSpawnPoint } from 'shared/types'
-import { SceneDataDownloadManager } from './controllers/download'
+import { SceneDataDownloadManager, TileIdPair } from './controllers/download'
 import { ParcelLifeCycleController } from './controllers/parcel'
 import { PositionLifecycleController } from './controllers/position'
 import { SceneLifeCycleController, SceneLifeCycleStatusReport } from './controllers/scene'
 import { Adapter } from './lib/adapter'
 import { setTutorialEnabled } from './tutorial/tutorial'
-import { Vector2Component } from 'atomicHelpers/landHelpers'
 
 const connector = new Adapter(WebWorkerTransport(self as any))
 
@@ -89,19 +88,19 @@ let downloadManager: SceneDataDownloadManager
         })
       })
 
-      connector.on('Scene.dataRequest', async (data: { sceneId: string }) =>
+      connector.on('Scene.dataRequest', async (data: { sceneId: string }) => {
         connector.notify('Scene.dataResponse', {
           data: (await downloadManager.getParcelDataBySceneId(data.sceneId)) as ILand
         })
-      )
+      })
 
-      connector.on('Scene.idRequest', async (data: { center: Vector2Component; size: number }) => {
-        let scenes: string[] = (await downloadManager.resolveScenesIdRange(data.center, data.size)) as string[]
+      connector.on('Scene.idRequest', async (data: { sceneIds: string[] }) => {
+        const scenes: TileIdPair[] = await downloadManager.resolveSceneSceneIds(data.sceneIds)
 
-        for (let scene of scenes) {
+        for (const scene of scenes) {
           connector.notify('Scene.idResponse', {
-            position: data.center,
-            data: scene
+            position: scene[0],
+            data: scene[1]
           })
         }
       })

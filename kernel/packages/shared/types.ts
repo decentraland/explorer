@@ -5,7 +5,6 @@ export { Avatar, Profile, ColorString, WearableId, Wearable } from './profiles/t
 
 export type MappingsResponse = {
   parcel_id: string
-  publisher: string
   root_cid: string
   contents: Array<ContentMapping>
 }

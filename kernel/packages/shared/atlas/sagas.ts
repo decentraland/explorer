@@ -1,6 +1,7 @@
 import { Vector2Component } from 'atomicHelpers/landHelpers'
 import { MinimapSceneInfo } from 'decentraland-ecs/src/decentraland/Types'
-import { call, fork, put, putResolve, select, take, takeEvery, all } from 'redux-saga/effects'
+// @ts-ignore
+import { call, fork, put, select, take, takeEvery, all, race } from 'redux-saga/effects'
 import { CAMPAIGN_PARCEL_SEQUENCE } from 'shared/world/TeleportController'
 import { parcelLimits } from '../../config'
 import { getServer, LifecycleManager } from '../../decentraland-loader/lifecycle/manager'
@@ -18,8 +19,10 @@ import {
   reportScenesAroundParcel
 } from './actions'
 import { shouldLoadSceneJsonData } from './selectors'
-import { AtlasState, MapSceneData, MARKET_DATA, QUERY_DATA_FROM_SCENE_JSON, REPORT_SCENES_AROUND_PARCEL } from './types'
+import { AtlasState, MARKET_DATA, QUERY_DATA_FROM_SCENE_JSON, REPORT_SCENES_AROUND_PARCEL, SUCCESS_DATA_FROM_SCENE_JSON, FAILURE_DATA_FROM_SCENE_JSON } from './types'
 import { getTilesRectFromCenter } from '../utils'
+import { Action } from 'redux'
+import { ILand } from 'shared/types'
 
 declare const window: {
   unityInterface: {
@@ -54,14 +57,15 @@ function* fetchTiles() {
 }
 
 function* querySceneDataAction(action: QuerySceneData) {
-  if (yield select(shouldLoadSceneJsonData, action.payload) !== undefined) {
+  const shouldFetch = yield select(shouldLoadSceneJsonData, action.payload)
+  if (shouldFetch) {
     yield call(fetchSceneJsonData, action.payload)
   }
 }
 
 function* fetchSceneJsonData(sceneId: string) {
   try {
-    const land = yield call(() => fetchSceneJson(sceneId))
+    const land: ILand = yield call(fetchSceneJson, sceneId)
     yield put(fetchDataFromSceneJsonSuccess(sceneId, land))
   } catch (e) {
     yield put(fetchDataFromSceneJsonFailure(sceneId, e))
@@ -74,11 +78,10 @@ async function fetchSceneJson(sceneId: string) {
   return land
 }
 
-async function fetchSceneIds(center: Vector2Component, size: number) {
+async function fetchSceneIds(tiles: string[]) {
   const server: LifecycleManager = getServer()
-  const id = await server.getSceneIds(center, size)
-  defaultLogger.log(`fetching position end! ${center} ... id = ${id}`)
-  return id
+  const promises = server.getSceneIds(tiles)
+  return Promise.all(promises)
 }
 
 export function* checkAndReportAround() {
@@ -98,65 +101,62 @@ export function* checkAndReportAround() {
   }
 }
 
+function isSceneAction(type: string, sceneId: string) {
+  return (action: Action) => type === action.type && sceneId === (action as any)?.payload?.sceneId
+}
+
 export function* reportScenesAroundParcelAction(action: ReportScenesAroundParcel) {
-  let atlasState = (yield select(state => state.atlas)) as AtlasState
+  let atlasState: AtlasState = yield select(state => state.atlas)
 
   while (!atlasState.hasMarketData) {
-    defaultLogger.log('waiting for market data...')
     yield take(MARKET_DATA)
     atlasState = yield select(state => state.atlas)
   }
 
   const tilesAround = getTilesRectFromCenter(action.payload.parcelCoord, action.payload.scenesAround)
-  let sceneIdsSet: Set<string> = new Set<string>()
 
-  defaultLogger.log(`waiting for ids... ${JSON.stringify(tilesAround)}`)
+  const sceneIds: (string | null)[] = yield call(fetchSceneIds, tilesAround)
 
-  const sceneIds: string[] = yield call(() => fetchSceneIds(action.payload.parcelCoord, action.payload.scenesAround))
+  const sceneIdsSet = new Set<string>(sceneIds.filter($ => $ !== null) as string[])
 
-  for (let id of sceneIds) {
-    sceneIdsSet.add(id)
+  for (const id of sceneIdsSet) {
+    yield put(querySceneData(id))
   }
 
-  defaultLogger.log(`waiting for scenes... ${JSON.stringify(sceneIdsSet)}`)
-
-  for (let id of sceneIdsSet) {
-    yield putResolve(querySceneData(id))
+  for (const id of sceneIdsSet) {
+    const shouldFetch = yield select(shouldLoadSceneJsonData, id)
+    if (shouldFetch) {
+      yield race({
+        success: take(isSceneAction(SUCCESS_DATA_FROM_SCENE_JSON, id)),
+        failure: take(isSceneAction(FAILURE_DATA_FROM_SCENE_JSON, id))
+      })
+    }
   }
 
-  defaultLogger.log(`end!`)
+  // renew atlas state to get loaded scenes information
+  atlasState = yield select(state => state.atlas)
 
-  yield call(reportScenes, atlasState, tilesAround)
+  yield call(reportScenes, atlasState, [...sceneIdsSet])
 }
 
-export function* reportScenes(atlas?: AtlasState, tiles?: string[]): any {
-  //NOTE(Brian): Check unique scenes inside tiles array argument
-  let scenes: Set<MapSceneData> = new Set<MapSceneData>()
+export function* reportScenes(atlas?: AtlasState, sceneIds: string[] = []): any {
+  if (!atlas) {
+    return
+  }
 
-  tiles?.forEach(x => {
-    if (!atlas) {
-      return
-    }
+  const scenes = sceneIds.map(sceneId => atlas.idToScene[sceneId])
 
-    const scene = atlas.tileToScene[x]
-    if (!scenes.has(scene)) {
-      scenes.add(scene)
-    }
-  })
-
-  //NOTE(Brian): iterate unique scenes, fill up the minimapSceneInfo and send it over
-  //             the update message to renderer.
-  let minimapSceneInfoResult: MinimapSceneInfo[] = []
+  const minimapSceneInfoResult: MinimapSceneInfo[] = []
 
   scenes.forEach(scene => {
-    let parcels: Vector2Component[] = []
+    const parcels: Vector2Component[] = []
     let isPOI: boolean = false
 
-    scene.sceneJsonData?.scene.parcels.forEach(p => {
-      let xyStr = p.split(',')
+    scene.sceneJsonData?.scene.parcels.forEach(parcel => {
+      let xyStr = parcel.split(',')
       let xy: Vector2Component = { x: parseInt(xyStr[0], 10), y: parseInt(xyStr[1], 10) }
 
-      if (CAMPAIGN_PARCEL_SEQUENCE.includes({ x: xy.x, y: xy.y })) {
+      if (CAMPAIGN_PARCEL_SEQUENCE.some(poi => poi.x === xy.x && poi.y === xy.y)) {
         isPOI = true
       }
 
@@ -169,10 +169,12 @@ export function* reportScenes(atlas?: AtlasState, tiles?: string[]): any {
       previewImageUrl: scene.sceneJsonData?.display?.navmapThumbnail,
       name: scene.name,
       type: scene.type,
-      parcels: parcels,
-      isPOI: isPOI
-    } as MinimapSceneInfo)
+      parcels,
+      isPOI
+    })
   })
+
+  defaultLogger.info(`minimap`, minimapSceneInfoResult)
 
   window.unityInterface.UpdateMinimapSceneInformation(minimapSceneInfoResult)
 }

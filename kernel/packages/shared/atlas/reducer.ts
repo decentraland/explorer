@@ -1,17 +1,19 @@
 import { Vector2Component } from 'atomicHelpers/landHelpers'
 import { AnyAction } from 'redux'
 import { ILand } from 'shared/types'
-import { REPORTED_SCENES_FOR_MINIMAP } from './actions'
+import { REPORTED_SCENES_FOR_MINIMAP, FetchDataFromSceneJsonSuccess, QuerySceneData, FetchDataFromSceneJsonFailure } from './actions';
 import { getSceneNameFromAtlasState, getSceneNameWithMarketAndAtlas, postProcessSceneName } from './selectors'
+// @ts-ignore
+import defaultLogger from '../logger'
 import {
   AtlasState,
   DISTRICT_DATA,
   FAILURE_DATA_FROM_SCENE_JSON,
-  FETCH_DATA_FROM_SCENE_JSON,
   MapSceneData,
   MarketData,
   MARKET_DATA,
-  SUCCESS_DATA_FROM_SCENE_JSON
+  SUCCESS_DATA_FROM_SCENE_JSON,
+  QUERY_DATA_FROM_SCENE_JSON
 } from './types'
 
 const ATLAS_INITIAL_STATE: AtlasState = {
@@ -40,12 +42,12 @@ export function atlasReducer(state?: AtlasState, action?: AnyAction) {
     return state
   }
   switch (action.type) {
-    case FETCH_DATA_FROM_SCENE_JSON:
-      return reduceFetchDataFromSceneJson(state, action.payload)
+    case QUERY_DATA_FROM_SCENE_JSON:
+      return reduceFetchDataFromSceneJson(state, (action as QuerySceneData).payload)
     case SUCCESS_DATA_FROM_SCENE_JSON:
-      return reduceSuccessDataFromSceneJson(state, action.payload)
+      return reduceSuccessDataFromSceneJson(state, (action as FetchDataFromSceneJsonSuccess).payload.data)
     case FAILURE_DATA_FROM_SCENE_JSON:
-      return reduceFailureDataFromSceneJson(state, action.payload)
+      return reduceFailureDataFromSceneJson(state, (action as FetchDataFromSceneJsonFailure).payload.sceneId)
     case MARKET_DATA:
       return reduceMarketData(state, action.payload)
     case REPORTED_SCENES_FOR_MINIMAP:
@@ -57,8 +59,8 @@ export function atlasReducer(state?: AtlasState, action?: AnyAction) {
 }
 
 function reduceFetchDataFromSceneJson(state: AtlasState, sceneId: string) {
-  if (state.idToScene[sceneId] === undefined) {
-    state.idToScene[sceneId] = MAP_SCENE_DATA_INITIAL_STATE
+  if (!state.idToScene[sceneId]) {
+    state.idToScene[sceneId] = { ...MAP_SCENE_DATA_INITIAL_STATE }
   }
 
   state.idToScene[sceneId].requestStatus = 'loading'
@@ -66,8 +68,8 @@ function reduceFetchDataFromSceneJson(state: AtlasState, sceneId: string) {
 }
 
 function reduceFailureDataFromSceneJson(state: AtlasState, sceneId: string) {
-  if (state.idToScene[sceneId] === undefined) {
-    state.idToScene[sceneId] = MAP_SCENE_DATA_INITIAL_STATE
+  if (!state.idToScene[sceneId]) {
+    state.idToScene[sceneId] = { ...MAP_SCENE_DATA_INITIAL_STATE }
   }
 
   state.idToScene[sceneId].requestStatus = 'fail'
@@ -75,9 +77,12 @@ function reduceFailureDataFromSceneJson(state: AtlasState, sceneId: string) {
 }
 
 function reduceSuccessDataFromSceneJson(state: AtlasState, landData: ILand) {
-  let mapScene: MapSceneData = state.idToScene[landData.sceneId]
+  const tileToScene = { ...state.tileToScene }
+  const idToScene = { ...state.idToScene }
 
-  //NOTE(Brian): this code is for the case in which market data comes first (most likely always)
+  let mapScene: MapSceneData = { ...state.idToScene[landData.sceneId] }
+
+  // NOTE(Brian): this code is for the case in which market data comes first (most likely always)
   //             in that case we find the tileToScene data and update the mapScene with the
   //             relevant market values. If we don't do this we will get an inconsistent state.
   landData.sceneJsonData.scene.parcels.forEach(x => {
@@ -88,22 +93,22 @@ function reduceSuccessDataFromSceneJson(state: AtlasState, landData: ILand) {
         type: state.tileToScene[x].type,
         estateId: state.tileToScene[x].estateId
       }
-
-      state.tileToScene[x] = mapScene
-      state.idToScene[landData.sceneId] = mapScene
     }
   })
 
   mapScene.requestStatus = 'ok'
   mapScene.sceneJsonData = landData.sceneJsonData
-  mapScene.name = getSceneNameFromAtlasState(state, mapScene.sceneJsonData) ?? mapScene.name
-  mapScene.name = postProcessSceneName(mapScene.name)
+
+  const name = getSceneNameFromAtlasState(state, mapScene.sceneJsonData) ?? mapScene.name
+  mapScene.name = postProcessSceneName(name)
 
   mapScene.sceneJsonData.scene.parcels.forEach(x => {
-    state.tileToScene[x] = mapScene
+    tileToScene[x] = mapScene
   })
 
-  return state
+  idToScene[landData.sceneId] = mapScene
+
+  return { ...state, tileToScene, idToScene }
 }
 
 function reduceDistrictData(state: AtlasState, action: AnyAction) {
@@ -137,7 +142,7 @@ function reduceMarketData(state: AtlasState, marketData: MarketData) {
     const value = marketData.data[key]
     let sceneName = postProcessSceneName(getSceneNameWithMarketAndAtlas(marketData, state, value.x, value.y))
 
-    //NOTE(Brian): If scene already has been loaded via a json fetch, just update relevant info.
+    // NOTE(Brian): If scene already has been loaded via a json fetch, just update relevant info.
     if (existingScene) {
       existingScene.name = sceneName
       existingScene.type = value.type

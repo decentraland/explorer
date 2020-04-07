@@ -15,12 +15,12 @@ import {
 export const querySceneData = (scene: string) => action(QUERY_DATA_FROM_SCENE_JSON, scene)
 export type QuerySceneData = ReturnType<typeof querySceneData>
 
-//export const fetchDataFromSceneJson = (scene: string) => action(FETCH_DATA_FROM_SCENE_JSON, scene)
-export const fetchDataFromSceneJsonSuccess = (scene: string, data: ILand) =>
-  action(SUCCESS_DATA_FROM_SCENE_JSON, { sceneId: scene, data: data })
-export const fetchDataFromSceneJsonFailure = (scene: string, e: any) =>
-  action(FAILURE_DATA_FROM_SCENE_JSON, { sceneId: scene, error: e })
+export const fetchDataFromSceneJsonSuccess = (sceneId: string, data: ILand) =>
+  action(SUCCESS_DATA_FROM_SCENE_JSON, { sceneId, data })
+export const fetchDataFromSceneJsonFailure = (sceneId: string, error: any) =>
+  action(FAILURE_DATA_FROM_SCENE_JSON, { sceneId, error })
 export type FetchDataFromSceneJsonSuccess = ReturnType<typeof fetchDataFromSceneJsonSuccess>
+export type FetchDataFromSceneJsonFailure = ReturnType<typeof fetchDataFromSceneJsonFailure>
 
 export const districtData = (districts: DistrictData) => action(DISTRICT_DATA, districts)
 export const marketData = (data: MarketData) => action(MARKET_DATA, data)

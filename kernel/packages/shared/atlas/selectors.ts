@@ -5,7 +5,7 @@ import { SceneJsonData } from 'shared/types'
 export const EMPTY_PARCEL_NAME = 'Empty parcel'
 
 export function shouldLoadSceneJsonData(state: RootAtlasState, sceneId: string) {
-  return state.atlas.idToScene[sceneId] === undefined || state.atlas.idToScene[sceneId].requestStatus === 'fail'
+  return !state.atlas.idToScene.hasOwnProperty(sceneId) || state.atlas.idToScene[sceneId].requestStatus !== 'ok'
 }
 
 export function getType(state: RootAtlasState, x: number, y: number): number {
