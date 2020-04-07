@@ -22,7 +22,7 @@ export type MapSceneData = {
   sceneId: string
   name: string
   type: number
-  estateId: number
+  estateId?: number
   sceneJsonData?: SceneJsonData
   alreadyReported: boolean
   requestStatus: undefined | 'loading' | 'ok' | 'fail'
@@ -51,7 +51,7 @@ export type MarketEntry = {
   x: number
   y: number
   name: string
-  estate_id: number
+  estate_id?: number
   type: number
 }
 

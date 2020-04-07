@@ -1,7 +1,7 @@
 import { Vector2Component } from 'atomicHelpers/landHelpers'
 import { AnyAction } from 'redux'
 import { ILand } from 'shared/types'
-import { REPORTED_SCENES_FOR_MINIMAP, FetchDataFromSceneJsonSuccess, QuerySceneData, FetchDataFromSceneJsonFailure } from './actions';
+import { REPORTED_SCENES_FOR_MINIMAP, FetchDataFromSceneJsonSuccess, QuerySceneData, FetchDataFromSceneJsonFailure } from './actions'
 import { getSceneNameFromAtlasState, getSceneNameWithMarketAndAtlas, postProcessSceneName } from './selectors'
 // @ts-ignore
 import defaultLogger from '../logger'
@@ -135,33 +135,37 @@ function reduceReportedScenesForMinimap(
 }
 
 function reduceMarketData(state: AtlasState, marketData: MarketData) {
-  state.hasMarketData = true
+  const tileToScene = { ...state.tileToScene }
 
   Object.keys(marketData.data).forEach(key => {
-    let existingScene = state.tileToScene[key]
+    const existingScene = state.tileToScene[key]
     const value = marketData.data[key]
-    let sceneName = postProcessSceneName(getSceneNameWithMarketAndAtlas(marketData, state, value.x, value.y))
 
-    // NOTE(Brian): If scene already has been loaded via a json fetch, just update relevant info.
+    const sceneName = postProcessSceneName(getSceneNameWithMarketAndAtlas(marketData, state, value.x, value.y))
+
+    let newScene: MapSceneData
+
     if (existingScene) {
-      existingScene.name = sceneName
-      existingScene.type = value.type
-      existingScene.estateId = value.estate_id
-      return
+      newScene = {
+        ...existingScene,
+        name: sceneName,
+        type: value.type,
+        estateId: value.estate_id
+      }
+    } else {
+      newScene = {
+        sceneId: '',
+        name: sceneName,
+        type: value.type,
+        estateId: value.estate_id,
+        sceneJsonData: undefined,
+        alreadyReported: false,
+        requestStatus: undefined
+      }
     }
 
-    const newScene: MapSceneData = {
-      sceneId: '',
-      name: sceneName,
-      type: value.type,
-      estateId: value.estate_id,
-      sceneJsonData: undefined,
-      alreadyReported: false,
-      requestStatus: undefined
-    }
-
-    state.tileToScene[key] = newScene
+    tileToScene[key] = newScene
   })
 
-  return state
+  return { ...state, hasMarketData: true }
 }

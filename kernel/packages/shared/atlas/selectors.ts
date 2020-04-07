@@ -1,4 +1,4 @@
-import { PlazaNames, RootAtlasState, AtlasState, MapSceneData, MarketEntry, MarketData } from './types'
+import { PlazaNames, RootAtlasState, AtlasState, MapSceneData, MarketData } from './types'
 import { getSceneNameFromJsonData } from 'shared/selectors'
 import { SceneJsonData } from 'shared/types'
 
@@ -36,15 +36,14 @@ export function getSceneNameFromAtlasState(state: AtlasState, sceneJsonData?: Sc
 
 export function getSceneNameFromMarketData(marketData: MarketData, x: number, y: number): string | undefined {
   const key = `${x},${y}`
-  let marketEntry: MarketEntry = marketData.data[key]
+  const marketEntry = marketData.data[key]
 
   if (marketEntry) {
     if (marketEntry.name) {
       return marketEntry.name
     }
 
-    let hasEstate: boolean = marketEntry.estate_id !== undefined
-    if (hasEstate && PlazaNames[marketEntry.estate_id]) {
+    if (marketEntry.estate_id !== undefined && PlazaNames[marketEntry.estate_id]) {
       return PlazaNames[marketEntry.estate_id]
     }
   }
