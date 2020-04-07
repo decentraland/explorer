@@ -28,10 +28,13 @@ namespace DCL
         public MapAtlas atlas;
         public RawImage parcelHighlightImage;
         public TextMeshProUGUI highlightedParcelText;
+        public Transform overlayContainer;
 
         public Image playerPositionIcon;
-        public HashSet<MinimapMetadata.MinimapSceneInfo> scenesOfInterest = new HashSet<MinimapMetadata.MinimapSceneInfo>();
-        public Dictionary<MinimapMetadata.MinimapSceneInfo, GameObject> scenesOfInterestMarkers = new Dictionary<MinimapMetadata.MinimapSceneInfo, GameObject>();
+        public MapSceneIcon scenesOfInterestIconPrefab;
+
+        private HashSet<MinimapMetadata.MinimapSceneInfo> scenesOfInterest = new HashSet<MinimapMetadata.MinimapSceneInfo>();
+        private Dictionary<MinimapMetadata.MinimapSceneInfo, GameObject> scenesOfInterestMarkers = new Dictionary<MinimapMetadata.MinimapSceneInfo, GameObject>();
 
         private bool parcelHighlightEnabledValue = false;
         public bool parcelHighlightEnabled
@@ -50,10 +53,6 @@ namespace DCL
         private void Awake()
         {
             i = this;
-        }
-
-        void Start()
-        {
             MinimapMetadata.GetMetadata().OnSceneInfoUpdated += MapRenderer_OnSceneInfoUpdated;
             playerWorldPosition.OnChange += OnCharacterMove;
             playerRotation.OnChange += OnCharacterRotate;
@@ -103,7 +102,9 @@ namespace DCL
             if (!parcelHighlightImage.gameObject.activeSelf)
                 parcelHighlightImage.gameObject.SetActive(true);
 
-            parcelHighlightImage.transform.position = worldCoordsOriginInMap + mouseMapCoords * parcelSizeInMap + new Vector3(parcelSizeInMap, parcelSizeInMap, 0f) / 2;
+            // parcelHighlightImage.transform.position = worldCoordsOriginInMap + mouseMapCoords * parcelSizeInMap + new Vector3(parcelSizeInMap, parcelSizeInMap, 0f) / 2;
+            // parcelHighlightImage.transform.position = worldCoordsOriginInMap + mouseMapCoords * parcelSizeInMap + new Vector3(parcelSizeInMap, parcelSizeInMap, 0f) / 2;
+            parcelHighlightImage.transform.position = worldCoordsOriginInMap + mouseMapCoords * parcelSizeInMap;
             highlightedParcelText.text = $"{mouseMapCoords.x}, {mouseMapCoords.y}";
 
             // ----------------------------------------------------
@@ -118,7 +119,31 @@ namespace DCL
 
         private void MapRenderer_OnSceneInfoUpdated(MinimapMetadata.MinimapSceneInfo sceneInfo)
         {
-            //TODO(Brian): Add markers.
+            if (!sceneInfo.isPOI)
+                return;
+
+            if (scenesOfInterest.Contains(sceneInfo))
+                return;
+
+            scenesOfInterest.Add(sceneInfo);
+
+            GameObject go = Object.Instantiate(scenesOfInterestIconPrefab.gameObject, overlayContainer.transform);
+
+            Vector2 centerTile = Vector2.zero;
+
+            foreach (var parcel in sceneInfo.parcels)
+            {
+                centerTile += parcel;
+            }
+
+            centerTile /= (float)sceneInfo.parcels.Count;
+
+            (go.transform as RectTransform).anchoredPosition = MapUtils.GetTileToLocalPosition(centerTile.x, centerTile.y);
+
+            MapSceneIcon icon = go.GetComponent<MapSceneIcon>();
+            icon.title.text = sceneInfo.name;
+
+            scenesOfInterestMarkers.Add(sceneInfo, go);
         }
 
         public void OnDestroy()

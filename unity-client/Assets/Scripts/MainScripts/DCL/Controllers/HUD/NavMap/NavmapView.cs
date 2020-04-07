@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 using DCL.Helpers;
 using TMPro;
@@ -14,6 +14,8 @@ namespace DCL
         [SerializeField] Transform scrollRectContentTransform;
         [SerializeField] TextMeshProUGUI currentSceneNameText;
         [SerializeField] TextMeshProUGUI currentSceneCoordsText;
+        [SerializeField] internal NavmapToastView toastView;
+
         InputAction_Trigger.Triggered toggleNavMapDelegate;
         RectTransform minimapViewport;
         Transform mapRendererMinimapParent;
@@ -38,9 +40,25 @@ namespace DCL
             toggleNavMapAction.OnTriggered += toggleNavMapDelegate;
 
             MinimapHUDView.OnUpdateData += UpdateCurrentSceneData;
+            CommonScriptableObjects.playerCoords.OnChange += PlayerCoords_OnChange;
+
+            toastView.gameObject.SetActive(false);
+            scrollRect.gameObject.SetActive(false);
         }
 
-        void ToggleNavMap()
+        private void OnDestroy()
+        {
+            MinimapHUDView.OnUpdateData -= UpdateCurrentSceneData;
+            CommonScriptableObjects.playerCoords.OnChange -= PlayerCoords_OnChange;
+        }
+
+        private void PlayerCoords_OnChange(Vector2Int current, Vector2Int previous)
+        {
+            //TODO(Brian): Populate toast on clicked scene instead of current scene.
+            toastView.Populate(current, MinimapMetadata.GetMetadata().GetSceneInfo(current.x, current.y));
+        }
+
+        internal void ToggleNavMap()
         {
             if (MapRenderer.i == null) return;
 
