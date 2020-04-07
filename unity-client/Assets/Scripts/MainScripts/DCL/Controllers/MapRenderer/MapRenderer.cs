@@ -9,19 +9,19 @@ namespace DCL
     public class MapRenderer : MonoBehaviour
     {
         const int LEFT_BORDER_PARCELS = 25;
+        const int RIGHT_BORDER_PARCELS = 31;
+        const int TOP_BORDER_PARCELS = 31;
         const int BOTTOM_BORDER_PARCELS = 25;
         const int WORLDMAP_WIDTH_IN_PARCELS = 300;
 
         public static MapRenderer i { get; private set; }
 
         [SerializeField] private float parcelHightlightScale = 1.25f;
-        private int parcelSizeInMap;
+        private float parcelSizeInMap;
         private Vector3Variable playerWorldPosition => CommonScriptableObjects.playerWorldPosition;
         private Vector3Variable playerRotation => CommonScriptableObjects.cameraForward;
         private Vector3[] mapWorldspaceCorners = new Vector3[4];
-        private Vector3 worldmapOffset;
         private Vector3 worldCoordsOriginInMap;
-        private RectTransform navmapRectTransform = null;
         private Vector3 mouseMapCoords;
 
         public Vector3 playerGridPosition => Utils.WorldToGridPositionUnclamped(playerWorldPosition.Get());
@@ -31,6 +31,7 @@ namespace DCL
         public Transform overlayContainer;
 
         public Image playerPositionIcon;
+        public RectTransform centeredReferenceParcel;
         public MapSceneIcon scenesOfInterestIconPrefab;
 
         private HashSet<MinimapMetadata.MinimapSceneInfo> scenesOfInterest = new HashSet<MinimapMetadata.MinimapSceneInfo>();
@@ -57,10 +58,6 @@ namespace DCL
             playerWorldPosition.OnChange += OnCharacterMove;
             playerRotation.OnChange += OnCharacterRotate;
 
-            worldmapOffset = new Vector3(LEFT_BORDER_PARCELS + WORLDMAP_WIDTH_IN_PARCELS / 2, BOTTOM_BORDER_PARCELS + WORLDMAP_WIDTH_IN_PARCELS / 2, 0);
-            parcelSizeInMap = (MapUtils.PARCEL_SIZE / 2);
-
-            navmapRectTransform = atlas.chunksParent.transform as RectTransform;
             parcelHighlightImage.rectTransform.localScale = new Vector3(parcelHightlightScale, parcelHightlightScale, 1f);
         }
 
@@ -68,12 +65,11 @@ namespace DCL
         {
             if (!parcelHighlightEnabled) return;
 
-            // Get the world-space corners of the map
-            navmapRectTransform.GetWorldCorners(mapWorldspaceCorners);
+            parcelSizeInMap = centeredReferenceParcel.rect.width * centeredReferenceParcel.lossyScale.x;
 
-            // Offset world coordinates origin position in map with border-parcels and worldmap amount of parcels (horizontally/vertically) / 2
-            // (since the "border-parcels" outside the world are not the same amount on the 4 sides of the worldmap we can't just use the center of the rect)
-            worldCoordsOriginInMap = mapWorldspaceCorners[0] + worldmapOffset * parcelSizeInMap;
+            // the reference parcel has a bottom-left pivot
+            centeredReferenceParcel.GetWorldCorners(mapWorldspaceCorners);
+            worldCoordsOriginInMap = mapWorldspaceCorners[0];
 
             UpdateMouseMapCoords();
 
@@ -102,9 +98,7 @@ namespace DCL
             if (!parcelHighlightImage.gameObject.activeSelf)
                 parcelHighlightImage.gameObject.SetActive(true);
 
-            // parcelHighlightImage.transform.position = worldCoordsOriginInMap + mouseMapCoords * parcelSizeInMap + new Vector3(parcelSizeInMap, parcelSizeInMap, 0f) / 2;
-            // parcelHighlightImage.transform.position = worldCoordsOriginInMap + mouseMapCoords * parcelSizeInMap + new Vector3(parcelSizeInMap, parcelSizeInMap, 0f) / 2;
-            parcelHighlightImage.transform.position = worldCoordsOriginInMap + mouseMapCoords * parcelSizeInMap;
+            parcelHighlightImage.transform.position = worldCoordsOriginInMap + mouseMapCoords * parcelSizeInMap + new Vector3(parcelSizeInMap, parcelSizeInMap, 0f) / 2;
             highlightedParcelText.text = $"{mouseMapCoords.x}, {mouseMapCoords.y}";
 
             // ----------------------------------------------------
