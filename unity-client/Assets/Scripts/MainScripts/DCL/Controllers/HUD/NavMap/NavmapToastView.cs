@@ -39,7 +39,7 @@ namespace DCL
 
             sceneOwnerText.transform.parent.gameObject.SetActive(sceneInfoExtists && !string.IsNullOrEmpty(sceneInfo.owner));
             sceneDescriptionText.transform.parent.gameObject.SetActive(sceneInfoExtists && !string.IsNullOrEmpty(sceneInfo.description));
-            sceneTitleText.transform.parent.gameObject.SetActive(sceneInfoExtists);
+            sceneTitleText.transform.parent.gameObject.SetActive(sceneInfoExtists && !string.IsNullOrEmpty(sceneInfo.name));
             scenePreviewImage.gameObject.SetActive(sceneInfoExtists && !string.IsNullOrEmpty(sceneInfo.previewImageUrl));
 
             if (sceneInfoExtists)
