@@ -70,6 +70,8 @@ namespace DCL
             onGotoClicked?.Invoke();
 
             WebInterface.GoTo(location.x, location.y);
+
+            OnCloseClick();
         }
 
         string currentImageUrl;
