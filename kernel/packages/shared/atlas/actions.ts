@@ -29,6 +29,7 @@ export type MarketDataAction = ReturnType<typeof marketData>
 export const REPORTED_SCENES_FOR_MINIMAP = 'Reporting scenes for minimap'
 export const reportedScenes = (parcels: string[], reportPosition?: Vector2Component) =>
   action(REPORTED_SCENES_FOR_MINIMAP, { parcels, reportPosition })
+export type ReportedScenes = ReturnType<typeof reportedScenes>
 
 export const reportScenesAroundParcel = (parcelCoord: { x: number; y: number }, rectSizeAround: number) =>
   action(REPORT_SCENES_AROUND_PARCEL, { parcelCoord, scenesAround: rectSizeAround })

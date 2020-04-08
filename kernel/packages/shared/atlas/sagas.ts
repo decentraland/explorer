@@ -16,13 +16,15 @@ import {
   querySceneData,
   QuerySceneData,
   ReportScenesAroundParcel,
-  reportScenesAroundParcel
+  reportScenesAroundParcel,
+  reportedScenes
 } from './actions'
 import { shouldLoadSceneJsonData } from './selectors'
 import { AtlasState, MARKET_DATA, QUERY_DATA_FROM_SCENE_JSON, REPORT_SCENES_AROUND_PARCEL, SUCCESS_DATA_FROM_SCENE_JSON, FAILURE_DATA_FROM_SCENE_JSON } from './types'
 import { getTilesRectFromCenter } from '../utils'
 import { Action } from 'redux'
 import { ILand } from 'shared/types'
+import { SCENE_LOAD } from 'shared/loading/actions'
 
 declare const window: {
   unityInterface: {
@@ -33,6 +35,8 @@ declare const window: {
 export function* atlasSaga(): any {
   yield fork(fetchDistricts)
   yield fork(fetchTiles)
+
+  yield takeEvery(SCENE_LOAD, checkAndReportAround)
 
   yield takeEvery(QUERY_DATA_FROM_SCENE_JSON, querySceneDataAction)
   yield takeEvery(REPORT_SCENES_AROUND_PARCEL, reportScenesAroundParcelAction)
@@ -86,11 +90,12 @@ async function fetchSceneIds(tiles: string[]) {
 
 export function* checkAndReportAround() {
   const userPosition = lastPlayerPosition
-  let lastReport: Vector2Component = yield select(state => state.atlas.lastReportPosition)
+  const lastReport: Vector2Component | undefined = yield select(state => state.atlas.lastReportPosition)
   const TRIGGER_DISTANCE = 10 * parcelLimits.parcelSize
   const MAX_SCENES_AROUND = 15
 
   if (
+    !lastReport ||
     Math.abs(userPosition.x - lastReport.x) > TRIGGER_DISTANCE ||
     Math.abs(userPosition.z - lastReport.y) > TRIGGER_DISTANCE
   ) {
@@ -137,6 +142,8 @@ export function* reportScenesAroundParcelAction(action: ReportScenesAroundParcel
   atlasState = yield select(state => state.atlas)
 
   yield call(reportScenes, atlasState, [...sceneIdsSet])
+
+  yield put(reportedScenes(tilesAround, action.payload.parcelCoord))
 }
 
 export function* reportScenes(atlas?: AtlasState, sceneIds: string[] = []): any {

@@ -1,7 +1,6 @@
-import { Vector2Component } from 'atomicHelpers/landHelpers'
 import { AnyAction } from 'redux'
 import { ILand } from 'shared/types'
-import { REPORTED_SCENES_FOR_MINIMAP, FetchDataFromSceneJsonSuccess, QuerySceneData, FetchDataFromSceneJsonFailure } from './actions'
+import { REPORTED_SCENES_FOR_MINIMAP, FetchDataFromSceneJsonSuccess, QuerySceneData, FetchDataFromSceneJsonFailure, ReportedScenes } from './actions'
 import { getSceneNameFromAtlasState, getSceneNameWithMarketAndAtlas, postProcessSceneName } from './selectors'
 // @ts-ignore
 import defaultLogger from '../logger'
@@ -51,7 +50,7 @@ export function atlasReducer(state?: AtlasState, action?: AnyAction) {
     case MARKET_DATA:
       return reduceMarketData(state, action.payload)
     case REPORTED_SCENES_FOR_MINIMAP:
-      return reduceReportedScenesForMinimap(state, action.payload)
+      return reduceReportedScenesForMinimap(state, (action as ReportedScenes).payload)
     case DISTRICT_DATA:
       return reduceDistrictData(state, action)
   }
@@ -118,9 +117,9 @@ function reduceDistrictData(state: AtlasState, action: AnyAction) {
 
 function reduceReportedScenesForMinimap(
   state: AtlasState,
-  payload: { parcels: string[]; reportPosition?: Vector2Component }
+  payload: ReportedScenes['payload']
 ) {
-  state.lastReportPosition = state.lastReportPosition ?? state.lastReportPosition
+  state.lastReportPosition = payload.reportPosition
 
   payload.parcels.forEach(x => (state.tileToScene[x].alreadyReported = true))
 
