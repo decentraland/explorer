@@ -4608,6 +4608,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   toggleNavMapAction: {fileID: 11400000, guid: fc656e28ef52546e6a82e7ae7f5570b5, type: 2}
+  selectParcelAction: {fileID: 0}
   closeButton: {fileID: 6221079439394858850}
   scrollRect: {fileID: 1040854978026124918}
   scrollRectContentTransform: {fileID: 4562892339457273614}
@@ -5611,7 +5612,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &6419990266750301548
 RectTransform:
   m_ObjectHideFlags: 0

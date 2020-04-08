@@ -22,8 +22,8 @@ namespace DCL
         private Vector3Variable playerRotation => CommonScriptableObjects.cameraForward;
         private Vector3[] mapWorldspaceCorners = new Vector3[4];
         private Vector3 worldCoordsOriginInMap;
-        private Vector3 mouseMapCoords;
 
+        [HideInInspector] public Vector3 mouseMapCoords;
         public Vector3 playerGridPosition => Utils.WorldToGridPositionUnclamped(playerWorldPosition.Get());
         public MapAtlas atlas;
         public RawImage parcelHighlightImage;
@@ -31,7 +31,10 @@ namespace DCL
         public Transform overlayContainer;
 
         public Image playerPositionIcon;
+
+        // Used as a reference of the coordinates origin in-map and as a parcel width/height reference
         public RectTransform centeredReferenceParcel;
+
         public MapSceneIcon scenesOfInterestIconPrefab;
 
         private HashSet<MinimapMetadata.MinimapSceneInfo> scenesOfInterest = new HashSet<MinimapMetadata.MinimapSceneInfo>();
@@ -50,6 +53,8 @@ namespace DCL
                 return parcelHighlightEnabledValue;
             }
         }
+
+        public static System.Action<int, int> onParcelClicked;
 
         private void Awake()
         {
@@ -193,6 +198,13 @@ namespace DCL
         public Vector3 GetViewportCenter()
         {
             return atlas.viewport.TransformPoint(atlas.viewport.rect.center);
+        }
+
+        // Called by the parcelhighlight image button
+        public void ClickMousePositionParcel()
+        {
+            Debug.Log("PARCEL CLICKED!!!");
+            onParcelClicked?.Invoke((int)mouseMapCoords.x, (int)mouseMapCoords.y);
         }
     }
 }
