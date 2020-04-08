@@ -41,7 +41,7 @@ namespace DCL
             toggleNavMapDelegate = (x) => { ToggleNavMap(); };
             toggleNavMapAction.OnTriggered += toggleNavMapDelegate;
             MapRenderer.onParcelClicked += OnParcelClicked;
-            toastView.onGotoClicked += ToggleNavMap;
+            toastView.OnGotoClicked += ToggleNavMap;
 
             MinimapHUDView.OnUpdateData += UpdateCurrentSceneData;
 
@@ -51,7 +51,7 @@ namespace DCL
 
         private void OnDestroy()
         {
-            toastView.onGotoClicked -= ToggleNavMap;
+            toastView.OnGotoClicked -= ToggleNavMap;
             MinimapHUDView.OnUpdateData -= UpdateCurrentSceneData;
         }
 

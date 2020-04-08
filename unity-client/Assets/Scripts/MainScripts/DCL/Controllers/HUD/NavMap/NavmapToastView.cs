@@ -18,7 +18,7 @@ namespace DCL
         [SerializeField] internal Button goToButton;
         [SerializeField] internal Button closeButton;
 
-        public System.Action onGotoClicked;
+        public System.Action OnGotoClicked;
 
         Vector2Int location;
 
@@ -30,19 +30,19 @@ namespace DCL
 
         public void Populate(Vector2Int coordinates, MinimapMetadata.MinimapSceneInfo sceneInfo)
         {
-            bool sceneInfoExtists = sceneInfo != null;
+            bool sceneInfoExists = sceneInfo != null;
 
             gameObject.SetActive(true);
             location = coordinates;
 
             sceneLocationText.text = $"{coordinates.x}, {coordinates.y}";
 
-            sceneOwnerText.transform.parent.gameObject.SetActive(sceneInfoExtists && !string.IsNullOrEmpty(sceneInfo.owner));
-            sceneDescriptionText.transform.parent.gameObject.SetActive(sceneInfoExtists && !string.IsNullOrEmpty(sceneInfo.description));
-            sceneTitleText.transform.parent.gameObject.SetActive(sceneInfoExtists && !string.IsNullOrEmpty(sceneInfo.name));
-            scenePreviewImage.gameObject.SetActive(sceneInfoExtists && !string.IsNullOrEmpty(sceneInfo.previewImageUrl));
+            sceneOwnerText.transform.parent.gameObject.SetActive(sceneInfoExists && !string.IsNullOrEmpty(sceneInfo.owner));
+            sceneDescriptionText.transform.parent.gameObject.SetActive(sceneInfoExists && !string.IsNullOrEmpty(sceneInfo.description));
+            sceneTitleText.transform.parent.gameObject.SetActive(sceneInfoExists && !string.IsNullOrEmpty(sceneInfo.name));
+            scenePreviewImage.gameObject.SetActive(sceneInfoExists && !string.IsNullOrEmpty(sceneInfo.previewImageUrl));
 
-            if (sceneInfoExtists)
+            if (sceneInfoExists)
             {
                 sceneTitleText.text = sceneInfo.name;
                 sceneOwnerText.text = $"Created by: {sceneInfo.owner}";
@@ -56,10 +56,10 @@ namespace DCL
                 if (downloadCoroutine != null)
                     CoroutineStarter.Stop(downloadCoroutine);
 
-                if (sceneInfoExtists && !string.IsNullOrEmpty(sceneInfo.previewImageUrl))
+                if (sceneInfoExists && !string.IsNullOrEmpty(sceneInfo.previewImageUrl))
                     downloadCoroutine = CoroutineStarter.Start(Download(sceneInfo.previewImageUrl));
 
-                currentImageUrl = sceneInfoExtists ? sceneInfo.previewImageUrl : "";
+                currentImageUrl = sceneInfoExists ? sceneInfo.previewImageUrl : "";
             }
         }
 
@@ -70,7 +70,7 @@ namespace DCL
 
         private void OnGotoClick()
         {
-            onGotoClicked?.Invoke();
+            OnGotoClicked?.Invoke();
 
             WebInterface.GoTo(location.x, location.y);
 

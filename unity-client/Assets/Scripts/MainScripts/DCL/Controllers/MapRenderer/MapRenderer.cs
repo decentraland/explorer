@@ -54,7 +54,7 @@ namespace DCL
             }
         }
 
-        public static System.Action<int, int> onParcelClicked;
+        public static System.Action<int, int> OnParcelClicked;
 
         private void Awake()
         {
@@ -92,7 +92,7 @@ namespace DCL
 
         void UpdateParcelHighlight()
         {
-            if (!CoordinatesAreInsideTheworld((int)mouseMapCoords.x, (int)mouseMapCoords.y))
+            if (!CoordinatesAreInsideTheWorld((int)mouseMapCoords.x, (int)mouseMapCoords.y))
             {
                 if (parcelHighlightImage.gameObject.activeSelf)
                     parcelHighlightImage.gameObject.SetActive(false);
@@ -111,7 +111,7 @@ namespace DCL
             // var sceneInfo = mapMetadata.GetSceneInfo(mouseMapCoords.x, mouseMapCoords.y);
         }
 
-        bool CoordinatesAreInsideTheworld(int xCoord, int yCoord)
+        bool CoordinatesAreInsideTheWorld(int xCoord, int yCoord)
         {
             return (Mathf.Abs(xCoord) <= WORLDMAP_WIDTH_IN_PARCELS / 2) && (Mathf.Abs(yCoord) <= WORLDMAP_WIDTH_IN_PARCELS / 2);
         }
@@ -203,7 +203,7 @@ namespace DCL
         // Called by the parcelhighlight image button
         public void ClickMousePositionParcel()
         {
-            onParcelClicked?.Invoke((int)mouseMapCoords.x, (int)mouseMapCoords.y);
+            OnParcelClicked?.Invoke((int)mouseMapCoords.x, (int)mouseMapCoords.y);
         }
     }
 }
