@@ -40,22 +40,10 @@ namespace DCL
 
             toggleNavMapDelegate = (x) => { ToggleNavMap(); };
             toggleNavMapAction.OnTriggered += toggleNavMapDelegate;
-
-            // selectParcelDelegate = (x) =>
-            // {
-            //     if (!isOpen) return;
-
-            //     int mouseMapX = (int)MapRenderer.i.mouseMapCoords.x;
-            //     int mouseMapY = (int)MapRenderer.i.mouseMapCoords.y;
-
-            //     toastView.Populate(new Vector2Int(mouseMapX, mouseMapY), MinimapMetadata.GetMetadata().GetSceneInfo(mouseMapX, mouseMapY));
-            // };
-            // selectParcelAction.OnTriggered += selectParcelDelegate;
             MapRenderer.onParcelClicked += OnParcelClicked;
             toastView.onGotoClicked += ToggleNavMap;
 
             MinimapHUDView.OnUpdateData += UpdateCurrentSceneData;
-            CommonScriptableObjects.playerCoords.OnChange += PlayerCoords_OnChange;
 
             toastView.gameObject.SetActive(false);
             scrollRect.gameObject.SetActive(false);
@@ -65,13 +53,6 @@ namespace DCL
         {
             toastView.onGotoClicked -= ToggleNavMap;
             MinimapHUDView.OnUpdateData -= UpdateCurrentSceneData;
-            CommonScriptableObjects.playerCoords.OnChange -= PlayerCoords_OnChange;
-        }
-
-        private void PlayerCoords_OnChange(Vector2Int current, Vector2Int previous)
-        {
-            //TODO(Brian): Populate toast on clicked scene instead of current scene.
-            // toastView.Populate(current, MinimapMetadata.GetMetadata().GetSceneInfo(current.x, current.y));
         }
 
         internal void ToggleNavMap()
