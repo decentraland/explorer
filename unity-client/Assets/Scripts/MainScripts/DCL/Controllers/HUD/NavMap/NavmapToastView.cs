@@ -32,32 +32,35 @@ namespace DCL
         {
             bool sceneInfoExtists = sceneInfo != null;
 
-            sceneOwnerText.gameObject.SetActive(sceneInfoExtists && !string.IsNullOrEmpty(sceneInfo.owner));
-            sceneDescriptionText.gameObject.SetActive(sceneInfoExtists && !string.IsNullOrEmpty(sceneInfo.description));
-            scenePreviewImage.gameObject.SetActive(sceneInfoExtists && !string.IsNullOrEmpty(sceneInfo.previewImageUrl));
-            sceneLocationText.text = $"{coordinates.x}, {coordinates.y}";
-
-            sceneTitleText.text = sceneInfoExtists ? sceneInfo.name : "";
-            sceneOwnerText.text = sceneInfoExtists ? $"Created by: {sceneInfo.owner}" : "";
-            sceneDescriptionText.text = sceneInfoExtists ? sceneInfo.description : "";
-
+            gameObject.SetActive(true);
             location = coordinates;
 
-            gameObject.SetActive(true);
+            sceneLocationText.text = $"{coordinates.x}, {coordinates.y}";
 
-            if (sceneInfoExtists && currentImageUrl == sceneInfo.previewImageUrl)
-                return;
+            sceneOwnerText.transform.parent.gameObject.SetActive(sceneInfoExtists && !string.IsNullOrEmpty(sceneInfo.owner));
+            sceneDescriptionText.transform.parent.gameObject.SetActive(sceneInfoExtists && !string.IsNullOrEmpty(sceneInfo.description));
+            sceneTitleText.transform.parent.gameObject.SetActive(sceneInfoExtists);
+            scenePreviewImage.gameObject.SetActive(sceneInfoExtists && !string.IsNullOrEmpty(sceneInfo.previewImageUrl));
 
-            if (currentImage != null)
-                Destroy(currentImage);
+            if (sceneInfoExtists)
+            {
+                sceneTitleText.text = sceneInfo.name;
+                sceneOwnerText.text = $"Created by: {sceneInfo.owner}";
+                sceneDescriptionText.text = sceneInfo.description;
 
-            if (downloadCoroutine != null)
-                CoroutineStarter.Stop(downloadCoroutine);
+                if (currentImageUrl == sceneInfo.previewImageUrl) return;
 
-            if (sceneInfoExtists && !string.IsNullOrEmpty(sceneInfo.previewImageUrl))
-                downloadCoroutine = CoroutineStarter.Start(Download(sceneInfo.previewImageUrl));
+                if (currentImage != null)
+                    Destroy(currentImage);
 
-            currentImageUrl = sceneInfoExtists ? sceneInfo.previewImageUrl : "";
+                if (downloadCoroutine != null)
+                    CoroutineStarter.Stop(downloadCoroutine);
+
+                if (sceneInfoExtists && !string.IsNullOrEmpty(sceneInfo.previewImageUrl))
+                    downloadCoroutine = CoroutineStarter.Start(Download(sceneInfo.previewImageUrl));
+
+                currentImageUrl = sceneInfoExtists ? sceneInfo.previewImageUrl : "";
+            }
         }
 
         private void OnCloseClick()

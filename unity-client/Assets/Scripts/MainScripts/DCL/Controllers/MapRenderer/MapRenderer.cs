@@ -203,7 +203,6 @@ namespace DCL
         // Called by the parcelhighlight image button
         public void ClickMousePositionParcel()
         {
-            Debug.Log("PARCEL CLICKED!!!");
             onParcelClicked?.Invoke((int)mouseMapCoords.x, (int)mouseMapCoords.y);
         }
     }
