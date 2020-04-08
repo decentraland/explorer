@@ -104,7 +104,7 @@ function reduceSuccessDataFromSceneJson(state: AtlasState, landData: ILand) {
   mapScene.requestStatus = 'ok'
   mapScene.sceneJsonData = landData.sceneJsonData
 
-  const name = getSceneNameFromAtlasState(state, mapScene.sceneJsonData) ?? mapScene.name
+  const name = getSceneNameFromAtlasState(mapScene.sceneJsonData) ?? mapScene.name
   mapScene.name = postProcessSceneName(name)
 
   mapScene.sceneJsonData.scene.parcels.forEach(x => {
@@ -143,10 +143,11 @@ function reduceMarketData(state: AtlasState, marketData: MarketData) {
   const tileToScene = { ...state.tileToScene }
 
   Object.keys(marketData.data).forEach(key => {
-    const existingScene = state.tileToScene[key]
+    const existingScene = tileToScene[key]
+
     const value = marketData.data[key]
 
-    const sceneName = postProcessSceneName(getSceneNameWithMarketAndAtlas(marketData, state, value.x, value.y))
+    const sceneName = postProcessSceneName(getSceneNameWithMarketAndAtlas(marketData, tileToScene, value.x, value.y))
 
     let newScene: MapSceneData
 
@@ -172,5 +173,5 @@ function reduceMarketData(state: AtlasState, marketData: MarketData) {
     tileToScene[key] = newScene
   })
 
-  return { ...state, hasMarketData: true }
+  return { ...state, tileToScene, hasMarketData: true }
 }

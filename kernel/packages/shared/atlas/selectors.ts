@@ -16,11 +16,11 @@ export function getType(state: RootAtlasState, x: number, y: number): number {
   return state.atlas.tileToScene[key] && state.atlas.tileToScene[key].type
 }
 
-export function getMapScene(state: AtlasState, x: number, y: number): MapSceneData | undefined {
-  return state.tileToScene[`${x},${y}`]
+export function getMapScene(tileToScene: AtlasState['tileToScene'], x: number, y: number): MapSceneData | undefined {
+  return tileToScene[`${x},${y}`]
 }
 
-export function getSceneNameFromAtlasState(state: AtlasState, sceneJsonData?: SceneJsonData): string | undefined {
+export function getSceneNameFromAtlasState(sceneJsonData?: SceneJsonData): string | undefined {
   if (!sceneJsonData) {
     return undefined
   }
@@ -53,16 +53,16 @@ export function getSceneNameFromMarketData(marketData: MarketData, x: number, y:
 
 export function getSceneNameWithMarketAndAtlas(
   marketData: MarketData,
-  state: AtlasState,
+  tileToScene: AtlasState['tileToScene'],
   x: number,
   y: number
 ): string | undefined {
   let tentativeName: string | undefined
 
-  const mapScene = getMapScene(state, x, y)
+  const mapScene = getMapScene(tileToScene, x, y)
 
   if (mapScene) {
-    tentativeName = getSceneNameFromAtlasState(state, mapScene.sceneJsonData)
+    tentativeName = getSceneNameFromAtlasState(mapScene.sceneJsonData)
   }
 
   if (tentativeName === undefined) {
