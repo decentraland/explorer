@@ -174,7 +174,5 @@ export function* reportScenes(atlas?: AtlasState, sceneIds: string[] = []): any 
     })
   })
 
-  defaultLogger.info(`minimap`, minimapSceneInfoResult)
-
   window.unityInterface.UpdateMinimapSceneInformation(minimapSceneInfoResult)
 }

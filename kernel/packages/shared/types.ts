@@ -194,7 +194,7 @@ export type SceneSource = {
 /// https://github.com/decentraland/proposals/blob/master/dsp/0020.mediawiki
 export type SceneJsonData = {
   display?: SceneDisplay
-  owner: string
+  owner?: string
   contact?: SceneContact
   main: string
   tags?: string[]

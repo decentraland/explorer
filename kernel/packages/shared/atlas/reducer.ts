@@ -114,13 +114,6 @@ function reduceSuccessDataFromSceneJson(state: AtlasState, landData: ILand) {
 function reduceDistrictData(state: AtlasState, action: AnyAction) {
   state.hasDistrictData = true
   return state
-  // {
-  //   ...state,
-  //   districtName: {
-  //     ...state.districtName,
-  //     ...zip(action.payload.data, (t: District) => [t.id, t.name])
-  //   }
-  // }
 }
 
 function reduceReportedScenesForMinimap(
