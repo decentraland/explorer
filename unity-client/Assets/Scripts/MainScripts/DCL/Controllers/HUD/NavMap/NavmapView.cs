@@ -40,7 +40,7 @@ namespace DCL
 
             toggleNavMapDelegate = (x) => { ToggleNavMap(); };
             toggleNavMapAction.OnTriggered += toggleNavMapDelegate;
-            MapRenderer.onParcelClicked += OnParcelClicked;
+            MapRenderer.OnParcelClicked += OnParcelClicked;
             toastView.OnGotoClicked += ToggleNavMap;
 
             MinimapHUDView.OnUpdateData += UpdateCurrentSceneData;
