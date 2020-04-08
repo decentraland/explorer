@@ -58,21 +58,27 @@ export function atlasReducer(state?: AtlasState, action?: AnyAction) {
 }
 
 function reduceFetchDataFromSceneJson(state: AtlasState, sceneId: string) {
-  if (!state.idToScene[sceneId]) {
-    state.idToScene[sceneId] = { ...MAP_SCENE_DATA_INITIAL_STATE }
+  const idToScene = { ...state.idToScene }
+
+  if (!idToScene[sceneId]) {
+    idToScene[sceneId] = { ...MAP_SCENE_DATA_INITIAL_STATE }
   }
 
-  state.idToScene[sceneId].requestStatus = 'loading'
-  return state
+  idToScene[sceneId].requestStatus = 'loading'
+
+  return { ...state, idToScene }
 }
 
 function reduceFailureDataFromSceneJson(state: AtlasState, sceneId: string) {
-  if (!state.idToScene[sceneId]) {
-    state.idToScene[sceneId] = { ...MAP_SCENE_DATA_INITIAL_STATE }
+  const idToScene = { ...state.idToScene }
+
+  if (!idToScene[sceneId]) {
+    idToScene[sceneId] = { ...MAP_SCENE_DATA_INITIAL_STATE }
   }
 
-  state.idToScene[sceneId].requestStatus = 'fail'
-  return state
+  idToScene[sceneId].requestStatus = 'fail'
+
+  return { ...state, idToScene }
 }
 
 function reduceSuccessDataFromSceneJson(state: AtlasState, landData: ILand) {
@@ -111,19 +117,26 @@ function reduceSuccessDataFromSceneJson(state: AtlasState, landData: ILand) {
 }
 
 function reduceDistrictData(state: AtlasState, action: AnyAction) {
-  state.hasDistrictData = true
-  return state
+  return { ...state, hasDistrictData: true }
 }
 
 function reduceReportedScenesForMinimap(
   state: AtlasState,
   payload: ReportedScenes['payload']
 ) {
-  state.lastReportPosition = payload.reportPosition
+  const tileToScene = { ...state.tileToScene }
 
-  payload.parcels.forEach(x => (state.tileToScene[x].alreadyReported = true))
+  payload.parcels.forEach(x => {
+    if (tileToScene[x]) {
+      tileToScene[x].alreadyReported = true
+    }
+  })
 
-  return state
+  return {
+    ...state,
+    lastReportPosition: payload.reportPosition,
+    tileToScene
+  }
 }
 
 function reduceMarketData(state: AtlasState, marketData: MarketData) {
