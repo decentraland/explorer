@@ -38,6 +38,7 @@ let downloadManager: SceneDataDownloadManager
     (options: {
       contentServer: string
       metaContentServer: string
+      metaContentService: string
       contentServerBundles: string
       lineOfSightRadius: number
       secureRadius: number
@@ -50,6 +51,7 @@ let downloadManager: SceneDataDownloadManager
       downloadManager = new SceneDataDownloadManager({
         contentServer: options.contentServer,
         metaContentServer: options.metaContentServer,
+        metaContentService: options.metaContentService,
         contentServerBundles: options.contentServerBundles,
         tutorialBaseURL: options.tutorialBaseURL
       })

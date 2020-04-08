@@ -9,7 +9,7 @@ import { resolveUrl } from 'atomicHelpers/parseUrl'
 import { ILand } from 'shared/types'
 
 import { DEBUG, parcelLimits, getServerConfigurations, ENABLE_EMPTY_SCENES, tutorialSceneEnabled } from '../../config'
-import { getFetchContentServer, getFetchMetaContentServer } from '../../shared/dao/selectors'
+import { getFetchContentServer, getFetchMetaContentServer, getFetchMetaContentService } from 'shared/dao/selectors'
 import { Store } from 'redux'
 
 import { getTutorialBaseURL } from 'shared/location'
@@ -98,6 +98,9 @@ export async function initParcelSceneWorker() {
     metaContentServer: DEBUG
       ? resolveUrl(document.location.origin, '/local-ipfs')
       : getFetchMetaContentServer(window.globalStore.getState()),
+    metaContentService: DEBUG
+      ? resolveUrl(document.location.origin, '/local-ipfs')
+      : getFetchMetaContentService(window.globalStore.getState()),
     contentServerBundles: DEBUG ? '' : getServerConfigurations().contentAsBundle,
     lineOfSightRadius: parcelLimits.visibleRadius,
     secureRadius: parcelLimits.secureRadius,

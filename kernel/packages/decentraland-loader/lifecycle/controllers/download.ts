@@ -40,11 +40,12 @@ export class SceneDataDownloadManager {
     public options: {
       contentServer: string
       metaContentServer: string
+      metaContentService: string
       contentServerBundles: string
       tutorialBaseURL: string
     }
   ) {
-    this.catalyst = new CatalystClient('https://peer.decentraland.org', 'EXPLORER')
+    this.catalyst = new CatalystClient(options.metaContentServer, 'EXPLORER')
   }
 
   async resolveSceneSceneIds(tiles: string[]): Promise<TileIdPair[]> {
@@ -141,10 +142,10 @@ export class SceneDataDownloadManager {
 
     try {
       const responseContent = await fetch(
-        this.options.metaContentServer + `/scenes?x1=${nw[0]}&x2=${nw[0]}&y1=${nw[1]}&y2=${nw[1]}`
+        this.options.metaContentService + `/scenes?x1=${nw[0]}&x2=${nw[0]}&y1=${nw[1]}&y2=${nw[1]}`
       )
       if (!responseContent.ok) {
-        error(`Error in ${this.options.metaContentServer}/scenes response!`, responseContent)
+        error(`Error in ${this.options.metaContentService}/scenes response!`, responseContent)
         promised.resolve(null)
         return null
       } else {
@@ -220,10 +221,10 @@ export class SceneDataDownloadManager {
       return promised
     }
 
-    const actualResponse = await fetch(this.options.metaContentServer + `/parcel_info?cids=${sceneId}`)
+    const actualResponse = await fetch(this.options.metaContentService + `/parcel_info?cids=${sceneId}`)
     if (!actualResponse.ok) {
-      error(`Error in ${this.options.metaContentServer}/parcel_info response!`, actualResponse)
-      const ret = new Error(`Error in ${this.options.metaContentServer}/parcel_info response!`)
+      error(`Error in ${this.options.metaContentService}/parcel_info response!`, actualResponse)
+      const ret = new Error(`Error in ${this.options.metaContentService}/parcel_info response!`)
       promised.reject(ret)
       throw ret
     }
