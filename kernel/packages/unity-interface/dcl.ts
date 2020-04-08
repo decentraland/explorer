@@ -509,7 +509,7 @@ export const unityInterface = {
     const CHUNK_SIZE = 100
 
     for (let i = 0; i < info.length; i += CHUNK_SIZE) {
-      let chunk = info.slice(i, i + CHUNK_SIZE)
+      const chunk = info.slice(i, i + CHUNK_SIZE)
       gameInstance.SendMessage('SceneController', 'UpdateMinimapSceneInformation', JSON.stringify(chunk))
     }
   },
