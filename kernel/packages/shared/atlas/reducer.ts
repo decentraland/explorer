@@ -39,7 +39,7 @@ export function atlasReducer(state?: AtlasState, action?: AnyAction) {
     case SUCCESS_DATA_FROM_SCENE_JSON:
       return reduceSuccessDataFromSceneJson(state, (action as FetchDataFromSceneJsonSuccess).payload.data)
     case FAILURE_DATA_FROM_SCENE_JSON:
-      return reduceFailureDataFromSceneJson(state, (action as FetchDataFromSceneJsonFailure).payload.sceneId)
+      return reduceFailureDataFromSceneJson(state, (action as FetchDataFromSceneJsonFailure).payload.sceneIds)
     case MARKET_DATA:
       return reduceMarketData(state, action.payload)
     case LAST_REPORTED_POSITION:
@@ -52,63 +52,78 @@ export function atlasReducer(state?: AtlasState, action?: AnyAction) {
   return state
 }
 
-function reduceFetchDataFromSceneJson(state: AtlasState, sceneId: string) {
-  const idToScene = { ...state.idToScene }
-
-  if (!idToScene[sceneId]) {
-    idToScene[sceneId] = { ...MAP_SCENE_DATA_INITIAL_STATE }
+function reduceFetchDataFromSceneJson(state: AtlasState, sceneIds: string[]) {
+  const newScenes = []
+  for (const sceneId of sceneIds) {
+    if (!state.idToScene[sceneId] || state.idToScene[sceneId].requestStatus !== 'ok') {
+      newScenes.push(sceneId)
+    }
   }
 
-  idToScene[sceneId].requestStatus = 'loading'
+  if (newScenes.length === 0) {
+    return state
+  }
+
+  const idToScene = { ...state.idToScene }
+
+  for (const sceneId of newScenes) {
+    idToScene[sceneId] = { ...MAP_SCENE_DATA_INITIAL_STATE, requestStatus: 'loading' }
+  }
 
   return { ...state, idToScene }
 }
 
-function reduceFailureDataFromSceneJson(state: AtlasState, sceneId: string) {
+function reduceFailureDataFromSceneJson(state: AtlasState, sceneIds: string[]) {
   const idToScene = { ...state.idToScene }
 
-  if (!idToScene[sceneId]) {
-    idToScene[sceneId] = { ...MAP_SCENE_DATA_INITIAL_STATE }
-  }
+  for (const sceneId of sceneIds) {
+    if (!idToScene[sceneId]) {
+      idToScene[sceneId] = { ...MAP_SCENE_DATA_INITIAL_STATE }
+    }
 
-  idToScene[sceneId].requestStatus = 'fail'
+    idToScene[sceneId].requestStatus = 'fail'
+  }
 
   return { ...state, idToScene }
 }
 
-function reduceSuccessDataFromSceneJson(state: AtlasState, landData: ILand) {
-  if (state.idToScene[landData.sceneId]?.requestStatus === 'ok') {
+function reduceSuccessDataFromSceneJson(state: AtlasState, landData: ILand[]) {
+  const newData = landData.filter(land => state.idToScene[land.sceneId]?.requestStatus !== 'ok')
+
+  if (newData.length === 0) {
     return state
   }
 
   const tileToScene = { ...state.tileToScene }
   const idToScene = { ...state.idToScene }
 
-  let mapScene: MapSceneData = { ...state.idToScene[landData.sceneId] }
+  for (const land of newData) {
+    let mapScene: MapSceneData = { ...state.idToScene[land.sceneId] }
 
-  landData.sceneJsonData.scene.parcels.forEach(x => {
-    const scene = tileToScene[x]
-    if (scene) {
-      mapScene = {
-        ...mapScene,
-        name: scene.name,
-        type: scene.type,
-        estateId: scene.estateId
+    land.sceneJsonData.scene.parcels.forEach(x => {
+      const scene = tileToScene[x]
+      if (scene) {
+        mapScene = {
+          ...mapScene,
+          name: scene.name,
+          type: scene.type,
+          estateId: scene.estateId
+        }
       }
-    }
-  })
+    })
 
-  mapScene.requestStatus = 'ok'
-  mapScene.sceneJsonData = landData.sceneJsonData
+    mapScene.requestStatus = 'ok'
+    mapScene.sceneJsonData = land.sceneJsonData
 
-  const name = getSceneNameFromAtlasState(mapScene.sceneJsonData) ?? mapScene.name
-  mapScene.name = postProcessSceneName(name)
+    const name = getSceneNameFromAtlasState(mapScene.sceneJsonData) ?? mapScene.name
+    mapScene.name = postProcessSceneName(name)
 
-  mapScene.sceneJsonData.scene.parcels.forEach(x => {
-    tileToScene[x] = mapScene
-  })
+    mapScene.sceneJsonData.scene.parcels.forEach(x => {
+      tileToScene[x] = mapScene
+    })
 
-  idToScene[landData.sceneId] = mapScene
+    idToScene[land.sceneId] = mapScene
+  }
 
   return { ...state, tileToScene, idToScene }
 }

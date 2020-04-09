@@ -4,17 +4,17 @@ import { Vector2Component } from '../../atomicHelpers/landHelpers'
 import { DistrictData, MarketData } from './types'
 
 export const QUERY_DATA_FROM_SCENE_JSON = '[Query] Fetch data from scene.json'
-export const querySceneData = (scene: string) => action(QUERY_DATA_FROM_SCENE_JSON, scene)
+export const querySceneData = (sceneIds: string[]) => action(QUERY_DATA_FROM_SCENE_JSON, sceneIds)
 export type QuerySceneData = ReturnType<typeof querySceneData>
 
 export const SUCCESS_DATA_FROM_SCENE_JSON = '[Success] Fetch data from scene.json'
-export const fetchDataFromSceneJsonSuccess = (sceneId: string, data: ILand) =>
-  action(SUCCESS_DATA_FROM_SCENE_JSON, { sceneId, data })
+export const fetchDataFromSceneJsonSuccess = (sceneIds: string[], data: ILand[]) =>
+  action(SUCCESS_DATA_FROM_SCENE_JSON, { sceneIds, data })
 export type FetchDataFromSceneJsonSuccess = ReturnType<typeof fetchDataFromSceneJsonSuccess>
 
 export const FAILURE_DATA_FROM_SCENE_JSON = '[Failure] Fetch data from scene.json'
-export const fetchDataFromSceneJsonFailure = (sceneId: string, error: any) =>
-  action(FAILURE_DATA_FROM_SCENE_JSON, { sceneId, error })
+export const fetchDataFromSceneJsonFailure = (sceneIds: string[], error: any) =>
+  action(FAILURE_DATA_FROM_SCENE_JSON, { sceneIds, error })
 export type FetchDataFromSceneJsonFailure = ReturnType<typeof fetchDataFromSceneJsonFailure>
 
 export const DISTRICT_DATA = '[Info] District data downloaded'

@@ -27,7 +27,6 @@ import {
 import { shouldLoadSceneJsonData, isMarketDataInitialized } from './selectors'
 import { AtlasState } from './types'
 import { getTilesRectFromCenter } from '../getTilesRectFromCenter'
-import { Action } from 'redux'
 import { ILand } from 'shared/types'
 import { SCENE_LOAD } from 'shared/loading/actions'
 import { worldToGrid } from '../../atomicHelpers/parcelScenePositions'
@@ -67,25 +66,19 @@ function* fetchTiles() {
 }
 
 function* querySceneDataAction(action: QuerySceneData) {
-  const shouldFetch = yield select(shouldLoadSceneJsonData, action.payload)
-  if (shouldFetch) {
-    yield call(fetchSceneJsonData, action.payload)
-  }
-}
-
-function* fetchSceneJsonData(sceneId: string) {
+  const sceneIds = action.payload
   try {
-    const land: ILand = yield call(fetchSceneJson, sceneId)
-    yield put(fetchDataFromSceneJsonSuccess(sceneId, land))
+    const lands: ILand[] = yield call(fetchSceneJson, sceneIds)
+    yield put(fetchDataFromSceneJsonSuccess(sceneIds, lands))
   } catch (e) {
-    yield put(fetchDataFromSceneJsonFailure(sceneId, e))
+    yield put(fetchDataFromSceneJsonFailure(sceneIds, e))
   }
 }
 
-async function fetchSceneJson(sceneId: string) {
+async function fetchSceneJson(sceneIds: string[]) {
   const server: LifecycleManager = getServer()
-  const land = await server.getParcelData(sceneId)
-  return land
+  const lands = await Promise.all(sceneIds.map(sceneId => server.getParcelData(sceneId)))
+  return lands
 }
 
 async function fetchSceneIds(tiles: string[]) {
@@ -113,10 +106,6 @@ export function* checkAndReportAround() {
   }
 }
 
-function isSceneAction(type: string, sceneId: string) {
-  return (action: Action) => type === action.type && sceneId === (action as any)?.payload?.sceneId
-}
-
 export function* reportScenesAroundParcelAction(action: ReportScenesAroundParcel) {
   let marketDataInitialized: boolean = yield select(isMarketDataInitialized)
 
@@ -127,25 +116,23 @@ export function* reportScenesAroundParcelAction(action: ReportScenesAroundParcel
 
   const tilesAround = getTilesRectFromCenter(action.payload.parcelCoord, MAX_SCENES_AROUND)
 
-  const sceneIds: (string | null)[] = yield call(fetchSceneIds, tilesAround)
+  const result: (string | null)[] = yield call(fetchSceneIds, tilesAround)
 
-  const sceneIdsSet = new Set<string>(sceneIds.filter($ => $ !== null) as string[])
+  const sceneIds = [...new Set<string>(result.filter($ => $ !== null) as string[])]
 
-  for (const id of sceneIdsSet) {
-    yield put(querySceneData(id))
-  }
+  yield put(querySceneData(sceneIds))
 
-  for (const id of sceneIdsSet) {
+  for (const id of sceneIds) {
     const shouldFetch = yield select(shouldLoadSceneJsonData, id)
     if (shouldFetch) {
       yield race({
-        success: take(isSceneAction(SUCCESS_DATA_FROM_SCENE_JSON, id)),
-        failure: take(isSceneAction(FAILURE_DATA_FROM_SCENE_JSON, id))
+        success: take(SUCCESS_DATA_FROM_SCENE_JSON),
+        failure: take(FAILURE_DATA_FROM_SCENE_JSON)
       })
     }
   }
 
-  yield call(reportScenes, [...sceneIdsSet])
+  yield call(reportScenes, sceneIds)
   yield put(reportedScenes(tilesAround))
 }
 

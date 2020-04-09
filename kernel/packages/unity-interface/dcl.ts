@@ -374,6 +374,8 @@ export function delightedSurvey() {
   }
 }
 
+const CHUNK_SIZE = 100
+
 export const unityInterface = {
   debug: false,
   SendGenericMessage(object: string, method: string, payload: string) {
@@ -506,8 +508,6 @@ export const unityInterface = {
     gameInstance.SendMessage('HUDController', 'ConfigureTermsOfServiceHUD', JSON.stringify(configuration))
   },
   UpdateMinimapSceneInformation(info: MinimapSceneInfo[]) {
-    const CHUNK_SIZE = 100
-
     for (let i = 0; i < info.length; i += CHUNK_SIZE) {
       const chunk = info.slice(i, i + CHUNK_SIZE)
       gameInstance.SendMessage('SceneController', 'UpdateMinimapSceneInformation', JSON.stringify(chunk))
