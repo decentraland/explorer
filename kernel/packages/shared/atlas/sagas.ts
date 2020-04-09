@@ -30,7 +30,7 @@ import { getTilesRectFromCenter } from '../utils'
 import { Action } from 'redux'
 import { ILand } from 'shared/types'
 import { SCENE_LOAD } from 'shared/loading/actions'
-import { worldToGrid } from '../../atomicHelpers/parcelScenePositions';
+import { worldToGrid } from '../../atomicHelpers/parcelScenePositions'
 
 declare const window: {
   unityInterface: {
