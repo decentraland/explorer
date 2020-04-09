@@ -30,6 +30,7 @@ import { getTilesRectFromCenter } from '../getTilesRectFromCenter'
 import { ILand } from 'shared/types'
 import { SCENE_LOAD } from 'shared/loading/actions'
 import { worldToGrid } from '../../atomicHelpers/parcelScenePositions'
+import { PARCEL_LOADING_STARTED } from 'shared/renderer/types'
 
 declare const window: {
   unityInterface: {
@@ -42,6 +43,8 @@ export function* atlasSaga(): any {
   yield fork(fetchTiles)
 
   yield takeEvery(SCENE_LOAD, checkAndReportAround)
+
+  yield takeLatest(PARCEL_LOADING_STARTED, reportPois)
 
   yield takeEvery(QUERY_DATA_FROM_SCENE_JSON, querySceneDataAction)
   yield takeLatest(REPORT_SCENES_AROUND_PARCEL, reportScenesAroundParcelAction)
@@ -90,7 +93,7 @@ async function fetchSceneIds(tiles: string[]) {
 const TRIGGER_DISTANCE = 10 * parcelLimits.parcelSize
 const MAX_SCENES_AROUND = 15
 
-export function* checkAndReportAround() {
+function* checkAndReportAround() {
   const userPosition = lastPlayerPosition
   const lastReport: Vector2Component | undefined = yield select(state => state.atlas.lastReportPosition)
 
@@ -106,7 +109,18 @@ export function* checkAndReportAround() {
   }
 }
 
-export function* reportScenesAroundParcelAction(action: ReportScenesAroundParcel) {
+const POI_TILES = CAMPAIGN_PARCEL_SEQUENCE.map(position => `${position.x},${position.y}`)
+
+function* reportPois() {
+  yield call(reportScenesFromTiles, POI_TILES)
+}
+
+function* reportScenesAroundParcelAction(action: ReportScenesAroundParcel) {
+  const tilesAround = getTilesRectFromCenter(action.payload.parcelCoord, MAX_SCENES_AROUND)
+  yield call(reportScenesFromTiles, tilesAround)
+}
+
+function* reportScenesFromTiles(tiles: string[]) {
   let marketDataInitialized: boolean = yield select(isMarketDataInitialized)
 
   while (!marketDataInitialized) {
@@ -114,11 +128,10 @@ export function* reportScenesAroundParcelAction(action: ReportScenesAroundParcel
     marketDataInitialized = yield select(isMarketDataInitialized)
   }
 
-  const tilesAround = getTilesRectFromCenter(action.payload.parcelCoord, MAX_SCENES_AROUND)
+  const result: (string | null)[] = yield call(fetchSceneIds, tiles)
 
-  const result: (string | null)[] = yield call(fetchSceneIds, tilesAround)
-
-  const sceneIds = [...new Set<string>(result.filter($ => $ !== null) as string[])]
+  // filter non null & distinct
+  const sceneIds = result.filter((e, i) => e !== null && result.indexOf(e) === i) as string[]
 
   yield put(querySceneData(sceneIds))
 
@@ -133,7 +146,7 @@ export function* reportScenesAroundParcelAction(action: ReportScenesAroundParcel
   }
 
   yield call(reportScenes, sceneIds)
-  yield put(reportedScenes(tilesAround))
+  yield put(reportedScenes(tiles))
 }
 
 function* reportScenes(sceneIds: string[]): any {
@@ -153,7 +166,7 @@ function* reportScenes(sceneIds: string[]): any {
         let xyStr = parcel.split(',')
         let xy: Vector2Component = { x: parseInt(xyStr[0], 10), y: parseInt(xyStr[1], 10) }
 
-        if (CAMPAIGN_PARCEL_SEQUENCE.some(poi => poi.x === xy.x && poi.y === xy.y)) {
+        if (POI_TILES.includes(parcel)) {
           isPOI = true
         }
 
