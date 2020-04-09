@@ -26,7 +26,7 @@ import {
 } from './actions'
 import { shouldLoadSceneJsonData, isMarketDataInitialized } from './selectors'
 import { AtlasState } from './types'
-import { getTilesRectFromCenter } from '../utils'
+import { getTilesRectFromCenter } from '../getTilesRectFromCenter'
 import { Action } from 'redux'
 import { ILand } from 'shared/types'
 import { SCENE_LOAD } from 'shared/loading/actions'
