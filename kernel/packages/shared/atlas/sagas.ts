@@ -26,7 +26,7 @@ import {
   INITIALIZE_POI_TILES
 } from './actions'
 import { shouldLoadSceneJsonData, isMarketDataInitialized, getPoiTiles } from './selectors'
-import { AtlasState, RootAtlasState } from './types';
+import { AtlasState, RootAtlasState } from './types'
 import { getTilesRectFromCenter } from '../getTilesRectFromCenter'
 import { ILand } from 'shared/types'
 import { SCENE_LOAD } from 'shared/loading/actions'

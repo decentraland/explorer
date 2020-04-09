@@ -1,5 +1,5 @@
 import { RootMetaState } from './types'
-import { Vector2Component } from 'atomicHelpers/landHelpers';
+import { Vector2Component } from 'atomicHelpers/landHelpers'
 
 export const getAddedServers = (store: RootMetaState): string[] => {
   const { config } = store.meta
