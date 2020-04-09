@@ -12,6 +12,10 @@ export function isMarketDataInitialized(state: RootAtlasState) {
   return state.atlas.hasMarketData
 }
 
+export function getPoiTiles(state: RootAtlasState) {
+  return state.atlas.pois
+}
+
 export function getType(state: RootAtlasState, x: number, y: number): number {
   const key = `${x},${y}`
   if (!state.atlas.tileToScene[key] || !state.atlas.tileToScene[key].type) {

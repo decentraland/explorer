@@ -36,3 +36,7 @@ export type ReportedScenes = ReturnType<typeof reportedScenes>
 export const LAST_REPORTED_POSITION = 'Last reported position'
 export const reportLastPosition = (position: Vector2Component) => action(LAST_REPORTED_POSITION, { position })
 export type ReportLastPosition = ReturnType<typeof reportLastPosition>
+
+export const INITIALIZE_POI_TILES = 'Initialize POI tiles'
+export const initializePoiTiles = (tiles: string[]) => action(INITIALIZE_POI_TILES, { tiles })
+export type InitializePoiTiles = ReturnType<typeof initializePoiTiles>

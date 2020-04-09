@@ -1,6 +1,6 @@
 import { AnyAction } from 'redux'
 import { ILand } from 'shared/types'
-import { REPORTED_SCENES_FOR_MINIMAP, FetchDataFromSceneJsonSuccess, QuerySceneData, FetchDataFromSceneJsonFailure, ReportedScenes, QUERY_DATA_FROM_SCENE_JSON, SUCCESS_DATA_FROM_SCENE_JSON, FAILURE_DATA_FROM_SCENE_JSON, MARKET_DATA, LAST_REPORTED_POSITION, DISTRICT_DATA, ReportLastPosition } from './actions'
+import { REPORTED_SCENES_FOR_MINIMAP, FetchDataFromSceneJsonSuccess, QuerySceneData, FetchDataFromSceneJsonFailure, ReportedScenes, QUERY_DATA_FROM_SCENE_JSON, SUCCESS_DATA_FROM_SCENE_JSON, FAILURE_DATA_FROM_SCENE_JSON, MARKET_DATA, LAST_REPORTED_POSITION, DISTRICT_DATA, ReportLastPosition, INITIALIZE_POI_TILES, InitializePoiTiles } from './actions'
 import { getSceneNameFromAtlasState, getSceneNameWithMarketAndAtlas, postProcessSceneName } from './selectors'
 import {
   AtlasState,
@@ -11,9 +11,11 @@ import {
 const ATLAS_INITIAL_STATE: AtlasState = {
   hasMarketData: false,
   hasDistrictData: false,
+  hasPois: false,
   tileToScene: {}, // '0,0' -> sceneId. Useful for mapping tile market data to actual scenes.
   idToScene: {}, // sceneId -> MapScene
-  lastReportPosition: undefined
+  lastReportPosition: undefined,
+  pois: []
 }
 
 const MAP_SCENE_DATA_INITIAL_STATE: MapSceneData = {
@@ -48,8 +50,14 @@ export function atlasReducer(state?: AtlasState, action?: AnyAction) {
       return reduceReportedScenesForMinimap(state, (action as ReportedScenes).payload)
     case DISTRICT_DATA:
       return reduceDistrictData(state, action)
+    case INITIALIZE_POI_TILES:
+      return reduceInitializePoiTiles(state, action as InitializePoiTiles)
   }
   return state
+}
+
+function reduceInitializePoiTiles(state: AtlasState, action: InitializePoiTiles) {
+  return { ...state, hasPois: true, pois: action.payload.tiles }
 }
 
 function reduceFetchDataFromSceneJson(state: AtlasState, sceneIds: string[]) {

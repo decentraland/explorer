@@ -1,7 +1,6 @@
 import { Vector2Component } from 'atomicHelpers/landHelpers'
 import { MinimapSceneInfo } from 'decentraland-ecs/src/decentraland/Types'
 import { call, fork, put, select, take, takeEvery, race, takeLatest } from 'redux-saga/effects'
-import { CAMPAIGN_PARCEL_SEQUENCE } from 'shared/world/TeleportController'
 import { parcelLimits } from '../../config'
 import { getServer, LifecycleManager } from '../../decentraland-loader/lifecycle/manager'
 import { getOwnerNameFromJsonData, getSceneDescriptionFromJsonData } from '../../shared/selectors'
@@ -22,15 +21,19 @@ import {
   SUCCESS_DATA_FROM_SCENE_JSON,
   FAILURE_DATA_FROM_SCENE_JSON,
   reportScenesAroundParcel,
-  reportLastPosition
+  reportLastPosition,
+  initializePoiTiles,
+  INITIALIZE_POI_TILES
 } from './actions'
-import { shouldLoadSceneJsonData, isMarketDataInitialized } from './selectors'
-import { AtlasState } from './types'
+import { shouldLoadSceneJsonData, isMarketDataInitialized, getPoiTiles } from './selectors'
+import { AtlasState, RootAtlasState } from './types';
 import { getTilesRectFromCenter } from '../getTilesRectFromCenter'
 import { ILand } from 'shared/types'
 import { SCENE_LOAD } from 'shared/loading/actions'
 import { worldToGrid } from '../../atomicHelpers/parcelScenePositions'
 import { PARCEL_LOADING_STARTED } from 'shared/renderer/types'
+import { getPois } from '../meta/selectors'
+import { META_CONFIGURATION_INITIALIZED } from '../meta/actions'
 
 declare const window: {
   unityInterface: {
@@ -44,6 +47,7 @@ export function* atlasSaga(): any {
 
   yield takeEvery(SCENE_LOAD, checkAndReportAround)
 
+  yield takeLatest(META_CONFIGURATION_INITIALIZED, initializePois)
   yield takeLatest(PARCEL_LOADING_STARTED, reportPois)
 
   yield takeEvery(QUERY_DATA_FROM_SCENE_JSON, querySceneDataAction)
@@ -109,10 +113,18 @@ function* checkAndReportAround() {
   }
 }
 
-const POI_TILES = CAMPAIGN_PARCEL_SEQUENCE.map(position => `${position.x},${position.y}`)
+function* waitForPoiTilesInitialization() {
+  while (!(yield select((state: RootAtlasState) => state.atlas.hasPois))) {
+    yield take(INITIALIZE_POI_TILES)
+  }
+}
 
 function* reportPois() {
-  yield call(reportScenesFromTiles, POI_TILES)
+  yield call(waitForPoiTilesInitialization)
+
+  const pois: string[] = yield select(getPoiTiles)
+
+  yield call(reportScenesFromTiles, pois)
 }
 
 function* reportScenesAroundParcelAction(action: ReportScenesAroundParcel) {
@@ -120,12 +132,15 @@ function* reportScenesAroundParcelAction(action: ReportScenesAroundParcel) {
   yield call(reportScenesFromTiles, tilesAround)
 }
 
-function* reportScenesFromTiles(tiles: string[]) {
-  let marketDataInitialized: boolean = yield select(isMarketDataInitialized)
+function* initializePois() {
+  const pois: Vector2Component[] = yield select(getPois)
+  const poiTiles = pois.map(position => `${position.x},${position.y}`)
+  yield put(initializePoiTiles(poiTiles))
+}
 
-  while (!marketDataInitialized) {
+function* reportScenesFromTiles(tiles: string[]) {
+  while (!(yield select(isMarketDataInitialized))) {
     yield take(MARKET_DATA)
-    marketDataInitialized = yield select(isMarketDataInitialized)
   }
 
   const result: (string | null)[] = yield call(fetchSceneIds, tiles)
@@ -150,6 +165,9 @@ function* reportScenesFromTiles(tiles: string[]) {
 }
 
 function* reportScenes(sceneIds: string[]): any {
+  yield call(waitForPoiTilesInitialization)
+  const pois = yield select(getPoiTiles)
+
   const atlas: AtlasState = yield select(state => state.atlas)
 
   const scenes = sceneIds.map(sceneId => atlas.idToScene[sceneId])
@@ -166,7 +184,7 @@ function* reportScenes(sceneIds: string[]): any {
         let xyStr = parcel.split(',')
         let xy: Vector2Component = { x: parseInt(xyStr[0], 10), y: parseInt(xyStr[1], 10) }
 
-        if (POI_TILES.includes(parcel)) {
+        if (pois.includes(parcel)) {
           isPOI = true
         }
 

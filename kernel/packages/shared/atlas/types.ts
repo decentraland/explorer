@@ -4,7 +4,9 @@ import { SceneJsonData } from 'shared/types'
 export type AtlasState = {
   hasMarketData: boolean
   hasDistrictData: boolean
+  hasPois: boolean
 
+  pois: string[] // tiles of POIs of the form `x,y`
   tileToScene: Record<string, MapSceneData> // '0,0' -> sceneId. Useful for mapping tile market data to actual scenes.
   idToScene: Record<string, MapSceneData> // sceneId -> MapScene
   lastReportPosition?: Vector2Component
