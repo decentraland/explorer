@@ -27,6 +27,9 @@ namespace DCL
         bool cursorLockedBeforeOpening = true;
         Vector2Int lastParcelClicked = new Vector2Int();
 
+        // TODO: remove this bool and its usage once the feature is ready to be shippped.
+        bool enableInProduction = false;
+
         public static bool isOpen
         {
             private set;
@@ -63,6 +66,10 @@ namespace DCL
         internal void ToggleNavMap()
         {
             if (MapRenderer.i == null) return;
+
+#if !UNITY_EDITOR
+            if (!enableInProduction) return;
+#endif
 
             scrollRect.StopMovement();
 
