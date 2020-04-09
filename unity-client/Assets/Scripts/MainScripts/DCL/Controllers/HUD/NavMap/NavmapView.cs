@@ -45,7 +45,7 @@ namespace DCL
             toastView.OnGotoClicked += ToggleNavMap;
 
             MapRenderer.OnParcelClicked += (x, y) => OnParcelClicked(x, y);
-            mapMetadata.OnSceneInfoUpdated += (x) => { if (toastView.isOpen) OnParcelClicked(lastParcelClicked.x, lastParcelClicked.y, false); };
+            mapMetadata.OnSceneInfoUpdated += OnMapMetadataInfoUpdated;
 
             MinimapHUDView.OnUpdateData += UpdateCurrentSceneData;
 
@@ -57,6 +57,7 @@ namespace DCL
         {
             toastView.OnGotoClicked -= ToggleNavMap;
             MinimapHUDView.OnUpdateData -= UpdateCurrentSceneData;
+            mapMetadata.OnSceneInfoUpdated -= OnMapMetadataInfoUpdated;
         }
 
         internal void ToggleNavMap()
@@ -125,6 +126,11 @@ namespace DCL
 
             toastView.Populate(new Vector2Int(mouseTileX, mouseTileY), sceneInfo);
             lastParcelClicked.Set(mouseTileX, mouseTileY);
+        }
+
+        void OnMapMetadataInfoUpdated(MinimapMetadata.MinimapSceneInfo sceneInfo)
+        {
+            if (toastView.isOpen) OnParcelClicked(lastParcelClicked.x, lastParcelClicked.y, false);
         }
     }
 }
