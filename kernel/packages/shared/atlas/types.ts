@@ -1,14 +1,6 @@
 import { Vector2Component } from 'atomicHelpers/landHelpers'
 import { SceneJsonData } from 'shared/types'
 
-export const UPDATE_MINIMAP_SCENE_NAME = 'Update tile name'
-export const QUERY_DATA_FROM_SCENE_JSON = '[Query] Fetch data from scene.json'
-export const SUCCESS_DATA_FROM_SCENE_JSON = '[Success] Fetch data from scene.json'
-export const FAILURE_DATA_FROM_SCENE_JSON = '[Failure] Fetch data from scene.json'
-export const DISTRICT_DATA = '[Info] District data downloaded'
-export const MARKET_DATA = '[Info] Market data downloaded'
-export const REPORT_SCENES_AROUND_PARCEL = 'Report scenes around parcel'
-
 export type AtlasState = {
   hasMarketData: boolean
   hasDistrictData: boolean

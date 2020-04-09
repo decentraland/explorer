@@ -1,18 +1,11 @@
 import { AnyAction } from 'redux'
 import { ILand } from 'shared/types'
-import { REPORTED_SCENES_FOR_MINIMAP, FetchDataFromSceneJsonSuccess, QuerySceneData, FetchDataFromSceneJsonFailure, ReportedScenes } from './actions'
+import { REPORTED_SCENES_FOR_MINIMAP, FetchDataFromSceneJsonSuccess, QuerySceneData, FetchDataFromSceneJsonFailure, ReportedScenes, QUERY_DATA_FROM_SCENE_JSON, SUCCESS_DATA_FROM_SCENE_JSON, FAILURE_DATA_FROM_SCENE_JSON, MARKET_DATA, LAST_REPORTED_POSITION, DISTRICT_DATA, ReportLastPosition } from './actions'
 import { getSceneNameFromAtlasState, getSceneNameWithMarketAndAtlas, postProcessSceneName } from './selectors'
-// @ts-ignore
-import defaultLogger from '../logger'
 import {
   AtlasState,
-  DISTRICT_DATA,
-  FAILURE_DATA_FROM_SCENE_JSON,
   MapSceneData,
-  MarketData,
-  MARKET_DATA,
-  SUCCESS_DATA_FROM_SCENE_JSON,
-  QUERY_DATA_FROM_SCENE_JSON
+  MarketData
 } from './types'
 
 const ATLAS_INITIAL_STATE: AtlasState = {
@@ -49,6 +42,8 @@ export function atlasReducer(state?: AtlasState, action?: AnyAction) {
       return reduceFailureDataFromSceneJson(state, (action as FetchDataFromSceneJsonFailure).payload.sceneId)
     case MARKET_DATA:
       return reduceMarketData(state, action.payload)
+    case LAST_REPORTED_POSITION:
+      return reduceReportedLastPositionForMinimap(state, (action as ReportLastPosition).payload)
     case REPORTED_SCENES_FOR_MINIMAP:
       return reduceReportedScenesForMinimap(state, (action as ReportedScenes).payload)
     case DISTRICT_DATA:
@@ -82,21 +77,23 @@ function reduceFailureDataFromSceneJson(state: AtlasState, sceneId: string) {
 }
 
 function reduceSuccessDataFromSceneJson(state: AtlasState, landData: ILand) {
+  if (state.idToScene[landData.sceneId]?.requestStatus === 'ok') {
+    return state
+  }
+
   const tileToScene = { ...state.tileToScene }
   const idToScene = { ...state.idToScene }
 
   let mapScene: MapSceneData = { ...state.idToScene[landData.sceneId] }
 
-  // NOTE(Brian): this code is for the case in which market data comes first (most likely always)
-  //             in that case we find the tileToScene data and update the mapScene with the
-  //             relevant market values. If we don't do this we will get an inconsistent state.
   landData.sceneJsonData.scene.parcels.forEach(x => {
-    if (state.tileToScene[x]) {
+    const scene = tileToScene[x]
+    if (scene) {
       mapScene = {
         ...mapScene,
-        name: state.tileToScene[x].name,
-        type: state.tileToScene[x].type,
-        estateId: state.tileToScene[x].estateId
+        name: scene.name,
+        type: scene.type,
+        estateId: scene.estateId
       }
     }
   })
@@ -120,21 +117,32 @@ function reduceDistrictData(state: AtlasState, action: AnyAction) {
   return { ...state, hasDistrictData: true }
 }
 
+function reduceReportedLastPositionForMinimap(state: AtlasState, payload: ReportLastPosition['payload']) {
+  return {
+    ...state,
+    lastReportPosition: payload.position
+  }
+}
+
 function reduceReportedScenesForMinimap(
   state: AtlasState,
   payload: ReportedScenes['payload']
 ) {
   const tileToScene = { ...state.tileToScene }
+  const idToScene = { ...state.idToScene }
 
   payload.parcels.forEach(x => {
-    if (tileToScene[x]) {
-      tileToScene[x].alreadyReported = true
+    const mapScene = tileToScene[x]
+    if (mapScene) {
+      mapScene.alreadyReported = true
+      if (mapScene.sceneId) {
+        idToScene[mapScene.sceneId].alreadyReported = true
+      }
     }
   })
 
   return {
     ...state,
-    lastReportPosition: payload.reportPosition,
     tileToScene
   }
 }

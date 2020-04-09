@@ -8,6 +8,10 @@ export function shouldLoadSceneJsonData(state: RootAtlasState, sceneId: string) 
   return !state.atlas.idToScene.hasOwnProperty(sceneId) || state.atlas.idToScene[sceneId].requestStatus !== 'ok'
 }
 
+export function isMarketDataInitialized(state: RootAtlasState) {
+  return state.atlas.hasMarketData
+}
+
 export function getType(state: RootAtlasState, x: number, y: number): number {
   const key = `${x},${y}`
   if (!state.atlas.tileToScene[key] || !state.atlas.tileToScene[key].type) {
