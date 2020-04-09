@@ -127,11 +127,7 @@ export function* reportScenesAroundParcelAction(action: ReportScenesAroundParcel
 
   const tilesAround = getTilesRectFromCenter(action.payload.parcelCoord, MAX_SCENES_AROUND)
 
-  defaultLogger.info(`atlas#tiles-around`, tilesAround)
-
   const sceneIds: (string | null)[] = yield call(fetchSceneIds, tilesAround)
-
-  defaultLogger.info(`atlas#scene-array`, sceneIds)
 
   const sceneIdsSet = new Set<string>(sceneIds.filter($ => $ !== null) as string[])
 
