@@ -2,6 +2,7 @@ using DCL.Helpers;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 using TMPro;
 
 namespace DCL
@@ -13,15 +14,21 @@ namespace DCL
         const int TOP_BORDER_PARCELS = 31;
         const int BOTTOM_BORDER_PARCELS = 25;
         const int WORLDMAP_WIDTH_IN_PARCELS = 300;
+        private int NAVMAP_CHUNK_LAYER;
 
         public static MapRenderer i { get; private set; }
 
         [SerializeField] private float parcelHightlightScale = 1.25f;
+        [SerializeField] private float parcelHoldTimeInSeconds = 1f;
         private float parcelSizeInMap;
         private Vector3Variable playerWorldPosition => CommonScriptableObjects.playerWorldPosition;
         private Vector3Variable playerRotation => CommonScriptableObjects.cameraForward;
         private Vector3[] mapWorldspaceCorners = new Vector3[4];
         private Vector3 worldCoordsOriginInMap;
+        private Vector3 lastMouseMapCoords;
+        private float parcelHoldCounter;
+        private List<RaycastResult> uiRaycastResults = new List<RaycastResult>();
+        private PointerEventData uiRaycastPointerEventData = new PointerEventData(EventSystem.current);
 
         [HideInInspector] public Vector3 mouseMapCoords;
         public Vector3 playerGridPosition => Utils.WorldToGridPositionUnclamped(playerWorldPosition.Get());
@@ -55,11 +62,17 @@ namespace DCL
         }
 
         public static System.Action<int, int> OnParcelClicked;
+        public static System.Action<int, int> OnParcelHold;
+        public static System.Action OnParcelHoldCancel;
 
         private void Awake()
         {
             i = this;
+
+            NAVMAP_CHUNK_LAYER = LayerMask.NameToLayer("NavmapChunk");
+
             MinimapMetadata.GetMetadata().OnSceneInfoUpdated += MapRenderer_OnSceneInfoUpdated;
+
             playerWorldPosition.OnChange += OnCharacterMove;
             playerRotation.OnChange += OnCharacterRotate;
 
@@ -79,15 +92,29 @@ namespace DCL
             UpdateMouseMapCoords();
 
             UpdateParcelHighlight();
+
+            UpdateParcelHold();
+
+            lastMouseMapCoords = mouseMapCoords;
         }
 
         void UpdateMouseMapCoords()
         {
+            if (!IsCursorOverMapChunk()) return;
+
             mouseMapCoords = Input.mousePosition - worldCoordsOriginInMap;
             mouseMapCoords = mouseMapCoords / parcelSizeInMap;
 
             mouseMapCoords.x = (int)Mathf.Floor(mouseMapCoords.x);
             mouseMapCoords.y = (int)Mathf.Floor(mouseMapCoords.y);
+        }
+
+        bool IsCursorOverMapChunk()
+        {
+            uiRaycastPointerEventData.position = Input.mousePosition;
+            EventSystem.current.RaycastAll(uiRaycastPointerEventData, uiRaycastResults);
+
+            return uiRaycastResults.Count > 0 && uiRaycastResults[0].gameObject.layer == NAVMAP_CHUNK_LAYER;
         }
 
         void UpdateParcelHighlight()
@@ -109,6 +136,25 @@ namespace DCL
             // ----------------------------------------------------
             // TODO: Use sceneInfo to highlight whole scene parcels and populate scenes hover info on navmap once we can access all the scenes info
             // var sceneInfo = mapMetadata.GetSceneInfo(mouseMapCoords.x, mouseMapCoords.y);
+        }
+
+        void UpdateParcelHold()
+        {
+            if (mouseMapCoords == lastMouseMapCoords)
+            {
+                parcelHoldCounter += Time.deltaTime;
+
+                if (parcelHoldCounter >= parcelHoldTimeInSeconds)
+                {
+                    parcelHoldCounter = 0f;
+                    OnParcelHold?.Invoke((int)mouseMapCoords.x, (int)mouseMapCoords.y);
+                }
+            }
+            else
+            {
+                parcelHoldCounter = 0f;
+                OnParcelHoldCancel?.Invoke();
+            }
         }
 
         bool CoordinatesAreInsideTheWorld(int xCoord, int yCoord)

@@ -30,6 +30,7 @@ namespace DCL
 
         private void Awake()
         {
+            MinimapMetadata.GetMetadata().OnSceneInfoUpdated += OnMapMetadataInfoUpdated;
             rectTransform = transform as RectTransform;
 
             goToButton.onClick.AddListener(OnGotoClick);
@@ -73,6 +74,13 @@ namespace DCL
             }
         }
 
+        public void OnMapMetadataInfoUpdated(MinimapMetadata.MinimapSceneInfo sceneInfo)
+        {
+            if (!isOpen) return;
+
+            Populate(location, sceneInfo);
+        }
+
         void PositionToast(Vector2Int coordinates)
         {
             // position the toast over the parcel parcelHighlightImage so that we can easily check with LOCAL pos info where it is on the screen
@@ -86,7 +94,7 @@ namespace DCL
             if (shouldOffsetHorizontally)
                 useLeft = toastContainer.localPosition.x > 0;
 
-            // By setting de pivot accordingly BEFORE we position the toast, we can have it always visible in an easier way
+            // By setting the pivot accordingly BEFORE we position the toast, we can have it always visible in an easier way
             toastContainer.pivot = new Vector2(shouldOffsetHorizontally ? (useLeft ? 1 : 0) : 0.5f, useBottom ? 1 : 0);
             toastContainer.position = MapRenderer.i.parcelHighlightImage.transform.position;
 
