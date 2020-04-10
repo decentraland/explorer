@@ -20,6 +20,7 @@ namespace DCL
         [SerializeField] internal Button closeButton;
         Vector2Int location;
         RectTransform rectTransform;
+        MinimapMetadata minimapMetadata;
 
         public System.Action OnGotoClicked;
 
@@ -30,11 +31,18 @@ namespace DCL
 
         private void Awake()
         {
-            MinimapMetadata.GetMetadata().OnSceneInfoUpdated += OnMapMetadataInfoUpdated;
+            minimapMetadata = MinimapMetadata.GetMetadata();
             rectTransform = transform as RectTransform;
 
             goToButton.onClick.AddListener(OnGotoClick);
             closeButton.onClick.AddListener(OnCloseClick);
+
+            minimapMetadata.OnSceneInfoUpdated += OnMapMetadataInfoUpdated;
+        }
+
+        private void OnDestroy()
+        {
+            minimapMetadata.OnSceneInfoUpdated -= OnMapMetadataInfoUpdated;
         }
 
         public void Populate(Vector2Int coordinates, MinimapMetadata.MinimapSceneInfo sceneInfo)
