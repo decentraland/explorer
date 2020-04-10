@@ -75,7 +75,7 @@ namespace DCL
 
         void PositionToast(Vector2Int coordinates)
         {
-            // position the toast over the parcel parcelHighlightImage so that we can easily check with local pos info where it is on the screen
+            // position the toast over the parcel parcelHighlightImage so that we can easily check with LOCAL pos info where it is on the screen
             toastContainer.position = MapRenderer.i.parcelHighlightImage.transform.position;
 
             bool useBottom = toastContainer.localPosition.y > 0;
@@ -86,11 +86,10 @@ namespace DCL
             if (shouldOffsetHorizontally)
                 useLeft = toastContainer.localPosition.x > 0;
 
-            float offsetHorizontalMultiplier = toastContainer.rect.width * 0.5f;
-            float offsetVerticalMultiplier = toastContainer.rect.height * 0.5f;
-            Vector3 offset = toastContainer.up * offsetVerticalMultiplier * (useBottom ? -1 : 1) + (shouldOffsetHorizontally ? (toastContainer.right * offsetHorizontalMultiplier * (useLeft ? -1 : 1)) : Vector3.zero);
+            // By setting de pivot accordingly BEFORE we position the toast, we can have it always visible in an easier way
+            toastContainer.pivot = new Vector2(shouldOffsetHorizontally ? (useLeft ? 1 : 0) : 0.5f, useBottom ? 1 : 0);
+            toastContainer.position = MapRenderer.i.parcelHighlightImage.transform.position;
 
-            toastContainer.position = MapRenderer.i.parcelHighlightImage.transform.position + offset;
         }
 
         public void OnCloseClick()
