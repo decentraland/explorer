@@ -26,7 +26,7 @@ namespace DCL
         bool cursorLockedBeforeOpening = true;
 
         // TODO: remove this bool and its usage once the feature is ready to be shippped.
-        bool enableInProduction = false;
+        bool enableInProduction = true;
 
         public static bool isOpen
         {

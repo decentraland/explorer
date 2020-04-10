@@ -13,6 +13,7 @@ namespace DCL
         [SerializeField] internal TextMeshProUGUI sceneOwnerText;
         [SerializeField] internal TextMeshProUGUI sceneLocationText;
         [SerializeField] internal TextMeshProUGUI sceneDescriptionText;
+        [SerializeField] internal RectTransform toastContainer;
         [SerializeField] internal Image scenePreviewImage;
 
         [SerializeField] internal Button goToButton;
