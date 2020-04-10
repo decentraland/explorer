@@ -19,6 +19,7 @@ namespace DCL
         [SerializeField] internal Button goToButton;
         [SerializeField] internal Button closeButton;
         Vector2Int location;
+        RectTransform rectTransform;
 
         public System.Action OnGotoClicked;
 
@@ -29,6 +30,8 @@ namespace DCL
 
         private void Awake()
         {
+            rectTransform = transform as RectTransform;
+
             goToButton.onClick.AddListener(OnGotoClick);
             closeButton.onClick.AddListener(OnCloseClick);
         }
@@ -39,6 +42,8 @@ namespace DCL
 
             gameObject.SetActive(true);
             location = coordinates;
+
+            PositionToast(coordinates);
 
             sceneLocationText.text = $"{coordinates.x}, {coordinates.y}";
 
@@ -66,6 +71,21 @@ namespace DCL
 
                 currentImageUrl = sceneInfoExists ? sceneInfo.previewImageUrl : "";
             }
+        }
+
+        void PositionToast(Vector2Int coordinates)
+        {
+            // position the toast over the parcel parcelHighlightImage so that we can easily check with local pos info where it is on the screen
+            toastContainer.position = MapRenderer.i.parcelHighlightImage.transform.position;
+
+            bool useBottom = toastContainer.localPosition.y > 0;
+            bool useLeft = toastContainer.localPosition.x > 0;
+
+            float offsetHorizontalMultiplier = toastContainer.rect.width * 0.5f;
+            float offsetVerticalMultiplier = toastContainer.rect.height * 0.5f;
+            Vector3 offset = toastContainer.up * offsetVerticalMultiplier * (useBottom ? -1 : 1) + toastContainer.right * offsetHorizontalMultiplier * (useLeft ? -1 : 1);
+
+            toastContainer.position = MapRenderer.i.parcelHighlightImage.transform.position + offset;
         }
 
         public void OnCloseClick()
