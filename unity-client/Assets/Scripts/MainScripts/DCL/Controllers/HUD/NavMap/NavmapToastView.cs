@@ -79,11 +79,16 @@ namespace DCL
             toastContainer.position = MapRenderer.i.parcelHighlightImage.transform.position;
 
             bool useBottom = toastContainer.localPosition.y > 0;
-            bool useLeft = toastContainer.localPosition.x > 0;
+
+            bool shouldOffsetHorizontally = Mathf.Abs(toastContainer.localPosition.x) > rectTransform.rect.width / 4;
+            bool useLeft = false;
+
+            if (shouldOffsetHorizontally)
+                useLeft = toastContainer.localPosition.x > 0;
 
             float offsetHorizontalMultiplier = toastContainer.rect.width * 0.5f;
             float offsetVerticalMultiplier = toastContainer.rect.height * 0.5f;
-            Vector3 offset = toastContainer.up * offsetVerticalMultiplier * (useBottom ? -1 : 1) + toastContainer.right * offsetHorizontalMultiplier * (useLeft ? -1 : 1);
+            Vector3 offset = toastContainer.up * offsetVerticalMultiplier * (useBottom ? -1 : 1) + (shouldOffsetHorizontally ? (toastContainer.right * offsetHorizontalMultiplier * (useLeft ? -1 : 1)) : Vector3.zero);
 
             toastContainer.position = MapRenderer.i.parcelHighlightImage.transform.position + offset;
         }
