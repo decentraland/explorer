@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using DCL.Interface;
 using DCL.Helpers;
 using TMPro;
 
@@ -7,7 +8,9 @@ namespace DCL
 {
     public class NavmapView : MonoBehaviour
     {
+        [Header("References")]
         [SerializeField] InputAction_Trigger toggleNavMapAction;
+        [SerializeField] InputAction_Trigger selectParcelAction;
         [SerializeField] Button closeButton;
         [SerializeField] ScrollRect scrollRect;
         [SerializeField] Transform scrollRectContentTransform;
@@ -16,26 +19,39 @@ namespace DCL
         [SerializeField] internal NavmapToastView toastView;
 
         InputAction_Trigger.Triggered toggleNavMapDelegate;
-
+        InputAction_Trigger.Triggered selectParcelDelegate;
         RectTransform minimapViewport;
         Transform mapRendererMinimapParent;
         Vector3 atlasOriginalPosition;
+        MinimapMetadata mapMetadata;
+        bool cursorLockedBeforeOpening = true;
+        Vector2Int lastParcelClicked = new Vector2Int();
 
-        public bool isToggledOn => scrollRect.gameObject.activeSelf;
+        // TODO: remove this bool and its usage once the feature is ready to be shippped.
+        bool enableInProduction = false;
 
-        // TODO: Remove this bool once we finish the feature
-        bool enabledInProduction = false;
+        public static bool isOpen
+        {
+            private set;
+            get;
+        } = false;
 
         void Start()
         {
-            closeButton.onClick.AddListener(() => { ToggleNavMap(); });
-            scrollRect.onValueChanged.AddListener((x) => { if (scrollRect.gameObject.activeSelf) MapRenderer.i.atlas.UpdateCulling(); });
+            mapMetadata = MinimapMetadata.GetMetadata();
 
-            toggleNavMapDelegate = (x) => { ToggleNavMap(); };
+            closeButton.onClick.AddListener(() => { ToggleNavMap(); });
+            scrollRect.onValueChanged.AddListener((x) => { if (isOpen) MapRenderer.i.atlas.UpdateCulling(); });
+
+            toggleNavMapDelegate = (x) => { if (!Input.GetKeyDown(KeyCode.Escape) || isOpen) ToggleNavMap(); };
             toggleNavMapAction.OnTriggered += toggleNavMapDelegate;
+            toastView.OnGotoClicked += ToggleNavMap;
+
+            MapRenderer.OnParcelClicked += (x, y) => OnParcelClicked(x, y);
+            mapMetadata.OnSceneInfoUpdated += OnMapMetadataInfoUpdated;
 
             MinimapHUDView.OnUpdateData += UpdateCurrentSceneData;
-            CommonScriptableObjects.playerCoords.OnChange += PlayerCoords_OnChange;
+            MinimapHUDView.OnOpenNavmapClicked += ToggleNavMap;
 
             toastView.gameObject.SetActive(false);
             scrollRect.gameObject.SetActive(false);
@@ -43,14 +59,10 @@ namespace DCL
 
         private void OnDestroy()
         {
+            toastView.OnGotoClicked -= ToggleNavMap;
             MinimapHUDView.OnUpdateData -= UpdateCurrentSceneData;
-            CommonScriptableObjects.playerCoords.OnChange -= PlayerCoords_OnChange;
-        }
-
-        private void PlayerCoords_OnChange(Vector2Int current, Vector2Int previous)
-        {
-            //TODO(Brian): Populate toast on clicked scene instead of current scene.
-            toastView.Populate(current, MinimapMetadata.GetMetadata().GetSceneInfo(current.x, current.y));
+            mapMetadata.OnSceneInfoUpdated -= OnMapMetadataInfoUpdated;
+            MinimapHUDView.OnOpenNavmapClicked -= ToggleNavMap;
         }
 
         internal void ToggleNavMap()
@@ -58,15 +70,20 @@ namespace DCL
             if (MapRenderer.i == null) return;
 
 #if !UNITY_EDITOR
-            if(!enabledInProduction) return;
+            if (!enableInProduction) return;
 #endif
 
             scrollRect.StopMovement();
-            scrollRect.gameObject.SetActive(!scrollRect.gameObject.activeSelf);
 
-            if (scrollRect.gameObject.activeSelf)
+            isOpen = !isOpen;
+            scrollRect.gameObject.SetActive(isOpen);
+            MapRenderer.i.parcelHighlightEnabled = isOpen;
+
+            if (isOpen)
             {
-                Utils.UnlockCursor();
+                cursorLockedBeforeOpening = Utils.isCursorLocked;
+                if (cursorLockedBeforeOpening)
+                    Utils.UnlockCursor();
 
                 minimapViewport = MapRenderer.i.atlas.viewport;
                 mapRendererMinimapParent = MapRenderer.i.transform.parent;
@@ -78,7 +95,7 @@ namespace DCL
 
                 scrollRect.content = MapRenderer.i.atlas.chunksParent.transform as RectTransform;
 
-                // Reposition de player icon parent to scroll everything together
+                // Reparent the player icon parent to scroll everything together
                 MapRenderer.i.atlas.overlayLayerGameobject.transform.SetParent(scrollRect.content);
 
                 // Center map
@@ -86,13 +103,17 @@ namespace DCL
             }
             else
             {
-                Utils.LockCursor();
+                if (cursorLockedBeforeOpening)
+                    Utils.LockCursor();
+
+                toastView.OnCloseClick();
 
                 MapRenderer.i.atlas.viewport = minimapViewport;
                 MapRenderer.i.transform.SetParent(mapRendererMinimapParent);
                 MapRenderer.i.atlas.chunksParent.transform.localPosition = atlasOriginalPosition;
                 MapRenderer.i.atlas.UpdateCulling();
 
+                // Restore the player icon to its original parent
                 MapRenderer.i.atlas.overlayLayerGameobject.transform.SetParent(MapRenderer.i.atlas.chunksParent.transform.parent);
                 (MapRenderer.i.atlas.overlayLayerGameobject.transform as RectTransform).anchoredPosition = Vector2.zero;
 
@@ -104,6 +125,21 @@ namespace DCL
         {
             currentSceneNameText.text = string.IsNullOrEmpty(model.sceneName) ? "Unnamed" : model.sceneName;
             currentSceneCoordsText.text = model.playerPosition;
+        }
+
+        void OnParcelClicked(int mouseTileX, int mouseTileY, bool requestSceneInfoIfMissing = true)
+        {
+            var sceneInfo = mapMetadata.GetSceneInfo(mouseTileX, mouseTileY);
+            if (requestSceneInfoIfMissing && sceneInfo == null)
+                WebInterface.RequestScenesInfoAroundParcel(new Vector2(mouseTileX, mouseTileY), 1);
+
+            toastView.Populate(new Vector2Int(mouseTileX, mouseTileY), sceneInfo);
+            lastParcelClicked.Set(mouseTileX, mouseTileY);
+        }
+
+        void OnMapMetadataInfoUpdated(MinimapMetadata.MinimapSceneInfo sceneInfo)
+        {
+            if (toastView.isOpen) OnParcelClicked(lastParcelClicked.x, lastParcelClicked.y, false);
         }
     }
 }
