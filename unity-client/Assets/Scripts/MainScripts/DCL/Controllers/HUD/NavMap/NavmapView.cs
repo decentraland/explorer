@@ -134,13 +134,13 @@ namespace DCL
             currentSceneCoordsText.text = model.playerPosition;
         }
 
-        void TriggerToast(int mouseTileX, int mouseTileY)
+        void TriggerToast(int cursorTileX, int cursorTileY)
         {
-            var sceneInfo = mapMetadata.GetSceneInfo(mouseTileX, mouseTileY);
+            var sceneInfo = mapMetadata.GetSceneInfo(cursorTileX, cursorTileY);
             if (sceneInfo == null)
-                WebInterface.RequestScenesInfoAroundParcel(new Vector2(mouseTileX, mouseTileY), 1);
+                WebInterface.RequestScenesInfoAroundParcel(new Vector2(cursorTileX, cursorTileY), 1);
 
-            toastView.Populate(new Vector2Int(mouseTileX, mouseTileY), sceneInfo);
+            toastView.Populate(new Vector2Int(cursorTileX, cursorTileY), sceneInfo);
         }
     }
 }

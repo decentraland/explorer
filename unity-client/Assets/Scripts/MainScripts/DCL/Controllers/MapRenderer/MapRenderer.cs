@@ -20,18 +20,19 @@ namespace DCL
 
         [SerializeField] private float parcelHightlightScale = 1.25f;
         [SerializeField] private float parcelHoldTimeInSeconds = 1f;
+        [SerializeField] private Button ParcelHighlightButton;
         private float parcelSizeInMap;
         private Vector3Variable playerWorldPosition => CommonScriptableObjects.playerWorldPosition;
         private Vector3Variable playerRotation => CommonScriptableObjects.cameraForward;
         private Vector3[] mapWorldspaceCorners = new Vector3[4];
         private Vector3 worldCoordsOriginInMap;
-        private Vector3 lastMouseMapCoords;
+        private Vector3 lastCursorMapCoords;
         private float parcelHoldCountdown;
         private List<RaycastResult> uiRaycastResults = new List<RaycastResult>();
         private PointerEventData uiRaycastPointerEventData = new PointerEventData(EventSystem.current);
 
-        [HideInInspector] public Vector3 mouseMapCoords;
-        [HideInInspector] public bool showMouseCoords = true;
+        [HideInInspector] public Vector3 cursorMapCoords;
+        [HideInInspector] public bool showCursorCoords = true;
         public Vector3 playerGridPosition => Utils.WorldToGridPositionUnclamped(playerWorldPosition.Get());
         public MapAtlas atlas;
         public RawImage parcelHighlightImage;
@@ -74,6 +75,8 @@ namespace DCL
 
             MinimapMetadata.GetMetadata().OnSceneInfoUpdated += MapRenderer_OnSceneInfoUpdated;
 
+            ParcelHighlightButton.onClick.AddListener(() => { ClickMousePositionParcel(); });
+
             playerWorldPosition.OnChange += OnCharacterMove;
             playerRotation.OnChange += OnCharacterRotate;
 
@@ -92,24 +95,24 @@ namespace DCL
             centeredReferenceParcel.GetWorldCorners(mapWorldspaceCorners);
             worldCoordsOriginInMap = mapWorldspaceCorners[0];
 
-            UpdateMouseMapCoords();
+            UpdateCursorMapCoords();
 
             UpdateParcelHighlight();
 
             UpdateParcelHold();
 
-            lastMouseMapCoords = mouseMapCoords;
+            lastCursorMapCoords = cursorMapCoords;
         }
 
-        void UpdateMouseMapCoords()
+        void UpdateCursorMapCoords()
         {
             if (!IsCursorOverMapChunk()) return;
 
-            mouseMapCoords = Input.mousePosition - worldCoordsOriginInMap;
-            mouseMapCoords = mouseMapCoords / parcelSizeInMap;
+            cursorMapCoords = Input.mousePosition - worldCoordsOriginInMap;
+            cursorMapCoords = cursorMapCoords / parcelSizeInMap;
 
-            mouseMapCoords.x = (int)Mathf.Floor(mouseMapCoords.x);
-            mouseMapCoords.y = (int)Mathf.Floor(mouseMapCoords.y);
+            cursorMapCoords.x = (int)Mathf.Floor(cursorMapCoords.x);
+            cursorMapCoords.y = (int)Mathf.Floor(cursorMapCoords.y);
         }
 
         bool IsCursorOverMapChunk()
@@ -122,7 +125,7 @@ namespace DCL
 
         void UpdateParcelHighlight()
         {
-            if (!CoordinatesAreInsideTheWorld((int)mouseMapCoords.x, (int)mouseMapCoords.y))
+            if (!CoordinatesAreInsideTheWorld((int)cursorMapCoords.x, (int)cursorMapCoords.y))
             {
                 if (parcelHighlightImage.gameObject.activeSelf)
                     parcelHighlightImage.gameObject.SetActive(false);
@@ -133,17 +136,17 @@ namespace DCL
             if (!parcelHighlightImage.gameObject.activeSelf)
                 parcelHighlightImage.gameObject.SetActive(true);
 
-            parcelHighlightImage.transform.position = worldCoordsOriginInMap + mouseMapCoords * parcelSizeInMap + new Vector3(parcelSizeInMap, parcelSizeInMap, 0f) / 2;
-            highlightedParcelText.text = showMouseCoords ? $"{mouseMapCoords.x}, {mouseMapCoords.y}" : string.Empty;
+            parcelHighlightImage.transform.position = worldCoordsOriginInMap + cursorMapCoords * parcelSizeInMap + new Vector3(parcelSizeInMap, parcelSizeInMap, 0f) / 2;
+            highlightedParcelText.text = showCursorCoords ? $"{cursorMapCoords.x}, {cursorMapCoords.y}" : string.Empty;
 
             // ----------------------------------------------------
             // TODO: Use sceneInfo to highlight whole scene parcels and populate scenes hover info on navmap once we can access all the scenes info
-            // var sceneInfo = mapMetadata.GetSceneInfo(mouseMapCoords.x, mouseMapCoords.y);
+            // var sceneInfo = mapMetadata.GetSceneInfo(cursorMapCoords.x, cursorMapCoords.y);
         }
 
         void UpdateParcelHold()
         {
-            if (mouseMapCoords == lastMouseMapCoords)
+            if (cursorMapCoords == lastCursorMapCoords)
             {
                 if (parcelHoldCountdown <= 0f) return;
 
@@ -153,7 +156,7 @@ namespace DCL
                 {
                     parcelHoldCountdown = 0f;
                     highlightedParcelText.text = string.Empty;
-                    OnParcelHold?.Invoke((int)mouseMapCoords.x, (int)mouseMapCoords.y);
+                    OnParcelHold?.Invoke((int)cursorMapCoords.x, (int)cursorMapCoords.y);
                 }
             }
             else
@@ -256,7 +259,7 @@ namespace DCL
         public void ClickMousePositionParcel()
         {
             highlightedParcelText.text = string.Empty;
-            OnParcelClicked?.Invoke((int)mouseMapCoords.x, (int)mouseMapCoords.y);
+            OnParcelClicked?.Invoke((int)cursorMapCoords.x, (int)cursorMapCoords.y);
         }
     }
 }
