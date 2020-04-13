@@ -121,6 +121,8 @@ namespace DCL
 
         void UpdateParcelHighlight()
         {
+            if (mouseMapCoords == lastMouseMapCoords) return;
+
             if (!CoordinatesAreInsideTheWorld((int)mouseMapCoords.x, (int)mouseMapCoords.y))
             {
                 if (parcelHighlightImage.gameObject.activeSelf)
@@ -151,6 +153,7 @@ namespace DCL
                 if (parcelHoldCountdown <= 0)
                 {
                     parcelHoldCountdown = 0f;
+                    highlightedParcelText.text = string.Empty;
                     OnParcelHold?.Invoke((int)mouseMapCoords.x, (int)mouseMapCoords.y);
                 }
             }
@@ -253,6 +256,7 @@ namespace DCL
         // Called by the parcelhighlight image button
         public void ClickMousePositionParcel()
         {
+            highlightedParcelText.text = string.Empty;
             OnParcelClicked?.Invoke((int)mouseMapCoords.x, (int)mouseMapCoords.y);
         }
     }
