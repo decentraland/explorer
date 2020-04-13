@@ -49,6 +49,8 @@ namespace DCL
         {
             bool sceneInfoExists = sceneInfo != null;
 
+            MapRenderer.i.showMouseCoords = false;
+
             gameObject.SetActive(true);
             location = coordinates;
 
@@ -121,6 +123,7 @@ namespace DCL
 
         public void OnCloseClick()
         {
+            MapRenderer.i.showMouseCoords = true;
             gameObject.SetActive(false);
         }
 

@@ -40,7 +40,13 @@ namespace DCL
             mapMetadata = MinimapMetadata.GetMetadata();
 
             closeButton.onClick.AddListener(() => { ToggleNavMap(); });
-            scrollRect.onValueChanged.AddListener((x) => { if (isOpen) MapRenderer.i.atlas.UpdateCulling(); });
+            scrollRect.onValueChanged.AddListener((x) =>
+            {
+                if (!isOpen) return;
+
+                MapRenderer.i.atlas.UpdateCulling();
+                toastView.OnCloseClick();
+            });
 
             toggleNavMapDelegate = (x) => { if (!Input.GetKeyDown(KeyCode.Escape) || isOpen) ToggleNavMap(); };
             toggleNavMapAction.OnTriggered += toggleNavMapDelegate;

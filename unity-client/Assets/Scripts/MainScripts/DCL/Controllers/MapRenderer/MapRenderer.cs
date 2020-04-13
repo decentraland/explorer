@@ -31,6 +31,7 @@ namespace DCL
         private PointerEventData uiRaycastPointerEventData = new PointerEventData(EventSystem.current);
 
         [HideInInspector] public Vector3 mouseMapCoords;
+        [HideInInspector] public bool showMouseCoords = true;
         public Vector3 playerGridPosition => Utils.WorldToGridPositionUnclamped(playerWorldPosition.Get());
         public MapAtlas atlas;
         public RawImage parcelHighlightImage;
@@ -121,8 +122,6 @@ namespace DCL
 
         void UpdateParcelHighlight()
         {
-            if (mouseMapCoords == lastMouseMapCoords) return;
-
             if (!CoordinatesAreInsideTheWorld((int)mouseMapCoords.x, (int)mouseMapCoords.y))
             {
                 if (parcelHighlightImage.gameObject.activeSelf)
@@ -135,7 +134,7 @@ namespace DCL
                 parcelHighlightImage.gameObject.SetActive(true);
 
             parcelHighlightImage.transform.position = worldCoordsOriginInMap + mouseMapCoords * parcelSizeInMap + new Vector3(parcelSizeInMap, parcelSizeInMap, 0f) / 2;
-            highlightedParcelText.text = $"{mouseMapCoords.x}, {mouseMapCoords.y}";
+            highlightedParcelText.text = showMouseCoords ? $"{mouseMapCoords.x}, {mouseMapCoords.y}" : string.Empty;
 
             // ----------------------------------------------------
             // TODO: Use sceneInfo to highlight whole scene parcels and populate scenes hover info on navmap once we can access all the scenes info
