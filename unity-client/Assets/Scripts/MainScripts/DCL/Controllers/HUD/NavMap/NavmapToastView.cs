@@ -86,7 +86,18 @@ namespace DCL
         {
             if (!isOpen) return;
 
-            Populate(location, sceneInfo);
+            bool updatedCurrentLocationInfo = false;
+            foreach (Vector2Int parcel in sceneInfo.parcels)
+            {
+                if (parcel == location)
+                {
+                    updatedCurrentLocationInfo = true;
+                    break;
+                }
+            }
+
+            if (updatedCurrentLocationInfo)
+                Populate(location, sceneInfo);
         }
 
         void PositionToast(Vector2Int coordinates)

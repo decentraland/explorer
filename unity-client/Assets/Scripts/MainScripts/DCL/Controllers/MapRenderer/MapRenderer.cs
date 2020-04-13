@@ -26,7 +26,7 @@ namespace DCL
         private Vector3[] mapWorldspaceCorners = new Vector3[4];
         private Vector3 worldCoordsOriginInMap;
         private Vector3 lastMouseMapCoords;
-        private float parcelHoldCounter;
+        private float parcelHoldCountdown;
         private List<RaycastResult> uiRaycastResults = new List<RaycastResult>();
         private PointerEventData uiRaycastPointerEventData = new PointerEventData(EventSystem.current);
 
@@ -77,6 +77,8 @@ namespace DCL
             playerRotation.OnChange += OnCharacterRotate;
 
             parcelHighlightImage.rectTransform.localScale = new Vector3(parcelHightlightScale, parcelHightlightScale, 1f);
+
+            parcelHoldCountdown = parcelHoldTimeInSeconds;
         }
 
         void Update()
@@ -142,17 +144,19 @@ namespace DCL
         {
             if (mouseMapCoords == lastMouseMapCoords)
             {
-                parcelHoldCounter += Time.deltaTime;
+                if (parcelHoldCountdown <= 0f) return;
 
-                if (parcelHoldCounter >= parcelHoldTimeInSeconds)
+                parcelHoldCountdown -= Time.deltaTime;
+
+                if (parcelHoldCountdown <= 0)
                 {
-                    parcelHoldCounter = 0f;
+                    parcelHoldCountdown = 0f;
                     OnParcelHold?.Invoke((int)mouseMapCoords.x, (int)mouseMapCoords.y);
                 }
             }
             else
             {
-                parcelHoldCounter = 0f;
+                parcelHoldCountdown = parcelHoldTimeInSeconds;
                 OnParcelHoldCancel?.Invoke();
             }
         }
