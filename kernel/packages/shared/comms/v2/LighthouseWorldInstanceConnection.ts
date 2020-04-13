@@ -13,7 +13,7 @@ import * as Long from 'long'
 declare const window: any
 window.Long = Long
 
-const { Peer } = require('decentraland-katalyst-peer')
+const { Peer, buildCatalystPeerStatsData } = require('decentraland-katalyst-peer')
 
 const NOOP = () => {
   // do nothing
@@ -100,7 +100,7 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
     return {
       // We slice the id in order to reduce the potential event size. Eventually, we should slice all comms ids
       connectedPeers: this.peer.fullyConnectedPeerIds().map(it => it.slice(-6)),
-      stats: this.peer.stats
+      stats: buildCatalystPeerStatsData(this.peer)
     }
   }
 
