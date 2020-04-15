@@ -397,3 +397,18 @@ export type GraphResponse = {
 }
 
 export type AnalyticsContainer = { analytics: SegmentAnalytics.AnalyticsJS }
+
+export enum ChatMessageType {
+  NONE,
+  PUBLIC,
+  PRIVATE,
+  SYSTEM
+}
+
+export type ChatMessage = {
+  messageType: ChatMessageType
+  sender: string | undefined
+  recipient: string | undefined
+  timestamp: number
+  body: string
+}

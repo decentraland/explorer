@@ -73,7 +73,8 @@ import {
   RemoveEntityPayload,
   SetEntityParentPayload,
   UpdateEntityComponentPayload,
-  WelcomeHUDControllerModel
+  WelcomeHUDControllerModel,
+  ChatMessage
 } from 'shared/types'
 import { ParcelSceneAPI } from 'shared/world/ParcelSceneAPI'
 import {
@@ -333,6 +334,10 @@ const browserInterface = {
 
   SetAudioStream(data: { url: string; play: boolean; volume: number }) {
     setAudioStream(data.url, data.play, data.volume).catch(err => defaultLogger.log(err))
+  },
+
+  SendChatMessage(message: ChatMessage) {
+    // TODO - not yet impleemented - moliva - 15/04/2020
   }
 }
 
@@ -570,6 +575,9 @@ export const unityInterface = {
   },
   OnBuilderKeyDown(key: string) {
     this.SendBuilderMessage('OnBuilderKeyDown', key)
+  },
+  AddMessageToChatWindow(message: ChatMessage) {
+    // TODO - not yet implemented - moliva - 15/04/2020
   }
 }
 
