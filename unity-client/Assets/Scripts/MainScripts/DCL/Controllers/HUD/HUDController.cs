@@ -21,6 +21,7 @@ public class HUDController : MonoBehaviour
     public WelcomeHUDController welcomeHudController { get; private set; }
     public AirdroppingHUDController airdroppingHUDController { get; private set; }
     public TermsOfServiceHUDController termsOfServiceHUDController { get; private set; }
+    public ChatTaskbarHUDController chatTaskbarHUDController { get; private set; }
 
     private UserProfile ownUserProfile => UserProfile.GetOwnUserProfile();
     private WearableDictionary wearableCatalog => CatalogController.wearableCatalog;
@@ -57,6 +58,17 @@ public class HUDController : MonoBehaviour
         {
             avatarHud.SetNewWearablesNotification(wearableCount);
         }
+    }
+
+    public void ConfigureChatTaskbarHUD(string configurationJson)
+    {
+        HUDConfiguration configuration = JsonUtility.FromJson<HUDConfiguration>(configurationJson);
+        if (configuration.active && chatTaskbarHUDController == null)
+        {
+            chatTaskbarHUDController = new ChatTaskbarHUDController();
+        }
+
+        chatTaskbarHUDController?.SetVisibility(configuration.active && configuration.visible);
     }
 
     public void ConfigureMinimapHUD(string configurationJson)

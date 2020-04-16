@@ -10,8 +10,11 @@ public class ChatEntry : MonoBehaviour
     public Color privateMessageColor = Color.white;
     public Color systemColor = Color.white;
 
-    public void Populate(ChatHUDController.ChatMessage chatMessage)
+    public ChatController.ChatMessage message;
+
+    public void Populate(ChatController.ChatMessage chatMessage)
     {
+        this.message = chatMessage;
         string userString = "";
 
         if (!string.IsNullOrEmpty(chatMessage.sender))
@@ -19,15 +22,15 @@ public class ChatEntry : MonoBehaviour
 
         switch (chatMessage.messageType)
         {
-            case ChatHUDController.ChatMessageType.NONE:
+            case ChatController.ChatMessageType.NONE:
                 break;
-            case ChatHUDController.ChatMessageType.PUBLIC:
+            case ChatController.ChatMessageType.PUBLIC:
                 body.color = username.color = worldMessageColor;
                 break;
-            case ChatHUDController.ChatMessageType.PRIVATE:
+            case ChatController.ChatMessageType.PRIVATE:
                 body.color = username.color = privateMessageColor;
                 break;
-            case ChatHUDController.ChatMessageType.SYSTEM:
+            case ChatController.ChatMessageType.SYSTEM:
                 body.color = username.color = systemColor;
                 break;
         }

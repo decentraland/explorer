@@ -210,6 +210,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   inputField: {fileID: 6940267282881019307}
   chatEntriesContainer: {fileID: 1398511019163901991}
+  scrollRect: {fileID: 249819674404411145}
 --- !u!225 &8356831171081595404
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -390,6 +391,7 @@ GameObject:
   - component: {fileID: 1398511019163901991}
   - component: {fileID: 6812228848873554245}
   - component: {fileID: 3773582486354358658}
+  - component: {fileID: 5335797673911002636}
   m_Layer: 5
   m_Name: Message Container
   m_TagString: Untagged
@@ -455,6 +457,26 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_HorizontalFit: 0
   m_VerticalFit: 2
+--- !u!114 &5335797673911002636
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6703478960844270763}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 1679637790, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_IgnoreLayout: 0
+  m_MinWidth: -1
+  m_MinHeight: 400
+  m_PreferredWidth: -1
+  m_PreferredHeight: -1
+  m_FlexibleWidth: -1
+  m_FlexibleHeight: -1
+  m_LayoutPriority: 1
 --- !u!1 &6916174365915786362
 GameObject:
   m_ObjectHideFlags: 0

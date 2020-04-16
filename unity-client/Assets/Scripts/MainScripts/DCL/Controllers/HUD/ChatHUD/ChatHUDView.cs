@@ -4,21 +4,23 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using ChatMessage = ChatController.ChatMessage;
+using ChatMessageType = ChatController.ChatMessageType;
+
 
 public class ChatHUDView : MonoBehaviour
 {
-    const string VIEW_PATH = "ChatHUDView";
-
     public TMP_InputField inputField;
     public RectTransform chatEntriesContainer;
 
+    public ScrollRect scrollRect;
     GameObject chatEntryPrefab;
-    ChatHUDController controller;
+    public ChatHUDController controller;
     [NonSerialized] public List<ChatEntry> entries = new List<ChatEntry>();
 
     string userName;
 
-    private void Initialize(ChatHUDController controller)
+    public void Initialize(ChatHUDController controller)
     {
         this.controller = controller;
 
@@ -44,17 +46,17 @@ public class ChatHUDView : MonoBehaviour
         inputField.Select();
         inputField.ActivateInputField();
 
-        var data = new ChatHUDController.ChatMessage()
+        var data = new ChatMessage()
         {
             body = msgBody,
             sender = userName,
-            messageType = ChatHUDController.ChatMessageType.PUBLIC
+            messageType = ChatMessageType.PUBLIC
         };
 
         controller.AddChatMessage(data);
     }
 
-    public void AddEntry(ChatHUDController.ChatMessage message)
+    public void AddEntry(ChatMessage message)
     {
         ChatEntry chatEntry = Instantiate(chatEntryPrefab, chatEntriesContainer).GetComponent<ChatEntry>();
         chatEntry.Populate(message);
@@ -70,11 +72,24 @@ public class ChatHUDView : MonoBehaviour
 
     public void CleanAllEntries()
     {
-        var entries = chatEntriesContainer.GetComponentsInChildren<ChatEntry>();
-
         foreach (var entry in entries)
         {
             Destroy(entry.gameObject);
         }
+
+        entries.Clear();
     }
+
+    public void RepopulateAllChatMessages(List<ChatMessage> entriesList)
+    {
+        CleanAllEntries();
+
+        int entriesCount = entriesList.Count;
+
+        for (int i = 0; i < entriesCount; i++)
+        {
+            AddEntry(entriesList[i]);
+        }
+    }
+
 }

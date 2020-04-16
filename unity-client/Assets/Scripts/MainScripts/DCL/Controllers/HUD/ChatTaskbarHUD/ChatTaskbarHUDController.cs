@@ -1,18 +1,19 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+using System;
 
-public class ChatTaskbarHUDController : MonoBehaviour
+public class ChatTaskbarHUDController : IDisposable, IHUD
 {
-    // Start is called before the first frame update
-    void Start()
+    ChatTaskbarHUDView view;
+
+    public ChatTaskbarHUDController()
     {
-        
+        view = ChatTaskbarHUDView.Create(this);
+    }
+    public void Dispose()
+    {
     }
 
-    // Update is called once per frame
-    void Update()
+    public void SetVisibility(bool visible)
     {
-        
+        view.SetVisibility(visible);
     }
 }
