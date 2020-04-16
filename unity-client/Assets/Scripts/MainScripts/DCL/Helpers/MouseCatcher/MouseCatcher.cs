@@ -1,4 +1,3 @@
-using DCL.Components;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using System.Collections.Generic;
@@ -8,6 +7,8 @@ namespace DCL
 {
     public class MouseCatcher : MonoBehaviour, IPointerDownHandler
     {
+        public event System.Action OnMouseUnlock;
+        public event System.Action OnMouseLock;
         //Default OnPointerEvent
         public LayerMask OnPointerDownTarget = 1 << 9;
 
@@ -25,12 +26,14 @@ namespace DCL
         public void LockCursor()
         {
             Utils.LockCursor();
+            OnMouseLock?.Invoke();
         }
 
         //Externally called by the browser
         public void UnlockCursor()
         {
             Utils.UnlockCursor();
+            OnMouseUnlock?.Invoke();
         }
 
         public void OnPointerDown(PointerEventData eventData)
