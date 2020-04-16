@@ -68,7 +68,7 @@ namespace DCL.Components
             return meshCollider;
         }
 
-        public bool isColliderInCollection(Collider targetCollider)
+        public bool IsColliderInCollection(Collider targetCollider)
         {
             bool foundCollider = false;
             for (int i = 0; i < pointerEventColliders.Length; i++)
