@@ -98,8 +98,6 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
 
   analyticsData() {
     return {
-      // We slice the id in order to reduce the potential event size. Eventually, we should slice all comms ids
-      connectedPeers: this.peer.fullyConnectedPeerIds().map(it => it.slice(-6)),
       stats: buildCatalystPeerStatsData(this.peer)
     }
   }
