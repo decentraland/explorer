@@ -1,3 +1,4 @@
+using DCL.Interface;
 using System.Collections.Generic;
 using System.Linq;
 using ChatMessage = ChatController.ChatMessage;
@@ -7,6 +8,11 @@ public class ChatHUDController
     const int MAX_CHAT_ENTRIES = 100;
 
     public ChatHUDView view;
+
+    public void SendChatMessage(ChatMessage message)
+    {
+        WebInterface.SendChatMessage(message);
+    }
 
     public void AddChatMessage(ChatMessage message)
     {

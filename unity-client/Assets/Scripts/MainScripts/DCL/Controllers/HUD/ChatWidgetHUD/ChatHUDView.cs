@@ -53,6 +53,7 @@ public class ChatHUDView : MonoBehaviour
             messageType = ChatMessageType.PUBLIC
         };
 
+        controller.SendChatMessage(data);
         controller.AddChatMessage(data);
     }
 

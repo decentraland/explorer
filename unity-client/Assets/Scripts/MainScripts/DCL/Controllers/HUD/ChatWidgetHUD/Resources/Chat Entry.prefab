@@ -131,6 +131,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   username: {fileID: 4711086080818900299}
   body: {fileID: 8068759164719752186}
+  worldMessageColor: {r: 1, g: 1, b: 1, a: 1}
+  privateMessageColor: {r: 0.15044188, g: 1, b: 0, a: 1}
+  systemColor: {r: 0, g: 1, b: 0.9367821, a: 1}
 --- !u!1 &4764336508582838174
 GameObject:
   m_ObjectHideFlags: 0

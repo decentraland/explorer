@@ -857,6 +857,7 @@ MonoBehaviour:
   worldFilterButton: {fileID: 2884296052892011786}
   pmFilterButton: {fileID: 4059019902953681699}
   closeButton: {fileID: 4184198625477665569}
+  chatHudView: {fileID: 3847869198944684466}
   group: {fileID: 6037274476719757411}
 --- !u!225 &6037274476719757411
 CanvasGroup:
@@ -1144,6 +1145,11 @@ PrefabInstance:
       propertyPath: m_Pivot.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8055313006203715533, guid: 486cb7198dd7515498189de8c605a1a3,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 1.0999756
+      objectReference: {fileID: 0}
     - target: {fileID: 1398511019163901991, guid: 486cb7198dd7515498189de8c605a1a3,
         type: 3}
       propertyPath: m_AnchoredPosition.x
@@ -1164,11 +1170,6 @@ PrefabInstance:
       propertyPath: m_SizeDelta.y
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 8055313006203715533, guid: 486cb7198dd7515498189de8c605a1a3,
-        type: 3}
-      propertyPath: m_AnchoredPosition.x
-      value: 1.0999756
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 486cb7198dd7515498189de8c605a1a3, type: 3}
 --- !u!224 &4341154685806590042 stripped
@@ -1177,3 +1178,15 @@ RectTransform:
     type: 3}
   m_PrefabInstance: {fileID: 4346750413489447445}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &3847869198944684466 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 663334123155352487, guid: 486cb7198dd7515498189de8c605a1a3,
+    type: 3}
+  m_PrefabInstance: {fileID: 4346750413489447445}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c3b34a804476c5243872ffafcab770d3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

@@ -5,10 +5,9 @@ public class TaskbarHUDView : MonoBehaviour
 {
     const string VIEW_PATH = "Taskbar";
 
+    public RectTransform windowContainer;
     public Button chatButton;
     public Button friendsButton;
-
-    public ChatHUDView chatHUDView;
 
     TaskbarHUDController controller;
 
@@ -22,10 +21,11 @@ public class TaskbarHUDView : MonoBehaviour
     public void Initialize(TaskbarHUDController controller)
     {
         this.controller = controller;
+    }
 
-        var chatHUDController = new ChatHUDController();
-        chatHUDController.view = chatHUDView;
-        chatHUDView.Initialize(chatHUDController);
+    internal void OnAddChatWindow()
+    {
+        chatButton.gameObject.SetActive(true);
     }
 
     public void SetVisibility(bool visible)

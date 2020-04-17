@@ -4,20 +4,27 @@ using UnityEngine.UI;
 
 public class WorldChatWindowHUDView : MonoBehaviour
 {
+    const string VIEW_PATH = "Main Chat Window";
+
     public Button worldFilterButton;
     public Button pmFilterButton;
     public Button closeButton;
 
+    public ChatHUDView chatHudView;
+
     public CanvasGroup group;
+    public WorldChatWindowHUDController controller;
+
+    public static WorldChatWindowHUDView Create()
+    {
+        var view = Instantiate(Resources.Load<GameObject>(VIEW_PATH)).GetComponent<WorldChatWindowHUDView>();
+        return view;
+    }
 
     private void Start()
     {
         InitialSceneReferences.i.mouseCatcher.OnMouseLock += MouseCatcher_OnMouseLock;
         InitialSceneReferences.i.mouseCatcher.OnMouseUnlock += MouseCatcher_OnMouseUnlock;
-
-        //ChatController.i.OnAddMessage -= AddChatMessage;
-        //ChatController.i.OnAddMessage += AddChatMessage;
-
     }
 
     private void MouseCatcher_OnMouseUnlock()
