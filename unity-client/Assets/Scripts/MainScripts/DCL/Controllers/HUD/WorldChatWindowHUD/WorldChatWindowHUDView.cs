@@ -2,7 +2,7 @@ using DCL;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class WorldChatHUDView : MonoBehaviour
+public class WorldChatWindowHUDView : MonoBehaviour
 {
     public Button worldFilterButton;
     public Button pmFilterButton;
@@ -14,6 +14,10 @@ public class WorldChatHUDView : MonoBehaviour
     {
         InitialSceneReferences.i.mouseCatcher.OnMouseLock += MouseCatcher_OnMouseLock;
         InitialSceneReferences.i.mouseCatcher.OnMouseUnlock += MouseCatcher_OnMouseUnlock;
+
+        //ChatController.i.OnAddMessage -= AddChatMessage;
+        //ChatController.i.OnAddMessage += AddChatMessage;
+
     }
 
     private void MouseCatcher_OnMouseUnlock()

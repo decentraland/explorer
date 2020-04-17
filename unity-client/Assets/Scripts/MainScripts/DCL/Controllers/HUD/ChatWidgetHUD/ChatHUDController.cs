@@ -8,12 +8,6 @@ public class ChatHUDController
 
     public ChatHUDView view;
 
-    public ChatHUDController()
-    {
-        ChatController.i.OnAddMessage -= AddChatMessage;
-        ChatController.i.OnAddMessage += AddChatMessage;
-    }
-
     public void AddChatMessage(ChatMessage message)
     {
         if (view.entries.Count > MAX_CHAT_ENTRIES)

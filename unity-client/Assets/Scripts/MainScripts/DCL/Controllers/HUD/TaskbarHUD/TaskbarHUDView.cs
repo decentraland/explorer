@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ChatTaskbarHUDView : MonoBehaviour
+public class TaskbarHUDView : MonoBehaviour
 {
     const string VIEW_PATH = "Taskbar";
 
@@ -10,11 +10,11 @@ public class ChatTaskbarHUDView : MonoBehaviour
 
     public ChatHUDView chatHUDView;
 
-    ChatTaskbarHUDController controller;
+    TaskbarHUDController controller;
 
-    internal static ChatTaskbarHUDView Create(ChatTaskbarHUDController controller)
+    internal static TaskbarHUDView Create(TaskbarHUDController controller)
     {
-        var view = Instantiate(Resources.Load<GameObject>(VIEW_PATH)).GetComponent<ChatTaskbarHUDView>();
+        var view = Instantiate(Resources.Load<GameObject>(VIEW_PATH)).GetComponent<TaskbarHUDView>();
         view.Initialize(controller);
         return view;
     }
@@ -23,7 +23,7 @@ public class ChatTaskbarHUDView : MonoBehaviour
         Initialize(null);
     }
 
-    public void Initialize(ChatTaskbarHUDController controller)
+    public void Initialize(TaskbarHUDController controller)
     {
         this.controller = controller;
 

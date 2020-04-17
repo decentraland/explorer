@@ -79,10 +79,10 @@ function sceneRenderable() {
 initializeUnity(container)
   .then(async ret => {
     const i = unityInterface
-    i.ConfigureMinimapHUD({ active: true, visible: true })
-    i.ConfigureNotificationHUD({ active: true, visible: true })
-    i.ConfigureSettingsHUD({ active: true, visible: false })
-    i.ConfigureAirdroppingHUD({ active: true, visible: true })
+    i.ConfigureHUDElement('MinimapHUD', { active: true, visible: true })
+    i.ConfigureHUDElement('NotificationHUD', { active: true, visible: true })
+    i.ConfigureHUDElement('SettingsHUD', { active: true, visible: true })
+    i.ConfigureHUDElement('AirdroppingHUD', { active: true, visible: true })
 
     global.globalStore.dispatch(signalRendererInitialized())
 

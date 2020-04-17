@@ -1,4 +1,4 @@
-﻿using DCL.Components;
+using DCL.Components;
 using DCL.Interface;
 using System.Collections.Generic;
 using UnityEngine;
@@ -376,32 +376,12 @@ namespace DCL
                             case "ShowNewWearablesNotification":
                                 HUDController.i?.ShowNewWearablesNotification(msg.payload);
                                 break;
-                            case "ConfigureMinimapHUD":
-                                HUDController.i?.ConfigureMinimapHUD(msg.payload);
-                                break;
-                            case "ConfigureAvatarHUD":
-                                HUDController.i?.ConfigureAvatarHUD(msg.payload);
-                                break;
-                            case "ConfigureNotificationHUD":
-                                HUDController.i?.ConfigureNotificationHUD(msg.payload);
-                                break;
-                            case "ConfigureAvatarEditorHUD":
-                                HUDController.i?.ConfigureAvatarEditorHUD(msg.payload);
-                                break;
-                            case "ConfigurePlayerInfoCardHUD":
-                                HUDController.i.ConfigurePlayerInfoCardHUD(msg.payload);
-                                break;
-                            case "ConfigureExpressionsHUD":
-                                HUDController.i.ConfigureExpressionsHUD(msg.payload);
-                                break;
-                            case "ConfigureWelcomeHUD":
-                                HUDController.i.ConfigureWelcomeHUD(msg.payload);
+                            case "ConfigureHUDElement":
+                                Debug.Log("msg payload = " + msg.payload);
+                                //HUDController.i?.ConfigureHUDElement(msg.payload);
                                 break;
                             case "UpdateMinimapSceneInformation":
                                 MinimapMetadataController.i?.UpdateMinimapSceneInformation(msg.payload);
-                                break;
-                            case "ConfigureSettingsHUD":
-                                HUDController.i.ConfigureSettingsHUD(msg.payload);
                                 break;
                             case "SetTutorialEnabled":
                                 DCL.Tutorial.TutorialController.i?.SetTutorialEnabled();
@@ -409,17 +389,11 @@ namespace DCL
                             case "TriggerSelfUserExpression":
                                 HUDController.i.TriggerSelfUserExpression(msg.payload);
                                 break;
-                            case "ConfigureAirdroppingHUD":
-                                HUDController.i.ConfigureAirdroppingHUD(msg.payload);
-                                break;
                             case "AirdroppingRequest":
                                 HUDController.i.AirdroppingRequest(msg.payload);
                                 break;
                             case "ShowWelcomeNotification":
                                 HUDController.i.ShowWelcomeNotification();
-                                break;
-                            case "ConfigureTermsOfServiceHUD":
-                                HUDController.i.ConfigureTermsOfServiceHUD(msg.payload);
                                 break;
                             case "ShowTermsOfServices":
                                 HUDController.i.ShowTermsOfServices(msg.payload);
