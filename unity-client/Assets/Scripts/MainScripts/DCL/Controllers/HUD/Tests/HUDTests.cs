@@ -37,8 +37,8 @@ namespace Tests
             Assert.IsNotNull(hudController, "There must be a HUDController in the scene");
 
             HUDConfiguration config = new HUDConfiguration() { active = true, visible = true };
-            hudController.ConfigureHUDElement(HUDController.HUDElementID.AVATAR, JsonUtility.ToJson(config));
-            hudController.ConfigureHUDElement(HUDController.HUDElementID.NOTIFICATION, JsonUtility.ToJson(config));
+            hudController.ConfigureHUDElement(HUDController.HUDElementID.AVATAR, config);
+            hudController.ConfigureHUDElement(HUDController.HUDElementID.NOTIFICATION, config);
 
             yield return null;
 

@@ -73,7 +73,6 @@ import {
   RemoveEntityPayload,
   SetEntityParentPayload,
   UpdateEntityComponentPayload,
-  WelcomeHUDControllerModel,
   ChatMessage,
   HUDElementID
 } from 'shared/types'
@@ -478,7 +477,7 @@ export const unityInterface = {
            gameInstance.SendMessage('HUDController', 'ShowNotificationFromJson', JSON.stringify(notification))
          },
          ConfigureHUDElement(hudElementId: HUDElementID, configuration: HUDConfiguration) {
-           gameInstance.SendMessage('HUDController', `ConfigureHUDElement`, hudElementId, JSON.stringify(configuration))
+           gameInstance.SendMessage('HUDController', `ConfigureHUDElement`, JSON.stringify({ hudElementId:hudElementId, configuration:configuration }) )
          },
          ShowWelcomeNotification() {
            gameInstance.SendMessage('HUDController', 'ShowWelcomeNotification')

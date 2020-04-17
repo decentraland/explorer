@@ -1,3 +1,4 @@
+
 public class WorldChatWindowHUDController : IHUD
 {
     public void Dispose()

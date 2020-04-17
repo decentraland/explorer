@@ -7,12 +7,12 @@ global.enableWeb3 = true
 import { ReportFatalError } from 'shared/loading/ReportFatalError'
 import { experienceStarted, NOT_INVITED, AUTH_ERROR_LOGGED_OUT, FAILED_FETCHING_UNITY } from 'shared/loading/types'
 import { worldToGrid } from '../atomicHelpers/parcelScenePositions'
-import { NO_MOTD, tutorialEnabled } from '../config/index'
+import { NO_MOTD, tutorialEnabled, OPEN_AVATAR_EDITOR } from '../config/index'
 import defaultLogger from 'shared/logger'
 import { signalRendererInitialized, signalParcelLoadingStarted } from 'shared/renderer/actions'
 import { lastPlayerPosition, teleportObservable } from 'shared/world/positionThings'
 import { StoreContainer } from 'shared/store/rootTypes'
-import { hasWallet, startUnityParcelLoading, unityInterface } from '../unity-interface/dcl'
+import { startUnityParcelLoading, unityInterface } from '../unity-interface/dcl'
 import { initializeUnity } from '../unity-interface/initializer'
 import { HUDElementID } from 'shared/types'
 const container = document.getElementById('gameContainer')
@@ -25,8 +25,8 @@ initializeUnity(container)
     i.ConfigureHUDElement(HUDElementID.MINIMAP, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.AVATAR, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.NOTIFICATION, { active: true, visible: true })
-    i.ConfigureHUDElement(HUDElementID.AVATAR_EDITOR, { active: true, visible: true })
-    i.ConfigureHUDElement(HUDElementID.SETTINGS, { active: true, visible: true })
+    i.ConfigureHUDElement(HUDElementID.AVATAR_EDITOR, { active: true, visible: OPEN_AVATAR_EDITOR })
+    i.ConfigureHUDElement(HUDElementID.SETTINGS, { active: true, visible: false })
     i.ConfigureHUDElement(HUDElementID.EXPRESSIONS, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.PLAYER_INFO_CARD, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.AIRDROPPING, { active: true, visible: true })
@@ -41,7 +41,7 @@ initializeUnity(container)
     globalThis.globalStore.dispatch(signalParcelLoadingStarted())
 
     if (!NO_MOTD) {
-      i.ConfigureHUDElement(HUDElementID.WELCOME, { active: false, visible: !tutorialEnabled() })
+      i.ConfigureHUDElement(HUDElementID.MESSAGE_OF_THE_DAY, { active: false, visible: !tutorialEnabled() })
     }
 
     _.instancedJS

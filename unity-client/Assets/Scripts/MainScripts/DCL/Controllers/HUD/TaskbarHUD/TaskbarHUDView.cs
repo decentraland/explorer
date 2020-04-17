@@ -18,10 +18,6 @@ public class TaskbarHUDView : MonoBehaviour
         view.Initialize(controller);
         return view;
     }
-    private void Start()
-    {
-        Initialize(null);
-    }
 
     public void Initialize(TaskbarHUDController controller)
     {

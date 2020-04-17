@@ -41,7 +41,6 @@ namespace DCL
             lock (WSSController.queuedMessages)
             {
                 Message finalMessage;
-
                 finalMessage = JsonUtility.FromJson<Message>(e.Data);
 
                 WSSController.queuedMessages.Enqueue(finalMessage);
@@ -377,8 +376,7 @@ namespace DCL
                                 HUDController.i?.ShowNewWearablesNotification(msg.payload);
                                 break;
                             case "ConfigureHUDElement":
-                                Debug.Log("msg payload = " + msg.payload);
-                                //HUDController.i?.ConfigureHUDElement(msg.payload);
+                                HUDController.i?.ConfigureHUDElement(msg.payload);
                                 break;
                             case "UpdateMinimapSceneInformation":
                                 MinimapMetadataController.i?.UpdateMinimapSceneInformation(msg.payload);

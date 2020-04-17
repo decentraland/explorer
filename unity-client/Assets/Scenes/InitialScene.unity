@@ -304,6 +304,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 114754758112584508, guid: b387035aa46399445bdc7951a41d5213,
+        type: 3}
+      propertyPath: debugScenes
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: b387035aa46399445bdc7951a41d5213, type: 3}
 --- !u!114 &322303338 stripped
@@ -1219,7 +1224,7 @@ MonoBehaviour:
   renderingController: {fileID: 322303339}
   characterController: {fileID: 1989862556}
   cameraController: {fileID: 1608366483}
-  openBrowserWhenStart: 0
+  openBrowserWhenStart: 1
   useCustomContentServer: 0
   customContentServerUrl: http://localhost:1338/
   baseUrlMode: 0

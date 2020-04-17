@@ -6,6 +6,7 @@ using UnityEngine;
 
 public class HUDController : MonoBehaviour
 {
+    static bool VERBOSE = false;
     const int NOTIFICATION_DURATION = 5;
 
     public static HUDController i { get; private set; }
@@ -65,8 +66,24 @@ public class HUDController : MonoBehaviour
         MESSAGE_OF_THE_DAY = 12,
     }
 
+    [System.Serializable]
+    class ConfigureHUDElementMessage
+    {
+        public HUDElementID hudElementId;
+        public HUDConfiguration configuration;
+    }
 
-    public void ConfigureHUDElement(HUDElementID id, string configurationJson)
+    public void ConfigureHUDElement(string payload)
+    {
+        ConfigureHUDElementMessage message = JsonUtility.FromJson<ConfigureHUDElementMessage>(payload);
+
+        HUDConfiguration configuration = message.configuration;
+        HUDElementID id = message.hudElementId;
+
+        ConfigureHUDElement(id, configuration);
+    }
+
+    public void ConfigureHUDElement(HUDElementID hudElementId, HUDConfiguration configuration)
     {
         //TODO(Brian): For now, the factory code is using this switch approach.
         //             In order to avoid the factory upkeep we can transform the IHUD elements
@@ -76,79 +93,82 @@ public class HUDController : MonoBehaviour
         //             This will allow us to unify the serialized factory objects design,
         //             like we already do with ECS components.
 
-        HUDConfiguration configuration = JsonUtility.FromJson<HUDConfiguration>(configurationJson);
-
-        switch (id)
+        switch (hudElementId)
         {
             case HUDElementID.NONE:
                 break;
             case HUDElementID.MINIMAP:
-                CreateHudElement<MinimapHUDController>(configuration, id);
+                CreateHudElement<MinimapHUDController>(configuration, hudElementId);
                 break;
             case HUDElementID.AVATAR:
-                CreateHudElement<AvatarHUDController>(configuration, id);
-                avatarHud.Initialize();
-                avatarHud.OnEditAvatarPressed += ShowAvatarEditor;
-                avatarHud.OnSettingsPressed += ShowSettings;
-                ownUserProfile.OnUpdate += OwnUserProfileUpdated;
-                OwnUserProfileUpdated(ownUserProfile);
+                CreateHudElement<AvatarHUDController>(configuration, hudElementId);
+
+                if (avatarHud != null)
+                {
+                    avatarHud.Initialize();
+                    avatarHud.OnEditAvatarPressed += ShowAvatarEditor;
+                    avatarHud.OnSettingsPressed += ShowSettings;
+                    ownUserProfile.OnUpdate += OwnUserProfileUpdated;
+                    OwnUserProfileUpdated(ownUserProfile);
+                }
                 break;
             case HUDElementID.NOTIFICATION:
-                CreateHudElement<NotificationHUDController>(configuration, id);
+                CreateHudElement<NotificationHUDController>(configuration, hudElementId);
                 break;
             case HUDElementID.AVATAR_EDITOR:
-                CreateHudElement<AvatarEditorHUDController>(configuration, id);
-                avatarEditorHud.Initialize(ownUserProfile, wearableCatalog);
+                CreateHudElement<AvatarEditorHUDController>(configuration, hudElementId);
+                avatarEditorHud?.Initialize(ownUserProfile, wearableCatalog);
                 break;
             case HUDElementID.SETTINGS:
-                CreateHudElement<SettingsHUDController>(configuration, id);
+                CreateHudElement<SettingsHUDController>(configuration, hudElementId);
                 break;
             case HUDElementID.EXPRESSIONS:
-                CreateHudElement<ExpressionsHUDController>(configuration, id);
+                CreateHudElement<ExpressionsHUDController>(configuration, hudElementId);
                 break;
             case HUDElementID.PLAYER_INFO_CARD:
-                CreateHudElement<PlayerInfoCardHUDController>(configuration, id);
+                CreateHudElement<PlayerInfoCardHUDController>(configuration, hudElementId);
                 break;
             case HUDElementID.AIRDROPPING:
-                CreateHudElement<AirdroppingHUDController>(configuration, id);
+                CreateHudElement<AirdroppingHUDController>(configuration, hudElementId);
                 break;
             case HUDElementID.TERMS_OF_SERVICE:
-                CreateHudElement<TermsOfServiceHUDController>(configuration, id);
+                CreateHudElement<TermsOfServiceHUDController>(configuration, hudElementId);
                 break;
             case HUDElementID.WORLD_CHAT_WINDOW:
-                CreateHudElement<WorldChatWindowHUDController>(configuration, id);
+                CreateHudElement<WorldChatWindowHUDController>(configuration, hudElementId);
                 if (taskbarHud != null)
                 {
-                    taskbarHud.AddChatWindow(worldChatWindowHud);
+                    taskbarHud?.AddChatWindow(worldChatWindowHud);
                 }
 
                 break;
             case HUDElementID.TASKBAR:
-                CreateHudElement<TaskbarHUDController>(configuration, id);
+                CreateHudElement<TaskbarHUDController>(configuration, hudElementId);
                 if (worldChatWindowHud != null)
                 {
-                    taskbarHud.AddChatWindow(worldChatWindowHud);
+                    taskbarHud?.AddChatWindow(worldChatWindowHud);
                 }
                 break;
             case HUDElementID.MESSAGE_OF_THE_DAY:
-                CreateHudElement<WelcomeHUDController>(configuration, id);
-                messageOfTheDayHud.Initialize(ownUserProfile.hasConnectedWeb3);
+                CreateHudElement<WelcomeHUDController>(configuration, hudElementId);
+                messageOfTheDayHud?.Initialize(ownUserProfile.hasConnectedWeb3);
                 break;
         }
 
-        GetHUDElement(id)?.SetVisibility(configuration.active && configuration.visible);
-
+        GetHUDElement(hudElementId)?.SetVisibility(configuration.active && configuration.visible);
     }
 
     public void CreateHudElement<T>(HUDConfiguration config, HUDElementID id)
-    where T : IHUD, new()
+        where T : IHUD, new()
     {
         bool controllerCreated = hudElements.ContainsKey(id);
 
         if (config.active && !controllerCreated)
         {
             hudElements.Add(id, new T());
-            Debug.Log($"adding {id} .. type {hudElements[id].GetType().Name}");
+
+            if (VERBOSE)
+                Debug.Log($"Adding {id} .. type {hudElements[id].GetType().Name}");
         }
     }
     public void ShowNotificationFromJson(string notificationJson)
