@@ -25,6 +25,7 @@ public class WorldChatWindowHUDView : MonoBehaviour
     {
         InitialSceneReferences.i.mouseCatcher.OnMouseLock += MouseCatcher_OnMouseLock;
         InitialSceneReferences.i.mouseCatcher.OnMouseUnlock += MouseCatcher_OnMouseUnlock;
+        this.closeButton.onClick.AddListener(Toggle);
     }
 
     private void MouseCatcher_OnMouseUnlock()

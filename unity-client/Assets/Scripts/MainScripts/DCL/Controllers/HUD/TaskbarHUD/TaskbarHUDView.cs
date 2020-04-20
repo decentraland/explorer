@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 
 public class TaskbarHUDView : MonoBehaviour
@@ -23,9 +24,10 @@ public class TaskbarHUDView : MonoBehaviour
         this.controller = controller;
     }
 
-    internal void OnAddChatWindow()
+    internal void OnAddChatWindow(GameObject windowContainer, UnityAction onToggle)
     {
         chatButton.gameObject.SetActive(true);
+        chatButton.onClick.AddListener(onToggle);
     }
 
     public void SetVisibility(bool visible)

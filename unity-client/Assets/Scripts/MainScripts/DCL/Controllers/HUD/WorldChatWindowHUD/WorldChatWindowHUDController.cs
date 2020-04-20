@@ -11,6 +11,7 @@ public class WorldChatWindowHUDController : IHUD
 
         view = WorldChatWindowHUDView.Create();
         view.chatHudView.Initialize(chatHudController);
+        chatHudController.view = view.chatHudView;
 
         ChatController.i.OnAddMessage -= view.chatHudView.controller.AddChatMessage;
         ChatController.i.OnAddMessage += view.chatHudView.controller.AddChatMessage;

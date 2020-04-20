@@ -33,7 +33,6 @@ public class ChatHUDView : MonoBehaviour
 
         if (!string.IsNullOrEmpty(profileUserName))
             userName = profileUserName;
-
     }
 
     void SendChatMessage(string msgBody)

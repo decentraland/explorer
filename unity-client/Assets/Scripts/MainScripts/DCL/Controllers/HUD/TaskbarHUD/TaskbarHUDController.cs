@@ -1,5 +1,3 @@
-using UnityEngine;
-
 public class TaskbarHUDController : IHUD
 {
     TaskbarHUDView view;
@@ -10,21 +8,21 @@ public class TaskbarHUDController : IHUD
         view = TaskbarHUDView.Create(this);
     }
 
-    public void ToggleChatWindow()
+    public void AddChatWindow(WorldChatWindowHUDController controller)
+    {
+        controller.view.transform.SetParent(view.windowContainer, false);
+        worldChatWindowHud = controller;
+        view.OnAddChatWindow(controller.view.gameObject, ToggleChatWindow);
+    }
+
+    private void ToggleChatWindow()
     {
         worldChatWindowHud.SetVisibility(!worldChatWindowHud.view.gameObject.activeSelf);
     }
 
-    public void AddChatWindow(WorldChatWindowHUDController controller)
-    {
-        controller.view.transform.SetParent(view.windowContainer);
-        worldChatWindowHud = controller;
-        view.OnAddChatWindow();
-    }
-
     public void Dispose()
     {
-        Object.Destroy(view.gameObject);
+        UnityEngine.Object.Destroy(view.gameObject);
     }
 
     public void SetVisibility(bool visible)

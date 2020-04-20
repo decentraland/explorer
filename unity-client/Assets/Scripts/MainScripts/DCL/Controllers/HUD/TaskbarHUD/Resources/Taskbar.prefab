@@ -299,7 +299,6 @@ MonoBehaviour:
   windowContainer: {fileID: 5687400926487522963}
   chatButton: {fileID: 5681366293077149653}
   friendsButton: {fileID: 3686269489964235905}
-  chatHUDView: {fileID: 0}
 --- !u!1 &3108778069056455287
 GameObject:
   m_ObjectHideFlags: 0
@@ -493,8 +492,8 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 497.4, y: 0}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_SizeDelta: {x: 497.4, y: 500}
+  m_Pivot: {x: 0.5, y: 0}
 --- !u!114 &2951915630458723456
 MonoBehaviour:
   m_ObjectHideFlags: 0
