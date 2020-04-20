@@ -70,14 +70,14 @@ namespace DCL
                 return;
             }
 
-            if (!CollidersManager.i.GetColliderInfo(hitInfo.collider, out ColliderInfo info))
-                newHoveredEvent = hitInfo.collider.GetComponentInChildren<OnPointerEvent>();
-            else
+            if (CollidersManager.i.GetColliderInfo(hitInfo.collider, out ColliderInfo info))
                 newHoveredEvent = info.entity.gameObject.GetComponentInChildren<OnPointerEvent>();
+            else
+                newHoveredEvent = hitInfo.collider.GetComponentInChildren<OnPointerEvent>();
 
             clickHandler = null;
 
-            if (newHoveredEvent == null || !newHoveredEvent.IsAtHoverDistance(DCLCharacterController.i.transform))
+            if (newHoveredEvent == null || !AreSameEntity(newHoveredEvent, info) || !newHoveredEvent.IsAtHoverDistance(DCLCharacterController.i.transform))
             {
                 UnhoverLastHoveredObject();
                 return;
@@ -294,9 +294,17 @@ namespace DCL
                 else
                     hitGameObject = collider.gameObject;
 
-                hitGameObject.GetComponentInChildren<OnClick>()?.Report(buttonId, raycastInfoPointerEventLayer.hitInfo.hit);
-                hitGameObject.GetComponentInChildren<OnPointerDown>()?.Report(buttonId, ray, raycastInfoPointerEventLayer.hitInfo.hit);
+                OnClick onClick = hitGameObject.GetComponentInChildren<OnClick>();
+                if (AreSameEntity(onClick, info))
+                    onClick.Report(buttonId, raycastInfoPointerEventLayer.hitInfo.hit);
+
+                OnPointerDown onPointerDown = hitGameObject.GetComponentInChildren<OnPointerDown>();
+                if (AreSameEntity(onPointerDown, info))
+                    onPointerDown.Report(buttonId, ray, raycastInfoPointerEventLayer.hitInfo.hit);
+
                 pointerUpEvent = hitGameObject.GetComponentInChildren<OnPointerUp>();
+                if (!AreSameEntity(pointerUpEvent, info))
+                    pointerUpEvent = null;
 
                 lastPointerDownEventHitInfo = raycastInfoPointerEventLayer.hitInfo;
             }
@@ -322,6 +330,11 @@ namespace DCL
             {
                 WebInterface.ReportGlobalPointerDownEvent(buttonId, raycastInfoGlobalLayer.ray, Vector3.zero, Vector3.zero, 0, sceneId);
             }
+        }
+
+        bool AreSameEntity(OnPointerEvent pointerEvent, ColliderInfo colliderInfo)
+        {
+            return pointerEvent != null && colliderInfo.entity != null && pointerEvent.entity == colliderInfo.entity;
         }
 
         bool IsBlockingOnClick(RaycastHitInfo targetOnClickHit, RaycastHitInfo potentialBlockerHit)
