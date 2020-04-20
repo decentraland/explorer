@@ -336,8 +336,10 @@ const browserInterface = {
     setAudioStream(data.url, data.play, data.volume).catch(err => defaultLogger.log(err))
   },
 
-  SendChatMessage(message: ChatMessage) {
+  SendChatMessage(data: { message: ChatMessage } ) {
+    defaultLogger.log( JSON.stringify(data) )
     // TODO - not yet impleemented - moliva - 15/04/2020
+    unityInterface.AddMessageToChatWindow( data.message )
   }
 }
 

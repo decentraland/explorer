@@ -378,6 +378,9 @@ namespace DCL
                             case "ConfigureHUDElement":
                                 HUDController.i?.ConfigureHUDElement(msg.payload);
                                 break;
+                            case "AddMessageToChatWindow":
+                                ChatController.i?.AddMessageToChatWindow(msg.payload);
+                                break;
                             case "UpdateMinimapSceneInformation":
                                 MinimapMetadataController.i?.UpdateMinimapSceneInformation(msg.payload);
                                 break;

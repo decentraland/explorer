@@ -36,6 +36,10 @@ public class ChatController : MonoBehaviour
     public void AddMessageToChatWindow(string jsonMessage)
     {
         ChatMessage message = JsonUtility.FromJson<ChatMessage>(jsonMessage);
+
+        if (message == null)
+            return;
+
         entries.Add(message);
         OnAddMessage?.Invoke(message);
     }

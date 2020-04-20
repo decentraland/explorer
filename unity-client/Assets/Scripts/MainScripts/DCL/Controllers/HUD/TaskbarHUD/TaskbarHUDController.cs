@@ -12,7 +12,7 @@ public class TaskbarHUDController : IHUD
     {
         controller.view.transform.SetParent(view.windowContainer, false);
         worldChatWindowHud = controller;
-        view.OnAddChatWindow(controller.view.gameObject, ToggleChatWindow);
+        view.OnAddChatWindow(ToggleChatWindow);
     }
 
     private void ToggleChatWindow()

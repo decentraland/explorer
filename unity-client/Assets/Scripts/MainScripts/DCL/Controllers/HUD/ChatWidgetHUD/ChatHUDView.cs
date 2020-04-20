@@ -3,11 +3,10 @@ using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
+
 using ChatMessage = ChatController.ChatMessage;
-using ChatMessageType = ChatController.ChatMessageType;
-
-
 public class ChatHUDView : MonoBehaviour
 {
     public TMP_InputField inputField;
@@ -18,43 +17,25 @@ public class ChatHUDView : MonoBehaviour
     public ChatHUDController controller;
     [NonSerialized] public List<ChatEntry> entries = new List<ChatEntry>();
 
-    string userName;
-
-    public void Initialize(ChatHUDController controller)
+    public void Initialize(ChatHUDController controller, UnityAction<string> onSendMessage)
     {
         this.controller = controller;
 
         chatEntryPrefab = Resources.Load("Chat Entry") as GameObject;
-        inputField.onSubmit.AddListener(SendChatMessage);
-
-        userName = "NO_USER";
-
-        var profileUserName = UserProfile.GetOwnUserProfile().userName;
-
-        if (!string.IsNullOrEmpty(profileUserName))
-            userName = profileUserName;
+        inputField.onSubmit.AddListener(onSendMessage);
     }
-
-    void SendChatMessage(string msgBody)
+    public void ResetInputField()
     {
-        if (string.IsNullOrEmpty(msgBody))
-            return;
-
         inputField.text = "";
         inputField.caretColor = Color.white;
+    }
+
+    public void FocusInputField()
+    {
         inputField.Select();
         inputField.ActivateInputField();
-
-        var data = new ChatMessage()
-        {
-            body = msgBody,
-            sender = userName,
-            messageType = ChatMessageType.PUBLIC
-        };
-
-        controller.SendChatMessage(data);
-        controller.AddChatMessage(data);
     }
+
 
     public void AddEntry(ChatMessage message)
     {
