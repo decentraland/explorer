@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 public class WorldChatWindowHUDView : MonoBehaviour
 {
-    const string VIEW_PATH = "Main Chat Window";
+    const string VIEW_PATH = "World Chat Window";
 
     public Button worldFilterButton;
     public Button pmFilterButton;
