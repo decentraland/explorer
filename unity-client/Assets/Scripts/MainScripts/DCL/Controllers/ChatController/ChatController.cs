@@ -19,6 +19,7 @@ public class ChatController : MonoBehaviour
         SYSTEM
     }
 
+    [System.Serializable]
     public class ChatMessage
     {
         public ChatMessageType messageType;
@@ -32,8 +33,9 @@ public class ChatController : MonoBehaviour
 
     public event Action<ChatMessage> OnAddMessage;
 
-    public void AddMessageToChatWindow(ChatMessage message)
+    public void AddMessageToChatWindow(string jsonMessage)
     {
+        ChatMessage message = JsonUtility.FromJson<ChatMessage>(jsonMessage);
         entries.Add(message);
         OnAddMessage?.Invoke(message);
     }
