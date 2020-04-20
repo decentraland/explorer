@@ -336,10 +336,11 @@ const browserInterface = {
     setAudioStream(data.url, data.play, data.volume).catch(err => defaultLogger.log(err))
   },
 
-  SendChatMessage(data: { message: ChatMessage } ) {
-    defaultLogger.log( JSON.stringify(data) )
+  SendChatMessage(data: { message: ChatMessage }) {
+    defaultLogger.log(JSON.stringify(data))
     // TODO - not yet impleemented - moliva - 15/04/2020
-    unityInterface.AddMessageToChatWindow( data.message )
+    // tslint:disable-next-line
+    unityInterface.AddMessageToChatWindow(data.message)
   }
 }
 
