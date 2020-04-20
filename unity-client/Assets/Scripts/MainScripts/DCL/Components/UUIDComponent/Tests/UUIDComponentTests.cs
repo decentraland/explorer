@@ -888,11 +888,11 @@ namespace Tests
         }
 
         [UnityTest]
-        public IEnumerator OnPointerUpEventNotTriggeredByParent()
+        public IEnumerator PointerEventNotTriggeredByParent()
         {
             Assert.IsNotNull(cameraController, "camera is null?");
 
-            // Create blocking entity
+            // Create parent entity
             DecentralandEntity blockingEntity;
             BoxShape blockingShape;
             InstantiateEntityWithShape(out blockingEntity, out blockingShape);
