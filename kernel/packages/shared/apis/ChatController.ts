@@ -22,14 +22,13 @@ import { changeRealm, catalystRealmConnected, changeToCrowdedRealm } from 'share
 import defaultLogger from 'shared/logger'
 import { registerAPI, APIOptions, exposeMethod } from 'decentraland-rpc/lib/host'
 import { ExposableAPI } from './ExposableAPI'
-import { UnityInterfaceContainer } from '../../unity-interface/dcl'
 import { StoreContainer } from '../store/rootTypes'
 import { sendMessage } from 'shared/chat/actions'
 import { EngineAPI } from './EngineAPI'
 import { sendPublicChatMessage } from 'shared/comms'
 import { USE_NEW_CHAT } from '../../config/index'
 
-declare const globalThis: UnityInterfaceContainer & StoreContainer
+declare const globalThis: StoreContainer & { unityInterface: { TriggerSelfUserExpression: any } }
 
 const userPose: { [key: string]: Vector3Component } = {}
 avatarMessageObservable.add((pose: AvatarMessage) => {
