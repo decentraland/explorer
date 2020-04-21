@@ -2,7 +2,12 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ChatController : MonoBehaviour
+public interface IChatController
+{
+    event Action<ChatController.ChatMessage> OnAddMessage;
+}
+
+public class ChatController : MonoBehaviour, IChatController
 {
     public static ChatController i { get; private set; }
 

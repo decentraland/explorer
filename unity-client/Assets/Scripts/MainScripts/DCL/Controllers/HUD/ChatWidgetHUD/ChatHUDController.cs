@@ -1,22 +1,40 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine.Events;
 using ChatMessage = ChatController.ChatMessage;
 using ChatMessageType = ChatController.ChatMessageType;
-public class ChatHUDController
+public class ChatHUDController : IDisposable
 {
-    const int MAX_CHAT_ENTRIES = 100;
+    public const int MAX_CHAT_ENTRIES = 100;
 
     public ChatHUDView view;
 
+    public UnityAction<string> OnSendMessage;
+
+    public void Initialize(ChatHUDView view = null, UnityAction<string> onSendMessage = null)
+    {
+        if (view == null)
+        {
+            this.view = ChatHUDView.Create();
+        }
+        else
+        {
+            this.view = view;
+        }
+
+        this.view.Initialize(this, onSendMessage);
+    }
+
     public void AddChatMessage(ChatMessage message)
     {
+        view.AddEntry(message);
+
         if (view.entries.Count > MAX_CHAT_ENTRIES)
         {
             var result = TrimAndSortChatMessages(view.entries.Select((x) => x.message).ToList());
             view.RepopulateAllChatMessages(result);
         }
-
-        view.AddEntry(message);
     }
 
     public void FilterByType(ChatMessageType type)
@@ -26,7 +44,6 @@ public class ChatHUDController
         view.RepopulateAllChatMessages(result);
     }
 
-
     public List<ChatMessage> TrimAndSortChatMessages(List<ChatMessage> messages)
     {
         var result = messages;
@@ -35,10 +52,15 @@ public class ChatHUDController
 
         if (result.Count > MAX_CHAT_ENTRIES)
         {
-            int entriesToRemove = MAX_CHAT_ENTRIES - result.Count;
+            int entriesToRemove = (result.Count - MAX_CHAT_ENTRIES);
             result.RemoveRange(0, entriesToRemove);
         }
 
         return result;
+    }
+
+    public void Dispose()
+    {
+        UnityEngine.Object.Destroy(this.view.gameObject);
     }
 }

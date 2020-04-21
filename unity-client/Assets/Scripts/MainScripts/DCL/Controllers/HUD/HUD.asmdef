@@ -21,7 +21,10 @@
         "GUID:5d02c64bb7b20a24db543402280f4e74",
         "GUID:012093226beb0234c97a809109f7086d",
         "GUID:6c83ec3e64bad1743a40f7646cd964a4",
-        "GUID:bfcb62efe121edb4cb291924b28114eb"
+        "GUID:bfcb62efe121edb4cb291924b28114eb",
+        "GUID:eb95615676ca6984687c5ae7774d6309",
+        "GUID:bd51ff2b035ce4ab4be7c38c43c88889",
+        "GUID:858f845923fcab3448cf8b66614b41a1"
     ],
     "optionalUnityReferences": [],
     "includePlatforms": [],

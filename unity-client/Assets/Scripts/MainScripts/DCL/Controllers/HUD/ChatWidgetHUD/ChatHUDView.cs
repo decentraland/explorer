@@ -9,21 +9,27 @@ using UnityEngine.UI;
 using ChatMessage = ChatController.ChatMessage;
 public class ChatHUDView : MonoBehaviour
 {
+    static string VIEW_PATH = "Chat Widget";
     public TMP_InputField inputField;
     public RectTransform chatEntriesContainer;
 
     public ScrollRect scrollRect;
-    GameObject chatEntryPrefab;
     public ChatHUDController controller;
     [NonSerialized] public List<ChatEntry> entries = new List<ChatEntry>();
+
+    public static ChatHUDView Create()
+    {
+        var view = Instantiate(Resources.Load<GameObject>(VIEW_PATH)).GetComponent<ChatHUDView>();
+        return view;
+    }
+
 
     public void Initialize(ChatHUDController controller, UnityAction<string> onSendMessage)
     {
         this.controller = controller;
-
-        chatEntryPrefab = Resources.Load("Chat Entry") as GameObject;
         inputField.onSubmit.AddListener(onSendMessage);
     }
+
     public void ResetInputField()
     {
         inputField.text = "";
@@ -39,7 +45,8 @@ public class ChatHUDView : MonoBehaviour
 
     public void AddEntry(ChatMessage message)
     {
-        ChatEntry chatEntry = Instantiate(chatEntryPrefab, chatEntriesContainer).GetComponent<ChatEntry>();
+        var chatEntryGO = Instantiate(Resources.Load("Chat Entry") as GameObject, chatEntriesContainer);
+        ChatEntry chatEntry = chatEntryGO.GetComponent<ChatEntry>();
         chatEntry.Populate(message);
         entries.Add(chatEntry);
 

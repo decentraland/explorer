@@ -1,10 +1,11 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class ChatEntry : MonoBehaviour
 {
-    [SerializeField] private TextMeshProUGUI username;
-    [SerializeField] private TextMeshProUGUI body;
+    [SerializeField] internal TextMeshProUGUI username;
+    [SerializeField] internal TextMeshProUGUI body;
 
     public Color worldMessageColor = Color.white;
     public Color privateMessageColor = Color.white;
@@ -14,6 +15,9 @@ public class ChatEntry : MonoBehaviour
 
     public void Populate(ChatController.ChatMessage chatMessage)
     {
+        if (chatMessage == null)
+            return;
+
         this.message = chatMessage;
         string userString = "";
 
@@ -35,7 +39,14 @@ public class ChatEntry : MonoBehaviour
                 break;
         }
 
+        //NOTE(Brian): ContentSizeFitter doesn't fare well with tabs, so i'm replacing these
+        //             with spaces.
+        chatMessage.body = chatMessage.body.Replace("\t", "    ");
+
         username.text = userString;
         body.text = $"{userString} {chatMessage.body}";
+
+        LayoutRebuilder.ForceRebuildLayoutImmediate(body.transform as RectTransform);
+        LayoutRebuilder.ForceRebuildLayoutImmediate(username.transform as RectTransform);
     }
 }

@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class HUDController : MonoBehaviour
 {
-    static bool VERBOSE = false;
+    static bool VERBOSE = true;
     const int NOTIFICATION_DURATION = 5;
 
     public static HUDController i { get; private set; }
@@ -64,6 +64,7 @@ public class HUDController : MonoBehaviour
         WORLD_CHAT_WINDOW = 10,
         TASKBAR = 11,
         MESSAGE_OF_THE_DAY = 12,
+        COUNT = 13
     }
 
     [System.Serializable]
@@ -136,18 +137,13 @@ public class HUDController : MonoBehaviour
                 break;
             case HUDElementID.WORLD_CHAT_WINDOW:
                 CreateHudElement<WorldChatWindowHUDController>(configuration, hudElementId);
-                if (taskbarHud != null)
-                {
-                    taskbarHud?.AddChatWindow(worldChatWindowHud);
-                }
+                worldChatWindowHud?.Initialize(ChatController.i, DCL.InitialSceneReferences.i?.mouseCatcher);
+                ConfigureTaskbar();
 
                 break;
             case HUDElementID.TASKBAR:
                 CreateHudElement<TaskbarHUDController>(configuration, hudElementId);
-                if (worldChatWindowHud != null)
-                {
-                    taskbarHud?.AddChatWindow(worldChatWindowHud);
-                }
+                ConfigureTaskbar();
                 break;
             case HUDElementID.MESSAGE_OF_THE_DAY:
                 CreateHudElement<WelcomeHUDController>(configuration, hudElementId);
@@ -156,6 +152,17 @@ public class HUDController : MonoBehaviour
         }
 
         GetHUDElement(hudElementId)?.SetVisibility(configuration.active && configuration.visible);
+    }
+
+    public void ConfigureTaskbar()
+    {
+        if (taskbarHud == null)
+            return;
+
+        if (worldChatWindowHud == null)
+            return;
+
+        taskbarHud?.AddChatWindow(worldChatWindowHud);
     }
 
     public void CreateHudElement<T>(HUDConfiguration config, HUDElementID id)
@@ -256,7 +263,7 @@ public class HUDController : MonoBehaviour
         }
     }
 
-    private IHUD GetHUDElement(HUDElementID id)
+    public IHUD GetHUDElement(HUDElementID id)
     {
         if (!hudElements.ContainsKey(id))
             return null;
