@@ -7,7 +7,7 @@ global.enableWeb3 = true
 import { ReportFatalError } from 'shared/loading/ReportFatalError'
 import { experienceStarted, NOT_INVITED, AUTH_ERROR_LOGGED_OUT, FAILED_FETCHING_UNITY } from 'shared/loading/types'
 import { worldToGrid } from '../atomicHelpers/parcelScenePositions'
-import { NO_MOTD, tutorialEnabled, OPEN_AVATAR_EDITOR } from '../config/index'
+import { NO_MOTD, tutorialEnabled, OPEN_AVATAR_EDITOR, USE_NEW_CHAT } from '../config/index'
 import defaultLogger from 'shared/logger'
 import { signalRendererInitialized, signalParcelLoadingStarted } from 'shared/renderer/actions'
 import { lastPlayerPosition, teleportObservable } from 'shared/world/positionThings'
@@ -32,7 +32,7 @@ initializeUnity(container)
     i.ConfigureHUDElement(HUDElementID.AIRDROPPING, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.TERMS_OF_SERVICE, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.TASKBAR, { active: true, visible: true })
-    i.ConfigureHUDElement(HUDElementID.WORLD_CHAT_WINDOW, { active: true, visible: true })
+    i.ConfigureHUDElement(HUDElementID.WORLD_CHAT_WINDOW, { active: USE_NEW_CHAT, visible: USE_NEW_CHAT })
 
     globalThis.globalStore.dispatch(signalRendererInitialized())
 

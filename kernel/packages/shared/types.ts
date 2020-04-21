@@ -30,9 +30,11 @@ export type UserData = {
 
 export type MessageEntry = {
   id: string
-  sender: string
+  isCommand: boolean
+  sender: string | undefined
+  recipient?: string | undefined
   message: string
-  isCommand?: boolean
+  timestamp: number
 }
 
 export interface IChatCommand {
@@ -422,9 +424,10 @@ export enum ChatMessageType {
 }
 
 export type ChatMessage = {
+  messageId: string
   messageType: ChatMessageType
-  sender: string | undefined
-  recipient: string | undefined
+  sender?: string | undefined
+  recipient?: string | undefined
   timestamp: number
   body: string
 }
