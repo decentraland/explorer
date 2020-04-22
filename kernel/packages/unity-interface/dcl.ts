@@ -93,7 +93,7 @@ import { StoreContainer } from 'shared/store/rootTypes'
 import { ILandToLoadableParcelScene, ILandToLoadableParcelSceneUpdate } from 'shared/selectors'
 import { sendMessage } from 'shared/chat/actions'
 
-declare const globalThis: UnityInterfaceContainer &
+declare const globalThis: UnityInterfaceContainer & BrowserInterfaceContainer &
   StoreContainer & { analytics: any; delighted: any } & { messages: (e: any) => void }
 
 type GameInstance = {
@@ -349,6 +349,10 @@ const browserInterface = {
   SendChatMessage(data: { message: ChatMessage }) {
     globalThis.globalStore.dispatch(sendMessage(data.message))
   }
+}
+globalThis.browserInterface = browserInterface
+type BrowserInterfaceContainer = {
+  browserInterface: typeof browserInterface
 }
 
 export function setLoadingScreenVisible(shouldShow: boolean) {
