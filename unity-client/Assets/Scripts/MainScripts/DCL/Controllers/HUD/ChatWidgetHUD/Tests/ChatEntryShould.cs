@@ -51,25 +51,4 @@ public class ChatEntryShould : TestsBase
 
         entry.Populate(null);
     }
-
-    [Test]
-    public void HaveCorrectSizeForMessageBody()
-    {
-        var message = new ChatController.ChatMessage()
-        {
-            messageType = ChatController.ChatMessageType.NONE,
-            sender = "user test",
-            recipient = "",
-            timestamp = 0,
-            body = "\t\t\tLorem ipsum dolor sit amet, consectetur adipiscing elit. Cras convallis rutrum est id efficitur. Donec ornare, neque vitae dignissim mattis, sem diam varius augue, sollicitudin tempor dui sapien quis felis. Donec aliquet bibendum ligula, fringilla vestibulum sapien vehicula eu. Nulla auctor lectus a dui scelerisque tincidunt. Ut eget gravida ligula. Vestibulum pellentesque ac mi id aliquam. In hendrerit dignissim commodo. Nulla in fringilla dolor, at efficitur arcu. Nullam malesuada et est et mattis. Vestibulum quis massa sodales, consequat diam nec, condimentum diam. Aliquam eu sollicitudin dui, ac aliquet purus. Praesent id neque in erat tincidunt eleifend. Phasellus sit amet nisi luctus nibh imperdiet sollicitudin ut sit amet felis. Pellentesque dictum tempor lectus accumsan mollis. Vivamus in aliquam enim, vel scelerisque arcu.",
-        };
-
-        entry.Populate(message);
-        UnityEngine.Assertions.Assert.AreApproximatelyEqual(143.82f, (entry.body.transform as RectTransform).sizeDelta.y, 0.5f);
-
-        message.body = "Tiny message";
-        entry.Populate(message);
-
-        UnityEngine.Assertions.Assert.AreApproximatelyEqual(33.41f, (entry.body.transform as RectTransform).sizeDelta.y, 0.5f);
-    }
 }

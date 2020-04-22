@@ -82,11 +82,12 @@ public class WorldChatWindowHUDShould : TestsBase
             };
 
         WebInterface.OnMessageFromEngine += messageCallback;
+        controller.resetInputFieldOnSubmit = false;
         controller.SendChatMessage("test message");
         Assert.IsTrue(messageWasSent);
         Assert.AreEqual("", controller.view.chatHudView.inputField.text);
         WebInterface.OnMessageFromEngine -= messageCallback;
-        yield return null;
+        yield break;
     }
 
     [Test]
@@ -97,6 +98,4 @@ public class WorldChatWindowHUDShould : TestsBase
         controller.view.closeButton.onClick.Invoke();
         Assert.AreEqual(false, controller.view.gameObject.activeSelf);
     }
-
-
 }

@@ -5,13 +5,15 @@ using UnityEngine;
 
 public class WorldChatWindowHUDController : IHUD
 {
-    ChatHUDController chatHudController;
+    private ChatHUDController chatHudController;
     public WorldChatWindowHUDView view;
 
-    string userName;
+    private string userName;
 
-    IChatController chatController;
-    IMouseCatcher mouseCatcher;
+    private IChatController chatController;
+    private IMouseCatcher mouseCatcher;
+
+    internal bool resetInputFieldOnSubmit = true;
 
     public void Initialize(IChatController chatController, IMouseCatcher mouseCatcher)
     {
@@ -63,9 +65,11 @@ public class WorldChatWindowHUDController : IHUD
         if (string.IsNullOrEmpty(msgBody))
             return;
 
-        view.chatHudView.ResetInputField();
-        view.chatHudView.FocusInputField();
-
+        if (resetInputFieldOnSubmit)
+        {
+            view.chatHudView.ResetInputField();
+            view.chatHudView.FocusInputField();
+        }
         var data = new ChatController.ChatMessage()
         {
             body = msgBody,
