@@ -133,20 +133,8 @@ namespace Tests
             DCLCharacterController.i.PauseGravity();
             DCLCharacterController.i.SetPosition(new Vector3(8, 1, 7f));
 
-            var cameraController = GameObject.FindObjectOfType<CameraController>();
-
             // Rotate camera towards the interactive object
-            var cameraRotationPayload = new CameraController.SetRotationPayload()
-            {
-                x = 45,
-                y = 0,
-                z = 0
-            };
-
-            cameraController.SetRotation(JsonConvert.SerializeObject(cameraRotationPayload, Formatting.None, new JsonSerializerSettings()
-            {
-                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-            }));
+            cameraController.SetRotation(45, 0, 0);
 
             yield return null;
 
