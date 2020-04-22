@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class HUDController : MonoBehaviour
 {
-    static bool VERBOSE = true;
+    static bool VERBOSE = false;
     const int NOTIFICATION_DURATION = 5;
 
     public static HUDController i { get; private set; }
