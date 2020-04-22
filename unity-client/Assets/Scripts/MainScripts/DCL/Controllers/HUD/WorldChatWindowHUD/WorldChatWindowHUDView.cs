@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
@@ -27,14 +27,18 @@ public class WorldChatWindowHUDView : MonoBehaviour, IPointerClickHandler
         this.closeButton.onClick.AddListener(Toggle);
     }
 
+    public bool isInPreview { get; private set; }
+
     public void DeactivatePreview()
     {
         group.alpha = 1;
+        isInPreview = false;
     }
 
     public void ActivatePreview()
     {
         group.alpha = 0;
+        isInPreview = true;
     }
 
     public void Toggle()

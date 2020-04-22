@@ -29,7 +29,13 @@ public class TaskbarHUDController : IHUD
 
     private void ToggleChatWindow()
     {
-        worldChatWindowHud.SetVisibility(!worldChatWindowHud.view.gameObject.activeSelf);
+        if (worldChatWindowHud.view.isInPreview)
+        {
+            worldChatWindowHud.view.DeactivatePreview();
+            return;
+        }
+
+        worldChatWindowHud.view.Toggle();
 
         if (worldChatWindowHud.view.gameObject.activeSelf)
             OnToggleOn();
