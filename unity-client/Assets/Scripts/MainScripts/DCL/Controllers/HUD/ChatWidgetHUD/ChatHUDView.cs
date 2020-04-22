@@ -56,6 +56,8 @@ public class ChatHUDView : MonoBehaviour
             LayoutRebuilder.ForceRebuildLayoutImmediate(x);
         },
         chatEntriesContainer);
+
+        LayoutRebuilder.ForceRebuildLayoutImmediate(chatEntriesContainer);
     }
 
     public void CleanAllEntries()
