@@ -3,11 +3,18 @@ using DCL.Interface;
 using NUnit.Framework;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine.TestTools;
 
 class ChatController_Mock : IChatController
 {
     public event Action<ChatController.ChatMessage> OnAddMessage;
+
+    public List<ChatController.ChatMessage> GetEntries()
+    {
+        return new List<ChatController.ChatMessage>();
+    }
+
     public void RaiseAddMessage(ChatController.ChatMessage chatMessage) { OnAddMessage?.Invoke(chatMessage); }
 }
 class MouseCatcher_Mock : IMouseCatcher

@@ -5,6 +5,7 @@ using UnityEngine;
 public interface IChatController
 {
     event Action<ChatController.ChatMessage> OnAddMessage;
+    List<ChatController.ChatMessage> GetEntries();
 }
 
 public class ChatController : MonoBehaviour, IChatController
@@ -47,5 +48,10 @@ public class ChatController : MonoBehaviour, IChatController
 
         entries.Add(message);
         OnAddMessage?.Invoke(message);
+    }
+
+    public List<ChatMessage> GetEntries()
+    {
+        return new List<ChatMessage>(entries);
     }
 }
