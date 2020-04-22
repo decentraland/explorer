@@ -890,12 +890,8 @@ namespace Tests
         [UnityTest]
         public IEnumerator PointerEventNotTriggeredByParent()
         {
-            Assert.IsNotNull(cameraController, "camera is null?");
-
             // Create parent entity
-            DecentralandEntity blockingEntity;
-            BoxShape blockingShape;
-            InstantiateEntityWithShape(out blockingEntity, out blockingShape);
+            InstantiateEntityWithShape(out DecentralandEntity blockingEntity, out BoxShape blockingShape);
             TestHelpers.SetEntityTransform(scene, blockingEntity, new Vector3(3, 3, 3), Quaternion.identity, new Vector3(1, 1, 1));
             yield return blockingShape.routine;
 
