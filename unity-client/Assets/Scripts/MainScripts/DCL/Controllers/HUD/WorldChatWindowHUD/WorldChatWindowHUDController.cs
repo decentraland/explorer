@@ -1,4 +1,5 @@
 
+using DCL;
 using DCL.Interface;
 using UnityEngine;
 
@@ -9,16 +10,30 @@ public class WorldChatWindowHUDController : IHUD
 
     string userName;
 
-    public WorldChatWindowHUDController()
+    IChatController chatController;
+    IMouseCatcher mouseCatcher;
+
+    public void Initialize(IChatController chatController, IMouseCatcher mouseCatcher)
     {
-        chatHudController = new ChatHUDController();
-
         view = WorldChatWindowHUDView.Create();
-        view.chatHudView.Initialize(chatHudController, SendChatMessage);
-        chatHudController.view = view.chatHudView;
 
-        ChatController.i.OnAddMessage -= view.chatHudView.controller.AddChatMessage;
-        ChatController.i.OnAddMessage += view.chatHudView.controller.AddChatMessage;
+        chatHudController = new ChatHUDController();
+        chatHudController.Initialize(view.chatHudView, SendChatMessage);
+
+        this.chatController = chatController;
+        this.mouseCatcher = mouseCatcher;
+
+        if (chatController != null)
+        {
+            chatController.OnAddMessage -= view.chatHudView.controller.AddChatMessage;
+            chatController.OnAddMessage += view.chatHudView.controller.AddChatMessage;
+        }
+
+        if (mouseCatcher != null)
+        {
+            mouseCatcher.OnMouseLock += view.OnMouseLock;
+            mouseCatcher.OnMouseUnlock += view.OnMouseUnlock;
+        }
 
         userName = "NO_USER";
 
@@ -29,7 +44,15 @@ public class WorldChatWindowHUDController : IHUD
     }
     public void Dispose()
     {
-        ChatController.i.OnAddMessage -= view.chatHudView.controller.AddChatMessage;
+        if (chatController != null)
+            chatController.OnAddMessage -= view.chatHudView.controller.AddChatMessage;
+
+        if (mouseCatcher != null)
+        {
+            mouseCatcher.OnMouseLock -= view.OnMouseLock;
+            mouseCatcher.OnMouseUnlock -= view.OnMouseUnlock;
+        }
+
         Object.Destroy(view);
     }
 

@@ -5,7 +5,13 @@ using DCL.Helpers;
 
 namespace DCL
 {
-    public class MouseCatcher : MonoBehaviour, IPointerDownHandler
+    public interface IMouseCatcher
+    {
+        event System.Action OnMouseUnlock;
+        event System.Action OnMouseLock;
+    }
+
+    public class MouseCatcher : MonoBehaviour, IMouseCatcher, IPointerDownHandler
     {
         public event System.Action OnMouseUnlock;
         public event System.Action OnMouseLock;

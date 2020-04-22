@@ -1,4 +1,3 @@
-using DCL;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -18,22 +17,21 @@ public class WorldChatWindowHUDView : MonoBehaviour
     public static WorldChatWindowHUDView Create()
     {
         var view = Instantiate(Resources.Load<GameObject>(VIEW_PATH)).GetComponent<WorldChatWindowHUDView>();
+        view.Initialize();
         return view;
     }
 
-    private void Start()
+    private void Initialize()
     {
-        InitialSceneReferences.i.mouseCatcher.OnMouseLock += MouseCatcher_OnMouseLock;
-        InitialSceneReferences.i.mouseCatcher.OnMouseUnlock += MouseCatcher_OnMouseUnlock;
         this.closeButton.onClick.AddListener(Toggle);
     }
 
-    private void MouseCatcher_OnMouseUnlock()
+    public void OnMouseUnlock()
     {
         group.alpha = 1;
     }
 
-    private void MouseCatcher_OnMouseLock()
+    public void OnMouseLock()
     {
         group.alpha = 0;
     }

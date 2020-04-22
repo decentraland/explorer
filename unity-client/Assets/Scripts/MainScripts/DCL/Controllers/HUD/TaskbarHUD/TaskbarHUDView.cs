@@ -10,7 +10,7 @@ public class TaskbarHUDView : MonoBehaviour
     public Button chatButton;
     public Button friendsButton;
 
-    TaskbarHUDController controller;
+    internal TaskbarHUDController controller;
 
     internal static TaskbarHUDView Create(TaskbarHUDController controller)
     {
