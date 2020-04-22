@@ -1,7 +1,9 @@
+using DCL;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class WorldChatWindowHUDView : MonoBehaviour
+public class WorldChatWindowHUDView : MonoBehaviour, IPointerClickHandler
 {
     const string VIEW_PATH = "World Chat Window";
 
@@ -26,12 +28,12 @@ public class WorldChatWindowHUDView : MonoBehaviour
         this.closeButton.onClick.AddListener(Toggle);
     }
 
-    public void OnMouseUnlock()
+    public void DeactivatePreview()
     {
         group.alpha = 1;
     }
 
-    public void OnMouseLock()
+    public void ActivatePreview()
     {
         group.alpha = 0;
     }
@@ -41,6 +43,24 @@ public class WorldChatWindowHUDView : MonoBehaviour
         if (gameObject.activeSelf)
             gameObject.SetActive(false);
         else
+        {
             gameObject.SetActive(true);
+            DeactivatePreview();
+        }
+    }
+
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        DeactivatePreview();
+    }
+
+    public void Update()
+    {
+        if (Input.GetKey(KeyCode.Return) && !chatHudView.inputField.isFocused)
+        {
+            chatHudView.FocusInputField();
+            DeactivatePreview();
+            InitialSceneReferences.i.mouseCatcher.UnlockCursor();
+        }
     }
 }

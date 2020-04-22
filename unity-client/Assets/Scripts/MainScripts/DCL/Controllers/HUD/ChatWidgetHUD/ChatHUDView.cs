@@ -81,5 +81,4 @@ public class ChatHUDView : MonoBehaviour
             AddEntry(entriesList[i]);
         }
     }
-
 }

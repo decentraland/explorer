@@ -33,8 +33,7 @@ public class WorldChatWindowHUDController : IHUD
 
         if (mouseCatcher != null)
         {
-            mouseCatcher.OnMouseLock += view.OnMouseLock;
-            mouseCatcher.OnMouseUnlock += view.OnMouseUnlock;
+            mouseCatcher.OnMouseLock += view.ActivatePreview;
         }
 
         userName = "NO_USER";
@@ -51,8 +50,7 @@ public class WorldChatWindowHUDController : IHUD
 
         if (mouseCatcher != null)
         {
-            mouseCatcher.OnMouseLock -= view.OnMouseLock;
-            mouseCatcher.OnMouseUnlock -= view.OnMouseUnlock;
+            mouseCatcher.OnMouseLock -= view.ActivatePreview;
         }
 
         Object.Destroy(view);
