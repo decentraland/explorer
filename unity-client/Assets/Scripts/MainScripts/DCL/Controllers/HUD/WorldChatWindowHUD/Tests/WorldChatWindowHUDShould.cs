@@ -69,8 +69,6 @@ public class WorldChatWindowHUDShould : TestsBase
     {
         mouseCatcher.RaiseMouseLock();
         Assert.AreEqual(0, view.group.alpha);
-        mouseCatcher.RaiseMouseUnlock();
-        Assert.AreEqual(1, view.group.alpha);
     }
 
 
