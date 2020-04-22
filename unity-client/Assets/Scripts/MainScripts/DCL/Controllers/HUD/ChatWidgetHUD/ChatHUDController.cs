@@ -33,8 +33,8 @@ public class ChatHUDController : IDisposable
 
         if (view.entries.Count > MAX_CHAT_ENTRIES)
         {
-            var result = TrimAndSortChatMessages(view.entries.Select((x) => x.message).ToList());
-            view.RepopulateAllChatMessages(result);
+            UnityEngine.Object.Destroy(view.entries[0].gameObject);
+            view.entries.Remove(view.entries[0]);
         }
     }
 
