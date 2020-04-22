@@ -42,6 +42,8 @@ public class WorldChatWindowHUDController : IHUD
 
         if (!string.IsNullOrEmpty(profileUserName))
             userName = profileUserName;
+
+        chatHudController.view.RepopulateAllChatMessages(chatController.GetEntries());
     }
     public void Dispose()
     {
