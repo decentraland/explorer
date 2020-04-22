@@ -31,7 +31,7 @@ initializeUnity(container)
     i.ConfigureHUDElement(HUDElementID.PLAYER_INFO_CARD, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.AIRDROPPING, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.TERMS_OF_SERVICE, { active: true, visible: true })
-    i.ConfigureHUDElement(HUDElementID.TASKBAR, { active: true, visible: true })
+    i.ConfigureHUDElement(HUDElementID.TASKBAR, { active: USE_NEW_CHAT, visible: USE_NEW_CHAT })
     i.ConfigureHUDElement(HUDElementID.WORLD_CHAT_WINDOW, { active: USE_NEW_CHAT, visible: USE_NEW_CHAT })
 
     globalThis.globalStore.dispatch(signalRendererInitialized())
