@@ -3,7 +3,8 @@ using UnityEngine;
 public class TaskbarHUDController : IHUD
 {
     internal TaskbarHUDView view;
-    WorldChatWindowHUDController worldChatWindowHud;
+    public WorldChatWindowHUDController worldChatWindowHud;
+    public bool alreadyToggledOnForFirstTime { get; private set; } = false;
 
     public TaskbarHUDController()
     {
@@ -29,15 +30,35 @@ public class TaskbarHUDController : IHUD
     private void ToggleChatWindow()
     {
         worldChatWindowHud.SetVisibility(!worldChatWindowHud.view.gameObject.activeSelf);
+
+        if (worldChatWindowHud.view.gameObject.activeSelf)
+            OnToggleOn();
     }
 
     public void Dispose()
     {
-        UnityEngine.Object.Destroy(view.gameObject);
+        Object.Destroy(view.gameObject);
     }
 
     public void SetVisibility(bool visible)
     {
         view.SetVisibility(visible);
+    }
+
+    public void OnPressReturn()
+    {
+        if (worldChatWindowHud.OnPressReturn())
+        {
+            OnToggleOn();
+        }
+    }
+
+    void OnToggleOn()
+    {
+        if (alreadyToggledOnForFirstTime)
+            return;
+
+        alreadyToggledOnForFirstTime = true;
+        view.OnToggleForFirstTime();
     }
 }

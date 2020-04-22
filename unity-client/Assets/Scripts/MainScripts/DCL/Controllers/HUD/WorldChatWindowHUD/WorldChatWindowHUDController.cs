@@ -84,4 +84,16 @@ public class WorldChatWindowHUDController : IHUD
     {
         view.gameObject.SetActive(visible);
     }
+
+    public bool OnPressReturn()
+    {
+        if (view.chatHudView.inputField.isFocused)
+            return false;
+
+        SetVisibility(true);
+        view.chatHudView.FocusInputField();
+        view.DeactivatePreview();
+        InitialSceneReferences.i.mouseCatcher.UnlockCursor();
+        return true;
+    }
 }

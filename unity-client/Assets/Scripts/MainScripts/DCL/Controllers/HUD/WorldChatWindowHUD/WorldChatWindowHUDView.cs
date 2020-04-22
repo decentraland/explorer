@@ -1,4 +1,3 @@
-using DCL;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -52,15 +51,5 @@ public class WorldChatWindowHUDView : MonoBehaviour, IPointerClickHandler
     public void OnPointerClick(PointerEventData eventData)
     {
         DeactivatePreview();
-    }
-
-    public void Update()
-    {
-        if (Input.GetKey(KeyCode.Return) && !chatHudView.inputField.isFocused)
-        {
-            chatHudView.FocusInputField();
-            DeactivatePreview();
-            InitialSceneReferences.i.mouseCatcher.UnlockCursor();
-        }
     }
 }

@@ -144,6 +144,7 @@ MonoBehaviour:
   windowContainer: {fileID: 5687400926487522963}
   chatButton: {fileID: 5681366293077149653}
   friendsButton: {fileID: 3686269489964235905}
+  chatTooltip: {fileID: 6367743213003561031}
 --- !u!222 &7643556927286160474
 CanvasRenderer:
   m_ObjectHideFlags: 0
