@@ -26,7 +26,7 @@ public class TaskbarHUDView : MonoBehaviour
 
     internal void OnAddChatWindow(UnityAction onToggle)
     {
-        chatButton.gameObject.SetActive(true);
+        chatButton.gameObject.SetActive(false);
         chatButton.onClick.AddListener(onToggle);
     }
 
