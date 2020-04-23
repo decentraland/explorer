@@ -25,7 +25,11 @@ DECENTRALAND_LOADER := static/loader/lifecycle/worker.js
 INTERNAL_SCENES := static/systems/decentraland-ui.scene.js
 BUILD_ECS := packages/build-ecs/index.js
 
-scripts/%.js: $(SOURCE_SUPPORT_TS_FILES) scripts/tsconfig.json
+CONTRACTS_INFO := packages/config/contracts.ts
+packages/config/contracts.ts:
+	@node ./scripts/updateContracts.js
+
+scripts/%.js: $(SOURCE_SUPPORT_TS_FILES) scripts/tsconfig.json $(CONTRACTS_INFO)
 	npx tsc --build scripts/tsconfig.json
 
 packages/build-ecs/%.js: packages/build-ecs/%.ts packages/build-ecs/tsconfig.json
