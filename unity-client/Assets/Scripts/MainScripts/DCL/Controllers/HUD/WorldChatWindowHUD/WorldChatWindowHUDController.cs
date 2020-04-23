@@ -59,12 +59,24 @@ public class WorldChatWindowHUDController : IHUD
         Object.Destroy(view);
     }
 
+    int invalidSubmitLastFrame = 0;
+
     //NOTE(Brian): Send chat responsibilities must be on the chatHud containing window like this one, this way we ensure
     //             it can be reused by the private messaging windows down the road.
     public void SendChatMessage(string msgBody)
     {
-        if (string.IsNullOrEmpty(msgBody))
+        bool validString = !string.IsNullOrEmpty(msgBody);
+
+        if (msgBody.Length == 1 && (byte)msgBody[0] == 11) //NOTE(Brian): Trim doesn't work. neither IsNullOrWhitespace.
+            validString = false;
+
+        if (!validString)
+        {
+            view.ActivatePreview();
+            InitialSceneReferences.i.mouseCatcher.LockCursor();
+            invalidSubmitLastFrame = Time.frameCount;
             return;
+        }
 
         if (resetInputFieldOnSubmit)
         {
@@ -87,7 +99,7 @@ public class WorldChatWindowHUDController : IHUD
 
     public bool OnPressReturn()
     {
-        if (view.chatHudView.inputField.isFocused)
+        if (view.chatHudView.inputField.isFocused || (Time.frameCount - invalidSubmitLastFrame) < 2)
             return false;
 
         SetVisibility(true);
