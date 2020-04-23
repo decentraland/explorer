@@ -11,7 +11,7 @@ fetch('https://contracts.decentraland.org/addresses.json').then((res, error) => 
       console.error(error)
       process.exit(-1)
     }
-    fs.writeFileSync('packages/config/contracts.ts', 'export const contracts = ' + JSON.stringify(json, null, 2))
+    fs.writeFileSync('packages/config/contracts.ts', 'export const contracts = ' + JSON.stringify(json, null, 2).replace('"', `'`))
     process.exit(0)
   })
 }).catch(error => {
