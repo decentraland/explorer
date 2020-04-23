@@ -73,8 +73,7 @@ import {
   SetEntityParentPayload,
   UpdateEntityComponentPayload,
   ChatMessage,
-  HUDElementID,
-  ChatMessageType
+  HUDElementID
 } from 'shared/types'
 import { ParcelSceneAPI } from 'shared/world/ParcelSceneAPI'
 import {
@@ -92,9 +91,11 @@ import { profileToRendererFormat } from 'shared/profiles/transformations/profile
 import { StoreContainer } from 'shared/store/rootTypes'
 import { ILandToLoadableParcelScene, ILandToLoadableParcelSceneUpdate } from 'shared/selectors'
 import { sendMessage } from 'shared/chat/actions'
+import { sendPublicChatMessage } from '../shared/comms/index'
 
-declare const globalThis: UnityInterfaceContainer & BrowserInterfaceContainer &
-  StoreContainer & { analytics: any; delighted: any } & { messages: (e: any) => void }
+declare const globalThis: UnityInterfaceContainer &
+  BrowserInterfaceContainer &
+  StoreContainer & { analytics: any; delighted: any }
 
 type GameInstance = {
   SendMessage(object: string, method: string, ...args: (number | string)[]): void
@@ -199,15 +200,7 @@ const browserInterface = {
     const messageId = uuid()
     const body = `␐${data.id} ${data.timestamp}`
 
-    globalThis.globalStore.dispatch(
-      sendMessage({
-        messageId,
-        body,
-        messageType: ChatMessageType.PUBLIC,
-        sender: getUserProfile().identity.address,
-        timestamp: Date.now()
-      })
-    )
+    sendPublicChatMessage(messageId, body)
   },
 
   TermsOfServiceResponse(sceneId: string, accepted: boolean, dontShowAgain: boolean) {
