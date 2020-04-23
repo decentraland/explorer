@@ -1,5 +1,5 @@
 import { saveToLocalStorage } from 'atomicHelpers/localStorage'
-import { commConfigurations, parcelLimits, COMMS, AUTO_CHANGE_REALM, USE_NEW_CHAT } from 'config'
+import { commConfigurations, parcelLimits, COMMS, AUTO_CHANGE_REALM, USE_LEGACY_CHAT } from 'config'
 import { CommunicationsController } from 'shared/apis/CommunicationsController'
 import { defaultLogger } from 'shared/logger'
 import { ChatMessage as InternalChatMessage, ChatMessageType, MessageEntry } from 'shared/types'
@@ -287,7 +287,7 @@ export function processChatMessage(context: Context, fromAlias: string, message:
         })
       } else {
         if (profile && user.userId && !isBlocked(profile, user.userId)) {
-          if (USE_NEW_CHAT) {
+          if (!USE_LEGACY_CHAT) {
             const messageEntry: InternalChatMessage = {
               messageType: ChatMessageType.PUBLIC,
               messageId: msgId,

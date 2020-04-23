@@ -3,7 +3,7 @@ import { MessageEntry, ChatMessageType } from 'shared/types'
 import { uuid } from 'atomicHelpers/math'
 import { StoreContainer } from '../store/rootTypes'
 import { messageReceived } from '../chat/actions'
-import { USE_NEW_CHAT } from '../../config/index'
+import { USE_LEGACY_CHAT } from '../../config/index'
 
 declare const globalThis: StoreContainer
 
@@ -20,7 +20,7 @@ export type ChatEvent = {
 export const chatObservable = new Observable<ChatEvent>()
 
 export function notifyStatusThroughChat(status: string) {
-  if (USE_NEW_CHAT) {
+  if (!USE_LEGACY_CHAT) {
     globalThis.globalStore.dispatch(
       messageReceived({
         messageId: uuid(),
