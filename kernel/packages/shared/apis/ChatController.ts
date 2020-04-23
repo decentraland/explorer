@@ -26,7 +26,7 @@ import { StoreContainer } from '../store/rootTypes'
 import { sendMessage } from 'shared/chat/actions'
 import { EngineAPI } from './EngineAPI'
 import { sendPublicChatMessage } from 'shared/comms'
-import { USE_LEGACY_CHAT } from '../../config/index'
+import { USE_NEW_CHAT } from '../../config/index'
 
 declare const globalThis: StoreContainer & { unityInterface: { TriggerSelfUserExpression: any } }
 
@@ -84,7 +84,7 @@ export class ChatController extends ExposableAPI implements IChatController {
 
   @exposeMethod
   async isEnabled(): Promise<boolean> {
-    return USE_LEGACY_CHAT
+    return !USE_NEW_CHAT
   }
 
   @exposeMethod
