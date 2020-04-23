@@ -3,7 +3,7 @@ import { EventDispatcher } from 'decentraland-rpc/lib/common/core/EventDispatche
 import { IFuture } from 'fp-future'
 import { Empty } from 'google-protobuf/google/protobuf/empty_pb'
 import { identity } from 'shared'
-import { persistCurrentUser } from 'shared/comms'
+import { persistCurrentUser, sendPublicChatMessage  } from 'shared/comms'
 import { AvatarMessageType } from 'shared/comms/interface/types'
 import { avatarMessageObservable, getUserProfile } from 'shared/comms/peers'
 import { providerFuture } from 'shared/ethereum/provider'
@@ -91,7 +91,6 @@ import { profileToRendererFormat } from 'shared/profiles/transformations/profile
 import { StoreContainer } from 'shared/store/rootTypes'
 import { ILandToLoadableParcelScene, ILandToLoadableParcelSceneUpdate } from 'shared/selectors'
 import { sendMessage } from 'shared/chat/actions'
-import { sendPublicChatMessage } from '../shared/comms/index'
 
 declare const globalThis: UnityInterfaceContainer &
   BrowserInterfaceContainer &
