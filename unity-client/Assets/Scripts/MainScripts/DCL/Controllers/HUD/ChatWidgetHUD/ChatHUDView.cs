@@ -74,6 +74,7 @@ public class ChatHUDView : MonoBehaviour
         }
     }
 
+    [ContextMenu("Force Layout Update")]
     public void ForceUpdateLayout()
     {
         Utils.InverseTransformChildTraversal<RectTransform>(
@@ -82,5 +83,7 @@ public class ChatHUDView : MonoBehaviour
             LayoutRebuilder.ForceRebuildLayoutImmediate(x);
         },
         chatEntriesContainer);
+
+        LayoutRebuilder.ForceRebuildLayoutImmediate(chatEntriesContainer);
     }
 }

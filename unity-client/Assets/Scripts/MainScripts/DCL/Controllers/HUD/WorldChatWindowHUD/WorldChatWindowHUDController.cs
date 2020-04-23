@@ -1,6 +1,7 @@
 
 using DCL;
 using DCL.Interface;
+using System.Collections;
 using UnityEngine;
 
 public class WorldChatWindowHUDController : IHUD
@@ -100,8 +101,14 @@ public class WorldChatWindowHUDController : IHUD
 
         if (visible)
         {
-            view.chatHudView.ForceUpdateLayout();
+            view.StartCoroutine(ForceLayoutDelayed());
         }
+    }
+
+    IEnumerator ForceLayoutDelayed()
+    {
+        yield return null;
+        view.chatHudView.ForceUpdateLayout();
     }
 
     public bool OnPressReturn()
