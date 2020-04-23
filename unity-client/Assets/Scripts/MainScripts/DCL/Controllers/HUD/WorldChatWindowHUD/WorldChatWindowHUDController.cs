@@ -45,6 +45,8 @@ public class WorldChatWindowHUDController : IHUD
 
         if (chatController != null)
             chatHudController.view.RepopulateAllChatMessages(chatController.GetEntries());
+
+        view.chatHudView.ForceUpdateLayout();
     }
     public void Dispose()
     {
@@ -95,6 +97,11 @@ public class WorldChatWindowHUDController : IHUD
     public void SetVisibility(bool visible)
     {
         view.gameObject.SetActive(visible);
+
+        if (visible)
+        {
+            view.chatHudView.ForceUpdateLayout();
+        }
     }
 
     public bool OnPressReturn()

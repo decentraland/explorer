@@ -49,15 +49,7 @@ public class ChatHUDView : MonoBehaviour
         ChatEntry chatEntry = chatEntryGO.GetComponent<ChatEntry>();
         chatEntry.Populate(message);
         entries.Add(chatEntry);
-
-        Utils.InverseTransformChildTraversal<RectTransform>(
-        (x) =>
-        {
-            LayoutRebuilder.ForceRebuildLayoutImmediate(x);
-        },
-        chatEntriesContainer);
-
-        LayoutRebuilder.ForceRebuildLayoutImmediate(chatEntriesContainer);
+        ForceUpdateLayout();
     }
 
     public void CleanAllEntries()
@@ -80,5 +72,15 @@ public class ChatHUDView : MonoBehaviour
         {
             AddEntry(entriesList[i]);
         }
+    }
+
+    public void ForceUpdateLayout()
+    {
+        Utils.InverseTransformChildTraversal<RectTransform>(
+        (x) =>
+        {
+            LayoutRebuilder.ForceRebuildLayoutImmediate(x);
+        },
+        chatEntriesContainer);
     }
 }
