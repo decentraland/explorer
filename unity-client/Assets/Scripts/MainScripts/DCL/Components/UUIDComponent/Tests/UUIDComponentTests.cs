@@ -683,6 +683,95 @@ namespace Tests
         }
 
         [UnityTest]
+        public IEnumerator OnPointerUpEventNotTriggeredOnInvisibles()
+        {
+            DecentralandEntity entity;
+            BoxShape shape;
+            InstantiateEntityWithShape(out entity, out shape);
+            TestHelpers.SetEntityTransform(scene, entity, new Vector3(9f, 1.5f, 11.0f), Quaternion.identity, new Vector3(5, 5, 5));
+
+            cameraController.SetRotation(0, 0, 0, new Vector3(1, 0, 0));
+            DCLCharacterController.i.SetPosition(new Vector3(3, 2, 12));
+
+            yield return shape.routine;
+
+            string onPointerId = "pointerevent-1";
+            var OnPointerUpComponentModel = new OnPointerUp.Model()
+            {
+                type = OnPointerUp.NAME,
+                uuid = onPointerId
+            };
+            var component = TestHelpers.EntityComponentCreate<OnPointerUp, OnPointerUp.Model>(scene, entity,
+                OnPointerUpComponentModel, CLASS_ID_COMPONENT.UUID_CALLBACK);
+
+            Assert.IsTrue(component != null);
+
+            string targetEventType = "SceneEvent";
+
+            var onPointerUpEvent = new WebInterface.OnPointerUpEvent();
+            onPointerUpEvent.uuid = onPointerId;
+            onPointerUpEvent.payload = new WebInterface.OnPointerEventPayload();
+            onPointerUpEvent.payload.hit = new WebInterface.OnPointerEventPayload.Hit();
+            onPointerUpEvent.payload.hit.entityId = component.entity.entityId;
+            onPointerUpEvent.payload.hit.meshName = component.name;
+
+            var sceneEvent = new WebInterface.SceneEvent<WebInterface.OnPointerUpEvent>();
+            sceneEvent.sceneId = scene.sceneData.id;
+            sceneEvent.payload = onPointerUpEvent;
+            sceneEvent.eventType = "uuidEvent";
+            bool eventTriggered = false;
+
+            DCL.InputController_Legacy.i.RaiseEvent(WebInterface.ACTION_BUTTON.POINTER, DCL.InputController_Legacy.EVENT.BUTTON_DOWN, true);
+
+            yield return TestHelpers.WaitForEventFromEngine(targetEventType, sceneEvent,
+                () =>
+                {
+                    DCL.InputController_Legacy.i.RaiseEvent(WebInterface.ACTION_BUTTON.POINTER, DCL.InputController_Legacy.EVENT.BUTTON_UP, true);
+                },
+                (pointerEvent) =>
+                {
+                    if (pointerEvent.eventType == sceneEvent.eventType &&
+                        pointerEvent.payload.uuid == sceneEvent.payload.uuid &&
+                        pointerEvent.payload.payload.hit.entityId == sceneEvent.payload.payload.hit.entityId)
+                    {
+                        eventTriggered = true;
+                        return true;
+                    }
+                    return false;
+                });
+
+            Assert.IsTrue(eventTriggered);
+
+            // turn shape invisible
+            TestHelpers.UpdateShape(scene, shape.id, JsonConvert.SerializeObject(
+            new
+            {
+                visible = false
+            }));
+
+            DCL.InputController_Legacy.i.RaiseEvent(WebInterface.ACTION_BUTTON.POINTER, DCL.InputController_Legacy.EVENT.BUTTON_DOWN, true);
+            eventTriggered = false;
+            yield return TestHelpers.WaitForEventFromEngine(targetEventType, sceneEvent,
+                () =>
+                {
+                    DCL.InputController_Legacy.i.RaiseEvent(WebInterface.ACTION_BUTTON.POINTER, DCL.InputController_Legacy.EVENT.BUTTON_UP, true);
+                },
+                (pointerEvent) =>
+                {
+                    if (pointerEvent.eventType == sceneEvent.eventType &&
+                        pointerEvent.payload.uuid == sceneEvent.payload.uuid &&
+                        pointerEvent.payload.payload.hit.entityId == sceneEvent.payload.payload.hit.entityId)
+                    {
+                        eventTriggered = true;
+                        return true;
+                    }
+                    return false;
+                });
+
+            Assert.IsFalse(eventTriggered);
+        }
+
+        [UnityTest]
         public IEnumerator OnPointerDownEventWhenEntityIsBehindOther()
         {
             Assert.IsNotNull(cameraController, "camera is null?");
@@ -887,7 +976,101 @@ namespace Tests
             Assert.IsTrue(targetEntityHit, "Target entity wasn't hit and no other entity is blocking it");
         }
 
+        [UnityTest]
+        public IEnumerator PointerEventNotTriggeredByParent()
+        {
+            // Create parent entity
+            InstantiateEntityWithShape(out DecentralandEntity blockingEntity, out BoxShape blockingShape);
+            TestHelpers.SetEntityTransform(scene, blockingEntity, new Vector3(3, 3, 3), Quaternion.identity, new Vector3(1, 1, 1));
+            yield return blockingShape.routine;
 
+            // Create target entity for click
+            DecentralandEntity clickTargetEntity;
+            BoxShape clickTargetShape;
+            InstantiateEntityWithShape(out clickTargetEntity, out clickTargetShape);
+            TestHelpers.SetEntityTransform(scene, clickTargetEntity, new Vector3(0, 0, 5), Quaternion.identity, new Vector3(1, 1, 1));
+            yield return clickTargetShape.routine;
+
+            // Enparent target entity as a child of the blocking entity
+            TestHelpers.SetEntityParent(scene, clickTargetEntity, blockingEntity);
+
+            // Set character position and camera rotation
+            DCLCharacterController.i.SetPosition(new Vector3(3, 2, 1));
+            yield return null;
+
+            // Create pointer down component and add it to target entity
+            string onPointerId = "pointerevent-1";
+            var OnPointerDownModel = new OnPointerDown.Model()
+            {
+                type = OnPointerDown.NAME,
+                uuid = onPointerId
+            };
+            var component = TestHelpers.EntityComponentCreate<OnPointerDown, OnPointerDown.Model>(scene, clickTargetEntity,
+                OnPointerDownModel, CLASS_ID_COMPONENT.UUID_CALLBACK);
+
+            Assert.IsTrue(component != null);
+
+            string targetEventType = "SceneEvent";
+
+            var onPointerDownEvent = new WebInterface.OnPointerDownEvent();
+            onPointerDownEvent.uuid = onPointerId;
+            onPointerDownEvent.payload = new WebInterface.OnPointerEventPayload();
+            onPointerDownEvent.payload.hit = new WebInterface.OnPointerEventPayload.Hit();
+            onPointerDownEvent.payload.hit.entityId = component.entity.entityId;
+            onPointerDownEvent.payload.hit.meshName = component.name;
+
+            var sceneEvent = new WebInterface.SceneEvent<WebInterface.OnPointerDownEvent>();
+            sceneEvent.sceneId = scene.sceneData.id;
+            sceneEvent.payload = onPointerDownEvent;
+            sceneEvent.eventType = "uuidEvent";
+
+            // Check if target entity is triggered by hitting the parent entity
+            bool targetEntityHit = false;
+            yield return TestHelpers.WaitForEventFromEngine(targetEventType, sceneEvent,
+                () =>
+                {
+                    DCL.InputController_Legacy.i.RaiseEvent(WebInterface.ACTION_BUTTON.POINTER, DCL.InputController_Legacy.EVENT.BUTTON_DOWN, true);
+                },
+                (pointerEvent) =>
+                {
+                    if (pointerEvent.eventType == "uuidEvent" &&
+                        pointerEvent.payload.uuid == onPointerId &&
+                        pointerEvent.payload.payload.hit.entityId == clickTargetEntity.entityId)
+                    {
+                        targetEntityHit = true;
+                    }
+                    return true;
+                });
+
+            Assert.IsFalse(targetEntityHit, "Target entity was hit but other entity was blocking it");
+
+            // Move character in front of target entity and rotate camera
+            DCLCharacterController.i.SetPosition(new Vector3(3, 2, 12));
+            cameraController.SetRotation(0, 0, 0, new Vector3(0, 0, -1));
+
+            yield return null;
+
+            // Check if target entity is triggered when hit directly
+            targetEntityHit = false;
+            yield return TestHelpers.WaitForEventFromEngine(targetEventType, sceneEvent,
+                () =>
+                {
+                    DCL.InputController_Legacy.i.RaiseEvent(WebInterface.ACTION_BUTTON.POINTER, DCL.InputController_Legacy.EVENT.BUTTON_DOWN, true);
+                },
+                (pointerEvent) =>
+                {
+                    if (pointerEvent.eventType == "uuidEvent" &&
+                        pointerEvent.payload.uuid == onPointerId &&
+                        pointerEvent.payload.payload.hit.entityId == clickTargetEntity.entityId)
+                    {
+                        targetEntityHit = true;
+                    }
+                    return true;
+                });
+
+            yield return null;
+            Assert.IsTrue(targetEntityHit, "Target entity wasn't hit and no other entity is blocking it");
+        }
 
         [UnityTest]
         public IEnumerator OnPointerHoverFeedbackPropertiesAreAppliedCorrectly()
