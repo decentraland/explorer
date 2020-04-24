@@ -339,7 +339,7 @@ namespace DCL
 
         bool AreSameEntity(OnPointerEvent pointerEvent, ColliderInfo colliderInfo)
         {
-            return pointerEvent != null && colliderInfo.entity != null && pointerEvent.entity == colliderInfo.entity;
+            return pointerEvent != null && (pointerEvent is AvatarOnPointerDown || (colliderInfo.entity != null && pointerEvent.entity == colliderInfo.entity));
         }
 
         bool IsBlockingOnClick(RaycastHitInfo targetOnClickHit, RaycastHitInfo potentialBlockerHit)
