@@ -46,6 +46,116 @@ public class WorldChatWindowHUDShould : TestsBase
     }
 
     [Test]
+    public void TabsWorkCorrectly()
+    {
+        var messages = new ChatController.ChatMessage[]
+        {
+            new ChatController.ChatMessage()
+            {
+                messageType = ChatController.ChatMessageType.PUBLIC,
+                body = "test message 1",
+                sender = "NO_USER",
+                recipient = "TEST_USER"
+            },
+            new ChatController.ChatMessage()
+            {
+                messageType = ChatController.ChatMessageType.PUBLIC,
+                body = "test message 2",
+                sender = "NO_USER",
+                recipient = "TEST_USER"
+            },
+            new ChatController.ChatMessage()
+            {
+                messageType = ChatController.ChatMessageType.PRIVATE,
+                body = "test message 3",
+                sender = "NO_USER",
+                recipient = "TEST_USER"
+            },
+            new ChatController.ChatMessage()
+            {
+                messageType = ChatController.ChatMessageType.PRIVATE,
+                body = "test message 4",
+                sender = "NO_USER",
+                recipient = "TEST_USER"
+            },
+        };
+
+        foreach (var msg in messages)
+        {
+            chatController.RaiseAddMessage(msg);
+        }
+
+        var expectedBodyMessages = new string[]
+        {
+            "",
+            "",
+            "",
+            ""
+        };
+
+        for (int i = 0; i < controller.view.chatHudView.entries.Count; i++)
+        {
+            ChatEntry entry = controller.view.chatHudView.entries[i];
+            Assert.AreEqual(expectedBodyMessages[i], entry.body.text);
+        }
+
+        controller.view.pmFilterButton.onClick.Invoke();
+
+        expectedBodyMessages = new string[]
+        {
+            "",
+            "",
+            "",
+            ""
+        };
+
+        for (int i = 0; i < controller.view.chatHudView.entries.Count; i++)
+        {
+            ChatEntry entry = controller.view.chatHudView.entries[i];
+            Assert.AreEqual(expectedBodyMessages[i], entry.body.text);
+        }
+
+        controller.view.worldFilterButton.onClick.Invoke();
+    }
+
+    [Test]
+    public void HandlePrivateMessagesProperly()
+    {
+        var sentPM = new ChatController.ChatMessage()
+        {
+            messageType = ChatController.ChatMessageType.PRIVATE,
+            body = "test message",
+            sender = "NO_USER",
+            recipient = "TEST_USER"
+        };
+
+        chatController.RaiseAddMessage(sentPM);
+
+        Assert.AreEqual(1, controller.view.chatHudView.entries.Count);
+
+        ChatEntry entry = controller.view.chatHudView.entries[0];
+
+        Assert.AreEqual("<b>[To NO_USER]:</b>", entry.body.text);
+        Assert.AreEqual("<b>[To NO_USER]:</b> test message", entry.username.text);
+
+        var receivedPM = new ChatController.ChatMessage()
+        {
+            messageType = ChatController.ChatMessageType.PRIVATE,
+            body = "test message",
+            sender = "TEST_USER",
+            recipient = "NO_USER"
+        };
+
+        chatController.RaiseAddMessage(receivedPM);
+
+        ChatEntry entry2 = controller.view.chatHudView.entries[1];
+
+        Assert.AreEqual("<b>[From NO_USER]:</b>", entry2.body.text);
+        Assert.AreEqual("<b>[From NO_USER]:</b> test message", entry2.username.text);
+    }
+
+
+    [Test]
     public void HandleChatControllerProperly()
     {
         var chatMessage = new ChatController.ChatMessage()
