@@ -9,13 +9,17 @@ using UnityEngine.TestTools;
 class ChatController_Mock : IChatController
 {
     public event Action<ChatController.ChatMessage> OnAddMessage;
-
+    List<ChatController.ChatMessage> entries = new List<ChatController.ChatMessage>();
     public List<ChatController.ChatMessage> GetEntries()
     {
-        return new List<ChatController.ChatMessage>();
+        return entries;
     }
 
-    public void RaiseAddMessage(ChatController.ChatMessage chatMessage) { OnAddMessage?.Invoke(chatMessage); }
+    public void RaiseAddMessage(ChatController.ChatMessage chatMessage)
+    {
+        entries.Add(chatMessage);
+        OnAddMessage?.Invoke(chatMessage);
+    }
 }
 class MouseCatcher_Mock : IMouseCatcher
 {
@@ -87,11 +91,13 @@ public class WorldChatWindowHUDShould : TestsBase
 
         var expectedBodyMessages = new string[]
         {
-            "",
-            "",
-            "",
-            ""
+            "<b>NO_USER:</b> test message 1",
+            "<b>NO_USER:</b> test message 2",
+            "<b>[To TEST_USER]:</b> test message 3",
+            "<b>[To TEST_USER]:</b> test message 4"
         };
+
+        Assert.AreEqual(4, controller.view.chatHudView.entries.Count);
 
         for (int i = 0; i < controller.view.chatHudView.entries.Count; i++)
         {
@@ -103,11 +109,11 @@ public class WorldChatWindowHUDShould : TestsBase
 
         expectedBodyMessages = new string[]
         {
-            "",
-            "",
-            "",
-            ""
+            "<b>NO_USER:</b> test message 3",
+            "<b>NO_USER:</b> test message 4",
         };
+
+        Assert.AreEqual(2, controller.view.chatHudView.entries.Count);
 
         for (int i = 0; i < controller.view.chatHudView.entries.Count; i++)
         {
@@ -135,8 +141,8 @@ public class WorldChatWindowHUDShould : TestsBase
 
         ChatEntry entry = controller.view.chatHudView.entries[0];
 
-        Assert.AreEqual("<b>[To NO_USER]:</b>", entry.body.text);
-        Assert.AreEqual("<b>[To NO_USER]:</b> test message", entry.username.text);
+        Assert.AreEqual("<b>[To TEST_USER]:</b>", entry.username.text);
+        Assert.AreEqual("<b>[To TEST_USER]:</b> test message", entry.body.text);
 
         var receivedPM = new ChatController.ChatMessage()
         {
@@ -150,8 +156,8 @@ public class WorldChatWindowHUDShould : TestsBase
 
         ChatEntry entry2 = controller.view.chatHudView.entries[1];
 
-        Assert.AreEqual("<b>[From NO_USER]:</b>", entry2.body.text);
-        Assert.AreEqual("<b>[From NO_USER]:</b> test message", entry2.username.text);
+        Assert.AreEqual("<b>[From TEST_USER]:</b>", entry2.username.text);
+        Assert.AreEqual("<b>[From TEST_USER]:</b> test message", entry2.body.text);
     }
 
 

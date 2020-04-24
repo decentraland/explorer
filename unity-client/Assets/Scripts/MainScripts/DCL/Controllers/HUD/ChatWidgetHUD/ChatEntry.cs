@@ -1,4 +1,3 @@
-
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -14,7 +13,14 @@ public class ChatEntry : MonoBehaviour
 
     public ChatController.ChatMessage message;
 
-    public void Populate(ChatController.ChatMessage chatMessage)
+    public enum MessageSubType
+    {
+        NONE,
+        PRIVATE_TO,
+        PRIVATE_FROM,
+    }
+
+    public void Populate(ChatController.ChatMessage chatMessage, MessageSubType subType = MessageSubType.NONE)
     {
         if (chatMessage == null)
             return;
@@ -34,6 +40,17 @@ public class ChatEntry : MonoBehaviour
                 break;
             case ChatController.ChatMessageType.PRIVATE:
                 body.color = username.color = privateMessageColor;
+
+                if (subType == MessageSubType.PRIVATE_FROM)
+                {
+                    userString = $"<b>[From {chatMessage.sender}]:</b>";
+                }
+                else
+                if (subType == MessageSubType.PRIVATE_TO)
+                {
+                    userString = $"<b>[To {chatMessage.recipient}]:</b>";
+                }
+
                 break;
             case ChatController.ChatMessageType.SYSTEM:
                 body.color = username.color = systemColor;

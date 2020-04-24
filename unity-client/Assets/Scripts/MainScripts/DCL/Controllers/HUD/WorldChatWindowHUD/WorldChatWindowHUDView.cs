@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
@@ -15,16 +16,18 @@ public class WorldChatWindowHUDView : MonoBehaviour, IPointerClickHandler
     public CanvasGroup group;
     public WorldChatWindowHUDController controller;
 
-    public static WorldChatWindowHUDView Create()
+    public static WorldChatWindowHUDView Create(UnityAction onPrivateMessages, UnityAction onWorldMessages)
     {
         var view = Instantiate(Resources.Load<GameObject>(VIEW_PATH)).GetComponent<WorldChatWindowHUDView>();
-        view.Initialize();
+        view.Initialize(onPrivateMessages, onWorldMessages);
         return view;
     }
 
-    private void Initialize()
+    private void Initialize(UnityAction onPrivateMessages, UnityAction onWorldMessages)
     {
         this.closeButton.onClick.AddListener(Toggle);
+        this.pmFilterButton.onClick.AddListener(onPrivateMessages);
+        this.worldFilterButton.onClick.AddListener(onWorldMessages);
     }
 
     public bool isInPreview { get; private set; }

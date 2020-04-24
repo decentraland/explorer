@@ -27,9 +27,9 @@ public class ChatHUDController : IDisposable
         this.view.Initialize(this, onSendMessage);
     }
 
-    public void AddChatMessage(ChatMessage message)
+    public void AddChatMessage(ChatMessage message, ChatEntry.MessageSubType subType = ChatEntry.MessageSubType.NONE)
     {
-        view.AddEntry(message);
+        view.AddEntry(message, subType);
 
         if (view.entries.Count > MAX_CHAT_ENTRIES)
         {
@@ -38,9 +38,9 @@ public class ChatHUDController : IDisposable
         }
     }
 
-    public void FilterByType(ChatMessageType type)
+    public void FilterByType(List<ChatMessage> messages, ChatMessageType type)
     {
-        var result = ChatController.i.entries.Where((x) => x.messageType == type).ToList();
+        var result = messages.Where((x) => x.messageType == type).ToList();
         result = TrimAndSortChatMessages(result);
         view.RepopulateAllChatMessages(result);
     }

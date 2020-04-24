@@ -43,11 +43,11 @@ public class ChatHUDView : MonoBehaviour
     }
 
 
-    public void AddEntry(ChatMessage message)
+    public void AddEntry(ChatMessage message, ChatEntry.MessageSubType subType = ChatEntry.MessageSubType.NONE)
     {
         var chatEntryGO = Instantiate(Resources.Load("Chat Entry") as GameObject, chatEntriesContainer);
         ChatEntry chatEntry = chatEntryGO.GetComponent<ChatEntry>();
-        chatEntry.Populate(message);
+        chatEntry.Populate(message, subType);
         entries.Add(chatEntry);
         ForceUpdateLayout();
     }
@@ -64,6 +64,9 @@ public class ChatHUDView : MonoBehaviour
 
     public void RepopulateAllChatMessages(List<ChatMessage> entriesList)
     {
+        if (entriesList == null)
+            return;
+
         CleanAllEntries();
 
         int entriesCount = entriesList.Count;

@@ -15,10 +15,11 @@ public class WorldChatWindowHUDController : IHUD
     private IMouseCatcher mouseCatcher;
 
     internal bool resetInputFieldOnSubmit = true;
+    private int invalidSubmitLastFrame = 0;
 
     public void Initialize(IChatController chatController, IMouseCatcher mouseCatcher)
     {
-        view = WorldChatWindowHUDView.Create();
+        view = WorldChatWindowHUDView.Create(OnEnablePrivateTab, OnEnableWorldTab);
 
         chatHudController = new ChatHUDController();
         chatHudController.Initialize(view.chatHudView, SendChatMessage);
@@ -28,8 +29,8 @@ public class WorldChatWindowHUDController : IHUD
 
         if (chatController != null)
         {
-            chatController.OnAddMessage -= view.chatHudView.controller.AddChatMessage;
-            chatController.OnAddMessage += view.chatHudView.controller.AddChatMessage;
+            chatController.OnAddMessage -= OnAddMessage;
+            chatController.OnAddMessage += OnAddMessage;
         }
 
         if (mouseCatcher != null)
@@ -52,7 +53,7 @@ public class WorldChatWindowHUDController : IHUD
     public void Dispose()
     {
         if (chatController != null)
-            chatController.OnAddMessage -= view.chatHudView.controller.AddChatMessage;
+            chatController.OnAddMessage -= OnAddMessage;
 
         if (mouseCatcher != null)
         {
@@ -62,7 +63,31 @@ public class WorldChatWindowHUDController : IHUD
         Object.Destroy(view);
     }
 
-    int invalidSubmitLastFrame = 0;
+    void OnEnableWorldTab()
+    {
+        chatHudController.view.RepopulateAllChatMessages(chatController.GetEntries());
+    }
+
+    void OnEnablePrivateTab()
+    {
+        chatHudController.FilterByType(chatController.GetEntries(), ChatController.ChatMessageType.PRIVATE);
+    }
+
+    void OnAddMessage(ChatController.ChatMessage message)
+    {
+        if (message.recipient == userName)
+        {
+            view.chatHudView.controller.AddChatMessage(message, ChatEntry.MessageSubType.PRIVATE_FROM);
+            return;
+        }
+        else if (message.sender == userName)
+        {
+            view.chatHudView.controller.AddChatMessage(message, ChatEntry.MessageSubType.PRIVATE_TO);
+            return;
+        }
+
+        view.chatHudView.controller.AddChatMessage(message, ChatEntry.MessageSubType.NONE);
+    }
 
     //NOTE(Brian): Send chat responsibilities must be on the chatHud containing window like this one, this way we ensure
     //             it can be reused by the private messaging windows down the road.
