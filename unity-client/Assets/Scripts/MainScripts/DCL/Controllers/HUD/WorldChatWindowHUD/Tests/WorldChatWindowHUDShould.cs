@@ -109,8 +109,8 @@ public class WorldChatWindowHUDShould : TestsBase
 
         expectedBodyMessages = new string[]
         {
-            "<b>NO_USER:</b> test message 3",
-            "<b>NO_USER:</b> test message 4",
+            "<b>[To TEST_USER]:</b> test message 3",
+            "<b>[To TEST_USER]:</b> test message 4"
         };
 
         Assert.AreEqual(2, controller.view.chatHudView.entries.Count);

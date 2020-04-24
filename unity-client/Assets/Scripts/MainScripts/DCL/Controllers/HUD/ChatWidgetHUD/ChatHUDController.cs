@@ -1,10 +1,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine.Events;
 using ChatMessage = ChatController.ChatMessage;
-using ChatMessageType = ChatController.ChatMessageType;
 public class ChatHUDController : IDisposable
 {
     public const int MAX_CHAT_ENTRIES = 100;
@@ -36,13 +34,6 @@ public class ChatHUDController : IDisposable
             UnityEngine.Object.Destroy(view.entries[0].gameObject);
             view.entries.Remove(view.entries[0]);
         }
-    }
-
-    public void FilterByType(List<ChatMessage> messages, ChatMessageType type)
-    {
-        var result = messages.Where((x) => x.messageType == type).ToList();
-        result = TrimAndSortChatMessages(result);
-        view.RepopulateAllChatMessages(result);
     }
 
     public List<ChatMessage> TrimAndSortChatMessages(List<ChatMessage> messages)

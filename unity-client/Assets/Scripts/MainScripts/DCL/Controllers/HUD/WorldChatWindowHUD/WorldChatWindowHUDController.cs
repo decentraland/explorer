@@ -2,6 +2,7 @@
 using DCL;
 using DCL.Interface;
 using System.Collections;
+using System.Linq;
 using UnityEngine;
 
 public class WorldChatWindowHUDController : IHUD
@@ -45,9 +46,7 @@ public class WorldChatWindowHUDController : IHUD
         if (!string.IsNullOrEmpty(profileUserName))
             userName = profileUserName;
 
-        if (chatController != null)
-            chatHudController.view.RepopulateAllChatMessages(chatController.GetEntries());
-
+        OnEnableWorldTab();
         view.chatHudView.ForceUpdateLayout();
     }
     public void Dispose()
@@ -65,12 +64,23 @@ public class WorldChatWindowHUDController : IHUD
 
     void OnEnableWorldTab()
     {
-        chatHudController.view.RepopulateAllChatMessages(chatController.GetEntries());
+        view.chatHudView.CleanAllEntries();
+
+        foreach (var v in chatController.GetEntries())
+        {
+            OnAddMessage(v);
+        }
     }
 
     void OnEnablePrivateTab()
     {
-        chatHudController.FilterByType(chatController.GetEntries(), ChatController.ChatMessageType.PRIVATE);
+        view.chatHudView.CleanAllEntries();
+        var result = chatController.GetEntries().Where((x) => x.messageType == ChatController.ChatMessageType.PRIVATE).ToList();
+
+        foreach (var v in result)
+        {
+            OnAddMessage(v);
+        }
     }
 
     void OnAddMessage(ChatController.ChatMessage message)

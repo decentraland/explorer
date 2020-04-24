@@ -62,21 +62,6 @@ public class ChatHUDView : MonoBehaviour
         entries.Clear();
     }
 
-    public void RepopulateAllChatMessages(List<ChatMessage> entriesList)
-    {
-        if (entriesList == null)
-            return;
-
-        CleanAllEntries();
-
-        int entriesCount = entriesList.Count;
-
-        for (int i = 0; i < entriesCount; i++)
-        {
-            AddEntry(entriesList[i]);
-        }
-    }
-
     [ContextMenu("Force Layout Update")]
     public void ForceUpdateLayout()
     {
