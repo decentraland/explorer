@@ -307,7 +307,7 @@ PrefabInstance:
     - target: {fileID: 114754758112584508, guid: b387035aa46399445bdc7951a41d5213,
         type: 3}
       propertyPath: debugScenes
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: b387035aa46399445bdc7951a41d5213, type: 3}
@@ -1240,6 +1240,7 @@ MonoBehaviour:
   allWearables: 0
   testWearables: 0
   enableTutorial: 0
+  useNewChat: 1
   debugPanelMode: 0
 --- !u!4 &1444882337
 Transform:

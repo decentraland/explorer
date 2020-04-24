@@ -66,7 +66,9 @@ public class WorldChatWindowHUDController : IHUD
     {
         view.chatHudView.CleanAllEntries();
 
-        foreach (var v in chatController.GetEntries())
+        var result = chatController.GetEntries();
+
+        foreach (var v in result)
         {
             OnAddMessage(v);
         }
