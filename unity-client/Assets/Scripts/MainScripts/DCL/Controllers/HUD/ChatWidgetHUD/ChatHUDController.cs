@@ -56,6 +56,14 @@ public class ChatHUDController : IDisposable
         UnityEngine.Object.Destroy(this.view.gameObject);
     }
 
+    public static string ConstructGuestName(string id)
+    {
+        if (string.IsNullOrEmpty(id))
+            return "Guest-unknown";
+
+        return "Guest-" + id.Substring(0, 5);
+    }
+
     public static ChatEntry.Model ChatMessageToChatEntry(ChatMessage message)
     {
         ChatEntry.Model model = new ChatEntry.Model();
@@ -68,8 +76,8 @@ public class ChatHUDController : IDisposable
         var senderProfile = UserProfileController.userProfilesCatalog.Get(message.sender);
         var recipientProfile = UserProfileController.userProfilesCatalog.Get(message.recipient);
 
-        model.senderName = senderProfile != null ? senderProfile.userName : message.sender;
-        model.recipientName = recipientProfile != null ? recipientProfile.userName : message.recipient;
+        model.senderName = senderProfile != null ? senderProfile.userName : ConstructGuestName(message.sender);
+        model.recipientName = recipientProfile != null ? recipientProfile.userName : ConstructGuestName(message.recipient);
 
         if (model.messageType == ChatController.ChatMessageType.PRIVATE)
         {
