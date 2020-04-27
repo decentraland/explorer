@@ -79,10 +79,10 @@ function sceneRenderable() {
 initializeUnity(container)
   .then(async ret => {
     const i = unityInterface
-    i.ConfigureHUDElement( HUDElementID.MINIMAP, { active: true, visible: true })
-    i.ConfigureHUDElement( HUDElementID.NOTIFICATION, { active: true, visible: true })
-    i.ConfigureHUDElement( HUDElementID.SETTINGS, { active: true, visible: true })
-    i.ConfigureHUDElement( HUDElementID.AIRDROPPING, { active: true, visible: true })
+    i.ConfigureHUDElement( HUDElementID.MINIMAP, { active: true, visible: false })
+    i.ConfigureHUDElement( HUDElementID.NOTIFICATION, { active: true, visible: false })
+    i.ConfigureHUDElement( HUDElementID.SETTINGS, { active: true, visible: false })
+    i.ConfigureHUDElement( HUDElementID.AIRDROPPING, { active: true, visible: false })
 
     global.globalStore.dispatch(signalRendererInitialized())
 
