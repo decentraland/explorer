@@ -25,9 +25,9 @@ public class ChatHUDController : IDisposable
         this.view.Initialize(this, onSendMessage);
     }
 
-    public void AddChatMessage(ChatMessage message, ChatEntry.MessageSubType subType = ChatEntry.MessageSubType.NONE)
+    public void AddChatMessage(ChatEntry.Model chatEntryModel)
     {
-        view.AddEntry(message, subType);
+        view.AddEntry(chatEntryModel);
 
         if (view.entries.Count > MAX_CHAT_ENTRIES)
         {
@@ -54,5 +54,39 @@ public class ChatHUDController : IDisposable
     public void Dispose()
     {
         UnityEngine.Object.Destroy(this.view.gameObject);
+    }
+
+    public static ChatEntry.Model ChatMessageToChatEntry(ChatMessage message)
+    {
+        ChatEntry.Model model = new ChatEntry.Model();
+
+        var ownProfile = UserProfile.GetOwnUserProfile();
+
+        model.messageType = message.messageType;
+        model.bodyText = message.body;
+
+        var senderProfile = UserProfileController.userProfilesCatalog.Get(message.sender);
+        var recipientProfile = UserProfileController.userProfilesCatalog.Get(message.recipient);
+
+        model.senderName = senderProfile != null ? senderProfile.userName : message.sender;
+        model.recipientName = recipientProfile != null ? recipientProfile.userName : message.recipient;
+
+        if (model.messageType == ChatController.ChatMessageType.PRIVATE)
+        {
+            if (message.recipient == ownProfile.userId)
+            {
+                model.subType = ChatEntry.Model.SubType.PRIVATE_FROM;
+            }
+            else if (message.sender == ownProfile.userId)
+            {
+                model.subType = ChatEntry.Model.SubType.PRIVATE_TO;
+            }
+            else
+            {
+                model.subType = ChatEntry.Model.SubType.NONE;
+            }
+        }
+
+        return model;
     }
 }

@@ -40,29 +40,28 @@ public class ChatHUDShould : TestsBase
     {
         for (int i = 0; i < ChatHUDController.MAX_CHAT_ENTRIES + 5; i++)
         {
-            var msg = new ChatController.ChatMessage()
+            var msg = new ChatEntry.Model()
             {
                 messageType = ChatController.ChatMessageType.PUBLIC,
-                sender = "test" + i,
-                body = "test" + i,
-                timestamp = (ulong)i,
+                senderName = "test" + i,
+                bodyText = "test" + i,
             };
 
             controller.AddChatMessage(msg);
         }
 
         Assert.AreEqual(ChatHUDController.MAX_CHAT_ENTRIES, controller.view.entries.Count);
-        Assert.AreEqual("test5", controller.view.entries[0].message.body);
+        Assert.AreEqual("test5", controller.view.entries[0].message.bodyText);
     }
 
     [Test]
     public void AddAndClearChatEntriesProperly()
     {
-        var msg = new ChatController.ChatMessage()
+        var msg = new ChatEntry.Model()
         {
             messageType = ChatController.ChatMessageType.PUBLIC,
-            sender = "test",
-            body = "test",
+            senderName = "test",
+            bodyText = "test",
         };
 
         controller.AddChatMessage(msg);

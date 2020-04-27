@@ -5,8 +5,6 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
-
-using ChatMessage = ChatController.ChatMessage;
 public class ChatHUDView : MonoBehaviour
 {
     static string VIEW_PATH = "Chat Widget";
@@ -43,11 +41,13 @@ public class ChatHUDView : MonoBehaviour
     }
 
 
-    public void AddEntry(ChatMessage message, ChatEntry.MessageSubType subType = ChatEntry.MessageSubType.NONE)
+    public void AddEntry(ChatEntry.Model chatEntryModel)
     {
         var chatEntryGO = Instantiate(Resources.Load("Chat Entry") as GameObject, chatEntriesContainer);
         ChatEntry chatEntry = chatEntryGO.GetComponent<ChatEntry>();
-        chatEntry.Populate(message, subType);
+
+        chatEntry.Populate(chatEntryModel);
+
         entries.Add(chatEntry);
         ForceUpdateLayout();
     }

@@ -26,13 +26,12 @@ public class ChatEntryShould : TestsBase
     [Test]
     public void BePopulatedCorrectly()
     {
-        var message = new ChatController.ChatMessage()
+        var message = new ChatEntry.Model()
         {
             messageType = ChatController.ChatMessageType.PUBLIC,
-            sender = "user-test",
-            recipient = "",
-            timestamp = 0,
-            body = "test message",
+            senderName = "user-test",
+            recipientName = "",
+            bodyText = "test message",
         };
 
         entry.Populate(message);
@@ -48,7 +47,5 @@ public class ChatEntryShould : TestsBase
         message.messageType = ChatController.ChatMessageType.SYSTEM;
         entry.Populate(message);
         Assert.AreEqual(entry.systemColor, entry.body.color);
-
-        entry.Populate(null);
     }
 }

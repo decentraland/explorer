@@ -87,18 +87,7 @@ public class WorldChatWindowHUDController : IHUD
 
     void OnAddMessage(ChatController.ChatMessage message)
     {
-        if (message.recipient == userName)
-        {
-            view.chatHudView.controller.AddChatMessage(message, ChatEntry.MessageSubType.PRIVATE_FROM);
-            return;
-        }
-        else if (message.sender == userName)
-        {
-            view.chatHudView.controller.AddChatMessage(message, ChatEntry.MessageSubType.PRIVATE_TO);
-            return;
-        }
-
-        view.chatHudView.controller.AddChatMessage(message, ChatEntry.MessageSubType.NONE);
+        view.chatHudView.controller.AddChatMessage(ChatHUDController.ChatMessageToChatEntry(message));
     }
 
     //NOTE(Brian): Send chat responsibilities must be on the chatHud containing window like this one, this way we ensure

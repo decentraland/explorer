@@ -37,8 +37,33 @@ public class WorldChatWindowHUDShould : TestsBase
     private ChatController_Mock chatController;
     private MouseCatcher_Mock mouseCatcher;
 
+    private UserProfileModel ownProfileModel;
+    private UserProfileModel testProfileModel;
+
+    protected override bool justSceneSetUp => true;
+
     protected override IEnumerator SetUp()
     {
+        yield return base.SetUp();
+
+        UserProfileController.i.ClearProfilesCatalog();
+
+        var ownProfile = UserProfile.GetOwnUserProfile();
+
+        ownProfileModel = new UserProfileModel();
+        ownProfileModel.userId = "my-user-id";
+        ownProfileModel.name = "NO_USER";
+        ownProfile.UpdateData(ownProfileModel, false);
+
+        testProfileModel = new UserProfileModel();
+        testProfileModel.userId = "my-user-id-2";
+        testProfileModel.name = "TEST_USER";
+        UserProfileController.i.AddUserProfileToCatalog(testProfileModel);
+
+        //NOTE(Brian): This profile is added by the LoadProfile message in the normal flow.
+        //             Adding this here because its used by the chat flow in ChatMessageToChatEntry.
+        UserProfileController.i.AddUserProfileToCatalog(ownProfileModel);
+
         controller = new WorldChatWindowHUDController();
         chatController = new ChatController_Mock();
         mouseCatcher = new MouseCatcher_Mock();
@@ -46,41 +71,43 @@ public class WorldChatWindowHUDShould : TestsBase
         this.view = controller.view;
         Assert.IsTrue(view != null, "World chat hud view is null?");
         Assert.IsTrue(controller != null, "World chat hud controller is null?");
+
         yield break;
     }
 
     [Test]
     public void TabsWorkCorrectly()
     {
+
         var messages = new ChatController.ChatMessage[]
         {
             new ChatController.ChatMessage()
             {
                 messageType = ChatController.ChatMessageType.PUBLIC,
                 body = "test message 1",
-                sender = "NO_USER",
-                recipient = "TEST_USER"
+                sender = ownProfileModel.userId,
+                recipient = testProfileModel.userId
             },
             new ChatController.ChatMessage()
             {
                 messageType = ChatController.ChatMessageType.PUBLIC,
                 body = "test message 2",
-                sender = "NO_USER",
-                recipient = "TEST_USER"
+                sender = ownProfileModel.userId,
+                recipient = testProfileModel.userId
             },
             new ChatController.ChatMessage()
             {
                 messageType = ChatController.ChatMessageType.PRIVATE,
                 body = "test message 3",
-                sender = "NO_USER",
-                recipient = "TEST_USER"
+                sender = ownProfileModel.userId,
+                recipient = testProfileModel.userId
             },
             new ChatController.ChatMessage()
             {
                 messageType = ChatController.ChatMessageType.PRIVATE,
                 body = "test message 4",
-                sender = "NO_USER",
-                recipient = "TEST_USER"
+                sender = ownProfileModel.userId,
+                recipient = testProfileModel.userId
             },
         };
 
@@ -131,8 +158,8 @@ public class WorldChatWindowHUDShould : TestsBase
         {
             messageType = ChatController.ChatMessageType.PRIVATE,
             body = "test message",
-            sender = "NO_USER",
-            recipient = "TEST_USER"
+            sender = ownProfileModel.userId,
+            recipient = testProfileModel.userId
         };
 
         chatController.RaiseAddMessage(sentPM);
@@ -148,8 +175,8 @@ public class WorldChatWindowHUDShould : TestsBase
         {
             messageType = ChatController.ChatMessageType.PRIVATE,
             body = "test message",
-            sender = "TEST_USER",
-            recipient = "NO_USER"
+            sender = testProfileModel.userId,
+            recipient = ownProfileModel.userId
         };
 
         chatController.RaiseAddMessage(receivedPM);
@@ -168,7 +195,7 @@ public class WorldChatWindowHUDShould : TestsBase
         {
             messageType = ChatController.ChatMessageType.PUBLIC,
             body = "test message",
-            sender = "test user"
+            sender = testProfileModel.userId
         };
 
         chatController.RaiseAddMessage(chatMessage);
@@ -177,7 +204,9 @@ public class WorldChatWindowHUDShould : TestsBase
 
         var entry = controller.view.chatHudView.entries[0];
 
-        Assert.AreEqual(entry.message, chatMessage);
+        var chatEntryModel = ChatHUDController.ChatMessageToChatEntry(chatMessage);
+
+        Assert.AreEqual(entry.message, chatEntryModel);
     }
 
     [Test]
