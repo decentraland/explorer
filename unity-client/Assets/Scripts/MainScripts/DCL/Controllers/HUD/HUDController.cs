@@ -28,6 +28,7 @@ public class HUDController : MonoBehaviour
     public TermsOfServiceHUDController termsOfServiceHud => GetHUDElement(HUDElementID.TERMS_OF_SERVICE) as TermsOfServiceHUDController;
     public TaskbarHUDController taskbarHud => GetHUDElement(HUDElementID.TASKBAR) as TaskbarHUDController;
     public WorldChatWindowHUDController worldChatWindowHud => GetHUDElement(HUDElementID.WORLD_CHAT_WINDOW) as WorldChatWindowHUDController;
+    public FriendsHUDController friendsHud => GetHUDElement(HUDElementID.FRIENDS) as FriendsHUDController;
 
     public Dictionary<HUDElementID, IHUD> hudElements { get; private set; } = new Dictionary<HUDElementID, IHUD>();
 
@@ -64,6 +65,7 @@ public class HUDController : MonoBehaviour
         WORLD_CHAT_WINDOW = 10,
         TASKBAR = 11,
         MESSAGE_OF_THE_DAY = 12,
+        FRIENDS = 13,
         COUNT = 13
     }
 
@@ -138,12 +140,16 @@ public class HUDController : MonoBehaviour
             case HUDElementID.WORLD_CHAT_WINDOW:
                 CreateHudElement<WorldChatWindowHUDController>(configuration, hudElementId);
                 worldChatWindowHud?.Initialize(ChatController.i, DCL.InitialSceneReferences.i?.mouseCatcher);
-                ConfigureTaskbar();
-
+                taskbarHud?.AddChatWindow(worldChatWindowHud);
+                break;
+            case HUDElementID.FRIENDS:
+                CreateHudElement<FriendsHUDController>(configuration, hudElementId);
+                friendsHud?.Initialize();
+                taskbarHud?.AddFriendsWindow(friendsHud);
                 break;
             case HUDElementID.TASKBAR:
                 CreateHudElement<TaskbarHUDController>(configuration, hudElementId);
-                ConfigureTaskbar();
+                // ConfigureTaskbar();
                 break;
             case HUDElementID.MESSAGE_OF_THE_DAY:
                 CreateHudElement<WelcomeHUDController>(configuration, hudElementId);
@@ -152,17 +158,6 @@ public class HUDController : MonoBehaviour
         }
 
         GetHUDElement(hudElementId)?.SetVisibility(configuration.active && configuration.visible);
-    }
-
-    public void ConfigureTaskbar()
-    {
-        if (taskbarHud == null)
-            return;
-
-        if (worldChatWindowHud == null)
-            return;
-
-        taskbarHud?.AddChatWindow(worldChatWindowHud);
     }
 
     public void CreateHudElement<T>(HUDConfiguration config, HUDElementID id)
