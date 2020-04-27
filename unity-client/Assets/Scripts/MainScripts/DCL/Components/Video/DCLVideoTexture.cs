@@ -90,11 +90,6 @@ namespace DCL.Components
                 }
                 texture = texturePlayer.texture;
                 isPlayStateDirty = true;
-                //ApplyTextureProperties();
-            }
-            else if (HasTexturePropertiesChanged())
-            {
-                //ApplyTextureProperties();
             }
 
             if (texturePlayer != null)
