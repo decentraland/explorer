@@ -93,10 +93,6 @@ jobs:
           command: |
             find Assets -type f \( -not -path '*Plugins*' \) \( -iname \*.cs -o -iname \*.meta -o -iname \*.xml -o -iname \*.shader -o -iname \*.prefab -o -iname \*.yml -o -iname \*.mat -o -iname \*.json -o -iname \*.js -o -iname \*.jspre  -o -iname \*.jslib  -o -iname \*.hlsl  -o -iname \*.asmdef  -o -iname \*.csproj  \) \( -exec md5sum "$PWD"/{} \; \) | sort > ../.unitysources-checksum
       - restore_cache:
-          name: Restore unity Library Cache
-          keys:
-            - unity-libcache2-{{ .Branch  }}
-      - restore_cache:
           name: Restore decentraland-renderer if exists
           keys:
             - unity-build-{{ checksum "../.unitysources-checksum" }}
@@ -118,11 +114,6 @@ jobs:
                 bash ./test-ci.sh
                 exit $?
             fi;
-      - save_cache:
-          name: Store Library Cache
-          key: unity-libcache2-{{ .Branch  }}
-          paths:
-            - /tmp/explorer/unity-client/Library/
       - save_cache:
           name: Store test results
           key: unity-tests-{{ checksum "../.unitysources-checksum" }}
@@ -147,10 +138,6 @@ jobs:
           name: Get the hash of source files
           command: |
             find Assets -type f \( -not -path '*Plugins*' \) \( -iname \*.cs -o -iname \*.meta -o -iname \*.xml -o -iname \*.shader -o -iname \*.prefab -o -iname \*.yml -o -iname \*.mat -o -iname \*.json -o -iname \*.js -o -iname \*.jspre  -o -iname \*.jslib  -o -iname \*.hlsl  -o -iname \*.asmdef  -o -iname \*.csproj  \) \( -exec md5sum "$PWD"/{} \; \) | sort > ../.unitysources-checksum
-      - restore_cache:
-          name: Restore unity Library Cache
-          keys:
-            - unity-libcache2-{{ .Branch  }}
       - restore_cache:
           name: Restore decentraland-renderer if exists
           keys:
@@ -183,11 +170,6 @@ jobs:
           key: unity-build-{{ checksum "../.unitysources-checksum" }}
           paths:
             - /tmp/explorer/unity-client/Builds/
-      - save_cache:
-          name: Store Library Cache
-          key: unity-libcache2-{{ .Branch  }}
-          paths:
-            - /tmp/explorer/unity-client/Library/
       - store_artifacts:
           name: Store logs
           path: /tmp/buildlog.txt
