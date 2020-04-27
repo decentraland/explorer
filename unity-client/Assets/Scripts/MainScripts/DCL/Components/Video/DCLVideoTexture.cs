@@ -72,6 +72,7 @@ namespace DCL.Components
                 texturePlayer = new WebVideoPlayer(id, dclVideoClip.model.url);
                 texturePlayerUpdateRoutine = CoroutineStarter.Start(VideoTextureUpdate());
                 CommonScriptableObjects.playerCoords.OnChange += OnPlayerCoordsChanged;
+                scene.OnEntityRemoved += OnEntityRemoved;
             }
 
             // NOTE: create texture for testing cause real texture will only be created on web platform
@@ -270,9 +271,15 @@ namespace DCL.Components
             }
         }
 
+        void OnEntityRemoved(DecentralandEntity entity)
+        {
+            isPlayStateDirty = true;
+        }
+
         public override void Dispose()
         {
             CommonScriptableObjects.playerCoords.OnChange -= OnPlayerCoordsChanged;
+            if (scene != null) scene.OnEntityRemoved -= OnEntityRemoved;
             if (texturePlayerUpdateRoutine != null)
             {
                 CoroutineStarter.Stop(texturePlayerUpdateRoutine);
