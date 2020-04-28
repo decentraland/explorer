@@ -26,8 +26,19 @@ public class WorldChatWindowHUDView : MonoBehaviour, IPointerClickHandler
     private void Initialize(UnityAction onPrivateMessages, UnityAction onWorldMessages)
     {
         this.closeButton.onClick.AddListener(Toggle);
-        this.pmFilterButton.onClick.AddListener(onPrivateMessages);
-        this.worldFilterButton.onClick.AddListener(onWorldMessages);
+        this.pmFilterButton.onClick.AddListener(() =>
+           {
+               pmFilterButton.animator.SetBool("Selected", true);
+               worldFilterButton.animator.SetBool("Selected", false);
+               onPrivateMessages.Invoke();
+           });
+
+        this.worldFilterButton.onClick.AddListener(() =>
+           {
+               pmFilterButton.animator.SetBool("Selected", false);
+               worldFilterButton.animator.SetBool("Selected", true);
+               onWorldMessages.Invoke();
+           });
     }
 
     public bool isInPreview { get; private set; }
