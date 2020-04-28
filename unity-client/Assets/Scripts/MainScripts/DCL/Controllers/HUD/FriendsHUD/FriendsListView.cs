@@ -24,4 +24,9 @@ public class FriendsListView : MonoBehaviour
 
         friendEntry.transform.SetParent(isOnline ? onlineFriendsContainer : offlineFriendsContainer);
     }
+
+    public void RemoveFriend(string userId)
+    {
+        friendEntries.Remove(userId);
+    }
 }
