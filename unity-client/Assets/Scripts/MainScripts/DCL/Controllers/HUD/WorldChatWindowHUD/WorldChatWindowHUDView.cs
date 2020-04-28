@@ -6,6 +6,7 @@ using UnityEngine.UI;
 public class WorldChatWindowHUDView : MonoBehaviour, IPointerClickHandler
 {
     const string VIEW_PATH = "World Chat Window";
+    static int ANIM_PROPERTY_SELECTED = Animator.StringToHash("Selected");
 
     public Button worldFilterButton;
     public Button pmFilterButton;
@@ -28,15 +29,15 @@ public class WorldChatWindowHUDView : MonoBehaviour, IPointerClickHandler
         this.closeButton.onClick.AddListener(Toggle);
         this.pmFilterButton.onClick.AddListener(() =>
            {
-               pmFilterButton.animator.SetBool("Selected", true);
-               worldFilterButton.animator.SetBool("Selected", false);
+               pmFilterButton.animator.SetBool(ANIM_PROPERTY_SELECTED, true);
+               worldFilterButton.animator.SetBool(ANIM_PROPERTY_SELECTED, false);
                onPrivateMessages.Invoke();
            });
 
         this.worldFilterButton.onClick.AddListener(() =>
            {
-               pmFilterButton.animator.SetBool("Selected", false);
-               worldFilterButton.animator.SetBool("Selected", true);
+               pmFilterButton.animator.SetBool(ANIM_PROPERTY_SELECTED, false);
+               worldFilterButton.animator.SetBool(ANIM_PROPERTY_SELECTED, true);
                onWorldMessages.Invoke();
            });
     }
