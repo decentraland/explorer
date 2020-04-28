@@ -22,6 +22,11 @@ public class FriendEntry : MonoBehaviour
         jumpInButton.onClick.AddListener(() => WebInterface.GoTo((int)playerCoords.x, (int)playerCoords.y));
 
         whisperButton.onClick.RemoveAllListeners();
-        // whisperButton.onClick.AddListener(() => );
+        whisperButton.onClick.AddListener(WhisperPlayer);
+    }
+
+    void WhisperPlayer()
+    {
+        // TODO: trigger private message to the user
     }
 }
