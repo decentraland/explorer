@@ -1,3 +1,4 @@
+using DCL.Interface;
 using NUnit.Framework;
 using System.Collections;
 
@@ -42,7 +43,7 @@ public class ChatHUDShould : TestsBase
         {
             var msg = new ChatEntry.Model()
             {
-                messageType = ChatController.ChatMessageType.PUBLIC,
+                messageType = ChatMessage.Type.PUBLIC,
                 senderName = "test" + i,
                 bodyText = "test" + i,
             };
@@ -59,7 +60,7 @@ public class ChatHUDShould : TestsBase
     {
         var msg = new ChatEntry.Model()
         {
-            messageType = ChatController.ChatMessageType.PUBLIC,
+            messageType = ChatMessage.Type.PUBLIC,
             senderName = "test",
             bodyText = "test",
         };

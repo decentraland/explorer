@@ -10,8 +10,6 @@ public class WorldChatWindowHUDController : IHUD
     private ChatHUDController chatHudController;
     public WorldChatWindowHUDView view;
 
-    private string userName;
-
     private IChatController chatController;
     private IMouseCatcher mouseCatcher;
 
@@ -39,15 +37,10 @@ public class WorldChatWindowHUDController : IHUD
             mouseCatcher.OnMouseLock += view.ActivatePreview;
         }
 
-        userName = "NO_USER";
-
-        var profileUserName = UserProfile.GetOwnUserProfile().userName;
-
-        if (!string.IsNullOrEmpty(profileUserName))
-            userName = profileUserName;
-
         if (chatController != null)
-            OnEnableWorldTab();
+        {
+            view.worldFilterButton.onClick.Invoke();
+        }
 
         view.chatHudView.ForceUpdateLayout();
     }
@@ -79,7 +72,7 @@ public class WorldChatWindowHUDController : IHUD
     void OnEnablePrivateTab()
     {
         view.chatHudView.CleanAllEntries();
-        var result = chatController.GetEntries().Where((x) => x.messageType == ChatController.ChatMessageType.PRIVATE).ToList();
+        var result = chatController.GetEntries().Where((x) => x.messageType == ChatMessage.Type.PRIVATE).ToList();
 
         foreach (var v in result)
         {
@@ -87,7 +80,7 @@ public class WorldChatWindowHUDController : IHUD
         }
     }
 
-    void OnAddMessage(ChatController.ChatMessage message)
+    void OnAddMessage(ChatMessage message)
     {
         view.chatHudView.controller.AddChatMessage(ChatHUDController.ChatMessageToChatEntry(message));
     }
@@ -114,10 +107,11 @@ public class WorldChatWindowHUDController : IHUD
             view.chatHudView.ResetInputField();
             view.chatHudView.FocusInputField();
         }
-        var data = new ChatController.ChatMessage()
+
+        var data = new ChatMessage()
         {
             body = msgBody,
-            sender = userName,
+            sender = UserProfile.GetOwnUserProfile().userId,
         };
 
         WebInterface.SendChatMessage(data);

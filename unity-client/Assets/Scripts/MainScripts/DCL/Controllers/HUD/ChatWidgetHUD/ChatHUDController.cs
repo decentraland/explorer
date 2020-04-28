@@ -1,8 +1,8 @@
 
+using DCL.Interface;
 using System;
 using System.Collections.Generic;
 using UnityEngine.Events;
-using ChatMessage = ChatController.ChatMessage;
 public class ChatHUDController : IDisposable
 {
     public const int MAX_CHAT_ENTRIES = 100;
@@ -56,14 +56,6 @@ public class ChatHUDController : IDisposable
         UnityEngine.Object.Destroy(this.view.gameObject);
     }
 
-    public static string ConstructGuestName(string id)
-    {
-        if (string.IsNullOrEmpty(id))
-            return "Guest-unknown";
-
-        return "Guest-" + id.Substring(0, 5);
-    }
-
     public static ChatEntry.Model ChatMessageToChatEntry(ChatMessage message)
     {
         ChatEntry.Model model = new ChatEntry.Model();
@@ -76,16 +68,16 @@ public class ChatHUDController : IDisposable
         if (message.recipient != null)
         {
             var recipientProfile = UserProfileController.userProfilesCatalog.Get(message.recipient);
-            model.recipientName = recipientProfile != null ? recipientProfile.userName : ConstructGuestName(message.recipient);
+            model.recipientName = recipientProfile != null ? recipientProfile.userName : message.recipient;
         }
 
         if (message.sender != null)
         {
             var senderProfile = UserProfileController.userProfilesCatalog.Get(message.sender);
-            model.senderName = senderProfile != null ? senderProfile.userName : ConstructGuestName(message.sender);
+            model.senderName = senderProfile != null ? senderProfile.userName : message.sender;
         }
 
-        if (model.messageType == ChatController.ChatMessageType.PRIVATE)
+        if (model.messageType == ChatMessage.Type.PRIVATE)
         {
             if (message.recipient == ownProfile.userId)
             {

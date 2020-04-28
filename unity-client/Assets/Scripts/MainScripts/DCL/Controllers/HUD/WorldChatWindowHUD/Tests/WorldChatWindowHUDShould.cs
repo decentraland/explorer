@@ -8,14 +8,14 @@ using UnityEngine.TestTools;
 
 class ChatController_Mock : IChatController
 {
-    public event Action<ChatController.ChatMessage> OnAddMessage;
-    List<ChatController.ChatMessage> entries = new List<ChatController.ChatMessage>();
-    public List<ChatController.ChatMessage> GetEntries()
+    public event Action<ChatMessage> OnAddMessage;
+    List<ChatMessage> entries = new List<ChatMessage>();
+    public List<ChatMessage> GetEntries()
     {
         return entries;
     }
 
-    public void RaiseAddMessage(ChatController.ChatMessage chatMessage)
+    public void RaiseAddMessage(ChatMessage chatMessage)
     {
         entries.Add(chatMessage);
         OnAddMessage?.Invoke(chatMessage);
@@ -79,32 +79,32 @@ public class WorldChatWindowHUDShould : TestsBase
     public void TabsWorkCorrectly()
     {
 
-        var messages = new ChatController.ChatMessage[]
+        var messages = new ChatMessage[]
         {
-            new ChatController.ChatMessage()
+            new ChatMessage()
             {
-                messageType = ChatController.ChatMessageType.PUBLIC,
+                messageType = ChatMessage.Type.PUBLIC,
                 body = "test message 1",
                 sender = ownProfileModel.userId,
                 recipient = testProfileModel.userId
             },
-            new ChatController.ChatMessage()
+            new ChatMessage()
             {
-                messageType = ChatController.ChatMessageType.PUBLIC,
+                messageType = ChatMessage.Type.PUBLIC,
                 body = "test message 2",
                 sender = ownProfileModel.userId,
                 recipient = testProfileModel.userId
             },
-            new ChatController.ChatMessage()
+            new ChatMessage()
             {
-                messageType = ChatController.ChatMessageType.PRIVATE,
+                messageType = ChatMessage.Type.PRIVATE,
                 body = "test message 3",
                 sender = ownProfileModel.userId,
                 recipient = testProfileModel.userId
             },
-            new ChatController.ChatMessage()
+            new ChatMessage()
             {
-                messageType = ChatController.ChatMessageType.PRIVATE,
+                messageType = ChatMessage.Type.PRIVATE,
                 body = "test message 4",
                 sender = ownProfileModel.userId,
                 recipient = testProfileModel.userId
@@ -154,9 +154,9 @@ public class WorldChatWindowHUDShould : TestsBase
     [Test]
     public void HandlePrivateMessagesProperly()
     {
-        var sentPM = new ChatController.ChatMessage()
+        var sentPM = new ChatMessage()
         {
-            messageType = ChatController.ChatMessageType.PRIVATE,
+            messageType = ChatMessage.Type.PRIVATE,
             body = "test message",
             sender = ownProfileModel.userId,
             recipient = testProfileModel.userId
@@ -171,9 +171,9 @@ public class WorldChatWindowHUDShould : TestsBase
         Assert.AreEqual("<b>[To TEST_USER]:</b>", entry.username.text);
         Assert.AreEqual("<b>[To TEST_USER]:</b> test message", entry.body.text);
 
-        var receivedPM = new ChatController.ChatMessage()
+        var receivedPM = new ChatMessage()
         {
-            messageType = ChatController.ChatMessageType.PRIVATE,
+            messageType = ChatMessage.Type.PRIVATE,
             body = "test message",
             sender = testProfileModel.userId,
             recipient = ownProfileModel.userId
@@ -191,9 +191,9 @@ public class WorldChatWindowHUDShould : TestsBase
     [Test]
     public void HandleChatControllerProperly()
     {
-        var chatMessage = new ChatController.ChatMessage()
+        var chatMessage = new ChatMessage()
         {
-            messageType = ChatController.ChatMessageType.PUBLIC,
+            messageType = ChatMessage.Type.PUBLIC,
             body = "test message",
             sender = testProfileModel.userId
         };

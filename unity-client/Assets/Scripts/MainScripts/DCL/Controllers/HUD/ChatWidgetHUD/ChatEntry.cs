@@ -1,3 +1,4 @@
+using DCL.Interface;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -13,7 +14,7 @@ public class ChatEntry : MonoBehaviour
             PRIVATE_TO
         }
 
-        public ChatController.ChatMessageType messageType;
+        public ChatMessage.Type messageType;
         public string bodyText;
         public string senderName;
         public string recipientName;
@@ -47,13 +48,13 @@ public class ChatEntry : MonoBehaviour
 
         switch (chatEntryModel.messageType)
         {
-            case ChatController.ChatMessageType.PUBLIC:
+            case ChatMessage.Type.PUBLIC:
                 this.body.color = username.color = worldMessageColor;
                 break;
-            case ChatController.ChatMessageType.PRIVATE:
+            case ChatMessage.Type.PRIVATE:
                 this.body.color = username.color = privateMessageColor;
                 break;
-            case ChatController.ChatMessageType.SYSTEM:
+            case ChatMessage.Type.SYSTEM:
                 this.body.color = username.color = systemColor;
                 break;
         }
