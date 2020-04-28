@@ -46,7 +46,9 @@ public class WorldChatWindowHUDController : IHUD
         if (!string.IsNullOrEmpty(profileUserName))
             userName = profileUserName;
 
-        OnEnableWorldTab();
+        if (chatController != null)
+            OnEnableWorldTab();
+
         view.chatHudView.ForceUpdateLayout();
     }
     public void Dispose()

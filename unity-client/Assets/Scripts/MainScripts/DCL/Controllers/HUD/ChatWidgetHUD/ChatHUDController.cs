@@ -73,11 +73,17 @@ public class ChatHUDController : IDisposable
         model.messageType = message.messageType;
         model.bodyText = message.body;
 
-        var senderProfile = UserProfileController.userProfilesCatalog.Get(message.sender);
-        var recipientProfile = UserProfileController.userProfilesCatalog.Get(message.recipient);
+        if (message.recipient != null)
+        {
+            var recipientProfile = UserProfileController.userProfilesCatalog.Get(message.recipient);
+            model.recipientName = recipientProfile != null ? recipientProfile.userName : ConstructGuestName(message.recipient);
+        }
 
-        model.senderName = senderProfile != null ? senderProfile.userName : ConstructGuestName(message.sender);
-        model.recipientName = recipientProfile != null ? recipientProfile.userName : ConstructGuestName(message.recipient);
+        if (message.sender != null)
+        {
+            var senderProfile = UserProfileController.userProfilesCatalog.Get(message.sender);
+            model.senderName = senderProfile != null ? senderProfile.userName : ConstructGuestName(message.sender);
+        }
 
         if (model.messageType == ChatController.ChatMessageType.PRIVATE)
         {
