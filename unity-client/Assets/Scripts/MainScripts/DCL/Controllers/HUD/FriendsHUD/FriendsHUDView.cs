@@ -7,14 +7,10 @@ public class FriendsHUDView : MonoBehaviour
     const string VIEW_PATH = "FriendsHUD";
 
     public Button closeButton;
-
-    public Button onlineFriendsToggleButton;
-    public GameObject onlineFriendsContainer;
-    public Transform onlineFriendsToggleButtonIcon;
-
-    public Button offlineFriendsToggleButton;
-    public GameObject offlineFriendsContainer;
-    public Transform offlineFriendsToggleButtonIcon;
+    public Button friendsButton;
+    public Button friendRequestsButton;
+    public GameObject friendsList;
+    public GameObject friendRequestsList;
 
     public static FriendsHUDView Create()
     {
@@ -26,15 +22,15 @@ public class FriendsHUDView : MonoBehaviour
     private void Initialize()
     {
         closeButton.onClick.AddListener(Toggle);
-        onlineFriendsToggleButton.onClick.AddListener(() =>
+        friendsButton.onClick.AddListener(() =>
         {
-            onlineFriendsContainer.SetActive(!onlineFriendsContainer.activeSelf);
-            onlineFriendsToggleButtonIcon.localScale = new Vector3(onlineFriendsToggleButtonIcon.localScale.x, -onlineFriendsToggleButtonIcon.localScale.y, 1f);
+            friendsList.SetActive(true);
+            friendRequestsList.SetActive(false);
         });
-        offlineFriendsToggleButton.onClick.AddListener(() =>
+        friendRequestsButton.onClick.AddListener(() =>
         {
-            offlineFriendsContainer.SetActive(!offlineFriendsContainer.activeSelf);
-            offlineFriendsToggleButtonIcon.localScale = new Vector3(offlineFriendsToggleButtonIcon.localScale.x, -offlineFriendsToggleButtonIcon.localScale.y, 1f);
+            friendsList.SetActive(false);
+            friendRequestsList.SetActive(true);
         });
     }
 

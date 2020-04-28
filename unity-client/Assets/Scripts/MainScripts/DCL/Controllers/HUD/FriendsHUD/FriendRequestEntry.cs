@@ -1,18 +1,65 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
+using DCL.Interface;
 
 public class FriendRequestEntry : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    [SerializeField] internal TextMeshProUGUI playerNameText;
+    [SerializeField] internal Image playerImage;
+    [SerializeField] internal Button acceptButton;
+    [SerializeField] internal Button rejectButton;
+    [SerializeField] internal Button cancelButton;
+
+    public void Populate(string playerName, Sprite playerAvatarImage, bool isReceived)
     {
-        
+        playerNameText.text = playerName;
+        playerImage.sprite = playerAvatarImage;
+
+        if (isReceived)
+        {
+            cancelButton.gameObject.SetActive(false);
+            acceptButton.gameObject.SetActive(true);
+            rejectButton.gameObject.SetActive(true);
+
+            acceptButton.onClick.RemoveAllListeners();
+            acceptButton.onClick.AddListener(AcceptRequest);
+
+            rejectButton.onClick.RemoveAllListeners();
+            rejectButton.onClick.AddListener(RejectRequest);
+        }
+        else
+        {
+            cancelButton.gameObject.SetActive(true);
+            acceptButton.gameObject.SetActive(false);
+            rejectButton.gameObject.SetActive(false);
+
+            cancelButton.onClick.RemoveAllListeners();
+            cancelButton.onClick.AddListener(CancelRequest);
+        }
     }
 
-    // Update is called once per frame
-    void Update()
+    void AcceptRequest()
     {
-        
+        // TODO: Notify Kernel
+
+        // TODO: Add to friends list
+
+        Destroy(gameObject);
+    }
+
+    void RejectRequest()
+    {
+        // TODO: Notify Kernel
+
+        Destroy(gameObject);
+    }
+
+    void CancelRequest()
+    {
+        // TODO: Notify Kernel
+
+        Destroy(gameObject);
     }
 }
+
