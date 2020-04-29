@@ -511,4 +511,4 @@ function parseWhisperExpression(expression: string) {
 }
 
 globalThis.sendPrivateMessage = (userId: string, message: string) =>
-  globalThis.globalStore.dispatch(sendPrivateMessage(userId, message))
+  globalThis.globalStore.dispatch(sendPrivateMessage(userId, message), true)

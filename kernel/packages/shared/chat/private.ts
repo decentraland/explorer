@@ -176,24 +176,27 @@ function* handleSendPrivateMessage(action: SendPrivateMessage, debug: boolean = 
     return
   }
 
-  if (!userId) {
-    logger.error(`User id not initialized`)
-    return
+  let socialId: string
+  if (!debug) {
+    const userData: ReturnType<typeof findByUserId> = yield select(findByUserId, userId)
+    if (!userData) {
+      logger.error(`User not found ${userId}`)
+      return
+    }
+
+    const _isFriend: ReturnType<typeof isFriend> = yield select(isFriend, userId)
+    if (!_isFriend) {
+      logger.error(`Trying to send a message to a non friend ${userId}`)
+      return
+    }
+
+    socialId = userData.socialId
+  } else {
+    // used only for debugging purposes
+    socialId = userId
   }
 
-  const userData: ReturnType<typeof findByUserId> = yield select(findByUserId, userId)
-  if (!userData) {
-    logger.error(`User not found ${userId}`)
-    return
-  }
-
-  const _isFriend: ReturnType<typeof isFriend> = yield select(isFriend, userId)
-  if (!_isFriend) {
-    logger.error(`Trying to send a message to a non friend ${userId}`)
-    return
-  }
-
-  const conversation: Conversation = yield client.createDirectConversation(userData.socialId)
+  const conversation: Conversation = yield client.createDirectConversation(socialId)
 
   const messageId: string = yield client.sendMessageTo(conversation.id, message)
 
