@@ -1,7 +1,6 @@
 ﻿using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using DCL.Interface;
 
 public class FriendRequestEntry : MonoBehaviour
 {
@@ -11,9 +10,15 @@ public class FriendRequestEntry : MonoBehaviour
     [SerializeField] internal Button rejectButton;
     [SerializeField] internal Button cancelButton;
 
-    string friendId;
-    public System.Action<string> OnRemoved;
-    public System.Action<string> OnAccepted;
+    public string friendId
+    {
+        get;
+        private set;
+    }
+
+    public System.Action<FriendRequestEntry> OnAccepted;
+    public System.Action<FriendRequestEntry> OnRejected;
+    public System.Action<FriendRequestEntry> OnCancelled;
 
     public void Populate(string playerId, string playerName, Sprite playerAvatarImage, bool isReceived)
     {
@@ -47,30 +52,17 @@ public class FriendRequestEntry : MonoBehaviour
 
     void AcceptRequest()
     {
-        // TODO: Notify Kernel
-
-        // TODO: Add to friends list
-
-        OnAccepted?.Invoke(friendId);
-
-        OnRemoved?.Invoke(friendId);
-        Destroy(gameObject);
+        OnAccepted?.Invoke(this);
     }
 
     void RejectRequest()
     {
-        // TODO: Notify Kernel
-
-        OnRemoved?.Invoke(friendId);
-        Destroy(gameObject);
+        OnRejected?.Invoke(this);
     }
 
     void CancelRequest()
     {
-        // TODO: Notify Kernel
-
-        OnRemoved?.Invoke(friendId);
-        Destroy(gameObject);
+        OnCancelled?.Invoke(this);
     }
 }
 
