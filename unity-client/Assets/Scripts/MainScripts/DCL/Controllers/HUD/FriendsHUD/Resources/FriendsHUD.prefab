@@ -142,7 +142,7 @@ MonoBehaviour:
     type: 3}
   receivedRequestsContainer: {fileID: 8912797600660916732}
   sentRequestsContainer: {fileID: 4417659405308114824}
-  friendSearchInputField: {fileID: 0}
+  friendSearchInputField: {fileID: 3393797650520696229}
   requestSentNotification: {fileID: 8347565519525447700}
   requestSentNotificationText: {fileID: 2671914754147954507}
   friendSearchFailedNotification: {fileID: 6043985242258827856}
