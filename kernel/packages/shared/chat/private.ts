@@ -149,7 +149,7 @@ export function* initializePrivateMessaging(synapseUrl: string, identity: Explor
     })
   })
 
-  client.onFriendshipRequest(async socialId => {
+  const handleIncomingFriendshipUpdateStatus = async (action: FriendshipAction, socialId: string) => {
     // map social id to user id
     const userId = parseUserId(socialId)
 
@@ -163,28 +163,24 @@ export function* initializePrivateMessaging(synapseUrl: string, identity: Explor
     // ensure user profile is initialized and send to renderer
     await ProfileAsPromise(userId)
 
-    // add to friendRequests
-    // update renderer
-    globalThis.globalStore.dispatch(updateFriendship(FriendshipAction.REQUESTED_FROM, userId, true))
-  })
+    // add to friendRequests & update renderer
+    globalThis.globalStore.dispatch(updateFriendship(action, userId, true))
+  }
 
-  client.onFriendshipRequestCancellation(socialId => {
-    // map social id to user id
-    // remove from friendRequests and friends
-    // update renderer
-  })
+  client.onFriendshipRequest(socialId =>
+    handleIncomingFriendshipUpdateStatus(FriendshipAction.REQUESTED_FROM, socialId)
+  )
+  client.onFriendshipRequestCancellation(socialId =>
+    handleIncomingFriendshipUpdateStatus(FriendshipAction.CANCELED, socialId)
+  )
 
-  client.onFriendshipRequestApproval(socialId => {
-    // map social id to user id
-    // add to friends if in friend request to
-    // update renderer
-  })
+  client.onFriendshipRequestApproval(socialId =>
+    handleIncomingFriendshipUpdateStatus(FriendshipAction.APPROVED, socialId)
+  )
 
-  client.onFriendshipRequestRejection(socialId => {
-    // map social id to user id
-    // remove from friends requests if in friend request from
-    // update renderer
-  })
+  client.onFriendshipRequestRejection(socialId =>
+    handleIncomingFriendshipUpdateStatus(FriendshipAction.REJECTED, socialId)
+  )
 
   yield takeEvery(SEND_PRIVATE_MESSAGE, handleSendPrivateMessage)
 }

@@ -19,7 +19,8 @@ import {
   RESET_TUTORIAL,
   SCENE_DEBUG_PANEL,
   SHOW_FPS_COUNTER,
-  tutorialEnabled
+  tutorialEnabled,
+  getServerConfigurations
 } from '../config'
 import { Quaternion, ReadOnlyQuaternion, ReadOnlyVector3, Vector3 } from '../decentraland-ecs/src/decentraland/math'
 import { IEventNames, IEvents, ProfileForRenderer, MinimapSceneInfo } from '../decentraland-ecs/src/decentraland/Types'
@@ -92,7 +93,8 @@ import { worldRunningObservable } from 'shared/world/worldState'
 import { profileToRendererFormat } from 'shared/profiles/transformations/profileToRendererFormat'
 import { StoreContainer } from 'shared/store/rootTypes'
 import { ILandToLoadableParcelScene, ILandToLoadableParcelSceneUpdate } from 'shared/selectors'
-import { sendMessage } from 'shared/chat/actions'
+import { sendMessage, addUserData } from 'shared/chat/actions'
+import { updateFriendship } from '../shared/chat/actions'
 
 declare const globalThis: UnityInterfaceContainer &
   BrowserInterfaceContainer &
@@ -342,11 +344,21 @@ const browserInterface = {
 
   SendChatMessage(data: { message: ChatMessage }) {
     globalThis.globalStore.dispatch(sendMessage(data.message))
+  },
+  UpdateFriendshipStatus(data: { message: FriendshipUpdateStatusMessage }) {
+    const { userId, action } = data.message
+
+    globalThis.globalStore.dispatch(addUserData(userId, toSocialId(userId)))
+    globalThis.globalStore.dispatch(updateFriendship(action, userId, false))
   }
 }
 globalThis.browserInterface = browserInterface
 type BrowserInterfaceContainer = {
   browserInterface: typeof browserInterface
+}
+
+function toSocialId(userId: string) {
+  return `@${userId}:${getServerConfigurations().synapseHost}`
 }
 
 export function setLoadingScreenVisible(shouldShow: boolean) {
