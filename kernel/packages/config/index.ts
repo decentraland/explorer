@@ -259,6 +259,7 @@ export function getServerConfigurations() {
     explorerConfiguration: `https://explorer-config.decentraland.${
       TLDDefault === 'today' ? 'org' : TLDDefault
     }/configuration.json`,
+    synapseUrl: `https://matrix.decentraland.zone`,
     avatar: {
       snapshotStorage: `https://avatars-storage.decentraland.${TLDDefault}/`,
       catalog: getExclusiveServer(),

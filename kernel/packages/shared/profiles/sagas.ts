@@ -63,7 +63,7 @@ import {
   DeployData
 } from './types'
 import { identity, ExplorerIdentity } from '../index'
-import { Authenticator, AuthLink, Timestamp, ContentFileHash } from 'dcl-crypto'
+import { Authenticator, AuthLink } from 'dcl-crypto'
 import { sha3 } from 'web3x/utils'
 import { CATALYST_REALM_INITIALIZED } from '../dao/actions'
 import { isRealmInitialized, getUpdateProfileServer } from '../dao/selectors'
@@ -73,6 +73,9 @@ import { backupProfile } from 'shared/profiles/generateRandomUserProfile'
 import { getTutorialBaseURL } from '../location'
 import { takeLatestById } from './utils/takeLatestById'
 import { UnityInterfaceContainer } from 'unity-interface/dcl'
+
+type Timestamp = number
+type ContentFileHash = string
 
 const CID = require('cids')
 const multihashing = require('multihashing-async')
