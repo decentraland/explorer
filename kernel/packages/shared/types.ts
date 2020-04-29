@@ -432,3 +432,24 @@ export type ChatMessage = {
   timestamp: number
   body: string
 }
+
+export type FriendsInitializationMessage = {
+  currentFriends: string[]
+  requestedTo: string[]
+  requestedFrom: string[]
+}
+
+export enum FriendshipAction {
+  NONE,
+  APPROVED,
+  REJECTED,
+  CANCELED,
+  REQUESTED_FROM,
+  REQUESTED_TO,
+  DELETED
+}
+
+export type FriendshipUpdateStatusMessage = {
+  userId: string
+  action: FriendshipAction
+}

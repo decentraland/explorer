@@ -60,15 +60,11 @@ export function* initializePrivateMessaging(synapseUrl: string, identity: Explor
     {}
   )
 
-  yield put(
-    clientInitialized(
-      client,
-      socialInfo,
-      friendsSocial.map($ => $.userId),
-      fromFriendRequestsSocial.map($ => $.userId),
-      toFriendRequestsSocial.map($ => $.userId)
-    )
-  )
+  const friendIds = friendsSocial.map($ => $.userId)
+  const requestedFromIds = fromFriendRequestsSocial.map($ => $.userId)
+  const requestedToIds = toFriendRequestsSocial.map($ => $.userId)
+
+  yield put(clientInitialized(client, socialInfo, friendIds, requestedFromIds, requestedToIds))
 
   yield Promise.all(
     Object.values(socialInfo)
@@ -107,6 +103,12 @@ export function* initializePrivateMessaging(synapseUrl: string, identity: Explor
     })
   )
 
+  unityInterface.InitializeFriends({
+    currentFriends: friendIds,
+    requestedTo: requestedToIds,
+    requestedFrom: requestedFromIds
+  })
+
   // register listener for new messages
   client.onMessage((conversation, message) => {
     const friend = friendsSocial.find(friend => friend.conversationId === conversation.id)
@@ -126,9 +128,18 @@ export function* initializePrivateMessaging(synapseUrl: string, identity: Explor
     })
   })
 
-  client.onFriendshipRequest(socialId => {
+  client.onFriendshipRequest(async socialId => {
     // map social id to user id
+    const userId = parseUserId(socialId)
+
+    if (!userId) {
+      logger.warn(`cannot paarse user id from social id`, socialId)
+      return null
+    }
+
     // ensure user profile is initialized and send to renderer
+    await ProfileAsPromise(userId)
+
     // add to friendRequests
     // update renderer
   })

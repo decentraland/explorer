@@ -73,7 +73,9 @@ import {
   SetEntityParentPayload,
   UpdateEntityComponentPayload,
   ChatMessage,
-  HUDElementID
+  HUDElementID,
+  FriendsInitializationMessage,
+  FriendshipUpdateStatusMessage
 } from 'shared/types'
 import { ParcelSceneAPI } from 'shared/world/ParcelSceneAPI'
 import {
@@ -513,6 +515,12 @@ export const unityInterface = {
   },
   AddMessageToChatWindow(message: ChatMessage) {
     gameInstance.SendMessage('SceneController', 'AddMessageToChatWindow', JSON.stringify(message))
+  },
+  InitializeFriends(initializationMessage: FriendsInitializationMessage) {
+    gameInstance.SendMessage('SceneController', 'InitializeFriends', JSON.stringify(initializationMessage))
+  },
+  UpdateFriendshipStatus(updateMessage: FriendshipUpdateStatusMessage) {
+    gameInstance.SendMessage('SceneController', 'UpdateFriendshipStatus', JSON.stringify(updateMessage))
   },
 
   // *********************************************************************************
