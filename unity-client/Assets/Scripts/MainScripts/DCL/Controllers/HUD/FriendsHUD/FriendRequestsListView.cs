@@ -81,7 +81,7 @@ public class FriendRequestsListView : MonoBehaviour
             currentNotification = null;
         }
 
-        notificationGameobject.SetActive(true);
+        notificationGameobject.SetActive(false);
         StartCoroutine(WaitAndCloseNotification(notificationGameobject));
     }
 
