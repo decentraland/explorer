@@ -2,16 +2,28 @@ import { ExplorerIdentity } from 'shared'
 import { SocialClient, FriendshipRequest, Conversation } from 'dcl-social-client'
 import { SocialAPI } from 'dcl-social-client/dist/SocialAPI'
 import { Authenticator } from 'dcl-crypto'
-import { takeEvery, put, select } from 'redux-saga/effects'
-import { SEND_PRIVATE_MESSAGE, SendPrivateMessage, clientInitialized, sendPrivateMessage } from './actions'
-import { getClient, findByUserId, isFriend } from './selectors'
+import { takeEvery, put, select, call, take } from 'redux-saga/effects'
+import {
+  SEND_PRIVATE_MESSAGE,
+  SendPrivateMessage,
+  clientInitialized,
+  sendPrivateMessage,
+  updateFriendship,
+  UPDATE_FRIENDSHIP,
+  UpdateFriendship,
+  updateState,
+  addUserData
+} from './actions'
+import { getClient, findByUserId, isFriend, getPrivateMessaging } from './selectors'
 import { createLogger } from '../logger'
 import { ProfileAsPromise } from '../profiles/ProfileAsPromise'
 import { unityInterface } from 'unity-interface/dcl'
-import { ChatMessageType } from 'shared/types'
-import { SocialData } from './types'
+import { ChatMessageType, FriendshipAction } from 'shared/types'
+import { SocialData, ChatState } from './types'
+import { StoreContainer } from '../store/rootTypes'
+import { RENDERER_INITIALIZED } from '../renderer/types'
 
-declare const globalThis: { sendPrivateMessage: (userId: string, message: string) => void }
+declare const globalThis: StoreContainer & { sendPrivateMessage: (userId: string, message: string) => void }
 
 const logger = createLogger('chat: ')
 
@@ -66,11 +78,23 @@ export function* initializePrivateMessaging(synapseUrl: string, identity: Explor
 
   yield put(clientInitialized(client, socialInfo, friendIds, requestedFromIds, requestedToIds))
 
+  // ensure friend profiles are sent to renderer
+
   yield Promise.all(
     Object.values(socialInfo)
       .map(socialData => socialData.userId)
       .map(userId => ProfileAsPromise(userId))
   )
+
+  yield take(RENDERER_INITIALIZED) // wait for renderer to initialize
+
+  unityInterface.InitializeFriends({
+    currentFriends: friendIds,
+    requestedTo: requestedToIds,
+    requestedFrom: requestedFromIds
+  })
+
+  // initialize conversations
 
   const conversations: {
     conversation: Conversation
@@ -103,13 +127,10 @@ export function* initializePrivateMessaging(synapseUrl: string, identity: Explor
     })
   )
 
-  unityInterface.InitializeFriends({
-    currentFriends: friendIds,
-    requestedTo: requestedToIds,
-    requestedFrom: requestedFromIds
-  })
+  yield takeEvery(UPDATE_FRIENDSHIP, handleUpdateFriendship)
 
   // register listener for new messages
+
   client.onMessage((conversation, message) => {
     const friend = friendsSocial.find(friend => friend.conversationId === conversation.id)
 
@@ -133,15 +154,18 @@ export function* initializePrivateMessaging(synapseUrl: string, identity: Explor
     const userId = parseUserId(socialId)
 
     if (!userId) {
-      logger.warn(`cannot paarse user id from social id`, socialId)
+      logger.warn(`cannot parse user id from social id`, socialId)
       return null
     }
+
+    globalThis.globalStore.dispatch(addUserData(userId, socialId))
 
     // ensure user profile is initialized and send to renderer
     await ProfileAsPromise(userId)
 
     // add to friendRequests
     // update renderer
+    globalThis.globalStore.dispatch(updateFriendship(FriendshipAction.REQUESTED_FROM, userId, true))
   })
 
   client.onFriendshipRequestCancellation(socialId => {
@@ -215,6 +239,128 @@ function* handleSendPrivateMessage(action: SendPrivateMessage, debug: boolean = 
 
   if (debug) {
     logger.info(`message sent with id `, messageId)
+  }
+}
+
+function* handleUpdateFriendship({ payload, meta }: UpdateFriendship) {
+  const { action, userId } = payload
+  const { incoming } = meta
+
+  const state: ReturnType<typeof getPrivateMessaging> = yield select(getPrivateMessaging)
+
+  let newState: ChatState['privateMessaging'] | undefined
+
+  switch (action) {
+    case FriendshipAction.NONE: {
+      // do nothing
+      break
+    }
+    case FriendshipAction.APPROVED:
+    case FriendshipAction.REJECTED: {
+      const index = state.fromFriendRequests.indexOf(userId)
+
+      if (index !== -1) {
+        const fromFriendRequests = [...state.fromFriendRequests]
+        fromFriendRequests.splice(index, 1)
+
+        newState = { ...state, fromFriendRequests }
+
+        if (action === FriendshipAction.APPROVED && !state.friends.includes(userId)) {
+          newState.friends.push(userId)
+        }
+      }
+
+      break
+    }
+    case FriendshipAction.CANCELED: {
+      const index = state.toFriendRequests.indexOf(userId)
+
+      if (index !== -1) {
+        const toFriendRequests = [...state.toFriendRequests]
+        toFriendRequests.splice(index, 1)
+
+        newState = { ...state, toFriendRequests }
+      }
+
+      break
+    }
+    case FriendshipAction.REQUESTED_FROM: {
+      const exists = state.fromFriendRequests.includes(userId)
+
+      if (!exists) {
+        newState = { ...state, fromFriendRequests: [...state.fromFriendRequests, userId] }
+      }
+
+      break
+    }
+    case FriendshipAction.REQUESTED_TO: {
+      const exists = state.toFriendRequests.includes(userId)
+
+      if (!exists) {
+        newState = { ...state, toFriendRequests: [...state.toFriendRequests, userId] }
+      }
+
+      break
+    }
+    case FriendshipAction.DELETED: {
+      const index = state.friends.indexOf(userId)
+
+      if (index !== -1) {
+        const friends = [...state.friends]
+        friends.splice(index, 1)
+
+        newState = { ...state, friends }
+      }
+
+      break
+    }
+  }
+
+  if (newState) {
+    yield put(updateState(newState))
+
+    if (incoming) {
+      unityInterface.UpdateFriendshipStatus(payload)
+    } else {
+      yield call(handleOutgoingUpdateFriendshipStatus, payload)
+    }
+  }
+}
+
+function* handleOutgoingUpdateFriendshipStatus(update: UpdateFriendship['payload']) {
+  const client: SocialAPI = yield select(getClient)
+  const socialData: SocialData = yield select(findByUserId, update.userId)
+
+  if (!socialData) {
+    logger.error(`could not find social data for`, update.userId)
+    return
+  }
+
+  switch (update.action) {
+    case FriendshipAction.NONE: {
+      // do nothing in this case
+      break
+    }
+    case FriendshipAction.APPROVED: {
+      yield client.addAsFriend(socialData.socialId)
+
+      break
+    }
+    case FriendshipAction.REJECTED: {
+      break
+    }
+    case FriendshipAction.CANCELED: {
+      break
+    }
+    case FriendshipAction.REQUESTED_FROM: {
+      break
+    }
+    case FriendshipAction.REQUESTED_TO: {
+      break
+    }
+    case FriendshipAction.DELETED: {
+      break
+    }
   }
 }
 

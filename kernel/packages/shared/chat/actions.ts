@@ -1,7 +1,7 @@
 import { action } from 'typesafe-actions'
-import { ChatMessage } from '../types'
+import { ChatMessage, FriendshipAction } from '../types'
 import { SocialAPI } from 'dcl-social-client'
-import { SocialData } from './types'
+import { SocialData, ChatState } from './types'
 
 export const MESSAGE_RECEIVED = 'Message received'
 export const messageReceived = (message: ChatMessage) => action(MESSAGE_RECEIVED, message)
@@ -24,3 +24,16 @@ export const clientInitialized = (
   fromFriendRequests: string[]
 ) => action(SOCIAL_CLIENT_INITIALIZED, { client, socialInfo, friends, toFriendRequests, fromFriendRequests })
 export type ClientInitialized = ReturnType<typeof clientInitialized>
+
+export const UPDATE_FRIENDSHIP = 'Update friendship'
+export const updateFriendship = (_action: FriendshipAction, userId: string, incoming: boolean) =>
+  action(UPDATE_FRIENDSHIP, { action: _action, userId }, { incoming })
+export type UpdateFriendship = ReturnType<typeof updateFriendship>
+
+export const UPDATE_PRIVATE_MESSAGING = 'Update private messaging state'
+export const updateState = (state: ChatState['privateMessaging']) => action(UPDATE_PRIVATE_MESSAGING, state)
+export type UpdateState = ReturnType<typeof updateState>
+
+export const ADD_USER_DATA = 'Add user data'
+export const addUserData = (userId: string, socialId: string) => action(ADD_USER_DATA, { userId, socialId })
+export type AddUserData = ReturnType<typeof addUserData>
