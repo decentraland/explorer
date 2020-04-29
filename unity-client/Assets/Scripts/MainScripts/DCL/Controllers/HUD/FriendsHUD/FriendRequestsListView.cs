@@ -1,17 +1,16 @@
-﻿using System.Collections.Generic;
 using System.Collections;
+using System.Collections.Generic;
 using TMPro;
-using UnityEngine.UI;
 using UnityEngine;
-using DCL.Interface;
+using UnityEngine.UI;
 
 public class FriendRequestsListView : MonoBehaviour
 {
     public float notificationsDuration = 3f;
 
     [SerializeField] GameObject friendRequestEntryPrefab;
-    [SerializeField] Transform receivedRequestsContainer;
-    [SerializeField] Transform sentRequestsContainer;
+    [SerializeField] internal Transform receivedRequestsContainer;
+    [SerializeField] internal Transform sentRequestsContainer;
 
     [SerializeField] TMP_InputField friendSearchInputField;
 
@@ -32,11 +31,16 @@ public class FriendRequestsListView : MonoBehaviour
     [SerializeField] Button cancelRequestDialogCancelButton;
     [SerializeField] Button cancelRequestDialogConfirmButton;
 
-    FriendRequestEntry friendRequestEntry;
     Dictionary<string, FriendRequestEntry> friendRequestEntries = new Dictionary<string, FriendRequestEntry>();
     IEnumerator currentNotificationRoutine = null;
     GameObject currentNotification = null;
     FriendRequestEntry currentDialogRequestEntry = null;
+
+    internal FriendRequestEntry GetEntry(string userId)
+    {
+        return friendRequestEntries[userId];
+    }
+
 
     void Awake()
     {
@@ -93,39 +97,40 @@ public class FriendRequestsListView : MonoBehaviour
         notificationGameobject.SetActive(false);
     }
 
-    public void UpdateOrCreateFriendRequestEntry(string userId, bool isReceived)
+    public void UpdateOrCreateFriendRequestEntry(string userId, FriendEntry.Model model, bool isReceived)
     {
-        friendRequestEntry = friendRequestEntries[userId];
+        FriendRequestEntry entry;
 
-        if (friendRequestEntry == null)
+        if (!friendRequestEntries.ContainsKey(userId))
         {
-            friendRequestEntry = Instantiate(friendRequestEntryPrefab).GetComponent<FriendRequestEntry>();
-            friendRequestEntry.OnAccepted += OnFriendRequestReceivedAccepted;
-            friendRequestEntry.OnRejected += OnFriendRequestReceivedRejected;
-            friendRequestEntry.OnCancelled += OnFriendRequestSentCancelled;
-
-            // TODO
-            // friendRequestEntry.Populate();
+            entry = Instantiate(friendRequestEntryPrefab).GetComponent<FriendRequestEntry>();
+            entry.OnAccepted += (x) => { OnFriendRequestReceivedAccepted(x); RemoveRequestEntry(userId); };
+            entry.OnRejected += (x) => { OnFriendRequestReceivedRejected(x); RemoveRequestEntry(userId); };
+            entry.OnCancelled += (x) => { OnFriendRequestSentCancelled(x); RemoveRequestEntry(userId); };
+            friendRequestEntries.Add(userId, entry);
+        }
+        else
+        {
+            entry = friendRequestEntries[userId];
         }
 
-        friendRequestEntry.transform.SetParent(isReceived ? receivedRequestsContainer : sentRequestsContainer);
+        entry.Populate(model, isReceived);
+        entry.transform.SetParent(isReceived ? receivedRequestsContainer : sentRequestsContainer);
     }
 
     void OnFriendRequestReceivedAccepted(FriendRequestEntry requestEntry)
     {
         // TODO: Notify Kernel & Add to friends list
 
-        acceptedFriendNotificationText.text = $"You and {requestEntry.friendId} are now friends!";
+        acceptedFriendNotificationText.text = $"You and {requestEntry.model.userName} are now friends!";
         TriggerNotification(acceptedFriendNotification);
-
-        RemoveRequestEntry(requestEntry);
     }
 
     void OnFriendRequestReceivedRejected(FriendRequestEntry requestEntry)
     {
         currentDialogRequestEntry = requestEntry;
 
-        rejectRequestDialogText.text = $"Are you sure you want to reject {requestEntry.friendId} friend request?";
+        rejectRequestDialogText.text = $"Are you sure you want to reject {requestEntry.model.userName} friend request?";
         rejectRequestDialog.SetActive(true);
     }
 
@@ -134,8 +139,6 @@ public class FriendRequestsListView : MonoBehaviour
         if (currentDialogRequestEntry == null) return;
 
         rejectRequestDialog.SetActive(false);
-
-        RemoveRequestEntry(currentDialogRequestEntry);
         currentDialogRequestEntry = null;
 
         // TODO: Notify Kernel
@@ -143,7 +146,7 @@ public class FriendRequestsListView : MonoBehaviour
 
     void OnFriendRequestSentCancelled(FriendRequestEntry requestEntry)
     {
-        cancelRequestDialogText.text = $"Are you sure you want to cancel {requestEntry.friendId} friend request?";
+        cancelRequestDialogText.text = $"Are you sure you want to cancel {requestEntry.model.userName} friend request?";
         cancelRequestDialog.SetActive(true);
     }
 
@@ -152,8 +155,6 @@ public class FriendRequestsListView : MonoBehaviour
         if (currentDialogRequestEntry == null) return;
 
         cancelRequestDialog.SetActive(false);
-
-        RemoveRequestEntry(currentDialogRequestEntry);
         currentDialogRequestEntry = null;
 
         // TODO: Notify Kernel
@@ -166,9 +167,12 @@ public class FriendRequestsListView : MonoBehaviour
         rejectRequestDialog.SetActive(false);
     }
 
-    void RemoveRequestEntry(FriendRequestEntry requestEntry)
+    public void RemoveRequestEntry(string userId)
     {
-        friendRequestEntries.Remove(requestEntry.friendId);
-        Destroy(requestEntry.gameObject);
+        if (!friendRequestEntries.ContainsKey(userId))
+            return;
+
+        friendRequestEntries.Remove(userId);
+        Destroy(friendRequestEntries[userId].gameObject);
     }
 }

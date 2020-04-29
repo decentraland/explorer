@@ -1,6 +1,5 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 
 public class FriendsHUDView : MonoBehaviour
 {
@@ -9,8 +8,8 @@ public class FriendsHUDView : MonoBehaviour
     public Button closeButton;
     public Button friendsButton;
     public Button friendRequestsButton;
-    public GameObject friendsList;
-    public GameObject friendRequestsList;
+    public FriendsListView friendsList;
+    public FriendRequestsListView friendRequestsList;
 
     public static FriendsHUDView Create()
     {
@@ -24,13 +23,13 @@ public class FriendsHUDView : MonoBehaviour
         closeButton.onClick.AddListener(Toggle);
         friendsButton.onClick.AddListener(() =>
         {
-            friendsList.SetActive(true);
-            friendRequestsList.SetActive(false);
+            friendsList.gameObject.SetActive(true);
+            friendRequestsList.gameObject.SetActive(false);
         });
         friendRequestsButton.onClick.AddListener(() =>
         {
-            friendsList.SetActive(false);
-            friendRequestsList.SetActive(true);
+            friendsList.gameObject.SetActive(false);
+            friendRequestsList.gameObject.SetActive(true);
         });
     }
 

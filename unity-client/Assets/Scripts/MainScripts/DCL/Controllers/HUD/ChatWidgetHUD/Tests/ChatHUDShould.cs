@@ -46,6 +46,7 @@ public class ChatHUDShould : TestsBase
                 sender = "test" + i,
                 body = "test" + i,
                 timestamp = (ulong)i,
+
             };
 
             controller.AddChatMessage(msg);

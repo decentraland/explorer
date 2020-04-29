@@ -102,7 +102,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 0, y: -528.9}
+  m_AnchoredPosition: {x: 0, y: -618}
   m_SizeDelta: {x: 460, y: 294}
   m_Pivot: {x: 0, y: 0}
 --- !u!225 &2481497620801839290
@@ -5243,7 +5243,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &4170319777576616387
 RectTransform:
   m_ObjectHideFlags: 0
@@ -5259,10 +5259,10 @@ RectTransform:
   m_Father: {fileID: 3403102992548348466}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 230, y: -64.2445}
-  m_SizeDelta: {x: 446, y: 38.489}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3596069761681897216
 CanvasRenderer:
@@ -6631,8 +6631,8 @@ MonoBehaviour:
   closeButton: {fileID: 4184198625477665569}
   friendsButton: {fileID: 2884296052892011786}
   friendRequestsButton: {fileID: 3805095587391845107}
-  friendsList: {fileID: 2763045267980766482}
-  friendRequestsList: {fileID: 177495755980735158}
+  friendsList: {fileID: 5342959054778025512}
+  friendRequestsList: {fileID: 6601800852802052046}
 --- !u!1 &9099771525429736719
 GameObject:
   m_ObjectHideFlags: 0
@@ -7536,12 +7536,12 @@ PrefabInstance:
     - target: {fileID: 5456606117727073459, guid: 28149d49252bc4933a8455289c2b15b4,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 223
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5456606117727073459, guid: 28149d49252bc4933a8455289c2b15b4,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -19.2445
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5456606117727073459, guid: 28149d49252bc4933a8455289c2b15b4,
         type: 3}
@@ -7561,7 +7561,7 @@ PrefabInstance:
     - target: {fileID: 5456606117727073459, guid: 28149d49252bc4933a8455289c2b15b4,
         type: 3}
       propertyPath: m_AnchorMin.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5456606117727073459, guid: 28149d49252bc4933a8455289c2b15b4,
         type: 3}
@@ -7571,7 +7571,7 @@ PrefabInstance:
     - target: {fileID: 5456606117727073459, guid: 28149d49252bc4933a8455289c2b15b4,
         type: 3}
       propertyPath: m_AnchorMax.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5456606117727073459, guid: 28149d49252bc4933a8455289c2b15b4,
         type: 3}

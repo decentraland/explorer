@@ -1,7 +1,7 @@
-﻿using TMPro;
+using DCL.Interface;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using DCL.Interface;
 
 public class FriendEntry : MonoBehaviour
 {
@@ -11,15 +11,33 @@ public class FriendEntry : MonoBehaviour
     [SerializeField] internal Button jumpInButton;
     [SerializeField] internal Button whisperButton;
 
-    public void Populate(string playerName, Vector2 playerCoords, string playerRealm, Sprite playerAvatarImage)
+    public struct Model
     {
-        playerNameText.text = playerName;
-        playerLocationText.text = $"{playerRealm} {playerCoords}";
+        public enum Status
+        {
+            NONE,
+            OFFLINE,
+            ONLINE,
+            LOADING,
+            AFK
+        }
 
-        playerImage.sprite = playerAvatarImage;
+        public Status status;
+        public string userName;
+        public Vector2 coords;
+        public string realm;
+        public Sprite avatarImage;
+    }
+
+    public void Populate(Model model)
+    {
+        playerNameText.text = model.userName;
+        playerLocationText.text = $"{model.realm} {model.coords}";
+
+        playerImage.sprite = model.avatarImage;
 
         jumpInButton.onClick.RemoveAllListeners();
-        jumpInButton.onClick.AddListener(() => WebInterface.GoTo((int)playerCoords.x, (int)playerCoords.y));
+        jumpInButton.onClick.AddListener(() => WebInterface.GoTo((int)model.coords.x, (int)model.coords.y));
 
         whisperButton.onClick.RemoveAllListeners();
         whisperButton.onClick.AddListener(WhisperPlayer);
