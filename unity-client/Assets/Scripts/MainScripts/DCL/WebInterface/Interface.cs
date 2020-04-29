@@ -150,6 +150,12 @@ namespace DCL.Interface
         {
         }
 
+        [System.Serializable]
+        public class SendChatMessageEvent
+        {
+            public ChatMessage message;
+        }
+
 
         [System.Serializable]
         public class OnPointerEventPayload
@@ -245,6 +251,14 @@ namespace DCL.Interface
             public string id;
             public string encodedTexture;
         };
+
+        [System.Serializable]
+        public class GotoEvent
+        {
+            public int x;
+            public int y;
+        };
+
 
         //-----------------------------------------------------
         // Raycast
@@ -356,6 +370,21 @@ namespace DCL.Interface
             public string userEmail;
         }
 
+        [System.Serializable]
+        public class RequestScenesInfoAroundParcelPayload
+        {
+            public Vector2 parcel;
+            public int scenesAround;
+        }
+
+        [System.Serializable]
+        public class AudioStreamingPayload
+        {
+            public string url;
+            public bool play;
+            public float volume;
+        }
+
 #if UNITY_WEBGL && !UNITY_EDITOR
     /**
      * This method is called after the first render. It marks the loading of the
@@ -414,6 +443,9 @@ namespace DCL.Interface
         private static OnPointerEventPayload onPointerEventPayload = new OnPointerEventPayload();
         private static OnGlobalPointerEventPayload onGlobalPointerEventPayload = new OnGlobalPointerEventPayload();
         private static OnGlobalPointerEvent onGlobalPointerEvent = new OnGlobalPointerEvent();
+        private static AudioStreamingPayload onAudioStreamingEvent = new AudioStreamingPayload();
+        private static GotoEvent gotoEvent = new GotoEvent();
+        private static SendChatMessageEvent sendChatMessageEvent = new SendChatMessageEvent();
 
         public static void SendSceneEvent<T>(string sceneId, string eventType, T payload)
         {
@@ -757,6 +789,35 @@ namespace DCL.Interface
             {
                 userEmail = email
             });
+        }
+
+        public static void RequestScenesInfoAroundParcel(Vector2 parcel, int maxScenesArea)
+        {
+            SendMessage("RequestScenesInfoInArea", new RequestScenesInfoAroundParcelPayload()
+            {
+                parcel = parcel,
+                scenesAround = maxScenesArea
+            });
+        }
+
+        public static void SendAudioStreamEvent(string url, bool play, float volume)
+        {
+            onAudioStreamingEvent.url = url;
+            onAudioStreamingEvent.play = play;
+            onAudioStreamingEvent.volume = volume;
+            SendMessage("SetAudioStream", onAudioStreamingEvent);
+        }
+        public static void GoTo(int x, int y)
+        {
+            gotoEvent.x = x;
+            gotoEvent.y = y;
+            SendMessage("GoTo", gotoEvent);
+        }
+
+        public static void SendChatMessage(ChatMessage message)
+        {
+            sendChatMessageEvent.message = message;
+            SendMessage("SendChatMessage", sendChatMessageEvent);
         }
     }
 }

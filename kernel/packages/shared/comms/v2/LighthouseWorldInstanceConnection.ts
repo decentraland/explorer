@@ -4,7 +4,8 @@ import { Package, BusMessage, ChatMessage, ProfileVersion, UserInformation, Pack
 import { Position, positionHash } from '../interface/utils'
 import defaultLogger, { createLogger } from 'shared/logger'
 import { PeerMessageTypes, PeerMessageType } from 'decentraland-katalyst-peer/src/messageTypes'
-import { Peer as PeerType, PacketCallback } from 'decentraland-katalyst-peer/src/Peer'
+import { Peer as PeerType } from 'decentraland-katalyst-peer/src/Peer'
+import { PacketCallback } from 'decentraland-katalyst-peer/src/types'
 import { ChatData, CommsMessage, ProfileData, SceneData, PositionData } from './proto/comms_pb'
 import { Realm, CommsStatus } from 'shared/dao/types'
 
@@ -12,7 +13,7 @@ import * as Long from 'long'
 declare const window: any
 window.Long = Long
 
-const { Peer } = require('decentraland-katalyst-peer')
+const { Peer, buildCatalystPeerStatsData } = require('decentraland-katalyst-peer')
 
 const NOOP = () => {
   // do nothing
@@ -93,6 +94,12 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
 
   close() {
     return this.cleanUpPeer()
+  }
+
+  analyticsData() {
+    return {
+      stats: buildCatalystPeerStatsData(this.peer)
+    }
   }
 
   async sendInitialMessage(userInfo: Partial<UserInformation>) {
@@ -180,10 +187,6 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
   private initializePeer() {
     this.statusHandler({ status: 'connecting', connectedPeers: this.connectedPeersCount() })
     this.peer = this.createPeer()
-    // @ts-ignore
-    this.peer.log = () => {
-      // DO NOTHING
-    }
     global.__DEBUG_PEER = this.peer
     return this.peer
   }
@@ -201,6 +204,7 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
         this.statusHandler({ status, connectedPeers: this.connectedPeersCount() })
       }
     }
+
     return new Peer(this.lighthouseUrl, this.peerId, this.peerCallback, this.peerConfig)
   }
 
@@ -216,10 +220,9 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
           this.chatHandler(sender, createPackage(commsMessage, 'chat', mapToPackageChat(commsMessage.getChatData()!)))
           break
         case CommsMessage.DataCase.POSITION_DATA:
-          this.positionHandler(
-            sender,
-            createPackage(commsMessage, 'position', mapToPositionMessage(commsMessage.getPositionData()!))
-          )
+          const positionMessage = mapToPositionMessage(commsMessage.getPositionData()!)
+          this.peer.setPeerPosition(sender, positionMessage.slice(0, 3))
+          this.positionHandler(sender, createPackage(commsMessage, 'position', positionMessage))
           break
         case CommsMessage.DataCase.SCENE_DATA:
           this.sceneMessageHandler(

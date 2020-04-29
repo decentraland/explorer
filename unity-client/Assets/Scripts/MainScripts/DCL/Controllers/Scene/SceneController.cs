@@ -77,10 +77,14 @@ namespace DCL
         [System.NonSerialized]
         public bool prewarmSceneMessagesPool = true;
 
+        [System.NonSerialized]
+        public bool useBoundariesChecker = true;
+
         public bool hasPendingMessages => MessagingControllersManager.i.pendingMessagesCount > 0;
 
         public string globalSceneId { get; private set; }
         public string currentSceneId { get; private set; }
+        public SceneBoundariesChecker boundariesChecker { get; private set; }
 
         private bool sceneSortDirty = false;
         private bool positionDirty = true;
@@ -109,6 +113,8 @@ namespace DCL
             Debug.unityLogger.logEnabled = false;
 #endif
 
+            InitializeSceneBoundariesChecker();
+
             MessagingControllersManager.i.Initialize(this);
             MemoryManager.i.Initialize();
 
@@ -124,6 +130,24 @@ namespace DCL
                 StartCoroutine(DeferredDecoding());
 
             DCLCharacterController.OnCharacterMoved += SetPositionDirty;
+        }
+
+        void InitializeSceneBoundariesChecker()
+        {
+            if (!useBoundariesChecker) return;
+
+            if (boundariesChecker != null)
+                boundariesChecker.Stop();
+
+            if (isDebugMode)
+            {
+                boundariesChecker = new SceneBoundariesDebugModeChecker();
+                boundariesChecker.timeBetweenChecks = 0f;
+            }
+            else
+            {
+                boundariesChecker = new SceneBoundariesChecker();
+            }
         }
 
         private void SetPositionDirty(DCLCharacterPosition character)
@@ -143,6 +167,7 @@ namespace DCL
 
         private void SortScenesByDistance()
         {
+            currentSceneId = null;
             scenesSortedByDistance.Sort(SortScenesByDistanceMethod);
 
             using (var iterator = scenesSortedByDistance.GetEnumerator())
@@ -167,7 +192,7 @@ namespace DCL
             {
                 if (TryGetScene(currentSceneId, out ParcelScene scene) && scene.isReady)
                 {
-                    RenderingController.i.renderingActivatedAckLock.RemoveLock(this);
+                    CommonScriptableObjects.rendererState.RemoveLock(this);
                 }
             }
 
@@ -198,14 +223,17 @@ namespace DCL
             }
 
             if (!debugScenes)
-                RenderingController.i.OnRenderingStateChanged += OnRenderingStateChange;
+            {
+                CommonScriptableObjects.rendererState.OnChange += OnRenderingStateChange;
+                OnRenderingStateChange(CommonScriptableObjects.rendererState.Get(), false);
+            }
         }
 
-        private void OnRenderingStateChange(bool enabled)
+        private void OnRenderingStateChange(bool enabled, bool prevState)
         {
             if (!enabled)
             {
-                RenderingController.i.renderingActivatedAckLock.AddLock(this);
+                CommonScriptableObjects.rendererState.AddLock(this);
             }
         }
 
@@ -213,7 +241,7 @@ namespace DCL
         {
             if (scene.sceneData.id == currentSceneId)
             {
-                RenderingController.i.renderingActivatedAckLock.RemoveLock(this);
+                CommonScriptableObjects.rendererState.RemoveLock(this);
             }
         }
 
@@ -233,7 +261,7 @@ namespace DCL
 
         void OnDestroy()
         {
-            RenderingController.i.OnRenderingStateChanged -= OnRenderingStateChange;
+            CommonScriptableObjects.rendererState.OnChange -= OnRenderingStateChange;
             DCLCharacterController.OnCharacterMoved -= SetPositionDirty;
             ParcelScene.parcelScenesCleaner.Stop();
         }
@@ -298,6 +326,8 @@ namespace DCL
 
             isDebugMode = true;
             fpsPanel.SetActive(true);
+
+            InitializeSceneBoundariesChecker();
 
             OnDebugModeSet?.Invoke();
         }
@@ -529,7 +559,7 @@ namespace DCL
 
             for (int i = 0; i < count; i++)
             {
-                if (RenderingController.i.renderingEnabled && enqueue)
+                if (CommonScriptableObjects.rendererState.Get() && enqueue)
                 {
                     payloadsToDecode.Enqueue(chunks[i]);
                 }
@@ -579,7 +609,7 @@ namespace DCL
 
             while (true)
             {
-                maxTimeForDecode = RenderingController.i.renderingEnabled ? MAX_TIME_FOR_DECODE : float.MaxValue;
+                maxTimeForDecode = CommonScriptableObjects.rendererState.Get() ? MAX_TIME_FOR_DECODE : float.MaxValue;
 
                 if (payloadsToDecode.Count > 0)
                 {

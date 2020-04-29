@@ -1,12 +1,11 @@
 import { saveToLocalStorage } from 'atomicHelpers/localStorage'
-import { commConfigurations, parcelLimits, COMMS, AUTO_CHANGE_REALM } from 'config'
+import { commConfigurations, parcelLimits, COMMS, AUTO_CHANGE_REALM, USE_NEW_CHAT } from 'config'
 import { CommunicationsController } from 'shared/apis/CommunicationsController'
 import { defaultLogger } from 'shared/logger'
-import { MessageEntry } from 'shared/types'
+import { ChatMessage as InternalChatMessage, ChatMessageType, MessageEntry } from 'shared/types'
 import { positionObservable, PositionReport } from 'shared/world/positionThings'
-import 'webrtc-adapter'
-import { PassportAsPromise } from '../passports/PassportAsPromise'
-import { ChatEvent, chatObservable, notifyStatusThroughChat } from './chat'
+import { ProfileAsPromise } from '../profiles/ProfileAsPromise'
+import { notifyStatusThroughChat, chatObservable, ChatEventType } from './chat'
 import { CliBrokerConnection } from './CliBrokerConnection'
 import { Stats } from './debug'
 import { IBrokerConnection } from '../comms/v1/IBrokerConnection'
@@ -43,7 +42,7 @@ import {
   ParcelArray
 } from './interface/utils'
 import { BrokerWorldInstanceConnection } from '../comms/v1/brokerWorldInstanceConnection'
-import { profileToRendererFormat } from 'shared/passports/transformations/profileToRendererFormat'
+import { profileToRendererFormat } from 'shared/profiles/transformations/profileToRendererFormat'
 import { ProfileForRenderer } from 'decentraland-ecs/src'
 import { worldRunningObservable, isWorldRunning } from '../world/worldState'
 import { WorldInstanceConnection } from './interface/index'
@@ -55,7 +54,7 @@ import { Authenticator } from 'dcl-crypto'
 import { getCommsServer, getRealm, getAllCatalystCandidates } from '../dao/selectors'
 import { Realm, LayerUserInfo } from 'shared/dao/types'
 import { Store } from 'redux'
-import { RootState } from 'shared/store/rootTypes'
+import { RootState, StoreContainer } from 'shared/store/rootTypes'
 import { store } from 'shared/store/store'
 import {
   setCatalystRealmCommsStatus,
@@ -64,8 +63,11 @@ import {
   markCatalystRealmConnectionError
 } from 'shared/dao/actions'
 import { observeRealmChange, pickCatalystRealm, changeToCrowdedRealm } from 'shared/dao'
-import { getProfile } from 'shared/passports/selectors'
-import { Profile } from 'shared/passports/types'
+import { getProfile } from 'shared/profiles/selectors'
+import { Profile } from 'shared/profiles/types'
+import { realmToString } from '../dao/utils/realmToString'
+import { queueTrackingEvent } from 'shared/analytics'
+import { messageReceived } from '../chat/actions'
 
 export type CommsVersion = 'v1' | 'v2'
 export type CommsMode = CommsV1Mode | CommsV2Mode
@@ -85,8 +87,11 @@ export const MORDOR_POSITION: Position = [
   0
 ]
 
-declare var global: any
-declare const window: any
+type CommsContainer = {
+  printCommsInformation: () => void
+}
+
+declare const globalThis: StoreContainer & CommsContainer
 
 export class PeerTrackingInfo {
   public position: Position | null = null
@@ -111,7 +116,7 @@ export class PeerTrackingInfo {
         }
       }
       this.profilePromise = {
-        promise: PassportAsPromise(this.identity, profileVersion)
+        promise: ProfileAsPromise(this.identity, profileVersion)
           .then(profile => {
             const forRenderer = profileToRendererFormat(profile)
             this.lastProfileUpdate = new Date().getTime()
@@ -145,6 +150,7 @@ export class Context {
   positionObserver: any
   worldRunningObserver: any
   infoCollecterInterval?: NodeJS.Timer
+  analyticsInterval?: NodeJS.Timer
 
   timeToChangeRealm: number = Date.now() + commConfigurations.autoChangeRealmInterval
 
@@ -260,7 +266,7 @@ function ensurePeerTrackingInfo(context: Context, alias: string): PeerTrackingIn
 
 export function processChatMessage(context: Context, fromAlias: string, message: Package<ChatMessage>) {
   const msgId = message.data.id
-  const profile = getProfile(global.globalStore.getState(), identity.address)
+  const profile = getProfile(globalThis.globalStore.getState(), identity.address)
 
   const peerTrackingInfo = ensurePeerTrackingInfo(context, fromAlias)
   if (!peerTrackingInfo.receivedPublicChatMessages.has(msgId)) {
@@ -280,14 +286,26 @@ export function processChatMessage(context: Context, fromAlias: string, message:
           timestamp: parseInt(timestamp, 10)
         })
       } else {
-        const entry: MessageEntry = {
-          id: msgId,
-          sender: displayName || 'unknown',
-          message: text,
-          isCommand: false
-        }
         if (profile && user.userId && !isBlocked(profile, user.userId)) {
-          chatObservable.notifyObservers({ type: ChatEvent.MESSAGE_RECEIVED, messageEntry: entry })
+          if (USE_NEW_CHAT) {
+            const messageEntry: InternalChatMessage = {
+              messageType: ChatMessageType.PUBLIC,
+              messageId: msgId,
+              sender: displayName || 'unknown',
+              body: text,
+              timestamp: message.time
+            }
+            globalThis.globalStore.dispatch(messageReceived(messageEntry))
+          } else {
+            const messageEntry: MessageEntry = {
+              id: msgId,
+              sender: displayName || 'unknown',
+              isCommand: false,
+              message: text,
+              timestamp: message.time
+            }
+            chatObservable.notifyObservers({ type: ChatEventType.MESSAGE_RECEIVED, messageEntry })
+          }
         }
       }
     }
@@ -468,7 +486,7 @@ function collectInfo(context: Context) {
   checkAutochangeRealm(visiblePeers, context, now)
 
   if (context.stats) {
-    context.stats.visiblePeersCount = visiblePeers.length
+    context.stats.visiblePeerIds = visiblePeers.map(it => it.alias)
     context.stats.trackingPeersCount = context.peerData.size
     context.stats.collectInfoDuration.stop()
   }
@@ -571,7 +589,7 @@ export async function connect(userId: string) {
         break
       }
       case 'v2': {
-        const store: Store<RootState> = window.globalStore
+        const store: Store<RootState> = globalThis.globalStore
         const lighthouseUrl = getCommsServer(store.getState())
         const realm = getRealm(store.getState())
 
@@ -588,10 +606,12 @@ export async function connect(userId: string) {
             // if any error occurs
             return identity
           },
-          parcelGetter: () => {
-            if (context && context.currentPosition) {
-              const parcel = position2parcel(context.currentPosition)
-              return [parcel.x, parcel.z]
+          logLevel: 'NONE',
+          positionConfig: {
+            selfPosition: () => {
+              if (context && context.currentPosition) {
+                return context.currentPosition.slice(0, 3)
+              }
             }
           }
         }
@@ -664,6 +684,21 @@ export async function connect(userId: string) {
       }
     }, 1000)
 
+    if (commConfigurations.sendAnalytics) {
+      context.analyticsInterval = setInterval(() => {
+        const connectionAnalytics = connection.analyticsData()
+        // We slice the ids in order to reduce the potential event size. Eventually, we should slice all comms ids
+        connectionAnalytics.trackedPeers = context?.peerData.keys()
+          ? [...context?.peerData.keys()].map(it => it.slice(-6))
+          : []
+        connectionAnalytics.visiblePeers = context?.stats.visiblePeerIds.map(it => it.slice(-6))
+
+        if (connectionAnalytics) {
+          queueTrackingEvent('Comms Status v2', connectionAnalytics)
+        }
+      }, 30000)
+    }
+
     context.worldRunningObserver = worldRunningObservable.add(isRunning => {
       onWorldRunning(isRunning)
     })
@@ -703,12 +738,8 @@ export async function connect(userId: string) {
   }
 }
 
-function realmString(realm: Realm) {
-  return realm.catalystName + '-' + realm.layer
-}
-
 function handleReconnectionError() {
-  const store: Store<RootState> = window.globalStore
+  const store: Store<RootState> = globalThis.globalStore
   const realm = getRealm(store.getState())
 
   if (realm) {
@@ -720,8 +751,8 @@ function handleReconnectionError() {
   const otherRealm = pickCatalystRealm(candidates)
 
   const notificationMessage = realm
-    ? `Lost connection to ${realmString(realm)}, joining realm ${realmString(otherRealm)} instead`
-    : `Joining realm ${realmString(otherRealm)}`
+    ? `Lost connection to ${realmToString(realm)}, joining realm ${realmToString(otherRealm)} instead`
+    : `Joining realm ${realmToString(otherRealm)}`
 
   notifyStatusThroughChat(notificationMessage)
 
@@ -729,7 +760,7 @@ function handleReconnectionError() {
 }
 
 function handleFullLayer() {
-  const store: Store<RootState> = window.globalStore
+  const store: Store<RootState> = globalThis.globalStore
   const realm = getRealm(store.getState())
 
   if (realm) {
@@ -771,6 +802,9 @@ export function disconnect() {
     if (context.infoCollecterInterval) {
       clearInterval(context.infoCollecterInterval)
     }
+    if (context.analyticsInterval) {
+      clearInterval(context.analyticsInterval)
+    }
     if (context.positionObserver) {
       positionObservable.remove(context.positionObserver)
     }
@@ -784,7 +818,7 @@ export function disconnect() {
 }
 
 export async function fetchLayerUsersParcels(): Promise<ParcelArray[]> {
-  const store: Store<RootState> = window.globalStore
+  const store: Store<RootState> = globalThis.globalStore
   const realm = getRealm(store.getState())
   const commsUrl = getCommsServer(store.getState())
 
@@ -799,7 +833,7 @@ export async function fetchLayerUsersParcels(): Promise<ParcelArray[]> {
   return []
 }
 
-global['printCommsInformation'] = function() {
+globalThis.printCommsInformation = function() {
   if (context) {
     defaultLogger.log('Communication topics: ' + previousTopics)
     context.stats.printDebugInformation()

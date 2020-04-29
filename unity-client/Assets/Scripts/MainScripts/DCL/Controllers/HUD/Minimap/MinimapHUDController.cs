@@ -1,8 +1,7 @@
-﻿using System;
 using DCL.Interface;
 using UnityEngine;
 
-public class MinimapHUDController : IDisposable, IHUD
+public class MinimapHUDController : IHUD
 {
     private static bool VERBOSE = false;
 
@@ -11,7 +10,7 @@ public class MinimapHUDController : IDisposable, IHUD
     private FloatVariable minimapZoom => CommonScriptableObjects.minimapZoom;
     private StringVariable currentSceneId => CommonScriptableObjects.sceneID;
 
-    public MinimapHUDModel model { get; private set; }
+    public MinimapHUDModel model { get; private set; } = new MinimapHUDModel();
 
     public MinimapHUDController() : this(new MinimapHUDModel()) { }
 
@@ -32,19 +31,19 @@ public class MinimapHUDController : IDisposable, IHUD
     private void OnPlayerCoordsChange(Vector2Int current, Vector2Int previous)
     {
         UpdatePlayerPosition(current);
-        UpdateSceneName(MinimapMetadata.GetMetadata().GetTile(current.x, current.y)?.name);
+        UpdateSceneName(MinimapMetadata.GetMetadata().GetSceneInfo(current.x, current.y)?.name);
     }
 
     public void UpdateData(MinimapHUDModel model)
     {
         this.model = model;
-        view.UpdateData(this.model);
+        view?.UpdateData(this.model);
     }
 
     public void UpdateSceneName(string sceneName)
     {
         model.sceneName = sceneName;
-        view.UpdateData(model);
+        view?.UpdateData(model);
     }
 
     public void UpdatePlayerPosition(Vector2 position)
@@ -56,7 +55,7 @@ public class MinimapHUDController : IDisposable, IHUD
     public void UpdatePlayerPosition(string position)
     {
         model.playerPosition = position;
-        view.UpdateData(model);
+        view?.UpdateData(model);
     }
 
     public void AddZoomDelta(float delta)
@@ -80,7 +79,8 @@ public class MinimapHUDController : IDisposable, IHUD
 
     public void ReportScene()
     {
-        WebInterface.SendReportScene(currentSceneId);
+        if (!string.IsNullOrEmpty(currentSceneId))
+            WebInterface.SendReportScene(currentSceneId);
     }
 
     public void SetVisibility(bool visible)

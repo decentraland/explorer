@@ -28,7 +28,7 @@ export class SceneLifeCycleController extends EventEmitter {
 
   contains(status: SceneLifeCycleStatus, position: Vector2Component) {
     return (
-      status.sceneDescription && status.sceneDescription.scene.scene.parcels.includes(`${position.x},${position.y}`)
+      status.sceneDescription && status.sceneDescription.sceneJsonData.scene.parcels.includes(`${position.x},${position.y}`)
     )
   }
 
@@ -135,7 +135,7 @@ export class SceneLifeCycleController extends EventEmitter {
           return this.futureOfPositionToSceneId.get(position)!
         }
 
-        for (const pos of land.scene.scene.parcels) {
+        for (const pos of land.sceneJsonData.scene.parcels) {
           if (!this._positionToSceneId.has(pos)) {
             this._positionToSceneId.set(pos, land.sceneId)
           }
@@ -146,7 +146,10 @@ export class SceneLifeCycleController extends EventEmitter {
           }
         }
       } catch (e) {
-        this.futureOfPositionToSceneId.get(position)!.reject(e)
+        const future = this.futureOfPositionToSceneId.get(position)!
+        // do not cache result if it was not successful
+        this.futureOfPositionToSceneId.delete(position)
+        future.reject(e)
       }
       return this.futureOfPositionToSceneId.get(position)!
     } else {

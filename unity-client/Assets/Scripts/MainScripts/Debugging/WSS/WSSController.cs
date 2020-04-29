@@ -1,4 +1,4 @@
-﻿using DCL.Components;
+using DCL.Components;
 using DCL.Interface;
 using System.Collections.Generic;
 using UnityEngine;
@@ -39,7 +39,6 @@ namespace DCL
             lock (WSSController.queuedMessages)
             {
                 Message finalMessage;
-
                 finalMessage = JsonUtility.FromJson<Message>(e.Data);
 
                 WSSController.queuedMessages.Enqueue(finalMessage);
@@ -96,6 +95,7 @@ namespace DCL
         static bool VERBOSE = false;
         WebSocketServer ws;
         public SceneController sceneController;
+        public RenderingController renderingController;
         public DCLCharacterController characterController;
         private Builder.DCLBuilderBridge builderBridge = null;
         public CameraController cameraController;
@@ -128,6 +128,7 @@ namespace DCL
         public bool allWearables = false;
         public bool testWearables = false;
         public bool enableTutorial = false;
+        public bool useNewChat = true;
         public DebugPanel debugPanelMode = DebugPanel.Off;
 
 
@@ -197,6 +198,11 @@ namespace DCL
                 if (enableTutorial)
                 {
                     debugString += "RESET_TUTORIAL&";
+                }
+
+                if (useNewChat)
+                {
+                    debugString += "USE_NEW_CHAT&";
                 }
 
                 string debugPanelString = "";
@@ -292,10 +298,10 @@ namespace DCL
                                 UserProfileController.i.RemoveUserProfilesFromCatalog(msg.payload);
                                 break;
                             case "DeactivateRendering":
-                                RenderingController.i.DeactivateRendering();
+                                renderingController.DeactivateRendering();
                                 break;
                             case "ActivateRendering":
-                                RenderingController.i.ActivateRendering();
+                                renderingController.ActivateRendering();
                                 break;
                             case "ShowNotification":
                                 HUDController.i.ShowNotificationFromJson(msg.payload);
@@ -369,32 +375,14 @@ namespace DCL
                             case "ShowNewWearablesNotification":
                                 HUDController.i?.ShowNewWearablesNotification(msg.payload);
                                 break;
-                            case "ConfigureMinimapHUD":
-                                HUDController.i?.ConfigureMinimapHUD(msg.payload);
+                            case "ConfigureHUDElement":
+                                HUDController.i?.ConfigureHUDElement(msg.payload);
                                 break;
-                            case "ConfigureAvatarHUD":
-                                HUDController.i?.ConfigureAvatarHUD(msg.payload);
-                                break;
-                            case "ConfigureNotificationHUD":
-                                HUDController.i?.ConfigureNotificationHUD(msg.payload);
-                                break;
-                            case "ConfigureAvatarEditorHUD":
-                                HUDController.i?.ConfigureAvatarEditorHUD(msg.payload);
-                                break;
-                            case "ConfigurePlayerInfoCardHUD":
-                                HUDController.i.ConfigurePlayerInfoCardHUD(msg.payload);
-                                break;
-                            case "ConfigureExpressionsHUD":
-                                HUDController.i.ConfigureExpressionsHUD(msg.payload);
-                                break;
-                            case "ConfigureWelcomeHUD":
-                                HUDController.i.ConfigureWelcomeHUD(msg.payload);
+                            case "AddMessageToChatWindow":
+                                ChatController.i?.AddMessageToChatWindow(msg.payload);
                                 break;
                             case "UpdateMinimapSceneInformation":
                                 MinimapMetadataController.i?.UpdateMinimapSceneInformation(msg.payload);
-                                break;
-                            case "ConfigureSettingsHUD":
-                                HUDController.i.ConfigureSettingsHUD(msg.payload);
                                 break;
                             case "SetTutorialEnabled":
                                 DCL.Tutorial.TutorialController.i?.SetTutorialEnabled();
@@ -402,17 +390,11 @@ namespace DCL
                             case "TriggerSelfUserExpression":
                                 HUDController.i.TriggerSelfUserExpression(msg.payload);
                                 break;
-                            case "ConfigureAirdroppingHUD":
-                                HUDController.i.ConfigureAirdroppingHUD(msg.payload);
-                                break;
                             case "AirdroppingRequest":
                                 HUDController.i.AirdroppingRequest(msg.payload);
                                 break;
                             case "ShowWelcomeNotification":
                                 HUDController.i.ShowWelcomeNotification();
-                                break;
-                            case "ConfigureTermsOfServiceHUD":
-                                HUDController.i.ConfigureTermsOfServiceHUD(msg.payload);
                                 break;
                             case "ShowTermsOfServices":
                                 HUDController.i.ShowTermsOfServices(msg.payload);

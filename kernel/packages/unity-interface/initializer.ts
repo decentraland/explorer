@@ -103,6 +103,8 @@ namespace DCL {
 
     _instancedJS
       .then($ => {
+        // Expose the "kernel" interface as a global object to allow easier inspection
+        global['browserInterface'] = $
         engineInitialized.resolve($)
       })
       .catch(error => {

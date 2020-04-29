@@ -352,6 +352,13 @@ namespace DCL.Helpers
                 (int)Mathf.Floor(worldPosition.z / ParcelSettings.PARCEL_SIZE)
             );
         }
+        public static Vector2 WorldToGridPositionUnclamped(Vector3 worldPosition)
+        {
+            return new Vector2(
+                worldPosition.x / ParcelSettings.PARCEL_SIZE,
+                worldPosition.z / ParcelSettings.PARCEL_SIZE
+            );
+        }
 
         public static string GetTestAssetsPathRaw()
         {
@@ -403,6 +410,8 @@ namespace DCL.Helpers
 
             for (int i = 0; i < renderers.Length; i++)
             {
+                if (renderers[i] == null) continue;
+
                 if (i == 0)
                     bounds = renderers[i].bounds;
                 else
@@ -441,6 +450,49 @@ namespace DCL.Helpers
             {
                 UnityEngine.Object.Destroy(child.gameObject);
             }
+        }
+
+        public static List<Vector2Int> GetBottomLeftZoneArray(Vector2Int bottomLeftAnchor, Vector2Int size)
+        {
+            List<Vector2Int> coords = new List<Vector2Int>();
+
+            for (int x = bottomLeftAnchor.x; x < bottomLeftAnchor.x + size.x; x++)
+            {
+                for (int y = bottomLeftAnchor.y; y < bottomLeftAnchor.y + size.y; y++)
+                {
+                    coords.Add(new Vector2Int(x, y));
+                }
+            }
+
+            return coords;
+        }
+
+        public static List<Vector2Int> GetCenteredZoneArray(Vector2Int center, Vector2Int size)
+        {
+            List<Vector2Int> coords = new List<Vector2Int>();
+
+            for (int x = center.x - size.x; x < center.x + size.x; x++)
+            {
+                for (int y = center.y - size.y; y < center.y + size.y; y++)
+                {
+                    coords.Add(new Vector2Int(x, y));
+                }
+            }
+
+            return coords;
+        }
+
+        public static void DrawRectGizmo(Rect rect, Color color, float duration)
+        {
+            Vector3 tl2 = new Vector3(rect.xMin, rect.yMax, 0);
+            Vector3 bl2 = new Vector3(rect.xMin, rect.yMin, 0);
+            Vector3 tr2 = new Vector3(rect.xMax, rect.yMax, 0);
+            Vector3 br2 = new Vector3(rect.xMax, rect.yMin, 0);
+
+            Debug.DrawLine(tl2, bl2, color, duration);
+            Debug.DrawLine(tl2, tr2, color, duration);
+            Debug.DrawLine(bl2, br2, color, duration);
+            Debug.DrawLine(tr2, br2, color, duration);
         }
     }
 }

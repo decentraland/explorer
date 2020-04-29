@@ -1,8 +1,8 @@
-using System;
-using System.Collections.Generic;
 using DCL.Helpers;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Assertions;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
@@ -103,6 +103,7 @@ public class PlayerInfoCardHUDView : MonoBehaviour
         }
 
         cardCanvas.enabled = active;
+        CommonScriptableObjects.playerInfoCardVisibleState.Set(active);
     }
 
     private void UpdateTabs()
@@ -115,6 +116,8 @@ public class PlayerInfoCardHUDView : MonoBehaviour
 
     public void SetUserProfile(UserProfile userProfile)
     {
+        Assert.IsTrue(userProfile != null, "userProfile can't be null");
+
         currentUserProfile = userProfile;
         name.text = currentUserProfile.userName;
         description.text = currentUserProfile.description;
@@ -160,10 +163,14 @@ public class PlayerInfoCardHUDView : MonoBehaviour
 
     internal bool IsBlocked(string userId)
     {
+        if (ownUserProfile == null || ownUserProfile.blocked == null)
+            return false;
+
         for (int i = 0; i < ownUserProfile.blocked.Count; i++)
         {
             if (ownUserProfile.blocked[i] == userId) return true;
         }
+
         return false;
     }
 }

@@ -35,6 +35,31 @@ namespace DCL.Models
             public MeshFilter[] meshFilters;
             public List<Collider> colliders = new List<Collider>();
 
+            Vector3 lastBoundsCalculationPosition;
+            Vector3 lastBoundsCalculationScale;
+            Quaternion lastBoundsCalculationRotation;
+            Bounds mergedBoundsValue;
+            public Bounds mergedBounds
+            {
+                get
+                {
+                    if (meshRootGameObject.transform.position != lastBoundsCalculationPosition)
+                    {
+                        mergedBoundsValue.center += meshRootGameObject.transform.position - lastBoundsCalculationPosition;
+                        lastBoundsCalculationPosition = meshRootGameObject.transform.position;
+                    }
+
+                    if (meshRootGameObject.transform.lossyScale != lastBoundsCalculationScale || meshRootGameObject.transform.rotation != lastBoundsCalculationRotation)
+                        RecalculateBounds();
+
+                    return mergedBoundsValue;
+                }
+                set
+                {
+                    mergedBoundsValue = value;
+                }
+            }
+
             GameObject meshRootGameObjectValue;
 
             public void UpdateRenderersCollection()
@@ -43,8 +68,22 @@ namespace DCL.Models
                 {
                     renderers = meshRootGameObjectValue.GetComponentsInChildren<Renderer>(true);
                     meshFilters = meshRootGameObjectValue.GetComponentsInChildren<MeshFilter>(true);
+
+                    RecalculateBounds();
+
                     OnUpdated?.Invoke();
                 }
+            }
+
+            public void RecalculateBounds()
+            {
+                if (renderers == null || renderers.Length == 0) return;
+
+                lastBoundsCalculationPosition = meshRootGameObject.transform.position;
+                lastBoundsCalculationScale = meshRootGameObject.transform.lossyScale;
+                lastBoundsCalculationRotation = meshRootGameObject.transform.rotation;
+
+                mergedBoundsValue = Utils.BuildMergedBounds(renderers);
             }
 
             public void CleanReferences()
@@ -96,7 +135,7 @@ namespace DCL.Models
         public System.Action<DecentralandEntity> OnMeshesInfoCleaned;
 
         public System.Action<ICleanableEventDispatcher> OnCleanupEvent { get; set; }
-        Dictionary<Type, BaseDisposable> sharedComponents = new Dictionary<Type, BaseDisposable>();
+        Dictionary<System.Type, BaseDisposable> sharedComponents = new Dictionary<System.Type, BaseDisposable>();
 
         const string MESH_GAMEOBJECT_NAME = "Mesh";
 
@@ -189,7 +228,7 @@ namespace DCL.Models
             isReleased = true;
         }
 
-        public void AddSharedComponent(Type componentType, BaseDisposable component)
+        public void AddSharedComponent(System.Type componentType, BaseDisposable component)
         {
             if (component == null)
             {
@@ -201,7 +240,7 @@ namespace DCL.Models
             sharedComponents.Add(componentType, component);
         }
 
-        public void RemoveSharedComponent(Type targetType, bool triggerDettaching = true)
+        public void RemoveSharedComponent(System.Type targetType, bool triggerDettaching = true)
         {
             BaseDisposable component;
             if (sharedComponents.TryGetValue(targetType, out component) && component != null)
@@ -215,7 +254,7 @@ namespace DCL.Models
             }
         }
 
-        public BaseDisposable GetSharedComponent(Type targetType)
+        public BaseDisposable GetSharedComponent(System.Type targetType)
         {
             BaseDisposable component;
             sharedComponents.TryGetValue(targetType, out component);

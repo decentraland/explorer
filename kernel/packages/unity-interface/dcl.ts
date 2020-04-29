@@ -1,21 +1,15 @@
-declare var window: any
-declare var global: any
-
-type GameInstance = {
-  SendMessage(object: string, method: string, ...args: (number | string)[]): void
-}
-
 import { uuid } from 'decentraland-ecs/src'
 import { EventDispatcher } from 'decentraland-rpc/lib/common/core/EventDispatcher'
 import { IFuture } from 'fp-future'
 import { Empty } from 'google-protobuf/google/protobuf/empty_pb'
 import { identity } from 'shared'
-import { sendPublicChatMessage, persistCurrentUser } from 'shared/comms'
+import { persistCurrentUser, sendPublicChatMessage } from 'shared/comms'
 import { AvatarMessageType } from 'shared/comms/interface/types'
 import { avatarMessageObservable, getUserProfile } from 'shared/comms/peers'
 import { providerFuture } from 'shared/ethereum/provider'
-import { getProfile } from 'shared/passports/selectors'
+import { getProfile } from 'shared/profiles/selectors'
 import { TeleportController } from 'shared/world/TeleportController'
+import { reportScenesAroundParcel } from 'shared/atlas/actions'
 import { gridToWorld } from '../atomicHelpers/parcelScenePositions'
 import {
   DEBUG,
@@ -28,19 +22,18 @@ import {
   tutorialEnabled
 } from '../config'
 import { Quaternion, ReadOnlyQuaternion, ReadOnlyVector3, Vector3 } from '../decentraland-ecs/src/decentraland/math'
-import { IEventNames, IEvents, ProfileForRenderer } from '../decentraland-ecs/src/decentraland/Types'
+import { IEventNames, IEvents, ProfileForRenderer, MinimapSceneInfo } from '../decentraland-ecs/src/decentraland/Types'
 import { sceneLifeCycleObservable } from '../decentraland-loader/lifecycle/controllers/scene'
-import { tutorialStepId } from '../decentraland-loader/lifecycle/tutorial/tutorial'
-import { AirdropInfo } from '../shared/airdrops/interface'
-import { queueTrackingEvent } from '../shared/analytics'
-import { DevTools } from '../shared/apis/DevTools'
-import { ParcelIdentity } from '../shared/apis/ParcelIdentity'
-import { chatObservable } from '../shared/comms/chat'
-import { aborted } from '../shared/loading/ReportFatalError'
-import { loadingScenes, teleportTriggered, unityClientLoaded } from '../shared/loading/types'
-import { createLogger, defaultLogger, ILogger } from '../shared/logger'
-import { saveAvatarRequest } from '../shared/passports/actions'
-import { Avatar, Profile, Wearable } from '../shared/passports/types'
+import { tutorialStepId } from 'decentraland-loader/lifecycle/tutorial/tutorial'
+import { AirdropInfo } from 'shared/airdrops/interface'
+import { queueTrackingEvent } from 'shared/analytics'
+import { DevTools } from 'shared/apis/DevTools'
+import { ParcelIdentity } from 'shared/apis/ParcelIdentity'
+import { aborted } from 'shared/loading/ReportFatalError'
+import { loadingScenes, teleportTriggered, unityClientLoaded } from 'shared/loading/types'
+import { createLogger, defaultLogger, ILogger } from 'shared/logger'
+import { saveProfileRequest } from 'shared/profiles/actions'
+import { Avatar, Profile, Wearable } from 'shared/profiles/types'
 import {
   PB_AttachEntityComponent,
   PB_ComponentCreated,
@@ -57,8 +50,8 @@ import {
   PB_UpdateEntityComponent,
   PB_Vector3
 } from '../shared/proto/engineinterface_pb'
-import { Session } from '../shared/session'
-import { getPerformanceInfo } from '../shared/session/getPerformanceInfo'
+import { Session } from 'shared/session'
+import { getPerformanceInfo } from 'shared/session/getPerformanceInfo'
 import {
   AttachEntityComponentPayload,
   ComponentCreatedPayload,
@@ -70,10 +63,8 @@ import {
   EnvironmentData,
   HUDConfiguration,
   ILand,
-  ILandToLoadableParcelScene,
-  ILandToLoadableParcelSceneUpdate,
   InstancedSpawnPoint,
-  IScene,
+  SceneJsonData,
   LoadableParcelScene,
   MappingsResponse,
   Notification,
@@ -81,21 +72,33 @@ import {
   RemoveEntityPayload,
   SetEntityParentPayload,
   UpdateEntityComponentPayload,
-  WelcomeHUDControllerModel
-} from '../shared/types'
-import { ParcelSceneAPI } from '../shared/world/ParcelSceneAPI'
+  ChatMessage,
+  HUDElementID
+} from 'shared/types'
+import { ParcelSceneAPI } from 'shared/world/ParcelSceneAPI'
 import {
   enableParcelSceneLoading,
   getParcelSceneID,
   getSceneWorkerBySceneID,
   loadParcelScene,
   stopParcelSceneWorker
-} from '../shared/world/parcelSceneManager'
-import { positionObservable, teleportObservable } from '../shared/world/positionThings'
-import { hudWorkerUrl, SceneWorker } from '../shared/world/SceneWorker'
-import { ensureUiApis } from '../shared/world/uiSceneInitializer'
-import { worldRunningObservable } from '../shared/world/worldState'
-import { profileToRendererFormat } from 'shared/passports/transformations/profileToRendererFormat'
+} from 'shared/world/parcelSceneManager'
+import { positionObservable, teleportObservable } from 'shared/world/positionThings'
+import { hudWorkerUrl, SceneWorker } from 'shared/world/SceneWorker'
+import { ensureUiApis } from 'shared/world/uiSceneInitializer'
+import { worldRunningObservable } from 'shared/world/worldState'
+import { profileToRendererFormat } from 'shared/profiles/transformations/profileToRendererFormat'
+import { StoreContainer } from 'shared/store/rootTypes'
+import { ILandToLoadableParcelScene, ILandToLoadableParcelSceneUpdate } from 'shared/selectors'
+import { sendMessage } from 'shared/chat/actions'
+
+declare const globalThis: UnityInterfaceContainer &
+  BrowserInterfaceContainer &
+  StoreContainer & { analytics: any; delighted: any }
+
+type GameInstance = {
+  SendMessage(object: string, method: string, ...args: (number | string)[]): void
+}
 
 const rendererVersion = require('decentraland-renderer')
 window['console'].log('Renderer version: ' + rendererVersion)
@@ -106,14 +109,41 @@ let isTheFirstLoading = true
 export let futures: Record<string, IFuture<any>> = {}
 export let hasWallet: boolean = false
 
-export let unityInterface: any
-
 const positionEvent = {
   position: Vector3.Zero(),
   quaternion: Quaternion.Identity,
   rotation: Vector3.Zero(),
   playerHeight: playerConfigurations.height,
   mousePosition: Vector3.Zero()
+}
+
+/////////////////////////////////// AUDIO STREAMING ///////////////////////////////////
+
+const audioStreamSource = new Audio()
+
+teleportObservable.add(() => {
+  audioStreamSource.pause()
+})
+
+async function setAudioStream(url: string, play: boolean, volume: number) {
+  const isSameSrc = audioStreamSource.src.length > 1 && url.includes(audioStreamSource.src)
+  const playSrc = play && (!isSameSrc || (isSameSrc && audioStreamSource.paused))
+
+  audioStreamSource.volume = volume
+
+  if (play && !isSameSrc) {
+    audioStreamSource.src = url
+  } else if (!play && isSameSrc) {
+    audioStreamSource.pause()
+  }
+
+  if (playSrc) {
+    try {
+      await audioStreamSource.play()
+    } catch (err) {
+      defaultLogger.log('setAudioStream: failed to play' + err)
+    }
+  }
 }
 
 /////////////////////////////////// HANDLERS ///////////////////////////////////
@@ -166,9 +196,10 @@ const browserInterface = {
       expressionId: data.id,
       timestamp: data.timestamp
     })
-    const id = uuid()
-    const chatMessage = `␐${data.id} ${data.timestamp}`
-    sendPublicChatMessage(id, chatMessage)
+    const messageId = uuid()
+    const body = `␐${data.id} ${data.timestamp}`
+
+    sendPublicChatMessage(messageId, body)
   },
 
   TermsOfServiceResponse(sceneId: string, accepted: boolean, dontShowAgain: boolean) {
@@ -183,6 +214,10 @@ const browserInterface = {
     }
   },
 
+  GoTo(data: { x: number; y: number }) {
+    TeleportController.goTo(data.x, data.y)
+  },
+
   LogOut() {
     Session.current.then(s => s.logout()).catch(e => defaultLogger.error('error while logging out', e))
   },
@@ -191,13 +226,13 @@ const browserInterface = {
     const { face, body, avatar } = changes
     const profile: Profile = getUserProfile().profile as Profile
     const updated = { ...profile, avatar: { ...avatar, snapshots: { face, body } } }
-    global.globalStore.dispatch(saveAvatarRequest(updated))
+    globalThis.globalStore.dispatch(saveProfileRequest(updated))
   },
 
   SaveUserTutorialStep(data: { tutorialStep: number }) {
     const profile: Profile = getUserProfile().profile as Profile
     profile.tutorialStep = data.tutorialStep
-    global.globalStore.dispatch(saveAvatarRequest(profile))
+    globalThis.globalStore.dispatch(saveProfileRequest(profile))
 
     persistCurrentUser({
       version: profile.version,
@@ -205,7 +240,7 @@ const browserInterface = {
     })
 
     if (data.tutorialStep === tutorialStepId.FINISHED) {
-      delightedSurvey()
+      // we used to call delightedSurvey() here
     }
   },
 
@@ -243,7 +278,7 @@ const browserInterface = {
   },
 
   EditAvatarClicked() {
-    delightedSurvey()
+    // We used to call delightedSurvey() here
   },
 
   ReportScene(sceneId: string) {
@@ -255,7 +290,7 @@ const browserInterface = {
   },
 
   BlockPlayer(data: { userId: string }) {
-    const profile = getProfile(global.globalStore.getState(), identity.address)
+    const profile = getProfile(globalThis.globalStore.getState(), identity.address)
 
     if (profile) {
       let blocked: string[] = [data.userId]
@@ -271,16 +306,16 @@ const browserInterface = {
         blocked = [...profile.blocked, ...blocked]
       }
 
-      global.globalStore.dispatch(saveAvatarRequest({ ...profile, blocked }))
+      globalThis.globalStore.dispatch(saveProfileRequest({ ...profile, blocked }))
     }
   },
 
   UnblockPlayer(data: { userId: string }) {
-    const profile = getProfile(global.globalStore.getState(), identity.address)
+    const profile = getProfile(globalThis.globalStore.getState(), identity.address)
 
     if (profile) {
       const blocked = profile.blocked ? profile.blocked.filter(id => id !== data.userId) : []
-      global.globalStore.dispatch(saveAvatarRequest({ ...profile, blocked }))
+      globalThis.globalStore.dispatch(saveProfileRequest({ ...profile, blocked }))
     }
   },
 
@@ -293,7 +328,23 @@ const browserInterface = {
         window.analytics.identify({ email: data.userEmail })
       }
     }
+  },
+
+  RequestScenesInfoInArea(data: { parcel: { x: number; y: number }; scenesAround: number }) {
+    globalThis.globalStore.dispatch(reportScenesAroundParcel(data.parcel, data.scenesAround))
+  },
+
+  SetAudioStream(data: { url: string; play: boolean; volume: number }) {
+    setAudioStream(data.url, data.play, data.volume).catch(err => defaultLogger.log(err))
+  },
+
+  SendChatMessage(data: { message: ChatMessage }) {
+    globalThis.globalStore.dispatch(sendMessage(data.message))
   }
+}
+globalThis.browserInterface = browserInterface
+type BrowserInterfaceContainer = {
+  browserInterface: typeof browserInterface
 }
 
 export function setLoadingScreenVisible(shouldShow: boolean) {
@@ -306,12 +357,19 @@ export function setLoadingScreenVisible(shouldShow: boolean) {
   }
 }
 
-function delightedSurvey() {
-  const { analytics, delighted } = global
+export function delightedSurvey() {
+  // tslint:disable-next-line:strict-type-predicates
+  if (typeof globalThis === 'undefined' || typeof globalThis !== 'object') {
+    return
+  }
+  const { analytics, delighted } = globalThis
+  if (!analytics || !delighted) {
+    return
+  }
   const profile = getUserProfile().profile as Profile | null
-  if (!isTheFirstLoading && analytics && delighted && profile) {
+  if (!isTheFirstLoading && profile) {
     const payload = {
-      email: profile.email || (profile.ethAddress + '@dcl.gg'),
+      email: profile.email || profile.ethAddress + '@dcl.gg',
       name: profile.name || 'Guest',
       properties: {
         ethAddress: profile.ethAddress,
@@ -327,51 +385,9 @@ function delightedSurvey() {
   }
 }
 
-const CHUNK_SIZE = 500
+const CHUNK_SIZE = 100
 
-export function* chunkGenerator(
-  parcelChunkSize: number,
-  info: { name: string; type: number; parcels: { x: number; y: number }[] }[]
-) {
-  if (parcelChunkSize < 1) {
-    throw Error(`parcel chunk size (${parcelChunkSize}) cannot be less than 1`)
-  }
-
-  // flatten scene data into parcels
-  const parcels = info.reduce(
-    (parcels, elem, index) =>
-      parcels.concat(
-        elem.parcels.map(parcel => ({
-          index,
-          name: elem.name,
-          type: elem.type,
-          parcel
-        }))
-      ),
-    [] as { index: number; name: string; type: number; parcel: { x: number; y: number } }[]
-  )
-
-  // split into chunk size + fold into scene
-  while (parcels.length > 0) {
-    const chunk = parcels
-      .splice(0, parcelChunkSize)
-      .reduce((scenes, parcel) => {
-        const scene = scenes.get(parcel.index)
-        if (scene) {
-          scene.parcels.push(parcel.parcel)
-        } else {
-          const newScene = { name: parcel.name, type: parcel.type, parcels: [parcel.parcel] }
-          scenes.set(parcel.index, newScene)
-        }
-        return scenes
-      }, new Map())
-      .values()
-
-    yield [...chunk]
-  }
-}
-
-unityInterface = {
+export const unityInterface = {
   debug: false,
   SendGenericMessage(object: string, method: string, payload: string) {
     gameInstance.SendMessage(object, method, payload)
@@ -466,23 +482,12 @@ unityInterface = {
   ShowNotification(notification: Notification) {
     gameInstance.SendMessage('HUDController', 'ShowNotificationFromJson', JSON.stringify(notification))
   },
-  ConfigureMinimapHUD(configuration: HUDConfiguration) {
-    gameInstance.SendMessage('HUDController', 'ConfigureMinimapHUD', JSON.stringify(configuration))
-  },
-  ConfigureAvatarHUD(configuration: HUDConfiguration) {
-    gameInstance.SendMessage('HUDController', 'ConfigureAvatarHUD', JSON.stringify(configuration))
-  },
-  ConfigureNotificationHUD(configuration: HUDConfiguration) {
-    gameInstance.SendMessage('HUDController', 'ConfigureNotificationHUD', JSON.stringify(configuration))
-  },
-  ConfigureAvatarEditorHUD(configuration: HUDConfiguration) {
-    gameInstance.SendMessage('HUDController', 'ConfigureAvatarEditorHUD', JSON.stringify(configuration))
-  },
-  ConfigureSettingsHUD(configuration: HUDConfiguration) {
-    gameInstance.SendMessage('HUDController', 'ConfigureSettingsHUD', JSON.stringify(configuration))
-  },
-  ConfigureExpressionsHUD(configuration: HUDConfiguration) {
-    gameInstance.SendMessage('HUDController', 'ConfigureExpressionsHUD', JSON.stringify(configuration))
+  ConfigureHUDElement(hudElementId: HUDElementID, configuration: HUDConfiguration) {
+    gameInstance.SendMessage(
+      'HUDController',
+      `ConfigureHUDElement`,
+      JSON.stringify({ hudElementId: hudElementId, configuration: configuration })
+    )
   },
   ShowWelcomeNotification() {
     gameInstance.SendMessage('HUDController', 'ShowWelcomeNotification')
@@ -490,22 +495,9 @@ unityInterface = {
   TriggerSelfUserExpression(expressionId: string) {
     gameInstance.SendMessage('HUDController', 'TriggerSelfUserExpression', expressionId)
   },
-  ConfigurePlayerInfoCardHUD(configuration: HUDConfiguration) {
-    gameInstance.SendMessage('HUDController', 'ConfigurePlayerInfoCardHUD', JSON.stringify(configuration))
-  },
-  ConfigureWelcomeHUD(configuration: WelcomeHUDControllerModel) {
-    gameInstance.SendMessage('HUDController', 'ConfigureWelcomeHUD', JSON.stringify(configuration))
-  },
-  ConfigureAirdroppingHUD(configuration: HUDConfiguration) {
-    gameInstance.SendMessage('HUDController', 'ConfigureAirdroppingHUD', JSON.stringify(configuration))
-  },
-  ConfigureTermsOfServiceHUD(configuration: HUDConfiguration) {
-    gameInstance.SendMessage('HUDController', 'ConfigureTermsOfServiceHUD', JSON.stringify(configuration))
-  },
-  UpdateMinimapSceneInformation(info: { name: string; type: number; parcels: { x: number; y: number }[] }[]) {
-    const chunks = chunkGenerator(CHUNK_SIZE, info)
-
-    for (const chunk of chunks) {
+  UpdateMinimapSceneInformation(info: MinimapSceneInfo[]) {
+    for (let i = 0; i < info.length; i += CHUNK_SIZE) {
+      const chunk = info.slice(i, i + CHUNK_SIZE)
       gameInstance.SendMessage('SceneController', 'UpdateMinimapSceneInformation', JSON.stringify(chunk))
     }
   },
@@ -519,6 +511,14 @@ unityInterface = {
   TriggerAirdropDisplay(data: AirdropInfo) {
     // Disabled for security reasons
   },
+  AddMessageToChatWindow(message: ChatMessage) {
+    gameInstance.SendMessage('SceneController', 'AddMessageToChatWindow', JSON.stringify(message))
+  },
+
+  // *********************************************************************************
+  // ************** Builder messages **************
+  // *********************************************************************************
+
   SelectGizmoBuilder(type: string) {
     this.SendBuilderMessage('SelectGizmo', type)
   },
@@ -569,7 +569,13 @@ unityInterface = {
   }
 }
 
-window['unityInterface'] = unityInterface
+globalThis.unityInterface = unityInterface
+
+export type UnityInterface = typeof unityInterface
+
+export type UnityInterfaceContainer = {
+  unityInterface: UnityInterface
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -784,7 +790,7 @@ export class UnityParcelScene extends UnityScene<LoadableParcelScene> {
 export async function initializeEngine(_gameInstance: GameInstance) {
   gameInstance = _gameInstance
 
-  global['globalStore'].dispatch(unityClientLoaded())
+  globalThis.globalStore.dispatch(unityClientLoaded())
   setLoadingScreenVisible(true)
 
   unityInterface.DeactivateRendering()
@@ -818,7 +824,7 @@ export async function initializeEngine(_gameInstance: GameInstance) {
     onMessage(type: string, message: any) {
       if (type in browserInterface) {
         // tslint:disable-next-line:semicolon
-        ; (browserInterface as any)[type](message)
+        ;(browserInterface as any)[type](message)
       } else {
         defaultLogger.info(`Unknown message (did you forget to add ${type} to unity-interface/dcl.ts?)`, message)
       }
@@ -830,7 +836,7 @@ export async function startUnityParcelLoading() {
   const p = await providerFuture
   hasWallet = p.successful
 
-  global['globalStore'].dispatch(loadingScenes())
+  globalThis.globalStore.dispatch(loadingScenes())
   await enableParcelSceneLoading({
     parcelSceneClass: UnityParcelScene,
     preloadScene: async _land => {
@@ -904,16 +910,15 @@ export async function loadPreviewScene() {
     // we load the scene to get the metadata
     // about rhe bounds and position of the scene
     // TODO(fmiras): Validate scene according to https://github.com/decentraland/proposals/blob/master/dsp/0020.mediawiki
-    const scene = (await result.json()) as IScene
+    const scene = (await result.json()) as SceneJsonData
     const mappingsFetch = await fetch('/mappings')
     const mappingsResponse = (await mappingsFetch.json()) as MappingsResponse
 
     let defaultScene: ILand = {
-      name: scene.name,
       sceneId: 'previewScene',
       baseUrl: location.toString().replace(/\?[^\n]+/g, ''),
       baseUrlBundles: '',
-      scene,
+      sceneJsonData: scene,
       mappingsResponse: mappingsResponse
     }
 
@@ -974,7 +979,7 @@ export function updateBuilderScene(sceneData: ILand) {
 teleportObservable.add((position: { x: number; y: number; text?: string }) => {
   // before setting the new position, show loading screen to avoid showing an empty world
   setLoadingScreenVisible(true)
-  const globalStore = global['globalStore']
+  const globalStore = globalThis.globalStore
   globalStore.dispatch(teleportTriggered(position.text || `Teleporting to ${position.x}, ${position.y}`))
 })
 
@@ -983,8 +988,6 @@ worldRunningObservable.add(isRunning => {
     setLoadingScreenVisible(false)
   }
 })
-
-window['messages'] = (e: any) => chatObservable.notifyObservers(e)
 
 document.addEventListener('pointerlockchange', e => {
   if (!document.pointerLockElement) {

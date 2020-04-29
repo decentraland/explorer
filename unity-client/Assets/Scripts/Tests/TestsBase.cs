@@ -1,9 +1,8 @@
-using DCL;
+﻿using DCL;
 using DCL.Controllers;
 using DCL.Helpers;
 using DCL.Models;
 using Newtonsoft.Json;
-using System;
 using System.Collections;
 using System.Reflection;
 using UnityEngine;
@@ -35,6 +34,7 @@ public class TestsBase
         SetUp_Camera();
         yield return SetUp_SceneController();
         yield return SetUp_CharacterController();
+        SetUp_Renderer();
     }
 
 
@@ -50,6 +50,13 @@ public class TestsBase
         MemoryManager.i?.CleanupPoolsIfNeeded(true);
         PoolManager.i?.Cleanup();
         PointerEventsController.i?.Cleanup();
+
+        if (DCLCharacterController.i != null)
+        {
+            DCLCharacterController.i.ResumeGravity();
+            DCLCharacterController.i.enabled = true;
+            DCLCharacterController.i.characterController.enabled = true;
+        }
 
         Caching.ClearCache();
         Resources.UnloadUnusedAssets();
@@ -92,6 +99,7 @@ public class TestsBase
 
         yield return null;
         Assert.IsTrue(DCLCharacterController.i != null);
+        DCLCharacterController.i.gameObject.SetActive(true);
         DCLCharacterController.i.characterController.enabled = true;
     }
 
@@ -131,6 +139,11 @@ public class TestsBase
         );
     }
 
+    public virtual void SetUp_Renderer()
+    {
+        CommonScriptableObjects.rendererState.Set(true);
+    }
+
 
     protected virtual IEnumerator InitScene(bool usesWebServer = false, bool spawnCharController = true, bool spawnTestScene = true, bool spawnUIScene = true, bool debugMode = false, bool reloadUnityScene = true)
     {
@@ -161,7 +174,7 @@ public class TestsBase
         yield break;
     }
 
-    public static T Reflection_GetStaticField<T>(Type baseType, string fieldName)
+    public static T Reflection_GetStaticField<T>(System.Type baseType, string fieldName)
     {
         return (T)baseType.GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Static).GetValue(null);
     }
@@ -169,6 +182,11 @@ public class TestsBase
     public static T Reflection_GetField<T>(object instance, string fieldName)
     {
         return (T)instance.GetType().GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance).GetValue(instance);
+    }
+
+    public static void Reflection_SetField<T>(object instance, string fieldName, T newValue)
+    {
+        instance.GetType().GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance).SetValue(instance, newValue);
     }
 
 }

@@ -14,7 +14,8 @@ namespace DCL.Models
         AUDIO_SOURCE = 201,
         GIZMOS = 203,
         BILLBOARD = 32,
-        SMART_ITEM = 204
+        SMART_ITEM = 204,
+        AUDIO_STREAM = 202
     }
 
     public enum CLASS_ID
@@ -48,6 +49,9 @@ namespace DCL.Models
         HIGHLIGHT_ENTITY = 66,
 
         TEXTURE = 68,
+
+        VIDEO_CLIP = 70,
+        VIDEO_TEXTURE = 71,
 
         AUDIO_CLIP = 200
     }

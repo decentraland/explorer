@@ -516,7 +516,7 @@ namespace DCL.Helpers
             scene.SharedComponentUpdate(componentId, model);
         }
 
-        static object GetRandomValueForType(Type t)
+        static object GetRandomValueForType(System.Type t)
         {
             if (t == typeof(float))
             {
@@ -642,7 +642,7 @@ namespace DCL.Helpers
                 yield return component.routine;
             }
 
-            Type componentType = typeof(TComponent);
+            System.Type componentType = typeof(TComponent);
 
             if (component is BaseShape)
             {
@@ -999,22 +999,24 @@ namespace DCL.Helpers
 
             // Check that there's at least one result
             if (results.Count == 0)
+            {
                 return false;
+            }
 
+            Debug.Log("results[0] = " + results[0].gameObject.name);
             // Check that the clicked object is the one on the front
             return results[0].gameObject == rectT.gameObject;
         }
 
         public static IEnumerator UnloadAllUnityScenes()
         {
+            if (SceneManager.sceneCount == 1)
+                yield break;
+
             for (int i = SceneManager.sceneCount - 1; i >= 0; i--)
             {
                 var scene = SceneManager.GetSceneAt(i);
-
-                if (scene.name.Contains(testingSceneName))
-                {
-                    yield return SceneManager.UnloadSceneAsync(scene);
-                }
+                yield return SceneManager.UnloadSceneAsync(scene);
             }
         }
 

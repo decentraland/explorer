@@ -1,4 +1,5 @@
-﻿using TMPro;
+using DCL;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,32 +10,40 @@ public class MinimapHUDView : MonoBehaviour
 
     [Header("Information")]
     [SerializeField] private TextMeshProUGUI sceneNameText;
-
     [SerializeField] private TextMeshProUGUI playerPositionText;
 
     [Header("Options")]
     [SerializeField] private Button optionsButton;
-
     [SerializeField] private GameObject optionsPanel;
-
     [SerializeField] private Button addBookmarkButton;
-
     [SerializeField] private Button reportSceneButton;
 
-    [SerializeField] private MinimapZoom minimapZoom;
+    [Header("Map Renderer")]
+    public RectTransform mapRenderContainer;
+    public RectTransform mapViewport;
+    [SerializeField] private Button openNavmapButton;
 
-    private MinimapHUDController controller;
+    public static System.Action<MinimapHUDModel> OnUpdateData;
+    public static System.Action OnOpenNavmapClicked;
 
     private void Initialize(MinimapHUDController controller)
     {
-        this.controller = controller;
         gameObject.name = VIEW_OBJECT_NAME;
         optionsPanel.SetActive(false);
 
         optionsButton.onClick.AddListener(controller.ToggleOptions);
         addBookmarkButton.onClick.AddListener(controller.AddBookmark);
         reportSceneButton.onClick.AddListener(controller.ReportScene);
-        minimapZoom.OnZoom += (relativeZoom) => controller.AddZoomDelta(relativeZoom);
+        openNavmapButton.onClick.AddListener(() => { OnOpenNavmapClicked?.Invoke(); });
+
+        var renderer = MapRenderer.i;
+
+        if (renderer != null)
+        {
+            renderer.atlas.viewport = mapViewport;
+            renderer.transform.SetParent(mapRenderContainer);
+            renderer.transform.SetAsFirstSibling();
+        }
     }
 
     internal static MinimapHUDView Create(MinimapHUDController controller)
@@ -48,6 +57,8 @@ public class MinimapHUDView : MonoBehaviour
     {
         sceneNameText.text = string.IsNullOrEmpty(model.sceneName) ? "Unnamed" : model.sceneName;
         playerPositionText.text = model.playerPosition;
+
+        OnUpdateData?.Invoke(model);
     }
 
     public void ToggleOptions()

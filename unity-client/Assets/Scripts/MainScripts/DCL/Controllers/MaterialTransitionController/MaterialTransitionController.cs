@@ -32,6 +32,7 @@ public class MaterialTransitionController : MonoBehaviour
     Material hologramMaterialCopy;
 
     public Material[] finalMaterials;
+    Material[] cullingFXMaterials;
 
     Renderer targetRendererValue;
 
@@ -59,28 +60,33 @@ public class MaterialTransitionController : MonoBehaviour
     public bool materialReady { get; private set; }
     public bool canSwitchMaterial { get { return materialReady && state != State.FINISHED; } }
 
-    public void PopulateLoadingMaterialWithFinalMaterial()
+    public void PopulateTargetRendererWithMaterial(Material[] newMaterials, bool updateCulling = false)
     {
-        for (int i = 0; i < finalMaterials.Length; i++)
+        if (newMaterials == null) return;
+
+        Material material;
+        for (int i = 0; i < newMaterials.Length; i++)
         {
-            Material material = finalMaterials[i];
+            material = newMaterials[i];
 
             material.SetColor(ShaderId_LoadingColor, Color.clear);
             material.SetFloat(ShaderId_FadeDirection, 0);
             material.SetFloat(ShaderId_FadeThickness, fadeThickness);
-            material.SetFloat(ShaderId_CullYPlane, currentCullYPlane);
+
+            if (updateCulling)
+                material.SetFloat(ShaderId_CullYPlane, currentCullYPlane);
         }
 
-        targetRenderer.sharedMaterials = finalMaterials;
+        targetRenderer.sharedMaterials = newMaterials;
     }
 
-    void UpdateCullYValue()
+    void UpdateCullYValueFXMaterial()
     {
-        if (finalMaterials != null)
+        if (cullingFXMaterials != null)
         {
-            for (int i = 0; i < finalMaterials.Length; i++)
+            for (int i = 0; i < cullingFXMaterials.Length; i++)
             {
-                Material material = finalMaterials[i];
+                Material material = cullingFXMaterials[i];
                 material.SetFloat(ShaderId_CullYPlane, currentCullYPlane);
             }
         }
@@ -92,6 +98,14 @@ public class MaterialTransitionController : MonoBehaviour
             hologramMaterialCopy.SetFloat(ShaderId_CullYPlane, currentCullYPlane);
     }
 
+    void PrepareCullingFXMaterials()
+    {
+        cullingFXMaterials = new Material[finalMaterials.Length];
+        for (int i = 0; i < finalMaterials.Length; i++)
+        {
+            cullingFXMaterials[i] = new Material(finalMaterials[i]);
+        }
+    }
 
     private void Awake()
     {
@@ -146,7 +160,6 @@ public class MaterialTransitionController : MonoBehaviour
         placeholderRenderer.sharedMaterials = new Material[] { hologramMaterialCopy };
     }
 
-
     private void Update()
     {
         if (targetRendererValue == null)
@@ -170,7 +183,9 @@ public class MaterialTransitionController : MonoBehaviour
                     {
                         currentCullYPlane = topYRendererBounds;
                         targetRendererValue.enabled = true;
-                        PopulateLoadingMaterialWithFinalMaterial();
+
+                        PrepareCullingFXMaterials();
+                        PopulateTargetRendererWithMaterial(cullingFXMaterials, true);
 
                         state = State.SHOWING_LOADED;
                     }
@@ -184,10 +199,13 @@ public class MaterialTransitionController : MonoBehaviour
                     currentCullYPlane = Mathf.Clamp(currentCullYPlane, lowerYRendererBounds, topYRendererBounds);
 
                     UpdateCullYValueHologram();
-                    UpdateCullYValue();
+                    UpdateCullYValueFXMaterial();
 
                     if (currentCullYPlane <= lowerYRendererBounds + 0.1f)
                     {
+                        // We don't update the culling value in the final material to avoid affecting the already-loaded meshes
+                        PopulateTargetRendererWithMaterial(finalMaterials);
+
                         DestroyPlaceholder();
                         state = State.FINISHED;
                     }
@@ -229,6 +247,14 @@ public class MaterialTransitionController : MonoBehaviour
         if (placeholder != null)
         {
             Destroy(placeholder);
+        }
+
+        if (cullingFXMaterials != null)
+        {
+            for (int i = 0; i < cullingFXMaterials.Length; i++)
+            {
+                Destroy(cullingFXMaterials[i]);
+            }
         }
     }
 

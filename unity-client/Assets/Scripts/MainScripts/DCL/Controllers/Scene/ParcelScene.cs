@@ -20,6 +20,7 @@ namespace DCL.Controllers
             READY,
         }
 
+        public static ParcelScenesCleaner parcelScenesCleaner = new ParcelScenesCleaner();
         private const int ENTITY_POOL_PREWARM_COUNT = 2000;
 
         public Dictionary<string, DecentralandEntity> entities = new Dictionary<string, DecentralandEntity>();
@@ -38,9 +39,6 @@ namespace DCL.Controllers
         public int disposableNotReadyCount => disposableNotReady.Count;
 
         [System.NonSerialized]
-        public bool useBoundariesChecker = false;
-
-        [System.NonSerialized]
         public bool useBlockers = true;
 
         [System.NonSerialized]
@@ -52,22 +50,16 @@ namespace DCL.Controllers
         [System.NonSerialized]
         public bool unloadWithDistance = true;
 
-        public static ParcelScenesCleaner parcelScenesCleaner = new ParcelScenesCleaner();
-
-        private readonly List<string> disposableNotReady = new List<string>();
-        private bool isReleased = false;
-        public bool isReady => state == State.READY;
-        private State state = State.NOT_READY;
-        public SceneBoundariesChecker boundariesChecker { private set; get; }
-
         public BlockerHandler blockerHandler;
+        public bool isReady => state == State.READY;
 
+        readonly List<string> disposableNotReady = new List<string>();
+        bool isReleased = false;
+        State state = State.NOT_READY;
 
         public void Awake()
         {
             state = State.NOT_READY;
-
-            blockerHandler = new BlockerHandler();
 
             if (DCLCharacterController.i)
                 DCLCharacterController.i.characterPosition.OnPrecisionAdjust += OnPrecisionAdjust;
@@ -75,10 +67,8 @@ namespace DCL.Controllers
             metricsController = new SceneMetricsController(this);
             metricsController.Enable();
 
-            if (SceneController.i.isDebugMode)
-                boundariesChecker = new SceneBoundariesDebugModeChecker(this);
-            else
-                boundariesChecker = new SceneBoundariesChecker(this);
+            CommonScriptableObjects.rendererState.OnChange += OnRenderingStateChanged;
+            OnRenderingStateChanged(CommonScriptableObjects.rendererState.Get(), false);
         }
 
         void OnDisable()
@@ -86,9 +76,15 @@ namespace DCL.Controllers
             metricsController.Disable();
         }
 
+        private void OnDestroy()
+        {
+            blockerHandler?.CleanBlockers();
+            CommonScriptableObjects.rendererState.OnChange -= OnRenderingStateChanged;
+        }
+
         private void Update()
         {
-            if (state == State.READY && RenderingController.i.renderingEnabled)
+            if (state == State.READY && CommonScriptableObjects.rendererState.Get())
                 SendMetricsEvent();
         }
 
@@ -138,6 +134,9 @@ namespace DCL.Controllers
                 parcels.Add(sceneData.parcels[i]);
             }
 
+            if (useBlockers)
+                blockerHandler = new BlockerHandler();
+
             if (DCLCharacterController.i != null)
                 gameObject.transform.position = DCLCharacterController.i.characterPosition.WorldToUnityPosition(Utils.GridToWorldPosition(data.basePosition.x, data.basePosition.y));
 
@@ -149,8 +148,7 @@ namespace DCL.Controllers
                 return;
             }
 #endif
-            if (useBlockers)
-                blockerHandler.SetupBlockers(data.parcels, metricsController.GetLimits().sceneHeight, this.transform);
+            blockerHandler?.SetupBlockers(parcels, metricsController.GetLimits().sceneHeight, this.transform);
 
             if (isTestScene)
                 SetSceneReady();
@@ -222,7 +220,7 @@ namespace DCL.Controllers
             if (DCLCharacterController.i)
                 DCLCharacterController.i.characterPosition.OnPrecisionAdjust -= OnPrecisionAdjust;
 
-            if (!RenderingController.i.renderingEnabled)
+            if (!CommonScriptableObjects.rendererState.Get())
             {
                 RemoveAllEntitiesImmediate();
             }
@@ -348,8 +346,8 @@ namespace DCL.Controllers
 
             newEntity.OnCleanupEvent += po.OnCleanup;
 
-            if (useBoundariesChecker || SceneController.i.isDebugMode)
-                newEntity.OnShapeUpdated += boundariesChecker.EvaluateEntityPosition;
+            if (SceneController.i.useBoundariesChecker)
+                newEntity.OnShapeUpdated += SceneController.i.boundariesChecker.AddEntityToBeChecked;
 
             entities.Add(tmpCreateEntityMessage.id, newEntity);
 
@@ -375,8 +373,15 @@ namespace DCL.Controllers
                     CleanUpEntityRecursively(entity, removeImmediatelyFromEntitiesList);
                 }
 
+                if (SceneController.i.useBoundariesChecker)
+                {
+                    entity.OnShapeUpdated -= SceneController.i.boundariesChecker.AddEntityToBeChecked;
+                    SceneController.i.boundariesChecker.RemoveEntityToBeChecked(entity);
+                }
+
                 entities.Remove(tmpRemoveEntityMessage.id);
             }
+
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             else
             {
@@ -384,8 +389,6 @@ namespace DCL.Controllers
             }
 #endif
         }
-
-
 
         void CleanUpEntityRecursively(DecentralandEntity entity, bool removeImmediatelyFromEntitiesList)
         {
@@ -551,8 +554,7 @@ namespace DCL.Controllers
                     entity.gameObject.transform.localRotation = DCLTransform.model.rotation;
                     entity.gameObject.transform.localScale = DCLTransform.model.scale;
 
-                    if (useBoundariesChecker || SceneController.i.isDebugMode)
-                        boundariesChecker.EvaluateEntityPosition(entity);
+                    SceneController.i.boundariesChecker?.AddEntityToBeChecked(entity);
                 }
 
                 return null;
@@ -829,6 +831,18 @@ namespace DCL.Controllers
                         break;
                     }
 
+                case CLASS_ID.VIDEO_CLIP:
+                    {
+                        newComponent = new DCLVideoClip(this);
+                        break;
+                    }
+
+                case CLASS_ID.VIDEO_TEXTURE:
+                    {
+                        newComponent = new DCLVideoTexture(this);
+                        break;
+                    }
+
                 default:
                     Debug.LogError($"Unknown classId");
                     break;
@@ -1090,13 +1104,20 @@ namespace DCL.Controllers
 
             state = State.READY;
 
-            if (useBlockers)
-                blockerHandler.CleanBlockers();
+            blockerHandler?.CleanBlockers();
 
             SceneController.i.SendSceneReady(sceneData.id);
             RefreshName();
 
             OnSceneReady?.Invoke(this);
+        }
+
+        void OnRenderingStateChanged(bool isEnable, bool prevState)
+        {
+            if (isEnable)
+            {
+                parcelScenesCleaner.ForceCleanup();
+            }
         }
 
 #if UNITY_EDITOR
@@ -1117,7 +1138,16 @@ namespace DCL.Controllers
 
                             foreach (var entity in component.attachedEntities)
                             {
-                                Debug.Log($"This shape is attached to {entity.entityId} entity. Click here for highlight it.", entity.gameObject);
+                                var loader = LoadableShape.GetLoaderForEntity(entity);
+
+                                string loadInfo = "No loader";
+
+                                if (loader != null)
+                                {
+                                    loadInfo = loader.ToString();
+                                }
+
+                                Debug.Log($"This shape is attached to {entity.entityId} entity. Click here for highlight it.\nLoading info: {loadInfo}", entity.gameObject);
                             }
                         }
                         else

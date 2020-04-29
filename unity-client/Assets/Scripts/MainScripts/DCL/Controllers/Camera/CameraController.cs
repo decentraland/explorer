@@ -26,8 +26,8 @@ public class CameraController : MonoBehaviour
 
     private void Start()
     {
-        if (RenderingController.i != null)
-            RenderingController.i.OnRenderingStateChanged += OnRenderingStateChanged;
+        CommonScriptableObjects.rendererState.OnChange += OnRenderingStateChanged;
+        OnRenderingStateChanged(CommonScriptableObjects.rendererState.Get(), false);
 
         cachedModeToVirtualCamera = cameraModes.ToDictionary(x => x.cameraModeId, x => x);
 
@@ -45,7 +45,7 @@ public class CameraController : MonoBehaviour
         SetCameraMode(currentMode);
     }
 
-    private void OnRenderingStateChanged(bool enabled)
+    private void OnRenderingStateChanged(bool enabled, bool prevState)
     {
         cameraTransform.gameObject.SetActive(enabled);
     }
@@ -89,6 +89,11 @@ public class CameraController : MonoBehaviour
         currentCameraState?.OnSetRotation(payload);
     }
 
+    public void SetRotation(float x, float y, float z, Vector3? cameraTarget = null)
+    {
+        currentCameraState?.OnSetRotation(new SetRotationPayload() { x = x, y = y, z = z, cameraTarget = cameraTarget });
+    }
+
     public Vector3 GetRotation()
     {
         if (currentCameraState != null)
@@ -107,9 +112,10 @@ public class CameraController : MonoBehaviour
     {
         CommonScriptableObjects.playerUnityToWorldOffset.OnChange -= PrecisionChanged;
         cameraChangeAction.OnTriggered -= OnCameraChangeAction;
-        RenderingController.i.OnRenderingStateChanged -= OnRenderingStateChanged;
+        CommonScriptableObjects.rendererState.OnChange -= OnRenderingStateChanged;
     }
 
+    [System.Serializable]
     public class SetRotationPayload
     {
         public float x;

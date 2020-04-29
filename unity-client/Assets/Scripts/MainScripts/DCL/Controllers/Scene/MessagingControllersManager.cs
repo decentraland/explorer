@@ -24,6 +24,7 @@ namespace DCL
 
         public bool hasPendingMessages => pendingMessagesCount > 0;
 
+        public float timeBudgetCounter = MAX_GLOBAL_MSG_BUDGET;
         public int pendingMessagesCount;
         public int pendingInitMessagesCount;
         public long processedInitMessagesCount;
@@ -226,8 +227,6 @@ namespace DCL
             }
         }
 
-        float timeBudgetCounter = MAX_GLOBAL_MSG_BUDGET;
-
         IEnumerator ProcessMessages()
         {
             while (true)
@@ -238,7 +237,7 @@ namespace DCL
                     populateBusesDirty = false;
                 }
 
-                timeBudgetCounter = RenderingController.i.renderingEnabled ? MAX_GLOBAL_MSG_BUDGET : float.MaxValue;
+                timeBudgetCounter = CommonScriptableObjects.rendererState.Get() ? MAX_GLOBAL_MSG_BUDGET : float.MaxValue;
 
                 for (int i = 0; i < busesToProcessCount; ++i)
                 {

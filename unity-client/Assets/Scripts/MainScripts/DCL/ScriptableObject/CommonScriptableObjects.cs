@@ -5,6 +5,9 @@ public static class CommonScriptableObjects
     private static Vector3Variable playerUnityPositionValue;
     public static Vector3Variable playerUnityPosition => GetOrLoad(ref playerUnityPositionValue, "ScriptableObjects/PlayerUnityPosition");
 
+    private static Vector3Variable playerWorldPositionValue;
+    public static Vector3Variable playerWorldPosition => GetOrLoad(ref playerWorldPositionValue, "ScriptableObjects/PlayerWorldPosition");
+
     private static Vector3Variable playerUnityEulerAnglesValue;
     public static Vector3Variable playerUnityEulerAngles => GetOrLoad(ref playerUnityEulerAnglesValue, "ScriptableObjects/PlayerUnityEulerAngles");
 
@@ -29,8 +32,14 @@ public static class CommonScriptableObjects
     private static Vector3Variable cameraPositionValue;
     public static Vector3Variable cameraPosition => GetOrLoad(ref cameraPositionValue, "ScriptableObjects/CameraPosition");
 
-    public static Vector3Variable cameraRight => GetOrLoad(ref cameraRightValue, "ScriptableObjects/CameraRight");
     private static Vector3Variable cameraRightValue;
+    public static Vector3Variable cameraRight => GetOrLoad(ref cameraRightValue, "ScriptableObjects/CameraRight");
+
+    private static BooleanVariable playerInfoCardVisibleStateValue;
+    public static BooleanVariable playerInfoCardVisibleState => GetOrLoad(ref playerInfoCardVisibleStateValue, "ScriptableObjects/PlayerInfoCardVisibleState");
+
+    public static RendererState rendererState => GetOrLoad(ref rendererStateValue, "ScriptableObjects/RendererState");
+    private static RendererState rendererStateValue;
 
     private static T GetOrLoad<T>(ref T variable, string path) where T : Object
     {

@@ -1,5 +1,6 @@
 import { getUserProfile } from 'shared/comms/peers'
 import { tutorialStepId } from '../decentraland-loader/lifecycle/tutorial/tutorial'
+import { contracts as contractInfo } from './contracts'
 const queryString = require('query-string')
 declare var window: any
 
@@ -94,6 +95,7 @@ export const STATIC_WORLD = location.search.indexOf('STATIC_WORLD') !== -1 || !!
 // Development
 export const ENABLE_WEB3 = location.search.indexOf('ENABLE_WEB3') !== -1 || !!(global as any).enableWeb3
 export const ENV_OVERRIDE = location.search.indexOf('ENV') !== -1
+export const USE_NEW_CHAT = location.search.indexOf('USE_NEW_CHAT') !== -1
 
 const qs = queryString.parse(location.search)
 
@@ -132,11 +134,13 @@ export const SCENE_DEBUG_PANEL = location.search.indexOf('SCENE_DEBUG_PANEL') !=
 export const SHOW_FPS_COUNTER = location.search.indexOf('SHOW_FPS_COUNTER') !== -1 || DEBUG
 export const RESET_TUTORIAL = location.search.indexOf('RESET_TUTORIAL') !== -1
 export const NO_TUTORIAL = location.search.indexOf('NO_TUTORIAL') !== -1
+export const HAS_INITIAL_POSITION_MARK = location.search.indexOf('position') !== -1
 
 export function tutorialEnabled() {
   return (
     !NO_TUTORIAL &&
     WORLD_EXPLORER &&
+    !HAS_INITIAL_POSITION_MARK &&
     (RESET_TUTORIAL || getUserProfile().profile.tutorialStep !== tutorialStepId.FINISHED)
   )
 }
@@ -148,6 +152,8 @@ export function tutorialSceneEnabled() {
 export namespace commConfigurations {
   export const debug = true
   export const commRadius = 4
+
+  export const sendAnalytics = true
 
   export const peerTtlMs = 60000
 
@@ -263,8 +269,7 @@ export function getServerConfigurations() {
 
 export async function setNetwork(net: ETHEREUM_NETWORK) {
   try {
-    const response = await fetch('https://contracts.decentraland.org/addresses.json')
-    const json = await response.json()
+    const json = contractInfo
 
     network = net
     contracts = json[net]

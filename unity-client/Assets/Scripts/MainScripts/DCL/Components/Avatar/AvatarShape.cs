@@ -1,4 +1,5 @@
 using DCL.Components;
+using DCL.Interface;
 using System.Collections;
 using UnityEngine;
 
@@ -6,14 +7,14 @@ namespace DCL
 {
     public class AvatarShape : BaseComponent
     {
-        private const string CURRENT_PLAYER_NAME = "CurrentPlayerInfoCardName";
+        private const string CURRENT_PLAYER_ID = "CurrentPlayerInfoCardId";
 
         public AvatarName avatarName;
         public AvatarRenderer avatarRenderer;
         public AvatarMovementController avatarMovementController;
         [SerializeField] internal GameObject minimapRepresentation;
-        [SerializeField] private RaycastPointerClickProxy clickProxy;
-        private StringVariable currentPlayerInfoCardName;
+        [SerializeField] private AvatarOnPointerDown onPointerDown;
+        private StringVariable currentPlayerInfoCardId;
 
         private string currentSerialization = "";
         public AvatarModel model = new AvatarModel();
@@ -22,22 +23,32 @@ namespace DCL
 
         void Awake()
         {
-            currentPlayerInfoCardName = Resources.Load<StringVariable>(CURRENT_PLAYER_NAME);
+            currentPlayerInfoCardId = Resources.Load<StringVariable>(CURRENT_PLAYER_ID);
 
             if (string.IsNullOrEmpty(currentSerialization))
                 SetMinimapRepresentationActive(false);
 
-            clickProxy.OnClick += PlayerClicked;
+            onPointerDown.OnPointerDownReport += PlayerClicked;
+        }
+
+        void Start()
+        {
+            onPointerDown.Setup(scene, entity, new OnPointerDown.Model()
+            {
+                type = OnPointerDown.NAME,
+                button = WebInterface.ACTION_BUTTON.POINTER.ToString(),
+                hoverText = "view profile"
+            });
         }
 
         private void PlayerClicked()
         {
-            currentPlayerInfoCardName.Set(model?.name);
+            currentPlayerInfoCardId.Set(model?.id);
         }
 
         void OnDestroy()
         {
-            clickProxy.OnClick -= PlayerClicked;
+            onPointerDown.OnPointerDownReport -= PlayerClicked;
             if (entity != null)
                 entity.OnTransformChange = null;
         }
@@ -47,7 +58,6 @@ namespace DCL
             //NOTE(Brian): Horrible fix to the double ApplyChanges call, as its breaking the needed logic.
             if (newJson == "{}")
                 yield break;
-
 
             if (entity != null && entity.OnTransformChange == null)
             {

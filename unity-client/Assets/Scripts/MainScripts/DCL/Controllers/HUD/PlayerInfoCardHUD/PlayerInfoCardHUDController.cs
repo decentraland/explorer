@@ -1,13 +1,12 @@
-﻿using System;
 using DCL.Interface;
 using UnityEngine;
 
-public class PlayerInfoCardHUDController : IHUD, IDisposable
+public class PlayerInfoCardHUDController : IHUD
 {
-    internal const string CURRENT_PLAYER_NAME = "CurrentPlayerInfoCardName";
+    internal const string CURRENT_PLAYER_ID = "CurrentPlayerInfoCardId";
 
     internal PlayerInfoCardHUDView view;
-    internal StringVariable currentPlayerName;
+    internal StringVariable currentPlayerId;
     internal UserProfile currentUserProfile;
     private UserProfile ownUserProfile => UserProfile.GetOwnUserProfile();
 
@@ -15,19 +14,19 @@ public class PlayerInfoCardHUDController : IHUD, IDisposable
     public PlayerInfoCardHUDController()
     {
         view = PlayerInfoCardHUDView.CreateView();
-        view.Initialize(() => { currentPlayerName.Set(null); }, ReportPlayer, BlockPlayer, UnblockPlayer);
-        currentPlayerName = Resources.Load<StringVariable>(CURRENT_PLAYER_NAME);
-        currentPlayerName.OnChange += OnCurrentPlayerNameChanged;
-        OnCurrentPlayerNameChanged(currentPlayerName, null);
+        view.Initialize(() => { currentPlayerId.Set(null); }, ReportPlayer, BlockPlayer, UnblockPlayer);
+        currentPlayerId = Resources.Load<StringVariable>(CURRENT_PLAYER_ID);
+        currentPlayerId.OnChange += OnCurrentPlayerIdChanged;
+        OnCurrentPlayerIdChanged(currentPlayerId, null);
     }
 
 
-    internal void OnCurrentPlayerNameChanged(string current, string previous)
+    internal void OnCurrentPlayerIdChanged(string current, string previous)
     {
         if (currentUserProfile != null)
             currentUserProfile.OnUpdate -= SetUserProfile;
 
-        currentUserProfile = string.IsNullOrEmpty(currentPlayerName) ? null : UserProfileController.userProfilesCatalog.Get(currentPlayerName);
+        currentUserProfile = string.IsNullOrEmpty(currentPlayerId) ? null : UserProfileController.userProfilesCatalog.Get(currentPlayerId);
 
         if (currentUserProfile == null)
         {
@@ -69,7 +68,7 @@ public class PlayerInfoCardHUDController : IHUD, IDisposable
 
     private void ReportPlayer()
     {
-        WebInterface.SendReportPlayer(currentPlayerName);
+        WebInterface.SendReportPlayer(currentPlayerId);
     }
 
     public void Dispose()
@@ -77,7 +76,7 @@ public class PlayerInfoCardHUDController : IHUD, IDisposable
         if (currentUserProfile != null)
             currentUserProfile.OnUpdate -= SetUserProfile;
 
-        if (currentPlayerName != null)
-            currentPlayerName.OnChange -= OnCurrentPlayerNameChanged;
+        if (currentPlayerId != null)
+            currentPlayerId.OnChange -= OnCurrentPlayerIdChanged;
     }
 }
