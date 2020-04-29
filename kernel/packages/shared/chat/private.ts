@@ -3,13 +3,15 @@ import { SocialClient, FriendshipRequest, Conversation } from 'dcl-social-client
 import { SocialAPI } from 'dcl-social-client/dist/SocialAPI'
 import { Authenticator } from 'dcl-crypto'
 import { takeEvery, put, select } from 'redux-saga/effects'
-import { SEND_PRIVATE_MESSAGE, SendPrivateMessage, clientInitialized } from './actions'
+import { SEND_PRIVATE_MESSAGE, SendPrivateMessage, clientInitialized, sendPrivateMessage } from './actions'
 import { getClient, findByUserId, isFriend } from './selectors'
 import { createLogger } from '../logger'
 import { ProfileAsPromise } from '../profiles/ProfileAsPromise'
 import { unityInterface } from 'unity-interface/dcl'
 import { ChatMessageType } from 'shared/types'
 import { SocialData } from './types'
+
+declare const globalThis: { sendPrivateMessage: (userId: string, message: string) => void }
 
 const logger = createLogger('chat: ')
 
@@ -213,3 +215,6 @@ function toSocialData(socialIds: string[]) {
     }))
     .filter(({ userId }) => !!userId) as SocialData[]
 }
+
+globalThis.sendPrivateMessage = (userId: string, message: string) =>
+  handleSendPrivateMessage(sendPrivateMessage(userId, message), true)

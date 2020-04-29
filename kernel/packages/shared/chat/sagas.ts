@@ -38,8 +38,7 @@ import { identity } from '../index'
 import { AUTH_SUCCESSFUL } from '../loading/types'
 import { getServerConfigurations } from '../../config/index'
 
-declare const globalThis: UnityInterfaceContainer &
-  StoreContainer & { sendPrivateMessage: (userId: string, message: string) => void }
+declare const globalThis: UnityInterfaceContainer & StoreContainer
 
 interface IChatCommand {
   name: string
@@ -509,6 +508,3 @@ function parseWhisperExpression(expression: string) {
 
   return [userName, restOfMessage]
 }
-
-globalThis.sendPrivateMessage = (userId: string, message: string) =>
-  globalThis.globalStore.dispatch(sendPrivateMessage(userId, message), true)
