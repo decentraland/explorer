@@ -141,6 +141,19 @@ MonoBehaviour:
     type: 3}
   receivedRequestsContainer: {fileID: 8912797600660916732}
   sentRequestsContainer: {fileID: 4417659405308114824}
+  requestSentNotification: {fileID: 8347565519525447700}
+  requestSentNotificationText: {fileID: 2671914754147954507}
+  friendSearchFailedNotification: {fileID: 6043985242258827856}
+  acceptedFriendNotification: {fileID: 8480154010055608497}
+  acceptedFriendNotificationText: {fileID: 2451271072227462636}
+  rejectRequestDialog: {fileID: 2381761533188805065}
+  rejectRequestDialogText: {fileID: 1812117283198954669}
+  rejectRequestDialogCancelButton: {fileID: 1121386393595440412}
+  rejectRequestDialogConfirmButton: {fileID: 7795992283709463811}
+  cancelRequestDialog: {fileID: 3638255728589380681}
+  cancelRequestDialogText: {fileID: 8938215561938896953}
+  cancelRequestDialogCancelButton: {fileID: 9040031509112313173}
+  cancelRequestDialogConfirmButton: {fileID: 9102068592350534347}
 --- !u!1 &588637995014497629
 GameObject:
   m_ObjectHideFlags: 0
