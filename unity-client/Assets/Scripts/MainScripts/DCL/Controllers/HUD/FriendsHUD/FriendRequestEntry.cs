@@ -11,11 +11,14 @@ public class FriendRequestEntry : MonoBehaviour
     [SerializeField] internal Button rejectButton;
     [SerializeField] internal Button cancelButton;
 
-    string playerId;
+    string friendId;
     public System.Action<string> OnRemoved;
+    public System.Action<string> OnAccepted;
 
-    public void Populate(string playerName, Sprite playerAvatarImage, bool isReceived)
+    public void Populate(string playerId, string playerName, Sprite playerAvatarImage, bool isReceived)
     {
+        friendId = playerId;
+
         playerNameText.text = playerName;
         playerImage.sprite = playerAvatarImage;
 
@@ -48,7 +51,9 @@ public class FriendRequestEntry : MonoBehaviour
 
         // TODO: Add to friends list
 
-        OnRemoved?.Invoke(playerId);
+        OnAccepted?.Invoke(friendId);
+
+        OnRemoved?.Invoke(friendId);
         Destroy(gameObject);
     }
 
@@ -56,7 +61,7 @@ public class FriendRequestEntry : MonoBehaviour
     {
         // TODO: Notify Kernel
 
-        OnRemoved?.Invoke(playerId);
+        OnRemoved?.Invoke(friendId);
         Destroy(gameObject);
     }
 
@@ -64,7 +69,7 @@ public class FriendRequestEntry : MonoBehaviour
     {
         // TODO: Notify Kernel
 
-        OnRemoved?.Invoke(playerId);
+        OnRemoved?.Invoke(friendId);
         Destroy(gameObject);
     }
 }

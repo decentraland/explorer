@@ -39,11 +39,15 @@ public class FriendRequestsListView : MonoBehaviour
         friendSearchInputField.onSubmit.AddListener(SendFriendRequest);
     }
 
-    void SendFriendRequest(string targetFriendId)
+    void SendFriendRequest(string friendId)
     {
         // TODO: Check existence with kernel, if the user exists trigger requestSentNotification
 
-        TriggerNotification(friendSearchFailedNotification);
+        requestSentNotificationText.text = $"Your request to {friendId} successfully sent!";
+        TriggerNotification(requestSentNotification);
+
+        // If friend Id doesn't exist:
+        // TriggerNotification(friendSearchFailedNotification);
     }
 
     void TriggerNotification(GameObject notificationGameobject)
@@ -74,6 +78,7 @@ public class FriendRequestsListView : MonoBehaviour
         {
             friendRequestEntry = Instantiate(friendRequestEntryPrefab).GetComponent<FriendRequestEntry>();
             friendRequestEntry.OnRemoved += OnFriendRequestRemoved;
+            friendRequestEntry.OnAccepted += OnFriendRequestReceivedAccepted;
 
             // TODO
             // friendRequestEntry.Populate();
@@ -85,5 +90,11 @@ public class FriendRequestsListView : MonoBehaviour
     void OnFriendRequestRemoved(string playerId)
     {
         friendRequestEntries.Remove(playerId);
+    }
+
+    void OnFriendRequestReceivedAccepted(string friendId)
+    {
+        acceptedFriendNotificationText.text = $"You and {friendId} are now friends!";
+        TriggerNotification(acceptedFriendNotification);
     }
 }
