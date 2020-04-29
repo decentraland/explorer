@@ -81,7 +81,7 @@ public class FriendRequestsListView : MonoBehaviour
             currentNotification = null;
         }
 
-        notificationGameobject.SetActive(false);
+        notificationGameobject.SetActive(true);
         StartCoroutine(WaitAndCloseNotification(notificationGameobject));
     }
 
@@ -90,6 +90,7 @@ public class FriendRequestsListView : MonoBehaviour
         currentNotification = notificationGameobject;
 
         yield return WaitForSecondsCache.Get(notificationsDuration);
+        notificationGameobject.SetActive(false);
     }
 
     public void UpdateOrCreateFriendRequestEntry(string userId, bool isReceived)
