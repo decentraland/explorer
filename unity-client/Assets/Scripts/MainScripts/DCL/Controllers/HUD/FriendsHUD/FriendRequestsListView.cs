@@ -176,9 +176,9 @@ public class FriendRequestsListView : MonoBehaviour
         if (selectedRequestEntry == null) return;
 
         rejectRequestDialog.SetActive(false);
-        selectedRequestEntry = null;
-
         OnFriendRequestRejected?.Invoke(selectedRequestEntry);
+        RemoveEntry(selectedRequestEntry.userId);
+        selectedRequestEntry = null;
     }
 
     void OnFriendRequestSentCancelled(FriendRequestEntry requestEntry)
@@ -195,6 +195,7 @@ public class FriendRequestsListView : MonoBehaviour
 
         cancelRequestDialog.SetActive(false);
         OnFriendRequestCancelled?.Invoke(selectedRequestEntry);
+        RemoveEntry(selectedRequestEntry.userId);
         selectedRequestEntry = null;
     }
 
