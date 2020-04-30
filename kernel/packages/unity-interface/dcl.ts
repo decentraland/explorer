@@ -352,13 +352,13 @@ const browserInterface = {
     globalThis.globalStore.dispatch(updateFriendship(action, userId, false))
   }
 }
-globalThis.browserInterface = browserInterface
+globalThis.browserInterface2 = browserInterface
 type BrowserInterfaceContainer = {
-  browserInterface: typeof browserInterface
+  browserInterface2: typeof browserInterface
 }
 
 function toSocialId(userId: string) {
-  return `@${userId}:${getServerConfigurations().synapseHost}`
+  return `@${userId.toLowerCase()}:${getServerConfigurations().synapseHost}`
 }
 
 export function setLoadingScreenVisible(shouldShow: boolean) {
