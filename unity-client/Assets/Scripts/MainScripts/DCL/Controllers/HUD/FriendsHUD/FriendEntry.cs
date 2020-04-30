@@ -14,8 +14,6 @@ public class FriendEntry : MonoBehaviour, IFriendEntry, IPointerEnterHandler, IP
     public string userId { get; private set; }
 
     public event System.Action<FriendEntry> OnMenuToggle;
-    public event System.Action<FriendEntry> OnFocus;
-    public event System.Action<FriendEntry> OnBlur;
     public event System.Action<FriendEntry> OnJumpInClick;
     public event System.Action<FriendEntry> OnWhisperClick;
 
@@ -58,8 +56,6 @@ public class FriendEntry : MonoBehaviour, IFriendEntry, IPointerEnterHandler, IP
         backgroundImage.sprite = hoveredBackgroundSprite;
         menuButton.gameObject.SetActive(true);
         whisperLabel.SetActive(true);
-
-        OnFocus?.Invoke(this);
     }
 
     public void OnPointerExit(PointerEventData eventData)
@@ -67,8 +63,6 @@ public class FriendEntry : MonoBehaviour, IFriendEntry, IPointerEnterHandler, IP
         backgroundImage.sprite = unhoveredBackgroundSprite;
         menuButton.gameObject.SetActive(false);
         whisperLabel.SetActive(false);
-
-        OnBlur?.Invoke(this);
     }
 
     void OnDisable()

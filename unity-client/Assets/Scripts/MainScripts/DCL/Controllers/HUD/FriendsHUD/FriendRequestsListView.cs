@@ -214,13 +214,12 @@ public class FriendRequestsListView : MonoBehaviour
     [ContextMenu("AddFakeRequestReceived")]
     public void AddFakeRequestReceived()
     {
+        string id1 = Random.Range(0, 1000000).ToString();
         var model1 = new FriendEntry.Model()
         {
             status = FriendsController.PresenceStatus.ONLINE,
-            userName = "Pravus",
+            userName = id1,
         };
-
-        string id1 = Random.Range(0, 1000000).ToString();
 
         CreateOrUpdateEntry(id1, model1, true);
     }
@@ -228,13 +227,12 @@ public class FriendRequestsListView : MonoBehaviour
     [ContextMenu("AddFakeRequestSent")]
     public void AddFakeRequestSent()
     {
+        string id1 = Random.Range(0, 1000000).ToString();
         var model1 = new FriendEntry.Model()
         {
             status = FriendsController.PresenceStatus.ONLINE,
-            userName = "Brian",
+            userName = id1,
         };
-
-        string id1 = Random.Range(0, 1000000).ToString();
 
         CreateOrUpdateEntry(id1, model1, false);
     }

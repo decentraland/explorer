@@ -23,12 +23,19 @@ public class FriendsListView : MonoBehaviour
     Dictionary<string, FriendEntry> friendEntries = new Dictionary<string, FriendEntry>();
     FriendEntry selectedFriendEntry;
 
+    public event System.Action<FriendEntry> OnJumpIn;
+    public event System.Action<FriendEntry> OnWhisper;
+    public event System.Action<FriendEntry> OnBlock;
+    public event System.Action<FriendEntry> OnPassport;
+    public event System.Action<FriendEntry> OnDelete;
+    public event System.Action<FriendEntry> OnReport;
+
     void Awake()
     {
-        friendPassportButton.onClick.AddListener(() => OnPassport?.Invoke(selectedFriendEntry));
-        blockFriendButton.onClick.AddListener(() => OnBlock?.Invoke(selectedFriendEntry));
-        reportFriendButton.onClick.AddListener(() => OnReport?.Invoke(selectedFriendEntry));
-        deleteFriendButton.onClick.AddListener(OnFriendDelete);
+        friendPassportButton.onClick.AddListener(() => { OnPassport?.Invoke(selectedFriendEntry); ToggleMenuPanel(selectedFriendEntry); });
+        blockFriendButton.onClick.AddListener(() => { OnBlock?.Invoke(selectedFriendEntry); ToggleMenuPanel(selectedFriendEntry); });
+        reportFriendButton.onClick.AddListener(() => { OnReport?.Invoke(selectedFriendEntry); ToggleMenuPanel(selectedFriendEntry); });
+        deleteFriendButton.onClick.AddListener(() => { ToggleMenuPanel(selectedFriendEntry); OnFriendDelete(); });
 
         deleteFriendDialogConfirmButton.onClick.AddListener(ConfirmFriendDelete);
         deleteFriendDialogCancelButton.onClick.AddListener(CancelConfirmationDialog);
@@ -37,14 +44,8 @@ public class FriendsListView : MonoBehaviour
     void OnDisable()
     {
         CancelConfirmationDialog();
+        friendMenuPanel.SetActive(false);
     }
-
-    public event System.Action<FriendEntry> OnJumpIn;
-    public event System.Action<FriendEntry> OnWhisper;
-    public event System.Action<FriendEntry> OnBlock;
-    public event System.Action<FriendEntry> OnPassport;
-    public event System.Action<FriendEntry> OnDelete;
-    public event System.Action<FriendEntry> OnReport;
 
     internal FriendEntry GetEntry(string userId)
     {
@@ -74,9 +75,7 @@ public class FriendsListView : MonoBehaviour
         var entry = Instantiate(friendEntryPrefab).GetComponent<FriendEntry>();
         friendEntries.Add(userId, entry);
 
-        entry.OnMenuToggle += ToggleMenuPanel;
-        entry.OnFocus += OnEntryFocused;
-        entry.OnBlur += OnEntryBlurred;
+        entry.OnMenuToggle += (x) => { selectedFriendEntry = x; ToggleMenuPanel(x); };
 
         entry.OnJumpInClick += (x) => OnJumpIn?.Invoke(x);
         entry.OnWhisperClick += (x) => OnWhisper?.Invoke(x);
@@ -103,18 +102,6 @@ public class FriendsListView : MonoBehaviour
         friendEntries.Remove(userId);
 
         LayoutRebuilder.ForceRebuildLayoutImmediate(containerRectTransform);
-    }
-
-    void OnEntryFocused(FriendEntry entry)
-    {
-        selectedFriendEntry = entry;
-    }
-
-    void OnEntryBlurred(FriendEntry entry)
-    {
-        selectedFriendEntry = null;
-
-        friendMenuPanel.SetActive(false);
     }
 
     void OnFriendDelete()
@@ -148,19 +135,18 @@ public class FriendsListView : MonoBehaviour
         // Reposition menu panel to be over the corresponding entry
         friendMenuPanel.transform.position = entry.transform.position;
 
-        friendMenuPanel.SetActive(!friendMenuPanel.activeSelf);
+        friendMenuPanel.SetActive(selectedFriendEntry == entry ? !friendMenuPanel.activeSelf : true);
     }
 
     [ContextMenu("AddFakeOnlineFriend")]
     public void AddFakeOnlineFriend()
     {
+        string id1 = Random.Range(0, 1000000).ToString();
         var model1 = new FriendEntry.Model()
         {
             status = FriendsController.PresenceStatus.ONLINE,
-            userName = "Pravus",
+            userName = id1,
         };
-
-        string id1 = Random.Range(0, 1000000).ToString();
 
         CreateOrUpdateEntry(id1, model1);
     }
@@ -168,15 +154,14 @@ public class FriendsListView : MonoBehaviour
     [ContextMenu("AddFakeOfflineFriend")]
     public void AddFakeOfflineFriend()
     {
+        string id1 = Random.Range(0, 1000000).ToString();
+
         var model1 = new FriendEntry.Model()
         {
             status = FriendsController.PresenceStatus.OFFLINE,
-            userName = "Brian",
+            userName = id1,
         };
-
-        string id1 = Random.Range(0, 1000000).ToString();
 
         CreateOrUpdateEntry(id1, model1);
     }
-
 }
