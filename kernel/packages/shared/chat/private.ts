@@ -22,7 +22,6 @@ import { ChatMessageType, FriendshipAction } from 'shared/types'
 import { SocialData, ChatState } from './types'
 import { StoreContainer } from '../store/rootTypes'
 import { RENDERER_INITIALIZED } from '../renderer/types'
-import { delay } from '../profiles/sagas'
 import { ChatMessage } from '../types'
 
 declare const globalThis: StoreContainer & { sendPrivateMessage: (userId: string, message: string) => void }
@@ -42,9 +41,6 @@ export function* initializePrivateMessaging(synapseUrl: string, identity: Explor
   const authChain = Authenticator.signPayload(identity, messageToSign)
 
   const client: SocialAPI = yield SocialClient.loginToServer(synapseUrl, ethAddress, timestamp, authChain)
-
-  // wait for sync to happen (this will be added automatically in the next version of the social api)
-  yield delay(2000)
 
   const ownId = client.getUserId()
   DEBUG && logger.info(`initializePrivateMessaging#ownId`, ownId)
