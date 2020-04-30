@@ -37,6 +37,7 @@ RectTransform:
   - {fileID: 5557930252562946457}
   - {fileID: 5445745748562596266}
   - {fileID: 2880661323653110145}
+  - {fileID: 2396126356780351439}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -65,18 +66,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7a62ca82e21d64101955248fdc2abcb8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  menuPositionReference: {fileID: 2396126356780351439}
   playerNameText: {fileID: 5460751659792233842}
   playerLocationText: {fileID: 8747893688553154550}
   playerImage: {fileID: 4777978208689502769}
   jumpInButton: {fileID: 596808249942825202}
   whisperButton: {fileID: 5791209562270436312}
   menuButton: {fileID: 1575258791199021983}
-  passportButton: {fileID: 0}
-  blockButton: {fileID: 0}
-  reportButton: {fileID: 0}
-  deleteButton: {fileID: 0}
   backgroundImage: {fileID: 712334457687682705}
-  menuPanel: {fileID: 0}
   whisperLabel: {fileID: 1110130480339001881}
   hoveredBackgroundSprite: {fileID: 21300000, guid: 34f9d2e031bca4541bfe490cf7eb27de,
     type: 3}
@@ -1134,3 +1131,38 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.UI.Button+ButtonClickedEvent, UnityEngine.UI, Version=1.0.0.0,
       Culture=neutral, PublicKeyToken=null
+--- !u!1 &8663159899939223294
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2396126356780351439}
+  m_Layer: 5
+  m_Name: MenuPositionReference
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &2396126356780351439
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8663159899939223294}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 5456606117727073459}
+  m_RootOrder: 8
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0.5}
+  m_AnchorMax: {x: 0, y: 0.5}
+  m_AnchoredPosition: {x: 73.1, y: -9.6}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
