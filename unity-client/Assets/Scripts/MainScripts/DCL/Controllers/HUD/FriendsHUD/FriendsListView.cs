@@ -10,14 +10,26 @@ public class FriendsListView : MonoBehaviour
     public Transform offlineFriendsContainer;
     [SerializeField] GameObject deleteFriendDialog;
     [SerializeField] TextMeshProUGUI deleteFriendDialogText;
+
+    [SerializeField] GameObject friendMenuPanel;
+    [SerializeField] Button friendPassportButton;
+    [SerializeField] Button blockFriendButton;
+    [SerializeField] Button reportFriendButton;
+    [SerializeField] Button deleteFriendButton;
+
     [SerializeField] Button deleteFriendDialogCancelButton;
     [SerializeField] Button deleteFriendDialogConfirmButton;
 
     Dictionary<string, FriendEntry> friendEntries = new Dictionary<string, FriendEntry>();
-    FriendEntry currentDialogFriendEntry;
+    FriendEntry selectedFriendEntry;
 
     void Awake()
     {
+        // friendPassportButton.onClick.AddListener();
+        // blockFriendButton.onClick.AddListener();
+        // reportFriendButton.onClick.AddListener();
+        deleteFriendButton.onClick.AddListener(OnFriendDelete);
+
         deleteFriendDialogConfirmButton.onClick.AddListener(ConfirmFriendRequestSentCancellation);
         deleteFriendDialogCancelButton.onClick.AddListener(CancelConfirmationDialog);
     }
@@ -55,12 +67,9 @@ public class FriendsListView : MonoBehaviour
         var friendEntry = Instantiate(friendEntryPrefab).GetComponent<FriendEntry>();
         friendEntries.Add(userId, friendEntry);
 
-        friendEntry.OnDelete += OnFriendDelete;
-        // friendEntry.OnBlock += ;
-        // friendEntry.OnJumpIn += ;
-        // friendEntry.OnPassport += ;
-        // friendEntry.OnReport += ;
-        // friendEntry.OnWhisper += ;
+        friendEntry.OnMenuToggle += ToggleMenuPanel;
+        friendEntry.OnFocus += OnEntryFocused;
+        friendEntry.OnBlur += OnEntryBlurred;
 
         return true;
     }
@@ -84,30 +93,50 @@ public class FriendsListView : MonoBehaviour
         LayoutRebuilder.ForceRebuildLayoutImmediate(containerRectTransform);
     }
 
+    void OnEntryFocused(FriendEntry entry)
+    {
+        selectedFriendEntry = entry;
+    }
+
+    void OnEntryBlurred(FriendEntry entry)
+    {
+        selectedFriendEntry = null;
+
+        friendMenuPanel.SetActive(false);
+    }
+
+    void OnFriendDelete()
+    {
+        if (selectedFriendEntry == null) return;
+
+        deleteFriendDialogText.text = $"Are you sure you want to delete {selectedFriendEntry.model.userName} as a friend?";
+        deleteFriendDialog.SetActive(true);
+    }
+
     void ConfirmFriendRequestSentCancellation()
     {
-        if (currentDialogFriendEntry == null) return;
+        if (selectedFriendEntry == null) return;
 
-        RemoveEntry(currentDialogFriendEntry.userId);
+        RemoveEntry(selectedFriendEntry.userId);
 
         deleteFriendDialog.SetActive(false);
-        currentDialogFriendEntry = null;
+        selectedFriendEntry = null;
 
         // TODO: Notify Kernel
     }
 
     void CancelConfirmationDialog()
     {
-        currentDialogFriendEntry = null;
+        selectedFriendEntry = null;
         deleteFriendDialog.SetActive(false);
     }
 
-    void OnFriendDelete(FriendEntry entry)
+    void ToggleMenuPanel(FriendEntry entry)
     {
-        currentDialogFriendEntry = entry;
+        // Reposition menu panel to be over the corresponding entry
+        friendMenuPanel.transform.position = entry.transform.position;
 
-        deleteFriendDialogText.text = $"Are you sure you want to delete {entry.model.userName} as a friend?";
-        deleteFriendDialog.SetActive(true);
+        friendMenuPanel.SetActive(!friendMenuPanel.activeSelf);
     }
 
     [ContextMenu("AddFakeOnlineFriend")]

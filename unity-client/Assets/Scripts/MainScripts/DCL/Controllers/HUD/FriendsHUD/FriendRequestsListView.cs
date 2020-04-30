@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -13,6 +13,9 @@ public class FriendRequestsListView : MonoBehaviour
     [SerializeField] internal Transform sentRequestsContainer;
 
     [SerializeField] TMP_InputField friendSearchInputField;
+    [SerializeField] GameObject requestMenuPanel;
+    [SerializeField] Button playerPassportButton;
+    [SerializeField] Button blockPlayerButton;
 
     [Header("Notifications")]
     [SerializeField] GameObject requestSentNotification;
