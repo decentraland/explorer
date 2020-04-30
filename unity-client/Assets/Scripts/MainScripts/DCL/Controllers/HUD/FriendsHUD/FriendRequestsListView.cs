@@ -36,6 +36,11 @@ public class FriendRequestsListView : MonoBehaviour
     GameObject currentNotification = null;
     FriendRequestEntry currentDialogRequestEntry = null;
 
+    public event System.Action<FriendRequestEntry> OnFriendRequestCancelled;
+    public event System.Action<FriendRequestEntry> OnFriendRequestRejected;
+    public event System.Action<FriendRequestEntry> OnFriendRequestApproved;
+
+
     internal FriendRequestEntry GetEntry(string userId)
     {
         return friendRequestEntries[userId];
@@ -139,10 +144,10 @@ public class FriendRequestsListView : MonoBehaviour
 
     void OnFriendRequestReceivedAccepted(FriendRequestEntry requestEntry)
     {
-        // TODO: Notify Kernel & Add to friends list
-
         acceptedFriendNotificationText.text = $"You and {requestEntry.model.userName} are now friends!";
         TriggerNotification(acceptedFriendNotification);
+
+        OnFriendRequestApproved?.Invoke(requestEntry);
     }
 
     void OnFriendRequestReceivedRejected(FriendRequestEntry requestEntry)
@@ -157,12 +162,10 @@ public class FriendRequestsListView : MonoBehaviour
     {
         if (currentDialogRequestEntry == null) return;
 
-        RemoveEntry(currentDialogRequestEntry.userId);
-
         rejectRequestDialog.SetActive(false);
         currentDialogRequestEntry = null;
 
-        // TODO: Notify Kernel
+        OnFriendRequestRejected?.Invoke(currentDialogRequestEntry);
     }
 
     void OnFriendRequestSentCancelled(FriendRequestEntry requestEntry)
@@ -177,12 +180,10 @@ public class FriendRequestsListView : MonoBehaviour
     {
         if (currentDialogRequestEntry == null) return;
 
-        RemoveEntry(currentDialogRequestEntry.userId);
-
         cancelRequestDialog.SetActive(false);
         currentDialogRequestEntry = null;
 
-        // TODO: Notify Kernel
+        OnFriendRequestCancelled?.Invoke(currentDialogRequestEntry);
     }
 
     void CancelConfirmationDialog()
@@ -197,9 +198,11 @@ public class FriendRequestsListView : MonoBehaviour
         if (!friendRequestEntries.ContainsKey(userId))
             return;
 
-        RectTransform containerRectTransform = friendRequestEntries[userId].transform.parent as RectTransform;
+        var entry = friendRequestEntries[userId];
 
-        Destroy(friendRequestEntries[userId].gameObject);
+        RectTransform containerRectTransform = entry.transform.parent as RectTransform;
+
+        Destroy(entry.gameObject);
         friendRequestEntries.Remove(userId);
 
         LayoutRebuilder.ForceRebuildLayoutImmediate(containerRectTransform);

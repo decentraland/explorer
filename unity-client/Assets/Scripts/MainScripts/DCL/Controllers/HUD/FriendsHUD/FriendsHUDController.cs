@@ -1,3 +1,4 @@
+using DCL.Interface;
 using UnityEngine;
 
 public class FriendsHUDController : IHUD
@@ -19,6 +20,13 @@ public class FriendsHUDController : IHUD
             this.friendsController.OnUpdateFriendship += OnUpdateFriendship;
             this.friendsController.OnUpdateUserStatus += OnUpdateUserStatus;
         }
+
+        view.friendRequestsList.OnFriendRequestApproved += Entry_OnRequestAccepted;
+        view.friendRequestsList.OnFriendRequestCancelled += Entry_OnRequestCancelled;
+        view.friendRequestsList.OnFriendRequestRejected += Entry_OnRequestRejected;
+
+        view.friendsList.OnJumpInClick += Entry_OnJumpInClick;
+        view.friendsList.OnWhisperClick += Entry_OnWhisperClick;
     }
 
     private void OnUpdateUserStatus(string userId, FriendsController.UserStatus newStatus)
@@ -67,7 +75,7 @@ public class FriendsHUDController : IHUD
             case FriendsController.FriendshipAction.REJECTED:
                 view.friendRequestsList.RemoveEntry(userId);
                 break;
-            case FriendsController.FriendshipAction.CANCELED:
+            case FriendsController.FriendshipAction.CANCELLED:
                 view.friendRequestsList.RemoveEntry(userId);
                 break;
             case FriendsController.FriendshipAction.REQUESTED_FROM:
@@ -81,6 +89,46 @@ public class FriendsHUDController : IHUD
                 view.friendsList.RemoveEntry(userId);
                 break;
         }
+    }
+
+    private void Entry_OnWhisperClick(FriendEntry entry)
+    {
+        //TODO(Brian): add /w username to chat input text and focus
+    }
+
+    private void Entry_OnJumpInClick(FriendEntry entry)
+    {
+        WebInterface.GoTo((int)entry.model.coords.x, (int)entry.model.coords.y);
+    }
+
+    private void Entry_OnRequestRejected(FriendRequestEntry entry)
+    {
+        WebInterface.UpdateFriendshipStatus(
+            new FriendsController.FriendshipUpdateStatusMessage()
+            {
+                action = FriendsController.FriendshipAction.REJECTED,
+                userId = entry.userId
+            });
+    }
+
+    private void Entry_OnRequestCancelled(FriendRequestEntry entry)
+    {
+        WebInterface.UpdateFriendshipStatus(
+            new FriendsController.FriendshipUpdateStatusMessage()
+            {
+                action = FriendsController.FriendshipAction.CANCELLED,
+                userId = entry.userId
+            });
+    }
+
+    private void Entry_OnRequestAccepted(FriendRequestEntry entry)
+    {
+        WebInterface.UpdateFriendshipStatus(
+            new FriendsController.FriendshipUpdateStatusMessage()
+            {
+                action = FriendsController.FriendshipAction.APPROVED,
+                userId = entry.userId
+            });
     }
 
     public void Dispose()
@@ -101,4 +149,5 @@ public class FriendsHUDController : IHUD
     {
         view.gameObject.SetActive(visible);
     }
+
 }

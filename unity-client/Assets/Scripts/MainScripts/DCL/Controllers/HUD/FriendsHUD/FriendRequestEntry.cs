@@ -21,6 +21,19 @@ public class FriendRequestEntry : MonoBehaviour, IFriendEntry
     }
 
     public FriendEntry.Model model { get; private set; }
+
+    public void Awake()
+    {
+        acceptButton.onClick.RemoveAllListeners();
+        acceptButton.onClick.AddListener(AcceptRequest);
+
+        rejectButton.onClick.RemoveAllListeners();
+        rejectButton.onClick.AddListener(RejectRequest);
+
+        cancelButton.onClick.RemoveAllListeners();
+        cancelButton.onClick.AddListener(CancelRequest);
+    }
+
     public void Populate(string userId, FriendEntry.Model model, bool? isReceived = null)
     {
         this.userId = userId;
@@ -46,12 +59,6 @@ public class FriendRequestEntry : MonoBehaviour, IFriendEntry
         cancelButton.gameObject.SetActive(false);
         acceptButton.gameObject.SetActive(true);
         rejectButton.gameObject.SetActive(true);
-
-        acceptButton.onClick.RemoveAllListeners();
-        acceptButton.onClick.AddListener(AcceptRequest);
-
-        rejectButton.onClick.RemoveAllListeners();
-        rejectButton.onClick.AddListener(RejectRequest);
     }
 
     void PopulateSent()
@@ -59,9 +66,6 @@ public class FriendRequestEntry : MonoBehaviour, IFriendEntry
         cancelButton.gameObject.SetActive(true);
         acceptButton.gameObject.SetActive(false);
         rejectButton.gameObject.SetActive(false);
-
-        cancelButton.onClick.RemoveAllListeners();
-        cancelButton.onClick.AddListener(CancelRequest);
     }
 
     void AcceptRequest()

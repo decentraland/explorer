@@ -10,6 +10,10 @@ public class FriendsListView : MonoBehaviour
 
     Dictionary<string, FriendEntry> friendEntries = new Dictionary<string, FriendEntry>();
 
+    public event System.Action<FriendEntry> OnJumpInClick;
+    public event System.Action<FriendEntry> OnWhisperClick;
+
+
     internal FriendEntry GetEntry(string userId)
     {
         return friendEntries[userId];
@@ -35,8 +39,8 @@ public class FriendsListView : MonoBehaviour
         if (friendEntries.ContainsKey(userId))
             return false;
 
-        var friendEntry = Instantiate(friendEntryPrefab).GetComponent<FriendEntry>();
-        friendEntries.Add(userId, friendEntry);
+        var entry = Instantiate(friendEntryPrefab).GetComponent<FriendEntry>();
+        friendEntries.Add(userId, entry);
         return true;
     }
 
@@ -51,9 +55,11 @@ public class FriendsListView : MonoBehaviour
         if (!friendEntries.ContainsKey(userId))
             return;
 
-        RectTransform containerRectTransform = friendEntries[userId].transform.parent as RectTransform;
+        var entry = friendEntries[userId];
 
-        Object.Destroy(friendEntries[userId].gameObject);
+        RectTransform containerRectTransform = entry.transform.parent as RectTransform;
+
+        Object.Destroy(entry.gameObject);
         friendEntries.Remove(userId);
 
         LayoutRebuilder.ForceRebuildLayoutImmediate(containerRectTransform);

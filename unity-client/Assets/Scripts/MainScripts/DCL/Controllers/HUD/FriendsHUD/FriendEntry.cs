@@ -1,4 +1,3 @@
-using DCL.Interface;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -26,6 +25,18 @@ public class FriendEntry : MonoBehaviour, IFriendEntry
 
     public Model model { get; private set; }
 
+    public event System.Action<FriendEntry> OnJumpInClick;
+    public event System.Action<FriendEntry> OnWhisperClick;
+
+    public void Awake()
+    {
+        jumpInButton.onClick.RemoveAllListeners();
+        jumpInButton.onClick.AddListener(() => OnJumpInClick?.Invoke(this));
+
+        whisperButton.onClick.RemoveAllListeners();
+        whisperButton.onClick.AddListener(() => OnWhisperClick?.Invoke(this));
+    }
+
     public void Populate(Model model)
     {
         this.model = model;
@@ -34,16 +45,5 @@ public class FriendEntry : MonoBehaviour, IFriendEntry
         playerLocationText.text = $"{model.realm} {model.coords}";
 
         playerImage.sprite = model.avatarImage;
-
-        jumpInButton.onClick.RemoveAllListeners();
-        jumpInButton.onClick.AddListener(() => WebInterface.GoTo((int)model.coords.x, (int)model.coords.y));
-
-        whisperButton.onClick.RemoveAllListeners();
-        whisperButton.onClick.AddListener(WhisperPlayer);
-    }
-
-    void WhisperPlayer()
-    {
-        // TODO: trigger private message to the user
     }
 }

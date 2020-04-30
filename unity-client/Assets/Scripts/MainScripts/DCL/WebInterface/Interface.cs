@@ -819,5 +819,10 @@ namespace DCL.Interface
             sendChatMessageEvent.message = message;
             SendMessage("SendChatMessage", sendChatMessageEvent);
         }
+
+        public static void UpdateFriendshipStatus(FriendsController.FriendshipUpdateStatusMessage message)
+        {
+            SendMessage("UpdateFriendshipStatus", message);
+        }
     }
 }
