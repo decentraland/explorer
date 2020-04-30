@@ -12,6 +12,7 @@ public interface IFriendEntry
 public class FriendEntry : MonoBehaviour, IFriendEntry, IPointerEnterHandler, IPointerExitHandler
 {
     public Model model { get; private set; }
+    public string userId { get; private set; }
     public event System.Action<FriendEntry> OnJumpIn;
     public event System.Action<FriendEntry> OnWhisper;
     public event System.Action<FriendEntry> OnPassport;
@@ -63,6 +64,7 @@ public class FriendEntry : MonoBehaviour, IFriendEntry, IPointerEnterHandler, IP
     {
         backgroundImage.sprite = unhoveredBackgroundSprite;
         menuButton.gameObject.SetActive(false);
+        menuPanel.SetActive(false);
         whisperLabel.SetActive(false);
     }
 
@@ -71,9 +73,10 @@ public class FriendEntry : MonoBehaviour, IFriendEntry, IPointerEnterHandler, IP
         OnPointerExit(null);
     }
 
-    public void Populate(Model model)
+    public void Populate(string userId, Model model)
     {
         this.model = model;
+        this.userId = userId;
 
         playerNameText.text = model.userName;
         playerLocationText.text = $"{model.realm} {model.coords}";
@@ -81,7 +84,7 @@ public class FriendEntry : MonoBehaviour, IFriendEntry, IPointerEnterHandler, IP
         playerImage.sprite = model.avatarImage;
 
         jumpInButton.onClick.RemoveAllListeners();
-        jumpInButton.onClick.AddListener(() => WebInterface.GoTo((int)model.coords.x, (int)model.coords.y));
+        jumpInButton.onClick.AddListener(() => OnJumpIn?.Invoke(this));
 
         whisperButton.onClick.RemoveAllListeners();
         whisperButton.onClick.AddListener(() => OnWhisper?.Invoke(this));
