@@ -1,8 +1,8 @@
-﻿using TMPro;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class FriendRequestEntry : MonoBehaviour
+public class FriendRequestEntry : MonoBehaviour, IFriendEntry
 {
     [SerializeField] internal TextMeshProUGUI playerNameText;
     [SerializeField] internal Image playerImage;
@@ -20,21 +20,24 @@ public class FriendRequestEntry : MonoBehaviour
         private set;
     }
 
-    public FriendEntry.Model model;
-    public void Populate(string userId, FriendEntry.Model model, bool isReceived)
+    public FriendEntry.Model model { get; private set; }
+    public void Populate(string userId, FriendEntry.Model model, bool? isReceived = null)
     {
         this.userId = userId;
         this.model = model;
         playerNameText.text = model.userName;
         playerImage.sprite = model.avatarImage;
 
-        if (isReceived)
+        if (isReceived.HasValue)
         {
-            PopulateReceived();
-        }
-        else
-        {
-            PopulateSent();
+            if (isReceived.Value)
+            {
+                PopulateReceived();
+            }
+            else
+            {
+                PopulateSent();
+            }
         }
     }
 

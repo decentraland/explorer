@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -15,28 +15,38 @@ public class FriendsListView : MonoBehaviour
         return friendEntries[userId];
     }
 
-    public void UpdateOrCreateFriendEntry(string userId, FriendEntry.Model model)
+    public bool UpdateEntry(string userId, FriendEntry.Model model)
     {
-        FriendEntry friendEntry;
-
         if (!friendEntries.ContainsKey(userId))
-        {
-            friendEntry = Instantiate(friendEntryPrefab).GetComponent<FriendEntry>();
-            friendEntries.Add(userId, friendEntry);
-        }
-        else
-        {
-            friendEntry = friendEntries[userId];
-        }
+            return false;
+
+        var friendEntry = friendEntries[userId];
 
         friendEntry.Populate(model);
-        friendEntry.transform.SetParent(model.status == FriendEntry.Model.Status.ONLINE ? onlineFriendsContainer : offlineFriendsContainer);
+        friendEntry.transform.SetParent(model.status == FriendsController.PresenceStatus.ONLINE ? onlineFriendsContainer : offlineFriendsContainer);
         friendEntry.transform.localScale = Vector3.one;
 
         LayoutRebuilder.ForceRebuildLayoutImmediate(friendEntry.transform.parent as RectTransform);
+        return true;
     }
 
-    public void RemoveFriend(string userId)
+    public bool CreateEntry(string userId)
+    {
+        if (friendEntries.ContainsKey(userId))
+            return false;
+
+        var friendEntry = Instantiate(friendEntryPrefab).GetComponent<FriendEntry>();
+        friendEntries.Add(userId, friendEntry);
+        return true;
+    }
+
+    public void CreateOrUpdateEntry(string userId, FriendEntry.Model model)
+    {
+        CreateEntry(userId);
+        UpdateEntry(userId, model);
+    }
+
+    public void RemoveEntry(string userId)
     {
         if (!friendEntries.ContainsKey(userId))
             return;
@@ -54,13 +64,13 @@ public class FriendsListView : MonoBehaviour
     {
         var model1 = new FriendEntry.Model()
         {
-            status = FriendEntry.Model.Status.ONLINE,
+            status = FriendsController.PresenceStatus.ONLINE,
             userName = "Pravus",
         };
 
         string id1 = Random.Range(0, 1000000).ToString();
 
-        UpdateOrCreateFriendEntry(id1, model1);
+        CreateOrUpdateEntry(id1, model1);
     }
 
     [ContextMenu("AddFakeOfflineFriend")]
@@ -68,12 +78,12 @@ public class FriendsListView : MonoBehaviour
     {
         var model1 = new FriendEntry.Model()
         {
-            status = FriendEntry.Model.Status.OFFLINE,
+            status = FriendsController.PresenceStatus.OFFLINE,
             userName = "Brian",
         };
 
         string id1 = Random.Range(0, 1000000).ToString();
 
-        UpdateOrCreateFriendEntry(id1, model1);
+        CreateOrUpdateEntry(id1, model1);
     }
 }

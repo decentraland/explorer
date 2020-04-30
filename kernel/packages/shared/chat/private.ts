@@ -12,7 +12,7 @@ import {
   UPDATE_FRIENDSHIP,
   UpdateFriendship,
   updateState,
-  addUserData
+  updateUserData
 } from './actions'
 import { getClient, findByUserId, isFriend, getPrivateMessaging } from './selectors'
 import { createLogger } from '../logger'
@@ -132,7 +132,8 @@ export function* initializePrivateMessaging(synapseUrl: string, identity: Explor
   // register listener for new messages
 
   client.onMessage((conversation, message) => {
-    const friend = friendsSocial.find(friend => friend.conversationId === conversation.id)
+    const { socialInfo } = globalThis.globalStore.getState().chat.privateMessaging
+    const friend = Object.values(socialInfo).find(friend => friend.conversationId === conversation.id)
 
     if (!friend) {
       logger.warn(`friend not found for conversation`, conversation.id)
@@ -158,7 +159,7 @@ export function* initializePrivateMessaging(synapseUrl: string, identity: Explor
       return null
     }
 
-    globalThis.globalStore.dispatch(addUserData(userId, socialId))
+    globalThis.globalStore.dispatch(updateUserData(userId, socialId))
 
     // ensure user profile is initialized and send to renderer
     await ProfileAsPromise(userId)
@@ -253,29 +254,39 @@ function* handleUpdateFriendship({ payload, meta }: UpdateFriendship) {
     }
     case FriendshipAction.APPROVED:
     case FriendshipAction.REJECTED: {
-      const index = state.fromFriendRequests.indexOf(userId)
+      const selector = incoming ? 'toFriendRequests' : 'fromFriendRequests'
+      const requests = [...state[selector]]
+
+      const index = requests.indexOf(userId)
 
       if (index !== -1) {
-        const fromFriendRequests = [...state.fromFriendRequests]
-        fromFriendRequests.splice(index, 1)
+        requests.splice(index, 1)
 
-        newState = { ...state, fromFriendRequests }
+        newState = { ...state, [selector]: requests }
 
         if (action === FriendshipAction.APPROVED && !state.friends.includes(userId)) {
           newState.friends.push(userId)
+
+          const socialData: SocialData = yield select(findByUserId, userId)
+          const client: SocialAPI = yield select(getClient)
+          const conversationId = yield client.createDirectConversation(socialData.socialId)
+
+          yield put(updateUserData(userId, socialData.socialId, conversationId))
         }
       }
 
       break
     }
     case FriendshipAction.CANCELED: {
-      const index = state.toFriendRequests.indexOf(userId)
+      const selector = incoming ? 'fromFriendRequests' : 'toFriendRequests'
+      const requests = [...state[selector]]
+
+      const index = requests.indexOf(userId)
 
       if (index !== -1) {
-        const toFriendRequests = [...state.toFriendRequests]
-        toFriendRequests.splice(index, 1)
+        requests.splice(index, 1)
 
-        newState = { ...state, toFriendRequests }
+        newState = { ...state, [selector]: requests }
       }
 
       break
@@ -332,29 +343,35 @@ function* handleOutgoingUpdateFriendshipStatus(update: UpdateFriendship['payload
     return
   }
 
+  const { socialId } = socialData
+
   switch (update.action) {
     case FriendshipAction.NONE: {
       // do nothing in this case
       break
     }
     case FriendshipAction.APPROVED: {
-      yield client.addAsFriend(socialData.socialId)
-
+      yield client.addAsFriend(socialId)
       break
     }
     case FriendshipAction.REJECTED: {
+      yield client.rejectFriendshipRequestFrom(socialId)
       break
     }
     case FriendshipAction.CANCELED: {
+      yield client.cancelFriendshipRequestTo(socialId)
       break
     }
     case FriendshipAction.REQUESTED_FROM: {
+      // do nothing in this case
       break
     }
     case FriendshipAction.REQUESTED_TO: {
+      yield client.addAsFriend(socialId)
       break
     }
     case FriendshipAction.DELETED: {
+      yield client.deleteFriendshipWith(socialId)
       break
     }
   }

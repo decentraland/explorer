@@ -4,8 +4,15 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
-public class FriendEntry : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
+public interface IFriendEntry
 {
+    FriendEntry.Model model { get; }
+}
+
+public class FriendEntry : MonoBehaviour, IFriendEntry, IPointerEnterHandler, IPointerExitHandler
+{
+    public Model model { get; private set; }
+
     [SerializeField] internal TextMeshProUGUI playerNameText;
     [SerializeField] internal TextMeshProUGUI playerLocationText;
     [SerializeField] internal Image playerImage;
@@ -25,16 +32,7 @@ public class FriendEntry : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
     public struct Model
     {
-        public enum Status
-        {
-            NONE,
-            OFFLINE,
-            ONLINE,
-            LOADING,
-            AFK
-        }
-
-        public Status status;
+        public FriendsController.PresenceStatus status;
         public string userName;
         public Vector2 coords;
         public string realm;
@@ -69,6 +67,8 @@ public class FriendEntry : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
     public void Populate(Model model)
     {
+        this.model = model;
+
         playerNameText.text = model.userName;
         playerLocationText.text = $"{model.realm} {model.coords}";
 

@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -96,28 +96,45 @@ public class FriendRequestsListView : MonoBehaviour
         notificationGameobject.SetActive(false);
     }
 
-    public void UpdateOrCreateFriendRequestEntry(string userId, FriendEntry.Model model, bool isReceived)
+    public bool CreateEntry(string userId)
     {
+        if (friendRequestEntries.ContainsKey(userId))
+            return false;
+
         FriendRequestEntry entry;
 
+        entry = Instantiate(friendRequestEntryPrefab).GetComponent<FriendRequestEntry>();
+        entry.OnAccepted += (x) => { OnFriendRequestReceivedAccepted(x); RemoveEntry(userId); };
+        entry.OnRejected += OnFriendRequestReceivedRejected;
+        entry.OnCancelled += OnFriendRequestSentCancelled;
+        friendRequestEntries.Add(userId, entry);
+
+        return true;
+    }
+
+    public bool UpdateEntry(string userId, FriendEntry.Model model, bool? isReceived = null)
+    {
         if (!friendRequestEntries.ContainsKey(userId))
+            return false;
+
+        var entry = friendRequestEntries[userId];
+        entry.Populate(userId, model, isReceived);
+
+        if (isReceived.HasValue)
         {
-            entry = Instantiate(friendRequestEntryPrefab).GetComponent<FriendRequestEntry>();
-            entry.OnAccepted += (x) => { OnFriendRequestReceivedAccepted(x); RemoveRequestEntry(userId); };
-            entry.OnRejected += OnFriendRequestReceivedRejected;
-            entry.OnCancelled += OnFriendRequestSentCancelled;
-            friendRequestEntries.Add(userId, entry);
-        }
-        else
-        {
-            entry = friendRequestEntries[userId];
+            entry.transform.SetParent(isReceived.Value ? receivedRequestsContainer : sentRequestsContainer);
         }
 
-        entry.Populate(userId, model, isReceived);
-        entry.transform.SetParent(isReceived ? receivedRequestsContainer : sentRequestsContainer);
         entry.transform.localScale = Vector3.one;
 
         LayoutRebuilder.ForceRebuildLayoutImmediate(entry.transform.parent as RectTransform);
+        return true;
+    }
+
+    public void CreateOrUpdateEntry(string userId, FriendEntry.Model model, bool isReceived)
+    {
+        CreateEntry(userId);
+        UpdateEntry(userId, model, isReceived);
     }
 
     void OnFriendRequestReceivedAccepted(FriendRequestEntry requestEntry)
@@ -140,7 +157,7 @@ public class FriendRequestsListView : MonoBehaviour
     {
         if (currentDialogRequestEntry == null) return;
 
-        RemoveRequestEntry(currentDialogRequestEntry.userId);
+        RemoveEntry(currentDialogRequestEntry.userId);
 
         rejectRequestDialog.SetActive(false);
         currentDialogRequestEntry = null;
@@ -160,7 +177,7 @@ public class FriendRequestsListView : MonoBehaviour
     {
         if (currentDialogRequestEntry == null) return;
 
-        RemoveRequestEntry(currentDialogRequestEntry.userId);
+        RemoveEntry(currentDialogRequestEntry.userId);
 
         cancelRequestDialog.SetActive(false);
         currentDialogRequestEntry = null;
@@ -175,7 +192,7 @@ public class FriendRequestsListView : MonoBehaviour
         rejectRequestDialog.SetActive(false);
     }
 
-    public void RemoveRequestEntry(string userId)
+    public void RemoveEntry(string userId)
     {
         if (!friendRequestEntries.ContainsKey(userId))
             return;
@@ -193,13 +210,13 @@ public class FriendRequestsListView : MonoBehaviour
     {
         var model1 = new FriendEntry.Model()
         {
-            status = FriendEntry.Model.Status.ONLINE,
+            status = FriendsController.PresenceStatus.ONLINE,
             userName = "Pravus",
         };
 
         string id1 = Random.Range(0, 1000000).ToString();
 
-        UpdateOrCreateFriendRequestEntry(id1, model1, true);
+        CreateOrUpdateEntry(id1, model1, true);
     }
 
     [ContextMenu("AddFakeRequestSent")]
@@ -207,12 +224,12 @@ public class FriendRequestsListView : MonoBehaviour
     {
         var model1 = new FriendEntry.Model()
         {
-            status = FriendEntry.Model.Status.ONLINE,
+            status = FriendsController.PresenceStatus.ONLINE,
             userName = "Brian",
         };
 
         string id1 = Random.Range(0, 1000000).ToString();
 
-        UpdateOrCreateFriendRequestEntry(id1, model1, false);
+        CreateOrUpdateEntry(id1, model1, false);
     }
 }

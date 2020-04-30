@@ -130,6 +130,7 @@ namespace DCL
         public bool allWearables = false;
         public bool testWearables = false;
         public bool enableTutorial = false;
+        public bool useNewChat = true;
         public DebugPanel debugPanelMode = DebugPanel.Off;
 
 
@@ -199,6 +200,11 @@ namespace DCL
                 if (enableTutorial)
                 {
                     debugString += "RESET_TUTORIAL&";
+                }
+
+                if (useNewChat)
+                {
+                    debugString += "USE_NEW_CHAT&";
                 }
 
                 string debugPanelString = "";
@@ -383,6 +389,9 @@ namespace DCL
                                 break;
                             case "UpdateFriendshipStatus":
                                 FriendsController.i?.UpdateFriendshipStatus(msg.payload);
+                                break;
+                            case "UpdateUserStatus":
+                                FriendsController.i?.UpdateUserStatus(msg.payload);
                                 break;
                             case "AddMessageToChatWindow":
                                 ChatController.i?.AddMessageToChatWindow(msg.payload);

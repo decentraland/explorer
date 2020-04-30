@@ -1,12 +1,12 @@
 import { AnyAction } from 'redux'
-import { ChatState } from './types'
+import { ChatState, SocialData } from './types'
 import {
   SOCIAL_CLIENT_INITIALIZED,
   ClientInitialized,
   UPDATE_PRIVATE_MESSAGING,
   UpdateState,
-  ADD_USER_DATA,
-  AddUserData
+  UPDATE_USER_DATA,
+  UpdateUserData
 } from './actions'
 
 const CHAT_INITIAL_STATE: ChatState = {
@@ -33,8 +33,8 @@ export function chatReducer(state?: ChatState, action?: AnyAction) {
     case UPDATE_PRIVATE_MESSAGING: {
       return reducePrivateMessaging(state, action as UpdateState)
     }
-    case ADD_USER_DATA: {
-      return reduceAddUserData(state, action as AddUserData)
+    case UPDATE_USER_DATA: {
+      return reduceUpdateUserData(state, action as UpdateUserData)
     }
   }
   return state
@@ -48,7 +48,13 @@ function reducePrivateMessaging(state: ChatState, action: UpdateState) {
   return { ...state, privateMessaging: action.payload }
 }
 
-function reduceAddUserData(state: ChatState, action: AddUserData) {
+function reduceUpdateUserData(state: ChatState, action: UpdateUserData) {
+  const socialData = state.privateMessaging.socialInfo[action.payload.socialId]
+  if (socialData && deepEquals(socialData, action.payload)) {
+    // return state as is if user data exists and is equal
+    return state
+  }
+
   return {
     ...state,
     privateMessaging: {
@@ -59,4 +65,8 @@ function reduceAddUserData(state: ChatState, action: AddUserData) {
       }
     }
   }
+}
+
+function deepEquals(a: SocialData, b: SocialData) {
+  return a.userId === b.userId && a.socialId === b.socialId && a.conversationId === b.conversationId
 }
