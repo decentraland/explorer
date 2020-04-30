@@ -25,8 +25,12 @@ public class FriendsHUDController : IHUD
         view.friendRequestsList.OnFriendRequestCancelled += Entry_OnRequestCancelled;
         view.friendRequestsList.OnFriendRequestRejected += Entry_OnRequestRejected;
 
-        view.friendsList.OnJumpInClick += Entry_OnJumpInClick;
-        view.friendsList.OnWhisperClick += Entry_OnWhisperClick;
+        view.friendsList.OnJumpIn += Entry_OnJumpIn;
+        view.friendsList.OnWhisper += Entry_OnWhisper;
+        view.friendsList.OnBlock += Entry_OnBlock;
+        view.friendsList.OnDelete += Entry_OnDelete;
+        view.friendsList.OnPassport += Entry_OnPassport;
+        view.friendsList.OnReport += Entry_OnReport;
     }
 
     private void OnUpdateUserStatus(string userId, FriendsController.UserStatus newStatus)
@@ -91,14 +95,43 @@ public class FriendsHUDController : IHUD
         }
     }
 
-    private void Entry_OnWhisperClick(FriendEntry entry)
+    private void Entry_OnWhisper(FriendEntry entry)
     {
         //TODO(Brian): add /w username to chat input text and focus
     }
+    private void Entry_OnReport(FriendEntry entry)
+    {
+        WebInterface.SendReportPlayer(entry.userId);
+    }
 
-    private void Entry_OnJumpInClick(FriendEntry entry)
+    internal const string CURRENT_PLAYER_ID = "CurrentPlayerInfoCardId";
+
+    private void Entry_OnPassport(FriendEntry entry)
+    {
+        var currentPlayerId = Resources.Load<StringVariable>(CURRENT_PLAYER_ID);
+        currentPlayerId.Set(entry.userId);
+
+
+    }
+
+    private void Entry_OnBlock(FriendEntry entry)
+    {
+        WebInterface.SendBlockPlayer(entry.userId);
+    }
+
+    private void Entry_OnJumpIn(FriendEntry entry)
     {
         WebInterface.GoTo((int)entry.model.coords.x, (int)entry.model.coords.y);
+    }
+
+    private void Entry_OnDelete(FriendEntry entry)
+    {
+        WebInterface.UpdateFriendshipStatus(
+            new FriendsController.FriendshipUpdateStatusMessage()
+            {
+                action = FriendsController.FriendshipAction.DELETED,
+                userId = entry.userId
+            });
     }
 
     private void Entry_OnRequestRejected(FriendRequestEntry entry)

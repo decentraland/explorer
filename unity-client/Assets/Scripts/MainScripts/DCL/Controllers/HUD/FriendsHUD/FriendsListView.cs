@@ -18,7 +18,7 @@ public class FriendsListView : MonoBehaviour
 
     void Awake()
     {
-        deleteFriendDialogConfirmButton.onClick.AddListener(ConfirmFriendRequestSentCancellation);
+        deleteFriendDialogConfirmButton.onClick.AddListener(ConfirmFriendDelete);
         deleteFriendDialogCancelButton.onClick.AddListener(CancelConfirmationDialog);
     }
 
@@ -27,11 +27,12 @@ public class FriendsListView : MonoBehaviour
         CancelConfirmationDialog();
     }
 
-    public event System.Action<FriendEntry> OnJumpInClick;
-    public event System.Action<FriendEntry> OnWhisperClick;
-    public event System.Action<FriendEntry> OnBlockClick;
-    public event System.Action<FriendEntry> OnPassportClick;
-    public event System.Action<FriendEntry> OnDeleteClick;
+    public event System.Action<FriendEntry> OnJumpIn;
+    public event System.Action<FriendEntry> OnWhisper;
+    public event System.Action<FriendEntry> OnBlock;
+    public event System.Action<FriendEntry> OnPassport;
+    public event System.Action<FriendEntry> OnDelete;
+    public event System.Action<FriendEntry> OnReport;
 
 
     internal FriendEntry GetEntry(string userId)
@@ -63,11 +64,11 @@ public class FriendsListView : MonoBehaviour
         friendEntries.Add(userId, entry);
 
         entry.OnDeleteClick += OnFriendDelete;
-        // friendEntry.OnBlock += ;
-        // friendEntry.OnJumpIn += ;
-        // friendEntry.OnPassport += ;
-        // friendEntry.OnReport += ;
-        // friendEntry.OnWhisper += ;
+        entry.OnBlockClick += (x) => OnBlock?.Invoke(x);
+        entry.OnJumpInClick += (x) => OnJumpIn?.Invoke(x);
+        entry.OnPassportClick += (x) => OnPassport?.Invoke(x);
+        entry.OnReportClick += (x) => OnReport?.Invoke(x);
+        entry.OnWhisperClick += (x) => OnWhisper?.Invoke(x);
 
         return true;
     }
@@ -93,16 +94,14 @@ public class FriendsListView : MonoBehaviour
         LayoutRebuilder.ForceRebuildLayoutImmediate(containerRectTransform);
     }
 
-    void ConfirmFriendRequestSentCancellation()
+    void ConfirmFriendDelete()
     {
         if (currentDialogFriendEntry == null) return;
-
-        RemoveEntry(currentDialogFriendEntry.userId);
 
         deleteFriendDialog.SetActive(false);
         currentDialogFriendEntry = null;
 
-        // TODO: Notify Kernel
+        OnDelete?.Invoke(currentDialogFriendEntry);
     }
 
     void CancelConfirmationDialog()
