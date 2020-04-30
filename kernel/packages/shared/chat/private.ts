@@ -113,7 +113,7 @@ export function* initializePrivateMessaging(synapseUrl: string, identity: Explor
     conversations.map(async ({ conversation }) => {
       // TODO - add support for group messaging - moliva - 22/04/2020
       const cursor = await client.getCursorOnLastMessage(conversation.id, { initialSize: INITIAL_CHAT_SIZE })
-      const messages = await cursor.getMessages()
+      const messages = cursor.getMessages()
 
       const friend = friendsSocial.find(friend => friend.conversationId === conversation.id)
 
