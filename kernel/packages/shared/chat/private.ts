@@ -23,6 +23,7 @@ import { SocialData, ChatState } from './types'
 import { StoreContainer } from '../store/rootTypes'
 import { RENDERER_INITIALIZED } from '../renderer/types'
 import { delay } from '../profiles/sagas'
+import { ChatMessage } from '../types'
 
 declare const globalThis: StoreContainer & { sendPrivateMessage: (userId: string, message: string) => void }
 
@@ -126,14 +127,15 @@ export function* initializePrivateMessaging(synapseUrl: string, identity: Explor
       }
 
       messages.forEach(message => {
-        unityInterface.AddMessageToChatWindow({
+        const chatMessage = {
           messageId: message.id,
           messageType: ChatMessageType.PRIVATE,
           timestamp: message.timestamp,
           body: message.text,
           sender: message.sender === ownId ? ethAddress : friend.userId,
           recipient: message.sender === ownId ? friend.userId : ethAddress
-        })
+        }
+        addNewChatMessage(chatMessage)
       })
     })
   )
@@ -161,8 +163,7 @@ export function* initializePrivateMessaging(synapseUrl: string, identity: Explor
       sender: message.sender === ownId ? ethAddress : friend.userId,
       recipient: message.sender === ownId ? friend.userId : ethAddress
     }
-    DEBUG && logger.info(`add new private chat message to window`, chatMessage)
-    unityInterface.AddMessageToChatWindow(chatMessage)
+    addNewChatMessage(chatMessage)
   })
 
   const handleIncomingFriendshipUpdateStatus = async (action: FriendshipAction, socialId: string) => {
@@ -215,6 +216,11 @@ function parseUserId(socialId: string) {
     return null
   }
   return result[1]
+}
+
+function addNewChatMessage(chatMessage: ChatMessage) {
+  DEBUG && logger.info(`add new private chat message to window`, chatMessage)
+  unityInterface.AddMessageToChatWindow(chatMessage)
 }
 
 function* handleSendPrivateMessage(action: SendPrivateMessage, debug: boolean = false) {
