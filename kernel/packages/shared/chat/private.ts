@@ -253,13 +253,15 @@ function* handleUpdateFriendship({ payload, meta }: UpdateFriendship) {
     }
     case FriendshipAction.APPROVED:
     case FriendshipAction.REJECTED: {
-      const index = state.fromFriendRequests.indexOf(userId)
+      const selector = incoming ? 'toFriendRequests' : 'fromFriendRequests'
+      const requests = [...state[selector]]
+
+      const index = requests.indexOf(userId)
 
       if (index !== -1) {
-        const fromFriendRequests = [...state.fromFriendRequests]
-        fromFriendRequests.splice(index, 1)
+        requests.splice(index, 1)
 
-        newState = { ...state, fromFriendRequests }
+        newState = { ...state, [selector]: requests }
 
         if (action === FriendshipAction.APPROVED && !state.friends.includes(userId)) {
           newState.friends.push(userId)
@@ -269,13 +271,15 @@ function* handleUpdateFriendship({ payload, meta }: UpdateFriendship) {
       break
     }
     case FriendshipAction.CANCELED: {
-      const index = state.toFriendRequests.indexOf(userId)
+      const selector = incoming ? 'fromFriendRequests' : 'toFriendRequests'
+      const requests = [...state[selector]]
+
+      const index = requests.indexOf(userId)
 
       if (index !== -1) {
-        const toFriendRequests = [...state.toFriendRequests]
-        toFriendRequests.splice(index, 1)
+        requests.splice(index, 1)
 
-        newState = { ...state, toFriendRequests }
+        newState = { ...state, [selector]: requests }
       }
 
       break
