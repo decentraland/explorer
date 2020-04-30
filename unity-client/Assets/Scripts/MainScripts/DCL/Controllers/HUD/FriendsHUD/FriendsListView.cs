@@ -26,16 +26,16 @@ public class FriendsListView : MonoBehaviour
 
     public event System.Action<FriendEntry> OnJumpIn;
     public event System.Action<FriendEntry> OnWhisper;
-    public event System.Action<FriendEntry> OnBlock;
-    public event System.Action<FriendEntry> OnPassport;
     public event System.Action<FriendEntry> OnDelete;
-    public event System.Action<FriendEntry> OnReport;
+    public event System.Action<string> OnBlock;
+    public event System.Action<string> OnPassport;
+    public event System.Action<string> OnReport;
 
     void Awake()
     {
-        friendPassportButton.onClick.AddListener(() => { OnPassport?.Invoke(selectedFriendEntry); ToggleMenuPanel(selectedFriendEntry); });
-        blockFriendButton.onClick.AddListener(() => { OnBlock?.Invoke(selectedFriendEntry); ToggleMenuPanel(selectedFriendEntry); });
-        reportFriendButton.onClick.AddListener(() => { OnReport?.Invoke(selectedFriendEntry); ToggleMenuPanel(selectedFriendEntry); });
+        friendPassportButton.onClick.AddListener(() => { OnPassport?.Invoke(selectedFriendEntry.userId); ToggleMenuPanel(selectedFriendEntry); });
+        blockFriendButton.onClick.AddListener(() => { OnBlock?.Invoke(selectedFriendEntry.userId); ToggleMenuPanel(selectedFriendEntry); });
+        reportFriendButton.onClick.AddListener(() => { OnReport?.Invoke(selectedFriendEntry.userId); ToggleMenuPanel(selectedFriendEntry); });
         deleteFriendButton.onClick.AddListener(() => { ToggleMenuPanel(selectedFriendEntry); OnFriendDelete(); });
 
         deleteFriendDialogConfirmButton.onClick.AddListener(ConfirmFriendDelete);
