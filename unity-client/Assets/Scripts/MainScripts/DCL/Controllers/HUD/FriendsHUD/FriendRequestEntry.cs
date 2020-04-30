@@ -1,4 +1,4 @@
-﻿using TMPro;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -20,6 +20,7 @@ public class FriendRequestEntry : MonoBehaviour, IFriendEntry
         private set;
     }
     public Transform menuPositionReference;
+
     public FriendEntry.Model model { get; private set; }
 
     public void Awake()
