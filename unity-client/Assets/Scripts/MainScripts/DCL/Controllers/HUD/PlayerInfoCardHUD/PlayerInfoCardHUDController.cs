@@ -20,6 +20,13 @@ public class PlayerInfoCardHUDController : IHUD
         OnCurrentPlayerIdChanged(currentPlayerId, null);
     }
 
+    void UpdateUserState()
+    {
+    }
+
+    void AddFriend()
+    {
+    }
 
     internal void OnCurrentPlayerIdChanged(string current, string previous)
     {

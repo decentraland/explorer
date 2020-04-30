@@ -110,8 +110,6 @@ public class FriendsHUDController : IHUD
     {
         var currentPlayerId = Resources.Load<StringVariable>(CURRENT_PLAYER_ID);
         currentPlayerId.Set(entry.userId);
-
-
     }
 
     private void Entry_OnBlock(FriendEntry entry)
