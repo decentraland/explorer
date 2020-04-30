@@ -29,7 +29,7 @@ public class FriendEntryShould : TestsBase
         Sprite testSprite = Sprite.Create(Texture2D.whiteTexture, Rect.zero, Vector2.zero);
 
         var model = new FriendEntry.Model() { };
-        entry.Populate(model);
+        entry.Populate("userId-1", model);
         Object.Destroy(testSprite);
     }
 
@@ -37,7 +37,7 @@ public class FriendEntryShould : TestsBase
     public void SendProperMessageWhenGoToButtonIsPressed()
     {
         var model = new FriendEntry.Model() { };
-        entry.Populate(model);
+        entry.Populate("userId-1", model);
         entry.jumpInButton.onClick.Invoke();
 
     }
@@ -46,7 +46,7 @@ public class FriendEntryShould : TestsBase
     public void WhisperPlayerCorrectlyWhenWhisperButtonIsPressed()
     {
         var model = new FriendEntry.Model() { };
-        entry.Populate(model);
+        entry.Populate("userId-1", model);
         entry.whisperButton.onClick.Invoke();
     }
 }
