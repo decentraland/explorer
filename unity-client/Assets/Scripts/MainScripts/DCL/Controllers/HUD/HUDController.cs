@@ -145,6 +145,8 @@ public class HUDController : MonoBehaviour
             case HUDElementID.FRIENDS:
                 CreateHudElement<FriendsHUDController>(configuration, hudElementId);
                 friendsHud?.Initialize(FriendsController.i);
+                friendsHud.OnPressWhisper -= FriendsHud_OnPressWhisper;
+                friendsHud.OnPressWhisper += FriendsHud_OnPressWhisper;
                 taskbarHud?.AddFriendsWindow(friendsHud);
                 break;
             case HUDElementID.TASKBAR:
@@ -158,6 +160,11 @@ public class HUDController : MonoBehaviour
         }
 
         GetHUDElement(hudElementId)?.SetVisibility(configuration.active && configuration.visible);
+    }
+
+    private void FriendsHud_OnPressWhisper(string userName)
+    {
+        worldChatWindowHud.ForceFocus($"/w {userName} ");
     }
 
     public void CreateHudElement<T>(HUDConfiguration config, HUDElementID id)

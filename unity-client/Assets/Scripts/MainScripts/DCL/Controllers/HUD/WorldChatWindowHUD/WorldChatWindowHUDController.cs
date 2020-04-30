@@ -1,5 +1,6 @@
 
 using DCL;
+
 using DCL.Interface;
 using System.Collections;
 using System.Linq;
@@ -138,10 +139,21 @@ public class WorldChatWindowHUDController : IHUD
         if (view.chatHudView.inputField.isFocused || (Time.frameCount - invalidSubmitLastFrame) < 2)
             return false;
 
+        ForceFocus();
+        return true;
+    }
+
+    public void ForceFocus(string setInputText = null)
+    {
         SetVisibility(true);
         view.chatHudView.FocusInputField();
         view.DeactivatePreview();
         InitialSceneReferences.i.mouseCatcher.UnlockCursor();
-        return true;
+
+        if (!string.IsNullOrEmpty(setInputText))
+        {
+            view.chatHudView.inputField.text = setInputText;
+            view.chatHudView.inputField.caretPosition = setInputText.Length;
+        }
     }
 }

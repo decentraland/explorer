@@ -11,6 +11,7 @@ public class FriendsHUDController : IHUD
     }
 
     IFriendsController friendsController;
+    public event System.Action<string> OnPressWhisper;
     public void Initialize(IFriendsController friendsController)
     {
         view = FriendsHUDView.Create();
@@ -111,8 +112,9 @@ public class FriendsHUDController : IHUD
 
     private void Entry_OnWhisper(FriendEntry entry)
     {
-        //TODO(Brian): add /w username to chat input text and focus
+        OnPressWhisper?.Invoke(entry.model.userName);
     }
+
     private void Entry_OnReport(string userId)
     {
         WebInterface.SendReportPlayer(userId);
