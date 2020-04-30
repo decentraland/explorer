@@ -132,8 +132,6 @@ public class FriendsListView : MonoBehaviour
 
     void ToggleMenuPanel(FriendEntry entry)
     {
-        // Reposition menu panel to be over the corresponding entry
-        // friendMenuPanel.transform.position = entry.transform.position;
         friendMenuPanel.transform.position = entry.menuPositionReference.position;
 
         friendMenuPanel.SetActive(selectedFriendEntry == entry ? !friendMenuPanel.activeSelf : true);
