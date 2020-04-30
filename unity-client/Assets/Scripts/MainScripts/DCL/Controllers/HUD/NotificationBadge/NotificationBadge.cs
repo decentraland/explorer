@@ -1,0 +1,27 @@
+using UnityEngine;
+
+public class NotificationBadge : MonoBehaviour
+{
+    [SerializeField] private FloatVariable notificationVariable;
+    [SerializeField] private TMPro.TextMeshProUGUI notificationText;
+    [SerializeField] private GameObject notificationContainer;
+
+    private void Start()
+    {
+        notificationVariable.OnChange += NotificationVariable_OnChange;
+        NotificationVariable_OnChange(notificationVariable.Get(), notificationVariable.Get());
+    }
+
+    private void NotificationVariable_OnChange(float current, float previous)
+    {
+        if (current > 0)
+        {
+            notificationContainer.SetActive(true);
+            notificationText.text = ((int)current).ToString();
+        }
+        else
+        {
+            notificationContainer.SetActive(false);
+        }
+    }
+}
