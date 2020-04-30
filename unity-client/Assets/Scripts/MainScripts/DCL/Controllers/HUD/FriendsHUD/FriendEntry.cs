@@ -12,6 +12,7 @@ public class FriendEntry : MonoBehaviour, IFriendEntry, IPointerEnterHandler, IP
 {
     public Model model { get; private set; }
     public string userId { get; private set; }
+    public Transform menuPositionReference;
 
     public event System.Action<FriendEntry> OnMenuToggle;
     public event System.Action<FriendEntry> OnJumpInClick;
