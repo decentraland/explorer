@@ -12,6 +12,12 @@ public interface IFriendEntry
 public class FriendEntry : MonoBehaviour, IFriendEntry, IPointerEnterHandler, IPointerExitHandler
 {
     public Model model { get; private set; }
+    public event System.Action<FriendEntry> OnJumpIn;
+    public event System.Action<FriendEntry> OnWhisper;
+    public event System.Action<FriendEntry> OnPassport;
+    public event System.Action<FriendEntry> OnBlock;
+    public event System.Action<FriendEntry> OnReport;
+    public event System.Action<FriendEntry> OnDelete;
 
     [SerializeField] internal TextMeshProUGUI playerNameText;
     [SerializeField] internal TextMeshProUGUI playerLocationText;
@@ -78,44 +84,19 @@ public class FriendEntry : MonoBehaviour, IFriendEntry, IPointerEnterHandler, IP
         jumpInButton.onClick.AddListener(() => WebInterface.GoTo((int)model.coords.x, (int)model.coords.y));
 
         whisperButton.onClick.RemoveAllListeners();
-        whisperButton.onClick.AddListener(WhisperFriend);
+        whisperButton.onClick.AddListener(() => OnWhisper?.Invoke(this));
 
         passportButton.onClick.RemoveAllListeners();
-        passportButton.onClick.AddListener(WhisperFriend);
+        passportButton.onClick.AddListener(() => OnPassport?.Invoke(this));
 
         blockButton.onClick.RemoveAllListeners();
-        blockButton.onClick.AddListener(WhisperFriend);
+        blockButton.onClick.AddListener(() => OnBlock?.Invoke(this));
 
         reportButton.onClick.RemoveAllListeners();
-        reportButton.onClick.AddListener(WhisperFriend);
+        reportButton.onClick.AddListener(() => OnReport?.Invoke(this));
 
         deleteButton.onClick.RemoveAllListeners();
-        deleteButton.onClick.AddListener(WhisperFriend);
-    }
-
-    void WhisperFriend()
-    {
-        // TODO: trigger private message to the user
-    }
-
-    void OpenFriendPassport()
-    {
-        // TODO:
-    }
-
-    void BlockFriend()
-    {
-        // TODO:
-    }
-
-    void ReportFriend()
-    {
-        // TODO:
-    }
-
-    void DeleteFriend()
-    {
-        // TODO:
+        deleteButton.onClick.AddListener(() => OnDelete?.Invoke(this));
     }
 
     void ToggleMenuPanel()
