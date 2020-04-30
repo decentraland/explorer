@@ -114,10 +114,8 @@ public class FriendsController : MonoBehaviour, IFriendsController
         }
     }
 
-    public void UpdateUserStatus(string json)
+    public void UpdateUserStatus(UserStatus newUserStatus)
     {
-        UserStatus newUserStatus = JsonUtility.FromJson<UserStatus>(json);
-
         if (!friends.ContainsKey(newUserStatus.userId))
         {
             friends.Add(newUserStatus.userId, newUserStatus);
@@ -128,6 +126,12 @@ public class FriendsController : MonoBehaviour, IFriendsController
         }
 
         OnUpdateUserStatus?.Invoke(newUserStatus.userId, newUserStatus);
+    }
+
+    public void UpdateUserStatus(string json)
+    {
+        UserStatus newUserStatus = JsonUtility.FromJson<UserStatus>(json);
+        UpdateUserStatus(newUserStatus);
     }
 
     public void UpdateFriendshipStatus(FriendshipUpdateStatusMessage msg)

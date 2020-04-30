@@ -8,6 +8,9 @@ public class NotificationBadge : MonoBehaviour
 
     private void Start()
     {
+        if (notificationVariable == null)
+            return;
+
         notificationVariable.OnChange += NotificationVariable_OnChange;
         NotificationVariable_OnChange(notificationVariable.Get(), notificationVariable.Get());
     }

@@ -3,6 +3,8 @@ using UnityEngine.UI;
 
 public class FriendsHUDView : MonoBehaviour
 {
+    static int ANIM_PROPERTY_SELECTED = Animator.StringToHash("Selected");
+
     const string VIEW_PATH = "FriendsHUD";
 
     public Button closeButton;
@@ -23,11 +25,15 @@ public class FriendsHUDView : MonoBehaviour
         closeButton.onClick.AddListener(Toggle);
         friendsButton.onClick.AddListener(() =>
         {
+            friendsButton.animator.SetBool(ANIM_PROPERTY_SELECTED, true);
+            friendRequestsButton.animator.SetBool(ANIM_PROPERTY_SELECTED, false);
             friendsList.gameObject.SetActive(true);
             friendRequestsList.gameObject.SetActive(false);
         });
         friendRequestsButton.onClick.AddListener(() =>
         {
+            friendsButton.animator.SetBool(ANIM_PROPERTY_SELECTED, false);
+            friendRequestsButton.animator.SetBool(ANIM_PROPERTY_SELECTED, true);
             friendsList.gameObject.SetActive(false);
             friendRequestsList.gameObject.SetActive(true);
         });

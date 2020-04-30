@@ -897,6 +897,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Notification Badge (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 2845107033472647055, guid: 2fc88af23bad36741becd2e487a423f4,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8819543312367979352, guid: 2fc88af23bad36741becd2e487a423f4,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -1002,6 +1007,12 @@ PrefabInstance:
       propertyPath: m_Pivot.y
       value: 0.5
       objectReference: {fileID: 0}
+    - target: {fileID: 5984344161284955003, guid: 2fc88af23bad36741becd2e487a423f4,
+        type: 3}
+      propertyPath: notificationVariable
+      value: 
+      objectReference: {fileID: 11400000, guid: bf9ed0ab20e4ab846bcb0d9f7c0cf594,
+        type: 2}
     - target: {fileID: 8818213553393692271, guid: 2fc88af23bad36741becd2e487a423f4,
         type: 3}
       propertyPath: m_textInfo.characterCount

@@ -1,4 +1,4 @@
-using DCL.Helpers;
+﻿using DCL.Helpers;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -159,13 +159,20 @@ public class FriendsListView : MonoBehaviour
     public void AddFakeOnlineFriend()
     {
         string id1 = Random.Range(0, 1000000).ToString();
-        var model1 = new FriendEntry.Model()
-        {
-            status = FriendsController.PresenceStatus.ONLINE,
-            userName = id1,
-        };
 
-        CreateOrUpdateEntry(id1, model1);
+        UserProfileController.i.AddUserProfileToCatalog(new UserProfileModel()
+        {
+            userId = id1,
+            name = "Brian"
+        });
+
+        FriendsController.i.UpdateFriendshipStatus(new FriendsController.FriendshipUpdateStatusMessage()
+        {
+            userId = id1,
+            action = FriendsController.FriendshipAction.APPROVED
+        });
+
+        FriendsController.i.UpdateUserStatus(new FriendsController.UserStatus() { userId = id1, presenceStatus = FriendsController.PresenceStatus.ONLINE });
     }
 
     [ContextMenu("AddFakeOfflineFriend")]
@@ -173,12 +180,18 @@ public class FriendsListView : MonoBehaviour
     {
         string id1 = Random.Range(0, 1000000).ToString();
 
-        var model1 = new FriendEntry.Model()
+        UserProfileController.i.AddUserProfileToCatalog(new UserProfileModel()
         {
-            status = FriendsController.PresenceStatus.OFFLINE,
-            userName = id1,
-        };
+            userId = id1,
+            name = "Pravus"
+        });
 
-        CreateOrUpdateEntry(id1, model1);
+        FriendsController.i.UpdateFriendshipStatus(new FriendsController.FriendshipUpdateStatusMessage()
+        {
+            userId = id1,
+            action = FriendsController.FriendshipAction.APPROVED
+        });
+
+        FriendsController.i.UpdateUserStatus(new FriendsController.UserStatus() { userId = id1, presenceStatus = FriendsController.PresenceStatus.OFFLINE });
     }
 }

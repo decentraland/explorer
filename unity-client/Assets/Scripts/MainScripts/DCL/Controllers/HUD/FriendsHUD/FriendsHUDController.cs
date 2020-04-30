@@ -1,4 +1,4 @@
-using DCL.Interface;
+﻿using DCL.Interface;
 using UnityEngine;
 
 public class FriendsHUDController : IHUD
@@ -103,7 +103,7 @@ public class FriendsHUDController : IHUD
                 break;
         }
 
-        var pendingFriendRequestsSO = Resources.Load<FloatVariable>("PendingFriendRequests");
+        var pendingFriendRequestsSO = Resources.Load<FloatVariable>("ScriptableObjects/PendingFriendRequests");
 
         if (pendingFriendRequestsSO != null)
             pendingFriendRequestsSO.Set(view.friendRequestsList.entriesCount);
