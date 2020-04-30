@@ -11,6 +11,13 @@ export const getProfile = (store: RootProfileState, userId: string): Profile | n
     ? (store.profiles.userInfo[userId].data as Profile)
     : null
 
+export const findProfileByName = (store: RootProfileState, userName: string): Profile | null =>
+  store.profiles && store.profiles.userInfo
+    ? Object.values(store.profiles.userInfo)
+        .filter(user => user.status === 'ok')
+        .find(user => user.data.name === userName)?.data
+    : null
+
 export const getEthereumAddress = (store: RootProfileState, userId: string): string | undefined =>
   store.profiles &&
   store.profiles.userInfo &&

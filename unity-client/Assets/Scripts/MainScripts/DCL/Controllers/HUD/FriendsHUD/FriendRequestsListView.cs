@@ -44,6 +44,7 @@ public class FriendRequestsListView : MonoBehaviour
     public event System.Action<FriendRequestEntry> OnFriendRequestApproved;
     public event System.Action<string> OnFriendRequestSent;
 
+    public int entriesCount => friendRequestEntries.Count;
     internal FriendRequestEntry GetEntry(string userId)
     {
         return friendRequestEntries[userId];
