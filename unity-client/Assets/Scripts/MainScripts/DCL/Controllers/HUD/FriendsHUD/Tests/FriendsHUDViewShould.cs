@@ -1,21 +1,8 @@
 using NUnit.Framework;
-using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine.TestTools;
 
-class FriendsController_Mock : IFriendsController
-{
-    public event Action<string, FriendsController.FriendshipAction> OnUpdateFriendship;
-    public event Action<string, FriendsController.UserStatus> OnUpdateUserStatus;
-
-    public Dictionary<string, FriendsController.UserStatus> GetFriends()
-    {
-        return null;
-    }
-}
-
-public class FriendsHUDShould : TestsBase
+public class FriendsHUDViewShould : TestsBase
 {
     FriendsHUDController controller;
     FriendsHUDView view;
@@ -27,7 +14,7 @@ public class FriendsHUDShould : TestsBase
         base.SetUp();
 
         controller = new FriendsHUDController();
-        controller.Initialize(new FriendsController_Mock());
+        controller.Initialize(null);
         this.view = controller.view;
 
         Assert.IsTrue(view != null, "Friends hud view is null?");
@@ -42,7 +29,7 @@ public class FriendsHUDShould : TestsBase
     }
 
     [Test]
-    public void TabsWorkCorrectly()
+    public void ChangeContentWhenClickingTabs()
     {
         controller.view.friendsButton.onClick.Invoke();
 
