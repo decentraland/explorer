@@ -1,4 +1,4 @@
-﻿using DCL.Components;
+using DCL.Components;
 using DCL.Interface;
 using System.Collections.Generic;
 using UnityEngine;
@@ -377,6 +377,12 @@ namespace DCL
                                 break;
                             case "ConfigureHUDElement":
                                 HUDController.i?.ConfigureHUDElement(msg.payload);
+                                break;
+                            case "InitializeFriends":
+                                FriendsController.i?.InitializeFriends(msg.payload);
+                                break;
+                            case "UpdateFriendshipStatus":
+                                FriendsController.i?.UpdateFriendshipStatus(msg.payload);
                                 break;
                             case "AddMessageToChatWindow":
                                 ChatController.i?.AddMessageToChatWindow(msg.payload);
