@@ -336,29 +336,35 @@ function* handleOutgoingUpdateFriendshipStatus(update: UpdateFriendship['payload
     return
   }
 
+  const { socialId } = socialData
+
   switch (update.action) {
     case FriendshipAction.NONE: {
       // do nothing in this case
       break
     }
     case FriendshipAction.APPROVED: {
-      yield client.addAsFriend(socialData.socialId)
-
+      yield client.addAsFriend(socialId)
       break
     }
     case FriendshipAction.REJECTED: {
+      yield client.rejectFriendshipRequestFrom(socialId)
       break
     }
     case FriendshipAction.CANCELED: {
+      yield client.cancelFriendshipRequestTo(socialId)
       break
     }
     case FriendshipAction.REQUESTED_FROM: {
+      // do nothing in this case
       break
     }
     case FriendshipAction.REQUESTED_TO: {
+      yield client.addAsFriend(socialId)
       break
     }
     case FriendshipAction.DELETED: {
+      yield client.deleteFriendshipWith(socialId)
       break
     }
   }
