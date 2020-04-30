@@ -10,6 +10,7 @@ public interface IFriendsController
 }
 public class FriendsController : MonoBehaviour, IFriendsController
 {
+    public static bool VERBOSE = true;
     public static FriendsController i { get; private set; }
 
     void Awake()
@@ -159,6 +160,9 @@ public class FriendsController : MonoBehaviour, IFriendsController
                 friends[msg.userId].friendshipStatus = FriendshipStatus.NONE;
                 break;
         }
+
+        if (VERBOSE)
+            Debug.Log($"Change friend status of {msg.userId} to {friends[msg.userId].friendshipStatus}");
 
         if (friends[msg.userId].friendshipStatus == FriendshipStatus.NONE)
         {

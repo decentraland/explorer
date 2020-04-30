@@ -1,4 +1,4 @@
-﻿using TMPro;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
@@ -20,6 +20,7 @@ public class FriendRequestEntry : MonoBehaviour, IFriendEntry, IPointerEnterHand
         private set;
     }
     public Transform menuPositionReference;
+
     public FriendEntry.Model model { get; private set; }
     internal Sprite unhoveredBackgroundSprite;
 

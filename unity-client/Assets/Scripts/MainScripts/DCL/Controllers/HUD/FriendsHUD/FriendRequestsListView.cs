@@ -121,8 +121,8 @@ public class FriendRequestsListView : MonoBehaviour
         FriendRequestEntry entry;
 
         entry = Instantiate(friendRequestEntryPrefab).GetComponent<FriendRequestEntry>();
+        entry.OnAccepted += OnFriendRequestReceivedAccepted;
         entry.OnMenuToggle += (x) => { selectedRequestEntry = x; ToggleMenuPanel(x); };
-        entry.OnAccepted += (x) => { OnFriendRequestReceivedAccepted(x); RemoveEntry(userId); };
         entry.OnRejected += OnFriendRequestReceivedRejected;
         entry.OnCancelled += OnFriendRequestSentCancelled;
         friendRequestEntries.Add(userId, entry);
@@ -194,9 +194,8 @@ public class FriendRequestsListView : MonoBehaviour
         if (selectedRequestEntry == null) return;
 
         cancelRequestDialog.SetActive(false);
-        selectedRequestEntry = null;
-
         OnFriendRequestCancelled?.Invoke(selectedRequestEntry);
+        selectedRequestEntry = null;
     }
 
     void CancelConfirmationDialog()
