@@ -1,4 +1,5 @@
-﻿using System.Collections;
+using DCL.Helpers;
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -47,6 +48,9 @@ public class FriendRequestsListView : MonoBehaviour
     public int entriesCount => friendRequestEntries.Count;
     internal FriendRequestEntry GetEntry(string userId)
     {
+        if (!friendRequestEntries.ContainsKey(userId))
+            return null;
+
         return friendRequestEntries[userId];
     }
 
@@ -140,7 +144,7 @@ public class FriendRequestsListView : MonoBehaviour
 
         entry.transform.localScale = Vector3.one;
 
-        LayoutRebuilder.ForceRebuildLayoutImmediate(entry.transform.parent as RectTransform);
+        ForceUpdateLayout();
         return true;
     }
 
@@ -171,9 +175,8 @@ public class FriendRequestsListView : MonoBehaviour
         if (selectedRequestEntry == null) return;
 
         rejectRequestDialog.SetActive(false);
-        selectedRequestEntry = null;
-
         OnFriendRequestRejected?.Invoke(selectedRequestEntry);
+        selectedRequestEntry = null;
     }
 
     void OnFriendRequestSentCancelled(FriendRequestEntry requestEntry)
@@ -214,10 +217,23 @@ public class FriendRequestsListView : MonoBehaviour
 
         var entry = friendRequestEntries[userId];
 
-        RectTransform containerRectTransform = entry.transform.parent as RectTransform;
 
         Destroy(entry.gameObject);
         friendRequestEntries.Remove(userId);
+
+        ForceUpdateLayout();
+    }
+
+    public void ForceUpdateLayout()
+    {
+        RectTransform containerRectTransform = transform as RectTransform;
+
+        Utils.InverseTransformChildTraversal<RectTransform>(
+        (x) =>
+        {
+            LayoutRebuilder.ForceRebuildLayoutImmediate(x);
+        },
+        containerRectTransform);
 
         LayoutRebuilder.ForceRebuildLayoutImmediate(containerRectTransform);
     }
@@ -226,25 +242,34 @@ public class FriendRequestsListView : MonoBehaviour
     public void AddFakeRequestReceived()
     {
         string id1 = Random.Range(0, 1000000).ToString();
-        var model1 = new FriendEntry.Model()
+        UserProfileController.i.AddUserProfileToCatalog(new UserProfileModel()
         {
-            status = FriendsController.PresenceStatus.ONLINE,
-            userName = id1,
-        };
+            userId = id1,
+            name = "Pravus"
+        });
 
-        CreateOrUpdateEntry(id1, model1, true);
+        FriendsController.i.UpdateFriendshipStatus(new FriendsController.FriendshipUpdateStatusMessage()
+        {
+            userId = id1,
+            action = FriendsController.FriendshipAction.REQUESTED_FROM
+        });
     }
 
     [ContextMenu("AddFakeRequestSent")]
     public void AddFakeRequestSent()
     {
         string id1 = Random.Range(0, 1000000).ToString();
-        var model1 = new FriendEntry.Model()
-        {
-            status = FriendsController.PresenceStatus.ONLINE,
-            userName = id1,
-        };
 
-        CreateOrUpdateEntry(id1, model1, false);
+        UserProfileController.i.AddUserProfileToCatalog(new UserProfileModel()
+        {
+            userId = id1,
+            name = "Brian"
+        });
+
+        FriendsController.i.UpdateFriendshipStatus(new FriendsController.FriendshipUpdateStatusMessage()
+        {
+            userId = id1,
+            action = FriendsController.FriendshipAction.REQUESTED_TO
+        });
     }
 }

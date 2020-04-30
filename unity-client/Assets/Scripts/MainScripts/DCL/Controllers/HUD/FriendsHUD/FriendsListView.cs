@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+using DCL.Helpers;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -49,6 +50,9 @@ public class FriendsListView : MonoBehaviour
 
     internal FriendEntry GetEntry(string userId)
     {
+        if (!friendEntries.ContainsKey(userId))
+            return null;
+
         return friendEntries[userId];
     }
 
@@ -63,7 +67,7 @@ public class FriendsListView : MonoBehaviour
         friendEntry.transform.SetParent(model.status == FriendsController.PresenceStatus.ONLINE ? onlineFriendsContainer : offlineFriendsContainer);
         friendEntry.transform.localScale = Vector3.one;
 
-        LayoutRebuilder.ForceRebuildLayoutImmediate(friendEntry.transform.parent as RectTransform);
+        ForceUpdateLayout();
         return true;
     }
 
@@ -101,7 +105,7 @@ public class FriendsListView : MonoBehaviour
         Object.Destroy(entry.gameObject);
         friendEntries.Remove(userId);
 
-        LayoutRebuilder.ForceRebuildLayoutImmediate(containerRectTransform);
+        ForceUpdateLayout();
     }
 
     void OnFriendDelete()
@@ -135,6 +139,20 @@ public class FriendsListView : MonoBehaviour
         friendMenuPanel.transform.position = entry.menuPositionReference.position;
 
         friendMenuPanel.SetActive(selectedFriendEntry == entry ? !friendMenuPanel.activeSelf : true);
+    }
+
+    public void ForceUpdateLayout()
+    {
+        RectTransform containerRectTransform = transform as RectTransform;
+
+        Utils.InverseTransformChildTraversal<RectTransform>(
+        (x) =>
+        {
+            LayoutRebuilder.ForceRebuildLayoutImmediate(x);
+        },
+        containerRectTransform);
+
+        LayoutRebuilder.ForceRebuildLayoutImmediate(containerRectTransform);
     }
 
     [ContextMenu("AddFakeOnlineFriend")]

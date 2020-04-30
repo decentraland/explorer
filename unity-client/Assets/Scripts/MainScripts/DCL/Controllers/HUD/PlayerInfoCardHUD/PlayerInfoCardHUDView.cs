@@ -110,6 +110,9 @@ public class PlayerInfoCardHUDView : MonoBehaviour
 
     private void OnFriendStatusUpdated(string userId, FriendsController.FriendshipAction action)
     {
+        if (currentUserProfile == null)
+            return;
+
         UpdateFriendButton();
     }
 
@@ -173,6 +176,9 @@ public class PlayerInfoCardHUDView : MonoBehaviour
             requestSentButton.gameObject.SetActive(false);
             return;
         }
+
+        if (currentUserProfile == null)
+            return;
 
         var status = FriendsController.i.GetUserStatus(currentUserProfile.userId);
 
