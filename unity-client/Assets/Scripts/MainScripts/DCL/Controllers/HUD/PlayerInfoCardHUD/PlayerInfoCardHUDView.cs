@@ -68,7 +68,11 @@ public class PlayerInfoCardHUDView : MonoBehaviour
         return Instantiate(Resources.Load<GameObject>(PREFAB_PATH)).GetComponent<PlayerInfoCardHUDView>();
     }
 
-    public void Initialize(UnityAction cardClosedCallback, UnityAction reportPlayerCallback, UnityAction blockPlayerCallback, UnityAction unblockPlayerCallback)
+    public void Initialize(UnityAction cardClosedCallback,
+        UnityAction reportPlayerCallback,
+        UnityAction blockPlayerCallback,
+        UnityAction unblockPlayerCallback,
+        UnityAction addFriendCallback)
     {
         hideCardButton.onClick.RemoveAllListeners();
         hideCardButton.onClick.AddListener(cardClosedCallback);
@@ -81,6 +85,9 @@ public class PlayerInfoCardHUDView : MonoBehaviour
 
         unblockPlayerButton.onClick.RemoveAllListeners();
         unblockPlayerButton.onClick.AddListener(unblockPlayerCallback);
+
+        addFriendButton.onClick.RemoveAllListeners();
+        addFriendButton.onClick.AddListener(addFriendCallback);
 
         for (int index = 0; index < tabsMapping.Length; index++)
         {
@@ -97,6 +104,13 @@ public class PlayerInfoCardHUDView : MonoBehaviour
                 break;
             }
         }
+
+        FriendsController.i.OnUpdateFriendship += OnFriendStatusUpdated;
+    }
+
+    private void OnFriendStatusUpdated(string userId, FriendsController.FriendshipAction action)
+    {
+        UpdateFriendButton();
     }
 
     public void SetCardActive(bool active)
@@ -146,6 +160,45 @@ public class PlayerInfoCardHUDView : MonoBehaviour
         }
 
         SetIsBlocked(IsBlocked(userProfile.userId));
+
+        UpdateFriendButton();
+    }
+
+    private void UpdateFriendButton()
+    {
+        if (FriendsController.i == null)
+        {
+            addFriendButton.gameObject.SetActive(false);
+            alreadyFriendsContainer.gameObject.SetActive(false);
+            requestSentButton.gameObject.SetActive(false);
+            return;
+        }
+
+        var status = FriendsController.i.GetUserStatus(currentUserProfile.userId);
+
+        switch (status.friendshipStatus)
+        {
+            case FriendsController.FriendshipStatus.NONE:
+                addFriendButton.gameObject.SetActive(true);
+                alreadyFriendsContainer.gameObject.SetActive(false);
+                requestSentButton.gameObject.SetActive(false);
+                break;
+            case FriendsController.FriendshipStatus.FRIEND:
+                addFriendButton.gameObject.SetActive(false);
+                alreadyFriendsContainer.gameObject.SetActive(true);
+                requestSentButton.gameObject.SetActive(false);
+                break;
+            case FriendsController.FriendshipStatus.REQUESTED_FROM:
+                addFriendButton.gameObject.SetActive(true);
+                alreadyFriendsContainer.gameObject.SetActive(false);
+                requestSentButton.gameObject.SetActive(false);
+                break;
+            case FriendsController.FriendshipStatus.REQUESTED_TO:
+                addFriendButton.gameObject.SetActive(false);
+                alreadyFriendsContainer.gameObject.SetActive(false);
+                requestSentButton.gameObject.SetActive(true);
+                break;
+        }
     }
 
     public void SetIsBlocked(bool isBlocked)

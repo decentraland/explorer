@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -42,6 +42,8 @@ public class FriendRequestsListView : MonoBehaviour
     public event System.Action<FriendRequestEntry> OnFriendRequestCancelled;
     public event System.Action<FriendRequestEntry> OnFriendRequestRejected;
     public event System.Action<FriendRequestEntry> OnFriendRequestApproved;
+    public event System.Action<string> OnFriendRequestSent;
+
 
 
     internal FriendRequestEntry GetEntry(string userId)
@@ -79,6 +81,7 @@ public class FriendRequestsListView : MonoBehaviour
         requestSentNotificationText.text = $"Your request to {friendId} successfully sent!";
         TriggerNotification(requestSentNotification);
 
+        OnFriendRequestSent?.Invoke(friendId);
         // If friend Id doesn't exist:
         // TriggerNotification(friendSearchFailedNotification);
     }

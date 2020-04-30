@@ -24,6 +24,7 @@ public class FriendsHUDController : IHUD
         view.friendRequestsList.OnFriendRequestApproved += Entry_OnRequestAccepted;
         view.friendRequestsList.OnFriendRequestCancelled += Entry_OnRequestCancelled;
         view.friendRequestsList.OnFriendRequestRejected += Entry_OnRequestRejected;
+        view.friendRequestsList.OnFriendRequestSent += Entry_OnRequestSent;
 
         view.friendsList.OnJumpIn += Entry_OnJumpIn;
         view.friendsList.OnWhisper += Entry_OnWhisper;
@@ -31,6 +32,11 @@ public class FriendsHUDController : IHUD
         view.friendsList.OnDelete += Entry_OnDelete;
         view.friendsList.OnPassport += Entry_OnPassport;
         view.friendsList.OnReport += Entry_OnReport;
+    }
+
+    private void Entry_OnRequestSent(string userId)
+    {
+        WebInterface.UpdateFriendshipStatus(new FriendsController.FriendshipUpdateStatusMessage() { userId = userId, action = FriendsController.FriendshipAction.REQUESTED_TO });
     }
 
     private void OnUpdateUserStatus(string userId, FriendsController.UserStatus newStatus)
