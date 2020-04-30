@@ -13,10 +13,7 @@ public class FriendEntry : MonoBehaviour, IFriendEntry, IPointerEnterHandler, IP
     public Model model { get; private set; }
     public string userId { get; private set; }
 
-    public event System.Action<FriendEntry> OnPassportClick;
-    public event System.Action<FriendEntry> OnBlockClick;
-    public event System.Action<FriendEntry> OnReportClick;
-    public event System.Action<FriendEntry> OnDeleteClick;
+    public event System.Action<FriendEntry> OnMenuToggle;
     public event System.Action<FriendEntry> OnJumpInClick;
     public event System.Action<FriendEntry> OnWhisperClick;
 
@@ -26,12 +23,7 @@ public class FriendEntry : MonoBehaviour, IFriendEntry, IPointerEnterHandler, IP
     [SerializeField] internal Button jumpInButton;
     [SerializeField] internal Button whisperButton;
     [SerializeField] internal Button menuButton;
-    [SerializeField] internal Button passportButton;
-    [SerializeField] internal Button blockButton;
-    [SerializeField] internal Button reportButton;
-    [SerializeField] internal Button deleteButton;
     [SerializeField] internal Image backgroundImage;
-    [SerializeField] internal GameObject menuPanel;
     [SerializeField] internal GameObject whisperLabel;
     [SerializeField] internal Sprite hoveredBackgroundSprite;
 
@@ -50,26 +42,13 @@ public class FriendEntry : MonoBehaviour, IFriendEntry, IPointerEnterHandler, IP
     {
         unhoveredBackgroundSprite = backgroundImage.sprite;
 
-        menuButton.onClick.AddListener(ToggleMenuPanel);
+        menuButton.onClick.AddListener(() => OnMenuToggle?.Invoke(this));
 
         jumpInButton.onClick.RemoveAllListeners();
         jumpInButton.onClick.AddListener(() => OnJumpInClick?.Invoke(this));
 
         whisperButton.onClick.RemoveAllListeners();
         whisperButton.onClick.AddListener(() => OnWhisperClick?.Invoke(this));
-
-        passportButton.onClick.RemoveAllListeners();
-        passportButton.onClick.AddListener(() => OnPassportClick?.Invoke(this));
-
-        blockButton.onClick.RemoveAllListeners();
-        blockButton.onClick.AddListener(() => OnBlockClick?.Invoke(this));
-
-        reportButton.onClick.RemoveAllListeners();
-        reportButton.onClick.AddListener(() => OnReportClick?.Invoke(this));
-
-        deleteButton.onClick.RemoveAllListeners();
-        deleteButton.onClick.AddListener(() => OnDeleteClick?.Invoke(this));
-
     }
 
     public void OnPointerEnter(PointerEventData eventData)
@@ -83,7 +62,6 @@ public class FriendEntry : MonoBehaviour, IFriendEntry, IPointerEnterHandler, IP
     {
         backgroundImage.sprite = unhoveredBackgroundSprite;
         menuButton.gameObject.SetActive(false);
-        menuPanel.SetActive(false);
         whisperLabel.SetActive(false);
     }
 
@@ -101,10 +79,11 @@ public class FriendEntry : MonoBehaviour, IFriendEntry, IPointerEnterHandler, IP
         playerLocationText.text = $"{model.realm} {model.coords}";
 
         playerImage.sprite = model.avatarImage;
-    }
 
-    void ToggleMenuPanel()
-    {
-        menuPanel.SetActive(!menuPanel.activeSelf);
+        jumpInButton.onClick.RemoveAllListeners();
+        jumpInButton.onClick.AddListener(() => OnJumpInClick?.Invoke(this));
+
+        whisperButton.onClick.RemoveAllListeners();
+        whisperButton.onClick.AddListener(() => OnWhisperClick?.Invoke(this));
     }
 }
