@@ -171,13 +171,13 @@ public class FriendRequestsListView : MonoBehaviour
         rejectRequestDialog.SetActive(true);
     }
 
+    // Instead of removing the entry here, we wait for the entries updated state from Kernel
     void ConfirmFriendRequestReceivedRejection()
     {
         if (selectedRequestEntry == null) return;
 
         rejectRequestDialog.SetActive(false);
         OnFriendRequestRejected?.Invoke(selectedRequestEntry);
-        RemoveEntry(selectedRequestEntry.userId);
         selectedRequestEntry = null;
     }
 
@@ -189,13 +189,13 @@ public class FriendRequestsListView : MonoBehaviour
         cancelRequestDialog.SetActive(true);
     }
 
+    // Instead of removing the entry here, we wait for the entries updated state from Kernel
     void ConfirmFriendRequestSentCancellation()
     {
         if (selectedRequestEntry == null) return;
 
         cancelRequestDialog.SetActive(false);
         OnFriendRequestCancelled?.Invoke(selectedRequestEntry);
-        RemoveEntry(selectedRequestEntry.userId);
         selectedRequestEntry = null;
     }
 
