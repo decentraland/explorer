@@ -3,8 +3,10 @@ using UnityEngine;
 
 public interface IFriendsController
 {
-    void InitializeFriends(string json);
-    void UpdateFriendshipStatus(string json);
+    Dictionary<string, FriendsController.UserStatus> GetFriends();
+
+    event System.Action<string, FriendsController.FriendshipAction> OnUpdateFriendship;
+    event System.Action<string, FriendsController.UserStatus> OnUpdateUserStatus;
 }
 public class FriendsController : MonoBehaviour, IFriendsController
 {
@@ -15,7 +17,31 @@ public class FriendsController : MonoBehaviour, IFriendsController
         i = this;
     }
 
-    public Dictionary<string, FriendshipStatus> friends = new Dictionary<string, FriendshipStatus>();
+    public Dictionary<string, UserStatus> friends = new Dictionary<string, UserStatus>();
+
+    [System.Serializable]
+    public class UserStatus
+    {
+        [System.Serializable]
+        public class Realm
+        {
+            public string serverName;
+            public string layer;
+        }
+
+        public Realm realm;
+        public string userId;
+        public FriendshipStatus friendshipStatus;
+        public PresenceStatus presenceStatus;
+    }
+
+    public enum PresenceStatus
+    {
+        NONE,
+        OFFLINE,
+        ONLINE,
+        UNAVAILABLE,
+    }
 
     public enum FriendshipStatus
     {
@@ -51,19 +77,20 @@ public class FriendsController : MonoBehaviour, IFriendsController
         public FriendshipAction action;
     }
 
-    public FriendshipStatus GetFriendStatus(string userId)
+    public UserStatus GetUserStatus(string userId)
     {
         if (!friends.ContainsKey(userId))
-            return FriendshipStatus.NONE;
+            return new UserStatus() { userId = userId, friendshipStatus = FriendshipStatus.NONE };
 
         return friends[userId];
     }
 
+    public event System.Action<string, UserStatus> OnUpdateUserStatus;
     public event System.Action<string, FriendshipAction> OnUpdateFriendship;
 
-    public Dictionary<string, FriendshipStatus> GetFriends()
+    public Dictionary<string, UserStatus> GetFriends()
     {
-        return new Dictionary<string, FriendshipStatus>(friends);
+        return new Dictionary<string, UserStatus>(friends);
     }
 
     public void InitializeFriends(string json)
@@ -86,33 +113,54 @@ public class FriendsController : MonoBehaviour, IFriendsController
         }
     }
 
+    public void UpdateUserStatus(string json)
+    {
+        UserStatus newUserStatus = JsonUtility.FromJson<UserStatus>(json);
+
+        if (!friends.ContainsKey(newUserStatus.userId))
+        {
+            friends.Add(newUserStatus.userId, newUserStatus);
+        }
+        else
+        {
+            friends[newUserStatus.userId] = newUserStatus;
+        }
+
+        OnUpdateUserStatus?.Invoke(newUserStatus.userId, newUserStatus);
+    }
+
     public void UpdateFriendshipStatus(FriendshipUpdateStatusMessage msg)
     {
+        if (!friends.ContainsKey(msg.userId))
+        {
+            friends.Add(msg.userId, new UserStatus() { });
+        }
+
         switch (msg.action)
         {
             case FriendshipAction.NONE:
                 break;
             case FriendshipAction.APPROVED:
-                friends[msg.userId] = FriendshipStatus.FRIEND;
+                friends[msg.userId].friendshipStatus = FriendshipStatus.FRIEND;
                 break;
             case FriendshipAction.REJECTED:
-                friends[msg.userId] = FriendshipStatus.NONE;
+                friends[msg.userId].friendshipStatus = FriendshipStatus.NONE;
                 break;
             case FriendshipAction.CANCELED:
-                friends[msg.userId] = FriendshipStatus.NONE;
+                friends[msg.userId].friendshipStatus = FriendshipStatus.NONE;
                 break;
             case FriendshipAction.REQUESTED_FROM:
-                friends[msg.userId] = FriendshipStatus.REQUESTED_FROM;
+                friends[msg.userId].friendshipStatus = FriendshipStatus.REQUESTED_FROM;
                 break;
             case FriendshipAction.REQUESTED_TO:
-                friends[msg.userId] = FriendshipStatus.REQUESTED_TO;
+                friends[msg.userId].friendshipStatus = FriendshipStatus.REQUESTED_TO;
                 break;
             case FriendshipAction.DELETED:
-                friends[msg.userId] = FriendshipStatus.NONE;
+                friends[msg.userId].friendshipStatus = FriendshipStatus.NONE;
                 break;
         }
 
-        if (friends[msg.userId] == FriendshipStatus.NONE)
+        if (friends[msg.userId].friendshipStatus == FriendshipStatus.NONE)
         {
             friends.Remove(msg.userId);
         }

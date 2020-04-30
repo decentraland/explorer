@@ -144,7 +144,7 @@ public class HUDController : MonoBehaviour
                 break;
             case HUDElementID.FRIENDS:
                 CreateHudElement<FriendsHUDController>(configuration, hudElementId);
-                friendsHud?.Initialize();
+                friendsHud?.Initialize(FriendsController.i);
                 taskbarHud?.AddFriendsWindow(friendsHud);
                 break;
             case HUDElementID.TASKBAR:

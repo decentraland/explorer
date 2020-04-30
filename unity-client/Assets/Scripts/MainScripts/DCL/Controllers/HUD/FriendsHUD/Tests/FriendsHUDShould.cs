@@ -1,7 +1,19 @@
 using NUnit.Framework;
+using System;
 using System.Collections;
-using UnityEngine;
+using System.Collections.Generic;
 using UnityEngine.TestTools;
+
+class FriendsController_Mock : IFriendsController
+{
+    public event Action<string, FriendsController.FriendshipAction> OnUpdateFriendship;
+    public event Action<string, FriendsController.UserStatus> OnUpdateUserStatus;
+
+    public Dictionary<string, FriendsController.UserStatus> GetFriends()
+    {
+        return null;
+    }
+}
 
 public class FriendsHUDShould : TestsBase
 {
@@ -15,7 +27,7 @@ public class FriendsHUDShould : TestsBase
         base.SetUp();
 
         controller = new FriendsHUDController();
-        controller.Initialize();
+        controller.Initialize(new FriendsController_Mock());
         this.view = controller.view;
 
         Assert.IsTrue(view != null, "Friends hud view is null?");
@@ -26,7 +38,7 @@ public class FriendsHUDShould : TestsBase
     protected override IEnumerator TearDown()
     {
         yield return base.TearDown();
-        Object.Destroy(view);
+        UnityEngine.Object.Destroy(view);
     }
 
     [Test]
@@ -48,21 +60,21 @@ public class FriendsHUDShould : TestsBase
     {
         var model1 = new FriendEntry.Model()
         {
-            status = FriendEntry.Model.Status.ONLINE,
+            status = FriendsController.PresenceStatus.ONLINE,
             userName = "Pravus",
         };
 
         var model2 = new FriendEntry.Model()
         {
-            status = FriendEntry.Model.Status.OFFLINE,
+            status = FriendsController.PresenceStatus.OFFLINE,
             userName = "Brian",
         };
 
         string id1 = "userId-1";
         string id2 = "userId-2";
 
-        controller.view.friendsList.UpdateOrCreateFriendEntry(id1, model1);
-        controller.view.friendsList.UpdateOrCreateFriendEntry(id2, model2);
+        controller.view.friendsList.CreateOrUpdateEntry(id1, model1);
+        controller.view.friendsList.CreateOrUpdateEntry(id2, model2);
 
         var entry1 = controller.view.friendsList.GetEntry(id1);
         Assert.AreEqual(model1.userName, entry1.playerNameText.text);
@@ -72,8 +84,8 @@ public class FriendsHUDShould : TestsBase
         Assert.AreEqual(model2.userName, entry2.playerNameText.text);
         Assert.AreEqual(controller.view.friendsList.offlineFriendsContainer, entry2.transform.parent);
 
-        model2.status = FriendEntry.Model.Status.ONLINE;
-        controller.view.friendsList.UpdateOrCreateFriendEntry(id2, model2);
+        model2.status = FriendsController.PresenceStatus.ONLINE;
+        controller.view.friendsList.CreateOrUpdateEntry(id2, model2);
 
         Assert.AreEqual(controller.view.friendsList.onlineFriendsContainer, entry2.transform.parent);
     }
@@ -84,11 +96,11 @@ public class FriendsHUDShould : TestsBase
     {
         string id1 = "userId-1";
 
-        controller.view.friendRequestsList.UpdateOrCreateFriendRequestEntry(id1, new FriendEntry.Model(), isReceived: true);
+        controller.view.friendRequestsList.CreateOrUpdateEntry(id1, new FriendEntry.Model(), isReceived: true);
 
         Assert.IsNotNull(controller.view.friendRequestsList.GetEntry(id1));
 
-        controller.view.friendRequestsList.RemoveRequestEntry(id1);
+        controller.view.friendRequestsList.RemoveEntry(id1);
 
         Assert.IsNull(controller.view.friendRequestsList.GetEntry(id1));
     }
@@ -98,21 +110,21 @@ public class FriendsHUDShould : TestsBase
     {
         var model1 = new FriendEntry.Model()
         {
-            status = FriendEntry.Model.Status.ONLINE,
+            status = FriendsController.PresenceStatus.ONLINE,
             userName = "Pravus",
         };
 
         var model2 = new FriendEntry.Model()
         {
-            status = FriendEntry.Model.Status.OFFLINE,
+            status = FriendsController.PresenceStatus.OFFLINE,
             userName = "Brian",
         };
 
         string id1 = "userId-1";
         string id2 = "userId-2";
 
-        controller.view.friendRequestsList.UpdateOrCreateFriendRequestEntry(id1, model1, true);
-        controller.view.friendRequestsList.UpdateOrCreateFriendRequestEntry(id2, model2, false);
+        controller.view.friendRequestsList.CreateOrUpdateEntry(id1, model1, true);
+        controller.view.friendRequestsList.CreateOrUpdateEntry(id2, model2, false);
 
         var entry1 = controller.view.friendsList.GetEntry(id1);
         Assert.AreEqual(model1.userName, entry1.playerNameText.text);
@@ -122,8 +134,8 @@ public class FriendsHUDShould : TestsBase
         Assert.AreEqual(model2.userName, entry2.playerNameText.text);
         Assert.AreEqual(controller.view.friendsList.offlineFriendsContainer, entry2.transform.parent);
 
-        model2.status = FriendEntry.Model.Status.ONLINE;
-        controller.view.friendRequestsList.UpdateOrCreateFriendRequestEntry(id2, model2, true);
+        model2.status = FriendsController.PresenceStatus.ONLINE;
+        controller.view.friendRequestsList.CreateOrUpdateEntry(id2, model2, true);
 
         Assert.AreEqual(controller.view.friendsList.onlineFriendsContainer, entry2.transform.parent);
     }

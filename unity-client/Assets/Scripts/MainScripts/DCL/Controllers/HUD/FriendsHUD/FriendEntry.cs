@@ -3,7 +3,11 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class FriendEntry : MonoBehaviour
+public interface IFriendEntry
+{
+    FriendEntry.Model model { get; }
+}
+public class FriendEntry : MonoBehaviour, IFriendEntry
 {
     [SerializeField] internal TextMeshProUGUI playerNameText;
     [SerializeField] internal TextMeshProUGUI playerLocationText;
@@ -13,24 +17,19 @@ public class FriendEntry : MonoBehaviour
 
     public struct Model
     {
-        public enum Status
-        {
-            NONE,
-            OFFLINE,
-            ONLINE,
-            LOADING,
-            AFK
-        }
-
-        public Status status;
+        public FriendsController.PresenceStatus status;
         public string userName;
         public Vector2 coords;
         public string realm;
         public Sprite avatarImage;
     }
 
+    public Model model { get; private set; }
+
     public void Populate(Model model)
     {
+        this.model = model;
+
         playerNameText.text = model.userName;
         playerLocationText.text = $"{model.realm} {model.coords}";
 
