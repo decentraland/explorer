@@ -12,7 +12,7 @@ import {
   UPDATE_FRIENDSHIP,
   UpdateFriendship,
   updateState,
-  addUserData
+  updateUserData
 } from './actions'
 import { getClient, findByUserId, isFriend, getPrivateMessaging } from './selectors'
 import { createLogger } from '../logger'
@@ -132,7 +132,8 @@ export function* initializePrivateMessaging(synapseUrl: string, identity: Explor
   // register listener for new messages
 
   client.onMessage((conversation, message) => {
-    const friend = friendsSocial.find(friend => friend.conversationId === conversation.id)
+    const { socialInfo } = globalThis.globalStore.getState().chat.privateMessaging
+    const friend = Object.values(socialInfo).find(friend => friend.conversationId === conversation.id)
 
     if (!friend) {
       logger.warn(`friend not found for conversation`, conversation.id)
@@ -158,7 +159,7 @@ export function* initializePrivateMessaging(synapseUrl: string, identity: Explor
       return null
     }
 
-    globalThis.globalStore.dispatch(addUserData(userId, socialId))
+    globalThis.globalStore.dispatch(updateUserData(userId, socialId))
 
     // ensure user profile is initialized and send to renderer
     await ProfileAsPromise(userId)
@@ -265,6 +266,12 @@ function* handleUpdateFriendship({ payload, meta }: UpdateFriendship) {
 
         if (action === FriendshipAction.APPROVED && !state.friends.includes(userId)) {
           newState.friends.push(userId)
+
+          const socialData: SocialData = yield select(findByUserId, userId)
+          const client: SocialAPI = yield select(getClient)
+          const conversationId = yield client.createDirectConversation(socialData.socialId)
+
+          yield put(updateUserData(userId, socialData.socialId, conversationId))
         }
       }
 
