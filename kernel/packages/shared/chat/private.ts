@@ -22,6 +22,7 @@ import { ChatMessageType, FriendshipAction } from 'shared/types'
 import { SocialData, ChatState } from './types'
 import { StoreContainer } from '../store/rootTypes'
 import { RENDERER_INITIALIZED } from '../renderer/types'
+import { delay } from '../profiles/sagas'
 
 declare const globalThis: StoreContainer & { sendPrivateMessage: (userId: string, message: string) => void }
 
@@ -40,11 +41,17 @@ export function* initializePrivateMessaging(synapseUrl: string, identity: Explor
   const authChain = Authenticator.signPayload(identity, messageToSign)
 
   const client: SocialAPI = yield SocialClient.loginToServer(synapseUrl, ethAddress, timestamp, authChain)
+
+  // wait for sync to happen (this will be added automatically in the next version of the social api)
+  yield delay(2000)
+
   const ownId = client.getUserId()
   DEBUG && logger.info(`initializePrivateMessaging#ownId`, ownId)
 
   // init friends
   const friends: string[] = yield client.getAllFriends()
+  DEBUG && logger.info(`friends`, friends)
+
   const friendsSocial: SocialData[] = yield Promise.all(
     toSocialData(friends).map(async friend => {
       const conversation = await client.createDirectConversation(friend.socialId)
@@ -54,6 +61,7 @@ export function* initializePrivateMessaging(synapseUrl: string, identity: Explor
 
   // init friend requests
   const friendRequests: FriendshipRequest[] = yield client.getPendingRequests()
+  DEBUG && logger.info(`friendRequests`, friendRequests)
 
   // filter my requests to others
   const toFriendRequests = friendRequests.filter(request => request.from === ownId).map(request => request.to)
@@ -135,6 +143,8 @@ export function* initializePrivateMessaging(synapseUrl: string, identity: Explor
   // register listener for new messages
 
   client.onMessage((conversation, message) => {
+    DEBUG && logger.info(`onMessage`, conversation, message)
+
     const { socialInfo } = globalThis.globalStore.getState().chat.privateMessaging
     const friend = Object.values(socialInfo).find(friend => friend.conversationId === conversation.id)
 
@@ -143,20 +153,21 @@ export function* initializePrivateMessaging(synapseUrl: string, identity: Explor
       return
     }
 
-    unityInterface.AddMessageToChatWindow({
+    const chatMessage = {
       messageId: message.id,
       messageType: ChatMessageType.PRIVATE,
       timestamp: message.timestamp,
       body: message.text,
       sender: message.sender === ownId ? ethAddress : friend.userId,
       recipient: message.sender === ownId ? friend.userId : ethAddress
-    })
+    }
+    DEBUG && logger.info(`add new private chat message to window`, chatMessage)
+    unityInterface.AddMessageToChatWindow(chatMessage)
   })
 
   const handleIncomingFriendshipUpdateStatus = async (action: FriendshipAction, socialId: string) => {
-    if (DEBUG) {
-      logger.info(`handleIncomingFriendshipUpdateStatus`, action, socialId)
-    }
+    DEBUG && logger.info(`handleIncomingFriendshipUpdateStatus`, action, socialId)
+
     // map social id to user id
     const userId = parseUserId(socialId)
 
@@ -207,6 +218,7 @@ function parseUserId(socialId: string) {
 }
 
 function* handleSendPrivateMessage(action: SendPrivateMessage, debug: boolean = false) {
+  DEBUG && logger.info(`handleSendPrivateMessage`, action)
   const { message, userId } = action.payload
 
   const client: SocialAPI | null = yield select(getClient)

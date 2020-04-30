@@ -1,4 +1,4 @@
-import { takeEvery, put, call } from 'redux-saga/effects'
+import { takeEvery, put, call, select, take } from 'redux-saga/effects'
 import { UnityInterfaceContainer } from '../../unity-interface/dcl'
 import {
   MESSAGE_RECEIVED,
@@ -37,6 +37,9 @@ import { initializePrivateMessaging } from './private'
 import { identity } from '../index'
 import { AUTH_SUCCESSFUL } from '../loading/types'
 import { getServerConfigurations } from '../../config/index'
+import { findProfileByName } from '../profiles/selectors'
+import { isRealmInitialized } from 'shared/dao/selectors'
+import { CATALYST_REALM_INITIALIZED } from 'shared/dao/actions'
 
 declare const globalThis: UnityInterfaceContainer & StoreContainer
 
@@ -77,6 +80,10 @@ export function* chatSaga(): any {
 
 function* handleAuthSuccessful() {
   if (identity.hasConnectedWeb3) {
+    while (!(yield select(isRealmInitialized))) {
+      yield take(CATALYST_REALM_INITIALIZED)
+    }
+
     yield call(initializePrivateMessaging, getServerConfigurations().synapseUrl, identity)
   }
 }
@@ -403,7 +410,7 @@ function initChatCommands() {
     const currentUser = getCurrentUser()
     if (!currentUser) throw new Error('cannotGetCurrentUser')
 
-    const user = findPeerByName(userName)
+    const user = findProfileByName(globalThis.globalStore.getState(), userName)
 
     if (!user || !user.userId) {
       return {
@@ -421,7 +428,7 @@ function initChatCommands() {
       messageId: uuid(),
       messageType: ChatMessageType.PRIVATE,
       sender: currentUser.userId,
-      recipient: userName,
+      recipient: user.userId,
       timestamp: Date.now(),
       body: message
     }
