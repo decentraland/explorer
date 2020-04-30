@@ -31,7 +31,7 @@ public class FriendRequestEntryShould : TestsBase
         var model1 = new FriendEntry.Model() { userName = "test1", avatarImage = testSprite1 };
         var model2 = new FriendEntry.Model() { userName = "test2", avatarImage = testSprite2 };
 
-        entry.Populate(model1, isReceived: true);
+        entry.Populate("userId1", model1, isReceived: true);
 
         Assert.AreEqual(model1.userName, entry.playerNameText.text);
         Assert.AreEqual(model1.avatarImage, entry.playerImage.sprite);
@@ -40,7 +40,7 @@ public class FriendRequestEntryShould : TestsBase
         Assert.IsTrue(entry.acceptButton.gameObject.activeSelf);
         Assert.IsTrue(entry.rejectButton.gameObject.activeSelf);
 
-        entry.Populate(model2, isReceived: false);
+        entry.Populate("userId2", model2, isReceived: false);
 
         Assert.AreEqual(model2.userName, entry.playerNameText.text);
         Assert.AreEqual(model2.avatarImage, entry.playerImage.sprite);
@@ -56,7 +56,7 @@ public class FriendRequestEntryShould : TestsBase
     [Test]
     public void AcceptRequestCorrectly()
     {
-        entry.Populate(new FriendEntry.Model(), isReceived: true);
+        entry.Populate("userId1", new FriendEntry.Model(), isReceived: true);
         entry.acceptButton.onClick.Invoke();
     }
 
@@ -64,7 +64,7 @@ public class FriendRequestEntryShould : TestsBase
     public void RejectRequestCorrectly()
     {
         var model1 = new FriendEntry.Model() { userName = "test1", avatarImage = null };
-        entry.Populate(model1, isReceived: true);
+        entry.Populate("userId1", model1, isReceived: true);
         entry.rejectButton.onClick.Invoke();
     }
 
@@ -72,7 +72,7 @@ public class FriendRequestEntryShould : TestsBase
     public void CancelRequestCorrectly()
     {
         var model2 = new FriendEntry.Model() { userName = "test1", avatarImage = null };
-        entry.Populate(model2, isReceived: false);
+        entry.Populate("userId1", model2, isReceived: false);
         entry.cancelButton.onClick.Invoke();
     }
 }

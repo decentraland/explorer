@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -40,7 +40,6 @@ public class FriendRequestsListView : MonoBehaviour
     {
         return friendRequestEntries[userId];
     }
-
 
     void Awake()
     {
@@ -105,8 +104,8 @@ public class FriendRequestsListView : MonoBehaviour
         {
             entry = Instantiate(friendRequestEntryPrefab).GetComponent<FriendRequestEntry>();
             entry.OnAccepted += (x) => { OnFriendRequestReceivedAccepted(x); RemoveRequestEntry(userId); };
-            entry.OnRejected += (x) => { OnFriendRequestReceivedRejected(x); RemoveRequestEntry(userId); };
-            entry.OnCancelled += (x) => { OnFriendRequestSentCancelled(x); RemoveRequestEntry(userId); };
+            entry.OnRejected += OnFriendRequestReceivedRejected;
+            entry.OnCancelled += OnFriendRequestSentCancelled;
             friendRequestEntries.Add(userId, entry);
         }
         else
@@ -114,8 +113,11 @@ public class FriendRequestsListView : MonoBehaviour
             entry = friendRequestEntries[userId];
         }
 
-        entry.Populate(model, isReceived);
+        entry.Populate(userId, model, isReceived);
         entry.transform.SetParent(isReceived ? receivedRequestsContainer : sentRequestsContainer);
+        entry.transform.localScale = Vector3.one;
+
+        LayoutRebuilder.ForceRebuildLayoutImmediate(entry.transform.parent as RectTransform);
     }
 
     void OnFriendRequestReceivedAccepted(FriendRequestEntry requestEntry)
@@ -138,6 +140,8 @@ public class FriendRequestsListView : MonoBehaviour
     {
         if (currentDialogRequestEntry == null) return;
 
+        RemoveRequestEntry(currentDialogRequestEntry.userId);
+
         rejectRequestDialog.SetActive(false);
         currentDialogRequestEntry = null;
 
@@ -146,6 +150,8 @@ public class FriendRequestsListView : MonoBehaviour
 
     void OnFriendRequestSentCancelled(FriendRequestEntry requestEntry)
     {
+        currentDialogRequestEntry = requestEntry;
+
         cancelRequestDialogText.text = $"Are you sure you want to cancel {requestEntry.model.userName} friend request?";
         cancelRequestDialog.SetActive(true);
     }
@@ -153,6 +159,8 @@ public class FriendRequestsListView : MonoBehaviour
     void ConfirmFriendRequestSentCancellation()
     {
         if (currentDialogRequestEntry == null) return;
+
+        RemoveRequestEntry(currentDialogRequestEntry.userId);
 
         cancelRequestDialog.SetActive(false);
         currentDialogRequestEntry = null;
@@ -172,7 +180,39 @@ public class FriendRequestsListView : MonoBehaviour
         if (!friendRequestEntries.ContainsKey(userId))
             return;
 
-        friendRequestEntries.Remove(userId);
+        RectTransform containerRectTransform = friendRequestEntries[userId].transform.parent as RectTransform;
+
         Destroy(friendRequestEntries[userId].gameObject);
+        friendRequestEntries.Remove(userId);
+
+        LayoutRebuilder.ForceRebuildLayoutImmediate(containerRectTransform);
+    }
+
+    [ContextMenu("AddFakeRequestReceived")]
+    public void AddFakeRequestReceived()
+    {
+        var model1 = new FriendEntry.Model()
+        {
+            status = FriendEntry.Model.Status.ONLINE,
+            userName = "Pravus",
+        };
+
+        string id1 = Random.Range(0, 1000000).ToString();
+
+        UpdateOrCreateFriendRequestEntry(id1, model1, true);
+    }
+
+    [ContextMenu("AddFakeRequestSent")]
+    public void AddFakeRequestSent()
+    {
+        var model1 = new FriendEntry.Model()
+        {
+            status = FriendEntry.Model.Status.ONLINE,
+            userName = "Brian",
+        };
+
+        string id1 = Random.Range(0, 1000000).ToString();
+
+        UpdateOrCreateFriendRequestEntry(id1, model1, false);
     }
 }

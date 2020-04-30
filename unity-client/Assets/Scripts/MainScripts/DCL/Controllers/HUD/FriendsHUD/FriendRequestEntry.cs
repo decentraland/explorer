@@ -1,4 +1,4 @@
-using TMPro;
+﻿using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -14,9 +14,16 @@ public class FriendRequestEntry : MonoBehaviour
     public event System.Action<FriendRequestEntry> OnRejected;
     public event System.Action<FriendRequestEntry> OnCancelled;
 
-    public FriendEntry.Model model;
-    public void Populate(FriendEntry.Model model, bool isReceived)
+    public string userId
     {
+        get;
+        private set;
+    }
+
+    public FriendEntry.Model model;
+    public void Populate(string userId, FriendEntry.Model model, bool isReceived)
+    {
+        this.userId = userId;
         this.model = model;
         playerNameText.text = model.userName;
         playerImage.sprite = model.avatarImage;
