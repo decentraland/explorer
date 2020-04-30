@@ -25,6 +25,8 @@ import { RENDERER_INITIALIZED } from '../renderer/types'
 
 declare const globalThis: StoreContainer & { sendPrivateMessage: (userId: string, message: string) => void }
 
+const DEBUG = true
+
 const logger = createLogger('chat: ')
 
 const INITIAL_CHAT_SIZE = 50
@@ -39,6 +41,7 @@ export function* initializePrivateMessaging(synapseUrl: string, identity: Explor
 
   const client: SocialAPI = yield SocialClient.loginToServer(synapseUrl, ethAddress, timestamp, authChain)
   const ownId = client.getUserId()
+  DEBUG && logger.info(`initializePrivateMessaging#ownId`, ownId)
 
   // init friends
   const friends: string[] = yield client.getAllFriends()
@@ -151,6 +154,9 @@ export function* initializePrivateMessaging(synapseUrl: string, identity: Explor
   })
 
   const handleIncomingFriendshipUpdateStatus = async (action: FriendshipAction, socialId: string) => {
+    if (DEBUG) {
+      logger.info(`handleIncomingFriendshipUpdateStatus`, action, socialId)
+    }
     // map social id to user id
     const userId = parseUserId(socialId)
 
@@ -335,6 +341,10 @@ function* handleUpdateFriendship({ payload, meta }: UpdateFriendship) {
 }
 
 function* handleOutgoingUpdateFriendshipStatus(update: UpdateFriendship['payload']) {
+  if (DEBUG) {
+    logger.info(`handleOutgoingFriendshipUpdateStatus`, update)
+  }
+
   const client: SocialAPI = yield select(getClient)
   const socialData: SocialData = yield select(findByUserId, update.userId)
 

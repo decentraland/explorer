@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 
 public class FriendsListView : MonoBehaviour
 {
@@ -25,12 +25,12 @@ public class FriendsListView : MonoBehaviour
 
     void Awake()
     {
-        // friendPassportButton.onClick.AddListener();
-        // blockFriendButton.onClick.AddListener();
-        // reportFriendButton.onClick.AddListener();
+        friendPassportButton.onClick.AddListener(() => OnPassport?.Invoke(selectedFriendEntry));
+        blockFriendButton.onClick.AddListener(() => OnBlock?.Invoke(selectedFriendEntry));
+        reportFriendButton.onClick.AddListener(() => OnReport?.Invoke(selectedFriendEntry));
         deleteFriendButton.onClick.AddListener(OnFriendDelete);
 
-        deleteFriendDialogConfirmButton.onClick.AddListener(ConfirmFriendRequestSentCancellation);
+        deleteFriendDialogConfirmButton.onClick.AddListener(ConfirmFriendDelete);
         deleteFriendDialogCancelButton.onClick.AddListener(CancelConfirmationDialog);
     }
 
@@ -38,6 +38,13 @@ public class FriendsListView : MonoBehaviour
     {
         CancelConfirmationDialog();
     }
+
+    public event System.Action<FriendEntry> OnJumpIn;
+    public event System.Action<FriendEntry> OnWhisper;
+    public event System.Action<FriendEntry> OnBlock;
+    public event System.Action<FriendEntry> OnPassport;
+    public event System.Action<FriendEntry> OnDelete;
+    public event System.Action<FriendEntry> OnReport;
 
     internal FriendEntry GetEntry(string userId)
     {
@@ -64,12 +71,15 @@ public class FriendsListView : MonoBehaviour
         if (friendEntries.ContainsKey(userId))
             return false;
 
-        var friendEntry = Instantiate(friendEntryPrefab).GetComponent<FriendEntry>();
-        friendEntries.Add(userId, friendEntry);
+        var entry = Instantiate(friendEntryPrefab).GetComponent<FriendEntry>();
+        friendEntries.Add(userId, entry);
 
-        friendEntry.OnMenuToggle += ToggleMenuPanel;
-        friendEntry.OnFocus += OnEntryFocused;
-        friendEntry.OnBlur += OnEntryBlurred;
+        entry.OnMenuToggle += ToggleMenuPanel;
+        entry.OnFocus += OnEntryFocused;
+        entry.OnBlur += OnEntryBlurred;
+
+        entry.OnJumpInClick += (x) => OnJumpIn?.Invoke(x);
+        entry.OnWhisperClick += (x) => OnWhisper?.Invoke(x);
 
         return true;
     }
@@ -85,9 +95,11 @@ public class FriendsListView : MonoBehaviour
         if (!friendEntries.ContainsKey(userId))
             return;
 
-        RectTransform containerRectTransform = friendEntries[userId].transform.parent as RectTransform;
+        var entry = friendEntries[userId];
 
-        Object.Destroy(friendEntries[userId].gameObject);
+        RectTransform containerRectTransform = entry.transform.parent as RectTransform;
+
+        Object.Destroy(entry.gameObject);
         friendEntries.Remove(userId);
 
         LayoutRebuilder.ForceRebuildLayoutImmediate(containerRectTransform);
@@ -113,16 +125,16 @@ public class FriendsListView : MonoBehaviour
         deleteFriendDialog.SetActive(true);
     }
 
-    void ConfirmFriendRequestSentCancellation()
+    void ConfirmFriendDelete()
     {
         if (selectedFriendEntry == null) return;
 
         RemoveEntry(selectedFriendEntry.userId);
 
+        OnDelete?.Invoke(selectedFriendEntry);
+
         deleteFriendDialog.SetActive(false);
         selectedFriendEntry = null;
-
-        // TODO: Notify Kernel
     }
 
     void CancelConfirmationDialog()

@@ -1,8 +1,7 @@
-using DCL.Interface;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 public interface IFriendEntry
 {
@@ -13,11 +12,12 @@ public class FriendEntry : MonoBehaviour, IFriendEntry, IPointerEnterHandler, IP
 {
     public Model model { get; private set; }
     public string userId { get; private set; }
-    public event System.Action<FriendEntry> OnJumpIn;
-    public event System.Action<FriendEntry> OnWhisper;
+
     public event System.Action<FriendEntry> OnMenuToggle;
     public event System.Action<FriendEntry> OnFocus;
     public event System.Action<FriendEntry> OnBlur;
+    public event System.Action<FriendEntry> OnJumpInClick;
+    public event System.Action<FriendEntry> OnWhisperClick;
 
     [SerializeField] internal TextMeshProUGUI playerNameText;
     [SerializeField] internal TextMeshProUGUI playerLocationText;
@@ -45,6 +45,12 @@ public class FriendEntry : MonoBehaviour, IFriendEntry, IPointerEnterHandler, IP
         unhoveredBackgroundSprite = backgroundImage.sprite;
 
         menuButton.onClick.AddListener(() => OnMenuToggle?.Invoke(this));
+
+        jumpInButton.onClick.RemoveAllListeners();
+        jumpInButton.onClick.AddListener(() => OnJumpInClick?.Invoke(this));
+
+        whisperButton.onClick.RemoveAllListeners();
+        whisperButton.onClick.AddListener(() => OnWhisperClick?.Invoke(this));
     }
 
     public void OnPointerEnter(PointerEventData eventData)
@@ -81,9 +87,9 @@ public class FriendEntry : MonoBehaviour, IFriendEntry, IPointerEnterHandler, IP
         playerImage.sprite = model.avatarImage;
 
         jumpInButton.onClick.RemoveAllListeners();
-        jumpInButton.onClick.AddListener(() => OnJumpIn?.Invoke(this));
+        jumpInButton.onClick.AddListener(() => OnJumpInClick?.Invoke(this));
 
         whisperButton.onClick.RemoveAllListeners();
-        whisperButton.onClick.AddListener(() => OnWhisper?.Invoke(this));
+        whisperButton.onClick.AddListener(() => OnWhisperClick?.Invoke(this));
     }
 }

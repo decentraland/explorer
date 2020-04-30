@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public interface IFriendsController
@@ -55,7 +55,7 @@ public class FriendsController : MonoBehaviour, IFriendsController
         NONE,
         APPROVED,
         REJECTED,
-        CANCELED,
+        CANCELLED,
         REQUESTED_FROM,
         REQUESTED_TO,
         DELETED
@@ -146,7 +146,7 @@ public class FriendsController : MonoBehaviour, IFriendsController
             case FriendshipAction.REJECTED:
                 friends[msg.userId].friendshipStatus = FriendshipStatus.NONE;
                 break;
-            case FriendshipAction.CANCELED:
+            case FriendshipAction.CANCELLED:
                 friends[msg.userId].friendshipStatus = FriendshipStatus.NONE;
                 break;
             case FriendshipAction.REQUESTED_FROM:
