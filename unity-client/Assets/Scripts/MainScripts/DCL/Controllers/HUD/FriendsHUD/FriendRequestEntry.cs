@@ -1,18 +1,18 @@
 ﻿using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
-public class FriendRequestEntry : MonoBehaviour, IFriendEntry
+public class FriendRequestEntry : MonoBehaviour, IFriendEntry, IPointerEnterHandler, IPointerExitHandler
 {
     [SerializeField] internal TextMeshProUGUI playerNameText;
     [SerializeField] internal Image playerImage;
+    [SerializeField] internal Button menuButton;
     [SerializeField] internal Button acceptButton;
     [SerializeField] internal Button rejectButton;
     [SerializeField] internal Button cancelButton;
-
-    public event System.Action<FriendRequestEntry> OnAccepted;
-    public event System.Action<FriendRequestEntry> OnRejected;
-    public event System.Action<FriendRequestEntry> OnCancelled;
+    [SerializeField] internal Image backgroundImage;
+    [SerializeField] internal Sprite hoveredBackgroundSprite;
 
     public string userId
     {
@@ -21,17 +21,38 @@ public class FriendRequestEntry : MonoBehaviour, IFriendEntry
     }
     public Transform menuPositionReference;
     public FriendEntry.Model model { get; private set; }
+    internal Sprite unhoveredBackgroundSprite;
+
+    public event System.Action<FriendRequestEntry> OnMenuToggle;
+    public event System.Action<FriendRequestEntry> OnAccepted;
+    public event System.Action<FriendRequestEntry> OnRejected;
+    public event System.Action<FriendRequestEntry> OnCancelled;
 
     public void Awake()
     {
-        acceptButton.onClick.RemoveAllListeners();
-        acceptButton.onClick.AddListener(AcceptRequest);
+        unhoveredBackgroundSprite = backgroundImage.sprite;
 
-        rejectButton.onClick.RemoveAllListeners();
-        rejectButton.onClick.AddListener(RejectRequest);
+        menuButton.onClick.AddListener(() => OnMenuToggle?.Invoke(this));
+        acceptButton.onClick.AddListener(() => OnAccepted?.Invoke(this));
+        rejectButton.onClick.AddListener(() => OnRejected?.Invoke(this));
+        cancelButton.onClick.AddListener(() => OnCancelled?.Invoke(this));
+    }
 
-        cancelButton.onClick.RemoveAllListeners();
-        cancelButton.onClick.AddListener(CancelRequest);
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        backgroundImage.sprite = hoveredBackgroundSprite;
+        menuButton.gameObject.SetActive(true);
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        backgroundImage.sprite = unhoveredBackgroundSprite;
+        menuButton.gameObject.SetActive(false);
+    }
+
+    void OnDisable()
+    {
+        OnPointerExit(null);
     }
 
     public void Populate(string userId, FriendEntry.Model model, bool? isReceived = null)
@@ -66,20 +87,5 @@ public class FriendRequestEntry : MonoBehaviour, IFriendEntry
         cancelButton.gameObject.SetActive(true);
         acceptButton.gameObject.SetActive(false);
         rejectButton.gameObject.SetActive(false);
-    }
-
-    void AcceptRequest()
-    {
-        OnAccepted?.Invoke(this);
-    }
-
-    void RejectRequest()
-    {
-        OnRejected?.Invoke(this);
-    }
-
-    void CancelRequest()
-    {
-        OnCancelled?.Invoke(this);
     }
 }
