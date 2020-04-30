@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -37,7 +37,7 @@ public class FriendRequestsListView : MonoBehaviour
     Dictionary<string, FriendRequestEntry> friendRequestEntries = new Dictionary<string, FriendRequestEntry>();
     IEnumerator currentNotificationRoutine = null;
     GameObject currentNotification = null;
-    FriendRequestEntry currentDialogRequestEntry = null;
+    FriendRequestEntry selectedRequestEntry = null;
 
     public event System.Action<FriendRequestEntry> OnFriendRequestCancelled;
     public event System.Action<FriendRequestEntry> OnFriendRequestRejected;
@@ -45,8 +45,6 @@ public class FriendRequestsListView : MonoBehaviour
     public event System.Action<string> OnFriendRequestSent;
 
     public int entriesCount => friendRequestEntries.Count;
-
-
     internal FriendRequestEntry GetEntry(string userId)
     {
         return friendRequestEntries[userId];
@@ -73,6 +71,8 @@ public class FriendRequestsListView : MonoBehaviour
         }
 
         CancelConfirmationDialog();
+
+        requestMenuPanel.SetActive(false);
     }
 
     void SendFriendRequest(string friendId)
@@ -117,6 +117,7 @@ public class FriendRequestsListView : MonoBehaviour
 
         entry = Instantiate(friendRequestEntryPrefab).GetComponent<FriendRequestEntry>();
         entry.OnAccepted += OnFriendRequestReceivedAccepted;
+        entry.OnMenuToggle += (x) => { selectedRequestEntry = x; ToggleMenuPanel(x); };
         entry.OnRejected += OnFriendRequestReceivedRejected;
         entry.OnCancelled += OnFriendRequestSentCancelled;
         friendRequestEntries.Add(userId, entry);
@@ -159,7 +160,7 @@ public class FriendRequestsListView : MonoBehaviour
 
     void OnFriendRequestReceivedRejected(FriendRequestEntry requestEntry)
     {
-        currentDialogRequestEntry = requestEntry;
+        selectedRequestEntry = requestEntry;
 
         rejectRequestDialogText.text = $"Are you sure you want to reject {requestEntry.model.userName} friend request?";
         rejectRequestDialog.SetActive(true);
@@ -167,17 +168,17 @@ public class FriendRequestsListView : MonoBehaviour
 
     void ConfirmFriendRequestReceivedRejection()
     {
-        if (currentDialogRequestEntry == null) return;
+        if (selectedRequestEntry == null) return;
 
         rejectRequestDialog.SetActive(false);
-        currentDialogRequestEntry = null;
+        selectedRequestEntry = null;
 
-        OnFriendRequestRejected?.Invoke(currentDialogRequestEntry);
+        OnFriendRequestRejected?.Invoke(selectedRequestEntry);
     }
 
     void OnFriendRequestSentCancelled(FriendRequestEntry requestEntry)
     {
-        currentDialogRequestEntry = requestEntry;
+        selectedRequestEntry = requestEntry;
 
         cancelRequestDialogText.text = $"Are you sure you want to cancel {requestEntry.model.userName} friend request?";
         cancelRequestDialog.SetActive(true);
@@ -185,19 +186,25 @@ public class FriendRequestsListView : MonoBehaviour
 
     void ConfirmFriendRequestSentCancellation()
     {
-        if (currentDialogRequestEntry == null) return;
+        if (selectedRequestEntry == null) return;
 
         cancelRequestDialog.SetActive(false);
-        OnFriendRequestCancelled?.Invoke(currentDialogRequestEntry);
-        currentDialogRequestEntry = null;
-
+        OnFriendRequestCancelled?.Invoke(selectedRequestEntry);
+        selectedRequestEntry = null;
     }
 
     void CancelConfirmationDialog()
     {
-        currentDialogRequestEntry = null;
+        selectedRequestEntry = null;
         cancelRequestDialog.SetActive(false);
         rejectRequestDialog.SetActive(false);
+    }
+
+    void ToggleMenuPanel(FriendRequestEntry entry)
+    {
+        requestMenuPanel.transform.position = entry.menuPositionReference.position;
+
+        requestMenuPanel.SetActive(selectedRequestEntry == entry ? !requestMenuPanel.activeSelf : true);
     }
 
     public void RemoveEntry(string userId)
