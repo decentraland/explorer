@@ -36,6 +36,14 @@ public class PlayerInfoCardHUDView : MonoBehaviour
     [SerializeField] internal Image blockedAvatarOverlay;
     [SerializeField] internal TextMeshProUGUI name;
 
+    [SerializeField]
+    [Header("Friends")]
+    internal Button requestSentButton;
+    [SerializeField]
+    internal Button addFriendButton;
+    [SerializeField]
+    internal GameObject alreadyFriendsContainer;
+
     [Header("Passport")]
     [SerializeField]
     internal TextMeshProUGUI description;
