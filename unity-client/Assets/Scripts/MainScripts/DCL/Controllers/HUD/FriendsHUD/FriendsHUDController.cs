@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class FriendsHUDController : IHUD
 {
+    internal const string CURRENT_PLAYER_ID = "CurrentPlayerInfoCardId";
     public FriendsHUDView view
     {
         get;
@@ -99,6 +100,11 @@ public class FriendsHUDController : IHUD
                 view.friendsList.RemoveEntry(userId);
                 break;
         }
+
+        var pendingFriendRequestsSO = Resources.Load<FloatVariable>("PendingFriendRequests");
+
+        if (pendingFriendRequestsSO != null)
+            pendingFriendRequestsSO.Set(view.friendRequestsList.entriesCount);
     }
 
     private void Entry_OnWhisper(FriendEntry entry)
@@ -109,8 +115,6 @@ public class FriendsHUDController : IHUD
     {
         WebInterface.SendReportPlayer(entry.userId);
     }
-
-    internal const string CURRENT_PLAYER_ID = "CurrentPlayerInfoCardId";
 
     private void Entry_OnPassport(FriendEntry entry)
     {
