@@ -42,6 +42,8 @@ public class FriendRequestsListView : MonoBehaviour
     public event System.Action<FriendRequestEntry> OnFriendRequestCancelled;
     public event System.Action<FriendRequestEntry> OnFriendRequestRejected;
     public event System.Action<FriendRequestEntry> OnFriendRequestApproved;
+    public event System.Action<string> OnBlock;
+    public event System.Action<string> OnPassport;
     public event System.Action<string> OnFriendRequestSent;
 
     public int entriesCount => friendRequestEntries.Count;
@@ -53,6 +55,9 @@ public class FriendRequestsListView : MonoBehaviour
     void Awake()
     {
         friendSearchInputField.onSubmit.AddListener(SendFriendRequest);
+
+        playerPassportButton.onClick.AddListener(() => { OnPassport?.Invoke(selectedRequestEntry.userId); ToggleMenuPanel(selectedRequestEntry); });
+        blockPlayerButton.onClick.AddListener(() => { OnBlock?.Invoke(selectedRequestEntry.userId); ToggleMenuPanel(selectedRequestEntry); });
 
         rejectRequestDialogConfirmButton.onClick.AddListener(ConfirmFriendRequestReceivedRejection);
         cancelRequestDialogConfirmButton.onClick.AddListener(ConfirmFriendRequestSentCancellation);

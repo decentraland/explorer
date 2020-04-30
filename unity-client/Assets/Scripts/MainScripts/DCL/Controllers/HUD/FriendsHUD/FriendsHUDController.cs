@@ -26,6 +26,8 @@ public class FriendsHUDController : IHUD
         view.friendRequestsList.OnFriendRequestCancelled += Entry_OnRequestCancelled;
         view.friendRequestsList.OnFriendRequestRejected += Entry_OnRequestRejected;
         view.friendRequestsList.OnFriendRequestSent += Entry_OnRequestSent;
+        view.friendRequestsList.OnBlock += Entry_OnBlock;
+        view.friendRequestsList.OnPassport += Entry_OnPassport;
 
         view.friendsList.OnJumpIn += Entry_OnJumpIn;
         view.friendsList.OnWhisper += Entry_OnWhisper;
@@ -111,20 +113,20 @@ public class FriendsHUDController : IHUD
     {
         //TODO(Brian): add /w username to chat input text and focus
     }
-    private void Entry_OnReport(FriendEntry entry)
+    private void Entry_OnReport(string userId)
     {
-        WebInterface.SendReportPlayer(entry.userId);
+        WebInterface.SendReportPlayer(userId);
     }
 
-    private void Entry_OnPassport(FriendEntry entry)
+    private void Entry_OnPassport(string userId)
     {
         var currentPlayerId = Resources.Load<StringVariable>(CURRENT_PLAYER_ID);
-        currentPlayerId.Set(entry.userId);
+        currentPlayerId.Set(userId);
     }
 
-    private void Entry_OnBlock(FriendEntry entry)
+    private void Entry_OnBlock(string userId)
     {
-        WebInterface.SendBlockPlayer(entry.userId);
+        WebInterface.SendBlockPlayer(userId);
     }
 
     private void Entry_OnJumpIn(FriendEntry entry)
