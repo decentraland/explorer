@@ -830,6 +830,7 @@ namespace DCL.Controllers
                         newComponent = new UIText(this);
                         break;
                     }
+
                 case CLASS_ID.VIDEO_CLIP:
                     {
                         newComponent = new DCLVideoClip(this);
