@@ -34,6 +34,7 @@ export const UPDATE_PRIVATE_MESSAGING = 'Update private messaging state'
 export const updateState = (state: ChatState['privateMessaging']) => action(UPDATE_PRIVATE_MESSAGING, state)
 export type UpdateState = ReturnType<typeof updateState>
 
-export const ADD_USER_DATA = 'Add user data'
-export const addUserData = (userId: string, socialId: string) => action(ADD_USER_DATA, { userId, socialId })
-export type AddUserData = ReturnType<typeof addUserData>
+export const UPDATE_USER_DATA = 'Update user data'
+export const updateUserData = (userId: string, socialId: string, conversationId?: string) =>
+  action(UPDATE_USER_DATA, { userId, socialId, conversationId })
+export type UpdateUserData = ReturnType<typeof updateUserData>
