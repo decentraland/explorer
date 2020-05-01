@@ -90,7 +90,7 @@ public class FriendsListView : MonoBehaviour
                 offlineFriends--;
         }
 
-        UpdateUsersStatusText();
+        UpdateUsersToggleTexts();
 
         ForceUpdateLayout();
         return true;
@@ -129,7 +129,7 @@ public class FriendsListView : MonoBehaviour
             onlineFriends--;
         else
             offlineFriends--;
-        UpdateUsersStatusText();
+        UpdateUsersToggleTexts();
 
         RectTransform containerRectTransform = entry.transform.parent as RectTransform;
 
@@ -139,7 +139,7 @@ public class FriendsListView : MonoBehaviour
         ForceUpdateLayout();
     }
 
-    void UpdateUsersStatusText()
+    void UpdateUsersToggleTexts()
     {
         onlineFriendsToggleText.text = $"ONLINE ({onlineFriends})";
         offlineFriendsToggleText.text = $"OFFLINE ({offlineFriends})";

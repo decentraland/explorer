@@ -149,6 +149,8 @@ MonoBehaviour:
   addFriendButton: {fileID: 8222469670151691449}
   playerPassportButton: {fileID: 653160374987509970}
   blockPlayerButton: {fileID: 6452886967430927035}
+  receivedRequestsToggleText: {fileID: 3396915662445348230}
+  sentRequestsToggleText: {fileID: 2961274995397393352}
   requestSentNotification: {fileID: 8347565519525447700}
   requestSentNotificationText: {fileID: 2671914754147954507}
   friendSearchFailedNotification: {fileID: 6043985242258827856}

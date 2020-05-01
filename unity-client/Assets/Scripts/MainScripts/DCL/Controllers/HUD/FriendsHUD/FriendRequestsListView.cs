@@ -19,6 +19,8 @@ public class FriendRequestsListView : MonoBehaviour
     [SerializeField] Button addFriendButton;
     [SerializeField] Button playerPassportButton;
     [SerializeField] Button blockPlayerButton;
+    [SerializeField] TextMeshProUGUI receivedRequestsToggleText;
+    [SerializeField] TextMeshProUGUI sentRequestsToggleText;
 
     [Header("Notifications")]
     [SerializeField] GameObject requestSentNotification;
@@ -41,6 +43,8 @@ public class FriendRequestsListView : MonoBehaviour
     Coroutine currentNotificationRoutine = null;
     GameObject currentNotification = null;
     FriendRequestEntry selectedRequestEntry = null;
+    int receivedRequests = 0;
+    int sentRequests = 0;
 
     public event System.Action<FriendRequestEntry> OnFriendRequestCancelled;
     public event System.Action<FriendRequestEntry> OnFriendRequestRejected;
@@ -179,7 +183,18 @@ public class FriendRequestsListView : MonoBehaviour
 
         if (isReceived.HasValue)
         {
-            entry.transform.SetParent(isReceived.Value ? receivedRequestsContainer : sentRequestsContainer);
+            if (isReceived.Value)
+            {
+                entry.transform.SetParent(receivedRequestsContainer);
+                receivedRequests++;
+            }
+            else
+            {
+                entry.transform.SetParent(sentRequestsContainer);
+                sentRequests++;
+            }
+
+            UpdateUsersToggleTexts();
         }
 
         entry.transform.localScale = Vector3.one;
@@ -259,11 +274,15 @@ public class FriendRequestsListView : MonoBehaviour
 
     public void RemoveEntry(string userId)
     {
-        if (!friendRequestEntries.ContainsKey(userId))
-            return;
+        if (!friendRequestEntries.ContainsKey(userId)) return;
 
         var entry = friendRequestEntries[userId];
 
+        if (entry.isReceived)
+            receivedRequests--;
+        else
+            sentRequests--;
+        UpdateUsersToggleTexts();
 
         Destroy(entry.gameObject);
         friendRequestEntries.Remove(userId);
@@ -283,6 +302,12 @@ public class FriendRequestsListView : MonoBehaviour
         containerRectTransform);
 
         LayoutRebuilder.ForceRebuildLayoutImmediate(containerRectTransform);
+    }
+
+    void UpdateUsersToggleTexts()
+    {
+        receivedRequestsToggleText.text = $"RECEIVED ({receivedRequests})";
+        sentRequestsToggleText.text = $"SENT ({sentRequests})";
     }
 
     [ContextMenu("AddFakeRequestReceived")]
