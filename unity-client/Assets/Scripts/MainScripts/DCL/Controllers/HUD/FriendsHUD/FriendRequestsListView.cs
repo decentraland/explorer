@@ -16,6 +16,7 @@ public class FriendRequestsListView : MonoBehaviour
     [SerializeField] TMP_InputField friendSearchInputField;
     [SerializeField] GameObject emptyListImage;
     [SerializeField] GameObject requestMenuPanel;
+    [SerializeField] Button addFriendButton;
     [SerializeField] Button playerPassportButton;
     [SerializeField] Button blockPlayerButton;
 
