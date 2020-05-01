@@ -131,13 +131,13 @@ public class FriendsHUDViewShould : TestsBase
     }
 
     [Test]
-    void CountProperlyStatus()
+    public void CountProperlyStatus()
     {
 
     }
 
     [Test]
-    void DeleteFriendProperly()
+    public void DeleteFriendProperly()
     {
         var model1 = new FriendEntry.Model()
         {
@@ -151,17 +151,17 @@ public class FriendsHUDViewShould : TestsBase
     }
 
     [Test]
-    void RejectFriendRequestsProperly()
+    public void RejectFriendRequestsProperly()
     {
     }
 
     [Test]
-    void CancelFriendRequestsProperly()
+    public void CancelFriendRequestsProperly()
     {
     }
 
     [Test]
-    void SendFriendRequestsProperly()
+    public void SendFriendRequestsProperly()
     {
     }
 }
