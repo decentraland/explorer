@@ -32,7 +32,8 @@ import {
   SaveProfileRequest,
   saveProfileSuccess,
   profileRequest,
-  saveProfileFailure
+  saveProfileFailure,
+  addedProfileToCatalog
 } from './actions'
 import { generateRandomUserProfile } from './generateRandomUserProfile'
 import {
@@ -306,7 +307,11 @@ export function* submitProfileToRenderer(action: ProfileSuccessAction): any {
     yield call(ensureRenderer)
     yield call(ensureBaseCatalogs)
 
-    globalThis.unityInterface.AddUserProfileToCatalog(profileToRendererFormat(profile))
+    const forRenderer = profileToRendererFormat(profile)
+
+    globalThis.unityInterface.AddUserProfileToCatalog(forRenderer)
+
+    yield put(addedProfileToCatalog(action.payload.userId, forRenderer))
   }
 }
 

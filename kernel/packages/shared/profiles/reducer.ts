@@ -1,6 +1,7 @@
 import { AnyAction } from 'redux'
 import { ProfileState, INITIAL_PROFILES } from './types'
 import {
+  ADDED_PROFILE_TO_CATALOG,
   ADD_CATALOG,
   AddCatalogAction,
   CATALOG_LOADED,
@@ -103,6 +104,17 @@ export function profileReducer(state?: ProfileState, action?: AnyAction): Profil
         userInfo: {
           ...state.userInfo,
           [action.payload.userId]: { status: 'error', data: action.payload.error }
+        }
+      }
+    case ADDED_PROFILE_TO_CATALOG:
+      return {
+        ...state,
+        userInfo: {
+          ...state.userInfo,
+          [action.payload.userId]: {
+            ...state.userInfo[action.payload.userId],
+            addedToCatalog: true
+          }
         }
       }
     default:

@@ -18,6 +18,12 @@ export const findProfileByName = (store: RootProfileState, userName: string): Pr
         .find(user => user.data.name === userName)?.data
     : null
 
+export const isAddedToCatalog = (store: RootProfileState, userId: string): boolean =>
+  store.profiles &&
+    store.profiles.userInfo &&
+    store.profiles.userInfo[userId] &&
+    store.profiles.userInfo[userId].status === 'ok' ? !!store.profiles.userInfo[userId].addedToCatalog : false
+
 export const getEthereumAddress = (store: RootProfileState, userId: string): string | undefined =>
   store.profiles &&
   store.profiles.userInfo &&

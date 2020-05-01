@@ -20,12 +20,13 @@ import { unityInterface } from 'unity-interface/dcl'
 import { ChatMessageType, FriendshipAction, PresenceStatus } from 'shared/types'
 import { SocialData, ChatState } from './types'
 import { StoreContainer } from '../store/rootTypes'
-import { RENDERER_INITIALIZED } from '../renderer/types'
 import { ChatMessage } from '../types'
 import { getRealm } from 'shared/dao/selectors'
 import { lastPlayerPosition } from '../world/positionThings'
 import { worldToGrid } from '../../atomicHelpers/parcelScenePositions'
-import { isInitialized } from 'shared/renderer/selectors'
+import { ensureRenderer } from '../profiles/sagas'
+import { ADDED_PROFILE_TO_CATALOG } from '../profiles/actions'
+import { isAddedToCatalog } from 'shared/profiles/selectors'
 
 declare const globalThis: StoreContainer & { sendPrivateMessage: (userId: string, message: string) => void }
 
@@ -216,14 +217,17 @@ function* initializeFriends(client: SocialAPI) {
 
   // ensure friend profiles are sent to renderer
 
-  yield Promise.all(
-    Object.values(socialInfo)
-      .map(socialData => socialData.userId)
-      .map(userId => ProfileAsPromise(userId))
-  )
+  yield call(ensureRenderer)
 
-  while (!(yield select(isInitialized))) {
-    yield take(RENDERER_INITIALIZED) // wait for renderer to initialize
+  const profileIds = Object.values(socialInfo).map(socialData => socialData.userId)
+
+  const profiles = yield Promise.all(profileIds.map(userId => ProfileAsPromise(userId)))
+  DEBUG && logger.info(`profiles`, profiles)
+
+  for (const userId of profileIds) {
+    while (!(yield select(isAddedToCatalog, userId))) {
+      yield take(ADDED_PROFILE_TO_CATALOG)
+    }
   }
 
   const initMessage = {

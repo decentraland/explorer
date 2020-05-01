@@ -80,11 +80,15 @@ export function* chatSaga(): any {
 
 function* handleAuthSuccessful() {
   if (identity.hasConnectedWeb3) {
-    while (!(yield select(isRealmInitialized))) {
-      yield take(CATALYST_REALM_INITIALIZED)
-    }
+    yield call(ensureRealmInitialized)
 
     yield call(initializePrivateMessaging, getServerConfigurations().synapseUrl, identity)
+  }
+}
+
+function* ensureRealmInitialized() {
+  while (!(yield select(isRealmInitialized))) {
+    yield take(CATALYST_REALM_INITIALIZED)
   }
 }
 

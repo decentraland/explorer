@@ -1,5 +1,6 @@
 import { action } from 'typesafe-actions'
 import { Profile, Wearable, Catalog, WearableId } from './types'
+import { ProfileForRenderer } from '../../decentraland-ecs/src/decentraland/Types'
 
 // Profile fetching
 
@@ -68,3 +69,8 @@ export type InventoryFailure = ReturnType<typeof inventoryFailure>
 export const NOTIFY_NEW_INVENTORY_ITEM = '[Inventory] New inventory item'
 export const notifyNewInventoryItem = () => action(NOTIFY_NEW_INVENTORY_ITEM)
 export type NotifyNewInventoryItem = ReturnType<typeof notifyNewInventoryItem>
+
+export const ADDED_PROFILE_TO_CATALOG = '[Success] Added profile to catalog'
+export const addedProfileToCatalog = (userId: string, profile: ProfileForRenderer) =>
+  action(ADDED_PROFILE_TO_CATALOG, { userId, profile })
+export type AddedProfileToCatalog = ReturnType<typeof addedProfileToCatalog>
