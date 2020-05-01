@@ -94,8 +94,7 @@ import { worldRunningObservable } from 'shared/world/worldState'
 import { profileToRendererFormat } from 'shared/profiles/transformations/profileToRendererFormat'
 import { StoreContainer } from 'shared/store/rootTypes'
 import { ILandToLoadableParcelScene, ILandToLoadableParcelSceneUpdate } from 'shared/selectors'
-import { sendMessage, updateUserData } from 'shared/chat/actions'
-import { updateFriendship } from '../shared/chat/actions'
+import { sendMessage, updateUserData, updateFriendship } from 'shared/chat/actions'
 
 declare const globalThis: UnityInterfaceContainer &
   BrowserInterfaceContainer &
@@ -346,8 +345,8 @@ const browserInterface = {
   SendChatMessage(data: { message: ChatMessage }) {
     globalThis.globalStore.dispatch(sendMessage(data.message))
   },
-  UpdateFriendshipStatus(data: { message: FriendshipUpdateStatusMessage }) {
-    const { userId, action } = data.message
+  UpdateFriendshipStatus(message: FriendshipUpdateStatusMessage) {
+    const { userId, action } = message
 
     globalThis.globalStore.dispatch(updateUserData(userId, toSocialId(userId)))
     globalThis.globalStore.dispatch(updateFriendship(action, userId, false))

@@ -261,20 +261,20 @@ function initializeStatusUpdateInterval(client: SocialAPI) {
 
     if (!realm) {
       // if no realm is initialized yet, cannot set status
+      DEBUG && logger.info(`update status with no realm, skipping`)
       return
     }
 
-    client
-      .setStatus({
-        realm: {
-          layer: realm.layer,
-          serverName: realm.catalystName
-        },
-        position,
-        presence: PresenceType.ONLINE
-      })
-      .catch(e => logger.error(`error while setting status`, e))
-
+    const updateStatus = {
+      realm: {
+        layer: realm.layer,
+        serverName: realm.catalystName
+      },
+      position,
+      presence: PresenceType.ONLINE
+    }
+    DEBUG && logger.info(`sending update status`, updateStatus)
+    client.setStatus(updateStatus).catch(e => logger.error(`error while setting status`, e))
   }, SEND_STATUS_INTERVAL_MILLIS)
 }
 
@@ -434,9 +434,7 @@ function* handleUpdateFriendship({ payload, meta }: UpdateFriendship) {
 }
 
 function* handleOutgoingUpdateFriendshipStatus(update: UpdateFriendship['payload']) {
-  if (DEBUG) {
-    logger.info(`handleOutgoingFriendshipUpdateStatus`, update)
-  }
+  DEBUG && logger.info(`handleOutgoingFriendshipUpdateStatus`, update)
 
   const client: SocialAPI = yield select(getClient)
   const socialData: SocialData = yield select(findByUserId, update.userId)
