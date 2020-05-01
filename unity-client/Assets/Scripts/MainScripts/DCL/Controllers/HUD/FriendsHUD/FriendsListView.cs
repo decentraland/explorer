@@ -90,8 +90,7 @@ public class FriendsListView : MonoBehaviour
                 offlineFriends--;
         }
 
-        onlineFriendsToggleText.text = $"ONLINE ({onlineFriends})";
-        offlineFriendsToggleText.text = $"OFFLINE ({offlineFriends})";
+        UpdateUsersStatusText();
 
         ForceUpdateLayout();
         return true;
@@ -122,10 +121,15 @@ public class FriendsListView : MonoBehaviour
 
     public void RemoveEntry(string userId)
     {
-        if (!friendEntries.ContainsKey(userId))
-            return;
+        if (!friendEntries.ContainsKey(userId)) return;
 
         var entry = friendEntries[userId];
+
+        if (entry.model.status == FriendsController.PresenceStatus.ONLINE)
+            onlineFriends--;
+        else
+            offlineFriends--;
+        UpdateUsersStatusText();
 
         RectTransform containerRectTransform = entry.transform.parent as RectTransform;
 
@@ -133,6 +137,12 @@ public class FriendsListView : MonoBehaviour
         friendEntries.Remove(userId);
 
         ForceUpdateLayout();
+    }
+
+    void UpdateUsersStatusText()
+    {
+        onlineFriendsToggleText.text = $"ONLINE ({onlineFriends})";
+        offlineFriendsToggleText.text = $"OFFLINE ({offlineFriends})";
     }
 
     void OnFriendDelete()
