@@ -38,7 +38,7 @@ public class FriendRequestsListView : MonoBehaviour
     [SerializeField] Button cancelRequestDialogConfirmButton;
 
     Dictionary<string, FriendRequestEntry> friendRequestEntries = new Dictionary<string, FriendRequestEntry>();
-    IEnumerator currentNotificationRoutine = null;
+    Coroutine currentNotificationRoutine = null;
     GameObject currentNotification = null;
     FriendRequestEntry selectedRequestEntry = null;
 
@@ -61,6 +61,8 @@ public class FriendRequestsListView : MonoBehaviour
     void Awake()
     {
         friendSearchInputField.onSubmit.AddListener(SendFriendRequest);
+        friendSearchInputField.onValueChanged.AddListener(OnSearchInputValueChanged);
+        addFriendButton.onClick.AddListener(() => friendSearchInputField.OnSubmit(null));
 
         playerPassportButton.onClick.AddListener(() => { OnPassport?.Invoke(selectedRequestEntry.userId); ToggleMenuPanel(selectedRequestEntry); });
         blockPlayerButton.onClick.AddListener(() => { OnBlock?.Invoke(selectedRequestEntry.userId); ToggleMenuPanel(selectedRequestEntry); });
@@ -89,34 +91,70 @@ public class FriendRequestsListView : MonoBehaviour
     void SendFriendRequest(string friendId)
     {
         // TODO: Check existence with kernel, if the user exists trigger requestSentNotification
+        bool targetUserExists = true;
 
-        requestSentNotificationText.text = $"Your request to {friendId} successfully sent!";
-        TriggerNotification(requestSentNotification);
+        if (targetUserExists)
+        {
+            requestSentNotificationText.text = $"Your request to {friendId} successfully sent!";
+            TriggerNotification(requestSentNotification);
 
-        OnFriendRequestSent?.Invoke(friendId);
-        // If friend Id doesn't exist:
-        // TriggerNotification(friendSearchFailedNotification);
+            friendSearchInputField.placeholder.enabled = true;
+            friendSearchInputField.text = string.Empty;
+
+            addFriendButton.gameObject.SetActive(false);
+
+            OnFriendRequestSent?.Invoke(friendId);
+        }
+        else
+        {
+            // TODO: somehow force FOCUS on the text input?
+
+            TriggerNotification(friendSearchFailedNotification);
+
+            addFriendButton.interactable = false;
+        }
+    }
+
+    void OnSearchInputValueChanged(string friendId)
+    {
+        if (!addFriendButton.gameObject.activeSelf)
+            addFriendButton.gameObject.SetActive(true);
+
+        if (!addFriendButton.interactable)
+            addFriendButton.interactable = true;
+
+        DismissCurrentNotification();
+    }
+
+    void DismissCurrentNotification()
+    {
+        if (currentNotificationRoutine == null) return;
+
+        StopCoroutine(currentNotificationRoutine);
+        currentNotificationRoutine = null;
+
+        currentNotification.SetActive(false);
+        currentNotification = null;
     }
 
     void TriggerNotification(GameObject notificationGameobject)
     {
-        if (currentNotificationRoutine != null)
-        {
-            StopCoroutine(currentNotificationRoutine);
-            currentNotification.SetActive(false);
-            currentNotification = null;
-        }
+        DismissCurrentNotification();
 
-        notificationGameobject.SetActive(true);
-        StartCoroutine(WaitAndCloseNotification(notificationGameobject));
-    }
-
-    IEnumerator WaitAndCloseNotification(GameObject notificationGameobject)
-    {
         currentNotification = notificationGameobject;
 
+        notificationGameobject.SetActive(true);
+        currentNotificationRoutine = StartCoroutine(WaitAndCloseCurrentNotification(notificationGameobject));
+    }
+
+    IEnumerator WaitAndCloseCurrentNotification(GameObject notificationGameobject)
+    {
         yield return WaitForSecondsCache.Get(notificationsDuration);
+
+        currentNotificationRoutine = null;
+
         notificationGameobject.SetActive(false);
+        currentNotification = null;
     }
 
     public bool CreateEntry(string userId)

@@ -1,13 +1,6 @@
 import { AnyAction } from 'redux'
 import { ChatState, SocialData } from './types'
-import {
-  SOCIAL_CLIENT_INITIALIZED,
-  ClientInitialized,
-  UPDATE_PRIVATE_MESSAGING,
-  UpdateState,
-  UPDATE_USER_DATA,
-  UpdateUserData
-} from './actions'
+import { UPDATE_PRIVATE_MESSAGING, UpdatePrivateMessagingState, UPDATE_USER_DATA, UpdateUserData } from './actions'
 
 const CHAT_INITIAL_STATE: ChatState = {
   privateMessaging: {
@@ -27,11 +20,8 @@ export function chatReducer(state?: ChatState, action?: AnyAction) {
     return state
   }
   switch (action.type) {
-    case SOCIAL_CLIENT_INITIALIZED: {
-      return reduceSocialClientInitialized(state, action as ClientInitialized)
-    }
     case UPDATE_PRIVATE_MESSAGING: {
-      return reducePrivateMessaging(state, action as UpdateState)
+      return reducePrivateMessaging(state, action as UpdatePrivateMessagingState)
     }
     case UPDATE_USER_DATA: {
       return reduceUpdateUserData(state, action as UpdateUserData)
@@ -40,11 +30,7 @@ export function chatReducer(state?: ChatState, action?: AnyAction) {
   return state
 }
 
-function reduceSocialClientInitialized(state: ChatState, action: ClientInitialized) {
-  return { ...state, privateMessaging: action.payload }
-}
-
-function reducePrivateMessaging(state: ChatState, action: UpdateState) {
+function reducePrivateMessaging(state: ChatState, action: UpdatePrivateMessagingState) {
   return { ...state, privateMessaging: action.payload }
 }
 

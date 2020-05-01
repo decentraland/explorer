@@ -6,12 +6,11 @@ import { takeEvery, put, select, call, take } from 'redux-saga/effects'
 import {
   SEND_PRIVATE_MESSAGE,
   SendPrivateMessage,
-  clientInitialized,
   sendPrivateMessage,
   updateFriendship,
   UPDATE_FRIENDSHIP,
   UpdateFriendship,
-  updateState,
+  updatePrivateMessagingState,
   updateUserData
 } from './actions'
 import { getClient, findByUserId, isFriend, getPrivateMessaging } from './selectors'
@@ -26,6 +25,7 @@ import { ChatMessage } from '../types'
 import { getRealm } from 'shared/dao/selectors'
 import { lastPlayerPosition } from '../world/positionThings'
 import { worldToGrid } from '../../atomicHelpers/parcelScenePositions'
+import { isInitialized } from 'shared/renderer/selectors'
 
 declare const globalThis: StoreContainer & { sendPrivateMessage: (userId: string, message: string) => void }
 
@@ -50,67 +50,7 @@ export function* initializePrivateMessaging(synapseUrl: string, identity: Explor
 
   const client: SocialAPI = yield SocialClient.loginToServer(synapseUrl, ethAddress, timestamp, authChain)
 
-  const ownId = client.getUserId()
-  DEBUG && logger.info(`initializePrivateMessaging#ownId`, ownId)
-
-  // init friends
-  const friends: string[] = yield client.getAllFriends()
-  DEBUG && logger.info(`friends`, friends)
-
-  const friendsSocial: SocialData[] = yield Promise.all(
-    toSocialData(friends).map(async friend => {
-      const conversation = await client.createDirectConversation(friend.socialId)
-      return { ...friend, conversationId: conversation.id }
-    })
-  )
-
-  // init friend requests
-  const friendRequests: FriendshipRequest[] = yield client.getPendingRequests()
-  DEBUG && logger.info(`friendRequests`, friendRequests)
-
-  // filter my requests to others
-  const toFriendRequests = friendRequests.filter(request => request.from === ownId).map(request => request.to)
-  const toFriendRequestsSocial = toSocialData(toFriendRequests)
-
-  // filter other requests to me
-  const fromFriendRequests = friendRequests.filter(request => request.to === ownId).map(request => request.from)
-  const fromFriendRequestsSocial = toSocialData(fromFriendRequests)
-
-  const socialInfo: Record<string, SocialData> = [
-    ...friendsSocial,
-    ...toFriendRequestsSocial,
-    ...fromFriendRequestsSocial
-  ].reduce(
-    (acc, current) => ({
-      ...acc,
-      [current.socialId]: current
-    }),
-    {}
-  )
-
-  const friendIds = friendsSocial.map($ => $.userId)
-  const requestedFromIds = fromFriendRequestsSocial.map($ => $.userId)
-  const requestedToIds = toFriendRequestsSocial.map($ => $.userId)
-
-  yield put(clientInitialized(client, socialInfo, friendIds, requestedFromIds, requestedToIds))
-
-  // ensure friend profiles are sent to renderer
-
-  yield Promise.all(
-    Object.values(socialInfo)
-      .map(socialData => socialData.userId)
-      .map(userId => ProfileAsPromise(userId))
-  )
-
-  yield take(RENDERER_INITIALIZED) // wait for renderer to initialize
-
-  const initMessage = {
-    currentFriends: friendIds,
-    requestedTo: requestedToIds,
-    requestedFrom: requestedFromIds
-  }
-  DEBUG && logger.info(`unityInterface.InitializeFriends`, initMessage)
-  unityInterface.InitializeFriends(initMessage)
+  const { friendsSocial, ownId }: { friendsSocial: SocialData[]; ownId: string } = yield call(initializeFriends, client)
 
   // initialize conversations
 
@@ -219,6 +159,82 @@ export function* initializePrivateMessaging(synapseUrl: string, identity: Explor
 
   initializeReceivedMessagesCleanUp()
   initializeStatusUpdateInterval(client)
+}
+
+function* initializeFriends(client: SocialAPI) {
+  const ownId = client.getUserId()
+  DEBUG && logger.info(`initializePrivateMessaging#ownId`, ownId)
+
+  // init friends
+  const friends: string[] = yield client.getAllFriends()
+  DEBUG && logger.info(`friends`, friends)
+
+  const friendsSocial: SocialData[] = yield Promise.all(
+    toSocialData(friends).map(async friend => {
+      const conversation = await client.createDirectConversation(friend.socialId)
+      return { ...friend, conversationId: conversation.id }
+    })
+  )
+
+  // init friend requests
+  const friendRequests: FriendshipRequest[] = yield client.getPendingRequests()
+  DEBUG && logger.info(`friendRequests`, friendRequests)
+
+  // filter my requests to others
+  const toFriendRequests = friendRequests.filter(request => request.from === ownId).map(request => request.to)
+  const toFriendRequestsSocial = toSocialData(toFriendRequests)
+
+  // filter other requests to me
+  const fromFriendRequests = friendRequests.filter(request => request.to === ownId).map(request => request.from)
+  const fromFriendRequestsSocial = toSocialData(fromFriendRequests)
+
+  const socialInfo: Record<string, SocialData> = [
+    ...friendsSocial,
+    ...toFriendRequestsSocial,
+    ...fromFriendRequestsSocial
+  ].reduce(
+    (acc, current) => ({
+      ...acc,
+      [current.socialId]: current
+    }),
+    {}
+  )
+
+  const friendIds = friendsSocial.map($ => $.userId)
+  const requestedFromIds = fromFriendRequestsSocial.map($ => $.userId)
+  const requestedToIds = toFriendRequestsSocial.map($ => $.userId)
+
+  yield put(
+    updatePrivateMessagingState({
+      client,
+      socialInfo,
+      friends: friendIds,
+      fromFriendRequests: requestedFromIds,
+      toFriendRequests: requestedToIds
+    })
+  )
+
+  // ensure friend profiles are sent to renderer
+
+  yield Promise.all(
+    Object.values(socialInfo)
+      .map(socialData => socialData.userId)
+      .map(userId => ProfileAsPromise(userId))
+  )
+
+  while (!(yield select(isInitialized))) {
+    yield take(RENDERER_INITIALIZED) // wait for renderer to initialize
+  }
+
+  const initMessage = {
+    currentFriends: friendIds,
+    requestedTo: requestedToIds,
+    requestedFrom: requestedFromIds
+  }
+  DEBUG && logger.info(`unityInterface.InitializeFriends`, initMessage)
+  unityInterface.InitializeFriends(initMessage)
+
+  return { friendsSocial, ownId }
 }
 
 function initializeReceivedMessagesCleanUp() {
@@ -345,6 +361,8 @@ function* handleUpdateFriendship({ payload, meta }: UpdateFriendship) {
 
   let newState: ChatState['privateMessaging'] | undefined
 
+  const client: SocialAPI = yield select(getClient)
+
   switch (action) {
     case FriendshipAction.NONE: {
       // do nothing
@@ -366,7 +384,6 @@ function* handleUpdateFriendship({ payload, meta }: UpdateFriendship) {
           newState.friends.push(userId)
 
           const socialData: SocialData = yield select(findByUserId, userId)
-          const client: SocialAPI = yield select(getClient)
           const conversationId = yield client.createDirectConversation(socialData.socialId)
 
           yield put(updateUserData(userId, socialData.socialId, conversationId))
@@ -422,13 +439,16 @@ function* handleUpdateFriendship({ payload, meta }: UpdateFriendship) {
   }
 
   if (newState) {
-    yield put(updateState(newState))
+    yield put(updatePrivateMessagingState(newState))
 
     if (incoming) {
       DEBUG && logger.info(`unityInterface.UpdateFriendshipStatus`, payload)
       unityInterface.UpdateFriendshipStatus(payload)
     } else {
       yield call(handleOutgoingUpdateFriendshipStatus, payload)
+
+      // refresh self & renderer friends status
+      yield call(initializeFriends, client)
     }
   }
 }
