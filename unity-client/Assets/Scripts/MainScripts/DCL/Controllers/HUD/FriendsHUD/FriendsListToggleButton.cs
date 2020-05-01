@@ -5,7 +5,6 @@ using TMPro;
 
 public class FriendsListToggleButton : MonoBehaviour
 {
-    public bool toggleOnAwake = false;
     public Button toggleButton;
     public Transform toggleButtonIcon;
     public RectTransform containerRectTransform;
@@ -18,8 +17,5 @@ public class FriendsListToggleButton : MonoBehaviour
             toggleButtonIcon.localScale = new Vector3(toggleButtonIcon.localScale.x, -toggleButtonIcon.localScale.y, 1f);
             LayoutRebuilder.ForceRebuildLayoutImmediate(containerRectTransform);
         });
-
-        if (toggleOnAwake)
-            toggleButton.OnPointerClick(null);
     }
 }

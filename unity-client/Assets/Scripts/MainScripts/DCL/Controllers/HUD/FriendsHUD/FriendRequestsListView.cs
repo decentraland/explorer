@@ -90,29 +90,22 @@ public class FriendRequestsListView : MonoBehaviour
 
     void SendFriendRequest(string friendId)
     {
-        // TODO: Check existence with kernel, if the user exists trigger requestSentNotification
-        bool targetUserExists = true;
+        requestSentNotificationText.text = $"Your request to {friendId} successfully sent!";
+        TriggerNotification(requestSentNotification);
 
-        if (targetUserExists)
-        {
-            requestSentNotificationText.text = $"Your request to {friendId} successfully sent!";
-            TriggerNotification(requestSentNotification);
+        friendSearchInputField.placeholder.enabled = true;
+        friendSearchInputField.text = string.Empty;
 
-            friendSearchInputField.placeholder.enabled = true;
-            friendSearchInputField.text = string.Empty;
+        addFriendButton.gameObject.SetActive(false);
 
-            addFriendButton.gameObject.SetActive(false);
+        OnFriendRequestSent?.Invoke(friendId);
+    }
 
-            OnFriendRequestSent?.Invoke(friendId);
-        }
-        else
-        {
-            // TODO: somehow force FOCUS on the text input?
+    public void DisplayFriendUserNotFound()
+    {
+        TriggerNotification(friendSearchFailedNotification);
 
-            TriggerNotification(friendSearchFailedNotification);
-
-            addFriendButton.interactable = false;
-        }
+        addFriendButton.interactable = false;
     }
 
     void OnSearchInputValueChanged(string friendId)
