@@ -24,7 +24,6 @@ public class FriendRequestEntryShould : TestsBase
     }
 
     [Test]
-    [Explicit("Disabling until feature is complete")]
     public void BePopulatedCorrectly()
     {
         Sprite testSprite1 = Sprite.Create(Texture2D.whiteTexture, Rect.zero, Vector2.zero);
@@ -54,29 +53,49 @@ public class FriendRequestEntryShould : TestsBase
         Object.Destroy(testSprite2);
     }
 
+
     [Test]
-    [Explicit("Disabling until feature is complete")]
-    public void AcceptRequestCorrectly()
+    public void SendProperEventWhenOnAcceptedIsPressed()
     {
-        entry.Populate("userId1", new FriendEntry.Model(), isReceived: true);
+        var model = new FriendEntry.Model() { };
+        entry.Populate("userId-1", model);
+        bool buttonPressed = false;
+        entry.OnAccepted += (x) => { if (x == entry) buttonPressed = true; };
         entry.acceptButton.onClick.Invoke();
+        Assert.IsTrue(buttonPressed);
     }
 
     [Test]
-    [Explicit("Disabling until feature is complete")]
-    public void RejectRequestCorrectly()
+    public void SendProperEventWhenOnCancelledIsPressed()
     {
-        var model1 = new FriendEntry.Model() { userName = "test1", avatarImage = null };
-        entry.Populate("userId1", model1, isReceived: true);
-        entry.rejectButton.onClick.Invoke();
-    }
-
-    [Test]
-    [Explicit("Disabling until feature is complete")]
-    public void CancelRequestCorrectly()
-    {
-        var model2 = new FriendEntry.Model() { userName = "test1", avatarImage = null };
-        entry.Populate("userId1", model2, isReceived: false);
+        var model = new FriendEntry.Model() { };
+        entry.Populate("userId-1", model);
+        bool buttonPressed = false;
+        entry.OnCancelled += (x) => { if (x == entry) buttonPressed = true; };
         entry.cancelButton.onClick.Invoke();
+        Assert.IsTrue(buttonPressed);
     }
+
+    [Test]
+    public void SendProperEventWhenOnMenuToggleIsPressed()
+    {
+        var model = new FriendEntry.Model() { };
+        entry.Populate("userId-1", model);
+        bool buttonPressed = false;
+        entry.OnMenuToggle += (x) => { if (x == entry) buttonPressed = true; };
+        entry.menuButton.onClick.Invoke();
+        Assert.IsTrue(buttonPressed);
+    }
+
+    [Test]
+    public void SendProperEventWhenOnRejectedIsPressed()
+    {
+        var model = new FriendEntry.Model() { };
+        entry.Populate("userId-1", model);
+        bool buttonPressed = false;
+        entry.OnRejected += (x) => { if (x == entry) buttonPressed = true; };
+        entry.rejectButton.onClick.Invoke();
+        Assert.IsTrue(buttonPressed);
+    }
+
 }
