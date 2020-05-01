@@ -1,4 +1,4 @@
-﻿using DCL.Interface;
+using DCL.Interface;
 using UnityEngine;
 
 public class FriendsHUDController : IHUD
@@ -12,6 +12,7 @@ public class FriendsHUDController : IHUD
 
     IFriendsController friendsController;
     public event System.Action<string> OnPressWhisper;
+    InputAction_Trigger toggleTrigger;
     public void Initialize(IFriendsController friendsController)
     {
         view = FriendsHUDView.Create();
@@ -36,6 +37,17 @@ public class FriendsHUDController : IHUD
         view.friendsList.OnDelete += Entry_OnDelete;
         view.friendsList.OnPassport += Entry_OnPassport;
         view.friendsList.OnReport += Entry_OnReport;
+
+        toggleTrigger = Resources.Load<InputAction_Trigger>("ToggleFriends");
+        toggleTrigger.OnTriggered += OnHotkeyPress;
+    }
+
+    private void OnHotkeyPress(DCLAction_Trigger action)
+    {
+        if (action != DCLAction_Trigger.ToggleFriends)
+            return;
+
+        SetVisibility(!view.gameObject.activeSelf);
     }
 
     private void Entry_OnRequestSent(string userId)
@@ -183,6 +195,8 @@ public class FriendsHUDController : IHUD
             this.friendsController.OnUpdateFriendship -= OnUpdateFriendship;
             this.friendsController.OnUpdateUserStatus -= OnUpdateUserStatus;
         }
+
+        toggleTrigger.OnTriggered -= OnHotkeyPress;
 
         if (view != null)
         {
