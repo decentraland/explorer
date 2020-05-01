@@ -1,4 +1,4 @@
-using DCL.Interface;
+﻿using DCL.Interface;
 using UnityEngine;
 
 public class FriendsHUDController : IHUD
@@ -22,6 +22,7 @@ public class FriendsHUDController : IHUD
         {
             this.friendsController.OnUpdateFriendship += OnUpdateFriendship;
             this.friendsController.OnUpdateUserStatus += OnUpdateUserStatus;
+            this.friendsController.OnFriendNotFound += OnFriendNotFound;
         }
 
         view.friendRequestsList.OnFriendRequestApproved += Entry_OnRequestAccepted;
@@ -68,6 +69,11 @@ public class FriendsHUDController : IHUD
 
         view.friendsList.UpdateEntry(userId, model);
         view.friendRequestsList.UpdateEntry(userId, model);
+    }
+
+    void OnFriendNotFound(string name)
+    {
+        view.friendRequestsList.DisplayFriendUserNotFound();
     }
 
     private void OnUpdateFriendship(string userId, FriendsController.FriendshipAction friendshipAction)

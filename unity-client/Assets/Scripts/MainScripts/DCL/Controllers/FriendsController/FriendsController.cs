@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -7,6 +8,7 @@ public interface IFriendsController
 
     event System.Action<string, FriendsController.FriendshipAction> OnUpdateFriendship;
     event System.Action<string, FriendsController.UserStatus> OnUpdateUserStatus;
+    event System.Action<string> OnFriendNotFound;
 }
 public class FriendsController : MonoBehaviour, IFriendsController
 {
@@ -88,10 +90,16 @@ public class FriendsController : MonoBehaviour, IFriendsController
 
     public event System.Action<string, UserStatus> OnUpdateUserStatus;
     public event System.Action<string, FriendshipAction> OnUpdateFriendship;
+    public event Action<string> OnFriendNotFound;
 
     public Dictionary<string, UserStatus> GetFriends()
     {
         return new Dictionary<string, UserStatus>(friends);
+    }
+
+    public void FriendNotFound(string name)
+    {
+        OnFriendNotFound?.Invoke(name);
     }
 
     public void InitializeFriends(string json)

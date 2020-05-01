@@ -11,6 +11,7 @@ namespace Tests
     {
         public event Action<string, FriendsController.FriendshipAction> OnUpdateFriendship;
         public event Action<string, FriendsController.UserStatus> OnUpdateUserStatus;
+        public event Action<string> OnFriendNotFound;
 
         public Dictionary<string, FriendsController.UserStatus> GetFriends()
         {
