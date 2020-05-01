@@ -29,7 +29,6 @@ public class FriendsHUDViewShould : TestsBase
     }
 
     [Test]
-    [Explicit("Disabling until feature is complete")]
     public void ChangeContentWhenClickingTabs()
     {
         controller.view.friendsButton.onClick.Invoke();
@@ -44,7 +43,6 @@ public class FriendsHUDViewShould : TestsBase
     }
 
     [Test]
-    [Explicit("Disabling until feature is complete")]
     public void PopulateFriendListCorrectly()
     {
         var model1 = new FriendEntry.Model()
@@ -66,10 +64,12 @@ public class FriendsHUDViewShould : TestsBase
         controller.view.friendsList.CreateOrUpdateEntry(id2, model2);
 
         var entry1 = controller.view.friendsList.GetEntry(id1);
+        Assert.IsNotNull(entry1);
         Assert.AreEqual(model1.userName, entry1.playerNameText.text);
         Assert.AreEqual(controller.view.friendsList.onlineFriendsContainer, entry1.transform.parent);
 
         var entry2 = controller.view.friendsList.GetEntry(id2);
+        Assert.IsNotNull(entry2);
         Assert.AreEqual(model2.userName, entry2.playerNameText.text);
         Assert.AreEqual(controller.view.friendsList.offlineFriendsContainer, entry2.transform.parent);
 
@@ -81,7 +81,6 @@ public class FriendsHUDViewShould : TestsBase
 
 
     [Test]
-    [Explicit("Disabling until feature is complete")]
     public void RemoveFriendCorrectly()
     {
         string id1 = "userId-1";
@@ -96,8 +95,7 @@ public class FriendsHUDViewShould : TestsBase
     }
 
     [Test]
-    [Explicit("Disabling until feature is complete")]
-    public void HandleFriendRequestCorrectly()
+    public void PopulateFriendRequestCorrectly()
     {
         var model1 = new FriendEntry.Model()
         {
@@ -117,17 +115,53 @@ public class FriendsHUDViewShould : TestsBase
         controller.view.friendRequestsList.CreateOrUpdateEntry(id1, model1, true);
         controller.view.friendRequestsList.CreateOrUpdateEntry(id2, model2, false);
 
-        var entry1 = controller.view.friendsList.GetEntry(id1);
+        var entry1 = controller.view.friendRequestsList.GetEntry(id1);
+
+        Assert.IsNotNull(entry1);
         Assert.AreEqual(model1.userName, entry1.playerNameText.text);
-        Assert.AreEqual(controller.view.friendsList.onlineFriendsContainer, entry1.transform.parent);
+        Assert.AreEqual(controller.view.friendRequestsList.receivedRequestsContainer, entry1.transform.parent);
 
-        var entry2 = controller.view.friendsList.GetEntry(id2);
+        var entry2 = controller.view.friendRequestsList.GetEntry(id2);
+        Assert.IsNotNull(entry2);
         Assert.AreEqual(model2.userName, entry2.playerNameText.text);
-        Assert.AreEqual(controller.view.friendsList.offlineFriendsContainer, entry2.transform.parent);
+        Assert.AreEqual(controller.view.friendRequestsList.sentRequestsContainer, entry2.transform.parent);
 
-        model2.status = FriendsController.PresenceStatus.ONLINE;
-        controller.view.friendRequestsList.CreateOrUpdateEntry(id2, model2, true);
+        controller.view.friendRequestsList.UpdateEntry(id2, model2, true);
+        Assert.AreEqual(controller.view.friendRequestsList.receivedRequestsContainer, entry2.transform.parent);
+    }
 
-        Assert.AreEqual(controller.view.friendsList.onlineFriendsContainer, entry2.transform.parent);
+    [Test]
+    void CountProperlyStatus()
+    {
+
+    }
+
+    [Test]
+    void DeleteFriendProperly()
+    {
+        var model1 = new FriendEntry.Model()
+        {
+            status = FriendsController.PresenceStatus.ONLINE,
+            userName = "Pravus",
+        };
+
+        string id1 = "userId-1";
+
+        controller.view.friendsList.CreateOrUpdateEntry(id1, model1);
+    }
+
+    [Test]
+    void RejectFriendRequestsProperly()
+    {
+    }
+
+    [Test]
+    void CancelFriendRequestsProperly()
+    {
+    }
+
+    [Test]
+    void SendFriendRequestsProperly()
+    {
     }
 }
