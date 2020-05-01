@@ -11,7 +11,8 @@ public class FriendsListView : MonoBehaviour
     public Transform offlineFriendsContainer;
     [SerializeField] GameObject deleteFriendDialog;
     [SerializeField] TextMeshProUGUI deleteFriendDialogText;
-
+    [SerializeField] TextMeshProUGUI onlineFriendsToggleText;
+    [SerializeField] TextMeshProUGUI offlineFriendsToggleText;
     [SerializeField] GameObject emptyListImage;
     [SerializeField] GameObject friendMenuPanel;
     [SerializeField] Button friendPassportButton;
@@ -24,6 +25,8 @@ public class FriendsListView : MonoBehaviour
 
     Dictionary<string, FriendEntry> friendEntries = new Dictionary<string, FriendEntry>();
     FriendEntry selectedFriendEntry;
+    int onlineFriends = 0;
+    int offlineFriends = 0;
 
     public event System.Action<FriendEntry> OnJumpIn;
     public event System.Action<FriendEntry> OnWhisper;
@@ -57,16 +60,38 @@ public class FriendsListView : MonoBehaviour
         return friendEntries[userId];
     }
 
-    public bool UpdateEntry(string userId, FriendEntry.Model model)
+    public bool UpdateEntry(string userId, FriendEntry.Model model, bool firstUpdate = false)
     {
-        if (!friendEntries.ContainsKey(userId))
-            return false;
+        if (!friendEntries.ContainsKey(userId)) return false;
 
         var friendEntry = friendEntries[userId];
+        var previousStatus = friendEntry.model.status;
 
         friendEntry.Populate(userId, model);
-        friendEntry.transform.SetParent(model.status == FriendsController.PresenceStatus.ONLINE ? onlineFriendsContainer : offlineFriendsContainer);
+
+        if (friendEntry.model.status == FriendsController.PresenceStatus.ONLINE)
+        {
+            friendEntry.transform.SetParent(onlineFriendsContainer);
+            onlineFriends++;
+        }
+        else
+        {
+            friendEntry.transform.SetParent(offlineFriendsContainer);
+            offlineFriends++;
+        }
+
         friendEntry.transform.localScale = Vector3.one;
+
+        if (!firstUpdate)
+        {
+            if (previousStatus == FriendsController.PresenceStatus.ONLINE)
+                onlineFriends--;
+            else
+                offlineFriends--;
+        }
+
+        onlineFriendsToggleText.text = $"ONLINE ({onlineFriends})";
+        offlineFriendsToggleText.text = $"OFFLINE ({offlineFriends})";
 
         ForceUpdateLayout();
         return true;
@@ -92,8 +117,7 @@ public class FriendsListView : MonoBehaviour
 
     public void CreateOrUpdateEntry(string userId, FriendEntry.Model model)
     {
-        CreateEntry(userId);
-        UpdateEntry(userId, model);
+        UpdateEntry(userId, model, CreateEntry(userId));
     }
 
     public void RemoveEntry(string userId)
