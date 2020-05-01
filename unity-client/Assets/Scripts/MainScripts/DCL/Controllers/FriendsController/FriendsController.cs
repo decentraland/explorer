@@ -105,20 +105,35 @@ public class FriendsController : MonoBehaviour, IFriendsController
     public void InitializeFriends(string json)
     {
         FriendshipInitializationMessage msg = JsonUtility.FromJson<FriendshipInitializationMessage>(json);
+        HashSet<string> processedIds = new HashSet<string>();
 
         foreach (var userId in msg.currentFriends)
         {
             UpdateFriendshipStatus(new FriendshipUpdateStatusMessage() { action = FriendshipAction.APPROVED, userId = userId });
+            if (!processedIds.Contains(userId))
+                processedIds.Add(userId);
         }
 
         foreach (var userId in msg.requestedFrom)
         {
             UpdateFriendshipStatus(new FriendshipUpdateStatusMessage() { action = FriendshipAction.REQUESTED_FROM, userId = userId });
+            if (!processedIds.Contains(userId))
+                processedIds.Add(userId);
         }
 
         foreach (var userId in msg.requestedTo)
         {
             UpdateFriendshipStatus(new FriendshipUpdateStatusMessage() { action = FriendshipAction.REQUESTED_TO, userId = userId });
+            if (!processedIds.Contains(userId))
+                processedIds.Add(userId);
+        }
+
+        foreach (var kvp in friends)
+        {
+            if (!processedIds.Contains(kvp.Key))
+            {
+                UpdateFriendshipStatus(new FriendshipUpdateStatusMessage() { action = FriendshipAction.NONE, userId = kvp.Key });
+            }
         }
     }
 

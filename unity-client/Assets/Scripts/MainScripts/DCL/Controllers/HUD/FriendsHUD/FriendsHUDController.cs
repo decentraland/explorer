@@ -99,6 +99,8 @@ public class FriendsHUDController : IHUD
         switch (friendshipAction)
         {
             case FriendsController.FriendshipAction.NONE:
+                view.friendRequestsList.RemoveEntry(userId);
+                view.friendsList.RemoveEntry(userId);
                 break;
             case FriendsController.FriendshipAction.APPROVED:
                 view.friendRequestsList.RemoveEntry(userId);
