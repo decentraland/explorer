@@ -43,6 +43,7 @@ public class FriendEntry : MonoBehaviour, IFriendEntry, IPointerEnterHandler, IP
     {
         unhoveredBackgroundSprite = backgroundImage.sprite;
 
+        menuButton.onClick.RemoveAllListeners();
         menuButton.onClick.AddListener(() => OnMenuToggle?.Invoke(this));
 
         jumpInButton.onClick.RemoveAllListeners();
@@ -80,11 +81,5 @@ public class FriendEntry : MonoBehaviour, IFriendEntry, IPointerEnterHandler, IP
         playerLocationText.text = $"{model.realm} {model.coords}";
 
         playerImage.sprite = model.avatarImage;
-
-        jumpInButton.onClick.RemoveAllListeners();
-        jumpInButton.onClick.AddListener(() => OnJumpInClick?.Invoke(this));
-
-        whisperButton.onClick.RemoveAllListeners();
-        whisperButton.onClick.AddListener(() => OnWhisperClick?.Invoke(this));
     }
 }

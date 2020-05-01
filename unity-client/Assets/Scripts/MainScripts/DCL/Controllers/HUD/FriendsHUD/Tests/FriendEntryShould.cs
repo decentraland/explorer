@@ -24,32 +24,58 @@ public class FriendEntryShould : TestsBase
     }
 
     [Test]
-    [Explicit("Disabling until feature is complete")]
     public void BePopulatedCorrectly()
     {
         Sprite testSprite = Sprite.Create(Texture2D.whiteTexture, Rect.zero, Vector2.zero);
 
-        var model = new FriendEntry.Model() { };
+        FriendEntry.Model model = new FriendEntry.Model()
+        {
+            coords = Vector2.one,
+            avatarImage = testSprite,
+            realm = "realm-test",
+            status = FriendsController.PresenceStatus.ONLINE,
+            userName = "test-name"
+        };
+
         entry.Populate("userId-1", model);
+
+        Assert.AreEqual(entry.playerNameText.text, entry.playerNameText.text);
+        Assert.AreEqual(entry.playerLocationText.text, $"{model.realm} {model.coords}");
+        Assert.AreEqual(entry.playerImage.sprite, testSprite);
+
         Object.Destroy(testSprite);
     }
 
     [Test]
-    [Explicit("Disabling until feature is complete")]
-    public void SendProperMessageWhenGoToButtonIsPressed()
+    public void SendProperEventWhenJumpInButtonIsPressed()
     {
         var model = new FriendEntry.Model() { };
         entry.Populate("userId-1", model);
+        bool buttonPressed = false;
+        entry.OnJumpInClick += (x) => { if (x == entry) buttonPressed = true; };
         entry.jumpInButton.onClick.Invoke();
-
+        Assert.IsTrue(buttonPressed);
     }
 
     [Test]
-    [Explicit("Disabling until feature is complete")]
-    public void WhisperPlayerCorrectlyWhenWhisperButtonIsPressed()
+    public void SendProperEventWhenWhisperButtonIsPressed()
     {
         var model = new FriendEntry.Model() { };
         entry.Populate("userId-1", model);
+        bool buttonPressed = false;
+        entry.OnWhisperClick += (x) => { if (x == entry) buttonPressed = true; };
         entry.whisperButton.onClick.Invoke();
+        Assert.IsTrue(buttonPressed);
+    }
+
+    [Test]
+    public void SendProperEventWhenOnMenuToggleIsPressed()
+    {
+        var model = new FriendEntry.Model() { };
+        entry.Populate("userId-1", model);
+        bool buttonPressed = false;
+        entry.OnMenuToggle += (x) => { if (x == entry) buttonPressed = true; };
+        entry.menuButton.onClick.Invoke();
+        Assert.IsTrue(buttonPressed);
     }
 }
