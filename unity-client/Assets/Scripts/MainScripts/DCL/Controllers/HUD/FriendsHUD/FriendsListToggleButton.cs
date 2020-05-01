@@ -5,16 +5,21 @@ using TMPro;
 
 public class FriendsListToggleButton : MonoBehaviour
 {
+    public bool toggleOnAwake = false;
     public Button toggleButton;
     public Transform toggleButtonIcon;
-    public GameObject container;
+    public RectTransform containerRectTransform;
 
     void Awake()
     {
         toggleButton.onClick.AddListener(() =>
         {
-            container.SetActive(!container.activeSelf);
+            containerRectTransform.gameObject.SetActive(!containerRectTransform.gameObject.activeSelf);
             toggleButtonIcon.localScale = new Vector3(toggleButtonIcon.localScale.x, -toggleButtonIcon.localScale.y, 1f);
+            LayoutRebuilder.ForceRebuildLayoutImmediate(containerRectTransform);
         });
+
+        if (toggleOnAwake)
+            toggleButton.OnPointerClick(null);
     }
 }
