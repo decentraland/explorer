@@ -12,6 +12,7 @@ public class FriendsListView : MonoBehaviour
     [SerializeField] GameObject deleteFriendDialog;
     [SerializeField] TextMeshProUGUI deleteFriendDialogText;
 
+    [SerializeField] GameObject emptyListImage;
     [SerializeField] GameObject friendMenuPanel;
     [SerializeField] Button friendPassportButton;
     [SerializeField] Button blockFriendButton;
@@ -73,8 +74,10 @@ public class FriendsListView : MonoBehaviour
 
     public bool CreateEntry(string userId)
     {
-        if (friendEntries.ContainsKey(userId))
-            return false;
+        if (friendEntries.ContainsKey(userId)) return false;
+
+        if (emptyListImage.activeSelf)
+            emptyListImage.SetActive(false);
 
         var entry = Instantiate(friendEntryPrefab).GetComponent<FriendEntry>();
         friendEntries.Add(userId, entry);

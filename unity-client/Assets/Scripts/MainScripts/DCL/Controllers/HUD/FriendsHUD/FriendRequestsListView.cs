@@ -1,4 +1,4 @@
-using DCL.Helpers;
+﻿using DCL.Helpers;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -14,6 +14,7 @@ public class FriendRequestsListView : MonoBehaviour
     [SerializeField] internal Transform sentRequestsContainer;
 
     [SerializeField] TMP_InputField friendSearchInputField;
+    [SerializeField] GameObject emptyListImage;
     [SerializeField] GameObject requestMenuPanel;
     [SerializeField] Button playerPassportButton;
     [SerializeField] Button blockPlayerButton;
@@ -119,8 +120,10 @@ public class FriendRequestsListView : MonoBehaviour
 
     public bool CreateEntry(string userId)
     {
-        if (friendRequestEntries.ContainsKey(userId))
-            return false;
+        if (friendRequestEntries.ContainsKey(userId)) return false;
+
+        if (emptyListImage.activeSelf)
+            emptyListImage.SetActive(false);
 
         FriendRequestEntry entry;
 
