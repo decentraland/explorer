@@ -12,7 +12,7 @@ public class PlayerInfoCardHUDViewShould : TestsBase
     {
         yield return base.SetUp();
         view = PlayerInfoCardHUDView.CreateView();
-        view.Initialize(null, null, null, null, null);
+        view.Initialize(null, null, null, null, null, null);
         CreateMockWearableByRarity(WearableLiterals.ItemRarity.EPIC);
         CreateMockWearableByRarity(WearableLiterals.ItemRarity.LEGENDARY);
         CreateMockWearableByRarity(WearableLiterals.ItemRarity.MYTHIC);
@@ -51,9 +51,10 @@ public class PlayerInfoCardHUDViewShould : TestsBase
         bool blockButtonWasPressed = false;
         bool unblockButtonWasPressed = false;
         bool addFriendWasPressed = false;
+        bool cancelWasPressed = false;
 
 
-        view.Initialize(() => hideCardButtonWasPressed = true, () => reportButtonWasPressed = true, () => blockButtonWasPressed = true, () => unblockButtonWasPressed = true, () => addFriendWasPressed = true);
+        view.Initialize(() => hideCardButtonWasPressed = true, () => reportButtonWasPressed = true, () => blockButtonWasPressed = true, () => unblockButtonWasPressed = true, () => addFriendWasPressed = true, () => cancelWasPressed = true);
         view.hideCardButton.onClick.Invoke();
         view.reportPlayerButton.onClick.Invoke();
         view.blockPlayerButton.onClick.Invoke();
@@ -65,6 +66,7 @@ public class PlayerInfoCardHUDViewShould : TestsBase
         Assert.IsTrue(blockButtonWasPressed);
         Assert.IsTrue(unblockButtonWasPressed);
         Assert.IsTrue(addFriendWasPressed);
+        Assert.IsTrue(cancelWasPressed);
         Assert.IsTrue(GetTabMapping(PlayerInfoCardHUDView.Tabs.Passport).container.activeSelf);
         Assert.IsFalse(GetTabMapping(PlayerInfoCardHUDView.Tabs.Trade).container.activeSelf);
         Assert.IsFalse(GetTabMapping(PlayerInfoCardHUDView.Tabs.Block).container.activeSelf);

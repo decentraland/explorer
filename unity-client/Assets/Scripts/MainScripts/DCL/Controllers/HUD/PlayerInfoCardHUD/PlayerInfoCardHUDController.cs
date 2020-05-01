@@ -14,7 +14,7 @@ public class PlayerInfoCardHUDController : IHUD
     public PlayerInfoCardHUDController()
     {
         view = PlayerInfoCardHUDView.CreateView();
-        view.Initialize(() => { currentPlayerId.Set(null); }, ReportPlayer, BlockPlayer, UnblockPlayer, AddPlayerAsFriend);
+        view.Initialize(() => { currentPlayerId.Set(null); }, ReportPlayer, BlockPlayer, UnblockPlayer, AddPlayerAsFriend, CancelInvitation);
         currentPlayerId = Resources.Load<StringVariable>(CURRENT_PLAYER_ID);
         currentPlayerId.OnChange += OnCurrentPlayerIdChanged;
         OnCurrentPlayerIdChanged(currentPlayerId, null);
@@ -23,6 +23,10 @@ public class PlayerInfoCardHUDController : IHUD
     private void AddPlayerAsFriend()
     {
         WebInterface.UpdateFriendshipStatus(new FriendsController.FriendshipUpdateStatusMessage() { userId = currentPlayerId, action = FriendsController.FriendshipAction.REQUESTED_TO });
+    }
+    private void CancelInvitation()
+    {
+        WebInterface.UpdateFriendshipStatus(new FriendsController.FriendshipUpdateStatusMessage() { userId = currentPlayerId, action = FriendsController.FriendshipAction.CANCELLED });
     }
 
     internal void OnCurrentPlayerIdChanged(string current, string previous)

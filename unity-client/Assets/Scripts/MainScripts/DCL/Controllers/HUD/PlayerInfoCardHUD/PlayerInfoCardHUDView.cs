@@ -72,7 +72,8 @@ public class PlayerInfoCardHUDView : MonoBehaviour
         UnityAction reportPlayerCallback,
         UnityAction blockPlayerCallback,
         UnityAction unblockPlayerCallback,
-        UnityAction addFriendCallback)
+        UnityAction addFriendCallback,
+        UnityAction cancelInvitation)
     {
         hideCardButton.onClick.RemoveAllListeners();
         hideCardButton.onClick.AddListener(cardClosedCallback);
@@ -88,6 +89,9 @@ public class PlayerInfoCardHUDView : MonoBehaviour
 
         addFriendButton.onClick.RemoveAllListeners();
         addFriendButton.onClick.AddListener(addFriendCallback);
+
+        requestSentButton.onClick.RemoveAllListeners();
+        requestSentButton.onClick.AddListener(cancelInvitation);
 
         for (int index = 0; index < tabsMapping.Length; index++)
         {
