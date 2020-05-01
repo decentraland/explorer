@@ -60,6 +60,7 @@ public class PlayerInfoCardHUDViewShould : TestsBase
         view.blockPlayerButton.onClick.Invoke();
         view.unblockPlayerButton.onClick.Invoke();
         view.addFriendButton.onClick.Invoke();
+        view.requestSentButton.onClick.Invoke();
 
         Assert.IsTrue(hideCardButtonWasPressed);
         Assert.IsTrue(reportButtonWasPressed);

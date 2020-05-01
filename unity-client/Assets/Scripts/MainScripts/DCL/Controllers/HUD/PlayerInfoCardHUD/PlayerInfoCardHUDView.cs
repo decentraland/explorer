@@ -87,9 +87,11 @@ public class PlayerInfoCardHUDView : MonoBehaviour
         unblockPlayerButton.onClick.RemoveAllListeners();
         unblockPlayerButton.onClick.AddListener(unblockPlayerCallback);
 
+        addFriendButton.gameObject.SetActive(true);
         addFriendButton.onClick.RemoveAllListeners();
         addFriendButton.onClick.AddListener(addFriendCallback);
 
+        requestSentButton.gameObject.SetActive(true);
         requestSentButton.onClick.RemoveAllListeners();
         requestSentButton.onClick.AddListener(cancelInvitation);
 
