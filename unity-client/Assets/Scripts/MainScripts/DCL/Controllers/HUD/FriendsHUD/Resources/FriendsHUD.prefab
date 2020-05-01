@@ -146,6 +146,7 @@ MonoBehaviour:
   friendSearchInputField: {fileID: 3393797650520696229}
   emptyListImage: {fileID: 3818198924903853334}
   requestMenuPanel: {fileID: 4546731736641852777}
+  addFriendButton: {fileID: 8222469670151691449}
   playerPassportButton: {fileID: 653160374987509970}
   blockPlayerButton: {fileID: 6452886967430927035}
   requestSentNotification: {fileID: 8347565519525447700}
@@ -2724,7 +2725,7 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 1
+  m_Interactable: 0
   m_TargetGraphic: {fileID: 3730577279561767738}
   m_OnClick:
     m_PersistentCalls:
