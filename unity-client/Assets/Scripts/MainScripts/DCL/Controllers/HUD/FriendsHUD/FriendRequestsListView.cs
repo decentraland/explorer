@@ -212,6 +212,11 @@ public class FriendRequestsListView : MonoBehaviour
     void OnFriendRequestReceivedAccepted(FriendRequestEntry requestEntry)
     {
         // Add placeholder friend to avoid affecting UX by roundtrip with kernel
+        FriendsController.i.UpdateFriendshipStatus(new FriendsController.FriendshipUpdateStatusMessage()
+        {
+            userId = requestEntry.userId,
+            action = FriendsController.FriendshipAction.APPROVED
+        });
         FriendsController.i.UpdateUserStatus(new FriendsController.UserStatus() { userId = requestEntry.userId, presenceStatus = FriendsController.PresenceStatus.OFFLINE });
 
         acceptedFriendNotificationText.text = $"You and {requestEntry.model.userName} are now friends!";
