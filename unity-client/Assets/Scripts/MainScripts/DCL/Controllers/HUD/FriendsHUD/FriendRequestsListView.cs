@@ -62,6 +62,7 @@ public class FriendRequestsListView : MonoBehaviour
     {
         friendSearchInputField.onSubmit.AddListener(SendFriendRequest);
         friendSearchInputField.onValueChanged.AddListener(OnSearchInputValueChanged);
+        addFriendButton.onClick.AddListener(() => friendSearchInputField.OnSubmit(null));
 
         playerPassportButton.onClick.AddListener(() => { OnPassport?.Invoke(selectedRequestEntry.userId); ToggleMenuPanel(selectedRequestEntry); });
         blockPlayerButton.onClick.AddListener(() => { OnBlock?.Invoke(selectedRequestEntry.userId); ToggleMenuPanel(selectedRequestEntry); });
@@ -90,15 +91,15 @@ public class FriendRequestsListView : MonoBehaviour
     void SendFriendRequest(string friendId)
     {
         // TODO: Check existence with kernel, if the user exists trigger requestSentNotification
-        bool targetUserExists = false;
+        bool targetUserExists = true;
 
         if (targetUserExists)
         {
             requestSentNotificationText.text = $"Your request to {friendId} successfully sent!";
             TriggerNotification(requestSentNotification);
 
-            // TODO: make sure the input clears and has the placeholder text again
-            // friendSearchInputField.
+            friendSearchInputField.placeholder.enabled = true;
+            friendSearchInputField.text = string.Empty;
 
             addFriendButton.gameObject.SetActive(false);
 
@@ -106,6 +107,8 @@ public class FriendRequestsListView : MonoBehaviour
         }
         else
         {
+            // TODO: somehow force FOCUS on the text input?
+
             TriggerNotification(friendSearchFailedNotification);
 
             addFriendButton.interactable = false;
