@@ -453,3 +453,18 @@ export type FriendshipUpdateStatusMessage = {
   userId: string
   action: FriendshipAction
 }
+
+export type PresenceStatus = 'online' | 'offline'
+
+export type UpdateUserStatusMessage = {
+  userId: string
+  realm: undefined | {
+    layer: string
+    serverName: string
+  }
+  position: undefined | {
+    x: number
+    y: number
+  }
+  presence: PresenceStatus
+}

@@ -76,7 +76,8 @@ import {
   ChatMessage,
   HUDElementID,
   FriendsInitializationMessage,
-  FriendshipUpdateStatusMessage
+  FriendshipUpdateStatusMessage,
+  UpdateUserStatusMessage
 } from 'shared/types'
 import { ParcelSceneAPI } from 'shared/world/ParcelSceneAPI'
 import {
@@ -533,6 +534,9 @@ export const unityInterface = {
   },
   UpdateFriendshipStatus(updateMessage: FriendshipUpdateStatusMessage) {
     gameInstance.SendMessage('SceneController', 'UpdateFriendshipStatus', JSON.stringify(updateMessage))
+  },
+  UpdateUserStatus(status: UpdateUserStatusMessage) {
+    gameInstance.SendMessage('SceneController', 'UpdateUserStatus', JSON.stringify(status))
   },
 
   // *********************************************************************************

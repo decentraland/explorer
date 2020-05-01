@@ -1,5 +1,5 @@
 import { ExplorerIdentity } from 'shared'
-import { SocialClient, FriendshipRequest, Conversation } from 'dcl-social-client'
+import { SocialClient, FriendshipRequest, Conversation, PresenceType } from 'dcl-social-client'
 import { SocialAPI } from 'dcl-social-client/dist/SocialAPI'
 import { Authenticator } from 'dcl-crypto'
 import { takeEvery, put, select, call, take } from 'redux-saga/effects'
@@ -18,11 +18,14 @@ import { getClient, findByUserId, isFriend, getPrivateMessaging } from './select
 import { createLogger } from '../logger'
 import { ProfileAsPromise } from '../profiles/ProfileAsPromise'
 import { unityInterface } from 'unity-interface/dcl'
-import { ChatMessageType, FriendshipAction } from 'shared/types'
+import { ChatMessageType, FriendshipAction, PresenceStatus } from 'shared/types'
 import { SocialData, ChatState } from './types'
 import { StoreContainer } from '../store/rootTypes'
 import { RENDERER_INITIALIZED } from '../renderer/types'
 import { ChatMessage } from '../types'
+import { getRealm } from 'shared/dao/selectors'
+import { lastPlayerPosition } from '../world/positionThings'
+import { worldToGrid } from '../../atomicHelpers/parcelScenePositions'
 
 declare const globalThis: StoreContainer & { sendPrivateMessage: (userId: string, message: string) => void }
 
@@ -34,6 +37,8 @@ const INITIAL_CHAT_SIZE = 50
 
 const receivedMessages: Record<string, number> = {}
 const MESSAGE_LIFESPAN_MILLIS = 1000
+
+const SEND_STATUS_INTERVAL_MILLIS = 5000
 
 export function* initializePrivateMessaging(synapseUrl: string, identity: ExplorerIdentity) {
   const { address: ethAddress } = identity
@@ -213,6 +218,7 @@ export function* initializePrivateMessaging(synapseUrl: string, identity: Explor
   yield takeEvery(SEND_PRIVATE_MESSAGE, handleSendPrivateMessage)
 
   initializeReceivedMessagesCleanUp()
+  initializeStatusUpdateInterval(client)
 }
 
 function initializeReceivedMessagesCleanUp() {
@@ -223,6 +229,53 @@ function initializeReceivedMessagesCleanUp() {
       .filter(([, timestamp]) => now - timestamp > MESSAGE_LIFESPAN_MILLIS)
       .forEach(([id]) => delete receivedMessages[id])
   }, MESSAGE_LIFESPAN_MILLIS)
+}
+
+function initializeStatusUpdateInterval(client: SocialAPI) {
+  client.onStatusChange((socialId, status) => {
+    const user: SocialData | undefined = globalThis.globalStore.getState().chat.privateMessaging.socialInfo[socialId]
+
+    if (!user) {
+      logger.error(`user not found for status change with social id`, socialId)
+      return
+    }
+
+    const presence: PresenceStatus = status.presence === PresenceType.ONLINE ? 'online' : 'offline'
+
+    const updateMessage = {
+      userId: user.userId,
+      realm: status.realm,
+      position: status.position,
+      presence
+    }
+
+    DEBUG && logger.info(`unityInterface.UpdateUserStatus`, updateMessage)
+    unityInterface.UpdateUserStatus(updateMessage)
+  })
+
+  setInterval(() => {
+    const realm = getRealm(globalThis.globalStore.getState())
+    const worldPosition = lastPlayerPosition
+
+    const position = worldToGrid(worldPosition)
+
+    if (!realm) {
+      // if no realm is initialized yet, cannot set status
+      return
+    }
+
+    client
+      .setStatus({
+        realm: {
+          layer: realm.layer,
+          serverName: realm.catalystName
+        },
+        position,
+        presence: PresenceType.ONLINE
+      })
+      .catch(e => logger.error(`error while setting status`, e))
+
+  }, SEND_STATUS_INTERVAL_MILLIS)
 }
 
 /**
