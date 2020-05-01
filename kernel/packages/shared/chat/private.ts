@@ -32,6 +32,9 @@ const logger = createLogger('chat: ')
 
 const INITIAL_CHAT_SIZE = 50
 
+const receivedMessages: Record<string, number> = {}
+const MESSAGE_LIFESPAN_MILLIS = 1000
+
 export function* initializePrivateMessaging(synapseUrl: string, identity: ExplorerIdentity) {
   const { address: ethAddress } = identity
   const timestamp = Date.now()
@@ -96,11 +99,13 @@ export function* initializePrivateMessaging(synapseUrl: string, identity: Explor
 
   yield take(RENDERER_INITIALIZED) // wait for renderer to initialize
 
-  unityInterface.InitializeFriends({
+  const initMessage = {
     currentFriends: friendIds,
     requestedTo: requestedToIds,
     requestedFrom: requestedFromIds
-  })
+  }
+  DEBUG && logger.info(`unityInterface.InitializeFriends`, initMessage)
+  unityInterface.InitializeFriends(initMessage)
 
   // initialize conversations
 
@@ -140,8 +145,16 @@ export function* initializePrivateMessaging(synapseUrl: string, identity: Explor
 
   // register listener for new messages
 
+  DEBUG && logger.info(`registering onMessage`)
   client.onMessage((conversation, message) => {
     DEBUG && logger.info(`onMessage`, conversation, message)
+
+    if (receivedMessages.hasOwnProperty(message.id)) {
+      // message already processed, skipping
+      return
+    } else {
+      receivedMessages[message.id] = Date.now()
+    }
 
     const { socialInfo } = globalThis.globalStore.getState().chat.privateMessaging
     const friend = Object.values(socialInfo).find(friend => friend.conversationId === conversation.id)
@@ -198,6 +211,18 @@ export function* initializePrivateMessaging(synapseUrl: string, identity: Explor
   )
 
   yield takeEvery(SEND_PRIVATE_MESSAGE, handleSendPrivateMessage)
+
+  initializeReceivedMessagesCleanUp()
+}
+
+function initializeReceivedMessagesCleanUp() {
+  setInterval(() => {
+    const now = Date.now()
+
+    Object.entries(receivedMessages)
+      .filter(([, timestamp]) => now - timestamp > MESSAGE_LIFESPAN_MILLIS)
+      .forEach(([id]) => delete receivedMessages[id])
+  }, MESSAGE_LIFESPAN_MILLIS)
 }
 
 /**
@@ -215,7 +240,7 @@ function parseUserId(socialId: string) {
 }
 
 function addNewChatMessage(chatMessage: ChatMessage) {
-  DEBUG && logger.info(`add new private chat message to window`, chatMessage)
+  DEBUG && logger.info(`unityInterface.AddMessageToChatWindow`, chatMessage)
   unityInterface.AddMessageToChatWindow(chatMessage)
 }
 
@@ -347,6 +372,7 @@ function* handleUpdateFriendship({ payload, meta }: UpdateFriendship) {
     yield put(updateState(newState))
 
     if (incoming) {
+      DEBUG && logger.info(`unityInterface.UpdateFriendshipStatus`, payload)
       unityInterface.UpdateFriendshipStatus(payload)
     } else {
       yield call(handleOutgoingUpdateFriendshipStatus, payload)
