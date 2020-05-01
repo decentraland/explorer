@@ -179,6 +179,7 @@ export function* handleFetchProfile(action: ProfileRequestAction): any {
 
   const currentId = yield select(getCurrentUserId)
   let profile: any
+  let hasConnectedWeb3 = false
   if (WORLD_EXPLORER) {
     try {
       const serverUrl = yield select(getProfileDownloadServer)
@@ -186,6 +187,7 @@ export function* handleFetchProfile(action: ProfileRequestAction): any {
 
       if (profiles.avatars.length !== 0) {
         profile = profiles.avatars[0]
+        hasConnectedWeb3 = true
       }
     } catch (error) {
       defaultLogger.warn(`Error requesting profile for ${userId}, `, error)
@@ -228,7 +230,7 @@ export function* handleFetchProfile(action: ProfileRequestAction): any {
   }
 
   const passport = yield call(processServerProfile, userId, profile)
-  yield put(profileSuccess(userId, passport))
+  yield put(profileSuccess(userId, passport, hasConnectedWeb3))
 }
 
 export async function profileServerRequest(serverUrl: string, userId: string) {

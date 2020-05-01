@@ -95,7 +95,11 @@ export function profileReducer(state?: ProfileState, action?: AnyAction): Profil
         ...state,
         userInfo: {
           ...state.userInfo,
-          [action.payload.userId]: { data: action.payload.profile, status: 'ok' }
+          [action.payload.userId]: {
+            data: action.payload.profile,
+            status: 'ok',
+            hasConnectedWeb3: action.payload.hasConnectedWeb3
+          }
         }
       }
     case PROFILE_FAILURE:
