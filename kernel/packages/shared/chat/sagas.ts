@@ -408,7 +408,7 @@ function initChatCommands() {
     }
   )
 
-  let whisperFn = (expression:string) => {
+  let whisperFn = (expression: string) => {
     const [userName, message] = parseWhisperExpression(expression)
 
     const currentUser = getCurrentUser()
@@ -436,10 +436,10 @@ function initChatCommands() {
       timestamp: Date.now(),
       body: message
     }
-  } 
+  }
 
   addChatCommand('whisper', 'Send a private message to a friend', whisperFn)
-  
+
   addChatCommand('w', 'Send a private message to a friend', whisperFn)
 
   addChatCommand('airdrop', 'fake an airdrop', () => {
