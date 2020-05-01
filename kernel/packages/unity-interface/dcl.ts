@@ -348,8 +348,8 @@ const browserInterface = {
   UpdateFriendshipStatus(message: FriendshipUpdateStatusMessage) {
     const { userId, action } = message
 
-    globalThis.globalStore.dispatch(updateUserData(userId, toSocialId(userId)))
-    globalThis.globalStore.dispatch(updateFriendship(action, userId, false))
+    globalThis.globalStore.dispatch(updateUserData(userId.toLowerCase(), toSocialId(userId)))
+    globalThis.globalStore.dispatch(updateFriendship(action, userId.toLowerCase(), false))
   }
 }
 globalThis.browserInterface2 = browserInterface

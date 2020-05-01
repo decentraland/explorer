@@ -450,10 +450,12 @@ function* handleUpdateFriendship({ payload, meta }: UpdateFriendship) {
       unityInterface.UpdateFriendshipStatus(payload)
     } else {
       yield call(handleOutgoingUpdateFriendshipStatus, payload)
-
-      // refresh self & renderer friends status
-      yield call(initializeFriends, client)
     }
+  }
+
+  if (!incoming) {
+    // refresh self & renderer friends status if update was triggered by renderer
+    yield call(initializeFriends, client)
   }
 }
 
