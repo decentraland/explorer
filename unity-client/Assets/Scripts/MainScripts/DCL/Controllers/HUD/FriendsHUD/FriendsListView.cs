@@ -1,5 +1,6 @@
 ﻿using DCL.Helpers;
 using System.Collections.Generic;
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -44,6 +45,11 @@ public class FriendsListView : MonoBehaviour
 
         deleteFriendDialogConfirmButton.onClick.AddListener(ConfirmFriendDelete);
         deleteFriendDialogCancelButton.onClick.AddListener(CancelConfirmationDialog);
+    }
+
+    void OnEnable()
+    {
+        ForceUpdateLayout();
     }
 
     void OnDisable()
@@ -180,6 +186,15 @@ public class FriendsListView : MonoBehaviour
 
     public void ForceUpdateLayout()
     {
+        if (!gameObject.activeInHierarchy) return;
+
+        StartCoroutine(ForceUpdateLayoutRoutine());
+    }
+
+    public IEnumerator ForceUpdateLayoutRoutine()
+    {
+        yield return null;
+
         RectTransform containerRectTransform = transform as RectTransform;
 
         Utils.InverseTransformChildTraversal<RectTransform>(
