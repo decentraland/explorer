@@ -59,13 +59,6 @@ namespace Tests
         }
 
         [Test]
-        [Explicit("Disabling until feature is complete")]
-        public void ReactCorrectlyToKernelMessages()
-        {
-        }
-
-        [Test]
-        [Explicit("Disabling until feature is complete")]
         public void ReactCorrectlyToJumpInClick()
         {
             var id = "test-id-1";
@@ -88,13 +81,16 @@ namespace Tests
         }
 
         [Test]
-        [Explicit("Disabling until feature is complete")]
         public void ReactCorrectlyToWhisperClick()
         {
         }
 
         [Test]
-        [Explicit("Disabling until feature is complete")]
+        public void PopulateViewsCorrectly()
+        {
+        }
+
+        [Test]
         public void ReactCorrectlyToFriendApproved()
         {
             var id = "test-id-1";
@@ -108,7 +104,6 @@ namespace Tests
         }
 
         [Test]
-        [Explicit("Disabling until feature is complete")]
         public void ReactCorrectlyToFriendRejected()
         {
             var id = "test-id-1";
@@ -122,7 +117,6 @@ namespace Tests
         }
 
         [Test]
-        [Explicit("Disabling until feature is complete")]
         public void ReactCorrectlyToFriendCancelled()
         {
             var id = "test-id-1";
