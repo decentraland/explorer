@@ -85,12 +85,7 @@ public class FriendRequestsListView : MonoBehaviour
 
     void OnDisable()
     {
-        if (currentNotificationRoutine != null)
-        {
-            StopCoroutine(currentNotificationRoutine);
-            currentNotification.SetActive(false);
-            currentNotification = null;
-        }
+        DismissCurrentNotification();
 
         CancelConfirmationDialog();
 
@@ -134,6 +129,8 @@ public class FriendRequestsListView : MonoBehaviour
 
         StopCoroutine(currentNotificationRoutine);
         currentNotificationRoutine = null;
+
+        if (currentNotification == null) return;
 
         currentNotification.SetActive(false);
         currentNotification = null;
