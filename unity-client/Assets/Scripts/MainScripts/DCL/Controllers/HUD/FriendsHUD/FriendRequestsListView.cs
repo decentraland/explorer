@@ -1,11 +1,13 @@
 ﻿using DCL.Helpers;
+using DCL.Configuration;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
-public class FriendRequestsListView : MonoBehaviour
+public class FriendRequestsListView : MonoBehaviour, IPointerDownHandler
 {
     public float notificationsDuration = 3f;
 
@@ -90,6 +92,12 @@ public class FriendRequestsListView : MonoBehaviour
         CancelConfirmationDialog();
 
         requestMenuPanel.SetActive(false);
+    }
+
+    public void OnPointerDown(PointerEventData eventData)
+    {
+        if (eventData.pointerPressRaycast.gameObject == null || eventData.pointerPressRaycast.gameObject.layer != PhysicsLayers.friendsHUDPlayerMenu)
+            requestMenuPanel.SetActive(false);
     }
 
     void SendFriendRequest(string friendId)
@@ -332,7 +340,7 @@ public class FriendRequestsListView : MonoBehaviour
         UserProfileController.i.AddUserProfileToCatalog(new UserProfileModel()
         {
             userId = id1,
-            name = "Pravus"
+            name = "Pravus-" + id1
         });
 
         FriendsController.i.UpdateFriendshipStatus(new FriendsController.FriendshipUpdateStatusMessage()
@@ -350,7 +358,7 @@ public class FriendRequestsListView : MonoBehaviour
         UserProfileController.i.AddUserProfileToCatalog(new UserProfileModel()
         {
             userId = id1,
-            name = "Brian"
+            name = "Brian-" + id1
         });
 
         FriendsController.i.UpdateFriendshipStatus(new FriendsController.FriendshipUpdateStatusMessage()
