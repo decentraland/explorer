@@ -22,6 +22,9 @@ public class FriendsHUDView : MonoBehaviour
 
     private void Initialize()
     {
+        friendsList.Initialize();
+        friendRequestsList.Initialize();
+
         closeButton.onClick.AddListener(Toggle);
         friendsButton.onClick.AddListener(() =>
         {

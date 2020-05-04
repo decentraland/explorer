@@ -13,31 +13,31 @@ public class FriendRequestsListView : MonoBehaviour
     [SerializeField] internal Transform receivedRequestsContainer;
     [SerializeField] internal Transform sentRequestsContainer;
 
-    [SerializeField] TMP_InputField friendSearchInputField;
-    [SerializeField] GameObject emptyListImage;
-    [SerializeField] GameObject requestMenuPanel;
-    [SerializeField] Button addFriendButton;
-    [SerializeField] Button playerPassportButton;
-    [SerializeField] Button blockPlayerButton;
-    [SerializeField] TextMeshProUGUI receivedRequestsToggleText;
-    [SerializeField] TextMeshProUGUI sentRequestsToggleText;
+    [SerializeField] internal TMP_InputField friendSearchInputField;
+    [SerializeField] internal GameObject emptyListImage;
+    [SerializeField] internal GameObject requestMenuPanel;
+    [SerializeField] internal Button addFriendButton;
+    [SerializeField] internal Button playerPassportButton;
+    [SerializeField] internal Button blockPlayerButton;
+    [SerializeField] internal TextMeshProUGUI receivedRequestsToggleText;
+    [SerializeField] internal TextMeshProUGUI sentRequestsToggleText;
 
     [Header("Notifications")]
-    [SerializeField] GameObject requestSentNotification;
-    [SerializeField] TextMeshProUGUI requestSentNotificationText;
-    [SerializeField] GameObject friendSearchFailedNotification;
-    [SerializeField] GameObject acceptedFriendNotification;
-    [SerializeField] TextMeshProUGUI acceptedFriendNotificationText;
+    [SerializeField] internal GameObject requestSentNotification;
+    [SerializeField] internal TextMeshProUGUI requestSentNotificationText;
+    [SerializeField] internal GameObject friendSearchFailedNotification;
+    [SerializeField] internal GameObject acceptedFriendNotification;
+    [SerializeField] internal TextMeshProUGUI acceptedFriendNotificationText;
 
     [Header("Confirmation Dialogs")]
-    [SerializeField] GameObject rejectRequestDialog;
-    [SerializeField] TextMeshProUGUI rejectRequestDialogText;
-    [SerializeField] Button rejectRequestDialogCancelButton;
-    [SerializeField] Button rejectRequestDialogConfirmButton;
-    [SerializeField] GameObject cancelRequestDialog;
-    [SerializeField] TextMeshProUGUI cancelRequestDialogText;
-    [SerializeField] Button cancelRequestDialogCancelButton;
-    [SerializeField] Button cancelRequestDialogConfirmButton;
+    [SerializeField] internal GameObject rejectRequestDialog;
+    [SerializeField] internal TextMeshProUGUI rejectRequestDialogText;
+    [SerializeField] internal Button rejectRequestDialogCancelButton;
+    [SerializeField] internal Button rejectRequestDialogConfirmButton;
+    [SerializeField] internal GameObject cancelRequestDialog;
+    [SerializeField] internal TextMeshProUGUI cancelRequestDialogText;
+    [SerializeField] internal Button cancelRequestDialogCancelButton;
+    [SerializeField] internal Button cancelRequestDialogConfirmButton;
 
     Dictionary<string, FriendRequestEntry> friendRequestEntries = new Dictionary<string, FriendRequestEntry>();
     Coroutine currentNotificationRoutine = null;
@@ -62,7 +62,7 @@ public class FriendRequestsListView : MonoBehaviour
         return friendRequestEntries[userId];
     }
 
-    void Awake()
+    public void Initialize()
     {
         friendSearchInputField.onSubmit.AddListener(SendFriendRequest);
         friendSearchInputField.onValueChanged.AddListener(OnSearchInputValueChanged);

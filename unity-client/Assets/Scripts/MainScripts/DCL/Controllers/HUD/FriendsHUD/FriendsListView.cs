@@ -1,4 +1,4 @@
-﻿using DCL.Helpers;
+using DCL.Helpers;
 using System.Collections.Generic;
 using System.Collections;
 using TMPro;
@@ -15,19 +15,19 @@ public class FriendsListView : MonoBehaviour
     [SerializeField] TextMeshProUGUI onlineFriendsToggleText;
     [SerializeField] TextMeshProUGUI offlineFriendsToggleText;
     [SerializeField] GameObject emptyListImage;
-    [SerializeField] GameObject friendMenuPanel;
-    [SerializeField] Button friendPassportButton;
-    [SerializeField] Button blockFriendButton;
-    [SerializeField] Button reportFriendButton;
-    [SerializeField] Button deleteFriendButton;
+    [SerializeField] internal GameObject friendMenuPanel;
+    [SerializeField] internal Button friendPassportButton;
+    [SerializeField] internal Button blockFriendButton;
+    [SerializeField] internal Button reportFriendButton;
+    [SerializeField] internal Button deleteFriendButton;
 
-    [SerializeField] Button deleteFriendDialogCancelButton;
-    [SerializeField] Button deleteFriendDialogConfirmButton;
+    [SerializeField] internal Button deleteFriendDialogCancelButton;
+    [SerializeField] internal Button deleteFriendDialogConfirmButton;
 
     Dictionary<string, FriendEntry> friendEntries = new Dictionary<string, FriendEntry>();
-    FriendEntry selectedFriendEntry;
-    int onlineFriends = 0;
-    int offlineFriends = 0;
+    internal FriendEntry selectedFriendEntry;
+    internal int onlineFriends = 0;
+    internal int offlineFriends = 0;
 
     public event System.Action<FriendEntry> OnJumpIn;
     public event System.Action<FriendEntry> OnWhisper;
@@ -36,7 +36,7 @@ public class FriendsListView : MonoBehaviour
     public event System.Action<string> OnPassport;
     public event System.Action<string> OnReport;
 
-    void Awake()
+    public void Initialize()
     {
         friendPassportButton.onClick.AddListener(() => { OnPassport?.Invoke(selectedFriendEntry.userId); ToggleMenuPanel(selectedFriendEntry); });
         blockFriendButton.onClick.AddListener(() => { OnBlock?.Invoke(selectedFriendEntry.userId); ToggleMenuPanel(selectedFriendEntry); });
