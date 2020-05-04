@@ -1,11 +1,13 @@
+using DCL.Configuration;
 using DCL.Helpers;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class FriendsListView : MonoBehaviour
+public class FriendsListView : MonoBehaviour, IPointerDownHandler
 {
     [SerializeField] GameObject friendEntryPrefab;
     public Transform onlineFriendsContainer;
@@ -56,6 +58,12 @@ public class FriendsListView : MonoBehaviour
     {
         CancelConfirmationDialog();
         friendMenuPanel.SetActive(false);
+    }
+
+    public void OnPointerDown(PointerEventData eventData)
+    {
+        if (eventData.pointerPressRaycast.gameObject == null || eventData.pointerPressRaycast.gameObject.layer != PhysicsLayers.friendsHUDPlayerMenu)
+            friendMenuPanel.SetActive(false);
     }
 
     internal FriendEntry GetEntry(string userId)
@@ -214,7 +222,7 @@ public class FriendsListView : MonoBehaviour
         UserProfileController.i.AddUserProfileToCatalog(new UserProfileModel()
         {
             userId = id1,
-            name = "Brian"
+            name = "Brian-" + id1
         });
 
         FriendsController.i.UpdateFriendshipStatus(new FriendsController.FriendshipUpdateStatusMessage()
@@ -234,7 +242,7 @@ public class FriendsListView : MonoBehaviour
         UserProfileController.i.AddUserProfileToCatalog(new UserProfileModel()
         {
             userId = id1,
-            name = "Pravus"
+            name = "Pravus-" + id1
         });
 
         FriendsController.i.UpdateFriendshipStatus(new FriendsController.FriendshipUpdateStatusMessage()
