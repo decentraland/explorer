@@ -1,6 +1,6 @@
 using DCL.Helpers;
-using System.Collections.Generic;
 using System.Collections;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -135,9 +135,8 @@ public class FriendsListView : MonoBehaviour
             onlineFriends--;
         else
             offlineFriends--;
-        UpdateUsersToggleTexts();
 
-        RectTransform containerRectTransform = entry.transform.parent as RectTransform;
+        UpdateUsersToggleTexts();
 
         Object.Destroy(entry.gameObject);
         friendEntries.Remove(userId);
@@ -188,7 +187,7 @@ public class FriendsListView : MonoBehaviour
     {
         if (!gameObject.activeInHierarchy) return;
 
-        StartCoroutine(ForceUpdateLayoutRoutine());
+        CoroutineStarter.Start(ForceUpdateLayoutRoutine());
     }
 
     public IEnumerator ForceUpdateLayoutRoutine()

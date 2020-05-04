@@ -44,7 +44,7 @@ public class FriendsHUDControllerShould : TestsBase
     [UnitySetUp]
     protected override IEnumerator SetUp()
     {
-        base.SetUp();
+        yield return base.SetUp();
 
         controller = new FriendsHUDController();
         friendsController = new FriendsController_Mock();

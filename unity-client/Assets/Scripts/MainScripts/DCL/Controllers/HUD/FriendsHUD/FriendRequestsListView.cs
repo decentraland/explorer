@@ -1,4 +1,4 @@
-﻿using DCL.Helpers;
+using DCL.Helpers;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -143,7 +143,7 @@ public class FriendRequestsListView : MonoBehaviour
         currentNotification = notificationGameobject;
 
         notificationGameobject.SetActive(true);
-        currentNotificationRoutine = StartCoroutine(WaitAndCloseCurrentNotification(notificationGameobject));
+        currentNotificationRoutine = CoroutineStarter.Start(WaitAndCloseCurrentNotification(notificationGameobject));
     }
 
     IEnumerator WaitAndCloseCurrentNotification(GameObject notificationGameobject)
@@ -301,7 +301,7 @@ public class FriendRequestsListView : MonoBehaviour
     {
         if (!gameObject.activeInHierarchy) return;
 
-        StartCoroutine(ForceUpdateLayoutRoutine());
+        CoroutineStarter.Start(ForceUpdateLayoutRoutine());
     }
 
     public IEnumerator ForceUpdateLayoutRoutine()
