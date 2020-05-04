@@ -78,6 +78,11 @@ public class FriendRequestsListView : MonoBehaviour
         cancelRequestDialogCancelButton.onClick.AddListener(CancelConfirmationDialog);
     }
 
+    void OnEnable()
+    {
+        ForceUpdateLayout();
+    }
+
     void OnDisable()
     {
         if (currentNotificationRoutine != null)
@@ -297,6 +302,14 @@ public class FriendRequestsListView : MonoBehaviour
 
     public void ForceUpdateLayout()
     {
+        if (!gameObject.activeInHierarchy) return;
+
+        StartCoroutine(ForceUpdateLayoutRoutine());
+    }
+
+    public IEnumerator ForceUpdateLayoutRoutine()
+    {
+        yield return null;
         RectTransform containerRectTransform = transform as RectTransform;
 
         Utils.InverseTransformChildTraversal<RectTransform>(
