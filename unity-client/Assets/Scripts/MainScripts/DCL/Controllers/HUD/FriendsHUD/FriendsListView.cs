@@ -1,6 +1,5 @@
 using DCL.Configuration;
 using DCL.Helpers;
-using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -10,24 +9,29 @@ using UnityEngine.UI;
 public class FriendsListView : MonoBehaviour, IPointerDownHandler
 {
     [SerializeField] GameObject friendEntryPrefab;
-    public Transform onlineFriendsContainer;
-    public Transform offlineFriendsContainer;
-    [SerializeField] GameObject deleteFriendDialog;
-    [SerializeField] TextMeshProUGUI deleteFriendDialogText;
+
     [SerializeField] TextMeshProUGUI onlineFriendsToggleText;
     [SerializeField] TextMeshProUGUI offlineFriendsToggleText;
+
     [SerializeField] GameObject emptyListImage;
     [SerializeField] internal GameObject friendMenuPanel;
+
     [SerializeField] internal Button friendPassportButton;
     [SerializeField] internal Button blockFriendButton;
     [SerializeField] internal Button reportFriendButton;
-    [SerializeField] internal Button deleteFriendButton;
 
+    [SerializeField] internal Button deleteFriendButton;
+    [SerializeField] GameObject deleteFriendDialog;
+    [SerializeField] TextMeshProUGUI deleteFriendDialogText;
     [SerializeField] internal Button deleteFriendDialogCancelButton;
     [SerializeField] internal Button deleteFriendDialogConfirmButton;
 
     Dictionary<string, FriendEntry> friendEntries = new Dictionary<string, FriendEntry>();
+
     internal FriendEntry selectedFriendEntry;
+
+    public Transform onlineFriendsContainer;
+    public Transform offlineFriendsContainer;
     internal int onlineFriends = 0;
     internal int offlineFriends = 0;
 
@@ -51,7 +55,7 @@ public class FriendsListView : MonoBehaviour, IPointerDownHandler
 
     void OnEnable()
     {
-        ForceUpdateLayout();
+        (transform as RectTransform).ForceUpdateLayout();
     }
 
     void OnDisable()
@@ -106,7 +110,7 @@ public class FriendsListView : MonoBehaviour, IPointerDownHandler
 
         UpdateUsersToggleTexts();
 
-        ForceUpdateLayout();
+        (transform as RectTransform).ForceUpdateLayout();
         return true;
     }
 
@@ -149,7 +153,7 @@ public class FriendsListView : MonoBehaviour, IPointerDownHandler
         Object.Destroy(entry.gameObject);
         friendEntries.Remove(userId);
 
-        ForceUpdateLayout();
+        (transform as RectTransform).ForceUpdateLayout();
     }
 
     void UpdateUsersToggleTexts()
@@ -189,29 +193,6 @@ public class FriendsListView : MonoBehaviour, IPointerDownHandler
         friendMenuPanel.transform.position = entry.menuPositionReference.position;
 
         friendMenuPanel.SetActive(selectedFriendEntry == entry ? !friendMenuPanel.activeSelf : true);
-    }
-
-    public void ForceUpdateLayout()
-    {
-        if (!gameObject.activeInHierarchy) return;
-
-        CoroutineStarter.Start(ForceUpdateLayoutRoutine());
-    }
-
-    public IEnumerator ForceUpdateLayoutRoutine()
-    {
-        yield return null;
-
-        RectTransform containerRectTransform = transform as RectTransform;
-
-        Utils.InverseTransformChildTraversal<RectTransform>(
-        (x) =>
-        {
-            LayoutRebuilder.ForceRebuildLayoutImmediate(x);
-        },
-        containerRectTransform);
-
-        LayoutRebuilder.ForceRebuildLayoutImmediate(containerRectTransform);
     }
 
     [ContextMenu("AddFakeOnlineFriend")]

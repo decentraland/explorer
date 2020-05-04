@@ -80,6 +80,11 @@ public class FriendEntry : MonoBehaviour, IFriendEntry, IPointerEnterHandler, IP
         playerNameText.text = model.userName;
         playerLocationText.text = $"{model.realm} {model.coords}";
 
+        if (model.avatarImage == null)
+        {
+
+        }
+
         playerImage.sprite = model.avatarImage;
     }
 }

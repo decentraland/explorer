@@ -83,7 +83,7 @@ public class FriendRequestsListView : MonoBehaviour, IPointerDownHandler
 
     void OnEnable()
     {
-        ForceUpdateLayout();
+        (transform as RectTransform).ForceUpdateLayout();
     }
 
     void OnDisable()
@@ -210,7 +210,7 @@ public class FriendRequestsListView : MonoBehaviour, IPointerDownHandler
 
         entry.transform.localScale = Vector3.one;
 
-        ForceUpdateLayout();
+        (transform as RectTransform).ForceUpdateLayout();
         return true;
     }
 
@@ -303,30 +303,9 @@ public class FriendRequestsListView : MonoBehaviour, IPointerDownHandler
         Destroy(entry.gameObject);
         friendRequestEntries.Remove(userId);
 
-        ForceUpdateLayout();
+        (transform as RectTransform).ForceUpdateLayout();
     }
 
-    public void ForceUpdateLayout()
-    {
-        if (!gameObject.activeInHierarchy) return;
-
-        CoroutineStarter.Start(ForceUpdateLayoutRoutine());
-    }
-
-    public IEnumerator ForceUpdateLayoutRoutine()
-    {
-        yield return null;
-        RectTransform containerRectTransform = transform as RectTransform;
-
-        Utils.InverseTransformChildTraversal<RectTransform>(
-        (x) =>
-        {
-            LayoutRebuilder.ForceRebuildLayoutImmediate(x);
-        },
-        containerRectTransform);
-
-        LayoutRebuilder.ForceRebuildLayoutImmediate(containerRectTransform);
-    }
 
     void UpdateUsersToggleTexts()
     {

@@ -24,7 +24,6 @@ public class TaskbarHUDController : IHUD
             return;
 
         controller.view.transform.SetParent(view.windowContainer, false);
-        (controller.view.transform as RectTransform).sizeDelta = new Vector2(500, 500);
 
         worldChatWindowHud = controller;
         view.OnAddChatWindow(ToggleChatWindow);
@@ -42,7 +41,6 @@ public class TaskbarHUDController : IHUD
             return;
 
         controller.view.transform.SetParent(view.windowContainer, false);
-        (controller.view.transform as RectTransform).sizeDelta = new Vector2(500, 500);
 
         friendsHud = controller;
         view.OnAddFriendsWindow(ToggleFriendsWindow);
