@@ -3,130 +3,233 @@ using NUnit.Framework;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace Tests
+class FriendsController_Mock : IFriendsController
 {
-    class FriendsController_Mock : IFriendsController
+    public event Action<string, FriendsController.FriendshipAction> OnUpdateFriendship;
+    public event Action<string, FriendsController.UserStatus> OnUpdateUserStatus;
+    public event Action<string> OnFriendNotFound;
+
+    public Dictionary<string, FriendsController.UserStatus> GetFriends()
     {
-        public event Action<string, FriendsController.FriendshipAction> OnUpdateFriendship;
-        public event Action<string, FriendsController.UserStatus> OnUpdateUserStatus;
-        public event Action<string> OnFriendNotFound;
-
-        public Dictionary<string, FriendsController.UserStatus> GetFriends()
-        {
-            return null;
-        }
-
-        public void RaiseUpdateFriendship(string id, FriendsController.FriendshipAction action)
-        {
-            OnUpdateFriendship?.Invoke(id, action);
-        }
-
-        public void RaiseUpdateUserStatus(string id, FriendsController.UserStatus userStatus)
-        {
-            OnUpdateUserStatus?.Invoke(id, userStatus);
-        }
+        return null;
     }
 
-    public class FriendsHUDControllerShould : TestsBase
+    public void RaiseUpdateFriendship(string id, FriendsController.FriendshipAction action)
     {
-        FriendsHUDController controller;
-        FriendsHUDView view;
-        FriendsController_Mock friendsController;
+        OnUpdateFriendship?.Invoke(id, action);
+    }
 
-        protected override bool justSceneSetUp => true;
+    public void RaiseUpdateUserStatus(string id, FriendsController.UserStatus userStatus)
+    {
+        OnUpdateUserStatus?.Invoke(id, userStatus);
+    }
 
-        [UnitySetUp]
-        protected override IEnumerator SetUp()
+    public void RaiseOnFriendNotFound(string id)
+    {
+        OnFriendNotFound?.Invoke(id);
+    }
+}
+
+public class FriendsHUDControllerShould : TestsBase
+{
+    FriendsHUDController controller;
+    FriendsHUDView view;
+    FriendsController_Mock friendsController;
+
+    protected override bool justSceneSetUp => true;
+
+    [UnitySetUp]
+    protected override IEnumerator SetUp()
+    {
+        base.SetUp();
+
+        controller = new FriendsHUDController();
+        friendsController = new FriendsController_Mock();
+        controller.Initialize(friendsController);
+        this.view = controller.view;
+
+        Assert.IsTrue(view != null, "Friends hud view is null?");
+        Assert.IsTrue(controller != null, "Friends hud controller is null?");
+        yield break;
+    }
+
+    protected override IEnumerator TearDown()
+    {
+        yield return base.TearDown();
+        UnityEngine.Object.Destroy(view);
+    }
+
+    [Test]
+    public void ReactCorrectlyToJumpInClick()
+    {
+        var id = "test-id-1";
+        var entry = AddFriendThruFriendsController(id);
+
+        bool jumpInCalled = false;
+
+        System.Action<string, string> callback = (name, payload) =>
+         {
+             if (name == "GoTo")
+             {
+                 jumpInCalled = true;
+             }
+         };
+
+        WebInterface.OnMessageFromEngine += callback;
+
+        entry.jumpInButton.onClick.Invoke();
+
+        WebInterface.OnMessageFromEngine -= callback;
+
+        Assert.IsTrue(jumpInCalled);
+    }
+
+    [Test]
+    public void ReactCorrectlyToWhisperClick()
+    {
+        var id = "test-id-1";
+        var entry = AddFriendThruFriendsController(id);
+
+        bool pressedWhisper = false;
+        controller.OnPressWhisper += (x) => { pressedWhisper = x == id; };
+        entry.whisperButton.onClick.Invoke();
+        Assert.IsTrue(pressedWhisper);
+    }
+
+    [Test]
+    public void ReactCorrectlyToReportClick()
+    {
+        var id = "test-id-1";
+        var entry = AddFriendThruFriendsController(id);
+
+        bool reportPlayerSent = false;
+
+        Action<string, string> callback =
+        (name, payload) =>
         {
-            base.SetUp();
-
-            controller = new FriendsHUDController();
-            friendsController = new FriendsController_Mock();
-            controller.Initialize(friendsController);
-            this.view = controller.view;
-
-            Assert.IsTrue(view != null, "Friends hud view is null?");
-            Assert.IsTrue(controller != null, "Friends hud controller is null?");
-            yield break;
-        }
-
-        protected override IEnumerator TearDown()
-        {
-            yield return base.TearDown();
-            UnityEngine.Object.Destroy(view);
-        }
-
-        [Test]
-        public void ReactCorrectlyToJumpInClick()
-        {
-            var id = "test-id-1";
-            friendsController.RaiseUpdateFriendship(id, FriendsController.FriendshipAction.APPROVED);
-
-            bool jumpInCalled = false;
-
-            WebInterface.OnMessageFromEngine += (name, payload) =>
+            if (name == "ReportPlayer")
             {
-                if (name == "GoTo")
-                {
-                    jumpInCalled = true;
-                }
-            };
+                reportPlayerSent = true;
+            }
+        };
 
-            var entry = controller.view.friendsList.GetEntry(id);
-            entry.jumpInButton.onClick.Invoke();
+        WebInterface.OnMessageFromEngine += callback;
 
-            Assert.IsTrue(jumpInCalled);
-        }
+        entry.menuButton.onClick.Invoke();
+        controller.view.friendsList.reportFriendButton.onClick.Invoke();
 
-        [Test]
-        public void ReactCorrectlyToWhisperClick()
+        Assert.IsTrue(reportPlayerSent);
+
+        WebInterface.OnMessageFromEngine -= callback;
+    }
+
+    [Test]
+    public void ReactCorrectlyToPassportClick()
+    {
+        var id = "test-id-1";
+        var entry = AddFriendThruFriendsController(id);
+
+        var currentPlayerId = Resources.Load<StringVariable>(FriendsHUDController.CURRENT_PLAYER_ID);
+
+        entry.menuButton.onClick.Invoke();
+        Assert.AreNotEqual(currentPlayerId.Get(), id);
+
+        view.friendsList.friendPassportButton.onClick.Invoke();
+
+        Assert.AreEqual(currentPlayerId.Get(), id);
+    }
+
+    [Test]
+    public void HandleUsernameErrorCorrectly()
+    {
+        friendsController.RaiseOnFriendNotFound("test");
+    }
+
+    [Test]
+    public void SendFriendRequestCorrectly()
+    {
+        bool messageSent = false;
+
+        string id = "user test";
+        Action<string, string> callback = (name, payload) =>
         {
-        }
-
-        [Test]
-        public void PopulateViewsCorrectly()
-        {
-        }
-
-        [Test]
-        public void ReactCorrectlyToFriendApproved()
-        {
-            var id = "test-id-1";
-            friendsController.RaiseUpdateFriendship(id, FriendsController.FriendshipAction.APPROVED);
-
-            WebInterface.OnMessageFromEngine += (name, payload) =>
+            var msg = JsonUtility.FromJson<FriendsController.FriendshipUpdateStatusMessage>(payload);
+            if (msg.action == FriendsController.FriendshipAction.REQUESTED_TO &&
+                 msg.userId == id)
             {
-            };
+                messageSent = true;
+            }
+        };
 
-            var entry = controller.view.friendsList.GetEntry(id);
-        }
+        WebInterface.OnMessageFromEngine += callback;
 
-        [Test]
-        public void ReactCorrectlyToFriendRejected()
+        view.friendRequestsList.friendSearchInputField.onSubmit.Invoke(id);
+
+        Assert.IsTrue(messageSent);
+
+        WebInterface.OnMessageFromEngine -= callback;
+
+    }
+
+
+    [Test]
+    public void ReactCorrectlyToFriendApproved()
+    {
+        var id = "test-id-1";
+        var entry = AddFriendThruFriendsController(id);
+        Assert.IsNotNull(entry);
+
+        friendsController.RaiseUpdateFriendship(id, FriendsController.FriendshipAction.DELETED);
+        entry = controller.view.friendsList.GetEntry(id);
+        Assert.IsNull(entry);
+    }
+
+    [Test]
+    public void ReactCorrectlyToFriendRejected()
+    {
+        var id = "test-id-1";
+        var fentry = AddFriendThruFriendsController(id);
+        Assert.IsNotNull(fentry);
+
+        friendsController.RaiseUpdateFriendship(id, FriendsController.FriendshipAction.REQUESTED_FROM);
+        friendsController.RaiseUpdateFriendship(id, FriendsController.FriendshipAction.REJECTED);
+
+        var entry = controller.view.friendRequestsList.GetEntry(id);
+        Assert.IsNull(entry);
+    }
+
+    [Test]
+    public void ReactCorrectlyToFriendCancelled()
+    {
+        var id = "test-id-1";
+        AddFriendThruFriendsController(id);
+
+        friendsController.RaiseUpdateFriendship(id, FriendsController.FriendshipAction.REQUESTED_TO);
+        var entry = controller.view.friendRequestsList.GetEntry(id);
+        Assert.IsNotNull(entry);
+        friendsController.RaiseUpdateFriendship(id, FriendsController.FriendshipAction.CANCELLED);
+        entry = controller.view.friendRequestsList.GetEntry(id);
+        Assert.IsNull(entry);
+    }
+
+    [Test]
+    public void UpdateUserStatusCorrectly()
+    {
+    }
+
+    FriendEntry AddFriendThruFriendsController(string id)
+    {
+        UserProfileModel model = new UserProfileModel()
         {
-            var id = "test-id-1";
-            friendsController.RaiseUpdateFriendship(id, FriendsController.FriendshipAction.APPROVED);
+            userId = id,
+            name = id,
+        };
 
-            WebInterface.OnMessageFromEngine += (name, payload) =>
-            {
-            };
-
-            var entry = controller.view.friendsList.GetEntry(id);
-        }
-
-        [Test]
-        public void ReactCorrectlyToFriendCancelled()
-        {
-            var id = "test-id-1";
-            friendsController.RaiseUpdateFriendship(id, FriendsController.FriendshipAction.APPROVED);
-
-            WebInterface.OnMessageFromEngine += (name, payload) =>
-            {
-            };
-
-            var entry = controller.view.friendsList.GetEntry(id);
-        }
+        UserProfileController.i.AddUserProfileToCatalog(model);
+        friendsController.RaiseUpdateFriendship(id, FriendsController.FriendshipAction.APPROVED);
+        return view.friendsList.GetEntry(id);
     }
 }
