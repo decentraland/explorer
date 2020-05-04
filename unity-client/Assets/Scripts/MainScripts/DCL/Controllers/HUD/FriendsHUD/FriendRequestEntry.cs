@@ -13,13 +13,10 @@ public class FriendRequestEntry : MonoBehaviour, IFriendEntry, IPointerEnterHand
     [SerializeField] internal Button cancelButton;
     [SerializeField] internal Image backgroundImage;
     [SerializeField] internal Sprite hoveredBackgroundSprite;
-
-    public string userId
-    {
-        get;
-        private set;
-    }
     public Transform menuPositionReference;
+
+    public string userId { get; private set; }
+    public bool isReceived { get; private set; }
 
     public FriendEntry.Model model { get; private set; }
     internal Sprite unhoveredBackgroundSprite;
@@ -66,18 +63,15 @@ public class FriendRequestEntry : MonoBehaviour, IFriendEntry, IPointerEnterHand
         if (isReceived.HasValue)
         {
             if (isReceived.Value)
-            {
                 PopulateReceived();
-            }
             else
-            {
                 PopulateSent();
-            }
         }
     }
 
     void PopulateReceived()
     {
+        isReceived = true;
         cancelButton.gameObject.SetActive(false);
         acceptButton.gameObject.SetActive(true);
         rejectButton.gameObject.SetActive(true);
@@ -85,6 +79,7 @@ public class FriendRequestEntry : MonoBehaviour, IFriendEntry, IPointerEnterHand
 
     void PopulateSent()
     {
+        isReceived = false;
         cancelButton.gameObject.SetActive(true);
         acceptButton.gameObject.SetActive(false);
         rejectButton.gameObject.SetActive(false);

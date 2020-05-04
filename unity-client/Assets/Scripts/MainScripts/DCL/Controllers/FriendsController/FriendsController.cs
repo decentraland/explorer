@@ -128,12 +128,17 @@ public class FriendsController : MonoBehaviour, IFriendsController
                 processedIds.Add(userId);
         }
 
+        Queue<string> newFriends = new Queue<string>();
         foreach (var kvp in friends)
         {
             if (!processedIds.Contains(kvp.Key))
             {
-                UpdateFriendshipStatus(new FriendshipUpdateStatusMessage() { action = FriendshipAction.NONE, userId = kvp.Key });
+                newFriends.Enqueue(kvp.Key);
             }
+        }
+        while (newFriends.Count > 0)
+        {
+            UpdateFriendshipStatus(new FriendshipUpdateStatusMessage() { action = FriendshipAction.NONE, userId = newFriends.Dequeue() });
         }
     }
 

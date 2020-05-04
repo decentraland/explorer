@@ -1,5 +1,6 @@
 using DCL.Helpers;
 using System.Collections.Generic;
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -46,6 +47,11 @@ public class FriendsListView : MonoBehaviour
         deleteFriendDialogCancelButton.onClick.AddListener(CancelConfirmationDialog);
     }
 
+    void OnEnable()
+    {
+        ForceUpdateLayout();
+    }
+
     void OnDisable()
     {
         CancelConfirmationDialog();
@@ -90,7 +96,7 @@ public class FriendsListView : MonoBehaviour
                 offlineFriends--;
         }
 
-        UpdateUsersStatusText();
+        UpdateUsersToggleTexts();
 
         ForceUpdateLayout();
         return true;
@@ -129,7 +135,7 @@ public class FriendsListView : MonoBehaviour
             onlineFriends--;
         else
             offlineFriends--;
-        UpdateUsersStatusText();
+        UpdateUsersToggleTexts();
 
         RectTransform containerRectTransform = entry.transform.parent as RectTransform;
 
@@ -139,7 +145,7 @@ public class FriendsListView : MonoBehaviour
         ForceUpdateLayout();
     }
 
-    void UpdateUsersStatusText()
+    void UpdateUsersToggleTexts()
     {
         onlineFriendsToggleText.text = $"ONLINE ({onlineFriends})";
         offlineFriendsToggleText.text = $"OFFLINE ({offlineFriends})";
@@ -180,6 +186,15 @@ public class FriendsListView : MonoBehaviour
 
     public void ForceUpdateLayout()
     {
+        if (!gameObject.activeInHierarchy) return;
+
+        StartCoroutine(ForceUpdateLayoutRoutine());
+    }
+
+    public IEnumerator ForceUpdateLayoutRoutine()
+    {
+        yield return null;
+
         RectTransform containerRectTransform = transform as RectTransform;
 
         Utils.InverseTransformChildTraversal<RectTransform>(

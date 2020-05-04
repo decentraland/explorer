@@ -1,4 +1,4 @@
-using DCL.Helpers;
+﻿using DCL.Helpers;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -19,6 +19,8 @@ public class FriendRequestsListView : MonoBehaviour
     [SerializeField] internal Button addFriendButton;
     [SerializeField] internal Button playerPassportButton;
     [SerializeField] internal Button blockPlayerButton;
+    [SerializeField] internal TextMeshProUGUI receivedRequestsToggleText;
+    [SerializeField] internal TextMeshProUGUI sentRequestsToggleText;
 
     [Header("Notifications")]
     [SerializeField] internal GameObject requestSentNotification;
@@ -41,6 +43,8 @@ public class FriendRequestsListView : MonoBehaviour
     Coroutine currentNotificationRoutine = null;
     GameObject currentNotification = null;
     FriendRequestEntry selectedRequestEntry = null;
+    int receivedRequests = 0;
+    int sentRequests = 0;
 
     public event System.Action<FriendRequestEntry> OnFriendRequestCancelled;
     public event System.Action<FriendRequestEntry> OnFriendRequestRejected;
@@ -72,6 +76,11 @@ public class FriendRequestsListView : MonoBehaviour
 
         rejectRequestDialogCancelButton.onClick.AddListener(CancelConfirmationDialog);
         cancelRequestDialogCancelButton.onClick.AddListener(CancelConfirmationDialog);
+    }
+
+    void OnEnable()
+    {
+        ForceUpdateLayout();
     }
 
     void OnDisable()
@@ -179,7 +188,18 @@ public class FriendRequestsListView : MonoBehaviour
 
         if (isReceived.HasValue)
         {
-            entry.transform.SetParent(isReceived.Value ? receivedRequestsContainer : sentRequestsContainer);
+            if (isReceived.Value)
+            {
+                entry.transform.SetParent(receivedRequestsContainer);
+                receivedRequests++;
+            }
+            else
+            {
+                entry.transform.SetParent(sentRequestsContainer);
+                sentRequests++;
+            }
+
+            UpdateUsersToggleTexts();
         }
 
         entry.transform.localScale = Vector3.one;
@@ -197,6 +217,11 @@ public class FriendRequestsListView : MonoBehaviour
     void OnFriendRequestReceivedAccepted(FriendRequestEntry requestEntry)
     {
         // Add placeholder friend to avoid affecting UX by roundtrip with kernel
+        FriendsController.i.UpdateFriendshipStatus(new FriendsController.FriendshipUpdateStatusMessage()
+        {
+            userId = requestEntry.userId,
+            action = FriendsController.FriendshipAction.APPROVED
+        });
         FriendsController.i.UpdateUserStatus(new FriendsController.UserStatus() { userId = requestEntry.userId, presenceStatus = FriendsController.PresenceStatus.OFFLINE });
 
         acceptedFriendNotificationText.text = $"You and {requestEntry.model.userName} are now friends!";
@@ -259,11 +284,15 @@ public class FriendRequestsListView : MonoBehaviour
 
     public void RemoveEntry(string userId)
     {
-        if (!friendRequestEntries.ContainsKey(userId))
-            return;
+        if (!friendRequestEntries.ContainsKey(userId)) return;
 
         var entry = friendRequestEntries[userId];
 
+        if (entry.isReceived)
+            receivedRequests--;
+        else
+            sentRequests--;
+        UpdateUsersToggleTexts();
 
         Destroy(entry.gameObject);
         friendRequestEntries.Remove(userId);
@@ -273,6 +302,14 @@ public class FriendRequestsListView : MonoBehaviour
 
     public void ForceUpdateLayout()
     {
+        if (!gameObject.activeInHierarchy) return;
+
+        StartCoroutine(ForceUpdateLayoutRoutine());
+    }
+
+    public IEnumerator ForceUpdateLayoutRoutine()
+    {
+        yield return null;
         RectTransform containerRectTransform = transform as RectTransform;
 
         Utils.InverseTransformChildTraversal<RectTransform>(
@@ -283,6 +320,12 @@ public class FriendRequestsListView : MonoBehaviour
         containerRectTransform);
 
         LayoutRebuilder.ForceRebuildLayoutImmediate(containerRectTransform);
+    }
+
+    void UpdateUsersToggleTexts()
+    {
+        receivedRequestsToggleText.text = $"RECEIVED ({receivedRequests})";
+        sentRequestsToggleText.text = $"SENT ({sentRequests})";
     }
 
     [ContextMenu("AddFakeRequestReceived")]

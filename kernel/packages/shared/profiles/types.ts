@@ -90,8 +90,8 @@ export type ColorString = string
 export type ProfileState = {
   userInfo: {
     [key: string]:
-      | { status: 'loading' | 'error'; data: any; addedToCatalog?: boolean }
-      | { status: 'ok'; data: Profile; addedToCatalog?: boolean }
+      | { status: 'loading' | 'error'; data: any; hasConnectedWeb3: boolean; addedToCatalog?: boolean }
+      | { status: 'ok'; data: Profile; hasConnectedWeb3: boolean; addedToCatalog?: boolean }
   }
   userInventory: {
     [key: string]: { status: 'loading' } | { status: 'error'; data: any } | { status: 'ok'; data: WearableId[] }
