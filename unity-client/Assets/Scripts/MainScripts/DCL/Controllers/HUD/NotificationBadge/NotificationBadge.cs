@@ -15,6 +15,14 @@ public class NotificationBadge : MonoBehaviour
         NotificationVariable_OnChange(notificationVariable.Get(), notificationVariable.Get());
     }
 
+    private void OnDestroy()
+    {
+        if (notificationVariable == null)
+            return;
+
+        notificationVariable.OnChange -= NotificationVariable_OnChange;
+    }
+
     private void NotificationVariable_OnChange(float current, float previous)
     {
         if (current > 0)
