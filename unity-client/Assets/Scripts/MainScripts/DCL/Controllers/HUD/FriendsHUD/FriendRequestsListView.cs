@@ -45,8 +45,9 @@ public class FriendRequestsListView : MonoBehaviour, IPointerDownHandler
     Coroutine currentNotificationRoutine = null;
     GameObject currentNotification = null;
     FriendRequestEntry selectedRequestEntry = null;
-    int receivedRequests = 0;
-    int sentRequests = 0;
+
+    internal int receivedRequests = 0;
+    internal int sentRequests = 0;
 
     public event System.Action<FriendRequestEntry> OnFriendRequestCancelled;
     public event System.Action<FriendRequestEntry> OnFriendRequestRejected;
