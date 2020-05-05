@@ -213,7 +213,7 @@ public class FriendsListView : MonoBehaviour, IPointerDownHandler
             action = FriendsController.FriendshipAction.APPROVED
         });
 
-        FriendsController.i.UpdateUserStatus(new FriendsController.UserStatus() { userId = id1, presenceStatus = FriendsController.PresenceStatus.ONLINE });
+        FriendsController.i.UpdateUserStatus(new FriendsController.UserStatus() { userId = id1, presence = FriendsController.PresenceStatus.ONLINE });
     }
 
     [ContextMenu("AddFakeOfflineFriend")]
@@ -233,6 +233,6 @@ public class FriendsListView : MonoBehaviour, IPointerDownHandler
             action = FriendsController.FriendshipAction.APPROVED
         });
 
-        FriendsController.i.UpdateUserStatus(new FriendsController.UserStatus() { userId = id1, presenceStatus = FriendsController.PresenceStatus.OFFLINE });
+        FriendsController.i.UpdateUserStatus(new FriendsController.UserStatus() { userId = id1, presence = FriendsController.PresenceStatus.OFFLINE });
     }
 }

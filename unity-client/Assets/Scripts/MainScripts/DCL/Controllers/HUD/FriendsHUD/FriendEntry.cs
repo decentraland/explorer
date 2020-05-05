@@ -84,7 +84,11 @@ public class FriendEntry : MonoBehaviour, IFriendEntry, IPointerEnterHandler, IP
         this.userId = userId;
 
         playerNameText.text = model.userName;
-        playerLocationText.text = $"{model.realm} {model.coords}";
+
+        if (model.status == FriendsController.PresenceStatus.ONLINE || model.status == FriendsController.PresenceStatus.UNAVAILABLE)
+            playerLocationText.text = $"{model.realm} {model.coords.x}, {model.coords.y}";
+        else
+            playerLocationText.text = $"";
 
         model.OnSpriteUpdateEvent -= OnAvatarImageChange;
         model.OnSpriteUpdateEvent += OnAvatarImageChange;

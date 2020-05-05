@@ -454,7 +454,13 @@ export type FriendshipUpdateStatusMessage = {
   action: FriendshipAction
 }
 
-export type PresenceStatus = 'online' | 'offline'
+export enum PresenceStatus
+{
+  NONE,
+  OFFLINE,
+  ONLINE,
+  UNAVAILABLE
+}
 
 export type UpdateUserStatusMessage = {
   userId: string

@@ -228,7 +228,7 @@ public class FriendRequestsListView : MonoBehaviour, IPointerDownHandler
             userId = requestEntry.userId,
             action = FriendsController.FriendshipAction.APPROVED
         });
-        FriendsController.i.UpdateUserStatus(new FriendsController.UserStatus() { userId = requestEntry.userId, presenceStatus = FriendsController.PresenceStatus.OFFLINE });
+        FriendsController.i.UpdateUserStatus(new FriendsController.UserStatus() { userId = requestEntry.userId, presence = FriendsController.PresenceStatus.OFFLINE });
 
         acceptedFriendNotificationText.text = $"You and {requestEntry.model.userName} are now friends!";
         TriggerNotification(acceptedFriendNotification);

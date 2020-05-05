@@ -1,3 +1,4 @@
+using DCL.Helpers;
 using DCL.Interface;
 using UnityEngine;
 
@@ -65,7 +66,9 @@ public class FriendsHUDController : IHUD
         if (entry != null)
             model = entry.model;
 
-        model.status = newStatus.presenceStatus;
+        model.status = newStatus.presence;
+        model.coords = newStatus.position;
+        model.realm = $"{newStatus.realm.serverName.ToUpperFirst()} {newStatus.realm.layer.ToUpperFirst()}";
 
         view.friendsList.UpdateEntry(userId, model);
         view.friendRequestsList.UpdateEntry(userId, model);

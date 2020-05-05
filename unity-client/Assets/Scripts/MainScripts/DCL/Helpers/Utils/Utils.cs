@@ -518,5 +518,17 @@ namespace DCL.Helpers
             Debug.DrawLine(bl2, br2, color, duration);
             Debug.DrawLine(tr2, br2, color, duration);
         }
+
+        public static string ToUpperFirst(this string value)
+        {
+            if (!string.IsNullOrEmpty(value))
+            {
+                var capital = char.ToUpper(value[0]);
+                value = capital + value.Substring(1);
+            }
+
+            return value;
+        }
+
     }
 }
