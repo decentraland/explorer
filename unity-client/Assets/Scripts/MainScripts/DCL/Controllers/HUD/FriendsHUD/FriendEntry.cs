@@ -12,6 +12,7 @@ public class FriendEntry : MonoBehaviour, IFriendEntry, IPointerEnterHandler, IP
 {
     public Model model { get; private set; } = new Model();
     public string userId { get; private set; }
+    public Image playerBlockedImage;
     public Transform menuPositionReference;
 
     public event System.Action<FriendEntry> OnMenuToggle;
@@ -101,4 +102,8 @@ public class FriendEntry : MonoBehaviour, IFriendEntry, IPointerEnterHandler, IP
         playerImage.sprite = sprite;
     }
 
+    public void ToggleBlockedImage(bool targetState)
+    {
+        playerBlockedImage.enabled = targetState;
+    }
 }

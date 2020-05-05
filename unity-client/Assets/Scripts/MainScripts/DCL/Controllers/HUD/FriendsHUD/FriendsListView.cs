@@ -8,6 +8,9 @@ using UnityEngine.UI;
 
 public class FriendsListView : MonoBehaviour, IPointerDownHandler
 {
+    const string BLOCK_BTN_BLOCK_TEXT = "Block";
+    const string BLOCK_BTN_UNBLOCK_TEXT = "Unblock";
+
     [SerializeField] GameObject friendEntryPrefab;
 
     [SerializeField] TextMeshProUGUI onlineFriendsToggleText;
@@ -18,6 +21,7 @@ public class FriendsListView : MonoBehaviour, IPointerDownHandler
 
     [SerializeField] internal Button friendPassportButton;
     [SerializeField] internal Button blockFriendButton;
+    [SerializeField] internal TextMeshProUGUI blockFriendButtonText;
     [SerializeField] internal Button reportFriendButton;
 
     [SerializeField] internal Button deleteFriendButton;
@@ -34,6 +38,7 @@ public class FriendsListView : MonoBehaviour, IPointerDownHandler
     public Transform offlineFriendsContainer;
     internal int onlineFriends = 0;
     internal int offlineFriends = 0;
+    UserProfile ownUserProfile => UserProfile.GetOwnUserProfile();
 
     public event System.Action<FriendEntry> OnJumpIn;
     public event System.Action<FriendEntry> OnWhisper;
@@ -44,10 +49,10 @@ public class FriendsListView : MonoBehaviour, IPointerDownHandler
 
     public void Initialize()
     {
-        friendPassportButton.onClick.AddListener(() => { OnPassport?.Invoke(selectedFriendEntry.userId); ToggleMenuPanel(selectedFriendEntry); });
-        blockFriendButton.onClick.AddListener(() => { OnBlock?.Invoke(selectedFriendEntry.userId); ToggleMenuPanel(selectedFriendEntry); });
-        reportFriendButton.onClick.AddListener(() => { OnReport?.Invoke(selectedFriendEntry.userId); ToggleMenuPanel(selectedFriendEntry); });
-        deleteFriendButton.onClick.AddListener(() => { ToggleMenuPanel(selectedFriendEntry); OnFriendDelete(); });
+        friendPassportButton.onClick.AddListener(OnPassportButtonPressed);
+        reportFriendButton.onClick.AddListener(OnReportFriendButtonPressed);
+        deleteFriendButton.onClick.AddListener(OnDeleteFriendButtonPressed);
+        blockFriendButton.onClick.AddListener(OnBlockFriendButtonPressed);
 
         deleteFriendDialogConfirmButton.onClick.AddListener(ConfirmFriendDelete);
         deleteFriendDialogCancelButton.onClick.AddListener(CancelConfirmationDialog);
@@ -68,6 +73,36 @@ public class FriendsListView : MonoBehaviour, IPointerDownHandler
     {
         if (eventData.pointerPressRaycast.gameObject == null || eventData.pointerPressRaycast.gameObject.layer != PhysicsLayers.friendsHUDPlayerMenu)
             friendMenuPanel.SetActive(false);
+    }
+
+    void OnPassportButtonPressed()
+    {
+        OnPassport?.Invoke(selectedFriendEntry.userId);
+
+        ToggleMenuPanel(selectedFriendEntry);
+    }
+
+    void OnReportFriendButtonPressed()
+    {
+        OnReport?.Invoke(selectedFriendEntry.userId);
+
+        ToggleMenuPanel(selectedFriendEntry);
+    }
+
+    void OnDeleteFriendButtonPressed()
+    {
+        ToggleMenuPanel(selectedFriendEntry);
+
+        OnFriendDelete();
+    }
+
+    void OnBlockFriendButtonPressed()
+    {
+        OnBlock?.Invoke(selectedFriendEntry.userId);
+
+        selectedFriendEntry.ToggleBlockedImage(!selectedFriendEntry.playerBlockedImage.enabled);
+
+        ToggleMenuPanel(selectedFriendEntry);
     }
 
     internal FriendEntry GetEntry(string userId)
@@ -110,7 +145,10 @@ public class FriendsListView : MonoBehaviour, IPointerDownHandler
 
         UpdateUsersToggleTexts();
 
+        friendEntry.ToggleBlockedImage(ownUserProfile.blocked.Contains(userId));
+
         (transform as RectTransform).ForceUpdateLayout();
+
         return true;
     }
 
@@ -194,6 +232,9 @@ public class FriendsListView : MonoBehaviour, IPointerDownHandler
         friendMenuPanel.transform.position = entry.menuPositionReference.position;
 
         friendMenuPanel.SetActive(selectedFriendEntry == entry ? !friendMenuPanel.activeSelf : true);
+
+        if (friendMenuPanel.activeSelf)
+            blockFriendButtonText.text = ownUserProfile.blocked.Contains(entry.userId) ? BLOCK_BTN_UNBLOCK_TEXT : BLOCK_BTN_BLOCK_TEXT;
     }
 
     [ContextMenu("AddFakeOnlineFriend")]

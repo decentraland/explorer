@@ -14,6 +14,7 @@ public class FriendRequestEntry : MonoBehaviour, IFriendEntry, IPointerEnterHand
     [SerializeField] internal Image backgroundImage;
     [SerializeField] internal Sprite hoveredBackgroundSprite;
     public Transform menuPositionReference;
+    public Image playerBlockedImage;
 
     public string userId { get; private set; }
     public bool isReceived { get; private set; }
@@ -96,5 +97,10 @@ public class FriendRequestEntry : MonoBehaviour, IFriendEntry, IPointerEnterHand
         cancelButton.gameObject.SetActive(true);
         acceptButton.gameObject.SetActive(false);
         rejectButton.gameObject.SetActive(false);
+    }
+
+    public void ToggleBlockedImage(bool targetState)
+    {
+        playerBlockedImage.enabled = targetState;
     }
 }

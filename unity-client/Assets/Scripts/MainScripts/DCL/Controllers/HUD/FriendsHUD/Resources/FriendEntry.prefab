@@ -70,6 +70,7 @@ MonoBehaviour:
   playerNameText: {fileID: 5460751659792233842}
   playerLocationText: {fileID: 8747893688553154550}
   playerImage: {fileID: 4777978208689502769}
+  playerBlockedImage: {fileID: 3044162380546479886}
   jumpInButton: {fileID: 596808249942825202}
   whisperButton: {fileID: 5791209562270436312}
   menuButton: {fileID: 1575258791199021983}
@@ -834,7 +835,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &5155187108045625646
 RectTransform:
   m_ObjectHideFlags: 0
@@ -869,14 +870,14 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2750868330286968561}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: -765806418, guid: f70555f144d8491a825f0804e09c671c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
