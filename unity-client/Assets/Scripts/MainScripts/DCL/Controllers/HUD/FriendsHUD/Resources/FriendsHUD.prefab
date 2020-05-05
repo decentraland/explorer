@@ -36,7 +36,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 26, y: 0}
   m_SizeDelta: {x: 460, y: 528.9}
   m_Pivot: {x: 0, y: 0}
 --- !u!114 &6433316941555892342
@@ -1742,10 +1742,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   friendEntryPrefab: {fileID: 434402956254495305, guid: 28149d49252bc4933a8455289c2b15b4,
     type: 3}
-  onlineFriendsContainer: {fileID: 4170319777576616387}
-  offlineFriendsContainer: {fileID: 9057412822816918847}
-  deleteFriendDialog: {fileID: 2047776841370283232}
-  deleteFriendDialogText: {fileID: 5746423953254440856}
   onlineFriendsToggleText: {fileID: 3213783841871339297}
   offlineFriendsToggleText: {fileID: 3090834247870482610}
   emptyListImage: {fileID: 7768145353694721691}
@@ -1754,8 +1750,12 @@ MonoBehaviour:
   blockFriendButton: {fileID: 4001785326659235964}
   reportFriendButton: {fileID: 7802328647876505906}
   deleteFriendButton: {fileID: 1470154781986977453}
+  deleteFriendDialog: {fileID: 2047776841370283232}
+  deleteFriendDialogText: {fileID: 5746423953254440856}
   deleteFriendDialogCancelButton: {fileID: 6037775532746624824}
   deleteFriendDialogConfirmButton: {fileID: 1238907741233345095}
+  onlineFriendsContainer: {fileID: 4170319777576616387}
+  offlineFriendsContainer: {fileID: 9057412822816918847}
 --- !u!1 &2850567470945615878
 GameObject:
   m_ObjectHideFlags: 0
