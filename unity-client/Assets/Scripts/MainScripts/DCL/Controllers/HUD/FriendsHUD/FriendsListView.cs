@@ -113,6 +113,36 @@ public class FriendsListView : MonoBehaviour, IPointerDownHandler
         return friendEntries[userId];
     }
 
+    public void CreateOrUpdateEntry(string userId, FriendEntry.Model model)
+    {
+        bool firstUpdate = CreateEntry(userId);
+        UpdateEntry(userId, model, firstUpdate);
+    }
+
+    public bool CreateEntry(string userId)
+    {
+        if (friendEntries.ContainsKey(userId)) return false;
+
+        if (emptyListImage.activeSelf)
+            emptyListImage.SetActive(false);
+
+        if (!onlineFriendsToggleText.transform.parent.gameObject.activeSelf)
+        {
+            onlineFriendsToggleText.transform.parent.gameObject.SetActive(true);
+            offlineFriendsToggleText.transform.parent.gameObject.SetActive(true);
+        }
+
+        var entry = Instantiate(friendEntryPrefab).GetComponent<FriendEntry>();
+        friendEntries.Add(userId, entry);
+
+        entry.OnMenuToggle += (x) => { selectedFriendEntry = x; ToggleMenuPanel(x); };
+
+        entry.OnJumpInClick += (x) => OnJumpIn?.Invoke(x);
+        entry.OnWhisperClick += (x) => OnWhisper?.Invoke(x);
+
+        return true;
+    }
+
     public bool UpdateEntry(string userId, FriendEntry.Model model, bool firstUpdate = false)
     {
         if (!friendEntries.ContainsKey(userId)) return false;
@@ -152,30 +182,6 @@ public class FriendsListView : MonoBehaviour, IPointerDownHandler
         return true;
     }
 
-    public bool CreateEntry(string userId)
-    {
-        if (friendEntries.ContainsKey(userId)) return false;
-
-        if (emptyListImage.activeSelf)
-            emptyListImage.SetActive(false);
-
-        var entry = Instantiate(friendEntryPrefab).GetComponent<FriendEntry>();
-        friendEntries.Add(userId, entry);
-
-        entry.OnMenuToggle += (x) => { selectedFriendEntry = x; ToggleMenuPanel(x); };
-
-        entry.OnJumpInClick += (x) => OnJumpIn?.Invoke(x);
-        entry.OnWhisperClick += (x) => OnWhisper?.Invoke(x);
-
-        return true;
-    }
-
-    public void CreateOrUpdateEntry(string userId, FriendEntry.Model model)
-    {
-        bool firstUpdate = CreateEntry(userId);
-        UpdateEntry(userId, model, firstUpdate);
-    }
-
     public void RemoveEntry(string userId)
     {
         if (!friendEntries.ContainsKey(userId)) return;
@@ -191,6 +197,12 @@ public class FriendsListView : MonoBehaviour, IPointerDownHandler
 
         Object.Destroy(entry.gameObject);
         friendEntries.Remove(userId);
+
+        if (friendEntries.Count == 0)
+        {
+            onlineFriendsToggleText.transform.parent.gameObject.SetActive(false);
+            offlineFriendsToggleText.transform.parent.gameObject.SetActive(false);
+        }
 
         (transform as RectTransform).ForceUpdateLayout();
     }

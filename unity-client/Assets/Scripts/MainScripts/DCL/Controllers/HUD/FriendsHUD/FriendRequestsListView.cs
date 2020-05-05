@@ -186,12 +186,24 @@ public class FriendRequestsListView : MonoBehaviour, IPointerDownHandler
         currentNotification = null;
     }
 
+    public void CreateOrUpdateEntry(string userId, FriendEntry.Model model, bool isReceived)
+    {
+        CreateEntry(userId);
+        UpdateEntry(userId, model, isReceived);
+    }
+
     public bool CreateEntry(string userId)
     {
         if (friendRequestEntries.ContainsKey(userId)) return false;
 
         if (emptyListImage.activeSelf)
             emptyListImage.SetActive(false);
+
+        if (!sentRequestsToggleText.transform.parent.gameObject.activeSelf)
+        {
+            receivedRequestsToggleText.transform.parent.gameObject.SetActive(true);
+            sentRequestsToggleText.transform.parent.gameObject.SetActive(true);
+        }
 
         FriendRequestEntry entry;
 
@@ -236,12 +248,6 @@ public class FriendRequestsListView : MonoBehaviour, IPointerDownHandler
         (transform as RectTransform).ForceUpdateLayout();
 
         return true;
-    }
-
-    public void CreateOrUpdateEntry(string userId, FriendEntry.Model model, bool isReceived)
-    {
-        CreateEntry(userId);
-        UpdateEntry(userId, model, isReceived);
     }
 
     void OnFriendRequestReceivedAccepted(FriendRequestEntry requestEntry)
@@ -329,6 +335,12 @@ public class FriendRequestsListView : MonoBehaviour, IPointerDownHandler
 
         Destroy(entry.gameObject);
         friendRequestEntries.Remove(userId);
+
+        if (friendRequestEntries.Count == 0)
+        {
+            receivedRequestsToggleText.transform.parent.gameObject.SetActive(false);
+            sentRequestsToggleText.transform.parent.gameObject.SetActive(false);
+        }
 
         (transform as RectTransform).ForceUpdateLayout();
     }
