@@ -495,7 +495,7 @@ GameObject:
   - component: {fileID: 1628654731514149087}
   - component: {fileID: 949520735742362079}
   m_Layer: 5
-  m_Name: ChatToolTip
+  m_Name: TaskBarTooltip
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -609,6 +609,7 @@ GameObject:
   - component: {fileID: 622851922180223295}
   - component: {fileID: 7061163220679428443}
   - component: {fileID: 3686269489964235905}
+  - component: {fileID: 9212644601157265122}
   m_Layer: 5
   m_Name: Friends Button
   m_TagString: Untagged
@@ -717,6 +718,21 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.UI.Button+ButtonClickedEvent, UnityEngine.UI, Version=1.0.0.0,
       Culture=neutral, PublicKeyToken=null
+--- !u!114 &9212644601157265122
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7772005873924984123}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d30b4ce08e6854094b8461fdea1282aa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  targetRectTransform: {fileID: 7876693640766577542}
+  hoverScale: 1.03
+  normalScale: 1
 --- !u!1 &7984381791258128339
 GameObject:
   m_ObjectHideFlags: 0
@@ -766,6 +782,7 @@ GameObject:
   - component: {fileID: 2744175068965865580}
   - component: {fileID: 1413073526740766789}
   - component: {fileID: 5681366293077149653}
+  - component: {fileID: 4765218403611597198}
   m_Layer: 5
   m_Name: Chat Button
   m_TagString: Untagged
@@ -885,6 +902,21 @@ MonoBehaviour:
         m_CallState: 2
     m_TypeName: UnityEngine.UI.Button+ButtonClickedEvent, UnityEngine.UI, Version=1.0.0.0,
       Culture=neutral, PublicKeyToken=null
+--- !u!114 &4765218403611597198
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8012558485580923328}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d30b4ce08e6854094b8461fdea1282aa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  targetRectTransform: {fileID: 4478478436062547217}
+  hoverScale: 1.03
+  normalScale: 1
 --- !u!1001 &4172891374910103336
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -8,6 +8,9 @@ using UnityEngine.UI;
 
 public class FriendsListView : MonoBehaviour, IPointerDownHandler
 {
+    const string BLOCK_BTN_BLOCK_TEXT = "Block";
+    const string BLOCK_BTN_UNBLOCK_TEXT = "Unblock";
+
     [SerializeField] GameObject friendEntryPrefab;
 
     [SerializeField] TextMeshProUGUI onlineFriendsToggleText;
@@ -18,6 +21,7 @@ public class FriendsListView : MonoBehaviour, IPointerDownHandler
 
     [SerializeField] internal Button friendPassportButton;
     [SerializeField] internal Button blockFriendButton;
+    [SerializeField] internal TextMeshProUGUI blockFriendButtonText;
     [SerializeField] internal Button reportFriendButton;
 
     [SerializeField] internal Button deleteFriendButton;
@@ -34,6 +38,7 @@ public class FriendsListView : MonoBehaviour, IPointerDownHandler
     public Transform offlineFriendsContainer;
     internal int onlineFriends = 0;
     internal int offlineFriends = 0;
+    UserProfile ownUserProfile => UserProfile.GetOwnUserProfile();
 
     public event System.Action<FriendEntry> OnJumpIn;
     public event System.Action<FriendEntry> OnWhisper;
@@ -44,10 +49,10 @@ public class FriendsListView : MonoBehaviour, IPointerDownHandler
 
     public void Initialize()
     {
-        friendPassportButton.onClick.AddListener(() => { OnPassport?.Invoke(selectedFriendEntry.userId); ToggleMenuPanel(selectedFriendEntry); });
-        blockFriendButton.onClick.AddListener(() => { OnBlock?.Invoke(selectedFriendEntry.userId); ToggleMenuPanel(selectedFriendEntry); });
-        reportFriendButton.onClick.AddListener(() => { OnReport?.Invoke(selectedFriendEntry.userId); ToggleMenuPanel(selectedFriendEntry); });
-        deleteFriendButton.onClick.AddListener(() => { ToggleMenuPanel(selectedFriendEntry); OnFriendDelete(); });
+        friendPassportButton.onClick.AddListener(OnPassportButtonPressed);
+        reportFriendButton.onClick.AddListener(OnReportFriendButtonPressed);
+        deleteFriendButton.onClick.AddListener(OnDeleteFriendButtonPressed);
+        blockFriendButton.onClick.AddListener(OnBlockFriendButtonPressed);
 
         deleteFriendDialogConfirmButton.onClick.AddListener(ConfirmFriendDelete);
         deleteFriendDialogCancelButton.onClick.AddListener(CancelConfirmationDialog);
@@ -70,12 +75,72 @@ public class FriendsListView : MonoBehaviour, IPointerDownHandler
             friendMenuPanel.SetActive(false);
     }
 
+    void OnPassportButtonPressed()
+    {
+        OnPassport?.Invoke(selectedFriendEntry.userId);
+
+        ToggleMenuPanel(selectedFriendEntry);
+    }
+
+    void OnReportFriendButtonPressed()
+    {
+        OnReport?.Invoke(selectedFriendEntry.userId);
+
+        ToggleMenuPanel(selectedFriendEntry);
+    }
+
+    void OnDeleteFriendButtonPressed()
+    {
+        ToggleMenuPanel(selectedFriendEntry);
+
+        OnFriendDelete();
+    }
+
+    void OnBlockFriendButtonPressed()
+    {
+        OnBlock?.Invoke(selectedFriendEntry.userId);
+
+        selectedFriendEntry.ToggleBlockedImage(!selectedFriendEntry.playerBlockedImage.enabled);
+
+        ToggleMenuPanel(selectedFriendEntry);
+    }
+
     internal FriendEntry GetEntry(string userId)
     {
         if (!friendEntries.ContainsKey(userId))
             return null;
 
         return friendEntries[userId];
+    }
+
+    public void CreateOrUpdateEntry(string userId, FriendEntry.Model model)
+    {
+        bool firstUpdate = CreateEntry(userId);
+        UpdateEntry(userId, model, firstUpdate);
+    }
+
+    public bool CreateEntry(string userId)
+    {
+        if (friendEntries.ContainsKey(userId)) return false;
+
+        if (emptyListImage.activeSelf)
+            emptyListImage.SetActive(false);
+
+        if (!onlineFriendsToggleText.transform.parent.gameObject.activeSelf)
+        {
+            onlineFriendsToggleText.transform.parent.gameObject.SetActive(true);
+            offlineFriendsToggleText.transform.parent.gameObject.SetActive(true);
+        }
+
+        var entry = Instantiate(friendEntryPrefab).GetComponent<FriendEntry>();
+        friendEntries.Add(userId, entry);
+
+        entry.OnMenuToggle += (x) => { selectedFriendEntry = x; ToggleMenuPanel(x); };
+
+        entry.OnJumpInClick += (x) => OnJumpIn?.Invoke(x);
+        entry.OnWhisperClick += (x) => OnWhisper?.Invoke(x);
+
+        return true;
     }
 
     public bool UpdateEntry(string userId, FriendEntry.Model model, bool firstUpdate = false)
@@ -110,32 +175,11 @@ public class FriendsListView : MonoBehaviour, IPointerDownHandler
 
         UpdateUsersToggleTexts();
 
+        friendEntry.ToggleBlockedImage(ownUserProfile.blocked.Contains(userId));
+
         (transform as RectTransform).ForceUpdateLayout();
-        return true;
-    }
-
-    public bool CreateEntry(string userId)
-    {
-        if (friendEntries.ContainsKey(userId)) return false;
-
-        if (emptyListImage.activeSelf)
-            emptyListImage.SetActive(false);
-
-        var entry = Instantiate(friendEntryPrefab).GetComponent<FriendEntry>();
-        friendEntries.Add(userId, entry);
-
-        entry.OnMenuToggle += (x) => { selectedFriendEntry = x; ToggleMenuPanel(x); };
-
-        entry.OnJumpInClick += (x) => OnJumpIn?.Invoke(x);
-        entry.OnWhisperClick += (x) => OnWhisper?.Invoke(x);
 
         return true;
-    }
-
-    public void CreateOrUpdateEntry(string userId, FriendEntry.Model model)
-    {
-        bool firstUpdate = CreateEntry(userId);
-        UpdateEntry(userId, model, firstUpdate);
     }
 
     public void RemoveEntry(string userId)
@@ -153,6 +197,12 @@ public class FriendsListView : MonoBehaviour, IPointerDownHandler
 
         Object.Destroy(entry.gameObject);
         friendEntries.Remove(userId);
+
+        if (friendEntries.Count == 0)
+        {
+            onlineFriendsToggleText.transform.parent.gameObject.SetActive(false);
+            offlineFriendsToggleText.transform.parent.gameObject.SetActive(false);
+        }
 
         (transform as RectTransform).ForceUpdateLayout();
     }
@@ -194,6 +244,9 @@ public class FriendsListView : MonoBehaviour, IPointerDownHandler
         friendMenuPanel.transform.position = entry.menuPositionReference.position;
 
         friendMenuPanel.SetActive(selectedFriendEntry == entry ? !friendMenuPanel.activeSelf : true);
+
+        if (friendMenuPanel.activeSelf)
+            blockFriendButtonText.text = ownUserProfile.blocked.Contains(entry.userId) ? BLOCK_BTN_UNBLOCK_TEXT : BLOCK_BTN_BLOCK_TEXT;
     }
 
     [ContextMenu("AddFakeOnlineFriend")]
