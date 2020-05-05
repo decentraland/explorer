@@ -22,10 +22,29 @@ public class PlayerInfoCardHUDController : IHUD
 
     private void AddPlayerAsFriend()
     {
+        // Add fake action to avoid waiting for kernel
+        UserProfileController.i.AddUserProfileToCatalog(new UserProfileModel()
+        {
+            userId = currentPlayerId,
+            name = currentPlayerId
+        });
+        FriendsController.i.UpdateFriendshipStatus(new FriendsController.FriendshipUpdateStatusMessage()
+        {
+            userId = currentPlayerId,
+            action = FriendsController.FriendshipAction.REQUESTED_TO
+        });
+
         WebInterface.UpdateFriendshipStatus(new FriendsController.FriendshipUpdateStatusMessage() { userId = currentPlayerId, action = FriendsController.FriendshipAction.REQUESTED_TO });
     }
     private void CancelInvitation()
     {
+        // Add fake action to avoid waiting for kernel
+        FriendsController.i.UpdateFriendshipStatus(new FriendsController.FriendshipUpdateStatusMessage()
+        {
+            userId = currentPlayerId,
+            action = FriendsController.FriendshipAction.CANCELLED
+        });
+
         WebInterface.UpdateFriendshipStatus(new FriendsController.FriendshipUpdateStatusMessage() { userId = currentPlayerId, action = FriendsController.FriendshipAction.CANCELLED });
     }
 
