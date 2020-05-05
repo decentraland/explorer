@@ -10,7 +10,7 @@ public interface IFriendEntry
 
 public class FriendEntry : MonoBehaviour, IFriendEntry, IPointerEnterHandler, IPointerExitHandler
 {
-    public Model model { get; private set; }
+    public Model model { get; private set; } = new Model();
     public string userId { get; private set; }
     public Transform menuPositionReference;
 
@@ -30,13 +30,19 @@ public class FriendEntry : MonoBehaviour, IFriendEntry, IPointerEnterHandler, IP
 
     internal Sprite unhoveredBackgroundSprite;
 
-    public struct Model
+    public class Model
     {
         public FriendsController.PresenceStatus status;
         public string userName;
         public Vector2 coords;
         public string realm;
         public Sprite avatarImage;
+
+        public event System.Action<Sprite> OnSpriteUpdateEvent;
+        public void OnSpriteUpdate(Sprite sprite)
+        {
+            OnSpriteUpdateEvent?.Invoke(sprite);
+        }
     }
 
     void Awake()
@@ -80,11 +86,19 @@ public class FriendEntry : MonoBehaviour, IFriendEntry, IPointerEnterHandler, IP
         playerNameText.text = model.userName;
         playerLocationText.text = $"{model.realm} {model.coords}";
 
-        if (model.avatarImage == null)
-        {
-
-        }
-
+        model.OnSpriteUpdateEvent -= OnAvatarImageChange;
+        model.OnSpriteUpdateEvent += OnAvatarImageChange;
         playerImage.sprite = model.avatarImage;
     }
+
+    void OnDestroy()
+    {
+        model.OnSpriteUpdateEvent -= OnAvatarImageChange;
+    }
+
+    private void OnAvatarImageChange(Sprite sprite)
+    {
+        playerImage.sprite = sprite;
+    }
+
 }

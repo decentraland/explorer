@@ -134,7 +134,8 @@ public class FriendsListView : MonoBehaviour, IPointerDownHandler
 
     public void CreateOrUpdateEntry(string userId, FriendEntry.Model model)
     {
-        UpdateEntry(userId, model, CreateEntry(userId));
+        bool firstUpdate = CreateEntry(userId);
+        UpdateEntry(userId, model, firstUpdate);
     }
 
     public void RemoveEntry(string userId)

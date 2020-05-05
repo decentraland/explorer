@@ -337,7 +337,7 @@ RectTransform:
   m_GameObject: {fileID: 4146330243079072463}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1.1, y: 1.1, z: 1}
   m_Children: []
   m_Father: {fileID: 7759976297831992496}
   m_RootOrder: 0
@@ -892,6 +892,16 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 4414333763480853137}
     m_Modifications:
+    - target: {fileID: 2845107033472647055, guid: 2fc88af23bad36741becd2e487a423f4,
+        type: 3}
+      propertyPath: m_Name
+      value: Notification Badge (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 2845107033472647055, guid: 2fc88af23bad36741becd2e487a423f4,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8819543312367979352, guid: 2fc88af23bad36741becd2e487a423f4,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -997,15 +1007,25 @@ PrefabInstance:
       propertyPath: m_Pivot.y
       value: 0.5
       objectReference: {fileID: 0}
-    - target: {fileID: 2845107033472647055, guid: 2fc88af23bad36741becd2e487a423f4,
+    - target: {fileID: 6334302917501517762, guid: 2fc88af23bad36741becd2e487a423f4,
         type: 3}
-      propertyPath: m_Name
-      value: Notification Badge (1)
+      propertyPath: m_SizeDelta.x
+      value: 18
       objectReference: {fileID: 0}
-    - target: {fileID: 2845107033472647055, guid: 2fc88af23bad36741becd2e487a423f4,
+    - target: {fileID: 6334302917501517762, guid: 2fc88af23bad36741becd2e487a423f4,
         type: 3}
-      propertyPath: m_IsActive
-      value: 1
+      propertyPath: m_SizeDelta.y
+      value: 18
+      objectReference: {fileID: 0}
+    - target: {fileID: 6334302917501517762, guid: 2fc88af23bad36741becd2e487a423f4,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 21
+      objectReference: {fileID: 0}
+    - target: {fileID: 6334302917501517762, guid: 2fc88af23bad36741becd2e487a423f4,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -11
       objectReference: {fileID: 0}
     - target: {fileID: 5984344161284955003, guid: 2fc88af23bad36741becd2e487a423f4,
         type: 3}
@@ -1036,7 +1056,7 @@ PrefabInstance:
     - target: {fileID: 8818213553393692271, guid: 2fc88af23bad36741becd2e487a423f4,
         type: 3}
       propertyPath: m_fontSize
-      value: 14
+      value: 10.35
       objectReference: {fileID: 0}
     - target: {fileID: 8818213553393692271, guid: 2fc88af23bad36741becd2e487a423f4,
         type: 3}
@@ -1074,26 +1094,6 @@ PrefabInstance:
       propertyPath: m_fontColor32.rgba
       value: 4294967295
       objectReference: {fileID: 0}
-    - target: {fileID: 6334302917501517762, guid: 2fc88af23bad36741becd2e487a423f4,
-        type: 3}
-      propertyPath: m_SizeDelta.x
-      value: 18
-      objectReference: {fileID: 0}
-    - target: {fileID: 6334302917501517762, guid: 2fc88af23bad36741becd2e487a423f4,
-        type: 3}
-      propertyPath: m_SizeDelta.y
-      value: 18
-      objectReference: {fileID: 0}
-    - target: {fileID: 6334302917501517762, guid: 2fc88af23bad36741becd2e487a423f4,
-        type: 3}
-      propertyPath: m_AnchoredPosition.x
-      value: 21
-      objectReference: {fileID: 0}
-    - target: {fileID: 6334302917501517762, guid: 2fc88af23bad36741becd2e487a423f4,
-        type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: -11
-      objectReference: {fileID: 0}
     - target: {fileID: 6336046026291867439, guid: 2fc88af23bad36741becd2e487a423f4,
         type: 3}
       propertyPath: m_Color.g
@@ -1130,6 +1130,16 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1775317218298059707}
     m_Modifications:
+    - target: {fileID: 2845107033472647055, guid: 2fc88af23bad36741becd2e487a423f4,
+        type: 3}
+      propertyPath: m_Name
+      value: Notification Badge
+      objectReference: {fileID: 0}
+    - target: {fileID: 2845107033472647055, guid: 2fc88af23bad36741becd2e487a423f4,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8819543312367979352, guid: 2fc88af23bad36741becd2e487a423f4,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -1235,20 +1245,30 @@ PrefabInstance:
       propertyPath: m_Pivot.y
       value: 0.5
       objectReference: {fileID: 0}
-    - target: {fileID: 2845107033472647055, guid: 2fc88af23bad36741becd2e487a423f4,
+    - target: {fileID: 6334302917501517762, guid: 2fc88af23bad36741becd2e487a423f4,
         type: 3}
-      propertyPath: m_Name
-      value: Notification Badge
+      propertyPath: m_SizeDelta.x
+      value: 18
       objectReference: {fileID: 0}
-    - target: {fileID: 2845107033472647055, guid: 2fc88af23bad36741becd2e487a423f4,
+    - target: {fileID: 6334302917501517762, guid: 2fc88af23bad36741becd2e487a423f4,
         type: 3}
-      propertyPath: m_IsActive
-      value: 1
+      propertyPath: m_SizeDelta.y
+      value: 18
+      objectReference: {fileID: 0}
+    - target: {fileID: 6334302917501517762, guid: 2fc88af23bad36741becd2e487a423f4,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -11.00001
+      objectReference: {fileID: 0}
+    - target: {fileID: 6334302917501517762, guid: 2fc88af23bad36741becd2e487a423f4,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 17
       objectReference: {fileID: 0}
     - target: {fileID: 8818213553393692271, guid: 2fc88af23bad36741becd2e487a423f4,
         type: 3}
       propertyPath: m_fontSize
-      value: 14
+      value: 10.35
       objectReference: {fileID: 0}
     - target: {fileID: 8818213553393692271, guid: 2fc88af23bad36741becd2e487a423f4,
         type: 3}
@@ -1285,26 +1305,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_fontColor32.rgba
       value: 4294967295
-      objectReference: {fileID: 0}
-    - target: {fileID: 6334302917501517762, guid: 2fc88af23bad36741becd2e487a423f4,
-        type: 3}
-      propertyPath: m_SizeDelta.x
-      value: 18
-      objectReference: {fileID: 0}
-    - target: {fileID: 6334302917501517762, guid: 2fc88af23bad36741becd2e487a423f4,
-        type: 3}
-      propertyPath: m_SizeDelta.y
-      value: 18
-      objectReference: {fileID: 0}
-    - target: {fileID: 6334302917501517762, guid: 2fc88af23bad36741becd2e487a423f4,
-        type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: -11.00001
-      objectReference: {fileID: 0}
-    - target: {fileID: 6334302917501517762, guid: 2fc88af23bad36741becd2e487a423f4,
-        type: 3}
-      propertyPath: m_AnchoredPosition.x
-      value: 17
       objectReference: {fileID: 0}
     - target: {fileID: 6336046026291867439, guid: 2fc88af23bad36741becd2e487a423f4,
         type: 3}

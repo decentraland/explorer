@@ -96,9 +96,13 @@ public class FriendsHUDController : IHUD
         friendEntryModel.userName = userProfile.userName;
         friendEntryModel.avatarImage = userProfile.faceSnapshot;
 
+        userProfile.OnFaceSnapshotReadyEvent -= friendEntryModel.OnSpriteUpdate;
+        userProfile.OnFaceSnapshotReadyEvent += friendEntryModel.OnSpriteUpdate;
+
         switch (friendshipAction)
         {
             case FriendsController.FriendshipAction.NONE:
+                userProfile.OnFaceSnapshotReadyEvent -= friendEntryModel.OnSpriteUpdate;
                 view.friendRequestsList.RemoveEntry(userId);
                 view.friendsList.RemoveEntry(userId);
                 break;
@@ -107,9 +111,11 @@ public class FriendsHUDController : IHUD
                 view.friendsList.CreateOrUpdateEntry(userId, friendEntryModel);
                 break;
             case FriendsController.FriendshipAction.REJECTED:
+                userProfile.OnFaceSnapshotReadyEvent -= friendEntryModel.OnSpriteUpdate;
                 view.friendRequestsList.RemoveEntry(userId);
                 break;
             case FriendsController.FriendshipAction.CANCELLED:
+                userProfile.OnFaceSnapshotReadyEvent -= friendEntryModel.OnSpriteUpdate;
                 view.friendRequestsList.RemoveEntry(userId);
                 break;
             case FriendsController.FriendshipAction.REQUESTED_FROM:
@@ -119,6 +125,7 @@ public class FriendsHUDController : IHUD
                 view.friendRequestsList.CreateOrUpdateEntry(userId, friendEntryModel, false);
                 break;
             case FriendsController.FriendshipAction.DELETED:
+                userProfile.OnFaceSnapshotReadyEvent -= friendEntryModel.OnSpriteUpdate;
                 view.friendRequestsList.RemoveEntry(userId);
                 view.friendsList.RemoveEntry(userId);
                 break;

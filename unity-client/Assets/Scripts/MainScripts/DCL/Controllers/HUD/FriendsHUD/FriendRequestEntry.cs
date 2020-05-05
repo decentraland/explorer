@@ -1,7 +1,7 @@
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 public class FriendRequestEntry : MonoBehaviour, IFriendEntry, IPointerEnterHandler, IPointerExitHandler
 {
@@ -58,7 +58,6 @@ public class FriendRequestEntry : MonoBehaviour, IFriendEntry, IPointerEnterHand
         this.userId = userId;
         this.model = model;
         playerNameText.text = model.userName;
-        playerImage.sprite = model.avatarImage;
 
         if (isReceived.HasValue)
         {
@@ -67,6 +66,20 @@ public class FriendRequestEntry : MonoBehaviour, IFriendEntry, IPointerEnterHand
             else
                 PopulateSent();
         }
+
+        model.OnSpriteUpdateEvent -= OnAvatarImageChange;
+        model.OnSpriteUpdateEvent += OnAvatarImageChange;
+        playerImage.sprite = model.avatarImage;
+    }
+
+    void OnDestroy()
+    {
+        model.OnSpriteUpdateEvent -= OnAvatarImageChange;
+    }
+
+    private void OnAvatarImageChange(Sprite sprite)
+    {
+        playerImage.sprite = sprite;
     }
 
     void PopulateReceived()
