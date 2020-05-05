@@ -7,24 +7,13 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class FriendRequestsListView : MonoBehaviour, IPointerDownHandler
+public class FriendRequestsListView : FriendsHUDListViewBase
 {
-    const string BLOCK_BTN_BLOCK_TEXT = "Block";
-    const string BLOCK_BTN_UNBLOCK_TEXT = "Unblock";
-
-    public float notificationsDuration = 3f;
-
-    [SerializeField] GameObject friendRequestEntryPrefab;
     [SerializeField] internal Transform receivedRequestsContainer;
     [SerializeField] internal Transform sentRequestsContainer;
 
     [SerializeField] internal TMP_InputField friendSearchInputField;
-    [SerializeField] internal GameObject emptyListImage;
-    [SerializeField] internal GameObject requestMenuPanel;
     [SerializeField] internal Button addFriendButton;
-    [SerializeField] internal Button playerPassportButton;
-    [SerializeField] internal Button blockPlayerButton;
-    [SerializeField] internal TextMeshProUGUI blockPlayerButtonText;
     [SerializeField] internal TextMeshProUGUI receivedRequestsToggleText;
     [SerializeField] internal TextMeshProUGUI sentRequestsToggleText;
 
@@ -35,91 +24,148 @@ public class FriendRequestsListView : MonoBehaviour, IPointerDownHandler
     [SerializeField] internal GameObject acceptedFriendNotification;
     [SerializeField] internal TextMeshProUGUI acceptedFriendNotificationText;
 
-    [Header("Confirmation Dialogs")]
-    [SerializeField] internal GameObject rejectRequestDialog;
-    [SerializeField] internal TextMeshProUGUI rejectRequestDialogText;
-    [SerializeField] internal Button rejectRequestDialogCancelButton;
-    [SerializeField] internal Button rejectRequestDialogConfirmButton;
-    [SerializeField] internal GameObject cancelRequestDialog;
-    [SerializeField] internal TextMeshProUGUI cancelRequestDialogText;
-    [SerializeField] internal Button cancelRequestDialogCancelButton;
-    [SerializeField] internal Button cancelRequestDialogConfirmButton;
-
-    UserProfile ownUserProfile => UserProfile.GetOwnUserProfile();
-    Dictionary<string, FriendRequestEntry> friendRequestEntries = new Dictionary<string, FriendRequestEntry>();
-    Coroutine currentNotificationRoutine = null;
-    GameObject currentNotification = null;
-    FriendRequestEntry selectedRequestEntry = null;
-
+    internal Coroutine currentNotificationRoutine = null;
+    internal GameObject currentNotification = null;
     internal int receivedRequests = 0;
     internal int sentRequests = 0;
 
     public event System.Action<FriendRequestEntry> OnFriendRequestCancelled;
     public event System.Action<FriendRequestEntry> OnFriendRequestRejected;
     public event System.Action<FriendRequestEntry> OnFriendRequestApproved;
-    public event System.Action<string> OnBlock;
-    public event System.Action<string> OnPassport;
     public event System.Action<string> OnFriendRequestSent;
 
-    public int entriesCount => friendRequestEntries.Count;
-    internal FriendRequestEntry GetEntry(string userId)
+    public override void Initialize()
     {
-        if (!friendRequestEntries.ContainsKey(userId))
-            return null;
+        base.Initialize();
 
-        return friendRequestEntries[userId];
-    }
-
-    public void Initialize()
-    {
         friendSearchInputField.onSubmit.AddListener(SendFriendRequest);
         friendSearchInputField.onValueChanged.AddListener(OnSearchInputValueChanged);
         addFriendButton.onClick.AddListener(() => friendSearchInputField.OnSubmit(null));
-
-        playerPassportButton.onClick.AddListener(OnPassportButtonPressed);
-        blockPlayerButton.onClick.AddListener(OnBlockFriendButtonPressed);
-
-        rejectRequestDialogConfirmButton.onClick.AddListener(ConfirmFriendRequestReceivedRejection);
-        cancelRequestDialogConfirmButton.onClick.AddListener(ConfirmFriendRequestSentCancellation);
-
-        rejectRequestDialogCancelButton.onClick.AddListener(CancelConfirmationDialog);
-        cancelRequestDialogCancelButton.onClick.AddListener(CancelConfirmationDialog);
     }
 
-    void OnEnable()
+    protected override void OnDisable()
     {
-        (transform as RectTransform).ForceUpdateLayout();
+        base.OnDisable();
+
+        DismissCurrentNotification();
     }
 
-    void OnDisable()
+    public void CreateOrUpdateEntry(string userId, FriendEntry.Model model, bool isReceived)
+    {
+        CreateEntry(userId);
+        UpdateEntry(userId, model, isReceived);
+    }
+
+    public override bool CreateEntry(string userId)
+    {
+        if (entries.ContainsKey(userId)) return false;
+
+        if (emptyListImage.activeSelf)
+            emptyListImage.SetActive(false);
+
+        if (!sentRequestsToggleText.transform.parent.gameObject.activeSelf)
+        {
+            receivedRequestsToggleText.transform.parent.gameObject.SetActive(true);
+            sentRequestsToggleText.transform.parent.gameObject.SetActive(true);
+        }
+
+        FriendRequestEntry entry;
+
+        entry = Instantiate(entryPrefab).GetComponent<FriendRequestEntry>();
+        entry.OnAccepted += OnFriendRequestReceivedAccepted;
+        entry.OnMenuToggle += (x) => { selectedEntry = x; ToggleMenuPanel(x); };
+        entry.OnRejected += OnFriendRequestReceivedRejected;
+        entry.OnCancelled += OnFriendRequestSentCancelled;
+        entries.Add(userId, entry);
+
+        return true;
+    }
+
+    public bool UpdateEntry(string userId, FriendsHUDListEntry.Model model, bool? isReceived = null)
+    {
+        if (!entries.ContainsKey(userId))
+            return false;
+
+        FriendRequestEntry entry = entries[userId] as FriendRequestEntry;
+        entry.Populate(userId, model, isReceived);
+
+        if (isReceived.HasValue)
+        {
+            if (isReceived.Value)
+            {
+                entry.transform.SetParent(receivedRequestsContainer);
+                receivedRequests++;
+            }
+            else
+            {
+                entry.transform.SetParent(sentRequestsContainer);
+                sentRequests++;
+            }
+
+            UpdateUsersToggleTexts();
+        }
+
+        entry.transform.localScale = Vector3.one;
+
+        entry.ToggleBlockedImage(ownUserProfile.blocked.Contains(userId));
+
+        (transform as RectTransform).ForceUpdateLayout();
+
+        return true;
+    }
+
+    public override void RemoveEntry(string userId)
+    {
+        if (!entries.ContainsKey(userId)) return;
+
+        FriendRequestEntry entry = entries[userId] as FriendRequestEntry;
+
+        if (entry.isReceived)
+            receivedRequests--;
+        else
+            sentRequests--;
+        UpdateUsersToggleTexts();
+
+        Destroy(entry.gameObject);
+        entries.Remove(userId);
+
+        if (entries.Count == 0)
+        {
+            emptyListImage.SetActive(true);
+            receivedRequestsToggleText.transform.parent.gameObject.SetActive(false);
+            sentRequestsToggleText.transform.parent.gameObject.SetActive(false);
+        }
+
+    (transform as RectTransform).ForceUpdateLayout();
+    }
+
+    void TriggerNotification(GameObject notificationGameobject)
     {
         DismissCurrentNotification();
 
-        CancelConfirmationDialog();
+        currentNotification = notificationGameobject;
 
-        requestMenuPanel.SetActive(false);
+        notificationGameobject.SetActive(true);
+        currentNotificationRoutine = CoroutineStarter.Start(WaitAndCloseCurrentNotification());
     }
 
-    public void OnPointerDown(PointerEventData eventData)
+    IEnumerator WaitAndCloseCurrentNotification()
     {
-        if (eventData.pointerPressRaycast.gameObject == null || eventData.pointerPressRaycast.gameObject.layer != PhysicsLayers.friendsHUDPlayerMenu)
-            requestMenuPanel.SetActive(false);
+        yield return WaitForSecondsCache.Get(notificationsDuration);
+
+        DismissCurrentNotification();
     }
 
-    void OnPassportButtonPressed()
+    protected void DismissCurrentNotification()
     {
-        OnPassport?.Invoke(selectedRequestEntry.userId);
+        if (currentNotification == null) return;
 
-        ToggleMenuPanel(selectedRequestEntry);
-    }
+        currentNotification.SetActive(false);
 
-    void OnBlockFriendButtonPressed()
-    {
-        OnBlock?.Invoke(selectedRequestEntry.userId);
+        if (currentNotificationRoutine == null) return;
 
-        selectedRequestEntry.ToggleBlockedImage(!selectedRequestEntry.playerBlockedImage.enabled);
-
-        ToggleMenuPanel(selectedRequestEntry);
+        StopCoroutine(currentNotificationRoutine);
+        currentNotificationRoutine = null;
     }
 
     void SendFriendRequest(string friendId)
@@ -153,103 +199,6 @@ public class FriendRequestsListView : MonoBehaviour, IPointerDownHandler
         DismissCurrentNotification();
     }
 
-    void DismissCurrentNotification()
-    {
-        if (currentNotificationRoutine == null) return;
-
-        StopCoroutine(currentNotificationRoutine);
-        currentNotificationRoutine = null;
-
-        if (currentNotification == null) return;
-
-        currentNotification.SetActive(false);
-        currentNotification = null;
-    }
-
-    void TriggerNotification(GameObject notificationGameobject)
-    {
-        DismissCurrentNotification();
-
-        currentNotification = notificationGameobject;
-
-        notificationGameobject.SetActive(true);
-        currentNotificationRoutine = CoroutineStarter.Start(WaitAndCloseCurrentNotification(notificationGameobject));
-    }
-
-    IEnumerator WaitAndCloseCurrentNotification(GameObject notificationGameobject)
-    {
-        yield return WaitForSecondsCache.Get(notificationsDuration);
-
-        currentNotificationRoutine = null;
-
-        notificationGameobject.SetActive(false);
-        currentNotification = null;
-    }
-
-    public void CreateOrUpdateEntry(string userId, FriendEntry.Model model, bool isReceived)
-    {
-        CreateEntry(userId);
-        UpdateEntry(userId, model, isReceived);
-    }
-
-    public bool CreateEntry(string userId)
-    {
-        if (friendRequestEntries.ContainsKey(userId)) return false;
-
-        if (emptyListImage.activeSelf)
-            emptyListImage.SetActive(false);
-
-        if (!sentRequestsToggleText.transform.parent.gameObject.activeSelf)
-        {
-            receivedRequestsToggleText.transform.parent.gameObject.SetActive(true);
-            sentRequestsToggleText.transform.parent.gameObject.SetActive(true);
-        }
-
-        FriendRequestEntry entry;
-
-        entry = Instantiate(friendRequestEntryPrefab).GetComponent<FriendRequestEntry>();
-        entry.OnAccepted += OnFriendRequestReceivedAccepted;
-        entry.OnMenuToggle += (x) => { selectedRequestEntry = x; ToggleMenuPanel(x); };
-        entry.OnRejected += OnFriendRequestReceivedRejected;
-        entry.OnCancelled += OnFriendRequestSentCancelled;
-        friendRequestEntries.Add(userId, entry);
-
-        return true;
-    }
-
-    public bool UpdateEntry(string userId, FriendEntry.Model model, bool? isReceived = null)
-    {
-        if (!friendRequestEntries.ContainsKey(userId))
-            return false;
-
-        var entry = friendRequestEntries[userId];
-        entry.Populate(userId, model, isReceived);
-
-        if (isReceived.HasValue)
-        {
-            if (isReceived.Value)
-            {
-                entry.transform.SetParent(receivedRequestsContainer);
-                receivedRequests++;
-            }
-            else
-            {
-                entry.transform.SetParent(sentRequestsContainer);
-                sentRequests++;
-            }
-
-            UpdateUsersToggleTexts();
-        }
-
-        entry.transform.localScale = Vector3.one;
-
-        entry.ToggleBlockedImage(ownUserProfile.blocked.Contains(userId));
-
-        (transform as RectTransform).ForceUpdateLayout();
-
-        return true;
-    }
-
     void OnFriendRequestReceivedAccepted(FriendRequestEntry requestEntry)
     {
         // Add placeholder friend to avoid affecting UX by roundtrip with kernel
@@ -270,81 +219,33 @@ public class FriendRequestsListView : MonoBehaviour, IPointerDownHandler
 
     void OnFriendRequestReceivedRejected(FriendRequestEntry requestEntry)
     {
-        selectedRequestEntry = requestEntry;
+        selectedEntry = requestEntry;
 
-        rejectRequestDialogText.text = $"Are you sure you want to reject {requestEntry.model.userName} friend request?";
-        rejectRequestDialog.SetActive(true);
+        TriggerDialog($"Are you sure you want to reject {requestEntry.model.userName} friend request?", ConfirmFriendRequestReceivedRejection);
     }
 
     void ConfirmFriendRequestReceivedRejection()
     {
-        if (selectedRequestEntry == null) return;
+        if (selectedEntry == null) return;
 
-        rejectRequestDialog.SetActive(false);
-        RemoveEntry(selectedRequestEntry.userId);
-        OnFriendRequestRejected?.Invoke(selectedRequestEntry);
-        selectedRequestEntry = null;
+        RemoveEntry(selectedEntry.userId);
+        OnFriendRequestRejected?.Invoke(selectedEntry as FriendRequestEntry);
     }
 
     void OnFriendRequestSentCancelled(FriendRequestEntry requestEntry)
     {
-        selectedRequestEntry = requestEntry;
+        selectedEntry = requestEntry;
 
-        cancelRequestDialogText.text = $"Are you sure you want to cancel {requestEntry.model.userName} friend request?";
-        cancelRequestDialog.SetActive(true);
+        TriggerDialog($"Are you sure you want to cancel {requestEntry.model.userName} friend request?", ConfirmFriendRequestSentCancellation);
     }
 
     void ConfirmFriendRequestSentCancellation()
     {
-        if (selectedRequestEntry == null) return;
+        if (selectedEntry == null) return;
 
-        cancelRequestDialog.SetActive(false);
-        RemoveEntry(selectedRequestEntry.userId);
-        OnFriendRequestCancelled?.Invoke(selectedRequestEntry);
-        selectedRequestEntry = null;
+        RemoveEntry(selectedEntry.userId);
+        OnFriendRequestCancelled?.Invoke(selectedEntry as FriendRequestEntry);
     }
-
-    void CancelConfirmationDialog()
-    {
-        selectedRequestEntry = null;
-        cancelRequestDialog.SetActive(false);
-        rejectRequestDialog.SetActive(false);
-    }
-
-    void ToggleMenuPanel(FriendRequestEntry entry)
-    {
-        requestMenuPanel.transform.position = entry.menuPositionReference.position;
-
-        requestMenuPanel.SetActive(selectedRequestEntry == entry ? !requestMenuPanel.activeSelf : true);
-
-        if (requestMenuPanel.activeSelf)
-            blockPlayerButtonText.text = ownUserProfile.blocked.Contains(entry.userId) ? BLOCK_BTN_UNBLOCK_TEXT : BLOCK_BTN_BLOCK_TEXT;
-    }
-
-    public void RemoveEntry(string userId)
-    {
-        if (!friendRequestEntries.ContainsKey(userId)) return;
-
-        var entry = friendRequestEntries[userId];
-
-        if (entry.isReceived)
-            receivedRequests--;
-        else
-            sentRequests--;
-        UpdateUsersToggleTexts();
-
-        Destroy(entry.gameObject);
-        friendRequestEntries.Remove(userId);
-
-        if (friendRequestEntries.Count == 0)
-        {
-            receivedRequestsToggleText.transform.parent.gameObject.SetActive(false);
-            sentRequestsToggleText.transform.parent.gameObject.SetActive(false);
-        }
-
-        (transform as RectTransform).ForceUpdateLayout();
-    }
-
 
     void UpdateUsersToggleTexts()
     {

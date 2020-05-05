@@ -127,8 +127,8 @@ public class FriendsHUDViewShould : TestsBase
     {
         var entry = CreateFriendEntry("userId-1", "Pravus");
         entry.menuButton.onClick.Invoke();
-        Assert.IsTrue(view.friendsList.friendMenuPanel.activeSelf);
-        Assert.AreEqual(entry, view.friendsList.selectedFriendEntry);
+        Assert.IsTrue(view.friendsList.contextMenuPanel.activeSelf);
+        Assert.AreEqual(entry, view.friendsList.selectedEntry);
     }
 
     [Test]
@@ -138,11 +138,11 @@ public class FriendsHUDViewShould : TestsBase
         var entry = CreateFriendEntry(id1, "Ted Bundy");
 
         entry.menuButton.onClick.Invoke();
-        Assert.IsTrue(view.friendsList.deleteFriendButton.gameObject.activeSelf);
-        Assert.IsTrue(view.friendsList.deleteFriendButton.isActiveAndEnabled);
+        Assert.IsTrue(view.friendsList.contextMenuDeleteButton.gameObject.activeSelf);
+        Assert.IsTrue(view.friendsList.contextMenuDeleteButton.isActiveAndEnabled);
 
-        view.friendsList.deleteFriendButton.onClick.Invoke();
-        view.friendsList.deleteFriendDialogConfirmButton.onClick.Invoke();
+        view.friendsList.contextMenuDeleteButton.onClick.Invoke();
+        view.friendsList.confirmationDialogConfirmButton.onClick.Invoke();
 
         Assert.IsNull(view.friendsList.GetEntry(id1));
     }
@@ -155,11 +155,11 @@ public class FriendsHUDViewShould : TestsBase
 
         entry.rejectButton.onClick.Invoke();
 
-        Assert.IsTrue(view.friendRequestsList.rejectRequestDialog.activeSelf);
+        Assert.IsTrue(view.friendRequestsList.confirmationDialog.activeSelf);
 
-        view.friendRequestsList.rejectRequestDialogConfirmButton.onClick.Invoke();
+        view.friendRequestsList.confirmationDialogConfirmButton.onClick.Invoke();
 
-        Assert.IsFalse(view.friendRequestsList.rejectRequestDialog.activeSelf);
+        Assert.IsFalse(view.friendRequestsList.confirmationDialog.activeSelf);
         Assert.IsNull(view.friendRequestsList.GetEntry(entry.userId));
 
         //NOTE(Brian): Deny cancellation
@@ -167,11 +167,11 @@ public class FriendsHUDViewShould : TestsBase
 
         entry2.rejectButton.onClick.Invoke();
 
-        Assert.IsTrue(view.friendRequestsList.rejectRequestDialog.activeSelf);
+        Assert.IsTrue(view.friendRequestsList.confirmationDialog.activeSelf);
 
-        view.friendRequestsList.rejectRequestDialogCancelButton.onClick.Invoke();
+        view.friendRequestsList.confirmationDialogCancelButton.onClick.Invoke();
 
-        Assert.IsFalse(view.friendRequestsList.rejectRequestDialog.activeSelf);
+        Assert.IsFalse(view.friendRequestsList.confirmationDialog.activeSelf);
         Assert.IsNotNull(view.friendRequestsList.GetEntry(entry2.userId));
     }
 
@@ -183,11 +183,11 @@ public class FriendsHUDViewShould : TestsBase
 
         entry.cancelButton.onClick.Invoke();
 
-        Assert.IsTrue(view.friendRequestsList.cancelRequestDialog.activeSelf);
+        Assert.IsTrue(view.friendRequestsList.confirmationDialog.activeSelf);
 
-        view.friendRequestsList.cancelRequestDialogConfirmButton.onClick.Invoke();
+        view.friendRequestsList.confirmationDialogConfirmButton.onClick.Invoke();
 
-        Assert.IsFalse(view.friendRequestsList.cancelRequestDialog.activeSelf);
+        Assert.IsFalse(view.friendRequestsList.confirmationDialog.activeSelf);
         Assert.IsNull(view.friendRequestsList.GetEntry(entry.userId));
 
         //NOTE(Brian): Deny cancellation
@@ -195,11 +195,11 @@ public class FriendsHUDViewShould : TestsBase
 
         entry2.cancelButton.onClick.Invoke();
 
-        Assert.IsTrue(view.friendRequestsList.cancelRequestDialog.activeSelf);
+        Assert.IsTrue(view.friendRequestsList.confirmationDialog.activeSelf);
 
-        view.friendRequestsList.cancelRequestDialogCancelButton.onClick.Invoke();
+        view.friendRequestsList.confirmationDialogCancelButton.onClick.Invoke();
 
-        Assert.IsFalse(view.friendRequestsList.cancelRequestDialog.activeSelf);
+        Assert.IsFalse(view.friendRequestsList.confirmationDialog.activeSelf);
         Assert.IsNotNull(view.friendRequestsList.GetEntry(entry2.userId));
     }
 
@@ -213,7 +213,7 @@ public class FriendsHUDViewShould : TestsBase
 
         controller.view.friendsList.CreateOrUpdateEntry(id, model1);
 
-        return controller.view.friendsList.GetEntry(id);
+        return controller.view.friendsList.GetEntry(id) as FriendEntry;
     }
 
     FriendRequestEntry CreateFriendRequestEntry(string id, string name, bool isReceived)
@@ -225,7 +225,7 @@ public class FriendsHUDViewShould : TestsBase
 
         controller.view.friendRequestsList.CreateOrUpdateEntry(id, model1, isReceived);
 
-        return controller.view.friendRequestsList.GetEntry(id);
+        return controller.view.friendRequestsList.GetEntry(id) as FriendRequestEntry;
     }
 
 }

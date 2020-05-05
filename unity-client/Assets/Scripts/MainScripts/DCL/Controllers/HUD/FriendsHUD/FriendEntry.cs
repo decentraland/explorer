@@ -3,55 +3,19 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public interface IFriendEntry
+public class FriendEntry : FriendsHUDListEntry
 {
-    FriendEntry.Model model { get; }
-}
-
-public class FriendEntry : MonoBehaviour, IFriendEntry, IPointerEnterHandler, IPointerExitHandler
-{
-    public Model model { get; private set; } = new Model();
-    public string userId { get; private set; }
-    public Image playerBlockedImage;
-    public Transform menuPositionReference;
-
-    public event System.Action<FriendEntry> OnMenuToggle;
     public event System.Action<FriendEntry> OnJumpInClick;
     public event System.Action<FriendEntry> OnWhisperClick;
 
-    [SerializeField] internal TextMeshProUGUI playerNameText;
     [SerializeField] internal TextMeshProUGUI playerLocationText;
-    [SerializeField] internal Image playerImage;
     [SerializeField] internal Button jumpInButton;
     [SerializeField] internal Button whisperButton;
-    [SerializeField] internal Button menuButton;
-    [SerializeField] internal Image backgroundImage;
     [SerializeField] internal GameObject whisperLabel;
-    [SerializeField] internal Sprite hoveredBackgroundSprite;
 
-    internal Sprite unhoveredBackgroundSprite;
-
-    public class Model
+    protected override void Awake()
     {
-        public FriendsController.PresenceStatus status;
-        public string userName;
-        public Vector2 coords;
-        public string realm;
-        public Sprite avatarImage;
-
-        public event System.Action<Sprite> OnSpriteUpdateEvent;
-        public void OnSpriteUpdate(Sprite sprite)
-        {
-            OnSpriteUpdateEvent?.Invoke(sprite);
-        }
-    }
-
-    void Awake()
-    {
-        unhoveredBackgroundSprite = backgroundImage.sprite;
-
-        menuButton.onClick.RemoveAllListeners();
-        menuButton.onClick.AddListener(() => OnMenuToggle?.Invoke(this));
+        base.Awake();
 
         jumpInButton.onClick.RemoveAllListeners();
         jumpInButton.onClick.AddListener(() => OnJumpInClick?.Invoke(this));
@@ -60,54 +24,32 @@ public class FriendEntry : MonoBehaviour, IFriendEntry, IPointerEnterHandler, IP
         whisperButton.onClick.AddListener(() => OnWhisperClick?.Invoke(this));
     }
 
-    public void OnPointerEnter(PointerEventData eventData)
+    public override void OnPointerEnter(PointerEventData eventData)
     {
-        backgroundImage.sprite = hoveredBackgroundSprite;
-        menuButton.gameObject.SetActive(true);
+        base.OnPointerEnter(eventData);
+
         whisperLabel.SetActive(true);
     }
 
-    public void OnPointerExit(PointerEventData eventData)
+    public override void OnPointerExit(PointerEventData eventData)
     {
-        backgroundImage.sprite = unhoveredBackgroundSprite;
-        menuButton.gameObject.SetActive(false);
+        base.OnPointerExit(eventData);
+
         whisperLabel.SetActive(false);
     }
 
-    void OnDisable()
+    public override void Populate(string userId, Model model)
     {
-        OnPointerExit(null);
-    }
-
-    public void Populate(string userId, Model model)
-    {
-        this.model = model;
-        this.userId = userId;
-
-        playerNameText.text = model.userName;
+        base.Populate(userId, model);
 
         if (model.status == FriendsController.PresenceStatus.ONLINE || model.status == FriendsController.PresenceStatus.UNAVAILABLE)
             playerLocationText.text = $"{model.realm} {model.coords.x}, {model.coords.y}";
         else
             playerLocationText.text = $"";
-
-        model.OnSpriteUpdateEvent -= OnAvatarImageChange;
-        model.OnSpriteUpdateEvent += OnAvatarImageChange;
-        playerImage.sprite = model.avatarImage;
-    }
-
-    void OnDestroy()
-    {
-        model.OnSpriteUpdateEvent -= OnAvatarImageChange;
     }
 
     private void OnAvatarImageChange(Sprite sprite)
     {
         playerImage.sprite = sprite;
-    }
-
-    public void ToggleBlockedImage(bool targetState)
-    {
-        playerBlockedImage.enabled = targetState;
     }
 }

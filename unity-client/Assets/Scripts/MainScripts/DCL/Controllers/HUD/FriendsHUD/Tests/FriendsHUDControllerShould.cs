@@ -119,7 +119,7 @@ public class FriendsHUDControllerShould : TestsBase
         WebInterface.OnMessageFromEngine += callback;
 
         entry.menuButton.onClick.Invoke();
-        controller.view.friendsList.reportFriendButton.onClick.Invoke();
+        controller.view.friendsList.contextMenuReportButton.onClick.Invoke();
 
         Assert.IsTrue(reportPlayerSent);
 
@@ -137,7 +137,7 @@ public class FriendsHUDControllerShould : TestsBase
         entry.menuButton.onClick.Invoke();
         Assert.AreNotEqual(currentPlayerId.Get(), id);
 
-        view.friendsList.friendPassportButton.onClick.Invoke();
+        view.friendsList.contextMenuPassportButton.onClick.Invoke();
 
         Assert.AreEqual(currentPlayerId.Get(), id);
     }
@@ -183,7 +183,7 @@ public class FriendsHUDControllerShould : TestsBase
         Assert.IsNotNull(entry);
 
         friendsController.RaiseUpdateFriendship(id, FriendsController.FriendshipAction.DELETED);
-        entry = controller.view.friendsList.GetEntry(id);
+        entry = controller.view.friendsList.GetEntry(id) as FriendEntry;
         Assert.IsNull(entry);
     }
 
@@ -230,6 +230,6 @@ public class FriendsHUDControllerShould : TestsBase
 
         UserProfileController.i.AddUserProfileToCatalog(model);
         friendsController.RaiseUpdateFriendship(id, FriendsController.FriendshipAction.APPROVED);
-        return view.friendsList.GetEntry(id);
+        return view.friendsList.GetEntry(id) as FriendEntry;
     }
 }
