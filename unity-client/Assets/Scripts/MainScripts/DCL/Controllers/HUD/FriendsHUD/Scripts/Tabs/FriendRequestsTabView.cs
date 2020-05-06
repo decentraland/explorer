@@ -1,4 +1,4 @@
-using DCL.Helpers;
+﻿using DCL.Helpers;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -20,8 +20,8 @@ public class FriendRequestsTabView : FriendsTabViewBase
     internal int receivedRequests = 0;
     internal int sentRequests = 0;
 
-    public event System.Action<FriendRequestEntry> OnFriendRequestCancelled;
-    public event System.Action<FriendRequestEntry> OnFriendRequestRejected;
+    public event System.Action<FriendRequestEntry> OnCancelConfirmation;
+    public event System.Action<FriendRequestEntry> OnRejectConfirmation;
     public event System.Action<FriendRequestEntry> OnFriendRequestApproved;
     public event System.Action<string> OnFriendRequestSent;
 
@@ -73,9 +73,10 @@ public class FriendRequestsTabView : FriendsTabViewBase
 
         entry = Instantiate(entryPrefab).GetComponent<FriendRequestEntry>();
         entry.OnAccepted += OnFriendRequestReceivedAccepted;
-        entry.OnMenuToggle += (x) => { selectedEntry = x; ToggleMenuPanel(x); };
-        entry.OnRejected += OnFriendRequestReceivedRejected;
-        entry.OnCancelled += OnFriendRequestSentCancelled;
+        entry.OnMenuToggle += (x) => { contextMenuPanel.Toggle(x); };
+        entry.OnRejected += OnEntryRejectButtonPressed;
+        entry.OnCancelled += OnEntryCancelButtonPressed;
+
         entries.Add(userId, entry);
 
         return true;
@@ -191,34 +192,24 @@ public class FriendRequestsTabView : FriendsTabViewBase
         OnFriendRequestApproved?.Invoke(requestEntry);
     }
 
-    void OnFriendRequestReceivedRejected(FriendRequestEntry requestEntry)
+    void OnEntryRejectButtonPressed(FriendRequestEntry requestEntry)
     {
-        selectedEntry = requestEntry;
-
-        TriggerDialog($"Are you sure you want to reject {requestEntry.model.userName} friend request?", ConfirmFriendRequestReceivedRejection);
+        confirmationDialog.SetText($"Are you sure you want to reject {requestEntry.model.userName} friend request?");
+        confirmationDialog.Show(() =>
+        {
+            RemoveEntry(requestEntry.userId);
+            OnRejectConfirmation?.Invoke(requestEntry as FriendRequestEntry);
+        });
     }
 
-    void ConfirmFriendRequestReceivedRejection()
+    void OnEntryCancelButtonPressed(FriendRequestEntry requestEntry)
     {
-        if (selectedEntry == null) return;
-
-        RemoveEntry(selectedEntry.userId);
-        OnFriendRequestRejected?.Invoke(selectedEntry as FriendRequestEntry);
-    }
-
-    void OnFriendRequestSentCancelled(FriendRequestEntry requestEntry)
-    {
-        selectedEntry = requestEntry;
-
-        TriggerDialog($"Are you sure you want to cancel {requestEntry.model.userName} friend request?", ConfirmFriendRequestSentCancellation);
-    }
-
-    void ConfirmFriendRequestSentCancellation()
-    {
-        if (selectedEntry == null) return;
-
-        RemoveEntry(selectedEntry.userId);
-        OnFriendRequestCancelled?.Invoke(selectedEntry as FriendRequestEntry);
+        confirmationDialog.SetText($"Are you sure you want to cancel {requestEntry.model.userName} friend request?");
+        confirmationDialog.Show(() =>
+        {
+            RemoveEntry(requestEntry.userId);
+            OnCancelConfirmation?.Invoke(requestEntry as FriendRequestEntry);
+        });
     }
 
     void UpdateUsersToggleTexts()

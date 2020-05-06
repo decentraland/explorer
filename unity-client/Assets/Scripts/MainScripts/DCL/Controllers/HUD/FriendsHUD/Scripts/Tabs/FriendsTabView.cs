@@ -14,7 +14,7 @@ public class FriendsTabView : FriendsTabViewBase
 
     public event System.Action<FriendEntry> OnJumpIn;
     public event System.Action<FriendEntry> OnWhisper;
-
+    public event System.Action<FriendEntry> OnDeleteConfirmation;
     public override bool CreateEntry(string userId)
     {
         if (entries.ContainsKey(userId)) return false;
@@ -31,7 +31,7 @@ public class FriendsTabView : FriendsTabViewBase
         var entry = Instantiate(entryPrefab).GetComponent<FriendEntry>();
         entries.Add(userId, entry);
 
-        entry.OnMenuToggle += (x) => { selectedEntry = x; ToggleMenuPanel(x); };
+        entry.OnMenuToggle += (x) => { contextMenuPanel.Toggle(x); };
         entry.OnJumpInClick += (x) => OnJumpIn?.Invoke(x);
         entry.OnWhisperClick += (x) => OnWhisper?.Invoke(x);
 
@@ -108,22 +108,16 @@ public class FriendsTabView : FriendsTabViewBase
         offlineFriendsToggleText.text = $"OFFLINE ({offlineFriends})";
     }
 
-    protected override void OnDeleteUserButtonPressed()
+    protected override void OnPressDeleteButton(FriendEntryBase entry)
     {
-        base.OnDeleteUserButtonPressed();
+        if (entry == null) return;
 
-        if (selectedEntry == null) return;
-
-        TriggerDialog($"Are you sure you want to delete {selectedEntry.model.userName} as a friend?", ConfirmFriendDelete);
-    }
-
-    void ConfirmFriendDelete()
-    {
-        if (selectedEntry == null) return;
-
-        RemoveEntry(selectedEntry.userId);
-
-        OnDelete?.Invoke(selectedEntry);
+        confirmationDialog.SetText($"Are you sure you want to delete {entry.model.userName} as a friend?");
+        confirmationDialog.Show(() =>
+        {
+            RemoveEntry(entry.userId);
+            OnDeleteConfirmation?.Invoke(entry as FriendEntry);
+        });
     }
 
     [ContextMenu("AddFakeOnlineFriend")]

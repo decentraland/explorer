@@ -31,7 +31,8 @@ public class FriendRequestEntryShould : TestsBase
         var model1 = new FriendEntry.Model() { userName = "test1", avatarImage = testSprite1 };
         var model2 = new FriendEntry.Model() { userName = "test2", avatarImage = testSprite2 };
 
-        entry.Populate("userId1", model1, isReceived: true);
+        entry.userId = "userId1";
+        entry.Populate(model1, isReceived: true);
 
         Assert.AreEqual(model1.userName, entry.playerNameText.text);
         Assert.AreEqual(model1.avatarImage, entry.playerImage.sprite);
@@ -40,7 +41,8 @@ public class FriendRequestEntryShould : TestsBase
         Assert.IsTrue(entry.acceptButton.gameObject.activeSelf);
         Assert.IsTrue(entry.rejectButton.gameObject.activeSelf);
 
-        entry.Populate("userId2", model2, isReceived: false);
+        entry.userId = "userId2";
+        entry.Populate(model2, isReceived: false);
 
         Assert.AreEqual(model2.userName, entry.playerNameText.text);
         Assert.AreEqual(model2.avatarImage, entry.playerImage.sprite);
@@ -58,7 +60,9 @@ public class FriendRequestEntryShould : TestsBase
     public void SendProperEventWhenOnAcceptedIsPressed()
     {
         var model = new FriendEntry.Model() { };
-        entry.Populate("userId-1", model);
+        entry.userId = "userId-1";
+        entry.Populate(model);
+
         bool buttonPressed = false;
         entry.OnAccepted += (x) => { if (x == entry) buttonPressed = true; };
         entry.acceptButton.onClick.Invoke();
@@ -69,7 +73,8 @@ public class FriendRequestEntryShould : TestsBase
     public void SendProperEventWhenOnCancelledIsPressed()
     {
         var model = new FriendEntry.Model() { };
-        entry.Populate("userId-1", model);
+        entry.userId = "userId-1";
+        entry.Populate(model);
         bool buttonPressed = false;
         entry.OnCancelled += (x) => { if (x == entry) buttonPressed = true; };
         entry.cancelButton.onClick.Invoke();
@@ -80,7 +85,8 @@ public class FriendRequestEntryShould : TestsBase
     public void SendProperEventWhenOnMenuToggleIsPressed()
     {
         var model = new FriendEntry.Model() { };
-        entry.Populate("userId-1", model);
+        entry.userId = "userId-1";
+        entry.Populate(model);
         bool buttonPressed = false;
         entry.OnMenuToggle += (x) => { if (x == entry) buttonPressed = true; };
         entry.menuButton.onClick.Invoke();
@@ -91,7 +97,8 @@ public class FriendRequestEntryShould : TestsBase
     public void SendProperEventWhenOnRejectedIsPressed()
     {
         var model = new FriendEntry.Model() { };
-        entry.Populate("userId-1", model);
+        entry.userId = "userId-1";
+        entry.Populate(model);
         bool buttonPressed = false;
         entry.OnRejected += (x) => { if (x == entry) buttonPressed = true; };
         entry.rejectButton.onClick.Invoke();

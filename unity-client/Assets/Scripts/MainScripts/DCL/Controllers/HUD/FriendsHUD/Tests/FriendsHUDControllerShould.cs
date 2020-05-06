@@ -119,7 +119,7 @@ public class FriendsHUDControllerShould : TestsBase
         WebInterface.OnMessageFromEngine += callback;
 
         entry.menuButton.onClick.Invoke();
-        controller.view.friendsList.contextMenuReportButton.onClick.Invoke();
+        controller.view.friendsList.contextMenuPanel.reportButton.onClick.Invoke();
 
         Assert.IsTrue(reportPlayerSent);
 
@@ -137,7 +137,7 @@ public class FriendsHUDControllerShould : TestsBase
         entry.menuButton.onClick.Invoke();
         Assert.AreNotEqual(currentPlayerId.Get(), id);
 
-        view.friendsList.contextMenuPassportButton.onClick.Invoke();
+        view.friendsList.contextMenuPanel.passportButton.onClick.Invoke();
 
         Assert.AreEqual(currentPlayerId.Get(), id);
     }

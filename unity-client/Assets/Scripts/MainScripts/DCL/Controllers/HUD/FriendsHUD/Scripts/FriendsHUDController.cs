@@ -28,18 +28,19 @@ public class FriendsHUDController : IHUD
         }
 
         view.friendRequestsList.OnFriendRequestApproved += Entry_OnRequestAccepted;
-        view.friendRequestsList.OnFriendRequestCancelled += Entry_OnRequestCancelled;
-        view.friendRequestsList.OnFriendRequestRejected += Entry_OnRequestRejected;
+        view.friendRequestsList.OnCancelConfirmation += Entry_OnRequestCancelled;
+        view.friendRequestsList.OnRejectConfirmation += Entry_OnRequestRejected;
         view.friendRequestsList.OnFriendRequestSent += Entry_OnRequestSent;
-        view.friendRequestsList.OnBlock += Entry_OnBlock;
-        view.friendRequestsList.OnPassport += Entry_OnPassport;
+        view.friendRequestsList.contextMenuPanel.OnBlock += Entry_OnBlock;
+        view.friendRequestsList.contextMenuPanel.OnPassport += Entry_OnPassport;
 
         view.friendsList.OnJumpIn += Entry_OnJumpIn;
         view.friendsList.OnWhisper += Entry_OnWhisper;
-        view.friendsList.OnBlock += Entry_OnBlock;
-        view.friendsList.OnDelete += Entry_OnDelete;
-        view.friendsList.OnPassport += Entry_OnPassport;
-        view.friendsList.OnReport += Entry_OnReport;
+        view.friendsList.contextMenuPanel.OnBlock += Entry_OnBlock;
+        view.friendsList.contextMenuPanel.OnPassport += Entry_OnPassport;
+        view.friendsList.contextMenuPanel.OnReport += Entry_OnReport;
+
+        view.friendsList.OnDeleteConfirmation += Entry_OnDelete;
 
         toggleTrigger = Resources.Load<InputAction_Trigger>("ToggleFriends");
         toggleTrigger.OnTriggered += OnHotkeyPress;
@@ -165,20 +166,20 @@ public class FriendsHUDController : IHUD
         OnPressWhisper?.Invoke(entry.model.userName);
     }
 
-    private void Entry_OnReport(string userId)
+    private void Entry_OnReport(FriendEntryBase entry)
     {
-        WebInterface.SendReportPlayer(userId);
+        WebInterface.SendReportPlayer(entry.userId);
     }
 
-    private void Entry_OnPassport(string userId)
+    private void Entry_OnPassport(FriendEntryBase entry)
     {
         var currentPlayerId = Resources.Load<StringVariable>(CURRENT_PLAYER_ID);
-        currentPlayerId.Set(userId);
+        currentPlayerId.Set(entry.userId);
     }
 
-    private void Entry_OnBlock(string userId)
+    private void Entry_OnBlock(FriendEntryBase entry)
     {
-        WebInterface.SendBlockPlayer(userId);
+        WebInterface.SendBlockPlayer(entry.userId);
     }
 
     private void Entry_OnJumpIn(FriendEntry entry)
