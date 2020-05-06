@@ -62,6 +62,7 @@ export type EntityActionType =
   | 'ComponentUpdated'
   | 'Query'
   | 'InitMessagesFinished'
+  | 'OpenExternalUrl'
 
 export type QueryPayload = { queryId: string; payload: RayQuery }
 
