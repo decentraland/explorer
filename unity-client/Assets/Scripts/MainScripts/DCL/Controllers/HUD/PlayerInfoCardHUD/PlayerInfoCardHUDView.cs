@@ -51,6 +51,8 @@ public class PlayerInfoCardHUDView : MonoBehaviour
     [Header("Trade")]
     [SerializeField]
     private RectTransform wearablesContainer;
+    [SerializeField]
+    private GameObject emptyCollectiblesImage;
 
     [Header("Block")]
     [SerializeField]
@@ -167,6 +169,8 @@ public class PlayerInfoCardHUDView : MonoBehaviour
             playerInfoCollectibles.Add(playerInfoCollectible);
             playerInfoCollectible.Initialize(collectible);
         }
+
+        emptyCollectiblesImage.SetActive(collectiblesIds.Length == 0);
 
         SetIsBlocked(IsBlocked(userProfile.userId));
 
