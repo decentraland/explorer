@@ -1,10 +1,52 @@
 using DCL.Helpers;
 using System.Collections.Generic;
 using System.Linq;
+using TMPro;
 using UnityEngine;
 
 public class FriendsTabViewBase : MonoBehaviour
 {
+    [System.Serializable]
+    public class EntryList
+    {
+        public string toggleTextPrefix;
+        public TextMeshProUGUI toggleText;
+        public Transform container;
+        private Dictionary<string, FriendEntryBase> entries = new Dictionary<string, FriendEntryBase>();
+
+        public int GetCount()
+        {
+            return entries.Count;
+        }
+
+        public void Add(string userId, FriendEntryBase entry)
+        {
+            if (entries.ContainsKey(userId))
+                return;
+
+            entries.Add(userId, entry);
+            entry.transform.SetParent(container);
+            toggleText.text = $"{toggleTextPrefix} ({GetCount()})";
+            container.gameObject.SetActive(true);
+        }
+
+        public FriendEntryBase Remove(string userId)
+        {
+            if (!entries.ContainsKey(userId))
+                return null;
+
+            var entry = entries[userId];
+
+            entries.Remove(userId);
+            toggleText.text = $"{toggleTextPrefix} ({GetCount()})";
+
+            if (GetCount() == 0)
+                container.gameObject.SetActive(false);
+
+            return entry;
+        }
+    }
+
     [SerializeField] protected GameObject entryPrefab;
     [SerializeField] protected GameObject emptyListImage;
 
@@ -72,8 +114,8 @@ public class FriendsTabViewBase : MonoBehaviour
 
     public virtual void CreateOrUpdateEntry(string userId, FriendEntryBase.Model model)
     {
-        bool firstUpdate = CreateEntry(userId);
-        UpdateEntry(userId, model, firstUpdate);
+        CreateEntry(userId);
+        UpdateEntry(userId, model);
     }
 
     public virtual bool CreateEntry(string userId)
@@ -91,7 +133,7 @@ public class FriendsTabViewBase : MonoBehaviour
         return true;
     }
 
-    public virtual bool UpdateEntry(string userId, FriendEntryBase.Model model, bool firstUpdate = false)
+    public virtual bool UpdateEntry(string userId, FriendEntryBase.Model model)
     {
         if (!entries.ContainsKey(userId)) return false;
 
@@ -101,7 +143,6 @@ public class FriendsTabViewBase : MonoBehaviour
         entry.userId = userId;
 
         rectTransform.ForceUpdateLayout();
-
         return true;
     }
 
@@ -117,6 +158,12 @@ public class FriendsTabViewBase : MonoBehaviour
         if (entries.Count == 0)
             emptyListImage.SetActive(true);
 
+        UpdateToggleTexts();
+
         rectTransform.ForceUpdateLayout();
+    }
+
+    protected virtual void UpdateToggleTexts()
+    {
     }
 }

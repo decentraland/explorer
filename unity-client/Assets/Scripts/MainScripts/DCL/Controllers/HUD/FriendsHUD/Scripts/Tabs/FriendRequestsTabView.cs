@@ -1,24 +1,18 @@
-﻿using DCL.Helpers;
-using TMPro;
+﻿using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 public class FriendRequestsTabView : FriendsTabViewBase
 {
-    [SerializeField] internal Transform receivedRequestsContainer;
-    [SerializeField] internal Transform sentRequestsContainer;
+    [SerializeField] internal EntryList receivedRequestsList = new EntryList();
+    [SerializeField] internal EntryList sentRequestsList = new EntryList();
 
     [SerializeField] internal TMP_InputField friendSearchInputField;
     [SerializeField] internal Button addFriendButton;
-    [SerializeField] internal TextMeshProUGUI receivedRequestsToggleText;
-    [SerializeField] internal TextMeshProUGUI sentRequestsToggleText;
 
     [Header("Notifications")]
     [SerializeField] internal Notification requestSentNotification;
     [SerializeField] internal Notification friendSearchFailedNotification;
     [SerializeField] internal Notification acceptedFriendNotification;
-
-    internal int receivedRequests = 0;
-    internal int sentRequests = 0;
 
     public event System.Action<FriendRequestEntry> OnCancelConfirmation;
     public event System.Action<FriendRequestEntry> OnRejectConfirmation;
@@ -28,6 +22,9 @@ public class FriendRequestsTabView : FriendsTabViewBase
     public override void Initialize(FriendsHUDView owner)
     {
         base.Initialize(owner);
+
+        receivedRequestsList.toggleTextPrefix = "RECEIVED";
+        sentRequestsList.toggleTextPrefix = "SENT";
 
         requestSentNotification.model.timer = owner.notificationsDuration;
         requestSentNotification.model.groupID = FriendsHUDView.NOTIFICATIONS_ID;
@@ -58,20 +55,10 @@ public class FriendRequestsTabView : FriendsTabViewBase
 
     public override bool CreateEntry(string userId)
     {
-        if (entries.ContainsKey(userId)) return false;
+        if (!base.CreateEntry(userId)) return false;
 
-        if (emptyListImage.activeSelf)
-            emptyListImage.SetActive(false);
+        FriendRequestEntry entry = GetEntry(userId) as FriendRequestEntry;
 
-        if (!sentRequestsToggleText.transform.parent.gameObject.activeSelf)
-        {
-            receivedRequestsToggleText.transform.parent.gameObject.SetActive(true);
-            sentRequestsToggleText.transform.parent.gameObject.SetActive(true);
-        }
-
-        FriendRequestEntry entry;
-
-        entry = Instantiate(entryPrefab).GetComponent<FriendRequestEntry>();
         entry.OnAccepted += OnFriendRequestReceivedAccepted;
         entry.OnMenuToggle += (x) => { contextMenuPanel.Toggle(x); };
         entry.OnRejected += OnEntryRejectButtonPressed;
@@ -84,59 +71,20 @@ public class FriendRequestsTabView : FriendsTabViewBase
 
     public bool UpdateEntry(string userId, FriendEntryBase.Model model, bool? isReceived = null)
     {
-        if (!entries.ContainsKey(userId))
+        if (!base.UpdateEntry(userId, model))
             return false;
 
         FriendRequestEntry entry = entries[userId] as FriendRequestEntry;
-        entry.userId = userId;
-        entry.Populate(model, isReceived);
 
         if (isReceived.HasValue)
         {
             if (isReceived.Value)
-            {
-                entry.transform.SetParent(receivedRequestsContainer);
-                receivedRequests++;
-            }
+                receivedRequestsList.Add(userId, entry);
             else
-            {
-                entry.transform.SetParent(sentRequestsContainer);
-                sentRequests++;
-            }
-
-            UpdateUsersToggleTexts();
+                sentRequestsList.Add(userId, entry);
         }
-
-        entry.transform.localScale = Vector3.one;
-        rectTransform.ForceUpdateLayout();
 
         return true;
-    }
-
-    public override void RemoveEntry(string userId)
-    {
-        if (!entries.ContainsKey(userId)) return;
-
-        FriendRequestEntry entry = entries[userId] as FriendRequestEntry;
-
-        if (entry.isReceived)
-            receivedRequests--;
-        else
-            sentRequests--;
-
-        UpdateUsersToggleTexts();
-
-        Destroy(entry.gameObject);
-        entries.Remove(userId);
-
-        if (entries.Count == 0)
-        {
-            emptyListImage.SetActive(true);
-            receivedRequestsToggleText.transform.parent.gameObject.SetActive(false);
-            sentRequestsToggleText.transform.parent.gameObject.SetActive(false);
-        }
-
-        rectTransform.ForceUpdateLayout();
     }
 
     void SendFriendRequest(string friendId)
@@ -212,11 +160,18 @@ public class FriendRequestsTabView : FriendsTabViewBase
         });
     }
 
-    void UpdateUsersToggleTexts()
+    protected override void UpdateToggleTexts()
     {
-        receivedRequestsToggleText.text = $"RECEIVED ({receivedRequests})";
-        sentRequestsToggleText.text = $"SENT ({sentRequests})";
+        if (entries.Count == 0)
+        {
+            emptyListImage.SetActive(true);
+        }
+        else
+        {
+            emptyListImage.SetActive(false);
+        }
     }
+
 
     [ContextMenu("AddFakeRequestReceived")]
     public void AddFakeRequestReceived()

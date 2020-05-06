@@ -1,35 +1,27 @@
-using DCL.Helpers;
-using TMPro;
 using UnityEngine;
 
 public class FriendsTabView : FriendsTabViewBase
 {
-    [SerializeField] TextMeshProUGUI onlineFriendsToggleText;
-    [SerializeField] TextMeshProUGUI offlineFriendsToggleText;
-
-    public Transform onlineFriendsContainer;
-    public Transform offlineFriendsContainer;
-    internal int onlineFriends = 0;
-    internal int offlineFriends = 0;
+    public EntryList onlineFriendsList = new EntryList();
+    public EntryList offlineFriendsList = new EntryList();
 
     public event System.Action<FriendEntry> OnJumpIn;
     public event System.Action<FriendEntry> OnWhisper;
     public event System.Action<FriendEntry> OnDeleteConfirmation;
+
+    public override void Initialize(FriendsHUDView owner)
+    {
+        base.Initialize(owner);
+
+        onlineFriendsList.toggleTextPrefix = "ONLINE";
+        offlineFriendsList.toggleTextPrefix = "OFFLINE";
+    }
+
     public override bool CreateEntry(string userId)
     {
-        if (entries.ContainsKey(userId)) return false;
+        if (!base.CreateEntry(userId)) return false;
 
-        if (emptyListImage.activeSelf)
-            emptyListImage.SetActive(false);
-
-        if (!onlineFriendsToggleText.transform.parent.gameObject.activeSelf)
-        {
-            onlineFriendsToggleText.transform.parent.gameObject.SetActive(true);
-            offlineFriendsToggleText.transform.parent.gameObject.SetActive(true);
-        }
-
-        var entry = Instantiate(entryPrefab).GetComponent<FriendEntry>();
-        entries.Add(userId, entry);
+        var entry = GetEntry(userId) as FriendEntry;
 
         entry.OnMenuToggle += (x) => { contextMenuPanel.Toggle(x); };
         entry.OnJumpInClick += (x) => OnJumpIn?.Invoke(x);
@@ -38,74 +30,38 @@ public class FriendsTabView : FriendsTabViewBase
         return true;
     }
 
-    public override bool UpdateEntry(string userId, FriendEntryBase.Model model, bool firstUpdate = false)
+    public override bool UpdateEntry(string userId, FriendEntryBase.Model model)
     {
-        if (!entries.ContainsKey(userId)) return false;
+        if (!base.UpdateEntry(userId, model))
+            return false;
 
-        FriendEntry entry = entries[userId] as FriendEntry;
-        var previousStatus = entry.model.status;
+        var entry = entries[userId];
 
-        entry.userId = userId;
-        entry.Populate(model);
-
-        if (entry.model.status == FriendsController.PresenceStatus.ONLINE)
+        if (model.status == FriendsController.PresenceStatus.ONLINE)
         {
-            entry.transform.SetParent(onlineFriendsContainer);
-            onlineFriends++;
-        }
-        else
-        {
-            entry.transform.SetParent(offlineFriendsContainer);
-            offlineFriends++;
+            offlineFriendsList.Remove(userId);
+            onlineFriendsList.Add(userId, entry);
         }
 
-        entry.transform.localScale = Vector3.one;
-
-        if (!firstUpdate)
+        if (model.status == FriendsController.PresenceStatus.OFFLINE)
         {
-            if (previousStatus == FriendsController.PresenceStatus.ONLINE)
-                onlineFriends--;
-            else
-                offlineFriends--;
+            onlineFriendsList.Remove(userId);
+            offlineFriendsList.Add(userId, entry);
         }
-
-        UpdateUsersToggleTexts();
-
-        rectTransform.ForceUpdateLayout();
 
         return true;
     }
 
-    public override void RemoveEntry(string userId)
+    protected override void UpdateToggleTexts()
     {
-        if (!entries.ContainsKey(userId)) return;
-
-        var entry = entries[userId];
-
-        if (entry.model.status == FriendsController.PresenceStatus.ONLINE)
-            onlineFriends--;
-        else
-            offlineFriends--;
-
-        UpdateUsersToggleTexts();
-
-        Object.Destroy(entry.gameObject);
-        entries.Remove(userId);
-
         if (entries.Count == 0)
         {
             emptyListImage.SetActive(true);
-            onlineFriendsToggleText.transform.parent.gameObject.SetActive(false);
-            offlineFriendsToggleText.transform.parent.gameObject.SetActive(false);
         }
-
-        rectTransform.ForceUpdateLayout();
-    }
-
-    void UpdateUsersToggleTexts()
-    {
-        onlineFriendsToggleText.text = $"ONLINE ({onlineFriends})";
-        offlineFriendsToggleText.text = $"OFFLINE ({offlineFriends})";
+        else
+        {
+            emptyListImage.SetActive(false);
+        }
     }
 
     protected override void OnPressDeleteButton(FriendEntryBase entry)

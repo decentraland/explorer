@@ -53,17 +53,17 @@ public class FriendsHUDViewShould : TestsBase
 
         Assert.IsNotNull(entry1);
         Assert.AreEqual(entry1.model.userName, entry1.playerNameText.text);
-        Assert.AreEqual(controller.view.friendsList.onlineFriendsContainer, entry1.transform.parent);
+        Assert.AreEqual(controller.view.friendsList.onlineFriendsList.container, entry1.transform.parent);
 
         Assert.IsNotNull(entry2);
         Assert.AreEqual(entry2.model.userName, entry2.playerNameText.text);
-        Assert.AreEqual(controller.view.friendsList.offlineFriendsContainer, entry2.transform.parent);
+        Assert.AreEqual(controller.view.friendsList.offlineFriendsList.container, entry2.transform.parent);
 
         var model2 = entry2.model;
         model2.status = FriendsController.PresenceStatus.ONLINE;
         controller.view.friendsList.CreateOrUpdateEntry(id2, model2);
 
-        Assert.AreEqual(controller.view.friendsList.onlineFriendsContainer, entry2.transform.parent);
+        Assert.AreEqual(controller.view.friendsList.onlineFriendsList.container, entry2.transform.parent);
     }
 
 
@@ -92,14 +92,14 @@ public class FriendsHUDViewShould : TestsBase
 
         Assert.IsNotNull(entry1);
         Assert.AreEqual("Pravus", entry1.playerNameText.text);
-        Assert.AreEqual(controller.view.friendRequestsList.receivedRequestsContainer, entry1.transform.parent);
+        Assert.AreEqual(controller.view.friendRequestsList.receivedRequestsList.container, entry1.transform.parent);
 
         Assert.IsNotNull(entry2);
         Assert.AreEqual("Brian", entry2.playerNameText.text);
-        Assert.AreEqual(controller.view.friendRequestsList.sentRequestsContainer, entry2.transform.parent);
+        Assert.AreEqual(controller.view.friendRequestsList.sentRequestsList.container, entry2.transform.parent);
 
         controller.view.friendRequestsList.UpdateEntry(id2, entry2.model, true);
-        Assert.AreEqual(controller.view.friendRequestsList.receivedRequestsContainer, entry2.transform.parent);
+        Assert.AreEqual(controller.view.friendRequestsList.receivedRequestsList.container, entry2.transform.parent);
     }
 
     [Test]
@@ -111,14 +111,14 @@ public class FriendsHUDViewShould : TestsBase
         CreateFriendEntry("user3", "Wanda Nara", FriendsController.PresenceStatus.OFFLINE);
         CreateFriendEntry("user4", "Mirtha Legrand", FriendsController.PresenceStatus.OFFLINE);
 
-        Assert.AreEqual(2, view.friendsList.onlineFriends);
-        Assert.AreEqual(2, view.friendsList.offlineFriends);
+        Assert.AreEqual(2, view.friendsList.onlineFriendsList.GetCount());
+        Assert.AreEqual(2, view.friendsList.offlineFriendsList.GetCount());
 
         view.friendsList.RemoveEntry("user1");
         view.friendsList.RemoveEntry("user3");
 
-        Assert.AreEqual(1, view.friendsList.onlineFriends);
-        Assert.AreEqual(1, view.friendsList.offlineFriends);
+        Assert.AreEqual(1, view.friendsList.onlineFriendsList.GetCount());
+        Assert.AreEqual(1, view.friendsList.offlineFriendsList.GetCount());
     }
 
 

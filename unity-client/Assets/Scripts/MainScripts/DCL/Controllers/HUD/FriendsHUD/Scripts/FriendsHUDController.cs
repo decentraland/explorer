@@ -158,7 +158,7 @@ public class FriendsHUDController : IHUD
         var pendingFriendRequestsSO = Resources.Load<FloatVariable>("ScriptableObjects/PendingFriendRequests");
 
         if (pendingFriendRequestsSO != null)
-            pendingFriendRequestsSO.Set(view.friendRequestsList.receivedRequests);
+            pendingFriendRequestsSO.Set(view.friendRequestsList.receivedRequestsList.GetCount());
     }
 
     private void Entry_OnWhisper(FriendEntry entry)

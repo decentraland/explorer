@@ -79,6 +79,7 @@ public class FriendEntryBase : MonoBehaviour, IPointerEnterHandler, IPointerExit
             playerImage.sprite = model.avatarImage;
 
         playerBlockedImage.enabled = model.blocked;
+        transform.localScale = Vector3.one;
     }
 
     private void OnAvatarImageChange(Sprite sprite)
