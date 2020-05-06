@@ -1,5 +1,6 @@
 using DCL.Helpers;
 using DCL.Interface;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class FriendsHUDController : IHUD
@@ -42,6 +43,23 @@ public class FriendsHUDController : IHUD
 
         toggleTrigger = Resources.Load<InputAction_Trigger>("ToggleFriends");
         toggleTrigger.OnTriggered += OnHotkeyPress;
+
+        UserProfile.GetOwnUserProfile().OnUpdate += OnUserProfileUpdate;
+    }
+
+    private void OnUserProfileUpdate(UserProfile profile)
+    {
+        //NOTE(Brian): HashSet to check Contains quicker.
+        HashSet<string> allBlockedUsers = new HashSet<string>(profile.blocked);
+
+        var entries = view.GetAllEntries();
+        int entriesCount = entries.Count;
+
+        for (int i = 0; i < entriesCount; i++)
+        {
+            entries[i].model.blocked = allBlockedUsers.Contains(entries[i].userId);
+            entries[i].Populate(entries[i].model);
+        }
     }
 
     private void OnHotkeyPress(DCLAction_Trigger action)
@@ -101,6 +119,8 @@ public class FriendsHUDController : IHUD
 
         userProfile.OnFaceSnapshotReadyEvent -= friendEntryModel.OnSpriteUpdate;
         userProfile.OnFaceSnapshotReadyEvent += friendEntryModel.OnSpriteUpdate;
+
+        friendEntryModel.blocked = UserProfile.GetOwnUserProfile().blocked.Contains(userId);
 
         switch (friendshipAction)
         {
@@ -220,6 +240,11 @@ public class FriendsHUDController : IHUD
         {
             UnityEngine.Object.Destroy(view.gameObject);
         }
+
+        var ownProfile = UserProfile.GetOwnUserProfile();
+
+        if (ownProfile != null)
+            ownProfile.OnUpdate -= OnUserProfileUpdate;
     }
 
     public void SetVisibility(bool visible)

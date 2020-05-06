@@ -29,6 +29,15 @@ public class FriendRequestsTabView : FriendsTabViewBase
     {
         base.Initialize(owner);
 
+        requestSentNotification.model.timer = owner.notificationsDuration;
+        requestSentNotification.model.groupID = FriendsHUDView.NOTIFICATIONS_ID;
+
+        friendSearchFailedNotification.model.timer = owner.notificationsDuration;
+        friendSearchFailedNotification.model.groupID = FriendsHUDView.NOTIFICATIONS_ID;
+
+        acceptedFriendNotification.model.timer = owner.notificationsDuration;
+        acceptedFriendNotification.model.groupID = FriendsHUDView.NOTIFICATIONS_ID;
+
         friendSearchInputField.onSubmit.AddListener(SendFriendRequest);
         friendSearchInputField.onValueChanged.AddListener(OnSearchInputValueChanged);
         addFriendButton.onClick.AddListener(() => friendSearchInputField.OnSubmit(null));
@@ -78,7 +87,8 @@ public class FriendRequestsTabView : FriendsTabViewBase
             return false;
 
         FriendRequestEntry entry = entries[userId] as FriendRequestEntry;
-        entry.Populate(userId, model, isReceived);
+        entry.userId = userId;
+        entry.Populate(model, isReceived);
 
         if (isReceived.HasValue)
         {
@@ -97,10 +107,7 @@ public class FriendRequestsTabView : FriendsTabViewBase
         }
 
         entry.transform.localScale = Vector3.one;
-
-        entry.ToggleBlockedImage(ownUserProfile.blocked.Contains(userId));
-
-        (transform as RectTransform).ForceUpdateLayout();
+        rectTransform.ForceUpdateLayout();
 
         return true;
     }
@@ -115,6 +122,7 @@ public class FriendRequestsTabView : FriendsTabViewBase
             receivedRequests--;
         else
             sentRequests--;
+
         UpdateUsersToggleTexts();
 
         Destroy(entry.gameObject);
@@ -127,14 +135,12 @@ public class FriendRequestsTabView : FriendsTabViewBase
             sentRequestsToggleText.transform.parent.gameObject.SetActive(false);
         }
 
-        (transform as RectTransform).ForceUpdateLayout();
+        rectTransform.ForceUpdateLayout();
     }
 
     void SendFriendRequest(string friendId)
     {
         requestSentNotification.model.message = $"Your request to {friendId} successfully sent!";
-        requestSentNotification.model.groupID = FriendsHUDView.NOTIFICATIONS_ID;
-        requestSentNotification.model.timer = 3;
         NotificationsController.i.ShowNotification(requestSentNotification);
 
         friendSearchInputField.placeholder.enabled = true;
@@ -147,8 +153,6 @@ public class FriendRequestsTabView : FriendsTabViewBase
 
     public void DisplayFriendUserNotFound()
     {
-        friendSearchFailedNotification.model.groupID = FriendsHUDView.NOTIFICATIONS_ID;
-        friendSearchFailedNotification.model.timer = 3;
         NotificationsController.i.ShowNotification(friendSearchFailedNotification);
         addFriendButton.interactable = false;
     }
@@ -172,11 +176,14 @@ public class FriendRequestsTabView : FriendsTabViewBase
             userId = requestEntry.userId,
             action = FriendsController.FriendshipAction.APPROVED
         });
-        FriendsController.i.UpdateUserStatus(new FriendsController.UserStatus() { userId = requestEntry.userId, presence = FriendsController.PresenceStatus.OFFLINE });
+
+        FriendsController.i.UpdateUserStatus(new FriendsController.UserStatus()
+        {
+            userId = requestEntry.userId,
+            presence = FriendsController.PresenceStatus.OFFLINE
+        });
 
         acceptedFriendNotification.model.message = $"You and {requestEntry.model.userName} are now friends!";
-        acceptedFriendNotification.model.groupID = FriendsHUDView.NOTIFICATIONS_ID;
-        acceptedFriendNotification.model.timer = 3;
         NotificationsController.i.ShowNotification(acceptedFriendNotification);
 
         RemoveEntry(requestEntry.userId);

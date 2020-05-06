@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -23,6 +24,14 @@ public class FriendsHUDView : MonoBehaviour
         var view = Instantiate(Resources.Load<GameObject>(VIEW_PATH)).GetComponent<FriendsHUDView>();
         view.Initialize();
         return view;
+    }
+
+    internal List<FriendEntryBase> GetAllEntries()
+    {
+        var result = new List<FriendEntryBase>();
+        result.AddRange(friendsList.GetAllEntries());
+        result.AddRange(friendRequestsList.GetAllEntries());
+        return result;
     }
 
     private void Initialize()
@@ -53,33 +62,4 @@ public class FriendsHUDView : MonoBehaviour
     {
         gameObject.SetActive(!gameObject.activeSelf);
     }
-
-    //public void TriggerNotification(GameObject notificationGO)
-    //{
-    //    DismissCurrentNotification();
-
-    //    currentNotification = notificationGO;
-
-    //    notificationGO.SetActive(true);
-    //    currentNotificationRoutine = CoroutineStarter.Start(WaitAndCloseCurrentNotification());
-    //}
-
-    //IEnumerator WaitAndCloseCurrentNotification()
-    //{
-    //    yield return WaitForSecondsCache.Get(notificationsDuration);
-    //    DismissCurrentNotification();
-    //}
-
-    //public void DismissCurrentNotification()
-    //{
-    //    if (currentNotification == null) return;
-
-    //    currentNotification.SetActive(false);
-
-    //    if (currentNotificationRoutine == null) return;
-
-    //    StopCoroutine(currentNotificationRoutine);
-    //    currentNotificationRoutine = null;
-    //}
-
 }

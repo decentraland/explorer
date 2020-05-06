@@ -45,7 +45,8 @@ public class FriendsTabView : FriendsTabViewBase
         FriendEntry entry = entries[userId] as FriendEntry;
         var previousStatus = entry.model.status;
 
-        entry.Populate(userId, model);
+        entry.userId = userId;
+        entry.Populate(model);
 
         if (entry.model.status == FriendsController.PresenceStatus.ONLINE)
         {
@@ -70,9 +71,7 @@ public class FriendsTabView : FriendsTabViewBase
 
         UpdateUsersToggleTexts();
 
-        entry.ToggleBlockedImage(ownUserProfile.blocked.Contains(userId));
-
-        (transform as RectTransform).ForceUpdateLayout();
+        rectTransform.ForceUpdateLayout();
 
         return true;
     }
@@ -100,7 +99,7 @@ public class FriendsTabView : FriendsTabViewBase
             offlineFriendsToggleText.transform.parent.gameObject.SetActive(false);
         }
 
-        (transform as RectTransform).ForceUpdateLayout();
+        rectTransform.ForceUpdateLayout();
     }
 
     void UpdateUsersToggleTexts()

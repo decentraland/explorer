@@ -12,6 +12,7 @@ public class FriendEntryBase : MonoBehaviour, IPointerEnterHandler, IPointerExit
         public Vector2 coords;
         public string realm;
         public Sprite avatarImage;
+        public bool blocked;
 
         public event System.Action<Sprite> OnSpriteUpdateEvent;
         public void OnSpriteUpdate(Sprite sprite)
@@ -21,7 +22,8 @@ public class FriendEntryBase : MonoBehaviour, IPointerEnterHandler, IPointerExit
     }
 
     public Model model { get; private set; } = new Model();
-    public string userId { get; private set; }
+    public string userId;
+
     public Image playerBlockedImage;
     public Transform menuPositionReference;
 
@@ -60,24 +62,28 @@ public class FriendEntryBase : MonoBehaviour, IPointerEnterHandler, IPointerExit
         model.OnSpriteUpdateEvent -= OnAvatarImageChange;
     }
 
-    public virtual void Populate(string userId, Model model)
+    public virtual void Populate(Model model)
     {
-        this.userId = userId;
         this.model = model;
-        playerNameText.text = model.userName;
 
-        model.OnSpriteUpdateEvent -= OnAvatarImageChange;
-        model.OnSpriteUpdateEvent += OnAvatarImageChange;
-        playerImage.sprite = model.avatarImage;
+        if (playerNameText.text != model.userName)
+            playerNameText.text = model.userName;
+
+        if (model.avatarImage == null)
+        {
+            model.OnSpriteUpdateEvent -= OnAvatarImageChange;
+            model.OnSpriteUpdateEvent += OnAvatarImageChange;
+        }
+
+        if (model.avatarImage != playerImage.sprite)
+            playerImage.sprite = model.avatarImage;
+
+        playerBlockedImage.enabled = model.blocked;
     }
 
     private void OnAvatarImageChange(Sprite sprite)
     {
         playerImage.sprite = sprite;
-    }
-
-    public void ToggleBlockedImage(bool targetState)
-    {
-        playerBlockedImage.enabled = targetState;
+        model.avatarImage = sprite;
     }
 }

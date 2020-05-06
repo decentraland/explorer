@@ -1,6 +1,7 @@
 using DCL.Configuration;
 using DCL.Helpers;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -13,6 +14,8 @@ public class FriendsTabViewBase : MonoBehaviour, IPointerDownHandler
 
     public GameObject entryPrefab;
     public GameObject emptyListImage;
+
+    protected RectTransform rectTransform;
 
     protected FriendsHUDView owner;
 
@@ -32,7 +35,6 @@ public class FriendsTabViewBase : MonoBehaviour, IPointerDownHandler
 
     protected Dictionary<string, FriendEntryBase> entries = new Dictionary<string, FriendEntryBase>();
     protected internal FriendEntryBase selectedEntry;
-    protected UserProfile ownUserProfile => UserProfile.GetOwnUserProfile();
 
     public System.Action<string> OnPassport;
     public System.Action<string> OnReport;
@@ -40,6 +42,12 @@ public class FriendsTabViewBase : MonoBehaviour, IPointerDownHandler
     public System.Action<FriendEntryBase> OnDelete;
 
     public int entriesCount => entries.Count;
+
+    internal List<FriendEntryBase> GetAllEntries()
+    {
+        return entries.Values.ToList();
+    }
+
     internal FriendEntryBase GetEntry(string userId)
     {
         if (!entries.ContainsKey(userId))
@@ -50,7 +58,7 @@ public class FriendsTabViewBase : MonoBehaviour, IPointerDownHandler
 
     protected virtual void OnEnable()
     {
-        (transform as RectTransform).ForceUpdateLayout();
+        rectTransform.ForceUpdateLayout();
     }
 
     protected virtual void OnDisable()
@@ -68,6 +76,9 @@ public class FriendsTabViewBase : MonoBehaviour, IPointerDownHandler
     public virtual void Initialize(FriendsHUDView owner)
     {
         this.owner = owner;
+
+        rectTransform = transform as RectTransform;
+
         contextMenuPassportButton.onClick.AddListener(OnPassportButtonPressed);
         contextMenuReportButton.onClick.AddListener(OnReportUserButtonPressed);
         contextMenuDeleteButton.onClick.AddListener(OnDeleteUserButtonPressed);
@@ -102,13 +113,11 @@ public class FriendsTabViewBase : MonoBehaviour, IPointerDownHandler
         if (!entries.ContainsKey(userId)) return false;
 
         var entry = entries[userId];
-        var previousStatus = entry.model.status;
 
-        entry.Populate(userId, model);
+        entry.Populate(model);
+        entry.userId = userId;
 
-        entry.ToggleBlockedImage(ownUserProfile.blocked.Contains(userId));
-
-        (transform as RectTransform).ForceUpdateLayout();
+        rectTransform.ForceUpdateLayout();
 
         return true;
     }
@@ -125,7 +134,7 @@ public class FriendsTabViewBase : MonoBehaviour, IPointerDownHandler
         if (entries.Count == 0)
             emptyListImage.SetActive(true);
 
-        (transform as RectTransform).ForceUpdateLayout();
+        rectTransform.ForceUpdateLayout();
     }
 
     protected void TriggerDialog(string text, UnityEngine.Events.UnityAction ConfirmCallback)
@@ -158,8 +167,8 @@ public class FriendsTabViewBase : MonoBehaviour, IPointerDownHandler
     protected virtual void OnBlockUserButtonPressed()
     {
         OnBlock?.Invoke(selectedEntry.userId);
-
-        selectedEntry.ToggleBlockedImage(!selectedEntry.playerBlockedImage.enabled);
+        selectedEntry.model.blocked = !selectedEntry.model.blocked;
+        selectedEntry.Populate(selectedEntry.model);
 
         ToggleMenuPanel(selectedEntry);
     }
@@ -177,6 +186,6 @@ public class FriendsTabViewBase : MonoBehaviour, IPointerDownHandler
         contextMenuPanel.SetActive(selectedEntry == entry ? !contextMenuPanel.activeSelf : true);
 
         if (contextMenuPanel.activeSelf)
-            contextMenuBlockButtonText.text = ownUserProfile.blocked.Contains(entry.userId) ? BLOCK_BTN_UNBLOCK_TEXT : BLOCK_BTN_BLOCK_TEXT;
+            contextMenuBlockButtonText.text = entry.model.blocked ? BLOCK_BTN_UNBLOCK_TEXT : BLOCK_BTN_BLOCK_TEXT;
     }
 }

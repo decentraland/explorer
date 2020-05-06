@@ -38,9 +38,9 @@ public class FriendEntry : FriendEntryBase
         whisperLabel.SetActive(false);
     }
 
-    public override void Populate(string userId, Model model)
+    public override void Populate(Model model)
     {
-        base.Populate(userId, model);
+        base.Populate(model);
 
         if (model.status == FriendsController.PresenceStatus.ONLINE || model.status == FriendsController.PresenceStatus.UNAVAILABLE)
             playerLocationText.text = $"{model.realm} {model.coords.x}, {model.coords.y}";
