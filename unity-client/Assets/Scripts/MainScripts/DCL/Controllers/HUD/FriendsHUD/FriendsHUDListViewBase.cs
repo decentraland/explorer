@@ -17,7 +17,7 @@ public class FriendsHUDListViewBase : MonoBehaviour, IPointerDownHandler
     public GameObject emptyListImage;
 
     [Header("Context Menu References")]
-    public GameObject contextMenuPanel;
+    public RectTransform contextMenuPanel;
     public Button contextMenuPassportButton;
     public Button contextMenuBlockButton;
     public TextMeshProUGUI contextMenuBlockButtonText;
@@ -56,13 +56,13 @@ public class FriendsHUDListViewBase : MonoBehaviour, IPointerDownHandler
     protected virtual void OnDisable()
     {
         CloseDialog();
-        contextMenuPanel.SetActive(false);
+        contextMenuPanel.gameObject.SetActive(false);
     }
 
     public void OnPointerDown(PointerEventData eventData)
     {
         if (eventData.pointerPressRaycast.gameObject == null || eventData.pointerPressRaycast.gameObject.layer != PhysicsLayers.friendsHUDPlayerMenu)
-            contextMenuPanel.SetActive(false);
+            contextMenuPanel.gameObject.SetActive(false);
     }
 
     public virtual void Initialize()
@@ -171,11 +171,17 @@ public class FriendsHUDListViewBase : MonoBehaviour, IPointerDownHandler
 
     protected void ToggleMenuPanel(FriendsHUDListEntry entry)
     {
+        // By setting the pivot accordingly BEFORE we position the menu, we can have it always visible in an easier way
+        if (entry.transform.parent.InverseTransformPoint(entry.menuPositionReference.position).y < 0f)
+            contextMenuPanel.pivot = new Vector2(0.5f, 0f);
+        else
+            contextMenuPanel.pivot = new Vector2(0.5f, 1f);
+
         contextMenuPanel.transform.position = entry.menuPositionReference.position;
 
-        contextMenuPanel.SetActive(selectedEntry == entry ? !contextMenuPanel.activeSelf : true);
+        contextMenuPanel.gameObject.SetActive(selectedEntry == entry ? !contextMenuPanel.gameObject.activeSelf : true);
 
-        if (contextMenuPanel.activeSelf)
+        if (contextMenuPanel.gameObject.activeSelf)
             contextMenuBlockButtonText.text = ownUserProfile.blocked.Contains(entry.userId) ? BLOCK_BTN_UNBLOCK_TEXT : BLOCK_BTN_BLOCK_TEXT;
     }
 }

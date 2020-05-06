@@ -127,7 +127,7 @@ public class FriendsHUDViewShould : TestsBase
     {
         var entry = CreateFriendEntry("userId-1", "Pravus");
         entry.menuButton.onClick.Invoke();
-        Assert.IsTrue(view.friendsList.contextMenuPanel.activeSelf);
+        Assert.IsTrue(view.friendsList.contextMenuPanel.gameObject.activeSelf);
         Assert.AreEqual(entry, view.friendsList.selectedEntry);
     }
 
