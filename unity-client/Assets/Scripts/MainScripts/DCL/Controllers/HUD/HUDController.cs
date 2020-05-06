@@ -64,7 +64,8 @@ public class HUDController : MonoBehaviour
         WORLD_CHAT_WINDOW = 10,
         TASKBAR = 11,
         MESSAGE_OF_THE_DAY = 12,
-        COUNT = 13
+        OPEN_EXTERNAL_URL_PROMPT = 13,
+        COUNT = 14
     }
 
     [System.Serializable]
@@ -148,6 +149,9 @@ public class HUDController : MonoBehaviour
             case HUDElementID.MESSAGE_OF_THE_DAY:
                 CreateHudElement<WelcomeHUDController>(configuration, hudElementId);
                 messageOfTheDayHud?.Initialize(ownUserProfile.hasConnectedWeb3);
+                break;
+            case HUDElementID.OPEN_EXTERNAL_URL_PROMPT:
+                CreateHudElement<ExternalUrlPromptHUDController>(configuration, hudElementId);
                 break;
         }
 
