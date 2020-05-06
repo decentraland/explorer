@@ -310,7 +310,7 @@ namespace DCL
                                 renderingController.ActivateRendering();
                                 break;
                             case "ShowNotification":
-                                HUDController.i.ShowNotificationFromJson(msg.payload);
+                                NotificationsController.i.ShowNotificationFromJson(msg.payload);
                                 break;
                             case "BuilderReady":
                                 sceneController.BuilderReady();
@@ -409,7 +409,7 @@ namespace DCL
                                 HUDController.i.AirdroppingRequest(msg.payload);
                                 break;
                             case "ShowWelcomeNotification":
-                                HUDController.i.ShowWelcomeNotification();
+                                NotificationsController.i.ShowWelcomeNotification();
                                 break;
                             case "ShowTermsOfServices":
                                 HUDController.i.ShowTermsOfServices(msg.payload);

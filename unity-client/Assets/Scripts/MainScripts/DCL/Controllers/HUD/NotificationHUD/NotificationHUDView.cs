@@ -1,4 +1,3 @@
-﻿using System;
 using UnityEngine;
 
 public class NotificationHUDView : MonoBehaviour
@@ -8,9 +7,7 @@ public class NotificationHUDView : MonoBehaviour
     [SerializeField]
     private RectTransform notificationPanel;
 
-    public event System.Action<NotificationModel> OnNotificationDismissed;
-
-    private Canvas notificationCanvas;
+    public event System.Action<Notification> OnNotificationDismissedEvent;
 
     private const string VIEW_PATH = "NotificationHUD";
     private const string VIEW_OBJECT_NAME = "_NotificationHUD";
@@ -27,18 +24,28 @@ public class NotificationHUDView : MonoBehaviour
         gameObject.name = VIEW_OBJECT_NAME;
     }
 
-    public void ShowNotification(NotificationModel notificationModel)
+    public void ShowNotification(Notification notification)
     {
-        if (notificationModel == null) return;
+        if (notification == null)
+            return;
 
-        Notification notification = notificationFactory.CreateNotificationFromType(notificationModel.type, notificationPanel);
-        notification.OnNotificationDismissed += DismissNotification;
-        notification.Initialize(notificationModel);
+        notification.OnNotificationDismissed += OnNotificationDismissed;
+        notification.Initialize(notification.model);
     }
 
-    private void DismissNotification(Notification n)
+    public Notification ShowNotification(Notification.Model notificationModel)
     {
-        OnNotificationDismissed?.Invoke(n.notificationModel);
+        if (notificationModel == null)
+            return null;
+
+        Notification notification = notificationFactory.CreateNotificationFromType(notificationModel.type, notificationPanel);
+        ShowNotification(notification);
+        return notification;
+    }
+
+    private void OnNotificationDismissed(Notification n)
+    {
+        OnNotificationDismissedEvent?.Invoke(n);
         Destroy(n.gameObject);
     }
 

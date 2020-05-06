@@ -2,7 +2,7 @@ using DCL.Helpers;
 using TMPro;
 using UnityEngine;
 
-public class FriendsListView : FriendsHUDListViewBase
+public class FriendsTabView : FriendsTabViewBase
 {
     [SerializeField] TextMeshProUGUI onlineFriendsToggleText;
     [SerializeField] TextMeshProUGUI offlineFriendsToggleText;
@@ -38,7 +38,7 @@ public class FriendsListView : FriendsHUDListViewBase
         return true;
     }
 
-    public override bool UpdateEntry(string userId, FriendsHUDListEntry.Model model, bool firstUpdate = false)
+    public override bool UpdateEntry(string userId, FriendEntryBase.Model model, bool firstUpdate = false)
     {
         if (!entries.ContainsKey(userId)) return false;
 

@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class FriendRequestEntry : FriendsHUDListEntry
+public class FriendRequestEntry : FriendEntryBase
 {
     [SerializeField] internal Button acceptButton;
     [SerializeField] internal Button rejectButton;

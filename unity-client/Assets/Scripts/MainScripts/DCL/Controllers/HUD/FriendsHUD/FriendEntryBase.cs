@@ -1,9 +1,9 @@
-﻿using TMPro;
+using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class FriendsHUDListEntry : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
+public class FriendEntryBase : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
     public class Model
     {
@@ -32,7 +32,7 @@ public class FriendsHUDListEntry : MonoBehaviour, IPointerEnterHandler, IPointer
     [SerializeField] protected internal Sprite hoveredBackgroundSprite;
     protected internal Sprite unhoveredBackgroundSprite;
 
-    public event System.Action<FriendsHUDListEntry> OnMenuToggle;
+    public event System.Action<FriendEntryBase> OnMenuToggle;
 
     protected virtual void Awake()
     {

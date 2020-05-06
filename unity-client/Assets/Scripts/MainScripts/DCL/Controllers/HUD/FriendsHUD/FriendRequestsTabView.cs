@@ -1,13 +1,8 @@
-using DCL.Configuration;
 using DCL.Helpers;
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
-
-public class FriendRequestsListView : FriendsHUDListViewBase
+public class FriendRequestsTabView : FriendsTabViewBase
 {
     [SerializeField] internal Transform receivedRequestsContainer;
     [SerializeField] internal Transform sentRequestsContainer;
@@ -18,14 +13,10 @@ public class FriendRequestsListView : FriendsHUDListViewBase
     [SerializeField] internal TextMeshProUGUI sentRequestsToggleText;
 
     [Header("Notifications")]
-    [SerializeField] internal GameObject requestSentNotification;
-    [SerializeField] internal TextMeshProUGUI requestSentNotificationText;
-    [SerializeField] internal GameObject friendSearchFailedNotification;
-    [SerializeField] internal GameObject acceptedFriendNotification;
-    [SerializeField] internal TextMeshProUGUI acceptedFriendNotificationText;
+    [SerializeField] internal Notification requestSentNotification;
+    [SerializeField] internal Notification friendSearchFailedNotification;
+    [SerializeField] internal Notification acceptedFriendNotification;
 
-    internal Coroutine currentNotificationRoutine = null;
-    internal GameObject currentNotification = null;
     internal int receivedRequests = 0;
     internal int sentRequests = 0;
 
@@ -34,9 +25,9 @@ public class FriendRequestsListView : FriendsHUDListViewBase
     public event System.Action<FriendRequestEntry> OnFriendRequestApproved;
     public event System.Action<string> OnFriendRequestSent;
 
-    public override void Initialize()
+    public override void Initialize(FriendsHUDView owner)
     {
-        base.Initialize();
+        base.Initialize(owner);
 
         friendSearchInputField.onSubmit.AddListener(SendFriendRequest);
         friendSearchInputField.onValueChanged.AddListener(OnSearchInputValueChanged);
@@ -47,7 +38,7 @@ public class FriendRequestsListView : FriendsHUDListViewBase
     {
         base.OnDisable();
 
-        DismissCurrentNotification();
+        NotificationsController.i.DismissAllNotifications(FriendsHUDView.NOTIFICATIONS_ID);
     }
 
     public void CreateOrUpdateEntry(string userId, FriendEntry.Model model, bool isReceived)
@@ -81,7 +72,7 @@ public class FriendRequestsListView : FriendsHUDListViewBase
         return true;
     }
 
-    public bool UpdateEntry(string userId, FriendsHUDListEntry.Model model, bool? isReceived = null)
+    public bool UpdateEntry(string userId, FriendEntryBase.Model model, bool? isReceived = null)
     {
         if (!entries.ContainsKey(userId))
             return false;
@@ -136,42 +127,15 @@ public class FriendRequestsListView : FriendsHUDListViewBase
             sentRequestsToggleText.transform.parent.gameObject.SetActive(false);
         }
 
-    (transform as RectTransform).ForceUpdateLayout();
-    }
-
-    void TriggerNotification(GameObject notificationGameobject)
-    {
-        DismissCurrentNotification();
-
-        currentNotification = notificationGameobject;
-
-        notificationGameobject.SetActive(true);
-        currentNotificationRoutine = CoroutineStarter.Start(WaitAndCloseCurrentNotification());
-    }
-
-    IEnumerator WaitAndCloseCurrentNotification()
-    {
-        yield return WaitForSecondsCache.Get(notificationsDuration);
-
-        DismissCurrentNotification();
-    }
-
-    protected void DismissCurrentNotification()
-    {
-        if (currentNotification == null) return;
-
-        currentNotification.SetActive(false);
-
-        if (currentNotificationRoutine == null) return;
-
-        StopCoroutine(currentNotificationRoutine);
-        currentNotificationRoutine = null;
+        (transform as RectTransform).ForceUpdateLayout();
     }
 
     void SendFriendRequest(string friendId)
     {
-        requestSentNotificationText.text = $"Your request to {friendId} successfully sent!";
-        TriggerNotification(requestSentNotification);
+        requestSentNotification.model.message = $"Your request to {friendId} successfully sent!";
+        requestSentNotification.model.groupID = FriendsHUDView.NOTIFICATIONS_ID;
+        requestSentNotification.model.timer = 3;
+        NotificationsController.i.ShowNotification(requestSentNotification);
 
         friendSearchInputField.placeholder.enabled = true;
         friendSearchInputField.text = string.Empty;
@@ -183,8 +147,9 @@ public class FriendRequestsListView : FriendsHUDListViewBase
 
     public void DisplayFriendUserNotFound()
     {
-        TriggerNotification(friendSearchFailedNotification);
-
+        friendSearchFailedNotification.model.groupID = FriendsHUDView.NOTIFICATIONS_ID;
+        friendSearchFailedNotification.model.timer = 3;
+        NotificationsController.i.ShowNotification(friendSearchFailedNotification);
         addFriendButton.interactable = false;
     }
 
@@ -196,7 +161,7 @@ public class FriendRequestsListView : FriendsHUDListViewBase
         if (!addFriendButton.interactable)
             addFriendButton.interactable = true;
 
-        DismissCurrentNotification();
+        NotificationsController.i.DismissAllNotifications(FriendsHUDView.NOTIFICATIONS_ID);
     }
 
     void OnFriendRequestReceivedAccepted(FriendRequestEntry requestEntry)
@@ -209,8 +174,10 @@ public class FriendRequestsListView : FriendsHUDListViewBase
         });
         FriendsController.i.UpdateUserStatus(new FriendsController.UserStatus() { userId = requestEntry.userId, presence = FriendsController.PresenceStatus.OFFLINE });
 
-        acceptedFriendNotificationText.text = $"You and {requestEntry.model.userName} are now friends!";
-        TriggerNotification(acceptedFriendNotification);
+        acceptedFriendNotification.model.message = $"You and {requestEntry.model.userName} are now friends!";
+        acceptedFriendNotification.model.groupID = FriendsHUDView.NOTIFICATIONS_ID;
+        acceptedFriendNotification.model.timer = 3;
+        NotificationsController.i.ShowNotification(acceptedFriendNotification);
 
         RemoveEntry(requestEntry.userId);
 

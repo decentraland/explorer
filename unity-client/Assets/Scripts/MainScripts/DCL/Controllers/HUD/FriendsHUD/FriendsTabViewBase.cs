@@ -1,20 +1,20 @@
-﻿using DCL.Configuration;
+using DCL.Configuration;
 using DCL.Helpers;
-using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class FriendsHUDListViewBase : MonoBehaviour, IPointerDownHandler
+public class FriendsTabViewBase : MonoBehaviour, IPointerDownHandler
 {
     const string BLOCK_BTN_BLOCK_TEXT = "Block";
     const string BLOCK_BTN_UNBLOCK_TEXT = "Unblock";
 
-    public float notificationsDuration = 3f;
     public GameObject entryPrefab;
     public GameObject emptyListImage;
+
+    protected FriendsHUDView owner;
 
     [Header("Context Menu References")]
     public GameObject contextMenuPanel;
@@ -30,17 +30,17 @@ public class FriendsHUDListViewBase : MonoBehaviour, IPointerDownHandler
     public Button confirmationDialogCancelButton;
     public Button confirmationDialogConfirmButton;
 
-    protected Dictionary<string, FriendsHUDListEntry> entries = new Dictionary<string, FriendsHUDListEntry>();
-    protected internal FriendsHUDListEntry selectedEntry;
+    protected Dictionary<string, FriendEntryBase> entries = new Dictionary<string, FriendEntryBase>();
+    protected internal FriendEntryBase selectedEntry;
     protected UserProfile ownUserProfile => UserProfile.GetOwnUserProfile();
 
     public System.Action<string> OnPassport;
     public System.Action<string> OnReport;
     public System.Action<string> OnBlock;
-    public System.Action<FriendsHUDListEntry> OnDelete;
+    public System.Action<FriendEntryBase> OnDelete;
 
     public int entriesCount => entries.Count;
-    internal FriendsHUDListEntry GetEntry(string userId)
+    internal FriendEntryBase GetEntry(string userId)
     {
         if (!entries.ContainsKey(userId))
             return null;
@@ -65,8 +65,9 @@ public class FriendsHUDListViewBase : MonoBehaviour, IPointerDownHandler
             contextMenuPanel.SetActive(false);
     }
 
-    public virtual void Initialize()
+    public virtual void Initialize(FriendsHUDView owner)
     {
+        this.owner = owner;
         contextMenuPassportButton.onClick.AddListener(OnPassportButtonPressed);
         contextMenuReportButton.onClick.AddListener(OnReportUserButtonPressed);
         contextMenuDeleteButton.onClick.AddListener(OnDeleteUserButtonPressed);
@@ -75,7 +76,7 @@ public class FriendsHUDListViewBase : MonoBehaviour, IPointerDownHandler
         confirmationDialogCancelButton.onClick.AddListener(CloseDialog);
     }
 
-    public virtual void CreateOrUpdateEntry(string userId, FriendsHUDListEntry.Model model)
+    public virtual void CreateOrUpdateEntry(string userId, FriendEntryBase.Model model)
     {
         bool firstUpdate = CreateEntry(userId);
         UpdateEntry(userId, model, firstUpdate);
@@ -88,7 +89,7 @@ public class FriendsHUDListViewBase : MonoBehaviour, IPointerDownHandler
         if (emptyListImage.activeSelf)
             emptyListImage.SetActive(false);
 
-        var entry = Instantiate(entryPrefab).GetComponent<FriendsHUDListEntry>();
+        var entry = Instantiate(entryPrefab).GetComponent<FriendEntryBase>();
         entries.Add(userId, entry);
 
         entry.OnMenuToggle += (x) => { selectedEntry = x; ToggleMenuPanel(x); };
@@ -96,7 +97,7 @@ public class FriendsHUDListViewBase : MonoBehaviour, IPointerDownHandler
         return true;
     }
 
-    public virtual bool UpdateEntry(string userId, FriendsHUDListEntry.Model model, bool firstUpdate = false)
+    public virtual bool UpdateEntry(string userId, FriendEntryBase.Model model, bool firstUpdate = false)
     {
         if (!entries.ContainsKey(userId)) return false;
 
@@ -169,7 +170,7 @@ public class FriendsHUDListViewBase : MonoBehaviour, IPointerDownHandler
         selectedEntry = null;
     }
 
-    protected void ToggleMenuPanel(FriendsHUDListEntry entry)
+    protected void ToggleMenuPanel(FriendEntryBase entry)
     {
         contextMenuPanel.transform.position = entry.menuPositionReference.position;
 

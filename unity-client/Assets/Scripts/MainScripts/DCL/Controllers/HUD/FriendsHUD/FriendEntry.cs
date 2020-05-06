@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class FriendEntry : FriendsHUDListEntry
+public class FriendEntry : FriendEntryBase
 {
     public event System.Action<FriendEntry> OnJumpInClick;
     public event System.Action<FriendEntry> OnWhisperClick;

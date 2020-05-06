@@ -61,7 +61,7 @@ public class FriendsHUDController : IHUD
     {
         var model = new FriendEntry.Model();
 
-        FriendsHUDListEntry entry = view.friendsList.GetEntry(userId) ?? view.friendRequestsList.GetEntry(userId);
+        FriendEntryBase entry = view.friendsList.GetEntry(userId) ?? view.friendRequestsList.GetEntry(userId);
 
         if (entry != null)
             model = entry.model;
@@ -91,7 +91,7 @@ public class FriendsHUDController : IHUD
 
         var friendEntryModel = new FriendEntry.Model();
 
-        FriendsHUDListEntry entry = view.friendsList.GetEntry(userId) ?? view.friendRequestsList.GetEntry(userId);
+        FriendEntryBase entry = view.friendsList.GetEntry(userId) ?? view.friendRequestsList.GetEntry(userId);
 
         if (entry != null)
             friendEntryModel = entry.model;
@@ -166,7 +166,7 @@ public class FriendsHUDController : IHUD
         WebInterface.GoTo((int)entry.model.coords.x, (int)entry.model.coords.y);
     }
 
-    private void Entry_OnDelete(FriendsHUDListEntry entry)
+    private void Entry_OnDelete(FriendEntryBase entry)
     {
         WebInterface.UpdateFriendshipStatus(
             new FriendsController.FriendshipUpdateStatusMessage()

@@ -3,6 +3,7 @@ using UnityEngine.UI;
 
 public class FriendsHUDView : MonoBehaviour
 {
+    public const string NOTIFICATIONS_ID = "Friends";
     static int ANIM_PROPERTY_SELECTED = Animator.StringToHash("Selected");
 
     const string VIEW_PATH = "FriendsHUD";
@@ -10,8 +11,12 @@ public class FriendsHUDView : MonoBehaviour
     public Button closeButton;
     public Button friendsButton;
     public Button friendRequestsButton;
-    public FriendsListView friendsList;
-    public FriendRequestsListView friendRequestsList;
+    public FriendsTabView friendsList;
+    public FriendRequestsTabView friendRequestsList;
+
+    internal Coroutine currentNotificationRoutine = null;
+    internal GameObject currentNotification = null;
+    public float notificationsDuration = 3f;
 
     public static FriendsHUDView Create()
     {
@@ -22,10 +27,11 @@ public class FriendsHUDView : MonoBehaviour
 
     private void Initialize()
     {
-        friendsList.Initialize();
-        friendRequestsList.Initialize();
+        friendsList.Initialize(this);
+        friendRequestsList.Initialize(this);
 
         closeButton.onClick.AddListener(Toggle);
+
         friendsButton.onClick.AddListener(() =>
         {
             friendsButton.animator.SetBool(ANIM_PROPERTY_SELECTED, true);
@@ -33,6 +39,7 @@ public class FriendsHUDView : MonoBehaviour
             friendsList.gameObject.SetActive(true);
             friendRequestsList.gameObject.SetActive(false);
         });
+
         friendRequestsButton.onClick.AddListener(() =>
         {
             friendsButton.animator.SetBool(ANIM_PROPERTY_SELECTED, false);
@@ -46,4 +53,33 @@ public class FriendsHUDView : MonoBehaviour
     {
         gameObject.SetActive(!gameObject.activeSelf);
     }
+
+    //public void TriggerNotification(GameObject notificationGO)
+    //{
+    //    DismissCurrentNotification();
+
+    //    currentNotification = notificationGO;
+
+    //    notificationGO.SetActive(true);
+    //    currentNotificationRoutine = CoroutineStarter.Start(WaitAndCloseCurrentNotification());
+    //}
+
+    //IEnumerator WaitAndCloseCurrentNotification()
+    //{
+    //    yield return WaitForSecondsCache.Get(notificationsDuration);
+    //    DismissCurrentNotification();
+    //}
+
+    //public void DismissCurrentNotification()
+    //{
+    //    if (currentNotification == null) return;
+
+    //    currentNotification.SetActive(false);
+
+    //    if (currentNotificationRoutine == null) return;
+
+    //    StopCoroutine(currentNotificationRoutine);
+    //    currentNotificationRoutine = null;
+    //}
+
 }
