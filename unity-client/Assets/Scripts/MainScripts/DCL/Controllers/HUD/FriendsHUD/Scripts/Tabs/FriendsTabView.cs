@@ -23,10 +23,19 @@ public class FriendsTabView : FriendsTabViewBase
 
         var entry = GetEntry(userId) as FriendEntry;
 
-        entry.OnMenuToggle += (x) => { contextMenuPanel.Toggle(x); };
         entry.OnJumpInClick += (x) => OnJumpIn?.Invoke(x);
         entry.OnWhisperClick += (x) => OnWhisper?.Invoke(x);
 
+        return true;
+    }
+
+    public override bool RemoveEntry(string userId)
+    {
+        if (!base.RemoveEntry(userId))
+            return false;
+
+        offlineFriendsList.Remove(userId);
+        onlineFriendsList.Remove(userId);
         return true;
     }
 
@@ -50,18 +59,6 @@ public class FriendsTabView : FriendsTabViewBase
         }
 
         return true;
-    }
-
-    protected override void UpdateToggleTexts()
-    {
-        if (entries.Count == 0)
-        {
-            emptyListImage.SetActive(true);
-        }
-        else
-        {
-            emptyListImage.SetActive(false);
-        }
     }
 
     protected override void OnPressDeleteButton(FriendEntryBase entry)

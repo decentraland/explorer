@@ -25,6 +25,8 @@ public class FriendsHUD_DialogBox : MonoBehaviour
 
         cancelButton.onClick.RemoveAllListeners();
         cancelButton.onClick.AddListener(() => { onCancel?.Invoke(); Hide(); });
+
+        gameObject.SetActive(true);
     }
 
     internal void Hide()

@@ -1,4 +1,4 @@
-﻿using TMPro;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 public class FriendRequestsTabView : FriendsTabViewBase
@@ -55,17 +55,24 @@ public class FriendRequestsTabView : FriendsTabViewBase
 
     public override bool CreateEntry(string userId)
     {
-        if (!base.CreateEntry(userId)) return false;
+        if (!base.CreateEntry(userId))
+            return false;
 
         FriendRequestEntry entry = GetEntry(userId) as FriendRequestEntry;
 
         entry.OnAccepted += OnFriendRequestReceivedAccepted;
-        entry.OnMenuToggle += (x) => { contextMenuPanel.Toggle(x); };
         entry.OnRejected += OnEntryRejectButtonPressed;
         entry.OnCancelled += OnEntryCancelButtonPressed;
+        return true;
+    }
 
-        entries.Add(userId, entry);
+    public override bool RemoveEntry(string userId)
+    {
+        if (!base.RemoveEntry(userId))
+            return false;
 
+        receivedRequestsList.Remove(userId);
+        sentRequestsList.Remove(userId);
         return true;
     }
 
@@ -159,19 +166,6 @@ public class FriendRequestsTabView : FriendsTabViewBase
             OnCancelConfirmation?.Invoke(requestEntry as FriendRequestEntry);
         });
     }
-
-    protected override void UpdateToggleTexts()
-    {
-        if (entries.Count == 0)
-        {
-            emptyListImage.SetActive(true);
-        }
-        else
-        {
-            emptyListImage.SetActive(false);
-        }
-    }
-
 
     [ContextMenu("AddFakeRequestReceived")]
     public void AddFakeRequestReceived()

@@ -13,7 +13,7 @@ public class FriendRequestEntry : FriendEntryBase
     public event System.Action<FriendRequestEntry> OnRejected;
     public event System.Action<FriendRequestEntry> OnCancelled;
 
-    protected override void Awake()
+    public override void Awake()
     {
         base.Awake();
 

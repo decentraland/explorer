@@ -14,7 +14,7 @@ public class FriendsHUDViewShould : TestsBase
         base.SetUp();
 
         controller = new FriendsHUDController();
-        controller.Initialize(null);
+        controller.Initialize(null, null);
         this.view = controller.view;
 
         Assert.IsTrue(view != null, "Friends hud view is null?");
@@ -106,7 +106,7 @@ public class FriendsHUDViewShould : TestsBase
     public void CountProperlyStatus()
     {
         CreateFriendEntry("user1", "Armando Barreda", FriendsController.PresenceStatus.ONLINE);
-        CreateFriendEntry("user2", "Neo", FriendsController.PresenceStatus.ONLINE);
+        CreateFriendEntry("user2", "Guillermo Andino", FriendsController.PresenceStatus.ONLINE);
 
         CreateFriendEntry("user3", "Wanda Nara", FriendsController.PresenceStatus.OFFLINE);
         CreateFriendEntry("user4", "Mirtha Legrand", FriendsController.PresenceStatus.OFFLINE);
@@ -126,7 +126,17 @@ public class FriendsHUDViewShould : TestsBase
     public void OpenContextMenuProperly()
     {
         var entry = CreateFriendEntry("userId-1", "Pravus");
+        bool onMenuToggleCalled = false;
+
+        System.Action<FriendEntryBase> callback = (x) => { onMenuToggleCalled = true; };
+
+        Assert.IsFalse(view.friendsList.contextMenuPanel.gameObject.activeSelf);
+
+        entry.OnMenuToggle += callback;
         entry.menuButton.onClick.Invoke();
+        entry.OnMenuToggle -= callback;
+
+        Assert.IsTrue(onMenuToggleCalled);
         Assert.IsTrue(view.friendsList.contextMenuPanel.gameObject.activeSelf);
         Assert.AreEqual(entry, view.friendsList.contextMenuPanel.targetEntry);
     }

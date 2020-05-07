@@ -73,6 +73,9 @@ public class FriendsTabViewBase : MonoBehaviour
 
     protected virtual void OnEnable()
     {
+        if (rectTransform == null)
+            rectTransform = transform as RectTransform;
+
         rectTransform.ForceUpdateLayout();
     }
 
@@ -146,9 +149,9 @@ public class FriendsTabViewBase : MonoBehaviour
         return true;
     }
 
-    public virtual void RemoveEntry(string userId)
+    public virtual bool RemoveEntry(string userId)
     {
-        if (!entries.ContainsKey(userId)) return;
+        if (!entries.ContainsKey(userId)) return false;
 
         var entry = entries[userId];
 
@@ -161,9 +164,18 @@ public class FriendsTabViewBase : MonoBehaviour
         UpdateToggleTexts();
 
         rectTransform.ForceUpdateLayout();
+        return true;
     }
 
     protected virtual void UpdateToggleTexts()
     {
+        if (entries.Count == 0)
+        {
+            emptyListImage.SetActive(true);
+        }
+        else
+        {
+            emptyListImage.SetActive(false);
+        }
     }
 }

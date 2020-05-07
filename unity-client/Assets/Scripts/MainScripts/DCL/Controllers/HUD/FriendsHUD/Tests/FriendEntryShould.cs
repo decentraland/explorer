@@ -40,8 +40,8 @@ public class FriendEntryShould : TestsBase
         entry.userId = "userId-1";
         entry.Populate(model);
 
-        Assert.AreEqual(entry.playerNameText.text, entry.playerNameText.text);
-        Assert.AreEqual(entry.playerLocationText.text, $"{model.realm} {model.coords}");
+        Assert.AreEqual(model.userName, entry.playerNameText.text);
+        Assert.AreEqual("realm-test 1, 1", entry.playerLocationText.text);
         Assert.AreEqual(entry.playerImage.sprite, testSprite);
 
         Object.Destroy(testSprite);

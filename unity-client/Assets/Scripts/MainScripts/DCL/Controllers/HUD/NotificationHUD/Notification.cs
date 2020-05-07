@@ -26,7 +26,7 @@ public class Notification : MonoBehaviour
     [SerializeField]
     private TextMeshProUGUI actionButtonLabel;
 
-    public Notification.Model model { get; private set; }
+    public Notification.Model model { get; private set; } = new Model();
 
     public event System.Action<Notification> OnNotificationDismissed;
 

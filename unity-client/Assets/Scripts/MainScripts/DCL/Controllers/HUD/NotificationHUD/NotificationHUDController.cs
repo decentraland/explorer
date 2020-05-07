@@ -27,9 +27,12 @@ public class NotificationHUDController : IHUD
 
     public void ShowNotification(Notification.Model model)
     {
-        //NOTE(Brian): If more notifications of the same group are visible, hide them.
-        //             This works when having notifications in different contexts (i.e. FriendsHUD vs global notifications)
-        DismissAllNotifications(model.groupID);
+        if (!string.IsNullOrEmpty(model.groupID))
+        {
+            //NOTE(Brian): If more notifications of the same group are visible, hide them.
+            //             This works when having notifications in different contexts (i.e. FriendsHUD vs global notifications)
+            DismissAllNotifications(model.groupID);
+        }
 
         var notification = view.ShowNotification(model);
         this.model.notifications.Add(notification);

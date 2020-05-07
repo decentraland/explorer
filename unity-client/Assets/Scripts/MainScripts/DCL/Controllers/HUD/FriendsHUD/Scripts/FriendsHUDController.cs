@@ -15,7 +15,10 @@ public class FriendsHUDController : IHUD
     IFriendsController friendsController;
     public event System.Action<string> OnPressWhisper;
     InputAction_Trigger toggleTrigger;
-    public void Initialize(IFriendsController friendsController)
+
+    UserProfile ownUserProfile;
+
+    public void Initialize(IFriendsController friendsController, UserProfile ownUserProfile)
     {
         view = FriendsHUDView.Create();
         this.friendsController = friendsController;
@@ -45,13 +48,22 @@ public class FriendsHUDController : IHUD
         toggleTrigger = Resources.Load<InputAction_Trigger>("ToggleFriends");
         toggleTrigger.OnTriggered += OnHotkeyPress;
 
-        UserProfile.GetOwnUserProfile().OnUpdate += OnUserProfileUpdate;
+        if (ownUserProfile != null)
+        {
+            this.ownUserProfile = ownUserProfile;
+            ownUserProfile.OnUpdate += OnUserProfileUpdate;
+        }
     }
 
     private void OnUserProfileUpdate(UserProfile profile)
     {
         //NOTE(Brian): HashSet to check Contains quicker.
-        HashSet<string> allBlockedUsers = new HashSet<string>(profile.blocked);
+        HashSet<string> allBlockedUsers;
+
+        if (profile.blocked != null)
+            allBlockedUsers = new HashSet<string>(profile.blocked);
+        else
+            allBlockedUsers = new HashSet<string>();
 
         var entries = view.GetAllEntries();
         int entriesCount = entries.Count;
@@ -121,7 +133,8 @@ public class FriendsHUDController : IHUD
         userProfile.OnFaceSnapshotReadyEvent -= friendEntryModel.OnSpriteUpdate;
         userProfile.OnFaceSnapshotReadyEvent += friendEntryModel.OnSpriteUpdate;
 
-        friendEntryModel.blocked = UserProfile.GetOwnUserProfile().blocked.Contains(userId);
+        if (ownUserProfile != null && ownUserProfile.blocked != null)
+            friendEntryModel.blocked = ownUserProfile.blocked.Contains(userId);
 
         switch (friendshipAction)
         {
@@ -173,6 +186,7 @@ public class FriendsHUDController : IHUD
 
     private void Entry_OnPassport(FriendEntryBase entry)
     {
+        Debug.Log("on passport?");
         var currentPlayerId = Resources.Load<StringVariable>(CURRENT_PLAYER_ID);
         currentPlayerId.Set(entry.userId);
     }
@@ -242,10 +256,8 @@ public class FriendsHUDController : IHUD
             UnityEngine.Object.Destroy(view.gameObject);
         }
 
-        var ownProfile = UserProfile.GetOwnUserProfile();
-
-        if (ownProfile != null)
-            ownProfile.OnUpdate -= OnUserProfileUpdate;
+        if (this.ownUserProfile != null)
+            ownUserProfile.OnUpdate -= OnUserProfileUpdate;
     }
 
     public void SetVisibility(bool visible)

@@ -22,7 +22,7 @@ public class FriendEntryBase : MonoBehaviour, IPointerEnterHandler, IPointerExit
     }
 
     public Model model { get; private set; } = new Model();
-    public string userId;
+    [System.NonSerialized] public string userId;
 
     public Image playerBlockedImage;
     public Transform menuPositionReference;
@@ -36,10 +36,9 @@ public class FriendEntryBase : MonoBehaviour, IPointerEnterHandler, IPointerExit
 
     public event System.Action<FriendEntryBase> OnMenuToggle;
 
-    protected virtual void Awake()
+    public virtual void Awake()
     {
         unhoveredBackgroundSprite = backgroundImage.sprite;
-
         menuButton.onClick.AddListener(() => OnMenuToggle?.Invoke(this));
     }
 

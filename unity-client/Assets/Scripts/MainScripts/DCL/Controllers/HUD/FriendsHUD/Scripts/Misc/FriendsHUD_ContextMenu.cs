@@ -15,14 +15,15 @@ public class FriendsHUD_ContextMenu : MonoBehaviour, IPointerDownHandler
     public Button reportButton;
     public Button deleteButton;
 
-    public System.Action<FriendEntryBase> OnPassport;
-    public System.Action<FriendEntryBase> OnReport;
-    public System.Action<FriendEntryBase> OnBlock;
-    public System.Action<FriendEntryBase> OnDelete;
+    public event System.Action<FriendEntryBase> OnPassport;
+    public event System.Action<FriendEntryBase> OnReport;
+    public event System.Action<FriendEntryBase> OnBlock;
+    public event System.Action<FriendEntryBase> OnDelete;
 
 
     public void Awake()
     {
+        Debug.Log("awake!");
         passportButton.onClick.AddListener(OnPassportButtonPressed);
         reportButton.onClick.AddListener(OnReportUserButtonPressed);
         deleteButton.onClick.AddListener(OnDeleteUserButtonPressed);
@@ -33,10 +34,15 @@ public class FriendsHUD_ContextMenu : MonoBehaviour, IPointerDownHandler
 
     internal void Toggle(FriendEntryBase entry)
     {
-        this.targetEntry = entry;
         transform.position = entry.menuPositionReference.position;
 
+        Debug.Log(" Toggle called pre ... " + gameObject.activeSelf);
+
         gameObject.SetActive(targetEntry == entry ? !gameObject.activeSelf : true);
+
+        Debug.Log(" Toggle called post ... " + gameObject.activeSelf);
+
+        this.targetEntry = entry;
 
         if (gameObject.activeSelf)
             blockButtonText.text = entry.model.blocked ? BLOCK_BTN_UNBLOCK_TEXT : BLOCK_BTN_BLOCK_TEXT;
@@ -67,6 +73,7 @@ public class FriendsHUD_ContextMenu : MonoBehaviour, IPointerDownHandler
 
     private void OnPassportButtonPressed()
     {
+        Debug.Log("on passport pressed...");
         OnPassport?.Invoke(targetEntry);
         Hide();
     }

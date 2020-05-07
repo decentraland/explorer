@@ -24,13 +24,15 @@ public class NotificationHUDView : MonoBehaviour
         gameObject.name = VIEW_OBJECT_NAME;
     }
 
-    public void ShowNotification(Notification notification)
+    public void ShowNotification(Notification notification, Notification.Model model = null)
     {
         if (notification == null)
             return;
 
         notification.OnNotificationDismissed += OnNotificationDismissed;
-        notification.Initialize(notification.model);
+
+        if (model != null)
+            notification.Initialize(model);
     }
 
     public Notification ShowNotification(Notification.Model notificationModel)
@@ -39,7 +41,7 @@ public class NotificationHUDView : MonoBehaviour
             return null;
 
         Notification notification = notificationFactory.CreateNotificationFromType(notificationModel.type, notificationPanel);
-        ShowNotification(notification);
+        ShowNotification(notification, notificationModel);
         return notification;
     }
 

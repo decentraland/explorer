@@ -13,7 +13,7 @@ public class FriendEntry : FriendEntryBase
     [SerializeField] internal Button whisperButton;
     [SerializeField] internal GameObject whisperLabel;
 
-    protected override void Awake()
+    public override void Awake()
     {
         base.Awake();
 
@@ -42,14 +42,10 @@ public class FriendEntry : FriendEntryBase
     {
         base.Populate(model);
 
-        if (model.status == FriendsController.PresenceStatus.ONLINE || model.status == FriendsController.PresenceStatus.UNAVAILABLE)
-            playerLocationText.text = $"{model.realm} {model.coords.x}, {model.coords.y}";
+        if (model.status == FriendsController.PresenceStatus.ONLINE ||
+            model.status == FriendsController.PresenceStatus.UNAVAILABLE)
+            playerLocationText.text = $"{model.realm} {(int)model.coords.x}, {(int)model.coords.y}";
         else
             playerLocationText.text = $"";
-    }
-
-    private void OnAvatarImageChange(Sprite sprite)
-    {
-        playerImage.sprite = sprite;
     }
 }
