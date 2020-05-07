@@ -111,14 +111,14 @@ public class FriendsHUDViewShould : TestsBase
         CreateFriendEntry("user3", "Wanda Nara", FriendsController.PresenceStatus.OFFLINE);
         CreateFriendEntry("user4", "Mirtha Legrand", FriendsController.PresenceStatus.OFFLINE);
 
-        Assert.AreEqual(2, view.friendsList.onlineFriendsList.GetCount());
-        Assert.AreEqual(2, view.friendsList.offlineFriendsList.GetCount());
+        Assert.AreEqual(2, view.friendsList.onlineFriendsList.Count());
+        Assert.AreEqual(2, view.friendsList.offlineFriendsList.Count());
 
         view.friendsList.RemoveEntry("user1");
         view.friendsList.RemoveEntry("user3");
 
-        Assert.AreEqual(1, view.friendsList.onlineFriendsList.GetCount());
-        Assert.AreEqual(1, view.friendsList.offlineFriendsList.GetCount());
+        Assert.AreEqual(1, view.friendsList.onlineFriendsList.Count());
+        Assert.AreEqual(1, view.friendsList.offlineFriendsList.Count());
     }
 
 

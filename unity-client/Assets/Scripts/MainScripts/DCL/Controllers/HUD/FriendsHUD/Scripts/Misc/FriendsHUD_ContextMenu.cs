@@ -23,7 +23,6 @@ public class FriendsHUD_ContextMenu : MonoBehaviour, IPointerDownHandler
 
     public void Awake()
     {
-        Debug.Log("awake!");
         passportButton.onClick.AddListener(OnPassportButtonPressed);
         reportButton.onClick.AddListener(OnReportUserButtonPressed);
         deleteButton.onClick.AddListener(OnDeleteUserButtonPressed);
@@ -36,11 +35,7 @@ public class FriendsHUD_ContextMenu : MonoBehaviour, IPointerDownHandler
     {
         transform.position = entry.menuPositionReference.position;
 
-        Debug.Log(" Toggle called pre ... " + gameObject.activeSelf);
-
         gameObject.SetActive(targetEntry == entry ? !gameObject.activeSelf : true);
-
-        Debug.Log(" Toggle called post ... " + gameObject.activeSelf);
 
         this.targetEntry = entry;
 
@@ -73,7 +68,6 @@ public class FriendsHUD_ContextMenu : MonoBehaviour, IPointerDownHandler
 
     private void OnPassportButtonPressed()
     {
-        Debug.Log("on passport pressed...");
         OnPassport?.Invoke(targetEntry);
         Hide();
     }

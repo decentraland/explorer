@@ -85,6 +85,8 @@ public class FriendRequestsTabView : FriendsTabViewBase
 
         if (isReceived.HasValue)
         {
+            entry.SetReceived(isReceived.Value);
+
             if (isReceived.Value)
                 receivedRequestsList.Add(userId, entry);
             else
@@ -121,7 +123,8 @@ public class FriendRequestsTabView : FriendsTabViewBase
         if (!addFriendButton.interactable)
             addFriendButton.interactable = true;
 
-        NotificationsController.i.DismissAllNotifications(FriendsHUDView.NOTIFICATIONS_ID);
+        if (!string.IsNullOrEmpty(friendId))
+            NotificationsController.i.DismissAllNotifications(FriendsHUDView.NOTIFICATIONS_ID);
     }
 
     void OnFriendRequestReceivedAccepted(FriendRequestEntry requestEntry)

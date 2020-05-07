@@ -14,7 +14,9 @@ public class Notification : MonoBehaviour
         public string scene;
         public System.Action callback;
         public string externalCallbackID;
+
         public string groupID;
+        public bool destroyOnFinish = false;
     }
 
     [SerializeField]
@@ -32,16 +34,19 @@ public class Notification : MonoBehaviour
 
     private void OnEnable()
     {
-        actionButton.onClick.AddListener(Dismiss);
+        if (actionButton != null)
+            actionButton.onClick.AddListener(Dismiss);
     }
 
     private void OnDisable()
     {
-        actionButton.onClick.RemoveAllListeners();
+        if (actionButton != null)
+            actionButton.onClick.RemoveAllListeners();
     }
 
     public void Initialize(Notification.Model model)
     {
+        gameObject.SetActive(true);
         this.model = model;
 
         if (!string.IsNullOrEmpty(this.model.message))
@@ -56,7 +61,7 @@ public class Notification : MonoBehaviour
 
         if (this.model.timer > 0)
         {
-            StartCoroutine(TimerCoroutine(this.model.timer));
+            CoroutineStarter.Start(TimerCoroutine(this.model.timer));
         }
 
         if (!string.IsNullOrEmpty(this.model.scene))
@@ -65,17 +70,20 @@ public class Notification : MonoBehaviour
             CurrentSceneUpdated(sceneID, string.Empty);
         }
 
-        if (this.model.callback != null)
+        if (actionButton != null)
         {
-            actionButton.onClick.AddListener(this.model.callback.Invoke);
-        }
-
-        if (!string.IsNullOrEmpty(this.model.externalCallbackID))
-        {
-            actionButton.onClick.AddListener(() =>
+            if (this.model.callback != null)
             {
-                // TODO: send message to kernel with callbackID
-            });
+                actionButton.onClick.AddListener(this.model.callback.Invoke);
+            }
+
+            if (!string.IsNullOrEmpty(this.model.externalCallbackID))
+            {
+                actionButton.onClick.AddListener(() =>
+                {
+                    // TODO: send message to kernel with callbackID
+                });
+            }
         }
     }
 

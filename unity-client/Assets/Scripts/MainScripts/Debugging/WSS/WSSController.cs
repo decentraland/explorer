@@ -393,6 +393,9 @@ namespace DCL
                             case "UpdateUserStatus":
                                 FriendsController.i?.UpdateUserStatus(msg.payload);
                                 break;
+                            case "FriendNotFound":
+                                FriendsController.i?.FriendNotFound(msg.payload);
+                                break;
                             case "AddMessageToChatWindow":
                                 ChatController.i?.AddMessageToChatWindow(msg.payload);
                                 break;

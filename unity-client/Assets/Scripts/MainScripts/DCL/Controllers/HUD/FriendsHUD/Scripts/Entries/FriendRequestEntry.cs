@@ -22,17 +22,14 @@ public class FriendRequestEntry : FriendEntryBase
         cancelButton.onClick.AddListener(() => OnCancelled?.Invoke(this));
     }
 
-    public void Populate(FriendEntry.Model model, bool? isReceived = null)
+    public void SetReceived(bool value)
     {
-        base.Populate(model);
+        isReceived = value;
 
-        if (isReceived.HasValue)
-        {
-            if (isReceived.Value)
-                PopulateReceived();
-            else
-                PopulateSent();
-        }
+        if (isReceived)
+            PopulateReceived();
+        else
+            PopulateSent();
     }
 
     void PopulateReceived()

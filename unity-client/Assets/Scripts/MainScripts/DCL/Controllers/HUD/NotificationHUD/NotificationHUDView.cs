@@ -41,6 +41,7 @@ public class NotificationHUDView : MonoBehaviour
             return null;
 
         Notification notification = notificationFactory.CreateNotificationFromType(notificationModel.type, notificationPanel);
+        notificationModel.destroyOnFinish = true;
         ShowNotification(notification, notificationModel);
         return notification;
     }
@@ -48,7 +49,11 @@ public class NotificationHUDView : MonoBehaviour
     private void OnNotificationDismissed(Notification n)
     {
         OnNotificationDismissedEvent?.Invoke(n);
-        Destroy(n.gameObject);
+
+        if (n.model.destroyOnFinish)
+            Destroy(n.gameObject);
+        else
+            n.gameObject.SetActive(false);
     }
 
     public void SetActive(bool active)

@@ -10,11 +10,12 @@ public class FriendsTabViewBase : MonoBehaviour
     public class EntryList
     {
         public string toggleTextPrefix;
+        public GameObject toggleButton;
         public TextMeshProUGUI toggleText;
         public Transform container;
         private Dictionary<string, FriendEntryBase> entries = new Dictionary<string, FriendEntryBase>();
 
-        public int GetCount()
+        public int Count()
         {
             return entries.Count;
         }
@@ -25,9 +26,11 @@ public class FriendsTabViewBase : MonoBehaviour
                 return;
 
             entries.Add(userId, entry);
-            entry.transform.SetParent(container);
-            toggleText.text = $"{toggleTextPrefix} ({GetCount()})";
-            container.gameObject.SetActive(true);
+
+            entry.transform.SetParent(container, false);
+            entry.transform.localScale = Vector3.one;
+
+            UpdateToggle();
         }
 
         public FriendEntryBase Remove(string userId)
@@ -38,12 +41,16 @@ public class FriendsTabViewBase : MonoBehaviour
             var entry = entries[userId];
 
             entries.Remove(userId);
-            toggleText.text = $"{toggleTextPrefix} ({GetCount()})";
 
-            if (GetCount() == 0)
-                container.gameObject.SetActive(false);
+            UpdateToggle();
 
             return entry;
+        }
+
+        void UpdateToggle()
+        {
+            toggleText.text = $"{toggleTextPrefix} ({Count()})";
+            toggleButton.SetActive(Count() != 0);
         }
     }
 

@@ -145,10 +145,12 @@ MonoBehaviour:
   confirmationDialog: {fileID: 3615013675651196859}
   receivedRequestsList:
     toggleTextPrefix: RECEIVED
+    toggleButton: {fileID: 6509815651344373640}
     toggleText: {fileID: 3396915662445348230}
     container: {fileID: 8912797600660916732}
   sentRequestsList:
     toggleTextPrefix: SENT
+    toggleButton: {fileID: 892816310148651841}
     toggleText: {fileID: 2961274995397393352}
     container: {fileID: 4417659405308114824}
   friendSearchInputField: {fileID: 3393797650520696229}
@@ -1771,10 +1773,12 @@ MonoBehaviour:
   confirmationDialog: {fileID: 1192872094190131343}
   onlineFriendsList:
     toggleTextPrefix: ONLINE
+    toggleButton: {fileID: 4723240361997474987}
     toggleText: {fileID: 3213783841871339297}
     container: {fileID: 4170319777576616387}
   offlineFriendsList:
     toggleTextPrefix: OFFLINE
+    toggleButton: {fileID: 7611410632106715941}
     toggleText: {fileID: 3090834247870482610}
     container: {fileID: 9057412822816918847}
 --- !u!1 &3068801947464849613

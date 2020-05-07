@@ -171,7 +171,7 @@ public class FriendsHUDController : IHUD
         var pendingFriendRequestsSO = Resources.Load<FloatVariable>("ScriptableObjects/PendingFriendRequests");
 
         if (pendingFriendRequestsSO != null)
-            pendingFriendRequestsSO.Set(view.friendRequestsList.receivedRequestsList.GetCount());
+            pendingFriendRequestsSO.Set(view.friendRequestsList.receivedRequestsList.Count());
     }
 
     private void Entry_OnWhisper(FriendEntry entry)
@@ -186,7 +186,6 @@ public class FriendsHUDController : IHUD
 
     private void Entry_OnPassport(FriendEntryBase entry)
     {
-        Debug.Log("on passport?");
         var currentPlayerId = Resources.Load<StringVariable>(CURRENT_PLAYER_ID);
         currentPlayerId.Set(entry.userId);
     }

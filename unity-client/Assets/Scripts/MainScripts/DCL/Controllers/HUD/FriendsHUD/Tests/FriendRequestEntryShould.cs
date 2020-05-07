@@ -32,7 +32,8 @@ public class FriendRequestEntryShould : TestsBase
         var model2 = new FriendEntry.Model() { userName = "test2", avatarImage = testSprite2 };
 
         entry.userId = "userId1";
-        entry.Populate(model1, isReceived: true);
+        entry.Populate(model1);
+        entry.SetReceived(true);
 
         Assert.AreEqual(model1.userName, entry.playerNameText.text);
         Assert.AreEqual(model1.avatarImage, entry.playerImage.sprite);
@@ -42,7 +43,8 @@ public class FriendRequestEntryShould : TestsBase
         Assert.IsTrue(entry.rejectButton.gameObject.activeSelf);
 
         entry.userId = "userId2";
-        entry.Populate(model2, isReceived: false);
+        entry.Populate(model2);
+        entry.SetReceived(false);
 
         Assert.AreEqual(model2.userName, entry.playerNameText.text);
         Assert.AreEqual(model2.avatarImage, entry.playerImage.sprite);

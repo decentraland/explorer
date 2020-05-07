@@ -22,7 +22,7 @@ public class NotificationHUDController : IHUD
     public void ShowNotification(Notification notification)
     {
         model.notifications.Add(notification);
-        view.ShowNotification(notification);
+        view.ShowNotification(notification, notification.model);
     }
 
     public void ShowNotification(Notification.Model model)
