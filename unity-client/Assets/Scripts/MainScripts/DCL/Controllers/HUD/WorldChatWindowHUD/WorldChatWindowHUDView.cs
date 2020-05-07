@@ -2,6 +2,9 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using TMPro;
+using System.Text.RegularExpressions;
+using System.Collections;
 
 public class WorldChatWindowHUDView : MonoBehaviour, IPointerClickHandler
 {
@@ -11,11 +14,15 @@ public class WorldChatWindowHUDView : MonoBehaviour, IPointerClickHandler
     public Button worldFilterButton;
     public Button pmFilterButton;
     public Button closeButton;
+    public TMP_InputField inputField;
 
     public ChatHUDView chatHudView;
 
     public CanvasGroup group;
     public WorldChatWindowHUDController controller;
+
+    Regex whisperRegex = new Regex(@"(?i)^\/(whisper|w) (\S*) ");
+    Match whisperRegexMatch;
 
     TabMode tabMode = TabMode.WORLD;
     enum TabMode
@@ -29,6 +36,12 @@ public class WorldChatWindowHUDView : MonoBehaviour, IPointerClickHandler
         var view = Instantiate(Resources.Load<GameObject>(VIEW_PATH)).GetComponent<WorldChatWindowHUDView>();
         view.Initialize(onPrivateMessages, onWorldMessages);
         return view;
+    }
+
+    void Awake()
+    {
+        inputField.onSubmit.AddListener(OnTextInputSubmit);
+        inputField.onValueChanged.AddListener(OnTextInputValueChanged);
     }
 
     void OnEnable()
@@ -98,5 +111,43 @@ public class WorldChatWindowHUDView : MonoBehaviour, IPointerClickHandler
     public void OnPointerClick(PointerEventData eventData)
     {
         DeactivatePreview();
+    }
+
+    public void OnTextInputValueChanged(string text)
+    {
+        if (!string.IsNullOrEmpty(controller.lastPrivateMessageReceivedSender) && text == "/r ")
+        {
+            inputField.text = $"/w {controller.lastPrivateMessageReceivedSender} ";
+            inputField.caretPosition = inputField.text.Length;
+        }
+    }
+
+    public void OnTextInputSubmit(string text)
+    {
+        text = GetLastWhisperCommand(text);
+
+        if (!string.IsNullOrEmpty(text))
+        {
+            StartCoroutine(WaitAndUpdateInputText(text));
+        }
+    }
+
+    IEnumerator WaitAndUpdateInputText(string newText)
+    {
+        yield return null;
+
+        inputField.text = newText;
+        inputField.caretPosition = newText.Length;
+    }
+
+    public string GetLastWhisperCommand(string inputString)
+    {
+        whisperRegexMatch = whisperRegex.Match(inputString);
+        if (whisperRegexMatch.Success)
+        {
+            return whisperRegexMatch.Value;
+        }
+
+        return string.Empty;
     }
 }

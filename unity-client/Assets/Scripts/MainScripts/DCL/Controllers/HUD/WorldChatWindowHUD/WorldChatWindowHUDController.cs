@@ -1,6 +1,5 @@
 
 using DCL;
-
 using DCL.Interface;
 using System.Collections;
 using System.Linq;
@@ -17,11 +16,13 @@ public class WorldChatWindowHUDController : IHUD
 
     internal bool resetInputFieldOnSubmit = true;
     private int invalidSubmitLastFrame = 0;
+    UserProfile ownProfile => UserProfile.GetOwnUserProfile();
+    public string lastPrivateMessageReceivedSender = string.Empty;
 
     public void Initialize(IChatController chatController, IMouseCatcher mouseCatcher)
     {
         view = WorldChatWindowHUDView.Create(OnEnablePrivateTab, OnEnableWorldTab);
-
+        view.controller = this;
         chatHudController = new ChatHUDController();
         chatHudController.Initialize(view.chatHudView, SendChatMessage);
 
@@ -85,6 +86,9 @@ public class WorldChatWindowHUDController : IHUD
     void OnAddMessage(ChatMessage message)
     {
         view.chatHudView.controller.AddChatMessage(ChatHUDController.ChatMessageToChatEntry(message));
+
+        if (message.messageType == ChatMessage.Type.PRIVATE && message.recipient == ownProfile.userId)
+            lastPrivateMessageReceivedSender = UserProfileController.userProfilesCatalog.Get(message.sender).userName;
     }
 
     //NOTE(Brian): Send chat responsibilities must be on the chatHud containing window like this one, this way we ensure
@@ -147,7 +151,6 @@ public class WorldChatWindowHUDController : IHUD
         ForceFocus();
         return true;
     }
-
 
     public void ForceFocus(string setInputText = null)
     {
