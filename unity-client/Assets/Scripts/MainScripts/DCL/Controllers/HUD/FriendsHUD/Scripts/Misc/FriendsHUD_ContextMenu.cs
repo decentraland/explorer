@@ -23,7 +23,9 @@ public class FriendsHUD_ContextMenu : MonoBehaviour, IPointerDownHandler
     RectTransform rectTransform;
     public void Awake()
     {
-        rectTransform = transform as RectTransform;
+        if (rectTransform == null)
+            rectTransform = transform as RectTransform;
+
         passportButton.onClick.AddListener(OnPassportButtonPressed);
         reportButton.onClick.AddListener(OnReportUserButtonPressed);
         deleteButton.onClick.AddListener(OnDeleteUserButtonPressed);
@@ -34,6 +36,9 @@ public class FriendsHUD_ContextMenu : MonoBehaviour, IPointerDownHandler
 
     internal void Toggle(FriendEntryBase entry)
     {
+        if (rectTransform == null)
+            rectTransform = transform as RectTransform;
+
         //NOTE(Pravus): By setting the pivot accordingly BEFORE we position the menu, we can have it always
         //              visible in an easier way.
         if (entry.transform.parent.InverseTransformPoint(entry.menuPositionReference.position).y < 0f)
