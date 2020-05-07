@@ -454,8 +454,7 @@ export type FriendshipUpdateStatusMessage = {
   action: FriendshipAction
 }
 
-export enum PresenceStatus
-{
+export enum PresenceStatus {
   NONE,
   OFFLINE,
   ONLINE,
@@ -464,13 +463,17 @@ export enum PresenceStatus
 
 export type UpdateUserStatusMessage = {
   userId: string
-  realm: undefined | {
-    layer: string
-    serverName: string
-  }
-  position: undefined | {
-    x: number
-    y: number
-  }
+  realm:
+    | undefined
+    | {
+        layer: string
+        serverName: string
+      }
+  position:
+    | undefined
+    | {
+        x: number
+        y: number
+      }
   presence: PresenceStatus
 }

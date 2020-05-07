@@ -251,29 +251,30 @@ function initializeReceivedMessagesCleanUp() {
   }, MESSAGE_LIFESPAN_MILLIS)
 }
 
-function sendUpdateUserStatus( id:string, status:CurrentUserStatus ) {
-    const presence: PresenceStatus =
-      status.presence === PresenceType.ONLINE ? PresenceStatus.ONLINE : PresenceStatus.OFFLINE
+function sendUpdateUserStatus(id: string, status: CurrentUserStatus) {
+  const presence: PresenceStatus =
+    status.presence === PresenceType.ONLINE ? PresenceStatus.ONLINE : PresenceStatus.OFFLINE
 
-    let matches = id.match(/@(\w.+):matrix.decentraland.zone/i)
+  let matches = id.match(/@(\w.+):matrix.decentraland.zone/i)
 
-    const updateMessage = {
-      userId: matches !== null ? matches[1] : id,
-      realm: status.realm,
-      position: status.position,
-      presence
-    }
+  const updateMessage = {
+    userId: matches !== null ? matches[1] : id,
+    realm: status.realm,
+    position: status.position,
+    presence
+  }
 
-    DEBUG && logger.info(`unityInterface.UpdateUserStatus`, updateMessage)
-    unityInterface.UpdateUserStatus(updateMessage)
+  DEBUG && logger.info(`unityInterface.UpdateUserStatus`, updateMessage)
+  unityInterface.UpdateUserStatus(updateMessage)
 }
 
 function initializeStatusUpdateInterval(client: SocialAPI) {
-  
-  let friends = globalThis.globalStore.getState().chat.privateMessaging.friends.map ( (x) => { return `@${x}:matrix.decentraland.zone` })
+  let friends = globalThis.globalStore.getState().chat.privateMessaging.friends.map(x => {
+    return `@${x}:matrix.decentraland.zone`
+  })
   let statuses = client.getUserStatuses(...friends)
 
-  statuses.forEach( (value, key) => { 
+  statuses.forEach((value, key) => {
     sendUpdateUserStatus(key, value)
   })
 
