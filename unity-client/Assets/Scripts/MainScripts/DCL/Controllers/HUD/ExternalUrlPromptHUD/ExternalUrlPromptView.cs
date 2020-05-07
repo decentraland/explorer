@@ -6,12 +6,12 @@ using DCL.Helpers;
 public class ExternalUrlPromptView : MonoBehaviour
 {
     [SerializeField] internal GameObject content;
-    [SerializeField] Button closeButton;
-    [SerializeField] Button continueButton;
-    [SerializeField] Button cancelButton;
-    [SerializeField] TMPro.TextMeshProUGUI domainText;
-    [SerializeField] TMPro.TextMeshProUGUI urlText;
-    [SerializeField] Toggle trustToggle;
+    [SerializeField] internal Button closeButton;
+    [SerializeField] internal Button continueButton;
+    [SerializeField] internal Button cancelButton;
+    [SerializeField] internal TMPro.TextMeshProUGUI domainText;
+    [SerializeField] internal TMPro.TextMeshProUGUI urlText;
+    [SerializeField] internal Toggle trustToggle;
 
     internal enum ResultType { CANCELED, APPROVED, APPROVED_TRUSTED }
 

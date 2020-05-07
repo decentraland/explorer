@@ -9,7 +9,7 @@ public class ExternalUrlPromptHUDController : IHUD
 {
     internal ExternalUrlPromptView view { get; private set; }
 
-    private Dictionary<string, HashSet<string>> trustedDomains = new Dictionary<string, HashSet<string>>();
+    internal Dictionary<string, HashSet<string>> trustedDomains = new Dictionary<string, HashSet<string>>();
 
     public ExternalUrlPromptHUDController()
     {
@@ -34,7 +34,7 @@ public class ExternalUrlPromptHUDController : IHUD
         trustedDomains.Clear();
     }
 
-    private void ProcessOpenUrlRequest(ParcelScene scene, string url)
+    internal void ProcessOpenUrlRequest(ParcelScene scene, string url)
     {
         Uri uri;
         if (Uri.TryCreate(url, UriKind.Absolute, out uri))

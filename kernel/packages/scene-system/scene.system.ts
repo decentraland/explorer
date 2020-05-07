@@ -87,7 +87,7 @@ export default class GamekitScene extends Script {
   scenePosition: Vector2 = new Vector2()
   parcels: Array<{ x: number; y: number }> = []
 
-  allowOpenExternalUrl: boolean = false
+  private allowOpenExternalUrl: boolean = false
 
   constructor(transport: ScriptingTransport, opt?: ILogOpts) {
     super(transport, opt)
