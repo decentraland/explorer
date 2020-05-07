@@ -20,9 +20,10 @@ public class FriendsHUD_ContextMenu : MonoBehaviour, IPointerDownHandler
     public event System.Action<FriendEntryBase> OnBlock;
     public event System.Action<FriendEntryBase> OnDelete;
 
-
+    RectTransform rectTransform;
     public void Awake()
     {
+        rectTransform = transform as RectTransform;
         passportButton.onClick.AddListener(OnPassportButtonPressed);
         reportButton.onClick.AddListener(OnReportUserButtonPressed);
         deleteButton.onClick.AddListener(OnDeleteUserButtonPressed);
@@ -33,6 +34,13 @@ public class FriendsHUD_ContextMenu : MonoBehaviour, IPointerDownHandler
 
     internal void Toggle(FriendEntryBase entry)
     {
+        //NOTE(Pravus): By setting the pivot accordingly BEFORE we position the menu, we can have it always
+        //              visible in an easier way.
+        if (entry.transform.parent.InverseTransformPoint(entry.menuPositionReference.position).y < 0f)
+            rectTransform.pivot = new Vector2(0.5f, 0f);
+        else
+            rectTransform.pivot = new Vector2(0.5f, 1f);
+
         transform.position = entry.menuPositionReference.position;
 
         gameObject.SetActive(targetEntry == entry ? !gameObject.activeSelf : true);
