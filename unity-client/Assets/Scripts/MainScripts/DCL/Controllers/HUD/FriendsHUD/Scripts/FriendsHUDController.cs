@@ -99,7 +99,11 @@ public class FriendsHUDController : IHUD
 
         model.status = newStatus.presence;
         model.coords = newStatus.position;
-        model.realm = $"{newStatus.realm.serverName.ToUpperFirst()} {newStatus.realm.layer.ToUpperFirst()}";
+
+        if(newStatus.realm != null)
+            model.realm = $"{newStatus.realm.serverName.ToUpperFirst()} {newStatus.realm.layer.ToUpperFirst()}";
+        else
+            model.realm = string.Empty;
 
         view.friendsList.UpdateEntry(userId, model);
         view.friendRequestsList.UpdateEntry(userId, model);
