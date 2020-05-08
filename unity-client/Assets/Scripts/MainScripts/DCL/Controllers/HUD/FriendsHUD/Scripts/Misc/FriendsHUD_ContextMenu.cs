@@ -1,10 +1,8 @@
-using DCL.Configuration;
 using TMPro;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class FriendsHUD_ContextMenu : MonoBehaviour, IPointerDownHandler
+public class FriendsHUD_ContextMenu : MonoBehaviour
 {
     const string BLOCK_BTN_BLOCK_TEXT = "Block";
     const string BLOCK_BTN_UNBLOCK_TEXT = "Unblock";
@@ -82,11 +80,4 @@ public class FriendsHUD_ContextMenu : MonoBehaviour, IPointerDownHandler
         OnPassport?.Invoke(targetEntry);
         Hide();
     }
-
-    public void OnPointerDown(PointerEventData eventData)
-    {
-        if (eventData.pointerPressRaycast.gameObject == null || eventData.pointerPressRaycast.gameObject.layer != PhysicsLayers.friendsHUDPlayerMenu)
-            Hide();
-    }
-
 }

@@ -1,10 +1,12 @@
 using DCL.Helpers;
+using DCL.Configuration;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
-public class FriendsTabViewBase : MonoBehaviour
+public class FriendsTabViewBase : MonoBehaviour, IPointerDownHandler
 {
     [System.Serializable]
     public class EntryList
@@ -90,6 +92,12 @@ public class FriendsTabViewBase : MonoBehaviour
     {
         confirmationDialog.Hide();
         contextMenuPanel.Hide();
+    }
+
+    public void OnPointerDown(PointerEventData eventData)
+    {
+        if (eventData.pointerPressRaycast.gameObject == null || eventData.pointerPressRaycast.gameObject.layer != PhysicsLayers.friendsHUDPlayerMenu)
+            contextMenuPanel.Hide();
     }
 
     public virtual void Initialize(FriendsHUDView owner)
