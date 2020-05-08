@@ -39,6 +39,7 @@ public class FriendEntryBase : MonoBehaviour, IPointerEnterHandler, IPointerExit
     public virtual void Awake()
     {
         unhoveredBackgroundSprite = backgroundImage.sprite;
+        menuButton.onClick.RemoveAllListeners();
         menuButton.onClick.AddListener(() => OnMenuToggle?.Invoke(this));
     }
 

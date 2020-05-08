@@ -32,6 +32,8 @@ public class Notification : MonoBehaviour
 
     public event System.Action<Notification> OnNotificationDismissed;
 
+    Coroutine timerCoroutine;
+
     private void OnEnable()
     {
         if (actionButton != null)
@@ -42,12 +44,22 @@ public class Notification : MonoBehaviour
     {
         if (actionButton != null)
             actionButton.onClick.RemoveAllListeners();
+
+        StopTimer();
     }
+
+    private void OnDestroy()
+    {
+        StopTimer();
+    }
+
 
     public void Initialize(Notification.Model model)
     {
         gameObject.SetActive(true);
         this.model = model;
+
+        Debug.Log("Notification Initialize... destroy on finish: " + model.destroyOnFinish);
 
         if (!string.IsNullOrEmpty(this.model.message))
         {
@@ -61,7 +73,8 @@ public class Notification : MonoBehaviour
 
         if (this.model.timer > 0)
         {
-            CoroutineStarter.Start(TimerCoroutine(this.model.timer));
+            StopTimer();
+            timerCoroutine = CoroutineStarter.Start(TimerCoroutine(this.model.timer));
         }
 
         if (!string.IsNullOrEmpty(this.model.scene))
@@ -103,7 +116,18 @@ public class Notification : MonoBehaviour
 
     public void Dismiss()
     {
-        StopAllCoroutines();
-        OnNotificationDismissed?.Invoke(this);
+        StopTimer();
+
+        if (this != null)
+            OnNotificationDismissed?.Invoke(this);
+    }
+
+    private void StopTimer()
+    {
+        if (timerCoroutine != null)
+        {
+            CoroutineStarter.Stop(timerCoroutine);
+            timerCoroutine = null;
+        }
     }
 }
