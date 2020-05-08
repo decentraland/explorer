@@ -1,4 +1,4 @@
-import { Vector3Component } from '../atomicHelpers/landHelpers'
+import { Vector3Component, Vector2Component } from '../atomicHelpers/landHelpers'
 import { QueryType } from 'decentraland-ecs/src/decentraland/PhysicsCast'
 
 export { Avatar, Profile, ColorString, WearableId, Wearable } from './profiles/types'
@@ -454,23 +454,21 @@ export type FriendshipUpdateStatusMessage = {
   action: FriendshipAction
 }
 
-export enum PresenceStatus
-{
+export enum PresenceStatus {
   NONE,
   OFFLINE,
   ONLINE,
   UNAVAILABLE
 }
 
+type Realm = {
+  layer: string
+  serverName: string
+}
+
 export type UpdateUserStatusMessage = {
   userId: string
-  realm: undefined | {
-    layer: string
-    serverName: string
-  }
-  position: undefined | {
-    x: number
-    y: number
-  }
+  realm: Realm | undefined
+  position: Vector2Component | undefined
   presence: PresenceStatus
 }

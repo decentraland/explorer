@@ -760,17 +760,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 686a388f6188e44d4a640967167d85b6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  playerBlockedImage: {fileID: 7231910938041917282}
+  menuPositionReference: {fileID: 4882786013316759375}
   playerNameText: {fileID: 9059110502284925088}
   playerImage: {fileID: 3805504581241070516}
   menuButton: {fileID: 1278527795422366261}
-  acceptButton: {fileID: 552327391556498921}
-  rejectButton: {fileID: 5241274719269839806}
-  cancelButton: {fileID: 5651660656805690779}
   backgroundImage: {fileID: 8006369808805477131}
   hoveredBackgroundSprite: {fileID: 21300000, guid: f48850fa5be164fc68819a7c8586432c,
     type: 3}
-  menuPositionReference: {fileID: 4882786013316759375}
-  playerBlockedImage: {fileID: 7231910938041917282}
+  acceptButton: {fileID: 552327391556498921}
+  rejectButton: {fileID: 5241274719269839806}
+  cancelButton: {fileID: 5651660656805690779}
 --- !u!1 &4465955091894006684
 GameObject:
   m_ObjectHideFlags: 0

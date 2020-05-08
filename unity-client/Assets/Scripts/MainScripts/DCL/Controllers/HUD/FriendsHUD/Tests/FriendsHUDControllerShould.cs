@@ -46,9 +46,11 @@ public class FriendsHUDControllerShould : TestsBase
     {
         yield return base.SetUp();
 
+        NotificationsController.i.Initialize(new NotificationHUDController());
+
         controller = new FriendsHUDController();
         friendsController = new FriendsController_Mock();
-        controller.Initialize(friendsController);
+        controller.Initialize(friendsController, UserProfile.GetOwnUserProfile());
         this.view = controller.view;
 
         Assert.IsTrue(view != null, "Friends hud view is null?");
@@ -59,7 +61,7 @@ public class FriendsHUDControllerShould : TestsBase
     protected override IEnumerator TearDown()
     {
         yield return base.TearDown();
-        UnityEngine.Object.Destroy(view);
+        controller.Dispose();
     }
 
     [Test]
@@ -119,7 +121,11 @@ public class FriendsHUDControllerShould : TestsBase
         WebInterface.OnMessageFromEngine += callback;
 
         entry.menuButton.onClick.Invoke();
-        controller.view.friendsList.contextMenuReportButton.onClick.Invoke();
+
+        Assert.IsTrue(controller.view.friendsList.contextMenuPanel.gameObject.activeSelf);
+        Assert.AreEqual(entry, controller.view.friendsList.contextMenuPanel.targetEntry);
+
+        controller.view.friendsList.contextMenuPanel.reportButton.onClick.Invoke();
 
         Assert.IsTrue(reportPlayerSent);
 
@@ -135,11 +141,11 @@ public class FriendsHUDControllerShould : TestsBase
         var currentPlayerId = Resources.Load<StringVariable>(FriendsHUDController.CURRENT_PLAYER_ID);
 
         entry.menuButton.onClick.Invoke();
-        Assert.AreNotEqual(currentPlayerId.Get(), id);
+        Assert.AreNotEqual(id, currentPlayerId.Get());
 
-        view.friendsList.contextMenuPassportButton.onClick.Invoke();
+        view.friendsList.contextMenuPanel.passportButton.onClick.Invoke();
 
-        Assert.AreEqual(currentPlayerId.Get(), id);
+        Assert.AreEqual(id, currentPlayerId.Get());
     }
 
     [Test]

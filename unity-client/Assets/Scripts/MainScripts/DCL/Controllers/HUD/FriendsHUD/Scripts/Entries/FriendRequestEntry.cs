@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class FriendRequestEntry : FriendsHUDListEntry
+public class FriendRequestEntry : FriendEntryBase
 {
     [SerializeField] internal Button acceptButton;
     [SerializeField] internal Button rejectButton;
@@ -13,7 +13,7 @@ public class FriendRequestEntry : FriendsHUDListEntry
     public event System.Action<FriendRequestEntry> OnRejected;
     public event System.Action<FriendRequestEntry> OnCancelled;
 
-    protected override void Awake()
+    public override void Awake()
     {
         base.Awake();
 
@@ -22,17 +22,14 @@ public class FriendRequestEntry : FriendsHUDListEntry
         cancelButton.onClick.AddListener(() => OnCancelled?.Invoke(this));
     }
 
-    public void Populate(string userId, FriendEntry.Model model, bool? isReceived = null)
+    public void SetReceived(bool value)
     {
-        base.Populate(userId, model);
+        isReceived = value;
 
-        if (isReceived.HasValue)
-        {
-            if (isReceived.Value)
-                PopulateReceived();
-            else
-                PopulateSent();
-        }
+        if (isReceived)
+            PopulateReceived();
+        else
+            PopulateSent();
     }
 
     void PopulateReceived()

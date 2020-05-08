@@ -1,4 +1,4 @@
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using System.Collections;
 using UnityEngine.TestTools;
 
@@ -14,7 +14,7 @@ public class FriendsHUDViewShould : TestsBase
         base.SetUp();
 
         controller = new FriendsHUDController();
-        controller.Initialize(null);
+        controller.Initialize(null, null);
         this.view = controller.view;
 
         Assert.IsTrue(view != null, "Friends hud view is null?");
@@ -53,17 +53,17 @@ public class FriendsHUDViewShould : TestsBase
 
         Assert.IsNotNull(entry1);
         Assert.AreEqual(entry1.model.userName, entry1.playerNameText.text);
-        Assert.AreEqual(controller.view.friendsList.onlineFriendsContainer, entry1.transform.parent);
+        Assert.AreEqual(controller.view.friendsList.onlineFriendsList.container, entry1.transform.parent);
 
         Assert.IsNotNull(entry2);
         Assert.AreEqual(entry2.model.userName, entry2.playerNameText.text);
-        Assert.AreEqual(controller.view.friendsList.offlineFriendsContainer, entry2.transform.parent);
+        Assert.AreEqual(controller.view.friendsList.offlineFriendsList.container, entry2.transform.parent);
 
         var model2 = entry2.model;
         model2.status = FriendsController.PresenceStatus.ONLINE;
         controller.view.friendsList.CreateOrUpdateEntry(id2, model2);
 
-        Assert.AreEqual(controller.view.friendsList.onlineFriendsContainer, entry2.transform.parent);
+        Assert.AreEqual(controller.view.friendsList.onlineFriendsList.container, entry2.transform.parent);
     }
 
 
@@ -92,33 +92,33 @@ public class FriendsHUDViewShould : TestsBase
 
         Assert.IsNotNull(entry1);
         Assert.AreEqual("Pravus", entry1.playerNameText.text);
-        Assert.AreEqual(controller.view.friendRequestsList.receivedRequestsContainer, entry1.transform.parent);
+        Assert.AreEqual(controller.view.friendRequestsList.receivedRequestsList.container, entry1.transform.parent);
 
         Assert.IsNotNull(entry2);
         Assert.AreEqual("Brian", entry2.playerNameText.text);
-        Assert.AreEqual(controller.view.friendRequestsList.sentRequestsContainer, entry2.transform.parent);
+        Assert.AreEqual(controller.view.friendRequestsList.sentRequestsList.container, entry2.transform.parent);
 
         controller.view.friendRequestsList.UpdateEntry(id2, entry2.model, true);
-        Assert.AreEqual(controller.view.friendRequestsList.receivedRequestsContainer, entry2.transform.parent);
+        Assert.AreEqual(controller.view.friendRequestsList.receivedRequestsList.container, entry2.transform.parent);
     }
 
     [Test]
     public void CountProperlyStatus()
     {
         CreateFriendEntry("user1", "Armando Barreda", FriendsController.PresenceStatus.ONLINE);
-        CreateFriendEntry("user2", "Neo", FriendsController.PresenceStatus.ONLINE);
+        CreateFriendEntry("user2", "Guillermo Andino", FriendsController.PresenceStatus.ONLINE);
 
         CreateFriendEntry("user3", "Wanda Nara", FriendsController.PresenceStatus.OFFLINE);
         CreateFriendEntry("user4", "Mirtha Legrand", FriendsController.PresenceStatus.OFFLINE);
 
-        Assert.AreEqual(2, view.friendsList.onlineFriends);
-        Assert.AreEqual(2, view.friendsList.offlineFriends);
+        Assert.AreEqual(2, view.friendsList.onlineFriendsList.Count());
+        Assert.AreEqual(2, view.friendsList.offlineFriendsList.Count());
 
         view.friendsList.RemoveEntry("user1");
         view.friendsList.RemoveEntry("user3");
 
-        Assert.AreEqual(1, view.friendsList.onlineFriends);
-        Assert.AreEqual(1, view.friendsList.offlineFriends);
+        Assert.AreEqual(1, view.friendsList.onlineFriendsList.Count());
+        Assert.AreEqual(1, view.friendsList.offlineFriendsList.Count());
     }
 
 
@@ -126,9 +126,19 @@ public class FriendsHUDViewShould : TestsBase
     public void OpenContextMenuProperly()
     {
         var entry = CreateFriendEntry("userId-1", "Pravus");
+        bool onMenuToggleCalled = false;
+
+        System.Action<FriendEntryBase> callback = (x) => { onMenuToggleCalled = true; };
+
+        Assert.IsFalse(view.friendsList.contextMenuPanel.gameObject.activeSelf);
+
+        entry.OnMenuToggle += callback;
         entry.menuButton.onClick.Invoke();
+        entry.OnMenuToggle -= callback;
+
+        Assert.IsTrue(onMenuToggleCalled);
         Assert.IsTrue(view.friendsList.contextMenuPanel.gameObject.activeSelf);
-        Assert.AreEqual(entry, view.friendsList.selectedEntry);
+        Assert.AreEqual(entry, view.friendsList.contextMenuPanel.targetEntry);
     }
 
     [Test]
@@ -138,11 +148,11 @@ public class FriendsHUDViewShould : TestsBase
         var entry = CreateFriendEntry(id1, "Ted Bundy");
 
         entry.menuButton.onClick.Invoke();
-        Assert.IsTrue(view.friendsList.contextMenuDeleteButton.gameObject.activeSelf);
-        Assert.IsTrue(view.friendsList.contextMenuDeleteButton.isActiveAndEnabled);
+        Assert.IsTrue(view.friendsList.contextMenuPanel.deleteButton.gameObject.activeSelf);
+        Assert.IsTrue(view.friendsList.contextMenuPanel.deleteButton.isActiveAndEnabled);
 
-        view.friendsList.contextMenuDeleteButton.onClick.Invoke();
-        view.friendsList.confirmationDialogConfirmButton.onClick.Invoke();
+        view.friendsList.contextMenuPanel.deleteButton.onClick.Invoke();
+        view.friendsList.confirmationDialog.confirmButton.onClick.Invoke();
 
         Assert.IsNull(view.friendsList.GetEntry(id1));
     }
@@ -155,11 +165,11 @@ public class FriendsHUDViewShould : TestsBase
 
         entry.rejectButton.onClick.Invoke();
 
-        Assert.IsTrue(view.friendRequestsList.confirmationDialog.activeSelf);
+        Assert.IsTrue(view.friendRequestsList.confirmationDialog.gameObject.activeSelf);
 
-        view.friendRequestsList.confirmationDialogConfirmButton.onClick.Invoke();
+        view.friendRequestsList.confirmationDialog.confirmButton.onClick.Invoke();
 
-        Assert.IsFalse(view.friendRequestsList.confirmationDialog.activeSelf);
+        Assert.IsFalse(view.friendRequestsList.confirmationDialog.gameObject.activeSelf);
         Assert.IsNull(view.friendRequestsList.GetEntry(entry.userId));
 
         //NOTE(Brian): Deny cancellation
@@ -167,11 +177,11 @@ public class FriendsHUDViewShould : TestsBase
 
         entry2.rejectButton.onClick.Invoke();
 
-        Assert.IsTrue(view.friendRequestsList.confirmationDialog.activeSelf);
+        Assert.IsTrue(view.friendRequestsList.confirmationDialog.gameObject.activeSelf);
 
-        view.friendRequestsList.confirmationDialogCancelButton.onClick.Invoke();
+        view.friendRequestsList.confirmationDialog.cancelButton.onClick.Invoke();
 
-        Assert.IsFalse(view.friendRequestsList.confirmationDialog.activeSelf);
+        Assert.IsFalse(view.friendRequestsList.confirmationDialog.gameObject.activeSelf);
         Assert.IsNotNull(view.friendRequestsList.GetEntry(entry2.userId));
     }
 
@@ -183,11 +193,11 @@ public class FriendsHUDViewShould : TestsBase
 
         entry.cancelButton.onClick.Invoke();
 
-        Assert.IsTrue(view.friendRequestsList.confirmationDialog.activeSelf);
+        Assert.IsTrue(view.friendRequestsList.confirmationDialog.gameObject.activeSelf);
 
-        view.friendRequestsList.confirmationDialogConfirmButton.onClick.Invoke();
+        view.friendRequestsList.confirmationDialog.confirmButton.onClick.Invoke();
 
-        Assert.IsFalse(view.friendRequestsList.confirmationDialog.activeSelf);
+        Assert.IsFalse(view.friendRequestsList.confirmationDialog.gameObject.activeSelf);
         Assert.IsNull(view.friendRequestsList.GetEntry(entry.userId));
 
         //NOTE(Brian): Deny cancellation
@@ -195,11 +205,11 @@ public class FriendsHUDViewShould : TestsBase
 
         entry2.cancelButton.onClick.Invoke();
 
-        Assert.IsTrue(view.friendRequestsList.confirmationDialog.activeSelf);
+        Assert.IsTrue(view.friendRequestsList.confirmationDialog.gameObject.activeSelf);
 
-        view.friendRequestsList.confirmationDialogCancelButton.onClick.Invoke();
+        view.friendRequestsList.confirmationDialog.cancelButton.onClick.Invoke();
 
-        Assert.IsFalse(view.friendRequestsList.confirmationDialog.activeSelf);
+        Assert.IsFalse(view.friendRequestsList.confirmationDialog.gameObject.activeSelf);
         Assert.IsNotNull(view.friendRequestsList.GetEntry(entry2.userId));
     }
 

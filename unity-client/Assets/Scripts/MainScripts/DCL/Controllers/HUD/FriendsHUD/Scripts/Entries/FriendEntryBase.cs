@@ -1,9 +1,9 @@
-﻿using TMPro;
+using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class FriendsHUDListEntry : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
+public class FriendEntryBase : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
     public class Model
     {
@@ -12,6 +12,7 @@ public class FriendsHUDListEntry : MonoBehaviour, IPointerEnterHandler, IPointer
         public Vector2 coords;
         public string realm;
         public Sprite avatarImage;
+        public bool blocked;
 
         public event System.Action<Sprite> OnSpriteUpdateEvent;
         public void OnSpriteUpdate(Sprite sprite)
@@ -21,7 +22,8 @@ public class FriendsHUDListEntry : MonoBehaviour, IPointerEnterHandler, IPointer
     }
 
     public Model model { get; private set; } = new Model();
-    public string userId { get; private set; }
+    [System.NonSerialized] public string userId;
+
     public Image playerBlockedImage;
     public Transform menuPositionReference;
 
@@ -32,12 +34,11 @@ public class FriendsHUDListEntry : MonoBehaviour, IPointerEnterHandler, IPointer
     [SerializeField] protected internal Sprite hoveredBackgroundSprite;
     protected internal Sprite unhoveredBackgroundSprite;
 
-    public event System.Action<FriendsHUDListEntry> OnMenuToggle;
+    public event System.Action<FriendEntryBase> OnMenuToggle;
 
-    protected virtual void Awake()
+    public virtual void Awake()
     {
         unhoveredBackgroundSprite = backgroundImage.sprite;
-
         menuButton.onClick.AddListener(() => OnMenuToggle?.Invoke(this));
     }
 
@@ -60,24 +61,28 @@ public class FriendsHUDListEntry : MonoBehaviour, IPointerEnterHandler, IPointer
         model.OnSpriteUpdateEvent -= OnAvatarImageChange;
     }
 
-    public virtual void Populate(string userId, Model model)
+    public virtual void Populate(Model model)
     {
-        this.userId = userId;
         this.model = model;
-        playerNameText.text = model.userName;
 
-        model.OnSpriteUpdateEvent -= OnAvatarImageChange;
-        model.OnSpriteUpdateEvent += OnAvatarImageChange;
-        playerImage.sprite = model.avatarImage;
+        if (playerNameText.text != model.userName)
+            playerNameText.text = model.userName;
+
+        if (model.avatarImage == null)
+        {
+            model.OnSpriteUpdateEvent -= OnAvatarImageChange;
+            model.OnSpriteUpdateEvent += OnAvatarImageChange;
+        }
+
+        if (model.avatarImage != playerImage.sprite)
+            playerImage.sprite = model.avatarImage;
+
+        playerBlockedImage.enabled = model.blocked;
     }
 
     private void OnAvatarImageChange(Sprite sprite)
     {
         playerImage.sprite = sprite;
-    }
-
-    public void ToggleBlockedImage(bool targetState)
-    {
-        playerBlockedImage.enabled = targetState;
+        model.avatarImage = sprite;
     }
 }

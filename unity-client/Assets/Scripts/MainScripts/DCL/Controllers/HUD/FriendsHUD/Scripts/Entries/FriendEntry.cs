@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class FriendEntry : FriendsHUDListEntry
+public class FriendEntry : FriendEntryBase
 {
     public event System.Action<FriendEntry> OnJumpInClick;
     public event System.Action<FriendEntry> OnWhisperClick;
@@ -13,7 +13,7 @@ public class FriendEntry : FriendsHUDListEntry
     [SerializeField] internal Button whisperButton;
     [SerializeField] internal GameObject whisperLabel;
 
-    protected override void Awake()
+    public override void Awake()
     {
         base.Awake();
 
@@ -38,18 +38,14 @@ public class FriendEntry : FriendsHUDListEntry
         whisperLabel.SetActive(false);
     }
 
-    public override void Populate(string userId, Model model)
+    public override void Populate(Model model)
     {
-        base.Populate(userId, model);
+        base.Populate(model);
 
-        if (model.status == FriendsController.PresenceStatus.ONLINE || model.status == FriendsController.PresenceStatus.UNAVAILABLE)
-            playerLocationText.text = $"{model.realm} {model.coords.x}, {model.coords.y}";
+        if (model.status == FriendsController.PresenceStatus.ONLINE ||
+            model.status == FriendsController.PresenceStatus.UNAVAILABLE)
+            playerLocationText.text = $"{model.realm} {(int)model.coords.x}, {(int)model.coords.y}";
         else
             playerLocationText.text = $"";
-    }
-
-    private void OnAvatarImageChange(Sprite sprite)
-    {
-        playerImage.sprite = sprite;
     }
 }

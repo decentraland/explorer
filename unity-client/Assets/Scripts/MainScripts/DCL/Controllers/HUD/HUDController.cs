@@ -7,7 +7,6 @@ using UnityEngine;
 public class HUDController : MonoBehaviour
 {
     static bool VERBOSE = false;
-    const int NOTIFICATION_DURATION = 5;
 
     public static HUDController i { get; private set; }
 
@@ -117,6 +116,7 @@ public class HUDController : MonoBehaviour
                 break;
             case HUDElementID.NOTIFICATION:
                 CreateHudElement<NotificationHUDController>(configuration, hudElementId);
+                NotificationsController.i?.Initialize(notificationHud);
                 break;
             case HUDElementID.AVATAR_EDITOR:
                 CreateHudElement<AvatarEditorHUDController>(configuration, hudElementId);
@@ -144,7 +144,7 @@ public class HUDController : MonoBehaviour
                 break;
             case HUDElementID.FRIENDS:
                 CreateHudElement<FriendsHUDController>(configuration, hudElementId);
-                friendsHud?.Initialize(FriendsController.i);
+                friendsHud?.Initialize(FriendsController.i, UserProfile.GetOwnUserProfile());
                 friendsHud.OnPressWhisper -= FriendsHud_OnPressWhisper;
                 friendsHud.OnPressWhisper += FriendsHud_OnPressWhisper;
                 taskbarHud?.AddFriendsWindow(friendsHud);
@@ -180,16 +180,6 @@ public class HUDController : MonoBehaviour
                 Debug.Log($"Adding {id} .. type {hudElements[id].GetType().Name}");
         }
     }
-    public void ShowNotificationFromJson(string notificationJson)
-    {
-        NotificationModel model = JsonUtility.FromJson<NotificationModel>(notificationJson);
-        ShowNotification(model);
-    }
-
-    public void ShowNotification(NotificationModel notification)
-    {
-        notificationHud.ShowNotification(notification);
-    }
 
     public void ShowNewWearablesNotification(string wearableCountString)
     {
@@ -202,28 +192,6 @@ public class HUDController : MonoBehaviour
     public void TriggerSelfUserExpression(string id)
     {
         expressionsHud?.ExpressionCalled(id);
-    }
-
-    public void ShowWelcomeNotification()
-    {
-        string notificationText = $"Welcome, {UserProfile.GetOwnUserProfile().userName}!";
-        Vector2Int currentCoords = CommonScriptableObjects.playerCoords.Get();
-        string parcelName = MinimapMetadata.GetMetadata().GetSceneInfo(currentCoords.x, currentCoords.y)?.name;
-
-        if (!string.IsNullOrEmpty(parcelName))
-        {
-            notificationText += $" You are in {parcelName} {currentCoords.x}, {currentCoords.y}";
-        }
-
-        NotificationModel model = new NotificationModel()
-        {
-            message = notificationText,
-            scene = "",
-            type = NotificationModel.NotificationType.GENERIC_WITHOUT_BUTTON,
-            timer = NOTIFICATION_DURATION
-        };
-
-        notificationHud.ShowNotification(model);
     }
 
     public void AirdroppingRequest(string payload)

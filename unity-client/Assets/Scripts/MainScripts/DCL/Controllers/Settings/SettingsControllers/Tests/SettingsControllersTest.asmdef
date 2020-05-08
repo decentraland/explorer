@@ -1,0 +1,24 @@
+{
+    "name": "SettingsControllersTest",
+    "references": [
+        "GUID:ef84d7ce90ba34f07be26ace428e9bc8",
+        "GUID:3a20bd2e61151461ab17e9cf5dc7a24b",
+        "GUID:301149363e31a4bdaa1943465a825c8e",
+        "GUID:b1087c5731ff68448a0a9c625bb7e52d",
+        "GUID:1cd9f56ea305aae458297148eecef98c",
+        "GUID:15fc0a57446b3144c949da3e2b9737a9",
+        "GUID:d60799ab2a985554ea1a39cd38695018",
+        "GUID:4307f53044263cf4b835bd812fc161a4"
+    ],
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": []
+}

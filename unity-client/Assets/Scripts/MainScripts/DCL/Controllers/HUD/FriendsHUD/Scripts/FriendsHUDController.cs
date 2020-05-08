@@ -1,5 +1,6 @@
 using DCL.Helpers;
 using DCL.Interface;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class FriendsHUDController : IHUD
@@ -14,7 +15,10 @@ public class FriendsHUDController : IHUD
     IFriendsController friendsController;
     public event System.Action<string> OnPressWhisper;
     InputAction_Trigger toggleTrigger;
-    public void Initialize(IFriendsController friendsController)
+
+    UserProfile ownUserProfile;
+
+    public void Initialize(IFriendsController friendsController, UserProfile ownUserProfile)
     {
         view = FriendsHUDView.Create();
         this.friendsController = friendsController;
@@ -27,21 +31,48 @@ public class FriendsHUDController : IHUD
         }
 
         view.friendRequestsList.OnFriendRequestApproved += Entry_OnRequestAccepted;
-        view.friendRequestsList.OnFriendRequestCancelled += Entry_OnRequestCancelled;
-        view.friendRequestsList.OnFriendRequestRejected += Entry_OnRequestRejected;
+        view.friendRequestsList.OnCancelConfirmation += Entry_OnRequestCancelled;
+        view.friendRequestsList.OnRejectConfirmation += Entry_OnRequestRejected;
         view.friendRequestsList.OnFriendRequestSent += Entry_OnRequestSent;
-        view.friendRequestsList.OnBlock += Entry_OnBlock;
-        view.friendRequestsList.OnPassport += Entry_OnPassport;
+        view.friendRequestsList.contextMenuPanel.OnBlock += Entry_OnBlock;
+        view.friendRequestsList.contextMenuPanel.OnPassport += Entry_OnPassport;
 
         view.friendsList.OnJumpIn += Entry_OnJumpIn;
         view.friendsList.OnWhisper += Entry_OnWhisper;
-        view.friendsList.OnBlock += Entry_OnBlock;
-        view.friendsList.OnDelete += Entry_OnDelete;
-        view.friendsList.OnPassport += Entry_OnPassport;
-        view.friendsList.OnReport += Entry_OnReport;
+        view.friendsList.contextMenuPanel.OnBlock += Entry_OnBlock;
+        view.friendsList.contextMenuPanel.OnPassport += Entry_OnPassport;
+        view.friendsList.contextMenuPanel.OnReport += Entry_OnReport;
+
+        view.friendsList.OnDeleteConfirmation += Entry_OnDelete;
 
         toggleTrigger = Resources.Load<InputAction_Trigger>("ToggleFriends");
         toggleTrigger.OnTriggered += OnHotkeyPress;
+
+        if (ownUserProfile != null)
+        {
+            this.ownUserProfile = ownUserProfile;
+            ownUserProfile.OnUpdate += OnUserProfileUpdate;
+        }
+    }
+
+    private void OnUserProfileUpdate(UserProfile profile)
+    {
+        //NOTE(Brian): HashSet to check Contains quicker.
+        HashSet<string> allBlockedUsers;
+
+        if (profile.blocked != null)
+            allBlockedUsers = new HashSet<string>(profile.blocked);
+        else
+            allBlockedUsers = new HashSet<string>();
+
+        var entries = view.GetAllEntries();
+        int entriesCount = entries.Count;
+
+        for (int i = 0; i < entriesCount; i++)
+        {
+            entries[i].model.blocked = allBlockedUsers.Contains(entries[i].userId);
+            entries[i].Populate(entries[i].model);
+        }
     }
 
     private void OnHotkeyPress(DCLAction_Trigger action)
@@ -61,14 +92,18 @@ public class FriendsHUDController : IHUD
     {
         var model = new FriendEntry.Model();
 
-        FriendsHUDListEntry entry = view.friendsList.GetEntry(userId) ?? view.friendRequestsList.GetEntry(userId);
+        FriendEntryBase entry = view.friendsList.GetEntry(userId) ?? view.friendRequestsList.GetEntry(userId);
 
         if (entry != null)
             model = entry.model;
 
         model.status = newStatus.presence;
         model.coords = newStatus.position;
-        model.realm = $"{newStatus.realm.serverName.ToUpperFirst()} {newStatus.realm.layer.ToUpperFirst()}";
+
+        if(newStatus.realm != null)
+            model.realm = $"{newStatus.realm.serverName.ToUpperFirst()} {newStatus.realm.layer.ToUpperFirst()}";
+        else
+            model.realm = string.Empty;
 
         view.friendsList.UpdateEntry(userId, model);
         view.friendRequestsList.UpdateEntry(userId, model);
@@ -91,7 +126,7 @@ public class FriendsHUDController : IHUD
 
         var friendEntryModel = new FriendEntry.Model();
 
-        FriendsHUDListEntry entry = view.friendsList.GetEntry(userId) ?? view.friendRequestsList.GetEntry(userId);
+        FriendEntryBase entry = view.friendsList.GetEntry(userId) ?? view.friendRequestsList.GetEntry(userId);
 
         if (entry != null)
             friendEntryModel = entry.model;
@@ -101,6 +136,9 @@ public class FriendsHUDController : IHUD
 
         userProfile.OnFaceSnapshotReadyEvent -= friendEntryModel.OnSpriteUpdate;
         userProfile.OnFaceSnapshotReadyEvent += friendEntryModel.OnSpriteUpdate;
+
+        if (ownUserProfile != null && ownUserProfile.blocked != null)
+            friendEntryModel.blocked = ownUserProfile.blocked.Contains(userId);
 
         switch (friendshipAction)
         {
@@ -137,7 +175,7 @@ public class FriendsHUDController : IHUD
         var pendingFriendRequestsSO = Resources.Load<FloatVariable>("ScriptableObjects/PendingFriendRequests");
 
         if (pendingFriendRequestsSO != null)
-            pendingFriendRequestsSO.Set(view.friendRequestsList.receivedRequests);
+            pendingFriendRequestsSO.Set(view.friendRequestsList.receivedRequestsList.Count());
     }
 
     private void Entry_OnWhisper(FriendEntry entry)
@@ -145,20 +183,20 @@ public class FriendsHUDController : IHUD
         OnPressWhisper?.Invoke(entry.model.userName);
     }
 
-    private void Entry_OnReport(string userId)
+    private void Entry_OnReport(FriendEntryBase entry)
     {
-        WebInterface.SendReportPlayer(userId);
+        WebInterface.SendReportPlayer(entry.userId);
     }
 
-    private void Entry_OnPassport(string userId)
+    private void Entry_OnPassport(FriendEntryBase entry)
     {
         var currentPlayerId = Resources.Load<StringVariable>(CURRENT_PLAYER_ID);
-        currentPlayerId.Set(userId);
+        currentPlayerId.Set(entry.userId);
     }
 
-    private void Entry_OnBlock(string userId)
+    private void Entry_OnBlock(FriendEntryBase entry)
     {
-        WebInterface.SendBlockPlayer(userId);
+        WebInterface.SendBlockPlayer(entry.userId);
     }
 
     private void Entry_OnJumpIn(FriendEntry entry)
@@ -166,7 +204,7 @@ public class FriendsHUDController : IHUD
         WebInterface.GoTo((int)entry.model.coords.x, (int)entry.model.coords.y);
     }
 
-    private void Entry_OnDelete(FriendsHUDListEntry entry)
+    private void Entry_OnDelete(FriendEntryBase entry)
     {
         WebInterface.UpdateFriendshipStatus(
             new FriendsController.FriendshipUpdateStatusMessage()
@@ -220,6 +258,9 @@ public class FriendsHUDController : IHUD
         {
             UnityEngine.Object.Destroy(view.gameObject);
         }
+
+        if (this.ownUserProfile != null)
+            ownUserProfile.OnUpdate -= OnUserProfileUpdate;
     }
 
     public void SetVisibility(bool visible)

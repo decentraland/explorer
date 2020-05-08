@@ -37,10 +37,11 @@ public class FriendEntryShould : TestsBase
             userName = "test-name"
         };
 
-        entry.Populate("userId-1", model);
+        entry.userId = "userId-1";
+        entry.Populate(model);
 
-        Assert.AreEqual(entry.playerNameText.text, entry.playerNameText.text);
-        Assert.AreEqual(entry.playerLocationText.text, $"{model.realm} {model.coords}");
+        Assert.AreEqual(model.userName, entry.playerNameText.text);
+        Assert.AreEqual("realm-test 1, 1", entry.playerLocationText.text);
         Assert.AreEqual(entry.playerImage.sprite, testSprite);
 
         Object.Destroy(testSprite);
@@ -50,7 +51,8 @@ public class FriendEntryShould : TestsBase
     public void SendProperEventWhenJumpInButtonIsPressed()
     {
         var model = new FriendEntry.Model() { };
-        entry.Populate("userId-1", model);
+        entry.userId = "userId-1";
+        entry.Populate(model);
         bool buttonPressed = false;
         entry.OnJumpInClick += (x) => { if (x == entry) buttonPressed = true; };
         entry.jumpInButton.onClick.Invoke();
@@ -61,7 +63,8 @@ public class FriendEntryShould : TestsBase
     public void SendProperEventWhenWhisperButtonIsPressed()
     {
         var model = new FriendEntry.Model() { };
-        entry.Populate("userId-1", model);
+        entry.userId = "userId-1";
+        entry.Populate(model);
         bool buttonPressed = false;
         entry.OnWhisperClick += (x) => { if (x == entry) buttonPressed = true; };
         entry.whisperButton.onClick.Invoke();
@@ -72,7 +75,8 @@ public class FriendEntryShould : TestsBase
     public void SendProperEventWhenOnMenuToggleIsPressed()
     {
         var model = new FriendEntry.Model() { };
-        entry.Populate("userId-1", model);
+        entry.userId = "userId-1";
+        entry.Populate(model);
         bool buttonPressed = false;
         entry.OnMenuToggle += (x) => { if (x == entry) buttonPressed = true; };
         entry.menuButton.onClick.Invoke();
