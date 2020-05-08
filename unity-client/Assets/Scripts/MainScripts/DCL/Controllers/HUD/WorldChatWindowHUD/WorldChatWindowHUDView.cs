@@ -14,7 +14,6 @@ public class WorldChatWindowHUDView : MonoBehaviour, IPointerClickHandler
     public Button worldFilterButton;
     public Button pmFilterButton;
     public Button closeButton;
-    public TMP_InputField inputField;
 
     public ChatHUDView chatHudView;
 
@@ -40,8 +39,8 @@ public class WorldChatWindowHUDView : MonoBehaviour, IPointerClickHandler
 
     void Awake()
     {
-        inputField.onSubmit.AddListener(OnTextInputSubmit);
-        inputField.onValueChanged.AddListener(OnTextInputValueChanged);
+        chatHudView.inputField.onSubmit.AddListener(OnTextInputSubmit);
+        chatHudView.inputField.onValueChanged.AddListener(OnTextInputValueChanged);
     }
 
     void OnEnable()
@@ -117,8 +116,8 @@ public class WorldChatWindowHUDView : MonoBehaviour, IPointerClickHandler
     {
         if (!string.IsNullOrEmpty(controller.lastPrivateMessageReceivedSender) && text == "/r ")
         {
-            inputField.text = $"/w {controller.lastPrivateMessageReceivedSender} ";
-            inputField.caretPosition = inputField.text.Length;
+            chatHudView.inputField.text = $"/w {controller.lastPrivateMessageReceivedSender} ";
+            chatHudView.inputField.caretPosition = chatHudView.inputField.text.Length;
         }
     }
 
@@ -136,8 +135,8 @@ public class WorldChatWindowHUDView : MonoBehaviour, IPointerClickHandler
     {
         yield return null;
 
-        inputField.text = newText;
-        inputField.caretPosition = newText.Length;
+        chatHudView.inputField.text = newText;
+        chatHudView.inputField.caretPosition = newText.Length;
     }
 
     public string GetLastWhisperCommand(string inputString)
