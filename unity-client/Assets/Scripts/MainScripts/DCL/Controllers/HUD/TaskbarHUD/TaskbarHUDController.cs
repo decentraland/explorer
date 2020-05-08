@@ -27,6 +27,14 @@ public class TaskbarHUDController : IHUD
 
         worldChatWindowHud = controller;
         view.OnAddChatWindow(ToggleChatWindow);
+
+        if (!worldChatWindowHud.view.gameObject.activeSelf)
+        {
+            worldChatWindowHud.view.Toggle();
+            OnToggleOn();
+        }
+
+        worldChatWindowHud.view.DeactivatePreview();
     }
 
     public void AddFriendsWindow(FriendsHUDController controller)
@@ -49,15 +57,9 @@ public class TaskbarHUDController : IHUD
     private void ToggleChatWindow()
     {
         if (worldChatWindowHud.view.isInPreview)
-        {
             worldChatWindowHud.view.DeactivatePreview();
-            return;
-        }
-
-        worldChatWindowHud.view.Toggle();
-
-        if (worldChatWindowHud.view.gameObject.activeSelf)
-            OnToggleOn();
+        else
+            worldChatWindowHud.view.ActivatePreview();
     }
 
     private void ToggleFriendsWindow()

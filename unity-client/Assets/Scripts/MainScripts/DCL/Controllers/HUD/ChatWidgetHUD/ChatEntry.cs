@@ -1,7 +1,47 @@
 using DCL.Interface;
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+
+public static class RectTransformExtensions
+{
+    public static int CountCornersVisibleFrom(this RectTransform rectTransform, RectTransform viewport)
+    {
+        Vector3[] viewCorners = new Vector3[4];
+        viewport.GetWorldCorners(viewCorners);
+
+        Vector2 size = new Vector2(viewport.rect.size.x * viewport.lossyScale.x, viewport.rect.size.y * viewport.lossyScale.y);
+        Rect screenBounds = new Rect(viewCorners[0], size); // Screen space bounds (assumes camera renders across the entire screen)
+
+        Vector3[] objectCorners = new Vector3[4];
+        rectTransform.GetWorldCorners(objectCorners);
+
+        int visibleCorners = 0;
+
+        for (var i = 0; i < viewCorners.Length; i++)
+        {
+            if (i != viewCorners.Length - 1)
+                Debug.DrawLine(viewCorners[i], viewCorners[i + 1], Color.blue, 1.0f);
+        }
+
+        for (var i = 0; i < objectCorners.Length; i++) // For each corner in rectTransform
+        {
+            if (screenBounds.Contains(objectCorners[i])) // If the corner is inside the screen
+            {
+                visibleCorners++;
+            }
+        }
+
+        for (var i = 0; i < objectCorners.Length; i++) // For each corner in rectTransform
+        {
+            if (i != objectCorners.Length - 1)
+                Debug.DrawLine(objectCorners[i], objectCorners[i + 1], visibleCorners > 0 ? Color.green : Color.red, 1.0f);
+        }
+
+        return visibleCorners;
+    }
+}
 
 public class ChatEntry : MonoBehaviour
 {
@@ -19,20 +59,22 @@ public class ChatEntry : MonoBehaviour
         public string senderName;
         public string recipientName;
         public SubType subType;
+
+        public ulong timestamp;
     }
 
     [SerializeField] internal TextMeshProUGUI username;
     [SerializeField] internal TextMeshProUGUI body;
 
-    public Color worldMessageColor = Color.white;
-    public Color privateMessageColor = Color.white;
-    public Color systemColor = Color.white;
+    [SerializeField] internal Color worldMessageColor = Color.white;
+    [SerializeField] internal Color privateMessageColor = Color.white;
+    [SerializeField] internal Color systemColor = Color.white;
 
-    public Model message;
+    public Model model { get; private set; }
 
     public void Populate(Model chatEntryModel)
     {
-        this.message = chatEntryModel;
+        this.model = chatEntryModel;
 
         string userString = GetDefaultSenderString(chatEntryModel.senderName);
 
@@ -66,6 +108,42 @@ public class ChatEntry : MonoBehaviour
 
         LayoutRebuilder.ForceRebuildLayoutImmediate(body.transform as RectTransform);
         LayoutRebuilder.ForceRebuildLayoutImmediate(username.transform as RectTransform);
+
+        if (this.enabled)
+            group.alpha = 0;
+    }
+
+    [SerializeField] CanvasGroup group;
+
+    const float TIME_TO_FADE = 10;
+    const float FADE_DURATION = 5;
+
+    public void SetFadeout(bool enabled)
+    {
+        if (!enabled)
+        {
+            group.alpha = 1;
+            this.enabled = false;
+            return;
+        }
+
+        this.enabled = true;
+    }
+
+    private void Update()
+    {
+        double fadeTime = (double)(model.timestamp / 1000.0) + TIME_TO_FADE;
+        double currentTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() / 1000.0;
+
+        if (currentTime > fadeTime)
+        {
+            double timeSinceFadeTime = currentTime - fadeTime;
+            group.alpha = Mathf.Clamp01(1 - (float)(timeSinceFadeTime / FADE_DURATION));
+        }
+        else
+        {
+            group.alpha += (1 - group.alpha) * 0.05f;
+        }
     }
 
     string RemoveTabs(string text)

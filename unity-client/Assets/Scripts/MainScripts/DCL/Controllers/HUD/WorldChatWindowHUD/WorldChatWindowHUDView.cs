@@ -75,12 +75,14 @@ public class WorldChatWindowHUDView : MonoBehaviour, IPointerClickHandler
     {
         group.alpha = 1;
         isInPreview = false;
+        chatHudView.SetFadeoutMode(false);
     }
 
     public void ActivatePreview()
     {
         group.alpha = 0;
         isInPreview = true;
+        chatHudView.SetFadeoutMode(true);
     }
 
     public void Toggle()

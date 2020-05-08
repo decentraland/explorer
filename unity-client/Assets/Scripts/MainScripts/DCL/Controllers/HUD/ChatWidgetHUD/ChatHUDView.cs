@@ -40,11 +40,46 @@ public class ChatHUDView : MonoBehaviour
         inputField.ActivateInputField();
     }
 
+    bool enableFadeoutMode = false;
+
+    bool EntryIsVisible(ChatEntry entry)
+    {
+        int visibleCorners = (entry.transform as RectTransform).CountCornersVisibleFrom(scrollRect.viewport.transform as RectTransform);
+        return visibleCorners > 0;
+    }
+
+    public void SetFadeoutMode(bool enabled)
+    {
+        if (enableFadeoutMode == enabled)
+            return;
+
+        enableFadeoutMode = enabled;
+
+        for (int i = 0; i < entries.Count; i++)
+        {
+            ChatEntry entry = entries[i];
+
+            if (enabled)
+            {
+                entry.SetFadeout(EntryIsVisible(entry));
+            }
+            else
+            {
+                entry.SetFadeout(false);
+            }
+        }
+    }
+
 
     public void AddEntry(ChatEntry.Model chatEntryModel)
     {
         var chatEntryGO = Instantiate(Resources.Load("Chat Entry") as GameObject, chatEntriesContainer);
         ChatEntry chatEntry = chatEntryGO.GetComponent<ChatEntry>();
+
+        if (enableFadeoutMode && EntryIsVisible(chatEntry))
+            chatEntry.SetFadeout(true);
+        else
+            chatEntry.SetFadeout(false);
 
         chatEntry.Populate(chatEntryModel);
 
