@@ -23,7 +23,8 @@
         "MaterialCachingHelper",
         "SRPBatchingHelper",
         "MouseCatcher",
-        "Settings"
+        "Settings",
+        "Gif"
     ],
     "optionalUnityReferences": [],
     "includePlatforms": [],

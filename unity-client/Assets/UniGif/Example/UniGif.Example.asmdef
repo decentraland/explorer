@@ -1,0 +1,15 @@
+{
+    "name": "UniGif.Example",
+    "references": [
+        "GUID:4efd4f6072cb64982ab90a7168745f82"
+    ],
+    "optionalUnityReferences": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": []
+}

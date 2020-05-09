@@ -160,7 +160,7 @@ namespace DCL.Helpers
             return request != null && !request.isNetworkError && !request.isHttpError;
         }
 
-        static IEnumerator FetchAsset(string url, UnityWebRequest request,
+        public static IEnumerator FetchAsset(string url, UnityWebRequest request,
             System.Action<UnityWebRequest> OnSuccess = null, System.Action<string> OnFail = null)
         {
             if (!string.IsNullOrEmpty(url))
