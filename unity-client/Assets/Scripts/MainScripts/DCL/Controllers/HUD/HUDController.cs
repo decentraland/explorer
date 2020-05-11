@@ -66,7 +66,7 @@ public class HUDController : MonoBehaviour
         MESSAGE_OF_THE_DAY = 12,
         FRIENDS = 13,
         OPEN_EXTERNAL_URL_PROMPT = 14,
-        COUNT = 14
+        COUNT = 15
     }
 
     [System.Serializable]
