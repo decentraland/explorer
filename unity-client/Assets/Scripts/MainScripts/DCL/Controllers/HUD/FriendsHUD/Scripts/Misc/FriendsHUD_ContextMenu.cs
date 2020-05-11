@@ -18,12 +18,8 @@ public class FriendsHUD_ContextMenu : MonoBehaviour
     public event System.Action<FriendEntryBase> OnBlock;
     public event System.Action<FriendEntryBase> OnDelete;
 
-    RectTransform rectTransform;
     public void Awake()
     {
-        if (rectTransform == null)
-            rectTransform = transform as RectTransform;
-
         passportButton.onClick.AddListener(OnPassportButtonPressed);
         reportButton.onClick.AddListener(OnReportUserButtonPressed);
         deleteButton.onClick.AddListener(OnDeleteUserButtonPressed);
@@ -34,15 +30,17 @@ public class FriendsHUD_ContextMenu : MonoBehaviour
 
     internal void Toggle(FriendEntryBase entry)
     {
-        if (rectTransform == null)
-            rectTransform = transform as RectTransform;
+        RectTransform rectTransform = transform as RectTransform;
 
-        //NOTE(Pravus): By setting the pivot accordingly BEFORE we position the menu, we can have it always
-        //              visible in an easier way.
-        if (entry.transform.parent.InverseTransformPoint(entry.menuPositionReference.position).y < 0f)
-            rectTransform.pivot = new Vector2(0.5f, 0f);
-        else
-            rectTransform.pivot = new Vector2(0.5f, 1f);
+        if (entry.transform.parent != null)
+        {
+            //NOTE(Pravus): By setting the pivot accordingly BEFORE we position the menu, we can have it always
+            //              visible in an easier way.
+            if (entry.transform.parent.InverseTransformPoint(entry.menuPositionReference.position).y < 0f)
+                rectTransform.pivot = new Vector2(0.5f, 0f);
+            else
+                rectTransform.pivot = new Vector2(0.5f, 1f);
+        }
 
         transform.position = entry.menuPositionReference.position;
 

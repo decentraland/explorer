@@ -44,7 +44,7 @@ public class FriendRequestsTabView : FriendsTabViewBase
     {
         base.OnDisable();
 
-        NotificationsController.i.DismissAllNotifications(FriendsHUDView.NOTIFICATIONS_ID);
+        NotificationsController.i?.DismissAllNotifications(FriendsHUDView.NOTIFICATIONS_ID);
     }
 
     public void CreateOrUpdateEntry(string userId, FriendEntry.Model model, bool isReceived)
