@@ -1661,6 +1661,12 @@ MonoBehaviour:
     button: {fileID: 234398039322459571}
   - expressionId: raiseHand
     button: {fileID: 4287247481211862919}
+  - expressionId: clap
+    button: {fileID: 373236788406191674}
+  - expressionId: money
+    button: {fileID: 3217893231158219506}
+  - expressionId: kiss
+    button: {fileID: 3694800106491159368}
   showContentButton: {fileID: 3828354362020330558}
   hideContentButton: {fileID: 7369359897116190397}
   content: {fileID: 3368308072246989936}
