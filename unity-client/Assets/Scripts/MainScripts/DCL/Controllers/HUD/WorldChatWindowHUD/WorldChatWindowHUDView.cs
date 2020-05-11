@@ -117,7 +117,7 @@ public class WorldChatWindowHUDView : MonoBehaviour, IPointerClickHandler
         if (!string.IsNullOrEmpty(controller.lastPrivateMessageReceivedSender) && text == "/r ")
         {
             chatHudView.inputField.text = $"/w {controller.lastPrivateMessageReceivedSender} ";
-            chatHudView.inputField.caretPosition = chatHudView.inputField.text.Length;
+            chatHudView.inputField.caretPosition = chatHudView.inputField.text.Length - 1;
         }
     }
 
@@ -136,7 +136,7 @@ public class WorldChatWindowHUDView : MonoBehaviour, IPointerClickHandler
         yield return null;
 
         chatHudView.inputField.text = newText;
-        chatHudView.inputField.caretPosition = newText.Length;
+        chatHudView.inputField.caretPosition = newText.Length - 1;
     }
 
     public string GetLastWhisperCommand(string inputString)
