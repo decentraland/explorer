@@ -36,8 +36,8 @@ public class ChatHUDView : MonoBehaviour
 
     public void FocusInputField()
     {
-        inputField.Select();
         inputField.ActivateInputField();
+        inputField.Select();
     }
 
     bool enableFadeoutMode = false;
