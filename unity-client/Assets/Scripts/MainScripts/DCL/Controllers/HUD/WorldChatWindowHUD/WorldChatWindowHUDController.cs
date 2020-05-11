@@ -116,8 +116,6 @@ public class WorldChatWindowHUDController : IHUD
             sender = UserProfile.GetOwnUserProfile().userId,
         };
 
-        view.chatHudView.inputField.text = "sarlanga";
-
         WebInterface.SendChatMessage(data);
     }
 
