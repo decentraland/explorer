@@ -15,14 +15,14 @@ public class WorldChatWindowHUDView : MonoBehaviour, IPointerClickHandler
     public CanvasGroup group;
     public WorldChatWindowHUDController controller;
 
-    public static WorldChatWindowHUDView Create(UnityAction onPrivateMessages, UnityAction onWorldMessages)
+    public static WorldChatWindowHUDView Create()
     {
         var view = Instantiate(Resources.Load<GameObject>(VIEW_PATH)).GetComponent<WorldChatWindowHUDView>();
-        view.Initialize(onPrivateMessages, onWorldMessages);
+        view.Initialize();
         return view;
     }
 
-    private void Initialize(UnityAction onPrivateMessages, UnityAction onWorldMessages)
+    private void Initialize()
     {
         this.closeButton.onClick.AddListener(Toggle);
     }

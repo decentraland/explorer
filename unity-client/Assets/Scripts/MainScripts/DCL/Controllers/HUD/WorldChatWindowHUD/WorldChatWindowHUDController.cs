@@ -20,7 +20,7 @@ public class WorldChatWindowHUDController : IHUD
 
     public void Initialize(IChatController chatController, IMouseCatcher mouseCatcher)
     {
-        view = WorldChatWindowHUDView.Create(OnEnablePrivateTab, OnEnableWorldTab);
+        view = WorldChatWindowHUDView.Create();
 
         chatHudController = new ChatHUDController();
         chatHudController.Initialize(view.chatHudView, SendChatMessage);
