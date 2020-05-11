@@ -10,6 +10,54 @@ public class PrivateChatWindowHUDController : IHUD
 
     private IChatController chatController;
 
+    internal bool resetInputFieldOnSubmit = true;
+
+    public void Initialize(IChatController chatController, IMouseCatcher mouseCatcher)
+    {
+        view = PrivateChatWindowHUDView.Create();
+
+        chatHudController = new ChatHUDController();
+        chatHudController.Initialize(view.chatHudView, SendChatMessage);
+
+        this.chatController = chatController;
+
+        if (chatController != null)
+        {
+            chatController.OnAddMessage -= OnAddMessage;
+            chatController.OnAddMessage += OnAddMessage;
+        }
+
+        view.chatHudView.ForceUpdateLayout();
+    }
+
+    public void SendChatMessage(string msgBody)
+    {
+        bool validString = !string.IsNullOrEmpty(msgBody);
+
+        if (msgBody.Length == 1 && (byte)msgBody[0] == 11) //NOTE(Brian): Trim doesn't work. neither IsNullOrWhitespace.
+            validString = false;
+
+        if (!validString)
+        {
+            InitialSceneReferences.i.mouseCatcher.LockCursor();
+            return;
+        }
+
+        if (resetInputFieldOnSubmit)
+        {
+            view.chatHudView.ResetInputField();
+            view.chatHudView.FocusInputField();
+        }
+
+        var data = new ChatMessage()
+        {
+            body = msgBody,
+            sender = UserProfile.GetOwnUserProfile().userId,
+        };
+
+        WebInterface.SendChatMessage(data);
+    }
+
     public void SetVisibility(bool visible)
     {
         view.gameObject.SetActive(visible);

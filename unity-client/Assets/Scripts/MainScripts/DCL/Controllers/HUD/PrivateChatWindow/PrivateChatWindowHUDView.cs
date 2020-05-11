@@ -13,14 +13,14 @@ public class PrivateChatWindowHUDView : MonoBehaviour
     public PrivateChatWindowHUDController controller;
     public TMP_Text windowTitleText;
 
-    public static PrivateChatWindowHUDView Create(UnityAction onPrivateMessages, UnityAction onWorldMessages)
+    public static PrivateChatWindowHUDView Create()
     {
         var view = Instantiate(Resources.Load<GameObject>(VIEW_PATH)).GetComponent<PrivateChatWindowHUDView>();
-        view.Initialize(onPrivateMessages, onWorldMessages);
+        view.Initialize();
         return view;
     }
 
-    private void Initialize(UnityAction onPrivateMessages, UnityAction onWorldMessages)
+    private void Initialize()
     {
         this.closeButton.onClick.AddListener(Toggle);
     }
