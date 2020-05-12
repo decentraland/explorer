@@ -28,7 +28,15 @@ public class NotificationBadge : MonoBehaviour
         if (current > 0)
         {
             notificationContainer.SetActive(true);
-            notificationText.text = ((int)current).ToString();
+
+            if (current < 99)
+            {
+                notificationText.text = ((int)current).ToString();
+            }
+            else
+            {
+                notificationText.text = "99+";
+            }
         }
         else
         {

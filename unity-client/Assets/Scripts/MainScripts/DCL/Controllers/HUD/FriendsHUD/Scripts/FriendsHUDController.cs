@@ -1,10 +1,11 @@
-using DCL.Helpers;
+﻿using DCL.Helpers;
 using DCL.Interface;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class FriendsHUDController : IHUD
 {
+    const string PLAYER_PREFS_SEEN_FRIEND_COUNT = "SeenFriendsCount";
     internal const string CURRENT_PLAYER_ID = "CurrentPlayerInfoCardId";
     public FriendsHUDView view
     {
@@ -100,7 +101,7 @@ public class FriendsHUDController : IHUD
         model.status = newStatus.presence;
         model.coords = newStatus.position;
 
-        if(newStatus.realm != null)
+        if (newStatus.realm != null)
             model.realm = $"{newStatus.realm.serverName.ToUpperFirst()} {newStatus.realm.layer.ToUpperFirst()}";
         else
             model.realm = string.Empty;
@@ -172,10 +173,34 @@ public class FriendsHUDController : IHUD
                 break;
         }
 
+        UpdateNotificationsCounter();
+    }
+
+    private void UpdateNotificationsCounter()
+    {
+        //NOTE(Brian): If friends tab is already active, update and save this value instantly
+        if (view.friendsList.gameObject.activeSelf)
+        {
+            PlayerPrefs.SetInt(PLAYER_PREFS_SEEN_FRIEND_COUNT, FriendsController.i.friends.Count);
+            PlayerPrefs.Save();
+        }
+
         var pendingFriendRequestsSO = Resources.Load<FloatVariable>("ScriptableObjects/PendingFriendRequests");
 
         if (pendingFriendRequestsSO != null)
-            pendingFriendRequestsSO.Set(view.friendRequestsList.receivedRequestsList.Count());
+        {
+            int receivedRequestsCount = view.friendRequestsList.receivedRequestsList.Count();
+            int seenFriendsCount = PlayerPrefs.GetInt(PLAYER_PREFS_SEEN_FRIEND_COUNT, 0);
+            int friendsCount = FriendsController.i.friends.Count;
+
+            int newFriends = friendsCount - seenFriendsCount;
+
+            //NOTE(Brian): If someone deletes you, don't show badge notification
+            if (newFriends < 0)
+                newFriends = 0;
+
+            pendingFriendRequestsSO.Set(receivedRequestsCount + newFriends);
+        }
     }
 
     private void Entry_OnWhisper(FriendEntry entry)
@@ -266,6 +291,11 @@ public class FriendsHUDController : IHUD
     public void SetVisibility(bool visible)
     {
         view.gameObject.SetActive(visible);
+
+        if (visible)
+        {
+            UpdateNotificationsCounter();
+        }
     }
 
 }
