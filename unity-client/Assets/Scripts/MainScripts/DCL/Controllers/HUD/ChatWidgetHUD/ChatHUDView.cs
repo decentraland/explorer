@@ -35,10 +35,7 @@ public class ChatHUDView : MonoBehaviour
     {
         // A TMP_InputField is automatically marked as 'wasCanceled' when the ESC key is pressed
         if (inputField.wasCanceled)
-        {
-            FocusInputField();
-            return;
-        }
+            message = "";
 
         onSendMessageAction(message);
     }
