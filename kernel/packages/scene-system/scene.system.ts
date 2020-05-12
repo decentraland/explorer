@@ -23,6 +23,7 @@ import { ScriptingTransport, ILogOpts } from 'decentraland-rpc/src/common/json-r
 import { QueryType, CLASS_ID, Transform, Vector2 } from 'decentraland-ecs/src'
 import { PB_Transform, PB_Vector3, PB_Quaternion } from '../shared/proto/engineinterface_pb'
 import { worldToGrid } from 'atomicHelpers/parcelScenePositions'
+import { log } from 'util'
 
 // tslint:disable-next-line:whitespace
 type IEngineAPI = import('shared/apis/EngineAPI').IEngineAPI
@@ -233,7 +234,7 @@ export default class GamekitScene extends Script {
               payload: url
             })
           } else {
-            this.error('openExternalUrl cant only be used inside a pointerEvent')
+            this.error('openExternalUrl can only be used inside a pointerEvent')
           }
         },
 
@@ -605,10 +606,7 @@ export default class GamekitScene extends Script {
   private isPointerEvent(event: any): boolean {
     switch (event.type) {
       case 'uuidEvent':
-        if (event.data.payload as InputEventResult) {
-          return true
-        }
-        break
+        return event.data.payload.buttonId !== undefined
     }
     return false
   }
