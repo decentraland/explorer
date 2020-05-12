@@ -14,7 +14,7 @@ import {
   QueryPayload,
   LoadableParcelScene
 } from 'shared/types'
-import { DecentralandInterface, IEvents, InputEventResult } from 'decentraland-ecs/src/decentraland/Types'
+import { DecentralandInterface, IEvents } from 'decentraland-ecs/src/decentraland/Types'
 import { defaultLogger } from 'shared/logger'
 
 import { customEval, getES5Context } from './sdk/sandbox'
@@ -23,7 +23,6 @@ import { ScriptingTransport, ILogOpts } from 'decentraland-rpc/src/common/json-r
 import { QueryType, CLASS_ID, Transform, Vector2 } from 'decentraland-ecs/src'
 import { PB_Transform, PB_Vector3, PB_Quaternion } from '../shared/proto/engineinterface_pb'
 import { worldToGrid } from 'atomicHelpers/parcelScenePositions'
-import { log } from 'util'
 
 // tslint:disable-next-line:whitespace
 type IEngineAPI = import('shared/apis/EngineAPI').IEngineAPI
