@@ -14,7 +14,7 @@ public class PrivateChatWindowHUDController : IHUD
     string conversationUserId = string.Empty;
     string conversationUserName = string.Empty;
 
-    public void Initialize(IChatController chatController) // TODO: Try removing the chatController reference and just use the singleton one
+    public void Initialize(IChatController chatController)
     {
         view = PrivateChatWindowHUDView.Create();
 
@@ -32,22 +32,20 @@ public class PrivateChatWindowHUDController : IHUD
         view.chatHudView.ForceUpdateLayout();
     }
 
-    public void Configure(string userId)
+    public void Configure(string newConversationUserId)
     {
-        if (string.IsNullOrEmpty(userId)) return;
+        if (string.IsNullOrEmpty(newConversationUserId) || newConversationUserId == conversationUserId) return;
 
-        conversationUserId = userId;
-        conversationUserName = UserProfileController.userProfilesCatalog.Get(userId).userName;
+        conversationUserId = newConversationUserId;
+        conversationUserName = UserProfileController.userProfilesCatalog.Get(newConversationUserId).userName;
 
         view.chatHudView.CleanAllEntries();
 
-        var messageEntries = chatController.GetEntries().Where((x) => x.messageType == ChatMessage.Type.PRIVATE && (x.sender == conversationUserId || x.recipient == conversationUserId)).ToList();
+        var messageEntries = chatController.GetEntries().Where((x) => x.messageType == ChatMessage.Type.PRIVATE && IsMessageFomCurrentConversation(x)).ToList();
         foreach (var v in messageEntries)
         {
             OnAddMessage(v);
         }
-
-        // TODO: hook up to the "new message" event to show the new messages as they arrive
     }
 
     public void SendChatMessage(string msgBody)
@@ -101,7 +99,14 @@ public class PrivateChatWindowHUDController : IHUD
 
     void OnAddMessage(ChatMessage message)
     {
+        if (!IsMessageFomCurrentConversation(message)) return;
+
         view.chatHudView.controller.AddChatMessage(ChatHUDController.ChatMessageToChatEntry(message));
+    }
+
+    bool IsMessageFomCurrentConversation(ChatMessage message)
+    {
+        return message.sender == conversationUserId || message.recipient == conversationUserId;
     }
 
     IEnumerator ForceLayoutDelayed()
