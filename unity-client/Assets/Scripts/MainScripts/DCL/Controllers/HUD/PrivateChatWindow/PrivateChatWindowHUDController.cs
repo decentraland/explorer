@@ -2,17 +2,19 @@
 using DCL.Interface;
 using System.Collections;
 using UnityEngine;
+using System.Linq;
 
 public class PrivateChatWindowHUDController : IHUD
 {
-    private ChatHUDController chatHudController;
     public PrivateChatWindowHUDView view;
 
-    private IChatController chatController;
+    ChatHUDController chatHudController;
+    IChatController chatController;
+    bool resetInputFieldOnSubmit = true;
+    string conversationUserId = string.Empty;
+    string conversationUserName = string.Empty;
 
-    internal bool resetInputFieldOnSubmit = true;
-
-    public void Initialize(IChatController chatController, IMouseCatcher mouseCatcher)
+    public void Initialize(IChatController chatController) // TODO: Try removing the chatController reference and just use the singleton one
     {
         view = PrivateChatWindowHUDView.Create();
 
@@ -30,8 +32,28 @@ public class PrivateChatWindowHUDController : IHUD
         view.chatHudView.ForceUpdateLayout();
     }
 
+    public void Configure(string userId)
+    {
+        if (string.IsNullOrEmpty(userId)) return;
+
+        conversationUserId = userId;
+        conversationUserName = UserProfileController.userProfilesCatalog.Get(userId).userName;
+
+        view.chatHudView.CleanAllEntries();
+
+        var messageEntries = chatController.GetEntries().Where((x) => x.messageType == ChatMessage.Type.PRIVATE && (x.sender == conversationUserId || x.recipient == conversationUserId)).ToList();
+        foreach (var v in messageEntries)
+        {
+            OnAddMessage(v);
+        }
+
+        // TODO: hook up to the "new message" event to show the new messages as they arrive
+    }
+
     public void SendChatMessage(string msgBody)
     {
+        if (string.IsNullOrEmpty(conversationUserName)) return;
+
         bool validString = !string.IsNullOrEmpty(msgBody);
 
         if (msgBody.Length == 1 && (byte)msgBody[0] == 11) //NOTE(Brian): Trim doesn't work. neither IsNullOrWhitespace.
@@ -51,8 +73,9 @@ public class PrivateChatWindowHUDController : IHUD
 
         var data = new ChatMessage()
         {
-            body = msgBody,
+            body = $"/w {conversationUserName} " + msgBody,
             sender = UserProfile.GetOwnUserProfile().userId,
+            messageType = ChatMessage.Type.PRIVATE
         };
 
         WebInterface.SendChatMessage(data);

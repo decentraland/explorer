@@ -146,7 +146,7 @@ public class HUDController : MonoBehaviour
                 taskbarHud?.AddWorldChatWindow(worldChatWindowHud);
 
                 CreateHudElement<PrivateChatWindowHUDController>(configuration, hudElementId);
-                privateChatWindowHud?.Initialize(ChatController.i, DCL.InitialSceneReferences.i?.mouseCatcher);
+                privateChatWindowHud?.Initialize(ChatController.i);
                 taskbarHud?.AddPrivateChatWindow(privateChatWindowHud);
                 break;
             case HUDElementID.FRIENDS:

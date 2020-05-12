@@ -11,7 +11,6 @@ public class PrivateChatWindowHUDShould : TestsBase
     private PrivateChatWindowHUDController controller;
     private PrivateChatWindowHUDView view;
     private ChatController_Mock chatController;
-    private MouseCatcher_Mock mouseCatcher;
 
     private UserProfileModel ownProfileModel;
     private UserProfileModel testProfileModel;
@@ -42,8 +41,7 @@ public class PrivateChatWindowHUDShould : TestsBase
 
         controller = new PrivateChatWindowHUDController();
         chatController = new ChatController_Mock();
-        mouseCatcher = new MouseCatcher_Mock();
-        controller.Initialize(chatController, mouseCatcher);
+        controller.Initialize(chatController);
         this.view = controller.view;
         Assert.IsTrue(view != null, "World chat hud view is null?");
         Assert.IsTrue(controller != null, "World chat hud controller is null?");
@@ -72,7 +70,7 @@ public class PrivateChatWindowHUDShould : TestsBase
         Assert.AreEqual(entry.message, chatEntryModel);
     }
 
-        [UnityTest]
+    [UnityTest]
     public IEnumerator SendChatMessageProperly()
     {
         bool messageWasSent = false;
@@ -87,7 +85,7 @@ public class PrivateChatWindowHUDShould : TestsBase
             };
 
         WebInterface.OnMessageFromEngine += messageCallback;
-        controller.resetInputFieldOnSubmit = false;
+        // controller.resetInputFieldOnSubmit = false;
         controller.SendChatMessage("test message");
         Assert.IsTrue(messageWasSent);
         Assert.AreEqual("", controller.view.chatHudView.inputField.text);
