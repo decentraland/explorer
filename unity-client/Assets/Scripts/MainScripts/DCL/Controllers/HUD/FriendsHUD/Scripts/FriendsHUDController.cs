@@ -179,28 +179,28 @@ public class FriendsHUDController : IHUD
     private void UpdateNotificationsCounter()
     {
         //NOTE(Brian): If friends tab is already active, update and save this value instantly
-        if (view.friendsList.gameObject.activeSelf)
+        if (view.friendsList.gameObject.activeInHierarchy)
         {
-            PlayerPrefs.SetInt(PLAYER_PREFS_SEEN_FRIEND_COUNT, FriendsController.i.friends.Count);
+            PlayerPrefs.SetInt(PLAYER_PREFS_SEEN_FRIEND_COUNT, friendsController.friendCount);
             PlayerPrefs.Save();
         }
 
         var pendingFriendRequestsSO = Resources.Load<FloatVariable>("ScriptableObjects/PendingFriendRequests");
 
-        if (pendingFriendRequestsSO != null)
-        {
-            int receivedRequestsCount = view.friendRequestsList.receivedRequestsList.Count();
-            int seenFriendsCount = PlayerPrefs.GetInt(PLAYER_PREFS_SEEN_FRIEND_COUNT, 0);
-            int friendsCount = FriendsController.i.friends.Count;
+        if (pendingFriendRequestsSO == null)
+            return;
 
-            int newFriends = friendsCount - seenFriendsCount;
+        int receivedRequestsCount = view.friendRequestsList.receivedRequestsList.Count();
+        int seenFriendsCount = PlayerPrefs.GetInt(PLAYER_PREFS_SEEN_FRIEND_COUNT, 0);
+        int friendsCount = friendsController.friendCount;
 
-            //NOTE(Brian): If someone deletes you, don't show badge notification
-            if (newFriends < 0)
-                newFriends = 0;
+        int newFriends = friendsCount - seenFriendsCount;
 
-            pendingFriendRequestsSO.Set(receivedRequestsCount + newFriends);
-        }
+        //NOTE(Brian): If someone deletes you, don't show badge notification
+        if (newFriends < 0)
+            newFriends = 0;
+
+        pendingFriendRequestsSO.Set(receivedRequestsCount + newFriends);
     }
 
     private void Entry_OnWhisper(FriendEntry entry)

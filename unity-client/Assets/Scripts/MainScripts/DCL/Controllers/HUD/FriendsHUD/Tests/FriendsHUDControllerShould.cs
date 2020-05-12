@@ -12,13 +12,29 @@ class FriendsController_Mock : IFriendsController
     public event Action<string, FriendsController.UserStatus> OnUpdateUserStatus;
     public event Action<string> OnFriendNotFound;
 
+    Dictionary<string, FriendsController.UserStatus> friends = new Dictionary<string, FriendsController.UserStatus>();
+
+    public int friendCount => friends.Count;
+
     public Dictionary<string, FriendsController.UserStatus> GetFriends()
     {
-        return null;
+        return friends;
     }
 
     public void RaiseUpdateFriendship(string id, FriendsController.FriendshipAction action)
     {
+        if (action == FriendsController.FriendshipAction.NONE)
+        {
+            if (friends.ContainsKey(id))
+                friends.Remove(id);
+        }
+
+        if (action == FriendsController.FriendshipAction.APPROVED)
+        {
+            if (!friends.ContainsKey(id))
+                friends.Add(id, new FriendsController.UserStatus());
+        }
+
         OnUpdateFriendship?.Invoke(id, action);
     }
 
@@ -229,11 +245,14 @@ public class FriendsHUDControllerShould : TestsBase
     [Test]
     public void TaskbarNotificationBadgeHasCorrectValue()
     {
+        PlayerPrefs.SetInt(FriendsHUDController.PLAYER_PREFS_SEEN_FRIEND_COUNT, 0);
+
         var pendingFriendRequestsSO = Resources.Load<FloatVariable>("ScriptableObjects/PendingFriendRequests");
 
         Assert.IsTrue(pendingFriendRequestsSO != null);
 
         controller.SetVisibility(false);
+
         AddFriendThruFriendsController("friend-1");
         AddFriendThruFriendsController("friend-2");
         AddFriendThruFriendsController("friend-3");
@@ -259,6 +278,8 @@ public class FriendsHUDControllerShould : TestsBase
         Assert.AreEqual(0, pendingFriendRequestsSO.Get(), "If pending friend is accepted and friends hud is visible, badge notif should dissapear");
 
         AddFriendThruFriendsController("friend-6", FriendsController.FriendshipAction.APPROVED);
+
+        seenFriendsCount = PlayerPrefs.GetInt(FriendsHUDController.PLAYER_PREFS_SEEN_FRIEND_COUNT, 0);
 
         Assert.AreEqual(6, seenFriendsCount);
         Assert.AreEqual(0, pendingFriendRequestsSO.Get(), "If pending friend is accepted and friends hud is visible, badge notif should dissapear");
