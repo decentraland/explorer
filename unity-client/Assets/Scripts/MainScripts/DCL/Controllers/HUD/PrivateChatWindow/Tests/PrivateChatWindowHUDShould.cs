@@ -41,7 +41,11 @@ public class PrivateChatWindowHUDShould : TestsBase
 
         controller = new PrivateChatWindowHUDController();
         chatController = new ChatController_Mock();
+
         controller.Initialize(chatController);
+        controller.Configure(testProfileModel.userId);
+        controller.SetVisibility(true);
+
         this.view = controller.view;
         Assert.IsTrue(view != null, "World chat hud view is null?");
         Assert.IsTrue(controller != null, "World chat hud controller is null?");
@@ -54,7 +58,7 @@ public class PrivateChatWindowHUDShould : TestsBase
     {
         var chatMessage = new ChatMessage()
         {
-            messageType = ChatMessage.Type.PUBLIC,
+            messageType = ChatMessage.Type.PRIVATE,
             body = "test message",
             sender = testProfileModel.userId
         };
@@ -85,12 +89,63 @@ public class PrivateChatWindowHUDShould : TestsBase
             };
 
         WebInterface.OnMessageFromEngine += messageCallback;
-        // controller.resetInputFieldOnSubmit = false;
+        controller.resetInputFieldOnSubmit = false;
         controller.SendChatMessage("test message");
         Assert.IsTrue(messageWasSent);
         Assert.AreEqual("", controller.view.chatHudView.inputField.text);
         WebInterface.OnMessageFromEngine -= messageCallback;
         yield break;
+    }
+
+    [Test]
+    public void DisplayCorrectUserMessages()
+    {
+        // Send 2 private messages from correct user
+        var chatMessage = new ChatMessage()
+        {
+            messageType = ChatMessage.Type.PRIVATE,
+            body = "test message",
+            sender = testProfileModel.userId
+        };
+
+        chatController.RaiseAddMessage(chatMessage);
+
+        Assert.AreEqual(1, controller.view.chatHudView.entries.Count);
+
+        chatMessage = new ChatMessage()
+        {
+            messageType = ChatMessage.Type.PRIVATE,
+            body = "test message 2",
+            sender = testProfileModel.userId
+        };
+
+        chatController.RaiseAddMessage(chatMessage);
+
+        Assert.AreEqual(2, controller.view.chatHudView.entries.Count);
+
+        // Send 1 PUBLIC message from correct user
+        chatMessage = new ChatMessage()
+        {
+            messageType = ChatMessage.Type.PUBLIC,
+            body = "test message 3 - PUBLIC",
+            sender = testProfileModel.userId
+        };
+
+        chatController.RaiseAddMessage(chatMessage);
+
+        Assert.AreEqual(2, controller.view.chatHudView.entries.Count);
+
+        // Send 1 PRIVATE message from incorrect user
+        chatMessage = new ChatMessage()
+        {
+            messageType = ChatMessage.Type.PRIVATE,
+            body = "test message 3 - INCORRECT-USER",
+            sender = "other-user-id"
+        };
+
+        chatController.RaiseAddMessage(chatMessage);
+
+        Assert.AreEqual(2, controller.view.chatHudView.entries.Count);
     }
 
     [Test]

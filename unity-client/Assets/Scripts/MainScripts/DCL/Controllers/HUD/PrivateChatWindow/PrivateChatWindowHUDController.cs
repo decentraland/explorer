@@ -7,10 +7,10 @@ using System.Linq;
 public class PrivateChatWindowHUDController : IHUD
 {
     public PrivateChatWindowHUDView view;
+    public bool resetInputFieldOnSubmit = true;
 
     ChatHUDController chatHudController;
     IChatController chatController;
-    bool resetInputFieldOnSubmit = true;
     string conversationUserId = string.Empty;
     string conversationUserName = string.Empty;
 
@@ -45,7 +45,7 @@ public class PrivateChatWindowHUDController : IHUD
 
         view.chatHudView.CleanAllEntries();
 
-        var messageEntries = chatController.GetEntries().Where((x) => x.messageType == ChatMessage.Type.PRIVATE && IsMessageFomCurrentConversation(x)).ToList();
+        var messageEntries = chatController.GetEntries().Where((x) => IsMessageFomCurrentConversation(x)).ToList();
         foreach (var v in messageEntries)
         {
             OnAddMessage(v);
@@ -110,7 +110,7 @@ public class PrivateChatWindowHUDController : IHUD
 
     bool IsMessageFomCurrentConversation(ChatMessage message)
     {
-        return message.sender == conversationUserId || message.recipient == conversationUserId;
+        return message.messageType == ChatMessage.Type.PRIVATE && (message.sender == conversationUserId || message.recipient == conversationUserId);
     }
 
     public void ForceFocus()
