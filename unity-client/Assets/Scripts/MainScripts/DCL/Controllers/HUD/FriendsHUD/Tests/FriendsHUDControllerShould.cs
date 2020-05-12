@@ -226,7 +226,45 @@ public class FriendsHUDControllerShould : TestsBase
     {
     }
 
-    FriendEntry AddFriendThruFriendsController(string id)
+    [Test]
+    public void TaskbarNotificationBadgeHasCorrectValue()
+    {
+        var pendingFriendRequestsSO = Resources.Load<FloatVariable>("ScriptableObjects/PendingFriendRequests");
+
+        Assert.IsTrue(pendingFriendRequestsSO != null);
+
+        controller.SetVisibility(false);
+        AddFriendThruFriendsController("friend-1");
+        AddFriendThruFriendsController("friend-2");
+        AddFriendThruFriendsController("friend-3");
+        AddFriendThruFriendsController("friend-4");
+        AddFriendThruFriendsController("friend-5", FriendsController.FriendshipAction.REQUESTED_FROM);
+
+        int seenFriendsCount = PlayerPrefs.GetInt(FriendsHUDController.PLAYER_PREFS_SEEN_FRIEND_COUNT, 0);
+
+        Assert.AreEqual(0, seenFriendsCount);
+        Assert.AreEqual(5, pendingFriendRequestsSO.Get());
+
+        controller.SetVisibility(true);
+
+        seenFriendsCount = PlayerPrefs.GetInt(FriendsHUDController.PLAYER_PREFS_SEEN_FRIEND_COUNT, 0);
+        Assert.AreEqual(4, seenFriendsCount);
+        Assert.AreEqual(1, pendingFriendRequestsSO.Get(), "Pending friend should remain counted in the toast");
+
+        AddFriendThruFriendsController("friend-5", FriendsController.FriendshipAction.APPROVED);
+
+        seenFriendsCount = PlayerPrefs.GetInt(FriendsHUDController.PLAYER_PREFS_SEEN_FRIEND_COUNT, 0);
+
+        Assert.AreEqual(5, seenFriendsCount);
+        Assert.AreEqual(0, pendingFriendRequestsSO.Get(), "If pending friend is accepted and friends hud is visible, badge notif should dissapear");
+
+        AddFriendThruFriendsController("friend-6", FriendsController.FriendshipAction.APPROVED);
+
+        Assert.AreEqual(6, seenFriendsCount);
+        Assert.AreEqual(0, pendingFriendRequestsSO.Get(), "If pending friend is accepted and friends hud is visible, badge notif should dissapear");
+    }
+
+    FriendEntry AddFriendThruFriendsController(string id, FriendsController.FriendshipAction action = FriendsController.FriendshipAction.APPROVED)
     {
         UserProfileModel model = new UserProfileModel()
         {
@@ -235,7 +273,7 @@ public class FriendsHUDControllerShould : TestsBase
         };
 
         UserProfileController.i.AddUserProfileToCatalog(model);
-        friendsController.RaiseUpdateFriendship(id, FriendsController.FriendshipAction.APPROVED);
+        friendsController.RaiseUpdateFriendship(id, action);
         return view.friendsList.GetEntry(id) as FriendEntry;
     }
 }

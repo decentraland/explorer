@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class FriendsHUDController : IHUD
 {
-    const string PLAYER_PREFS_SEEN_FRIEND_COUNT = "SeenFriendsCount";
+    internal const string PLAYER_PREFS_SEEN_FRIEND_COUNT = "SeenFriendsCount";
     internal const string CURRENT_PLAYER_ID = "CurrentPlayerInfoCardId";
     public FriendsHUDView view
     {
