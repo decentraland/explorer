@@ -145,7 +145,7 @@ public class HUDController : MonoBehaviour
                 worldChatWindowHud?.Initialize(ChatController.i, DCL.InitialSceneReferences.i?.mouseCatcher);
                 taskbarHud?.AddWorldChatWindow(worldChatWindowHud);
 
-                CreateHudElement<PrivateChatWindowHUDController>(configuration, hudElementId);
+                CreateHudElement<PrivateChatWindowHUDController>(configuration, HUDElementID.PRIVATE_CHAT_WINDOW);
                 privateChatWindowHud?.Initialize(ChatController.i);
                 taskbarHud?.AddPrivateChatWindow(privateChatWindowHud);
                 break;
@@ -172,9 +172,11 @@ public class HUDController : MonoBehaviour
         GetHUDElement(hudElementId)?.SetVisibility(configuration.active && configuration.visible);
     }
 
-    private void FriendsHud_OnPressWhisper(string userName)
+    private void FriendsHud_OnPressWhisper(string targetUserId)
     {
-        worldChatWindowHud.ForceFocus($"/w {userName} ");
+        privateChatWindowHud.Configure(targetUserId);
+        privateChatWindowHud.SetVisibility(true);
+        privateChatWindowHud.ForceFocus();
     }
 
     public void CreateHudElement<T>(HUDConfiguration config, HUDElementID id)

@@ -30,6 +30,8 @@ public class PrivateChatWindowHUDController : IHUD
         }
 
         view.chatHudView.ForceUpdateLayout();
+
+        SetVisibility(false);
     }
 
     public void Configure(string newConversationUserId)
@@ -38,6 +40,8 @@ public class PrivateChatWindowHUDController : IHUD
 
         conversationUserId = newConversationUserId;
         conversationUserName = UserProfileController.userProfilesCatalog.Get(newConversationUserId).userName;
+
+        view.ConfigureTitle(conversationUserName);
 
         view.chatHudView.CleanAllEntries();
 
@@ -81,12 +85,12 @@ public class PrivateChatWindowHUDController : IHUD
 
     public void SetVisibility(bool visible)
     {
+        if (view.gameObject.activeSelf == visible) return;
+
         view.gameObject.SetActive(visible);
 
         if (visible)
-        {
             view.StartCoroutine(ForceLayoutDelayed());
-        }
     }
 
     public void Dispose()
@@ -107,6 +111,12 @@ public class PrivateChatWindowHUDController : IHUD
     bool IsMessageFomCurrentConversation(ChatMessage message)
     {
         return message.sender == conversationUserId || message.recipient == conversationUserId;
+    }
+
+    public void ForceFocus()
+    {
+        SetVisibility(true);
+        view.chatHudView.FocusInputField();
     }
 
     IEnumerator ForceLayoutDelayed()

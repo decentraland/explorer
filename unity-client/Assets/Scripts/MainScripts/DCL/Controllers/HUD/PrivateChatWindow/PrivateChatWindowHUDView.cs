@@ -25,6 +25,11 @@ public class PrivateChatWindowHUDView : MonoBehaviour
         this.closeButton.onClick.AddListener(Toggle);
     }
 
+    public void ConfigureTitle(string targetUserName)
+    {
+        windowTitleText.text = targetUserName;
+    }
+
     public void Toggle()
     {
         if (gameObject.activeSelf)
