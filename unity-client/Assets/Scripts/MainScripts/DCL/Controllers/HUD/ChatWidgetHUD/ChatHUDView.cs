@@ -15,6 +15,8 @@ public class ChatHUDView : MonoBehaviour
     public ChatHUDController controller;
     [NonSerialized] public List<ChatEntry> entries = new List<ChatEntry>();
 
+    private UnityAction<string> onSendMessageAction;
+
     public static ChatHUDView Create()
     {
         var view = Instantiate(Resources.Load<GameObject>(VIEW_PATH)).GetComponent<ChatHUDView>();
@@ -25,7 +27,17 @@ public class ChatHUDView : MonoBehaviour
     public void Initialize(ChatHUDController controller, UnityAction<string> onSendMessage)
     {
         this.controller = controller;
-        inputField.onSubmit.AddListener(onSendMessage);
+        onSendMessageAction = onSendMessage;
+        inputField.onSubmit.AddListener(OnInputFieldSubmit);
+    }
+
+    private void OnInputFieldSubmit(string message)
+    {
+        // A TMP_InputField is automatically marked as 'wasCanceled' when the ESC key is pressed
+        if (inputField.wasCanceled)
+            message = "";
+
+        onSendMessageAction(message);
     }
 
     public void ResetInputField()
@@ -36,8 +48,38 @@ public class ChatHUDView : MonoBehaviour
 
     public void FocusInputField()
     {
-        inputField.Select();
         inputField.ActivateInputField();
+        inputField.Select();
+    }
+
+    bool enableFadeoutMode = false;
+
+    bool EntryIsVisible(ChatEntry entry)
+    {
+        int visibleCorners = (entry.transform as RectTransform).CountCornersVisibleFrom(scrollRect.viewport.transform as RectTransform);
+        return visibleCorners > 0;
+    }
+
+    public void SetFadeoutMode(bool enabled)
+    {
+        if (enableFadeoutMode == enabled)
+            return;
+
+        enableFadeoutMode = enabled;
+
+        for (int i = 0; i < entries.Count; i++)
+        {
+            ChatEntry entry = entries[i];
+
+            if (enabled)
+            {
+                entry.SetFadeout(EntryIsVisible(entry));
+            }
+            else
+            {
+                entry.SetFadeout(false);
+            }
+        }
     }
 
 
@@ -45,6 +87,11 @@ public class ChatHUDView : MonoBehaviour
     {
         var chatEntryGO = Instantiate(Resources.Load("Chat Entry") as GameObject, chatEntriesContainer);
         ChatEntry chatEntry = chatEntryGO.GetComponent<ChatEntry>();
+
+        if (enableFadeoutMode && EntryIsVisible(chatEntry))
+            chatEntry.SetFadeout(true);
+        else
+            chatEntry.SetFadeout(false);
 
         chatEntry.Populate(chatEntryModel);
 
