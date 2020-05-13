@@ -12,6 +12,7 @@ public class FriendEntry : FriendEntryBase
     [SerializeField] internal Button jumpInButton;
     [SerializeField] internal Button whisperButton;
     [SerializeField] internal GameObject whisperLabel;
+    [SerializeField] internal UnreadNotificacionBadge notificationBadge;
 
     public override void Awake()
     {
@@ -22,6 +23,11 @@ public class FriendEntry : FriendEntryBase
 
         whisperButton.onClick.RemoveAllListeners();
         whisperButton.onClick.AddListener(() => OnWhisperClick?.Invoke(this));
+    }
+
+    private void Start()
+    {
+        notificationBadge.Initialize(userId);
     }
 
     public override void OnPointerEnter(PointerEventData eventData)
