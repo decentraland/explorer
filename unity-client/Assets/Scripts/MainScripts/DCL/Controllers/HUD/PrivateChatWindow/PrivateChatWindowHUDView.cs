@@ -1,8 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using UnityEngine.Events;
-using UnityEngine.EventSystems;
 
 public class PrivateChatWindowHUDView : MonoBehaviour
 {
@@ -12,6 +10,11 @@ public class PrivateChatWindowHUDView : MonoBehaviour
     public ChatHUDView chatHudView;
     public PrivateChatWindowHUDController controller;
     public TMP_Text windowTitleText;
+
+    void OnEnable()
+    {
+        DCL.Helpers.Utils.ForceUpdateLayout(transform as RectTransform);
+    }
 
     public static PrivateChatWindowHUDView Create()
     {

@@ -1,6 +1,5 @@
 ﻿using DCL;
 using DCL.Interface;
-using System.Collections;
 using UnityEngine;
 using System.Linq;
 
@@ -88,9 +87,6 @@ public class PrivateChatWindowHUDController : IHUD
         if (view.gameObject.activeSelf == visible) return;
 
         view.gameObject.SetActive(visible);
-
-        if (visible)
-            view.StartCoroutine(ForceLayoutDelayed());
     }
 
     public void Dispose()
@@ -117,11 +113,5 @@ public class PrivateChatWindowHUDController : IHUD
     {
         SetVisibility(true);
         view.chatHudView.FocusInputField();
-    }
-
-    IEnumerator ForceLayoutDelayed()
-    {
-        yield return null;
-        view.chatHudView.ForceUpdateLayout();
     }
 }
