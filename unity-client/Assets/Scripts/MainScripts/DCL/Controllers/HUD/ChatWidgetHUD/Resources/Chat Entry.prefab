@@ -130,6 +130,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 615ed236a52062f49a259cf7d86e52e1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  timeToFade: 10
+  fadeDuration: 5
   username: {fileID: 4711086080818900299}
   body: {fileID: 8068759164719752186}
   worldMessageColor: {r: 1, g: 1, b: 1, a: 1}
