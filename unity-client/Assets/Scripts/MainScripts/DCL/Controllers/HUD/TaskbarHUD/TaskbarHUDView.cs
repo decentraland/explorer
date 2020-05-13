@@ -7,24 +7,30 @@ public class TaskbarHUDView : MonoBehaviour
     const string VIEW_PATH = "Taskbar";
 
     public RectTransform windowContainer;
+    public CanvasGroup windowContainerCanvasGroup;
+    public LayoutGroup windowContainerLayout;
+
     public Button chatButton;
     public Button friendsButton;
 
     public GameObject chatTooltip;
 
+    public ConversationBlobGroupView pmButtonsContainer;
+
     internal TaskbarHUDController controller;
 
-    internal static TaskbarHUDView Create(TaskbarHUDController controller)
+    internal static TaskbarHUDView Create(TaskbarHUDController controller, IChatController chatController)
     {
         var view = Instantiate(Resources.Load<GameObject>(VIEW_PATH)).GetComponent<TaskbarHUDView>();
-        view.Initialize(controller);
+        view.Initialize(controller, chatController);
         return view;
     }
 
-    public void Initialize(TaskbarHUDController controller)
+    public void Initialize(TaskbarHUDController controller, IChatController chatController)
     {
         this.controller = controller;
         chatTooltip.SetActive(false);
+        pmButtonsContainer.Initialize(chatController);
         CommonScriptableObjects.rendererState.OnChange -= RendererState_OnChange;
         CommonScriptableObjects.rendererState.OnChange += RendererState_OnChange;
     }
@@ -55,6 +61,10 @@ public class TaskbarHUDView : MonoBehaviour
     {
         friendsButton.gameObject.SetActive(true);
         friendsButton.onClick.AddListener(onToggle);
+    }
+
+    internal void OnAddPrivateMessageButton()
+    {
     }
 
     public void SetVisibility(bool visible)

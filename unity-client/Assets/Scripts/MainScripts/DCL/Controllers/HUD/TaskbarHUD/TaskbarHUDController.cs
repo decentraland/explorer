@@ -1,15 +1,50 @@
+using DCL;
 using UnityEngine;
 
 public class TaskbarHUDController : IHUD
 {
+    public const bool WINDOW_STACKING_ENABLED = false;
+
     internal TaskbarHUDView view;
     public WorldChatWindowHUDController worldChatWindowHud;
     public FriendsHUDController friendsHud;
     public bool alreadyToggledOnForFirstTime { get; private set; } = false;
 
-    public TaskbarHUDController()
+    IMouseCatcher mouseCatcher;
+    IChatController chatController;
+
+    public void Initialize(IMouseCatcher mouseCatcher, IChatController chatController)
     {
-        view = TaskbarHUDView.Create(this);
+        this.mouseCatcher = mouseCatcher;
+        this.chatController = chatController;
+
+        view = TaskbarHUDView.Create(this, chatController);
+
+        mouseCatcher.OnMouseLock -= MouseCatcher_OnMouseLock;
+        mouseCatcher.OnMouseUnlock -= MouseCatcher_OnMouseUnlock;
+        mouseCatcher.OnMouseLock += MouseCatcher_OnMouseLock;
+        mouseCatcher.OnMouseUnlock += MouseCatcher_OnMouseUnlock;
+
+        if (!WINDOW_STACKING_ENABLED)
+        {
+            view.windowContainerLayout.enabled = false;
+        }
+    }
+
+
+    private void MouseCatcher_OnMouseUnlock()
+    {
+        view.windowContainerCanvasGroup.alpha = 1;
+    }
+
+    private void MouseCatcher_OnMouseLock()
+    {
+        view.windowContainerCanvasGroup.alpha = 0;
+    }
+
+    public void AddPrivateMessageButton(string userId)
+    {
+        view.OnAddPrivateMessageButton();
     }
 
     public void AddChatWindow(WorldChatWindowHUDController controller)
@@ -72,7 +107,13 @@ public class TaskbarHUDController : IHUD
     {
         if (view != null)
         {
-            Object.Destroy(view.gameObject);
+            UnityEngine.Object.Destroy(view.gameObject);
+        }
+
+        if (mouseCatcher != null)
+        {
+            mouseCatcher.OnMouseLock -= MouseCatcher_OnMouseLock;
+            mouseCatcher.OnMouseUnlock -= MouseCatcher_OnMouseUnlock;
         }
     }
 

@@ -10,7 +10,7 @@ public class TaskbarHUDShould : TestsBase
     protected override IEnumerator SetUp()
     {
         controller = new TaskbarHUDController();
-        view = TaskbarHUDView.Create(controller);
+        view = TaskbarHUDView.Create(controller, null);
         controller.view = view;
         view.controller = controller;
 
