@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -14,12 +14,8 @@ public class TaskbarHUDView : MonoBehaviour
     public TaskbarButton chatButton;
     public TaskbarButton friendsButton;
 
-    public GameObject chatTooltip;
-
     public ChatHeadsGroupView chatHeadsGroup;
-
     public List<TaskbarButton> taskbarButtonList = new List<TaskbarButton>();
-
     internal TaskbarHUDController controller;
 
     void RefreshButtonList()
@@ -40,27 +36,8 @@ public class TaskbarHUDView : MonoBehaviour
     public void Initialize(TaskbarHUDController controller, IChatController chatController)
     {
         this.controller = controller;
-        chatTooltip.SetActive(false);
         chatHeadsGroup.Initialize(chatController);
-        CommonScriptableObjects.rendererState.OnChange -= RendererState_OnChange;
-        CommonScriptableObjects.rendererState.OnChange += RendererState_OnChange;
         RefreshButtonList();
-    }
-
-    private void OnDestroy()
-    {
-        CommonScriptableObjects.rendererState.OnChange -= RendererState_OnChange;
-    }
-
-    private void RendererState_OnChange(bool current, bool previous)
-    {
-        if (current == previous)
-            return;
-
-        if (current && !controller.alreadyToggledOnForFirstTime)
-        {
-            chatTooltip.SetActive(true);
-        }
     }
 
     internal void OnAddChatWindow(UnityAction onToggle)
@@ -82,12 +59,6 @@ public class TaskbarHUDView : MonoBehaviour
     public void SetVisibility(bool visible)
     {
         gameObject.SetActive(visible);
-    }
-
-    public void OnToggleForFirstTime()
-    {
-        //TODO(Brian): Toggle an animator trigger/bool instead of doing this.
-        chatTooltip.SetActive(false);
     }
 
     private void Update()

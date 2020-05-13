@@ -17,10 +17,13 @@ public class WorldChatWindowHUDController : IHUD
 
     internal bool resetInputFieldOnSubmit = true;
     private int invalidSubmitLastFrame = 0;
+    UserProfile ownProfile => UserProfile.GetOwnUserProfile();
+    public string lastPrivateMessageReceivedSender = string.Empty;
 
     public void Initialize(IChatController chatController, IMouseCatcher mouseCatcher)
     {
-        view = WorldChatWindowHUDView.Create(OnEnablePrivateTab, OnEnableWorldTab);
+        view = WorldChatWindowHUDView.Create();
+        view.controller = this;
 
         chatHudController = new ChatHUDController();
         chatHudController.Initialize(view.chatHudView, SendChatMessage);
@@ -59,32 +62,12 @@ public class WorldChatWindowHUDController : IHUD
         Object.Destroy(view);
     }
 
-    void OnEnableWorldTab()
-    {
-        view.chatHudView.CleanAllEntries();
-
-        var result = chatController.GetEntries();
-
-        foreach (var v in result)
-        {
-            OnAddMessage(v);
-        }
-    }
-
-    void OnEnablePrivateTab()
-    {
-        view.chatHudView.CleanAllEntries();
-        var result = chatController.GetEntries().Where((x) => x.messageType == ChatMessage.Type.PRIVATE).ToList();
-
-        foreach (var v in result)
-        {
-            OnAddMessage(v);
-        }
-    }
-
     void OnAddMessage(ChatMessage message)
     {
         view.chatHudView.controller.AddChatMessage(ChatHUDController.ChatMessageToChatEntry(message));
+
+        if (message.messageType == ChatMessage.Type.PRIVATE && message.recipient == ownProfile.userId)
+            lastPrivateMessageReceivedSender = UserProfileController.userProfilesCatalog.Get(message.sender).userName;
     }
 
     //NOTE(Brian): Send chat responsibilities must be on the chatHud containing window like this one, this way we ensure
@@ -147,7 +130,6 @@ public class WorldChatWindowHUDController : IHUD
         ForceFocus();
         return true;
     }
-
 
     public void ForceFocus(string setInputText = null)
     {

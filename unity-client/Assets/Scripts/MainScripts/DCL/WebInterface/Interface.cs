@@ -148,6 +148,7 @@ namespace DCL.Interface
         [System.Serializable]
         public class OnClickEventPayload
         {
+            public ACTION_BUTTON buttonId = ACTION_BUTTON.POINTER;
         }
 
         [System.Serializable]
@@ -775,7 +776,7 @@ namespace DCL.Interface
             });
         }
 
-        public static void SendUnlockPlayer(string userId)
+        public static void SendUnblockPlayer(string userId)
         {
             SendMessage("UnblockPlayer", new SendUnblockPlayerPayload()
             {

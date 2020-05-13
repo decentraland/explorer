@@ -195,7 +195,7 @@ namespace Tests
 
                 DCLCharacterController.i.LateUpdate();
 
-                if (!checkedParent && lerpTime >= 0.5f)
+                if (!checkedParent && lerpTime >= 0.25f)
                 {
                     Assert.IsTrue(DCLCharacterController.i.isOnMovingPlatform, "isOnMovingPlatform should be true when the platform moves/rotates");
                     checkedParent = true;
@@ -286,6 +286,8 @@ namespace Tests
             // remove platform and check character parent
             string platformEntityId = "movingPlatform";
             TestHelpers.RemoveSceneEntity(scene, platformEntityId);
+            yield return null;
+            yield return null;
             yield return null;
 
             Assert.IsNull(DCLCharacterController.i.transform.parent, "The character shouldn't be parented as there's no platform anymore");

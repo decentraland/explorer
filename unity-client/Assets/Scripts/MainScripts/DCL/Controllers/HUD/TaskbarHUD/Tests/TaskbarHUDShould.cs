@@ -24,7 +24,7 @@ public class TaskbarHUDShould : TestsBase
         WorldChatWindowHUDController chatWindowController = new WorldChatWindowHUDController();
         chatWindowController.Initialize(null, null);
 
-        controller.AddChatWindow(chatWindowController);
+        controller.AddWorldChatWindow(chatWindowController);
 
         Assert.IsTrue(chatWindowController.view.transform.parent == view.windowContainer, "Chat window isn't inside taskbar window container!");
         Assert.IsTrue(chatWindowController.view.gameObject.activeSelf, "Chat window is disabled!");
@@ -32,20 +32,20 @@ public class TaskbarHUDShould : TestsBase
     }
 
     [UnityTest]
-    public IEnumerator ToggleWindowsProperly()
+    public IEnumerator ToggleChatPreviewProperly()
     {
         WorldChatWindowHUDController chatWindowController = new WorldChatWindowHUDController();
         chatWindowController.Initialize(null, null);
 
-        controller.AddChatWindow(chatWindowController);
+        controller.AddWorldChatWindow(chatWindowController);
 
-        view.chatButton.onClick.Invoke();
+        view.chatButton.openButton.onClick.Invoke();
 
-        Assert.IsFalse(chatWindowController.view.gameObject.activeSelf);
+        Assert.IsTrue(chatWindowController.view.isInPreview);
 
-        view.chatButton.onClick.Invoke();
+        view.chatButton.openButton.onClick.Invoke();
 
-        Assert.IsTrue(chatWindowController.view.gameObject.activeSelf);
+        Assert.IsFalse(chatWindowController.view.isInPreview);
         yield break;
     }
 }
