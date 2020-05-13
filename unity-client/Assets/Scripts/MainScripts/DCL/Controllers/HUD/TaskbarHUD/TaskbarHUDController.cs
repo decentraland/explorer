@@ -26,10 +26,23 @@ public class TaskbarHUDController : IHUD
         mouseCatcher.OnMouseLock += MouseCatcher_OnMouseLock;
         mouseCatcher.OnMouseUnlock += MouseCatcher_OnMouseUnlock;
 
+        view.chatHeadsGroup.OnHeadOpen += ChatHeadsGroup_OnHeadOpen;
+
         if (!WINDOW_STACKING_ENABLED)
         {
             view.windowContainerLayout.enabled = false;
         }
+    }
+
+    private void ChatHeadsGroup_OnHeadOpen(TaskbarButton taskbarBtn)
+    {
+        ChatHeadButton head = taskbarBtn as ChatHeadButton;
+
+        if (taskbarBtn == null)
+            return;
+
+        privateChatWindowHud.Configure(head.profile.userId);
+        privateChatWindowHud.view.gameObject.SetActive(true);
     }
 
 

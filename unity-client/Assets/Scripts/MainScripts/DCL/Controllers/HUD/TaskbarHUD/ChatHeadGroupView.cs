@@ -2,13 +2,16 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class ChatHeadsGroupView : MonoBehaviour
+public class ChatHeadGroupView : MonoBehaviour
 {
     const int MAX_GROUP_SIZE = 5;
     const string CHAT_HEAD_PATH = "ChatHead";
 
+    public event System.Action<TaskbarButton> OnHeadOpen;
+    public event System.Action<TaskbarButton> OnHeadClose;
+
     public Transform container;
-    public List<ChatHeadButton> chatHeads = new List<ChatHeadButton>();
+    [System.NonSerialized] public List<ChatHeadButton> chatHeads = new List<ChatHeadButton>();
     private IChatController chatController;
 
     public void Initialize(IChatController chatController)
@@ -48,12 +51,13 @@ public class ChatHeadsGroupView : MonoBehaviour
 
     private void OnOpen(TaskbarButton head)
     {
-        //TODO(Brian): Open private window
+        OnHeadOpen?.Invoke(head);
     }
 
     private void OnClose(ChatHeadButton head)
     {
         RemoveHead(head);
+        OnHeadClose?.Invoke(head);
     }
 
     private void AddChatHead(string userId, ulong timestamp)

@@ -4,16 +4,16 @@ using UnityEngine.UI;
 
 public class ChatHeadButton : TaskbarButton, IPointerEnterHandler, IPointerExitHandler
 {
-    internal GameObject labelContainer;
-    internal TMPro.TextMeshProUGUI label;
-    internal Button closeButton;
+    [SerializeField] internal GameObject labelContainer;
+    [SerializeField] internal TMPro.TextMeshProUGUI label;
+    [SerializeField] internal Button closeButton;
 
-    internal Sprite portrait;
+    [SerializeField] internal Image portrait;
     internal ulong lastTimestamp;
 
     public event System.Action<ChatHeadButton> OnClose;
 
-    public UserProfile profile;
+    internal UserProfile profile;
     public void Initialize(UserProfile profile)
     {
         base.Initialize();
@@ -22,15 +22,15 @@ public class ChatHeadButton : TaskbarButton, IPointerEnterHandler, IPointerExitH
         closeButton.onClick.AddListener(OnCloseButtonPressed);
 
         if (profile.faceSnapshot != null)
-            portrait = profile.faceSnapshot;
+            portrait.sprite = profile.faceSnapshot;
         else
             profile.OnFaceSnapshotReadyEvent += Profile_OnFaceSnapshotReadyEvent;
     }
 
-    private void Profile_OnFaceSnapshotReadyEvent(Sprite portrait)
+    private void Profile_OnFaceSnapshotReadyEvent(Sprite portraitSprite)
     {
         profile.OnFaceSnapshotReadyEvent -= Profile_OnFaceSnapshotReadyEvent;
-        this.portrait = portrait;
+        this.portrait.sprite = portraitSprite;
     }
 
     private void OnCloseButtonPressed()

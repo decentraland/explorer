@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -14,7 +14,7 @@ public class TaskbarHUDView : MonoBehaviour
     public TaskbarButton chatButton;
     public TaskbarButton friendsButton;
 
-    public ChatHeadsGroupView chatHeadsGroup;
+    public ChatHeadGroupView chatHeadsGroup;
     public List<TaskbarButton> taskbarButtonList = new List<TaskbarButton>();
     internal TaskbarHUDController controller;
 
@@ -38,6 +38,30 @@ public class TaskbarHUDView : MonoBehaviour
         this.controller = controller;
         chatHeadsGroup.Initialize(chatController);
         RefreshButtonList();
+
+        chatHeadsGroup.OnHeadOpen += ChatHeadsGroup_OnHeadOpen;
+        chatHeadsGroup.OnHeadClose += ChatHeadsGroup_OnHeadClose;
+    }
+
+    private void ChatHeadsGroup_OnHeadClose(TaskbarButton obj)
+    {
+        ToggleLine(null);
+    }
+
+    private void ChatHeadsGroup_OnHeadOpen(TaskbarButton obj)
+    {
+        ToggleLine(obj);
+    }
+
+    void ToggleLine(TaskbarButton obj)
+    {
+        foreach (var btn in taskbarButtonList)
+        {
+            if (btn == obj)
+                btn.SetLineIndicator(true);
+            else
+                btn.SetLineIndicator(false);
+        }
     }
 
     internal void OnAddChatWindow(UnityAction onToggle)
