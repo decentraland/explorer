@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -10,14 +11,24 @@ public class TaskbarHUDView : MonoBehaviour
     public CanvasGroup windowContainerCanvasGroup;
     public LayoutGroup windowContainerLayout;
 
-    public Button chatButton;
-    public Button friendsButton;
+    public TaskbarButton chatButton;
+    public TaskbarButton friendsButton;
 
     public GameObject chatTooltip;
 
-    public ConversationBlobGroupView pmButtonsContainer;
+    public ChatHeadsGroupView chatHeadsGroup;
+
+    public List<TaskbarButton> taskbarButtonList = new List<TaskbarButton>();
 
     internal TaskbarHUDController controller;
+
+    void RefreshButtonList()
+    {
+        taskbarButtonList = new List<TaskbarButton>();
+        taskbarButtonList.Add(chatButton);
+        taskbarButtonList.Add(friendsButton);
+        taskbarButtonList.AddRange(chatHeadsGroup.chatHeads);
+    }
 
     internal static TaskbarHUDView Create(TaskbarHUDController controller, IChatController chatController)
     {
@@ -30,9 +41,10 @@ public class TaskbarHUDView : MonoBehaviour
     {
         this.controller = controller;
         chatTooltip.SetActive(false);
-        pmButtonsContainer.Initialize(chatController);
+        chatHeadsGroup.Initialize(chatController);
         CommonScriptableObjects.rendererState.OnChange -= RendererState_OnChange;
         CommonScriptableObjects.rendererState.OnChange += RendererState_OnChange;
+        RefreshButtonList();
     }
 
     private void OnDestroy()
@@ -54,13 +66,13 @@ public class TaskbarHUDView : MonoBehaviour
     internal void OnAddChatWindow(UnityAction onToggle)
     {
         chatButton.gameObject.SetActive(true);
-        chatButton.onClick.AddListener(onToggle);
+        chatButton.openButton.onClick.AddListener(onToggle);
     }
 
     internal void OnAddFriendsWindow(UnityAction onToggle)
     {
         friendsButton.gameObject.SetActive(true);
-        friendsButton.onClick.AddListener(onToggle);
+        friendsButton.openButton.onClick.AddListener(onToggle);
     }
 
     internal void OnAddPrivateMessageButton()
