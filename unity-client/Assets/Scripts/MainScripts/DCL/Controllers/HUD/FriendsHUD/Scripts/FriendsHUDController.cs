@@ -228,7 +228,10 @@ public class FriendsHUDController : IHUD
 
     private void Entry_OnBlock(FriendEntryBase entry)
     {
-        WebInterface.SendBlockPlayer(entry.userId);
+        if (entry.model.blocked)
+            WebInterface.SendBlockPlayer(entry.userId);
+        else
+            WebInterface.SendUnblockPlayer(entry.userId);
     }
 
     private void Entry_OnJumpIn(FriendEntry entry)
