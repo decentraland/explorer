@@ -30,21 +30,20 @@ public class ExpressionsHUDView : MonoBehaviour
 
     private void Awake()
     {
-        openExpressionsDelegate = (x) => { if (IsVisible()) ToggleContent(); };
+        openExpressionsDelegate = (x) =>
+        {
+            if (!IsVisible())
+                return;
+            if (Input.GetKeyDown(KeyCode.Escape) && !IsContentVisible())
+                return;
+            ToggleContent();
+        };
         openExpressionsAction.OnTriggered += openExpressionsDelegate;
         showContentButton.onClick.AddListener(ToggleContent);
 
         for (int i = 0; i < hideContentButtons.Length; i++)
         {
             hideContentButtons[i].onClick.AddListener(HideContent);
-        }
-    }
-
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            HideContent();
         }
     }
 
