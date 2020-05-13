@@ -1,37 +1,52 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class NotificationBadge : MonoBehaviour
 {
-    [SerializeField] private FloatVariable notificationVariable;
+    [Tooltip("The value shown on this badge is the sum of the notification variables")]
+    [SerializeField] private List<FloatVariable> notificationVariables;
     [SerializeField] private TMPro.TextMeshProUGUI notificationText;
     [SerializeField] private GameObject notificationContainer;
 
     private void Start()
     {
-        if (notificationVariable == null)
+        if (notificationVariables == null || notificationVariables.Count == 0)
             return;
 
-        notificationVariable.OnChange += NotificationVariable_OnChange;
-        NotificationVariable_OnChange(notificationVariable.Get(), notificationVariable.Get());
+        foreach (var notiVariable in notificationVariables)
+        {
+            notiVariable.OnChange += NotificationVariable_OnChange;
+            NotificationVariable_OnChange(notiVariable.Get(), notiVariable.Get());
+        }
     }
 
     private void OnDestroy()
     {
-        if (notificationVariable == null)
+        if (notificationVariables == null || notificationVariables.Count == 0)
             return;
 
-        notificationVariable.OnChange -= NotificationVariable_OnChange;
+        foreach (var notiVariable in notificationVariables)
+        {
+            notiVariable.OnChange -= NotificationVariable_OnChange;
+        }
     }
 
     private void NotificationVariable_OnChange(float current, float previous)
     {
-        if (current > 0)
+        int finalValue = 0;
+
+        foreach (var notiVariable in notificationVariables)
+        {
+            finalValue += (int)notiVariable.Get();
+        }
+
+        if (finalValue > 0)
         {
             notificationContainer.SetActive(true);
 
-            if (current < 99)
+            if (finalValue < 99)
             {
-                notificationText.text = ((int)current).ToString();
+                notificationText.text = finalValue.ToString();
             }
             else
             {

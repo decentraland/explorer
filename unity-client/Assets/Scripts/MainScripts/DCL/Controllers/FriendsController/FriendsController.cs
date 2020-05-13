@@ -216,5 +216,4 @@ public class FriendsController : MonoBehaviour, IFriendsController
         FriendshipUpdateStatusMessage msg = JsonUtility.FromJson<FriendshipUpdateStatusMessage>(json);
         UpdateFriendshipStatus(msg);
     }
-
 }

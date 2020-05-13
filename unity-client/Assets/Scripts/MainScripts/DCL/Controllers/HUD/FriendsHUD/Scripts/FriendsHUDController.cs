@@ -1,4 +1,4 @@
-﻿using DCL.Helpers;
+using DCL.Helpers;
 using DCL.Interface;
 using System.Collections.Generic;
 using UnityEngine;
@@ -21,7 +21,7 @@ public class FriendsHUDController : IHUD
 
     public void Initialize(IFriendsController friendsController, UserProfile ownUserProfile)
     {
-        view = FriendsHUDView.Create();
+        view = FriendsHUDView.Create(this);
         this.friendsController = friendsController;
 
         if (this.friendsController != null)
@@ -185,12 +185,14 @@ public class FriendsHUDController : IHUD
             PlayerPrefs.Save();
         }
 
-        var pendingFriendRequestsSO = Resources.Load<FloatVariable>("ScriptableObjects/PendingFriendRequests");
-
-        if (pendingFriendRequestsSO == null)
-            return;
-
+        var pendingFriendRequestsSO = Resources.Load<FloatVariable>("ScriptableObjects/NotificationBadge_PendingFriendRequests");
         int receivedRequestsCount = view.friendRequestsList.receivedRequestsList.Count();
+
+        if (pendingFriendRequestsSO != null)
+        {
+            pendingFriendRequestsSO.Set(receivedRequestsCount);
+        }
+
         int seenFriendsCount = PlayerPrefs.GetInt(PLAYER_PREFS_SEEN_FRIEND_COUNT, 0);
         int friendsCount = friendsController.friendCount;
 
@@ -200,7 +202,12 @@ public class FriendsHUDController : IHUD
         if (newFriends < 0)
             newFriends = 0;
 
-        pendingFriendRequestsSO.Set(receivedRequestsCount + newFriends);
+        var newApprovedFriendsSO = Resources.Load<FloatVariable>("ScriptableObjects/NotificationBadge_NewApprovedFriends");
+
+        if (newApprovedFriendsSO != null)
+        {
+            newApprovedFriendsSO.Set(newFriends);
+        }
     }
 
     private void Entry_OnWhisper(FriendEntry entry)
