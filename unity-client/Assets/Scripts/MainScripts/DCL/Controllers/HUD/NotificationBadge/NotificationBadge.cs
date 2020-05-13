@@ -8,7 +8,13 @@ public class NotificationBadge : MonoBehaviour
     [SerializeField] private TMPro.TextMeshProUGUI notificationText;
     [SerializeField] private GameObject notificationContainer;
 
+    public int finalValue { get; private set; }
     private void Start()
+    {
+        Initialize();
+    }
+
+    public void Initialize()
     {
         if (notificationVariables == null || notificationVariables.Count == 0)
             return;
@@ -39,6 +45,8 @@ public class NotificationBadge : MonoBehaviour
         {
             finalValue += (int)notiVariable.Get();
         }
+
+        this.finalValue = finalValue;
 
         if (finalValue > 0)
         {

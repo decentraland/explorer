@@ -242,14 +242,26 @@ public class FriendsHUDControllerShould : TestsBase
     {
     }
 
+    NotificationBadge GetBadge(string path)
+    {
+        GameObject prefab = Resources.Load(path) as GameObject;
+        Assert.IsTrue(prefab != null);
+        GameObject go = UnityEngine.Object.Instantiate(prefab);
+        Assert.IsTrue(go != null);
+
+        var noti = go.GetComponent<NotificationBadge>();
+        noti.Initialize();
+
+        return noti;
+    }
+
     [Test]
     public void TaskbarNotificationBadgeHasCorrectValue()
     {
         PlayerPrefs.SetInt(FriendsHUDController.PLAYER_PREFS_SEEN_FRIEND_COUNT, 0);
 
-        var pendingFriendRequestsSO = Resources.Load<FloatVariable>("ScriptableObjects/PendingFriendRequests");
-
-        Assert.IsTrue(pendingFriendRequestsSO != null);
+        var friendsRequestBadge = GetBadge("NotificationBadge_FriendsRequestTab");
+        var friendsTaskbarBadge = GetBadge("NotificationBadge_FriendsButton");
 
         controller.SetVisibility(false);
 
@@ -259,30 +271,19 @@ public class FriendsHUDControllerShould : TestsBase
         AddFriendThruFriendsController("friend-4");
         AddFriendThruFriendsController("friend-5", FriendsController.FriendshipAction.REQUESTED_FROM);
 
-        int seenFriendsCount = PlayerPrefs.GetInt(FriendsHUDController.PLAYER_PREFS_SEEN_FRIEND_COUNT, 0);
-
-        Assert.AreEqual(0, seenFriendsCount);
-        Assert.AreEqual(5, pendingFriendRequestsSO.Get());
+        Assert.AreEqual(1, friendsRequestBadge.finalValue);
+        Assert.AreEqual(5, friendsTaskbarBadge.finalValue);
 
         controller.SetVisibility(true);
 
-        seenFriendsCount = PlayerPrefs.GetInt(FriendsHUDController.PLAYER_PREFS_SEEN_FRIEND_COUNT, 0);
-        Assert.AreEqual(4, seenFriendsCount);
-        Assert.AreEqual(1, pendingFriendRequestsSO.Get(), "Pending friend should remain counted in the toast");
+        Assert.AreEqual(1, friendsRequestBadge.finalValue);
+        Assert.AreEqual(1, friendsTaskbarBadge.finalValue);
 
         AddFriendThruFriendsController("friend-5", FriendsController.FriendshipAction.APPROVED);
+        AddFriendThruFriendsController("friend-6", FriendsController.FriendshipAction.REQUESTED_FROM);
 
-        seenFriendsCount = PlayerPrefs.GetInt(FriendsHUDController.PLAYER_PREFS_SEEN_FRIEND_COUNT, 0);
-
-        Assert.AreEqual(5, seenFriendsCount);
-        Assert.AreEqual(0, pendingFriendRequestsSO.Get(), "If pending friend is accepted and friends hud is visible, badge notif should dissapear");
-
-        AddFriendThruFriendsController("friend-6", FriendsController.FriendshipAction.APPROVED);
-
-        seenFriendsCount = PlayerPrefs.GetInt(FriendsHUDController.PLAYER_PREFS_SEEN_FRIEND_COUNT, 0);
-
-        Assert.AreEqual(6, seenFriendsCount);
-        Assert.AreEqual(0, pendingFriendRequestsSO.Get(), "If pending friend is accepted and friends hud is visible, badge notif should dissapear");
+        Assert.AreEqual(1, friendsRequestBadge.finalValue);
+        Assert.AreEqual(1, friendsTaskbarBadge.finalValue);
     }
 
     FriendEntry AddFriendThruFriendsController(string id, FriendsController.FriendshipAction action = FriendsController.FriendshipAction.APPROVED)

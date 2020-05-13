@@ -185,7 +185,7 @@ public class FriendsHUDController : IHUD
             PlayerPrefs.Save();
         }
 
-        var pendingFriendRequestsSO = Resources.Load<FloatVariable>("ScriptableObjects/NotificationBadge_PendingFriendRequests");
+        var pendingFriendRequestsSO = NotificationScriptableObjects.pendingFriendRequests;
         int receivedRequestsCount = view.friendRequestsList.receivedRequestsList.Count();
 
         if (pendingFriendRequestsSO != null)
@@ -202,7 +202,7 @@ public class FriendsHUDController : IHUD
         if (newFriends < 0)
             newFriends = 0;
 
-        var newApprovedFriendsSO = Resources.Load<FloatVariable>("ScriptableObjects/NotificationBadge_NewApprovedFriends");
+        var newApprovedFriendsSO = NotificationScriptableObjects.newApprovedFriends;
 
         if (newApprovedFriendsSO != null)
         {
