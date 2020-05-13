@@ -27,7 +27,9 @@ public class TaskbarHUDController : IHUD
         controller.view.transform.SetParent(view.windowContainer, false);
 
         worldChatWindowHud = controller;
-        view.OnAddChatWindow(ToggleWorldChatWindow);
+
+        view.OnAddChatWindow(ToggleChatWindow);
+        worldChatWindowHud.view.DeactivatePreview();
     }
 
     public void AddPrivateChatWindow(PrivateChatWindowHUDController controller)
@@ -65,34 +67,22 @@ public class TaskbarHUDController : IHUD
         view.OnAddFriendsWindow(ToggleFriendsWindow);
     }
 
-    private void ToggleWorldChatWindow()
+    private void ToggleChatWindow()
     {
         if (worldChatWindowHud.view.isInPreview)
-        {
             worldChatWindowHud.view.DeactivatePreview();
-            return;
-        }
-
-        worldChatWindowHud.view.Toggle();
-
-        if (worldChatWindowHud.view.gameObject.activeSelf)
-            OnToggleOn();
+        else
+            worldChatWindowHud.view.ActivatePreview();
     }
 
     private void TogglePrivateChatWindow()
     {
         privateChatWindowHud.view.Toggle();
-
-        if (privateChatWindowHud.view.gameObject.activeSelf)
-            OnToggleOn();
     }
 
     private void ToggleFriendsWindow()
     {
         friendsHud.view.Toggle();
-
-        if (friendsHud.view.gameObject.activeSelf)
-            OnToggleOn();
     }
 
     public void Dispose()
@@ -110,18 +100,6 @@ public class TaskbarHUDController : IHUD
 
     public void OnPressReturn()
     {
-        if (worldChatWindowHud.OnPressReturn())
-        {
-            OnToggleOn();
-        }
-    }
-
-    void OnToggleOn()
-    {
-        if (alreadyToggledOnForFirstTime)
-            return;
-
-        alreadyToggledOnForFirstTime = true;
-        view.OnToggleForFirstTime();
+        worldChatWindowHud.OnPressReturn();
     }
 }

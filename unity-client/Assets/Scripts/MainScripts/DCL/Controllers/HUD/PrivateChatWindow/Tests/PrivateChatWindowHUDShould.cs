@@ -71,7 +71,7 @@ public class PrivateChatWindowHUDShould : TestsBase
 
         var chatEntryModel = ChatHUDController.ChatMessageToChatEntry(chatMessage);
 
-        Assert.AreEqual(entry.message, chatEntryModel);
+        Assert.AreEqual(entry.model, chatEntryModel);
     }
 
     [UnityTest]
