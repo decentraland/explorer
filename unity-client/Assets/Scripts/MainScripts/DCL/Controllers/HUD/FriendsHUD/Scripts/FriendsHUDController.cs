@@ -212,7 +212,7 @@ public class FriendsHUDController : IHUD
 
     private void Entry_OnWhisper(FriendEntry entry)
     {
-        OnPressWhisper?.Invoke(entry.model.userName);
+        OnPressWhisper?.Invoke(entry.userId);
     }
 
     private void Entry_OnReport(FriendEntryBase entry)
