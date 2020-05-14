@@ -22,8 +22,6 @@ public class ChatEntry : MonoBehaviour
         public ulong timestamp;
 
         public SubType subType;
-
-        public ulong timestamp;
     }
 
     [SerializeField] internal float timeToFade = 10;
