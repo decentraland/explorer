@@ -10,6 +10,8 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
     static DateTime epochStart = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
     public event Action<UserProfile> OnUpdate;
+    public event Action<Sprite> OnFaceSnapshotReadyEvent;
+    public event Action<string> OnAvatarExpressionSet;
 
     public string userId => model.userId;
     public string userName => model.name;
@@ -82,6 +84,7 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
     {
         faceSnapshot = sprite;
         OnUpdate?.Invoke(this);
+        OnFaceSnapshotReadyEvent?.Invoke(sprite);
     }
 
     private void OnBodySnapshotReady(Sprite sprite)
@@ -111,6 +114,7 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
         avatar.expressionTriggerTimestamp = timestamp;
         WebInterface.SendExpression(id, timestamp);
         OnUpdate?.Invoke(this);
+        OnAvatarExpressionSet?.Invoke(id);
     }
 
     public string[] GetInventoryItemsIds()

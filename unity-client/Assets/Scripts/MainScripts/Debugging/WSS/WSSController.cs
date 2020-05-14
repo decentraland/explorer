@@ -1,4 +1,4 @@
-﻿using DCL.Components;
+using DCL.Components;
 using DCL.Interface;
 using System.Collections.Generic;
 using UnityEngine;
@@ -130,6 +130,7 @@ namespace DCL
         public bool allWearables = false;
         public bool testWearables = false;
         public bool enableTutorial = false;
+        public bool useNewChat = true;
         public DebugPanel debugPanelMode = DebugPanel.Off;
 
 
@@ -199,6 +200,11 @@ namespace DCL
                 if (enableTutorial)
                 {
                     debugString += "RESET_TUTORIAL&";
+                }
+
+                if (useNewChat)
+                {
+                    debugString += "USE_NEW_CHAT&";
                 }
 
                 string debugPanelString = "";
@@ -304,7 +310,7 @@ namespace DCL
                                 renderingController.ActivateRendering();
                                 break;
                             case "ShowNotification":
-                                HUDController.i.ShowNotificationFromJson(msg.payload);
+                                NotificationsController.i.ShowNotificationFromJson(msg.payload);
                                 break;
                             case "BuilderReady":
                                 sceneController.BuilderReady();
@@ -378,6 +384,18 @@ namespace DCL
                             case "ConfigureHUDElement":
                                 HUDController.i?.ConfigureHUDElement(msg.payload);
                                 break;
+                            case "InitializeFriends":
+                                FriendsController.i?.InitializeFriends(msg.payload);
+                                break;
+                            case "UpdateFriendshipStatus":
+                                FriendsController.i?.UpdateFriendshipStatus(msg.payload);
+                                break;
+                            case "UpdateUserStatus":
+                                FriendsController.i?.UpdateUserStatus(msg.payload);
+                                break;
+                            case "FriendNotFound":
+                                FriendsController.i?.FriendNotFound(msg.payload);
+                                break;
                             case "AddMessageToChatWindow":
                                 ChatController.i?.AddMessageToChatWindow(msg.payload);
                                 break;
@@ -394,7 +412,7 @@ namespace DCL
                                 HUDController.i.AirdroppingRequest(msg.payload);
                                 break;
                             case "ShowWelcomeNotification":
-                                HUDController.i.ShowWelcomeNotification();
+                                NotificationsController.i.ShowWelcomeNotification();
                                 break;
                             case "ShowTermsOfServices":
                                 HUDController.i.ShowTermsOfServices(msg.payload);
