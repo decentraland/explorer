@@ -115,6 +115,9 @@ public class PrivateChatWindowHUDController : IHUD
         if (!IsMessageFomCurrentConversation(message)) return;
 
         view.chatHudView.controller.AddChatMessage(ChatHUDController.ChatMessageToChatEntry(message));
+
+        if (view.chatHudView.inputField.isFocused)
+            UpdateLastReadMessages(conversationUserId);
     }
 
     bool IsMessageFomCurrentConversation(ChatMessage message)
