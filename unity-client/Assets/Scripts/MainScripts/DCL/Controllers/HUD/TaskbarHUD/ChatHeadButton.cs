@@ -11,15 +11,24 @@ public class ChatHeadButton : TaskbarButton, IPointerEnterHandler, IPointerExitH
     [SerializeField] internal Image portrait;
     internal ulong lastTimestamp;
 
-    public event System.Action<ChatHeadButton> OnClose;
-
     internal UserProfile profile;
+
+    public event System.Action<TaskbarButton> OnClose;
+
     public void Initialize(UserProfile profile)
     {
         base.Initialize();
         this.profile = profile;
+
         closeButton.onClick.RemoveAllListeners();
         closeButton.onClick.AddListener(OnCloseButtonPressed);
+
+        labelContainer.SetActive(false);
+
+        if (profile.userName.Length > 10)
+            label.text = profile.userName.Substring(0, 10) + "...";
+        else
+            label.text = profile.userName;
 
         if (profile.faceSnapshot != null)
             portrait.sprite = profile.faceSnapshot;
@@ -30,11 +39,21 @@ public class ChatHeadButton : TaskbarButton, IPointerEnterHandler, IPointerExitH
     private void Profile_OnFaceSnapshotReadyEvent(Sprite portraitSprite)
     {
         profile.OnFaceSnapshotReadyEvent -= Profile_OnFaceSnapshotReadyEvent;
-        this.portrait.sprite = portraitSprite;
+
+        if (portraitSprite != null && this.portrait.sprite != portraitSprite)
+            this.portrait.sprite = portraitSprite;
+    }
+
+    private void OnDestroy()
+    {
+        if (profile != null)
+            profile.OnFaceSnapshotReadyEvent -= Profile_OnFaceSnapshotReadyEvent;
     }
 
     private void OnCloseButtonPressed()
     {
+        labelContainer.SetActive(false);
+        SetToggleState(false);
         OnClose?.Invoke(this);
     }
 

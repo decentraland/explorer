@@ -39,11 +39,11 @@ public class TaskbarHUDShould : TestsBase
 
         controller.AddWorldChatWindow(chatWindowController);
 
-        view.chatButton.openButton.onClick.Invoke();
+        view.chatButton.toggleButton.onClick.Invoke();
 
         Assert.IsTrue(chatWindowController.view.isInPreview);
 
-        view.chatButton.openButton.onClick.Invoke();
+        view.chatButton.toggleButton.onClick.Invoke();
 
         Assert.IsFalse(chatWindowController.view.isInPreview);
         yield break;

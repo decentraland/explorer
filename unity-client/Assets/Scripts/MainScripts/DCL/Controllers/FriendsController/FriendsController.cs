@@ -11,6 +11,7 @@ public interface IFriendsController
     event System.Action<string, FriendsController.UserStatus> OnUpdateUserStatus;
     event System.Action<string> OnFriendNotFound;
 }
+
 public class FriendsController : MonoBehaviour, IFriendsController
 {
     public static bool VERBOSE = true;
@@ -23,7 +24,7 @@ public class FriendsController : MonoBehaviour, IFriendsController
         i = this;
     }
 
-    public bool initialized = false;
+    public bool initialized { get; private set; } = false;
     public Dictionary<string, UserStatus> friends = new Dictionary<string, UserStatus>();
 
     [System.Serializable]

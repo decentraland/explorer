@@ -7,8 +7,8 @@ public class ChatHeadGroupView : MonoBehaviour
     const int MAX_GROUP_SIZE = 5;
     const string CHAT_HEAD_PATH = "ChatHead";
 
-    public event System.Action<TaskbarButton> OnHeadOpen;
-    public event System.Action<TaskbarButton> OnHeadClose;
+    public event System.Action<TaskbarButton> OnHeadToggleOn;
+    public event System.Action<TaskbarButton> OnHeadToggleOff;
 
     public Transform container;
     [System.NonSerialized] public List<ChatHeadButton> chatHeads = new List<ChatHeadButton>();
@@ -49,30 +49,57 @@ public class ChatHeadGroupView : MonoBehaviour
         }
     }
 
-    private void OnOpen(TaskbarButton head)
+    private void OnToggleOn(TaskbarButton head)
     {
-        OnHeadOpen?.Invoke(head);
+        OnHeadToggleOn?.Invoke(head);
     }
 
-    private void OnClose(ChatHeadButton head)
+    private void OnToggleOff(TaskbarButton head)
     {
-        RemoveHead(head);
-        OnHeadClose?.Invoke(head);
+        if (!(head is ChatHeadButton))
+            return;
+
+        OnHeadToggleOff?.Invoke(head);
+    }
+
+    private void OnClose(TaskbarButton head)
+    {
+        if (!(head is ChatHeadButton))
+            return;
+
+        RemoveHead(head as ChatHeadButton);
+        OnHeadToggleOff?.Invoke(head);
     }
 
     private void AddChatHead(string userId, ulong timestamp)
     {
+        var existingHead = chatHeads.FirstOrDefault(x => x.profile.userId == userId);
+
+        if (existingHead)
+        {
+            existingHead.lastTimestamp = timestamp;
+            chatHeads = chatHeads.OrderBy((x) => x.lastTimestamp).ToList();
+
+            for (int i = 0; i < chatHeads.Count; i++)
+            {
+                chatHeads[i].transform.SetSiblingIndex(i);
+            }
+
+            return;
+        }
+
         GameObject prefab = Resources.Load(CHAT_HEAD_PATH) as GameObject;
         GameObject instance = Instantiate(prefab, container);
         ChatHeadButton chatHead = instance.GetComponent<ChatHeadButton>();
 
         chatHead.Initialize(UserProfileController.userProfilesCatalog.Get(userId));
         chatHead.lastTimestamp = timestamp;
-        chatHead.OnOpen += OnOpen;
+        chatHead.OnToggleOn += OnToggleOn;
+        chatHead.OnToggleOff += OnToggleOff;
         chatHead.OnClose += OnClose;
 
         chatHeads.Add(chatHead);
-        chatHeads.OrderBy((x) => x.lastTimestamp);
+        chatHeads = chatHeads.OrderBy((x) => x.lastTimestamp).ToList();
 
         if (chatHeads.Count > MAX_GROUP_SIZE)
         {
@@ -81,10 +108,10 @@ public class ChatHeadGroupView : MonoBehaviour
         }
     }
 
-    void RemoveHead(ChatHeadButton lastChatHead)
+    void RemoveHead(ChatHeadButton chatHead)
     {
-        Destroy(lastChatHead.gameObject);
-        chatHeads.Remove(lastChatHead);
+        Destroy(chatHead.gameObject);
+        chatHeads.Remove(chatHead);
     }
 
 }

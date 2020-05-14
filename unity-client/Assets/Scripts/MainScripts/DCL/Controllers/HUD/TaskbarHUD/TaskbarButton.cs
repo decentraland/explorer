@@ -1,26 +1,66 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public class TaskbarButton : MonoBehaviour
 {
-    public Button openButton;
+    [FormerlySerializedAs("openButton")]
+    public Button toggleButton;
     public GameObject lineOffIndicator;
     public GameObject lineOnIndicator;
 
-    public event System.Action<TaskbarButton> OnOpen;
+    public event System.Action<TaskbarButton> OnToggleOn;
+    public event System.Action<TaskbarButton> OnToggleOff;
+
+    public bool toggledOn { get; private set; }
+
+    internal bool onlyToggleOn;
     public void Initialize()
     {
-        openButton.onClick.AddListener(OnOpenButtonClick);
+        toggleButton.onClick.AddListener(OnToggleButtonClick);
+        SetLineIndicator(false);
     }
 
-    private void OnOpenButtonClick()
+    private void OnToggleButtonClick()
     {
-        OnOpen?.Invoke(this);
+        SetToggleState(!toggledOn);
+    }
+
+    public void SetToggleState(bool on, bool useCallback = true)
+    {
+        if (toggledOn == on)
+            return;
+
+        if (onlyToggleOn)
+        {
+            if (useCallback)
+                OnToggleOn?.Invoke(this);
+            SetLineIndicator(true);
+            toggledOn = true;
+            return;
+        }
+
+        SetLineIndicator(on);
+
+        if (useCallback)
+        {
+            if (on)
+                OnToggleOn?.Invoke(this);
+            else
+                OnToggleOff?.Invoke(this);
+        }
+
+        toggledOn = on;
     }
 
     public void SetLineIndicator(bool on)
     {
-        lineOnIndicator?.SetActive(on);
-        lineOffIndicator?.SetActive(!on);
+        if (lineOnIndicator != null)
+            lineOnIndicator.SetActive(on);
+
+        if (lineOffIndicator != null)
+            lineOffIndicator.SetActive(!on);
+
+        toggledOn = on;
     }
 }

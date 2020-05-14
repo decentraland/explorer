@@ -1,21 +1,20 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.UI;
 
 public class TaskbarHUDView : MonoBehaviour
 {
     const string VIEW_PATH = "Taskbar";
 
-    public RectTransform windowContainer;
-    public CanvasGroup windowContainerCanvasGroup;
-    public LayoutGroup windowContainerLayout;
+    [SerializeField] internal RectTransform windowContainer;
+    [SerializeField] internal CanvasGroup windowContainerCanvasGroup;
+    [SerializeField] internal LayoutGroup windowContainerLayout;
 
-    public TaskbarButton chatButton;
-    public TaskbarButton friendsButton;
+    [SerializeField] internal TaskbarButton chatButton;
+    [SerializeField] internal TaskbarButton friendsButton;
 
-    public ChatHeadGroupView chatHeadsGroup;
-    public List<TaskbarButton> taskbarButtonList = new List<TaskbarButton>();
+    [SerializeField] internal ChatHeadGroupView chatHeadsGroup;
+    internal List<TaskbarButton> taskbarButtonList = new List<TaskbarButton>();
     internal TaskbarHUDController controller;
 
     void RefreshButtonList()
@@ -37,47 +36,85 @@ public class TaskbarHUDView : MonoBehaviour
     {
         this.controller = controller;
         chatHeadsGroup.Initialize(chatController);
+        chatButton.Initialize();
+        friendsButton.Initialize();
+
         RefreshButtonList();
 
-        chatHeadsGroup.OnHeadOpen += ChatHeadsGroup_OnHeadOpen;
-        chatHeadsGroup.OnHeadClose += ChatHeadsGroup_OnHeadClose;
+        chatHeadsGroup.OnHeadToggleOn += OnWindowToggleOn;
+        chatHeadsGroup.OnHeadToggleOff += OnWindowToggleOff;
+
+        chatButton.OnToggleOn += OnWindowToggleOn;
+        chatButton.OnToggleOff += OnWindowToggleOff;
+
+        friendsButton.OnToggleOn += OnWindowToggleOn;
+        friendsButton.OnToggleOff += OnWindowToggleOff;
+
+        chatButton.SetToggleState(true);
     }
 
-    private void ChatHeadsGroup_OnHeadClose(TaskbarButton obj)
-    {
-        ToggleLine(null);
-    }
+    public event System.Action OnChatToggleOn;
+    public event System.Action OnChatToggleOff;
+    public event System.Action OnFriendsToggleOn;
+    public event System.Action OnFriendsToggleOff;
 
-    private void ChatHeadsGroup_OnHeadOpen(TaskbarButton obj)
+    private void OnWindowToggleOff(TaskbarButton obj)
     {
-        ToggleLine(obj);
-    }
+        if (obj == friendsButton)
+            OnFriendsToggleOff?.Invoke();
+        else if (obj == chatButton)
+            OnChatToggleOff?.Invoke();
 
-    void ToggleLine(TaskbarButton obj)
-    {
+        obj.SetToggleState(false, useCallback: true);
+
+
+        RefreshButtonList();
+
+        bool anyVisible = false;
+
         foreach (var btn in taskbarButtonList)
         {
-            if (btn == obj)
-                btn.SetLineIndicator(true);
-            else
-                btn.SetLineIndicator(false);
+            if (btn.toggledOn)
+                anyVisible = true;
+        }
+
+        if (!anyVisible)
+        {
+            chatButton.SetToggleState(true);
         }
     }
 
-    internal void OnAddChatWindow(UnityAction onToggle)
+    private void OnWindowToggleOn(TaskbarButton obj)
+    {
+        if (obj == friendsButton)
+            OnFriendsToggleOn?.Invoke();
+        else if (obj == chatButton)
+            OnChatToggleOn?.Invoke();
+
+        SelectButton(obj);
+    }
+
+    void SelectButton(TaskbarButton obj)
+    {
+        RefreshButtonList();
+
+        foreach (var btn in taskbarButtonList)
+        {
+            if (btn != obj)
+            {
+                btn.SetToggleState(false, useCallback: true);
+            }
+        }
+    }
+
+    internal void OnAddChatWindow()
     {
         chatButton.gameObject.SetActive(true);
-        chatButton.openButton.onClick.AddListener(onToggle);
     }
 
-    internal void OnAddFriendsWindow(UnityAction onToggle)
+    internal void OnAddFriendsWindow()
     {
         friendsButton.gameObject.SetActive(true);
-        friendsButton.openButton.onClick.AddListener(onToggle);
-    }
-
-    internal void OnAddPrivateMessageButton()
-    {
     }
 
     public void SetVisibility(bool visible)
@@ -90,6 +127,11 @@ public class TaskbarHUDView : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Return))
         {
             controller.OnPressReturn();
+        }
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            controller.OnPressEsc();
         }
     }
 }
