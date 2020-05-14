@@ -21,10 +21,13 @@ public class TaskbarHUDController : IHUD
 
         view = TaskbarHUDView.Create(this, chatController);
 
-        mouseCatcher.OnMouseLock -= MouseCatcher_OnMouseLock;
-        mouseCatcher.OnMouseUnlock -= MouseCatcher_OnMouseUnlock;
-        mouseCatcher.OnMouseLock += MouseCatcher_OnMouseLock;
-        mouseCatcher.OnMouseUnlock += MouseCatcher_OnMouseUnlock;
+        if (mouseCatcher != null)
+        {
+            mouseCatcher.OnMouseLock -= MouseCatcher_OnMouseLock;
+            mouseCatcher.OnMouseUnlock -= MouseCatcher_OnMouseUnlock;
+            mouseCatcher.OnMouseLock += MouseCatcher_OnMouseLock;
+            mouseCatcher.OnMouseUnlock += MouseCatcher_OnMouseUnlock;
+        }
 
         view.chatHeadsGroup.OnHeadToggleOn += ChatHeadsGroup_OnHeadOpen;
         view.chatHeadsGroup.OnHeadToggleOff += ChatHeadsGroup_OnHeadClose;

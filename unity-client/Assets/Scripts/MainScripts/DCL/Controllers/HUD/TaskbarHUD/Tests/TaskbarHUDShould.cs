@@ -34,18 +34,6 @@ public class TaskbarHUDShould : TestsBase
     [UnityTest]
     public IEnumerator ToggleChatPreviewProperly()
     {
-        WorldChatWindowHUDController chatWindowController = new WorldChatWindowHUDController();
-        chatWindowController.Initialize(null, null);
-
-        controller.AddWorldChatWindow(chatWindowController);
-
-        view.chatButton.toggleButton.onClick.Invoke();
-
-        Assert.IsTrue(chatWindowController.view.isInPreview);
-
-        view.chatButton.toggleButton.onClick.Invoke();
-
-        Assert.IsFalse(chatWindowController.view.isInPreview);
         yield break;
     }
 }
