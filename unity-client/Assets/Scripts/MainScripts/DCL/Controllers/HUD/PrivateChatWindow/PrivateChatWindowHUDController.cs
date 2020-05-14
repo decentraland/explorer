@@ -1,10 +1,14 @@
-﻿using DCL;
+using DCL;
 using DCL.Interface;
 using UnityEngine;
 using System.Linq;
+using System.Collections.Generic;
+using Newtonsoft.Json;
 
 public class PrivateChatWindowHUDController : IHUD
 {
+    internal const string PLAYER_PREFS_LAST_READ_CHAT_MESSAGES = "LastReadChatMessages";
+
     public PrivateChatWindowHUDView view;
     public bool resetInputFieldOnSubmit = true;
 
@@ -17,8 +21,12 @@ public class PrivateChatWindowHUDController : IHUD
     {
         view = PrivateChatWindowHUDView.Create();
 
+        view.chatHudView.inputField.onSelect.RemoveListener(ChatHUDViewInputField_OnSelect);
+        view.chatHudView.inputField.onSelect.AddListener(ChatHUDViewInputField_OnSelect);
+
         chatHudController = new ChatHUDController();
         chatHudController.Initialize(view.chatHudView, SendChatMessage);
+        LoadLastReadMessages();
 
         this.chatController = chatController;
 
@@ -87,14 +95,19 @@ public class PrivateChatWindowHUDController : IHUD
         if (view.gameObject.activeSelf == visible) return;
 
         view.gameObject.SetActive(visible);
+
+        if (visible)
+            UpdateLastReadMessages(conversationUserId);
     }
 
     public void Dispose()
     {
+        view.chatHudView.inputField.onSelect.RemoveListener(ChatHUDViewInputField_OnSelect);
+
         if (chatController != null)
             chatController.OnAddMessage -= OnAddMessage;
 
-        Object.Destroy(view);
+        UnityEngine.Object.Destroy(view);
     }
 
     void OnAddMessage(ChatMessage message)
@@ -113,5 +126,46 @@ public class PrivateChatWindowHUDController : IHUD
     {
         SetVisibility(true);
         view.chatHudView.FocusInputField();
+    }
+
+    private void UpdateLastReadMessages(string userId)
+    {
+        CommonScriptableObjects.lastReadChatMessages.Remove(userId);
+        CommonScriptableObjects.lastReadChatMessages.Add(userId, System.DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+        SaveLastReadMessages();
+    }
+
+    private void SaveLastReadMessages()
+    {
+        List<KeyValuePair<string, long>> lastReadChatMessagesList = new List<KeyValuePair<string, long>>();
+        using (var iterator = CommonScriptableObjects.lastReadChatMessages.GetEnumerator())
+        {
+            while (iterator.MoveNext())
+            {
+                lastReadChatMessagesList.Add(new KeyValuePair<string, long>(iterator.Current.Key, iterator.Current.Value));
+            }
+        }
+
+        PlayerPrefs.SetString(PLAYER_PREFS_LAST_READ_CHAT_MESSAGES, JsonConvert.SerializeObject(lastReadChatMessagesList));
+        PlayerPrefs.Save();
+    }
+
+    private void LoadLastReadMessages()
+    {
+        CommonScriptableObjects.lastReadChatMessages.Clear();
+
+        List<KeyValuePair<string, long>> lastReadChatMessagesList = JsonConvert.DeserializeObject<List<KeyValuePair<string, long>>>(PlayerPrefs.GetString(PLAYER_PREFS_LAST_READ_CHAT_MESSAGES));
+        if (lastReadChatMessagesList != null)
+        {
+            foreach (var item in lastReadChatMessagesList)
+            {
+                CommonScriptableObjects.lastReadChatMessages.Add(item.Key, item.Value);
+            }
+        }
+    }
+
+    private void ChatHUDViewInputField_OnSelect(string message)
+    {
+        UpdateLastReadMessages(conversationUserId);
     }
 }

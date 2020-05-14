@@ -210,16 +210,9 @@ public class FriendsHUDController : IHUD
         }
     }
 
-    private void UpdateLastReadMessages(string userName)
-    {
-        CommonScriptableObjects.lastReadChatMessages.Remove(userName);
-        CommonScriptableObjects.lastReadChatMessages.Add(userName, System.DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
-    }
-
     private void Entry_OnWhisper(FriendEntry entry)
     {
         OnPressWhisper?.Invoke(entry.userId);
-        UpdateLastReadMessages(entry.userId);
     }
 
     private void Entry_OnReport(FriendEntryBase entry)
