@@ -1,6 +1,7 @@
 using DCL.Helpers;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
@@ -34,6 +35,11 @@ public class ChatHUDView : MonoBehaviour
         inputField.caretColor = Color.white;
     }
 
+    void OnEnable()
+    {
+        Utils.ForceUpdateLayout(transform as RectTransform);
+    }
+
     public void FocusInputField()
     {
         inputField.Select();
@@ -49,8 +55,23 @@ public class ChatHUDView : MonoBehaviour
         chatEntry.Populate(chatEntryModel);
 
         entries.Add(chatEntry);
-        ForceUpdateLayout();
+
+        SortEntries();
+
+        Utils.ForceUpdateLayout(chatEntriesContainer, delayed: false);
     }
+
+    public void SortEntries()
+    {
+        entries = entries.OrderBy(x => x.message.timestamp).ToList();
+
+        int count = entries.Count;
+        for (int i = 0; i < count; i++)
+        {
+            entries[i].transform.SetSiblingIndex(i);
+        }
+    }
+
 
     public void CleanAllEntries()
     {
@@ -60,18 +81,5 @@ public class ChatHUDView : MonoBehaviour
         }
 
         entries.Clear();
-    }
-
-    [ContextMenu("Force Layout Update")]
-    public void ForceUpdateLayout()
-    {
-        Utils.InverseTransformChildTraversal<RectTransform>(
-        (x) =>
-        {
-            LayoutRebuilder.ForceRebuildLayoutImmediate(x);
-        },
-        chatEntriesContainer);
-
-        LayoutRebuilder.ForceRebuildLayoutImmediate(chatEntriesContainer);
     }
 }

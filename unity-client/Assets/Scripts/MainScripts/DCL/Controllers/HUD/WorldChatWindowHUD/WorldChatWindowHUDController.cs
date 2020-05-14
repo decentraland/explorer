@@ -2,7 +2,6 @@
 using DCL;
 
 using DCL.Interface;
-using System.Collections;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -43,8 +42,6 @@ public class WorldChatWindowHUDController : IHUD
         {
             view.worldFilterButton.onClick.Invoke();
         }
-
-        view.chatHudView.ForceUpdateLayout();
     }
     public void Dispose()
     {
@@ -122,17 +119,6 @@ public class WorldChatWindowHUDController : IHUD
     public void SetVisibility(bool visible)
     {
         view.gameObject.SetActive(visible);
-
-        if (visible)
-        {
-            view.StartCoroutine(ForceLayoutDelayed());
-        }
-    }
-
-    IEnumerator ForceLayoutDelayed()
-    {
-        yield return null;
-        view.chatHudView.ForceUpdateLayout();
     }
 
     public bool OnPressReturn()

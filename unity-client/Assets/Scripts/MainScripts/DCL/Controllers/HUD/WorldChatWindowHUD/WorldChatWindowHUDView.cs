@@ -91,7 +91,6 @@ public class WorldChatWindowHUDView : MonoBehaviour, IPointerClickHandler
         {
             gameObject.SetActive(true);
             DeactivatePreview();
-            chatHudView.ForceUpdateLayout();
         }
     }
 

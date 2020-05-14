@@ -18,6 +18,8 @@ public class ChatEntry : MonoBehaviour
         public string bodyText;
         public string senderName;
         public string recipientName;
+        public ulong timestamp;
+
         public SubType subType;
     }
 
