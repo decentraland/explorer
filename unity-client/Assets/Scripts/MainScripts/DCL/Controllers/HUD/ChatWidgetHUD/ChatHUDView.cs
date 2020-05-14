@@ -110,7 +110,7 @@ public class ChatHUDView : MonoBehaviour
 
     public void SortEntries()
     {
-        entries = entries.OrderBy(x => x.message.timestamp).ToList();
+        entries = entries.OrderBy(x => x.model.timestamp).ToList();
 
         int count = entries.Count;
         for (int i = 0; i < count; i++)
