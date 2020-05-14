@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 8819543312367979352}
   - component: {fileID: 5984344161284955003}
   m_Layer: 5
-  m_Name: Notification Badge
+  m_Name: NotificationBadge_ChatButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -49,8 +49,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 77d514aaef02f6140b1e793c2d8dcae8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  notificationVariable: {fileID: 11400000, guid: f726059480ddf394bb7a032c8b2a6e2d,
-    type: 2}
+  notificationVariables:
+  - {fileID: 11400000, guid: bf9ed0ab20e4ab846bcb0d9f7c0cf594, type: 2}
   notificationText: {fileID: 8818213553393692271}
   notificationContainer: {fileID: 6031753764605853471}
 --- !u!1 &5373302442282244823
