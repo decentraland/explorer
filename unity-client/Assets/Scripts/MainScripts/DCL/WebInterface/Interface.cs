@@ -148,12 +148,13 @@ namespace DCL.Interface
         [System.Serializable]
         public class OnClickEventPayload
         {
+            public ACTION_BUTTON buttonId = ACTION_BUTTON.POINTER;
         }
 
         [System.Serializable]
         public class SendChatMessageEvent
         {
-            public ChatController.ChatMessage message;
+            public ChatMessage message;
         }
 
 
@@ -775,7 +776,7 @@ namespace DCL.Interface
             });
         }
 
-        public static void SendUnlockPlayer(string userId)
+        public static void SendUnblockPlayer(string userId)
         {
             SendMessage("UnblockPlayer", new SendUnblockPlayerPayload()
             {
@@ -814,10 +815,16 @@ namespace DCL.Interface
             SendMessage("GoTo", gotoEvent);
         }
 
-        public static void SendChatMessage(ChatController.ChatMessage message)
+        public static void SendChatMessage(ChatMessage message)
         {
             sendChatMessageEvent.message = message;
             SendMessage("SendChatMessage", sendChatMessageEvent);
+        }
+
+        public static void UpdateFriendshipStatus(FriendsController.FriendshipUpdateStatusMessage message)
+        {
+            Debug.Log("Sending message... " + JsonUtility.ToJson(message) + "... " + message.action);
+            SendMessage("UpdateFriendshipStatus", message);
         }
     }
 }

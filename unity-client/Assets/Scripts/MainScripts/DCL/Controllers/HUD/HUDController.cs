@@ -7,7 +7,6 @@ using UnityEngine;
 public class HUDController : MonoBehaviour
 {
     static bool VERBOSE = false;
-    const int NOTIFICATION_DURATION = 5;
 
     public static HUDController i { get; private set; }
 
@@ -28,6 +27,8 @@ public class HUDController : MonoBehaviour
     public TermsOfServiceHUDController termsOfServiceHud => GetHUDElement(HUDElementID.TERMS_OF_SERVICE) as TermsOfServiceHUDController;
     public TaskbarHUDController taskbarHud => GetHUDElement(HUDElementID.TASKBAR) as TaskbarHUDController;
     public WorldChatWindowHUDController worldChatWindowHud => GetHUDElement(HUDElementID.WORLD_CHAT_WINDOW) as WorldChatWindowHUDController;
+    public PrivateChatWindowHUDController privateChatWindowHud => GetHUDElement(HUDElementID.PRIVATE_CHAT_WINDOW) as PrivateChatWindowHUDController;
+    public FriendsHUDController friendsHud => GetHUDElement(HUDElementID.FRIENDS) as FriendsHUDController;
 
     public Dictionary<HUDElementID, IHUD> hudElements { get; private set; } = new Dictionary<HUDElementID, IHUD>();
 
@@ -64,7 +65,10 @@ public class HUDController : MonoBehaviour
         WORLD_CHAT_WINDOW = 10,
         TASKBAR = 11,
         MESSAGE_OF_THE_DAY = 12,
-        COUNT = 13
+        FRIENDS = 13,
+        OPEN_EXTERNAL_URL_PROMPT = 14,
+        PRIVATE_CHAT_WINDOW = 15,
+        COUNT = 16
     }
 
     [System.Serializable]
@@ -115,6 +119,7 @@ public class HUDController : MonoBehaviour
                 break;
             case HUDElementID.NOTIFICATION:
                 CreateHudElement<NotificationHUDController>(configuration, hudElementId);
+                NotificationsController.i?.Initialize(notificationHud);
                 break;
             case HUDElementID.AVATAR_EDITOR:
                 CreateHudElement<AvatarEditorHUDController>(configuration, hudElementId);
@@ -138,31 +143,43 @@ public class HUDController : MonoBehaviour
             case HUDElementID.WORLD_CHAT_WINDOW:
                 CreateHudElement<WorldChatWindowHUDController>(configuration, hudElementId);
                 worldChatWindowHud?.Initialize(ChatController.i, DCL.InitialSceneReferences.i?.mouseCatcher);
-                ConfigureTaskbar();
+                taskbarHud?.AddWorldChatWindow(worldChatWindowHud);
 
+                CreateHudElement<PrivateChatWindowHUDController>(configuration, HUDElementID.PRIVATE_CHAT_WINDOW);
+                privateChatWindowHud?.Initialize(ChatController.i);
+                taskbarHud?.AddPrivateChatWindow(privateChatWindowHud);
+                break;
+            case HUDElementID.FRIENDS:
+                CreateHudElement<FriendsHUDController>(configuration, hudElementId);
+
+                if (friendsHud != null)
+                {
+                    friendsHud.Initialize(FriendsController.i, UserProfile.GetOwnUserProfile());
+                    friendsHud.OnPressWhisper -= FriendsHud_OnPressWhisper;
+                    friendsHud.OnPressWhisper += FriendsHud_OnPressWhisper;
+                }
+                taskbarHud?.AddFriendsWindow(friendsHud);
                 break;
             case HUDElementID.TASKBAR:
                 CreateHudElement<TaskbarHUDController>(configuration, hudElementId);
-                ConfigureTaskbar();
                 break;
             case HUDElementID.MESSAGE_OF_THE_DAY:
                 CreateHudElement<WelcomeHUDController>(configuration, hudElementId);
                 messageOfTheDayHud?.Initialize(ownUserProfile.hasConnectedWeb3);
+                break;
+            case HUDElementID.OPEN_EXTERNAL_URL_PROMPT:
+                CreateHudElement<ExternalUrlPromptHUDController>(configuration, hudElementId);
                 break;
         }
 
         GetHUDElement(hudElementId)?.SetVisibility(configuration.active && configuration.visible);
     }
 
-    public void ConfigureTaskbar()
+    private void FriendsHud_OnPressWhisper(string targetUserId)
     {
-        if (taskbarHud == null)
-            return;
-
-        if (worldChatWindowHud == null)
-            return;
-
-        taskbarHud?.AddChatWindow(worldChatWindowHud);
+        privateChatWindowHud.Configure(targetUserId);
+        privateChatWindowHud.SetVisibility(true);
+        privateChatWindowHud.ForceFocus();
     }
 
     public void CreateHudElement<T>(HUDConfiguration config, HUDElementID id)
@@ -178,16 +195,6 @@ public class HUDController : MonoBehaviour
                 Debug.Log($"Adding {id} .. type {hudElements[id].GetType().Name}");
         }
     }
-    public void ShowNotificationFromJson(string notificationJson)
-    {
-        NotificationModel model = JsonUtility.FromJson<NotificationModel>(notificationJson);
-        ShowNotification(model);
-    }
-
-    public void ShowNotification(NotificationModel notification)
-    {
-        notificationHud.ShowNotification(notification);
-    }
 
     public void ShowNewWearablesNotification(string wearableCountString)
     {
@@ -200,28 +207,6 @@ public class HUDController : MonoBehaviour
     public void TriggerSelfUserExpression(string id)
     {
         expressionsHud?.ExpressionCalled(id);
-    }
-
-    public void ShowWelcomeNotification()
-    {
-        string notificationText = $"Welcome, {UserProfile.GetOwnUserProfile().userName}!";
-        Vector2Int currentCoords = CommonScriptableObjects.playerCoords.Get();
-        string parcelName = MinimapMetadata.GetMetadata().GetSceneInfo(currentCoords.x, currentCoords.y)?.name;
-
-        if (!string.IsNullOrEmpty(parcelName))
-        {
-            notificationText += $" You are in {parcelName} {currentCoords.x}, {currentCoords.y}";
-        }
-
-        NotificationModel model = new NotificationModel()
-        {
-            message = notificationText,
-            scene = "",
-            type = NotificationModel.NotificationType.GENERIC_WITHOUT_BUTTON,
-            timer = NOTIFICATION_DURATION
-        };
-
-        notificationHud.ShowNotification(model);
     }
 
     public void AirdroppingRequest(string payload)
