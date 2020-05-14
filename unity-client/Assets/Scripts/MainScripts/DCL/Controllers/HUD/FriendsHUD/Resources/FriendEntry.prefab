@@ -78,7 +78,7 @@ MonoBehaviour:
   jumpInButton: {fileID: 596808249942825202}
   whisperButton: {fileID: 5791209562270436312}
   whisperLabel: {fileID: 1110130480339001881}
-  notificationBadge: {fileID: 6141585309611989806}
+  unreadNotificationBadge: {fileID: 6141585309611989806}
 --- !u!1 &504354867123715343
 GameObject:
   m_ObjectHideFlags: 0

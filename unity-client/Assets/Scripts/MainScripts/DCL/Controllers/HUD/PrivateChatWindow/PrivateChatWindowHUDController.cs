@@ -26,7 +26,7 @@ public class PrivateChatWindowHUDController : IHUD
 
         chatHudController = new ChatHUDController();
         chatHudController.Initialize(view.chatHudView, SendChatMessage);
-        LoadLastReadMessages();
+        LoadLatestReadChatMessagesStatus();
 
         this.chatController = chatController;
 
@@ -97,7 +97,10 @@ public class PrivateChatWindowHUDController : IHUD
         view.gameObject.SetActive(visible);
 
         if (visible)
-            UpdateLastReadMessages(conversationUserId);
+        {
+            // The messages from 'conversationUserId' are marked as read once the private chat is opened
+            MarkUserChatMessagesAsRead(conversationUserId);
+        }
     }
 
     public void Dispose()
@@ -117,7 +120,10 @@ public class PrivateChatWindowHUDController : IHUD
         view.chatHudView.controller.AddChatMessage(ChatHUDController.ChatMessageToChatEntry(message));
 
         if (view.chatHudView.inputField.isFocused)
-            UpdateLastReadMessages(conversationUserId);
+        {
+            // The messages from 'conversationUserId' are marked as read if the player was already focused on the input field of the private chat
+            MarkUserChatMessagesAsRead(conversationUserId);
+        }
     }
 
     bool IsMessageFomCurrentConversation(ChatMessage message)
@@ -131,14 +137,14 @@ public class PrivateChatWindowHUDController : IHUD
         view.chatHudView.FocusInputField();
     }
 
-    private void UpdateLastReadMessages(string userId)
+    private void MarkUserChatMessagesAsRead(string userId)
     {
         CommonScriptableObjects.lastReadChatMessages.Remove(userId);
         CommonScriptableObjects.lastReadChatMessages.Add(userId, System.DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
-        SaveLastReadMessages();
+        SaveLatestReadChatMessagesStatus();
     }
 
-    private void SaveLastReadMessages()
+    private void SaveLatestReadChatMessagesStatus()
     {
         List<KeyValuePair<string, long>> lastReadChatMessagesList = new List<KeyValuePair<string, long>>();
         using (var iterator = CommonScriptableObjects.lastReadChatMessages.GetEnumerator())
@@ -153,7 +159,7 @@ public class PrivateChatWindowHUDController : IHUD
         PlayerPrefs.Save();
     }
 
-    private void LoadLastReadMessages()
+    private void LoadLatestReadChatMessagesStatus()
     {
         CommonScriptableObjects.lastReadChatMessages.Clear();
 
@@ -169,6 +175,7 @@ public class PrivateChatWindowHUDController : IHUD
 
     private void ChatHUDViewInputField_OnSelect(string message)
     {
-        UpdateLastReadMessages(conversationUserId);
+        // The messages from 'conversationUserId' are marked as read if the player clicks on the input field of the private chat
+        MarkUserChatMessagesAsRead(conversationUserId);
     }
 }

@@ -3,15 +3,18 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 
-public class UnreadNotificacionBadge : MonoBehaviour
+/// <summary>
+/// Shows the number of unread messages from a friend.
+/// </summary>
+public class UnreadNotificationBadge : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI notificationText;
     [SerializeField] private GameObject notificationContainer;
 
     private string userId;
     private long currentTimestampReading;
-
     private int currentUnreadMessages;
+
     public int CurrentUnreadMessages
     {
         get => currentUnreadMessages;
@@ -22,9 +25,13 @@ public class UnreadNotificacionBadge : MonoBehaviour
         }
     }
 
-    public void Initialize(string userName)
+    /// <summary>
+    /// Prepares the notification badge for listening to a specific user
+    /// </summary>
+    /// <param name="user">User ID to listen to</param>
+    public void Initialize(string user)
     {
-        userId = userName;
+        userId = user;
         CommonScriptableObjects.lastReadChatMessages.TryGetValue(userId, out currentTimestampReading);
         CountUnreadMessages();
 
