@@ -6,7 +6,6 @@ import { takeEvery, put, select, call, take } from 'redux-saga/effects'
 import {
   SEND_PRIVATE_MESSAGE,
   SendPrivateMessage,
-  sendPrivateMessage,
   updateFriendship,
   UPDATE_FRIENDSHIP,
   UpdateFriendship,
@@ -30,7 +29,7 @@ import { isAddedToCatalog } from 'shared/profiles/selectors'
 
 declare const globalThis: StoreContainer & { sendPrivateMessage: (userId: string, message: string) => void }
 
-const DEBUG = true
+const DEBUG = false
 
 const logger = createLogger('chat: ')
 
@@ -528,6 +527,3 @@ function toSocialData(socialIds: string[]) {
     }))
     .filter(({ userId }) => !!userId) as SocialData[]
 }
-
-globalThis.sendPrivateMessage = (userId: string, message: string) =>
-  handleSendPrivateMessage(sendPrivateMessage(userId, message), true)
