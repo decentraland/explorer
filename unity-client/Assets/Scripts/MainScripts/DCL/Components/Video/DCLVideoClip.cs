@@ -23,5 +23,17 @@ namespace DCL.Components
             model = SceneController.i.SafeFromJson<Model>(newJson);
             yield break;
         }
+
+        public string GetUrl()
+        {
+            string contentsUrl = string.Empty;
+            bool isExternalURL = model.url.StartsWith("http://") || model.url.StartsWith("https://");
+
+            if (isExternalURL)
+                contentsUrl = model.url;
+            else
+                scene.contentProvider.TryGetContentsUrl(model.url, out contentsUrl);
+            return contentsUrl;
+        }
     }
 }
