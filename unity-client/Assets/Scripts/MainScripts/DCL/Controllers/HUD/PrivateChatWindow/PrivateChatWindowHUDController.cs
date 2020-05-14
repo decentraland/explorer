@@ -37,10 +37,13 @@ public class PrivateChatWindowHUDController : IHUD
     {
         if (string.IsNullOrEmpty(newConversationUserId) || newConversationUserId == conversationUserId) return;
 
+        UserProfile newConversationUserProfile = UserProfileController.userProfilesCatalog.Get(newConversationUserId);
+
         conversationUserId = newConversationUserId;
-        conversationUserName = UserProfileController.userProfilesCatalog.Get(newConversationUserId).userName;
+        conversationUserName = newConversationUserProfile.userName;
 
         view.ConfigureTitle(conversationUserName);
+        view.ConfigureProfilePicture(newConversationUserProfile.faceSnapshot);
 
         view.chatHudView.CleanAllEntries();
 

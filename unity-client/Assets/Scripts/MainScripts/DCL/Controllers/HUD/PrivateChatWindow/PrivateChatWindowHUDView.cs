@@ -10,6 +10,7 @@ public class PrivateChatWindowHUDView : MonoBehaviour
     public ChatHUDView chatHudView;
     public PrivateChatWindowHUDController controller;
     public TMP_Text windowTitleText;
+    public Image profilePictureImage;
 
     void OnEnable()
     {
@@ -31,6 +32,11 @@ public class PrivateChatWindowHUDView : MonoBehaviour
     public void ConfigureTitle(string targetUserName)
     {
         windowTitleText.text = targetUserName;
+    }
+
+    public void ConfigureProfilePicture(Sprite sprite)
+    {
+        profilePictureImage.sprite = sprite;
     }
 
     public void Toggle()
