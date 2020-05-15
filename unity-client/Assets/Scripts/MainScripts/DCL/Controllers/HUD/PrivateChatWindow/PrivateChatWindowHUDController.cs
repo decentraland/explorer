@@ -1,9 +1,9 @@
 using DCL;
 using DCL.Interface;
-using UnityEngine;
 using System.Linq;
 using System.Collections.Generic;
 using Newtonsoft.Json;
+using UnityEngine;
 
 public class PrivateChatWindowHUDController : IHUD
 {
@@ -35,8 +35,6 @@ public class PrivateChatWindowHUDController : IHUD
             chatController.OnAddMessage -= OnAddMessage;
             chatController.OnAddMessage += OnAddMessage;
         }
-
-        view.chatHudView.ForceUpdateLayout();
 
         SetVisibility(false);
     }
