@@ -42,8 +42,8 @@ public class FriendEntry : FriendEntryBase
     {
         base.Populate(model);
 
-        if (model.status == FriendsController.PresenceStatus.ONLINE ||
-            model.status == FriendsController.PresenceStatus.UNAVAILABLE)
+        if (model.status == PresenceStatus.ONLINE ||
+            model.status == PresenceStatus.UNAVAILABLE)
             playerLocationText.text = $"{model.realm} {(int)model.coords.x}, {(int)model.coords.y}";
         else
             playerLocationText.text = $"";

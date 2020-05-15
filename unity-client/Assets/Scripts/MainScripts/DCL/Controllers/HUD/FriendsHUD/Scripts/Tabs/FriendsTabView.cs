@@ -44,13 +44,13 @@ public class FriendsTabView : FriendsTabViewBase
 
         var entry = entries[userId];
 
-        if (model.status == FriendsController.PresenceStatus.ONLINE)
+        if (model.status == PresenceStatus.ONLINE)
         {
             offlineFriendsList.Remove(userId);
             onlineFriendsList.Add(userId, entry);
         }
 
-        if (model.status == FriendsController.PresenceStatus.OFFLINE)
+        if (model.status == PresenceStatus.OFFLINE)
         {
             onlineFriendsList.Remove(userId);
             offlineFriendsList.Add(userId, entry);

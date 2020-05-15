@@ -7,7 +7,7 @@ public class FriendEntryBase : MonoBehaviour, IPointerEnterHandler, IPointerExit
 {
     public class Model
     {
-        public FriendsController.PresenceStatus status;
+        public PresenceStatus status;
         public string userName;
         public Vector2 coords;
         public string realm;

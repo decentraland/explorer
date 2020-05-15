@@ -80,7 +80,7 @@ public class FriendsHUDView : MonoBehaviour
         FriendsController.i.UpdateFriendshipStatus(new FriendsController.FriendshipUpdateStatusMessage()
         {
             userId = id1,
-            action = FriendsController.FriendshipAction.REQUESTED_FROM
+            action = FriendshipAction.REQUESTED_FROM
         });
     }
 
@@ -98,7 +98,7 @@ public class FriendsHUDView : MonoBehaviour
         FriendsController.i.UpdateFriendshipStatus(new FriendsController.FriendshipUpdateStatusMessage()
         {
             userId = id1,
-            action = FriendsController.FriendshipAction.REQUESTED_TO
+            action = FriendshipAction.REQUESTED_TO
         });
     }
 
@@ -116,10 +116,10 @@ public class FriendsHUDView : MonoBehaviour
         FriendsController.i.UpdateFriendshipStatus(new FriendsController.FriendshipUpdateStatusMessage()
         {
             userId = id1,
-            action = FriendsController.FriendshipAction.APPROVED
+            action = FriendshipAction.APPROVED
         });
 
-        FriendsController.i.UpdateUserStatus(new FriendsController.UserStatus() { userId = id1, presence = FriendsController.PresenceStatus.ONLINE });
+        FriendsController.i.UpdateUserStatus(new FriendsController.UserStatus() { userId = id1, presence = PresenceStatus.ONLINE });
     }
 
     [ContextMenu("AddFakeOfflineFriend")]
@@ -136,10 +136,10 @@ public class FriendsHUDView : MonoBehaviour
         FriendsController.i.UpdateFriendshipStatus(new FriendsController.FriendshipUpdateStatusMessage()
         {
             userId = id1,
-            action = FriendsController.FriendshipAction.APPROVED
+            action = FriendshipAction.APPROVED
         });
 
-        FriendsController.i.UpdateUserStatus(new FriendsController.UserStatus() { userId = id1, presence = FriendsController.PresenceStatus.OFFLINE });
+        FriendsController.i.UpdateUserStatus(new FriendsController.UserStatus() { userId = id1, presence = PresenceStatus.OFFLINE });
     }
 #endif
 }

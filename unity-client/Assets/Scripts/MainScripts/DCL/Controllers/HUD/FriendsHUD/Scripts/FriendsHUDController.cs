@@ -86,7 +86,7 @@ public class FriendsHUDController : IHUD
 
     private void Entry_OnRequestSent(string userId)
     {
-        WebInterface.UpdateFriendshipStatus(new FriendsController.FriendshipUpdateStatusMessage() { userId = userId, action = FriendsController.FriendshipAction.REQUESTED_TO });
+        WebInterface.UpdateFriendshipStatus(new FriendsController.FriendshipUpdateStatusMessage() { userId = userId, action = FriendshipAction.REQUESTED_TO });
     }
 
     private void OnUpdateUserStatus(string userId, FriendsController.UserStatus newStatus)
@@ -115,7 +115,7 @@ public class FriendsHUDController : IHUD
         view.friendRequestsList.DisplayFriendUserNotFound();
     }
 
-    private void OnUpdateFriendship(string userId, FriendsController.FriendshipAction friendshipAction)
+    private void OnUpdateFriendship(string userId, FriendshipAction friendshipAction)
     {
         var userProfile = UserProfileController.userProfilesCatalog.Get(userId);
 
@@ -143,30 +143,30 @@ public class FriendsHUDController : IHUD
 
         switch (friendshipAction)
         {
-            case FriendsController.FriendshipAction.NONE:
+            case FriendshipAction.NONE:
                 userProfile.OnFaceSnapshotReadyEvent -= friendEntryModel.OnSpriteUpdate;
                 view.friendRequestsList.RemoveEntry(userId);
                 view.friendsList.RemoveEntry(userId);
                 break;
-            case FriendsController.FriendshipAction.APPROVED:
+            case FriendshipAction.APPROVED:
                 view.friendRequestsList.RemoveEntry(userId);
                 view.friendsList.CreateOrUpdateEntry(userId, friendEntryModel);
                 break;
-            case FriendsController.FriendshipAction.REJECTED:
+            case FriendshipAction.REJECTED:
                 userProfile.OnFaceSnapshotReadyEvent -= friendEntryModel.OnSpriteUpdate;
                 view.friendRequestsList.RemoveEntry(userId);
                 break;
-            case FriendsController.FriendshipAction.CANCELLED:
+            case FriendshipAction.CANCELLED:
                 userProfile.OnFaceSnapshotReadyEvent -= friendEntryModel.OnSpriteUpdate;
                 view.friendRequestsList.RemoveEntry(userId);
                 break;
-            case FriendsController.FriendshipAction.REQUESTED_FROM:
+            case FriendshipAction.REQUESTED_FROM:
                 view.friendRequestsList.CreateOrUpdateEntry(userId, friendEntryModel, true);
                 break;
-            case FriendsController.FriendshipAction.REQUESTED_TO:
+            case FriendshipAction.REQUESTED_TO:
                 view.friendRequestsList.CreateOrUpdateEntry(userId, friendEntryModel, false);
                 break;
-            case FriendsController.FriendshipAction.DELETED:
+            case FriendshipAction.DELETED:
                 userProfile.OnFaceSnapshotReadyEvent -= friendEntryModel.OnSpriteUpdate;
                 view.friendRequestsList.RemoveEntry(userId);
                 view.friendsList.RemoveEntry(userId);
@@ -244,7 +244,7 @@ public class FriendsHUDController : IHUD
         WebInterface.UpdateFriendshipStatus(
             new FriendsController.FriendshipUpdateStatusMessage()
             {
-                action = FriendsController.FriendshipAction.DELETED,
+                action = FriendshipAction.DELETED,
                 userId = entry.userId
             });
     }
@@ -254,7 +254,7 @@ public class FriendsHUDController : IHUD
         WebInterface.UpdateFriendshipStatus(
             new FriendsController.FriendshipUpdateStatusMessage()
             {
-                action = FriendsController.FriendshipAction.REJECTED,
+                action = FriendshipAction.REJECTED,
                 userId = entry.userId
             });
     }
@@ -264,7 +264,7 @@ public class FriendsHUDController : IHUD
         WebInterface.UpdateFriendshipStatus(
             new FriendsController.FriendshipUpdateStatusMessage()
             {
-                action = FriendsController.FriendshipAction.CANCELLED,
+                action = FriendshipAction.CANCELLED,
                 userId = entry.userId
             });
     }
@@ -274,7 +274,7 @@ public class FriendsHUDController : IHUD
         WebInterface.UpdateFriendshipStatus(
             new FriendsController.FriendshipUpdateStatusMessage()
             {
-                action = FriendsController.FriendshipAction.APPROVED,
+                action = FriendshipAction.APPROVED,
                 userId = entry.userId
             });
     }

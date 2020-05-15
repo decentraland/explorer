@@ -1,25 +1,46 @@
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using System.Collections;
-using UnityEngine.TestTools;
+using UnityEngine;
 
 public class TaskbarHUDShould : TestsBase
 {
     private TaskbarHUDController controller;
     private TaskbarHUDView view;
 
+    private FriendsController_Mock friendsController = new FriendsController_Mock();
+    private ChatController_Mock chatController = new ChatController_Mock();
+
+    private GameObject userProfileGO;
+
     protected override IEnumerator SetUp()
     {
+        UserProfile ownProfile = UserProfile.GetOwnUserProfile();
+
+        var ownProfileModel = new UserProfileModel();
+        ownProfileModel.userId = "my-user-id";
+        ownProfileModel.name = "NO_USER";
+        ownProfile.UpdateData(ownProfileModel, false);
+
+        userProfileGO = new GameObject();
+        userProfileGO.AddComponent<UserProfileController>();
+
         controller = new TaskbarHUDController();
-        view = TaskbarHUDView.Create(controller, null);
-        controller.view = view;
-        view.controller = controller;
+        controller.Initialize(null, chatController);
+        view = controller.view;
 
         Assert.IsTrue(view != null, "Taskbar view is null?");
         yield break;
     }
 
-    [UnityTest]
-    public IEnumerator AddWindowsProperly()
+    protected override IEnumerator TearDown()
+    {
+        UnityEngine.Object.Destroy(view);
+        UnityEngine.Object.Destroy(userProfileGO);
+        yield break;
+    }
+
+    [Test]
+    public void AddWindowsProperly()
     {
         WorldChatWindowHUDController chatWindowController = new WorldChatWindowHUDController();
         chatWindowController.Initialize(null, null);
@@ -28,12 +49,82 @@ public class TaskbarHUDShould : TestsBase
 
         Assert.IsTrue(chatWindowController.view.transform.parent == view.windowContainer, "Chat window isn't inside taskbar window container!");
         Assert.IsTrue(chatWindowController.view.gameObject.activeSelf, "Chat window is disabled!");
-        yield return null;
     }
 
-    [UnityTest]
-    public IEnumerator ToggleChatPreviewProperly()
+    [Test]
+    public void ToggleWindowsProperly()
     {
-        yield break;
+        var privateChatController = new PrivateChatWindowHUDController();
+        privateChatController.Initialize(chatController);
+        controller.AddPrivateChatWindow(privateChatController);
+
+        const string badPositionMsg = "Anchored position should be zero or it won't be correctly placed inside the taskbar";
+        const string badPivotMsg = "Pivot should be zero or it won't be correctly placed inside the taskbar";
+
+        RectTransform rt = privateChatController.view.transform as RectTransform;
+        Assert.AreEqual(Vector2.zero, rt.anchoredPosition, badPositionMsg);
+        Assert.AreEqual(Vector2.zero, rt.pivot, badPivotMsg);
+
+        var chatWindowController = new WorldChatWindowHUDController();
+        chatWindowController.Initialize(chatController, null);
+        controller.AddWorldChatWindow(chatWindowController);
+
+        rt = chatWindowController.view.transform as RectTransform;
+        Assert.AreEqual(Vector2.zero, rt.anchoredPosition, badPositionMsg);
+        Assert.AreEqual(Vector2.zero, rt.pivot, badPivotMsg);
+
+        var friendsHUDController = new FriendsHUDController();
+        friendsHUDController.Initialize(friendsController, UserProfile.GetOwnUserProfile());
+        controller.AddFriendsWindow(friendsHUDController);
+
+        rt = friendsHUDController.view.transform as RectTransform;
+        Assert.AreEqual(Vector2.zero, rt.anchoredPosition, badPositionMsg);
+        Assert.AreEqual(Vector2.zero, rt.pivot, badPivotMsg);
+
+        TestHelpers_Friends.FakeAddFriend(friendsController, friendsHUDController.view, "test-1");
+        TestHelpers_Chat.FakePrivateChatMessageFrom(chatController, "test-1", "test message!");
+        view.RefreshButtonList();
+
+        Assert.AreEqual(3, view.taskbarButtonList.Count, "Chat head is missing when receiving a private message?");
+
+        Assert.IsTrue(view.chatButton.toggledOn);
+        Assert.IsTrue(view.taskbarButtonList[2] is ChatHeadButton);
+
+        ChatHeadButton headButton = view.taskbarButtonList[2] as ChatHeadButton;
+        Assert.IsFalse(headButton.toggledOn);
+
+        //NOTE(Brian): Toggle chat head on and test it works as intended
+        headButton.toggleButton.onClick.Invoke();
+
+        Assert.IsTrue(headButton.lineOnIndicator.activeInHierarchy);
+        Assert.IsFalse(view.friendsButton.lineOnIndicator.activeInHierarchy);
+        Assert.IsFalse(view.chatButton.lineOnIndicator.activeInHierarchy);
+        Assert.IsTrue(controller.privateChatWindowHud.view.gameObject.activeInHierarchy);
+
+        //NOTE(Brian): Toggle friends window on and test all other windows are untoggled
+        view.friendsButton.toggleButton.onClick.Invoke();
+
+        Assert.IsFalse(controller.privateChatWindowHud.view.gameObject.activeInHierarchy);
+        Assert.IsFalse(headButton.lineOnIndicator.activeInHierarchy);
+        Assert.IsTrue(view.friendsButton.lineOnIndicator.activeInHierarchy);
+        Assert.IsFalse(view.chatButton.lineOnIndicator.activeInHierarchy);
+
+        //NOTE(Brian): Toggle friends window off and test all other windows are untoggled with the exception
+        //             of world chat window, that should be toggled on.
+        view.friendsButton.toggleButton.onClick.Invoke();
+
+        Assert.IsFalse(controller.privateChatWindowHud.view.gameObject.activeInHierarchy);
+        Assert.IsFalse(headButton.lineOnIndicator.activeInHierarchy);
+        Assert.IsFalse(view.friendsButton.lineOnIndicator.activeInHierarchy);
+        Assert.IsTrue(view.chatButton.lineOnIndicator.activeInHierarchy, "When any window is untoggled, world chat window should toggle.");
+        Assert.IsTrue(controller.worldChatWindowHud.view.gameObject.activeInHierarchy, "When any window is untoggled, world chat window should toggle.");
+
+        //NOTE(Brian): Toggle friends on, and then chat button on. Then check if world chat window is showing up.
+        view.friendsButton.toggleButton.onClick.Invoke();
+        view.chatButton.toggleButton.onClick.Invoke();
+
+        Assert.IsTrue(controller.worldChatWindowHud.view.gameObject.activeInHierarchy);
+        Assert.IsFalse(controller.friendsHud.view.gameObject.activeInHierarchy);
+        Assert.IsFalse(view.friendsButton.lineOnIndicator.activeInHierarchy);
     }
 }

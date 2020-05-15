@@ -7,6 +7,8 @@ public interface IChatController
 {
     event Action<ChatMessage> OnAddMessage;
     List<ChatMessage> GetEntries();
+
+    void AddMessageToChatWindow(string jsonMessage);
 }
 
 public class ChatController : MonoBehaviour, IChatController

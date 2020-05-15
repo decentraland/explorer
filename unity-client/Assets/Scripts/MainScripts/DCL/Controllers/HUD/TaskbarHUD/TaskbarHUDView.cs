@@ -17,7 +17,7 @@ public class TaskbarHUDView : MonoBehaviour
     internal List<TaskbarButton> taskbarButtonList = new List<TaskbarButton>();
     internal TaskbarHUDController controller;
 
-    void RefreshButtonList()
+    internal void RefreshButtonList()
     {
         taskbarButtonList = new List<TaskbarButton>();
         taskbarButtonList.Add(chatButton);

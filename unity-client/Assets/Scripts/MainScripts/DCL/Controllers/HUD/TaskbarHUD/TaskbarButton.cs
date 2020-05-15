@@ -12,13 +12,12 @@ public class TaskbarButton : MonoBehaviour
     public event System.Action<TaskbarButton> OnToggleOn;
     public event System.Action<TaskbarButton> OnToggleOff;
 
-    public bool toggledOn { get; private set; }
+    public bool toggledOn { get; private set; } = true;
 
-    internal bool onlyToggleOn;
     public void Initialize()
     {
         toggleButton.onClick.AddListener(OnToggleButtonClick);
-        SetLineIndicator(false);
+        SetToggleState(false, useCallback: false);
     }
 
     private void OnToggleButtonClick()
@@ -30,15 +29,6 @@ public class TaskbarButton : MonoBehaviour
     {
         if (toggledOn == on)
             return;
-
-        if (onlyToggleOn)
-        {
-            if (useCallback)
-                OnToggleOn?.Invoke(this);
-            SetLineIndicator(true);
-            toggledOn = true;
-            return;
-        }
 
         SetLineIndicator(on);
 
