@@ -13,7 +13,7 @@ public interface IFriendsController
 }
 public class FriendsController : MonoBehaviour, IFriendsController
 {
-    public static bool VERBOSE = true;
+    public static bool VERBOSE = false;
     public static FriendsController i { get; private set; }
 
     public int friendCount => friends.Count;
