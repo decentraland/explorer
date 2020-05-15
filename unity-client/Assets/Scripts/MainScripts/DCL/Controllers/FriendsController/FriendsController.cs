@@ -168,7 +168,7 @@ public class FriendsController : MonoBehaviour, IFriendsController
     public void UpdateUserStatus(string json)
     {
         UserStatus newUserStatus = JsonUtility.FromJson<UserStatus>(json);
-        Debug.Log("Updating user status:" + JsonUtility.ToJson(newUserStatus));
+
         UpdateUserStatus(newUserStatus);
     }
 
