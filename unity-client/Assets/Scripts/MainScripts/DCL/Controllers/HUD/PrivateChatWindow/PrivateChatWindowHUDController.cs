@@ -13,9 +13,12 @@ public class PrivateChatWindowHUDController : IHUD
     string conversationUserId = string.Empty;
     string conversationUserName = string.Empty;
 
+    public event System.Action OnPressBack;
+
     public void Initialize(IChatController chatController)
     {
         view = PrivateChatWindowHUDView.Create();
+        view.OnPressBack += View_OnPressBack;
 
         chatHudController = new ChatHUDController();
         chatHudController.Initialize(view.chatHudView, SendChatMessage);
@@ -31,6 +34,11 @@ public class PrivateChatWindowHUDController : IHUD
         view.chatHudView.ForceUpdateLayout();
 
         SetVisibility(false);
+    }
+
+    void View_OnPressBack()
+    {
+        OnPressBack?.Invoke();
     }
 
     public void Configure(string newConversationUserId)

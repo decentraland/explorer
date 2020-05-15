@@ -13,6 +13,8 @@ public class PrivateChatWindowHUDView : MonoBehaviour
     public TMP_Text windowTitleText;
     public Image profilePictureImage;
 
+    public event System.Action OnPressBack;
+
     void OnEnable()
     {
         DCL.Helpers.Utils.ForceUpdateLayout(transform as RectTransform);
@@ -27,7 +29,8 @@ public class PrivateChatWindowHUDView : MonoBehaviour
 
     private void Initialize()
     {
-        this.closeButton.onClick.AddListener(Toggle);
+        closeButton.onClick.AddListener(Toggle);
+        backButton.onClick.AddListener(() => { Toggle(); OnPressBack?.Invoke(); });
     }
 
     public void ConfigureTitle(string targetUserName)
