@@ -6,6 +6,7 @@ public class PrivateChatWindowHUDView : MonoBehaviour
 {
     const string VIEW_PATH = "PrivateChatWindow";
 
+    public Button backButton;
     public Button closeButton;
     public ChatHUDView chatHudView;
     public PrivateChatWindowHUDController controller;
