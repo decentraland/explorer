@@ -1,4 +1,5 @@
 using DCL.Interface;
+using DCL.Helpers;
 using System;
 using TMPro;
 using UnityEngine;
@@ -80,14 +81,13 @@ public class ChatEntry : MonoBehaviour
         {
             username.text = userString;
             body.text = $"{userString} {chatEntryModel.bodyText}";
-            LayoutRebuilder.ForceRebuildLayoutImmediate(username.transform as RectTransform);
         }
         else
         {
             body.text = $"{chatEntryModel.bodyText}";
         }
 
-        LayoutRebuilder.ForceRebuildLayoutImmediate(body.transform as RectTransform);
+        Utils.ForceUpdateLayout(transform as RectTransform);
 
         if (this.enabled)
             group.alpha = 0;
