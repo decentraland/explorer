@@ -55,23 +55,39 @@ public class ChatEntry : MonoBehaviour
         switch (chatEntryModel.messageType)
         {
             case ChatMessage.Type.PUBLIC:
-                this.body.color = username.color = worldMessageColor;
+                body.color = worldMessageColor;
+
+                if (username != null)
+                    username.color = worldMessageColor;
                 break;
             case ChatMessage.Type.PRIVATE:
-                this.body.color = username.color = privateMessageColor;
+                body.color = privateMessageColor;
+
+                if (username != null)
+                    username.color = privateMessageColor;
                 break;
             case ChatMessage.Type.SYSTEM:
-                this.body.color = username.color = systemColor;
+                body.color = systemColor;
+
+                if (username != null)
+                    username.color = systemColor;
                 break;
         }
 
         chatEntryModel.bodyText = RemoveTabs(chatEntryModel.bodyText);
 
-        username.text = userString;
-        body.text = $"{userString} {chatEntryModel.bodyText}";
+        if (username != null)
+        {
+            username.text = userString;
+            body.text = $"{userString} {chatEntryModel.bodyText}";
+            LayoutRebuilder.ForceRebuildLayoutImmediate(username.transform as RectTransform);
+        }
+        else
+        {
+            body.text = $"{chatEntryModel.bodyText}";
+        }
 
         LayoutRebuilder.ForceRebuildLayoutImmediate(body.transform as RectTransform);
-        LayoutRebuilder.ForceRebuildLayoutImmediate(username.transform as RectTransform);
 
         if (this.enabled)
             group.alpha = 0;

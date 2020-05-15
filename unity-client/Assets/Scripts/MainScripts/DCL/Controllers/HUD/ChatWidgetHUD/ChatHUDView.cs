@@ -8,6 +8,8 @@ using UnityEngine.UI;
 public class ChatHUDView : MonoBehaviour
 {
     static string VIEW_PATH = "Chat Widget";
+    string ENTRY_PATH = "Chat Entry";
+
     public TMP_InputField inputField;
     public RectTransform chatEntriesContainer;
 
@@ -22,7 +24,6 @@ public class ChatHUDView : MonoBehaviour
         var view = Instantiate(Resources.Load<GameObject>(VIEW_PATH)).GetComponent<ChatHUDView>();
         return view;
     }
-
 
     public void Initialize(ChatHUDController controller, UnityAction<string> onSendMessage)
     {
@@ -82,10 +83,9 @@ public class ChatHUDView : MonoBehaviour
         }
     }
 
-
-    public void AddEntry(ChatEntry.Model chatEntryModel)
+    public virtual void AddEntry(ChatEntry.Model chatEntryModel)
     {
-        var chatEntryGO = Instantiate(Resources.Load("Chat Entry") as GameObject, chatEntriesContainer);
+        var chatEntryGO = Instantiate(Resources.Load(ENTRY_PATH) as GameObject, chatEntriesContainer);
         ChatEntry chatEntry = chatEntryGO.GetComponent<ChatEntry>();
 
         if (enableFadeoutMode && EntryIsVisible(chatEntry))
