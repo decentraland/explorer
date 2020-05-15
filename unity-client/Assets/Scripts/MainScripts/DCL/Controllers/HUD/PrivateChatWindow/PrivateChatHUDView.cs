@@ -1,4 +1,4 @@
-﻿using DCL.Interface;
+﻿using DCL.Helpers;
 using UnityEngine;
 
 public class PrivateChatHUDView : ChatHUDView
@@ -16,6 +16,6 @@ public class PrivateChatHUDView : ChatHUDView
         chatEntry.Populate(chatEntryModel);
 
         entries.Add(chatEntry);
-        ForceUpdateLayout();
+        Utils.ForceUpdateLayout(transform as RectTransform);
     }
 }
