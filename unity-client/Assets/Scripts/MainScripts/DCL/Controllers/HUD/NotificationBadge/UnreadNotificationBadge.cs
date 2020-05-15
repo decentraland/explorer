@@ -10,6 +10,7 @@ public class UnreadNotificationBadge : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI notificationText;
     [SerializeField] private GameObject notificationContainer;
+    [SerializeField] private int maxNumberToShow = 9;
 
     private string userId;
     private long currentTimestampReading;
@@ -33,7 +34,7 @@ public class UnreadNotificationBadge : MonoBehaviour
     {
         userId = user;
         CommonScriptableObjects.lastReadChatMessages.TryGetValue(userId, out currentTimestampReading);
-        CountUnreadMessages();
+        UpdateUnreadMessages();
 
         ChatController.i.OnAddMessage -= ChatController_OnAddMessage;
         ChatController.i.OnAddMessage += ChatController_OnAddMessage;
@@ -54,7 +55,7 @@ public class UnreadNotificationBadge : MonoBehaviour
             newMessage.sender == userId)
         {
             // A new message from [userId] is received
-            CountUnreadMessages();
+            UpdateUnreadMessages();
         }
     }
 
@@ -68,7 +69,7 @@ public class UnreadNotificationBadge : MonoBehaviour
         }
     }
 
-    private void CountUnreadMessages()
+    private void UpdateUnreadMessages()
     {
         CurrentUnreadMessages = ChatController.i.entries.Count(
             msg => msg.messageType == ChatMessage.Type.PRIVATE &&
@@ -81,7 +82,7 @@ public class UnreadNotificationBadge : MonoBehaviour
         if (currentUnreadMessages > 0)
         {
             notificationContainer.SetActive(true);
-            notificationText.text = currentUnreadMessages.ToString();
+            notificationText.text = currentUnreadMessages <= maxNumberToShow ? currentUnreadMessages.ToString() : string.Format("+{0}", maxNumberToShow);
         }
         else
         {

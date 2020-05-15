@@ -1,3 +1,5 @@
+using DCL.Interface;
+
 public class FriendsTabView : FriendsTabViewBase
 {
     public EntryList onlineFriendsList = new EntryList();
@@ -13,6 +15,16 @@ public class FriendsTabView : FriendsTabViewBase
 
         onlineFriendsList.toggleTextPrefix = "ONLINE";
         offlineFriendsList.toggleTextPrefix = "OFFLINE";
+
+        ChatController.i.OnAddMessage -= ChatController_OnAddMessage;
+        ChatController.i.OnAddMessage += ChatController_OnAddMessage;
+    }
+
+    public override void OnDestroy()
+    {
+        base.OnDestroy();
+
+        ChatController.i.OnAddMessage -= ChatController_OnAddMessage;
     }
 
     public override bool CreateEntry(string userId)
@@ -34,6 +46,8 @@ public class FriendsTabView : FriendsTabViewBase
 
         offlineFriendsList.Remove(userId);
         onlineFriendsList.Remove(userId);
+        offlineFriendsList.RemoveLastTimestamp(userId);
+        onlineFriendsList.RemoveLastTimestamp(userId);
         return true;
     }
 
@@ -48,12 +62,18 @@ public class FriendsTabView : FriendsTabViewBase
         {
             offlineFriendsList.Remove(userId);
             onlineFriendsList.Add(userId, entry);
+
+            var removedTimestamp = offlineFriendsList.RemoveLastTimestamp(userId);
+            onlineFriendsList.AddOrUpdateLastTimestamp(removedTimestamp);
         }
 
         if (model.status == FriendsController.PresenceStatus.OFFLINE)
         {
             onlineFriendsList.Remove(userId);
             offlineFriendsList.Add(userId, entry);
+
+            var removedTimestamp = onlineFriendsList.RemoveLastTimestamp(userId);
+            offlineFriendsList.AddOrUpdateLastTimestamp(removedTimestamp);
         }
 
         return true;
@@ -69,5 +89,31 @@ public class FriendsTabView : FriendsTabViewBase
             RemoveEntry(entry.userId);
             OnDeleteConfirmation?.Invoke(entry as FriendEntry);
         });
+    }
+
+    private void ChatController_OnAddMessage(ChatMessage message)
+    {
+        if (message.messageType == ChatMessage.Type.PRIVATE)
+        {
+            FriendEntryBase friend = GetEntry(message.sender != UserProfile.GetOwnUserProfile().userId ? message.sender : message.recipient);
+            if (friend != null)
+            {
+                LastFriendTimestampModel timestampToUpdate = new LastFriendTimestampModel
+                {
+                    userId = friend.userId,
+                    lastMessageTimestamp = message.timestamp
+                };
+
+                // Each time a private message is received (or sent by the player), we sort the online and offline lists by timestamp
+                if (friend.model.status == FriendsController.PresenceStatus.ONLINE)
+                {
+                    onlineFriendsList.AddOrUpdateLastTimestamp(timestampToUpdate);
+                }
+                else
+                {
+                    offlineFriendsList.AddOrUpdateLastTimestamp(timestampToUpdate);
+                }
+            }
+        }
     }
 }
