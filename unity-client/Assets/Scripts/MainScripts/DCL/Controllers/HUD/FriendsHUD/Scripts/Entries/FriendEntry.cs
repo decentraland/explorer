@@ -27,7 +27,7 @@ public class FriendEntry : FriendEntryBase
 
     private void Start()
     {
-        unreadNotificationBadge.Initialize(userId);
+        unreadNotificationBadge.Initialize(ChatController.i, userId);
     }
 
     public override void OnPointerEnter(PointerEventData eventData)
