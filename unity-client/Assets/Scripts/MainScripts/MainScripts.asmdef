@@ -24,7 +24,7 @@
         "SRPBatchingHelper",
         "MouseCatcher",
         "Settings",
-        "Gif"
+        "WrappedTextureAsset"
     ],
     "optionalUnityReferences": [],
     "includePlatforms": [],

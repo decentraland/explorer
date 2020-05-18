@@ -280,6 +280,23 @@ namespace DCL.Helpers
             yield return FetchAsset(textureURL, UnityWebRequestTexture.GetTexture(textureURL), OnSuccessInternal);
         }
 
+        public static IEnumerator FetchWrappedTextureAsset(string url, Action<IWrappedTextureAsset> OnSuccess)
+        {
+            string contentType = null;
+            byte[] bytes = null;
+
+            yield return Utils.FetchAsset(url, UnityWebRequest.Get(url), (request) =>
+            {
+                contentType = request.GetResponseHeader("Content-Type");
+                bytes = request.downloadHandler.data;
+            });
+
+            if (contentType != null && bytes != null)
+            {
+                yield return WrappedTextureAssetFactory.Create(contentType, bytes, OnSuccess);
+            }
+        }
+
         public static AudioType GetAudioTypeFromUrlName(string url)
         {
             if (string.IsNullOrEmpty(url))
