@@ -34,6 +34,9 @@ public class UnreadNotificationBadge : MonoBehaviour
     /// <param name="userId">User ID to listen to</param>
     public void Initialize(IChatController chatController, string userId)
     {
+        if (chatController == null)
+            return;
+
         currentChatController = chatController;
         currentUserId = userId;
 
@@ -49,6 +52,9 @@ public class UnreadNotificationBadge : MonoBehaviour
 
     private void OnDestroy()
     {
+        if (currentChatController == null)
+            return;
+
         currentChatController.OnAddMessage -= ChatController_OnAddMessage;
         CommonScriptableObjects.lastReadChatMessages.OnAdded -= LastReadChatMessages_OnAdded;
     }

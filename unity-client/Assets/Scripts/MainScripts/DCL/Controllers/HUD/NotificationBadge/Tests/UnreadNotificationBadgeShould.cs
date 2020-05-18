@@ -21,7 +21,8 @@ public class UnreadNotificationBadgeShould : TestsBase
         unreadNotificationBadge = go.GetComponent<UnreadNotificationBadge>();
         unreadNotificationBadge.Initialize(chatController, TEST_USER_ID);
 
-        Assert.AreEqual(0, unreadNotificationBadge.CurrentUnreadMessages);
+        Assert.AreEqual(0, unreadNotificationBadge.CurrentUnreadMessages, "There shouldn't be any unread notification after initialization");
+        Assert.AreEqual(false, unreadNotificationBadge.notificationContainer.activeSelf, "Notificaton container should be deactivated");
 
         yield break;
     }
@@ -44,6 +45,24 @@ public class UnreadNotificationBadgeShould : TestsBase
             timestamp = (ulong) System.DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
         });
 
-        Assert.AreEqual(1, unreadNotificationBadge.CurrentUnreadMessages);
+        Assert.AreEqual(1, unreadNotificationBadge.CurrentUnreadMessages, "There should be 1 unread notification related to the sent private message");
+        Assert.AreEqual(true, unreadNotificationBadge.notificationContainer.activeSelf, "Notificaton container should be activated");
+        Assert.AreEqual("1", unreadNotificationBadge.notificationText.text, "Notification text should be 1");
+    }
+
+    [Test]
+    public void ReceivePublicMessage()
+    {
+        chatController.RaiseAddMessage(new ChatMessage
+        {
+            messageType = ChatMessage.Type.PUBLIC,
+            sender = TEST_USER_ID,
+            body = "test body",
+            recipient = "test recipient",
+            timestamp = (ulong)System.DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
+        });
+
+        Assert.AreEqual(0, unreadNotificationBadge.CurrentUnreadMessages, "There shouldn't be any unread notification related to the sent public message");
+        Assert.AreEqual(false, unreadNotificationBadge.notificationContainer.activeSelf, "Notificaton container should be deactivated");
     }
 }

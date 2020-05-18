@@ -16,15 +16,19 @@ public class FriendsTabView : FriendsTabViewBase
         onlineFriendsList.toggleTextPrefix = "ONLINE";
         offlineFriendsList.toggleTextPrefix = "OFFLINE";
 
-        ChatController.i.OnAddMessage -= ChatController_OnAddMessage;
-        ChatController.i.OnAddMessage += ChatController_OnAddMessage;
+        if (ChatController.i != null)
+        {
+            ChatController.i.OnAddMessage -= ChatController_OnAddMessage;
+            ChatController.i.OnAddMessage += ChatController_OnAddMessage;
+        }
     }
 
     public override void OnDestroy()
     {
         base.OnDestroy();
 
-        ChatController.i.OnAddMessage -= ChatController_OnAddMessage;
+        if (ChatController.i != null)
+            ChatController.i.OnAddMessage -= ChatController_OnAddMessage;
     }
 
     public override bool CreateEntry(string userId)
