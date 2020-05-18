@@ -8,11 +8,12 @@ using UnityEngine;
 /// </summary>
 public class UnreadNotificationBadge : MonoBehaviour
 {
-    [SerializeField] private TextMeshProUGUI notificationText;
-    [SerializeField] private GameObject notificationContainer;
-    [SerializeField] private int maxNumberToShow = 9;
+    public TextMeshProUGUI notificationText;
+    public GameObject notificationContainer;
+    public int maxNumberToShow = 9;
 
-    private string userId;
+    private IChatController currentChatController;
+    private string currentUserId;
     private long currentTimestampReading;
     private int currentUnreadMessages;
 
@@ -29,15 +30,18 @@ public class UnreadNotificationBadge : MonoBehaviour
     /// <summary>
     /// Prepares the notification badge for listening to a specific user
     /// </summary>
-    /// <param name="user">User ID to listen to</param>
-    public void Initialize(string user)
+    /// <param name="chatController">Chat Controlled to be listened</param>
+    /// <param name="userId">User ID to listen to</param>
+    public void Initialize(IChatController chatController, string userId)
     {
-        userId = user;
-        CommonScriptableObjects.lastReadChatMessages.TryGetValue(userId, out currentTimestampReading);
+        currentChatController = chatController;
+        currentUserId = userId;
+
+        CommonScriptableObjects.lastReadChatMessages.TryGetValue(currentUserId, out currentTimestampReading);
         UpdateUnreadMessages();
 
-        ChatController.i.OnAddMessage -= ChatController_OnAddMessage;
-        ChatController.i.OnAddMessage += ChatController_OnAddMessage;
+        currentChatController.OnAddMessage -= ChatController_OnAddMessage;
+        currentChatController.OnAddMessage += ChatController_OnAddMessage;
 
         CommonScriptableObjects.lastReadChatMessages.OnAdded -= LastReadChatMessages_OnAdded;
         CommonScriptableObjects.lastReadChatMessages.OnAdded += LastReadChatMessages_OnAdded;
@@ -45,14 +49,14 @@ public class UnreadNotificationBadge : MonoBehaviour
 
     private void OnDestroy()
     {
-        ChatController.i.OnAddMessage -= ChatController_OnAddMessage;
+        currentChatController.OnAddMessage -= ChatController_OnAddMessage;
         CommonScriptableObjects.lastReadChatMessages.OnAdded -= LastReadChatMessages_OnAdded;
     }
 
     private void ChatController_OnAddMessage(ChatMessage newMessage)
     {
         if (newMessage.messageType == ChatMessage.Type.PRIVATE &&
-            newMessage.sender == userId)
+            newMessage.sender == currentUserId)
         {
             // A new message from [userId] is received
             UpdateUnreadMessages();
@@ -61,7 +65,7 @@ public class UnreadNotificationBadge : MonoBehaviour
 
     private void LastReadChatMessages_OnAdded(string addedKey, long addedValue)
     {
-        if (addedKey == userId)
+        if (addedKey == currentUserId)
         {
             // The player reads the latest messages of [userId]
             currentTimestampReading = addedValue;
@@ -71,9 +75,9 @@ public class UnreadNotificationBadge : MonoBehaviour
 
     private void UpdateUnreadMessages()
     {
-        CurrentUnreadMessages = ChatController.i.entries.Count(
+        CurrentUnreadMessages = currentChatController.GetEntries().Count(
             msg => msg.messageType == ChatMessage.Type.PRIVATE &&
-            msg.sender == userId &&
+            msg.sender == currentUserId &&
             msg.timestamp > (ulong)currentTimestampReading);
     }
 
