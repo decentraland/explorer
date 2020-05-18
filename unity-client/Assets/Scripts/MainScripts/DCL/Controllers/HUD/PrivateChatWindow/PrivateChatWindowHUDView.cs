@@ -6,10 +6,14 @@ public class PrivateChatWindowHUDView : MonoBehaviour
 {
     const string VIEW_PATH = "PrivateChatWindow";
 
+    public Button backButton;
     public Button closeButton;
     public ChatHUDView chatHudView;
     public PrivateChatWindowHUDController controller;
     public TMP_Text windowTitleText;
+    public Image profilePictureImage;
+
+    public event System.Action OnPressBack;
 
     void OnEnable()
     {
@@ -25,12 +29,18 @@ public class PrivateChatWindowHUDView : MonoBehaviour
 
     private void Initialize()
     {
-        this.closeButton.onClick.AddListener(Toggle);
+        closeButton.onClick.AddListener(Toggle);
+        backButton.onClick.AddListener(() => { Toggle(); OnPressBack?.Invoke(); });
     }
 
     public void ConfigureTitle(string targetUserName)
     {
         windowTitleText.text = targetUserName;
+    }
+
+    public void ConfigureProfilePicture(Sprite sprite)
+    {
+        profilePictureImage.sprite = sprite;
     }
 
     public void Toggle()

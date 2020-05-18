@@ -17,9 +17,12 @@ public class PrivateChatWindowHUDController : IHUD
     string conversationUserId = string.Empty;
     string conversationUserName = string.Empty;
 
+    public event System.Action OnPressBack;
+
     public void Initialize(IChatController chatController)
     {
         view = PrivateChatWindowHUDView.Create();
+        view.OnPressBack += View_OnPressBack;
 
         view.chatHudView.inputField.onSelect.RemoveListener(ChatHUDViewInputField_OnSelect);
         view.chatHudView.inputField.onSelect.AddListener(ChatHUDViewInputField_OnSelect);
@@ -39,14 +42,22 @@ public class PrivateChatWindowHUDController : IHUD
         SetVisibility(false);
     }
 
+    void View_OnPressBack()
+    {
+        OnPressBack?.Invoke();
+    }
+
     public void Configure(string newConversationUserId)
     {
         if (string.IsNullOrEmpty(newConversationUserId) || newConversationUserId == conversationUserId) return;
 
+        UserProfile newConversationUserProfile = UserProfileController.userProfilesCatalog.Get(newConversationUserId);
+
         conversationUserId = newConversationUserId;
-        conversationUserName = UserProfileController.userProfilesCatalog.Get(newConversationUserId).userName;
+        conversationUserName = newConversationUserProfile.userName;
 
         view.ConfigureTitle(conversationUserName);
+        view.ConfigureProfilePicture(newConversationUserProfile.faceSnapshot);
 
         view.chatHudView.CleanAllEntries();
 

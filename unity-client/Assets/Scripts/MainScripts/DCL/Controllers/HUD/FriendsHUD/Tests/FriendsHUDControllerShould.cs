@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-class FriendsController_Mock : IFriendsController
+public class FriendsController_Mock : IFriendsController
 {
     public event Action<string, FriendsController.FriendshipAction> OnUpdateFriendship;
     public event Action<string, FriendsController.UserStatus> OnUpdateUserStatus;
