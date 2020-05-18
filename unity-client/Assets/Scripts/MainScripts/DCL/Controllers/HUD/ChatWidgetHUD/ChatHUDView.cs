@@ -1,4 +1,5 @@
 using DCL.Helpers;
+using DCL.Interface;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -101,7 +102,9 @@ public class ChatHUDView : MonoBehaviour
             chatEntry.SetFadeout(false);
 
         chatEntry.Populate(chatEntryModel);
-        chatEntry.OnPress += OnPressPrivateMessage;
+
+        if (chatEntryModel.messageType == ChatMessage.Type.PRIVATE)
+            chatEntry.OnPress += OnPressPrivateMessage;
 
         entries.Add(chatEntry);
 
