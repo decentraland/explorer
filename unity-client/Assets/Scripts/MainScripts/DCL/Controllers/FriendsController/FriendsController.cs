@@ -40,7 +40,7 @@ public enum FriendshipAction
 
 public class FriendsController : MonoBehaviour, IFriendsController
 {
-    public static bool VERBOSE = true;
+    public static bool VERBOSE = false;
     public static FriendsController i { get; private set; }
 
     public int friendCount => friends.Count;
@@ -168,7 +168,7 @@ public class FriendsController : MonoBehaviour, IFriendsController
     public void UpdateUserStatus(string json)
     {
         UserStatus newUserStatus = JsonUtility.FromJson<UserStatus>(json);
-        Debug.Log("Updating user status:" + JsonUtility.ToJson(newUserStatus));
+
         UpdateUserStatus(newUserStatus);
     }
 

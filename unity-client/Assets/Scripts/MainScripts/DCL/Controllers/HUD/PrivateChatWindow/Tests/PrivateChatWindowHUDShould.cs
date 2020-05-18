@@ -146,11 +146,42 @@ public class PrivateChatWindowHUDShould : TestsBase
     }
 
     [Test]
-    public void CloseWhenButtonPressed()
+    public void CloseOnCloseButtonPressed()
     {
         controller.SetVisibility(true);
         Assert.AreEqual(true, controller.view.gameObject.activeSelf);
         controller.view.closeButton.onClick.Invoke();
         Assert.AreEqual(false, controller.view.gameObject.activeSelf);
+    }
+
+    [Test]
+    public void CloseOnBackButtonPressed()
+    {
+        controller.SetVisibility(true);
+        Assert.AreEqual(true, controller.view.gameObject.activeSelf);
+        controller.view.backButton.onClick.Invoke();
+        Assert.AreEqual(false, controller.view.gameObject.activeSelf);
+    }
+
+    [UnityTest]
+    public IEnumerator OpenFriendsHUDOnBackButtonPressed()
+    {
+        // Initialize friends HUD
+        NotificationsController.i.Initialize(new NotificationHUDController());
+
+        var friendsHUDController = new FriendsHUDController();
+        friendsHUDController.Initialize(new FriendsController_Mock(), UserProfile.GetOwnUserProfile());
+
+        Assert.IsTrue(view != null, "Friends hud view is null?");
+        Assert.IsTrue(controller != null, "Friends hud controller is null?");
+
+        // initialie private chat
+        controller.SetVisibility(true);
+        Assert.AreEqual(true, controller.view.gameObject.activeSelf);
+
+        controller.view.backButton.onClick.Invoke();
+        yield return null;
+
+        Assert.AreEqual(true, friendsHUDController.view.gameObject.activeSelf);
     }
 }
