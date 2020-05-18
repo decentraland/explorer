@@ -111,15 +111,12 @@ public class TaskbarHUDShould : TestsBase
         Assert.IsTrue(view.friendsButton.lineOnIndicator.activeInHierarchy);
         Assert.IsFalse(view.chatButton.lineOnIndicator.activeInHierarchy);
 
-        //NOTE(Brian): Toggle friends window off and test all other windows are untoggled with the exception
-        //             of world chat window, that should be toggled on.
+        //NOTE(Brian): Toggle friends window off and test all other windows are untoggled
         view.friendsButton.toggleButton.onClick.Invoke();
 
         Assert.IsFalse(controller.privateChatWindowHud.view.gameObject.activeInHierarchy);
         Assert.IsFalse(headButton.lineOnIndicator.activeInHierarchy);
         Assert.IsFalse(view.friendsButton.lineOnIndicator.activeInHierarchy);
-        Assert.IsTrue(view.chatButton.lineOnIndicator.activeInHierarchy, "When any window is untoggled, world chat window should toggle.");
-        Assert.IsTrue(controller.worldChatWindowHud.view.gameObject.activeInHierarchy, "When any window is untoggled, world chat window should toggle.");
 
         //NOTE(Brian): Toggle friends on, and then chat button on. Then check if world chat window is showing up.
         view.friendsButton.toggleButton.onClick.Invoke();
