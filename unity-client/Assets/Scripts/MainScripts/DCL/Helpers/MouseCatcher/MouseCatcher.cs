@@ -9,10 +9,12 @@ namespace DCL
     {
         event System.Action OnMouseUnlock;
         event System.Action OnMouseLock;
+        bool isLocked { get; }
     }
 
     public class MouseCatcher : MonoBehaviour, IMouseCatcher, IPointerDownHandler
     {
+        public bool isLocked => Utils.isCursorLocked;
         public event System.Action OnMouseUnlock;
         public event System.Action OnMouseLock;
         //Default OnPointerEvent

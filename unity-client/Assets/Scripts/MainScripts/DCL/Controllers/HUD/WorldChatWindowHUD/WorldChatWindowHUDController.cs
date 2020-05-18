@@ -2,7 +2,6 @@
 using DCL;
 
 using DCL.Interface;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
 

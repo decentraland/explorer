@@ -1,4 +1,4 @@
-﻿using DCL.Helpers;
+using DCL.Helpers;
 using UnityEngine;
 
 public class PrivateChatHUDView : ChatHUDView
@@ -12,7 +12,6 @@ public class PrivateChatHUDView : ChatHUDView
         ChatEntry chatEntry = chatEntryGO.GetComponent<ChatEntry>();
 
         chatEntry.SetFadeout(false);
-
         chatEntry.Populate(chatEntryModel);
 
         entries.Add(chatEntry);

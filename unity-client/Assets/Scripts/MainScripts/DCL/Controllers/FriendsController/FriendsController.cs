@@ -7,10 +7,37 @@ public interface IFriendsController
     int friendCount { get; }
     Dictionary<string, FriendsController.UserStatus> GetFriends();
 
-    event System.Action<string, FriendsController.FriendshipAction> OnUpdateFriendship;
-    event System.Action<string, FriendsController.UserStatus> OnUpdateUserStatus;
-    event System.Action<string> OnFriendNotFound;
+    event Action<string, FriendshipAction> OnUpdateFriendship;
+    event Action<string, FriendsController.UserStatus> OnUpdateUserStatus;
+    event Action<string> OnFriendNotFound;
 }
+
+public enum PresenceStatus
+{
+    NONE,
+    OFFLINE,
+    ONLINE,
+    UNAVAILABLE,
+}
+
+public enum FriendshipStatus
+{
+    NONE,
+    FRIEND,
+    REQUESTED_FROM,
+    REQUESTED_TO
+}
+public enum FriendshipAction
+{
+    NONE,
+    APPROVED,
+    REJECTED,
+    CANCELLED,
+    REQUESTED_FROM,
+    REQUESTED_TO,
+    DELETED
+}
+
 public class FriendsController : MonoBehaviour, IFriendsController
 {
     public static bool VERBOSE = false;
@@ -23,7 +50,7 @@ public class FriendsController : MonoBehaviour, IFriendsController
         i = this;
     }
 
-    public bool initialized = false;
+    public bool initialized { get; private set; } = false;
     public Dictionary<string, UserStatus> friends = new Dictionary<string, UserStatus>();
 
     [System.Serializable]
@@ -42,33 +69,6 @@ public class FriendsController : MonoBehaviour, IFriendsController
         public FriendshipStatus friendshipStatus;
         public PresenceStatus presence;
     }
-
-    public enum PresenceStatus
-    {
-        NONE,
-        OFFLINE,
-        ONLINE,
-        UNAVAILABLE,
-    }
-
-    public enum FriendshipStatus
-    {
-        NONE,
-        FRIEND,
-        REQUESTED_FROM,
-        REQUESTED_TO
-    }
-    public enum FriendshipAction
-    {
-        NONE,
-        APPROVED,
-        REJECTED,
-        CANCELLED,
-        REQUESTED_FROM,
-        REQUESTED_TO,
-        DELETED
-    }
-
 
     [System.Serializable]
     public class FriendshipInitializationMessage
