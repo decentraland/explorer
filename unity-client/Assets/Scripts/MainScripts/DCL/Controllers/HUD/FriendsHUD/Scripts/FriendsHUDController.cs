@@ -307,5 +307,4 @@ public class FriendsHUDController : IHUD
             UpdateNotificationsCounter();
         }
     }
-
 }
