@@ -17,6 +17,9 @@ public enum DCLAction_Trigger
     Expression_FistPump = 202,
     Expression_Robot = 203,
     Expression_RaiseHand = 204,
+    Expression_Clap = 205,
+    Expression_ThrowMoney = 206,
+    Expression_SendKiss = 207
 }
 
 public enum DCLAction_Hold
@@ -73,6 +76,7 @@ public class InputController : MonoBehaviour
                     break;
                 case DCLAction_Trigger.OpenExpressions:
                     InputProcessor.FromKey(action, KeyCode.B, modifiers: InputProcessor.Modifier.FocusNotInInput);
+                    InputProcessor.FromKey(action, KeyCode.Escape, modifiers: InputProcessor.Modifier.FocusNotInInput);
                     break;
                 case DCLAction_Trigger.Expression_Wave:
                     InputProcessor.FromKey(action, KeyCode.Alpha1, modifiers: InputProcessor.Modifier.FocusNotInInput);
@@ -85,6 +89,15 @@ public class InputController : MonoBehaviour
                     break;
                 case DCLAction_Trigger.Expression_RaiseHand:
                     InputProcessor.FromKey(action, KeyCode.Alpha4, modifiers: InputProcessor.Modifier.FocusNotInInput);
+                    break;
+                case DCLAction_Trigger.Expression_Clap:
+                    InputProcessor.FromKey(action, KeyCode.Alpha5, modifiers: InputProcessor.Modifier.FocusNotInInput);
+                    break;
+                case DCLAction_Trigger.Expression_ThrowMoney:
+                    InputProcessor.FromKey(action, KeyCode.Alpha6, modifiers: InputProcessor.Modifier.FocusNotInInput);
+                    break;
+                case DCLAction_Trigger.Expression_SendKiss:
+                    InputProcessor.FromKey(action, KeyCode.Alpha7, modifiers: InputProcessor.Modifier.FocusNotInInput);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
