@@ -119,7 +119,7 @@ public class FriendsTabView : FriendsTabViewBase
             };
 
             // Each time a private message is received (or sent by the player), we sort the online and offline lists by timestamp
-            if (friend.model.status == FriendsController.PresenceStatus.ONLINE)
+            if (friend.model.status == PresenceStatus.ONLINE)
             {
                 onlineFriendsList.AddOrUpdateLastTimestamp(timestampToUpdate, reorderFriendEntries);
             }
