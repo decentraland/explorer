@@ -152,6 +152,14 @@ public class TaskbarHUDController : IHUD
     {
         if (view != null)
         {
+            view.chatHeadsGroup.OnHeadToggleOn -= ChatHeadsGroup_OnHeadOpen;
+            view.chatHeadsGroup.OnHeadToggleOff -= ChatHeadsGroup_OnHeadClose;
+
+            view.OnChatToggleOff -= View_OnChatToggleOff;
+            view.OnChatToggleOn -= View_OnChatToggleOn;
+            view.OnFriendsToggleOff -= View_OnFriendsToggleOff;
+            view.OnFriendsToggleOn -= View_OnFriendsToggleOn;
+
             UnityEngine.Object.Destroy(view.gameObject);
         }
 

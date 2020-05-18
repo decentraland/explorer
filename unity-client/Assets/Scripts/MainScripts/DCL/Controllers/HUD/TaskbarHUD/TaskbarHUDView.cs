@@ -14,8 +14,14 @@ public class TaskbarHUDView : MonoBehaviour
     [SerializeField] internal TaskbarButton friendsButton;
 
     [SerializeField] internal ChatHeadGroupView chatHeadsGroup;
+
     internal List<TaskbarButton> taskbarButtonList = new List<TaskbarButton>();
     internal TaskbarHUDController controller;
+
+    public event System.Action OnChatToggleOn;
+    public event System.Action OnChatToggleOff;
+    public event System.Action OnFriendsToggleOn;
+    public event System.Action OnFriendsToggleOff;
 
     internal void RefreshButtonList()
     {
@@ -35,6 +41,7 @@ public class TaskbarHUDView : MonoBehaviour
     public void Initialize(TaskbarHUDController controller, IChatController chatController)
     {
         this.controller = controller;
+
         chatHeadsGroup.Initialize(chatController);
         chatButton.Initialize();
         friendsButton.Initialize();
@@ -52,11 +59,6 @@ public class TaskbarHUDView : MonoBehaviour
 
         chatButton.SetToggleState(true);
     }
-
-    public event System.Action OnChatToggleOn;
-    public event System.Action OnChatToggleOff;
-    public event System.Action OnFriendsToggleOn;
-    public event System.Action OnFriendsToggleOff;
 
     private void OnWindowToggleOff(TaskbarButton obj)
     {
@@ -132,6 +134,27 @@ public class TaskbarHUDView : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             controller.OnPressEsc();
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (chatHeadsGroup != null)
+        {
+            chatHeadsGroup.OnHeadToggleOn += OnWindowToggleOn;
+            chatHeadsGroup.OnHeadToggleOff += OnWindowToggleOff;
+        }
+
+        if (chatButton != null)
+        {
+            chatButton.OnToggleOn += OnWindowToggleOn;
+            chatButton.OnToggleOff += OnWindowToggleOff;
+        }
+
+        if (friendsButton != null)
+        {
+            friendsButton.OnToggleOn += OnWindowToggleOn;
+            friendsButton.OnToggleOff += OnWindowToggleOff;
         }
     }
 }
