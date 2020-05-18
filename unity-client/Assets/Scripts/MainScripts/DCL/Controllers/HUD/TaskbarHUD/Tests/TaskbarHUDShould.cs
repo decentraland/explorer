@@ -1,4 +1,4 @@
-﻿using NUnit.Framework;
+using NUnit.Framework;
 using System.Collections;
 using UnityEngine;
 
@@ -36,6 +36,7 @@ public class TaskbarHUDShould : TestsBase
     {
         UnityEngine.Object.Destroy(view);
         UnityEngine.Object.Destroy(userProfileGO);
+        yield return null;
         yield break;
     }
 
