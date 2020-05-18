@@ -15,14 +15,14 @@ public class UnreadNotificationBadge : MonoBehaviour
     private IChatController currentChatController;
     private string currentUserId;
     private long currentTimestampReading;
-    private int currentUnreadMessages;
+    private int currentUnreadMessagesValue;
 
-    public int CurrentUnreadMessages
+    public int currentUnreadMessages
     {
-        get => currentUnreadMessages;
+        get => currentUnreadMessagesValue;
         set
         {
-            currentUnreadMessages = value;
+            currentUnreadMessagesValue = value;
             RefreshNotificationBadge();
         }
     }
@@ -75,13 +75,13 @@ public class UnreadNotificationBadge : MonoBehaviour
         {
             // The player reads the latest messages of [userId]
             currentTimestampReading = addedValue;
-            CurrentUnreadMessages = 0;
+            currentUnreadMessages = 0;
         }
     }
 
     private void UpdateUnreadMessages()
     {
-        CurrentUnreadMessages = currentChatController.GetEntries().Count(
+        currentUnreadMessages = currentChatController.GetEntries().Count(
             msg => msg.messageType == ChatMessage.Type.PRIVATE &&
             msg.sender == currentUserId &&
             msg.timestamp > (ulong)currentTimestampReading);
@@ -89,10 +89,10 @@ public class UnreadNotificationBadge : MonoBehaviour
 
     private void RefreshNotificationBadge()
     {
-        if (currentUnreadMessages > 0)
+        if (currentUnreadMessagesValue > 0)
         {
             notificationContainer.SetActive(true);
-            notificationText.text = currentUnreadMessages <= maxNumberToShow ? currentUnreadMessages.ToString() : string.Format("+{0}", maxNumberToShow);
+            notificationText.text = currentUnreadMessagesValue <= maxNumberToShow ? currentUnreadMessagesValue.ToString() : string.Format("+{0}", maxNumberToShow);
         }
         else
         {
