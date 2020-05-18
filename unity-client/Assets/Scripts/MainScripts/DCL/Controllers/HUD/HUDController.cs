@@ -182,9 +182,7 @@ public class HUDController : MonoBehaviour
 
     private void FriendsHud_OnPressWhisper(string targetUserId)
     {
-        privateChatWindowHud.Configure(targetUserId);
-        privateChatWindowHud.SetVisibility(true);
-        privateChatWindowHud.ForceFocus();
+        taskbarHud?.OpenPrivateChatTo(targetUserId);
     }
 
     public void CreateHudElement<T>(HUDConfiguration config, HUDElementID id)

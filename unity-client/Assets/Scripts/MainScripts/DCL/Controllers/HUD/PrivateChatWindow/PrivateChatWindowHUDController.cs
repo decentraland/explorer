@@ -10,12 +10,12 @@ public class PrivateChatWindowHUDController : IHUD
 
     ChatHUDController chatHudController;
     IChatController chatController;
-    string conversationUserId = string.Empty;
-    string conversationUserName = string.Empty;
+    public string conversationUserId { get; private set; } = string.Empty;
+    public string conversationUserName { get; private set; } = string.Empty;
 
     public void Initialize(IChatController chatController)
     {
-        view = PrivateChatWindowHUDView.Create();
+        view = PrivateChatWindowHUDView.Create(this);
 
         chatHudController = new ChatHUDController();
         chatHudController.Initialize(view.chatHudView, SendChatMessage);

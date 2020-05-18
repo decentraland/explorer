@@ -1,4 +1,5 @@
 using DCL;
+using System.Linq;
 using UnityEngine;
 
 public class TaskbarHUDController : IHUD
@@ -79,13 +80,20 @@ public class TaskbarHUDController : IHUD
     private void MouseCatcher_OnMouseUnlock()
     {
         view.windowContainerCanvasGroup.alpha = 1;
+        view.chatButton.SetToggleState(true);
         worldChatWindowHud.view.DeactivatePreview();
     }
 
     private void MouseCatcher_OnMouseLock()
     {
         view.windowContainerCanvasGroup.alpha = 0;
-        view.chatButton.SetToggleState(true);
+
+        foreach (var btn in view.GetButtonList())
+        {
+            btn.SetToggleState(false);
+        }
+
+        worldChatWindowHud.SetVisibility(true);
         worldChatWindowHud.view.ActivatePreview();
     }
 
@@ -106,6 +114,13 @@ public class TaskbarHUDController : IHUD
 
         view.OnAddChatWindow();
         worldChatWindowHud.view.DeactivatePreview();
+        worldChatWindowHud.view.OnClose += () => { view.friendsButton.SetToggleState(false, false); };
+    }
+
+    public void OpenPrivateChatTo(string userId)
+    {
+        var button = view.chatHeadsGroup.AddChatHead(userId, ulong.MaxValue);
+        button.toggleButton.onClick.Invoke();
     }
 
     public void AddPrivateChatWindow(PrivateChatWindowHUDController controller)
@@ -122,6 +137,17 @@ public class TaskbarHUDController : IHUD
         controller.view.transform.SetParent(view.windowContainer, false);
 
         privateChatWindowHud = controller;
+
+        privateChatWindowHud.view.OnClose += () =>
+        {
+            ChatHeadButton btn = view.GetButtonList().FirstOrDefault(
+                (x) => x is ChatHeadButton &&
+                (x as ChatHeadButton).profile.userId == privateChatWindowHud.conversationUserId) as ChatHeadButton;
+
+            if (btn != null)
+                btn.SetToggleState(false, false);
+        };
+
     }
 
     public void AddFriendsWindow(FriendsHUDController controller)
@@ -139,6 +165,7 @@ public class TaskbarHUDController : IHUD
 
         friendsHud = controller;
         view.OnAddFriendsWindow();
+        friendsHud.view.OnClose += () => { view.friendsButton.SetToggleState(false, false); };
     }
 
 
@@ -146,6 +173,7 @@ public class TaskbarHUDController : IHUD
     {
         privateChatWindowHud.Configure(userId);
         privateChatWindowHud.SetVisibility(true);
+        privateChatWindowHud.ForceFocus();
     }
 
     public void Dispose()

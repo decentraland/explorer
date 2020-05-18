@@ -84,14 +84,15 @@ public class TaskbarHUDShould : TestsBase
 
         TestHelpers_Friends.FakeAddFriend(friendsController, friendsHUDController.view, "test-1");
         TestHelpers_Chat.FakePrivateChatMessageFrom(chatController, "test-1", "test message!");
-        view.RefreshButtonList();
 
-        Assert.AreEqual(3, view.taskbarButtonList.Count, "Chat head is missing when receiving a private message?");
+        var buttonList = view.GetButtonList();
+
+        Assert.AreEqual(3, buttonList.Count, "Chat head is missing when receiving a private message?");
 
         Assert.IsTrue(view.chatButton.toggledOn);
-        Assert.IsTrue(view.taskbarButtonList[2] is ChatHeadButton);
+        Assert.IsTrue(buttonList[2] is ChatHeadButton);
 
-        ChatHeadButton headButton = view.taskbarButtonList[2] as ChatHeadButton;
+        ChatHeadButton headButton = buttonList[2] as ChatHeadButton;
         Assert.IsFalse(headButton.toggledOn);
 
         //NOTE(Brian): Toggle chat head on and test it works as intended

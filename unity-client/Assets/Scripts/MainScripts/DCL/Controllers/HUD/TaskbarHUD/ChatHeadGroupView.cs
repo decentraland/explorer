@@ -71,7 +71,7 @@ public class ChatHeadGroupView : MonoBehaviour
         OnHeadToggleOff?.Invoke(head);
     }
 
-    private void AddChatHead(string userId, ulong timestamp)
+    internal ChatHeadButton AddChatHead(string userId, ulong timestamp)
     {
         var existingHead = chatHeads.FirstOrDefault(x => x.profile.userId == userId);
 
@@ -85,7 +85,7 @@ public class ChatHeadGroupView : MonoBehaviour
                 chatHeads[i].transform.SetSiblingIndex(i);
             }
 
-            return;
+            return existingHead;
         }
 
         GameObject prefab = Resources.Load(CHAT_HEAD_PATH) as GameObject;
@@ -106,6 +106,8 @@ public class ChatHeadGroupView : MonoBehaviour
             var lastChatHead = chatHeads[chatHeads.Count - 1];
             RemoveHead(lastChatHead);
         }
+
+        return chatHead;
     }
 
     void RemoveHead(ChatHeadButton chatHead)

@@ -2,7 +2,6 @@
 using DCL;
 
 using DCL.Interface;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -106,6 +105,9 @@ public class WorldChatWindowHUDController : IHUD
 
     public bool OnPressReturn()
     {
+        Debug.Log("Evt system = " + EventSystem.current, EventSystem.current.gameObject);
+        Debug.Log("Current = " + EventSystem.current.currentSelectedGameObject, EventSystem.current.currentSelectedGameObject);
+
         if (EventSystem.current.currentSelectedGameObject != null &&
             EventSystem.current.currentSelectedGameObject.GetComponent<TMPro.TMP_InputField>() != null)
             return false;

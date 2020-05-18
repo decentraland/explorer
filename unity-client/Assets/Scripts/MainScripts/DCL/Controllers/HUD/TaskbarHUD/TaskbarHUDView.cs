@@ -15,7 +15,6 @@ public class TaskbarHUDView : MonoBehaviour
 
     [SerializeField] internal ChatHeadGroupView chatHeadsGroup;
 
-    internal List<TaskbarButton> taskbarButtonList = new List<TaskbarButton>();
     internal TaskbarHUDController controller;
 
     public event System.Action OnChatToggleOn;
@@ -23,12 +22,13 @@ public class TaskbarHUDView : MonoBehaviour
     public event System.Action OnFriendsToggleOn;
     public event System.Action OnFriendsToggleOff;
 
-    internal void RefreshButtonList()
+    internal List<TaskbarButton> GetButtonList()
     {
-        taskbarButtonList = new List<TaskbarButton>();
+        var taskbarButtonList = new List<TaskbarButton>();
         taskbarButtonList.Add(chatButton);
         taskbarButtonList.Add(friendsButton);
         taskbarButtonList.AddRange(chatHeadsGroup.chatHeads);
+        return taskbarButtonList;
     }
 
     internal static TaskbarHUDView Create(TaskbarHUDController controller, IChatController chatController)
@@ -45,8 +45,6 @@ public class TaskbarHUDView : MonoBehaviour
         chatHeadsGroup.Initialize(chatController);
         chatButton.Initialize();
         friendsButton.Initialize();
-
-        RefreshButtonList();
 
         chatHeadsGroup.OnHeadToggleOn += OnWindowToggleOn;
         chatHeadsGroup.OnHeadToggleOff += OnWindowToggleOff;
@@ -68,22 +66,6 @@ public class TaskbarHUDView : MonoBehaviour
             OnChatToggleOff?.Invoke();
 
         obj.SetToggleState(false, useCallback: true);
-
-
-        RefreshButtonList();
-
-        bool anyVisible = false;
-
-        foreach (var btn in taskbarButtonList)
-        {
-            if (btn.toggledOn)
-                anyVisible = true;
-        }
-
-        if (!anyVisible)
-        {
-            chatButton.SetToggleState(true);
-        }
     }
 
     private void OnWindowToggleOn(TaskbarButton obj)
@@ -98,7 +80,7 @@ public class TaskbarHUDView : MonoBehaviour
 
     void SelectButton(TaskbarButton obj)
     {
-        RefreshButtonList();
+        var taskbarButtonList = GetButtonList();
 
         foreach (var btn in taskbarButtonList)
         {

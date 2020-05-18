@@ -21,6 +21,8 @@ public class FriendsHUDView : MonoBehaviour
 
     FriendsHUDController controller;
 
+    public event System.Action OnClose;
+
     public static FriendsHUDView Create(FriendsHUDController controller)
     {
         var view = Instantiate(Resources.Load<GameObject>(VIEW_PATH)).GetComponent<FriendsHUDView>();
@@ -42,7 +44,7 @@ public class FriendsHUDView : MonoBehaviour
         friendsList.Initialize(this);
         friendRequestsList.Initialize(this);
 
-        closeButton.onClick.AddListener(Toggle);
+        closeButton.onClick.AddListener(OnCloseButtonPressed);
 
         friendsButton.onClick.AddListener(() =>
         {
@@ -59,6 +61,12 @@ public class FriendsHUDView : MonoBehaviour
             friendsList.gameObject.SetActive(false);
             friendRequestsList.gameObject.SetActive(true);
         });
+    }
+
+    public void OnCloseButtonPressed()
+    {
+        controller.SetVisibility(false);
+        OnClose?.Invoke();
     }
 
     public void Toggle()
