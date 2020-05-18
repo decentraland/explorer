@@ -66,7 +66,7 @@ public class FriendsTabViewBase : MonoBehaviour, IPointerDownHandler
             toggleButton.SetActive(Count() != 0);
         }
 
-        public void AddOrUpdateLastTimestamp(LastFriendTimestampModel timestamp)
+        public void AddOrUpdateLastTimestamp(LastFriendTimestampModel timestamp, bool reorderFriendEntries = true)
         {
             if (timestamp == null)
                 return;
@@ -81,9 +81,11 @@ public class FriendsTabViewBase : MonoBehaviour, IPointerDownHandler
                 existingTimestamp.lastMessageTimestamp = timestamp.lastMessageTimestamp;
             }
 
-            latestTimestampsOrdered = latestTimestampsOrdered.OrderByDescending(f => f.lastMessageTimestamp).ToList();
-
-            ReorderingFriendEntries();
+            if (reorderFriendEntries)
+            {
+                latestTimestampsOrdered = latestTimestampsOrdered.OrderByDescending(f => f.lastMessageTimestamp).ToList();
+                ReorderingFriendEntries();
+            }
         }
 
         public LastFriendTimestampModel RemoveLastTimestamp(string userId)

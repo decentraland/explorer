@@ -9,6 +9,8 @@ public class FriendsTabView : FriendsTabViewBase
     public event System.Action<FriendEntry> OnWhisper;
     public event System.Action<FriendEntry> OnDeleteConfirmation;
 
+    private string lastProcessedFriend;
+
     public override void Initialize(FriendsHUDView owner)
     {
         base.Initialize(owner);
@@ -102,6 +104,13 @@ public class FriendsTabView : FriendsTabViewBase
             FriendEntryBase friend = GetEntry(message.sender != UserProfile.GetOwnUserProfile().userId ? message.sender : message.recipient);
             if (friend != null)
             {
+                bool reorderFriendEntries = false;
+                if (friend.userId != lastProcessedFriend)
+                {
+                    lastProcessedFriend = friend.userId;
+                    reorderFriendEntries = true;
+                }
+
                 LastFriendTimestampModel timestampToUpdate = new LastFriendTimestampModel
                 {
                     userId = friend.userId,
@@ -111,12 +120,14 @@ public class FriendsTabView : FriendsTabViewBase
                 // Each time a private message is received (or sent by the player), we sort the online and offline lists by timestamp
                 if (friend.model.status == FriendsController.PresenceStatus.ONLINE)
                 {
-                    onlineFriendsList.AddOrUpdateLastTimestamp(timestampToUpdate);
+                    onlineFriendsList.AddOrUpdateLastTimestamp(timestampToUpdate, reorderFriendEntries);
                 }
                 else
                 {
-                    offlineFriendsList.AddOrUpdateLastTimestamp(timestampToUpdate);
+                    offlineFriendsList.AddOrUpdateLastTimestamp(timestampToUpdate, reorderFriendEntries);
                 }
+
+                lastProcessedFriend = friend.userId;
             }
         }
     }
