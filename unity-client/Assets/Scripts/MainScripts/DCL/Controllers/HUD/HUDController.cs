@@ -142,19 +142,24 @@ public class HUDController : MonoBehaviour
                 break;
             case HUDElementID.WORLD_CHAT_WINDOW:
                 CreateHudElement<WorldChatWindowHUDController>(configuration, hudElementId);
-                worldChatWindowHud?.Initialize(ChatController.i, DCL.InitialSceneReferences.i?.mouseCatcher);
-                taskbarHud?.AddWorldChatWindow(worldChatWindowHud);
+                if (worldChatWindowHud != null)
+                {
+                    worldChatWindowHud.Initialize(ChatController.i, DCL.InitialSceneReferences.i?.mouseCatcher);
+                    worldChatWindowHud.OnPressPrivateMessage -= OpenPrivateChatWindow;
+                    worldChatWindowHud.OnPressPrivateMessage += OpenPrivateChatWindow;
+
+                    taskbarHud?.AddWorldChatWindow(worldChatWindowHud);
+                }
 
                 CreateHudElement<PrivateChatWindowHUDController>(configuration, HUDElementID.PRIVATE_CHAT_WINDOW);
-
                 if (privateChatWindowHud != null)
                 {
                     privateChatWindowHud.Initialize(ChatController.i);
                     privateChatWindowHud.OnPressBack -= PrivateChatWindowHud_OnPressBack;
                     privateChatWindowHud.OnPressBack += PrivateChatWindowHud_OnPressBack;
-                }
 
-                taskbarHud?.AddPrivateChatWindow(privateChatWindowHud);
+                    taskbarHud?.AddPrivateChatWindow(privateChatWindowHud);
+                }
                 break;
             case HUDElementID.FRIENDS:
                 CreateHudElement<FriendsHUDController>(configuration, hudElementId);
@@ -162,8 +167,8 @@ public class HUDController : MonoBehaviour
                 if (friendsHud != null)
                 {
                     friendsHud.Initialize(FriendsController.i, UserProfile.GetOwnUserProfile());
-                    friendsHud.OnPressWhisper -= FriendsHud_OnPressWhisper;
-                    friendsHud.OnPressWhisper += FriendsHud_OnPressWhisper;
+                    friendsHud.OnPressWhisper -= OpenPrivateChatWindow;
+                    friendsHud.OnPressWhisper += OpenPrivateChatWindow;
                 }
                 taskbarHud?.AddFriendsWindow(friendsHud);
                 break;
@@ -182,7 +187,7 @@ public class HUDController : MonoBehaviour
         GetHUDElement(hudElementId)?.SetVisibility(configuration.active && configuration.visible);
     }
 
-    private void FriendsHud_OnPressWhisper(string targetUserId)
+    private void OpenPrivateChatWindow(string targetUserId)
     {
         privateChatWindowHud.Configure(targetUserId);
         privateChatWindowHud.SetVisibility(true);

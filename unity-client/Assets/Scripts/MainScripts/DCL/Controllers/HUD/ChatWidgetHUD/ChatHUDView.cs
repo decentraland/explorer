@@ -18,7 +18,8 @@ public class ChatHUDView : MonoBehaviour
     public ChatHUDController controller;
     [NonSerialized] public List<ChatEntry> entries = new List<ChatEntry>();
 
-    private UnityAction<string> onSendMessageAction;
+    public event UnityAction<string> OnPressPrivateMessage;
+    private UnityAction<string> OnSendMessageAction;
 
     public static ChatHUDView Create()
     {
@@ -26,10 +27,10 @@ public class ChatHUDView : MonoBehaviour
         return view;
     }
 
-    public void Initialize(ChatHUDController controller, UnityAction<string> onSendMessage)
+    public void Initialize(ChatHUDController controller, UnityAction<string> OnSendMessage)
     {
         this.controller = controller;
-        onSendMessageAction = onSendMessage;
+        OnSendMessageAction = OnSendMessage;
         inputField.onSubmit.AddListener(OnInputFieldSubmit);
     }
 
@@ -39,7 +40,7 @@ public class ChatHUDView : MonoBehaviour
         if (inputField.wasCanceled)
             message = "";
 
-        onSendMessageAction(message);
+        OnSendMessageAction(message);
     }
 
     public void ResetInputField()
@@ -100,6 +101,7 @@ public class ChatHUDView : MonoBehaviour
             chatEntry.SetFadeout(false);
 
         chatEntry.Populate(chatEntryModel);
+        chatEntry.OnPress += OnPressPrivateMessage;
 
         entries.Add(chatEntry);
 

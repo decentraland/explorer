@@ -3,9 +3,10 @@ using DCL.Helpers;
 using System;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
+using UnityEngine.EventSystems;
+using UnityEngine.Events;
 
-public class ChatEntry : MonoBehaviour
+public class ChatEntry : MonoBehaviour, IPointerDownHandler
 {
     public struct Model
     {
@@ -20,6 +21,7 @@ public class ChatEntry : MonoBehaviour
         public string bodyText;
         public string senderName;
         public string recipientName;
+        public string otherUserId;
         public ulong timestamp;
 
         public SubType subType;
@@ -34,8 +36,12 @@ public class ChatEntry : MonoBehaviour
     [SerializeField] internal Color worldMessageColor = Color.white;
     [SerializeField] internal Color privateMessageColor = Color.white;
     [SerializeField] internal Color systemColor = Color.white;
+    [SerializeField] CanvasGroup group;
+    bool processFading = false;
 
     public Model model { get; private set; }
+
+    public event UnityAction<string> OnPress;
 
     public void Populate(Model chatEntryModel)
     {
@@ -89,26 +95,33 @@ public class ChatEntry : MonoBehaviour
 
         Utils.ForceUpdateLayout(transform as RectTransform);
 
-        if (this.enabled)
+        if (processFading)
             group.alpha = 0;
     }
 
-    [SerializeField] CanvasGroup group;
+    public void OnPointerDown(PointerEventData pointerEventData)
+    {
+        if (model.messageType != ChatMessage.Type.PRIVATE) return;
+
+        OnPress?.Invoke(model.otherUserId);
+    }
 
     public void SetFadeout(bool enabled)
     {
         if (!enabled)
         {
             group.alpha = 1;
-            this.enabled = false;
+            processFading = false;
             return;
         }
 
-        this.enabled = true;
+        processFading = true;
     }
 
     private void Update()
     {
+        if (!processFading) return;
+
         double fadeTime = (double)(model.timestamp / 1000.0) + timeToFade;
         double currentTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() / 1000.0;
 
@@ -140,5 +153,4 @@ public class ChatEntry : MonoBehaviour
 
         return "";
     }
-
 }
