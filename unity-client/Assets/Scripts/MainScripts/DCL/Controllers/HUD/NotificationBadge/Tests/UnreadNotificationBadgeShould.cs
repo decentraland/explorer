@@ -34,7 +34,7 @@ public class UnreadNotificationBadgeShould : TestsBase
     }
 
     [Test]
-    public void ReceivePrivateMessage()
+    public void ReceiveOneUnreadNotification()
     {
         chatController.RaiseAddMessage(new ChatMessage
         {
@@ -51,7 +51,29 @@ public class UnreadNotificationBadgeShould : TestsBase
     }
 
     [Test]
-    public void ReceivePublicMessage()
+    public void ReceiveSeveralUnreadNotifications()
+    {
+        unreadNotificationBadge.maxNumberToShow = 9;
+
+        for (int i = 0; i < unreadNotificationBadge.maxNumberToShow + 1; i++)
+        {
+            chatController.RaiseAddMessage(new ChatMessage
+            {
+                messageType = ChatMessage.Type.PRIVATE,
+                sender = TEST_USER_ID,
+                body = string.Format("test body {0}", i + 1),
+                recipient = "test recipient",
+                timestamp = (ulong)System.DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
+            });
+        }
+
+        Assert.AreEqual(unreadNotificationBadge.maxNumberToShow + 1, unreadNotificationBadge.currentUnreadMessages, "There should be [unreadNotificationBadge.maxNumberToShow + 1] unread notifications related to the sent private messages");
+        Assert.AreEqual(true, unreadNotificationBadge.notificationContainer.activeSelf, "Notificaton container should be activated");
+        Assert.AreEqual(string.Format("+{0}", unreadNotificationBadge.maxNumberToShow), unreadNotificationBadge.notificationText.text, "Notification text should be '+[unreadNotificationBadge.maxNumberToShow]'");
+    }
+
+    [Test]
+    public void NotReceiveUnreadNotificationsAfterPublicMessage()
     {
         chatController.RaiseAddMessage(new ChatMessage
         {
