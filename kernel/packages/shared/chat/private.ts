@@ -1,5 +1,12 @@
 import { ExplorerIdentity } from 'shared'
-import { SocialClient, FriendshipRequest, Conversation, PresenceType, CurrentUserStatus } from 'dcl-social-client'
+import {
+  SocialClient,
+  FriendshipRequest,
+  Conversation,
+  PresenceType,
+  CurrentUserStatus,
+  UnknownUsersError
+} from 'dcl-social-client'
 import { SocialAPI } from 'dcl-social-client/dist/SocialAPI'
 import { Authenticator } from 'dcl-crypto'
 import { takeEvery, put, select, call, take } from 'redux-saga/effects'
@@ -19,7 +26,7 @@ import { unityInterface } from 'unity-interface/dcl'
 import { ChatMessageType, FriendshipAction, PresenceStatus } from 'shared/types'
 import { SocialData, ChatState } from './types'
 import { StoreContainer } from '../store/rootTypes'
-import { ChatMessage } from '../types'
+import { ChatMessage, NotificationType } from '../types'
 import { getRealm } from 'shared/dao/selectors'
 import { lastPlayerPosition } from '../world/positionThings'
 import { worldToGrid } from '../../atomicHelpers/parcelScenePositions'
@@ -373,104 +380,124 @@ function* handleSendPrivateMessage(action: SendPrivateMessage, debug: boolean = 
 }
 
 function* handleUpdateFriendship({ payload, meta }: UpdateFriendship) {
-  const { action, userId } = payload
-  const { incoming } = meta
+  try {
+    const { action, userId } = payload
+    const { incoming } = meta
 
-  const state: ReturnType<typeof getPrivateMessaging> = yield select(getPrivateMessaging)
+    const state: ReturnType<typeof getPrivateMessaging> = yield select(getPrivateMessaging)
 
-  let newState: ChatState['privateMessaging'] | undefined
+    let newState: ChatState['privateMessaging'] | undefined
 
-  const client: SocialAPI = yield select(getClient)
+    const client: SocialAPI = yield select(getClient)
 
-  switch (action) {
-    case FriendshipAction.NONE: {
-      // do nothing
-      break
-    }
-    case FriendshipAction.APPROVED:
-    case FriendshipAction.REJECTED: {
-      const selector = incoming ? 'toFriendRequests' : 'fromFriendRequests'
-      const requests = [...state[selector]]
-
-      const index = requests.indexOf(userId)
-
-      if (index !== -1) {
-        requests.splice(index, 1)
-
-        newState = { ...state, [selector]: requests }
-
-        if (action === FriendshipAction.APPROVED && !state.friends.includes(userId)) {
-          newState.friends.push(userId)
-
-          const socialData: SocialData = yield select(findByUserId, userId)
-          const conversationId = yield client.createDirectConversation(socialData.socialId)
-
-          yield put(updateUserData(userId, socialData.socialId, conversationId))
-        }
-      }
-
-      break
-    }
-    case FriendshipAction.CANCELED: {
-      const selector = incoming ? 'fromFriendRequests' : 'toFriendRequests'
-      const requests = [...state[selector]]
-
-      const index = requests.indexOf(userId)
-
-      if (index !== -1) {
-        requests.splice(index, 1)
-
-        newState = { ...state, [selector]: requests }
-      }
-
-      break
-    }
-    case FriendshipAction.REQUESTED_FROM: {
-      const exists = state.fromFriendRequests.includes(userId)
-
-      if (!exists) {
-        newState = { ...state, fromFriendRequests: [...state.fromFriendRequests, userId] }
-      }
-
-      break
-    }
-    case FriendshipAction.REQUESTED_TO: {
-      const exists = state.toFriendRequests.includes(userId)
-
-      if (!exists) {
-        newState = { ...state, toFriendRequests: [...state.toFriendRequests, userId] }
-      }
-
-      break
-    }
-    case FriendshipAction.DELETED: {
-      const index = state.friends.indexOf(userId)
-
-      if (index !== -1) {
-        const friends = [...state.friends]
-        friends.splice(index, 1)
-
-        newState = { ...state, friends }
-      }
-
-      break
-    }
-  }
-
-  if (newState) {
-    yield put(updatePrivateMessagingState(newState))
-
-    if (incoming) {
-      DEBUG && logger.info(`unityInterface.UpdateFriendshipStatus`, payload)
-      unityInterface.UpdateFriendshipStatus(payload)
+    const socialData: SocialData | undefined = yield select(findByUserId, userId)
+    if (socialData) {
+      yield client.createDirectConversation(socialData.socialId)
     } else {
-      yield call(handleOutgoingUpdateFriendshipStatus, payload)
+      // if this is the case, a previous call to ensure data load is missing, this is an issue on our end
+      logger.error(`user not loaded!`, userId)
+      return
     }
-  }
 
-  if (!incoming) {
-    // refresh self & renderer friends status if update was triggered by renderer
-    yield call(initializeFriends, client)
+    switch (action) {
+      case FriendshipAction.NONE: {
+        // do nothing
+        break
+      }
+      case FriendshipAction.APPROVED:
+      case FriendshipAction.REJECTED: {
+        const selector = incoming ? 'toFriendRequests' : 'fromFriendRequests'
+        const requests = [...state[selector]]
+
+        const index = requests.indexOf(userId)
+
+        if (index !== -1) {
+          requests.splice(index, 1)
+
+          newState = { ...state, [selector]: requests }
+
+          if (action === FriendshipAction.APPROVED && !state.friends.includes(userId)) {
+            newState.friends.push(userId)
+
+            const socialData: SocialData = yield select(findByUserId, userId)
+            const conversationId = yield client.createDirectConversation(socialData.socialId)
+
+            yield put(updateUserData(userId, socialData.socialId, conversationId))
+          }
+        }
+
+        break
+      }
+      case FriendshipAction.CANCELED: {
+        const selector = incoming ? 'fromFriendRequests' : 'toFriendRequests'
+        const requests = [...state[selector]]
+
+        const index = requests.indexOf(userId)
+
+        if (index !== -1) {
+          requests.splice(index, 1)
+
+          newState = { ...state, [selector]: requests }
+        }
+
+        break
+      }
+      case FriendshipAction.REQUESTED_FROM: {
+        const exists = state.fromFriendRequests.includes(userId)
+
+        if (!exists) {
+          newState = { ...state, fromFriendRequests: [...state.fromFriendRequests, userId] }
+        }
+
+        break
+      }
+      case FriendshipAction.REQUESTED_TO: {
+        const exists = state.toFriendRequests.includes(userId)
+
+        if (!exists) {
+          newState = { ...state, toFriendRequests: [...state.toFriendRequests, userId] }
+        }
+
+        break
+      }
+      case FriendshipAction.DELETED: {
+        const index = state.friends.indexOf(userId)
+
+        if (index !== -1) {
+          const friends = [...state.friends]
+          friends.splice(index, 1)
+
+          newState = { ...state, friends }
+        }
+
+        break
+      }
+    }
+
+    if (newState) {
+      yield put(updatePrivateMessagingState(newState))
+
+      if (incoming) {
+        DEBUG && logger.info(`unityInterface.UpdateFriendshipStatus`, payload)
+        unityInterface.UpdateFriendshipStatus(payload)
+      } else {
+        yield call(handleOutgoingUpdateFriendshipStatus, payload)
+      }
+    }
+
+    if (!incoming) {
+      // refresh self & renderer friends status if update was triggered by renderer
+      yield call(initializeFriends, client)
+    }
+  } catch (e) {
+    if (e instanceof UnknownUsersError) {
+      unityInterface.ShowNotification({
+        type: NotificationType.COMMS_ERROR,
+        message: `User must log in at least once before befriending them`,
+        buttonMessage: 'OK',
+        timer: 5
+      })
+    }
   }
 }
 
