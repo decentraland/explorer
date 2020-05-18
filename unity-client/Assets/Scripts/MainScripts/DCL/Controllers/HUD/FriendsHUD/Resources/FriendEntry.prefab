@@ -929,7 +929,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0.5}
   m_AnchorMax: {x: 1, y: 0.5}
-  m_AnchoredPosition: {x: -25.4, y: 0}
+  m_AnchoredPosition: {x: -26.8, y: 0}
   m_SizeDelta: {x: 28.59, y: 28.585}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3224002457026079413
@@ -1452,11 +1452,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 5557930252562946457}
     m_Modifications:
-    - target: {fileID: 8022463139147755279, guid: 0a008e464c70e3744b62a048a23c72f5,
-        type: 3}
-      propertyPath: m_Name
-      value: UnreadNotificationBadge
-      objectReference: {fileID: 0}
     - target: {fileID: 4429308612254855752, guid: 0a008e464c70e3744b62a048a23c72f5,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -1515,22 +1510,22 @@ PrefabInstance:
     - target: {fileID: 4429308612254855752, guid: 0a008e464c70e3744b62a048a23c72f5,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 10
+      value: 12.8
       objectReference: {fileID: 0}
     - target: {fileID: 4429308612254855752, guid: 0a008e464c70e3744b62a048a23c72f5,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -5
+      value: -6.4
       objectReference: {fileID: 0}
     - target: {fileID: 4429308612254855752, guid: 0a008e464c70e3744b62a048a23c72f5,
         type: 3}
       propertyPath: m_SizeDelta.x
-      value: 15
+      value: 16
       objectReference: {fileID: 0}
     - target: {fileID: 4429308612254855752, guid: 0a008e464c70e3744b62a048a23c72f5,
         type: 3}
       propertyPath: m_SizeDelta.y
-      value: 15
+      value: 16
       objectReference: {fileID: 0}
     - target: {fileID: 4429308612254855752, guid: 0a008e464c70e3744b62a048a23c72f5,
         type: 3}
@@ -1562,6 +1557,11 @@ PrefabInstance:
       propertyPath: m_Pivot.y
       value: 0.5
       objectReference: {fileID: 0}
+    - target: {fileID: 8022463139147755279, guid: 0a008e464c70e3744b62a048a23c72f5,
+        type: 3}
+      propertyPath: m_Name
+      value: UnreadNotificationBadge
+      objectReference: {fileID: 0}
     - target: {fileID: 5156119195053263761, guid: 0a008e464c70e3744b62a048a23c72f5,
         type: 3}
       propertyPath: m_textInfo.characterCount
@@ -1584,12 +1584,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0a008e464c70e3744b62a048a23c72f5, type: 3}
---- !u!224 &5339480615015758430 stripped
-RectTransform:
-  m_CorrespondingSourceObject: {fileID: 4429308612254855752, guid: 0a008e464c70e3744b62a048a23c72f5,
-    type: 3}
-  m_PrefabInstance: {fileID: 8602356751915698198}
-  m_PrefabAsset: {fileID: 0}
 --- !u!114 &6141585309611989806 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 2475570976191959864, guid: 0a008e464c70e3744b62a048a23c72f5,
@@ -1602,3 +1596,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 63cc3165dc2ab80458cb65b4ac41fdbd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!224 &5339480615015758430 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 4429308612254855752, guid: 0a008e464c70e3744b62a048a23c72f5,
+    type: 3}
+  m_PrefabInstance: {fileID: 8602356751915698198}
+  m_PrefabAsset: {fileID: 0}
