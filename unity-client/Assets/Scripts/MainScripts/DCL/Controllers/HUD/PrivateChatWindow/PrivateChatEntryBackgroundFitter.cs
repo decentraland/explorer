@@ -1,5 +1,5 @@
-﻿using UnityEngine;
 using TMPro;
+using UnityEngine;
 
 [ExecuteInEditMode]
 public class PrivateChatEntryBackgroundFitter : MonoBehaviour
