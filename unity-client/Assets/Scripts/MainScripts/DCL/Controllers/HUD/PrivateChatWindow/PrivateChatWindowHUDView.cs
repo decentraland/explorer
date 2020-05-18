@@ -15,22 +15,32 @@ public class PrivateChatWindowHUDView : MonoBehaviour
 
     public event System.Action OnPressBack;
 
+    public event System.Action OnClose;
+
+
     void OnEnable()
     {
         DCL.Helpers.Utils.ForceUpdateLayout(transform as RectTransform);
     }
 
-    public static PrivateChatWindowHUDView Create()
+    public static PrivateChatWindowHUDView Create(PrivateChatWindowHUDController controller)
     {
         var view = Instantiate(Resources.Load<GameObject>(VIEW_PATH)).GetComponent<PrivateChatWindowHUDView>();
-        view.Initialize();
+        view.Initialize(controller);
         return view;
     }
 
-    private void Initialize()
+    private void Initialize(PrivateChatWindowHUDController controller)
     {
-        closeButton.onClick.AddListener(Toggle);
-        backButton.onClick.AddListener(() => { Toggle(); OnPressBack?.Invoke(); });
+        this.controller = controller;
+        this.closeButton.onClick.AddListener(OnCloseButtonPressed);
+        this.backButton.onClick.AddListener(() => { Toggle(); OnPressBack?.Invoke(); });
+    }
+
+    public void OnCloseButtonPressed()
+    {
+        controller.SetVisibility(false);
+        OnClose?.Invoke();
     }
 
     public void ConfigureTitle(string targetUserName)
@@ -54,4 +64,6 @@ public class PrivateChatWindowHUDView : MonoBehaviour
             gameObject.SetActive(true);
         }
     }
+
+
 }

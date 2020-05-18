@@ -64,7 +64,7 @@ public class FriendsTabView : FriendsTabViewBase
 
         var entry = entries[userId];
 
-        if (model.status == FriendsController.PresenceStatus.ONLINE)
+        if (model.status == PresenceStatus.ONLINE)
         {
             offlineFriendsList.Remove(userId);
             onlineFriendsList.Add(userId, entry);
@@ -73,7 +73,7 @@ public class FriendsTabView : FriendsTabViewBase
             onlineFriendsList.AddOrUpdateLastTimestamp(removedTimestamp);
         }
 
-        if (model.status == FriendsController.PresenceStatus.OFFLINE)
+        if (model.status == PresenceStatus.OFFLINE)
         {
             onlineFriendsList.Remove(userId);
             offlineFriendsList.Add(userId, entry);
@@ -119,7 +119,7 @@ public class FriendsTabView : FriendsTabViewBase
             };
 
             // Each time a private message is received (or sent by the player), we sort the online and offline lists by timestamp
-            if (friend.model.status == FriendsController.PresenceStatus.ONLINE)
+            if (friend.model.status == PresenceStatus.ONLINE)
             {
                 onlineFriendsList.AddOrUpdateLastTimestamp(timestampToUpdate, reorderFriendEntries);
             }

@@ -1,16 +1,100 @@
+using DCL;
+using System.Linq;
 using UnityEngine;
 
 public class TaskbarHUDController : IHUD
 {
+    public const bool WINDOW_STACKING_ENABLED = false;
+
     internal TaskbarHUDView view;
     public WorldChatWindowHUDController worldChatWindowHud;
     public PrivateChatWindowHUDController privateChatWindowHud;
     public FriendsHUDController friendsHud;
     public bool alreadyToggledOnForFirstTime { get; private set; } = false;
 
-    public TaskbarHUDController()
+    IMouseCatcher mouseCatcher;
+    IChatController chatController;
+
+    public void Initialize(IMouseCatcher mouseCatcher, IChatController chatController)
     {
-        view = TaskbarHUDView.Create(this);
+        this.mouseCatcher = mouseCatcher;
+        this.chatController = chatController;
+
+        view = TaskbarHUDView.Create(this, chatController);
+
+        if (mouseCatcher != null)
+        {
+            mouseCatcher.OnMouseLock -= MouseCatcher_OnMouseLock;
+            mouseCatcher.OnMouseUnlock -= MouseCatcher_OnMouseUnlock;
+            mouseCatcher.OnMouseLock += MouseCatcher_OnMouseLock;
+            mouseCatcher.OnMouseUnlock += MouseCatcher_OnMouseUnlock;
+        }
+
+        view.chatHeadsGroup.OnHeadToggleOn += ChatHeadsGroup_OnHeadOpen;
+        view.chatHeadsGroup.OnHeadToggleOff += ChatHeadsGroup_OnHeadClose;
+
+        view.windowContainerLayout.enabled = false;
+
+        view.OnChatToggleOff += View_OnChatToggleOff;
+        view.OnChatToggleOn += View_OnChatToggleOn;
+        view.OnFriendsToggleOff += View_OnFriendsToggleOff;
+        view.OnFriendsToggleOn += View_OnFriendsToggleOn;
+    }
+
+    private void ChatHeadsGroup_OnHeadClose(TaskbarButton obj)
+    {
+        privateChatWindowHud.SetVisibility(false);
+    }
+
+    private void View_OnFriendsToggleOn()
+    {
+        friendsHud.SetVisibility(true);
+    }
+
+    private void View_OnFriendsToggleOff()
+    {
+        friendsHud.SetVisibility(false);
+    }
+
+    private void View_OnChatToggleOn()
+    {
+        worldChatWindowHud.SetVisibility(true);
+    }
+
+    private void View_OnChatToggleOff()
+    {
+        worldChatWindowHud.SetVisibility(false);
+    }
+
+    private void ChatHeadsGroup_OnHeadOpen(TaskbarButton taskbarBtn)
+    {
+        ChatHeadButton head = taskbarBtn as ChatHeadButton;
+
+        if (taskbarBtn == null)
+            return;
+
+        OpenPrivateChatWindow(head.profile.userId);
+    }
+
+
+    private void MouseCatcher_OnMouseUnlock()
+    {
+        view.windowContainerCanvasGroup.alpha = 1;
+        view.chatButton.SetToggleState(true);
+        worldChatWindowHud.view.DeactivatePreview();
+    }
+
+    private void MouseCatcher_OnMouseLock()
+    {
+        view.windowContainerCanvasGroup.alpha = 0;
+
+        foreach (var btn in view.GetButtonList())
+        {
+            btn.SetToggleState(false);
+        }
+
+        worldChatWindowHud.SetVisibility(true);
+        worldChatWindowHud.view.ActivatePreview();
     }
 
     public void AddWorldChatWindow(WorldChatWindowHUDController controller)
@@ -28,8 +112,15 @@ public class TaskbarHUDController : IHUD
 
         worldChatWindowHud = controller;
 
-        view.OnAddChatWindow(ToggleChatWindow);
+        view.OnAddChatWindow();
         worldChatWindowHud.view.DeactivatePreview();
+        worldChatWindowHud.view.OnClose += () => { view.friendsButton.SetToggleState(false, false); };
+    }
+
+    public void OpenPrivateChatTo(string userId)
+    {
+        var button = view.chatHeadsGroup.AddChatHead(userId, ulong.MaxValue);
+        button.toggleButton.onClick.Invoke();
     }
 
     public void AddPrivateChatWindow(PrivateChatWindowHUDController controller)
@@ -47,7 +138,16 @@ public class TaskbarHUDController : IHUD
 
         privateChatWindowHud = controller;
 
-        //Note(Pravus): We don't notify the view about this new window here because it is not toggled from a taskbar icon until we get a private conversation.
+        privateChatWindowHud.view.OnClose += () =>
+        {
+            ChatHeadButton btn = view.GetButtonList().FirstOrDefault(
+                (x) => x is ChatHeadButton &&
+                (x as ChatHeadButton).profile.userId == privateChatWindowHud.conversationUserId) as ChatHeadButton;
+
+            if (btn != null)
+                btn.SetToggleState(false, false);
+        };
+
     }
 
     public void AddFriendsWindow(FriendsHUDController controller)
@@ -64,32 +164,37 @@ public class TaskbarHUDController : IHUD
         controller.view.transform.SetParent(view.windowContainer, false);
 
         friendsHud = controller;
-        view.OnAddFriendsWindow(ToggleFriendsWindow);
+        view.OnAddFriendsWindow();
+        friendsHud.view.OnClose += () => { view.friendsButton.SetToggleState(false, false); };
     }
 
-    private void ToggleChatWindow()
-    {
-        if (worldChatWindowHud.view.isInPreview)
-            worldChatWindowHud.view.DeactivatePreview();
-        else
-            worldChatWindowHud.view.ActivatePreview();
-    }
 
-    private void TogglePrivateChatWindow()
+    private void OpenPrivateChatWindow(string userId)
     {
-        privateChatWindowHud.view.Toggle();
-    }
-
-    private void ToggleFriendsWindow()
-    {
-        friendsHud.view.Toggle();
+        privateChatWindowHud.Configure(userId);
+        privateChatWindowHud.SetVisibility(true);
+        privateChatWindowHud.ForceFocus();
     }
 
     public void Dispose()
     {
         if (view != null)
         {
-            Object.Destroy(view.gameObject);
+            view.chatHeadsGroup.OnHeadToggleOn -= ChatHeadsGroup_OnHeadOpen;
+            view.chatHeadsGroup.OnHeadToggleOff -= ChatHeadsGroup_OnHeadClose;
+
+            view.OnChatToggleOff -= View_OnChatToggleOff;
+            view.OnChatToggleOn -= View_OnChatToggleOn;
+            view.OnFriendsToggleOff -= View_OnFriendsToggleOff;
+            view.OnFriendsToggleOn -= View_OnFriendsToggleOn;
+
+            UnityEngine.Object.Destroy(view.gameObject);
+        }
+
+        if (mouseCatcher != null)
+        {
+            mouseCatcher.OnMouseLock -= MouseCatcher_OnMouseLock;
+            mouseCatcher.OnMouseUnlock -= MouseCatcher_OnMouseUnlock;
         }
     }
 
@@ -101,5 +206,14 @@ public class TaskbarHUDController : IHUD
     public void OnPressReturn()
     {
         worldChatWindowHud.OnPressReturn();
+    }
+
+    public void OnPressEsc()
+    {
+        if (mouseCatcher.isLocked)
+            return;
+
+        view.chatButton.SetToggleState(true);
+        worldChatWindowHud.view.DeactivatePreview();
     }
 }

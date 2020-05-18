@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 public class HUDController : MonoBehaviour
 {
@@ -174,6 +175,7 @@ public class HUDController : MonoBehaviour
                 break;
             case HUDElementID.TASKBAR:
                 CreateHudElement<TaskbarHUDController>(configuration, hudElementId);
+                taskbarHud.Initialize(DCL.InitialSceneReferences.i?.mouseCatcher, ChatController.i);
                 break;
             case HUDElementID.MESSAGE_OF_THE_DAY:
                 CreateHudElement<WelcomeHUDController>(configuration, hudElementId);
@@ -184,14 +186,15 @@ public class HUDController : MonoBehaviour
                 break;
         }
 
-        GetHUDElement(hudElementId)?.SetVisibility(configuration.active && configuration.visible);
+        var hudElement = GetHUDElement(hudElementId);
+
+        if (hudElement != null)
+            hudElement.SetVisibility(configuration.active && configuration.visible);
     }
 
     private void OpenPrivateChatWindow(string targetUserId)
     {
-        privateChatWindowHud.Configure(targetUserId);
-        privateChatWindowHud.SetVisibility(true);
-        privateChatWindowHud.ForceFocus();
+        taskbarHud?.OpenPrivateChatTo(targetUserId);
     }
 
     private void PrivateChatWindowHud_OnPressBack()

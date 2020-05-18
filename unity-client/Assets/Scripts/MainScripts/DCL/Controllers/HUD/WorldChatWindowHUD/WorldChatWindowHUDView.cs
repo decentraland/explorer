@@ -16,6 +16,8 @@ public class WorldChatWindowHUDView : MonoBehaviour, IPointerClickHandler
     public CanvasGroup group;
     public WorldChatWindowHUDController controller;
 
+    public event System.Action OnClose;
+
     Regex whisperRegex = new Regex(@"(?i)^\/(whisper|w) (\S*) ");
     Match whisperRegexMatch;
 
@@ -34,8 +36,15 @@ public class WorldChatWindowHUDView : MonoBehaviour, IPointerClickHandler
 
     private void Initialize()
     {
-        this.closeButton.onClick.AddListener(Toggle);
+        this.closeButton.onClick.AddListener(OnCloseButtonPressed);
     }
+
+    public void OnCloseButtonPressed()
+    {
+        controller.SetVisibility(false);
+        OnClose?.Invoke();
+    }
+
 
     public bool isInPreview { get; private set; }
 
@@ -108,4 +117,6 @@ public class WorldChatWindowHUDView : MonoBehaviour, IPointerClickHandler
 
         return string.Empty;
     }
+
+
 }
