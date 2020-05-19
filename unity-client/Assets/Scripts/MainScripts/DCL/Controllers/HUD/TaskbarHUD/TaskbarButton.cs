@@ -32,15 +32,22 @@ public class TaskbarButton : MonoBehaviour
 
         SetLineIndicator(on);
 
-        if (useCallback)
+        if (!useCallback)
         {
-            if (on)
-                OnToggleOn?.Invoke(this);
-            else
-                OnToggleOff?.Invoke(this);
+            toggledOn = on;
+            return;
         }
 
-        toggledOn = on;
+        if (on)
+        {
+            OnToggleOn?.Invoke(this);
+            toggledOn = on;
+        }
+        else
+        {
+            toggledOn = on;
+            OnToggleOff?.Invoke(this);
+        }
     }
 
     public void SetLineIndicator(bool on)
@@ -50,7 +57,5 @@ public class TaskbarButton : MonoBehaviour
 
         if (lineOffIndicator != null)
             lineOffIndicator.SetActive(!on);
-
-        toggledOn = on;
     }
 }

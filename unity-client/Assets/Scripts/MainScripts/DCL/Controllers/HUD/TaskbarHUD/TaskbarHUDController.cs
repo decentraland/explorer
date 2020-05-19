@@ -59,11 +59,24 @@ public class TaskbarHUDController : IHUD
     private void View_OnChatToggleOn()
     {
         worldChatWindowHud.SetVisibility(true);
+
+        if (view.AllButtonsToggledOff())
+        {
+            worldChatWindowHud.view.DeactivatePreview();
+        }
     }
 
     private void View_OnChatToggleOff()
     {
-        worldChatWindowHud.SetVisibility(false);
+        if (view.AllButtonsToggledOff())
+        {
+            worldChatWindowHud.SetVisibility(true);
+            worldChatWindowHud.view.ActivatePreview();
+        }
+        else
+        {
+            worldChatWindowHud.SetVisibility(false);
+        }
     }
 
     private void ChatHeadsGroup_OnHeadOpen(TaskbarButton taskbarBtn)
@@ -219,6 +232,7 @@ public class TaskbarHUDController : IHUD
             return;
 
         view.chatButton.SetToggleState(true);
-        worldChatWindowHud.view.DeactivatePreview();
+        view.chatButton.SetToggleState(false, false);
+        worldChatWindowHud.view.ActivatePreview();
     }
 }

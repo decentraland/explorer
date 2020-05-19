@@ -65,7 +65,27 @@ public class TaskbarHUDView : MonoBehaviour
         else if (obj == chatButton)
             OnChatToggleOff?.Invoke();
 
-        obj.SetToggleState(false, useCallback: true);
+        if (AllButtonsToggledOff())
+        {
+            chatButton.SetToggleState(false, useCallback: false);
+            controller.worldChatWindowHud.SetVisibility(true);
+            controller.worldChatWindowHud.view.ActivatePreview();
+        }
+    }
+
+    public bool AllButtonsToggledOff()
+    {
+        var btns = GetButtonList();
+
+        bool allToggledOff = true;
+
+        foreach (var btn in btns)
+        {
+            if (btn.toggledOn)
+                allToggledOff = false;
+        }
+
+        return allToggledOff;
     }
 
     private void OnWindowToggleOn(TaskbarButton obj)
