@@ -9,19 +9,21 @@ public class ChatHUDController : IDisposable
     public ChatHUDView view;
 
     public UnityAction<string> OnSendMessage;
+    public event UnityAction<string> OnPressPrivateMessage;
 
     public void Initialize(ChatHUDView view = null, UnityAction<string> onSendMessage = null)
     {
-        if (view == null)
-        {
-            this.view = ChatHUDView.Create();
-        }
-        else
-        {
-            this.view = view;
-        }
+        this.view = view ?? ChatHUDView.Create();
 
         this.view.Initialize(this, onSendMessage);
+
+        this.view.OnPressPrivateMessage -= View_OnPressPrivateMessage;
+        this.view.OnPressPrivateMessage += View_OnPressPrivateMessage;
+    }
+
+    void View_OnPressPrivateMessage(string friendUserId)
+    {
+        OnPressPrivateMessage?.Invoke(friendUserId);
     }
 
     public void AddChatMessage(ChatEntry.Model chatEntryModel)
@@ -37,6 +39,7 @@ public class ChatHUDController : IDisposable
 
     public void Dispose()
     {
+        view.OnPressPrivateMessage -= View_OnPressPrivateMessage;
         UnityEngine.Object.Destroy(this.view.gameObject);
     }
 
@@ -67,10 +70,12 @@ public class ChatHUDController : IDisposable
             if (message.recipient == ownProfile.userId)
             {
                 model.subType = ChatEntry.Model.SubType.PRIVATE_FROM;
+                model.otherUserId = message.sender;
             }
             else if (message.sender == ownProfile.userId)
             {
                 model.subType = ChatEntry.Model.SubType.PRIVATE_TO;
+                model.otherUserId = message.recipient;
             }
             else
             {
