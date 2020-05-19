@@ -523,7 +523,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Padding:
-    m_Left: 0
+    m_Left: 6
     m_Right: 0
     m_Top: 0
     m_Bottom: 0
@@ -570,7 +570,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: -24}
-  m_SizeDelta: {x: 28, y: 2}
+  m_SizeDelta: {x: 28, y: 3}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3113392085745859704
 CanvasRenderer:
@@ -683,7 +683,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 45.93, y: 38}
+  m_SizeDelta: {x: 122.1, y: 38}
   m_Pivot: {x: 0, y: 0}
 --- !u!114 &2892056255105806501
 MonoBehaviour:
@@ -698,12 +698,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Padding:
-    m_Left: 0
+    m_Left: 2
     m_Right: 0
     m_Top: 2
     m_Bottom: 2
   m_ChildAlignment: 3
-  m_Spacing: 16
+  m_Spacing: 12
   m_ChildForceExpandWidth: 0
   m_ChildForceExpandHeight: 1
   m_ChildControlWidth: 0
@@ -906,7 +906,6 @@ GameObject:
   - component: {fileID: 4603229045924843475}
   - component: {fileID: 7061163220679428443}
   - component: {fileID: 3686269489964235905}
-  - component: {fileID: 9212644601157265122}
   m_Layer: 5
   m_Name: Friends Button
   m_TagString: Untagged
@@ -1008,7 +1007,7 @@ MonoBehaviour:
   m_Transition: 1
   m_Colors:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
-    m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_HighlightedColor: {r: 0.9245283, g: 0.9245283, b: 0.9245283, a: 1}
     m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
     m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
     m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
@@ -1032,21 +1031,6 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.UI.Button+ButtonClickedEvent, UnityEngine.UI, Version=1.0.0.0,
       Culture=neutral, PublicKeyToken=null
---- !u!114 &9212644601157265122
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7772005873924984123}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d30b4ce08e6854094b8461fdea1282aa, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  targetRectTransform: {fileID: 7876693640766577542}
-  hoverScale: 1.03
-  normalScale: 1
 --- !u!1 &7984381791258128339
 GameObject:
   m_ObjectHideFlags: 0
@@ -1096,7 +1080,6 @@ GameObject:
   - component: {fileID: 8561792805223980205}
   - component: {fileID: 1413073526740766789}
   - component: {fileID: 5681366293077149653}
-  - component: {fileID: 4765218403611597198}
   m_Layer: 5
   m_Name: Chat Button
   m_TagString: Untagged
@@ -1123,7 +1106,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 39, y: 34}
+  m_SizeDelta: {x: 37.1, y: 32.34}
   m_Pivot: {x: 0, y: 0}
 --- !u!222 &2744175068965865580
 CanvasRenderer:
@@ -1198,7 +1181,7 @@ MonoBehaviour:
   m_Transition: 1
   m_Colors:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
-    m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_HighlightedColor: {r: 0.9245283, g: 0.9245283, b: 0.9245283, a: 1}
     m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
     m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
     m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
@@ -1233,21 +1216,6 @@ MonoBehaviour:
         m_CallState: 2
     m_TypeName: UnityEngine.UI.Button+ButtonClickedEvent, UnityEngine.UI, Version=1.0.0.0,
       Culture=neutral, PublicKeyToken=null
---- !u!114 &4765218403611597198
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8012558485580923328}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d30b4ce08e6854094b8461fdea1282aa, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  targetRectTransform: {fileID: 4478478436062547217}
-  hoverScale: 1.03
-  normalScale: 1
 --- !u!114 &6055033003011169187
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1296,8 +1264,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 1, y: -24}
-  m_SizeDelta: {x: 28, y: 2}
+  m_AnchoredPosition: {x: 0.79999924, y: -23.2}
+  m_SizeDelta: {x: 28, y: 3}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8123018129819034708
 CanvasRenderer:
@@ -1648,15 +1616,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 2fc88af23bad36741becd2e487a423f4, type: 3}
---- !u!1 &7664016677116977207 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 6031753764605853471, guid: 2fc88af23bad36741becd2e487a423f4,
-    type: 3}
-  m_PrefabInstance: {fileID: 4172891374910103336}
-  m_PrefabAsset: {fileID: 0}
 --- !u!224 &4867363645875770480 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 8819543312367979352, guid: 2fc88af23bad36741becd2e487a423f4,
+    type: 3}
+  m_PrefabInstance: {fileID: 4172891374910103336}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &7664016677116977207 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6031753764605853471, guid: 2fc88af23bad36741becd2e487a423f4,
     type: 3}
   m_PrefabInstance: {fileID: 4172891374910103336}
   m_PrefabAsset: {fileID: 0}
@@ -1826,7 +1794,7 @@ PrefabInstance:
     - target: {fileID: 4206135554152958384, guid: 2fc88af23bad36741becd2e487a423f4,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 8
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4206135554152958384, guid: 2fc88af23bad36741becd2e487a423f4,
         type: 3}
