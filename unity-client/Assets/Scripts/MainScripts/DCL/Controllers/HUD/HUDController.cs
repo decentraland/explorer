@@ -199,7 +199,7 @@ public class HUDController : MonoBehaviour
 
     private void PrivateChatWindowHud_OnPressBack()
     {
-        friendsHud.SetVisibility(true);
+        taskbarHud?.OpenFriendsWindow();
     }
 
     public void CreateHudElement<T>(HUDConfiguration config, HUDElementID id)
