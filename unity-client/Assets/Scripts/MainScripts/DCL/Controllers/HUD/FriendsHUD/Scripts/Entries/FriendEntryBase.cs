@@ -43,13 +43,13 @@ public class FriendEntryBase : MonoBehaviour, IPointerEnterHandler, IPointerExit
         menuButton.onClick.AddListener(() => OnMenuToggle?.Invoke(this));
     }
 
-    public virtual void OnPointerEnter(PointerEventData eventData)
+    public void OnPointerEnter(PointerEventData eventData)
     {
         backgroundImage.sprite = hoveredBackgroundSprite;
         menuButton.gameObject.SetActive(true);
     }
 
-    public virtual void OnPointerExit(PointerEventData eventData)
+    public void OnPointerExit(PointerEventData eventData)
     {
         backgroundImage.sprite = unhoveredBackgroundSprite;
         menuButton.gameObject.SetActive(false);
