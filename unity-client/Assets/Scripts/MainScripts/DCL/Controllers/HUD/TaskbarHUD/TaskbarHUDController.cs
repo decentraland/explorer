@@ -6,7 +6,7 @@ public class TaskbarHUDController : IHUD
 {
     public const bool WINDOW_STACKING_ENABLED = false;
 
-    internal TaskbarHUDView view;
+    public TaskbarHUDView view;
     public WorldChatWindowHUDController worldChatWindowHud;
     public PrivateChatWindowHUDController privateChatWindowHud;
     public FriendsHUDController friendsHud;
@@ -115,6 +115,11 @@ public class TaskbarHUDController : IHUD
         view.OnAddChatWindow();
         worldChatWindowHud.view.DeactivatePreview();
         worldChatWindowHud.view.OnClose += () => { view.friendsButton.SetToggleState(false, false); };
+    }
+
+    public void OpenFriendsWindow()
+    {
+        view.friendsButton.SetToggleState(true);
     }
 
     public void OpenPrivateChatTo(string userId)

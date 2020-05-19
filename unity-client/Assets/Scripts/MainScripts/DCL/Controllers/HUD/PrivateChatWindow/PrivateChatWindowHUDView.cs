@@ -1,3 +1,4 @@
+
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -14,7 +15,6 @@ public class PrivateChatWindowHUDView : MonoBehaviour
     public Image profilePictureImage;
 
     public event System.Action OnPressBack;
-
     public event System.Action OnClose;
 
 
@@ -34,7 +34,7 @@ public class PrivateChatWindowHUDView : MonoBehaviour
     {
         this.controller = controller;
         this.closeButton.onClick.AddListener(OnCloseButtonPressed);
-        this.backButton.onClick.AddListener(() => { Toggle(); OnPressBack?.Invoke(); });
+        this.backButton.onClick.AddListener(() => { OnPressBack?.Invoke(); });
     }
 
     public void OnCloseButtonPressed()
