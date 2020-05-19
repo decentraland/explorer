@@ -54,6 +54,23 @@ public class FriendsHUDController : IHUD
             this.ownUserProfile = ownUserProfile;
             ownUserProfile.OnUpdate += OnUserProfileUpdate;
         }
+
+        if (friendsController.isInitialized)
+        {
+            view.HideSpinner();
+        }
+        else
+        {
+            view.ShowSpinner();
+            friendsController.OnInitialized -= FriendsController_OnInitialized;
+            friendsController.OnInitialized += FriendsController_OnInitialized;
+        }
+    }
+
+    private void FriendsController_OnInitialized()
+    {
+        friendsController.OnInitialized -= FriendsController_OnInitialized;
+        view.HideSpinner();
     }
 
     private void OnUserProfileUpdate(UserProfile profile)
@@ -283,6 +300,7 @@ public class FriendsHUDController : IHUD
     {
         if (this.friendsController != null)
         {
+            this.friendsController.OnInitialized -= FriendsController_OnInitialized;
             this.friendsController.OnUpdateFriendship -= OnUpdateFriendship;
             this.friendsController.OnUpdateUserStatus -= OnUpdateUserStatus;
         }
@@ -305,7 +323,9 @@ public class FriendsHUDController : IHUD
         if (visible)
         {
             UpdateNotificationsCounter();
-            view.friendsButton.onClick.Invoke();
+
+            if (view.friendsButton.interactable)
+                view.friendsButton.onClick.Invoke();
         }
     }
 }

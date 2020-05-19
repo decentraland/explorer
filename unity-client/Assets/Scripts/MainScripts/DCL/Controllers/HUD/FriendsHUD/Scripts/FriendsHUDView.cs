@@ -14,7 +14,7 @@ public class FriendsHUDView : MonoBehaviour
     public Button friendRequestsButton;
     public FriendsTabView friendsList;
     public FriendRequestsTabView friendRequestsList;
-
+    public GameObject spinner;
     internal Coroutine currentNotificationRoutine = null;
     internal GameObject currentNotification = null;
     public float notificationsDuration = 3f;
@@ -36,6 +36,30 @@ public class FriendsHUDView : MonoBehaviour
         result.AddRange(friendsList.GetAllEntries());
         result.AddRange(friendRequestsList.GetAllEntries());
         return result;
+    }
+
+    public void ShowSpinner()
+    {
+        spinner.gameObject.SetActive(true);
+
+        friendsList.gameObject.SetActive(false);
+        friendRequestsList.gameObject.SetActive(false);
+
+        friendsButton.interactable = false;
+        friendRequestsButton.interactable = false;
+    }
+
+    public void HideSpinner()
+    {
+        spinner.gameObject.SetActive(false);
+
+        friendsList.gameObject.SetActive(true);
+        friendRequestsList.gameObject.SetActive(false);
+
+        friendsButton.interactable = true;
+        friendsButton.onClick.Invoke();
+
+        friendRequestsButton.interactable = true;
     }
 
     private void Initialize(FriendsHUDController controller)
@@ -62,7 +86,8 @@ public class FriendsHUDView : MonoBehaviour
             friendRequestsList.gameObject.SetActive(true);
         });
 
-        friendsButton.onClick.Invoke();
+        if (friendsButton.interactable)
+            friendsButton.onClick.Invoke();
     }
 
     public void OnCloseButtonPressed()
