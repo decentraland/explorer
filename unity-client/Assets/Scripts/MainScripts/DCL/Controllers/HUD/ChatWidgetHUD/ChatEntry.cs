@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 
-public class ChatEntry : MonoBehaviour, IPointerClickHandler
+public class ChatEntry : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
 {
     public struct Model
     {
@@ -27,8 +27,8 @@ public class ChatEntry : MonoBehaviour, IPointerClickHandler
         public SubType subType;
     }
 
-    [SerializeField] internal float timeToFade = 10;
-    [SerializeField] internal float fadeDuration = 5;
+    [SerializeField] internal float timeToFade = 10f;
+    [SerializeField] internal float fadeDuration = 5f;
 
     [SerializeField] internal TextMeshProUGUI username;
     [SerializeField] internal TextMeshProUGUI body;
@@ -37,9 +37,13 @@ public class ChatEntry : MonoBehaviour, IPointerClickHandler
     [SerializeField] internal Color privateMessageColor = Color.white;
     [SerializeField] internal Color systemColor = Color.white;
     [SerializeField] CanvasGroup group;
+    [SerializeField] internal float timeToHoverPanel = 1f;
+    [SerializeField] GameObject hoverPanel;
+    [SerializeField] TextMeshProUGUI hoverText;
 
     bool fadeEnabled = false;
     double fadeoutStartTime;
+    float hoverPanelTimer = 0;
 
     public Model model { get; private set; }
 
@@ -95,6 +99,8 @@ public class ChatEntry : MonoBehaviour, IPointerClickHandler
             body.text = $"{chatEntryModel.bodyText}";
         }
 
+        hoverText.text = UnixTimeStampToLocalDateTime(chatEntryModel.timestamp).ToString();
+
         Utils.ForceUpdateLayout(transform as RectTransform);
 
         if (fadeEnabled)
@@ -106,6 +112,23 @@ public class ChatEntry : MonoBehaviour, IPointerClickHandler
         if (model.messageType != ChatMessage.Type.PRIVATE) return;
 
         OnPress?.Invoke(model.otherUserId);
+    }
+
+    public void OnPointerEnter(PointerEventData pointerEventData)
+    {
+        hoverPanelTimer = timeToHoverPanel;
+    }
+
+    public void OnPointerExit(PointerEventData pointerEventData)
+    {
+        hoverPanelTimer = 0f;
+        hoverPanel.transform.position = Input.mousePosition;
+        hoverPanel.SetActive(false);
+    }
+
+    void OnDisable()
+    {
+        OnPointerExit(null);
     }
 
     public void SetFadeout(bool enabled)
@@ -121,7 +144,14 @@ public class ChatEntry : MonoBehaviour, IPointerClickHandler
         fadeEnabled = true;
     }
 
-    private void Update()
+    void Update()
+    {
+        Fade();
+
+        ProcessHoverPanelTimer();
+    }
+
+    void Fade()
     {
         if (!fadeEnabled) return;
 
@@ -142,6 +172,19 @@ public class ChatEntry : MonoBehaviour, IPointerClickHandler
         }
     }
 
+    void ProcessHoverPanelTimer()
+    {
+        if (hoverPanel.activeSelf || hoverPanelTimer <= 0f) return;
+
+        hoverPanelTimer -= Time.deltaTime;
+        if (hoverPanelTimer <= 0f)
+        {
+            hoverPanelTimer = 0f;
+
+            hoverPanel.SetActive(true);
+        }
+    }
+
     string RemoveTabs(string text)
     {
         if (string.IsNullOrEmpty(text))
@@ -158,5 +201,14 @@ public class ChatEntry : MonoBehaviour, IPointerClickHandler
             return $"<b>{sender}:</b>";
 
         return "";
+    }
+
+    DateTime UnixTimeStampToLocalDateTime(ulong unixTimeStampMilliseconds)
+    {
+        // TODO see if we can simplify with 'DateTimeOffset.FromUnixTimeMilliseconds'
+        System.DateTime dtDateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
+        dtDateTime = dtDateTime.AddMilliseconds(unixTimeStampMilliseconds).ToLocalTime();
+
+        return dtDateTime;
     }
 }
