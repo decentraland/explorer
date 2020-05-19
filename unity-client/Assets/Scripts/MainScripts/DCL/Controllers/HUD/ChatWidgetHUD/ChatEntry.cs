@@ -1,10 +1,10 @@
-using DCL.Interface;
 using DCL.Helpers;
+using DCL.Interface;
 using System;
 using TMPro;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.Events;
+using UnityEngine.EventSystems;
 
 public class ChatEntry : MonoBehaviour, IPointerDownHandler
 {
@@ -37,7 +37,9 @@ public class ChatEntry : MonoBehaviour, IPointerDownHandler
     [SerializeField] internal Color privateMessageColor = Color.white;
     [SerializeField] internal Color systemColor = Color.white;
     [SerializeField] CanvasGroup group;
+
     bool fadeEnabled = false;
+    double fadeoutStartTime;
 
     public Model model { get; private set; }
 
@@ -108,6 +110,9 @@ public class ChatEntry : MonoBehaviour, IPointerDownHandler
 
     public void SetFadeout(bool enabled)
     {
+        if (enabled == fadeEnabled)
+            return;
+
         if (!enabled)
         {
             group.alpha = 1;
@@ -115,6 +120,7 @@ public class ChatEntry : MonoBehaviour, IPointerDownHandler
             return;
         }
 
+        fadeoutStartTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() / 1000.0;
         fadeEnabled = true;
     }
 
@@ -122,7 +128,10 @@ public class ChatEntry : MonoBehaviour, IPointerDownHandler
     {
         if (!fadeEnabled) return;
 
-        double fadeTime = (double)(model.timestamp / 1000.0) + timeToFade;
+        //NOTE(Brian): Small offset using normalized Y so we keep the cascade effect
+        double yOffset = (transform as RectTransform).anchoredPosition.y / (double)Screen.height * 2.0;
+
+        double fadeTime = Math.Max(model.timestamp / 1000.0, fadeoutStartTime) + timeToFade - yOffset;
         double currentTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() / 1000.0;
 
         if (currentTime > fadeTime)
