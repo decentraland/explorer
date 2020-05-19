@@ -61,6 +61,8 @@ public class FriendsHUDView : MonoBehaviour
             friendsList.gameObject.SetActive(false);
             friendRequestsList.gameObject.SetActive(true);
         });
+
+        friendsButton.onClick.Invoke();
     }
 
     public void OnCloseButtonPressed()
