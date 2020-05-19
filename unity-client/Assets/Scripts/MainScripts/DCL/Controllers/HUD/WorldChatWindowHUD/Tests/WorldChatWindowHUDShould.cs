@@ -67,8 +67,8 @@ public class WorldChatWindowHUDShould : TestsBase
 
         ChatEntry entry = controller.view.chatHudView.entries[0];
 
-        Assert.AreEqual("<b>[To TEST_USER]:</b>", entry.username.text);
-        Assert.AreEqual("<b>[To TEST_USER]:</b> test message", entry.body.text);
+        Assert.AreEqual("<b>To TEST_USER:</b>", entry.username.text);
+        Assert.AreEqual("<b>To TEST_USER:</b> test message", entry.body.text);
 
         var receivedPM = new ChatMessage()
         {
@@ -82,8 +82,8 @@ public class WorldChatWindowHUDShould : TestsBase
 
         ChatEntry entry2 = controller.view.chatHudView.entries[1];
 
-        Assert.AreEqual("<b>[From TEST_USER]:</b>", entry2.username.text);
-        Assert.AreEqual("<b>[From TEST_USER]:</b> test message", entry2.body.text);
+        Assert.AreEqual("<b>From TEST_USER:</b>", entry2.username.text);
+        Assert.AreEqual("<b>From TEST_USER:</b> test message", entry2.body.text);
     }
 
 

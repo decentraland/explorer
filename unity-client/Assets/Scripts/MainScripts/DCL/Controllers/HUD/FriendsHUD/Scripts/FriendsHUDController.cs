@@ -55,15 +55,18 @@ public class FriendsHUDController : IHUD
             ownUserProfile.OnUpdate += OnUserProfileUpdate;
         }
 
-        if (friendsController.isInitialized)
+        if (friendsController != null)
         {
-            view.HideSpinner();
-        }
-        else
-        {
-            view.ShowSpinner();
-            friendsController.OnInitialized -= FriendsController_OnInitialized;
-            friendsController.OnInitialized += FriendsController_OnInitialized;
+            if (friendsController.isInitialized)
+            {
+                view.HideSpinner();
+            }
+            else
+            {
+                view.ShowSpinner();
+                friendsController.OnInitialized -= FriendsController_OnInitialized;
+                friendsController.OnInitialized += FriendsController_OnInitialized;
+            }
         }
     }
 

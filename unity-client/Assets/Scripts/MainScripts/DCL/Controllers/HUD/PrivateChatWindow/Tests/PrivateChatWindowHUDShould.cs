@@ -159,8 +159,10 @@ public class PrivateChatWindowHUDShould : TestsBase
     {
         controller.SetVisibility(true);
         Assert.AreEqual(true, controller.view.gameObject.activeSelf);
+        bool pressedBack = false;
+        controller.view.OnPressBack += () => { pressedBack = true; };
         controller.view.backButton.onClick.Invoke();
-        Assert.AreEqual(false, controller.view.gameObject.activeSelf);
+        Assert.IsTrue(pressedBack);
     }
 
     [UnityTest]
