@@ -1,9 +1,9 @@
 
 using DCL;
-
 using DCL.Interface;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.Events;
 
 public class WorldChatWindowHUDController : IHUD
 {
@@ -18,6 +18,8 @@ public class WorldChatWindowHUDController : IHUD
     UserProfile ownProfile => UserProfile.GetOwnUserProfile();
     public string lastPrivateMessageReceivedSender = string.Empty;
 
+    public event UnityAction<string> OnPressPrivateMessage;
+
     public void Initialize(IChatController chatController, IMouseCatcher mouseCatcher)
     {
         view = WorldChatWindowHUDView.Create();
@@ -25,6 +27,8 @@ public class WorldChatWindowHUDController : IHUD
 
         chatHudController = new ChatHUDController();
         chatHudController.Initialize(view.chatHudView, SendChatMessage);
+        chatHudController.OnPressPrivateMessage -= ChatHUDController_OnPressPrivateMessage;
+        chatHudController.OnPressPrivateMessage += ChatHUDController_OnPressPrivateMessage;
 
         this.chatController = chatController;
         this.mouseCatcher = mouseCatcher;
@@ -45,10 +49,19 @@ public class WorldChatWindowHUDController : IHUD
             view.worldFilterButton.onClick.Invoke();
         }
     }
+
+    void ChatHUDController_OnPressPrivateMessage(string friendUserId)
+    {
+        OnPressPrivateMessage?.Invoke(friendUserId);
+    }
+
     public void Dispose()
     {
         if (chatController != null)
             chatController.OnAddMessage -= OnAddMessage;
+
+        if (chatHudController != null)
+            chatHudController.OnPressPrivateMessage -= ChatHUDController_OnPressPrivateMessage;
 
         if (mouseCatcher != null)
         {
