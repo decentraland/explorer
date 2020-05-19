@@ -384,29 +384,31 @@ const browserInterface = {
   },
 
   JumpIn(data: WorldPosition) {
-    const realmString = data.realm.serverName + '-' + data.realm.layer
+    const {
+      gridPosition: { x, y },
+      realm: { serverName, layer }
+    } = data
+
+    const realmString = serverName + '-' + layer
     const realm = changeRealm(realmString)
-    let response: string
+
+    notifyStatusThroughChat(`Changing to realm ${realmString}`)
+
     if (realm) {
-      response = `Changing to Realm ${realm.catalystName}-${realm.layer}...`
-      // TODO: This status should be shown in the chat window
       catalystRealmConnected().then(
         () => {
-          notifyStatusThroughChat(
-            `Changed realm successfuly. Welcome to the realm ${realm.catalystName}-${realm.layer}!`
-          )
-          TeleportController.goTo(data.gridPosition.x, data.gridPosition.y)
+          TeleportController.goTo(x, y, `Jumping to ${x},${y} in realm ${realm.catalystName}-${realm.layer}!`)
         },
         e => {
           const cause = e === 'realm-full' ? ' The requested realm is full.' : ''
           notifyStatusThroughChat('Could not join realm.' + cause)
+
           defaultLogger.error('Error joining realm', e)
         }
       )
     } else {
-      response = `Couldn't find realm ${realmString}`
+      notifyStatusThroughChat(`Couldn't find realm ${realmString}`)
     }
-    notifyStatusThroughChat(response)
   }
 }
 globalThis.browserInterface2 = browserInterface
