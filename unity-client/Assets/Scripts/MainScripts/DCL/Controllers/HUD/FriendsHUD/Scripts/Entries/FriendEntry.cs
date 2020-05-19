@@ -48,10 +48,15 @@ public class FriendEntry : FriendEntryBase
     {
         base.Populate(model);
 
-        if (model.status == PresenceStatus.ONLINE ||
-            model.status == PresenceStatus.UNAVAILABLE)
+        if (model.status == PresenceStatus.ONLINE)
+        {
             playerLocationText.text = $"{model.realm} {(int)model.coords.x}, {(int)model.coords.y}";
+            jumpInButton.gameObject.SetActive(true);
+        }
         else
-            playerLocationText.text = $"";
+        {
+            jumpInButton.gameObject.SetActive(false);
+            playerLocationText.text = string.Empty;
+        }
     }
 }
