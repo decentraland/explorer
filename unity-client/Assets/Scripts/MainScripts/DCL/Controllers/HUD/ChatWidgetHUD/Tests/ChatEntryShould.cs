@@ -43,7 +43,7 @@ public class ChatEntryShould : TestsBase
 
         message.messageType = ChatMessage.Type.PRIVATE;
         entry.Populate(message);
-        Assert.AreEqual(entry.privateMessageColor, entry.body.color);
+        Assert.AreEqual(entry.privateMessageColor, entry.username.color);
 
         message.messageType = ChatMessage.Type.SYSTEM;
         entry.Populate(message);
