@@ -1,4 +1,4 @@
-using DCL.Helpers;
+﻿using DCL.Helpers;
 using DCL.Interface;
 using System;
 using TMPro;
@@ -53,12 +53,12 @@ public class ChatEntry : MonoBehaviour, IPointerDownHandler
 
         if (chatEntryModel.subType == Model.SubType.PRIVATE_FROM)
         {
-            userString = $"<b>[From {chatEntryModel.senderName}]:</b>";
+            userString = $"<b>From {chatEntryModel.senderName}:</b>";
         }
         else
         if (chatEntryModel.subType == Model.SubType.PRIVATE_TO)
         {
-            userString = $"<b>[To {chatEntryModel.recipientName}]:</b>";
+            userString = $"<b>To {chatEntryModel.recipientName}:</b>";
         }
 
         switch (chatEntryModel.messageType)
