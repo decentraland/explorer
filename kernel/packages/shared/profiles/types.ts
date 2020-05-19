@@ -1,6 +1,6 @@
 import { ReadOnlyColor4 } from 'decentraland-ecs/src'
 import { AuthLink } from 'dcl-crypto'
-import { RarityEnum } from '../airdrops/interface';
+import { RarityEnum } from '../airdrops/interface'
 
 export type Catalog = Wearable[]
 
