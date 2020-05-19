@@ -22,6 +22,9 @@ public class UnreadNotificationBadgeShould : TestsBase
         unreadNotificationBadge = go.GetComponent<UnreadNotificationBadge>();
         unreadNotificationBadge.Initialize(chatController, TEST_USER_ID);
 
+        CommonScriptableObjects.lastReadChatMessages.Remove(TEST_USER_ID);
+        CommonScriptableObjects.lastReadChatMessages.Remove(INVALID_TEST_USER_ID);
+
         Assert.AreEqual(0, unreadNotificationBadge.currentUnreadMessages, "There shouldn't be any unread notification after initialization");
         Assert.AreEqual(false, unreadNotificationBadge.notificationContainer.activeSelf, "Notificaton container should be deactivated");
 
@@ -31,6 +34,8 @@ public class UnreadNotificationBadgeShould : TestsBase
     protected override IEnumerator TearDown()
     {
         Object.Destroy(unreadNotificationBadge.gameObject);
+        CommonScriptableObjects.lastReadChatMessages.Remove(TEST_USER_ID);
+        CommonScriptableObjects.lastReadChatMessages.Remove(INVALID_TEST_USER_ID);
         yield break;
     }
 
@@ -90,7 +95,7 @@ public class UnreadNotificationBadgeShould : TestsBase
     }
 
     [Test]
-    public void NotReceiveUnreadNotificationsBecauseOfDifferentUserId()
+    public void NotReceiveUnreadNotificationsBecauseOfDifferentUser()
     {
         chatController.RaiseAddMessage(new ChatMessage
         {
@@ -103,5 +108,30 @@ public class UnreadNotificationBadgeShould : TestsBase
 
         Assert.AreEqual(0, unreadNotificationBadge.currentUnreadMessages, "There shouldn't be any unread notification");
         Assert.AreEqual(false, unreadNotificationBadge.notificationContainer.activeSelf, "Notificaton container should be deactivated");
+    }
+
+    [Test]
+    public void CleanAllUnreadNotifications()
+    {
+        ReadLastMessages(TEST_USER_ID);
+
+        Assert.AreEqual(0, unreadNotificationBadge.currentUnreadMessages, "There shouldn't be any unread notification");
+        Assert.AreEqual(false, unreadNotificationBadge.notificationContainer.activeSelf, "Notificaton container should be deactivated");
+    }
+
+    [Test]
+    public void NotCleanUnreadNotificationsBecauseOfFifferentUser()
+    {
+        ReceiveOneUnreadNotification();
+        ReadLastMessages(INVALID_TEST_USER_ID);
+
+        Assert.AreEqual(1, unreadNotificationBadge.currentUnreadMessages, "There should be 1 unread notification");
+        Assert.AreEqual(true, unreadNotificationBadge.notificationContainer.activeSelf, "Notificaton container should be activated");
+        Assert.AreEqual("1", unreadNotificationBadge.notificationText.text, "Notification text should be 1");
+    }
+
+    private static void ReadLastMessages(string userId)
+    {
+        CommonScriptableObjects.lastReadChatMessages.Add(userId, System.DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
     }
 }
