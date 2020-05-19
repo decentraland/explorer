@@ -71,9 +71,6 @@ public class ChatHUDView : MonoBehaviour
 
     public void SetFadeoutMode(bool enabled)
     {
-        if (enableFadeoutMode == enabled)
-            return;
-
         enableFadeoutMode = enabled;
 
         for (int i = 0; i < entries.Count; i++)

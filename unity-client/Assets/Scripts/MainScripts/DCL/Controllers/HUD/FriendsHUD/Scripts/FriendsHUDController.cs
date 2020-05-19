@@ -305,6 +305,7 @@ public class FriendsHUDController : IHUD
         if (visible)
         {
             UpdateNotificationsCounter();
+            view.friendsButton.onClick.Invoke();
         }
     }
 }

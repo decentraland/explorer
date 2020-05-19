@@ -101,6 +101,11 @@ public class ChatHeadGroupView : MonoBehaviour
         chatHeads.Add(chatHead);
         chatHeads = chatHeads.OrderBy((x) => x.lastTimestamp).ToList();
 
+        for (int i = 0; i < chatHeads.Count; i++)
+        {
+            chatHeads[i].transform.SetSiblingIndex(i);
+        }
+
         if (chatHeads.Count > MAX_GROUP_SIZE)
         {
             var lastChatHead = chatHeads[chatHeads.Count - 1];

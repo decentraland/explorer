@@ -1,4 +1,3 @@
-using DCL;
 using DCL.Interface;
 using Newtonsoft.Json;
 using System.Collections.Generic;
@@ -80,7 +79,6 @@ public class PrivateChatWindowHUDController : IHUD
 
         if (!validString)
         {
-            InitialSceneReferences.i.mouseCatcher.LockCursor();
             return;
         }
 
