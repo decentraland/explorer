@@ -70,10 +70,10 @@ public class ChatEntry : MonoBehaviour, IPointerDownHandler
                     username.color = worldMessageColor;
                 break;
             case ChatMessage.Type.PRIVATE:
-                body.color = privateMessageColor;
+                body.color = worldMessageColor;
 
                 if (username != null)
-                    username.color = worldMessageColor;
+                    username.color = privateMessageColor;
                 break;
             case ChatMessage.Type.SYSTEM:
                 body.color = systemColor;
