@@ -37,7 +37,7 @@ public class ChatEntry : MonoBehaviour, IPointerDownHandler
     [SerializeField] internal Color privateMessageColor = Color.white;
     [SerializeField] internal Color systemColor = Color.white;
     [SerializeField] CanvasGroup group;
-    bool processFading = false;
+    bool fadeEnabled = false;
 
     public Model model { get; private set; }
 
@@ -95,7 +95,7 @@ public class ChatEntry : MonoBehaviour, IPointerDownHandler
 
         Utils.ForceUpdateLayout(transform as RectTransform);
 
-        if (processFading)
+        if (fadeEnabled)
             group.alpha = 0;
     }
 
@@ -111,16 +111,16 @@ public class ChatEntry : MonoBehaviour, IPointerDownHandler
         if (!enabled)
         {
             group.alpha = 1;
-            processFading = false;
+            fadeEnabled = false;
             return;
         }
 
-        processFading = true;
+        fadeEnabled = true;
     }
 
     private void Update()
     {
-        if (!processFading) return;
+        if (!fadeEnabled) return;
 
         double fadeTime = (double)(model.timestamp / 1000.0) + timeToFade;
         double currentTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() / 1000.0;
