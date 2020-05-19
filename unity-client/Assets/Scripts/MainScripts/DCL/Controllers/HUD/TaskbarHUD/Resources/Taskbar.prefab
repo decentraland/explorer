@@ -496,7 +496,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -25.8}
+  m_AnchoredPosition: {x: 0, y: -25.5}
   m_SizeDelta: {x: 28, y: 3}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3113392085745859704
@@ -1482,11 +1482,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 4478478436062547217}
     m_Modifications:
-    - target: {fileID: 8022463139147755279, guid: ffadaebc1af107142a4c7fd23524095c,
-        type: 3}
-      propertyPath: m_Name
-      value: UnreadWorldNotificationBadge
-      objectReference: {fileID: 0}
     - target: {fileID: 4429308612254855752, guid: ffadaebc1af107142a4c7fd23524095c,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -1591,6 +1586,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Pivot.y
       value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8022463139147755279, guid: ffadaebc1af107142a4c7fd23524095c,
+        type: 3}
+      propertyPath: m_Name
+      value: UnreadWorldNotificationBadge
       objectReference: {fileID: 0}
     - target: {fileID: 5156119195053263761, guid: ffadaebc1af107142a4c7fd23524095c,
         type: 3}
