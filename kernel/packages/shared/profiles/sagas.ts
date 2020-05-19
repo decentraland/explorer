@@ -138,6 +138,16 @@ function overrideBaseUrl(wearable: Wearable) {
   }
 }
 
+function overrideSwankyRarity(wearable: Wearable) {
+  if (wearable.rarity as any === 'swanky') {
+    return {
+      ...wearable,
+      rarity: 'rare'
+    }
+  }
+  return wearable
+}
+
 export function* initialLoad() {
   if (WORLD_EXPLORER) {
     try {
@@ -150,6 +160,7 @@ export function* initialLoad() {
       const catalog = collections
         .reduce((flatten, collection) => flatten.concat(collection.wearables), [] as Wearable[])
         .map(overrideBaseUrl)
+        .map(overrideSwankyRarity)
       const baseAvatars = catalog.filter((_: Wearable) => _.tags && !_.tags.includes('exclusive'))
       const baseExclusive = catalog.filter((_: Wearable) => _.tags && _.tags.includes('exclusive'))
       if (!(yield select(isInitialized))) {
