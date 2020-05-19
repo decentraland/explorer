@@ -38,16 +38,17 @@ public class ChatEntry : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
     [SerializeField] internal Color systemColor = Color.white;
     [SerializeField] CanvasGroup group;
     [SerializeField] internal float timeToHoverPanel = 1f;
-    [SerializeField] GameObject hoverPanel;
-    [SerializeField] TextMeshProUGUI hoverText;
 
     bool fadeEnabled = false;
     double fadeoutStartTime;
     float hoverPanelTimer = 0;
+    string messageLocalDateTime;
 
     public Model model { get; private set; }
 
     public event UnityAction<string> OnPress;
+    public event UnityAction<string> OnTriggerHover;
+    public event UnityAction OnCancelHover;
 
     public void Populate(Model chatEntryModel)
     {
@@ -99,7 +100,7 @@ public class ChatEntry : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
             body.text = $"{chatEntryModel.bodyText}";
         }
 
-        hoverText.text = UnixTimeStampToLocalDateTime(chatEntryModel.timestamp).ToString();
+        messageLocalDateTime = UnixTimeStampToLocalDateTime(chatEntryModel.timestamp).ToString();
 
         Utils.ForceUpdateLayout(transform as RectTransform);
 
@@ -122,8 +123,8 @@ public class ChatEntry : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
     public void OnPointerExit(PointerEventData pointerEventData)
     {
         hoverPanelTimer = 0f;
-        hoverPanel.transform.position = Input.mousePosition;
-        hoverPanel.SetActive(false);
+
+        OnCancelHover?.Invoke();
     }
 
     void OnDisable()
@@ -174,14 +175,15 @@ public class ChatEntry : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
 
     void ProcessHoverPanelTimer()
     {
-        if (hoverPanel.activeSelf || hoverPanelTimer <= 0f) return;
+        if (hoverPanelTimer <= 0f) return;
 
         hoverPanelTimer -= Time.deltaTime;
         if (hoverPanelTimer <= 0f)
         {
             hoverPanelTimer = 0f;
 
-            hoverPanel.SetActive(true);
+            // hoverPanel.SetActive(true);
+            OnTriggerHover?.Invoke(messageLocalDateTime);
         }
     }
 

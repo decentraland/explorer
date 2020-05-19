@@ -794,6 +794,8 @@ MonoBehaviour:
   inputField: {fileID: 3076944175797663715}
   chatEntriesContainer: {fileID: 6452473416983833199}
   scrollRect: {fileID: 5302075511252737345}
+  messageHoverPanel: {fileID: 2344953874994563285}
+  messageHoverText: {fileID: 2094873311772713126}
 --- !u!1 &5971340815546429105
 GameObject:
   m_ObjectHideFlags: 0
@@ -1812,5 +1814,23 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2da0c512f12947e489f739169773d7ca, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!1 &2344953874994563285 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7667865579842765469, guid: 486cb7198dd7515498189de8c605a1a3,
+    type: 3}
+  m_PrefabInstance: {fileID: 5396236211427936840}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2094873311772713126 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6336903410787003118, guid: 486cb7198dd7515498189de8c605a1a3,
+    type: 3}
+  m_PrefabInstance: {fileID: 5396236211427936840}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 

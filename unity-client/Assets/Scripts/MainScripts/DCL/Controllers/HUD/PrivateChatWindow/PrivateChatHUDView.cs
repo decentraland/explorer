@@ -14,6 +14,9 @@ public class PrivateChatHUDView : ChatHUDView
         chatEntry.SetFadeout(false);
         chatEntry.Populate(chatEntryModel);
 
+        chatEntry.OnTriggerHover += OnMessageTriggerHover;
+        chatEntry.OnCancelHover += OnMessageCancelHover;
+
         entries.Add(chatEntry);
         Utils.ForceUpdateLayout(transform as RectTransform);
     }

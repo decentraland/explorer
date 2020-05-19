@@ -17,6 +17,8 @@ public class ChatHUDView : MonoBehaviour
 
     public ScrollRect scrollRect;
     public ChatHUDController controller;
+    public GameObject messageHoverPanel;
+    public TextMeshProUGUI messageHoverText;
     [NonSerialized] public List<ChatEntry> entries = new List<ChatEntry>();
 
     public event UnityAction<string> OnPressPrivateMessage;
@@ -103,11 +105,27 @@ public class ChatHUDView : MonoBehaviour
         if (chatEntryModel.messageType == ChatMessage.Type.PRIVATE)
             chatEntry.OnPress += OnPressPrivateMessage;
 
+        chatEntry.OnTriggerHover += OnMessageTriggerHover;
+        chatEntry.OnCancelHover += OnMessageCancelHover;
+
         entries.Add(chatEntry);
 
         SortEntries();
 
         Utils.ForceUpdateLayout(transform as RectTransform, delayed: false);
+    }
+
+    protected void OnMessageTriggerHover(string messageDateTime)
+    {
+        messageHoverText.text = messageDateTime;
+        messageHoverPanel.transform.position = Input.mousePosition;
+        messageHoverPanel.SetActive(true);
+    }
+
+    protected void OnMessageCancelHover()
+    {
+        messageHoverPanel.SetActive(false);
+        messageHoverText.text = string.Empty;
     }
 
     public void SortEntries()
@@ -120,7 +138,6 @@ public class ChatHUDView : MonoBehaviour
             entries[i].transform.SetSiblingIndex(i);
         }
     }
-
 
     public void CleanAllEntries()
     {
