@@ -1,4 +1,4 @@
-﻿using DCL.Helpers;
+using DCL.Helpers;
 using DCL.Interface;
 using System;
 using TMPro;
@@ -110,9 +110,6 @@ public class ChatEntry : MonoBehaviour, IPointerClickHandler
 
     public void SetFadeout(bool enabled)
     {
-        if (enabled == fadeEnabled)
-            return;
-
         if (!enabled)
         {
             group.alpha = 1;
