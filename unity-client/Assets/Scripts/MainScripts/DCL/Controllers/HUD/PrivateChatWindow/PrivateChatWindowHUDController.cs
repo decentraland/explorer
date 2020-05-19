@@ -117,6 +117,8 @@ public class PrivateChatWindowHUDController : IHUD
     {
         view.chatHudView.inputField.onSelect.RemoveListener(ChatHUDViewInputField_OnSelect);
 
+        view.OnPressBack -= View_OnPressBack;
+
         if (chatController != null)
             chatController.OnAddMessage -= OnAddMessage;
 

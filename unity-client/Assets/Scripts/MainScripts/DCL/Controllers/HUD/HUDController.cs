@@ -262,6 +262,15 @@ public class HUDController : MonoBehaviour
             avatarHud.OnSettingsPressed -= ShowSettings;
         }
 
+        if (worldChatWindowHud != null)
+            worldChatWindowHud.OnPressPrivateMessage -= OpenPrivateChatWindow;
+
+        if (privateChatWindowHud != null)
+            privateChatWindowHud.OnPressBack -= PrivateChatWindowHud_OnPressBack;
+
+        if (friendsHud != null)
+            friendsHud.OnPressWhisper -= OpenPrivateChatWindow;
+
         foreach (var kvp in hudElements)
         {
             kvp.Value?.Dispose();

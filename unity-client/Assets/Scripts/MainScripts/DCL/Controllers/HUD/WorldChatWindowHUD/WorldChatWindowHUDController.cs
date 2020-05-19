@@ -60,6 +60,9 @@ public class WorldChatWindowHUDController : IHUD
         if (chatController != null)
             chatController.OnAddMessage -= OnAddMessage;
 
+        if (chatHudController != null)
+            chatHudController.OnPressPrivateMessage -= ChatHUDController_OnPressPrivateMessage;
+
         if (mouseCatcher != null)
         {
             mouseCatcher.OnMouseLock -= view.ActivatePreview;

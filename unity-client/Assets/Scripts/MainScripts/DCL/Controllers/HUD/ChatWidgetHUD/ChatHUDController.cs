@@ -39,6 +39,7 @@ public class ChatHUDController : IDisposable
 
     public void Dispose()
     {
+        view.OnPressPrivateMessage -= View_OnPressPrivateMessage;
         UnityEngine.Object.Destroy(this.view.gameObject);
     }
 
