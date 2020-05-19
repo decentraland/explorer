@@ -31,10 +31,10 @@ public class PlayerInfoCardHUDController : IHUD
         FriendsController.i.UpdateFriendshipStatus(new FriendsController.FriendshipUpdateStatusMessage()
         {
             userId = currentPlayerId,
-            action = FriendsController.FriendshipAction.REQUESTED_TO
+            action = FriendshipAction.REQUESTED_TO
         });
 
-        WebInterface.UpdateFriendshipStatus(new FriendsController.FriendshipUpdateStatusMessage() { userId = currentPlayerId, action = FriendsController.FriendshipAction.REQUESTED_TO });
+        WebInterface.UpdateFriendshipStatus(new FriendsController.FriendshipUpdateStatusMessage() { userId = currentPlayerId, action = FriendshipAction.REQUESTED_TO });
     }
     private void CancelInvitation()
     {
@@ -42,10 +42,10 @@ public class PlayerInfoCardHUDController : IHUD
         FriendsController.i.UpdateFriendshipStatus(new FriendsController.FriendshipUpdateStatusMessage()
         {
             userId = currentPlayerId,
-            action = FriendsController.FriendshipAction.CANCELLED
+            action = FriendshipAction.CANCELLED
         });
 
-        WebInterface.UpdateFriendshipStatus(new FriendsController.FriendshipUpdateStatusMessage() { userId = currentPlayerId, action = FriendsController.FriendshipAction.CANCELLED });
+        WebInterface.UpdateFriendshipStatus(new FriendsController.FriendshipUpdateStatusMessage() { userId = currentPlayerId, action = FriendshipAction.CANCELLED });
     }
 
     internal void OnCurrentPlayerIdChanged(string current, string previous)
@@ -79,7 +79,9 @@ public class PlayerInfoCardHUDController : IHUD
 
     private void BlockPlayer()
     {
-        if (ownUserProfile.blocked.Contains(currentUserProfile.userId)) return;
+        if (ownUserProfile.blocked.Contains(currentUserProfile.userId))
+            return;
+
         ownUserProfile.blocked.Add(currentUserProfile.userId);
         view.SetIsBlocked(true);
         WebInterface.SendBlockPlayer(currentUserProfile.userId);
@@ -87,7 +89,9 @@ public class PlayerInfoCardHUDController : IHUD
 
     private void UnblockPlayer()
     {
-        if (!ownUserProfile.blocked.Contains(currentUserProfile.userId)) return;
+        if (!ownUserProfile.blocked.Contains(currentUserProfile.userId))
+            return;
+
         ownUserProfile.blocked.Remove(currentUserProfile.userId);
         view.SetIsBlocked(false);
         WebInterface.SendUnblockPlayer(currentUserProfile.userId);

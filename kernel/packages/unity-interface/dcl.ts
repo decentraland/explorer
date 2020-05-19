@@ -79,7 +79,8 @@ import {
   FriendsInitializationMessage,
   FriendshipUpdateStatusMessage,
   UpdateUserStatusMessage,
-  FriendshipAction
+  FriendshipAction,
+  WorldPosition
 } from 'shared/types'
 import { ParcelSceneAPI } from 'shared/world/ParcelSceneAPI'
 import {
@@ -97,7 +98,9 @@ import { profileToRendererFormat } from 'shared/profiles/transformations/profile
 import { StoreContainer } from 'shared/store/rootTypes'
 import { ILandToLoadableParcelScene, ILandToLoadableParcelSceneUpdate } from 'shared/selectors'
 import { sendMessage, updateUserData, updateFriendship } from 'shared/chat/actions'
-import { ProfileAsPromise } from '../shared/profiles/ProfileAsPromise'
+import { ProfileAsPromise } from 'shared/profiles/ProfileAsPromise'
+import { changeRealm, catalystRealmConnected } from '../shared/dao/index'
+import { notifyStatusThroughChat } from 'shared/comms/chat'
 
 declare const globalThis: UnityInterfaceContainer &
   BrowserInterfaceContainer &
@@ -378,6 +381,32 @@ const browserInterface = {
 
     globalThis.globalStore.dispatch(updateUserData(userId.toLowerCase(), toSocialId(userId)))
     globalThis.globalStore.dispatch(updateFriendship(action, userId.toLowerCase(), false))
+  },
+
+  JumpIn(data: WorldPosition) {
+    const realmString = data.realm.serverName + '-' + data.realm.layer
+    const realm = changeRealm(realmString)
+    let response: string
+    if (realm) {
+      response = `Changing to Realm ${realm.catalystName}-${realm.layer}...`
+      // TODO: This status should be shown in the chat window
+      catalystRealmConnected().then(
+        () => {
+          notifyStatusThroughChat(
+            `Changed realm successfuly. Welcome to the realm ${realm.catalystName}-${realm.layer}!`
+          )
+          TeleportController.goTo(data.gridPosition.x, data.gridPosition.y)
+        },
+        e => {
+          const cause = e === 'realm-full' ? ' The requested realm is full.' : ''
+          notifyStatusThroughChat('Could not join realm.' + cause)
+          defaultLogger.error('Error joining realm', e)
+        }
+      )
+    } else {
+      response = `Couldn't find realm ${realmString}`
+    }
+    notifyStatusThroughChat(response)
   }
 }
 globalThis.browserInterface2 = browserInterface

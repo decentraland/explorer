@@ -118,7 +118,7 @@ public class PlayerInfoCardHUDView : MonoBehaviour
         FriendsController.i.OnUpdateFriendship += OnFriendStatusUpdated;
     }
 
-    private void OnFriendStatusUpdated(string userId, FriendsController.FriendshipAction action)
+    private void OnFriendStatusUpdated(string userId, FriendshipAction action)
     {
         if (currentUserProfile == null)
             return;
@@ -196,26 +196,22 @@ public class PlayerInfoCardHUDView : MonoBehaviour
 
         var status = FriendsController.i.GetUserStatus(currentUserProfile.userId);
 
+        addFriendButton.gameObject.SetActive(false);
+        alreadyFriendsContainer.gameObject.SetActive(false);
+        requestSentButton.gameObject.SetActive(false);
+
         switch (status.friendshipStatus)
         {
-            case FriendsController.FriendshipStatus.NONE:
+            case FriendshipStatus.NONE:
                 addFriendButton.gameObject.SetActive(true);
-                alreadyFriendsContainer.gameObject.SetActive(false);
-                requestSentButton.gameObject.SetActive(false);
                 break;
-            case FriendsController.FriendshipStatus.FRIEND:
-                addFriendButton.gameObject.SetActive(false);
+            case FriendshipStatus.FRIEND:
                 alreadyFriendsContainer.gameObject.SetActive(true);
-                requestSentButton.gameObject.SetActive(false);
                 break;
-            case FriendsController.FriendshipStatus.REQUESTED_FROM:
+            case FriendshipStatus.REQUESTED_FROM:
                 addFriendButton.gameObject.SetActive(true);
-                alreadyFriendsContainer.gameObject.SetActive(false);
-                requestSentButton.gameObject.SetActive(false);
                 break;
-            case FriendsController.FriendshipStatus.REQUESTED_TO:
-                addFriendButton.gameObject.SetActive(false);
-                alreadyFriendsContainer.gameObject.SetActive(false);
+            case FriendshipStatus.REQUESTED_TO:
                 requestSentButton.gameObject.SetActive(true);
                 break;
         }

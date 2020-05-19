@@ -33,7 +33,7 @@ public class FriendEntryShould : TestsBase
             coords = Vector2.one,
             avatarImage = testSprite,
             realm = "realm-test",
-            status = FriendsController.PresenceStatus.ONLINE,
+            status = PresenceStatus.ONLINE,
             userName = "test-name"
         };
 

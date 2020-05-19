@@ -1,39 +1,104 @@
+using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.UI;
 
 public class TaskbarHUDView : MonoBehaviour
 {
     const string VIEW_PATH = "Taskbar";
 
-    public RectTransform windowContainer;
-    public Button chatButton;
-    public Button friendsButton;
+    [SerializeField] internal RectTransform windowContainer;
+    [SerializeField] internal CanvasGroup windowContainerCanvasGroup;
+    [SerializeField] internal LayoutGroup windowContainerLayout;
+
+    [SerializeField] internal TaskbarButton chatButton;
+    [SerializeField] internal TaskbarButton friendsButton;
+
+    [SerializeField] internal ChatHeadGroupView chatHeadsGroup;
 
     internal TaskbarHUDController controller;
 
-    internal static TaskbarHUDView Create(TaskbarHUDController controller)
+    public event System.Action OnChatToggleOn;
+    public event System.Action OnChatToggleOff;
+    public event System.Action OnFriendsToggleOn;
+    public event System.Action OnFriendsToggleOff;
+
+    internal List<TaskbarButton> GetButtonList()
+    {
+        var taskbarButtonList = new List<TaskbarButton>();
+        taskbarButtonList.Add(chatButton);
+        taskbarButtonList.Add(friendsButton);
+        taskbarButtonList.AddRange(chatHeadsGroup.chatHeads);
+        return taskbarButtonList;
+    }
+
+    internal static TaskbarHUDView Create(TaskbarHUDController controller, IChatController chatController)
     {
         var view = Instantiate(Resources.Load<GameObject>(VIEW_PATH)).GetComponent<TaskbarHUDView>();
-        view.Initialize(controller);
+        view.Initialize(controller, chatController);
         return view;
     }
 
-    public void Initialize(TaskbarHUDController controller)
+    public void Initialize(TaskbarHUDController controller, IChatController chatController)
     {
         this.controller = controller;
+
+        chatHeadsGroup.Initialize(chatController);
+        chatButton.Initialize();
+        friendsButton.Initialize();
+
+        chatHeadsGroup.OnHeadToggleOn += OnWindowToggleOn;
+        chatHeadsGroup.OnHeadToggleOff += OnWindowToggleOff;
+
+        chatButton.OnToggleOn += OnWindowToggleOn;
+        chatButton.OnToggleOff += OnWindowToggleOff;
+
+        friendsButton.OnToggleOn += OnWindowToggleOn;
+        friendsButton.OnToggleOff += OnWindowToggleOff;
+
+        chatButton.SetToggleState(true);
     }
 
-    internal void OnAddChatWindow(UnityAction onToggle)
+    private void OnWindowToggleOff(TaskbarButton obj)
+    {
+        if (obj == friendsButton)
+            OnFriendsToggleOff?.Invoke();
+        else if (obj == chatButton)
+            OnChatToggleOff?.Invoke();
+
+        obj.SetToggleState(false, useCallback: true);
+    }
+
+    private void OnWindowToggleOn(TaskbarButton obj)
+    {
+        if (obj == friendsButton)
+            OnFriendsToggleOn?.Invoke();
+        else if (obj == chatButton)
+            OnChatToggleOn?.Invoke();
+
+        SelectButton(obj);
+    }
+
+    void SelectButton(TaskbarButton obj)
+    {
+        var taskbarButtonList = GetButtonList();
+
+        foreach (var btn in taskbarButtonList)
+        {
+            if (btn != obj)
+            {
+                btn.SetToggleState(false, useCallback: true);
+            }
+        }
+    }
+
+    internal void OnAddChatWindow()
     {
         chatButton.gameObject.SetActive(true);
-        chatButton.onClick.AddListener(onToggle);
     }
 
-    internal void OnAddFriendsWindow(UnityAction onToggle)
+    internal void OnAddFriendsWindow()
     {
         friendsButton.gameObject.SetActive(true);
-        friendsButton.onClick.AddListener(onToggle);
     }
 
     public void SetVisibility(bool visible)
@@ -46,6 +111,32 @@ public class TaskbarHUDView : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Return))
         {
             controller.OnPressReturn();
+        }
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            controller.OnPressEsc();
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (chatHeadsGroup != null)
+        {
+            chatHeadsGroup.OnHeadToggleOn += OnWindowToggleOn;
+            chatHeadsGroup.OnHeadToggleOff += OnWindowToggleOff;
+        }
+
+        if (chatButton != null)
+        {
+            chatButton.OnToggleOn += OnWindowToggleOn;
+            chatButton.OnToggleOff += OnWindowToggleOff;
+        }
+
+        if (friendsButton != null)
+        {
+            friendsButton.OnToggleOn += OnWindowToggleOn;
+            friendsButton.OnToggleOff += OnWindowToggleOff;
         }
     }
 }

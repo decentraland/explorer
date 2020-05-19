@@ -1,8 +1,8 @@
 using DCL;
 using DCL.Interface;
-using System.Linq;
-using System.Collections.Generic;
 using Newtonsoft.Json;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class PrivateChatWindowHUDController : IHUD
@@ -14,12 +14,15 @@ public class PrivateChatWindowHUDController : IHUD
 
     ChatHUDController chatHudController;
     IChatController chatController;
-    string conversationUserId = string.Empty;
-    string conversationUserName = string.Empty;
+    public string conversationUserId { get; private set; } = string.Empty;
+    public string conversationUserName { get; private set; } = string.Empty;
+
+    public event System.Action OnPressBack;
 
     public void Initialize(IChatController chatController)
     {
-        view = PrivateChatWindowHUDView.Create();
+        view = PrivateChatWindowHUDView.Create(this);
+        view.OnPressBack += View_OnPressBack;
 
         view.chatHudView.inputField.onSelect.RemoveListener(ChatHUDViewInputField_OnSelect);
         view.chatHudView.inputField.onSelect.AddListener(ChatHUDViewInputField_OnSelect);
@@ -39,14 +42,22 @@ public class PrivateChatWindowHUDController : IHUD
         SetVisibility(false);
     }
 
+    void View_OnPressBack()
+    {
+        OnPressBack?.Invoke();
+    }
+
     public void Configure(string newConversationUserId)
     {
         if (string.IsNullOrEmpty(newConversationUserId) || newConversationUserId == conversationUserId) return;
 
+        UserProfile newConversationUserProfile = UserProfileController.userProfilesCatalog.Get(newConversationUserId);
+
         conversationUserId = newConversationUserId;
-        conversationUserName = UserProfileController.userProfilesCatalog.Get(newConversationUserId).userName;
+        conversationUserName = newConversationUserProfile.userName;
 
         view.ConfigureTitle(conversationUserName);
+        view.ConfigureProfilePicture(newConversationUserProfile.faceSnapshot);
 
         view.chatHudView.CleanAllEntries();
 
