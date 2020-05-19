@@ -905,6 +905,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5557930252562946457}
   - component: {fileID: 3224002457026079413}
+  - component: {fileID: 2902915859653300001}
   - component: {fileID: 7505627329061135178}
   - component: {fileID: 5791209562270436312}
   m_Layer: 5
@@ -942,6 +943,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3878216755995512703}
   m_CullTransparentMesh: 0
+--- !u!114 &2902915859653300001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3878216755995512703}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f82e017250d074fa2a218204a7281cb0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  targetObjects:
+  - {fileID: 1110130480339001881}
 --- !u!114 &7505627329061135178
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1315,8 +1330,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f82e017250d074fa2a218204a7281cb0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hoverTime: 1
-  locationText: {fileID: 994504623797398403}
+  targetObjects:
+  - {fileID: 994504623797398403}
 --- !u!114 &3012618489471262033
 MonoBehaviour:
   m_ObjectHideFlags: 0
