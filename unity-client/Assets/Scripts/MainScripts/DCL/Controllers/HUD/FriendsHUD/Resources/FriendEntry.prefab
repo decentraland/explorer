@@ -44,7 +44,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 442, y: 42}
+  m_SizeDelta: {x: 383, y: 42}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3221293148122281813
 CanvasRenderer:
@@ -308,8 +308,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 0, y: 0.5}
-  m_AnchoredPosition: {x: 265.5, y: 0}
-  m_SizeDelta: {x: 128.61, y: 50}
+  m_AnchoredPosition: {x: 266.9, y: 0}
+  m_SizeDelta: {x: 125.82, y: 28.58}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4526416970774517607
 CanvasRenderer:
@@ -341,8 +341,9 @@ MonoBehaviour:
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_text: Blue Unicorn -66, -15
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: c0f2e4affe3f2438d9042ca1db45764f, type: 2}
+  m_sharedMaterial: {fileID: 8921694724713903678, guid: c0f2e4affe3f2438d9042ca1db45764f,
+    type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -367,12 +368,12 @@ MonoBehaviour:
   m_outlineColor:
     serializedVersion: 2
     rgba: 4278190080
-  m_fontSize: 13
-  m_fontSizeBase: 13
+  m_fontSize: 12
+  m_fontSizeBase: 12
   m_fontWeight: 400
-  m_enableAutoSizing: 0
-  m_fontSizeMin: 18
-  m_fontSizeMax: 72
+  m_enableAutoSizing: 1
+  m_fontSizeMin: 8
+  m_fontSizeMax: 12
   m_fontStyle: 0
   m_textAlignment: 513
   m_characterSpacing: 0
@@ -622,8 +623,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 0, y: 0.5}
-  m_AnchoredPosition: {x: 131.30005, y: 0}
-  m_SizeDelta: {x: 149.51, y: 30}
+  m_AnchoredPosition: {x: 142.35, y: 0}
+  m_SizeDelta: {x: 166.7, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3898557991638601270
 CanvasRenderer:
@@ -681,8 +682,8 @@ MonoBehaviour:
   m_outlineColor:
     serializedVersion: 2
     rgba: 4278190080
-  m_fontSize: 12
-  m_fontSizeBase: 12
+  m_fontSize: 14
+  m_fontSizeBase: 14
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -1565,12 +1566,12 @@ PrefabInstance:
     - target: {fileID: 5156119195053263761, guid: 0a008e464c70e3744b62a048a23c72f5,
         type: 3}
       propertyPath: m_textInfo.characterCount
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 5156119195053263761, guid: 0a008e464c70e3744b62a048a23c72f5,
         type: 3}
       propertyPath: m_textInfo.wordCount
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 5156119195053263761, guid: 0a008e464c70e3744b62a048a23c72f5,
         type: 3}
