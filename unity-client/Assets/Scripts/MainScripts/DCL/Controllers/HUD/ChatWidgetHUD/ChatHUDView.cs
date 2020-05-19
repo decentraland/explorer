@@ -110,7 +110,7 @@ public class ChatHUDView : MonoBehaviour
 
         SortEntries();
 
-        Utils.ForceUpdateLayout(chatEntriesContainer, delayed: false);
+        Utils.ForceUpdateLayout(transform as RectTransform, delayed: false);
     }
 
     public void SortEntries()
