@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 public class FriendsController_Mock : IFriendsController
@@ -6,10 +6,13 @@ public class FriendsController_Mock : IFriendsController
     public event Action<string, FriendshipAction> OnUpdateFriendship;
     public event Action<string, FriendsController.UserStatus> OnUpdateUserStatus;
     public event Action<string> OnFriendNotFound;
+    public event Action OnInitialized;
 
     Dictionary<string, FriendsController.UserStatus> friends = new Dictionary<string, FriendsController.UserStatus>();
 
     public int friendCount => friends.Count;
+
+    public bool isInitialized => true;
 
     public Dictionary<string, FriendsController.UserStatus> GetFriends()
     {

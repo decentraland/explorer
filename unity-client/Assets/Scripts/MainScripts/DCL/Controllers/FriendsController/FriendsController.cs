@@ -5,8 +5,10 @@ using UnityEngine;
 public interface IFriendsController
 {
     int friendCount { get; }
+    bool isInitialized { get; }
     Dictionary<string, FriendsController.UserStatus> GetFriends();
 
+    event Action OnInitialized;
     event Action<string, FriendshipAction> OnUpdateFriendship;
     event Action<string, FriendsController.UserStatus> OnUpdateUserStatus;
     event Action<string> OnFriendNotFound;
@@ -50,7 +52,7 @@ public class FriendsController : MonoBehaviour, IFriendsController
         i = this;
     }
 
-    public bool initialized { get; private set; } = false;
+    public bool isInitialized { get; private set; } = false;
     public Dictionary<string, UserStatus> friends = new Dictionary<string, UserStatus>();
 
     [System.Serializable]
@@ -96,6 +98,7 @@ public class FriendsController : MonoBehaviour, IFriendsController
     public event System.Action<string, UserStatus> OnUpdateUserStatus;
     public event System.Action<string, FriendshipAction> OnUpdateFriendship;
     public event Action<string> OnFriendNotFound;
+    public event Action OnInitialized;
 
     public Dictionary<string, UserStatus> GetFriends()
     {
@@ -109,7 +112,8 @@ public class FriendsController : MonoBehaviour, IFriendsController
 
     public void InitializeFriends(string json)
     {
-        initialized = true;
+        isInitialized = true;
+        OnInitialized?.Invoke();
 
         FriendshipInitializationMessage msg = JsonUtility.FromJson<FriendshipInitializationMessage>(json);
         HashSet<string> processedIds = new HashSet<string>();

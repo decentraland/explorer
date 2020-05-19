@@ -1,4 +1,4 @@
-using DCL.Helpers;
+﻿using DCL.Helpers;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -153,7 +153,7 @@ public class PlayerInfoCardHUDView : MonoBehaviour
     {
         Assert.IsTrue(userProfile != null, "userProfile can't be null");
 
-        friendStatusContainer.SetActive(FriendsController.i.initialized);
+        friendStatusContainer.SetActive(FriendsController.i.isInitialized);
 
         currentUserProfile = userProfile;
         name.text = currentUserProfile.userName;
