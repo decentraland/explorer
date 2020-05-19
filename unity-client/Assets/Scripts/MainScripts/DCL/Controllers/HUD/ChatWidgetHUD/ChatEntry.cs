@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 
-public class ChatEntry : MonoBehaviour, IPointerDownHandler
+public class ChatEntry : MonoBehaviour, IPointerClickHandler
 {
     public struct Model
     {
@@ -101,7 +101,7 @@ public class ChatEntry : MonoBehaviour, IPointerDownHandler
             group.alpha = 0;
     }
 
-    public void OnPointerDown(PointerEventData pointerEventData)
+    public void OnPointerClick(PointerEventData pointerEventData)
     {
         if (model.messageType != ChatMessage.Type.PRIVATE) return;
 
