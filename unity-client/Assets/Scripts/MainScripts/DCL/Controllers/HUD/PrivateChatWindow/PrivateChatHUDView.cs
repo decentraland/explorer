@@ -18,6 +18,6 @@ public class PrivateChatHUDView : ChatHUDView
         chatEntry.OnCancelHover += OnMessageCancelHover;
 
         entries.Add(chatEntry);
-        Utils.ForceUpdateLayout(transform as RectTransform);
+        Utils.ForceUpdateLayout(transform as RectTransform, delayed: false);
     }
 }
