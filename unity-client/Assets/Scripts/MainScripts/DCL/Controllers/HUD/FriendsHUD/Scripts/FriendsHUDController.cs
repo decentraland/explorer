@@ -110,9 +110,17 @@ public class FriendsHUDController : IHUD
         model.coords = newStatus.position;
 
         if (newStatus.realm != null)
+        {
             model.realm = $"{newStatus.realm.serverName.ToUpperFirst()} {newStatus.realm.layer.ToUpperFirst()}";
+            model.realmServerName = newStatus.realm.serverName;
+            model.realmLayerName = newStatus.realm.layer;
+        }
         else
+        {
             model.realm = string.Empty;
+            model.realmServerName = string.Empty;
+            model.realmLayerName = string.Empty;
+        }
 
         view.friendsList.UpdateEntry(userId, model);
         view.friendRequestsList.UpdateEntry(userId, model);
@@ -244,7 +252,7 @@ public class FriendsHUDController : IHUD
 
     private void Entry_OnJumpIn(FriendEntry entry)
     {
-        WebInterface.GoTo((int)entry.model.coords.x, (int)entry.model.coords.y);
+        WebInterface.JumpIn((int)entry.model.coords.x, (int)entry.model.coords.y, entry.model.realmServerName, entry.model.realmLayerName);
     }
 
     private void Entry_OnDelete(FriendEntryBase entry)

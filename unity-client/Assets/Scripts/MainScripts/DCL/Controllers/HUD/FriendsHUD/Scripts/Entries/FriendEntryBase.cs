@@ -11,6 +11,8 @@ public class FriendEntryBase : MonoBehaviour, IPointerEnterHandler, IPointerExit
         public string userName;
         public Vector2 coords;
         public string realm;
+        public string realmServerName;
+        public string realmLayerName;
         public Sprite avatarImage;
         public bool blocked;
 
