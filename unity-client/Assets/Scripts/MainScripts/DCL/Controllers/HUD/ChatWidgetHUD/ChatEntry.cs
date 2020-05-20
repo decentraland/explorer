@@ -94,7 +94,7 @@ public class ChatEntry : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
 
         chatEntryModel.bodyText = RemoveTabs(chatEntryModel.bodyText);
 
-        if (!string.IsNullOrEmpty(userString))
+        if (username != null && !string.IsNullOrEmpty(userString))
         {
             if (username != null)
                 username.text = userString;
