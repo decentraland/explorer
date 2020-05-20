@@ -21,6 +21,7 @@ public class PrivateChatHUDView : ChatHUDView
 
         SortEntries();
 
+        Utils.ForceUpdateLayout(chatEntry.transform as RectTransform);
         Utils.ForceUpdateLayout(transform as RectTransform, delayed: false);
     }
 
