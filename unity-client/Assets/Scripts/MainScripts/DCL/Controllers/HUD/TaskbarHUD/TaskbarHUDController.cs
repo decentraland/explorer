@@ -66,7 +66,16 @@ public class TaskbarHUDController : IHUD
     {
         Utils.UnlockCursor();
         view.windowContainerCanvasGroup.alpha = 1;
-        view.friendsButton.SetToggleState(!view.friendsButton.toggledOn);
+
+        foreach (var btn in view.GetButtonList())
+        {
+            if (btn != view.friendsButton)
+                btn.SetToggleState(false);
+            else
+                btn.SetToggleState(!btn.toggledOn);
+        }
+
+        worldChatWindowHud.SetVisibility(false);
     }
 
     private void View_OnChatToggleOn()
