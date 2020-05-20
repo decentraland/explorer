@@ -19,7 +19,7 @@ namespace DCL.Helpers.NFT
             }
         }
 
-        // NOtE: this method doesn't make sense now, but it will when support for other market is added
+        // NOTE: this method doesn't make sense now, but it will when support for other market is added
         static public IEnumerator getMarket(string assetContractAddress, string tokenId, Action<INFTMarket> onSuccess)
         {
             onSuccess?.Invoke(market);

@@ -21,6 +21,7 @@ namespace DCL.Helpers.NFT.Markets
                 if (!request.isNetworkError && !request.isHttpError)
                 {
                     AssetResponse response = Utils.FromJsonWithNulls<AssetResponse>(request.downloadHandler.text);
+                    onSuccess?.Invoke(responseToNFTInfo(response));
                 }
             }
         }
