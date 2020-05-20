@@ -74,6 +74,7 @@ import { backupProfile } from 'shared/profiles/generateRandomUserProfile'
 import { getTutorialBaseURL } from '../location'
 import { takeLatestById } from './utils/takeLatestById'
 import { UnityInterfaceContainer } from 'unity-interface/dcl'
+import { RarityEnum } from '../airdrops/interface';
 
 type Timestamp = number
 type ContentFileHash = string
@@ -142,7 +143,7 @@ function overrideSwankyRarity(wearable: Wearable) {
   if (wearable.rarity as any === 'swanky') {
     return {
       ...wearable,
-      rarity: 'rare'
+      rarity: 'rare' as RarityEnum
     }
   }
   return wearable
