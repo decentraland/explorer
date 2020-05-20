@@ -9,7 +9,7 @@ import {
 } from 'dcl-social-client'
 import { SocialAPI } from 'dcl-social-client/dist/SocialAPI'
 import { Authenticator } from 'dcl-crypto'
-import { takeEvery, put, select, call, take } from 'redux-saga/effects'
+import { takeEvery, put, select, call, take, delay } from 'redux-saga/effects'
 import {
   SEND_PRIVATE_MESSAGE,
   SendPrivateMessage,
@@ -157,6 +157,8 @@ export function* initializePrivateMessaging(synapseUrl: string, identity: Explor
   client.onFriendshipRequestApproval(socialId =>
     handleIncomingFriendshipUpdateStatus(FriendshipAction.APPROVED, socialId)
   )
+
+  client.onFriendshipDeletion(socialId => handleIncomingFriendshipUpdateStatus(FriendshipAction.DELETED, socialId))
 
   client.onFriendshipRequestRejection(socialId =>
     handleIncomingFriendshipUpdateStatus(FriendshipAction.REJECTED, socialId)
@@ -411,6 +413,7 @@ function* handleUpdateFriendship({ payload, meta }: UpdateFriendship) {
 
         const index = requests.indexOf(userId)
 
+        DEBUG && logger.info(`requests[${selector}]`, requests, index, userId)
         if (index !== -1) {
           requests.splice(index, 1)
 
@@ -420,9 +423,10 @@ function* handleUpdateFriendship({ payload, meta }: UpdateFriendship) {
             newState.friends.push(userId)
 
             const socialData: SocialData = yield select(findByUserId, userId)
-            const conversationId = yield client.createDirectConversation(socialData.socialId)
+            const conversation: Conversation = yield client.createDirectConversation(socialData.socialId)
 
-            yield put(updateUserData(userId, socialData.socialId, conversationId))
+            DEBUG && logger.info(`userData`, userId, socialData.socialId, conversation.id)
+            newState.socialInfo[userId] = { userId, socialId: socialData.socialId, conversationId: conversation.id }
           }
         }
 
@@ -520,7 +524,7 @@ function* handleOutgoingUpdateFriendshipStatus(update: UpdateFriendship['payload
       break
     }
     case FriendshipAction.APPROVED: {
-      yield client.addAsFriend(socialId)
+      yield client.approveFriendshipRequestFrom(socialId)
       break
     }
     case FriendshipAction.REJECTED: {
@@ -544,6 +548,9 @@ function* handleOutgoingUpdateFriendshipStatus(update: UpdateFriendship['payload
       break
     }
   }
+
+  // wait for matrix server to process new status
+  yield delay(500)
 }
 
 function toSocialData(socialIds: string[]) {
