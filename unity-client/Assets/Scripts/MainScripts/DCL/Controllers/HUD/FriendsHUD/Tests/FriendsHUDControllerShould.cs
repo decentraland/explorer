@@ -46,7 +46,7 @@ public class FriendsHUDControllerShould : TestsBase
 
         System.Action<string, string> callback = (name, payload) =>
          {
-             if (name == "GoTo")
+             if (name == "JumpIn")
              {
                  jumpInCalled = true;
              }
