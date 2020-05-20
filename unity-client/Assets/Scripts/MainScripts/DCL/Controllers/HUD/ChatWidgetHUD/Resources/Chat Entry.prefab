@@ -138,6 +138,8 @@ MonoBehaviour:
   worldMessageColor: {r: 1, g: 1, b: 1, a: 1}
   privateMessageColor: {r: 0.38431373, g: 1, b: 0.40784314, a: 1}
   systemColor: {r: 0.4669811, g: 1, b: 0.9846577, a: 1}
+  playerNameColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  nonPlayerNameColor: {r: 0.88235295, g: 0.9764706, b: 0.98039216, a: 1}
   group: {fileID: -2281352007695473291}
   timeToHoverPanel: 1
   hoverPanelPositionReference: {fileID: 1110658662034786025}
@@ -325,8 +327,8 @@ MonoBehaviour:
   m_text: 'Name: The worlds can aosidj jdoisj doisajd oiasjd oaisjd asoi jsaoi djas
     iosaj ioasjd oisaj saoi jsaio jasoi jasio jasio asj aoisj io'
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 26b03903800224f718b64e9afbc91b61, type: 2}
-  m_sharedMaterial: {fileID: 2100000, guid: 7dfa1f6019e8840a797a48955651317e, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 131598e906f4d4a048cfa339caa74472, type: 2}
+  m_sharedMaterial: {fileID: 2100000, guid: 8f0c7039aba8d420aad6241bf1b80584, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -449,7 +451,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: -0.6}
   m_SizeDelta: {x: 0, y: 25}
   m_Pivot: {x: 0, y: 1}
 --- !u!222 &7889741886548215090
@@ -482,8 +484,8 @@ MonoBehaviour:
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_text: 'Name: '
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 26b03903800224f718b64e9afbc91b61, type: 2}
-  m_sharedMaterial: {fileID: 2100000, guid: 7dfa1f6019e8840a797a48955651317e, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 131598e906f4d4a048cfa339caa74472, type: 2}
+  m_sharedMaterial: {fileID: 2100000, guid: 8f0c7039aba8d420aad6241bf1b80584, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []

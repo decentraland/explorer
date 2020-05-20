@@ -69,6 +69,8 @@ MonoBehaviour:
   worldMessageColor: {r: 0, g: 0, b: 0, a: 1}
   privateMessageColor: {r: 0, g: 0, b: 0, a: 1}
   systemColor: {r: 0.4669811, g: 1, b: 0.9846577, a: 1}
+  playerNameColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  nonPlayerNameColor: {r: 1, g: 1, b: 1, a: 1}
   group: {fileID: 150487731994969879}
   timeToHoverPanel: 1
   hoverPanelPositionReference: {fileID: 2464393378482792029}
@@ -382,7 +384,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.9098039, g: 1, b: 0.8392157, a: 1}
   m_RaycastTarget: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -405,7 +407,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1224045834093360536}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 1573420865, guid: f70555f144d8491a825f0804e09c671c, type: 3}
   m_Name: 
