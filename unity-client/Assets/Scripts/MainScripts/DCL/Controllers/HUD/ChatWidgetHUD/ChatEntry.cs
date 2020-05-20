@@ -36,6 +36,8 @@ public class ChatEntry : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
     [SerializeField] internal Color worldMessageColor = Color.white;
     [SerializeField] internal Color privateMessageColor = Color.white;
     [SerializeField] internal Color systemColor = Color.white;
+    [SerializeField] internal Color playerNameColor = Color.yellow;
+    [SerializeField] internal Color nonPlayerNameColor = Color.white;
     [SerializeField] CanvasGroup group;
     [SerializeField] internal float timeToHoverPanel = 1f;
 
@@ -74,7 +76,7 @@ public class ChatEntry : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
                 body.color = worldMessageColor;
 
                 if (username != null)
-                    username.color = worldMessageColor;
+                    username.color = chatEntryModel.senderName == UserProfile.GetOwnUserProfile().userName ? playerNameColor : nonPlayerNameColor;
                 break;
             case ChatMessage.Type.PRIVATE:
                 body.color = worldMessageColor;
