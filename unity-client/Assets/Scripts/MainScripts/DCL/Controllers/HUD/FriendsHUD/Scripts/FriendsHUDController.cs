@@ -15,7 +15,6 @@ public class FriendsHUDController : IHUD
 
     IFriendsController friendsController;
     public event System.Action<string> OnPressWhisper;
-    InputAction_Trigger toggleTrigger;
 
     UserProfile ownUserProfile;
 
@@ -45,9 +44,6 @@ public class FriendsHUDController : IHUD
         view.friendsList.contextMenuPanel.OnReport += Entry_OnReport;
 
         view.friendsList.OnDeleteConfirmation += Entry_OnDelete;
-
-        toggleTrigger = Resources.Load<InputAction_Trigger>("ToggleFriends");
-        toggleTrigger.OnTriggered += OnHotkeyPress;
 
         if (ownUserProfile != null)
         {
@@ -94,14 +90,6 @@ public class FriendsHUDController : IHUD
             entries[i].model.blocked = allBlockedUsers.Contains(entries[i].userId);
             entries[i].Populate(entries[i].model);
         }
-    }
-
-    private void OnHotkeyPress(DCLAction_Trigger action)
-    {
-        if (action != DCLAction_Trigger.ToggleFriends)
-            return;
-
-        SetVisibility(!view.gameObject.activeSelf);
     }
 
     private void Entry_OnRequestSent(string userId)
@@ -307,8 +295,6 @@ public class FriendsHUDController : IHUD
             this.friendsController.OnUpdateFriendship -= OnUpdateFriendship;
             this.friendsController.OnUpdateUserStatus -= OnUpdateUserStatus;
         }
-
-        toggleTrigger.OnTriggered -= OnHotkeyPress;
 
         if (view != null)
         {

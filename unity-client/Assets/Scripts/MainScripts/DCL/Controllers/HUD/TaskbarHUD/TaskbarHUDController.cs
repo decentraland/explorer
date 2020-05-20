@@ -1,4 +1,5 @@
 using DCL;
+using DCL.Helpers;
 using System.Linq;
 using UnityEngine;
 
@@ -14,6 +15,7 @@ public class TaskbarHUDController : IHUD
 
     IMouseCatcher mouseCatcher;
     IChatController chatController;
+    InputAction_Trigger toggleTrigger;
 
     public void Initialize(IMouseCatcher mouseCatcher, IChatController chatController)
     {
@@ -39,6 +41,10 @@ public class TaskbarHUDController : IHUD
         view.OnChatToggleOn += View_OnChatToggleOn;
         view.OnFriendsToggleOff += View_OnFriendsToggleOff;
         view.OnFriendsToggleOn += View_OnFriendsToggleOn;
+
+        toggleTrigger = Resources.Load<InputAction_Trigger>("ToggleFriends");
+        toggleTrigger.OnTriggered -= ToggleTrigger_OnTriggered;
+        toggleTrigger.OnTriggered += ToggleTrigger_OnTriggered;
     }
 
     private void ChatHeadsGroup_OnHeadClose(TaskbarButton obj)
@@ -54,6 +60,13 @@ public class TaskbarHUDController : IHUD
     private void View_OnFriendsToggleOff()
     {
         friendsHud.SetVisibility(false);
+    }
+
+    private void ToggleTrigger_OnTriggered(DCLAction_Trigger action)
+    {
+        Utils.UnlockCursor();
+        view.windowContainerCanvasGroup.alpha = 1;
+        view.friendsButton.SetToggleState(!view.friendsButton.toggledOn);
     }
 
     private void View_OnChatToggleOn()
@@ -214,6 +227,8 @@ public class TaskbarHUDController : IHUD
             mouseCatcher.OnMouseLock -= MouseCatcher_OnMouseLock;
             mouseCatcher.OnMouseUnlock -= MouseCatcher_OnMouseUnlock;
         }
+
+        toggleTrigger.OnTriggered -= ToggleTrigger_OnTriggered;
     }
 
     public void SetVisibility(bool visible)
