@@ -115,10 +115,10 @@ public class ChatHUDView : MonoBehaviour
         Utils.ForceUpdateLayout(transform as RectTransform, delayed: false);
     }
 
-    protected void OnMessageTriggerHover(string messageDateTime)
+    protected virtual void OnMessageTriggerHover(ChatEntry chatEntry)
     {
-        messageHoverText.text = messageDateTime;
-        messageHoverPanel.transform.position = Input.mousePosition;
+        messageHoverText.text = chatEntry.messageLocalDateTime;
+        messageHoverPanel.transform.position = chatEntry.hoverPanelPositionReference.position;
         messageHoverPanel.SetActive(true);
     }
 

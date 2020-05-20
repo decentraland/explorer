@@ -39,15 +39,17 @@ public class ChatEntry : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
     [SerializeField] CanvasGroup group;
     [SerializeField] internal float timeToHoverPanel = 1f;
 
+    [NonSerialized] public string messageLocalDateTime;
+
     bool fadeEnabled = false;
     double fadeoutStartTime;
     float hoverPanelTimer = 0;
-    string messageLocalDateTime;
 
+    public RectTransform hoverPanelPositionReference;
     public Model model { get; private set; }
 
     public event UnityAction<string> OnPress;
-    public event UnityAction<string> OnTriggerHover;
+    public event UnityAction<ChatEntry> OnTriggerHover;
     public event UnityAction OnCancelHover;
 
     public void Populate(Model chatEntryModel)
@@ -182,8 +184,7 @@ public class ChatEntry : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
         {
             hoverPanelTimer = 0f;
 
-            // hoverPanel.SetActive(true);
-            OnTriggerHover?.Invoke(messageLocalDateTime);
+            OnTriggerHover?.Invoke(this);
         }
     }
 
