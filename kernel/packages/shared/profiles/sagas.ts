@@ -74,7 +74,7 @@ import { backupProfile } from 'shared/profiles/generateRandomUserProfile'
 import { getTutorialBaseURL } from '../location'
 import { takeLatestById } from './utils/takeLatestById'
 import { UnityInterfaceContainer } from 'unity-interface/dcl'
-import { RarityEnum } from '../airdrops/interface';
+import { RarityEnum } from '../airdrops/interface'
 
 type Timestamp = number
 type ContentFileHash = string
