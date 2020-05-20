@@ -96,12 +96,16 @@ public class ChatEntry : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
 
         if (!string.IsNullOrEmpty(userString))
         {
-            username.text = userString;
+            if (username != null)
+                username.text = userString;
+
             body.text = $"{userString} {chatEntryModel.bodyText}";
         }
         else
         {
-            username.text = "";
+            if (username != null)
+                username.text = "";
+
             body.text = $"{chatEntryModel.bodyText}";
         }
 
@@ -142,12 +146,16 @@ public class ChatEntry : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
         if (!enabled)
         {
             group.alpha = 1;
+            group.blocksRaycasts = true;
+            group.interactable = true;
             fadeEnabled = false;
             return;
         }
 
         fadeoutStartTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() / 1000.0;
         fadeEnabled = true;
+        group.blocksRaycasts = false;
+        group.interactable = false;
     }
 
     void Update()
