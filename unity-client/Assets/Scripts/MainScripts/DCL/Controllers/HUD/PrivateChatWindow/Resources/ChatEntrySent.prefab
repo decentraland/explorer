@@ -159,7 +159,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 0.00015258789, y: 0.000015258789}
-  m_SizeDelta: {x: -4.2949673e+9, y: -4.2949673e+9}
+  m_SizeDelta: {x: 15.917225, y: 8.701416}
   m_Pivot: {x: 0, y: 1}
 --- !u!222 &150487733389631813
 CanvasRenderer:
@@ -238,6 +238,7 @@ MonoBehaviour:
   rectTransform: {fileID: 150487733389631865}
   parentContainerRectTransform: {fileID: 150487734072305108}
   messageText: {fileID: 150487733643597186}
+  leftMessage: 0
 --- !u!1 &150487733643597189
 GameObject:
   m_ObjectHideFlags: 0
@@ -273,7 +274,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 0.00015258789, y: 0.000015258789}
+  m_AnchoredPosition: {x: 0, y: 0.000015258789}
   m_SizeDelta: {x: 330, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!222 &150487733643597185
@@ -448,7 +449,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: -4.2949673e+9, y: -4.2949673e+9}
+  m_SizeDelta: {x: 15.917225, y: 8.701416}
   m_Pivot: {x: 0, y: 1}
 --- !u!222 &150487734072305107
 CanvasRenderer:
