@@ -8,6 +8,7 @@ public class PrivateChatWindowHUDView : MonoBehaviour
     const string VIEW_PATH = "PrivateChatWindow";
 
     public Button backButton;
+    public Button minimizeButton;
     public Button closeButton;
     public JumpInButton jumpInButton;
     public ChatHUDView chatHudView;
@@ -16,6 +17,7 @@ public class PrivateChatWindowHUDView : MonoBehaviour
     public Image profilePictureImage;
 
     public event System.Action OnPressBack;
+    public event System.Action OnMinimize;
     public event System.Action OnClose;
 
     void OnEnable()
@@ -33,8 +35,15 @@ public class PrivateChatWindowHUDView : MonoBehaviour
     private void Initialize(PrivateChatWindowHUDController controller)
     {
         this.controller = controller;
+        this.minimizeButton.onClick.AddListener(OnMinimizeButtonPressed);
         this.closeButton.onClick.AddListener(OnCloseButtonPressed);
         this.backButton.onClick.AddListener(() => { OnPressBack?.Invoke(); });
+    }
+
+    public void OnMinimizeButtonPressed()
+    {
+        controller.SetVisibility(false);
+        OnMinimize?.Invoke();
     }
 
     public void OnCloseButtonPressed()

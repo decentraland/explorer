@@ -62,15 +62,6 @@ public class ChatHeadGroupView : MonoBehaviour
         OnHeadToggleOff?.Invoke(head);
     }
 
-    private void OnClose(TaskbarButton head)
-    {
-        if (!(head is ChatHeadButton))
-            return;
-
-        RemoveHead(head as ChatHeadButton);
-        OnHeadToggleOff?.Invoke(head);
-    }
-
     internal ChatHeadButton AddChatHead(string userId, ulong timestamp)
     {
         var existingHead = chatHeads.FirstOrDefault(x => x.profile.userId == userId);
@@ -96,7 +87,6 @@ public class ChatHeadGroupView : MonoBehaviour
         chatHead.lastTimestamp = timestamp;
         chatHead.OnToggleOn += OnToggleOn;
         chatHead.OnToggleOff += OnToggleOff;
-        chatHead.OnClose += OnClose;
 
         chatHeads.Add(chatHead);
         chatHeads = chatHeads.OrderBy((x) => x.lastTimestamp).ToList();
@@ -109,13 +99,13 @@ public class ChatHeadGroupView : MonoBehaviour
         if (chatHeads.Count > MAX_GROUP_SIZE)
         {
             var lastChatHead = chatHeads[chatHeads.Count - 1];
-            RemoveHead(lastChatHead);
+            RemoveChatHead(lastChatHead);
         }
 
         return chatHead;
     }
 
-    void RemoveHead(ChatHeadButton chatHead)
+    internal void RemoveChatHead(ChatHeadButton chatHead)
     {
         Destroy(chatHead.gameObject);
         chatHeads.Remove(chatHead);

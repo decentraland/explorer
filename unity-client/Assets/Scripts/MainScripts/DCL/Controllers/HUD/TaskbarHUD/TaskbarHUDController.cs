@@ -169,7 +169,7 @@ public class TaskbarHUDController : IHUD
 
         privateChatWindowHud = controller;
 
-        privateChatWindowHud.view.OnClose += () =>
+        privateChatWindowHud.view.OnMinimize += () =>
         {
             ChatHeadButton btn = view.GetButtonList().FirstOrDefault(
                 (x) => x is ChatHeadButton &&
@@ -179,8 +179,19 @@ public class TaskbarHUDController : IHUD
                 btn.SetToggleState(false, false);
         };
 
-    }
+        privateChatWindowHud.view.OnClose += () =>
+        {
+            ChatHeadButton btn = view.GetButtonList().FirstOrDefault(
+                (x) => x is ChatHeadButton &&
+                (x as ChatHeadButton).profile.userId == privateChatWindowHud.conversationUserId) as ChatHeadButton;
 
+            if (btn != null)
+            {
+                btn.SetToggleState(false, false);
+                view.chatHeadsGroup.RemoveChatHead(btn);
+            }
+        };
+    }
     public void AddFriendsWindow(FriendsHUDController controller)
     {
         if (controller == null || controller.view == null)

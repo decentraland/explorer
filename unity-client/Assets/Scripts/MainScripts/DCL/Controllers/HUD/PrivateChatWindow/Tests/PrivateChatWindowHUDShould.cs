@@ -1,4 +1,4 @@
-using DCL.Interface;
+﻿using DCL.Interface;
 using NUnit.Framework;
 using System.Collections;
 using UnityEngine.TestTools;
@@ -150,7 +150,7 @@ public class PrivateChatWindowHUDShould : TestsBase
     {
         controller.SetVisibility(true);
         Assert.AreEqual(true, controller.view.gameObject.activeSelf);
-        controller.view.closeButton.onClick.Invoke();
+        controller.view.minimizeButton.onClick.Invoke();
         Assert.AreEqual(false, controller.view.gameObject.activeSelf);
     }
 

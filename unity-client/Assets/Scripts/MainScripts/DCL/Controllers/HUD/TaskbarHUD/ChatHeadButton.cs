@@ -6,23 +6,17 @@ public class ChatHeadButton : TaskbarButton, IPointerEnterHandler, IPointerExitH
 {
     [SerializeField] internal GameObject labelContainer;
     [SerializeField] internal TMPro.TextMeshProUGUI label;
-    [SerializeField] internal Button closeButton;
     [SerializeField] internal Image portrait;
     [SerializeField] internal UnreadNotificationBadge unreadNotificationBadge;
 
     internal ulong lastTimestamp;
     internal UserProfile profile;
 
-    public event System.Action<TaskbarButton> OnClose;
-
     public void Initialize(UserProfile profile)
     {
         base.Initialize();
         this.profile = profile;
         unreadNotificationBadge.Initialize(ChatController.i, profile.userId);
-
-        closeButton.onClick.RemoveAllListeners();
-        closeButton.onClick.AddListener(OnCloseButtonPressed);
 
         labelContainer.SetActive(false);
 
@@ -55,7 +49,6 @@ public class ChatHeadButton : TaskbarButton, IPointerEnterHandler, IPointerExitH
     {
         labelContainer.SetActive(false);
         SetToggleState(false);
-        OnClose?.Invoke(this);
     }
 
     public void OnPointerEnter(PointerEventData eventData)
