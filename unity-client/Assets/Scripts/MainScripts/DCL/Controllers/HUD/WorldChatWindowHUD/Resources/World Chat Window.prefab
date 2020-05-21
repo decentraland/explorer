@@ -234,7 +234,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1420950607002861509
 RectTransform:
   m_ObjectHideFlags: 0
@@ -253,10 +253,10 @@ RectTransform:
   m_Father: {fileID: 915684326489745630}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 36}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 200, y: -216.90002}
+  m_SizeDelta: {x: 400, y: 36}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &8529609400659568496
 MonoBehaviour:
@@ -1548,6 +1548,11 @@ PrefabInstance:
       propertyPath: m_RestoreOriginalTextOnEscape
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3904520324089697892, guid: 486cb7198dd7515498189de8c605a1a3,
+        type: 3}
+      propertyPath: m_SizeDelta.y
+      value: -29.000008
+      objectReference: {fileID: 0}
     - target: {fileID: 8055313006203715533, guid: 486cb7198dd7515498189de8c605a1a3,
         type: 3}
       propertyPath: m_AnchoredPosition.x
@@ -1598,6 +1603,11 @@ PrefabInstance:
       propertyPath: m_SizeDelta.x
       value: -12
       objectReference: {fileID: 0}
+    - target: {fileID: 8181726496436410213, guid: 486cb7198dd7515498189de8c605a1a3,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7267414639488135717, guid: 486cb7198dd7515498189de8c605a1a3,
         type: 3}
       propertyPath: m_Color.r
@@ -1626,6 +1636,11 @@ PrefabInstance:
     - target: {fileID: 6812228848873554245, guid: 486cb7198dd7515498189de8c605a1a3,
         type: 3}
       propertyPath: m_Spacing
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5159254117417088523, guid: 486cb7198dd7515498189de8c605a1a3,
+        type: 3}
+      propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 388698245028910683, guid: 486cb7198dd7515498189de8c605a1a3,
