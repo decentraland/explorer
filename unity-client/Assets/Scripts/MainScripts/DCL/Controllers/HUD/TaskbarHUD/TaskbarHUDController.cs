@@ -106,8 +106,6 @@ public class TaskbarHUDController : IHUD
     private void MouseCatcher_OnMouseUnlock()
     {
         view.windowContainerCanvasGroup.alpha = 1;
-        view.chatButton.SetToggleState(true);
-        worldChatWindowHud.view.DeactivatePreview();
     }
 
     private void MouseCatcher_OnMouseLock()
