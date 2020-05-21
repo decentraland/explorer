@@ -72,10 +72,6 @@ namespace DCL
         {
             if (MapRenderer.i == null) return;
 
-#if !UNITY_EDITOR
-            if (!enableInProduction) return;
-#endif
-
             scrollRect.StopMovement();
 
             isOpen = !isOpen;
