@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Linq;
 using UnityEngine.Networking;
 
 namespace DCL.Helpers.NFT.Markets
@@ -8,7 +9,6 @@ namespace DCL.Helpers.NFT.Markets
     {
         const string API_URL_SINGLE_ASSET = "https://api.opensea.io/api/v1/asset/{0}/{1}/";
 
-        MarketInfo INFTMarket.marketInfo => openSeaMarketInfo;
         MarketInfo openSeaMarketInfo = new MarketInfo() { name = "OpenSea" };
 
         IEnumerator INFTMarket.fetchNFTInfo(string assetContractAddress, string tokenId, Action<NFTInfo> onSuccess)
@@ -61,7 +61,7 @@ namespace DCL.Helpers.NFT.Markets
             }
 
             UnityEngine.Color backgroundColor;
-            if (UnityEngine.ColorUtility.TryParseHtmlString(response.background_color, out backgroundColor))
+            if (UnityEngine.ColorUtility.TryParseHtmlString("#" + response.background_color, out backgroundColor))
             {
                 ret.backgroundColor = backgroundColor;
             }
@@ -77,7 +77,16 @@ namespace DCL.Helpers.NFT.Markets
 
         private string priceToFloatingPointString(string price, PaymentTokenInfo tokenInfo)
         {
-            return price.Insert(price.Length - tokenInfo.decimals, ".");
+            int pointPosition = price.Length - tokenInfo.decimals;
+            if (pointPosition <= 0)
+            {
+                if (pointPosition < 0) pointPosition++;
+                return "0." + string.Concat(Enumerable.Repeat("0", Math.Abs(pointPosition))) + price;
+            }
+            else
+            {
+                return price.Insert(pointPosition, ".");
+            }
         }
 
         [Serializable]
