@@ -390,8 +390,8 @@ namespace DCL
                             case "UpdateFriendshipStatus":
                                 FriendsController.i?.UpdateFriendshipStatus(msg.payload);
                                 break;
-                            case "UpdateUserStatus":
-                                FriendsController.i?.UpdateUserStatus(msg.payload);
+                            case "UpdateUserPresence":
+                                FriendsController.i?.UpdateUserPresence(msg.payload);
                                 break;
                             case "FriendNotFound":
                                 FriendsController.i?.FriendNotFound(msg.payload);

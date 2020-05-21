@@ -625,8 +625,8 @@ export const unityInterface = {
   UpdateFriendshipStatus(updateMessage: FriendshipUpdateStatusMessage) {
     gameInstance.SendMessage('SceneController', 'UpdateFriendshipStatus', JSON.stringify(updateMessage))
   },
-  UpdateUserStatus(status: UpdateUserStatusMessage) {
-    gameInstance.SendMessage('SceneController', 'UpdateUserStatus', JSON.stringify(status))
+  UpdateUserPresence(status: UpdateUserStatusMessage) {
+    gameInstance.SendMessage('SceneController', 'UpdateUserPresence', JSON.stringify(status))
   },
   FriendNotFound(queryString: string) {
     gameInstance.SendMessage('SceneController', 'FriendNotFound', JSON.stringify(queryString))

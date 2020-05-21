@@ -139,19 +139,34 @@ public class FriendsController : MonoBehaviour, IFriendsController
                 processedIds.Add(userId);
         }
 
-        Queue<string> newFriends = new Queue<string>();
-
-        foreach (var kvp in friends)
+        using (var iterator = friends.GetEnumerator())
         {
-            if (!processedIds.Contains(kvp.Key))
+            while (iterator.MoveNext())
             {
-                newFriends.Enqueue(kvp.Key);
-            }
-        }
+                if (!processedIds.Contains(iterator.Current.Key))
+                {
+                    Debug.Log($"extra friend: {friends[iterator.Current.Key]} with {iterator.Current.Value.friendshipStatus}");
+                    FriendshipAction friendshipAction;
 
-        while (newFriends.Count > 0)
-        {
-            UpdateFriendshipStatus(new FriendshipUpdateStatusMessage() { action = FriendshipAction.NONE, userId = newFriends.Dequeue() });
+                    switch (iterator.Current.Value.friendshipStatus)
+                    {
+                        case FriendshipStatus.FRIEND:
+                            friendshipAction = FriendshipAction.APPROVED;
+                            break;
+                        case FriendshipStatus.REQUESTED_FROM:
+                            friendshipAction = FriendshipAction.REQUESTED_FROM;
+                            break;
+                        case FriendshipStatus.REQUESTED_TO:
+                            friendshipAction = FriendshipAction.REQUESTED_TO;
+                            break;
+                        default:
+                            friendshipAction = FriendshipAction.NONE;
+                            break;
+                    }
+
+                    UpdateFriendshipStatus(new FriendshipUpdateStatusMessage() { action = friendshipAction, userId = iterator.Current.Key });
+                }
+            }
         }
     }
 
@@ -169,9 +184,14 @@ public class FriendsController : MonoBehaviour, IFriendsController
         OnUpdateUserStatus?.Invoke(newUserStatus.userId, newUserStatus);
     }
 
-    public void UpdateUserStatus(string json)
+    public void UpdateUserPresence(string json)
     {
         UserStatus newUserStatus = JsonUtility.FromJson<UserStatus>(json);
+
+        if (!friends.ContainsKey(newUserStatus.userId)) return;
+
+        // Kernel doesn't send the friendship status on this call, we have to keep it or it gets defaulted
+        newUserStatus.friendshipStatus = friends[newUserStatus.userId].friendshipStatus;
 
         UpdateUserStatus(newUserStatus);
     }

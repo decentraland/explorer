@@ -273,7 +273,7 @@ function sendUpdateUserStatus(id: string, status: CurrentUserStatus) {
   }
 
   DEBUG && logger.info(`unityInterface.UpdateUserStatus`, updateMessage)
-  unityInterface.UpdateUserStatus(updateMessage)
+  unityInterface.UpdateUserPresence(updateMessage)
 }
 
 function initializeStatusUpdateInterval(client: SocialAPI) {
