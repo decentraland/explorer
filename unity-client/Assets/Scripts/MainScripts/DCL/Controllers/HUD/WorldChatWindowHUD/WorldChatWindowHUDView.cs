@@ -18,7 +18,7 @@ public class WorldChatWindowHUDView : MonoBehaviour, IPointerClickHandler
 
     public event System.Action OnClose;
 
-    Regex whisperRegex = new Regex(@"(?i)^\/(whisper|w) (\S*) ");
+    Regex whisperRegex = new Regex(@"(?i)^\/(whisper|w) (\S*?) ");
     Match whisperRegexMatch;
 
     public static WorldChatWindowHUDView Create()
@@ -72,7 +72,7 @@ public class WorldChatWindowHUDView : MonoBehaviour, IPointerClickHandler
         if (!string.IsNullOrEmpty(controller.lastPrivateMessageReceivedSender) && text == "/r ")
         {
             chatHudView.inputField.text = $"/w {controller.lastPrivateMessageReceivedSender} ";
-            chatHudView.inputField.caretPosition = chatHudView.inputField.text.Length - 1;
+            chatHudView.inputField.caretPosition = chatHudView.inputField.text.Length;
         }
     }
 
@@ -91,12 +91,13 @@ public class WorldChatWindowHUDView : MonoBehaviour, IPointerClickHandler
         yield return null;
 
         chatHudView.inputField.text = newText;
-        chatHudView.inputField.caretPosition = newText.Length - 1;
+        chatHudView.inputField.caretPosition = newText.Length;
     }
 
     public string GetLastWhisperCommand(string inputString)
     {
         whisperRegexMatch = whisperRegex.Match(inputString);
+
         if (whisperRegexMatch.Success)
         {
             return whisperRegexMatch.Value;
