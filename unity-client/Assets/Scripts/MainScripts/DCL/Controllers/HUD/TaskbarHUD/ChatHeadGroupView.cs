@@ -62,6 +62,16 @@ public class ChatHeadGroupView : MonoBehaviour
         OnHeadToggleOff?.Invoke(head);
     }
 
+    private void SortChatHeads()
+    {
+        chatHeads = chatHeads.OrderByDescending((x) => x.lastTimestamp).ToList();
+
+        for (int i = 0; i < chatHeads.Count; i++)
+        {
+            chatHeads[i].transform.SetSiblingIndex(i);
+        }
+    }
+
     internal ChatHeadButton AddChatHead(string userId, ulong timestamp)
     {
         var existingHead = chatHeads.FirstOrDefault(x => x.profile.userId == userId);
@@ -69,13 +79,7 @@ public class ChatHeadGroupView : MonoBehaviour
         if (existingHead)
         {
             existingHead.lastTimestamp = timestamp;
-            chatHeads = chatHeads.OrderBy((x) => x.lastTimestamp).ToList();
-
-            for (int i = 0; i < chatHeads.Count; i++)
-            {
-                chatHeads[i].transform.SetSiblingIndex(i);
-            }
-
+            SortChatHeads();
             return existingHead;
         }
 
@@ -89,12 +93,7 @@ public class ChatHeadGroupView : MonoBehaviour
         chatHead.OnToggleOff += OnToggleOff;
 
         chatHeads.Add(chatHead);
-        chatHeads = chatHeads.OrderBy((x) => x.lastTimestamp).ToList();
-
-        for (int i = 0; i < chatHeads.Count; i++)
-        {
-            chatHeads[i].transform.SetSiblingIndex(i);
-        }
+        SortChatHeads();
 
         if (chatHeads.Count > MAX_GROUP_SIZE)
         {
