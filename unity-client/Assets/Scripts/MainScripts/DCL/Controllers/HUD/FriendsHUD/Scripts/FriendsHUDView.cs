@@ -137,6 +137,30 @@ public class FriendsHUDView : MonoBehaviour
         });
     }
 
+    [ContextMenu("AddFakeRequestSentAccepted")]
+    public void AddFakeRequestSentAccepted()
+    {
+        string id1 = Random.Range(0, 1000000).ToString();
+
+        UserProfileController.i.AddUserProfileToCatalog(new UserProfileModel()
+        {
+            userId = id1,
+            name = "Brian-" + id1
+        });
+
+        FriendsController.i.UpdateFriendshipStatus(new FriendsController.FriendshipUpdateStatusMessage()
+        {
+            userId = id1,
+            action = FriendshipAction.REQUESTED_TO
+        });
+
+        FriendsController.i.UpdateFriendshipStatus(new FriendsController.FriendshipUpdateStatusMessage()
+        {
+            userId = id1,
+            action = FriendshipAction.APPROVED
+        });
+    }
+
     [ContextMenu("AddFakeOnlineFriend")]
     public void AddFakeOnlineFriend()
     {

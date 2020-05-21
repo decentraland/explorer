@@ -72,8 +72,7 @@ public class FriendsTabView : FriendsTabViewBase
             var removedTimestamp = offlineFriendsList.RemoveLastTimestamp(userId);
             onlineFriendsList.AddOrUpdateLastTimestamp(removedTimestamp);
         }
-
-        if (model.status == PresenceStatus.OFFLINE)
+        else
         {
             onlineFriendsList.Remove(userId);
             offlineFriendsList.Add(userId, entry);
