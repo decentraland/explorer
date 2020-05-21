@@ -207,17 +207,21 @@ public class NFTPromptHUDView : MonoBehaviour
         int pointPosition = value.IndexOf('.');
         if (pointPosition <= 0) return value;
 
-        string[] pointSplit = new string[]
-            {
-                value.Substring(0, pointPosition),
-                value.Substring(pointPosition + 1, Mathf.Min(value.Length - pointPosition - 1, decimalCount))
-            };
+        string ret = value.Substring(0, pointPosition + Mathf.Min(value.Length - pointPosition, decimalCount + 1));
 
-        if (pointSplit[1] == string.Concat(Enumerable.Repeat("0", pointSplit[1].Length)))
+        for (int i = ret.Length - 1; i >= 0; i--)
         {
-            return pointSplit[0];
+            if (ret[i] == '.')
+            {
+                return ret.Substring(0, i);
+            }
+            if (ret[i] != '0')
+            {
+                return ret.Substring(0, i + 1);
+            }
         }
-        return pointSplit[0] + "." + pointSplit[1];
+
+        return ret;
     }
 
     private void SetSmartBackgroundColor(Texture2D texture)
