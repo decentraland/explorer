@@ -66,18 +66,4 @@ public class PrivateChatWindowHUDView : MonoBehaviour
     {
         jumpInButton.Initialize(FriendsController.i, userId);
     }
-
-    public void Toggle()
-    {
-        if (gameObject.activeSelf)
-        {
-            gameObject.SetActive(false);
-        }
-        else
-        {
-            gameObject.SetActive(true);
-        }
-    }
-
-
 }

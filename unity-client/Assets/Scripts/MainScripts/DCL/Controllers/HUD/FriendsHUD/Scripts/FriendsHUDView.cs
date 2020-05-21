@@ -96,11 +96,6 @@ public class FriendsHUDView : MonoBehaviour
         OnClose?.Invoke();
     }
 
-    public void Toggle()
-    {
-        this.controller.SetVisibility(!gameObject.activeSelf);
-    }
-
 #if UNITY_EDITOR
     [ContextMenu("AddFakeRequestReceived")]
     public void AddFakeRequestReceived()

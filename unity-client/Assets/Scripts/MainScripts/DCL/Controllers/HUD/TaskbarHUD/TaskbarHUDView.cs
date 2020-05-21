@@ -54,8 +54,6 @@ public class TaskbarHUDView : MonoBehaviour
 
         friendsButton.OnToggleOn += OnWindowToggleOn;
         friendsButton.OnToggleOff += OnWindowToggleOff;
-
-        chatButton.SetToggleState(true);
     }
 
     private void OnWindowToggleOff(TaskbarButton obj)

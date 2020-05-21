@@ -62,19 +62,6 @@ public class WorldChatWindowHUDView : MonoBehaviour, IPointerClickHandler
         chatHudView.SetFadeoutMode(true);
     }
 
-    public void Toggle()
-    {
-        if (gameObject.activeSelf)
-        {
-            gameObject.SetActive(false);
-        }
-        else
-        {
-            gameObject.SetActive(true);
-            DeactivatePreview();
-        }
-    }
-
     public void OnPointerClick(PointerEventData eventData)
     {
         DeactivatePreview();

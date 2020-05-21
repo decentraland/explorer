@@ -139,7 +139,7 @@ public class TaskbarHUDController : IHUD
         worldChatWindowHud = controller;
 
         view.OnAddChatWindow();
-        worldChatWindowHud.view.DeactivatePreview();
+        worldChatWindowHud.view.ActivatePreview();
         worldChatWindowHud.view.OnClose += () => { view.friendsButton.SetToggleState(false, false); };
     }
 
