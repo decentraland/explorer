@@ -45,6 +45,12 @@ public class PlayerInfoCardHUDView : MonoBehaviour
     internal Button addFriendButton;
     [SerializeField]
     internal GameObject alreadyFriendsContainer;
+    [SerializeField]
+    internal GameObject requestReceivedContainer;
+    [SerializeField]
+    internal Button acceptRequestButton;
+    [SerializeField]
+    internal Button rejectRequestButton;
 
     [Header("Passport")]
     [SerializeField]
@@ -77,7 +83,9 @@ public class PlayerInfoCardHUDView : MonoBehaviour
         UnityAction blockPlayerCallback,
         UnityAction unblockPlayerCallback,
         UnityAction addFriendCallback,
-        UnityAction cancelInvitation)
+        UnityAction cancelInvitation,
+        UnityAction acceptFriendRequest,
+        UnityAction rejectFriendRequest)
     {
         hideCardButton.onClick.RemoveAllListeners();
         hideCardButton.onClick.AddListener(cardClosedCallback);
@@ -91,13 +99,17 @@ public class PlayerInfoCardHUDView : MonoBehaviour
         unblockPlayerButton.onClick.RemoveAllListeners();
         unblockPlayerButton.onClick.AddListener(unblockPlayerCallback);
 
-        addFriendButton.gameObject.SetActive(true);
         addFriendButton.onClick.RemoveAllListeners();
         addFriendButton.onClick.AddListener(addFriendCallback);
 
-        requestSentButton.gameObject.SetActive(true);
         requestSentButton.onClick.RemoveAllListeners();
         requestSentButton.onClick.AddListener(cancelInvitation);
+
+        acceptRequestButton.onClick.RemoveAllListeners();
+        acceptRequestButton.onClick.AddListener(acceptFriendRequest);
+
+        rejectRequestButton.onClick.RemoveAllListeners();
+        rejectRequestButton.onClick.AddListener(rejectFriendRequest);
 
         for (int index = 0; index < tabsMapping.Length; index++)
         {
@@ -180,7 +192,7 @@ public class PlayerInfoCardHUDView : MonoBehaviour
         if (FriendsController.i == null || !FriendsController.i.isInitialized)
         {
             addFriendButton.gameObject.SetActive(false);
-            alreadyFriendsContainer.gameObject.SetActive(false);
+            alreadyFriendsContainer.SetActive(false);
             requestSentButton.gameObject.SetActive(false);
             return;
         }
@@ -191,7 +203,8 @@ public class PlayerInfoCardHUDView : MonoBehaviour
         var status = FriendsController.i.GetUserStatus(currentUserProfile.userId);
 
         addFriendButton.gameObject.SetActive(false);
-        alreadyFriendsContainer.gameObject.SetActive(false);
+        alreadyFriendsContainer.SetActive(false);
+        requestReceivedContainer.SetActive(false);
         requestSentButton.gameObject.SetActive(false);
 
         switch (status.friendshipStatus)
@@ -200,10 +213,10 @@ public class PlayerInfoCardHUDView : MonoBehaviour
                 addFriendButton.gameObject.SetActive(true);
                 break;
             case FriendshipStatus.FRIEND:
-                alreadyFriendsContainer.gameObject.SetActive(true);
+                alreadyFriendsContainer.SetActive(true);
                 break;
             case FriendshipStatus.REQUESTED_FROM:
-                addFriendButton.gameObject.SetActive(true);
+                requestReceivedContainer.SetActive(true);
                 break;
             case FriendshipStatus.REQUESTED_TO:
                 requestSentButton.gameObject.SetActive(true);

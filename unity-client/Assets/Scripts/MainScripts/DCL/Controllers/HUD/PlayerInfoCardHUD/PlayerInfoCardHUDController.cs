@@ -14,7 +14,7 @@ public class PlayerInfoCardHUDController : IHUD
     public PlayerInfoCardHUDController()
     {
         view = PlayerInfoCardHUDView.CreateView();
-        view.Initialize(() => { currentPlayerId.Set(null); }, ReportPlayer, BlockPlayer, UnblockPlayer, AddPlayerAsFriend, CancelInvitation);
+        view.Initialize(() => { currentPlayerId.Set(null); }, ReportPlayer, BlockPlayer, UnblockPlayer, AddPlayerAsFriend, CancelInvitation, AcceptFriendRequest, RejectFriendRequest);
         currentPlayerId = Resources.Load<StringVariable>(CURRENT_PLAYER_ID);
         currentPlayerId.OnChange += OnCurrentPlayerIdChanged;
         OnCurrentPlayerIdChanged(currentPlayerId, null);
@@ -36,6 +36,7 @@ public class PlayerInfoCardHUDController : IHUD
 
         WebInterface.UpdateFriendshipStatus(new FriendsController.FriendshipUpdateStatusMessage() { userId = currentPlayerId, action = FriendshipAction.REQUESTED_TO });
     }
+
     private void CancelInvitation()
     {
         // Add fake action to avoid waiting for kernel
@@ -46,6 +47,30 @@ public class PlayerInfoCardHUDController : IHUD
         });
 
         WebInterface.UpdateFriendshipStatus(new FriendsController.FriendshipUpdateStatusMessage() { userId = currentPlayerId, action = FriendshipAction.CANCELLED });
+    }
+
+    private void AcceptFriendRequest()
+    {
+        // Add fake action to avoid waiting for kernel
+        FriendsController.i.UpdateFriendshipStatus(new FriendsController.FriendshipUpdateStatusMessage()
+        {
+            userId = currentPlayerId,
+            action = FriendshipAction.APPROVED
+        });
+
+        WebInterface.UpdateFriendshipStatus(new FriendsController.FriendshipUpdateStatusMessage() { userId = currentPlayerId, action = FriendshipAction.APPROVED });
+    }
+
+    private void RejectFriendRequest()
+    {
+        // Add fake action to avoid waiting for kernel
+        FriendsController.i.UpdateFriendshipStatus(new FriendsController.FriendshipUpdateStatusMessage()
+        {
+            userId = currentPlayerId,
+            action = FriendshipAction.REJECTED
+        });
+
+        WebInterface.UpdateFriendshipStatus(new FriendsController.FriendshipUpdateStatusMessage() { userId = currentPlayerId, action = FriendshipAction.REJECTED });
     }
 
     internal void OnCurrentPlayerIdChanged(string current, string previous)
