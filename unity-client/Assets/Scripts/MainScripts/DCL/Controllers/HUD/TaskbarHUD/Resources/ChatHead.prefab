@@ -430,7 +430,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 22.035, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5472022867475902975
@@ -674,7 +674,6 @@ MonoBehaviour:
   lineOnIndicator: {fileID: 8808836106863622667}
   labelContainer: {fileID: 3457902708936436261}
   label: {fileID: 4219386172326663630}
-  closeButton: {fileID: 7364935749767637119}
   portrait: {fileID: 3063364984001725074}
   unreadNotificationBadge: {fileID: 2870536401237111500}
 --- !u!222 &3059943524694515089
@@ -1044,7 +1043,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 0.78431374}
+  m_Color: {r: 0.07636168, g: 0.08976016, b: 0.11320752, a: 1}
   m_RaycastTarget: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
