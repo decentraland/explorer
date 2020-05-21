@@ -129,13 +129,7 @@ public class PlayerInfoCardHUDView : MonoBehaviour
     public void SetCardActive(bool active)
     {
         if (active)
-        {
             Utils.UnlockCursor();
-        }
-        else
-        {
-            Utils.LockCursor();
-        }
 
         cardCanvas.enabled = active;
         CommonScriptableObjects.playerInfoCardVisibleState.Set(active);
@@ -152,8 +146,6 @@ public class PlayerInfoCardHUDView : MonoBehaviour
     public void SetUserProfile(UserProfile userProfile)
     {
         Assert.IsTrue(userProfile != null, "userProfile can't be null");
-
-        friendStatusContainer.SetActive(FriendsController.i.isInitialized);
 
         currentUserProfile = userProfile;
         name.text = currentUserProfile.userName;
@@ -183,7 +175,9 @@ public class PlayerInfoCardHUDView : MonoBehaviour
 
     private void UpdateFriendButton()
     {
-        if (FriendsController.i == null)
+        friendStatusContainer.SetActive(FriendsController.i.isInitialized);
+
+        if (FriendsController.i == null || !FriendsController.i.isInitialized)
         {
             addFriendButton.gameObject.SetActive(false);
             alreadyFriendsContainer.gameObject.SetActive(false);

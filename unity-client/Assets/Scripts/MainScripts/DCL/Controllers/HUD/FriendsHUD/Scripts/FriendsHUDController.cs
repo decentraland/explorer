@@ -37,7 +37,6 @@ public class FriendsHUDController : IHUD
         view.friendRequestsList.contextMenuPanel.OnBlock += Entry_OnBlock;
         view.friendRequestsList.contextMenuPanel.OnPassport += Entry_OnPassport;
 
-        view.friendsList.OnJumpIn += Entry_OnJumpIn;
         view.friendsList.OnWhisper += Entry_OnWhisper;
         view.friendsList.contextMenuPanel.OnBlock += Entry_OnBlock;
         view.friendsList.contextMenuPanel.OnPassport += Entry_OnPassport;
@@ -248,11 +247,6 @@ public class FriendsHUDController : IHUD
             WebInterface.SendBlockPlayer(entry.userId);
         else
             WebInterface.SendUnblockPlayer(entry.userId);
-    }
-
-    private void Entry_OnJumpIn(FriendEntry entry)
-    {
-        WebInterface.JumpIn((int)entry.model.coords.x, (int)entry.model.coords.y, entry.model.realmServerName, entry.model.realmLayerName);
     }
 
     private void Entry_OnDelete(FriendEntryBase entry)

@@ -33,6 +33,8 @@ public class FriendEntryShould : TestsBase
             coords = Vector2.one,
             avatarImage = testSprite,
             realm = "realm-test",
+            realmServerName = "realm-test",
+            realmLayerName = "realm-layer-test",
             status = PresenceStatus.ONLINE,
             userName = "test-name"
         };
@@ -41,22 +43,9 @@ public class FriendEntryShould : TestsBase
         entry.Populate(model);
 
         Assert.AreEqual(model.userName, entry.playerNameText.text);
-        Assert.AreEqual("realm-test 1, 1", entry.jumpInButton.playerLocationText.text);
         Assert.AreEqual(entry.playerImage.sprite, testSprite);
 
         Object.Destroy(testSprite);
-    }
-
-    [Test]
-    public void SendProperEventWhenJumpInButtonIsPressed()
-    {
-        var model = new FriendEntry.Model() { };
-        entry.userId = "userId-1";
-        entry.Populate(model);
-        bool buttonPressed = false;
-        entry.OnJumpInClick += (x) => { if (x == entry) buttonPressed = true; };
-        entry.jumpInButton.button.onClick.Invoke();
-        Assert.IsTrue(buttonPressed);
     }
 
     [Test]

@@ -37,31 +37,6 @@ public class FriendsHUDControllerShould : TestsBase
     }
 
     [Test]
-    public void ReactCorrectlyToJumpInClick()
-    {
-        var id = "test-id-1";
-        var entry = TestHelpers_Friends.FakeAddFriend(friendsController, view, id);
-
-        bool jumpInCalled = false;
-
-        System.Action<string, string> callback = (name, payload) =>
-         {
-             if (name == "JumpIn")
-             {
-                 jumpInCalled = true;
-             }
-         };
-
-        WebInterface.OnMessageFromEngine += callback;
-
-        entry.jumpInButton.button.onClick.Invoke();
-
-        WebInterface.OnMessageFromEngine -= callback;
-
-        Assert.IsTrue(jumpInCalled);
-    }
-
-    [Test]
     public void ReactCorrectlyToWhisperClick()
     {
         var id = "test-id-1";
