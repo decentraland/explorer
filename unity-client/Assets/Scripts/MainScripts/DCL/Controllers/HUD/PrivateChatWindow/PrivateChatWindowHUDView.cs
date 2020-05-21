@@ -9,6 +9,7 @@ public class PrivateChatWindowHUDView : MonoBehaviour
 
     public Button backButton;
     public Button closeButton;
+    public JumpInButton jumpInButton;
     public ChatHUDView chatHudView;
     public PrivateChatWindowHUDController controller;
     public TMP_Text windowTitleText;
@@ -16,7 +17,6 @@ public class PrivateChatWindowHUDView : MonoBehaviour
 
     public event System.Action OnPressBack;
     public event System.Action OnClose;
-
 
     void OnEnable()
     {
@@ -51,6 +51,11 @@ public class PrivateChatWindowHUDView : MonoBehaviour
     public void ConfigureProfilePicture(Sprite sprite)
     {
         profilePictureImage.sprite = sprite;
+    }
+
+    public void ConfigureJumpInButton(string userId)
+    {
+        jumpInButton.Initialize(FriendsController.i, userId);
     }
 
     public void Toggle()

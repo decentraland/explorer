@@ -39,7 +39,6 @@ public class FriendsTabView : FriendsTabViewBase
 
         var entry = GetEntry(userId) as FriendEntry;
 
-        entry.OnJumpInClick += (x) => OnJumpIn?.Invoke(x);
         entry.OnWhisperClick += (x) => OnWhisper?.Invoke(x);
 
         return true;

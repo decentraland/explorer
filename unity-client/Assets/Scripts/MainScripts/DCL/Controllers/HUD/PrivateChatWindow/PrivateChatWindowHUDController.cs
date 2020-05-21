@@ -58,6 +58,7 @@ public class PrivateChatWindowHUDController : IHUD
 
         view.ConfigureTitle(conversationUserName);
         view.ConfigureProfilePicture(newConversationUserProfile.faceSnapshot);
+        view.ConfigureJumpInButton(newConversationUserProfile.userId);
 
         view.chatHudView.CleanAllEntries();
 
