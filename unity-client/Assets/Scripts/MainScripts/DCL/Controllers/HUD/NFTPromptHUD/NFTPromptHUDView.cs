@@ -1,0 +1,247 @@
+﻿using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
+using DCL;
+using DCL.Helpers;
+using DCL.Helpers.NFT;
+using System.Linq;
+using DCL.Interface;
+
+public class NFTPromptHUDView : MonoBehaviour
+{
+    [SerializeField] GameObject content;
+
+    [SerializeField] RawImage imageNft;
+    [SerializeField] Image imageNftBackground;
+    [SerializeField] TextMeshProUGUI textNftName;
+    [SerializeField] TextMeshProUGUI textOwner;
+
+    [Header("Last Sale")]
+    [SerializeField] TextMeshProUGUI textLastSaleSymbol;
+    [SerializeField] TextMeshProUGUI textLastSalePrice;
+    [SerializeField] TextMeshProUGUI textLastSaleDate;
+
+    [Header("Description & Comment")]
+    [SerializeField] TextMeshProUGUI textDescription;
+    [SerializeField] TextMeshProUGUI textComment;
+    [SerializeField] GameObject containerDescription;
+    [SerializeField] GameObject containerComment;
+
+    [Header("Spinners")]
+    [SerializeField] GameObject spinnerGeneral;
+    [SerializeField] GameObject spinnerNftImage;
+
+    [Header("Buttons")]
+    [SerializeField] Button buttonClose;
+    [SerializeField] Button buttonCancel;
+    [SerializeField] Button buttonOpenMarket;
+    [SerializeField] TextMeshProUGUI textOpenMarketButton;
+
+    Coroutine fetchNFTRoutine = null;
+    Coroutine fetchNFTImageRoutine = null;
+    IWrappedTextureAsset imageAsset = null;
+
+    bool backgroundColorSet = false;
+    string marketUrl = null;
+
+    private void Awake()
+    {
+        buttonClose.onClick.AddListener(Hide);
+        buttonCancel.onClick.AddListener(Hide);
+        buttonOpenMarket.onClick.AddListener(OpenMarketUrl);
+
+        //ShowNFT("0xf64dc33a192e056bb5f0e5049356a0498b502d50", "2481", "let's add some comment");
+        ShowNFT("0xb932a70a57673d89f4acffbe830e8ed7f75fb9e0", "6674", "let's add some comment");
+    }
+
+    internal void ShowNFT(string assetContractAddress, string tokenId, string comment)
+    {
+        content.SetActive(true);
+        Utils.UnlockCursor();
+
+        if (fetchNFTRoutine != null) StopCoroutine(fetchNFTRoutine);
+        if (fetchNFTImageRoutine != null) StopCoroutine(fetchNFTImageRoutine);
+
+        SetLoading();
+
+        fetchNFTRoutine = StartCoroutine(NFTHelper.fetchNFTInfo(assetContractAddress, tokenId, (nftInfo) => SetNFTInfo(nftInfo, comment)));
+    }
+
+    internal void Hide()
+    {
+        content.SetActive(false);
+
+        if (imageAsset != null) imageAsset.Dispose();
+        if (fetchNFTRoutine != null) StopCoroutine(fetchNFTRoutine);
+        if (fetchNFTImageRoutine != null) StopCoroutine(fetchNFTImageRoutine);
+
+        fetchNFTRoutine = null;
+        fetchNFTImageRoutine = null;
+    }
+
+    private void SetLoading()
+    {
+        imageNftBackground.color = Color.white;
+
+        imageNft.gameObject.SetActive(false);
+        textNftName.gameObject.SetActive(false);
+        textOwner.gameObject.SetActive(false);
+        textLastSaleSymbol.gameObject.SetActive(false);
+        textLastSalePrice.gameObject.SetActive(false);
+        textLastSaleDate.gameObject.SetActive(false);
+        containerDescription.SetActive(false);
+        containerComment.SetActive(false);
+        buttonCancel.gameObject.SetActive(false);
+        buttonOpenMarket.gameObject.SetActive(false);
+
+        spinnerGeneral.SetActive(true);
+        spinnerNftImage.SetActive(false);
+    }
+
+    private void SetNFTInfo(NFTInfo info, string comment)
+    {
+        spinnerGeneral.SetActive(false);
+
+        imageNftBackground.color = Color.white;
+        backgroundColorSet = info.backgroundColor != null;
+        if (backgroundColorSet)
+        {
+            imageNftBackground.color = info.backgroundColor.Value;
+        }
+
+        textNftName.text = info.name;
+        textNftName.gameObject.SetActive(true);
+
+        textOwner.text = info.owner;
+        textOwner.gameObject.SetActive(true);
+
+        if (!string.IsNullOrEmpty(info.lastSaleAmount))
+        {
+            textLastSalePrice.text = ShortDecimals(info.lastSaleAmount, 4);
+            textLastSalePrice.gameObject.SetActive(true);
+        }
+        else
+        {
+            textLastSalePrice.text = "-";
+            textLastSalePrice.gameObject.SetActive(true);
+        }
+
+        if (!string.IsNullOrEmpty(info.lastSaleDate))
+        {
+            textLastSaleDate.text = info.lastSaleDate;
+            textLastSaleDate.gameObject.SetActive(true);
+        }
+
+        if (info.lastSaleToken != null)
+        {
+            textLastSaleSymbol.text = info.lastSaleToken.Value.symbol;
+            textLastSaleSymbol.gameObject.SetActive(true);
+        }
+
+        if (!string.IsNullOrEmpty(info.description))
+        {
+            textDescription.text = info.description;
+            containerDescription.SetActive(true);
+        }
+
+        if (!string.IsNullOrEmpty(comment))
+        {
+            textComment.text = comment;
+            containerComment.SetActive(true);
+        }
+
+        textOpenMarketButton.text = "VIEW";
+        if (info.marketInfo != null)
+        {
+            textOpenMarketButton.text = $"{textOpenMarketButton.text} IN {info.marketInfo.Value.name.ToUpper()}";
+        }
+
+        marketUrl = null;
+        if (!string.IsNullOrEmpty(info.marketLink))
+        {
+            marketUrl = info.marketLink;
+        }
+        else if (!string.IsNullOrEmpty(info.assetLink))
+        {
+            marketUrl = info.assetLink;
+        }
+
+        buttonCancel.gameObject.SetActive(true);
+        buttonOpenMarket.gameObject.SetActive(true);
+
+        if (!string.IsNullOrEmpty(info.thumbnailUrl))
+        {
+            spinnerNftImage.SetActive(true);
+            fetchNFTImageRoutine = StartCoroutine(Utils.FetchWrappedTextureAsset(info.thumbnailUrl, (asset) =>
+            {
+                imageAsset = asset;
+                imageNft.texture = asset.texture;
+
+                var gifAsset = asset as WrappedGif;
+                if (gifAsset != null)
+                {
+                    gifAsset.SetUpdateTextureCallback((texture) =>
+                    {
+                        imageNft.texture = texture;
+                    });
+                }
+                SetNFTImageSize(asset.texture);
+                if (!backgroundColorSet) SetSmartBackgroundColor(asset.texture);
+
+                imageNft.gameObject.SetActive(true);
+                spinnerNftImage.SetActive(false);
+            }));
+        }
+    }
+
+    private void SetNFTImageSize(Texture2D texture)
+    {
+        RectTransform rt = (RectTransform)imageNft.transform.parent;
+        float h = rt.rect.height;
+        float w = h * (texture.width / (float)texture.height);
+        imageNft.rectTransform.sizeDelta = new Vector2(w, h);
+    }
+
+    private string ShortDecimals(string value, int decimalCount)
+    {
+        int pointPosition = value.IndexOf('.');
+        if (pointPosition <= 0) return value;
+
+        string[] pointSplit = new string[]
+            {
+                value.Substring(0, pointPosition),
+                value.Substring(pointPosition + 1, Mathf.Min(value.Length - pointPosition - 1, decimalCount))
+            };
+
+        if (pointSplit[1] == string.Concat(Enumerable.Repeat("0", pointSplit[1].Length)))
+        {
+            return pointSplit[0];
+        }
+        return pointSplit[0] + "." + pointSplit[1];
+    }
+
+    private void SetSmartBackgroundColor(Texture2D texture)
+    {
+        imageNftBackground.color = texture.GetPixel(0, 0);
+    }
+
+    private void OpenMarketUrl()
+    {
+        if (!string.IsNullOrEmpty(marketUrl))
+        {
+            WebInterface.OpenURL(marketUrl);
+        }
+        else
+        {
+            Hide();
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (imageAsset != null)
+        {
+            imageAsset.Dispose();
+        }
+    }
+}
