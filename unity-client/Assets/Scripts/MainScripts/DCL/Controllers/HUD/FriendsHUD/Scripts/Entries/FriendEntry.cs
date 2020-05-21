@@ -1,4 +1,3 @@
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,8 +6,7 @@ public class FriendEntry : FriendEntryBase
     public event System.Action<FriendEntry> OnJumpInClick;
     public event System.Action<FriendEntry> OnWhisperClick;
 
-    [SerializeField] internal TextMeshProUGUI playerLocationText;
-    [SerializeField] internal Button jumpInButton;
+    [SerializeField] internal JumpInButton jumpInButton;
     [SerializeField] internal Button whisperButton;
     [SerializeField] internal UnreadNotificationBadge unreadNotificationBadge;
 
@@ -16,8 +14,8 @@ public class FriendEntry : FriendEntryBase
     {
         base.Awake();
 
-        jumpInButton.onClick.RemoveAllListeners();
-        jumpInButton.onClick.AddListener(() => OnJumpInClick?.Invoke(this));
+        jumpInButton.button.onClick.RemoveAllListeners();
+        jumpInButton.button.onClick.AddListener(() => OnJumpInClick?.Invoke(this));
 
         whisperButton.onClick.RemoveAllListeners();
         whisperButton.onClick.AddListener(() => OnWhisperClick?.Invoke(this));
@@ -31,16 +29,11 @@ public class FriendEntry : FriendEntryBase
     public override void Populate(Model model)
     {
         base.Populate(model);
+        jumpInButton.UpdateInfo(model);
 
         if (model.status == PresenceStatus.ONLINE)
-        {
-            playerLocationText.text = $"{model.realm} {(int)model.coords.x}, {(int)model.coords.y}";
             jumpInButton.gameObject.SetActive(true);
-        }
         else
-        {
             jumpInButton.gameObject.SetActive(false);
-            playerLocationText.text = string.Empty;
-        }
     }
 }

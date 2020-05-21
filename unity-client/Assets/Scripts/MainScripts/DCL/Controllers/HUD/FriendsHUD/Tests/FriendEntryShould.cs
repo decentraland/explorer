@@ -41,7 +41,7 @@ public class FriendEntryShould : TestsBase
         entry.Populate(model);
 
         Assert.AreEqual(model.userName, entry.playerNameText.text);
-        Assert.AreEqual("realm-test 1, 1", entry.playerLocationText.text);
+        Assert.AreEqual("realm-test 1, 1", entry.jumpInButton.playerLocationText.text);
         Assert.AreEqual(entry.playerImage.sprite, testSprite);
 
         Object.Destroy(testSprite);
@@ -55,7 +55,7 @@ public class FriendEntryShould : TestsBase
         entry.Populate(model);
         bool buttonPressed = false;
         entry.OnJumpInClick += (x) => { if (x == entry) buttonPressed = true; };
-        entry.jumpInButton.onClick.Invoke();
+        entry.jumpInButton.button.onClick.Invoke();
         Assert.IsTrue(buttonPressed);
     }
 

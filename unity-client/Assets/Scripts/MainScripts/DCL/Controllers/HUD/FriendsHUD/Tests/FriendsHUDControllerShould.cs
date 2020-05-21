@@ -54,7 +54,7 @@ public class FriendsHUDControllerShould : TestsBase
 
         WebInterface.OnMessageFromEngine += callback;
 
-        entry.jumpInButton.onClick.Invoke();
+        entry.jumpInButton.button.onClick.Invoke();
 
         WebInterface.OnMessageFromEngine -= callback;
 
