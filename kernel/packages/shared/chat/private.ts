@@ -19,7 +19,7 @@ import {
   updatePrivateMessagingState,
   updateUserData
 } from './actions'
-import { getClient, findByUserId, isFriend, getPrivateMessaging } from './selectors'
+import { getClient, findByUserId, getPrivateMessaging } from './selectors'
 import { createLogger } from '../logger'
 import { ProfileAsPromise } from '../profiles/ProfileAsPromise'
 import { unityInterface } from 'unity-interface/dcl'
@@ -34,7 +34,7 @@ import { ensureRenderer } from '../profiles/sagas'
 import { ADDED_PROFILE_TO_CATALOG } from '../profiles/actions'
 import { isAddedToCatalog } from 'shared/profiles/selectors'
 
-declare const globalThis: StoreContainer & { sendPrivateMessage: (userId: string, message: string) => void }
+declare const globalThis: StoreContainer
 
 const DEBUG = false
 
@@ -360,12 +360,6 @@ function* handleSendPrivateMessage(action: SendPrivateMessage, debug: boolean = 
       return
     }
 
-    const _isFriend: ReturnType<typeof isFriend> = yield select(isFriend, userId)
-    if (!_isFriend) {
-      logger.error(`Trying to send a message to a non friend ${userId}`)
-      return
-    }
-
     socialId = userData.socialId
   } else {
     // used only for debugging purposes
@@ -495,14 +489,18 @@ function* handleUpdateFriendship({ payload, meta }: UpdateFriendship) {
     }
   } catch (e) {
     if (e instanceof UnknownUsersError) {
-      unityInterface.ShowNotification({
-        type: NotificationType.COMMS_ERROR,
-        message: `User must log in at least once before befriending them`,
-        buttonMessage: 'OK',
-        timer: 5
-      })
+      showErrorNotification(`User must log in at least once before befriending them`)
     }
   }
+}
+
+function showErrorNotification(message: string) {
+  unityInterface.ShowNotification({
+    type: NotificationType.COMMS_ERROR,
+    message,
+    buttonMessage: 'OK',
+    timer: 5
+  })
 }
 
 function* handleOutgoingUpdateFriendshipStatus(update: UpdateFriendship['payload']) {
