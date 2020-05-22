@@ -11,7 +11,7 @@ namespace DCL.Helpers.NFT.Markets
 
         MarketInfo openSeaMarketInfo = new MarketInfo() { name = "OpenSea" };
 
-        IEnumerator INFTMarket.FetchNFTInfo(string assetContractAddress, string tokenId, Action<NFTInfo> onSuccess)
+        IEnumerator INFTMarket.FetchNFTInfo(string assetContractAddress, string tokenId, Action<NFTInfo> onSuccess, Action<string> onError)
         {
             string url = string.Format(API_URL_SINGLE_ASSET, assetContractAddress, tokenId);
             using (UnityWebRequest request = UnityWebRequest.Get(url))
@@ -22,6 +22,10 @@ namespace DCL.Helpers.NFT.Markets
                 {
                     AssetResponse response = Utils.FromJsonWithNulls<AssetResponse>(request.downloadHandler.text);
                     onSuccess?.Invoke(ResponseToNFTInfo(response));
+                }
+                else
+                {
+                    onError?.Invoke($"{openSeaMarketInfo.name} error fetching {assetContractAddress}/{tokenId} {request.error}");
                 }
             }
         }

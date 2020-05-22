@@ -65,7 +65,7 @@ public class NFTPromptHUDView : MonoBehaviour
         //ShowNFT("0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85", "108024385621239244618096740331803135526962319540778177318110146440918862054900", "let's add some comment");
         //ShowNFT("0x1e1b3525388e8a63988f8455638aee87f68eeaa7", "7", "let's add some comment");
         //ShowNFT("0x989e1fb123b67afd66e10574c8b409bc6e812d9a", "3182", "let's add some comment");
-        ShowNFT("0xd35147be6401dcb20811f2104c33de8e97ed6818", "4891", "let's add some comment");
+        ShowNFT("0xd35147be6401dcb20811f2104c33de8e97ed6818", "671", "let's add some comment");
     }
 
     internal void ShowNFT(string assetContractAddress, string tokenId, string comment)
@@ -78,7 +78,10 @@ public class NFTPromptHUDView : MonoBehaviour
 
         SetLoading();
 
-        fetchNFTRoutine = StartCoroutine(NFTHelper.FetchNFTInfo(assetContractAddress, tokenId, (nftInfo) => SetNFTInfo(nftInfo, comment)));
+        fetchNFTRoutine = StartCoroutine(NFTHelper.FetchNFTInfo(assetContractAddress, tokenId,
+            (nftInfo) => SetNFTInfo(nftInfo, comment),
+            (error) => OnError(error)
+        ));
     }
 
     internal void Hide()
@@ -302,6 +305,13 @@ public class NFTPromptHUDView : MonoBehaviour
         {
             Hide();
         }
+    }
+
+    private void OnError(string error)
+    {
+        Debug.LogError(error);
+        Hide();
+        Utils.LockCursor();
     }
 
     private void OnDestroy()
