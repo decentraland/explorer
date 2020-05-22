@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 public class ChatHeadButton : TaskbarButton, IPointerEnterHandler, IPointerExitHandler
 {
-    [SerializeField] internal GameObject labelContainer;
+    [SerializeField] internal ShowHideAnimator labelContainer;
     [SerializeField] internal TMPro.TextMeshProUGUI label;
     [SerializeField] internal Image portrait;
     [SerializeField] internal UnreadNotificationBadge unreadNotificationBadge;
@@ -18,7 +18,7 @@ public class ChatHeadButton : TaskbarButton, IPointerEnterHandler, IPointerExitH
         this.profile = profile;
         unreadNotificationBadge.Initialize(ChatController.i, profile.userId);
 
-        labelContainer.SetActive(false);
+        labelContainer.Hide(true);
 
         if (profile.userName.Length > 10)
             label.text = profile.userName.Substring(0, 10) + "...";
@@ -45,19 +45,13 @@ public class ChatHeadButton : TaskbarButton, IPointerEnterHandler, IPointerExitH
             profile.OnFaceSnapshotReadyEvent -= Profile_OnFaceSnapshotReadyEvent;
     }
 
-    private void OnCloseButtonPressed()
-    {
-        labelContainer.SetActive(false);
-        SetToggleState(false);
-    }
-
     public void OnPointerEnter(PointerEventData eventData)
     {
-        labelContainer.SetActive(true);
+        labelContainer.Show();
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        labelContainer.SetActive(false);
+        labelContainer.Hide();
     }
 }

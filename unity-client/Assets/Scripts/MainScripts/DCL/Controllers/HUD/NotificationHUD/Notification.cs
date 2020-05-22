@@ -153,7 +153,7 @@ public class Notification : MonoBehaviour
         }
     }
 
-    private void DismissInternal()
+    private void DismissInternal(ShowHideAnimator animator = null)
     {
         if (model.destroyOnFinish)
             Destroy(gameObject);

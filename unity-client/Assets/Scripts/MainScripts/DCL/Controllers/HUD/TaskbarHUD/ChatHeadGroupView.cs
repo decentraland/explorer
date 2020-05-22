@@ -92,6 +92,9 @@ public class ChatHeadGroupView : MonoBehaviour
         chatHead.OnToggleOn += OnToggleOn;
         chatHead.OnToggleOff += OnToggleOff;
 
+        var animator = chatHead.GetComponent<ShowHideAnimator>();
+        animator?.Show();
+
         chatHeads.Add(chatHead);
         SortChatHeads();
 
@@ -106,8 +109,25 @@ public class ChatHeadGroupView : MonoBehaviour
 
     internal void RemoveChatHead(ChatHeadButton chatHead)
     {
-        Destroy(chatHead.gameObject);
+        var animator = chatHead.GetComponent<ShowHideAnimator>();
+
+        if (animator != null)
+        {
+            animator.OnWillFinishHide -= Animator_OnWillFinishHide;
+            animator.OnWillFinishHide += Animator_OnWillFinishHide;
+            animator.Hide();
+        }
+        else
+        {
+            Destroy(chatHead.gameObject);
+        }
+
         chatHeads.Remove(chatHead);
     }
 
+    private void Animator_OnWillFinishHide(ShowHideAnimator animator)
+    {
+        animator.OnWillFinishHide -= Animator_OnWillFinishHide;
+        Destroy(animator.gameObject);
+    }
 }

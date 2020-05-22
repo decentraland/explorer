@@ -7,7 +7,7 @@ public class TaskbarButton : MonoBehaviour
     [FormerlySerializedAs("openButton")]
     public Button toggleButton;
     public GameObject lineOffIndicator;
-    public GameObject lineOnIndicator;
+    public ShowHideAnimator lineOnIndicator;
 
     public event System.Action<TaskbarButton> OnToggleOn;
     public event System.Action<TaskbarButton> OnToggleOff;
@@ -18,6 +18,7 @@ public class TaskbarButton : MonoBehaviour
     {
         toggleButton.onClick.AddListener(OnToggleButtonClick);
         SetToggleState(false, useCallback: false);
+        lineOnIndicator.Hide(true);
     }
 
     private void OnToggleButtonClick()
@@ -53,7 +54,12 @@ public class TaskbarButton : MonoBehaviour
     public void SetLineIndicator(bool on)
     {
         if (lineOnIndicator != null)
-            lineOnIndicator.SetActive(on);
+        {
+            if (on)
+                lineOnIndicator.Show();
+            else
+                lineOnIndicator.Hide();
+        }
 
         if (lineOffIndicator != null)
             lineOffIndicator.SetActive(!on);
