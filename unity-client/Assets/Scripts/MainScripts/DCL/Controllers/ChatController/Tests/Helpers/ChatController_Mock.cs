@@ -1,4 +1,4 @@
-﻿using DCL.Interface;
+using DCL.Interface;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,6 +7,9 @@ public class ChatController_Mock : IChatController
 {
     public event Action<ChatMessage> OnAddMessage;
     List<ChatMessage> entries = new List<ChatMessage>();
+
+    public double initTime => 0;
+
     public List<ChatMessage> GetEntries()
     {
         return entries;
