@@ -19,7 +19,7 @@ import {
   updatePrivateMessagingState,
   updateUserData
 } from './actions'
-import { getClient, findByUserId, isFriend, getPrivateMessaging } from './selectors'
+import { getClient, findByUserId, getPrivateMessaging } from './selectors'
 import { createLogger } from '../logger'
 import { ProfileAsPromise } from '../profiles/ProfileAsPromise'
 import { unityInterface } from 'unity-interface/dcl'
@@ -357,12 +357,6 @@ function* handleSendPrivateMessage(action: SendPrivateMessage, debug: boolean = 
     const userData: ReturnType<typeof findByUserId> = yield select(findByUserId, userId)
     if (!userData) {
       logger.error(`User not found ${userId}`)
-      return
-    }
-
-    const _isFriend: ReturnType<typeof isFriend> = yield select(isFriend, userId)
-    if (!_isFriend) {
-      showErrorNotification(`Trying to send a message to a non friend ${userId}`)
       return
     }
 
