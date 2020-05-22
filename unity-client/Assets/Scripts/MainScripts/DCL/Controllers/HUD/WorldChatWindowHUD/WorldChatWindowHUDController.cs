@@ -73,8 +73,24 @@ public class WorldChatWindowHUDController : IHUD
         Object.Destroy(view);
     }
 
+    bool IsOldPrivateMessage(ChatMessage message)
+    {
+        if (message.messageType != ChatMessage.Type.PRIVATE)
+            return false;
+
+        double timestampAsSeconds = message.timestamp / 1000.0f;
+
+        if (timestampAsSeconds < chatController.initTime)
+            return true;
+
+        return false;
+    }
+
     void OnAddMessage(ChatMessage message)
     {
+        if (IsOldPrivateMessage(message))
+            return;
+
         view.chatHudView.controller.AddChatMessage(ChatHUDController.ChatMessageToChatEntry(message));
 
         if (message.messageType == ChatMessage.Type.PRIVATE && message.recipient == ownProfile.userId)

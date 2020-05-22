@@ -843,7 +843,6 @@ namespace DCL.Interface
 
         public static void UpdateFriendshipStatus(FriendsController.FriendshipUpdateStatusMessage message)
         {
-            Debug.Log("Sending message... " + JsonUtility.ToJson(message) + "... " + message.action);
             SendMessage("UpdateFriendshipStatus", message);
         }
     }
