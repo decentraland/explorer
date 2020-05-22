@@ -26,9 +26,6 @@ public class WorldChatWindowHUDController : IHUD
         view = WorldChatWindowHUDView.Create();
         view.controller = this;
 
-        view.chatHudView.inputField.onSelect.RemoveListener(ChatHUDViewInputField_OnSelect);
-        view.chatHudView.inputField.onSelect.AddListener(ChatHUDViewInputField_OnSelect);
-
         chatHudController = new ChatHUDController();
         chatHudController.Initialize(view.chatHudView, SendChatMessage);
         chatHudController.OnPressPrivateMessage -= ChatHUDController_OnPressPrivateMessage;
@@ -62,8 +59,6 @@ public class WorldChatWindowHUDController : IHUD
 
     public void Dispose()
     {
-        view.chatHudView.inputField.onSelect.RemoveListener(ChatHUDViewInputField_OnSelect);
-
         if (chatController != null)
             chatController.OnAddMessage -= OnAddMessage;
 
@@ -100,12 +95,6 @@ public class WorldChatWindowHUDController : IHUD
 
         if (message.messageType == ChatMessage.Type.PRIVATE && message.recipient == ownProfile.userId)
             lastPrivateMessageReceivedSender = UserProfileController.userProfilesCatalog.Get(message.sender).userName;
-
-        if (view.chatHudView.inputField.isFocused)
-        {
-            // The messages are marked as read if the player was already focused on the input field of the world chat
-            MarkWorldChatMessagesAsRead();
-        }
     }
 
     //NOTE(Brian): Send chat responsibilities must be on the chatHud containing window like this one, this way we ensure
@@ -143,12 +132,6 @@ public class WorldChatWindowHUDController : IHUD
     public void SetVisibility(bool visible)
     {
         view.gameObject.SetActive(visible);
-
-        if (visible)
-        {
-            // The messages are marked as read once the world chat is opened
-            MarkWorldChatMessagesAsRead();
-        }
     }
 
     public bool OnPressReturn()
@@ -178,7 +161,7 @@ public class WorldChatWindowHUDController : IHUD
         }
     }
 
-    private void MarkWorldChatMessagesAsRead()
+    public void MarkWorldChatMessagesAsRead()
     {
         CommonScriptableObjects.lastReadWorldChatMessages.Set(System.DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
         SaveLatestReadWorldChatMessagesStatus();
@@ -195,11 +178,5 @@ public class WorldChatWindowHUDController : IHUD
         CommonScriptableObjects.lastReadWorldChatMessages.Set(0);
         string storedLastReadWorldChatMessagesString = PlayerPrefs.GetString(PLAYER_PREFS_LAST_READ_WORLD_CHAT_MESSAGES);
         CommonScriptableObjects.lastReadWorldChatMessages.Set(System.Convert.ToInt64(string.IsNullOrEmpty(storedLastReadWorldChatMessagesString) ? 0 : System.Convert.ToInt64(storedLastReadWorldChatMessagesString)));
-    }
-
-    private void ChatHUDViewInputField_OnSelect(string message)
-    {
-        // The messages are marked as read if the player clicks on the input field of the world chat
-        MarkWorldChatMessagesAsRead();
     }
 }
