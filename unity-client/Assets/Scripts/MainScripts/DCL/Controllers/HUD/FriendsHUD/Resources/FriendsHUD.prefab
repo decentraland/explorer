@@ -143,8 +143,6 @@ MonoBehaviour:
   entryPrefab: {fileID: 3492364064683962267, guid: 88563d067fb0348b3a1c343c25d57c00,
     type: 3}
   emptyListImage: {fileID: 3818198924903853334}
-  scrollBar: {fileID: 8220218010567520024}
-  scrollRect: {fileID: 1230309097732463093}
   contextMenuPanel: {fileID: 8473461400604206003}
   confirmationDialog: {fileID: 3615013675651196859}
   receivedRequestsList:
@@ -2119,8 +2117,6 @@ MonoBehaviour:
   entryPrefab: {fileID: 434402956254495305, guid: 28149d49252bc4933a8455289c2b15b4,
     type: 3}
   emptyListImage: {fileID: 7768145353694721691}
-  scrollBar: {fileID: 6466575319108658561}
-  scrollRect: {fileID: 4550126368231617820}
   contextMenuPanel: {fileID: 1987134379908678004}
   confirmationDialog: {fileID: 1192872094190131343}
   onlineFriendsList:
@@ -8481,7 +8477,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1964071191878130184
 RectTransform:
   m_ObjectHideFlags: 0
