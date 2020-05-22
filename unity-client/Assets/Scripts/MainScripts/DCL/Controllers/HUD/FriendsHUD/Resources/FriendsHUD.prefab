@@ -105,7 +105,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 0, y: -528}
+  m_AnchoredPosition: {x: 0, y: -624}
   m_SizeDelta: {x: 400, y: 294}
   m_Pivot: {x: 0, y: 0}
 --- !u!225 &2481497620801839290
@@ -1422,7 +1422,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 20, y: 20}
+  m_SizeDelta: {x: 8, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6111230435446464421
 CanvasRenderer:
@@ -1452,7 +1452,7 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
-  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+  m_Sprite: {fileID: 21300000, guid: 7b9d8b2a13149489fac02d8d802c41b6, type: 3}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -2164,7 +2164,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 20, y: 20}
+  m_SizeDelta: {x: 8, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1765594135316873133
 CanvasRenderer:
@@ -2194,7 +2194,7 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
-  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+  m_Sprite: {fileID: 21300000, guid: 7b9d8b2a13149489fac02d8d802c41b6, type: 3}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -6479,8 +6479,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0.52, y: 0}
-  m_SizeDelta: {x: 20, y: 0}
+  m_AnchoredPosition: {x: 0, y: -4}
+  m_SizeDelta: {x: 20, y: -9}
   m_Pivot: {x: 1, y: 1}
 --- !u!222 &6651410584783864586
 CanvasRenderer:
@@ -6503,14 +6503,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 0}
   m_RaycastTarget: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
     m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
-  m_Sprite: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
+  m_Sprite: {fileID: 0}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -7210,7 +7210,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 200, y: -5}
+  m_AnchoredPosition: {x: 200, y: -37}
   m_SizeDelta: {x: 400, y: 10}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3596069761681897216
@@ -8160,13 +8160,13 @@ MonoBehaviour:
   m_margin: {x: 0, y: 0, z: 0, w: 0}
   m_textInfo:
     textComponent: {fileID: 5746423953254440856}
-    characterCount: 60
+    characterCount: 0
     spriteCount: 0
-    spaceCount: 9
-    wordCount: 10
+    spaceCount: 0
+    wordCount: 0
     linkCount: 0
-    lineCount: 2
-    pageCount: 1
+    lineCount: 0
+    pageCount: 0
     materialCount: 1
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
@@ -8221,7 +8221,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 200, y: -47}
+  m_AnchoredPosition: {x: 200, y: -59}
   m_SizeDelta: {x: 400, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &654190599293904870
@@ -8543,8 +8543,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0.5199585, y: 0}
-  m_SizeDelta: {x: 20, y: 0}
+  m_AnchoredPosition: {x: 0, y: -50}
+  m_SizeDelta: {x: 20, y: -55}
   m_Pivot: {x: 1, y: 1}
 --- !u!222 &1988961944850044893
 CanvasRenderer:
@@ -8567,14 +8567,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 0}
   m_RaycastTarget: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
     m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
-  m_Sprite: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
+  m_Sprite: {fileID: 0}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -9796,12 +9796,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6f1d207f329734f55af0baa844844bdc, type: 3}
---- !u!224 &1517377132598062789 stripped
-RectTransform:
-  m_CorrespondingSourceObject: {fileID: 209470434955866080, guid: 6f1d207f329734f55af0baa844844bdc,
-    type: 3}
-  m_PrefabInstance: {fileID: 1722343416482971941}
-  m_PrefabAsset: {fileID: 0}
 --- !u!114 &8473461400604206003 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 7093510303057191574, guid: 6f1d207f329734f55af0baa844844bdc,
@@ -9814,6 +9808,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5796ffbdefae06f4ba10fafb876f9681, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!224 &1517377132598062789 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 209470434955866080, guid: 6f1d207f329734f55af0baa844844bdc,
+    type: 3}
+  m_PrefabInstance: {fileID: 1722343416482971941}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &8782738599111058402
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -9860,6 +9860,26 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2583684662727995992, guid: 6f1d207f329734f55af0baa844844bdc,
+        type: 3}
+      propertyPath: m_textInfo.characterCount
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2583684662727995992, guid: 6f1d207f329734f55af0baa844844bdc,
+        type: 3}
+      propertyPath: m_textInfo.wordCount
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2583684662727995992, guid: 6f1d207f329734f55af0baa844844bdc,
+        type: 3}
+      propertyPath: m_textInfo.lineCount
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2583684662727995992, guid: 6f1d207f329734f55af0baa844844bdc,
+        type: 3}
+      propertyPath: m_textInfo.pageCount
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1559391499053547033, guid: 6f1d207f329734f55af0baa844844bdc,
         type: 3}
@@ -9920,26 +9940,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_AnchoredPosition.y
       value: -93
-      objectReference: {fileID: 0}
-    - target: {fileID: 2583684662727995992, guid: 6f1d207f329734f55af0baa844844bdc,
-        type: 3}
-      propertyPath: m_textInfo.characterCount
-      value: 5
-      objectReference: {fileID: 0}
-    - target: {fileID: 2583684662727995992, guid: 6f1d207f329734f55af0baa844844bdc,
-        type: 3}
-      propertyPath: m_textInfo.wordCount
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 2583684662727995992, guid: 6f1d207f329734f55af0baa844844bdc,
-        type: 3}
-      propertyPath: m_textInfo.lineCount
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 2583684662727995992, guid: 6f1d207f329734f55af0baa844844bdc,
-        type: 3}
-      propertyPath: m_textInfo.pageCount
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3445016899283845686, guid: 6f1d207f329734f55af0baa844844bdc,
         type: 3}
