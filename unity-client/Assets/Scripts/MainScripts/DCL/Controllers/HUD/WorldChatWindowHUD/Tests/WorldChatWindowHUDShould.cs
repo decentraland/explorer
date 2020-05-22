@@ -153,7 +153,7 @@ public class WorldChatWindowHUDShould : TestsBase
     [UnityTest]
     public IEnumerator KeepWhisperCommandAfterUsage()
     {
-        string baseCommand = "/whisper testUser ";
+        string baseCommand = "/w testUser ";
 
         controller.resetInputFieldOnSubmit = false;
 
