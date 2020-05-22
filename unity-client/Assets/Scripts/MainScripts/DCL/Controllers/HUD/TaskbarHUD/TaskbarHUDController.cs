@@ -1,5 +1,7 @@
+using Boo.Lang;
 using DCL;
 using DCL.Helpers;
+using DCL.Interface;
 using System.Linq;
 using UnityEngine;
 
@@ -45,6 +47,12 @@ public class TaskbarHUDController : IHUD
         toggleTrigger = Resources.Load<InputAction_Trigger>("ToggleFriends");
         toggleTrigger.OnTriggered -= ToggleTrigger_OnTriggered;
         toggleTrigger.OnTriggered += ToggleTrigger_OnTriggered;
+
+        if (chatController != null)
+        {
+            chatController.OnAddMessage -= OnAddMessage;
+            chatController.OnAddMessage += OnAddMessage;
+        }
     }
 
     private void ChatHeadsGroup_OnHeadClose(TaskbarButton obj)
@@ -72,6 +80,7 @@ public class TaskbarHUDController : IHUD
     private void View_OnChatToggleOn()
     {
         worldChatWindowHud.SetVisibility(true);
+        worldChatWindowHud.MarkWorldChatMessagesAsRead();
 
         if (view.AllButtonsToggledOff())
         {
@@ -119,6 +128,9 @@ public class TaskbarHUDController : IHUD
 
         worldChatWindowHud.SetVisibility(true);
         worldChatWindowHud.view.ActivatePreview();
+
+        if (!AnyWindowsOpen())
+            worldChatWindowHud.MarkWorldChatMessagesAsRead();
     }
 
     public void AddWorldChatWindow(WorldChatWindowHUDController controller)
@@ -175,6 +187,9 @@ public class TaskbarHUDController : IHUD
 
             if (btn != null)
                 btn.SetToggleState(false, false);
+
+            if (!AnyWindowsOpen())
+                worldChatWindowHud.MarkWorldChatMessagesAsRead();
         };
 
         privateChatWindowHud.view.OnClose += () =>
@@ -188,6 +203,9 @@ public class TaskbarHUDController : IHUD
                 btn.SetToggleState(false, false);
                 view.chatHeadsGroup.RemoveChatHead(btn);
             }
+
+            if (!AnyWindowsOpen())
+                worldChatWindowHud.MarkWorldChatMessagesAsRead();
         };
     }
     public void AddFriendsWindow(FriendsHUDController controller)
@@ -205,7 +223,12 @@ public class TaskbarHUDController : IHUD
 
         friendsHud = controller;
         view.OnAddFriendsWindow();
-        friendsHud.view.OnClose += () => { view.friendsButton.SetToggleState(false, false); };
+        friendsHud.view.OnClose += () => {
+            view.friendsButton.SetToggleState(false, false);
+
+            if (!AnyWindowsOpen())
+                worldChatWindowHud.MarkWorldChatMessagesAsRead();
+        };
     }
 
 
@@ -238,6 +261,9 @@ public class TaskbarHUDController : IHUD
         }
 
         toggleTrigger.OnTriggered -= ToggleTrigger_OnTriggered;
+
+        if (chatController != null)
+            chatController.OnAddMessage -= OnAddMessage;
     }
 
     public void SetVisibility(bool visible)
@@ -258,5 +284,17 @@ public class TaskbarHUDController : IHUD
         view.chatButton.SetToggleState(true);
         view.chatButton.SetToggleState(false, false);
         worldChatWindowHud.view.ActivatePreview();
+    }
+
+    void OnAddMessage(ChatMessage message)
+    {
+        if (!AnyWindowsOpen())
+            worldChatWindowHud.MarkWorldChatMessagesAsRead();
+    }
+
+    private bool AnyWindowsOpen()
+    {
+        return (friendsHud != null && friendsHud.view.gameObject.activeSelf) ||
+               (privateChatWindowHud != null && privateChatWindowHud.view.gameObject.activeSelf);
     }
 }
