@@ -67,7 +67,6 @@ public class TaskbarHUDView : MonoBehaviour
         {
             chatButton.SetToggleState(false, useCallback: false);
             controller.worldChatWindowHud.SetVisibility(true);
-            controller.worldChatWindowHud.view.ActivatePreview();
         }
     }
 

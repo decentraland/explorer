@@ -81,11 +81,7 @@ public class TaskbarHUDController : IHUD
     {
         worldChatWindowHud.SetVisibility(true);
         worldChatWindowHud.MarkWorldChatMessagesAsRead();
-
-        if (view.AllButtonsToggledOff())
-        {
-            worldChatWindowHud.view.DeactivatePreview();
-        }
+        worldChatWindowHud.view.DeactivatePreview();
     }
 
     private void View_OnChatToggleOff()
