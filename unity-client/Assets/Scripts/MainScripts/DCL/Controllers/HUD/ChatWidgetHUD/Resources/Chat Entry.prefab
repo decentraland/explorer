@@ -136,7 +136,8 @@ MonoBehaviour:
   username: {fileID: 4711086080818900299}
   body: {fileID: 8068759164719752186}
   worldMessageColor: {r: 1, g: 1, b: 1, a: 1}
-  privateMessageColor: {r: 0.38431373, g: 1, b: 0.40784314, a: 1}
+  privateToMessageColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  privateFromMessageColor: {r: 0.38431373, g: 1, b: 0.40784314, a: 1}
   systemColor: {r: 0.4669811, g: 1, b: 0.9846577, a: 1}
   playerNameColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   nonPlayerNameColor: {r: 0.88235295, g: 0.9764706, b: 0.98039216, a: 1}
