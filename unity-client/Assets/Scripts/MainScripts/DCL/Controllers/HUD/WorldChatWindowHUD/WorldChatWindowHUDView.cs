@@ -18,7 +18,7 @@ public class WorldChatWindowHUDView : MonoBehaviour, IPointerClickHandler
 
     public event System.Action OnClose;
 
-    Regex whisperRegex = new Regex(@"(?i)^\/(whisper|w) (\S*?) ");
+    Regex whisperRegex = new Regex(@"(?i)^\/(whisper|w) (\S+) (\S+)");
     Match whisperRegexMatch;
 
     public static WorldChatWindowHUDView Create()
@@ -99,12 +99,8 @@ public class WorldChatWindowHUDView : MonoBehaviour, IPointerClickHandler
         whisperRegexMatch = whisperRegex.Match(inputString);
 
         if (whisperRegexMatch.Success)
-        {
-            return whisperRegexMatch.Value;
-        }
+            return $"/w {whisperRegexMatch.Groups[2]} ";
 
         return string.Empty;
     }
-
-
 }
