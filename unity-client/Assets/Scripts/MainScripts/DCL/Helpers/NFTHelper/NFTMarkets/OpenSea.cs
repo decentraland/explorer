@@ -66,6 +66,16 @@ namespace DCL.Helpers.NFT.Markets
                 ret.backgroundColor = backgroundColor;
             }
 
+            OrderInfo? sellOrder = GetSellOrder(response.orders, response.owner.Value.address);
+            if (sellOrder != null)
+            {
+                ret.currentPrice = priceToFloatingPointString(sellOrder.Value.current_price, sellOrder.Value.payment_token_contract);
+                ret.currentPriceToken = new NFT.PaymentTokenInfo()
+                {
+                    symbol = sellOrder.Value.payment_token_contract.symbol
+                };
+            }
+
             return ret;
         }
 
@@ -77,16 +87,34 @@ namespace DCL.Helpers.NFT.Markets
 
         private string priceToFloatingPointString(string price, PaymentTokenInfo tokenInfo)
         {
-            int pointPosition = price.Length - tokenInfo.decimals;
+            string priceString = price;
+            if (price.Contains('.'))
+            {
+                priceString = price.Split('.')[0];
+            }
+            int pointPosition = priceString.Length - tokenInfo.decimals;
             if (pointPosition <= 0)
             {
-                if (pointPosition < 0) pointPosition++;
-                return "0." + string.Concat(Enumerable.Repeat("0", Math.Abs(pointPosition))) + price;
+                return "0." + string.Concat(Enumerable.Repeat("0", Math.Abs(pointPosition))) + priceString;
             }
             else
             {
-                return price.Insert(pointPosition, ".");
+                return priceString.Insert(pointPosition, ".");
             }
+        }
+
+        private OrderInfo? GetSellOrder(OrderInfo[] orders, string nftOwner)
+        {
+            OrderInfo? ret = null;
+            for (int i = 0; i < orders.Length; i++)
+            {
+                if (orders[i].maker.address == nftOwner)
+                {
+                    ret = orders[i];
+                    break;
+                }
+            }
+            return ret;
         }
 
         [Serializable]
@@ -106,6 +134,7 @@ namespace DCL.Helpers.NFT.Markets
             public AccountInfo? owner;
             public string permalink;
             public AssetSaleInfo? last_sale;
+            public OrderInfo[] orders;
         }
 
         [Serializable]
@@ -162,6 +191,14 @@ namespace DCL.Helpers.NFT.Markets
             public AccountInfo? from_account;
             public AccountInfo? to_account;
             public string transaction_hash;
+        }
+
+        [Serializable]
+        struct OrderInfo
+        {
+            public AccountInfo maker;
+            public string current_price;
+            public PaymentTokenInfo payment_token_contract;
         }
     }
 }

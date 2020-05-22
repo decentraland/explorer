@@ -14,6 +14,8 @@
         public PaymentTokenInfo? lastSaleToken;
         public UnityEngine.Color? backgroundColor;
         public MarketInfo? marketInfo;
+        public string currentPrice;
+        public PaymentTokenInfo? currentPriceToken;
 
         static public NFTInfo defaultNFTInfo
         {

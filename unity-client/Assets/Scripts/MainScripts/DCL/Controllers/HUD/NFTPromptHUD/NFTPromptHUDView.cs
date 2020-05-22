@@ -19,7 +19,14 @@ public class NFTPromptHUDView : MonoBehaviour
     [Header("Last Sale")]
     [SerializeField] TextMeshProUGUI textLastSaleSymbol;
     [SerializeField] TextMeshProUGUI textLastSalePrice;
-    [SerializeField] TextMeshProUGUI textLastSaleDate;
+    [SerializeField] TextMeshProUGUI textLastSaleNeverSold;
+    [SerializeField] Image imageLastSaleTokenIcon;
+
+    [Header("Price")]
+    [SerializeField] TextMeshProUGUI textPriceSymbol;
+    [SerializeField] TextMeshProUGUI textPrice;
+    [SerializeField] TextMeshProUGUI textPriceNotForSale;
+    [SerializeField] Image imagePriceTokenIcon;
 
     [Header("Description & Comment")]
     [SerializeField] TextMeshProUGUI textDescription;
@@ -37,6 +44,9 @@ public class NFTPromptHUDView : MonoBehaviour
     [SerializeField] Button buttonOpenMarket;
     [SerializeField] TextMeshProUGUI textOpenMarketButton;
 
+    [Header("Token Icons - Order Matters!")]
+    [SerializeField] Sprite[] spriteTokenIcons;
+
     Coroutine fetchNFTRoutine = null;
     Coroutine fetchNFTImageRoutine = null;
     IWrappedTextureAsset imageAsset = null;
@@ -51,7 +61,11 @@ public class NFTPromptHUDView : MonoBehaviour
         buttonOpenMarket.onClick.AddListener(OpenMarketUrl);
 
         //ShowNFT("0xf64dc33a192e056bb5f0e5049356a0498b502d50", "2481", "let's add some comment");
-        ShowNFT("0xb932a70a57673d89f4acffbe830e8ed7f75fb9e0", "6674", "let's add some comment");
+        //ShowNFT("0xb932a70a57673d89f4acffbe830e8ed7f75fb9e0", "6674", "let's add some comment");
+        //ShowNFT("0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85", "108024385621239244618096740331803135526962319540778177318110146440918862054900", "let's add some comment");
+        //ShowNFT("0x1e1b3525388e8a63988f8455638aee87f68eeaa7", "7", "let's add some comment");
+        //ShowNFT("0x989e1fb123b67afd66e10574c8b409bc6e812d9a", "3182", "let's add some comment");
+        ShowNFT("0xd35147be6401dcb20811f2104c33de8e97ed6818", "4891", "let's add some comment");
     }
 
     internal void ShowNFT(string assetContractAddress, string tokenId, string comment)
@@ -88,7 +102,12 @@ public class NFTPromptHUDView : MonoBehaviour
         textOwner.gameObject.SetActive(false);
         textLastSaleSymbol.gameObject.SetActive(false);
         textLastSalePrice.gameObject.SetActive(false);
-        textLastSaleDate.gameObject.SetActive(false);
+        textLastSaleNeverSold.gameObject.SetActive(false);
+        imageLastSaleTokenIcon.gameObject.SetActive(false);
+        textPriceSymbol.gameObject.SetActive(false);
+        textPrice.gameObject.SetActive(false);
+        textPriceNotForSale.gameObject.SetActive(false);
+        imagePriceTokenIcon.gameObject.SetActive(false);
         containerDescription.SetActive(false);
         containerComment.SetActive(false);
         buttonCancel.gameObject.SetActive(false);
@@ -122,20 +141,27 @@ public class NFTPromptHUDView : MonoBehaviour
         }
         else
         {
-            textLastSalePrice.text = "-";
-            textLastSalePrice.gameObject.SetActive(true);
+            textLastSaleNeverSold.gameObject.SetActive(true);
         }
 
-        if (!string.IsNullOrEmpty(info.lastSaleDate))
+        if (!string.IsNullOrEmpty(info.currentPrice))
         {
-            textLastSaleDate.text = info.lastSaleDate;
-            textLastSaleDate.gameObject.SetActive(true);
+            textPrice.text = ShortDecimals(info.currentPrice, 4);
+            textPrice.gameObject.SetActive(true);
+
+            if (info.currentPriceToken != null)
+            {
+                SetTokenSymbol(textPriceSymbol, imagePriceTokenIcon, info.currentPriceToken.Value.symbol);
+            }
+        }
+        else
+        {
+            textPriceNotForSale.gameObject.SetActive(true);
         }
 
         if (info.lastSaleToken != null)
         {
-            textLastSaleSymbol.text = info.lastSaleToken.Value.symbol;
-            textLastSaleSymbol.gameObject.SetActive(true);
+            SetTokenSymbol(textLastSaleSymbol, imageLastSaleTokenIcon, info.lastSaleToken.Value.symbol);
         }
 
         if (!string.IsNullOrEmpty(info.description))
@@ -227,6 +253,43 @@ public class NFTPromptHUDView : MonoBehaviour
     private void SetSmartBackgroundColor(Texture2D texture)
     {
         imageNftBackground.color = texture.GetPixel(0, 0);
+    }
+
+    private void SetTokenSymbol(TextMeshProUGUI textToken, Image imageToken, string symbol)
+    {
+        switch (symbol)
+        {
+            case "MANA":
+                textToken.gameObject.SetActive(false);
+                imageToken.sprite = spriteTokenIcons[0];
+                imageToken.gameObject.SetActive(true);
+                break;
+            case "ETH":
+                textToken.gameObject.SetActive(false);
+                imageToken.sprite = spriteTokenIcons[1];
+                imageToken.gameObject.SetActive(true);
+                break;
+            case "DAI":
+                textToken.gameObject.SetActive(false);
+                imageToken.sprite = spriteTokenIcons[2];
+                imageToken.gameObject.SetActive(true);
+                break;
+            case "USDC":
+                textToken.gameObject.SetActive(false);
+                imageToken.sprite = spriteTokenIcons[3];
+                imageToken.gameObject.SetActive(true);
+                break;
+            case "WETH":
+                textToken.gameObject.SetActive(false);
+                imageToken.sprite = spriteTokenIcons[4];
+                imageToken.gameObject.SetActive(true);
+                break;
+            default:
+                textToken.text = symbol;
+                textToken.gameObject.SetActive(true);
+                imageToken.gameObject.SetActive(false);
+                break;
+        }
     }
 
     private void OpenMarketUrl()
