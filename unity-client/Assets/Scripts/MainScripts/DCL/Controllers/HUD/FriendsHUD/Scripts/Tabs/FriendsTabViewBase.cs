@@ -201,13 +201,12 @@ public class FriendsTabViewBase : MonoBehaviour, IPointerDownHandler
     {
         if (entries.ContainsKey(userId)) return false;
 
-        if (emptyListImage.activeSelf)
-            emptyListImage.SetActive(false);
-
         var entry = Instantiate(entryPrefab).GetComponent<FriendEntryBase>();
         entries.Add(userId, entry);
 
         entry.OnMenuToggle += (x) => { contextMenuPanel.Toggle(entry); };
+
+        UpdateEmptyListObjects();
 
         return true;
     }
@@ -234,24 +233,14 @@ public class FriendsTabViewBase : MonoBehaviour, IPointerDownHandler
         UnityEngine.Object.Destroy(entry.gameObject);
         entries.Remove(userId);
 
-        if (entries.Count == 0)
-            emptyListImage.SetActive(true);
-
-        UpdateToggleTexts();
+        UpdateEmptyListObjects();
 
         rectTransform.ForceUpdateLayout();
         return true;
     }
 
-    protected virtual void UpdateToggleTexts()
+    protected virtual void UpdateEmptyListObjects()
     {
-        if (entries.Count == 0)
-        {
-            emptyListImage.SetActive(true);
-        }
-        else
-        {
-            emptyListImage.SetActive(false);
-        }
+        emptyListImage.SetActive(entries.Count == 0);
     }
 }
