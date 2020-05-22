@@ -1105,8 +1105,7 @@ export function updateBuilderScene(sceneData: ILand) {
 teleportObservable.add((position: { x: number; y: number; text?: string }) => {
   // before setting the new position, show loading screen to avoid showing an empty world
   setLoadingScreenVisible(true)
-  const globalStore = globalThis.globalStore
-  globalStore.dispatch(teleportTriggered(position.text || `Teleporting to ${position.x}, ${position.y}`))
+  globalThis.globalStore.dispatch(teleportTriggered(position.text || `Teleporting to ${position.x}, ${position.y}`))
 })
 
 worldRunningObservable.add(isRunning => {
