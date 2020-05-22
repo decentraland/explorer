@@ -261,7 +261,7 @@ export function getServerConfigurations() {
     synapseUrl = `https://matrix.decentraland.zone`
   } else {
     synapseHost = 'decentraland.modular.im'
-    synapseUrl = `https://decentraland.modular.im/_matrix/static/`
+    synapseUrl = `https://decentraland.modular.im`
   }
 
   return {
