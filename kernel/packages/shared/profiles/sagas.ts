@@ -161,6 +161,7 @@ export function* initialLoad() {
       const catalog = collections
         .reduce((flatten, collection) => flatten.concat(collection.wearables), [] as Wearable[])
         .map(overrideBaseUrl)
+        // TODO - remove once all swankies are removed from service! - moliva - 22/05/2020
         .map(overrideSwankyRarity)
       const baseAvatars = catalog.filter((_: Wearable) => _.tags && !_.tags.includes('exclusive'))
       const baseExclusive = catalog.filter((_: Wearable) => _.tags && _.tags.includes('exclusive'))
