@@ -11,7 +11,7 @@ namespace DCL.Helpers.NFT.Markets
 
         MarketInfo openSeaMarketInfo = new MarketInfo() { name = "OpenSea" };
 
-        IEnumerator INFTMarket.fetchNFTInfo(string assetContractAddress, string tokenId, Action<NFTInfo> onSuccess)
+        IEnumerator INFTMarket.FetchNFTInfo(string assetContractAddress, string tokenId, Action<NFTInfo> onSuccess)
         {
             string url = string.Format(API_URL_SINGLE_ASSET, assetContractAddress, tokenId);
             using (UnityWebRequest request = UnityWebRequest.Get(url))
@@ -21,12 +21,12 @@ namespace DCL.Helpers.NFT.Markets
                 if (!request.isNetworkError && !request.isHttpError)
                 {
                     AssetResponse response = Utils.FromJsonWithNulls<AssetResponse>(request.downloadHandler.text);
-                    onSuccess?.Invoke(responseToNFTInfo(response));
+                    onSuccess?.Invoke(ResponseToNFTInfo(response));
                 }
             }
         }
 
-        private NFTInfo responseToNFTInfo(AssetResponse response)
+        private NFTInfo ResponseToNFTInfo(AssetResponse response)
         {
             NFTInfo ret = NFTInfo.defaultNFTInfo;
             ret.marketInfo = openSeaMarketInfo;
@@ -52,7 +52,7 @@ namespace DCL.Helpers.NFT.Markets
 
                 if (response.last_sale.Value.payment_token != null)
                 {
-                    ret.lastSaleAmount = priceToFloatingPointString(response.last_sale.Value);
+                    ret.lastSaleAmount = PriceToFloatingPointString(response.last_sale.Value);
                     ret.lastSaleToken = new NFT.PaymentTokenInfo()
                     {
                         symbol = response.last_sale.Value.payment_token.Value.symbol
@@ -69,7 +69,7 @@ namespace DCL.Helpers.NFT.Markets
             OrderInfo? sellOrder = GetSellOrder(response.orders, response.owner.Value.address);
             if (sellOrder != null)
             {
-                ret.currentPrice = priceToFloatingPointString(sellOrder.Value.current_price, sellOrder.Value.payment_token_contract);
+                ret.currentPrice = PriceToFloatingPointString(sellOrder.Value.current_price, sellOrder.Value.payment_token_contract);
                 ret.currentPriceToken = new NFT.PaymentTokenInfo()
                 {
                     symbol = sellOrder.Value.payment_token_contract.symbol
@@ -79,13 +79,13 @@ namespace DCL.Helpers.NFT.Markets
             return ret;
         }
 
-        private string priceToFloatingPointString(AssetSaleInfo saleInfo)
+        private string PriceToFloatingPointString(AssetSaleInfo saleInfo)
         {
             if (saleInfo.payment_token == null) return null;
-            return priceToFloatingPointString(saleInfo.total_price, saleInfo.payment_token.Value);
+            return PriceToFloatingPointString(saleInfo.total_price, saleInfo.payment_token.Value);
         }
 
-        private string priceToFloatingPointString(string price, PaymentTokenInfo tokenInfo)
+        private string PriceToFloatingPointString(string price, PaymentTokenInfo tokenInfo)
         {
             string priceString = price;
             if (price.Contains('.'))

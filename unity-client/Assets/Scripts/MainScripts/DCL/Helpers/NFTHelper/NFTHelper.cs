@@ -8,19 +8,19 @@ namespace DCL.Helpers.NFT
     {
         static INFTMarket market = new OpenSea();
 
-        static public IEnumerator fetchNFTInfo(string assetContractAddress, string tokenId, Action<NFTInfo> onSuccess)
+        static public IEnumerator FetchNFTInfo(string assetContractAddress, string tokenId, Action<NFTInfo> onSuccess)
         {
             INFTMarket selectedMarket = null;
-            yield return getMarket(assetContractAddress, tokenId, (mkt) => selectedMarket = mkt);
+            yield return GetMarket(assetContractAddress, tokenId, (mkt) => selectedMarket = mkt);
 
             if (selectedMarket != null)
             {
-                yield return selectedMarket.fetchNFTInfo(assetContractAddress, tokenId, onSuccess);
+                yield return selectedMarket.FetchNFTInfo(assetContractAddress, tokenId, onSuccess);
             }
         }
 
         // NOTE: this method doesn't make sense now, but it will when support for other market is added
-        static public IEnumerator getMarket(string assetContractAddress, string tokenId, Action<INFTMarket> onSuccess)
+        static public IEnumerator GetMarket(string assetContractAddress, string tokenId, Action<INFTMarket> onSuccess)
         {
             onSuccess?.Invoke(market);
             yield break;

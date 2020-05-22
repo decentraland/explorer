@@ -78,7 +78,7 @@ public class NFTPromptHUDView : MonoBehaviour
 
         SetLoading();
 
-        fetchNFTRoutine = StartCoroutine(NFTHelper.fetchNFTInfo(assetContractAddress, tokenId, (nftInfo) => SetNFTInfo(nftInfo, comment)));
+        fetchNFTRoutine = StartCoroutine(NFTHelper.FetchNFTInfo(assetContractAddress, tokenId, (nftInfo) => SetNFTInfo(nftInfo, comment)));
     }
 
     internal void Hide()
