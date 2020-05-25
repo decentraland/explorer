@@ -16,10 +16,10 @@ public class JumpInButton : MonoBehaviour
     private string currentUserId;
     private FriendsController.UserStatus currentUserStatus;
 
-    private Vector2 currentCoords;
-    private string currentRealmServerName;
-    private string currentRealmLayerName;
-    private PresenceStatus currentPresenceStatus;
+    internal Vector2 currentCoords;
+    internal string currentRealmServerName;
+    internal string currentRealmLayerName;
+    internal PresenceStatus currentPresenceStatus;
 
     /// <summary>
     /// Prepares the JumpIn button for listening to a specific user.
@@ -62,7 +62,7 @@ public class JumpInButton : MonoBehaviour
 
     private void SearchUserStatus(string userId)
     {
-        if (FriendsController.i.GetFriends().TryGetValue(userId, out currentUserStatus))
+        if (currentFriendsController.GetFriends().TryGetValue(userId, out currentUserStatus))
         {
             UpdateInfo(
                 currentUserStatus.position,
