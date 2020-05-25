@@ -16,9 +16,9 @@ public class ChatHUDShould : TestsBase
         yield break;
     }
 
-    string lastMsgSent;
+    ChatMessage lastMsgSent;
 
-    void OnSendMessage(string msg)
+    void OnSendMessage(ChatMessage msg)
     {
         lastMsgSent = msg;
     }

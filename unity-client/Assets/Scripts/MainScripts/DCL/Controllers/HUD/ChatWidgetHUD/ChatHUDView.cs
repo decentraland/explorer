@@ -7,11 +7,14 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
+using System.Text.RegularExpressions;
+
 public class ChatHUDView : MonoBehaviour
 {
     static string VIEW_PATH = "Chat Widget";
     string ENTRY_PATH = "Chat Entry";
 
+    public bool detectWhisper = true;
     public TMP_InputField inputField;
     public RectTransform chatEntriesContainer;
 
@@ -21,8 +24,12 @@ public class ChatHUDView : MonoBehaviour
     public TextMeshProUGUI messageHoverText;
     [NonSerialized] public List<ChatEntry> entries = new List<ChatEntry>();
 
+    ChatMessage currentMessage = new ChatMessage();
+    Regex whisperRegex = new Regex(@"(?i)^\/(whisper|w) (\S+) (.*)");
+    Match whisperRegexMatch;
+
     public event UnityAction<string> OnPressPrivateMessage;
-    private UnityAction<string> OnSendMessageAction;
+    public event UnityAction<ChatMessage> OnSendMessage;
 
     public static ChatHUDView Create()
     {
@@ -30,25 +37,41 @@ public class ChatHUDView : MonoBehaviour
         return view;
     }
 
-    public void Initialize(ChatHUDController controller, UnityAction<string> OnSendMessage)
+    public void Initialize(ChatHUDController controller, UnityAction<ChatMessage> OnSendMessage)
     {
         this.controller = controller;
-        OnSendMessageAction = OnSendMessage;
+        this.OnSendMessage += OnSendMessage;
         inputField.onSubmit.AddListener(OnInputFieldSubmit);
     }
 
     private void OnInputFieldSubmit(string message)
     {
+        currentMessage.body = message;
+        currentMessage.sender = UserProfile.GetOwnUserProfile().userId;
+        currentMessage.messageType = ChatMessage.Type.NONE;
+        currentMessage.recipient = string.Empty;
+
+        if (detectWhisper)
+        {
+            whisperRegexMatch = whisperRegex.Match(message);
+            if (whisperRegexMatch.Success)
+            {
+                currentMessage.messageType = ChatMessage.Type.PRIVATE;
+                currentMessage.recipient = whisperRegexMatch.Groups[2].Value;
+                currentMessage.body = whisperRegexMatch.Groups[3].Value;
+            }
+        }
+
         // A TMP_InputField is automatically marked as 'wasCanceled' when the ESC key is pressed
         if (inputField.wasCanceled)
-            message = "";
+            currentMessage.body = string.Empty;
 
-        OnSendMessageAction(message);
+        OnSendMessage?.Invoke(currentMessage);
     }
 
     public void ResetInputField()
     {
-        inputField.text = "";
+        inputField.text = string.Empty;
         inputField.caretColor = Color.white;
     }
 

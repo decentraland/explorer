@@ -132,7 +132,7 @@ public class WorldChatWindowHUDShould : TestsBase
 
         WebInterface.OnMessageFromEngine += messageCallback;
         controller.resetInputFieldOnSubmit = false;
-        controller.SendChatMessage("test message");
+        controller.SendChatMessage(new ChatMessage() { body = "test message" });
         Assert.IsTrue(messageWasSent);
         WebInterface.OnMessageFromEngine -= messageCallback;
         yield return null;

@@ -27,10 +27,12 @@ public class WorldChatWindowHUDController : IHUD
         view.controller = this;
 
         chatHudController = new ChatHUDController();
-        chatHudController.Initialize(view.chatHudView, SendChatMessage);
+        chatHudController.Initialize(view.chatHudView);
         chatHudController.OnPressPrivateMessage -= ChatHUDController_OnPressPrivateMessage;
         chatHudController.OnPressPrivateMessage += ChatHUDController_OnPressPrivateMessage;
         LoadLatestReadWorldChatMessagesStatus();
+
+        view.OnSendMessage += SendChatMessage;
 
         this.chatController = chatController;
         this.mouseCatcher = mouseCatcher;
@@ -66,9 +68,9 @@ public class WorldChatWindowHUDController : IHUD
             chatHudController.OnPressPrivateMessage -= ChatHUDController_OnPressPrivateMessage;
 
         if (mouseCatcher != null)
-        {
             mouseCatcher.OnMouseLock -= view.ActivatePreview;
-        }
+
+        view.OnSendMessage -= SendChatMessage;
 
         Object.Destroy(view);
     }
@@ -99,18 +101,25 @@ public class WorldChatWindowHUDController : IHUD
 
     //NOTE(Brian): Send chat responsibilities must be on the chatHud containing window like this one, this way we ensure
     //             it can be reused by the private messaging windows down the road.
-    public void SendChatMessage(string msgBody)
+    public void SendChatMessage(ChatMessage message)
     {
-        bool validString = !string.IsNullOrEmpty(msgBody);
+        bool validMessage = !string.IsNullOrEmpty(message.body);
+        if (validMessage && message.body.Length == 1 && (byte)message.body[0] == 11) //NOTE(Brian): Trim doesn't work. neither IsNullOrWhitespace.
+            validMessage = false;
 
-        if (msgBody.Length == 1 && (byte)msgBody[0] == 11) //NOTE(Brian): Trim doesn't work. neither IsNullOrWhitespace.
-            validString = false;
+        bool isPrivateMessage = message.messageType == ChatMessage.Type.PRIVATE;
 
-        if (!validString)
+        if (!validMessage)
         {
-            view.ActivatePreview();
-            InitialSceneReferences.i.mouseCatcher.LockCursor();
-            invalidSubmitLastFrame = Time.frameCount;
+            EventSystem.current.SetSelectedGameObject(null);
+
+            if (!isPrivateMessage && !view.isInPreview)
+            {
+                view.ActivatePreview();
+                InitialSceneReferences.i.mouseCatcher.LockCursor();
+                invalidSubmitLastFrame = Time.frameCount;
+            }
+
             return;
         }
 
@@ -120,13 +129,12 @@ public class WorldChatWindowHUDController : IHUD
             view.chatHudView.FocusInputField();
         }
 
-        var data = new ChatMessage()
+        if (isPrivateMessage)
         {
-            body = msgBody,
-            sender = UserProfile.GetOwnUserProfile().userId,
-        };
+            message.body = $"/w {message.recipient} {message.body}";
+        }
 
-        WebInterface.SendChatMessage(data);
+        WebInterface.SendChatMessage(message);
     }
 
     public void SetVisibility(bool visible)
