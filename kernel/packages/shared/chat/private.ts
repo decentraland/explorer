@@ -36,7 +36,7 @@ import { isAddedToCatalog } from 'shared/profiles/selectors'
 
 declare const globalThis: StoreContainer
 
-const DEBUG = false
+const DEBUG = true
 
 const logger = createLogger('chat: ')
 
@@ -272,7 +272,7 @@ function sendUpdateUserStatus(id: string, status: CurrentUserStatus) {
     presence
   }
 
-  DEBUG && logger.info(`unityInterface.UpdateUserStatus`, updateMessage)
+  DEBUG && logger.info(`unityInterface.UpdateUserPresence`, updateMessage)
   unityInterface.UpdateUserPresence(updateMessage)
 }
 
@@ -287,6 +287,7 @@ function initializeStatusUpdateInterval(client: SocialAPI) {
   })
 
   client.onStatusChange((socialId, status) => {
+    DEBUG && logger.info(`client.onStatusChange`, socialId, status)
     const user: SocialData | undefined = globalThis.globalStore.getState().chat.privateMessaging.socialInfo[socialId]
 
     if (!user) {
