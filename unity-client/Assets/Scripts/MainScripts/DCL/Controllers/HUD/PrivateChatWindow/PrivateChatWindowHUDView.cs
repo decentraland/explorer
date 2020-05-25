@@ -49,6 +49,8 @@ public class PrivateChatWindowHUDView : MonoBehaviour
 
     public void ChatHUDView_OnSendMessage(ChatMessage message)
     {
+        if (string.IsNullOrEmpty(message.body)) return;
+
         message.messageType = ChatMessage.Type.PRIVATE;
         message.recipient = controller.conversationUserName;
 
