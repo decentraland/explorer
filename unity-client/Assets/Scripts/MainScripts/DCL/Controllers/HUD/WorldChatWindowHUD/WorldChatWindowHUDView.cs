@@ -96,6 +96,5 @@ public class WorldChatWindowHUDView : MonoBehaviour, IPointerClickHandler
 
         chatHudView.inputField.text = newText;
         chatHudView.inputField.caretPosition = newText.Length;
-        chatHudView.FocusInputField();
     }
 }
