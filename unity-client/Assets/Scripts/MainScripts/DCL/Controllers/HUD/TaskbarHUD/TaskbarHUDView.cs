@@ -7,7 +7,7 @@ public class TaskbarHUDView : MonoBehaviour
     const string VIEW_PATH = "Taskbar";
 
     [SerializeField] internal RectTransform windowContainer;
-    [SerializeField] internal CanvasGroup windowContainerCanvasGroup;
+    [SerializeField] internal ShowHideAnimator windowContainerAnimator;
     [SerializeField] internal LayoutGroup windowContainerLayout;
 
     [SerializeField] internal TaskbarButton chatButton;

@@ -98,25 +98,25 @@ public class TaskbarHUDShould : TestsBase
         //NOTE(Brian): Toggle chat head on and test it works as intended
         headButton.toggleButton.onClick.Invoke();
 
-        Assert.IsTrue(headButton.lineOnIndicator.activeInHierarchy);
-        Assert.IsFalse(view.friendsButton.lineOnIndicator.activeInHierarchy);
-        Assert.IsFalse(view.chatButton.lineOnIndicator.activeInHierarchy);
+        Assert.IsTrue(headButton.lineOnIndicator.isVisible);
+        Assert.IsFalse(view.friendsButton.lineOnIndicator.isVisible);
+        Assert.IsFalse(view.chatButton.lineOnIndicator.isVisible);
         Assert.IsTrue(controller.privateChatWindowHud.view.gameObject.activeInHierarchy);
 
         //NOTE(Brian): Toggle friends window on and test all other windows are untoggled
         view.friendsButton.toggleButton.onClick.Invoke();
 
         Assert.IsFalse(controller.privateChatWindowHud.view.gameObject.activeInHierarchy);
-        Assert.IsFalse(headButton.lineOnIndicator.activeInHierarchy);
-        Assert.IsTrue(view.friendsButton.lineOnIndicator.activeInHierarchy);
-        Assert.IsFalse(view.chatButton.lineOnIndicator.activeInHierarchy);
+        Assert.IsFalse(headButton.lineOnIndicator.isVisible);
+        Assert.IsTrue(view.friendsButton.lineOnIndicator.isVisible);
+        Assert.IsFalse(view.chatButton.lineOnIndicator.isVisible);
 
         //NOTE(Brian): Toggle friends window off and test all other windows are untoggled
         view.friendsButton.toggleButton.onClick.Invoke();
 
         Assert.IsFalse(controller.privateChatWindowHud.view.gameObject.activeInHierarchy);
-        Assert.IsFalse(headButton.lineOnIndicator.activeInHierarchy);
-        Assert.IsFalse(view.friendsButton.lineOnIndicator.activeInHierarchy);
+        Assert.IsFalse(headButton.lineOnIndicator.isVisible);
+        Assert.IsFalse(view.friendsButton.lineOnIndicator.isVisible);
 
         //NOTE(Brian): Toggle friends on, and then chat button on. Then check if world chat window is showing up.
         view.friendsButton.toggleButton.onClick.Invoke();
@@ -124,6 +124,6 @@ public class TaskbarHUDShould : TestsBase
 
         Assert.IsTrue(controller.worldChatWindowHud.view.gameObject.activeInHierarchy);
         Assert.IsFalse(controller.friendsHud.view.gameObject.activeInHierarchy);
-        Assert.IsFalse(view.friendsButton.lineOnIndicator.activeInHierarchy);
+        Assert.IsFalse(view.friendsButton.lineOnIndicator.isVisible);
     }
 }

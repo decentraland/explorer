@@ -45,4 +45,9 @@ public class FriendsController_Mock : IFriendsController
     {
         OnFriendNotFound?.Invoke(id);
     }
+
+    public void AddFriend(FriendsController.UserStatus newFriend)
+    {
+        friends.Add(newFriend.userId, newFriend);
+    }
 }

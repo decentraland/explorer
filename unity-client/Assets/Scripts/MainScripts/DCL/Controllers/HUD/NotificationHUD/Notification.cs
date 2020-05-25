@@ -153,8 +153,14 @@ public class Notification : MonoBehaviour
         }
     }
 
-    private void DismissInternal()
+    private void DismissInternal(ShowHideAnimator animator = null)
     {
+        if (this == null)
+            return;
+
+        if (showHideAnimator != null)
+            showHideAnimator.OnWillFinishHide -= DismissInternal;
+
         if (model.destroyOnFinish)
             Destroy(gameObject);
         else

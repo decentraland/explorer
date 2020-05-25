@@ -1,4 +1,3 @@
-using Boo.Lang;
 using DCL;
 using DCL.Helpers;
 using DCL.Interface;
@@ -73,7 +72,7 @@ public class TaskbarHUDController : IHUD
     private void ToggleTrigger_OnTriggered(DCLAction_Trigger action)
     {
         Utils.UnlockCursor();
-        view.windowContainerCanvasGroup.alpha = 1;
+        view.windowContainerAnimator.Show();
         view.friendsButton.SetToggleState(!view.friendsButton.toggledOn);
     }
 
@@ -82,6 +81,7 @@ public class TaskbarHUDController : IHUD
         worldChatWindowHud.SetVisibility(true);
         worldChatWindowHud.MarkWorldChatMessagesAsRead();
         worldChatWindowHud.view.DeactivatePreview();
+        OnPressReturn();
     }
 
     private void View_OnChatToggleOff()
@@ -110,12 +110,12 @@ public class TaskbarHUDController : IHUD
 
     private void MouseCatcher_OnMouseUnlock()
     {
-        view.windowContainerCanvasGroup.alpha = 1;
+        view.windowContainerAnimator.Show();
     }
 
     private void MouseCatcher_OnMouseLock()
     {
-        view.windowContainerCanvasGroup.alpha = 0;
+        view.windowContainerAnimator.Hide();
 
         foreach (var btn in view.GetButtonList())
         {
@@ -219,7 +219,8 @@ public class TaskbarHUDController : IHUD
 
         friendsHud = controller;
         view.OnAddFriendsWindow();
-        friendsHud.view.OnClose += () => {
+        friendsHud.view.OnClose += () =>
+        {
             view.friendsButton.SetToggleState(false, false);
 
             if (!AnyWindowsOpen())

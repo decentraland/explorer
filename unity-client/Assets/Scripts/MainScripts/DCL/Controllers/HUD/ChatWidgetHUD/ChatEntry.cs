@@ -5,6 +5,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
+using UnityEngine.Serialization;
 
 public class ChatEntry : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
 {
@@ -34,7 +35,13 @@ public class ChatEntry : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
     [SerializeField] internal TextMeshProUGUI body;
 
     [SerializeField] internal Color worldMessageColor = Color.white;
-    [SerializeField] internal Color privateMessageColor = Color.white;
+
+    [FormerlySerializedAs("privateMessageColor")]
+    [SerializeField] internal Color privateToMessageColor = Color.white;
+
+    [FormerlySerializedAs("privateMessageColor")]
+    [SerializeField] internal Color privateFromMessageColor = Color.white;
+
     [SerializeField] internal Color systemColor = Color.white;
     [SerializeField] internal Color playerNameColor = Color.yellow;
     [SerializeField] internal Color nonPlayerNameColor = Color.white;
@@ -82,7 +89,13 @@ public class ChatEntry : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
                 body.color = worldMessageColor;
 
                 if (username != null)
-                    username.color = privateMessageColor;
+                {
+                    if (model.subType == Model.SubType.PRIVATE_TO)
+                        username.color = privateToMessageColor;
+                    else
+                        username.color = privateFromMessageColor;
+                }
+
                 break;
             case ChatMessage.Type.SYSTEM:
                 body.color = systemColor;
