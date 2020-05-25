@@ -131,7 +131,8 @@ public class WorldChatWindowHUDController : IHUD
 
     public bool OnPressReturn()
     {
-        if (EventSystem.current.currentSelectedGameObject != null &&
+        if (EventSystem.current != null &&
+            EventSystem.current.currentSelectedGameObject != null &&
             EventSystem.current.currentSelectedGameObject.GetComponent<TMPro.TMP_InputField>() != null)
             return false;
 
@@ -147,7 +148,7 @@ public class WorldChatWindowHUDController : IHUD
         SetVisibility(true);
         view.chatHudView.FocusInputField();
         view.DeactivatePreview();
-        InitialSceneReferences.i.mouseCatcher.UnlockCursor();
+        InitialSceneReferences.i?.mouseCatcher.UnlockCursor();
 
         if (!string.IsNullOrEmpty(setInputText))
         {

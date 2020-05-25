@@ -254,15 +254,7 @@ export function getWearablesSafeURL() {
 export function getServerConfigurations() {
   const TLDDefault = getDefaultTLD()
 
-  let synapseHost
-  let synapseUrl
-  if (TLDDefault === 'zone') {
-    synapseHost = `matrix.decentraland.zone`
-    synapseUrl = `https://matrix.decentraland.zone`
-  } else {
-    synapseHost = 'decentraland.modular.im'
-    synapseUrl = `https://decentraland.modular.im`
-  }
+  const synapseUrl = TLDDefault === 'zone' ? `https://matrix.decentraland.zone` : `https://decentraland.modular.im`
 
   return {
     contentAsBundle: `https://content-assets-as-bundle.decentraland.org`,
@@ -270,7 +262,6 @@ export function getServerConfigurations() {
     explorerConfiguration: `https://explorer-config.decentraland.${
       TLDDefault === 'today' ? 'org' : TLDDefault
     }/configuration.json`,
-    synapseHost,
     synapseUrl,
     avatar: {
       snapshotStorage: `https://avatars-storage.decentraland.${TLDDefault}/`,

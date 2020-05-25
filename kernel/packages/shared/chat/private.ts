@@ -263,7 +263,8 @@ function sendUpdateUserStatus(id: string, status: CurrentUserStatus) {
   const presence: PresenceStatus =
     status.presence === PresenceType.ONLINE ? PresenceStatus.ONLINE : PresenceStatus.OFFLINE
 
-  let matches = id.match(/@(\w.+):matrix.decentraland.zone/i)
+  const domain = globalThis.globalStore.getState().chat.privateMessaging.client?.getDomain()
+  let matches = id.match(new RegExp(`@(\\w.+):${domain}`, 'i'))
 
   const updateMessage = {
     userId: matches !== null ? matches[1] : id,
@@ -277,10 +278,13 @@ function sendUpdateUserStatus(id: string, status: CurrentUserStatus) {
 }
 
 function initializeStatusUpdateInterval(client: SocialAPI) {
-  let friends = globalThis.globalStore.getState().chat.privateMessaging.friends.map(x => {
-    return `@${x}:matrix.decentraland.zone`
+  const domain = globalThis.globalStore.getState().chat.privateMessaging.client?.getDomain()
+
+  const friends = globalThis.globalStore.getState().chat.privateMessaging.friends.map(x => {
+    return `@${x}:${domain}`
   })
-  let statuses = client.getUserStatuses(...friends)
+  const statuses = client.getUserStatuses(...friends)
+  DEBUG && logger.info(`initialize status`, friends, statuses)
 
   statuses.forEach((value, key) => {
     sendUpdateUserStatus(key, value)

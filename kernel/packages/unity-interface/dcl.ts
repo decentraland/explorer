@@ -19,8 +19,7 @@ import {
   RESET_TUTORIAL,
   SCENE_DEBUG_PANEL,
   SHOW_FPS_COUNTER,
-  tutorialEnabled,
-  getServerConfigurations
+  tutorialEnabled
 } from '../config'
 import { Quaternion, ReadOnlyQuaternion, ReadOnlyVector3, Vector3 } from '../decentraland-ecs/src/decentraland/math'
 import { IEventNames, IEvents, ProfileForRenderer, MinimapSceneInfo } from '../decentraland-ecs/src/decentraland/Types'
@@ -449,7 +448,8 @@ async function queryGraph(query: string, variables: any) {
 }
 
 function toSocialId(userId: string) {
-  return `@${userId.toLowerCase()}:${getServerConfigurations().synapseHost}`
+  const domain = globalThis.globalStore.getState().chat.privateMessaging.client?.getDomain()
+  return `@${userId.toLowerCase()}:${domain}`
 }
 
 export function setLoadingScreenVisible(shouldShow: boolean) {
