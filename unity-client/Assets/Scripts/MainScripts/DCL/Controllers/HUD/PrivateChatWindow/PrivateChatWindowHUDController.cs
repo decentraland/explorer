@@ -28,8 +28,10 @@ public class PrivateChatWindowHUDController : IHUD
         view.chatHudView.inputField.onSelect.AddListener(ChatHUDViewInputField_OnSelect);
 
         chatHudController = new ChatHUDController();
-        chatHudController.Initialize(view.chatHudView, SendChatMessage);
+        chatHudController.Initialize(view.chatHudView);
         LoadLatestReadChatMessagesStatus();
+
+        view.OnSendMessage += SendChatMessage;
 
         this.chatController = chatController;
 
@@ -69,19 +71,15 @@ public class PrivateChatWindowHUDController : IHUD
         }
     }
 
-    public void SendChatMessage(string msgBody)
+    public void SendChatMessage(ChatMessage message)
     {
         if (string.IsNullOrEmpty(conversationUserName)) return;
 
-        bool validString = !string.IsNullOrEmpty(msgBody);
+        bool validMessage = !string.IsNullOrEmpty(message.body) || !string.IsNullOrEmpty(message.recipient);
+        if (validMessage && message.body.Length == 1 && (byte)message.body[0] == 11) //NOTE(Brian): Trim doesn't work. neither IsNullOrWhitespace.
+            validMessage = false;
 
-        if (msgBody.Length == 1 && (byte)msgBody[0] == 11) //NOTE(Brian): Trim doesn't work. neither IsNullOrWhitespace.
-            validString = false;
-
-        if (!validString)
-        {
-            return;
-        }
+        if (!validMessage) return;
 
         if (resetInputFieldOnSubmit)
         {
@@ -89,14 +87,10 @@ public class PrivateChatWindowHUDController : IHUD
             view.chatHudView.FocusInputField();
         }
 
-        var data = new ChatMessage()
-        {
-            body = $"/w {conversationUserName} " + msgBody,
-            sender = UserProfile.GetOwnUserProfile().userId,
-            messageType = ChatMessage.Type.PRIVATE
-        };
+        // If Kernel allowed for private messages without the whisper param we could avoid this line
+        message.body = $"/w {message.recipient} {message.body}";
 
-        WebInterface.SendChatMessage(data);
+        WebInterface.SendChatMessage(message);
     }
 
     public void SetVisibility(bool visible)

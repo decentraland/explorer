@@ -1,7 +1,8 @@
-
 using TMPro;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
+using DCL.Interface;
 
 public class PrivateChatWindowHUDView : MonoBehaviour
 {
@@ -19,6 +20,12 @@ public class PrivateChatWindowHUDView : MonoBehaviour
     public event System.Action OnPressBack;
     public event System.Action OnMinimize;
     public event System.Action OnClose;
+    public UnityAction<ChatMessage> OnSendMessage;
+
+    void Awake()
+    {
+        chatHudView.OnSendMessage += ChatHUDView_OnSendMessage;
+    }
 
     void OnEnable()
     {
@@ -38,6 +45,16 @@ public class PrivateChatWindowHUDView : MonoBehaviour
         this.minimizeButton.onClick.AddListener(OnMinimizeButtonPressed);
         this.closeButton.onClick.AddListener(OnCloseButtonPressed);
         this.backButton.onClick.AddListener(() => { OnPressBack?.Invoke(); });
+    }
+
+    public void ChatHUDView_OnSendMessage(ChatMessage message)
+    {
+        if (string.IsNullOrEmpty(message.body)) return;
+
+        message.messageType = ChatMessage.Type.PRIVATE;
+        message.recipient = controller.conversationUserName;
+
+        OnSendMessage?.Invoke(message);
     }
 
     public void OnMinimizeButtonPressed()
