@@ -1,6 +1,7 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+
 public class FriendRequestsTabView : FriendsTabViewBase
 {
     [SerializeField] internal EntryList receivedRequestsList = new EntryList();
@@ -9,8 +10,9 @@ public class FriendRequestsTabView : FriendsTabViewBase
     [SerializeField] internal TMP_InputField friendSearchInputField;
     [SerializeField] internal Button addFriendButton;
 
-    [Header("Notifications")]
-    [SerializeField] internal Notification requestSentNotification;
+    [Header("Notifications")] [SerializeField]
+    internal Notification requestSentNotification;
+
     [SerializeField] internal Notification friendSearchFailedNotification;
     [SerializeField] internal Notification acceptedFriendNotification;
 
@@ -58,11 +60,15 @@ public class FriendRequestsTabView : FriendsTabViewBase
         if (!base.CreateEntry(userId))
             return false;
 
-        FriendRequestEntry entry = GetEntry(userId) as FriendRequestEntry;
+        var entry = GetEntry(userId) as FriendRequestEntry;
+
+        if (entry == null)
+            return false;
 
         entry.OnAccepted += OnFriendRequestReceivedAccepted;
         entry.OnRejected += OnEntryRejectButtonPressed;
         entry.OnCancelled += OnEntryCancelButtonPressed;
+
         return true;
     }
 
@@ -81,7 +87,7 @@ public class FriendRequestsTabView : FriendsTabViewBase
         if (!base.UpdateEntry(userId, model))
             return false;
 
-        FriendRequestEntry entry = entries[userId] as FriendRequestEntry;
+        var entry = entries[userId] as FriendRequestEntry;
 
         if (isReceived.HasValue)
         {

@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 [RequireComponent(typeof(Animator))]
@@ -6,6 +7,7 @@ public class ShowHideAnimator : MonoBehaviour
     public event System.Action<ShowHideAnimator> OnWillFinishHide;
     public event System.Action<ShowHideAnimator> OnWillFinishStart;
 
+    public bool hideOnEnable = true;
     public float animSpeedFactor = 1.0f;
     public bool disableAfterFadeOut;
     public string visibleParam = "visible";
@@ -70,5 +72,13 @@ public class ShowHideAnimator : MonoBehaviour
     public void AnimEvent_ShowFinished()
     {
         OnWillFinishStart?.Invoke(this);
+    }
+
+    private void OnEnable()
+    {
+        if ( hideOnEnable )
+        {
+            Hide(true);
+        }
     }
 }

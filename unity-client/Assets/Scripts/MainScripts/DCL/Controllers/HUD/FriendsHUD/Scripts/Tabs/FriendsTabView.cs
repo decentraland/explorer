@@ -4,8 +4,6 @@ public class FriendsTabView : FriendsTabViewBase
 {
     public EntryList onlineFriendsList = new EntryList();
     public EntryList offlineFriendsList = new EntryList();
-
-    public event System.Action<FriendEntry> OnJumpIn;
     public event System.Action<FriendEntry> OnWhisper;
     public event System.Action<FriendEntry> OnDeleteConfirmation;
 
@@ -100,33 +98,37 @@ public class FriendsTabView : FriendsTabViewBase
         if (message.messageType != ChatMessage.Type.PRIVATE)
             return;
 
-        FriendEntryBase friend = GetEntry(message.sender != UserProfile.GetOwnUserProfile().userId ? message.sender : message.recipient);
-        if (friend != null)
+        FriendEntryBase friend = GetEntry(message.sender != UserProfile.GetOwnUserProfile().userId
+            ? message.sender
+            : message.recipient);
+
+        if (friend == null)
+            return;
+
+        bool reorderFriendEntries = false;
+
+        if (friend.userId != lastProcessedFriend)
         {
-            bool reorderFriendEntries = false;
-            if (friend.userId != lastProcessedFriend)
-            {
-                lastProcessedFriend = friend.userId;
-                reorderFriendEntries = true;
-            }
-
-            LastFriendTimestampModel timestampToUpdate = new LastFriendTimestampModel
-            {
-                userId = friend.userId,
-                lastMessageTimestamp = message.timestamp
-            };
-
-            // Each time a private message is received (or sent by the player), we sort the online and offline lists by timestamp
-            if (friend.model.status == PresenceStatus.ONLINE)
-            {
-                onlineFriendsList.AddOrUpdateLastTimestamp(timestampToUpdate, reorderFriendEntries);
-            }
-            else
-            {
-                offlineFriendsList.AddOrUpdateLastTimestamp(timestampToUpdate, reorderFriendEntries);
-            }
-
             lastProcessedFriend = friend.userId;
+            reorderFriendEntries = true;
         }
+
+        LastFriendTimestampModel timestampToUpdate = new LastFriendTimestampModel
+        {
+            userId = friend.userId,
+            lastMessageTimestamp = message.timestamp
+        };
+
+        // Each time a private message is received (or sent by the player), we sort the online and offline lists by timestamp
+        if (friend.model.status == PresenceStatus.ONLINE)
+        {
+            onlineFriendsList.AddOrUpdateLastTimestamp(timestampToUpdate, reorderFriendEntries);
+        }
+        else
+        {
+            offlineFriendsList.AddOrUpdateLastTimestamp(timestampToUpdate, reorderFriendEntries);
+        }
+
+        lastProcessedFriend = friend.userId;
     }
 }

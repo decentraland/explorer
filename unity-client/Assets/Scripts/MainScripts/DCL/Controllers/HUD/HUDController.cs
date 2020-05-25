@@ -17,18 +17,40 @@ public class HUDController : MonoBehaviour
     }
 
     public AvatarHUDController avatarHud => GetHUDElement(HUDElementID.AVATAR) as AvatarHUDController;
-    public NotificationHUDController notificationHud => GetHUDElement(HUDElementID.NOTIFICATION) as NotificationHUDController;
+
+    public NotificationHUDController notificationHud =>
+        GetHUDElement(HUDElementID.NOTIFICATION) as NotificationHUDController;
+
     public MinimapHUDController minimapHud => GetHUDElement(HUDElementID.MINIMAP) as MinimapHUDController;
-    public AvatarEditorHUDController avatarEditorHud => GetHUDElement(HUDElementID.AVATAR_EDITOR) as AvatarEditorHUDController;
+
+    public AvatarEditorHUDController avatarEditorHud =>
+        GetHUDElement(HUDElementID.AVATAR_EDITOR) as AvatarEditorHUDController;
+
     public SettingsHUDController settingsHud => GetHUDElement(HUDElementID.SETTINGS) as SettingsHUDController;
-    public ExpressionsHUDController expressionsHud => GetHUDElement(HUDElementID.EXPRESSIONS) as ExpressionsHUDController;
-    public PlayerInfoCardHUDController playerInfoCardHud => GetHUDElement(HUDElementID.PLAYER_INFO_CARD) as PlayerInfoCardHUDController;
-    public WelcomeHUDController messageOfTheDayHud => GetHUDElement(HUDElementID.MESSAGE_OF_THE_DAY) as WelcomeHUDController;
-    public AirdroppingHUDController airdroppingHud => GetHUDElement(HUDElementID.AIRDROPPING) as AirdroppingHUDController;
-    public TermsOfServiceHUDController termsOfServiceHud => GetHUDElement(HUDElementID.TERMS_OF_SERVICE) as TermsOfServiceHUDController;
+
+    public ExpressionsHUDController expressionsHud =>
+        GetHUDElement(HUDElementID.EXPRESSIONS) as ExpressionsHUDController;
+
+    public PlayerInfoCardHUDController playerInfoCardHud =>
+        GetHUDElement(HUDElementID.PLAYER_INFO_CARD) as PlayerInfoCardHUDController;
+
+    public WelcomeHUDController messageOfTheDayHud =>
+        GetHUDElement(HUDElementID.MESSAGE_OF_THE_DAY) as WelcomeHUDController;
+
+    public AirdroppingHUDController airdroppingHud =>
+        GetHUDElement(HUDElementID.AIRDROPPING) as AirdroppingHUDController;
+
+    public TermsOfServiceHUDController termsOfServiceHud =>
+        GetHUDElement(HUDElementID.TERMS_OF_SERVICE) as TermsOfServiceHUDController;
+
     public TaskbarHUDController taskbarHud => GetHUDElement(HUDElementID.TASKBAR) as TaskbarHUDController;
-    public WorldChatWindowHUDController worldChatWindowHud => GetHUDElement(HUDElementID.WORLD_CHAT_WINDOW) as WorldChatWindowHUDController;
-    public PrivateChatWindowHUDController privateChatWindowHud => GetHUDElement(HUDElementID.PRIVATE_CHAT_WINDOW) as PrivateChatWindowHUDController;
+
+    public WorldChatWindowHUDController worldChatWindowHud =>
+        GetHUDElement(HUDElementID.WORLD_CHAT_WINDOW) as WorldChatWindowHUDController;
+
+    public PrivateChatWindowHUDController privateChatWindowHud =>
+        GetHUDElement(HUDElementID.PRIVATE_CHAT_WINDOW) as PrivateChatWindowHUDController;
+
     public FriendsHUDController friendsHud => GetHUDElement(HUDElementID.FRIENDS) as FriendsHUDController;
 
     public Dictionary<HUDElementID, IHUD> hudElements { get; private set; } = new Dictionary<HUDElementID, IHUD>();
@@ -117,6 +139,7 @@ public class HUDController : MonoBehaviour
                     ownUserProfile.OnUpdate += OwnUserProfileUpdated;
                     OwnUserProfileUpdated(ownUserProfile);
                 }
+
                 break;
             case HUDElementID.NOTIFICATION:
                 CreateHudElement<NotificationHUDController>(configuration, hudElementId);
@@ -161,6 +184,7 @@ public class HUDController : MonoBehaviour
 
                     taskbarHud?.AddPrivateChatWindow(privateChatWindowHud);
                 }
+
                 break;
             case HUDElementID.FRIENDS:
                 CreateHudElement<FriendsHUDController>(configuration, hudElementId);
@@ -171,6 +195,7 @@ public class HUDController : MonoBehaviour
                     friendsHud.OnPressWhisper -= OpenPrivateChatWindow;
                     friendsHud.OnPressWhisper += OpenPrivateChatWindow;
                 }
+
                 taskbarHud?.AddFriendsWindow(friendsHud);
                 break;
             case HUDElementID.TASKBAR:
@@ -292,6 +317,7 @@ public class HUDController : MonoBehaviour
         var newModel = ownUserProfile.CloneModel();
         newModel.name = "FakePassport";
         newModel.description = "Fake Description for Testing";
+        newModel.userId = "test-id";
         newModel.inventory = new[]
         {
             "dcl://halloween_2019/machete_headband_top_head",
@@ -301,7 +327,7 @@ public class HUDController : MonoBehaviour
         };
 
         UserProfileController.i.AddUserProfileToCatalog(newModel);
-        Resources.Load<StringVariable>("CurrentPlayerInfoCardName").Set(newModel.name);
+        Resources.Load<StringVariable>("CurrentPlayerInfoCardId").Set(newModel.userId);
     }
 #endif
 }

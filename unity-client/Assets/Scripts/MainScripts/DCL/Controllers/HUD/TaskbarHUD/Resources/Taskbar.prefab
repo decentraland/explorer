@@ -420,6 +420,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d8b939b5bedb9494b806609faeda7d8d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  hideOnEnable: 0
   animSpeedFactor: 1
   disableAfterFadeOut: 0
   visibleParam: visible
@@ -606,6 +607,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d8b939b5bedb9494b806609faeda7d8d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  hideOnEnable: 1
   animSpeedFactor: 3
   disableAfterFadeOut: 0
   visibleParam: visible
@@ -1277,6 +1279,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d8b939b5bedb9494b806609faeda7d8d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  hideOnEnable: 1
   animSpeedFactor: 3
   disableAfterFadeOut: 0
   visibleParam: visible

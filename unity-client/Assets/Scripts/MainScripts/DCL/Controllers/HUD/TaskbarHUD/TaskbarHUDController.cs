@@ -6,13 +6,10 @@ using UnityEngine;
 
 public class TaskbarHUDController : IHUD
 {
-    public const bool WINDOW_STACKING_ENABLED = false;
-
     public TaskbarHUDView view;
     public WorldChatWindowHUDController worldChatWindowHud;
     public PrivateChatWindowHUDController privateChatWindowHud;
     public FriendsHUDController friendsHud;
-    public bool alreadyToggledOnForFirstTime { get; private set; } = false;
 
     IMouseCatcher mouseCatcher;
     IChatController chatController;
@@ -52,6 +49,8 @@ public class TaskbarHUDController : IHUD
             chatController.OnAddMessage -= OnAddMessage;
             chatController.OnAddMessage += OnAddMessage;
         }
+
+        view.windowContainerAnimator.Show();
     }
 
     private void ChatHeadsGroup_OnHeadClose(TaskbarButton obj)
@@ -144,8 +143,10 @@ public class TaskbarHUDController : IHUD
         worldChatWindowHud = controller;
 
         view.OnAddChatWindow();
-        worldChatWindowHud.view.ActivatePreview();
         worldChatWindowHud.view.OnClose += () => { view.friendsButton.SetToggleState(false, false); };
+
+        view.chatButton.SetToggleState(true);
+        view.chatButton.SetToggleState(false);
     }
 
     public void OpenFriendsWindow()
@@ -177,8 +178,9 @@ public class TaskbarHUDController : IHUD
         privateChatWindowHud.view.OnMinimize += () =>
         {
             ChatHeadButton btn = view.GetButtonList().FirstOrDefault(
-                (x) => x is ChatHeadButton &&
-                (x as ChatHeadButton).profile.userId == privateChatWindowHud.conversationUserId) as ChatHeadButton;
+                    (x) => x is ChatHeadButton &&
+                           (x as ChatHeadButton).profile.userId == privateChatWindowHud.conversationUserId) as
+                ChatHeadButton;
 
             if (btn != null)
                 btn.SetToggleState(false, false);
@@ -190,8 +192,9 @@ public class TaskbarHUDController : IHUD
         privateChatWindowHud.view.OnClose += () =>
         {
             ChatHeadButton btn = view.GetButtonList().FirstOrDefault(
-                (x) => x is ChatHeadButton &&
-                (x as ChatHeadButton).profile.userId == privateChatWindowHud.conversationUserId) as ChatHeadButton;
+                    (x) => x is ChatHeadButton &&
+                           (x as ChatHeadButton).profile.userId == privateChatWindowHud.conversationUserId) as
+                ChatHeadButton;
 
             if (btn != null)
             {
@@ -203,6 +206,7 @@ public class TaskbarHUDController : IHUD
                 worldChatWindowHud.MarkWorldChatMessagesAsRead();
         };
     }
+
     public void AddFriendsWindow(FriendsHUDController controller)
     {
         if (controller == null || controller.view == null)

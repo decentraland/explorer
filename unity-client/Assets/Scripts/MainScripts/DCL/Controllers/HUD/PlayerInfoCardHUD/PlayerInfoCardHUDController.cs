@@ -10,31 +10,53 @@ public class PlayerInfoCardHUDController : IHUD
     internal UserProfile currentUserProfile;
     private UserProfile ownUserProfile => UserProfile.GetOwnUserProfile();
 
+    private InputAction_Trigger toggleTrigger;
+
 
     public PlayerInfoCardHUDController()
     {
         view = PlayerInfoCardHUDView.CreateView();
-        view.Initialize(() => { currentPlayerId.Set(null); }, ReportPlayer, BlockPlayer, UnblockPlayer, AddPlayerAsFriend, CancelInvitation, AcceptFriendRequest, RejectFriendRequest);
+        view.Initialize(() => { OnCloseButtonPressed(); }
+            , ReportPlayer, BlockPlayer, UnblockPlayer,
+            AddPlayerAsFriend, CancelInvitation, AcceptFriendRequest, RejectFriendRequest);
         currentPlayerId = Resources.Load<StringVariable>(CURRENT_PLAYER_ID);
         currentPlayerId.OnChange += OnCurrentPlayerIdChanged;
         OnCurrentPlayerIdChanged(currentPlayerId, null);
+
+        toggleTrigger = Resources.Load<InputAction_Trigger>("CloseWindow");
+        toggleTrigger.OnTriggered -= OnCloseButtonPressed;
+        toggleTrigger.OnTriggered += OnCloseButtonPressed;
     }
+
+    private void OnCloseButtonPressed(DCLAction_Trigger action = DCLAction_Trigger.CloseWindow)
+    {
+        currentPlayerId.Set(null);
+    }
+
+    private void ToggleTrigger_OnTriggered(DCLAction_Trigger action)
+    {
+        SetVisibility(false);
+    }
+
 
     private void AddPlayerAsFriend()
     {
-        // Add fake action to avoid waiting for kernel
+// Add fake action to avoid waiting for kernel
         UserProfileController.i.AddUserProfileToCatalog(new UserProfileModel()
         {
             userId = currentPlayerId,
             name = currentPlayerId
         });
+
         FriendsController.i.UpdateFriendshipStatus(new FriendsController.FriendshipUpdateStatusMessage()
         {
             userId = currentPlayerId,
             action = FriendshipAction.REQUESTED_TO
         });
-
-        WebInterface.UpdateFriendshipStatus(new FriendsController.FriendshipUpdateStatusMessage() { userId = currentPlayerId, action = FriendshipAction.REQUESTED_TO });
+        WebInterface.UpdateFriendshipStatus(new FriendsController.FriendshipUpdateStatusMessage()
+        {
+            userId = currentPlayerId, action = FriendshipAction.REQUESTED_TO
+        });
     }
 
     private void CancelInvitation()
@@ -45,8 +67,11 @@ public class PlayerInfoCardHUDController : IHUD
             userId = currentPlayerId,
             action = FriendshipAction.CANCELLED
         });
-
-        WebInterface.UpdateFriendshipStatus(new FriendsController.FriendshipUpdateStatusMessage() { userId = currentPlayerId, action = FriendshipAction.CANCELLED });
+        
+        WebInterface.UpdateFriendshipStatus(new FriendsController.FriendshipUpdateStatusMessage()
+        {
+            userId = currentPlayerId, action = FriendshipAction.CANCELLED
+        });
     }
 
     private void AcceptFriendRequest()
@@ -57,20 +82,24 @@ public class PlayerInfoCardHUDController : IHUD
             userId = currentPlayerId,
             action = FriendshipAction.APPROVED
         });
-
-        WebInterface.UpdateFriendshipStatus(new FriendsController.FriendshipUpdateStatusMessage() { userId = currentPlayerId, action = FriendshipAction.APPROVED });
+        WebInterface.UpdateFriendshipStatus(new FriendsController.FriendshipUpdateStatusMessage()
+        {
+            userId = currentPlayerId, action = FriendshipAction.APPROVED
+        });
     }
 
     private void RejectFriendRequest()
     {
-        // Add fake action to avoid waiting for kernel
+// Add fake action to avoid waiting for kernel
         FriendsController.i.UpdateFriendshipStatus(new FriendsController.FriendshipUpdateStatusMessage()
         {
             userId = currentPlayerId,
             action = FriendshipAction.REJECTED
         });
-
-        WebInterface.UpdateFriendshipStatus(new FriendsController.FriendshipUpdateStatusMessage() { userId = currentPlayerId, action = FriendshipAction.REJECTED });
+        WebInterface.UpdateFriendshipStatus(new FriendsController.FriendshipUpdateStatusMessage()
+        {
+            userId = currentPlayerId, action = FriendshipAction.REJECTED
+        });
     }
 
     internal void OnCurrentPlayerIdChanged(string current, string previous)
@@ -78,7 +107,9 @@ public class PlayerInfoCardHUDController : IHUD
         if (currentUserProfile != null)
             currentUserProfile.OnUpdate -= SetUserProfile;
 
-        currentUserProfile = string.IsNullOrEmpty(currentPlayerId) ? null : UserProfileController.userProfilesCatalog.Get(currentPlayerId);
+        currentUserProfile = string.IsNullOrEmpty(currentPlayerId)
+            ? null
+            : UserProfileController.userProfilesCatalog.Get(currentPlayerId);
 
         if (currentUserProfile == null)
         {
@@ -108,7 +139,9 @@ public class PlayerInfoCardHUDController : IHUD
             return;
 
         ownUserProfile.blocked.Add(currentUserProfile.userId);
+
         view.SetIsBlocked(true);
+
         WebInterface.SendBlockPlayer(currentUserProfile.userId);
     }
 
@@ -118,7 +151,9 @@ public class PlayerInfoCardHUDController : IHUD
             return;
 
         ownUserProfile.blocked.Remove(currentUserProfile.userId);
+
         view.SetIsBlocked(false);
+
         WebInterface.SendUnblockPlayer(currentUserProfile.userId);
     }
 
@@ -134,5 +169,8 @@ public class PlayerInfoCardHUDController : IHUD
 
         if (currentPlayerId != null)
             currentPlayerId.OnChange -= OnCurrentPlayerIdChanged;
+
+        if (toggleTrigger != null)
+            toggleTrigger.OnTriggered -= ToggleTrigger_OnTriggered;
     }
 }

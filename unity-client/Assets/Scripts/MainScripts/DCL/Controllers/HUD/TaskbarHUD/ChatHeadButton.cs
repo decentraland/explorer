@@ -18,8 +18,6 @@ public class ChatHeadButton : TaskbarButton, IPointerEnterHandler, IPointerExitH
         this.profile = profile;
         unreadNotificationBadge.Initialize(ChatController.i, profile.userId);
 
-        labelContainer.Hide(true);
-
         if (profile.userName.Length > 10)
             label.text = profile.userName.Substring(0, 10) + "...";
         else

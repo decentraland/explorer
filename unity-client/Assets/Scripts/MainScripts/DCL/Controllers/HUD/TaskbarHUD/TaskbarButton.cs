@@ -18,7 +18,6 @@ public class TaskbarButton : MonoBehaviour
     {
         toggleButton.onClick.AddListener(OnToggleButtonClick);
         SetToggleState(false, useCallback: false);
-        lineOnIndicator.Hide(true);
     }
 
     private void OnToggleButtonClick()

@@ -45,11 +45,6 @@ public class WorldChatWindowHUDController : IHUD
         {
             mouseCatcher.OnMouseLock += view.ActivatePreview;
         }
-
-        if (chatController != null)
-        {
-            view.worldFilterButton.onClick.Invoke();
-        }
     }
 
     void ChatHUDController_OnPressPrivateMessage(string friendUserId)

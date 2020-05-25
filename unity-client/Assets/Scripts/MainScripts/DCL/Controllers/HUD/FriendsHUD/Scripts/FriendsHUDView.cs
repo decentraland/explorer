@@ -5,7 +5,7 @@ using UnityEngine.UI;
 public class FriendsHUDView : MonoBehaviour
 {
     public const string NOTIFICATIONS_ID = "Friends";
-    static int ANIM_PROPERTY_SELECTED = Animator.StringToHash("Selected");
+    static readonly int ANIM_PROPERTY_SELECTED = Animator.StringToHash("Selected");
 
     const string VIEW_PATH = "FriendsHUD";
 
@@ -15,8 +15,7 @@ public class FriendsHUDView : MonoBehaviour
     public FriendsTabView friendsList;
     public FriendRequestsTabView friendRequestsList;
     public GameObject spinner;
-    internal Coroutine currentNotificationRoutine = null;
-    internal GameObject currentNotification = null;
+
     public float notificationsDuration = 3f;
 
     FriendsHUDController controller;
@@ -173,7 +172,8 @@ public class FriendsHUDView : MonoBehaviour
             action = FriendshipAction.APPROVED
         });
 
-        FriendsController.i.UpdateUserStatus(new FriendsController.UserStatus() { userId = id1, presence = PresenceStatus.ONLINE });
+        FriendsController.i.UpdateUserStatus(new FriendsController.UserStatus()
+            {userId = id1, presence = PresenceStatus.ONLINE});
     }
 
     [ContextMenu("AddFakeOfflineFriend")]
@@ -193,7 +193,8 @@ public class FriendsHUDView : MonoBehaviour
             action = FriendshipAction.APPROVED
         });
 
-        FriendsController.i.UpdateUserStatus(new FriendsController.UserStatus() { userId = id1, presence = PresenceStatus.OFFLINE });
+        FriendsController.i.UpdateUserStatus(new FriendsController.UserStatus()
+            {userId = id1, presence = PresenceStatus.OFFLINE});
     }
 #endif
 }

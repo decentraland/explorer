@@ -1,9 +1,13 @@
-﻿using DCL.Helpers;
+﻿using System;
+using DCL.Helpers;
 using System.Collections.Generic;
+using DCL;
+using DCL.Configuration;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Events;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class PlayerInfoCardHUDView : MonoBehaviour
@@ -30,41 +34,24 @@ public class PlayerInfoCardHUDView : MonoBehaviour
     [SerializeField] internal TabsMapping[] tabsMapping;
     [SerializeField] internal Button hideCardButton;
 
-    [Space]
-    [SerializeField]
-    internal Image avatarPicture;
+    [Space] [SerializeField] internal Image avatarPicture;
     [SerializeField] internal Image blockedAvatarOverlay;
     [SerializeField] internal TextMeshProUGUI name;
 
-    [Header("Friends")]
-    [SerializeField]
-    internal GameObject friendStatusContainer;
-    [SerializeField]
-    internal Button requestSentButton;
-    [SerializeField]
-    internal Button addFriendButton;
-    [SerializeField]
-    internal GameObject alreadyFriendsContainer;
-    [SerializeField]
-    internal GameObject requestReceivedContainer;
-    [SerializeField]
-    internal Button acceptRequestButton;
-    [SerializeField]
-    internal Button rejectRequestButton;
+    [Header("Friends")] [SerializeField] internal GameObject friendStatusContainer;
+    [SerializeField] internal Button requestSentButton;
+    [SerializeField] internal Button addFriendButton;
+    [SerializeField] internal GameObject alreadyFriendsContainer;
+    [SerializeField] internal GameObject requestReceivedContainer;
+    [SerializeField] internal Button acceptRequestButton;
+    [SerializeField] internal Button rejectRequestButton;
 
-    [Header("Passport")]
-    [SerializeField]
-    internal TextMeshProUGUI description;
+    [Header("Passport")] [SerializeField] internal TextMeshProUGUI description;
 
-    [Header("Trade")]
-    [SerializeField]
-    private RectTransform wearablesContainer;
-    [SerializeField]
-    private GameObject emptyCollectiblesImage;
+    [Header("Trade")] [SerializeField] private RectTransform wearablesContainer;
+    [SerializeField] private GameObject emptyCollectiblesImage;
 
-    [Header("Block")]
-    [SerializeField]
-    internal Button reportPlayerButton;
+    [Header("Block")] [SerializeField] internal Button reportPlayerButton;
     [SerializeField] internal Button blockPlayerButton;
     [SerializeField] internal Button unblockPlayerButton;
 
@@ -72,6 +59,8 @@ public class PlayerInfoCardHUDView : MonoBehaviour
     internal UserProfile currentUserProfile;
     private UnityAction<bool> toggleChangedDelegate => (x) => UpdateTabs();
     private UserProfile ownUserProfile => UserProfile.GetOwnUserProfile();
+
+    private MouseCatcher mouseCatcher;
 
     public static PlayerInfoCardHUDView CreateView()
     {
@@ -127,7 +116,20 @@ public class PlayerInfoCardHUDView : MonoBehaviour
             }
         }
 
+
+        FriendsController.i.OnUpdateFriendship -= OnFriendStatusUpdated;
         FriendsController.i.OnUpdateFriendship += OnFriendStatusUpdated;
+
+        if (InitialSceneReferences.i != null)
+        {
+            var mouseCatcher = DCL.InitialSceneReferences.i.mouseCatcher;
+
+            if (mouseCatcher != null)
+            {
+                this.mouseCatcher = mouseCatcher;
+                mouseCatcher.OnMouseDown += OnPointerDown;
+            }
+        }
     }
 
     private void OnFriendStatusUpdated(string userId, FriendshipAction action)
@@ -172,7 +174,9 @@ public class PlayerInfoCardHUDView : MonoBehaviour
             WearableItem collectible = CatalogController.wearableCatalog.Get(collectibleId);
             if (collectible == null) continue;
 
-            var playerInfoCollectible = collectiblesFactory.Instantiate<PlayerInfoCollectibleItem>(collectible.rarity, wearablesContainer.transform);
+            var playerInfoCollectible =
+                collectiblesFactory.Instantiate<PlayerInfoCollectibleItem>(collectible.rarity,
+                    wearablesContainer.transform);
             if (playerInfoCollectible == null) continue;
             playerInfoCollectibles.Add(playerInfoCollectible);
             playerInfoCollectible.Initialize(collectible);
@@ -256,5 +260,17 @@ public class PlayerInfoCardHUDView : MonoBehaviour
         }
 
         return false;
+    }
+
+    private void OnPointerDown()
+    {
+        hideCardButton.onClick.Invoke();
+    }
+
+
+    private void OnDestroy()
+    {
+        if (mouseCatcher != null)
+            mouseCatcher.OnMouseDown -= OnPointerDown;
     }
 }
