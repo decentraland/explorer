@@ -113,6 +113,7 @@ public class UnreadNotificationBadgeShould : TestsBase
     [Test]
     public void CleanAllUnreadNotifications()
     {
+        ReceiveOneUnreadNotification();
         ReadLastMessages(TEST_USER_ID);
 
         Assert.AreEqual(0, unreadNotificationBadge.currentUnreadMessages, "There shouldn't be any unread notification");
