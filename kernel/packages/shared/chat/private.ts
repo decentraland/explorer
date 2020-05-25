@@ -280,10 +280,11 @@ function sendUpdateUserStatus(id: string, status: CurrentUserStatus) {
 function initializeStatusUpdateInterval(client: SocialAPI) {
   const domain = globalThis.globalStore.getState().chat.privateMessaging.client?.getDomain()
 
-  let friends = globalThis.globalStore.getState().chat.privateMessaging.friends.map(x => {
+  const friends = globalThis.globalStore.getState().chat.privateMessaging.friends.map(x => {
     return `@${x}:${domain}`
   })
-  let statuses = client.getUserStatuses(...friends)
+  const statuses = client.getUserStatuses(...friends)
+  DEBUG && logger.info(`initialize status`, friends, statuses)
 
   statuses.forEach((value, key) => {
     sendUpdateUserStatus(key, value)
