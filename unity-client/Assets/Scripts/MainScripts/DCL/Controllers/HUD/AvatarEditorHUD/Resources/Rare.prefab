@@ -1055,7 +1055,7 @@ PrefabInstance:
     - target: {fileID: 8230317160069512979, guid: 72f65bd5e4281dc4287222ec7af9a07c,
         type: 3}
       propertyPath: m_text
-      value: RARE
+      value: Rare
       objectReference: {fileID: 0}
     - target: {fileID: 8230317160069512979, guid: 72f65bd5e4281dc4287222ec7af9a07c,
         type: 3}
