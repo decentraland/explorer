@@ -32,7 +32,7 @@ import { lastPlayerPosition } from '../world/positionThings'
 import { worldToGrid } from '../../atomicHelpers/parcelScenePositions'
 import { ensureRenderer } from '../profiles/sagas'
 import { ADDED_PROFILE_TO_CATALOG } from '../profiles/actions'
-import { isAddedToCatalog } from 'shared/profiles/selectors'
+import { isAddedToCatalog, getProfile } from 'shared/profiles/selectors'
 
 declare const globalThis: StoreContainer
 
@@ -113,6 +113,13 @@ export function* initializePrivateMessaging(synapseUrl: string, identity: Explor
 
     if (!friend) {
       logger.warn(`friend not found for conversation`, conversation.id)
+      return
+    }
+
+    const profile = getProfile(globalThis.globalStore.getState(), identity.address)
+    const blocked = profile?.blocked ?? []
+    if (blocked.includes(friend.userId)) {
+      logger.warn(`got a message from blocked user`, friend.userId)
       return
     }
 
@@ -381,8 +388,8 @@ function* handleSendPrivateMessage(action: SendPrivateMessage, debug: boolean = 
 }
 
 function* handleUpdateFriendship({ payload, meta }: UpdateFriendship) {
+  const { action, userId } = payload
   try {
-    const { action, userId } = payload
     const { incoming } = meta
 
     const state: ReturnType<typeof getPrivateMessaging> = yield select(getPrivateMessaging)
@@ -494,7 +501,9 @@ function* handleUpdateFriendship({ payload, meta }: UpdateFriendship) {
     }
   } catch (e) {
     if (e instanceof UnknownUsersError) {
-      showErrorNotification(`User must log in at least once before befriending them`)
+      const profile = yield ProfileAsPromise(userId)
+      const id = profile?.name ? profile.name : `with address '${userId}'`
+      showErrorNotification(`User ${id} must log in at least once before befriending them`)
     }
   }
 }
