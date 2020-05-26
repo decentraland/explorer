@@ -8,10 +8,9 @@ public class ChatHUDController : IDisposable
 
     public ChatHUDView view;
 
-    public UnityAction<string> OnSendMessage;
     public event UnityAction<string> OnPressPrivateMessage;
 
-    public void Initialize(ChatHUDView view = null, UnityAction<string> onSendMessage = null)
+    public void Initialize(ChatHUDView view = null, UnityAction<ChatMessage> onSendMessage = null)
     {
         this.view = view ?? ChatHUDView.Create();
 

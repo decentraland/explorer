@@ -87,7 +87,7 @@ public class PrivateChatWindowHUDShould : TestsBase
 
         WebInterface.OnMessageFromEngine += messageCallback;
         controller.resetInputFieldOnSubmit = false;
-        controller.SendChatMessage("test message");
+        controller.SendChatMessage(new ChatMessage() { body = "test message" });
         Assert.IsTrue(messageWasSent);
         Assert.AreEqual("", controller.view.chatHudView.inputField.text);
         WebInterface.OnMessageFromEngine -= messageCallback;

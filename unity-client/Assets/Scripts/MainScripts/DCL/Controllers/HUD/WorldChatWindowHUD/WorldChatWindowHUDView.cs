@@ -1,8 +1,9 @@
 using System.Collections;
-using System.Text.RegularExpressions;
+using DCL.Interface;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using UnityEngine.Events;
 
 public class WorldChatWindowHUDView : MonoBehaviour, IPointerClickHandler
 {
@@ -14,11 +15,12 @@ public class WorldChatWindowHUDView : MonoBehaviour, IPointerClickHandler
 
     public CanvasGroup group;
     public WorldChatWindowHUDController controller;
+    public bool isInPreview { get; private set; }
 
-    public event System.Action OnClose;
+    public event UnityAction OnClose;
+    public UnityAction<ChatMessage> OnSendMessage;
 
-    Regex whisperRegex = new Regex(@"(?i)^\/(whisper|w) (\S+) (\S+)");
-    Match whisperRegexMatch;
+    ChatMessage lastWhisperMessageSent;
 
     public static WorldChatWindowHUDView Create()
     {
@@ -29,7 +31,7 @@ public class WorldChatWindowHUDView : MonoBehaviour, IPointerClickHandler
 
     void Awake()
     {
-        chatHudView.inputField.onSubmit.AddListener(OnTextInputSubmit);
+        chatHudView.OnSendMessage += ChatHUDView_OnSendMessage;
         chatHudView.inputField.onValueChanged.AddListener(OnTextInputValueChanged);
     }
 
@@ -43,9 +45,6 @@ public class WorldChatWindowHUDView : MonoBehaviour, IPointerClickHandler
         controller.SetVisibility(false);
         OnClose?.Invoke();
     }
-
-
-    public bool isInPreview { get; private set; }
 
     public void DeactivatePreview()
     {
@@ -75,14 +74,19 @@ public class WorldChatWindowHUDView : MonoBehaviour, IPointerClickHandler
         }
     }
 
-    public void OnTextInputSubmit(string text)
+    public void ChatHUDView_OnSendMessage(ChatMessage message)
     {
-        text = GetLastWhisperCommand(text);
+        if (message.messageType == ChatMessage.Type.PRIVATE && !string.IsNullOrEmpty(message.body))
+            lastWhisperMessageSent = message;
+        else
+            lastWhisperMessageSent = null;
 
-        if (!string.IsNullOrEmpty(text))
-        {
-            StartCoroutine(WaitAndUpdateInputText(text));
-        }
+        if (lastWhisperMessageSent != null)
+            StartCoroutine(WaitAndUpdateInputText($"/w {lastWhisperMessageSent.recipient} "));
+        else
+            StartCoroutine(WaitAndUpdateInputText(string.Empty));
+
+        OnSendMessage?.Invoke(message);
     }
 
     IEnumerator WaitAndUpdateInputText(string newText)
@@ -91,15 +95,5 @@ public class WorldChatWindowHUDView : MonoBehaviour, IPointerClickHandler
 
         chatHudView.inputField.text = newText;
         chatHudView.inputField.caretPosition = newText.Length;
-    }
-
-    public string GetLastWhisperCommand(string inputString)
-    {
-        whisperRegexMatch = whisperRegex.Match(inputString);
-
-        if (whisperRegexMatch.Success)
-            return $"/w {whisperRegexMatch.Groups[2]} ";
-
-        return string.Empty;
     }
 }
