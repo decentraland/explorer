@@ -1,18 +1,35 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
-public class NFTPromptHUDController : MonoBehaviour
+public class NFTPromptHUDController : IHUD
 {
-    // Start is called before the first frame update
-    void Start()
+    internal NFTPromptHUDView view { get; private set; }
+
+    public NFTPromptHUDController()
     {
-        
+        view = UnityEngine.Object.Instantiate(Resources.Load<GameObject>("NFTPromptHUD")).GetComponent<NFTPromptHUDView>();
+        view.name = "_NFTPromptHUD";
+        view.content.SetActive(false);
     }
 
-    // Update is called once per frame
-    void Update()
+    public void OpenNftInfoDialog(string assetContractAddress, string tokenId, string comment)
     {
-        
+        if (!view.content.activeSelf)
+        {
+            view.ShowNFT(assetContractAddress, tokenId, comment);
+        }
     }
+
+    public void SetVisibility(bool visible)
+    {
+        view.content.SetActive(visible);
+    }
+
+    public void Dispose()
+    {
+        if (view != null)
+        {
+            Object.Destroy(view.gameObject);
+        }
+    }
+
 }

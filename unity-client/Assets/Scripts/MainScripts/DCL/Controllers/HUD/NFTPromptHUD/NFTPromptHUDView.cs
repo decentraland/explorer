@@ -9,7 +9,7 @@ using DCL.Interface;
 
 public class NFTPromptHUDView : MonoBehaviour
 {
-    [SerializeField] GameObject content;
+    [SerializeField] internal GameObject content;
 
     [SerializeField] RawImage imageNft;
     [SerializeField] Image imageNftBackground;
