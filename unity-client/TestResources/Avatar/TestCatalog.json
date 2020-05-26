@@ -13729,6 +13729,87 @@
     "rarity": "swanky"
   },
   {
+    "id": "dcl://halloween_2019/mariachi_hat_rare",
+    "representations": [
+      {
+        "bodyShapes": [
+          "dcl://base-avatars/BaseMale"
+        ],
+        "mainFile": "M_Hat_Mexican_02.glb",
+        "overrideReplaces": [],
+        "overrideHides": [],
+        "contents": [
+          {
+            "file": "AvatarWearables_TX.png",
+            "hash": "QmWLrKJFzDCMGXVCef78SDkMHWB94eHP1ZeXfyci3kphTb"
+          },
+          {
+            "file": "F_Hat_Mexican_02.glb",
+            "hash": "QmWstFA4xpKJajzj8KgfVbAhkopRPpGP8UzyxSBpCzwy37"
+          },
+          {
+            "file": "M_Hat_Mexican_02.glb",
+            "hash": "QmXzbqGteTPmtgYmdcZWTennF5kSbzAjnp5UirVLUU9ubP"
+          }
+        ]
+      },
+      {
+        "bodyShapes": [
+          "dcl://base-avatars/BaseFemale"
+        ],
+        "mainFile": "F_Hat_Mexican_02.glb",
+        "overrideReplaces": [],
+        "overrideHides": [],
+        "contents": [
+          {
+            "file": "AvatarWearables_TX.png",
+            "hash": "QmWLrKJFzDCMGXVCef78SDkMHWB94eHP1ZeXfyci3kphTb"
+          },
+          {
+            "file": "F_Hat_Mexican_02.glb",
+            "hash": "QmWstFA4xpKJajzj8KgfVbAhkopRPpGP8UzyxSBpCzwy37"
+          },
+          {
+            "file": "M_Hat_Mexican_02.glb",
+            "hash": "QmXzbqGteTPmtgYmdcZWTennF5kSbzAjnp5UirVLUU9ubP"
+          }
+        ]
+      }
+    ],
+    "type": "wearable",
+    "category": "hat",
+    "tags": [
+      "accesories",
+      "exclusive",
+      "mexican",
+      "hat",
+      "exclusive"
+    ],
+    "baseUrl": "https://content.decentraland.org/contents/",
+    "i18n": [
+      {
+        "code": "en",
+        "text": "Mariachi Hat"
+      },
+      {
+        "code": "es",
+        "text": "Sombrero Mariachi"
+      }
+    ],
+    "thumbnail": "Qmad3ZzsthdnAWN8EorMb3kZWmgv97zpg3XXh7ewoS2jg7",
+    "image": "QmcgqVkwygPns8jji8SxaCnX9a8uSUBipycVtk2dP68B7Q",
+    "replaces": [
+      "helmet",
+      "tiara",
+      "top_head"
+    ],
+    "hides": [
+      "hair"
+    ],
+    "description": "Guitar not included",
+    "rarity": "rare"
+  },
+  {
     "id": "dcl://halloween_2019/classic_top_hat",
     "representations": [
       {

@@ -17,6 +17,7 @@ public class PlayerInfoCardHUDViewShould : TestsBase
         CreateMockWearableByRarity(WearableLiterals.ItemRarity.LEGENDARY);
         CreateMockWearableByRarity(WearableLiterals.ItemRarity.MYTHIC);
         CreateMockWearableByRarity(WearableLiterals.ItemRarity.SWANKY);
+        CreateMockWearableByRarity(WearableLiterals.ItemRarity.RARE);
         CreateMockWearableByRarity(WearableLiterals.ItemRarity.UNIQUE);
 
         UserProfileController.i.AddUserProfileToCatalog(new UserProfileModel()
@@ -31,6 +32,7 @@ public class PlayerInfoCardHUDViewShould : TestsBase
                 WearableLiterals.ItemRarity.LEGENDARY,
                 WearableLiterals.ItemRarity.MYTHIC,
                 WearableLiterals.ItemRarity.SWANKY,
+                WearableLiterals.ItemRarity.RARE,
                 WearableLiterals.ItemRarity.UNIQUE,
             }
         });
