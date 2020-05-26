@@ -48,6 +48,7 @@ public class WorldChatWindowHUDView : MonoBehaviour, IPointerClickHandler
 
     public void DeactivatePreview()
     {
+        chatHudView.scrollRect.enabled = true;
         group.alpha = 1;
         isInPreview = false;
         chatHudView.SetFadeoutMode(false);
@@ -55,6 +56,7 @@ public class WorldChatWindowHUDView : MonoBehaviour, IPointerClickHandler
 
     public void ActivatePreview()
     {
+        chatHudView.scrollRect.enabled = false;
         group.alpha = 0;
         isInPreview = true;
         chatHudView.SetFadeoutMode(true);
