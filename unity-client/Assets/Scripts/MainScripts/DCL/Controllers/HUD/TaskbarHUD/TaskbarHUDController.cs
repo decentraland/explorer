@@ -13,7 +13,10 @@ public class TaskbarHUDController : IHUD
 
     IMouseCatcher mouseCatcher;
     IChatController chatController;
-    InputAction_Trigger toggleFriendsTrigger;
+
+    private InputAction_Trigger toggleFriendsTrigger;
+    private InputAction_Trigger closeWindowTrigger;
+    private InputAction_Trigger toggleWorldChatTrigger;
 
     public void Initialize(IMouseCatcher mouseCatcher, IChatController chatController)
     {
@@ -41,8 +44,16 @@ public class TaskbarHUDController : IHUD
         view.OnFriendsToggleOn += View_OnFriendsToggleOn;
 
         toggleFriendsTrigger = Resources.Load<InputAction_Trigger>("ToggleFriends");
-        toggleFriendsTrigger.OnTriggered -= ToggleTrigger_OnTriggered;
-        toggleFriendsTrigger.OnTriggered += ToggleTrigger_OnTriggered;
+        toggleFriendsTrigger.OnTriggered -= ToggleFriendsTrigger_OnTriggered;
+        toggleFriendsTrigger.OnTriggered += ToggleFriendsTrigger_OnTriggered;
+
+        closeWindowTrigger = Resources.Load<InputAction_Trigger>("CloseWindow");
+        closeWindowTrigger.OnTriggered -= CloseWindowTrigger_OnTriggered;
+        closeWindowTrigger.OnTriggered += CloseWindowTrigger_OnTriggered;
+
+        toggleWorldChatTrigger = Resources.Load<InputAction_Trigger>("ToggleWorldChat");
+        toggleWorldChatTrigger.OnTriggered -= ToggleWorldChatTrigger_OnTriggered;
+        toggleWorldChatTrigger.OnTriggered += ToggleWorldChatTrigger_OnTriggered;
 
         if (chatController != null)
         {
@@ -68,11 +79,21 @@ public class TaskbarHUDController : IHUD
         friendsHud.SetVisibility(false);
     }
 
-    private void ToggleTrigger_OnTriggered(DCLAction_Trigger action)
+    private void ToggleFriendsTrigger_OnTriggered(DCLAction_Trigger action)
     {
         Utils.UnlockCursor();
         view.windowContainerAnimator.Show();
         view.friendsButton.SetToggleState(!view.friendsButton.toggledOn);
+    }
+
+    private void ToggleWorldChatTrigger_OnTriggered(DCLAction_Trigger action)
+    {
+        OnPressReturn();
+    }
+
+    private void CloseWindowTrigger_OnTriggered(DCLAction_Trigger action)
+    {
+        OnPressEsc();
     }
 
     private void View_OnChatToggleOn()
@@ -261,7 +282,14 @@ public class TaskbarHUDController : IHUD
             mouseCatcher.OnMouseUnlock -= MouseCatcher_OnMouseUnlock;
         }
 
-        toggleFriendsTrigger.OnTriggered -= ToggleTrigger_OnTriggered;
+        if (toggleFriendsTrigger != null)
+            toggleFriendsTrigger.OnTriggered -= ToggleFriendsTrigger_OnTriggered;
+
+        if (closeWindowTrigger != null)
+            closeWindowTrigger.OnTriggered -= CloseWindowTrigger_OnTriggered;
+
+        if (toggleWorldChatTrigger != null)
+            toggleWorldChatTrigger.OnTriggered -= ToggleWorldChatTrigger_OnTriggered;
 
         if (chatController != null)
             chatController.OnAddMessage -= OnAddMessage;

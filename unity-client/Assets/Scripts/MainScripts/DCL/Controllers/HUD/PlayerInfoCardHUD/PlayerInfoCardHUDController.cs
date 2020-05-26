@@ -10,8 +10,9 @@ public class PlayerInfoCardHUDController : IHUD
     internal UserProfile currentUserProfile;
     private UserProfile ownUserProfile => UserProfile.GetOwnUserProfile();
 
-    private InputAction_Trigger toggleTrigger;
-
+    private InputAction_Trigger toggleFriendsTrigger;
+    private InputAction_Trigger closeWindowTrigger;
+    private InputAction_Trigger toggleWorldChatTrigger;
 
     public PlayerInfoCardHUDController()
     {
@@ -23,21 +24,23 @@ public class PlayerInfoCardHUDController : IHUD
         currentPlayerId.OnChange += OnCurrentPlayerIdChanged;
         OnCurrentPlayerIdChanged(currentPlayerId, null);
 
-        toggleTrigger = Resources.Load<InputAction_Trigger>("CloseWindow");
-        toggleTrigger.OnTriggered -= OnCloseButtonPressed;
-        toggleTrigger.OnTriggered += OnCloseButtonPressed;
+        toggleFriendsTrigger = Resources.Load<InputAction_Trigger>("ToggleFriends");
+        toggleFriendsTrigger.OnTriggered -= OnCloseButtonPressed;
+        toggleFriendsTrigger.OnTriggered += OnCloseButtonPressed;
+
+        closeWindowTrigger = Resources.Load<InputAction_Trigger>("CloseWindow");
+        closeWindowTrigger.OnTriggered -= OnCloseButtonPressed;
+        closeWindowTrigger.OnTriggered += OnCloseButtonPressed;
+
+        toggleWorldChatTrigger = Resources.Load<InputAction_Trigger>("ToggleWorldChat");
+        toggleWorldChatTrigger.OnTriggered -= OnCloseButtonPressed;
+        toggleWorldChatTrigger.OnTriggered += OnCloseButtonPressed;
     }
 
     private void OnCloseButtonPressed(DCLAction_Trigger action = DCLAction_Trigger.CloseWindow)
     {
         currentPlayerId.Set(null);
     }
-
-    private void ToggleTrigger_OnTriggered(DCLAction_Trigger action)
-    {
-        SetVisibility(false);
-    }
-
 
     private void AddPlayerAsFriend()
     {
@@ -170,7 +173,13 @@ public class PlayerInfoCardHUDController : IHUD
         if (currentPlayerId != null)
             currentPlayerId.OnChange -= OnCurrentPlayerIdChanged;
 
-        if (toggleTrigger != null)
-            toggleTrigger.OnTriggered -= ToggleTrigger_OnTriggered;
+        if (closeWindowTrigger != null)
+            closeWindowTrigger.OnTriggered -= OnCloseButtonPressed;
+
+        if (closeWindowTrigger != null)
+            closeWindowTrigger.OnTriggered -= OnCloseButtonPressed;
+
+        if (toggleWorldChatTrigger != null)
+            toggleWorldChatTrigger.OnTriggered -= OnCloseButtonPressed;
     }
 }
