@@ -82,7 +82,7 @@ public class InputController : MonoBehaviour
                     InputProcessor.FromKey(action, KeyCode.Return, modifiers: InputProcessor.Modifier.FocusNotInInput);
                     break;
                 case DCLAction_Trigger.CloseWindow:
-                    InputProcessor.FromKey(action, KeyCode.Escape, modifiers: InputProcessor.Modifier.FocusNotInInput);
+                    InputProcessor.FromKey(action, KeyCode.Escape, modifiers: InputProcessor.Modifier.None);
                     break;
                 case DCLAction_Trigger.OpenExpressions:
                     InputProcessor.FromKey(action, KeyCode.B, modifiers: InputProcessor.Modifier.FocusNotInInput);
