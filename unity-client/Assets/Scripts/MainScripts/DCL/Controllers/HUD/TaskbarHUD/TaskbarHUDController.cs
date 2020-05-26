@@ -13,7 +13,7 @@ public class TaskbarHUDController : IHUD
 
     IMouseCatcher mouseCatcher;
     IChatController chatController;
-    InputAction_Trigger toggleTrigger;
+    InputAction_Trigger toggleFriendsTrigger;
 
     public void Initialize(IMouseCatcher mouseCatcher, IChatController chatController)
     {
@@ -40,9 +40,9 @@ public class TaskbarHUDController : IHUD
         view.OnFriendsToggleOff += View_OnFriendsToggleOff;
         view.OnFriendsToggleOn += View_OnFriendsToggleOn;
 
-        toggleTrigger = Resources.Load<InputAction_Trigger>("ToggleFriends");
-        toggleTrigger.OnTriggered -= ToggleTrigger_OnTriggered;
-        toggleTrigger.OnTriggered += ToggleTrigger_OnTriggered;
+        toggleFriendsTrigger = Resources.Load<InputAction_Trigger>("ToggleFriends");
+        toggleFriendsTrigger.OnTriggered -= ToggleTrigger_OnTriggered;
+        toggleFriendsTrigger.OnTriggered += ToggleTrigger_OnTriggered;
 
         if (chatController != null)
         {
@@ -80,7 +80,7 @@ public class TaskbarHUDController : IHUD
         worldChatWindowHud.SetVisibility(true);
         worldChatWindowHud.MarkWorldChatMessagesAsRead();
         worldChatWindowHud.view.DeactivatePreview();
-        OnPressReturn();
+        worldChatWindowHud.OnPressReturn();
     }
 
     private void View_OnChatToggleOff()
@@ -124,7 +124,7 @@ public class TaskbarHUDController : IHUD
         worldChatWindowHud.SetVisibility(true);
         worldChatWindowHud.view.ActivatePreview();
 
-        if (!AnyWindowsOpen())
+        if (!AnyWindowsDifferentThanChatIsOpen())
             worldChatWindowHud.MarkWorldChatMessagesAsRead();
     }
 
@@ -186,7 +186,7 @@ public class TaskbarHUDController : IHUD
             if (btn != null)
                 btn.SetToggleState(false, false);
 
-            if (!AnyWindowsOpen())
+            if (!AnyWindowsDifferentThanChatIsOpen())
                 worldChatWindowHud.MarkWorldChatMessagesAsRead();
         };
 
@@ -203,7 +203,7 @@ public class TaskbarHUDController : IHUD
                 view.chatHeadsGroup.RemoveChatHead(btn);
             }
 
-            if (!AnyWindowsOpen())
+            if (!AnyWindowsDifferentThanChatIsOpen())
                 worldChatWindowHud.MarkWorldChatMessagesAsRead();
         };
     }
@@ -227,7 +227,7 @@ public class TaskbarHUDController : IHUD
         {
             view.friendsButton.SetToggleState(false, false);
 
-            if (!AnyWindowsOpen())
+            if (!AnyWindowsDifferentThanChatIsOpen())
                 worldChatWindowHud.MarkWorldChatMessagesAsRead();
         };
     }
@@ -261,7 +261,7 @@ public class TaskbarHUDController : IHUD
             mouseCatcher.OnMouseUnlock -= MouseCatcher_OnMouseUnlock;
         }
 
-        toggleTrigger.OnTriggered -= ToggleTrigger_OnTriggered;
+        toggleFriendsTrigger.OnTriggered -= ToggleTrigger_OnTriggered;
 
         if (chatController != null)
             chatController.OnAddMessage -= OnAddMessage;
@@ -274,7 +274,18 @@ public class TaskbarHUDController : IHUD
 
     public void OnPressReturn()
     {
+        if (privateChatWindowHud != null && privateChatWindowHud.view.gameObject.activeSelf)
+            return;
+
         worldChatWindowHud.OnPressReturn();
+
+        if (AnyWindowsDifferentThanChatIsOpen())
+        {
+            foreach (var btn in view.GetButtonList())
+            {
+                btn.SetToggleState(btn == view.chatButton);
+            }
+        }
     }
 
     public void OnPressEsc()
@@ -289,11 +300,11 @@ public class TaskbarHUDController : IHUD
 
     void OnAddMessage(ChatMessage message)
     {
-        if (!AnyWindowsOpen())
+        if (!AnyWindowsDifferentThanChatIsOpen())
             worldChatWindowHud.MarkWorldChatMessagesAsRead();
     }
 
-    private bool AnyWindowsOpen()
+    private bool AnyWindowsDifferentThanChatIsOpen()
     {
         return (friendsHud != null && friendsHud.view.gameObject.activeSelf) ||
                (privateChatWindowHud != null && privateChatWindowHud.view.gameObject.activeSelf);
