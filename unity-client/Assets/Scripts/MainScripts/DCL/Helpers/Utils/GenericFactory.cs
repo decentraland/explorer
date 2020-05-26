@@ -37,6 +37,7 @@ namespace DCL.Helpers
             PrepareCache();
 
             GameObject prefab = cachedItems.ContainsKey(key) ? cachedItems[key] : defaultPrefab;
+            Debug.LogError($"Prefab for prefab: {prefab}!");
             if (prefab == null)
             {
                 Debug.LogError($"Prefab for Key: {key} is null!");
