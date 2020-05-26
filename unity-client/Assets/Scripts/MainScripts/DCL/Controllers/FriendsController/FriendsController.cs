@@ -95,6 +95,8 @@ public class FriendsController : MonoBehaviour, IFriendsController
         return friends[userId];
     }
 
+    Queue<string> friendsToRemove = new Queue<string>();
+
     public event System.Action<string, UserStatus> OnUpdateUserStatus;
     public event System.Action<string, FriendshipAction> OnUpdateFriendship;
     public event Action<string> OnFriendNotFound;
@@ -139,34 +141,39 @@ public class FriendsController : MonoBehaviour, IFriendsController
                 processedIds.Add(userId);
         }
 
-        using (var iterator = friends.GetEnumerator())
+        // Remove extra friends tracked in the renderer and not in kernel (deleted or requests cancelled)
+        bool found;
+        foreach (var oldFriend in friends)
         {
-            while (iterator.MoveNext())
+            found = false;
+            foreach (var userId in msg.currentFriends)
             {
-                if (!processedIds.Contains(iterator.Current.Key))
+                if (userId == oldFriend.Key)
                 {
-                    Debug.Log($"extra friend: {friends[iterator.Current.Key]} with {iterator.Current.Value.friendshipStatus}");
-                    FriendshipAction friendshipAction;
-
-                    switch (iterator.Current.Value.friendshipStatus)
-                    {
-                        case FriendshipStatus.FRIEND:
-                            friendshipAction = FriendshipAction.APPROVED;
-                            break;
-                        case FriendshipStatus.REQUESTED_FROM:
-                            friendshipAction = FriendshipAction.REQUESTED_FROM;
-                            break;
-                        case FriendshipStatus.REQUESTED_TO:
-                            friendshipAction = FriendshipAction.REQUESTED_TO;
-                            break;
-                        default:
-                            friendshipAction = FriendshipAction.NONE;
-                            break;
-                    }
-
-                    UpdateFriendshipStatus(new FriendshipUpdateStatusMessage() { action = friendshipAction, userId = iterator.Current.Key });
+                    found = true;
+                    break;
                 }
             }
+
+            if (!found)
+            {
+                foreach (var userId in msg.requestedTo)
+                {
+                    if (userId == oldFriend.Key)
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!found)
+                friendsToRemove.Enqueue(oldFriend.Key);
+        }
+
+        while (friendsToRemove.Count > 0)
+        {
+            friends.Remove(friendsToRemove.Dequeue());
         }
     }
 
