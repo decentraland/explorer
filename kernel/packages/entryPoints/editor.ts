@@ -8,7 +8,7 @@ import { EventEmitter } from 'events'
 import future, { IFuture } from 'fp-future'
 
 import { loadedSceneWorkers } from '../shared/world/parcelSceneManager'
-import { SceneJsonData, ILand } from '../shared/types'
+import { SceneJsonData, ILand, HUDElementID } from '../shared/types'
 import { normalizeContentMappings } from '../shared/selectors'
 import { SceneWorker } from '../shared/world/SceneWorker'
 import { initializeUnity } from '../unity-interface/initializer'
@@ -61,7 +61,7 @@ async function createBuilderScene(scene: SceneJsonData, baseUrl: string) {
   evtEmitter.emit('ready', {})
 }
 
-async function renewBuilderScene(scene: SceneJsonData, mappings:any) {
+async function renewBuilderScene(scene: SceneJsonData, mappings: any) {
   if (unityScene) {
     const sceneData = await getSceneData(scene, unityScene.data.baseUrl, mappings)
     updateBuilderScene(sceneData)
@@ -72,7 +72,7 @@ async function renewBuilderScene(scene: SceneJsonData, mappings:any) {
  * It fakes the content mappings for being used at the Builder without
  * content server plus loads and creates the scene worker
  */
-async function getSceneData(scene: SceneJsonData, baseUrl: string, mappings:any): Promise<ILand> {
+async function getSceneData(scene: SceneJsonData, baseUrl: string, mappings: any): Promise<ILand> {
   const id = getBaseCoords(scene)
   const contents = normalizeContentMappings(mappings || [])
 
@@ -169,6 +169,8 @@ namespace editor {
     try {
       await initializeUnity(container, buildConfigPath)
       defaultLogger.log('Engine initialized.')
+      unityInterface.ConfigureHUDElement(HUDElementID.NFT_INFO_DIALOG, { active: true, visible: false })
+
       initializedEngine.resolve()
     } catch (err) {
       defaultLogger.error('Error loading Unity', err)

@@ -391,7 +391,8 @@ export enum HUDElementID {
   TASKBAR = 11,
   MESSAGE_OF_THE_DAY = 12,
   FRIENDS = 13,
-  OPEN_EXTERNAL_URL_PROMPT = 14
+  OPEN_EXTERNAL_URL_PROMPT = 14,
+  NFT_INFO_DIALOG = 16
 }
 
 export type HUDConfiguration = {
