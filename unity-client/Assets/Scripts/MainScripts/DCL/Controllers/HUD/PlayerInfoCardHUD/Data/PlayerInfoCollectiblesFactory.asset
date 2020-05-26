@@ -35,3 +35,6 @@ MonoBehaviour:
       type: 3}
   - key: uncommon
     prefab: {fileID: 603902549804205089, guid: 7b98f01c8f7174d979b08a76c96755a9, type: 3}
+  - key: rare
+    prefab: {fileID: 8059322503478537989, guid: 2e0dd06b78c636c4785c836c5c7c5d3f,
+      type: 3}
