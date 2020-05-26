@@ -184,7 +184,8 @@ const browserInterface = {
   },
 
   OpenWebURL(data: { url: string }) {
-    window.open(data.url, '_blank')
+    const newWindow: any = window.open(data.url, '_blank', 'noopener,noreferrer')
+    if (newWindow != null) newWindow.opener = null
   },
 
   PerformanceReport(samples: string) {
@@ -539,7 +540,7 @@ export const unityInterface = {
     gameInstance.SendMessage('SceneController', 'AddUserProfileToCatalog', JSON.stringify(peerProfile))
   },
   AddWearablesToCatalog(wearables: Wearable[]) {
-    for (let wearable of wearables) {
+    for (const wearable of wearables) {
       gameInstance.SendMessage('SceneController', 'AddWearableToCatalog', JSON.stringify(wearable))
     }
   },

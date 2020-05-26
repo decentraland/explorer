@@ -106,12 +106,24 @@ namespace DCL.Helpers
             t.ForceUpdateRectTransforms();
         }
 
-        public static void ForceUpdateLayout(this RectTransform rt)
+        public static void ForceUpdateLayout(this RectTransform rt, bool delayed = true)
         {
             if (!rt.gameObject.activeInHierarchy)
                 return;
 
-            CoroutineStarter.Start(ForceUpdateLayoutRoutine(rt));
+            if (delayed)
+                CoroutineStarter.Start(ForceUpdateLayoutRoutine(rt));
+            else
+            {
+                Utils.InverseTransformChildTraversal<RectTransform>(
+                (x) =>
+                {
+                    LayoutRebuilder.ForceRebuildLayoutImmediate(x);
+                },
+                rt);
+
+                LayoutRebuilder.ForceRebuildLayoutImmediate(rt);
+            }
         }
 
         private static IEnumerator ForceUpdateLayoutRoutine(RectTransform rt)
@@ -184,7 +196,7 @@ namespace DCL.Helpers
             return request != null && !request.isNetworkError && !request.isHttpError;
         }
 
-        static IEnumerator FetchAsset(string url, UnityWebRequest request,
+        public static IEnumerator FetchAsset(string url, UnityWebRequest request,
             System.Action<UnityWebRequest> OnSuccess = null, System.Action<string> OnFail = null)
         {
             if (!string.IsNullOrEmpty(url))
@@ -266,6 +278,23 @@ namespace DCL.Helpers
                 };
 
             yield return FetchAsset(textureURL, UnityWebRequestTexture.GetTexture(textureURL), OnSuccessInternal);
+        }
+
+        public static IEnumerator FetchWrappedTextureAsset(string url, Action<IWrappedTextureAsset> OnSuccess)
+        {
+            string contentType = null;
+            byte[] bytes = null;
+
+            yield return Utils.FetchAsset(url, UnityWebRequest.Get(url), (request) =>
+            {
+                contentType = request.GetResponseHeader("Content-Type");
+                bytes = request.downloadHandler.data;
+            });
+
+            if (contentType != null && bytes != null)
+            {
+                yield return WrappedTextureAssetFactory.Create(contentType, bytes, OnSuccess);
+            }
         }
 
         public static AudioType GetAudioTypeFromUrlName(string url)
