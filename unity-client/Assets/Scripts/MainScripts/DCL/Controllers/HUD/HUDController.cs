@@ -171,6 +171,8 @@ public class HUDController : MonoBehaviour
                     worldChatWindowHud.Initialize(ChatController.i, DCL.InitialSceneReferences.i?.mouseCatcher);
                     worldChatWindowHud.OnPressPrivateMessage -= OpenPrivateChatWindow;
                     worldChatWindowHud.OnPressPrivateMessage += OpenPrivateChatWindow;
+                    worldChatWindowHud.view.OnDeactivatePreview -= View_OnDeactivatePreview;
+                    worldChatWindowHud.view.OnDeactivatePreview += View_OnDeactivatePreview;
 
                     taskbarHud?.AddWorldChatWindow(worldChatWindowHud);
                 }
@@ -200,7 +202,12 @@ public class HUDController : MonoBehaviour
                 break;
             case HUDElementID.TASKBAR:
                 CreateHudElement<TaskbarHUDController>(configuration, hudElementId);
-                taskbarHud.Initialize(DCL.InitialSceneReferences.i?.mouseCatcher, ChatController.i);
+                if (taskbarHud != null)
+                {
+                    taskbarHud.Initialize(DCL.InitialSceneReferences.i?.mouseCatcher, ChatController.i);
+                    taskbarHud.OnAnyTaskbarButtonClicked -= TaskbarHud_onAnyTaskbarButtonClicked;
+                    taskbarHud.OnAnyTaskbarButtonClicked += TaskbarHud_onAnyTaskbarButtonClicked;
+                }
                 break;
             case HUDElementID.MESSAGE_OF_THE_DAY:
                 CreateHudElement<WelcomeHUDController>(configuration, hudElementId);
@@ -222,9 +229,19 @@ public class HUDController : MonoBehaviour
         taskbarHud?.OpenPrivateChatTo(targetUserId);
     }
 
+    private void View_OnDeactivatePreview()
+    {
+        playerInfoCardHud?.CloseCard();
+    }
+
     private void PrivateChatWindowHud_OnPressBack()
     {
         taskbarHud?.OpenFriendsWindow();
+    }
+
+    private void TaskbarHud_onAnyTaskbarButtonClicked()
+    {
+        playerInfoCardHud?.CloseCard();
     }
 
     public void CreateHudElement<T>(HUDConfiguration config, HUDElementID id)
@@ -288,13 +305,19 @@ public class HUDController : MonoBehaviour
         }
 
         if (worldChatWindowHud != null)
+        {
             worldChatWindowHud.OnPressPrivateMessage -= OpenPrivateChatWindow;
+            worldChatWindowHud.view.OnDeactivatePreview -= View_OnDeactivatePreview;
+        }
 
         if (privateChatWindowHud != null)
             privateChatWindowHud.OnPressBack -= PrivateChatWindowHud_OnPressBack;
 
         if (friendsHud != null)
             friendsHud.OnPressWhisper -= OpenPrivateChatWindow;
+
+        if (taskbarHud != null)
+            taskbarHud.OnAnyTaskbarButtonClicked -= TaskbarHud_onAnyTaskbarButtonClicked;
 
         foreach (var kvp in hudElements)
         {

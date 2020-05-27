@@ -18,6 +18,8 @@ public class TaskbarHUDController : IHUD
     private InputAction_Trigger closeWindowTrigger;
     private InputAction_Trigger toggleWorldChatTrigger;
 
+    public event System.Action OnAnyTaskbarButtonClicked;
+
     public void Initialize(IMouseCatcher mouseCatcher, IChatController chatController)
     {
         this.mouseCatcher = mouseCatcher;
@@ -72,6 +74,7 @@ public class TaskbarHUDController : IHUD
     private void View_OnFriendsToggleOn()
     {
         friendsHud.SetVisibility(true);
+        OnAnyTaskbarButtonClicked?.Invoke();
     }
 
     private void View_OnFriendsToggleOff()
@@ -102,6 +105,7 @@ public class TaskbarHUDController : IHUD
         worldChatWindowHud.MarkWorldChatMessagesAsRead();
         worldChatWindowHud.view.DeactivatePreview();
         worldChatWindowHud.OnPressReturn();
+        OnAnyTaskbarButtonClicked?.Invoke();
     }
 
     private void View_OnChatToggleOff()
@@ -259,6 +263,7 @@ public class TaskbarHUDController : IHUD
         privateChatWindowHud.Configure(userId);
         privateChatWindowHud.SetVisibility(true);
         privateChatWindowHud.ForceFocus();
+        OnAnyTaskbarButtonClicked?.Invoke();
     }
 
     public void Dispose()

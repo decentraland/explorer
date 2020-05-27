@@ -142,8 +142,8 @@ public class PlayerInfoCardHUDView : MonoBehaviour
 
     public void SetCardActive(bool active)
     {
-        if (active)
-            Utils.UnlockCursor();
+        if (active && mouseCatcher != null)
+            mouseCatcher.UnlockCursor();
 
         cardCanvas.enabled = active;
         CommonScriptableObjects.playerInfoCardVisibleState.Set(active);

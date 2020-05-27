@@ -37,9 +37,14 @@ public class PlayerInfoCardHUDController : IHUD
         toggleWorldChatTrigger.OnTriggered += OnCloseButtonPressed;
     }
 
-    private void OnCloseButtonPressed(DCLAction_Trigger action = DCLAction_Trigger.CloseWindow)
+    public void CloseCard()
     {
         currentPlayerId.Set(null);
+    }
+
+    private void OnCloseButtonPressed(DCLAction_Trigger action = DCLAction_Trigger.CloseWindow)
+    {
+        CloseCard();
     }
 
     private void AddPlayerAsFriend()
