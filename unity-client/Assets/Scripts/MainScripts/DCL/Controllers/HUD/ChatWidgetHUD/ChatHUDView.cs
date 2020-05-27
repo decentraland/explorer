@@ -46,6 +46,12 @@ public class ChatHUDView : MonoBehaviour
 
     private void OnInputFieldSubmit(string message)
     {
+        if (string.IsNullOrWhiteSpace(message))
+        {
+            ResetInputField();
+            return;
+        }
+
         currentMessage.body = message;
         currentMessage.sender = UserProfile.GetOwnUserProfile().userId;
         currentMessage.messageType = ChatMessage.Type.NONE;
