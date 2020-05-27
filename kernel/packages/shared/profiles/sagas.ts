@@ -296,7 +296,7 @@ export function* ensureBaseCatalogs() {
 }
 
 export function* submitProfileToRenderer(action: ProfileSuccessAction): any {
-  const profile = { ...action.payload.profile }
+  const profile = { ...action.payload.profile, hasConnectedWeb3: action.payload.hasConnectedWeb3 }
   if ((yield select(getCurrentUserId)) === action.payload.userId) {
     yield call(ensureRenderer)
     yield call(ensureBaseCatalogs)
