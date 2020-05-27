@@ -296,7 +296,7 @@ export function* ensureBaseCatalogs() {
 }
 
 export function* submitProfileToRenderer(action: ProfileSuccessAction): any {
-  const profile = { ...action.payload.profile, hasConnectedWeb3: action.payload.hasConnectedWeb3 }
+  const profile = { ...action.payload.profile }
   if ((yield select(getCurrentUserId)) === action.payload.userId) {
     yield call(ensureRenderer)
     yield call(ensureBaseCatalogs)
@@ -310,6 +310,7 @@ export function* submitProfileToRenderer(action: ProfileSuccessAction): any {
     yield call(ensureBaseCatalogs)
 
     const forRenderer = profileToRendererFormat(profile)
+    forRenderer.hasConnectedWeb3 = action.payload.hasConnectedWeb3
 
     globalThis.unityInterface.AddUserProfileToCatalog(forRenderer)
 
