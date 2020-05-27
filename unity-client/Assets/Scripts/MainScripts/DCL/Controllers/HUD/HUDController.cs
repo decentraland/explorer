@@ -200,7 +200,8 @@ public class HUDController : MonoBehaviour
                 break;
             case HUDElementID.TASKBAR:
                 CreateHudElement<TaskbarHUDController>(configuration, hudElementId);
-                taskbarHud.Initialize(DCL.InitialSceneReferences.i?.mouseCatcher, ChatController.i);
+                taskbarHud.Initialize(DCL.InitialSceneReferences.i?.mouseCatcher, ChatController.i,
+                    FriendsController.i);
                 break;
             case HUDElementID.MESSAGE_OF_THE_DAY:
                 CreateHudElement<WelcomeHUDController>(configuration, hudElementId);

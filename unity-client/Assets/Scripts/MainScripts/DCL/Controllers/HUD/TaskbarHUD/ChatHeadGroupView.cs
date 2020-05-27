@@ -12,14 +12,33 @@ public class ChatHeadGroupView : MonoBehaviour
 
     public Transform container;
     [System.NonSerialized] public List<ChatHeadButton> chatHeads = new List<ChatHeadButton>();
-    private IChatController chatController;
 
-    public void Initialize(IChatController chatController)
+    private IChatController chatController;
+    private IFriendsController friendsController;
+
+    public void Initialize(IChatController chatController, IFriendsController friendsController)
     {
         this.chatController = chatController;
+        this.friendsController = friendsController;
 
         if (chatController != null)
             chatController.OnAddMessage += ChatController_OnAddMessage;
+
+        if (friendsController != null)
+            friendsController.OnUpdateFriendship += FriendsController_OnUpdateFriendship;
+    }
+
+    private void FriendsController_OnUpdateFriendship(string id, FriendshipAction action)
+    {
+        if (action != FriendshipAction.NONE)
+            return;
+
+        ChatHeadButton chatHead = chatHeads.FirstOrDefault((x) => x.profile.userId == id);
+
+        if (chatHead == null)
+            return;
+
+        RemoveChatHead(chatHead);
     }
 
     private void OnDestroy()
@@ -27,6 +46,8 @@ public class ChatHeadGroupView : MonoBehaviour
         if (chatController != null)
             chatController.OnAddMessage -= ChatController_OnAddMessage;
 
+        if (friendsController != null)
+            friendsController.OnUpdateFriendship -= FriendsController_OnUpdateFriendship;
     }
 
     private void ChatController_OnAddMessage(DCL.Interface.ChatMessage obj)
@@ -76,7 +97,7 @@ public class ChatHeadGroupView : MonoBehaviour
     {
         var existingHead = chatHeads.FirstOrDefault(x => x.profile.userId == userId);
 
-        if (existingHead)
+        if (existingHead != null)
         {
             existingHead.lastTimestamp = timestamp;
             SortChatHeads();

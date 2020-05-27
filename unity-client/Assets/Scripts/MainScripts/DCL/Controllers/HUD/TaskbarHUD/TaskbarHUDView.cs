@@ -31,18 +31,20 @@ public class TaskbarHUDView : MonoBehaviour
         return taskbarButtonList;
     }
 
-    internal static TaskbarHUDView Create(TaskbarHUDController controller, IChatController chatController)
+    internal static TaskbarHUDView Create(TaskbarHUDController controller, IChatController chatController,
+        IFriendsController friendsController)
     {
         var view = Instantiate(Resources.Load<GameObject>(VIEW_PATH)).GetComponent<TaskbarHUDView>();
-        view.Initialize(controller, chatController);
+        view.Initialize(controller, chatController, friendsController);
         return view;
     }
 
-    public void Initialize(TaskbarHUDController controller, IChatController chatController)
+    public void Initialize(TaskbarHUDController controller, IChatController chatController,
+        IFriendsController friendsController)
     {
         this.controller = controller;
 
-        chatHeadsGroup.Initialize(chatController);
+        chatHeadsGroup.Initialize(chatController, friendsController);
         chatButton.Initialize();
         friendsButton.Initialize();
 

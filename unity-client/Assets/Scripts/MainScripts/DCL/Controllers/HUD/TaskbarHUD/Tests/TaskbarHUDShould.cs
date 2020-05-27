@@ -25,7 +25,7 @@ public class TaskbarHUDShould : TestsBase
         userProfileGO.AddComponent<UserProfileController>();
 
         controller = new TaskbarHUDController();
-        controller.Initialize(null, chatController);
+        controller.Initialize(null, chatController, null);
         view = controller.view;
 
         Assert.IsTrue(view != null, "Taskbar view is null?");
@@ -48,7 +48,8 @@ public class TaskbarHUDShould : TestsBase
 
         controller.AddWorldChatWindow(chatWindowController);
 
-        Assert.IsTrue(chatWindowController.view.transform.parent == view.windowContainer, "Chat window isn't inside taskbar window container!");
+        Assert.IsTrue(chatWindowController.view.transform.parent == view.windowContainer,
+            "Chat window isn't inside taskbar window container!");
         Assert.IsTrue(chatWindowController.view.gameObject.activeSelf, "Chat window is disabled!");
     }
 
@@ -59,7 +60,8 @@ public class TaskbarHUDShould : TestsBase
         privateChatController.Initialize(chatController);
         controller.AddPrivateChatWindow(privateChatController);
 
-        const string badPositionMsg = "Anchored position should be zero or it won't be correctly placed inside the taskbar";
+        const string badPositionMsg =
+            "Anchored position should be zero or it won't be correctly placed inside the taskbar";
         const string badPivotMsg = "Pivot should be zero or it won't be correctly placed inside the taskbar";
 
         RectTransform rt = privateChatController.view.transform as RectTransform;

@@ -15,12 +15,13 @@ public class TaskbarHUDController : IHUD
     IChatController chatController;
     InputAction_Trigger toggleFriendsTrigger;
 
-    public void Initialize(IMouseCatcher mouseCatcher, IChatController chatController)
+    public void Initialize(IMouseCatcher mouseCatcher, IChatController chatController,
+        IFriendsController friendsController)
     {
         this.mouseCatcher = mouseCatcher;
         this.chatController = chatController;
 
-        view = TaskbarHUDView.Create(this, chatController);
+        view = TaskbarHUDView.Create(this, chatController, friendsController);
 
         if (mouseCatcher != null)
         {

@@ -29,6 +29,7 @@ public enum FriendshipStatus
     REQUESTED_FROM,
     REQUESTED_TO
 }
+
 public enum FriendshipAction
 {
     NONE,
@@ -90,7 +91,7 @@ public class FriendsController : MonoBehaviour, IFriendsController
     public UserStatus GetUserStatus(string userId)
     {
         if (!friends.ContainsKey(userId))
-            return new UserStatus() { userId = userId, friendshipStatus = FriendshipStatus.NONE };
+            return new UserStatus() {userId = userId, friendshipStatus = FriendshipStatus.NONE};
 
         return friends[userId];
     }
@@ -120,21 +121,24 @@ public class FriendsController : MonoBehaviour, IFriendsController
 
         foreach (var userId in msg.currentFriends)
         {
-            UpdateFriendshipStatus(new FriendshipUpdateStatusMessage() { action = FriendshipAction.APPROVED, userId = userId });
+            UpdateFriendshipStatus(new FriendshipUpdateStatusMessage()
+                {action = FriendshipAction.APPROVED, userId = userId});
             if (!processedIds.Contains(userId))
                 processedIds.Add(userId);
         }
 
         foreach (var userId in msg.requestedFrom)
         {
-            UpdateFriendshipStatus(new FriendshipUpdateStatusMessage() { action = FriendshipAction.REQUESTED_FROM, userId = userId });
+            UpdateFriendshipStatus(new FriendshipUpdateStatusMessage()
+                {action = FriendshipAction.REQUESTED_FROM, userId = userId});
             if (!processedIds.Contains(userId))
                 processedIds.Add(userId);
         }
 
         foreach (var userId in msg.requestedTo)
         {
-            UpdateFriendshipStatus(new FriendshipUpdateStatusMessage() { action = FriendshipAction.REQUESTED_TO, userId = userId });
+            UpdateFriendshipStatus(new FriendshipUpdateStatusMessage()
+                {action = FriendshipAction.REQUESTED_TO, userId = userId});
             if (!processedIds.Contains(userId))
                 processedIds.Add(userId);
         }
@@ -145,13 +149,14 @@ public class FriendsController : MonoBehaviour, IFriendsController
             {
                 if (!processedIds.Contains(iterator.Current.Key))
                 {
-                    Debug.Log($"extra friend: {friends[iterator.Current.Key]} with {iterator.Current.Value.friendshipStatus}");
+                    Debug.Log(
+                        $"extra friend: {friends[iterator.Current.Key]} with {iterator.Current.Value.friendshipStatus}");
                     FriendshipAction friendshipAction;
 
                     switch (iterator.Current.Value.friendshipStatus)
                     {
                         case FriendshipStatus.FRIEND:
-                            friendshipAction = FriendshipAction.APPROVED;
+                            friendshipAction = FriendshipAction.NONE;
                             break;
                         case FriendshipStatus.REQUESTED_FROM:
                             friendshipAction = FriendshipAction.REQUESTED_FROM;
@@ -164,7 +169,8 @@ public class FriendsController : MonoBehaviour, IFriendsController
                             break;
                     }
 
-                    UpdateFriendshipStatus(new FriendshipUpdateStatusMessage() { action = friendshipAction, userId = iterator.Current.Key });
+                    UpdateFriendshipStatus(new FriendshipUpdateStatusMessage()
+                        {action = friendshipAction, userId = iterator.Current.Key});
                 }
             }
         }
