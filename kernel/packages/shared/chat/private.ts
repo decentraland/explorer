@@ -161,9 +161,10 @@ export function* initializePrivateMessaging(synapseUrl: string, identity: Explor
     handleIncomingFriendshipUpdateStatus(FriendshipAction.CANCELED, socialId)
   )
 
-  client.onFriendshipRequestApproval(socialId =>
-    handleIncomingFriendshipUpdateStatus(FriendshipAction.APPROVED, socialId)
-  )
+  client.onFriendshipRequestApproval(async socialId => {
+    await handleIncomingFriendshipUpdateStatus(FriendshipAction.APPROVED, socialId)
+    updateUserStatus(client, socialId)
+  })
 
   client.onFriendshipDeletion(socialId => handleIncomingFriendshipUpdateStatus(FriendshipAction.DELETED, socialId))
 
@@ -284,18 +285,23 @@ function sendUpdateUserStatus(id: string, status: CurrentUserStatus) {
   unityInterface.UpdateUserPresence(updateMessage)
 }
 
-function initializeStatusUpdateInterval(client: SocialAPI) {
-  const domain = globalThis.globalStore.getState().chat.privateMessaging.client?.getDomain()
-
-  const friends = globalThis.globalStore.getState().chat.privateMessaging.friends.map(x => {
-    return `@${x}:${domain}`
-  })
-  const statuses = client.getUserStatuses(...friends)
-  DEBUG && logger.info(`initialize status`, friends, statuses)
+function updateUserStatus(client: SocialAPI, ...socialIds: string[]) {
+  const statuses = client.getUserStatuses(...socialIds)
+  DEBUG && logger.info(`initialize status`, socialIds, statuses)
 
   statuses.forEach((value, key) => {
     sendUpdateUserStatus(key, value)
   })
+}
+
+function initializeStatusUpdateInterval(client: SocialAPI) {
+  const domain = client.getDomain()
+
+  const friends = globalThis.globalStore.getState().chat.privateMessaging.friends.map(x => {
+    return `@${x}:${domain}`
+  })
+
+  updateUserStatus(client, ...friends)
 
   client.onStatusChange((socialId, status) => {
     DEBUG && logger.info(`client.onStatusChange`, socialId, status)
@@ -537,6 +543,7 @@ function* handleOutgoingUpdateFriendshipStatus(update: UpdateFriendship['payload
     }
     case FriendshipAction.APPROVED: {
       yield client.approveFriendshipRequestFrom(socialId)
+      updateUserStatus(client, socialId)
       break
     }
     case FriendshipAction.REJECTED: {
