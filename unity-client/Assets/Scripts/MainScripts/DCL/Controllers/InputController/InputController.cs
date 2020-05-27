@@ -12,6 +12,7 @@ public enum DCLAction_Trigger
     ToggleNavMap = 110,
     ToggleFriends = 120,
     CloseWindow = 121,
+    ToggleWorldChat = 122,
 
     OpenExpressions = 200,
     Expression_Wave = 201,
@@ -77,8 +78,11 @@ public class InputController : MonoBehaviour
                 case DCLAction_Trigger.ToggleFriends:
                     InputProcessor.FromKey(action, KeyCode.L, modifiers: InputProcessor.Modifier.FocusNotInInput);
                     break;
+                case DCLAction_Trigger.ToggleWorldChat:
+                    InputProcessor.FromKey(action, KeyCode.Return, modifiers: InputProcessor.Modifier.FocusNotInInput);
+                    break;
                 case DCLAction_Trigger.CloseWindow:
-                    InputProcessor.FromKey(action, KeyCode.Escape, modifiers: InputProcessor.Modifier.FocusNotInInput);
+                    InputProcessor.FromKey(action, KeyCode.Escape, modifiers: InputProcessor.Modifier.None);
                     break;
                 case DCLAction_Trigger.OpenExpressions:
                     InputProcessor.FromKey(action, KeyCode.B, modifiers: InputProcessor.Modifier.FocusNotInInput);

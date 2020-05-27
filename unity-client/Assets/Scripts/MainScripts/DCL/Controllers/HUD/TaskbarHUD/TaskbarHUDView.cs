@@ -125,18 +125,18 @@ public class TaskbarHUDView : MonoBehaviour
         gameObject.SetActive(visible);
     }
 
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Return))
-        {
-            controller.OnPressReturn();
-        }
+    //private void Update()
+    //{
+    //    if (Input.GetKeyDown(KeyCode.Return))
+    //    {
+    //        controller.OnPressReturn();
+    //    }
 
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            controller.OnPressEsc();
-        }
-    }
+    //    if (Input.GetKeyDown(KeyCode.Escape))
+    //    {
+    //        controller.OnPressEsc();
+    //    }
+    //}
 
     private void OnDestroy()
     {

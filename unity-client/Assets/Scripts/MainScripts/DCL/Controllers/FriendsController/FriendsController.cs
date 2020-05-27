@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public interface IFriendsController
@@ -96,6 +97,8 @@ public class FriendsController : MonoBehaviour, IFriendsController
         return friends[userId];
     }
 
+    Queue<string> friendsToRemove = new Queue<string>();
+
     public event System.Action<string, UserStatus> OnUpdateUserStatus;
     public event System.Action<string, FriendshipAction> OnUpdateFriendship;
     public event Action<string> OnFriendNotFound;
@@ -143,36 +146,20 @@ public class FriendsController : MonoBehaviour, IFriendsController
                 processedIds.Add(userId);
         }
 
-        using (var iterator = friends.GetEnumerator())
+        Queue<string> newFriends = new Queue<string>();
+
+        foreach (var kvp in friends)
         {
-            while (iterator.MoveNext())
+            if (!processedIds.Contains(kvp.Key))
             {
-                if (!processedIds.Contains(iterator.Current.Key))
-                {
-                    Debug.Log(
-                        $"extra friend: {friends[iterator.Current.Key]} with {iterator.Current.Value.friendshipStatus}");
-                    FriendshipAction friendshipAction;
-
-                    switch (iterator.Current.Value.friendshipStatus)
-                    {
-                        case FriendshipStatus.FRIEND:
-                            friendshipAction = FriendshipAction.NONE;
-                            break;
-                        case FriendshipStatus.REQUESTED_FROM:
-                            friendshipAction = FriendshipAction.REQUESTED_FROM;
-                            break;
-                        case FriendshipStatus.REQUESTED_TO:
-                            friendshipAction = FriendshipAction.REQUESTED_TO;
-                            break;
-                        default:
-                            friendshipAction = FriendshipAction.NONE;
-                            break;
-                    }
-
-                    UpdateFriendshipStatus(new FriendshipUpdateStatusMessage()
-                        {action = friendshipAction, userId = iterator.Current.Key});
-                }
+                newFriends.Enqueue(kvp.Key);
             }
+        }
+
+        while (newFriends.Count > 0)
+        {
+            UpdateFriendshipStatus(new FriendshipUpdateStatusMessage()
+                {action = FriendshipAction.NONE, userId = newFriends.Dequeue()});
         }
     }
 

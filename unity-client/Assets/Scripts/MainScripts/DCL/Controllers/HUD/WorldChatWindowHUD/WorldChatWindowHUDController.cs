@@ -88,7 +88,7 @@ public class WorldChatWindowHUDController : IHUD
         if (IsOldPrivateMessage(message))
             return;
 
-        view.chatHudView.controller.AddChatMessage(ChatHUDController.ChatMessageToChatEntry(message));
+        view.chatHudView.controller.AddChatMessage(ChatHUDController.ChatMessageToChatEntry(message), view.isInPreview);
 
         if (message.messageType == ChatMessage.Type.PRIVATE && message.recipient == ownProfile.userId)
             lastPrivateMessageReceivedSender = UserProfileController.userProfilesCatalog.Get(message.sender).userName;
@@ -98,13 +98,10 @@ public class WorldChatWindowHUDController : IHUD
     //             it can be reused by the private messaging windows down the road.
     public void SendChatMessage(ChatMessage message)
     {
-        bool validMessage = !string.IsNullOrEmpty(message.body);
-        if (validMessage && message.body.Length == 1 && (byte)message.body[0] == 11) //NOTE(Brian): Trim doesn't work. neither IsNullOrWhitespace.
-            validMessage = false;
-
+        bool isValidMessage = !string.IsNullOrEmpty(message.body) && !string.IsNullOrWhiteSpace(message.body);
         bool isPrivateMessage = message.messageType == ChatMessage.Type.PRIVATE;
 
-        if (!validMessage)
+        if (!isValidMessage)
         {
             EventSystem.current.SetSelectedGameObject(null);
 

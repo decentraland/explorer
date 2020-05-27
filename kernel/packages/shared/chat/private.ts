@@ -119,7 +119,7 @@ export function* initializePrivateMessaging(synapseUrl: string, identity: Explor
     const profile = getProfile(globalThis.globalStore.getState(), identity.address)
     const blocked = profile?.blocked ?? []
     if (blocked.includes(friend.userId)) {
-      logger.warn(`got a message from blocked user`, friend.userId)
+      DEBUG && logger.warn(`got a message from blocked user`, friend.userId)
       return
     }
 
@@ -161,9 +161,10 @@ export function* initializePrivateMessaging(synapseUrl: string, identity: Explor
     handleIncomingFriendshipUpdateStatus(FriendshipAction.CANCELED, socialId)
   )
 
-  client.onFriendshipRequestApproval(socialId =>
-    handleIncomingFriendshipUpdateStatus(FriendshipAction.APPROVED, socialId)
-  )
+  client.onFriendshipRequestApproval(async socialId => {
+    await handleIncomingFriendshipUpdateStatus(FriendshipAction.APPROVED, socialId)
+    updateUserStatus(client, socialId)
+  })
 
   client.onFriendshipDeletion(socialId => handleIncomingFriendshipUpdateStatus(FriendshipAction.DELETED, socialId))
 
@@ -284,18 +285,23 @@ function sendUpdateUserStatus(id: string, status: CurrentUserStatus) {
   unityInterface.UpdateUserPresence(updateMessage)
 }
 
-function initializeStatusUpdateInterval(client: SocialAPI) {
-  const domain = globalThis.globalStore.getState().chat.privateMessaging.client?.getDomain()
-
-  const friends = globalThis.globalStore.getState().chat.privateMessaging.friends.map(x => {
-    return `@${x}:${domain}`
-  })
-  const statuses = client.getUserStatuses(...friends)
-  DEBUG && logger.info(`initialize status`, friends, statuses)
+function updateUserStatus(client: SocialAPI, ...socialIds: string[]) {
+  const statuses = client.getUserStatuses(...socialIds)
+  DEBUG && logger.info(`initialize status`, socialIds, statuses)
 
   statuses.forEach((value, key) => {
     sendUpdateUserStatus(key, value)
   })
+}
+
+function initializeStatusUpdateInterval(client: SocialAPI) {
+  const domain = client.getDomain()
+
+  const friends = globalThis.globalStore.getState().chat.privateMessaging.friends.map(x => {
+    return `@${x}:${domain}`
+  })
+
+  updateUserStatus(client, ...friends)
 
   client.onStatusChange((socialId, status) => {
     DEBUG && logger.info(`client.onStatusChange`, socialId, status)
@@ -389,14 +395,15 @@ function* handleSendPrivateMessage(action: SendPrivateMessage, debug: boolean = 
 
 function* handleUpdateFriendship({ payload, meta }: UpdateFriendship) {
   const { action, userId } = payload
+
+  const client: SocialAPI = yield select(getClient)
+
   try {
     const { incoming } = meta
 
     const state: ReturnType<typeof getPrivateMessaging> = yield select(getPrivateMessaging)
 
     let newState: ChatState['privateMessaging'] | undefined
-
-    const client: SocialAPI = yield select(getClient)
 
     const socialData: SocialData | undefined = yield select(findByUserId, userId)
     if (socialData) {
@@ -505,6 +512,9 @@ function* handleUpdateFriendship({ payload, meta }: UpdateFriendship) {
       const id = profile?.name ? profile.name : `with address '${userId}'`
       showErrorNotification(`User ${id} must log in at least once before befriending them`)
     }
+
+    // in case of any error, re initialize friends, to possibly correct state in both kernel and renderer
+    yield call(initializeFriends, client)
   }
 }
 
@@ -537,6 +547,7 @@ function* handleOutgoingUpdateFriendshipStatus(update: UpdateFriendship['payload
     }
     case FriendshipAction.APPROVED: {
       yield client.approveFriendshipRequestFrom(socialId)
+      updateUserStatus(client, socialId)
       break
     }
     case FriendshipAction.REJECTED: {

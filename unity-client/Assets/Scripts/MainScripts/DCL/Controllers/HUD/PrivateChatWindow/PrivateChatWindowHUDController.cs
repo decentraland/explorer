@@ -75,11 +75,8 @@ public class PrivateChatWindowHUDController : IHUD
     {
         if (string.IsNullOrEmpty(conversationUserName)) return;
 
-        bool validMessage = !string.IsNullOrEmpty(message.body) || !string.IsNullOrEmpty(message.recipient);
-        if (validMessage && message.body.Length == 1 && (byte)message.body[0] == 11) //NOTE(Brian): Trim doesn't work. neither IsNullOrWhitespace.
-            validMessage = false;
-
-        if (!validMessage) return;
+        bool isValidMessage = !string.IsNullOrEmpty(message.body) && !string.IsNullOrWhiteSpace(message.body) && !string.IsNullOrEmpty(message.recipient);
+        if (!isValidMessage) return;
 
         if (resetInputFieldOnSubmit)
         {
@@ -103,6 +100,7 @@ public class PrivateChatWindowHUDController : IHUD
         {
             // The messages from 'conversationUserId' are marked as read once the private chat is opened
             MarkUserChatMessagesAsRead(conversationUserId);
+            view.chatHudView.scrollRect.verticalNormalizedPosition = 0;
         }
     }
 
