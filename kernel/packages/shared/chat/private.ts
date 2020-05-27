@@ -395,14 +395,15 @@ function* handleSendPrivateMessage(action: SendPrivateMessage, debug: boolean = 
 
 function* handleUpdateFriendship({ payload, meta }: UpdateFriendship) {
   const { action, userId } = payload
+
+  const client: SocialAPI = yield select(getClient)
+
   try {
     const { incoming } = meta
 
     const state: ReturnType<typeof getPrivateMessaging> = yield select(getPrivateMessaging)
 
     let newState: ChatState['privateMessaging'] | undefined
-
-    const client: SocialAPI = yield select(getClient)
 
     const socialData: SocialData | undefined = yield select(findByUserId, userId)
     if (socialData) {
@@ -511,6 +512,9 @@ function* handleUpdateFriendship({ payload, meta }: UpdateFriendship) {
       const id = profile?.name ? profile.name : `with address '${userId}'`
       showErrorNotification(`User ${id} must log in at least once before befriending them`)
     }
+
+    // in case of any error, re initialize friends, to possibly correct state in both kernel and renderer
+    yield call(initializeFriends, client)
   }
 }
 
