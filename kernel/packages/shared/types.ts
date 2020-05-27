@@ -63,6 +63,7 @@ export type EntityActionType =
   | 'Query'
   | 'InitMessagesFinished'
   | 'OpenExternalUrl'
+  | 'OpenNFTDialog'
 
 export type QueryPayload = { queryId: string; payload: RayQuery }
 
@@ -114,6 +115,8 @@ export type EntityAction = {
   tag?: string
   payload: any
 }
+
+export type OpenNFTDialogPayload = { assetContractAddress: string; tokenId: string; comment: string | null }
 
 /** THIS INTERFACE CANNOT CHANGE, IT IS USED IN THE UNITY BUILD */
 export type LoadableParcelScene = {

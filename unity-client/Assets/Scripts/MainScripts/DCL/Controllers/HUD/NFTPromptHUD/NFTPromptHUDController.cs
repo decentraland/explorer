@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using DCL;
+using UnityEngine;
 
 public class NFTPromptHUDController : IHUD
 {
@@ -9,6 +10,9 @@ public class NFTPromptHUDController : IHUD
         view = UnityEngine.Object.Instantiate(Resources.Load<GameObject>("NFTPromptHUD")).GetComponent<NFTPromptHUDView>();
         view.name = "_NFTPromptHUD";
         view.content.SetActive(false);
+
+        if (SceneController.i)
+            SceneController.i.OnOpenNFTDialogRequest += OpenNftInfoDialog;
     }
 
     public void OpenNftInfoDialog(string assetContractAddress, string tokenId, string comment)
@@ -30,6 +34,8 @@ public class NFTPromptHUDController : IHUD
         {
             Object.Destroy(view.gameObject);
         }
+        if (SceneController.i)
+            SceneController.i.OnOpenNFTDialogRequest -= OpenNftInfoDialog;
     }
 
 }

@@ -76,3 +76,12 @@ export function openExternalURL(url: string) {
     console.error('ERROR: openExternalURL dcl is undefined')
   }
 }
+
+export function openNFTDialog(assetContractAddress: string, tokenId: string, comment: string | null = null) {
+  if (typeof dcl !== 'undefined') {
+    dcl.openNFTDialog(assetContractAddress, tokenId, comment)
+  } else {
+    // tslint:disable-next-line:no-console
+    console.error('ERROR: undefined dcl is undefined')
+  }
+}
