@@ -46,20 +46,15 @@ public class ChatHUDView : MonoBehaviour
 
     private void OnInputFieldSubmit(string message)
     {
-        if (string.IsNullOrWhiteSpace(message))
-        {
-            ResetInputField();
-            return;
-        }
-
         currentMessage.body = message;
         currentMessage.sender = UserProfile.GetOwnUserProfile().userId;
         currentMessage.messageType = ChatMessage.Type.NONE;
         currentMessage.recipient = string.Empty;
 
-        if (detectWhisper)
+        if (detectWhisper && !string.IsNullOrWhiteSpace(message))
         {
             whisperRegexMatch = whisperRegex.Match(message);
+
             if (whisperRegexMatch.Success)
             {
                 currentMessage.messageType = ChatMessage.Type.PRIVATE;
@@ -96,7 +91,8 @@ public class ChatHUDView : MonoBehaviour
 
     bool EntryIsVisible(ChatEntry entry)
     {
-        int visibleCorners = (entry.transform as RectTransform).CountCornersVisibleFrom(scrollRect.viewport.transform as RectTransform);
+        int visibleCorners =
+            (entry.transform as RectTransform).CountCornersVisibleFrom(scrollRect.viewport.transform as RectTransform);
         return visibleCorners > 0;
     }
 
