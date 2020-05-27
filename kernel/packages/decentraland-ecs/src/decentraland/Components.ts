@@ -379,9 +379,9 @@ export class Texture extends ObservableComponent {
    * Enables texture wrapping for this material.
    * | Value | Type      |
    * |-------|-----------|
-   * |     1 | CLAMP     |
-   * |     2 | WRAP      |
-   * |     3 | MIRROR    |
+   * |     0 | CLAMP     |
+   * |     1 | WRAP      |
+   * |     2 | MIRROR    |
    */
   @ObservableComponent.readonly
   readonly wrap!: number
@@ -924,6 +924,15 @@ export class VideoTexture extends ObservableComponent {
   @ObservableComponent.field
   volume: number = 1
 
+  @ObservableComponent.field
+  playbackRate: number = 1
+
+  @ObservableComponent.field
+  loop: boolean = false
+
+  @ObservableComponent.field
+  seek: number = -1
+
   /**
    * Is this VideoTexture playing?
    */
@@ -943,5 +952,33 @@ export class VideoTexture extends ObservableComponent {
         that[i as 'samplingMode' | 'wrap'] = (opts as any)[i]
       }
     }
+  }
+
+  play() {
+    this.playing = true
+  }
+
+  pause() {
+    this.playing = false
+  }
+
+  reset() {
+    this.seekTime(0)
+  }
+
+  seekTime(seconds: number) {
+    this.seek = seconds
+    this.dirty = true
+    this.data.nonce = Math.random()
+  }
+
+  toJSON() {
+    if (this.seek < 0) {
+      return super.toJSON()
+    }
+
+    const ret = JSON.parse(JSON.stringify(super.toJSON()))
+    this.seek = -1
+    return ret
   }
 }

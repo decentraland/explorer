@@ -21,6 +21,9 @@ namespace DCL.Components
             public string videoClipId;
             public bool playing = false;
             public float volume = 1f;
+            public float playbackRate = 1f;
+            public bool loop = false;
+            public float seek = -1;
             public BabylonWrapMode wrap = BabylonWrapMode.CLAMP;
             public FilterMode samplingMode = FilterMode.Bilinear;
         }
@@ -88,6 +91,16 @@ namespace DCL.Components
                 {
                     yield return null;
                 }
+
+                if (texturePlayer.isError)
+                {
+                    if (texturePlayerUpdateRoutine != null)
+                    {
+                        CoroutineStarter.Stop(texturePlayerUpdateRoutine);
+                        texturePlayerUpdateRoutine = null;
+                    }
+                    yield break;
+                }
                 texture = texturePlayer.texture;
                 isPlayStateDirty = true;
             }
@@ -102,6 +115,14 @@ namespace DCL.Components
                     baseVolume = model.volume;
                     UpdateVolume();
                 }
+
+                if (model.seek >= 0)
+                {
+                    texturePlayer.SetTime(model.seek);
+                    model.seek = -1;
+                }
+                texturePlayer.SetPlaybackRate(model.playbackRate);
+                texturePlayer.SetLoop(model.loop);
             }
         }
 
