@@ -191,9 +191,10 @@ public class PlayerInfoCardHUDView : MonoBehaviour
 
     private void UpdateFriendButton()
     {
-        friendStatusContainer.SetActive(FriendsController.i.isInitialized);
+        bool canUseFriendButton = FriendsController.i != null && FriendsController.i.isInitialized && currentUserProfile.hasConnectedWeb3;
 
-        if (FriendsController.i == null || !FriendsController.i.isInitialized)
+        friendStatusContainer.SetActive(canUseFriendButton);
+        if (!canUseFriendButton)
         {
             addFriendButton.gameObject.SetActive(false);
             alreadyFriendsContainer.SetActive(false);
