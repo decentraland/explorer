@@ -28,11 +28,15 @@ import { SocialData, ChatState } from './types'
 import { StoreContainer } from '../store/rootTypes'
 import { ChatMessage, NotificationType } from '../types'
 import { getRealm } from 'shared/dao/selectors'
-import { lastPlayerPosition } from '../world/positionThings'
+import { Realm } from 'shared/dao/types'
+import { lastPlayerPosition, positionObservable } from '../world/positionThings'
 import { worldToGrid } from '../../atomicHelpers/parcelScenePositions'
 import { ensureRenderer } from '../profiles/sagas'
 import { ADDED_PROFILE_TO_CATALOG } from '../profiles/actions'
 import { isAddedToCatalog, getProfile } from 'shared/profiles/selectors'
+import { Vector3Component } from '../../atomicHelpers/landHelpers'
+import { INIT_CATALYST_REALM, SET_CATALYST_REALM, SetCatalystRealm, InitCatalystRealm } from '../dao/actions'
+import { deepEqual } from '../../atomicHelpers/deepEqual'
 
 declare const globalThis: StoreContainer
 
@@ -175,7 +179,7 @@ export function* initializePrivateMessaging(synapseUrl: string, identity: Explor
   yield takeEvery(SEND_PRIVATE_MESSAGE, handleSendPrivateMessage)
 
   initializeReceivedMessagesCleanUp()
-  initializeStatusUpdateInterval(client)
+  yield initializeStatusUpdateInterval(client)
 }
 
 function* initializeFriends(client: SocialAPI) {
@@ -294,7 +298,7 @@ function updateUserStatus(client: SocialAPI, ...socialIds: string[]) {
   })
 }
 
-function initializeStatusUpdateInterval(client: SocialAPI) {
+function* initializeStatusUpdateInterval(client: SocialAPI) {
   const domain = client.getDomain()
 
   const friends = globalThis.globalStore.getState().chat.privateMessaging.friends.map(x => {
@@ -315,16 +319,31 @@ function initializeStatusUpdateInterval(client: SocialAPI) {
     sendUpdateUserStatus(user.userId, status)
   })
 
-  setInterval(() => {
-    const realm = getRealm(globalThis.globalStore.getState())
-    const worldPosition = lastPlayerPosition
+  type StatusReport = { worldPosition: Vector3Component, realm: Realm | undefined, timestamp: number }
 
-    const position = worldToGrid(worldPosition)
+  let lastStatus: StatusReport | undefined = undefined
+
+  const sendOwnStatusIfNecessary = (status: StatusReport) => {
+    const { worldPosition, realm, timestamp } = status
 
     if (!realm) {
       // if no realm is initialized yet, cannot set status
       DEBUG && logger.info(`update status with no realm, skipping`)
       return
+    }
+
+    const position = worldToGrid(worldPosition)
+
+    if (lastStatus) {
+      if (timestamp < lastStatus.timestamp + SEND_STATUS_INTERVAL_MILLIS) {
+        DEBUG && logger.info(`update status within time interval, skipping`)
+        return
+      }
+
+      if (deepEqual(position, worldToGrid(lastStatus.worldPosition)) && deepEqual(realm, lastStatus.realm)) {
+        DEBUG && logger.info(`update status with same position and realm, skipping`)
+        return
+      }
     }
 
     const updateStatus = {
@@ -337,7 +356,23 @@ function initializeStatusUpdateInterval(client: SocialAPI) {
     }
     DEBUG && logger.info(`sending update status`, updateStatus)
     client.setStatus(updateStatus).catch(e => logger.error(`error while setting status`, e))
-  }, SEND_STATUS_INTERVAL_MILLIS)
+
+    lastStatus = status
+  }
+
+  positionObservable.add(({ position: { x, y, z } }) => {
+    const realm = getRealm(globalThis.globalStore.getState())
+
+    sendOwnStatusIfNecessary({ worldPosition: { x, y, z }, realm, timestamp: Date.now() })
+  })
+
+  const handleSetCatalystRealm = (action: SetCatalystRealm & InitCatalystRealm) => {
+    const realm = action.payload
+
+    sendOwnStatusIfNecessary({ worldPosition: lastPlayerPosition.clone(), realm, timestamp: Date.now() })
+  }
+
+  yield takeEvery([INIT_CATALYST_REALM, SET_CATALYST_REALM], handleSetCatalystRealm)
 }
 
 /**
