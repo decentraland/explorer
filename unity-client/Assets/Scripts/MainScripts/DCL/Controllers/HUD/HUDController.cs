@@ -177,6 +177,18 @@ public class HUDController : MonoBehaviour
                     taskbarHud?.AddWorldChatWindow(worldChatWindowHud);
                 }
 
+                break;
+            case HUDElementID.FRIENDS:
+                CreateHudElement<FriendsHUDController>(configuration, hudElementId);
+                if (friendsHud != null)
+                {
+                    friendsHud.Initialize(FriendsController.i, UserProfile.GetOwnUserProfile());
+                    friendsHud.OnPressWhisper -= OpenPrivateChatWindow;
+                    friendsHud.OnPressWhisper += OpenPrivateChatWindow;
+
+                    taskbarHud?.AddFriendsWindow(friendsHud);
+                }
+
                 CreateHudElement<PrivateChatWindowHUDController>(configuration, HUDElementID.PRIVATE_CHAT_WINDOW);
                 if (privateChatWindowHud != null)
                 {
@@ -186,19 +198,6 @@ public class HUDController : MonoBehaviour
 
                     taskbarHud?.AddPrivateChatWindow(privateChatWindowHud);
                 }
-
-                break;
-            case HUDElementID.FRIENDS:
-                CreateHudElement<FriendsHUDController>(configuration, hudElementId);
-
-                if (friendsHud != null)
-                {
-                    friendsHud.Initialize(FriendsController.i, UserProfile.GetOwnUserProfile());
-                    friendsHud.OnPressWhisper -= OpenPrivateChatWindow;
-                    friendsHud.OnPressWhisper += OpenPrivateChatWindow;
-                }
-
-                taskbarHud?.AddFriendsWindow(friendsHud);
                 break;
             case HUDElementID.TASKBAR:
                 CreateHudElement<TaskbarHUDController>(configuration, hudElementId);
