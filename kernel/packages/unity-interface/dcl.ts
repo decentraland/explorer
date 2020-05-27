@@ -428,7 +428,7 @@ export function setLoadingScreenVisible(shouldShow: boolean) {
   const loadingAudio = document.getElementById('loading-audio') as HTMLMediaElement
 
   if (shouldShow) {
-    loadingAudio?.play()
+    loadingAudio?.play().catch(e => {/*Ignored. If this fails is not critical*/})
   } else {
     loadingAudio?.pause()
   }
