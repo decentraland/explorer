@@ -54,6 +54,7 @@ public class FriendsController : MonoBehaviour, IFriendsController
         i = this;
     }
 
+    private const bool KERNEL_CAN_REMOVE_ENTRIES = false;
     public bool isInitialized { get; private set; } = false;
     public Dictionary<string, UserStatus> friends = new Dictionary<string, UserStatus>();
 
@@ -96,8 +97,6 @@ public class FriendsController : MonoBehaviour, IFriendsController
 
         return friends[userId];
     }
-
-    Queue<string> friendsToRemove = new Queue<string>();
 
     public event System.Action<string, UserStatus> OnUpdateUserStatus;
     public event System.Action<string, FriendshipAction> OnUpdateFriendship;
@@ -158,8 +157,16 @@ public class FriendsController : MonoBehaviour, IFriendsController
 
         while (newFriends.Count > 0)
         {
-            UpdateFriendshipStatus(new FriendshipUpdateStatusMessage()
-                {action = FriendshipAction.NONE, userId = newFriends.Dequeue()});
+            var userId = newFriends.Dequeue();
+
+            if (KERNEL_CAN_REMOVE_ENTRIES)
+            {
+                UpdateFriendshipStatus(new FriendshipUpdateStatusMessage()
+                    {action = FriendshipAction.NONE, userId = userId});
+            }
+
+            if (friends.ContainsKey(userId))
+                friends.Remove(userId);
         }
     }
 

@@ -256,6 +256,11 @@ public class TaskbarHUDController : IHUD
             if (!AnyWindowsDifferentThanChatIsOpen())
                 worldChatWindowHud.MarkWorldChatMessagesAsRead();
         };
+
+        friendsHud.view.friendsList.OnDeleteConfirmation += (entry) =>
+        {
+            view.chatHeadsGroup.RemoveChatHead(entry.userId);
+        };
     }
 
 

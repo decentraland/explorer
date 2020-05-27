@@ -33,12 +33,7 @@ public class ChatHeadGroupView : MonoBehaviour
         if (action != FriendshipAction.NONE)
             return;
 
-        ChatHeadButton chatHead = chatHeads.FirstOrDefault((x) => x.profile.userId == id);
-
-        if (chatHead == null)
-            return;
-
-        RemoveChatHead(chatHead);
+        RemoveChatHead(id);
     }
 
     private void OnDestroy()
@@ -114,7 +109,9 @@ public class ChatHeadGroupView : MonoBehaviour
         chatHead.OnToggleOff += OnToggleOff;
 
         var animator = chatHead.GetComponent<ShowHideAnimator>();
-        animator?.Show();
+
+        if (animator != null)
+            animator.Show();
 
         chatHeads.Add(chatHead);
         SortChatHeads();
@@ -128,8 +125,16 @@ public class ChatHeadGroupView : MonoBehaviour
         return chatHead;
     }
 
+    internal void RemoveChatHead(string userId)
+    {
+        RemoveChatHead(chatHeads.FirstOrDefault(x => x.profile.userId == userId));
+    }
+
     internal void RemoveChatHead(ChatHeadButton chatHead)
     {
+        if (chatHead == null)
+            return;
+
         var animator = chatHead.GetComponent<ShowHideAnimator>();
 
         if (animator != null)
