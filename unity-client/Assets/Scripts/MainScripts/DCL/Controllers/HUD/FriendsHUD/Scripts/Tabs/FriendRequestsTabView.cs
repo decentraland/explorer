@@ -10,11 +10,11 @@ public class FriendRequestsTabView : FriendsTabViewBase
     [SerializeField] internal TMP_InputField friendSearchInputField;
     [SerializeField] internal Button addFriendButton;
 
-    [Header("Notifications")] [SerializeField]
-    internal Notification requestSentNotification;
-
+    [Header("Notifications")]
+    [SerializeField] internal Notification requestSentNotification;
     [SerializeField] internal Notification friendSearchFailedNotification;
     [SerializeField] internal Notification acceptedFriendNotification;
+    [SerializeField] internal Notification alreadyFriendsNotification;
 
     public event System.Action<FriendRequestEntry> OnCancelConfirmation;
     public event System.Action<FriendRequestEntry> OnRejectConfirmation;
@@ -36,6 +36,9 @@ public class FriendRequestsTabView : FriendsTabViewBase
 
         acceptedFriendNotification.model.timer = owner.notificationsDuration;
         acceptedFriendNotification.model.groupID = FriendsHUDView.NOTIFICATIONS_ID;
+
+        alreadyFriendsNotification.model.timer = owner.notificationsDuration;
+        alreadyFriendsNotification.model.groupID = FriendsHUDView.NOTIFICATIONS_ID;
 
         friendSearchInputField.onSubmit.AddListener(SendFriendRequest);
         friendSearchInputField.onValueChanged.AddListener(OnSearchInputValueChanged);
@@ -102,17 +105,35 @@ public class FriendRequestsTabView : FriendsTabViewBase
         return true;
     }
 
-    void SendFriendRequest(string friendId)
+    void SendFriendRequest(string friendUserName)
     {
-        requestSentNotification.model.message = $"Your request to {friendId} successfully sent!";
-        NotificationsController.i.ShowNotification(requestSentNotification);
+        if (string.IsNullOrEmpty(friendUserName)) return;
 
         friendSearchInputField.placeholder.enabled = true;
         friendSearchInputField.text = string.Empty;
 
         addFriendButton.gameObject.SetActive(false);
 
-        OnFriendRequestSent?.Invoke(friendId);
+        if (!AlreadyFriends(friendUserName))
+        {
+            requestSentNotification.model.message = $"Your request to {friendUserName} successfully sent!";
+            NotificationsController.i.ShowNotification(requestSentNotification);
+
+            OnFriendRequestSent?.Invoke(friendUserName);
+        }
+        else
+        {
+            NotificationsController.i.ShowNotification(alreadyFriendsNotification);
+        }
+    }
+
+    bool AlreadyFriends(string friendUserName)
+    {
+        var friendUserProfile = UserProfileController.GetProfileByName(friendUserName);
+
+        return friendUserProfile != null
+            && FriendsController.i.friends.ContainsKey(friendUserProfile.userId)
+            && FriendsController.i.friends[friendUserProfile.userId].friendshipStatus == FriendshipStatus.FRIEND;
     }
 
     public void DisplayFriendUserNotFound()
@@ -121,7 +142,7 @@ public class FriendRequestsTabView : FriendsTabViewBase
         addFriendButton.interactable = false;
     }
 
-    void OnSearchInputValueChanged(string friendId)
+    void OnSearchInputValueChanged(string friendUserName)
     {
         if (!addFriendButton.gameObject.activeSelf)
             addFriendButton.gameObject.SetActive(true);
@@ -129,7 +150,7 @@ public class FriendRequestsTabView : FriendsTabViewBase
         if (!addFriendButton.interactable)
             addFriendButton.interactable = true;
 
-        if (!string.IsNullOrEmpty(friendId))
+        if (!string.IsNullOrEmpty(friendUserName))
             NotificationsController.i.DismissAllNotifications(FriendsHUDView.NOTIFICATIONS_ID);
     }
 
