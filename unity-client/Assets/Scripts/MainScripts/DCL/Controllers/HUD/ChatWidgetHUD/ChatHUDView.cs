@@ -113,7 +113,7 @@ public class ChatHUDView : MonoBehaviour
         }
     }
 
-    public virtual void AddEntry(ChatEntry.Model chatEntryModel)
+    public virtual void AddEntry(ChatEntry.Model chatEntryModel, bool setScrollPositionToBottom = false)
     {
         var chatEntryGO = Instantiate(Resources.Load(ENTRY_PATH) as GameObject, chatEntriesContainer);
         ChatEntry chatEntry = chatEntryGO.GetComponent<ChatEntry>();
@@ -136,6 +136,9 @@ public class ChatHUDView : MonoBehaviour
         SortEntries();
 
         Utils.ForceUpdateLayout(transform as RectTransform, delayed: false);
+
+        if (setScrollPositionToBottom)
+            scrollRect.verticalNormalizedPosition = 0;
     }
 
     protected virtual void OnMessageTriggerHover(ChatEntry chatEntry)

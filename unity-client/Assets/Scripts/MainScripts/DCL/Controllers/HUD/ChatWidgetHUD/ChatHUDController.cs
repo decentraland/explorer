@@ -25,9 +25,9 @@ public class ChatHUDController : IDisposable
         OnPressPrivateMessage?.Invoke(friendUserId);
     }
 
-    public void AddChatMessage(ChatEntry.Model chatEntryModel)
+    public void AddChatMessage(ChatEntry.Model chatEntryModel, bool setScrollPositionToBottom = false)
     {
-        view.AddEntry(chatEntryModel);
+        view.AddEntry(chatEntryModel, setScrollPositionToBottom);
 
         if (view.entries.Count > MAX_CHAT_ENTRIES)
         {
