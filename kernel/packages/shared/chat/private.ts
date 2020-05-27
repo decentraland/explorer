@@ -119,7 +119,7 @@ export function* initializePrivateMessaging(synapseUrl: string, identity: Explor
     const profile = getProfile(globalThis.globalStore.getState(), identity.address)
     const blocked = profile?.blocked ?? []
     if (blocked.includes(friend.userId)) {
-      logger.warn(`got a message from blocked user`, friend.userId)
+      DEBUG && logger.warn(`got a message from blocked user`, friend.userId)
       return
     }
 
