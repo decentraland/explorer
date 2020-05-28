@@ -84,7 +84,9 @@ public class JumpInButton : MonoBehaviour
 
     private void ResfreshInfo()
     {
-        if (currentPresenceStatus == PresenceStatus.ONLINE)
+        if (currentPresenceStatus == PresenceStatus.ONLINE &&
+            !string.IsNullOrEmpty(currentRealmServerName) &&
+            !string.IsNullOrEmpty(currentRealmLayerName))
         {
             playerLocationText.text = $"{currentRealmServerName}-{currentRealmLayerName} {(int)currentCoords.x}, {(int)currentCoords.y}";
             this.gameObject.SetActive(true);
