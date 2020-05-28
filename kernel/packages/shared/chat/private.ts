@@ -290,7 +290,7 @@ function sendUpdateUserStatus(id: string, status: CurrentUserStatus) {
     if (!status.realm && !status.position) {
       const lastPresence = presenceMap[userId]
 
-      DEBUG && logger.info(`online status with no realm & position, using from map`, lastPresence)
+      DEBUG && logger.info(`online status with no realm & position, using from map`, userId, lastPresence)
       status.realm = lastPresence?.realm
       status.position = lastPresence?.position
     } else {
