@@ -272,8 +272,10 @@ function initializeReceivedMessagesCleanUp() {
 }
 
 function sendUpdateUserStatus(id: string, status: CurrentUserStatus) {
+  DEBUG && logger.info(`sendUpdateUserStatus`, id, status)
+  // treat 'unavailable' status as 'online'
   const presence: PresenceStatus =
-    status.presence === PresenceType.ONLINE ? PresenceStatus.ONLINE : PresenceStatus.OFFLINE
+    status.presence === PresenceType.OFFLINE ? PresenceStatus.OFFLINE : PresenceStatus.ONLINE
 
   const domain = globalThis.globalStore.getState().chat.privateMessaging.client?.getDomain()
   let matches = id.match(new RegExp(`@(\\w.+):${domain}`, 'i'))
