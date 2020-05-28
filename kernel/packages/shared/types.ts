@@ -430,6 +430,17 @@ export enum ChatMessageType {
   SYSTEM
 }
 
+export type WorldPosition = {
+  realm: {
+    serverName: string
+    layer: string
+  }
+  gridPosition: {
+    x: number
+    y: number
+  }
+}
+
 export type ChatMessage = {
   messageId: string
   messageType: ChatMessageType
