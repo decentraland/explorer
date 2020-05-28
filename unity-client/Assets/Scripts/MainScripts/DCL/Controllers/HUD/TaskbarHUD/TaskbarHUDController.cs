@@ -313,7 +313,8 @@ public class TaskbarHUDController : IHUD
 
     public void OnPressReturn()
     {
-        if (privateChatWindowHud != null && privateChatWindowHud.view.gameObject.activeSelf)
+        if ((privateChatWindowHud != null && privateChatWindowHud.view.gameObject.activeSelf) ||
+            (friendsHud != null && friendsHud.view.friendRequestsList.gameObject.activeSelf))
             return;
 
         worldChatWindowHud.OnPressReturn();
