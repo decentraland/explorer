@@ -37,10 +37,11 @@ import { isAddedToCatalog, getProfile } from 'shared/profiles/selectors'
 import { Vector3Component } from '../../atomicHelpers/landHelpers'
 import { INIT_CATALYST_REALM, SET_CATALYST_REALM, SetCatalystRealm, InitCatalystRealm } from '../dao/actions'
 import { deepEqual } from '../../atomicHelpers/deepEqual'
+import { DEBUG_PM } from 'config'
 
 declare const globalThis: StoreContainer
 
-const DEBUG = false
+const DEBUG = DEBUG_PM
 
 const logger = createLogger('chat: ')
 
