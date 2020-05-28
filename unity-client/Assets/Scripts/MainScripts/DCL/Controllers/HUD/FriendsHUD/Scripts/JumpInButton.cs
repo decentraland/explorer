@@ -79,10 +79,10 @@ public class JumpInButton : MonoBehaviour
         currentRealmLayerName = realmLayerName;
         currentPresenceStatus = status;
 
-        ResfreshInfo();
+        RefreshInfo();
     }
 
-    private void ResfreshInfo()
+    private void RefreshInfo()
     {
         if (currentPresenceStatus == PresenceStatus.ONLINE &&
             !string.IsNullOrEmpty(currentRealmServerName) &&
