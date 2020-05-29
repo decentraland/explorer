@@ -30,13 +30,15 @@ public class DateSeparatorEntry : MonoBehaviour
     {
         string result = string.Empty;
 
-        if (date < DateTime.Now.AddDays(-1))
+        if (date.Year == DateTime.Now.Year &&
+            date.Month == DateTime.Now.Month &&
+            date.Day == DateTime.Now.Day)
         {
-            result = date.ToLongDateString();
+            result = "Today";
         }
         else
         {
-            result = "Today";
+            result = date.ToLongDateString();
         }
 
         return result;

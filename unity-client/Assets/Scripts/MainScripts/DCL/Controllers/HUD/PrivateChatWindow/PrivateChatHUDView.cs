@@ -38,9 +38,12 @@ public class PrivateChatHUDView : ChatHUDView
     private void AddSeparatorEntryIfNeeded(ChatEntry.Model chatEntryModel)
     {
         DateTime entryDateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
-        entryDateTime = DateTimeFromUnixTimestampMilliseconds(chatEntryModel.timestamp);
+        entryDateTime = GetDateTimeFromUnixTimestampMilliseconds(chatEntryModel.timestamp);
 
-        if (!dateSeparators.Exists(e => e.model.date.Year == entryDateTime.Year && e.model.date.Month == entryDateTime.Month && e.model.date.Day == entryDateTime.Day))
+        if (!dateSeparators.Exists(separator =>
+            separator.model.date.Year == entryDateTime.Year &&
+            separator.model.date.Month == entryDateTime.Month &&
+            separator.model.date.Day == entryDateTime.Day))
         {
             var chatEntrySeparatorGO = Instantiate(Resources.Load(ENTRY_PATH_SEPARATOR) as GameObject, chatEntriesContainer);
             DateSeparatorEntry dateSeparatorEntry = chatEntrySeparatorGO.GetComponent<DateSeparatorEntry>();
@@ -52,7 +55,7 @@ public class PrivateChatHUDView : ChatHUDView
         }
     }
 
-    public static DateTime DateTimeFromUnixTimestampMilliseconds(ulong milliseconds)
+    private DateTime GetDateTimeFromUnixTimestampMilliseconds(ulong milliseconds)
     {
         System.DateTime result = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
         return result.AddMilliseconds(milliseconds);
