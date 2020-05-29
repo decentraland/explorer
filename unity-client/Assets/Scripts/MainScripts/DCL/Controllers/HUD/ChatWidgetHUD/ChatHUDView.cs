@@ -26,7 +26,7 @@ public class ChatHUDView : MonoBehaviour
     [NonSerialized] public List<DateSeparatorEntry> dateSeparators = new List<DateSeparatorEntry>();
 
     ChatMessage currentMessage = new ChatMessage();
-    Regex whisperRegex = new Regex(@"(?i)^\/(whisper|w) (\S+) (.*)");
+    Regex whisperRegex = new Regex(@"(?i)^\/(whisper|w) (\S+)( *)(.*)");
     Match whisperRegexMatch;
 
     public event UnityAction<string> OnPressPrivateMessage;
@@ -60,7 +60,7 @@ public class ChatHUDView : MonoBehaviour
             {
                 currentMessage.messageType = ChatMessage.Type.PRIVATE;
                 currentMessage.recipient = whisperRegexMatch.Groups[2].Value;
-                currentMessage.body = whisperRegexMatch.Groups[3].Value;
+                currentMessage.body = whisperRegexMatch.Groups[4].Value;
             }
         }
 

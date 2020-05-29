@@ -103,6 +103,7 @@ public class WorldChatWindowHUDController : IHUD
 
         if (!isValidMessage)
         {
+            view.chatHudView.ResetInputField();
             EventSystem.current.SetSelectedGameObject(null);
 
             if (!isPrivateMessage && !view.isInPreview)
