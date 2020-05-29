@@ -32,9 +32,11 @@ namespace DCL
         internal static string DOWNLOADED_PATH_ROOT = Application.dataPath + "/" + DOWNLOADED_FOLDER_NAME;
         internal static string ASSET_BUNDLES_PATH_ROOT = Application.dataPath + "/../" + ASSET_BUNDLE_FOLDER_NAME;
 
-        internal static string[] bufferExtensions = { ".bin" };
-        internal static string[] gltfExtensions = { ".glb", ".gltf" };
-        internal static string[] textureExtensions = { ".jpg", ".png", ".jpeg", ".tga", ".gif", ".bmp", ".psd", ".tiff", ".iff" };
+        internal static string[] bufferExtensions = {".bin"};
+        internal static string[] gltfExtensions = {".glb", ".gltf"};
+
+        internal static string[] textureExtensions =
+            {".jpg", ".png", ".jpeg", ".tga", ".gif", ".bmp", ".psd", ".tiff", ".iff"};
     }
 
     public class AssetBundleBuilder
@@ -90,42 +92,50 @@ namespace DCL
 
             try
             {
-                if (AssetBundleBuilderUtils.ParseOption(commandLineArgs, AssetBundleBuilderConfig.CLI_SET_CUSTOM_OUTPUT_ROOT_PATH, 1, out string[] outputPath))
+                if (AssetBundleBuilderUtils.ParseOption(commandLineArgs,
+                    AssetBundleBuilderConfig.CLI_SET_CUSTOM_OUTPUT_ROOT_PATH, 1, out string[] outputPath))
                 {
                     builder.finalAssetBundlePath = outputPath[0] + "/";
                 }
 
-                if (AssetBundleBuilderUtils.ParseOption(commandLineArgs, AssetBundleBuilderConfig.CLI_SET_CUSTOM_BASE_URL, 1, out string[] customBaseUrl))
+                if (AssetBundleBuilderUtils.ParseOption(commandLineArgs,
+                    AssetBundleBuilderConfig.CLI_SET_CUSTOM_BASE_URL, 1, out string[] customBaseUrl))
                 {
                     ContentServerUtils.customBaseUrl = customBaseUrl[0];
                     builder.environment = ContentServerUtils.ApiEnvironment.NONE;
                 }
 
-                if (AssetBundleBuilderUtils.ParseOption(commandLineArgs, AssetBundleBuilderConfig.CLI_VERBOSE, 0, out _))
+                if (AssetBundleBuilderUtils.ParseOption(commandLineArgs, AssetBundleBuilderConfig.CLI_VERBOSE, 0,
+                    out _))
                     VERBOSE = true;
 
-                if (AssetBundleBuilderUtils.ParseOption(commandLineArgs, AssetBundleBuilderConfig.CLI_ALWAYS_BUILD_SYNTAX, 0, out _))
+                if (AssetBundleBuilderUtils.ParseOption(commandLineArgs,
+                    AssetBundleBuilderConfig.CLI_ALWAYS_BUILD_SYNTAX, 0, out _))
                     builder.skipAlreadyBuiltBundles = false;
 
-                if (AssetBundleBuilderUtils.ParseOption(commandLineArgs, AssetBundleBuilderConfig.CLI_KEEP_BUNDLES_SYNTAX, 0, out _))
+                if (AssetBundleBuilderUtils.ParseOption(commandLineArgs,
+                    AssetBundleBuilderConfig.CLI_KEEP_BUNDLES_SYNTAX, 0, out _))
                     builder.deleteDownloadPathAfterFinished = false;
 
-                if (AssetBundleBuilderUtils.ParseOption(commandLineArgs, AssetBundleBuilderConfig.CLI_BUILD_SCENE_SYNTAX, 1, out string[] sceneCid))
+                if (AssetBundleBuilderUtils.ParseOption(commandLineArgs,
+                    AssetBundleBuilderConfig.CLI_BUILD_SCENE_SYNTAX, 1, out string[] sceneCid))
                 {
                     if (sceneCid == null || string.IsNullOrEmpty(sceneCid[0]))
                     {
-                        throw new ArgumentException("Invalid sceneCid argument! Please use -sceneCid <id> to establish the desired id to process.");
+                        throw new ArgumentException(
+                            "Invalid sceneCid argument! Please use -sceneCid <id> to establish the desired id to process.");
                     }
 
                     builder.DumpScene(sceneCid[0]);
                     return;
                 }
-                else
-                if (AssetBundleBuilderUtils.ParseOption(commandLineArgs, AssetBundleBuilderConfig.CLI_BUILD_PARCELS_RANGE_SYNTAX, 4, out string[] xywh))
+                else if (AssetBundleBuilderUtils.ParseOption(commandLineArgs,
+                    AssetBundleBuilderConfig.CLI_BUILD_PARCELS_RANGE_SYNTAX, 4, out string[] xywh))
                 {
                     if (xywh == null)
                     {
-                        throw new ArgumentException("Invalid parcelsXYWH argument! Please use -parcelsXYWH x y w h to establish the desired parcels range to process.");
+                        throw new ArgumentException(
+                            "Invalid parcelsXYWH argument! Please use -parcelsXYWH x y w h to establish the desired parcels range to process.");
                     }
 
                     int x, y, w, h;
@@ -138,12 +148,14 @@ namespace DCL
 
                     if (!parseSuccess)
                     {
-                        throw new ArgumentException("Invalid parcelsXYWH argument! Please use -parcelsXYWH x y w h to establish the desired parcels range to process.");
+                        throw new ArgumentException(
+                            "Invalid parcelsXYWH argument! Please use -parcelsXYWH x y w h to establish the desired parcels range to process.");
                     }
 
                     if (w > 10 || h > 10 || w < 0 || h < 0)
                     {
-                        throw new ArgumentException("Invalid parcelsXYWH argument! Please don't use negative width/height values, and ensure any given width/height doesn't exceed 10.");
+                        throw new ArgumentException(
+                            "Invalid parcelsXYWH argument! Please don't use negative width/height values, and ensure any given width/height doesn't exceed 10.");
                     }
 
                     builder.DumpArea(new Vector2Int(x, y), new Vector2Int(w, h));
@@ -151,7 +163,8 @@ namespace DCL
                 }
                 else
                 {
-                    throw new ArgumentException("Invalid arguments! You must pass -parcelsXYWH or -sceneCid for dump to work!");
+                    throw new ArgumentException(
+                        "Invalid arguments! You must pass -parcelsXYWH or -sceneCid for dump to work!");
                 }
             }
             catch (Exception e)
@@ -181,13 +194,14 @@ namespace DCL
             Debug.Log(log);
 
             CleanupWorkingFolders();
-            AssetBundleBuilderUtils.Exit((int)errorCode);
+            AssetBundleBuilderUtils.Exit((int) errorCode);
         }
 
 
         private void DumpSceneTextures(MappingPair[] rawContents)
         {
-            var hashToTexturePair = AssetBundleBuilderUtils.FilterExtensions(rawContents, AssetBundleBuilderConfig.textureExtensions);
+            var hashToTexturePair =
+                AssetBundleBuilderUtils.FilterExtensions(rawContents, AssetBundleBuilderConfig.textureExtensions);
 
             Dictionary<string, string> pathsToTag = new Dictionary<string, string>();
 
@@ -262,11 +276,12 @@ namespace DCL
         }
 
 
-
         private bool DumpAssets(MappingPair[] rawContents)
         {
-            var hashToGltfPair = AssetBundleBuilderUtils.FilterExtensions(rawContents, AssetBundleBuilderConfig.gltfExtensions);
-            var hashToBufferPair = AssetBundleBuilderUtils.FilterExtensions(rawContents, AssetBundleBuilderConfig.bufferExtensions);
+            var hashToGltfPair =
+                AssetBundleBuilderUtils.FilterExtensions(rawContents, AssetBundleBuilderConfig.gltfExtensions);
+            var hashToBufferPair =
+                AssetBundleBuilderUtils.FilterExtensions(rawContents, AssetBundleBuilderConfig.bufferExtensions);
 
             Dictionary<string, string> pathsToTag = new Dictionary<string, string>();
 
@@ -277,7 +292,8 @@ namespace DCL
             if (skipAlreadyBuiltBundles)
             {
                 int gltfCount = hashToGltfPair.Count;
-                hashToGltfPair = hashToGltfPair.Where((kvp) => !File.Exists(finalAssetBundlePath + kvp.Key)).ToDictionary(x => x.Key, x => x.Value);
+                hashToGltfPair = hashToGltfPair.Where((kvp) => !File.Exists(finalAssetBundlePath + kvp.Key))
+                    .ToDictionary(x => x.Key, x => x.Value);
                 int skippedCount = gltfCount - hashToGltfPair.Count;
                 skippedAssets += skippedCount;
                 shouldAbortBecauseAllBundlesExist = hashToGltfPair.Count == 0;
@@ -329,14 +345,16 @@ namespace DCL
                     string contentFilePathLower = contentPair.file.ToLowerInvariant();
                     string contentFilePath = contentPair.file;
 
-                    bool endsWithTextureExtensions = AssetBundleBuilderConfig.textureExtensions.Any((x) => contentFilePathLower.EndsWith(x));
+                    bool endsWithTextureExtensions =
+                        AssetBundleBuilderConfig.textureExtensions.Any((x) => contentFilePathLower.EndsWith(x));
 
                     if (endsWithTextureExtensions)
                     {
                         RetrieveAndInjectTexture(hashToGltfPair, gltfHash, contentPair);
                     }
 
-                    bool endsWithBufferExtensions = AssetBundleBuilderConfig.bufferExtensions.Any((x) => contentFilePathLower.EndsWith(x));
+                    bool endsWithBufferExtensions =
+                        AssetBundleBuilderConfig.bufferExtensions.Any((x) => contentFilePathLower.EndsWith(x));
 
                     if (endsWithBufferExtensions)
                     {
@@ -377,12 +395,15 @@ namespace DCL
 
         internal bool BuildAssetBundles(out AssetBundleManifest manifest)
         {
-            AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport | ImportAssetOptions.ForceUpdate | ImportAssetOptions.ImportRecursive);
+            AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport | ImportAssetOptions.ForceUpdate |
+                                  ImportAssetOptions.ImportRecursive);
             AssetDatabase.SaveAssets();
 
             AssetDatabase.MoveAsset(finalDownloadedAssetDbPath, AssetBundleBuilderConfig.DOWNLOADED_ASSET_DB_PATH_ROOT);
 
-            manifest = BuildPipeline.BuildAssetBundles(finalAssetBundlePath, BuildAssetBundleOptions.UncompressedAssetBundle | BuildAssetBundleOptions.ForceRebuildAssetBundle, BuildTarget.WebGL);
+            manifest = BuildPipeline.BuildAssetBundles(finalAssetBundlePath,
+                BuildAssetBundleOptions.UncompressedAssetBundle | BuildAssetBundleOptions.ForceRebuildAssetBundle,
+                BuildTarget.WebGL);
 
             if (manifest == null)
             {
@@ -415,7 +436,7 @@ namespace DCL
 
             startTime = Time.realtimeSinceStartup;
 
-            InitializeDirectoryPaths(false);
+            InitializeDirectoryPaths(true);
             PopulateLowercaseMappings(rawContents);
 
             float timer = Time.realtimeSinceStartup;
@@ -485,7 +506,8 @@ namespace DCL
 
             if (sceneCidsList == null || sceneCidsList.Count == 0)
             {
-                Debug.LogError("Scene list is null or count == 0! Maybe this sector lacks scenes or content requests failed?");
+                Debug.LogError(
+                    "Scene list is null or count == 0! Maybe this sector lacks scenes or content requests failed?");
                 OnFinish?.Invoke(ErrorCodes.SCENE_LIST_NULL);
                 return;
             }
@@ -505,9 +527,9 @@ namespace DCL
 
         private void CleanAssetBundleFolder(string[] assetBundles)
         {
-            AssetBundleBuilderUtils.CleanAssetBundleFolder(finalAssetBundlePath, assetBundles, hashLowercaseToHashProper);
+            AssetBundleBuilderUtils.CleanAssetBundleFolder(finalAssetBundlePath, assetBundles,
+                hashLowercaseToHashProper);
         }
-
 
 
         internal void PopulateLowercaseMappings(MappingPair[] rawContents)
@@ -522,21 +544,25 @@ namespace DCL
             }
         }
 
-        private void RetrieveAndInjectTexture(Dictionary<string, MappingPair> hashToGltfPair, string gltfHash, MappingPair textureMappingPair)
+        private void RetrieveAndInjectTexture(Dictionary<string, MappingPair> hashToGltfPair, string gltfHash,
+            MappingPair textureMappingPair)
         {
             string fileExt = Path.GetExtension(textureMappingPair.file);
-            string realOutputPath = finalDownloadedPath + textureMappingPair.hash + "/" + textureMappingPair.hash + fileExt;
+            string realOutputPath =
+                finalDownloadedPath + textureMappingPair.hash + "/" + textureMappingPair.hash + fileExt;
             Texture2D t2d = null;
 
             if (File.Exists(realOutputPath))
             {
-                string assetDBOutputPath = finalDownloadedAssetDbPath + textureMappingPair.hash + "/" + textureMappingPair.hash + fileExt;
+                string assetDBOutputPath = finalDownloadedAssetDbPath + textureMappingPair.hash + "/" +
+                                           textureMappingPair.hash + fileExt;
                 t2d = AssetDatabase.LoadAssetAtPath<Texture2D>(assetDBOutputPath);
             }
 
             if (t2d != null)
             {
-                string relativePath = AssetBundleBuilderUtils.GetRelativePathTo(hashToGltfPair[gltfHash].file, textureMappingPair.file);
+                string relativePath =
+                    AssetBundleBuilderUtils.GetRelativePathTo(hashToGltfPair[gltfHash].file, textureMappingPair.file);
                 //NOTE(Brian): This cache will be used by the GLTF importer when seeking textures. This way the importer will
                 //             consume the asset bundle dependencies instead of trying to create new textures.
                 PersistentAssetCache.ImageCacheByUri[relativePath] = new RefCountedTextureData(relativePath, t2d);
@@ -546,7 +572,8 @@ namespace DCL
         private void RetrieveAndInjectBuffer(string gltfFilePath, MappingPair bufferMappingPair, string contentFilePath)
         {
             string fileExt = Path.GetExtension(bufferMappingPair.file);
-            string realOutputPath = finalDownloadedPath + bufferMappingPair.hash + "/" + bufferMappingPair.hash + fileExt;
+            string realOutputPath =
+                finalDownloadedPath + bufferMappingPair.hash + "/" + bufferMappingPair.hash + fileExt;
 
             if (File.Exists(realOutputPath))
             {
@@ -589,14 +616,15 @@ namespace DCL
             {
                 req = UnityWebRequest.Get(finalUrl);
                 req.SendWebRequest();
-                while (req.isDone == false) { }
+                while (req.isDone == false)
+                {
+                }
 
                 retryCount--;
 
                 if (retryCount == 0)
                     return null;
-            }
-            while (!req.WebRequestSucceded());
+            } while (!req.WebRequestSucceded());
 
             if (VERBOSE)
             {
@@ -630,7 +658,7 @@ namespace DCL
 
         internal void DumpScene(string cid, Action<ErrorCodes> OnFinish = null)
         {
-            ConvertScenesToAssetBundles(new List<string> { cid }, OnFinish);
+            ConvertScenesToAssetBundles(new List<string> {cid}, OnFinish);
         }
 
         internal void InitializeDirectoryPaths(bool deleteIfExists)
@@ -641,8 +669,10 @@ namespace DCL
 
         internal void CleanupWorkingFolders()
         {
-            AssetBundleBuilderUtils.DeleteFile(finalAssetBundlePath + AssetBundleBuilderConfig.ASSET_BUNDLE_FOLDER_NAME);
-            AssetBundleBuilderUtils.DeleteFile(finalAssetBundlePath + AssetBundleBuilderConfig.ASSET_BUNDLE_FOLDER_NAME + ".manifest");
+            AssetBundleBuilderUtils.DeleteFile(finalAssetBundlePath +
+                                               AssetBundleBuilderConfig.ASSET_BUNDLE_FOLDER_NAME);
+            AssetBundleBuilderUtils.DeleteFile(finalAssetBundlePath +
+                                               AssetBundleBuilderConfig.ASSET_BUNDLE_FOLDER_NAME + ".manifest");
 
             if (deleteDownloadPathAfterFinished)
             {
