@@ -343,7 +343,7 @@ public class TaskbarHUDController : IHUD
 
     void OnAddMessage(ChatMessage message)
     {
-        if (!AnyWindowsDifferentThanChatIsOpen())
+        if (!AnyWindowsDifferentThanChatIsOpen() && message.messageType == ChatMessage.Type.PUBLIC)
             worldChatWindowHud.MarkWorldChatMessagesAsRead((long) message.timestamp);
     }
 
