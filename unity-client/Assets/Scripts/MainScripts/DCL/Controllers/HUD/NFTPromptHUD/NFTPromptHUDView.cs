@@ -219,8 +219,17 @@ public class NFTPromptHUDView : MonoBehaviour
     private void SetNFTImageSize(Texture2D texture)
     {
         RectTransform rt = (RectTransform)imageNft.transform.parent;
-        float h = rt.rect.height;
-        float w = h * (texture.width / (float)texture.height);
+        float h, w;
+        if (texture.height > texture.width)
+        {
+            h = rt.rect.height;
+            w = h * (texture.width / (float)texture.height);
+        }
+        else
+        {
+            w = rt.rect.width;
+            h = w * (texture.height / (float)texture.width);
+        }
         imageNft.rectTransform.sizeDelta = new Vector2(w, h);
     }
 
