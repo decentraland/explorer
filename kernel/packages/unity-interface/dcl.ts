@@ -19,8 +19,7 @@ import {
   RESET_TUTORIAL,
   SCENE_DEBUG_PANEL,
   SHOW_FPS_COUNTER,
-  tutorialEnabled,
-  getServerConfigurations
+  tutorialEnabled
 } from '../config'
 import { Quaternion, ReadOnlyQuaternion, ReadOnlyVector3, Vector3 } from '../decentraland-ecs/src/decentraland/math'
 import { IEventNames, IEvents, ProfileForRenderer, MinimapSceneInfo } from '../decentraland-ecs/src/decentraland/Types'
@@ -79,7 +78,8 @@ import {
   FriendsInitializationMessage,
   FriendshipUpdateStatusMessage,
   UpdateUserStatusMessage,
-  FriendshipAction
+  FriendshipAction,
+  WorldPosition
 } from 'shared/types'
 import { ParcelSceneAPI } from 'shared/world/ParcelSceneAPI'
 import {
@@ -97,7 +97,9 @@ import { profileToRendererFormat } from 'shared/profiles/transformations/profile
 import { StoreContainer } from 'shared/store/rootTypes'
 import { ILandToLoadableParcelScene, ILandToLoadableParcelSceneUpdate } from 'shared/selectors'
 import { sendMessage, updateUserData, updateFriendship } from 'shared/chat/actions'
-import { ProfileAsPromise } from '../shared/profiles/ProfileAsPromise'
+import { ProfileAsPromise } from 'shared/profiles/ProfileAsPromise'
+import { changeRealm, catalystRealmConnected } from '../shared/dao/index'
+import { notifyStatusThroughChat } from 'shared/comms/chat'
 
 declare const globalThis: UnityInterfaceContainer &
   BrowserInterfaceContainer &
@@ -378,6 +380,34 @@ const browserInterface = {
 
     globalThis.globalStore.dispatch(updateUserData(userId.toLowerCase(), toSocialId(userId)))
     globalThis.globalStore.dispatch(updateFriendship(action, userId.toLowerCase(), false))
+  },
+
+  JumpIn(data: WorldPosition) {
+    const {
+      gridPosition: { x, y },
+      realm: { serverName, layer }
+    } = data
+
+    const realmString = serverName + '-' + layer
+    const realm = changeRealm(realmString)
+
+    notifyStatusThroughChat(`Changing to realm ${realmString}`)
+
+    if (realm) {
+      catalystRealmConnected().then(
+        () => {
+          TeleportController.goTo(x, y, `Jumping to ${x},${y} in realm ${realm.catalystName}-${realm.layer}!`)
+        },
+        e => {
+          const cause = e === 'realm-full' ? ' The requested realm is full.' : ''
+          notifyStatusThroughChat('Could not join realm.' + cause)
+
+          defaultLogger.error('Error joining realm', e)
+        }
+      )
+    } else {
+      notifyStatusThroughChat(`Couldn't find realm ${realmString}`)
+    }
   }
 }
 globalThis.browserInterface2 = browserInterface
@@ -418,13 +448,22 @@ async function queryGraph(query: string, variables: any) {
 }
 
 function toSocialId(userId: string) {
-  return `@${userId.toLowerCase()}:${getServerConfigurations().synapseHost}`
+  const domain = globalThis.globalStore.getState().chat.privateMessaging.client?.getDomain()
+  return `@${userId.toLowerCase()}:${domain}`
 }
 
 export function setLoadingScreenVisible(shouldShow: boolean) {
   document.getElementById('overlay')!.style.display = shouldShow ? 'block' : 'none'
   document.getElementById('load-messages-wrapper')!.style.display = shouldShow ? 'block' : 'none'
   document.getElementById('progress-bar')!.style.display = shouldShow ? 'block' : 'none'
+  const loadingAudio = document.getElementById('loading-audio') as HTMLMediaElement
+
+  if (shouldShow) {
+    loadingAudio?.play().catch(e => {/*Ignored. If this fails is not critical*/})
+  } else {
+    loadingAudio?.pause()
+  }
+
   if (!shouldShow && !EDITOR) {
     isTheFirstLoading = false
     TeleportController.stopTeleportAnimation()
@@ -540,7 +579,7 @@ export const unityInterface = {
     gameInstance.SendMessage('SceneController', 'AddUserProfileToCatalog', JSON.stringify(peerProfile))
   },
   AddWearablesToCatalog(wearables: Wearable[]) {
-    for (let wearable of wearables) {
+    for (const wearable of wearables) {
       gameInstance.SendMessage('SceneController', 'AddWearableToCatalog', JSON.stringify(wearable))
     }
   },
@@ -594,8 +633,8 @@ export const unityInterface = {
   UpdateFriendshipStatus(updateMessage: FriendshipUpdateStatusMessage) {
     gameInstance.SendMessage('SceneController', 'UpdateFriendshipStatus', JSON.stringify(updateMessage))
   },
-  UpdateUserStatus(status: UpdateUserStatusMessage) {
-    gameInstance.SendMessage('SceneController', 'UpdateUserStatus', JSON.stringify(status))
+  UpdateUserPresence(status: UpdateUserStatusMessage) {
+    gameInstance.SendMessage('SceneController', 'UpdateUserPresence', JSON.stringify(status))
   },
   FriendNotFound(queryString: string) {
     gameInstance.SendMessage('SceneController', 'FriendNotFound', JSON.stringify(queryString))
@@ -1074,8 +1113,7 @@ export function updateBuilderScene(sceneData: ILand) {
 teleportObservable.add((position: { x: number; y: number; text?: string }) => {
   // before setting the new position, show loading screen to avoid showing an empty world
   setLoadingScreenVisible(true)
-  const globalStore = globalThis.globalStore
-  globalStore.dispatch(teleportTriggered(position.text || `Teleporting to ${position.x}, ${position.y}`))
+  globalThis.globalStore.dispatch(teleportTriggered(position.text || `Teleporting to ${position.x}, ${position.y}`))
 })
 
 worldRunningObservable.add(isRunning => {
