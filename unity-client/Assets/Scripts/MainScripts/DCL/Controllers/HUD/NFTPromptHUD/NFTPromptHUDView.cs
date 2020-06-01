@@ -20,13 +20,11 @@ public class NFTPromptHUDView : MonoBehaviour
     [SerializeField] TextMeshProUGUI textLastSaleSymbol;
     [SerializeField] TextMeshProUGUI textLastSalePrice;
     [SerializeField] TextMeshProUGUI textLastSaleNeverSold;
-    [SerializeField] Image imageLastSaleTokenIcon;
 
     [Header("Price")]
     [SerializeField] TextMeshProUGUI textPriceSymbol;
     [SerializeField] TextMeshProUGUI textPrice;
     [SerializeField] TextMeshProUGUI textPriceNotForSale;
-    [SerializeField] Image imagePriceTokenIcon;
 
     [Header("Description & Comment")]
     [SerializeField] TextMeshProUGUI textDescription;
@@ -43,9 +41,6 @@ public class NFTPromptHUDView : MonoBehaviour
     [SerializeField] Button buttonCancel;
     [SerializeField] Button buttonOpenMarket;
     [SerializeField] TextMeshProUGUI textOpenMarketButton;
-
-    [Header("Token Icons - Order Matters!")]
-    [SerializeField] Sprite[] spriteTokenIcons;
 
     Coroutine fetchNFTRoutine = null;
     Coroutine fetchNFTImageRoutine = null;
@@ -106,11 +101,9 @@ public class NFTPromptHUDView : MonoBehaviour
         textLastSaleSymbol.gameObject.SetActive(false);
         textLastSalePrice.gameObject.SetActive(false);
         textLastSaleNeverSold.gameObject.SetActive(false);
-        imageLastSaleTokenIcon.gameObject.SetActive(false);
         textPriceSymbol.gameObject.SetActive(false);
         textPrice.gameObject.SetActive(false);
         textPriceNotForSale.gameObject.SetActive(false);
-        imagePriceTokenIcon.gameObject.SetActive(false);
         containerDescription.SetActive(false);
         containerComment.SetActive(false);
         buttonCancel.gameObject.SetActive(false);
@@ -154,7 +147,7 @@ public class NFTPromptHUDView : MonoBehaviour
 
             if (info.currentPriceToken != null)
             {
-                SetTokenSymbol(textPriceSymbol, imagePriceTokenIcon, info.currentPriceToken.Value.symbol);
+                SetTokenSymbol(textPriceSymbol, info.currentPriceToken.Value.symbol);
             }
         }
         else
@@ -164,7 +157,7 @@ public class NFTPromptHUDView : MonoBehaviour
 
         if (info.lastSaleToken != null)
         {
-            SetTokenSymbol(textLastSaleSymbol, imageLastSaleTokenIcon, info.lastSaleToken.Value.symbol);
+            SetTokenSymbol(textLastSaleSymbol, info.lastSaleToken.Value.symbol);
         }
 
         if (!string.IsNullOrEmpty(info.description))
@@ -258,41 +251,10 @@ public class NFTPromptHUDView : MonoBehaviour
         imageNftBackground.color = texture.GetPixel(0, 0);
     }
 
-    private void SetTokenSymbol(TextMeshProUGUI textToken, Image imageToken, string symbol)
+    private void SetTokenSymbol(TextMeshProUGUI textToken, string symbol)
     {
-        switch (symbol)
-        {
-            case "MANA":
-                textToken.gameObject.SetActive(false);
-                imageToken.sprite = spriteTokenIcons[0];
-                imageToken.gameObject.SetActive(true);
-                break;
-            case "ETH":
-                textToken.gameObject.SetActive(false);
-                imageToken.sprite = spriteTokenIcons[1];
-                imageToken.gameObject.SetActive(true);
-                break;
-            case "DAI":
-                textToken.gameObject.SetActive(false);
-                imageToken.sprite = spriteTokenIcons[2];
-                imageToken.gameObject.SetActive(true);
-                break;
-            case "USDC":
-                textToken.gameObject.SetActive(false);
-                imageToken.sprite = spriteTokenIcons[3];
-                imageToken.gameObject.SetActive(true);
-                break;
-            case "WETH":
-                textToken.gameObject.SetActive(false);
-                imageToken.sprite = spriteTokenIcons[4];
-                imageToken.gameObject.SetActive(true);
-                break;
-            default:
-                textToken.text = symbol;
-                textToken.gameObject.SetActive(true);
-                imageToken.gameObject.SetActive(false);
-                break;
-        }
+        textToken.text = symbol;
+        textToken.gameObject.SetActive(true);
     }
 
     private void OpenMarketUrl()
