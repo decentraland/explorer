@@ -82,7 +82,11 @@ function* handleAuthSuccessful() {
   if (identity.hasConnectedWeb3 && USE_NEW_CHAT) {
     yield call(ensureRealmInitialized)
 
-    yield call(initializePrivateMessaging, getServerConfigurations().synapseUrl, identity)
+    try {
+      yield call(initializePrivateMessaging, getServerConfigurations().synapseUrl, identity)
+    } catch (e) {
+      defaultLogger.error(`error initializing private messaging`, e)
+    }
   }
 }
 
