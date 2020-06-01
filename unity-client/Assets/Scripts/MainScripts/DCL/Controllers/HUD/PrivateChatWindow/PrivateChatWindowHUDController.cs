@@ -126,7 +126,7 @@ public class PrivateChatWindowHUDController : IHUD
         if (view.chatHudView.inputField.isFocused)
         {
             // The messages from 'conversationUserId' are marked as read if the player was already focused on the input field of the private chat
-            MarkUserChatMessagesAsRead(conversationUserId);
+            MarkUserChatMessagesAsRead(conversationUserId, (long) message.timestamp);
         }
     }
 
@@ -141,10 +141,10 @@ public class PrivateChatWindowHUDController : IHUD
         view.chatHudView.FocusInputField();
     }
 
-    private void MarkUserChatMessagesAsRead(string userId)
+    private void MarkUserChatMessagesAsRead(string userId, long? timestamp = null)
     {
         CommonScriptableObjects.lastReadChatMessages.Remove(userId);
-        CommonScriptableObjects.lastReadChatMessages.Add(userId, System.DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+        CommonScriptableObjects.lastReadChatMessages.Add(userId, timestamp != null ? timestamp.Value : System.DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
         SaveLatestReadChatMessagesStatus();
     }
 

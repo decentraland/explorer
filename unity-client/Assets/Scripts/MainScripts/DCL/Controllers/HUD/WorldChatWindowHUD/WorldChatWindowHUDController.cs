@@ -163,9 +163,9 @@ public class WorldChatWindowHUDController : IHUD
         }
     }
 
-    public void MarkWorldChatMessagesAsRead()
+    public void MarkWorldChatMessagesAsRead(long? timestamp = null)
     {
-        CommonScriptableObjects.lastReadWorldChatMessages.Set(System.DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+        CommonScriptableObjects.lastReadWorldChatMessages.Set(timestamp != null ? timestamp.Value : System.DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
         SaveLatestReadWorldChatMessagesStatus();
     }
 
