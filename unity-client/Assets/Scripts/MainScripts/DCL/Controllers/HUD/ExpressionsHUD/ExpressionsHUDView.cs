@@ -12,7 +12,7 @@ public class ExpressionsHUDView : MonoBehaviour
     public class ButtonToExpression
     {
         public string expressionId;
-        public Button button;
+        public Button_OnPointerDown button; // When the button is used to lock/unlock the mouse we have to use onPointerDown
     }
 
     [SerializeField] internal ButtonToExpression[] buttonToExpressionMap;
@@ -53,12 +53,7 @@ public class ExpressionsHUDView : MonoBehaviour
 
         foreach (var buttonToExpression in buttonToExpressionMap)
         {
-            buttonToExpression.button.onClick.RemoveAllListeners();
-            buttonToExpression.button.onClick.AddListener(() =>
-                {
-                    clickedDelegate?.Invoke(buttonToExpression.expressionId);
-                }
-            );
+            buttonToExpression.button.onPointerDown += () => clickedDelegate?.Invoke(buttonToExpression.expressionId);
         }
     }
 

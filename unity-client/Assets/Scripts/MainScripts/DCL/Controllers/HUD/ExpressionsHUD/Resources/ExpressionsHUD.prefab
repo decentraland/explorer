@@ -1654,19 +1654,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   buttonToExpressionMap:
   - expressionId: wave
-    button: {fileID: 6959363111349760724}
+    button: {fileID: 8899024452345124865}
   - expressionId: fistpump
-    button: {fileID: 7429565090657569286}
+    button: {fileID: 6920979846287350269}
   - expressionId: robot
-    button: {fileID: 234398039322459571}
+    button: {fileID: 7079493532869316107}
   - expressionId: raiseHand
-    button: {fileID: 4287247481211862919}
+    button: {fileID: 8496611908133421776}
   - expressionId: clap
-    button: {fileID: 373236788406191674}
+    button: {fileID: 7767993376052004405}
   - expressionId: money
-    button: {fileID: 3217893231158219506}
+    button: {fileID: 25081012869704405}
   - expressionId: kiss
-    button: {fileID: 3694800106491159368}
+    button: {fileID: 6836242333474179246}
   showContentButton: {fileID: 3828354362020330558}
   hideContentButtons:
   - {fileID: 5791184483059670900}
@@ -1693,7 +1693,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6480631354274678046}
   - component: {fileID: 4568952583338752013}
-  - component: {fileID: 234398039322459571}
+  - component: {fileID: 7079493532869316107}
   - component: {fileID: 4884999025973778337}
   m_Layer: 5
   m_Name: DanceButton
@@ -1733,7 +1733,7 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3309478375450759555}
   m_CullTransparentMesh: 0
---- !u!114 &234398039322459571
+--- !u!114 &7079493532869316107
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1742,7 +1742,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 3309478375450759555}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 1392445389, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Script: {fileID: 11500000, guid: 028f6aecab96a43f096fdbbc8a753ead, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Navigation:
@@ -2326,7 +2326,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4950410367805398983}
   - component: {fileID: 26786792254107118}
-  - component: {fileID: 7429565090657569286}
+  - component: {fileID: 6920979846287350269}
   - component: {fileID: 7748480536203718372}
   m_Layer: 5
   m_Name: FistPumpButton
@@ -2366,7 +2366,7 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3976618281351183969}
   m_CullTransparentMesh: 0
---- !u!114 &7429565090657569286
+--- !u!114 &6920979846287350269
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -2375,7 +2375,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 3976618281351183969}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 1392445389, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Script: {fileID: 11500000, guid: 028f6aecab96a43f096fdbbc8a753ead, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Navigation:
@@ -2440,7 +2440,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7892502618935349957}
   - component: {fileID: 663222235591802679}
-  - component: {fileID: 3217893231158219506}
+  - component: {fileID: 25081012869704405}
   - component: {fileID: 1163595592883164786}
   m_Layer: 5
   m_Name: ThrowMoney
@@ -2480,7 +2480,7 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4305308132892508061}
   m_CullTransparentMesh: 0
---- !u!114 &3217893231158219506
+--- !u!114 &25081012869704405
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -2489,7 +2489,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 4305308132892508061}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 1392445389, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Script: {fileID: 11500000, guid: 028f6aecab96a43f096fdbbc8a753ead, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Navigation:
@@ -2628,7 +2628,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6380930832859347887}
   - component: {fileID: 1104267520085762724}
-  - component: {fileID: 6959363111349760724}
+  - component: {fileID: 8899024452345124865}
   - component: {fileID: 3292822135945279988}
   m_Layer: 5
   m_Name: WaveHandButton
@@ -2668,7 +2668,7 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4493361109717490464}
   m_CullTransparentMesh: 0
---- !u!114 &6959363111349760724
+--- !u!114 &8899024452345124865
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -2677,7 +2677,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 4493361109717490464}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 1392445389, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Script: {fileID: 11500000, guid: 028f6aecab96a43f096fdbbc8a753ead, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Navigation:
@@ -3753,7 +3753,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6587213980418622947}
   - component: {fileID: 6259155763869372812}
-  - component: {fileID: 3694800106491159368}
+  - component: {fileID: 6836242333474179246}
   - component: {fileID: 5079774866683632801}
   m_Layer: 5
   m_Name: Send Kiss
@@ -3793,7 +3793,7 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6408490469187445268}
   m_CullTransparentMesh: 0
---- !u!114 &3694800106491159368
+--- !u!114 &6836242333474179246
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -3802,7 +3802,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 6408490469187445268}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 1392445389, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Script: {fileID: 11500000, guid: 028f6aecab96a43f096fdbbc8a753ead, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Navigation:
@@ -4461,7 +4461,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3189298678517278681}
   - component: {fileID: 6516097776908433022}
-  - component: {fileID: 4287247481211862919}
+  - component: {fileID: 8496611908133421776}
   - component: {fileID: 4118555837419026667}
   m_Layer: 5
   m_Name: RaiseHandButton
@@ -4501,7 +4501,7 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7180080547580295838}
   m_CullTransparentMesh: 0
---- !u!114 &4287247481211862919
+--- !u!114 &8496611908133421776
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -4510,7 +4510,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 7180080547580295838}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 1392445389, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Script: {fileID: 11500000, guid: 028f6aecab96a43f096fdbbc8a753ead, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Navigation:
@@ -4915,7 +4915,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8902071888976354546}
   - component: {fileID: 4327657274195754415}
-  - component: {fileID: 373236788406191674}
+  - component: {fileID: 7767993376052004405}
   - component: {fileID: 7286959071320628324}
   m_Layer: 5
   m_Name: Clap
@@ -4955,7 +4955,7 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8192546585518253487}
   m_CullTransparentMesh: 0
---- !u!114 &373236788406191674
+--- !u!114 &7767993376052004405
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -4964,7 +4964,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 8192546585518253487}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 1392445389, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Script: {fileID: 11500000, guid: 028f6aecab96a43f096fdbbc8a753ead, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Navigation:
