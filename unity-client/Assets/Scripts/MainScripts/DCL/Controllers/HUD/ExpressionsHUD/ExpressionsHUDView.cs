@@ -17,7 +17,7 @@ public class ExpressionsHUDView : MonoBehaviour
 
     [SerializeField] internal ButtonToExpression[] buttonToExpressionMap;
     [SerializeField] internal Button showContentButton;
-    [SerializeField] internal Button[] hideContentButtons;
+    [SerializeField] internal Button_OnPointerDown[] hideContentButtons;
     [SerializeField] internal RectTransform content;
     [SerializeField] internal InputAction_Trigger openExpressionsAction;
     [SerializeField] internal Image avatarPic;
@@ -43,7 +43,7 @@ public class ExpressionsHUDView : MonoBehaviour
 
         for (int i = 0; i < hideContentButtons.Length; i++)
         {
-            hideContentButtons[i].onClick.AddListener(HideContent);
+            hideContentButtons[i].onPointerDown += HideContent;
         }
     }
 
