@@ -86,16 +86,7 @@ public class TaskbarHUDController : IHUD
 
     private void ToggleFriendsTrigger_OnTriggered(DCLAction_Trigger action)
     {
-        bool currentFocusIsAnInputField = EventSystem.current != null &&
-             EventSystem.current.currentSelectedGameObject != null &&
-             EventSystem.current.currentSelectedGameObject.GetComponent<TMPro.TMP_InputField>() != null;
-
-        if ((currentFocusIsAnInputField && !worldChatWindowHud.view.isInPreview) || AnyPrivateChatWindowIsOpen())
-            return;
-
-        Utils.UnlockCursor();
-        view.windowContainerAnimator.Show();
-        view.friendsButton.SetToggleState(!view.friendsButton.toggledOn);
+        OnPressL();
     }
 
     private void ToggleWorldChatTrigger_OnTriggered(DCLAction_Trigger action)
@@ -321,10 +312,11 @@ public class TaskbarHUDController : IHUD
 
     public void OnPressReturn()
     {
-        bool isPrivateChatWindowOpen = privateChatWindowHud != null && privateChatWindowHud.view.gameObject.activeSelf;
-        bool isFriendRequestsWindowOpen = friendsHud != null &&  friendsHud.view.friendRequestsList.gameObject.activeSelf;
+        bool anyInputFieldIsSelected = EventSystem.current != null &&
+            EventSystem.current.currentSelectedGameObject != null &&
+            EventSystem.current.currentSelectedGameObject.GetComponent<TMPro.TMP_InputField>() != null;
 
-        if (isPrivateChatWindowOpen || isFriendRequestsWindowOpen)
+        if (anyInputFieldIsSelected)
             return;
 
         worldChatWindowHud.OnPressReturn();
@@ -349,6 +341,21 @@ public class TaskbarHUDController : IHUD
         worldChatWindowHud.view.ActivatePreview();
     }
 
+    private void OnPressL()
+    {
+        bool anyInputFieldDifferentThanWorlChat = EventSystem.current != null &&
+            EventSystem.current.currentSelectedGameObject != null &&
+            EventSystem.current.currentSelectedGameObject.GetComponent<TMPro.TMP_InputField>() != null &&
+            (!worldChatWindowHud.view.chatHudView.inputField.isFocused || !worldChatWindowHud.view.isInPreview);
+
+        if (anyInputFieldDifferentThanWorlChat)
+            return;
+
+        Utils.UnlockCursor();
+        view.windowContainerAnimator.Show();
+        view.friendsButton.SetToggleState(!view.friendsButton.toggledOn);
+    }
+
     void OnAddMessage(ChatMessage message)
     {
         if (!AnyWindowsDifferentThanChatIsOpen())
@@ -359,10 +366,5 @@ public class TaskbarHUDController : IHUD
     {
         return (friendsHud != null && friendsHud.view.gameObject.activeSelf) ||
                (privateChatWindowHud != null && privateChatWindowHud.view.gameObject.activeSelf);
-    }
-
-    private bool AnyPrivateChatWindowIsOpen()
-    {
-        return privateChatWindowHud != null && privateChatWindowHud.view.gameObject.activeSelf;
     }
 }
