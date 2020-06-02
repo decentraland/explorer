@@ -3,6 +3,7 @@ using DCL.Helpers;
 using DCL.Interface;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class TaskbarHUDController : IHUD
 {
@@ -85,6 +86,13 @@ public class TaskbarHUDController : IHUD
 
     private void ToggleFriendsTrigger_OnTriggered(DCLAction_Trigger action)
     {
+        if ((EventSystem.current != null &&
+             EventSystem.current.currentSelectedGameObject != null &&
+             EventSystem.current.currentSelectedGameObject.GetComponent<TMPro.TMP_InputField>() != null &&
+             !worldChatWindowHud.view.isInPreview) ||
+            AnyPrivateChatWindowIsOpen())
+            return;
+
         Utils.UnlockCursor();
         view.windowContainerAnimator.Show();
         view.friendsButton.SetToggleState(!view.friendsButton.toggledOn);
@@ -351,5 +359,10 @@ public class TaskbarHUDController : IHUD
     {
         return (friendsHud != null && friendsHud.view.gameObject.activeSelf) ||
                (privateChatWindowHud != null && privateChatWindowHud.view.gameObject.activeSelf);
+    }
+
+    private bool AnyPrivateChatWindowIsOpen()
+    {
+        return privateChatWindowHud != null && privateChatWindowHud.view.gameObject.activeSelf;
     }
 }
