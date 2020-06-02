@@ -86,11 +86,11 @@ public class TaskbarHUDController : IHUD
 
     private void ToggleFriendsTrigger_OnTriggered(DCLAction_Trigger action)
     {
-        if ((EventSystem.current != null &&
+        bool currentFocusIsAnInputField = EventSystem.current != null &&
              EventSystem.current.currentSelectedGameObject != null &&
-             EventSystem.current.currentSelectedGameObject.GetComponent<TMPro.TMP_InputField>() != null &&
-             !worldChatWindowHud.view.isInPreview) ||
-            AnyPrivateChatWindowIsOpen())
+             EventSystem.current.currentSelectedGameObject.GetComponent<TMPro.TMP_InputField>() != null;
+
+        if ((currentFocusIsAnInputField && !worldChatWindowHud.view.isInPreview) || AnyPrivateChatWindowIsOpen())
             return;
 
         Utils.UnlockCursor();
