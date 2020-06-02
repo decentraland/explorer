@@ -49,8 +49,17 @@ public class InputController : MonoBehaviour
     public InputAction_Hold[] holdActions;
     public InputAction_Measurable[] measurableActions;
 
+    bool renderingEnabled;
+
+    void Awake()
+    {
+        renderingEnabled = CommonScriptableObjects.rendererState.Get();
+    }
+
     private void Update()
     {
+        if (!renderingEnabled) return;
+
         Update_Trigger();
         Update_Hold();
         Update_Measurable();
