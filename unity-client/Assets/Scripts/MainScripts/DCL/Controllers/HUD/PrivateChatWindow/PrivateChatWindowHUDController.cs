@@ -143,8 +143,12 @@ public class PrivateChatWindowHUDController : IHUD
 
     private void MarkUserChatMessagesAsRead(string userId, long? timestamp = null)
     {
+        long timeMark = System.DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+        if (timestamp != null && timestamp.Value > timeMark)
+            timeMark = timestamp.Value;
+
         CommonScriptableObjects.lastReadChatMessages.Remove(userId);
-        CommonScriptableObjects.lastReadChatMessages.Add(userId, timestamp != null ? timestamp.Value : System.DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+        CommonScriptableObjects.lastReadChatMessages.Add(userId, timeMark);
         SaveLatestReadChatMessagesStatus();
     }
 
