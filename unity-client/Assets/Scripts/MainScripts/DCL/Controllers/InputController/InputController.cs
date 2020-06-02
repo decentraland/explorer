@@ -48,13 +48,7 @@ public class InputController : MonoBehaviour
     public InputAction_Trigger[] triggerTimeActions;
     public InputAction_Hold[] holdActions;
     public InputAction_Measurable[] measurableActions;
-
-    bool renderingEnabled;
-
-    void Awake()
-    {
-        renderingEnabled = CommonScriptableObjects.rendererState.Get();
-    }
+    bool renderingEnabled => CommonScriptableObjects.rendererState.Get();
 
     private void Update()
     {
