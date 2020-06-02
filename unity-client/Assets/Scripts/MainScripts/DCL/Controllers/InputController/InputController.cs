@@ -167,7 +167,7 @@ public class InputController : MonoBehaviour
 
 public static class InputProcessor
 {
-    private static readonly KeyCode[] MODIFIER_KEYS = new[] {KeyCode.LeftControl, KeyCode.LeftAlt, KeyCode.LeftShift};
+    private static readonly KeyCode[] MODIFIER_KEYS = new[] { KeyCode.LeftControl, KeyCode.LeftAlt, KeyCode.LeftShift };
 
     [Flags]
     public enum Modifier
@@ -180,7 +180,7 @@ public static class InputProcessor
 
     public static bool PassModifiers(Modifier modifiers)
     {
-        if (IsModifierSet(modifiers, Modifier.NeedsPointerLocked) && Cursor.lockState != CursorLockMode.Locked)
+        if (IsModifierSet(modifiers, Modifier.NeedsPointerLocked) && !DCL.Helpers.Utils.isCursorLocked)
             return false;
 
         if (IsModifierSet(modifiers, Modifier.FocusNotInInput) && FocusIsInInputField())
@@ -248,8 +248,8 @@ public static class InputProcessor
 
     public static bool IsModifierSet(Modifier modifiers, Modifier value)
     {
-        int flagsValue = (int) modifiers;
-        int flagValue = (int) value;
+        int flagsValue = (int)modifiers;
+        int flagValue = (int)value;
 
         return (flagsValue & flagValue) != 0;
     }

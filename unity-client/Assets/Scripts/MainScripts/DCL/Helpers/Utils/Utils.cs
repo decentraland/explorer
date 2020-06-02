@@ -8,10 +8,6 @@ using UnityEngine.EventSystems;
 using UnityEngine.Networking;
 using UnityEngine.UI;
 
-#if UNITY_WEBGL && !UNITY_EDITOR
-using System.Runtime.InteropServices;
-#endif
-
 namespace DCL.Helpers
 {
     public static class Utils
@@ -479,15 +475,11 @@ namespace DCL.Helpers
         }
 
         private static int lockedInFrame = -1;
-        private static int unlockedInFrame = -1;
         public static bool LockedThisFrame() => lockedInFrame == Time.frameCount;
 
         //NOTE(Brian): Made as an independent flag because the CI doesn't work well with the Cursor.lockState check.
         public static bool isCursorLocked = false;
 
-#if UNITY_WEBGL && !UNITY_EDITOR
-    [DllImport("__Internal")] public static extern void LockBrowserCursor();
-#endif
         public static void LockCursor()
         {
             if (isCursorLocked) return;
@@ -498,32 +490,17 @@ namespace DCL.Helpers
             Cursor.lockState = CursorLockMode.Locked;
 
             EventSystem.current.SetSelectedGameObject(null);
-
-#if UNITY_WEBGL && !UNITY_EDITOR
-            // We have to "manually" notify the browser that we require the lock/unlock or sometimes we get a false-lock that messes up the interactions
-            LockBrowserCursor();
-#endif
         }
 
-#if UNITY_WEBGL && !UNITY_EDITOR
-    [DllImport("__Internal")] public static extern void UnlockBrowserCursor();
-#endif
         public static void UnlockCursor()
         {
             if (!isCursorLocked) return;
 
             isCursorLocked = false;
-            unlockedInFrame = Time.frameCount;
             Cursor.visible = true;
             Cursor.lockState = CursorLockMode.None;
 
             EventSystem.current.SetSelectedGameObject(null);
-
-
-#if UNITY_WEBGL && !UNITY_EDITOR
-            // We have to "manually" notify the browser that we require the lock/unlock or sometimes we get a false-lock that messes up the interactions
-            UnlockBrowserCursor();
-#endif
         }
 
         public static void DestroyAllChild(this Transform transform)
