@@ -127,7 +127,7 @@ public class NFTPromptHUDView : MonoBehaviour
         textNftName.text = info.name;
         textNftName.gameObject.SetActive(true);
 
-        textOwner.text = info.owner;
+        textOwner.text = FormatOwnerAddress(info.owner);
         textOwner.gameObject.SetActive(true);
 
         if (!string.IsNullOrEmpty(info.lastSaleAmount))
@@ -253,6 +253,24 @@ public class NFTPromptHUDView : MonoBehaviour
         }
 
         return ret;
+    }
+
+    private string FormatOwnerAddress(string address)
+    {
+        const int maxCharacters = 27;
+        const string ellipsis = "...";
+
+        if (address.Length <= maxCharacters)
+        {
+            return address;
+        }
+        else
+        {
+            int segmentLength = Mathf.FloorToInt((maxCharacters - ellipsis.Length) * 0.5f);
+            return string.Format("{1}{0}{2}", ellipsis,
+                            address.Substring(0, segmentLength),
+                            address.Substring(address.Length - segmentLength, segmentLength));
+        }
     }
 
     private void SetSmartBackgroundColor(Texture2D texture)
