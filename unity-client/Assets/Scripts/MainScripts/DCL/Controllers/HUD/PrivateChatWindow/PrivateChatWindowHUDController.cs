@@ -123,7 +123,7 @@ public class PrivateChatWindowHUDController : IHUD
 
         view.chatHudView.controller.AddChatMessage(ChatHUDController.ChatMessageToChatEntry(message));
 
-        if (view.UserId == conversationUserId)
+        if (view.userId == conversationUserId)
         {
             // The messages from 'conversationUserId' are marked as read if his private chat window is currently open
             MarkUserChatMessagesAsRead(conversationUserId, (long) message.timestamp);

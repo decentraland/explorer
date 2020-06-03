@@ -22,7 +22,7 @@ public class PrivateChatWindowHUDView : MonoBehaviour
     public event System.Action OnClose;
     public UnityAction<ChatMessage> OnSendMessage;
 
-    public string UserId { get; internal set; }
+    public string userId { get; internal set; }
 
     void Awake()
     {
@@ -83,7 +83,7 @@ public class PrivateChatWindowHUDView : MonoBehaviour
 
     public void ConfigureUserId(string userId)
     {
-        UserId = userId;
+        this.userId = userId;
         jumpInButton.Initialize(FriendsController.i, userId);
     }
 }
