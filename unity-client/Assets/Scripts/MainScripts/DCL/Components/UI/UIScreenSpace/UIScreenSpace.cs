@@ -1,4 +1,4 @@
-﻿using DCL.Configuration;
+using DCL.Configuration;
 using DCL.Controllers;
 using DCL.Helpers;
 using DCL.Models;
@@ -160,6 +160,7 @@ namespace DCL.Components
                 // "Constrained" panel mask (to avoid rendering parcels UI on the viewport's top 10%)
                 GameObject constrainedPanel = new GameObject("ConstrainedPanel");
                 constrainedPanel.AddComponent<RectMask2D>();
+                constrainedPanel.AddComponent<ShowHideUIByTrigger>();
                 childHookRectTransform = constrainedPanel.GetComponent<RectTransform>();
                 childHookRectTransform.SetParent(canvas.transform);
                 childHookRectTransform.ResetLocalTRS();
