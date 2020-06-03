@@ -85,6 +85,8 @@ public class TaskbarHUDController : IHUD
 
     private void ToggleFriendsTrigger_OnTriggered(DCLAction_Trigger action)
     {
+        if (!view.friendsButton.gameObject.activeSelf) return;
+
         Utils.UnlockCursor();
         view.windowContainerAnimator.Show();
         view.friendsButton.SetToggleState(!view.friendsButton.toggledOn);
@@ -263,6 +265,11 @@ public class TaskbarHUDController : IHUD
         };
     }
 
+    public void DisableFriendsWindow()
+    {
+        view.friendsButton.gameObject.SetActive(false);
+        view.chatHeadsGroup.ClearChatHeads();
+    }
 
     private void OpenPrivateChatWindow(string userId)
     {
@@ -314,7 +321,7 @@ public class TaskbarHUDController : IHUD
     public void OnPressReturn()
     {
         bool isPrivateChatWindowOpen = privateChatWindowHud != null && privateChatWindowHud.view.gameObject.activeSelf;
-        bool isFriendRequestsWindowOpen = friendsHud != null &&  friendsHud.view.friendRequestsList.gameObject.activeSelf;
+        bool isFriendRequestsWindowOpen = friendsHud != null && friendsHud.view.friendRequestsList.gameObject.activeSelf;
 
         if (isPrivateChatWindowOpen || isFriendRequestsWindowOpen)
             return;
@@ -344,7 +351,7 @@ public class TaskbarHUDController : IHUD
     void OnAddMessage(ChatMessage message)
     {
         if (!AnyWindowsDifferentThanChatIsOpen() && message.messageType == ChatMessage.Type.PUBLIC)
-            worldChatWindowHud.MarkWorldChatMessagesAsRead((long) message.timestamp);
+            worldChatWindowHud.MarkWorldChatMessagesAsRead((long)message.timestamp);
     }
 
     private bool AnyWindowsDifferentThanChatIsOpen()
