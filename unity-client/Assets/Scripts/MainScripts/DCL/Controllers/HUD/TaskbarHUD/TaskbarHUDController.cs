@@ -86,17 +86,17 @@ public class TaskbarHUDController : IHUD
 
     private void ToggleFriendsTrigger_OnTriggered(DCLAction_Trigger action)
     {
-        OnPressL();
+        OnFriendsToggleInputPress();
     }
 
     private void ToggleWorldChatTrigger_OnTriggered(DCLAction_Trigger action)
     {
-        OnPressReturn();
+        OnWorldChatToggleInputPress();
     }
 
     private void CloseWindowTrigger_OnTriggered(DCLAction_Trigger action)
     {
-        OnPressEsc();
+        OnCloseWindowToggleInputPress();
     }
 
     private void View_OnChatToggleOn()
@@ -310,7 +310,7 @@ public class TaskbarHUDController : IHUD
         view.SetVisibility(visible);
     }
 
-    public void OnPressReturn()
+    public void OnWorldChatToggleInputPress()
     {
         bool anyInputFieldIsSelected = EventSystem.current != null &&
             EventSystem.current.currentSelectedGameObject != null &&
@@ -330,7 +330,7 @@ public class TaskbarHUDController : IHUD
         }
     }
 
-    public void OnPressEsc()
+    public void OnCloseWindowToggleInputPress()
     {
         if (mouseCatcher.isLocked)
             return;
@@ -341,7 +341,7 @@ public class TaskbarHUDController : IHUD
         worldChatWindowHud.view.ActivatePreview();
     }
 
-    private void OnPressL()
+    private void OnFriendsToggleInputPress()
     {
         bool anyInputFieldDifferentThanWorlChat = EventSystem.current != null &&
             EventSystem.current.currentSelectedGameObject != null &&
