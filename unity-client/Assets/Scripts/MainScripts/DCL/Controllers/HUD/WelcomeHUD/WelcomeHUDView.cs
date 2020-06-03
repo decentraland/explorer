@@ -15,6 +15,10 @@ public class WelcomeHUDView : MonoBehaviour
 
     [SerializeField] internal Button_OnPointerDown confirmButton;
     [SerializeField] internal Button_OnPointerDown closeButton;
+
+    UnityAction OnConfirmButtonPressed;
+    UnityAction OnCloseButtonPressed;
+
     public static WelcomeHUDView CreateView(bool hasWallet)
     {
         GameObject prefab;
@@ -29,7 +33,16 @@ public class WelcomeHUDView : MonoBehaviour
 
     public void Initialize(UnityAction OnConfirm, UnityAction OnClose)
     {
-        confirmButton.onPointerDown += OnConfirm;
-        closeButton.onPointerDown += OnClose;
+        OnConfirmButtonPressed = OnConfirm;
+        OnCloseButtonPressed = OnClose;
+
+        confirmButton.onPointerDown += OnConfirmButtonPressed;
+        closeButton.onPointerDown += OnCloseButtonPressed;
+    }
+
+    public void CleanUp()
+    {
+        confirmButton.onPointerDown -= OnConfirmButtonPressed;
+        closeButton.onPointerDown -= OnCloseButtonPressed;
     }
 }
