@@ -45,7 +45,7 @@ export class AirdropController extends ExposableAPI {
       requestManager.eth_sendTransaction({
         from,
         to: this.mapIdToTargetContract[id],
-        data: this.mapIdToTransactions[id]
+        data: this.mapIdToTransactions[id],
       })
     } else {
       defaultLogger.warn('Received accept of an invalid id')

@@ -18,7 +18,7 @@ import {
   updateBuilderScene,
   futures,
   unloadCurrentBuilderScene,
-  unityInterface
+  unityInterface,
 } from '../unity-interface/dcl'
 import defaultLogger from '../shared/logger'
 import { uuid } from '../decentraland-ecs/src/ecs/helpers'
@@ -43,7 +43,7 @@ async function createBuilderScene(scene: SceneJsonData, baseUrl: string) {
   bindSceneEvents()
 
   const engineReady = future()
-  sceneLifeCycleObservable.addOnce(obj => {
+  sceneLifeCycleObservable.addOnce((obj) => {
     if (sceneData.sceneId === obj.sceneId && obj.status === 'ready') {
       engineReady.resolve(true)
     }
@@ -61,7 +61,7 @@ async function createBuilderScene(scene: SceneJsonData, baseUrl: string) {
   evtEmitter.emit('ready', {})
 }
 
-async function renewBuilderScene(scene: SceneJsonData, mappings:any) {
+async function renewBuilderScene(scene: SceneJsonData, mappings: any) {
   if (unityScene) {
     const sceneData = await getSceneData(scene, unityScene.data.baseUrl, mappings)
     updateBuilderScene(sceneData)
@@ -72,7 +72,7 @@ async function renewBuilderScene(scene: SceneJsonData, mappings:any) {
  * It fakes the content mappings for being used at the Builder without
  * content server plus loads and creates the scene worker
  */
-async function getSceneData(scene: SceneJsonData, baseUrl: string, mappings:any): Promise<ILand> {
+async function getSceneData(scene: SceneJsonData, baseUrl: string, mappings: any): Promise<ILand> {
   const id = getBaseCoords(scene)
   const contents = normalizeContentMappings(mappings || [])
 
@@ -88,8 +88,8 @@ async function getSceneData(scene: SceneJsonData, baseUrl: string, mappings:any)
     mappingsResponse: {
       contents,
       parcel_id: id,
-      root_cid: 'Qmtest'
-    }
+      root_cid: 'Qmtest',
+    },
   }
 }
 
@@ -98,7 +98,7 @@ async function getSceneData(scene: SceneJsonData, baseUrl: string, mappings:any)
  */
 function getBaseCoords(scene: SceneJsonData): string {
   if (scene && scene.scene && scene.scene.base) {
-    const [x, y] = scene.scene.base.split(',').map($ => parseInt($, 10))
+    const [x, y] = scene.scene.base.split(',').map(($) => parseInt($, 10))
     return `${x},${y}`
   }
 
@@ -108,7 +108,7 @@ function getBaseCoords(scene: SceneJsonData): string {
 function bindSceneEvents() {
   if (!unityScene) return
 
-  unityScene.on('uuidEvent' as any, event => {
+  unityScene.on('uuidEvent' as any, (event) => {
     const { type } = event.payload
 
     if (type === 'onEntityLoading') {
@@ -121,41 +121,41 @@ function bindSceneEvents() {
     }
   })
 
-  unityScene.on('metricsUpdate', e => {
+  unityScene.on('metricsUpdate', (e) => {
     evtEmitter.emit('metrics', {
       metrics: e.given,
-      limits: e.limit
+      limits: e.limit,
     })
   })
 
-  unityScene.on('entitiesOutOfBoundaries', e => {
+  unityScene.on('entitiesOutOfBoundaries', (e) => {
     evtEmitter.emit('entitiesOutOfBoundaries', e)
   })
 
-  unityScene.on('entityOutOfScene', e => {
+  unityScene.on('entityOutOfScene', (e) => {
     evtEmitter.emit('entityOutOfScene', e)
   })
 
-  unityScene.on('entityBackInScene', e => {
+  unityScene.on('entityBackInScene', (e) => {
     evtEmitter.emit('entityBackInScene', e)
   })
 
-  unityScene.on('builderSceneStart', e => {
+  unityScene.on('builderSceneStart', (e) => {
     builderSceneLoaded.resolve(true)
   })
 
-  unityScene.on('builderSceneUnloaded', e => {
+  unityScene.on('builderSceneUnloaded', (e) => {
     loadingEntities = []
   })
-  unityScene.on('gizmoEvent', e => {
+  unityScene.on('gizmoEvent', (e) => {
     if (e.type === 'gizmoSelected') {
       evtEmitter.emit('gizmoSelected', {
         gizmoType: e.gizmoType,
-        entities: e.entities
+        entities: e.entities,
       })
     } else if (e.type === 'gizmoDragEnded') {
       evtEmitter.emit('transform', {
-        transforms: e.transforms
+        transforms: e.transforms,
       })
     }
   })

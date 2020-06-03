@@ -32,14 +32,14 @@ function processLoginAttempt(response: IFuture<{ successful: boolean; provider: 
         // whether accounts is undefined or empty array => provider not enabled
         result = {
           successful: false,
-          provider: createProvider()
+          provider: createProvider(),
         }
       }
     } catch (error) {
       // User denied account access...
       result = {
         successful: false,
-        provider: createProvider()
+        provider: createProvider(),
       }
     }
     response.resolve(result)
@@ -104,12 +104,12 @@ export async function awaitWeb3Approval(): Promise<void> {
       providerFuture.resolve({
         successful: false,
         provider: createProvider(),
-        localIdentity: Account.create()
+        localIdentity: Account.create(),
       })
     }
   }
 
-  providerFuture.then(result => requestManager.setProvider(result.provider)).catch(defaultLogger.error)
+  providerFuture.then((result) => requestManager.setProvider(result.provider)).catch(defaultLogger.error)
 
   return providerFuture
 }

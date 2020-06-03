@@ -29,7 +29,7 @@ export class DevTools extends API implements DevToolsServer {
           this.logs.push(event)
         }
 
-        this.logger.log('', ...event.args.map($ => ('value' in $ ? $.value : $.unserializableValue)))
+        this.logger.log('', ...event.args.map(($) => ('value' in $ ? $.value : $.unserializableValue)))
 
         break
       }

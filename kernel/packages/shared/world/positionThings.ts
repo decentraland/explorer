@@ -5,7 +5,7 @@ import {
   ReadOnlyVector3,
   ReadOnlyQuaternion,
   Vector2,
-  ReadOnlyVector2
+  ReadOnlyVector2,
 } from 'decentraland-ecs/src/decentraland/math'
 import { Observable } from 'decentraland-ecs/src/ecs/Observable'
 import { ILand } from 'shared/types'
@@ -31,7 +31,7 @@ export const teleportObservable = new Observable<ReadOnlyVector2>()
 
 export const lastPlayerPosition = new Vector3()
 
-positionObservable.add(event => {
+positionObservable.add((event) => {
   lastPlayerPosition.copyFrom(event.position)
 })
 
@@ -61,7 +61,7 @@ export function initializeUrlPositionObserver() {
     }
   }
 
-  positionObservable.add(event => {
+  positionObservable.add((event) => {
     updateUrlPosition(event.position)
   })
 
@@ -102,7 +102,7 @@ export function pickWorldSpawnpoint(land: ILand): InstancedSpawnPoint {
 
   return {
     position: basePosition.add(position),
-    cameraTarget: cameraTarget ? basePosition.add(cameraTarget) : undefined
+    cameraTarget: cameraTarget ? basePosition.add(cameraTarget) : undefined,
   }
 }
 
@@ -112,7 +112,7 @@ function pickSpawnpoint(land: ILand): InstancedSpawnPoint | undefined {
   }
 
   // 1 - default spawn points
-  const defaults = land.sceneJsonData.spawnPoints.filter($ => $.default)
+  const defaults = land.sceneJsonData.spawnPoints.filter(($) => $.default)
 
   // 2 - if no default spawn points => all existing spawn points
   const eligiblePoints = defaults.length === 0 ? land.sceneJsonData.spawnPoints : defaults
@@ -125,9 +125,9 @@ function pickSpawnpoint(land: ILand): InstancedSpawnPoint | undefined {
     position: {
       x: computeComponentValue(position.x),
       y: computeComponentValue(position.y),
-      z: computeComponentValue(position.z)
+      z: computeComponentValue(position.z),
     },
-    cameraTarget
+    cameraTarget,
   }
 }
 

@@ -10,7 +10,7 @@ class EventListener extends EventDispatcher {
     super()
     const evt = new CustomEvent('customEvent', { detail: 'test' })
 
-    self.addEventListener('customEvent', e => {
+    self.addEventListener('customEvent', (e) => {
       this.handleEvent(e.type, (e as CustomEvent).detail)
     })
 
@@ -64,18 +64,18 @@ export class EventController extends SubscribableAPI {
 
   @exposeMethod
   async unsubscribe(event: string) {
-    this.bindings.filter(binding => binding.event === event).forEach(binding => binding.off())
+    this.bindings.filter((binding) => binding.event === event).forEach((binding) => binding.off())
   }
 }
 
-describe('EventDispatcher', function() {
+describe('EventDispatcher', function () {
   testInWorker('test/out/fixtures/11.1.EventSubscriber.js', {
     plugins: [EventController],
-    log: false
+    log: false,
   })
 
   testInWorker('test/out/fixtures/11.2.ComplexEventSubscriber.js', {
     plugins: [EventController],
-    log: false
+    log: false,
   })
 })

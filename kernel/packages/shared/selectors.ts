@@ -21,7 +21,7 @@ export function normalizeContentMappings(
 
 export function ILandToLoadableParcelScene(land: ILand): EnvironmentData<LoadableParcelScene> {
   const mappings: ContentMapping[] = normalizeContentMappings(land.mappingsResponse.contents)
-  const sceneJsons = land.mappingsResponse.contents.filter(land => land.file === 'scene.json')
+  const sceneJsons = land.mappingsResponse.contents.filter((land) => land.file === 'scene.json')
   if (!sceneJsons.length) {
     throw new Error('Invalid scene mapping: no scene.json')
   }
@@ -46,8 +46,8 @@ export function ILandToLoadableParcelScene(land: ILand): EnvironmentData<Loadabl
       baseUrl: land.baseUrl,
       baseUrlBundles: land.baseUrlBundles,
       contents: mappings,
-      land
-    }
+      land,
+    },
   }
 
   return ret
@@ -76,8 +76,8 @@ export function ILandToLoadableParcelSceneUpdate(land: ILand): EnvironmentData<L
       baseUrl: land.baseUrl,
       baseUrlBundles: land.baseUrlBundles,
       contents: mappings,
-      land
-    }
+      land,
+    },
   }
 
   return ret

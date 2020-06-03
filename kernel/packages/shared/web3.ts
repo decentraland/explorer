@@ -124,7 +124,7 @@ const query = `
 const opts = (ethAddress: string) => ({
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ query, variables: { beneficiary: ethAddress.toLowerCase() } })
+  body: JSON.stringify({ query, variables: { beneficiary: ethAddress.toLowerCase() } }),
 })
 
 export async function fetchOwnedENS(theGraphBaseUrl: string, ethAddress: string): Promise<string[]> {
@@ -134,7 +134,7 @@ export async function fetchOwnedENS(theGraphBaseUrl: string, ethAddress: string)
       const response = await fetch(theGraphBaseUrl, opts(ethAddress))
       if (response.ok) {
         const jsonResponse: GraphResponse = await response.json()
-        return jsonResponse.data.nfts.map(nft => nft.ens.subdomain)
+        return jsonResponse.data.nfts.map((nft) => nft.ens.subdomain)
       }
     } catch (error) {
       defaultLogger.warn(`Could not retrieve ENS for address ${ethAddress}. Try ${attempt} of ${totalAttempts}.`, error)

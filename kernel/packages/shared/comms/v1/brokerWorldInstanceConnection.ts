@@ -11,7 +11,7 @@ import {
   SubscriptionMessage,
   MessageHeader,
   TopicIdentityMessage,
-  TopicIdentityFWMessage
+  TopicIdentityFWMessage,
 } from './proto/broker'
 import { Position, positionHash } from '../../comms/interface/utils'
 import { UserInformation, Package, ChatMessage, ProfileVersion, BusMessage } from '../../comms/interface/types'
@@ -306,8 +306,8 @@ export class BrokerWorldInstanceConnection implements WorldInstanceConnection {
                   positionData.getRotationX(),
                   positionData.getRotationY(),
                   positionData.getRotationZ(),
-                  positionData.getRotationW()
-                ]
+                  positionData.getRotationW(),
+                ],
               })
             break
           }
@@ -325,8 +325,8 @@ export class BrokerWorldInstanceConnection implements WorldInstanceConnection {
                 time: chatData.getTime(),
                 data: {
                   id: chatData.getMessageId(),
-                  text: chatData.getText()
-                }
+                  text: chatData.getText(),
+                },
               })
             break
           }
@@ -342,7 +342,7 @@ export class BrokerWorldInstanceConnection implements WorldInstanceConnection {
               this.sceneMessageHandler(alias, {
                 type: 'chat',
                 time: chatData.getTime(),
-                data: { id: chatData.getMessageId(), text: chatData.getText() }
+                data: { id: chatData.getMessageId(), text: chatData.getText() },
               })
             break
           }
@@ -390,7 +390,7 @@ export class BrokerWorldInstanceConnection implements WorldInstanceConnection {
               this.profileHandler(alias, userId, {
                 type: 'profile',
                 time: profileData.getTime(),
-                data: { user: userId, version: profileData.getProfileVersion() }
+                data: { user: userId, version: profileData.getProfileVersion() },
               })
             break
           }

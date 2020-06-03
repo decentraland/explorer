@@ -19,7 +19,7 @@ function getSceneIdFromSceneMappingResponse(scene: DeployedScene) {
   return scene.root_cid
 }
 
-export type TileIdPair = [ string, string | null ]
+export type TileIdPair = [string, string | null]
 
 export class SceneDataDownloadManager {
   positionToSceneId: Map<string, IFuture<string | null>> = new Map()
@@ -46,7 +46,7 @@ export class SceneDataDownloadManager {
   async resolveSceneSceneIds(tiles: string[]): Promise<TileIdPair[]> {
     if (!this.emptyScenesPromise) {
       this.emptyScenesPromise = jsonFetch(globalThis.location.origin + '/loader/empty-scenes/index.json').then(
-        scenes => {
+        (scenes) => {
           this.emptySceneNames = Object.keys(scenes)
           this.emptyScenes = scenes
           return this.emptyScenes
@@ -69,7 +69,7 @@ export class SceneDataDownloadManager {
         missingTiles.push(tile)
       }
 
-      futures.push(promise.then(id => ([tile, id])))
+      futures.push(promise.then((id) => [tile, id]))
     }
 
     if (missingTiles.length > 0) {
@@ -100,7 +100,7 @@ export class SceneDataDownloadManager {
           baseUrl,
           baseUrlBundles,
           sceneJsonData: scene.metadata,
-          mappingsResponse: content
+          mappingsResponse: content,
         }
 
         const pendingSceneData = this.sceneIdToLandData.get(sceneId) || future<ILand | null>()
@@ -127,7 +127,7 @@ export class SceneDataDownloadManager {
   }
 
   async resolveSceneSceneId(pos: string): Promise<string | null> {
-    return this.resolveSceneSceneIds([pos]).then(pairs => pairs.length > 0 ? pairs[0][1] : null)
+    return this.resolveSceneSceneIds([pos]).then((pairs) => (pairs.length > 0 ? pairs[0][1] : null))
   }
 
   setSceneRoots(contents: SceneMappingResponse) {
@@ -158,13 +158,13 @@ export class SceneDataDownloadManager {
         tags: [],
         scene: { parcels: [coordinates], base: coordinates },
         policy: {},
-        communications: { commServerUrl: '' }
+        communications: { commServerUrl: '' },
       },
       mappingsResponse: {
         parcel_id: coordinates,
         root_cid: sceneId,
-        contents: this.emptyScenes[sceneName]
-      }
+        contents: this.emptyScenes[sceneName],
+      },
     }
   }
 
@@ -219,9 +219,9 @@ export class SceneDataDownloadManager {
         {
           parcel_id: tutorialScene.mappingsResponse.parcel_id,
           root_cid: tutorialScene.mappingsResponse.root_cid,
-          scene_cid: ''
-        }
-      ]
+          scene_cid: '',
+        },
+      ],
     } as SceneMappingResponse
     this.setSceneRoots(contents)
     this.sceneIdToLandData.set(TUTORIAL_SCENE_ID, promised)

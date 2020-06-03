@@ -13,9 +13,9 @@ export class Throttling extends API {
   }
 }
 
-describe('Throttling', function() {
+describe('Throttling', function () {
   testInWorker('test/out/fixtures/10.Throttling.js', {
     plugins: [Throttling],
-    log: false
+    log: false,
   })
 })

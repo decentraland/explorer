@@ -21,7 +21,7 @@ import defaultLogger from 'shared/logger'
 const lifecycleWorkerRaw = require('raw-loader!../../../static/loader/lifecycle/worker.js')
 const lifecycleWorkerUrl = URL.createObjectURL(new Blob([lifecycleWorkerRaw]))
 const worker: Worker = new (Worker as any)(lifecycleWorkerUrl, { name: 'LifecycleWorker' })
-worker.onerror = e => defaultLogger.error('Loader worker error', e)
+worker.onerror = (e) => defaultLogger.error('Loader worker error', e)
 
 export class LifecycleManager extends TransportBasedServer {
   sceneIdToRequest: Map<string, IFuture<ILand>> = new Map()
@@ -107,7 +107,7 @@ export async function initParcelSceneWorker() {
     secureRadius: parcelLimits.secureRadius,
     emptyScenes: ENABLE_EMPTY_SCENES && !(globalThis as any)['isRunningTests'],
     tutorialBaseURL: getTutorialBaseURL(),
-    tutorialSceneEnabled: tutorialSceneEnabled()
+    tutorialSceneEnabled: tutorialSceneEnabled(),
   })
 
   return server

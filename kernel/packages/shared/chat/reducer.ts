@@ -8,8 +8,8 @@ const CHAT_INITIAL_STATE: ChatState = {
     socialInfo: {},
     friends: [],
     toFriendRequests: [],
-    fromFriendRequests: []
-  }
+    fromFriendRequests: [],
+  },
 }
 
 export function chatReducer(state?: ChatState, action?: AnyAction) {
@@ -47,9 +47,9 @@ function reduceUpdateUserData(state: ChatState, action: UpdateUserData) {
       ...state.privateMessaging,
       socialInfo: {
         ...state.privateMessaging.socialInfo,
-        [action.payload.socialId]: action.payload
-      }
-    }
+        [action.payload.socialId]: action.payload,
+      },
+    },
   }
 }
 

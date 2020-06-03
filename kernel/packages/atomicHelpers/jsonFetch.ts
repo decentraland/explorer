@@ -16,7 +16,7 @@ export async function jsonFetch(url: string): Promise<any> {
   requestCache.set(url, futureCache)
 
   fetch(url).then(
-    async $ => {
+    async ($) => {
       if (!$.ok) {
         // do not cache in case of error fetching
         requestCache.delete(url)
@@ -30,7 +30,7 @@ export async function jsonFetch(url: string): Promise<any> {
         }
       }
     },
-    e => futureCache.reject(e)
+    (e) => futureCache.reject(e)
   )
 
   return futureCache

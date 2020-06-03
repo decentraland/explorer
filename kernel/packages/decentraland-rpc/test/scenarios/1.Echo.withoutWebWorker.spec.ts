@@ -16,7 +16,7 @@ it('test/out/1.Echo.withoutWebWorker.spec', async () => {
     const data: object = await ScriptingClient.call('MethodX', ['a worker generated string'])
     await ScriptingClient.call('JumpBack', data)
   }
-  x().catch(x => console.error(x))
+  x().catch((x) => console.error(x))
 
   // SERVER
 
@@ -25,11 +25,11 @@ it('test/out/1.Echo.withoutWebWorker.spec', async () => {
   const randomNumber = Math.random()
   const aFuture = future()
 
-  worker.expose('MethodX', async message => {
+  worker.expose('MethodX', async (message) => {
     return { number: randomNumber }
   })
 
-  worker.expose('JumpBack', async data => {
+  worker.expose('JumpBack', async (data) => {
     aFuture.resolve(data.number)
   })
 

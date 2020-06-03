@@ -19,7 +19,7 @@ export class EventSubscriber extends EventDispatcher {
   on(event: string, callback: any, once?: boolean): EventDispatcherBinding
   on(event: string, handler: any) {
     if (this.getEventBindings(event).length === 0) {
-      this.component.subscribe(event).catch(e => this.emit('error', e))
+      this.component.subscribe(event).catch((e) => this.emit('error', e))
     }
     return super.on.apply(this, arguments as any)
   }
@@ -44,7 +44,7 @@ export class EventSubscriber extends EventDispatcher {
         // If we are removing the last event listener, remove it also from the component
         // this will keep listeners unrelated to the component intact
 
-        this.component.unsubscribe(theEventToValidate).catch(e => this.emit('error', e))
+        this.component.unsubscribe(theEventToValidate).catch((e) => this.emit('error', e))
       }
     }
 

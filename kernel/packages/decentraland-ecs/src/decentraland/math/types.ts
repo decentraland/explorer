@@ -8,7 +8,7 @@ export enum Orientation {
    */
   CW = 0,
   /** Counter clockwise */
-  CCW = 1
+  CCW = 1,
 }
 
 /**
@@ -21,7 +21,7 @@ export enum Space {
   /** World space */
   WORLD = 1,
   /** Bone space */
-  BONE = 2
+  BONE = 2,
 }
 
 /** @public */

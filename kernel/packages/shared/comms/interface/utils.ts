@@ -84,7 +84,7 @@ export function countParcelsCloseTo(origin: ParcelArray, parcels: ParcelArray[],
 
   const squaredDistance = distance * distance
 
-  parcels.forEach(parcel => {
+  parcels.forEach((parcel) => {
     if (gridSquareDistance(origin, parcel) <= squaredDistance) {
       close += 1
     }

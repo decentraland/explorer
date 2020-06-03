@@ -54,7 +54,7 @@ export class MessageBusManager extends IntermediateApi {
 
   apiWillUnmount() {
     // TODO: test component will unmount
-    this.joinedTo.forEach($ => $.off())
+    this.joinedTo.forEach(($) => $.off())
     this.joinedTo.length = 0
   }
 }

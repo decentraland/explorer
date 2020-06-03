@@ -23,7 +23,7 @@ export function* trackLoadTime(action: SceneLoad): any {
   const sceneId = action.payload
   const result = yield race({
     start: take((action: AnyAction) => action.type === SCENE_START && action.payload === sceneId),
-    fail: take((action: AnyAction) => action.type === SCENE_FAIL && action.payload === sceneId)
+    fail: take((action: AnyAction) => action.type === SCENE_FAIL && action.payload === sceneId),
   })
   const user = yield select(getCurrentUser)
   const position = lastPlayerPosition
@@ -32,7 +32,7 @@ export function* trackLoadTime(action: SceneLoad): any {
     elapsed: new Date().getTime() - start,
     success: !!result.start,
     sceneId,
-    userId: user.userId
+    userId: user.userId,
   })
 }
 
@@ -44,7 +44,7 @@ function* refreshTeleport() {
 }
 function* refreshTextInScreen() {
   while (true) {
-    const status = yield select(state => state.loading)
+    const status = yield select((state) => state.loading)
     yield call(() => updateTextInScreen(status))
     yield delay(200)
   }
@@ -54,9 +54,9 @@ export function* waitForSceneLoads() {
   while (true) {
     yield race({
       started: take(SCENE_START),
-      failed: take(SCENE_FAIL)
+      failed: take(SCENE_FAIL),
     })
-    if (yield select(state => state.loading.pendingScenes === 0)) {
+    if (yield select((state) => state.loading.pendingScenes === 0)) {
       break
     }
   }
@@ -66,22 +66,22 @@ export function* initialSceneLoading() {
   yield race({
     refresh: call(refreshTeleport),
     textInScreen: call(refreshTextInScreen),
-    finish: call(function*() {
+    finish: call(function* () {
       yield take(EXPERIENCE_STARTED)
       yield take('Loading scene')
       yield call(waitForSceneLoads)
-    })
+    }),
   })
 }
 
 export function* teleportSceneLoading() {
   yield race({
     refresh: call(refreshTeleport),
-    textInScreen: call(function*() {
+    textInScreen: call(function* () {
       yield delay(2000)
       yield call(refreshTextInScreen)
     }),
-    finish: call(waitForSceneLoads)
+    finish: call(waitForSceneLoads),
   })
 }
 

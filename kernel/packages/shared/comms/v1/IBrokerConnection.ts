@@ -10,7 +10,7 @@ export enum SocketReadyState {
   CONNECTING,
   OPEN,
   CLOSING,
-  CLOSED
+  CLOSED,
 }
 
 export interface IBrokerConnection {

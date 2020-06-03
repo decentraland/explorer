@@ -118,7 +118,7 @@ export type InputEventResult = {
 /** @public */
 export enum InputEventType {
   DOWN,
-  UP
+  UP,
 }
 
 /** @public */

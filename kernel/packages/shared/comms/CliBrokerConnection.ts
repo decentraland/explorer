@@ -114,7 +114,7 @@ export class CliBrokerConnection implements IBrokerConnection {
 
         this.onMessageObservable.notifyObservers({
           channel: 'ws',
-          data: msg
+          data: msg,
         })
 
         break
@@ -146,13 +146,13 @@ export class CliBrokerConnection implements IBrokerConnection {
     this.ws = new WebSocket(this.url, 'comms')
     this.ws.binaryType = 'arraybuffer'
 
-    this.ws.onerror = event => {
+    this.ws.onerror = (event) => {
       this.logger.error('socket error', event)
       this.ws = null
     }
 
-    this.ws.onmessage = event => {
-      this.onWsMessage(event).catch(err => {
+    this.ws.onmessage = (event) => {
+      this.onWsMessage(event).catch((err) => {
         this.logger.error(err)
       })
     }

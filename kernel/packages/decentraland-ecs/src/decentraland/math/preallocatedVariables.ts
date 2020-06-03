@@ -17,5 +17,5 @@ export const MathTmp = {
   Matrix: buildArray(2, Matrix.Identity),
   Quaternion: buildArray(3, Quaternion.Zero),
   staticUp: Vector3.Up() as Readonly<Vector3>,
-  tmpMatrix: Matrix.Zero()
+  tmpMatrix: Matrix.Zero(),
 }

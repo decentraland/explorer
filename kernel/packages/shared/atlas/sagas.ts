@@ -23,7 +23,7 @@ import {
   reportScenesAroundParcel,
   reportLastPosition,
   initializePoiTiles,
-  INITIALIZE_POI_TILES
+  INITIALIZE_POI_TILES,
 } from './actions'
 import { shouldLoadSceneJsonData, isMarketDataInitialized, getPoiTiles } from './selectors'
 import { AtlasState, RootAtlasState } from './types'
@@ -56,7 +56,7 @@ export function* atlasSaga(): any {
 
 function* fetchDistricts() {
   try {
-    const districts = yield call(() => fetch('https://api.decentraland.org/v1/districts').then(e => e.json()))
+    const districts = yield call(() => fetch('https://api.decentraland.org/v1/districts').then((e) => e.json()))
     yield put(districtData(districts))
   } catch (e) {
     defaultLogger.log(e)
@@ -65,7 +65,7 @@ function* fetchDistricts() {
 
 function* fetchTiles() {
   try {
-    const tiles = yield call(() => fetch('https://api.decentraland.org/v1/tiles').then(e => e.json()))
+    const tiles = yield call(() => fetch('https://api.decentraland.org/v1/tiles').then((e) => e.json()))
     yield put(marketData(tiles))
   } catch (e) {
     defaultLogger.log(e)
@@ -84,7 +84,7 @@ function* querySceneDataAction(action: QuerySceneData) {
 
 async function fetchSceneJson(sceneIds: string[]) {
   const server: LifecycleManager = getServer()
-  const lands = await Promise.all(sceneIds.map(sceneId => server.getParcelData(sceneId)))
+  const lands = await Promise.all(sceneIds.map((sceneId) => server.getParcelData(sceneId)))
   return lands
 }
 
@@ -99,7 +99,7 @@ const MAX_SCENES_AROUND = 15
 
 function* checkAndReportAround() {
   const userPosition = lastPlayerPosition
-  const lastReport: Vector2Component | undefined = yield select(state => state.atlas.lastReportPosition)
+  const lastReport: Vector2Component | undefined = yield select((state) => state.atlas.lastReportPosition)
 
   if (
     !lastReport ||
@@ -134,7 +134,7 @@ function* reportScenesAroundParcelAction(action: ReportScenesAroundParcel) {
 
 function* initializePois() {
   const pois: Vector2Component[] = yield select(getPois)
-  const poiTiles = pois.map(position => `${position.x},${position.y}`)
+  const poiTiles = pois.map((position) => `${position.x},${position.y}`)
   yield put(initializePoiTiles(poiTiles))
 }
 
@@ -155,7 +155,7 @@ function* reportScenesFromTiles(tiles: string[]) {
     if (shouldFetch) {
       yield race({
         success: take(SUCCESS_DATA_FROM_SCENE_JSON),
-        failure: take(FAILURE_DATA_FROM_SCENE_JSON)
+        failure: take(FAILURE_DATA_FROM_SCENE_JSON),
       })
     }
   }
@@ -168,19 +168,19 @@ function* reportScenes(sceneIds: string[]): any {
   yield call(waitForPoiTilesInitialization)
   const pois = yield select(getPoiTiles)
 
-  const atlas: AtlasState = yield select(state => state.atlas)
+  const atlas: AtlasState = yield select((state) => state.atlas)
 
-  const scenes = sceneIds.map(sceneId => atlas.idToScene[sceneId])
+  const scenes = sceneIds.map((sceneId) => atlas.idToScene[sceneId])
 
   const minimapSceneInfoResult: MinimapSceneInfo[] = []
 
   scenes
-    .filter(scene => !scene.alreadyReported)
-    .forEach(scene => {
+    .filter((scene) => !scene.alreadyReported)
+    .forEach((scene) => {
       const parcels: Vector2Component[] = []
       let isPOI: boolean = false
 
-      scene.sceneJsonData?.scene.parcels.forEach(parcel => {
+      scene.sceneJsonData?.scene.parcels.forEach((parcel) => {
         let xyStr = parcel.split(',')
         let xy: Vector2Component = { x: parseInt(xyStr[0], 10), y: parseInt(xyStr[1], 10) }
 
@@ -198,7 +198,7 @@ function* reportScenes(sceneIds: string[]): any {
         name: scene.name,
         type: scene.type,
         parcels,
-        isPOI
+        isPOI,
       })
     })
 

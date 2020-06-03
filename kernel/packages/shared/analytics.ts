@@ -25,7 +25,7 @@ let tracking = false
 
 enum AnalyticsAccount {
   PRD = '1plAT9a2wOOgbPCrTaU8rgGUMzgUTJtU',
-  DEV = 'a4h4BC4dL1v7FhIQKKuPHEdZIiNRDVhc'
+  DEV = 'a4h4BC4dL1v7FhIQKKuPHEdZIiNRDVhc',
 }
 
 // TODO fill with segment keys and integrate identity server
@@ -104,13 +104,13 @@ function track({ name, data }: SegmentEvent) {
 
 function hookObservables() {
   // TODO - remove when new chat is enabled - moliva - 20/04/2020
-  chatObservable.add(event => {
+  chatObservable.add((event) => {
     if (event.type === ChatEventType.MESSAGE_RECEIVED) {
       queueTrackingEvent('Chat message received', { length: event.messageEntry.message.length })
     } else if (event.type === ChatEventType.MESSAGE_SENT) {
       queueTrackingEvent('Send chat message', {
         messageId: event.messageEntry.id,
-        length: event.messageEntry.message.length
+        length: event.messageEntry.message.length,
       })
     }
   })

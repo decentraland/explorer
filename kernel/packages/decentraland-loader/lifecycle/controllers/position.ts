@@ -63,7 +63,7 @@ export class PositionLifecycleController extends EventEmitter {
         resolvedPosition = worldToGrid(spawnPoint.position)
         this.queueTrackingEvent('Scene Spawn', {
           parcel: land.sceneJsonData.scene.base,
-          spawnpoint: spawnPoint.position
+          spawnpoint: spawnPoint.position,
         })
 
         this.currentSpawnpoint = spawnPoint
@@ -97,10 +97,13 @@ export class PositionLifecycleController extends EventEmitter {
 
   private checkPositionSettlement() {
     if (!this.positionSettled) {
-      const settling = this.currentlySightedScenes.every($ => this.sceneController.isRenderable($))
+      const settling = this.currentlySightedScenes.every(($) => this.sceneController.isRenderable($))
 
       DEBUG &&
-        logger.info(`remaining-scenes`, this.currentlySightedScenes.filter($ => !this.sceneController.isRenderable($)))
+        logger.info(
+          `remaining-scenes`,
+          this.currentlySightedScenes.filter(($) => !this.sceneController.isRenderable($))
+        )
       if (settling) {
         this.positionSettled = settling
 

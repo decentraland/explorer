@@ -486,7 +486,7 @@ export class Color3 {
     return {
       r: this.r,
       g: this.g,
-      b: this.b
+      b: this.b,
     }
   }
 }

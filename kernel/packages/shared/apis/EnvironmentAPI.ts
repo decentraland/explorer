@@ -41,7 +41,7 @@ export class EnvironmentAPI extends ExposableAPI {
       domain,
       layer,
       serverName,
-      displayName: `${serverName}-${layer}`
+      displayName: `${serverName}-${layer}`,
     }
   }
 }

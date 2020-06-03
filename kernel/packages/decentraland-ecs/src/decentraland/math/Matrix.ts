@@ -1010,7 +1010,7 @@ export class Matrix {
       matrix._m[6],
       matrix._m[8],
       matrix._m[9],
-      matrix._m[10]
+      matrix._m[10],
     ]
   }
 

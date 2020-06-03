@@ -28,7 +28,7 @@ const commsMessageType: PeerMessageType = {
   name: 'sceneComms',
   ttl: 10,
   expirationTime: 10 * 1000,
-  optimistic: true
+  optimistic: true,
 }
 
 declare var global: any
@@ -69,7 +69,7 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
       defaultLogger.error('Error while connecting to layer', e)
       this.statusHandler({
         status: e.responseJson && e.responseJson.status === 'layer_is_full' ? 'realm-full' : 'error',
-        connectedPeers: this.connectedPeersCount()
+        connectedPeers: this.connectedPeersCount(),
       })
       throw e
     }
@@ -99,7 +99,7 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
 
   analyticsData() {
     return {
-      stats: buildCatalystPeerStatsData(this.peer)
+      stats: buildCatalystPeerStatsData(this.peer),
     }
   }
 
@@ -154,15 +154,15 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
 
   private async syncRoomsWithPeer() {
     const currentRooms = this.peer.currentRooms
-    const joining = this.rooms.map(room => {
-      if (!currentRooms.some(current => current.id === room)) {
+    const joining = this.rooms.map((room) => {
+      if (!currentRooms.some((current) => current.id === room)) {
         return this.peer.joinRoom(room)
       } else {
         return Promise.resolve()
       }
     })
-    const leaving = currentRooms.map(current => {
-      if (!this.rooms.some(room => current.id === room)) {
+    const leaving = currentRooms.map((current) => {
+      if (!this.rooms.some((room) => current.id === room)) {
         return this.peer.leaveRoom(current.id)
       } else {
         return Promise.resolve()
@@ -172,7 +172,7 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
   }
 
   private async sendData(topic: string, messageData: MessageData, type: PeerMessageType) {
-    if (this.peer.currentRooms.some(it => it.id === topic)) {
+    if (this.peer.currentRooms.some((it) => it.id === topic)) {
       await this.peer.sendMessage(topic, createCommsMessage(messageData).serializeBinary(), type)
     } else {
       // TODO: We may want to queue some messages
@@ -261,7 +261,7 @@ function createPackage<T>(commsMessage: CommsMessage, type: PackageType, data: T
   return {
     time: commsMessage.getTime(),
     type,
-    data
+    data,
   }
 }
 
@@ -273,21 +273,21 @@ function mapToPositionMessage(positionData: PositionData): Position {
     positionData.getRotationX(),
     positionData.getRotationY(),
     positionData.getRotationZ(),
-    positionData.getRotationW()
+    positionData.getRotationW(),
   ]
 }
 
 function mapToPackageChat(chatData: ChatData) {
   return {
     id: chatData.getMessageId(),
-    text: chatData.getText()
+    text: chatData.getText(),
   }
 }
 
 function mapToPackageScene(sceneData: SceneData) {
   return {
     id: sceneData.getSceneId(),
-    text: sceneData.getText()
+    text: sceneData.getText(),
   }
 }
 

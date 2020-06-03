@@ -96,7 +96,7 @@ export async function enableParcelSceneLoading(options: EnableParcelSceneLoading
 
     let timer: any
 
-    const observer = sceneLifeCycleObservable.add(sceneStatus => {
+    const observer = sceneLifeCycleObservable.add((sceneStatus) => {
       if (sceneStatus.sceneId === sceneId) {
         sceneLifeCycleObservable.remove(observer)
         clearForegroundTimeout(timer)
@@ -154,7 +154,7 @@ export async function enableParcelSceneLoading(options: EnableParcelSceneLoading
     ret.notify('User.setPosition', { position, teleported: true })
   })
 
-  positionObservable.add(obj => {
+  positionObservable.add((obj) => {
     worldToGrid(obj.position, position)
     ret.notify('User.setPosition', { position, teleported: false })
   })

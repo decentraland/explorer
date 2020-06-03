@@ -110,7 +110,7 @@ export type RootProfileState = {
 export const INITIAL_PROFILES: ProfileState = {
   userInfo: {},
   userInventory: {},
-  catalogs: {}
+  catalogs: {},
 }
 
 export type Timestamp = number
@@ -142,13 +142,13 @@ export type ControllerEntityContent = {
 export enum EntityType {
   SCENE = 'scene',
   WEARABLE = 'wearable',
-  PROFILE = 'profile'
+  PROFILE = 'profile',
 }
 export type EntityId = ContentFileHash
 export enum EntityField {
   CONTENT = 'content',
   POINTERS = 'pointers',
-  METADATA = 'metadata'
+  METADATA = 'metadata',
 }
 export const ENTITY_FILE_NAME = 'entity.json'
 export class Entity {

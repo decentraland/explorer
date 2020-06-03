@@ -34,7 +34,7 @@ export class MessageBusClient<T = any> extends EventDispatcher<T> {
     this.api[this.broadcastIdentifier]({
       event,
       args,
-      sender: this.busClientId
+      sender: this.busClientId,
     } as IMessage)
     super.emit(event, ...args)
   }

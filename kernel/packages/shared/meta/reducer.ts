@@ -4,7 +4,7 @@ import { MetaState } from './types'
 
 const initialState = {
   initialized: false,
-  config: {}
+  config: {},
 }
 
 export function metaReducer(state?: MetaState, action?: AnyAction): MetaState {
@@ -19,7 +19,7 @@ export function metaReducer(state?: MetaState, action?: AnyAction): MetaState {
       return {
         ...state,
         initialized: true,
-        config: action.payload
+        config: action.payload,
       }
     default:
       return state

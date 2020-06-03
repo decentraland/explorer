@@ -2,7 +2,7 @@ import { RendererState, RENDERER_INITIALIZED } from './types'
 import { AnyAction } from 'redux'
 
 const INITIAL_STATE: RendererState = {
-  initialized: false
+  initialized: false,
 }
 
 export function rendererReducer(state?: RendererState, action?: AnyAction): RendererState {
@@ -15,7 +15,7 @@ export function rendererReducer(state?: RendererState, action?: AnyAction): Rend
   switch (action.type) {
     case RENDERER_INITIALIZED:
       return {
-        initialized: true
+        initialized: true,
       }
     default:
       return state

@@ -332,7 +332,7 @@ export class Observable<T> {
     state.skipNextObservers = false
 
     // execute one callback after another (not using Promise.all, the order is important)
-    this._observers.forEach(obs => {
+    this._observers.forEach((obs) => {
       if (state.skipNextObservers) {
         return
       }
@@ -341,12 +341,12 @@ export class Observable<T> {
       }
       if (obs.mask & mask) {
         if (obs.scope) {
-          p = p.then(lastReturnedValue => {
+          p = p.then((lastReturnedValue) => {
             state.lastReturnValue = lastReturnedValue
             return obs.callback.apply(obs.scope, [eventData, state])
           })
         } else {
-          p = p.then(lastReturnedValue => {
+          p = p.then((lastReturnedValue) => {
             state.lastReturnValue = lastReturnedValue
             return obs.callback(eventData, state)
           })

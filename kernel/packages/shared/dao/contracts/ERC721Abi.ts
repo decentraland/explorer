@@ -1,392 +1,392 @@
-import { ContractAbi} from 'web3x/contract';
+import { ContractAbi } from 'web3x/contract'
 export default new ContractAbi([
   {
-    "constant": true,
-    "inputs": [
+    constant: true,
+    inputs: [
       {
-        "name": "interfaceId",
-        "type": "bytes4"
-      }
+        name: 'interfaceId',
+        type: 'bytes4',
+      },
     ],
-    "name": "supportsInterface",
-    "outputs": [
+    name: 'supportsInterface',
+    outputs: [
       {
-        "name": "",
-        "type": "bool"
-      }
+        name: '',
+        type: 'bool',
+      },
     ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
+    payable: false,
+    stateMutability: 'view',
+    type: 'function',
   },
   {
-    "constant": true,
-    "inputs": [],
-    "name": "name",
-    "outputs": [
+    constant: true,
+    inputs: [],
+    name: 'name',
+    outputs: [
       {
-        "name": "",
-        "type": "string"
-      }
+        name: '',
+        type: 'string',
+      },
     ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
+    payable: false,
+    stateMutability: 'view',
+    type: 'function',
   },
   {
-    "constant": true,
-    "inputs": [
+    constant: true,
+    inputs: [
       {
-        "name": "tokenId",
-        "type": "uint256"
-      }
+        name: 'tokenId',
+        type: 'uint256',
+      },
     ],
-    "name": "getApproved",
-    "outputs": [
+    name: 'getApproved',
+    outputs: [
       {
-        "name": "",
-        "type": "address"
-      }
+        name: '',
+        type: 'address',
+      },
     ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
+    payable: false,
+    stateMutability: 'view',
+    type: 'function',
   },
   {
-    "constant": false,
-    "inputs": [
+    constant: false,
+    inputs: [
       {
-        "name": "to",
-        "type": "address"
+        name: 'to',
+        type: 'address',
       },
       {
-        "name": "tokenId",
-        "type": "uint256"
-      }
+        name: 'tokenId',
+        type: 'uint256',
+      },
     ],
-    "name": "approve",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
+    name: 'approve',
+    outputs: [],
+    payable: false,
+    stateMutability: 'nonpayable',
+    type: 'function',
   },
   {
-    "constant": true,
-    "inputs": [],
-    "name": "totalSupply",
-    "outputs": [
+    constant: true,
+    inputs: [],
+    name: 'totalSupply',
+    outputs: [
       {
-        "name": "",
-        "type": "uint256"
-      }
+        name: '',
+        type: 'uint256',
+      },
     ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
+    payable: false,
+    stateMutability: 'view',
+    type: 'function',
   },
   {
-    "constant": false,
-    "inputs": [
+    constant: false,
+    inputs: [
       {
-        "name": "from",
-        "type": "address"
+        name: 'from',
+        type: 'address',
       },
       {
-        "name": "to",
-        "type": "address"
+        name: 'to',
+        type: 'address',
       },
       {
-        "name": "tokenId",
-        "type": "uint256"
-      }
+        name: 'tokenId',
+        type: 'uint256',
+      },
     ],
-    "name": "transferFrom",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
+    name: 'transferFrom',
+    outputs: [],
+    payable: false,
+    stateMutability: 'nonpayable',
+    type: 'function',
   },
   {
-    "constant": true,
-    "inputs": [
+    constant: true,
+    inputs: [
       {
-        "name": "owner",
-        "type": "address"
+        name: 'owner',
+        type: 'address',
       },
       {
-        "name": "index",
-        "type": "uint256"
-      }
+        name: 'index',
+        type: 'uint256',
+      },
     ],
-    "name": "tokenOfOwnerByIndex",
-    "outputs": [
+    name: 'tokenOfOwnerByIndex',
+    outputs: [
       {
-        "name": "",
-        "type": "uint256"
-      }
+        name: '',
+        type: 'uint256',
+      },
     ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
+    payable: false,
+    stateMutability: 'view',
+    type: 'function',
   },
   {
-    "constant": false,
-    "inputs": [
+    constant: false,
+    inputs: [
       {
-        "name": "from",
-        "type": "address"
+        name: 'from',
+        type: 'address',
       },
       {
-        "name": "to",
-        "type": "address"
+        name: 'to',
+        type: 'address',
       },
       {
-        "name": "tokenId",
-        "type": "uint256"
-      }
+        name: 'tokenId',
+        type: 'uint256',
+      },
     ],
-    "name": "safeTransferFrom",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
+    name: 'safeTransferFrom',
+    outputs: [],
+    payable: false,
+    stateMutability: 'nonpayable',
+    type: 'function',
   },
   {
-    "constant": true,
-    "inputs": [
+    constant: true,
+    inputs: [
       {
-        "name": "index",
-        "type": "uint256"
-      }
+        name: 'index',
+        type: 'uint256',
+      },
     ],
-    "name": "tokenByIndex",
-    "outputs": [
+    name: 'tokenByIndex',
+    outputs: [
       {
-        "name": "",
-        "type": "uint256"
-      }
+        name: '',
+        type: 'uint256',
+      },
     ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
+    payable: false,
+    stateMutability: 'view',
+    type: 'function',
   },
   {
-    "constant": true,
-    "inputs": [
+    constant: true,
+    inputs: [
       {
-        "name": "tokenId",
-        "type": "uint256"
-      }
+        name: 'tokenId',
+        type: 'uint256',
+      },
     ],
-    "name": "ownerOf",
-    "outputs": [
+    name: 'ownerOf',
+    outputs: [
       {
-        "name": "",
-        "type": "address"
-      }
+        name: '',
+        type: 'address',
+      },
     ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
+    payable: false,
+    stateMutability: 'view',
+    type: 'function',
   },
   {
-    "constant": true,
-    "inputs": [
+    constant: true,
+    inputs: [
       {
-        "name": "owner",
-        "type": "address"
-      }
+        name: 'owner',
+        type: 'address',
+      },
     ],
-    "name": "balanceOf",
-    "outputs": [
+    name: 'balanceOf',
+    outputs: [
       {
-        "name": "",
-        "type": "uint256"
-      }
+        name: '',
+        type: 'uint256',
+      },
     ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
+    payable: false,
+    stateMutability: 'view',
+    type: 'function',
   },
   {
-    "constant": true,
-    "inputs": [],
-    "name": "symbol",
-    "outputs": [
+    constant: true,
+    inputs: [],
+    name: 'symbol',
+    outputs: [
       {
-        "name": "",
-        "type": "string"
-      }
+        name: '',
+        type: 'string',
+      },
     ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
+    payable: false,
+    stateMutability: 'view',
+    type: 'function',
   },
   {
-    "constant": false,
-    "inputs": [
+    constant: false,
+    inputs: [
       {
-        "name": "to",
-        "type": "address"
+        name: 'to',
+        type: 'address',
       },
       {
-        "name": "approved",
-        "type": "bool"
-      }
+        name: 'approved',
+        type: 'bool',
+      },
     ],
-    "name": "setApprovalForAll",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
+    name: 'setApprovalForAll',
+    outputs: [],
+    payable: false,
+    stateMutability: 'nonpayable',
+    type: 'function',
   },
   {
-    "constant": false,
-    "inputs": [
+    constant: false,
+    inputs: [
       {
-        "name": "from",
-        "type": "address"
+        name: 'from',
+        type: 'address',
       },
       {
-        "name": "to",
-        "type": "address"
+        name: 'to',
+        type: 'address',
       },
       {
-        "name": "tokenId",
-        "type": "uint256"
+        name: 'tokenId',
+        type: 'uint256',
       },
       {
-        "name": "_data",
-        "type": "bytes"
-      }
+        name: '_data',
+        type: 'bytes',
+      },
     ],
-    "name": "safeTransferFrom",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
+    name: 'safeTransferFrom',
+    outputs: [],
+    payable: false,
+    stateMutability: 'nonpayable',
+    type: 'function',
   },
   {
-    "constant": true,
-    "inputs": [
+    constant: true,
+    inputs: [
       {
-        "name": "tokenId",
-        "type": "uint256"
-      }
+        name: 'tokenId',
+        type: 'uint256',
+      },
     ],
-    "name": "tokenURI",
-    "outputs": [
+    name: 'tokenURI',
+    outputs: [
       {
-        "name": "",
-        "type": "string"
-      }
+        name: '',
+        type: 'string',
+      },
     ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
+    payable: false,
+    stateMutability: 'view',
+    type: 'function',
   },
   {
-    "constant": true,
-    "inputs": [
+    constant: true,
+    inputs: [
       {
-        "name": "owner",
-        "type": "address"
+        name: 'owner',
+        type: 'address',
       },
       {
-        "name": "operator",
-        "type": "address"
-      }
+        name: 'operator',
+        type: 'address',
+      },
     ],
-    "name": "isApprovedForAll",
-    "outputs": [
+    name: 'isApprovedForAll',
+    outputs: [
       {
-        "name": "",
-        "type": "bool"
-      }
+        name: '',
+        type: 'bool',
+      },
     ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
+    payable: false,
+    stateMutability: 'view',
+    type: 'function',
   },
   {
-    "inputs": [
+    inputs: [
       {
-        "name": "name",
-        "type": "string"
+        name: 'name',
+        type: 'string',
       },
       {
-        "name": "symbol",
-        "type": "string"
-      }
+        name: 'symbol',
+        type: 'string',
+      },
     ],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "constructor"
+    payable: false,
+    stateMutability: 'nonpayable',
+    type: 'constructor',
   },
   {
-    "anonymous": false,
-    "inputs": [
+    anonymous: false,
+    inputs: [
       {
-        "indexed": true,
-        "name": "from",
-        "type": "address"
+        indexed: true,
+        name: 'from',
+        type: 'address',
       },
       {
-        "indexed": true,
-        "name": "to",
-        "type": "address"
+        indexed: true,
+        name: 'to',
+        type: 'address',
       },
       {
-        "indexed": true,
-        "name": "tokenId",
-        "type": "uint256"
-      }
+        indexed: true,
+        name: 'tokenId',
+        type: 'uint256',
+      },
     ],
-    "name": "Transfer",
-    "type": "event"
+    name: 'Transfer',
+    type: 'event',
   },
   {
-    "anonymous": false,
-    "inputs": [
+    anonymous: false,
+    inputs: [
       {
-        "indexed": true,
-        "name": "owner",
-        "type": "address"
+        indexed: true,
+        name: 'owner',
+        type: 'address',
       },
       {
-        "indexed": true,
-        "name": "approved",
-        "type": "address"
+        indexed: true,
+        name: 'approved',
+        type: 'address',
       },
       {
-        "indexed": true,
-        "name": "tokenId",
-        "type": "uint256"
-      }
+        indexed: true,
+        name: 'tokenId',
+        type: 'uint256',
+      },
     ],
-    "name": "Approval",
-    "type": "event"
+    name: 'Approval',
+    type: 'event',
   },
   {
-    "anonymous": false,
-    "inputs": [
+    anonymous: false,
+    inputs: [
       {
-        "indexed": true,
-        "name": "owner",
-        "type": "address"
+        indexed: true,
+        name: 'owner',
+        type: 'address',
       },
       {
-        "indexed": true,
-        "name": "operator",
-        "type": "address"
+        indexed: true,
+        name: 'operator',
+        type: 'address',
       },
       {
-        "indexed": false,
-        "name": "approved",
-        "type": "bool"
-      }
+        indexed: false,
+        name: 'approved',
+        type: 'bool',
+      },
     ],
-    "name": "ApprovalForAll",
-    "type": "event"
-  }
-]);
+    name: 'ApprovalForAll',
+    type: 'event',
+  },
+])

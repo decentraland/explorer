@@ -13,9 +13,9 @@ export class RateLimiter extends API {
   }
 }
 
-describe('RateLimiter', function() {
+describe('RateLimiter', function () {
   testInWorker('test/out/fixtures/8.RateLimiting.js', {
     plugins: [RateLimiter],
-    log: false
+    log: false,
   })
 })

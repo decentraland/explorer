@@ -18,7 +18,7 @@ export class ParcelIdentity extends ExposableAPI implements IParcelIdentity {
   async getParcel(): Promise<{ land: ILand; cid: string }> {
     return {
       land: this.land,
-      cid: this.cid
+      cid: this.cid,
     }
   }
 }

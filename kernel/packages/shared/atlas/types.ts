@@ -69,5 +69,5 @@ export const PlazaNames: { [key: number]: string } = {
   1925: 'Roads',
   1830: 'Roads',
   1831: 'Roads',
-  1832: 'Roads'
+  1832: 'Roads',
 }

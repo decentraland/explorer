@@ -58,7 +58,7 @@ export const CAMPAIGN_PARCEL_SEQUENCE = [
   { x: -35, y: -42 },
   { x: 24, y: -124 },
   { x: -148, y: -35 },
-  { x: -109, y: -89 }
+  { x: -109, y: -89 },
 ]
 
 export class TeleportController {
@@ -82,7 +82,7 @@ export class TeleportController {
     const profile = getUserProfile().profile as Profile
 
     if (!tutorialEnabled() || profile.tutorialStep !== tutorialStepId.INITIAL_SCENE) {
-      (window as any)['unityInterface'].ShowWelcomeNotification()
+      ;(window as any)['unityInterface'].ShowWelcomeNotification()
     }
   }
 
@@ -100,13 +100,13 @@ export class TeleportController {
       const currentParcel = worldToGrid(lastPlayerPosition)
 
       usersParcels = usersParcels.filter(
-        it => isInsideParcelLimits(it[0], it[1]) && currentParcel.x !== it[0] && currentParcel.y !== it[1]
+        (it) => isInsideParcelLimits(it[0], it[1]) && currentParcel.x !== it[0] && currentParcel.y !== it[1]
       )
 
       if (usersParcels.length > 0) {
         // Sorting from most close users
         const [target, closeUsers] = usersParcels
-          .map(it => [it, countParcelsCloseTo(it, usersParcels)] as [ParcelArray, number])
+          .map((it) => [it, countParcelsCloseTo(it, usersParcels)] as [ParcelArray, number])
           .sort(([_, score1], [__, score2]) => score2 - score1)[0]
 
         return TeleportController.goTo(
@@ -117,14 +117,14 @@ export class TeleportController {
       } else {
         return {
           message: 'There seems to be no users in other parcels at the current realm. Could not teleport.',
-          success: false
+          success: false,
         }
       }
     } catch (e) {
       defaultLogger.error('Error while trying to teleport to crowd', e)
       return {
         message: 'Could not teleport to crowd! Could not get information about other users in the realm',
-        success: false
+        success: false,
       }
     }
   }
@@ -150,7 +150,7 @@ export class TeleportController {
       teleportObservable.notifyObservers({
         x: x,
         y: y,
-        text: tpMessage
+        text: tpMessage,
       } as any)
 
       TeleportController.ensureTeleportAnimation()

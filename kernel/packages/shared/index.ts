@@ -27,7 +27,7 @@ import {
   MOBILE_NOT_SUPPORTED,
   NETWORK_MISMATCH,
   NEW_LOGIN,
-  notStarted
+  notStarted,
 } from './loading/types'
 import { defaultLogger } from './logger'
 import { ProfileAsPromise } from './profiles/ProfileAsPromise'
@@ -98,7 +98,7 @@ export async function initShared(): Promise<Session | undefined> {
 
         setLocalProfile(userId, {
           userId,
-          identity
+          identity,
         })
       } else {
         identity = userData.identity
@@ -106,7 +106,7 @@ export async function initShared(): Promise<Session | undefined> {
 
         setLocalProfile(userId, {
           userId,
-          identity
+          identity,
         })
       }
     } catch (e) {
@@ -126,7 +126,7 @@ export async function initShared(): Promise<Session | undefined> {
 
     setLocalProfile(userId, {
       userId,
-      identity
+      identity,
     })
   }
 
@@ -192,7 +192,7 @@ export async function initShared(): Promise<Session | undefined> {
 
   persistCurrentUser({
     version: profile.version,
-    profile: profileToRendererFormat(profile, identity)
+    profile: profileToRendererFormat(profile, identity),
   })
   console['groupEnd']()
 

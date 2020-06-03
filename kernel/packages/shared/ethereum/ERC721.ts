@@ -7,38 +7,38 @@ const ERC721Abi = [
     inputs: [
       {
         name: '_tokenId',
-        type: 'uint256'
-      }
+        type: 'uint256',
+      },
     ],
     name: 'ownerOf',
     outputs: [
       {
         name: 'owner',
-        type: 'address'
-      }
+        type: 'address',
+      },
     ],
     payable: false,
     stateMutability: 'view',
-    type: 'function'
+    type: 'function',
   },
   {
     constant: true,
     inputs: [
       {
         name: '_owner',
-        type: 'address'
-      }
+        type: 'address',
+      },
     ],
     name: 'balanceOf',
     outputs: [
       {
         name: 'balance',
-        type: 'uint256'
-      }
+        type: 'uint256',
+      },
     ],
     payable: false,
-    type: 'function'
-  }
+    type: 'function',
+  },
 ]
 
 export interface IERC721 extends Contract {

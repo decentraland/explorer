@@ -28,7 +28,7 @@ export class Terminator extends API {
   }
 }
 
-describe('Terminate', function() {
+describe('Terminate', function () {
   it('should kill the worker', async () => {
     const worker = await ScriptingHost.fromTransport(
       WebWorkerTransport(new Worker('test/out/fixtures/6.GreedyWorker.js'))

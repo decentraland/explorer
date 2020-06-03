@@ -29,7 +29,7 @@ export function getParcelSceneLimits(parcelCount: number): IParcelSceneLimits {
     entities: Math.floor(lineal * parcelLimits.entities),
     materials: Math.floor(log * parcelLimits.materials),
     textures: Math.floor(log * parcelLimits.textures),
-    geometries: Math.floor(log * parcelLimits.geometries)
+    geometries: Math.floor(log * parcelLimits.geometries),
   }
 }
 

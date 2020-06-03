@@ -32,12 +32,12 @@ export class TicTacToeBoard extends API {
   }
 }
 
-describe('TicTacToe', function() {
+describe('TicTacToe', function () {
   this.timeout(6000)
   let numberOfGames = 0
 
   function randomizeGame(file: string) {
-    it(`randomized game ${numberOfGames++} ${file}`, async function() {
+    it(`randomized game ${numberOfGames++} ${file}`, async function () {
       let workerO = await ScriptingHost.fromTransport(WebWorkerTransport(new Worker(file)))
       let workerX = await ScriptingHost.fromTransport(WebWorkerTransport(new Worker(file)))
 

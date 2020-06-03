@@ -380,17 +380,17 @@ export enum MessageType {
   TOPIC = 9,
   TOPIC_FW = 10,
   TOPIC_IDENTITY = 11,
-  TOPIC_IDENTITY_FW = 12
+  TOPIC_IDENTITY_FW = 12,
 }
 
 export enum Role {
   UNKNOWN_ROLE = 0,
   CLIENT = 1,
-  COMMUNICATION_SERVER = 2
+  COMMUNICATION_SERVER = 2,
 }
 
 export enum Format {
   UNKNOWN_FORMAT = 0,
   PLAIN = 1,
-  GZIP = 2
+  GZIP = 2,
 }

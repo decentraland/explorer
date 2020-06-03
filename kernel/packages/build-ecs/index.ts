@@ -34,7 +34,7 @@ function compile(cfg: ts.ParsedCommandLine, watch: boolean) {
   const files: FileMap = {}
 
   // initialize the list of files
-  cfg.fileNames.forEach(fileName => {
+  cfg.fileNames.forEach((fileName) => {
     files[fileName] = { version: 0 }
   })
 
@@ -42,8 +42,8 @@ function compile(cfg: ts.ParsedCommandLine, watch: boolean) {
   const services = ts.createLanguageService(
     {
       getScriptFileNames: () => cfg.fileNames,
-      getScriptVersion: fileName => files[fileName] && files[fileName].version.toString(),
-      getScriptSnapshot: fileName => {
+      getScriptVersion: (fileName) => files[fileName] && files[fileName].version.toString(),
+      getScriptSnapshot: (fileName) => {
         if (!fs.existsSync(fileName)) {
           return undefined
         }
@@ -56,17 +56,17 @@ function compile(cfg: ts.ParsedCommandLine, watch: boolean) {
       },
       getCurrentDirectory: ts.sys.getCurrentDirectory,
       getCompilationSettings: () => cfg.options,
-      getDefaultLibFileName: options => ts.getDefaultLibFilePath(options),
+      getDefaultLibFileName: (options) => ts.getDefaultLibFilePath(options),
       fileExists: ts.sys.fileExists,
       readFile: ts.sys.readFile,
-      readDirectory: ts.sys.readDirectory
+      readDirectory: ts.sys.readDirectory,
     },
     ts.createDocumentRegistry()
   )
 
   if (watch) {
     // Now let's watch the files
-    cfg.fileNames.forEach(fileName => {
+    cfg.fileNames.forEach((fileName) => {
       watchFile(fileName, services, files)
     })
   }
@@ -111,7 +111,7 @@ function emitFile(fileName: string, services: ts.LanguageService) {
   const ecsPackageECS = loadArtifact(process.env.ECS_PATH || 'decentraland-ecs/dist/src/index.js')
   const ecsPackageAMD = loadArtifact(process.env.AMD_PATH || 'decentraland-ecs/artifacts/amd.js')
 
-  output.outputFiles.forEach(o => {
+  output.outputFiles.forEach((o) => {
     console.log(`> Emitting ${o.name.replace(ts.sys.getCurrentDirectory(), '')}`)
 
     let generatedCode: string = PRODUCTION ? o.text : `eval(${JSON.stringify(o.text)});`
@@ -124,13 +124,13 @@ function emitFile(fileName: string, services: ts.LanguageService) {
     const compiled = uglify.minify(ret, {
       mangle: PRODUCTION
         ? {
-            reserved: ['dcl']
+            reserved: ['dcl'],
           }
         : false,
       compress: PRODUCTION,
       output: {
-        comments: /^!/
-      }
+        comments: /^!/,
+      },
     })
 
     if (compiled.warnings) {
@@ -172,7 +172,7 @@ function getConfiguration(sceneJson: any) {
     useCaseSensitiveFileNames: ts.sys.useCaseSensitiveFileNames,
     fileExists: ts.sys.fileExists,
     readFile: ts.sys.readFile,
-    readDirectory: ts.sys.readDirectory
+    readDirectory: ts.sys.readDirectory,
   }
   const parsed = ts.parseConfigFileTextToJson('tsconfig.json', ts.sys.readFile('tsconfig.json'))
 
@@ -233,8 +233,9 @@ function printDiagnostic(diagnostic: ts.Diagnostic) {
   if (diagnostic.file) {
     let { line, character } = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start!)
     console.log(
-      `  Error ${diagnostic.file.fileName.replace(ts.sys.getCurrentDirectory(), '')} (${line + 1},${character +
-        1}): ${message}`
+      `  Error ${diagnostic.file.fileName.replace(ts.sys.getCurrentDirectory(), '')} (${line + 1},${
+        character + 1
+      }): ${message}`
     )
   } else {
     console.log(`  Error: ${message}`)

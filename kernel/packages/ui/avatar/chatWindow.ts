@@ -7,7 +7,7 @@ import {
   UIText,
   UIContainerStack,
   UIContainerRect,
-  UIScrollRect
+  UIScrollRect,
 } from 'decentraland-ecs/src/decentraland/UIShapes'
 
 import { MessageEntry } from 'shared/types'
@@ -36,14 +36,14 @@ const internalState = {
   commandsList: [] as Array<any>,
   messages: [] as Array<any>,
   isFocused: false,
-  isSliderVisible: false
+  isSliderVisible: false,
 }
 
 function createUi() {
   // UI creators -------------------
   dcl.subscribe('MESSAGE_RECEIVED')
   dcl.subscribe('MESSAGE_SENT')
-  dcl.onEvent(event => {
+  dcl.onEvent((event) => {
     const eventType: string = event.type
     const eventData: any = event.data
     if (eventType === 'MESSAGE_RECEIVED' || eventType === 'MESSAGE_SENT') {
@@ -146,7 +146,7 @@ function createUi() {
     isCommand: true,
     sender: 'Decentraland',
     timestamp: Date.now(),
-    message: 'Type /help for info about controls'
+    message: 'Type /help for info about controls',
   }
 
   addMessage(instructionsMessage)

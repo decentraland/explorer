@@ -15,8 +15,8 @@ import ProgressBar = require('progress')
 import chalk from 'chalk'
 
 const packageJson = JSON.parse(fs.readFileSync(require.resolve('../package.json')).toString())
-const isWatching = process.argv.some($ => $ === '--watch')
-const instrumentCoverage = process.argv.some($ => $ === '--coverage') || process.env.NODE_ENV === 'coverage'
+const isWatching = process.argv.some(($) => $ === '--watch')
+const instrumentCoverage = process.argv.some(($) => $ === '--coverage') || process.env.NODE_ENV === 'coverage'
 const isProduction = process.env.NODE_ENV !== 'development' && !isWatching && !instrumentCoverage
 const webWorkerTransport = resolve(__dirname, '../lib/common/transports/WebWorker')
 
@@ -65,8 +65,8 @@ class ESModulePlugin {
   ) {}
 
   apply(compiler: webpack.Compiler) {
-    compiler.hooks.compilation.tap('ESModulePlugin', compilation => {
-      compilation.hooks.afterOptimizeChunkAssets.tap('ESModulePlugin', chunks => {
+    compiler.hooks.compilation.tap('ESModulePlugin', (compilation) => {
+      compilation.hooks.afterOptimizeChunkAssets.tap('ESModulePlugin', (chunks) => {
         for (const chunk of chunks) {
           if (!chunk.canBeInitial()) {
             continue
@@ -92,37 +92,34 @@ export async function compile(opt: ICompilerOptions) {
     const extensions = ['.ts', '.tsx', '.js', '.json']
 
     if (opt.target === 'webworker') {
-      entry = entry.map($ => {
+      entry = entry.map(($) => {
         const file = resolve(tmpdir(), Math.random().toString() + '.WebWorker.js')
         fs.writeFileSync(file, entryPointWebWorker($))
         return file
       })
     }
 
-    entry = entry.reduce(
-      (obj, $, $$) => {
-        let name = relative(opt.rootFolder, opt.files[$$])
-        extensions.forEach($ => {
-          if (name.endsWith($)) {
-            name = name.substr(0, name.length - $.length)
-          }
-        })
-        let target = name
-        if (target.endsWith('.js')) {
-          target = target.substr(0, target.length - 3)
+    entry = entry.reduce((obj, $, $$) => {
+      let name = relative(opt.rootFolder, opt.files[$$])
+      extensions.forEach(($) => {
+        if (name.endsWith($)) {
+          name = name.substr(0, name.length - $.length)
         }
-        obj[target] = $
-        return obj
-      },
-      {} as webpack.Entry
-    )
+      })
+      let target = name
+      if (target.endsWith('.js')) {
+        target = target.substr(0, target.length - 3)
+      }
+      obj[target] = $
+      return obj
+    }, {} as webpack.Entry)
 
     console.log(
       [
         `     files:`,
         ...Object.keys(entry).map(
           ($, $$) => `            (root)/${relative(opt.rootFolder, opt.files[$$])} -> (outDir)/${$}.js`
-        )
+        ),
       ].join('\n')
     )
 
@@ -156,18 +153,18 @@ export async function compile(opt: ICompilerOptions) {
       optimization: {
         nodeEnv: isProduction ? 'production' : 'development',
         namedModules: !isProduction,
-        minimize: isProduction
+        minimize: isProduction,
       },
       output: {
         filename: opt.fileName,
         path: opt.outDir,
-        libraryTarget
+        libraryTarget,
       },
 
       resolve: {
         // Add '.ts' and '.tsx' as resolvable extensions.
         extensions,
-        plugins: [new TsconfigPathsPlugin({ configFile: opt.tsconfig })]
+        plugins: [new TsconfigPathsPlugin({ configFile: opt.tsconfig })],
       },
       watch: isWatching,
       module: {
@@ -178,23 +175,23 @@ export async function compile(opt: ICompilerOptions) {
               {
                 loader: require.resolve('url-loader'),
                 options: {
-                  limit: 512000
-                }
-              }
-            ]
+                  limit: 512000,
+                },
+              },
+            ],
           },
           // All files with a '.ts' or '.tsx' extension will be handled by 'awesome-typescript-loader'.
           {
             test: /\.tsx?$/,
             loader: require.resolve('ts-loader'),
             options: {
-              configFile: opt.tsconfig
-            }
-          }
-        ]
+              configFile: opt.tsconfig,
+            },
+          },
+        ],
       },
       target,
-      plugins
+      plugins,
     }
 
     if (opt.coverage) {
@@ -203,10 +200,10 @@ export async function compile(opt: ICompilerOptions) {
         test: /\.[jt]sx?$/,
         use: {
           loader: 'istanbul-instrumenter-loader',
-          options: { esModules: true, sourceMaps: true }
+          options: { esModules: true, sourceMaps: true },
         },
         enforce: 'post',
-        exclude: /node_modules|\.spec\.js$/
+        exclude: /node_modules|\.spec\.js$/,
       })
     }
 
@@ -235,7 +232,7 @@ export async function compile(opt: ICompilerOptions) {
             stats.toString({
               colors: true,
               errors: true,
-              warnings: true
+              warnings: true,
             })
           )
         } else {
@@ -266,30 +263,30 @@ export async function tsc(tsconfig: string) {
   }
 
   const childProcess = spawn('node', args, {
-    cwd: dirname(tsconfig)
+    cwd: dirname(tsconfig),
   })
 
   if (isWatching) {
     return true
   }
 
-  let resolve: (x: any) => any = a => void 0
-  let reject: (x: any) => any = a => void 0
+  let resolve: (x: any) => any = (a) => void 0
+  let reject: (x: any) => any = (a) => void 0
 
   const semaphore = new Promise((ok, err) => {
     resolve = ok
     reject = err
   })
 
-  childProcess.stdout.on('data', data => {
+  childProcess.stdout.on('data', (data) => {
     console.log(`tsc stdout: ${data}`)
   })
 
-  childProcess.stderr.on('data', data => {
+  childProcess.stderr.on('data', (data) => {
     console.log(`tsc stderr: ${data}`)
   })
 
-  childProcess.on('close', exitCode => {
+  childProcess.on('close', (exitCode) => {
     if (exitCode) {
       reject(exitCode)
     } else {
@@ -360,7 +357,7 @@ export async function processFile(opt: {
     rootFolder,
     fileName: opt.fileName,
     library: opt.library,
-    globalObject: opt.globalObject
+    globalObject: opt.globalObject,
   }
 
   console.log(`
@@ -378,7 +375,7 @@ export async function processFile(opt: {
         entrypoints: true,
         env: true,
         errors: true,
-        publicPath: true
+        publicPath: true,
       })
     )
   }
@@ -391,7 +388,7 @@ export async function processFile(opt: {
         entrypoints: true,
         env: true,
         errors: true,
-        publicPath: true
+        publicPath: true,
       })
     )
   }
@@ -412,7 +409,7 @@ export async function glob(path: string) {
 export async function cli(args: string[]) {
   const files = await glob(process.argv[2])
 
-  await Promise.all(files.map($ => processFile({ file: $, outFile: args[3] })))
+  await Promise.all(files.map(($) => processFile({ file: $, outFile: args[3] })))
 }
 
 export async function processJson(file: string) {
@@ -463,12 +460,12 @@ cli(process.argv)
       process.stdin.resume()
     }
   })
-  .catch(err => {
+  .catch((err) => {
     console.error(err)
     process.exit(1)
   })
 
-process.on('unhandledRejection', e => {
+process.on('unhandledRejection', (e) => {
   throw e
 })
 
@@ -479,7 +476,7 @@ function ProgressBarPlugin(options: any) {
   let enabled = stream && stream.isTTY
 
   if (!enabled) {
-    return function() {
+    return function () {
       // stub
     }
   }
@@ -504,7 +501,7 @@ function ProgressBarPlugin(options: any) {
       incomplete: ' ',
       width: 20,
       total: 100,
-      clear: true
+      clear: true,
     },
     options
   )
@@ -515,7 +512,7 @@ function ProgressBarPlugin(options: any) {
   let startTime: Date = new Date()
   let lastPercent = 0
 
-  return new webpack.ProgressPlugin(function(percent, msg) {
+  return new webpack.ProgressPlugin(function (percent, msg) {
     if (!running && lastPercent !== 0 && !customSummary) {
       stream.write('\n')
     }
@@ -524,7 +521,7 @@ function ProgressBarPlugin(options: any) {
 
     if (lastPercent !== newPercent) {
       bar.update(percent, {
-        msg: msg
+        msg: msg,
       })
       lastPercent = newPercent
     }

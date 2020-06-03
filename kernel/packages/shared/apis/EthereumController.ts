@@ -5,7 +5,7 @@ import {
   sendAsync,
   convertMessageToObject,
   signMessage,
-  getUserAccount
+  getUserAccount,
 } from 'shared/ethereum/EthereumService'
 import { ExposableAPI } from './ExposableAPI'
 import { RPCSendableMessage } from 'shared/types'

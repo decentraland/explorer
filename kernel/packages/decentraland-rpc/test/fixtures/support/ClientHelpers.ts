@@ -68,7 +68,7 @@ export function future<T = any>(): IFuture<T> {
 }
 
 export function wait(ms: number): Promise<void> {
-  return new Promise(ok => {
+  return new Promise((ok) => {
     setTimeout(ok, ms)
   })
 }
@@ -79,14 +79,14 @@ export function testWithTransport(transport: ScriptingTransport, fn: (system: Sc
   ScriptingClient.loadAPIs(['Test'])
     .then(({ Test }) =>
       fn(ScriptingClient)
-        .then(x => Test.pass(x))
-        .catch(x => {
+        .then((x) => Test.pass(x))
+        .catch((x) => {
           console.error('Test failed')
           console.error(x)
           return Test.fail(x)
         })
     )
-    .catch(x => console.error(x))
+    .catch((x) => console.error(x))
 }
 
 export function test(fn: (system: Script) => Promise<any>) {
@@ -98,12 +98,12 @@ export function testToFail(fn: (system: Script) => Promise<any>) {
 
   ScriptingClient.loadAPIs(['Test']).then(({ Test }) =>
     fn(ScriptingClient)
-      .then(x => {
+      .then((x) => {
         console.error('Test did not fail')
         console.error(x)
         return Test.fail(x)
       })
-      .catch(x => {
+      .catch((x) => {
         console.dir(x)
         return Test.pass(x)
       })

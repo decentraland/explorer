@@ -20,6 +20,6 @@ export function getPerformanceInfo(samples: string) {
     p90: sorted[Math.ceil(length * 0.9)],
     p95: sorted[Math.ceil(length * 0.95)],
     p99: sorted[Math.ceil(length * 0.99)],
-    max: sorted[length - 1]
+    max: sorted[length - 1],
   }
 }

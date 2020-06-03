@@ -13,7 +13,7 @@ export enum tutorialStepId {
   INITIAL_SCENE = 1,
   GENESIS_PLAZA = 2,
   CHAT_AND_AVATAR_EXPRESSIONS = 3,
-  FINISHED = 99
+  FINISHED = 99,
 }
 
 export function setTutorialEnabled(v: boolean) {
@@ -55,17 +55,17 @@ export function createTutorialILand(baseLocation: string): ILand {
           position: {
             x: 37,
             y: 2.5,
-            z: 60.5
-          }
-        }
-      ]
+            z: 60.5,
+          },
+        },
+      ],
     } as SceneJsonData,
     mappingsResponse: {
       parcel_id: coordinates,
       contents: tutorialSceneContents,
       root_cid: TUTORIAL_SCENE_ID,
-      publisher: '0x13371b17ddb77893cd19e10ffa58461396ebcc19'
-    } as MappingsResponse
+      publisher: '0x13371b17ddb77893cd19e10ffa58461396ebcc19',
+    } as MappingsResponse,
   }
 }
 

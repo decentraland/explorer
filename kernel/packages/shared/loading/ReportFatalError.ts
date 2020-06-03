@@ -6,7 +6,7 @@ import {
   NO_WEBGL_COULD_BE_CREATED,
   MOBILE_NOT_SUPPORTED,
   NEW_LOGIN,
-  NETWORK_MISMATCH
+  NETWORK_MISMATCH,
 } from './types'
 import { StoreContainer } from 'shared/store/rootTypes'
 

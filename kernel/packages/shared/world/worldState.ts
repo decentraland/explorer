@@ -4,7 +4,7 @@ let worldRunning: boolean = false
 
 export const worldRunningObservable = new Observable<Readonly<boolean>>()
 
-worldRunningObservable.add(state => {
+worldRunningObservable.add((state) => {
   worldRunning = state
 })
 

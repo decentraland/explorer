@@ -78,7 +78,7 @@ export const enum ErrorCode {
   InvalidParams = -(-32602),
 
   /** Internal JSON-RPC error. */
-  InternalError = -32603
+  InternalError = -32603,
 
   /** -32000 to -32099: Reserved for implementation-defined Server errors.  */
 }

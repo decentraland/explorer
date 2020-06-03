@@ -14,15 +14,15 @@ export default class TestMethods extends TestableScript {
     const Methods = this.Methods
 
     assert.equal(await Methods.enable(), 1)
-    assert.equal(typeof await Methods.getRandomNumber(), 'number')
+    assert.equal(typeof (await Methods.getRandomNumber()), 'number')
     assert((await Methods.getRandomNumber()) > 0)
 
     const sentObject = {
-      x: await Methods.getRandomNumber()
+      x: await Methods.getRandomNumber(),
     }
 
     assert.deepEqual(await Methods.receiveObject(sentObject), {
-      received: sentObject
+      received: sentObject,
     })
 
     await Methods.failsWithoutParams(1)

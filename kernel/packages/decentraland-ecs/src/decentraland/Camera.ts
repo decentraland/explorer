@@ -48,7 +48,7 @@ export class Camera {
       dcl.subscribe('positionChanged')
       dcl.subscribe('rotationChanged')
 
-      dcl.onEvent(event => {
+      dcl.onEvent((event) => {
         switch (event.type) {
           case 'positionChanged':
             this.positionChanged(event.data as any)
@@ -61,55 +61,55 @@ export class Camera {
     }
 
     Object.defineProperty(this.position, 'x', {
-      get: () => this.lastEventPosition.x
+      get: () => this.lastEventPosition.x,
     })
 
     Object.defineProperty(this.position, 'y', {
-      get: () => this.lastEventPosition.y
+      get: () => this.lastEventPosition.y,
     })
 
     Object.defineProperty(this.position, 'z', {
-      get: () => this.lastEventPosition.z
+      get: () => this.lastEventPosition.z,
     })
 
     Object.defineProperty(this.worldPosition, 'x', {
-      get: () => this.lastEventWorldPosition.x
+      get: () => this.lastEventWorldPosition.x,
     })
 
     Object.defineProperty(this.worldPosition, 'y', {
-      get: () => this.lastEventWorldPosition.y
+      get: () => this.lastEventWorldPosition.y,
     })
 
     Object.defineProperty(this.worldPosition, 'z', {
-      get: () => this.lastEventWorldPosition.z
+      get: () => this.lastEventWorldPosition.z,
     })
 
     Object.defineProperty(this.feetPosition, 'x', {
-      get: () => this.lastEventPosition.x
+      get: () => this.lastEventPosition.x,
     })
 
     Object.defineProperty(this.feetPosition, 'y', {
-      get: () => this.lastEventPosition.y - this.playerHeight
+      get: () => this.lastEventPosition.y - this.playerHeight,
     })
 
     Object.defineProperty(this.feetPosition, 'z', {
-      get: () => this.lastEventPosition.z
+      get: () => this.lastEventPosition.z,
     })
 
     Object.defineProperty(this.rotation, 'x', {
-      get: () => this.lastEventRotation.x
+      get: () => this.lastEventRotation.x,
     })
 
     Object.defineProperty(this.rotation, 'y', {
-      get: () => this.lastEventRotation.y
+      get: () => this.lastEventRotation.y,
     })
 
     Object.defineProperty(this.rotation, 'z', {
-      get: () => this.lastEventRotation.z
+      get: () => this.lastEventRotation.z,
     })
 
     Object.defineProperty(this.rotation, 'w', {
-      get: () => this.lastEventRotation.w
+      get: () => this.lastEventRotation.w,
     })
   }
 

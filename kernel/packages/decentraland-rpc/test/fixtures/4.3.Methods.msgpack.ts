@@ -2,7 +2,7 @@ import * as assert from 'assert'
 import { test, shouldFail } from './support/ClientHelpers'
 import { Methods } from './support/ClientCommons'
 
-test(async ScriptingClient => {
+test(async (ScriptingClient) => {
   const { Methods } = (await ScriptingClient.loadAPIs(['Methods'])) as {
     Methods: Methods
   }
@@ -12,7 +12,7 @@ test(async ScriptingClient => {
   assert((await Methods.getRandomNumber()) > 0)
 
   const sentObject = {
-    x: await Methods.getRandomNumber()
+    x: await Methods.getRandomNumber(),
   }
 
   assert.equal(await Methods.ret0(), 0)
@@ -22,7 +22,7 @@ test(async ScriptingClient => {
   assert.equal(await Methods.retTrue(), true)
 
   assert.deepEqual(await Methods.receiveObject(sentObject), {
-    received: sentObject
+    received: sentObject,
   })
 
   await Methods.failsWithoutParams(1)

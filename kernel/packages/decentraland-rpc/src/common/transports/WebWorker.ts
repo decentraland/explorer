@@ -23,7 +23,7 @@ export function WebWorkerTransport(worker: IWorker): ScriptingTransport {
               error: err.error,
               filename: err.filename,
               lineno: err.lineno,
-              message: err.message
+              message: err.message,
             })
           )
         }
@@ -45,7 +45,7 @@ export function WebWorkerTransport(worker: IWorker): ScriptingTransport {
         // tslint:disable-next-line:semicolon
         ;(worker as any).close()
       }
-    }
+    },
   }
 
   return api

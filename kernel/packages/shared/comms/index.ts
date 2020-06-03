@@ -19,7 +19,7 @@ import {
   receiveUserPose,
   receiveUserVisible,
   removeById,
-  avatarMessageObservable
+  avatarMessageObservable,
 } from './peers'
 import {
   Pose,
@@ -31,7 +31,7 @@ import {
   AvatarMessageType,
   ConnectionEstablishmentError,
   IdTakenError,
-  UnknownCommsModeError
+  UnknownCommsModeError,
 } from './interface/types'
 import {
   CommunicationArea,
@@ -39,7 +39,7 @@ import {
   position2parcel,
   sameParcel,
   squareDistance,
-  ParcelArray
+  ParcelArray,
 } from './interface/utils'
 import { BrokerWorldInstanceConnection } from '../comms/v1/brokerWorldInstanceConnection'
 import { profileToRendererFormat } from 'shared/profiles/transformations/profileToRendererFormat'
@@ -60,7 +60,7 @@ import {
   setCatalystRealmCommsStatus,
   setCatalystRealm,
   markCatalystRealmFull,
-  markCatalystRealmConnectionError
+  markCatalystRealmConnectionError,
 } from 'shared/dao/actions'
 import { observeRealmChange, pickCatalystRealm, changeToCrowdedRealm } from 'shared/dao'
 import { getProfile } from 'shared/profiles/selectors'
@@ -84,7 +84,7 @@ export const MORDOR_POSITION: Position = [
   0,
   0,
   0,
-  0
+  0,
 ]
 
 type CommsContainer = {
@@ -104,7 +104,7 @@ export class PeerTrackingInfo {
 
   profilePromise: { promise: Promise<ProfileForRenderer | void>; version: number | null } = {
     promise: Promise.resolve(),
-    version: null
+    version: null,
   }
 
   public loadProfileIfNecessary(profileVersion: number) {
@@ -112,12 +112,12 @@ export class PeerTrackingInfo {
       if (!this.userInfo || !this.userInfo.userId) {
         this.userInfo = {
           ...(this.userInfo || {}),
-          userId: this.identity
+          userId: this.identity,
         }
       }
       this.profilePromise = {
         promise: ProfileAsPromise(this.identity, profileVersion)
-          .then(profile => {
+          .then((profile) => {
             const forRenderer = profileToRendererFormat(profile)
             this.lastProfileUpdate = new Date().getTime()
             const userInfo = this.userInfo || {}
@@ -126,10 +126,10 @@ export class PeerTrackingInfo {
             this.userInfo = userInfo
             return forRenderer
           })
-          .catch(error => {
+          .catch((error) => {
             defaultLogger.error('Error fetching profile!', error)
           }),
-        version: profileVersion
+        version: profileVersion,
       }
     }
   }
@@ -172,7 +172,7 @@ const scenesSubscribedToCommsEvents = new Set<CommunicationsController>()
 function getParcelSceneSubscriptions(): string[] {
   let ids: string[] = []
 
-  scenesSubscribedToCommsEvents.forEach($ => {
+  scenesSubscribedToCommsEvents.forEach(($) => {
     ids.push($.cid)
   })
 
@@ -183,7 +183,7 @@ export function sendPublicChatMessage(messageId: string, text: string) {
   if (context && context.currentPosition && context.worldInstanceConnection) {
     context.worldInstanceConnection
       .sendChatMessage(context.currentPosition, messageId, text)
-      .catch(e => defaultLogger.warn(`error while sending message `, e))
+      .catch((e) => defaultLogger.warn(`error while sending message `, e))
   }
 }
 
@@ -191,7 +191,7 @@ export function sendParcelSceneCommsMessage(cid: string, message: string) {
   if (context && context.currentPosition && context.worldInstanceConnection) {
     context.worldInstanceConnection
       .sendParcelSceneCommsMessage(cid, message)
-      .catch(e => defaultLogger.warn(`error while sending message `, e))
+      .catch((e) => defaultLogger.warn(`error while sending message `, e))
   }
 }
 
@@ -224,7 +224,7 @@ export function processParcelSceneCommsMessage(context: Context, fromAlias: stri
   const peer = getPeer(fromAlias)
 
   if (peer) {
-    scenesSubscribedToCommsEvents.forEach($ => {
+    scenesSubscribedToCommsEvents.forEach(($) => {
       if ($.cid === cid) {
         $.receiveCommsMessage(text, peer)
       }
@@ -283,7 +283,7 @@ export function processChatMessage(context: Context, fromAlias: string, message:
           type: AvatarMessageType.USER_EXPRESSION,
           uuid: fromAlias,
           expressionId: id.slice(1),
-          timestamp: parseInt(timestamp, 10)
+          timestamp: parseInt(timestamp, 10),
         })
       } else {
         if (profile && user.userId && !isBlocked(profile, user.userId)) {
@@ -293,7 +293,7 @@ export function processChatMessage(context: Context, fromAlias: string, message:
               messageId: msgId,
               sender: displayName || 'unknown',
               body: text,
-              timestamp: message.time
+              timestamp: message.time,
             }
             globalThis.globalStore.dispatch(messageReceived(messageEntry))
           } else {
@@ -302,7 +302,7 @@ export function processChatMessage(context: Context, fromAlias: string, message:
               sender: displayName || 'unknown',
               isCommand: false,
               message: text,
-              timestamp: message.time
+              timestamp: message.time,
             }
             chatObservable.notifyObservers({ type: ChatEventType.MESSAGE_RECEIVED, messageEntry })
           }
@@ -394,7 +394,7 @@ export function onPositionUpdate(context: Context, p: Position) {
     if (context.currentPosition && !context.positionUpdatesPaused) {
       worldConnection
         .sendParcelUpdateMessage(context.currentPosition, p)
-        .catch(e => defaultLogger.warn(`error while sending message `, e))
+        .catch((e) => defaultLogger.warn(`error while sending message `, e))
     }
   }
 
@@ -410,7 +410,7 @@ export function onPositionUpdate(context: Context, p: Position) {
   if (topics !== previousTopics) {
     worldConnection
       .updateSubscriptions(topics.split(' '))
-      .catch(e => defaultLogger.warn(`error while updating subscriptions`, e))
+      .catch((e) => defaultLogger.warn(`error while updating subscriptions`, e))
     previousTopics = topics
   }
 
@@ -418,7 +418,7 @@ export function onPositionUpdate(context: Context, p: Position) {
   const now = new Date().getTime()
   if (now - lastNetworkUpdatePosition > 100 && !context.positionUpdatesPaused) {
     lastNetworkUpdatePosition = now
-    worldConnection.sendPositionMessage(p).catch(e => defaultLogger.warn(`error while sending message `, e))
+    worldConnection.sendPositionMessage(p).catch((e) => defaultLogger.warn(`error while sending message `, e))
   }
 }
 
@@ -456,7 +456,7 @@ function collectInfo(context: Context) {
       position: trackingInfo.position,
       userInfo: trackingInfo.userInfo,
       squareDistance: squareDistance(context.currentPosition, trackingInfo.position),
-      alias: peerAlias
+      alias: peerAlias,
     })
   }
 
@@ -486,7 +486,7 @@ function collectInfo(context: Context) {
   checkAutochangeRealm(visiblePeers, context, now)
 
   if (context.stats) {
-    context.stats.visiblePeerIds = visiblePeers.map(it => it.alias)
+    context.stats.visiblePeerIds = visiblePeers.map((it) => it.alias)
     context.stats.trackingPeersCount = context.peerData.size
     context.stats.collectInfoDuration.stop()
   }
@@ -507,7 +507,7 @@ function checkAutochangeRealm(visiblePeers: ProcessingPeerInfo[], context: Conte
             defaultLogger.log('No crowded realm found')
           }
         },
-        error => defaultLogger.warn('Error trying to change realm', error)
+        (error) => defaultLogger.warn('Error trying to change realm', error)
       )
     }
   }
@@ -549,7 +549,7 @@ export async function connect(userId: string) {
     }
 
     const userInfo = {
-      ...user
+      ...user,
     }
 
     let connection: WorldInstanceConnection
@@ -569,7 +569,7 @@ export async function connect(userId: string) {
 
             const url = new URL(commsUrl)
             const qs = new URLSearchParams({
-              identity: btoa(userId)
+              identity: btoa(userId),
             })
             url.search = qs.toString()
 
@@ -595,7 +595,7 @@ export async function connect(userId: string) {
 
         const peerConfig = {
           connectionConfig: {
-            iceServers: commConfigurations.iceServers
+            iceServers: commConfigurations.iceServers,
           },
           authHandler: async (msg: string) => {
             try {
@@ -612,8 +612,8 @@ export async function connect(userId: string) {
               if (context && context.currentPosition) {
                 return context.currentPosition.slice(0, 3)
               }
-            }
-          }
+            },
+          },
         }
 
         defaultLogger.log('Using Remote lighthouse service: ', lighthouseUrl)
@@ -623,7 +623,7 @@ export async function connect(userId: string) {
           realm!,
           lighthouseUrl,
           peerConfig,
-          status => {
+          (status) => {
             store.dispatch(setCatalystRealmCommsStatus(status))
             switch (status.status) {
               case 'realm-full': {
@@ -680,7 +680,7 @@ export async function connect(userId: string) {
       if (context && context.currentPosition && context.worldInstanceConnection) {
         context.worldInstanceConnection
           .sendProfileMessage(context.currentPosition, context.userInfo)
-          .catch(e => defaultLogger.warn(`error while sending message `, e))
+          .catch((e) => defaultLogger.warn(`error while sending message `, e))
       }
     }, 1000)
 
@@ -689,9 +689,9 @@ export async function connect(userId: string) {
         const connectionAnalytics = connection.analyticsData()
         // We slice the ids in order to reduce the potential event size. Eventually, we should slice all comms ids
         connectionAnalytics.trackedPeers = context?.peerData.keys()
-          ? [...context?.peerData.keys()].map(it => it.slice(-6))
+          ? [...context?.peerData.keys()].map((it) => it.slice(-6))
           : []
-        connectionAnalytics.visiblePeers = context?.stats.visiblePeerIds.map(it => it.slice(-6))
+        connectionAnalytics.visiblePeers = context?.stats.visiblePeerIds.map((it) => it.slice(-6))
 
         if (connectionAnalytics) {
           queueTrackingEvent('Comms Status v2', connectionAnalytics)
@@ -699,7 +699,7 @@ export async function connect(userId: string) {
       }, 30000)
     }
 
-    context.worldRunningObserver = worldRunningObservable.add(isRunning => {
+    context.worldRunningObserver = worldRunningObservable.add((isRunning) => {
       onWorldRunning(isRunning)
     })
 
@@ -711,7 +711,7 @@ export async function connect(userId: string) {
         obj.quaternion.x,
         obj.quaternion.y,
         obj.quaternion.z,
-        obj.quaternion.w
+        obj.quaternion.w,
       ] as Position
 
       if (context && isWorldRunning) {
@@ -785,7 +785,7 @@ export function onWorldRunning(isRunning: boolean, _context: Context | null = co
 }
 
 export function sendToMordor(_context: Context | null = context) {
-  sendToMordorAsync().catch(e => defaultLogger.warn(`error while sending message `, e))
+  sendToMordorAsync().catch((e) => defaultLogger.warn(`error while sending message `, e))
 }
 
 async function sendToMordorAsync(_context: Context | null = context) {
@@ -826,14 +826,14 @@ export async function fetchLayerUsersParcels(): Promise<ParcelArray[]> {
     const layerUsersResponse = await fetch(`${commsUrl}/layers/${realm.layer}/users`)
     if (layerUsersResponse.ok) {
       const layerUsers: LayerUserInfo[] = await layerUsersResponse.json()
-      return layerUsers.filter(it => it.parcel).map(it => it.parcel!)
+      return layerUsers.filter((it) => it.parcel).map((it) => it.parcel!)
     }
   }
 
   return []
 }
 
-globalThis.printCommsInformation = function() {
+globalThis.printCommsInformation = function () {
   if (context) {
     defaultLogger.log('Communication topics: ' + previousTopics)
     context.stats.printDebugInformation()

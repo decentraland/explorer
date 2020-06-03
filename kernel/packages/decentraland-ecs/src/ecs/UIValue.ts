@@ -3,7 +3,7 @@
  */
 export enum UIValueType {
   PERCENT = 0,
-  PIXELS = 1
+  PIXELS = 1,
 }
 
 /**

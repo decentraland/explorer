@@ -35,7 +35,7 @@ export function setLocalProfile(uuid: UUID, user: UserInformation = {}) {
   const profile = {
     uuid,
     user,
-    flags: {}
+    flags: {},
   }
 
   peerMap.set(uuid, profile)
@@ -44,7 +44,7 @@ export function setLocalProfile(uuid: UUID, user: UserInformation = {}) {
 
   avatarMessageObservable.notifyObservers({
     type: AvatarMessageType.SET_LOCAL_UUID,
-    uuid
+    uuid,
   })
 
   return profile
@@ -62,7 +62,7 @@ export function removeById(uuid: UUID) {
   if (peerMap.delete(uuid)) {
     avatarMessageObservable.notifyObservers({
       type: AvatarMessageType.USER_REMOVED,
-      uuid
+      uuid,
     })
   }
 }
@@ -113,7 +113,7 @@ export function setUpID(uuid: UUID): PeerInformation | null {
   if (!peerMap.has(uuid)) {
     peer = {
       uuid,
-      flags: {}
+      flags: {},
     }
 
     peerMap.set(uuid, peer)
@@ -137,7 +137,7 @@ export function receiveUserData(uuid: string, data: Partial<UserInformation>) {
       avatarMessageObservable.notifyObservers({
         type: AvatarMessageType.USER_DATA,
         uuid,
-        data
+        data,
       })
     }
   }
@@ -147,7 +147,7 @@ export function receiveUserPose(uuid: string, pose: Pose) {
   avatarMessageObservable.notifyObservers({
     type: AvatarMessageType.USER_POSE,
     uuid,
-    pose
+    pose,
   })
 }
 
@@ -159,7 +159,7 @@ export function receiveUserVisible(uuid: string, visible: boolean) {
   avatarMessageObservable.notifyObservers({
     type: AvatarMessageType.USER_VISIBLE,
     uuid,
-    visible
+    visible,
   })
 }
 
@@ -172,7 +172,7 @@ export function addToBlockedUsers(uuid: string): Set<string> {
 
     avatarMessageObservable.notifyObservers({
       type: AvatarMessageType.USER_BLOCKED,
-      uuid
+      uuid,
     })
 
     return updatedSet
@@ -188,7 +188,7 @@ export function removeFromBlockedUsers(uuid: string): Set<string> {
 
   avatarMessageObservable.notifyObservers({
     type: AvatarMessageType.USER_UNBLOCKED,
-    uuid
+    uuid,
   })
 
   return blockedUsers
@@ -203,7 +203,7 @@ export function addToMutedUsers(uuid: string): Set<string> {
 
     avatarMessageObservable.notifyObservers({
       type: AvatarMessageType.USER_MUTED,
-      uuid
+      uuid,
     })
 
     return updatedSet
@@ -219,7 +219,7 @@ export function removeFromMutedUsers(uuid: string): Set<string> {
 
   avatarMessageObservable.notifyObservers({
     type: AvatarMessageType.USER_UNMUTED,
-    uuid
+    uuid,
   })
 
   return mutedUsers

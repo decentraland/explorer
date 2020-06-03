@@ -13,7 +13,7 @@ declare var dcl: DecentralandInterface | void
  */
 export class RaycastEventSystem implements ISystem {
   activate(engine: Engine) {
-    engine.eventManager.addListener(RaycastResponse, this, event => {
+    engine.eventManager.addListener(RaycastResponse, this, (event) => {
       if (event.payload.queryType === 'HitFirst') {
         PhysicsCast.instance.handleRaycastHitFirstResponse(event as RaycastResponse<RaycastHitEntity>)
       } else if (event.payload.queryType === 'HitAll') {
@@ -41,7 +41,7 @@ export const raycastEventSystem = new RaycastEventSystem()
  */
 export class PointerEventSystem implements ISystem {
   activate(engine: Engine) {
-    engine.eventManager.addListener(PointerEvent, this, event => {
+    engine.eventManager.addListener(PointerEvent, this, (event) => {
       Input.instance.handlePointerEvent(event.payload as GlobalInputEventResult)
     })
 

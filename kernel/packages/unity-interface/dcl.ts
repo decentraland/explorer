@@ -19,7 +19,7 @@ import {
   RESET_TUTORIAL,
   SCENE_DEBUG_PANEL,
   SHOW_FPS_COUNTER,
-  tutorialEnabled
+  tutorialEnabled,
 } from '../config'
 import { Quaternion, ReadOnlyQuaternion, ReadOnlyVector3, Vector3 } from '../decentraland-ecs/src/decentraland/math'
 import { IEventNames, IEvents, ProfileForRenderer, MinimapSceneInfo } from '../decentraland-ecs/src/decentraland/Types'
@@ -49,7 +49,7 @@ import {
   PB_SetEntityParent,
   PB_UpdateEntityComponent,
   PB_Vector3,
-  PB_OpenExternalUrl
+  PB_OpenExternalUrl,
 } from '../shared/proto/engineinterface_pb'
 import { Session } from 'shared/session'
 import { getPerformanceInfo } from 'shared/session/getPerformanceInfo'
@@ -79,7 +79,7 @@ import {
   FriendshipUpdateStatusMessage,
   UpdateUserStatusMessage,
   FriendshipAction,
-  WorldPosition
+  WorldPosition,
 } from 'shared/types'
 import { ParcelSceneAPI } from 'shared/world/ParcelSceneAPI'
 import {
@@ -87,7 +87,7 @@ import {
   getParcelSceneID,
   getSceneWorkerBySceneID,
   loadParcelScene,
-  stopParcelSceneWorker
+  stopParcelSceneWorker,
 } from 'shared/world/parcelSceneManager'
 import { positionObservable, teleportObservable } from 'shared/world/positionThings'
 import { hudWorkerUrl, SceneWorker } from 'shared/world/SceneWorker'
@@ -123,7 +123,7 @@ const positionEvent = {
   quaternion: Quaternion.Identity,
   rotation: Vector3.Zero(),
   playerHeight: playerConfigurations.height,
-  mousePosition: Vector3.Zero()
+  mousePosition: Vector3.Zero(),
 }
 
 /////////////////////////////////// AUDIO STREAMING ///////////////////////////////////
@@ -204,7 +204,7 @@ const browserInterface = {
       type: AvatarMessageType.USER_EXPRESSION,
       uuid: uuid(),
       expressionId: data.id,
-      timestamp: data.timestamp
+      timestamp: data.timestamp,
     })
     const messageId = uuid()
     const body = `␐${data.id} ${data.timestamp}`
@@ -229,7 +229,7 @@ const browserInterface = {
   },
 
   LogOut() {
-    Session.current.then(s => s.logout()).catch(e => defaultLogger.error('error while logging out', e))
+    Session.current.then((s) => s.logout()).catch((e) => defaultLogger.error('error while logging out', e))
   },
 
   SaveUserAvatar(changes: { face: string; body: string; avatar: Avatar }) {
@@ -246,7 +246,7 @@ const browserInterface = {
 
     persistCurrentUser({
       version: profile.version,
-      profile: profileToRendererFormat(profile, identity)
+      profile: profileToRendererFormat(profile, identity),
     })
 
     if (data.tutorialStep === tutorialStepId.FINISHED) {
@@ -324,7 +324,7 @@ const browserInterface = {
     const profile = getProfile(globalThis.globalStore.getState(), identity.address)
 
     if (profile) {
-      const blocked = profile.blocked ? profile.blocked.filter(id => id !== data.userId) : []
+      const blocked = profile.blocked ? profile.blocked.filter((id) => id !== data.userId) : []
       globalThis.globalStore.dispatch(saveProfileRequest({ ...profile, blocked }))
     }
   },
@@ -345,7 +345,7 @@ const browserInterface = {
   },
 
   SetAudioStream(data: { url: string; play: boolean; volume: number }) {
-    setAudioStream(data.url, data.play, data.volume).catch(err => defaultLogger.log(err))
+    setAudioStream(data.url, data.play, data.volume).catch((err) => defaultLogger.log(err))
   },
 
   SendChatMessage(data: { message: ChatMessage }) {
@@ -385,7 +385,7 @@ const browserInterface = {
   JumpIn(data: WorldPosition) {
     const {
       gridPosition: { x, y },
-      realm: { serverName, layer }
+      realm: { serverName, layer },
     } = data
 
     const realmString = serverName + '-' + layer
@@ -398,7 +398,7 @@ const browserInterface = {
         () => {
           TeleportController.goTo(x, y, `Jumping to ${x},${y} in realm ${realm.catalystName}-${realm.layer}!`)
         },
-        e => {
+        (e) => {
           const cause = e === 'realm-full' ? ' The requested realm is full.' : ''
           notifyStatusThroughChat('Could not join realm.' + cause)
 
@@ -408,7 +408,7 @@ const browserInterface = {
     } else {
       notifyStatusThroughChat(`Couldn't find realm ${realmString}`)
     }
-  }
+  },
 }
 globalThis.browserInterface2 = browserInterface
 type BrowserInterfaceContainer = {
@@ -441,7 +441,7 @@ async function queryGraph(query: string, variables: any) {
   const opts = {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ query, variables })
+    body: JSON.stringify({ query, variables }),
   }
   const res = await fetch(url, opts)
   return res.json()
@@ -459,7 +459,9 @@ export function setLoadingScreenVisible(shouldShow: boolean) {
   const loadingAudio = document.getElementById('loading-audio') as HTMLMediaElement
 
   if (shouldShow) {
-    loadingAudio?.play().catch(e => {/*Ignored. If this fails is not critical*/})
+    loadingAudio?.play().catch((e) => {
+      /*Ignored. If this fails is not critical*/
+    })
   } else {
     loadingAudio?.pause()
   }
@@ -486,8 +488,8 @@ export function delightedSurvey() {
       name: profile.name || 'Guest',
       properties: {
         ethAddress: profile.ethAddress,
-        anonymous_id: analytics && analytics.user ? analytics.user().anonymousId() : null
-      }
+        anonymous_id: analytics && analytics.user ? analytics.user().anonymousId() : null,
+      },
     }
 
     try {
@@ -691,7 +693,7 @@ export const unityInterface = {
   },
   OnBuilderKeyDown(key: string) {
     this.SendBuilderMessage('OnBuilderKeyDown', key)
-  }
+  },
 }
 
 globalThis.unityInterface = unityInterface
@@ -902,14 +904,14 @@ export class UnityParcelScene extends UnityScene<LoadableParcelScene> {
     gridToWorld(this.data.data.basePosition.x, this.data.data.basePosition.y, worker.position)
 
     this.worker.system
-      .then(system => {
+      .then((system) => {
         system.getAPIInstance(DevTools).logger = this.logger
 
         const parcelIdentity = system.getAPIInstance(ParcelIdentity)
         parcelIdentity.land = this.data.data.land
         parcelIdentity.cid = getParcelSceneID(worker.parcelScene)
       })
-      .catch(e => this.logger.error('Error initializing system', e))
+      .catch((e) => this.logger.error('Error initializing system', e))
   }
 }
 
@@ -962,7 +964,7 @@ export async function initializeEngine(_gameInstance: GameInstance) {
       } else {
         defaultLogger.info(`Unknown message (did you forget to add ${type} to unity-interface/dcl.ts?)`, message)
       }
-    }
+    },
   }
 }
 
@@ -973,27 +975,27 @@ export async function startUnityParcelLoading() {
   globalThis.globalStore.dispatch(loadingScenes())
   await enableParcelSceneLoading({
     parcelSceneClass: UnityParcelScene,
-    preloadScene: async _land => {
+    preloadScene: async (_land) => {
       // TODO:
       // 1) implement preload call
       // 2) await for preload message or timeout
       // 3) return
     },
-    onLoadParcelScenes: lands => {
+    onLoadParcelScenes: (lands) => {
       unityInterface.LoadParcelScenes(
-        lands.map($ => {
+        lands.map(($) => {
           const x = Object.assign({}, ILandToLoadableParcelScene($).data)
           delete x.land
           return x
         })
       )
     },
-    onUnloadParcelScenes: lands => {
-      lands.forEach($ => {
+    onUnloadParcelScenes: (lands) => {
+      lands.forEach(($) => {
         unityInterface.UnloadScene($.sceneId)
       })
     },
-    onPositionSettled: spawnPoint => {
+    onPositionSettled: (spawnPoint) => {
       if (!aborted) {
         unityInterface.Teleport(spawnPoint)
         unityInterface.ActivateRendering()
@@ -1001,7 +1003,7 @@ export async function startUnityParcelLoading() {
     },
     onPositionUnsettled: () => {
       unityInterface.DeactivateRendering()
-    }
+    },
   })
 }
 
@@ -1015,7 +1017,7 @@ async function initializeDecentralandUI() {
     main: hudWorkerUrl,
     useFPSThrottling: false,
     data: {},
-    mappings: []
+    mappings: [],
   })
 
   const worker = loadParcelScene(scene)
@@ -1053,7 +1055,7 @@ export async function loadPreviewScene() {
       baseUrl: location.toString().replace(/\?[^\n]+/g, ''),
       baseUrlBundles: '',
       sceneJsonData: scene,
-      mappingsResponse: mappingsResponse
+      mappingsResponse: mappingsResponse,
     }
 
     const parcelScene = new UnityParcelScene(ILandToLoadableParcelScene(defaultScene))
@@ -1116,13 +1118,13 @@ teleportObservable.add((position: { x: number; y: number; text?: string }) => {
   globalThis.globalStore.dispatch(teleportTriggered(position.text || `Teleporting to ${position.x}, ${position.y}`))
 })
 
-worldRunningObservable.add(isRunning => {
+worldRunningObservable.add((isRunning) => {
   if (isRunning) {
     setLoadingScreenVisible(false)
   }
 })
 
-document.addEventListener('pointerlockchange', e => {
+document.addEventListener('pointerlockchange', (e) => {
   if (!document.pointerLockElement) {
     unityInterface.UnlockCursor()
   }

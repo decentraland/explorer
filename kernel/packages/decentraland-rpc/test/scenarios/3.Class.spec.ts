@@ -49,7 +49,7 @@ export class Runtime extends API {
 
 testInWorker('test/out/fixtures/3.Class.js', {
   plugins: [Debugger, Profiler, Runtime],
-  validateResult: async result => {
+  validateResult: async (result) => {
     assert.equal(await aFuture, true)
-  }
+  },
 })

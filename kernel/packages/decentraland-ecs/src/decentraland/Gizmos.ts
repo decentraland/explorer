@@ -9,7 +9,7 @@ export enum Gizmo {
   MOVE = 'MOVE',
   ROTATE = 'ROTATE',
   SCALE = 'SCALE',
-  NONE = 'NONE'
+  NONE = 'NONE',
 }
 
 /**

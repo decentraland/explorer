@@ -9,7 +9,7 @@ export const performanceConfigurations = [
   { antialiasing: false, downsampling: 1, shadows: true },
   { antialiasing: false, downsampling: 1, shadows: false },
   { antialiasing: false, downsampling: 1, shadows: true },
-  { antialiasing: false, downsampling: 2, shadows: false }
+  { antialiasing: false, downsampling: 2, shadows: false },
 ]
 
 export const NETWORK_HZ = 10
@@ -164,44 +164,44 @@ export namespace commConfigurations {
 
   export const iceServers = [
     {
-      urls: 'stun:stun.l.google.com:19302'
+      urls: 'stun:stun.l.google.com:19302',
     },
     {
-      urls: 'stun:stun2.l.google.com:19302'
+      urls: 'stun:stun2.l.google.com:19302',
     },
     {
-      urls: 'stun:stun3.l.google.com:19302'
+      urls: 'stun:stun3.l.google.com:19302',
     },
     {
-      urls: 'stun:stun4.l.google.com:19302'
+      urls: 'stun:stun4.l.google.com:19302',
     },
     {
       urls: 'turn:stun.decentraland.org:3478',
       credential: 'passworddcl',
-      username: 'usernamedcl'
-    }
+      username: 'usernamedcl',
+    },
   ]
 }
 export const loginConfig = {
   org: {
     domain: 'decentraland.auth0.com',
-    client_id: 'yqFiSmQsxk3LK46JOIB4NJ3wK4HzZVxG'
+    client_id: 'yqFiSmQsxk3LK46JOIB4NJ3wK4HzZVxG',
   },
   today: {
     domain: 'dcl-stg.auth0.com',
-    client_id: '0UB0I7w6QA3AgSvbXh9rGvDuhKrJV1C0'
+    client_id: '0UB0I7w6QA3AgSvbXh9rGvDuhKrJV1C0',
   },
   zone: {
     domain: 'dcl-test.auth0.com',
-    client_id: 'lTUEMnFpYb0aiUKeIRPbh7pBxKM6sccx'
-  }
+    client_id: 'lTUEMnFpYb0aiUKeIRPbh7pBxKM6sccx',
+  },
 }
 
 // take address from http://contracts.decentraland.org/addresses.json
 
 export enum ETHEREUM_NETWORK {
   MAINNET = 'mainnet',
-  ROPSTEN = 'ropsten'
+  ROPSTEN = 'ropsten',
 }
 
 export let decentralandConfigurations: any = {}
@@ -267,8 +267,8 @@ export function getServerConfigurations() {
     avatar: {
       snapshotStorage: `https://avatars-storage.decentraland.${TLDDefault}/`,
       catalog: getExclusiveServer(),
-      presets: `https://avatars-storage.decentraland.org/mobile-avatars`
-    }
+      presets: `https://avatars-storage.decentraland.org/mobile-avatars`,
+    },
   }
 }
 
@@ -290,11 +290,11 @@ export async function setNetwork(net: ETHEREUM_NETWORK) {
       dao: contracts.CatalystProxy,
       ens: contracts.CatalystProxy,
       contracts: {
-        serviceLocator: contracts.ServiceLocator
+        serviceLocator: contracts.ServiceLocator,
       },
       paymentTokens: {
-        MANA: contracts.MANAToken
-      }
+        MANA: contracts.MANAToken,
+      },
     }
   } catch (e) {
     // Could not fetch addresses. You might be offline. Setting sensitive defaults for contract addresses...
@@ -306,11 +306,11 @@ export async function setNetwork(net: ETHEREUM_NETWORK) {
       contractAddress: '',
       dao: '',
       contracts: {
-        serviceLocator: ''
+        serviceLocator: '',
       },
       paymentTokens: {
-        MANA: ''
-      }
+        MANA: '',
+      },
     }
   }
 }
@@ -320,13 +320,13 @@ export namespace ethereumConfigurations {
     wss: 'wss://mainnet.infura.io/ws/v3/074a68d50a7c4e6cb46aec204a50cbf0',
     http: 'https://mainnet.infura.io/v3/074a68d50a7c4e6cb46aec204a50cbf0/',
     etherscan: 'https://etherscan.io',
-    names: 'https://api.thegraph.com/subgraphs/name/decentraland/marketplace'
+    names: 'https://api.thegraph.com/subgraphs/name/decentraland/marketplace',
   }
   export const ropsten = {
     wss: 'wss://ropsten.infura.io/ws/v3/074a68d50a7c4e6cb46aec204a50cbf0',
     http: 'https://ropsten.infura.io/v3/074a68d50a7c4e6cb46aec204a50cbf0/',
     etherscan: 'https://ropsten.etherscan.io',
-    names: 'https://api.thegraph.com/subgraphs/name/decentraland/marketplace-ropsten'
+    names: 'https://api.thegraph.com/subgraphs/name/decentraland/marketplace-ropsten',
   }
 }
 

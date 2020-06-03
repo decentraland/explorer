@@ -270,7 +270,7 @@ export namespace PB_Component {
     BASICMATERIAL = 64,
     TEXTURE = 68,
     AUDIOCLIP = 200,
-    AUDIOSOURCE = 201
+    AUDIOSOURCE = 201,
   }
 }
 
@@ -887,7 +887,7 @@ export namespace PB_SendSceneMessage {
     COMPONENTUPDATED = 11,
     QUERY = 12,
     SCENESTARTED = 13,
-    OPENEXTERNALURL = 14
+    OPENEXTERNALURL = 14,
   }
 }
 
@@ -1133,7 +1133,7 @@ export namespace PB_DclMessage {
     UNLOADSCENE = 6,
     SETPOSITION = 7,
     RESET = 8,
-    CREATEUISCENE = 9
+    CREATEUISCENE = 9,
   }
 }
 

@@ -3,7 +3,7 @@ import { action } from 'typesafe-actions'
 export const helpTexts = [
   `With blockchain-based virtual items, users are in control: buy, sell, or gift them without asking for permission.`,
   `MANA is Decentraland's virtual currency. Use it to buy LAND and other premium items, vote on Decentraland's key policy, and pay platform fees.`,
-  `Decentraland is made up of over 90,000 LANDs, virtual spaces backed by cryptographic tokens. Only landowners determine the content that sits on their LAND.`
+  `Decentraland is made up of over 90,000 LANDs, virtual spaces backed by cryptographic tokens. Only landowners determine the content that sits on their LAND.`,
 ]
 
 export const ROTATE_HELP_TEXT = 'Set Help Text'
@@ -82,7 +82,7 @@ export const ExecutionLifecycleNotifications = {
   commsErrorRetrying,
   commsCouldNotBeEstablished,
   newLogin,
-  networkMismatch
+  networkMismatch,
 }
 
 export type ExecutionLifecycleEvent =
@@ -133,5 +133,5 @@ export const ExecutionLifecycleEventsList: ExecutionLifecycleEvent[] = [
   MOBILE_NOT_SUPPORTED,
   COMMS_COULD_NOT_BE_ESTABLISHED,
   NEW_LOGIN,
-  NETWORK_MISMATCH
+  NETWORK_MISMATCH,
 ]

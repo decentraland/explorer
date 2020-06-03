@@ -29,7 +29,7 @@ export function getExposedMethods<T extends API>(instance: T): Set<keyof T> {
   while (!!currentPrototype) {
     if (hasOwnSymbol(currentPrototype, exposedMethodSymbol)) {
       const currentList: Set<string> = currentPrototype[exposedMethodSymbol]
-      currentList.forEach($ => result.add($ as any))
+      currentList.forEach(($) => result.add($ as any))
     }
     currentPrototype = Object.getPrototypeOf(currentPrototype)
   }
@@ -38,7 +38,7 @@ export function getExposedMethods<T extends API>(instance: T): Set<keyof T> {
 }
 
 export function rateLimit<T>(interval: number = 100) {
-  return function(
+  return function (
     target: T,
     propertyKey: string,
     descriptor: TypedPropertyDescriptor<(...args: any[]) => Promise<any | void>>
@@ -48,7 +48,7 @@ export function rateLimit<T>(interval: number = 100) {
 
     return {
       ...descriptor,
-      value: function(this: T) {
+      value: function (this: T) {
         const now = performance.now()
 
         if (now - lastCall < interval) {
@@ -57,13 +57,13 @@ export function rateLimit<T>(interval: number = 100) {
 
         lastCall = now
         return originalValue.apply(this, arguments)
-      }
+      },
     }
   }
 }
 
 export function throttle<T>(callLimit: number, interval: number = 100) {
-  return function(
+  return function (
     target: T,
     propertyKey: string,
     descriptor: TypedPropertyDescriptor<(...args: any[]) => Promise<any | void>>
@@ -74,7 +74,7 @@ export function throttle<T>(callLimit: number, interval: number = 100) {
 
     return {
       ...descriptor,
-      value: function(this: T) {
+      value: function (this: T) {
         const now = performance.now()
 
         if (now - initTime >= interval) {
@@ -89,7 +89,7 @@ export function throttle<T>(callLimit: number, interval: number = 100) {
         calls++
 
         return originalValue.apply(this, arguments)
-      }
+      },
     }
   }
 }

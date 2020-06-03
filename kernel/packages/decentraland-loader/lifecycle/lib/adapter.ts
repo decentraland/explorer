@@ -6,7 +6,7 @@ export class Adapter extends Client {
     super({})
 
     if (transport.onError) {
-      transport.onError(e => {
+      transport.onError((e) => {
         this.emit('error', e)
       })
     }
@@ -17,7 +17,7 @@ export class Adapter extends Client {
       })
     }
 
-    transport.onMessage(message => {
+    transport.onMessage((message) => {
       this.processMessage(message)
     })
 

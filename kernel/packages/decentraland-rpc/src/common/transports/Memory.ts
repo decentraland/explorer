@@ -34,7 +34,7 @@ export function MemoryTransport() {
         if (connected == false) {
           onConnectList.push(handler)
         }
-      }
+      },
     }
   }
 
@@ -44,7 +44,7 @@ export function MemoryTransport() {
   // we send a RPC.Enable message when the server gets connected as start signal
   clientEd.on('message', () => {
     if (connected === false) {
-      onConnectList.forEach($ => $())
+      onConnectList.forEach(($) => $())
       onConnectList.length = 0
       connected = true
     }
@@ -52,6 +52,6 @@ export function MemoryTransport() {
 
   return {
     client,
-    server
+    server,
   }
 }

@@ -35,8 +35,8 @@ function testWithTransport(transport: ScriptingTransport, fn: (script: Script) =
   ScriptingClient.loadAPIs(['Test'])
     .then((APIs: any) =>
       fn(ScriptingClient)
-        .then(x => APIs.Test.pass(x))
-        .catch(x => {
+        .then((x) => APIs.Test.pass(x))
+        .catch((x) => {
           console.error('Test failed')
           console.error(x)
           return APIs.Test.fail(x)
@@ -50,17 +50,17 @@ export function initializeWebSocketTester(server: Server) {
   wss.on('connection', function connection(ws, req) {
     console.log('Got websocket connection')
 
-    testWithTransport(WebSocketTransport(ws), async ScriptingClient => {
+    testWithTransport(WebSocketTransport(ws), async (ScriptingClient) => {
       const { Methods } = (await ScriptingClient.loadAPIs(['Methods'])) as {
         Methods: Methods
       }
 
       assert.equal(await Methods.enable(), 1)
-      assert.equal(typeof await Methods.getRandomNumber(), 'number')
+      assert.equal(typeof (await Methods.getRandomNumber()), 'number')
       assert((await Methods.getRandomNumber()) > 0)
 
       const sentObject = {
-        x: await Methods.getRandomNumber()
+        x: await Methods.getRandomNumber(),
       }
 
       assert.equal(await Methods.ret0(), 0)
@@ -70,7 +70,7 @@ export function initializeWebSocketTester(server: Server) {
       assert.equal(await Methods.retTrue(), true)
 
       assert.deepEqual(await Methods.receiveObject(sentObject), {
-        received: sentObject
+        received: sentObject,
       })
 
       await Methods.failsWithoutParams(1)
@@ -86,6 +86,6 @@ export function initializeWebSocketTester(server: Server) {
       }
     })
   })
-  wss.on('error', e => console.log(e))
+  wss.on('error', (e) => console.log(e))
   return wss
 }

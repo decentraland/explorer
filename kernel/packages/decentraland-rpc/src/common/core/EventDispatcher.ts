@@ -72,7 +72,7 @@ export class EventDispatcher<T = EventDispatcherEventsBase> {
       bindList && bindList.push(tmp)
 
       if (once) {
-        tmp.cb = function(this: EventDispatcher<T>) {
+        tmp.cb = function (this: EventDispatcher<T>) {
           callback.apply(this, arguments)
           tmp.cb = null
         }.bind(this)
@@ -186,6 +186,6 @@ export class EventDispatcher<T = EventDispatcherEventsBase> {
   }
 
   protected getEventBindings(event: string) {
-    return (this.edBindings[event] || []).filter($ => $ && $.enabled)
+    return (this.edBindings[event] || []).filter(($) => $ && $.enabled)
   }
 }

@@ -29,7 +29,7 @@ export function inject(apiName?: string) {
   if (apiName !== undefined && !apiName) {
     throw new TypeError('API name cannot be null / empty')
   }
-  return function<T extends Script>(target: T, propertyKey: keyof T) {
+  return function <T extends Script>(target: T, propertyKey: keyof T) {
     if (typeof propertyKey === 'string') {
       getInjectableMap(target).set(propertyKey, apiName || propertyKey)
     } else throw new TypeError('Cannot inject APIs with non-string names')
@@ -72,7 +72,7 @@ async function _injectAPIs(target: Script) {
 
   await target.loadAPIs(Array.from(injectedMap.values()))
 
-  injectedMap.forEach(function(apiName: string, property) {
+  injectedMap.forEach(function (apiName: string, property) {
     target[property] = target.loadedAPIs[apiName]
   })
 }
@@ -88,7 +88,7 @@ class Script extends Client {
     super(opt)
 
     if (transport.onError) {
-      transport.onError(e => {
+      transport.onError((e) => {
         this.emit('error', e)
       })
     }
@@ -99,7 +99,7 @@ class Script extends Client {
       })
     }
 
-    transport.onMessage(message => {
+    transport.onMessage((message) => {
       this.processMessage(message)
     })
 
@@ -126,7 +126,7 @@ class Script extends Client {
   async loadAPIs(apiName: string[]): Promise<{ [key: string]: any }> {
     const loadedKeys = Object.keys(this.loadedAPIs)
 
-    const keysToRequest = apiName.filter(function($) {
+    const keysToRequest = apiName.filter(function ($) {
       return !loadedKeys.includes($)
     })
 
@@ -134,7 +134,7 @@ class Script extends Client {
       await this.call(loadAPIsNotificationName, [keysToRequest])
 
       // Load / request the API
-      keysToRequest.forEach(async apiName => {
+      keysToRequest.forEach(async (apiName) => {
         this.loadedAPIs[apiName] = getApi(this, apiName)
       })
     }
@@ -154,14 +154,14 @@ class Script extends Client {
           try {
             const r = this.systemDidEnable()
             if (r && isPromiseLike(r)) {
-              r.catch(e => this.emit('error', e))
+              r.catch((e) => this.emit('error', e))
             }
           } catch (e) {
             this.emit('error', e)
           }
         }
       })
-      .catch(e => this.emit('error', e))
+      .catch((e) => this.emit('error', e))
   }
 }
 

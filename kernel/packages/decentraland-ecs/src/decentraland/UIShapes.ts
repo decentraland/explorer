@@ -117,7 +117,7 @@ export class UIContainerRect extends UIShape {
  */
 export enum UIStackOrientation {
   VERTICAL,
-  HORIZONTAL
+  HORIZONTAL,
 }
 
 /**

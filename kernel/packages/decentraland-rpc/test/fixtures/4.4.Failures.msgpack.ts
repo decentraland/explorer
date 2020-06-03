@@ -1,7 +1,7 @@
 import { testToFail } from './support/ClientHelpers'
 import { Methods } from './support/ClientCommons'
 
-testToFail(async ScriptingClient => {
+testToFail(async (ScriptingClient) => {
   const { Methods } = (await ScriptingClient.loadAPIs(['Methods'])) as {
     Methods: Methods
   }

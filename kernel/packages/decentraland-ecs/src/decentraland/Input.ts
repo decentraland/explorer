@@ -15,7 +15,7 @@ export enum ActionButton {
   POINTER = 'POINTER',
   PRIMARY = 'PRIMARY',
   SECONDARY = 'SECONDARY',
-  ANY = 'ANY'
+  ANY = 'ANY',
 }
 
 /** @public */
@@ -87,35 +87,35 @@ export class Input {
   private subscriptions: Record<ActionButton, Record<InputEventKind, Array<Subscription>>> = {
     [ActionButton.POINTER]: {
       BUTTON_DOWN: [],
-      BUTTON_UP: []
+      BUTTON_UP: [],
     },
     [ActionButton.PRIMARY]: {
       BUTTON_DOWN: [],
-      BUTTON_UP: []
+      BUTTON_UP: [],
     },
     [ActionButton.SECONDARY]: {
       BUTTON_DOWN: [],
-      BUTTON_UP: []
+      BUTTON_UP: [],
     },
     [ActionButton.ANY]: {
       BUTTON_DOWN: [],
-      BUTTON_UP: []
-    }
+      BUTTON_UP: [],
+    },
   }
 
   private internalState: InputState = {
     [ActionButton.POINTER]: {
-      BUTTON_DOWN: false
+      BUTTON_DOWN: false,
     },
     [ActionButton.PRIMARY]: {
-      BUTTON_DOWN: false
+      BUTTON_DOWN: false,
     },
     [ActionButton.SECONDARY]: {
-      BUTTON_DOWN: false
+      BUTTON_DOWN: false,
     },
     [ActionButton.ANY]: {
-      BUTTON_DOWN: false
-    }
+      BUTTON_DOWN: false,
+    },
   }
 
   private constructor() {}
@@ -177,7 +177,7 @@ export class Input {
       button: button,
       direction: new Vector3().copyFrom(data.direction),
       origin: new Vector3().copyFrom(data.origin),
-      hit: undefined
+      hit: undefined,
     }
 
     const hit = data.hit
@@ -185,7 +185,7 @@ export class Input {
           ...data.hit,
           hitPoint: new Vector3().copyFrom(data.hit.hitPoint),
           normal: new Vector3().copyFrom(data.hit.normal),
-          worldNormal: new Vector3().copyFrom(data.hit.worldNormal)
+          worldNormal: new Vector3().copyFrom(data.hit.worldNormal),
         }
       : undefined
 

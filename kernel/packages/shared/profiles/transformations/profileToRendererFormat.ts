@@ -5,7 +5,7 @@ import { dropDeprecatedWearables } from './processServerProfile'
 import { ExplorerIdentity } from 'shared'
 
 const profileDefaults = {
-  tutorialStep: 0
+  tutorialStep: 0,
 }
 
 export function profileToRendererFormat(profile: Profile, identity?: ExplorerIdentity): ProfileForRenderer {
@@ -20,7 +20,7 @@ export function profileToRendererFormat(profile: Profile, identity?: ExplorerIde
       wearables: profile.avatar.wearables.filter(dropDeprecatedWearables),
       eyeColor: convertToRGBObject(profile.avatar.eyeColor),
       hairColor: convertToRGBObject(profile.avatar.hairColor),
-      skinColor: convertToRGBObject(profile.avatar.skinColor)
-    }
+      skinColor: convertToRGBObject(profile.avatar.skinColor),
+    },
   }
 }

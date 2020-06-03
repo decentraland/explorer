@@ -50,6 +50,6 @@ export function getApi<T extends object = any>(rpcClient: Client, _prefix: strin
       }
 
       return target[prop]
-    }
+    },
   })
 }

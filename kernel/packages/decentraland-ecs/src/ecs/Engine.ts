@@ -8,7 +8,7 @@ import {
   ComponentConstructor,
   DisposableComponentCreated,
   DisposableComponentRemoved,
-  getComponentClassId
+  getComponentClassId,
 } from './Component'
 import { EventManager } from './EventManager'
 import { ComponentGroup } from './ComponentGroup'

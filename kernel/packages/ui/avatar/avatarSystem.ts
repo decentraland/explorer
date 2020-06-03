@@ -11,7 +11,7 @@ import {
   UserInformation,
   UserMessage,
   UserRemovedMessage,
-  UUID
+  UUID,
 } from 'shared/comms/interface/types'
 import { execute } from './rpc'
 
@@ -77,7 +77,7 @@ export class AvatarEntity extends Entity {
     if (userData.profile) {
       this.loadProfile(userData)
     }
-  } 
+  }
 
   setExpression(id: string, timestamp: number): void {
     const shape = this.avatarShape
@@ -212,7 +212,7 @@ function handleMutedBlockedMessages({ uuid }: UserMessage): void {
   executeTask(hideBlockedUsers)
 }
 
-avatarMessageObservable.add(evt => {
+avatarMessageObservable.add((evt) => {
   if (evt.type === AvatarMessageType.USER_DATA) {
     handleUserData(evt)
   } else if (evt.type === AvatarMessageType.USER_POSE) {

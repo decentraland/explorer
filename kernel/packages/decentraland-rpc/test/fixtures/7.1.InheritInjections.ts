@@ -21,7 +21,7 @@ export default class TestMethods extends BaseTestMethods {
       ['Logger', 'Logger'],
       ['testComponent', 'Test'],
       ['xxx', 'Test'],
-      ['m', 'Methods']
+      ['m', 'Methods'],
     ])
 
     if (!this.m) {
@@ -49,11 +49,11 @@ export default class TestMethods extends BaseTestMethods {
     assert((await Methods.getRandomNumber()) > 0)
 
     const sentObject = {
-      x: await Methods.getRandomNumber()
+      x: await Methods.getRandomNumber(),
     }
 
     assert.deepEqual(await Methods.receiveObject(sentObject), {
-      received: sentObject
+      received: sentObject,
     })
 
     await Methods.failsWithoutParams(1)

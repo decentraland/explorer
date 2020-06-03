@@ -8,7 +8,7 @@ enum TicTacToeAction {
   PLACE = 'placeSymbol',
   RESTART = 'restart',
   SYNC = 'sync',
-  SET_SYMBOL = 'setSymbol'
+  SET_SYMBOL = 'setSymbol',
 }
 
 interface ITicTacToeState {
@@ -23,7 +23,7 @@ interface IGenericAction {
 
 const initialState: ITicTacToeState = {
   board: [null, null, null, null, null, null, null, null, null],
-  mySymbol: null
+  mySymbol: null,
 }
 
 let state = initialState
@@ -35,26 +35,26 @@ function reducer(state: ITicTacToeState = initialState, action: IGenericAction):
     case TicTacToeAction.SYNC:
       return {
         ...state,
-        board: payload.board
+        board: payload.board,
       }
 
     case TicTacToeAction.RESTART:
       return {
-        ...initialState
+        ...initialState,
       }
 
     case TicTacToeAction.PLACE:
       return {
         ...state,
         board: Object.assign([], state.board, {
-          [payload.index]: payload.symbol
-        })
+          [payload.index]: payload.symbol,
+        }),
       }
 
     case TicTacToeAction.SET_SYMBOL:
       return {
         ...state,
-        mySymbol: payload.symbol
+        mySymbol: payload.symbol,
       }
   }
 
@@ -76,15 +76,15 @@ const winingCombinations = [
   // tslint:disable-next-line
   [0, 4, 8], // nw - se
   // tslint:disable-next-line
-  [6, 4, 2] // sw - ne
+  [6, 4, 2], // sw - ne
 ]
 
 const getWinner = () =>
-  ['x', 'o'].find($ =>
-    winingCombinations.some(combination => combination.every(position => state.board[position] === $))
+  ['x', 'o'].find(($) =>
+    winingCombinations.some((combination) => combination.every((position) => state.board[position] === $))
   )
 
-test(async ScriptingClient => {
+test(async (ScriptingClient) => {
   const { Test, TicTacToeBoard } = (await ScriptingClient.loadAPIs(['Test', 'TicTacToeBoard'])) as {
     Test: Test
     TicTacToeBoard: any
@@ -98,8 +98,8 @@ test(async ScriptingClient => {
     handleAction({
       type: TicTacToeAction.SET_SYMBOL,
       payload: {
-        symbol
-      }
+        symbol,
+      },
     })
   })
 
@@ -112,8 +112,8 @@ test(async ScriptingClient => {
       type: TicTacToeAction.PLACE,
       payload: {
         index,
-        symbol
-      }
+        symbol,
+      },
     })
 
     const winner = getWinner()

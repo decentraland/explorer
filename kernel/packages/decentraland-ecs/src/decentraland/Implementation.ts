@@ -5,7 +5,7 @@ import {
   getComponentClassId,
   getComponentId,
   isDisposableComponent,
-  ObservableComponent
+  ObservableComponent,
 } from '../ecs/Component'
 import { Engine } from '../ecs/Engine'
 import { ComponentAdded, ComponentRemoved, IEntity, ISystem, ParentChanged } from '../ecs/IEntity'
@@ -37,12 +37,12 @@ export class DecentralandSynchronizationSystem implements ISystem {
 
     // TODO(agus): send disposableComponents if exist
 
-    this.dcl.onUpdate(dt => {
+    this.dcl.onUpdate((dt) => {
       engine.update(dt)
       this.presentEntities()
     })
 
-    this.dcl.onEvent(event => {
+    this.dcl.onEvent((event) => {
       const data = event.data as any
       switch (event.type) {
         case 'uuidEvent':

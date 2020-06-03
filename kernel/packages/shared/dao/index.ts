@@ -51,13 +51,13 @@ export function ping(url: string, timeoutMs: number = 5000): Promise<PingResult>
           const ended = new Date().getTime()
           if (http.status !== 200) {
             result.resolve({
-              status: ServerConnectionStatus.UNREACHABLE
+              status: ServerConnectionStatus.UNREACHABLE,
             })
           } else {
             result.resolve({
               status: ServerConnectionStatus.OK,
               elapsed: ended - started.getTime(),
-              result: JSON.parse(http.responseText)
+              result: JSON.parse(http.responseText),
             })
           }
         } catch (e) {
@@ -73,7 +73,7 @@ export function ping(url: string, timeoutMs: number = 5000): Promise<PingResult>
       http.send(null)
     } catch (exception) {
       result.resolve({
-        status: ServerConnectionStatus.UNREACHABLE
+        status: ServerConnectionStatus.UNREACHABLE,
       })
     }
   }).catch(defaultLogger.error)
@@ -92,21 +92,21 @@ export async function fecthCatalystRealms(): Promise<Candidate[]> {
 
 export async function fetchCatalystStatuses(nodes: { domain: string }[]) {
   const results: PingResult[] = await Promise.all(
-    nodes.map(node => ping(`${node.domain}/comms/status?includeLayers=true`))
+    nodes.map((node) => ping(`${node.domain}/comms/status?includeLayers=true`))
   )
 
   return zip(nodes, results).reduce(
     (union: Candidate[], [{ domain }, { elapsed, result, status }]: [CatalystNode, PingResult]) =>
       status === ServerConnectionStatus.OK
         ? union.concat(
-            result!.layers.map(layer => ({
+            result!.layers.map((layer) => ({
               catalystName: result!.name,
               domain,
               status,
               elapsed: elapsed!,
               layer,
               score: score(layer),
-              lighthouseVersion: result!.version
+              lighthouseVersion: result!.version,
             }))
           )
         : union,
@@ -117,7 +117,7 @@ export async function fetchCatalystStatuses(nodes: { domain: string }[]) {
 export function pickCatalystRealm(candidates: Candidate[]): Realm {
   const usersByDomain: Record<string, number> = {}
 
-  candidates.forEach(it => {
+  candidates.forEach((it) => {
     if (!usersByDomain[it.domain]) {
       usersByDomain[it.domain] = 0
     }
@@ -126,7 +126,7 @@ export function pickCatalystRealm(candidates: Candidate[]): Realm {
   })
 
   const sorted = candidates
-    .filter(it => it.status === ServerConnectionStatus.OK && it.layer.usersCount < it.layer.maxUsers)
+    .filter((it) => it.status === ServerConnectionStatus.OK && it.layer.usersCount < it.layer.maxUsers)
     .sort((c1, c2) => {
       const elapsedDiff = c1.elapsed - c2.elapsed
       const usersDiff = usersByDomain[c1.domain] - usersByDomain[c2.domain]
@@ -156,7 +156,7 @@ export async function realmInitialized(): Promise<void> {
     return Promise.resolve()
   }
 
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     const unsubscribe = store.subscribe(() => {
       const initialized = isRealmInitialized(store.getState())
       if (initialized) {
@@ -179,12 +179,12 @@ function candidateToRealm(candidate: Candidate) {
     catalystName: candidate.catalystName,
     domain: candidate.domain,
     layer: candidate.layer.name,
-    lighthouseVersion: candidate.lighthouseVersion
+    lighthouseVersion: candidate.lighthouseVersion,
   }
 }
 
 function realmFor(name: string, layer: string, candidates: Candidate[]): Realm | undefined {
-  const candidate = candidates.find(it => it.catalystName === name && it.layer.name === layer)
+  const candidate = candidates.find((it) => it.catalystName === name && it.layer.name === layer)
   return candidate ? candidateToRealm(candidate) : undefined
 }
 
@@ -217,8 +217,10 @@ export async function changeToCrowdedRealm(): Promise<[boolean, Realm]> {
   let crowdedRealm: RealmPeople = { realm: currentRealm, closePeople: 0 }
 
   candidates
-    .filter(it => it.layer.usersParcels && it.layer.usersParcels.length > 0 && it.layer.usersCount < it.layer.maxUsers)
-    .forEach(candidate => {
+    .filter(
+      (it) => it.layer.usersParcels && it.layer.usersParcels.length > 0 && it.layer.usersCount < it.layer.maxUsers
+    )
+    .forEach((candidate) => {
       if (candidate.layer.usersParcels) {
         let closePeople = countParcelsCloseTo(currentPosition, candidate.layer.usersParcels, 4)
         // If it is the realm of the player, we substract 1 to not count ourselves
@@ -229,7 +231,7 @@ export async function changeToCrowdedRealm(): Promise<[boolean, Realm]> {
         if (closePeople > crowdedRealm.closePeople) {
           crowdedRealm = {
             realm: candidateToRealm(candidate),
-            closePeople
+            closePeople,
           }
         }
       }
@@ -247,7 +249,7 @@ export async function changeToCrowdedRealm(): Promise<[boolean, Realm]> {
 export async function refreshCandidatesStatuses() {
   const store: Store<RootState> = (window as any)['globalStore']
 
-  const candidates = await fetchCatalystStatuses(Array.from(getCandidateDomains(store)).map(it => ({ domain: it })))
+  const candidates = await fetchCatalystStatuses(Array.from(getCandidateDomains(store)).map((it) => ({ domain: it })))
 
   store.dispatch(setCatalystCandidates(candidates))
 
@@ -255,7 +257,7 @@ export async function refreshCandidatesStatuses() {
 }
 
 function getCandidateDomains(store: Store<RootDaoState>): Set<string> {
-  return new Set(getAllCatalystCandidates(store.getState()).map(it => it.domain))
+  return new Set(getAllCatalystCandidates(store.getState()).map((it) => it.domain))
 }
 
 export async function catalystRealmConnected(): Promise<void> {

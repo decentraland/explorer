@@ -30,7 +30,7 @@ export function createLogger(prefix: string): ILogger {
     },
     trace(message: string, ...args: any[]): void {
       console.trace(prefix + message, ...args)
-    }
+    },
   }
 }
 

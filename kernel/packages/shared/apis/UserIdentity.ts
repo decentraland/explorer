@@ -36,7 +36,7 @@ export class UserIdentity extends ExposableAPI implements IUserIdentity {
       displayName: user.profile.name,
       publicKey: identity.hasConnectedWeb3 ? user.userId : null,
       hasConnectedWeb3: !!identity.hasConnectedWeb3,
-      userId: user.userId
+      userId: user.userId,
     }
   }
 }

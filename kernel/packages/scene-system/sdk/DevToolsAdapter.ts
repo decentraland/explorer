@@ -18,7 +18,7 @@ export class DevToolsAdapter {
       type: 'log',
       timestamp: this.now,
       executionContextId: 0,
-      args: args.map($ => {
+      args: args.map(($) => {
         let value = undefined
         let unserializableValue = undefined
         const type = typeof $
@@ -39,10 +39,10 @@ export class DevToolsAdapter {
         const remoteObject: Protocol.Runtime.RemoteObject = {
           type: typeof $,
           value,
-          unserializableValue
+          unserializableValue,
         }
         return remoteObject
-      })
+      }),
     }
 
     this.api.event('Runtime.consoleAPICalled', [params]).catch(this.catchHandler)
@@ -63,7 +63,7 @@ export class DevToolsAdapter {
     const exception: Protocol.Runtime.RemoteObject = {
       type: typeof e,
       value,
-      unserializableValue
+      unserializableValue,
     }
 
     const param: Protocol.Runtime.ExceptionThrownEvent = {
@@ -73,8 +73,8 @@ export class DevToolsAdapter {
         exceptionId,
         columnNumber: 0,
         lineNumber: 0,
-        exception
-      }
+        exception,
+      },
     }
 
     this.api.event('Runtime.exceptionThrown', [param]).catch(this.catchHandler)

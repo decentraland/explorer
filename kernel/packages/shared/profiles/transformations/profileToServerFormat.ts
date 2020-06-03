@@ -32,7 +32,7 @@ export function ensureServerFormat(profile: Profile, currentVersion: number): an
       hair: { color: hair },
       skin: { color: skin },
       wearables: avatar.wearables,
-      version: currentVersion + 1
-    }
+      version: currentVersion + 1,
+    },
   }
 }

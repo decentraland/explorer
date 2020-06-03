@@ -33,20 +33,20 @@ export class Test7 extends API {
   }
 }
 
-describe('Class based systems', function() {
+describe('Class based systems', function () {
   testInWorker('test/out/fixtures/7.0.MethodsInjection.js', {
     plugins: [Logger, Methods, Test],
-    log: false
+    log: false,
   })
 
   testInWorker('test/out/fixtures/7.0.MethodsInjection.js?without_preload', {
     plugins: [],
-    log: false
+    log: false,
   })
 
   testInWorker('test/out/fixtures/7.1.InheritInjections.js', {
     plugins: [],
-    log: false
+    log: false,
   })
 
   testInWorker('test/out/fixtures/7.2.ValidateValuesInServer.js', {
@@ -55,7 +55,7 @@ describe('Class based systems', function() {
     validateResult: (result: any, worker: ScriptingHost) => {
       const test7 = worker.getAPIInstance(Test7)
       assert.notEqual(test7.receivedNumber, -1)
-    }
+    },
   })
 
   testInWorker('test/out/fixtures/7.3.Interval.js', {
@@ -67,6 +67,6 @@ describe('Class based systems', function() {
       setTimeout(() => {
         return test7.setStatus()
       }, 500)
-    }
+    },
   })
 })

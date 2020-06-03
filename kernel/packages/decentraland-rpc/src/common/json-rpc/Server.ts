@@ -145,7 +145,7 @@ export abstract class Server<ClientType = any> extends EventDispatcher implement
                     this._send(from, {
                       jsonrpc: '2.0',
                       id: request.id,
-                      result: typeof actualResult === 'undefined' ? null : actualResult
+                      result: typeof actualResult === 'undefined' ? null : actualResult,
                     })
                   })
                   .catch((error: Error) => {
@@ -156,7 +156,7 @@ export abstract class Server<ClientType = any> extends EventDispatcher implement
                 this._send(from, {
                   jsonrpc: '2.0',
                   id: request.id,
-                  result: typeof result === 'undefined' ? null : result
+                  result: typeof result === 'undefined' ? null : result,
                 })
               }
             } catch (error) {
@@ -202,7 +202,7 @@ export abstract class Server<ClientType = any> extends EventDispatcher implement
       this._send(receiver, {
         jsonrpc: '2.0',
         id: (request && request.id) || -1,
-        error: this._errorFromCode(errorCode, sanitizeError(error), request && request.method)
+        error: this._errorFromCode(errorCode, sanitizeError(error), request && request.method),
       })
     } catch (error) {
       // Since we can't even send errors, do nothing. The connection was probably closed.

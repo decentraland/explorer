@@ -6,4 +6,4 @@ const x = async () => {
   const data: object = await ScriptingClient.call('MethodX', ['a worker generated string'])
   await ScriptingClient.call('JumpBack', data)
 }
-x().catch(x => console.error(x))
+x().catch((x) => console.error(x))

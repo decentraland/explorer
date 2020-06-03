@@ -13,7 +13,7 @@ export function ProfileAsPromise(userId: string, version?: number): Promise<Prof
   if (existingProfile && (!version || existingProfile.version >= version)) {
     return Promise.resolve(existingProfile)
   }
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     const unsubscribe = store.subscribe(() => {
       const profile = getProfile(store.getState(), userId)
       if (profile) {

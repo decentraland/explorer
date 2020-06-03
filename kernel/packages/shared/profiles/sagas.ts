@@ -33,7 +33,7 @@ import {
   saveProfileSuccess,
   profileRequest,
   saveProfileFailure,
-  addedProfileToCatalog
+  addedProfileToCatalog,
 } from './actions'
 import { generateRandomUserProfile } from './generateRandomUserProfile'
 import {
@@ -42,7 +42,7 @@ import {
   getInventory,
   getProfile,
   getProfileDownloadServer,
-  getExclusiveCatalog
+  getExclusiveCatalog,
 } from './selectors'
 import { processServerProfile } from './transformations/processServerProfile'
 import { profileToRendererFormat } from './transformations/profileToRendererFormat'
@@ -61,7 +61,7 @@ import {
   Pointer,
   ContentFile,
   ENTITY_FILE_NAME,
-  DeployData
+  DeployData,
 } from './types'
 import { identity, ExplorerIdentity } from '../index'
 import { Authenticator, AuthLink } from 'dcl-crypto'
@@ -135,15 +135,15 @@ function overrideBaseUrl(wearable: Wearable) {
   return {
     ...wearable,
     baseUrl: getWearablesSafeURL() + '/contents/',
-    baseUrlBundles: getServerConfigurations().contentAsBundle + '/'
+    baseUrlBundles: getServerConfigurations().contentAsBundle + '/',
   }
 }
 
 function overrideSwankyRarity(wearable: Wearable) {
-  if (wearable.rarity as any === 'swanky') {
+  if ((wearable.rarity as any) === 'swanky') {
     return {
       ...wearable,
-      rarity: 'rare' as RarityEnum
+      rarity: 'rare' as RarityEnum,
     }
   }
   return wearable
@@ -233,7 +233,7 @@ export function* handleFetchProfile(action: ProfileRequestAction): any {
     yield put(inventoryRequest(userId, userId))
     const inventoryResult = yield race({
       success: take(isActionFor(INVENTORY_SUCCESS, userId)),
-      failure: take(isActionFor(INVENTORY_FAILURE, userId))
+      failure: take(isActionFor(INVENTORY_FAILURE, userId)),
     })
     if (inventoryResult.failure) {
       defaultLogger.error(`Unable to fetch inventory for ${userId}:`, inventoryResult.failure)
@@ -292,7 +292,7 @@ export function handleNewInventoryItem() {
     type: NotificationType.GENERIC,
     message: 'You received an exclusive wearable NFT mask! Check it out in the avatar editor.',
     buttonMessage: 'OK',
-    timer: 7
+    timer: 7,
   })
 }
 
@@ -350,10 +350,7 @@ export function* handleFetchInventory(action: InventoryRequest) {
 }
 
 function dropIndexFromExclusives(exclusive: string) {
-  return exclusive
-    .split('/')
-    .slice(0, 4)
-    .join('/')
+  return exclusive.split('/').slice(0, 4).join('/')
 }
 
 export async function fetchInventoryItemsByAddress(address: string) {
@@ -366,7 +363,7 @@ export async function fetchInventoryItemsByAddress(address: string) {
   }
   const inventory: { id: string }[] = await result.json()
 
-  return inventory.map(wearable => wearable.id)
+  return inventory.map((wearable) => wearable.id)
 }
 
 export function* handleSaveAvatar(saveAvatar: SaveProfileRequest) {
@@ -385,7 +382,7 @@ export function* handleSaveAvatar(saveAvatar: SaveProfileRequest) {
         userId,
         currentVersion,
         identity,
-        profile
+        profile,
       })
 
       const { creationTimestamp: version } = result
@@ -483,7 +480,7 @@ export async function modifyAvatar(params: {
     if (snapshots.face.includes('://') && snapshots.body.includes('://')) {
       newAvatar.snapshots = {
         face: snapshots.face.split('/').pop()!,
-        body: snapshots.body.split('/').pop()!
+        body: snapshots.body.split('/').pop()!,
       }
     } else {
       // replace base64 snapshots with their respective hashes
@@ -495,7 +492,7 @@ export async function modifyAvatar(params: {
 
       newAvatar.snapshots = {
         face: faceFileHash,
-        body: bodyFileHash
+        body: bodyFileHash,
       }
       files = [faceFile, bodyFile]
     }
@@ -505,7 +502,7 @@ export async function modifyAvatar(params: {
   const [data] = await buildDeployData(
     [identity.address],
     {
-      avatars: [newProfile]
+      avatars: [newProfile],
     },
     files
   )
@@ -551,7 +548,7 @@ export async function buildDeployData(
     // Every position in the body ethAddress every position in the authLink is an slavon.
     // 1 = ethAddress, 2 ehpemeral & signature w/ethAdrress, 3 request & signature with ephemeral
     authChain: body,
-    files: [entityFile, ...files]
+    files: [entityFile, ...files],
   }
 
   return [deployData, entity]
@@ -567,7 +564,7 @@ export function createEthereumMessageHash(msg: string) {
 }
 
 export async function calculateHashes(files: ContentFile[]): Promise<Map<string, ContentFile>> {
-  const entries: Promise<[string, ContentFile]>[] = Array.from(files).map(file =>
+  const entries: Promise<[string, ContentFile]>[] = Array.from(files).map((file) =>
     calculateBufferHash(file.content).then((hash: string) => [hash, file])
   )
   return new Map(await Promise.all(entries))
@@ -582,7 +579,7 @@ export async function deploy(contentServerUrl: string, data: DeployData) {
   }
   const deployResponse = await fetch(`${contentServerUrl}/entities`, {
     method: 'POST',
-    body: form
+    body: form,
   })
   return deployResponse.json()
 }
@@ -635,7 +632,7 @@ const MILLIS_PER_SECOND = 1000
 const ONE_MINUTE = 60 * MILLIS_PER_SECOND
 
 export function delay(time: number) {
-  return new Promise(resolve => setTimeout(resolve, time))
+  return new Promise((resolve) => setTimeout(resolve, time))
 }
 
 export function* queryInventoryEveryMinute() {
@@ -658,7 +655,7 @@ export function* checkInventoryForUpdates() {
   yield put(inventoryRequest(userId, ethAddress))
   const fetchNewInventory = yield race({
     success: take(INVENTORY_SUCCESS),
-    fail: take(INVENTORY_FAILURE)
+    fail: take(INVENTORY_FAILURE),
   })
   if (fetchNewInventory.success) {
     const newInventory: string[] = (fetchNewInventory.success as InventorySuccess).payload.inventory

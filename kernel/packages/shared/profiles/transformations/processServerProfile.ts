@@ -12,13 +12,13 @@ export const deprecatedWearables = [
   'dcl://base-avatars/BaseFemale',
   'dcl://base-avatars/00_EmptyEarring',
   'dcl://base-avatars/00_EmptyFacialHair',
-  'dcl://base-avatars/00_bald'
+  'dcl://base-avatars/00_bald',
 ]
 export function dropDeprecatedWearables(wearableId: string): boolean {
   return deprecatedWearables.indexOf(wearableId) === -1
 }
 export function noExclusiveMismatches(inventory: WearableId[]) {
-  return function(wearableId: WearableId) {
+  return function (wearableId: WearableId) {
     return wearableId.startsWith('dcl://base-avatars') || inventory.indexOf(wearableId) !== -1
   }
 }
@@ -46,11 +46,11 @@ export function processServerProfile(userId: string, receivedProfile: any): Prof
       skinColor: colorString(skinColor),
       bodyShape: fixWearableIds(receivedProfile.avatar.bodyShape),
       wearables,
-      snapshots
+      snapshots,
     },
     inventory: receivedProfile.inventory || [],
     blocked: receivedProfile.blocked,
-    tutorialStep: receivedProfile.tutorialStep || tutorialStepId.INITIAL_SCENE
+    tutorialStep: receivedProfile.tutorialStep || tutorialStepId.INITIAL_SCENE,
   }
 }
 

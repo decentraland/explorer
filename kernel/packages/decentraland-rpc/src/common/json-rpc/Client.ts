@@ -56,7 +56,7 @@ export abstract class Client extends EventDispatcher implements JsonRpc2.IClient
         } else {
           promise.reject(
             Object.assign(new Error(`Response must have result or error: ${messageStr}`), {
-              code: JsonRpc2.ErrorCode.ParseError
+              code: JsonRpc2.ErrorCode.ParseError,
             })
           )
         }

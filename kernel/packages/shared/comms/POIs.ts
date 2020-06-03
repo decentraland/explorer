@@ -9,7 +9,7 @@ export const POIs = [
     id: '0',
     createdAt: 1573089561308,
     updatedAt: 1573092007064,
-    priority: 10000
+    priority: 10000,
   },
   {
     description: "Chris/ACLCrypto's House",
@@ -20,7 +20,7 @@ export const POIs = [
     y: '-118',
     id: '14',
     createdAt: 1573141584432,
-    updatedAt: 1573141584432
+    updatedAt: 1573141584432,
   },
   {
     description: '',
@@ -30,7 +30,7 @@ export const POIs = [
     y: '-65',
     id: '2',
     createdAt: 1573094770483,
-    updatedAt: 1574432972331
+    updatedAt: 1574432972331,
   },
   {
     description: '',
@@ -40,7 +40,7 @@ export const POIs = [
     y: '73',
     id: '3',
     createdAt: 1573095160622,
-    updatedAt: 1573095160622
+    updatedAt: 1573095160622,
   },
   {
     description: '',
@@ -50,7 +50,7 @@ export const POIs = [
     y: '41',
     id: '4',
     createdAt: 1573095754848,
-    updatedAt: 1573095754848
+    updatedAt: 1573095754848,
   },
   {
     description: 'Drive around the jungle maze, shooting coconuts at monkeys to win bananas.',
@@ -60,7 +60,7 @@ export const POIs = [
     y: '58',
     id: '5',
     createdAt: 1573130525067,
-    updatedAt: 1573130725038
+    updatedAt: 1573130725038,
   },
   {
     description:
@@ -71,7 +71,7 @@ export const POIs = [
     y: '-37',
     id: '6',
     createdAt: 1573130676505,
-    updatedAt: 1573130676505
+    updatedAt: 1573130676505,
   },
   {
     description: 'No intro needed',
@@ -82,7 +82,7 @@ export const POIs = [
     y: 0,
     id: '1',
     createdAt: 1573092063703,
-    updatedAt: 1573092063703
+    updatedAt: 1573092063703,
   },
   {
     description: '',
@@ -93,7 +93,7 @@ export const POIs = [
     y: 0,
     id: '8',
     createdAt: 1573130979319,
-    updatedAt: 1573131386015
+    updatedAt: 1573131386015,
   },
   {
     description: '',
@@ -104,7 +104,7 @@ export const POIs = [
     y: '15',
     id: '9',
     createdAt: 1573131095948,
-    updatedAt: 1573131356677
+    updatedAt: 1573131356677,
   },
   {
     description: '',
@@ -115,7 +115,7 @@ export const POIs = [
     y: '-8',
     id: '10',
     createdAt: 1573131328369,
-    updatedAt: 1573131328369
+    updatedAt: 1573131328369,
   },
   {
     description: '',
@@ -126,7 +126,7 @@ export const POIs = [
     y: '-35',
     id: '11',
     createdAt: 1573141103271,
-    updatedAt: 1573141103271
+    updatedAt: 1573141103271,
   },
   {
     description: '',
@@ -137,7 +137,7 @@ export const POIs = [
     y: '31',
     id: '12',
     createdAt: 1573141192398,
-    updatedAt: 1573141192398
+    updatedAt: 1573141192398,
   },
   {
     description: '',
@@ -148,7 +148,7 @@ export const POIs = [
     y: '-53',
     id: '13',
     createdAt: 1573141337447,
-    updatedAt: 1573141605037
+    updatedAt: 1573141605037,
   },
   {
     description: 'Enjoy farming and cooking vegetables in this super fun, fast-paced food game.',
@@ -158,6 +158,6 @@ export const POIs = [
     y: '-33',
     id: '7',
     createdAt: 1573130812099,
-    updatedAt: 1573130812099
-  }
+    updatedAt: 1573130812099,
+  },
 ]

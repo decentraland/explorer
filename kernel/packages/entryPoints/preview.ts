@@ -31,11 +31,11 @@ function startPreviewWatcher() {
 
   const loadScene = () => {
     loadPreviewScene()
-      .then(scene => {
+      .then((scene) => {
         isSceneLoading = false
         defaultScene.resolve(scene)
       })
-      .catch(err => {
+      .catch((err) => {
         isSceneLoading = false
         defaultLogger.error('Error loading scene', err)
         defaultScene.reject(err)
@@ -44,7 +44,7 @@ function startPreviewWatcher() {
 
   loadScene()
 
-  global.handleServerMessage = function(message: any) {
+  global.handleServerMessage = function (message: any) {
     if (message.type === 'update') {
       if (DEBUG_WS_MESSAGES) {
         defaultLogger.info('Message received: ', message)
@@ -66,7 +66,7 @@ function startPreviewWatcher() {
 function sceneRenderable() {
   const sceneRenderable = future<void>()
 
-  const observer = sceneLifeCycleObservable.add(async sceneStatus => {
+  const observer = sceneLifeCycleObservable.add(async (sceneStatus) => {
     if (sceneStatus.sceneId === (await defaultScene).sceneId) {
       sceneLifeCycleObservable.remove(observer)
       sceneRenderable.resolve()
@@ -77,12 +77,12 @@ function sceneRenderable() {
 }
 
 initializeUnity(container)
-  .then(async ret => {
+  .then(async (ret) => {
     const i = unityInterface
-    i.ConfigureHUDElement( HUDElementID.MINIMAP, { active: true, visible: true })
-    i.ConfigureHUDElement( HUDElementID.NOTIFICATION, { active: true, visible: false })
-    i.ConfigureHUDElement( HUDElementID.SETTINGS, { active: true, visible: false })
-    i.ConfigureHUDElement( HUDElementID.AIRDROPPING, { active: true, visible: true })
+    i.ConfigureHUDElement(HUDElementID.MINIMAP, { active: true, visible: true })
+    i.ConfigureHUDElement(HUDElementID.NOTIFICATION, { active: true, visible: false })
+    i.ConfigureHUDElement(HUDElementID.SETTINGS, { active: true, visible: false })
+    i.ConfigureHUDElement(HUDElementID.AIRDROPPING, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.OPEN_EXTERNAL_URL_PROMPT, { active: true, visible: true })
 
     global.globalStore.dispatch(signalRendererInitialized())
@@ -100,6 +100,6 @@ initializeUnity(container)
       })
       .catch(defaultLogger.error)
   })
-  .catch(err => {
+  .catch((err) => {
     defaultLogger.error('There was an error', err)
   })

@@ -23,15 +23,15 @@ export class ComponentGroup {
     }
 
     Object.defineProperty(this, 'requires', {
-      get: function() {
+      get: function () {
         return requires.slice()
-      }
+      },
     })
 
     Object.defineProperty(this, 'requiresNames', {
-      get: function() {
+      get: function () {
         return this._requiresNames.slice()
-      }
+      },
     })
 
     for (let ix = 0; ix < requires.length; ix++) {
@@ -50,7 +50,7 @@ export class ComponentGroup {
         )
       }
 
-      if (this._requiresNames.some($ => $ === name)) {
+      if (this._requiresNames.some(($) => $ === name)) {
         throw new Error(`ComponentGroup: the required component list has a repeated name ${name}`)
       }
 

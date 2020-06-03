@@ -6,13 +6,13 @@ const traceur = require('traceur')
 
 // replace node.js require by traceur's
 traceur.require.makeDefault(
-  function(filename: string) {
+  function (filename: string) {
     // don't transpile our dependencies, just our app
     return filename.indexOf('node_modules') === -1
   },
   {
     asyncFunctions: true,
-    asyncGenerators: true
+    asyncGenerators: true,
   }
 )
 
@@ -24,7 +24,7 @@ import fs = require('fs')
 
 const WS = require('../test/server/_testWebSocketServer')
 
-const keepOpen = process.argv.some($ => $ === '--keep-open')
+const keepOpen = process.argv.some(($) => $ === '--keep-open')
 const app = express()
 const port = process.env.PORT || 3000
 const server = http.createServer(app)
@@ -32,7 +32,7 @@ const server = http.createServer(app)
 WS.initializeWebSocketTester(server)
 
 // serve build.html
-app.get('/', function(req, res) {
+app.get('/', function (req, res) {
   res.sendFile(resolve(__dirname, '../test/index.html'))
 })
 
@@ -41,7 +41,7 @@ console.log(resolve(__dirname, '../node_modules'))
 app.use('/test', express.static(resolve(__dirname, '../test')))
 app.use('/node_modules', express.static(resolve(__dirname, '../node_modules')))
 
-server.listen(port, function(error: any) {
+server.listen(port, function (error: any) {
   if (error) {
     console.error(error)
     process.exit(1)
@@ -54,12 +54,12 @@ server.listen(port, function(error: any) {
       height: 600,
       width: 800,
       timeout: 5 * 60 * 1000,
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
     }
 
     titere
       .run(options)
-      .then(result => {
+      .then((result) => {
         if (result.coverage) {
           fs.writeFileSync('test/out/out.json', JSON.stringify(result.coverage))
         } else {
@@ -76,4 +76,4 @@ server.listen(port, function(error: any) {
   }
 })
 
-server.on('error', e => console.log(e))
+server.on('error', (e) => console.log(e))

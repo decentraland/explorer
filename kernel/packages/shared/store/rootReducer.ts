@@ -16,5 +16,5 @@ export const reducers = combineReducers({
   renderer: rendererReducer,
   protocol: protocolReducer,
   dao: daoReducer,
-  meta: metaReducer
+  meta: metaReducer,
 })

@@ -4,7 +4,7 @@ import { registerAPI, exposeMethod, APIOptions } from 'decentraland-rpc/lib/host
 import {
   sendParcelSceneCommsMessage,
   subscribeParcelSceneToCommsMessages,
-  unsubscribeParcelSceneToCommsMessages
+  unsubscribeParcelSceneToCommsMessages,
 } from 'shared/comms'
 import { ExposableAPI } from 'shared/apis/ExposableAPI'
 import { EngineAPI } from 'shared/apis/EngineAPI'
@@ -33,7 +33,7 @@ export class CommunicationsController extends ExposableAPI {
   receiveCommsMessage(message: string, sender: PeerInformation) {
     this.engineAPI.sendSubscriptionEvent('comms', {
       message,
-      sender: sender.uuid
+      sender: sender.uuid,
     })
   }
 

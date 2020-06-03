@@ -16,7 +16,7 @@ export type QueryType = 'HitFirst' | 'HitAll' | 'HitFirstAvatar' | 'HitAllAvatar
  */
 enum QueryPrefix {
   HitFirst = 'rqhf',
-  HitAll = 'rqha'
+  HitAll = 'rqha',
 }
 
 /**
@@ -136,7 +136,7 @@ export class PhysicsCast implements IPhysicsCast {
     const ray: Ray = {
       origin: Camera.instance.position,
       direction: direction,
-      distance: distance
+      distance: distance,
     }
 
     return ray
@@ -149,7 +149,7 @@ export class PhysicsCast implements IPhysicsCast {
     const ray: Ray = {
       origin: from,
       direction: direction.normalize(),
-      distance: length
+      distance: length,
     }
 
     return ray

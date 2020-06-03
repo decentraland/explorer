@@ -36,13 +36,13 @@ export interface IWebSocket {
 export function WebSocketTransport(socket: IWebSocket): ScriptingTransport {
   const queue: (string | Uint8Array | ArrayBuffer | SharedArrayBuffer)[] = []
 
-  socket.addEventListener('open', function() {
+  socket.addEventListener('open', function () {
     flush()
   })
 
   function flush() {
     if (socket.readyState === socket.OPEN) {
-      queue.forEach($ => send($))
+      queue.forEach(($) => send($))
       queue.length = 0
     }
   }
@@ -76,7 +76,7 @@ export function WebSocketTransport(socket: IWebSocket): ScriptingTransport {
               error: err.error,
               filename: err.filename,
               lineno: err.lineno,
-              message: err.message
+              message: err.message,
             })
           )
         }
@@ -98,7 +98,7 @@ export function WebSocketTransport(socket: IWebSocket): ScriptingTransport {
     },
     close() {
       socket.close()
-    }
+    },
   }
 
   return api

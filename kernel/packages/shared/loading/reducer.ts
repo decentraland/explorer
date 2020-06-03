@@ -6,7 +6,7 @@ import {
   helpTexts,
   NOT_STARTED,
   ROTATE_HELP_TEXT,
-  TELEPORT_TRIGGERED
+  TELEPORT_TRIGGERED,
 } from './types'
 
 export type LoadingState = {

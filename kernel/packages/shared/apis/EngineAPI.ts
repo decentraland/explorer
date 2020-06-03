@@ -83,7 +83,7 @@ export class EngineAPI extends ExposableAPI implements IEngineAPI {
     if (this.subscribedEvents[event]) {
       this.options.notify('SubscribedEvent', {
         event,
-        data
+        data,
       })
     }
   }

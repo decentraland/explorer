@@ -16,7 +16,7 @@ export type ITestInWorkerOptions = {
 }
 
 export function wait(ms: number): Promise<void> {
-  return new Promise(ok => {
+  return new Promise((ok) => {
     setTimeout(ok, ms)
   })
 }
@@ -63,7 +63,7 @@ export async function testWithTransport(
     system.setLogging({ logConsole: true })
   }
 
-  options.plugins && options.plugins.forEach($ => system.getAPIInstance($))
+  options.plugins && options.plugins.forEach(($) => system.getAPIInstance($))
 
   system.enable()
 

@@ -63,8 +63,8 @@ export class SceneWorker {
     this.subscribeToWorldRunningEvents()
 
     this.loadSystem(transport)
-      .then($ => this.system.resolve($))
-      .catch($ => this.system.reject($))
+      .then(($) => this.system.resolve($))
+      .catch(($) => this.system.reject($))
   }
 
   dispose() {
@@ -86,7 +86,7 @@ export class SceneWorker {
 
       // Unmount the system
       if (this.system) {
-        this.system.then(unmountSystem).catch(e => defaultLogger.error('Unable to unmount system', e))
+        this.system.then(unmountSystem).catch((e) => defaultLogger.error('Unable to unmount system', e))
       }
 
       this.parcelScene.dispose()
@@ -102,10 +102,10 @@ export class SceneWorker {
           position: {
             x: positionReport.position.x - this.position.x,
             z: positionReport.position.z - this.position.z,
-            y: positionReport.position.y
+            y: positionReport.position.y,
           },
           cameraPosition: positionReport.position,
-          playerHeight: playerConfigurations.height
+          playerHeight: playerConfigurations.height,
         })
         this.lastSentPosition.copyFrom(positionReport.position)
       }
@@ -115,7 +115,7 @@ export class SceneWorker {
       if (positionReport.quaternion && !this.lastSentRotation.equals(positionReport.quaternion)) {
         this.engineAPI.sendSubscriptionEvent('rotationChanged', {
           rotation: positionReport.rotation,
-          quaternion: positionReport.quaternion
+          quaternion: positionReport.quaternion,
         })
         this.lastSentRotation.copyFrom(positionReport.quaternion)
       }
@@ -125,7 +125,7 @@ export class SceneWorker {
   private subscribeToPositionEvents() {
     const position = Vector2.Zero()
 
-    this.positionObserver = positionObservable.add(obj => {
+    this.positionObserver = positionObservable.add((obj) => {
       worldToGrid(obj.position, position)
 
       this.sendUserViewMatrix(obj)
@@ -133,13 +133,13 @@ export class SceneWorker {
   }
 
   private subscribeToWorldRunningEvents() {
-    this.worldRunningObserver = worldRunningObservable.add(isRunning => {
+    this.worldRunningObserver = worldRunningObservable.add((isRunning) => {
       this.sendSceneReadyIfNecessary()
     })
   }
 
   private subscribeToSceneLifeCycleEvents() {
-    this.sceneLifeCycleObserver = sceneLifeCycleObservable.add(obj => {
+    this.sceneLifeCycleObserver = sceneLifeCycleObservable.add((obj) => {
       if (this.parcelScene.data.sceneId === obj.sceneId && obj.status === 'ready') {
         this.sceneReady = true
         sceneLifeCycleObservable.remove(this.sceneLifeCycleObserver)
@@ -173,7 +173,7 @@ export class SceneWorker {
 
   private async loadSystem(transport?: ScriptingTransport): Promise<ScriptingHost> {
     const worker = new (Worker as any)(gamekitWorkerUrl, {
-      name: `ParcelSceneWorker(${this.parcelScene.data.sceneId})`
+      name: `ParcelSceneWorker(${this.parcelScene.data.sceneId})`,
     })
     return this.startSystem(transport || WebWorkerTransport(worker))
   }

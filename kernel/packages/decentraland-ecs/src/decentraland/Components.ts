@@ -63,7 +63,7 @@ export enum CLASS_ID {
   AUDIO_SOURCE = 201,
   AUDIO_STREAM = 202,
   GIZMOS = 203,
-  SMART_ITEM = 204
+  SMART_ITEM = 204,
 }
 
 /**
@@ -474,7 +474,7 @@ export enum Fonts {
   SanFrancisco = 'builtin:SF-UI-Text-Regular SDF',
   SanFrancisco_Heavy = 'builtin:SF-UI-Text-Heavy SDF',
   SanFrancisco_Semibold = 'builtin:SF-UI-Text-Semibold SDF',
-  LiberationSans = 'builtin:LiberationSans SDF'
+  LiberationSans = 'builtin:LiberationSans SDF',
 }
 
 /**
@@ -580,7 +580,7 @@ export enum TransparencyMode {
   ALPHA_TEST = 1,
   ALPHA_BLEND = 2,
   ALPHA_TEST_AND_BLEND = 3,
-  AUTO = 4
+  AUTO = 4,
 }
 
 /**
@@ -785,14 +785,14 @@ export class OnUUIDEvent<T extends keyof IEvents> extends ObservableComponent {
 
       Object.defineProperty(target, componentSymbol, {
         ...Object.getOwnPropertyDescriptor(target, componentSymbol),
-        enumerable: false
+        enumerable: false,
       })
 
       Object.defineProperty(target, propertyKey.toString(), {
-        get: function() {
+        get: function () {
           return this[componentSymbol]
         },
-        set: function(value) {
+        set: function (value) {
           const oldValue = this[componentSymbol]
 
           if (value) {
@@ -815,7 +815,7 @@ export class OnUUIDEvent<T extends keyof IEvents> extends ObservableComponent {
             }
           }
         },
-        enumerable: true
+        enumerable: true,
       })
     }
   }
@@ -848,7 +848,7 @@ export class OnPointerUUIDEvent<T extends keyof IEvents> extends OnUUIDEvent<T> 
       button: this.button,
       hoverText: this.hoverText,
       distance: this.distance,
-      showFeedback: this.showFeedback
+      showFeedback: this.showFeedback,
     }
   }
 }

@@ -39,7 +39,7 @@ namespace PrivateHelpers {
     if (api.apiWillUnmount) {
       const promise = api.apiWillUnmount()
       if (promise && 'catch' in promise) {
-        promise.catch(error => console.error('Error unmounting API', { api, error }))
+        promise.catch((error) => console.error('Error unmounting API', { api, error }))
       }
     }
   }
@@ -48,7 +48,7 @@ namespace PrivateHelpers {
     if (api.apiDidMount) {
       const promise = api.apiDidMount()
       if (promise && 'catch' in promise) {
-        promise.catch(error => console.error('Error mounting API', { api, error }))
+        promise.catch((error) => console.error('Error mounting API', { api, error }))
       }
     }
   }
@@ -59,7 +59,7 @@ namespace PrivateHelpers {
 export enum ScriptingHostEvents {
   systemWillUnmount = 'systemWillUnmount',
   systemWillEnable = 'systemWillEnable',
-  systemDidUnmount = 'systemDidUnmount'
+  systemDidUnmount = 'systemDidUnmount',
 }
 
 export function getAPIName(klass: APIClass<API>): string | null {
@@ -67,7 +67,7 @@ export function getAPIName(klass: APIClass<API>): string | null {
 }
 
 export function registerAPI(apiName: string): (klass: APIClass<API>) => void {
-  return function(api: APIClass<API>) {
+  return function (api: APIClass<API>) {
     PrivateHelpers._registerAPI(apiName, api)
   }
 }
@@ -193,7 +193,7 @@ export class ScriptingHost extends TransportBasedServer {
         // tslint:disable-next-line
         return this.getAPIInstance(name) as any
       },
-      system: this
+      system: this,
     }
 
     const instance = ctor.factory ? ctor.factory(ctor, apiOptions) : new ctor(apiOptions)
@@ -217,9 +217,9 @@ export class ScriptingHost extends TransportBasedServer {
     }
 
     const notFound = apiNames
-      .map(name => ({ api: this.getAPIInstance(name), name }))
-      .filter($ => $.api === null)
-      .map($ => $.name)
+      .map((name) => ({ api: this.getAPIInstance(name), name }))
+      .filter(($) => $.api === null)
+      .map(($) => $.name)
 
     if (notFound.length) {
       const message = `Components not found ${notFound.join(',')}`

@@ -12,12 +12,12 @@ executeTask(async () => {
   await Promise.all([
     dcl.loadModule('@decentraland/ChatController'),
     dcl.loadModule('@decentraland/Identity'),
-    dcl.loadModule('@decentraland/SocialController')
+    dcl.loadModule('@decentraland/SocialController'),
   ])
 
   dcl.subscribe(AVATAR_OBSERVABLE)
 
-  dcl.onEvent(event => {
+  dcl.onEvent((event) => {
     const eventType: string = event.type
 
     if (eventType === AVATAR_OBSERVABLE) {

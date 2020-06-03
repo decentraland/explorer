@@ -9,7 +9,7 @@ declare const globalThis: StoreContainer
 
 export enum ChatEventType {
   MESSAGE_RECEIVED = 'MESSAGE_RECEIVED',
-  MESSAGE_SENT = 'MESSAGE_SENT'
+  MESSAGE_SENT = 'MESSAGE_SENT',
 }
 
 export type ChatEvent = {
@@ -26,7 +26,7 @@ export function notifyStatusThroughChat(status: string) {
         messageId: uuid(),
         messageType: ChatMessageType.SYSTEM,
         timestamp: Date.now(),
-        body: status
+        body: status,
       })
     )
   } else {
@@ -37,8 +37,8 @@ export function notifyStatusThroughChat(status: string) {
         sender: 'Decentraland',
         isCommand: true,
         message: status,
-        timestamp: Date.now()
-      }
+        timestamp: Date.now(),
+      },
     })
   }
 }

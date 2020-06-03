@@ -132,19 +132,19 @@ export const BillboardModes = {
   BILLBOARDMODE_X: 1,
   BILLBOARDMODE_Y: 2,
   BILLBOARDMODE_Z: 4,
-  BILLBOARDMODE_ALL: 7
+  BILLBOARDMODE_ALL: 7,
 }
 
 export const TextureSamplingMode = {
   NEAREST: 1,
   BILINEAR: 2,
-  TRILINEAR: 3
+  TRILINEAR: 3,
 }
 
 export const TextureWrapping = {
   CLAMP: 0,
   WRAP: 1,
-  MIRROR: 2
+  MIRROR: 2,
 }
 
 export type BillboardModes = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7
@@ -153,7 +153,7 @@ export const TransparencyModes = {
   OPAQUE: 0,
   ALPHATEST: 1,
   ALPHABLEND: 2,
-  ALPHATESTANDBLEND: 3
+  ALPHATESTANDBLEND: 3,
 }
 
 export type TransparencyModes = 0 | 1 | 2 | 3
@@ -364,7 +364,7 @@ export type RayQuery = {
 export enum NotificationType {
   GENERIC = 0,
   SCRIPTING_ERROR = 1,
-  COMMS_ERROR = 2
+  COMMS_ERROR = 2,
 }
 
 export type Notification = {
@@ -391,7 +391,7 @@ export enum HUDElementID {
   TASKBAR = 11,
   MESSAGE_OF_THE_DAY = 12,
   FRIENDS = 13,
-  OPEN_EXTERNAL_URL_PROMPT = 14
+  OPEN_EXTERNAL_URL_PROMPT = 14,
 }
 
 export type HUDConfiguration = {
@@ -423,7 +423,7 @@ export enum ChatMessageType {
   NONE,
   PUBLIC,
   PRIVATE,
-  SYSTEM
+  SYSTEM,
 }
 
 export type WorldPosition = {
@@ -459,7 +459,7 @@ export enum FriendshipAction {
   CANCELED,
   REQUESTED_FROM,
   REQUESTED_TO,
-  DELETED
+  DELETED,
 }
 
 export type FriendshipUpdateStatusMessage = {
@@ -471,7 +471,7 @@ export enum PresenceStatus {
   NONE,
   OFFLINE,
   ONLINE,
-  UNAVAILABLE
+  UNAVAILABLE,
 }
 
 type Realm = {

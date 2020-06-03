@@ -9,12 +9,12 @@ export class TransportBasedServer extends Server<ScriptingTransport> {
       throw new TypeError('transport cannot be undefined or null')
     }
 
-    this.transport.onMessage(msg => {
+    this.transport.onMessage((msg) => {
       this.processMessage(this.transport, msg)
     })
 
     if (this.transport.onError) {
-      this.transport.onError(err => this.emit('error', err))
+      this.transport.onError((err) => this.emit('error', err))
     }
 
     if (this.transport.onClose) {

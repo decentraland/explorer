@@ -12,7 +12,7 @@ const winingCombinations = [
   [2, 5, 8], // 3 col
 
   [0, 4, 8], // a nw - se
-  [6, 4, 2] //  a sw - ne
+  [6, 4, 2], //  a sw - ne
 ]
 
 type GameSymbol = 'x' | 'o' | null
@@ -28,8 +28,8 @@ export default class Game extends TestableScript {
   }
 
   getWinner() {
-    return ['x', 'o'].find($ =>
-      winingCombinations.some(combination => combination.every(position => this.board[position] === $))
+    return ['x', 'o'].find(($) =>
+      winingCombinations.some((combination) => combination.every((position) => this.board[position] === $))
     )
   }
 
