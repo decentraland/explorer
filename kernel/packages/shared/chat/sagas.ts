@@ -41,6 +41,7 @@ import { isRealmInitialized } from 'shared/dao/selectors'
 import { CATALYST_REALM_INITIALIZED } from 'shared/dao/actions'
 import { isFriend } from './selectors'
 import { ensureRenderer } from '../profiles/sagas'
+import { worldRunningObservable } from '../world/worldState'
 
 declare const globalThis: UnityInterfaceContainer & StoreContainer
 
@@ -85,19 +86,25 @@ function* handleAuthSuccessful() {
 
     try {
       yield call(initializePrivateMessaging, getServerConfigurations().synapseUrl, identity)
-
     } catch (e) {
       defaultLogger.error(`error initializing private messaging`, e)
+
+      const observer = worldRunningObservable.add(isRunning => {
+        if (isRunning) {
+          worldRunningObservable.remove(observer)
+
+          unityInterface.ShowNotification({
+            type: NotificationType.GENERIC,
+            message: 'There was an error initializing friends and private messages',
+            buttonMessage: 'OK',
+            timer: 7
+          })
+        }
+      })
 
       yield call(ensureRenderer)
 
       unityInterface.ConfigureHUDElement(HUDElementID.FRIENDS, { active: false, visible: false })
-      unityInterface.ShowNotification({
-        type: NotificationType.GENERIC,
-        message: 'There was an error initializing friends and private messages',
-        buttonMessage: 'OK',
-        timer: 7
-      })
     }
   }
 }
