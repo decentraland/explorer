@@ -2,6 +2,7 @@
 using DCL.Components;
 using UnityEngine;
 using TMPro;
+using System.Collections.Generic;
 
 public class InteractionHoverCanvasController : MonoBehaviour
 {
@@ -18,14 +19,29 @@ public class InteractionHoverCanvasController : MonoBehaviour
     GameObject hoverIcon;
     Vector3 meshCenteredPos;
     DecentralandEntity entity;
+    Dictionary<string, GameObject> buttonIcons = new Dictionary<string, GameObject>();
 
     const string ACTION_BUTTON_POINTER = "POINTER";
     const string ACTION_BUTTON_PRIMARY = "PRIMARY";
     const string ACTION_BUTTON_SECONDARY = "SECONDARY";
+    const string ACTION_BUTTON_ANY = "ANY";
 
     void Awake()
     {
         mainCamera = Camera.main;
+
+        buttonIcons.Add(ACTION_BUTTON_POINTER, Object.Instantiate(pointerActionIconPrefab, backgroundTransform));
+        buttonIcons[ACTION_BUTTON_POINTER].SetActive(false);
+
+        buttonIcons.Add(ACTION_BUTTON_PRIMARY, Object.Instantiate(primaryActionIconPrefab, backgroundTransform));
+        buttonIcons[ACTION_BUTTON_PRIMARY].SetActive(false);
+
+        buttonIcons.Add(ACTION_BUTTON_SECONDARY, Object.Instantiate(secondaryActionIconPrefab, backgroundTransform));
+        buttonIcons[ACTION_BUTTON_SECONDARY].SetActive(false);
+
+        buttonIcons.Add(ACTION_BUTTON_ANY, Object.Instantiate(secondaryActionIconPrefab, backgroundTransform));
+        buttonIcons[ACTION_BUTTON_ANY].SetActive(false);
+
     }
 
     public void Setup(string button, string feedbackText, DecentralandEntity entity)
@@ -40,26 +56,14 @@ public class InteractionHoverCanvasController : MonoBehaviour
 
     void ConfigureIcon(string button)
     {
-        // When we allow for custom input key bindings this implementation will change
+        hoverIcon?.SetActive(false);
 
-        if (hoverIcon != null)
-            Destroy(hoverIcon);
+        if (buttonIcons.ContainsKey(button))
+            hoverIcon = buttonIcons[button];
+        else
+            hoverIcon = buttonIcons[ACTION_BUTTON_ANY];
 
-        switch (button)
-        {
-            case ACTION_BUTTON_POINTER:
-                hoverIcon = Object.Instantiate(pointerActionIconPrefab, backgroundTransform);
-                break;
-            case ACTION_BUTTON_PRIMARY:
-                hoverIcon = Object.Instantiate(primaryActionIconPrefab, backgroundTransform);
-                break;
-            case ACTION_BUTTON_SECONDARY:
-                hoverIcon = Object.Instantiate(secondaryActionIconPrefab, backgroundTransform);
-                break;
-            default: // WebInterface.ACTION_BUTTON.ANY
-                hoverIcon = Object.Instantiate(anyActionIconPrefab, backgroundTransform);
-                break;
-        }
+        hoverIcon.SetActive(true);
     }
 
     public void SetHoverState(bool hoverState)
