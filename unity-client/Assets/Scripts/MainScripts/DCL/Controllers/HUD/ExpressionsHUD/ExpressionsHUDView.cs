@@ -106,5 +106,10 @@ public class ExpressionsHUDView : MonoBehaviour
     public void CleanUp()
     {
         openExpressionsAction.OnTriggered -= openExpressionsDelegate;
+
+        for (int i = 0; i < hideContentButtons.Length; i++)
+        {
+            hideContentButtons[i].onPointerDown -= HideContent;
+        }
     }
 }
