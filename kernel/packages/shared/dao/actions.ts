@@ -16,9 +16,9 @@ export const SET_ADDED_CATALYST_CANDIDATES = 'Set Added Catalyst Candidates'
 export const setAddedCatalystCandidates = (candidates: Candidate[]) => action(SET_ADDED_CATALYST_CANDIDATES, candidates)
 export type SetAddedCatalystCandidates = ReturnType<typeof setAddedCatalystCandidates>
 
-export const SET_CONTENT_WHITELIST = 'Set Content Whitelist'
-export const setContentWhitelist = (candidates: Candidate[]) => action(SET_CONTENT_WHITELIST, candidates)
-export type SetContentWhitelist = ReturnType<typeof setContentWhitelist>
+export const SET_CONTENT_WHITELIST = 'Set Content Allowlist'
+export const setContentAllowlist = (candidates: Candidate[]) => action(SET_CONTENT_WHITELIST, candidates)
+export type SetContentAllowlist = ReturnType<typeof setContentAllowlist>
 
 export const INIT_CATALYST_REALM = 'Init Catalyst realm'
 export const initCatalystRealm = (realm: Realm) => action(INIT_CATALYST_REALM, realm)

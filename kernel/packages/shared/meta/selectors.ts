@@ -11,14 +11,14 @@ export const getAddedServers = (store: RootMetaState): string[] => {
   return config.servers.added
 }
 
-export const getContentWhitelist = (store: RootMetaState): string[] => {
+export const getContentAllowlist = (store: RootMetaState): string[] => {
   const { config } = store.meta
 
-  if (!config || !config.servers || !config.servers.contentWhitelist) {
+  if (!config || !config.servers || !config.servers.contentAllowlist) {
     return []
   }
 
-  return config.servers.contentWhitelist
+  return config.servers.contentAllowlist
 }
 
 export const isMetaConfigurationInitiazed = (store: RootMetaState): boolean => store.meta.initialized

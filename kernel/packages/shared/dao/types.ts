@@ -7,7 +7,7 @@ export type Layer = {
 
 export enum ServerConnectionStatus {
   OK,
-  UNREACHABLE
+  UNREACHABLE,
 }
 
 export type CatalystLayers = {
@@ -49,7 +49,7 @@ export type DaoState = {
   commsServer: string
   realm: Realm | undefined
   candidates: Candidate[]
-  contentWhitelist: Candidate[]
+  contentAllowlist: Candidate[]
   addedCandidates: Candidate[]
   commsStatus: CommsStatus
 }

@@ -24,7 +24,7 @@ const messageMap = new Map<number, IFuture<any>>()
 
 let lastSentId = 100000
 
-const whitelist = [
+const allowlist = [
   'eth_sendTransaction',
   'eth_getTransactionReceipt',
   'eth_estimateGas',
@@ -38,11 +38,11 @@ const whitelist = [
   'web3_sha3',
   'web3_clientVersion',
   'eth_getTransactionCount',
-  'eth_getBlockByNumber'
+  'eth_getBlockByNumber',
 ]
 
-function isWhitelistedRPC(msg: RPCSendableMessage) {
-  return msg.method && whitelist.includes(msg.method)
+function isAllowlistedRPC(msg: RPCSendableMessage) {
+  return msg.method && allowlist.includes(msg.method)
 }
 
 export async function getUserAccount(): Promise<string | undefined> {
@@ -63,7 +63,7 @@ export async function sendAsync(message: RPCSendableMessage): Promise<any> {
     throw new Error('Invalid JSON-RPC message')
   }
 
-  if (!isWhitelistedRPC(message)) {
+  if (!isAllowlistedRPC(message)) {
     throw new Error(`The Ethereum method "${message.method}" is blacklisted on Decentraland Provider`)
   }
 
@@ -151,7 +151,7 @@ export async function requirePayment(toAddress: string, amount: number, currency
         from: fromAddress,
         // TODO: fix this in eth-connect
         value: toWei(amount as any, 'ether') as any,
-        data: null as any
+        data: null as any,
       })
     } else {
       const supportedTokens: Record<string, string> = {} // a TODO: getNetworkConfigurations(network).paymentTokens
@@ -173,7 +173,7 @@ export async function requirePayment(toAddress: string, amount: number, currency
       // TODO: fix this
       result = contractInstance.transfer(toAddress, amount as any, {
         from: fromAddress,
-        gas: 3000000
+        gas: 3000000,
       })
     }
     return result
@@ -239,7 +239,7 @@ export async function convertMessageToObject(message: string): Promise<MessageDi
   // First, split the string parts into nested array
   const arr = parsedMessage
     .split('\n')
-    .map(m => m.split(':'))
+    .map((m) => m.split(':'))
     .map(([key, value]) => [key, value.trim()])
 
   // convert the array into object of type MessageDict

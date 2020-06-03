@@ -8,16 +8,16 @@ import { isMetaConfigurationInitiazed } from './selectors'
 
 const DEFAULT_META_CONFIGURATION: MetaConfiguration = {
   explorer: {
-    minBuildNumber: 0
+    minBuildNumber: 0,
   },
   servers: {
     added: [],
     denied: [],
-    contentWhitelist: []
+    contentAllowlist: [],
   },
   world: {
-    pois: []
-  }
+    pois: [],
+  },
 }
 
 export function* metaSaga(): any {

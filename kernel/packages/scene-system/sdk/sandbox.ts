@@ -1,4 +1,4 @@
-const whitelistES5: Array<keyof typeof global> = [
+const allowlistES5: Array<keyof typeof global> = [
   'eval',
   'parseInt',
   'parseFloat',
@@ -29,7 +29,7 @@ const whitelistES5: Array<keyof typeof global> = [
   'Array',
   'Promise',
   'NaN',
-  'Infinity'
+  'Infinity',
 ]
 
 const defer: (fn: Function) => void = (Promise.resolve().then as any).bind(Promise.resolve() as any)
@@ -40,7 +40,7 @@ export async function customEval(code: string, context: any) {
   let resultKey = 'SAFE_EVAL_' + Math.floor(Math.random() * 1000000)
   sandbox[resultKey] = {}
 
-  Object.keys(context).forEach(function(key) {
+  Object.keys(context).forEach(function (key) {
     sandbox[key] = context[key]
   })
 
@@ -51,7 +51,7 @@ export async function customEval(code: string, context: any) {
 }
 
 export function getES5Context(base: Record<string, any>) {
-  whitelistES5.forEach($ => (base[$] = global[$]))
+  allowlistES5.forEach(($) => (base[$] = global[$]))
 
   return base
 }

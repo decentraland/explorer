@@ -12,7 +12,7 @@ import {
   ComponentDisposedPayload,
   ComponentUpdatedPayload,
   QueryPayload,
-  LoadableParcelScene
+  LoadableParcelScene,
 } from 'shared/types'
 import { DecentralandInterface, IEvents } from 'decentraland-ecs/src/decentraland/Types'
 import { defaultLogger } from 'shared/logger'
@@ -113,7 +113,7 @@ export default class GamekitScene extends Script {
    * Get a standard ethereum provider
    * Please notice this is highly experimental and might change in the future.
    *
-   * method whitelist = [
+   * method allowlist = [
    *   'eth_sendTransaction',
    *   'eth_getTransactionReceipt',
    *   'eth_estimateGas',
@@ -148,7 +148,7 @@ export default class GamekitScene extends Script {
         EthereumController.sendAsync(message)
           .then((x: any) => callback(null, x))
           .catch(callback)
-      }
+      },
     } as {
       send: Function
       sendAsync: Function
@@ -161,7 +161,7 @@ export default class GamekitScene extends Script {
 
     if (bootstrapData && bootstrapData.main) {
       const mappingName = bootstrapData.main
-      const mapping = bootstrapData.mappings.find($ => $.file === mappingName)
+      const mapping = bootstrapData.mappings.find(($) => $.file === mappingName)
       const url = resolveMapping(mapping && mapping.hash, mappingName, bootstrapData.baseUrl)
       const html = await fetch(url)
 
@@ -192,7 +192,7 @@ export default class GamekitScene extends Script {
   calculateSceneCenter(parcels: Array<{ x: number; y: number }>): Vector2 {
     let center: Vector2 = new Vector2()
 
-    parcels.forEach(v2 => {
+    parcels.forEach((v2) => {
       center = Vector2.Add(v2, center)
     })
 
@@ -230,7 +230,7 @@ export default class GamekitScene extends Script {
             that.events.push({
               type: 'OpenExternalUrl',
               tag: '',
-              payload: url
+              payload: url,
             })
           } else {
             this.error('openExternalUrl can only be used inside a pointerEvent')
@@ -245,7 +245,7 @@ export default class GamekitScene extends Script {
           that.events.push({
             type: 'CreateEntity',
             tag: entityId,
-            payload: { id: entityId } as CreateEntityPayload
+            payload: { id: entityId } as CreateEntityPayload,
           })
         },
 
@@ -253,7 +253,7 @@ export default class GamekitScene extends Script {
           that.events.push({
             type: 'RemoveEntity',
             tag: entityId,
-            payload: { id: entityId } as RemoveEntityPayload
+            payload: { id: entityId } as RemoveEntityPayload,
           })
         },
 
@@ -285,8 +285,8 @@ export default class GamekitScene extends Script {
                 entityId,
                 classId,
                 name: componentName.replace(componentNameRE, ''),
-                json: that.generatePBObject(classId, json)
-              } as UpdateEntityComponentPayload
+                json: that.generatePBObject(classId, json),
+              } as UpdateEntityComponentPayload,
             })
           }
         },
@@ -300,8 +300,8 @@ export default class GamekitScene extends Script {
               payload: {
                 entityId,
                 name: componentName.replace(componentNameRE, ''),
-                id
-              } as AttachEntityComponentPayload
+                id,
+              } as AttachEntityComponentPayload,
             })
           }
         },
@@ -314,8 +314,8 @@ export default class GamekitScene extends Script {
               tag: entityId,
               payload: {
                 entityId,
-                name: componentName.replace(componentNameRE, '')
-              } as ComponentRemovedPayload
+                name: componentName.replace(componentNameRE, ''),
+              } as ComponentRemovedPayload,
             })
           }
         },
@@ -327,8 +327,8 @@ export default class GamekitScene extends Script {
             tag: entityId,
             payload: {
               entityId,
-              parentId
-            } as SetEntityParentPayload
+              parentId,
+            } as SetEntityParentPayload,
           })
         },
 
@@ -339,14 +339,14 @@ export default class GamekitScene extends Script {
             tag: sceneId + '_' + payload.queryId,
             payload: {
               queryId: queryType,
-              payload
-            } as QueryPayload
+              payload,
+            } as QueryPayload,
           })
         },
 
         /** subscribe to specific events, events will be handled by the onEvent function */
         subscribe(eventName: string): void {
-          that.eventSubscriber.on(eventName, event => {
+          that.eventSubscriber.on(eventName, (event) => {
             that.fireEvent({ type: eventName, data: event.data })
           })
         },
@@ -364,8 +364,8 @@ export default class GamekitScene extends Script {
               payload: {
                 id,
                 classId,
-                name: componentName.replace(componentNameRE, '')
-              } as ComponentCreatedPayload
+                name: componentName.replace(componentNameRE, ''),
+              } as ComponentCreatedPayload,
             })
           }
         },
@@ -374,7 +374,7 @@ export default class GamekitScene extends Script {
           that.events.push({
             type: 'ComponentDisposed',
             tag: id,
-            payload: { id } as ComponentDisposedPayload
+            payload: { id } as ComponentDisposedPayload,
           })
         },
 
@@ -384,12 +384,12 @@ export default class GamekitScene extends Script {
             tag: id,
             payload: {
               id,
-              json
-            } as ComponentUpdatedPayload
+              json,
+            } as ComponentUpdatedPayload,
           })
         },
 
-        loadModule: async _moduleName => {
+        loadModule: async (_moduleName) => {
           const moduleToLoad = _moduleName.replace(/^@decentraland\//, '')
           let methods: string[] = []
 
@@ -403,14 +403,14 @@ export default class GamekitScene extends Script {
               methods = await proxy._getExposedMethods()
             } catch (e) {
               throw Object.assign(new Error(`Error getting the methods of ${moduleToLoad}: ` + e.message), {
-                original: e
+                original: e,
               })
             }
           }
 
           return {
             rpcHandle: moduleToLoad,
-            methods: methods.map(name => ({ name }))
+            methods: methods.map((name) => ({ name })),
           }
         },
         callRpc: async (rpcHandle: string, methodName: string, args: any[]) => {
@@ -429,12 +429,12 @@ export default class GamekitScene extends Script {
         },
         error(message, data) {
           that.onError(Object.assign(new Error(message), { data }))
-        }
+        },
       }
 
       {
         const monkeyPatchDcl: any = dcl
-        monkeyPatchDcl.updateEntity = function() {
+        monkeyPatchDcl.updateEntity = function () {
           throw new Error('The scene is using an outdated version of decentraland-ecs, please upgrade to >5.0.0')
         }
       }
@@ -444,7 +444,7 @@ export default class GamekitScene extends Script {
           this.startLoop()
         }
 
-        this.onStartFunctions.forEach($ => {
+        this.onStartFunctions.forEach(($) => {
           try {
             $()
           } catch (e) {
@@ -487,7 +487,7 @@ export default class GamekitScene extends Script {
 
   private setupFpsThrottling(dcl: DecentralandInterface) {
     dcl.subscribe('positionChanged')
-    dcl.onEvent(event => {
+    dcl.onEvent((event) => {
       if (event.type !== 'positionChanged') {
         return
       }
@@ -504,7 +504,7 @@ export default class GamekitScene extends Script {
       const distanceToPlayer = Vector2.Distance(playerPos, scenePos)
 
       let fps: number = 1
-      const insideScene: boolean = this.parcels.some(e => e.x === playerPos.x && e.y === playerPos.y)
+      const insideScene: boolean = this.parcels.some((e) => e.x === playerPos.x && e.y === playerPos.y)
 
       if (insideScene) {
         fps = 30
@@ -538,7 +538,7 @@ export default class GamekitScene extends Script {
     return {
       type: 'InitMessagesFinished',
       tag: 'scene',
-      payload: '{}'
+      payload: '{}',
     }
   }
 

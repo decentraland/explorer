@@ -4,7 +4,7 @@ import {
   initCatalystRealm,
   setCatalystCandidates,
   setAddedCatalystCandidates,
-  setContentWhitelist,
+  setContentAllowlist,
   INIT_CATALYST_REALM,
   SET_CATALYST_REALM,
   InitCatalystRealm,
@@ -12,14 +12,14 @@ import {
   SET_CATALYST_CANDIDATES,
   SET_ADDED_CATALYST_CANDIDATES,
   SetCatalystCandidates,
-  SetAddedCatalystCandidates
+  SetAddedCatalystCandidates,
 } from './actions'
 import { call, put, takeEvery, select, fork } from 'redux-saga/effects'
 import { WORLD_EXPLORER, REALM } from 'config'
 import { waitForMetaConfigurationInitialization } from '../meta/sagas'
 import { Candidate, Realm, ServerConnectionStatus } from './types'
 import { fecthCatalystRealms, fetchCatalystStatuses, pickCatalystRealm, getRealmFromString } from '.'
-import { getAddedServers, getContentWhitelist } from 'shared/meta/selectors'
+import { getAddedServers, getContentAllowlist } from 'shared/meta/selectors'
 import { getAllCatalystCandidates } from './selectors'
 import { saveToLocalStorage, getFromLocalStorage } from '../../atomicHelpers/localStorage'
 import { ping } from './index'
@@ -87,13 +87,13 @@ function* loadCatalystRealms() {
   } else {
     yield put(setCatalystCandidates([]))
     yield put(setAddedCatalystCandidates([]))
-    yield put(setContentWhitelist([]))
+    yield put(setContentAllowlist([]))
     yield put(
       initCatalystRealm({
         domain: window.location.origin,
         catalystName: 'localhost',
         layer: 'stub',
-        lighthouseVersion: '0.1'
+        lighthouseVersion: '0.1',
       })
     )
   }
@@ -113,20 +113,23 @@ function* initializeCatalystCandidates() {
   yield put(setCatalystCandidates(candidates))
 
   const added: string[] = yield select(getAddedServers)
-  const addedCandidates: Candidate[] = yield call(fetchCatalystStatuses, added.map(url => ({ domain: url })))
+  const addedCandidates: Candidate[] = yield call(
+    fetchCatalystStatuses,
+    added.map((url) => ({ domain: url }))
+  )
 
   yield put(setAddedCatalystCandidates(addedCandidates))
 
   const allCandidates: Candidate[] = yield select(getAllCatalystCandidates)
 
-  const whitelist: string[] = yield select(getContentWhitelist)
-  let whitelistedCandidates = allCandidates.filter(candidate => whitelist.includes(candidate.domain))
-  if (whitelistedCandidates.length === 0) {
-    // if intersection is empty (no whitelisted or not in our candidate set) => whitelist all candidates
-    whitelistedCandidates = allCandidates
+  const allowlist: string[] = yield select(getContentAllowlist)
+  let allowlistedCandidates = allCandidates.filter((candidate) => allowlist.includes(candidate.domain))
+  if (allowlistedCandidates.length === 0) {
+    // if intersection is empty (no allowlisted or not in our candidate set) => allowlist all candidates
+    allowlistedCandidates = allCandidates
   }
 
-  yield put(setContentWhitelist(whitelistedCandidates))
+  yield put(setContentAllowlist(allowlistedCandidates))
 }
 
 async function checkValidRealm(realm: Realm) {
