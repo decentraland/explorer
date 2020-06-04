@@ -42,7 +42,7 @@ namespace DCL.Helpers.NFT.Markets
 
             if (!string.IsNullOrEmpty(response.owner?.address))
             {
-                ret.owner = response.owner.Value.address;
+                ret.owner = response.owner.address;
             }
 
             if (response.num_sales != null)
@@ -52,14 +52,14 @@ namespace DCL.Helpers.NFT.Markets
 
             if (response.last_sale != null)
             {
-                ret.lastSaleDate = response.last_sale.Value.event_timestamp;
+                ret.lastSaleDate = response.last_sale.event_timestamp;
 
-                if (response.last_sale.Value.payment_token != null)
+                if (response.last_sale.payment_token != null)
                 {
-                    ret.lastSaleAmount = PriceToFloatingPointString(response.last_sale.Value);
+                    ret.lastSaleAmount = PriceToFloatingPointString(response.last_sale);
                     ret.lastSaleToken = new NFT.PaymentTokenInfo()
                     {
-                        symbol = response.last_sale.Value.payment_token.Value.symbol
+                        symbol = response.last_sale.payment_token.symbol
                     };
                 }
             }
@@ -70,13 +70,13 @@ namespace DCL.Helpers.NFT.Markets
                 ret.backgroundColor = backgroundColor;
             }
 
-            OrderInfo? sellOrder = GetSellOrder(response.orders, response.owner.Value.address);
+            OrderInfo sellOrder = GetSellOrder(response.orders, response.owner.address);
             if (sellOrder != null)
             {
-                ret.currentPrice = PriceToFloatingPointString(sellOrder.Value.current_price, sellOrder.Value.payment_token_contract);
+                ret.currentPrice = PriceToFloatingPointString(sellOrder.current_price, sellOrder.payment_token_contract);
                 ret.currentPriceToken = new NFT.PaymentTokenInfo()
                 {
-                    symbol = sellOrder.Value.payment_token_contract.symbol
+                    symbol = sellOrder.payment_token_contract.symbol
                 };
             }
 
@@ -86,7 +86,7 @@ namespace DCL.Helpers.NFT.Markets
         private string PriceToFloatingPointString(AssetSaleInfo saleInfo)
         {
             if (saleInfo.payment_token == null) return null;
-            return PriceToFloatingPointString(saleInfo.total_price, saleInfo.payment_token.Value);
+            return PriceToFloatingPointString(saleInfo.total_price, saleInfo.payment_token);
         }
 
         private string PriceToFloatingPointString(string price, PaymentTokenInfo tokenInfo)
@@ -107,9 +107,9 @@ namespace DCL.Helpers.NFT.Markets
             }
         }
 
-        private OrderInfo? GetSellOrder(OrderInfo[] orders, string nftOwner)
+        private OrderInfo GetSellOrder(OrderInfo[] orders, string nftOwner)
         {
-            OrderInfo? ret = null;
+            OrderInfo ret = null;
             for (int i = 0; i < orders.Length; i++)
             {
                 if (orders[i].maker.address == nftOwner)
@@ -122,10 +122,10 @@ namespace DCL.Helpers.NFT.Markets
         }
 
         [Serializable]
-        struct AssetResponse
+        class AssetResponse
         {
             public string token_id;
-            public long? num_sales;
+            public long? num_sales = null;
             public string background_color;
             public string image_url;
             public string image_preview_url;
@@ -134,49 +134,49 @@ namespace DCL.Helpers.NFT.Markets
             public string name;
             public string description;
             public string external_link;
-            public AssetContract? asset_contract;
-            public AccountInfo? owner;
+            public AssetContract asset_contract = null;
+            public AccountInfo owner = null;
             public string permalink;
-            public AssetSaleInfo? last_sale;
-            public OrderInfo[] orders;
+            public AssetSaleInfo last_sale = null;
+            public OrderInfo[] orders = null;
         }
 
         [Serializable]
-        struct AssetContract
+        class AssetContract
         {
             public string address;
             public string asset_contract_type;
             public string created_date;
             public string name;
             public string nft_version;
-            public long? owner;
+            public long? owner = null;
             public string schema_name;
             public string symbol;
-            public long? total_supply;
+            public long? total_supply = null;
             public string description;
             public string external_link;
             public string image_url;
         }
 
         [Serializable]
-        struct AccountInfo
+        class AccountInfo
         {
             public string profile_img_url;
             public string address;
         }
 
         [Serializable]
-        struct AssetSaleInfo
+        class AssetSaleInfo
         {
             public string event_type;
             public string event_timestamp;
             public string total_price;
-            public PaymentTokenInfo? payment_token;
-            public TransactionInfo? transaction;
+            public PaymentTokenInfo payment_token = null;
+            public TransactionInfo transaction = null;
         }
 
         [Serializable]
-        struct PaymentTokenInfo
+        class PaymentTokenInfo
         {
             public long id;
             public string symbol;
@@ -189,16 +189,16 @@ namespace DCL.Helpers.NFT.Markets
         }
 
         [Serializable]
-        struct TransactionInfo
+        class TransactionInfo
         {
             public long id;
-            public AccountInfo? from_account;
-            public AccountInfo? to_account;
+            public AccountInfo from_account;
+            public AccountInfo to_account;
             public string transaction_hash;
         }
 
         [Serializable]
-        struct OrderInfo
+        class OrderInfo
         {
             public AccountInfo maker;
             public string current_price;
