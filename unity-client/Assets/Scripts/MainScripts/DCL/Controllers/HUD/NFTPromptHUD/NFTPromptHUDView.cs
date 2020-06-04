@@ -37,9 +37,9 @@ public class NFTPromptHUDView : MonoBehaviour
     [SerializeField] GameObject spinnerNftImage;
 
     [Header("Buttons")]
-    [SerializeField] Button buttonClose;
-    [SerializeField] Button buttonCancel;
-    [SerializeField] Button buttonOpenMarket;
+    [SerializeField] internal Button buttonClose;
+    [SerializeField] internal Button buttonCancel;
+    [SerializeField] internal Button buttonOpenMarket;
     [SerializeField] TextMeshProUGUI textOpenMarketButton;
 
     Coroutine fetchNFTRoutine = null;
@@ -54,13 +54,6 @@ public class NFTPromptHUDView : MonoBehaviour
         buttonClose.onClick.AddListener(Hide);
         buttonCancel.onClick.AddListener(Hide);
         buttonOpenMarket.onClick.AddListener(OpenMarketUrl);
-
-        //ShowNFT("0xf64dc33a192e056bb5f0e5049356a0498b502d50", "2481", "let's add some comment");
-        //ShowNFT("0xb932a70a57673d89f4acffbe830e8ed7f75fb9e0", "6674", "let's add some comment");
-        //ShowNFT("0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85", "108024385621239244618096740331803135526962319540778177318110146440918862054900", "let's add some comment");
-        //ShowNFT("0x1e1b3525388e8a63988f8455638aee87f68eeaa7", "7", "let's add some comment");
-        //ShowNFT("0x989e1fb123b67afd66e10574c8b409bc6e812d9a", "3182", "let's add some comment");
-        ShowNFT("0xd35147be6401dcb20811f2104c33de8e97ed6818", "671", "let's add some comment");
     }
 
     internal void ShowNFT(string assetContractAddress, string tokenId, string comment)
