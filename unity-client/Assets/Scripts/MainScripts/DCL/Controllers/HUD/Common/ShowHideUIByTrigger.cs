@@ -7,27 +7,22 @@ using UnityEngine.EventSystems;
 [RequireComponent(typeof(CanvasGroup))]
 public class ShowHideUIByTrigger : MonoBehaviour
 {
-    private const string TOGGLE_UI_VISIBILITY_ASSET_NAME = "ToggleUIVisibility";
-
-    private InputAction_Trigger toggleTrigger;
+    //private InputAction_Trigger toggleTrigger;
     private CanvasGroup canvasGroup;
-    private bool isVisible;
 
     private void Awake()
     {
-        toggleTrigger = Resources.Load<InputAction_Trigger>(TOGGLE_UI_VISIBILITY_ASSET_NAME);
-        toggleTrigger.OnTriggered += ToggleTrigger_OnTriggered;
-
         canvasGroup = GetComponent<CanvasGroup>();
-        isVisible = canvasGroup.alpha > 0f;
+        CommonScriptableObjects.allUIHidden.OnChange += AllUIVisible_OnChange;
+        SetUIVisibility(!CommonScriptableObjects.allUIHidden.Get());
     }
 
     private void OnDestroy()
     {
-        toggleTrigger.OnTriggered -= ToggleTrigger_OnTriggered;
+        CommonScriptableObjects.allUIHidden.OnChange -= AllUIVisible_OnChange;
     }
 
-    private void ToggleTrigger_OnTriggered(DCLAction_Trigger action)
+    private void AllUIVisible_OnChange(bool current, bool previous)
     {
         bool anyInputFieldIsSelected = EventSystem.current != null &&
             EventSystem.current.currentSelectedGameObject != null &&
@@ -37,8 +32,7 @@ public class ShowHideUIByTrigger : MonoBehaviour
             return;
 
         EventSystem.current.SetSelectedGameObject(null);
-        isVisible = !isVisible;
-        SetUIVisibility(isVisible);
+        SetUIVisibility(!current);
     }
 
     private void SetUIVisibility(bool isVisible)

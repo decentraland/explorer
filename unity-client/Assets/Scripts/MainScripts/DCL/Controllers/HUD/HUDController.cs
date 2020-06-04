@@ -4,13 +4,20 @@ using UnityEngine;
 
 public class HUDController : MonoBehaviour
 {
+    private const string TOGGLE_UI_VISIBILITY_ASSET_NAME = "ToggleUIVisibility";
+
     static bool VERBOSE = false;
 
     public static HUDController i { get; private set; }
 
+    private InputAction_Trigger toggleUIVisibilityTrigger;
+
     private void Awake()
     {
         i = this;
+
+        toggleUIVisibilityTrigger = Resources.Load<InputAction_Trigger>(TOGGLE_UI_VISIBILITY_ASSET_NAME);
+        toggleUIVisibilityTrigger.OnTriggered += ToggleUIVisibility_OnTriggered;
     }
 
     public AvatarHUDController avatarHud => GetHUDElement(HUDElementID.AVATAR) as AvatarHUDController;
@@ -63,6 +70,11 @@ public class HUDController : MonoBehaviour
     private void ShowSettings()
     {
         settingsHud?.SetVisibility(true);
+    }
+
+    private void ToggleUIVisibility_OnTriggered(DCLAction_Trigger action)
+    {
+        CommonScriptableObjects.allUIHidden.Set(!CommonScriptableObjects.allUIHidden.Get());
     }
 
     private void OwnUserProfileUpdated(UserProfile profile)
@@ -335,6 +347,8 @@ public class HUDController : MonoBehaviour
 
     private void OnDestroy()
     {
+        toggleUIVisibilityTrigger.OnTriggered -= ToggleUIVisibility_OnTriggered;
+
         if (ownUserProfile != null)
             ownUserProfile.OnUpdate -= OwnUserProfileUpdated;
 

@@ -50,6 +50,7 @@ public class InputController : MonoBehaviour
     public InputAction_Hold[] holdActions;
     public InputAction_Measurable[] measurableActions;
     bool renderingEnabled => CommonScriptableObjects.rendererState.Get();
+    bool allUIHidden => CommonScriptableObjects.allUIHidden.Get();
 
     private void Update()
     {
@@ -75,23 +76,28 @@ public class InputController : MonoBehaviour
                                        InputProcessor.Modifier.FocusNotInInput);
                     break;
                 case DCLAction_Trigger.ToggleNavMap:
+                    if (allUIHidden) break;
                     InputProcessor.FromKey(action, KeyCode.M, modifiers: InputProcessor.Modifier.FocusNotInInput);
                     InputProcessor.FromKey(action, KeyCode.Tab, modifiers: InputProcessor.Modifier.FocusNotInInput);
                     InputProcessor.FromKey(action, KeyCode.Escape, modifiers: InputProcessor.Modifier.FocusNotInInput);
                     break;
                 case DCLAction_Trigger.ToggleFriends:
+                    if (allUIHidden) break;
                     InputProcessor.FromKey(action, KeyCode.L, modifiers: InputProcessor.Modifier.None);
                     break;
                 case DCLAction_Trigger.ToggleWorldChat:
+                    if (allUIHidden) break;
                     InputProcessor.FromKey(action, KeyCode.Return, modifiers: InputProcessor.Modifier.None);
                     break;
                 case DCLAction_Trigger.ToggleUIVisibility:
                     InputProcessor.FromKey(action, KeyCode.U, modifiers: InputProcessor.Modifier.None);
                     break;
                 case DCLAction_Trigger.CloseWindow:
+                    if (allUIHidden) break;
                     InputProcessor.FromKey(action, KeyCode.Escape, modifiers: InputProcessor.Modifier.None);
                     break;
                 case DCLAction_Trigger.OpenExpressions:
+                    if (allUIHidden) break;
                     InputProcessor.FromKey(action, KeyCode.B, modifiers: InputProcessor.Modifier.FocusNotInInput);
                     InputProcessor.FromKey(action, KeyCode.Escape, modifiers: InputProcessor.Modifier.FocusNotInInput);
                     break;
