@@ -80,7 +80,7 @@ public class HUDController : MonoBehaviour
             EventSystem.current.currentSelectedGameObject.GetComponent<TMPro.TMP_InputField>() != null &&
             (!worldChatWindowHud.view.chatHudView.inputField.isFocused || !worldChatWindowHud.view.isInPreview);
 
-        if (anyInputFieldIsSelected || settingsHud.view.isOpen || avatarEditorHud.view.isOpen)
+        if (anyInputFieldIsSelected || settingsHud.view.isOpen || avatarEditorHud.view.isOpen || DCL.NavmapView.isOpen)
             return;
 
         CommonScriptableObjects.allUIHidden.Set(!CommonScriptableObjects.allUIHidden.Get());
