@@ -1,6 +1,7 @@
 using DCL.SettingsHUD;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class HUDController : MonoBehaviour
 {
@@ -74,6 +75,14 @@ public class HUDController : MonoBehaviour
 
     private void ToggleUIVisibility_OnTriggered(DCLAction_Trigger action)
     {
+        bool anyInputFieldIsSelected = EventSystem.current != null &&
+            EventSystem.current.currentSelectedGameObject != null &&
+            EventSystem.current.currentSelectedGameObject.GetComponent<TMPro.TMP_InputField>() != null &&
+            (!worldChatWindowHud.view.chatHudView.inputField.isFocused || !worldChatWindowHud.view.isInPreview);
+
+        if (anyInputFieldIsSelected)
+            return;
+
         CommonScriptableObjects.allUIHidden.Set(!CommonScriptableObjects.allUIHidden.Get());
     }
 

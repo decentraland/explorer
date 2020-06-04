@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.EventSystems;
 
 /// <summary>
 /// Attaching this component to a canvas, will hide/show it after triggering the ToggleUIVisibility input action.
@@ -24,14 +23,6 @@ public class ShowHideUIByTrigger : MonoBehaviour
 
     private void AllUIVisible_OnChange(bool current, bool previous)
     {
-        bool anyInputFieldIsSelected = EventSystem.current != null &&
-            EventSystem.current.currentSelectedGameObject != null &&
-            EventSystem.current.currentSelectedGameObject.GetComponent<TMPro.TMP_InputField>() != null;
-
-        if (anyInputFieldIsSelected)
-            return;
-
-        EventSystem.current.SetSelectedGameObject(null);
         SetUIVisibility(!current);
     }
 
