@@ -6,7 +6,6 @@ using UnityEngine;
 [RequireComponent(typeof(CanvasGroup))]
 public class ShowHideUIByTrigger : MonoBehaviour
 {
-    //private InputAction_Trigger toggleTrigger;
     private CanvasGroup canvasGroup;
 
     private void Awake()
