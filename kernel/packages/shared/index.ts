@@ -84,7 +84,11 @@ export function initShared(): InitFutures {
   const futures: InitFutures = { essentials: future(), all: future() }
   const [session, store] = initEssentials()
 
-  futures.essentials.resolve(session)
+  const userData = getUserProfile()
+
+  if (!isSessionExpired(userData)) {
+    futures.essentials.resolve(session)
+  }
 
   let net: ETHEREUM_NETWORK = ETHEREUM_NETWORK.MAINNET
   let userId: string
@@ -105,8 +109,6 @@ export function initShared(): InitFutures {
       }
 
       try {
-        const userData = getUserProfile()
-
         // check that user data is stored & key is not expired
         if (isSessionExpired(userData)) {
           identity = await createAuthIdentity()
@@ -148,6 +150,10 @@ export function initShared(): InitFutures {
 
     defaultLogger.log(`User ${userId} logged in`)
     store.dispatch(authSuccessful())
+
+    if (futures.essentials.isPending) {
+      futures.essentials.resolve(session)
+    }
 
     console['groupEnd']()
 
