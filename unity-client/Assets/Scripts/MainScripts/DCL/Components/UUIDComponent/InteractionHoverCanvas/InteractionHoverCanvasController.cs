@@ -9,39 +9,21 @@ public class InteractionHoverCanvasController : MonoBehaviour
     public Canvas canvas;
     public RectTransform backgroundTransform;
     public TextMeshProUGUI text;
-    public GameObject pointerActionIconPrefab;
-    public GameObject primaryActionIconPrefab;
-    public GameObject secondaryActionIconPrefab;
-    public GameObject anyActionIconPrefab;
+    public GameObject[] icons;
 
     bool isHovered = false;
     Camera mainCamera;
     GameObject hoverIcon;
     Vector3 meshCenteredPos;
     DecentralandEntity entity;
-    Dictionary<string, GameObject> buttonIcons = new Dictionary<string, GameObject>();
 
     const string ACTION_BUTTON_POINTER = "POINTER";
     const string ACTION_BUTTON_PRIMARY = "PRIMARY";
     const string ACTION_BUTTON_SECONDARY = "SECONDARY";
-    const string ACTION_BUTTON_ANY = "ANY";
 
     void Awake()
     {
         mainCamera = Camera.main;
-
-        buttonIcons.Add(ACTION_BUTTON_POINTER, Object.Instantiate(pointerActionIconPrefab, backgroundTransform));
-        buttonIcons[ACTION_BUTTON_POINTER].SetActive(false);
-
-        buttonIcons.Add(ACTION_BUTTON_PRIMARY, Object.Instantiate(primaryActionIconPrefab, backgroundTransform));
-        buttonIcons[ACTION_BUTTON_PRIMARY].SetActive(false);
-
-        buttonIcons.Add(ACTION_BUTTON_SECONDARY, Object.Instantiate(secondaryActionIconPrefab, backgroundTransform));
-        buttonIcons[ACTION_BUTTON_SECONDARY].SetActive(false);
-
-        buttonIcons.Add(ACTION_BUTTON_ANY, Object.Instantiate(secondaryActionIconPrefab, backgroundTransform));
-        buttonIcons[ACTION_BUTTON_ANY].SetActive(false);
-
     }
 
     public void Setup(string button, string feedbackText, DecentralandEntity entity)
@@ -58,10 +40,21 @@ public class InteractionHoverCanvasController : MonoBehaviour
     {
         hoverIcon?.SetActive(false);
 
-        if (buttonIcons.ContainsKey(button))
-            hoverIcon = buttonIcons[button];
-        else
-            hoverIcon = buttonIcons[ACTION_BUTTON_ANY];
+        switch (button)
+        {
+            case ACTION_BUTTON_POINTER:
+                hoverIcon = icons[0];
+                break;
+            case ACTION_BUTTON_PRIMARY:
+                hoverIcon = icons[1];
+                break;
+            case ACTION_BUTTON_SECONDARY:
+                hoverIcon = icons[2];
+                break;
+            default: // ANY
+                hoverIcon = icons[3];
+                break;
+        }
 
         hoverIcon.SetActive(true);
     }
@@ -73,6 +66,11 @@ public class InteractionHoverCanvasController : MonoBehaviour
         isHovered = hoverState;
 
         canvas.enabled = isHovered;
+    }
+
+    public GameObject GetCurrentHoverIcon()
+    {
+        return hoverIcon;
     }
 
     // This method will be used when we apply a "loose aim" for the 3rd person camera
