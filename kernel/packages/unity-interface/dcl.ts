@@ -561,10 +561,6 @@ export const unityInterface = {
   SetEngineDebugPanel() {
     gameInstance.SendMessage('SceneController', 'SetEngineDebugPanel')
   },
-  // @internal
-  SendBuilderMessage(method: string, payload: string = '') {
-    gameInstance.SendMessage(`BuilderController`, method, payload)
-  },
   ActivateRendering() {
     gameInstance.SendMessage('SceneController', 'ActivateRendering')
   },
@@ -646,6 +642,10 @@ export const unityInterface = {
   // ************** Builder messages **************
   // *********************************************************************************
 
+  // @internal
+  SendBuilderMessage(method: string, payload: string = '') {
+    gameInstance.SendMessage(`BuilderController`, method, payload)
+  },
   SelectGizmoBuilder(type: string) {
     this.SendBuilderMessage('SelectGizmo', type)
   },
