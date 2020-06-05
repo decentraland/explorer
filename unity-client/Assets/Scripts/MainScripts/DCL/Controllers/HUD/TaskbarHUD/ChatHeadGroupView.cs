@@ -25,7 +25,10 @@ public class ChatHeadGroupView : MonoBehaviour
             chatController.OnAddMessage += ChatController_OnAddMessage;
 
         if (friendsController != null)
+        {
             friendsController.OnUpdateFriendship += FriendsController_OnUpdateFriendship;
+            friendsController.OnUpdateUserStatus += FriendsController_OnUpdateUserStatus;
+        }
     }
 
     private void FriendsController_OnUpdateFriendship(string id, FriendshipAction action)
@@ -36,13 +39,23 @@ public class ChatHeadGroupView : MonoBehaviour
         RemoveChatHead(id);
     }
 
+    private void FriendsController_OnUpdateUserStatus(string userId, FriendsController.UserStatus userStatus)
+    {
+        ChatHeadButton updatedChatHead = chatHeads.FirstOrDefault(ch => ch.profile.userId == userId);
+        if (updatedChatHead != null)
+            updatedChatHead.SetOnlineStatus(userStatus.presence == PresenceStatus.ONLINE);
+    }
+
     private void OnDestroy()
     {
         if (chatController != null)
             chatController.OnAddMessage -= ChatController_OnAddMessage;
 
         if (friendsController != null)
+        {
             friendsController.OnUpdateFriendship -= FriendsController_OnUpdateFriendship;
+            friendsController.OnUpdateUserStatus -= FriendsController_OnUpdateUserStatus;
+        }
     }
 
     private void ChatController_OnAddMessage(DCL.Interface.ChatMessage obj)
@@ -107,6 +120,12 @@ public class ChatHeadGroupView : MonoBehaviour
         chatHead.lastTimestamp = timestamp;
         chatHead.OnToggleOn += OnToggleOn;
         chatHead.OnToggleOff += OnToggleOff;
+
+        if (friendsController != null &&
+            friendsController.GetFriends().TryGetValue(userId, out FriendsController.UserStatus friendStatus))
+        {
+            chatHead.SetOnlineStatus(friendStatus.presence == PresenceStatus.ONLINE);
+        }
 
         var animator = chatHead.GetComponent<ShowHideAnimator>();
 

@@ -8,6 +8,7 @@ public class ChatHeadButton : TaskbarButton, IPointerEnterHandler, IPointerExitH
     [SerializeField] internal TMPro.TextMeshProUGUI label;
     [SerializeField] internal Image portrait;
     [SerializeField] internal UnreadNotificationBadge unreadNotificationBadge;
+    [SerializeField] internal GameObject onlineStatus;
 
     internal ulong lastTimestamp;
     internal UserProfile profile;
@@ -27,6 +28,8 @@ public class ChatHeadButton : TaskbarButton, IPointerEnterHandler, IPointerExitH
             portrait.sprite = profile.faceSnapshot;
         else
             profile.OnFaceSnapshotReadyEvent += Profile_OnFaceSnapshotReadyEvent;
+
+        SetOnlineStatus(false);
     }
 
     private void Profile_OnFaceSnapshotReadyEvent(Sprite portraitSprite)
@@ -51,5 +54,10 @@ public class ChatHeadButton : TaskbarButton, IPointerEnterHandler, IPointerExitH
     public void OnPointerExit(PointerEventData eventData)
     {
         labelContainer.Hide();
+    }
+
+    public void SetOnlineStatus(bool isOnline)
+    {
+        onlineStatus.SetActive(isOnline);
     }
 }
