@@ -36,9 +36,9 @@ let builderSceneLoaded: IFuture<boolean> = future()
  * Function executed by builder
  * It creates the builder scene, binds the scene events and stubs the content mappings
  */
-async function createBuilderScene(scene: SceneJsonData, baseUrl: string) {
+async function createBuilderScene(scene: SceneJsonData, baseUrl: string, mappings: any) {
   const isFirstRun = unityScene === undefined
-  const sceneData = await getSceneData(scene, baseUrl, [])
+  const sceneData = await getSceneData(scene, baseUrl, mappings)
   unityScene = loadBuilderScene(sceneData)
   bindSceneEvents()
 
@@ -182,7 +182,7 @@ namespace editor {
   export async function handleMessage(message: any) {
     if (message.type === 'update') {
       await initializedEngine
-      await createBuilderScene(message.payload.scene, message.payload.scene.baseUrl)
+      await createBuilderScene(message.payload.scene, message.payload.scene.baseUrl, message.payload.scene._mappings)
     }
   }
 
