@@ -8,7 +8,9 @@ public class ChatHeadButton : TaskbarButton, IPointerEnterHandler, IPointerExitH
     [SerializeField] internal TMPro.TextMeshProUGUI label;
     [SerializeField] internal Image portrait;
     [SerializeField] internal UnreadNotificationBadge unreadNotificationBadge;
-    [SerializeField] internal GameObject onlineStatus;
+    [SerializeField] internal Image onlineStatusIndicator;
+    [SerializeField] internal Color onlineColor = Color.green;
+    [SerializeField] internal Color offlineColor = Color.gray;
 
     internal ulong lastTimestamp;
     internal UserProfile profile;
@@ -58,6 +60,6 @@ public class ChatHeadButton : TaskbarButton, IPointerEnterHandler, IPointerExitH
 
     public void SetOnlineStatus(bool isOnline)
     {
-        onlineStatus.SetActive(isOnline);
+        onlineStatusIndicator.color = isOnline ? onlineColor : offlineColor;
     }
 }
