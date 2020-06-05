@@ -80,17 +80,22 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: eae10bddbf29d4322b4eae2bbf752815, type: 2}
+      objectReference: {fileID: 2100000, guid: c36d793a3caa440359e539786d62a233, type: 2}
     - target: {fileID: -1504981713932161579, guid: ed10a6d33b22449e9bde8daf89147c69,
         type: 3}
       propertyPath: m_Materials.Array.data[1]
       value: 
-      objectReference: {fileID: 2100000, guid: 0199dbd72f1ca4dcead06e22e186f09a, type: 2}
+      objectReference: {fileID: 2100000, guid: 37175175efbdb4f2687c47624fa71874, type: 2}
     - target: {fileID: -1504981713932161579, guid: ed10a6d33b22449e9bde8daf89147c69,
         type: 3}
       propertyPath: m_Materials.Array.data[2]
       value: 
       objectReference: {fileID: 2100000, guid: 462bb333b45174218827ed50f919134d, type: 2}
+    - target: {fileID: -1504981713932161579, guid: ed10a6d33b22449e9bde8daf89147c69,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: -4216859302048453862, guid: ed10a6d33b22449e9bde8daf89147c69,
         type: 3}
       propertyPath: m_LocalPosition.x
