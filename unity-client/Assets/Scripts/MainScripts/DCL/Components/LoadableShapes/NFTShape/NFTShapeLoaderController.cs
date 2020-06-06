@@ -28,7 +28,8 @@ public class NFTShapeLoaderController : MonoBehaviour
         PeriodicPerlin,
         Simplex,
         SimplexNumericalGrad,
-        SimplexAnalyticalGrad
+        SimplexAnalyticalGrad,
+        None
     }
 
     public MeshRenderer meshRenderer;
@@ -40,19 +41,24 @@ public class NFTShapeLoaderController : MonoBehaviour
     public event System.Action OnLoadingAssetSuccess;
     public event System.Action OnLoadingAssetFail;
 
+    [Header("Material Indexes")]
+    [SerializeField] int materialIndex_Background = -1;
+    [SerializeField] int materialIndex_NFTImage = -1;
+    [SerializeField] int materialIndex_Frame = -1;
+
     [Header("Noise Shader")]
     [SerializeField] NoiseType noiseType = NoiseType.Simplex;
     [SerializeField] bool noiseIs3D = false;
     [SerializeField] bool noiseIsFractal = false;
 
-    Material frameMaterial;
+    Material frameMaterial = null;
     System.Action<LoadWrapper> OnSuccess;
     System.Action<LoadWrapper> OnFail;
     string darURLProtocol;
     string darURLRegistry;
     string darURLAsset;
-    MaterialPropertyBlock imageMaterialPropertyBlock;
-    MaterialPropertyBlock backgroundMaterialPropertyBlock;
+    MaterialPropertyBlock imageMaterialPropertyBlock = null;
+    MaterialPropertyBlock backgroundMaterialPropertyBlock = null;
 
     int BASEMAP_SHADER_PROPERTY = Shader.PropertyToID("_BaseMap");
     int COLOR_SHADER_PROPERTY = Shader.PropertyToID("_BaseColor");
@@ -63,9 +69,9 @@ public class NFTShapeLoaderController : MonoBehaviour
 
     void Awake()
     {
-        imageMaterialPropertyBlock = new MaterialPropertyBlock();
-        backgroundMaterialPropertyBlock = new MaterialPropertyBlock();
-        frameMaterial = meshRenderer.materials[2];
+        if (materialIndex_NFTImage >= 0) imageMaterialPropertyBlock = new MaterialPropertyBlock();
+        if (materialIndex_Background >= 0) backgroundMaterialPropertyBlock = new MaterialPropertyBlock();
+        if (materialIndex_Frame >= 0) frameMaterial = meshRenderer.materials[materialIndex_Frame];
 
         InitializePerlinNoise();
     }
@@ -124,9 +130,12 @@ public class NFTShapeLoaderController : MonoBehaviour
 
     public void UpdateBackgroundColor(Color newColor)
     {
-        meshRenderer.GetPropertyBlock(backgroundMaterialPropertyBlock, 1);
+        if (backgroundMaterialPropertyBlock == null)
+            return;
+
+        meshRenderer.GetPropertyBlock(backgroundMaterialPropertyBlock, materialIndex_Background);
         backgroundMaterialPropertyBlock.SetColor(COLOR_SHADER_PROPERTY, newColor);
-        meshRenderer.SetPropertyBlock(backgroundMaterialPropertyBlock, 1);
+        meshRenderer.SetPropertyBlock(backgroundMaterialPropertyBlock, materialIndex_Background);
     }
 
     IEnumerator FetchNFTImage()
@@ -243,15 +252,24 @@ public class NFTShapeLoaderController : MonoBehaviour
 
     void UpdateTexture(Texture2D texture)
     {
-        meshRenderer.GetPropertyBlock(imageMaterialPropertyBlock, 0);
+        if (imageMaterialPropertyBlock == null)
+            return;
+
+        meshRenderer.GetPropertyBlock(imageMaterialPropertyBlock, materialIndex_NFTImage);
         imageMaterialPropertyBlock.SetTexture(BASEMAP_SHADER_PROPERTY, texture);
         imageMaterialPropertyBlock.SetColor(COLOR_SHADER_PROPERTY, Color.white);
-        meshRenderer.SetPropertyBlock(imageMaterialPropertyBlock, 0);
+        meshRenderer.SetPropertyBlock(imageMaterialPropertyBlock, materialIndex_NFTImage);
     }
 
     void InitializePerlinNoise()
     {
+        if (frameMaterial == null)
+            return;
+
         frameMaterial.shaderKeywords = null;
+
+        if (noiseType == NoiseType.None)
+            return;
 
         switch (noiseType)
         {

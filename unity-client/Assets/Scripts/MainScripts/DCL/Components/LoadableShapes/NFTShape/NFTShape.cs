@@ -7,10 +7,13 @@ namespace DCL.Components
 {
     public class NFTShape : LoadableShape<LoadWrapper_NFT, NFTShape.Model>
     {
+        static NFTShapeFactory nftShapeFactory = null;
+
         [System.Serializable]
         public new class Model : LoadableShape.Model
         {
             public Color color = new Color(0.6404918f, 0.611472f, 0.8584906f); // "light purple" default, same as in explorer
+            public int style = 0;
         }
 
         public override string componentName => "NFT Shape";
@@ -18,6 +21,10 @@ namespace DCL.Components
 
         public NFTShape(ParcelScene scene) : base(scene)
         {
+            if (nftShapeFactory == null)
+            {
+                nftShapeFactory = Resources.Load<NFTShapeFactory>("NFTShapeFactory");
+            }
         }
 
         protected override void AttachShape(DecentralandEntity entity)
@@ -30,7 +37,7 @@ namespace DCL.Components
                 return;
             }
 
-            entity.meshesInfo.meshRootGameObject = Object.Instantiate(Resources.Load("NFTShapeLoader")) as GameObject;
+            entity.meshesInfo.meshRootGameObject = nftShapeFactory.InstantiateLoaderController(model.style);
             entity.meshesInfo.currentShape = this;
 
             entity.meshRootGameObject.name = componentName + " mesh";
