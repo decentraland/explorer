@@ -10,6 +10,6 @@ public class NFTShapeFactory : ScriptableObject
         {
             return Object.Instantiate(loaderControllersPrefabs[index]);
         }
-        return null;
+        return Object.Instantiate(Resources.Load("NFTShapeLoader_Classic") as GameObject);
     }
 }
