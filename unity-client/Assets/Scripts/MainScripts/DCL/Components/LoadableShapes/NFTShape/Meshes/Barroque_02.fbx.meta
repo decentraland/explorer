@@ -20,7 +20,7 @@ ModelImporter:
       name: PictureFrame_MAT
     second: {fileID: 2100000, guid: aa9b757215d974567ad6f0e7a1b0d66e, type: 2}
   materials:
-    importMaterials: 1
+    importMaterials: 0
     materialName: 0
     materialSearch: 1
     materialLocation: 1
