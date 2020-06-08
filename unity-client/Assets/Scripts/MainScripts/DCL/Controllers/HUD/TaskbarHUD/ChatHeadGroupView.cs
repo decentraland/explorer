@@ -7,6 +7,7 @@ public class ChatHeadGroupView : MonoBehaviour
 {
     const int MAX_GROUP_SIZE = 5;
     const string CHAT_HEAD_PATH = "ChatHead";
+    const string PLAYER_PREFS_LATEST_OPEN_CHATS = "LatestOpenChats";
 
     public event System.Action<TaskbarButton> OnHeadToggleOn;
     public event System.Action<TaskbarButton> OnHeadToggleOff;
@@ -228,14 +229,14 @@ public class ChatHeadGroupView : MonoBehaviour
 
     private void SaveLatestOpenChats()
     {
-        PlayerPrefs.SetString("LatestOpenChats", JsonConvert.SerializeObject(CommonScriptableObjects.latestOpenChats.GetList()));
+        PlayerPrefs.SetString(PLAYER_PREFS_LATEST_OPEN_CHATS, JsonConvert.SerializeObject(CommonScriptableObjects.latestOpenChats.GetList()));
         PlayerPrefs.Save();
     }
 
     private void LoadLatestOpenChats()
     {
         CommonScriptableObjects.latestOpenChats.Clear();
-        List<LatestOpenChatsList.Model> latestOpenChatsFromStorage = JsonConvert.DeserializeObject<List<LatestOpenChatsList.Model>>(PlayerPrefs.GetString("LatestOpenChats"));
+        List<LatestOpenChatsList.Model> latestOpenChatsFromStorage = JsonConvert.DeserializeObject<List<LatestOpenChatsList.Model>>(PlayerPrefs.GetString(PLAYER_PREFS_LATEST_OPEN_CHATS));
         if (latestOpenChatsFromStorage != null)
         {
             foreach (LatestOpenChatsList.Model item in latestOpenChatsFromStorage)
