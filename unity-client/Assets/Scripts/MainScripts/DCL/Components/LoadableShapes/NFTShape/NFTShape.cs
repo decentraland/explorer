@@ -7,8 +7,6 @@ namespace DCL.Components
 {
     public class NFTShape : LoadableShape<LoadWrapper_NFT, NFTShape.Model>
     {
-        static NFTShapeFactory nftShapeFactory = null;
-
         [System.Serializable]
         public new class Model : LoadableShape.Model
         {
@@ -21,10 +19,6 @@ namespace DCL.Components
 
         public NFTShape(ParcelScene scene) : base(scene)
         {
-            if (nftShapeFactory == null)
-            {
-                nftShapeFactory = Resources.Load<NFTShapeFactory>("NFTShapeFactory");
-            }
         }
 
         protected override void AttachShape(DecentralandEntity entity)
@@ -37,7 +31,7 @@ namespace DCL.Components
                 return;
             }
 
-            entity.meshesInfo.meshRootGameObject = nftShapeFactory.InstantiateLoaderController(model.style);
+            entity.meshesInfo.meshRootGameObject = NFTShapeFactory.InstantiateLoaderController(model.style);
             entity.meshesInfo.currentShape = this;
 
             entity.meshRootGameObject.name = componentName + " mesh";
