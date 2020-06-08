@@ -36,10 +36,21 @@ public class MinimapMetadata : ScriptableObject
         public string previewImageUrl;
     }
 
+    [Serializable]
+    public class MinimapUserInfo
+    {
+        public string userId;
+        public string userName;
+        public Vector2 coords;
+    }
+
     public event Action<MinimapSceneInfo> OnSceneInfoUpdated;
+    public event Action<MinimapUserInfo> OnUserInfoUpdated;
+    public event Action<string> OnUserInfoRemoved;
 
     HashSet<MinimapSceneInfo> scenesInfo = new HashSet<MinimapSceneInfo>();
     Dictionary<Vector2Int, MinimapSceneInfo> sceneInfoMap = new Dictionary<Vector2Int, MinimapSceneInfo>();
+    Dictionary<string, MinimapUserInfo> usersInfo = new Dictionary<string, MinimapUserInfo>();
 
     public MinimapSceneInfo GetSceneInfo(int x, int y)
     {
@@ -73,6 +84,22 @@ public class MinimapMetadata : ScriptableObject
         scenesInfo.Add(sceneInfo);
 
         OnSceneInfoUpdated?.Invoke(sceneInfo);
+    }
+
+    public void AddOrUpdateUserInfo(MinimapUserInfo userInfo)
+    {
+        if (usersInfo.TryGetValue(userInfo.userId, out MinimapUserInfo existingUserInfo))
+            existingUserInfo = userInfo;
+        else
+            usersInfo.Add(userInfo.userId, userInfo);
+
+        OnUserInfoUpdated?.Invoke(userInfo);
+    }
+
+    public void RemoveUserInfo(string userId)
+    {
+        if (usersInfo.Remove(userId))
+            OnUserInfoRemoved?.Invoke(userId);
     }
 
     public void Clear()
