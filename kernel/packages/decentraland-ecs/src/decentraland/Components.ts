@@ -343,7 +343,7 @@ export enum PictureFrameStyle {
   Diamond_Ornament,
   Minimal_Wide,
   Minimal_Grey,
-  Canvas,
+  Blocky,
   Gold_Edges,
   Gold_Carved,
   Gold_Wide,
@@ -359,7 +359,7 @@ export enum PictureFrameStyle {
   Wood_Slim,
   Wood_Wide,
   Wood_Twigs,
-  Canvas_Simple
+  Canvas
 }
 
 /** @public */
