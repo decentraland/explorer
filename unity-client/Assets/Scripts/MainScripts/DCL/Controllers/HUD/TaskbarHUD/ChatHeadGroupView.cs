@@ -241,6 +241,9 @@ public class ChatHeadGroupView : MonoBehaviour
         {
             foreach (LatestOpenChatsList.Model item in latestOpenChatsFromStorage)
             {
+                if (UserProfileController.userProfilesCatalog.Get(item.userId) == null)
+                    continue;
+
                 CommonScriptableObjects.latestOpenChats.Add(item);
                 AddChatHead(item.userId, item.lastTimestamp, false);
             }
