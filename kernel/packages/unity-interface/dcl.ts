@@ -49,7 +49,8 @@ import {
   PB_SetEntityParent,
   PB_UpdateEntityComponent,
   PB_Vector3,
-  PB_OpenExternalUrl
+  PB_OpenExternalUrl,
+  PB_OpenNFTDialog
 } from '../shared/proto/engineinterface_pb'
 import { Session } from 'shared/session'
 import { getPerformanceInfo } from 'shared/session/getPerformanceInfo'
@@ -79,7 +80,8 @@ import {
   FriendshipUpdateStatusMessage,
   UpdateUserStatusMessage,
   FriendshipAction,
-  WorldPosition
+  WorldPosition,
+  OpenNFTDialogPayload
 } from 'shared/types'
 import { ParcelSceneAPI } from 'shared/world/ParcelSceneAPI'
 import {
@@ -456,6 +458,14 @@ export function setLoadingScreenVisible(shouldShow: boolean) {
   document.getElementById('overlay')!.style.display = shouldShow ? 'block' : 'none'
   document.getElementById('load-messages-wrapper')!.style.display = shouldShow ? 'block' : 'none'
   document.getElementById('progress-bar')!.style.display = shouldShow ? 'block' : 'none'
+  const loadingAudio = document.getElementById('loading-audio') as HTMLMediaElement
+
+  if (shouldShow) {
+    loadingAudio?.play().catch(e => {/*Ignored. If this fails is not critical*/})
+  } else {
+    loadingAudio?.pause()
+  }
+
   if (!shouldShow && !EDITOR) {
     isTheFirstLoading = false
     TeleportController.stopTeleportAnimation()
@@ -551,10 +561,6 @@ export const unityInterface = {
   SetEngineDebugPanel() {
     gameInstance.SendMessage('SceneController', 'SetEngineDebugPanel')
   },
-  // @internal
-  SendBuilderMessage(method: string, payload: string = '') {
-    gameInstance.SendMessage(`BuilderController`, method, payload)
-  },
   ActivateRendering() {
     gameInstance.SendMessage('SceneController', 'ActivateRendering')
   },
@@ -636,6 +642,10 @@ export const unityInterface = {
   // ************** Builder messages **************
   // *********************************************************************************
 
+  // @internal
+  SendBuilderMessage(method: string, payload: string = '') {
+    gameInstance.SendMessage(`BuilderController`, method, payload)
+  },
   SelectGizmoBuilder(type: string) {
     this.SendBuilderMessage('SelectGizmo', type)
   },
@@ -712,6 +722,7 @@ const componentCreated: PB_ComponentCreated = new PB_ComponentCreated()
 const componentDisposed: PB_ComponentDisposed = new PB_ComponentDisposed()
 const componentUpdated: PB_ComponentUpdated = new PB_ComponentUpdated()
 const openExternalUrl: PB_OpenExternalUrl = new PB_OpenExternalUrl()
+const openNFTDialog: PB_OpenNFTDialog = new PB_OpenNFTDialog()
 
 class UnityScene<T> implements ParcelSceneAPI {
   eventDispatcher = new EventDispatcher()
@@ -796,6 +807,9 @@ class UnityScene<T> implements ParcelSceneAPI {
       case 'OpenExternalUrl':
         message.setOpenexternalurl(this.encodeOpenExternalUrl(payload))
         break
+      case 'OpenNFTDialog':
+        message.setOpennftdialog(this.encodeOpenNFTDialog(payload))
+        break
     }
 
     let arrayBuffer: Uint8Array = message.serializeBinary()
@@ -879,6 +893,13 @@ class UnityScene<T> implements ParcelSceneAPI {
   encodeOpenExternalUrl(url: any): PB_OpenExternalUrl {
     openExternalUrl.setUrl(url)
     return openExternalUrl
+  }
+
+  encodeOpenNFTDialog(nftDialogPayload: OpenNFTDialogPayload): PB_OpenNFTDialog {
+    openNFTDialog.setAssetcontractaddress(nftDialogPayload.assetContractAddress)
+    openNFTDialog.setTokenid(nftDialogPayload.tokenId)
+    openNFTDialog.setComment(nftDialogPayload.comment ? nftDialogPayload.comment : '')
+    return openNFTDialog
   }
 }
 

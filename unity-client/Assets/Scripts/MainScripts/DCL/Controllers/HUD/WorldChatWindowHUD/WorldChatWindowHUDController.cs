@@ -101,14 +101,9 @@ public class WorldChatWindowHUDController : IHUD
         bool isValidMessage = !string.IsNullOrEmpty(message.body) && !string.IsNullOrWhiteSpace(message.body);
         bool isPrivateMessage = message.messageType == ChatMessage.Type.PRIVATE;
 
-        if (!isValidMessage || resetInputFieldOnSubmit)
-        {
-            view.chatHudView.ResetInputField();
-            view.chatHudView.FocusInputField();
-        }
-
         if (!isValidMessage)
         {
+            view.chatHudView.ResetInputField();
             EventSystem.current.SetSelectedGameObject(null);
 
             if (!isPrivateMessage && !view.isInPreview)
@@ -119,6 +114,12 @@ public class WorldChatWindowHUDController : IHUD
             }
 
             return;
+        }
+
+        if (resetInputFieldOnSubmit)
+        {
+            view.chatHudView.ResetInputField();
+            view.chatHudView.FocusInputField();
         }
 
         if (isPrivateMessage)
@@ -162,9 +163,13 @@ public class WorldChatWindowHUDController : IHUD
         }
     }
 
-    public void MarkWorldChatMessagesAsRead()
+    public void MarkWorldChatMessagesAsRead(long? timestamp = null)
     {
-        CommonScriptableObjects.lastReadWorldChatMessages.Set(System.DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+        long timeMark = System.DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+        if (timestamp != null && timestamp.Value > timeMark)
+            timeMark = timestamp.Value;
+
+        CommonScriptableObjects.lastReadWorldChatMessages.Set(timeMark);
         SaveLatestReadWorldChatMessagesStatus();
     }
 
