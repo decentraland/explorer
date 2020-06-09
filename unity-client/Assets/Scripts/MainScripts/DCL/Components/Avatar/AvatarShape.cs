@@ -1,4 +1,5 @@
 using DCL.Components;
+using DCL.Helpers;
 using DCL.Interface;
 using System.Collections;
 using UnityEngine;
@@ -20,6 +21,8 @@ namespace DCL
         public AvatarModel model = new AvatarModel();
 
         public bool everythingIsLoaded;
+
+        private Vector3? lastAvatarPosition = null;
 
         void Awake()
         {
@@ -50,7 +53,10 @@ namespace DCL
         {
             onPointerDown.OnPointerDownReport -= PlayerClicked;
             if (entity != null)
+            {
                 entity.OnTransformChange = null;
+                MinimapMetadataController.i?.UpdateMinimapUserInformation(new MinimapMetadata.MinimapUserInfo { userId = model.id }, true);
+            }
         }
 
         public override IEnumerator ApplyChanges(string newJson)
@@ -62,6 +68,7 @@ namespace DCL
             if (entity != null && entity.OnTransformChange == null)
             {
                 entity.OnTransformChange += avatarMovementController.OnTransformChanged;
+                entity.OnTransformChange += OnEntityTransformChanged;
             }
 
             if (currentSerialization == newJson)
@@ -83,6 +90,16 @@ namespace DCL
             avatarName.SetName(model.name);
             SetMinimapRepresentationActive(true);
             everythingIsLoaded = true;
+
+            if (!string.IsNullOrEmpty(model.id))
+            {
+                MinimapMetadataController.i?.UpdateMinimapUserInformation(new MinimapMetadata.MinimapUserInfo
+                {
+                    userId = model.id,
+                    userName = model.name,
+                    worldPosition = lastAvatarPosition != null ? lastAvatarPosition.Value : minimapRepresentation.transform.position
+                });
+            }
         }
 
         void SetMinimapRepresentationActive(bool active)
@@ -91,6 +108,21 @@ namespace DCL
                 return;
 
             minimapRepresentation.SetActive(active);
+        }
+
+        private void OnEntityTransformChanged(DCLTransform.Model updatedModel)
+        {
+            if (string.IsNullOrEmpty(model.id))
+                return;
+
+            MinimapMetadataController.i?.UpdateMinimapUserInformation(new MinimapMetadata.MinimapUserInfo
+            {
+                userId = model.id,
+                userName = model.name,
+                worldPosition = updatedModel.position
+            });
+
+            lastAvatarPosition = updatedModel.position;
         }
     }
 }

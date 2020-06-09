@@ -41,7 +41,7 @@ public class MinimapMetadata : ScriptableObject
     {
         public string userId;
         public string userName;
-        public Vector2 coords;
+        public Vector3 worldPosition;
     }
 
     public event Action<MinimapSceneInfo> OnSceneInfoUpdated;
@@ -86,6 +86,10 @@ public class MinimapMetadata : ScriptableObject
         OnSceneInfoUpdated?.Invoke(sceneInfo);
     }
 
+    /// <summary>
+    /// Adds (or updates) the information of an user in the minimap.
+    /// </summary>
+    /// <param name="userInfo">User info model</param>
     public void AddOrUpdateUserInfo(MinimapUserInfo userInfo)
     {
         if (usersInfo.TryGetValue(userInfo.userId, out MinimapUserInfo existingUserInfo))
@@ -96,6 +100,10 @@ public class MinimapMetadata : ScriptableObject
         OnUserInfoUpdated?.Invoke(userInfo);
     }
 
+    /// <summary>
+    /// Removes the information of an user from the minimap.
+    /// </summary>
+    /// <param name="userId">User Id</param>
     public void RemoveUserInfo(string userId)
     {
         if (usersInfo.Remove(userId))

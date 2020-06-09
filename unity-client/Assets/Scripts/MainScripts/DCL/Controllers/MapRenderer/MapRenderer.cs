@@ -197,7 +197,10 @@ namespace DCL
 
             centerTile /= (float)sceneInfo.parcels.Count;
 
-            ConfigureMapSceneIcon(go, centerTile.x, centerTile.y, sceneInfo.name);
+            (go.transform as RectTransform).anchoredPosition = MapUtils.GetTileToLocalPosition(centerTile.x, centerTile.y);
+
+            MapSceneIcon icon = go.GetComponent<MapSceneIcon>();
+            icon.title.text = sceneInfo.name;
 
             scenesOfInterestMarkers.Add(sceneInfo, go);
         }
@@ -209,14 +212,14 @@ namespace DCL
                 existingUserInfo = userInfo;
 
                 if (usersInfoMarkers.TryGetValue(userInfo.userId, out GameObject go))
-                    ConfigureMapSceneIcon(go, userInfo.coords.x, userInfo.coords.y, userInfo.userName);
+                    ConfigureUserIcon(go, userInfo.worldPosition, userInfo.userName);
             }
             else
             {
                 usersInfo.Add(userInfo.userId, userInfo);
 
                 GameObject go = Object.Instantiate(userIconPrefab.gameObject, overlayContainer.transform);
-                ConfigureMapSceneIcon(go, userInfo.coords.x, userInfo.coords.y, userInfo.userName);
+                ConfigureUserIcon(go, userInfo.worldPosition, userInfo.userName);
 
                 usersInfoMarkers.Add(userInfo.userId, go);
             }
@@ -234,9 +237,10 @@ namespace DCL
             }
         }
 
-        private void ConfigureMapSceneIcon(GameObject iconGO, float x, float y, string name)
+        private void ConfigureUserIcon(GameObject iconGO, Vector3 pos, string name)
         {
-            (iconGO.transform as RectTransform).anchoredPosition = MapUtils.GetTileToLocalPosition(x, y);
+            var gridPosition = Utils.WorldToGridPositionUnclamped(pos);
+            iconGO.transform.localPosition = MapUtils.GetTileToLocalPosition(gridPosition.x, gridPosition.y);
             MapSceneIcon icon = iconGO.GetComponent<MapSceneIcon>();
             icon.title.text = name;
         }
