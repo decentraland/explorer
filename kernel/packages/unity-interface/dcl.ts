@@ -230,6 +230,14 @@ const browserInterface = {
     TeleportController.goTo(data.x, data.y)
   },
 
+  GoToMagic() {
+    TeleportController.goToMagic()
+  },
+
+  GoToCrowd() {
+    TeleportController.goToCrowd().catch(e => defaultLogger.error('error goToCrowd', e))
+  },
+
   LogOut() {
     Session.current.then(s => s.logout()).catch(e => defaultLogger.error('error while logging out', e))
   },
@@ -636,6 +644,9 @@ export const unityInterface = {
   },
   FriendNotFound(queryString: string) {
     gameInstance.SendMessage('SceneController', 'FriendNotFound', JSON.stringify(queryString))
+  },
+  RequestTeleport(destination: string){
+    gameInstance.SendMessage('HUDController', 'RequestTeleport', destination)
   },
 
   // *********************************************************************************

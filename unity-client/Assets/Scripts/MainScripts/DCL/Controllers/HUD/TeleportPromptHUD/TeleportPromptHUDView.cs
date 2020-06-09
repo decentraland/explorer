@@ -8,7 +8,6 @@ using DCL.Helpers;
 using System.Linq;
 using DCL.Interface;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 
 public class TeleportPromptHUDView : MonoBehaviour
 {
@@ -24,8 +23,9 @@ public class TeleportPromptHUDView : MonoBehaviour
 
     const string TELEPORT_COMMAND_MAGIC = "magic";
     const string TELEPORT_COMMAND_CROWD = "crowd";
+    const string TELEPORT_COMMAND_COORDS = "coords";
 
-    [SerializeField] GameObject content;
+    [SerializeField] internal GameObject content;
 
     [Header("Images")]
     [SerializeField] RawImage imageSceneThumbnail;
@@ -65,14 +65,14 @@ public class TeleportPromptHUDView : MonoBehaviour
     MinimapMetadata.MinimapSceneInfo currentSceneInfo;
     Vector2Int currentCoords;
     Texture2D downloadedBanner;
+
     string teleportTarget;
 
     private void Awake()
     {
-        Teleport("-149,-144");
-        //Teleport("57, -44");
-        //Teleport("magic");
-        //Teleport("crowd");
+        closeButton.onClick.AddListener(Hide);
+        cancelButton.onClick.AddListener(Hide);
+        continueButton.onClick.AddListener(Teleport);
     }
 
     internal void Teleport(string teleportCommand)
@@ -100,7 +100,7 @@ public class TeleportPromptHUDView : MonoBehaviour
                     int x, y;
                     if (int.TryParse(coords[0], out x) && int.TryParse(coords[1], out y))
                     {
-                        teleportTarget = string.Format("{0},{1}", coords[0], coords[1]);
+                        teleportTarget = TELEPORT_COMMAND_COORDS;
                         TeleportToCoords(new Vector2Int(x, y));
                         break;
                     }
@@ -113,17 +113,20 @@ public class TeleportPromptHUDView : MonoBehaviour
     {
         containerMagic.SetActive(true);
         imageGotoMagic.gameObject.SetActive(true);
+        Utils.UnlockCursor();
     }
 
     private void TeleportToCrowd()
     {
         containerCrowd.SetActive(true);
         imageGotoCrowd.gameObject.SetActive(true);
+        Utils.UnlockCursor();
     }
 
     private void TeleportToCoords(Vector2Int coords)
     {
         containerCoords.SetActive(true);
+        Utils.UnlockCursor();
 
         currentCoords = coords;
         textCoords.text = $"{coords.x}, {coords.y}";
@@ -173,6 +176,23 @@ public class TeleportPromptHUDView : MonoBehaviour
             UnityEngine.Object.Destroy(downloadedBanner);
             downloadedBanner = null;
         }
+    }
+
+    private void Teleport()
+    {
+        switch (teleportTarget)
+        {
+            case TELEPORT_COMMAND_CROWD:
+                WebInterface.GoToCrowd();
+                break;
+            case TELEPORT_COMMAND_MAGIC:
+                WebInterface.GoToMagic();
+                break;
+            case TELEPORT_COMMAND_COORDS:
+                WebInterface.GoTo(currentCoords.x, currentCoords.y);
+                break;
+        }
+        Hide();
     }
 
     private void OnDestroy()
