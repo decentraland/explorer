@@ -24,7 +24,8 @@
         "SRPBatchingHelper",
         "MouseCatcher",
         "Settings",
-        "WrappedTextureAsset"
+        "WrappedTextureAsset",
+        "Rendering"
     ],
     "optionalUnityReferences": [],
     "includePlatforms": [],

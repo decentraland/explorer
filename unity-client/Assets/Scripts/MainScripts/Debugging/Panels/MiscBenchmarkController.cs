@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using UnityEngine;
 
@@ -26,20 +27,23 @@ namespace DCL
             MESHES_COUNT,
             BREAK_1,
             GLTF_BEING_LOADED,
+            AB_BEING_LOADED,
             MESSAGES_PER_SECOND_REAL,
-            CPU_SCHEDULER,
+            RENDERER_UNLOCK_SEGS,
             MESSAGE_BUSES,
         }
 
         const string BREAK_0_TEXT = "";
         const string BREAK_1_TEXT = "";
 
+        const string RENDERER_UNLOCK_TEXT = "Time Until Renderer Enable";
         const string SHARED_OBJECTS_COUNT_TEXT = "Shared Objects Count";
         const string COMPONENT_OBJECTS_COUNT_TEXT = "Components Count";
         const string ENTITY_OBJECTS_COUNT_TEXT = "Entity Count";
         const string MATERIAL_COUNT_TEXT = "Material Count";
         const string MESHES_COUNT_TEXT = "Meshes Count";
-        const string GLTF_BEING_LOADED_TEXT = "GLTFs being loaded";
+        const string GLTF_BEING_LOADED_TEXT = "GLTFs active requests";
+        const string AB_BEING_LOADED_TEXT = "Asset bundles active requests";
         const string MESSAGES_PER_SECOND_REAL_TEXT = "Messages x sec";
         const string MESSAGES_BUSES_TEXT = "Message buses";
 
@@ -72,7 +76,9 @@ namespace DCL
             statsPanel.SetCellText(0, (int) Rows.MESHES_COUNT, MESHES_COUNT_TEXT);
             statsPanel.SetCellText(0, (int) Rows.BREAK_1, BREAK_1_TEXT);
             statsPanel.SetCellText(0, (int) Rows.GLTF_BEING_LOADED, GLTF_BEING_LOADED_TEXT);
+            statsPanel.SetCellText(0, (int) Rows.AB_BEING_LOADED, AB_BEING_LOADED_TEXT);
             statsPanel.SetCellText(0, (int) Rows.MESSAGES_PER_SECOND_REAL, MESSAGES_PER_SECOND_REAL_TEXT);
+            statsPanel.SetCellText(0, (int) Rows.RENDERER_UNLOCK_SEGS, RENDERER_UNLOCK_TEXT);
             statsPanel.SetCellText(0, (int) Rows.MESSAGE_BUSES, MESSAGES_BUSES_TEXT);
         }
 
@@ -113,7 +119,7 @@ namespace DCL
             {
                 sampleCount++;
                 mps += 1 / (Time.deltaTime / messagesProcessedLastFrame);
-                statsPanel.SetCellText(1, (int) Rows.MESSAGES_PER_SECOND_REAL, (mps / sampleCount).ToString());
+                statsPanel.SetCellText(1, (int) Rows.MESSAGES_PER_SECOND_REAL, (mps / sampleCount).ToString(CultureInfo.InvariantCulture));
             }
 
             lastPendingMessages = MessagingControllersManager.i.pendingMessagesCount;
@@ -159,7 +165,9 @@ namespace DCL
                 statsPanel.SetCellText(1, (int) Rows.ENTITY_OBJECTS_COUNT, entityCount.ToString());
                 statsPanel.SetCellText(1, (int) Rows.MATERIAL_COUNT, materialCount.ToString());
                 statsPanel.SetCellText(1, (int) Rows.MESHES_COUNT, meshesCount.ToString());
-                statsPanel.SetCellText(1, (int) Rows.GLTF_BEING_LOADED, UnityGLTF.GLTFComponent.downloadingCount.ToString() + " / " + UnityGLTF.GLTFComponent.queueCount.ToString());
+                statsPanel.SetCellText(1, (int) Rows.GLTF_BEING_LOADED, UnityGLTF.GLTFComponent.downloadingCount.ToString() + " ... In Queue: " + UnityGLTF.GLTFComponent.queueCount.ToString());
+                statsPanel.SetCellText(1, (int) Rows.AB_BEING_LOADED, AssetPromise_AB.downloadingCount.ToString() + " ...  In Queue: " + AssetPromise_AB.queueCount.ToString());
+                statsPanel.SetCellText(1, (int) Rows.RENDERER_UNLOCK_SEGS, RenderingController.firstActivationTime.ToString(CultureInfo.InvariantCulture));
 
                 string busesLog = "";
                 Dictionary<string, int> pendingMessagesCount = new Dictionary<string, int>();
