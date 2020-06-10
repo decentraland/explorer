@@ -93,7 +93,7 @@ namespace DCL
 
             if (!string.IsNullOrEmpty(model.id))
             {
-                MinimapMetadataController.i?.UpdateMinimapUserInformation(new MinimapMetadata.MinimapUserInfo
+                UpdateMinimapUserInformation(new MinimapMetadata.MinimapUserInfo
                 {
                     userId = model.id,
                     userName = model.name,
@@ -112,17 +112,28 @@ namespace DCL
 
         private void OnEntityTransformChanged(DCLTransform.Model updatedModel)
         {
-            if (string.IsNullOrEmpty(model.id))
-                return;
+            lastAvatarPosition = updatedModel.position;
 
-            MinimapMetadataController.i?.UpdateMinimapUserInformation(new MinimapMetadata.MinimapUserInfo
+            UpdateMinimapUserInformation(new MinimapMetadata.MinimapUserInfo
             {
                 userId = model.id,
                 userName = model.name,
                 worldPosition = updatedModel.position
             });
+        }
 
-            lastAvatarPosition = updatedModel.position;
+        private void UpdateMinimapUserInformation(MinimapMetadata.MinimapUserInfo userInfo)
+        {
+            if (string.IsNullOrEmpty(userInfo.userId))
+                return;
+
+            Debug.Log(string.Format("[SANTI LOG] USER [{0}] UpdateMinimapUserInformation->worldPosition: [{1}][{2}][{3}]", userInfo.userName, userInfo.worldPosition.x, userInfo.worldPosition.y, userInfo.worldPosition.z));
+            MinimapMetadataController.i?.UpdateMinimapUserInformation(new MinimapMetadata.MinimapUserInfo
+            {
+                userId = userInfo.userId,
+                userName = userInfo.userName,
+                worldPosition = userInfo.worldPosition
+            });
         }
     }
 }
