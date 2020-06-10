@@ -41,6 +41,9 @@ namespace DCL
                 case PB_SendSceneMessage.PayloadOneofCase.CreateEntity:
                     message = MessagingTypes.ENTITY_CREATE;
                     break;
+                case PB_SendSceneMessage.PayloadOneofCase.CreateEntityWithComponents:
+                    message = MessagingTypes.ENTITY_CREATE_WITH_COMPONENTS;
+                    break;
                 case PB_SendSceneMessage.PayloadOneofCase.RemoveEntity:
                     message = MessagingTypes.ENTITY_DESTROY;
                     break;

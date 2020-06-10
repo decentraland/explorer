@@ -114,7 +114,7 @@ namespace DCL
 #if !UNITY_EDITOR
             Debug.Log("DCL Unity Build Version: " + DCL.Configuration.ApplicationSettings.version);
 
-            Debug.unityLogger.logEnabled = false;
+            //Debug.unityLogger.logEnabled = false;
 #endif
 
             InitializeSceneBoundariesChecker();
@@ -643,6 +643,25 @@ namespace DCL
             return busId;
         }
 
+        private void CreateEntityWithComponents(ParcelScene scene, PB_CreateEntityWithComponents entity, out CleanableYieldInstruction yieldInstruction) {
+            yieldInstruction = null;
+            
+            scene.CreateEntity(entity.Id);
+            if(entity.ParentId != "") {
+                scene.SetEntityParent(entity.Id, entity.ParentId);
+            }
+
+            foreach (var attached in entity.AttachedComponents)
+            {
+                scene.SharedComponentAttach(entity.Id, attached.Id, attached.Name);
+            }
+
+            foreach (var component in entity.Components)
+            {
+                scene.EntityComponentCreateOrUpdate(entity.Id, component.Name, component.ClassId, component.Data, out yieldInstruction);
+            }
+        }
+
         public bool ProcessMessage(MessagingBus.QueuedSceneMessage_Scene msgObject, out CleanableYieldInstruction yieldInstruction)
         {
             string sceneId = msgObject.sceneId;
@@ -677,6 +696,9 @@ namespace DCL
                 {
                     case MessagingTypes.ENTITY_CREATE:
                         scene.CreateEntity(tag);
+                        break;
+                    case MessagingTypes.ENTITY_CREATE_WITH_COMPONENTS:
+                        this.CreateEntityWithComponents(scene, payload.CreateEntityWithComponents, out yieldInstruction);
                         break;
                     case MessagingTypes.ENTITY_REPARENT:
                         scene.SetEntityParent(payload.SetEntityParent.EntityId, payload.SetEntityParent.ParentId);

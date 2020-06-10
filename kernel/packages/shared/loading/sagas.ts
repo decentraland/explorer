@@ -6,6 +6,7 @@ import { lastPlayerPosition } from '../world/positionThings'
 import { SceneLoad, SCENE_FAIL, SCENE_LOAD, SCENE_START } from './actions'
 import { LoadingState } from './reducer'
 import { EXPERIENCE_STARTED, helpTexts, rotateHelpText, TELEPORT_TRIGGERED } from './types'
+import defaultLogger from 'shared/logger'
 
 const SECONDS = 1000
 
@@ -20,6 +21,7 @@ export function* loadingSaga() {
 
 export function* trackLoadTime(action: SceneLoad): any {
   const start = new Date().getTime()
+  defaultLogger.log(`Started to load scene: ${performance.now()}`)
   const sceneId = action.payload
   const result = yield race({
     start: take((action: AnyAction) => action.type === SCENE_START && action.payload === sceneId),
@@ -27,9 +29,14 @@ export function* trackLoadTime(action: SceneLoad): any {
   })
   const user = yield select(getCurrentUser)
   const position = lastPlayerPosition
+
+  const elapsed = new Date().getTime() - start
+
+  defaultLogger.log(`Scene ${sceneId} loaded in: ${elapsed}`)
+
   queueTrackingEvent('SceneLoadTimes', {
     position: { ...position },
-    elapsed: new Date().getTime() - start,
+    elapsed,
     success: !!result.start,
     sceneId,
     userId: user.userId

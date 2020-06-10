@@ -13,9 +13,10 @@ import {
   ComponentUpdatedPayload,
   QueryPayload,
   LoadableParcelScene,
-  OpenNFTDialogPayload
+  OpenNFTDialogPayload,
+  CreateEntityWithComponentsPayload
 } from 'shared/types'
-import { DecentralandInterface, IEvents } from 'decentraland-ecs/src/decentraland/Types'
+import { DecentralandInterface, IEvents, EntityComponent } from 'decentraland-ecs/src/decentraland/Types'
 import { defaultLogger } from 'shared/logger'
 
 import { customEval, getES5Context } from './sdk/sandbox'
@@ -58,6 +59,89 @@ function resolveMapping(mapping: string | undefined, mappingName: string, baseUr
   }
 
   return (baseUrl.endsWith('/') ? baseUrl : baseUrl + '/') + url
+}
+
+function setParentToEvent(event: EntityAction, parentId: string): EntityAction {
+  if (event.type === 'CreateEntity') {
+    return { type: 'CreateEntityWithComponents', tag: event.tag, payload: { id: event.tag, parentId, components: [] } }
+  } else {
+    event.payload.parentId = parentId
+    return event
+  }
+}
+
+function attachComponentToEvent(event: EntityAction, componentName: string, id: string): EntityAction {
+  const component: EntityComponent = {
+    attached: { componentName: componentName.replace(componentNameRE, ''), componentId: id }
+  }
+  return addComponentToEvent(event, component)
+}
+
+function addComponentToEvent(event: EntityAction, component: EntityComponent): EntityAction {
+  if (event.type === 'CreateEntity') {
+    return {
+      type: 'CreateEntityWithComponents',
+      tag: event.tag,
+      payload: { id: event.tag, components: [component] }
+    }
+  } else {
+    event.payload.components.push(component)
+    return event
+  }
+}
+
+function addEmbeddedComponentToEvent(
+  event: EntityAction,
+  componentName: string,
+  classId: number,
+  json: string
+): EntityAction {
+  const component: EntityComponent = {
+    embedded: {
+      componentName: componentName.replace(componentNameRE, ''),
+      classId,
+      json: generatePBObject(classId, json)
+    }
+  }
+  return addComponentToEvent(event, component)
+}
+
+function isEventOfEntityCreation(lastEvent: EntityAction | undefined, entityId: string) {
+  return (
+    lastEvent &&
+    (lastEvent.type === 'CreateEntity' || lastEvent.type === 'CreateEntityWithComponents') &&
+    lastEvent.tag === entityId
+  )
+}
+
+function generatePBObject(classId: CLASS_ID, json: string): string {
+  let data: string = json
+
+  if (classId === CLASS_ID.TRANSFORM) {
+    const transform: Transform = JSON.parse(json)
+
+    pbPosition.setX(transform.position.x)
+    pbPosition.setY(transform.position.y)
+    pbPosition.setZ(transform.position.z)
+
+    pbRotation.setX(transform.rotation.x)
+    pbRotation.setY(transform.rotation.y)
+    pbRotation.setZ(transform.rotation.z)
+    pbRotation.setW(transform.rotation.w)
+
+    pbScale.setX(transform.scale.x)
+    pbScale.setY(transform.scale.y)
+    pbScale.setZ(transform.scale.z)
+
+    pbTransform.setPosition(pbPosition)
+    pbTransform.setRotation(pbRotation)
+    pbTransform.setScale(pbScale)
+
+    let arrayBuffer: Uint8Array = pbTransform.serializeBinary()
+    data = btoa(String.fromCharCode(...arrayBuffer))
+  }
+
+  return data
 }
 
 const componentNameRE = /^(engine\.)/
@@ -266,6 +350,14 @@ export default class GamekitScene extends Script {
           })
         },
 
+        addEntityWithComponents(entityId: string, components: EntityComponent[], parentId?: string) {
+          that.events.push({
+            type: 'CreateEntityWithComponents',
+            tag: entityId,
+            payload: { id: entityId, parentId, components } as CreateEntityWithComponentsPayload
+          })
+        },
+
         removeEntity(entityId: string) {
           that.events.push({
             type: 'RemoveEntity',
@@ -295,31 +387,43 @@ export default class GamekitScene extends Script {
         /** called after adding a component to the entity or after updating a component */
         updateEntityComponent(entityId: string, componentName: string, classId: number, json: string): void {
           if (componentNameRE.test(componentName)) {
-            that.events.push({
-              type: 'UpdateEntityComponent',
-              tag: sceneId + '_' + entityId + '_' + classId,
-              payload: {
-                entityId,
-                classId,
-                name: componentName.replace(componentNameRE, ''),
-                json: that.generatePBObject(classId, json)
-              } as UpdateEntityComponentPayload
-            })
+            const lastEvent = that.events[that.events.length - 1]
+
+            if (isEventOfEntityCreation(lastEvent, entityId)) {
+              that.events[that.events.length - 1] = addEmbeddedComponentToEvent(lastEvent, componentName, classId, json)
+            } else {
+              that.events.push({
+                type: 'UpdateEntityComponent',
+                tag: sceneId + '_' + entityId + '_' + classId,
+                payload: {
+                  entityId,
+                  classId,
+                  name: componentName.replace(componentNameRE, ''),
+                  json: generatePBObject(classId, json)
+                } as UpdateEntityComponentPayload
+              })
+            }
           }
         },
 
         /** called after adding a DisposableComponent to the entity */
         attachEntityComponent(entityId: string, componentName: string, id: string): void {
           if (componentNameRE.test(componentName)) {
-            that.events.push({
-              type: 'AttachEntityComponent',
-              tag: entityId,
-              payload: {
-                entityId,
-                name: componentName.replace(componentNameRE, ''),
-                id
-              } as AttachEntityComponentPayload
-            })
+            const lastEvent = that.events[that.events.length - 1]
+
+            if (isEventOfEntityCreation(lastEvent, entityId)) {
+              that.events[that.events.length - 1] = attachComponentToEvent(lastEvent, componentName, id)
+            } else {
+              that.events.push({
+                type: 'AttachEntityComponent',
+                tag: entityId,
+                payload: {
+                  entityId,
+                  name: componentName.replace(componentNameRE, ''),
+                  id
+                } as AttachEntityComponentPayload
+              })
+            }
           }
         },
 
@@ -339,14 +443,20 @@ export default class GamekitScene extends Script {
 
         /** set a new parent for the entity */
         setParent(entityId: string, parentId: string): void {
-          that.events.push({
-            type: 'SetEntityParent',
-            tag: entityId,
-            payload: {
-              entityId,
-              parentId
-            } as SetEntityParentPayload
-          })
+          const lastEvent = that.events[that.events.length - 1]
+
+          if (isEventOfEntityCreation(lastEvent, entityId)) {
+            that.events[that.events.length - 1] = setParentToEvent(lastEvent, parentId)
+          } else {
+            that.events.push({
+              type: 'SetEntityParent',
+              tag: entityId,
+              payload: {
+                entityId,
+                parentId
+              } as SetEntityParentPayload
+            })
+          }
         },
 
         /** queries for a specific system with a certain query configuration */
@@ -587,36 +697,6 @@ export default class GamekitScene extends Script {
     }
 
     update()
-  }
-
-  private generatePBObject(classId: CLASS_ID, json: string): string {
-    let data: string = json
-
-    if (classId === CLASS_ID.TRANSFORM) {
-      const transform: Transform = JSON.parse(json)
-
-      pbPosition.setX(transform.position.x)
-      pbPosition.setY(transform.position.y)
-      pbPosition.setZ(transform.position.z)
-
-      pbRotation.setX(transform.rotation.x)
-      pbRotation.setY(transform.rotation.y)
-      pbRotation.setZ(transform.rotation.z)
-      pbRotation.setW(transform.rotation.w)
-
-      pbScale.setX(transform.scale.x)
-      pbScale.setY(transform.scale.y)
-      pbScale.setZ(transform.scale.z)
-
-      pbTransform.setPosition(pbPosition)
-      pbTransform.setRotation(pbRotation)
-      pbTransform.setScale(pbScale)
-
-      let arrayBuffer: Uint8Array = pbTransform.serializeBinary()
-      data = btoa(String.fromCharCode(...arrayBuffer))
-    }
-
-    return data
   }
 
   private isPointerEvent(event: any): boolean {

@@ -11,6 +11,8 @@ namespace DCL
     {
         public const string ENTITY_COMPONENT_CREATE_OR_UPDATE = "UpdateEntityComponent";
         public const string ENTITY_CREATE = "CreateEntity";
+
+        public const string ENTITY_CREATE_WITH_COMPONENTS = "CreateEntityWithComponents";
         public const string ENTITY_REPARENT = "SetEntityParent";
         public const string ENTITY_COMPONENT_DESTROY = "ComponentRemoved";
         public const string SHARED_COMPONENT_ATTACH = "AttachEntityComponent";

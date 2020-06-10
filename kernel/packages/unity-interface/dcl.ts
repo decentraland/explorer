@@ -50,7 +50,8 @@ import {
   PB_UpdateEntityComponent,
   PB_Vector3,
   PB_OpenExternalUrl,
-  PB_OpenNFTDialog
+  PB_OpenNFTDialog,
+  PB_CreateEntityWithComponents
 } from '../shared/proto/engineinterface_pb'
 import { Session } from 'shared/session'
 import { getPerformanceInfo } from 'shared/session/getPerformanceInfo'
@@ -81,7 +82,8 @@ import {
   UpdateUserStatusMessage,
   FriendshipAction,
   WorldPosition,
-  OpenNFTDialogPayload
+  OpenNFTDialogPayload,
+  CreateEntityWithComponentsPayload
 } from 'shared/types'
 import { ParcelSceneAPI } from 'shared/world/ParcelSceneAPI'
 import {
@@ -723,6 +725,7 @@ const componentDisposed: PB_ComponentDisposed = new PB_ComponentDisposed()
 const componentUpdated: PB_ComponentUpdated = new PB_ComponentUpdated()
 const openExternalUrl: PB_OpenExternalUrl = new PB_OpenExternalUrl()
 const openNFTDialog: PB_OpenNFTDialog = new PB_OpenNFTDialog()
+const createEntityWithComponents: PB_CreateEntityWithComponents = new PB_CreateEntityWithComponents;
 
 class UnityScene<T> implements ParcelSceneAPI {
   eventDispatcher = new EventDispatcher()
@@ -774,6 +777,9 @@ class UnityScene<T> implements ParcelSceneAPI {
       case 'CreateEntity':
         message.setCreateentity(this.encodeCreateEntity(payload))
         break
+      case 'CreateEntityWithComponents':
+        message.setCreateentitywithcomponents(this.encodeCreateEntityWithComponents(payload))
+        break
       case 'RemoveEntity':
         message.setRemoveentity(this.encodeRemoveEntity(payload))
         break
@@ -819,6 +825,25 @@ class UnityScene<T> implements ParcelSceneAPI {
   encodeCreateEntity(createEntityPayload: CreateEntityPayload): PB_CreateEntity {
     createEntity.setId(createEntityPayload.id)
     return createEntity
+  }
+
+  encodeCreateEntityWithComponents(createEntityPayload: CreateEntityWithComponentsPayload): PB_CreateEntityWithComponents {
+    createEntityWithComponents.setAttachedcomponentsList([])
+    createEntityWithComponents.setComponentsList([])
+    createEntityWithComponents.setId(createEntityPayload.id);
+    createEntityWithComponents.setParentid(createEntityPayload.parentId ?? "");
+    createEntityPayload.components.forEach(it => {
+      if("attached" in it) {
+        createEntityWithComponents.addAttachedcomponents(this.encodeAttachEntityComponent(
+          { name: it.attached.componentName, id: it.attached.componentId, entityId: createEntityPayload.id }
+        ))
+      } else {
+        createEntityWithComponents.addComponents(this.encodeUpdateEntityComponent(
+          { name: it.embedded.componentName, json: it.embedded.json, entityId: createEntityPayload.id, classId: it.embedded.classId }
+        ))
+      }
+    })
+    return createEntityWithComponents
   }
 
   encodeRemoveEntity(removeEntityPayload: RemoveEntityPayload): PB_RemoveEntity {

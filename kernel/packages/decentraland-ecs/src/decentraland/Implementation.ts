@@ -11,7 +11,7 @@ import { Engine } from '../ecs/Engine'
 import { ComponentAdded, ComponentRemoved, IEntity, ISystem, ParentChanged } from '../ecs/IEntity'
 import { PointerEvent, RaycastResponse, UUIDEvent } from './Events'
 import { RaycastHitEntities, RaycastHitEntity } from './PhysicsCast'
-import { DecentralandInterface } from './Types'
+import { DecentralandInterface, EntityComponent } from './Types'
 
 // This number is defined in the protocol ECS.SetEntityParent.3
 const ROOT_ENTITY_ID = '0'
@@ -71,21 +71,12 @@ export class DecentralandSynchronizationSystem implements ISystem {
       const entityId = entity.uuid
       const parent = entity.getParent()
 
-      this.dcl.addEntity(entityId)
-
-      if (parent) {
-        // If the entity has a parent, we send the the enparenting signal
-        // otherwise the engine will know the entity is set as a child of
-        // engine.rootEntity by default
-        this.dcl.setParent(entityId, parent.uuid)
-      }
+      const entityComponents: EntityComponent[] = []
 
       // This creates a cache dictionary to avoid send redundant information to
       // the engine in order to avoid unnecessary work in the main thread.
       this.cachedComponents[entityId] = {}
 
-      // this iterator sends the current components of te engine at the moment
-      // of addition
       for (let componentName in entity.components) {
         const component = entity.components[componentName]
         const classId = getComponentClassId(component)
@@ -93,18 +84,20 @@ export class DecentralandSynchronizationSystem implements ISystem {
         if (classId !== null) {
           if (isDisposableComponent(component)) {
             // Send the attach component signal
-            this.dcl.attachEntityComponent(entity.uuid, componentName, getComponentId(component))
+            entityComponents.push({ attached: { componentName, componentId: getComponentId(component) } })
           } else {
             const componentJson: string = JSON.stringify(component)
 
             // Send the updated component
-            this.dcl.updateEntityComponent(entityId, componentName, classId, componentJson)
+            entityComponents.push({ embedded: { componentName, classId, json: componentJson } })
 
             // Update the cached copy of the sent component
             this.cachedComponents[entityId][componentName] = componentJson
           }
         }
       }
+
+      this.dcl.addEntityWithComponents(entityId, entityComponents, parent?.uuid)
     }
   }
 

@@ -1,5 +1,6 @@
 import { Vector3Component, Vector2Component } from '../atomicHelpers/landHelpers'
 import { QueryType } from 'decentraland-ecs/src/decentraland/PhysicsCast'
+import { EntityComponent } from 'decentraland-ecs/src'
 
 export { Avatar, Profile, ColorString, WearableId, Wearable } from './profiles/types'
 
@@ -52,6 +53,7 @@ export type RPCSendableMessage = {
 
 export type EntityActionType =
   | 'CreateEntity'
+  | 'CreateEntityWithComponents'
   | 'RemoveEntity'
   | 'SetEntityParent'
   | 'UpdateEntityComponent'
@@ -68,6 +70,8 @@ export type EntityActionType =
 export type QueryPayload = { queryId: string; payload: RayQuery }
 
 export type CreateEntityPayload = { id: string }
+
+export type CreateEntityWithComponentsPayload = { id: string; parentId?: string; components: EntityComponent[] }
 
 export type RemoveEntityPayload = { id: string }
 export type SceneStartedPayload = {}

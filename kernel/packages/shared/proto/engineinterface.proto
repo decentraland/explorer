@@ -10,6 +10,13 @@ message PB_CreateEntity {
     string id = 1;
 }
 
+message PB_CreateEntityWithComponents {
+  string id = 1;
+  repeated PB_UpdateEntityComponent components = 2;
+  repeated PB_AttachEntityComponent attachedComponents = 3;
+  string parentId = 4;
+}
+
 message PB_RemoveEntity {
     string id = 1;
 }
@@ -185,6 +192,7 @@ message PB_SendSceneMessage {
         google.protobuf.Empty sceneStarted = 13;
         PB_OpenExternalUrl openExternalUrl = 14;
         PB_OpenNFTDialog openNFTDialog = 15;
+        PB_CreateEntityWithComponents createEntityWithComponents = 16;
     }
 }
 

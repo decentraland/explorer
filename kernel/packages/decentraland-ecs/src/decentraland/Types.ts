@@ -11,6 +11,15 @@ export type ModuleDescriptor = {
 export type MethodDescriptor = { name: string }
 
 /** @public */
+export type EmbeddedComponent = { componentName: string; classId: number; json: string }
+
+/** @public */
+export type AttachedComponent = { componentName: string; componentId: string }
+
+/** @public */
+export type EntityComponent = { embedded: EmbeddedComponent } | { attached: AttachedComponent }
+
+/** @public */
 export type DecentralandInterface = {
   /** are we running in debug mode? */
   DEBUG: boolean
@@ -42,6 +51,8 @@ export type DecentralandInterface = {
 
   /** create the entity in the engine */
   addEntity(entityId: string): void
+
+  addEntityWithComponents(entityId: string, components: EntityComponent[], parentId?: string): void
 
   /** remove the entity from the engine */
   removeEntity(entityId: string): void
