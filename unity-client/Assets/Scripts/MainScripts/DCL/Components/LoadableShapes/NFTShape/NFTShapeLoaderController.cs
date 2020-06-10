@@ -39,14 +39,15 @@ public class NFTShapeLoaderController : MonoBehaviour
     [SerializeField] bool noiseIs3D = false;
     [SerializeField] bool noiseIsFractal = false;
 
-    Material frameMaterial = null;
     System.Action<LoadWrapper> OnSuccess;
     System.Action<LoadWrapper> OnFail;
     string darURLProtocol;
     string darURLRegistry;
     string darURLAsset;
-    MaterialPropertyBlock imageMaterialPropertyBlock = null;
-    MaterialPropertyBlock backgroundMaterialPropertyBlock = null;
+
+    Material frameMaterial = null;
+    Material imageMaterial = null;
+    Material backgroundMaterial = null;
 
     int BASEMAP_SHADER_PROPERTY = Shader.PropertyToID("_BaseMap");
     int COLOR_SHADER_PROPERTY = Shader.PropertyToID("_BaseColor");
@@ -57,8 +58,8 @@ public class NFTShapeLoaderController : MonoBehaviour
 
     void Awake()
     {
-        if (materialIndex_NFTImage >= 0) imageMaterialPropertyBlock = new MaterialPropertyBlock();
-        if (materialIndex_Background >= 0) backgroundMaterialPropertyBlock = new MaterialPropertyBlock();
+        if (materialIndex_NFTImage >= 0) imageMaterial = meshRenderer.materials[materialIndex_NFTImage];
+        if (materialIndex_Background >= 0) backgroundMaterial = meshRenderer.materials[materialIndex_Background];
         if (materialIndex_Frame >= 0) frameMaterial = meshRenderer.materials[materialIndex_Frame];
 
         InitializePerlinNoise();
@@ -118,12 +119,10 @@ public class NFTShapeLoaderController : MonoBehaviour
 
     public void UpdateBackgroundColor(Color newColor)
     {
-        if (backgroundMaterialPropertyBlock == null)
+        if (backgroundMaterial == null)
             return;
 
-        meshRenderer.GetPropertyBlock(backgroundMaterialPropertyBlock, materialIndex_Background);
-        backgroundMaterialPropertyBlock.SetColor(COLOR_SHADER_PROPERTY, newColor);
-        meshRenderer.SetPropertyBlock(backgroundMaterialPropertyBlock, materialIndex_Background);
+        backgroundMaterial.SetColor(COLOR_SHADER_PROPERTY, newColor);
     }
 
     IEnumerator FetchNFTImage()
@@ -209,13 +208,11 @@ public class NFTShapeLoaderController : MonoBehaviour
 
     void UpdateTexture(Texture2D texture)
     {
-        if (imageMaterialPropertyBlock == null)
+        if (imageMaterial == null)
             return;
 
-        meshRenderer.GetPropertyBlock(imageMaterialPropertyBlock, materialIndex_NFTImage);
-        imageMaterialPropertyBlock.SetTexture(BASEMAP_SHADER_PROPERTY, texture);
-        imageMaterialPropertyBlock.SetColor(COLOR_SHADER_PROPERTY, Color.white);
-        meshRenderer.SetPropertyBlock(imageMaterialPropertyBlock, materialIndex_NFTImage);
+        imageMaterial.SetTexture(BASEMAP_SHADER_PROPERTY, texture);
+        imageMaterial.SetColor(COLOR_SHADER_PROPERTY, Color.white);
     }
 
     void InitializePerlinNoise()
