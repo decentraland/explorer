@@ -93,7 +93,7 @@ namespace DCL
 
             if (!string.IsNullOrEmpty(model.id))
             {
-                UpdateMinimapUserInformation(new MinimapMetadata.MinimapUserInfo
+                UpdateAvatarIconInMinimap(new MinimapMetadata.MinimapUserInfo
                 {
                     userId = model.id,
                     userName = model.name,
@@ -114,7 +114,7 @@ namespace DCL
         {
             lastAvatarPosition = updatedModel.position;
 
-            UpdateMinimapUserInformation(new MinimapMetadata.MinimapUserInfo
+            UpdateAvatarIconInMinimap(new MinimapMetadata.MinimapUserInfo
             {
                 userId = model.id,
                 userName = model.name,
@@ -122,11 +122,8 @@ namespace DCL
             });
         }
 
-        private void UpdateMinimapUserInformation(MinimapMetadata.MinimapUserInfo userInfo)
+        private void UpdateAvatarIconInMinimap(MinimapMetadata.MinimapUserInfo userInfo)
         {
-            if (string.IsNullOrEmpty(userInfo.userId))
-                return;
-
             MinimapMetadataController.i?.UpdateMinimapUserInformation(new MinimapMetadata.MinimapUserInfo
             {
                 userId = userInfo.userId,
