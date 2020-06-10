@@ -105,6 +105,7 @@ public class TeleportPromptHUDView : MonoBehaviour
                         break;
                     }
                 }
+                Debug.LogError($"Teleport error: {teleportCommand} is not a valid destination");
                 Hide();
                 break;
         }
