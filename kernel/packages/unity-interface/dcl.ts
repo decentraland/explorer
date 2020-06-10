@@ -725,7 +725,7 @@ const componentDisposed: PB_ComponentDisposed = new PB_ComponentDisposed()
 const componentUpdated: PB_ComponentUpdated = new PB_ComponentUpdated()
 const openExternalUrl: PB_OpenExternalUrl = new PB_OpenExternalUrl()
 const openNFTDialog: PB_OpenNFTDialog = new PB_OpenNFTDialog()
-const createEntityWithComponents: PB_CreateEntityWithComponents = new PB_CreateEntityWithComponents;
+const createEntityWithComponents: PB_CreateEntityWithComponents = new PB_CreateEntityWithComponents()
 
 class UnityScene<T> implements ParcelSceneAPI {
   eventDispatcher = new EventDispatcher()
@@ -830,10 +830,10 @@ class UnityScene<T> implements ParcelSceneAPI {
   encodeCreateEntityWithComponents(createEntityPayload: CreateEntityWithComponentsPayload): PB_CreateEntityWithComponents {
     createEntityWithComponents.setAttachedcomponentsList([])
     createEntityWithComponents.setComponentsList([])
-    createEntityWithComponents.setId(createEntityPayload.id);
-    createEntityWithComponents.setParentid(createEntityPayload.parentId ?? "");
+    createEntityWithComponents.setId(createEntityPayload.id)
+    createEntityWithComponents.setParentid(createEntityPayload.parentId ?? "")
     createEntityPayload.components.forEach(it => {
-      if("attached" in it) {
+      if ("attached" in it) {
         createEntityWithComponents.addAttachedcomponents(this.encodeAttachEntityComponent(
           { name: it.attached.componentName, id: it.attached.componentId, entityId: createEntityPayload.id }
         ))
