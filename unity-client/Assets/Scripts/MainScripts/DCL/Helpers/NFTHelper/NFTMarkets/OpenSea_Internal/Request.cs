@@ -58,7 +58,7 @@ namespace DCL.Helpers.NFT.Markets.OpenSea_Internal
 
         public bool isOpen { private set; get; }
 
-        List<Request> requests = new List<Request>();
+        Dictionary<string, Request> requests = new Dictionary<string, Request>();
         string requestUrl = "";
 
         Coroutine fetchRoutine = null;
@@ -73,8 +73,16 @@ namespace DCL.Helpers.NFT.Markets.OpenSea_Internal
 
         public Request AddRequest(string assetContractAddress, string tokenId)
         {
-            Request request = new Request(assetContractAddress, tokenId);
-            requests.Add(request);
+            string nftId = $"{assetContractAddress}/{tokenId}";
+
+            Request request = null;
+            if (requests.TryGetValue(nftId, out request))
+            {
+                return request;
+            }
+
+            request = new Request(assetContractAddress, tokenId);
+            requests.Add(nftId, request);
             requestUrl += request.ToString();
 
             if (requestUrl.Length >= URL_PARAMS_MAX_LENGTH)
@@ -105,12 +113,15 @@ namespace DCL.Helpers.NFT.Markets.OpenSea_Internal
                     response = Utils.FromJsonWithNulls<AssetsResponse>(request.downloadHandler.text);
                 }
 
-                for (int i = 0; i < requests.Count; i++)
+                using (var iterator = requests.GetEnumerator())
                 {
-                    if (response != null)
-                        requests[i].Resolve(response);
-                    else
-                        requests[i].Resolve(request.error);
+                    while (iterator.MoveNext())
+                    {
+                        if (response != null)
+                            iterator.Current.Value.Resolve(response);
+                        else
+                            iterator.Current.Value.Resolve(request.error);
+                    }
                 }
             }
         }
