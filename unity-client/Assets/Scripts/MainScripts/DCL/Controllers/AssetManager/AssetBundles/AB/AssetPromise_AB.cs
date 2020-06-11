@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -19,7 +20,11 @@ namespace DCL
 
         static readonly float maxLoadBudgetTime = 0.032f;
         static float currentLoadBudgetTime = 0;
-        public static bool limitTimeBudget { get { return CommonScriptableObjects.rendererState.Get(); } }
+
+        public static bool limitTimeBudget
+        {
+            get { return CommonScriptableObjects.rendererState.Get(); }
+        }
 
         Coroutine loadCoroutine;
         static HashSet<string> failedRequestUrls = new HashSet<string>();
@@ -29,16 +34,16 @@ namespace DCL
 
         static Dictionary<string, int> loadOrderByExtension = new Dictionary<string, int>()
         {
-            { "png", 0 },
-            { "jpg", 1 },
-            { "peg", 2 },
-            { "bmp", 3 },
-            { "psd", 4 },
-            { "iff", 5 },
-            { "mat", 6 },
-            { "nim", 7 },
-            { "ltf", 8 },
-            { "glb", 9 }
+            {"png", 0},
+            {"jpg", 1},
+            {"peg", 2},
+            {"bmp", 3},
+            {"psd", 4},
+            {"iff", 5},
+            {"mat", 6},
+            {"nim", 7},
+            {"ltf", 8},
+            {"glb", 9}
         };
 
         public AssetPromise_AB(string contentUrl, string hash) : base(contentUrl, hash)
@@ -160,7 +165,7 @@ namespace DCL
                 yield break;
             }
 
-            assetBundleRequest = UnityWebRequestAssetBundle.GetAssetBundle(finalUrl);
+            assetBundleRequest = UnityWebRequestAssetBundle.GetAssetBundle(finalUrl, Hash128.Compute(hash));
 
             yield return assetBundleRequest.SendWebRequest();
 
@@ -221,6 +226,7 @@ namespace DCL
                 {
                     yield break;
                 }
+
                 if (asset == null)
                     break;
 
