@@ -26,11 +26,11 @@ namespace DCL.Helpers.NFT.Markets
                 (assetResponse) =>
                 {
                     NFTInfo nftInfo = ResponseToNFTInfo(assetResponse);
-                    onSuccess?.Invoke(nftInfo);
                     if (!cachedResponses.ContainsKey(nftId))
                     {
                         cachedResponses.Add(nftId, nftInfo);
                     }
+                    onSuccess?.Invoke(nftInfo);
                 },
                 (error) =>
                 {
