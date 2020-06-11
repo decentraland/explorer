@@ -9,7 +9,7 @@ namespace DCL.Helpers.NFT.Markets
     internal class OpenSea : INFTMarket
     {
         MarketInfo openSeaMarketInfo = new MarketInfo() { name = "OpenSea" };
-        RequestController requestController = new RequestController();
+        OpenSeaRequestController requestController = new OpenSeaRequestController();
         Dictionary<string, NFTInfo> cachedResponses = new Dictionary<string, NFTInfo>();
 
         IEnumerator INFTMarket.FetchNFTInfo(string assetContractAddress, string tokenId, Action<NFTInfo> onSuccess, Action<string> onError)
@@ -21,7 +21,7 @@ namespace DCL.Helpers.NFT.Markets
                 yield break;
             }
 
-            Request request = requestController.AddRequest(assetContractAddress, tokenId);
+            OpenSeaRequest request = requestController.AddRequest(assetContractAddress, tokenId);
             yield return request.OnResolved(
                 (assetResponse) =>
                 {

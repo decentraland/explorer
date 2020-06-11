@@ -8,17 +8,17 @@ using UnityEngine.Networking;
 
 namespace DCL.Helpers.NFT.Markets.OpenSea_Internal
 {
-    internal class RequestController
+    internal class OpenSeaRequestController
     {
         internal const bool VERBOSE = false;
         const float MIN_REQUEST_DELAY = 0.34f; // max 3 requests per second
 
-        List<RequestGroup> requestGroup = new List<RequestGroup>();
+        List<OpenSeaRequestGroup> requestGroup = new List<OpenSeaRequestGroup>();
         float lastApiRequestTime = 0;
 
-        public Request AddRequest(string assetContractAddress, string tokenId)
+        public OpenSeaRequest AddRequest(string assetContractAddress, string tokenId)
         {
-            RequestGroup group = null;
+            OpenSeaRequestGroup group = null;
             for (int i = 0; i < requestGroup.Count; i++)
             {
                 if (requestGroup[i].isOpen)
@@ -34,7 +34,7 @@ namespace DCL.Helpers.NFT.Markets.OpenSea_Internal
             return group.AddRequest(assetContractAddress, tokenId);
         }
 
-        RequestGroup CreateNewGroup()
+        OpenSeaRequestGroup CreateNewGroup()
         {
             float delayRequest = MIN_REQUEST_DELAY;
             float timeSinceLastApiRequest = Time.unscaledTime - lastApiRequestTime;
@@ -44,14 +44,14 @@ namespace DCL.Helpers.NFT.Markets.OpenSea_Internal
                 delayRequest += Math.Abs(timeSinceLastApiRequest);
             }
 
-            RequestGroup group = new RequestGroup(delayRequest, OnGroupClosed);
+            OpenSeaRequestGroup group = new OpenSeaRequestGroup(delayRequest, OnGroupClosed);
             requestGroup.Add(group);
             lastApiRequestTime = Time.unscaledTime + delayRequest;
             if (VERBOSE) Debug.Log($"RequestController: RequestGroup created to request at {lastApiRequestTime}");
             return group;
         }
 
-        void OnGroupClosed(RequestGroup group)
+        void OnGroupClosed(OpenSeaRequestGroup group)
         {
             if (VERBOSE) Debug.Log("RequestController: RequestGroup closed");
             if (requestGroup.Contains(group))
@@ -61,37 +61,37 @@ namespace DCL.Helpers.NFT.Markets.OpenSea_Internal
         }
     }
 
-    class RequestGroup : IDisposable
+    class OpenSeaRequestGroup : IDisposable
     {
         const string API_URL_ASSETS = "https://api.opensea.io/api/v1/assets?";
         const float URL_PARAMS_MAX_LENGTH = 1854; // maxUrl(2048) - apiUrl(37) - longestPossibleRequest (78 tokenId + 42 contractAddress + 37 urlParams)
 
         public bool isOpen { private set; get; }
 
-        Dictionary<string, Request> requests = new Dictionary<string, Request>();
+        Dictionary<string, OpenSeaRequest> requests = new Dictionary<string, OpenSeaRequest>();
         string requestUrl = "";
 
         Coroutine fetchRoutine = null;
-        Action<RequestGroup> onGroupClosed = null;
+        Action<OpenSeaRequestGroup> onGroupClosed = null;
 
-        public RequestGroup(float delayRequest, Action<RequestGroup> onGroupClosed)
+        public OpenSeaRequestGroup(float delayRequest, Action<OpenSeaRequestGroup> onGroupClosed)
         {
             isOpen = true;
             this.onGroupClosed = onGroupClosed;
             fetchRoutine = CoroutineStarter.Start(Fetch(delayRequest));
         }
 
-        public Request AddRequest(string assetContractAddress, string tokenId)
+        public OpenSeaRequest AddRequest(string assetContractAddress, string tokenId)
         {
             string nftId = $"{assetContractAddress}/{tokenId}";
 
-            Request request = null;
+            OpenSeaRequest request = null;
             if (requests.TryGetValue(nftId, out request))
             {
                 return request;
             }
 
-            request = new Request(assetContractAddress, tokenId);
+            request = new OpenSeaRequest(assetContractAddress, tokenId);
             requests.Add(nftId, request);
             requestUrl += request.ToString() + "&";
 
@@ -110,7 +110,7 @@ namespace DCL.Helpers.NFT.Markets.OpenSea_Internal
 
             string url = API_URL_ASSETS + requestUrl;
 
-            if (RequestController.VERBOSE) Debug.Log($"RequestGroup: Request to OpenSea {url}");
+            if (OpenSeaRequestController.VERBOSE) Debug.Log($"RequestGroup: Request to OpenSea {url}");
 
             using (UnityWebRequest request = UnityWebRequest.Get(url))
             {
@@ -123,7 +123,7 @@ namespace DCL.Helpers.NFT.Markets.OpenSea_Internal
                     response = Utils.FromJsonWithNulls<AssetsResponse>(request.downloadHandler.text);
                 }
 
-                if (RequestController.VERBOSE) Debug.Log($"RequestGroup: Request resolving {response != null} {request.error} {url}");
+                if (OpenSeaRequestController.VERBOSE) Debug.Log($"RequestGroup: Request resolving {response != null} {request.error} {url}");
                 using (var iterator = requests.GetEnumerator())
                 {
                     while (iterator.MoveNext())
@@ -152,7 +152,7 @@ namespace DCL.Helpers.NFT.Markets.OpenSea_Internal
         }
     }
 
-    internal class Request
+    internal class OpenSeaRequest
     {
         string assetContractAddress;
         string tokenId;
@@ -161,11 +161,11 @@ namespace DCL.Helpers.NFT.Markets.OpenSea_Internal
         AssetResponse assetResponse = null;
         string error = null;
 
-        public Request(string assetContractAddress, string tokenId)
+        public OpenSeaRequest(string assetContractAddress, string tokenId)
         {
             this.assetContractAddress = assetContractAddress;
             this.tokenId = tokenId;
-            if (RequestController.VERBOSE) Debug.Log($"Request: created {this.ToString()}");
+            if (OpenSeaRequestController.VERBOSE) Debug.Log($"Request: created {this.ToString()}");
         }
 
         public void Resolve(AssetsResponse response)
@@ -176,7 +176,7 @@ namespace DCL.Helpers.NFT.Markets.OpenSea_Internal
                 asset = response.assets[i];
                 if (asset.token_id == tokenId && String.Equals(asset.asset_contract.address, assetContractAddress, StringComparison.OrdinalIgnoreCase))
                 {
-                    if (RequestController.VERBOSE) Debug.Log($"Request: resolved {this.ToString()}");
+                    if (OpenSeaRequestController.VERBOSE) Debug.Log($"Request: resolved {this.ToString()}");
                     assetResponse = asset;
                     break;
                 }
@@ -184,7 +184,7 @@ namespace DCL.Helpers.NFT.Markets.OpenSea_Internal
             if (assetResponse == null)
             {
                 error = $"asset {assetContractAddress}/{tokenId} not found in api response";
-                if (RequestController.VERBOSE) Debug.Log($"Request: not found {JsonUtility.ToJson(response)}");
+                if (OpenSeaRequestController.VERBOSE) Debug.Log($"Request: not found {JsonUtility.ToJson(response)}");
             }
             resolved = true;
         }
