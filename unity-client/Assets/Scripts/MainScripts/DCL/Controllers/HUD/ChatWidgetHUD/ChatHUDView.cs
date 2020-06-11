@@ -22,6 +22,8 @@ public class ChatHUDView : MonoBehaviour
     public ChatHUDController controller;
     public GameObject messageHoverPanel;
     public TextMeshProUGUI messageHoverText;
+    public UserContextMenu contextMenu;
+
     [NonSerialized] public List<ChatEntry> entries = new List<ChatEntry>();
     [NonSerialized] public List<DateSeparatorEntry> dateSeparators = new List<DateSeparatorEntry>();
 
@@ -131,6 +133,9 @@ public class ChatHUDView : MonoBehaviour
         if (chatEntryModel.messageType == ChatMessage.Type.PRIVATE)
             chatEntry.OnPress += OnPressPrivateMessage;
 
+        if (chatEntryModel.messageType == ChatMessage.Type.PUBLIC || chatEntryModel.messageType == ChatMessage.Type.PRIVATE)
+            chatEntry.OnPressRightButton += OnOpenContextMenu;
+
         chatEntry.OnTriggerHover += OnMessageTriggerHover;
         chatEntry.OnCancelHover += OnMessageCancelHover;
 
@@ -142,6 +147,20 @@ public class ChatHUDView : MonoBehaviour
 
         if (setScrollPositionToBottom)
             scrollRect.verticalNormalizedPosition = 0;
+    }
+
+    private void OnOpenContextMenu(ChatEntry chatEntry)
+    {
+        bool isBlocked = UserProfile.GetOwnUserProfile().blocked.Contains(chatEntry.model.otherUserId);
+
+        contextMenu.Initialize(
+            chatEntry.model.otherUserId,
+            chatEntry.model.senderName,
+            isBlocked);
+
+        contextMenu.transform.position = chatEntry.contextMenuPositionReference.position;
+        contextMenu.transform.parent = chatEntriesContainer.transform;
+        contextMenu.Show();
     }
 
     protected virtual void OnMessageTriggerHover(ChatEntry chatEntry)

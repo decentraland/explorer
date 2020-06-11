@@ -1,10 +1,12 @@
-
 using DCL.Interface;
 using System;
+using UnityEngine;
 using UnityEngine.Events;
+
 public class ChatHUDController : IDisposable
 {
     public const int MAX_CHAT_ENTRIES = 100;
+    internal const string CURRENT_PLAYER_ID = "CurrentPlayerInfoCardId";
 
     public ChatHUDView view;
 
@@ -18,11 +20,42 @@ public class ChatHUDController : IDisposable
 
         this.view.OnPressPrivateMessage -= View_OnPressPrivateMessage;
         this.view.OnPressPrivateMessage += View_OnPressPrivateMessage;
+
+        if (this.view.contextMenu != null)
+        {
+            this.view.contextMenu.OnPassport -= ContextMenu_OnPassport;
+            this.view.contextMenu.OnPassport += ContextMenu_OnPassport;
+
+            this.view.contextMenu.OnBlock -= ContextMenu_OnBlock;
+            this.view.contextMenu.OnBlock += ContextMenu_OnBlock;
+
+            this.view.contextMenu.OnReport -= ContextMenu_OnReport;
+            this.view.contextMenu.OnReport += ContextMenu_OnReport;
+        }
     }
 
     void View_OnPressPrivateMessage(string friendUserId)
     {
         OnPressPrivateMessage?.Invoke(friendUserId);
+    }
+
+    private void ContextMenu_OnPassport(string userId)
+    {
+        var currentPlayerId = Resources.Load<StringVariable>(CURRENT_PLAYER_ID);
+        currentPlayerId.Set(userId);
+    }
+
+    private void ContextMenu_OnBlock(string userId, bool blockUser)
+    {
+        if (blockUser)
+            WebInterface.SendBlockPlayer(userId);
+        else
+            WebInterface.SendUnblockPlayer(userId);
+    }
+
+    private void ContextMenu_OnReport(string userId)
+    {
+        WebInterface.SendReportPlayer(userId);
     }
 
     public void AddChatMessage(ChatEntry.Model chatEntryModel, bool setScrollPositionToBottom = false)
@@ -39,7 +72,13 @@ public class ChatHUDController : IDisposable
     public void Dispose()
     {
         view.OnPressPrivateMessage -= View_OnPressPrivateMessage;
-        UnityEngine.Object.Destroy(this.view.gameObject);
+        if (view.contextMenu != null)
+        {
+            view.contextMenu.OnPassport -= ContextMenu_OnPassport;
+            view.contextMenu.OnBlock -= ContextMenu_OnBlock;
+            view.contextMenu.OnReport -= ContextMenu_OnReport;
+        }
+        UnityEngine.Object.Destroy(view.gameObject);
     }
 
     public static ChatEntry.Model ChatMessageToChatEntry(ChatMessage message)
@@ -64,16 +103,16 @@ public class ChatHUDController : IDisposable
             model.senderName = senderProfile != null ? senderProfile.userName : message.sender;
         }
 
-        if (model.messageType == ChatMessage.Type.PRIVATE)
+        if (model.messageType == ChatMessage.Type.PRIVATE || model.messageType == ChatMessage.Type.PUBLIC)
         {
             if (message.recipient == ownProfile.userId)
             {
-                model.subType = ChatEntry.Model.SubType.PRIVATE_FROM;
+                model.subType = model.messageType == ChatMessage.Type.PRIVATE ? ChatEntry.Model.SubType.PRIVATE_FROM : ChatEntry.Model.SubType.NONE;
                 model.otherUserId = message.sender;
             }
             else if (message.sender == ownProfile.userId)
             {
-                model.subType = ChatEntry.Model.SubType.PRIVATE_TO;
+                model.subType = model.messageType == ChatMessage.Type.PRIVATE ? ChatEntry.Model.SubType.PRIVATE_TO : ChatEntry.Model.SubType.NONE;
                 model.otherUserId = message.recipient;
             }
             else
