@@ -12,6 +12,8 @@ public class ChatHUDController : IDisposable
 
     public event UnityAction<string> OnPressPrivateMessage;
 
+    private InputAction_Trigger closeWindowTrigger;
+
     public void Initialize(ChatHUDView view = null, UnityAction<ChatMessage> onSendMessage = null)
     {
         this.view = view ?? ChatHUDView.Create();
@@ -32,6 +34,10 @@ public class ChatHUDController : IDisposable
             this.view.contextMenu.OnReport -= ContextMenu_OnReport;
             this.view.contextMenu.OnReport += ContextMenu_OnReport;
         }
+
+        closeWindowTrigger = Resources.Load<InputAction_Trigger>("CloseWindow");
+        closeWindowTrigger.OnTriggered -= OnCloseButtonPressed;
+        closeWindowTrigger.OnTriggered += OnCloseButtonPressed;
     }
 
     void View_OnPressPrivateMessage(string friendUserId)
@@ -58,6 +64,14 @@ public class ChatHUDController : IDisposable
         WebInterface.SendReportPlayer(userId);
     }
 
+    private void OnCloseButtonPressed(DCLAction_Trigger action)
+    {
+        if (view.contextMenu != null)
+        {
+            view.contextMenu.Hide();
+        }
+    }
+
     public void AddChatMessage(ChatEntry.Model chatEntryModel, bool setScrollPositionToBottom = false)
     {
         view.AddEntry(chatEntryModel, setScrollPositionToBottom);
@@ -78,6 +92,7 @@ public class ChatHUDController : IDisposable
             view.contextMenu.OnBlock -= ContextMenu_OnBlock;
             view.contextMenu.OnReport -= ContextMenu_OnReport;
         }
+        closeWindowTrigger.OnTriggered -= OnCloseButtonPressed;
         UnityEngine.Object.Destroy(view.gameObject);
     }
 
