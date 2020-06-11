@@ -92,13 +92,10 @@ namespace DCL
             SetMinimapRepresentationActive(true);
             everythingIsLoaded = true;
 
-            if (!string.IsNullOrEmpty(model.id))
-            {
-                avatarUserInfo.userId = model.id;
-                avatarUserInfo.userName = model.name;
-                avatarUserInfo.worldPosition = lastAvatarPosition != null ? lastAvatarPosition.Value : minimapRepresentation.transform.position;
-                UpdateAvatarIconInMinimap(avatarUserInfo);
-            }
+            avatarUserInfo.userId = model.id;
+            avatarUserInfo.userName = model.name;
+            avatarUserInfo.worldPosition = lastAvatarPosition != null ? lastAvatarPosition.Value : minimapRepresentation.transform.position;
+            UpdateAvatarIconInMinimap(avatarUserInfo);
         }
 
         void SetMinimapRepresentationActive(bool active)
