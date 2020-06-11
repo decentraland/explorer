@@ -11,7 +11,8 @@ namespace DCL.Helpers.NFT.Markets.OpenSea_Internal
     internal class OpenSeaRequestController
     {
         internal const bool VERBOSE = false;
-        const float MIN_REQUEST_DELAY = 0.34f; // max 3 requests per second
+
+        internal const float MIN_REQUEST_DELAY = 0.4f; // max ~2 requests per second
 
         List<OpenSeaRequestGroup> requestGroup = new List<OpenSeaRequestGroup>();
         float lastApiRequestTime = 0;
@@ -36,17 +37,9 @@ namespace DCL.Helpers.NFT.Markets.OpenSea_Internal
 
         OpenSeaRequestGroup CreateNewGroup()
         {
-            float delayRequest = MIN_REQUEST_DELAY;
-            float timeSinceLastApiRequest = Time.unscaledTime - lastApiRequestTime;
-
-            if (timeSinceLastApiRequest < 0)
-            {
-                delayRequest += Math.Abs(timeSinceLastApiRequest);
-            }
-
-            OpenSeaRequestGroup group = new OpenSeaRequestGroup(delayRequest, OnGroupClosed);
+            float delayRequest = IncrementApiRequestDelay();
+            OpenSeaRequestGroup group = new OpenSeaRequestGroup(delayRequest, OnGroupClosed, IncrementApiRequestDelay);
             requestGroup.Add(group);
-            lastApiRequestTime = Time.unscaledTime + delayRequest;
             if (VERBOSE) Debug.Log($"RequestController: RequestGroup created to request at {lastApiRequestTime}");
             return group;
         }
@@ -59,12 +52,26 @@ namespace DCL.Helpers.NFT.Markets.OpenSea_Internal
                 requestGroup.Remove(group);
             }
         }
+
+        internal float IncrementApiRequestDelay()
+        {
+            float delayRequest = MIN_REQUEST_DELAY;
+            float timeSinceLastApiRequest = Time.unscaledTime - lastApiRequestTime;
+
+            if (timeSinceLastApiRequest < 0)
+            {
+                delayRequest += Math.Abs(timeSinceLastApiRequest);
+            }
+            lastApiRequestTime = Time.unscaledTime + delayRequest;
+            return delayRequest;
+        }
     }
 
     class OpenSeaRequestGroup : IDisposable
     {
         const string API_URL_ASSETS = "https://api.opensea.io/api/v1/assets?";
         const float URL_PARAMS_MAX_LENGTH = 1854; // maxUrl(2048) - apiUrl(37) - longestPossibleRequest (78 tokenId + 42 contractAddress + 37 urlParams)
+        const int REQUEST_RETRIES = 3;
 
         public bool isOpen { private set; get; }
 
@@ -72,12 +79,15 @@ namespace DCL.Helpers.NFT.Markets.OpenSea_Internal
         string requestUrl = "";
 
         Coroutine fetchRoutine = null;
-        Action<OpenSeaRequestGroup> onGroupClosed = null;
 
-        public OpenSeaRequestGroup(float delayRequest, Action<OpenSeaRequestGroup> onGroupClosed)
+        Action<OpenSeaRequestGroup> onGroupClosed = null;
+        Func<float> getRetryDelay = null;
+
+        public OpenSeaRequestGroup(float delayRequest, Action<OpenSeaRequestGroup> onGroupClosed, Func<float> getRetryDelay)
         {
             isOpen = true;
             this.onGroupClosed = onGroupClosed;
+            this.getRetryDelay = getRetryDelay;
             fetchRoutine = CoroutineStarter.Start(Fetch(delayRequest));
         }
 
@@ -108,33 +118,60 @@ namespace DCL.Helpers.NFT.Markets.OpenSea_Internal
             yield return new WaitForSeconds(delayRequest);
             CloseGroup();
 
+            bool shouldRetry = false;
+            int retryCount = 0;
+
             string url = API_URL_ASSETS + requestUrl;
 
-            if (OpenSeaRequestController.VERBOSE) Debug.Log($"RequestGroup: Request to OpenSea {url}");
-
-            using (UnityWebRequest request = UnityWebRequest.Get(url))
+            do
             {
-                yield return request.SendWebRequest();
-
-                AssetsResponse response = null;
-
-                if (!request.isNetworkError && !request.isHttpError)
+                using (UnityWebRequest request = UnityWebRequest.Get(url))
                 {
-                    response = Utils.FromJsonWithNulls<AssetsResponse>(request.downloadHandler.text);
-                }
+                    if (OpenSeaRequestController.VERBOSE) Debug.Log($"RequestGroup: Request to OpenSea {url}");
+                    yield return request.SendWebRequest();
 
-                if (OpenSeaRequestController.VERBOSE) Debug.Log($"RequestGroup: Request resolving {response != null} {request.error} {url}");
-                using (var iterator = requests.GetEnumerator())
-                {
-                    while (iterator.MoveNext())
+                    AssetsResponse response = null;
+
+                    if (!request.isNetworkError && !request.isHttpError)
                     {
-                        if (response != null)
-                            iterator.Current.Value.Resolve(response);
+                        response = Utils.FromJsonWithNulls<AssetsResponse>(request.downloadHandler.text);
+                    }
+
+                    if (OpenSeaRequestController.VERBOSE) Debug.Log($"RequestGroup: Request resolving {response != null} {request.error} {url}");
+                    if (response != null)
+                    {
+                        shouldRetry = false;
+                        using (var iterator = requests.GetEnumerator())
+                        {
+                            while (iterator.MoveNext())
+                            {
+                                iterator.Current.Value.Resolve(response);
+                            }
+                        }
+
+                    }
+                    else
+                    {
+                        shouldRetry = retryCount < REQUEST_RETRIES;
+                        if (!shouldRetry)
+                        {
+                            using (var iterator = requests.GetEnumerator())
+                            {
+                                while (iterator.MoveNext())
+                                {
+                                    iterator.Current.Value.Resolve(request.error);
+                                }
+                            }
+                        }
                         else
-                            iterator.Current.Value.Resolve(request.error);
+                        {
+                            retryCount++;
+                            if (OpenSeaRequestController.VERBOSE) Debug.Log($"RequestGroup: Request retrying {url}");
+                            yield return new WaitForSeconds(GetRetryDelay());
+                        }
                     }
                 }
-            }
+            } while (shouldRetry);
         }
 
         void CloseGroup()
@@ -142,6 +179,13 @@ namespace DCL.Helpers.NFT.Markets.OpenSea_Internal
             isOpen = false;
             this.onGroupClosed?.Invoke(this);
             this.onGroupClosed = null;
+        }
+
+        float GetRetryDelay()
+        {
+            if (getRetryDelay != null)
+                return getRetryDelay();
+            return OpenSeaRequestController.MIN_REQUEST_DELAY;
         }
 
         public void Dispose()
