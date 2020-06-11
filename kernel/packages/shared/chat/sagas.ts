@@ -29,7 +29,7 @@ import { catalystRealmConnected, changeRealm, changeToCrowdedRealm } from 'share
 import { addToMutedUsers } from '../comms/peers'
 import { isValidExpression, expressionExplainer, validExpressions } from 'shared/apis/expressionExplainer'
 import { StoreContainer } from '../store/rootTypes'
-import { SHOW_FPS_COUNTER, getServerConfigurations, USE_NEW_CHAT } from 'config'
+import { SHOW_FPS_COUNTER, getServerConfigurations, USE_NEW_CHAT, INIT_PRE_LOAD } from 'config'
 import { Vector3Component } from 'atomicHelpers/landHelpers'
 import { AvatarMessage, AvatarMessageType } from 'shared/comms/interface/types'
 import { sampleDropData } from 'shared/airdrops/sampleDrop'
@@ -41,7 +41,8 @@ import { isRealmInitialized } from 'shared/dao/selectors'
 import { CATALYST_REALM_INITIALIZED } from 'shared/dao/actions'
 import { isFriend } from './selectors'
 import { ensureRenderer } from '../profiles/sagas'
-import { worldRunningObservable } from '../world/worldState'
+import { worldRunningObservable, isWorldRunning } from '../world/worldState'
+import future, { IFuture } from 'fp-future'
 
 declare const globalThis: UnityInterfaceContainer & StoreContainer
 
@@ -67,6 +68,24 @@ avatarMessageObservable.add((pose: AvatarMessage) => {
   }
 })
 
+async function ensureWorldRunning() {
+  const result: IFuture<void> = future()
+
+  if (isWorldRunning()) {
+    result.resolve()
+    return result
+  }
+
+  const observer = worldRunningObservable.add(isRunning => {
+    if (isRunning) {
+      worldRunningObservable.remove(observer)
+      result.resolve()
+    }
+  })
+
+  return result
+}
+
 export function* chatSaga(): any {
   initChatCommands()
 
@@ -84,27 +103,28 @@ function* handleAuthSuccessful() {
   if (identity.hasConnectedWeb3 && USE_NEW_CHAT) {
     yield call(ensureRealmInitialized)
 
+    if (!INIT_PRE_LOAD) {
+      // wait until initial load finishes and world is running
+      yield ensureWorldRunning()
+    }
+
     try {
       yield call(initializePrivateMessaging, getServerConfigurations().synapseUrl, identity)
     } catch (e) {
       defaultLogger.error(`error initializing private messaging`, e)
 
-      const observer = worldRunningObservable.add(isRunning => {
-        if (isRunning) {
-          worldRunningObservable.remove(observer)
-
-          unityInterface.ShowNotification({
-            type: NotificationType.GENERIC,
-            message: 'There was an error initializing friends and private messages',
-            buttonMessage: 'OK',
-            timer: 7
-          })
-        }
-      })
-
       yield call(ensureRenderer)
 
       unityInterface.ConfigureHUDElement(HUDElementID.FRIENDS, { active: false, visible: false })
+
+      yield ensureWorldRunning()
+
+      unityInterface.ShowNotification({
+        type: NotificationType.GENERIC,
+        message: 'There was an error initializing friends and private messages',
+        buttonMessage: 'OK',
+        timer: 7
+      })
     }
   }
 }
