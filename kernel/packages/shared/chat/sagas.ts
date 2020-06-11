@@ -42,6 +42,7 @@ import { CATALYST_REALM_INITIALIZED } from 'shared/dao/actions'
 import { isFriend } from './selectors'
 import { ensureRenderer } from '../profiles/sagas'
 import { worldRunningObservable } from '../world/worldState'
+import future, { IFuture } from 'fp-future'
 
 declare const globalThis: UnityInterfaceContainer & StoreContainer
 
@@ -67,6 +68,19 @@ avatarMessageObservable.add((pose: AvatarMessage) => {
   }
 })
 
+async function ensureWorldRunning() {
+  const result: IFuture<void> = future()
+
+  const observer = worldRunningObservable.add(isRunning => {
+    if (isRunning) {
+      worldRunningObservable.remove(observer)
+      result.resolve()
+    }
+  })
+
+  return result
+}
+
 export function* chatSaga(): any {
   initChatCommands()
 
@@ -84,28 +98,24 @@ function* handleAuthSuccessful() {
   if (identity.hasConnectedWeb3 && USE_NEW_CHAT) {
     yield call(ensureRealmInitialized)
 
+    yield ensureWorldRunning()
+
     try {
       yield call(initializePrivateMessaging, getServerConfigurations().synapseUrl, identity)
     } catch (e) {
       defaultLogger.error(`error initializing private messaging`, e)
 
-      const observer = worldRunningObservable.add(isRunning => {
-        if (isRunning) {
-          worldRunningObservable.remove(observer)
-
-          unityInterface.ShowNotification({
-            type: NotificationType.GENERIC,
-            message: 'There was an error initializing friends and private messages',
-            buttonMessage: 'OK',
-            timer: 7
-          })
-        }
+      unityInterface.ShowNotification({
+        type: NotificationType.GENERIC,
+        message: 'There was an error initializing friends and private messages',
+        buttonMessage: 'OK',
+        timer: 7
       })
-
-      yield call(ensureRenderer)
-
-      unityInterface.ConfigureHUDElement(HUDElementID.FRIENDS, { active: false, visible: false })
     }
+
+    yield call(ensureRenderer)
+
+    unityInterface.ConfigureHUDElement(HUDElementID.FRIENDS, { active: false, visible: false })
   }
 }
 
