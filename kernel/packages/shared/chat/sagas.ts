@@ -41,7 +41,7 @@ import { isRealmInitialized } from 'shared/dao/selectors'
 import { CATALYST_REALM_INITIALIZED } from 'shared/dao/actions'
 import { isFriend } from './selectors'
 import { ensureRenderer } from '../profiles/sagas'
-import { worldRunningObservable } from '../world/worldState'
+import { worldRunningObservable, isWorldRunning } from '../world/worldState'
 import future, { IFuture } from 'fp-future'
 
 declare const globalThis: UnityInterfaceContainer & StoreContainer
@@ -70,6 +70,11 @@ avatarMessageObservable.add((pose: AvatarMessage) => {
 
 async function ensureWorldRunning() {
   const result: IFuture<void> = future()
+
+  if (isWorldRunning()) {
+    result.resolve()
+    return result
+  }
 
   const observer = worldRunningObservable.add(isRunning => {
     if (isRunning) {
@@ -108,6 +113,12 @@ function* handleAuthSuccessful() {
     } catch (e) {
       defaultLogger.error(`error initializing private messaging`, e)
 
+      yield call(ensureRenderer)
+
+      unityInterface.ConfigureHUDElement(HUDElementID.FRIENDS, { active: false, visible: false })
+
+      yield ensureWorldRunning()
+
       unityInterface.ShowNotification({
         type: NotificationType.GENERIC,
         message: 'There was an error initializing friends and private messages',
@@ -115,10 +126,6 @@ function* handleAuthSuccessful() {
         timer: 7
       })
     }
-
-    yield call(ensureRenderer)
-
-    unityInterface.ConfigureHUDElement(HUDElementID.FRIENDS, { active: false, visible: false })
   }
 }
 
