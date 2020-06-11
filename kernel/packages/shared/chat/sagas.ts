@@ -29,7 +29,7 @@ import { catalystRealmConnected, changeRealm, changeToCrowdedRealm } from 'share
 import { addToMutedUsers } from '../comms/peers'
 import { isValidExpression, expressionExplainer, validExpressions } from 'shared/apis/expressionExplainer'
 import { StoreContainer } from '../store/rootTypes'
-import { SHOW_FPS_COUNTER, getServerConfigurations, USE_NEW_CHAT } from 'config'
+import { SHOW_FPS_COUNTER, getServerConfigurations, USE_NEW_CHAT, INIT_PRE_LOAD } from 'config'
 import { Vector3Component } from 'atomicHelpers/landHelpers'
 import { AvatarMessage, AvatarMessageType } from 'shared/comms/interface/types'
 import { sampleDropData } from 'shared/airdrops/sampleDrop'
@@ -98,7 +98,10 @@ function* handleAuthSuccessful() {
   if (identity.hasConnectedWeb3 && USE_NEW_CHAT) {
     yield call(ensureRealmInitialized)
 
-    yield ensureWorldRunning()
+    if (!INIT_PRE_LOAD) {
+      // wait until initial load finishes and world is running
+      yield ensureWorldRunning()
+    }
 
     try {
       yield call(initializePrivateMessaging, getServerConfigurations().synapseUrl, identity)
