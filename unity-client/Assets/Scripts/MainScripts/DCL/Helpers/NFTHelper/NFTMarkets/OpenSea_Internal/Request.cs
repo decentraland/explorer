@@ -54,10 +54,12 @@ namespace DCL.Helpers.NFT.Markets.OpenSea_Internal
     {
         const string API_URL_ASSETS = "https://api.opensea.io/api/v1/assets?";
         const float WAIT_TIME = 0.2f;
+        const float URL_PARAMS_MAX_LENGTH = 1854; // maxUrl(2048) - apiUrl(37) - longestPossibleRequest (78 tokenId + 42 contractAddress + 37 urlParams)
 
         public bool isOpen { private set; get; }
 
         List<Request> requests = new List<Request>();
+        string requestUrl = "";
 
         Coroutine fetchRoutine = null;
         Action<RequestGroup> onGroupClosed = null;
@@ -73,26 +75,22 @@ namespace DCL.Helpers.NFT.Markets.OpenSea_Internal
         {
             Request request = new Request(assetContractAddress, tokenId);
             requests.Add(request);
+            requestUrl += request.ToString();
+
+            if (requestUrl.Length >= URL_PARAMS_MAX_LENGTH)
+            {
+                CloseGroup();
+            }
+
             return request;
         }
 
         IEnumerator Fetch()
         {
             yield return new WaitForSeconds(WAIT_TIME);
-            isOpen = false;
-            this.onGroupClosed?.Invoke(this);
-            this.onGroupClosed = null;
+            CloseGroup();
 
-            string url = API_URL_ASSETS;
-
-            for (int i = 0; i < requests.Count; i++)
-            {
-                url += requests[i].ToString();
-                if (i < requests.Count - 1)
-                {
-                    url += "&";
-                }
-            }
+            string url = API_URL_ASSETS + requestUrl;
 
             if (RequestController.VERBOSE) Debug.Log($"Request to OpenSea {url}");
 
@@ -117,16 +115,18 @@ namespace DCL.Helpers.NFT.Markets.OpenSea_Internal
             }
         }
 
-        public void Dispose()
+        void CloseGroup()
         {
             isOpen = false;
+            this.onGroupClosed?.Invoke(this);
+            this.onGroupClosed = null;
+        }
+
+        public void Dispose()
+        {
             if (fetchRoutine != null) CoroutineStarter.Stop(fetchRoutine);
             fetchRoutine = null;
-            if (this.onGroupClosed != null)
-            {
-                this.onGroupClosed?.Invoke(this);
-                this.onGroupClosed = null;
-            }
+            CloseGroup();
         }
     }
 
