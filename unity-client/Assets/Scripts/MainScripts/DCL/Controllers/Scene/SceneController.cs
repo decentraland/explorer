@@ -111,11 +111,11 @@ namespace DCL
 
             PointerEventsController.i.Initialize();
 
-#if !UNITY_EDITOR
-            Debug.Log("DCL Unity Build Version: " + DCL.Configuration.ApplicationSettings.version);
+            // #if !UNITY_EDITOR
+            //             Debug.Log("DCL Unity Build Version: " + DCL.Configuration.ApplicationSettings.version);
 
-            Debug.unityLogger.logEnabled = false;
-#endif
+            Debug.unityLogger.logEnabled = true;
+            // #endif
 
             InitializeSceneBoundariesChecker();
 
