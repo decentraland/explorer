@@ -19,7 +19,7 @@ import {
   receiveUserPose,
   receiveUserVisible,
   removeById,
-  avatarMessageObservable,
+  avatarMessageObservable
 } from './peers'
 import {
   Pose,
@@ -31,7 +31,7 @@ import {
   AvatarMessageType,
   ConnectionEstablishmentError,
   IdTakenError,
-  UnknownCommsModeError,
+  UnknownCommsModeError
 } from './interface/types'
 import {
   CommunicationArea,
@@ -39,7 +39,7 @@ import {
   position2parcel,
   sameParcel,
   squareDistance,
-  ParcelArray,
+  ParcelArray
 } from './interface/utils'
 import { BrokerWorldInstanceConnection } from '../comms/v1/brokerWorldInstanceConnection'
 import { profileToRendererFormat } from 'shared/profiles/transformations/profileToRendererFormat'
@@ -60,7 +60,7 @@ import {
   setCatalystRealmCommsStatus,
   setCatalystRealm,
   markCatalystRealmFull,
-  markCatalystRealmConnectionError,
+  markCatalystRealmConnectionError
 } from 'shared/dao/actions'
 import { observeRealmChange, pickCatalystRealm, changeToCrowdedRealm } from 'shared/dao'
 import { getProfile } from 'shared/profiles/selectors'
@@ -84,7 +84,7 @@ export const MORDOR_POSITION: Position = [
   0,
   0,
   0,
-  0,
+  0
 ]
 
 type CommsContainer = {
@@ -104,7 +104,7 @@ export class PeerTrackingInfo {
 
   profilePromise: { promise: Promise<ProfileForRenderer | void>; version: number | null } = {
     promise: Promise.resolve(),
-    version: null,
+    version: null
   }
 
   public loadProfileIfNecessary(profileVersion: number) {
@@ -112,7 +112,7 @@ export class PeerTrackingInfo {
       if (!this.userInfo || !this.userInfo.userId) {
         this.userInfo = {
           ...(this.userInfo || {}),
-          userId: this.identity,
+          userId: this.identity
         }
       }
       this.profilePromise = {
@@ -129,7 +129,7 @@ export class PeerTrackingInfo {
           .catch((error) => {
             defaultLogger.error('Error fetching profile!', error)
           }),
-        version: profileVersion,
+        version: profileVersion
       }
     }
   }
@@ -283,7 +283,7 @@ export function processChatMessage(context: Context, fromAlias: string, message:
           type: AvatarMessageType.USER_EXPRESSION,
           uuid: fromAlias,
           expressionId: id.slice(1),
-          timestamp: parseInt(timestamp, 10),
+          timestamp: parseInt(timestamp, 10)
         })
       } else {
         if (profile && user.userId && !isBlocked(profile, user.userId)) {
@@ -293,7 +293,7 @@ export function processChatMessage(context: Context, fromAlias: string, message:
               messageId: msgId,
               sender: displayName || 'unknown',
               body: text,
-              timestamp: message.time,
+              timestamp: message.time
             }
             globalThis.globalStore.dispatch(messageReceived(messageEntry))
           } else {
@@ -302,7 +302,7 @@ export function processChatMessage(context: Context, fromAlias: string, message:
               sender: displayName || 'unknown',
               isCommand: false,
               message: text,
-              timestamp: message.time,
+              timestamp: message.time
             }
             chatObservable.notifyObservers({ type: ChatEventType.MESSAGE_RECEIVED, messageEntry })
           }
@@ -456,7 +456,7 @@ function collectInfo(context: Context) {
       position: trackingInfo.position,
       userInfo: trackingInfo.userInfo,
       squareDistance: squareDistance(context.currentPosition, trackingInfo.position),
-      alias: peerAlias,
+      alias: peerAlias
     })
   }
 
@@ -549,7 +549,7 @@ export async function connect(userId: string) {
     }
 
     const userInfo = {
-      ...user,
+      ...user
     }
 
     let connection: WorldInstanceConnection
@@ -569,7 +569,7 @@ export async function connect(userId: string) {
 
             const url = new URL(commsUrl)
             const qs = new URLSearchParams({
-              identity: btoa(userId),
+              identity: btoa(userId)
             })
             url.search = qs.toString()
 
@@ -595,7 +595,7 @@ export async function connect(userId: string) {
 
         const peerConfig = {
           connectionConfig: {
-            iceServers: commConfigurations.iceServers,
+            iceServers: commConfigurations.iceServers
           },
           authHandler: async (msg: string) => {
             try {
@@ -612,8 +612,8 @@ export async function connect(userId: string) {
               if (context && context.currentPosition) {
                 return context.currentPosition.slice(0, 3)
               }
-            },
-          },
+            }
+          }
         }
 
         defaultLogger.log('Using Remote lighthouse service: ', lighthouseUrl)
@@ -677,8 +677,8 @@ export async function startCommunications(context: Context) {
 
   try {
     try {
-      if (context.worldInstanceConnection instanceof LighthouseWorldInstanceConnection) {
-        await context.worldInstanceConnection.connectPeer()
+      if (connection instanceof LighthouseWorldInstanceConnection) {
+        await connection.connectPeer()
       }
     } catch (e) {
       // Do nothing if layer is full. This will be handled by status handler
@@ -688,16 +688,16 @@ export async function startCommunications(context: Context) {
     }
 
     connection.positionHandler = (alias: string, data: Package<Position>) => {
-      processPositionMessage(context!, alias, data)
+      processPositionMessage(context, alias, data)
     }
     connection.profileHandler = (alias: string, identity: string, data: Package<ProfileVersion>) => {
-      processProfileMessage(context!, alias, identity, data)
+      processProfileMessage(context, alias, identity, data)
     }
     connection.chatHandler = (alias: string, data: Package<ChatMessage>) => {
-      processChatMessage(context!, alias, data)
+      processChatMessage(context, alias, data)
     }
     connection.sceneMessageHandler = (alias: string, data: Package<BusMessage>) => {
-      processParcelSceneCommsMessage(context!, alias, data)
+      processParcelSceneCommsMessage(context, alias, data)
     }
 
     if (commConfigurations.debug) {
@@ -739,7 +739,7 @@ export async function startCommunications(context: Context) {
         obj.quaternion.x,
         obj.quaternion.y,
         obj.quaternion.z,
-        obj.quaternion.w,
+        obj.quaternion.w
       ] as Position
 
       if (context && isWorldRunning) {
