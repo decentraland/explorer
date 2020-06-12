@@ -25,6 +25,9 @@ public class ChatHUDController : IDisposable
 
         if (this.view.contextMenu != null)
         {
+            this.view.contextMenu.OnShowMenu -= ContextMenu_OnShowMenu;
+            this.view.contextMenu.OnShowMenu += ContextMenu_OnShowMenu;
+
             this.view.contextMenu.OnPassport -= ContextMenu_OnPassport;
             this.view.contextMenu.OnPassport += ContextMenu_OnPassport;
 
@@ -43,6 +46,11 @@ public class ChatHUDController : IDisposable
     void View_OnPressPrivateMessage(string friendUserId)
     {
         OnPressPrivateMessage?.Invoke(friendUserId);
+    }
+
+    private void ContextMenu_OnShowMenu()
+    {
+        view.OnMessageCancelHover();
     }
 
     private void ContextMenu_OnPassport(string userId)
@@ -88,6 +96,7 @@ public class ChatHUDController : IDisposable
         view.OnPressPrivateMessage -= View_OnPressPrivateMessage;
         if (view.contextMenu != null)
         {
+            view.contextMenu.OnShowMenu -= ContextMenu_OnShowMenu;
             view.contextMenu.OnPassport -= ContextMenu_OnPassport;
             view.contextMenu.OnBlock -= ContextMenu_OnBlock;
             view.contextMenu.OnReport -= ContextMenu_OnReport;

@@ -17,6 +17,9 @@ public class UserContextMenu : MonoBehaviour
     public Button reportButton;
     public TextMeshProUGUI blockText;
 
+    public bool isVisible => gameObject.activeSelf;
+
+    public event System.Action OnShowMenu;
     public event System.Action<string> OnPassport;
     public event System.Action<string> OnReport;
     public event System.Action<string, bool> OnBlock;
@@ -66,6 +69,7 @@ public class UserContextMenu : MonoBehaviour
     {
         gameObject.SetActive(true);
         UpdateBlockButton();
+        OnShowMenu?.Invoke();
     }
 
     /// <summary>

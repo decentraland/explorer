@@ -159,18 +159,21 @@ public class ChatHUDView : MonoBehaviour
             isBlocked);
 
         contextMenu.transform.position = chatEntry.contextMenuPositionReference.position;
-        contextMenu.transform.parent = chatEntriesContainer.transform;
+        contextMenu.transform.parent = this.transform;
         contextMenu.Show();
     }
 
     protected virtual void OnMessageTriggerHover(ChatEntry chatEntry)
     {
+        if (contextMenu.isVisible)
+            return;
+
         messageHoverText.text = chatEntry.messageLocalDateTime;
         messageHoverPanel.transform.position = chatEntry.hoverPanelPositionReference.position;
         messageHoverPanel.SetActive(true);
     }
 
-    protected void OnMessageCancelHover()
+    public void OnMessageCancelHover()
     {
         messageHoverPanel.SetActive(false);
         messageHoverText.text = string.Empty;
