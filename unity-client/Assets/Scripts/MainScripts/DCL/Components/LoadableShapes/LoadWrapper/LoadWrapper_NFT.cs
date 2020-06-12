@@ -42,7 +42,7 @@ namespace DCL.Components
 
             assetUrl = src;
 
-            if (CommonScriptableObjects.rendererState)
+            if (CommonScriptableObjects.rendererState.Get())
             {
                 LoadAsset();
             }
@@ -64,7 +64,7 @@ namespace DCL.Components
 
         void LoadAsset()
         {
-            loaderController.LoadAsset(assetUrl, true);
+            loaderController?.LoadAsset(assetUrl, true);
         }
 
         void OnRendererStateChanged(bool current, bool previous)
