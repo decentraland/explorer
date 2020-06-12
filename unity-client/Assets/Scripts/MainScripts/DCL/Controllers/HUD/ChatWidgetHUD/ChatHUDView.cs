@@ -151,10 +151,10 @@ public class ChatHUDView : MonoBehaviour
 
     private void OnOpenContextMenu(ChatEntry chatEntry)
     {
-        bool isBlocked = UserProfile.GetOwnUserProfile().blocked.Contains(chatEntry.model.otherUserId);
+        bool isBlocked = UserProfile.GetOwnUserProfile().blocked.Contains(chatEntry.model.senderId);
 
         contextMenu.Initialize(
-            chatEntry.model.otherUserId,
+            chatEntry.model.senderId,
             chatEntry.model.senderName,
             isBlocked);
 

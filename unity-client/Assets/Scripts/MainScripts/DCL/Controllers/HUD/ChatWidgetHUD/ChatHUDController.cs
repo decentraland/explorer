@@ -125,18 +125,19 @@ public class ChatHUDController : IDisposable
         {
             var senderProfile = UserProfileController.userProfilesCatalog.Get(message.sender);
             model.senderName = senderProfile != null ? senderProfile.userName : message.sender;
+            model.senderId = message.sender;
         }
 
-        if (model.messageType == ChatMessage.Type.PRIVATE || model.messageType == ChatMessage.Type.PUBLIC)
+        if (model.messageType == ChatMessage.Type.PRIVATE)
         {
             if (message.recipient == ownProfile.userId)
             {
-                model.subType = model.messageType == ChatMessage.Type.PRIVATE ? ChatEntry.Model.SubType.PRIVATE_FROM : ChatEntry.Model.SubType.NONE;
+                model.subType = ChatEntry.Model.SubType.PRIVATE_FROM;
                 model.otherUserId = message.sender;
             }
             else if (message.sender == ownProfile.userId)
             {
-                model.subType = model.messageType == ChatMessage.Type.PRIVATE ? ChatEntry.Model.SubType.PRIVATE_TO : ChatEntry.Model.SubType.NONE;
+                model.subType = ChatEntry.Model.SubType.PRIVATE_TO;
                 model.otherUserId = message.recipient;
             }
             else

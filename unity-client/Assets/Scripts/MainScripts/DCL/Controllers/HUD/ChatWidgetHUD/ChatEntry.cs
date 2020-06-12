@@ -20,6 +20,7 @@ public class ChatEntry : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
 
         public ChatMessage.Type messageType;
         public string bodyText;
+        public string senderId;
         public string senderName;
         public string recipientName;
         public string otherUserId;
@@ -144,7 +145,7 @@ public class ChatEntry : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
         else if (pointerEventData.button == PointerEventData.InputButton.Right)
         {
             if ((model.messageType != ChatMessage.Type.PUBLIC && model.messageType != ChatMessage.Type.PRIVATE) ||
-                model.senderName == UserProfile.GetOwnUserProfile().userName)
+                model.senderId == UserProfile.GetOwnUserProfile().userId)
                 return;
 
             OnPressRightButton?.Invoke(this);
