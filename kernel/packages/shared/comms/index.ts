@@ -331,9 +331,9 @@ export function processProfileMessage(
     peerTrackingInfo.identity = identity
     peerTrackingInfo.lastUpdate = Date.now()
 
-    if(ensureTrackingUniqueAndLatest(context, fromAlias, identity, msgTimestamp)) {
+    if (ensureTrackingUniqueAndLatest(context, fromAlias, identity, msgTimestamp)) {
       const profileVersion = message.data.version
-      peerTrackingInfo.loadProfileIfNecessary(profileVersion ? parseInt(profileVersion, 10) : 0)  
+      peerTrackingInfo.loadProfileIfNecessary(profileVersion ? parseInt(profileVersion, 10) : 0)
     }
   }
 }
@@ -343,22 +343,22 @@ export function processProfileMessage(
  * Returns true if this is the latest update and the one that remains
  */
 function ensureTrackingUniqueAndLatest(context: Context, fromAlias: string, identity: string, thisUpdateTimestamp: Timestamp) {
-  let currentLastProfileAlias = fromAlias;
-  let currentLastProfileUpdate = thisUpdateTimestamp;
+  let currentLastProfileAlias = fromAlias
+  let currentLastProfileUpdate = thisUpdateTimestamp
 
   context.peerData.forEach((info, key) => {
-    if(info.identity === identity) {
-      if(info.lastProfileUpdate < currentLastProfileUpdate) {
-        removePeer(context, key);
-      } else if(info.lastProfileUpdate > currentLastProfileUpdate) {
-        removePeer(context, currentLastProfileAlias);
-        currentLastProfileAlias = key;
-        currentLastProfileUpdate = info.lastProfileUpdate;
+    if (info.identity === identity) {
+      if (info.lastProfileUpdate < currentLastProfileUpdate) {
+        removePeer(context, key)
+      } else if (info.lastProfileUpdate > currentLastProfileUpdate) {
+        removePeer(context, currentLastProfileAlias)
+        currentLastProfileAlias = key
+        currentLastProfileUpdate = info.lastProfileUpdate
       }
     }
   })
-  
-  return currentLastProfileAlias === fromAlias;
+
+  return currentLastProfileAlias === fromAlias
 }
 
 export function processPositionMessage(context: Context, fromAlias: string, message: Package<Position>) {
