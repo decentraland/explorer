@@ -319,7 +319,7 @@ function isBlocked(profile: Profile, userId: string): boolean {
 export function processProfileMessage(
   context: Context,
   fromAlias: string,
-  identity: string,
+  peerIdentity: string,
   message: Package<ProfileVersion>
 ) {
   const msgTimestamp = message.time
@@ -328,10 +328,10 @@ export function processProfileMessage(
 
   if (msgTimestamp > peerTrackingInfo.lastProfileUpdate) {
     peerTrackingInfo.lastProfileUpdate = msgTimestamp
-    peerTrackingInfo.identity = identity
+    peerTrackingInfo.identity = peerIdentity
     peerTrackingInfo.lastUpdate = Date.now()
 
-    if (ensureTrackingUniqueAndLatest(context, fromAlias, identity, msgTimestamp)) {
+    if (ensureTrackingUniqueAndLatest(context, fromAlias, peerIdentity, msgTimestamp)) {
       const profileVersion = message.data.version
       peerTrackingInfo.loadProfileIfNecessary(profileVersion ? parseInt(profileVersion, 10) : 0)
     }
@@ -342,12 +342,12 @@ export function processProfileMessage(
  * Ensures that there is only one peer tracking info for this identity.
  * Returns true if this is the latest update and the one that remains
  */
-function ensureTrackingUniqueAndLatest(context: Context, fromAlias: string, identity: string, thisUpdateTimestamp: Timestamp) {
+function ensureTrackingUniqueAndLatest(context: Context, fromAlias: string, peerIdentity: string, thisUpdateTimestamp: Timestamp) {
   let currentLastProfileAlias = fromAlias
   let currentLastProfileUpdate = thisUpdateTimestamp
 
   context.peerData.forEach((info, key) => {
-    if (info.identity === identity) {
+    if (info.identity === peerIdentity) {
       if (info.lastProfileUpdate < currentLastProfileUpdate) {
         removePeer(context, key)
       } else if (info.lastProfileUpdate > currentLastProfileUpdate) {
@@ -464,6 +464,12 @@ function collectInfo(context: Context) {
     if (msSinceLastUpdate > commConfigurations.peerTtlMs) {
       removePeer(context, peerAlias)
 
+      continue
+    }
+
+    if (trackingInfo.identity === identity.address) {
+      // If we are tracking a peer that is ourselves, we remove it
+      removePeer(context, peerAlias)
       continue
     }
 
