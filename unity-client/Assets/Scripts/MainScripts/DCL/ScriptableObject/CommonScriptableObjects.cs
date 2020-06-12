@@ -59,6 +59,12 @@ public static class CommonScriptableObjects
     private static LongVariable lastReadChatMessagesValue;
     public static LongVariable lastReadWorldChatMessages => GetOrLoad(ref lastReadChatMessagesValue, "ScriptableObjects/LastReadWorldChatMessages");
 
+    private static BooleanVariable allUIHiddenValue;
+    public static BooleanVariable allUIHidden => GetOrLoad(ref allUIHiddenValue, "ScriptableObjects/AllUIHidden");
+
+    private static LatestOpenChatsList latestOpenChatsValue;
+    public static LatestOpenChatsList latestOpenChats => GetOrLoad(ref latestOpenChatsValue, "ScriptableObjects/LatestOpenChats");
+
     internal static T GetOrLoad<T>(ref T variable, string path) where T : Object
     {
         if (variable == null)
