@@ -14,6 +14,7 @@ namespace DCL.Components
 
         public override void Unload()
         {
+            CommonScriptableObjects.rendererState.OnChange -= OnRendererStateChanged;
             loaderController.OnLoadingAssetSuccess -= CallOnComponentUpdated;
             Object.Destroy(loaderController);
 
