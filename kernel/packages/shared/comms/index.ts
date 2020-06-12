@@ -327,14 +327,38 @@ export function processProfileMessage(
   const peerTrackingInfo = ensurePeerTrackingInfo(context, fromAlias)
 
   if (msgTimestamp > peerTrackingInfo.lastProfileUpdate) {
-    const profileVersion = message.data.version
-
-    peerTrackingInfo.identity = identity
-    peerTrackingInfo.loadProfileIfNecessary(profileVersion ? parseInt(profileVersion, 10) : 0)
-
     peerTrackingInfo.lastProfileUpdate = msgTimestamp
+    peerTrackingInfo.identity = identity
     peerTrackingInfo.lastUpdate = Date.now()
+
+    if(ensureTrackingUniqueAndLatest(context, fromAlias, identity, msgTimestamp)) {
+      const profileVersion = message.data.version
+      peerTrackingInfo.loadProfileIfNecessary(profileVersion ? parseInt(profileVersion, 10) : 0)  
+    }
   }
+}
+
+/**
+ * Ensures that there is only one peer tracking info for this identity.
+ * Returns true if this is the latest update and the one that remains
+ */
+function ensureTrackingUniqueAndLatest(context: Context, fromAlias: string, identity: string, thisUpdateTimestamp: Timestamp) {
+  let currentLastProfileAlias = fromAlias;
+  let currentLastProfileUpdate = thisUpdateTimestamp;
+
+  context.peerData.forEach((info, key) => {
+    if(info.identity === identity) {
+      if(info.lastProfileUpdate < currentLastProfileUpdate) {
+        removePeer(context, key);
+      } else if(info.lastProfileUpdate > currentLastProfileUpdate) {
+        removePeer(context, currentLastProfileAlias);
+        currentLastProfileAlias = key;
+        currentLastProfileUpdate = info.lastProfileUpdate;
+      }
+    }
+  })
+  
+  return currentLastProfileAlias === fromAlias;
 }
 
 export function processPositionMessage(context: Context, fromAlias: string, message: Package<Position>) {
