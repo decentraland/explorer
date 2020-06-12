@@ -10,6 +10,8 @@ namespace DCL.Components
         public bool withCollisions;
         public Color backgroundColor;
 
+        string assetUrl;
+
         public override void Unload()
         {
             loaderController.OnLoadingAssetSuccess -= CallOnComponentUpdated;
@@ -37,10 +39,19 @@ namespace DCL.Components
 
             loaderController.OnLoadingAssetSuccess += CallOnComponentUpdated;
 
-            loaderController.OnLoadingAssetSuccess += () => OnSuccess(this);
-            loaderController.OnLoadingAssetFail += () => OnFail(this);
+            assetUrl = src;
 
-            loaderController.LoadAsset(src, true);
+            if (CommonScriptableObjects.rendererState)
+            {
+                LoadAsset();
+            }
+            else
+            {
+                CommonScriptableObjects.rendererState.OnChange += OnRendererStateChanged;
+            }
+
+            // NOTE: frame meshes are already included in the build, there is no need lock renderer just to wait for the images.
+            OnSuccess?.Invoke(this);
         }
 
         void CallOnComponentUpdated()
@@ -48,6 +59,20 @@ namespace DCL.Components
             alreadyLoaded = true;
 
             entity.OnShapeUpdated?.Invoke(entity);
+        }
+
+        void LoadAsset()
+        {
+            loaderController.LoadAsset(assetUrl, true);
+        }
+
+        void OnRendererStateChanged(bool current, bool previous)
+        {
+            if (current)
+            {
+                CommonScriptableObjects.rendererState.OnChange -= OnRendererStateChanged;
+                LoadAsset();
+            }
         }
     }
 }
