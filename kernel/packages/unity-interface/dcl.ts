@@ -49,7 +49,8 @@ import {
   PB_SetEntityParent,
   PB_UpdateEntityComponent,
   PB_Vector3,
-  PB_OpenExternalUrl
+  PB_OpenExternalUrl,
+  PB_OpenNFTDialog
 } from '../shared/proto/engineinterface_pb'
 import { Session } from 'shared/session'
 import { getPerformanceInfo } from 'shared/session/getPerformanceInfo'
@@ -79,7 +80,8 @@ import {
   FriendshipUpdateStatusMessage,
   UpdateUserStatusMessage,
   FriendshipAction,
-  WorldPosition
+  WorldPosition,
+  OpenNFTDialogPayload
 } from 'shared/types'
 import { ParcelSceneAPI } from 'shared/world/ParcelSceneAPI'
 import {
@@ -98,7 +100,7 @@ import { StoreContainer } from 'shared/store/rootTypes'
 import { ILandToLoadableParcelScene, ILandToLoadableParcelSceneUpdate } from 'shared/selectors'
 import { sendMessage, updateUserData, updateFriendship } from 'shared/chat/actions'
 import { ProfileAsPromise } from 'shared/profiles/ProfileAsPromise'
-import { changeRealm, catalystRealmConnected } from '../shared/dao/index'
+import { changeRealm, catalystRealmConnected, candidatesFetched } from '../shared/dao/index'
 import { notifyStatusThroughChat } from 'shared/comms/chat'
 
 declare const globalThis: UnityInterfaceContainer &
@@ -382,21 +384,29 @@ const browserInterface = {
     globalThis.globalStore.dispatch(updateFriendship(action, userId.toLowerCase(), false))
   },
 
-  JumpIn(data: WorldPosition) {
+  async JumpIn(data: WorldPosition) {
     const {
       gridPosition: { x, y },
       realm: { serverName, layer }
     } = data
 
     const realmString = serverName + '-' + layer
-    const realm = changeRealm(realmString)
 
-    notifyStatusThroughChat(`Changing to realm ${realmString}`)
+    notifyStatusThroughChat(`Jumping to ${realmString} at ${x},${y}...`)
+
+    const future = candidatesFetched()
+    if (future.isPending) {
+      notifyStatusThroughChat(`Waiting while realms are initialized, this may take a while...`)
+    }
+
+    await future
+
+    const realm = changeRealm(realmString)
 
     if (realm) {
       catalystRealmConnected().then(
         () => {
-          TeleportController.goTo(x, y, `Jumping to ${x},${y} in realm ${realm.catalystName}-${realm.layer}!`)
+          TeleportController.goTo(x, y, `Jumped to ${x},${y} in realm ${realmString}!`)
         },
         e => {
           const cause = e === 'realm-full' ? ' The requested realm is full.' : ''
@@ -502,6 +512,7 @@ const CHUNK_SIZE = 100
 
 export const unityInterface = {
   debug: false,
+
   SendGenericMessage(object: string, method: string, payload: string) {
     gameInstance.SendMessage(object, method, payload)
   },
@@ -720,6 +731,7 @@ const componentCreated: PB_ComponentCreated = new PB_ComponentCreated()
 const componentDisposed: PB_ComponentDisposed = new PB_ComponentDisposed()
 const componentUpdated: PB_ComponentUpdated = new PB_ComponentUpdated()
 const openExternalUrl: PB_OpenExternalUrl = new PB_OpenExternalUrl()
+const openNFTDialog: PB_OpenNFTDialog = new PB_OpenNFTDialog()
 
 class UnityScene<T> implements ParcelSceneAPI {
   eventDispatcher = new EventDispatcher()
@@ -804,6 +816,9 @@ class UnityScene<T> implements ParcelSceneAPI {
       case 'OpenExternalUrl':
         message.setOpenexternalurl(this.encodeOpenExternalUrl(payload))
         break
+      case 'OpenNFTDialog':
+        message.setOpennftdialog(this.encodeOpenNFTDialog(payload))
+        break
     }
 
     let arrayBuffer: Uint8Array = message.serializeBinary()
@@ -887,6 +902,13 @@ class UnityScene<T> implements ParcelSceneAPI {
   encodeOpenExternalUrl(url: any): PB_OpenExternalUrl {
     openExternalUrl.setUrl(url)
     return openExternalUrl
+  }
+
+  encodeOpenNFTDialog(nftDialogPayload: OpenNFTDialogPayload): PB_OpenNFTDialog {
+    openNFTDialog.setAssetcontractaddress(nftDialogPayload.assetContractAddress)
+    openNFTDialog.setTokenid(nftDialogPayload.tokenId)
+    openNFTDialog.setComment(nftDialogPayload.comment ? nftDialogPayload.comment : '')
+    return openNFTDialog
   }
 }
 

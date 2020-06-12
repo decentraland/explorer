@@ -1,16 +1,24 @@
 using DCL.SettingsHUD;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class HUDController : MonoBehaviour
 {
+    private const string TOGGLE_UI_VISIBILITY_ASSET_NAME = "ToggleUIVisibility";
+
     static bool VERBOSE = false;
 
     public static HUDController i { get; private set; }
 
+    private InputAction_Trigger toggleUIVisibilityTrigger;
+
     private void Awake()
     {
         i = this;
+
+        toggleUIVisibilityTrigger = Resources.Load<InputAction_Trigger>(TOGGLE_UI_VISIBILITY_ASSET_NAME);
+        toggleUIVisibilityTrigger.OnTriggered += ToggleUIVisibility_OnTriggered;
     }
 
     public AvatarHUDController avatarHud => GetHUDElement(HUDElementID.AVATAR) as AvatarHUDController;
@@ -65,6 +73,19 @@ public class HUDController : MonoBehaviour
         settingsHud?.SetVisibility(true);
     }
 
+    private void ToggleUIVisibility_OnTriggered(DCLAction_Trigger action)
+    {
+        bool anyInputFieldIsSelected = EventSystem.current != null &&
+            EventSystem.current.currentSelectedGameObject != null &&
+            EventSystem.current.currentSelectedGameObject.GetComponent<TMPro.TMP_InputField>() != null &&
+            (!worldChatWindowHud.view.chatHudView.inputField.isFocused || !worldChatWindowHud.view.isInPreview);
+
+        if (anyInputFieldIsSelected || settingsHud.view.isOpen || avatarEditorHud.view.isOpen || DCL.NavmapView.isOpen)
+            return;
+
+        CommonScriptableObjects.allUIHidden.Set(!CommonScriptableObjects.allUIHidden.Get());
+    }
+
     private void OwnUserProfileUpdated(UserProfile profile)
     {
         UpdateAvatarHUD();
@@ -88,7 +109,8 @@ public class HUDController : MonoBehaviour
         FRIENDS = 13,
         OPEN_EXTERNAL_URL_PROMPT = 14,
         PRIVATE_CHAT_WINDOW = 15,
-        COUNT = 16
+        NFT_INFO_DIALOG = 16,
+        COUNT = 17
     }
 
     [System.Serializable]
@@ -245,6 +267,9 @@ public class HUDController : MonoBehaviour
             case HUDElementID.OPEN_EXTERNAL_URL_PROMPT:
                 CreateHudElement<ExternalUrlPromptHUDController>(configuration, hudElementId);
                 break;
+            case HUDElementID.NFT_INFO_DIALOG:
+                CreateHudElement<NFTPromptHUDController>(configuration, hudElementId);
+                break;
         }
 
         var hudElement = GetHUDElement(hudElementId);
@@ -335,6 +360,8 @@ public class HUDController : MonoBehaviour
 
     private void OnDestroy()
     {
+        toggleUIVisibilityTrigger.OnTriggered -= ToggleUIVisibility_OnTriggered;
+
         if (ownUserProfile != null)
             ownUserProfile.OnUpdate -= OwnUserProfileUpdated;
 
