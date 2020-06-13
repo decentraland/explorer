@@ -466,6 +466,9 @@ export default class GamekitScene extends Script {
             $()
           } catch (e) {
             this.onError(e)
+
+            // TODO: onError is not being shown anywhere!! put a console.error in the meantime to make devs life easier
+            console.error(e);
           }
         })
       })

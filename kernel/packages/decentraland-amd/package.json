@@ -12,11 +12,17 @@
   "files": [
     "dist"
   ],
+  "prettier": {
+    "semi": true,
+    "singleQuote": false,
+    "printWidth": 120
+  },
   "license": "MIT",
   "devDependencies": {
     "expect": "^23.6.0",
     "mocha": "^5.2.0",
-    "typescript": "^3.1.2",
-    "uglify-js": "^3.4.9"
-  }
+    "terser": "^4.7.0",
+    "typescript": "^3.9.5"
+  },
+  "dependencies": {}
 }
