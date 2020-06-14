@@ -22,7 +22,7 @@ import { customEval, getES5Context } from './sdk/sandbox'
 import { DevToolsAdapter } from './sdk/DevToolsAdapter'
 import { ScriptingTransport, ILogOpts } from 'decentraland-rpc/src/common/json-rpc/types'
 import { QueryType, CLASS_ID, Transform, Vector2 } from 'decentraland-ecs/src'
-import { PB_Transform, PB_Vector3, PB_Quaternion } from 'shared/proto/engineinterface_pb'
+import { PB_Transform, PB_Vector3, PB_Quaternion } from '../shared/proto/engineinterface_pb'
 import { worldToGrid } from 'atomicHelpers/parcelScenePositions'
 
 // tslint:disable-next-line:whitespace
