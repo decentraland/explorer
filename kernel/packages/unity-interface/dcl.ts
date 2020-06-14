@@ -10,7 +10,7 @@ import {
   tutorialEnabled
 } from 'config'
 import { uuid } from 'decentraland-ecs/src'
-import { Quaternion, ReadOnlyQuaternion, ReadOnlyVector3, Vector3 } from 'decentraland-ecs/src/decentraland/math'
+import { ReadOnlyQuaternion, ReadOnlyVector3 } from 'decentraland-ecs/src/decentraland/math'
 import { IEventNames, IEvents, MinimapSceneInfo, ProfileForRenderer } from 'decentraland-ecs/src/decentraland/Types'
 import { sceneLifeCycleObservable } from 'decentraland-loader/lifecycle/controllers/scene'
 import { tutorialStepId } from 'decentraland-loader/lifecycle/tutorial/tutorial'
@@ -32,7 +32,7 @@ import { candidatesFetched, catalystRealmConnected, changeRealm } from 'shared/d
 import { providerFuture } from 'shared/ethereum/provider'
 import { globalDCL } from 'shared/globalDCL'
 import { aborted } from 'shared/loading/ReportFatalError'
-import { loadingScenes, teleportTriggered, unityClientLoaded } from 'shared/loading/types'
+import { loadingScenes, unityClientLoaded } from 'shared/loading/types'
 import { createLogger, defaultLogger, ILogger } from 'shared/logger'
 import { saveProfileRequest } from 'shared/profiles/actions'
 import { ProfileAsPromise } from 'shared/profiles/ProfileAsPromise'
@@ -62,20 +62,17 @@ import { worldRunningObservable } from 'shared/world/worldState'
 import {
   PB_AttachEntityComponent,
   PB_ComponentCreated,
-  PB_ComponentDisposed,
   PB_ComponentRemoved,
   PB_ComponentUpdated,
   PB_CreateEntity,
   PB_OpenExternalUrl,
   PB_OpenNFTDialog, PB_Query,
-  PB_Ray,
-  PB_RayQuery,
   PB_RemoveEntity,
   PB_SendSceneMessage,
   PB_SetEntityParent,
-  PB_UpdateEntityComponent,
-  PB_Vector3
-} from '../shared/proto/engineinterface_pb'
+  PB_UpdateEntityComponent} from '../shared/proto/engineinterface_pb'
+import { setupPosition, cachedPositionEvent } from './position/setupPosition'
+import { createEntity, removeEntity, updateEntityComponent, attachEntity, removeEntityComponent, setEntityParent, origin, direction, ray, rayQuery, query, componentCreated, componentDisposed, componentUpdated, openExternalUrl, openNFTDialog } from './cachedProtobuf'
 
 type GameInstance = {
   SendMessage(object: string, method: string, ...args: (number | string)[]): void
@@ -89,14 +86,6 @@ let isTheFirstLoading = true
 
 export let futures: Record<string, IFuture<any>> = {}
 export let hasWallet: boolean = false
-
-const positionEvent = {
-  position: Vector3.Zero(),
-  quaternion: Quaternion.Identity,
-  rotation: Vector3.Zero(),
-  playerHeight: playerConfigurations.height,
-  mousePosition: Vector3.Zero()
-}
 
 /////////////////////////////////// AUDIO STREAMING ///////////////////////////////////
 
@@ -132,16 +121,16 @@ async function setAudioStream(url: string, play: boolean, volume: number) {
 const browserInterface: browserInterfaceType = {
   /** Triggered when the camera moves */
   ReportPosition(data: { position: ReadOnlyVector3; rotation: ReadOnlyQuaternion; playerHeight?: number }) {
-    positionEvent.position.set(data.position.x, data.position.y, data.position.z)
-    positionEvent.quaternion.set(data.rotation.x, data.rotation.y, data.rotation.z, data.rotation.w)
-    positionEvent.rotation.copyFrom(positionEvent.quaternion.eulerAngles)
-    positionEvent.playerHeight = data.playerHeight || playerConfigurations.height
-    positionObservable.notifyObservers(positionEvent)
+    cachedPositionEvent.position.set(data.position.x, data.position.y, data.position.z)
+    cachedPositionEvent.quaternion.set(data.rotation.x, data.rotation.y, data.rotation.z, data.rotation.w)
+    cachedPositionEvent.rotation.copyFrom(cachedPositionEvent.quaternion.eulerAngles)
+    cachedPositionEvent.playerHeight = data.playerHeight || playerConfigurations.height
+    positionObservable.notifyObservers(cachedPositionEvent)
   },
 
   ReportMousePosition(data: { id: string; mousePosition: ReadOnlyVector3 }) {
-    positionEvent.mousePosition.set(data.mousePosition.x, data.mousePosition.y, data.mousePosition.z)
-    positionObservable.notifyObservers(positionEvent)
+    cachedPositionEvent.mousePosition.set(data.mousePosition.x, data.mousePosition.y, data.mousePosition.z)
+    positionObservable.notifyObservers(cachedPositionEvent)
     futures[data.id].resolve(data.mousePosition)
   },
 
@@ -691,26 +680,6 @@ export type UnityInterfaceContainer = {
   unityInterface: UnityInterface
 }
 
-////////////////////////////////////////////////////////////////////////////////
-
-// protobuf message instances
-const createEntity: PB_CreateEntity = new PB_CreateEntity()
-const removeEntity: PB_RemoveEntity = new PB_RemoveEntity()
-const updateEntityComponent: PB_UpdateEntityComponent = new PB_UpdateEntityComponent()
-const attachEntity: PB_AttachEntityComponent = new PB_AttachEntityComponent()
-const removeEntityComponent: PB_ComponentRemoved = new PB_ComponentRemoved()
-const setEntityParent: PB_SetEntityParent = new PB_SetEntityParent()
-const query: PB_Query = new PB_Query()
-const rayQuery: PB_RayQuery = new PB_RayQuery()
-const ray: PB_Ray = new PB_Ray()
-const origin: PB_Vector3 = new PB_Vector3()
-const direction: PB_Vector3 = new PB_Vector3()
-const componentCreated: PB_ComponentCreated = new PB_ComponentCreated()
-const componentDisposed: PB_ComponentDisposed = new PB_ComponentDisposed()
-const componentUpdated: PB_ComponentUpdated = new PB_ComponentUpdated()
-const openExternalUrl: PB_OpenExternalUrl = new PB_OpenExternalUrl()
-const openNFTDialog: PB_OpenNFTDialog = new PB_OpenNFTDialog()
-
 class UnityScene<T> implements ParcelSceneAPI {
   eventDispatcher = new EventDispatcher()
   worker!: SceneWorker
@@ -1110,17 +1079,7 @@ export function updateBuilderScene(sceneData: ILand) {
   }
 }
 
-teleportObservable.add((position: { x: number; y: number; text?: string }) => {
-  // before setting the new position, show loading screen to avoid showing an empty world
-  unityInterface.SetLoadingScreenVisible(true)
-  globalDCL.globalStore.dispatch(teleportTriggered(position.text || `Teleporting to ${position.x}, ${position.y}`))
-})
-
-worldRunningObservable.add(isRunning => {
-  if (isRunning) {
-    unityInterface.SetLoadingScreenVisible(false)
-  }
-})
+setupPosition()
 
 document.addEventListener('pointerlockchange', e => {
   if (!document.pointerLockElement) {
