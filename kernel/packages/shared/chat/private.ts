@@ -1,46 +1,41 @@
-import { ExplorerIdentity } from 'shared'
+import { Vector3Component } from 'atomicHelpers/landHelpers'
+import { DEBUG_PM } from 'config'
+import { Authenticator } from 'dcl-crypto'
 import {
-  SocialClient,
-  FriendshipRequest,
   Conversation,
-  PresenceType,
-  CurrentUserStatus,
+  CurrentUserStatus, FriendshipRequest,
+  PresenceType, SocialClient,
   UnknownUsersError,
   UserPosition
 } from 'dcl-social-client'
-import { SocialAPI, Realm as SocialRealm } from 'dcl-social-client/dist'
-import { Authenticator } from 'dcl-crypto'
-import { takeEvery, put, select, call, take, delay } from 'redux-saga/effects'
-import {
-  SEND_PRIVATE_MESSAGE,
-  SendPrivateMessage,
-  updateFriendship,
-  UPDATE_FRIENDSHIP,
-  UpdateFriendship,
-  updatePrivateMessagingState,
-  updateUserData
-} from './actions'
-import { getClient, findByUserId, getPrivateMessaging } from './selectors'
-import { createLogger } from '../logger'
-import { ProfileAsPromise } from '../profiles/ProfileAsPromise'
-import { unityInterface } from 'unity-interface/dcl'
-import { ChatMessageType, FriendshipAction, PresenceStatus } from 'shared/types'
-import { SocialData, ChatState } from './types'
-import { StoreContainer } from '../store/rootTypes'
-import { ChatMessage, NotificationType } from '../types'
+import { Realm as SocialRealm, SocialAPI } from 'dcl-social-client/dist'
+import { call, delay, put, select, take, takeEvery } from 'redux-saga/effects'
+import { ExplorerIdentity } from 'shared'
 import { getRealm } from 'shared/dao/selectors'
 import { Realm } from 'shared/dao/types'
-import { lastPlayerPosition, positionObservable } from '../world/positionThings'
-import { worldToGrid } from '../../atomicHelpers/parcelScenePositions'
-import { ensureRenderer } from '../profiles/sagas'
-import { ADDED_PROFILE_TO_CATALOG } from '../profiles/actions'
-import { isAddedToCatalog, getProfile } from 'shared/profiles/selectors'
-import { INIT_CATALYST_REALM, SET_CATALYST_REALM, SetCatalystRealm, InitCatalystRealm } from '../dao/actions'
+import { getProfile, isAddedToCatalog } from 'shared/profiles/selectors'
+import { ChatMessageType, FriendshipAction, PresenceStatus } from 'shared/types'
 import { deepEqual } from '../../atomicHelpers/deepEqual'
-import { DEBUG_PM } from 'config'
-import { Vector3Component } from 'atomicHelpers/landHelpers'
+import { worldToGrid } from '../../atomicHelpers/parcelScenePositions'
+import { InitCatalystRealm, INIT_CATALYST_REALM, SetCatalystRealm, SET_CATALYST_REALM } from '../dao/actions'
+import { globalDCL } from '../globalDCL'
+import { createLogger } from '../logger'
+import { ADDED_PROFILE_TO_CATALOG } from '../profiles/actions'
+import { ProfileAsPromise } from '../profiles/ProfileAsPromise'
+import { ensureRenderer } from '../profiles/sagas'
+import { ChatMessage, NotificationType } from '../types'
+import { lastPlayerPosition, positionObservable } from '../world/positionThings'
+import {
+  SendPrivateMessage, SEND_PRIVATE_MESSAGE,
 
-declare const globalThis: StoreContainer
+  updateFriendship,
+
+  UpdateFriendship,
+  updatePrivateMessagingState,
+  updateUserData, UPDATE_FRIENDSHIP
+} from './actions'
+import { findByUserId, getClient, getPrivateMessaging } from './selectors'
+import { ChatState, SocialData } from './types'
 
 const DEBUG = DEBUG_PM
 
@@ -125,7 +120,7 @@ export function* initializePrivateMessaging(synapseUrl: string, identity: Explor
       receivedMessages[message.id] = Date.now()
     }
 
-    const { socialInfo } = globalThis.globalStore.getState().chat.privateMessaging
+    const { socialInfo } = globalDCL.globalStore.getState().chat.privateMessaging
     const friend = Object.values(socialInfo).find(friend => friend.conversationId === conversation.id)
 
     if (!friend) {
@@ -133,7 +128,7 @@ export function* initializePrivateMessaging(synapseUrl: string, identity: Explor
       return
     }
 
-    const profile = getProfile(globalThis.globalStore.getState(), identity.address)
+    const profile = getProfile(globalDCL.globalStore.getState(), identity.address)
     const blocked = profile?.blocked ?? []
     if (blocked.includes(friend.userId)) {
       DEBUG && logger.warn(`got a message from blocked user`, friend.userId)
@@ -162,13 +157,13 @@ export function* initializePrivateMessaging(synapseUrl: string, identity: Explor
       return null
     }
 
-    globalThis.globalStore.dispatch(updateUserData(userId, socialId))
+    globalDCL.globalStore.dispatch(updateUserData(userId, socialId))
 
     // ensure user profile is initialized and send to renderer
     await ProfileAsPromise(userId)
 
     // add to friendRequests & update renderer
-    globalThis.globalStore.dispatch(updateFriendship(action, userId, true))
+    globalDCL.globalStore.dispatch(updateFriendship(action, userId, true))
   }
 
   client.onFriendshipRequest(socialId =>
@@ -269,7 +264,7 @@ function* initializeFriends(client: SocialAPI) {
     requestedFrom: requestedFromIds
   }
   DEBUG && logger.info(`unityInterface.InitializeFriends`, initMessage)
-  unityInterface.InitializeFriends(initMessage)
+  globalDCL.rendererInterface.InitializeFriends(initMessage)
 
   return { friendsSocial, ownId }
 }
@@ -290,7 +285,7 @@ function sendUpdateUserStatus(id: string, status: CurrentUserStatus) {
   const presence: PresenceStatus =
     status.presence === PresenceType.OFFLINE ? PresenceStatus.OFFLINE : PresenceStatus.ONLINE
 
-  const domain = globalThis.globalStore.getState().chat.privateMessaging.client?.getDomain()
+  const domain = globalDCL.globalStore.getState().chat.privateMessaging.client?.getDomain()
   let matches = id.match(new RegExp(`@(\\w.+):${domain}`, 'i'))
 
   const userId = matches !== null ? matches[1] : id
@@ -315,7 +310,7 @@ function sendUpdateUserStatus(id: string, status: CurrentUserStatus) {
   }
 
   DEBUG && logger.info(`unityInterface.UpdateUserPresence`, updateMessage)
-  unityInterface.UpdateUserPresence(updateMessage)
+  globalDCL.rendererInterface.UpdateUserPresence(updateMessage)
 }
 
 function updateUserStatus(client: SocialAPI, ...socialIds: string[]) {
@@ -330,7 +325,7 @@ function updateUserStatus(client: SocialAPI, ...socialIds: string[]) {
 function* initializeStatusUpdateInterval(client: SocialAPI) {
   const domain = client.getDomain()
 
-  const friends = globalThis.globalStore.getState().chat.privateMessaging.friends.map(x => {
+  const friends = globalDCL.globalStore.getState().chat.privateMessaging.friends.map(x => {
     return `@${x}:${domain}`
   })
 
@@ -338,7 +333,7 @@ function* initializeStatusUpdateInterval(client: SocialAPI) {
 
   client.onStatusChange((socialId, status) => {
     DEBUG && logger.info(`client.onStatusChange`, socialId, status)
-    const user: SocialData | undefined = globalThis.globalStore.getState().chat.privateMessaging.socialInfo[socialId]
+    const user: SocialData | undefined = globalDCL.globalStore.getState().chat.privateMessaging.socialInfo[socialId]
 
     if (!user) {
       logger.error(`user not found for status change with social id`, socialId)
@@ -390,12 +385,12 @@ function* initializeStatusUpdateInterval(client: SocialAPI) {
   }
 
   positionObservable.add(({ position: { x, y, z } }) => {
-    const realm = getRealm(globalThis.globalStore.getState())
+    const realm = getRealm(globalDCL.globalStore.getState())
 
     sendOwnStatusIfNecessary({ worldPosition: { x, y, z }, realm, timestamp: Date.now() })
   })
 
-  const handleSetCatalystRealm = (action: SetCatalystRealm & InitCatalystRealm) => {
+  const handleSetCatalystRealm = (action: SetCatalystRealm | InitCatalystRealm) => {
     const realm = action.payload
 
     sendOwnStatusIfNecessary({ worldPosition: lastPlayerPosition.clone(), realm, timestamp: Date.now() })
@@ -420,7 +415,7 @@ function parseUserId(socialId: string) {
 
 function addNewChatMessage(chatMessage: ChatMessage) {
   DEBUG && logger.info(`unityInterface.AddMessageToChatWindow`, chatMessage)
-  unityInterface.AddMessageToChatWindow(chatMessage)
+  globalDCL.rendererInterface.AddMessageToChatWindow(chatMessage)
 }
 
 function* handleSendPrivateMessage(action: SendPrivateMessage, debug: boolean = false) {
@@ -560,7 +555,7 @@ function* handleUpdateFriendship({ payload, meta }: UpdateFriendship) {
 
       if (incoming) {
         DEBUG && logger.info(`unityInterface.UpdateFriendshipStatus`, payload)
-        unityInterface.UpdateFriendshipStatus(payload)
+        globalDCL.rendererInterface.UpdateFriendshipStatus(payload)
       } else {
         yield call(handleOutgoingUpdateFriendshipStatus, payload)
       }
@@ -583,7 +578,7 @@ function* handleUpdateFriendship({ payload, meta }: UpdateFriendship) {
 }
 
 function showErrorNotification(message: string) {
-  unityInterface.ShowNotification({
+  globalDCL.rendererInterface.ShowNotification({
     type: NotificationType.GENERIC,
     message,
     buttonMessage: 'OK',

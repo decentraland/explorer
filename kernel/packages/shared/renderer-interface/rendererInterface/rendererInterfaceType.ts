@@ -1,5 +1,5 @@
 import { MinimapSceneInfo, ProfileForRenderer } from 'decentraland-ecs/src/decentraland/Types'
-import { Wearable } from 'shared/profiles/types'
+import { Wearable } from '../../profiles/types'
 import {
   ChatMessage,
   FriendshipUpdateStatusMessage,
@@ -10,10 +10,10 @@ import {
   LoadableParcelScene,
   Notification,
   UpdateUserStatusMessage
-} from 'shared/types'
-import { AirdropInfo } from 'shared/airdrops/interface'
+} from '../../types'
+import { AirdropInfo } from '../../airdrops/interface'
 
-export type unityInterfaceType = {
+export type rendererInterfaceType = {
   debug: boolean
   SendGenericMessage: (object: string, method: string, payload: string) => void
   SetDebug: () => void
@@ -47,6 +47,7 @@ export type unityInterfaceType = {
   TriggerSelfUserExpression: (expressionId: string) => void
   UpdateMinimapSceneInformation: (info: MinimapSceneInfo[]) => void
   SetTutorialEnabled: () => void
+  SetLoadingScreenVisible: (visible: boolean) => void
   TriggerAirdropDisplay: (data: AirdropInfo) => void
   AddMessageToChatWindow: (message: ChatMessage) => void
   InitializeFriends: (initializationMessage: FriendsInitializationMessage) => void

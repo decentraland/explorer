@@ -1,5 +1,4 @@
 import { takeEvery, put, call, select, take } from 'redux-saga/effects'
-import { UnityInterfaceContainer, unityInterface } from 'unity-interface/dcl'
 import {
   MESSAGE_RECEIVED,
   MessageReceived,
@@ -28,7 +27,6 @@ import defaultLogger from 'shared/logger'
 import { catalystRealmConnected, changeRealm, changeToCrowdedRealm } from 'shared/dao'
 import { addToMutedUsers } from '../comms/peers'
 import { isValidExpression, expressionExplainer, validExpressions } from 'shared/apis/expressionExplainer'
-import { StoreContainer } from '../store/rootTypes'
 import { SHOW_FPS_COUNTER, getServerConfigurations, USE_NEW_CHAT } from 'config'
 import { Vector3Component } from 'atomicHelpers/landHelpers'
 import { AvatarMessage, AvatarMessageType } from 'shared/comms/interface/types'
@@ -42,8 +40,7 @@ import { isFriend } from './selectors'
 import { ensureRenderer } from '../profiles/sagas'
 import { worldRunningObservable } from '../world/worldState'
 import { identity } from 'shared'
-
-declare const globalThis: UnityInterfaceContainer & StoreContainer
+import { globalDCL } from 'shared/globalDCL'
 
 interface IChatCommand {
   name: string
@@ -93,7 +90,7 @@ function* handleAuthSuccessful() {
         if (isRunning) {
           worldRunningObservable.remove(observer)
 
-          unityInterface.ShowNotification({
+          globalDCL.rendererInterface.ShowNotification({
             type: NotificationType.GENERIC,
             message: 'There was an error initializing friends and private messages',
             buttonMessage: 'OK',
@@ -104,7 +101,7 @@ function* handleAuthSuccessful() {
 
       yield call(ensureRenderer)
 
-      unityInterface.ConfigureHUDElement(HUDElementID.FRIENDS, { active: false, visible: false })
+      globalDCL.rendererInterface.ConfigureHUDElement(HUDElementID.FRIENDS, { active: false, visible: false })
     }
   }
 }
@@ -147,7 +144,7 @@ function* trackEvents(action: PayloadAction<MessageEvent, ChatMessage>) {
 }
 
 function* handleReceivedMessage(action: MessageReceived) {
-  globalThis.unityInterface.AddMessageToChatWindow(action.payload)
+  globalDCL.rendererInterface.AddMessageToChatWindow(action.payload)
 }
 
 function* handleSendMessage(action: SendMessage) {
@@ -186,7 +183,7 @@ function* handleSendMessage(action: SendMessage) {
     sendPublicChatMessage(entry.messageId, entry.body)
   }
 
-  globalThis.unityInterface.AddMessageToChatWindow(entry)
+  globalDCL.rendererInterface.AddMessageToChatWindow(entry)
 }
 
 function handleChatCommand(message: string) {
@@ -419,7 +416,7 @@ function initChatCommands() {
 
       sendPublicChatMessage(uuid(), `␐${expression} ${time}`)
 
-      globalThis.unityInterface.TriggerSelfUserExpression(expression)
+      globalDCL.rendererInterface.TriggerSelfUserExpression(expression)
 
       return {
         messageId: uuid(),
@@ -437,7 +434,7 @@ function initChatCommands() {
     const currentUser = getCurrentUser()
     if (!currentUser) throw new Error('cannotGetCurrentUser')
 
-    const user = findProfileByName(globalThis.globalStore.getState(), userName)
+    const user = findProfileByName(globalDCL.globalStore.getState(), userName)
 
     if (!user || !user.userId) {
       return {
@@ -449,7 +446,7 @@ function initChatCommands() {
       }
     }
 
-    const _isFriend: ReturnType<typeof isFriend> = isFriend(globalThis.globalStore.getState(), user.userId)
+    const _isFriend: ReturnType<typeof isFriend> = isFriend(globalDCL.globalStore.getState(), user.userId)
     if (!_isFriend) {
       return {
         messageId: uuid(),
@@ -460,7 +457,7 @@ function initChatCommands() {
       }
     }
 
-    globalThis.globalStore.dispatch(sendPrivateMessage(user.userId, message))
+    globalDCL.globalStore.dispatch(sendPrivateMessage(user.userId, message))
 
     return {
       messageId: uuid(),

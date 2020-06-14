@@ -1,9 +1,9 @@
-import { disconnect, sendToMordor } from '../comms'
-import { setLoadingScreenVisible } from 'unity-interface/dcl'
 import { future, IFuture } from 'fp-future'
+import { disconnect, sendToMordor } from '../comms'
+import { removeUserProfile } from '../comms/peers'
+import { globalDCL } from '../globalDCL'
 import { bringDownClientAndShowError } from '../loading/ReportFatalError'
 import { NEW_LOGIN } from '../loading/types'
-import { removeUserProfile } from '../comms/peers'
 
 export class Session {
   private static _instance: IFuture<Session> = future()
@@ -13,7 +13,7 @@ export class Session {
   }
 
   async logout() {
-    setLoadingScreenVisible(true)
+    globalDCL.rendererInterface.SetLoadingScreenVisible(true)
     sendToMordor()
     disconnect()
     removeUserProfile()
