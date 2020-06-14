@@ -73,6 +73,7 @@ import {
   PB_UpdateEntityComponent} from '../shared/proto/engineinterface_pb'
 import { setupPosition, cachedPositionEvent } from './position/setupPosition'
 import { createEntity, removeEntity, updateEntityComponent, attachEntity, removeEntityComponent, setEntityParent, origin, direction, ray, rayQuery, query, componentCreated, componentDisposed, componentUpdated, openExternalUrl, openNFTDialog } from './cachedProtobuf'
+import { setupPointerLock } from './setupPointerLock'
 
 type GameInstance = {
   SendMessage(object: string, method: string, ...args: (number | string)[]): void
@@ -1081,8 +1082,5 @@ export function updateBuilderScene(sceneData: ILand) {
 
 setupPosition()
 
-document.addEventListener('pointerlockchange', e => {
-  if (!document.pointerLockElement) {
-    unityInterface.UnlockCursor()
-  }
-})
+setupPointerLock()
+
