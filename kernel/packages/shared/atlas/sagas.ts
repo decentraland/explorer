@@ -34,12 +34,7 @@ import { worldToGrid } from 'atomicHelpers/parcelScenePositions'
 import { PARCEL_LOADING_STARTED } from 'shared/renderer/types'
 import { getPois } from '../meta/selectors'
 import { META_CONFIGURATION_INITIALIZED } from '../meta/actions'
-
-declare const window: {
-  unityInterface: {
-    UpdateMinimapSceneInformation: (data: MinimapSceneInfo[]) => void
-  }
-}
+import { globalDCL } from 'shared/globalDCL'
 
 export function* atlasSaga(): any {
   yield fork(fetchDistricts)
@@ -202,5 +197,5 @@ function* reportScenes(sceneIds: string[]): any {
       })
     })
 
-  window.unityInterface.UpdateMinimapSceneInformation(minimapSceneInfoResult)
+  globalDCL.rendererInterface.UpdateMinimapSceneInformation(minimapSceneInfoResult)
 }
