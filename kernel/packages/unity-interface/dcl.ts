@@ -10,7 +10,7 @@ import { providerFuture } from 'shared/ethereum/provider'
 import { getProfile, hasConnectedWeb3 } from 'shared/profiles/selectors'
 import { TeleportController } from 'shared/world/TeleportController'
 import { reportScenesAroundParcel } from 'shared/atlas/actions'
-import { gridToWorld } from '../atomicHelpers/parcelScenePositions'
+import { gridToWorld } from 'atomicHelpers/parcelScenePositions'
 import {
   DEBUG,
   EDITOR,
@@ -20,10 +20,10 @@ import {
   SCENE_DEBUG_PANEL,
   SHOW_FPS_COUNTER,
   tutorialEnabled
-} from '../config'
-import { Quaternion, ReadOnlyQuaternion, ReadOnlyVector3, Vector3 } from '../decentraland-ecs/src/decentraland/math'
-import { IEventNames, IEvents, ProfileForRenderer, MinimapSceneInfo } from '../decentraland-ecs/src/decentraland/Types'
-import { sceneLifeCycleObservable } from '../decentraland-loader/lifecycle/controllers/scene'
+} from 'config'
+import { Quaternion, ReadOnlyQuaternion, ReadOnlyVector3, Vector3 } from 'decentraland-ecs/src/decentraland/math'
+import { IEventNames, IEvents, ProfileForRenderer, MinimapSceneInfo } from 'decentraland-ecs/src/decentraland/Types'
+import { sceneLifeCycleObservable } from 'decentraland-loader/lifecycle/controllers/scene'
 import { tutorialStepId } from 'decentraland-loader/lifecycle/tutorial/tutorial'
 import { AirdropInfo } from 'shared/airdrops/interface'
 import { queueTrackingEvent } from 'shared/analytics'
@@ -51,7 +51,7 @@ import {
   PB_Vector3,
   PB_OpenExternalUrl,
   PB_OpenNFTDialog
-} from '../shared/proto/engineinterface_pb'
+} from 'shared/proto/engineinterface_pb'
 import { Session } from 'shared/session'
 import { getPerformanceInfo } from 'shared/session/getPerformanceInfo'
 import {
@@ -100,7 +100,7 @@ import { StoreContainer } from 'shared/store/rootTypes'
 import { ILandToLoadableParcelScene, ILandToLoadableParcelSceneUpdate } from 'shared/selectors'
 import { sendMessage, updateUserData, updateFriendship } from 'shared/chat/actions'
 import { ProfileAsPromise } from 'shared/profiles/ProfileAsPromise'
-import { changeRealm, catalystRealmConnected, candidatesFetched } from '../shared/dao/index'
+import { changeRealm, catalystRealmConnected, candidatesFetched } from 'shared/dao/index'
 import { notifyStatusThroughChat } from 'shared/comms/chat'
 
 declare const globalThis: UnityInterfaceContainer &

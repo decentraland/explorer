@@ -1,11 +1,11 @@
 import future from 'fp-future'
-import { DEBUG_MESSAGES } from '../config'
-import { initShared } from '../shared'
-import { ReportFatalError } from '../shared/loading/ReportFatalError'
-import { defaultLogger } from '../shared/logger'
+import { DEBUG_MESSAGES } from 'config'
+import { initShared } from 'shared'
+import { ReportFatalError } from 'shared/loading/ReportFatalError'
+import { defaultLogger } from 'shared/logger'
 import { initializeEngine } from './dcl'
-import { Session } from '../shared/session'
-import { waitingForRenderer } from '../shared/loading/types'
+import { Session } from 'shared/session'
+import { waitingForRenderer } from 'shared/loading/types'
 const queryString = require('query-string')
 
 declare var global: any

@@ -1,5 +1,5 @@
 import { disconnect, sendToMordor } from '../comms'
-import { setLoadingScreenVisible } from '../../unity-interface/dcl'
+import { setLoadingScreenVisible } from 'unity-interface/dcl'
 import { future, IFuture } from 'fp-future'
 import { bringDownClientAndShowError } from '../loading/ReportFatalError'
 import { NEW_LOGIN } from '../loading/types'

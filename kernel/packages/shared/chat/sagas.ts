@@ -1,5 +1,5 @@
 import { takeEvery, put, call, select, take } from 'redux-saga/effects'
-import { UnityInterfaceContainer, unityInterface } from '../../unity-interface/dcl'
+import { UnityInterfaceContainer, unityInterface } from 'unity-interface/dcl'
 import {
   MESSAGE_RECEIVED,
   MessageReceived,
@@ -34,7 +34,6 @@ import { Vector3Component } from 'atomicHelpers/landHelpers'
 import { AvatarMessage, AvatarMessageType } from 'shared/comms/interface/types'
 import { sampleDropData } from 'shared/airdrops/sampleDrop'
 import { initializePrivateMessaging } from './private'
-import { identity } from '../index'
 import { AUTH_SUCCESSFUL } from '../loading/types'
 import { findProfileByName } from '../profiles/selectors'
 import { isRealmInitialized } from 'shared/dao/selectors'
@@ -42,6 +41,7 @@ import { CATALYST_REALM_INITIALIZED } from 'shared/dao/actions'
 import { isFriend } from './selectors'
 import { ensureRenderer } from '../profiles/sagas'
 import { worldRunningObservable } from '../world/worldState'
+import { identity } from 'shared'
 
 declare const globalThis: UnityInterfaceContainer & StoreContainer
 
