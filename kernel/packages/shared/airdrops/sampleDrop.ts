@@ -1,4 +1,7 @@
-export const sampleDropData = {
+import { AirdropInfo } from './interface'
+
+export const sampleDropData: AirdropInfo = {
+  id: 'a',
   title: "You've found a chest!",
   subtitle: "Click on it to see what's inside!",
   items: [

@@ -1,46 +1,46 @@
-import { takeEvery, put, call, select, take } from 'redux-saga/effects'
-import {
-  MESSAGE_RECEIVED,
-  MessageReceived,
-  messageReceived,
-  SEND_MESSAGE,
-  SendMessage,
-  sendPrivateMessage
-} from './actions'
+import { Vector3Component } from 'atomicHelpers/landHelpers'
 import { uuid } from 'atomicHelpers/math'
-import { ChatMessageType, ChatMessage, HUDElementID, NotificationType } from 'shared/types'
-import { EXPERIENCE_STARTED } from 'shared/loading/types'
-import { PayloadAction } from 'typesafe-actions'
+import { parseParcelPosition, worldToGrid } from 'atomicHelpers/parcelScenePositions'
+import { getServerConfigurations, SHOW_FPS_COUNTER, USE_NEW_CHAT } from 'config'
+import { call, put, select, take, takeEvery } from 'redux-saga/effects'
+import { identity } from 'shared'
+import { sampleDropData } from 'shared/airdrops/sampleDrop'
 import { queueTrackingEvent } from 'shared/analytics'
+import { expressionExplainer, isValidExpression, validExpressions } from 'shared/apis/expressionExplainer'
 import { sendPublicChatMessage } from 'shared/comms'
+import { notifyStatusThroughChat } from 'shared/comms/chat'
+import { AvatarMessage, AvatarMessageType } from 'shared/comms/interface/types'
 import {
+  avatarMessageObservable,
+  findPeerByName,
   getCurrentUser,
   peerMap,
-  findPeerByName,
-  removeFromMutedUsers,
-  avatarMessageObservable
+  removeFromMutedUsers
 } from 'shared/comms/peers'
-import { parseParcelPosition, worldToGrid } from 'atomicHelpers/parcelScenePositions'
-import { TeleportController } from 'shared/world/TeleportController'
-import { notifyStatusThroughChat } from 'shared/comms/chat'
-import defaultLogger from 'shared/logger'
 import { catalystRealmConnected, changeRealm, changeToCrowdedRealm } from 'shared/dao'
-import { addToMutedUsers } from '../comms/peers'
-import { isValidExpression, expressionExplainer, validExpressions } from 'shared/apis/expressionExplainer'
-import { SHOW_FPS_COUNTER, getServerConfigurations, USE_NEW_CHAT } from 'config'
-import { Vector3Component } from 'atomicHelpers/landHelpers'
-import { AvatarMessage, AvatarMessageType } from 'shared/comms/interface/types'
-import { sampleDropData } from 'shared/airdrops/sampleDrop'
-import { initializePrivateMessaging } from './private'
-import { AUTH_SUCCESSFUL } from '../loading/types'
-import { findProfileByName } from '../profiles/selectors'
-import { isRealmInitialized } from 'shared/dao/selectors'
 import { CATALYST_REALM_INITIALIZED } from 'shared/dao/actions'
-import { isFriend } from './selectors'
-import { ensureRenderer } from '../profiles/sagas'
-import { worldRunningObservable } from '../world/worldState'
-import { identity } from 'shared'
+import { isRealmInitialized } from 'shared/dao/selectors'
 import { globalDCL } from 'shared/globalDCL'
+import { EXPERIENCE_STARTED } from 'shared/loading/types'
+import defaultLogger from 'shared/logger'
+import { ChatMessage, ChatMessageType, HUDElementID, NotificationType } from 'shared/types'
+import { TeleportController } from 'shared/world/TeleportController'
+import { PayloadAction } from 'typesafe-actions'
+import { addToMutedUsers } from '../comms/peers'
+import { AUTH_SUCCESSFUL } from '../loading/types'
+import { ensureRenderer } from '../profiles/sagas'
+import { findProfileByName } from '../profiles/selectors'
+import { worldRunningObservable } from '../world/worldState'
+import {
+  MessageReceived,
+  messageReceived,
+  MESSAGE_RECEIVED,
+  SendMessage,
+  sendPrivateMessage,
+  SEND_MESSAGE
+} from './actions'
+import { initializePrivateMessaging } from './private'
+import { isFriend } from './selectors'
 
 interface IChatCommand {
   name: string
@@ -335,8 +335,7 @@ function initChatCommands() {
 
   addChatCommand('showfps', 'Show FPS counter', message => {
     fpsConfiguration.visible = !fpsConfiguration.visible
-    const unityWindow: any = window
-    fpsConfiguration.visible ? unityWindow.unityInterface.ShowFPSPanel() : unityWindow.unityInterface.HideFPSPanel()
+    fpsConfiguration.visible ? globalDCL.rendererInterface.ShowFPSPanel() : globalDCL.rendererInterface.HideFPSPanel()
 
     return {
       messageId: uuid(),
@@ -474,8 +473,7 @@ function initChatCommands() {
   addChatCommand('w', 'Send a private message to a friend', whisperFn)
 
   addChatCommand('airdrop', 'fake an airdrop', () => {
-    const unityWindow: any = window
-    unityWindow.unityInterface.TriggerAirdropDisplay(sampleDropData)
+    globalDCL.rendererInterface.TriggerAirdropDisplay(sampleDropData)
     return {
       messageId: uuid(),
       messageType: ChatMessageType.SYSTEM,

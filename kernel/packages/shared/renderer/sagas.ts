@@ -1,5 +1,6 @@
 import { call, fork, put } from 'redux-saga/effects'
 import { signalRendererInitialized } from './actions'
+import { globalDCL } from 'shared/globalDCL'
 
 export function* rendererSaga() {
   yield fork(awaitRendererInitialSignal)
@@ -13,7 +14,7 @@ export function* awaitRendererInitialSignal(): any {
 export async function waitForRenderer() {
   return new Promise(resolve => {
     const interval = setInterval(() => {
-      if ((window as any)['unityInterface'] && (window as any)['unityInterface'].SendMessage) {
+      if (globalDCL.rendererInterface) {
         clearInterval(interval)
         resolve()
       }

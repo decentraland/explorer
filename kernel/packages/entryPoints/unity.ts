@@ -12,10 +12,11 @@ import defaultLogger from 'shared/logger'
 import { signalRendererInitialized, signalParcelLoadingStarted } from 'shared/renderer/actions'
 import { lastPlayerPosition, teleportObservable } from 'shared/world/positionThings'
 import { StoreContainer } from 'shared/store/rootTypes'
-import { startUnityParcelLoading, unityInterface } from 'unity-interface/dcl'
+import { startUnityParcelLoading } from 'unity-interface/dcl'
 import { initializeUnity } from 'unity-interface/initializer'
 import { HUDElementID } from 'shared/types'
 import { identity } from 'shared'
+import { globalDCL } from 'shared/globalDCL'
 
 const container = document.getElementById('gameContainer')
 
@@ -23,7 +24,7 @@ if (!container) throw new Error('cannot find element #gameContainer')
 
 initializeUnity(container)
   .then(async _ => {
-    const i = unityInterface
+    const i = globalDCL.rendererInterface
     i.ConfigureHUDElement(HUDElementID.MINIMAP, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.AVATAR, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.NOTIFICATION, { active: true, visible: true })

@@ -23,6 +23,8 @@ export const globalDCL: {
   }
   messageHandler: HandlerOfRendererMessages
   rendererInterface: rendererInterfaceType
+  // @deprecated
+  unityInterface: rendererInterfaceType
   globalStore: Store<RootState>
   browserInterface: browserInterfaceType
   analytics: {

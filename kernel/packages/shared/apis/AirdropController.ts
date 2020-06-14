@@ -6,6 +6,7 @@ import { getUserAccount } from '../ethereum/EthereumService'
 import { Observable } from 'decentraland-ecs/src/ecs/Observable'
 import { v4 } from 'uuid'
 import { defaultLogger } from '../logger'
+import { globalDCL } from '../globalDCL'
 
 export const airdropObservable = new Observable<string>()
 
@@ -28,7 +29,7 @@ export class AirdropController extends ExposableAPI {
 
   @exposeMethod
   async openCrate(data: AirdropInput, transaction: string, targetContract: string): Promise<void> {
-    const unityInstance: unityAirdropInterface = (window as any).unityInterface
+    const unityInstance: unityAirdropInterface = globalDCL.rendererInterface
     const id = v4()
     this.mapIdToTransactions[id] = transaction
     this.mapIdToTargetContract[id] = targetContract
