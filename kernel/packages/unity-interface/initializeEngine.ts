@@ -8,6 +8,8 @@ import { setupPosition } from './position/setupPosition'
 import { setupPointerLock } from './setupPointerLock'
 import { unityInterface } from './unityInterface'
 
+const rendererVersion = require('decentraland-renderer')
+window['console'].log('Renderer version: ' + rendererVersion)
 /**
  * Common initialization logic for the unity engine
  *
