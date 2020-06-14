@@ -1,8 +1,4 @@
-import {
-  EDITOR,
-
-  RESET_TUTORIAL
-} from 'config';
+import { EDITOR, RESET_TUTORIAL } from 'config';
 import { ReadOnlyVector3 } from 'decentraland-ecs/src/decentraland/math';
 import { MinimapSceneInfo, ProfileForRenderer } from 'decentraland-ecs/src/decentraland/Types';
 import { AirdropInfo } from 'shared/airdrops/interface';
@@ -13,7 +9,8 @@ import { rendererInterfaceType } from 'shared/renderer-interface/rendererInterfa
 import { ChatMessage, FriendshipUpdateStatusMessage, FriendsInitializationMessage, HUDConfiguration, HUDElementID, InstancedSpawnPoint, LoadableParcelScene, Notification, UpdateUserStatusMessage } from 'shared/types';
 import { TeleportController } from 'shared/world/TeleportController';
 import { browserInterface } from './browserInterface';
-import { CHUNK_SIZE } from './dcl';
+
+export const CHUNK_SIZE = 100
 
 export const unityInterface: rendererInterfaceType & builderInterfaceType = {
   debug: false,

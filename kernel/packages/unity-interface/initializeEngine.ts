@@ -9,14 +9,16 @@ import { setupPointerLock } from './setupPointerLock'
 import { unityInterface } from './unityInterface'
 
 /**
- *
  * Common initialization logic for the unity engine
  *
  * @param _gameInstance Unity game instance
  */
-
 export async function initializeEngine(_gameInstance: any) {
   globalDCL.lowLevelInterface = _gameInstance
+  globalDCL.rendererInterface = unityInterface
+  globalDCL.unityInterface = unityInterface
+  globalDCL.builderInterface = unityInterface
+  globalDCL.browserInterface = browserInterface
 
   setupPosition()
 
