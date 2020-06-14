@@ -51,7 +51,7 @@ import {
   PB_Vector3,
   PB_OpenExternalUrl,
   PB_OpenNFTDialog
-} from 'shared/proto/engineinterface_pb'
+} from '../shared/proto/engineinterface_pb'
 import { Session } from 'shared/session'
 import { getPerformanceInfo } from 'shared/session/getPerformanceInfo'
 import {
@@ -102,6 +102,9 @@ import { sendMessage, updateUserData, updateFriendship } from 'shared/chat/actio
 import { ProfileAsPromise } from 'shared/profiles/ProfileAsPromise'
 import { changeRealm, catalystRealmConnected, candidatesFetched } from 'shared/dao/index'
 import { notifyStatusThroughChat } from 'shared/comms/chat'
+import { unityInterfaceType } from './unityInterface/unityInterfaceType'
+import { builderUnityInterface } from './builder/builderUnityInterface'
+import { browserInterfaceType } from './browserInterface/browserInterfaceType'
 
 declare const globalThis: UnityInterfaceContainer &
   BrowserInterfaceContainer &
@@ -159,7 +162,7 @@ async function setAudioStream(url: string, play: boolean, volume: number) {
 
 /////////////////////////////////// HANDLERS ///////////////////////////////////
 
-const browserInterface = {
+const browserInterface: browserInterfaceType = {
   /** Triggered when the camera moves */
   ReportPosition(data: { position: ReadOnlyVector3; rotation: ReadOnlyQuaternion; playerHeight?: number }) {
     positionEvent.position.set(data.position.x, data.position.y, data.position.z)
@@ -510,7 +513,7 @@ export function delightedSurvey() {
 
 const CHUNK_SIZE = 100
 
-export const unityInterface = {
+export const unityInterface: unityInterfaceType & builderUnityInterface = {
   debug: false,
 
   SendGenericMessage(object: string, method: string, payload: string) {
@@ -679,7 +682,7 @@ export const unityInterface = {
   TakeScreenshotBuilder(id: string) {
     this.SendBuilderMessage('TakeScreenshot', id)
   },
-  SetCameraPositionBuilder(position: Vector3) {
+  SetCameraPositionBuilder(position: ReadOnlyVector3) {
     this.SendBuilderMessage('SetBuilderCameraPosition', position.x + ',' + position.y + ',' + position.z)
   },
   SetCameraRotationBuilder(aplha: number, beta: number) {
