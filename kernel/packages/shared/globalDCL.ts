@@ -43,11 +43,11 @@ Object.assign(globalDCL, {
     EngineStarted: tooEarlyHandler,
     MessageFromEngine: (type: any, message: any) => {
       defaultLogger.error(`Received message before initialization is ready: ${type}`)
-    },
+    }
   },
   messageHandler: (type: any, message: any) =>
     defaultLogger.error(`Received message before initialization is ready: ${type}`),
-  futures: {},
+  futures: {}
 })
 
 function tooEarlyHandler() {
