@@ -458,6 +458,14 @@ export function delightedSurvey() {
 }
 
 const CHUNK_SIZE = 100
+const batchedMessages: string[] = []
+const TIME_BETWEEN_SCENE_MESSAGES = 20
+setInterval(() => {
+  if (batchedMessages.length) {
+    gameInstance.SendMessage(`SceneController`, `SendSceneMessage`, batchedMessages.join('\n'))
+    batchedMessages.length = 0
+  }
+}, TIME_BETWEEN_SCENE_MESSAGES)
 
 export const unityInterface: rendererInterfaceType & builderInterface = {
   debug: false,
@@ -505,7 +513,7 @@ export const unityInterface: rendererInterfaceType & builderInterface = {
     gameInstance.SendMessage('SceneController', 'UnloadScene', sceneId)
   },
   SendSceneMessage(messages: string) {
-    gameInstance.SendMessage(`SceneController`, `SendSceneMessage`, messages)
+    // See `batchedMessages`
   },
   SetSceneDebugPanel() {
     gameInstance.SendMessage('SceneController', 'SetSceneDebugPanel')
@@ -711,14 +719,10 @@ class UnityScene<T> implements ParcelSceneAPI {
 
   sendBatch(actions: EntityAction[]): void {
     const sceneId = getParcelSceneID(this)
-    let messages = ''
     for (let i = 0; i < actions.length; i++) {
       const action = actions[i]
-      messages += this.encodeSceneMessage(sceneId, action.type, action.payload, action.tag)
-      messages += '\n'
+      batchedMessages.push(this.encodeSceneMessage(sceneId, action.type, action.payload, action.tag))
     }
-
-    unityInterface.SendSceneMessage(messages)
   }
 
   registerWorker(worker: SceneWorker): void {
