@@ -42,18 +42,16 @@ import { Avatar, Profile, Wearable } from 'shared/profiles/types'
 import { browserInterfaceType } from 'shared/renderer-interface/browserInterface/browserInterfaceType'
 import { builderInterface } from 'shared/renderer-interface/builder/builderInterface'
 import { rendererInterfaceType } from 'shared/renderer-interface/rendererInterface/rendererInterfaceType'
-import { ILandToLoadableParcelScene, ILandToLoadableParcelSceneUpdate } from 'shared/selectors'
+import { ILandToLoadableParcelScene } from 'shared/selectors'
 import { Session } from 'shared/session'
 import { getPerformanceInfo } from 'shared/session/getPerformanceInfo'
-import { AttachEntityComponentPayload, ChatMessage, ComponentCreatedPayload, ComponentDisposedPayload, ComponentRemovedPayload, ComponentUpdatedPayload, CreateEntityPayload, EntityAction, EnvironmentData, FriendshipAction, FriendshipUpdateStatusMessage, FriendsInitializationMessage, HUDConfiguration, HUDElementID, ILand, InstancedSpawnPoint, LoadableParcelScene, MappingsResponse, Notification, OpenNFTDialogPayload, QueryPayload, RemoveEntityPayload, SceneJsonData, SetEntityParentPayload, UpdateEntityComponentPayload, UpdateUserStatusMessage, WorldPosition } from 'shared/types'
+import { AttachEntityComponentPayload, ChatMessage, ComponentCreatedPayload, ComponentDisposedPayload, ComponentRemovedPayload, ComponentUpdatedPayload, CreateEntityPayload, EntityAction, EnvironmentData, FriendshipAction, FriendshipUpdateStatusMessage, FriendsInitializationMessage, HUDConfiguration, HUDElementID, InstancedSpawnPoint, LoadableParcelScene, Notification, OpenNFTDialogPayload, QueryPayload, RemoveEntityPayload, SetEntityParentPayload, UpdateEntityComponentPayload, UpdateUserStatusMessage, WorldPosition } from 'shared/types'
 import { ParcelSceneAPI } from 'shared/world/ParcelSceneAPI'
 import {
   enableParcelSceneLoading,
   getParcelSceneID,
   getSceneWorkerBySceneID,
-  loadParcelScene,
-  stopParcelSceneWorker
-} from 'shared/world/parcelSceneManager'
+  loadParcelScene} from 'shared/world/parcelSceneManager'
 import { positionObservable, teleportObservable } from 'shared/world/positionThings'
 import { hudWorkerUrl, SceneWorker } from 'shared/world/SceneWorker'
 import { TeleportController } from 'shared/world/TeleportController'
@@ -994,90 +992,6 @@ async function initializeDecentralandUI() {
   await ensureUiApis(worker)
 
   unityInterface.CreateUIScene({ id: getParcelSceneID(scene), baseUrl: scene.data.baseUrl })
-}
-
-// Builder functions
-
-let currentLoadedScene: SceneWorker | null
-
-export async function loadPreviewScene() {
-  const result = await fetch('/scene.json?nocache=' + Math.random())
-
-  let lastId: string | null = null
-
-  if (currentLoadedScene) {
-    lastId = currentLoadedScene.parcelScene.data.sceneId
-    stopParcelSceneWorker(currentLoadedScene)
-  }
-
-  if (result.ok) {
-    // we load the scene to get the metadata
-    // about rhe bounds and position of the scene
-    // TODO(fmiras): Validate scene according to https://github.com/decentraland/proposals/blob/master/dsp/0020.mediawiki
-    const scene = (await result.json()) as SceneJsonData
-    const mappingsFetch = await fetch('/mappings')
-    const mappingsResponse = (await mappingsFetch.json()) as MappingsResponse
-
-    let defaultScene: ILand = {
-      sceneId: 'previewScene',
-      baseUrl: location.toString().replace(/\?[^\n]+/g, ''),
-      baseUrlBundles: '',
-      sceneJsonData: scene,
-      mappingsResponse: mappingsResponse
-    }
-
-    const parcelScene = new UnityParcelScene(ILandToLoadableParcelScene(defaultScene))
-    currentLoadedScene = loadParcelScene(parcelScene)
-
-    const target: LoadableParcelScene = { ...ILandToLoadableParcelScene(defaultScene).data }
-    delete target.land
-
-    defaultLogger.info('Reloading scene...')
-
-    if (lastId) {
-      unityInterface.UnloadScene(lastId)
-    }
-
-    unityInterface.LoadParcelScenes([target])
-
-    defaultLogger.info('finish...')
-
-    return defaultScene
-  } else {
-    throw new Error('Could not load scene.json')
-  }
-}
-
-export function loadBuilderScene(sceneData: ILand) {
-  unloadCurrentBuilderScene()
-
-  const parcelScene = new UnityParcelScene(ILandToLoadableParcelScene(sceneData))
-  currentLoadedScene = loadParcelScene(parcelScene)
-
-  const target: LoadableParcelScene = { ...ILandToLoadableParcelScene(sceneData).data }
-  delete target.land
-
-  unityInterface.LoadParcelScenes([target])
-  return parcelScene
-}
-
-export function unloadCurrentBuilderScene() {
-  if (currentLoadedScene) {
-    const parcelScene = currentLoadedScene.parcelScene as UnityParcelScene
-    parcelScene.emit('builderSceneUnloaded', {})
-
-    stopParcelSceneWorker(currentLoadedScene)
-    unityInterface.SendBuilderMessage('UnloadBuilderScene', parcelScene.data.sceneId)
-    currentLoadedScene = null
-  }
-}
-
-export function updateBuilderScene(sceneData: ILand) {
-  if (currentLoadedScene) {
-    const target: LoadableParcelScene = { ...ILandToLoadableParcelSceneUpdate(sceneData).data }
-    delete target.land
-    unityInterface.UpdateParcelScenes([target])
-  }
 }
 
 setupPosition()

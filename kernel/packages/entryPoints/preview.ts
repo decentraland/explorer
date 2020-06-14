@@ -6,7 +6,7 @@ global.preview = window.preview = true
 global.enableWeb3 = window.enableWeb3
 
 import { initializeUnity } from 'unity-interface/initializer'
-import { loadPreviewScene } from 'unity-interface/dcl'
+import { loadPreviewScene } from 'unity-interface/preview'
 import { DEBUG_WS_MESSAGES } from 'config'
 import defaultLogger from 'shared/logger'
 import { ILand, HUDElementID } from 'shared/types'

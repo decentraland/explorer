@@ -12,14 +12,8 @@ import { SceneJsonData, ILand, HUDElementID } from 'shared/types'
 import { normalizeContentMappings } from 'shared/selectors'
 import { SceneWorker } from 'shared/world/SceneWorker'
 import { initializeUnity } from 'unity-interface/initializer'
-import {
-  UnityParcelScene,
-  loadBuilderScene,
-  updateBuilderScene,
-  futures,
-  unloadCurrentBuilderScene,
-  unityInterface
-} from 'unity-interface/dcl'
+import { UnityParcelScene, futures, unityInterface } from 'unity-interface/dcl'
+import { loadBuilderScene, updateBuilderScene, unloadCurrentBuilderScene } from 'unity-interface/builder'
 import defaultLogger from 'shared/logger'
 import { uuid } from 'decentraland-ecs/src/ecs/helpers'
 import { Vector3 } from 'decentraland-ecs/src/decentraland/math'
