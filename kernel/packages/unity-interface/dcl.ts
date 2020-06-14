@@ -45,95 +45,7 @@ import { rendererInterfaceType } from 'shared/renderer-interface/rendererInterfa
 import { ILandToLoadableParcelScene, ILandToLoadableParcelSceneUpdate } from 'shared/selectors'
 import { Session } from 'shared/session'
 import { getPerformanceInfo } from 'shared/session/getPerformanceInfo'
-import {
-  AttachEntityComponentPayload,
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  ChatMessage, ComponentCreatedPayload,
-  ComponentDisposedPayload,
-  ComponentRemovedPayload,
-  ComponentUpdatedPayload,
-  CreateEntityPayload,
-  EntityAction,
-  EnvironmentData,
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  FriendshipAction, FriendshipUpdateStatusMessage, FriendsInitializationMessage, HUDConfiguration,
-
-
-
-
-
-
-
-
-
-
-
-  HUDElementID, ILand,
-  InstancedSpawnPoint,
-
-  LoadableParcelScene,
-  MappingsResponse,
-  Notification,
-
-
-
-
-
-
-
-
-
-
-
-  OpenNFTDialogPayload, QueryPayload,
-  RemoveEntityPayload, SceneJsonData,
-
-
-
-
-
-  SetEntityParentPayload,
-  UpdateEntityComponentPayload,
-
-
-
-
-  UpdateUserStatusMessage,
-
-  WorldPosition
-} from 'shared/types'
+import { AttachEntityComponentPayload, ChatMessage, ComponentCreatedPayload, ComponentDisposedPayload, ComponentRemovedPayload, ComponentUpdatedPayload, CreateEntityPayload, EntityAction, EnvironmentData, FriendshipAction, FriendshipUpdateStatusMessage, FriendsInitializationMessage, HUDConfiguration, HUDElementID, ILand, InstancedSpawnPoint, LoadableParcelScene, MappingsResponse, Notification, OpenNFTDialogPayload, QueryPayload, RemoveEntityPayload, SceneJsonData, SetEntityParentPayload, UpdateEntityComponentPayload, UpdateUserStatusMessage, WorldPosition } from 'shared/types'
 import { ParcelSceneAPI } from 'shared/world/ParcelSceneAPI'
 import {
   enableParcelSceneLoading,
@@ -154,14 +66,6 @@ import {
   PB_ComponentRemoved,
   PB_ComponentUpdated,
   PB_CreateEntity,
-
-
-
-
-
-
-
-
   PB_OpenExternalUrl,
   PB_OpenNFTDialog, PB_Query,
   PB_Ray,
@@ -767,6 +671,7 @@ export const unityInterface: rendererInterfaceType & builderInterface = {
   }
 }
 
+globalDCL.unityInterface = unityInterface
 globalDCL.rendererInterface = unityInterface
 
 export type UnityInterface = typeof unityInterface

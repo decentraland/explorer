@@ -6,7 +6,7 @@ global.preview = window.preview = true
 global.enableWeb3 = window.enableWeb3
 
 import { initializeUnity } from 'unity-interface/initializer'
-import { loadPreviewScene, unityInterface } from 'unity-interface/dcl'
+import { loadPreviewScene } from 'unity-interface/dcl'
 import { DEBUG_WS_MESSAGES } from 'config'
 import defaultLogger from 'shared/logger'
 import { ILand, HUDElementID } from 'shared/types'
@@ -15,6 +15,7 @@ import { signalRendererInitialized } from 'shared/renderer/actions'
 import { StoreContainer } from 'shared/store/rootTypes'
 import { future, IFuture } from 'fp-future'
 import { sceneLifeCycleObservable } from 'decentraland-loader/lifecycle/controllers/scene'
+import { globalDCL } from 'shared/globalDCL'
 
 // Remove the 'dcl-loading' class, used until JS loads.
 document.body.classList.remove('dcl-loading')
@@ -78,11 +79,11 @@ function sceneRenderable() {
 
 initializeUnity(container)
   .then(async ret => {
-    const i = unityInterface
-    i.ConfigureHUDElement( HUDElementID.MINIMAP, { active: true, visible: true })
-    i.ConfigureHUDElement( HUDElementID.NOTIFICATION, { active: true, visible: false })
-    i.ConfigureHUDElement( HUDElementID.SETTINGS, { active: true, visible: false })
-    i.ConfigureHUDElement( HUDElementID.AIRDROPPING, { active: true, visible: true })
+    const i = globalDCL.rendererInterface
+    i.ConfigureHUDElement(HUDElementID.MINIMAP, { active: true, visible: true })
+    i.ConfigureHUDElement(HUDElementID.NOTIFICATION, { active: true, visible: false })
+    i.ConfigureHUDElement(HUDElementID.SETTINGS, { active: true, visible: false })
+    i.ConfigureHUDElement(HUDElementID.AIRDROPPING, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.OPEN_EXTERNAL_URL_PROMPT, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.NFT_INFO_DIALOG, { active: true, visible: false })
 

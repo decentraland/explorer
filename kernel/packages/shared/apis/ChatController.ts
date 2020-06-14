@@ -3,32 +3,30 @@ import { Vector3Component } from 'atomicHelpers/landHelpers'
 import { uuid } from 'atomicHelpers/math'
 import { parseParcelPosition, worldToGrid } from 'atomicHelpers/parcelScenePositions'
 import { SHOW_FPS_COUNTER } from 'config'
+import { APIOptions, exposeMethod, registerAPI } from 'decentraland-rpc/lib/host'
 import { sampleDropData } from 'shared/airdrops/sampleDrop'
-import { notifyStatusThroughChat, chatObservable, ChatEventType } from 'shared/comms/chat'
+import { sendMessage } from 'shared/chat/actions'
+import { sendPublicChatMessage } from 'shared/comms'
+import { ChatEventType, chatObservable, notifyStatusThroughChat } from 'shared/comms/chat'
 import { AvatarMessage, AvatarMessageType } from 'shared/comms/interface/types'
 import {
   addToMutedUsers,
   avatarMessageObservable,
   findPeerByName,
   getCurrentUser,
+  getUserProfile,
   peerMap,
-  removeFromMutedUsers,
-  getUserProfile
+  removeFromMutedUsers
 } from 'shared/comms/peers'
-import { IChatCommand, MessageEntry, ChatMessageType } from 'shared/types'
-import { TeleportController } from 'shared/world/TeleportController'
-import { expressionExplainer, isValidExpression, validExpressions } from './expressionExplainer'
-import { changeRealm, catalystRealmConnected, changeToCrowdedRealm } from 'shared/dao'
+import { catalystRealmConnected, changeRealm, changeToCrowdedRealm } from 'shared/dao'
 import defaultLogger from 'shared/logger'
-import { registerAPI, APIOptions, exposeMethod } from 'decentraland-rpc/lib/host'
-import { ExposableAPI } from './ExposableAPI'
-import { StoreContainer } from '../store/rootTypes'
-import { sendMessage } from 'shared/chat/actions'
-import { EngineAPI } from './EngineAPI'
-import { sendPublicChatMessage } from 'shared/comms'
+import { ChatMessageType, IChatCommand, MessageEntry } from 'shared/types'
+import { TeleportController } from 'shared/world/TeleportController'
 import { USE_NEW_CHAT } from '../../config/index'
-
-declare const globalThis: StoreContainer & { unityInterface: { TriggerSelfUserExpression: any } }
+import { globalDCL } from '../globalDCL'
+import { EngineAPI } from './EngineAPI'
+import { ExposableAPI } from './ExposableAPI'
+import { expressionExplainer, isValidExpression, validExpressions } from './expressionExplainer'
 
 const userPose: { [key: string]: Vector3Component } = {}
 avatarMessageObservable.add((pose: AvatarMessage) => {
@@ -282,8 +280,7 @@ export class ChatController extends ExposableAPI implements IChatController {
 
     this.addChatCommand('showfps', 'Show FPS counter', (message: any) => {
       fpsConfiguration.visible = !fpsConfiguration.visible
-      const unityWindow: any = window
-      fpsConfiguration.visible ? unityWindow.unityInterface.ShowFPSPanel() : unityWindow.unityInterface.HideFPSPanel()
+      fpsConfiguration.visible ? globalDCL.rendererInterface.ShowFPSPanel() : globalDCL.rendererInterface.HideFPSPanel()
 
       return {
         id: uuid(),
@@ -361,7 +358,7 @@ export class ChatController extends ExposableAPI implements IChatController {
 
         const time = Date.now()
 
-        globalThis.globalStore.dispatch(
+        globalDCL.globalStore.dispatch(
           sendMessage({
             messageId: uuid(),
             body: `␐${expression} ${time}`,
@@ -371,7 +368,7 @@ export class ChatController extends ExposableAPI implements IChatController {
           })
         )
 
-        globalThis.unityInterface.TriggerSelfUserExpression(expression)
+        globalDCL.rendererInterface.TriggerSelfUserExpression(expression)
 
         return {
           id: uuid(),
@@ -384,8 +381,7 @@ export class ChatController extends ExposableAPI implements IChatController {
     )
 
     this.addChatCommand('airdrop', 'fake an airdrop', () => {
-      const unityWindow: any = window
-      unityWindow.unityInterface.TriggerAirdropDisplay(sampleDropData)
+      globalDCL.rendererInterface.TriggerAirdropDisplay(sampleDropData as any)
       return {
         id: uuid(),
         sender: 'Decentraland',
