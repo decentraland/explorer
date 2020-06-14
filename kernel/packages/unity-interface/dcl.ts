@@ -50,12 +50,11 @@ import { ParcelSceneAPI } from 'shared/world/ParcelSceneAPI'
 import {
   enableParcelSceneLoading,
   getParcelSceneID,
-  getSceneWorkerBySceneID,
-  loadParcelScene} from 'shared/world/parcelSceneManager'
+  getSceneWorkerBySceneID
+} from 'shared/world/parcelSceneManager'
 import { positionObservable, teleportObservable } from 'shared/world/positionThings'
-import { hudWorkerUrl, SceneWorker } from 'shared/world/SceneWorker'
+import { SceneWorker } from 'shared/world/SceneWorker'
 import { TeleportController } from 'shared/world/TeleportController'
-import { ensureUiApis } from 'shared/world/uiSceneInitializer'
 import { worldRunningObservable } from 'shared/world/worldState'
 import {
   PB_AttachEntityComponent,
@@ -68,9 +67,11 @@ import {
   PB_RemoveEntity,
   PB_SendSceneMessage,
   PB_SetEntityParent,
-  PB_UpdateEntityComponent} from '../shared/proto/engineinterface_pb'
-import { setupPosition, cachedPositionEvent } from './position/setupPosition'
-import { createEntity, removeEntity, updateEntityComponent, attachEntity, removeEntityComponent, setEntityParent, origin, direction, ray, rayQuery, query, componentCreated, componentDisposed, componentUpdated, openExternalUrl, openNFTDialog } from './cachedProtobuf'
+  PB_UpdateEntityComponent
+} from '../shared/proto/engineinterface_pb'
+import { attachEntity, componentCreated, componentDisposed, componentUpdated, createEntity, direction, openExternalUrl, openNFTDialog, origin, query, ray, rayQuery, removeEntity, removeEntityComponent, setEntityParent, updateEntityComponent } from './cachedProtobuf'
+import { initializeDecentralandUI } from './initializeDecentralandUI'
+import { cachedPositionEvent, setupPosition } from './position/setupPosition'
 import { setupPointerLock } from './setupPointerLock'
 
 type GameInstance = {
@@ -679,7 +680,7 @@ export type UnityInterfaceContainer = {
   unityInterface: UnityInterface
 }
 
-class UnityScene<T> implements ParcelSceneAPI {
+export class UnityScene<T> implements ParcelSceneAPI {
   eventDispatcher = new EventDispatcher()
   worker!: SceneWorker
   logger: ILogger
@@ -971,27 +972,6 @@ export async function startUnityParcelLoading() {
       unityInterface.DeactivateRendering()
     }
   })
-}
-
-async function initializeDecentralandUI() {
-  const sceneId = 'dcl-ui-scene'
-
-  const scene = new UnityScene({
-    sceneId,
-    name: 'ui',
-    baseUrl: location.origin,
-    main: hudWorkerUrl,
-    useFPSThrottling: false,
-    data: {},
-    mappings: []
-  })
-
-  const worker = loadParcelScene(scene)
-  worker.persistent = true
-
-  await ensureUiApis(worker)
-
-  unityInterface.CreateUIScene({ id: getParcelSceneID(scene), baseUrl: scene.data.baseUrl })
 }
 
 setupPosition()
