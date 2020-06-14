@@ -13,19 +13,19 @@ import { rendererInterfaceType } from 'shared/renderer-interface/rendererInterfa
 import { ChatMessage, FriendshipUpdateStatusMessage, FriendsInitializationMessage, HUDConfiguration, HUDElementID, InstancedSpawnPoint, LoadableParcelScene, Notification, UpdateUserStatusMessage } from 'shared/types';
 import { TeleportController } from 'shared/world/TeleportController';
 import { browserInterface } from './browserInterface';
-import { gameInstance, CHUNK_SIZE } from './dcl';
+import { CHUNK_SIZE } from './dcl';
 
 export const unityInterface: rendererInterfaceType & builderInterfaceType = {
   debug: false,
 
   SendGenericMessage(object: string, method: string, payload: string) {
-    gameInstance.SendMessage(object, method, payload);
+    globalDCL.lowLevelInterface.SendMessage(object, method, payload);
   },
   SetDebug() {
-    gameInstance.SendMessage('SceneController', 'SetDebug');
+    globalDCL.lowLevelInterface.SendMessage('SceneController', 'SetDebug');
   },
   LoadProfile(profile: ProfileForRenderer) {
-    gameInstance.SendMessage('SceneController', 'LoadProfile', JSON.stringify(profile));
+    globalDCL.lowLevelInterface.SendMessage('SceneController', 'LoadProfile', JSON.stringify(profile));
   },
   CreateUIScene(data: { id: string; baseUrl: string; }) {
     /**
@@ -34,96 +34,96 @@ export const unityInterface: rendererInterfaceType & builderInterfaceType = {
      * kind of scenes is the Avatar scene. All the avatars are just GLTFs in
      * a scene.
      */
-    gameInstance.SendMessage('SceneController', 'CreateUIScene', JSON.stringify(data));
+    globalDCL.lowLevelInterface.SendMessage('SceneController', 'CreateUIScene', JSON.stringify(data));
   },
   /** Sends the camera position & target to the engine */
   Teleport({ position: { x, y, z }, cameraTarget }: InstancedSpawnPoint) {
     const theY = y <= 0 ? 2 : y;
 
     TeleportController.ensureTeleportAnimation();
-    gameInstance.SendMessage('CharacterController', 'Teleport', JSON.stringify({ x, y: theY, z }));
-    gameInstance.SendMessage('CameraController', 'SetRotation', JSON.stringify({ x, y: theY, z, cameraTarget }));
+    globalDCL.lowLevelInterface.SendMessage('CharacterController', 'Teleport', JSON.stringify({ x, y: theY, z }));
+    globalDCL.lowLevelInterface.SendMessage('CameraController', 'SetRotation', JSON.stringify({ x, y: theY, z, cameraTarget }));
   },
   /** Tells the engine which scenes to load */
   LoadParcelScenes(parcelsToLoad: LoadableParcelScene[]) {
     if (parcelsToLoad.length > 1) {
       throw new Error('Only one scene at a time!');
     }
-    gameInstance.SendMessage('SceneController', 'LoadParcelScenes', JSON.stringify(parcelsToLoad[0]));
+    globalDCL.lowLevelInterface.SendMessage('SceneController', 'LoadParcelScenes', JSON.stringify(parcelsToLoad[0]));
   },
   UpdateParcelScenes(parcelsToLoad: LoadableParcelScene[]) {
     if (parcelsToLoad.length > 1) {
       throw new Error('Only one scene at a time!');
     }
-    gameInstance.SendMessage('SceneController', 'UpdateParcelScenes', JSON.stringify(parcelsToLoad[0]));
+    globalDCL.lowLevelInterface.SendMessage('SceneController', 'UpdateParcelScenes', JSON.stringify(parcelsToLoad[0]));
   },
   UnloadScene(sceneId: string) {
-    gameInstance.SendMessage('SceneController', 'UnloadScene', sceneId);
+    globalDCL.lowLevelInterface.SendMessage('SceneController', 'UnloadScene', sceneId);
   },
   SendSceneMessage(messages: string) {
-    gameInstance.SendMessage(`SceneController`, `SendSceneMessage`, messages);
+    globalDCL.lowLevelInterface.SendMessage(`SceneController`, `SendSceneMessage`, messages);
   },
   SetSceneDebugPanel() {
-    gameInstance.SendMessage('SceneController', 'SetSceneDebugPanel');
+    globalDCL.lowLevelInterface.SendMessage('SceneController', 'SetSceneDebugPanel');
   },
   ShowFPSPanel() {
-    gameInstance.SendMessage('SceneController', 'ShowFPSPanel');
+    globalDCL.lowLevelInterface.SendMessage('SceneController', 'ShowFPSPanel');
   },
   HideFPSPanel() {
-    gameInstance.SendMessage('SceneController', 'HideFPSPanel');
+    globalDCL.lowLevelInterface.SendMessage('SceneController', 'HideFPSPanel');
   },
   SetEngineDebugPanel() {
-    gameInstance.SendMessage('SceneController', 'SetEngineDebugPanel');
+    globalDCL.lowLevelInterface.SendMessage('SceneController', 'SetEngineDebugPanel');
   },
   ActivateRendering() {
-    gameInstance.SendMessage('SceneController', 'ActivateRendering');
+    globalDCL.lowLevelInterface.SendMessage('SceneController', 'ActivateRendering');
   },
   DeactivateRendering() {
-    gameInstance.SendMessage('SceneController', 'DeactivateRendering');
+    globalDCL.lowLevelInterface.SendMessage('SceneController', 'DeactivateRendering');
   },
   UnlockCursor() {
-    gameInstance.SendMessage('MouseCatcher', 'UnlockCursor');
+    globalDCL.lowLevelInterface.SendMessage('MouseCatcher', 'UnlockCursor');
   },
   SetBuilderReady() {
-    gameInstance.SendMessage('SceneController', 'BuilderReady');
+    globalDCL.lowLevelInterface.SendMessage('SceneController', 'BuilderReady');
   },
   AddUserProfileToCatalog(peerProfile: ProfileForRenderer) {
-    gameInstance.SendMessage('SceneController', 'AddUserProfileToCatalog', JSON.stringify(peerProfile));
+    globalDCL.lowLevelInterface.SendMessage('SceneController', 'AddUserProfileToCatalog', JSON.stringify(peerProfile));
   },
   AddWearablesToCatalog(wearables: Wearable[]) {
     for (const wearable of wearables) {
-      gameInstance.SendMessage('SceneController', 'AddWearableToCatalog', JSON.stringify(wearable));
+      globalDCL.lowLevelInterface.SendMessage('SceneController', 'AddWearableToCatalog', JSON.stringify(wearable));
     }
   },
   RemoveWearablesFromCatalog(wearableIds: string[]) {
-    gameInstance.SendMessage('SceneController', 'RemoveWearablesFromCatalog', JSON.stringify(wearableIds));
+    globalDCL.lowLevelInterface.SendMessage('SceneController', 'RemoveWearablesFromCatalog', JSON.stringify(wearableIds));
   },
   ClearWearableCatalog() {
-    gameInstance.SendMessage('SceneController', 'ClearWearableCatalog');
+    globalDCL.lowLevelInterface.SendMessage('SceneController', 'ClearWearableCatalog');
   },
   ShowNewWearablesNotification(wearableNumber: number) {
-    gameInstance.SendMessage('HUDController', 'ShowNewWearablesNotification', wearableNumber.toString());
+    globalDCL.lowLevelInterface.SendMessage('HUDController', 'ShowNewWearablesNotification', wearableNumber.toString());
   },
   ShowNotification(notification: Notification) {
-    gameInstance.SendMessage('HUDController', 'ShowNotificationFromJson', JSON.stringify(notification));
+    globalDCL.lowLevelInterface.SendMessage('HUDController', 'ShowNotificationFromJson', JSON.stringify(notification));
   },
   ConfigureHUDElement(hudElementId: HUDElementID, configuration: HUDConfiguration) {
-    gameInstance.SendMessage(
+    globalDCL.lowLevelInterface.SendMessage(
       'HUDController',
       `ConfigureHUDElement`,
       JSON.stringify({ hudElementId: hudElementId, configuration: configuration })
     );
   },
   ShowWelcomeNotification() {
-    gameInstance.SendMessage('HUDController', 'ShowWelcomeNotification');
+    globalDCL.lowLevelInterface.SendMessage('HUDController', 'ShowWelcomeNotification');
   },
   TriggerSelfUserExpression(expressionId: string) {
-    gameInstance.SendMessage('HUDController', 'TriggerSelfUserExpression', expressionId);
+    globalDCL.lowLevelInterface.SendMessage('HUDController', 'TriggerSelfUserExpression', expressionId);
   },
   UpdateMinimapSceneInformation(info: MinimapSceneInfo[]) {
     for (let i = 0; i < info.length; i += CHUNK_SIZE) {
       const chunk = info.slice(i, i + CHUNK_SIZE);
-      gameInstance.SendMessage('SceneController', 'UpdateMinimapSceneInformation', JSON.stringify(chunk));
+      globalDCL.lowLevelInterface.SendMessage('SceneController', 'UpdateMinimapSceneInformation', JSON.stringify(chunk));
     }
   },
   SetTutorialEnabled() {
@@ -131,7 +131,7 @@ export const unityInterface: rendererInterfaceType & builderInterfaceType = {
       browserInterface.SaveUserTutorialStep({ tutorialStep: 0 });
     }
 
-    gameInstance.SendMessage('TutorialController', 'SetTutorialEnabled');
+    globalDCL.lowLevelInterface.SendMessage('TutorialController', 'SetTutorialEnabled');
   },
   SetLoadingScreenVisible(shouldShow: boolean) {
     document.getElementById('overlay')!.style.display = shouldShow ? 'block' : 'none';
@@ -155,19 +155,19 @@ export const unityInterface: rendererInterfaceType & builderInterfaceType = {
     // Disabled for security reasons
   },
   AddMessageToChatWindow(message: ChatMessage) {
-    gameInstance.SendMessage('SceneController', 'AddMessageToChatWindow', JSON.stringify(message));
+    globalDCL.lowLevelInterface.SendMessage('SceneController', 'AddMessageToChatWindow', JSON.stringify(message));
   },
   InitializeFriends(initializationMessage: FriendsInitializationMessage) {
-    gameInstance.SendMessage('SceneController', 'InitializeFriends', JSON.stringify(initializationMessage));
+    globalDCL.lowLevelInterface.SendMessage('SceneController', 'InitializeFriends', JSON.stringify(initializationMessage));
   },
   UpdateFriendshipStatus(updateMessage: FriendshipUpdateStatusMessage) {
-    gameInstance.SendMessage('SceneController', 'UpdateFriendshipStatus', JSON.stringify(updateMessage));
+    globalDCL.lowLevelInterface.SendMessage('SceneController', 'UpdateFriendshipStatus', JSON.stringify(updateMessage));
   },
   UpdateUserPresence(status: UpdateUserStatusMessage) {
-    gameInstance.SendMessage('SceneController', 'UpdateUserPresence', JSON.stringify(status));
+    globalDCL.lowLevelInterface.SendMessage('SceneController', 'UpdateUserPresence', JSON.stringify(status));
   },
   FriendNotFound(queryString: string) {
-    gameInstance.SendMessage('SceneController', 'FriendNotFound', JSON.stringify(queryString));
+    globalDCL.lowLevelInterface.SendMessage('SceneController', 'FriendNotFound', JSON.stringify(queryString));
   },
   RequestTeleport(teleportData: {}) {
     gameInstance.SendMessage('HUDController', 'RequestTeleport', JSON.stringify(teleportData))
@@ -178,7 +178,7 @@ export const unityInterface: rendererInterfaceType & builderInterfaceType = {
   // *********************************************************************************
   // @internal
   SendBuilderMessage(method: string, payload: string = '') {
-    gameInstance.SendMessage(`BuilderController`, method, payload);
+    globalDCL.lowLevelInterface.SendMessage(`BuilderController`, method, payload);
   },
   SelectGizmoBuilder(type: string) {
     this.SendBuilderMessage('SelectGizmo', type);

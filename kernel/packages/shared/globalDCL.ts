@@ -1,10 +1,10 @@
 import future, { IFuture } from 'fp-future'
 import type { Store } from 'redux'
-import defaultLogger from './logger'
 import { HandlerOfRendererMessages } from '../unity-interface/HandlerOfRendererMessages'
-import { rendererInterfaceType } from './renderer-interface/rendererInterface/rendererInterfaceType'
-import { builderInterfaceType } from './renderer-interface/builder/builderInterface'
+import defaultLogger from './logger'
 import { browserInterfaceType } from './renderer-interface/browserInterface/browserInterfaceType'
+import { builderInterfaceType } from './renderer-interface/builder/builderInterface'
+import { rendererInterfaceType } from './renderer-interface/rendererInterface/rendererInterfaceType'
 import { RootState } from './store/rootTypes'
 import { SceneWorker } from './world/SceneWorker'
 
@@ -21,6 +21,9 @@ export const globalDCL: {
   DCL: {
     EngineStarted: () => void
     MessageFromEngine: HandlerOfRendererMessages
+  }
+  lowLevelInterface: {
+    SendMessage(object: string, method: string, ...args: (number | string)[]): void
   }
   messageHandler: HandlerOfRendererMessages
   rendererInterface: rendererInterfaceType

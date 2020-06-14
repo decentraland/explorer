@@ -2,7 +2,8 @@ import { globalDCL } from 'shared/globalDCL'
 import { getParcelSceneID, loadParcelScene } from 'shared/world/parcelSceneManager'
 import { hudWorkerUrl } from 'shared/world/SceneWorker'
 import { ensureUiApis } from 'shared/world/uiSceneInitializer'
-import { UnityScene } from './dcl'
+import { UnityScene } from './UnityScene'
+
 export async function initializeDecentralandUI() {
   const sceneId = 'dcl-ui-scene'
 

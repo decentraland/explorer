@@ -2,7 +2,7 @@ import { defaultLogger } from 'shared/logger'
 import { ILandToLoadableParcelScene } from 'shared/selectors'
 import { ILand, LoadableParcelScene, MappingsResponse, SceneJsonData } from 'shared/types'
 import { loadParcelScene, stopParcelSceneWorker } from 'shared/world/parcelSceneManager'
-import { UnityParcelScene } from '../dcl'
+import { UnityParcelScene } from '../UnityParcelScene'
 import { globalDCL } from 'shared/globalDCL'
 
 export async function loadPreviewScene() {

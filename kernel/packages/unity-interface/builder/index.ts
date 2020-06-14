@@ -2,7 +2,7 @@ import { globalDCL } from 'shared/globalDCL'
 import { ILandToLoadableParcelScene, ILandToLoadableParcelSceneUpdate } from 'shared/selectors'
 import { ILand, LoadableParcelScene } from 'shared/types'
 import { loadParcelScene, stopParcelSceneWorker } from 'shared/world/parcelSceneManager'
-import { UnityParcelScene } from '../dcl'
+import { UnityParcelScene } from '../UnityParcelScene'
 
 export function loadBuilderScene(sceneData: ILand) {
   unloadCurrentBuilderScene()

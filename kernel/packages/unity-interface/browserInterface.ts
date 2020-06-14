@@ -32,7 +32,7 @@ import { worldRunningObservable } from 'shared/world/worldState'
 import { fetchOwner, toSocialId } from './getAddressByNameNFT'
 import { cachedPositionEvent } from './position/setupPosition'
 import { setAudioStream } from './audioStreamSource'
-import { UnityParcelScene } from './dcl'
+import { UnityParcelScene } from './UnityParcelScene'
 /////////////////////////////////// HANDLERS ///////////////////////////////////
 
 export const browserInterface: browserInterfaceType = {

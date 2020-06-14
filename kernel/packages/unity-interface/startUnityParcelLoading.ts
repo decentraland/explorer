@@ -4,7 +4,7 @@ import { aborted } from 'shared/loading/ReportFatalError'
 import { loadingScenes } from 'shared/loading/types'
 import { ILandToLoadableParcelScene } from 'shared/selectors'
 import { enableParcelSceneLoading } from 'shared/world/parcelSceneManager'
-import { UnityParcelScene } from './dcl'
+import { UnityParcelScene } from './UnityParcelScene'
 
 export async function startUnityParcelLoading() {
   const p = await providerFuture
