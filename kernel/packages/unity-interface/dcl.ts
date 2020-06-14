@@ -1,32 +1,32 @@
 import { gridToWorld } from 'atomicHelpers/parcelScenePositions'
-import {
-  DEBUG,
-  EDITOR,
-  ENGINE_DEBUG_PANEL,
-  RESET_TUTORIAL,
-  SCENE_DEBUG_PANEL,
-  SHOW_FPS_COUNTER,
-  tutorialEnabled
-} from 'config'
-import { ReadOnlyVector3 } from 'decentraland-ecs/src/decentraland/math'
-import { IEventNames, IEvents, MinimapSceneInfo, ProfileForRenderer } from 'decentraland-ecs/src/decentraland/Types'
+import { DEBUG, EDITOR, ENGINE_DEBUG_PANEL, SCENE_DEBUG_PANEL, SHOW_FPS_COUNTER, tutorialEnabled } from 'config'
+import { IEventNames, IEvents } from 'decentraland-ecs/src/decentraland/Types'
 import { EventDispatcher } from 'decentraland-rpc/lib/common/core/EventDispatcher'
 import { Empty } from 'google-protobuf/google/protobuf/empty_pb'
-import { AirdropInfo } from 'shared/airdrops/interface'
 import { DevTools } from 'shared/apis/DevTools'
 import { ParcelIdentity } from 'shared/apis/ParcelIdentity'
 import { globalDCL } from 'shared/globalDCL'
 import { unityClientLoaded } from 'shared/loading/types'
 import { createLogger, defaultLogger, ILogger } from 'shared/logger'
-import { Wearable } from 'shared/profiles/types'
-import { builderInterfaceType } from 'shared/renderer-interface/builder/builderInterface'
-import { rendererInterfaceType } from 'shared/renderer-interface/rendererInterface/rendererInterfaceType'
-import { AttachEntityComponentPayload, ChatMessage, ComponentCreatedPayload, ComponentDisposedPayload, ComponentRemovedPayload, ComponentUpdatedPayload, CreateEntityPayload, EntityAction, EnvironmentData, FriendshipUpdateStatusMessage, FriendsInitializationMessage, HUDConfiguration, HUDElementID, InstancedSpawnPoint, LoadableParcelScene, Notification, OpenNFTDialogPayload, QueryPayload, RemoveEntityPayload, SetEntityParentPayload, UpdateEntityComponentPayload, UpdateUserStatusMessage } from 'shared/types'
-import { ParcelSceneAPI } from 'shared/world/ParcelSceneAPI'
 import {
-  getParcelSceneID} from 'shared/world/parcelSceneManager'
+  AttachEntityComponentPayload,
+  ComponentCreatedPayload,
+  ComponentDisposedPayload,
+  ComponentRemovedPayload,
+  ComponentUpdatedPayload,
+  CreateEntityPayload,
+  EntityAction,
+  EnvironmentData,
+  LoadableParcelScene,
+  OpenNFTDialogPayload,
+  QueryPayload,
+  RemoveEntityPayload,
+  SetEntityParentPayload,
+  UpdateEntityComponentPayload
+} from 'shared/types'
+import { ParcelSceneAPI } from 'shared/world/ParcelSceneAPI'
+import { getParcelSceneID } from 'shared/world/parcelSceneManager'
 import { SceneWorker } from 'shared/world/SceneWorker'
-import { TeleportController } from 'shared/world/TeleportController'
 import {
   PB_AttachEntityComponent,
   PB_ComponentCreated,
@@ -34,17 +34,36 @@ import {
   PB_ComponentUpdated,
   PB_CreateEntity,
   PB_OpenExternalUrl,
-  PB_OpenNFTDialog, PB_Query,
+  PB_OpenNFTDialog,
+  PB_Query,
   PB_RemoveEntity,
   PB_SendSceneMessage,
   PB_SetEntityParent,
   PB_UpdateEntityComponent
 } from '../shared/proto/engineinterface_pb'
-import { attachEntity, componentCreated, componentDisposed, componentUpdated, createEntity, direction, openExternalUrl, openNFTDialog, origin, query, ray, rayQuery, removeEntity, removeEntityComponent, setEntityParent, updateEntityComponent } from './cachedProtobuf'
+import {
+  attachEntity,
+  componentCreated,
+  componentDisposed,
+  componentUpdated,
+  createEntity,
+  direction,
+  openExternalUrl,
+  openNFTDialog,
+  origin,
+  query,
+  ray,
+  rayQuery,
+  removeEntity,
+  removeEntityComponent,
+  setEntityParent,
+  updateEntityComponent
+} from './cachedProtobuf'
 import { initializeDecentralandUI } from './initializeDecentralandUI'
 import { setupPosition } from './position/setupPosition'
 import { setupPointerLock } from './setupPointerLock'
 import { browserInterface } from './browserInterface'
+import { unityInterface } from './unityInterface'
 
 type GameInstance = {
   SendMessage(object: string, method: string, ...args: (number | string)[]): void
@@ -53,224 +72,11 @@ type GameInstance = {
 const rendererVersion = require('decentraland-renderer')
 window['console'].log('Renderer version: ' + rendererVersion)
 
-let gameInstance!: GameInstance
+export let gameInstance!: GameInstance
 
 globalDCL.browserInterface = browserInterface
 
-const CHUNK_SIZE = 100
-
-export const unityInterface: rendererInterfaceType & builderInterfaceType = {
-  debug: false,
-
-  SendGenericMessage(object: string, method: string, payload: string) {
-    gameInstance.SendMessage(object, method, payload)
-  },
-  SetDebug() {
-    gameInstance.SendMessage('SceneController', 'SetDebug')
-  },
-  LoadProfile(profile: ProfileForRenderer) {
-    gameInstance.SendMessage('SceneController', 'LoadProfile', JSON.stringify(profile))
-  },
-  CreateUIScene(data: { id: string; baseUrl: string }) {
-    /**
-     * UI Scenes are scenes that does not check any limit or boundary. The
-     * position is fixed at 0,0 and they are universe-wide. An example of this
-     * kind of scenes is the Avatar scene. All the avatars are just GLTFs in
-     * a scene.
-     */
-    gameInstance.SendMessage('SceneController', 'CreateUIScene', JSON.stringify(data))
-  },
-  /** Sends the camera position & target to the engine */
-  Teleport({ position: { x, y, z }, cameraTarget }: InstancedSpawnPoint) {
-    const theY = y <= 0 ? 2 : y
-
-    TeleportController.ensureTeleportAnimation()
-    gameInstance.SendMessage('CharacterController', 'Teleport', JSON.stringify({ x, y: theY, z }))
-    gameInstance.SendMessage('CameraController', 'SetRotation', JSON.stringify({ x, y: theY, z, cameraTarget }))
-  },
-  /** Tells the engine which scenes to load */
-  LoadParcelScenes(parcelsToLoad: LoadableParcelScene[]) {
-    if (parcelsToLoad.length > 1) {
-      throw new Error('Only one scene at a time!')
-    }
-    gameInstance.SendMessage('SceneController', 'LoadParcelScenes', JSON.stringify(parcelsToLoad[0]))
-  },
-  UpdateParcelScenes(parcelsToLoad: LoadableParcelScene[]) {
-    if (parcelsToLoad.length > 1) {
-      throw new Error('Only one scene at a time!')
-    }
-    gameInstance.SendMessage('SceneController', 'UpdateParcelScenes', JSON.stringify(parcelsToLoad[0]))
-  },
-  UnloadScene(sceneId: string) {
-    gameInstance.SendMessage('SceneController', 'UnloadScene', sceneId)
-  },
-  SendSceneMessage(messages: string) {
-    gameInstance.SendMessage(`SceneController`, `SendSceneMessage`, messages)
-  },
-  SetSceneDebugPanel() {
-    gameInstance.SendMessage('SceneController', 'SetSceneDebugPanel')
-  },
-  ShowFPSPanel() {
-    gameInstance.SendMessage('SceneController', 'ShowFPSPanel')
-  },
-  HideFPSPanel() {
-    gameInstance.SendMessage('SceneController', 'HideFPSPanel')
-  },
-  SetEngineDebugPanel() {
-    gameInstance.SendMessage('SceneController', 'SetEngineDebugPanel')
-  },
-  ActivateRendering() {
-    gameInstance.SendMessage('SceneController', 'ActivateRendering')
-  },
-  DeactivateRendering() {
-    gameInstance.SendMessage('SceneController', 'DeactivateRendering')
-  },
-  UnlockCursor() {
-    gameInstance.SendMessage('MouseCatcher', 'UnlockCursor')
-  },
-  SetBuilderReady() {
-    gameInstance.SendMessage('SceneController', 'BuilderReady')
-  },
-  AddUserProfileToCatalog(peerProfile: ProfileForRenderer) {
-    gameInstance.SendMessage('SceneController', 'AddUserProfileToCatalog', JSON.stringify(peerProfile))
-  },
-  AddWearablesToCatalog(wearables: Wearable[]) {
-    for (const wearable of wearables) {
-      gameInstance.SendMessage('SceneController', 'AddWearableToCatalog', JSON.stringify(wearable))
-    }
-  },
-  RemoveWearablesFromCatalog(wearableIds: string[]) {
-    gameInstance.SendMessage('SceneController', 'RemoveWearablesFromCatalog', JSON.stringify(wearableIds))
-  },
-  ClearWearableCatalog() {
-    gameInstance.SendMessage('SceneController', 'ClearWearableCatalog')
-  },
-  ShowNewWearablesNotification(wearableNumber: number) {
-    gameInstance.SendMessage('HUDController', 'ShowNewWearablesNotification', wearableNumber.toString())
-  },
-  ShowNotification(notification: Notification) {
-    gameInstance.SendMessage('HUDController', 'ShowNotificationFromJson', JSON.stringify(notification))
-  },
-  ConfigureHUDElement(hudElementId: HUDElementID, configuration: HUDConfiguration) {
-    gameInstance.SendMessage(
-      'HUDController',
-      `ConfigureHUDElement`,
-      JSON.stringify({ hudElementId: hudElementId, configuration: configuration })
-    )
-  },
-  ShowWelcomeNotification() {
-    gameInstance.SendMessage('HUDController', 'ShowWelcomeNotification')
-  },
-  TriggerSelfUserExpression(expressionId: string) {
-    gameInstance.SendMessage('HUDController', 'TriggerSelfUserExpression', expressionId)
-  },
-  UpdateMinimapSceneInformation(info: MinimapSceneInfo[]) {
-    for (let i = 0; i < info.length; i += CHUNK_SIZE) {
-      const chunk = info.slice(i, i + CHUNK_SIZE)
-      gameInstance.SendMessage('SceneController', 'UpdateMinimapSceneInformation', JSON.stringify(chunk))
-    }
-  },
-  SetTutorialEnabled() {
-    if (RESET_TUTORIAL) {
-      browserInterface.SaveUserTutorialStep({ tutorialStep: 0 })
-    }
-
-    gameInstance.SendMessage('TutorialController', 'SetTutorialEnabled')
-  },
-  SetLoadingScreenVisible(shouldShow: boolean) {
-    document.getElementById('overlay')!.style.display = shouldShow ? 'block' : 'none'
-    document.getElementById('load-messages-wrapper')!.style.display = shouldShow ? 'block' : 'none'
-    document.getElementById('progress-bar')!.style.display = shouldShow ? 'block' : 'none'
-    const loadingAudio = document.getElementById('loading-audio') as HTMLMediaElement
-
-    if (shouldShow) {
-      loadingAudio?.play().catch(e => {/*Ignored. If this fails is not critical*/})
-    } else {
-      loadingAudio?.pause()
-    }
-
-    if (!shouldShow && !EDITOR) {
-      globalDCL.isTheFirstLoading = false
-      TeleportController.stopTeleportAnimation()
-    }
-  },
-  TriggerAirdropDisplay(data: AirdropInfo) {
-    // Disabled for security reasons
-  },
-  AddMessageToChatWindow(message: ChatMessage) {
-    gameInstance.SendMessage('SceneController', 'AddMessageToChatWindow', JSON.stringify(message))
-  },
-  InitializeFriends(initializationMessage: FriendsInitializationMessage) {
-    gameInstance.SendMessage('SceneController', 'InitializeFriends', JSON.stringify(initializationMessage))
-  },
-  UpdateFriendshipStatus(updateMessage: FriendshipUpdateStatusMessage) {
-    gameInstance.SendMessage('SceneController', 'UpdateFriendshipStatus', JSON.stringify(updateMessage))
-  },
-  UpdateUserPresence(status: UpdateUserStatusMessage) {
-    gameInstance.SendMessage('SceneController', 'UpdateUserPresence', JSON.stringify(status))
-  },
-  FriendNotFound(queryString: string) {
-    gameInstance.SendMessage('SceneController', 'FriendNotFound', JSON.stringify(queryString))
-  },
-
-
-  // *********************************************************************************
-  // ************** Builder messages **************
-  // *********************************************************************************
-
-  // @internal
-  SendBuilderMessage(method: string, payload: string = '') {
-    gameInstance.SendMessage(`BuilderController`, method, payload)
-  },
-  SelectGizmoBuilder(type: string) {
-    this.SendBuilderMessage('SelectGizmo', type)
-  },
-  ResetBuilderObject() {
-    this.SendBuilderMessage('ResetObject')
-  },
-  SetCameraZoomDeltaBuilder(delta: number) {
-    this.SendBuilderMessage('ZoomDelta', delta.toString())
-  },
-  GetCameraTargetBuilder(futureId: string) {
-    this.SendBuilderMessage('GetCameraTargetBuilder', futureId)
-  },
-  SetPlayModeBuilder(on: string) {
-    this.SendBuilderMessage('SetPlayMode', on)
-  },
-  PreloadFileBuilder(url: string) {
-    this.SendBuilderMessage('PreloadFile', url)
-  },
-  GetMousePositionBuilder(x: string, y: string, id: string) {
-    this.SendBuilderMessage('GetMousePosition', `{"x":"${x}", "y": "${y}", "id": "${id}" }`)
-  },
-  TakeScreenshotBuilder(id: string) {
-    this.SendBuilderMessage('TakeScreenshot', id)
-  },
-  SetCameraPositionBuilder(position: ReadOnlyVector3) {
-    this.SendBuilderMessage('SetBuilderCameraPosition', position.x + ',' + position.y + ',' + position.z)
-  },
-  SetCameraRotationBuilder(aplha: number, beta: number) {
-    this.SendBuilderMessage('SetBuilderCameraRotation', aplha + ',' + beta)
-  },
-  ResetCameraZoomBuilder() {
-    this.SendBuilderMessage('ResetBuilderCameraZoom')
-  },
-  SetBuilderGridResolution(position: number, rotation: number, scale: number) {
-    this.SendBuilderMessage(
-      'SetGridResolution',
-      JSON.stringify({ position: position, rotation: rotation, scale: scale })
-    )
-  },
-  SetBuilderSelectedEntities(entities: string[]) {
-    this.SendBuilderMessage('SetSelectedEntities', JSON.stringify({ entities: entities }))
-  },
-  ResetBuilderScene() {
-    this.SendBuilderMessage('ResetBuilderScene')
-  },
-  OnBuilderKeyDown(key: string) {
-    this.SendBuilderMessage('OnBuilderKeyDown', key)
-  }
-}
+export const CHUNK_SIZE = 100
 
 globalDCL.unityInterface = unityInterface
 globalDCL.rendererInterface = unityInterface
@@ -540,4 +346,3 @@ export async function initializeEngine(_gameInstance: GameInstance) {
 setupPosition()
 
 setupPointerLock()
-

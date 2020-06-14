@@ -54,4 +54,5 @@ export type rendererInterfaceType = {
   UpdateFriendshipStatus: (updateMessage: FriendshipUpdateStatusMessage) => void
   UpdateUserPresence: (updateMessage: UpdateUserStatusMessage) => void
   FriendNotFound: (queryString: string) => void
+  RequestTeleport: (teleportData: {}) => void
 }
