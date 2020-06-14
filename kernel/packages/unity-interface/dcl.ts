@@ -1,15 +1,3 @@
-import { uuid } from 'decentraland-ecs/src'
-import { EventDispatcher } from 'decentraland-rpc/lib/common/core/EventDispatcher'
-import { IFuture } from 'fp-future'
-import { Empty } from 'google-protobuf/google/protobuf/empty_pb'
-import { identity } from 'shared'
-import { persistCurrentUser, sendPublicChatMessage } from 'shared/comms'
-import { AvatarMessageType } from 'shared/comms/interface/types'
-import { avatarMessageObservable, getUserProfile } from 'shared/comms/peers'
-import { providerFuture } from 'shared/ethereum/provider'
-import { getProfile, hasConnectedWeb3 } from 'shared/profiles/selectors'
-import { TeleportController } from 'shared/world/TeleportController'
-import { reportScenesAroundParcel } from 'shared/atlas/actions'
 import { gridToWorld } from 'atomicHelpers/parcelScenePositions'
 import {
   DEBUG,
@@ -21,67 +9,130 @@ import {
   SHOW_FPS_COUNTER,
   tutorialEnabled
 } from 'config'
+import { uuid } from 'decentraland-ecs/src'
 import { Quaternion, ReadOnlyQuaternion, ReadOnlyVector3, Vector3 } from 'decentraland-ecs/src/decentraland/math'
-import { IEventNames, IEvents, ProfileForRenderer, MinimapSceneInfo } from 'decentraland-ecs/src/decentraland/Types'
+import { IEventNames, IEvents, MinimapSceneInfo, ProfileForRenderer } from 'decentraland-ecs/src/decentraland/Types'
 import { sceneLifeCycleObservable } from 'decentraland-loader/lifecycle/controllers/scene'
 import { tutorialStepId } from 'decentraland-loader/lifecycle/tutorial/tutorial'
+import { EventDispatcher } from 'decentraland-rpc/lib/common/core/EventDispatcher'
+import { IFuture } from 'fp-future'
+import { Empty } from 'google-protobuf/google/protobuf/empty_pb'
+import { identity } from 'shared'
 import { AirdropInfo } from 'shared/airdrops/interface'
 import { queueTrackingEvent } from 'shared/analytics'
 import { DevTools } from 'shared/apis/DevTools'
 import { ParcelIdentity } from 'shared/apis/ParcelIdentity'
+import { reportScenesAroundParcel } from 'shared/atlas/actions'
+import { sendMessage, updateFriendship, updateUserData } from 'shared/chat/actions'
+import { persistCurrentUser, sendPublicChatMessage } from 'shared/comms'
+import { notifyStatusThroughChat } from 'shared/comms/chat'
+import { AvatarMessageType } from 'shared/comms/interface/types'
+import { avatarMessageObservable, getUserProfile } from 'shared/comms/peers'
+import { candidatesFetched, catalystRealmConnected, changeRealm } from 'shared/dao/index'
+import { providerFuture } from 'shared/ethereum/provider'
+import { globalDCL } from 'shared/globalDCL'
 import { aborted } from 'shared/loading/ReportFatalError'
 import { loadingScenes, teleportTriggered, unityClientLoaded } from 'shared/loading/types'
 import { createLogger, defaultLogger, ILogger } from 'shared/logger'
 import { saveProfileRequest } from 'shared/profiles/actions'
+import { ProfileAsPromise } from 'shared/profiles/ProfileAsPromise'
+import { getProfile, hasConnectedWeb3 } from 'shared/profiles/selectors'
+import { profileToRendererFormat } from 'shared/profiles/transformations/profileToRendererFormat'
 import { Avatar, Profile, Wearable } from 'shared/profiles/types'
-import {
-  PB_AttachEntityComponent,
-  PB_ComponentCreated,
-  PB_ComponentDisposed,
-  PB_ComponentRemoved,
-  PB_ComponentUpdated,
-  PB_CreateEntity,
-  PB_Query,
-  PB_Ray,
-  PB_RayQuery,
-  PB_RemoveEntity,
-  PB_SendSceneMessage,
-  PB_SetEntityParent,
-  PB_UpdateEntityComponent,
-  PB_Vector3,
-  PB_OpenExternalUrl,
-  PB_OpenNFTDialog
-} from '../shared/proto/engineinterface_pb'
+import { browserInterfaceType } from 'shared/renderer-interface/browserInterface/browserInterfaceType'
+import { builderInterface } from 'shared/renderer-interface/builder/builderInterface'
+import { rendererInterfaceType } from 'shared/renderer-interface/rendererInterface/rendererInterfaceType'
+import { ILandToLoadableParcelScene, ILandToLoadableParcelSceneUpdate } from 'shared/selectors'
 import { Session } from 'shared/session'
 import { getPerformanceInfo } from 'shared/session/getPerformanceInfo'
 import {
   AttachEntityComponentPayload,
-  ComponentCreatedPayload,
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  ChatMessage, ComponentCreatedPayload,
   ComponentDisposedPayload,
   ComponentRemovedPayload,
   ComponentUpdatedPayload,
   CreateEntityPayload,
   EntityAction,
   EnvironmentData,
-  HUDConfiguration,
-  ILand,
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  FriendshipAction, FriendshipUpdateStatusMessage, FriendsInitializationMessage, HUDConfiguration,
+
+
+
+
+
+
+
+
+
+
+
+  HUDElementID, ILand,
   InstancedSpawnPoint,
-  SceneJsonData,
+
   LoadableParcelScene,
   MappingsResponse,
   Notification,
-  QueryPayload,
-  RemoveEntityPayload,
+
+
+
+
+
+
+
+
+
+
+
+  OpenNFTDialogPayload, QueryPayload,
+  RemoveEntityPayload, SceneJsonData,
+
+
+
+
+
   SetEntityParentPayload,
   UpdateEntityComponentPayload,
-  ChatMessage,
-  HUDElementID,
-  FriendsInitializationMessage,
-  FriendshipUpdateStatusMessage,
+
+
+
+
   UpdateUserStatusMessage,
-  FriendshipAction,
-  WorldPosition,
-  OpenNFTDialogPayload
+
+  WorldPosition
 } from 'shared/types'
 import { ParcelSceneAPI } from 'shared/world/ParcelSceneAPI'
 import {
@@ -93,22 +144,34 @@ import {
 } from 'shared/world/parcelSceneManager'
 import { positionObservable, teleportObservable } from 'shared/world/positionThings'
 import { hudWorkerUrl, SceneWorker } from 'shared/world/SceneWorker'
+import { TeleportController } from 'shared/world/TeleportController'
 import { ensureUiApis } from 'shared/world/uiSceneInitializer'
 import { worldRunningObservable } from 'shared/world/worldState'
-import { profileToRendererFormat } from 'shared/profiles/transformations/profileToRendererFormat'
-import { StoreContainer } from 'shared/store/rootTypes'
-import { ILandToLoadableParcelScene, ILandToLoadableParcelSceneUpdate } from 'shared/selectors'
-import { sendMessage, updateUserData, updateFriendship } from 'shared/chat/actions'
-import { ProfileAsPromise } from 'shared/profiles/ProfileAsPromise'
-import { changeRealm, catalystRealmConnected, candidatesFetched } from 'shared/dao/index'
-import { notifyStatusThroughChat } from 'shared/comms/chat'
-import { unityInterfaceType } from './unityInterface/unityInterfaceType'
-import { builderUnityInterface } from './builder/builderUnityInterface'
-import { browserInterfaceType } from './browserInterface/browserInterfaceType'
+import {
+  PB_AttachEntityComponent,
+  PB_ComponentCreated,
+  PB_ComponentDisposed,
+  PB_ComponentRemoved,
+  PB_ComponentUpdated,
+  PB_CreateEntity,
 
-declare const globalThis: UnityInterfaceContainer &
-  BrowserInterfaceContainer &
-  StoreContainer & { analytics: any; delighted: any }
+
+
+
+
+
+
+
+  PB_OpenExternalUrl,
+  PB_OpenNFTDialog, PB_Query,
+  PB_Ray,
+  PB_RayQuery,
+  PB_RemoveEntity,
+  PB_SendSceneMessage,
+  PB_SetEntityParent,
+  PB_UpdateEntityComponent,
+  PB_Vector3
+} from '../shared/proto/engineinterface_pb'
 
 type GameInstance = {
   SendMessage(object: string, method: string, ...args: (number | string)[]): void
@@ -249,13 +312,13 @@ const browserInterface: browserInterfaceType = {
     const { face, body, avatar } = changes
     const profile: Profile = getUserProfile().profile as Profile
     const updated = { ...profile, avatar: { ...avatar, snapshots: { face, body } } }
-    globalThis.globalStore.dispatch(saveProfileRequest(updated))
+    globalDCL.globalStore.dispatch(saveProfileRequest(updated))
   },
 
   SaveUserTutorialStep(data: { tutorialStep: number }) {
     const profile: Profile = getUserProfile().profile as Profile
     profile.tutorialStep = data.tutorialStep
-    globalThis.globalStore.dispatch(saveProfileRequest(profile))
+    globalDCL.globalStore.dispatch(saveProfileRequest(profile))
 
     persistCurrentUser({
       version: profile.version,
@@ -313,7 +376,7 @@ const browserInterface: browserInterfaceType = {
   },
 
   BlockPlayer(data: { userId: string }) {
-    const profile = getProfile(globalThis.globalStore.getState(), identity.address)
+    const profile = getProfile(globalDCL.globalStore.getState(), identity.address)
 
     if (profile) {
       let blocked: string[] = [data.userId]
@@ -329,16 +392,16 @@ const browserInterface: browserInterfaceType = {
         blocked = [...profile.blocked, ...blocked]
       }
 
-      globalThis.globalStore.dispatch(saveProfileRequest({ ...profile, blocked }))
+      globalDCL.globalStore.dispatch(saveProfileRequest({ ...profile, blocked }))
     }
   },
 
   UnblockPlayer(data: { userId: string }) {
-    const profile = getProfile(globalThis.globalStore.getState(), identity.address)
+    const profile = getProfile(globalDCL.globalStore.getState(), identity.address)
 
     if (profile) {
       const blocked = profile.blocked ? profile.blocked.filter(id => id !== data.userId) : []
-      globalThis.globalStore.dispatch(saveProfileRequest({ ...profile, blocked }))
+      globalDCL.globalStore.dispatch(saveProfileRequest({ ...profile, blocked }))
     }
   },
 
@@ -346,15 +409,15 @@ const browserInterface: browserInterfaceType = {
     const profile = getUserProfile().profile
     if (profile) {
       if (hasWallet) {
-        window.analytics.identify(profile.userId, { email: data.userEmail })
+        globalDCL.analytics.identify(profile.userId, { email: data.userEmail })
       } else {
-        window.analytics.identify({ email: data.userEmail })
+        globalDCL.analytics.identify({ email: data.userEmail })
       }
     }
   },
 
   RequestScenesInfoInArea(data: { parcel: { x: number; y: number }; scenesAround: number }) {
-    globalThis.globalStore.dispatch(reportScenesAroundParcel(data.parcel, data.scenesAround))
+    globalDCL.globalStore.dispatch(reportScenesAroundParcel(data.parcel, data.scenesAround))
   },
 
   SetAudioStream(data: { url: string; play: boolean; volume: number }) {
@@ -362,7 +425,7 @@ const browserInterface: browserInterfaceType = {
   },
 
   SendChatMessage(data: { message: ChatMessage }) {
-    globalThis.globalStore.dispatch(sendMessage(data.message))
+    globalDCL.globalStore.dispatch(sendMessage(data.message))
   },
   async UpdateFriendshipStatus(message: FriendshipUpdateStatusMessage) {
     let { userId, action } = message
@@ -371,7 +434,7 @@ const browserInterface: browserInterfaceType = {
     let found = false
     if (action === FriendshipAction.REQUESTED_TO) {
       await ProfileAsPromise(userId) // ensure profile
-      found = hasConnectedWeb3(globalThis.globalStore.getState(), userId)
+      found = hasConnectedWeb3(globalDCL.globalStore.getState(), userId)
     }
 
     if (!found) {
@@ -391,8 +454,8 @@ const browserInterface: browserInterfaceType = {
       return
     }
 
-    globalThis.globalStore.dispatch(updateUserData(userId.toLowerCase(), toSocialId(userId)))
-    globalThis.globalStore.dispatch(updateFriendship(action, userId.toLowerCase(), false))
+    globalDCL.globalStore.dispatch(updateUserData(userId.toLowerCase(), toSocialId(userId)))
+    globalDCL.globalStore.dispatch(updateFriendship(action, userId.toLowerCase(), false))
   },
 
   async JumpIn(data: WorldPosition) {
@@ -431,10 +494,7 @@ const browserInterface: browserInterfaceType = {
     }
   }
 }
-globalThis.browserInterface2 = browserInterface
-type BrowserInterfaceContainer = {
-  browserInterface2: typeof browserInterface
-}
+globalDCL.browserInterface = browserInterface
 
 async function fetchOwner(name: string) {
   const query = `
@@ -469,34 +529,16 @@ async function queryGraph(query: string, variables: any) {
 }
 
 function toSocialId(userId: string) {
-  const domain = globalThis.globalStore.getState().chat.privateMessaging.client?.getDomain()
+  const domain = globalDCL.globalStore.getState().chat.privateMessaging.client?.getDomain()
   return `@${userId.toLowerCase()}:${domain}`
-}
-
-export function setLoadingScreenVisible(shouldShow: boolean) {
-  document.getElementById('overlay')!.style.display = shouldShow ? 'block' : 'none'
-  document.getElementById('load-messages-wrapper')!.style.display = shouldShow ? 'block' : 'none'
-  document.getElementById('progress-bar')!.style.display = shouldShow ? 'block' : 'none'
-  const loadingAudio = document.getElementById('loading-audio') as HTMLMediaElement
-
-  if (shouldShow) {
-    loadingAudio?.play().catch(e => {/*Ignored. If this fails is not critical*/})
-  } else {
-    loadingAudio?.pause()
-  }
-
-  if (!shouldShow && !EDITOR) {
-    isTheFirstLoading = false
-    TeleportController.stopTeleportAnimation()
-  }
 }
 
 export function delightedSurvey() {
   // tslint:disable-next-line:strict-type-predicates
-  if (typeof globalThis === 'undefined' || typeof globalThis !== 'object') {
+  if (typeof globalDCL === 'undefined' || typeof globalDCL !== 'object') {
     return
   }
-  const { analytics, delighted } = globalThis
+  const { analytics, delighted } = globalDCL
   if (!analytics || !delighted) {
     return
   }
@@ -521,7 +563,7 @@ export function delightedSurvey() {
 
 const CHUNK_SIZE = 100
 
-export const unityInterface: unityInterfaceType & builderUnityInterface = {
+export const unityInterface: rendererInterfaceType & builderInterface = {
   debug: false,
 
   SendGenericMessage(object: string, method: string, payload: string) {
@@ -639,6 +681,23 @@ export const unityInterface: unityInterfaceType & builderUnityInterface = {
 
     gameInstance.SendMessage('TutorialController', 'SetTutorialEnabled')
   },
+  SetLoadingScreenVisible(shouldShow: boolean) {
+    document.getElementById('overlay')!.style.display = shouldShow ? 'block' : 'none'
+    document.getElementById('load-messages-wrapper')!.style.display = shouldShow ? 'block' : 'none'
+    document.getElementById('progress-bar')!.style.display = shouldShow ? 'block' : 'none'
+    const loadingAudio = document.getElementById('loading-audio') as HTMLMediaElement
+
+    if (shouldShow) {
+      loadingAudio?.play().catch(e => {/*Ignored. If this fails is not critical*/})
+    } else {
+      loadingAudio?.pause()
+    }
+
+    if (!shouldShow && !EDITOR) {
+      isTheFirstLoading = false
+      TeleportController.stopTeleportAnimation()
+    }
+  },
   TriggerAirdropDisplay(data: AirdropInfo) {
     // Disabled for security reasons
   },
@@ -719,7 +778,7 @@ export const unityInterface: unityInterfaceType & builderUnityInterface = {
   }
 }
 
-globalThis.unityInterface = unityInterface
+globalDCL.rendererInterface = unityInterface
 
 export type UnityInterface = typeof unityInterface
 
@@ -960,8 +1019,8 @@ export class UnityParcelScene extends UnityScene<LoadableParcelScene> {
 export async function initializeEngine(_gameInstance: GameInstance) {
   gameInstance = _gameInstance
 
-  globalThis.globalStore.dispatch(unityClientLoaded())
-  setLoadingScreenVisible(true)
+  globalDCL.globalStore.dispatch(unityClientLoaded())
+  unityInterface.SetLoadingScreenVisible(true)
 
   unityInterface.DeactivateRendering()
 
@@ -1006,7 +1065,7 @@ export async function startUnityParcelLoading() {
   const p = await providerFuture
   hasWallet = p.successful
 
-  globalThis.globalStore.dispatch(loadingScenes())
+  globalDCL.globalStore.dispatch(loadingScenes())
   await enableParcelSceneLoading({
     parcelSceneClass: UnityParcelScene,
     preloadScene: async _land => {
@@ -1148,13 +1207,13 @@ export function updateBuilderScene(sceneData: ILand) {
 
 teleportObservable.add((position: { x: number; y: number; text?: string }) => {
   // before setting the new position, show loading screen to avoid showing an empty world
-  setLoadingScreenVisible(true)
-  globalThis.globalStore.dispatch(teleportTriggered(position.text || `Teleporting to ${position.x}, ${position.y}`))
+  unityInterface.SetLoadingScreenVisible(true)
+  globalDCL.globalStore.dispatch(teleportTriggered(position.text || `Teleporting to ${position.x}, ${position.y}`))
 })
 
 worldRunningObservable.add(isRunning => {
   if (isRunning) {
-    setLoadingScreenVisible(false)
+    unityInterface.SetLoadingScreenVisible(false)
   }
 })
 

@@ -1,12 +1,11 @@
 import future, { IFuture } from 'fp-future'
 import type { Store } from 'redux'
-import defaultLogger from 'shared/logger'
-import { HandlerOfRendererMessages } from './HandlerOfRendererMessages'
-import { unityInterfaceType } from './unityInterface/unityInterfaceType'
-import { browserInterfaceType } from './browserInterface/browserInterfaceType'
-import { UnityBuildInterface } from './unityInterface/UnityBuildInterface'
-import { RootState } from 'shared/store/rootTypes'
-import { SceneWorker } from 'shared/world/SceneWorker'
+import defaultLogger from './logger'
+import { HandlerOfRendererMessages } from '../unity-interface/HandlerOfRendererMessages'
+import { rendererInterfaceType } from './renderer-interface/rendererInterface/rendererInterfaceType'
+import { browserInterfaceType } from './renderer-interface/browserInterface/browserInterfaceType'
+import { RootState } from './store/rootTypes'
+import { SceneWorker } from './world/SceneWorker'
 
 declare var globalThis: any
 
@@ -23,13 +22,14 @@ export const globalDCL: {
     MessageFromEngine: HandlerOfRendererMessages
   }
   messageHandler: HandlerOfRendererMessages
-  unityInterface: unityInterfaceType
-  gameInstance: UnityBuildInterface
+  rendererInterface: rendererInterfaceType
   globalStore: Store<RootState>
   browserInterface: browserInterfaceType
   analytics: {
-    identify: (id: string, userData: { email: string }) => void
+    identify: (id: string | any, userData?: { email: string } | any) => void
+    user: any
   }
+  delighted: any
   /**
    * This variable is used by the Builder and Preview
    */

@@ -1,7 +1,7 @@
 import { ReadOnlyVector3 } from 'decentraland-ecs'
-import { unityInterfaceType } from '../unityInterface/unityInterfaceType'
+import { rendererInterfaceType } from '../rendererInterface/rendererInterfaceType'
 
-export type builderUnityInterface = unityInterfaceType & {
+export type builderInterface = rendererInterfaceType & {
   SelectGizmoBuilder: (type: string) => void
   ResetBuilderObject: () => void
   SetCameraZoomDeltaBuilder: (delta: number) => void

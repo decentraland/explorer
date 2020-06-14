@@ -1,6 +1,6 @@
 import { ReadOnlyQuaternion, ReadOnlyVector3 } from 'decentraland-ecs/src/decentraland/math'
-import { Avatar } from 'shared/profiles/types'
-import { ChatMessage, FriendshipUpdateStatusMessage, WorldPosition } from 'shared/types'
+import { Avatar } from '../../profiles/types'
+import { ChatMessage, FriendshipUpdateStatusMessage, WorldPosition } from '../../types'
 
 export type browserInterfaceType = {
   /** Triggered when the camera moves */
