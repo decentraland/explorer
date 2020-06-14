@@ -3,6 +3,7 @@ import type { Store } from 'redux'
 import defaultLogger from './logger'
 import { HandlerOfRendererMessages } from '../unity-interface/HandlerOfRendererMessages'
 import { rendererInterfaceType } from './renderer-interface/rendererInterface/rendererInterfaceType'
+import { builderInterfaceType } from './renderer-interface/builder/builderInterface'
 import { browserInterfaceType } from './renderer-interface/browserInterface/browserInterfaceType'
 import { RootState } from './store/rootTypes'
 import { SceneWorker } from './world/SceneWorker'
@@ -23,6 +24,7 @@ export const globalDCL: {
   }
   messageHandler: HandlerOfRendererMessages
   rendererInterface: rendererInterfaceType
+  builderInterface: builderInterfaceType
   // @deprecated
   unityInterface: rendererInterfaceType
   globalStore: Store<RootState>
@@ -37,6 +39,8 @@ export const globalDCL: {
    */
   currentLoadedScene?: SceneWorker | null
   futures: Record<string, IFuture<any>>
+  hasWallet: boolean
+  isTheFirstLoading: boolean
 } = globalThis
 
 Object.assign(globalDCL, {
@@ -49,7 +53,8 @@ Object.assign(globalDCL, {
   },
   messageHandler: (type: any, message: any) =>
     defaultLogger.error(`Received message before initialization is ready: ${type}`),
-  futures: {}
+  futures: {},
+  isTheFirstLoading: true
 })
 
 function tooEarlyHandler() {

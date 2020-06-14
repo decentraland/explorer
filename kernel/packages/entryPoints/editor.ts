@@ -12,12 +12,13 @@ import { SceneJsonData, ILand, HUDElementID } from 'shared/types'
 import { normalizeContentMappings } from 'shared/selectors'
 import { SceneWorker } from 'shared/world/SceneWorker'
 import { initializeUnity } from 'unity-interface/initializer'
-import { UnityParcelScene, futures, unityInterface } from 'unity-interface/dcl'
+import { UnityParcelScene } from 'unity-interface/dcl'
 import { loadBuilderScene, updateBuilderScene, unloadCurrentBuilderScene } from 'unity-interface/builder'
 import defaultLogger from 'shared/logger'
 import { uuid } from 'decentraland-ecs/src/ecs/helpers'
 import { Vector3 } from 'decentraland-ecs/src/decentraland/math'
 import { sceneLifeCycleObservable } from 'decentraland-loader/lifecycle/controllers/scene'
+import { globalDCL } from 'shared/globalDCL'
 
 const evtEmitter = new EventEmitter()
 const initializedEngine = future<void>()
@@ -45,13 +46,13 @@ async function createBuilderScene(scene: SceneJsonData, baseUrl: string, mapping
   await engineReady
 
   if (isFirstRun) {
-    unityInterface.SetBuilderReady()
+    globalDCL.builderInterface.SetBuilderReady()
   } else {
-    unityInterface.ResetBuilderScene()
+    globalDCL.builderInterface.ResetBuilderScene()
   }
   await builderSceneLoaded
 
-  unityInterface.ActivateRendering()
+  globalDCL.builderInterface.ActivateRendering()
   evtEmitter.emit('ready', {})
 }
 
@@ -163,7 +164,7 @@ namespace editor {
     try {
       await initializeUnity(container, buildConfigPath)
       defaultLogger.log('Engine initialized.')
-      unityInterface.ConfigureHUDElement(HUDElementID.NFT_INFO_DIALOG, { active: true, visible: false })
+      globalDCL.builderInterface.ConfigureHUDElement(HUDElementID.NFT_INFO_DIALOG, { active: true, visible: false })
 
       initializedEngine.resolve()
     } catch (err) {
@@ -181,11 +182,11 @@ namespace editor {
   }
 
   export function setGridResolution(position: number, rotation: number, scale: number) {
-    unityInterface.SetBuilderGridResolution(position, rotation, scale)
+    globalDCL.builderInterface.SetBuilderGridResolution(position, rotation, scale)
   }
 
   export function setSelectedEntities(entities: string[]) {
-    unityInterface.SetBuilderSelectedEntities(entities)
+    globalDCL.builderInterface.SetBuilderSelectedEntities(entities)
   }
 
   export function getDCLCanvas() {
@@ -199,7 +200,7 @@ namespace editor {
   export async function sendExternalAction(action: { type: string; payload: { [key: string]: any } }) {
     if (action.type === 'Close editor') {
       unloadCurrentBuilderScene()
-      unityInterface.DeactivateRendering()
+      globalDCL.builderInterface.DeactivateRendering()
     } else if (unityScene) {
       const { worker } = unityScene
       if (action.payload.mappings) {
@@ -211,12 +212,12 @@ namespace editor {
   }
 
   export function selectGizmo(type: string) {
-    unityInterface.SelectGizmoBuilder(type)
+    globalDCL.builderInterface.SelectGizmoBuilder(type)
   }
 
   export async function setPlayMode(on: boolean) {
     const onString: string = on ? 'true' : 'false'
-    unityInterface.SetPlayModeBuilder(onString)
+    globalDCL.builderInterface.SetPlayModeBuilder(onString)
   }
 
   export function on(evt: string, listener: (...args: any[]) => void) {
@@ -228,37 +229,37 @@ namespace editor {
   }
 
   export function setCameraZoomDelta(delta: number) {
-    unityInterface.SetCameraZoomDeltaBuilder(delta)
+    globalDCL.builderInterface.SetCameraZoomDeltaBuilder(delta)
   }
 
   export function getCameraTarget() {
     const id = uuid()
-    futures[id] = future()
-    unityInterface.GetCameraTargetBuilder(id)
-    return futures[id]
+    globalDCL.futures[id] = future()
+    globalDCL.builderInterface.GetCameraTargetBuilder(id)
+    return globalDCL.futures[id]
   }
 
   export function resetCameraZoom() {
-    unityInterface.ResetCameraZoomBuilder()
+    globalDCL.builderInterface.ResetCameraZoomBuilder()
   }
 
   export function getMouseWorldPosition(x: number, y: number): IFuture<Vector3> {
     const id = uuid()
-    futures[id] = future()
-    unityInterface.GetMousePositionBuilder(x.toString(), y.toString(), id)
-    return futures[id]
+    globalDCL.futures[id] = future()
+    globalDCL.builderInterface.GetMousePositionBuilder(x.toString(), y.toString(), id)
+    return globalDCL.futures[id]
   }
 
   export function handleUnitySomeVale(id: string, value: Vector3) {
-    futures[id].resolve(value)
+    globalDCL.futures[id].resolve(value)
   }
 
   export function preloadFile(url: string) {
-    unityInterface.PreloadFileBuilder(url)
+    globalDCL.builderInterface.PreloadFileBuilder(url)
   }
 
   export function setCameraRotation(alpha: number, beta: number) {
-    unityInterface.SetCameraRotationBuilder(alpha, beta)
+    globalDCL.builderInterface.SetCameraRotationBuilder(alpha, beta)
   }
 
   export function getLoadingEntities() {
@@ -271,17 +272,17 @@ namespace editor {
 
   export function takeScreenshot(mime?: string): IFuture<string> {
     const id = uuid()
-    futures[id] = future()
-    unityInterface.TakeScreenshotBuilder(id)
-    return futures[id]
+    globalDCL.futures[id] = future()
+    globalDCL.builderInterface.TakeScreenshotBuilder(id)
+    return globalDCL.futures[id]
   }
 
   export function setCameraPosition(position: Vector3) {
-    unityInterface.SetCameraPositionBuilder(position)
+    globalDCL.builderInterface.SetCameraPositionBuilder(position)
   }
 
   export function onKeyDown(key: string) {
-    unityInterface.OnBuilderKeyDown(key)
+    globalDCL.builderInterface.OnBuilderKeyDown(key)
   }
 }
 

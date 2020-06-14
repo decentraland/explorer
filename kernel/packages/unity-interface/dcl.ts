@@ -15,7 +15,6 @@ import { IEventNames, IEvents, MinimapSceneInfo, ProfileForRenderer } from 'dece
 import { sceneLifeCycleObservable } from 'decentraland-loader/lifecycle/controllers/scene'
 import { tutorialStepId } from 'decentraland-loader/lifecycle/tutorial/tutorial'
 import { EventDispatcher } from 'decentraland-rpc/lib/common/core/EventDispatcher'
-import { IFuture } from 'fp-future'
 import { Empty } from 'google-protobuf/google/protobuf/empty_pb'
 import { identity } from 'shared'
 import { AirdropInfo } from 'shared/airdrops/interface'
@@ -29,10 +28,9 @@ import { notifyStatusThroughChat } from 'shared/comms/chat'
 import { AvatarMessageType } from 'shared/comms/interface/types'
 import { avatarMessageObservable, getUserProfile } from 'shared/comms/peers'
 import { candidatesFetched, catalystRealmConnected, changeRealm } from 'shared/dao/index'
-import { providerFuture } from 'shared/ethereum/provider'
 import { globalDCL } from 'shared/globalDCL'
 import { aborted } from 'shared/loading/ReportFatalError'
-import { loadingScenes, unityClientLoaded } from 'shared/loading/types'
+import { unityClientLoaded } from 'shared/loading/types'
 import { createLogger, defaultLogger, ILogger } from 'shared/logger'
 import { saveProfileRequest } from 'shared/profiles/actions'
 import { ProfileAsPromise } from 'shared/profiles/ProfileAsPromise'
@@ -40,15 +38,13 @@ import { getProfile, hasConnectedWeb3 } from 'shared/profiles/selectors'
 import { profileToRendererFormat } from 'shared/profiles/transformations/profileToRendererFormat'
 import { Avatar, Profile, Wearable } from 'shared/profiles/types'
 import { browserInterfaceType } from 'shared/renderer-interface/browserInterface/browserInterfaceType'
-import { builderInterface } from 'shared/renderer-interface/builder/builderInterface'
+import { builderInterfaceType } from 'shared/renderer-interface/builder/builderInterface'
 import { rendererInterfaceType } from 'shared/renderer-interface/rendererInterface/rendererInterfaceType'
-import { ILandToLoadableParcelScene } from 'shared/selectors'
 import { Session } from 'shared/session'
 import { getPerformanceInfo } from 'shared/session/getPerformanceInfo'
 import { AttachEntityComponentPayload, ChatMessage, ComponentCreatedPayload, ComponentDisposedPayload, ComponentRemovedPayload, ComponentUpdatedPayload, CreateEntityPayload, EntityAction, EnvironmentData, FriendshipAction, FriendshipUpdateStatusMessage, FriendsInitializationMessage, HUDConfiguration, HUDElementID, InstancedSpawnPoint, LoadableParcelScene, Notification, OpenNFTDialogPayload, QueryPayload, RemoveEntityPayload, SetEntityParentPayload, UpdateEntityComponentPayload, UpdateUserStatusMessage, WorldPosition } from 'shared/types'
 import { ParcelSceneAPI } from 'shared/world/ParcelSceneAPI'
 import {
-  enableParcelSceneLoading,
   getParcelSceneID,
   getSceneWorkerBySceneID
 } from 'shared/world/parcelSceneManager'
@@ -70,6 +66,7 @@ import {
   PB_UpdateEntityComponent
 } from '../shared/proto/engineinterface_pb'
 import { attachEntity, componentCreated, componentDisposed, componentUpdated, createEntity, direction, openExternalUrl, openNFTDialog, origin, query, ray, rayQuery, removeEntity, removeEntityComponent, setEntityParent, updateEntityComponent } from './cachedProtobuf'
+import { fetchOwner, toSocialId } from './getAddressByNameNFT'
 import { initializeDecentralandUI } from './initializeDecentralandUI'
 import { cachedPositionEvent, setupPosition } from './position/setupPosition'
 import { setupPointerLock } from './setupPointerLock'
@@ -82,10 +79,6 @@ const rendererVersion = require('decentraland-renderer')
 window['console'].log('Renderer version: ' + rendererVersion)
 
 let gameInstance!: GameInstance
-let isTheFirstLoading = true
-
-export let futures: Record<string, IFuture<any>> = {}
-export let hasWallet: boolean = false
 
 /////////////////////////////////// AUDIO STREAMING ///////////////////////////////////
 
@@ -131,7 +124,7 @@ const browserInterface: browserInterfaceType = {
   ReportMousePosition(data: { id: string; mousePosition: ReadOnlyVector3 }) {
     cachedPositionEvent.mousePosition.set(data.mousePosition.x, data.mousePosition.y, data.mousePosition.z)
     positionObservable.notifyObservers(cachedPositionEvent)
-    futures[data.id].resolve(data.mousePosition)
+    globalDCL.futures[data.id].resolve(data.mousePosition)
   },
 
   SceneEvent(data: { sceneId: string; eventType: string; payload: any }) {
@@ -178,7 +171,7 @@ const browserInterface: browserInterfaceType = {
   },
 
   MotdConfirmClicked() {
-    if (hasWallet) {
+    if (globalDCL.hasWallet) {
       TeleportController.goToNext()
     } else {
       window.open('https://docs.decentraland.org/get-a-wallet/', '_blank')
@@ -244,11 +237,11 @@ const browserInterface: browserInterfaceType = {
   },
 
   SendScreenshot(data: { id: string; encodedTexture: string }) {
-    futures[data.id].resolve(data.encodedTexture)
+    globalDCL.futures[data.id].resolve(data.encodedTexture)
   },
 
   ReportBuilderCameraTarget(data: { id: string; cameraTarget: ReadOnlyVector3 }) {
-    futures[data.id].resolve(data.cameraTarget)
+    globalDCL.futures[data.id].resolve(data.cameraTarget)
   },
 
   UserAcceptedCollectibles(data: { id: string }) {
@@ -301,7 +294,7 @@ const browserInterface: browserInterfaceType = {
   ReportUserEmail(data: { userEmail: string }) {
     const profile = getUserProfile().profile
     if (profile) {
-      if (hasWallet) {
+      if (globalDCL.hasWallet) {
         globalDCL.analytics.identify(profile.userId, { email: data.userEmail })
       } else {
         globalDCL.analytics.identify({ email: data.userEmail })
@@ -343,7 +336,7 @@ const browserInterface: browserInterfaceType = {
     if (action === FriendshipAction.REQUESTED_TO && !found) {
       // if we still haven't the user by now (meaning the user has never logged and doesn't have a profile in the dao, or the user id is for a non wallet user or name is not correct) -> fail
       // tslint:disable-next-line
-      unityInterface.FriendNotFound(userId)
+      globalDCL.rendererInterface.FriendNotFound(userId)
       return
     }
 
@@ -389,74 +382,9 @@ const browserInterface: browserInterfaceType = {
 }
 globalDCL.browserInterface = browserInterface
 
-async function fetchOwner(name: string) {
-  const query = `
-    query GetOwner($name: String!) {
-      nfts(first: 1, where: { searchText: $name }) {
-        owner{
-          address
-        }
-      }
-    }`
-
-  const variables = { name: name.toLowerCase() }
-
-  try {
-    const resp = await queryGraph(query, variables)
-    return resp.data.nfts.length === 1 ? (resp.data.nfts[0].owner.address as string) : null
-  } catch (error) {
-    defaultLogger.error(`Error querying graph`, error)
-    throw error
-  }
-}
-
-async function queryGraph(query: string, variables: any) {
-  const url = 'https://api.thegraph.com/subgraphs/name/decentraland/marketplace'
-  const opts = {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ query, variables })
-  }
-  const res = await fetch(url, opts)
-  return res.json()
-}
-
-function toSocialId(userId: string) {
-  const domain = globalDCL.globalStore.getState().chat.privateMessaging.client?.getDomain()
-  return `@${userId.toLowerCase()}:${domain}`
-}
-
-export function delightedSurvey() {
-  // tslint:disable-next-line:strict-type-predicates
-  if (typeof globalDCL === 'undefined' || typeof globalDCL !== 'object') {
-    return
-  }
-  const { analytics, delighted } = globalDCL
-  if (!analytics || !delighted) {
-    return
-  }
-  const profile = getUserProfile().profile as Profile | null
-  if (!isTheFirstLoading && profile) {
-    const payload = {
-      email: profile.email || profile.ethAddress + '@dcl.gg',
-      name: profile.name || 'Guest',
-      properties: {
-        ethAddress: profile.ethAddress,
-        anonymous_id: analytics && analytics.user ? analytics.user().anonymousId() : null
-      }
-    }
-
-    try {
-      delighted.survey(payload)
-    } catch (error) {
-      defaultLogger.error('Delighted error: ' + error.message, error)
-    }
-  }
-}
-
 const CHUNK_SIZE = 100
 
-export const unityInterface: rendererInterfaceType & builderInterface = {
+export const unityInterface: rendererInterfaceType & builderInterfaceType = {
   debug: false,
 
   SendGenericMessage(object: string, method: string, payload: string) {
@@ -587,7 +515,7 @@ export const unityInterface: rendererInterfaceType & builderInterface = {
     }
 
     if (!shouldShow && !EDITOR) {
-      isTheFirstLoading = false
+      globalDCL.isTheFirstLoading = false
       TeleportController.stopTeleportAnimation()
     }
   },
@@ -673,6 +601,7 @@ export const unityInterface: rendererInterfaceType & builderInterface = {
 
 globalDCL.unityInterface = unityInterface
 globalDCL.rendererInterface = unityInterface
+globalDCL.builderInterface = unityInterface
 
 export type UnityInterface = typeof unityInterface
 
@@ -698,7 +627,7 @@ export class UnityScene<T> implements ParcelSceneAPI {
       messages += '\n'
     }
 
-    unityInterface.SendSceneMessage(messages)
+    globalDCL.rendererInterface.SendSceneMessage(messages)
   }
 
   registerWorker(worker: SceneWorker): void {
@@ -718,7 +647,7 @@ export class UnityScene<T> implements ParcelSceneAPI {
   }
 
   encodeSceneMessage(parcelSceneId: string, method: string, payload: any, tag: string = ''): string {
-    if (unityInterface.debug) {
+    if (globalDCL.rendererInterface.debug) {
       defaultLogger.info(parcelSceneId, method, payload, tag)
     }
 
@@ -894,28 +823,28 @@ export async function initializeEngine(_gameInstance: GameInstance) {
   gameInstance = _gameInstance
 
   globalDCL.globalStore.dispatch(unityClientLoaded())
-  unityInterface.SetLoadingScreenVisible(true)
+  globalDCL.rendererInterface.SetLoadingScreenVisible(true)
 
-  unityInterface.DeactivateRendering()
+  globalDCL.rendererInterface.DeactivateRendering()
 
   if (DEBUG) {
-    unityInterface.SetDebug()
+    globalDCL.rendererInterface.SetDebug()
   }
 
   if (SCENE_DEBUG_PANEL) {
-    unityInterface.SetSceneDebugPanel()
+    globalDCL.rendererInterface.SetSceneDebugPanel()
   }
 
   if (SHOW_FPS_COUNTER) {
-    unityInterface.ShowFPSPanel()
+    globalDCL.rendererInterface.ShowFPSPanel()
   }
 
   if (ENGINE_DEBUG_PANEL) {
-    unityInterface.SetEngineDebugPanel()
+    globalDCL.rendererInterface.SetEngineDebugPanel()
   }
 
   if (tutorialEnabled()) {
-    unityInterface.SetTutorialEnabled()
+    globalDCL.rendererInterface.SetTutorialEnabled()
   }
 
   if (!EDITOR) {
@@ -933,45 +862,6 @@ export async function initializeEngine(_gameInstance: GameInstance) {
       }
     }
   }
-}
-
-export async function startUnityParcelLoading() {
-  const p = await providerFuture
-  hasWallet = p.successful
-
-  globalDCL.globalStore.dispatch(loadingScenes())
-  await enableParcelSceneLoading({
-    parcelSceneClass: UnityParcelScene,
-    preloadScene: async _land => {
-      // TODO:
-      // 1) implement preload call
-      // 2) await for preload message or timeout
-      // 3) return
-    },
-    onLoadParcelScenes: lands => {
-      unityInterface.LoadParcelScenes(
-        lands.map($ => {
-          const x = Object.assign({}, ILandToLoadableParcelScene($).data)
-          delete x.land
-          return x
-        })
-      )
-    },
-    onUnloadParcelScenes: lands => {
-      lands.forEach($ => {
-        unityInterface.UnloadScene($.sceneId)
-      })
-    },
-    onPositionSettled: spawnPoint => {
-      if (!aborted) {
-        unityInterface.Teleport(spawnPoint)
-        unityInterface.ActivateRendering()
-      }
-    },
-    onPositionUnsettled: () => {
-      unityInterface.DeactivateRendering()
-    }
-  })
 }
 
 setupPosition()
