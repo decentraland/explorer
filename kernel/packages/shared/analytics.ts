@@ -8,7 +8,7 @@ import { chatObservable, ChatEventType } from './comms/chat'
 import { avatarMessageObservable } from './comms/peers'
 import { AvatarMessageType } from './comms/interface/types'
 import { positionObservable } from './world/positionThings'
-import { uuid } from '../decentraland-ecs/src/ecs/helpers'
+import { uuid } from 'decentraland-ecs/src/ecs/helpers'
 import { AnalyticsContainer } from './types'
 
 declare const window: Window & AnalyticsContainer
