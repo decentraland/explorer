@@ -13,7 +13,7 @@
     "dist"
   ],
   "prettier": {
-    "semi": true,
+    "semi": false,
     "singleQuote": false,
     "printWidth": 120
   },
