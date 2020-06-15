@@ -31,15 +31,15 @@ namespace DownloadableClient
             AsyncOperation sceneOperation = SceneManager.LoadSceneAsync("InitialScene", LoadSceneMode.Additive);
             yield return sceneOperation;
 
-            RenderingController.i.OnRenderingStateChanged += OnRenderingStateChanged;
+            CommonScriptableObjects.rendererState.OnChange += OnRenderingStateChanged;
 
             DCL.WSSController.i.openBrowserWhenStart = true;
             //DCL.WSSController.i.baseUrlMode = DCL.WSSController.BaseUrl.LOCAL_HOST;
             //DCL.WSSController.i.forceLocalComms = true;
             DCL.WSSController.i.baseUrlMode = DCL.WSSController.BaseUrl.CUSTOM;
-            DCL.WSSController.i.baseUrlCustom = "https://explorer.decentraland.zone/?";
+            DCL.WSSController.i.baseUrlCustom = "https://play.decentraland.org/?";
             DCL.WSSController.i.forceLocalComms = false;
-            DCL.WSSController.i.environment = DCL.WSSController.Environment.ZONE;
+            DCL.WSSController.i.environment = DCL.WSSController.Environment.ORG;
             DCL.WSSController.i.debugPanelMode = DCL.WSSController.DebugPanel.Off;
 
             sceneCamera.GetComponent<AudioListener>().enabled = false;
@@ -54,11 +54,11 @@ namespace DownloadableClient
             }
         }
 
-        private void OnRenderingStateChanged(bool isRendering)
+        private void OnRenderingStateChanged(bool isRendering, bool prev)
         {
             if (isRendering)
             {
-                RenderingController.i.OnRenderingStateChanged -= OnRenderingStateChanged;
+                CommonScriptableObjects.rendererState.OnChange -= OnRenderingStateChanged;
                 Application.logMessageReceived -= OnLogMessageReceived;
                 canvas.gameObject.SetActive(false);
                 sceneCamera.gameObject.SetActive(false);
