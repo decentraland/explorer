@@ -66,7 +66,6 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
         if (downloadAssets && model.snapshots != null)
         {
             GetThumbnail(model.snapshots.face, OnFaceSnapshotReady);
-            GetThumbnail(model.snapshots.body, OnBodySnapshotReady);
         }
 
         OnUpdate?.Invoke(this);
