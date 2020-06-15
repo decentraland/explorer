@@ -2,7 +2,9 @@
     "name": "Utils",
     "references": [
         "Unity.TextMeshPro",
-        "Configuration"
+        "Configuration",
+        "CoroutineHelpers",
+        "WrappedTextureAsset"
     ],
     "optionalUnityReferences": [],
     "includePlatforms": [],

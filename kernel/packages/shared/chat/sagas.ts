@@ -1,8 +1,15 @@
-import { takeEvery, put } from 'redux-saga/effects'
-import { UnityInterfaceContainer } from '../../unity-interface/dcl'
-import { MESSAGE_RECEIVED, MessageReceived, messageReceived, SEND_MESSAGE, SendMessage } from './actions'
+import { takeEvery, put, call, select, take } from 'redux-saga/effects'
+import { UnityInterfaceContainer, unityInterface } from '../../unity-interface/dcl'
+import {
+  MESSAGE_RECEIVED,
+  MessageReceived,
+  messageReceived,
+  SEND_MESSAGE,
+  SendMessage,
+  sendPrivateMessage
+} from './actions'
 import { uuid } from 'atomicHelpers/math'
-import { ChatMessageType, ChatMessage } from 'shared/types'
+import { ChatMessageType, ChatMessage, HUDElementID, NotificationType } from 'shared/types'
 import { EXPERIENCE_STARTED } from 'shared/loading/types'
 import { PayloadAction } from 'typesafe-actions'
 import { queueTrackingEvent } from 'shared/analytics'
@@ -22,10 +29,19 @@ import { catalystRealmConnected, changeRealm, changeToCrowdedRealm } from 'share
 import { addToMutedUsers } from '../comms/peers'
 import { isValidExpression, expressionExplainer, validExpressions } from 'shared/apis/expressionExplainer'
 import { StoreContainer } from '../store/rootTypes'
-import { SHOW_FPS_COUNTER } from 'config'
+import { SHOW_FPS_COUNTER, getServerConfigurations, USE_NEW_CHAT } from 'config'
 import { Vector3Component } from 'atomicHelpers/landHelpers'
 import { AvatarMessage, AvatarMessageType } from 'shared/comms/interface/types'
 import { sampleDropData } from 'shared/airdrops/sampleDrop'
+import { initializePrivateMessaging } from './private'
+import { identity } from '../index'
+import { AUTH_SUCCESSFUL } from '../loading/types'
+import { findProfileByName } from '../profiles/selectors'
+import { isRealmInitialized } from 'shared/dao/selectors'
+import { CATALYST_REALM_INITIALIZED } from 'shared/dao/actions'
+import { isFriend } from './selectors'
+import { ensureRenderer } from '../profiles/sagas'
+import { worldRunningObservable } from '../world/worldState'
 
 declare const globalThis: UnityInterfaceContainer & StoreContainer
 
@@ -54,12 +70,49 @@ avatarMessageObservable.add((pose: AvatarMessage) => {
 export function* chatSaga(): any {
   initChatCommands()
 
+  yield takeEvery(AUTH_SUCCESSFUL, handleAuthSuccessful)
+
   yield takeEvery([MESSAGE_RECEIVED, SEND_MESSAGE], trackEvents)
 
   yield takeEvery(MESSAGE_RECEIVED, handleReceivedMessage)
   yield takeEvery(SEND_MESSAGE, handleSendMessage)
 
   yield takeEvery(EXPERIENCE_STARTED, showWelcomeMessage)
+}
+
+function* handleAuthSuccessful() {
+  if (identity.hasConnectedWeb3 && USE_NEW_CHAT) {
+    yield call(ensureRealmInitialized)
+
+    try {
+      yield call(initializePrivateMessaging, getServerConfigurations().synapseUrl, identity)
+    } catch (e) {
+      defaultLogger.error(`error initializing private messaging`, e)
+
+      const observer = worldRunningObservable.add(isRunning => {
+        if (isRunning) {
+          worldRunningObservable.remove(observer)
+
+          unityInterface.ShowNotification({
+            type: NotificationType.GENERIC,
+            message: 'There was an error initializing friends and private messages',
+            buttonMessage: 'OK',
+            timer: 7
+          })
+        }
+      })
+
+      yield call(ensureRenderer)
+
+      unityInterface.ConfigureHUDElement(HUDElementID.FRIENDS, { active: false, visible: false })
+    }
+  }
+}
+
+function* ensureRealmInitialized() {
+  while (!(yield select(isRealmInitialized))) {
+    yield take(CATALYST_REALM_INITIALIZED)
+  }
 }
 
 function* showWelcomeMessage() {
@@ -378,6 +431,51 @@ function initChatCommands() {
     }
   )
 
+  let whisperFn = (expression: string) => {
+    const [userName, message] = parseWhisperExpression(expression)
+
+    const currentUser = getCurrentUser()
+    if (!currentUser) throw new Error('cannotGetCurrentUser')
+
+    const user = findProfileByName(globalThis.globalStore.getState(), userName)
+
+    if (!user || !user.userId) {
+      return {
+        messageId: uuid(),
+        messageType: ChatMessageType.SYSTEM,
+        sender: 'Decentraland',
+        timestamp: Date.now(),
+        body: `Cannot find user ${userName}`
+      }
+    }
+
+    const _isFriend: ReturnType<typeof isFriend> = isFriend(globalThis.globalStore.getState(), user.userId)
+    if (!_isFriend) {
+      return {
+        messageId: uuid(),
+        messageType: ChatMessageType.SYSTEM,
+        sender: 'Decentraland',
+        timestamp: Date.now(),
+        body: `Trying to send a message to a non friend ${userName}`
+      }
+    }
+
+    globalThis.globalStore.dispatch(sendPrivateMessage(user.userId, message))
+
+    return {
+      messageId: uuid(),
+      messageType: ChatMessageType.PRIVATE,
+      sender: currentUser.userId,
+      recipient: user.userId,
+      timestamp: Date.now(),
+      body: message
+    }
+  }
+
+  addChatCommand('whisper', 'Send a private message to a friend', whisperFn)
+
+  addChatCommand('w', 'Send a private message to a friend', whisperFn)
+
   addChatCommand('airdrop', 'fake an airdrop', () => {
     const unityWindow: any = window
     unityWindow.unityInterface.TriggerAirdropDisplay(sampleDropData)
@@ -446,4 +544,16 @@ function initChatCommands() {
           .join('\n')}`
     }
   })
+}
+
+function parseWhisperExpression(expression: string) {
+  const words = expression.split(' ')
+
+  const userName = words[0].trim() // remove the leading '/'
+
+  words.shift() // Remove userName from sentence
+
+  const restOfMessage = words.join(' ')
+
+  return [userName, restOfMessage]
 }

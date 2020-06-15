@@ -38,6 +38,7 @@ export enum CLASS_ID {
   BILLBOARD = 32,
 
   ANIMATION = 33,
+  FONT = 34,
 
   UI_FULLSCREEN_SHAPE = 40, // internal fullscreen scenes
   UI_BUTTON_SHAPE = 41,
@@ -336,6 +337,37 @@ export class GLTFShape extends Shape {
   }
 }
 
+export enum PictureFrameStyle {
+  Classic = 0,
+  Baroque_Ornament,
+  Diamond_Ornament,
+  Minimal_Wide,
+  Minimal_Grey,
+  Blocky,
+  Gold_Edges,
+  Gold_Carved,
+  Gold_Wide,
+  Gold_Rounded,
+  Metal_Medium,
+  Metal_Wide,
+  Metal_Slim,
+  Metal_Rounded,
+  Pins,
+  Minimal_Black,
+  Minimal_White,
+  Tape,
+  Wood_Slim,
+  Wood_Wide,
+  Wood_Twigs,
+  Canvas
+}
+
+/** @public */
+export type NFTShapeConstructorArgs = {
+  color?: Color3
+  style?: PictureFrameStyle
+}
+
 /**
  * @public
  */
@@ -344,14 +376,32 @@ export class NFTShape extends Shape {
   @Shape.readonly
   readonly src!: string
 
+  @Shape.readonly
+  readonly style!: PictureFrameStyle
+
   @ObservableComponent.field
   color: Color3
 
-  // Light purple as the default background color
-  constructor(src: string, color: Color3 = new Color3(0.6404918, 0.611472, 0.8584906)) {
+  constructor(src: string)
+  constructor(src: string, color: Color3) // for backwards compatibility
+  constructor(src: string, args: NFTShapeConstructorArgs)
+  constructor(src: string, args: any = {}) {
     super()
     this.src = src
+
+    let color = new Color3(0.6404918, 0.611472, 0.8584906)
+    let style = PictureFrameStyle.Classic
+
+    // check if args is color (backwards compatibility)
+    if (args instanceof Color3) {
+      color = args
+    } else if (args != null) {
+      if (args.color) color = args.color
+      if (args.style) style = args.style
+    }
+
     this.color = color
+    this.style = style
   }
 }
 
@@ -378,9 +428,9 @@ export class Texture extends ObservableComponent {
    * Enables texture wrapping for this material.
    * | Value | Type      |
    * |-------|-----------|
-   * |     1 | CLAMP     |
-   * |     2 | WRAP      |
-   * |     3 | MIRROR    |
+   * |     0 | CLAMP     |
+   * |     1 | WRAP      |
+   * |     2 | MIRROR    |
    */
   @ObservableComponent.readonly
   readonly wrap!: number
@@ -458,6 +508,27 @@ export class OBJShape extends Shape {
 /**
  * @public
  */
+@DisposableComponent('engine.font', CLASS_ID.FONT)
+export class Font extends ObservableComponent {
+  @ObservableComponent.readonly
+  readonly src!: string
+
+  public constructor(src: string = '') {
+    super()
+    this.src = src
+  }
+}
+
+export enum Fonts {
+  SanFrancisco = 'builtin:SF-UI-Text-Regular SDF',
+  SanFrancisco_Heavy = 'builtin:SF-UI-Text-Heavy SDF',
+  SanFrancisco_Semibold = 'builtin:SF-UI-Text-Semibold SDF',
+  LiberationSans = 'builtin:LiberationSans SDF'
+}
+
+/**
+ * @public
+ */
 @Component('engine.text', CLASS_ID.TEXT_SHAPE)
 export class TextShape extends Shape {
   @ObservableComponent.field
@@ -474,6 +545,9 @@ export class TextShape extends Shape {
 
   @ObservableComponent.field
   fontWeight: string = 'normal'
+
+  @ObservableComponent.component
+  font?: Font
 
   @ObservableComponent.field
   opacity: number = 1.0
@@ -899,6 +973,15 @@ export class VideoTexture extends ObservableComponent {
   @ObservableComponent.field
   volume: number = 1
 
+  @ObservableComponent.field
+  playbackRate: number = 1
+
+  @ObservableComponent.field
+  loop: boolean = false
+
+  @ObservableComponent.field
+  seek: number = -1
+
   /**
    * Is this VideoTexture playing?
    */
@@ -918,5 +1001,33 @@ export class VideoTexture extends ObservableComponent {
         that[i as 'samplingMode' | 'wrap'] = (opts as any)[i]
       }
     }
+  }
+
+  play() {
+    this.playing = true
+  }
+
+  pause() {
+    this.playing = false
+  }
+
+  reset() {
+    this.seekTime(0)
+  }
+
+  seekTime(seconds: number) {
+    this.seek = seconds
+    this.dirty = true
+    this.data.nonce = Math.random()
+  }
+
+  toJSON() {
+    if (this.seek < 0) {
+      return super.toJSON()
+    }
+
+    const ret = JSON.parse(JSON.stringify(super.toJSON()))
+    this.seek = -1
+    return ret
   }
 }

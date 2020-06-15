@@ -12,12 +12,12 @@ public class ExpressionsHUDView : MonoBehaviour
     public class ButtonToExpression
     {
         public string expressionId;
-        public Button button;
+        public Button_OnPointerDown button; // When the button is used to lock/unlock the mouse we have to use onPointerDown
     }
 
     [SerializeField] internal ButtonToExpression[] buttonToExpressionMap;
     [SerializeField] internal Button showContentButton;
-    [SerializeField] internal Button hideContentButton;
+    [SerializeField] internal Button_OnPointerDown[] hideContentButtons;
     [SerializeField] internal RectTransform content;
     [SerializeField] internal InputAction_Trigger openExpressionsAction;
     [SerializeField] internal Image avatarPic;
@@ -30,25 +30,30 @@ public class ExpressionsHUDView : MonoBehaviour
 
     private void Awake()
     {
-        openExpressionsDelegate = (x) => { if (IsVisible()) ToggleContent(); };
+        openExpressionsDelegate = (x) =>
+        {
+            if (!IsVisible())
+                return;
+            if (Input.GetKeyDown(KeyCode.Escape) && !IsContentVisible())
+                return;
+            ToggleContent();
+        };
         openExpressionsAction.OnTriggered += openExpressionsDelegate;
-        hideContentButton.onClick.AddListener(HideContent);
         showContentButton.onClick.AddListener(ToggleContent);
+
+        for (int i = 0; i < hideContentButtons.Length; i++)
+        {
+            hideContentButtons[i].onPointerDown += HideContent;
+        }
     }
 
     internal void Initialize(ExpressionClicked clickedDelegate)
     {
-        HideContent();
+        content.gameObject.SetActive(false);
 
         foreach (var buttonToExpression in buttonToExpressionMap)
         {
-            buttonToExpression.button.onClick.RemoveAllListeners();
-            buttonToExpression.button.onClick.AddListener(() =>
-                {
-                    clickedDelegate?.Invoke(buttonToExpression.expressionId);
-                    HideContent();
-                }
-            );
+            buttonToExpression.button.onPointerDown += () => clickedDelegate?.Invoke(buttonToExpression.expressionId);
         }
     }
 
@@ -61,7 +66,7 @@ public class ExpressionsHUDView : MonoBehaviour
 
     internal void ToggleContent()
     {
-        if (content.gameObject.activeSelf)
+        if (IsContentVisible())
         {
             HideContent();
         }
@@ -83,6 +88,11 @@ public class ExpressionsHUDView : MonoBehaviour
         DCL.Helpers.Utils.LockCursor();
     }
 
+    public bool IsContentVisible()
+    {
+        return content.gameObject.activeSelf;
+    }
+
     public void SetVisiblity(bool visible)
     {
         gameObject.SetActive(visible);
@@ -96,5 +106,10 @@ public class ExpressionsHUDView : MonoBehaviour
     public void CleanUp()
     {
         openExpressionsAction.OnTriggered -= openExpressionsDelegate;
+
+        for (int i = 0; i < hideContentButtons.Length; i++)
+        {
+            hideContentButtons[i].onPointerDown -= HideContent;
+        }
     }
 }

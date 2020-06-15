@@ -23,6 +23,8 @@ namespace DCL
         public const string SCENE_DESTROY = "UnloadScene";
         public const string INIT_DONE = "InitMessagesFinished";
         public const string QUERY = "Query";
+        public const string OPEN_EXTERNAL_URL = "OpenExternalUrl";
+        public const string OPEN_NFT_DIALOG = "OpenNFTDialog";
     }
 
     public class MessagingBusId

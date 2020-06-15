@@ -1,7 +1,6 @@
 
 using DCL.Interface;
 using System;
-using System.Collections.Generic;
 using UnityEngine.Events;
 public class ChatHUDController : IDisposable
 {
@@ -9,25 +8,26 @@ public class ChatHUDController : IDisposable
 
     public ChatHUDView view;
 
-    public UnityAction<string> OnSendMessage;
+    public event UnityAction<string> OnPressPrivateMessage;
 
-    public void Initialize(ChatHUDView view = null, UnityAction<string> onSendMessage = null)
+    public void Initialize(ChatHUDView view = null, UnityAction<ChatMessage> onSendMessage = null)
     {
-        if (view == null)
-        {
-            this.view = ChatHUDView.Create();
-        }
-        else
-        {
-            this.view = view;
-        }
+        this.view = view ?? ChatHUDView.Create();
 
         this.view.Initialize(this, onSendMessage);
+
+        this.view.OnPressPrivateMessage -= View_OnPressPrivateMessage;
+        this.view.OnPressPrivateMessage += View_OnPressPrivateMessage;
     }
 
-    public void AddChatMessage(ChatEntry.Model chatEntryModel)
+    void View_OnPressPrivateMessage(string friendUserId)
     {
-        view.AddEntry(chatEntryModel);
+        OnPressPrivateMessage?.Invoke(friendUserId);
+    }
+
+    public void AddChatMessage(ChatEntry.Model chatEntryModel, bool setScrollPositionToBottom = false)
+    {
+        view.AddEntry(chatEntryModel, setScrollPositionToBottom);
 
         if (view.entries.Count > MAX_CHAT_ENTRIES)
         {
@@ -36,23 +36,9 @@ public class ChatHUDController : IDisposable
         }
     }
 
-    public List<ChatMessage> TrimAndSortChatMessages(List<ChatMessage> messages)
-    {
-        var result = messages;
-
-        result.Sort((x, y) => { return x.timestamp > y.timestamp ? 1 : -1; });
-
-        if (result.Count > MAX_CHAT_ENTRIES)
-        {
-            int entriesToRemove = (result.Count - MAX_CHAT_ENTRIES);
-            result.RemoveRange(0, entriesToRemove);
-        }
-
-        return result;
-    }
-
     public void Dispose()
     {
+        view.OnPressPrivateMessage -= View_OnPressPrivateMessage;
         UnityEngine.Object.Destroy(this.view.gameObject);
     }
 
@@ -64,6 +50,7 @@ public class ChatHUDController : IDisposable
 
         model.messageType = message.messageType;
         model.bodyText = message.body;
+        model.timestamp = message.timestamp;
 
         if (message.recipient != null)
         {
@@ -82,10 +69,12 @@ public class ChatHUDController : IDisposable
             if (message.recipient == ownProfile.userId)
             {
                 model.subType = ChatEntry.Model.SubType.PRIVATE_FROM;
+                model.otherUserId = message.sender;
             }
             else if (message.sender == ownProfile.userId)
             {
                 model.subType = ChatEntry.Model.SubType.PRIVATE_TO;
+                model.otherUserId = message.recipient;
             }
             else
             {

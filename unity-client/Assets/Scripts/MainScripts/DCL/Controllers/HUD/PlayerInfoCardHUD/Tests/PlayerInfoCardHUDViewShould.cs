@@ -12,11 +12,11 @@ public class PlayerInfoCardHUDViewShould : TestsBase
     {
         yield return base.SetUp();
         view = PlayerInfoCardHUDView.CreateView();
-        view.Initialize(null, null, null, null);
+        view.Initialize(null, null, null, null, null, null, null, null);
         CreateMockWearableByRarity(WearableLiterals.ItemRarity.EPIC);
         CreateMockWearableByRarity(WearableLiterals.ItemRarity.LEGENDARY);
         CreateMockWearableByRarity(WearableLiterals.ItemRarity.MYTHIC);
-        CreateMockWearableByRarity(WearableLiterals.ItemRarity.SWANKY);
+        CreateMockWearableByRarity(WearableLiterals.ItemRarity.RARE);
         CreateMockWearableByRarity(WearableLiterals.ItemRarity.UNIQUE);
 
         UserProfileController.i.AddUserProfileToCatalog(new UserProfileModel()
@@ -30,7 +30,7 @@ public class PlayerInfoCardHUDViewShould : TestsBase
                 WearableLiterals.ItemRarity.EPIC,
                 WearableLiterals.ItemRarity.LEGENDARY,
                 WearableLiterals.ItemRarity.MYTHIC,
-                WearableLiterals.ItemRarity.SWANKY,
+                WearableLiterals.ItemRarity.RARE,
                 WearableLiterals.ItemRarity.UNIQUE,
             }
         });
@@ -50,18 +50,29 @@ public class PlayerInfoCardHUDViewShould : TestsBase
         bool reportButtonWasPressed = false;
         bool blockButtonWasPressed = false;
         bool unblockButtonWasPressed = false;
+        bool addFriendWasPressed = false;
+        bool cancelWasPressed = false;
+        bool acceptRequestWasPressed = false;
+        bool rejectRequestWasPressed = false;
 
-
-        view.Initialize(() => hideCardButtonWasPressed = true, () => reportButtonWasPressed = true, () => blockButtonWasPressed = true, () => unblockButtonWasPressed = true);
+        view.Initialize(() => hideCardButtonWasPressed = true, () => reportButtonWasPressed = true, () => blockButtonWasPressed = true, () => unblockButtonWasPressed = true, () => addFriendWasPressed = true, () => cancelWasPressed = true, () => acceptRequestWasPressed = true, () => rejectRequestWasPressed = true);
         view.hideCardButton.onClick.Invoke();
         view.reportPlayerButton.onClick.Invoke();
         view.blockPlayerButton.onClick.Invoke();
         view.unblockPlayerButton.onClick.Invoke();
+        view.addFriendButton.onClick.Invoke();
+        view.requestSentButton.onClick.Invoke();
+        view.acceptRequestButton.onClick.Invoke();
+        view.rejectRequestButton.onClick.Invoke();
 
         Assert.IsTrue(hideCardButtonWasPressed);
         Assert.IsTrue(reportButtonWasPressed);
         Assert.IsTrue(blockButtonWasPressed);
         Assert.IsTrue(unblockButtonWasPressed);
+        Assert.IsTrue(addFriendWasPressed);
+        Assert.IsTrue(cancelWasPressed);
+        Assert.IsTrue(acceptRequestWasPressed);
+        Assert.IsTrue(rejectRequestWasPressed);
         Assert.IsTrue(GetTabMapping(PlayerInfoCardHUDView.Tabs.Passport).container.activeSelf);
         Assert.IsFalse(GetTabMapping(PlayerInfoCardHUDView.Tabs.Trade).container.activeSelf);
         Assert.IsFalse(GetTabMapping(PlayerInfoCardHUDView.Tabs.Block).container.activeSelf);

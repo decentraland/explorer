@@ -1,34 +1,8 @@
-using DCL;
 using DCL.Interface;
 using NUnit.Framework;
-using System;
 using System.Collections;
-using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.TestTools;
-
-class ChatController_Mock : IChatController
-{
-    public event Action<ChatMessage> OnAddMessage;
-    List<ChatMessage> entries = new List<ChatMessage>();
-    public List<ChatMessage> GetEntries()
-    {
-        return entries;
-    }
-
-    public void RaiseAddMessage(ChatMessage chatMessage)
-    {
-        entries.Add(chatMessage);
-        OnAddMessage?.Invoke(chatMessage);
-    }
-}
-class MouseCatcher_Mock : IMouseCatcher
-{
-    public event Action OnMouseUnlock;
-    public event Action OnMouseLock;
-
-    public void RaiseMouseUnlock() { OnMouseUnlock?.Invoke(); }
-    public void RaiseMouseLock() { OnMouseLock?.Invoke(); }
-}
 
 public class WorldChatWindowHUDShould : TestsBase
 {
@@ -75,81 +49,6 @@ public class WorldChatWindowHUDShould : TestsBase
         yield break;
     }
 
-    [Test]
-    public void TabsWorkCorrectly()
-    {
-
-        var messages = new ChatMessage[]
-        {
-            new ChatMessage()
-            {
-                messageType = ChatMessage.Type.PUBLIC,
-                body = "test message 1",
-                sender = ownProfileModel.userId,
-                recipient = testProfileModel.userId
-            },
-            new ChatMessage()
-            {
-                messageType = ChatMessage.Type.PUBLIC,
-                body = "test message 2",
-                sender = ownProfileModel.userId,
-                recipient = testProfileModel.userId
-            },
-            new ChatMessage()
-            {
-                messageType = ChatMessage.Type.PRIVATE,
-                body = "test message 3",
-                sender = ownProfileModel.userId,
-                recipient = testProfileModel.userId
-            },
-            new ChatMessage()
-            {
-                messageType = ChatMessage.Type.PRIVATE,
-                body = "test message 4",
-                sender = ownProfileModel.userId,
-                recipient = testProfileModel.userId
-            },
-        };
-
-        foreach (var msg in messages)
-        {
-            chatController.RaiseAddMessage(msg);
-        }
-
-        var expectedBodyMessages = new string[]
-        {
-            "<b>NO_USER:</b> test message 1",
-            "<b>NO_USER:</b> test message 2",
-            "<b>[To TEST_USER]:</b> test message 3",
-            "<b>[To TEST_USER]:</b> test message 4"
-        };
-
-        Assert.AreEqual(4, controller.view.chatHudView.entries.Count);
-
-        for (int i = 0; i < controller.view.chatHudView.entries.Count; i++)
-        {
-            ChatEntry entry = controller.view.chatHudView.entries[i];
-            Assert.AreEqual(expectedBodyMessages[i], entry.body.text);
-        }
-
-        controller.view.pmFilterButton.onClick.Invoke();
-
-        expectedBodyMessages = new string[]
-        {
-            "<b>[To TEST_USER]:</b> test message 3",
-            "<b>[To TEST_USER]:</b> test message 4"
-        };
-
-        Assert.AreEqual(2, controller.view.chatHudView.entries.Count);
-
-        for (int i = 0; i < controller.view.chatHudView.entries.Count; i++)
-        {
-            ChatEntry entry = controller.view.chatHudView.entries[i];
-            Assert.AreEqual(expectedBodyMessages[i], entry.body.text);
-        }
-
-        controller.view.worldFilterButton.onClick.Invoke();
-    }
 
     [Test]
     public void HandlePrivateMessagesProperly()
@@ -168,8 +67,8 @@ public class WorldChatWindowHUDShould : TestsBase
 
         ChatEntry entry = controller.view.chatHudView.entries[0];
 
-        Assert.AreEqual("<b>[To TEST_USER]:</b>", entry.username.text);
-        Assert.AreEqual("<b>[To TEST_USER]:</b> test message", entry.body.text);
+        Assert.AreEqual("<b>To TEST_USER:</b>", entry.username.text);
+        Assert.AreEqual("<b>To TEST_USER:</b> test message", entry.body.text);
 
         var receivedPM = new ChatMessage()
         {
@@ -183,8 +82,8 @@ public class WorldChatWindowHUDShould : TestsBase
 
         ChatEntry entry2 = controller.view.chatHudView.entries[1];
 
-        Assert.AreEqual("<b>[From TEST_USER]:</b>", entry2.username.text);
-        Assert.AreEqual("<b>[From TEST_USER]:</b> test message", entry2.body.text);
+        Assert.AreEqual("<b>From TEST_USER:</b>", entry2.username.text);
+        Assert.AreEqual("<b>From TEST_USER:</b> test message", entry2.body.text);
     }
 
 
@@ -206,7 +105,7 @@ public class WorldChatWindowHUDShould : TestsBase
 
         var chatEntryModel = ChatHUDController.ChatMessageToChatEntry(chatMessage);
 
-        Assert.AreEqual(entry.message, chatEntryModel);
+        Assert.AreEqual(entry.model, chatEntryModel);
     }
 
     [Test]
@@ -233,10 +132,12 @@ public class WorldChatWindowHUDShould : TestsBase
 
         WebInterface.OnMessageFromEngine += messageCallback;
         controller.resetInputFieldOnSubmit = false;
-        controller.SendChatMessage("test message");
+        controller.SendChatMessage(new ChatMessage() { body = "test message" });
         Assert.IsTrue(messageWasSent);
-        Assert.AreEqual("", controller.view.chatHudView.inputField.text);
         WebInterface.OnMessageFromEngine -= messageCallback;
+        yield return null;
+        yield return null;
+        yield return null;
         yield break;
     }
 
@@ -247,5 +148,72 @@ public class WorldChatWindowHUDShould : TestsBase
         Assert.AreEqual(true, controller.view.gameObject.activeSelf);
         controller.view.closeButton.onClick.Invoke();
         Assert.AreEqual(false, controller.view.gameObject.activeSelf);
+    }
+
+    [UnityTest]
+    public IEnumerator KeepWhisperCommandAfterUsage()
+    {
+        string baseCommand = "/w testUser ";
+
+        controller.resetInputFieldOnSubmit = false;
+
+        controller.view.chatHudView.inputField.text = baseCommand + "testMessage";
+        yield return null;
+
+        controller.view.chatHudView.inputField.onSubmit.Invoke(controller.view.chatHudView.inputField.text);
+
+        yield return null;
+
+        Assert.AreEqual(baseCommand, controller.view.chatHudView.inputField.text);
+
+        baseCommand = "/w testUser ";
+
+        controller.view.chatHudView.inputField.text = baseCommand + "testMessage";
+        yield return null;
+
+        controller.view.chatHudView.inputField.onSubmit.Invoke(controller.view.chatHudView.inputField.text);
+
+        yield return null;
+
+        Assert.AreEqual(baseCommand, controller.view.chatHudView.inputField.text);
+        yield break;
+    }
+
+    [UnityTest]
+    public IEnumerator WhisperLastPrivateMessageSenderOnReply()
+    {
+        UserProfile ownProfile = UserProfile.GetOwnUserProfile();
+
+        var model = new UserProfileModel()
+        {
+            userId = "testUserId",
+            name = "testUserName",
+        };
+
+        UserProfileController.i.AddUserProfileToCatalog(model);
+
+        var msg = new ChatMessage()
+        {
+            body = "test message",
+            sender = model.userId,
+            recipient = ownProfile.userId,
+            messageType = ChatMessage.Type.PRIVATE
+        };
+
+        yield return null;
+
+        chatController.AddMessageToChatWindow(JsonUtility.ToJson(msg));
+
+        yield return null;
+
+        Assert.AreEqual(controller.lastPrivateMessageReceivedSender, model.name);
+
+        controller.view.chatHudView.inputField.text = "/r ";
+
+        Assert.AreEqual($"/w {model.name} ", controller.view.chatHudView.inputField.text);
+
+        yield return null;
+
+        yield break;
     }
 }

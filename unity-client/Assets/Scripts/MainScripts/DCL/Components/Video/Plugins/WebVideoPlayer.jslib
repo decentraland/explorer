@@ -1,8 +1,7 @@
 var WebVideoPlayer = {
   $videos: {},
-  $hls: null,
 
-  WebVideoPlayerCreate: function (videoId, url) {
+  WebVideoPlayerCreate: function (videoId, url, useHls) {
     const videoState = {
       NONE: 0,
       ERROR: 1,
@@ -10,9 +9,11 @@ var WebVideoPlayer = {
       READY: 3,
       PLAYING: 4,
       BUFFERING: 5,
+      SEEKING: 6,
+      PAUSED: 7,
     };
 
-    var str = Pointer_stringify(url);
+    const videoUrl = Pointer_stringify(url);
     const vid = document.createElement("video");
     vid.autoplay = false;
 
@@ -22,28 +23,41 @@ var WebVideoPlayer = {
       error: "",
     };
 
-    hls = new Hls();
-    hls.loadSource(str);
-    hls.attachMedia(vid);
+    if (useHls) {
+      const hls = new Hls();
+      hls.loadSource(videoUrl);
+      hls.attachMedia(vid);
+      hls.on(Hls.Events.ERROR, function () {
+        videoData.state = videoState.ERROR;
+        videoData.error = "Hls error";
+      });
+      videoData["hlsInstance"] = hls;
+    } else {
+      vid.src = videoUrl;
+    }
 
     vid.oncanplay = function () {
       videoData.state = videoState.READY;
-      console.log("video: READY");
     };
 
     vid.loadstart = function () {
       videoData.state = videoState.LOADING;
-      console.log("video: LOADING");
     };
 
     vid.onplaying = function () {
       videoData.state = videoState.PLAYING;
-      console.log("video: PLAYING");
+    };
+
+    vid.onpause = function () {
+      videoData.state = videoState.PAUSED;
     };
 
     vid.onwaiting = function () {
       videoData.state = videoState.BUFFERING;
-      console.log("video: BUFFERING");
+    };
+
+    vid.onseeking = function () {
+      videoData.state = videoState.SEEKING;
     };
 
     vid.onerror = function () {
@@ -58,17 +72,19 @@ var WebVideoPlayer = {
 
   WebVideoPlayerRemove: function (videoId) {
     const id = Pointer_stringify(videoId);
-    videos[id].video.srt = "";
+    videos[id].video.src = "";
     videos[id].video.load();
     videos[id].video = null;
+    if (videos[id].hlsInstance !== undefined) {
+      delete videos[id].hlsInstance;
+    }
     delete videos[id];
-    delete hls;
   },
 
   WebVideoPlayerTextureUpdate: function (videoId, texturePtr, isWebGL1) {
     const id = Pointer_stringify(videoId);
 
-    if (videos[id].paused) return;
+    if (videos[id].state !== 4) return; //PLAYING
 
     GLctx.bindTexture(GLctx.TEXTURE_2D, GL.textures[texturePtr]);
     if (isWebGL1) {
@@ -95,14 +111,16 @@ var WebVideoPlayer = {
 
   WebVideoPlayerPlay: function (videoId) {
     try {
-      videos[Pointer_stringify(videoId)].video.play();
+      const videoData = videos[Pointer_stringify(videoId)];
+      videoData.video.play();
     } catch (err) {
       // Exception!
     }
   },
 
   WebVideoPlayerPause: function (videoId) {
-    videos[Pointer_stringify(videoId)].video.pause();
+    const videoData = videos[Pointer_stringify(videoId)];
+    videoData.video.pause();
   },
 
   WebVideoPlayerVolume: function (videoId, volume) {
@@ -147,7 +165,28 @@ var WebVideoPlayer = {
     stringToUTF8(errorStr, buffer, bufferSize);
     return buffer;
   },
+
+  WebVideoPlayerSetTime: function (videoId, second) {
+    const videoData = videos[Pointer_stringify(videoId)];
+    const vid = videoData.video;
+
+    if (second == 0) {
+      const playbackRate = vid.playbackRate;
+      vid.pause();
+      vid.load();
+      vid.play();
+    } else if (vid.seekable && vid.seekable.length > 0) {
+      vid.currentTime = second;
+    }
+  },
+
+  WebVideoPlayerSetLoop: function (videoId, value) {
+    videos[Pointer_stringify(videoId)].video.loop = value;
+  },
+
+  WebVideoPlayerSetPlaybackRate: function (videoId, value) {
+    videos[Pointer_stringify(videoId)].video.playbackRate = value;
+  },
 };
-autoAddDeps(WebVideoPlayer, "$hls");
 autoAddDeps(WebVideoPlayer, "$videos");
 mergeInto(LibraryManager.library, WebVideoPlayer);

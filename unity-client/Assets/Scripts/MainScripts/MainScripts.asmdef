@@ -22,7 +22,10 @@
         "GenericPointers",
         "MaterialCachingHelper",
         "SRPBatchingHelper",
-        "MouseCatcher"
+        "MouseCatcher",
+        "Settings",
+        "WrappedTextureAsset",
+        "NFTHelper"
     ],
     "optionalUnityReferences": [],
     "includePlatforms": [],

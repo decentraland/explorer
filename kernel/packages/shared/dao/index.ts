@@ -1,9 +1,15 @@
 import defaultLogger from '../logger'
-import future from 'fp-future'
+import future, { IFuture } from 'fp-future'
 import { Layer, Realm, Candidate, RootDaoState, ServerConnectionStatus, PingResult } from './types'
 import { RootState } from 'shared/store/rootTypes'
 import { Store } from 'redux'
-import { isRealmInitialized, getCatalystRealmCommsStatus, getRealm, getAllCatalystCandidates } from './selectors'
+import {
+  isRealmInitialized,
+  getCatalystRealmCommsStatus,
+  getRealm,
+  getAllCatalystCandidates,
+  areCandidatesFetched
+} from './selectors'
 import { fetchCatalystNodes } from 'shared/web3'
 import { setCatalystRealm, setCatalystCandidates } from './actions'
 import { deepEqual } from 'atomicHelpers/deepEqual'
@@ -32,7 +38,7 @@ const score = ({ usersCount, maxUsers = 50 }: Layer) => {
   return v + v * Math.cos(phase + period * usersCount)
 }
 
-function ping(url: string): Promise<PingResult> {
+export function ping(url: string, timeoutMs: number = 5000): Promise<PingResult> {
   const result = future<PingResult>()
 
   new Promise(() => {
@@ -40,7 +46,7 @@ function ping(url: string): Promise<PingResult> {
 
     let started: Date
 
-    http.timeout = 5000
+    http.timeout = timeoutMs
 
     http.onreadystatechange = () => {
       if (http.readyState === XMLHttpRequest.OPENED) {
@@ -90,10 +96,16 @@ export async function fecthCatalystRealms(): Promise<Candidate[]> {
   return fetchCatalystStatuses(nodes)
 }
 
+export function commsStatusUrl(domain: string, includeLayers: boolean = false) {
+  let url = `${domain}/comms/status`
+  if (includeLayers) {
+    url += `?includeLayers=true`
+  }
+  return url
+}
+
 export async function fetchCatalystStatuses(nodes: { domain: string }[]) {
-  const results: PingResult[] = await Promise.all(
-    nodes.map(node => ping(`${node.domain}/comms/status?includeLayers=true`))
-  )
+  const results: PingResult[] = await Promise.all(nodes.map(node => ping(commsStatusUrl(node.domain, true))))
 
   return zip(nodes, results).reduce(
     (union: Candidate[], [{ domain }, { elapsed, result, status }]: [CatalystNode, PingResult]) =>
@@ -105,7 +117,8 @@ export async function fetchCatalystStatuses(nodes: { domain: string }[]) {
               status,
               elapsed: elapsed!,
               layer,
-              score: score(layer)
+              score: score(layer),
+              lighthouseVersion: result!.version
             }))
           )
         : union,
@@ -147,6 +160,32 @@ export function pickCatalystRealm(candidates: Candidate[]): Realm {
   return candidateToRealm(sorted[0])
 }
 
+export function candidatesFetched(): IFuture<void> {
+  const result: IFuture<void> = future()
+
+  const store: Store<RootState> = (window as any)['globalStore']
+
+  const fetched = areCandidatesFetched(store.getState())
+  if (fetched) {
+    result.resolve()
+    return result
+  }
+
+  new Promise(resolve => {
+    const unsubscribe = store.subscribe(() => {
+      const fetched = areCandidatesFetched(store.getState())
+      if (fetched) {
+        unsubscribe()
+        return resolve()
+      }
+    })
+  })
+    .then(() => result.resolve())
+    .catch(e => result.reject(e))
+
+  return result
+}
+
 export async function realmInitialized(): Promise<void> {
   const store: Store<RootState> = (window as any)['globalStore']
 
@@ -174,7 +213,12 @@ export function getRealmFromString(realmString: string, candidates: Candidate[])
 }
 
 function candidateToRealm(candidate: Candidate) {
-  return { catalystName: candidate.catalystName, domain: candidate.domain, layer: candidate.layer.name }
+  return {
+    catalystName: candidate.catalystName,
+    domain: candidate.domain,
+    layer: candidate.layer.name,
+    lighthouseVersion: candidate.lighthouseVersion
+  }
 }
 
 function realmFor(name: string, layer: string, candidates: Candidate[]): Realm | undefined {

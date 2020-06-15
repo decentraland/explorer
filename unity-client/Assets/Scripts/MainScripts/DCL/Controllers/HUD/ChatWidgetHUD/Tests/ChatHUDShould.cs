@@ -16,9 +16,9 @@ public class ChatHUDShould : TestsBase
         yield break;
     }
 
-    string lastMsgSent;
+    ChatMessage lastMsgSent;
 
-    void OnSendMessage(string msg)
+    void OnSendMessage(ChatMessage msg)
     {
         lastMsgSent = msg;
     }
@@ -33,7 +33,7 @@ public class ChatHUDShould : TestsBase
     public void SubmitMessageProperly()
     {
         controller.view.inputField.onSubmit.Invoke("test message");
-        Assert.AreEqual("test message", lastMsgSent);
+        Assert.AreEqual("test message", lastMsgSent.body);
     }
 
     [Test]
@@ -52,7 +52,7 @@ public class ChatHUDShould : TestsBase
         }
 
         Assert.AreEqual(ChatHUDController.MAX_CHAT_ENTRIES, controller.view.entries.Count);
-        Assert.AreEqual("test5", controller.view.entries[0].message.bodyText);
+        Assert.AreEqual("test5", controller.view.entries[0].model.bodyText);
     }
 
     [Test]
@@ -68,11 +68,25 @@ public class ChatHUDShould : TestsBase
         controller.AddChatMessage(msg);
 
         Assert.AreEqual(1, controller.view.entries.Count);
-        Assert.AreEqual(msg, controller.view.entries[0].message);
+        Assert.AreEqual(msg, controller.view.entries[0].model);
 
         controller.view.CleanAllEntries();
 
         Assert.AreEqual(0, controller.view.entries.Count);
 
+    }
+
+    [Test]
+    public void CancelMessageSubmitionByEscapeKey()
+    {
+        string testMessage = "test message";
+
+        controller.view.FocusInputField();
+        controller.view.inputField.text = testMessage;
+        controller.view.inputField.ProcessEvent(new UnityEngine.Event { keyCode = UnityEngine.KeyCode.Escape });
+        controller.view.inputField.onSubmit.Invoke(testMessage);
+
+        Assert.AreEqual("", lastMsgSent.body);
+        Assert.AreEqual(testMessage, controller.view.inputField.text);
     }
 }

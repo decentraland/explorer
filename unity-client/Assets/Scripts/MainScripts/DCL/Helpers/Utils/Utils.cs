@@ -6,6 +6,7 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.EventSystems;
 using UnityEngine.Networking;
+using UnityEngine.UI;
 
 namespace DCL.Helpers
 {
@@ -105,10 +106,45 @@ namespace DCL.Helpers
             t.ForceUpdateRectTransforms();
         }
 
+        public static void ForceUpdateLayout(this RectTransform rt, bool delayed = true)
+        {
+            if (!rt.gameObject.activeInHierarchy)
+                return;
+
+            if (delayed)
+                CoroutineStarter.Start(ForceUpdateLayoutRoutine(rt));
+            else
+            {
+                Utils.InverseTransformChildTraversal<RectTransform>(
+                (x) =>
+                {
+                    LayoutRebuilder.ForceRebuildLayoutImmediate(x);
+                },
+                rt);
+
+                LayoutRebuilder.ForceRebuildLayoutImmediate(rt);
+            }
+        }
+
+        private static IEnumerator ForceUpdateLayoutRoutine(RectTransform rt)
+        {
+            yield return null;
+
+            Utils.InverseTransformChildTraversal<RectTransform>(
+            (x) =>
+            {
+                LayoutRebuilder.ForceRebuildLayoutImmediate(x);
+            },
+            rt);
+
+            LayoutRebuilder.ForceRebuildLayoutImmediate(rt);
+        }
+
+
         public static void InverseTransformChildTraversal<TComponent>(Action<TComponent> action, Transform startTransform)
             where TComponent : Component
         {
-            Assert.IsTrue(startTransform != null, "startTransform must not be null");
+            if (startTransform == null) return;
 
             foreach (Transform t in startTransform)
             {
@@ -160,7 +196,7 @@ namespace DCL.Helpers
             return request != null && !request.isNetworkError && !request.isHttpError;
         }
 
-        static IEnumerator FetchAsset(string url, UnityWebRequest request,
+        public static IEnumerator FetchAsset(string url, UnityWebRequest request,
             System.Action<UnityWebRequest> OnSuccess = null, System.Action<string> OnFail = null)
         {
             if (!string.IsNullOrEmpty(url))
@@ -242,6 +278,23 @@ namespace DCL.Helpers
                 };
 
             yield return FetchAsset(textureURL, UnityWebRequestTexture.GetTexture(textureURL), OnSuccessInternal);
+        }
+
+        public static IEnumerator FetchWrappedTextureAsset(string url, Action<IWrappedTextureAsset> OnSuccess)
+        {
+            string contentType = null;
+            byte[] bytes = null;
+
+            yield return Utils.FetchAsset(url, UnityWebRequest.Get(url), (request) =>
+            {
+                contentType = request.GetResponseHeader("Content-Type");
+                bytes = request.downloadHandler.data;
+            });
+
+            if (contentType != null && bytes != null)
+            {
+                yield return WrappedTextureAssetFactory.Create(contentType, bytes, OnSuccess);
+            }
         }
 
         public static AudioType GetAudioTypeFromUrlName(string url)
@@ -429,6 +482,8 @@ namespace DCL.Helpers
 
         public static void LockCursor()
         {
+            if (isCursorLocked) return;
+
             isCursorLocked = true;
             lockedInFrame = Time.frameCount;
             Cursor.visible = false;
@@ -439,9 +494,13 @@ namespace DCL.Helpers
 
         public static void UnlockCursor()
         {
+            if (!isCursorLocked) return;
+
             isCursorLocked = false;
             Cursor.visible = true;
             Cursor.lockState = CursorLockMode.None;
+
+            EventSystem.current.SetSelectedGameObject(null);
         }
 
         public static void DestroyAllChild(this Transform transform)
@@ -494,5 +553,17 @@ namespace DCL.Helpers
             Debug.DrawLine(bl2, br2, color, duration);
             Debug.DrawLine(tr2, br2, color, duration);
         }
+
+        public static string ToUpperFirst(this string value)
+        {
+            if (!string.IsNullOrEmpty(value))
+            {
+                var capital = char.ToUpper(value[0]);
+                value = capital + value.Substring(1);
+            }
+
+            return value;
+        }
+
     }
 }

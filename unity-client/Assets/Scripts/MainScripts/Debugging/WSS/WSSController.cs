@@ -103,28 +103,26 @@ namespace DCL
         [System.NonSerialized]
         public static Queue<DCLWebSocketService.Message> queuedMessages = new Queue<DCLWebSocketService.Message>();
 
-        [System.NonSerialized]
-        public static volatile bool queuedMessagesDirty;
+        [System.NonSerialized] public static volatile bool queuedMessagesDirty;
 
-        public bool isServerReady { get { return ws.IsListening; } }
+        public bool isServerReady
+        {
+            get { return ws.IsListening; }
+        }
 
         public bool openBrowserWhenStart;
 
-        [Header("Kernel General Settings")]
-        public bool useCustomContentServer = false;
+        [Header("Kernel General Settings")] public bool useCustomContentServer = false;
         public string customContentServerUrl = "http://localhost:1338/";
 
-        [Space(10)]
-        public BaseUrl baseUrlMode;
+        [Space(10)] public BaseUrl baseUrlMode;
         public string baseUrlCustom;
 
-        [Space(10)]
-        public Environment environment;
+        [Space(10)] public Environment environment;
 
         public Vector2 startInCoords = new Vector2(-99, 109);
 
-        [Header("Kernel Misc Settings")]
-        public bool forceLocalComms = true;
+        [Header("Kernel Misc Settings")] public bool forceLocalComms = true;
         public bool allWearables = false;
         public bool testWearables = false;
         public bool enableTutorial = false;
@@ -303,8 +301,8 @@ namespace DCL
                             case "ActivateRendering":
                                 renderingController.ActivateRendering();
                                 break;
-                            case "ShowNotification":
-                                HUDController.i.ShowNotificationFromJson(msg.payload);
+                            case "ShowNotificationFromJson":
+                                NotificationsController.i.ShowNotificationFromJson(msg.payload);
                                 break;
                             case "BuilderReady":
                                 sceneController.BuilderReady();
@@ -378,6 +376,18 @@ namespace DCL
                             case "ConfigureHUDElement":
                                 HUDController.i?.ConfigureHUDElement(msg.payload);
                                 break;
+                            case "InitializeFriends":
+                                FriendsController.i?.InitializeFriends(msg.payload);
+                                break;
+                            case "UpdateFriendshipStatus":
+                                FriendsController.i?.UpdateFriendshipStatus(msg.payload);
+                                break;
+                            case "UpdateUserPresence":
+                                FriendsController.i?.UpdateUserPresence(msg.payload);
+                                break;
+                            case "FriendNotFound":
+                                FriendsController.i?.FriendNotFound(msg.payload);
+                                break;
                             case "AddMessageToChatWindow":
                                 ChatController.i?.AddMessageToChatWindow(msg.payload);
                                 break;
@@ -394,13 +404,15 @@ namespace DCL
                                 HUDController.i.AirdroppingRequest(msg.payload);
                                 break;
                             case "ShowWelcomeNotification":
-                                HUDController.i.ShowWelcomeNotification();
+                                NotificationsController.i.ShowWelcomeNotification();
                                 break;
                             case "ShowTermsOfServices":
                                 HUDController.i.ShowTermsOfServices(msg.payload);
                                 break;
                             default:
-                                Debug.Log("<b><color=#FF0000>WSSController:</color></b> received an unknown message from kernel to renderer: " + msg.type);
+                                Debug.Log(
+                                    "<b><color=#FF0000>WSSController:</color></b> received an unknown message from kernel to renderer: " +
+                                    msg.type);
                                 break;
                         }
                     }
@@ -416,6 +428,7 @@ namespace DCL
             {
                 builderBridge = FindObjectOfType<Builder.DCLBuilderBridge>();
             }
+
             return builderBridge;
         }
     }

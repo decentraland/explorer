@@ -12,7 +12,8 @@ import {
   ComponentDisposedPayload,
   ComponentUpdatedPayload,
   QueryPayload,
-  LoadableParcelScene
+  LoadableParcelScene,
+  OpenNFTDialogPayload
 } from 'shared/types'
 import { DecentralandInterface, IEvents } from 'decentraland-ecs/src/decentraland/Types'
 import { defaultLogger } from 'shared/logger'
@@ -86,6 +87,8 @@ export default class GamekitScene extends Script {
 
   scenePosition: Vector2 = new Vector2()
   parcels: Array<{ x: number; y: number }> = []
+
+  private allowOpenExternalUrl: boolean = false
 
   constructor(transport: ScriptingTransport, opt?: ILogOpts) {
     super(transport, opt)
@@ -175,12 +178,16 @@ export default class GamekitScene extends Script {
 
   fireEvent(event: any) {
     try {
+      if (this.isPointerEvent(event)) {
+        this.allowOpenExternalUrl = true
+      }
       for (let trigger of this.onEventFunctions) {
         trigger(event)
       }
     } catch (e) {
       this.onError(e)
     }
+    this.allowOpenExternalUrl = false
   }
 
   calculateSceneCenter(parcels: Array<{ x: number; y: number }>): Vector2 {
@@ -217,6 +224,34 @@ export default class GamekitScene extends Script {
         log(...args) {
           // tslint:disable-next-line:no-console
           that.onLog(...args)
+        },
+
+        openExternalUrl(url: string) {
+          if (that.allowOpenExternalUrl) {
+            that.events.push({
+              type: 'OpenExternalUrl',
+              tag: '',
+              payload: url
+            })
+          } else {
+            this.error('openExternalUrl can only be used inside a pointerEvent')
+          }
+        },
+
+        openNFTDialog(assetContractAddress: string, tokenId: string, comment: string | null) {
+          if (that.allowOpenExternalUrl) {
+            that.events.push({
+              type: 'OpenNFTDialog',
+              tag: '',
+              payload: {
+                assetContractAddress,
+                tokenId,
+                comment
+              } as OpenNFTDialogPayload
+            })
+          } else {
+            this.error('openNFTDialog can only be used inside a pointerEvent')
+          }
         },
 
         addEntity(entityId: string) {
@@ -582,5 +617,13 @@ export default class GamekitScene extends Script {
     }
 
     return data
+  }
+
+  private isPointerEvent(event: any): boolean {
+    switch (event.type) {
+      case 'uuidEvent':
+        return event.data.payload.buttonId !== undefined
+    }
+    return false
   }
 }

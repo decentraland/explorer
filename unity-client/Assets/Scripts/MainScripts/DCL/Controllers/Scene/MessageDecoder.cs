@@ -71,6 +71,12 @@ namespace DCL
                 case PB_SendSceneMessage.PayloadOneofCase.Query:
                     message = MessagingTypes.QUERY;
                     break;
+                case PB_SendSceneMessage.PayloadOneofCase.OpenExternalUrl:
+                    message = MessagingTypes.OPEN_EXTERNAL_URL;
+                    break;
+                case PB_SendSceneMessage.PayloadOneofCase.OpenNFTDialog:
+                    message = MessagingTypes.OPEN_NFT_DIALOG;
+                    break;
                 default:
                     Debug.Log("Error: " + payload);
                     break;

@@ -1,33 +1,63 @@
 using DCL.SettingsHUD;
-using System;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class HUDController : MonoBehaviour
 {
+    private const string TOGGLE_UI_VISIBILITY_ASSET_NAME = "ToggleUIVisibility";
+
     static bool VERBOSE = false;
-    const int NOTIFICATION_DURATION = 5;
 
     public static HUDController i { get; private set; }
+
+    private InputAction_Trigger toggleUIVisibilityTrigger;
 
     private void Awake()
     {
         i = this;
+
+        toggleUIVisibilityTrigger = Resources.Load<InputAction_Trigger>(TOGGLE_UI_VISIBILITY_ASSET_NAME);
+        toggleUIVisibilityTrigger.OnTriggered += ToggleUIVisibility_OnTriggered;
     }
 
     public AvatarHUDController avatarHud => GetHUDElement(HUDElementID.AVATAR) as AvatarHUDController;
-    public NotificationHUDController notificationHud => GetHUDElement(HUDElementID.NOTIFICATION) as NotificationHUDController;
+
+    public NotificationHUDController notificationHud =>
+        GetHUDElement(HUDElementID.NOTIFICATION) as NotificationHUDController;
+
     public MinimapHUDController minimapHud => GetHUDElement(HUDElementID.MINIMAP) as MinimapHUDController;
-    public AvatarEditorHUDController avatarEditorHud => GetHUDElement(HUDElementID.AVATAR_EDITOR) as AvatarEditorHUDController;
+
+    public AvatarEditorHUDController avatarEditorHud =>
+        GetHUDElement(HUDElementID.AVATAR_EDITOR) as AvatarEditorHUDController;
+
     public SettingsHUDController settingsHud => GetHUDElement(HUDElementID.SETTINGS) as SettingsHUDController;
-    public ExpressionsHUDController expressionsHud => GetHUDElement(HUDElementID.EXPRESSIONS) as ExpressionsHUDController;
-    public PlayerInfoCardHUDController playerInfoCardHud => GetHUDElement(HUDElementID.PLAYER_INFO_CARD) as PlayerInfoCardHUDController;
-    public WelcomeHUDController messageOfTheDayHud => GetHUDElement(HUDElementID.MESSAGE_OF_THE_DAY) as WelcomeHUDController;
-    public AirdroppingHUDController airdroppingHud => GetHUDElement(HUDElementID.AIRDROPPING) as AirdroppingHUDController;
-    public TermsOfServiceHUDController termsOfServiceHud => GetHUDElement(HUDElementID.TERMS_OF_SERVICE) as TermsOfServiceHUDController;
+
+    public ExpressionsHUDController expressionsHud =>
+        GetHUDElement(HUDElementID.EXPRESSIONS) as ExpressionsHUDController;
+
+    public PlayerInfoCardHUDController playerInfoCardHud =>
+        GetHUDElement(HUDElementID.PLAYER_INFO_CARD) as PlayerInfoCardHUDController;
+
+    public WelcomeHUDController messageOfTheDayHud =>
+        GetHUDElement(HUDElementID.MESSAGE_OF_THE_DAY) as WelcomeHUDController;
+
+    public AirdroppingHUDController airdroppingHud =>
+        GetHUDElement(HUDElementID.AIRDROPPING) as AirdroppingHUDController;
+
+    public TermsOfServiceHUDController termsOfServiceHud =>
+        GetHUDElement(HUDElementID.TERMS_OF_SERVICE) as TermsOfServiceHUDController;
+
     public TaskbarHUDController taskbarHud => GetHUDElement(HUDElementID.TASKBAR) as TaskbarHUDController;
-    public WorldChatWindowHUDController worldChatWindowHud => GetHUDElement(HUDElementID.WORLD_CHAT_WINDOW) as WorldChatWindowHUDController;
+
+    public WorldChatWindowHUDController worldChatWindowHud =>
+        GetHUDElement(HUDElementID.WORLD_CHAT_WINDOW) as WorldChatWindowHUDController;
+
+    public PrivateChatWindowHUDController privateChatWindowHud =>
+        GetHUDElement(HUDElementID.PRIVATE_CHAT_WINDOW) as PrivateChatWindowHUDController;
+
+    public FriendsHUDController friendsHud => GetHUDElement(HUDElementID.FRIENDS) as FriendsHUDController;
 
     public Dictionary<HUDElementID, IHUD> hudElements { get; private set; } = new Dictionary<HUDElementID, IHUD>();
 
@@ -42,6 +72,19 @@ public class HUDController : MonoBehaviour
     private void ShowSettings()
     {
         settingsHud?.SetVisibility(true);
+    }
+
+    private void ToggleUIVisibility_OnTriggered(DCLAction_Trigger action)
+    {
+        bool anyInputFieldIsSelected = EventSystem.current != null &&
+            EventSystem.current.currentSelectedGameObject != null &&
+            EventSystem.current.currentSelectedGameObject.GetComponent<TMPro.TMP_InputField>() != null &&
+            (!worldChatWindowHud.view.chatHudView.inputField.isFocused || !worldChatWindowHud.view.isInPreview);
+
+        if (anyInputFieldIsSelected || settingsHud.view.isOpen || avatarEditorHud.view.isOpen || DCL.NavmapView.isOpen)
+            return;
+
+        CommonScriptableObjects.allUIHidden.Set(!CommonScriptableObjects.allUIHidden.Get());
     }
 
     private void OwnUserProfileUpdated(UserProfile profile)
@@ -64,7 +107,11 @@ public class HUDController : MonoBehaviour
         WORLD_CHAT_WINDOW = 10,
         TASKBAR = 11,
         MESSAGE_OF_THE_DAY = 12,
-        COUNT = 13
+        FRIENDS = 13,
+        OPEN_EXTERNAL_URL_PROMPT = 14,
+        PRIVATE_CHAT_WINDOW = 15,
+        NFT_INFO_DIALOG = 16,
+        COUNT = 17
     }
 
     [System.Serializable]
@@ -112,9 +159,11 @@ public class HUDController : MonoBehaviour
                     ownUserProfile.OnUpdate += OwnUserProfileUpdated;
                     OwnUserProfileUpdated(ownUserProfile);
                 }
+
                 break;
             case HUDElementID.NOTIFICATION:
                 CreateHudElement<NotificationHUDController>(configuration, hudElementId);
+                NotificationsController.i?.Initialize(notificationHud);
                 break;
             case HUDElementID.AVATAR_EDITOR:
                 CreateHudElement<AvatarEditorHUDController>(configuration, hudElementId);
@@ -136,33 +185,118 @@ public class HUDController : MonoBehaviour
                 CreateHudElement<TermsOfServiceHUDController>(configuration, hudElementId);
                 break;
             case HUDElementID.WORLD_CHAT_WINDOW:
-                CreateHudElement<WorldChatWindowHUDController>(configuration, hudElementId);
-                worldChatWindowHud?.Initialize(ChatController.i, DCL.InitialSceneReferences.i?.mouseCatcher);
-                ConfigureTaskbar();
+                if (worldChatWindowHud == null)
+                {
+                    CreateHudElement<WorldChatWindowHUDController>(configuration, hudElementId);
+
+                    if (worldChatWindowHud != null)
+                    {
+                        worldChatWindowHud.Initialize(ChatController.i, DCL.InitialSceneReferences.i?.mouseCatcher);
+                        worldChatWindowHud.OnPressPrivateMessage -= OpenPrivateChatWindow;
+                        worldChatWindowHud.OnPressPrivateMessage += OpenPrivateChatWindow;
+                        worldChatWindowHud.view.OnDeactivatePreview -= View_OnDeactivatePreview;
+                        worldChatWindowHud.view.OnDeactivatePreview += View_OnDeactivatePreview;
+
+                        taskbarHud?.AddWorldChatWindow(worldChatWindowHud);
+                    }
+                }
+                else
+                {
+                    UpdateHudElement<WorldChatWindowHUDController>(configuration, hudElementId);
+                }
 
                 break;
+            case HUDElementID.FRIENDS:
+                if (friendsHud == null)
+                {
+                    CreateHudElement<FriendsHUDController>(configuration, hudElementId);
+
+                    if (friendsHud != null)
+                    {
+                        friendsHud.Initialize(FriendsController.i, UserProfile.GetOwnUserProfile());
+                        friendsHud.OnPressWhisper -= OpenPrivateChatWindow;
+                        friendsHud.OnPressWhisper += OpenPrivateChatWindow;
+
+                        taskbarHud?.AddFriendsWindow(friendsHud);
+                    }
+                }
+                else
+                {
+                    UpdateHudElement<FriendsHUDController>(configuration, hudElementId);
+
+                    if (!configuration.active)
+                        taskbarHud?.DisableFriendsWindow();
+                }
+
+                if (privateChatWindowHud == null)
+                {
+                    CreateHudElement<PrivateChatWindowHUDController>(configuration, HUDElementID.PRIVATE_CHAT_WINDOW);
+
+                    if (privateChatWindowHud != null)
+                    {
+                        privateChatWindowHud.Initialize(ChatController.i);
+                        privateChatWindowHud.OnPressBack -= PrivateChatWindowHud_OnPressBack;
+                        privateChatWindowHud.OnPressBack += PrivateChatWindowHud_OnPressBack;
+
+                        taskbarHud?.AddPrivateChatWindow(privateChatWindowHud);
+                    }
+                }
+                break;
             case HUDElementID.TASKBAR:
-                CreateHudElement<TaskbarHUDController>(configuration, hudElementId);
-                ConfigureTaskbar();
+                if (taskbarHud == null)
+                {
+                    CreateHudElement<TaskbarHUDController>(configuration, hudElementId);
+
+                    if (taskbarHud != null)
+                    {
+                        taskbarHud.Initialize(DCL.InitialSceneReferences.i?.mouseCatcher, ChatController.i,
+                            FriendsController.i);
+                        taskbarHud.OnAnyTaskbarButtonClicked -= TaskbarHud_onAnyTaskbarButtonClicked;
+                        taskbarHud.OnAnyTaskbarButtonClicked += TaskbarHud_onAnyTaskbarButtonClicked;
+                    }
+                }
+                else
+                {
+                    UpdateHudElement<TaskbarHUDController>(configuration, hudElementId);
+                }
+
                 break;
             case HUDElementID.MESSAGE_OF_THE_DAY:
                 CreateHudElement<WelcomeHUDController>(configuration, hudElementId);
                 messageOfTheDayHud?.Initialize(ownUserProfile.hasConnectedWeb3);
                 break;
+            case HUDElementID.OPEN_EXTERNAL_URL_PROMPT:
+                CreateHudElement<ExternalUrlPromptHUDController>(configuration, hudElementId);
+                break;
+            case HUDElementID.NFT_INFO_DIALOG:
+                CreateHudElement<NFTPromptHUDController>(configuration, hudElementId);
+                break;
         }
 
-        GetHUDElement(hudElementId)?.SetVisibility(configuration.active && configuration.visible);
+        var hudElement = GetHUDElement(hudElementId);
+
+        if (hudElement != null)
+            hudElement.SetVisibility(configuration.active && configuration.visible);
     }
 
-    public void ConfigureTaskbar()
+    private void OpenPrivateChatWindow(string targetUserId)
     {
-        if (taskbarHud == null)
-            return;
+        taskbarHud?.OpenPrivateChatTo(targetUserId);
+    }
 
-        if (worldChatWindowHud == null)
-            return;
+    private void View_OnDeactivatePreview()
+    {
+        playerInfoCardHud?.CloseCard();
+    }
 
-        taskbarHud?.AddChatWindow(worldChatWindowHud);
+    private void PrivateChatWindowHud_OnPressBack()
+    {
+        taskbarHud?.OpenFriendsWindow();
+    }
+
+    private void TaskbarHud_onAnyTaskbarButtonClicked()
+    {
+        playerInfoCardHud?.CloseCard();
     }
 
     public void CreateHudElement<T>(HUDConfiguration config, HUDElementID id)
@@ -178,15 +312,16 @@ public class HUDController : MonoBehaviour
                 Debug.Log($"Adding {id} .. type {hudElements[id].GetType().Name}");
         }
     }
-    public void ShowNotificationFromJson(string notificationJson)
-    {
-        NotificationModel model = JsonUtility.FromJson<NotificationModel>(notificationJson);
-        ShowNotification(model);
-    }
 
-    public void ShowNotification(NotificationModel notification)
+    public void UpdateHudElement<T>(HUDConfiguration config, HUDElementID id)
+    where T : IHUD, new()
     {
-        notificationHud.ShowNotification(notification);
+        if (!hudElements.ContainsKey(id)) return;
+
+        if (VERBOSE)
+            Debug.Log($"Updating {id}, type {hudElements[id].GetType().Name}, active: {config.active} visible: {config.visible}");
+
+        hudElements[id].SetVisibility(config.visible);
     }
 
     public void ShowNewWearablesNotification(string wearableCountString)
@@ -200,28 +335,6 @@ public class HUDController : MonoBehaviour
     public void TriggerSelfUserExpression(string id)
     {
         expressionsHud?.ExpressionCalled(id);
-    }
-
-    public void ShowWelcomeNotification()
-    {
-        string notificationText = $"Welcome, {UserProfile.GetOwnUserProfile().userName}!";
-        Vector2Int currentCoords = CommonScriptableObjects.playerCoords.Get();
-        string parcelName = MinimapMetadata.GetMetadata().GetSceneInfo(currentCoords.x, currentCoords.y)?.name;
-
-        if (!string.IsNullOrEmpty(parcelName))
-        {
-            notificationText += $" You are in {parcelName} {currentCoords.x}, {currentCoords.y}";
-        }
-
-        NotificationModel model = new NotificationModel()
-        {
-            message = notificationText,
-            scene = "",
-            type = NotificationModel.NotificationType.GENERIC_WITHOUT_BUTTON,
-            timer = NOTIFICATION_DURATION
-        };
-
-        notificationHud.ShowNotification(model);
     }
 
     public void AirdroppingRequest(string payload)
@@ -248,6 +361,8 @@ public class HUDController : MonoBehaviour
 
     private void OnDestroy()
     {
+        toggleUIVisibilityTrigger.OnTriggered -= ToggleUIVisibility_OnTriggered;
+
         if (ownUserProfile != null)
             ownUserProfile.OnUpdate -= OwnUserProfileUpdated;
 
@@ -256,6 +371,21 @@ public class HUDController : MonoBehaviour
             avatarHud.OnEditAvatarPressed -= ShowAvatarEditor;
             avatarHud.OnSettingsPressed -= ShowSettings;
         }
+
+        if (worldChatWindowHud != null)
+        {
+            worldChatWindowHud.OnPressPrivateMessage -= OpenPrivateChatWindow;
+            worldChatWindowHud.view.OnDeactivatePreview -= View_OnDeactivatePreview;
+        }
+
+        if (privateChatWindowHud != null)
+            privateChatWindowHud.OnPressBack -= PrivateChatWindowHud_OnPressBack;
+
+        if (friendsHud != null)
+            friendsHud.OnPressWhisper -= OpenPrivateChatWindow;
+
+        if (taskbarHud != null)
+            taskbarHud.OnAnyTaskbarButtonClicked -= TaskbarHud_onAnyTaskbarButtonClicked;
 
         foreach (var kvp in hudElements)
         {
@@ -278,6 +408,7 @@ public class HUDController : MonoBehaviour
         var newModel = ownUserProfile.CloneModel();
         newModel.name = "FakePassport";
         newModel.description = "Fake Description for Testing";
+        newModel.userId = "test-id";
         newModel.inventory = new[]
         {
             "dcl://halloween_2019/machete_headband_top_head",
@@ -287,7 +418,7 @@ public class HUDController : MonoBehaviour
         };
 
         UserProfileController.i.AddUserProfileToCatalog(newModel);
-        Resources.Load<StringVariable>("CurrentPlayerInfoCardName").Set(newModel.name);
+        Resources.Load<StringVariable>("CurrentPlayerInfoCardId").Set(newModel.userId);
     }
 #endif
 }

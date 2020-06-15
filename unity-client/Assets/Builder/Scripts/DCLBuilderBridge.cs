@@ -316,6 +316,8 @@ namespace Builder
             cameraController = Object.FindObjectOfType<CameraController>();
             cursorController = Object.FindObjectOfType<CursorController>();
             mouseCatcher = InitialSceneReferences.i?.mouseCatcher;
+            var playerAvatarController = Object.FindObjectOfType<PlayerAvatarController>();
+
             if (mouseCatcher != null)
             {
                 mouseCatcher.enabled = false;
@@ -336,6 +338,12 @@ namespace Builder
             if (cursorController)
             {
                 cursorController.gameObject.SetActive(false);
+            }
+
+            // NOTE: no third person camera in builder yet, so avoid rendering being locked waiting for avatar.
+            if (playerAvatarController)
+            {
+                CommonScriptableObjects.rendererState.RemoveLock(playerAvatarController);
             }
 
             SceneController.i?.fpsPanel.SetActive(false);
@@ -592,9 +600,9 @@ namespace Builder
 
         private void SetupQualitySettings()
         {
-            DCL.SettingsHUD.QualitySettings settings = new DCL.SettingsHUD.QualitySettings()
+            DCL.SettingsData.QualitySettings settings = new DCL.SettingsData.QualitySettings()
             {
-                textureQuality = DCL.SettingsHUD.QualitySettings.TextureQuality.FullRes,
+                textureQuality = DCL.SettingsData.QualitySettings.TextureQuality.FullRes,
                 antiAliasing = UnityEngine.Rendering.LWRP.MsaaQuality._2x,
                 renderScale = 1,
                 shadows = true,

@@ -7,7 +7,7 @@ import { persistCurrentUser, sendPublicChatMessage } from 'shared/comms'
 import { AvatarMessageType } from 'shared/comms/interface/types'
 import { avatarMessageObservable, getUserProfile } from 'shared/comms/peers'
 import { providerFuture } from 'shared/ethereum/provider'
-import { getProfile } from 'shared/profiles/selectors'
+import { getProfile, hasConnectedWeb3 } from 'shared/profiles/selectors'
 import { TeleportController } from 'shared/world/TeleportController'
 import { reportScenesAroundParcel } from 'shared/atlas/actions'
 import { gridToWorld } from '../atomicHelpers/parcelScenePositions'
@@ -48,7 +48,9 @@ import {
   PB_SendSceneMessage,
   PB_SetEntityParent,
   PB_UpdateEntityComponent,
-  PB_Vector3
+  PB_Vector3,
+  PB_OpenExternalUrl,
+  PB_OpenNFTDialog
 } from '../shared/proto/engineinterface_pb'
 import { Session } from 'shared/session'
 import { getPerformanceInfo } from 'shared/session/getPerformanceInfo'
@@ -73,7 +75,13 @@ import {
   SetEntityParentPayload,
   UpdateEntityComponentPayload,
   ChatMessage,
-  HUDElementID
+  HUDElementID,
+  FriendsInitializationMessage,
+  FriendshipUpdateStatusMessage,
+  UpdateUserStatusMessage,
+  FriendshipAction,
+  WorldPosition,
+  OpenNFTDialogPayload
 } from 'shared/types'
 import { ParcelSceneAPI } from 'shared/world/ParcelSceneAPI'
 import {
@@ -90,7 +98,10 @@ import { worldRunningObservable } from 'shared/world/worldState'
 import { profileToRendererFormat } from 'shared/profiles/transformations/profileToRendererFormat'
 import { StoreContainer } from 'shared/store/rootTypes'
 import { ILandToLoadableParcelScene, ILandToLoadableParcelSceneUpdate } from 'shared/selectors'
-import { sendMessage } from 'shared/chat/actions'
+import { sendMessage, updateUserData, updateFriendship } from 'shared/chat/actions'
+import { ProfileAsPromise } from 'shared/profiles/ProfileAsPromise'
+import { changeRealm, catalystRealmConnected, candidatesFetched } from '../shared/dao/index'
+import { notifyStatusThroughChat } from 'shared/comms/chat'
 
 declare const globalThis: UnityInterfaceContainer &
   BrowserInterfaceContainer &
@@ -177,7 +188,8 @@ const browserInterface = {
   },
 
   OpenWebURL(data: { url: string }) {
-    window.open(data.url, '_blank')
+    const newWindow: any = window.open(data.url, '_blank', 'noopener,noreferrer')
+    if (newWindow != null) newWindow.opener = null
   },
 
   PerformanceReport(samples: string) {
@@ -340,17 +352,128 @@ const browserInterface = {
 
   SendChatMessage(data: { message: ChatMessage }) {
     globalThis.globalStore.dispatch(sendMessage(data.message))
+  },
+  async UpdateFriendshipStatus(message: FriendshipUpdateStatusMessage) {
+    let { userId, action } = message
+
+    // TODO - fix this hack: search should come from another message and method should only exec correct updates (userId, action) - moliva - 01/05/2020
+    let found = false
+    if (action === FriendshipAction.REQUESTED_TO) {
+      await ProfileAsPromise(userId) // ensure profile
+      found = hasConnectedWeb3(globalThis.globalStore.getState(), userId)
+    }
+
+    if (!found) {
+      // if user profile was not found on server -> no connected web3, check if it's a claimed name
+      const address = await fetchOwner(userId)
+      if (address) {
+        // if an address was found for the name -> set as user id & add that instead
+        userId = address
+        found = true
+      }
+    }
+
+    if (action === FriendshipAction.REQUESTED_TO && !found) {
+      // if we still haven't the user by now (meaning the user has never logged and doesn't have a profile in the dao, or the user id is for a non wallet user or name is not correct) -> fail
+      // tslint:disable-next-line
+      unityInterface.FriendNotFound(userId)
+      return
+    }
+
+    globalThis.globalStore.dispatch(updateUserData(userId.toLowerCase(), toSocialId(userId)))
+    globalThis.globalStore.dispatch(updateFriendship(action, userId.toLowerCase(), false))
+  },
+
+  async JumpIn(data: WorldPosition) {
+    const {
+      gridPosition: { x, y },
+      realm: { serverName, layer }
+    } = data
+
+    const realmString = serverName + '-' + layer
+
+    notifyStatusThroughChat(`Jumping to ${realmString} at ${x},${y}...`)
+
+    const future = candidatesFetched()
+    if (future.isPending) {
+      notifyStatusThroughChat(`Waiting while realms are initialized, this may take a while...`)
+    }
+
+    await future
+
+    const realm = changeRealm(realmString)
+
+    if (realm) {
+      catalystRealmConnected().then(
+        () => {
+          TeleportController.goTo(x, y, `Jumped to ${x},${y} in realm ${realmString}!`)
+        },
+        e => {
+          const cause = e === 'realm-full' ? ' The requested realm is full.' : ''
+          notifyStatusThroughChat('Could not join realm.' + cause)
+
+          defaultLogger.error('Error joining realm', e)
+        }
+      )
+    } else {
+      notifyStatusThroughChat(`Couldn't find realm ${realmString}`)
+    }
   }
 }
-globalThis.browserInterface = browserInterface
+globalThis.browserInterface2 = browserInterface
 type BrowserInterfaceContainer = {
-  browserInterface: typeof browserInterface
+  browserInterface2: typeof browserInterface
+}
+
+async function fetchOwner(name: string) {
+  const query = `
+    query GetOwner($name: String!) {
+      nfts(first: 1, where: { searchText: $name }) {
+        owner{
+          address
+        }
+      }
+    }`
+
+  const variables = { name: name.toLowerCase() }
+
+  try {
+    const resp = await queryGraph(query, variables)
+    return resp.data.nfts.length === 1 ? (resp.data.nfts[0].owner.address as string) : null
+  } catch (error) {
+    defaultLogger.error(`Error querying graph`, error)
+    throw error
+  }
+}
+
+async function queryGraph(query: string, variables: any) {
+  const url = 'https://api.thegraph.com/subgraphs/name/decentraland/marketplace'
+  const opts = {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query, variables })
+  }
+  const res = await fetch(url, opts)
+  return res.json()
+}
+
+function toSocialId(userId: string) {
+  const domain = globalThis.globalStore.getState().chat.privateMessaging.client?.getDomain()
+  return `@${userId.toLowerCase()}:${domain}`
 }
 
 export function setLoadingScreenVisible(shouldShow: boolean) {
   document.getElementById('overlay')!.style.display = shouldShow ? 'block' : 'none'
   document.getElementById('load-messages-wrapper')!.style.display = shouldShow ? 'block' : 'none'
   document.getElementById('progress-bar')!.style.display = shouldShow ? 'block' : 'none'
+  const loadingAudio = document.getElementById('loading-audio') as HTMLMediaElement
+
+  if (shouldShow) {
+    loadingAudio?.play().catch(e => {/*Ignored. If this fails is not critical*/})
+  } else {
+    loadingAudio?.pause()
+  }
+
   if (!shouldShow && !EDITOR) {
     isTheFirstLoading = false
     TeleportController.stopTeleportAnimation()
@@ -389,6 +512,7 @@ const CHUNK_SIZE = 100
 
 export const unityInterface = {
   debug: false,
+
   SendGenericMessage(object: string, method: string, payload: string) {
     gameInstance.SendMessage(object, method, payload)
   },
@@ -446,10 +570,6 @@ export const unityInterface = {
   SetEngineDebugPanel() {
     gameInstance.SendMessage('SceneController', 'SetEngineDebugPanel')
   },
-  // @internal
-  SendBuilderMessage(method: string, payload: string = '') {
-    gameInstance.SendMessage(`BuilderController`, method, payload)
-  },
   ActivateRendering() {
     gameInstance.SendMessage('SceneController', 'ActivateRendering')
   },
@@ -466,7 +586,7 @@ export const unityInterface = {
     gameInstance.SendMessage('SceneController', 'AddUserProfileToCatalog', JSON.stringify(peerProfile))
   },
   AddWearablesToCatalog(wearables: Wearable[]) {
-    for (let wearable of wearables) {
+    for (const wearable of wearables) {
       gameInstance.SendMessage('SceneController', 'AddWearableToCatalog', JSON.stringify(wearable))
     }
   },
@@ -514,11 +634,27 @@ export const unityInterface = {
   AddMessageToChatWindow(message: ChatMessage) {
     gameInstance.SendMessage('SceneController', 'AddMessageToChatWindow', JSON.stringify(message))
   },
+  InitializeFriends(initializationMessage: FriendsInitializationMessage) {
+    gameInstance.SendMessage('SceneController', 'InitializeFriends', JSON.stringify(initializationMessage))
+  },
+  UpdateFriendshipStatus(updateMessage: FriendshipUpdateStatusMessage) {
+    gameInstance.SendMessage('SceneController', 'UpdateFriendshipStatus', JSON.stringify(updateMessage))
+  },
+  UpdateUserPresence(status: UpdateUserStatusMessage) {
+    gameInstance.SendMessage('SceneController', 'UpdateUserPresence', JSON.stringify(status))
+  },
+  FriendNotFound(queryString: string) {
+    gameInstance.SendMessage('SceneController', 'FriendNotFound', JSON.stringify(queryString))
+  },
 
   // *********************************************************************************
   // ************** Builder messages **************
   // *********************************************************************************
 
+  // @internal
+  SendBuilderMessage(method: string, payload: string = '') {
+    gameInstance.SendMessage(`BuilderController`, method, payload)
+  },
   SelectGizmoBuilder(type: string) {
     this.SendBuilderMessage('SelectGizmo', type)
   },
@@ -594,6 +730,8 @@ const direction: PB_Vector3 = new PB_Vector3()
 const componentCreated: PB_ComponentCreated = new PB_ComponentCreated()
 const componentDisposed: PB_ComponentDisposed = new PB_ComponentDisposed()
 const componentUpdated: PB_ComponentUpdated = new PB_ComponentUpdated()
+const openExternalUrl: PB_OpenExternalUrl = new PB_OpenExternalUrl()
+const openNFTDialog: PB_OpenNFTDialog = new PB_OpenNFTDialog()
 
 class UnityScene<T> implements ParcelSceneAPI {
   eventDispatcher = new EventDispatcher()
@@ -675,6 +813,12 @@ class UnityScene<T> implements ParcelSceneAPI {
       case 'InitMessagesFinished':
         message.setScenestarted(new Empty()) // don't know if this is necessary
         break
+      case 'OpenExternalUrl':
+        message.setOpenexternalurl(this.encodeOpenExternalUrl(payload))
+        break
+      case 'OpenNFTDialog':
+        message.setOpennftdialog(this.encodeOpenNFTDialog(payload))
+        break
     }
 
     let arrayBuffer: Uint8Array = message.serializeBinary()
@@ -753,6 +897,18 @@ class UnityScene<T> implements ParcelSceneAPI {
     componentUpdated.setId(componentUpdatedPayload.id)
     componentUpdated.setJson(componentUpdatedPayload.json)
     return componentUpdated
+  }
+
+  encodeOpenExternalUrl(url: any): PB_OpenExternalUrl {
+    openExternalUrl.setUrl(url)
+    return openExternalUrl
+  }
+
+  encodeOpenNFTDialog(nftDialogPayload: OpenNFTDialogPayload): PB_OpenNFTDialog {
+    openNFTDialog.setAssetcontractaddress(nftDialogPayload.assetContractAddress)
+    openNFTDialog.setTokenid(nftDialogPayload.tokenId)
+    openNFTDialog.setComment(nftDialogPayload.comment ? nftDialogPayload.comment : '')
+    return openNFTDialog
   }
 }
 
@@ -979,8 +1135,7 @@ export function updateBuilderScene(sceneData: ILand) {
 teleportObservable.add((position: { x: number; y: number; text?: string }) => {
   // before setting the new position, show loading screen to avoid showing an empty world
   setLoadingScreenVisible(true)
-  const globalStore = globalThis.globalStore
-  globalStore.dispatch(teleportTriggered(position.text || `Teleporting to ${position.x}, ${position.y}`))
+  globalThis.globalStore.dispatch(teleportTriggered(position.text || `Teleporting to ${position.x}, ${position.y}`))
 })
 
 worldRunningObservable.add(isRunning => {

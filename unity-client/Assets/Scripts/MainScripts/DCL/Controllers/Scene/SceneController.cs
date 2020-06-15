@@ -91,6 +91,10 @@ namespace DCL
         private int lastSortFrame = 0;
 
         public event Action OnSortScenes;
+        public event Action<ParcelScene, string> OnOpenExternalUrlRequest;
+
+        public delegate void OnOpenNFTDialogDelegate(string assetContractAddress, string tokenId, string comment);
+        public event OnOpenNFTDialogDelegate OnOpenNFTDialogRequest;
 
         private Vector2Int currentGridSceneCoordinate = new Vector2Int(EnvironmentSettings.MORDOR_SCALAR, EnvironmentSettings.MORDOR_SCALAR);
         private Vector2Int sortAuxiliaryVector = new Vector2Int(EnvironmentSettings.MORDOR_SCALAR, EnvironmentSettings.MORDOR_SCALAR);
@@ -231,7 +235,7 @@ namespace DCL
 
         private void OnRenderingStateChange(bool enabled, bool prevState)
         {
-            if (!enabled)
+            if (!enabled && !string.IsNullOrEmpty(currentSceneId))
             {
                 CommonScriptableObjects.rendererState.AddLock(this);
             }
@@ -707,6 +711,12 @@ namespace DCL
                         break;
                     case MessagingTypes.QUERY:
                         ParseQuery(payload.Query.QueryId, payload.Query.Payload, scene.sceneData.id);
+                        break;
+                    case MessagingTypes.OPEN_EXTERNAL_URL:
+                        OnOpenExternalUrlRequest?.Invoke(scene, payload.OpenExternalUrl.Url);
+                        break;
+                    case MessagingTypes.OPEN_NFT_DIALOG:
+                        OnOpenNFTDialogRequest?.Invoke(payload.OpenNFTDialog.AssetContractAddress, payload.OpenNFTDialog.TokenId, payload.OpenNFTDialog.Comment);
                         break;
                     default:
                         Debug.LogError($"Unknown method {method}");

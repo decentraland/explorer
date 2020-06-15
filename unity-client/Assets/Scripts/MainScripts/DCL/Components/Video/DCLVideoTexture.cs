@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using DCL.Controllers;
 using DCL.Models;
@@ -22,6 +21,9 @@ namespace DCL.Components
             public string videoClipId;
             public bool playing = false;
             public float volume = 1f;
+            public float playbackRate = 1f;
+            public bool loop = false;
+            public float seek = -1;
             public BabylonWrapMode wrap = BabylonWrapMode.CLAMP;
             public FilterMode samplingMode = FilterMode.Bilinear;
         }
@@ -69,10 +71,11 @@ namespace DCL.Components
                     Debug.LogError("Wrong video clip type when playing VideoTexture!!");
                     yield break;
                 }
-                texturePlayer = new WebVideoPlayer(id, dclVideoClip.model.url);
+                texturePlayer = new WebVideoPlayer(id, dclVideoClip.GetUrl(), dclVideoClip.isStream);
                 texturePlayerUpdateRoutine = CoroutineStarter.Start(VideoTextureUpdate());
                 CommonScriptableObjects.playerCoords.OnChange += OnPlayerCoordsChanged;
                 scene.OnEntityRemoved += OnEntityRemoved;
+                Settings.i.OnGeneralSettingsChanged += OnSettingsChanged;
             }
 
             // NOTE: create texture for testing cause real texture will only be created on web platform
@@ -88,6 +91,16 @@ namespace DCL.Components
                 {
                     yield return null;
                 }
+
+                if (texturePlayer.isError)
+                {
+                    if (texturePlayerUpdateRoutine != null)
+                    {
+                        CoroutineStarter.Stop(texturePlayerUpdateRoutine);
+                        texturePlayerUpdateRoutine = null;
+                    }
+                    yield break;
+                }
                 texture = texturePlayer.texture;
                 isPlayStateDirty = true;
             }
@@ -100,8 +113,16 @@ namespace DCL.Components
                 if (baseVolume != model.volume)
                 {
                     baseVolume = model.volume;
-                    texturePlayer.SetVolume(baseVolume * distanceVolumeModifier);
+                    UpdateVolume();
                 }
+
+                if (model.seek >= 0)
+                {
+                    texturePlayer.SetTime(model.seek);
+                    model.seek = -1;
+                }
+                texturePlayer.SetPlaybackRate(model.playbackRate);
+                texturePlayer.SetLoop(model.loop);
             }
         }
 
@@ -162,7 +183,7 @@ namespace DCL.Components
 
             if (isVisible)
             {
-                const float maxDistanceBlockForSound = 2;
+                const float maxDistanceBlockForSound = 6;
                 float sqrParcelDistance = DCL.Configuration.ParcelSettings.PARCEL_SIZE * DCL.Configuration.ParcelSettings.PARCEL_SIZE * 2.25f;
                 distanceVolumeModifier = 1 - Mathf.Clamp01(Mathf.FloorToInt(minDistance / sqrParcelDistance) / maxDistanceBlockForSound);
             }
@@ -179,7 +200,7 @@ namespace DCL.Components
         {
             if (texturePlayer != null)
             {
-                texturePlayer.SetVolume(baseVolume * distanceVolumeModifier * AudioListener.volume);
+                texturePlayer.SetVolume(baseVolume * distanceVolumeModifier * Settings.i.generalSettings.sfxVolume);
             }
         }
 
@@ -271,8 +292,14 @@ namespace DCL.Components
             isPlayStateDirty = true;
         }
 
+        void OnSettingsChanged(SettingsData.GeneralSettings settings)
+        {
+            UpdateVolume();
+        }
+
         public override void Dispose()
         {
+            Settings.i.OnGeneralSettingsChanged -= OnSettingsChanged;
             CommonScriptableObjects.playerCoords.OnChange -= OnPlayerCoordsChanged;
             if (scene != null) scene.OnEntityRemoved -= OnEntityRemoved;
             if (texturePlayerUpdateRoutine != null)
