@@ -140,7 +140,7 @@ function overrideBaseUrl(wearable: Wearable) {
 }
 
 function overrideSwankyRarity(wearable: Wearable) {
-  if ((wearable.rarity as any) === 'swanky') {
+  if (wearable.rarity as any === 'swanky') {
     return {
       ...wearable,
       rarity: 'rare' as RarityEnum

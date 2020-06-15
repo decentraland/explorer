@@ -8,6 +8,7 @@ using UnityEngine.Events;
 public class WorldChatWindowHUDView : MonoBehaviour, IPointerClickHandler
 {
     const string VIEW_PATH = "World Chat Window";
+
     public Button closeButton;
 
     public ChatHUDView chatHudView;

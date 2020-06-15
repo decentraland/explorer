@@ -149,6 +149,7 @@ namespace DCL.Components.Video.Plugin
         {
             if (isError)
                 return;
+
             WebVideoPlayerVolume(videoPlayerId, volume);
             this.volume = volume;
         }

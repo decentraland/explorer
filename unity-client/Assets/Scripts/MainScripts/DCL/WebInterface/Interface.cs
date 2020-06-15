@@ -157,12 +157,6 @@ namespace DCL.Interface
             public ChatMessage message;
         }
 
-        [System.Serializable]
-        public class SendChatMessageEvent
-        {
-            public ChatMessage message;
-        }
-
 
         [System.Serializable]
         public class OnPointerEventPayload
@@ -822,6 +816,7 @@ namespace DCL.Interface
             onAudioStreamingEvent.volume = volume;
             SendMessage("SetAudioStream", onAudioStreamingEvent);
         }
+
         public static void GoTo(int x, int y)
         {
             gotoEvent.x = x;
