@@ -38,31 +38,31 @@ public class TeleportPromptHUDController : IHUD
 
     public void RequestTeleport(string teleportDataJson)
     {
-        if (!view.contentAnimator.isVisible)
+        if (view.contentAnimator.isVisible)
+            return;
+
+        Utils.UnlockCursor();
+
+        view.Reset();
+        SetVisibility(true);
+
+        teleportData = Utils.SafeFromJson<TeleportData>(teleportDataJson);
+
+        switch (teleportData.destination)
         {
-            Utils.UnlockCursor();
-
-            view.Reset();
-            SetVisibility(true);
-
-            teleportData = Utils.SafeFromJson<TeleportData>(teleportDataJson);
-
-            switch (teleportData.destination)
-            {
-                case TELEPORT_COMMAND_MAGIC:
-                    view.ShowTeleportToMagic();
-                    break;
-                case TELEPORT_COMMAND_CROWD:
-                    view.ShowTeleportToCrowd();
-                    break;
-                default:
-                    view.ShowTeleportToCoords(teleportData.destination,
-                        teleportData.sceneData.name,
-                        teleportData.sceneData.owner,
-                        teleportData.sceneData.previewImageUrl);
-                    SetSceneEvent();
-                    break;
-            }
+            case TELEPORT_COMMAND_MAGIC:
+                view.ShowTeleportToMagic();
+                break;
+            case TELEPORT_COMMAND_CROWD:
+                view.ShowTeleportToCrowd();
+                break;
+            default:
+                view.ShowTeleportToCoords(teleportData.destination,
+                    teleportData.sceneData.name,
+                    teleportData.sceneData.owner,
+                    teleportData.sceneData.previewImageUrl);
+                SetSceneEvent();
+                break;
         }
     }
 

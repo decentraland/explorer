@@ -91,23 +91,7 @@ public class TeleportPromptHUDView : MonoBehaviour
         textSceneName.text = sceneName;
         textSceneOwner.text = sceneCreator;
 
-        if (!string.IsNullOrEmpty(previewImageUrl))
-        {
-            spinnerImage.SetActive(true);
-            fetchParcelImageRoutine = StartCoroutine(Utils.FetchTexture(previewImageUrl, (texture) =>
-                {
-                    downloadedBanner = texture;
-                    imageSceneThumbnail.texture = texture;
-
-                    RectTransform rt = (RectTransform)imageSceneThumbnail.transform.parent;
-                    float h = rt.rect.height;
-                    float w = h * (texture.width / (float)texture.height);
-                    imageSceneThumbnail.rectTransform.sizeDelta = new Vector2(w, h);
-
-                    spinnerImage.SetActive(false);
-                    imageSceneThumbnail.gameObject.SetActive(true);
-                }));
-        }
+        FetchScenePreviewImage(previewImageUrl);
     }
 
     public void SetEventInfo(string eventName, string eventStatus, int attendeesCount)
@@ -130,6 +114,27 @@ public class TeleportPromptHUDView : MonoBehaviour
             UnityEngine.Object.Destroy(downloadedBanner);
             downloadedBanner = null;
         }
+    }
+
+    private void FetchScenePreviewImage(string previewImageUrl)
+    {
+        if (string.IsNullOrEmpty(previewImageUrl))
+            return;
+
+        spinnerImage.SetActive(true);
+        fetchParcelImageRoutine = StartCoroutine(Utils.FetchTexture(previewImageUrl, (texture) =>
+            {
+                downloadedBanner = texture;
+                imageSceneThumbnail.texture = texture;
+
+                RectTransform rt = (RectTransform)imageSceneThumbnail.transform.parent;
+                float h = rt.rect.height;
+                float w = h * (texture.width / (float)texture.height);
+                imageSceneThumbnail.rectTransform.sizeDelta = new Vector2(w, h);
+
+                spinnerImage.SetActive(false);
+                imageSceneThumbnail.gameObject.SetActive(true);
+            }));
     }
 
     private void OnClosePressed()
