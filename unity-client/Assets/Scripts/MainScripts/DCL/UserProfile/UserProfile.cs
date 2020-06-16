@@ -62,7 +62,6 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
 
         if (downloadAssets && model.snapshots != null)
         {
-            Debug.Log(string.Format("[SANTI LOG] GetThumbnail() - {0} - URL: {1} - TIME: {2}", model.name, model.snapshots.face, Time.realtimeSinceStartup));
             GetThumbnail(model.snapshots.face, OnFaceSnapshotReady);
         }
 
