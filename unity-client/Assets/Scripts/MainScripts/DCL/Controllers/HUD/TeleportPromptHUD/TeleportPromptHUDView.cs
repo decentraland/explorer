@@ -1,31 +1,13 @@
 ﻿using System;
-using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using UnityEngine.Networking;
 using DCL.Helpers;
-using System.Linq;
-using DCL.Interface;
-using System.Collections.Generic;
 
 public class TeleportPromptHUDView : MonoBehaviour
 {
-    const string MARKETPLACE_PARCEL_API = "https://api.decentraland.org/v1/parcels/{0}/{1}";
-    const string MARKETPLACE_MAP_API = "https://api.decentraland.org/v1/map.png?width=480&height=237&size=20&center={0}&selected={1}";
-    const string EVENTS_API = "https://events.decentraland.org/api/events";
-
-    const string EVENT_STRING_LIVE = "Current event";
-    const string EVENT_STRING_TODAY = "Today @ {0:HH:mm}";
-    const string SCENE_STRING_NO_OWNER = "Unknown";
-
-    const float SCENE_INFO_TIMEOUT = 3;
-
-    const string TELEPORT_COMMAND_MAGIC = "magic";
-    const string TELEPORT_COMMAND_CROWD = "crowd";
-    const string TELEPORT_COMMAND_COORDS = "coords";
-
     [SerializeField] internal GameObject content;
+    [SerializeField] internal ShowHideAnimator contentAnimator;
 
     [Header("Images")]
     [SerializeField] RawImage imageSceneThumbnail;
@@ -58,154 +40,21 @@ public class TeleportPromptHUDView : MonoBehaviour
     [SerializeField] GameObject spinnerGeneral;
     [SerializeField] GameObject spinnerImage;
 
-    Coroutine fetchParcelDataRoutine;
+    public event Action OnCloseEvent;
+    public event Action OnTeleportEvent;
+
     Coroutine fetchParcelImageRoutine;
-    Coroutine fetchEventsRoutine;
-
-    MinimapMetadata.MinimapSceneInfo currentSceneInfo;
-    Vector2Int currentCoords;
     Texture2D downloadedBanner;
-
-    string teleportTarget;
 
     private void Awake()
     {
-        closeButton.onClick.AddListener(Hide);
-        cancelButton.onClick.AddListener(Hide);
-        continueButton.onClick.AddListener(Teleport);
+        closeButton.onClick.AddListener(OnClosePressed);
+        cancelButton.onClick.AddListener(OnClosePressed);
+        continueButton.onClick.AddListener(OnTeleportPressed);
+        contentAnimator.OnWillFinishHide += (animator) => Hide();
     }
 
-    internal void Teleport(string teleportCommand)
-    {
-        Reset();
-        content.SetActive(true);
-
-        switch (teleportCommand)
-        {
-            case TELEPORT_COMMAND_MAGIC:
-                teleportTarget = teleportCommand;
-                TeleportToMagic();
-                break;
-            case TELEPORT_COMMAND_CROWD:
-                teleportTarget = teleportCommand;
-                TeleportToCrowd();
-                break;
-            default:
-                var coords = teleportCommand.Split(',')
-                        .Select(x => x.Trim())
-                        .Where(x => !string.IsNullOrWhiteSpace(x))
-                        .ToArray();
-                if (coords.Length == 2)
-                {
-                    int x, y;
-                    if (int.TryParse(coords[0], out x) && int.TryParse(coords[1], out y))
-                    {
-                        teleportTarget = TELEPORT_COMMAND_COORDS;
-                        TeleportToCoords(new Vector2Int(x, y));
-                        break;
-                    }
-                }
-                Debug.LogError($"Teleport error: {teleportCommand} is not a valid destination");
-                Hide();
-                break;
-        }
-    }
-    private void TeleportToMagic()
-    {
-        containerMagic.SetActive(true);
-        imageGotoMagic.gameObject.SetActive(true);
-        Utils.UnlockCursor();
-    }
-
-    private void TeleportToCrowd()
-    {
-        containerCrowd.SetActive(true);
-        imageGotoCrowd.gameObject.SetActive(true);
-        Utils.UnlockCursor();
-    }
-
-    private void TeleportToCoords(Vector2Int coords)
-    {
-        containerCoords.SetActive(true);
-        Utils.UnlockCursor();
-
-        currentCoords = coords;
-        textCoords.text = $"{coords.x}, {coords.y}";
-
-        spinnerGeneral.SetActive(true);
-        fetchParcelDataRoutine = StartCoroutine(FetchSceneInfo(coords, (info) =>
-        {
-            spinnerGeneral.SetActive(false);
-            spinnerImage.SetActive(true);
-
-            SetSceneInfo(info);
-
-            fetchParcelImageRoutine = StartCoroutine(FetchSceneThumbnail(coords, info, (texture) =>
-            {
-                downloadedBanner = texture;
-                imageSceneThumbnail.texture = texture;
-
-                RectTransform rt = (RectTransform)imageSceneThumbnail.transform.parent;
-                float h = rt.rect.height;
-                float w = h * (texture.width / (float)texture.height);
-                imageSceneThumbnail.rectTransform.sizeDelta = new Vector2(w, h);
-
-                spinnerImage.SetActive(false);
-                imageSceneThumbnail.gameObject.SetActive(true);
-            }));
-        }, Hide));
-
-        fetchEventsRoutine = StartCoroutine(FetchEventsData(coords, SetEventInfo));
-    }
-
-    internal void Hide()
-    {
-        content.SetActive(false);
-
-        MinimapMetadata.GetMetadata().OnSceneInfoUpdated -= OnMapMetadataInfoUpdated;
-
-        if (fetchParcelDataRoutine != null) StopCoroutine(fetchParcelDataRoutine);
-        if (fetchParcelImageRoutine != null) StopCoroutine(fetchParcelImageRoutine);
-        if (fetchEventsRoutine != null) StopCoroutine(fetchEventsRoutine);
-
-        fetchParcelDataRoutine = null;
-        fetchParcelImageRoutine = null;
-        fetchEventsRoutine = null;
-
-        if (downloadedBanner != null)
-        {
-            UnityEngine.Object.Destroy(downloadedBanner);
-            downloadedBanner = null;
-        }
-    }
-
-    private void Teleport()
-    {
-        switch (teleportTarget)
-        {
-            case TELEPORT_COMMAND_CROWD:
-                WebInterface.GoToCrowd();
-                break;
-            case TELEPORT_COMMAND_MAGIC:
-                WebInterface.GoToMagic();
-                break;
-            case TELEPORT_COMMAND_COORDS:
-                WebInterface.GoTo(currentCoords.x, currentCoords.y);
-                break;
-        }
-        Hide();
-    }
-
-    private void OnDestroy()
-    {
-        if (downloadedBanner != null)
-        {
-            UnityEngine.Object.Destroy(downloadedBanner);
-            downloadedBanner = null;
-        }
-    }
-
-    private void Reset()
+    public void Reset()
     {
         containerCoords.SetActive(false);
         containerCrowd.SetActive(false);
@@ -221,202 +70,86 @@ public class TeleportPromptHUDView : MonoBehaviour
         spinnerGeneral.SetActive(false);
     }
 
-    private void SetSceneInfo(SceneInfo info)
+    public void ShowTeleportToMagic()
     {
+        containerMagic.SetActive(true);
+        imageGotoMagic.gameObject.SetActive(true);
+    }
+
+    public void ShowTeleportToCrowd()
+    {
+        containerCrowd.SetActive(true);
+        imageGotoCrowd.gameObject.SetActive(true);
+    }
+
+    public void ShowTeleportToCoords(string coords, string sceneName, string sceneCreator, string previewImageUrl)
+    {
+        containerCoords.SetActive(true);
         containerScene.SetActive(true);
-        textSceneName.text = !string.IsNullOrEmpty(info.sceneName) ? info.sceneName : ToString(currentCoords);
-        textSceneOwner.text = !string.IsNullOrEmpty(info.sceneOwner) ? info.sceneOwner : SCENE_STRING_NO_OWNER;
-    }
 
-    private void SetEventInfo(EventInfo eventInfo)
-    {
-        if (eventInfo.isNow || eventInfo.startsToday)
+        textCoords.text = coords;
+        textSceneName.text = sceneName;
+        textSceneOwner.text = sceneCreator;
+
+        if (!string.IsNullOrEmpty(previewImageUrl))
         {
-            containerEvent.SetActive(true);
-            if (eventInfo.isNow) textEventInfo.text = EVENT_STRING_LIVE;
-            else if (eventInfo.startsToday) textEventInfo.text = string.Format(EVENT_STRING_TODAY, eventInfo.startingDate);
-            textEventName.text = eventInfo.name;
-            textEventAttendees.text = string.Format("+{0}", eventInfo.attendeesCount);
-        }
-    }
-
-    IEnumerator FetchSceneInfo(Vector2Int coords, Action<SceneInfo> onResponse, Action onError)
-    {
-        currentSceneInfo = MinimapMetadata.GetMetadata().GetSceneInfo(coords.x, coords.y);
-
-        if (currentSceneInfo == null)
-        {
-            MinimapMetadata.GetMetadata().OnSceneInfoUpdated += OnMapMetadataInfoUpdated;
-            WebInterface.RequestScenesInfoAroundParcel(new Vector2(coords.x, coords.y), 1);
-
-            float timeOut = Time.unscaledTime + SCENE_INFO_TIMEOUT;
-
-            while (currentSceneInfo == null && Time.unscaledTime < timeOut)
-            {
-                yield return null;
-            }
-
-            MinimapMetadata.GetMetadata().OnSceneInfoUpdated -= OnMapMetadataInfoUpdated;
-        }
-
-        if (currentSceneInfo == null)
-        {
-            yield return FetchSceneInfoFallbackMarketPlace(coords);
-        }
-
-        if (currentSceneInfo == null)
-        {
-            onError?.Invoke();
-            yield break;
-        }
-
-        onResponse?.Invoke(new SceneInfo()
-        {
-            sceneName = currentSceneInfo.name,
-            sceneOwner = currentSceneInfo.owner,
-            sceneDescription = currentSceneInfo.description,
-            thumbnailUrl = currentSceneInfo.previewImageUrl,
-            parcels = currentSceneInfo.parcels
-        });
-    }
-
-    IEnumerator FetchSceneInfoFallbackMarketPlace(Vector2Int coords)
-    {
-        string url = string.Format(MARKETPLACE_PARCEL_API, coords.x, coords.y);
-        using (UnityWebRequest request = UnityWebRequest.Get(url))
-        {
-            yield return request.SendWebRequest();
-
-            if (!request.isNetworkError && !request.isHttpError)
-            {
-                ParcelResponse response = Utils.FromJsonWithNulls<ParcelResponse>(request.downloadHandler.text);
-
-                currentSceneInfo = new MinimapMetadata.MinimapSceneInfo()
+            spinnerImage.SetActive(true);
+            fetchParcelImageRoutine = StartCoroutine(Utils.FetchTexture(previewImageUrl, (texture) =>
                 {
-                    name = response.data.data.name,
-                    description = response.data.data.description,
-                    owner = SCENE_STRING_NO_OWNER,
-                    parcels = new List<Vector2Int>() { coords }
-                };
-            }
+                    downloadedBanner = texture;
+                    imageSceneThumbnail.texture = texture;
+
+                    RectTransform rt = (RectTransform)imageSceneThumbnail.transform.parent;
+                    float h = rt.rect.height;
+                    float w = h * (texture.width / (float)texture.height);
+                    imageSceneThumbnail.rectTransform.sizeDelta = new Vector2(w, h);
+
+                    spinnerImage.SetActive(false);
+                    imageSceneThumbnail.gameObject.SetActive(true);
+                }));
         }
     }
 
-    IEnumerator FetchSceneThumbnail(Vector2Int center, SceneInfo sceneInfo, Action<Texture2D> onResponse)
+    public void SetEventInfo(string eventName, string eventStatus, int attendeesCount)
     {
-        string url = sceneInfo.thumbnailUrl;
-        if (string.IsNullOrEmpty(url))
+        containerEvent.SetActive(true);
+        textEventInfo.text = eventStatus;
+        textEventName.text = eventName;
+        textEventAttendees.text = string.Format("+{0}", attendeesCount);
+    }
+
+    private void Hide()
+    {
+        content.SetActive(false);
+
+        if (fetchParcelImageRoutine != null) StopCoroutine(fetchParcelImageRoutine);
+        fetchParcelImageRoutine = null;
+
+        if (downloadedBanner != null)
         {
-            string parcels = string.Join(";", sceneInfo.parcels.Select(x => ToString(x)).ToArray());
-            url = string.Format(MARKETPLACE_MAP_API, ToString(center), parcels);
-
+            UnityEngine.Object.Destroy(downloadedBanner);
+            downloadedBanner = null;
         }
-        yield return Utils.FetchTexture(url, onResponse);
     }
 
-    IEnumerator FetchEventsData(Vector2Int coords, Action<EventInfo> onResponse)
+    private void OnClosePressed()
     {
-        using (UnityWebRequest request = UnityWebRequest.Get(EVENTS_API))
+        OnCloseEvent?.Invoke();
+        contentAnimator.Hide(true);
+    }
+
+    private void OnTeleportPressed()
+    {
+        OnTeleportEvent?.Invoke();
+        contentAnimator.Hide(true);
+    }
+
+    private void OnDestroy()
+    {
+        if (downloadedBanner != null)
         {
-            yield return request.SendWebRequest();
-
-            if (!request.isNetworkError && !request.isHttpError)
-            {
-                EventResponse response = Utils.FromJsonWithNulls<EventResponse>(request.downloadHandler.text);
-                DateTime dateNow = DateTime.Now;
-
-                for (int i = 0; i < response.data.Length; i++)
-                {
-                    EventData eventData = response.data[i];
-                    if (eventData.coordinates[0] == coords.x && eventData.coordinates[1] == coords.y)
-                    {
-                        DateTime eventStart;
-                        DateTime eventEnd;
-                        if (DateTime.TryParse(eventData.start_at, out eventStart) && DateTime.TryParse(eventData.finish_at, out eventEnd))
-                        {
-                            onResponse?.Invoke(new EventInfo()
-                            {
-                                startsToday = eventStart.Date == dateNow.Date,
-                                isNow = eventStart <= dateNow && dateNow <= eventEnd,
-                                startingDate = eventStart,
-                                name = eventData.name,
-                                attendeesCount = eventData.total_attendees
-                            });
-                            break;
-                        }
-                    }
-                }
-            }
+            UnityEngine.Object.Destroy(downloadedBanner);
+            downloadedBanner = null;
         }
-    }
-
-    private void OnMapMetadataInfoUpdated(MinimapMetadata.MinimapSceneInfo info)
-    {
-        if (info.parcels.Any(parcel => parcel == currentCoords))
-        {
-            currentSceneInfo = info;
-        }
-    }
-
-    private string ToString(Vector2Int v)
-    {
-        return string.Format("{0},{1}", v.x, v.y);
-    }
-
-    class SceneInfo
-    {
-        public string sceneName;
-        public string sceneOwner;
-        public string sceneDescription;
-        public string thumbnailUrl;
-        public List<Vector2Int> parcels;
-    }
-
-    class EventInfo
-    {
-        public bool isNow = false;
-        public bool startsToday = false;
-        public DateTime startingDate;
-        public string name;
-        public int attendeesCount;
-    }
-
-    [Serializable]
-    struct ParcelResponse
-    {
-        public bool ok;
-        public ParcelData data;
-    }
-
-    [Serializable]
-    struct ParcelData
-    {
-        public string id;
-        public string owner;
-        public string district_id;
-        public Data data;
-    }
-
-    [Serializable]
-    struct Data
-    {
-        public string name;
-        public string description;
-    }
-
-    [Serializable]
-    struct EventResponse
-    {
-        public EventData[] data;
-    }
-
-    [Serializable]
-    struct EventData
-    {
-        public string name;
-        public int total_attendees;
-        public string start_at;
-        public string finish_at;
-        public int[] coordinates;
     }
 }

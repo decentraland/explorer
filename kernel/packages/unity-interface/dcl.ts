@@ -645,8 +645,8 @@ export const unityInterface = {
   FriendNotFound(queryString: string) {
     gameInstance.SendMessage('SceneController', 'FriendNotFound', JSON.stringify(queryString))
   },
-  RequestTeleport(destination: string) {
-    gameInstance.SendMessage('HUDController', 'RequestTeleport', destination)
+  RequestTeleport(teleportData: {}) {
+    gameInstance.SendMessage('HUDController', 'RequestTeleport', JSON.stringify(teleportData))
   },
 
   // *********************************************************************************

@@ -25,9 +25,9 @@ namespace Tests
         [UnityTest]
         public IEnumerator OpenAndCloseCorrectly()
         {
-            controller.RequestTeleport("magic");
+            controller.RequestTeleport("{\"destination\": \"magic\"}");
             Assert.IsTrue(controller.view.content.activeSelf, "teleport dialog should be visible");
-            controller.view.Hide();
+            controller.view.contentAnimator.Hide(true);
             Assert.IsFalse(controller.view.content.activeSelf, "teleport dialog should not be visible");
             yield break;
         }

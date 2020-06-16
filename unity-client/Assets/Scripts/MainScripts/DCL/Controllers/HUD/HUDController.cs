@@ -58,6 +58,8 @@ public class HUDController : MonoBehaviour
 
     public FriendsHUDController friendsHud => GetHUDElement(HUDElementID.FRIENDS) as FriendsHUDController;
 
+    public TeleportPromptHUDController teleportHud => GetHUDElement(HUDElementID.TELEPORT_DIALOG) as TeleportPromptHUDController;
+
     public Dictionary<HUDElementID, IHUD> hudElements { get; private set; } = new Dictionary<HUDElementID, IHUD>();
 
     private UserProfile ownUserProfile => UserProfile.GetOwnUserProfile();
@@ -362,9 +364,9 @@ public class HUDController : MonoBehaviour
         });
     }
 
-    public void RequestTeleport(string destination)
+    public void RequestTeleport(string teleportDataJson)
     {
-        (GetHUDElement(HUDElementID.TELEPORT_DIALOG) as TeleportPromptHUDController)?.RequestTeleport(destination);
+        teleportHud?.RequestTeleport(teleportDataJson);
     }
 
     private void OnDestroy()
