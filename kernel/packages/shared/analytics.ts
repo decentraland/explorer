@@ -25,7 +25,7 @@ let tracking = false
 
 enum AnalyticsAccount {
   PRD = '1plAT9a2wOOgbPCrTaU8rgGUMzgUTJtU',
-  DEV = 'a4h4BC4dL1v7FhIQKKuPHEdZIiNRDVhc'
+  DEV = 'a4h4BC4dL1v7FhIQKKuPHEdZIiNRDVhc',
 }
 
 // TODO fill with segment keys and integrate identity server
@@ -59,6 +59,9 @@ export async function initialize(segmentKey: string): Promise<void> {
     // loading client for the first time
     window.analytics.load(segmentKey)
     window.analytics.page()
+    window.analytics.ready(() => {
+      window.analytics.timeout(10000)
+    })
   }
 }
 
