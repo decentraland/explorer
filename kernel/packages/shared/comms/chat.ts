@@ -1,4 +1,3 @@
-import { Observable } from 'decentraland-ecs/src'
 import { MessageEntry, ChatMessageType } from 'shared/types'
 import { uuid } from 'atomicHelpers/math'
 import { StoreContainer } from '../store/rootTypes'

@@ -4,7 +4,6 @@ import { worldToGrid } from 'atomicHelpers/parcelScenePositions'
 import { Vector2, ReadOnlyVector3, Vector3 } from 'decentraland-ecs/src'
 import { defaultLogger } from 'shared/logger'
 
-import { ChatEventType } from './comms/chat'
 import { avatarMessageObservable } from './comms/peers'
 import { AvatarMessageType } from './comms/interface/types'
 import { positionObservable } from './world/positionThings'
