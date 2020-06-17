@@ -18,6 +18,7 @@ namespace DCL.Helpers
             CACHE_EVERYTHING = CACHE_MATERIALS | CACHE_SHADERS,
         }
 
+        public static bool timeBudgetEnabled => CommonScriptableObjects.rendererState.Get();
         public static float timeBudgetMax = 0.003f;
         public static float timeBudget = 0;
 
@@ -103,13 +104,16 @@ namespace DCL.Helpers
                         matList.Add(new Material(mat));
                     }
 
-                    elapsedTime = Time.realtimeSinceStartup - elapsedTime;
-                    timeBudget -= elapsedTime;
-
-                    if (timeBudget < 0)
+                    if (timeBudgetEnabled)
                     {
-                        yield return null;
-                        timeBudget += timeBudgetMax;
+                        elapsedTime = Time.realtimeSinceStartup - elapsedTime;
+                        timeBudget -= elapsedTime;
+
+                        if (timeBudget < 0)
+                        {
+                            yield return null;
+                            timeBudget += timeBudgetMax;
+                        }
                     }
                 }
 
