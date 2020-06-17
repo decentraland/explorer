@@ -25,7 +25,7 @@ let tracking = false
 
 enum AnalyticsAccount {
   PRD = '1plAT9a2wOOgbPCrTaU8rgGUMzgUTJtU',
-  DEV = 'a4h4BC4dL1v7FhIQKKuPHEdZIiNRDVhc',
+  DEV = 'a4h4BC4dL1v7FhIQKKuPHEdZIiNRDVhc'
 }
 
 // TODO fill with segment keys and integrate identity server
