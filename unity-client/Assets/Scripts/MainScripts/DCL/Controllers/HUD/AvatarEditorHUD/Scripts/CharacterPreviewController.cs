@@ -11,7 +11,7 @@ public class CharacterPreviewController : MonoBehaviour
     private const int SNAPSHOT_FACE_WIDTH_RES = 512;
     private const int SNAPSHOT_FACE_HEIGHT_RES = 512;
 
-    private const int SUPERSAMPLING = 4;
+    private const int SUPERSAMPLING = 1;
     private const float CAMERA_TRANSITION_TIME = 0.5f;
     private static int CHARACTER_PREVIEW_LAYER => LayerMask.NameToLayer("CharacterPreview");
 

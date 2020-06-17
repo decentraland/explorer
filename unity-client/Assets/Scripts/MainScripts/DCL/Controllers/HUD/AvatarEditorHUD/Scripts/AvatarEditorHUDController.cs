@@ -402,7 +402,7 @@ public class AvatarEditorHUDController : IHUD
     {
         var avatarModel = model.ToAvatarModel();
         WebInterface.SendSaveAvatar(avatarModel, faceSnapshot, bodySnapshot);
-        userProfile.OverrideAvatar(avatarModel, faceSnapshot, bodySnapshot);
+        userProfile.OverrideAvatar(avatarModel, faceSnapshot);
 
         SetVisibility(false);
     }
