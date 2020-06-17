@@ -141,7 +141,13 @@ namespace DCL.Components
                 childHookRectTransform.SetParent(canvas.transform);
                 childHookRectTransform.ResetLocalTRS();
 
-                SetConstrainedPanel(canvasScaler);
+                float canvasHeight = canvasScaler.referenceResolution.y;
+
+                childHookRectTransform.anchorMin = Vector2.zero;
+                childHookRectTransform.anchorMax = new Vector2(1, 0);
+                // We scale the panel downwards to release the viewport's top 10%
+                childHookRectTransform.sizeDelta = new Vector2(0, canvasHeight - (canvasHeight * UISettings.RESERVED_CANVAS_TOP_PERCENTAGE / 100));
+                childHookRectTransform.pivot = new Vector2(0.5f, 0f);
             }
 
             // Canvas group
@@ -169,28 +175,6 @@ namespace DCL.Components
             {
                 UpdateCanvasVisibility();
             }
-        }
-
-        void SetConstrainedPanelLegacy()
-        {
-            childHookRectTransform.anchorMin = Vector2.zero;
-            childHookRectTransform.anchorMax = Vector2.one;
-            childHookRectTransform.sizeDelta = Vector2.zero;
-
-            // We scale the panel downwards to release the viewport's top 10%
-            childHookRectTransform.pivot = new Vector2(0.5f, 0f);
-            childHookRectTransform.localScale = new Vector3(1f, 1f - (UISettings.RESERVED_CANVAS_TOP_PERCENTAGE / 100), 1f);
-        }
-
-        void SetConstrainedPanel(CanvasScaler canvasScaler)
-        {
-            float canvasHeight = canvasScaler.referenceResolution.y;
-
-            childHookRectTransform.anchorMin = Vector2.zero;
-            childHookRectTransform.anchorMax = new Vector2(1, 0);
-            // We scale the panel downwards to release the viewport's top 10%
-            childHookRectTransform.sizeDelta = new Vector2(0, canvasHeight - (canvasHeight * UISettings.RESERVED_CANVAS_TOP_PERCENTAGE / 100));
-            childHookRectTransform.pivot = new Vector2(0.5f, 0f);
         }
     }
 }
