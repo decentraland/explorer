@@ -132,13 +132,10 @@ namespace DCL
                     else
                         scene.contentProvider.TryGetContentsUrl(model.src, out contentsUrl);
 
-                    if (!string.IsNullOrEmpty(contentsUrl))
-                    {
-                        yield return Utils.FetchTexture(contentsUrl, (tex) =>
-                        {
-                            texture = (Texture2D)tex;
-                        });
-                    }
+                    AssetPromise_Texture texturePromise = new AssetPromise_Texture(contentsUrl);
+                    texturePromise.OnSuccessEvent += (x) => texture = x.texture;
+                    texturePromise.OnFailEvent += (x) => texture = null;
+                    AssetPromiseKeeper_Texture.i.Keep(texturePromise);
                 }
 
                 if (texture != null)
@@ -149,6 +146,8 @@ namespace DCL
                     texture.Apply(unitySamplingMode != FilterMode.Point, true);
                 }
             }
+
+            return null;
         }
 
         public virtual void AttachTo(PBRMaterial material) { }

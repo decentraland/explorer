@@ -50,7 +50,6 @@ namespace DCL
         {
         }
 
-
         protected override bool AddToLibrary()
         {
             if (!library.Add(asset))
