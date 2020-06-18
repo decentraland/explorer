@@ -58,6 +58,8 @@ public class HUDController : MonoBehaviour
 
     public FriendsHUDController friendsHud => GetHUDElement(HUDElementID.FRIENDS) as FriendsHUDController;
 
+    public TeleportPromptHUDController teleportHud => GetHUDElement(HUDElementID.TELEPORT_DIALOG) as TeleportPromptHUDController;
+
     public Dictionary<HUDElementID, IHUD> hudElements { get; private set; } = new Dictionary<HUDElementID, IHUD>();
 
     private UserProfile ownUserProfile => UserProfile.GetOwnUserProfile();
@@ -110,8 +112,9 @@ public class HUDController : MonoBehaviour
         OPEN_EXTERNAL_URL_PROMPT = 14,
         PRIVATE_CHAT_WINDOW = 15,
         NFT_INFO_DIALOG = 16,
-        CONTROLS_HUD = 17,
-        COUNT = 18
+        TELEPORT_DIALOG = 17,
+        CONTROLS_HUD = 18,
+        COUNT = 19
     }
 
     [System.Serializable]
@@ -271,6 +274,9 @@ public class HUDController : MonoBehaviour
             case HUDElementID.NFT_INFO_DIALOG:
                 CreateHudElement<NFTPromptHUDController>(configuration, hudElementId);
                 break;
+            case HUDElementID.TELEPORT_DIALOG:
+                CreateHudElement<TeleportPromptHUDController>(configuration, hudElementId);
+                break;
             case HUDElementID.CONTROLS_HUD:
                 CreateHudElement<ControlsHUDController>(configuration, hudElementId);
                 break;
@@ -360,6 +366,11 @@ public class HUDController : MonoBehaviour
             mail = ownUserProfile.email,
             avatarPic = ownUserProfile.faceSnapshot
         });
+    }
+
+    public void RequestTeleport(string teleportDataJson)
+    {
+        teleportHud?.RequestTeleport(teleportDataJson);
     }
 
     private void OnDestroy()
