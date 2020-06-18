@@ -256,8 +256,7 @@ function* populateFaceIfNecessary(profile: any, resolution: string) {
     try {
       const resizeServiceUrl: string = yield select(getResizeService)
       const faceUrlSegments = profile.avatar.snapshots.face.split('/')
-      const response: Blob = yield fetch(`${resizeServiceUrl}/${faceUrlSegments[faceUrlSegments.length - 1]}/${resolution}`).then(r => r.blob())
-      const faceUrl = URL.createObjectURL(response)
+      const faceUrl = `${resizeServiceUrl}/${faceUrlSegments[faceUrlSegments.length - 1]}/${resolution}`
       profile.avatar = { ...profile.avatar, snapshots: { ...profile.avatar?.snapshots, [selector]: faceUrl } }
     } catch (e) {
       defaultLogger.error(`error while resizing image for user ${profile.userId} for resolution ${resolution}`, e)
