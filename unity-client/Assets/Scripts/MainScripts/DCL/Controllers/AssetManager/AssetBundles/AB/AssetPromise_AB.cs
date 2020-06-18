@@ -14,7 +14,7 @@ namespace DCL
     {
         public static bool VERBOSE = false;
 
-        public static int MAX_CONCURRENT_REQUESTS = limitTimeBudget ? 30 : 999;
+        public static int MAX_CONCURRENT_REQUESTS = 30;
         static int concurrentRequests = 0;
         bool requestRegistered = false;
 
@@ -117,8 +117,12 @@ namespace DCL
                         var promise = new AssetPromise_AB(baseUrl, dep);
                         AssetPromiseKeeper_AB.i.Keep(promise);
                         dependencyPromises.Add(promise);
-                        yield return promise;
                     }
+                }
+
+                foreach (var promise in dependencyPromises)
+                {
+                    yield return promise;
                 }
             }
 
@@ -163,7 +167,12 @@ namespace DCL
 
             assetBundleRequest = UnityWebRequestAssetBundle.GetAssetBundle(finalUrl, Hash128.Compute(hash));
 
-            yield return assetBundleRequest.SendWebRequest();
+            var asyncOp = assetBundleRequest.SendWebRequest();
+
+            while (!asyncOp.isDone)
+            {
+                yield return null;
+            }
 
             //NOTE(Brian): For some reason, another coroutine iteration can be triggered after Cleanup().
             //             So assetBundleRequest can be null here.
@@ -185,7 +194,6 @@ namespace DCL
 
             AssetBundle assetBundle = DownloadHandlerAssetBundle.GetContent(assetBundleRequest);
 
-
             if (assetBundle == null || asset == null)
             {
                 assetBundleRequest.Abort();
@@ -199,6 +207,49 @@ namespace DCL
             asset.ownerAssetBundle = assetBundle;
             asset.assetBundleAssetName = assetBundle.name;
 
+            List<UnityEngine.Object> loadedAssetsList = new List<UnityEngine.Object>();
+
+            yield return LoadAssetsInOrder(assetBundle, loadedAssetsList);
+
+            if (loadCoroutine == null)
+            {
+                OnFail?.Invoke();
+                yield break;
+            }
+
+            foreach (var loadedAsset in loadedAssetsList)
+            {
+                string ext = "any";
+
+                if (loadedAsset is Texture)
+                {
+                    ext = "png";
+                }
+                else if (loadedAsset is Material)
+                {
+                    ext = "mat";
+                }
+                else if (loadedAsset is Animation || loadedAsset is AnimationClip)
+                {
+                    ext = "nim";
+                }
+                else if (loadedAsset is GameObject)
+                {
+                    ext = "glb";
+                }
+
+                if (!asset.assetsByExtension.ContainsKey(ext))
+                    asset.assetsByExtension.Add(ext, new List<UnityEngine.Object>());
+
+                asset.assetsByExtension[ext].Add(loadedAsset);
+            }
+
+            OnSuccess?.Invoke();
+        }
+
+
+        private IEnumerator LoadAssetsInOrder(AssetBundle assetBundle, List<UnityEngine.Object> loadedAssetByName)
+        {
             string[] assets = assetBundle.GetAllAssetNames();
 
             assetsToLoad = assets.OrderBy(
@@ -218,7 +269,6 @@ namespace DCL
                 //             To handle this case we exit using this.
                 if (loadCoroutine == null)
                 {
-                    OnFail?.Invoke();
                     yield break;
                 }
 
@@ -234,20 +284,12 @@ namespace DCL
                 if (VERBOSE)
                     Debug.Log("loading asset = " + assetName);
 #endif
-                string ext = assetName.Substring(assetName.Length - 3);
-
                 UnityEngine.Object loadedAsset = assetBundle.LoadAsset(assetName);
 
                 if (loadedAsset is Material loadedMaterial)
                     loadedMaterial.shader = null;
 
-                if (!asset.assetsByName.ContainsKey(assetName))
-                    asset.assetsByName.Add(assetName, loadedAsset);
-
-                if (!asset.assetsByExtension.ContainsKey(ext))
-                    asset.assetsByExtension.Add(ext, new List<UnityEngine.Object>());
-
-                asset.assetsByExtension[ext].Add(loadedAsset);
+                loadedAssetByName.Add(loadedAsset);
 
                 if (!limitTimeBudget)
                     continue;
@@ -260,8 +302,6 @@ namespace DCL
                     yield return null;
                 }
             }
-
-            OnSuccess?.Invoke();
         }
 
         protected override void OnLoad(Action OnSuccess, Action OnFail)
