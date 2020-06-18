@@ -145,9 +145,9 @@ namespace DCL.Components
 
                 childHookRectTransform.anchorMin = Vector2.zero;
                 childHookRectTransform.anchorMax = new Vector2(1, 0);
+                childHookRectTransform.pivot = new Vector2(0.5f, 0f);
                 // We scale the panel downwards to release the viewport's top 10%
                 childHookRectTransform.sizeDelta = new Vector2(0, canvasHeight - (canvasHeight * UISettings.RESERVED_CANVAS_TOP_PERCENTAGE / 100));
-                childHookRectTransform.pivot = new Vector2(0.5f, 0f);
             }
 
             // Canvas group
