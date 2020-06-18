@@ -76,6 +76,7 @@ import { getTutorialBaseURL } from '../location'
 import { takeLatestById } from './utils/takeLatestById'
 import { UnityInterfaceContainer } from 'unity-interface/dcl'
 import { RarityEnum } from '../airdrops/interface'
+import { StoreContainer } from '../store/rootTypes'
 
 type Timestamp = number
 type ContentFileHash = string
@@ -84,7 +85,7 @@ const CID = require('cids')
 const multihashing = require('multihashing-async')
 const toBuffer = require('blob-to-buffer')
 
-declare const globalThis: Window & UnityInterfaceContainer
+declare const globalThis: Window & UnityInterfaceContainer & StoreContainer
 
 export const getCurrentUserId = () => identity.address
 
@@ -486,8 +487,9 @@ async function buildSnapshotContent(selector: string, value: string): Promise<[s
   let hash: string
   let contentFile: ContentFile | undefined
 
-  if (value.startsWith('blob')) {
-    // value is coming in a blob url => convert to blob & upload content
+  const resizeServeUrl = getResizeService(globalThis.globalStore.getState())
+  if (value.startsWith(resizeServeUrl)) {
+    // value is coming in a resize service url => generate image & upload content
     const blob = await fetch(value).then(r => r.blob())
 
     contentFile = await makeContentFile(`./${selector}.png`, blob)
