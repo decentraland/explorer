@@ -525,7 +525,7 @@ export async function modifyAvatar(params: {
   if (snapshots) {
     const newSnapshots: Record<string, string> = {}
     for (const [selector, value] of Object.entries(snapshots)) {
-      const [hash, contentFile] = await buildSnapshotContent(selector, value)
+      const [hash, contentFile] = await buildSnapshotContent(selector, value as any)
 
       newSnapshots[selector] = hash
       contentFile && files.push(contentFile)
