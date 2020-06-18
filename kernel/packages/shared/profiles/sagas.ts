@@ -229,9 +229,9 @@ export function* handleFetchProfile(action: ProfileRequestAction): any {
     profile.email = email
   }
 
-  if (!profile.avatar.snapshots.face256) {
+  if (!profile.avatar?.snapshots?.face256) {
     // TODO - change with actual resizing service - moliva - 18/06/2020
-    profile.avatar.snapshots = { ...profile.avatar.snapshots, face256: 'https://upload.wikimedia.org/wikipedia/commons/f/f6/Icon_Einstein_256x256.png' }
+    profile.avatar = { ...profile.avatar, snapshots: { ...profile.avatar?.snapshots, face256: 'https://upload.wikimedia.org/wikipedia/commons/f/f6/Icon_Einstein_256x256.png' } }
   }
 
   if (!ALL_WEARABLES && WORLD_EXPLORER) {
