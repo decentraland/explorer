@@ -14,17 +14,14 @@ namespace DCL
     {
         public static bool VERBOSE = false;
 
-        public static readonly int MAX_CONCURRENT_REQUESTS = 30;
+        public static int MAX_CONCURRENT_REQUESTS = limitTimeBudget ? 30 : 999;
         static int concurrentRequests = 0;
         bool requestRegistered = false;
 
         static readonly float maxLoadBudgetTime = 0.032f;
         static float currentLoadBudgetTime = 0;
 
-        public static bool limitTimeBudget
-        {
-            get { return CommonScriptableObjects.rendererState.Get(); }
-        }
+        public static bool limitTimeBudget => CommonScriptableObjects.rendererState.Get();
 
         Coroutine loadCoroutine;
         static HashSet<string> failedRequestUrls = new HashSet<string>();
@@ -46,6 +43,8 @@ namespace DCL
             {"glb", 9}
         };
 
+        private IOrderedEnumerable<string> assetsToLoad;
+
         public AssetPromise_AB(string contentUrl, string hash) : base(contentUrl, hash)
         {
         }
@@ -61,11 +60,6 @@ namespace DCL
 
             asset = library.Get(asset.id);
             return true;
-        }
-
-        internal override object GetId()
-        {
-            return hash;
         }
 
         protected override void OnCancelLoading()
@@ -137,7 +131,7 @@ namespace DCL
 
         public override string ToString()
         {
-            string result = $"AB request state... loadCoroutine = {loadCoroutine} ... state = {state}\n";
+            string result = $"AB request... loadCoroutine = {loadCoroutine} ... state = {state}\n";
 
             if (assetBundleRequest != null)
                 result += $"url = {assetBundleRequest.url} ... code = {assetBundleRequest.responseCode} ... progress = {assetBundleRequest.downloadProgress}\n";
@@ -147,12 +141,14 @@ namespace DCL
 
             if (dependencyPromises != null && dependencyPromises.Count > 0)
             {
-                result += "dependencies:\n";
+                result += "Dependencies:\n\n";
                 foreach (var p in dependencyPromises)
                 {
-                    result += p.ToString() + "\n";
+                    result += p.ToString() + "\n\n";
                 }
             }
+
+            result += "Concurrent requests = " + concurrentRequests;
 
             return result;
         }
@@ -173,6 +169,7 @@ namespace DCL
             //             So assetBundleRequest can be null here.
             if (assetBundleRequest == null)
             {
+                OnFail?.Invoke();
                 yield break;
             }
 
@@ -203,7 +200,6 @@ namespace DCL
             asset.assetBundleAssetName = assetBundle.name;
 
             string[] assets = assetBundle.GetAllAssetNames();
-            List<string> assetsToLoad = new List<string>();
 
             assetsToLoad = assets.OrderBy(
                 (x) =>
@@ -214,23 +210,25 @@ namespace DCL
                         return loadOrderByExtension[ext];
                     else
                         return 99;
-                }).ToList();
+                });
 
-
-            for (int i = 0; i < assetsToLoad.Count; i++)
+            foreach (string assetName in assetsToLoad)
             {
-                string assetName = assetsToLoad[i];
                 //NOTE(Brian): For some reason, another coroutine iteration can be triggered after Cleanup().
                 //             To handle this case we exit using this.
                 if (loadCoroutine == null)
                 {
+                    OnFail?.Invoke();
                     yield break;
                 }
 
                 if (asset == null)
                     break;
 
-                float time = Time.realtimeSinceStartup;
+                float time = 0;
+
+                if (limitTimeBudget)
+                    time = Time.realtimeSinceStartup;
 
 #if UNITY_EDITOR
                 if (VERBOSE)
@@ -240,6 +238,9 @@ namespace DCL
 
                 UnityEngine.Object loadedAsset = assetBundle.LoadAsset(assetName);
 
+                if (loadedAsset is Material loadedMaterial)
+                    loadedMaterial.shader = null;
+
                 if (!asset.assetsByName.ContainsKey(assetName))
                     asset.assetsByName.Add(assetName, loadedAsset);
 
@@ -248,15 +249,15 @@ namespace DCL
 
                 asset.assetsByExtension[ext].Add(loadedAsset);
 
-                if (limitTimeBudget)
-                {
-                    currentLoadBudgetTime += Time.realtimeSinceStartup - time;
+                if (!limitTimeBudget)
+                    continue;
 
-                    if (currentLoadBudgetTime > maxLoadBudgetTime)
-                    {
-                        currentLoadBudgetTime = 0;
-                        yield return null;
-                    }
+                currentLoadBudgetTime += Time.realtimeSinceStartup - time;
+
+                if (currentLoadBudgetTime > maxLoadBudgetTime)
+                {
+                    currentLoadBudgetTime = 0;
+                    yield return null;
                 }
             }
 
@@ -270,9 +271,9 @@ namespace DCL
 
         IEnumerator WaitForConcurrentRequestsSlot()
         {
-            if (concurrentRequests >= MAX_CONCURRENT_REQUESTS)
+            while (concurrentRequests >= MAX_CONCURRENT_REQUESTS)
             {
-                yield return new WaitUntil(() => concurrentRequests < MAX_CONCURRENT_REQUESTS);
+                yield return null;
             }
         }
 
