@@ -61,13 +61,14 @@ import {
   Pointer,
   ContentFile,
   ENTITY_FILE_NAME,
-  DeployData
+  DeployData,
+  Avatar
 } from './types'
 import { identity, ExplorerIdentity } from '../index'
 import { Authenticator, AuthLink } from 'dcl-crypto'
 import { sha3 } from 'web3x/utils'
 import { CATALYST_REALM_INITIALIZED } from '../dao/actions'
-import { isRealmInitialized, getUpdateProfileServer } from '../dao/selectors'
+import { isRealmInitialized, getUpdateProfileServer, getResizeService } from '../dao/selectors'
 import { getUserProfile } from '../comms/peers'
 import { WORLD_EXPLORER } from '../../config/index'
 import { backupProfile } from 'shared/profiles/generateRandomUserProfile'
@@ -75,6 +76,7 @@ import { getTutorialBaseURL } from '../location'
 import { takeLatestById } from './utils/takeLatestById'
 import { UnityInterfaceContainer } from 'unity-interface/dcl'
 import { RarityEnum } from '../airdrops/interface'
+import { StoreContainer } from '../store/rootTypes'
 
 type Timestamp = number
 type ContentFileHash = string
@@ -83,7 +85,7 @@ const CID = require('cids')
 const multihashing = require('multihashing-async')
 const toBuffer = require('blob-to-buffer')
 
-declare const globalThis: Window & UnityInterfaceContainer
+declare const globalThis: Window & UnityInterfaceContainer & StoreContainer
 
 export const getCurrentUserId = () => identity.address
 
@@ -229,10 +231,8 @@ export function* handleFetchProfile(action: ProfileRequestAction): any {
     profile.email = email
   }
 
-  if (!profile.avatar?.snapshots?.face256) {
-    // TODO - change with actual resizing service - moliva - 18/06/2020
-    profile.avatar = { ...profile.avatar, snapshots: { ...profile.avatar?.snapshots, face256: 'https://upload.wikimedia.org/wikipedia/commons/f/f6/Icon_Einstein_256x256.png' } }
-  }
+  yield populateFaceIfNecessary(profile, '256')
+  yield populateFaceIfNecessary(profile, '128')
 
   if (!ALL_WEARABLES && WORLD_EXPLORER) {
     yield put(inventoryRequest(userId, userId))
@@ -249,6 +249,20 @@ export function* handleFetchProfile(action: ProfileRequestAction): any {
 
   const passport = yield call(processServerProfile, userId, profile)
   yield put(profileSuccess(userId, passport, hasConnectedWeb3))
+}
+
+function* populateFaceIfNecessary(profile: any, resolution: string) {
+  const selector = `face${resolution}`
+  if (profile.avatar?.snapshots && !profile.avatar?.snapshots[selector] && profile.avatar?.snapshots?.face) {
+    try {
+      const resizeServiceUrl: string = yield select(getResizeService)
+      const faceUrlSegments = profile.avatar.snapshots.face.split('/')
+      const faceUrl = `${resizeServiceUrl}/${faceUrlSegments[faceUrlSegments.length - 1]}/${resolution}`
+      profile.avatar = { ...profile.avatar, snapshots: { ...profile.avatar?.snapshots, [selector]: faceUrl } }
+    } catch (e) {
+      defaultLogger.error(`error while resizing image for user ${profile.userId} for resolution ${resolution}`, e)
+    }
+  }
 }
 
 export async function profileServerRequest(serverUrl: string, userId: string) {
@@ -469,6 +483,30 @@ export async function calculateBufferHash(buffer: Buffer): Promise<string> {
   return new CID(0, 'dag-pb', hash).toBaseEncodedString()
 }
 
+async function buildSnapshotContent(selector: string, value: string): Promise<[string, ContentFile?]> {
+  let hash: string
+  let contentFile: ContentFile | undefined
+
+  const resizeServeUrl = getResizeService(globalThis.globalStore.getState())
+  if (value.startsWith(resizeServeUrl)) {
+    // value is coming in a resize service url => generate image & upload content
+    const blob = await fetch(value).then(r => r.blob())
+
+    contentFile = await makeContentFile(`./${selector}.png`, blob)
+    hash = await calculateBufferHash(contentFile.content)
+  } else if (value.includes('://')) {
+    // value is already a URL => use existing hash
+    hash = value.split('/').pop()!
+  } else {
+    // value is coming in base 64 => convert to blob & upload content
+    const blob = base64ToBlob(value)
+
+    contentFile = await makeContentFile(`./${selector}.png`, blob)
+    hash = await calculateBufferHash(contentFile.content)
+  }
+  return [hash, contentFile]
+}
+
 export async function modifyAvatar(params: {
   url: string
   currentVersion: number
@@ -485,25 +523,14 @@ export async function modifyAvatar(params: {
 
   const snapshots = avatar.snapshots || (profile as any).snapshots
   if (snapshots) {
-    if (snapshots.face.includes('://') && snapshots.body.includes('://')) {
-      newAvatar.snapshots = {
-        face: snapshots.face.split('/').pop()!,
-        body: snapshots.body.split('/').pop()!
-      }
-    } else {
-      // replace base64 snapshots with their respective hashes
-      const faceFile: ContentFile = await makeContentFile('./face.png', base64ToBlob(snapshots.face))
-      const bodyFile: ContentFile = await makeContentFile('./body.png', base64ToBlob(snapshots.body))
+    const newSnapshots: Record<string, string> = {}
+    for (const [selector, value] of Object.entries(snapshots)) {
+      const [hash, contentFile] = await buildSnapshotContent(selector, value as any)
 
-      const faceFileHash: string = await calculateBufferHash(faceFile.content)
-      const bodyFileHash: string = await calculateBufferHash(bodyFile.content)
-
-      newAvatar.snapshots = {
-        face: faceFileHash,
-        body: bodyFileHash
-      }
-      files = [faceFile, bodyFile]
+      newSnapshots[selector] = hash
+      contentFile && files.push(contentFile)
     }
+    newAvatar.snapshots = newSnapshots as Avatar['snapshots']
   }
   const newProfile = ensureServerFormat({ ...profile, avatar: newAvatar }, currentVersion)
 

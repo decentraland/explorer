@@ -33,7 +33,7 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
 
     public void UpdateData(UserProfileModel newModel, bool downloadAssets = true)
     {
-        ForgetThumbnail(model?.snapshots?.face, OnFaceSnapshotReady);
+        ForgetThumbnail(model?.snapshots?.face256, OnFaceSnapshotReady);
 
         inventory.Clear();
         faceSnapshot = null;
@@ -62,7 +62,7 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
 
         if (downloadAssets && model.snapshots != null)
         {
-            GetThumbnail(model.snapshots.face, OnFaceSnapshotReady);
+            GetThumbnail(model.snapshots.face256, OnFaceSnapshotReady);
         }
 
         OnUpdate?.Invoke(this);
@@ -87,7 +87,7 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
     {
         if (model?.snapshots != null)
         {
-            ForgetThumbnail(model.snapshots.face, OnFaceSnapshotReady);
+            ForgetThumbnail(model.snapshots.face256, OnFaceSnapshotReady);
         }
 
         model.avatar.CopyFrom(newModel);

@@ -2,6 +2,7 @@
 using DCL.Helpers;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Newtonsoft.Json;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -28,8 +29,16 @@ public static class DependencyMapLoadHelper
 
     public static IEnumerator WaitUntilDepMapIsResolved(string hash)
     {
-        yield return new WaitUntil(() => !downloadingDepmap.Contains(hash));
-        yield return new WaitUntil(() => dependenciesMap.ContainsKey(hash) || failedRequests.Contains(hash));
+        while (true)
+        {
+            bool depmapBeingDownloaded = downloadingDepmap.Contains(hash);
+            bool depmapRequestIsDone = dependenciesMap.ContainsKey(hash) || failedRequests.Contains(hash);
+
+            if (!depmapBeingDownloaded && depmapRequestIsDone)
+                break;
+
+            yield return null;
+        }
     }
 
     public static IEnumerator GetDepMap(string baseUrl, string hash)
@@ -38,10 +47,10 @@ public static class DependencyMapLoadHelper
 
         LoadPersistentCache();
 
-        if (failedRequests.Contains(hash))
+        if (dependenciesMap.ContainsKey(hash))
             yield break;
 
-        if (dependenciesMap.ContainsKey(hash))
+        if (failedRequests.Contains(hash))
             yield break;
 
         if (downloadingDepmap.Contains(hash))
@@ -64,6 +73,7 @@ public static class DependencyMapLoadHelper
             }
 
             AssetDependencyMap map = JsonUtility.FromJson<AssetDependencyMap>(depmapRequest.downloadHandler.text);
+            map.dependencies = map.dependencies.Where(x => !x.Contains("mainshader")).ToArray();
 
             dependenciesMap.Add(hash, new List<string>(map.dependencies));
 
@@ -82,16 +92,15 @@ public static class DependencyMapLoadHelper
 
     private static void LoadPersistentCache()
     {
-        if (!persistentCacheLoaded)
+        if (persistentCacheLoaded) return;
+
+        persistentCacheLoaded = true;
+
+        string depMapCache = PlayerPrefs.GetString(PERSISTENT_CACHE_KEY, String.Empty);
+
+        if (!string.IsNullOrEmpty(depMapCache))
         {
-            persistentCacheLoaded = true;
-
-            string depMapCache = PlayerPrefs.GetString(PERSISTENT_CACHE_KEY, String.Empty);
-
-            if (!string.IsNullOrEmpty(depMapCache))
-            {
-                dependenciesMap = JsonConvert.DeserializeObject<Dictionary<string, List<string>>>(depMapCache);
-            }
+            dependenciesMap = JsonConvert.DeserializeObject<Dictionary<string, List<string>>>(depMapCache);
         }
     }
 }

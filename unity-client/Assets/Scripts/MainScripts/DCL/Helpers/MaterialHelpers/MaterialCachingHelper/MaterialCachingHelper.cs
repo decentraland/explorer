@@ -24,9 +24,21 @@ namespace DCL.Helpers
 
         public static Dictionary<string, Shader> shaderByHash = new Dictionary<string, Shader>();
 
+        private static Shader mainShader;
+
         public static string ComputeHash(Material mat)
         {
             return mat.ComputeCRC().ToString();
+        }
+
+        static Shader EnsureMainShader()
+        {
+            if (mainShader == null)
+            {
+                mainShader = Shader.Find("DCL/LWRP/Lit");
+            }
+
+            return mainShader;
         }
 
         public static IEnumerator Process(List<Renderer> renderers, bool enableRenderers = true, Mode cachingFlags = Mode.CACHE_EVERYTHING)
@@ -62,7 +74,14 @@ namespace DCL.Helpers
 
                         if (!shaderByHash.ContainsKey(shaderHash))
                         {
-                            shaderByHash.Add(shaderHash, Shader.Find(mat.shader.name));
+                            if (!mat.shader.name.Contains("Error"))
+                            {
+                                shaderByHash.Add(shaderHash, Shader.Find(mat.shader.name));
+                            }
+                            else
+                            {
+                                shaderByHash.Add(shaderHash, EnsureMainShader());
+                            }
                         }
 
                         mat.shader = shaderByHash[shaderHash];
