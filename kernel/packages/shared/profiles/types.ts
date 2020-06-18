@@ -16,6 +16,7 @@ export interface Profile {
   blocked: string[]
   snapshots?: {
     face: string
+    face256: string
     body: string
   }
   version: number
