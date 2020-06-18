@@ -68,7 +68,7 @@ import { identity, ExplorerIdentity } from '../index'
 import { Authenticator, AuthLink } from 'dcl-crypto'
 import { sha3 } from 'web3x/utils'
 import { CATALYST_REALM_INITIALIZED } from '../dao/actions'
-import { isRealmInitialized, getUpdateProfileServer, getResizeService } from '../dao/selectors';
+import { isRealmInitialized, getUpdateProfileServer, getResizeService } from '../dao/selectors'
 import { getUserProfile } from '../comms/peers'
 import { WORLD_EXPLORER } from '../../config/index'
 import { backupProfile } from 'shared/profiles/generateRandomUserProfile'
