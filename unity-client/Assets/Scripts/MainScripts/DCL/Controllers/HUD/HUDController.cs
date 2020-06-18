@@ -60,6 +60,8 @@ public class HUDController : MonoBehaviour
 
     public TeleportPromptHUDController teleportHud => GetHUDElement(HUDElementID.TELEPORT_DIALOG) as TeleportPromptHUDController;
 
+    public ControlsHUDController controlsHud => GetHUDElement(HUDElementID.CONTROLS_HUD) as ControlsHUDController;
+
     public Dictionary<HUDElementID, IHUD> hudElements { get; private set; } = new Dictionary<HUDElementID, IHUD>();
 
     private UserProfile ownUserProfile => UserProfile.GetOwnUserProfile();
@@ -73,6 +75,11 @@ public class HUDController : MonoBehaviour
     private void ShowSettings()
     {
         settingsHud?.SetVisibility(true);
+    }
+
+    private void ShowControls()
+    {
+        controlsHud?.SetVisibility(true);
     }
 
     private void ToggleUIVisibility_OnTriggered(DCLAction_Trigger action)
@@ -159,6 +166,7 @@ public class HUDController : MonoBehaviour
                     avatarHud.Initialize();
                     avatarHud.OnEditAvatarPressed += ShowAvatarEditor;
                     avatarHud.OnSettingsPressed += ShowSettings;
+                    avatarHud.OnControlsPressed += ShowControls;
                     ownUserProfile.OnUpdate += OwnUserProfileUpdated;
                     OwnUserProfileUpdated(ownUserProfile);
                 }
@@ -384,6 +392,7 @@ public class HUDController : MonoBehaviour
         {
             avatarHud.OnEditAvatarPressed -= ShowAvatarEditor;
             avatarHud.OnSettingsPressed -= ShowSettings;
+            avatarHud.OnControlsPressed -= ShowControls;
         }
 
         if (worldChatWindowHud != null)

@@ -1916,11 +1916,11 @@ MonoBehaviour:
   toggleExpandButton: {fileID: 5249297500395189288}
   expandedContainer: {fileID: 3073583394034477279}
   nameText: {fileID: 470573529617210512}
-  mailText: {fileID: 0}
   editAvatarButton: {fileID: 8127968709767793726}
   newWearableNotification: {fileID: 4015978988222737975}
   newWearableNotificationText: {fileID: 220411951052900668}
   settingsButton: {fileID: 6359075905450045981}
+  controlsButton: {fileID: 8802185040998133461}
   signOutButton: {fileID: 2439665739510493948}
   faqButton: {fileID: 5960867254960926024}
 --- !u!225 &5103067147336230822
