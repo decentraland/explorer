@@ -3,7 +3,6 @@ using System;
 
 public class ControlsHUDView : MonoBehaviour
 {
-    [SerializeField] internal GameObject content;
     [SerializeField] internal InputAction_Trigger toggleAction;
     [SerializeField] internal InputAction_Trigger closeAction;
     [SerializeField] internal ShowHideAnimator showHideAnimator;
