@@ -199,6 +199,11 @@ export function initShared(): InitFutures {
         }
       }
 
+      if (profile.avatar.snapshots?.face128?.startsWith('blob') || profile.avatar.snapshots?.face256?.startsWith('blob')) {
+        // setting dirty profile, as at least one of the face images are taken from a local blob
+        profileDirty = true
+      }
+
       const localTutorialStep = getUserProfile().profile
         ? getUserProfile().profile.tutorialStep
         : tutorialStepId.INITIAL_SCENE
