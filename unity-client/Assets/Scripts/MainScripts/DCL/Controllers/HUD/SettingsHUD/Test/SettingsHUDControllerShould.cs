@@ -2,7 +2,7 @@
 using NUnit.Framework;
 using UnityEngine.TestTools;
 using DCL.SettingsHUD;
-using UnityEngine.Rendering.LWRP;
+
 
 using QualitySettings = DCL.SettingsData.QualitySettings;
 using GeneralSettings = DCL.SettingsData.GeneralSettings;
@@ -23,11 +23,11 @@ namespace Tests
             testQualitySettings = new QualitySettings()
             {
                 textureQuality = QualitySettings.TextureQuality.HalfRes,
-                antiAliasing = MsaaQuality._4x,
+                antiAliasing = UnityEngine.Rendering.Universal.MsaaQuality._4x,
                 renderScale = 0.1f,
                 shadows = false,
                 softShadows = false,
-                shadowResolution = UnityEngine.Rendering.LWRP.ShadowResolution._512,
+                shadowResolution = UnityEngine.Rendering.Universal.ShadowResolution._512,
                 cameraDrawDistance = 51f,
                 bloom = true,
                 colorGrading = true

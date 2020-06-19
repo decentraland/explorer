@@ -25,7 +25,7 @@ namespace Tests
         CinemachinePOV povCamera;
         Light environmentLight;
         PostProcessVolume postProcessVolume;
-        LightweightRenderPipelineAsset lwrpAsset;
+        UnityEngine.Rendering.Universal.UniversalRenderPipelineAsset lwrpAsset;
 
         [UnitySetUp]
         protected override IEnumerator SetUp()
@@ -33,11 +33,11 @@ namespace Tests
             testQualitySettings = new QualitySettings()
             {
                 textureQuality = QualitySettings.TextureQuality.HalfRes,
-                antiAliasing = MsaaQuality._4x,
+                antiAliasing = UnityEngine.Rendering.Universal.MsaaQuality._4x,
                 renderScale = 0.1f,
                 shadows = false,
                 softShadows = true,
-                shadowResolution = UnityEngine.Rendering.LWRP.ShadowResolution._512,
+                shadowResolution = UnityEngine.Rendering.Universal.ShadowResolution._512,
                 cameraDrawDistance = 50.1f,
                 bloom = false,
                 colorGrading = true
@@ -137,7 +137,7 @@ namespace Tests
 
         public void SetupReferences()
         {
-            lwrpAsset = GraphicsSettings.renderPipelineAsset as LightweightRenderPipelineAsset;
+            lwrpAsset = GraphicsSettings.renderPipelineAsset as UnityEngine.Rendering.Universal.UniversalRenderPipelineAsset;
             GeneralSettingsController generalSettingsController = GameObject.FindObjectOfType<GeneralSettingsController>();
             QualitySettingsController qualitySettingsController = GameObject.FindObjectOfType<QualitySettingsController>();
 

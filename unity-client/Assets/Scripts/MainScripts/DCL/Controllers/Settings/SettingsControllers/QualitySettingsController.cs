@@ -1,17 +1,15 @@
-﻿using UnityEngine;
-using UnityEngine.Rendering;
-using UnityEngine.Rendering.LWRP;
-using UnityEngine.Rendering.PostProcessing;
-using System.Reflection;
 using Cinemachine;
-
+using System.Reflection;
+using UnityEngine;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.PostProcessing;
 using UnitySettings = UnityEngine.QualitySettings;
 
 namespace DCL.SettingsController
 {
     public class QualitySettingsController : MonoBehaviour
     {
-        private LightweightRenderPipelineAsset lightweightRenderPipelineAsset = null;
+        private UnityEngine.Rendering.Universal.UniversalRenderPipelineAsset lightweightRenderPipelineAsset = null;
 
         private FieldInfo lwrpaShadowField = null;
         private FieldInfo lwrpaSoftShadowField = null;
@@ -26,7 +24,7 @@ namespace DCL.SettingsController
         {
             if (lightweightRenderPipelineAsset == null)
             {
-                lightweightRenderPipelineAsset = GraphicsSettings.renderPipelineAsset as LightweightRenderPipelineAsset;
+                lightweightRenderPipelineAsset = GraphicsSettings.renderPipelineAsset as UnityEngine.Rendering.Universal.UniversalRenderPipelineAsset;
 
                 // NOTE: LightweightRenderPipelineAsset doesn't expose properties to set any of the following fields
                 lwrpaShadowField = lightweightRenderPipelineAsset.GetType().GetField("m_MainLightShadowsSupported", BindingFlags.NonPublic | BindingFlags.Instance);
