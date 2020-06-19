@@ -142,7 +142,7 @@ function overrideBaseUrl(wearable: Wearable) {
 }
 
 function overrideSwankyRarity(wearable: Wearable) {
-  if (wearable.rarity as any === 'swanky') {
+  if ((wearable.rarity as any) === 'swanky') {
     return {
       ...wearable,
       rarity: 'rare' as RarityEnum
@@ -329,6 +329,13 @@ export function* ensureBaseCatalogs() {
 
 export function* submitProfileToRenderer(action: ProfileSuccessAction): any {
   const profile = { ...action.payload.profile }
+  const { snapshots } = profile.avatar
+  // set face variants if missing before sending profile to renderer
+  profile.avatar.snapshots = {
+    ...snapshots,
+    face128: snapshots.face128 || snapshots.face,
+    face256: snapshots.face256 || snapshots.face
+  }
   if ((yield select(getCurrentUserId)) === action.payload.userId) {
     yield call(ensureRenderer)
     yield call(ensureBaseCatalogs)
@@ -369,10 +376,7 @@ export function* handleFetchInventory(action: InventoryRequest) {
 }
 
 function dropIndexFromExclusives(exclusive: string) {
-  return exclusive
-    .split('/')
-    .slice(0, 4)
-    .join('/')
+  return exclusive.split('/').slice(0, 4).join('/')
 }
 
 export async function fetchInventoryItemsByAddress(address: string) {
@@ -385,7 +389,7 @@ export async function fetchInventoryItemsByAddress(address: string) {
   }
   const inventory: { id: string }[] = await result.json()
 
-  return inventory.map(wearable => wearable.id)
+  return inventory.map((wearable) => wearable.id)
 }
 
 export function* handleSaveAvatar(saveAvatar: SaveProfileRequest) {
@@ -490,7 +494,7 @@ async function buildSnapshotContent(selector: string, value: string): Promise<[s
   const resizeServeUrl = getResizeService(globalThis.globalStore.getState())
   if (value.startsWith(resizeServeUrl)) {
     // value is coming in a resize service url => generate image & upload content
-    const blob = await fetch(value).then(r => r.blob())
+    const blob = await fetch(value).then((r) => r.blob())
 
     contentFile = await makeContentFile(`./${selector}.png`, blob)
     hash = await calculateBufferHash(contentFile.content)
@@ -599,7 +603,7 @@ export function createEthereumMessageHash(msg: string) {
 }
 
 export async function calculateHashes(files: ContentFile[]): Promise<Map<string, ContentFile>> {
-  const entries: Promise<[string, ContentFile]>[] = Array.from(files).map(file =>
+  const entries: Promise<[string, ContentFile]>[] = Array.from(files).map((file) =>
     calculateBufferHash(file.content).then((hash: string) => [hash, file])
   )
   return new Map(await Promise.all(entries))
@@ -667,7 +671,7 @@ const MILLIS_PER_SECOND = 1000
 const ONE_MINUTE = 60 * MILLIS_PER_SECOND
 
 export function delay(time: number) {
-  return new Promise(resolve => setTimeout(resolve, time))
+  return new Promise((resolve) => setTimeout(resolve, time))
 }
 
 export function* queryInventoryEveryMinute() {
