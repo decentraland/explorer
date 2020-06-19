@@ -101,9 +101,6 @@ jobs:
           keys:
             - unity-tests-{{ checksum "../.unitysources-checksum" }}
       - run:
-          name: Extract the license key for Unity
-          command: |
-      - run:
           name: Run tests
           command: |
             if [[ -e /tmp/explorer/unity-client/testlog/log.txt ]]; then
