@@ -34,7 +34,7 @@ import { worldToGrid } from '../../atomicHelpers/parcelScenePositions'
 import { PARCEL_LOADING_STARTED } from 'shared/renderer/types'
 import { getPois } from '../meta/selectors'
 import { META_CONFIGURATION_INITIALIZED } from '../meta/actions'
-import { cache } from './cache'
+import { retrieve, store } from 'shared/cache'
 
 declare const window: {
   unityInterface: {
@@ -68,27 +68,6 @@ export function* atlasSaga(): any {
 
   yield takeEvery(QUERY_DATA_FROM_SCENE_JSON, querySceneDataAction)
   yield takeLatest(REPORT_SCENES_AROUND_PARCEL, reportScenesAroundParcelAction)
-}
-
-async function retrieve(cachedKey: string) {
-  try {
-    const db = await cache
-    return db.read(cachedKey)
-  } catch (e) {
-    defaultLogger.info(`error while retrieving marketplace cache data`, e)
-    return undefined
-  }
-}
-
-async function store(cachedKey: string, data: any) {
-  try {
-    const db = await cache
-    db.write((store) => {
-      store.put(data, cachedKey)
-    })
-  } catch (e) {
-    defaultLogger.info(`error while retrieving marketplace cache data`, e)
-  }
 }
 
 function* loadMarketplace(config: MarketplaceConfig) {

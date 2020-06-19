@@ -77,6 +77,7 @@ import { takeLatestById } from './utils/takeLatestById'
 import { UnityInterfaceContainer } from 'unity-interface/dcl'
 import { RarityEnum } from '../airdrops/interface'
 import { StoreContainer } from '../store/rootTypes'
+import { retrieve, store } from 'shared/cache'
 
 type Timestamp = number
 type ContentFileHash = string
@@ -154,13 +155,32 @@ function overrideSwankyRarity(wearable: Wearable) {
 export function* initialLoad() {
   if (WORLD_EXPLORER) {
     try {
-      let collections: Collection[]
+      const catalogUrl = getServerConfigurations().avatar.catalog
+
+      let collections: Collection[] | undefined
       if (globalThis.location.search.match(/TEST_WEARABLES/)) {
-        collections = [{ id: 'all', wearables: yield call(fetchCatalog, getServerConfigurations().avatar.catalog) }]
+        collections = [{ id: 'all', wearables: (yield call(fetchCatalog, catalogUrl))[0] }]
       } else {
-        collections = yield call(fetchCatalog, getServerConfigurations().avatar.catalog)
+        const cached = yield retrieve('catalog')
+
+        if (cached) {
+          const version = yield headCatalog(catalogUrl)
+          if (cached.version === version) {
+            collections = cached.data
+          }
+        }
+
+        if (!collections) {
+          const response = yield call(fetchCatalog, catalogUrl)
+          collections = response[0]
+
+          const version = response[1]
+          if (version) {
+            yield store('catalog', { version, data: response[0] })
+          }
+        }
       }
-      const catalog = collections
+      const catalog = collections!
         .reduce((flatten, collection) => flatten.concat(collection.wearables), [] as Wearable[])
         .map(overrideBaseUrl)
         // TODO - remove once all swankies are removed from service! - moliva - 22/05/2020
@@ -294,12 +314,21 @@ export function* handleAddCatalog(action: AddCatalogAction): any {
   yield put(catalogLoaded(action.payload.name))
 }
 
+async function headCatalog(url: string) {
+  const request = await fetch(url, { method: 'HEAD' })
+  if (!request.ok) {
+    throw new Error('Catalog not found')
+  }
+  return request.headers.get('etag')
+}
+
 export async function fetchCatalog(url: string) {
   const request = await fetch(url)
   if (!request.ok) {
     throw new Error('Catalog not found')
   }
-  return request.json()
+  const etag = request.headers.get('etag')
+  return [await request.json(), etag]
 }
 
 export function sendWearablesCatalog(catalog: Catalog) {
@@ -329,12 +358,14 @@ export function* ensureBaseCatalogs() {
 
 export function* submitProfileToRenderer(action: ProfileSuccessAction): any {
   const profile = { ...action.payload.profile }
-  const { snapshots } = profile.avatar
-  // set face variants if missing before sending profile to renderer
-  profile.avatar.snapshots = {
-    ...snapshots,
-    face128: snapshots.face128 || snapshots.face,
-    face256: snapshots.face256 || snapshots.face
+  if (profile.avatar) {
+    const { snapshots } = profile.avatar
+    // set face variants if missing before sending profile to renderer
+    profile.avatar.snapshots = {
+      ...snapshots,
+      face128: snapshots.face128 || snapshots.face,
+      face256: snapshots.face256 || snapshots.face
+    }
   }
   if ((yield select(getCurrentUserId)) === action.payload.userId) {
     yield call(ensureRenderer)

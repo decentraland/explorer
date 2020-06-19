@@ -1,5 +1,5 @@
 import future from 'fp-future'
-import { createLogger } from '../logger'
+import { createLogger } from './logger'
 
 const logger = createLogger('cache: ')
 const DEBUG = false
@@ -62,4 +62,25 @@ request.onsuccess = (event: any) => {
   }
 
   init.resolve(db)
+}
+
+export async function retrieve(cachedKey: string) {
+  try {
+    const db = await cache
+    return db.read(cachedKey)
+  } catch (e) {
+    logger.info(`error while retrieving cache data`, e)
+    return undefined
+  }
+}
+
+export async function store(cachedKey: string, data: any) {
+  try {
+    const db = await cache
+    db.write((store) => {
+      store.put(data, cachedKey)
+    })
+  } catch (e) {
+    logger.info(`error while retrieving cache data`, e)
+  }
 }

@@ -41,8 +41,7 @@ import { isRealmInitialized } from 'shared/dao/selectors'
 import { CATALYST_REALM_INITIALIZED } from 'shared/dao/actions'
 import { isFriend } from './selectors'
 import { ensureRenderer } from '../profiles/sagas'
-import { worldRunningObservable, isWorldRunning } from '../world/worldState'
-import future, { IFuture } from 'fp-future'
+import { ensureWorldRunning } from 'shared/world/worldState'
 
 declare const globalThis: UnityInterfaceContainer & StoreContainer
 
@@ -67,24 +66,6 @@ avatarMessageObservable.add((pose: AvatarMessage) => {
     delete userPose[pose.uuid]
   }
 })
-
-async function ensureWorldRunning() {
-  const result: IFuture<void> = future()
-
-  if (isWorldRunning()) {
-    result.resolve()
-    return result
-  }
-
-  const observer = worldRunningObservable.add(isRunning => {
-    if (isRunning) {
-      worldRunningObservable.remove(observer)
-      result.resolve()
-    }
-  })
-
-  return result
-}
 
 export function* chatSaga(): any {
   initChatCommands()
