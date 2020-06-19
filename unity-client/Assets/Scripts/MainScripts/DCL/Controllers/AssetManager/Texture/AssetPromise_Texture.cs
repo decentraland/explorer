@@ -51,8 +51,10 @@ namespace DCL
 
                 OnSuccess?.Invoke();
             }
-
-            loadCoroutine = CoroutineStarter.Start(DownloadAndStore(OnSuccess, OnFail));
+            else
+            {
+                loadCoroutine = CoroutineStarter.Start(DownloadAndStore(OnSuccess, OnFail));
+            }
         }
 
         IEnumerator DownloadAndStore(Action OnSuccess, Action OnFail)
@@ -84,7 +86,11 @@ namespace DCL
                     // Duplicate default texture to be configured as we want
                     Texture2D duplicatedTex = new Texture2D(asset.texture.width, asset.texture.height, asset.texture.format, false);
                     Graphics.CopyTexture(asset.texture, duplicatedTex);
-                    asset = asset.Clone() as Asset_Texture;
+
+                    // By using library.Get() for the default tex we just stored, we add a reference count to it,
+                    // that will come in handy for removing that default tex when there is no one using it
+                    asset = library.Get(defaultTextureId).Clone() as Asset_Texture;
+
                     asset.id = id;
                     asset.texture = duplicatedTex;
                 }
