@@ -26,6 +26,7 @@ namespace DCL
         }
 
         protected Model model;
+        AssetPromise_Texture texturePromise = null;
 
         public TextureWrapMode unityWrap;
         public FilterMode unitySamplingMode;
@@ -121,6 +122,14 @@ namespace DCL
                     {
                         Debug.LogError($"DCLTexture with id {id} couldn't parse its base64 image data.");
                     }
+
+                    if (texture != null)
+                    {
+                        texture.wrapMode = unityWrap;
+                        texture.filterMode = unitySamplingMode;
+                        texture.Compress(false);
+                        texture.Apply(unitySamplingMode != FilterMode.Point, true);
+                    }
                 }
                 else
                 {
@@ -132,21 +141,20 @@ namespace DCL
                     else
                         scene.contentProvider.TryGetContentsUrl(model.src, out contentsUrl);
 
-                    AssetPromise_Texture texturePromise = new AssetPromise_Texture(contentsUrl);
-                    texturePromise.OnSuccessEvent += (x) => texture = x.texture;
-                    texturePromise.OnFailEvent += (x) => texture = null;
-                    AssetPromiseKeeper_Texture.i.Keep(texturePromise);
-                }
+                    if (!string.IsNullOrEmpty(contentsUrl))
+                    {
+                        if (texturePromise != null)
+                            AssetPromiseKeeper_Texture.i.Forget(texturePromise);
 
-                if (texture != null)
-                {
-                    texture.wrapMode = unityWrap;
-                    texture.filterMode = unitySamplingMode;
-                    texture.Compress(false);
-                    texture.Apply(unitySamplingMode != FilterMode.Point, true);
+                        texturePromise = new AssetPromise_Texture(contentsUrl, unityWrap, unitySamplingMode);
+                        texturePromise.OnSuccessEvent += (x) => texture = x.texture;
+                        texturePromise.OnFailEvent += (x) => texture = null;
+                        AssetPromiseKeeper_Texture.i.Keep(texturePromise);
+                    }
                 }
             }
 
+            // TODO: should we wait somehow for the texture promise to finish before finishing this ApplyChanges() ???
             return null;
         }
 
@@ -159,9 +167,13 @@ namespace DCL
 
         public override void Dispose()
         {
-            if (texture != null)
+            Debug.Log("DCLTexture.Dispose!!!");
+
+            if (texturePromise != null)
             {
-                UnityEngine.Object.Destroy(texture);
+                AssetPromiseKeeper_Texture.i.Forget(texturePromise);
+                texturePromise = null;
+                texture = null;
             }
 
             base.Dispose();

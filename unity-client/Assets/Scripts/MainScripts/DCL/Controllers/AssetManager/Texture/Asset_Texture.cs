@@ -8,6 +8,8 @@ namespace DCL
 
         public override void Cleanup()
         {
+            Object.Destroy(texture);
+            Debug.Log("destroyed texture in Asset_Texture, reference is now: " + texture);
         }
     }
 }

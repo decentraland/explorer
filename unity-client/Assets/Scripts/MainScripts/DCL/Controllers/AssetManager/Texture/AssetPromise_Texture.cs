@@ -7,22 +7,32 @@ namespace DCL
 {
     public class AssetPromise_Texture : AssetPromise<Asset_Texture>
     {
+        const TextureWrapMode DEFAULT_WRAP_MODE = TextureWrapMode.Clamp;
+        const FilterMode DEFAULT_FILTER_MODE = FilterMode.Bilinear;
+
         string url;
+        string id;
+        string defaultTextureId;
+        TextureWrapMode wrapMode;
+        FilterMode filterMode;
         Coroutine loadCoroutine;
 
-        public AssetPromise_Texture(string textureUrl)
+        public AssetPromise_Texture(string textureUrl, TextureWrapMode textureWrapMode = DEFAULT_WRAP_MODE, FilterMode textureFilterMode = DEFAULT_FILTER_MODE)
         {
             url = textureUrl;
+            wrapMode = textureWrapMode;
+            filterMode = textureFilterMode;
+
+            id = ConstructId(url, wrapMode, filterMode);
+            defaultTextureId = ConstructId(url, DEFAULT_WRAP_MODE, DEFAULT_FILTER_MODE);
         }
 
         protected override void OnAfterLoadOrReuse()
         {
-            // ClearLoadCoroutine();
         }
 
         protected override void OnBeforeLoadOrReuse()
         {
-            // ClearLoadCoroutine();
         }
 
         protected override void OnCancelLoading()
@@ -34,6 +44,14 @@ namespace DCL
         {
             ClearLoadCoroutine();
 
+            // Reuse the already-stored default texture with the needed config
+            if (!UsesDefaultWrapAndFilterMode() && library.Contains(defaultTextureId))
+            {
+                asset.texture = library.Get(defaultTextureId).texture;
+
+                OnSuccess?.Invoke();
+            }
+
             loadCoroutine = CoroutineStarter.Start(DownloadAndStore(OnSuccess, OnFail));
         }
 
@@ -43,7 +61,7 @@ namespace DCL
             {
                 yield return Utils.FetchTexture(url, (tex) =>
                 {
-                    asset.texture = (Texture2D)tex;
+                    asset.texture = tex;
                     OnSuccess?.Invoke();
                 }, (errorMessage) => OnFail?.Invoke());
             }
@@ -53,9 +71,51 @@ namespace DCL
             }
         }
 
+        protected override bool AddToLibrary()
+        {
+            if (!UsesDefaultWrapAndFilterMode())
+            {
+                if (!library.Contains(defaultTextureId))
+                {
+                    // Save default texture asset
+                    asset.id = defaultTextureId;
+                    library.Add(asset);
+
+                    // Duplicate default texture to be configured as we want
+                    Texture2D duplicatedTex = new Texture2D(asset.texture.width, asset.texture.height, asset.texture.format, false);
+                    Graphics.CopyTexture(asset.texture, duplicatedTex);
+                    asset = asset.Clone() as Asset_Texture;
+                    asset.id = id;
+                    asset.texture = duplicatedTex;
+                }
+
+                ConfigureTexture(asset.texture, wrapMode, filterMode);
+            }
+
+            return library.Add(asset);
+        }
+
+        void ConfigureTexture(Texture2D texture, TextureWrapMode textureWrapMode, FilterMode textureFilterMode)
+        {
+            texture.wrapMode = textureWrapMode;
+            texture.filterMode = textureFilterMode;
+            texture.Compress(false);
+            texture.Apply(textureFilterMode != FilterMode.Point, true);
+        }
+
+        string ConstructId(string textureUrl, TextureWrapMode textureWrapMode, FilterMode textureFilterMode)
+        {
+            return ((int)textureWrapMode) + ((int)textureFilterMode) + textureUrl;
+        }
+
         internal override object GetId()
         {
-            return url;
+            return id;
+        }
+
+        public bool UsesDefaultWrapAndFilterMode()
+        {
+            return wrapMode == DEFAULT_WRAP_MODE && filterMode == DEFAULT_FILTER_MODE;
         }
 
         void ClearLoadCoroutine()
