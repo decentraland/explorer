@@ -107,7 +107,7 @@ jobs:
                 exit 0
             else
                 openssl enc -d -aes-256-cbc -md sha256 -pbkdf2 -in /tmp/explorer/.circleci/license.zip-cipher -out /tmp/explorer/.circleci/license.zip -k ${UNITY_LICENSE_ENC}
-                cd / && unzip -o /tmp/explorer/.circleci/license.zip
+                cd / && unzip -o /tmp/explorer/.circleci/license.zip && cd /tmp/explorer/unity-client
                 export UNITY_LICENSE_CONTENT=$(base64 -d $UNITY_LICENSE_CONTENT_BASE64)
                 bash ./test-ci.sh
                 exit $?
@@ -145,7 +145,7 @@ jobs:
           command: |
             if [[ ! -e ${BUILD_PATH} ]] || [[ ! -n "$(ls -A ${BUILD_PATH})" ]]; then
                 openssl enc -d -aes-256-cbc -md sha256 -pbkdf2 -in /tmp/explorer/.circleci/license.zip-cipher -out /tmp/explorer/.circleci/license.zip -k ${UNITY_LICENSE_ENC}
-                cd / && unzip -o /tmp/explorer/.circleci/license.zip
+                cd / && unzip -o /tmp/explorer/.circleci/license.zip && cd /tmp/explorer/unity-client
                 export UNITY_LICENSE_CONTENT=$(base64 -d $UNITY_LICENSE_CONTENT_BASE64)
                 chmod +x $CIRCLE_WORKING_DIRECTORY/build-ci.sh
                 mkdir -p ${BUILD_PATH}
