@@ -81,7 +81,7 @@ jobs:
     <<: *working_directory_unity
     resource_class: xlarge
     docker:
-      - image: decentraland/renderer-build
+      - image: decentraland/renderer-build:2019.4
         environment:
           BUILD_TARGET: WebGL
           BUILD_PATH: /tmp/explorer/unity-client/Builds/unity
@@ -103,8 +103,8 @@ jobs:
       - run:
           name: Extract the license key for Unity
           command: |
-            openssl enc -d -aes-256-cbc -md sha256 -in /tmp/explorer/.circleci/license.zip-cipher -out /tmp/explorer/.circleci/license.zip -k ${CIPHER_KEY}
-            cd / && unzip /tmp/explorer/.circleci/license.zip
+            openssl enc -d -aes-256-cbc -md sha256 -pbkdf2 -in /tmp/explorer/.circleci/license.zip-cipher -out /tmp/explorer/.circleci/license.zip -k ${UNITY_LICENSE_ENC}
+            cd / && unzip -o /tmp/explorer/.circleci/license.zip
       - run:
           name: Run tests
           command: |
@@ -127,7 +127,7 @@ jobs:
     <<: *working_directory_unity
     resource_class: xlarge
     docker:
-      - image: decentraland/renderer-build
+      - image: decentraland/renderer-build:2019.4
         environment:
           BUILD_TARGET: WebGL
           BUILD_PATH: /tmp/explorer/unity-client/Builds/unity
@@ -145,8 +145,8 @@ jobs:
       - run:
           name: Extract the license key for Unity
           command: |
-            openssl enc -d -aes-256-cbc -md sha256 -in /tmp/explorer/.circleci/license.zip-cipher -out /tmp/explorer/.circleci/license.zip -k ${CIPHER_KEY}
-            cd / && unzip /tmp/explorer/.circleci/license.zip
+            openssl enc -d -aes-256-cbc -md sha256 -pbkdf2 -in /tmp/explorer/.circleci/license.zip-cipher -out /tmp/explorer/.circleci/license.zip -k ${UNITY_LICENSE_ENC}
+            cd / && unzip -o /tmp/explorer/.circleci/license.zip
       - run:
           name: Build decentraland-renderer
           command: |
