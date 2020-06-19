@@ -9,13 +9,13 @@ public class ControlsHUDView : MonoBehaviour
     [SerializeField] internal Button_OnPointerDown closeButton;
 
     public event Action onToggleActionTriggered;
-    public event Action onCloseActionTriggered;
+    public event Action<bool> onCloseActionTriggered;
 
     private void Awake()
     {
         toggleAction.OnTriggered += OnToggleActionTriggered;
         closeAction.OnTriggered += OnCloseActionTriggered;
-        closeButton.onPointerDown += () => OnCloseActionTriggered(DCLAction_Trigger.CloseWindow);
+        closeButton.onPointerDown += () => Close(true);
     }
 
     private void OnDestroy()
@@ -31,6 +31,11 @@ public class ControlsHUDView : MonoBehaviour
 
     private void OnCloseActionTriggered(DCLAction_Trigger action)
     {
-        onCloseActionTriggered?.Invoke();
+        Close(false);
+    }
+
+    private void Close(bool closedByButtonPress)
+    {
+        onCloseActionTriggered?.Invoke(closedByButtonPress);
     }
 }

@@ -60,8 +60,10 @@ public class ControlsHUDController : IHUD
         return view.showHideAnimator.isVisible;
     }
 
-    public void Hide()
+    public void Hide(bool restorePointerLockStatus)
     {
+        if (!restorePointerLockStatus)
+            prevMouseLockState = false;
         SetVisibility(false);
     }
 }
