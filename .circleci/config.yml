@@ -106,7 +106,8 @@ jobs:
             if [[ -e /tmp/explorer/unity-client/testlog/log.txt ]]; then
                 exit 0
             else
-                export UNITY_LICENSE_CONTENT=$(base64 -d $UNITY_LICENSE_CONTENT_BASE64)
+                export UNITY_LICENSE_CONTENT=$(base64 -d ${UNITY_LICENSE_CONTENT_BASE64})
+                echo ${UNITY_LICENSE_CONTENT}
                 bash ./test-ci.sh
                 exit $?
             fi;
