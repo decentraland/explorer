@@ -1,6 +1,9 @@
 {
     "name": "UniGif",
-    "references": [],
+    "references": [
+        "GUID:8f18b4ef38b9d4637b8190231eb24e38"
+    ],
+    "optionalUnityReferences": [],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
@@ -8,6 +11,5 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": [],
-    "noEngineReferences": false
+    "versionDefines": []
 }

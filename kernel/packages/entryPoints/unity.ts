@@ -7,8 +7,8 @@ global.enableWeb3 = true
 import { ReportFatalError } from 'shared/loading/ReportFatalError'
 import { experienceStarted, NOT_INVITED, AUTH_ERROR_LOGGED_OUT, FAILED_FETCHING_UNITY } from 'shared/loading/types'
 import { worldToGrid } from '../atomicHelpers/parcelScenePositions'
-import { NO_MOTD, tutorialEnabled, OPEN_AVATAR_EDITOR, USE_NEW_CHAT } from '../config/index'
-import defaultLogger from 'shared/logger'
+import { NO_MOTD, tutorialEnabled, OPEN_AVATAR_EDITOR, USE_NEW_CHAT, DEBUG_PM } from '../config/index'
+import defaultLogger, { createLogger } from 'shared/logger'
 import { signalRendererInitialized, signalParcelLoadingStarted } from 'shared/renderer/actions'
 import { lastPlayerPosition, teleportObservable } from 'shared/world/positionThings'
 import { StoreContainer } from 'shared/store/rootTypes'
@@ -16,10 +16,22 @@ import { startUnityParcelLoading, unityInterface } from '../unity-interface/dcl'
 import { initializeUnity } from '../unity-interface/initializer'
 import { HUDElementID } from 'shared/types'
 import { identity } from 'shared'
+import { worldRunningObservable } from 'shared/world/worldState'
 
 const container = document.getElementById('gameContainer')
 
 if (!container) throw new Error('cannot find element #gameContainer')
+
+const logger = createLogger('unity.ts: ')
+
+const start = Date.now()
+
+const observer = worldRunningObservable.add(isRunning => {
+  if (isRunning) {
+    worldRunningObservable.remove(observer)
+    DEBUG_PM && logger.info(`initial load: `, Date.now() - start)
+  }
+})
 
 initializeUnity(container)
   .then(async _ => {
@@ -39,6 +51,7 @@ initializeUnity(container)
     i.ConfigureHUDElement(HUDElementID.OPEN_EXTERNAL_URL_PROMPT, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.NFT_INFO_DIALOG, { active: true, visible: false })
     i.ConfigureHUDElement(HUDElementID.TELEPORT_DIALOG, { active: true, visible: false })
+    i.ConfigureHUDElement(HUDElementID.CONTROLS_HUD, { active: true, visible: false })
 
     globalThis.globalStore.dispatch(signalRendererInitialized())
 
