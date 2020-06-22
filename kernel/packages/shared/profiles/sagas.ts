@@ -277,8 +277,25 @@ function* populateFaceIfNecessary(profile: any, resolution: string) {
     try {
       const resizeServiceUrl: string = yield select(getResizeService)
       const faceUrlSegments = profile.avatar.snapshots.face.split('/')
-      const faceUrl = `${resizeServiceUrl}/${faceUrlSegments[faceUrlSegments.length - 1]}/${resolution}`
-      profile.avatar = { ...profile.avatar, snapshots: { ...profile.avatar?.snapshots, [selector]: faceUrl } }
+      const path = `${faceUrlSegments[faceUrlSegments.length - 1]}/${resolution}`
+      let faceUrl = `${resizeServiceUrl}/${path}`
+
+      // head to resize url in the current catalyst before populating
+      let response = yield fetch(faceUrl, { method: 'HEAD' })
+      if (!response.ok) {
+        // if resize service is not available for this image, try with fallback server
+        const fallbackServiceUrl = getServerConfigurations().fallbackResizeServiceUrl
+        if (fallbackServiceUrl !== resizeServiceUrl) {
+          faceUrl = `${fallbackServiceUrl}/${path}`
+
+          response = yield fetch(faceUrl, { method: 'HEAD' })
+        }
+      }
+
+      if (response.ok) {
+        // only populate image field if resize service responsed correctly
+        profile.avatar = { ...profile.avatar, snapshots: { ...profile.avatar?.snapshots, [selector]: faceUrl } }
+      }
     } catch (e) {
       defaultLogger.error(`error while resizing image for user ${profile.userId} for resolution ${resolution}`, e)
     }
