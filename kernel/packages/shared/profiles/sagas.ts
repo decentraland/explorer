@@ -77,6 +77,7 @@ import { takeLatestById } from './utils/takeLatestById'
 import { UnityInterfaceContainer } from 'unity-interface/dcl'
 import { RarityEnum } from '../airdrops/interface'
 import { StoreContainer } from '../store/rootTypes'
+import { retrieve, store } from 'shared/cache'
 
 type Timestamp = number
 type ContentFileHash = string
@@ -142,7 +143,7 @@ function overrideBaseUrl(wearable: Wearable) {
 }
 
 function overrideSwankyRarity(wearable: Wearable) {
-  if (wearable.rarity as any === 'swanky') {
+  if ((wearable.rarity as any) === 'swanky') {
     return {
       ...wearable,
       rarity: 'rare' as RarityEnum
@@ -154,13 +155,32 @@ function overrideSwankyRarity(wearable: Wearable) {
 export function* initialLoad() {
   if (WORLD_EXPLORER) {
     try {
-      let collections: Collection[]
+      const catalogUrl = getServerConfigurations().avatar.catalog
+
+      let collections: Collection[] | undefined
       if (globalThis.location.search.match(/TEST_WEARABLES/)) {
-        collections = [{ id: 'all', wearables: yield call(fetchCatalog, getServerConfigurations().avatar.catalog) }]
+        collections = [{ id: 'all', wearables: (yield call(fetchCatalog, catalogUrl))[0] }]
       } else {
-        collections = yield call(fetchCatalog, getServerConfigurations().avatar.catalog)
+        const cached = yield retrieve('catalog')
+
+        if (cached) {
+          const version = yield headCatalog(catalogUrl)
+          if (cached.version === version) {
+            collections = cached.data
+          }
+        }
+
+        if (!collections) {
+          const response = yield call(fetchCatalog, catalogUrl)
+          collections = response[0]
+
+          const version = response[1]
+          if (version) {
+            yield store('catalog', { version, data: response[0] })
+          }
+        }
       }
-      const catalog = collections
+      const catalog = collections!
         .reduce((flatten, collection) => flatten.concat(collection.wearables), [] as Wearable[])
         .map(overrideBaseUrl)
         // TODO - remove once all swankies are removed from service! - moliva - 22/05/2020
@@ -257,8 +277,25 @@ function* populateFaceIfNecessary(profile: any, resolution: string) {
     try {
       const resizeServiceUrl: string = yield select(getResizeService)
       const faceUrlSegments = profile.avatar.snapshots.face.split('/')
-      const faceUrl = `${resizeServiceUrl}/${faceUrlSegments[faceUrlSegments.length - 1]}/${resolution}`
-      profile.avatar = { ...profile.avatar, snapshots: { ...profile.avatar?.snapshots, [selector]: faceUrl } }
+      const path = `${faceUrlSegments[faceUrlSegments.length - 1]}/${resolution}`
+      let faceUrl = `${resizeServiceUrl}/${path}`
+
+      // head to resize url in the current catalyst before populating
+      let response = yield fetch(faceUrl, { method: 'HEAD' })
+      if (!response.ok) {
+        // if resize service is not available for this image, try with fallback server
+        const fallbackServiceUrl = getServerConfigurations().fallbackResizeServiceUrl
+        if (fallbackServiceUrl !== resizeServiceUrl) {
+          faceUrl = `${fallbackServiceUrl}/${path}`
+
+          response = yield fetch(faceUrl, { method: 'HEAD' })
+        }
+      }
+
+      if (response.ok) {
+        // only populate image field if resize service responsed correctly
+        profile.avatar = { ...profile.avatar, snapshots: { ...profile.avatar?.snapshots, [selector]: faceUrl } }
+      }
     } catch (e) {
       defaultLogger.error(`error while resizing image for user ${profile.userId} for resolution ${resolution}`, e)
     }
@@ -294,12 +331,21 @@ export function* handleAddCatalog(action: AddCatalogAction): any {
   yield put(catalogLoaded(action.payload.name))
 }
 
+async function headCatalog(url: string) {
+  const request = await fetch(url, { method: 'HEAD' })
+  if (!request.ok) {
+    throw new Error('Catalog not found')
+  }
+  return request.headers.get('etag')
+}
+
 export async function fetchCatalog(url: string) {
   const request = await fetch(url)
   if (!request.ok) {
     throw new Error('Catalog not found')
   }
-  return request.json()
+  const etag = request.headers.get('etag')
+  return [await request.json(), etag]
 }
 
 export function sendWearablesCatalog(catalog: Catalog) {
@@ -329,6 +375,15 @@ export function* ensureBaseCatalogs() {
 
 export function* submitProfileToRenderer(action: ProfileSuccessAction): any {
   const profile = { ...action.payload.profile }
+  if (profile.avatar) {
+    const { snapshots } = profile.avatar
+    // set face variants if missing before sending profile to renderer
+    profile.avatar.snapshots = {
+      ...snapshots,
+      face128: snapshots.face128 || snapshots.face,
+      face256: snapshots.face256 || snapshots.face
+    }
+  }
   if ((yield select(getCurrentUserId)) === action.payload.userId) {
     yield call(ensureRenderer)
     yield call(ensureBaseCatalogs)
@@ -369,10 +424,7 @@ export function* handleFetchInventory(action: InventoryRequest) {
 }
 
 function dropIndexFromExclusives(exclusive: string) {
-  return exclusive
-    .split('/')
-    .slice(0, 4)
-    .join('/')
+  return exclusive.split('/').slice(0, 4).join('/')
 }
 
 export async function fetchInventoryItemsByAddress(address: string) {
@@ -385,7 +437,7 @@ export async function fetchInventoryItemsByAddress(address: string) {
   }
   const inventory: { id: string }[] = await result.json()
 
-  return inventory.map(wearable => wearable.id)
+  return inventory.map((wearable) => wearable.id)
 }
 
 export function* handleSaveAvatar(saveAvatar: SaveProfileRequest) {
@@ -490,7 +542,7 @@ async function buildSnapshotContent(selector: string, value: string): Promise<[s
   const resizeServeUrl = getResizeService(globalThis.globalStore.getState())
   if (value.startsWith(resizeServeUrl)) {
     // value is coming in a resize service url => generate image & upload content
-    const blob = await fetch(value).then(r => r.blob())
+    const blob = await fetch(value).then((r) => r.blob())
 
     contentFile = await makeContentFile(`./${selector}.png`, blob)
     hash = await calculateBufferHash(contentFile.content)
@@ -599,7 +651,7 @@ export function createEthereumMessageHash(msg: string) {
 }
 
 export async function calculateHashes(files: ContentFile[]): Promise<Map<string, ContentFile>> {
-  const entries: Promise<[string, ContentFile]>[] = Array.from(files).map(file =>
+  const entries: Promise<[string, ContentFile]>[] = Array.from(files).map((file) =>
     calculateBufferHash(file.content).then((hash: string) => [hash, file])
   )
   return new Map(await Promise.all(entries))
@@ -667,7 +719,7 @@ const MILLIS_PER_SECOND = 1000
 const ONE_MINUTE = 60 * MILLIS_PER_SECOND
 
 export function delay(time: number) {
-  return new Promise(resolve => setTimeout(resolve, time))
+  return new Promise((resolve) => setTimeout(resolve, time))
 }
 
 export function* queryInventoryEveryMinute() {
