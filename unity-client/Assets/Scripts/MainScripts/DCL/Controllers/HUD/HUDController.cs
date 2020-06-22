@@ -58,6 +58,10 @@ public class HUDController : MonoBehaviour
 
     public FriendsHUDController friendsHud => GetHUDElement(HUDElementID.FRIENDS) as FriendsHUDController;
 
+    public TeleportPromptHUDController teleportHud => GetHUDElement(HUDElementID.TELEPORT_DIALOG) as TeleportPromptHUDController;
+
+    public ControlsHUDController controlsHud => GetHUDElement(HUDElementID.CONTROLS_HUD) as ControlsHUDController;
+
     public Dictionary<HUDElementID, IHUD> hudElements { get; private set; } = new Dictionary<HUDElementID, IHUD>();
 
     private UserProfile ownUserProfile => UserProfile.GetOwnUserProfile();
@@ -71,6 +75,11 @@ public class HUDController : MonoBehaviour
     private void ShowSettings()
     {
         settingsHud?.SetVisibility(true);
+    }
+
+    private void ShowControls()
+    {
+        controlsHud?.SetVisibility(true);
     }
 
     private void ToggleUIVisibility_OnTriggered(DCLAction_Trigger action)
@@ -110,7 +119,9 @@ public class HUDController : MonoBehaviour
         OPEN_EXTERNAL_URL_PROMPT = 14,
         PRIVATE_CHAT_WINDOW = 15,
         NFT_INFO_DIALOG = 16,
-        COUNT = 17
+        TELEPORT_DIALOG = 17,
+        CONTROLS_HUD = 18,
+        COUNT = 19
     }
 
     [System.Serializable]
@@ -155,6 +166,7 @@ public class HUDController : MonoBehaviour
                     avatarHud.Initialize();
                     avatarHud.OnEditAvatarPressed += ShowAvatarEditor;
                     avatarHud.OnSettingsPressed += ShowSettings;
+                    avatarHud.OnControlsPressed += ShowControls;
                     ownUserProfile.OnUpdate += OwnUserProfileUpdated;
                     OwnUserProfileUpdated(ownUserProfile);
                 }
@@ -270,6 +282,12 @@ public class HUDController : MonoBehaviour
             case HUDElementID.NFT_INFO_DIALOG:
                 CreateHudElement<NFTPromptHUDController>(configuration, hudElementId);
                 break;
+            case HUDElementID.TELEPORT_DIALOG:
+                CreateHudElement<TeleportPromptHUDController>(configuration, hudElementId);
+                break;
+            case HUDElementID.CONTROLS_HUD:
+                CreateHudElement<ControlsHUDController>(configuration, hudElementId);
+                break;
         }
 
         var hudElement = GetHUDElement(hudElementId);
@@ -358,6 +376,11 @@ public class HUDController : MonoBehaviour
         });
     }
 
+    public void RequestTeleport(string teleportDataJson)
+    {
+        teleportHud?.RequestTeleport(teleportDataJson);
+    }
+
     private void OnDestroy()
     {
         toggleUIVisibilityTrigger.OnTriggered -= ToggleUIVisibility_OnTriggered;
@@ -369,6 +392,7 @@ public class HUDController : MonoBehaviour
         {
             avatarHud.OnEditAvatarPressed -= ShowAvatarEditor;
             avatarHud.OnSettingsPressed -= ShowSettings;
+            avatarHud.OnControlsPressed -= ShowControls;
         }
 
         if (worldChatWindowHud != null)

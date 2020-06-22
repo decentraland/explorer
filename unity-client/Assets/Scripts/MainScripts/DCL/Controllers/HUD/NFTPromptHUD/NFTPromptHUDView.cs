@@ -168,7 +168,7 @@ public class NFTPromptHUDView : MonoBehaviour
         textOpenMarketButton.text = "VIEW";
         if (info.marketInfo != null)
         {
-            textOpenMarketButton.text = $"{textOpenMarketButton.text} IN {info.marketInfo.Value.name.ToUpper()}";
+            textOpenMarketButton.text = $"{textOpenMarketButton.text} ON {info.marketInfo.Value.name.ToUpper()}";
         }
 
         marketUrl = null;
@@ -204,7 +204,7 @@ public class NFTPromptHUDView : MonoBehaviour
                 (asset) =>
                 {
                     nftImageAsset = asset;
-                });
+                }, WrappedTextureMaxSize._256);
         }
 
         if (nftImageAsset != null)

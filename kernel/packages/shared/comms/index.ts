@@ -68,6 +68,8 @@ import { Profile } from 'shared/profiles/types'
 import { realmToString } from '../dao/utils/realmToString'
 import { queueTrackingEvent } from 'shared/analytics'
 import { messageReceived } from '../chat/actions'
+import { arrayEquals } from 'atomicHelpers/arrayEquals'
+import { getCommsConfig } from 'shared/meta/selectors'
 
 export type CommsVersion = 'v1' | 'v2'
 export type CommsMode = CommsV1Mode | CommsV2Mode
@@ -275,7 +277,7 @@ export function processChatMessage(context: Context, fromAlias: string, message:
 
     const user = getUser(fromAlias)
     if (user) {
-      const displayName = user.profile && user.profile.name
+      const displayName = user.profile && user.profile.userId
 
       if (text.startsWith('␐')) {
         const [id, timestamp] = text.split(' ')
@@ -342,7 +344,12 @@ export function processProfileMessage(
  * Ensures that there is only one peer tracking info for this identity.
  * Returns true if this is the latest update and the one that remains
  */
-function ensureTrackingUniqueAndLatest(context: Context, fromAlias: string, peerIdentity: string, thisUpdateTimestamp: Timestamp) {
+function ensureTrackingUniqueAndLatest(
+  context: Context,
+  fromAlias: string,
+  peerIdentity: string,
+  thisUpdateTimestamp: Timestamp
+) {
   let currentLastProfileAlias = fromAlias
   let currentLastProfileUpdate = thisUpdateTimestamp
 
@@ -385,6 +392,7 @@ let currentParcelTopics = ''
 let previousTopics = ''
 
 let lastNetworkUpdatePosition = new Date().getTime()
+let lastPositionSent: Position | undefined
 
 export function onPositionUpdate(context: Context, p: Position) {
   const worldConnection = context.worldInstanceConnection
@@ -439,8 +447,17 @@ export function onPositionUpdate(context: Context, p: Position) {
   }
 
   context.currentPosition = p
-  const now = new Date().getTime()
-  if (now - lastNetworkUpdatePosition > 100 && !context.positionUpdatesPaused) {
+
+  const now = Date.now()
+  const elapsed = now - lastNetworkUpdatePosition
+
+  // We only send the same position message as a ping if we have not sent positions in the last 5 seconds
+  if (arrayEquals(p, lastPositionSent) && elapsed < 5000) {
+    return
+  }
+
+  if (elapsed > 100 && !context.positionUpdatesPaused) {
+    lastPositionSent = p
     lastNetworkUpdatePosition = now
     worldConnection.sendPositionMessage(p).catch(e => defaultLogger.warn(`error while sending message `, e))
   }
@@ -622,6 +639,7 @@ export async function connect(userId: string) {
         const store: Store<RootState> = globalThis.globalStore
         const lighthouseUrl = getCommsServer(store.getState())
         const realm = getRealm(store.getState())
+        const commsConfig = getCommsConfig(store.getState())
 
         const peerConfig = {
           connectionConfig: {
@@ -637,6 +655,8 @@ export async function connect(userId: string) {
             return identity
           },
           logLevel: 'NONE',
+          targetConnections: commsConfig.targetConnections ?? 4,
+          maxConnections: commsConfig.maxConnections ?? 6,
           positionConfig: {
             selfPosition: () => {
               if (context && context.currentPosition) {
