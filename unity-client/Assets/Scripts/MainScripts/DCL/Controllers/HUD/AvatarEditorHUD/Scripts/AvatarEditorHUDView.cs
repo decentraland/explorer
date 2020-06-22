@@ -277,10 +277,10 @@ public class AvatarEditorHUDView : MonoBehaviour
         controller.DiscardAndClose();
     }
 
-    private void OnSnapshotsReady(Sprite face, Sprite face128, Sprite face256, Sprite body)
+    private void OnSnapshotsReady(Sprite face, Sprite body)
     {
         doneButton.interactable = true;
-        controller.SaveAvatar(face, face128, face256, body);
+        controller.SaveAvatar(face, body);
     }
 
     public void SetVisibility(bool visible)

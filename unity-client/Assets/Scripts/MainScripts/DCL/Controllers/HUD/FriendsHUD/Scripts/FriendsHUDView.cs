@@ -6,9 +6,8 @@ public class FriendsHUDView : MonoBehaviour
 {
     public const string NOTIFICATIONS_ID = "Friends";
     static readonly int ANIM_PROPERTY_SELECTED = Animator.StringToHash("Selected");
+
     const string VIEW_PATH = "FriendsHUD";
-    const int PREINSTANTIATED_FRIENDS_ENTRIES = 20;
-    const int PREINSTANTIATED_FRIENDS_REQUEST_ENTRIES = 10;
 
     public Button closeButton;
     public Button friendsButton;
@@ -65,8 +64,8 @@ public class FriendsHUDView : MonoBehaviour
     private void Initialize(FriendsHUDController controller)
     {
         this.controller = controller;
-        friendsList.Initialize(this, PREINSTANTIATED_FRIENDS_ENTRIES);
-        friendRequestsList.Initialize(this, PREINSTANTIATED_FRIENDS_REQUEST_ENTRIES);
+        friendsList.Initialize(this);
+        friendRequestsList.Initialize(this);
 
         closeButton.onClick.AddListener(OnCloseButtonPressed);
 

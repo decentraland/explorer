@@ -8,7 +8,6 @@ namespace DCL
     {
         public static float PROCESS_PROMISES_TIME_BUDGET = 0.006f;
     }
-
     /// <summary>
     /// The AssetPromiseKeeper is the user entry point interface.
     /// It manages stuff like requesting something that's already being loaded, etc.
@@ -25,7 +24,6 @@ namespace DCL
         where AssetPromiseType : AssetPromise<AssetType>
     {
         private static AssetPromiseKeeper<AssetType, AssetLibraryType, AssetPromiseType> instance;
-
         public static AssetPromiseKeeper<AssetType, AssetLibraryType, AssetPromiseType> i
         {
             get
@@ -55,8 +53,7 @@ namespace DCL
         //NOTE(Brian): Master promise id -> blocked promises HashSet
         Dictionary<object, HashSet<AssetPromiseType>> masterToBlockedPromises = new Dictionary<object, HashSet<AssetPromiseType>>(100);
 
-        public bool useTimeBudget => CommonScriptableObjects.rendererState.Get();
-
+        public bool useTimeBudget { get { return CommonScriptableObjects.rendererState.Get(); } }
         float startTime;
 
         public bool IsBlocked(AssetPromiseType promise)
@@ -99,8 +96,6 @@ namespace DCL
                 return promise;
             }
 
-            promise.isDirty = true;
-
             //NOTE(Brian): We already have a master promise for this id, add to blocked list.
             if (masterPromiseById.ContainsKey(id))
             {
@@ -117,7 +112,7 @@ namespace DCL
             }
 
             // NOTE(Brian): Not in library, add to corresponding lists...
-            if (!library.Contains(id))
+            if (!library.Contains(promise))
             {
                 waitingPromises.Add(promise);
                 masterPromiseById.Add(id, promise);
@@ -201,8 +196,6 @@ namespace DCL
                     yield return enumerator;
             }
         }
-
-
         private IEnumerator ProcessBlockedPromisesDeferred(AssetPromiseType loadedPromise)
         {
             object loadedPromiseId = loadedPromise.GetId();
@@ -218,7 +211,6 @@ namespace DCL
                 Debug.LogWarning($"Unexpected issue: masterPromiseById promise isn't the same as loaded promise? id: {loadedPromiseId} (can be harmless)");
                 yield break;
             }
-
 
             //NOTE(Brian): We have to keep checking to support the case in which
             //             new promises are enqueued while this promise ID is being
@@ -259,7 +251,6 @@ namespace DCL
                 startTime = Time.unscaledTime;
             }
         }
-
         private List<AssetPromiseType> GetBlockedPromisesToLoadForId(object masterPromiseId)
         {
             var blockedPromisesToLoadAux = new List<AssetPromiseType>();
@@ -316,11 +307,6 @@ namespace DCL
 
         void CleanPromise(AssetPromise<AssetType> promise)
         {
-            if (!promise.isDirty)
-                return;
-
-            promise.isDirty = false;
-
             AssetPromiseType finalPromise = promise as AssetPromiseType;
 
             object id = promise.GetId();
@@ -333,11 +319,8 @@ namespace DCL
                 }
             }
 
-
             if (masterPromiseById.ContainsKey(id) && masterPromiseById[id] == promise)
-            {
                 masterPromiseById.Remove(id);
-            }
 
             if (blockedPromises.Contains(finalPromise))
                 blockedPromises.Remove(finalPromise);

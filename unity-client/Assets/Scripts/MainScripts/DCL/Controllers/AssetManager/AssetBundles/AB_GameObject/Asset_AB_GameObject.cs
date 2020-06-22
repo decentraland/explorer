@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using DCL.Configuration;
 using UnityEngine;
 

@@ -95,7 +95,7 @@ namespace DCL
             avatarUserInfo.userId = model.id;
             avatarUserInfo.userName = model.name;
             avatarUserInfo.worldPosition = lastAvatarPosition != null ? lastAvatarPosition.Value : minimapRepresentation.transform.position;
-            MinimapMetadataController.i?.UpdateMinimapUserInformation(avatarUserInfo);
+            UpdateAvatarIconInMinimap(avatarUserInfo);
         }
 
         void SetMinimapRepresentationActive(bool active)
@@ -113,7 +113,17 @@ namespace DCL
             avatarUserInfo.userId = model.id;
             avatarUserInfo.userName = model.name;
             avatarUserInfo.worldPosition = updatedModel.position;
-            MinimapMetadataController.i?.UpdateMinimapUserInformation(avatarUserInfo);
+            UpdateAvatarIconInMinimap(avatarUserInfo);
+        }
+
+        private void UpdateAvatarIconInMinimap(MinimapMetadata.MinimapUserInfo userInfo)
+        {
+            MinimapMetadataController.i?.UpdateMinimapUserInformation(new MinimapMetadata.MinimapUserInfo
+            {
+                userId = userInfo.userId,
+                userName = userInfo.userName,
+                worldPosition = userInfo.worldPosition
+            });
         }
     }
 }

@@ -7,7 +7,6 @@ export const getFetchContentServer = (store: RootDaoState) => store.dao.fetchCon
 export const getFetchMetaContentServer = (store: RootDaoState) => store.dao.fetchMetaContentServer
 export const getFetchMetaContentService = (store: RootDaoState) =>
   store.dao.fetchMetaContentServer + '/lambdas/contentv2'
-export const getResizeService = (store: RootDaoState) => store.dao.resizeService
 
 export const getCommsServer = (store: RootDaoState) => store.dao.commsServer
 

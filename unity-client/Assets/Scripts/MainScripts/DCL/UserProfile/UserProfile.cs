@@ -25,6 +25,7 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
     internal Dictionary<string, int> inventory = new Dictionary<string, int>();
 
     public Sprite faceSnapshot { get; private set; }
+    public Sprite bodySnapshot { get; private set; }
 
     internal UserProfileModel model = new UserProfileModel() //Empty initialization to avoid nullchecks
     {
@@ -33,10 +34,12 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
 
     public void UpdateData(UserProfileModel newModel, bool downloadAssets = true)
     {
-        ForgetThumbnail(model?.snapshots?.face256, OnFaceSnapshotReady);
+        ForgetThumbnail(model?.snapshots?.face, OnFaceSnapshotReady);
+        ForgetThumbnail(model?.snapshots?.body, OnBodySnapshotReady);
 
         inventory.Clear();
         faceSnapshot = null;
+        bodySnapshot = null;
 
         if (newModel == null)
         {
@@ -62,7 +65,8 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
 
         if (downloadAssets && model.snapshots != null)
         {
-            GetThumbnail(model.snapshots.face256, OnFaceSnapshotReady);
+            GetThumbnail(model.snapshots.face, OnFaceSnapshotReady);
+            GetThumbnail(model.snapshots.body, OnBodySnapshotReady);
         }
 
         OnUpdate?.Invoke(this);
@@ -83,15 +87,23 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
         OnFaceSnapshotReadyEvent?.Invoke(sprite);
     }
 
-    public void OverrideAvatar(AvatarModel newModel, Sprite faceSnapshot)
+    private void OnBodySnapshotReady(Sprite sprite)
+    {
+        bodySnapshot = sprite;
+        OnUpdate?.Invoke(this);
+    }
+
+    public void OverrideAvatar(AvatarModel newModel, Sprite faceSnapshot, Sprite bodySnapshot)
     {
         if (model?.snapshots != null)
         {
-            ForgetThumbnail(model.snapshots.face256, OnFaceSnapshotReady);
+            ForgetThumbnail(model.snapshots.face, OnFaceSnapshotReady);
+            ForgetThumbnail(model.snapshots.body, OnBodySnapshotReady);
         }
 
         model.avatar.CopyFrom(newModel);
         this.faceSnapshot = faceSnapshot;
+        this.bodySnapshot = bodySnapshot;
         OnUpdate?.Invoke(this);
     }
 

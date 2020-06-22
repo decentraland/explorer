@@ -59,9 +59,6 @@ export async function initialize(segmentKey: string): Promise<void> {
     // loading client for the first time
     window.analytics.load(segmentKey)
     window.analytics.page()
-    window.analytics.ready(() => {
-      window.analytics.timeout(10000)
-    })
   }
 }
 

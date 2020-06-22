@@ -1,7 +1,6 @@
 using DCL.Components;
 using DCL.Interface;
 using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
 using WebSocketSharp;
 using WebSocketSharp.Server;
@@ -103,7 +102,8 @@ namespace DCL
         private Builder.DCLBuilderBridge builderBridge = null;
         public CameraController cameraController;
 
-        [System.NonSerialized] public static Queue<DCLWebSocketService.Message> queuedMessages = new Queue<DCLWebSocketService.Message>();
+        [System.NonSerialized]
+        public static Queue<DCLWebSocketService.Message> queuedMessages = new Queue<DCLWebSocketService.Message>();
 
         [System.NonSerialized] public static volatile bool queuedMessagesDirty;
 
@@ -139,18 +139,18 @@ namespace DCL
 
         private void Start()
         {
-            if (useCustomContentServer)
-            {
-                RendereableAssetLoadHelper.useCustomContentServerUrl = true;
-                RendereableAssetLoadHelper.customContentServerUrl = customContentServerUrl;
-            }
-
 #if UNITY_EDITOR
             SceneController.i.isWssDebugMode = true;
 
             ws = new WebSocketServer("ws://localhost:5000");
             ws.AddWebSocketService<DCLWebSocketService>("/dcl");
             ws.Start();
+
+            if (useCustomContentServer)
+            {
+                RendereableAssetLoadHelper.useCustomContentServerUrl = true;
+                RendereableAssetLoadHelper.customContentServerUrl = customContentServerUrl;
+            }
 
             if (openBrowserWhenStart)
             {

@@ -44,6 +44,7 @@ namespace DCL
             result.filterMode = FilterMode.Trilinear;
             result.wrapMode = TextureWrapMode.Clamp;
             result.anisoLevel = 16;
+            ((Texture2D)result).Apply(true, true);
 
             targetImage.texture = result;
             targetImage.SetNativeSize();

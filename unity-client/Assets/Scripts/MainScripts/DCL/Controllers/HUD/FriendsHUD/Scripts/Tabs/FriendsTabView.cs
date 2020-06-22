@@ -9,9 +9,9 @@ public class FriendsTabView : FriendsTabViewBase
 
     private string lastProcessedFriend;
 
-    public override void Initialize(FriendsHUDView owner, int preinstantiatedEntries)
+    public override void Initialize(FriendsHUDView owner)
     {
-        base.Initialize(owner, preinstantiatedEntries);
+        base.Initialize(owner);
 
         onlineFriendsList.toggleTextPrefix = "ONLINE";
         offlineFriendsList.toggleTextPrefix = "OFFLINE";

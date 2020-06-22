@@ -56,11 +56,10 @@ namespace DCL
         public void ApplyAfterLoad(List<Renderer> renderers = null)
         {
             int renderersCount = renderers.Count;
-
             for (int i = 0; i < renderersCount; i++)
             {
                 Renderer renderer = renderers[i];
-                renderer.enabled = visibleFlags != VisibleFlags.INVISIBLE;
+                renderer.enabled = visibleFlags == VisibleFlags.INVISIBLE ? false : true;
             }
         }
     }

@@ -14,9 +14,9 @@ using UnityEngine.Networking;
 using static DCL.ContentServerUtils;
 
 [assembly: InternalsVisibleTo("AssetBundleBuilderTests")]
-
 namespace DCL
 {
+
     public static class AssetBundleBuilderUtils
     {
         internal static bool ParseOption(string[] fullCmdArgs, string optionName, int argsQty, out string[] foundArgs)
@@ -50,7 +50,6 @@ namespace DCL
                         {
                             argState++;
                         }
-
                         break;
                     default:
                         foundArgsList.Add(rawArgsList[i]);
@@ -111,16 +110,10 @@ namespace DCL
             assetPath = Path.ChangeExtension(assetPath, null);
 
             assetPath = assetPath.Substring(0, assetPath.Length - 1);
-            AssetImporter importer = AssetImporter.GetAtPath(assetPath);
-            importer.SetAssetBundleNameAndVariant(abName, "");
+            AssetImporter a = AssetImporter.GetAtPath(assetPath);
+            a.SetAssetBundleNameAndVariant(abName, "");
         }
 
-        internal static void MarkForAssetBundleBuild(UnityEngine.Object asset, string abName)
-        {
-            string assetPath = AssetDatabase.GetAssetPath(asset);
-            var importer = AssetImporter.GetAtPath(assetPath);
-            importer.SetAssetBundleNameAndVariant(abName, "");
-        }
 
 
         internal static bool CheckProviderItemExists(DCL.ContentProvider contentProvider, string fileName)
@@ -137,9 +130,7 @@ namespace DCL
             {
                 req.SendWebRequest();
 
-                while (req.downloadedBytes > 0)
-                {
-                }
+                while (req.downloadedBytes > 0) { }
 
                 if (req.WebRequestSucceded())
                     result = true;
@@ -151,7 +142,6 @@ namespace DCL
         }
 
         public static MD5 md5 = new MD5CryptoServiceProvider();
-
         public static string CidToGuid(string cid)
         {
             byte[] data = md5.ComputeHash(Encoding.UTF8.GetBytes(cid));
@@ -174,9 +164,7 @@ namespace DCL
             UnityWebRequest w = UnityWebRequest.Get(url);
             w.SendWebRequest();
 
-            while (!w.isDone)
-            {
-            }
+            while (!w.isDone) { }
 
             if (!w.WebRequestSucceded())
             {
@@ -207,9 +195,7 @@ namespace DCL
                 UnityWebRequest w = UnityWebRequest.Get(url);
                 w.SendWebRequest();
 
-                while (!w.isDone)
-                {
-                }
+                while (!w.isDone) { }
 
                 if (!w.WebRequestSucceded())
                 {
@@ -237,9 +223,7 @@ namespace DCL
             UnityWebRequest w = UnityWebRequest.Get(url);
             w.SendWebRequest();
 
-            while (w.isDone == false)
-            {
-            }
+            while (w.isDone == false) { }
 
             if (!w.WebRequestSucceded())
                 throw new Exception($"Request error! mappings couldn't be fetched for scene {sceneCid}! -- {w.error}");

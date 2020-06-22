@@ -71,21 +71,19 @@ namespace DCL
             initializing = !renderingEnabled;
         }
 
-        public Pool AddPool(object id, GameObject original, IPooledObjectInstantiator instantiator = null, int maxPrewarmCount = DEFAULT_PREWARM_COUNT, bool isPersistent = false)
+        public Pool AddPool(object id, GameObject original, IPooledObjectInstantiator instantiator = null, int maxPrewarmCount = DEFAULT_PREWARM_COUNT)
         {
             if (ContainsPool(id))
             {
                 if (Pool.FindPoolInGameObject(original, out Pool poolAlreadyExists))
                 {
                     Debug.LogWarning("WARNING: Object is already being contained in an existing pool!. Returning it.");
-                    poolAlreadyExists.persistent = isPersistent;
                     return poolAlreadyExists;
                 }
 
                 Pool result = GetPool(id);
 
                 result.AddToPool(original);
-                result.persistent = isPersistent;
 
                 return result;
             }
@@ -97,7 +95,6 @@ namespace DCL
 
             pool.id = id;
             pool.original = original;
-            pool.persistent = isPersistent;
 
             if (USE_POOL_CONTAINERS)
             {

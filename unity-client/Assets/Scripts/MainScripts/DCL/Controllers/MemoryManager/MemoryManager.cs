@@ -21,7 +21,7 @@ namespace DCL
             {
                 if (isEnable)
                 {
-                    MemoryManager.i.CleanupPoolsIfNeeded();
+                    MemoryManager.i.CleanupPoolsIfNeeded(true);
                 }
             };
         }
@@ -47,9 +47,6 @@ namespace DCL
 
         private bool NeedsCleanup(Pool pool, bool forceCleanup = false)
         {
-            if (pool.persistent)
-                return false;
-
             if (forceCleanup)
                 return true;
 

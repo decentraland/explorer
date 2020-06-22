@@ -25,7 +25,6 @@ namespace DCL
     public abstract class AssetPromise<AssetType> : CustomYieldInstruction
         where AssetType : Asset, new()
     {
-        internal bool isDirty = false;
         internal AssetLibrary<AssetType> library;
         public AssetType asset { get; protected set; }
 
@@ -35,10 +34,7 @@ namespace DCL
         public event Action<AssetType> OnSuccessEvent;
         public event Action<AssetType> OnFailEvent;
 
-        public override bool keepWaiting
-        {
-            get { return state == AssetPromiseState.LOADING || state == AssetPromiseState.WAITING; }
-        }
+        public override bool keepWaiting { get { return state == AssetPromiseState.LOADING || state == AssetPromiseState.WAITING; } }
 
         public void ClearEvents()
         {
