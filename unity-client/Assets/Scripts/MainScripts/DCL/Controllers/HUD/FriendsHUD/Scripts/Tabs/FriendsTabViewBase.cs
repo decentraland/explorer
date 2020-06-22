@@ -212,19 +212,6 @@ public class FriendsTabViewBase : MonoBehaviour, IPointerDownHandler
         {
             bool isBlocked = UserProfile.GetOwnUserProfile().blocked.Contains(userId);
             contextMenuPanel.Initialize(userId, string.Empty, isBlocked);
-
-            //RectTransform rectTransform = contextMenuPanel.transform as RectTransform;
-
-            //if (entry.transform.parent != null)
-            //{
-            //    //NOTE(Pravus): By setting the pivot accordingly BEFORE we position the menu, we can have it always
-            //    //              visible in an easier way.
-            //    if (entry.transform.parent.InverseTransformPoint(entry.menuPositionReference.position).y < 0f)
-            //        rectTransform.pivot = new Vector2(0.5f, 0f);
-            //    else
-            //        rectTransform.pivot = new Vector2(0.5f, 1f);
-            //}
-
             contextMenuPanel.transform.position = entry.menuPositionReference.position;
             contextMenuPanel.Show();
         };
