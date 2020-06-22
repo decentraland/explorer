@@ -26,6 +26,7 @@ namespace DCL
         }
 
         protected Model model;
+        AssetPromise_Texture texturePromise = null;
 
         public TextureWrapMode unityWrap;
         public FilterMode unitySamplingMode;
@@ -121,6 +122,14 @@ namespace DCL
                     {
                         Debug.LogError($"DCLTexture with id {id} couldn't parse its base64 image data.");
                     }
+
+                    if (texture != null)
+                    {
+                        texture.wrapMode = unityWrap;
+                        texture.filterMode = unitySamplingMode;
+                        texture.Compress(false);
+                        texture.Apply(unitySamplingMode != FilterMode.Point, true);
+                    }
                 }
                 else
                 {
@@ -134,21 +143,18 @@ namespace DCL
 
                     if (!string.IsNullOrEmpty(contentsUrl))
                     {
-                        yield return Utils.FetchTexture(contentsUrl, (tex) =>
-                        {
-                            texture = (Texture2D)tex;
-                        });
+                        if (texturePromise != null)
+                            AssetPromiseKeeper_Texture.i.Forget(texturePromise);
+
+                        texturePromise = new AssetPromise_Texture(contentsUrl, unityWrap, unitySamplingMode);
+                        texturePromise.OnSuccessEvent += (x) => texture = x.texture;
+                        texturePromise.OnFailEvent += (x) => texture = null;
+                        AssetPromiseKeeper_Texture.i.Keep(texturePromise);
                     }
                 }
-
-                if (texture != null)
-                {
-                    texture.wrapMode = unityWrap;
-                    texture.filterMode = unitySamplingMode;
-                    texture.Compress(false);
-                    texture.Apply(unitySamplingMode != FilterMode.Point, true);
-                }
             }
+
+            return null;
         }
 
         public virtual void AttachTo(PBRMaterial material) { }
@@ -160,9 +166,11 @@ namespace DCL
 
         public override void Dispose()
         {
-            if (texture != null)
+            if (texturePromise != null)
             {
-                UnityEngine.Object.Destroy(texture);
+                AssetPromiseKeeper_Texture.i.Forget(texturePromise);
+                texturePromise = null;
+                texture = null;
             }
 
             base.Dispose();

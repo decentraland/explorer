@@ -122,15 +122,14 @@ namespace DCL
             OnFinish?.Invoke();
         }
 
-        private void OnReuseFinished()
+        protected void OnReuseFinished()
         {
             OnAfterLoadOrReuse();
             state = AssetPromiseState.FINISHED;
             CallAndClearEvents(isSuccess: true);
         }
 
-
-        private void OnLoadSuccess()
+        protected void OnLoadSuccess()
         {
             if (AddToLibrary())
             {
@@ -144,7 +143,7 @@ namespace DCL
             }
         }
 
-        private void OnLoadFailure()
+        protected void OnLoadFailure()
         {
             CallAndClearEvents(isSuccess: false);
             Cleanup();
