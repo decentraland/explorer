@@ -90,8 +90,16 @@ namespace DCL
             {
                 yield return Utils.FetchTexture(url, (tex) =>
                 {
-                    asset.texture = tex;
-                    OnSuccess?.Invoke();
+                    if (asset != null)
+                    {
+                        asset.texture = tex;
+                        OnSuccess?.Invoke();
+                    }
+                    else
+                    {
+                        Debug.Log($"Texture AssetPromise {url} cancelled while downloading asset!");
+                        OnFail?.Invoke();
+                    }
                 }, (errorMessage) => OnFail?.Invoke());
             }
             else

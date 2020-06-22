@@ -154,7 +154,6 @@ namespace DCL
                 }
             }
 
-            // TODO: should we wait somehow for the texture promise to finish before finishing this ApplyChanges() ???
             return null;
         }
 

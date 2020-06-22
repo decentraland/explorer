@@ -80,4 +80,13 @@ public class FacialFeatureController
         if (mainTextureRetrieved && maskTextureRetrieved)
             onTextureFetchedCallback?.Invoke(mainTexture, maskTexture);
     }
+
+    void OnDestroy()
+    {
+        if (mainTexturePromise != null)
+            AssetPromiseKeeper_Texture.i.Forget(mainTexturePromise);
+
+        if (maskTexturePromise != null)
+            AssetPromiseKeeper_Texture.i.Forget(maskTexturePromise);
+    }
 }
