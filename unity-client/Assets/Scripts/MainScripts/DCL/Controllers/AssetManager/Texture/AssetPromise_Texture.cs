@@ -111,9 +111,12 @@ namespace DCL
                     library.Add(asset);
                 }
 
+                var defaultTexAsset = library.Get(idWithDefaultTexSettings);
+
                 // By using library.Get() for the default tex we have stored, we increase its references counter,
                 // that will come in handy for removing that default tex when there is no one using it
-                asset = library.Get(idWithDefaultTexSettings).Clone() as Asset_Texture;
+                asset = defaultTexAsset.Clone() as Asset_Texture;
+                asset.dependencyAsset = defaultTexAsset;
 
                 // Duplicate default texture to be configured as we want
                 Texture2D duplicatedTex = new Texture2D(asset.texture.width, asset.texture.height, asset.texture.format, false);
