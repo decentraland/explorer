@@ -167,8 +167,6 @@ namespace DCL
 
         public override void Dispose()
         {
-            Debug.Log("DCLTexture.Dispose!!!");
-
             if (texturePromise != null)
             {
                 AssetPromiseKeeper_Texture.i.Forget(texturePromise);
