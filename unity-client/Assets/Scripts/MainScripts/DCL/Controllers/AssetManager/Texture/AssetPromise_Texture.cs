@@ -11,8 +11,8 @@ namespace DCL
         const FilterMode DEFAULT_FILTER_MODE = FilterMode.Bilinear;
 
         string url;
-        string id;
-        string defaultTextureId;
+        string idWithTexSettings;
+        string idWithDefaultTexSettings;
         TextureWrapMode wrapMode;
         FilterMode filterMode;
         Coroutine loadCoroutine;
@@ -23,8 +23,8 @@ namespace DCL
             wrapMode = textureWrapMode;
             filterMode = textureFilterMode;
 
-            id = ConstructId(url, wrapMode, filterMode);
-            defaultTextureId = ConstructId(url, DEFAULT_WRAP_MODE, DEFAULT_FILTER_MODE);
+            idWithDefaultTexSettings = ConstructId(url, DEFAULT_WRAP_MODE, DEFAULT_FILTER_MODE);
+            idWithTexSettings = UsesDefaultWrapAndFilterMode() ? idWithDefaultTexSettings : ConstructId(url, wrapMode, filterMode);
         }
 
         protected override void OnAfterLoadOrReuse()
@@ -33,6 +33,39 @@ namespace DCL
 
         protected override void OnBeforeLoadOrReuse()
         {
+        }
+
+        internal override void Load()
+        {
+            if (state == AssetPromiseState.LOADING || state == AssetPromiseState.FINISHED)
+                return;
+
+            state = AssetPromiseState.LOADING;
+
+            // We use the id-with-settings in the library, and the default tex id for the "processing" promise to block efficiently the other promises
+            // that may arise at that moment, disregarding their settings until it gets stored in the library
+            if (library.Contains(idWithTexSettings))
+            {
+                asset = GetAsset(idWithTexSettings);
+
+                if (asset != null)
+                {
+                    OnBeforeLoadOrReuse();
+                    OnReuse(OnReuseFinished);
+                }
+                else
+                {
+                    CallAndClearEvents(false);
+                }
+
+                return;
+            }
+
+            asset = new Asset_Texture();
+            OnBeforeLoadOrReuse();
+            asset.id = GetId();
+
+            OnLoad(OnLoadSuccess, OnLoadFailure);
         }
 
         protected override void OnCancelLoading()
@@ -44,17 +77,11 @@ namespace DCL
         {
             ClearLoadCoroutine();
 
-            // Reuse the already-stored default texture with the needed config
-            if (!UsesDefaultWrapAndFilterMode() && library.Contains(defaultTextureId))
-            {
-                asset.texture = library.Get(defaultTextureId).texture;
-
+            // Reuse the already-stored default texture, we duplicate it and set the needed config afterwards
+            if (library.Contains(idWithDefaultTexSettings) && !UsesDefaultWrapAndFilterMode())
                 OnSuccess?.Invoke();
-            }
             else
-            {
                 loadCoroutine = CoroutineStarter.Start(DownloadAndStore(OnSuccess, OnFail));
-            }
         }
 
         IEnumerator DownloadAndStore(Action OnSuccess, Action OnFail)
@@ -77,27 +104,27 @@ namespace DCL
         {
             if (!UsesDefaultWrapAndFilterMode())
             {
-                if (!library.Contains(defaultTextureId))
+                if (!library.Contains(idWithDefaultTexSettings))
                 {
                     // Save default texture asset
-                    asset.id = defaultTextureId;
+                    asset.id = idWithDefaultTexSettings;
                     library.Add(asset);
-
-                    // Duplicate default texture to be configured as we want
-                    Texture2D duplicatedTex = new Texture2D(asset.texture.width, asset.texture.height, asset.texture.format, false);
-                    Graphics.CopyTexture(asset.texture, duplicatedTex);
-
-                    // By using library.Get() for the default tex we just stored, we add a reference count to it,
-                    // that will come in handy for removing that default tex when there is no one using it
-                    asset = library.Get(defaultTextureId).Clone() as Asset_Texture;
-
-                    asset.id = id;
-                    asset.texture = duplicatedTex;
                 }
+
+                // By using library.Get() for the default tex we have stored, we increase its references counter,
+                // that will come in handy for removing that default tex when there is no one using it
+                asset = library.Get(idWithDefaultTexSettings).Clone() as Asset_Texture;
+
+                // Duplicate default texture to be configured as we want
+                Texture2D duplicatedTex = new Texture2D(asset.texture.width, asset.texture.height, asset.texture.format, false);
+                Graphics.CopyTexture(asset.texture, duplicatedTex);
+
+                asset.texture = duplicatedTex;
 
                 ConfigureTexture(asset.texture, wrapMode, filterMode);
             }
 
+            asset.id = idWithTexSettings;
             return library.Add(asset);
         }
 
@@ -116,7 +143,7 @@ namespace DCL
 
         internal override object GetId()
         {
-            return id;
+            return idWithDefaultTexSettings;
         }
 
         public bool UsesDefaultWrapAndFilterMode()
