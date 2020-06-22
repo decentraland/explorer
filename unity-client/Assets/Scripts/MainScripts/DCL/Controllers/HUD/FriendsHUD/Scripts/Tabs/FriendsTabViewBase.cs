@@ -115,7 +115,7 @@ public class FriendsTabViewBase : MonoBehaviour, IPointerDownHandler
     protected RectTransform rectTransform;
     protected FriendsHUDView owner;
 
-    public FriendsHUD_ContextMenu contextMenuPanel;
+    public UserContextMenu contextMenuPanel;
     public FriendsHUD_DialogBox confirmationDialog;
 
     protected Dictionary<string, FriendEntryBase> entries = new Dictionary<string, FriendEntryBase>();
@@ -173,22 +173,26 @@ public class FriendsTabViewBase : MonoBehaviour, IPointerDownHandler
         contextMenuPanel.OnReport -= OnPressReportButton;
     }
 
-    protected virtual void OnPressReportButton(FriendEntryBase obj)
+    protected virtual void OnPressReportButton(string userId)
     {
     }
 
-    protected virtual void OnPressPassportButton(FriendEntryBase obj)
+    protected virtual void OnPressPassportButton(string userId)
     {
     }
 
-    protected virtual void OnPressDeleteButton(FriendEntryBase obj)
+    protected virtual void OnPressDeleteButton(string userId)
     {
     }
 
-    protected virtual void OnPressBlockButton(FriendEntryBase entry)
+    protected virtual void OnPressBlockButton(string userId, bool blockUser)
     {
-        entry.model.blocked = !entry.model.blocked;
-        entry.Populate(entry.model);
+        FriendEntryBase friendEntryToBlock = GetEntry(userId);
+        if (friendEntryToBlock != null)
+        {
+            friendEntryToBlock.model.blocked = blockUser;
+            friendEntryToBlock.Populate(friendEntryToBlock.model);
+        }
     }
 
     public virtual void CreateOrUpdateEntry(string userId, FriendEntryBase.Model model)
@@ -204,7 +208,26 @@ public class FriendsTabViewBase : MonoBehaviour, IPointerDownHandler
         var entry = Instantiate(entryPrefab).GetComponent<FriendEntryBase>();
         entries.Add(userId, entry);
 
-        entry.OnMenuToggle += (x) => { contextMenuPanel.Toggle(entry); };
+        entry.OnMenuToggle += (x) =>
+        {
+            bool isBlocked = UserProfile.GetOwnUserProfile().blocked.Contains(userId);
+            contextMenuPanel.Initialize(userId, string.Empty, isBlocked);
+
+            //RectTransform rectTransform = contextMenuPanel.transform as RectTransform;
+
+            //if (entry.transform.parent != null)
+            //{
+            //    //NOTE(Pravus): By setting the pivot accordingly BEFORE we position the menu, we can have it always
+            //    //              visible in an easier way.
+            //    if (entry.transform.parent.InverseTransformPoint(entry.menuPositionReference.position).y < 0f)
+            //        rectTransform.pivot = new Vector2(0.5f, 0f);
+            //    else
+            //        rectTransform.pivot = new Vector2(0.5f, 1f);
+            //}
+
+            contextMenuPanel.transform.position = entry.menuPositionReference.position;
+            contextMenuPanel.Show();
+        };
 
         UpdateEmptyListObjects();
 
