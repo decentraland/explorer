@@ -123,9 +123,9 @@ namespace DCL
                 Graphics.CopyTexture(asset.texture, duplicatedTex);
 
                 asset.texture = duplicatedTex;
-
-                ConfigureTexture(asset.texture, wrapMode, filterMode);
             }
+
+            ConfigureTexture(asset.texture, wrapMode, filterMode);
 
             asset.id = idWithTexSettings;
             return library.Add(asset);
@@ -146,6 +146,7 @@ namespace DCL
 
         internal override object GetId()
         {
+            // We only use the id-with-settings when storing/reading from the library
             return idWithDefaultTexSettings;
         }
 
