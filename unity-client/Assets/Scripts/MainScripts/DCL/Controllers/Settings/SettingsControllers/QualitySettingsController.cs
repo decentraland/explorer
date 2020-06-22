@@ -1,8 +1,7 @@
-using Cinemachine;
+﻿using Cinemachine;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.Rendering;
-using UnityEngine.Rendering.PostProcessing;
 using UnitySettings = UnityEngine.QualitySettings;
 
 namespace DCL.SettingsController
@@ -16,7 +15,8 @@ namespace DCL.SettingsController
         private FieldInfo lwrpaShadowResolutionField = null;
 
         public Light environmentLight = null;
-        public PostProcessVolume postProcessVolume = null;
+
+        // public PostProcessVolume postProcessVolume = null;
         public CinemachineFreeLook thirdPersonCamera = null;
         public CinemachineVirtualCamera firstPersonCamera = null;
 
@@ -47,11 +47,11 @@ namespace DCL.SettingsController
 
         void ApplyQualitySettings(SettingsData.QualitySettings qualitySettings)
         {
-            UnitySettings.masterTextureLimit = (int)qualitySettings.textureQuality;
+            UnitySettings.masterTextureLimit = (int) qualitySettings.textureQuality;
 
             if (lightweightRenderPipelineAsset)
             {
-                lightweightRenderPipelineAsset.msaaSampleCount = (int)qualitySettings.antiAliasing;
+                lightweightRenderPipelineAsset.msaaSampleCount = (int) qualitySettings.antiAliasing;
                 lightweightRenderPipelineAsset.renderScale = qualitySettings.renderScale;
 
                 lwrpaShadowField?.SetValue(lightweightRenderPipelineAsset, qualitySettings.shadows);
@@ -66,22 +66,23 @@ namespace DCL.SettingsController
                 {
                     shadowType = qualitySettings.softShadows ? LightShadows.Soft : LightShadows.Hard;
                 }
+
                 environmentLight.shadows = shadowType;
             }
 
-            if (postProcessVolume)
-            {
-                Bloom bloom;
-                if (postProcessVolume.profile.TryGetSettings(out bloom))
-                {
-                    bloom.enabled.value = qualitySettings.bloom;
-                }
-                ColorGrading colorGrading;
-                if (postProcessVolume.profile.TryGetSettings(out colorGrading))
-                {
-                    colorGrading.enabled.value = qualitySettings.colorGrading;
-                }
-            }
+            // if (postProcessVolume)
+            // {
+            //     Bloom bloom;
+            //     if (postProcessVolume.profile.TryGetSettings(out bloom))
+            //     {
+            //         bloom.enabled.value = qualitySettings.bloom;
+            //     }
+            //     ColorGrading colorGrading;
+            //     if (postProcessVolume.profile.TryGetSettings(out colorGrading))
+            //     {
+            //         colorGrading.enabled.value = qualitySettings.colorGrading;
+            //     }
+            // }
 
             if (thirdPersonCamera)
             {

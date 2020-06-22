@@ -4,9 +4,8 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.LWRP;
-using UnityEngine.Rendering.PostProcessing;
+//using UnityEngine.Rendering.PostProcessing;
 using UnityEngine.TestTools;
-
 using QualitySettings = DCL.SettingsData.QualitySettings;
 using GeneralSettings = DCL.SettingsData.GeneralSettings;
 using GeneralSettingsController = DCL.SettingsController.GeneralSettingsController;
@@ -23,8 +22,10 @@ namespace Tests
         CinemachineFreeLook freeLookCamera;
         CinemachineVirtualCamera firstPersonCamera;
         CinemachinePOV povCamera;
+
         Light environmentLight;
-        PostProcessVolume postProcessVolume;
+
+        //PostProcessVolume postProcessVolume;
         UnityEngine.Rendering.Universal.UniversalRenderPipelineAsset lwrpAsset;
 
         [UnitySetUp]
@@ -83,7 +84,7 @@ namespace Tests
             Assert.IsNotNull(virtualCamera.GetCinemachineComponent<CinemachinePOV>(), "GeneralSettingsController: firstPersonCamera doesn't have CinemachinePOV component");
 
             Assert.IsNotNull(qualitySettingsController.environmentLight, "QualitySettingsController: environmentLight reference missing");
-            Assert.IsNotNull(qualitySettingsController.postProcessVolume, "QualitySettingsController: postProcessVolume reference missing");
+            //Assert.IsNotNull(qualitySettingsController.postProcessVolume, "QualitySettingsController: postProcessVolume reference missing");
             Assert.IsNotNull(qualitySettingsController.firstPersonCamera, "QualitySettingsController: firstPersonCamera reference missing");
             Assert.IsNotNull(qualitySettingsController.thirdPersonCamera, "QualitySettingsController: thirdPersonCamera reference missing");
             yield break;
@@ -94,7 +95,7 @@ namespace Tests
         {
             Assert.IsTrue(DCL.Settings.i.qualitySettingsPresets.Length > 0, "QualitySettingsData: No presets created");
             Assert.IsTrue(DCL.Settings.i.qualitySettingsPresets.defaultIndex > 0
-                && DCL.Settings.i.qualitySettingsPresets.defaultIndex < DCL.Settings.i.qualitySettingsPresets.Length, "QualitySettingsData: Wrong default preset index");
+                          && DCL.Settings.i.qualitySettingsPresets.defaultIndex < DCL.Settings.i.qualitySettingsPresets.Length, "QualitySettingsData: Wrong default preset index");
             yield break;
         }
 
@@ -155,8 +156,8 @@ namespace Tests
             environmentLight = qualitySettingsController.environmentLight;
             Assert.IsNotNull(environmentLight, "QualitySettingsController: environmentLight reference missing");
 
-            postProcessVolume = qualitySettingsController.postProcessVolume;
-            Assert.IsNotNull(postProcessVolume, "QualitySettingsController: postProcessVolume reference missing");
+            //postProcessVolume = qualitySettingsController.postProcessVolume;
+            //Assert.IsNotNull(postProcessVolume, "QualitySettingsController: postProcessVolume reference missing");
 
             firstPersonCamera = qualitySettingsController.firstPersonCamera;
             Assert.IsNotNull(firstPersonCamera, "QualitySettingsController: firstPersonCamera reference missing");
@@ -175,28 +176,29 @@ namespace Tests
 
         private void CheckIfQualitySettingsAreApplied()
         {
-            Assert.IsTrue(lwrpAsset.msaaSampleCount == (int)DCL.Settings.i.qualitySettings.antiAliasing, "antiAliasing mismatch");
+            Assert.IsTrue(lwrpAsset.msaaSampleCount == (int) DCL.Settings.i.qualitySettings.antiAliasing, "antiAliasing mismatch");
             Assert.IsTrue(lwrpAsset.renderScale == DCL.Settings.i.qualitySettings.renderScale, "renderScale mismatch");
             Assert.IsTrue(lwrpAsset.supportsMainLightShadows == DCL.Settings.i.qualitySettings.shadows, "shadows mismatch");
             Assert.IsTrue(lwrpAsset.supportsSoftShadows == DCL.Settings.i.qualitySettings.softShadows, "softShadows mismatch");
-            Assert.IsTrue(lwrpAsset.mainLightShadowmapResolution == (int)DCL.Settings.i.qualitySettings.shadowResolution, "shadowResolution mismatch");
+            Assert.IsTrue(lwrpAsset.mainLightShadowmapResolution == (int) DCL.Settings.i.qualitySettings.shadowResolution, "shadowResolution mismatch");
 
             LightShadows shadowType = LightShadows.None;
             if (DCL.Settings.i.qualitySettings.shadows)
             {
                 shadowType = DCL.Settings.i.qualitySettings.softShadows ? LightShadows.Soft : LightShadows.Hard;
             }
+
             Assert.IsTrue(environmentLight.shadows == shadowType, "shadows (environmentLight) mismatch");
-            Bloom bloom;
-            if (postProcessVolume.profile.TryGetSettings(out bloom))
-            {
-                Assert.IsTrue(bloom.enabled.value == DCL.Settings.i.qualitySettings.bloom, "bloom mismatch");
-            }
-            ColorGrading colorGrading;
-            if (postProcessVolume.profile.TryGetSettings(out colorGrading))
-            {
-                Assert.IsTrue(colorGrading.enabled.value == DCL.Settings.i.qualitySettings.colorGrading, "colorGrading mismatch");
-            }
+            // Bloom bloom;
+            // if (postProcessVolume.profile.TryGetSettings(out bloom))
+            // {
+            //     Assert.IsTrue(bloom.enabled.value == DCL.Settings.i.qualitySettings.bloom, "bloom mismatch");
+            // }
+            // ColorGrading colorGrading;
+            // if (postProcessVolume.profile.TryGetSettings(out colorGrading))
+            // {
+            //     Assert.IsTrue(colorGrading.enabled.value == DCL.Settings.i.qualitySettings.colorGrading, "colorGrading mismatch");
+            // }
             Assert.IsTrue(firstPersonCamera.m_Lens.FarClipPlane == DCL.Settings.i.qualitySettings.cameraDrawDistance, "cameraDrawDistance (firstPersonCamera) mismatch");
             Assert.IsTrue(freeLookCamera.m_Lens.FarClipPlane == DCL.Settings.i.qualitySettings.cameraDrawDistance, "cameraDrawDistance (freeLookCamera) mismatch");
         }
