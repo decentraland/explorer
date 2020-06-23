@@ -116,6 +116,9 @@ namespace DCL
                 {
                     // Save default texture asset
                     asset.id = idWithDefaultTexSettings;
+
+                    ConfigureTexture(asset.texture, DEFAULT_WRAP_MODE, DEFAULT_FILTER_MODE, false);
+
                     library.Add(asset);
                 }
 
@@ -139,12 +142,12 @@ namespace DCL
             return library.Add(asset);
         }
 
-        void ConfigureTexture(Texture2D texture, TextureWrapMode textureWrapMode, FilterMode textureFilterMode)
+        void ConfigureTexture(Texture2D texture, TextureWrapMode textureWrapMode, FilterMode textureFilterMode, bool makeNoLongerReadable = true)
         {
             texture.wrapMode = textureWrapMode;
             texture.filterMode = textureFilterMode;
             texture.Compress(false);
-            texture.Apply(textureFilterMode != FilterMode.Point, true);
+            texture.Apply(textureFilterMode != FilterMode.Point, makeNoLongerReadable);
         }
 
         string ConstructId(string textureUrl, TextureWrapMode textureWrapMode, FilterMode textureFilterMode)
