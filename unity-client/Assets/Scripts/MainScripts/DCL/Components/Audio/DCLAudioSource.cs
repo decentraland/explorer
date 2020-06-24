@@ -1,4 +1,4 @@
-﻿using DCL.Helpers;
+using DCL.Helpers;
 using System.Collections;
 using UnityEngine;
 
@@ -21,6 +21,22 @@ namespace DCL.Components
         AudioSource audioSource;
         DCLAudioClip lastDCLAudioClip;
 
+        private bool canBeLoaded = false;
+
+        private void Start()
+        {
+            CommonScriptableObjects.rendererState.OnChange += RendererState_OnChange;
+            RendererState_OnChange(CommonScriptableObjects.rendererState.Get(), CommonScriptableObjects.rendererState.Get());
+        }
+
+        private void RendererState_OnChange(bool current, bool previous)
+        {
+            canBeLoaded = current;
+
+            if (current)
+                CommonScriptableObjects.rendererState.OnChange -= RendererState_OnChange;
+        }
+
         public void InitDCLAudioClip(DCLAudioClip dclAudioClip)
         {
             if (lastDCLAudioClip != null)
@@ -33,6 +49,11 @@ namespace DCL.Components
 
         public override IEnumerator ApplyChanges(string newJson)
         {
+            while (!canBeLoaded)
+            {
+                yield return null;
+            }
+
             audioSource = gameObject.GetOrCreateComponent<AudioSource>();
             model = SceneController.i.SafeFromJson<Model>(newJson);
 
@@ -81,6 +102,7 @@ namespace DCL.Components
         {
             //NOTE(Brian): Unsuscribe events.
             InitDCLAudioClip(null);
+            CommonScriptableObjects.rendererState.OnChange -= RendererState_OnChange;
         }
 
         private void DclAudioClip_OnLoadingFinished(DCLAudioClip obj)

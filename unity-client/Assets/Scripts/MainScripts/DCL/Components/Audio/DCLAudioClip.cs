@@ -1,4 +1,4 @@
-﻿using DCL.Controllers;
+using DCL.Controllers;
 using DCL.Helpers;
 using System;
 using System.Collections;
@@ -33,11 +33,24 @@ namespace DCL.Components
         public LoadState loadingState { get; private set; }
         public event Action<DCLAudioClip> OnLoadingFinished;
 
+        private bool canBeLoaded = false;
+
         public DCLAudioClip(ParcelScene scene) : base(scene)
         {
             model = new Model();
 
             loadingState = LoadState.IDLE;
+
+            CommonScriptableObjects.rendererState.OnChange += RendererState_OnChange;
+            RendererState_OnChange(CommonScriptableObjects.rendererState.Get(), CommonScriptableObjects.rendererState.Get());
+        }
+
+        private void RendererState_OnChange(bool current, bool previous)
+        {
+            canBeLoaded = current;
+
+            if (current)
+                CommonScriptableObjects.rendererState.OnChange -= RendererState_OnChange;
         }
 
         void OnComplete(AudioClip clip)
@@ -96,6 +109,11 @@ namespace DCL.Components
 
         public override IEnumerator ApplyChanges(string newJson)
         {
+            while (!canBeLoaded)
+            {
+                yield return null;
+            }
+
             model = SceneController.i.SafeFromJson<Model>(newJson);
 
             if (!string.IsNullOrEmpty(model.url))
@@ -111,6 +129,13 @@ namespace DCL.Components
             }
 
             yield return null;
+        }
+
+        public override void Dispose()
+        {
+            base.Dispose();
+
+            CommonScriptableObjects.rendererState.OnChange -= RendererState_OnChange;
         }
     }
 }
