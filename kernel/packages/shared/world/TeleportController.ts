@@ -6,7 +6,6 @@ import { fetchLayerUsersParcels } from 'shared/comms'
 import { ParcelArray, countParcelsCloseTo } from 'shared/comms/interface/utils'
 import { worldToGrid } from 'atomicHelpers/parcelScenePositions'
 import defaultLogger from 'shared/logger'
-import { unityInterface } from 'unity-interface/dcl'
 
 export const CAMPAIGN_PARCEL_SEQUENCE = [
   { x: -3, y: -33 },
@@ -76,7 +75,7 @@ export class TeleportController {
   public static stopTeleportAnimation() {
     document.getElementById('gameContainer')!.setAttribute('style', 'background: #151419')
     document.body.setAttribute('style', 'background: #151419')
-    unityInterface.ShowWelcomeNotification()
+    ;(window as any)['unityInterface'].ShowWelcomeNotification()
   }
 
   public static goToMagic(): { message: string; success: boolean } {
@@ -93,13 +92,13 @@ export class TeleportController {
       const currentParcel = worldToGrid(lastPlayerPosition)
 
       usersParcels = usersParcels.filter(
-        it => isInsideParcelLimits(it[0], it[1]) && currentParcel.x !== it[0] && currentParcel.y !== it[1]
+        (it) => isInsideParcelLimits(it[0], it[1]) && currentParcel.x !== it[0] && currentParcel.y !== it[1]
       )
 
       if (usersParcels.length > 0) {
         // Sorting from most close users
         const [target, closeUsers] = usersParcels
-          .map(it => [it, countParcelsCloseTo(it, usersParcels)] as [ParcelArray, number])
+          .map((it) => [it, countParcelsCloseTo(it, usersParcels)] as [ParcelArray, number])
           .sort(([_, score1], [__, score2]) => score2 - score1)[0]
 
         return TeleportController.goTo(
