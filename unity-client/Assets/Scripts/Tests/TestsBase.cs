@@ -12,7 +12,7 @@ using UnityEngine.TestTools;
 
 public class TestsBase
 {
-    protected static bool sceneInitialized = false;
+    protected bool sceneInitialized = false;
     protected SceneController sceneController;
     protected ParcelScene scene;
     protected CameraController cameraController;
@@ -84,7 +84,6 @@ public class TestsBase
             SceneManager.SetActiveScene(SceneManager.GetSceneByName(sceneName));
         }
 
-        yield return null;
         CommonScriptableObjects.rendererState.Set(true);
     }
 
@@ -179,17 +178,16 @@ public class TestsBase
 
     public static T Reflection_GetStaticField<T>(System.Type baseType, string fieldName)
     {
-        return (T)baseType.GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Static).GetValue(null);
+        return (T) baseType.GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Static).GetValue(null);
     }
 
     public static T Reflection_GetField<T>(object instance, string fieldName)
     {
-        return (T)instance.GetType().GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance).GetValue(instance);
+        return (T) instance.GetType().GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance).GetValue(instance);
     }
 
     public static void Reflection_SetField<T>(object instance, string fieldName, T newValue)
     {
         instance.GetType().GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance).SetValue(instance, newValue);
     }
-
 }

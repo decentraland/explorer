@@ -14,8 +14,9 @@ namespace Tests
         [UnitySetUp]
         protected override IEnumerator SetUp()
         {
-            yield return SetUp_SceneController(true, false);
+            yield return SetUp_SceneController(false, false);
             yield return SetUp_CharacterController();
+            SceneController.i.useBoundariesChecker = false;
         }
 
         [UnityTest]
@@ -153,9 +154,9 @@ namespace Tests
                 Assert.AreApproximatelyEqual(0.4f, materialComponent.material.GetFloat("_EnvironmentReflections"));
                 Assert.AreApproximatelyEqual(2.0f, materialComponent.material.GetFloat("_SpecularHighlights"));
                 Assert.AreApproximatelyEqual(.0f, materialComponent.material.GetFloat("_AlphaClip"));
-                Assert.AreEqual((int)UnityEngine.Rendering.BlendMode.SrcAlpha,
+                Assert.AreEqual((int) UnityEngine.Rendering.BlendMode.SrcAlpha,
                     materialComponent.material.GetInt("_SrcBlend"));
-                Assert.AreEqual((int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha,
+                Assert.AreEqual((int) UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha,
                     materialComponent.material.GetInt("_DstBlend"));
                 Assert.AreEqual(0, materialComponent.material.GetInt("_ZWrite"));
             }

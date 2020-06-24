@@ -25,11 +25,9 @@ namespace DCL
         public HashSet<string> readyScenes = new HashSet<string>();
         public Dictionary<string, ParcelScene> loadedScenes = new Dictionary<string, ParcelScene>();
 
-        [Header("Debug Tools")]
-        public GameObject fpsPanel;
+        [Header("Debug Tools")] public GameObject fpsPanel;
 
-        [Header("Debug Panel")]
-        public GameObject engineDebugPanel;
+        [Header("Debug Panel")] public GameObject engineDebugPanel;
         public GameObject sceneDebugPanel;
 
         public bool debugScenes;
@@ -61,24 +59,20 @@ namespace DCL
 
 #if UNITY_EDITOR
         public delegate void ProcessDelegate(string sceneId, string method);
+
         public event ProcessDelegate OnMessageProcessInfoStart;
         public event ProcessDelegate OnMessageProcessInfoEnds;
 #endif
-        [System.NonSerialized]
-        public List<ParcelScene> scenesSortedByDistance = new List<ParcelScene>();
+        [System.NonSerialized] public List<ParcelScene> scenesSortedByDistance = new List<ParcelScene>();
         private Queue<MessagingBus.QueuedSceneMessage_Scene> sceneMessagesPool = new Queue<MessagingBus.QueuedSceneMessage_Scene>();
 
-        [System.NonSerialized]
-        public bool isDebugMode;
+        [System.NonSerialized] public bool isDebugMode;
 
-        [System.NonSerialized]
-        public bool isWssDebugMode;
+        [System.NonSerialized] public bool isWssDebugMode;
 
-        [System.NonSerialized]
-        public bool prewarmSceneMessagesPool = true;
+        [System.NonSerialized] public bool prewarmSceneMessagesPool = true;
 
-        [System.NonSerialized]
-        public bool useBoundariesChecker = true;
+        [System.NonSerialized] public bool useBoundariesChecker = true;
 
         public bool hasPendingMessages => MessagingControllersManager.i.pendingMessagesCount > 0;
 
@@ -94,6 +88,7 @@ namespace DCL
         public event Action<ParcelScene, string> OnOpenExternalUrlRequest;
 
         public delegate void OnOpenNFTDialogDelegate(string assetContractAddress, string tokenId, string comment);
+
         public event OnOpenNFTDialogDelegate OnOpenNFTDialogRequest;
 
         private Vector2Int currentGridSceneCoordinate = new Vector2Int(EnvironmentSettings.MORDOR_SCALAR, EnvironmentSettings.MORDOR_SCALAR);
@@ -156,8 +151,8 @@ namespace DCL
 
         private void SetPositionDirty(DCLCharacterPosition character)
         {
-            var currentX = (int)Math.Floor(character.worldPosition.x / ParcelSettings.PARCEL_SIZE);
-            var currentY = (int)Math.Floor(character.worldPosition.z / ParcelSettings.PARCEL_SIZE);
+            var currentX = (int) Math.Floor(character.worldPosition.x / ParcelSettings.PARCEL_SIZE);
+            var currentY = (int) Math.Floor(character.worldPosition.z / ParcelSettings.PARCEL_SIZE);
 
             positionDirty = currentX != currentGridSceneCoordinate.x || currentY != currentGridSceneCoordinate.y;
 
@@ -171,6 +166,9 @@ namespace DCL
 
         private void SortScenesByDistance()
         {
+            if (DCLCharacterController.i == null)
+                return;
+
             currentSceneId = null;
             scenesSortedByDistance.Sort(SortScenesByDistanceMethod);
 
@@ -182,6 +180,10 @@ namespace DCL
                 while (iterator.MoveNext())
                 {
                     scene = iterator.Current;
+
+                    if (scene == null)
+                        continue;
+
                     characterIsInsideScene = scene.IsInsideSceneBoundaries(DCLCharacterController.i.characterPosition);
 
                     if (scene.sceneData.id != globalSceneId && characterIsInsideScene)
@@ -452,7 +454,6 @@ namespace DCL
 
                 newScene.ownerController = this;
                 loadedScenes.Add(sceneToLoad.id, newScene);
-
             }
 
             OnMessageProcessEnds?.Invoke(MessagingTypes.SCENE_UPDATE);
@@ -461,7 +462,7 @@ namespace DCL
         public void UnloadScene(string sceneKey)
         {
             var queuedMessage = new MessagingBus.QueuedSceneMessage()
-            { type = MessagingBus.QueuedSceneMessage.Type.UNLOAD_PARCEL, message = sceneKey };
+                {type = MessagingBus.QueuedSceneMessage.Type.UNLOAD_PARCEL, message = sceneKey};
 
             OnMessageWillQueue?.Invoke(MessagingTypes.SCENE_DESTROY);
 
@@ -534,7 +535,7 @@ namespace DCL
         public void UpdateParcelScenes(string decentralandSceneJSON)
         {
             var queuedMessage = new MessagingBus.QueuedSceneMessage()
-            { type = MessagingBus.QueuedSceneMessage.Type.UPDATE_PARCEL, message = decentralandSceneJSON };
+                {type = MessagingBus.QueuedSceneMessage.Type.UPDATE_PARCEL, message = decentralandSceneJSON};
 
             OnMessageWillQueue?.Invoke(MessagingTypes.SCENE_UPDATE);
 
@@ -543,7 +544,7 @@ namespace DCL
 
         public void UnloadAllScenesQueued()
         {
-            var queuedMessage = new MessagingBus.QueuedSceneMessage() { type = MessagingBus.QueuedSceneMessage.Type.UNLOAD_SCENES };
+            var queuedMessage = new MessagingBus.QueuedSceneMessage() {type = MessagingBus.QueuedSceneMessage.Type.UNLOAD_SCENES};
 
             OnMessageWillQueue?.Invoke(MessagingTypes.SCENE_DESTROY);
 
@@ -557,7 +558,7 @@ namespace DCL
 
         private string SendSceneMessage(string payload, bool enqueue)
         {
-            string[] chunks = payload.Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] chunks = payload.Split(new char[] {'\n'}, StringSplitOptions.RemoveEmptyEntries);
             int count = chunks.Length;
             string lastBusId = null;
 
@@ -801,7 +802,7 @@ namespace DCL
 
             if (data.parcels == null)
             {
-                data.parcels = new Vector2Int[] { data.basePosition };
+                data.parcels = new Vector2Int[] {data.basePosition};
             }
 
             if (string.IsNullOrEmpty(data.id))
