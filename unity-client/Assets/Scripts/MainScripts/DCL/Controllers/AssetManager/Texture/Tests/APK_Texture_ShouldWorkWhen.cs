@@ -1,7 +1,6 @@
 ﻿using AssetPromiseKeeper_Tests;
 using DCL;
 using DCL.Helpers;
-using UnityEngine;
 
 namespace AssetPromiseKeeper_Texture_Tests
 {
@@ -14,16 +13,6 @@ namespace AssetPromiseKeeper_Texture_Tests
         {
             string url = Utils.GetTestsAssetsPath() + "/Images/atlas.png";
             var prom = new AssetPromise_Texture(url);
-            return prom;
-        }
-
-        protected AssetPromise_Texture CreatePromise(int wrapmode = -1, int filterMode = -1)
-        {
-            if (filterMode <= -1 && wrapmode <= -1) return CreatePromise();
-
-            string url = Utils.GetTestsAssetsPath() + "/Images/atlas.png";
-            AssetPromise_Texture prom = new AssetPromise_Texture(url, (TextureWrapMode)wrapmode, (FilterMode)filterMode);
-
             return prom;
         }
     }

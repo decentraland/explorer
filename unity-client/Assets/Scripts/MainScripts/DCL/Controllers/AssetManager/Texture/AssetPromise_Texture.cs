@@ -16,6 +16,7 @@ namespace DCL
         TextureWrapMode wrapMode;
         FilterMode filterMode;
         Coroutine loadCoroutine;
+        bool alreadyStoredInLibrary = false;
 
         public AssetPromise_Texture(string textureUrl, TextureWrapMode textureWrapMode = DEFAULT_WRAP_MODE, FilterMode textureFilterMode = DEFAULT_FILTER_MODE)
         {
@@ -139,7 +140,9 @@ namespace DCL
             ConfigureTexture(asset.texture, wrapMode, filterMode);
 
             asset.id = idWithTexSettings;
-            return library.Add(asset);
+
+            alreadyStoredInLibrary = library.Add(asset);
+            return alreadyStoredInLibrary;
         }
 
         void ConfigureTexture(Texture2D texture, TextureWrapMode textureWrapMode, FilterMode textureFilterMode, bool makeNoLongerReadable = true)
@@ -158,7 +161,7 @@ namespace DCL
         internal override object GetId()
         {
             // We only use the id-with-settings when storing/reading from the library
-            return idWithDefaultTexSettings;
+            return alreadyStoredInLibrary ? idWithTexSettings : idWithDefaultTexSettings;
         }
 
         public bool UsesDefaultWrapAndFilterMode()
