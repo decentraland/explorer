@@ -3,12 +3,11 @@ using NUnit.Framework;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Rendering;
-using UnityEngine.Rendering.LWRP;
-//using UnityEngine.Rendering.PostProcessing;
+using UnityEngine.Rendering.Universal;
 using UnityEngine.TestTools;
-using QualitySettings = DCL.SettingsData.QualitySettings;
 using GeneralSettings = DCL.SettingsData.GeneralSettings;
 using GeneralSettingsController = DCL.SettingsController.GeneralSettingsController;
+using QualitySettings = DCL.SettingsData.QualitySettings;
 using QualitySettingsController = DCL.SettingsController.QualitySettingsController;
 
 namespace Tests
@@ -25,7 +24,7 @@ namespace Tests
 
         Light environmentLight;
 
-        //PostProcessVolume postProcessVolume;
+        Volume postProcessVolume;
         UnityEngine.Rendering.Universal.UniversalRenderPipelineAsset lwrpAsset;
 
         [UnitySetUp]
@@ -84,7 +83,7 @@ namespace Tests
             Assert.IsNotNull(virtualCamera.GetCinemachineComponent<CinemachinePOV>(), "GeneralSettingsController: firstPersonCamera doesn't have CinemachinePOV component");
 
             Assert.IsNotNull(qualitySettingsController.environmentLight, "QualitySettingsController: environmentLight reference missing");
-            //Assert.IsNotNull(qualitySettingsController.postProcessVolume, "QualitySettingsController: postProcessVolume reference missing");
+            Assert.IsNotNull(qualitySettingsController.postProcessVolume, "QualitySettingsController: postProcessVolume reference missing");
             Assert.IsNotNull(qualitySettingsController.firstPersonCamera, "QualitySettingsController: firstPersonCamera reference missing");
             Assert.IsNotNull(qualitySettingsController.thirdPersonCamera, "QualitySettingsController: thirdPersonCamera reference missing");
             yield break;
@@ -156,8 +155,8 @@ namespace Tests
             environmentLight = qualitySettingsController.environmentLight;
             Assert.IsNotNull(environmentLight, "QualitySettingsController: environmentLight reference missing");
 
-            //postProcessVolume = qualitySettingsController.postProcessVolume;
-            //Assert.IsNotNull(postProcessVolume, "QualitySettingsController: postProcessVolume reference missing");
+            postProcessVolume = qualitySettingsController.postProcessVolume;
+            Assert.IsNotNull(postProcessVolume, "QualitySettingsController: postProcessVolume reference missing");
 
             firstPersonCamera = qualitySettingsController.firstPersonCamera;
             Assert.IsNotNull(firstPersonCamera, "QualitySettingsController: firstPersonCamera reference missing");
@@ -189,16 +188,16 @@ namespace Tests
             }
 
             Assert.IsTrue(environmentLight.shadows == shadowType, "shadows (environmentLight) mismatch");
-            // Bloom bloom;
-            // if (postProcessVolume.profile.TryGetSettings(out bloom))
-            // {
-            //     Assert.IsTrue(bloom.enabled.value == DCL.Settings.i.qualitySettings.bloom, "bloom mismatch");
-            // }
-            // ColorGrading colorGrading;
-            // if (postProcessVolume.profile.TryGetSettings(out colorGrading))
-            // {
-            //     Assert.IsTrue(colorGrading.enabled.value == DCL.Settings.i.qualitySettings.colorGrading, "colorGrading mismatch");
-            // }
+            Bloom bloom;
+            if (postProcessVolume.profile.TryGet<Bloom>(out bloom))
+            {
+                Assert.IsTrue(bloom.active == DCL.Settings.i.qualitySettings.bloom, "bloom mismatch");
+            }
+            Tonemapping toneMapping;
+            if (postProcessVolume.profile.TryGet<Tonemapping>(out toneMapping))
+            {
+                Assert.IsTrue(toneMapping.active == DCL.Settings.i.qualitySettings.colorGrading, "colorGrading mismatch");
+            }
             Assert.IsTrue(firstPersonCamera.m_Lens.FarClipPlane == DCL.Settings.i.qualitySettings.cameraDrawDistance, "cameraDrawDistance (firstPersonCamera) mismatch");
             Assert.IsTrue(freeLookCamera.m_Lens.FarClipPlane == DCL.Settings.i.qualitySettings.cameraDrawDistance, "cameraDrawDistance (freeLookCamera) mismatch");
         }

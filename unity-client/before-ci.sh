@@ -29,8 +29,8 @@ else
     echo "Using $LICENSE env var"
 fi
 
-echo "Writing $LICENSE to license file /root/.local/share/unity3d/Unity/Unity_lic.ulf"
-echo "${!LICENSE}" | tr -d '\r' > /root/.local/share/unity3d/Unity/Unity_lic.ulf
+echo "Writing LICENSE to license file /root/.local/share/unity3d/Unity/Unity_lic.ulf"
+echo "$LICENSE" | tr -d '\r' > /root/.local/share/unity3d/Unity/Unity_lic.ulf
 
 set -x
 

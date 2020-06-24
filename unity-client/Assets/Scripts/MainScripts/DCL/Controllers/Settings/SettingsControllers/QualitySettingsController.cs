@@ -1,7 +1,8 @@
-﻿using Cinemachine;
+using Cinemachine;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 using UnitySettings = UnityEngine.QualitySettings;
 
 namespace DCL.SettingsController
@@ -16,7 +17,7 @@ namespace DCL.SettingsController
 
         public Light environmentLight = null;
 
-        // public PostProcessVolume postProcessVolume = null;
+        public Volume postProcessVolume = null;
         public CinemachineFreeLook thirdPersonCamera = null;
         public CinemachineVirtualCamera firstPersonCamera = null;
 
@@ -70,19 +71,19 @@ namespace DCL.SettingsController
                 environmentLight.shadows = shadowType;
             }
 
-            // if (postProcessVolume)
-            // {
-            //     Bloom bloom;
-            //     if (postProcessVolume.profile.TryGetSettings(out bloom))
-            //     {
-            //         bloom.enabled.value = qualitySettings.bloom;
-            //     }
-            //     ColorGrading colorGrading;
-            //     if (postProcessVolume.profile.TryGetSettings(out colorGrading))
-            //     {
-            //         colorGrading.enabled.value = qualitySettings.colorGrading;
-            //     }
-            // }
+            if (postProcessVolume)
+            {
+                Bloom bloom;
+                if (postProcessVolume.profile.TryGet<Bloom>(out bloom))
+                {
+                    bloom.active = qualitySettings.bloom;
+                }
+                Tonemapping toneMapping;
+                if (postProcessVolume.profile.TryGet<Tonemapping>(out toneMapping))
+                {
+                    toneMapping.active = qualitySettings.colorGrading;
+                }
+            }
 
             if (thirdPersonCamera)
             {
