@@ -8,12 +8,12 @@ using UnityEngine.TestTools;
 
 namespace AssetPromiseKeeper_Texture_Tests
 {
-    public class APK_Texture_Promise_Should : APKWithRefCountedAssetShouldWorkWhen_Base<AssetPromiseKeeper_Texture,
+    public class APK_Texture_Promise_Should : TestsBase_APK<AssetPromiseKeeper_Texture,
                                                             AssetPromise_Texture,
                                                             Asset_Texture,
                                                             AssetLibrary_Texture>
     {
-        protected override AssetPromise_Texture CreatePromise()
+        protected AssetPromise_Texture CreatePromise()
         {
             string url = Utils.GetTestsAssetsPath() + "/Images/atlas.png";
             var prom = new AssetPromise_Texture(url);

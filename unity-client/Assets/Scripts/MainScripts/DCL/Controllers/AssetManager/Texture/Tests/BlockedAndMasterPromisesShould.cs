@@ -8,29 +8,19 @@ using UnityEngine.TestTools;
 
 namespace AssetPromiseKeeper_Texture_Tests
 {
-    public class BlockedAndMasterPromisesShould : APKWithRefCountedAssetShouldWorkWhen_Base<AssetPromiseKeeper_Texture,
+    public class BlockedAndMasterPromisesShould : TestsBase_APK<AssetPromiseKeeper_Texture,
                                                             AssetPromise_Texture,
                                                             Asset_Texture,
                                                             AssetLibrary_Texture>
     {
-        protected override AssetPromise_Texture CreatePromise()
+        protected AssetPromise_Texture CreatePromise(string promiseURL, int wrapmode = -1, int filterMode = -1)
         {
-            return CreatePromise(Utils.GetTestsAssetsPath() + "/Images/atlas.png");
-        }
+            AssetPromise_Texture prom;
 
-        protected AssetPromise_Texture CreatePromise(string promiseUrl)
-        {
-            string url = promiseUrl;
-            var prom = new AssetPromise_Texture(url);
-            return prom;
-        }
-
-        protected AssetPromise_Texture CreatePromise(int wrapmode = -1, int filterMode = -1)
-        {
-            if (filterMode <= -1 && wrapmode <= -1) return CreatePromise();
-
-            string url = Utils.GetTestsAssetsPath() + "/Images/atlas.png";
-            AssetPromise_Texture prom = new AssetPromise_Texture(url, (TextureWrapMode)wrapmode, (FilterMode)filterMode);
+            if (filterMode > -1 && wrapmode > -1)
+                prom = new AssetPromise_Texture(promiseURL, (TextureWrapMode)wrapmode, (FilterMode)filterMode);
+            else
+                prom = new AssetPromise_Texture(promiseURL);
 
             return prom;
         }
@@ -82,29 +72,32 @@ namespace AssetPromiseKeeper_Texture_Tests
             Assert.AreNotEqual(1, keeper.library.masterAssets.Count);
         }
 
+        [UnityTest]
         public IEnumerator WaitForPromisesOfSameTextureWithDifferentSettings()
         {
             // default texture (no settings)
-            var prom = CreatePromise();
+            var prom = CreatePromise(Utils.GetTestsAssetsPath() + "/Images/atlas.png");
             Asset_Texture asset = null;
             prom.OnSuccessEvent += (x) => { asset = x; };
-
             keeper.Keep(prom);
 
             // same texture but with settings
-            var prom2 = CreatePromise((int)TextureWrapMode.Repeat, (int)FilterMode.Trilinear);
+            var prom2 = CreatePromise(Utils.GetTestsAssetsPath() + "/Images/atlas.png", (int)TextureWrapMode.Repeat, (int)FilterMode.Trilinear);
             Asset_Texture asset2 = null;
             prom.OnSuccessEvent += (x) => { asset2 = x; };
+            keeper.Keep(prom2);
 
-            keeper.Keep(prom);
+            // different texture
+            var prom3 = CreatePromise(Utils.GetTestsAssetsPath() + "/Images/avatar.png");
+            Asset_Texture asset3 = null;
+            prom.OnSuccessEvent += (x) => { asset3 = x; };
+            keeper.Keep(prom3);
 
-            Assert.AreEqual(1, keeper.waitingPromisesCount);
+            Assert.AreEqual(AssetPromiseState.LOADING, prom.state);
+            Assert.AreEqual(AssetPromiseState.WAITING, prom2.state);
+            Assert.AreEqual(AssetPromiseState.LOADING, prom3.state);
 
-            Assert.AreNotEqual(AssetPromiseState.LOADING, prom.state);
-            Assert.AreNotEqual(AssetPromiseState.WAITING, prom2.state);
-
-            yield return prom;
-            yield return prom2;
+            return null;
         }
     }
 }
