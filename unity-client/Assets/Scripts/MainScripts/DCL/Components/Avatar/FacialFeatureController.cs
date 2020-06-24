@@ -13,8 +13,7 @@ public class FacialFeatureController
 
     Texture mainTexture = null;
     Texture maskTexture = null;
-    bool mainTextureRetrieved = false;
-    bool maskTextureRetrieved = false;
+    bool retrievedTextures = false;
     AssetPromise_Texture mainTexturePromise = null;
     AssetPromise_Texture maskTexturePromise = null;
     TexturesFetched onTextureFetchedCallback;
@@ -23,15 +22,14 @@ public class FacialFeatureController
     {
         this.wearable = wearableItem;
         this.bodyShapeType = bodyShapeType;
-        mainTextureRetrieved = false;
-        maskTextureRetrieved = false;
+        retrievedTextures = false;
     }
 
     public IEnumerator FetchTextures(TexturesFetched onTextureFetched)
     {
         onTextureFetchedCallback = onTextureFetched;
 
-        if (mainTextureRetrieved && maskTextureRetrieved)
+        if (retrievedTextures)
         {
             onTextureFetchedCallback?.Invoke(mainTexture, maskTexture);
             yield break;
@@ -47,14 +45,16 @@ public class FacialFeatureController
             if (mainTexturePromise != null)
                 AssetPromiseKeeper_Texture.i.Forget(mainTexturePromise);
 
+            bool finishedPromiseLoading = false;
             mainTexturePromise = new AssetPromise_Texture(wearable.baseUrl + mainTextureName);
-            mainTexturePromise.OnSuccessEvent += (x) => { mainTexture = x.texture; mainTextureRetrieved = true; TextureFetchFinished(); };
-            mainTexturePromise.OnFailEvent += (x) => { mainTexture = null; mainTextureRetrieved = true; };
+            mainTexturePromise.OnSuccessEvent += (x) => { mainTexture = x.texture; finishedPromiseLoading = true; };
+            mainTexturePromise.OnFailEvent += (x) => { mainTexture = null; finishedPromiseLoading = true; };
+
             AssetPromiseKeeper_Texture.i.Keep(mainTexturePromise);
-        }
-        else
-        {
-            mainTextureRetrieved = true;
+            while (!finishedPromiseLoading)
+            {
+                yield return null;
+            }
         }
 
         if (!string.IsNullOrEmpty(maskName))
@@ -62,23 +62,20 @@ public class FacialFeatureController
             if (maskTexturePromise != null)
                 AssetPromiseKeeper_Texture.i.Forget(maskTexturePromise);
 
+            bool finishedPromiseLoading = false;
             maskTexturePromise = new AssetPromise_Texture(wearable.baseUrl + maskName);
-            maskTexturePromise.OnSuccessEvent += (x) => { maskTexture = x.texture; maskTextureRetrieved = true; TextureFetchFinished(); };
-            maskTexturePromise.OnFailEvent += (x) => { maskTexture = null; maskTextureRetrieved = true; };
+            maskTexturePromise.OnSuccessEvent += (x) => { maskTexture = x.texture; finishedPromiseLoading = true; };
+            maskTexturePromise.OnFailEvent += (x) => { maskTexture = null; finishedPromiseLoading = true; };
+
             AssetPromiseKeeper_Texture.i.Keep(maskTexturePromise);
-        }
-        else
-        {
-            maskTextureRetrieved = true;
+            while (!finishedPromiseLoading)
+            {
+                yield return null;
+            }
         }
 
-        TextureFetchFinished();
-    }
-
-    void TextureFetchFinished()
-    {
-        if (mainTextureRetrieved && maskTextureRetrieved)
-            onTextureFetchedCallback?.Invoke(mainTexture, maskTexture);
+        retrievedTextures = true;
+        onTextureFetchedCallback?.Invoke(mainTexture, maskTexture);
     }
 
     void OnDestroy()

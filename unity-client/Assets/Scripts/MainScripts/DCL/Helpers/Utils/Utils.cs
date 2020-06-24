@@ -207,7 +207,7 @@ namespace DCL.Helpers
 
                     if (!WebRequestSucceded(request))
                     {
-                        Debug.LogError(
+                        Debug.Log(
                             string.Format("Fetching asset failed ({0}): {1} ", request.url, webRequest.error));
 
                         if (OnFail != null)
@@ -226,7 +226,7 @@ namespace DCL.Helpers
             }
             else
             {
-                Debug.LogError(string.Format("Can't fetch asset as the url is empty!"));
+                Debug.Log(string.Format("Can't fetch asset as the url is empty!"));
             }
         }
 

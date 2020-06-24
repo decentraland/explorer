@@ -146,15 +146,19 @@ namespace DCL
                         if (texturePromise != null)
                             AssetPromiseKeeper_Texture.i.Forget(texturePromise);
 
+                        bool finishedPromiseLoading = false;
                         texturePromise = new AssetPromise_Texture(contentsUrl, unityWrap, unitySamplingMode);
-                        texturePromise.OnSuccessEvent += (x) => texture = x.texture;
-                        texturePromise.OnFailEvent += (x) => texture = null;
+                        texturePromise.OnSuccessEvent += (x) => { texture = x.texture; finishedPromiseLoading = true; };
+                        texturePromise.OnFailEvent += (x) => { texture = null; finishedPromiseLoading = true; };
+
                         AssetPromiseKeeper_Texture.i.Keep(texturePromise);
+                        while (!finishedPromiseLoading)
+                        {
+                            yield return null;
+                        }
                     }
                 }
             }
-
-            return null;
         }
 
         public virtual void AttachTo(PBRMaterial material) { }
