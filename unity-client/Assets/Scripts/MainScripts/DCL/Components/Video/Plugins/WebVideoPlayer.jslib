@@ -1,5 +1,6 @@
 var WebVideoPlayer = {
   $videos: {},
+  $videoUrl: "",
 
   WebVideoPlayerCreate: function (videoId, url, useHls) {
     const videoState = {
@@ -13,7 +14,7 @@ var WebVideoPlayer = {
       PAUSED: 7,
     };
 
-    const videoUrl = Pointer_stringify(url);
+    videoUrl = Pointer_stringify(url);
     const vid = document.createElement("video");
     vid.autoplay = false;
 
@@ -112,15 +113,26 @@ var WebVideoPlayer = {
   WebVideoPlayerPlay: function (videoId) {
     try {
       const videoData = videos[Pointer_stringify(videoId)];
+      videoData.video.src = videoUrl;
+      videoData.video.load();
       videoData.video.play();
+      console.log("[SANTI LOG] PLAY: " + videoUrl);
     } catch (err) {
       // Exception!
+      console.log("[SANTI LOG - ERROR PLAYING!!]: " + err);
     }
   },
 
   WebVideoPlayerPause: function (videoId) {
-    const videoData = videos[Pointer_stringify(videoId)];
-    videoData.video.pause();
+    try {
+      const videoData = videos[Pointer_stringify(videoId)];
+      videoData.video.pause();
+      videoData.video.src = "";
+      console.log("[SANTI LOG] PAUSE: " + videoUrl);
+    } catch (err) {
+      // Exception!
+      console.log("[SANTI LOG - ERROR PAUSING!!]: " + err);
+    }
   },
 
   WebVideoPlayerVolume: function (videoId, volume) {
