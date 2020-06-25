@@ -15,11 +15,10 @@ namespace DCL.Components
         public Model model;
         private bool isPlaying = false;
         private float settingsVolume = 0;
-        private bool canBeLoaded = false;
 
         public override IEnumerator ApplyChanges(string newJson)
         {
-            yield return new WaitUntil(() => canBeLoaded);
+            yield return new WaitUntil(() => CommonScriptableObjects.rendererState.Get());
 
             Model prevModel = model;
             model = SceneController.i.SafeFromJson<Model>(newJson);
@@ -37,16 +36,6 @@ namespace DCL.Components
             CommonScriptableObjects.sceneID.OnChange += OnSceneChanged;
             CommonScriptableObjects.rendererState.OnChange += OnRendererStateChanged;
             Settings.i.OnGeneralSettingsChanged += OnSettingsChanged;
-            CommonScriptableObjects.rendererState.OnChange += RendererState_OnChange;
-            RendererState_OnChange(CommonScriptableObjects.rendererState.Get(), CommonScriptableObjects.rendererState.Get());
-        }
-
-        private void RendererState_OnChange(bool current, bool previous)
-        {
-            canBeLoaded = current;
-
-            if (current)
-                CommonScriptableObjects.rendererState.OnChange -= RendererState_OnChange;
         }
 
         private void OnDestroy()
@@ -54,7 +43,6 @@ namespace DCL.Components
             CommonScriptableObjects.sceneID.OnChange -= OnSceneChanged;
             CommonScriptableObjects.rendererState.OnChange -= OnRendererStateChanged;
             Settings.i.OnGeneralSettingsChanged -= OnSettingsChanged;
-            CommonScriptableObjects.rendererState.OnChange -= RendererState_OnChange;
             StopStreaming();
         }
 

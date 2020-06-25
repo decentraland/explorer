@@ -31,20 +31,8 @@ namespace DCL
         public FilterMode unitySamplingMode;
         public Texture2D texture;
 
-        private bool canBeLoaded = false;
-
         public DCLTexture(DCL.Controllers.ParcelScene scene) : base(scene)
         {
-            CommonScriptableObjects.rendererState.OnChange += RendererState_OnChange;
-            RendererState_OnChange(CommonScriptableObjects.rendererState.Get(), CommonScriptableObjects.rendererState.Get());
-        }
-
-        private void RendererState_OnChange(bool current, bool previous)
-        {
-            canBeLoaded = current;
-
-            if (current)
-                CommonScriptableObjects.rendererState.OnChange -= RendererState_OnChange;
         }
 
         public static IEnumerator FetchFromComponent(ParcelScene scene, string componentId,
@@ -99,7 +87,7 @@ namespace DCL
 
         public override IEnumerator ApplyChanges(string newJson)
         {
-            yield return new WaitUntil(() => canBeLoaded);
+            yield return new WaitUntil(() => CommonScriptableObjects.rendererState.Get());
 
             model = SceneController.i.SafeFromJson<Model>(newJson);
 
