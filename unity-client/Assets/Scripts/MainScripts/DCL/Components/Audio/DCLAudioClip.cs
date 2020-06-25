@@ -114,10 +114,5 @@ namespace DCL.Components
 
             yield return null;
         }
-
-        public override void Dispose()
-        {
-            base.Dispose();
-        }
     }
 }
