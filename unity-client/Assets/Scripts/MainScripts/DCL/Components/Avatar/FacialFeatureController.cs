@@ -13,7 +13,7 @@ public class FacialFeatureController
 
     Texture mainTexture = null;
     Texture maskTexture = null;
-    bool retrievedTextures = false;
+    bool texturesRetreived = false;
     AssetPromise_Texture mainTexturePromise = null;
     AssetPromise_Texture maskTexturePromise = null;
     TexturesFetched onTextureFetchedCallback;
@@ -22,14 +22,14 @@ public class FacialFeatureController
     {
         this.wearable = wearableItem;
         this.bodyShapeType = bodyShapeType;
-        retrievedTextures = false;
+        texturesRetreived = false;
     }
 
     public IEnumerator FetchTextures(TexturesFetched onTextureFetched)
     {
         onTextureFetchedCallback = onTextureFetched;
 
-        if (retrievedTextures)
+        if (texturesRetreived)
         {
             onTextureFetchedCallback?.Invoke(mainTexture, maskTexture);
             yield break;
@@ -66,7 +66,7 @@ public class FacialFeatureController
             yield return maskTexturePromise;
         }
 
-        retrievedTextures = true;
+        texturesRetreived = true;
         onTextureFetchedCallback?.Invoke(mainTexture, maskTexture);
     }
 
