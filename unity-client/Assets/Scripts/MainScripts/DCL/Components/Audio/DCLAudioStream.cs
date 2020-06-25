@@ -19,10 +19,7 @@ namespace DCL.Components
 
         public override IEnumerator ApplyChanges(string newJson)
         {
-            while (!canBeLoaded)
-            {
-                yield return null;
-            }
+            yield return new WaitUntil(() => canBeLoaded);
 
             Model prevModel = model;
             model = SceneController.i.SafeFromJson<Model>(newJson);
