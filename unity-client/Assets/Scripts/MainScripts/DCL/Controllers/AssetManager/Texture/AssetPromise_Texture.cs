@@ -16,7 +16,6 @@ namespace DCL
         TextureWrapMode wrapMode;
         FilterMode filterMode;
         Coroutine loadCoroutine;
-        bool alreadyStoredInLibrary = false;
 
         public AssetPromise_Texture(string textureUrl, TextureWrapMode textureWrapMode = DEFAULT_WRAP_MODE, FilterMode textureFilterMode = DEFAULT_FILTER_MODE)
         {
@@ -78,7 +77,7 @@ namespace DCL
         {
             ClearLoadCoroutine();
 
-            // Reuse the already-stored default texture, we duplicate it and set the needed config afterwards
+            // Reuse the already-stored default texture, we duplicate it and set the needed config afterwards in AddToLibrary()
             if (library.Contains(idWithDefaultTexSettings) && !UsesDefaultWrapAndFilterMode())
                 OnSuccess?.Invoke();
             else
@@ -123,10 +122,9 @@ namespace DCL
                     library.Add(asset);
                 }
 
-                var defaultTexAsset = library.Get(idWithDefaultTexSettings);
-
-                // By using library.Get() for the default tex we have stored, we increase its references counter,
+                // By always using library.Get() for the default tex we have stored, we increase its references counter,
                 // that will come in handy for removing that default tex when there is no one using it
+                var defaultTexAsset = library.Get(idWithDefaultTexSettings);
                 asset = defaultTexAsset.Clone() as Asset_Texture;
                 asset.dependencyAsset = defaultTexAsset;
 
@@ -141,8 +139,7 @@ namespace DCL
 
             asset.id = idWithTexSettings;
 
-            alreadyStoredInLibrary = library.Add(asset);
-            return alreadyStoredInLibrary;
+            return library.Add(asset);
         }
 
         void ConfigureTexture(Texture2D texture, TextureWrapMode textureWrapMode, FilterMode textureFilterMode, bool makeNoLongerReadable = true)
@@ -155,13 +152,13 @@ namespace DCL
 
         string ConstructId(string textureUrl, TextureWrapMode textureWrapMode, FilterMode textureFilterMode)
         {
-            return ((int)textureWrapMode) + ((int)textureFilterMode) + textureUrl;
+            return ((int)textureWrapMode).ToString() + ((int)textureFilterMode).ToString() + textureUrl;
         }
 
         internal override object GetId()
         {
             // We only use the id-with-settings when storing/reading from the library
-            return alreadyStoredInLibrary ? idWithTexSettings : idWithDefaultTexSettings;
+            return idWithDefaultTexSettings;
         }
 
         public bool UsesDefaultWrapAndFilterMode()
