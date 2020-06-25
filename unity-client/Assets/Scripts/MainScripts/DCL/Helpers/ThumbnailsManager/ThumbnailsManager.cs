@@ -84,14 +84,11 @@ public static class ThumbnailsManager
             texturePromises.Remove(url);
         }
 
-        bool finishedPromiseLoading = false;
         texturePromises[url] = new AssetPromise_Texture(url);
         texturePromises[url].OnSuccessEvent += (x) =>
         {
             sprite = Sprite.Create(x.texture, new Rect(0, 0, x.texture.width, x.texture.height), Vector2.zero);
             AddOrUpdateSprite(url, sprite);
-
-            finishedPromiseLoading = true;
         };
 
         texturePromises[url].OnFailEvent += (x) =>
@@ -99,16 +96,10 @@ public static class ThumbnailsManager
             Debug.Log($"Error downloading: {url}");
 
             sprite = null;
-
-            finishedPromiseLoading = true;
         };
 
         AssetPromiseKeeper_Texture.i.Keep(texturePromises[url]);
-
-        while (!finishedPromiseLoading)
-        {
-            yield return null;
-        }
+        yield return texturePromises[url];
 
         downloadingCoroutines.Remove(url);
 
