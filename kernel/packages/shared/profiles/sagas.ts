@@ -271,11 +271,17 @@ export function* handleFetchProfile(action: ProfileRequestAction): any {
   yield put(profileSuccess(userId, passport, hasConnectedWeb3))
 }
 
+function lastSegment(url: string) {
+  const segments = url.split('/')
+  const segment = segments[segments.length - 1]
+  return segment
+}
+
 function* populateFaceIfNecessary(profile: any, resolution: string) {
   const selector = `face${resolution}`
   if (
     profile.avatar?.snapshots &&
-    (!profile.avatar?.snapshots[selector] || profile.avatar.snapshots[selector] === resolution) && // XXX - check if content === resolution to fix current issue with corrupted profiles https://github.com/decentraland/explorer/issues/1061 - moliva - 25/06/2020
+    (!profile.avatar?.snapshots[selector] || lastSegment(profile.avatar.snapshots[selector]) === resolution) && // XXX - check if content === resolution to fix current issue with corrupted profiles https://github.com/decentraland/explorer/issues/1061 - moliva - 25/06/2020
     profile.avatar?.snapshots?.face
   ) {
     try {
