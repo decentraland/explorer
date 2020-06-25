@@ -11,6 +11,9 @@ public class TaskbarHUDShould : TestsBase
     private ChatController_Mock chatController = new ChatController_Mock();
 
     private GameObject userProfileGO;
+    private PrivateChatWindowHUDController privateChatController;
+    private FriendsHUDController friendsHudController;
+    private WorldChatWindowHUDController worldChatWindowController;
 
     protected override IEnumerator SetUp()
     {
@@ -34,29 +37,31 @@ public class TaskbarHUDShould : TestsBase
 
     protected override IEnumerator TearDown()
     {
-        UnityEngine.Object.Destroy(view);
+        controller.Dispose();
+        privateChatController?.Dispose();
+        worldChatWindowController?.Dispose();
+        friendsHudController?.Dispose();
         UnityEngine.Object.Destroy(userProfileGO);
         yield return null;
-        yield break;
     }
 
     [Test]
     public void AddWindowsProperly()
     {
-        WorldChatWindowHUDController chatWindowController = new WorldChatWindowHUDController();
-        chatWindowController.Initialize(null, null);
+        worldChatWindowController = new WorldChatWindowHUDController();
+        worldChatWindowController.Initialize(null, null);
 
-        controller.AddWorldChatWindow(chatWindowController);
+        controller.AddWorldChatWindow(worldChatWindowController);
 
-        Assert.IsTrue(chatWindowController.view.transform.parent == view.windowContainer,
+        Assert.IsTrue(worldChatWindowController.view.transform.parent == view.windowContainer,
             "Chat window isn't inside taskbar window container!");
-        Assert.IsTrue(chatWindowController.view.gameObject.activeSelf, "Chat window is disabled!");
+        Assert.IsTrue(worldChatWindowController.view.gameObject.activeSelf, "Chat window is disabled!");
     }
 
     [Test]
     public void ToggleWindowsProperly()
     {
-        var privateChatController = new PrivateChatWindowHUDController();
+        privateChatController = new PrivateChatWindowHUDController();
         privateChatController.Initialize(chatController);
         controller.AddPrivateChatWindow(privateChatController);
 
@@ -76,15 +81,15 @@ public class TaskbarHUDShould : TestsBase
         Assert.AreEqual(Vector2.zero, rt.anchoredPosition, badPositionMsg);
         Assert.AreEqual(Vector2.zero, rt.pivot, badPivotMsg);
 
-        var friendsHUDController = new FriendsHUDController();
-        friendsHUDController.Initialize(friendsController, UserProfile.GetOwnUserProfile());
-        controller.AddFriendsWindow(friendsHUDController);
+        friendsHudController = new FriendsHUDController();
+        friendsHudController.Initialize(friendsController, UserProfile.GetOwnUserProfile());
+        controller.AddFriendsWindow(friendsHudController);
 
-        rt = friendsHUDController.view.transform as RectTransform;
+        rt = friendsHudController.view.transform as RectTransform;
         Assert.AreEqual(Vector2.zero, rt.anchoredPosition, badPositionMsg);
         Assert.AreEqual(Vector2.zero, rt.pivot, badPivotMsg);
 
-        TestHelpers_Friends.FakeAddFriend(friendsController, friendsHUDController.view, "test-1");
+        TestHelpers_Friends.FakeAddFriend(friendsController, friendsHudController.view, "test-1");
         TestHelpers_Chat.FakePrivateChatMessageFrom(chatController, "test-1", "test message!");
 
         var buttonList = view.GetButtonList();

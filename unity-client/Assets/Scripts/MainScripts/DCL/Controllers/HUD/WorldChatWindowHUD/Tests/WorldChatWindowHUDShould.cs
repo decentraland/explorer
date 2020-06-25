@@ -45,8 +45,6 @@ public class WorldChatWindowHUDShould : TestsBase
         this.view = controller.view;
         Assert.IsTrue(view != null, "World chat hud view is null?");
         Assert.IsTrue(controller != null, "World chat hud controller is null?");
-
-        yield break;
     }
 
 
@@ -132,7 +130,7 @@ public class WorldChatWindowHUDShould : TestsBase
 
         WebInterface.OnMessageFromEngine += messageCallback;
         controller.resetInputFieldOnSubmit = false;
-        controller.SendChatMessage(new ChatMessage() { body = "test message" });
+        controller.SendChatMessage(new ChatMessage() {body = "test message"});
         Assert.IsTrue(messageWasSent);
         WebInterface.OnMessageFromEngine -= messageCallback;
         yield return null;
