@@ -16,12 +16,14 @@ namespace DCL
         TextureWrapMode wrapMode;
         FilterMode filterMode;
         Coroutine loadCoroutine;
+        bool storeDefaultTextureInAdvance = false;
 
-        public AssetPromise_Texture(string textureUrl, TextureWrapMode textureWrapMode = DEFAULT_WRAP_MODE, FilterMode textureFilterMode = DEFAULT_FILTER_MODE)
+        public AssetPromise_Texture(string textureUrl, TextureWrapMode textureWrapMode = DEFAULT_WRAP_MODE, FilterMode textureFilterMode = DEFAULT_FILTER_MODE, bool storeDefaultTextureInAdvance = false)
         {
             url = textureUrl;
             wrapMode = textureWrapMode;
             filterMode = textureFilterMode;
+            this.storeDefaultTextureInAdvance = storeDefaultTextureInAdvance;
 
             idWithDefaultTexSettings = ConstructId(url, DEFAULT_WRAP_MODE, DEFAULT_FILTER_MODE);
             idWithTexSettings = UsesDefaultWrapAndFilterMode() ? idWithDefaultTexSettings : ConstructId(url, wrapMode, filterMode);
@@ -110,7 +112,7 @@ namespace DCL
 
         protected override bool AddToLibrary()
         {
-            if (!UsesDefaultWrapAndFilterMode())
+            if (storeDefaultTextureInAdvance && !UsesDefaultWrapAndFilterMode())
             {
                 if (!library.Contains(idWithDefaultTexSettings))
                 {
