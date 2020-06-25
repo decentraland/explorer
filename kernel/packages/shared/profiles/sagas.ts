@@ -68,7 +68,7 @@ import { identity, ExplorerIdentity } from '../index'
 import { Authenticator, AuthLink } from 'dcl-crypto'
 import { sha3 } from 'web3x/utils'
 import { CATALYST_REALM_INITIALIZED } from '../dao/actions'
-import { isRealmInitialized, getUpdateProfileServer, getResizeService } from '../dao/selectors'
+import { isRealmInitialized, getUpdateProfileServer, getResizeService, isResizeServiceUrl } from '../dao/selectors'
 import { getUserProfile } from '../comms/peers'
 import { WORLD_EXPLORER } from '../../config/index'
 import { backupProfile } from 'shared/profiles/generateRandomUserProfile'
@@ -273,7 +273,11 @@ export function* handleFetchProfile(action: ProfileRequestAction): any {
 
 function* populateFaceIfNecessary(profile: any, resolution: string) {
   const selector = `face${resolution}`
-  if (profile.avatar?.snapshots && !profile.avatar?.snapshots[selector] && profile.avatar?.snapshots?.face) {
+  if (
+    profile.avatar?.snapshots &&
+    (!profile.avatar?.snapshots[selector] || profile.avatar.snapshots[selector] === resolution) && // XXX - check if content === resolution to fix current issue with corrupted profiles https://github.com/decentraland/explorer/issues/1061 - moliva - 25/06/2020
+    profile.avatar?.snapshots?.face
+  ) {
     try {
       const resizeServiceUrl: string = yield select(getResizeService)
       const faceUrlSegments = profile.avatar.snapshots.face.split('/')
@@ -539,8 +543,7 @@ async function buildSnapshotContent(selector: string, value: string): Promise<[s
   let hash: string
   let contentFile: ContentFile | undefined
 
-  const resizeServeUrl = getResizeService(globalThis.globalStore.getState())
-  if (value.startsWith(resizeServeUrl)) {
+  if (isResizeServiceUrl(globalThis.globalStore.getState(), value)) {
     // value is coming in a resize service url => generate image & upload content
     const blob = await fetch(value).then((r) => r.blob())
 
