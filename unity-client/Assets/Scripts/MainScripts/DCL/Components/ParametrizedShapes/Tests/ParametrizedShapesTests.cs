@@ -10,12 +10,6 @@ namespace Tests
 {
     public class ParametrizedShapesTests : TestsBase
     {
-        [UnitySetUp]
-        protected override IEnumerator SetUp()
-        {
-            yield return SetUp_SceneController();
-        }
-
         [UnityTest]
         public IEnumerator BoxShapeUpdate()
         {

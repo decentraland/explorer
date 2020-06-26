@@ -16,6 +16,18 @@ namespace DCL
         public GameObject mapChunkPrefab;
         private bool chunksInitialized = false;
 
+        public void Cleanup()
+        {
+            foreach (var kvp in chunks)
+            {
+                if (kvp.Value != null && kvp.Value.gameObject != null)
+                    Destroy(kvp.Value.gameObject);
+            }
+
+            chunks = new Dictionary<Vector2Int, MapChunk>();
+            chunksInitialized = false;
+        }
+
         public MapChunk GetChunk(int x, int y)
         {
             if (chunks.TryGetValue(new Vector2Int(x, y), out MapChunk value))

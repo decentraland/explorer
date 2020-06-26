@@ -494,7 +494,7 @@ namespace DCL
 
             if (scene)
             {
-                scene.Cleanup();
+                scene.Cleanup(!CommonScriptableObjects.rendererState.Get());
 
                 if (VERBOSE)
                 {
@@ -793,11 +793,6 @@ namespace DCL
             if (data == null)
             {
                 data = new LoadParcelScenesMessage.UnityParcelScene();
-            }
-
-            if (data.basePosition == null)
-            {
-                data.basePosition = new Vector2Int(0, 0);
             }
 
             if (data.parcels == null)

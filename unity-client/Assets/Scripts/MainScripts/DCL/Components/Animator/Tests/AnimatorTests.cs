@@ -12,6 +12,16 @@ namespace Tests
 {
     public class AnimatorTests : TestsBase
     {
+        protected override IEnumerator SetUp()
+        {
+            yield return base.SetUp();
+        }
+
+        protected override IEnumerator TearDown()
+        {
+            yield return base.TearDown();
+        }
+
         [UnityTest]
         public IEnumerator CreateAnimationComponent()
         {

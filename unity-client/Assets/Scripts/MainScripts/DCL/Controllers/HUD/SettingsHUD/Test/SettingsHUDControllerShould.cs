@@ -2,8 +2,6 @@
 using NUnit.Framework;
 using UnityEngine.TestTools;
 using DCL.SettingsHUD;
-
-
 using QualitySettings = DCL.SettingsData.QualitySettings;
 using GeneralSettings = DCL.SettingsData.GeneralSettings;
 
@@ -42,6 +40,12 @@ namespace Tests
             DCL.Settings.i.ApplyQualitySettings(testQualitySettings);
             DCL.Settings.i.ApplyGeneralSettings(testGeneralSettings);
             controller = new SettingsHUDController();
+        }
+
+        protected override IEnumerator TearDown()
+        {
+            controller.Dispose();
+            yield return base.TearDown();
         }
 
         [UnityTest]

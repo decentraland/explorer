@@ -1429,68 +1429,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d1d0821bf5c3e3f47ba67e483803236d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!1 &2017246370
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 2017246372}
-  - component: {fileID: 2017246371}
-  - component: {fileID: 2017246373}
-  m_Layer: 0
-  m_Name: SettingsController
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &2017246371
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2017246370}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cb5dedcd94f714a56b7f769bf5612a2a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  environmentLight: {fileID: 943100645024490816}
-  postProcessVolume: {fileID: 312495478}
-  thirdPersonCamera: {fileID: 941980743}
-  firstPersonCamera: {fileID: 134299876}
---- !u!4 &2017246372
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2017246370}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 245.70177, y: 346.56216, z: -231.94792}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 9
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2017246373
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2017246370}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ff86c290f7eee4e0a89ac07f6c4606be, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  thirdPersonCamera: {fileID: 941980743}
-  firstPersonCamera: {fileID: 134299876}
 --- !u!1001 &326638024064006570
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1651,3 +1589,102 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 943100645024490815}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &7150802491908439661
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 7150802491235533512, guid: 3cc27a6e023896e4598ba0a69519d17a,
+        type: 3}
+      propertyPath: thirdPersonCamera
+      value: 
+      objectReference: {fileID: 941980743}
+    - target: {fileID: 7150802491235533512, guid: 3cc27a6e023896e4598ba0a69519d17a,
+        type: 3}
+      propertyPath: firstPersonCamera
+      value: 
+      objectReference: {fileID: 134299876}
+    - target: {fileID: 7150802491235533513, guid: 3cc27a6e023896e4598ba0a69519d17a,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 245.70177
+      objectReference: {fileID: 0}
+    - target: {fileID: 7150802491235533513, guid: 3cc27a6e023896e4598ba0a69519d17a,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 346.56216
+      objectReference: {fileID: 0}
+    - target: {fileID: 7150802491235533513, guid: 3cc27a6e023896e4598ba0a69519d17a,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -231.94792
+      objectReference: {fileID: 0}
+    - target: {fileID: 7150802491235533513, guid: 3cc27a6e023896e4598ba0a69519d17a,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7150802491235533513, guid: 3cc27a6e023896e4598ba0a69519d17a,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7150802491235533513, guid: 3cc27a6e023896e4598ba0a69519d17a,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7150802491235533513, guid: 3cc27a6e023896e4598ba0a69519d17a,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7150802491235533513, guid: 3cc27a6e023896e4598ba0a69519d17a,
+        type: 3}
+      propertyPath: m_RootOrder
+      value: 9
+      objectReference: {fileID: 0}
+    - target: {fileID: 7150802491235533513, guid: 3cc27a6e023896e4598ba0a69519d17a,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7150802491235533513, guid: 3cc27a6e023896e4598ba0a69519d17a,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7150802491235533513, guid: 3cc27a6e023896e4598ba0a69519d17a,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7150802491235533518, guid: 3cc27a6e023896e4598ba0a69519d17a,
+        type: 3}
+      propertyPath: environmentLight
+      value: 
+      objectReference: {fileID: 943100645024490816}
+    - target: {fileID: 7150802491235533518, guid: 3cc27a6e023896e4598ba0a69519d17a,
+        type: 3}
+      propertyPath: postProcessVolume
+      value: 
+      objectReference: {fileID: 312495478}
+    - target: {fileID: 7150802491235533518, guid: 3cc27a6e023896e4598ba0a69519d17a,
+        type: 3}
+      propertyPath: thirdPersonCamera
+      value: 
+      objectReference: {fileID: 941980743}
+    - target: {fileID: 7150802491235533518, guid: 3cc27a6e023896e4598ba0a69519d17a,
+        type: 3}
+      propertyPath: firstPersonCamera
+      value: 
+      objectReference: {fileID: 134299876}
+    - target: {fileID: 7150802491235533519, guid: 3cc27a6e023896e4598ba0a69519d17a,
+        type: 3}
+      propertyPath: m_Name
+      value: SettingsController
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 3cc27a6e023896e4598ba0a69519d17a, type: 3}

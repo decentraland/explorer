@@ -56,6 +56,7 @@ namespace DCL
         private Pool usersInfoPool;
 
         private bool parcelHighlightEnabledValue = false;
+
         public bool parcelHighlightEnabled
         {
             set
@@ -63,10 +64,7 @@ namespace DCL
                 parcelHighlightEnabledValue = value;
                 parcelHighlightImage.gameObject.SetActive(parcelHighlightEnabledValue);
             }
-            get
-            {
-                return parcelHighlightEnabledValue;
-            }
+            get { return parcelHighlightEnabledValue; }
         }
 
         public static System.Action<int, int> OnParcelClicked;
@@ -130,8 +128,8 @@ namespace DCL
             cursorMapCoords = Input.mousePosition - worldCoordsOriginInMap;
             cursorMapCoords = cursorMapCoords / parcelSizeInMap;
 
-            cursorMapCoords.x = (int)Mathf.Floor(cursorMapCoords.x);
-            cursorMapCoords.y = (int)Mathf.Floor(cursorMapCoords.y);
+            cursorMapCoords.x = (int) Mathf.Floor(cursorMapCoords.x);
+            cursorMapCoords.y = (int) Mathf.Floor(cursorMapCoords.y);
         }
 
         bool IsCursorOverMapChunk()
@@ -144,7 +142,7 @@ namespace DCL
 
         void UpdateParcelHighlight()
         {
-            if (!CoordinatesAreInsideTheWorld((int)cursorMapCoords.x, (int)cursorMapCoords.y))
+            if (!CoordinatesAreInsideTheWorld((int) cursorMapCoords.x, (int) cursorMapCoords.y))
             {
                 if (parcelHighlightImage.gameObject.activeSelf)
                     parcelHighlightImage.gameObject.SetActive(false);
@@ -175,7 +173,7 @@ namespace DCL
                 {
                     parcelHoldCountdown = 0f;
                     highlightedParcelText.text = string.Empty;
-                    OnParcelHold?.Invoke((int)cursorMapCoords.x, (int)cursorMapCoords.y);
+                    OnParcelHold?.Invoke((int) cursorMapCoords.x, (int) cursorMapCoords.y);
                 }
             }
             else
@@ -209,7 +207,7 @@ namespace DCL
                 centerTile += parcel;
             }
 
-            centerTile /= (float)sceneInfo.parcels.Count;
+            centerTile /= (float) sceneInfo.parcels.Count;
 
             (go.transform as RectTransform).anchoredPosition = MapUtils.GetTileToLocalPosition(centerTile.x, centerTile.y);
 
@@ -285,7 +283,7 @@ namespace DCL
 
         public void OnCharacterSetPosition(Vector2Int newCoords, Vector2Int oldCoords)
         {
-            UpdateRendering(new Vector2((float)newCoords.x, (float)newCoords.y));
+            UpdateRendering(new Vector2((float) newCoords.x, (float) newCoords.y));
         }
 
         public void UpdateRendering(Vector2 newCoords)
@@ -325,7 +323,18 @@ namespace DCL
         public void ClickMousePositionParcel()
         {
             highlightedParcelText.text = string.Empty;
-            OnParcelClicked?.Invoke((int)cursorMapCoords.x, (int)cursorMapCoords.y);
+            OnParcelClicked?.Invoke((int) cursorMapCoords.x, (int) cursorMapCoords.y);
+        }
+
+        public void Cleanup()
+        {
+            atlas.Cleanup();
+
+            foreach (var kvp in scenesOfInterestMarkers)
+            {
+                if (kvp.Value != null)
+                    UnityEngine.Object.Destroy(kvp.Value);
+            }
         }
     }
 }

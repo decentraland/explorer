@@ -15,9 +15,14 @@ public class TaskbarHUDShould : TestsBase
     private FriendsHUDController friendsHudController;
     private WorldChatWindowHUDController worldChatWindowController;
 
+    protected override bool justSceneSetUp => true;
+
     protected override IEnumerator SetUp()
     {
+        yield return base.SetUp();
+
         UserProfile ownProfile = UserProfile.GetOwnUserProfile();
+        CommonScriptableObjects.rendererState.Set(true);
 
         var ownProfileModel = new UserProfileModel();
         ownProfileModel.userId = "my-user-id";
@@ -32,17 +37,20 @@ public class TaskbarHUDShould : TestsBase
         view = controller.view;
 
         Assert.IsTrue(view != null, "Taskbar view is null?");
-        yield break;
     }
 
     protected override IEnumerator TearDown()
     {
-        controller.Dispose();
+        yield return null;
+
         privateChatController?.Dispose();
         worldChatWindowController?.Dispose();
         friendsHudController?.Dispose();
+
+        controller.Dispose();
         UnityEngine.Object.Destroy(userProfileGO);
-        yield return null;
+
+        yield return base.TearDown();
     }
 
     [Test]
@@ -73,11 +81,11 @@ public class TaskbarHUDShould : TestsBase
         Assert.AreEqual(Vector2.zero, rt.anchoredPosition, badPositionMsg);
         Assert.AreEqual(Vector2.zero, rt.pivot, badPivotMsg);
 
-        var chatWindowController = new WorldChatWindowHUDController();
-        chatWindowController.Initialize(chatController, null);
-        controller.AddWorldChatWindow(chatWindowController);
+        worldChatWindowController = new WorldChatWindowHUDController();
+        worldChatWindowController.Initialize(chatController, null);
+        controller.AddWorldChatWindow(worldChatWindowController);
 
-        rt = chatWindowController.view.transform as RectTransform;
+        rt = worldChatWindowController.view.transform as RectTransform;
         Assert.AreEqual(Vector2.zero, rt.anchoredPosition, badPositionMsg);
         Assert.AreEqual(Vector2.zero, rt.pivot, badPivotMsg);
 

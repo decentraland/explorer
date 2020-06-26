@@ -14,9 +14,13 @@ namespace Tests
         [UnitySetUp]
         protected override IEnumerator SetUp()
         {
-            yield return SetUp_SceneController(false, false);
-            yield return SetUp_CharacterController();
+            yield return base.SetUp();
             SceneController.i.useBoundariesChecker = false;
+        }
+
+        protected override IEnumerator TearDown()
+        {
+            yield return base.TearDown();
         }
 
         [UnityTest]

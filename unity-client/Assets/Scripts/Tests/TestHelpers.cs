@@ -70,6 +70,8 @@ namespace DCL.Helpers
 
         public static DecentralandEntity CreateSceneEntity(ParcelScene scene)
         {
+            Assert.IsNotNull(scene, "Can't create entity for null scene!");
+
             entityCounter++;
             string id = $"{entityCounter}";
             return scene.CreateEntity(id);

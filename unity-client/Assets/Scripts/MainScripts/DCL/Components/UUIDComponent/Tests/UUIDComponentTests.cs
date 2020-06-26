@@ -14,6 +14,8 @@ namespace Tests
 {
     public class UUIDComponentTests : TestsBase
     {
+        protected override bool enableSceneIntegrityChecker => false;
+
         [UnitySetUp]
         protected override IEnumerator SetUp()
         {
@@ -1145,6 +1147,8 @@ namespace Tests
             yield return null;
 
             Assert.IsFalse(hoverCanvas.enabled);
+
+            Object.Destroy(component);
 
             DCLCharacterController.i.ResumeGravity();
         }

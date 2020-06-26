@@ -19,8 +19,8 @@ public class TermsOfServiceHUD_Should : TestsBase
 
     protected override IEnumerator TearDown()
     {
-        yield return base.TearDown();
         controller.Dispose();
+        yield return base.TearDown();
     }
 
     [Test]

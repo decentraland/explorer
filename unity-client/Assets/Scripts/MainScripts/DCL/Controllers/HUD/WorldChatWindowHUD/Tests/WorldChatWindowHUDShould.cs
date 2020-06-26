@@ -41,10 +41,18 @@ public class WorldChatWindowHUDShould : TestsBase
         controller = new WorldChatWindowHUDController();
         chatController = new ChatController_Mock();
         mouseCatcher = new MouseCatcher_Mock();
+
         controller.Initialize(chatController, mouseCatcher);
         this.view = controller.view;
+
         Assert.IsTrue(view != null, "World chat hud view is null?");
         Assert.IsTrue(controller != null, "World chat hud controller is null?");
+    }
+
+    protected override IEnumerator TearDown()
+    {
+        controller.Dispose();
+        yield return base.TearDown();
     }
 
 

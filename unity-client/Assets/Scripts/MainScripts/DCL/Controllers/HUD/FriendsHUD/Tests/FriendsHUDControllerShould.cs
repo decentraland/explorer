@@ -27,13 +27,14 @@ public class FriendsHUDControllerShould : TestsBase
 
         Assert.IsTrue(view != null, "Friends hud view is null?");
         Assert.IsTrue(controller != null, "Friends hud controller is null?");
-        yield break;
     }
 
     protected override IEnumerator TearDown()
     {
-        yield return base.TearDown();
+        NotificationsController.i.Dispose();
         controller.Dispose();
+
+        yield return base.TearDown();
     }
 
     [Test]
@@ -57,13 +58,13 @@ public class FriendsHUDControllerShould : TestsBase
         bool reportPlayerSent = false;
 
         Action<string, string> callback =
-        (name, payload) =>
-        {
-            if (name == "ReportPlayer")
+            (name, payload) =>
             {
-                reportPlayerSent = true;
-            }
-        };
+                if (name == "ReportPlayer")
+                {
+                    reportPlayerSent = true;
+                }
+            };
 
         WebInterface.OnMessageFromEngine += callback;
 
@@ -111,7 +112,7 @@ public class FriendsHUDControllerShould : TestsBase
         {
             var msg = JsonUtility.FromJson<FriendsController.FriendshipUpdateStatusMessage>(payload);
             if (msg.action == FriendshipAction.REQUESTED_TO &&
-                 msg.userId == id)
+                msg.userId == id)
             {
                 messageSent = true;
             }
@@ -124,7 +125,6 @@ public class FriendsHUDControllerShould : TestsBase
         Assert.IsTrue(messageSent);
 
         WebInterface.OnMessageFromEngine -= callback;
-
     }
 
 
@@ -210,5 +210,8 @@ public class FriendsHUDControllerShould : TestsBase
 
         Assert.AreEqual(1, friendsRequestBadge.finalValue);
         Assert.AreEqual(1, friendsTaskbarBadge.finalValue);
+
+        UnityEngine.Object.Destroy(friendsRequestBadge.gameObject);
+        UnityEngine.Object.Destroy(friendsTaskbarBadge.gameObject);
     }
 }

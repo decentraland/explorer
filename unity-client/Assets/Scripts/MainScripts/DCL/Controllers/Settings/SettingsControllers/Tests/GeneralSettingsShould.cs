@@ -25,15 +25,17 @@ namespace Tests
         Light environmentLight;
 
         Volume postProcessVolume;
-        UnityEngine.Rendering.Universal.UniversalRenderPipelineAsset lwrpAsset;
+        UniversalRenderPipelineAsset lwrpAsset;
 
         [UnitySetUp]
         protected override IEnumerator SetUp()
         {
+            yield return base.SetUp();
+
             testQualitySettings = new QualitySettings()
             {
                 textureQuality = QualitySettings.TextureQuality.HalfRes,
-                antiAliasing = UnityEngine.Rendering.Universal.MsaaQuality._4x,
+                antiAliasing = MsaaQuality._4x,
                 renderScale = 0.1f,
                 shadows = false,
                 softShadows = true,
@@ -52,27 +54,25 @@ namespace Tests
             initQualitySettings = DCL.Settings.i.qualitySettings;
             DCL.Settings.i.ApplyQualitySettings(testQualitySettings);
             DCL.Settings.i.ApplyGeneralSettings(testGeneralSettings);
-
-            yield return InitScene();
         }
 
-        public IEnumerator InitScene()
-        {
-            yield return InitUnityScene("InitialScene");
-            GameObject.DestroyImmediate(DCL.WSSController.i.gameObject);
-        }
+        // public IEnumerator InitScene()
+        // {
+        //     yield return InitUnityScene("InitialScene");
+        //     Object.DestroyImmediate(DCL.WSSController.i.gameObject);
+        // }
 
         protected override IEnumerator TearDown()
         {
-            yield return base.TearDown();
             DCL.Settings.i.ApplyQualitySettings(initQualitySettings);
+            yield return base.TearDown();
         }
 
-        [UnityTest]
-        public IEnumerator HaveItControllersSetupCorrectly()
+        [Test]
+        public void HaveItControllersSetupCorrectly()
         {
-            GeneralSettingsController generalSettingsController = GameObject.FindObjectOfType<GeneralSettingsController>();
-            QualitySettingsController qualitySettingsController = GameObject.FindObjectOfType<QualitySettingsController>();
+            GeneralSettingsController generalSettingsController = Object.FindObjectOfType<GeneralSettingsController>();
+            QualitySettingsController qualitySettingsController = Object.FindObjectOfType<QualitySettingsController>();
 
             Assert.IsNotNull(generalSettingsController, "GeneralSettingsController not found in scene");
             Assert.IsNotNull(qualitySettingsController, "QualitySettingsController not found in scene");
@@ -86,16 +86,14 @@ namespace Tests
             Assert.IsNotNull(qualitySettingsController.postProcessVolume, "QualitySettingsController: postProcessVolume reference missing");
             Assert.IsNotNull(qualitySettingsController.firstPersonCamera, "QualitySettingsController: firstPersonCamera reference missing");
             Assert.IsNotNull(qualitySettingsController.thirdPersonCamera, "QualitySettingsController: thirdPersonCamera reference missing");
-            yield break;
         }
 
-        [UnityTest]
-        public IEnumerator HaveQualityPresetSetCorrectly()
+        [Test]
+        public void HaveQualityPresetSetCorrectly()
         {
             Assert.IsTrue(DCL.Settings.i.qualitySettingsPresets.Length > 0, "QualitySettingsData: No presets created");
             Assert.IsTrue(DCL.Settings.i.qualitySettingsPresets.defaultIndex > 0
                           && DCL.Settings.i.qualitySettingsPresets.defaultIndex < DCL.Settings.i.qualitySettingsPresets.Length, "QualitySettingsData: Wrong default preset index");
-            yield break;
         }
 
         [UnityTest]
@@ -131,8 +129,6 @@ namespace Tests
 
             CheckIfQualitySettingsAreApplied();
             CheckIfGeneralSettingsAreApplied();
-
-            yield break;
         }
 
         public void SetupReferences()
@@ -188,27 +184,28 @@ namespace Tests
             }
 
             Assert.IsTrue(environmentLight.shadows == shadowType, "shadows (environmentLight) mismatch");
-            Bloom bloom;
-            if (postProcessVolume.profile.TryGet<Bloom>(out bloom))
+
+            if (postProcessVolume.profile.TryGet<Bloom>(out Bloom bloom))
             {
                 Assert.IsTrue(bloom.active == DCL.Settings.i.qualitySettings.bloom, "bloom mismatch");
             }
-            Tonemapping toneMapping;
-            if (postProcessVolume.profile.TryGet<Tonemapping>(out toneMapping))
+
+            if (postProcessVolume.profile.TryGet<Tonemapping>(out Tonemapping toneMapping))
             {
                 Assert.IsTrue(toneMapping.active == DCL.Settings.i.qualitySettings.colorGrading, "colorGrading mismatch");
             }
-            Assert.IsTrue(firstPersonCamera.m_Lens.FarClipPlane == DCL.Settings.i.qualitySettings.cameraDrawDistance, "cameraDrawDistance (firstPersonCamera) mismatch");
-            Assert.IsTrue(freeLookCamera.m_Lens.FarClipPlane == DCL.Settings.i.qualitySettings.cameraDrawDistance, "cameraDrawDistance (freeLookCamera) mismatch");
+
+            UnityEngine.Assertions.Assert.AreApproximatelyEqual(firstPersonCamera.m_Lens.FarClipPlane, DCL.Settings.i.qualitySettings.cameraDrawDistance, "cameraDrawDistance (firstPersonCamera) mismatch");
+            UnityEngine.Assertions.Assert.AreApproximatelyEqual(freeLookCamera.m_Lens.FarClipPlane, DCL.Settings.i.qualitySettings.cameraDrawDistance, "cameraDrawDistance (freeLookCamera) mismatch");
         }
 
         private void CheckIfGeneralSettingsAreApplied()
         {
-            Assert.IsTrue(freeLookCamera.m_XAxis.m_AccelTime == DCL.Settings.i.generalSettings.mouseSensitivity, "freeLookCamera (m_XAxis) mouseSensitivity mismatch");
-            Assert.IsTrue(freeLookCamera.m_YAxis.m_AccelTime == DCL.Settings.i.generalSettings.mouseSensitivity, "freeLookCamera (m_YAxis) mouseSensitivity mismatch");
-            Assert.IsTrue(povCamera.m_HorizontalAxis.m_AccelTime == DCL.Settings.i.generalSettings.mouseSensitivity, "freeLookCamera (m_HorizontalAxis) mouseSensitivity mismatch");
-            Assert.IsTrue(povCamera.m_VerticalAxis.m_AccelTime == DCL.Settings.i.generalSettings.mouseSensitivity, "freeLookCamera (m_VerticalAxis) mouseSensitivity mismatch");
-            Assert.IsTrue(AudioListener.volume == DCL.Settings.i.generalSettings.sfxVolume, "audioListener sfxVolume mismatch");
+            UnityEngine.Assertions.Assert.AreApproximatelyEqual(freeLookCamera.m_XAxis.m_AccelTime, DCL.Settings.i.generalSettings.mouseSensitivity, "freeLookCamera (m_XAxis) mouseSensitivity mismatch");
+            UnityEngine.Assertions.Assert.AreApproximatelyEqual(freeLookCamera.m_YAxis.m_AccelTime, DCL.Settings.i.generalSettings.mouseSensitivity, "freeLookCamera (m_YAxis) mouseSensitivity mismatch");
+            UnityEngine.Assertions.Assert.AreApproximatelyEqual(povCamera.m_HorizontalAxis.m_AccelTime, DCL.Settings.i.generalSettings.mouseSensitivity, "freeLookCamera (m_HorizontalAxis) mouseSensitivity mismatch");
+            UnityEngine.Assertions.Assert.AreApproximatelyEqual(povCamera.m_VerticalAxis.m_AccelTime, DCL.Settings.i.generalSettings.mouseSensitivity, "freeLookCamera (m_VerticalAxis) mouseSensitivity mismatch");
+            UnityEngine.Assertions.Assert.AreApproximatelyEqual(AudioListener.volume, DCL.Settings.i.generalSettings.sfxVolume, "audioListener sfxVolume mismatch");
         }
     }
 }
