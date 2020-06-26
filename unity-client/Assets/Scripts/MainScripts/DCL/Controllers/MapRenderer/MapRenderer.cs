@@ -71,20 +71,22 @@ namespace DCL
         public static System.Action<int, int> OnParcelHold;
         public static System.Action OnParcelHoldCancel;
 
+        private bool isInitialized = false;
+
         private void Awake()
         {
             i = this;
+            Initialize();
+        }
 
-            usersInfoPool = PoolManager.i.GetPool(MINIMAP_USER_ICONS_POOL_NAME);
-            if (usersInfoPool == null)
-            {
-                usersInfoPool = PoolManager.i.AddPool(
-                    MINIMAP_USER_ICONS_POOL_NAME,
-                    Instantiate(userIconPrefab.gameObject, overlayContainer.transform),
-                    maxPrewarmCount: MINIMAP_USER_ICONS_MAX_PREWARM,
-                    isPersistent: true);
-                usersInfoPool.ForcePrewarm();
-            }
+        public void Initialize()
+        {
+            if (isInitialized)
+                return;
+
+            isInitialized = true;
+            EnsurePools();
+            atlas.InitializeChunks();
 
             NAVMAP_CHUNK_LAYER = LayerMask.NameToLayer("NavmapChunk");
 
@@ -92,7 +94,7 @@ namespace DCL
             MinimapMetadata.GetMetadata().OnUserInfoUpdated += MapRenderer_OnUserInfoUpdated;
             MinimapMetadata.GetMetadata().OnUserInfoRemoved += MapRenderer_OnUserInfoRemoved;
 
-            ParcelHighlightButton.onClick.AddListener(() => { ClickMousePositionParcel(); });
+            ParcelHighlightButton.onClick.AddListener(ClickMousePositionParcel);
 
             playerWorldPosition.OnChange += OnCharacterMove;
             playerRotation.OnChange += OnCharacterRotate;
@@ -100,6 +102,52 @@ namespace DCL
             parcelHighlightImage.rectTransform.localScale = new Vector3(parcelHightlightScale, parcelHightlightScale, 1f);
 
             parcelHoldCountdown = parcelHoldTimeInSeconds;
+        }
+
+        private void EnsurePools()
+        {
+            usersInfoPool = PoolManager.i.GetPool(MINIMAP_USER_ICONS_POOL_NAME);
+
+            if (usersInfoPool == null)
+            {
+                usersInfoPool = PoolManager.i.AddPool(
+                    MINIMAP_USER_ICONS_POOL_NAME,
+                    Instantiate(userIconPrefab.gameObject, overlayContainer.transform),
+                    maxPrewarmCount: MINIMAP_USER_ICONS_MAX_PREWARM,
+                    isPersistent: true);
+
+                if (!Configuration.EnvironmentSettings.RUNNING_TESTS)
+                    usersInfoPool.ForcePrewarm();
+            }
+        }
+
+        public void OnDestroy()
+        {
+            Cleanup();
+        }
+
+        public void Cleanup()
+        {
+            if (atlas != null)
+                atlas.Cleanup();
+
+            foreach (var kvp in scenesOfInterestMarkers)
+            {
+                if (kvp.Value != null)
+                    Destroy(kvp.Value);
+            }
+
+            scenesOfInterestMarkers.Clear();
+
+            playerWorldPosition.OnChange -= OnCharacterMove;
+            playerRotation.OnChange -= OnCharacterRotate;
+            MinimapMetadata.GetMetadata().OnSceneInfoUpdated -= MapRenderer_OnSceneInfoUpdated;
+            MinimapMetadata.GetMetadata().OnUserInfoUpdated -= MapRenderer_OnUserInfoUpdated;
+            MinimapMetadata.GetMetadata().OnUserInfoRemoved -= MapRenderer_OnUserInfoRemoved;
+
+            ParcelHighlightButton.onClick.RemoveListener(ClickMousePositionParcel);
+
+            isInitialized = false;
         }
 
         void Update()
@@ -212,6 +260,7 @@ namespace DCL
             (go.transform as RectTransform).anchoredPosition = MapUtils.GetTileToLocalPosition(centerTile.x, centerTile.y);
 
             MapSceneIcon icon = go.GetComponent<MapSceneIcon>();
+
             if (icon.title != null)
                 icon.title.text = sceneInfo.name;
 
@@ -232,8 +281,8 @@ namespace DCL
                 usersInfo.Add(userInfo.userId, userInfo);
 
                 PoolableObject newUserIcon = usersInfoPool.Get();
-                newUserIcon.gameObject.name = string.Format("UserIcon-{0}", userInfo.userName);
-                newUserIcon.gameObject.transform.parent = overlayContainer.transform;
+                newUserIcon.gameObject.name = $"UserIcon-{userInfo.userName}";
+                newUserIcon.gameObject.transform.SetParent(overlayContainer.transform, true);
                 newUserIcon.gameObject.transform.localScale = Vector3.one;
                 ConfigureUserIcon(newUserIcon.gameObject, userInfo.worldPosition, userInfo.userName);
 
@@ -262,17 +311,14 @@ namespace DCL
                 icon.title.text = name;
         }
 
-        public void OnDestroy()
-        {
-            playerWorldPosition.OnChange -= OnCharacterMove;
-            playerRotation.OnChange -= OnCharacterRotate;
-            MinimapMetadata.GetMetadata().OnSceneInfoUpdated -= MapRenderer_OnSceneInfoUpdated;
-            MinimapMetadata.GetMetadata().OnUserInfoUpdated -= MapRenderer_OnUserInfoUpdated;
-            MinimapMetadata.GetMetadata().OnUserInfoRemoved -= MapRenderer_OnUserInfoRemoved;
-        }
-
         private void OnCharacterMove(Vector3 current, Vector3 previous)
         {
+            current.y = 0;
+            previous.y = 0;
+
+            if (Vector3.Distance(current, previous) < 0.1f)
+                return;
+
             UpdateRendering(Utils.WorldToGridPositionUnclamped(current));
         }
 
@@ -283,6 +329,9 @@ namespace DCL
 
         public void OnCharacterSetPosition(Vector2Int newCoords, Vector2Int oldCoords)
         {
+            if (oldCoords == newCoords)
+                return;
+
             UpdateRendering(new Vector2((float) newCoords.x, (float) newCoords.y));
         }
 
@@ -324,17 +373,6 @@ namespace DCL
         {
             highlightedParcelText.text = string.Empty;
             OnParcelClicked?.Invoke((int) cursorMapCoords.x, (int) cursorMapCoords.y);
-        }
-
-        public void Cleanup()
-        {
-            atlas.Cleanup();
-
-            foreach (var kvp in scenesOfInterestMarkers)
-            {
-                if (kvp.Value != null)
-                    UnityEngine.Object.Destroy(kvp.Value);
-            }
         }
     }
 }

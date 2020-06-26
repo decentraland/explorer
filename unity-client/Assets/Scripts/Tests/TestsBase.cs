@@ -5,6 +5,7 @@ using DCL.Models;
 using Newtonsoft.Json;
 using System.Collections;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Reflection;
 using NUnit.Framework;
@@ -29,6 +30,8 @@ public class TestsBase
     [UnitySetUp]
     protected virtual IEnumerator SetUp()
     {
+        DCL.Configuration.EnvironmentSettings.RUNNING_TESTS = true;
+
         if (!sceneInitialized)
         {
             yield return InitUnityScene("MainTest");
@@ -80,8 +83,6 @@ public class TestsBase
 #if UNITY_EDITOR
         yield return TearDown_SceneIntegrityChecker();
 #endif
-
-        yield return null;
     }
 
     protected void TearDown_PromiseKeepers()

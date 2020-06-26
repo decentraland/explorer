@@ -21,10 +21,12 @@ namespace DCL
             foreach (var kvp in chunks)
             {
                 if (kvp.Value != null && kvp.Value.gameObject != null)
+                {
                     Destroy(kvp.Value.gameObject);
+                }
             }
 
-            chunks = new Dictionary<Vector2Int, MapChunk>();
+            chunks.Clear();
             chunksInitialized = false;
         }
 
@@ -62,12 +64,7 @@ namespace DCL
             }
         }
 
-        private void Start()
-        {
-            InitializeChunks();
-        }
-
-        void InitializeChunks()
+        public void InitializeChunks()
         {
             if (chunksInitialized)
                 return;
@@ -87,9 +84,12 @@ namespace DCL
 #if UNITY_EDITOR
                     chunk.gameObject.name = $"Chunk {xTile}, {yTile}";
 #endif
-                    chunk.transform.SetParent(chunksParent.transform);
-                    chunk.transform.localScale = Vector3.one;
-                    chunk.transform.localPosition = new Vector3(xTile * MapUtils.CHUNK_SIZE.x, yTile * MapUtils.CHUNK_SIZE.y, 0);
+                    if (!(chunk.transform is RectTransform chunkTransform))
+                        continue;
+
+                    chunkTransform.SetParent(chunksParent.transform);
+                    chunkTransform.localScale = Vector3.one;
+                    chunkTransform.localPosition = new Vector3(xTile * MapUtils.CHUNK_SIZE.x, yTile * MapUtils.CHUNK_SIZE.y, 0);
 
                     //NOTE(Brian): Configure chunk with proper params
                     chunk.center.x = x;
@@ -97,7 +97,7 @@ namespace DCL
                     chunk.size.x = MapUtils.CHUNK_SIZE.x;
                     chunk.size.y = MapUtils.CHUNK_SIZE.y;
                     chunk.tileSize = MapUtils.PARCEL_SIZE;
-                    (chunk.transform as RectTransform).sizeDelta = new Vector2(MapUtils.CHUNK_SIZE.x, MapUtils.CHUNK_SIZE.y);
+                    chunkTransform.sizeDelta = new Vector2(MapUtils.CHUNK_SIZE.x, MapUtils.CHUNK_SIZE.y);
                     chunk.owner = this;
 
                     chunks[new Vector2Int(xTile, yTile)] = chunk;
