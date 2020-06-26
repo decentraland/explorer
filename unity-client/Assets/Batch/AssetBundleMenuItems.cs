@@ -1,5 +1,6 @@
 using DCL.Helpers;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using UnityEditor;
 using UnityEngine;
@@ -24,10 +25,10 @@ namespace DCL
         [MenuItem("Decentraland/Asset Bundle Builder/Dump All Wearables")]
         public static void DumpBaseAvatars()
         {
-            var avatarItemList = GetAvatarMappingList("https://dcl-wearables.now.sh/index.json");
-
+            var avatarItemList = GetAvatarMappingList("https://wearable-api.decentraland.org/v2/collections");
+            var slicedList = avatarItemList.ToList().GetRange(0, 10);
             var builder = new AssetBundleBuilder();
-            builder.DownloadAndConvertAssets(avatarItemList);
+            builder.DownloadAndConvertAssets(slicedList.ToArray());
         }
 
         [MenuItem("Decentraland/Asset Bundle Builder/Dump Zone -110,-110")]
@@ -71,9 +72,17 @@ namespace DCL
             BuildPipeline.BuildAssetBundles(AssetBundleBuilderConfig.ASSET_BUNDLES_PATH_ROOT, BuildAssetBundleOptions.UncompressedAssetBundle | BuildAssetBundleOptions.ForceRebuildAssetBundle, BuildTarget.WebGL);
         }
 
+        [System.Serializable]
         public class WearableItemArray
         {
-            public List<WearableItem> data;
+            [System.Serializable]
+            public class Collection
+            {
+                public string id;
+                public List<WearableItem> wearables;
+            }
+
+            public List<Collection> data;
         }
 
         public static MappingPair[] GetAvatarMappingList(string url)
@@ -93,13 +102,16 @@ namespace DCL
 
             var avatarApiData = JsonUtility.FromJson<WearableItemArray>("{\"data\":" + w.downloadHandler.text + "}");
 
-            foreach (var avatar in avatarApiData.data)
+            foreach (var collection in avatarApiData.data)
             {
-                foreach (var representation in avatar.representations)
+                foreach (var wearable in collection.wearables)
                 {
-                    foreach (var datum in representation.contents)
+                    foreach (var representation in wearable.representations)
                     {
-                        mappingPairs.Add(datum);
+                        foreach (var datum in representation.contents)
+                        {
+                            mappingPairs.Add(datum);
+                        }
                     }
                 }
             }
