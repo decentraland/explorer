@@ -1144,11 +1144,13 @@ worldRunningObservable.add(isRunning => {
 })
 
 document.addEventListener('pointerlockchange', pointerLockChange, false)
-document.addEventListener('mozpointerlockchange', pointerLockChange, false)
-document.addEventListener('webkitpointerlockchange', pointerLockChange, false)
 
+let isPointerLocked: boolean = false
 function pointerLockChange() {
   const doc: any = document
   const isLocked = (doc.pointerLockElement || doc.mozPointerLockElement || doc.webkitPointerLockElement) != null
-  unityInterface.SetCursorState(isLocked)
+  if (isPointerLocked !== isLocked) {
+    unityInterface.SetCursorState(isLocked)
+  }
+  isPointerLocked = isLocked
 }
