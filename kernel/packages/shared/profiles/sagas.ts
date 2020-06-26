@@ -291,14 +291,14 @@ function* populateFaceIfNecessary(profile: any, resolution: string) {
       let faceUrl = `${resizeServiceUrl}/${path}`
 
       // head to resize url in the current catalyst before populating
-      let response = yield fetch(faceUrl, { method: 'HEAD' })
+      let response = yield call(fetch, faceUrl, { method: 'HEAD' })
       if (!response.ok) {
         // if resize service is not available for this image, try with fallback server
         const fallbackServiceUrl = getServerConfigurations().fallbackResizeServiceUrl
         if (fallbackServiceUrl !== resizeServiceUrl) {
           faceUrl = `${fallbackServiceUrl}/${path}`
 
-          response = yield fetch(faceUrl, { method: 'HEAD' })
+          response = yield call(fetch, faceUrl, { method: 'HEAD' })
         }
       }
 
