@@ -16,15 +16,12 @@ import {
   EDITOR,
   ENGINE_DEBUG_PANEL,
   playerConfigurations,
-  RESET_TUTORIAL,
   SCENE_DEBUG_PANEL,
-  SHOW_FPS_COUNTER,
-  tutorialEnabled
+  SHOW_FPS_COUNTER
 } from '../config'
 import { Quaternion, ReadOnlyQuaternion, ReadOnlyVector3, Vector3 } from '../decentraland-ecs/src/decentraland/math'
 import { IEventNames, IEvents, ProfileForRenderer, MinimapSceneInfo } from '../decentraland-ecs/src/decentraland/Types'
 import { sceneLifeCycleObservable } from '../decentraland-loader/lifecycle/controllers/scene'
-import { tutorialStepId } from 'decentraland-loader/lifecycle/tutorial/tutorial'
 import { AirdropInfo } from 'shared/airdrops/interface'
 import { queueTrackingEvent } from 'shared/analytics'
 import { DevTools } from 'shared/apis/DevTools'
@@ -242,10 +239,10 @@ const browserInterface = {
     Session.current.then(s => s.logout()).catch(e => defaultLogger.error('error while logging out', e))
   },
 
-  SaveUserAvatar(changes: { face: string; body: string; avatar: Avatar }) {
-    const { face, body, avatar } = changes
+  SaveUserAvatar(changes: { face: string; face128: string, face256: string, body: string; avatar: Avatar }) {
+    const { face, face128, face256, body, avatar } = changes
     const profile: Profile = getUserProfile().profile as Profile
-    const updated = { ...profile, avatar: { ...avatar, snapshots: { face, body } } }
+    const updated = { ...profile, avatar: { ...avatar, snapshots: { face, face128, face256, body } } }
     globalThis.globalStore.dispatch(saveProfileRequest(updated))
   },
 
@@ -258,10 +255,6 @@ const browserInterface = {
       version: profile.version,
       profile: profileToRendererFormat(profile, identity)
     })
-
-    if (data.tutorialStep === tutorialStepId.FINISHED) {
-      // we used to call delightedSurvey() here
-    }
   },
 
   ControlEvent({ eventType, payload }: { eventType: string; payload: any }) {
@@ -630,10 +623,6 @@ export const unityInterface = {
     }
   },
   SetTutorialEnabled() {
-    if (RESET_TUTORIAL) {
-      browserInterface.SaveUserTutorialStep({ tutorialStep: 0 })
-    }
-
     gameInstance.SendMessage('TutorialController', 'SetTutorialEnabled')
   },
   TriggerAirdropDisplay(data: AirdropInfo) {
@@ -976,10 +965,6 @@ export async function initializeEngine(_gameInstance: GameInstance) {
 
   if (ENGINE_DEBUG_PANEL) {
     unityInterface.SetEngineDebugPanel()
-  }
-
-  if (tutorialEnabled()) {
-    unityInterface.SetTutorialEnabled()
   }
 
   if (!EDITOR) {
