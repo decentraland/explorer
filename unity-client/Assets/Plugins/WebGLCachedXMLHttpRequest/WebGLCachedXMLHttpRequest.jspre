@@ -171,8 +171,7 @@ CachedXMLHttpRequest.cache = {
   init: function () {
     var self = this;
 
-    self.indexedDB = null;
-    window.indexedDB = null;
+    console.log("[DCL-CachedXMLHttpRequest] Initializing plugin... IDB cache enabled = " + self.enabled);
     
     onError = function(e) {
       CachedXMLHttpRequest.log("can not open indexedDB database: " + e.message);
