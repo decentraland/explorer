@@ -1,8 +1,12 @@
 function CachedXMLHttpRequest() {
   var self = this, xhr = new CachedXMLHttpRequest.XMLHttpRequest(), cache = {};
 
+  Module.CachedXMLHttpRequestSilent = true
+  
   function send() {
+
     var onload = xhr.onload;
+
     xhr.onload = function (e) {
       var meta = {
         requestURL: cache.requestURL,
@@ -11,23 +15,32 @@ function CachedXMLHttpRequest() {
         lastModified: xhr.getResponseHeader("Last-Modified"),
         eTag: xhr.getResponseHeader("ETag"),
       };
+
       if (xhr.status == 200 && (meta.lastModified || meta.eTag)) {
+      
         meta.size = xhr.response.byteLength;
+      
         CachedXMLHttpRequest.cache.put(cache.requestURL, meta, xhr.response, function (err) {
+      
           CachedXMLHttpRequest.log("'" + cache.requestURL + "' downloaded successfully (" + xhr.response.byteLength + " bytes) " +
             (err ? "but not stored in indexedDB cache due to error: " + err.message : "and stored in indexedDB cache."));
+      
           if (onload)
             onload(e);
         });
+      
       } else {
+      
         if (xhr.status == 304) {
           cache.override = true;
           CachedXMLHttpRequest.log("'" + cache.requestURL + "' served from indexedDB cache (" + cache.response.byteLength + " bytes).");
         }
+      
         if (onload)
           onload(e);
       }
     };
+
     return xhr.send.apply(xhr, arguments);
   }
 
@@ -68,11 +81,14 @@ function CachedXMLHttpRequest() {
   Object.defineProperty(self, "send", { value: function (data) {
     var sendArguments = arguments;
     var absoluteUrlMatch = cache.requestURL.match("^https?:\/\/[^\/]+\/");
-    if (!absoluteUrlMatch || cache.customHeaders || data || cache.method != "GET" || !cache.async || xhr.responseType != "arraybuffer")
+    
+    if (!cache.enabled || !absoluteUrlMatch || cache.customHeaders || data || cache.method != "GET" || !cache.async || xhr.responseType != "arraybuffer")
       return xhr.send.apply(xhr, sendArguments);
+    
     CachedXMLHttpRequest.cache.get(cache.requestURL, function (err, result) {
       if (err || !result || !result.meta || result.meta.responseType != xhr.responseType)
         return send.apply(self, sendArguments);
+    
       cache.status = 200;
       cache.statusText = "OK";
       cache.response = result.response;
@@ -127,6 +143,8 @@ CachedXMLHttpRequest.checkBlacklist = function(list, url) {
 };
 
 CachedXMLHttpRequest.cache = {
+
+  enabled: window.indexedDB != null, // NOTE(Brian): disable chrome IndexedDB only
   database: "CachedXMLHttpRequest",
   version: 1,
   store: "cache",
@@ -137,11 +155,13 @@ CachedXMLHttpRequest.cache = {
     return this.link.href;
 
   },
+
   id: function (requestURL) {
     return encodeURIComponent(requestURL);
-
   },
+  
   queue: [],
+  
   processQueue: function () {
     var self = this;
     self.queue.forEach(function (queued) { self[queued.action].apply(self, queued.arguments); });
@@ -160,12 +180,15 @@ CachedXMLHttpRequest.cache = {
 
     if (!self.indexedDB)
       return CachedXMLHttpRequest.log("indexedDB is not available");
+
     var openDB;
+
     try {
       openDB = indexedDB.open(self.database, self.version);
     } catch(e) {
       return onError(new Error("indexedDB access denied"));
     }
+    
     openDB.onupgradeneeded = function (e) {
       var db = e.target.result;
       var transaction = e.target.transaction;
@@ -178,7 +201,9 @@ CachedXMLHttpRequest.cache = {
       }
       objectStore.clear();
     };
+
     openDB.onerror = onError;
+    
     openDB.onsuccess = function (e) {
       self.db = e.target.result;
       self.processQueue();
@@ -186,10 +211,14 @@ CachedXMLHttpRequest.cache = {
 
   },
   put: function (requestURL, meta, response, callback) {
+
     if (CachedXMLHttpRequest.checkBlacklist(Module.CachedXMLHttpRequestBlacklist, requestURL))
       return callback(new Error("requestURL was on the cache blacklist"));
 
     var self = this;
+
+    if (!self.enabled)
+      return callback(null);
     if (!self.indexedDB)
       return callback(new Error("indexedDB is not available"));
     if (!self.db)
@@ -197,13 +226,10 @@ CachedXMLHttpRequest.cache = {
 
     meta.version = self.version;
 
-    console.time("IDB put " + requestURL);
-
     var putDB = self.db.transaction([self.store], "readwrite").objectStore(self.store).put({id: self.id(requestURL), meta: meta, response: response});
     
-    putDB.onerror = function (e) { e.preventDefault(); callback(new Error("failed to put request into indexedDB cache")); console.timeEnd("IDB put " + requestURL);};
-    
-    putDB.onsuccess = function () { callback(null); console.timeEnd("IDB put " + requestURL); };
+    putDB.onerror = function (e) { e.preventDefault(); callback(new Error("failed to put request into indexedDB cache"));};
+    putDB.onsuccess = function () { callback(null); };
   },
   
 
@@ -212,16 +238,17 @@ CachedXMLHttpRequest.cache = {
       return callback(new Error("requestURL was on the cache blacklist"));
 
     var self = this;
+
+    if (!self.enabled)
+      return;
     if (!self.indexedDB)
       return callback(new Error("indexedDB is not available"));
-
     if (!self.db)
       return self.queue.push({action: "get", arguments: arguments});
 
-    console.time("IDB get " + requestURL);
     var getDB = self.db.transaction([self.store], "readonly").objectStore(self.store).get(self.id(requestURL));
-    getDB.onerror = function (e) { e.preventDefault(); callback(new Error("failed to get request from indexedDB cache")); console.timeEnd("IDB get " + requestURL); };
-    getDB.onsuccess = function (e) { callback(null, e.target.result); console.timeEnd("IDB get " + requestURL); };
+    getDB.onerror = function (e) { e.preventDefault(); callback(new Error("failed to get request from indexedDB cache")); };
+    getDB.onsuccess = function (e) { callback(null, e.target.result); };
   }
 
 
@@ -231,15 +258,25 @@ CachedXMLHttpRequest.cache.init();
 
 CachedXMLHttpRequest.wrap = function (func) {
   return function () {
+
     var realXMLHttpRequest = XMLHttpRequest, result;
     window.XMLHttpRequest = CachedXMLHttpRequest;
+
+    //NOTE(Brian): We always enable indexedDB for wrapped functions, as Unity modules
+    //             don't seem to cache properly with browser's disk cache.
+    var prevEnabled = CachedXMLHttpRequest.cache.enabled;
+    CachedXMLHttpRequest.cache.enabled = true;
+
     try {
       result = func.apply(this, arguments);
     } catch (e) {
       window.XMLHttpRequest = realXMLHttpRequest;
       throw e;
     }
+
     window.XMLHttpRequest = realXMLHttpRequest;
+    CachedXMLHttpRequest.cache.enabled = prevEnabled;
+
     return result;
   };
 };
