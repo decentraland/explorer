@@ -144,7 +144,7 @@ CachedXMLHttpRequest.checkBlacklist = function(list, url) {
 
 CachedXMLHttpRequest.cache = {
 
-  enabled: window.indexedDB != null, // NOTE(Brian): disable chrome IndexedDB only
+  enabled: window.indexedDB == null, // NOTE(Brian): disable chrome IndexedDB only
   database: "CachedXMLHttpRequest",
   version: 1,
   store: "cache",
