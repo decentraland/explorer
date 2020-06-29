@@ -5,7 +5,7 @@ import { getCurrentUser } from '../comms/peers'
 import { lastPlayerPosition } from '../world/positionThings'
 import { SceneLoad, SCENE_FAIL, SCENE_LOAD, SCENE_START } from './actions'
 import { LoadingState } from './reducer'
-import { EXPERIENCE_STARTED, helpTexts, rotateHelpText, TELEPORT_TRIGGERED } from './types'
+import { EXPERIENCE_STARTED, loadingTips, rotateHelpText, TELEPORT_TRIGGERED } from './types'
 
 const SECONDS = 1000
 
@@ -44,7 +44,7 @@ function* refreshTeleport() {
 }
 function* refreshTextInScreen() {
   while (true) {
-    const status = yield select(state => state.loading)
+    const status = yield select((state) => state.loading)
     yield call(() => updateTextInScreen(status))
     yield delay(200)
   }
@@ -56,7 +56,7 @@ export function* waitForSceneLoads() {
       started: take(SCENE_START),
       failed: take(SCENE_FAIL)
     })
-    if (yield select(state => state.loading.pendingScenes === 0)) {
+    if (yield select((state) => state.loading.pendingScenes === 0)) {
       break
     }
   }
@@ -66,7 +66,7 @@ export function* initialSceneLoading() {
   yield race({
     refresh: call(refreshTeleport),
     textInScreen: call(refreshTextInScreen),
-    finish: call(function*() {
+    finish: call(function* () {
       yield take(EXPERIENCE_STARTED)
       yield take('Loading scene')
       yield call(waitForSceneLoads)
@@ -77,7 +77,7 @@ export function* initialSceneLoading() {
 export function* teleportSceneLoading() {
   yield race({
     refresh: call(refreshTeleport),
-    textInScreen: call(function*() {
+    textInScreen: call(function* () {
       yield delay(2000)
       yield call(refreshTextInScreen)
     }),
@@ -87,8 +87,11 @@ export function* teleportSceneLoading() {
 
 export function updateTextInScreen(status: LoadingState) {
   const messages = document.getElementById('load-messages')
-  if (messages) {
-    messages.innerText = helpTexts[status.helpText]
+  const images = document.getElementById('load-images') as HTMLImageElement | null
+  if (messages && images) {
+    const loadingTip = loadingTips[status.helpText]
+    messages.innerText = loadingTip.text
+    images.src = loadingTip.image
   }
   const subMessages = document.getElementById('subtext-messages')
   if (subMessages) {

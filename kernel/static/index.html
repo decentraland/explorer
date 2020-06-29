@@ -14,6 +14,12 @@
       height: 100%;
       overflow: hidden;
       touch-action: none;
+
+      background: rgba(0, 0, 0, 1);
+      background-image: url(images/decentraland-connect/background.png);
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
     }
 
     #gameContainer {
@@ -30,8 +36,8 @@
 
     #gameContainer.loaded,
     body {
-      background: #090909 url(images/progress-logo.png) no-repeat center !important;
-      background-size: 309px 58px !important;
+      background: #090909 url(images/decentraland-connect/Isologotipo.png) no-repeat 50% 25% !important;
+      background-size: 170px 32px !important;
     }
 
     * {
@@ -64,6 +70,14 @@
       right: 0;
       bottom: 0;
       z-index: 2;
+
+      background: rgba(0, 0, 0, 1);
+      background-image: url(images/decentraland-connect/background.png);
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+
+      opacity: 0.15;
     }
 
     .progress {
@@ -77,6 +91,8 @@
       border-width: thick;
       border-left: none;
       border-right: none;
+      border-top: 3px solid #090909;
+      border-bottom: 3px solid #090909;
       text-align: center;
       border-color: #090909;
       background: #090909;
@@ -88,7 +104,7 @@
       width: 0%;
       height: 100%;
       display: inline-flex;
-      background-color: #eb455a;
+      background: linear-gradient(270deg, #FC9965 4.62%, #FF5273 58.77%, #DE3959 100%);
       animation: progress_30 10s forwards;
     }
 
@@ -161,23 +177,41 @@
     }
     #load-messages-wrapper {
       display: none;
-      min-width: 100%;
       z-index: 8;
-      bottom: 10%;
+
       position: fixed;
-      color: white;
+      top: 40%;
+
+      min-width: 100%;
       padding-left: 20%;
       padding-right: 20%;
+
+      color: white;
       text-align: center;
       font-family: -apple-system, system-ui, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       font-size: 1.25em;
       font-stretch: 125%;
       font-weight: 400;
     }
+    #load-images {
+      max-width: 400px;
+      max-height: 234px;
+
+      margin-bottom: 40px;
+    }
     #subtext-messages {
-      margin-top: 25px;
+      bottom: 40px;
+      left: 0;
+      position: fixed;
+
+      min-width: 100%;
+      padding-left: 20%;
+      padding-right: 20%;
+
+      text-align: center;
+
       font-size: 1.0em;
-      color: #353535;
+      color: #7D8385;
     }
 
     #eth-connect-advice {
@@ -202,9 +236,13 @@
     }
     #eth-login {
       display: none;
+
       background: rgba(0, 0, 0, 1);
       background-image: url(images/decentraland-connect/background.png);
-      background-size: cover;
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+
       position: absolute;
       z-index: 9;
       top: 0;
@@ -213,19 +251,15 @@
       height: 100%;
     }
     .eth-login-popup {
-      background-color: white; 
-      background-image: linear-gradient(to bottom right, #F4F4F4, #ffffff); 
-      width: 60%;
-      max-width: 470px;
+      width: 70%;
+      max-width: 650px;
       height: 446px;
 
       position: absolute;
       left: 50%;
-      top: 50%;
+      top: 30%;
       transform: translate(-50%, -50%);
-      border-radius: 12px;
       padding: 34px 44px;
-      box-shadow: 0 2px 4 rgba(0, 0, 0, 0.5);
 
       display: flex;
       flex-direction: column;
@@ -240,15 +274,15 @@
       src: url(images/decentraland-connect/SF-UI-Text-Semibold.otf);
     }
     .eth-login-description {
-      color: black;
-      margin-top: 68px;
-      margin-bottom: 60px;
+      color: white;
+      margin-top: 50px;
+      margin-bottom: 50px;
       text-align: center;
       font-size: 16px;
       font-family: sfregular, "Helvetica Neue", Arial, sans-serif;
     }
     .eth-login-welcome {
-      color: black;
+      color: white;
       font-family: sfregular, "Helvetica Neue", Arial, sans-serif;
       font-size: 16px;
       margin-bottom: 2px;
@@ -280,16 +314,17 @@
       vertical-align: middle;
     }
     .eth-login-tos {
+      max-width: 310px;
       margin-bottom: 50px;
       text-align: center;
     }
     .eth-login-tos-label {
-      font-size: 12px;
+      font-size: 11px;
       font-family: sfregular, "Helvetica Neue", Arial, sans-serif;
-      color: black;
+      color: white;
     }
     .eth-login-tos-label > a:any-link {
-      color: #FF2E56;
+      color: white;
       font-family: sfsemibold, "Helvetica Neue", Arial, sans-serif;
     }
     .eth-login-tos-agree {
@@ -305,6 +340,7 @@
     <source src="tone4.mp3">
   </audio>
   <div id="load-messages-wrapper">
+    <img id="load-images"></img>
     <div id="load-messages"></div>
     <div id="subtext-messages"></div>
   </div>
@@ -315,18 +351,18 @@
   </div>
   <div id="eth-login">
     <div class="eth-login-popup">
-      <div class="eth-login-welcome">Welcome to</div>
-      <img src="images/decentraland-connect/Isologotipo.png" style="width: 60%; margin-bottom: 20px"></img>
-      <div class="eth-login-description">The virtual world where you can build and explore 3D creations, play games or simply hang out with friends.</div>
-      <div class="eth-login-tos"><input type="checkbox" id="agree-check" class="eth-login-tos-agree" onchange="document.getElementById('eth-login-confirm-button').disabled = !this.checked;"><label for="agree-check" class="eth-login-tos-label">I am of legal age and I have read and agree to the <a href="https://decentraland.org/terms" target="_blank">Terms of Service</a> and <a href="https://decentraland.org/privacy" target="_blank">Privacy Policy</a></label></div>
-      <button id="eth-login-confirm-button" class="eth-login-confirm-button1" disabled>
-        <img src="./images/decentraland-connect/walletIcon.png" class="eth-login-wallet-icon"></img>Connect wallet</buttonclass="eth-login-description">
-    </div>
+      <img src="images/decentraland-connect/Isologotipo.png"></img>
+      <div class="eth-login-description">Inmerse yourself into the Ethereum blockchain based virtual game world created and owned by its users.</div>
+      <div class="eth-login-tos">
+        <input type="checkbox" id="agree-check" class="eth-login-tos-agree" onchange="document.getElementById('eth-login-confirm-button').disabled = !this.checked;">
+        <label for="agree-check" class="eth-login-tos-label">I am of legal age and I have read and agree to the <a href="https://decentraland.org/terms" target="_blank">Terms of Service</a> and <a href="https://decentraland.org/privacy" target="_blank">Privacy Policy</a></label>
+      </div>
+      <button id="eth-login-confirm-button" class="eth-login-confirm-button1" disabled>Start Exploring</buttonclass="eth-login-description"></div>
   </div>
   <div id="eth-connect-advice">
     <div class="eth-login-popup" style="height: 450px">
       <div class="eth-login-welcome">Welcome to</div>
-      <img src="images/decentraland-connect/Isologotipo.png" style="width: 60%; margin-bottom: 20px"></img>
+      <img src="images/decentraland-connect/Isologotipo.png"></img>
       <div class="eth-login-description">Please, follow the instructions provided by your Ethereum wallet provider to complete login.<br></br>To proceed, <strong>login</strong> into your wallet and confirm with <strong>connecting</strong> to your Ethereum wallet extension.</div>
       <button id="eth-relogin-confirm-button" class="eth-login-confirm-button1">
         <img src="./images/decentraland-connect/walletIcon.png" class="eth-login-wallet-icon"></img>Connect wallet</buttonclass="eth-login-description">
@@ -335,7 +371,7 @@
   <div id="eth-sign-advice">
     <div class="eth-login-popup" >
       <div class="eth-login-welcome">Welcome to</div>
-      <img src="images/decentraland-connect/Isologotipo.png" style="width: 60%; margin-bottom: 20px"></img>
+      <img src="images/decentraland-connect/Isologotipo.png"></img>
       <div class="eth-login-description">Please, follow the instructions provided by your Ethereum wallet provider to complete login.</div>
       <div class="eth-login-description" style="margin-top: 10px;">To proceed, confirm <strong>signing</strong> the following message in your wallet extension.</div>
       <div id="eth-sign-advice-msg" class="eth-login-description code"></div>

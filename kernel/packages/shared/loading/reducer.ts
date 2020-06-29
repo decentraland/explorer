@@ -3,7 +3,7 @@ import { SCENE_FAIL, SCENE_LOAD, SCENE_START } from './actions'
 import {
   ExecutionLifecycleEvent,
   ExecutionLifecycleEventsList,
-  helpTexts,
+  loadingTips,
   NOT_STARTED,
   ROTATE_HELP_TEXT,
   TELEPORT_TRIGGERED
@@ -38,7 +38,7 @@ export function loadingReducer(state?: LoadingState, action?: AnyAction) {
   }
   if (action.type === ROTATE_HELP_TEXT) {
     const newValue = state.helpText + 1
-    return { ...state, helpText: newValue >= helpTexts.length ? 0 : newValue }
+    return { ...state, helpText: newValue >= loadingTips.length ? 0 : newValue }
   }
   return state
 }
