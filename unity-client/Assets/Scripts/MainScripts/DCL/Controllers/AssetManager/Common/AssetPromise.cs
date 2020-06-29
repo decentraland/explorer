@@ -84,12 +84,13 @@ namespace DCL
             if (state == AssetPromiseState.LOADING || state == AssetPromiseState.FINISHED)
                 return;
 
-            object id = GetId();
             state = AssetPromiseState.LOADING;
+
             // NOTE(Brian): Get existent library element
-            if (library.Contains(id))
+            object libraryAssetCheckId = GetLibraryAssetCheckId();
+            if (library.Contains(libraryAssetCheckId))
             {
-                asset = GetAsset(id);
+                asset = GetAsset(libraryAssetCheckId);
 
                 if (asset != null)
                 {
@@ -107,9 +108,14 @@ namespace DCL
             // NOTE(Brian): Get new library element
             asset = new AssetType();
             OnBeforeLoadOrReuse();
-            asset.id = id;
+            asset.id = GetId();
 
             OnLoad(OnLoadSuccess, OnLoadFailure);
+        }
+
+        protected virtual object GetLibraryAssetCheckId()
+        {
+            return GetId();
         }
 
         protected virtual AssetType GetAsset(object id)

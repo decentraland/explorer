@@ -36,37 +36,9 @@ namespace DCL
         {
         }
 
-        internal override void Load()
+        protected override object GetLibraryAssetCheckId()
         {
-            if (state == AssetPromiseState.LOADING || state == AssetPromiseState.FINISHED)
-                return;
-
-            state = AssetPromiseState.LOADING;
-
-            // We use the id-with-settings in the library, and the default tex id for the "processing" promise to block efficiently the other promises
-            // that may arise at that moment, disregarding their settings until it gets stored in the library
-            if (library.Contains(idWithTexSettings))
-            {
-                asset = GetAsset(idWithTexSettings);
-
-                if (asset != null)
-                {
-                    OnBeforeLoadOrReuse();
-                    OnReuse(OnReuseFinished);
-                }
-                else
-                {
-                    CallAndClearEvents(false);
-                }
-
-                return;
-            }
-
-            asset = new Asset_Texture();
-            OnBeforeLoadOrReuse();
-            asset.id = GetId();
-
-            OnLoad(OnLoadSuccess, OnLoadFailure);
+            return idWithTexSettings;
         }
 
         protected override void OnCancelLoading()
