@@ -24,7 +24,6 @@ namespace DCL
             wrapMode = textureWrapMode;
             filterMode = textureFilterMode;
             this.storeDefaultTextureInAdvance = storeDefaultTextureInAdvance;
-
             idWithDefaultTexSettings = ConstructId(url, DEFAULT_WRAP_MODE, DEFAULT_FILTER_MODE);
             idWithTexSettings = UsesDefaultWrapAndFilterMode() ? idWithDefaultTexSettings : ConstructId(url, wrapMode, filterMode);
         }
@@ -118,8 +117,7 @@ namespace DCL
                 {
                     // Save default texture asset
                     asset.id = idWithDefaultTexSettings;
-
-                    ConfigureTexture(asset.texture, DEFAULT_WRAP_MODE, DEFAULT_FILTER_MODE, false);
+                    asset.ConfigureTexture(DEFAULT_WRAP_MODE, DEFAULT_FILTER_MODE, false);
 
                     library.Add(asset);
                 }
@@ -130,26 +128,13 @@ namespace DCL
                 asset = defaultTexAsset.Clone() as Asset_Texture;
                 asset.dependencyAsset = defaultTexAsset;
 
-                // Duplicate default texture to be configured as we want
-                Texture2D duplicatedTex = new Texture2D(asset.texture.width, asset.texture.height, asset.texture.format, false);
-                Graphics.CopyTexture(asset.texture, duplicatedTex);
-
-                asset.texture = duplicatedTex;
+                asset.CopyTextureFrom(defaultTexAsset.texture);
             }
 
-            ConfigureTexture(asset.texture, wrapMode, filterMode);
-
             asset.id = idWithTexSettings;
+            asset.ConfigureTexture(wrapMode, filterMode);
 
             return library.Add(asset);
-        }
-
-        void ConfigureTexture(Texture2D texture, TextureWrapMode textureWrapMode, FilterMode textureFilterMode, bool makeNoLongerReadable = true)
-        {
-            texture.wrapMode = textureWrapMode;
-            texture.filterMode = textureFilterMode;
-            texture.Compress(false);
-            texture.Apply(textureFilterMode != FilterMode.Point, makeNoLongerReadable);
         }
 
         string ConstructId(string textureUrl, TextureWrapMode textureWrapMode, FilterMode textureFilterMode)
