@@ -170,6 +170,9 @@ CachedXMLHttpRequest.cache = {
   },
   init: function () {
     var self = this;
+
+    self.indexedDB = null;
+    window.indexedDB = null;
     
     onError = function(e) {
       CachedXMLHttpRequest.log("can not open indexedDB database: " + e.message);

@@ -45,7 +45,7 @@ public static class DependencyMapLoadHelper
     {
         string url = baseUrl + hash + ".depmap";
 
-        //LoadPersistentCache();
+        LoadPersistentCache();
 
         if (dependenciesMap.ContainsKey(hash))
             yield break;
@@ -77,7 +77,7 @@ public static class DependencyMapLoadHelper
 
             dependenciesMap.Add(hash, new List<string>(map.dependencies));
 
-            //SavePersistentCache();
+            SavePersistentCache();
 
             downloadingDepmap.Remove(hash);
         }
