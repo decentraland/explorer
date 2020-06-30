@@ -233,7 +233,7 @@
     #eth-login {
       display: block;
 
-      background: rgba(0, 0, 0, 1);
+      background:#74A4D5;
       background-image: url(images/decentraland-connect/background.png);
       background-size: 100%;
       background-repeat: no-repeat;
@@ -288,20 +288,27 @@
     }
     .eth-login-confirm-button1 {
       color: white;
-      background-color: #FF2D55;
-      background-image: linear-gradient(to right, #FF2D55, #FF4974);
       cursor: pointer;
-      border-radius: 6px;
+
+      background-color: #FF5273;
+      box-shadow: 0px 3.66316px 0px #E12F4F;
+
       line-height: 40px;
       width: 214px;
+
       border: 0;
+      border-radius: 8px;
+
       text-transform: uppercase;
       font-size: 13px;
       font-family: sfsemibold, "Helvetica Neue", Arial, sans-serif;
     }
     .eth-login-confirm-button1:disabled {
       background-color: #F6DBE2;
-      background-image: none;
+      box-shadow: 0px 3.66316px 0px rgba(245, 215, 223, 0.863);
+    }
+    .eth-login-logo {
+      width: 262px;
     }
     .eth-login-wallet-icon {
       margin-right: 10px;
@@ -315,7 +322,7 @@
       text-align: center;
     }
     .eth-login-tos-label {
-      font-size: 11px;
+      font-size: 13px;
       font-family: sfregular, "Helvetica Neue", Arial, sans-serif;
       color: white;
     }
@@ -350,7 +357,6 @@
       vertical-align: middle;
     }
     .nav-text {
-      vertical-align: middle;
       color: white;
       font-family: sfregular, "Helvetica Neue", Arial, sans-serif;
     }
@@ -358,7 +364,7 @@
       width: fit-content;
 
       vertical-align: middle;
-      margin-left: 10px;
+      margin: 6px 0 8px 10px;
 
       border: 1px solid rgba(255, 255, 255, 0.6);
       padding: 8px 12.15px;
@@ -366,6 +372,14 @@
       box-sizing: border-box;
       border-radius: 6px;
       text-decoration: none;
+    }
+    .nav-discord-img {
+      height: 14px;
+      vertical-align: middle;
+    }
+    .nav-discord-text {
+      margin-left: 7px;
+      font-size: 10px;
     }
     .nav-need-support {
       width: fit-content;
@@ -400,6 +414,9 @@
       color: #736E7D;
       font-family: sfregular, "Helvetica Neue", Arial, sans-serif;
     }
+    .footer-icon {
+      max-height: 18px;
+    }
   </style>
 </head>
 
@@ -421,11 +438,11 @@
     <nav class="nav-bar">
       <div class="nav-bar-content">
         <div class="nav-text nav-need-support"><span>Need support?</span></div>
-        <a class="nav-discord" href="https://dcl.gg/discord" target="about:blank"><img src="images/decentraland-connect/Discord.png"></img> <span class="nav-text">JOIN OUR DISCORD</span></a>
+        <a class="nav-discord" href="https://dcl.gg/discord" target="about:blank"><img class="nav-discord-img" src="images/decentraland-connect/Discord.png"></img> <span class="nav-text nav-discord-text">JOIN OUR DISCORD</span></a>
       </div>
     </nav>
     <div class="eth-login-popup">
-      <img src="images/decentraland-connect/Isologotipo.png"></img>
+      <img class="eth-login-logo" src="images/decentraland-connect/Isologotipo.png"></img>
       <div class="eth-login-description">Inmerse yourself into the Ethereum blockchain based virtual game world created and owned by its users.</div>
       <div class="eth-login-tos">
         <input type="checkbox" id="agree-check" class="eth-login-tos-agree" disabled onchange="document.getElementById('eth-login-confirm-button').disabled = !this.checked;">
@@ -434,10 +451,10 @@
       <button id="eth-login-confirm-button" class="eth-login-confirm-button1" disabled>Please wait...</buttonclass="eth-login-description"></div>
     <footer class="footer-bar">
       <div class="footer-bar-content">
-        <a class="footer-link" href="https://dcl.gg/discord" target="about:blank"><img src="images/decentraland-connect/footer/Discord.png"></img></a>
-        <a class="footer-link" href="https://www.reddit.com/r/decentraland/" target="about:blank"><img src="images/decentraland-connect/footer/Reddit.png"></img></a>
-        <a class="footer-link" href="http://github.com/decentraland" target="about:blank"><img src="images/decentraland-connect/footer/Git.png"></img></a>
-        <a class="footer-link" href="https://twitter.com/decentraland" target="about:blank"><img src="images/decentraland-connect/footer/Twitter.png"></img></a>
+        <a class="footer-link" href="https://dcl.gg/discord" target="about:blank"><img class="footer-icon" src="images/decentraland-connect/footer/Discord.png"></img></a>
+        <a class="footer-link" href="https://www.reddit.com/r/decentraland/" target="about:blank"><img class="footer-icon" src="images/decentraland-connect/footer/Reddit.png"></img></a>
+        <a class="footer-link" href="http://github.com/decentraland" target="about:blank"><img class="footer-icon" src="images/decentraland-connect/footer/Git.png"></img></a>
+        <a class="footer-link" href="https://twitter.com/decentraland" target="about:blank"><img class="footer-icon" src="images/decentraland-connect/footer/Twitter.png"></img></a>
         <span class="footer-text">© 2020 Decentraland</span>
       </div>
     </footer>
