@@ -24,7 +24,10 @@ var WebVideoPlayer = {
     };
 
     if (useHls) {
-      const hls = new Hls();
+      var hlsConfig = {
+        maxBufferLength: 60
+      };
+      const hls = new Hls(hlsConfig);
       hls.on(Hls.Events.MEDIA_ATTACHED, function () {
         hls.loadSource(videoUrl);
       });
