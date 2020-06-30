@@ -62,6 +62,18 @@ export function* waitForSceneLoads() {
   }
 }
 
+function hideLoadingTips() {
+  const messages = document.getElementById('load-messages')
+  const images = document.getElementById('load-images') as HTMLImageElement | null
+
+  if (messages) {
+    messages.style.cssText = 'display: none;'
+  }
+  if (images) {
+    images.style.cssText = 'display: none;'
+  }
+}
+
 export function* initialSceneLoading() {
   yield race({
     refresh: call(refreshTeleport),
@@ -70,6 +82,7 @@ export function* initialSceneLoading() {
       yield take(EXPERIENCE_STARTED)
       yield take('Loading scene')
       yield call(waitForSceneLoads)
+      yield call(hideLoadingTips)
     })
   })
 }

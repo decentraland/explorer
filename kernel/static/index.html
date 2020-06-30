@@ -16,10 +16,6 @@
       touch-action: none;
 
       background: rgba(0, 0, 0, 1);
-      background-image: url(images/decentraland-connect/background.png);
-      background-size: contain;
-      background-repeat: no-repeat;
-      background-position: center;
     }
 
     #gameContainer {
@@ -73,9 +69,9 @@
 
       background: rgba(0, 0, 0, 1);
       background-image: url(images/decentraland-connect/background.png);
-      background-size: contain;
+      background-size: 115%;
       background-repeat: no-repeat;
-      background-position: center;
+      background-position: right -90px bottom 25px;
 
       opacity: 0.15;
     }
@@ -239,7 +235,7 @@
 
       background: rgba(0, 0, 0, 1);
       background-image: url(images/decentraland-connect/background.png);
-      background-size: contain;
+      background-size: cover;
       background-repeat: no-repeat;
       background-position: center;
 
@@ -332,6 +328,78 @@
       height: 20px;
       vertical-align: middle;
     }
+
+    .nav-bar {
+      background-color: rgba(0, 0, 0, 0.1);
+      height: 40px;
+      display: flex;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 3;
+    }
+    .nav-bar-content {
+      position: absolute;
+      right: 30%;
+      height: 100%;
+      display: flex;
+      width: fit-content;
+
+      align-items: center;
+      vertical-align: middle;
+    }
+    .nav-text {
+      vertical-align: middle;
+      color: white;
+      font-family: sfregular, "Helvetica Neue", Arial, sans-serif;
+    }
+    .nav-discord {
+      width: fit-content;
+
+      vertical-align: middle;
+      margin-left: 10px;
+
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      padding: 8px 12.15px;
+
+      box-sizing: border-box;
+      border-radius: 6px;
+      text-decoration: none;
+    }
+    .nav-need-support {
+      width: fit-content;
+    }
+
+    .footer-bar {
+      background: #1C191F; 
+      height: 33px;
+      display: flex;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      z-index: 3;
+    }
+    .footer-bar-content {
+      position: absolute;
+      right: 285px;
+      height: 100%;
+      display: flex;
+      width: fit-content;
+
+      align-items: center;
+      vertical-align: middle;
+    }
+    .footer-link {
+      margin-left: 34px;
+    }
+    .footer-text {
+      margin-left: 45px;
+      vertical-align: middle;
+      color: #736E7D;
+      font-family: sfregular, "Helvetica Neue", Arial, sans-serif;
+    }
   </style>
 </head>
 
@@ -350,6 +418,12 @@
     <div class="full"></div>
   </div>
   <div id="eth-login">
+    <nav class="nav-bar">
+      <div class="nav-bar-content">
+        <div class="nav-text nav-need-support"><span>Need support?</span></div>
+        <a class="nav-discord" href="https://dcl.gg/discord" target="about:blank"><img src="images/decentraland-connect/Discord.png"></img> <span class="nav-text">JOIN OUR DISCORD</span></a>
+      </div>
+    </nav>
     <div class="eth-login-popup">
       <img src="images/decentraland-connect/Isologotipo.png"></img>
       <div class="eth-login-description">Inmerse yourself into the Ethereum blockchain based virtual game world created and owned by its users.</div>
@@ -358,6 +432,15 @@
         <label for="agree-check" class="eth-login-tos-label">I am of legal age and I have read and agree to the <a href="https://decentraland.org/terms" target="_blank">Terms of Service</a> and <a href="https://decentraland.org/privacy" target="_blank">Privacy Policy</a></label>
       </div>
       <button id="eth-login-confirm-button" class="eth-login-confirm-button1" disabled>Start Exploring</buttonclass="eth-login-description"></div>
+    <footer class="footer-bar">
+      <div class="footer-bar-content">
+        <a class="footer-link" href="https://dcl.gg/discord" target="about:blank"><img src="images/decentraland-connect/footer/Discord.png"></img></a>
+        <a class="footer-link" href="https://www.reddit.com/r/decentraland/" target="about:blank"><img src="images/decentraland-connect/footer/Reddit.png"></img></a>
+        <a class="footer-link" href="http://github.com/decentraland" target="about:blank"><img src="images/decentraland-connect/footer/Git.png"></img></a>
+        <a class="footer-link" href="https://twitter.com/decentraland" target="about:blank"><img src="images/decentraland-connect/footer/Twitter.png"></img></a>
+        <span class="footer-text">© 2020 Decentraland</span>
+      </div>
+    </footer>
   </div>
   <div id="eth-connect-advice">
     <div class="eth-login-popup" style="height: 450px">
