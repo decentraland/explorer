@@ -231,7 +231,7 @@
       height: 100%;
     }
     #eth-login {
-      display: none;
+      display: block;
 
       background: rgba(0, 0, 0, 1);
       background-image: url(images/decentraland-connect/background.png);
@@ -428,10 +428,10 @@
       <img src="images/decentraland-connect/Isologotipo.png"></img>
       <div class="eth-login-description">Inmerse yourself into the Ethereum blockchain based virtual game world created and owned by its users.</div>
       <div class="eth-login-tos">
-        <input type="checkbox" id="agree-check" class="eth-login-tos-agree" onchange="document.getElementById('eth-login-confirm-button').disabled = !this.checked;">
+        <input type="checkbox" id="agree-check" class="eth-login-tos-agree" disabled onchange="document.getElementById('eth-login-confirm-button').disabled = !this.checked;">
         <label for="agree-check" class="eth-login-tos-label">I am of legal age and I have read and agree to the <a href="https://decentraland.org/terms" target="_blank">Terms of Service</a> and <a href="https://decentraland.org/privacy" target="_blank">Privacy Policy</a></label>
       </div>
-      <button id="eth-login-confirm-button" class="eth-login-confirm-button1" disabled>Start Exploring</buttonclass="eth-login-description"></div>
+      <button id="eth-login-confirm-button" class="eth-login-confirm-button1" disabled>Please wait...</buttonclass="eth-login-description"></div>
     <footer class="footer-bar">
       <div class="footer-bar-content">
         <a class="footer-link" href="https://dcl.gg/discord" target="about:blank"><img src="images/decentraland-connect/footer/Discord.png"></img></a>

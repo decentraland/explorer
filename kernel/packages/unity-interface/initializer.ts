@@ -79,12 +79,12 @@ export async function initializeUnity(
  */
 function preventUnityKeyboardLock() {
   const originalFunction = window.addEventListener
-  window.addEventListener = function(event: any, handler: any, options?: any) {
+  window.addEventListener = function (event: any, handler: any, options?: any) {
     if (['keypress', 'keydown', 'keyup'].includes(event)) {
       originalFunction.call(
         window,
         event,
-        e => {
+        (e) => {
           if (!document.activeElement || document.activeElement === document.body) {
             handler(e)
           }
@@ -98,20 +98,33 @@ function preventUnityKeyboardLock() {
   }
 }
 
+function enableLogin() {
+  const check = document.getElementById('agree-check') as HTMLInputElement
+  const confirmButton = document.getElementById('eth-login-confirm-button')
+  if (check && confirmButton) {
+    check.disabled = false
+    confirmButton.textContent = 'Start Exploring'
+  }
+}
+
 namespace DCL {
   // This function get's called by the engine
   export function EngineStarted() {
-    if (!_gameInstance) throw new Error('There is no UnityGame')
+    if (!_gameInstance) {
+      throw new Error('There is no UnityGame')
+    }
+
+    enableLogin()
 
     _instancedJS = initializeEngine(_gameInstance)
 
     _instancedJS
-      .then($ => {
+      .then(($) => {
         // Expose the "kernel" interface as a global object to allow easier inspection
         global['browserInterface'] = $
         engineInitialized.resolve($)
       })
-      .catch(error => {
+      .catch((error) => {
         engineInitialized.reject(error)
         ReportFatalError('Unexpected fatal error')
       })
@@ -120,12 +133,12 @@ namespace DCL {
   export function MessageFromEngine(type: string, jsonEncodedMessage: string) {
     if (_instancedJS) {
       if (type === 'PerformanceReport') {
-        _instancedJS.then($ => $.onMessage(type, jsonEncodedMessage)).catch(e => defaultLogger.error(e.message))
+        _instancedJS.then(($) => $.onMessage(type, jsonEncodedMessage)).catch((e) => defaultLogger.error(e.message))
         return
       }
       _instancedJS
-        .then($ => $.onMessage(type, JSON.parse(jsonEncodedMessage)))
-        .catch(e => defaultLogger.error(e.message))
+        .then(($) => $.onMessage(type, JSON.parse(jsonEncodedMessage)))
+        .catch((e) => defaultLogger.error(e.message))
     } else {
       defaultLogger.error('Message received without initializing engine', type, jsonEncodedMessage)
     }
@@ -142,17 +155,17 @@ function initializeUnityEditor(webSocketUrl: string, container: HTMLElement): Un
   container.innerHTML = `<h3>Connecting...</h3>`
   const ws = new WebSocket(webSocketUrl)
 
-  ws.onclose = function(e) {
+  ws.onclose = function (e) {
     defaultLogger.error('WS closed!', e)
     container.innerHTML = `<h3 style='color:red'>Disconnected</h3>`
   }
 
-  ws.onerror = function(e) {
+  ws.onerror = function (e) {
     defaultLogger.error('WS error!', e)
     container.innerHTML = `<h3 style='color:red'>EERRORR</h3>`
   }
 
-  ws.onmessage = function(ev) {
+  ws.onmessage = function (ev) {
     if (DEBUG_MESSAGES) {
       defaultLogger.info('>>>', ev.data)
     }
@@ -161,7 +174,7 @@ function initializeUnityEditor(webSocketUrl: string, container: HTMLElement): Un
       const m = JSON.parse(ev.data)
       if (m.type && m.payload) {
         const payload = m.type === 'PerformanceReport' ? m.payload : JSON.parse(m.payload)
-        _instancedJS!.then($ => $.onMessage(m.type, payload)).catch(e => defaultLogger.error(e.message))
+        _instancedJS!.then(($) => $.onMessage(m.type, payload)).catch((e) => defaultLogger.error(e.message))
       } else {
         defaultLogger.error('Unexpected message: ', m)
       }
@@ -182,7 +195,7 @@ function initializeUnityEditor(webSocketUrl: string, container: HTMLElement): Un
     }
   }
 
-  ws.onopen = function() {
+  ws.onopen = function () {
     container.classList.remove('dcl-loading')
     defaultLogger.info('WS open!')
     gameInstance.SendMessage('', 'Reset', '')
