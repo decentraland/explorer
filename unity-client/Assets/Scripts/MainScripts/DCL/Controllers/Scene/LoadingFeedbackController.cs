@@ -105,7 +105,7 @@ public class LoadingFeedbackController : MonoBehaviour
         if (CommonScriptableObjects.rendererState.Get())
             return;
 
-        string loadingText = "Loading scenes";
+        string loadingText = string.Empty;
 
         int currentComponentsLoading = model.loadedScenes.Sum(x => x.componentsLoading);
         int totalActiveDownloads = model.gltfActiveDownloads + model.assetBundlesActiveDownloads;
@@ -125,6 +125,7 @@ public class LoadingFeedbackController : MonoBehaviour
                 totalActiveDownloads > 1 ? "s" : string.Empty);
         }
 
-        WebInterface.ScenesLoadingFeedback(loadingText);
+        if (!string.IsNullOrEmpty(loadingText))
+            WebInterface.ScenesLoadingFeedback(loadingText);
     }
 }

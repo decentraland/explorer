@@ -94,8 +94,7 @@ export function updateTextInScreen(status: LoadingState) {
   if (subMessages) {
     subMessages.innerText =
       status.pendingScenes > 0
-        ? status.message ||
-          `Loading scenes (${status.pendingScenes} scene${status.pendingScenes > 0 ? 's' : ''} remaining)`
+        ? status.message || "Loading scenes..."
         : status.status
   }
 }
