@@ -23,7 +23,6 @@ public class LoadingFeedbackController : MonoBehaviour
         {
             public int sceneId;
             public int componentsLoading;
-            public int totalComponents;
         }
     }
 
@@ -54,7 +53,6 @@ public class LoadingFeedbackController : MonoBehaviour
         Model.SceneLoadingStatus refreshedScene = new Model.SceneLoadingStatus
         {
             sceneId = scene.GetInstanceID(),
-            totalComponents = scene.disposableComponents.Count,
             componentsLoading = scene.disposableNotReadyCount
         };
 
@@ -82,7 +80,6 @@ public class LoadingFeedbackController : MonoBehaviour
         else
         {
             existingScene.componentsLoading = scene.componentsLoading;
-            existingScene.totalComponents = scene.totalComponents;
         }
     }
 
@@ -105,10 +102,9 @@ public class LoadingFeedbackController : MonoBehaviour
 
     private void RefreshFeedbackMessage()
     {
-        string loadingText = string.Empty;
+        string loadingText = "Loading scenes";
 
         int currentComponentsLoading = model.loadedScenes.Sum(x => x.componentsLoading);
-        int totalComponents = model.loadedScenes.Sum(x => x.totalComponents);
         int totalActiveDownloads = model.gltfActiveDownloads + model.assetBundlesActiveDownloads;
 
         if (currentComponentsLoading > 0)
@@ -124,10 +120,6 @@ public class LoadingFeedbackController : MonoBehaviour
                 "Downloading assets ({0} asset{1} left...)",
                 totalActiveDownloads,
                 totalActiveDownloads > 1 ? "s" : string.Empty);
-        }
-        else
-        {
-            loadingText = string.Empty;
         }
 
         WebInterface.ScenesLoadingFeedback(loadingText);

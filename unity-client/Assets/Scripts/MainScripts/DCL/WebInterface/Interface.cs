@@ -862,7 +862,7 @@ namespace DCL.Interface
 
         public static void ScenesLoadingFeedback(string message)
         {
-            MessageFromEngine("ScenesLoadingFeedback", message);
+            MessageFromEngine("ScenesLoadingFeedback", '\"' + message + '\"');
         }
     }
 }
