@@ -427,11 +427,14 @@
       max-height: 18px;
     }
     .loader {
-      border: 12px solid #f3f3f3;
-      border-top: 12px solid #FF5273;
+      --thickness: 5px;
+      --diameter: 70px;
+
+      border: var(--thickness) solid #f3f3f3;
+      border-top: var(--thickness) solid #FF5273;
       border-radius: 50%;
-      width: 60px;
-      height: 60px;
+      width: var(--diameter);
+      height: var(--diameter);
       animation: spin 1.24s linear infinite;
     }
 
