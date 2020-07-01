@@ -630,7 +630,7 @@ export async function connect(userId: string) {
         const realm = getRealm(store.getState())
         const commsConfig = getCommsConfig(store.getState())
 
-        const peerConfig = {
+        const peerConfig: any = {
           connectionConfig: {
             iceServers: commConfigurations.iceServers
           },
@@ -655,6 +655,13 @@ export async function connect(userId: string) {
             maxConnectionDistance: 4,
             nearbyPeersDistance: 5,
             disconnectDistance: 5
+          }
+        }
+
+        if (!commsConfig.relaySuspensionDisabled) {
+          peerConfig.relaySuspensionConfig = {
+            relaySuspensionInterval: commsConfig.relaySuspensionInterval ?? 750,
+            relaySuspensionDuration: commsConfig.relaySuspensionDuration ?? 5000
           }
         }
 
