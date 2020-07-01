@@ -102,6 +102,9 @@ public class LoadingFeedbackController : MonoBehaviour
 
     private void RefreshFeedbackMessage()
     {
+        if (CommonScriptableObjects.rendererState.Get())
+            return;
+
         string loadingText = "Loading scenes";
 
         int currentComponentsLoading = model.loadedScenes.Sum(x => x.componentsLoading);
