@@ -32,9 +32,9 @@ namespace DCL
         internal static string DOWNLOADED_PATH_ROOT = Application.dataPath + "/" + DOWNLOADED_FOLDER_NAME;
         internal static string ASSET_BUNDLES_PATH_ROOT = Application.dataPath + "/../" + ASSET_BUNDLE_FOLDER_NAME;
 
-        internal static string[] bufferExtensions = {".bin"};
-        internal static string[] gltfExtensions = {".glb", ".gltf"};
-        internal static string[] textureExtensions = {".jpg", ".png", ".jpeg", ".tga", ".gif", ".bmp", ".psd", ".tiff", ".iff"};
+        internal static string[] bufferExtensions = { ".bin" };
+        internal static string[] gltfExtensions = { ".glb", ".gltf" };
+        internal static string[] textureExtensions = { ".jpg", ".png", ".jpeg", ".tga", ".gif", ".bmp", ".psd", ".tiff", ".iff" };
     }
 
     public class AssetBundleBuilder
@@ -182,7 +182,7 @@ namespace DCL
             Debug.Log(log);
 
             CleanupWorkingFolders();
-            AssetBundleBuilderUtils.Exit((int) errorCode);
+            AssetBundleBuilderUtils.Exit((int)errorCode);
         }
 
 
@@ -203,6 +203,37 @@ namespace DCL
 
                 string fileExt = Path.GetExtension(file);
                 string assetPath = hash + "/" + hash + fileExt;
+
+                byte[] image = File.ReadAllBytes(fullPathToTag + hash + fileExt);
+
+                var tmpTex = new Texture2D(1, 1);
+
+                if (ImageConversion.LoadImage(tmpTex, image))
+                {
+                    float factor = 1.0f;
+                    int width = tmpTex.width;
+                    int height = tmpTex.height;
+
+                    float maxTextureSize = 512;
+
+                    if (width > maxTextureSize || height > maxTextureSize)
+                    {
+                        if (width >= height)
+                        {
+                            factor = (float)maxTextureSize / width;
+                        }
+                        else
+                        {
+                            factor = (float)maxTextureSize / height;
+                        }
+
+                        Texture2D dstTex = TextureHelpers.Resize(tmpTex, (int)(width * factor), (int)(height * factor));
+                        byte[] endTex = ImageConversion.EncodeToPNG(dstTex);
+                        UnityEngine.Object.DestroyImmediate(tmpTex);
+
+                        File.WriteAllBytes(fullPathToTag + hash + fileExt, endTex);
+                    }
+                }
 
                 AssetDatabase.ImportAsset(finalDownloadedAssetDbPath + assetPath, ImportAssetOptions.ForceUpdate);
 
@@ -425,7 +456,7 @@ namespace DCL
 
             startTime = Time.realtimeSinceStartup;
 
-            InitializeDirectoryPaths(true);
+            InitializeDirectoryPaths(false);
             PopulateLowercaseMappings(rawContents);
 
             float timer = Time.realtimeSinceStartup;
@@ -563,7 +594,7 @@ namespace DCL
                 string relativePath = AssetBundleBuilderUtils.GetRelativePathTo(gltfFilePath, contentFilePath);
 
                 // NOTE(Brian): This cache will be used by the GLTF importer when seeking streams. This way the importer will
-                //              consume the asset bundle dependencies instead of trying to create new streams.
+                //              co nsume the asset bundle dependencies instead of trying to create new streams.
                 PersistentAssetCache.StreamCacheByUri[relativePath] = new RefCountedStreamData(relativePath, stream);
             }
         }
@@ -606,6 +637,7 @@ namespace DCL
 
                 if (retryCount == 0)
                     return null;
+
             } while (!req.WebRequestSucceded());
 
             if (VERBOSE)
@@ -640,7 +672,7 @@ namespace DCL
 
         internal void DumpScene(string cid, Action<ErrorCodes> OnFinish = null)
         {
-            ConvertScenesToAssetBundles(new List<string> {cid}, OnFinish);
+            ConvertScenesToAssetBundles(new List<string> { cid }, OnFinish);
         }
 
         internal void InitializeDirectoryPaths(bool deleteIfExists)

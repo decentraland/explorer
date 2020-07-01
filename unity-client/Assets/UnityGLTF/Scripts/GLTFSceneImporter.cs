@@ -116,13 +116,15 @@ namespace UnityGLTF
         public bool KeepCPUCopyOfMesh = true;
 
         private bool useMaterialTransitionValue = true;
+
+        public bool importSkeleton = false;
         public bool useMaterialTransition
         {
             get => useMaterialTransitionValue && !renderingIsDisabled;
             set => useMaterialTransitionValue = value;
         }
 
-        public const int MAX_TEXTURE_SIZE = 1024;
+        public int maxTextureSize = 1024;
         private const float SAME_KEYFRAME_TIME_DELTA = 0.0001f;
 
         protected struct GLBStream
@@ -333,6 +335,18 @@ namespace UnityGLTF
                         }
                     );
                 }
+
+                if (!importSkeleton)
+                {
+                    foreach (var skeleton in skeletonGameObjects)
+                    {
+                        if (Application.isPlaying)
+                            Object.Destroy(skeleton);
+                        else
+                            Object.DestroyImmediate(skeleton);
+                    }
+                }
+
             }
             finally
             {
@@ -763,7 +777,7 @@ namespace UnityGLTF
         // Note that if the texture is reduced in size, the source one is destroyed
         protected Texture2D CheckAndReduceTextureSize(Texture2D source)
         {
-            if (source.width > MAX_TEXTURE_SIZE || source.height > MAX_TEXTURE_SIZE)
+            if (source.width > maxTextureSize || source.height > maxTextureSize)
             {
                 float factor = 1.0f;
                 int width = source.width;
@@ -771,11 +785,11 @@ namespace UnityGLTF
 
                 if (width >= height)
                 {
-                    factor = (float)MAX_TEXTURE_SIZE / width;
+                    factor = (float)maxTextureSize / width;
                 }
                 else
                 {
-                    factor = (float)MAX_TEXTURE_SIZE / height;
+                    factor = (float)maxTextureSize / height;
                 }
 
                 Texture2D dstTex = TextureHelpers.Resize(source, (int)(width * factor), (int)(height * factor));
@@ -1485,10 +1499,15 @@ namespace UnityGLTF
                 bindPoses[i] = gltfBindPoses[i].ToMatrix4x4Convert();
             }
 
-            renderer.rootBone = _assetCache.NodeCache[skeletonId].transform;
             curMesh.bindposes = bindPoses;
             renderer.bones = bones;
+            renderer.rootBone = _assetCache.NodeCache[skeletonId].transform;
+
+            if (!skeletonGameObjects.Contains(renderer.rootBone.gameObject))
+                skeletonGameObjects.Add(renderer.rootBone.gameObject);
         }
+
+        HashSet<GameObject> skeletonGameObjects = new HashSet<GameObject>();
 
         private BoneWeight[] CreateBoneWeightArray(Vector4[] joints, Vector4[] weights, int vertCount)
         {
