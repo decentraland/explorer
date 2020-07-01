@@ -34,6 +34,7 @@ namespace DCL.Controllers
         public event System.Action<DecentralandEntity> OnEntityAdded;
         public event System.Action<DecentralandEntity> OnEntityRemoved;
         public event System.Action<ParcelScene> OnSceneReady;
+        public event System.Action<ParcelScene> OnStateRefreshed;
 
         public ContentProvider contentProvider;
         public int disposableNotReadyCount => disposableNotReady.Count;
@@ -52,6 +53,7 @@ namespace DCL.Controllers
 
         public BlockerHandler blockerHandler;
         public bool isReady => state == State.READY;
+        public State currentState => state;
 
         readonly List<string> disposableNotReady = new List<string>();
         bool isReleased = false;
@@ -90,8 +92,9 @@ namespace DCL.Controllers
 
         protected virtual string prettyName => sceneData.basePosition.ToString();
 
-        protected void RefreshName()
+        protected void RefreshSceneState()
         {
+            OnStateRefreshed?.Invoke(this);
 #if UNITY_EDITOR
             switch (state)
             {
@@ -126,7 +129,7 @@ namespace DCL.Controllers
             contentProvider.BakeHashes();
 
             state = State.WAITING_FOR_INIT_MESSAGES;
-            RefreshName();
+            RefreshSceneState();
 
             parcels.Clear();
             for (int i = 0; i < sceneData.parcels.Length; i++)
@@ -1063,7 +1066,7 @@ namespace DCL.Controllers
                 SetSceneReady();
             }
 
-            RefreshName();
+            RefreshSceneState();
         }
 
         public void SetInitMessagesDone()
@@ -1078,7 +1081,7 @@ namespace DCL.Controllers
             }
 
             state = State.WAITING_FOR_COMPONENTS;
-            RefreshName();
+            RefreshSceneState();
 
             if (disposableNotReadyCount > 0)
             {
@@ -1113,7 +1116,7 @@ namespace DCL.Controllers
             blockerHandler?.CleanBlockers();
 
             SceneController.i.SendSceneReady(sceneData.id);
-            RefreshName();
+            RefreshSceneState();
 
             OnSceneReady?.Invoke(this);
         }

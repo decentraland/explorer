@@ -1,4 +1,4 @@
-﻿using DCL.Helpers;
+using DCL.Helpers;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -15,7 +15,10 @@ namespace DCL
         public static bool VERBOSE = false;
 
         public static int MAX_CONCURRENT_REQUESTS = 30;
-        static int concurrentRequests = 0;
+
+        public static int concurrentRequests = 0;
+        public static event Action<int> OnConcurrentRequestsChange;
+
         bool requestRegistered = false;
 
         static readonly float maxLoadBudgetTime = 0.032f;
@@ -323,6 +326,7 @@ namespace DCL
                 return;
 
             concurrentRequests++;
+            OnConcurrentRequestsChange?.Invoke(concurrentRequests);
             requestRegistered = true;
         }
 
@@ -332,6 +336,7 @@ namespace DCL
                 return;
 
             concurrentRequests--;
+            OnConcurrentRequestsChange?.Invoke(concurrentRequests);
             requestRegistered = false;
         }
     }
