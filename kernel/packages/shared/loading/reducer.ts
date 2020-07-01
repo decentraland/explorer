@@ -1,5 +1,5 @@
 import { AnyAction } from 'redux'
-import { SCENE_FAIL, SCENE_LOAD, SCENE_START, UPDATE_STATUS_MESSAGE } from './actions';
+import { SCENE_FAIL, SCENE_LOAD, SCENE_START, UPDATE_STATUS_MESSAGE } from './actions'
 import {
   ExecutionLifecycleEvent,
   ExecutionLifecycleEventsList,
