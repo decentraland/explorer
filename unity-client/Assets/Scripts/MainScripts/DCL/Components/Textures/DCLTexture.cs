@@ -31,6 +31,7 @@ namespace DCL
         public TextureWrapMode unityWrap;
         public FilterMode unitySamplingMode;
         public Texture2D texture;
+
         public DCLTexture(DCL.Controllers.ParcelScene scene) : base(scene)
         {
         }
@@ -87,6 +88,8 @@ namespace DCL
 
         public override IEnumerator ApplyChanges(string newJson)
         {
+            yield return new WaitUntil(() => CommonScriptableObjects.rendererState.Get());
+
             model = SceneController.i.SafeFromJson<Model>(newJson);
 
             unitySamplingMode = model.samplingMode;
