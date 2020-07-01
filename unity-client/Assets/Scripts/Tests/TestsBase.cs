@@ -80,9 +80,7 @@ public class TestsBase
         if (MapRenderer.i != null)
             MapRenderer.i.Cleanup();
 
-#if UNITY_EDITOR
         yield return TearDown_SceneIntegrityChecker();
-#endif
     }
 
     protected void TearDown_PromiseKeepers()
@@ -236,6 +234,10 @@ public class TestsBase
         if (!enableSceneIntegrityChecker)
             yield break;
 
+        //NOTE(Brian): to make it run faster in CI
+        if (Application.isBatchMode)
+            yield break;
+
         yield return null;
         startingSceneComponents = Object.FindObjectsOfType<Component>();
     }
@@ -243,6 +245,10 @@ public class TestsBase
     protected IEnumerator TearDown_SceneIntegrityChecker()
     {
         if (!enableSceneIntegrityChecker)
+            yield break;
+
+        //NOTE(Brian): to make it run faster in CI
+        if (Application.isBatchMode)
             yield break;
 
         if (startingSceneComponents == null)
