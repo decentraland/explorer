@@ -5,6 +5,7 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using DCL;
 
 public class FriendsTabViewBase : MonoBehaviour, IPointerDownHandler
 {
@@ -109,16 +110,19 @@ public class FriendsTabViewBase : MonoBehaviour, IPointerDownHandler
         }
     }
 
+    private const string FRIEND_ENTRIES_POOL_NAME = "FriendEntriesPool_";
     [SerializeField] protected GameObject entryPrefab;
     [SerializeField] protected GameObject emptyListImage;
 
     protected RectTransform rectTransform;
     protected FriendsHUDView owner;
 
-    public FriendsHUD_ContextMenu contextMenuPanel;
+    public UserContextMenu contextMenuPanel;
     public FriendsHUD_DialogBox confirmationDialog;
 
     protected Dictionary<string, FriendEntryBase> entries = new Dictionary<string, FriendEntryBase>();
+    protected Dictionary<string, PoolableObject> instantiatedFriendEntries = new Dictionary<string, PoolableObject>();
+    protected Pool friendEntriesPool;
 
     internal List<FriendEntryBase> GetAllEntries()
     {
@@ -153,9 +157,20 @@ public class FriendsTabViewBase : MonoBehaviour, IPointerDownHandler
             contextMenuPanel.Hide();
     }
 
-    public virtual void Initialize(FriendsHUDView owner)
+    public virtual void Initialize(FriendsHUDView owner, int preinstantiatedEntries)
     {
         this.owner = owner;
+
+        friendEntriesPool = PoolManager.i.GetPool(FRIEND_ENTRIES_POOL_NAME + this.name + this.GetInstanceID());
+        if (friendEntriesPool == null)
+        {
+            friendEntriesPool = PoolManager.i.AddPool(
+                FRIEND_ENTRIES_POOL_NAME + this.name + this.GetInstanceID(),
+                Instantiate(entryPrefab),
+                maxPrewarmCount: preinstantiatedEntries,
+                isPersistent: true);
+            friendEntriesPool.ForcePrewarm();
+        }
 
         rectTransform = transform as RectTransform;
 
@@ -173,22 +188,26 @@ public class FriendsTabViewBase : MonoBehaviour, IPointerDownHandler
         contextMenuPanel.OnReport -= OnPressReportButton;
     }
 
-    protected virtual void OnPressReportButton(FriendEntryBase obj)
+    protected virtual void OnPressReportButton(string userId)
     {
     }
 
-    protected virtual void OnPressPassportButton(FriendEntryBase obj)
+    protected virtual void OnPressPassportButton(string userId)
     {
     }
 
-    protected virtual void OnPressDeleteButton(FriendEntryBase obj)
+    protected virtual void OnPressDeleteButton(string userId)
     {
     }
 
-    protected virtual void OnPressBlockButton(FriendEntryBase entry)
+    protected virtual void OnPressBlockButton(string userId, bool blockUser)
     {
-        entry.model.blocked = !entry.model.blocked;
-        entry.Populate(entry.model);
+        FriendEntryBase friendEntryToBlock = GetEntry(userId);
+        if (friendEntryToBlock != null)
+        {
+            friendEntryToBlock.model.blocked = blockUser;
+            friendEntryToBlock.Populate(friendEntryToBlock.model);
+        }
     }
 
     public virtual void CreateOrUpdateEntry(string userId, FriendEntryBase.Model model)
@@ -201,10 +220,18 @@ public class FriendsTabViewBase : MonoBehaviour, IPointerDownHandler
     {
         if (entries.ContainsKey(userId)) return false;
 
-        var entry = Instantiate(entryPrefab).GetComponent<FriendEntryBase>();
+        PoolableObject newFriendEntry = friendEntriesPool.Get();
+        instantiatedFriendEntries.Add(userId, newFriendEntry);
+        var entry = newFriendEntry.gameObject.GetComponent<FriendEntryBase>();
         entries.Add(userId, entry);
 
-        entry.OnMenuToggle += (x) => { contextMenuPanel.Toggle(entry); };
+        entry.OnMenuToggle += (x) =>
+        {
+            bool isBlocked = UserProfile.GetOwnUserProfile().blocked.Contains(userId);
+            contextMenuPanel.Initialize(userId, string.Empty, isBlocked);
+            contextMenuPanel.transform.position = entry.menuPositionReference.position;
+            contextMenuPanel.Show();
+        };
 
         UpdateEmptyListObjects();
 
@@ -228,9 +255,11 @@ public class FriendsTabViewBase : MonoBehaviour, IPointerDownHandler
     {
         if (!entries.ContainsKey(userId)) return false;
 
-        var entry = entries[userId];
-
-        UnityEngine.Object.Destroy(entry.gameObject);
+        if (instantiatedFriendEntries.TryGetValue(userId, out PoolableObject go))
+        {
+            friendEntriesPool.Release(go);
+            instantiatedFriendEntries.Remove(userId);
+        }
         entries.Remove(userId);
 
         UpdateEmptyListObjects();

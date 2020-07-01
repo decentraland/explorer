@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -6,6 +7,7 @@ public class ChatHeadGroupView : MonoBehaviour
 {
     const int MAX_GROUP_SIZE = 5;
     const string CHAT_HEAD_PATH = "ChatHead";
+    const string PLAYER_PREFS_LATEST_OPEN_CHATS = "LatestOpenChats";
 
     public event System.Action<TaskbarButton> OnHeadToggleOn;
     public event System.Action<TaskbarButton> OnHeadToggleOff;
@@ -15,6 +17,7 @@ public class ChatHeadGroupView : MonoBehaviour
 
     private IChatController chatController;
     private IFriendsController friendsController;
+    private ulong rendererStateTimeMark;
 
     public void Initialize(IChatController chatController, IFriendsController friendsController)
     {
@@ -25,7 +28,14 @@ public class ChatHeadGroupView : MonoBehaviour
             chatController.OnAddMessage += ChatController_OnAddMessage;
 
         if (friendsController != null)
+        {
             friendsController.OnUpdateFriendship += FriendsController_OnUpdateFriendship;
+            friendsController.OnUpdateUserStatus += FriendsController_OnUpdateUserStatus;
+            friendsController.OnInitialized += FriendsController_OnInitialized;
+        }
+
+        CommonScriptableObjects.rendererState.OnChange -= RendererState_OnChange;
+        CommonScriptableObjects.rendererState.OnChange += RendererState_OnChange;
     }
 
     private void FriendsController_OnUpdateFriendship(string id, FriendshipAction action)
@@ -36,18 +46,46 @@ public class ChatHeadGroupView : MonoBehaviour
         RemoveChatHead(id);
     }
 
+    private void FriendsController_OnUpdateUserStatus(string userId, FriendsController.UserStatus userStatus)
+    {
+        ChatHeadButton updatedChatHead = chatHeads.FirstOrDefault(ch => ch.profile.userId == userId);
+        if (updatedChatHead != null)
+            updatedChatHead.SetOnlineStatus(userStatus.presence == PresenceStatus.ONLINE);
+    }
+
+    private void FriendsController_OnInitialized()
+    {
+        // Load the chat heads from local storage just after FriendsController has been initialized
+        LoadLatestOpenChats();
+        friendsController.OnInitialized -= FriendsController_OnInitialized;
+    }
+
+    private void RendererState_OnChange(bool current, bool previous)
+    {
+        rendererStateTimeMark = (ulong)System.DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+        CommonScriptableObjects.rendererState.OnChange -= RendererState_OnChange;
+    }
+
     private void OnDestroy()
     {
         if (chatController != null)
             chatController.OnAddMessage -= ChatController_OnAddMessage;
 
         if (friendsController != null)
+        {
             friendsController.OnUpdateFriendship -= FriendsController_OnUpdateFriendship;
+            friendsController.OnUpdateUserStatus -= FriendsController_OnUpdateUserStatus;
+            friendsController.OnInitialized -= FriendsController_OnInitialized;
+        }
+
+        CommonScriptableObjects.rendererState.OnChange -= RendererState_OnChange;
     }
 
     private void ChatController_OnAddMessage(DCL.Interface.ChatMessage obj)
     {
-        if (obj.messageType != DCL.Interface.ChatMessage.Type.PRIVATE)
+        if (!CommonScriptableObjects.rendererState.Get() ||
+            obj.messageType != DCL.Interface.ChatMessage.Type.PRIVATE ||
+            obj.timestamp < rendererStateTimeMark)
             return;
 
         var ownProfile = UserProfile.GetOwnUserProfile();
@@ -88,7 +126,7 @@ public class ChatHeadGroupView : MonoBehaviour
         }
     }
 
-    internal ChatHeadButton AddChatHead(string userId, ulong timestamp)
+    internal ChatHeadButton AddChatHead(string userId, ulong timestamp, bool saveStatusInStorage = true)
     {
         var existingHead = chatHeads.FirstOrDefault(x => x.profile.userId == userId);
 
@@ -96,6 +134,17 @@ public class ChatHeadGroupView : MonoBehaviour
         {
             existingHead.lastTimestamp = timestamp;
             SortChatHeads();
+
+            if (saveStatusInStorage)
+            {
+                LatestOpenChatsList.Model existingHeadInStorage = CommonScriptableObjects.latestOpenChats.GetList().FirstOrDefault(c => c.userId == userId);
+                if (existingHeadInStorage != null)
+                {
+                    existingHeadInStorage.lastTimestamp = timestamp;
+                    SaveLatestOpenChats();
+                }
+            }
+
             return existingHead;
         }
 
@@ -108,6 +157,12 @@ public class ChatHeadGroupView : MonoBehaviour
         chatHead.OnToggleOn += OnToggleOn;
         chatHead.OnToggleOff += OnToggleOff;
 
+        if (friendsController != null &&
+            friendsController.GetFriends().TryGetValue(userId, out FriendsController.UserStatus friendStatus))
+        {
+            chatHead.SetOnlineStatus(friendStatus.presence == PresenceStatus.ONLINE);
+        }
+
         var animator = chatHead.GetComponent<ShowHideAnimator>();
 
         if (animator != null)
@@ -116,10 +171,16 @@ public class ChatHeadGroupView : MonoBehaviour
         chatHeads.Add(chatHead);
         SortChatHeads();
 
+        if (saveStatusInStorage)
+        {
+            CommonScriptableObjects.latestOpenChats.Add(new LatestOpenChatsList.Model { userId = userId, lastTimestamp = timestamp });
+            SaveLatestOpenChats();
+        }
+
         if (chatHeads.Count > MAX_GROUP_SIZE)
         {
             var lastChatHead = chatHeads[chatHeads.Count - 1];
-            RemoveChatHead(lastChatHead);
+            RemoveChatHead(lastChatHead, saveStatusInStorage);
         }
 
         return chatHead;
@@ -140,7 +201,7 @@ public class ChatHeadGroupView : MonoBehaviour
         RemoveChatHead(chatHeads.FirstOrDefault(x => x.profile.userId == userId));
     }
 
-    internal void RemoveChatHead(ChatHeadButton chatHead)
+    internal void RemoveChatHead(ChatHeadButton chatHead, bool saveStatusInStorage = true)
     {
         if (chatHead == null)
             return;
@@ -159,11 +220,41 @@ public class ChatHeadGroupView : MonoBehaviour
         }
 
         chatHeads.Remove(chatHead);
+
+        if (saveStatusInStorage)
+        {
+            LatestOpenChatsList.Model chatHeadToRemove = CommonScriptableObjects.latestOpenChats.GetList().FirstOrDefault(c => c.userId == chatHead.profile.userId);
+            CommonScriptableObjects.latestOpenChats.Remove(chatHeadToRemove);
+            SaveLatestOpenChats();
+        }
     }
 
     private void Animator_OnWillFinishHide(ShowHideAnimator animator)
     {
         animator.OnWillFinishHide -= Animator_OnWillFinishHide;
         Destroy(animator.gameObject);
+    }
+
+    private void SaveLatestOpenChats()
+    {
+        PlayerPrefs.SetString(PLAYER_PREFS_LATEST_OPEN_CHATS, JsonConvert.SerializeObject(CommonScriptableObjects.latestOpenChats.GetList()));
+        PlayerPrefs.Save();
+    }
+
+    private void LoadLatestOpenChats()
+    {
+        CommonScriptableObjects.latestOpenChats.Clear();
+        List<LatestOpenChatsList.Model> latestOpenChatsFromStorage = JsonConvert.DeserializeObject<List<LatestOpenChatsList.Model>>(PlayerPrefs.GetString(PLAYER_PREFS_LATEST_OPEN_CHATS));
+        if (latestOpenChatsFromStorage != null)
+        {
+            foreach (LatestOpenChatsList.Model item in latestOpenChatsFromStorage)
+            {
+                if (UserProfileController.userProfilesCatalog.Get(item.userId) == null)
+                    continue;
+
+                CommonScriptableObjects.latestOpenChats.Add(item);
+                AddChatHead(item.userId, item.lastTimestamp, false);
+            }
+        }
     }
 }

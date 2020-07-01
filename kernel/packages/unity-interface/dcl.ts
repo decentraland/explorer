@@ -16,15 +16,12 @@ import {
   EDITOR,
   ENGINE_DEBUG_PANEL,
   playerConfigurations,
-  RESET_TUTORIAL,
   SCENE_DEBUG_PANEL,
-  SHOW_FPS_COUNTER,
-  tutorialEnabled
+  SHOW_FPS_COUNTER
 } from '../config'
 import { Quaternion, ReadOnlyQuaternion, ReadOnlyVector3, Vector3 } from '../decentraland-ecs/src/decentraland/math'
 import { IEventNames, IEvents, ProfileForRenderer, MinimapSceneInfo } from '../decentraland-ecs/src/decentraland/Types'
 import { sceneLifeCycleObservable } from '../decentraland-loader/lifecycle/controllers/scene'
-import { tutorialStepId } from 'decentraland-loader/lifecycle/tutorial/tutorial'
 import { AirdropInfo } from 'shared/airdrops/interface'
 import { queueTrackingEvent } from 'shared/analytics'
 import { DevTools } from 'shared/apis/DevTools'
@@ -100,7 +97,7 @@ import { StoreContainer } from 'shared/store/rootTypes'
 import { ILandToLoadableParcelScene, ILandToLoadableParcelSceneUpdate } from 'shared/selectors'
 import { sendMessage, updateUserData, updateFriendship } from 'shared/chat/actions'
 import { ProfileAsPromise } from 'shared/profiles/ProfileAsPromise'
-import { changeRealm, catalystRealmConnected } from '../shared/dao/index'
+import { changeRealm, catalystRealmConnected, candidatesFetched } from '../shared/dao/index'
 import { notifyStatusThroughChat } from 'shared/comms/chat'
 
 declare const globalThis: UnityInterfaceContainer &
@@ -230,14 +227,22 @@ const browserInterface = {
     TeleportController.goTo(data.x, data.y)
   },
 
+  GoToMagic() {
+    TeleportController.goToMagic()
+  },
+
+  GoToCrowd() {
+    TeleportController.goToCrowd().catch(e => defaultLogger.error('error goToCrowd', e))
+  },
+
   LogOut() {
     Session.current.then(s => s.logout()).catch(e => defaultLogger.error('error while logging out', e))
   },
 
-  SaveUserAvatar(changes: { face: string; body: string; avatar: Avatar }) {
-    const { face, body, avatar } = changes
+  SaveUserAvatar(changes: { face: string; face128: string, face256: string, body: string; avatar: Avatar }) {
+    const { face, face128, face256, body, avatar } = changes
     const profile: Profile = getUserProfile().profile as Profile
-    const updated = { ...profile, avatar: { ...avatar, snapshots: { face, body } } }
+    const updated = { ...profile, avatar: { ...avatar, snapshots: { face, face128, face256, body } } }
     globalThis.globalStore.dispatch(saveProfileRequest(updated))
   },
 
@@ -250,10 +255,6 @@ const browserInterface = {
       version: profile.version,
       profile: profileToRendererFormat(profile, identity)
     })
-
-    if (data.tutorialStep === tutorialStepId.FINISHED) {
-      // we used to call delightedSurvey() here
-    }
   },
 
   ControlEvent({ eventType, payload }: { eventType: string; payload: any }) {
@@ -384,21 +385,29 @@ const browserInterface = {
     globalThis.globalStore.dispatch(updateFriendship(action, userId.toLowerCase(), false))
   },
 
-  JumpIn(data: WorldPosition) {
+  async JumpIn(data: WorldPosition) {
     const {
       gridPosition: { x, y },
       realm: { serverName, layer }
     } = data
 
     const realmString = serverName + '-' + layer
-    const realm = changeRealm(realmString)
 
-    notifyStatusThroughChat(`Changing to realm ${realmString}`)
+    notifyStatusThroughChat(`Jumping to ${realmString} at ${x},${y}...`)
+
+    const future = candidatesFetched()
+    if (future.isPending) {
+      notifyStatusThroughChat(`Waiting while realms are initialized, this may take a while...`)
+    }
+
+    await future
+
+    const realm = changeRealm(realmString)
 
     if (realm) {
       catalystRealmConnected().then(
         () => {
-          TeleportController.goTo(x, y, `Jumping to ${x},${y} in realm ${realm.catalystName}-${realm.layer}!`)
+          TeleportController.goTo(x, y, `Jumped to ${x},${y} in realm ${realmString}!`)
         },
         e => {
           const cause = e === 'realm-full' ? ' The requested realm is full.' : ''
@@ -504,6 +513,7 @@ const CHUNK_SIZE = 100
 
 export const unityInterface = {
   debug: false,
+
   SendGenericMessage(object: string, method: string, payload: string) {
     gameInstance.SendMessage(object, method, payload)
   },
@@ -613,10 +623,6 @@ export const unityInterface = {
     }
   },
   SetTutorialEnabled() {
-    if (RESET_TUTORIAL) {
-      browserInterface.SaveUserTutorialStep({ tutorialStep: 0 })
-    }
-
     gameInstance.SendMessage('TutorialController', 'SetTutorialEnabled')
   },
   TriggerAirdropDisplay(data: AirdropInfo) {
@@ -636,6 +642,9 @@ export const unityInterface = {
   },
   FriendNotFound(queryString: string) {
     gameInstance.SendMessage('SceneController', 'FriendNotFound', JSON.stringify(queryString))
+  },
+  RequestTeleport(teleportData: {}) {
+    gameInstance.SendMessage('HUDController', 'RequestTeleport', JSON.stringify(teleportData))
   },
 
   // *********************************************************************************
@@ -956,10 +965,6 @@ export async function initializeEngine(_gameInstance: GameInstance) {
 
   if (ENGINE_DEBUG_PANEL) {
     unityInterface.SetEngineDebugPanel()
-  }
-
-  if (tutorialEnabled()) {
-    unityInterface.SetTutorialEnabled()
   }
 
   if (!EDITOR) {

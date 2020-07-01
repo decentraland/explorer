@@ -1,17 +1,18 @@
 using DCL.Interface;
+using JetBrains.Annotations;
 
 public class FriendsTabView : FriendsTabViewBase
 {
     public EntryList onlineFriendsList = new EntryList();
     public EntryList offlineFriendsList = new EntryList();
     public event System.Action<FriendEntry> OnWhisper;
-    public event System.Action<FriendEntry> OnDeleteConfirmation;
+    public event System.Action<string> OnDeleteConfirmation;
 
     private string lastProcessedFriend;
 
-    public override void Initialize(FriendsHUDView owner)
+    public override void Initialize(FriendsHUDView owner, int preinstantiatedEntries)
     {
-        base.Initialize(owner);
+        base.Initialize(owner, preinstantiatedEntries);
 
         onlineFriendsList.toggleTextPrefix = "ONLINE";
         offlineFriendsList.toggleTextPrefix = "OFFLINE";
@@ -38,6 +39,7 @@ public class FriendsTabView : FriendsTabViewBase
         var entry = GetEntry(userId) as FriendEntry;
 
         entry.OnWhisperClick += (x) => OnWhisper?.Invoke(x);
+        entry.OnJumpInClick += (x) => this.owner.OnCloseButtonPressed();
 
         return true;
     }
@@ -81,16 +83,20 @@ public class FriendsTabView : FriendsTabViewBase
         return true;
     }
 
-    protected override void OnPressDeleteButton(FriendEntryBase entry)
+    protected override void OnPressDeleteButton(string userId)
     {
-        if (entry == null) return;
+        if (string.IsNullOrEmpty(userId)) return;
 
-        confirmationDialog.SetText($"Are you sure you want to delete {entry.model.userName} as a friend?");
-        confirmationDialog.Show(() =>
+        FriendEntryBase friendEntryToDelete = GetEntry(userId);
+        if (friendEntryToDelete != null)
         {
-            RemoveEntry(entry.userId);
-            OnDeleteConfirmation?.Invoke(entry as FriendEntry);
-        });
+            confirmationDialog.SetText($"Are you sure you want to delete {friendEntryToDelete.model.userName} as a friend?");
+            confirmationDialog.Show(() =>
+            {
+                RemoveEntry(userId);
+                OnDeleteConfirmation?.Invoke(userId);
+            });
+        }
     }
 
     private void ChatController_OnAddMessage(ChatMessage message)

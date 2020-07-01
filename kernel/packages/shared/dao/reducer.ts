@@ -15,18 +15,21 @@ import {
   FETCH_CONTENT_SERVICE,
   UPDATE_CONTENT_SERVICE,
   COMMS_SERVICE,
-  FETCH_META_CONTENT_SERVICE
-} from '../../config/index'
+  FETCH_META_CONTENT_SERVICE,
+  RESIZE_SERVICE
+} from 'config'
 
 export function daoReducer(state?: DaoState, action?: AnyAction): DaoState {
   if (!state) {
     return {
       initialized: false,
+      candidatesFetched: false,
       profileServer: '',
       fetchContentServer: '',
       fetchMetaContentServer: '',
       updateContentServer: '',
       commsServer: '',
+      resizeService: '',
       realm: undefined,
       candidates: [],
       addedCandidates: [],
@@ -41,6 +44,7 @@ export function daoReducer(state?: DaoState, action?: AnyAction): DaoState {
     case SET_CATALYST_CANDIDATES:
       return {
         ...state,
+        candidatesFetched: true,
         candidates: action.payload
       }
     case SET_ADDED_CATALYST_CANDIDATES:
@@ -116,6 +120,7 @@ function realmProperties(realm: Realm, configOverride: boolean = true): Partial<
     fetchMetaContentServer: FETCH_META_CONTENT_SERVICE && configOverride ? FETCH_META_CONTENT_SERVICE : domain,
     updateContentServer: UPDATE_CONTENT_SERVICE && configOverride ? UPDATE_CONTENT_SERVICE : domain + '/content',
     commsServer: COMMS_SERVICE && configOverride ? COMMS_SERVICE : domain + '/comms',
+    resizeService: RESIZE_SERVICE && configOverride ? RESIZE_SERVICE : domain + '/lambdas/images',
     realm
   }
 }

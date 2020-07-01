@@ -39,11 +39,11 @@ import { getAppNetwork, getNetworkFromTLD, fetchOwnedENS } from './web3'
 import { initializeUrlPositionObserver } from './world/positionThings'
 import { saveProfileRequest } from './profiles/actions'
 import { ethereumConfigurations } from 'config'
-import { tutorialStepId } from 'decentraland-loader/lifecycle/tutorial/tutorial'
 import { ENABLE_WEB3 } from '../config/index'
 import future, { IFuture } from 'fp-future'
 import { RootState } from './store/rootTypes'
 import { AnyAction, Store } from 'redux'
+import { isResizeServiceUrl } from './dao/selectors'
 
 declare const globalThis: any
 
@@ -92,7 +92,7 @@ export function initShared(): InitFutures {
 
   let net: ETHEREUM_NETWORK = ETHEREUM_NETWORK.MAINNET
   let userId: string
-  ;(async function() {
+  ;(async function () {
     if (WORLD_EXPLORER) {
       await initializeAnalytics()
     }
@@ -199,9 +199,15 @@ export function initShared(): InitFutures {
         }
       }
 
-      const localTutorialStep = getUserProfile().profile
-        ? getUserProfile().profile.tutorialStep
-        : tutorialStepId.INITIAL_SCENE
+      if (
+        isResizeServiceUrl(store.getState(), profile.avatar.snapshots?.face128) ||
+        isResizeServiceUrl(store.getState(), profile.avatar.snapshots?.face256)
+      ) {
+        // setting dirty profile, as at least one of the face images are taken from a local blob
+        profileDirty = true
+      }
+
+      const localTutorialStep = getUserProfile().profile ? getUserProfile().profile.tutorialStep : 0
 
       if (localTutorialStep !== profile.tutorialStep) {
         let finalTutorialStep = Math.max(localTutorialStep, profile.tutorialStep)

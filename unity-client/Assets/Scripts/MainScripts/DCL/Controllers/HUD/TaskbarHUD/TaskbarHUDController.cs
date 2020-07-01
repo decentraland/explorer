@@ -184,7 +184,7 @@ public class TaskbarHUDController : IHUD
 
     public void OpenPrivateChatTo(string userId)
     {
-        var button = view.chatHeadsGroup.AddChatHead(userId, ulong.MaxValue);
+        var button = view.chatHeadsGroup.AddChatHead(userId, (ulong)System.DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
         button.toggleButton.onClick.Invoke();
     }
 
@@ -258,9 +258,9 @@ public class TaskbarHUDController : IHUD
                 worldChatWindowHud.MarkWorldChatMessagesAsRead();
         };
 
-        friendsHud.view.friendsList.OnDeleteConfirmation += (entry) =>
+        friendsHud.view.friendsList.OnDeleteConfirmation += (userIdToRemove) =>
         {
-            view.chatHeadsGroup.RemoveChatHead(entry.userId);
+            view.chatHeadsGroup.RemoveChatHead(userIdToRemove);
         };
     }
 
