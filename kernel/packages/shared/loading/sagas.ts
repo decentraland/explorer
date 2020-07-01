@@ -44,7 +44,7 @@ function* refreshTeleport() {
 }
 function* refreshTextInScreen() {
   while (true) {
-    const status = yield select(state => state.loading)
+    const status = yield select((state) => state.loading)
     yield call(() => updateTextInScreen(status))
     yield delay(200)
   }
@@ -56,7 +56,7 @@ export function* waitForSceneLoads() {
       started: take(SCENE_START),
       failed: take(SCENE_FAIL)
     })
-    if (yield select(state => state.loading.pendingScenes === 0)) {
+    if (yield select((state) => state.loading.pendingScenes === 0)) {
       break
     }
   }
@@ -66,7 +66,7 @@ export function* initialSceneLoading() {
   yield race({
     refresh: call(refreshTeleport),
     textInScreen: call(refreshTextInScreen),
-    finish: call(function*() {
+    finish: call(function* () {
       yield take(EXPERIENCE_STARTED)
       yield take('Loading scene')
       yield call(waitForSceneLoads)
@@ -77,7 +77,7 @@ export function* initialSceneLoading() {
 export function* teleportSceneLoading() {
   yield race({
     refresh: call(refreshTeleport),
-    textInScreen: call(function*() {
+    textInScreen: call(function* () {
       yield delay(2000)
       yield call(refreshTextInScreen)
     }),
@@ -94,7 +94,8 @@ export function updateTextInScreen(status: LoadingState) {
   if (subMessages) {
     subMessages.innerText =
       status.pendingScenes > 0
-        ? `Loading scenes (${status.pendingScenes} scene${status.pendingScenes > 0 ? 's' : ''} remaining)`
+        ? status.message ||
+          `Loading scenes (${status.pendingScenes} scene${status.pendingScenes > 0 ? 's' : ''} remaining)`
         : status.status
   }
 }
