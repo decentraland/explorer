@@ -99,11 +99,11 @@ function preventUnityKeyboardLock() {
 }
 
 function enableLogin() {
-  const check = document.getElementById('agree-check') as HTMLInputElement
-  const confirmButton = document.getElementById('eth-login-confirm-button')
-  if (check && confirmButton) {
-    check.disabled = false
-    confirmButton.textContent = 'Start Exploring'
+  const wrapper = document.getElementById('eth-login-confirmation-wrapper')
+  const spinner = document.getElementById('eth-login-confirmation-spinner')
+  if (wrapper && spinner) {
+    spinner.style.cssText = 'display: none;'
+    wrapper.style.cssText = 'display: flex;'
   }
 }
 
