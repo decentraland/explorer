@@ -21,6 +21,9 @@ namespace DCL
 
         bool requestRegistered = false;
 
+        public static int downloadingCount => concurrentRequests;
+        public static int queueCount => AssetPromiseKeeper_AB.i.waitingPromisesCount;
+
         static readonly float maxLoadBudgetTime = 0.032f;
         static float currentLoadBudgetTime = 0;
 
