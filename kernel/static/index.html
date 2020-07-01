@@ -15,7 +15,11 @@
       overflow: hidden;
       touch-action: none;
 
-      background: rgba(0, 0, 0, 1);
+      background: #74A4D5;
+      background-image: url(images/decentraland-connect/background.png);
+      background-size: 115%;
+      background-repeat: no-repeat;
+      background-position: right -90px bottom 25px;
     }
 
     #gameContainer {
@@ -58,7 +62,7 @@
     }
 
     #overlay {
-      display: none;
+      display: block;
       width: 100%;
       height: 100%;
       top: 0;
@@ -214,27 +218,11 @@
 
     #eth-connect-advice {
       display: none;
-      background: rgba(0, 0, 0, 1);
-      position: absolute;
-      z-index: 9;
-      top: 0;
-      left:0;
-      width: 100%;
-      height: 100%;
     }
     #eth-sign-advice {
       display: none;
-      background: rgba(0, 0, 0, 1);
-      position: absolute;
-      z-index: 9;
-      top: 0;
-      left:0;
-      width: 100%;
-      height: 100%;
     }
-    #eth-login {
-      display: block;
-
+    .login {
       background:#74A4D5;
       background-image: url(images/decentraland-connect/background.png);
       background-size: 100%;
@@ -247,6 +235,9 @@
       left:0;
       width: 100%;
       height: 100%;
+    }
+    #eth-login {
+      display: block;
     }
     .eth-login-popup {
       width: 70%;
@@ -459,7 +450,7 @@
   <div id="progress-bar" class="progress ingame">
     <div class="full"></div>
   </div>
-  <div id="eth-login">
+  <div id="eth-login" class="login">
     <nav class="nav-bar">
       <div class="nav-bar-content">
         <div class="nav-text nav-need-support"><span>Need support?</span></div>
@@ -469,8 +460,8 @@
     <div class="eth-login-popup">
       <img class="eth-login-logo" src="images/decentraland-connect/Isologotipo.png"></img>
       <div class="eth-login-description">Inmerse yourself into the Ethereum blockchain based virtual game world created and owned by its users.</div>
-      <div id="eth-login-confirmation-spinner" class="loader"></div>
-      <div id="eth-login-confirmation-wrapper" style="display: none;">
+      <div id="eth-login-confirmation-spinner" class="loader" style="display: none;"></div>
+      <div id="eth-login-confirmation-wrapper">
         <div class="eth-login-tos">
           <input type="checkbox" id="agree-check" class="eth-login-tos-agree" onchange="document.getElementById('eth-login-confirm-button').disabled = !this.checked;"></input>
           <label for="agree-check" class="eth-login-tos-label">I am of legal age and I have read and agree to the <a href="https://decentraland.org/terms" target="_blank">Terms of Service</a> and <a href="https://decentraland.org/privacy" target="_blank">Privacy Policy</a></label>
@@ -488,23 +479,51 @@
       </div>
     </footer>
   </div>
-  <div id="eth-connect-advice">
+  <div id="eth-connect-advice" class="login">
+    <nav class="nav-bar">
+      <div class="nav-bar-content">
+        <div class="nav-text nav-need-support"><span>Need support?</span></div>
+        <a class="nav-discord" href="https://dcl.gg/discord" target="about:blank"><img class="nav-discord-img" src="images/decentraland-connect/Discord.png"></img> <span class="nav-text nav-discord-text">JOIN OUR DISCORD</span></a>
+      </div>
+    </nav>
     <div class="eth-login-popup" style="height: 450px">
-      <div class="eth-login-welcome">Welcome to</div>
-      <img src="images/decentraland-connect/Isologotipo.png"></img>
+      <img class="eth-login-logo" src="images/decentraland-connect/Isologotipo.png"></img>
       <div class="eth-login-description">Please, follow the instructions provided by your Ethereum wallet provider to complete login.<br></br>To proceed, <strong>login</strong> into your wallet and confirm with <strong>connecting</strong> to your Ethereum wallet extension.</div>
       <button id="eth-relogin-confirm-button" class="eth-login-confirm-button1">
         <img src="./images/decentraland-connect/walletIcon.png" class="eth-login-wallet-icon"></img>Connect wallet</buttonclass="eth-login-description">
     </div>
+    <footer class="footer-bar">
+      <div class="footer-bar-content">
+        <a class="footer-link" href="https://dcl.gg/discord" target="about:blank"><img class="footer-icon" src="images/decentraland-connect/footer/Discord.png"></img></a>
+        <a class="footer-link" href="https://www.reddit.com/r/decentraland/" target="about:blank"><img class="footer-icon" src="images/decentraland-connect/footer/Reddit.png"></img></a>
+        <a class="footer-link" href="http://github.com/decentraland" target="about:blank"><img class="footer-icon" src="images/decentraland-connect/footer/Git.png"></img></a>
+        <a class="footer-link" href="https://twitter.com/decentraland" target="about:blank"><img class="footer-icon" src="images/decentraland-connect/footer/Twitter.png"></img></a>
+        <span class="footer-text">© 2020 Decentraland</span>
+      </div>
+    </footer>
   </div>
-  <div id="eth-sign-advice">
+  <div id="eth-sign-advice" class="login">
+    <nav class="nav-bar">
+      <div class="nav-bar-content">
+        <div class="nav-text nav-need-support"><span>Need support?</span></div>
+        <a class="nav-discord" href="https://dcl.gg/discord" target="about:blank"><img class="nav-discord-img" src="images/decentraland-connect/Discord.png"></img> <span class="nav-text nav-discord-text">JOIN OUR DISCORD</span></a>
+      </div>
+    </nav>
     <div class="eth-login-popup" >
-      <div class="eth-login-welcome">Welcome to</div>
-      <img src="images/decentraland-connect/Isologotipo.png"></img>
+      <img class="eth-login-logo" src="images/decentraland-connect/Isologotipo.png"></img>
       <div class="eth-login-description">Please, follow the instructions provided by your Ethereum wallet provider to complete login.</div>
       <div class="eth-login-description" style="margin-top: 10px;">To proceed, confirm <strong>signing</strong> the following message in your wallet extension.</div>
       <div id="eth-sign-advice-msg" class="eth-login-description code"></div>
     </div>
+    <footer class="footer-bar">
+      <div class="footer-bar-content">
+        <a class="footer-link" href="https://dcl.gg/discord" target="about:blank"><img class="footer-icon" src="images/decentraland-connect/footer/Discord.png"></img></a>
+        <a class="footer-link" href="https://www.reddit.com/r/decentraland/" target="about:blank"><img class="footer-icon" src="images/decentraland-connect/footer/Reddit.png"></img></a>
+        <a class="footer-link" href="http://github.com/decentraland" target="about:blank"><img class="footer-icon" src="images/decentraland-connect/footer/Git.png"></img></a>
+        <a class="footer-link" href="https://twitter.com/decentraland" target="about:blank"><img class="footer-icon" src="images/decentraland-connect/footer/Twitter.png"></img></a>
+        <span class="footer-text">© 2020 Decentraland</span>
+      </div>
+    </footer>
   </div>
   <div id="gameContainer"></div>
 
