@@ -30,4 +30,5 @@ public class UserProfileModel
     public List<string> blocked;
     public int tutorialStep;
     public bool hasClaimedName = false;
+    public bool isMale = true;
 }

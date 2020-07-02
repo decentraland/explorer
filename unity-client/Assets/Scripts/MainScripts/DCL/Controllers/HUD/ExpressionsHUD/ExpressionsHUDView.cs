@@ -23,6 +23,10 @@ public class ExpressionsHUDView : MonoBehaviour
     [SerializeField] internal Image avatarPic;
     internal InputAction_Trigger.Triggered openExpressionsDelegate;
 
+    private bool usingMaleAnimations = true;
+    private bool alreadySetAnimations = false;
+    private UserProfile ownUserProfile => UserProfile.GetOwnUserProfile();
+
     public static ExpressionsHUDView Create()
     {
         return Instantiate(Resources.Load<GameObject>(PATH)).GetComponent<ExpressionsHUDView>();
@@ -45,6 +49,8 @@ public class ExpressionsHUDView : MonoBehaviour
         {
             hideContentButtons[i].onPointerDown += HideContent;
         }
+
+        ownUserProfile.OnUpdate += UpdateAnimationsIDBasedOnSex;
     }
 
     internal void Initialize(ExpressionClicked clickedDelegate)
@@ -101,6 +107,20 @@ public class ExpressionsHUDView : MonoBehaviour
     public bool IsVisible()
     {
         return gameObject.activeSelf;
+    }
+
+    private void UpdateAnimationsIDBasedOnSex(UserProfile userProfile)
+    {
+        if (alreadySetAnimations && userProfile.isMale == usingMaleAnimations) return;
+
+        usingMaleAnimations = userProfile.isMale;
+
+        foreach (var buttonToExpression in buttonToExpressionMap)
+        {
+            buttonToExpression.expressionId = (usingMaleAnimations ? "M_" : "F_") + buttonToExpression.expressionId;
+        }
+
+        alreadySetAnimations = true;
     }
 
     public void CleanUp()

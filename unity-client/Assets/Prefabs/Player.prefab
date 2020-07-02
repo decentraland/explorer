@@ -123,25 +123,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   waveExpression:
     inputAction: {fileID: 11400000, guid: 4ca7937ff0102de4cb93d6bfd22d6841, type: 2}
-    id: wave
+    id: Waving
   robotExpression:
     inputAction: {fileID: 11400000, guid: ed74cabe4260e5b4f9a680414e5fa2c2, type: 2}
-    id: robot
+    id: RobotDance
   fistpumpExpression:
     inputAction: {fileID: 11400000, guid: 51a7f49ac1922f641b55524fccfb0d0d, type: 2}
-    id: fistpump
+    id: FistPump
   raiseHandExpression:
     inputAction: {fileID: 11400000, guid: 3cb1c12de0cbd4dc2a6fde577ed28151, type: 2}
-    id: raiseHand
+    id: RaiseHand
   clapExpression:
     inputAction: {fileID: 11400000, guid: 084674dc6d216411e9b3abd7832994d6, type: 2}
-    id: clap
+    id: Clapping
   throwMoneyExpression:
     inputAction: {fileID: 11400000, guid: e5071e75b2b514d83a3b86c3d202f8df, type: 2}
-    id: money
+    id: Money
   sendKissExpression:
     inputAction: {fileID: 11400000, guid: f6b5c5a34be494aa69bb57ea0b658d72, type: 2}
-    id: kiss
+    id: Kiss
 --- !u!1 &326638024485685081
 GameObject:
   m_ObjectHideFlags: 0
