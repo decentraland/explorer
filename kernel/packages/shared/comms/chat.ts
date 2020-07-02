@@ -39,14 +39,14 @@ export function notifyFriendOnlineStatusThroughChat(userId: string, status: Pres
     friendStatus[friendName] = status
     return
   }
-  if (status === PresenceStatus.ONLINE && friendStatus[friendName] !== status) {
+  if (status === PresenceStatus.ONLINE && friendStatus[friendName] === PresenceStatus.OFFLINE) {
     friendStatus[friendName] = status
     globalThis.globalStore.dispatch(
       messageReceived({
         messageId: uuid(),
         messageType: ChatMessageType.SYSTEM,
         timestamp: Date.now(),
-        body: `${friendName} is online.`
+        body: `${friendName} is online`
       })
     )
   }
