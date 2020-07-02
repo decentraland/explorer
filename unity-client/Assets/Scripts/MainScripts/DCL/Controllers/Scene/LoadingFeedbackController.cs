@@ -15,8 +15,6 @@ public class LoadingFeedbackController : MonoBehaviour
 
     public class Model
     {
-        public int gltfActiveDownloads;
-        public int assetBundlesActiveDownloads;
         public List<SceneLoadingStatus> loadedScenes;
 
         public class SceneLoadingStatus
@@ -34,6 +32,7 @@ public class LoadingFeedbackController : MonoBehaviour
         SceneController.i.OnNewSceneAdded += SceneController_OnNewSceneAdded;
         GLTFComponent.OnDownloadingCountChange += GLTFComponent_OnDownloadingCountChange;
         AssetPromise_AB.OnConcurrentRequestsChange += AssetPromise_AB_OnConcurrentRequestsChange;
+        CommonScriptableObjects.rendererState.OnChange += RendererState_OnChange;
     }
 
     private void OnDestroy()
@@ -41,6 +40,7 @@ public class LoadingFeedbackController : MonoBehaviour
         SceneController.i.OnNewSceneAdded -= SceneController_OnNewSceneAdded;
         GLTFComponent.OnDownloadingCountChange -= GLTFComponent_OnDownloadingCountChange;
         AssetPromise_AB.OnConcurrentRequestsChange -= AssetPromise_AB_OnConcurrentRequestsChange;
+        CommonScriptableObjects.rendererState.OnChange -= RendererState_OnChange;
     }
 
     private void SceneController_OnNewSceneAdded(ParcelScene scene)
@@ -58,18 +58,15 @@ public class LoadingFeedbackController : MonoBehaviour
 
         switch (scene.currentState)
         {
-            case ParcelScene.State.NOT_READY:
-            case ParcelScene.State.WAITING_FOR_INIT_MESSAGES:
             case ParcelScene.State.WAITING_FOR_COMPONENTS:
                 AddOrUpdateLoadedScene(refreshedScene);
+                RefreshFeedbackMessage();
                 break;
             case ParcelScene.State.READY:
                 scene.OnStateRefreshed -= Scene_OnStateRefreshed;
-                RemoveLoadedScene(refreshedScene.sceneId);
+                RefreshFeedbackMessage();
                 break;
         }
-
-        RefreshFeedbackMessage();
     }
 
     private void AddOrUpdateLoadedScene(Model.SceneLoadingStatus scene)
@@ -83,20 +80,13 @@ public class LoadingFeedbackController : MonoBehaviour
         }
     }
 
-    private void RemoveLoadedScene(int id)
-    {
-        model.loadedScenes.RemoveAll(x => x.sceneId == id);
-    }
-
     private void GLTFComponent_OnDownloadingCountChange(int newDownloadingCount)
     {
-        model.gltfActiveDownloads = newDownloadingCount;
         RefreshFeedbackMessage();
     }
 
     private void AssetPromise_AB_OnConcurrentRequestsChange(int newConcurrentRequests)
     {
-        model.assetBundlesActiveDownloads = newConcurrentRequests;
         RefreshFeedbackMessage();
     }
 
@@ -106,9 +96,9 @@ public class LoadingFeedbackController : MonoBehaviour
             return;
 
         string loadingText = string.Empty;
-
+        string secondLoadingText = string.Empty;
         int currentComponentsLoading = model.loadedScenes.Sum(x => x.componentsLoading);
-        int totalActiveDownloads = model.gltfActiveDownloads + model.assetBundlesActiveDownloads;
+        int totalActiveDownloads = AssetPromiseKeeper_GLTF.i.waitingPromisesCount + AssetPromiseKeeper_AB.i.waitingPromisesCount;
 
         if (currentComponentsLoading > 0)
         {
@@ -117,15 +107,34 @@ public class LoadingFeedbackController : MonoBehaviour
                 currentComponentsLoading,
                 currentComponentsLoading > 1 ? "s" : string.Empty);
         }
-        else if (totalActiveDownloads > 0)
+
+        if (totalActiveDownloads > 0)
         {
-            loadingText = string.Format(
+            secondLoadingText = string.Format(
                 "Downloading assets ({0} asset{1} left...)",
                 totalActiveDownloads,
                 totalActiveDownloads > 1 ? "s" : string.Empty);
+
+            if (!string.IsNullOrEmpty(loadingText))
+            {
+                loadingText += "\\n";
+            }
+
+            loadingText += secondLoadingText;
         }
 
         if (!string.IsNullOrEmpty(loadingText))
+        {
             WebInterface.ScenesLoadingFeedback(loadingText);
+        }
+    }
+
+    private void RendererState_OnChange(bool current, bool previous)
+    {
+        if (!current)
+            return;
+
+        WebInterface.ScenesLoadingFeedback(string.Empty);
+        model.loadedScenes.Clear();
     }
 }
