@@ -250,11 +250,11 @@ export function getServerConfigurations() {
     wearablesApi: `https://wearable-api.decentraland.org/v2`,
     explorerConfiguration: `https://explorer-config.decentraland.${notToday}/configuration.json`,
     synapseUrl,
-    fallbackResizeServiceUrl: `https://peer.decentraland.${notToday}/lambdas/images`,
+    fallbackResizeServiceUrl: `${PIN_CATALYST ?? 'https://peer.decentraland.' + notToday}/lambdas/images`,
     avatar: {
-      snapshotStorage: `https://avatars-storage.decentraland.${TLDDefault}/`,
+      snapshotStorage: `https://avatars-storage.decentraland.${TLDDefault}/`, // TODO - unused, remove - moliva - 03/07/2020
       catalog: getExclusiveServer(),
-      presets: `https://avatars-storage.decentraland.org/mobile-avatars`
+      presets: `https://avatars-storage.decentraland.org/mobile-avatars` // TODO - unused, remove - moliva - 03/07/2020
     }
   }
 }
