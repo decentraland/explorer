@@ -258,7 +258,7 @@ public class TaskbarHUDController : IHUD
                 worldChatWindowHud.MarkWorldChatMessagesAsRead();
         };
 
-        friendsHud.view.friendsList.OnDeleteConfirmation += (entry) => { view.chatHeadsGroup.RemoveChatHead(entry.userId); };
+        friendsHud.view.friendsList.OnDeleteConfirmation += (userIdToRemove) => { view.chatHeadsGroup.RemoveChatHead(userIdToRemove); };
     }
 
     public void DisableFriendsWindow()

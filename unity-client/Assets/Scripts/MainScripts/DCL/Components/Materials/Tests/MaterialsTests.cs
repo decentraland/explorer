@@ -18,11 +18,6 @@ namespace Tests
             SceneController.i.useBoundariesChecker = false;
         }
 
-        protected override IEnumerator TearDown()
-        {
-            yield return base.TearDown();
-        }
-
         [UnityTest]
         public IEnumerator PBRMaterialUpdate()
         {

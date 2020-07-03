@@ -21,7 +21,6 @@ namespace AvatarEditorHUD_Tests
         private ColorList eyeColorList;
 
         protected override bool justSceneSetUp => true;
-        private bool recycleAvatarHud = false;
 
         [UnitySetUp]
         protected override IEnumerator SetUp()
@@ -133,9 +132,6 @@ namespace AvatarEditorHUD_Tests
                     eyeColor = eyeColorList.colors[0],
                 }
             }, false);
-
-            // controller = new AvatarEditorHUDController_Mock();
-            // controller.Initialize(userProfile, catalog);
 
             AssertAvatarModelAgainstAvatarEditorHUDModel(userProfile.avatar, controller.myModel);
         }
@@ -303,8 +299,6 @@ namespace AvatarEditorHUD_Tests
             Assert.AreEqual(avatarModel.skinColor, avatarEditorHUDModel.skinColor);
             Assert.AreEqual(avatarModel.hairColor, avatarEditorHUDModel.hairColor);
             Assert.AreEqual(avatarModel.eyeColor, avatarEditorHUDModel.eyesColor);
-
-            recycleAvatarHud = false;
         }
     }
 }
