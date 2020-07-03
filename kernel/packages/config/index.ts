@@ -252,9 +252,9 @@ export function getServerConfigurations() {
     synapseUrl,
     fallbackResizeServiceUrl: `${PIN_CATALYST ?? 'https://peer.decentraland.' + notToday}/lambdas/images`,
     avatar: {
-      snapshotStorage: `https://avatars-storage.decentraland.${TLDDefault}/`, // TODO - unused, remove - moliva - 03/07/2020
+      snapshotStorage: `https://avatars-storage.decentraland.${TLDDefault}/`, // ** TODO - unused, remove - moliva - 03/07/2020
       catalog: getExclusiveServer(),
-      presets: `https://avatars-storage.decentraland.org/mobile-avatars` // TODO - unused, remove - moliva - 03/07/2020
+      presets: `https://avatars-storage.decentraland.org/mobile-avatars` // ** TODO - unused, remove - moliva - 03/07/2020
     }
   }
 }

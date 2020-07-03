@@ -17,7 +17,7 @@ import {
   COMMS_SERVICE,
   FETCH_META_CONTENT_SERVICE,
   RESIZE_SERVICE,
-  PIN_CATALYST 
+  PIN_CATALYST
 } from 'config'
 
 export function daoReducer(state?: DaoState, action?: AnyAction): DaoState {

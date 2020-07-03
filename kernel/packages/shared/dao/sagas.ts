@@ -15,7 +15,7 @@ import {
   SetAddedCatalystCandidates
 } from './actions'
 import { call, put, takeEvery, select, fork } from 'redux-saga/effects'
-import { WORLD_EXPLORER, REALM, getDefaultTLD, PIN_CATALYST  } from 'config'
+import { WORLD_EXPLORER, REALM, getDefaultTLD, PIN_CATALYST } from 'config'
 import { waitForMetaConfigurationInitialization } from '../meta/sagas'
 import { Candidate, Realm, ServerConnectionStatus } from './types'
 import { fecthCatalystRealms, fetchCatalystStatuses, pickCatalystRealm, getRealmFromString, ping, commsStatusUrl } from '.'
