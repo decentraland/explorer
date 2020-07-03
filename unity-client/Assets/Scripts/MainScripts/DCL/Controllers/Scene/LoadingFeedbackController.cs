@@ -7,39 +7,33 @@ using UnityEngine;
 using UnityGLTF;
 
 /// <summary>
-/// This class recopiles all the needed information for show the feedback during the world loading
+/// This class recopiles all the needed information to be sent to the kernel and be able to show the feedback along the world loading.
 /// </summary>
 public class LoadingFeedbackController : MonoBehaviour
 {
-    private Model model;
-
-    public class Model
+    private class SceneLoadingStatus
     {
-        public List<SceneLoadingStatus> loadedScenes;
-
-        public class SceneLoadingStatus
-        {
-            public int sceneId;
-            public int componentsLoading;
-        }
+        public int sceneId;
+        public int componentsLoading;
     }
+
+    private List<SceneLoadingStatus> loadedScenes;
 
     private void Start()
     {
-        model = new Model();
-        model.loadedScenes = new List<Model.SceneLoadingStatus>();
+        loadedScenes = new List<SceneLoadingStatus>();
 
         SceneController.i.OnNewSceneAdded += SceneController_OnNewSceneAdded;
-        GLTFComponent.OnDownloadingCountChange += GLTFComponent_OnDownloadingCountChange;
-        AssetPromise_AB.OnConcurrentRequestsChange += AssetPromise_AB_OnConcurrentRequestsChange;
+        GLTFComponent.OnDownloadingProgressUpdate += GLTFComponent_OnDownloadingProgressUpdate;
+        AssetPromise_AB.OnDownloadingProgressUpdate += AssetPromise_AB_OnDownloadingProgressUpdate;
         CommonScriptableObjects.rendererState.OnChange += RendererState_OnChange;
     }
 
     private void OnDestroy()
     {
         SceneController.i.OnNewSceneAdded -= SceneController_OnNewSceneAdded;
-        GLTFComponent.OnDownloadingCountChange -= GLTFComponent_OnDownloadingCountChange;
-        AssetPromise_AB.OnConcurrentRequestsChange -= AssetPromise_AB_OnConcurrentRequestsChange;
+        GLTFComponent.OnDownloadingProgressUpdate -= GLTFComponent_OnDownloadingProgressUpdate;
+        AssetPromise_AB.OnDownloadingProgressUpdate -= AssetPromise_AB_OnDownloadingProgressUpdate;
         CommonScriptableObjects.rendererState.OnChange -= RendererState_OnChange;
     }
 
@@ -50,7 +44,7 @@ public class LoadingFeedbackController : MonoBehaviour
 
     private void Scene_OnStateRefreshed(ParcelScene scene)
     {
-        Model.SceneLoadingStatus refreshedScene = new Model.SceneLoadingStatus
+        SceneLoadingStatus refreshedScene = new SceneLoadingStatus
         {
             sceneId = scene.GetInstanceID(),
             componentsLoading = scene.disposableNotReadyCount
@@ -60,32 +54,32 @@ public class LoadingFeedbackController : MonoBehaviour
         {
             case ParcelScene.State.WAITING_FOR_COMPONENTS:
                 AddOrUpdateLoadedScene(refreshedScene);
-                RefreshFeedbackMessage();
                 break;
             case ParcelScene.State.READY:
                 scene.OnStateRefreshed -= Scene_OnStateRefreshed;
-                RefreshFeedbackMessage();
                 break;
         }
+
+        RefreshFeedbackMessage();
     }
 
-    private void AddOrUpdateLoadedScene(Model.SceneLoadingStatus scene)
+    private void AddOrUpdateLoadedScene(SceneLoadingStatus scene)
     {
-        Model.SceneLoadingStatus existingScene = model.loadedScenes.FirstOrDefault(x => x.sceneId == scene.sceneId);
+        SceneLoadingStatus existingScene = loadedScenes.FirstOrDefault(x => x.sceneId == scene.sceneId);
         if (existingScene == null)
-            model.loadedScenes.Add(scene);
+            loadedScenes.Add(scene);
         else
         {
             existingScene.componentsLoading = scene.componentsLoading;
         }
     }
 
-    private void GLTFComponent_OnDownloadingCountChange(int newDownloadingCount)
+    private void GLTFComponent_OnDownloadingProgressUpdate()
     {
         RefreshFeedbackMessage();
     }
 
-    private void AssetPromise_AB_OnConcurrentRequestsChange(int newConcurrentRequests)
+    private void AssetPromise_AB_OnDownloadingProgressUpdate()
     {
         RefreshFeedbackMessage();
     }
@@ -97,9 +91,8 @@ public class LoadingFeedbackController : MonoBehaviour
 
         string loadingText = string.Empty;
         string secondLoadingText = string.Empty;
-        int currentComponentsLoading = model.loadedScenes.Sum(x => x.componentsLoading);
-        int totalActiveDownloads = AssetPromiseKeeper_GLTF.i.waitingPromisesCount + AssetPromiseKeeper_AB.i.waitingPromisesCount;
 
+        int currentComponentsLoading = loadedScenes.Sum(x => x.componentsLoading);
         if (currentComponentsLoading > 0)
         {
             loadingText = string.Format(
@@ -108,6 +101,7 @@ public class LoadingFeedbackController : MonoBehaviour
                 currentComponentsLoading > 1 ? "s" : string.Empty);
         }
 
+        int totalActiveDownloads = AssetPromiseKeeper_GLTF.i.waitingPromisesCount + AssetPromiseKeeper_AB.i.waitingPromisesCount;
         if (totalActiveDownloads > 0)
         {
             secondLoadingText = string.Format(
@@ -134,7 +128,6 @@ public class LoadingFeedbackController : MonoBehaviour
         if (!current)
             return;
 
-        WebInterface.ScenesLoadingFeedback(string.Empty);
-        model.loadedScenes.Clear();
+        loadedScenes.Clear();
     }
 }

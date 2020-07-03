@@ -17,7 +17,7 @@ namespace DCL
         public static int MAX_CONCURRENT_REQUESTS = 30;
 
         public static int concurrentRequests = 0;
-        public static event Action<int> OnConcurrentRequestsChange;
+        public static event Action OnDownloadingProgressUpdate;
 
         bool requestRegistered = false;
 
@@ -328,7 +328,7 @@ namespace DCL
                 return;
 
             concurrentRequests++;
-            OnConcurrentRequestsChange?.Invoke(concurrentRequests);
+            OnDownloadingProgressUpdate?.Invoke();
             requestRegistered = true;
         }
 
@@ -338,7 +338,7 @@ namespace DCL
                 return;
 
             concurrentRequests--;
-            OnConcurrentRequestsChange?.Invoke(concurrentRequests);
+            OnDownloadingProgressUpdate?.Invoke();
             requestRegistered = false;
         }
     }
