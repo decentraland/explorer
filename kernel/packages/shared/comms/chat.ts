@@ -40,16 +40,22 @@ export function notifyFriendOnlineStatusThroughChat(userStatus: UpdateUserStatus
     return
   }
   if (userStatus.presence === PresenceStatus.ONLINE && friendStatus[friendName] === PresenceStatus.OFFLINE) {
-    let realmString = ''
+    let message = `${friendName} joined`
+
     if (userStatus.realm?.layer && userStatus.realm?.serverName) {
-      realmString = `${userStatus.realm.serverName}-${userStatus.realm.layer}`
+      message += ` ${userStatus.realm.serverName}-${userStatus.realm.layer}`
     }
+
+    if (userStatus.position) {
+      message += ` ${userStatus.position.x}, ${userStatus.position.y}`
+    }
+
     globalThis.globalStore.dispatch(
       messageReceived({
         messageId: uuid(),
         messageType: ChatMessageType.SYSTEM,
         timestamp: Date.now(),
-        body: `${friendName} joined ${realmString} ${userStatus.position}`
+        body: message
       })
     )
   }
