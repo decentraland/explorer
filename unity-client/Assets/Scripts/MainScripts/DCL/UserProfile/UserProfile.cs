@@ -58,7 +58,7 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
         model.blocked = newModel.blocked;
 
         if (newModel.avatar != null && newModel.avatar.bodyShape != null)
-            model.isMale = newModel.avatar.bodyShape.Contains(WearableLiterals.BodyShapes.MALE);
+            model.isMale = !newModel.avatar.bodyShape.Contains(WearableLiterals.BodyShapes.FEMALE);
 
         if (model.inventory != null)
             inventory = model.inventory.GroupBy(x => x).ToDictionary(x => x.Key, x => x.Count());
