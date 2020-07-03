@@ -1,5 +1,5 @@
 import future from 'fp-future'
-import { DEBUG_MESSAGES } from '../config'
+import { DEBUG_MESSAGES, DISABLE_IDB } from '../config'
 import { initShared } from '../shared'
 import { ReportFatalError } from '../shared/loading/ReportFatalError'
 import { defaultLogger } from '../shared/logger'
@@ -53,6 +53,8 @@ export async function initializeUnity(
   }
   Session.current.resolve(session)
   const qs = queryString.parse(document.location.search)
+
+  ;(window as any).DISABLE_IDB = DISABLE_IDB
 
   preventUnityKeyboardLock()
 
