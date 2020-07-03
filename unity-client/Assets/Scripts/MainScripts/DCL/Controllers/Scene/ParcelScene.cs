@@ -53,7 +53,6 @@ namespace DCL.Controllers
 
         public BlockerHandler blockerHandler;
         public bool isReady => state == State.READY;
-        public State currentState => state;
 
         readonly List<string> disposableNotReady = new List<string>();
         bool isReleased = false;

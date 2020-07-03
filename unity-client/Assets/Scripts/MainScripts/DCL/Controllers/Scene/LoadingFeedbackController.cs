@@ -50,7 +50,7 @@ public class LoadingFeedbackController : MonoBehaviour
             componentsLoading = scene.disposableNotReadyCount
         };
 
-        switch (scene.currentState)
+        switch (scene.state)
         {
             case ParcelScene.State.WAITING_FOR_COMPONENTS:
                 AddOrUpdateLoadedScene(refreshedScene);
