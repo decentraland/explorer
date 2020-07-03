@@ -56,17 +56,15 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
         model.hasConnectedWeb3 = newModel.hasConnectedWeb3;
         model.inventory = newModel.inventory;
         model.blocked = newModel.blocked;
-        model.isMale = !model.avatar.bodyShape.Contains(WearableLiterals.BodyShapes.FEMALE);
+
+        if (newModel.avatar != null)
+            model.isMale = !newModel.avatar.bodyShape.Contains(WearableLiterals.BodyShapes.FEMALE);
 
         if (model.inventory != null)
-        {
             inventory = model.inventory.GroupBy(x => x).ToDictionary(x => x.Key, x => x.Count());
-        }
 
         if (downloadAssets && model.snapshots != null)
-        {
             GetThumbnail(model.snapshots.face256, OnFaceSnapshotReady);
-        }
 
         OnUpdate?.Invoke(this);
     }
