@@ -118,9 +118,7 @@ public class LoadingFeedbackController : MonoBehaviour
         }
 
         if (!string.IsNullOrEmpty(loadingText))
-        {
             WebInterface.ScenesLoadingFeedback(loadingText);
-        }
     }
 
     private void RendererState_OnChange(bool current, bool previous)

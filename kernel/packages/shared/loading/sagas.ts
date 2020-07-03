@@ -100,9 +100,9 @@ export function updateTextInScreen(status: LoadingState) {
   }
 }
 
-export function cleanSubTextInScreen() {
+function cleanSubTextInScreen() {
   const subMessages = document.getElementById('subtext-messages')
   if (subMessages) {
-    subMessages.innerText = ""
+    subMessages.innerText = "Loading scenes..."
   }
 }
