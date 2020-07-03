@@ -27,13 +27,9 @@ public class ExpressionsHotKeyController : MonoBehaviour
     private InputAction_Trigger.Triggered sendKissDelegate;
 
     private UserProfile ownUserProfile => UserProfile.GetOwnUserProfile();
-    private bool usingMaleAnimations = true;
-    private bool alreadySetAnimations = false;
 
     private void Awake()
     {
-        ownUserProfile.OnUpdate += UpdateAnimationsIDBasedOnSex;
-
         waveDelegate = (x) => ExpressionCalled(waveExpression.id);
         waveExpression.inputAction.OnTriggered += waveDelegate;
 
@@ -59,22 +55,5 @@ public class ExpressionsHotKeyController : MonoBehaviour
     private void ExpressionCalled(string id)
     {
         ownUserProfile.SetAvatarExpression(id);
-    }
-
-    private void UpdateAnimationsIDBasedOnSex(UserProfile userProfile)
-    {
-        if (alreadySetAnimations && userProfile.isMale == usingMaleAnimations) return;
-
-        usingMaleAnimations = userProfile.isMale;
-
-        waveExpression.id = (usingMaleAnimations ? "M_" : "F_") + waveExpression.id;
-        robotExpression.id = (usingMaleAnimations ? "M_" : "F_") + robotExpression.id;
-        fistpumpExpression.id = (usingMaleAnimations ? "M_" : "F_") + fistpumpExpression.id;
-        raiseHandExpression.id = (usingMaleAnimations ? "M_" : "F_") + raiseHandExpression.id;
-        clapExpression.id = (usingMaleAnimations ? "M_" : "F_") + clapExpression.id;
-        throwMoneyExpression.id = (usingMaleAnimations ? "M_" : "F_") + throwMoneyExpression.id;
-        sendKissExpression.id = (usingMaleAnimations ? "M_" : "F_") + sendKissExpression.id;
-
-        alreadySetAnimations = true;
     }
 }

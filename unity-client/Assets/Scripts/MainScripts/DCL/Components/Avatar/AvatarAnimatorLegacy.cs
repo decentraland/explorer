@@ -235,7 +235,7 @@ public class AvatarAnimatorLegacy : MonoBehaviour
         {
             var animationToId = currentAnimations.Get()[i];
             if (this.animation.GetClip(animationToId.id) == null)
-                this.animation.AddClip(animationToId.clip, animationToId.clip.name);
+                this.animation.AddClip(animationToId.clip, animationToId.id);
         }
 
         SetIdleFrame();

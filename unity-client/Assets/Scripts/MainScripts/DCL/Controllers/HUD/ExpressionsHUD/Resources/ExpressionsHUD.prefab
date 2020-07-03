@@ -1655,19 +1655,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   buttonToExpressionMap:
-  - expressionId: Waving
+  - expressionId: wave
     button: {fileID: 8899024452345124865}
-  - expressionId: FistPump
+  - expressionId: fistpump
     button: {fileID: 6920979846287350269}
-  - expressionId: RobotDance
+  - expressionId: robot
     button: {fileID: 7079493532869316107}
-  - expressionId: RaiseHand
+  - expressionId: raiseHand
     button: {fileID: 8496611908133421776}
-  - expressionId: Clapping
+  - expressionId: clap
     button: {fileID: 7767993376052004405}
-  - expressionId: Money
+  - expressionId: money
     button: {fileID: 25081012869704405}
-  - expressionId: Kiss
+  - expressionId: kiss
     button: {fileID: 6836242333474179246}
   showContentButton: {fileID: 3828354362020330558}
   hideContentButtons:

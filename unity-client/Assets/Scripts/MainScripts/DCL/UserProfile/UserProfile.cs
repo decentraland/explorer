@@ -22,7 +22,6 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
     public bool hasClaimedName => model.hasClaimedName;
     public AvatarModel avatar => model.avatar;
     public int tutorialStep => model.tutorialStep;
-    public bool isMale => model.isMale;
     internal Dictionary<string, int> inventory = new Dictionary<string, int>();
 
     public Sprite faceSnapshot { get; private set; }
@@ -56,8 +55,6 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
         model.hasConnectedWeb3 = newModel.hasConnectedWeb3;
         model.inventory = newModel.inventory;
         model.blocked = newModel.blocked;
-        model.isMale = !model.avatar.bodyShape.Contains(WearableLiterals.BodyShapes.FEMALE);
-
         if (model.inventory != null)
         {
             inventory = model.inventory.GroupBy(x => x).ToDictionary(x => x.Key, x => x.Count());
