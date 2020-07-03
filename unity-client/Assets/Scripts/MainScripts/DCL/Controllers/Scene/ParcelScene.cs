@@ -57,7 +57,17 @@ namespace DCL.Controllers
 
         readonly List<string> disposableNotReady = new List<string>();
         bool isReleased = false;
-        State state = State.NOT_READY;
+
+        State stateValue = State.NOT_READY;
+        public State state
+        {
+            get { return stateValue; }
+            set
+            {
+                stateValue = value;
+                OnStateRefreshed?.Invoke(this);
+            }
+        }
 
         public void Awake()
         {
@@ -92,9 +102,8 @@ namespace DCL.Controllers
 
         protected virtual string prettyName => sceneData.basePosition.ToString();
 
-        protected void RefreshSceneState()
+        protected void RefreshName()
         {
-            OnStateRefreshed?.Invoke(this);
 #if UNITY_EDITOR
             switch (state)
             {
@@ -129,7 +138,7 @@ namespace DCL.Controllers
             contentProvider.BakeHashes();
 
             state = State.WAITING_FOR_INIT_MESSAGES;
-            RefreshSceneState();
+            RefreshName();
 
             parcels.Clear();
             for (int i = 0; i < sceneData.parcels.Length; i++)
@@ -1066,7 +1075,8 @@ namespace DCL.Controllers
                 SetSceneReady();
             }
 
-            RefreshSceneState();
+            OnStateRefreshed?.Invoke(this);
+            RefreshName();
         }
 
         public void SetInitMessagesDone()
@@ -1081,7 +1091,7 @@ namespace DCL.Controllers
             }
 
             state = State.WAITING_FOR_COMPONENTS;
-            RefreshSceneState();
+            RefreshName();
 
             if (disposableNotReadyCount > 0)
             {
@@ -1116,7 +1126,7 @@ namespace DCL.Controllers
             blockerHandler?.CleanBlockers();
 
             SceneController.i.SendSceneReady(sceneData.id);
-            RefreshSceneState();
+            RefreshName();
 
             OnSceneReady?.Invoke(this);
         }
