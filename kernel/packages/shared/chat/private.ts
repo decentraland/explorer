@@ -317,7 +317,7 @@ function sendUpdateUserStatus(id: string, status: CurrentUserStatus) {
 
   DEBUG && logger.info(`unityInterface.UpdateUserPresence`, updateMessage)
   unityInterface.UpdateUserPresence(updateMessage)
-  notifyFriendOnlineStatusThroughChat(userId, presence)
+  notifyFriendOnlineStatusThroughChat(updateMessage)
 }
 
 function updateUserStatus(client: SocialAPI, ...socialIds: string[]) {

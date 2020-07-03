@@ -1,4 +1,4 @@
-import { MessageEntry, ChatMessageType, PresenceStatus } from 'shared/types'
+import { MessageEntry, ChatMessageType, PresenceStatus, UpdateUserStatusMessage } from 'shared/types'
 import { uuid } from 'atomicHelpers/math'
 import { StoreContainer } from '../store/rootTypes'
 import { messageReceived } from '../chat/actions'
@@ -28,26 +28,30 @@ export function notifyStatusThroughChat(status: string) {
   )
 }
 
-export function notifyFriendOnlineStatusThroughChat(userId: string, status: PresenceStatus) {
-  const friendName = getProfile(globalThis.globalStore.getState(), userId)?.name
+export function notifyFriendOnlineStatusThroughChat(userStatus: UpdateUserStatusMessage) {
+  const friendName = getProfile(globalThis.globalStore.getState(), userStatus.userId)?.name
 
   if (friendName === undefined) {
     return
   }
 
   if (friendStatus[friendName] === undefined) {
-    friendStatus[friendName] = status
+    friendStatus[friendName] = userStatus.presence
     return
   }
-  if (status === PresenceStatus.ONLINE && friendStatus[friendName] === PresenceStatus.OFFLINE) {
-    friendStatus[friendName] = status
+  if (userStatus.presence === PresenceStatus.ONLINE && friendStatus[friendName] === PresenceStatus.OFFLINE) {
+    let realmString = ''
+    if (userStatus.realm?.layer && userStatus.realm?.serverName) {
+      realmString = `${userStatus.realm.serverName}-${userStatus.realm.layer}`
+    }
     globalThis.globalStore.dispatch(
       messageReceived({
         messageId: uuid(),
         messageType: ChatMessageType.SYSTEM,
         timestamp: Date.now(),
-        body: `${friendName} is online`
+        body: `${friendName} joined ${realmString} ${userStatus.position}`
       })
     )
   }
+  friendStatus[friendName] = userStatus.presence
 }
