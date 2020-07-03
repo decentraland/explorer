@@ -204,36 +204,7 @@ namespace DCL
                 string fileExt = Path.GetExtension(file);
                 string assetPath = hash + "/" + hash + fileExt;
 
-                byte[] image = File.ReadAllBytes(fullPathToTag + hash + fileExt);
-
-                var tmpTex = new Texture2D(1, 1);
-
-                if (ImageConversion.LoadImage(tmpTex, image))
-                {
-                    float factor = 1.0f;
-                    int width = tmpTex.width;
-                    int height = tmpTex.height;
-
-                    float maxTextureSize = 512;
-
-                    if (width > maxTextureSize || height > maxTextureSize)
-                    {
-                        if (width >= height)
-                        {
-                            factor = (float)maxTextureSize / width;
-                        }
-                        else
-                        {
-                            factor = (float)maxTextureSize / height;
-                        }
-
-                        Texture2D dstTex = TextureHelpers.Resize(tmpTex, (int)(width * factor), (int)(height * factor));
-                        byte[] endTex = ImageConversion.EncodeToPNG(dstTex);
-                        UnityEngine.Object.DestroyImmediate(tmpTex);
-
-                        File.WriteAllBytes(fullPathToTag + hash + fileExt, endTex);
-                    }
-                }
+                ReduceTextureSizeIfNeeded(fullPathToTag + hash + fileExt, 512);
 
                 AssetDatabase.ImportAsset(finalDownloadedAssetDbPath + assetPath, ImportAssetOptions.ForceUpdate);
 
@@ -302,7 +273,39 @@ namespace DCL
             AssetBundleBuilderUtils.MarkForAssetBundleBuild(mainShader, MAIN_SHADER_AB_NAME);
         }
 
+        private static void ReduceTextureSizeIfNeeded(string texturePath, float maxSize)
+        {
+            byte[] image = File.ReadAllBytes(texturePath);
 
+            var tmpTex = new Texture2D(1, 1);
+
+            if (!ImageConversion.LoadImage(tmpTex, image))
+                return;
+
+            float factor = 1.0f;
+            int width = tmpTex.width;
+            int height = tmpTex.height;
+
+            float maxTextureSize = maxSize;
+
+            if (width < maxTextureSize && height < maxTextureSize)
+                return;
+
+            if (width >= height)
+            {
+                factor = (float)maxTextureSize / width;
+            }
+            else
+            {
+                factor = (float)maxTextureSize / height;
+            }
+
+            Texture2D dstTex = TextureHelpers.Resize(tmpTex, (int)(width * factor), (int)(height * factor));
+            byte[] endTex = ImageConversion.EncodeToPNG(dstTex);
+            UnityEngine.Object.DestroyImmediate(tmpTex);
+
+            File.WriteAllBytes(texturePath, endTex);
+        }
 
         private bool DumpAssets(MappingPair[] rawContents)
         {
