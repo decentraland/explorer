@@ -77,8 +77,6 @@ public static class DependencyMapLoadHelper
 
             dependenciesMap.Add(hash, new List<string>(map.dependencies));
 
-            SavePersistentCache();
-
             downloadingDepmap.Remove(hash);
         }
     }
@@ -95,6 +93,7 @@ public static class DependencyMapLoadHelper
         if (persistentCacheLoaded) return;
 
         persistentCacheLoaded = true;
+        CommonScriptableObjects.rendererState.OnChange += RendererState_OnChange;
 
         string depMapCache = PlayerPrefs.GetString(PERSISTENT_CACHE_KEY, String.Empty);
 
@@ -102,5 +101,15 @@ public static class DependencyMapLoadHelper
         {
             dependenciesMap = JsonConvert.DeserializeObject<Dictionary<string, List<string>>>(depMapCache);
         }
+    }
+
+    private static void RendererState_OnChange(bool current, bool previous)
+    {
+        if (!current && persistentCacheLoaded)
+        {
+            // Once the persistent cache has been loaded the first time, it will be saved only the times when the RendererState be OFF
+            SavePersistentCache();
+        }
+
     }
 }
