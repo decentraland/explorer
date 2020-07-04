@@ -144,12 +144,13 @@ CachedXMLHttpRequest.checkBlacklist = function(list, url) {
 
 CachedXMLHttpRequest.cache = {
 
-  enabled: window.indexedDB == null || window.DISABLE_IDB, // NOTE(Brian): disable chrome IndexedDB only
+  enabled: window.indexedDB == null, // NOTE(Brian): disable chrome IndexedDB only
   database: "CachedXMLHttpRequest",
   version: 1,
   store: "cache",
   indexedDB: window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB,
   link: document.createElement("a"),
+
   requestURL: function (url) {
     this.link.href = url;
     return this.link.href;
@@ -170,9 +171,33 @@ CachedXMLHttpRequest.cache = {
   },
   init: function () {
     var self = this;
+    console.log("[DCL-CachedXMLHttpRequest] Initializing plugin... waiting for config...");
+  
+    var idb_enabled_future = window.USE_UNITY_INDEXED_DB_CACHE;
 
-    console.log("[DCL-CachedXMLHttpRequest] Initializing plugin... IDB cache enabled = " + self.enabled);
+    if ( idb_enabled_future == null ) {
+      console.log("[DCL-CachedXMLHttpRequest] future is null :(");
+      self.openDB();
+      return;
+    }
     
+    idb_enabled_future.then(
+      function(is_enabled) { 
+        is_enabled &= window.indexedDB == null; // NOTE(Brian): if config comes as false, disable in chrome only
+        
+        if (window.indexedDB == null) {
+          console.log("[DCL-CachedXMLHttpRequest] Non-chrome detected!. IndexedDB is " + !!is_enabled);
+        } else {
+          console.log("[DCL-CachedXMLHttpRequest] We are in chrome. IndexedDB is " + !!is_enabled);
+        }
+
+        self.enabled = is_enabled;
+        self.openDB();
+      })
+  },
+
+  openDB: function() {
+    var self = this;
     onError = function(e) {
       CachedXMLHttpRequest.log("can not open indexedDB database: " + e.message);
       self.indexedDB = null;

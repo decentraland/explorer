@@ -1,11 +1,12 @@
 import future from 'fp-future'
-import { DEBUG_MESSAGES, DISABLE_IDB } from '../config'
+import { DEBUG_MESSAGES } from '../config'
 import { initShared } from '../shared'
 import { ReportFatalError } from '../shared/loading/ReportFatalError'
 import { defaultLogger } from '../shared/logger'
 import { initializeEngine } from './dcl'
 import { Session } from '../shared/session'
 import { waitingForRenderer } from '../shared/loading/types'
+import { USE_UNITY_INDEXED_DB_CACHE } from '../shared/meta/types'
 const queryString = require('query-string')
 
 declare var global: any
@@ -53,8 +54,8 @@ export async function initializeUnity(
   }
   Session.current.resolve(session)
   const qs = queryString.parse(document.location.search)
-
-  ;(window as any).DISABLE_IDB = DISABLE_IDB
+  
+  ;(window as any).USE_UNITY_INDEXED_DB_CACHE = USE_UNITY_INDEXED_DB_CACHE
 
   preventUnityKeyboardLock()
 
