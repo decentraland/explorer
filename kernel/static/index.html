@@ -39,6 +39,12 @@
       background: #090909 url(images/decentraland-connect/DecentralandIsologotipo.png) no-repeat 50% 5% !important;
       background-size: 170px 32px !important;
     }
+    @media screen and (min-height: 500px) {
+      body {
+        background: #090909 url(images/decentraland-connect/DecentralandIsologotipo.png) no-repeat 50% 5% !important;
+        background-size: 170px 32px !important;
+      }
+    }
     @media screen and (min-height: 800px) {
       #gameContainer.loaded,
       body {
@@ -200,12 +206,20 @@
       font-stretch: 125%;
       font-weight: 400;
     }
+    @media screen and (min-height: 500px) {
+      #load-messages-wrapper {
+        top: 20%;
+
+        padding-left: 20%;
+        padding-right: 20%;
+      }
+    }
     @media screen and (min-height: 800px) {
       #load-messages-wrapper {
         top: 40%;
 
-        padding-left: 20%;
-        padding-right: 20%;
+        padding-left: 10%;
+        padding-right: 10%;
       }
     }
     #load-images {
