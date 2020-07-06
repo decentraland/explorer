@@ -35,6 +35,7 @@ namespace DCL.Controllers
         public event System.Action<DecentralandEntity> OnEntityAdded;
         public event System.Action<DecentralandEntity> OnEntityRemoved;
         public event System.Action<ParcelScene> OnSceneReady;
+        public event System.Action<ParcelScene> OnStateRefreshed;
 
         public ContentProvider contentProvider;
         public int disposableNotReadyCount => disposableNotReady.Count;
@@ -52,7 +53,17 @@ namespace DCL.Controllers
 
         readonly List<string> disposableNotReady = new List<string>();
         bool isReleased = false;
-        State state = State.NOT_READY;
+
+        State stateValue = State.NOT_READY;
+        public State state
+        {
+            get { return stateValue; }
+            set
+            {
+                stateValue = value;
+                OnStateRefreshed?.Invoke(this);
+            }
+        }
 
         public void Awake()
         {
@@ -1061,6 +1072,7 @@ namespace DCL.Controllers
                 SetSceneReady();
             }
 
+            OnStateRefreshed?.Invoke(this);
             RefreshName();
         }
 
