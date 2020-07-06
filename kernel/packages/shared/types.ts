@@ -63,6 +63,7 @@ export type EntityActionType =
   | 'Query'
   | 'InitMessagesFinished'
   | 'OpenExternalUrl'
+  | 'OpenNFTDialog'
 
 export type QueryPayload = { queryId: string; payload: RayQuery }
 
@@ -114,6 +115,8 @@ export type EntityAction = {
   tag?: string
   payload: any
 }
+
+export type OpenNFTDialogPayload = { assetContractAddress: string; tokenId: string; comment: string | null }
 
 /** THIS INTERFACE CANNOT CHANGE, IT IS USED IN THE UNITY BUILD */
 export type LoadableParcelScene = {
@@ -391,7 +394,10 @@ export enum HUDElementID {
   TASKBAR = 11,
   MESSAGE_OF_THE_DAY = 12,
   FRIENDS = 13,
-  OPEN_EXTERNAL_URL_PROMPT = 14
+  OPEN_EXTERNAL_URL_PROMPT = 14,
+  NFT_INFO_DIALOG = 16,
+  TELEPORT_DIALOG = 17,
+  CONTROLS_HUD = 18
 }
 
 export type HUDConfiguration = {
@@ -424,6 +430,17 @@ export enum ChatMessageType {
   PUBLIC,
   PRIVATE,
   SYSTEM
+}
+
+export type WorldPosition = {
+  realm: {
+    serverName: string
+    layer: string
+  }
+  gridPosition: {
+    x: number
+    y: number
+  }
 }
 
 export type ChatMessage = {

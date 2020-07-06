@@ -104,6 +104,8 @@ namespace DCL
 
         void PositionToast(Vector2Int coordinates)
         {
+            if (toastContainer == null || rectTransform == null) return;
+
             // position the toast over the parcel parcelHighlightImage so that we can easily check with LOCAL pos info where it is on the screen
             toastContainer.position = MapRenderer.i.parcelHighlightImage.transform.position;
 
@@ -152,7 +154,6 @@ namespace DCL
             {
                 var texture = ((DownloadHandlerTexture)www.downloadHandler).texture;
                 texture.Compress(false);
-                texture.Apply(false, true);
                 sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), Vector2.zero);
             }
             else

@@ -14,6 +14,7 @@ public class AvatarEditorHUDController : IHUD
     [NonSerialized] public bool bypassUpdateAvatarPreview = false;
     private UserProfile userProfile;
     private WearableDictionary catalog;
+    bool renderingEnabled => CommonScriptableObjects.rendererState.Get();
     private readonly Dictionary<string, List<WearableItem>> wearablesByCategory = new Dictionary<string, List<WearableItem>>();
     protected readonly AvatarEditorHUDModel model = new AvatarEditorHUDModel();
 
@@ -21,7 +22,7 @@ public class AvatarEditorHUDController : IHUD
     private ColorList eyeColorList;
     private ColorList hairColorList;
 
-    protected AvatarEditorHUDView view;
+    public AvatarEditorHUDView view;
 
     public Action<bool> OnVisibilityChanged;
 
@@ -40,7 +41,7 @@ public class AvatarEditorHUDController : IHUD
 
         SetCatalog(catalog);
 
-        LoadUserProfile(userProfile);
+        LoadUserProfile(userProfile, true);
         this.userProfile.OnUpdate += LoadUserProfile;
     }
 
@@ -61,7 +62,12 @@ public class AvatarEditorHUDController : IHUD
 
     public void LoadUserProfile(UserProfile userProfile)
     {
-        if (userProfile?.avatar == null || string.IsNullOrEmpty(userProfile.avatar.bodyShape)) return;
+        LoadUserProfile(userProfile, false);
+    }
+
+    public void LoadUserProfile(UserProfile userProfile, bool forceLoading)
+    {
+        if ((!Application.isBatchMode && !forceLoading && renderingEnabled && !view.isOpen) || userProfile?.avatar == null || string.IsNullOrEmpty(userProfile.avatar.bodyShape)) return;
 
         var bodyShape = CatalogController.wearableCatalog.Get(userProfile.avatar.bodyShape);
         if (bodyShape == null)
@@ -398,11 +404,11 @@ public class AvatarEditorHUDController : IHUD
         SetVisibility(configuration.active);
     }
 
-    public void SaveAvatar(Sprite faceSnapshot, Sprite bodySnapshot)
+    public void SaveAvatar(Sprite faceSnapshot, Sprite face128Snapshot, Sprite face256Snapshot, Sprite bodySnapshot)
     {
         var avatarModel = model.ToAvatarModel();
-        WebInterface.SendSaveAvatar(avatarModel, faceSnapshot, bodySnapshot);
-        userProfile.OverrideAvatar(avatarModel, faceSnapshot, bodySnapshot);
+        WebInterface.SendSaveAvatar(avatarModel, faceSnapshot, face128Snapshot, face256Snapshot, bodySnapshot);
+        userProfile.OverrideAvatar(avatarModel, face256Snapshot);
 
         SetVisibility(false);
     }

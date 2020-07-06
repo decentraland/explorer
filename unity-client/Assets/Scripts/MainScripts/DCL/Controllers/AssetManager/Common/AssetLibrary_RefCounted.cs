@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace DCL
 {
@@ -21,6 +22,7 @@ namespace DCL
 
             masterAssets.Add(asset.id, new RefCountedAsset() { asset = asset });
             assetToRefCountedAsset.Add(asset, masterAssets[asset.id]);
+
             return true;
         }
 
@@ -43,9 +45,13 @@ namespace DCL
         public override bool Contains(AssetType asset)
         {
             if (asset == null)
+            {
                 return false;
+            }
 
-            return masterAssets.ContainsKey(asset.id);
+            bool result = masterAssets.ContainsKey(asset.id);
+
+            return result;
         }
 
         public override AssetType Get(object id)
@@ -65,7 +71,7 @@ namespace DCL
             var refCountedAsset = assetToRefCountedAsset[asset];
             refCountedAsset.referenceCount--;
 
-            if (refCountedAsset.referenceCount != 0)
+            if (refCountedAsset.referenceCount > 0)
                 return;
 
             asset.Cleanup();

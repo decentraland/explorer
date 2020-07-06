@@ -144,7 +144,7 @@ namespace DCL.Helpers
         public static void InverseTransformChildTraversal<TComponent>(Action<TComponent> action, Transform startTransform)
             where TComponent : Component
         {
-            Assert.IsTrue(startTransform != null, "startTransform must not be null");
+            if (startTransform == null) return;
 
             foreach (Transform t in startTransform)
             {
@@ -207,7 +207,7 @@ namespace DCL.Helpers
 
                     if (!WebRequestSucceded(request))
                     {
-                        Debug.LogError(
+                        Debug.Log(
                             string.Format("Fetching asset failed ({0}): {1} ", request.url, webRequest.error));
 
                         if (OnFail != null)
@@ -226,7 +226,7 @@ namespace DCL.Helpers
             }
             else
             {
-                Debug.LogError(string.Format("Can't fetch asset as the url is empty!"));
+                Debug.Log(string.Format("Can't fetch asset as the url is empty!"));
             }
         }
 
@@ -267,7 +267,7 @@ namespace DCL.Helpers
                 OnFailInternal);
         }
 
-        public static IEnumerator FetchTexture(string textureURL, Action<Texture2D> OnSuccess)
+        public static IEnumerator FetchTexture(string textureURL, Action<Texture2D> OnSuccess, Action<string> OnFail = null)
         {
             //NOTE(Brian): This closure is called when the download is a success.
             System.Action<UnityWebRequest> OnSuccessInternal =
@@ -277,10 +277,11 @@ namespace DCL.Helpers
                     OnSuccess?.Invoke(texture);
                 };
 
-            yield return FetchAsset(textureURL, UnityWebRequestTexture.GetTexture(textureURL), OnSuccessInternal);
+            yield return FetchAsset(textureURL, UnityWebRequestTexture.GetTexture(textureURL), OnSuccessInternal, OnFail);
         }
 
-        public static IEnumerator FetchWrappedTextureAsset(string url, Action<IWrappedTextureAsset> OnSuccess)
+        public static IEnumerator FetchWrappedTextureAsset(string url, Action<IWrappedTextureAsset> OnSuccess,
+            WrappedTextureMaxSize maxTextureSize = WrappedTextureMaxSize.DONT_RESIZE)
         {
             string contentType = null;
             byte[] bytes = null;
@@ -293,7 +294,7 @@ namespace DCL.Helpers
 
             if (contentType != null && bytes != null)
             {
-                yield return WrappedTextureAssetFactory.Create(contentType, bytes, OnSuccess);
+                yield return WrappedTextureAssetFactory.Create(contentType, bytes, maxTextureSize, OnSuccess);
             }
         }
 
@@ -482,6 +483,8 @@ namespace DCL.Helpers
 
         public static void LockCursor()
         {
+            if (isCursorLocked) return;
+
             isCursorLocked = true;
             lockedInFrame = Time.frameCount;
             Cursor.visible = false;
@@ -492,9 +495,13 @@ namespace DCL.Helpers
 
         public static void UnlockCursor()
         {
+            if (!isCursorLocked) return;
+
             isCursorLocked = false;
             Cursor.visible = true;
             Cursor.lockState = CursorLockMode.None;
+
+            EventSystem.current.SetSelectedGameObject(null);
         }
 
         public static void DestroyAllChild(this Transform transform)

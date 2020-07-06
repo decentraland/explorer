@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class RenderingController : MonoBehaviour
 {
+    public static float firstActivationTime { get; private set; }
+    private bool firstActivationTimeHasBeenSet = false;
+
     public CompositeLock renderingActivatedAckLock = new CompositeLock();
 
     private bool activatedRenderingBefore { get; set; } = false;
@@ -12,6 +15,7 @@ public class RenderingController : MonoBehaviour
     {
         CommonScriptableObjects.rendererState.OnLockAdded += AddLock;
         CommonScriptableObjects.rendererState.OnLockRemoved += RemoveLock;
+        CommonScriptableObjects.rendererState.Set(false);
     }
 
     void OnDestroy()
@@ -35,12 +39,17 @@ public class RenderingController : MonoBehaviour
         CommonScriptableObjects.rendererState.Set(false);
     }
 
-
     [ContextMenu("Enable Rendering")]
     public void ActivateRendering()
     {
         if (CommonScriptableObjects.rendererState.Get())
             return;
+
+        if (!firstActivationTimeHasBeenSet)
+        {
+            firstActivationTime = Time.realtimeSinceStartup;
+            firstActivationTimeHasBeenSet = true;
+        }
 
         if (!renderingActivatedAckLock.isUnlocked)
         {

@@ -8,11 +8,10 @@ import { WebWorkerTransport } from 'decentraland-rpc/lib/common/transports/WebWo
 import { resolveUrl } from 'atomicHelpers/parseUrl'
 import { ILand } from 'shared/types'
 
-import { DEBUG, parcelLimits, getServerConfigurations, ENABLE_EMPTY_SCENES, tutorialSceneEnabled } from '../../config'
+import { DEBUG, parcelLimits, getServerConfigurations, ENABLE_EMPTY_SCENES, LOS } from 'config'
 import { getFetchContentServer, getFetchMetaContentServer, getFetchMetaContentService } from 'shared/dao/selectors'
 import { Store } from 'redux'
 
-import { getTutorialBaseURL } from 'shared/location'
 import defaultLogger from 'shared/logger'
 
 /*
@@ -21,7 +20,7 @@ import defaultLogger from 'shared/logger'
 const lifecycleWorkerRaw = require('raw-loader!../../../static/loader/lifecycle/worker.js')
 const lifecycleWorkerUrl = URL.createObjectURL(new Blob([lifecycleWorkerRaw]))
 const worker: Worker = new (Worker as any)(lifecycleWorkerUrl, { name: 'LifecycleWorker' })
-worker.onerror = e => defaultLogger.error('Loader worker error', e)
+worker.onerror = (e) => defaultLogger.error('Loader worker error', e)
 
 export class LifecycleManager extends TransportBasedServer {
   sceneIdToRequest: Map<string, IFuture<ILand>> = new Map()
@@ -102,12 +101,10 @@ export async function initParcelSceneWorker() {
     metaContentService: DEBUG
       ? resolveUrl(document.location.origin, '/local-ipfs')
       : getFetchMetaContentService(window.globalStore.getState()),
-    contentServerBundles: DEBUG ? '' : getServerConfigurations().contentAsBundle,
-    lineOfSightRadius: parcelLimits.visibleRadius,
+    contentServerBundles: DEBUG ? '' : getServerConfigurations().contentAsBundle + '/',
+    lineOfSightRadius: LOS ? Number.parseInt(LOS, 10) : parcelLimits.visibleRadius,
     secureRadius: parcelLimits.secureRadius,
-    emptyScenes: ENABLE_EMPTY_SCENES && !(globalThis as any)['isRunningTests'],
-    tutorialBaseURL: getTutorialBaseURL(),
-    tutorialSceneEnabled: tutorialSceneEnabled()
+    emptyScenes: ENABLE_EMPTY_SCENES && !(globalThis as any)['isRunningTests']
   })
 
   return server

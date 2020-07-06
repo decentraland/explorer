@@ -23,6 +23,8 @@ namespace AvatarEditorHUD_Tests
         [UnitySetUp]
         protected override IEnumerator SetUp()
         {
+            yield return base.SetUp();
+
             if (controller == null)
             {
                 skinColorList = Resources.Load<ColorList>("SkinTone");
@@ -63,7 +65,7 @@ namespace AvatarEditorHUD_Tests
                 controller.LoadUserProfile(userProfile);
             }
 
-            yield break;
+            controller.SetVisibility(true);
         }
 
         [UnityTearDown]
@@ -298,7 +300,7 @@ namespace AvatarEditorHUD_Tests
             controller.WearableClicked("dcl://base-avatars/black_jacket");
 
             Sprite whiteSprite = Sprite.Create(Texture2D.whiteTexture, new Rect(0, 0, Texture2D.whiteTexture.width, Texture2D.whiteTexture.height), Vector2.zero);
-            controller.SaveAvatar(whiteSprite, whiteSprite);
+            controller.SaveAvatar(whiteSprite, whiteSprite, whiteSprite, whiteSprite);
 
             AssertAvatarModelAgainstAvatarEditorHUDModel(userProfile.avatar, controller.myModel);
         }

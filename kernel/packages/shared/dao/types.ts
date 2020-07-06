@@ -42,11 +42,13 @@ export type Realm = {
 
 export type DaoState = {
   initialized: boolean
+  candidatesFetched: boolean
   profileServer: string
   fetchContentServer: string
   fetchMetaContentServer: string
   updateContentServer: string
   commsServer: string
+  resizeService: string
   realm: Realm | undefined
   candidates: Candidate[]
   contentWhitelist: Candidate[]

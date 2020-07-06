@@ -1,5 +1,5 @@
 import { takeEvery, put, call, select, take } from 'redux-saga/effects'
-import { UnityInterfaceContainer } from '../../unity-interface/dcl'
+import { UnityInterfaceContainer, unityInterface } from '../../unity-interface/dcl'
 import {
   MESSAGE_RECEIVED,
   MessageReceived,
@@ -9,7 +9,7 @@ import {
   sendPrivateMessage
 } from './actions'
 import { uuid } from 'atomicHelpers/math'
-import { ChatMessageType, ChatMessage } from 'shared/types'
+import { ChatMessageType, ChatMessage, HUDElementID, NotificationType } from 'shared/types'
 import { EXPERIENCE_STARTED } from 'shared/loading/types'
 import { PayloadAction } from 'typesafe-actions'
 import { queueTrackingEvent } from 'shared/analytics'
@@ -29,7 +29,7 @@ import { catalystRealmConnected, changeRealm, changeToCrowdedRealm } from 'share
 import { addToMutedUsers } from '../comms/peers'
 import { isValidExpression, expressionExplainer, validExpressions } from 'shared/apis/expressionExplainer'
 import { StoreContainer } from '../store/rootTypes'
-import { SHOW_FPS_COUNTER, getServerConfigurations, USE_NEW_CHAT } from 'config'
+import { SHOW_FPS_COUNTER, getServerConfigurations, INIT_PRE_LOAD } from 'config'
 import { Vector3Component } from 'atomicHelpers/landHelpers'
 import { AvatarMessage, AvatarMessageType } from 'shared/comms/interface/types'
 import { sampleDropData } from 'shared/airdrops/sampleDrop'
@@ -39,6 +39,9 @@ import { AUTH_SUCCESSFUL } from '../loading/types'
 import { findProfileByName } from '../profiles/selectors'
 import { isRealmInitialized } from 'shared/dao/selectors'
 import { CATALYST_REALM_INITIALIZED } from 'shared/dao/actions'
+import { isFriend } from './selectors'
+import { ensureRenderer } from '../profiles/sagas'
+import { ensureWorldRunning } from 'shared/world/worldState'
 
 declare const globalThis: UnityInterfaceContainer & StoreContainer
 
@@ -78,10 +81,32 @@ export function* chatSaga(): any {
 }
 
 function* handleAuthSuccessful() {
-  if (identity.hasConnectedWeb3 && USE_NEW_CHAT) {
+  if (identity.hasConnectedWeb3) {
     yield call(ensureRealmInitialized)
 
-    yield call(initializePrivateMessaging, getServerConfigurations().synapseUrl, identity)
+    if (!INIT_PRE_LOAD) {
+      // wait until initial load finishes and world is running
+      yield ensureWorldRunning()
+    }
+
+    try {
+      yield call(initializePrivateMessaging, getServerConfigurations().synapseUrl, identity)
+    } catch (e) {
+      defaultLogger.error(`error initializing private messaging`, e)
+
+      yield call(ensureRenderer)
+
+      unityInterface.ConfigureHUDElement(HUDElementID.FRIENDS, { active: false, visible: false })
+
+      yield ensureWorldRunning()
+
+      unityInterface.ShowNotification({
+        type: NotificationType.GENERIC,
+        message: 'There was an error initializing friends and private messages',
+        buttonMessage: 'OK',
+        timer: 7
+      })
+    }
   }
 }
 
@@ -155,7 +180,7 @@ function* handleSendMessage(action: SendMessage) {
       messageType: ChatMessageType.PUBLIC,
       messageId: uuid(),
       timestamp: Date.now(),
-      sender: currentUser.userId || currentUser.profile.name || 'unknown',
+      sender: currentUser.userId || currentUser.profile.userId || 'unknown',
       body: message
     }
 
@@ -422,6 +447,17 @@ function initChatCommands() {
         sender: 'Decentraland',
         timestamp: Date.now(),
         body: `Cannot find user ${userName}`
+      }
+    }
+
+    const _isFriend: ReturnType<typeof isFriend> = isFriend(globalThis.globalStore.getState(), user.userId)
+    if (!_isFriend) {
+      return {
+        messageId: uuid(),
+        messageType: ChatMessageType.SYSTEM,
+        sender: 'Decentraland',
+        timestamp: Date.now(),
+        body: `Trying to send a message to a non friend ${userName}`
       }
     }
 

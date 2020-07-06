@@ -24,6 +24,7 @@ namespace DCL
         public const string INIT_DONE = "InitMessagesFinished";
         public const string QUERY = "Query";
         public const string OPEN_EXTERNAL_URL = "OpenExternalUrl";
+        public const string OPEN_NFT_DIALOG = "OpenNFTDialog";
     }
 
     public class MessagingBusId
@@ -190,8 +191,6 @@ namespace DCL
                     SceneController.i?.OnMessageWillQueue?.Invoke(sm.method);
                 }
 
-                MessagingControllersManager.i.pendingMessagesCount++;
-
                 if (id == MessagingBusId.INIT)
                 {
                     MessagingControllersManager.i.pendingInitMessagesCount++;
@@ -263,8 +262,6 @@ namespace DCL
                             processedMessagesCount++;
 
                             msgYieldInstruction = null;
-
-                            return true;
                         }
 
                         break;
@@ -301,7 +298,6 @@ namespace DCL
         public void OnMessageProcessed()
         {
             processedMessagesCount++;
-            MessagingControllersManager.i.pendingMessagesCount--;
 
             if (id == MessagingBusId.INIT)
             {
@@ -312,6 +308,7 @@ namespace DCL
 
         private LinkedListNode<QueuedSceneMessage> AddReliableMessage(QueuedSceneMessage message)
         {
+            MessagingControllersManager.i.pendingMessagesCount++;
             pendingMessagesCount++;
             return pendingMessages.AddLast(message);
         }
@@ -322,6 +319,7 @@ namespace DCL
             {
                 pendingMessages.RemoveFirst();
                 pendingMessagesCount--;
+                MessagingControllersManager.i.pendingMessagesCount--;
             }
         }
         private void RemoveUnreliableMessage(MessagingBus.QueuedSceneMessage message)

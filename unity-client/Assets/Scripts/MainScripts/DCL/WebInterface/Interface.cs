@@ -386,6 +386,13 @@ namespace DCL.Interface
             public float volume;
         }
 
+        [System.Serializable]
+        public class JumpInPayload
+        {
+            public FriendsController.UserStatus.Realm realm = new FriendsController.UserStatus.Realm();
+            public Vector2 gridPosition;
+        }
+
 #if UNITY_WEBGL && !UNITY_EDITOR
     /**
      * This method is called after the first render. It marks the loading of the
@@ -445,6 +452,7 @@ namespace DCL.Interface
         private static OnGlobalPointerEventPayload onGlobalPointerEventPayload = new OnGlobalPointerEventPayload();
         private static OnGlobalPointerEvent onGlobalPointerEvent = new OnGlobalPointerEvent();
         private static AudioStreamingPayload onAudioStreamingEvent = new AudioStreamingPayload();
+        private static JumpInPayload jumpInPayload = new JumpInPayload();
         private static GotoEvent gotoEvent = new GotoEvent();
         private static SendChatMessageEvent sendChatMessageEvent = new SendChatMessageEvent();
 
@@ -698,16 +706,20 @@ namespace DCL.Interface
         public class SaveAvatarPayload
         {
             public string face;
+            public string face128;
+            public string face256;
             public string body;
             public AvatarModel avatar;
         }
 
-        public static void SendSaveAvatar(AvatarModel avatar, Sprite faceSnapshot, Sprite bodySnapshot)
+        public static void SendSaveAvatar(AvatarModel avatar, Sprite faceSnapshot, Sprite face128Snapshot, Sprite face256Snapshot, Sprite bodySnapshot)
         {
             var payload = new SaveAvatarPayload()
             {
                 avatar = avatar,
                 face = System.Convert.ToBase64String(faceSnapshot.texture.EncodeToPNG()),
+                face128 = System.Convert.ToBase64String(face128Snapshot.texture.EncodeToPNG()),
+                face256 = System.Convert.ToBase64String(face256Snapshot.texture.EncodeToPNG()),
                 body = System.Convert.ToBase64String(bodySnapshot.texture.EncodeToPNG())
             };
             SendMessage("SaveUserAvatar", payload);
@@ -808,11 +820,33 @@ namespace DCL.Interface
             onAudioStreamingEvent.volume = volume;
             SendMessage("SetAudioStream", onAudioStreamingEvent);
         }
+
         public static void GoTo(int x, int y)
         {
             gotoEvent.x = x;
             gotoEvent.y = y;
             SendMessage("GoTo", gotoEvent);
+        }
+
+        public static void GoToCrowd()
+        {
+            SendMessage("GoToCrowd");
+        }
+
+        public static void GoToMagic()
+        {
+            SendMessage("GoToMagic");
+        }
+
+        public static void JumpIn(int x, int y, string serverName, string layerName)
+        {
+            jumpInPayload.realm.serverName = serverName;
+            jumpInPayload.realm.layer = layerName;
+
+            jumpInPayload.gridPosition.x = x;
+            jumpInPayload.gridPosition.y = y;
+
+            SendMessage("JumpIn", jumpInPayload);
         }
 
         public static void SendChatMessage(ChatMessage message)
@@ -823,8 +857,12 @@ namespace DCL.Interface
 
         public static void UpdateFriendshipStatus(FriendsController.FriendshipUpdateStatusMessage message)
         {
-            Debug.Log("Sending message... " + JsonUtility.ToJson(message) + "... " + message.action);
             SendMessage("UpdateFriendshipStatus", message);
+        }
+
+        public static void ScenesLoadingFeedback(string message)
+        {
+            MessageFromEngine("ScenesLoadingFeedback", '\"' + message + '\"');
         }
     }
 }

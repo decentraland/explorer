@@ -5,9 +5,17 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using DCL;
 
 public class FriendsTabViewBase : MonoBehaviour, IPointerDownHandler
 {
+    [System.Serializable]
+    public class LastFriendTimestampModel
+    {
+        public string userId;
+        public ulong lastMessageTimestamp;
+    }
+
     [System.Serializable]
     public class EntryList
     {
@@ -16,6 +24,9 @@ public class FriendsTabViewBase : MonoBehaviour, IPointerDownHandler
         public TextMeshProUGUI toggleText;
         public Transform container;
         private Dictionary<string, FriendEntryBase> entries = new Dictionary<string, FriendEntryBase>();
+
+        // This list store each friendId with the greatest timestamp from his related messages
+        private List<LastFriendTimestampModel> latestTimestampsOrdered = new List<LastFriendTimestampModel>();
 
         public int Count()
         {
@@ -33,6 +44,7 @@ public class FriendsTabViewBase : MonoBehaviour, IPointerDownHandler
             entry.transform.localScale = Vector3.one;
 
             UpdateToggle();
+            ReorderingFriendEntries();
         }
 
         public FriendEntryBase Remove(string userId)
@@ -54,18 +66,63 @@ public class FriendsTabViewBase : MonoBehaviour, IPointerDownHandler
             toggleText.text = $"{toggleTextPrefix} ({Count()})";
             toggleButton.SetActive(Count() != 0);
         }
+
+        public void AddOrUpdateLastTimestamp(LastFriendTimestampModel timestamp, bool reorderFriendEntries = true)
+        {
+            if (timestamp == null)
+                return;
+
+            LastFriendTimestampModel existingTimestamp = latestTimestampsOrdered.FirstOrDefault(t => t.userId == timestamp.userId);
+            if (existingTimestamp == null)
+            {
+                latestTimestampsOrdered.Add(timestamp);
+            }
+            else if (timestamp.lastMessageTimestamp > existingTimestamp.lastMessageTimestamp)
+            {
+                existingTimestamp.lastMessageTimestamp = timestamp.lastMessageTimestamp;
+            }
+
+            if (reorderFriendEntries)
+            {
+                latestTimestampsOrdered = latestTimestampsOrdered.OrderByDescending(f => f.lastMessageTimestamp).ToList();
+                ReorderingFriendEntries();
+            }
+        }
+
+        public LastFriendTimestampModel RemoveLastTimestamp(string userId)
+        {
+            LastFriendTimestampModel timestampToRemove = latestTimestampsOrdered.FirstOrDefault(t => t.userId == userId);
+            if (timestampToRemove == null)
+                return null;
+
+            latestTimestampsOrdered.Remove(timestampToRemove);
+
+            return timestampToRemove;
+        }
+
+        private void ReorderingFriendEntries()
+        {
+            foreach (var item in latestTimestampsOrdered)
+            {
+                if (entries.ContainsKey(item.userId))
+                    entries[item.userId].transform.SetAsLastSibling();
+            }
+        }
     }
 
+    private const string FRIEND_ENTRIES_POOL_NAME = "FriendEntriesPool_";
     [SerializeField] protected GameObject entryPrefab;
     [SerializeField] protected GameObject emptyListImage;
 
     protected RectTransform rectTransform;
     protected FriendsHUDView owner;
 
-    public FriendsHUD_ContextMenu contextMenuPanel;
+    public UserContextMenu contextMenuPanel;
     public FriendsHUD_DialogBox confirmationDialog;
 
     protected Dictionary<string, FriendEntryBase> entries = new Dictionary<string, FriendEntryBase>();
+    protected Dictionary<string, PoolableObject> instantiatedFriendEntries = new Dictionary<string, PoolableObject>();
+    protected Pool friendEntriesPool;
 
     internal List<FriendEntryBase> GetAllEntries()
     {
@@ -100,9 +157,20 @@ public class FriendsTabViewBase : MonoBehaviour, IPointerDownHandler
             contextMenuPanel.Hide();
     }
 
-    public virtual void Initialize(FriendsHUDView owner)
+    public virtual void Initialize(FriendsHUDView owner, int preinstantiatedEntries)
     {
         this.owner = owner;
+
+        friendEntriesPool = PoolManager.i.GetPool(FRIEND_ENTRIES_POOL_NAME + this.name + this.GetInstanceID());
+        if (friendEntriesPool == null)
+        {
+            friendEntriesPool = PoolManager.i.AddPool(
+                FRIEND_ENTRIES_POOL_NAME + this.name + this.GetInstanceID(),
+                Instantiate(entryPrefab),
+                maxPrewarmCount: preinstantiatedEntries,
+                isPersistent: true);
+            friendEntriesPool.ForcePrewarm();
+        }
 
         rectTransform = transform as RectTransform;
 
@@ -112,22 +180,34 @@ public class FriendsTabViewBase : MonoBehaviour, IPointerDownHandler
         contextMenuPanel.OnReport += OnPressReportButton;
     }
 
-    protected virtual void OnPressReportButton(FriendEntryBase obj)
+    public virtual void OnDestroy()
+    {
+        contextMenuPanel.OnBlock -= OnPressBlockButton;
+        contextMenuPanel.OnDelete -= OnPressDeleteButton;
+        contextMenuPanel.OnPassport -= OnPressPassportButton;
+        contextMenuPanel.OnReport -= OnPressReportButton;
+    }
+
+    protected virtual void OnPressReportButton(string userId)
     {
     }
 
-    protected virtual void OnPressPassportButton(FriendEntryBase obj)
+    protected virtual void OnPressPassportButton(string userId)
     {
     }
 
-    protected virtual void OnPressDeleteButton(FriendEntryBase obj)
+    protected virtual void OnPressDeleteButton(string userId)
     {
     }
 
-    protected virtual void OnPressBlockButton(FriendEntryBase entry)
+    protected virtual void OnPressBlockButton(string userId, bool blockUser)
     {
-        entry.model.blocked = !entry.model.blocked;
-        entry.Populate(entry.model);
+        FriendEntryBase friendEntryToBlock = GetEntry(userId);
+        if (friendEntryToBlock != null)
+        {
+            friendEntryToBlock.model.blocked = blockUser;
+            friendEntryToBlock.Populate(friendEntryToBlock.model);
+        }
     }
 
     public virtual void CreateOrUpdateEntry(string userId, FriendEntryBase.Model model)
@@ -140,13 +220,20 @@ public class FriendsTabViewBase : MonoBehaviour, IPointerDownHandler
     {
         if (entries.ContainsKey(userId)) return false;
 
-        if (emptyListImage.activeSelf)
-            emptyListImage.SetActive(false);
-
-        var entry = Instantiate(entryPrefab).GetComponent<FriendEntryBase>();
+        PoolableObject newFriendEntry = friendEntriesPool.Get();
+        instantiatedFriendEntries.Add(userId, newFriendEntry);
+        var entry = newFriendEntry.gameObject.GetComponent<FriendEntryBase>();
         entries.Add(userId, entry);
 
-        entry.OnMenuToggle += (x) => { contextMenuPanel.Toggle(entry); };
+        entry.OnMenuToggle += (x) =>
+        {
+            bool isBlocked = UserProfile.GetOwnUserProfile().blocked.Contains(userId);
+            contextMenuPanel.Initialize(userId, string.Empty, isBlocked);
+            contextMenuPanel.transform.position = entry.menuPositionReference.position;
+            contextMenuPanel.Show();
+        };
+
+        UpdateEmptyListObjects();
 
         return true;
     }
@@ -168,29 +255,21 @@ public class FriendsTabViewBase : MonoBehaviour, IPointerDownHandler
     {
         if (!entries.ContainsKey(userId)) return false;
 
-        var entry = entries[userId];
-
-        UnityEngine.Object.Destroy(entry.gameObject);
+        if (instantiatedFriendEntries.TryGetValue(userId, out PoolableObject go))
+        {
+            friendEntriesPool.Release(go);
+            instantiatedFriendEntries.Remove(userId);
+        }
         entries.Remove(userId);
 
-        if (entries.Count == 0)
-            emptyListImage.SetActive(true);
-
-        UpdateToggleTexts();
+        UpdateEmptyListObjects();
 
         rectTransform.ForceUpdateLayout();
         return true;
     }
 
-    protected virtual void UpdateToggleTexts()
+    protected virtual void UpdateEmptyListObjects()
     {
-        if (entries.Count == 0)
-        {
-            emptyListImage.SetActive(true);
-        }
-        else
-        {
-            emptyListImage.SetActive(false);
-        }
+        emptyListImage.SetActive(entries.Count == 0);
     }
 }
