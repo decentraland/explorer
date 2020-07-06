@@ -74,6 +74,9 @@ namespace DCL
 
         [System.NonSerialized] public bool useBoundariesChecker = true;
 
+        [System.NonSerialized] public bool prewarmEntitiesPool = true;
+
+
         public bool hasPendingMessages => MessagingControllersManager.i.pendingMessagesCount > 0;
 
         public string globalSceneId { get; private set; }
@@ -228,6 +231,9 @@ namespace DCL
                     sceneMessagesPool.Enqueue(new MessagingBus.QueuedSceneMessage_Scene());
                 }
             }
+
+            if (prewarmEntitiesPool)
+                PoolManager.i.AddPool("Empty", new GameObject(), maxPrewarmCount: 2000, isPersistent: true).ForcePrewarm();
 
             if (!debugScenes)
             {
