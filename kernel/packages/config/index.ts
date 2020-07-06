@@ -134,7 +134,6 @@ export const ENGINE_DEBUG_PANEL = location.search.indexOf('ENGINE_DEBUG_PANEL') 
 export const SCENE_DEBUG_PANEL = location.search.indexOf('SCENE_DEBUG_PANEL') !== -1 && !ENGINE_DEBUG_PANEL
 export const SHOW_FPS_COUNTER = location.search.indexOf('SHOW_FPS_COUNTER') !== -1 || DEBUG
 export const HAS_INITIAL_POSITION_MARK = location.search.indexOf('position') !== -1
-export const ENABLE_IDB = true
 
 export namespace commConfigurations {
   export const debug = true
