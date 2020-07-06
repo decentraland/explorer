@@ -78,6 +78,9 @@ namespace DCL
         public bool prewarmSceneMessagesPool = true;
 
         [System.NonSerialized]
+        public bool prewarmEntitiesPool = true;
+
+        [System.NonSerialized]
         public bool useBoundariesChecker = true;
 
         public bool hasPendingMessages => MessagingControllersManager.i.pendingMessagesCount > 0;
@@ -92,6 +95,7 @@ namespace DCL
 
         public event Action OnSortScenes;
         public event Action<ParcelScene, string> OnOpenExternalUrlRequest;
+        public event Action<ParcelScene> OnNewSceneAdded;
 
         public delegate void OnOpenNFTDialogDelegate(string assetContractAddress, string tokenId, string comment);
         public event OnOpenNFTDialogDelegate OnOpenNFTDialogRequest;
@@ -226,6 +230,9 @@ namespace DCL
                 }
             }
 
+            if (prewarmEntitiesPool)
+                PoolManager.i.AddPool("Empty", new GameObject(), maxPrewarmCount: 2000, isPersistent: true).ForcePrewarm();
+
             if (!debugScenes)
             {
                 CommonScriptableObjects.rendererState.OnChange += OnRenderingStateChange;
@@ -312,6 +319,7 @@ namespace DCL
             newScene.SetData(data);
 
             loadedScenes.Add(uiSceneId, newScene);
+            OnNewSceneAdded?.Invoke(newScene);
 
             globalSceneId = uiSceneId;
 
@@ -404,6 +412,7 @@ namespace DCL
 
                 newScene.ownerController = this;
                 loadedScenes.Add(sceneToLoad.id, newScene);
+                OnNewSceneAdded?.Invoke(newScene);
 
                 scenesSortedByDistance.Add(newScene);
 
@@ -452,6 +461,7 @@ namespace DCL
 
                 newScene.ownerController = this;
                 loadedScenes.Add(sceneToLoad.id, newScene);
+                OnNewSceneAdded?.Invoke(newScene);
 
             }
 
@@ -831,6 +841,7 @@ namespace DCL
                 MessagingControllersManager.i.AddController(this, data.id);
 
             loadedScenes.Add(data.id, newScene);
+            OnNewSceneAdded?.Invoke(newScene);
 
             return newScene;
         }
