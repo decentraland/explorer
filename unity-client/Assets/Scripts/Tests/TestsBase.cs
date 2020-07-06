@@ -16,7 +16,7 @@ using Assert = UnityEngine.Assertions.Assert;
 
 public class TestsBase
 {
-    private const bool DEBUG_PAUSE_ON_INTEGRITY_FAIL = true;
+    private const bool DEBUG_PAUSE_ON_INTEGRITY_FAIL = false;
 
     protected Component[] startingSceneComponents = null;
     protected bool sceneInitialized = false;
@@ -282,13 +282,13 @@ public class TestsBase
             //NOTE(Brian): Can't use asserts here because Unity Editor hangs for some reason.
             foreach (var o in newObjects)
             {
-                if (DEBUG_PAUSE_ON_INTEGRITY_FAIL)
+                if (DEBUG_PAUSE_ON_INTEGRITY_FAIL && !Application.isBatchMode)
                     Debug.LogError($"Component - {o} (Click to highlight)", o.gameObject);
                 else
                     Debug.LogError($"Component - {o}", o.gameObject);
             }
 
-            if (DEBUG_PAUSE_ON_INTEGRITY_FAIL)
+            if (DEBUG_PAUSE_ON_INTEGRITY_FAIL && !Application.isBatchMode)
             {
                 Debug.Break();
                 yield return null;

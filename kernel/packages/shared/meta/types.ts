@@ -31,4 +31,7 @@ export type RootMetaState = {
 export type CommsConfig = {
   targetConnections?: number
   maxConnections?: number
+  relaySuspensionDisabled?: boolean
+  relaySuspensionInterval?: number
+  relaySuspensionDuration?: number
 }
