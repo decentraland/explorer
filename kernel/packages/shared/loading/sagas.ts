@@ -6,8 +6,7 @@ import { lastPlayerPosition } from '../world/positionThings'
 import { SceneLoad, SCENE_FAIL, SCENE_LOAD, SCENE_START } from './actions'
 import { LoadingState } from './reducer'
 import { EXPERIENCE_STARTED, loadingTips, rotateHelpText, TELEPORT_TRIGGERED } from './types'
-import { IFuture } from '../../decentraland-rpc/test/fixtures/support/ClientHelpers'
-import future from 'fp-future'
+import { future, IFuture } from 'fp-future'
 
 const SECONDS = 1000
 
