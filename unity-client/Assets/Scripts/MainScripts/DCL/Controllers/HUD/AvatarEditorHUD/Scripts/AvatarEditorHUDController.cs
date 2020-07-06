@@ -70,7 +70,20 @@ public class AvatarEditorHUDController : IHUD
 
     public void LoadUserProfile(UserProfile userProfile, bool forceLoading)
     {
-        if ((!Application.isBatchMode && !forceLoading && renderingEnabled && !view.isOpen) || userProfile?.avatar == null || string.IsNullOrEmpty(userProfile.avatar.bodyShape)) return;
+        bool avatarEditorNotVisible = !renderingEnabled || !view.isOpen;
+        bool isPlaying = !Application.isBatchMode;
+
+        if (!forceLoading)
+        {
+            if (isPlaying && avatarEditorNotVisible)
+                return;
+        }
+
+        if (userProfile == null)
+            return;
+
+        if (userProfile.avatar == null || string.IsNullOrEmpty(userProfile.avatar.bodyShape))
+            return;
 
         var bodyShape = CatalogController.wearableCatalog.Get(userProfile.avatar.bodyShape);
         if (bodyShape == null)

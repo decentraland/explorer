@@ -26,6 +26,7 @@ namespace AvatarEditorHUD_Tests
             Setup_AvatarEditorHUDController();
 
             controller.UnequipAllWearables();
+            controller.SetVisibility(true);
         }
 
         protected override IEnumerator TearDown()
