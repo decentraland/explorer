@@ -93,6 +93,7 @@ import { ProfileAsPromise } from 'shared/profiles/ProfileAsPromise'
 import { changeRealm, catalystRealmConnected, candidatesFetched } from 'shared/dao'
 import { notifyStatusThroughChat } from 'shared/comms/chat'
 import { getAppNetwork, fetchOwner } from 'shared/web3'
+import { updateStatusMessage } from 'shared/loading/actions'
 
 declare const globalThis: UnityInterfaceContainer &
   BrowserInterfaceContainer &
@@ -414,6 +415,10 @@ const browserInterface = {
     } else {
       notifyStatusThroughChat(`Couldn't find realm ${realmString}`)
     }
+  },
+
+  ScenesLoadingFeedback(message: string) {
+    globalThis.globalStore.dispatch(updateStatusMessage(message))
   }
 }
 globalThis.browserInterface2 = browserInterface

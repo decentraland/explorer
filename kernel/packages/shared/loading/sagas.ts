@@ -89,6 +89,7 @@ export function* initialSceneLoading() {
 }
 
 export function* teleportSceneLoading() {
+  cleanSubTextInScreen()
   yield race({
     refresh: call(refreshTeleport),
     textInScreen: call(function* () {
@@ -123,7 +124,14 @@ export async function updateTextInScreen(status: LoadingState) {
   if (subMessages) {
     subMessages.innerText =
       status.pendingScenes > 0
-        ? `Loading scenes (${status.pendingScenes} scene${status.pendingScenes > 0 ? 's' : ''} remaining)`
+        ? status.message || "Loading scenes..."
         : status.status
+  }
+}
+
+function cleanSubTextInScreen() {
+  const subMessages = document.getElementById('subtext-messages')
+  if (subMessages) {
+    subMessages.innerText = "Loading scenes..."
   }
 }
