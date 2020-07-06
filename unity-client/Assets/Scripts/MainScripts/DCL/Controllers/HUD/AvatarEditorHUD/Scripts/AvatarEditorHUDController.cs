@@ -70,7 +70,7 @@ public class AvatarEditorHUDController : IHUD
 
     public void LoadUserProfile(UserProfile userProfile, bool forceLoading)
     {
-        bool avatarEditorNotVisible = !renderingEnabled || !view.isOpen;
+        bool avatarEditorNotVisible = renderingEnabled && !view.isOpen;
         bool isPlaying = !Application.isBatchMode;
 
         if (!forceLoading)
