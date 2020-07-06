@@ -36,8 +36,14 @@
 
     #gameContainer.loaded,
     body {
-      background: #090909 url(images/decentraland-connect/DecentralandIsologotipo.png) no-repeat 50% 25% !important;
+      background: #090909 url(images/decentraland-connect/DecentralandIsologotipo.png) no-repeat 50% 5% !important;
       background-size: 170px 32px !important;
+    }
+    @media screen and (min-height: 800px) {
+      #gameContainer.loaded,
+      body {
+        background: #090909 url(images/decentraland-connect/DecentralandIsologotipo.png) no-repeat 50% 25% !important;
+      }
     }
 
     * {
@@ -109,7 +115,7 @@
     }
 
     .progress.loaded {
-      z-index: 1;
+      z-index: 9;
     }
 
     .progress.loaded .full {
@@ -180,11 +186,11 @@
       z-index: 8;
 
       position: fixed;
-      top: 40%;
+      top: 80px;
 
       min-width: 100%;
-      padding-left: 20%;
-      padding-right: 20%;
+      padding-left: 0;
+      padding-right: 0;
 
       color: white;
       text-align: center;
@@ -192,6 +198,14 @@
       font-size: 1.25em;
       font-stretch: 125%;
       font-weight: 400;
+    }
+    @media screen and (min-height: 800px) {
+      #load-messages-wrapper {
+        top: 40%;
+
+        padding-left: 20%;
+        padding-right: 20%;
+      }
     }
     #load-images {
       max-width: 306px;
