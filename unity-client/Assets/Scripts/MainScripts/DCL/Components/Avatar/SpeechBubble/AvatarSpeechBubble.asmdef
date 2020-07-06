@@ -1,0 +1,21 @@
+{
+    "name": "AvatarSpeechBubble",
+    "references": [
+        "GUID:6055be8ebefd69e48b49212b09b47b2f",
+        "GUID:9fad297e585ef204c9c2c497d77099f0",
+        "GUID:eb95615676ca6984687c5ae7774d6309",
+        "GUID:6afcac5154f98e846bbd9f27e454b57a",
+        "GUID:43315b150e1df4592868fc0fe58b3429"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [
+        "LinuxStandalone64"
+    ],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
