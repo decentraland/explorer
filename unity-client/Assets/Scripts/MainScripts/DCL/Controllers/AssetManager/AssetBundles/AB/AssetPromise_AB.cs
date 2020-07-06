@@ -1,4 +1,4 @@
-﻿using DCL.Helpers;
+using DCL.Helpers;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -15,8 +15,14 @@ namespace DCL
         public static bool VERBOSE = false;
 
         public static int MAX_CONCURRENT_REQUESTS = 30;
-        static int concurrentRequests = 0;
+
+        public static int concurrentRequests = 0;
+        public static event Action OnDownloadingProgressUpdate;
+
         bool requestRegistered = false;
+
+        public static int downloadingCount => concurrentRequests;
+        public static int queueCount => AssetPromiseKeeper_AB.i.waitingPromisesCount;
 
         static readonly float maxLoadBudgetTime = 0.032f;
         static float currentLoadBudgetTime = 0;
@@ -48,7 +54,6 @@ namespace DCL
         public AssetPromise_AB(string contentUrl, string hash) : base(contentUrl, hash)
         {
         }
-
 
         protected override bool AddToLibrary()
         {
@@ -323,6 +328,7 @@ namespace DCL
                 return;
 
             concurrentRequests++;
+            OnDownloadingProgressUpdate?.Invoke();
             requestRegistered = true;
         }
 
@@ -332,6 +338,7 @@ namespace DCL
                 return;
 
             concurrentRequests--;
+            OnDownloadingProgressUpdate?.Invoke();
             requestRegistered = false;
         }
     }

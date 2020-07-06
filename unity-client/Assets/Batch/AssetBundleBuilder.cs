@@ -454,6 +454,11 @@ namespace DCL
                 logBuffer += $"#{i} Generated asset bundle name: {assetBundles[i]}\n";
             }
 
+            FileInfo file = new FileInfo(finalAssetBundlePath);
+            DriveInfo info = new DriveInfo(file.Directory.Root.FullName);
+
+            logBuffer += $"\nFree disk space after conv: {info.AvailableFreeSpace}";
+
             return true;
         }
 
@@ -466,7 +471,12 @@ namespace DCL
 
             startTime = Time.realtimeSinceStartup;
 
-            InitializeDirectoryPaths(false);
+            FileInfo file = new FileInfo(finalAssetBundlePath);
+            DriveInfo info = new DriveInfo(file.Directory.Root.FullName);
+
+            Debug.Log($"Conversion start... free space in disk: {info.AvailableFreeSpace}");
+
+            InitializeDirectoryPaths(true);
             PopulateLowercaseMappings(rawContents);
 
             float timer = Time.realtimeSinceStartup;
