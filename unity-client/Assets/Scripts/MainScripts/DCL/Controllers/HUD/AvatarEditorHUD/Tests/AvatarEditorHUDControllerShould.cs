@@ -52,6 +52,7 @@ namespace AvatarEditorHUD_Tests
             }, false);
 
             controller.LoadUserProfile(userProfile);
+            controller.SetVisibility(true);
         }
 
         [UnityTearDown]
