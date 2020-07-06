@@ -204,11 +204,7 @@ namespace DCL
                 string fileExt = Path.GetExtension(file);
                 string assetPath = hash + "/" + hash + fileExt;
 
-                ReduceTextureSizeIfNeeded(fullPathToTag + hash + fileExt, 512);
-
-                AssetDatabase.ImportAsset(finalDownloadedAssetDbPath + assetPath, ImportAssetOptions.ForceUpdate);
-
-                AssetDatabase.SaveAssets();
+                ReduceTextureSizeIfNeeded(assetPath, 512);
 
                 string metaPath = finalDownloadedPath + assetPath + ".meta";
 
@@ -273,9 +269,11 @@ namespace DCL
             AssetBundleBuilderUtils.MarkForAssetBundleBuild(mainShader, MAIN_SHADER_AB_NAME);
         }
 
-        private static void ReduceTextureSizeIfNeeded(string texturePath, float maxSize)
+        private void ReduceTextureSizeIfNeeded(string texturePath, float maxSize)
         {
-            byte[] image = File.ReadAllBytes(texturePath);
+            string finalTexturePath = finalDownloadedPath + texturePath;
+
+            byte[] image = File.ReadAllBytes(finalTexturePath);
 
             var tmpTex = new Texture2D(1, 1);
 
@@ -304,7 +302,10 @@ namespace DCL
             byte[] endTex = ImageConversion.EncodeToPNG(dstTex);
             UnityEngine.Object.DestroyImmediate(tmpTex);
 
-            File.WriteAllBytes(texturePath, endTex);
+            File.WriteAllBytes(finalTexturePath, endTex);
+
+            AssetDatabase.ImportAsset(finalDownloadedAssetDbPath + texturePath, ImportAssetOptions.ForceUpdate);
+            AssetDatabase.SaveAssets();
         }
 
         private bool DumpAssets(MappingPair[] rawContents)
@@ -377,14 +378,14 @@ namespace DCL
 
                     if (endsWithTextureExtensions)
                     {
-                        RetrieveAndInjectTexture(hashToGltfPair, gltfHash, contentPair);
+                        RetrieveAndInjectTexture(kvp.Value, contentPair);
                     }
 
                     bool endsWithBufferExtensions = AssetBundleBuilderConfig.bufferExtensions.Any((x) => contentFilePathLower.EndsWith(x));
 
                     if (endsWithBufferExtensions)
                     {
-                        RetrieveAndInjectBuffer(gltfFilePath, contentPair, contentFilePath);
+                        RetrieveAndInjectBuffer(kvp.Value, contentPair);
                     }
                 }
 
@@ -393,8 +394,8 @@ namespace DCL
 
                 if (path != null)
                 {
-                    AssetDatabase.Refresh();
-                    AssetDatabase.SaveAssets();
+                    //AssetDatabase.Refresh();
+                    //AssetDatabase.SaveAssets();
                     pathsToTag.Add(path, gltfHash);
                 }
 
@@ -404,6 +405,10 @@ namespace DCL
                         streamsToDispose.Add(streamDataKvp.Value.stream);
                 }
             }
+
+            //Movi esto aca
+            AssetDatabase.Refresh();
+            AssetDatabase.SaveAssets();
 
             foreach (var kvp in pathsToTag)
             {
@@ -452,6 +457,8 @@ namespace DCL
             return true;
         }
 
+        internal bool generateAssetBundles = true;
+
         public bool DownloadAndConvertAssets(MappingPair[] rawContents, System.Action<ErrorCodes> OnFinish = null)
         {
             if (OnFinish == null)
@@ -463,7 +470,7 @@ namespace DCL
             PopulateLowercaseMappings(rawContents);
 
             float timer = Time.realtimeSinceStartup;
-            bool shouldGenerateAssetBundles = true;
+            bool shouldGenerateAssetBundles = generateAssetBundles;
             bool assetsAlreadyDumped = false;
 
             EditorApplication.CallbackFunction updateLoop = null;
@@ -491,7 +498,7 @@ namespace DCL
 
                     EditorApplication.update -= updateLoop;
 
-                    if (shouldGenerateAssetBundles)
+                    if (shouldGenerateAssetBundles && this.generateAssetBundles)
                     {
                         AssetBundleManifest manifest;
 
@@ -547,7 +554,7 @@ namespace DCL
             DownloadAndConvertAssets(rawContents.ToArray(), OnFinish);
         }
 
-        private void CleanAssetBundleFolder(string[] assetBundles)
+        internal void CleanAssetBundleFolder(string[] assetBundles)
         {
             AssetBundleBuilderUtils.CleanAssetBundleFolder(finalAssetBundlePath, assetBundles, hashLowercaseToHashProper);
         }
@@ -565,11 +572,12 @@ namespace DCL
             }
         }
 
-        private void RetrieveAndInjectTexture(Dictionary<string, MappingPair> hashToGltfPair, string gltfHash, MappingPair textureMappingPair)
+        private void RetrieveAndInjectTexture(MappingPair gltfMappingPair, MappingPair textureMappingPair)
         {
             string fileExt = Path.GetExtension(textureMappingPair.file);
             string realOutputPath = finalDownloadedPath + textureMappingPair.hash + "/" + textureMappingPair.hash + fileExt;
             Texture2D t2d = null;
+
 
             if (File.Exists(realOutputPath))
             {
@@ -579,14 +587,18 @@ namespace DCL
 
             if (t2d != null)
             {
-                string relativePath = AssetBundleBuilderUtils.GetRelativePathTo(hashToGltfPair[gltfHash].file, textureMappingPair.file);
+                string relativePath = AssetBundleBuilderUtils.GetRelativePathTo(gltfMappingPair.file, textureMappingPair.file);
+                string assetDBOutputPath = finalDownloadedAssetDbPath + gltfMappingPair.hash + "/" + gltfMappingPair.hash + Path.GetExtension(gltfMappingPair.file);
+
+                string id = relativePath + "@" + assetDBOutputPath;
+
                 //NOTE(Brian): This cache will be used by the GLTF importer when seeking textures. This way the importer will
                 //             consume the asset bundle dependencies instead of trying to create new textures.
-                PersistentAssetCache.ImageCacheByUri[relativePath] = new RefCountedTextureData(relativePath, t2d);
+                PersistentAssetCache.ImageCacheByUri[id] = new RefCountedTextureData(relativePath, t2d);
             }
         }
 
-        private void RetrieveAndInjectBuffer(string gltfFilePath, MappingPair bufferMappingPair, string contentFilePath)
+        private void RetrieveAndInjectBuffer(MappingPair gltfMappingPair, MappingPair bufferMappingPair)
         {
             string fileExt = Path.GetExtension(bufferMappingPair.file);
             string realOutputPath = finalDownloadedPath + bufferMappingPair.hash + "/" + bufferMappingPair.hash + fileExt;
@@ -594,11 +606,14 @@ namespace DCL
             if (File.Exists(realOutputPath))
             {
                 Stream stream = File.OpenRead(realOutputPath);
-                string relativePath = AssetBundleBuilderUtils.GetRelativePathTo(gltfFilePath, contentFilePath);
+                string relativePath = AssetBundleBuilderUtils.GetRelativePathTo(gltfMappingPair.file, bufferMappingPair.file);
+
+                string assetDbOutputPath = finalDownloadedAssetDbPath + gltfMappingPair.hash + "/" + gltfMappingPair.hash + fileExt;
+                string id = relativePath + "@" + assetDbOutputPath;
 
                 // NOTE(Brian): This cache will be used by the GLTF importer when seeking streams. This way the importer will
-                //              co nsume the asset bundle dependencies instead of trying to create new streams.
-                PersistentAssetCache.StreamCacheByUri[relativePath] = new RefCountedStreamData(relativePath, stream);
+                //              consume the asset bundle dependencies instead of trying to create new streams.
+                PersistentAssetCache.StreamCacheByUri[id] = new RefCountedStreamData(relativePath, stream);
             }
         }
 
@@ -652,6 +667,9 @@ namespace DCL
                 Directory.CreateDirectory(outputPathDir);
 
             File.WriteAllBytes(outputPath, req.downloadHandler.data);
+
+            string dbPath = finalDownloadedAssetDbPath + additionalPath + hash + fileExt;
+            AssetDatabase.ImportAsset(dbPath, ImportAssetOptions.ForceSynchronousImport | ImportAssetOptions.ImportRecursive);
 
             return finalDownloadedPath + additionalPath;
         }

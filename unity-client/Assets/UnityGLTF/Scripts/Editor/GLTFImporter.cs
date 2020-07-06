@@ -467,7 +467,7 @@ namespace UnityGLTF
 
                 OnGLTFRootIsConstructed?.Invoke(gLTFRoot);
 
-                var loader = new GLTFSceneImporter(gLTFRoot, fileLoader, null, stream);
+                var loader = new GLTFSceneImporter(projectFilePath, gLTFRoot, fileLoader, null, stream);
                 GLTFSceneImporter.budgetPerFrameInMilliseconds = float.MaxValue;
                 loader.addImagesToPersistentCaching = false;
                 loader.addMaterialsToPersistentCaching = false;
