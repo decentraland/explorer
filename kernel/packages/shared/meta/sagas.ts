@@ -38,7 +38,7 @@ function checkIndexedDB(config: Partial<MetaConfiguration>) {
     return
   }
 
-  if (!config || !config.explorer || !config.explorer.useUnityIndexedDbCache) {
+  if (!config.explorer.useUnityIndexedDbCache) {
     defaultLogger.info(`Unity IndexedDB meta config is undefined. Defaulting as false (only for chrome)`)
     USE_UNITY_INDEXED_DB_CACHE.resolve(false)
     return
