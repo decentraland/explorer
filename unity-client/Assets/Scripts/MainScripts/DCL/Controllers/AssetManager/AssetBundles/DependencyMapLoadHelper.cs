@@ -14,7 +14,10 @@ public static class DependencyMapLoadHelper
     static bool VERBOSE = false;
 
     private const string PERSISTENT_CACHE_KEY = "DepMapCache";
+    private const float MIN_TIME_BETWEEN_SAVING_PERSISTENT_CACHE = 300.0f;
+
     private static bool persistentCacheLoaded = false;
+    private static float lastTimeSavedPersistentCache = 0;
 
     public static Dictionary<string, List<string>> dependenciesMap = new Dictionary<string, List<string>>();
 
@@ -78,11 +81,18 @@ public static class DependencyMapLoadHelper
             dependenciesMap.Add(hash, new List<string>(map.dependencies));
 
             downloadingDepmap.Remove(hash);
+
+            if (DCLTime.realtimeSinceStartup - lastTimeSavedPersistentCache >= MIN_TIME_BETWEEN_SAVING_PERSISTENT_CACHE)
+            {
+                SavePersistentCache();
+            }
         }
     }
 
     private static void SavePersistentCache()
     {
+        lastTimeSavedPersistentCache = DCLTime.realtimeSinceStartup;
+
         //NOTE(Brian): Use JsonConvert because unity JsonUtility doesn't support dictionaries
         string cacheJson = JsonConvert.SerializeObject(dependenciesMap);
         PlayerPrefs.SetString(PERSISTENT_CACHE_KEY, cacheJson);
