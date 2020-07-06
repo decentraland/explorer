@@ -12,11 +12,16 @@ namespace Tests
     public class MaterialTransitionControllerTests : TestsBase
     {
         [UnityTest]
+        [Category("Explicit")]
+        [Explicit("Test is too slow")]
         public IEnumerator MaterialTransitionWithGLTF()
         {
             var entity1 = TestHelpers.CreateSceneEntity(scene);
 
             ParcelSettings.VISUAL_LOADING_ENABLED = true;
+
+            var prevLoadingType = RendereableAssetLoadHelper.loadingType;
+            RendereableAssetLoadHelper.loadingType = RendereableAssetLoadHelper.LoadingType.GLTF_ONLY;
 
             Shader hologramShader = Shader.Find("DCL/FX/Hologram");
 
@@ -71,6 +76,8 @@ namespace Tests
             }
 
             Assert.Less(timeout, 10.1f, "Timeout! MaterialTransitionController never appeared?");
+
+            RendereableAssetLoadHelper.loadingType = prevLoadingType;
 
             yield return null;
         }
