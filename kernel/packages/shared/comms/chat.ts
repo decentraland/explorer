@@ -41,6 +41,9 @@ export function notifyFriendOnlineStatusThroughChat(userStatus: UpdateUserStatus
   }
 
   if (!(userStatus.realm?.layer && userStatus.realm?.serverName)) {
+    if (userStatus.presence !== PresenceStatus.ONLINE) {
+      friendStatus[friendName] = userStatus.presence
+    }
     return
   }
 
