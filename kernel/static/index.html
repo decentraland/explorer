@@ -250,8 +250,8 @@
 
       position: absolute;
       left: 50%;
-      top: 30%;
-      transform: translate(-50%, -50%);
+      top: 40px;
+      transform: translate(-50%, 0);
       padding: 34px 44px;
 
       display: flex;
@@ -353,13 +353,18 @@
     }
     .nav-bar-content {
       position: absolute;
-      right: 30%;
+      right: 50px;
       height: 100%;
       display: flex;
       width: fit-content;
 
       align-items: center;
       vertical-align: middle;
+    }
+    @media screen and (min-width: 1200px) {
+      .nav-bar-content {
+        right: 285px;
+      }
     }
     .nav-text {
       color: white;
@@ -403,13 +408,18 @@
     }
     .footer-bar-content {
       position: absolute;
-      right: 285px;
+      right: 50px;
       height: 100%;
       display: flex;
       width: fit-content;
 
       align-items: center;
       vertical-align: middle;
+    }
+    @media screen and (min-width: 1200px) {
+      .footer-bar-content {
+        right: 285px;
+      }
     }
     .footer-link {
       margin-left: 34px;
