@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using DCL.Helpers;
 using System.Collections;
 using System.Collections.Generic;
@@ -105,9 +105,9 @@ public static class DependencyMapLoadHelper
 
     private static void RendererState_OnChange(bool current, bool previous)
     {
-        if (!current && persistentCacheLoaded)
+        if (persistentCacheLoaded)
         {
-            // Once the persistent cache has been loaded the first time, it will be saved only the times when the RendererState be OFF
+            // Once the persistent cache has been loaded the first time, it will go being saved each time the RendererState be changed
             SavePersistentCache();
         }
 
