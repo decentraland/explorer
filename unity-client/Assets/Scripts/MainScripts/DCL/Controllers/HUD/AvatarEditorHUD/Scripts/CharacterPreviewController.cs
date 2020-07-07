@@ -62,6 +62,7 @@ public class CharacterPreviewController : MonoBehaviour
     {
         bool avatarDone = false;
         bool avatarFailed = false;
+        AvatarRenderer.defaultModel = newModel;
         avatarRenderer.ApplyModel(newModel, () => avatarDone = true, () => avatarFailed = true);
         yield return new DCL.WaitUntil(() => avatarDone || avatarFailed);
 
@@ -71,6 +72,9 @@ public class CharacterPreviewController : MonoBehaviour
         }
 
         onDone?.Invoke();
+
+        // TODO: Hook this prewarm differently, mauybe to an event once we have the user profile loaded?
+        SceneController.i.PrewarmAvatarsPool();
     }
 
     private void SetLayerRecursively(GameObject gameObject, int layer)

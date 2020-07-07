@@ -18,7 +18,7 @@ namespace DCL
             get
             {
                 if (avatarTransformValue == null)
-                    avatarTransformValue = GetComponent<AvatarShape>().entity.gameObject.transform;
+                    avatarTransformValue = GetComponent<AvatarShape>()?.entity?.gameObject?.transform;
 
                 return avatarTransformValue;
             }
@@ -55,6 +55,8 @@ namespace DCL
 
         private void Start()
         {
+            if (avatarTransform == null) return;
+
             //HACK: this hack will be removed when we add a TransformLerped component
             //This fixes the edge case on initialization when Transform component is called before AvatarShape
             //and hack in ParcelScene.EntityComponentCreate wont work
@@ -83,8 +85,8 @@ namespace DCL
 
         public void OnTransformChanged(DCLTransform.Model model)
         {
-            MoveTo(	
-                model.position - Vector3.up * DCLCharacterController.i.characterController.height / 2, // To fix the "always flying" avatars bug, We report the chara's centered position but the body hast its pivot at its feet	
+            MoveTo(
+                model.position - Vector3.up * DCLCharacterController.i.characterController.height / 2, // To fix the "always flying" avatars bug, We report the chara's centered position but the body hast its pivot at its feet
                 model.rotation);
         }
 
@@ -146,7 +148,7 @@ namespace DCL
             flattenedDiff.y = 0;
 
             //NOTE(Brian): Avoid Unity error when computing look rotation for 0 magnitude vectors.
-            //             Note that this isn't the same as the previous distance check because this 
+            //             Note that this isn't the same as the previous distance check because this
             //             is computed with a flattened vector.
             if (flattenedDiff != Vector3.zero)
             {
@@ -171,6 +173,8 @@ namespace DCL
 
         void Update()
         {
+            if (avatarTransformValue == null) return;
+
             UpdateLerp(Time.deltaTime);
         }
     }

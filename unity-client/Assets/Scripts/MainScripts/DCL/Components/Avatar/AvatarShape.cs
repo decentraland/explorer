@@ -117,5 +117,12 @@ namespace DCL
             avatarUserInfo.worldPosition = updatedModel.position;
             MinimapMetadataController.i?.UpdateMinimapUserInformation(avatarUserInfo);
         }
+
+        public override void Cleanup()
+        {
+            base.Cleanup();
+
+            avatarRenderer.ResetAvatar();
+        }
     }
 }

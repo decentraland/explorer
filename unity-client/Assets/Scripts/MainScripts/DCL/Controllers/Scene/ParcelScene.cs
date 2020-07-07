@@ -63,6 +63,9 @@ namespace DCL.Controllers
                 OnStateRefreshed?.Invoke(this);
             }
         }
+        private CreateEntityMessage tmpCreateEntityMessage = new CreateEntityMessage();
+        private const string EMPTY_GO_POOL_NAME = "Empty";
+        private const string AVATARS_POOL_NAME = "AvatarShape";
 
         public void Awake()
         {
@@ -319,9 +322,6 @@ namespace DCL.Controllers
             return false;
         }
 
-        private CreateEntityMessage tmpCreateEntityMessage = new CreateEntityMessage();
-        private const string EMPTY_GO_POOL_NAME = "Empty";
-
         public DecentralandEntity CreateEntity(string id)
         {
             SceneController.i.OnMessageDecodeStart?.Invoke("CreateEntity");
@@ -367,6 +367,7 @@ namespace DCL.Controllers
 
         public void RemoveEntity(string id, bool removeImmediatelyFromEntitiesList = true)
         {
+            Debug.Log("REMOVE ENTITY: " + id);
             SceneController.i.OnMessageDecodeStart?.Invoke("RemoveEntity");
             tmpRemoveEntityMessage.id = id;
             SceneController.i.OnMessageDecodeEnds?.Invoke("RemoveEntity");
@@ -545,7 +546,7 @@ namespace DCL.Controllers
                 return null;
             }
 
-            CLASS_ID_COMPONENT classId = (CLASS_ID_COMPONENT) createEntityComponentMessage.classId;
+            CLASS_ID_COMPONENT classId = (CLASS_ID_COMPONENT)createEntityComponentMessage.classId;
 
             if (classId == CLASS_ID_COMPONENT.TRANSFORM)
             {
@@ -628,7 +629,22 @@ namespace DCL.Controllers
             {
                 if (!entity.components.ContainsKey(classId))
                 {
-                    newComponent = factory.CreateItemFromId<BaseComponent>(classId);
+                    if (classId == CLASS_ID_COMPONENT.AVATAR_SHAPE)
+                    {
+                        newComponent = PoolManager.i.Get(AVATARS_POOL_NAME).gameObject.GetComponent<BaseComponent>();
+                        // newComponent.Cleanup(); // remove old wearables from avatar
+
+                        // TODO: Unsubscribe???
+                        entity.OnCleanupEvent += (dispatcher) =>
+                        {
+                            PoolManager.i.Release(newComponent.gameObject);
+                            entity.meshesInfo?.CleanReferences();
+                        };
+                    }
+                    else
+                    {
+                        newComponent = factory.CreateItemFromId<BaseComponent>(classId);
+                    }
 
                     if (newComponent != null)
                     {
@@ -716,144 +732,144 @@ namespace DCL.Controllers
 
             BaseDisposable newComponent = null;
 
-            switch ((CLASS_ID) sharedComponentCreatedMessage.classId)
+            switch ((CLASS_ID)sharedComponentCreatedMessage.classId)
             {
                 case CLASS_ID.BOX_SHAPE:
-                {
-                    newComponent = new BoxShape(this);
-                    break;
-                }
+                    {
+                        newComponent = new BoxShape(this);
+                        break;
+                    }
 
                 case CLASS_ID.SPHERE_SHAPE:
-                {
-                    newComponent = new SphereShape(this);
-                    break;
-                }
+                    {
+                        newComponent = new SphereShape(this);
+                        break;
+                    }
 
                 case CLASS_ID.CONE_SHAPE:
-                {
-                    newComponent = new ConeShape(this);
-                    break;
-                }
+                    {
+                        newComponent = new ConeShape(this);
+                        break;
+                    }
 
                 case CLASS_ID.CYLINDER_SHAPE:
-                {
-                    newComponent = new CylinderShape(this);
-                    break;
-                }
+                    {
+                        newComponent = new CylinderShape(this);
+                        break;
+                    }
 
                 case CLASS_ID.PLANE_SHAPE:
-                {
-                    newComponent = new PlaneShape(this);
-                    break;
-                }
+                    {
+                        newComponent = new PlaneShape(this);
+                        break;
+                    }
 
                 case CLASS_ID.GLTF_SHAPE:
-                {
-                    newComponent = new GLTFShape(this);
-                    break;
-                }
+                    {
+                        newComponent = new GLTFShape(this);
+                        break;
+                    }
 
                 case CLASS_ID.NFT_SHAPE:
-                {
-                    newComponent = new NFTShape(this);
-                    break;
-                }
+                    {
+                        newComponent = new NFTShape(this);
+                        break;
+                    }
 
                 case CLASS_ID.OBJ_SHAPE:
-                {
-                    newComponent = new OBJShape(this);
-                    break;
-                }
+                    {
+                        newComponent = new OBJShape(this);
+                        break;
+                    }
 
                 case CLASS_ID.BASIC_MATERIAL:
-                {
-                    newComponent = new BasicMaterial(this);
-                    break;
-                }
+                    {
+                        newComponent = new BasicMaterial(this);
+                        break;
+                    }
 
                 case CLASS_ID.PBR_MATERIAL:
-                {
-                    newComponent = new PBRMaterial(this);
-                    break;
-                }
+                    {
+                        newComponent = new PBRMaterial(this);
+                        break;
+                    }
 
                 case CLASS_ID.AUDIO_CLIP:
-                {
-                    newComponent = new DCLAudioClip(this);
-                    break;
-                }
+                    {
+                        newComponent = new DCLAudioClip(this);
+                        break;
+                    }
 
                 case CLASS_ID.TEXTURE:
-                {
-                    newComponent = new DCLTexture(this);
-                    break;
-                }
+                    {
+                        newComponent = new DCLTexture(this);
+                        break;
+                    }
 
                 case CLASS_ID.UI_INPUT_TEXT_SHAPE:
-                {
-                    newComponent = new UIInputText(this);
-                    break;
-                }
+                    {
+                        newComponent = new UIInputText(this);
+                        break;
+                    }
 
                 case CLASS_ID.UI_FULLSCREEN_SHAPE:
                 case CLASS_ID.UI_SCREEN_SPACE_SHAPE:
-                {
-                    if (uiScreenSpace == null)
                     {
-                        newComponent = new UIScreenSpace(this);
+                        if (uiScreenSpace == null)
+                        {
+                            newComponent = new UIScreenSpace(this);
+                        }
+
+                        break;
                     }
 
-                    break;
-                }
-
                 case CLASS_ID.UI_CONTAINER_RECT:
-                {
-                    newComponent = new UIContainerRect(this);
-                    break;
-                }
+                    {
+                        newComponent = new UIContainerRect(this);
+                        break;
+                    }
 
                 case CLASS_ID.UI_SLIDER_SHAPE:
-                {
-                    newComponent = new UIScrollRect(this);
-                    break;
-                }
+                    {
+                        newComponent = new UIScrollRect(this);
+                        break;
+                    }
 
                 case CLASS_ID.UI_CONTAINER_STACK:
-                {
-                    newComponent = new UIContainerStack(this);
-                    break;
-                }
+                    {
+                        newComponent = new UIContainerStack(this);
+                        break;
+                    }
 
                 case CLASS_ID.UI_IMAGE_SHAPE:
-                {
-                    newComponent = new UIImage(this);
-                    break;
-                }
+                    {
+                        newComponent = new UIImage(this);
+                        break;
+                    }
 
                 case CLASS_ID.UI_TEXT_SHAPE:
-                {
-                    newComponent = new UIText(this);
-                    break;
-                }
+                    {
+                        newComponent = new UIText(this);
+                        break;
+                    }
 
                 case CLASS_ID.VIDEO_CLIP:
-                {
-                    newComponent = new DCLVideoClip(this);
-                    break;
-                }
+                    {
+                        newComponent = new DCLVideoClip(this);
+                        break;
+                    }
 
                 case CLASS_ID.VIDEO_TEXTURE:
-                {
-                    newComponent = new DCLVideoTexture(this);
-                    break;
-                }
+                    {
+                        newComponent = new DCLVideoTexture(this);
+                        break;
+                    }
 
                 case CLASS_ID.FONT:
-                {
-                    newComponent = new DCLFont(this);
-                    break;
-                }
+                    {
+                        newComponent = new DCLFont(this);
+                        break;
+                    }
 
                 default:
                     Debug.LogError($"Unknown classId");
@@ -942,6 +958,7 @@ namespace DCL.Controllers
 
         private void RemoveEntityComponent(DecentralandEntity entity, string componentName)
         {
+            Debug.Log("REMOVE ENTITY COMPONENT: " + componentName);
             switch (componentName)
             {
                 case "shape":

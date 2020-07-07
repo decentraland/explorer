@@ -55,8 +55,13 @@ namespace DCL
             this.maxPrewarmCount = maxPrewarmCount;
         }
 
+        bool prewarmed = false;
         public void ForcePrewarm()
         {
+            if (prewarmed) return;
+
+            prewarmed = true;
+
             for (int i = 0; i < maxPrewarmCount; i++)
                 Instantiate();
         }
@@ -81,7 +86,8 @@ namespace DCL
 
             PoolableObject poolable = Extract();
 
-            EnablePoolableObject(poolable);
+            if (poolable != null)
+                EnablePoolableObject(poolable);
 
             return poolable;
         }
@@ -89,7 +95,10 @@ namespace DCL
         private PoolableObject Extract()
         {
             PoolableObject po = null;
-            po = unusedObjects.First.Value;
+            po = unusedObjects.First?.Value;
+
+            if (po == null) return null;
+
             unusedObjects.RemoveFirst();
             po.node = usedObjects.AddFirst(po);
 
@@ -116,11 +125,12 @@ namespace DCL
             else
                 gameObject = GameObject.Instantiate(original);
 
-            gameObject.SetActive(true);
+            gameObject.SetActive(false);
 
             return gameObject;
         }
 
+        bool alreadySetup = false;
         private PoolableObject SetupPoolableObject(GameObject gameObject, bool active = false)
         {
             if (PoolManager.i.poolables.ContainsKey(gameObject))
@@ -140,8 +150,10 @@ namespace DCL
             else
             {
                 EnablePoolableObject(poolable);
-                poolable.node = usedObjects.AddFirst(poolable);
+                poolable.node = alreadySetup ? usedObjects.AddFirst(poolable) : unusedObjects.AddFirst(poolable);
             }
+
+            alreadySetup = true;
 
 #if UNITY_EDITOR
             RefreshName();
@@ -309,7 +321,7 @@ namespace DCL
 
         // We need to check if application is quitting in editor
         // to prevent the pool from releasing objects that are
-        // being destroyed 
+        // being destroyed
         void OnIsQuitting()
         {
             Application.quitting -= OnIsQuitting;

@@ -85,7 +85,7 @@ namespace DCL.Components
             return new ComponentUpdateHandler(this);
         }
 
-        public void Cleanup()
+        public virtual void Cleanup()
         {
             if (isRoutineRunning)
             {
