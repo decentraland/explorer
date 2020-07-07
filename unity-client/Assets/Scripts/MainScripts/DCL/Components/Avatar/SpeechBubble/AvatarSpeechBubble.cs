@@ -29,12 +29,12 @@ public class AvatarSpeechBubble : MonoBehaviour
         yOffsetFromName = thisRT.anchoredPosition.y - avatarNameRT.anchoredPosition.y;
         HideBubble();
 
-        ChatController.i.OnAddMessage += OnChatMessage;
+        if (ChatController.i) ChatController.i.OnAddMessage += OnChatMessage;
     }
 
     private void OnDestroy()
     {
-        ChatController.i.OnAddMessage -= OnChatMessage;
+        if (ChatController.i) ChatController.i.OnAddMessage -= OnChatMessage;
     }
 
     void LateUpdate()
@@ -59,7 +59,7 @@ public class AvatarSpeechBubble : MonoBehaviour
         thisRT.anchoredPosition = newPositon;
 
         float nameAlpha = avatarName.uiContainer.alpha;
-        uiContainer.alpha = nameAlpha > VANISHING_ALPHA_THRESHOLD ? nameAlpha : 0;
+        uiContainer.alpha = nameAlpha >= VANISHING_ALPHA_THRESHOLD ? nameAlpha : 0;
 
         if (uiContainer.gameObject.activeSelf != avatarName.uiContainer.gameObject.activeSelf)
         {
@@ -69,7 +69,7 @@ public class AvatarSpeechBubble : MonoBehaviour
 
     private void OnChatMessage(ChatMessage message)
     {
-        if (message.sender != avatarShape.model.id)
+        if (message.sender != avatarShape.model?.id)
         {
             return;
         }
@@ -82,7 +82,6 @@ public class AvatarSpeechBubble : MonoBehaviour
         chatText.text = string.Empty;
         uiContainer.alpha = 0;
         uiContainer.gameObject.SetActive(false);
-        Debug.Log($"{avatarShape.model.name} BUBBLE HIDDEN!");
     }
 
     private void ShowBubble(string text)
