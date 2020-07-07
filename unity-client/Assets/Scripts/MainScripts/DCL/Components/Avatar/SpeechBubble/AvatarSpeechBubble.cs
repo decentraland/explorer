@@ -73,6 +73,10 @@ public class AvatarSpeechBubble : MonoBehaviour
         {
             return;
         }
+        if (IsOldPrivateMessage(message))
+        {
+            return;
+        }
 
         ShowBubble(message.body);
     }
@@ -101,5 +105,23 @@ public class AvatarSpeechBubble : MonoBehaviour
         {
             return string.Format("{0}...", text.Substring(0, maxCharacters));
         }
+    }
+
+    private bool IsOldPrivateMessage(ChatMessage message)
+    {
+        if (!ChatController.i)
+        {
+            return true;
+        }
+
+        if (message.messageType != ChatMessage.Type.PRIVATE)
+            return false;
+
+        double timestampAsSeconds = message.timestamp * 0.001f;
+
+        if (timestampAsSeconds < ChatController.i.initTime)
+            return true;
+
+        return false;
     }
 }
