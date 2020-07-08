@@ -1103,9 +1103,11 @@
   min-width: 375px;
   height: 100vh;
   min-height: 667px;
-  position: relative;
+  position: absolute;
+  top: 0;
   overflow: hidden;
   margin: 0;
+  z-index: 7;
   -webkit-font-smoothing: antialiased;
   background-color: rgba(13, 12, 15, 1);
 }
@@ -1192,13 +1194,12 @@
 .iphone8916 .robotmobilebrowsererror {
   -webkit-font-smoothing: antialiased;
   background-color: rgba(255, 255, 255, 0);
-  top: 181px;
   width: 212px;
-  height: 331px;
   position: absolute;
   margin: 0;
-  left: 68px;
-  transform: rotate(0);
+  left: 50%;
+  top: 200px;
+  transform: translate(-50%, 0);
 }
 
 .iphone8916 .error {

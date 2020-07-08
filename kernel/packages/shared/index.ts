@@ -25,7 +25,8 @@ import {
   loadingStarted,
   NETWORK_MISMATCH,
   NEW_LOGIN,
-  notStarted
+  notStarted,
+  MOBILE_NOT_SUPPORTED
 } from './loading/types'
 import { defaultLogger } from './logger'
 import { ProfileAsPromise } from './profiles/ProfileAsPromise'
@@ -42,6 +43,7 @@ import future, { IFuture } from 'fp-future'
 import { RootState } from './store/rootTypes'
 import { AnyAction, Store } from 'redux'
 import { isResizeServiceUrl } from './dao/selectors'
+import { isMobile } from 'shared/comms/mobile'
 
 declare const globalThis: any
 
@@ -57,6 +59,15 @@ function initEssentials(): [Session | undefined, Store<RootState, AnyAction>] {
   globalThis.globalStore = store
 
   startSagas()
+
+  if (isMobile()) {
+    const element = document.getElementById('eth-login')
+    if (element) {
+      element.style.display = 'none'
+    }
+    ReportFatalError(MOBILE_NOT_SUPPORTED)
+    return [undefined, store]
+  }
 
   store.dispatch(notStarted())
 
