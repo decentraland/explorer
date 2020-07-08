@@ -8,7 +8,6 @@ import { identifyUser, queueTrackingEvent, initializeAnalytics } from './analyti
 import './apis/index'
 import { connect, disconnect, persistCurrentUser } from './comms'
 import { ConnectionEstablishmentError, IdTakenError } from './comms/interface/types'
-import { isMobile } from './comms/mobile'
 import { getUserProfile, setLocalProfile } from './comms/peers'
 import { initializeUrlRealmObserver, realmInitialized } from './dao'
 import { web3initialized } from './dao/actions'
@@ -24,7 +23,6 @@ import {
   COMMS_COULD_NOT_BE_ESTABLISHED,
   establishingComms,
   loadingStarted,
-  MOBILE_NOT_SUPPORTED,
   NETWORK_MISMATCH,
   NEW_LOGIN,
   notStarted
@@ -59,11 +57,6 @@ function initEssentials(): [Session | undefined, Store<RootState, AnyAction>] {
   globalThis.globalStore = store
 
   startSagas()
-
-  if (isMobile()) {
-    ReportFatalError(MOBILE_NOT_SUPPORTED)
-    return [undefined, store]
-  }
 
   store.dispatch(notStarted())
 
@@ -314,6 +307,7 @@ async function createAuthIdentity() {
             }
           }
         }
+        showEthSignAdvice(false)
         return result
       }
       hasConnectedWeb3 = true

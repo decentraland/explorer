@@ -100,12 +100,15 @@ export async function awaitWeb3Approval(): Promise<void> {
 
         button!.onclick = processLoginAttempt(response)
 
-        if (result.successful) {
+        // if the user signed properly or doesn't have a wallet => move on with login
+        if (result.successful || !window['ethereum']) {
           break
         } else {
           showEthConnectAdvice(true)
         }
       }
+
+      showEthConnectAdvice(false)
 
       // después post check
       if (window['ethereum']) {
