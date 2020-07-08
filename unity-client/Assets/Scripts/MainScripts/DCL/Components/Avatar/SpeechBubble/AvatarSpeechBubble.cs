@@ -47,7 +47,7 @@ public class AvatarSpeechBubble : MonoBehaviour
         if (string.IsNullOrEmpty(chatText.text))
             return;
 
-        if (Time.unscaledTime - lastMessageTime >= minVisibleTime)
+        if (Time.unscaledTime - lastMessageTime >= visibleTime)
         {
             HideBubble();
             return;
