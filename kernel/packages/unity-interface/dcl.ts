@@ -17,7 +17,8 @@ import {
   ENGINE_DEBUG_PANEL,
   playerConfigurations,
   SCENE_DEBUG_PANEL,
-  SHOW_FPS_COUNTER
+  SHOW_FPS_COUNTER,
+  NO_ASSET_BUNDLES
 } from '../config'
 import { Quaternion, ReadOnlyQuaternion, ReadOnlyVector3, Vector3 } from '../decentraland-ecs/src/decentraland/math'
 import { IEventNames, IEvents, ProfileForRenderer, MinimapSceneInfo } from '../decentraland-ecs/src/decentraland/Types'
@@ -99,6 +100,7 @@ import { sendMessage, updateUserData, updateFriendship } from 'shared/chat/actio
 import { ProfileAsPromise } from 'shared/profiles/ProfileAsPromise'
 import { changeRealm, catalystRealmConnected, candidatesFetched } from '../shared/dao/index'
 import { notifyStatusThroughChat } from 'shared/comms/chat'
+import { updateStatusMessage } from 'shared/loading/actions'
 
 declare const globalThis: UnityInterfaceContainer &
   BrowserInterfaceContainer &
@@ -419,6 +421,10 @@ const browserInterface = {
     } else {
       notifyStatusThroughChat(`Couldn't find realm ${realmString}`)
     }
+  },
+
+  ScenesLoadingFeedback(message: string) {
+    globalThis.globalStore.dispatch(updateStatusMessage(message))
   }
 }
 globalThis.browserInterface2 = browserInterface
@@ -570,6 +576,9 @@ export const unityInterface = {
   },
   SetEngineDebugPanel() {
     gameInstance.SendMessage('SceneController', 'SetEngineDebugPanel')
+  },
+  SetDisableAssetBundles() {
+    gameInstance.SendMessage('SceneController', 'SetDisableAssetBundles')
   },
   ActivateRendering() {
     gameInstance.SendMessage('SceneController', 'ActivateRendering')
@@ -960,6 +969,10 @@ export async function initializeEngine(_gameInstance: GameInstance) {
 
   if (SCENE_DEBUG_PANEL) {
     unityInterface.SetSceneDebugPanel()
+  }
+
+  if (NO_ASSET_BUNDLES) {
+    unityInterface.SetDisableAssetBundles()
   }
 
   if (SHOW_FPS_COUNTER) {

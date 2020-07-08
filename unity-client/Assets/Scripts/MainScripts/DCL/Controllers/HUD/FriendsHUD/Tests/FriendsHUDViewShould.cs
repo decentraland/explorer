@@ -8,10 +8,11 @@ public class FriendsHUDViewShould : TestsBase
     FriendsHUDView view;
 
     protected override bool justSceneSetUp => true;
+
     [UnitySetUp]
     protected override IEnumerator SetUp()
     {
-        base.SetUp();
+        yield return base.SetUp();
 
         controller = new FriendsHUDController();
         controller.Initialize(null, null);
@@ -19,13 +20,12 @@ public class FriendsHUDViewShould : TestsBase
 
         Assert.IsTrue(view != null, "Friends hud view is null?");
         Assert.IsTrue(controller != null, "Friends hud controller is null?");
-        yield break;
     }
 
     protected override IEnumerator TearDown()
     {
+        controller.Dispose();
         yield return base.TearDown();
-        UnityEngine.Object.Destroy(view);
     }
 
     [Test]
@@ -138,7 +138,6 @@ public class FriendsHUDViewShould : TestsBase
 
         Assert.IsTrue(onMenuToggleCalled);
         Assert.IsTrue(view.friendsList.contextMenuPanel.gameObject.activeSelf);
-        Assert.AreEqual(entry, view.friendsList.contextMenuPanel.targetEntry);
     }
 
     [Test]
@@ -237,5 +236,4 @@ public class FriendsHUDViewShould : TestsBase
 
         return controller.view.friendRequestsList.GetEntry(id) as FriendRequestEntry;
     }
-
 }
