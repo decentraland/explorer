@@ -59,7 +59,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -99,7 +99,7 @@ MonoBehaviour:
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
-  m_fontStyle: 2
+  m_fontStyle: 0
   m_textAlignment: 513
   m_characterSpacing: 0
   m_wordSpacing: 0
@@ -322,8 +322,10 @@ MonoBehaviour:
   avatarShape: {fileID: 0}
   uiContainer: {fileID: 4949766399678201534}
   chatText: {fileID: 8951865405457172221}
+  privateColor: {r: 0.38431373, g: 1, b: 0.40784314, a: 1}
+  defaultColor: {r: 1, g: 1, b: 1, a: 1}
   maxCharacters: 160
-  visibleTime: 5
+  minVisibleTime: 3
 --- !u!225 &4949766399678201534
 CanvasGroup:
   m_ObjectHideFlags: 0

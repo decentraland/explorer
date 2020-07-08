@@ -6,18 +6,23 @@ using UnityEngine;
 public class AvatarSpeechBubble : MonoBehaviour
 {
     const float VANISHING_ALPHA_THRESHOLD = 0.7f;
+    const float SECONDS_PER_CHARACTER = 0.04f; //25 char/secs
 
     public AvatarShape avatarShape;
     public CanvasGroup uiContainer;
     public TextMeshProUGUI chatText;
-    [SerializeField] int maxCharacters;
-    [SerializeField] float visibleTime;
+    public Color privateColor;
+    public Color defaultColor;
+
+    public int maxCharacters;
+    public float minVisibleTime;
 
     RectTransform avatarNameRT;
     RectTransform thisRT;
 
     float yOffsetFromName;
     float lastMessageTime;
+    float visibleTime;
 
     AvatarName avatarName;
 
@@ -42,7 +47,7 @@ public class AvatarSpeechBubble : MonoBehaviour
         if (string.IsNullOrEmpty(chatText.text))
             return;
 
-        if (Time.unscaledTime - lastMessageTime >= visibleTime)
+        if (Time.unscaledTime - lastMessageTime >= minVisibleTime)
         {
             HideBubble();
             return;
@@ -78,7 +83,15 @@ public class AvatarSpeechBubble : MonoBehaviour
             return;
         }
 
-        ShowBubble(message.body);
+        string messageText = message.body;
+
+        var senderProfile = UserProfileController.userProfilesCatalog.Get(message.sender);
+        if (!string.IsNullOrEmpty(senderProfile?.userName))
+        {
+            messageText = string.Format("{0}: {1}", senderProfile.userName, messageText);
+        }
+
+        ShowBubble(messageText, message.messageType == ChatMessage.Type.PRIVATE ? privateColor : defaultColor);
     }
 
     private void HideBubble()
@@ -88,10 +101,12 @@ public class AvatarSpeechBubble : MonoBehaviour
         uiContainer.gameObject.SetActive(false);
     }
 
-    private void ShowBubble(string text)
+    private void ShowBubble(string text, Color color)
     {
         chatText.text = FormatText(text);
+        chatText.color = color;
         lastMessageTime = Time.unscaledTime;
+        visibleTime = minVisibleTime + chatText.text.Length * SECONDS_PER_CHARACTER;
         uiContainer.gameObject.SetActive(true);
     }
 
