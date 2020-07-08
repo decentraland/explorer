@@ -5,7 +5,7 @@ import { messageReceived } from '../chat/actions'
 import { getProfile } from 'shared/profiles/selectors'
 
 declare const globalThis: StoreContainer
-let friendStatus: any = {}
+let friendStatus: Record<string, PresenceStatus> = {}
 
 export enum ChatEventType {
   MESSAGE_RECEIVED = 'MESSAGE_RECEIVED',
@@ -35,7 +35,7 @@ export function notifyFriendOnlineStatusThroughChat(userStatus: UpdateUserStatus
     return
   }
 
-  if (friendStatus[friendName] === undefined) {
+  if (!friendStatus[friendName]) {
     friendStatus[friendName] = userStatus.presence
     return
   }
@@ -54,14 +54,8 @@ export function notifyFriendOnlineStatusThroughChat(userStatus: UpdateUserStatus
       message += ` ${userStatus.position.x}, ${userStatus.position.y}`
     }
 
-    globalThis.globalStore.dispatch(
-      messageReceived({
-        messageId: uuid(),
-        messageType: ChatMessageType.SYSTEM,
-        timestamp: Date.now(),
-        body: message
-      })
-    )
+    notifyStatusThroughChat(message)
   }
+
   friendStatus[friendName] = userStatus.presence
 }
