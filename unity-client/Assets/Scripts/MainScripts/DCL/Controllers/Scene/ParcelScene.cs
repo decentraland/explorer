@@ -632,11 +632,11 @@ namespace DCL.Controllers
                     if (classId == CLASS_ID_COMPONENT.AVATAR_SHAPE)
                     {
                         newComponent = PoolManager.i.Get(AVATARS_POOL_NAME).gameObject.GetComponent<BaseComponent>();
-                        // newComponent.Cleanup(); // remove old wearables from avatar
 
                         // TODO: Unsubscribe???
                         entity.OnCleanupEvent += (dispatcher) =>
                         {
+                            newComponent.Cleanup();
                             PoolManager.i.Release(newComponent.gameObject);
                             entity.meshesInfo?.CleanReferences();
                         };

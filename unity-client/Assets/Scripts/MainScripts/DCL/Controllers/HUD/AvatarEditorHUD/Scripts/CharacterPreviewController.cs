@@ -62,7 +62,7 @@ public class CharacterPreviewController : MonoBehaviour
     {
         bool avatarDone = false;
         bool avatarFailed = false;
-        AvatarRenderer.defaultModel = newModel;
+
         avatarRenderer.ApplyModel(newModel, () => avatarDone = true, () => avatarFailed = true);
         yield return new DCL.WaitUntil(() => avatarDone || avatarFailed);
 

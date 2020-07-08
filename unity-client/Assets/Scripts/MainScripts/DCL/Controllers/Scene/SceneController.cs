@@ -246,8 +246,8 @@ namespace DCL
         {
             if (PoolManager.i.ContainsPool("AvatarShape")) return;
 
-            // PoolManager.i.AddPool("AvatarShape", Instantiate(avatarShapePrefab), maxPrewarmCount: 50, isPersistent: true, storeInactive: false).ForcePrewarm();
-            var pool = PoolManager.i.AddPool("AvatarShape", Instantiate(avatarShapePrefab), maxPrewarmCount: 5, isPersistent: true);
+            // var pool = PoolManager.i.AddPool("AvatarShape", Instantiate(avatarShapePrefab), maxPrewarmCount: 50, isPersistent: true);
+            var pool = PoolManager.i.AddPool("AvatarShape", Instantiate(avatarShapePrefab), maxPrewarmCount: 20, isPersistent: true);
             pool.ForcePrewarm();
         }
 

@@ -8,8 +8,6 @@ namespace DCL
 {
     public class AvatarRenderer : MonoBehaviour
     {
-        public static AvatarModel defaultModel;
-
         public Material defaultMaterial;
         public Material eyeMaterial;
         public Material eyebrowMaterial;
@@ -39,12 +37,6 @@ namespace DCL
         private void Awake()
         {
             animator = GetComponent<AvatarAnimatorLegacy>();
-
-            if (defaultModel != null)
-            {
-                Debug.Log("AvatarRenderer initializing with default model!");
-                ApplyModel(defaultModel, null, null);
-            }
         }
 
         public void ApplyModel(AvatarModel model, Action onSuccess, Action onFail)
@@ -73,7 +65,6 @@ namespace DCL
 
             StopLoadingCoroutines();
 
-            // if (isNewModel || this.model == null)
             if (this.model == null)
             {
                 ResetAvatar();
