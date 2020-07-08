@@ -280,12 +280,11 @@
   line-height: 22px;
 }
 
-
 /**
  * Network mismatch error
  */
 
- #error-networkmismatch.error-container .errormessage {
+#error-networkmismatch.error-container .errormessage {
   background-color: rgba(255, 255, 255, 0);
   width: 800px;
   display: flex;
@@ -808,6 +807,10 @@
  * Mobile (WIP)
  */
 
+#error-nomobile {
+  background-color: black;
+  opacity: 1;
+}
 #error-nomobile-mobile.error-container {
   position: absolute;
   top: 50%;
@@ -1101,8 +1104,7 @@
 .iphone8916 {
   width: 100%;
   min-width: 375px;
-  height: 100vh;
-  min-height: 667px;
+  height: 100%;
   position: absolute;
   top: 0;
   overflow: hidden;
@@ -1119,17 +1121,34 @@
   position: relative;
   font-family: 'SFUIText-Heavy', '-apple-system', Helvetica, Arial, serif;
   margin: auto;
+
+  padding-top: 51px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+@media screen and (min-height: 650px) {
+  .iphone8916 .div1 {
+    padding-top: 121px;
+  }
 }
 
 .iphone8916 .cta {
   -webkit-font-smoothing: antialiased;
-  background-color: rgba(255, 255, 255, 0);
+
   text-align: center;
   width: 320px;
-  position: absolute;
-  bottom: 70px;
-  left: 30px;
-  transform: rotate(0);
+
+  position: fixed;
+  bottom: 20px;
+}
+
+@media screen and (min-height: 550px) {
+  .iphone8916 .cta {
+    bottom: 70px;
+  }
 }
 
 .iphone8916 .cta img {
@@ -1141,24 +1160,34 @@
   position: absolute;
   margin: 0;
   left: 0;
-  transform: rotate(0);
 }
 
 .iphone8916 .signup {
-  font-family: 'SFUIText-Bold', '-apple-system', Helvetica, Arial, serif;
   font-weight: 500;
   font-size: 14px;
-  color: rgba(255, 255, 255, 1);
-  line-height: 14.4px;
   height: 50px;
   border-radius: 5px;
   z-index: 1000;
-  cursor: pointer;
-  border: 1px solid white;
+
   padding-top: 17px;
   padding-left: 5px;
-  text-transform: uppercase;
   width: 100%;
+
+  color: white;
+  cursor: pointer;
+
+  background-color: #ff5273;
+  box-shadow: 0px 3.66316px 0px #e12f4f;
+
+  line-height: 14.4px;
+
+  /* border: 1px solid white; */
+  border: 0;
+  border-radius: 8px;
+
+  text-transform: uppercase;
+  font-size: 13px;
+  font-family: sfsemibold, 'Helvetica Neue', Arial, sans-serif;
 }
 
 .iphone8916 .input button {
@@ -1193,13 +1222,9 @@
 
 .iphone8916 .robotmobilebrowsererror {
   -webkit-font-smoothing: antialiased;
-  background-color: rgba(255, 255, 255, 0);
+
   width: 212px;
-  position: absolute;
   margin: 0;
-  left: 50%;
-  top: 200px;
-  transform: translate(-50%, 0);
 }
 
 .iphone8916 .error {
@@ -1225,20 +1250,18 @@
 
 .iphone8916 .theclientisonlya {
   -webkit-font-smoothing: antialiased;
-  background-color: rgba(255, 255, 255, 0);
-  top: 121px;
+
   height: auto;
   width: 300px;
-  position: absolute;
-  margin: 0;
-  left: 46px;
-  transform: rotate(0);
+  line-height: 19px;
+  margin: 0 0 50px;
+
+  color: rgba(255, 255, 255, 1);
+
   font-family: 'SFUIText-Regular', Helvetica, Arial, serif;
   font-weight: 800;
   font-style: normal;
   font-size: 16px;
-  color: rgba(255, 255, 255, 1);
   text-align: right;
   letter-spacing: 2px;
-  line-height: 19px;
 }
