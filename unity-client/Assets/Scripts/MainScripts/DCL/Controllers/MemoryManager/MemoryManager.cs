@@ -22,9 +22,9 @@ namespace DCL
                 if (isEnable)
                 {
                     MemoryManager.i.CleanupPoolsIfNeeded();
-
-                    Resources.UnloadUnusedAssets();
                 }
+
+                Resources.UnloadUnusedAssets();
             };
         }
 
