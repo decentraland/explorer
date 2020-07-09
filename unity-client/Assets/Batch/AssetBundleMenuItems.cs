@@ -72,9 +72,23 @@ namespace DCL
             builder.skipAlreadyBuiltBundles = true;
             builder.deleteDownloadPathAfterFinished = false;
 
-            UnityGLTF.GLTFImporter.OnGLTFWillLoad += GLTFImporter_OnGLTFWillLoad;
+            UnityGLTF.GLTFImporter.OnGLTFWillLoad += GLTFImporter_OnNonBodyWearableLoad;
 
-            builder.DownloadAndConvertAssets(mappings.ToArray(), (err) => { UnityGLTF.GLTFImporter.OnGLTFWillLoad -= GLTFImporter_OnGLTFWillLoad; });
+            builder.DownloadAndConvertAssets(mappings.ToArray(), (err) => { UnityGLTF.GLTFImporter.OnGLTFWillLoad -= GLTFImporter_OnNonBodyWearableLoad; });
+        }
+
+        [MenuItem("Decentraland/Asset Bundle Builder/Dump All Wearables (Only bodies)")]
+        public static void DumpAllBodiesWearables()
+        {
+            List<WearableItem> avatarItemList = GetAvatarMappingList("https://wearable-api.decentraland.org/v2/collections")
+                .Where(x => x.category == WearableLiterals.Categories.BODY_SHAPE)
+                .ToList();
+
+            Queue<WearableItem> itemQueue = new Queue<WearableItem>(avatarItemList);
+            var builder = new AssetBundleBuilder();
+            builder.skipAlreadyBuiltBundles = false;
+            builder.deleteDownloadPathAfterFinished = false;
+            DumpWearableQueue(builder, itemQueue, GLTFImporter_OnBodyWearableLoad);
         }
 
         [MenuItem("Decentraland/Asset Bundle Builder/Dump All Wearables (Non bodies)")]
@@ -87,14 +101,15 @@ namespace DCL
 
             Queue<WearableItem> itemQueue = new Queue<WearableItem>(avatarItemList);
             var builder = new AssetBundleBuilder();
-            builder.skipAlreadyBuiltBundles = true;
+            builder.skipAlreadyBuiltBundles = false;
             builder.deleteDownloadPathAfterFinished = false;
-            builder.generateAssetBundles = false;
-            DumpWearableQueue(builder, itemQueue);
+            DumpWearableQueue(builder, itemQueue, GLTFImporter_OnNonBodyWearableLoad);
         }
 
-        private static void DumpWearableQueue(AssetBundleBuilder builder, Queue<WearableItem> items)
+        private static void DumpWearableQueue(AssetBundleBuilder builder, Queue<WearableItem> items, System.Action<UnityGLTF.GLTFSceneImporter> OnWearableLoad)
         {
+            builder.generateAssetBundles = false;
+
             if (items.Count == 0)
             {
                 AssetBundleManifest manifest;
@@ -111,29 +126,34 @@ namespace DCL
 
             var pairs = ExtractMappingPairs(new List<WearableItem>() { items.Dequeue() });
 
-            UnityGLTF.GLTFImporter.OnGLTFWillLoad += GLTFImporter_OnGLTFWillLoad;
+            UnityGLTF.GLTFImporter.OnGLTFWillLoad += OnWearableLoad;
 
             builder.DownloadAndConvertAssets(pairs.ToArray(),
                 (err) =>
                 {
-                    UnityGLTF.GLTFImporter.OnGLTFWillLoad -= GLTFImporter_OnGLTFWillLoad;
+                    UnityGLTF.GLTFImporter.OnGLTFWillLoad -= OnWearableLoad;
                     builder.CleanupWorkingFolders();
-                    DumpWearableQueue(builder, items);
+                    DumpWearableQueue(builder, items, OnWearableLoad);
                 });
         }
 
-        private static void GLTFImporter_OnGLTFWillLoad(UnityGLTF.GLTFSceneImporter obj)
+        private static void GLTFImporter_OnNonBodyWearableLoad(UnityGLTF.GLTFSceneImporter obj)
         {
             obj.importSkeleton = false;
             obj.maxTextureSize = 512;
         }
+        private static void GLTFImporter_OnBodyWearableLoad(UnityGLTF.GLTFSceneImporter obj)
+        {
+            obj.importSkeleton = true;
+            obj.maxTextureSize = 512;
+        }
 
-        [MenuItem("Decentraland/Asset Bundle Builder/Dump Zone -110,-110")]
+        [MenuItem("Decentraland/Asset Bundle Builder/Dump Org -6,30")]
         public static void DumpZoneArea()
         {
             var builder = new AssetBundleBuilder();
             builder.environment = ContentServerUtils.ApiEnvironment.ORG;
-            builder.DumpArea(new Vector2Int(-110, -110), new Vector2Int(1, 1));
+            builder.DumpArea(new Vector2Int(-6, 30), new Vector2Int(10, 10));
         }
 
         static void DumpAreaToMax(AssetBundleBuilder builder, int x, int y)
@@ -152,6 +172,15 @@ namespace DCL
             }
 
             builder.DumpArea(new Vector2Int(x, y), new Vector2Int(10, 10), (error) => DumpAreaToMax(builder, nextX, nextY));
+        }
+
+        [MenuItem("Decentraland/Asset Bundle Builder/Dump Org -6,30")]
+        public static void DumpOrg()
+        {
+            var builder = new AssetBundleBuilder();
+            builder.skipAlreadyBuiltBundles = true;
+            var zoneArray = Utils.GetCenteredZoneArray(new Vector2Int(-6, 30), new Vector2Int(15, 15));
+            builder.DumpArea(zoneArray);
         }
 
 
