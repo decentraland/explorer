@@ -22,6 +22,8 @@ namespace DCL
                 if (isEnable)
                 {
                     MemoryManager.i.CleanupPoolsIfNeeded();
+
+                    Resources.UnloadUnusedAssets();
                 }
             };
         }
@@ -86,7 +88,6 @@ namespace DCL
                     if (DCLTime.realtimeSinceStartup - lastTimeUnloadUnusedAssets >= MIN_TIME_BETWEEN_UNLOAD_ASSETS)
                     {
                         lastTimeUnloadUnusedAssets = DCLTime.realtimeSinceStartup;
-                        Resources.UnloadUnusedAssets();
                     }
                 }
             }

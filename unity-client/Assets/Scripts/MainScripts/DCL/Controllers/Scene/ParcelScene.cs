@@ -3,6 +3,7 @@ using DCL.Configuration;
 using DCL.Helpers;
 using DCL.Models;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Object = UnityEngine.Object;
@@ -223,6 +224,8 @@ namespace DCL.Controllers
         {
             if (isReleased)
                 return;
+
+            DisposeAllSceneComponents();
 
             if (DCLCharacterController.i)
                 DCLCharacterController.i.characterPosition.OnPrecisionAdjust -= OnPrecisionAdjust;
@@ -1131,6 +1134,15 @@ namespace DCL.Controllers
             if (isEnable)
             {
                 parcelScenesCleaner.ForceCleanup();
+            }
+        }
+
+        private void DisposeAllSceneComponents()
+        {
+            List<string> allDisposableComponents = disposableComponents.Select(x => x.Key).ToList();
+            foreach (string id in allDisposableComponents)
+            {
+                SharedComponentDispose(id);
             }
         }
 
