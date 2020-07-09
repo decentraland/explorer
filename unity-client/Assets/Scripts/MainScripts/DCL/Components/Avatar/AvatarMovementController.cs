@@ -53,21 +53,19 @@ namespace DCL
 
         float movementSpeed = SPEED_SLOW;
 
-        private void Start()
-        {
-            if (avatarTransform == null) return;
-
-            //HACK: this hack will be removed when we add a TransformLerped component
-            //This fixes the edge case on initialization when Transform component is called before AvatarShape
-            //and hack in ParcelScene.EntityComponentCreate wont work
-            MoveTo(
-                avatarTransform.localPosition - Vector3.up * DCLCharacterController.i.characterController.height / 2, // To fix the "always flying" avatars bug, We report the chara's centered position but the body hast its pivot at its feet
-                avatarTransform.transform.localRotation);
-        }
-
-
         void OnEnable()
         {
+            if (avatarTransform != null)
+            {
+                //HACK: this hack will be removed when we add a TransformLerped component
+                //This fixes the edge case on initialization when Transform component is called before AvatarShape
+                //and hack in ParcelScene.EntityComponentCreate wont work
+                isInitialPosition = true;
+                MoveTo(
+                    avatarTransform.localPosition - Vector3.up * DCLCharacterController.i.characterController.height / 2, // To fix the "always flying" avatars bug, We report the chara's centered position but the body hast its pivot at its feet
+                    avatarTransform.transform.localRotation);
+            }
+
             if (DCLCharacterController.i)
                 DCLCharacterController.i.characterPosition.OnPrecisionAdjust += OnPrecisionAdjust;
         }

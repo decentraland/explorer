@@ -346,7 +346,6 @@ namespace DCL
 
         protected virtual void OnDestroy()
         {
-            StopLoadingCoroutines();
             ResetAvatar();
         }
 

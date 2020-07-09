@@ -123,6 +123,13 @@ namespace DCL
             base.Cleanup();
 
             avatarRenderer.ResetAvatar();
+
+            OnDestroy();
+            everythingIsLoaded = false;
+            currentSerialization = "";
+            model = new AvatarModel();
+            lastAvatarPosition = null;
+            avatarUserInfo = new MinimapMetadata.MinimapUserInfo();
         }
     }
 }

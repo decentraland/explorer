@@ -367,7 +367,6 @@ namespace DCL.Controllers
 
         public void RemoveEntity(string id, bool removeImmediatelyFromEntitiesList = true)
         {
-            Debug.Log("REMOVE ENTITY: " + id);
             SceneController.i.OnMessageDecodeStart?.Invoke("RemoveEntity");
             tmpRemoveEntityMessage.id = id;
             SceneController.i.OnMessageDecodeEnds?.Invoke("RemoveEntity");
@@ -639,6 +638,7 @@ namespace DCL.Controllers
                             newComponent.Cleanup();
                             PoolManager.i.Release(newComponent.gameObject);
                             entity.meshesInfo?.CleanReferences();
+                            entity.OnTransformChange = null;
                         };
                     }
                     else
