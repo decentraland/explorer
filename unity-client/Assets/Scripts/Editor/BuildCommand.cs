@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEditor;
+using UnityEngine.Profiling;
 
 static class BuildCommand
 {
@@ -98,6 +99,7 @@ static class BuildCommand
             ? BuildOptions.AcceptExternalModificationsToPlayer
             : BuildOptions.None;
 
+        Profiler.maxUsedMemory = 17000000;
         result |= BuildOptions.ConnectWithProfiler;
         result |= BuildOptions.Development;
         return result;
