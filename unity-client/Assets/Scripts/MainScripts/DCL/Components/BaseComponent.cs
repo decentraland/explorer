@@ -14,8 +14,6 @@ namespace DCL.Components
         void UpdateFromJSON(string json);
         IEnumerator ApplyChanges(string newJson);
         void RaiseOnAppliedChanges();
-
-        MonoBehaviour GetCoroutineOwner();
         ComponentUpdateHandler CreateUpdateHandler();
     }
 
@@ -73,12 +71,12 @@ namespace DCL.Components
             updateHandler.ApplyChangesIfModified(updateHandler.oldSerialization ?? "{}");
         }
 
-        public abstract IEnumerator ApplyChanges(string newJson);
-
-        public MonoBehaviour GetCoroutineOwner()
+        private void OnDisable()
         {
-            return this;
+            updateHandler.Stop();
         }
+
+        public abstract IEnumerator ApplyChanges(string newJson);
 
         public virtual ComponentUpdateHandler CreateUpdateHandler()
         {
@@ -87,10 +85,7 @@ namespace DCL.Components
 
         public virtual void Cleanup()
         {
-            if (isRoutineRunning)
-            {
-                GetCoroutineOwner().StopCoroutine(routine);
-            }
+            updateHandler.Stop();
         }
     }
 }

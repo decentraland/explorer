@@ -113,7 +113,7 @@ namespace DCL.Components
         {
             if (isRoutineRunning)
             {
-                GetCoroutineOwner().StopCoroutine(routine);
+                CoroutineStarter.Stop(routine);
             }
         }
 

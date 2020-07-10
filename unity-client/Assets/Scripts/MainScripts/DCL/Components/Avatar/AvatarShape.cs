@@ -1,3 +1,4 @@
+using System;
 using DCL.Components;
 using DCL.Interface;
 using System.Collections;
@@ -24,25 +25,13 @@ namespace DCL
         private Vector3? lastAvatarPosition = null;
         private MinimapMetadata.MinimapUserInfo avatarUserInfo = new MinimapMetadata.MinimapUserInfo();
 
-        void Awake()
+        private void Awake()
         {
-            currentPlayerInfoCardId = Resources.Load<StringVariable>(CURRENT_PLAYER_ID);
-
-            if (string.IsNullOrEmpty(currentSerialization))
-                SetMinimapRepresentationActive(false);
-
-            onPointerDown.OnPointerDownReport += PlayerClicked;
+            OnReset();
         }
 
         void Start()
         {
-            onPointerDown.Setup(scene, entity, new OnPointerDown.Model()
-            {
-                type = OnPointerDown.NAME,
-                button = WebInterface.ACTION_BUTTON.POINTER.ToString(),
-                hoverText = "view profile"
-            });
-
             if (poolableObject != null)
             {
                 poolableObject.OnRelease += Cleanup;
@@ -68,6 +57,8 @@ namespace DCL
             //NOTE(Brian): Horrible fix to the double ApplyChanges call, as its breaking the needed logic.
             if (newJson == "{}")
                 yield break;
+
+            Debug.Log("Applying changes... " + newJson);
 
             if (entity != null && entity.OnTransformChange == null)
             {
@@ -123,6 +114,20 @@ namespace DCL
 
         public void OnReset()
         {
+            Debug.Log("Avatar shape reset " + avatarUserInfo.userName);
+            currentPlayerInfoCardId = Resources.Load<StringVariable>(CURRENT_PLAYER_ID);
+
+            if (string.IsNullOrEmpty(currentSerialization))
+                SetMinimapRepresentationActive(false);
+
+            onPointerDown.OnPointerDownReport += PlayerClicked;
+            onPointerDown.Setup(scene, entity, new OnPointerDown.Model()
+            {
+                type = OnPointerDown.NAME,
+                button = WebInterface.ACTION_BUTTON.POINTER.ToString(),
+                hoverText = "view profile"
+            });
+
             everythingIsLoaded = false;
             currentSerialization = "";
             model = new AvatarModel();
@@ -134,6 +139,7 @@ namespace DCL
         {
             base.Cleanup();
 
+            Debug.Log("Avatar shape clean " + avatarUserInfo.userName);
             avatarRenderer.CleanupAvatar();
 
             if (poolableObject != null)

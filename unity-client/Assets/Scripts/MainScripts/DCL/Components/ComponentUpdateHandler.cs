@@ -16,7 +16,10 @@ namespace DCL
 
         public IComponent owner;
 
-        public bool isRoutineRunning { get { return routine != null; } }
+        public bool isRoutineRunning
+        {
+            get { return routine != null; }
+        }
 
 #if UNITY_EDITOR
         bool applyChangesRunning = false;
@@ -29,7 +32,6 @@ namespace DCL
         }
 
 
-
         public void ApplyChangesIfModified(string newSerialization)
         {
             HandleUpdate(newSerialization);
@@ -38,25 +40,33 @@ namespace DCL
 
         protected void HandleUpdate(string newSerialization)
         {
-            if (newSerialization != oldSerialization)
+            if (newSerialization == oldSerialization)
+                return;
+
+            queue.Enqueue(newSerialization);
+
+            if (!isRoutineRunning)
             {
-                queue.Enqueue(newSerialization);
+                var enumerator = HandleUpdateCoroutines();
 
-                if (!isRoutineRunning)
+                if (enumerator != null)
                 {
-                    var enumerator = HandleUpdateCoroutines();
-
-                    if (enumerator != null)
-                    {
-                        routine = owner.GetCoroutineOwner().StartCoroutine(enumerator);
-                    }
+                    routine = CoroutineStarter.Start(enumerator);
                 }
-
-                oldSerialization = newSerialization;
             }
+
+            oldSerialization = newSerialization;
         }
 
+        public void Stop()
+        {
+            if (routine == null)
+                return;
 
+            CoroutineStarter.Stop(routine);
+            routine = null;
+            applyChangesRunning = false;
+        }
 
         protected IEnumerator HandleUpdateCoroutines()
         {
@@ -95,24 +105,5 @@ namespace DCL
 #endif
             owner.RaiseOnAppliedChanges();
         }
-
-        public void HandleUpdate_Legacy(string newSerialization)
-        {
-            if (newSerialization != oldSerialization)
-            {
-                if (isRoutineRunning)
-                    owner.GetCoroutineOwner().StopCoroutine(routine);
-
-                var enumerator = ApplyChangesWrapper(newSerialization);
-
-                if (enumerator != null)
-                {
-                    routine = owner.GetCoroutineOwner().StartCoroutine(enumerator);
-                }
-
-                oldSerialization = newSerialization;
-            }
-        }
     }
-
 }
