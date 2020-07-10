@@ -70,15 +70,15 @@ namespace DCL
         [System.NonSerialized] public bool isWssDebugMode;
         [System.NonSerialized] public bool prewarmSceneMessagesPool = true;
         [System.NonSerialized] public bool useBoundariesChecker = true;
+
         [System.NonSerialized] public bool prewarmEntitiesPool = true;
-        [System.NonSerialized] public bool prewarmAvatarsPool = true;
 
         public bool hasPendingMessages => MessagingControllersManager.i.pendingMessagesCount > 0;
 
         public string globalSceneId { get; private set; }
         public string currentSceneId { get; private set; }
+
         public SceneBoundariesChecker boundariesChecker { get; private set; }
-        public GameObject avatarShapePrefab;
 
         private bool sceneSortDirty = false;
         private bool positionDirty = true;
@@ -152,8 +152,8 @@ namespace DCL
 
         private void SetPositionDirty(DCLCharacterPosition character)
         {
-            var currentX = (int)Math.Floor(character.worldPosition.x / ParcelSettings.PARCEL_SIZE);
-            var currentY = (int)Math.Floor(character.worldPosition.z / ParcelSettings.PARCEL_SIZE);
+            var currentX = (int) Math.Floor(character.worldPosition.x / ParcelSettings.PARCEL_SIZE);
+            var currentY = (int) Math.Floor(character.worldPosition.z / ParcelSettings.PARCEL_SIZE);
 
             positionDirty = currentX != currentGridSceneCoordinate.x || currentY != currentGridSceneCoordinate.y;
 
@@ -232,23 +232,13 @@ namespace DCL
             if (prewarmEntitiesPool)
                 PoolManager.i.AddPool("Empty", new GameObject(), maxPrewarmCount: 2000, isPersistent: true).ForcePrewarm();
 
-            // if (prewarmAvatarsPool)
-            //     PrewarmAvatarsPool();
+            componentFactory.PrewarmPools();
 
             if (!debugScenes)
             {
                 CommonScriptableObjects.rendererState.OnChange += OnRenderingStateChange;
                 OnRenderingStateChange(CommonScriptableObjects.rendererState.Get(), false);
             }
-        }
-
-        public void PrewarmAvatarsPool()
-        {
-            if (PoolManager.i.ContainsPool("AvatarShape")) return;
-
-            // var pool = PoolManager.i.AddPool("AvatarShape", Instantiate(avatarShapePrefab), maxPrewarmCount: 50, isPersistent: true);
-            var pool = PoolManager.i.AddPool("AvatarShape", Instantiate(avatarShapePrefab), maxPrewarmCount: 20, isPersistent: true);
-            pool.ForcePrewarm();
         }
 
         private void OnRenderingStateChange(bool enabled, bool prevState)
@@ -481,7 +471,7 @@ namespace DCL
         public void UnloadScene(string sceneKey)
         {
             var queuedMessage = new MessagingBus.QueuedSceneMessage()
-            { type = MessagingBus.QueuedSceneMessage.Type.UNLOAD_PARCEL, message = sceneKey };
+                {type = MessagingBus.QueuedSceneMessage.Type.UNLOAD_PARCEL, message = sceneKey};
 
             OnMessageWillQueue?.Invoke(MessagingTypes.SCENE_DESTROY);
 
@@ -554,7 +544,7 @@ namespace DCL
         public void UpdateParcelScenes(string decentralandSceneJSON)
         {
             var queuedMessage = new MessagingBus.QueuedSceneMessage()
-            { type = MessagingBus.QueuedSceneMessage.Type.UPDATE_PARCEL, message = decentralandSceneJSON };
+                {type = MessagingBus.QueuedSceneMessage.Type.UPDATE_PARCEL, message = decentralandSceneJSON};
 
             OnMessageWillQueue?.Invoke(MessagingTypes.SCENE_UPDATE);
 
@@ -563,7 +553,7 @@ namespace DCL
 
         public void UnloadAllScenesQueued()
         {
-            var queuedMessage = new MessagingBus.QueuedSceneMessage() { type = MessagingBus.QueuedSceneMessage.Type.UNLOAD_SCENES };
+            var queuedMessage = new MessagingBus.QueuedSceneMessage() {type = MessagingBus.QueuedSceneMessage.Type.UNLOAD_SCENES};
 
             OnMessageWillQueue?.Invoke(MessagingTypes.SCENE_DESTROY);
 
@@ -577,7 +567,7 @@ namespace DCL
 
         private string SendSceneMessage(string payload, bool enqueue)
         {
-            string[] chunks = payload.Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] chunks = payload.Split(new char[] {'\n'}, StringSplitOptions.RemoveEmptyEntries);
             int count = chunks.Length;
             string lastBusId = null;
 
@@ -816,7 +806,7 @@ namespace DCL
 
             if (data.parcels == null)
             {
-                data.parcels = new Vector2Int[] { data.basePosition };
+                data.parcels = new Vector2Int[] {data.basePosition};
             }
 
             if (string.IsNullOrEmpty(data.id))

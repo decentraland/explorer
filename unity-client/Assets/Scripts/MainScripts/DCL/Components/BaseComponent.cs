@@ -26,6 +26,7 @@ namespace DCL.Components
     public class WaitForComponentUpdate : CleanableYieldInstruction
     {
         public IComponent component;
+
         public WaitForComponentUpdate(IComponent component)
         {
             this.component = component;
@@ -33,11 +34,9 @@ namespace DCL.Components
 
         public override bool keepWaiting
         {
-            get
-            {
-                return component.isRoutineRunning;
-            }
+            get { return component.isRoutineRunning; }
         }
+
         public override void Cleanup()
         {
             component.Cleanup();
@@ -53,6 +52,7 @@ namespace DCL.Components
 
         [NonSerialized] public ParcelScene scene;
         [NonSerialized] public DecentralandEntity entity;
+        [NonSerialized] public PoolableObject poolableObject;
 
         public string componentName => "BaseComponent";
 

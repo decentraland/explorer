@@ -46,10 +46,10 @@ public class CharacterPreviewController : MonoBehaviour
     {
         cameraFocusLookUp = new System.Collections.Generic.Dictionary<CameraFocus, Transform>()
         {
-            { CameraFocus.DefaultEditing, defaultEditingTemplate },
-            { CameraFocus.FaceEditing, faceEditingTemplate },
-            { CameraFocus.FaceSnapshot, faceSnapshotTemplate },
-            { CameraFocus.BodySnapshot, bodySnapshotTemplate },
+            {CameraFocus.DefaultEditing, defaultEditingTemplate},
+            {CameraFocus.FaceEditing, faceEditingTemplate},
+            {CameraFocus.FaceSnapshot, faceSnapshotTemplate},
+            {CameraFocus.BodySnapshot, bodySnapshotTemplate},
         };
     }
 
@@ -72,9 +72,6 @@ public class CharacterPreviewController : MonoBehaviour
         }
 
         onDone?.Invoke();
-
-        // TODO: Hook this prewarm differently, mauybe to an event once we have the user profile loaded?
-        SceneController.i.PrewarmAvatarsPool();
     }
 
     private void SetLayerRecursively(GameObject gameObject, int layer)

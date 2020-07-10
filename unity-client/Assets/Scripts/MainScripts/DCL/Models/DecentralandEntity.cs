@@ -18,10 +18,7 @@ namespace DCL.Models
 
             public GameObject meshRootGameObject
             {
-                get
-                {
-                    return meshRootGameObjectValue;
-                }
+                get { return meshRootGameObjectValue; }
                 set
                 {
                     meshRootGameObjectValue = value;
@@ -39,6 +36,7 @@ namespace DCL.Models
             Vector3 lastBoundsCalculationScale;
             Quaternion lastBoundsCalculationRotation;
             Bounds mergedBoundsValue;
+
             public Bounds mergedBounds
             {
                 get
@@ -54,10 +52,7 @@ namespace DCL.Models
 
                     return mergedBoundsValue;
                 }
-                set
-                {
-                    mergedBoundsValue = value;
-                }
+                set { mergedBoundsValue = value; }
             }
 
             GameObject meshRootGameObjectValue;
@@ -207,6 +202,14 @@ namespace DCL.Models
 
             // This will release the poolable objects of the mesh and the entity
             OnCleanupEvent?.Invoke(this);
+
+            foreach (var kvp in components)
+            {
+                if (kvp.Value.poolableObject == null)
+                    continue;
+
+                kvp.Value.poolableObject.Release();
+            }
 
             if (meshesInfo.meshRootGameObject)
             {

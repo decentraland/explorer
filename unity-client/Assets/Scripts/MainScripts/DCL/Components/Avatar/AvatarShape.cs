@@ -42,6 +42,20 @@ namespace DCL
                 button = WebInterface.ACTION_BUTTON.POINTER.ToString(),
                 hoverText = "view profile"
             });
+
+            if (poolableObject != null)
+            {
+                poolableObject.OnRelease += Cleanup;
+            }
+
+            // // TODO: Unsubscribe???
+            // entity.OnCleanupEvent += (dispatcher) =>
+            // {
+            //     newComponent.Cleanup();
+            //     PoolManager.i.Release(newComponent.gameObject);
+            //     entity.meshesInfo?.CleanReferences();
+            //     entity.OnTransformChange = null;
+            // };
         }
 
         private void PlayerClicked()
@@ -51,6 +65,12 @@ namespace DCL
 
         void OnDestroy()
         {
+            if (poolableObject != null)
+            {
+                poolableObject.OnRelease -= Cleanup;
+                poolableObject.pool.RemoveFromPool(poolableObject);
+            }
+
             onPointerDown.OnPointerDownReport -= PlayerClicked;
             if (entity != null)
             {
