@@ -310,7 +310,7 @@ namespace DCL.Components
 
             if (material != null)
             {
-                GameObject.Destroy(material);
+                Utils.SafeDestroy(material);
             }
 
             base.Dispose();
