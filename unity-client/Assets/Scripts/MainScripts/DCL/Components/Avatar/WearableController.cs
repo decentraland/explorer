@@ -50,7 +50,7 @@ public class WearableController
 
         loader = new RendereableAssetLoadHelper(provider, wearable.baseUrlBundles);
 
-        loader.settings.forceNewInstance = false;
+        loader.settings.forceNewInstance = true;
         loader.settings.initialLocalPosition = Vector3.up * 0.75f;
         loader.settings.cachingFlags = MaterialCachingHelper.Mode.CACHE_SHADERS;
         loader.settings.visibleFlags = AssetPromiseSettings_Rendering.VisibleFlags.INVISIBLE;
@@ -91,6 +91,7 @@ public class WearableController
             skinnedRenderers[i1].rootBone = skinnedMeshRenderer.rootBone;
             skinnedRenderers[i1].bones = skinnedMeshRenderer.bones;
         }
+
         bonesRetargeted = true;
     }
 

@@ -97,10 +97,6 @@ namespace DCL
         {
             StopLoadingCoroutines();
 
-            Destroy(eyebrowMaterialCopy);
-            Destroy(eyeMaterialCopy);
-            Destroy(mouthMaterialCopy);
-
             bodyShapeController?.CleanUp();
             bodyShapeController = null;
 
@@ -186,9 +182,14 @@ namespace DCL
             bool eyebrowsReady = false;
             bool mouthReady = false;
 
-            eyeMaterialCopy = new Material(eyeMaterial);
-            mouthMaterialCopy = new Material(mouthMaterial);
-            eyebrowMaterialCopy = new Material(eyebrowMaterial);
+            if (eyeMaterialCopy == null)
+                eyeMaterialCopy = new Material(eyeMaterial);
+
+            if (mouthMaterialCopy == null)
+                mouthMaterialCopy = new Material(mouthMaterial);
+
+            if (eyebrowMaterialCopy == null)
+                eyebrowMaterialCopy = new Material(eyebrowMaterial);
 
             var eyeCoroutine = CoroutineStarter.Start(eyesController?.FetchTextures((mainTexture, maskTexture) =>
             {
@@ -347,6 +348,10 @@ namespace DCL
         protected virtual void OnDestroy()
         {
             CleanupAvatar();
+
+            Destroy(eyebrowMaterialCopy);
+            Destroy(eyeMaterialCopy);
+            Destroy(mouthMaterialCopy);
         }
 
         private void ProcessWearable(string wearableId)

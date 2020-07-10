@@ -58,8 +58,6 @@ namespace DCL
             if (newJson == "{}")
                 yield break;
 
-            Debug.Log("Applying changes... " + newJson);
-
             if (entity != null && entity.OnTransformChange == null)
             {
                 entity.OnTransformChange += avatarMovementController.OnTransformChanged;
@@ -114,7 +112,6 @@ namespace DCL
 
         public void OnReset()
         {
-            Debug.Log("Avatar shape reset " + avatarUserInfo.userName);
             currentPlayerInfoCardId = Resources.Load<StringVariable>(CURRENT_PLAYER_ID);
 
             if (string.IsNullOrEmpty(currentSerialization))

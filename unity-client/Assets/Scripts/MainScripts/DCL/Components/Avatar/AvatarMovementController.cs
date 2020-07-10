@@ -27,12 +27,10 @@ namespace DCL
         Transform avatarTransformValue;
 
         bool isInitialPosition = true;
+
         Vector3 currentPosition
         {
-            get
-            {
-                return currentWorldPosition;
-            }
+            get { return currentWorldPosition; }
 
             set
             {
@@ -42,6 +40,7 @@ namespace DCL
         }
 
         Vector3 currentWorldPosition = Vector3.zero;
+
         Quaternion currentRotation
         {
             get { return avatarTransform.rotation; }
