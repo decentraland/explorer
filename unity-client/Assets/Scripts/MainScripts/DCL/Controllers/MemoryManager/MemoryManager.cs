@@ -8,8 +8,6 @@ namespace DCL
     public class MemoryManager : Singleton<MemoryManager>
     {
         private const float TIME_TO_POOL_CLEANUP = 60.0f;
-        private const float MIN_TIME_BETWEEN_UNLOAD_ASSETS = 10.0f;
-        private float lastTimeUnloadUnusedAssets = 0;
 
         public void Initialize()
         {
@@ -84,11 +82,6 @@ namespace DCL
                     {
                         PoolManager.i.RemovePool(idsToCleanup[i]);
                         yield return null;
-                    }
-
-                    if (DCLTime.realtimeSinceStartup - lastTimeUnloadUnusedAssets >= MIN_TIME_BETWEEN_UNLOAD_ASSETS)
-                    {
-                        lastTimeUnloadUnusedAssets = DCLTime.realtimeSinceStartup;
                     }
                 }
             }
