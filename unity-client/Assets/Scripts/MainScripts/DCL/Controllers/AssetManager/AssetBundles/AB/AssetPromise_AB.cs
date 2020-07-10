@@ -105,8 +105,29 @@ namespace DCL
         {
         }
 
+        private UnityWebRequestAsyncOperation asyncOp;
+
         protected IEnumerator LoadAssetBundleWithDeps(string baseUrl, string hash, Action OnSuccess, Action OnFail)
         {
+            string finalUrl = baseUrl + hash;
+
+            if (failedRequestUrls.Contains(finalUrl))
+            {
+                OnFail?.Invoke();
+                yield break;
+            }
+
+            yield return WaitForConcurrentRequestsSlot();
+
+            RegisterConcurrentRequest();
+#if UNITY_EDITOR
+            assetBundleRequest = UnityWebRequestAssetBundle.GetAssetBundle(finalUrl, Hash128.Compute(hash));
+#else
+            //NOTE(Brian): Disable in build because using the asset bundle caching uses IDB.
+            assetBundleRequest = UnityWebRequestAssetBundle.GetAssetBundle(finalUrl);
+#endif
+            asyncOp = assetBundleRequest.SendWebRequest();
+
             if (!DependencyMapLoadHelper.dependenciesMap.ContainsKey(hash))
                 CoroutineStarter.Start(DependencyMapLoadHelper.GetDepMap(baseUrl, hash));
 
@@ -131,10 +152,7 @@ namespace DCL
                 }
             }
 
-            yield return WaitForConcurrentRequestsSlot();
-
-            RegisterConcurrentRequest();
-            yield return LoadAssetBundle(baseUrl + hash, OnSuccess, OnFail);
+            yield return LoadAssetBundle(finalUrl, OnSuccess, OnFail);
             UnregisterConcurrentRequest();
         }
 
@@ -164,20 +182,6 @@ namespace DCL
 
         IEnumerator LoadAssetBundle(string finalUrl, Action OnSuccess, Action OnFail)
         {
-            if (failedRequestUrls.Contains(finalUrl))
-            {
-                OnFail?.Invoke();
-                yield break;
-            }
-
-#if UNITY_EDITOR
-            assetBundleRequest = UnityWebRequestAssetBundle.GetAssetBundle(finalUrl, Hash128.Compute(hash));
-#else
-            //NOTE(Brian): Disable in build because using the asset bundle caching uses IDB.
-            assetBundleRequest = UnityWebRequestAssetBundle.GetAssetBundle(finalUrl);
-#endif
-            var asyncOp = assetBundleRequest.SendWebRequest();
-
             while (!asyncOp.isDone)
             {
                 yield return null;
