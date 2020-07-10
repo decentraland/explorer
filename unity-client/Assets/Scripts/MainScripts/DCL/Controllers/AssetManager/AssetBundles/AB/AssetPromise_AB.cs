@@ -24,7 +24,7 @@ namespace DCL
         public static int downloadingCount => concurrentRequests;
         public static int queueCount => AssetPromiseKeeper_AB.i.waitingPromisesCount;
 
-        static readonly float maxLoadBudgetTime = 0.032f;
+        static readonly float maxLoadBudgetTime = 0.004f;
         static float currentLoadBudgetTime = 0;
 
         public static bool limitTimeBudget => CommonScriptableObjects.rendererState.Get();
@@ -289,6 +289,15 @@ namespace DCL
                 if (limitTimeBudget)
                     time = Time.realtimeSinceStartup;
 
+                if (limitTimeBudget)
+                {
+                    if (currentLoadBudgetTime > maxLoadBudgetTime)
+                    {
+                        yield return null;
+                        currentLoadBudgetTime = 0;
+                    }
+                }
+
 #if UNITY_EDITOR
                 if (VERBOSE)
                     Debug.Log("loading asset = " + assetName);
@@ -300,16 +309,8 @@ namespace DCL
 
                 loadedAssetByName.Add(loadedAsset);
 
-                if (!limitTimeBudget)
-                    continue;
-
-                currentLoadBudgetTime += Time.realtimeSinceStartup - time;
-
-                if (currentLoadBudgetTime > maxLoadBudgetTime)
-                {
-                    currentLoadBudgetTime = 0;
-                    yield return null;
-                }
+                if (limitTimeBudget)
+                    currentLoadBudgetTime += Time.realtimeSinceStartup - time;
             }
         }
 
