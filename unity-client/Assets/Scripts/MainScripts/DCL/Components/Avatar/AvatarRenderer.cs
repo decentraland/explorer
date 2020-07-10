@@ -67,7 +67,7 @@ namespace DCL
 
             if (this.model == null)
             {
-                ResetAvatar();
+                CleanupAvatar();
                 this.OnSuccessEvent?.Invoke();
                 return;
             }
@@ -93,7 +93,7 @@ namespace DCL
             loadCoroutine = null;
         }
 
-        public void ResetAvatar()
+        public void CleanupAvatar()
         {
             StopLoadingCoroutines();
 
@@ -239,7 +239,7 @@ namespace DCL
             Debug.LogError($"Avatar: {model.name}  -  Failed loading wearable: {wearableController.id}");
             StopLoadingCoroutines();
 
-            ResetAvatar();
+            CleanupAvatar();
             isLoading = false;
             OnFailEvent?.Invoke();
         }
@@ -346,7 +346,7 @@ namespace DCL
 
         protected virtual void OnDestroy()
         {
-            ResetAvatar();
+            CleanupAvatar();
         }
 
         private void ProcessWearable(string wearableId)

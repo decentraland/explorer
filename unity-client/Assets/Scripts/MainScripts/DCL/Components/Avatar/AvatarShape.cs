@@ -46,16 +46,8 @@ namespace DCL
             if (poolableObject != null)
             {
                 poolableObject.OnRelease += Cleanup;
+                poolableObject.OnReset += OnReset;
             }
-
-            // // TODO: Unsubscribe???
-            // entity.OnCleanupEvent += (dispatcher) =>
-            // {
-            //     newComponent.Cleanup();
-            //     PoolManager.i.Release(newComponent.gameObject);
-            //     entity.meshesInfo?.CleanReferences();
-            //     entity.OnTransformChange = null;
-            // };
         }
 
         private void PlayerClicked()
@@ -65,19 +57,10 @@ namespace DCL
 
         void OnDestroy()
         {
-            if (poolableObject != null)
-            {
-                poolableObject.OnRelease -= Cleanup;
-                poolableObject.pool.RemoveFromPool(poolableObject);
-            }
+            Cleanup();
 
-            onPointerDown.OnPointerDownReport -= PlayerClicked;
-            if (entity != null)
-            {
-                entity.OnTransformChange = null;
-                avatarUserInfo.userId = model.id;
-                MinimapMetadataController.i?.UpdateMinimapUserInformation(avatarUserInfo, true);
-            }
+            if (poolableObject != null && poolableObject.isInsidePool)
+                poolableObject.pool.RemoveFromPool(poolableObject);
         }
 
         public override IEnumerator ApplyChanges(string newJson)
@@ -138,18 +121,34 @@ namespace DCL
             MinimapMetadataController.i?.UpdateMinimapUserInformation(avatarUserInfo);
         }
 
-        public override void Cleanup()
+        public void OnReset()
         {
-            base.Cleanup();
-
-            avatarRenderer.ResetAvatar();
-
-            OnDestroy();
             everythingIsLoaded = false;
             currentSerialization = "";
             model = new AvatarModel();
             lastAvatarPosition = null;
             avatarUserInfo = new MinimapMetadata.MinimapUserInfo();
+        }
+
+        public override void Cleanup()
+        {
+            base.Cleanup();
+
+            avatarRenderer.CleanupAvatar();
+
+            if (poolableObject != null)
+            {
+                poolableObject.OnRelease -= Cleanup;
+            }
+
+            onPointerDown.OnPointerDownReport -= PlayerClicked;
+
+            if (entity != null)
+            {
+                entity.OnTransformChange = null;
+                avatarUserInfo.userId = model.id;
+                MinimapMetadataController.i?.UpdateMinimapUserInformation(avatarUserInfo, true);
+            }
         }
     }
 }

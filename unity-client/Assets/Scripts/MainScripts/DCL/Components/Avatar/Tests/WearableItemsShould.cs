@@ -248,7 +248,7 @@ namespace AvatarShape_Tests
         [Category("Explicit")]
         public IEnumerator BeHiddenUntilWholeAvatarIsReady()
         {
-            avatarShape.avatarRenderer.ResetAvatar();
+            avatarShape.avatarRenderer.CleanupAvatar();
             yield return null; //NOTE(Brian): Must wait a frame in order to all gameObjects finishes destroying.
 
             avatarModel.wearables = new List<string>() { SUNGLASSES_ID, BLUE_BANDANA_ID };

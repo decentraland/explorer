@@ -228,6 +228,7 @@ namespace DCL.Models
                 }
             }
 
+            OnTransformChange = null;
             isReleased = true;
         }
 

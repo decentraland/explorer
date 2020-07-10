@@ -9,9 +9,18 @@ namespace DCL
         public LinkedListNode<PoolableObject> node;
         public GameObject gameObject;
 
-        public bool isInsidePool { get { return node != null; } }
+        public bool isInsidePool
+        {
+            get { return node != null; }
+        }
 
+        public System.Action OnReset;
         public System.Action OnRelease;
+
+        public void Reset()
+        {
+            OnReset?.Invoke();
+        }
 
         public void Release()
         {
