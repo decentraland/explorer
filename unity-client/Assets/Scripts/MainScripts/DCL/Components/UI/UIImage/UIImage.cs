@@ -1,4 +1,4 @@
-﻿using DCL.Controllers;
+using DCL.Controllers;
 using DCL.Helpers;
 using DCL.Models;
 using System.Collections;
@@ -113,9 +113,10 @@ namespace DCL.Components
         public override void Dispose()
         {
             dclTexture?.DetachFrom(this);
-            dclTexture = null;
+            dclTexture?.Dispose();
 
-            Utils.SafeDestroy(referencesContainer.gameObject);
+            if (referencesContainer != null)
+                Utils.SafeDestroy(referencesContainer.gameObject);
 
             base.Dispose();
         }
