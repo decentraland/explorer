@@ -94,9 +94,13 @@ static class BuildCommand
     {
         string buildOptions = GetArgument("customBuildOptions");
 
-        return buildOptions == "AcceptExternalModificationsToPlayer"
+        var result = buildOptions == "AcceptExternalModificationsToPlayer"
             ? BuildOptions.AcceptExternalModificationsToPlayer
             : BuildOptions.None;
+
+        result |= BuildOptions.ConnectWithProfiler;
+        result |= BuildOptions.Development;
+        return result;
     }
 
     // https://stackoverflow.com/questions/1082532/how-to-tryparse-for-enum-value
@@ -107,7 +111,7 @@ static class BuildCommand
             return defaultValue;
         }
 
-        return (TEnum)Enum.Parse(typeof(TEnum), strEnumValue);
+        return (TEnum) Enum.Parse(typeof(TEnum), strEnumValue);
     }
 
     static string getEnv(string key, bool secret = false, bool verbose = true)
