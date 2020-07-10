@@ -14,7 +14,7 @@ namespace DCL
     {
         public static bool VERBOSE = false;
 
-        public static int MAX_CONCURRENT_REQUESTS = 30;
+        public static int MAX_CONCURRENT_REQUESTS = CommonScriptableObjects.rendererState.Get() ? 30 : 256;
 
         public static int concurrentRequests = 0;
         public static event Action OnDownloadingProgressUpdate;
@@ -145,43 +145,8 @@ namespace DCL
                         dependencyPromises.Add(promise);
                     }
                 }
-
-                foreach (var promise in dependencyPromises)
-                {
-                    yield return promise;
-                }
             }
 
-            yield return LoadAssetBundle(finalUrl, OnSuccess, OnFail);
-            UnregisterConcurrentRequest();
-        }
-
-        public override string ToString()
-        {
-            string result = $"AB request... loadCoroutine = {loadCoroutine} ... state = {state}\n";
-
-            if (assetBundleRequest != null)
-                result += $"url = {assetBundleRequest.url} ... code = {assetBundleRequest.responseCode} ... progress = {assetBundleRequest.downloadProgress}\n";
-            else
-                result += $"null request for url: {contentUrl + hash}\n";
-
-
-            if (dependencyPromises != null && dependencyPromises.Count > 0)
-            {
-                result += "Dependencies:\n\n";
-                foreach (var p in dependencyPromises)
-                {
-                    result += p.ToString() + "\n\n";
-                }
-            }
-
-            result += "Concurrent requests = " + concurrentRequests;
-
-            return result;
-        }
-
-        IEnumerator LoadAssetBundle(string finalUrl, Action OnSuccess, Action OnFail)
-        {
             while (!asyncOp.isDone)
             {
                 yield return null;
@@ -203,6 +168,13 @@ namespace DCL
                 assetBundleRequest = null;
                 OnFail?.Invoke();
                 yield break;
+            }
+
+            UnregisterConcurrentRequest();
+
+            foreach (var promise in dependencyPromises)
+            {
+                yield return promise;
             }
 
             AssetBundle assetBundle = DownloadHandlerAssetBundle.GetContent(assetBundleRequest);
@@ -260,9 +232,34 @@ namespace DCL
             OnSuccess?.Invoke();
         }
 
+        public override string ToString()
+        {
+            string result = $"AB request... loadCoroutine = {loadCoroutine} ... state = {state}\n";
+
+            if (assetBundleRequest != null)
+                result += $"url = {assetBundleRequest.url} ... code = {assetBundleRequest.responseCode} ... progress = {assetBundleRequest.downloadProgress}\n";
+            else
+                result += $"null request for url: {contentUrl + hash}\n";
+
+
+            if (dependencyPromises != null && dependencyPromises.Count > 0)
+            {
+                result += "Dependencies:\n\n";
+                foreach (var p in dependencyPromises)
+                {
+                    result += p.ToString() + "\n\n";
+                }
+            }
+
+            result += "Concurrent requests = " + concurrentRequests;
+
+            return result;
+        }
 
         private IEnumerator LoadAssetsInOrder(AssetBundle assetBundle, List<UnityEngine.Object> loadedAssetByName)
         {
+            float time = Time.realtimeSinceStartup;
+
             string[] assets = assetBundle.GetAllAssetNames();
 
             assetsToLoad = assets.OrderBy(
@@ -276,6 +273,9 @@ namespace DCL
                         return 99;
                 });
 
+            if (limitTimeBudget)
+                currentLoadBudgetTime += Time.realtimeSinceStartup - time;
+
             foreach (string assetName in assetsToLoad)
             {
                 //NOTE(Brian): For some reason, another coroutine iteration can be triggered after Cleanup().
@@ -287,8 +287,6 @@ namespace DCL
 
                 if (asset == null)
                     break;
-
-                float time = 0;
 
                 if (limitTimeBudget)
                     time = Time.realtimeSinceStartup;
