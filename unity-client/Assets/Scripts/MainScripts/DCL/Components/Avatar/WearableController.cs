@@ -3,6 +3,7 @@ using DCL.Components;
 using DCL.Helpers;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -50,7 +51,7 @@ public class WearableController
 
         loader = new RendereableAssetLoadHelper(provider, wearable.baseUrlBundles);
 
-        loader.settings.forceNewInstance = true;
+        loader.settings.forceNewInstance = false;
         loader.settings.initialLocalPosition = Vector3.up * 0.75f;
         loader.settings.cachingFlags = MaterialCachingHelper.Mode.CACHE_SHADERS;
         loader.settings.visibleFlags = AssetPromiseSettings_Rendering.VisibleFlags.INVISIBLE;
@@ -67,6 +68,8 @@ public class WearableController
         loader.Load(representation.mainFile);
     }
 
+    Dictionary<Renderer, Material[]> originalMaterials = new Dictionary<Renderer, Material[]>();
+
     public void SetupDefaultMaterial(Material defaultMaterial, Color skinColor, Color hairColor)
     {
         if (assetContainer == null)
@@ -74,11 +77,35 @@ public class WearableController
 
         if (materials == null)
         {
+            StoreOriginalMaterials();
             materials = AvatarUtils.ReplaceMaterialsWithCopiesOf(assetContainer.transform, defaultMaterial);
         }
 
         AvatarUtils.SetColorInHierarchy(assetContainer.transform, MATERIAL_FILTER_SKIN, skinColor);
         AvatarUtils.SetColorInHierarchy(assetContainer.transform, MATERIAL_FILTER_HAIR, hairColor);
+    }
+
+    private void StoreOriginalMaterials()
+    {
+        Renderer[] renderers = assetContainer.transform.GetComponentsInChildren<Renderer>();
+
+        for (int i = 0; i < renderers.Length; i++)
+        {
+            if (originalMaterials.ContainsKey(renderers[i]))
+                continue;
+
+            originalMaterials.Add(renderers[i], renderers[i].sharedMaterials.ToArray());
+        }
+    }
+
+    private void RestoreOriginalMaterials()
+    {
+        foreach (var kvp in originalMaterials)
+        {
+            kvp.Key.materials = kvp.Value;
+        }
+
+        originalMaterials.Clear();
     }
 
     public void SetAnimatorBones(SkinnedMeshRenderer skinnedMeshRenderer)
@@ -98,6 +125,7 @@ public class WearableController
     public void CleanUp()
     {
         UnloadMaterials();
+        RestoreOriginalMaterials();
 
         if (loader != null)
         {
