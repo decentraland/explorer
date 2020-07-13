@@ -58,12 +58,6 @@ namespace DCL
             if (newJson == "{}")
                 yield break;
 
-            if (entity != null && entity.OnTransformChange == null)
-            {
-                entity.OnTransformChange += avatarMovementController.OnTransformChanged;
-                entity.OnTransformChange += OnEntityTransformChanged;
-            }
-
             if (currentSerialization == newJson)
                 yield break;
 
@@ -112,6 +106,16 @@ namespace DCL
 
         public void OnReset()
         {
+            AvatarAnimatorLegacy animator = GetComponent<AvatarAnimatorLegacy>();
+
+            if (animator != null)
+                animator.OnReset();
+
+            AvatarMovementController movement = GetComponent<AvatarMovementController>();
+
+            if (movement != null)
+                movement.OnReset();
+
             currentPlayerInfoCardId = Resources.Load<StringVariable>(CURRENT_PLAYER_ID);
 
             if (string.IsNullOrEmpty(currentSerialization))
@@ -130,13 +134,20 @@ namespace DCL
             model = new AvatarModel();
             lastAvatarPosition = null;
             avatarUserInfo = new MinimapMetadata.MinimapUserInfo();
+
+            if (entity != null && entity.OnTransformChange == null)
+            {
+                Debug.Log("Suscribing to move...");
+                entity.OnTransformChange += avatarMovementController.OnTransformChanged;
+                entity.OnTransformChange += OnEntityTransformChanged;
+            }
         }
 
         public override void Cleanup()
         {
             base.Cleanup();
 
-            Debug.Log("Avatar shape clean " + avatarUserInfo.userName);
+            //Debug.Log("Avatar shape clean " + avatarUserInfo.userName);
             avatarRenderer.CleanupAvatar();
 
             if (poolableObject != null)
@@ -148,6 +159,7 @@ namespace DCL
 
             if (entity != null)
             {
+                Debug.Log("Unsuscribing from move...");
                 entity.OnTransformChange = null;
                 avatarUserInfo.userId = model.id;
                 MinimapMetadataController.i?.UpdateMinimapUserInformation(avatarUserInfo, true);

@@ -52,19 +52,13 @@ namespace DCL
 
         float movementSpeed = SPEED_SLOW;
 
+        public void OnReset()
+        {
+            isInitialPosition = true;
+        }
+
         void OnEnable()
         {
-            if (avatarTransform != null)
-            {
-                //HACK: this hack will be removed when we add a TransformLerped component
-                //This fixes the edge case on initialization when Transform component is called before AvatarShape
-                //and hack in ParcelScene.EntityComponentCreate wont work
-                isInitialPosition = true;
-                MoveTo(
-                    avatarTransform.localPosition - Vector3.up * DCLCharacterController.i.characterController.height / 2, // To fix the "always flying" avatars bug, We report the chara's centered position but the body hast its pivot at its feet
-                    avatarTransform.transform.localRotation);
-            }
-
             if (DCLCharacterController.i)
                 DCLCharacterController.i.characterPosition.OnPrecisionAdjust += OnPrecisionAdjust;
         }
@@ -154,7 +148,7 @@ namespace DCL
             }
 
             Vector3 direction = (targetPosition - currentPosition).normalized;
-            Vector3 delta = direction * movementSpeed * deltaTime;
+            Vector3 delta = direction * (movementSpeed * deltaTime);
 
             //NOTE(Brian): We need a separate value for Y movement because the gravity has to be lerped faster.
             delta.y = direction.y * SPEED_GRAVITY * deltaTime;
