@@ -137,7 +137,6 @@ namespace DCL
 
             if (entity != null && entity.OnTransformChange == null)
             {
-                Debug.Log("Suscribing to move...");
                 entity.OnTransformChange += avatarMovementController.OnTransformChanged;
                 entity.OnTransformChange += OnEntityTransformChanged;
             }
@@ -159,7 +158,6 @@ namespace DCL
 
             if (entity != null)
             {
-                Debug.Log("Unsuscribing from move...");
                 entity.OnTransformChange = null;
                 avatarUserInfo.userId = model.id;
                 MinimapMetadataController.i?.UpdateMinimapUserInformation(avatarUserInfo, true);

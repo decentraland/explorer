@@ -98,7 +98,6 @@ namespace DCL
 
             if (factoryItem.usePool)
             {
-                Debug.Log("Pool get...");
                 poolableObject = factoryItem.pool.Get();
                 instancedGo = poolableObject.gameObject;
             }
