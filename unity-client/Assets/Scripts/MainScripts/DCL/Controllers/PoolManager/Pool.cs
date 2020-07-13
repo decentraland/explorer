@@ -202,8 +202,13 @@ namespace DCL
 
         public void RemoveFromPool(PoolableObject poolable)
         {
-            poolable.node.List.Remove(poolable);
-            poolable.node = null;
+            if (poolable.node != null)
+            {
+                if (poolable.node.List != null)
+                    poolable.node.List.Remove(poolable);
+
+                poolable.node = null;
+            }
 
             PoolManager.i.poolables.Remove(poolable.gameObject);
             PoolManager.i.poolableValues.Remove(poolable);
@@ -214,6 +219,7 @@ namespace DCL
 
         public void Cleanup()
         {
+            Debug.Log("Pool cleanup ... " + id);
             ReleaseAll();
 
             while (unusedObjects.Count > 0)

@@ -63,7 +63,7 @@ namespace DCL
             {
                 Item item = factoryList[i];
 
-                if (item.usePool)
+                if (item.usePool && item.pool == null)
                 {
                     GameObject original = Instantiate(item.prefab.gameObject);
                     item.pool = PoolManager.i.AddPool(item.classId.ToString() + "_POOL", original, maxPrewarmCount: item.prewarmCount, isPersistent: true);
@@ -98,6 +98,7 @@ namespace DCL
 
             if (factoryItem.usePool)
             {
+                Debug.Log("Pool get...");
                 poolableObject = factoryItem.pool.Get();
                 instancedGo = poolableObject.gameObject;
             }

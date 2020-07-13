@@ -66,7 +66,6 @@ namespace DCL.Controllers
         }
 
         private CreateEntityMessage tmpCreateEntityMessage = new CreateEntityMessage();
-        private const string EMPTY_GO_POOL_NAME = "Empty";
 
         public void Awake()
         {
@@ -337,15 +336,10 @@ namespace DCL.Controllers
             var newEntity = new DecentralandEntity();
             newEntity.entityId = tmpCreateEntityMessage.id;
 
-            if (!PoolManager.i.ContainsPool(EMPTY_GO_POOL_NAME))
-            {
-                GameObject go = new GameObject();
-                Pool pool = PoolManager.i.AddPool(EMPTY_GO_POOL_NAME, go, maxPrewarmCount: 2000, isPersistent: true);
-                pool.ForcePrewarm();
-            }
+            SceneController.i.EnsureEntityPool();
 
             // As we know that the pool already exists, we just get one gameobject from it
-            PoolableObject po = PoolManager.i.Get(EMPTY_GO_POOL_NAME);
+            PoolableObject po = PoolManager.i.Get(SceneController.EMPTY_GO_POOL_NAME);
             newEntity.gameObject = po.gameObject;
             newEntity.gameObject.name = "ENTITY_" + tmpCreateEntityMessage.id;
             newEntity.gameObject.transform.SetParent(gameObject.transform, false);
