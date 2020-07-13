@@ -31,17 +31,14 @@ namespace DCL
             yieldInstruction = new WaitForComponentUpdate(owner);
         }
 
-
         public void ApplyChangesIfModified(string newSerialization)
         {
             HandleUpdate(newSerialization);
         }
 
-
         protected void HandleUpdate(string newSerialization)
         {
-            if (newSerialization == oldSerialization)
-                return;
+            if (newSerialization == oldSerialization) return;
 
             queue.Enqueue(newSerialization);
 
@@ -66,6 +63,12 @@ namespace DCL
             CoroutineStarter.Stop(routine);
             routine = null;
             applyChangesRunning = false;
+        }
+
+        public void Cleanup()
+        {
+            Stop();
+            oldSerialization = null;
         }
 
         protected IEnumerator HandleUpdateCoroutines()

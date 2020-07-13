@@ -85,7 +85,7 @@ namespace DCL.Components
 
         public virtual void Cleanup()
         {
-            updateHandler.Stop();
+            updateHandler.Cleanup();
         }
     }
 }
