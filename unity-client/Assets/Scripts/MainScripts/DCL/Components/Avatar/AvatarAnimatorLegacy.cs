@@ -1,7 +1,8 @@
 using System;
+using DCL.Components;
 using UnityEngine;
 
-public class AvatarAnimatorLegacy : MonoBehaviour
+public class AvatarAnimatorLegacy : MonoBehaviour, IPoolLifecycleHandler
 {
     const float IDLE_TRANSITION_TIME = 0.15f;
     const float STRAFE_TRANSITION_TIME = 0.25f;
@@ -64,15 +65,19 @@ public class AvatarAnimatorLegacy : MonoBehaviour
 
     public void Start()
     {
-        OnReset();
+        OnPoolGet();
     }
 
-    public void OnReset()
+    public void OnPoolGet()
     {
         if (DCLCharacterController.i != null)
             isOwnPlayer = DCLCharacterController.i.transform == transform.parent;
 
         currentState = State_Init;
+    }
+
+    public void OnPoolRelease()
+    {
     }
 
     void Update()

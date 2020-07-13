@@ -2,6 +2,8 @@ using System;
 using DCL.Components;
 using DCL.Interface;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace DCL
@@ -27,16 +29,7 @@ namespace DCL
 
         private void Awake()
         {
-            OnReset();
-        }
-
-        void Start()
-        {
-            if (poolableObject != null)
-            {
-                poolableObject.OnRelease += Cleanup;
-                poolableObject.OnReset += OnReset;
-            }
+            OnPoolGet();
         }
 
         private void PlayerClicked()
@@ -44,8 +37,10 @@ namespace DCL
             currentPlayerInfoCardId.Set(model?.id);
         }
 
-        void OnDestroy()
+        public override void OnDestroy()
         {
+            base.OnDestroy();
+
             Cleanup();
 
             if (poolableObject != null && poolableObject.isInsidePool)
@@ -104,18 +99,8 @@ namespace DCL
             MinimapMetadataController.i?.UpdateMinimapUserInformation(avatarUserInfo);
         }
 
-        public void OnReset()
+        public override void OnPoolGet()
         {
-            AvatarAnimatorLegacy animator = GetComponent<AvatarAnimatorLegacy>();
-
-            if (animator != null)
-                animator.OnReset();
-
-            AvatarMovementController movement = GetComponent<AvatarMovementController>();
-
-            if (movement != null)
-                movement.OnReset();
-
             currentPlayerInfoCardId = Resources.Load<StringVariable>(CURRENT_PLAYER_ID);
 
             if (string.IsNullOrEmpty(currentSerialization))
@@ -142,11 +127,15 @@ namespace DCL
             }
         }
 
+        public override void OnPoolRelease()
+        {
+            Cleanup();
+        }
+
         public override void Cleanup()
         {
             base.Cleanup();
 
-            //Debug.Log("Avatar shape clean " + avatarUserInfo.userName);
             avatarRenderer.CleanupAvatar();
 
             if (poolableObject != null)

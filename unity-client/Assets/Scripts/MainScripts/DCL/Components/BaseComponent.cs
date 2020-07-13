@@ -41,7 +41,7 @@ namespace DCL.Components
         }
     }
 
-    public abstract class BaseComponent : MonoBehaviour, IComponent
+    public abstract class BaseComponent : MonoBehaviour, IComponent, IPoolLifecycleHandler
     {
         ComponentUpdateHandler updateHandler;
         public WaitForComponentUpdate yieldInstruction => updateHandler.yieldInstruction;
@@ -53,6 +53,53 @@ namespace DCL.Components
         [NonSerialized] public PoolableObject poolableObject;
 
         public string componentName => "BaseComponent";
+
+        private IPoolLifecycleHandler[] poolHandlers;
+
+        public virtual void Start()
+        {
+            if (poolableObject != null)
+            {
+                poolableObject.OnRelease += OnPoolReleaseWrapper;
+                poolableObject.OnGet += OnPoolGetWrapper;
+                poolHandlers = GetComponentsInChildren<IPoolLifecycleHandler>();
+            }
+        }
+
+        public virtual void OnDestroy()
+        {
+            if (poolableObject != null)
+            {
+                poolableObject.OnRelease -= OnPoolReleaseWrapper;
+                poolableObject.OnGet -= OnPoolGetWrapper;
+            }
+        }
+
+        public void OnPoolReleaseWrapper()
+        {
+            for (var i = 0; i < poolHandlers.Length; i++)
+            {
+                var h = poolHandlers[i];
+                h.OnPoolRelease();
+            }
+        }
+
+        public void OnPoolGetWrapper()
+        {
+            for (var i = 0; i < poolHandlers.Length; i++)
+            {
+                var h = poolHandlers[i];
+                h.OnPoolGet();
+            }
+        }
+
+        public virtual void OnPoolRelease()
+        {
+        }
+
+        public virtual void OnPoolGet()
+        {
+        }
 
         public void RaiseOnAppliedChanges()
         {

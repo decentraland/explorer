@@ -4,7 +4,7 @@ using UnityEngine;
 namespace DCL
 {
     [RequireComponent(typeof(AvatarShape))]
-    public class AvatarMovementController : MonoBehaviour
+    public class AvatarMovementController : MonoBehaviour, IPoolLifecycleHandler
     {
         const float SPEED_SLOW = 2.0f;
         const float SPEED_FAST = 4.0f;
@@ -52,9 +52,13 @@ namespace DCL
 
         float movementSpeed = SPEED_SLOW;
 
-        public void OnReset()
+        public void OnPoolGet()
         {
             isInitialPosition = true;
+        }
+
+        public void OnPoolRelease()
+        {
         }
 
         void OnEnable()

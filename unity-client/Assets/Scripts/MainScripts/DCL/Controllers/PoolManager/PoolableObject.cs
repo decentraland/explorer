@@ -14,12 +14,17 @@ namespace DCL
             get { return node != null; }
         }
 
-        public System.Action OnReset;
+        public System.Action OnGet;
         public System.Action OnRelease;
 
-        public void Reset()
+        public void OnPoolGet()
         {
-            OnReset?.Invoke();
+            OnGet?.Invoke();
+        }
+
+        public void OnPoolRelease()
+        {
+            OnRelease?.Invoke();
         }
 
         public void Release()
@@ -43,7 +48,7 @@ namespace DCL
 #endif
             }
 
-            OnRelease?.Invoke();
+            OnPoolRelease();
         }
 
         public void OnCleanup(DCL.ICleanableEventDispatcher sender)
