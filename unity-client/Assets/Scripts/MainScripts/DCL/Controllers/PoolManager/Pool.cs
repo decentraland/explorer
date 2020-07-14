@@ -82,7 +82,7 @@ namespace DCL
             PoolableObject poolable = Extract();
 
             EnablePoolableObject(poolable);
-            poolable.Reset();
+            poolable.OnPoolGet();
             return poolable;
         }
 
