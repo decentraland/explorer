@@ -1130,7 +1130,7 @@ namespace DCL.Controllers
             List<string> allDisposableComponents = disposableComponents.Select(x => x.Key).ToList();
             foreach (string id in allDisposableComponents)
             {
-                SharedComponentDispose(id);
+                parcelScenesCleaner.MarkDisposableComponentForCleanup(this, id);
             }
         }
 
