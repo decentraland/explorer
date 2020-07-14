@@ -1,9 +1,9 @@
 import { Vector2Component } from 'atomicHelpers/landHelpers'
 import { MinimapSceneInfo } from 'decentraland-ecs/src/decentraland/Types'
 import { call, fork, put, select, take, takeEvery, race, takeLatest } from 'redux-saga/effects'
-import { parcelLimits } from '../../config'
+import { parcelLimits } from 'config'
 import { getServer, LifecycleManager } from '../../decentraland-loader/lifecycle/manager'
-import { getOwnerNameFromJsonData, getSceneDescriptionFromJsonData } from '../../shared/selectors'
+import { getOwnerNameFromJsonData, getSceneDescriptionFromJsonData } from 'shared/selectors'
 import defaultLogger from '../logger'
 import { lastPlayerPosition } from '../world/positionThings'
 import {

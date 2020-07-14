@@ -1,5 +1,7 @@
-import { takeEvery, put, call, select, take } from 'redux-saga/effects'
-import { UnityInterfaceContainer, unityInterface } from '../../unity-interface/dcl'
+import { takeEvery, put, call } from 'redux-saga/effects'
+import { PayloadAction } from 'typesafe-actions'
+import { Vector3Component } from 'atomicHelpers/landHelpers'
+import { UnityInterfaceContainer, unityInterface } from 'unity-interface/dcl'
 import {
   MESSAGE_RECEIVED,
   MessageReceived,
@@ -10,8 +12,7 @@ import {
 } from './actions'
 import { uuid } from 'atomicHelpers/math'
 import { ChatMessageType, ChatMessage, HUDElementID, NotificationType } from 'shared/types'
-import { EXPERIENCE_STARTED } from 'shared/loading/types'
-import { PayloadAction } from 'typesafe-actions'
+import { EXPERIENCE_STARTED, AUTH_SUCCESSFUL } from 'shared/loading/types'
 import { queueTrackingEvent } from 'shared/analytics'
 import { sendPublicChatMessage } from 'shared/comms'
 import {
@@ -19,29 +20,26 @@ import {
   peerMap,
   findPeerByName,
   removeFromMutedUsers,
-  avatarMessageObservable
+  avatarMessageObservable,
+  addToMutedUsers
 } from 'shared/comms/peers'
 import { parseParcelPosition, worldToGrid } from 'atomicHelpers/parcelScenePositions'
 import { TeleportController } from 'shared/world/TeleportController'
 import { notifyStatusThroughChat } from 'shared/comms/chat'
 import defaultLogger from 'shared/logger'
 import { catalystRealmConnected, changeRealm, changeToCrowdedRealm } from 'shared/dao'
-import { addToMutedUsers } from '../comms/peers'
 import { isValidExpression, expressionExplainer, validExpressions } from 'shared/apis/expressionExplainer'
-import { StoreContainer } from '../store/rootTypes'
+import { StoreContainer } from 'shared/store/rootTypes'
 import { SHOW_FPS_COUNTER, getServerConfigurations, INIT_PRE_LOAD } from 'config'
-import { Vector3Component } from 'atomicHelpers/landHelpers'
 import { AvatarMessage, AvatarMessageType } from 'shared/comms/interface/types'
 import { sampleDropData } from 'shared/airdrops/sampleDrop'
 import { initializePrivateMessaging } from './private'
-import { identity } from '../index'
-import { AUTH_SUCCESSFUL } from '../loading/types'
-import { findProfileByName } from '../profiles/selectors'
-import { isRealmInitialized } from 'shared/dao/selectors'
-import { CATALYST_REALM_INITIALIZED } from 'shared/dao/actions'
+import { identity } from '..'
+import { findProfileByName } from 'shared/profiles/selectors'
 import { isFriend } from './selectors'
-import { ensureRenderer } from '../profiles/sagas'
+import { ensureRenderer } from 'shared/profiles/sagas'
 import { ensureWorldRunning } from 'shared/world/worldState'
+import { ensureRealmInitialized } from 'shared/dao/sagas'
 
 declare const globalThis: UnityInterfaceContainer & StoreContainer
 
@@ -107,12 +105,6 @@ function* handleAuthSuccessful() {
         timer: 7
       })
     }
-  }
-}
-
-function* ensureRealmInitialized() {
-  while (!(yield select(isRealmInitialized))) {
-    yield take(CATALYST_REALM_INITIALIZED)
   }
 }
 
@@ -222,7 +214,7 @@ function addChatCommand(name: string, description: string, fn: (message: string)
 }
 
 function initChatCommands() {
-  addChatCommand('goto', 'Teleport to another parcel', message => {
+  addChatCommand('goto', 'Teleport to another parcel', (message) => {
     const coordinates = parseParcelPosition(message)
     const isValid = isFinite(coordinates.x) && isFinite(coordinates.y)
 
@@ -261,7 +253,7 @@ function initChatCommands() {
     }
   })
 
-  addChatCommand('changerealm', 'Changes communications realms', message => {
+  addChatCommand('changerealm', 'Changes communications realms', (message) => {
     const realmString = message.trim()
     let response = ''
 
@@ -278,7 +270,7 @@ function initChatCommands() {
             notifyStatusThroughChat(`Already on most crowded realm for location. Nothing changed.`)
           }
         },
-        e => {
+        (e) => {
           const cause = e === 'realm-full' ? ' The requested realm is full.' : ''
           notifyStatusThroughChat('Could not join realm.' + cause)
           defaultLogger.error(`Error joining crowded realm ${realmString}`, e)
@@ -295,7 +287,7 @@ function initChatCommands() {
             notifyStatusThroughChat(
               `Changed realm successfuly. Welcome to the realm ${realm.catalystName}-${realm.layer}!`
             ),
-          e => {
+          (e) => {
             const cause = e === 'realm-full' ? ' The requested realm is full.' : ''
             notifyStatusThroughChat('Could not join realm.' + cause)
             defaultLogger.error('Error joining realm', e)
@@ -315,13 +307,13 @@ function initChatCommands() {
     }
   })
 
-  addChatCommand('players', 'Shows a list of players around you', message => {
+  addChatCommand('players', 'Shows a list of players around you', (message) => {
     const users = [...peerMap.entries()]
 
     const strings = users
       .filter(([_, value]) => !!(value && value.user && value.user.profile && value.user.profile.name))
       .filter(([uuid]) => userPose[uuid])
-      .map(function([uuid, value]) {
+      .map(function ([uuid, value]) {
         const pos = { x: 0, y: 0 }
         worldToGrid(userPose[uuid], pos)
         return `  ${value.user!.profile!.name}: ${pos.x}, ${pos.y}`
@@ -337,7 +329,7 @@ function initChatCommands() {
     }
   })
 
-  addChatCommand('showfps', 'Show FPS counter', message => {
+  addChatCommand('showfps', 'Show FPS counter', (message) => {
     fpsConfiguration.visible = !fpsConfiguration.visible
     const unityWindow: any = window
     fpsConfiguration.visible ? unityWindow.unityInterface.ShowFPSPanel() : unityWindow.unityInterface.HideFPSPanel()
@@ -351,7 +343,7 @@ function initChatCommands() {
     }
   })
 
-  addChatCommand('getname', 'Gets your username', message => {
+  addChatCommand('getname', 'Gets your username', (message) => {
     const currentUser = getCurrentUser()
     if (!currentUser) throw new Error('cannotGetCurrentUser')
     if (!currentUser.profile) throw new Error('profileNotInitialized')
@@ -364,7 +356,7 @@ function initChatCommands() {
     }
   })
 
-  addChatCommand('mute', 'Mute [username]', message => {
+  addChatCommand('mute', 'Mute [username]', (message) => {
     const username = message
     const currentUser = getCurrentUser()
     if (!currentUser) throw new Error('cannotGetCurrentUser')
@@ -405,14 +397,14 @@ function initChatCommands() {
   addChatCommand(
     'emote',
     'Trigger avatar animation named [expression] ("robot", "wave", or "fistpump")',
-    expression => {
+    (expression) => {
       if (!isValidExpression(expression)) {
         return {
           messageId: uuid(),
           messageType: ChatMessageType.SYSTEM,
           sender: 'Decentraland',
           timestamp: Date.now(),
-          body: `Expression ${expression} is not one of ${validExpressions.map(_ => `"${_}"`).join(', ')}`
+          body: `Expression ${expression} is not one of ${validExpressions.map((_) => `"${_}"`).join(', ')}`
         }
       }
 
@@ -489,7 +481,7 @@ function initChatCommands() {
     }
   })
 
-  addChatCommand('unmute', 'Unmute [username]', message => {
+  addChatCommand('unmute', 'Unmute [username]', (message) => {
     const username = message
     const currentUser = getCurrentUser()
     if (!currentUser) throw new Error('cannotGetCurrentUser')
@@ -528,7 +520,7 @@ function initChatCommands() {
     }
   })
 
-  addChatCommand('help', 'Show a list of commands', message => {
+  addChatCommand('help', 'Show a list of commands', (message) => {
     return {
       messageId: uuid(),
       messageType: ChatMessageType.SYSTEM,
@@ -539,8 +531,8 @@ function initChatCommands() {
         `\n\nYou can move with the [WASD] keys and jump with the [SPACE] key.` +
         `\n\nYou can toggle the chat with the [ENTER] key.` +
         `\n\nAvailable commands:\n${Object.keys(chatCommands)
-          .filter(name => !blacklisted.includes(name))
-          .map(name => `\t/${name}: ${chatCommands[name].description}`)
+          .filter((name) => !blacklisted.includes(name))
+          .map((name) => `\t/${name}: ${chatCommands[name].description}`)
           .concat('\t/help: Show this list of commands')
           .join('\n')}`
     }

@@ -1,16 +1,8 @@
-import { uuid } from 'decentraland-ecs/src'
-import { EventDispatcher } from 'decentraland-rpc/lib/common/core/EventDispatcher'
 import { IFuture } from 'fp-future'
 import { Empty } from 'google-protobuf/google/protobuf/empty_pb'
-import { identity } from 'shared'
-import { persistCurrentUser, sendPublicChatMessage } from 'shared/comms'
-import { AvatarMessageType } from 'shared/comms/interface/types'
-import { avatarMessageObservable, getUserProfile } from 'shared/comms/peers'
-import { providerFuture } from 'shared/ethereum/provider'
-import { getProfile, hasConnectedWeb3 } from 'shared/profiles/selectors'
-import { TeleportController } from 'shared/world/TeleportController'
-import { reportScenesAroundParcel } from 'shared/atlas/actions'
-import { gridToWorld } from '../atomicHelpers/parcelScenePositions'
+
+import { EventDispatcher } from 'decentraland-rpc/lib/common/core/EventDispatcher'
+
 import {
   DEBUG,
   EDITOR,
@@ -21,9 +13,15 @@ import {
   ethereumConfigurations,
   NO_ASSET_BUNDLES
 } from 'config'
-import { Quaternion, ReadOnlyQuaternion, ReadOnlyVector3, Vector3 } from '../decentraland-ecs/src/decentraland/math'
-import { IEventNames, IEvents, ProfileForRenderer, MinimapSceneInfo } from '../decentraland-ecs/src/decentraland/Types'
-import { sceneLifeCycleObservable } from '../decentraland-loader/lifecycle/controllers/scene'
+
+import { identity } from 'shared'
+import { persistCurrentUser, sendPublicChatMessage } from 'shared/comms'
+import { AvatarMessageType } from 'shared/comms/interface/types'
+import { avatarMessageObservable, getUserProfile } from 'shared/comms/peers'
+import { providerFuture } from 'shared/ethereum/provider'
+import { getProfile, hasConnectedWeb3 } from 'shared/profiles/selectors'
+import { TeleportController } from 'shared/world/TeleportController'
+import { reportScenesAroundParcel } from 'shared/atlas/actions'
 import { AirdropInfo } from 'shared/airdrops/interface'
 import { queueTrackingEvent } from 'shared/analytics'
 import { DevTools } from 'shared/apis/DevTools'
@@ -33,24 +31,6 @@ import { loadingScenes, teleportTriggered, unityClientLoaded } from 'shared/load
 import { createLogger, defaultLogger, ILogger } from 'shared/logger'
 import { saveProfileRequest } from 'shared/profiles/actions'
 import { Avatar, Profile, Wearable } from 'shared/profiles/types'
-import {
-  PB_AttachEntityComponent,
-  PB_ComponentCreated,
-  PB_ComponentDisposed,
-  PB_ComponentRemoved,
-  PB_ComponentUpdated,
-  PB_CreateEntity,
-  PB_Query,
-  PB_Ray,
-  PB_RayQuery,
-  PB_RemoveEntity,
-  PB_SendSceneMessage,
-  PB_SetEntityParent,
-  PB_UpdateEntityComponent,
-  PB_Vector3,
-  PB_OpenExternalUrl,
-  PB_OpenNFTDialog
-} from '../shared/proto/engineinterface_pb'
 import { Session } from 'shared/session'
 import { getPerformanceInfo } from 'shared/session/getPerformanceInfo'
 import {
@@ -103,6 +83,33 @@ import { changeRealm, catalystRealmConnected, candidatesFetched } from 'shared/d
 import { notifyStatusThroughChat } from 'shared/comms/chat'
 import { getAppNetwork, fetchOwner } from 'shared/web3'
 import { updateStatusMessage } from 'shared/loading/actions'
+
+import { uuid } from 'decentraland-ecs/src'
+import { Quaternion, ReadOnlyQuaternion, ReadOnlyVector3, Vector3 } from 'decentraland-ecs/src/decentraland/math'
+import { IEventNames, IEvents, ProfileForRenderer, MinimapSceneInfo } from 'decentraland-ecs/src/decentraland/Types'
+
+import { sceneLifeCycleObservable } from 'decentraland-loader/lifecycle/controllers/scene'
+
+import { gridToWorld } from 'atomicHelpers/parcelScenePositions'
+
+import {
+  PB_AttachEntityComponent,
+  PB_ComponentCreated,
+  PB_ComponentDisposed,
+  PB_ComponentRemoved,
+  PB_ComponentUpdated,
+  PB_CreateEntity,
+  PB_Query,
+  PB_Ray,
+  PB_RayQuery,
+  PB_RemoveEntity,
+  PB_SendSceneMessage,
+  PB_SetEntityParent,
+  PB_UpdateEntityComponent,
+  PB_Vector3,
+  PB_OpenExternalUrl,
+  PB_OpenNFTDialog
+} from '../shared/proto/engineinterface_pb'
 
 declare const globalThis: UnityInterfaceContainer &
   BrowserInterfaceContainer &
@@ -978,6 +985,7 @@ export async function startUnityParcelLoading() {
   hasWallet = p.successful
 
   globalThis.globalStore.dispatch(loadingScenes())
+
   await enableParcelSceneLoading({
     parcelSceneClass: UnityParcelScene,
     preloadScene: async (_land) => {

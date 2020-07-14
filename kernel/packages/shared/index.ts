@@ -80,18 +80,20 @@ function initEssentials(): [Session | undefined, Store<RootState, AnyAction>] {
 }
 
 export type InitFutures = {
-  essentials: IFuture<Session | undefined>
+  essentials: IFuture<{ session: Session | undefined; identity: ExplorerIdentity }>
+  realmInitialization: IFuture<void>
   all: IFuture<void>
 }
 
 export function initShared(): InitFutures {
-  const futures: InitFutures = { essentials: future(), all: future() }
+  const futures: InitFutures = { essentials: future(), realmInitialization: future(), all: future() }
   const [session, store] = initEssentials()
 
   const userData = getUserProfile()
 
   if (!isSessionExpired(userData)) {
-    futures.essentials.resolve(session)
+    identity = userData.identity
+    futures.essentials.resolve({ session, identity: userData.identity })
   }
 
   let net: ETHEREUM_NETWORK = ETHEREUM_NETWORK.MAINNET
@@ -156,7 +158,7 @@ export function initShared(): InitFutures {
     store.dispatch(authSuccessful())
 
     if (futures.essentials.isPending) {
-      futures.essentials.resolve(session)
+      futures.essentials.resolve({ session, identity })
     }
 
     console['groupEnd']()
@@ -179,6 +181,7 @@ export function initShared(): InitFutures {
     initializeUrlRealmObserver()
 
     await realmInitialized()
+    futures.realmInitialization.resolve()
 
     defaultLogger.info(`Using Catalyst configuration: `, store.getState().dao)
 

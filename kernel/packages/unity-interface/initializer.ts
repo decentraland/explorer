@@ -1,16 +1,17 @@
 import future from 'fp-future'
-import { DEBUG_MESSAGES } from '../config'
-import { initShared } from '../shared'
-import { ReportFatalError } from '../shared/loading/ReportFatalError'
-import { defaultLogger } from '../shared/logger'
+import { DEBUG_MESSAGES } from 'config'
+import { initShared, ExplorerIdentity } from 'shared'
+import { ReportFatalError } from 'shared/loading/ReportFatalError'
+import { defaultLogger } from 'shared/logger'
 import { initializeEngine } from './dcl'
-import { Session } from '../shared/session'
-import { waitingForRenderer } from '../shared/loading/types'
-import { USE_UNITY_INDEXED_DB_CACHE } from '../shared/meta/types'
+import { Session } from 'shared/session'
+import { waitingForRenderer } from 'shared/loading/types'
+import { USE_UNITY_INDEXED_DB_CACHE } from 'shared/meta/types'
+
 const queryString = require('query-string')
 
-declare var global: any
-declare var UnityLoader: UnityLoaderType
+declare const global: any
+declare const UnityLoader: UnityLoaderType
 
 type UnityLoaderType = {
   // https://docs.unity3d.com/Manual/webgl-templates.html
@@ -36,6 +37,9 @@ export type InitializeUnityResult = {
   engine: UnityGame
   container: HTMLElement
   instancedJS: ReturnType<typeof initializeEngine>
+  identity: ExplorerIdentity
+  realmInitialization: Promise<void>
+  sharedServices: Promise<void>
 }
 
 const engineInitialized = future()
@@ -45,9 +49,9 @@ export async function initializeUnity(
   container: HTMLElement,
   buildConfigPath: string = 'unity/Build/unity.json'
 ): Promise<InitializeUnityResult> {
-  const { essentials, all } = initShared()
+  const { essentials, realmInitialization, all } = initShared()
 
-  const session = await essentials
+  const { session, identity } = await essentials
 
   if (!session) {
     throw new Error()
@@ -72,7 +76,10 @@ export async function initializeUnity(
   return {
     engine: _gameInstance,
     container,
-    instancedJS: _instancedJS!
+    instancedJS: _instancedJS!,
+    identity,
+    realmInitialization,
+    sharedServices: all
   }
 }
 

@@ -4,18 +4,18 @@ declare const global: any
 // IMPORTANT! This should be execd before loading 'config' module to ensure that init values are successfully loaded
 global.enableWeb3 = true
 
+import { NO_MOTD, OPEN_AVATAR_EDITOR, DEBUG_PM } from 'config'
+import { worldToGrid } from 'atomicHelpers/parcelScenePositions'
+import { initializeUnity } from 'unity-interface/initializer'
+import { startUnityParcelLoading, unityInterface } from 'unity-interface/dcl'
+
+import defaultLogger, { createLogger } from 'shared/logger'
 import { ReportFatalError } from 'shared/loading/ReportFatalError'
 import { experienceStarted, NOT_INVITED, AUTH_ERROR_LOGGED_OUT, FAILED_FETCHING_UNITY } from 'shared/loading/types'
-import { worldToGrid } from '../atomicHelpers/parcelScenePositions'
-import { NO_MOTD, OPEN_AVATAR_EDITOR, DEBUG_PM } from '../config/index'
-import defaultLogger, { createLogger } from 'shared/logger'
 import { signalRendererInitialized, signalParcelLoadingStarted } from 'shared/renderer/actions'
 import { lastPlayerPosition, teleportObservable } from 'shared/world/positionThings'
 import { StoreContainer } from 'shared/store/rootTypes'
-import { startUnityParcelLoading, unityInterface } from '../unity-interface/dcl'
-import { initializeUnity } from '../unity-interface/initializer'
 import { HUDElementID } from 'shared/types'
-import { identity } from 'shared'
 import { worldRunningObservable } from 'shared/world/worldState'
 
 const container = document.getElementById('gameContainer')
@@ -34,7 +34,7 @@ const observer = worldRunningObservable.add((isRunning) => {
 })
 
 initializeUnity(container)
-  .then(async (_) => {
+  .then(async ({ instancedJS, identity, realmInitialization, sharedServices }) => {
     const i = unityInterface
     i.ConfigureHUDElement(HUDElementID.MINIMAP, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.AVATAR, { active: true, visible: true })
@@ -63,8 +63,8 @@ initializeUnity(container)
       i.ConfigureHUDElement(HUDElementID.MESSAGE_OF_THE_DAY, { active: false, visible: true })
     }
 
-    _.instancedJS
-      .then(() => {
+    instancedJS
+      .then(async () => {
         teleportObservable.notifyObservers(worldToGrid(lastPlayerPosition))
         globalThis.globalStore.dispatch(experienceStarted())
       })
