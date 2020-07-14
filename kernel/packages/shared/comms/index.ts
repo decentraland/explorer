@@ -72,7 +72,7 @@ import { arrayEquals } from 'atomicHelpers/arrayEquals'
 import { getCommsConfig } from 'shared/meta/selectors'
 import { ensureMetaConfigurationInitialized } from 'shared/meta/index'
 import { ReportFatalError } from 'shared/loading/ReportFatalError'
-import { NEW_LOGIN, UNEXPECTED_ERROR } from 'shared/loading/types'
+import { NEW_LOGIN, UNEXPECTED_ERROR, commsEstablished } from 'shared/loading/types'
 
 export type CommsVersion = 'v1' | 'v2'
 export type CommsMode = CommsV1Mode | CommsV2Mode
@@ -628,6 +628,7 @@ export async function connect(userId: string) {
 
         const instance = new BrokerWorldInstanceConnection(commsBroker)
         await instance.isConnected
+        store.dispatch(commsEstablished())
 
         connection = instance
         break
@@ -745,6 +746,7 @@ export async function startCommunications(context: Context) {
     try {
       if (connection instanceof LighthouseWorldInstanceConnection) {
         await connection.connectPeer()
+        store.dispatch(commsEstablished())
       }
     } catch (e) {
       // Do nothing if layer is full. This will be handled by status handler
