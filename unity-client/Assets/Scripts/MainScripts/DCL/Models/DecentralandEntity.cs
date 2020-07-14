@@ -193,6 +193,11 @@ namespace DCL.Models
             }
         }
 
+        public void ResetRelease()
+        {
+            isReleased = false;
+        }
+
         public void Cleanup()
         {
             // Dont't do anything if this object was already released
@@ -205,11 +210,12 @@ namespace DCL.Models
 
             foreach (var kvp in components)
             {
-                if (kvp.Value.poolableObject == null)
+                if (kvp.Value == null || kvp.Value.poolableObject == null)
                     continue;
 
                 kvp.Value.poolableObject.Release();
             }
+            components.Clear();
 
             if (meshesInfo.meshRootGameObject)
             {

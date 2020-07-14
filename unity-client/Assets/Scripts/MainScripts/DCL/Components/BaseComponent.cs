@@ -43,7 +43,7 @@ namespace DCL.Components
 
     public abstract class BaseComponent : MonoBehaviour, IComponent
     {
-        ComponentUpdateHandler updateHandler;
+        protected ComponentUpdateHandler updateHandler;
         public WaitForComponentUpdate yieldInstruction => updateHandler.yieldInstruction;
         public Coroutine routine => updateHandler.routine;
         public bool isRoutineRunning => updateHandler.isRoutineRunning;
@@ -71,7 +71,7 @@ namespace DCL.Components
             updateHandler.ApplyChangesIfModified(updateHandler.oldSerialization ?? "{}");
         }
 
-        private void OnDisable()
+        void OnDisable()
         {
             updateHandler.Stop();
         }

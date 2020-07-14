@@ -219,7 +219,6 @@ namespace DCL
 
         public void Cleanup()
         {
-            Debug.Log("Pool cleanup ... " + id);
             ReleaseAll();
 
             while (unusedObjects.Count > 0)

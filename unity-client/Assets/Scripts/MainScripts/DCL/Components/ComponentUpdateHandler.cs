@@ -57,10 +57,9 @@ namespace DCL
 
         public void Stop()
         {
-            if (routine == null)
-                return;
+            if (routine != null)
+                CoroutineStarter.Stop(routine);
 
-            CoroutineStarter.Stop(routine);
             routine = null;
             applyChangesRunning = false;
         }
@@ -68,7 +67,9 @@ namespace DCL
         public void Cleanup()
         {
             Stop();
+
             oldSerialization = null;
+            queue.Clear();
         }
 
         protected IEnumerator HandleUpdateCoroutines()
@@ -97,6 +98,7 @@ namespace DCL
             Assert.IsFalse(applyChangesRunning, "ApplyChanges routine was interrupted when it shouldn't!");
             applyChangesRunning = true;
 #endif
+
             var enumerator = owner.ApplyChanges(newJson);
 
             if (enumerator != null)

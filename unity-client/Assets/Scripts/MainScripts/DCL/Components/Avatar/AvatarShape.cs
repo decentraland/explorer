@@ -24,6 +24,7 @@ namespace DCL
 
         private Vector3? lastAvatarPosition = null;
         private MinimapMetadata.MinimapUserInfo avatarUserInfo = new MinimapMetadata.MinimapUserInfo();
+        bool initializedPosition = false;
 
         private void Awake()
         {
@@ -74,6 +75,30 @@ namespace DCL
 
             yield return new WaitUntil(() => avatarDone || avatarFailed);
 
+            onPointerDown.OnPointerDownReport -= PlayerClicked;
+            onPointerDown.OnPointerDownReport += PlayerClicked;
+            onPointerDown.Setup(scene, entity, new OnPointerDown.Model()
+            {
+                type = OnPointerDown.NAME,
+                button = WebInterface.ACTION_BUTTON.POINTER.ToString(),
+                hoverText = "view profile"
+            });
+
+            entity.OnTransformChange -= avatarMovementController.OnTransformChanged;
+            entity.OnTransformChange += avatarMovementController.OnTransformChanged;
+            entity.OnTransformChange -= OnEntityTransformChanged;
+            entity.OnTransformChange += OnEntityTransformChanged;
+
+            // To deal with the cases in which the entity transform was configured before the AvatarShape
+            if (!initializedPosition && entity.components.ContainsKey(DCL.Models.CLASS_ID_COMPONENT.TRANSFORM))
+            {
+                initializedPosition = true;
+
+                avatarMovementController.MoveTo(
+                    entity.gameObject.transform.localPosition - Vector3.up * DCLCharacterController.i.characterController.height / 2,
+                    entity.gameObject.transform.localRotation, true);
+            }
+
             avatarName.SetName(model.name);
             SetMinimapRepresentationActive(true);
             everythingIsLoaded = true;
@@ -104,15 +129,14 @@ namespace DCL
             MinimapMetadataController.i?.UpdateMinimapUserInformation(avatarUserInfo);
         }
 
+        // The entity hasn't been assigned on reset (before getting the GO from the pool)
         public void OnReset()
         {
             AvatarAnimatorLegacy animator = GetComponent<AvatarAnimatorLegacy>();
-
             if (animator != null)
                 animator.OnReset();
 
             AvatarMovementController movement = GetComponent<AvatarMovementController>();
-
             if (movement != null)
                 movement.OnReset();
 
@@ -121,33 +145,20 @@ namespace DCL
             if (string.IsNullOrEmpty(currentSerialization))
                 SetMinimapRepresentationActive(false);
 
-            onPointerDown.OnPointerDownReport += PlayerClicked;
-            onPointerDown.Setup(scene, entity, new OnPointerDown.Model()
-            {
-                type = OnPointerDown.NAME,
-                button = WebInterface.ACTION_BUTTON.POINTER.ToString(),
-                hoverText = "view profile"
-            });
+            updateHandler?.Cleanup();
 
             everythingIsLoaded = false;
+            initializedPosition = false;
             currentSerialization = "";
             model = new AvatarModel();
             lastAvatarPosition = null;
             avatarUserInfo = new MinimapMetadata.MinimapUserInfo();
-
-            if (entity != null && entity.OnTransformChange == null)
-            {
-                Debug.Log("Suscribing to move...");
-                entity.OnTransformChange += avatarMovementController.OnTransformChanged;
-                entity.OnTransformChange += OnEntityTransformChanged;
-            }
         }
 
         public override void Cleanup()
         {
             base.Cleanup();
 
-            //Debug.Log("Avatar shape clean " + avatarUserInfo.userName);
             avatarRenderer.CleanupAvatar();
 
             if (poolableObject != null)
@@ -159,7 +170,6 @@ namespace DCL
 
             if (entity != null)
             {
-                Debug.Log("Unsuscribing from move...");
                 entity.OnTransformChange = null;
                 avatarUserInfo.userId = model.id;
                 MinimapMetadataController.i?.UpdateMinimapUserInformation(avatarUserInfo, true);

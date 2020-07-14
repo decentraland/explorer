@@ -26,8 +26,6 @@ namespace DCL
 
         Transform avatarTransformValue;
 
-        bool isInitialPosition = true;
-
         Vector3 currentPosition
         {
             get { return currentWorldPosition; }
@@ -54,7 +52,6 @@ namespace DCL
 
         public void OnReset()
         {
-            isInitialPosition = true;
         }
 
         void OnEnable()
@@ -81,14 +78,12 @@ namespace DCL
                 model.rotation);
         }
 
-        public void MoveTo(Vector3 position, Quaternion rotation)
+        public void MoveTo(Vector3 position, Quaternion rotation, bool immediate = false)
         {
-            // Edge case on first initialization
-            if (isInitialPosition)
+            if (immediate)
             {
                 currentPosition = position;
                 avatarTransform.rotation = rotation;
-                isInitialPosition = false;
             }
 
             Vector3 flatEulerRotation = rotation.eulerAngles;
