@@ -17,11 +17,8 @@ namespace Tests
             AvatarTestHelpers.CreateTestCatalog();
             AvatarShape avatar = AvatarTestHelpers.CreateAvatarShape(scene, "Avatar #1", "TestAvatar.json");
 
-            yield return new DCL.WaitUntil(() => avatar.everythingIsLoaded, 20);
-
-            Vector3 testPosition = Vector3.one * 20;
-            TestHelpers.SetEntityTransform(scene, avatar.entity, testPosition, Quaternion.identity, Vector3.one);
-
+            yield return null;
+            yield return null;
             yield return null;
 
             TestHelpers.RemoveSceneEntity(scene, avatar.entity);
@@ -29,9 +26,6 @@ namespace Tests
             yield return null;
 
             AvatarShape avatar2 = AvatarTestHelpers.CreateAvatarShape(scene, "Avatar #2", "TestAvatar.json");
-
-            testPosition = Vector3.one * 10;
-            TestHelpers.SetEntityTransform(scene, avatar.entity, testPosition, Quaternion.identity, Vector3.one);
 
             Assert.AreSame(avatar, avatar2);
         }
