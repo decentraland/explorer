@@ -61,7 +61,9 @@ namespace DCL
                 CoroutineStarter.Stop(routine);
 
             routine = null;
+#if UNITY_EDITOR
             applyChangesRunning = false;
+#endif
         }
 
         public void Cleanup()
