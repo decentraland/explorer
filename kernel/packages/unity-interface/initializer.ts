@@ -54,7 +54,7 @@ export async function initializeUnity(
   }
   Session.current.resolve(session)
   const qs = queryString.parse(document.location.search)
-  
+
   ;(window as any).USE_UNITY_INDEXED_DB_CACHE = USE_UNITY_INDEXED_DB_CACHE
 
   preventUnityKeyboardLock()

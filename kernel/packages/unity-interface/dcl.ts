@@ -11,7 +11,16 @@ import { getProfile, hasConnectedWeb3 } from 'shared/profiles/selectors'
 import { TeleportController } from 'shared/world/TeleportController'
 import { reportScenesAroundParcel } from 'shared/atlas/actions'
 import { gridToWorld } from '../atomicHelpers/parcelScenePositions'
-import { DEBUG, EDITOR, ENGINE_DEBUG_PANEL, playerConfigurations, SCENE_DEBUG_PANEL, SHOW_FPS_COUNTER, ethereumConfigurations } from 'config'
+import {
+  DEBUG,
+  EDITOR,
+  ENGINE_DEBUG_PANEL,
+  playerConfigurations,
+  SCENE_DEBUG_PANEL,
+  SHOW_FPS_COUNTER,
+  ethereumConfigurations,
+  NO_ASSET_BUNDLES
+} from 'config'
 import { Quaternion, ReadOnlyQuaternion, ReadOnlyVector3, Vector3 } from '../decentraland-ecs/src/decentraland/math'
 import { IEventNames, IEvents, ProfileForRenderer, MinimapSceneInfo } from '../decentraland-ecs/src/decentraland/Types'
 import { sceneLifeCycleObservable } from '../decentraland-loader/lifecycle/controllers/scene'
@@ -541,6 +550,9 @@ export const unityInterface = {
   SetEngineDebugPanel() {
     gameInstance.SendMessage('SceneController', 'SetEngineDebugPanel')
   },
+  SetDisableAssetBundles() {
+    gameInstance.SendMessage('SceneController', 'SetDisableAssetBundles')
+  },
   ActivateRendering() {
     gameInstance.SendMessage('SceneController', 'ActivateRendering')
   },
@@ -548,7 +560,10 @@ export const unityInterface = {
     gameInstance.SendMessage('SceneController', 'DeactivateRendering')
   },
   UnlockCursor() {
-    gameInstance.SendMessage('MouseCatcher', 'UnlockCursor')
+    this.SetCursorState(false)
+  },
+  SetCursorState(locked: boolean) {
+    gameInstance.SendMessage('MouseCatcher', 'UnlockCursorBrowser', locked ? 1 : 0)
   },
   SetBuilderReady() {
     gameInstance.SendMessage('SceneController', 'BuilderReady')
@@ -929,6 +944,10 @@ export async function initializeEngine(_gameInstance: GameInstance) {
     unityInterface.SetSceneDebugPanel()
   }
 
+  if (NO_ASSET_BUNDLES) {
+    unityInterface.SetDisableAssetBundles()
+  }
+
   if (SHOW_FPS_COUNTER) {
     unityInterface.ShowFPSPanel()
   }
@@ -1110,8 +1129,14 @@ worldRunningObservable.add((isRunning) => {
   }
 })
 
-document.addEventListener('pointerlockchange', (e) => {
-  if (!document.pointerLockElement) {
-    unityInterface.UnlockCursor()
+document.addEventListener('pointerlockchange', pointerLockChange, false)
+
+let isPointerLocked: boolean = false
+function pointerLockChange() {
+  const doc: any = document
+  const isLocked = (doc.pointerLockElement || doc.mozPointerLockElement || doc.webkitPointerLockElement) != null
+  if (isPointerLocked !== isLocked) {
+    unityInterface.SetCursorState(isLocked)
   }
-})
+  isPointerLocked = isLocked
+}

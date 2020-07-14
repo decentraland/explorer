@@ -3,6 +3,7 @@ using DCL.Configuration;
 using DCL.Helpers;
 using DCL.Models;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Object = UnityEngine.Object;
@@ -76,9 +77,6 @@ namespace DCL.Controllers
 
             metricsController = new SceneMetricsController(this);
             metricsController.Enable();
-
-            CommonScriptableObjects.rendererState.OnChange += OnRenderingStateChanged;
-            OnRenderingStateChanged(CommonScriptableObjects.rendererState.Get(), false);
         }
 
         void OnDisable()
@@ -89,7 +87,6 @@ namespace DCL.Controllers
         private void OnDestroy()
         {
             blockerHandler?.CleanBlockers();
-            CommonScriptableObjects.rendererState.OnChange -= OnRenderingStateChanged;
         }
 
         private void Update()
@@ -226,6 +223,8 @@ namespace DCL.Controllers
         {
             if (isReleased)
                 return;
+
+            DisposeAllSceneComponents();
 
             if (DCLCharacterController.i)
                 DCLCharacterController.i.characterPosition.OnPrecisionAdjust -= OnPrecisionAdjust;
@@ -1130,11 +1129,12 @@ namespace DCL.Controllers
             OnSceneReady?.Invoke(this);
         }
 
-        void OnRenderingStateChanged(bool isEnable, bool prevState)
+        private void DisposeAllSceneComponents()
         {
-            if (isEnable)
+            List<string> allDisposableComponents = disposableComponents.Select(x => x.Key).ToList();
+            foreach (string id in allDisposableComponents)
             {
-                parcelScenesCleaner.ForceCleanup();
+                parcelScenesCleaner.MarkDisposableComponentForCleanup(this, id);
             }
         }
 
