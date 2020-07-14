@@ -329,11 +329,6 @@ namespace DCL.Components
                 texturePlayer = null;
             }
 
-            if (isTest && texture != null)
-            {
-                UnityEngine.Object.Destroy(texture);
-            }
-
             Utils.SafeDestroy(texture);
             base.Dispose();
         }
