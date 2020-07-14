@@ -56,6 +56,8 @@ namespace DCL
 
         public void OnPoolRelease()
         {
+            avatarTransformValue = null;
+            currentWorldPosition = Vector3.zero;
         }
 
         void OnEnable()

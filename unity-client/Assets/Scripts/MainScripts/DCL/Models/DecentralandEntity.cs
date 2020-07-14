@@ -215,6 +215,7 @@ namespace DCL.Models
 
                 kvp.Value.poolableObject.Release();
             }
+
             components.Clear();
 
             if (meshesInfo.meshRootGameObject)
@@ -232,6 +233,9 @@ namespace DCL.Models
                 {
                     Utils.SafeDestroy(gameObject.transform.GetChild(i).gameObject);
                 }
+
+                //NOTE(Brian): This will prevent any component from storing/querying invalid gameObject references.
+                gameObject = null;
             }
 
             OnTransformChange = null;

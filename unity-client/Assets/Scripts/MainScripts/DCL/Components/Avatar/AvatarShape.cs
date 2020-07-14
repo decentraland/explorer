@@ -129,8 +129,6 @@ namespace DCL
             if (string.IsNullOrEmpty(currentSerialization))
                 SetMinimapRepresentationActive(false);
 
-            updateHandler?.Cleanup();
-
             everythingIsLoaded = false;
             initializedPosition = false;
             currentSerialization = "";
@@ -162,6 +160,7 @@ namespace DCL
                 entity.OnTransformChange = null;
                 avatarUserInfo.userId = model.id;
                 MinimapMetadataController.i?.UpdateMinimapUserInformation(avatarUserInfo, true);
+                entity = null;
             }
         }
     }

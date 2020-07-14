@@ -72,7 +72,7 @@ namespace DCL
         [System.NonSerialized] public bool prewarmSceneMessagesPool = true;
         [System.NonSerialized] public bool useBoundariesChecker = true;
 
-        [System.NonSerialized] public bool prewarmEntitiesPool = true;
+        [System.NonSerialized] public bool prewarmEntitiesPool = false;
 
         public bool hasPendingMessages => MessagingControllersManager.i.pendingMessagesCount > 0;
 
