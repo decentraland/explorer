@@ -67,8 +67,13 @@ namespace DCL
 
         public void ForcePrewarm()
         {
-            for (int i = 0; i < maxPrewarmCount; i++)
+            if (maxPrewarmCount <= objectsCount)
+                return;
+
+            for (int i = 0; i < Mathf.Max(0, maxPrewarmCount - objectsCount); i++)
+            {
                 Instantiate();
+            }
         }
 
         public PoolableObject Get()

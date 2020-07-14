@@ -16,8 +16,6 @@ namespace DCL
 
             [Header("Pool Options")] public bool usePool;
             public int prewarmCount;
-
-            [NonSerialized] public Pool pool;
         }
 
         public Item[] factoryList;
@@ -63,14 +61,38 @@ namespace DCL
             {
                 Item item = factoryList[i];
 
-                if (item.usePool && item.pool == null)
+                if (item.usePool)
                 {
-                    GameObject original = Instantiate(item.prefab.gameObject);
-                    item.pool = PoolManager.i.AddPool(item.classId.ToString() + "_POOL", original, maxPrewarmCount: item.prewarmCount, isPersistent: true);
-                    item.pool.useLifecycleHandlers = true;
-                    item.pool.ForcePrewarm();
+                    EnsurePoolForItem(item);
+                    GetPoolForItem(item).ForcePrewarm();
                 }
             }
+        }
+
+        private Pool GetPoolForItem(Item item)
+        {
+            return PoolManager.i.GetPool(GetIdForPool(item));
+        }
+
+        private object GetIdForPool(Item item)
+        {
+#if UNITY_EDITOR
+            return item.classId.ToString() + "_POOL";
+#else
+            return item.classId;
+#endif
+        }
+
+        private void EnsurePoolForItem(Item item)
+        {
+            Pool pool = GetPoolForItem(item);
+
+            if (pool != null)
+                return;
+
+            GameObject original = Instantiate(item.prefab.gameObject);
+            pool = PoolManager.i.AddPool(GetIdForPool(item), original, maxPrewarmCount: item.prewarmCount, isPersistent: true);
+            pool.useLifecycleHandlers = true;
         }
 
         public ItemType CreateItemFromId<ItemType>(CLASS_ID_COMPONENT id)
@@ -99,7 +121,8 @@ namespace DCL
 
             if (factoryItem.usePool)
             {
-                poolableObject = factoryItem.pool.Get();
+                EnsurePoolForItem(factoryItem);
+                poolableObject = GetPoolForItem(factoryItem).Get();
                 instancedGo = poolableObject.gameObject;
             }
             else
