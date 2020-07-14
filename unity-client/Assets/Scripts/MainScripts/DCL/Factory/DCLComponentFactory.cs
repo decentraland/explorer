@@ -67,6 +67,7 @@ namespace DCL
                 {
                     GameObject original = Instantiate(item.prefab.gameObject);
                     item.pool = PoolManager.i.AddPool(item.classId.ToString() + "_POOL", original, maxPrewarmCount: item.prewarmCount, isPersistent: true);
+                    item.pool.useLifecycleHandlers = true;
                     item.pool.ForcePrewarm();
                 }
             }

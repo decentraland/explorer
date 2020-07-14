@@ -20,7 +20,16 @@ namespace DCL
         public object id;
         public GameObject original;
         public GameObject container;
-        public bool persistent;
+
+        public bool persistent = false;
+
+        /// <summary>
+        /// If this is set to true, all Unity components in the poolable gameObject implementing ILifecycleHandler
+        /// will be registered and called when necessary.
+        ///
+        /// The interface call responsibility lies in the PoolableObject class.
+        /// </summary>
+        public bool useLifecycleHandlers = false;
 
         public System.Action<Pool> OnCleanup;
 
@@ -28,6 +37,7 @@ namespace DCL
 
         private readonly LinkedList<PoolableObject> unusedObjects = new LinkedList<PoolableObject>();
         private readonly LinkedList<PoolableObject> usedObjects = new LinkedList<PoolableObject>();
+
         private int maxPrewarmCount = 0;
 
         public float lastGetTime { get; private set; }
@@ -126,9 +136,7 @@ namespace DCL
             if (PoolManager.i.poolables.ContainsKey(gameObject))
                 return PoolManager.i.GetPoolable(gameObject);
 
-            PoolableObject poolable = new PoolableObject();
-            poolable.pool = this;
-            poolable.gameObject = gameObject;
+            PoolableObject poolable = new PoolableObject(this, gameObject);
             PoolManager.i.poolables.Add(gameObject, poolable);
             PoolManager.i.poolableValues.Add(poolable);
 

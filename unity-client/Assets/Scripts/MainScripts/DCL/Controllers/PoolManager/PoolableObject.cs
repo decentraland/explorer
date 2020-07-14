@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using DCL.Components;
 using UnityEngine;
 
 namespace DCL
@@ -17,13 +18,42 @@ namespace DCL
         public System.Action OnGet;
         public System.Action OnRelease;
 
+        private IPoolLifecycleHandler[] lifecycleHandlers = null;
+
+        public PoolableObject(Pool poolOwner, GameObject go)
+        {
+            this.gameObject = go;
+            this.pool = poolOwner;
+
+            if (pool.useLifecycleHandlers)
+                lifecycleHandlers = gameObject.GetComponents<IPoolLifecycleHandler>();
+        }
+
         public void OnPoolGet()
         {
+            if (lifecycleHandlers != null)
+            {
+                for (var i = 0; i < lifecycleHandlers.Length; i++)
+                {
+                    var handler = lifecycleHandlers[i];
+                    handler.OnPoolGet();
+                }
+            }
+
             OnGet?.Invoke();
         }
 
         public void OnPoolRelease()
         {
+            if (lifecycleHandlers != null)
+            {
+                for (var i = 0; i < lifecycleHandlers.Length; i++)
+                {
+                    var handler = lifecycleHandlers[i];
+                    handler.OnPoolRelease();
+                }
+            }
+
             OnRelease?.Invoke();
         }
 

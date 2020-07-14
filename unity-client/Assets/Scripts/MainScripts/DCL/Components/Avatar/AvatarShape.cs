@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace DCL
 {
-    public class AvatarShape : BaseComponent
+    public class AvatarShape : BaseComponent, IPoolLifecycleHandler
     {
         private const string CURRENT_PLAYER_ID = "CurrentPlayerInfoCardId";
 
@@ -38,10 +38,8 @@ namespace DCL
             currentPlayerInfoCardId.Set(model?.id);
         }
 
-        public override void OnDestroy()
+        public void OnDestroy()
         {
-            base.OnDestroy();
-
             Cleanup();
 
             if (poolableObject != null && poolableObject.isInsidePool)
@@ -124,7 +122,7 @@ namespace DCL
             MinimapMetadataController.i?.UpdateMinimapUserInformation(avatarUserInfo);
         }
 
-        public override void OnPoolGet()
+        public void OnPoolGet()
         {
             currentPlayerInfoCardId = Resources.Load<StringVariable>(CURRENT_PLAYER_ID);
 
@@ -141,7 +139,7 @@ namespace DCL
             avatarUserInfo = new MinimapMetadata.MinimapUserInfo();
         }
 
-        public override void OnPoolRelease()
+        public void OnPoolRelease()
         {
             Cleanup();
         }
