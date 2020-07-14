@@ -83,27 +83,23 @@ namespace DCL
 
         public void ForceCleanup()
         {
-            ParcelScene scene = null;
-
             while (disposableComponentsMarkedForCleanup.Count > 0)
             {
                 ParcelDisposableComponent parcelDisposableComponent = disposableComponentsMarkedForCleanup.Dequeue();
                 parcelDisposableComponent.scene.SharedComponentDispose(parcelDisposableComponent.componentId);
             }
 
+            HashSet<ParcelScene> scenesToRemove = new HashSet<ParcelScene>();
+
             // If we have root entities queued for removal, we call Parcel Scene's RemoveEntity()
             // so that the child entities end up recursively in the entitiesMarkedForCleanup queue
             while (rootEntitiesMarkedForCleanup.Count > 0)
             {
-                // If the next scene is different to the last one
-                // we removed all the entities from the parcel scene
-                if (scene != null && rootEntitiesMarkedForCleanup.Peek().scene != scene)
-                    break;
-
                 ParcelEntity parcelEntity = rootEntitiesMarkedForCleanup.Dequeue();
+                parcelEntity.scene.RemoveEntity(parcelEntity.entity.entityId, false);
 
-                scene = parcelEntity.scene;
-                scene.RemoveEntity(parcelEntity.entity.entityId, false);
+                if (!scenesToRemove.Contains(parcelEntity.scene))
+                    scenesToRemove.Add(parcelEntity.scene);
             }
 
             while (entitiesMarkedForCleanup.Count > 0)
@@ -113,8 +109,11 @@ namespace DCL
                 entity.Cleanup();
             }
 
-            if (scene != null)
-                Object.Destroy(scene.gameObject);
+            foreach (var scene in scenesToRemove)
+            {
+                if (scene != null)
+                    Object.Destroy(scene.gameObject);
+            }
         }
 
         IEnumerator CleanupEntitiesCoroutine()
