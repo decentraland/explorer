@@ -111,7 +111,7 @@ namespace DCL
 
             foreach (var scene in scenesToRemove)
             {
-                if (scene != null && SceneController.i.loadedScenes.ContainsKey(scene.sceneData.id))
+                if (scene != null && !SceneController.i.loadedScenes.ContainsKey(scene.sceneData.id))
                     Object.Destroy(scene.gameObject);
             }
         }
@@ -168,7 +168,7 @@ namespace DCL
 
                 foreach (var scene in scenesToRemove)
                 {
-                    if (scene != null && SceneController.i.loadedScenes.ContainsKey(scene.sceneData.id))
+                    if (scene != null && !SceneController.i.loadedScenes.ContainsKey(scene.sceneData.id))
                     {
                         Object.Destroy(scene.gameObject);
 
