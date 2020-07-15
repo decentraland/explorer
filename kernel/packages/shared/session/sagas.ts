@@ -29,6 +29,8 @@ export function* sessionSaga(): any {
 }
 
 function* login() {
+  console['group']('connect#login')
+
   let userId: string
   let identity: ExplorerIdentity
 

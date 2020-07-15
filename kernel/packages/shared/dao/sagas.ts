@@ -30,6 +30,7 @@ import {
 import { getAddedServers, getContentWhitelist } from 'shared/meta/selectors'
 import { getAllCatalystCandidates, isRealmInitialized } from './selectors'
 import { saveToLocalStorage, getFromLocalStorage } from '../../atomicHelpers/localStorage'
+import defaultLogger from '../logger'
 
 const CACHE_KEY = 'realm'
 const CATALYST_CANDIDATES_KEY = CACHE_KEY + '-' + SET_CATALYST_CANDIDATES
@@ -110,6 +111,8 @@ function* loadCatalystRealms() {
   }
 
   yield put(catalystRealmInitialized())
+
+  defaultLogger.info(`Using Catalyst configuration: `, yield select((state) => state.dao))
 }
 
 function getConfiguredRealm(candidates: Candidate[]) {

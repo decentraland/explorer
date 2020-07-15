@@ -17,7 +17,6 @@ import {
 import { persistCurrentUser, sendPublicChatMessage } from 'shared/comms'
 import { AvatarMessageType } from 'shared/comms/interface/types'
 import { avatarMessageObservable, getUserProfile } from 'shared/comms/peers'
-import { providerFuture } from 'shared/ethereum/provider'
 import { getProfile, hasConnectedWeb3 } from 'shared/profiles/selectors'
 import { TeleportController } from 'shared/world/TeleportController'
 import { reportScenesAroundParcel } from 'shared/atlas/actions'
@@ -109,9 +108,8 @@ import {
   PB_OpenExternalUrl,
   PB_OpenNFTDialog
 } from '../shared/proto/engineinterface_pb'
-import { signalRendererInitialized } from 'shared/renderer/actions'
 import { logout } from 'shared/session/actions'
-import { getIdentity } from 'shared/session'
+import { getIdentity, hasWallet } from 'shared/session'
 
 declare const globalThis: UnityInterfaceContainer &
   BrowserInterfaceContainer &
@@ -128,7 +126,6 @@ let gameInstance!: GameInstance
 let isTheFirstLoading = true
 
 export let futures: Record<string, IFuture<any>> = {}
-export let hasWallet: boolean = false
 
 const positionEvent = {
   position: Vector3.Zero(),
@@ -229,7 +226,7 @@ const browserInterface = {
   },
 
   MotdConfirmClicked() {
-    if (hasWallet) {
+    if (hasWallet()) {
       TeleportController.goToNext()
     } else {
       window.open('https://docs.decentraland.org/get-a-wallet/', '_blank')
@@ -271,6 +268,7 @@ const browserInterface = {
   },
 
   ControlEvent({ eventType, payload }: { eventType: string; payload: any }) {
+    defaultLogger.info(`browserInterface`, eventType, payload)
     switch (eventType) {
       case 'SceneReady': {
         const { sceneId } = payload
@@ -348,7 +346,7 @@ const browserInterface = {
   ReportUserEmail(data: { userEmail: string }) {
     const profile = getUserProfile().profile
     if (profile) {
-      if (hasWallet) {
+      if (hasWallet()) {
         window.analytics.identify(profile.userId, { email: data.userEmail })
       } else {
         window.analytics.identify({ email: data.userEmail })
@@ -939,9 +937,13 @@ export class UnityParcelScene extends UnityScene<LoadableParcelScene> {
  * @param _gameInstance Unity game instance
  */
 export async function initializeEngine(_gameInstance: GameInstance) {
-  gameInstance = _gameInstance
+  gameInstance = {
+    SendMessage: (...args) => {
+      defaultLogger.info('gameInstance', ...args)
+      _gameInstance.SendMessage(...args)
+    }
+  }
 
-  globalThis.globalStore.dispatch(signalRendererInitialized())
   setLoadingScreenVisible(true)
 
   unityInterface.DeactivateRendering()
@@ -984,9 +986,6 @@ export async function initializeEngine(_gameInstance: GameInstance) {
 }
 
 export async function startUnityParcelLoading() {
-  const p = await providerFuture
-  hasWallet = p.successful
-
   globalThis.globalStore.dispatch(loadingScenes())
 
   await enableParcelSceneLoading({

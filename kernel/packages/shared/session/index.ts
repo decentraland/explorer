@@ -6,9 +6,10 @@ import { disconnect, sendToMordor } from 'shared/comms'
 import { removeUserProfile } from 'shared/comms/peers'
 import { bringDownClientAndShowError } from 'shared/loading/ReportFatalError'
 import { NEW_LOGIN } from 'shared/loading/types'
-import { StoreContainer } from 'shared/store/rootTypes'
+import { StoreContainer, RootState } from 'shared/store/rootTypes'
 
-import { getCurrentIdentity } from './selectors'
+import { getCurrentIdentity, hasWallet as hasWalletSelector } from './selectors'
+import { Store } from 'redux'
 
 declare const globalThis: StoreContainer
 
@@ -36,3 +37,24 @@ export class Session {
 
 // tslint:disable-next-line
 export const getIdentity = () => getCurrentIdentity(globalThis.globalStore.getState())!
+
+export const hasWallet = () => hasWalletSelector(globalThis.globalStore.getState())
+
+export async function loginCompleted(): Promise<void> {
+  const store: Store<RootState> = globalThis.globalStore
+
+  const initialized = store.getState().session.initialized
+  if (initialized) {
+    return Promise.resolve()
+  }
+
+  return new Promise((resolve) => {
+    const unsubscribe = store.subscribe(() => {
+      const initialized = store.getState().session.initialized
+      if (initialized) {
+        unsubscribe()
+        return resolve()
+      }
+    })
+  })
+}
