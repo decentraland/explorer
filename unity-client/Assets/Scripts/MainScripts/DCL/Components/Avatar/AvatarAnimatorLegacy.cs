@@ -233,11 +233,6 @@ public class AvatarAnimatorLegacy : MonoBehaviour, IPoolLifecycleHandler
 
     public void BindBodyShape(Animation animation, string bodyShapeType, Transform target)
     {
-        // TODO: Once we are using pooled avatars, and populating its wearables, etc. on demand, when we prewarm the pool on loading time, we should sample the animation to avoid the inicial sampling hiccup
-
-        // Vector3 originalLocalPos = transform.localPosition;
-        // transform.localPosition = new Vector3(0, -1000, 0);
-
         this.target = target;
         this.animation = animation;
 
@@ -259,14 +254,8 @@ public class AvatarAnimatorLegacy : MonoBehaviour, IPoolLifecycleHandler
                 // Already coordinated with art team to have the animations with the correct ids
                 this.animation.AddClip(animationToId.clip, animationToId.id);
             }
-
-            // this.animation.Sample();
         }
 
-        // this.animation.Sample();
-
         SetIdleFrame();
-
-        // transform.localPosition = originalLocalPos;
     }
 }

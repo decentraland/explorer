@@ -200,7 +200,7 @@ namespace DCL.Models
 
         public void Cleanup()
         {
-            // Dont't do anything if this object was already released
+            // Don't do anything if this object was already released
             if (isReleased) return;
 
             OnRemoved?.Invoke(this);
