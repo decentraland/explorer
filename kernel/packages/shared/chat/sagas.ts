@@ -77,8 +77,7 @@ export function* chatSaga(): any {
   yield takeEvery(MESSAGE_RECEIVED, handleReceivedMessage)
   yield takeEvery(SEND_MESSAGE, handleSendMessage)
 
-  yield take(EXPERIENCE_STARTED)
-  yield call(showWelcomeMessage)
+  yield takeEvery(EXPERIENCE_STARTED, showWelcomeMessage)
 }
 
 function* handleAuthSuccessful() {
