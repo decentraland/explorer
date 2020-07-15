@@ -8,14 +8,13 @@ using UnityEngine;
 
 namespace DCL
 {
-    public class AvatarShape : BaseComponent, IPoolLifecycleHandler
+    public class AvatarShape : BaseComponent
     {
         private const string CURRENT_PLAYER_ID = "CurrentPlayerInfoCardId";
 
         public AvatarName avatarName;
         public AvatarRenderer avatarRenderer;
         public AvatarMovementController avatarMovementController;
-        [SerializeField] internal GameObject minimapRepresentation;
         [SerializeField] private AvatarOnPointerDown onPointerDown;
         private StringVariable currentPlayerInfoCardId;
 
@@ -28,7 +27,7 @@ namespace DCL
         private MinimapMetadata.MinimapUserInfo avatarUserInfo = new MinimapMetadata.MinimapUserInfo();
         bool initializedPosition = false;
 
-        private void Awake()
+        private void Start()
         {
             OnPoolGet();
         }
@@ -68,8 +67,6 @@ namespace DCL
 
             yield return new WaitUntil(() => avatarDone || avatarFailed);
 
-            onPointerDown.OnPointerDownReport -= PlayerClicked;
-            onPointerDown.OnPointerDownReport += PlayerClicked;
             onPointerDown.Setup(scene, entity, new OnPointerDown.Model()
             {
                 type = OnPointerDown.NAME,
@@ -77,10 +74,17 @@ namespace DCL
                 hoverText = "view profile"
             });
 
+            DCLCharacterController.i.characterPosition.OnPrecisionAdjust -= PrecisionAdjust;
+            DCLCharacterController.i.characterPosition.OnPrecisionAdjust += PrecisionAdjust;
+
             entity.OnTransformChange -= avatarMovementController.OnTransformChanged;
             entity.OnTransformChange += avatarMovementController.OnTransformChanged;
+
             entity.OnTransformChange -= OnEntityTransformChanged;
             entity.OnTransformChange += OnEntityTransformChanged;
+
+            onPointerDown.OnPointerDownReport -= PlayerClicked;
+            onPointerDown.OnPointerDownReport += PlayerClicked;
 
             // To deal with the cases in which the entity transform was configured before the AvatarShape
             if (!initializedPosition && entity.components.ContainsKey(DCL.Models.CLASS_ID_COMPONENT.TRANSFORM))
@@ -92,25 +96,24 @@ namespace DCL
                     entity.gameObject.transform.localRotation, true);
             }
 
+            avatarUserInfo.userId = model.id;
+            avatarUserInfo.userName = model.name;
+            avatarUserInfo.worldPosition = lastAvatarPosition != null ? lastAvatarPosition.Value : entity.gameObject.transform.position;
+            MinimapMetadataController.i?.UpdateMinimapUserInformation(avatarUserInfo);
+
             avatarName.SetName(model.name);
-            SetMinimapRepresentationActive(true);
+
             everythingIsLoaded = true;
 
             onPointerDown.collider.enabled = true;
+        }
 
-            avatarUserInfo.userId = model.id;
-            avatarUserInfo.userName = model.name;
-            avatarUserInfo.worldPosition = lastAvatarPosition != null ? lastAvatarPosition.Value : minimapRepresentation.transform.position;
+        private void PrecisionAdjust(DCLCharacterPosition obj)
+        {
+            avatarUserInfo.worldPosition = entity.gameObject.transform.position;
             MinimapMetadataController.i?.UpdateMinimapUserInformation(avatarUserInfo);
         }
 
-        void SetMinimapRepresentationActive(bool active)
-        {
-            if (minimapRepresentation == null)
-                return;
-
-            minimapRepresentation.SetActive(active);
-        }
 
         private void OnEntityTransformChanged(DCLTransform.Model updatedModel)
         {
@@ -128,26 +131,13 @@ namespace DCL
 
             currentPlayerInfoCardId = Resources.Load<StringVariable>(CURRENT_PLAYER_ID);
 
-            if (string.IsNullOrEmpty(currentSerialization))
-                SetMinimapRepresentationActive(false);
-
             everythingIsLoaded = false;
             initializedPosition = false;
             currentSerialization = "";
             model = new AvatarModel();
             lastAvatarPosition = null;
             avatarUserInfo = new MinimapMetadata.MinimapUserInfo();
-
-            minimapRepresentation.transform.position = new Vector3(0, 1, 0);
-            avatarUserInfo.worldPosition = minimapRepresentation.transform.position;
-
-            MinimapMetadataController.i?.UpdateMinimapUserInformation(avatarUserInfo);
-        }
-
-        public override void OnPoolRelease()
-        {
-            base.OnPoolRelease();
-            Cleanup();
+            avatarName.SetName(String.Empty);
         }
 
         public override void Cleanup()
@@ -162,14 +152,16 @@ namespace DCL
             }
 
             onPointerDown.OnPointerDownReport -= PlayerClicked;
+            DCLCharacterController.i.characterPosition.OnPrecisionAdjust -= PrecisionAdjust;
 
             if (entity != null)
             {
                 entity.OnTransformChange = null;
-                avatarUserInfo.userId = model.id;
-                MinimapMetadataController.i?.UpdateMinimapUserInformation(avatarUserInfo, true);
                 entity = null;
             }
+
+            avatarUserInfo.userId = model.id;
+            MinimapMetadataController.i?.UpdateMinimapUserInformation(avatarUserInfo, true);
         }
     }
 }
