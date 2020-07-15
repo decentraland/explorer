@@ -3,7 +3,7 @@ import { commConfigurations, parcelLimits, COMMS, AUTO_CHANGE_REALM } from 'conf
 import { CommunicationsController } from 'shared/apis/CommunicationsController'
 import { defaultLogger } from 'shared/logger'
 import { ChatMessage as InternalChatMessage, ChatMessageType } from 'shared/types'
-import { positionObservable, PositionReport } from 'shared/world/positionThings'
+import { positionObservable, PositionReport, lastPlayerPosition } from 'shared/world/positionThings'
 import { ProfileAsPromise } from '../profiles/ProfileAsPromise'
 import { notifyStatusThroughChat } from './chat'
 import { CliBrokerConnection } from './CliBrokerConnection'
@@ -43,8 +43,8 @@ import {
 } from './interface/utils'
 import { BrokerWorldInstanceConnection } from '../comms/v1/brokerWorldInstanceConnection'
 import { profileToRendererFormat } from 'shared/profiles/transformations/profileToRendererFormat'
-import { ProfileForRenderer } from 'decentraland-ecs/src'
-import { worldRunningObservable, isWorldRunning } from '../world/worldState'
+import { ProfileForRenderer, uuid } from 'decentraland-ecs/src'
+import { worldRunningObservable, isWorldRunning, onNextWorldRunning } from '../world/worldState'
 import { WorldInstanceConnection } from './interface/index'
 
 import { LighthouseWorldInstanceConnection } from './v2/LighthouseWorldInstanceConnection'
@@ -70,6 +70,9 @@ import { queueTrackingEvent } from 'shared/analytics'
 import { messageReceived } from '../chat/actions'
 import { arrayEquals } from 'atomicHelpers/arrayEquals'
 import { getCommsConfig } from 'shared/meta/selectors'
+import { ensureMetaConfigurationInitialized } from 'shared/meta/index'
+import { ReportFatalError } from 'shared/loading/ReportFatalError'
+import { NEW_LOGIN, UNEXPECTED_ERROR, commsEstablished } from 'shared/loading/types'
 
 export type CommsVersion = 'v1' | 'v2'
 export type CommsMode = CommsV1Mode | CommsV2Mode
@@ -91,6 +94,11 @@ export const MORDOR_POSITION: Position = [
 
 type CommsContainer = {
   printCommsInformation: () => void
+  bots: {
+    create: () => string
+    list: () => string[]
+    remove: (id: string) => boolean
+  }
 }
 
 declare const globalThis: StoreContainer & CommsContainer
@@ -620,17 +628,19 @@ export async function connect(userId: string) {
 
         const instance = new BrokerWorldInstanceConnection(commsBroker)
         await instance.isConnected
+        store.dispatch(commsEstablished())
 
         connection = instance
         break
       }
       case 'v2': {
+        await ensureMetaConfigurationInitialized()
         const store: Store<RootState> = globalThis.globalStore
         const lighthouseUrl = getCommsServer(store.getState())
         const realm = getRealm(store.getState())
         const commsConfig = getCommsConfig(store.getState())
 
-        const peerConfig = {
+        const peerConfig: any = {
           connectionConfig: {
             iceServers: commConfigurations.iceServers
           },
@@ -655,6 +665,13 @@ export async function connect(userId: string) {
             maxConnectionDistance: 4,
             nearbyPeersDistance: 5,
             disconnectDistance: 5
+          }
+        }
+
+        if (!commsConfig.relaySuspensionDisabled) {
+          peerConfig.relaySuspensionConfig = {
+            relaySuspensionInterval: commsConfig.relaySuspensionInterval ?? 750,
+            relaySuspensionDuration: commsConfig.relaySuspensionDuration ?? 5000
           }
         }
 
@@ -695,10 +712,18 @@ export async function connect(userId: string) {
     if (isWorldRunning()) {
       await startCommunications(context)
     } else {
-      let observer = worldRunningObservable.add((isRunning) => {
-        if (isRunning) {
-          startCommunications(context!).catch((e) => defaultLogger.log('Error starting communications!', e))
-          worldRunningObservable.remove(observer)
+      onNextWorldRunning(async () => {
+        try {
+          await startCommunications(context!)
+        } catch (e) {
+          disconnect()
+          if (e instanceof IdTakenError) {
+            ReportFatalError(NEW_LOGIN)
+          } else {
+            // not a comms issue per se => rethrow error
+            defaultLogger.error(`error while trying to establish communications `, e)
+            ReportFatalError(UNEXPECTED_ERROR)
+          }
         }
       })
     }
@@ -706,8 +731,8 @@ export async function connect(userId: string) {
     return context
   } catch (e) {
     defaultLogger.error(e)
-    if (e.message && e.message.includes('is taken')) {
-      throw new IdTakenError(e.message)
+    if (e instanceof IdTakenError) {
+      throw e
     } else {
       throw new ConnectionEstablishmentError(e.message)
     }
@@ -721,6 +746,7 @@ export async function startCommunications(context: Context) {
     try {
       if (connection instanceof LighthouseWorldInstanceConnection) {
         await connection.connectPeer()
+        store.dispatch(commsEstablished())
       }
     } catch (e) {
       // Do nothing if layer is full. This will be handled by status handler
@@ -797,7 +823,11 @@ export async function startCommunications(context: Context) {
       }
     }, 100)
   } catch (e) {
-    throw new ConnectionEstablishmentError(e.message)
+    if (e.message && e.message.includes('is taken')) {
+      throw new IdTakenError(e.message)
+    } else {
+      throw new ConnectionEstablishmentError(e.message)
+    }
   }
 }
 
@@ -901,4 +931,46 @@ globalThis.printCommsInformation = function () {
     defaultLogger.log('Communication topics: ' + previousTopics)
     context.stats.printDebugInformation()
   }
+}
+
+type Bot = { id: string; handle: any }
+const bots: Bot[] = []
+
+globalThis.bots = {
+  create: () => {
+    const id = uuid()
+    processProfileMessage(context!, id, id, {
+      type: 'profile',
+      time: Date.now(),
+      data: {
+        version: '1',
+        user: id
+      }
+    })
+    const position = { ...lastPlayerPosition }
+    const handle = setInterval(() => {
+      processPositionMessage(context!, id, {
+        type: 'position',
+        time: Date.now(),
+        data: [position.x, position.y, position.z, 0, 0, 0, 0]
+      })
+    }, 1000)
+    bots.push({ id, handle })
+    return id
+  },
+  remove: (id: string | undefined) => {
+    let bot
+    if (id) {
+      bot = bots.find((bot) => bot.id === id)
+    } else {
+      bot = bots.length > 0 ? bots[0] : undefined
+    }
+    if (bot) {
+      clearInterval(bot.handle)
+      bots.splice(bots.indexOf(bot), 1)
+      return true
+    }
+    return false
+  },
+  list: () => bots.map((bot) => bot.id)
 }

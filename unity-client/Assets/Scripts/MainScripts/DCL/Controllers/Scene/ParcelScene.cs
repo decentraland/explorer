@@ -3,15 +3,17 @@ using DCL.Configuration;
 using DCL.Helpers;
 using DCL.Models;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Object = UnityEngine.Object;
 
 namespace DCL.Controllers
 {
-    public class ParcelScene : MonoBehaviour, ICleanable
+    public class ParcelScene : MonoBehaviour
     {
         public static bool VERBOSE = false;
+
         public enum State
         {
             NOT_READY,
@@ -21,7 +23,6 @@ namespace DCL.Controllers
         }
 
         public static ParcelScenesCleaner parcelScenesCleaner = new ParcelScenesCleaner();
-        private const int ENTITY_POOL_PREWARM_COUNT = 2000;
 
         public Dictionary<string, DecentralandEntity> entities = new Dictionary<string, DecentralandEntity>();
         public Dictionary<string, BaseDisposable> disposableComponents = new Dictionary<string, BaseDisposable>();
@@ -34,28 +35,35 @@ namespace DCL.Controllers
         public event System.Action<DecentralandEntity> OnEntityAdded;
         public event System.Action<DecentralandEntity> OnEntityRemoved;
         public event System.Action<ParcelScene> OnSceneReady;
+        public event System.Action<ParcelScene> OnStateRefreshed;
 
         public ContentProvider contentProvider;
         public int disposableNotReadyCount => disposableNotReady.Count;
 
-        [System.NonSerialized]
-        public bool useBlockers = true;
+        [System.NonSerialized] public bool useBlockers = true;
 
-        [System.NonSerialized]
-        public bool isTestScene = false;
+        [System.NonSerialized] public bool isTestScene = false;
 
-        [System.NonSerialized]
-        public bool isPersistent = false;
+        [System.NonSerialized] public bool isPersistent = false;
 
-        [System.NonSerialized]
-        public bool unloadWithDistance = true;
+        [System.NonSerialized] public bool unloadWithDistance = true;
 
         public BlockerHandler blockerHandler;
         public bool isReady => state == State.READY;
 
         readonly List<string> disposableNotReady = new List<string>();
         bool isReleased = false;
-        State state = State.NOT_READY;
+
+        State stateValue = State.NOT_READY;
+        public State state
+        {
+            get { return stateValue; }
+            set
+            {
+                stateValue = value;
+                OnStateRefreshed?.Invoke(this);
+            }
+        }
 
         public void Awake()
         {
@@ -66,9 +74,6 @@ namespace DCL.Controllers
 
             metricsController = new SceneMetricsController(this);
             metricsController.Enable();
-
-            CommonScriptableObjects.rendererState.OnChange += OnRenderingStateChanged;
-            OnRenderingStateChanged(CommonScriptableObjects.rendererState.Get(), false);
         }
 
         void OnDisable()
@@ -79,7 +84,6 @@ namespace DCL.Controllers
         private void OnDestroy()
         {
             blockerHandler?.CleanBlockers();
-            CommonScriptableObjects.rendererState.OnChange -= OnRenderingStateChanged;
         }
 
         private void Update()
@@ -212,15 +216,17 @@ namespace DCL.Controllers
             }
         }
 
-        public void Cleanup()
+        public void Cleanup(bool immediate)
         {
             if (isReleased)
                 return;
 
+            DisposeAllSceneComponents();
+
             if (DCLCharacterController.i)
                 DCLCharacterController.i.characterPosition.OnPrecisionAdjust -= OnPrecisionAdjust;
 
-            if (!CommonScriptableObjects.rendererState.Get())
+            if (immediate) //!CommonScriptableObjects.rendererState.Get())
             {
                 RemoveAllEntitiesImmediate();
             }
@@ -244,7 +250,7 @@ namespace DCL.Controllers
 
         public override string ToString()
         {
-            return "gameObjectReference: " + this.ToString() + "\n" + sceneData.ToString();
+            return "Parcel Scene: " + base.ToString() + "\n" + sceneData.ToString();
         }
 
         public bool IsInsideSceneBoundaries(DCLCharacterPosition charPosition)
@@ -314,6 +320,7 @@ namespace DCL.Controllers
 
         private CreateEntityMessage tmpCreateEntityMessage = new CreateEntityMessage();
         private const string EMPTY_GO_POOL_NAME = "Empty";
+
         public DecentralandEntity CreateEntity(string id)
         {
             SceneController.i.OnMessageDecodeStart?.Invoke("CreateEntity");
@@ -328,11 +335,10 @@ namespace DCL.Controllers
             var newEntity = new DecentralandEntity();
             newEntity.entityId = tmpCreateEntityMessage.id;
 
-            // We need to manually create the Pool for empty game objects if it doesn't exist
             if (!PoolManager.i.ContainsPool(EMPTY_GO_POOL_NAME))
             {
                 GameObject go = new GameObject();
-                Pool pool = PoolManager.i.AddPool(EMPTY_GO_POOL_NAME, go, maxPrewarmCount: ENTITY_POOL_PREWARM_COUNT);
+                Pool pool = PoolManager.i.AddPool(EMPTY_GO_POOL_NAME, go, maxPrewarmCount: 2000, isPersistent: true);
                 pool.ForcePrewarm();
             }
 
@@ -381,7 +387,6 @@ namespace DCL.Controllers
 
                 entities.Remove(tmpRemoveEntityMessage.id);
             }
-
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             else
             {
@@ -518,6 +523,7 @@ namespace DCL.Controllers
 
         UUIDCallbackMessage uuidMessage = new UUIDCallbackMessage();
         EntityComponentCreateMessage createEntityComponentMessage = new EntityComponentCreateMessage();
+
         public BaseComponent EntityComponentCreateOrUpdate(string entityId, string name, int classIdNum, string data, out CleanableYieldInstruction yieldInstruction)
         {
             yieldInstruction = null;
@@ -538,7 +544,7 @@ namespace DCL.Controllers
                 return null;
             }
 
-            CLASS_ID_COMPONENT classId = (CLASS_ID_COMPONENT)createEntityComponentMessage.classId;
+            CLASS_ID_COMPONENT classId = (CLASS_ID_COMPONENT) createEntityComponentMessage.classId;
 
             if (classId == CLASS_ID_COMPONENT.TRANSFORM)
             {
@@ -601,7 +607,6 @@ namespace DCL.Controllers
                         {
                             uuidComponent.Setup(this, entity, model);
                             entity.uuidComponents.Add(type, uuidComponent);
-
                         }
                         else
                         {
@@ -710,144 +715,144 @@ namespace DCL.Controllers
 
             BaseDisposable newComponent = null;
 
-            switch ((CLASS_ID)sharedComponentCreatedMessage.classId)
+            switch ((CLASS_ID) sharedComponentCreatedMessage.classId)
             {
                 case CLASS_ID.BOX_SHAPE:
-                    {
-                        newComponent = new BoxShape(this);
-                        break;
-                    }
+                {
+                    newComponent = new BoxShape(this);
+                    break;
+                }
 
                 case CLASS_ID.SPHERE_SHAPE:
-                    {
-                        newComponent = new SphereShape(this);
-                        break;
-                    }
+                {
+                    newComponent = new SphereShape(this);
+                    break;
+                }
 
                 case CLASS_ID.CONE_SHAPE:
-                    {
-                        newComponent = new ConeShape(this);
-                        break;
-                    }
+                {
+                    newComponent = new ConeShape(this);
+                    break;
+                }
 
                 case CLASS_ID.CYLINDER_SHAPE:
-                    {
-                        newComponent = new CylinderShape(this);
-                        break;
-                    }
+                {
+                    newComponent = new CylinderShape(this);
+                    break;
+                }
 
                 case CLASS_ID.PLANE_SHAPE:
-                    {
-                        newComponent = new PlaneShape(this);
-                        break;
-                    }
+                {
+                    newComponent = new PlaneShape(this);
+                    break;
+                }
 
                 case CLASS_ID.GLTF_SHAPE:
-                    {
-                        newComponent = new GLTFShape(this);
-                        break;
-                    }
+                {
+                    newComponent = new GLTFShape(this);
+                    break;
+                }
 
                 case CLASS_ID.NFT_SHAPE:
-                    {
-                        newComponent = new NFTShape(this);
-                        break;
-                    }
+                {
+                    newComponent = new NFTShape(this);
+                    break;
+                }
 
                 case CLASS_ID.OBJ_SHAPE:
-                    {
-                        newComponent = new OBJShape(this);
-                        break;
-                    }
+                {
+                    newComponent = new OBJShape(this);
+                    break;
+                }
 
                 case CLASS_ID.BASIC_MATERIAL:
-                    {
-                        newComponent = new BasicMaterial(this);
-                        break;
-                    }
+                {
+                    newComponent = new BasicMaterial(this);
+                    break;
+                }
 
                 case CLASS_ID.PBR_MATERIAL:
-                    {
-                        newComponent = new PBRMaterial(this);
-                        break;
-                    }
+                {
+                    newComponent = new PBRMaterial(this);
+                    break;
+                }
 
                 case CLASS_ID.AUDIO_CLIP:
-                    {
-                        newComponent = new DCLAudioClip(this);
-                        break;
-                    }
+                {
+                    newComponent = new DCLAudioClip(this);
+                    break;
+                }
 
                 case CLASS_ID.TEXTURE:
-                    {
-                        newComponent = new DCLTexture(this);
-                        break;
-                    }
+                {
+                    newComponent = new DCLTexture(this);
+                    break;
+                }
 
                 case CLASS_ID.UI_INPUT_TEXT_SHAPE:
-                    {
-                        newComponent = new UIInputText(this);
-                        break;
-                    }
+                {
+                    newComponent = new UIInputText(this);
+                    break;
+                }
 
                 case CLASS_ID.UI_FULLSCREEN_SHAPE:
                 case CLASS_ID.UI_SCREEN_SPACE_SHAPE:
+                {
+                    if (uiScreenSpace == null)
                     {
-                        if (uiScreenSpace == null)
-                        {
-                            newComponent = new UIScreenSpace(this);
-                        }
-
-                        break;
+                        newComponent = new UIScreenSpace(this);
                     }
+
+                    break;
+                }
 
                 case CLASS_ID.UI_CONTAINER_RECT:
-                    {
-                        newComponent = new UIContainerRect(this);
-                        break;
-                    }
+                {
+                    newComponent = new UIContainerRect(this);
+                    break;
+                }
 
                 case CLASS_ID.UI_SLIDER_SHAPE:
-                    {
-                        newComponent = new UIScrollRect(this);
-                        break;
-                    }
+                {
+                    newComponent = new UIScrollRect(this);
+                    break;
+                }
 
                 case CLASS_ID.UI_CONTAINER_STACK:
-                    {
-                        newComponent = new UIContainerStack(this);
-                        break;
-                    }
+                {
+                    newComponent = new UIContainerStack(this);
+                    break;
+                }
 
                 case CLASS_ID.UI_IMAGE_SHAPE:
-                    {
-                        newComponent = new UIImage(this);
-                        break;
-                    }
+                {
+                    newComponent = new UIImage(this);
+                    break;
+                }
 
                 case CLASS_ID.UI_TEXT_SHAPE:
-                    {
-                        newComponent = new UIText(this);
-                        break;
-                    }
+                {
+                    newComponent = new UIText(this);
+                    break;
+                }
 
                 case CLASS_ID.VIDEO_CLIP:
-                    {
-                        newComponent = new DCLVideoClip(this);
-                        break;
-                    }
+                {
+                    newComponent = new DCLVideoClip(this);
+                    break;
+                }
 
                 case CLASS_ID.VIDEO_TEXTURE:
-                    {
-                        newComponent = new DCLVideoTexture(this);
-                        break;
-                    }
+                {
+                    newComponent = new DCLVideoTexture(this);
+                    break;
+                }
 
                 case CLASS_ID.FONT:
-                    {
-                        newComponent = new DCLFont(this);
-                        break;
-                    }
+                {
+                    newComponent = new DCLFont(this);
+                    break;
+                }
 
                 default:
                     Debug.LogError($"Unknown classId");
@@ -943,6 +948,7 @@ namespace DCL.Controllers
                     {
                         entity.meshesInfo.currentShape.DetachFrom(entity);
                     }
+
                     return;
                 case OnClick.NAME:
                     RemoveUUIDComponentType<OnClick>(entity, componentName);
@@ -1063,6 +1069,7 @@ namespace DCL.Controllers
                 SetSceneReady();
             }
 
+            OnStateRefreshed?.Invoke(this);
             RefreshName();
         }
 
@@ -1118,11 +1125,12 @@ namespace DCL.Controllers
             OnSceneReady?.Invoke(this);
         }
 
-        void OnRenderingStateChanged(bool isEnable, bool prevState)
+        private void DisposeAllSceneComponents()
         {
-            if (isEnable)
+            List<string> allDisposableComponents = disposableComponents.Select(x => x.Key).ToList();
+            foreach (string id in allDisposableComponents)
             {
-                parcelScenesCleaner.ForceCleanup();
+                parcelScenesCleaner.MarkDisposableComponentForCleanup(this, id);
             }
         }
 
@@ -1170,6 +1178,5 @@ namespace DCL.Controllers
             }
         }
 #endif
-
     }
 }

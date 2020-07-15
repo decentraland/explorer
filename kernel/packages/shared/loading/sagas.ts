@@ -5,7 +5,8 @@ import { getCurrentUser } from '../comms/peers'
 import { lastPlayerPosition } from '../world/positionThings'
 import { SceneLoad, SCENE_FAIL, SCENE_LOAD, SCENE_START } from './actions'
 import { LoadingState } from './reducer'
-import { EXPERIENCE_STARTED, helpTexts, rotateHelpText, TELEPORT_TRIGGERED } from './types'
+import { EXPERIENCE_STARTED, loadingTips, rotateHelpText, TELEPORT_TRIGGERED } from './types'
+import { future, IFuture } from 'fp-future'
 
 const SECONDS = 1000
 
@@ -44,7 +45,7 @@ function* refreshTeleport() {
 }
 function* refreshTextInScreen() {
   while (true) {
-    const status = yield select(state => state.loading)
+    const status = yield select((state) => state.loading)
     yield call(() => updateTextInScreen(status))
     yield delay(200)
   }
@@ -56,9 +57,21 @@ export function* waitForSceneLoads() {
       started: take(SCENE_START),
       failed: take(SCENE_FAIL)
     })
-    if (yield select(state => state.loading.pendingScenes === 0)) {
+    if (yield select((state) => state.loading.pendingScenes === 0)) {
       break
     }
+  }
+}
+
+function hideLoadingTips() {
+  const messages = document.getElementById('load-messages')
+  const images = document.getElementById('load-images') as HTMLImageElement | null
+
+  if (messages) {
+    messages.style.cssText = 'display: none;'
+  }
+  if (images) {
+    images.style.cssText = 'display: none;'
   }
 }
 
@@ -66,18 +79,20 @@ export function* initialSceneLoading() {
   yield race({
     refresh: call(refreshTeleport),
     textInScreen: call(refreshTextInScreen),
-    finish: call(function*() {
+    finish: call(function* () {
       yield take(EXPERIENCE_STARTED)
       yield take('Loading scene')
       yield call(waitForSceneLoads)
+      yield call(hideLoadingTips)
     })
   })
 }
 
 export function* teleportSceneLoading() {
+  cleanSubTextInScreen()
   yield race({
     refresh: call(refreshTeleport),
-    textInScreen: call(function*() {
+    textInScreen: call(function* () {
       yield delay(2000)
       yield call(refreshTextInScreen)
     }),
@@ -85,16 +100,38 @@ export function* teleportSceneLoading() {
   })
 }
 
-export function updateTextInScreen(status: LoadingState) {
+const loadingImagesCache: Record<string, IFuture<string>> = {}
+
+export async function updateTextInScreen(status: LoadingState) {
   const messages = document.getElementById('load-messages')
-  if (messages) {
-    messages.innerText = helpTexts[status.helpText]
+  const images = document.getElementById('load-images') as HTMLImageElement | null
+  if (messages && images) {
+    const loadingTip = loadingTips[status.helpText]
+    messages.innerText = loadingTip.text
+
+    if (!loadingImagesCache[loadingTip.image]) {
+      const promise = (loadingImagesCache[loadingTip.image] = future())
+      const response = await fetch(loadingTip.image)
+      const blob = await response.blob()
+      const url = URL.createObjectURL(blob)
+      promise.resolve(url)
+    }
+
+    const url = await loadingImagesCache[loadingTip.image]
+    images.src = url
   }
   const subMessages = document.getElementById('subtext-messages')
   if (subMessages) {
     subMessages.innerText =
       status.pendingScenes > 0
-        ? `Loading scenes (${status.pendingScenes} scene${status.pendingScenes > 0 ? 's' : ''} remaining)`
+        ? status.message || "Loading scenes..."
         : status.status
+  }
+}
+
+function cleanSubTextInScreen() {
+  const subMessages = document.getElementById('subtext-messages')
+  if (subMessages) {
+    subMessages.innerText = "Loading scenes..."
   }
 }

@@ -8,7 +8,9 @@ import { WebWorkerTransport } from 'decentraland-rpc/lib/common/transports/WebWo
 import { resolveUrl } from 'atomicHelpers/parseUrl'
 import { ILand } from 'shared/types'
 
-import { DEBUG, parcelLimits, getServerConfigurations, ENABLE_EMPTY_SCENES, PIN_CATALYST } from 'config'
+
+import { DEBUG, parcelLimits, getServerConfigurations, ENABLE_EMPTY_SCENES, LOS, PIN_CATALYST } from 'config'
+
 import { getFetchContentServer, getFetchMetaContentServer, getFetchMetaContentService } from 'shared/dao/selectors'
 import { Store } from 'redux'
 
@@ -102,7 +104,7 @@ export async function initParcelSceneWorker() {
       ? resolveUrl(document.location.origin, '/local-ipfs')
       : getFetchMetaContentService(window.globalStore.getState()),
     contentServerBundles: DEBUG || PIN_CATALYST ? '' : getServerConfigurations().contentAsBundle + '/',
-    lineOfSightRadius: parcelLimits.visibleRadius,
+    lineOfSightRadius: LOS ? Number.parseInt(LOS, 10) : parcelLimits.visibleRadius,
     secureRadius: parcelLimits.secureRadius,
     emptyScenes: ENABLE_EMPTY_SCENES && !(globalThis as any)['isRunningTests']
   })
