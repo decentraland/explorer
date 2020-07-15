@@ -387,6 +387,7 @@ namespace Builder
         private void OnEntityIsRemoved(DecentralandEntity entity)
         {
             var builderEntity = entity.gameObject.GetComponent<DCLBuilderEntity>();
+
             if (builderEntity != null)
             {
                 OnEntityRemoved?.Invoke(builderEntity);

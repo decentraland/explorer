@@ -41,7 +41,7 @@ namespace DCL.Components
         }
     }
 
-    public abstract class BaseComponent : MonoBehaviour, IComponent
+    public abstract class BaseComponent : MonoBehaviour, IComponent, IPoolLifecycleHandler
     {
         protected ComponentUpdateHandler updateHandler;
         public WaitForComponentUpdate yieldInstruction => updateHandler.yieldInstruction;
@@ -71,11 +71,6 @@ namespace DCL.Components
             updateHandler.ApplyChangesIfModified(updateHandler.oldSerialization ?? "{}");
         }
 
-        void OnDisable()
-        {
-            updateHandler.Stop();
-        }
-
         public abstract IEnumerator ApplyChanges(string newJson);
 
         public virtual ComponentUpdateHandler CreateUpdateHandler()
@@ -86,6 +81,17 @@ namespace DCL.Components
         public virtual void Cleanup()
         {
             updateHandler.Cleanup();
+        }
+
+        public void OnPoolRelease()
+        {
+            Cleanup();
+        }
+
+        public void OnPoolGet()
+        {
+            if (updateHandler == null)
+                updateHandler = CreateUpdateHandler();
         }
     }
 }

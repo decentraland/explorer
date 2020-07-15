@@ -340,11 +340,6 @@ namespace DCL.Controllers
             // As we know that the pool already exists, we just get one gameobject from it
             PoolableObject po = PoolManager.i.Get(SceneController.EMPTY_GO_POOL_NAME);
             newEntity.gameObject = po.gameObject;
-            po.OnRelease = () =>
-            {
-                newEntity.ResetRelease();
-                newEntity.Cleanup();
-            };
 
             newEntity.gameObject.name = "ENTITY_" + tmpCreateEntityMessage.id;
             newEntity.gameObject.transform.SetParent(gameObject.transform, false);

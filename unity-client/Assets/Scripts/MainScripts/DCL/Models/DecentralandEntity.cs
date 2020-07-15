@@ -236,6 +236,7 @@ namespace DCL.Models
 
                 //NOTE(Brian): This will prevent any component from storing/querying invalid gameObject references.
                 gameObject = null;
+                Debug.Log("Setting go to null");
             }
 
             OnTransformChange = null;
