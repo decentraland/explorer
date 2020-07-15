@@ -1,4 +1,5 @@
 import { takeEvery, put, select, call, take, delay } from 'redux-saga/effects'
+
 import { Authenticator } from 'dcl-crypto'
 import {
   SocialClient,
@@ -12,13 +13,23 @@ import {
   Realm as SocialRealm
 } from 'dcl-social-client'
 
-import { DEBUG_PM } from 'config'
-import { ExplorerIdentity } from 'shared'
+import { DEBUG_PM, INIT_PRE_LOAD, getServerConfigurations } from 'config'
 import { unityInterface } from 'unity-interface/dcl'
+
+import { Vector3Component } from 'atomicHelpers/landHelpers'
+import { worldToGrid } from 'atomicHelpers/parcelScenePositions'
+import { deepEqual } from 'atomicHelpers/deepEqual'
 
 import { createLogger } from 'shared/logger'
 import { ProfileAsPromise } from 'shared/profiles/ProfileAsPromise'
-import { ChatMessage, NotificationType, ChatMessageType, FriendshipAction, PresenceStatus } from 'shared/types'
+import {
+  ChatMessage,
+  NotificationType,
+  ChatMessageType,
+  FriendshipAction,
+  PresenceStatus,
+  HUDElementID
+} from 'shared/types'
 import { StoreContainer } from 'shared/store/rootTypes'
 import { getRealm } from 'shared/dao/selectors'
 import { Realm } from 'shared/dao/types'
@@ -28,22 +39,21 @@ import { ADDED_PROFILE_TO_CATALOG } from 'shared/profiles/actions'
 import { isAddedToCatalog, getProfile } from 'shared/profiles/selectors'
 import { INIT_CATALYST_REALM, SET_CATALYST_REALM, SetCatalystRealm, InitCatalystRealm } from 'shared/dao/actions'
 import { notifyFriendOnlineStatusThroughChat } from 'shared/comms/chat'
-
-import { Vector3Component } from 'atomicHelpers/landHelpers'
-import { worldToGrid } from 'atomicHelpers/parcelScenePositions'
-import { deepEqual } from 'atomicHelpers/deepEqual'
-
-import { SocialData, ChatState } from './types'
-import { getClient, findByUserId, getPrivateMessaging } from './selectors'
+import { ExplorerIdentity } from 'shared/session/types'
+import { SocialData, FriendsState } from 'shared/friends/types'
+import { getClient, findByUserId, getPrivateMessaging } from 'shared/friends/selectors'
+import { LOGIN_COMPLETED } from 'shared/session/actions'
+import { getCurrentIdentity } from 'shared/session/selectors'
+import { SEND_PRIVATE_MESSAGE, SendPrivateMessage } from 'shared/chat/actions'
 import {
-  SEND_PRIVATE_MESSAGE,
-  SendPrivateMessage,
   updateFriendship,
   UPDATE_FRIENDSHIP,
   UpdateFriendship,
   updatePrivateMessagingState,
   updateUserData
-} from './actions'
+} from 'shared/friends/actions'
+import { ensureWorldRunning } from 'shared/world/worldState'
+import { ensureRealmInitialized } from 'shared/dao/sagas'
 
 declare const globalThis: StoreContainer
 
@@ -60,12 +70,51 @@ const SEND_STATUS_INTERVAL_MILLIS = 5000
 type PresenceMemoization = { realm: SocialRealm | undefined; position: UserPosition | undefined }
 const presenceMap: Record<string, PresenceMemoization | undefined> = {}
 
-export function* initializePrivateMessaging(synapseUrl: string, identity: ExplorerIdentity) {
+const CLOCK_SERVICE_URL = 'https://worldtimeapi.org/api/timezone/Etc/UTC'
+
+export function* friendsSaga() {
+  yield takeEvery(LOGIN_COMPLETED, handleAuthSuccessful)
+}
+
+function* handleAuthSuccessful() {
+  const identity = yield select(getCurrentIdentity)
+
+  if (identity.hasConnectedWeb3) {
+    yield call(ensureRealmInitialized)
+
+    if (!INIT_PRE_LOAD) {
+      // wait until initial load finishes and world is running
+      yield ensureWorldRunning()
+    }
+
+    const identity = yield select(getCurrentIdentity)
+    try {
+      yield call(initializePrivateMessaging, getServerConfigurations().synapseUrl, identity)
+    } catch (e) {
+      logger.error(`error initializing private messaging`, e)
+
+      yield call(ensureRenderer)
+
+      unityInterface.ConfigureHUDElement(HUDElementID.FRIENDS, { active: false, visible: false })
+
+      yield ensureWorldRunning()
+
+      unityInterface.ShowNotification({
+        type: NotificationType.GENERIC,
+        message: 'There was an error initializing friends and private messages',
+        buttonMessage: 'OK',
+        timer: 7
+      })
+    }
+  }
+}
+
+function* initializePrivateMessaging(synapseUrl: string, identity: ExplorerIdentity) {
   const { address: ethAddress } = identity
   let timestamp
 
   try {
-    const response = yield fetch('https://worldtimeapi.org/api/timezone/Etc/UTC')
+    const response = yield fetch(CLOCK_SERVICE_URL)
     const { datetime } = yield response.json()
     timestamp = new Date(datetime).getTime()
   } catch (e) {
@@ -130,7 +179,7 @@ export function* initializePrivateMessaging(synapseUrl: string, identity: Explor
       receivedMessages[message.id] = Date.now()
     }
 
-    const { socialInfo } = globalThis.globalStore.getState().chat.privateMessaging
+    const { socialInfo } = globalThis.globalStore.getState().friends
     const friend = Object.values(socialInfo).find((friend) => friend.conversationId === conversation.id)
 
     if (!friend) {
@@ -295,7 +344,7 @@ function sendUpdateUserStatus(id: string, status: CurrentUserStatus) {
   const presence: PresenceStatus =
     status.presence === PresenceType.OFFLINE ? PresenceStatus.OFFLINE : PresenceStatus.ONLINE
 
-  const domain = globalThis.globalStore.getState().chat.privateMessaging.client?.getDomain()
+  const domain = globalThis.globalStore.getState().friends.client?.getDomain()
   let matches = id.match(new RegExp(`@(\\w.+):${domain}`, 'i'))
 
   const userId = matches !== null ? matches[1] : id
@@ -336,7 +385,7 @@ function updateUserStatus(client: SocialAPI, ...socialIds: string[]) {
 function* initializeStatusUpdateInterval(client: SocialAPI) {
   const domain = client.getDomain()
 
-  const friends = globalThis.globalStore.getState().chat.privateMessaging.friends.map((x) => {
+  const friends = globalThis.globalStore.getState().friends.friends.map((x) => {
     return `@${x}:${domain}`
   })
 
@@ -344,7 +393,7 @@ function* initializeStatusUpdateInterval(client: SocialAPI) {
 
   client.onStatusChange((socialId, status) => {
     DEBUG && logger.info(`client.onStatusChange`, socialId, status)
-    const user: SocialData | undefined = globalThis.globalStore.getState().chat.privateMessaging.socialInfo[socialId]
+    const user: SocialData | undefined = globalThis.globalStore.getState().friends.socialInfo[socialId]
 
     if (!user) {
       logger.error(`user not found for status change with social id`, socialId)
@@ -473,7 +522,7 @@ function* handleUpdateFriendship({ payload, meta }: UpdateFriendship) {
 
     const state: ReturnType<typeof getPrivateMessaging> = yield select(getPrivateMessaging)
 
-    let newState: ChatState['privateMessaging'] | undefined
+    let newState: FriendsState | undefined
 
     const socialData: SocialData | undefined = yield select(findByUserId, userId)
     if (socialData) {

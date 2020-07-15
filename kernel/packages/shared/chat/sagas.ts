@@ -1,7 +1,7 @@
-import { takeEvery, put, call } from 'redux-saga/effects'
+import { takeEvery, put } from 'redux-saga/effects'
 import { PayloadAction } from 'typesafe-actions'
 import { Vector3Component } from 'atomicHelpers/landHelpers'
-import { UnityInterfaceContainer, unityInterface } from 'unity-interface/dcl'
+import { UnityInterfaceContainer } from 'unity-interface/dcl'
 import {
   MESSAGE_RECEIVED,
   MessageReceived,
@@ -11,8 +11,8 @@ import {
   sendPrivateMessage
 } from './actions'
 import { uuid } from 'atomicHelpers/math'
-import { ChatMessageType, ChatMessage, HUDElementID, NotificationType } from 'shared/types'
-import { EXPERIENCE_STARTED, AUTH_SUCCESSFUL } from 'shared/loading/types'
+import { ChatMessageType, ChatMessage } from 'shared/types'
+import { EXPERIENCE_STARTED } from 'shared/loading/types'
 import { queueTrackingEvent } from 'shared/analytics'
 import { sendPublicChatMessage } from 'shared/comms'
 import {
@@ -30,16 +30,11 @@ import defaultLogger from 'shared/logger'
 import { catalystRealmConnected, changeRealm, changeToCrowdedRealm } from 'shared/dao'
 import { isValidExpression, expressionExplainer, validExpressions } from 'shared/apis/expressionExplainer'
 import { StoreContainer } from 'shared/store/rootTypes'
-import { SHOW_FPS_COUNTER, getServerConfigurations, INIT_PRE_LOAD } from 'config'
+import { SHOW_FPS_COUNTER } from 'config'
 import { AvatarMessage, AvatarMessageType } from 'shared/comms/interface/types'
 import { sampleDropData } from 'shared/airdrops/sampleDrop'
-import { initializePrivateMessaging } from './private'
-import { identity } from '..'
 import { findProfileByName } from 'shared/profiles/selectors'
-import { isFriend } from './selectors'
-import { ensureRenderer } from 'shared/profiles/sagas'
-import { ensureWorldRunning } from 'shared/world/worldState'
-import { ensureRealmInitialized } from 'shared/dao/sagas'
+import { isFriend } from 'shared/friends/selectors'
 
 declare const globalThis: UnityInterfaceContainer & StoreContainer
 
@@ -68,44 +63,12 @@ avatarMessageObservable.add((pose: AvatarMessage) => {
 export function* chatSaga(): any {
   initChatCommands()
 
-  yield takeEvery(AUTH_SUCCESSFUL, handleAuthSuccessful)
-
   yield takeEvery([MESSAGE_RECEIVED, SEND_MESSAGE], trackEvents)
 
   yield takeEvery(MESSAGE_RECEIVED, handleReceivedMessage)
   yield takeEvery(SEND_MESSAGE, handleSendMessage)
 
   yield takeEvery(EXPERIENCE_STARTED, showWelcomeMessage)
-}
-
-function* handleAuthSuccessful() {
-  if (identity.hasConnectedWeb3) {
-    yield call(ensureRealmInitialized)
-
-    if (!INIT_PRE_LOAD) {
-      // wait until initial load finishes and world is running
-      yield ensureWorldRunning()
-    }
-
-    try {
-      yield call(initializePrivateMessaging, getServerConfigurations().synapseUrl, identity)
-    } catch (e) {
-      defaultLogger.error(`error initializing private messaging`, e)
-
-      yield call(ensureRenderer)
-
-      unityInterface.ConfigureHUDElement(HUDElementID.FRIENDS, { active: false, visible: false })
-
-      yield ensureWorldRunning()
-
-      unityInterface.ShowNotification({
-        type: NotificationType.GENERIC,
-        message: 'There was an error initializing friends and private messages',
-        buttonMessage: 'OK',
-        timer: 7
-      })
-    }
-  }
 }
 
 function* showWelcomeMessage() {

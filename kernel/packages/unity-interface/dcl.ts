@@ -14,7 +14,6 @@ import {
   NO_ASSET_BUNDLES
 } from 'config'
 
-import { identity } from 'shared'
 import { persistCurrentUser, sendPublicChatMessage } from 'shared/comms'
 import { AvatarMessageType } from 'shared/comms/interface/types'
 import { avatarMessageObservable, getUserProfile } from 'shared/comms/peers'
@@ -27,11 +26,10 @@ import { queueTrackingEvent } from 'shared/analytics'
 import { DevTools } from 'shared/apis/DevTools'
 import { ParcelIdentity } from 'shared/apis/ParcelIdentity'
 import { aborted } from 'shared/loading/ReportFatalError'
-import { loadingScenes, teleportTriggered, unityClientLoaded } from 'shared/loading/types'
+import { loadingScenes, teleportTriggered } from 'shared/loading/types'
 import { createLogger, defaultLogger, ILogger } from 'shared/logger'
 import { saveProfileRequest } from 'shared/profiles/actions'
 import { Avatar, Profile, Wearable } from 'shared/profiles/types'
-import { Session } from 'shared/session'
 import { getPerformanceInfo } from 'shared/session/getPerformanceInfo'
 import {
   AttachEntityComponentPayload,
@@ -77,7 +75,8 @@ import { worldRunningObservable } from 'shared/world/worldState'
 import { profileToRendererFormat } from 'shared/profiles/transformations/profileToRendererFormat'
 import { StoreContainer } from 'shared/store/rootTypes'
 import { ILandToLoadableParcelScene, ILandToLoadableParcelSceneUpdate } from 'shared/selectors'
-import { sendMessage, updateUserData, updateFriendship } from 'shared/chat/actions'
+import { sendMessage } from 'shared/chat/actions'
+import { updateUserData, updateFriendship } from 'shared/friends/actions'
 import { ProfileAsPromise } from 'shared/profiles/ProfileAsPromise'
 import { changeRealm, catalystRealmConnected, candidatesFetched } from 'shared/dao'
 import { notifyStatusThroughChat } from 'shared/comms/chat'
@@ -110,6 +109,9 @@ import {
   PB_OpenExternalUrl,
   PB_OpenNFTDialog
 } from '../shared/proto/engineinterface_pb'
+import { signalRendererInitialized } from 'shared/renderer/actions'
+import { logout } from 'shared/session/actions'
+import { getIdentity } from 'shared/session'
 
 declare const globalThis: UnityInterfaceContainer &
   BrowserInterfaceContainer &
@@ -247,7 +249,7 @@ const browserInterface = {
   },
 
   LogOut() {
-    Session.current.then((s) => s.logout()).catch((e) => defaultLogger.error('error while logging out', e))
+    globalThis.globalStore.dispatch(logout())
   },
 
   SaveUserAvatar(changes: { face: string; face128: string; face256: string; body: string; avatar: Avatar }) {
@@ -264,7 +266,7 @@ const browserInterface = {
 
     persistCurrentUser({
       version: profile.version,
-      profile: profileToRendererFormat(profile, identity)
+      profile: profileToRendererFormat(profile, getIdentity())
     })
   },
 
@@ -314,7 +316,7 @@ const browserInterface = {
   },
 
   BlockPlayer(data: { userId: string }) {
-    const profile = getProfile(globalThis.globalStore.getState(), identity.address)
+    const profile = getProfile(globalThis.globalStore.getState(), getIdentity().address)
 
     if (profile) {
       let blocked: string[] = [data.userId]
@@ -335,7 +337,7 @@ const browserInterface = {
   },
 
   UnblockPlayer(data: { userId: string }) {
-    const profile = getProfile(globalThis.globalStore.getState(), identity.address)
+    const profile = getProfile(globalThis.globalStore.getState(), getIdentity().address)
 
     if (profile) {
       const blocked = profile.blocked ? profile.blocked.filter((id) => id !== data.userId) : []
@@ -442,8 +444,9 @@ type BrowserInterfaceContainer = {
   browserInterface2: typeof browserInterface
 }
 
+// ** TODO - move to friends related file - moliva - 15/07/2020
 function toSocialId(userId: string) {
-  const domain = globalThis.globalStore.getState().chat.privateMessaging.client?.getDomain()
+  const domain = globalThis.globalStore.getState().friends.client?.getDomain()
   return `@${userId.toLowerCase()}:${domain}`
 }
 
@@ -938,7 +941,7 @@ export class UnityParcelScene extends UnityScene<LoadableParcelScene> {
 export async function initializeEngine(_gameInstance: GameInstance) {
   gameInstance = _gameInstance
 
-  globalThis.globalStore.dispatch(unityClientLoaded())
+  globalThis.globalStore.dispatch(signalRendererInitialized())
   setLoadingScreenVisible(true)
 
   unityInterface.DeactivateRendering()

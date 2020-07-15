@@ -108,7 +108,7 @@ export async function awaitWeb3Approval(): Promise<void> {
 
       showEthConnectAdvice(false)
 
-      // después post check
+      // post check
       if (window['ethereum']) {
         registerProviderChanges()
       }

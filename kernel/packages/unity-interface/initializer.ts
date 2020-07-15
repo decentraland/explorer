@@ -1,12 +1,13 @@
 import future from 'fp-future'
+
 import { DEBUG_MESSAGES } from 'config'
-import { initShared, ExplorerIdentity } from 'shared'
+import { initShared } from 'shared'
 import { ReportFatalError } from 'shared/loading/ReportFatalError'
 import { defaultLogger } from 'shared/logger'
-import { initializeEngine } from './dcl'
-import { Session } from 'shared/session'
 import { waitingForRenderer } from 'shared/loading/types'
 import { USE_UNITY_INDEXED_DB_CACHE } from 'shared/meta/types'
+
+import { initializeEngine } from './dcl'
 
 const queryString = require('query-string')
 
@@ -37,7 +38,6 @@ export type InitializeUnityResult = {
   engine: UnityGame
   container: HTMLElement
   instancedJS: ReturnType<typeof initializeEngine>
-  identity: ExplorerIdentity
   realmInitialization: Promise<void>
   sharedServices: Promise<void>
 }
@@ -51,12 +51,8 @@ export async function initializeUnity(
 ): Promise<InitializeUnityResult> {
   const { essentials, realmInitialization, all } = initShared()
 
-  const { session, identity } = await essentials
+  await essentials
 
-  if (!session) {
-    throw new Error()
-  }
-  Session.current.resolve(session)
   const qs = queryString.parse(document.location.search)
 
   ;(window as any).USE_UNITY_INDEXED_DB_CACHE = USE_UNITY_INDEXED_DB_CACHE
@@ -77,7 +73,6 @@ export async function initializeUnity(
     engine: _gameInstance,
     container,
     instancedJS: _instancedJS!,
-    identity,
     realmInitialization,
     sharedServices: all
   }

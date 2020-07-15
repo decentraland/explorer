@@ -17,6 +17,7 @@ import { lastPlayerPosition, teleportObservable } from 'shared/world/positionThi
 import { StoreContainer } from 'shared/store/rootTypes'
 import { HUDElementID } from 'shared/types'
 import { worldRunningObservable } from 'shared/world/worldState'
+import { getCurrentIdentity } from 'shared/session/selectors'
 
 const container = document.getElementById('gameContainer')
 
@@ -34,7 +35,9 @@ const observer = worldRunningObservable.add((isRunning) => {
 })
 
 initializeUnity(container)
-  .then(async ({ instancedJS, identity, realmInitialization, sharedServices }) => {
+  .then(async ({ instancedJS }) => {
+    const identity = getCurrentIdentity(globalThis.globalStore.getState())!
+
     const i = unityInterface
     i.ConfigureHUDElement(HUDElementID.MINIMAP, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.AVATAR, { active: true, visible: true })

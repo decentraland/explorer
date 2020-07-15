@@ -1,9 +1,16 @@
-import { disconnect, sendToMordor } from '../comms'
-import { setLoadingScreenVisible } from '../../unity-interface/dcl'
 import { future, IFuture } from 'fp-future'
-import { bringDownClientAndShowError } from '../loading/ReportFatalError'
-import { NEW_LOGIN } from '../loading/types'
-import { removeUserProfile } from '../comms/peers'
+
+import { setLoadingScreenVisible } from 'unity-interface/dcl'
+
+import { disconnect, sendToMordor } from 'shared/comms'
+import { removeUserProfile } from 'shared/comms/peers'
+import { bringDownClientAndShowError } from 'shared/loading/ReportFatalError'
+import { NEW_LOGIN } from 'shared/loading/types'
+import { StoreContainer } from 'shared/store/rootTypes'
+
+import { getCurrentIdentity } from './selectors'
+
+declare const globalThis: StoreContainer
 
 export class Session {
   private static _instance: IFuture<Session> = future()
@@ -26,3 +33,6 @@ export class Session {
     disconnect()
   }
 }
+
+// tslint:disable-next-line
+export const getIdentity = () => getCurrentIdentity(globalThis.globalStore.getState())!

@@ -5,18 +5,42 @@ import { getCurrentUser } from '../comms/peers'
 import { lastPlayerPosition } from '../world/positionThings'
 import { SceneLoad, SCENE_FAIL, SCENE_LOAD, SCENE_START } from './actions'
 import { LoadingState } from './reducer'
-import { EXPERIENCE_STARTED, loadingTips, rotateHelpText, TELEPORT_TRIGGERED } from './types'
+import {
+  EXPERIENCE_STARTED,
+  loadingTips,
+  rotateHelpText,
+  TELEPORT_TRIGGERED,
+  unityClientLoaded,
+  authSuccessful
+} from './types'
 import { future, IFuture } from 'fp-future'
+import { RENDERER_INITIALIZED } from '../renderer/types'
+import { LOGIN_COMPLETED } from '../session/actions'
 
 const SECONDS = 1000
 
 export const DELAY_BETWEEN_MESSAGES = 10 * SECONDS
 
 export function* loadingSaga() {
+  yield fork(translateActions)
+
   yield fork(initialSceneLoading)
   yield takeLatest(TELEPORT_TRIGGERED, teleportSceneLoading)
 
   yield takeEvery(SCENE_LOAD, trackLoadTime)
+}
+
+function* translateActions() {
+  yield takeEvery(RENDERER_INITIALIZED, triggerUnityClientLoaded)
+  yield takeEvery(LOGIN_COMPLETED, triggerAuthSuccessful)
+}
+
+function* triggerAuthSuccessful() {
+  yield put(authSuccessful())
+}
+
+function* triggerUnityClientLoaded() {
+  yield put(unityClientLoaded())
 }
 
 export function* trackLoadTime(action: SceneLoad): any {
@@ -122,16 +146,13 @@ export async function updateTextInScreen(status: LoadingState) {
   }
   const subMessages = document.getElementById('subtext-messages')
   if (subMessages) {
-    subMessages.innerText =
-      status.pendingScenes > 0
-        ? status.message || "Loading scenes..."
-        : status.status
+    subMessages.innerText = status.pendingScenes > 0 ? status.message || 'Loading scenes...' : status.status
   }
 }
 
 function cleanSubTextInScreen() {
   const subMessages = document.getElementById('subtext-messages')
   if (subMessages) {
-    subMessages.innerText = "Loading scenes..."
+    subMessages.innerText = 'Loading scenes...'
   }
 }
