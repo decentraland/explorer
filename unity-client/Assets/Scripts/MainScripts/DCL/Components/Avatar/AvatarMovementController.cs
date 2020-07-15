@@ -18,7 +18,7 @@ namespace DCL
             get
             {
                 if (avatarTransformValue == null)
-                    avatarTransformValue = GetComponent<AvatarShape>()?.entity?.gameObject?.transform;
+                    avatarTransformValue = GetComponent<AvatarShape>().entity.gameObject.transform;
 
                 return avatarTransformValue;
             }
