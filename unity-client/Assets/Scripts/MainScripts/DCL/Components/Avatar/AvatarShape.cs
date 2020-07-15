@@ -122,8 +122,10 @@ namespace DCL
             MinimapMetadataController.i?.UpdateMinimapUserInformation(avatarUserInfo);
         }
 
-        public void OnPoolGet()
+        public override void OnPoolGet()
         {
+            base.OnPoolGet();
+
             currentPlayerInfoCardId = Resources.Load<StringVariable>(CURRENT_PLAYER_ID);
 
             if (string.IsNullOrEmpty(currentSerialization))
@@ -135,10 +137,16 @@ namespace DCL
             model = new AvatarModel();
             lastAvatarPosition = null;
             avatarUserInfo = new MinimapMetadata.MinimapUserInfo();
+
+            minimapRepresentation.transform.position = new Vector3(0, 1, 0);
+            avatarUserInfo.worldPosition = minimapRepresentation.transform.position;
+
+            MinimapMetadataController.i?.UpdateMinimapUserInformation(avatarUserInfo);
         }
 
-        public void OnPoolRelease()
+        public override void OnPoolRelease()
         {
+            base.OnPoolRelease();
             Cleanup();
         }
 

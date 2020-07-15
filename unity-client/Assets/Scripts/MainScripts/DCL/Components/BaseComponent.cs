@@ -83,12 +83,12 @@ namespace DCL.Components
             updateHandler.Cleanup();
         }
 
-        public void OnPoolRelease()
+        public virtual void OnPoolRelease()
         {
             Cleanup();
         }
 
-        public void OnPoolGet()
+        public virtual void OnPoolGet()
         {
             if (updateHandler == null)
                 updateHandler = CreateUpdateHandler();
