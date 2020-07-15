@@ -26,6 +26,7 @@ declare const globalThis: StoreContainer
 declare const UnityLoader: UnityLoaderType
 declare const global: any
 
+const DEBUG = false
 const logger = createLogger('renderer: ')
 
 let _gameInstance: UnityGame | null = null
@@ -89,7 +90,7 @@ function* handleMessageFromEngine(
   action: MessageFromEngineAction
 ) {
   const { type, jsonEncodedMessage } = action.payload
-  logger.info(`handleMessageFromEngine`, action.payload)
+  DEBUG && logger.info(`handleMessageFromEngine`, action.payload)
   if (_instancedJS) {
     if (type === 'PerformanceReport') {
       _instancedJS.then(($) => $.onMessage(type, jsonEncodedMessage)).catch((e) => logger.error(e.message))

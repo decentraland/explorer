@@ -1,10 +1,21 @@
-import { getFromLocalStorage, saveToLocalStorage } from 'atomicHelpers/localStorage'
+import { Store } from 'redux'
 import { call, fork, put, race, select, take, takeEvery, takeLatest } from 'redux-saga/effects'
+
+import { getFromLocalStorage, saveToLocalStorage } from 'atomicHelpers/localStorage'
+
+import {
+  getServerConfigurations,
+  ALL_WEARABLES,
+  getWearablesSafeURL,
+  PIN_CATALYST,
+  PREVIEW,
+  ethereumConfigurations
+} from 'config'
+
 import { NotificationType } from 'shared/types'
-import { getServerConfigurations, ALL_WEARABLES, getWearablesSafeURL } from '../../config'
-import defaultLogger from '../logger'
-import { isInitialized } from '../renderer/selectors'
-import { RENDERER_INITIALIZED } from '../renderer/types'
+import defaultLogger from 'shared/logger'
+import { isInitialized } from 'shared/renderer/selectors'
+import { RENDERER_INITIALIZED } from 'shared/renderer/types'
 import {
   addCatalog,
   AddCatalogAction,
@@ -68,8 +79,7 @@ import {
 import { ExplorerIdentity } from 'shared/session/types'
 import { Authenticator, AuthLink } from 'dcl-crypto'
 import { sha3 } from 'web3x/utils'
-import { CATALYST_REALM_INITIALIZED } from '../dao/actions'
-import { isRealmInitialized, getUpdateProfileServer, getResizeService, isResizeServiceUrl } from '../dao/selectors'
+import { getUpdateProfileServer, getResizeService, isResizeServiceUrl } from '../dao/selectors'
 import { getUserProfile } from '../comms/peers'
 import { WORLD_EXPLORER } from '../../config/index'
 import { backupProfile } from 'shared/profiles/generateRandomUserProfile'
@@ -82,11 +92,10 @@ import { retrieve, store } from 'shared/cache'
 import { getCurrentUserId, getCurrentIdentity, getCurrentNetwork } from 'shared/session/selectors'
 import { LOGIN_COMPLETED } from '../session/actions'
 import { ProfileAsPromise } from './ProfileAsPromise'
-import { PREVIEW, ethereumConfigurations } from 'config'
 import { fetchOwnedENS } from 'shared/web3'
 import { RootState } from 'shared/store/rootTypes'
-import { Store } from 'redux'
 import { persistCurrentUser } from 'shared/comms'
+import { ensureRealmInitialized } from 'shared/dao/sagas'
 
 type Timestamp = number
 type ContentFileHash = string
@@ -121,11 +130,9 @@ const takeLatestByUserId = (patternOrChannel: any, saga: any, ...args: any) =>
  * It's *very* important for the renderer to never receive a passport with items that have not been loaded into the catalog.
  */
 export function* profileSaga(): any {
-  if (!(yield select(isRealmInitialized))) {
-    yield take(CATALYST_REALM_INITIALIZED)
-  }
-  yield takeEvery(RENDERER_INITIALIZED, initialLoad)
   yield takeEvery(LOGIN_COMPLETED, initialProfileLoad)
+
+  yield takeEvery(RENDERER_INITIALIZED, initialLoad)
 
   yield takeLatest(ADD_CATALOG, handleAddCatalog)
 
@@ -143,6 +150,8 @@ export function* profileSaga(): any {
 }
 
 function* initialProfileLoad() {
+  yield call(ensureRealmInitialized)
+
   // initialize profile
   console['group']('connect#profile')
   const userId = yield select(getCurrentUserId)
@@ -217,7 +226,7 @@ function overrideBaseUrl(wearable: Wearable) {
   return {
     ...wearable,
     baseUrl: getWearablesSafeURL() + '/contents/',
-    baseUrlBundles: getServerConfigurations().contentAsBundle + '/'
+    baseUrlBundles: PIN_CATALYST ? '' : getServerConfigurations().contentAsBundle + '/'
   }
 }
 
@@ -232,6 +241,8 @@ function overrideSwankyRarity(wearable: Wearable) {
 }
 
 export function* initialLoad() {
+  yield call(ensureRealmInitialized)
+
   if (WORLD_EXPLORER) {
     try {
       const catalogUrl = getServerConfigurations().avatar.catalog

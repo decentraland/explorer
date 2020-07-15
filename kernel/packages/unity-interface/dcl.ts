@@ -268,7 +268,6 @@ const browserInterface = {
   },
 
   ControlEvent({ eventType, payload }: { eventType: string; payload: any }) {
-    defaultLogger.info(`browserInterface`, eventType, payload)
     switch (eventType) {
       case 'SceneReady': {
         const { sceneId } = payload
@@ -930,6 +929,19 @@ export class UnityParcelScene extends UnityScene<LoadableParcelScene> {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+function debuggingDecorator(_gameInstance: GameInstance) {
+  const debug = false
+  const decorator = {
+    // @ts-ignore
+    SendMessage: (...args) => {
+      defaultLogger.info('gameInstance', ...args)
+      // @ts-ignore
+      _gameInstance.SendMessage(...args)
+    }
+  }
+  return debug ? decorator : _gameInstance
+}
+
 /**
  *
  * Common initialization logic for the unity engine
@@ -937,12 +949,7 @@ export class UnityParcelScene extends UnityScene<LoadableParcelScene> {
  * @param _gameInstance Unity game instance
  */
 export async function initializeEngine(_gameInstance: GameInstance) {
-  gameInstance = {
-    SendMessage: (...args) => {
-      defaultLogger.info('gameInstance', ...args)
-      _gameInstance.SendMessage(...args)
-    }
-  }
+  gameInstance = debuggingDecorator(_gameInstance)
 
   setLoadingScreenVisible(true)
 

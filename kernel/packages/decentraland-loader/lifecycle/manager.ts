@@ -8,7 +8,7 @@ import { WebWorkerTransport } from 'decentraland-rpc/lib/common/transports/WebWo
 
 import { resolveUrl } from 'atomicHelpers/parseUrl'
 
-import { DEBUG, parcelLimits, getServerConfigurations, ENABLE_EMPTY_SCENES, LOS } from 'config'
+import { DEBUG, parcelLimits, getServerConfigurations, ENABLE_EMPTY_SCENES, LOS, PIN_CATALYST } from 'config'
 
 import { ILand } from 'shared/types'
 import { getFetchContentServer, getFetchMetaContentServer, getFetchMetaContentService } from 'shared/dao/selectors'
@@ -100,7 +100,7 @@ export async function initParcelSceneWorker() {
     contentServer: DEBUG ? localServer : getFetchContentServer(state),
     metaContentServer: DEBUG ? localServer : getFetchMetaContentServer(state),
     metaContentService: DEBUG ? localServer : getFetchMetaContentService(state),
-    contentServerBundles: DEBUG ? '' : getServerConfigurations().contentAsBundle + '/',
+    contentServerBundles: DEBUG || PIN_CATALYST ? '' : getServerConfigurations().contentAsBundle + '/',
     lineOfSightRadius: LOS ? Number.parseInt(LOS, 10) : parcelLimits.visibleRadius,
     secureRadius: parcelLimits.secureRadius,
     emptyScenes: ENABLE_EMPTY_SCENES && !(globalThis as any)['isRunningTests']

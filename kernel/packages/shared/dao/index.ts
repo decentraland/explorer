@@ -19,6 +19,7 @@ import { countParcelsCloseTo, ParcelArray } from 'shared/comms/interface/utils'
 import { CatalystNode } from '../types'
 import { zip } from './utils/zip'
 import { realmToString } from './utils/realmToString'
+import { PIN_CATALYST } from 'config'
 const qs: any = require('query-string')
 
 const v = 50
@@ -88,7 +89,7 @@ export function ping(url: string, timeoutMs: number = 5000): Promise<PingResult>
 }
 
 export async function fecthCatalystRealms(): Promise<Candidate[]> {
-  const nodes: CatalystNode[] = await fetchCatalystNodes()
+  const nodes: CatalystNode[] = PIN_CATALYST ? [{ domain: PIN_CATALYST }] : await fetchCatalystNodes()
   if (nodes.length === 0) {
     throw new Error('no nodes are available in the DAO for the current network')
   }
