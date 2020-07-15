@@ -8,7 +8,6 @@ import { WebWorkerTransport } from 'decentraland-rpc/lib/common/transports/WebWo
 import { resolveUrl } from 'atomicHelpers/parseUrl'
 import { ILand } from 'shared/types'
 
-
 import { DEBUG, parcelLimits, getServerConfigurations, ENABLE_EMPTY_SCENES, LOS, PIN_CATALYST } from 'config'
 
 import { getFetchContentServer, getFetchMetaContentServer, getFetchMetaContentService } from 'shared/dao/selectors'
