@@ -41,6 +41,7 @@ namespace DCL
 
         public void ApplyModel(AvatarModel model, Action onSuccess, Action onFail)
         {
+            bool isNewModel = this.model != model;
             this.model = model;
 
             Action onSuccessWrapper = null;
@@ -66,7 +67,7 @@ namespace DCL
 
             if (this.model == null)
             {
-                ResetAvatar();
+                CleanupAvatar();
                 this.OnSuccessEvent?.Invoke();
                 return;
             }
@@ -92,11 +93,9 @@ namespace DCL
             loadCoroutine = null;
         }
 
-        public void ResetAvatar()
+        public void CleanupAvatar()
         {
-            Destroy(eyebrowMaterialCopy);
-            Destroy(eyeMaterialCopy);
-            Destroy(mouthMaterialCopy);
+            StopLoadingCoroutines();
 
             bodyShapeController?.CleanUp();
             bodyShapeController = null;
@@ -183,9 +182,14 @@ namespace DCL
             bool eyebrowsReady = false;
             bool mouthReady = false;
 
-            eyeMaterialCopy = new Material(eyeMaterial);
-            mouthMaterialCopy = new Material(mouthMaterial);
-            eyebrowMaterialCopy = new Material(eyebrowMaterial);
+            if (eyeMaterialCopy == null)
+                eyeMaterialCopy = new Material(eyeMaterial);
+
+            if (mouthMaterialCopy == null)
+                mouthMaterialCopy = new Material(mouthMaterial);
+
+            if (eyebrowMaterialCopy == null)
+                eyebrowMaterialCopy = new Material(eyebrowMaterial);
 
             var eyeCoroutine = CoroutineStarter.Start(eyesController?.FetchTextures((mainTexture, maskTexture) =>
             {
@@ -236,7 +240,7 @@ namespace DCL
             Debug.LogError($"Avatar: {model.name}  -  Failed loading wearable: {wearableController.id}");
             StopLoadingCoroutines();
 
-            ResetAvatar();
+            CleanupAvatar();
             isLoading = false;
             OnFailEvent?.Invoke();
         }
@@ -343,8 +347,11 @@ namespace DCL
 
         protected virtual void OnDestroy()
         {
-            StopLoadingCoroutines();
-            ResetAvatar();
+            CleanupAvatar();
+
+            Destroy(eyebrowMaterialCopy);
+            Destroy(eyeMaterialCopy);
+            Destroy(mouthMaterialCopy);
         }
 
         private void ProcessWearable(string wearableId)

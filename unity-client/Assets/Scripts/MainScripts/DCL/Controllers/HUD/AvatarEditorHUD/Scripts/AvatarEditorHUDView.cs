@@ -50,7 +50,8 @@ public class AvatarEditorHUDView : MonoBehaviour
     [SerializeField] internal Button doneButton;
     [SerializeField] internal Button exitButton;
 
-    [Header("Collectibles")] [SerializeField]
+    [Header("Collectibles")]
+    [SerializeField]
     internal GameObject web3Container;
 
     [SerializeField] internal Button web3GoToMarketplaceButton;
@@ -292,6 +293,8 @@ public class AvatarEditorHUDView : MonoBehaviour
     {
         doneButton.interactable = true;
         controller.SaveAvatar(face, face128, face256, body);
+
+        characterPreviewController.ResetRenderersLayer();
     }
 
     public void SetVisibility(bool visible)
@@ -300,6 +303,8 @@ public class AvatarEditorHUDView : MonoBehaviour
         avatarEditorCanvas.enabled = visible;
         avatarEditorCanvasGroup.blocksRaycasts = visible;
         isOpen = visible;
+
+        characterPreviewController.gameObject.SetActive(visible);
     }
 
     public void CleanUp()

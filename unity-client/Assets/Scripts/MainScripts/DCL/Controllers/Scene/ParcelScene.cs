@@ -3,6 +3,7 @@ using DCL.Configuration;
 using DCL.Helpers;
 using DCL.Models;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Object = UnityEngine.Object;
@@ -54,6 +55,7 @@ namespace DCL.Controllers
         bool isReleased = false;
 
         State stateValue = State.NOT_READY;
+
         public State state
         {
             get { return stateValue; }
@@ -64,6 +66,8 @@ namespace DCL.Controllers
             }
         }
 
+        private CreateEntityMessage tmpCreateEntityMessage = new CreateEntityMessage();
+
         public void Awake()
         {
             state = State.NOT_READY;
@@ -73,9 +77,6 @@ namespace DCL.Controllers
 
             metricsController = new SceneMetricsController(this);
             metricsController.Enable();
-
-            CommonScriptableObjects.rendererState.OnChange += OnRenderingStateChanged;
-            OnRenderingStateChanged(CommonScriptableObjects.rendererState.Get(), false);
         }
 
         void OnDisable()
@@ -86,7 +87,6 @@ namespace DCL.Controllers
         private void OnDestroy()
         {
             blockerHandler?.CleanBlockers();
-            CommonScriptableObjects.rendererState.OnChange -= OnRenderingStateChanged;
         }
 
         private void Update()
@@ -224,6 +224,8 @@ namespace DCL.Controllers
             if (isReleased)
                 return;
 
+            DisposeAllSceneComponents();
+
             if (DCLCharacterController.i)
                 DCLCharacterController.i.characterPosition.OnPrecisionAdjust -= OnPrecisionAdjust;
 
@@ -319,9 +321,6 @@ namespace DCL.Controllers
             return false;
         }
 
-        private CreateEntityMessage tmpCreateEntityMessage = new CreateEntityMessage();
-        private const string EMPTY_GO_POOL_NAME = "Empty";
-
         public DecentralandEntity CreateEntity(string id)
         {
             SceneController.i.OnMessageDecodeStart?.Invoke("CreateEntity");
@@ -336,16 +335,12 @@ namespace DCL.Controllers
             var newEntity = new DecentralandEntity();
             newEntity.entityId = tmpCreateEntityMessage.id;
 
-            if (!PoolManager.i.ContainsPool(EMPTY_GO_POOL_NAME))
-            {
-                GameObject go = new GameObject();
-                Pool pool = PoolManager.i.AddPool(EMPTY_GO_POOL_NAME, go, maxPrewarmCount: 2000, isPersistent: true);
-                pool.ForcePrewarm();
-            }
+            SceneController.i.EnsureEntityPool();
 
             // As we know that the pool already exists, we just get one gameobject from it
-            PoolableObject po = PoolManager.i.Get(EMPTY_GO_POOL_NAME);
+            PoolableObject po = PoolManager.i.Get(SceneController.EMPTY_GO_POOL_NAME);
             newEntity.gameObject = po.gameObject;
+
             newEntity.gameObject.name = "ENTITY_" + tmpCreateEntityMessage.id;
             newEntity.gameObject.transform.SetParent(gameObject.transform, false);
             newEntity.gameObject.SetActive(true);
@@ -550,6 +545,9 @@ namespace DCL.Controllers
             if (classId == CLASS_ID_COMPONENT.TRANSFORM)
             {
                 MessageDecoder.DecodeTransform(data, ref DCLTransform.model);
+
+                if (!entity.components.ContainsKey(classId))
+                    entity.components.Add(classId, null);
 
                 if (entity.OnTransformChange != null)
                 {
@@ -1126,11 +1124,12 @@ namespace DCL.Controllers
             OnSceneReady?.Invoke(this);
         }
 
-        void OnRenderingStateChanged(bool isEnable, bool prevState)
+        private void DisposeAllSceneComponents()
         {
-            if (isEnable)
+            List<string> allDisposableComponents = disposableComponents.Select(x => x.Key).ToList();
+            foreach (string id in allDisposableComponents)
             {
-                parcelScenesCleaner.ForceCleanup();
+                parcelScenesCleaner.MarkDisposableComponentForCleanup(this, id);
             }
         }
 
