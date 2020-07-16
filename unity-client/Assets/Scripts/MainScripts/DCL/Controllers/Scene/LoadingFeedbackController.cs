@@ -101,11 +101,14 @@ public class LoadingFeedbackController : MonoBehaviour
 
         string loadingText = string.Empty;
         string secondLoadingText = string.Empty;
+        DCL.Interface.WebInterface.LoadingFeedbackMessage messageToSend = new WebInterface.LoadingFeedbackMessage();
+        messageToSend.loadPercentage = 0;
 
         currentComponentsLoading = loadedScenes.Sum(x => x.componentsLoading);
         if (currentComponentsLoading > 0)
         {
             loadingComponentsPercentage = GetLoadingComponentsPercentage(currentComponentsLoading);
+            messageToSend.loadPercentage = loadingComponentsPercentage;
             loadingText = string.Format("Loading scenes {0}%", loadingComponentsPercentage);
         }
 
@@ -124,7 +127,11 @@ public class LoadingFeedbackController : MonoBehaviour
         }
 
         if (!string.IsNullOrEmpty(loadingText))
-            WebInterface.ScenesLoadingFeedback(loadingText);
+        {
+            messageToSend.message = loadingText;
+            Debug.Log(string.Format("[SANTI] LOADING {0}", messageToSend.loadPercentage));
+            WebInterface.ScenesLoadingFeedback(messageToSend);
+        }
     }
 
     private int GetLoadingComponentsPercentage(int currentComponentsLoading)
