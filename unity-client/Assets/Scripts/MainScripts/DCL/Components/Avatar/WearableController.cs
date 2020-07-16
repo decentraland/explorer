@@ -51,7 +51,7 @@ public class WearableController
 
         loader = new RendereableAssetLoadHelper(provider, wearable.baseUrlBundles);
 
-        loader.settings.forceNewInstance = true;
+        loader.settings.forceNewInstance = false;
         loader.settings.initialLocalPosition = Vector3.up * 0.75f;
         loader.settings.cachingFlags = MaterialCachingHelper.Mode.CACHE_SHADERS;
         loader.settings.visibleFlags = AssetPromiseSettings_Rendering.VisibleFlags.INVISIBLE;
