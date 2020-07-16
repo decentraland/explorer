@@ -121,17 +121,16 @@ export async function updateTextInScreen(status: LoadingState) {
     images.src = url
   }
   const subMessages = document.getElementById('subtext-messages')
-  if (subMessages) {
-    subMessages.innerText =
-      status.pendingScenes > 0
-        ? status.message || "Loading scenes..."
-        : status.status
+  const progressBar = document.getElementById('progress-bar-inner')
+  if (subMessages && progressBar) {
+    subMessages.innerText = status.pendingScenes > 0 ? status.message || 'Loading scenes...' : status.status
+    progressBar.style.cssText = `width: ${status.loadPercentage}%`
   }
 }
 
 function cleanSubTextInScreen() {
   const subMessages = document.getElementById('subtext-messages')
   if (subMessages) {
-    subMessages.innerText = "Loading scenes..."
+    subMessages.innerText = 'Loading scenes...'
   }
 }

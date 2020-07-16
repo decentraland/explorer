@@ -14,10 +14,11 @@ export type LoadingState = {
   helpText: number
   pendingScenes: number
   message: string
+  loadPercentage: number
 }
 export function loadingReducer(state?: LoadingState, action?: AnyAction) {
   if (!state) {
-    return { status: NOT_STARTED, helpText: 0, pendingScenes: 0, message: '' }
+    return { status: NOT_STARTED, helpText: 0, pendingScenes: 0, message: '', loadPercentage: 0 }
   }
   if (!action) {
     return state
@@ -42,7 +43,7 @@ export function loadingReducer(state?: LoadingState, action?: AnyAction) {
     return { ...state, helpText: newValue >= loadingTips.length ? 0 : newValue }
   }
   if (action.type === UPDATE_STATUS_MESSAGE) {
-    return { ...state, message: action.payload }
+    return { ...state, message: action.payload.message, loadPercentage: action.payload.loadPercentage }
   }
   return state
 }
