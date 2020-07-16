@@ -73,10 +73,10 @@ const presenceMap: Record<string, PresenceMemoization | undefined> = {}
 const CLOCK_SERVICE_URL = 'https://worldtimeapi.org/api/timezone/Etc/UTC'
 
 export function* friendsSaga() {
-  yield takeEvery(USER_AUTHENTIFIED, handleAuthSuccessful)
+  yield takeEvery(USER_AUTHENTIFIED, initializeSaga)
 }
 
-function* handleAuthSuccessful() {
+function* initializeSaga() {
   const identity = yield select(getCurrentIdentity)
 
   if (identity.hasConnectedWeb3) {

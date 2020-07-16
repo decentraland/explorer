@@ -13,7 +13,7 @@ const FRIENDS_INITIAL_STATE: FriendsState = {
 
 type State = FriendsState
 
-export function friendsReducer(state?: FriendsState, action?: AnyAction) {
+export function friendsReducer(state?: State, action?: AnyAction): State {
   if (!state) {
     return FRIENDS_INITIAL_STATE
   }
@@ -32,7 +32,7 @@ export function friendsReducer(state?: FriendsState, action?: AnyAction) {
 }
 
 function reducePrivateMessaging(state: State, action: UpdatePrivateMessagingState) {
-  return { ...state, privateMessaging: action.payload }
+  return { ...state, ...action.payload }
 }
 
 function reduceUpdateUserData(state: State, action: UpdateUserData) {
