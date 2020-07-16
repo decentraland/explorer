@@ -4,7 +4,7 @@ import { STATIC_WORLD } from 'config'
 
 import { createLogger } from 'shared/logger'
 import { establishingComms, NEW_LOGIN, COMMS_COULD_NOT_BE_ESTABLISHED, commsErrorRetrying } from 'shared/loading/types'
-import { LOGIN_COMPLETED } from 'shared/session/actions'
+import { USER_AUTHENTIFIED } from 'shared/session/actions'
 import { getCurrentIdentity } from 'shared/session/selectors'
 import { setWorldContext } from 'shared/protocol/actions'
 import { ReportFatalError } from 'shared/loading/ReportFatalError'
@@ -15,7 +15,7 @@ import { IdTakenError, ConnectionEstablishmentError } from './interface/types'
 const logger = createLogger('comms: ')
 
 export function* commsSaga() {
-  yield takeEvery(LOGIN_COMPLETED, establishCommunications)
+  yield takeEvery(USER_AUTHENTIFIED, establishCommunications)
 }
 
 function* establishCommunications() {

@@ -42,7 +42,7 @@ import { notifyFriendOnlineStatusThroughChat } from 'shared/comms/chat'
 import { ExplorerIdentity } from 'shared/session/types'
 import { SocialData, FriendsState } from 'shared/friends/types'
 import { getClient, findByUserId, getPrivateMessaging } from 'shared/friends/selectors'
-import { LOGIN_COMPLETED } from 'shared/session/actions'
+import { USER_AUTHENTIFIED } from 'shared/session/actions'
 import { getCurrentIdentity } from 'shared/session/selectors'
 import { SEND_PRIVATE_MESSAGE, SendPrivateMessage } from 'shared/chat/actions'
 import {
@@ -73,7 +73,7 @@ const presenceMap: Record<string, PresenceMemoization | undefined> = {}
 const CLOCK_SERVICE_URL = 'https://worldtimeapi.org/api/timezone/Etc/UTC'
 
 export function* friendsSaga() {
-  yield takeEvery(LOGIN_COMPLETED, handleAuthSuccessful)
+  yield takeEvery(USER_AUTHENTIFIED, handleAuthSuccessful)
 }
 
 function* handleAuthSuccessful() {

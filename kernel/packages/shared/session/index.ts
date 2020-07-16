@@ -40,7 +40,7 @@ export const getIdentity = () => getCurrentIdentity(globalThis.globalStore.getSt
 
 export const hasWallet = () => hasWalletSelector(globalThis.globalStore.getState())
 
-export async function loginCompleted(): Promise<void> {
+export async function userAuthentified(): Promise<void> {
   const store: Store<RootState> = globalThis.globalStore
 
   const initialized = store.getState().session.initialized

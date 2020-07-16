@@ -110,6 +110,7 @@ import {
 } from '../shared/proto/engineinterface_pb'
 import { logout } from 'shared/session/actions'
 import { getIdentity, hasWallet } from 'shared/session'
+import { loginCompleted } from 'shared/ethereum/provider'
 
 declare const globalThis: UnityInterfaceContainer &
   BrowserInterfaceContainer &
@@ -1140,8 +1141,9 @@ teleportObservable.add((position: { x: number; y: number; text?: string }) => {
   globalThis.globalStore.dispatch(teleportTriggered(position.text || `Teleporting to ${position.x}, ${position.y}`))
 })
 
-worldRunningObservable.add((isRunning) => {
+worldRunningObservable.add(async (isRunning) => {
   if (isRunning) {
+    await loginCompleted
     setLoadingScreenVisible(false)
   }
 })

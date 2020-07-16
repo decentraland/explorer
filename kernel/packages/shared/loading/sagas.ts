@@ -1,8 +1,14 @@
 import { AnyAction } from 'redux'
 import { call, delay, fork, put, race, select, take, takeEvery, takeLatest } from 'redux-saga/effects'
+import { future, IFuture } from 'fp-future'
+
+import { RENDERER_INITIALIZED } from 'shared/renderer/types'
+import { LOGIN_COMPLETED, USER_AUTHENTIFIED } from 'shared/session/actions'
+import { web3initialized } from 'shared/dao/actions'
 import { queueTrackingEvent } from '../analytics'
 import { getCurrentUser } from '../comms/peers'
 import { lastPlayerPosition } from '../world/positionThings'
+
 import { SceneLoad, SCENE_FAIL, SCENE_LOAD, SCENE_START } from './actions'
 import { LoadingState } from './reducer'
 import {
@@ -13,9 +19,6 @@ import {
   unityClientLoaded,
   authSuccessful
 } from './types'
-import { future, IFuture } from 'fp-future'
-import { RENDERER_INITIALIZED } from '../renderer/types'
-import { LOGIN_COMPLETED } from '../session/actions'
 
 const SECONDS = 1000
 
@@ -32,11 +35,16 @@ export function* loadingSaga() {
 
 function* translateActions() {
   yield takeEvery(RENDERER_INITIALIZED, triggerUnityClientLoaded)
+  yield takeEvery(USER_AUTHENTIFIED, triggerWeb3Initialized)
   yield takeEvery(LOGIN_COMPLETED, triggerAuthSuccessful)
 }
 
 function* triggerAuthSuccessful() {
   yield put(authSuccessful())
+}
+
+function* triggerWeb3Initialized() {
+  yield put(web3initialized())
 }
 
 function* triggerUnityClientLoaded() {

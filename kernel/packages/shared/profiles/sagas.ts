@@ -90,7 +90,7 @@ import { RarityEnum } from '../airdrops/interface'
 import { StoreContainer } from '../store/rootTypes'
 import { retrieve, store } from 'shared/cache'
 import { getCurrentUserId, getCurrentIdentity, getCurrentNetwork } from 'shared/session/selectors'
-import { LOGIN_COMPLETED } from '../session/actions'
+import { USER_AUTHENTIFIED } from 'shared/session/actions'
 import { ProfileAsPromise } from './ProfileAsPromise'
 import { fetchOwnedENS } from 'shared/web3'
 import { RootState } from 'shared/store/rootTypes'
@@ -130,7 +130,7 @@ const takeLatestByUserId = (patternOrChannel: any, saga: any, ...args: any) =>
  * It's *very* important for the renderer to never receive a passport with items that have not been loaded into the catalog.
  */
 export function* profileSaga(): any {
-  yield takeEvery(LOGIN_COMPLETED, initialProfileLoad)
+  yield takeEvery(USER_AUTHENTIFIED, initialProfileLoad)
 
   yield takeEvery(RENDERER_INITIALIZED, initialLoad)
 

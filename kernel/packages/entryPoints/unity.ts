@@ -18,7 +18,7 @@ import { StoreContainer } from 'shared/store/rootTypes'
 import { HUDElementID } from 'shared/types'
 import { worldRunningObservable } from 'shared/world/worldState'
 import { getCurrentIdentity } from 'shared/session/selectors'
-import { loginCompleted } from 'shared/session'
+import { userAuthentified } from 'shared/session'
 import { realmInitialized } from 'shared/dao'
 
 const container = document.getElementById('gameContainer')
@@ -55,7 +55,7 @@ initializeUnity(container)
     i.ConfigureHUDElement(HUDElementID.TELEPORT_DIALOG, { active: true, visible: false })
     i.ConfigureHUDElement(HUDElementID.CONTROLS_HUD, { active: true, visible: false })
 
-    loginCompleted()
+    userAuthentified()
       .then(() => {
         const identity = getCurrentIdentity(globalThis.globalStore.getState())!
         i.ConfigureHUDElement(HUDElementID.FRIENDS, { active: identity.hasConnectedWeb3, visible: false })

@@ -1,6 +1,7 @@
-import { SessionState } from './types'
 import { AnyAction } from 'redux'
-import { LOGIN_COMPLETED, LoginCompleted } from './actions'
+
+import { SessionState } from './types'
+import { USER_AUTHENTIFIED, UserAuthentified } from './actions'
 
 const INITIAL_STATE: SessionState = {
   initialized: false,
@@ -17,8 +18,8 @@ export function sessionReducer(state?: SessionState, action?: AnyAction) {
     return state
   }
   switch (action.type) {
-    case LOGIN_COMPLETED: {
-      return { ...state, initialized: true, ...(action as LoginCompleted).payload }
+    case USER_AUTHENTIFIED: {
+      return { ...state, initialized: true, ...(action as UserAuthentified).payload }
     }
   }
   return state

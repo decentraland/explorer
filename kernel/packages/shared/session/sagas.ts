@@ -8,18 +8,17 @@ import { Authenticator } from 'dcl-crypto'
 import { ENABLE_WEB3, WORLD_EXPLORER, PREVIEW, ETHEREUM_NETWORK, getTLD, setNetwork } from 'config'
 
 import { createLogger } from 'shared/logger'
-import { awaitWeb3Approval, isSessionExpired, providerFuture } from 'shared/ethereum/provider'
+import { awaitWeb3Approval, isSessionExpired, providerFuture, loginCompleted } from 'shared/ethereum/provider'
 import { getUserProfile, setLocalProfile } from 'shared/comms/peers'
 import { ReportFatalError } from 'shared/loading/ReportFatalError'
 import { AUTH_ERROR_LOGGED_OUT, NETWORK_MISMATCH } from 'shared/loading/types'
 import { identifyUser, queueTrackingEvent } from 'shared/analytics'
 import { getNetworkFromTLD, getAppNetwork } from 'shared/web3'
 import { getNetwork } from 'shared/ethereum/EthereumService'
-import { web3initialized } from 'shared/dao/actions'
 
 import { Session } from '.'
 import { ExplorerIdentity } from './types'
-import { loginCompleted, LOGOUT, LOGIN } from './actions'
+import { userAuthentified, LOGOUT, LOGIN, loginCompleted as loginCompletedAction } from './actions'
 
 const logger = createLogger('session: ')
 
@@ -102,8 +101,10 @@ function* login() {
     queueTrackingEvent('Use network', { net })
   }
 
-  yield put(loginCompleted(userId, identity, net))
-  yield put(web3initialized())
+  yield put(userAuthentified(userId, identity, net))
+
+  yield loginCompleted
+  yield put(loginCompletedAction())
 
   console['groupEnd']()
 }
