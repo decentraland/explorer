@@ -129,7 +129,6 @@ public class LoadingFeedbackController : MonoBehaviour
         if (!string.IsNullOrEmpty(loadingText))
         {
             messageToSend.message = loadingText;
-            Debug.Log(string.Format("[SANTI] LOADING {0}", messageToSend.loadPercentage));
             WebInterface.ScenesLoadingFeedback(messageToSend);
         }
     }
