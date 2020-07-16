@@ -303,8 +303,6 @@ public class AvatarEditorHUDView : MonoBehaviour
         avatarEditorCanvas.enabled = visible;
         avatarEditorCanvasGroup.blocksRaycasts = visible;
         isOpen = visible;
-
-        characterPreviewController.gameObject.SetActive(visible);
     }
 
     public void CleanUp()

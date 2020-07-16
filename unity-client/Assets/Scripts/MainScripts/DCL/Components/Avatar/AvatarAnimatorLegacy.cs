@@ -222,6 +222,8 @@ public class AvatarAnimatorLegacy : MonoBehaviour, IPoolLifecycleHandler
 
     public void Reset()
     {
+        if (animation == null) return;
+
         //It will set the animation to the first frame, but due to the nature of the script and its Update. It wont stop the animation from playing
         animation.Stop();
     }
