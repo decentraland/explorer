@@ -17,7 +17,7 @@ namespace DCL
         private Material eyebrowMaterialCopy;
         private Material mouthMaterialCopy;
 
-        AvatarModel model;
+        private AvatarModel model;
 
         public event Action OnSuccessEvent;
         public event Action OnFailEvent;
@@ -41,7 +41,11 @@ namespace DCL
 
         public void ApplyModel(AvatarModel model, Action onSuccess, Action onFail)
         {
-            bool isNewModel = this.model != model;
+            if (this.model != null && this.model.Equals(model))
+            {
+                return;
+            }
+
             this.model = model;
 
             Action onSuccessWrapper = null;
@@ -52,6 +56,7 @@ namespace DCL
                 onSuccess?.Invoke();
                 this.OnSuccessEvent -= onSuccessWrapper;
             };
+
             onFailWrapper = () =>
             {
                 onFail?.Invoke();
@@ -73,6 +78,7 @@ namespace DCL
             }
 
             isLoading = true;
+            Debug.Log("Calling LoadAvatar...");
             loadCoroutine = CoroutineStarter.Start(LoadAvatar());
         }
 
@@ -160,18 +166,46 @@ namespace DCL
             }
 
             int wearableCount = model.wearables.Count;
+
+            var avatar = GetComponent<AvatarShape>();
+
+            //if (avatar != null)
+            Debug.Log("Wearable Count = " + wearablesController.Count);
+
             for (int index = 0; index < wearableCount; index++)
             {
                 var wearableId = this.model.wearables[index];
 
                 if (!wearablesController.ContainsKey(wearableId))
                 {
+                    //if (avatar != null)
+                    Debug.Log("Adding wearable: " + wearableId);
+
                     ProcessWearable(wearableId);
                 }
                 else
                 {
+                    //if (avatar != null)
+                    Debug.Log("Updating wearable: " + wearableId);
+
                     UpdateWearable(wearableId);
                 }
+            }
+
+            List<string> wearablesToRemove = new List<string>();
+
+            foreach (var kvp in wearablesController)
+            {
+                if (!this.model.wearables.Contains(kvp.Value.id))
+                {
+                    wearablesToRemove.Add(kvp.Value.id);
+                }
+            }
+
+            foreach (var removeId in wearablesToRemove)
+            {
+                wearablesController[removeId].CleanUp();
+                wearablesController.Remove(removeId);
             }
 
             yield return new WaitUntil(AreDownloadsReady);
@@ -247,9 +281,12 @@ namespace DCL
 
         private void SetWearableBones()
         {
+            //if (GetComponent<AvatarShape>() != null)
+            Debug.Log("Set wearable bones..." + wearablesController.Count);
             //NOTE(Brian): Set bones/rootBone of all wearables to be the same of the baseBody,
             //             so all of them are animated together.
             var mainSkinnedRenderer = bodyShapeController.skinnedMeshRenderer;
+
             using (var enumerator = wearablesController.GetEnumerator())
             {
                 while (enumerator.MoveNext())

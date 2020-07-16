@@ -110,6 +110,8 @@ public class WearableController
 
     public void SetAnimatorBones(SkinnedMeshRenderer skinnedMeshRenderer)
     {
+        Debug.Log("Setting wearable bones of ..." + id + " ... start");
+
         if (bonesRetargeted) return;
 
         SkinnedMeshRenderer[] skinnedRenderers = assetContainer.GetComponentsInChildren<SkinnedMeshRenderer>();
@@ -118,6 +120,8 @@ public class WearableController
             skinnedRenderers[i1].rootBone = skinnedMeshRenderer.rootBone;
             skinnedRenderers[i1].bones = skinnedMeshRenderer.bones;
         }
+
+        Debug.Log("Setting wearable bones of ..." + id + "... success");
 
         bonesRetargeted = true;
     }

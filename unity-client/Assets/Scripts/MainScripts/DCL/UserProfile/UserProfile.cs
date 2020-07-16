@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using DCL.Interface;
@@ -9,6 +9,7 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
 {
     static DateTime epochStart = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
+    public event Action<UserProfile> OnAvatarModelUpdate;
     public event Action<UserProfile> OnUpdate;
     public event Action<Sprite> OnFaceSnapshotReadyEvent;
     public event Action<string> OnAvatarExpressionSet;
@@ -97,7 +98,7 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
 
     public void SetAvatarExpression(string id)
     {
-        var timestamp = (long)(DateTime.UtcNow - epochStart).TotalMilliseconds;
+        var timestamp = (long) (DateTime.UtcNow - epochStart).TotalMilliseconds;
         avatar.expressionTriggerId = id;
         avatar.expressionTriggerTimestamp = timestamp;
         WebInterface.SendExpression(id, timestamp);
