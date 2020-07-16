@@ -2,22 +2,26 @@ const puppeteer = require('puppeteer')
 
 const position = process.env.BOT_POSITION ? process.env.BOT_POSITION : '20,20'
 const host = process.env.HOST ? process.env.HOST : 'https://explorer.decentraland.zone'
+const env = process.env.EXPLORER_ENV ? process.env : 'zone'
 
 async function main() {
   const browser = await puppeteer.launch({
     args: ['--no-sandbox']
-  });
+  })
   const page = await browser.newPage()
 
-  page.on('console', msg => {
+  page.on('console', (msg) => {
     for (let i = 0; i < msg.args().length; ++i) {
       console.info(`${i}: ${msg.args()[i]}`)
     }
   })
 
-  await page.goto(`${host}/?position=${position}&ws=ws%3A%2F%2Flocalhost%3A5001%2Floop&NO_TUTORIAL`, {
-    waitUntil: 'networkidle2'
-  })
+  await page.goto(
+    `${host}/?position=${position}&ws=ws%3A%2F%2Flocalhost%3A5001%2Floop&NO_TUTORIAL&SKIP_START_BUTTON&ENV=${env}`,
+    {
+      waitUntil: 'networkidle2'
+    }
+  )
 
   while (true) {
     // await page.screenshot({ path: `example-${i++}.png` })
