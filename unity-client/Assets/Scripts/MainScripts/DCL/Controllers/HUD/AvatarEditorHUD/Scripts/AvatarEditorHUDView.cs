@@ -304,7 +304,7 @@ public class AvatarEditorHUDView : MonoBehaviour
         avatarEditorCanvasGroup.blocksRaycasts = visible;
         isOpen = visible;
 
-        characterPreviewController.gameObject.SetActive(visible);
+        // characterPreviewController.gameObject.SetActive(visible);
     }
 
     public void CleanUp()
