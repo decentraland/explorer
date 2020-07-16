@@ -1,7 +1,7 @@
 import { WebSocketProvider, RequestManager } from 'eth-connect'
 import { future, IFuture } from 'fp-future'
 
-import { ethereumConfigurations, ETHEREUM_NETWORK } from 'config'
+import { ethereumConfigurations, ETHEREUM_NETWORK, SKIP_START_BUTTON } from 'config'
 import { defaultLogger } from 'shared/logger'
 import { Account } from 'web3x/account'
 import { getUserProfile } from 'shared/comms/peers'
@@ -85,6 +85,10 @@ export async function awaitWeb3Approval(): Promise<void> {
       let response = future()
 
       button!.onclick = processLoginAttempt(response)
+
+      if (SKIP_START_BUTTON) {
+        processLoginAttempt(response)()
+      }
 
       let result
       while (true) {

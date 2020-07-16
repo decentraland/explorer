@@ -136,6 +136,8 @@ export const ENGINE_DEBUG_PANEL = location.search.indexOf('ENGINE_DEBUG_PANEL') 
 export const SCENE_DEBUG_PANEL = location.search.indexOf('SCENE_DEBUG_PANEL') !== -1 && !ENGINE_DEBUG_PANEL
 export const SHOW_FPS_COUNTER = location.search.indexOf('SHOW_FPS_COUNTER') !== -1 || DEBUG
 export const HAS_INITIAL_POSITION_MARK = location.search.indexOf('position') !== -1
+export const SKIP_START_BUTTON = location.search.indexOf('SKIP_START_BUTTON') !== -1
+
 export const NO_ASSET_BUNDLES = location.search.indexOf('NO_ASSET_BUNDLES') !== -1
 
 export const PIN_CATALYST = qs.PIN_CATALYST
