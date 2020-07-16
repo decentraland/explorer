@@ -36,7 +36,7 @@ export function loadingReducer(state?: LoadingState, action?: AnyAction) {
     return { ...state, status: action.type }
   }
   if (action.type === TELEPORT_TRIGGERED) {
-    return { ...state, helpText: action.payload }
+    return { ...state, helpText: action.payload, loadPercentage: 0 }
   }
   if (action.type === ROTATE_HELP_TEXT) {
     const newValue = state.helpText + 1
