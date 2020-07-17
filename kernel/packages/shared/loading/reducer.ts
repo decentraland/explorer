@@ -1,7 +1,7 @@
 import { AnyAction } from 'redux'
 import { SCENE_FAIL, SCENE_LOAD, SCENE_START, UPDATE_STATUS_MESSAGE } from './actions'
-import { EXPERIENCE_STARTED } from './types'
 import {
+  EXPERIENCE_STARTED,
   ExecutionLifecycleEvent,
   ExecutionLifecycleEventsList,
   loadingTips,
