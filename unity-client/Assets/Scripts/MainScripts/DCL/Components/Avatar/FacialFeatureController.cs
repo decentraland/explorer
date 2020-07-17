@@ -4,7 +4,7 @@ using System.Linq;
 using UnityEngine;
 using DCL;
 
-public class FacialFeatureController : IWearableController
+public class FacialFeatureController
 {
     public string id => wearable.id;
     public string category => wearable.category;

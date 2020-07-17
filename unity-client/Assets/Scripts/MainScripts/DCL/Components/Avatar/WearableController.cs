@@ -7,15 +7,7 @@ using System.Linq;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-interface IWearableController
-{
-    string id { get; }
-    string category { get; }
-    bool isReady { get; }
-    void CleanUp();
-}
-
-public class WearableController : IWearableController
+public class WearableController
 {
     private const string MATERIAL_FILTER_HAIR = "hair";
     private const string MATERIAL_FILTER_SKIN = "skin";
