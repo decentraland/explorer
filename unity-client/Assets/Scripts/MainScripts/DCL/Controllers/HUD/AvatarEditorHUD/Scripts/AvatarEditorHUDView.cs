@@ -220,7 +220,14 @@ public class AvatarEditorHUDView : MonoBehaviour
 
         SetLoadingPanel(true);
         doneButton.interactable = false;
-        characterPreviewController.UpdateModel(avatarModel, () => {SetLoadingPanel(false); doneButton.interactable = true;});
+        characterPreviewController.UpdateModel(avatarModel,
+            () =>
+            {
+                SetLoadingPanel(false);
+
+                if (doneButton != null)
+                    doneButton.interactable = true;
+            });
     }
 
     private void SetLoadingPanel(bool active)
