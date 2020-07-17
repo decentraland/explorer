@@ -1,5 +1,6 @@
 import { AnyAction } from 'redux'
 import { SCENE_FAIL, SCENE_LOAD, SCENE_START, UPDATE_STATUS_MESSAGE } from './actions'
+import { EXPERIENCE_STARTED } from './types'
 import {
   ExecutionLifecycleEvent,
   ExecutionLifecycleEventsList,
@@ -49,10 +50,13 @@ export function loadingReducer(state?: LoadingState, action?: AnyAction) {
     if (SUBSYSTEMS_EVENTS.includes(action.type)) {
       newState.subsystemsLoad = state.subsystemsLoad + 100 / SUBSYSTEMS_EVENTS.length
     }
+    if (EXPERIENCE_STARTED === action.type) {
+      newState.initialLoad = false
+    }
     return newState
   }
   if (action.type === TELEPORT_TRIGGERED) {
-    return { ...state, helpText: action.payload, loadPercentage: 0, subsystemsLoad: 0, initialLoad: false }
+    return { ...state, helpText: action.payload }
   }
   if (action.type === ROTATE_HELP_TEXT) {
     const newValue = state.helpText + 1

@@ -124,9 +124,8 @@ export async function updateTextInScreen(status: LoadingState) {
   const progressBar = document.getElementById('progress-bar-inner')
   if (subMessages && progressBar) {
     subMessages.innerText = status.pendingScenes > 0 ? status.message || 'Loading scenes...' : status.status
-    const actualPercentage = Math.min(
-      status.initialLoad ? (status.loadPercentage + status.subsystemsLoad) / 2 : status.loadPercentage,
-      100
+    const actualPercentage = Math.floor(
+      Math.min(status.initialLoad ? (status.loadPercentage + status.subsystemsLoad) / 2 : status.loadPercentage, 100)
     )
     progressBar.style.cssText = `width: ${actualPercentage}%`
   }
