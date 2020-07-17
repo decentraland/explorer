@@ -50,8 +50,7 @@ public class AvatarEditorHUDView : MonoBehaviour
     [SerializeField] internal Button doneButton;
     [SerializeField] internal Button exitButton;
 
-    [Header("Collectibles")]
-    [SerializeField]
+    [Header("Collectibles")] [SerializeField]
     internal GameObject web3Container;
 
     [SerializeField] internal Button web3GoToMarketplaceButton;
@@ -225,7 +224,8 @@ public class AvatarEditorHUDView : MonoBehaviour
 
     private void SetLoadingPanel(bool active)
     {
-        loadingPanel.SetActive(active);
+        if (loadingPanel != null)
+            loadingPanel.SetActive(active);
     }
 
     public void AddWearable(WearableItem wearableItem, int amount)

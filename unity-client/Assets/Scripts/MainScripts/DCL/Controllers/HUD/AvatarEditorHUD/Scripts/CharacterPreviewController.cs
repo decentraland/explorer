@@ -43,6 +43,8 @@ public class CharacterPreviewController : MonoBehaviour
     public Transform faceSnapshotTemplate;
     public Transform bodySnapshotTemplate;
 
+    private Coroutine updateModelRoutine;
+
     private void Awake()
     {
         cameraFocusLookUp = new System.Collections.Generic.Dictionary<CameraFocus, Transform>()
@@ -56,7 +58,12 @@ public class CharacterPreviewController : MonoBehaviour
 
     public void UpdateModel(AvatarModel newModel, Action onDone)
     {
-        CoroutineStarter.Start(UpdateModelRoutine(newModel, onDone));
+        updateModelRoutine = CoroutineStarter.Start(UpdateModelRoutine(newModel, onDone));
+    }
+
+    private void OnDestroy()
+    {
+        CoroutineStarter.Stop(updateModelRoutine);
     }
 
     private IEnumerator UpdateModelRoutine(AvatarModel newModel, Action onDone)
@@ -67,9 +74,10 @@ public class CharacterPreviewController : MonoBehaviour
         ResetRenderersLayer();
 
         avatarRenderer.ApplyModel(newModel, () => avatarDone = true, () => avatarFailed = true);
+
         yield return new DCL.WaitUntil(() => avatarDone || avatarFailed);
 
-        if (avatarDone)
+        if (avatarDone && avatarRenderer != null)
         {
             SetLayerRecursively(avatarRenderer.gameObject, CHARACTER_PREVIEW_LAYER);
         }

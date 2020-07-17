@@ -8,11 +8,9 @@ using UnityEngine;
 public class UserProfile : ScriptableObject //TODO Move to base variable
 {
     static DateTime epochStart = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-
-    public event Action<UserProfile> OnAvatarModelUpdate;
     public event Action<UserProfile> OnUpdate;
     public event Action<Sprite> OnFaceSnapshotReadyEvent;
-    public event Action<string> OnAvatarExpressionSet;
+    public event Action<string, long> OnAvatarExpressionSet;
 
     public string userId => model.userId;
     public string userName => model.name;
@@ -56,6 +54,7 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
         model.hasConnectedWeb3 = newModel.hasConnectedWeb3;
         model.inventory = newModel.inventory;
         model.blocked = newModel.blocked;
+
         if (model.inventory != null)
         {
             inventory = model.inventory.GroupBy(x => x).ToDictionary(x => x.Key, x => x.Count());
@@ -103,7 +102,7 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
         avatar.expressionTriggerTimestamp = timestamp;
         WebInterface.SendExpression(id, timestamp);
         OnUpdate?.Invoke(this);
-        OnAvatarExpressionSet?.Invoke(id);
+        OnAvatarExpressionSet?.Invoke(id, timestamp);
     }
 
     public string[] GetInventoryItemsIds()
