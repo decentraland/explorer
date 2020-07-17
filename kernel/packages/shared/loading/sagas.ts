@@ -81,9 +81,8 @@ export function* initialSceneLoading() {
     textInScreen: call(refreshTextInScreen),
     finish: call(function* () {
       yield take(EXPERIENCE_STARTED)
-      yield take('Loading scene')
-      yield call(waitForSceneLoads)
       yield call(hideLoadingTips)
+      yield call(cleanSubTextInScreen)
     })
   })
 }
