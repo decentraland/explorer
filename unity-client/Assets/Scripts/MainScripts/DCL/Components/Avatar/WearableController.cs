@@ -7,7 +7,15 @@ using System.Linq;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-public class WearableController
+interface IWearableController
+{
+    string id { get; }
+    string category { get; }
+    bool isReady { get; }
+    void CleanUp();
+}
+
+public class WearableController : IWearableController
 {
     private const string MATERIAL_FILTER_HAIR = "hair";
     private const string MATERIAL_FILTER_SKIN = "skin";
@@ -69,8 +77,9 @@ public class WearableController
 
         loader.OnSuccessEvent += (x) =>
         {
-            PrepareWearable(x);
+            assetRenderers = x.GetComponentsInChildren<Renderer>();
             UpdateVisibility();
+            PrepareWearable(x);
             onSuccess.Invoke(this);
         };
 
@@ -166,7 +175,6 @@ public class WearableController
 
     protected virtual void PrepareWearable(GameObject assetContainer)
     {
-        assetRenderers = assetContainer.GetComponentsInChildren<Renderer>();
     }
 
     public virtual void UpdateVisibility()
