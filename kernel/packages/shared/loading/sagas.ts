@@ -133,4 +133,8 @@ function cleanSubTextInScreen() {
   if (subMessages) {
     subMessages.innerText = 'Loading scenes...'
   }
+  const progressBar = document.getElementById('progress-bar-inner')
+  if (progressBar) {
+    progressBar.style.cssText = `width: 0%`
+  }
 }
