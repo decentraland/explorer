@@ -118,18 +118,18 @@
       height: 100%;
       display: inline-flex;
       background: linear-gradient(270deg, #FC9965 4.62%, #FF5273 58.77%, #DE3959 100%);
-      animation: progress_30 10s forwards;
     }
 
     .progress.loaded {
       z-index: 9;
     }
 
-    .progress.loaded .full {
-      animation: progress_50 5s forwards;
+    .progress.ingame .full {
+      animation: none;
     }
 
-    .progress.ingame .full {
+    #progress-bar-inner {
+      width: 0%;
       transition: width 0.2s;
       animation: none;
     }
