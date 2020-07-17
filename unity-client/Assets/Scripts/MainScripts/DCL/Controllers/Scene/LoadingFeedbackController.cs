@@ -120,7 +120,7 @@ public class LoadingFeedbackController : MonoBehaviour
 
             if (!string.IsNullOrEmpty(loadingText))
             {
-                loadingText += "\\n";
+                loadingText += "\n";
             }
 
             loadingText += secondLoadingText;
