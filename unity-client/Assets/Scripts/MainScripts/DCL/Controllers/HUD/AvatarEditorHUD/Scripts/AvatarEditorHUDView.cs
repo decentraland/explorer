@@ -219,7 +219,8 @@ public class AvatarEditorHUDView : MonoBehaviour
         if (avatarModel?.wearables == null) return;
 
         SetLoadingPanel(true);
-        characterPreviewController.UpdateModel(avatarModel, () => SetLoadingPanel(false));
+        doneButton.interactable = false;
+        characterPreviewController.UpdateModel(avatarModel, () => {SetLoadingPanel(false); doneButton.interactable = true;});
     }
 
     private void SetLoadingPanel(bool active)
