@@ -23,6 +23,7 @@ namespace DCL
             {
                 currentIndex = 0;
                 Report(new string(encodedSamples));
+                GenerateHiccupReport();
             }
         }
 
