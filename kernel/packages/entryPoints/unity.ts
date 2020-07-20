@@ -55,12 +55,13 @@ initializeUnity(container)
     i.ConfigureHUDElement(HUDElementID.TELEPORT_DIALOG, { active: true, visible: false })
     i.ConfigureHUDElement(HUDElementID.CONTROLS_HUD, { active: true, visible: false })
 
-    userAuthentified()
-      .then(() => {
-        const identity = getCurrentIdentity(globalThis.globalStore.getState())!
-        i.ConfigureHUDElement(HUDElementID.FRIENDS, { active: identity.hasConnectedWeb3, visible: false })
-      })
-      .catch((e) => logger.error('error on configuring friends hub'))
+    try {
+      await userAuthentified()
+      const identity = getCurrentIdentity(globalThis.globalStore.getState())!
+      i.ConfigureHUDElement(HUDElementID.FRIENDS, { active: identity.hasConnectedWeb3, visible: false })
+    } catch (e) {
+      logger.error('error on configuring friends hud')
+    }
 
     globalThis.globalStore.dispatch(signalRendererInitialized())
 
