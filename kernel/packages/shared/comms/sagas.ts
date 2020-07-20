@@ -1,4 +1,4 @@
-import { put, takeEvery, select } from 'redux-saga/effects'
+import { put, takeEvery, select, call } from 'redux-saga/effects'
 
 import { STATIC_WORLD } from 'config'
 
@@ -8,6 +8,7 @@ import { USER_AUTHENTIFIED } from 'shared/session/actions'
 import { getCurrentIdentity } from 'shared/session/selectors'
 import { setWorldContext } from 'shared/protocol/actions'
 import { ReportFatalError } from 'shared/loading/ReportFatalError'
+import { ensureRealmInitialized } from 'shared/dao/sagas'
 
 import { connect, disconnect } from '.'
 import { IdTakenError, ConnectionEstablishmentError } from './interface/types'
@@ -22,6 +23,8 @@ function* establishCommunications() {
   if (STATIC_WORLD) {
     return
   }
+
+  yield call(ensureRealmInitialized)
 
   const identity = yield select(getCurrentIdentity)
 
