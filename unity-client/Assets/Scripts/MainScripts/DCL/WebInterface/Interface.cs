@@ -405,6 +405,13 @@ namespace DCL.Interface
             public Vector2 gridPosition;
         }
 
+        [System.Serializable]
+        public class LoadingFeedbackMessage
+        {
+            public string message;
+            public int loadPercentage;
+        }
+
 #if UNITY_WEBGL && !UNITY_EDITOR
     /**
      * This method is called after the first render. It marks the loading of the
@@ -882,9 +889,9 @@ namespace DCL.Interface
             SendMessage("UpdateFriendshipStatus", message);
         }
 
-        public static void ScenesLoadingFeedback(string message)
+        public static void ScenesLoadingFeedback(LoadingFeedbackMessage message)
         {
-            MessageFromEngine("ScenesLoadingFeedback", '\"' + message + '\"');
+            SendMessage("ScenesLoadingFeedback", message);
         }
     }
 }
