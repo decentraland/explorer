@@ -16,7 +16,7 @@ import { signalRendererInitialized, signalParcelLoadingStarted } from 'shared/re
 import { lastPlayerPosition, teleportObservable } from 'shared/world/positionThings'
 import { StoreContainer } from 'shared/store/rootTypes'
 import { HUDElementID } from 'shared/types'
-import { worldRunningObservable } from 'shared/world/worldState'
+import { worldRunningObservable, onNextWorldRunning } from 'shared/world/worldState'
 import { getCurrentIdentity } from 'shared/session/selectors'
 import { userAuthentified } from 'shared/session'
 import { realmInitialized } from 'shared/dao'
@@ -64,6 +64,8 @@ initializeUnity(container)
 
     globalThis.globalStore.dispatch(signalRendererInitialized())
 
+    onNextWorldRunning(() => globalThis.globalStore.dispatch(experienceStarted()))
+
     await realmInitialized()
     await startUnityParcelLoading()
 
@@ -74,7 +76,6 @@ initializeUnity(container)
     }
 
     teleportObservable.notifyObservers(worldToGrid(lastPlayerPosition))
-    globalThis.globalStore.dispatch(experienceStarted())
 
     document.body.classList.remove('dcl-loading')
     globalThis.UnityLoader.Error.handler = (error: any) => {
