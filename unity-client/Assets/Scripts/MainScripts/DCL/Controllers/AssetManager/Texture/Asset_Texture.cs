@@ -20,15 +20,6 @@ namespace DCL
             texture.Apply(textureFilterMode != FilterMode.Point, makeNoLongerReadable);
         }
 
-        public void CopyTextureFrom(Texture2D sourceTexture)
-        {
-            if (this.texture == null)
-                Object.Destroy(texture);
-
-            texture = new Texture2D(sourceTexture.width, sourceTexture.height, sourceTexture.format, false);
-            Graphics.CopyTexture(sourceTexture, texture);
-        }
-
         public override void Cleanup()
         {
             OnCleanup?.Invoke();

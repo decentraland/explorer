@@ -102,7 +102,7 @@ namespace DCL
                 var defaultTexAsset = library.Get(idWithDefaultTexSettings);
                 asset = defaultTexAsset.Clone() as Asset_Texture;
                 asset.dependencyAsset = defaultTexAsset;
-                asset.CopyTextureFrom(defaultTexAsset.texture);
+                asset.texture = TextureHelpers.CopyTexture(defaultTexAsset.texture);
             }
 
             asset.id = idWithTexSettings;
