@@ -221,12 +221,6 @@ namespace DCL
 
                 wearable.SetHiddenList(hiddenList);
 
-                // if (wearable.isReady)
-                // {
-                //     wearable.UpdateVisibility();
-                //     continue;
-                // }
-
                 wearable.Load(transform, OnWearableLoadingSuccess, OnWearableLoadingFail);
             }
 
