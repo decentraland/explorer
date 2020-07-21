@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
 
 namespace DCL
 {
@@ -24,7 +25,7 @@ namespace DCL
             if (this.texture == null)
                 Object.Destroy(texture);
 
-            texture = new Texture2D(sourceTexture.width, sourceTexture.height, sourceTexture.format, true);
+            texture = new Texture2D(sourceTexture.width, sourceTexture.height, sourceTexture.format, false);
             Graphics.CopyTexture(sourceTexture, texture);
         }
 

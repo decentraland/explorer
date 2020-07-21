@@ -70,7 +70,6 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
         else
         {
             ThumbnailsManager.ForgetThumbnail(thumbnailPromise);
-            OnFaceSnapshotReady(null);
             thumbnailPromise = null;
         }
 
@@ -90,7 +89,8 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
         if (faceSnapshot != null)
             Destroy(faceSnapshot);
 
-        faceSnapshot = ThumbnailsManager.CreateSpriteFromTexture(texture.texture);
+        if (texture != null)
+            faceSnapshot = ThumbnailsManager.CreateSpriteFromTexture(texture.texture);
 
         OnUpdate?.Invoke(this);
         OnFaceSnapshotReadyEvent?.Invoke(faceSnapshot);
