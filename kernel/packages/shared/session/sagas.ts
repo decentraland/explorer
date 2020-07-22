@@ -1,4 +1,4 @@
-import { put, takeLatest } from 'redux-saga/effects'
+import { put, takeLatest, call } from 'redux-saga/effects'
 import { createIdentity } from 'eth-crypto'
 import { Eth } from 'web3x/eth'
 import { Personal } from 'web3x/personal/personal'
@@ -19,12 +19,35 @@ import { getNetwork } from 'shared/ethereum/EthereumService'
 import { Session } from '.'
 import { ExplorerIdentity } from './types'
 import { userAuthentified, LOGOUT, LOGIN, loginCompleted as loginCompletedAction } from './actions'
+import { getFromLocalStorage } from 'atomicHelpers/localStorage'
+import { saveToLocalStorage } from '../../atomicHelpers/localStorage'
 
 const logger = createLogger('session: ')
 
 export function* sessionSaga(): any {
+  yield call(initializeTos)
+
   yield takeLatest(LOGIN, login)
   yield takeLatest(LOGOUT, logout)
+}
+
+function* initializeTos() {
+  const TOS_KEY = 'tos'
+  const tosAgreed: boolean = getFromLocalStorage(TOS_KEY) ?? false
+
+  const agreeCheck = document.getElementById('agree-check') as HTMLInputElement | undefined
+  if (agreeCheck) {
+    agreeCheck.checked = tosAgreed
+    // @ts-ignore
+    agreeCheck.onchange && agreeCheck.onchange()
+
+    const originalOnChange = agreeCheck.onchange
+    agreeCheck.onchange = (e) => {
+      saveToLocalStorage(TOS_KEY, agreeCheck.checked)
+      // @ts-ignore
+      originalOnChange && originalOnChange(e)
+    }
+  }
 }
 
 function* login() {
