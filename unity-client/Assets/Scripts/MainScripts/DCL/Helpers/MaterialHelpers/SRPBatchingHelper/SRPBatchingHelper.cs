@@ -53,7 +53,10 @@ namespace DCL.Helpers
             //NOTE(Brian): for transparent meshes skip further variant optimization.
             //             Transparency needs clip space z sorting to be displayed correctly.
             if (zWrite == 0)
+            {
+                material.renderQueue = (int) UnityEngine.Rendering.RenderQueue.Transparent;
                 return;
+            }
 
             int cullMode = (int) material.GetFloat(ShaderUtils._Cull);
 
