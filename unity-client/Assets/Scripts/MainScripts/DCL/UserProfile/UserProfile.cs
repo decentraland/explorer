@@ -1,6 +1,7 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using DCL;
 using DCL.Interface;
 using UnityEngine;
 
@@ -8,10 +9,9 @@ using UnityEngine;
 public class UserProfile : ScriptableObject //TODO Move to base variable
 {
     static DateTime epochStart = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-
     public event Action<UserProfile> OnUpdate;
     public event Action<Sprite> OnFaceSnapshotReadyEvent;
-    public event Action<string> OnAvatarExpressionSet;
+    public event Action<string, long> OnAvatarExpressionSet;
 
     public string userId => model.userId;
     public string userName => model.name;
@@ -25,6 +25,7 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
     internal Dictionary<string, int> inventory = new Dictionary<string, int>();
 
     public Sprite faceSnapshot { get; private set; }
+    private AssetPromise_Texture thumbnailPromise;
 
     internal UserProfileModel model = new UserProfileModel() //Empty initialization to avoid nullchecks
     {
@@ -33,8 +34,6 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
 
     public void UpdateData(UserProfileModel newModel, bool downloadAssets = true)
     {
-        ForgetThumbnail(model?.snapshots?.face256, OnFaceSnapshotReady);
-
         inventory.Clear();
         faceSnapshot = null;
 
@@ -55,6 +54,7 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
         model.hasConnectedWeb3 = newModel.hasConnectedWeb3;
         model.inventory = newModel.inventory;
         model.blocked = newModel.blocked;
+
         if (model.inventory != null)
         {
             inventory = model.inventory.GroupBy(x => x).ToDictionary(x => x.Key, x => x.Count());
@@ -62,7 +62,15 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
 
         if (downloadAssets && model.snapshots != null)
         {
-            GetThumbnail(model.snapshots.face256, OnFaceSnapshotReady);
+            //NOTE(Brian): Get before forget to prevent referenceCount == 0 and asset unload
+            var newThumbnailPromise = ThumbnailsManager.GetThumbnail(model.snapshots.face256, OnFaceSnapshotReady);
+            ThumbnailsManager.ForgetThumbnail(thumbnailPromise);
+            thumbnailPromise = newThumbnailPromise;
+        }
+        else
+        {
+            ThumbnailsManager.ForgetThumbnail(thumbnailPromise);
+            thumbnailPromise = null;
         }
 
         OnUpdate?.Invoke(this);
@@ -76,18 +84,29 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
         return inventory[itemId];
     }
 
-    private void OnFaceSnapshotReady(Sprite sprite)
+    private void OnFaceSnapshotReady(Asset_Texture texture)
     {
-        faceSnapshot = sprite;
+        if (faceSnapshot != null)
+            Destroy(faceSnapshot);
+
+        if (texture != null)
+            faceSnapshot = ThumbnailsManager.CreateSpriteFromTexture(texture.texture);
+
         OnUpdate?.Invoke(this);
-        OnFaceSnapshotReadyEvent?.Invoke(sprite);
+        OnFaceSnapshotReadyEvent?.Invoke(faceSnapshot);
     }
 
     public void OverrideAvatar(AvatarModel newModel, Sprite faceSnapshot)
     {
         if (model?.snapshots != null)
         {
-            ForgetThumbnail(model.snapshots.face256, OnFaceSnapshotReady);
+            if (thumbnailPromise != null)
+            {
+                ThumbnailsManager.ForgetThumbnail(thumbnailPromise);
+                thumbnailPromise = null;
+            }
+
+            OnFaceSnapshotReady(null);
         }
 
         model.avatar.CopyFrom(newModel);
@@ -97,24 +116,17 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
 
     public void SetAvatarExpression(string id)
     {
-        var timestamp = (long)(DateTime.UtcNow - epochStart).TotalMilliseconds;
+        var timestamp = (long) (DateTime.UtcNow - epochStart).TotalMilliseconds;
         avatar.expressionTriggerId = id;
         avatar.expressionTriggerTimestamp = timestamp;
         WebInterface.SendExpression(id, timestamp);
         OnUpdate?.Invoke(this);
-        OnAvatarExpressionSet?.Invoke(id);
+        OnAvatarExpressionSet?.Invoke(id, timestamp);
     }
 
     public string[] GetInventoryItemsIds()
     {
         return inventory.Keys.ToArray();
-    }
-
-    public void SetTutorialStepId(int newTutorialStep)
-    {
-        model.tutorialStep = newTutorialStep;
-
-        WebInterface.SaveUserTutorialStep(newTutorialStep);
     }
 
     internal static UserProfile ownUserProfile;
@@ -145,18 +157,4 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
             Resources.UnloadAsset(this);
     }
 #endif
-
-    private void GetThumbnail(string url, Action<Sprite> callback)
-    {
-        if (string.IsNullOrEmpty(url))
-            return;
-        ThumbnailsManager.GetThumbnail(url, callback);
-    }
-
-    private void ForgetThumbnail(string url, Action<Sprite> callback)
-    {
-        if (string.IsNullOrEmpty(url))
-            return;
-        ThumbnailsManager.ForgetThumbnail(url, callback);
-    }
 }
