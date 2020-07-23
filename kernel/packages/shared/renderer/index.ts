@@ -3,6 +3,7 @@ import { Store } from 'redux'
 import { RootState, StoreContainer } from 'shared/store/rootTypes'
 
 import { isInitialized } from './selectors'
+import { UnityInterface } from 'unity-interface/dcl'
 
 declare const globalThis: StoreContainer
 
@@ -42,4 +43,9 @@ export function rendererEnabled(): Promise<void> {
       }
     })
   })
+}
+
+export async function ensureUnityInterface(): Promise<UnityInterface> {
+  await rendererEnabled()
+  return globalThis.globalStore.getState().renderer.instancedJS!.then(({ unityInterface }) => unityInterface)
 }

@@ -110,6 +110,8 @@ function* login() {
       userId,
       identity
     })
+
+    loginCompleted.resolve()
   }
 
   logger.log(`User ${userId} logged in`)

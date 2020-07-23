@@ -103,6 +103,8 @@ export function awaitWeb3Approval(): Promise<void> {
     new Promise(async () => {
       const element = document.getElementById('eth-login')
       if (element) {
+        element.style.display = 'block'
+
         if (window['ethereum']) {
           await removeSessionIfNotValid()
           window['ethereum'].autoRefreshOnNetworkChange = false

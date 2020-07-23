@@ -200,11 +200,7 @@ const browserInterface = {
     if (newWindow != null) newWindow.opener = null
   },
 
-  PerformanceHiccupReport(data: {
-    hiccupsInThousandFrames: number,
-    hiccupsTime: number,
-    totalTime: number
-  }) {
+  PerformanceHiccupReport(data: { hiccupsInThousandFrames: number; hiccupsTime: number; totalTime: number }) {
     queueTrackingEvent('hiccup report', data)
   },
 
