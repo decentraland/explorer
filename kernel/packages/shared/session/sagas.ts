@@ -16,11 +16,11 @@ import { identifyUser, queueTrackingEvent } from 'shared/analytics'
 import { getNetworkFromTLD, getAppNetwork } from 'shared/web3'
 import { getNetwork } from 'shared/ethereum/EthereumService'
 
+import { getFromLocalStorage, saveToLocalStorage } from 'atomicHelpers/localStorage'
+
 import { Session } from '.'
 import { ExplorerIdentity } from './types'
 import { userAuthentified, LOGOUT, LOGIN, loginCompleted as loginCompletedAction } from './actions'
-import { getFromLocalStorage } from 'atomicHelpers/localStorage'
-import { saveToLocalStorage } from '../../atomicHelpers/localStorage'
 
 const logger = createLogger('session: ')
 
@@ -47,6 +47,9 @@ function* initializeTos() {
       // @ts-ignore
       originalOnChange && originalOnChange(e)
     }
+
+    // enable agree check after initialization
+    enableLogin()
   }
 }
 
@@ -227,4 +230,13 @@ function showEthSignAdvice(show: boolean) {
 
 function* logout() {
   Session.current.then((s) => s.logout()).catch((e) => logger.error('error while logging out', e))
+}
+
+function enableLogin() {
+  const wrapper = document.getElementById('eth-login-confirmation-wrapper')
+  const spinner = document.getElementById('eth-login-confirmation-spinner')
+  if (wrapper && spinner) {
+    spinner.style.cssText = 'display: none;'
+    wrapper.style.cssText = 'display: flex;'
+  }
 }

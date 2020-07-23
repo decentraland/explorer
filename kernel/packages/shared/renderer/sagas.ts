@@ -67,8 +67,6 @@ function* wrapEngineInstance(_gameInstance: UnityGame) {
     throw new Error('There is no UnityGame')
   }
 
-  enableLogin()
-
   const _instancedJS: ReturnType<typeof initializeEngine> = initializeEngine(_gameInstance)
 
   _instancedJS
@@ -171,15 +169,6 @@ function initializeUnityEditor(webSocketUrl: string, container: HTMLElement): Un
   }
 
   return gameInstance
-}
-
-function enableLogin() {
-  const wrapper = document.getElementById('eth-login-confirmation-wrapper')
-  const spinner = document.getElementById('eth-login-confirmation-spinner')
-  if (wrapper && spinner) {
-    spinner.style.cssText = 'display: none;'
-    wrapper.style.cssText = 'display: flex;'
-  }
 }
 
 /**
