@@ -14,10 +14,6 @@ namespace DCL
         public Material eyebrowMaterial;
         public Material mouthMaterial;
 
-        private Material eyeMaterialCopy;
-        private Material eyebrowMaterialCopy;
-        private Material mouthMaterialCopy;
-
         private AvatarModel model;
 
         public event Action OnSuccessEvent;
@@ -186,11 +182,28 @@ namespace DCL
                     bodyShapeController.SetupDefaultMaterial(defaultMaterial, model.skinColor, model.hairColor);
             }
 
+            HashSet<string> usedCategories = new HashSet<string>();
+
+            usedCategories.Add(WearableLiterals.Categories.UPPER_BODY);
+            usedCategories.Add(WearableLiterals.Categories.LOWER_BODY);
+            usedCategories.Add(WearableLiterals.Categories.EYEBROWS);
+            usedCategories.Add(WearableLiterals.Categories.FACIAL);
+            usedCategories.Add(WearableLiterals.Categories.MOUTH);
+            usedCategories.Add(WearableLiterals.Categories.FEET);
+            usedCategories.Add(WearableLiterals.Categories.EYES);
+
             int wearableCount = model.wearables.Count;
 
             for (int index = 0; index < wearableCount; index++)
             {
                 var wearableId = model.wearables[index];
+
+                var wearable = ResolveWearable(wearableId);
+
+                if (usedCategories.Contains(wearable.category))
+                {
+                    usedCategories.Remove(wearable.category);
+                }
 
                 if (!wearableControllers.ContainsKey(wearableId))
                 {
@@ -199,6 +212,25 @@ namespace DCL
                 else
                 {
                     UpdateWearableController(wearableId);
+                }
+            }
+
+            foreach (var category in usedCategories)
+            {
+                switch (category)
+                {
+                    case WearableLiterals.Categories.EYES:
+                        string eyesDefaultId = WearableLiterals.DefaultWearables.GetDefaultWearable(bodyShapeController.bodyShapeId, WearableLiterals.Categories.EYES);
+                        eyesController = new FacialFeatureController(ResolveWearable(eyesDefaultId), bodyShapeController.bodyShapeId, eyeMaterial);
+                        break;
+                    case WearableLiterals.Categories.MOUTH:
+                        string mouthDefaultId = WearableLiterals.DefaultWearables.GetDefaultWearable(bodyShapeController.bodyShapeId, WearableLiterals.Categories.MOUTH);
+                        mouthController = new FacialFeatureController(ResolveWearable(mouthDefaultId), bodyShapeController.bodyShapeId, mouthMaterial);
+                        break;
+                    case WearableLiterals.Categories.EYEBROWS:
+                        string eyebrowsDefaultId = WearableLiterals.DefaultWearables.GetDefaultWearable(bodyShapeController.bodyShapeId, WearableLiterals.Categories.EYEBROWS);
+                        eyebrowsController = new FacialFeatureController(ResolveWearable(eyebrowsDefaultId), bodyShapeController.bodyShapeId, eyebrowMaterial);
+                        break;
                 }
             }
 
@@ -232,7 +264,7 @@ namespace DCL
 
             yield return new WaitUntil(IsFaceReady);
 
-            bodyShapeController.RemoveUnusedParts();
+            bodyShapeController.RemoveUnusedParts(usedCategories);
             bodyShapeController.UpdateVisibility();
 
             foreach (var kvp in wearableControllers)
