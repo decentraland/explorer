@@ -1,5 +1,4 @@
 import { refreshCandidatesStatuses } from 'shared/dao'
-import { ParcelArray } from 'shared/comms/interface/utils'
 import { Candidate } from 'shared/dao/types'
 import { StoreContainer } from 'shared/store/rootTypes'
 import { fetchSceneIds } from 'decentraland-loader/lifecycle/utils/fetchSceneIds'
@@ -20,17 +19,14 @@ type CrowdedSceneRealmInfo = {
 
 type CrowdedSceneInfo = {
   name: string
-  coordinates: {
-    x: number
-    y: number
-  }
+  baseCoord: string
   realmsInfo: CrowdedSceneRealmInfo[]
 }
 
 type CandidateCrowdedScene = {
   id: string
   scene: SceneJsonData | undefined
-  baseCoord: ParcelArray
+  baseCoord: string
   usersCount: number
 }
 
@@ -78,7 +74,7 @@ function createCandidateCrowdedScene(
 ): CandidateCrowdedScene {
   return {
     id,
-    baseCoord: baseCoord.split(',').map((str) => parseInt(str, 10)) as ParcelArray,
+    baseCoord: baseCoord,
     scene: sceneJsonData,
     usersCount: 1
   }
@@ -116,12 +112,11 @@ async function getCrowdedScenesFromCandidate(candidate: Candidate): Promise<Cand
 function crowdedSceneInfoFromCandidateScene(candidateScene: CandidateCrowdedScene): CrowdedSceneInfo {
   const sceneName =
     getSceneNameFromAtlasState(candidateScene.scene) ??
-    globalThis.globalStore.getState().atlas.tileToScene[`${candidateScene.baseCoord[0]},${candidateScene.baseCoord[1]}`]
-      .name
+    globalThis.globalStore.getState().atlas.tileToScene[candidateScene.baseCoord].name
 
   return {
     name: postProcessSceneName(sceneName),
-    coordinates: { x: candidateScene.baseCoord[0], y: candidateScene.baseCoord[1] },
+    baseCoord: candidateScene.baseCoord,
     realmsInfo: []
   }
 }
