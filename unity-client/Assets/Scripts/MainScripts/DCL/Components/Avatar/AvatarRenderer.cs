@@ -220,16 +220,13 @@ namespace DCL
                 switch (category)
                 {
                     case WearableLiterals.Categories.EYES:
-                        string eyesDefaultId = WearableLiterals.DefaultWearables.GetDefaultWearable(bodyShapeController.bodyShapeId, WearableLiterals.Categories.EYES);
-                        eyesController = new FacialFeatureController(ResolveWearable(eyesDefaultId), bodyShapeController.bodyShapeId, eyeMaterial);
+                        SetDefaultEyes(bodyShapeController.bodyShapeId);
                         break;
                     case WearableLiterals.Categories.MOUTH:
-                        string mouthDefaultId = WearableLiterals.DefaultWearables.GetDefaultWearable(bodyShapeController.bodyShapeId, WearableLiterals.Categories.MOUTH);
-                        mouthController = new FacialFeatureController(ResolveWearable(mouthDefaultId), bodyShapeController.bodyShapeId, mouthMaterial);
+                        SetDefaultMouth(bodyShapeController.bodyShapeId);
                         break;
                     case WearableLiterals.Categories.EYEBROWS:
-                        string eyebrowsDefaultId = WearableLiterals.DefaultWearables.GetDefaultWearable(bodyShapeController.bodyShapeId, WearableLiterals.Categories.EYEBROWS);
-                        eyebrowsController = new FacialFeatureController(ResolveWearable(eyebrowsDefaultId), bodyShapeController.bodyShapeId, eyebrowMaterial);
+                        SetDefaultEyebrows(bodyShapeController.bodyShapeId);
                         break;
                 }
             }
@@ -425,12 +422,25 @@ namespace DCL
 
         private void SetupDefaultFacialFeatures(string bodyShape)
         {
+            SetDefaultEyes(bodyShape);
+            SetDefaultEyebrows(bodyShape);
+            SetDefaultMouth(bodyShape);
+        }
+
+        private void SetDefaultEyes(string bodyShape)
+        {
             string eyesDefaultId = WearableLiterals.DefaultWearables.GetDefaultWearable(bodyShape, WearableLiterals.Categories.EYES);
             eyesController = new FacialFeatureController(ResolveWearable(eyesDefaultId), bodyShapeController.bodyShapeId, eyeMaterial);
+        }
 
+        private void SetDefaultEyebrows(string bodyShape)
+        {
             string eyebrowsDefaultId = WearableLiterals.DefaultWearables.GetDefaultWearable(bodyShape, WearableLiterals.Categories.EYEBROWS);
             eyebrowsController = new FacialFeatureController(ResolveWearable(eyebrowsDefaultId), bodyShapeController.bodyShapeId, eyebrowMaterial);
+        }
 
+        private void SetDefaultMouth(string bodyShape)
+        {
             string mouthDefaultId = WearableLiterals.DefaultWearables.GetDefaultWearable(bodyShape, WearableLiterals.Categories.MOUTH);
             mouthController = new FacialFeatureController(ResolveWearable(mouthDefaultId), bodyShapeController.bodyShapeId, mouthMaterial);
         }

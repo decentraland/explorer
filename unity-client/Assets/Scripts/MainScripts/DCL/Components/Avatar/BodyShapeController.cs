@@ -127,18 +127,14 @@ public class BodyShapeController : WearableController
 
         foreach (var r in allRenderers)
         {
-            if (r.transform.parent.name.ToLower().Contains("ubody"))
-            {
+            string parentName = r.transform.parent.name.ToLower();
+
+            if (parentName.Contains("ubody"))
                 upperBodyRenderer = r;
-            }
-            else if (r.transform.parent.name.ToLower().Contains("lbody"))
-            {
+            else if (parentName.Contains("lbody"))
                 lowerBodyRenderer = r;
-            }
-            else if (r.transform.parent.name.ToLower().Contains("feet"))
-            {
+            else if (parentName.Contains("feet"))
                 feetRenderer = r;
-            }
         }
     }
 
