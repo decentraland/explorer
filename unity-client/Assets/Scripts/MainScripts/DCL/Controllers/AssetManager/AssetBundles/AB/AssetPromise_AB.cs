@@ -29,9 +29,11 @@ namespace DCL
         UnityWebRequest assetBundleRequest = null;
 
         public static AssetBundlesLoader assetBundlesLoader = new AssetBundlesLoader();
+        private Transform containerTransform;
 
-        public AssetPromise_AB(string contentUrl, string hash) : base(contentUrl, hash)
+        public AssetPromise_AB(string contentUrl, string hash, Transform containerTransform = null) : base(contentUrl, hash)
         {
+            this.containerTransform = containerTransform;
             assetBundlesLoader.Start();
         }
 
@@ -120,7 +122,7 @@ namespace DCL
                     while (it.MoveNext())
                     {
                         var dep = it.Current;
-                        var promise = new AssetPromise_AB(baseUrl, dep);
+                        var promise = new AssetPromise_AB(baseUrl, dep, containerTransform);
                         AssetPromiseKeeper_AB.i.Keep(promise);
                         dependencyPromises.Add(promise);
                     }
@@ -172,7 +174,7 @@ namespace DCL
             asset.ownerAssetBundle = assetBundle;
             asset.assetBundleAssetName = assetBundle.name;
 
-            assetBundlesLoader.MarkAssetBundleForLoad(asset, assetBundle, OnSuccess);
+            assetBundlesLoader.MarkAssetBundleForLoad(asset, assetBundle, containerTransform, OnSuccess);
         }
 
         public override string ToString()

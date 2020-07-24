@@ -8,6 +8,10 @@ namespace DCL
 {
     public class AssetBundlesLoader
     {
+        private const int SKIPPED_FRAMES_AFTER_BUDGET_TIME_FOR_NEARBY_ASSETS = 1;
+        private const int SKIPPED_FRAMES_AFTER_BUDGET_TIME_FOR_DISTANT_ASSETS = 10;
+        private const float MAX_SQR_DISTANCE_FOR_QUICK_LOADING = 5000f;
+
         private struct AssetBundleInfo
         {
             public Asset_AB asset;
@@ -24,7 +28,8 @@ namespace DCL
 
         private Coroutine assetBundlesLoadingCoroutine;
         private IOrderedEnumerable<string> assetsToLoad;
-        private Queue<AssetBundleInfo> assetBundlesMarkedForLoad = new Queue<AssetBundleInfo>();
+        private Queue<AssetBundleInfo> assetBundlesReadyToBeLoaded = new Queue<AssetBundleInfo>();
+        private Queue<AssetBundleInfo> assetBundlesWaitingForLoad = new Queue<AssetBundleInfo>();
         private Dictionary<string, int> loadOrderByExtension = new Dictionary<string, int>()
         {
             {"png", 0},
@@ -39,12 +44,11 @@ namespace DCL
             {"glb", 9}
         };
         private List<UnityEngine.Object> loadedAssetsByName = new List<UnityEngine.Object>();
-
-        private bool limitTimeBudget => CommonScriptableObjects.rendererState.Get();
-
-        private const int SKIPPED_FRAMES_AFTER_BUDGET_TIME = 1;
         private float maxLoadBudgetTime = 0.004f;
         private float currentLoadBudgetTime = 0;
+        private AssetBundleInfo assetBundleInfoToLoad;
+
+        private bool limitTimeBudget => CommonScriptableObjects.rendererState.Get();
 
         public void Start()
         {
@@ -60,31 +64,43 @@ namespace DCL
                 return;
 
             CoroutineStarter.Stop(assetBundlesLoadingCoroutine);
-            assetBundlesMarkedForLoad.Clear();
-            loadOrderByExtension.Clear();
+            assetBundlesReadyToBeLoaded.Clear();
+            assetBundlesWaitingForLoad.Clear();
             assetsToLoad.ToList().Clear();
         }
 
-        public void MarkAssetBundleForLoad(Asset_AB asset, AssetBundle assetBundle, Action onSuccess)
+        public void MarkAssetBundleForLoad(Asset_AB asset, AssetBundle assetBundle, Transform containerTransform, Action onSuccess)
         {
-            assetBundlesMarkedForLoad.Enqueue(new AssetBundleInfo(asset, assetBundle, onSuccess));
-        }
+            AssetBundleInfo assetBundleToLoad = new AssetBundleInfo(asset, assetBundle, onSuccess);
+
+            float distanceFromPlayer = limitTimeBudget ? Vector3.SqrMagnitude(containerTransform.position - CommonScriptableObjects.playerUnityPosition.Get()) : 0f;
+            if (distanceFromPlayer <= MAX_SQR_DISTANCE_FOR_QUICK_LOADING)
+                assetBundlesReadyToBeLoaded.Enqueue(assetBundleToLoad);
+            else
+                assetBundlesWaitingForLoad.Enqueue(assetBundleToLoad);
+    }
 
         private IEnumerator LoadAssetBundlesCoroutine()
         {
             while (true)
             {
-                while (assetBundlesMarkedForLoad.Count > 0)
+                while (assetBundlesReadyToBeLoaded.Count > 0)
                 {
-                    AssetBundleInfo assetBundleInfo = assetBundlesMarkedForLoad.Dequeue();
-                    yield return LoadAssetsInOrder(assetBundleInfo);
+                    assetBundleInfoToLoad = assetBundlesReadyToBeLoaded.Dequeue();
+                    yield return LoadAssetsInOrder(assetBundleInfoToLoad, SKIPPED_FRAMES_AFTER_BUDGET_TIME_FOR_NEARBY_ASSETS);
+                }
+
+                while (assetBundlesWaitingForLoad.Count > 0 && assetBundlesReadyToBeLoaded.Count == 0)
+                {
+                    assetBundleInfoToLoad = assetBundlesWaitingForLoad.Dequeue();
+                    yield return LoadAssetsInOrder(assetBundleInfoToLoad, SKIPPED_FRAMES_AFTER_BUDGET_TIME_FOR_DISTANT_ASSETS);
                 }
 
                 yield return null;
             }
         }
 
-        private IEnumerator LoadAssetsInOrder(AssetBundleInfo assetBundleInfo)
+        private IEnumerator LoadAssetsInOrder(AssetBundleInfo assetBundleInfo, int skippedFramesBetweenLoadings)
         {
             float time = Time.realtimeSinceStartup;
 
@@ -113,7 +129,7 @@ namespace DCL
                 //Debug.Log(string.Format("[SANTI LOG] loading asset = {0}", assetName));
                 UnityEngine.Object loadedAsset = assetBundleInfo.assetBundle.LoadAsset(assetName);
                 timeEnd = Time.realtimeSinceStartup - timeStart;
-                //Debug.Log(string.Format("[SANTI LOG] asses loaded = {0} | TIME: {1}", assetName, timeEnd));
+                Debug.Log(string.Format("[SANTI LOG] asset loaded = {0} | TIME: {1}", assetName, timeEnd));
 
                 if (loadedAsset is Material loadedMaterial)
                     loadedMaterial.shader = null;
@@ -125,10 +141,7 @@ namespace DCL
                     currentLoadBudgetTime += Time.realtimeSinceStartup - time;
                     if (currentLoadBudgetTime > maxLoadBudgetTime)
                     {
-                        for (int i = 0; i < SKIPPED_FRAMES_AFTER_BUDGET_TIME; i++)
-                        {
-                            yield return null;
-                        }
+                        yield return WaitForSkippedFrames(skippedFramesBetweenLoadings);
 
                         time = Time.realtimeSinceStartup;
                         currentLoadBudgetTime = 0f;
@@ -166,6 +179,16 @@ namespace DCL
             assetsToLoad.ToList().Clear();
             loadedAssetsByName.Clear();
             assetBundleInfo.onSuccess?.Invoke();
+        }
+
+        private IEnumerator WaitForSkippedFrames(int skippedFramesBetweenLoadings)
+        {
+            Debug.Log(string.Format("[SANTI LOG] WAITING {0} FRAMES...", skippedFramesBetweenLoadings));
+
+            for (int i = 0; i < skippedFramesBetweenLoadings; i++)
+            {
+                yield return null;
+            }
         }
     }
 }
