@@ -91,7 +91,7 @@ async function getCrowdedScenesFromCandidate(candidate: Candidate): Promise<Cand
 
   for (let i = 0; i < tiles.length; i++) {
     const id = scenesId[i] ?? tiles[i]
-    const land = scenesId[i] ? (await fetchSceneJson([scenesId[i] as string]))[0] : null
+    const land = scenesId[i] ? (await fetchSceneJson([scenesId[i]!]))[0] : null
 
     if (scenes[id]) {
       scenes[id].usersCount += 1
