@@ -87,22 +87,26 @@ function createCandidateCrowdedScene(
 async function getCrowdedScenesFromCandidate(candidate: Candidate): Promise<CandidateCrowdedScene[]> {
   let scenes: Record<string, CandidateCrowdedScene> = {}
 
-  const tiles = candidate.layer.usersParcels?.map((value) => `${value[0] | 0},${value[1] | 0}`) ?? []
+  const tiles =
+    candidate.layer.usersParcels?.filter((value) => value[0] && value[1]).map((value) => `${value[0]},${value[1]}`) ??
+    []
 
-  for (const tile of tiles) {
-    let id = (await fetchSceneIds([tile]))[0]
-    let land = null
+  const scenesId = await fetchSceneIds(tiles)
+  const scenesJson = await fetchSceneJson(scenesId.filter((id) => id !== null) as string[])
 
-    if (id) {
-      land = (await fetchSceneJson([id]))[0]
-    } else {
-      id = tile
+  let scenesJsonIdx = 0
+  for (let i = 0; i < tiles.length; i++) {
+    const id = scenesId[i] ?? tiles[i]
+    const land = scenesId[i] ? scenesJson[scenesJsonIdx] : null
+
+    if (land) {
+      scenesJsonIdx++
     }
 
     if (scenes[id]) {
       scenes[id].usersCount += 1
     } else {
-      scenes[id] = createCandidateCrowdedScene(id, land?.sceneJsonData?.scene.base ?? tile, land?.sceneJsonData)
+      scenes[id] = createCandidateCrowdedScene(id, land?.sceneJsonData?.scene.base ?? tiles[i], land?.sceneJsonData)
     }
   }
 
