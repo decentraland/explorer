@@ -96,7 +96,7 @@ var WebVideoPlayer = {
   WebVideoPlayerRemove: function (videoId) {
     const id = Pointer_stringify(videoId);
     if (!videos.hasOwnProperty(id)) {
-      console.log("video: trying to remove undefined video of id " + id);
+      console.warn("video: trying to remove undefined video of id " + id);
       return;
     }
     videos[id].video.src = "";
