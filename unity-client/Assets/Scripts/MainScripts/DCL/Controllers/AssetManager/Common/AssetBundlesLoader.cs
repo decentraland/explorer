@@ -129,7 +129,7 @@ namespace DCL
                 //Debug.Log(string.Format("[SANTI LOG] loading asset = {0}", assetName));
                 UnityEngine.Object loadedAsset = assetBundleInfo.assetBundle.LoadAsset(assetName);
                 timeEnd = Time.realtimeSinceStartup - timeStart;
-                Debug.Log(string.Format("[SANTI LOG] asset loaded = {0} | TIME: {1}", assetName, timeEnd));
+                //Debug.Log(string.Format("[SANTI LOG] asset loaded = {0} | TIME: {1}", assetName, timeEnd));
 
                 if (loadedAsset is Material loadedMaterial)
                     loadedMaterial.shader = null;
@@ -183,7 +183,7 @@ namespace DCL
 
         private IEnumerator WaitForSkippedFrames(int skippedFramesBetweenLoadings)
         {
-            Debug.Log(string.Format("[SANTI LOG] WAITING {0} FRAMES...", skippedFramesBetweenLoadings));
+            //Debug.Log(string.Format("[SANTI LOG] WAITING {0} FRAMES...", skippedFramesBetweenLoadings));
 
             for (int i = 0; i < skippedFramesBetweenLoadings; i++)
             {
