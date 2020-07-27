@@ -13,7 +13,6 @@ import { normalizeContentMappings } from '../shared/selectors'
 import { SceneWorker } from '../shared/world/SceneWorker'
 import { initializeUnity } from '../unity-interface/initializer'
 import {
-  UnityParcelScene,
   loadBuilderScene,
   updateBuilderScene,
   futures,
@@ -24,6 +23,7 @@ import defaultLogger from '../shared/logger'
 import { uuid } from '../decentraland-ecs/src/ecs/helpers'
 import { Vector3 } from '../decentraland-ecs/src/decentraland/math'
 import { sceneLifeCycleObservable } from '../decentraland-loader/lifecycle/controllers/scene'
+import { UnityParcelScene } from 'unity-interface/UnityParcelScene'
 
 const evtEmitter = new EventEmitter()
 const initializedEngine = future<void>()

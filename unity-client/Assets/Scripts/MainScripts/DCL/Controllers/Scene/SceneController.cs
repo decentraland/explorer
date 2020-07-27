@@ -65,7 +65,7 @@ namespace DCL
         public event ProcessDelegate OnMessageProcessInfoEnds;
 #endif
         [System.NonSerialized] public List<ParcelScene> scenesSortedByDistance = new List<ParcelScene>();
-        private Queue<MessagingBus.QueuedSceneMessage_Scene> sceneMessagesPool = new Queue<MessagingBus.QueuedSceneMessage_Scene>();
+        public Queue<MessagingBus.QueuedSceneMessage_Scene> sceneMessagesPool = new Queue<MessagingBus.QueuedSceneMessage_Scene>();
 
         [System.NonSerialized] public bool isDebugMode;
         [System.NonSerialized] public bool isWssDebugMode;
@@ -95,6 +95,8 @@ namespace DCL
 
         private Vector2Int currentGridSceneCoordinate = new Vector2Int(EnvironmentSettings.MORDOR_SCALAR, EnvironmentSettings.MORDOR_SCALAR);
         private Vector2Int sortAuxiliaryVector = new Vector2Int(EnvironmentSettings.MORDOR_SCALAR, EnvironmentSettings.MORDOR_SCALAR);
+
+        private EntryPoint_World worldEntryPoint;
 
         void Awake()
         {
@@ -131,7 +133,10 @@ namespace DCL
                 StartCoroutine(DeferredDecoding());
 
             DCLCharacterController.OnCharacterMoved += SetPositionDirty;
+
+            worldEntryPoint = new EntryPoint_World(this);
         }
+
 
         void InitializeSceneBoundariesChecker()
         {
@@ -631,7 +636,7 @@ namespace DCL
 
             MessageDecoder.DecodeSceneMessage(sceneId, message, messageTag, sendSceneMessage, ref queuedMessage);
 
-            EnqueueMessage(queuedMessage);
+            EnqueueSceneMessage(queuedMessage);
 
             OnMessageDecodeEnds?.Invoke("Misc");
 
@@ -662,17 +667,15 @@ namespace DCL
             }
         }
 
-        private string EnqueueMessage(MessagingBus.QueuedSceneMessage_Scene queuedMessage)
+        public void EnqueueSceneMessage(MessagingBus.QueuedSceneMessage_Scene queuedMessage)
         {
-            ParcelScene scene;
-            TryGetScene(queuedMessage.sceneId, out scene);
+            TryGetScene(queuedMessage.sceneId, out ParcelScene scene);
 
             // If it doesn't exist, create messaging controller for this scene id
             if (!MessagingControllersManager.i.ContainsController(queuedMessage.sceneId))
                 MessagingControllersManager.i.AddController(this, queuedMessage.sceneId);
 
-            string busId = MessagingControllersManager.i.Enqueue(scene, queuedMessage);
-            return busId;
+            MessagingControllersManager.i.Enqueue(scene, queuedMessage);
         }
 
         public bool ProcessMessage(MessagingBus.QueuedSceneMessage_Scene msgObject, out CleanableYieldInstruction yieldInstruction)
@@ -680,7 +683,6 @@ namespace DCL
             string sceneId = msgObject.sceneId;
             string tag = msgObject.tag;
             string method = msgObject.method;
-            DCL.Interface.PB_SendSceneMessage payload = msgObject.payload;
 
             yieldInstruction = null;
 
@@ -708,48 +710,86 @@ namespace DCL
                 switch (method)
                 {
                     case MessagingTypes.ENTITY_CREATE:
-                        scene.CreateEntity(tag);
+                    {
+                        if (msgObject.payload is NativePayloads.CreateEntity payload)
+                            scene.CreateEntity(payload.entityId);
+
                         break;
+                    }
                     case MessagingTypes.ENTITY_REPARENT:
+                    {
+                        PB_SendSceneMessage payload = msgObject.payload as PB_SendSceneMessage;
                         scene.SetEntityParent(payload.SetEntityParent.EntityId, payload.SetEntityParent.ParentId);
                         break;
+                    }
 
                     //NOTE(Brian): EntityComponent messages
                     case MessagingTypes.ENTITY_COMPONENT_CREATE_OR_UPDATE:
+                    {
+                        PB_SendSceneMessage payload = msgObject.payload as PB_SendSceneMessage;
                         scene.EntityComponentCreateOrUpdate(payload.UpdateEntityComponent.EntityId, payload.UpdateEntityComponent.Name, payload.UpdateEntityComponent.ClassId, payload.UpdateEntityComponent.Data, out yieldInstruction);
                         break;
+                    }
+
                     case MessagingTypes.ENTITY_COMPONENT_DESTROY:
+                    {
+                        PB_SendSceneMessage payload = msgObject.payload as PB_SendSceneMessage;
                         scene.EntityComponentRemove(payload.ComponentRemoved.EntityId, payload.ComponentRemoved.Name);
                         break;
+                    }
 
                     //NOTE(Brian): SharedComponent messages
                     case MessagingTypes.SHARED_COMPONENT_ATTACH:
+                    {
+                        PB_SendSceneMessage payload = msgObject.payload as PB_SendSceneMessage;
                         scene.SharedComponentAttach(payload.AttachEntityComponent.EntityId, payload.AttachEntityComponent.Id, payload.AttachEntityComponent.Name);
                         break;
+                    }
                     case MessagingTypes.SHARED_COMPONENT_CREATE:
+                    {
+                        PB_SendSceneMessage payload = msgObject.payload as PB_SendSceneMessage;
                         scene.SharedComponentCreate(payload.ComponentCreated.Id, payload.ComponentCreated.Name, payload.ComponentCreated.Classid);
                         break;
+                    }
                     case MessagingTypes.SHARED_COMPONENT_DISPOSE:
+                    {
+                        PB_SendSceneMessage payload = msgObject.payload as PB_SendSceneMessage;
                         scene.SharedComponentDispose(payload.ComponentDisposed.Id);
                         break;
+                    }
                     case MessagingTypes.SHARED_COMPONENT_UPDATE:
+                    {
+                        PB_SendSceneMessage payload = msgObject.payload as PB_SendSceneMessage;
                         scene.SharedComponentUpdate(payload.ComponentUpdated.Id, payload.ComponentUpdated.Json, out yieldInstruction);
                         break;
+                    }
                     case MessagingTypes.ENTITY_DESTROY:
-                        scene.RemoveEntity(tag);
+                    {
+                        if (msgObject.payload is NativePayloads.RemoveEntity payload)
+                            scene.RemoveEntity(payload.entityId);
                         break;
+                    }
                     case MessagingTypes.INIT_DONE:
                         scene.SetInitMessagesDone();
                         break;
                     case MessagingTypes.QUERY:
+                    {
+                        PB_SendSceneMessage payload = msgObject.payload as PB_SendSceneMessage;
                         ParseQuery(payload.Query.QueryId, payload.Query.Payload, scene.sceneData.id);
                         break;
+                    }
                     case MessagingTypes.OPEN_EXTERNAL_URL:
+                    {
+                        PB_SendSceneMessage payload = msgObject.payload as PB_SendSceneMessage;
                         OnOpenExternalUrlRequest?.Invoke(scene, payload.OpenExternalUrl.Url);
                         break;
+                    }
                     case MessagingTypes.OPEN_NFT_DIALOG:
+                    {
+                        PB_SendSceneMessage payload = msgObject.payload as PB_SendSceneMessage;
                         OnOpenNFTDialogRequest?.Invoke(payload.OpenNFTDialog.AssetContractAddress, payload.OpenNFTDialog.TokenId, payload.OpenNFTDialog.Comment);
                         break;
+                    }
                     default:
                         Debug.LogError($"Unknown method {method}");
                         return true;

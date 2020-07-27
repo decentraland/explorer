@@ -14,10 +14,7 @@ namespace DCL
 
         public override bool keepWaiting
         {
-            get
-            {
-                return false;
-            }
+            get { return false; }
         }
     }
 
@@ -33,6 +30,7 @@ namespace DCL
     public class MessagingController : IDisposable
     {
         const char SEPARATOR = '_';
+
         public enum QueueState
         {
             Init,
@@ -44,11 +42,7 @@ namespace DCL
         public string debugTag;
         public bool enabled = true;
 
-        private QueueState currentQueueState
-        {
-            get;
-            set;
-        }
+        private QueueState currentQueueState { get; set; }
 
         public readonly MessagingBus initBus;
         public readonly MessagingBus systemBus;
@@ -152,7 +146,7 @@ namespace DCL
                 GetEntityIdAndClassIdFromTag(queuedMessage.tag, out classId);
 
                 // If it is a transform update, the queue mode is Lossy
-                if (classId == (int)CLASS_ID_COMPONENT.TRANSFORM)
+                if (classId == (int) CLASS_ID_COMPONENT.TRANSFORM)
                 {
                     queueMode = QueueMode.Lossy;
                 }

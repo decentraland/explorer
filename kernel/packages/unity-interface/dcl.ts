@@ -1,7 +1,5 @@
 import { uuid } from 'decentraland-ecs/src'
-import { EventDispatcher } from 'decentraland-rpc/lib/common/core/EventDispatcher'
 import { IFuture } from 'fp-future'
-import { Empty } from 'google-protobuf/google/protobuf/empty_pb'
 import { identity } from 'shared'
 import { persistCurrentUser, sendPublicChatMessage } from 'shared/comms'
 import { AvatarMessageType } from 'shared/comms/interface/types'
@@ -10,7 +8,6 @@ import { providerFuture } from 'shared/ethereum/provider'
 import { getProfile, hasConnectedWeb3 } from 'shared/profiles/selectors'
 import { TeleportController } from 'shared/world/TeleportController'
 import { reportScenesAroundParcel } from 'shared/atlas/actions'
-import { gridToWorld } from '../atomicHelpers/parcelScenePositions'
 import {
   DEBUG,
   EDITOR,
@@ -19,49 +16,20 @@ import {
   SCENE_DEBUG_PANEL,
   SHOW_FPS_COUNTER,
   ethereumConfigurations,
-  NO_ASSET_BUNDLES
-} from 'config'
+  NO_ASSET_BUNDLES} from 'config'
 import { Quaternion, ReadOnlyQuaternion, ReadOnlyVector3, Vector3 } from '../decentraland-ecs/src/decentraland/math'
-import { IEventNames, IEvents, ProfileForRenderer, MinimapSceneInfo } from '../decentraland-ecs/src/decentraland/Types'
+import { IEventNames, ProfileForRenderer, MinimapSceneInfo } from '../decentraland-ecs/src/decentraland/Types'
 import { sceneLifeCycleObservable } from '../decentraland-loader/lifecycle/controllers/scene'
 import { AirdropInfo } from 'shared/airdrops/interface'
 import { queueTrackingEvent } from 'shared/analytics'
-import { DevTools } from 'shared/apis/DevTools'
-import { ParcelIdentity } from 'shared/apis/ParcelIdentity'
 import { aborted } from 'shared/loading/ReportFatalError'
 import { loadingScenes, teleportTriggered, unityClientLoaded } from 'shared/loading/types'
-import { createLogger, defaultLogger, ILogger } from 'shared/logger'
+import { defaultLogger } from 'shared/logger'
 import { saveProfileRequest } from 'shared/profiles/actions'
 import { Avatar, Profile, Wearable } from 'shared/profiles/types'
-import {
-  PB_AttachEntityComponent,
-  PB_ComponentCreated,
-  PB_ComponentDisposed,
-  PB_ComponentRemoved,
-  PB_ComponentUpdated,
-  PB_CreateEntity,
-  PB_Query,
-  PB_Ray,
-  PB_RayQuery,
-  PB_RemoveEntity,
-  PB_SendSceneMessage,
-  PB_SetEntityParent,
-  PB_UpdateEntityComponent,
-  PB_Vector3,
-  PB_OpenExternalUrl,
-  PB_OpenNFTDialog
-} from '../shared/proto/engineinterface_pb'
 import { Session } from 'shared/session'
 import { getPerformanceInfo } from 'shared/session/getPerformanceInfo'
 import {
-  AttachEntityComponentPayload,
-  ComponentCreatedPayload,
-  ComponentDisposedPayload,
-  ComponentRemovedPayload,
-  ComponentUpdatedPayload,
-  CreateEntityPayload,
-  EntityAction,
-  EnvironmentData,
   HUDConfiguration,
   ILand,
   InstancedSpawnPoint,
@@ -69,10 +37,6 @@ import {
   LoadableParcelScene,
   MappingsResponse,
   Notification,
-  QueryPayload,
-  RemoveEntityPayload,
-  SetEntityParentPayload,
-  UpdateEntityComponentPayload,
   ChatMessage,
   HUDElementID,
   FriendsInitializationMessage,
@@ -80,9 +44,7 @@ import {
   UpdateUserStatusMessage,
   FriendshipAction,
   WorldPosition,
-  OpenNFTDialogPayload
 } from 'shared/types'
-import { ParcelSceneAPI } from 'shared/world/ParcelSceneAPI'
 import {
   enableParcelSceneLoading,
   getParcelSceneID,
@@ -103,6 +65,10 @@ import { changeRealm, catalystRealmConnected, candidatesFetched } from 'shared/d
 import { notifyStatusThroughChat } from 'shared/comms/chat'
 import { getAppNetwork, fetchOwner } from 'shared/web3'
 import { updateStatusMessage } from 'shared/loading/actions'
+import { NativeMessagesBridge } from './nativeMessagesBridge'
+import { ProtobufMessagesBridge } from './protobufMessagesBridge'
+import { UnityScene } from './UnityScene'
+import { UnityParcelScene } from './UnityParcelScene'
 
 declare const globalThis: UnityInterfaceContainer &
   BrowserInterfaceContainer &
@@ -193,11 +159,7 @@ const browserInterface = {
     if (newWindow != null) newWindow.opener = null
   },
 
-  PerformanceHiccupReport(data: {
-    hiccupsInThousandFrames: number,
-    hiccupsTime: number,
-    totalTime: number
-  }) {
+  PerformanceHiccupReport(data: { hiccupsInThousandFrames: number; hiccupsTime: number; totalTime: number }) {
     queueTrackingEvent('hiccup report', data)
   },
 
@@ -709,225 +671,8 @@ export type UnityInterfaceContainer = {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-// protobuf message instances
-const createEntity: PB_CreateEntity = new PB_CreateEntity()
-const removeEntity: PB_RemoveEntity = new PB_RemoveEntity()
-const updateEntityComponent: PB_UpdateEntityComponent = new PB_UpdateEntityComponent()
-const attachEntity: PB_AttachEntityComponent = new PB_AttachEntityComponent()
-const removeEntityComponent: PB_ComponentRemoved = new PB_ComponentRemoved()
-const setEntityParent: PB_SetEntityParent = new PB_SetEntityParent()
-const query: PB_Query = new PB_Query()
-const rayQuery: PB_RayQuery = new PB_RayQuery()
-const ray: PB_Ray = new PB_Ray()
-const origin: PB_Vector3 = new PB_Vector3()
-const direction: PB_Vector3 = new PB_Vector3()
-const componentCreated: PB_ComponentCreated = new PB_ComponentCreated()
-const componentDisposed: PB_ComponentDisposed = new PB_ComponentDisposed()
-const componentUpdated: PB_ComponentUpdated = new PB_ComponentUpdated()
-const openExternalUrl: PB_OpenExternalUrl = new PB_OpenExternalUrl()
-const openNFTDialog: PB_OpenNFTDialog = new PB_OpenNFTDialog()
-
-class UnityScene<T> implements ParcelSceneAPI {
-  eventDispatcher = new EventDispatcher()
-  worker!: SceneWorker
-  logger: ILogger
-
-  constructor(public data: EnvironmentData<T>) {
-    this.logger = createLogger(getParcelSceneID(this) + ': ')
-  }
-
-  sendBatch(actions: EntityAction[]): void {
-    const sceneId = getParcelSceneID(this)
-    let messages = ''
-    for (let i = 0; i < actions.length; i++) {
-      const action = actions[i]
-      messages += this.encodeSceneMessage(sceneId, action.type, action.payload, action.tag)
-      messages += '\n'
-    }
-
-    unityInterface.SendSceneMessage(messages)
-  }
-
-  registerWorker(worker: SceneWorker): void {
-    this.worker = worker
-  }
-
-  dispose(): void {
-    // TODO: do we need to release some resource after releasing a scene worker?
-  }
-
-  on<T extends IEventNames>(event: T, cb: (event: IEvents[T]) => void): void {
-    this.eventDispatcher.on(event, cb)
-  }
-
-  emit<T extends IEventNames>(event: T, data: IEvents[T]): void {
-    this.eventDispatcher.emit(event, data)
-  }
-
-  encodeSceneMessage(parcelSceneId: string, method: string, payload: any, tag: string = ''): string {
-    if (unityInterface.debug) {
-      defaultLogger.info(parcelSceneId, method, payload, tag)
-    }
-
-    let message: PB_SendSceneMessage = new PB_SendSceneMessage()
-    message.setSceneid(parcelSceneId)
-    message.setTag(tag)
-
-    switch (method) {
-      case 'CreateEntity':
-        message.setCreateentity(this.encodeCreateEntity(payload))
-        break
-      case 'RemoveEntity':
-        message.setRemoveentity(this.encodeRemoveEntity(payload))
-        break
-      case 'UpdateEntityComponent':
-        message.setUpdateentitycomponent(this.encodeUpdateEntityComponent(payload))
-        break
-      case 'AttachEntityComponent':
-        message.setAttachentitycomponent(this.encodeAttachEntityComponent(payload))
-        break
-      case 'ComponentRemoved':
-        message.setComponentremoved(this.encodeComponentRemoved(payload))
-        break
-      case 'SetEntityParent':
-        message.setSetentityparent(this.encodeSetEntityParent(payload))
-        break
-      case 'Query':
-        message.setQuery(this.encodeQuery(payload))
-        break
-      case 'ComponentCreated':
-        message.setComponentcreated(this.encodeComponentCreated(payload))
-        break
-      case 'ComponentDisposed':
-        message.setComponentdisposed(this.encodeComponentDisposed(payload))
-        break
-      case 'ComponentUpdated':
-        message.setComponentupdated(this.encodeComponentUpdated(payload))
-        break
-      case 'InitMessagesFinished':
-        message.setScenestarted(new Empty()) // don't know if this is necessary
-        break
-      case 'OpenExternalUrl':
-        message.setOpenexternalurl(this.encodeOpenExternalUrl(payload))
-        break
-      case 'OpenNFTDialog':
-        message.setOpennftdialog(this.encodeOpenNFTDialog(payload))
-        break
-    }
-
-    let arrayBuffer: Uint8Array = message.serializeBinary()
-    return btoa(String.fromCharCode(...arrayBuffer))
-  }
-
-  encodeCreateEntity(createEntityPayload: CreateEntityPayload): PB_CreateEntity {
-    createEntity.setId(createEntityPayload.id)
-    return createEntity
-  }
-
-  encodeRemoveEntity(removeEntityPayload: RemoveEntityPayload): PB_RemoveEntity {
-    removeEntity.setId(removeEntityPayload.id)
-    return removeEntity
-  }
-
-  encodeUpdateEntityComponent(updateEntityComponentPayload: UpdateEntityComponentPayload): PB_UpdateEntityComponent {
-    updateEntityComponent.setClassid(updateEntityComponentPayload.classId)
-    updateEntityComponent.setEntityid(updateEntityComponentPayload.entityId)
-    updateEntityComponent.setData(updateEntityComponentPayload.json)
-    return updateEntityComponent
-  }
-
-  encodeAttachEntityComponent(attachEntityPayload: AttachEntityComponentPayload): PB_AttachEntityComponent {
-    attachEntity.setEntityid(attachEntityPayload.entityId)
-    attachEntity.setName(attachEntityPayload.name)
-    attachEntity.setId(attachEntityPayload.id)
-    return attachEntity
-  }
-
-  encodeComponentRemoved(removeEntityComponentPayload: ComponentRemovedPayload): PB_ComponentRemoved {
-    removeEntityComponent.setEntityid(removeEntityComponentPayload.entityId)
-    removeEntityComponent.setName(removeEntityComponentPayload.name)
-    return removeEntityComponent
-  }
-
-  encodeSetEntityParent(setEntityParentPayload: SetEntityParentPayload): PB_SetEntityParent {
-    setEntityParent.setEntityid(setEntityParentPayload.entityId)
-    setEntityParent.setParentid(setEntityParentPayload.parentId)
-    return setEntityParent
-  }
-
-  encodeQuery(queryPayload: QueryPayload): PB_Query {
-    origin.setX(queryPayload.payload.ray.origin.x)
-    origin.setY(queryPayload.payload.ray.origin.y)
-    origin.setZ(queryPayload.payload.ray.origin.z)
-    direction.setX(queryPayload.payload.ray.direction.x)
-    direction.setY(queryPayload.payload.ray.direction.y)
-    direction.setZ(queryPayload.payload.ray.direction.z)
-    ray.setOrigin(origin)
-    ray.setDirection(direction)
-    ray.setDistance(queryPayload.payload.ray.distance)
-    rayQuery.setRay(ray)
-    rayQuery.setQueryid(queryPayload.payload.queryId)
-    rayQuery.setQuerytype(queryPayload.payload.queryType)
-    query.setQueryid(queryPayload.queryId)
-    let arrayBuffer: Uint8Array = rayQuery.serializeBinary()
-    let base64: string = btoa(String.fromCharCode(...arrayBuffer))
-    query.setPayload(base64)
-    return query
-  }
-
-  encodeComponentCreated(componentCreatedPayload: ComponentCreatedPayload): PB_ComponentCreated {
-    componentCreated.setId(componentCreatedPayload.id)
-    componentCreated.setClassid(componentCreatedPayload.classId)
-    componentCreated.setName(componentCreatedPayload.name)
-    return componentCreated
-  }
-
-  encodeComponentDisposed(componentDisposedPayload: ComponentDisposedPayload) {
-    componentDisposed.setId(componentDisposedPayload.id)
-    return componentDisposed
-  }
-
-  encodeComponentUpdated(componentUpdatedPayload: ComponentUpdatedPayload): PB_ComponentUpdated {
-    componentUpdated.setId(componentUpdatedPayload.id)
-    componentUpdated.setJson(componentUpdatedPayload.json)
-    return componentUpdated
-  }
-
-  encodeOpenExternalUrl(url: any): PB_OpenExternalUrl {
-    openExternalUrl.setUrl(url)
-    return openExternalUrl
-  }
-
-  encodeOpenNFTDialog(nftDialogPayload: OpenNFTDialogPayload): PB_OpenNFTDialog {
-    openNFTDialog.setAssetcontractaddress(nftDialogPayload.assetContractAddress)
-    openNFTDialog.setTokenid(nftDialogPayload.tokenId)
-    openNFTDialog.setComment(nftDialogPayload.comment ? nftDialogPayload.comment : '')
-    return openNFTDialog
-  }
-}
-
-export class UnityParcelScene extends UnityScene<LoadableParcelScene> {
-  constructor(public data: EnvironmentData<LoadableParcelScene>) {
-    super(data)
-    this.logger = createLogger(data.data.basePosition.x + ',' + data.data.basePosition.y + ': ')
-  }
-
-  registerWorker(worker: SceneWorker): void {
-    super.registerWorker(worker)
-
-    gridToWorld(this.data.data.basePosition.x, this.data.data.basePosition.y, worker.position)
-
-    this.worker.system
-      .then((system) => {
-        system.getAPIInstance(DevTools).logger = this.logger
-
-        const parcelIdentity = system.getAPIInstance(ParcelIdentity)
-        parcelIdentity.land = this.data.data.land
-        parcelIdentity.cid = getParcelSceneID(worker.parcelScene)
-      })
-      .catch((e) => this.logger.error('Error initializing system', e))
-  }
-}
+export const nativeMsgBridge: NativeMessagesBridge = new NativeMessagesBridge()
+export const protobufMsgBridge: ProtobufMessagesBridge = new ProtobufMessagesBridge()
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -944,6 +689,8 @@ export async function initializeEngine(_gameInstance: GameInstance) {
   setLoadingScreenVisible(true)
 
   unityInterface.DeactivateRendering()
+
+  nativeMsgBridge.initNativeMessages()
 
   if (DEBUG) {
     unityInterface.SetDebug()

@@ -40,19 +40,6 @@ namespace DCL
         Lossy,
     }
 
-    public struct PendingMessage
-    {
-        public MessagingBus.QueuedSceneMessage_Scene message;
-        public string busId;
-        public QueueMode queueMode;
-
-        public PendingMessage(string busId, MessagingBus.QueuedSceneMessage_Scene message, QueueMode queueMode)
-        {
-            this.busId = busId;
-            this.message = message;
-            this.queueMode = queueMode;
-        }
-    }
 
     public class MessagingBus : IDisposable
     {
@@ -79,10 +66,11 @@ namespace DCL
             public bool isUnreliable;
             public string unreliableMessageKey;
         }
+
         public class QueuedSceneMessage_Scene : QueuedSceneMessage
         {
             public string method;
-            public PB_SendSceneMessage payload;
+            public object payload; //PB_SendSceneMessage
         }
 
         public IMessageHandler handler;
@@ -142,6 +130,7 @@ namespace DCL
 
             pendingMessagesCount = 0;
         }
+
         public void Dispose()
         {
             Stop();
@@ -322,11 +311,13 @@ namespace DCL
                 MessagingControllersManager.i.pendingMessagesCount--;
             }
         }
+
         private void RemoveUnreliableMessage(MessagingBus.QueuedSceneMessage message)
         {
             if (unreliableMessages.ContainsKey(message.unreliableMessageKey))
                 unreliableMessages.Remove(message.unreliableMessageKey);
         }
+
         private void LogMessage(MessagingBus.QueuedSceneMessage m, MessagingBus bus, bool logType = true)
         {
             string finalTag = SceneController.i.TryToGetSceneCoordsID(bus.debugTag);
@@ -340,6 +331,5 @@ namespace DCL
                 Debug.Log($"#{bus.processedMessagesCount} ... Bus = {finalTag}, id = {bus.id}... processing msg... {m.message}");
             }
         }
-
     }
 }
