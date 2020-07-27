@@ -11,6 +11,12 @@ export class NativeMessagesBridge {
 
   public initNativeMessages() {
     let unityModule: any = (globalThis as any).Module
+
+    if ( !unityModule ) {
+      console.error("Unity module not found! Are you in WSS mode?")
+      return
+    }
+
     this.__createEntity = unityModule.cwrap('call_create_entity', null, ['string', 'string'])
     this.__removeEntity = unityModule.cwrap('call_remove_entity', null, ['string', 'string'])
     this.__setSceneStarted = unityModule.cwrap('call_scene_started', null, ['string'])

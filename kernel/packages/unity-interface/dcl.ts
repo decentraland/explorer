@@ -16,7 +16,8 @@ import {
   SCENE_DEBUG_PANEL,
   SHOW_FPS_COUNTER,
   ethereumConfigurations,
-  NO_ASSET_BUNDLES} from 'config'
+  NO_ASSET_BUNDLES,
+  WSS_ENABLED} from 'config'
 import { Quaternion, ReadOnlyQuaternion, ReadOnlyVector3, Vector3 } from '../decentraland-ecs/src/decentraland/math'
 import { IEventNames, ProfileForRenderer, MinimapSceneInfo } from '../decentraland-ecs/src/decentraland/Types'
 import { sceneLifeCycleObservable } from '../decentraland-loader/lifecycle/controllers/scene'
@@ -690,8 +691,10 @@ export async function initializeEngine(_gameInstance: GameInstance) {
 
   unityInterface.DeactivateRendering()
 
-  nativeMsgBridge.initNativeMessages()
-
+  if ( !WSS_ENABLED ) {
+    nativeMsgBridge.initNativeMessages()
+  }
+  
   if (DEBUG) {
     unityInterface.SetDebug()
   }

@@ -134,7 +134,9 @@ namespace DCL
 
             DCLCharacterController.OnCharacterMoved += SetPositionDirty;
 
+#if !UNITY_EDITOR
             worldEntryPoint = new EntryPoint_World(this);
+#endif
         }
 
 
@@ -713,6 +715,8 @@ namespace DCL
                     {
                         if (msgObject.payload is NativePayloads.CreateEntity payload)
                             scene.CreateEntity(payload.entityId);
+                        else if (msgObject.payload is PB_SendSceneMessage pb_payload)
+                            scene.CreateEntity(pb_payload.CreateEntity.Id);
 
                         break;
                     }
@@ -767,6 +771,9 @@ namespace DCL
                     {
                         if (msgObject.payload is NativePayloads.RemoveEntity payload)
                             scene.RemoveEntity(payload.entityId);
+                        else if (msgObject.payload is PB_SendSceneMessage pb_payload)
+                            scene.RemoveEntity(pb_payload.RemoveEntity.Id);
+
                         break;
                     }
                     case MessagingTypes.INIT_DONE:
