@@ -26,12 +26,12 @@ public class HotScenesControllerTests : TestsBase
         {
             CheckListEquals(new List<HotScenesController.HotSceneInfo>(scenesArray), hotSceneList);
         };
-        controller.OnHotSceneListChunckUpdate += onListUpdate;
+        controller.OnHotSceneListChunkUpdate += onListUpdate;
 
         controller.UpdateHotScenesList(json);
         controller.FinishUpdateHotScenesList();
 
-        controller.OnHotSceneListChunckUpdate -= onListUpdate;
+        controller.OnHotSceneListChunkUpdate -= onListUpdate;
 
         CheckListEquals(controller.hotScenesList, hotSceneList);
 
