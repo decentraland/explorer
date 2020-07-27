@@ -8,9 +8,10 @@ namespace DCL
 {
     public class AssetBundlesLoader
     {
-        private const int SKIPPED_FRAMES_AFTER_BUDGET_TIME_FOR_NEARBY_ASSETS = 1;
-        private const int SKIPPED_FRAMES_AFTER_BUDGET_TIME_FOR_DISTANT_ASSETS = 10;
-        private const float MAX_SQR_DISTANCE_FOR_QUICK_LOADING = 5000f;
+        private const float MAX_LOAD_BUDGET_TIME = 0.004f;
+        private const int SKIPPED_FRAMES_AFTER_BUDGET_TIME_IS_REACHED_FOR_NEARBY_ASSETS = 1;
+        private const int SKIPPED_FRAMES_AFTER_BUDGET_TIME_IS_REACHED_FOR_DISTANT_ASSETS = 5;
+        private const float MAX_SQR_DISTANCE_FOR_QUICK_LOADING = 8000f;
 
         private struct AssetBundleInfo
         {
@@ -44,7 +45,6 @@ namespace DCL
             {"glb", 9}
         };
         private List<UnityEngine.Object> loadedAssetsByName = new List<UnityEngine.Object>();
-        private float maxLoadBudgetTime = 0.004f;
         private float currentLoadBudgetTime = 0;
         private AssetBundleInfo assetBundleInfoToLoad;
 
@@ -87,13 +87,13 @@ namespace DCL
                 while (assetBundlesReadyToBeLoaded.Count > 0)
                 {
                     assetBundleInfoToLoad = assetBundlesReadyToBeLoaded.Dequeue();
-                    yield return LoadAssetsInOrder(assetBundleInfoToLoad, SKIPPED_FRAMES_AFTER_BUDGET_TIME_FOR_NEARBY_ASSETS);
+                    yield return LoadAssetsInOrder(assetBundleInfoToLoad, SKIPPED_FRAMES_AFTER_BUDGET_TIME_IS_REACHED_FOR_NEARBY_ASSETS);
                 }
 
                 while (assetBundlesWaitingForLoad.Count > 0 && assetBundlesReadyToBeLoaded.Count == 0)
                 {
                     assetBundleInfoToLoad = assetBundlesWaitingForLoad.Dequeue();
-                    yield return LoadAssetsInOrder(assetBundleInfoToLoad, SKIPPED_FRAMES_AFTER_BUDGET_TIME_FOR_DISTANT_ASSETS);
+                    yield return LoadAssetsInOrder(assetBundleInfoToLoad, SKIPPED_FRAMES_AFTER_BUDGET_TIME_IS_REACHED_FOR_DISTANT_ASSETS);
                 }
 
                 yield return null;
@@ -105,9 +105,6 @@ namespace DCL
             float time = Time.realtimeSinceStartup;
 
             string[] assets = assetBundleInfo.assetBundle.GetAllAssetNames();
-
-            float timeStart = Time.realtimeSinceStartup;
-            float timeEnd = Time.realtimeSinceStartup;
 
             assetsToLoad = assets.OrderBy(
                 (x) =>
@@ -125,11 +122,7 @@ namespace DCL
                 if (assetBundleInfo.asset == null)
                     break;
 
-                timeStart = Time.realtimeSinceStartup;
-                //Debug.Log(string.Format("[SANTI LOG] loading asset = {0}", assetName));
                 UnityEngine.Object loadedAsset = assetBundleInfo.assetBundle.LoadAsset(assetName);
-                timeEnd = Time.realtimeSinceStartup - timeStart;
-                //Debug.Log(string.Format("[SANTI LOG] asset loaded = {0} | TIME: {1}", assetName, timeEnd));
 
                 if (loadedAsset is Material loadedMaterial)
                     loadedMaterial.shader = null;
@@ -139,7 +132,7 @@ namespace DCL
                 if (limitTimeBudget)
                 {
                     currentLoadBudgetTime += Time.realtimeSinceStartup - time;
-                    if (currentLoadBudgetTime > maxLoadBudgetTime)
+                    if (currentLoadBudgetTime > MAX_LOAD_BUDGET_TIME)
                     {
                         yield return WaitForSkippedFrames(skippedFramesBetweenLoadings);
 
@@ -183,8 +176,6 @@ namespace DCL
 
         private IEnumerator WaitForSkippedFrames(int skippedFramesBetweenLoadings)
         {
-            //Debug.Log(string.Format("[SANTI LOG] WAITING {0} FRAMES...", skippedFramesBetweenLoadings));
-
             for (int i = 0; i < skippedFramesBetweenLoadings; i++)
             {
                 yield return null;
