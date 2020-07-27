@@ -59,7 +59,8 @@ public class HotScenesControllerTests : TestsBase
                     usersCount = 2,
                     usersMax = 50
                 }
-            }
+            },
+            usersTotalCount = 12
         });
 
         hotSceneList.Add(new HotScenesController.HotSceneInfo()
@@ -73,7 +74,8 @@ public class HotScenesControllerTests : TestsBase
                     usersCount = 1,
                     usersMax = 50
                 }
-            }
+            },
+            usersTotalCount = 1
         });
 
         hotSceneList.Add(new HotScenesController.HotSceneInfo()
@@ -87,7 +89,8 @@ public class HotScenesControllerTests : TestsBase
                     usersCount = 100,
                     usersMax = 50
                 }
-            }
+            },
+            usersTotalCount = 100
         });
 
         return hotSceneList;
@@ -100,6 +103,8 @@ public class HotScenesControllerTests : TestsBase
         {
             Assert.IsTrue(l1[i].baseCoords.x == l2[i].baseCoords.x && l1[i].baseCoords.y == l2[i].baseCoords.y,
                 $"HotScenesLists baseCoords mismatch at index {i}");
+
+            Assert.IsTrue(l1[i].usersTotalCount == l2[i].usersTotalCount, $"HotScenesLists usersTotalCount mismatch at index {i}");
 
             Assert.IsTrue(l1[i].realms.Length == l2[i].realms.Length, $"HotScenesLists realms length mismatch at index {i}");
 

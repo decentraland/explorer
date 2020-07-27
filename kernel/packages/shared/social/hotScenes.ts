@@ -4,9 +4,16 @@ import { StoreContainer } from 'shared/store/rootTypes'
 import { fetchSceneIds } from 'decentraland-loader/lifecycle/utils/fetchSceneIds'
 import { fetchSceneJson } from 'decentraland-loader/lifecycle/utils/fetchSceneJson'
 import { SceneJsonData } from 'shared/types'
+import { reportScenesFromTiles } from 'shared/atlas/actions'
 import { getSceneNameFromAtlasState, postProcessSceneName } from 'shared/atlas/selectors'
 
 declare const globalThis: StoreContainer
+
+declare const window: {
+  unityInterface: {
+    UpdateHotScenesList: (info: HotSceneInfo[]) => void
+  }
+}
 
 type CrowdedSceneRealmInfo = {
   realm: {
@@ -28,6 +35,12 @@ type CandidateCrowdedScene = {
   scene: SceneJsonData | undefined
   baseCoord: string
   usersCount: number
+}
+
+export type HotSceneInfo = {
+  baseCoords: { x: number; y: number }
+  usersTotalCount: number
+  realms: { serverName: string; layer: string; usersCount: number; usersMax: number }[]
 }
 
 export async function fetchHotScenes(): Promise<CrowdedSceneInfo[]> {
@@ -61,6 +74,13 @@ export async function fetchHotScenes(): Promise<CrowdedSceneInfo[]> {
   sceneValues.forEach((scene) => scene.realmsInfo.sort((a, b) => (a.usersCount > b.usersCount ? -1 : 1)))
 
   return sceneValues.sort((a, b) => (countUsers(a) > countUsers(b) ? -1 : 1))
+}
+
+export async function reportHotScenes() {
+  const hotScenes = await fetchHotScenes()
+
+  globalThis.globalStore.dispatch(reportScenesFromTiles(hotScenes.map((scene) => scene.baseCoord)))
+  window.unityInterface.UpdateHotScenesList(hotScenes.map((scene) => hotSceneInfoFromCrowdedSceneInfo(scene)))
 }
 
 function countUsers(a: CrowdedSceneInfo) {
@@ -112,5 +132,21 @@ function crowdedSceneInfoFromCandidateScene(candidateScene: CandidateCrowdedScen
     name: postProcessSceneName(sceneName),
     baseCoord: candidateScene.baseCoord,
     realmsInfo: []
+  }
+}
+
+function hotSceneInfoFromCrowdedSceneInfo(crowdedSceneInfo: CrowdedSceneInfo): HotSceneInfo {
+  const baseCoord = crowdedSceneInfo.baseCoord.split(',').map((str) => parseInt(str, 10)) as [number, number]
+  return {
+    baseCoords: { x: baseCoord[0], y: baseCoord[1] },
+    usersTotalCount: countUsers(crowdedSceneInfo),
+    realms: crowdedSceneInfo.realmsInfo.map((realmInfo) => {
+      return {
+        serverName: realmInfo.realm.serverName,
+        layer: realmInfo.realm.layerName,
+        usersCount: realmInfo.usersCount,
+        usersMax: realmInfo.maxUsers
+      }
+    })
   }
 }

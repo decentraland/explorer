@@ -26,6 +26,7 @@ public class HotScenesController : MonoBehaviour
             public int usersMax;
         }
         public Vector2Int baseCoords;
+        public int usersTotalCount;
         public Realm[] realms;
     }
 

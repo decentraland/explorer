@@ -103,6 +103,7 @@ import { changeRealm, catalystRealmConnected, candidatesFetched } from 'shared/d
 import { notifyStatusThroughChat } from 'shared/comms/chat'
 import { getAppNetwork, fetchOwner } from 'shared/web3'
 import { updateStatusMessage } from 'shared/loading/actions'
+import { reportHotScenes, HotSceneInfo } from 'shared/social/hotScenes'
 
 declare const globalThis: UnityInterfaceContainer &
   BrowserInterfaceContainer &
@@ -437,6 +438,10 @@ const browserInterface = {
   ScenesLoadingFeedback(data: { message: string; loadPercentage: number }) {
     const { message, loadPercentage } = data
     globalThis.globalStore.dispatch(updateStatusMessage(message, loadPercentage))
+  },
+
+  FetchHotScenes() {
+    reportHotScenes().catch(e => defaultLogger.error('FetchHotScenes error', e))
   }
 }
 globalThis.browserInterface2 = browserInterface
@@ -639,6 +644,13 @@ export const unityInterface = {
   },
   RequestTeleport(teleportData: {}) {
     gameInstance.SendMessage('HUDController', 'RequestTeleport', JSON.stringify(teleportData))
+  },
+  UpdateHotScenesList(info: HotSceneInfo[]) {
+    for (let i = 0; i < info.length; i += CHUNK_SIZE) {
+      const chunk = info.slice(i, i + CHUNK_SIZE)
+      gameInstance.SendMessage('SceneController', 'UpdateHotScenesList', JSON.stringify(chunk))
+    }
+    gameInstance.SendMessage('SceneController', 'FinishUpdateHotScenesList')
   },
 
   // *********************************************************************************
