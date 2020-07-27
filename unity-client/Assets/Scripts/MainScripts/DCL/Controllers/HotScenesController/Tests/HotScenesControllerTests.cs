@@ -1,0 +1,115 @@
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using NUnit.Framework;
+using UnityEngine;
+using UnityEngine.TestTools;
+
+public class HotScenesControllerTests : TestsBase
+{
+    [UnityTest]
+    public IEnumerator HotScenesControllerShouldParseJsonCorrectly()
+    {
+        var controller = new HotScenesController();
+
+        var hotSceneList = GetTestHotSceneList();
+
+        var json = "[";
+        for (int i = 0; i < hotSceneList.Count; i++)
+        {
+            json += JsonUtility.ToJson(hotSceneList[i]);
+            if (i < hotSceneList.Count - 1) json += ",";
+        }
+        json += "]";
+
+        Action<HotScenesController.HotSceneInfo[]> onListUpdate = (scenesArray) =>
+        {
+            CheckListEquals(new List<HotScenesController.HotSceneInfo>(scenesArray), hotSceneList);
+        };
+        controller.OnHotSceneListChunckUpdate += onListUpdate;
+
+        controller.UpdateHotScenesList(json);
+        controller.FinishUpdateHotScenesList();
+
+        controller.OnHotSceneListChunckUpdate -= onListUpdate;
+
+        CheckListEquals(controller.hotScenesList, hotSceneList);
+
+        yield return null;
+    }
+
+    List<HotScenesController.HotSceneInfo> GetTestHotSceneList()
+    {
+        var hotSceneList = new List<HotScenesController.HotSceneInfo>();
+        hotSceneList.Add(new HotScenesController.HotSceneInfo()
+        {
+            baseCoords = new Vector2Int(0, 0),
+            realms = new HotScenesController.HotSceneInfo.Realm[]{
+                new HotScenesController.HotSceneInfo.Realm()
+                {
+                    layer = "amber",
+                    serverName = "fenrir",
+                    usersCount = 10,
+                    usersMax = 50
+                },
+                new HotScenesController.HotSceneInfo.Realm()
+                {
+                    layer = "blue",
+                    serverName = "unicorn",
+                    usersCount = 2,
+                    usersMax = 50
+                }
+            }
+        });
+
+        hotSceneList.Add(new HotScenesController.HotSceneInfo()
+        {
+            baseCoords = new Vector2Int(20, 20),
+            realms = new HotScenesController.HotSceneInfo.Realm[]{
+                new HotScenesController.HotSceneInfo.Realm()
+                {
+                    layer = "amber",
+                    serverName = "fenrir",
+                    usersCount = 1,
+                    usersMax = 50
+                }
+            }
+        });
+
+        hotSceneList.Add(new HotScenesController.HotSceneInfo()
+        {
+            baseCoords = new Vector2Int(70, -135),
+            realms = new HotScenesController.HotSceneInfo.Realm[]{
+                new HotScenesController.HotSceneInfo.Realm()
+                {
+                    layer = "red",
+                    serverName = "temptation",
+                    usersCount = 100,
+                    usersMax = 50
+                }
+            }
+        });
+
+        return hotSceneList;
+    }
+    void CheckListEquals(List<HotScenesController.HotSceneInfo> l1, List<HotScenesController.HotSceneInfo> l2)
+    {
+        Assert.IsTrue(l1.Count == l2.Count, "HotScenesLists length mismatch");
+
+        for (int i = 0; i < l1.Count; i++)
+        {
+            Assert.IsTrue(l1[i].baseCoords.x == l2[i].baseCoords.x && l1[i].baseCoords.y == l2[i].baseCoords.y,
+                $"HotScenesLists baseCoords mismatch at index {i}");
+
+            Assert.IsTrue(l1[i].realms.Length == l2[i].realms.Length, $"HotScenesLists realms length mismatch at index {i}");
+
+            for (int j = 0; j < l1[i].realms.Length; j++)
+            {
+                Assert.IsTrue(l1[i].realms[j].serverName == l2[i].realms[j].serverName, $"HotScenesLists realms serverName mismatch at index {i},{j}");
+                Assert.IsTrue(l1[i].realms[j].layer == l2[i].realms[j].layer, $"HotScenesLists realms layer mismatch at index {i},{j}");
+                Assert.IsTrue(l1[i].realms[j].usersCount == l2[i].realms[j].usersCount, $"HotScenesLists realms usersCount mismatch at index {i},{j}");
+                Assert.IsTrue(l1[i].realms[j].usersMax == l2[i].realms[j].usersMax, $"HotScenesLists realms usersMax mismatch at index {i},{j}");
+            }
+        }
+    }
+}
