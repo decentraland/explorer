@@ -12,8 +12,10 @@ public class HotScenesController : MonoBehaviour
 
     public List<HotSceneInfo> hotScenesList { get; private set; }
     public bool isUpdating { get; private set; }
+    public float timeSinceLastUpdate { get { return Time.realtimeSinceStartup - lastUpdateTime; } }
 
     private List<HotSceneInfo> tempHotScenesList = new List<HotSceneInfo>();
+    private float lastUpdateTime = float.MinValue;
 
     [Serializable]
     public struct HotSceneInfo
@@ -47,6 +49,7 @@ public class HotScenesController : MonoBehaviour
     public void FinishUpdateHotScenesList()
     {
         isUpdating = false;
+        lastUpdateTime = Time.realtimeSinceStartup;
         hotScenesList = tempHotScenesList;
         tempHotScenesList = new List<HotSceneInfo>();
         OnHotSceneListFinishUpdating?.Invoke();
