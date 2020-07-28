@@ -8,21 +8,26 @@ namespace DCL
 {
     public class AssetBundlesLoader
     {
+        public static event Action<KeyValuePair<int, int>> OnQueuesChanged;
+
         private const float MAX_LOAD_BUDGET_TIME = 0.004f;
         private const int SKIPPED_FRAMES_AFTER_BUDGET_TIME_IS_REACHED_FOR_NEARBY_ASSETS = 1;
         private const int SKIPPED_FRAMES_AFTER_BUDGET_TIME_IS_REACHED_FOR_DISTANT_ASSETS = 5;
-        private const float MAX_SQR_DISTANCE_FOR_QUICK_LOADING = 8000f;
+        private const float MAX_SQR_DISTANCE_FOR_QUICK_LOADING = 6000f;
+        private const float TIME_BETWEEN_REPRIORITIZATIONS = 1f;
 
         private struct AssetBundleInfo
         {
             public Asset_AB asset;
             public AssetBundle assetBundle;
+            public Transform containerTransform;
             public Action onSuccess;
 
-            public AssetBundleInfo(Asset_AB asset, AssetBundle assetBundle, Action onSuccess)
+            public AssetBundleInfo(Asset_AB asset, AssetBundle assetBundle, Transform containerTransform, Action onSuccess)
             {
                 this.asset = asset;
                 this.assetBundle = assetBundle;
+                this.containerTransform = containerTransform;
                 this.onSuccess = onSuccess;
             }
         }
@@ -47,6 +52,7 @@ namespace DCL
         private List<UnityEngine.Object> loadedAssetsByName = new List<UnityEngine.Object>();
         private float currentLoadBudgetTime = 0;
         private AssetBundleInfo assetBundleInfoToLoad;
+        private float lastQueuesReprioritizationTime = 0;
 
         private bool limitTimeBudget => CommonScriptableObjects.rendererState.Get();
 
@@ -71,14 +77,18 @@ namespace DCL
 
         public void MarkAssetBundleForLoad(Asset_AB asset, AssetBundle assetBundle, Transform containerTransform, Action onSuccess)
         {
-            AssetBundleInfo assetBundleToLoad = new AssetBundleInfo(asset, assetBundle, onSuccess);
+            CheckForReprioritizeAwaitingAssets();
 
-            float distanceFromPlayer = limitTimeBudget ? Vector3.SqrMagnitude(containerTransform.position - CommonScriptableObjects.playerUnityPosition.Get()) : 0f;
+            AssetBundleInfo assetBundleToLoad = new AssetBundleInfo(asset, assetBundle, containerTransform, onSuccess);
+
+            float distanceFromPlayer = GetDistanceFromPlayer(containerTransform);
             if (distanceFromPlayer <= MAX_SQR_DISTANCE_FOR_QUICK_LOADING)
                 assetBundlesReadyToBeLoaded.Enqueue(assetBundleToLoad);
             else
                 assetBundlesWaitingForLoad.Enqueue(assetBundleToLoad);
-    }
+
+            QueuesChanged();
+        }
 
         private IEnumerator LoadAssetBundlesCoroutine()
         {
@@ -88,12 +98,14 @@ namespace DCL
                 {
                     assetBundleInfoToLoad = assetBundlesReadyToBeLoaded.Dequeue();
                     yield return LoadAssetsInOrder(assetBundleInfoToLoad, SKIPPED_FRAMES_AFTER_BUDGET_TIME_IS_REACHED_FOR_NEARBY_ASSETS);
+                    QueuesChanged();
                 }
 
                 while (assetBundlesWaitingForLoad.Count > 0 && assetBundlesReadyToBeLoaded.Count == 0)
                 {
                     assetBundleInfoToLoad = assetBundlesWaitingForLoad.Dequeue();
                     yield return LoadAssetsInOrder(assetBundleInfoToLoad, SKIPPED_FRAMES_AFTER_BUDGET_TIME_IS_REACHED_FOR_DISTANT_ASSETS);
+                    QueuesChanged();
                 }
 
                 yield return null;
@@ -180,6 +192,29 @@ namespace DCL
             {
                 yield return null;
             }
+        }
+
+        private void CheckForReprioritizeAwaitingAssets()
+        {
+            if (assetBundlesWaitingForLoad.Count == 0 ||
+                (Time.realtimeSinceStartup - lastQueuesReprioritizationTime) < TIME_BETWEEN_REPRIORITIZATIONS)
+                return;
+
+            while (assetBundlesWaitingForLoad.Count > 0 && GetDistanceFromPlayer(assetBundlesWaitingForLoad.Peek().containerTransform) <= MAX_SQR_DISTANCE_FOR_QUICK_LOADING)
+            {
+                assetBundlesReadyToBeLoaded.Enqueue(assetBundlesWaitingForLoad.Dequeue());
+                lastQueuesReprioritizationTime = Time.realtimeSinceStartup;
+            }
+        }
+
+        private float GetDistanceFromPlayer(Transform containerTransform)
+        {
+            return limitTimeBudget ? Vector3.SqrMagnitude(containerTransform.position - CommonScriptableObjects.playerUnityPosition.Get()) : 0f;
+        }
+
+        private void QueuesChanged()
+        {
+            OnQueuesChanged?.Invoke(new KeyValuePair<int, int>(assetBundlesReadyToBeLoaded.Count, assetBundlesWaitingForLoad.Count));
         }
     }
 }
