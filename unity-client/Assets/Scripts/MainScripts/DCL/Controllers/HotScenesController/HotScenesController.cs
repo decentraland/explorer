@@ -15,7 +15,7 @@ public class HotScenesController : MonoBehaviour
     public float timeSinceLastUpdate { get { return Time.realtimeSinceStartup - lastUpdateTime; } }
 
     private List<HotSceneInfo> tempHotScenesList = new List<HotSceneInfo>();
-    private float lastUpdateTime = float.MinValue;
+    private float lastUpdateTime = float.MinValue * .5f;
 
     [Serializable]
     public struct HotSceneInfo
