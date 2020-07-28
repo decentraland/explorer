@@ -8,8 +8,6 @@ namespace DCL
 {
     public class AssetBundlesLoader
     {
-        public static event Action<KeyValuePair<int, int>> OnQueuesChanged;
-
         private const float MAX_LOAD_BUDGET_TIME = 0.004f;
         private const int SKIPPED_FRAMES_AFTER_BUDGET_TIME_IS_REACHED_FOR_NEARBY_ASSETS = 1;
         private const int SKIPPED_FRAMES_AFTER_BUDGET_TIME_IS_REACHED_FOR_DISTANT_ASSETS = 10;
@@ -86,8 +84,6 @@ namespace DCL
                 highPriorityLoadQueue.Enqueue(assetBundleToLoad);
             else
                 lowPriorityLoadQueue.Enqueue(assetBundleToLoad);
-
-            QueuesChanged();
         }
 
         private IEnumerator LoadAssetBundlesCoroutine()
@@ -98,14 +94,12 @@ namespace DCL
                 {
                     assetBundleInfoToLoad = highPriorityLoadQueue.Dequeue();
                     yield return LoadAssetsInOrder(assetBundleInfoToLoad, SKIPPED_FRAMES_AFTER_BUDGET_TIME_IS_REACHED_FOR_NEARBY_ASSETS);
-                    QueuesChanged();
                 }
 
                 while (lowPriorityLoadQueue.Count > 0 && highPriorityLoadQueue.Count == 0)
                 {
                     assetBundleInfoToLoad = lowPriorityLoadQueue.Dequeue();
                     yield return LoadAssetsInOrder(assetBundleInfoToLoad, SKIPPED_FRAMES_AFTER_BUDGET_TIME_IS_REACHED_FOR_DISTANT_ASSETS);
-                    QueuesChanged();
                 }
 
                 yield return null;
@@ -210,11 +204,6 @@ namespace DCL
         private float GetDistanceFromPlayer(Transform containerTransform)
         {
             return limitTimeBudget ? Vector3.SqrMagnitude(containerTransform.position - CommonScriptableObjects.playerUnityPosition.Get()) : 0f;
-        }
-
-        private void QueuesChanged()
-        {
-            OnQueuesChanged?.Invoke(new KeyValuePair<int, int>(highPriorityLoadQueue.Count, lowPriorityLoadQueue.Count));
         }
     }
 }
