@@ -11,6 +11,7 @@ public class HotScenesController : MonoBehaviour
     public event Action<HotSceneInfo[]> OnHotSceneListChunkUpdate;
 
     public List<HotSceneInfo> hotScenesList { get; private set; }
+    public bool isUpdating { get; private set; }
 
     private List<HotSceneInfo> tempHotScenesList = new List<HotSceneInfo>();
 
@@ -37,6 +38,7 @@ public class HotScenesController : MonoBehaviour
 
     public void UpdateHotScenesList(string json)
     {
+        isUpdating = true;
         var hotScenes = Utils.ParseJsonArray<HotSceneInfo[]>(json);
         tempHotScenesList.AddRange(hotScenes);
         OnHotSceneListChunkUpdate?.Invoke(hotScenes);
@@ -44,6 +46,7 @@ public class HotScenesController : MonoBehaviour
 
     public void FinishUpdateHotScenesList()
     {
+        isUpdating = false;
         hotScenesList = tempHotScenesList;
         tempHotScenesList = new List<HotSceneInfo>();
         OnHotSceneListFinishUpdating?.Invoke();
