@@ -34,8 +34,8 @@ namespace DCL
 
         private Coroutine assetBundlesLoadingCoroutine;
         private IOrderedEnumerable<string> assetsToLoad;
-        private Queue<AssetBundleInfo> assetBundlesReadyToBeLoaded = new Queue<AssetBundleInfo>();
-        private Queue<AssetBundleInfo> assetBundlesWaitingForLoad = new Queue<AssetBundleInfo>();
+        private Queue<AssetBundleInfo> highPriorityLoadQueue = new Queue<AssetBundleInfo>();
+        private Queue<AssetBundleInfo> lowPriorityLoadQueue = new Queue<AssetBundleInfo>();
         private Dictionary<string, int> loadOrderByExtension = new Dictionary<string, int>()
         {
             {"png", 0},
@@ -70,8 +70,8 @@ namespace DCL
                 return;
 
             CoroutineStarter.Stop(assetBundlesLoadingCoroutine);
-            assetBundlesReadyToBeLoaded.Clear();
-            assetBundlesWaitingForLoad.Clear();
+            highPriorityLoadQueue.Clear();
+            lowPriorityLoadQueue.Clear();
             assetsToLoad.ToList().Clear();
         }
 
@@ -83,9 +83,9 @@ namespace DCL
 
             float distanceFromPlayer = GetDistanceFromPlayer(containerTransform);
             if (distanceFromPlayer <= MAX_SQR_DISTANCE_FOR_QUICK_LOADING)
-                assetBundlesReadyToBeLoaded.Enqueue(assetBundleToLoad);
+                highPriorityLoadQueue.Enqueue(assetBundleToLoad);
             else
-                assetBundlesWaitingForLoad.Enqueue(assetBundleToLoad);
+                lowPriorityLoadQueue.Enqueue(assetBundleToLoad);
 
             QueuesChanged();
         }
@@ -94,16 +94,16 @@ namespace DCL
         {
             while (true)
             {
-                while (assetBundlesReadyToBeLoaded.Count > 0)
+                while (highPriorityLoadQueue.Count > 0)
                 {
-                    assetBundleInfoToLoad = assetBundlesReadyToBeLoaded.Dequeue();
+                    assetBundleInfoToLoad = highPriorityLoadQueue.Dequeue();
                     yield return LoadAssetsInOrder(assetBundleInfoToLoad, SKIPPED_FRAMES_AFTER_BUDGET_TIME_IS_REACHED_FOR_NEARBY_ASSETS);
                     QueuesChanged();
                 }
 
-                while (assetBundlesWaitingForLoad.Count > 0 && assetBundlesReadyToBeLoaded.Count == 0)
+                while (lowPriorityLoadQueue.Count > 0 && highPriorityLoadQueue.Count == 0)
                 {
-                    assetBundleInfoToLoad = assetBundlesWaitingForLoad.Dequeue();
+                    assetBundleInfoToLoad = lowPriorityLoadQueue.Dequeue();
                     yield return LoadAssetsInOrder(assetBundleInfoToLoad, SKIPPED_FRAMES_AFTER_BUDGET_TIME_IS_REACHED_FOR_DISTANT_ASSETS);
                     QueuesChanged();
                 }
@@ -196,13 +196,13 @@ namespace DCL
 
         private void CheckForReprioritizeAwaitingAssets()
         {
-            if (assetBundlesWaitingForLoad.Count == 0 ||
+            if (lowPriorityLoadQueue.Count == 0 ||
                 (Time.realtimeSinceStartup - lastQueuesReprioritizationTime) < TIME_BETWEEN_REPRIORITIZATIONS)
                 return;
 
-            while (assetBundlesWaitingForLoad.Count > 0 && GetDistanceFromPlayer(assetBundlesWaitingForLoad.Peek().containerTransform) <= MAX_SQR_DISTANCE_FOR_QUICK_LOADING)
+            while (lowPriorityLoadQueue.Count > 0 && GetDistanceFromPlayer(lowPriorityLoadQueue.Peek().containerTransform) <= MAX_SQR_DISTANCE_FOR_QUICK_LOADING)
             {
-                assetBundlesReadyToBeLoaded.Enqueue(assetBundlesWaitingForLoad.Dequeue());
+                highPriorityLoadQueue.Enqueue(lowPriorityLoadQueue.Dequeue());
                 lastQueuesReprioritizationTime = Time.realtimeSinceStartup;
             }
         }
@@ -214,7 +214,7 @@ namespace DCL
 
         private void QueuesChanged()
         {
-            OnQueuesChanged?.Invoke(new KeyValuePair<int, int>(assetBundlesReadyToBeLoaded.Count, assetBundlesWaitingForLoad.Count));
+            OnQueuesChanged?.Invoke(new KeyValuePair<int, int>(highPriorityLoadQueue.Count, lowPriorityLoadQueue.Count));
         }
     }
 }
