@@ -69,6 +69,8 @@ export async function initializeUnity(
   await all
   await engineInitialized
 
+
+
   return {
     engine: _gameInstance,
     container,

@@ -3,23 +3,24 @@ import { CreateEntityPayload, RemoveEntityPayload, EntityAction } from 'shared/t
 export class NativeMessagesBridge {
   private __createEntity!: (sceneId: string, entityId: string) => void
   private __removeEntity!: (sceneId: string, entityId: string) => void
-  private __setSceneStarted!: (sceneId: string) => void
+  private __sceneReady!: (sceneId: string) => void
 
   private currentSceneId: string = ''
 
   //private currentTag: number = 0
 
-  public initNativeMessages() {
-    let unityModule: any = (globalThis as any).Module
+  public initNativeMessages(gameInstance:any) {
+    let unityModule: any = gameInstance.Module
 
     if ( !unityModule ) {
       console.error("Unity module not found! Are you in WSS mode?")
       return
     }
 
-    this.__createEntity = unityModule.cwrap('call_create_entity', null, ['string', 'string'])
-    this.__removeEntity = unityModule.cwrap('call_remove_entity', null, ['string', 'string'])
-    this.__setSceneStarted = unityModule.cwrap('call_scene_started', null, ['string'])
+    this.__createEntity = unityModule.cwrap('call_CreateEntity', null, ['string', 'string'])
+    this.__removeEntity = unityModule.cwrap('call_RemoveEntity', null, ['string', 'string'])
+    this.__sceneReady = unityModule.cwrap('call_SceneReady', null, ['string'])
+    console.log('Init native messages...')
   }
 
   public optimizeSendMessage() {
@@ -46,8 +47,8 @@ export class NativeMessagesBridge {
     this.__removeEntity(this.currentSceneId, payload.id)
   }
 
-  public setSceneStarted() {
-    this.__setSceneStarted(this.currentSceneId)
+  public sceneReady() {
+    this.__sceneReady(this.currentSceneId)
   }
 
   public SendNativeMessage(parcelSceneId: string, action: EntityAction): void {
@@ -63,7 +64,7 @@ export class NativeMessagesBridge {
         this.removeEntity(action.payload)
         break
       case 'InitMessagesFinished':
-        this.setSceneStarted()
+        this.sceneReady()
         break
     }
   }

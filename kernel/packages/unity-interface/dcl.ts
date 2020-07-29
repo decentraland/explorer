@@ -17,7 +17,8 @@ import {
   SHOW_FPS_COUNTER,
   ethereumConfigurations,
   NO_ASSET_BUNDLES,
-  WSS_ENABLED} from 'config'
+  WSS_ENABLED
+} from 'config'
 import { Quaternion, ReadOnlyQuaternion, ReadOnlyVector3, Vector3 } from '../decentraland-ecs/src/decentraland/math'
 import { IEventNames, ProfileForRenderer, MinimapSceneInfo } from '../decentraland-ecs/src/decentraland/Types'
 import { sceneLifeCycleObservable } from '../decentraland-loader/lifecycle/controllers/scene'
@@ -44,7 +45,7 @@ import {
   FriendshipUpdateStatusMessage,
   UpdateUserStatusMessage,
   FriendshipAction,
-  WorldPosition,
+  WorldPosition
 } from 'shared/types'
 import {
   enableParcelSceneLoading,
@@ -70,6 +71,7 @@ import { NativeMessagesBridge } from './nativeMessagesBridge'
 import { ProtobufMessagesBridge } from './protobufMessagesBridge'
 import { UnityScene } from './UnityScene'
 import { UnityParcelScene } from './UnityParcelScene'
+import { setAudioStream } from './audioStream'
 
 declare const globalThis: UnityInterfaceContainer &
   BrowserInterfaceContainer &
@@ -83,7 +85,7 @@ const rendererVersion = require('decentraland-renderer')
 window['console'].log('Renderer version: ' + rendererVersion)
 
 let gameInstance!: GameInstance
-let isTheFirstLoading = true
+export let isTheFirstLoading = true
 
 export let futures: Record<string, IFuture<any>> = {}
 export let hasWallet: boolean = false
@@ -94,35 +96,6 @@ const positionEvent = {
   rotation: Vector3.Zero(),
   playerHeight: playerConfigurations.height,
   mousePosition: Vector3.Zero()
-}
-
-/////////////////////////////////// AUDIO STREAMING ///////////////////////////////////
-
-const audioStreamSource = new Audio()
-
-teleportObservable.add(() => {
-  audioStreamSource.pause()
-})
-
-async function setAudioStream(url: string, play: boolean, volume: number) {
-  const isSameSrc = audioStreamSource.src.length > 1 && url.includes(audioStreamSource.src)
-  const playSrc = play && (!isSameSrc || (isSameSrc && audioStreamSource.paused))
-
-  audioStreamSource.volume = volume
-
-  if (play && !isSameSrc) {
-    audioStreamSource.src = url
-  } else if (!play && isSameSrc) {
-    audioStreamSource.pause()
-  }
-
-  if (playSrc) {
-    try {
-      await audioStreamSource.play()
-    } catch (err) {
-      defaultLogger.log('setAudioStream: failed to play' + err)
-    }
-  }
 }
 
 /////////////////////////////////// HANDLERS ///////////////////////////////////
@@ -402,7 +375,9 @@ const browserInterface = {
     globalThis.globalStore.dispatch(updateStatusMessage(message, loadPercentage))
   }
 }
+
 globalThis.browserInterface2 = browserInterface
+
 type BrowserInterfaceContainer = {
   browserInterface2: typeof browserInterface
 }
@@ -432,38 +407,17 @@ export function setLoadingScreenVisible(shouldShow: boolean) {
   }
 }
 
-export function delightedSurvey() {
-  // tslint:disable-next-line:strict-type-predicates
-  if (typeof globalThis === 'undefined' || typeof globalThis !== 'object') {
-    return
-  }
-  const { analytics, delighted } = globalThis
-  if (!analytics || !delighted) {
-    return
-  }
-  const profile = getUserProfile().profile as Profile | null
-  if (!isTheFirstLoading && profile) {
-    const payload = {
-      email: profile.email || profile.ethAddress + '@dcl.gg',
-      name: profile.name || 'Guest',
-      properties: {
-        ethAddress: profile.ethAddress,
-        anonymous_id: analytics && analytics.user ? analytics.user().anonymousId() : null
-      }
-    }
-
-    try {
-      delighted.survey(payload)
-    } catch (error) {
-      defaultLogger.error('Delighted error: ' + error.message, error)
-    }
-  }
-}
-
 const CHUNK_SIZE = 100
 
 export const unityInterface = {
   debug: false,
+
+  InitCallbacks() {
+    console.log('Init callbacks?')
+    if (!WSS_ENABLED) {
+      nativeMsgBridge.initNativeMessages(gameInstance)
+    }
+  },
 
   SendGenericMessage(object: string, method: string, payload: string) {
     gameInstance.SendMessage(object, method, payload)
@@ -691,10 +645,6 @@ export async function initializeEngine(_gameInstance: GameInstance) {
 
   unityInterface.DeactivateRendering()
 
-  if ( !WSS_ENABLED ) {
-    nativeMsgBridge.initNativeMessages()
-  }
-  
   if (DEBUG) {
     unityInterface.SetDebug()
   }
@@ -713,10 +663,6 @@ export async function initializeEngine(_gameInstance: GameInstance) {
 
   if (ENGINE_DEBUG_PANEL) {
     unityInterface.SetEngineDebugPanel()
-  }
-
-  if (!EDITOR) {
-    await initializeDecentralandUI()
   }
 
   return {
@@ -771,7 +717,7 @@ export async function startUnityParcelLoading() {
   })
 }
 
-async function initializeDecentralandUI() {
+export async function initializeDecentralandUI() {
   const sceneId = 'dcl-ui-scene'
 
   const scene = new UnityScene({
@@ -891,6 +837,7 @@ worldRunningObservable.add((isRunning) => {
 document.addEventListener('pointerlockchange', pointerLockChange, false)
 
 let isPointerLocked: boolean = false
+
 function pointerLockChange() {
   const doc: any = document
   const isLocked = (doc.pointerLockElement || doc.mozPointerLockElement || doc.webkitPointerLockElement) != null

@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using AOT;
 using DCL;
 using DCL.Controllers;
 using UnityEngine;
@@ -20,7 +21,7 @@ public class NativePayloads
 
 public class EntryPoint_World
 {
-    private SceneController sceneController;
+    private static SceneController sceneController;
 
     delegate void CreateEntityDelegate(string sceneId, string entityId);
 
@@ -30,11 +31,11 @@ public class EntryPoint_World
 
     public EntryPoint_World(SceneController sceneController)
     {
-        this.sceneController = sceneController;
+        EntryPoint_World.sceneController = sceneController;
         SetCallbacks(CreateEntity, RemoveEntity, SendSceneReady);
     }
 
-    MessagingBus.QueuedSceneMessage_Scene GetSceneMessageInstance()
+    private static MessagingBus.QueuedSceneMessage_Scene GetSceneMessageInstance()
     {
         if (sceneController.sceneMessagesPool.Count > 0)
             return sceneController.sceneMessagesPool.Dequeue();
@@ -42,7 +43,8 @@ public class EntryPoint_World
         return new MessagingBus.QueuedSceneMessage_Scene();
     }
 
-    void CreateEntity(string sceneId, string entityId)
+    [MonoPInvokeCallback(typeof(CreateEntityDelegate))]
+    private static void CreateEntity(string sceneId, string entityId)
     {
         MessagingBus.QueuedSceneMessage_Scene queuedMessage = GetSceneMessageInstance();
         NativePayloads.CreateEntity payload = new NativePayloads.CreateEntity {entityId = entityId};
@@ -56,7 +58,8 @@ public class EntryPoint_World
         sceneController.EnqueueSceneMessage(queuedMessage);
     }
 
-    void RemoveEntity(string sceneId, string entityId)
+    [MonoPInvokeCallback(typeof(RemoveEntityDelegate))]
+    private static void RemoveEntity(string sceneId, string entityId)
     {
         MessagingBus.QueuedSceneMessage_Scene queuedMessage = GetSceneMessageInstance();
         NativePayloads.RemoveEntity payload = new NativePayloads.RemoveEntity();
@@ -71,7 +74,8 @@ public class EntryPoint_World
         sceneController.EnqueueSceneMessage(queuedMessage);
     }
 
-    void SendSceneReady(string sceneId)
+    [MonoPInvokeCallback(typeof(SendSceneReadyDelegate))]
+    private static void SendSceneReady(string sceneId)
     {
         MessagingBus.QueuedSceneMessage_Scene queuedMessage = GetSceneMessageInstance();
         queuedMessage.sceneId = sceneId;

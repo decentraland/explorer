@@ -6,9 +6,9 @@ callback_vss cb_createEntity;
 callback_vss cb_removeEntity;
 callback_vs cb_sceneReady;
 
-void set_callbacks(
-    callback_vss createEntity
-    callback_vss removeEntity
+void SetCallbacks(
+    callback_vss createEntity,
+    callback_vss removeEntity,
     callback_vs sceneReady
     )
 {
