@@ -6,7 +6,12 @@ import { EntityAction, EnvironmentData } from 'shared/types'
 import { ParcelSceneAPI } from 'shared/world/ParcelSceneAPI'
 import { getParcelSceneID } from 'shared/world/parcelSceneManager'
 import { SceneWorker } from 'shared/world/SceneWorker'
-import { protobufMsgBridge, unityInterface, nativeMsgBridge } from './dcl'
+import { unityInterface } from './dcl'
+import { NativeMessagesBridge } from './nativeMessagesBridge'
+import { ProtobufMessagesBridge } from './protobufMessagesBridge'
+
+export const nativeMsgBridge: NativeMessagesBridge = new NativeMessagesBridge()
+export const protobufMsgBridge: ProtobufMessagesBridge = new ProtobufMessagesBridge()
 
 export class UnityScene<T> implements ParcelSceneAPI {
   eventDispatcher = new EventDispatcher()

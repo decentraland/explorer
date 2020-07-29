@@ -67,9 +67,7 @@ import { changeRealm, catalystRealmConnected, candidatesFetched } from 'shared/d
 import { notifyStatusThroughChat } from 'shared/comms/chat'
 import { getAppNetwork, fetchOwner } from 'shared/web3'
 import { updateStatusMessage } from 'shared/loading/actions'
-import { NativeMessagesBridge } from './nativeMessagesBridge'
-import { ProtobufMessagesBridge } from './protobufMessagesBridge'
-import { UnityScene } from './UnityScene'
+import { UnityScene, nativeMsgBridge } from './UnityScene'
 import { UnityParcelScene } from './UnityParcelScene'
 import { setAudioStream } from './audioStream'
 
@@ -450,6 +448,7 @@ export const unityInterface = {
     if (parcelsToLoad.length > 1) {
       throw new Error('Only one scene at a time!')
     }
+
     gameInstance.SendMessage('SceneController', 'LoadParcelScenes', JSON.stringify(parcelsToLoad[0]))
   },
   UpdateParcelScenes(parcelsToLoad: LoadableParcelScene[]) {
@@ -624,10 +623,6 @@ export type UnityInterfaceContainer = {
   unityInterface: UnityInterface
 }
 
-////////////////////////////////////////////////////////////////////////////////
-
-export const nativeMsgBridge: NativeMessagesBridge = new NativeMessagesBridge()
-export const protobufMsgBridge: ProtobufMessagesBridge = new ProtobufMessagesBridge()
 
 ////////////////////////////////////////////////////////////////////////////////
 
