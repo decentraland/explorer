@@ -31,7 +31,6 @@ namespace DCL
         }
 
         private Coroutine assetBundlesLoadingCoroutine;
-        private IOrderedEnumerable<string> assetsToLoad;
         private Queue<AssetBundleInfo> highPriorityLoadQueue = new Queue<AssetBundleInfo>();
         private Queue<AssetBundleInfo> lowPriorityLoadQueue = new Queue<AssetBundleInfo>();
         private Dictionary<string, int> loadOrderByExtension = new Dictionary<string, int>()
@@ -70,7 +69,6 @@ namespace DCL
             CoroutineStarter.Stop(assetBundlesLoadingCoroutine);
             highPriorityLoadQueue.Clear();
             lowPriorityLoadQueue.Clear();
-            assetsToLoad.ToList().Clear();
         }
 
         public void MarkAssetBundleForLoad(Asset_AB asset, AssetBundle assetBundle, Transform containerTransform, Action onSuccess)
@@ -92,61 +90,61 @@ namespace DCL
             {
                 while (highPriorityLoadQueue.Count > 0)
                 {
+                    float time = Time.realtimeSinceStartup;
+
                     assetBundleInfoToLoad = highPriorityLoadQueue.Dequeue();
-                    yield return LoadAssetsInOrder(assetBundleInfoToLoad, SKIPPED_FRAMES_AFTER_BUDGET_TIME_IS_REACHED_FOR_NEARBY_ASSETS);
+                    yield return LoadAssetBundle(assetBundleInfoToLoad);
+
+                    if (IsLoadBudgetTimeReached(time))
+                    {
+                        yield return WaitForSkippedFrames(SKIPPED_FRAMES_AFTER_BUDGET_TIME_IS_REACHED_FOR_NEARBY_ASSETS);
+                        time = Time.realtimeSinceStartup;
+                    }
                 }
 
                 while (lowPriorityLoadQueue.Count > 0 && highPriorityLoadQueue.Count == 0)
                 {
+                    float time = Time.realtimeSinceStartup;
+
                     assetBundleInfoToLoad = lowPriorityLoadQueue.Dequeue();
-                    yield return LoadAssetsInOrder(assetBundleInfoToLoad, SKIPPED_FRAMES_AFTER_BUDGET_TIME_IS_REACHED_FOR_DISTANT_ASSETS);
+                    yield return LoadAssetBundle(assetBundleInfoToLoad);
+
+                    if (IsLoadBudgetTimeReached(time))
+                    {
+                        yield return WaitForSkippedFrames(SKIPPED_FRAMES_AFTER_BUDGET_TIME_IS_REACHED_FOR_DISTANT_ASSETS);
+                        time = Time.realtimeSinceStartup;
+                    }
                 }
 
                 yield return null;
             }
         }
 
-        private IEnumerator LoadAssetsInOrder(AssetBundleInfo assetBundleInfo, int skippedFramesBetweenLoadings)
+        private bool IsLoadBudgetTimeReached(float startTime)
         {
-            float time = Time.realtimeSinceStartup;
-
-            string[] assets = assetBundleInfo.assetBundle.GetAllAssetNames();
-
-            assetsToLoad = assets.OrderBy(
-                (x) =>
-                {
-                    string ext = x.Substring(x.Length - 3);
-
-                    if (loadOrderByExtension.ContainsKey(ext))
-                        return loadOrderByExtension[ext];
-                    else
-                        return 99;
-                });
-
-            foreach (string assetName in assetsToLoad)
+            if (limitTimeBudget)
             {
-                if (assetBundleInfo.asset == null)
-                    break;
-
-                UnityEngine.Object loadedAsset = assetBundleInfo.assetBundle.LoadAsset(assetName);
-
-                if (loadedAsset is Material loadedMaterial)
-                    loadedMaterial.shader = null;
-
-                loadedAssetsByName.Add(loadedAsset);
-
-                if (limitTimeBudget)
+                currentLoadBudgetTime += Time.realtimeSinceStartup - startTime;
+                if (currentLoadBudgetTime > MAX_LOAD_BUDGET_TIME)
                 {
-                    currentLoadBudgetTime += Time.realtimeSinceStartup - time;
-                    if (currentLoadBudgetTime > MAX_LOAD_BUDGET_TIME)
-                    {
-                        yield return WaitForSkippedFrames(skippedFramesBetweenLoadings);
-
-                        time = Time.realtimeSinceStartup;
-                        currentLoadBudgetTime = 0f;
-                    }
+                    currentLoadBudgetTime = 0f;
+                    return true;
                 }
             }
+
+            return false;
+        }
+
+        private IEnumerator LoadAssetBundle(AssetBundleInfo assetBundleInfo)
+        {
+            AssetBundleRequest abRequest = assetBundleInfo.assetBundle.LoadAllAssetsAsync();
+
+            while (!abRequest.isDone)
+            {
+                yield return null;
+            }
+
+            loadedAssetsByName = abRequest.allAssets.ToList();
 
             foreach (var loadedAsset in loadedAssetsByName)
             {
@@ -175,7 +173,6 @@ namespace DCL
                 assetBundleInfo.asset.assetsByExtension[ext].Add(loadedAsset);
             }
 
-            assetsToLoad.ToList().Clear();
             loadedAssetsByName.Clear();
             assetBundleInfo.onSuccess?.Invoke();
         }
