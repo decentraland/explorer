@@ -120,21 +120,6 @@ namespace DCL
             }
         }
 
-        private bool IsLoadBudgetTimeReached(float startTime)
-        {
-            if (limitTimeBudget)
-            {
-                currentLoadBudgetTime += Time.realtimeSinceStartup - startTime;
-                if (currentLoadBudgetTime > MAX_LOAD_BUDGET_TIME)
-                {
-                    currentLoadBudgetTime = 0f;
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
         private IEnumerator LoadAssetBundle(AssetBundleInfo assetBundleInfo)
         {
             AssetBundleRequest abRequest = assetBundleInfo.assetBundle.LoadAllAssetsAsync();
@@ -175,6 +160,21 @@ namespace DCL
 
             loadedAssetsByName.Clear();
             assetBundleInfo.onSuccess?.Invoke();
+        }
+
+        private bool IsLoadBudgetTimeReached(float startTime)
+        {
+            if (limitTimeBudget)
+            {
+                currentLoadBudgetTime += Time.realtimeSinceStartup - startTime;
+                if (currentLoadBudgetTime > MAX_LOAD_BUDGET_TIME)
+                {
+                    currentLoadBudgetTime = 0f;
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private IEnumerator WaitForSkippedFrames(int skippedFramesBetweenLoadings)
