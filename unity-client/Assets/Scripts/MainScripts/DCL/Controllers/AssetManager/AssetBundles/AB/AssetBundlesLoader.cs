@@ -200,7 +200,9 @@ namespace DCL
 
         private float GetDistanceFromPlayer(Transform containerTransform)
         {
-            return limitTimeBudget ? Vector3.SqrMagnitude(containerTransform.position - CommonScriptableObjects.playerUnityPosition.Get()) : 0f;
+            return (containerTransform != null && limitTimeBudget) ?
+                Vector3.SqrMagnitude(containerTransform.position - CommonScriptableObjects.playerUnityPosition.Get()) :
+                0f;
         }
     }
 }
