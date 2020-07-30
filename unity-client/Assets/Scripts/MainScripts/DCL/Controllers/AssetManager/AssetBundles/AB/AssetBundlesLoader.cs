@@ -8,7 +8,7 @@ namespace DCL
 {
     public class AssetBundlesLoader
     {
-        private const float MAX_LOAD_BUDGET_TIME = 0.05f;
+        private const float MAX_LOAD_BUDGET_TIME = 60.05f;
         private const int SKIPPED_FRAMES_AFTER_BUDGET_TIME_IS_REACHED_FOR_NEARBY_ASSETS = 1;
         private const int SKIPPED_FRAMES_AFTER_BUDGET_TIME_IS_REACHED_FOR_DISTANT_ASSETS = 5;
         private const float MAX_SQR_DISTANCE_FOR_QUICK_LOADING = 6000f;
