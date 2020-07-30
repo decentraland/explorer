@@ -398,12 +398,7 @@ namespace DCL
 
         public bool IsCharacterInsideScene(ParcelScene scene)
         {
-            bool result = false;
-
-            if (scene.IsInsideSceneBoundaries(DCLCharacterController.i.characterPosition))
-                result = true;
-
-            return result;
+            return scene.IsInsideSceneBoundaries(DCLCharacterController.i.characterPosition);
         }
 
         public void LoadParcelScenesExecute(string decentralandSceneJSON)
@@ -683,7 +678,6 @@ namespace DCL
         public bool ProcessMessage(MessagingBus.QueuedSceneMessage_Scene msgObject, out CleanableYieldInstruction yieldInstruction)
         {
             string sceneId = msgObject.sceneId;
-            string tag = msgObject.tag;
             string method = msgObject.method;
 
             yieldInstruction = null;
@@ -713,67 +707,68 @@ namespace DCL
                 {
                     case MessagingTypes.ENTITY_CREATE:
                     {
-                        if (msgObject.payload is NativePayloads.CreateEntity payload)
+                        if (msgObject.payload is Protocol.CreateEntity payload)
                             scene.CreateEntity(payload.entityId);
-                        else if (msgObject.payload is PB_SendSceneMessage pb_payload)
-                            scene.CreateEntity(pb_payload.CreateEntity.Id);
 
                         break;
                     }
                     case MessagingTypes.ENTITY_REPARENT:
                     {
-                        PB_SendSceneMessage payload = msgObject.payload as PB_SendSceneMessage;
-                        scene.SetEntityParent(payload.SetEntityParent.EntityId, payload.SetEntityParent.ParentId);
+                        if (msgObject.payload is Protocol.SetEntityParent payload)
+                            scene.SetEntityParent(payload.entityId, payload.parentId);
+
                         break;
                     }
 
                     //NOTE(Brian): EntityComponent messages
                     case MessagingTypes.ENTITY_COMPONENT_CREATE_OR_UPDATE:
                     {
-                        PB_SendSceneMessage payload = msgObject.payload as PB_SendSceneMessage;
-                        scene.EntityComponentCreateOrUpdate(payload.UpdateEntityComponent.EntityId, payload.UpdateEntityComponent.Name, payload.UpdateEntityComponent.ClassId, payload.UpdateEntityComponent.Data, out yieldInstruction);
+                        if (msgObject.payload is Protocol.EntityComponentCreateOrUpdate payload)
+                            scene.EntityComponentCreateOrUpdate(payload.entityId, (CLASS_ID_COMPONENT) payload.classId, payload.json, out yieldInstruction);
+
                         break;
                     }
 
                     case MessagingTypes.ENTITY_COMPONENT_DESTROY:
                     {
-                        PB_SendSceneMessage payload = msgObject.payload as PB_SendSceneMessage;
-                        scene.EntityComponentRemove(payload.ComponentRemoved.EntityId, payload.ComponentRemoved.Name);
+                        if (msgObject.payload is Protocol.EntityComponentDestroy payload)
+                            scene.EntityComponentRemove(payload.entityId, payload.name);
+
                         break;
                     }
 
                     //NOTE(Brian): SharedComponent messages
                     case MessagingTypes.SHARED_COMPONENT_ATTACH:
                     {
-                        PB_SendSceneMessage payload = msgObject.payload as PB_SendSceneMessage;
-                        scene.SharedComponentAttach(payload.AttachEntityComponent.EntityId, payload.AttachEntityComponent.Id, payload.AttachEntityComponent.Name);
+                        if (msgObject.payload is Protocol.SharedComponentAttach payload)
+                            scene.SharedComponentAttach(payload.entityId, payload.id);
+
                         break;
                     }
+
                     case MessagingTypes.SHARED_COMPONENT_CREATE:
                     {
-                        PB_SendSceneMessage payload = msgObject.payload as PB_SendSceneMessage;
-                        scene.SharedComponentCreate(payload.ComponentCreated.Id, payload.ComponentCreated.Name, payload.ComponentCreated.Classid);
+                        if (msgObject.payload is Protocol.SharedComponentCreate payload)
+                            scene.SharedComponentCreate(payload.id, payload.classId);
+
                         break;
                     }
                     case MessagingTypes.SHARED_COMPONENT_DISPOSE:
                     {
-                        PB_SendSceneMessage payload = msgObject.payload as PB_SendSceneMessage;
-                        scene.SharedComponentDispose(payload.ComponentDisposed.Id);
+                        if (msgObject.payload is Protocol.SharedComponentDispose payload)
+                            scene.SharedComponentDispose(payload.id);
                         break;
                     }
                     case MessagingTypes.SHARED_COMPONENT_UPDATE:
                     {
-                        PB_SendSceneMessage payload = msgObject.payload as PB_SendSceneMessage;
-                        scene.SharedComponentUpdate(payload.ComponentUpdated.Id, payload.ComponentUpdated.Json, out yieldInstruction);
+                        if (msgObject.payload is Protocol.SharedComponentUpdate payload)
+                            scene.SharedComponentUpdate(payload.componentId, payload.json, out yieldInstruction);
                         break;
                     }
                     case MessagingTypes.ENTITY_DESTROY:
                     {
-                        if (msgObject.payload is NativePayloads.RemoveEntity payload)
+                        if (msgObject.payload is Protocol.RemoveEntity payload)
                             scene.RemoveEntity(payload.entityId);
-                        else if (msgObject.payload is PB_SendSceneMessage pb_payload)
-                            scene.RemoveEntity(pb_payload.RemoveEntity.Id);
-
                         break;
                     }
                     case MessagingTypes.INIT_DONE:
@@ -787,14 +782,14 @@ namespace DCL
                     }
                     case MessagingTypes.OPEN_EXTERNAL_URL:
                     {
-                        PB_SendSceneMessage payload = msgObject.payload as PB_SendSceneMessage;
-                        OnOpenExternalUrlRequest?.Invoke(scene, payload.OpenExternalUrl.Url);
+                        if (msgObject.payload is Protocol.OpenExternalUrl payload)
+                            OnOpenExternalUrlRequest?.Invoke(scene, payload.url);
                         break;
                     }
                     case MessagingTypes.OPEN_NFT_DIALOG:
                     {
-                        PB_SendSceneMessage payload = msgObject.payload as PB_SendSceneMessage;
-                        OnOpenNFTDialogRequest?.Invoke(payload.OpenNFTDialog.AssetContractAddress, payload.OpenNFTDialog.TokenId, payload.OpenNFTDialog.Comment);
+                        if (msgObject.payload is Protocol.OpenNftDialog payload)
+                            OnOpenNFTDialogRequest?.Invoke(payload.contactAddress, payload.tokenId, payload.comment);
                         break;
                     }
                     default:

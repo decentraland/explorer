@@ -85,16 +85,54 @@ namespace DCL
             return true;
         }
 
-        public static MessagingBus.QueuedSceneMessage_Scene DecodeSceneMessage(string sceneId, string method, string tag, PB_SendSceneMessage sendSceneMessage, ref MessagingBus.QueuedSceneMessage_Scene queuedMessage)
+        public static void DecodeSceneMessage(string sceneId, string method, string tag, PB_SendSceneMessage sendSceneMessage, ref MessagingBus.QueuedSceneMessage_Scene queuedMessage)
         {
             queuedMessage.type = MessagingBus.QueuedSceneMessage.Type.SCENE_MESSAGE;
             queuedMessage.sceneId = sceneId;
             queuedMessage.method = method;
             queuedMessage.tag = tag;
 
-            queuedMessage.payload = sendSceneMessage;
-
-            return queuedMessage;
+            switch (method)
+            {
+                case MessagingTypes.INIT_DONE:
+                    break;
+                case MessagingTypes.QUERY:
+                    queuedMessage.payload = sendSceneMessage.Query;
+                    break;
+                case MessagingTypes.ENTITY_CREATE:
+                    queuedMessage.payload = Protocol.CreateEntity.FromPB(sendSceneMessage.CreateEntity);
+                    break;
+                case MessagingTypes.ENTITY_DESTROY:
+                    queuedMessage.payload = Protocol.RemoveEntity.FromPB(sendSceneMessage.RemoveEntity);
+                    break;
+                case MessagingTypes.ENTITY_REPARENT:
+                    queuedMessage.payload = Protocol.SetEntityParent.FromPB(sendSceneMessage.SetEntityParent);
+                    break;
+                case MessagingTypes.SHARED_COMPONENT_CREATE:
+                    queuedMessage.payload = Protocol.SharedComponentCreate.FromPB(sendSceneMessage.ComponentCreated);
+                    break;
+                case MessagingTypes.SHARED_COMPONENT_ATTACH:
+                    queuedMessage.payload = Protocol.SharedComponentAttach.FromPB(sendSceneMessage.AttachEntityComponent);
+                    break;
+                case MessagingTypes.SHARED_COMPONENT_UPDATE:
+                    queuedMessage.payload = Protocol.SharedComponentUpdate.FromPB(sendSceneMessage.ComponentUpdated);
+                    break;
+                case MessagingTypes.SHARED_COMPONENT_DISPOSE:
+                    queuedMessage.payload = Protocol.SharedComponentDispose.FromPB(sendSceneMessage.ComponentDisposed);
+                    break;
+                case MessagingTypes.ENTITY_COMPONENT_CREATE_OR_UPDATE:
+                    queuedMessage.payload = Protocol.EntityComponentCreateOrUpdate.FromPB(sendSceneMessage.UpdateEntityComponent);
+                    break;
+                case MessagingTypes.ENTITY_COMPONENT_DESTROY:
+                    queuedMessage.payload = Protocol.EntityComponentDestroy.FromPB(sendSceneMessage.ComponentRemoved);
+                    break;
+                case MessagingTypes.OPEN_NFT_DIALOG:
+                    queuedMessage.payload = Protocol.OpenNftDialog.FromPB(sendSceneMessage.OpenNFTDialog);
+                    break;
+                case MessagingTypes.OPEN_EXTERNAL_URL:
+                    queuedMessage.payload = Protocol.OpenExternalUrl.FromPB(sendSceneMessage.OpenExternalUrl);
+                    break;
+            }
         }
 
         public static void DecodeTransform(string payload, ref DCLTransform.Model model)
@@ -107,7 +145,7 @@ namespace DCL
             DCL.Interface.PB_Transform pbTransform = DCL.Interface.PB_Transform.Parser.ParseFrom(bytes);
             model.position = new Vector3(pbTransform.Position.X, pbTransform.Position.Y, pbTransform.Position.Z);
             model.scale = new Vector3(pbTransform.Scale.X, pbTransform.Scale.Y, pbTransform.Scale.Z);
-            model.rotation = new Quaternion((float)pbTransform.Rotation.X, (float)pbTransform.Rotation.Y, (float)pbTransform.Rotation.Z, (float)pbTransform.Rotation.W);
+            model.rotation = new Quaternion((float) pbTransform.Rotation.X, (float) pbTransform.Rotation.Y, (float) pbTransform.Rotation.Z, (float) pbTransform.Rotation.W);
         }
 
         public static void DecodeQueryMessage(string queryId, string payload, ref QueryMessage query)

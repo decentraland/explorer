@@ -17,202 +17,229 @@ import {
 import { PB_OpenExternalUrl } from 'shared/proto/engineinterface_pb'
 
 export class NativeMessagesBridge {
-         private __createEntity!: () => void
-         private __removeEntity!: () => void
-         private __sceneReady!: () => void
-         private __setSceneId!: (sceneId: string) => void
-         private __setEntityId!: (entityId: string) => void
-         private __setEntityParent!: (parentId: string) => void
-         private __updateEntityComponent!: (classId: number, json: string) => void
-         private __attachEntityComponent!: (name: string, id: string) => void
-         private __removeComponent!: (name: string) => void
-         private __openNftDialog!: (contactAddress: string, comment: string) => void
-         private __openExternalUrl!: (url: string) => void
-         private __componentUpdated!: (id: string, json: string) => void
-         private __componentDisposed!: (id: string) => void
-         private __componentCreated!: (id: string, classId: number, name: string) => void
-         private __query!: (payload: QueryPayload) => void
+  private __createEntity!: () => void
+  private __removeEntity!: () => void
+  private __sceneReady!: () => void
+  private __setSceneId!: (sceneId: string) => void
+  private __setEntityId!: (entityId: string) => void
+  private __setEntityParent!: (parentId: string) => void
 
-         private __loadParcelScene!: (scene: LoadableParcelScene) => void
-         private __updateParcelScene!: (scene: LoadableParcelScene) => void
-         private __unloadParcelScene!: (sceneId: string) => void
+  private __entityComponentCreateOrUpdate!: (classId: number, json: string) => void
+  private __entityComponentDestroy!: (name: string) => void
 
-         private currentSceneId: string = ''
-         private currentEntityId: string = ''
+  private __sharedComponentCreate!: (classId: number, id: string, name: string) => void
+  private __sharedComponentAttach!: (id: string, name: string) => void
+  private __sharedComponentUpdate!: (id: string, json: string) => void
+  private __sharedComponentDispose!: (id: string) => void
 
-         //private currentTag: number = 0
+  private __openNftDialog!: (contactAddress: string, comment: string) => void
+  private __openExternalUrl!: (url: string) => void
+  private __query!: (payload: QueryPayload) => void
 
-         public initNativeMessages(gameInstance: any) {
-           let unityModule: any = gameInstance.Module
+  private __loadParcelScene!: (scene: LoadableParcelScene) => void
+  private __updateParcelScene!: (scene: LoadableParcelScene) => void
+  private __unloadParcelScene!: (sceneId: string) => void
 
-           if (!unityModule) {
-             console.error('Unity module not found! Are you in WSS mode?')
-             return
-           }
+  private currentSceneId: string = ''
+  private currentEntityId: string = ''
 
-           this.__loadParcelScene = unityModule.cwrap('call_LoadParcelScene', null, ['number'])
-           this.__updateParcelScene = unityModule.cwrap('call_UpdateParcelScene', null, ['number'])
-           this.__unloadParcelScene = unityModule.cwrap('call_UnloadParcelScene', null, ['string'])
+  //private currentTag: number = 0
 
-           this.__setEntityId = unityModule.cwrap('call_SetEntityId', null, ['string'])
-           this.__setSceneId = unityModule.cwrap('call_SetSceneId', null, ['string'])
-           this.__setEntityParent = unityModule.cwrap('call_SetEntityParent', null, ['string'])
-           this.__updateEntityComponent = unityModule.cwrap('call_UpdateEntityComponent', null, ['string', 'string'])
-           this.__attachEntityComponent = unityModule.cwrap('call_AttachEntityComponent', null, ['string', 'string'])
-           this.__removeComponent = unityModule.cwrap('call_RemoveComponent', null, ['string'])
-           this.__openNftDialog = unityModule.cwrap('call_OpenNftDialog', null, ['string', 'string'])
-           this.__openExternalUrl = unityModule.cwrap('call_OpenExternalUrl', null, ['string'])
-           this.__componentUpdated = unityModule.cwrap('call_ComponentUpdated', null, ['string', 'string'])
-           this.__componentDisposed = unityModule.cwrap('call_ComponentDisposed', null, ['string'])
-           this.__componentCreated = unityModule.cwrap('call_ComponentCreated', null, ['string', 'string'])
-           this.__query = unityModule.cwrap('call_Query', null, ['number'])
+  public initNativeMessages(gameInstance: any) {
+    let unityModule: any = gameInstance.Module
 
-           this.__createEntity = unityModule.cwrap('call_CreateEntity', null, [])
-           this.__removeEntity = unityModule.cwrap('call_RemoveEntity', null, [])
-           this.__sceneReady = unityModule.cwrap('call_SceneReady', null, [])
-           console.log('Init native messages...')
-         }
+    if (!unityModule) {
+      console.error('Unity module not found! Are you in WSS mode?')
+      return
+    }
 
-         public optimizeSendMessage() {
-           //no-op
-         }
+    // this.__loadParcelScene = unityModule.cwrap('call_LoadParcelScene', null, ['number'])
+    // this.__updateParcelScene = unityModule.cwrap('call_UpdateParcelScene', null, ['number'])
+    // this.__unloadParcelScene = unityModule.cwrap('call_UnloadParcelScene', null, ['string'])
 
-         public isMethodSupported(method: EntityActionType): boolean {
-           return true
-         }
+    this.__setEntityId = unityModule.cwrap('call_SetEntityId', null, ['string'])
+    this.__setSceneId = unityModule.cwrap('call_SetSceneId', null, ['string'])
+    this.__setEntityParent = unityModule.cwrap('call_SetEntityParent', null, ['string'])
+    
+    this.__entityComponentCreateOrUpdate = unityModule.cwrap('call_EntityComponentCreateOrUpdate', null, [
+      'number',
+      'string'
+    ])
+    this.__entityComponentDestroy = unityModule.cwrap('call_EntityComponentRemove', null, ['string'])
 
-         setSceneId(sceneId: string) {
-           if (sceneId !== this.currentSceneId) {
-             this.__setSceneId(sceneId)
-           }
-           this.currentSceneId = sceneId
-         }
+    this.__sharedComponentCreate = unityModule.cwrap('call_SharedComponentCreate', null, ['number', 'string'])
+    this.__sharedComponentAttach = unityModule.cwrap('call_SharedComponentAttach', null, ['string', 'string'])
+    this.__sharedComponentUpdate = unityModule.cwrap('call_SharedComponentUpdate', null, ['string', 'string'])
+    this.__sharedComponentDispose = unityModule.cwrap('call_SharedComponentDispose', null, ['string'])
+    
+    this.__openNftDialog = unityModule.cwrap('call_OpenNftDialog', null, ['string', 'string'])
+    this.__openExternalUrl = unityModule.cwrap('call_OpenExternalUrl', null, ['string'])
+    this.__query = unityModule.cwrap('call_Query', null, ['number'])
 
-         setEntityId(entityId: string) {
-           if (entityId !== this.currentEntityId) {
-             this.__setEntityId(entityId)
-           }
-           this.currentEntityId = entityId
-         }
+    this.__createEntity = unityModule.cwrap('call_CreateEntity', null, [])
+    this.__removeEntity = unityModule.cwrap('call_RemoveEntity', null, [])
+    this.__sceneReady = unityModule.cwrap('call_SceneReady', null, [])
+    console.log('Init native messages...')
+  }
 
-         setTag(tag: string) {
-           //this.currentTag = tag
-         }
+  public optimizeSendMessage() {
+    //no-op
+  }
 
-         createEntity(payload: CreateEntityPayload) {
-           this.setEntityId(payload.id)
-           this.__createEntity()
-         }
+  // | 'UpdateEntityComponent'
+  // | 'AttachEntityComponent'
+  // | 'ComponentCreated'
+  // | 'ComponentDisposed'
+  // | 'ComponentRemoved'
+  // | 'ComponentUpdated'
+  public isMethodSupported(method: EntityActionType): boolean {
+    return method !== 'Query'
+    // return (
+    //   method === 'CreateEntity' ||
+    //   method === 'RemoveEntity' ||
+    //   method === 'SetEntityParent' ||
+    //   method === 'InitMessagesFinished' ||
+    //   method === 'UpdateEntityComponent' ||
+    //   method === 'AttachEntityComponent' ||
+    // )
+  }
 
-         removeEntity(payload: RemoveEntityPayload) {
-           this.setEntityId(payload.id)
-           this.__removeEntity()
-         }
+  setSceneId(sceneId: string) {
+    if (sceneId !== this.currentSceneId) {
+      this.__setSceneId(sceneId)
+    }
+    this.currentSceneId = sceneId
+  }
 
-         sceneReady() {
-           this.__sceneReady()
-         }
+  setEntityId(entityId: string) {
+    if (entityId !== this.currentEntityId) {
+      this.__setEntityId(entityId)
+    }
+    this.currentEntityId = entityId
+  }
 
-         setEntityParent(payload: SetEntityParentPayload) {
-           this.__setEntityParent(payload.parentId)
-         }
+  setTag(tag: string) {
+    //this.currentTag = tag
+  }
 
-         openNftDialog(payload: OpenNFTDialogPayload) {
-           this.__openNftDialog(payload.assetContractAddress, payload.comment ?? '')
-         }
+  createEntity(payload: CreateEntityPayload) {
+    this.setEntityId(payload.id)
+    this.__createEntity()
+  }
 
-         openExternalUrl(payload: PB_OpenExternalUrl) {
-           this.__openExternalUrl(payload.getUrl())
-         }
+  removeEntity(payload: RemoveEntityPayload) {
+    this.setEntityId(payload.id)
+    this.__removeEntity()
+  }
 
-         query(payload: QueryPayload) {
-           this.__query(payload)
-         }
+  sceneReady() {
+    this.__sceneReady()
+  }
 
-         componentUpdated(payload: ComponentUpdatedPayload) {
-           this.__componentUpdated(payload.id, payload.json)
-         }
+  setEntityParent(payload: SetEntityParentPayload) {
+    this.setEntityId(payload.entityId)
+    this.__setEntityParent(payload.parentId)
+  }
 
-         componentRemoved(payload: ComponentRemovedPayload) {
-           this.__removeComponent(payload.name)
-         }
+  openNftDialog(payload: OpenNFTDialogPayload) {
+    this.__openNftDialog(payload.assetContractAddress, payload.comment ?? '')
+  }
 
-         componentDisposed(payload: ComponentDisposedPayload) {
-           this.__componentDisposed(payload.id)
-         }
+  openExternalUrl(payload: PB_OpenExternalUrl) {
+    this.__openExternalUrl(payload.getUrl())
+  }
 
-         componentCreated(payload: ComponentCreatedPayload) {
-           this.__componentCreated(payload.id, payload.classId, payload.name)
-         }
+  query(payload: QueryPayload) {
+    this.__query(payload)
+  }
 
-         attachEntityComponent(payload: AttachEntityComponentPayload) {
-           this.__attachEntityComponent(payload.id, payload.name)
-         }
+  sharedComponentUpdate(payload: ComponentUpdatedPayload) {
+    this.__sharedComponentUpdate(payload.id, payload.json)
+  }
 
-         updateEntityComponent(payload: UpdateEntityComponentPayload) {
-           this.__updateEntityComponent(payload.classId, payload.json)
-         }
+  entityComponentRemove(payload: ComponentRemovedPayload) {
+    this.setEntityId(payload.entityId)
+    this.__entityComponentDestroy(payload.name)
+  }
 
-         public loadParcelScene(loadableParcelScene: LoadableParcelScene) {
-           this.__loadParcelScene(loadableParcelScene)
-         }
+  sharedComponentDispose(payload: ComponentDisposedPayload) {
+    this.__sharedComponentDispose(payload.id)
+  }
 
-         public updateParcelScene(loadableParcelScene: LoadableParcelScene) {
-           this.__updateParcelScene(loadableParcelScene)
-         }
+  sharedComponentCreate(payload: ComponentCreatedPayload) {
+    this.__sharedComponentCreate(payload.classId, payload.id, payload.name)
+  }
 
-         public unloadParcelScene(sceneId: string) {
-           this.__unloadParcelScene(sceneId)
-         }
+  sharedComponentAttach(payload: AttachEntityComponentPayload) {
+    this.setEntityId(payload.entityId)
+    this.__sharedComponentAttach(payload.id, payload.name)
+  }
 
-         public SendNativeMessage(parcelSceneId: string, action: EntityAction): void {
-           this.setSceneId(parcelSceneId)
+  entityComponentCreateOrUpdate(payload: UpdateEntityComponentPayload) {
+    this.setEntityId(payload.entityId)
+    this.__entityComponentCreateOrUpdate(payload.classId, payload.json)
+  }
 
-           if (action.tag !== undefined) this.setTag(action.tag)
+  public loadParcelScene(loadableParcelScene: LoadableParcelScene) {
+    this.__loadParcelScene(loadableParcelScene)
+  }
 
-           switch (action.type) {
-             case 'CreateEntity':
-               this.createEntity(action.payload)
-               break
-             case 'RemoveEntity':
-               this.removeEntity(action.payload)
-               break
-             case 'InitMessagesFinished':
-               this.sceneReady()
-               break
-             case 'SetEntityParent':
-               this.setEntityParent(action.payload)
-               break
-             case 'UpdateEntityComponent':
-               this.updateEntityComponent(action.payload)
-               break
-             case 'AttachEntityComponent':
-               this.attachEntityComponent(action.payload)
-               break
-             case 'ComponentCreated':
-               this.componentCreated(action.payload)
-               break
-             case 'ComponentDisposed':
-               this.componentDisposed(action.payload)
-               break
-             case 'ComponentRemoved':
-               this.componentRemoved(action.payload)
-               break
-             case 'ComponentUpdated':
-               this.componentUpdated(action.payload)
-               break
-             case 'Query':
-               this.query(action.payload)
-               break
-             case 'OpenExternalUrl':
-               this.openExternalUrl(action.payload)
-               break
-             case 'OpenNFTDialog':
-               this.openNftDialog(action.payload)
-               break
-           }
-         }
-       }
+  public updateParcelScene(loadableParcelScene: LoadableParcelScene) {
+    this.__updateParcelScene(loadableParcelScene)
+  }
+
+  public unloadParcelScene(sceneId: string) {
+    this.__unloadParcelScene(sceneId)
+  }
+
+  public SendNativeMessage(parcelSceneId: string, action: EntityAction): void {
+    this.setSceneId(parcelSceneId)
+
+    if (action.tag !== undefined) this.setTag(action.tag)
+
+    switch (action.type) {
+      case 'CreateEntity':
+        this.createEntity(action.payload)
+        break
+      case 'RemoveEntity':
+        this.removeEntity(action.payload)
+        break
+      case 'InitMessagesFinished':
+        this.sceneReady()
+        break
+      case 'SetEntityParent':
+        this.setEntityParent(action.payload)
+        break
+      case 'UpdateEntityComponent':
+        this.entityComponentCreateOrUpdate(action.payload)
+        break
+      case 'ComponentRemoved':
+        this.entityComponentRemove(action.payload)
+        break
+      case 'AttachEntityComponent':
+        this.sharedComponentAttach(action.payload)
+        break
+      case 'ComponentCreated':
+        this.sharedComponentCreate(action.payload)
+        break
+      case 'ComponentDisposed':
+        this.sharedComponentDispose(action.payload)
+        break
+      case 'ComponentUpdated':
+        this.sharedComponentUpdate(action.payload)
+        break
+      case 'Query':
+        this.query(action.payload)
+        break
+      case 'OpenExternalUrl':
+        this.openExternalUrl(action.payload)
+        break
+      case 'OpenNFTDialog':
+        this.openNftDialog(action.payload)
+        break
+    }
+  }
+}
 
 // tslint:disable:no-unused-variable
 // function asciiToInt(s: string): number {

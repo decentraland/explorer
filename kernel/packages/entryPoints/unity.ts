@@ -36,7 +36,6 @@ const observer = worldRunningObservable.add((isRunning) => {
 initializeUnity(container)
   .then(async (_) => {
     const i = unityInterface
-    logger.info('init callbacks?')
     i.InitCallbacks()
     i.ConfigureHUDElement(HUDElementID.MINIMAP, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.AVATAR, { active: true, visible: true })

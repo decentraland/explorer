@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using DCL.Interface;
+using UnityEngine;
 
 
 namespace DCL.Models
@@ -58,170 +59,154 @@ namespace DCL.Models
         AUDIO_CLIP = 200
     }
 
-    public class CallMethodComponentMessage
+    public abstract class Protocol
     {
-        public string methodName;
-        public object[] args;
-    }
-
-    [System.Serializable]
-    public class SharedComponentAttachMessage
-    {
-        /// id of the affected entity
-        public string entityId;
-
-        /// name of the compoenent
-        public string name;
-
-        /// ID of the disposable component
-        public string id;
-
-        public void FromJSON(string rawJson)
+        [System.Serializable]
+        public struct CreateEntity
         {
-            entityId = default(string);
-            name = default(string);
-            id = default(string);
+            public string entityId;
 
-            JsonUtility.FromJsonOverwrite(rawJson, this);
+            public static CreateEntity FromPB(PB_CreateEntity pbPayload)
+            {
+                return new CreateEntity() {entityId = pbPayload.Id};
+            }
         }
-    }
 
-    [System.Serializable]
-    public class EntityComponentCreateMessage
-    {
-        /// id of the affected entity
-        public string entityId;
-        /// name of the component
-        public string name;
-
-        /// class of the component that should be instantiated
-        public int classId;
-
-        public string json;
-
-        public void FromJSON(string rawJson)
+        [System.Serializable]
+        public struct RemoveEntity
         {
-            entityId = default(string);
-            name = default(string);
-            json = default(string);
-            classId = default(int);
+            public string entityId;
 
-            JsonUtility.FromJsonOverwrite(rawJson, this);
+            public static RemoveEntity FromPB(PB_RemoveEntity pbPayload)
+            {
+                return new RemoveEntity() {entityId = pbPayload.Id};
+            }
         }
-    }
 
-    [System.Serializable]
-    public class SetEntityParentMessage
-    {
-        /// id of the affected entity
-        public string entityId;
-
-        /// id of the parent entity
-        public string parentId;
-
-        public void FromJSON(string rawJson)
+        [System.Serializable]
+        public struct SetEntityParent
         {
-            entityId = default(string);
-            parentId = default(string);
-            JsonUtility.FromJsonOverwrite(rawJson, this);
+            public string entityId;
+            public string parentId;
+
+            public static SetEntityParent FromPB(PB_SetEntityParent pbPayload)
+            {
+                return new SetEntityParent() {entityId = pbPayload.EntityId, parentId = pbPayload.ParentId};
+            }
         }
-    }
 
-    [System.Serializable]
-    public class CreateEntityMessage
-    {
-        /// id of the new entity
-        public string id;
-
-        public void FromJSON(string rawJson)
+        [System.Serializable]
+        public struct EntityComponentCreateOrUpdate
         {
-            id = default(string);
-            JsonUtility.FromJsonOverwrite(rawJson, this);
+            public string entityId;
+            public int classId;
+            public string json;
+
+            public static EntityComponentCreateOrUpdate FromPB(PB_UpdateEntityComponent pbPayload)
+            {
+                return new EntityComponentCreateOrUpdate() {entityId = pbPayload.EntityId, classId = pbPayload.ClassId, json = pbPayload.Data};
+            }
         }
-    }
 
-    [System.Serializable]
-    public class RemoveEntityMessage
-    {
-        /// id of the new entity
-        public string id;
-
-        public void FromJSON(string rawJson)
+        [System.Serializable]
+        public struct EntityComponentDestroy
         {
-            id = default(string);
+            public string entityId;
+            public string name;
 
-            JsonUtility.FromJsonOverwrite(rawJson, this);
+            public static EntityComponentDestroy FromPB(PB_ComponentRemoved pbPayload)
+            {
+                return new EntityComponentDestroy() {entityId = pbPayload.EntityId, name = pbPayload.Name};
+            }
         }
-    }
 
-    [System.Serializable]
-    public class EntityComponentRemoveMessage
-    {
-        /// id of the affected entity
-        public string entityId;
-
-        /// name of the compoenent
-        public string name;
-
-        public void FromJSON(string rawJson)
+        [System.Serializable]
+        public struct SharedComponentAttach
         {
-            entityId = default(string);
-            name = default(string);
+            public string entityId;
+            public string id;
+            public string name;
 
-            JsonUtility.FromJsonOverwrite(rawJson, this);
+            public static SharedComponentAttach FromPB(PB_AttachEntityComponent pbPayload)
+            {
+                return new SharedComponentAttach() {entityId = pbPayload.EntityId, id = pbPayload.Id, name = pbPayload.Name};
+            }
         }
-    }
 
-    [System.Serializable]
-    public class SharedComponentUpdateMessage
-    {
-        /// ID of the disposable component
-        public string id;
-
-        public string json;
-
-        public void FromJSON(string rawJson)
+        [System.Serializable]
+        public struct SharedComponentCreate
         {
-            id = default(string);
-            json = default(string);
+            public string id;
+            public int classId;
+            public string name;
 
-            JsonUtility.FromJsonOverwrite(rawJson, this);
+            public static SharedComponentCreate FromPB(PB_ComponentCreated pbPayload)
+            {
+                return new SharedComponentCreate() {id = pbPayload.Id, classId = pbPayload.Classid, name = pbPayload.Name};
+            }
         }
-    }
 
-    [System.Serializable]
-    public class SharedComponentDisposeMessage
-    {
-        /// ID of the disposable component to dispose
-        public string id;
-
-        public void FromJSON(string rawJson)
+        [System.Serializable]
+        public struct SharedComponentDispose
         {
-            id = default(string);
+            public string id;
 
-            JsonUtility.FromJsonOverwrite(rawJson, this);
+            public static SharedComponentDispose FromPB(PB_ComponentDisposed pbPayload)
+            {
+                return new SharedComponentDispose() {id = pbPayload.Id};
+            }
         }
-    }
 
-    [System.Serializable]
-    public class SharedComponentCreateMessage
-    {
-        /// ID of the disposable component
-        public string id;
-
-        /// name of the compoenent
-        public string name;
-
-        /// class of the component that should be instantiated
-        public int classId;
-
-        public void FromJSON(string rawJson)
+        [System.Serializable]
+        public struct SharedComponentUpdate
         {
-            id = default(string);
-            name = default(string);
-            classId = default(int);
+            public string componentId;
+            public string json;
 
-            JsonUtility.FromJsonOverwrite(rawJson, this);
+            public static SharedComponentUpdate FromPB(PB_ComponentUpdated pbPayload)
+            {
+                return new SharedComponentUpdate() {componentId = pbPayload.Id, json = pbPayload.Json};
+            }
+        }
+
+
+        [System.Serializable]
+        public struct ParcelSceneLoad
+        {
+        }
+
+        [System.Serializable]
+        public struct ParcelSceneUpdate
+        {
+        }
+
+        [System.Serializable]
+        public struct ParcelSceneUnload
+        {
+        }
+
+        [System.Serializable]
+        public struct OpenExternalUrl
+        {
+            public string url;
+
+            public static OpenExternalUrl FromPB(PB_OpenExternalUrl pbPayload)
+            {
+                return new OpenExternalUrl() {url = pbPayload.Url};
+            }
+        }
+
+        [System.Serializable]
+        public struct OpenNftDialog
+        {
+            public string contactAddress;
+            public string comment;
+            public string tokenId;
+
+            public static OpenNftDialog FromPB(PB_OpenNFTDialog pbPayload)
+            {
+                return new OpenNftDialog() {contactAddress = pbPayload.AssetContractAddress, comment = pbPayload.Comment, tokenId = pbPayload.TokenId};
+            }
         }
     }
 
@@ -251,8 +236,7 @@ namespace DCL.Models
     {
         public Vector3 origin;
 
-        [System.NonSerialized]
-        public Vector3 unityOrigin;
+        [System.NonSerialized] public Vector3 unityOrigin;
 
         public Vector3 direction;
         public float distance;
