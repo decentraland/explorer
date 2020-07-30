@@ -48,7 +48,7 @@ public class ChatHeadGroupView : MonoBehaviour
     private void Update()
     {
         // NOTE: Update is only enabled when SetParentContainerAsDirty is called 
-        DCL.Helpers.Utils.ForceUpdateLayout(contentParentRT);
+        DCL.Helpers.Utils.ForceUpdateLayout(contentParentRT, delayed: true);
         this.enabled = false;
     }
 
