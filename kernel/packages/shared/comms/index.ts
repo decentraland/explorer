@@ -872,6 +872,7 @@ async function doStartCommunications(context: Context) {
     }
   }
 }
+
 function handleReconnectionError() {
   const realm = getRealm(store.getState())
 
