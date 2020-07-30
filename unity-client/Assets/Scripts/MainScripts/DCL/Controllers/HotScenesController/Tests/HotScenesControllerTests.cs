@@ -14,24 +14,22 @@ public class HotScenesControllerTests : TestsBase
 
         var hotSceneList = GetTestHotSceneList();
 
-        var json = "[";
-        for (int i = 0; i < hotSceneList.Count; i++)
+        var payload = new HotScenesController.HotScenesUpdatePayload
         {
-            json += JsonUtility.ToJson(hotSceneList[i]);
-            if (i < hotSceneList.Count - 1) json += ",";
-        }
-        json += "]";
-
-        Action<HotScenesController.HotSceneInfo[]> onListUpdate = (scenesArray) =>
-        {
-            CheckListEquals(new List<HotScenesController.HotSceneInfo>(scenesArray), hotSceneList);
+            chunkIndex = 0,
+            totalScenes = hotSceneList.Count,
+            scenesInfo = hotSceneList.ToArray()
         };
-        controller.OnHotSceneListChunkUpdate += onListUpdate;
 
-        controller.UpdateHotScenesList(json);
-        controller.FinishUpdateHotScenesList();
+        Action onListUpdate = () =>
+        {
+            CheckListEquals(controller.hotScenesList, hotSceneList);
+        };
+        controller.OnHotSceneListChunkUpdated += onListUpdate;
 
-        controller.OnHotSceneListChunkUpdate -= onListUpdate;
+        controller.UpdateHotScenesList(JsonUtility.ToJson(payload));
+
+        controller.OnHotSceneListChunkUpdated -= onListUpdate;
 
         CheckListEquals(controller.hotScenesList, hotSceneList);
 

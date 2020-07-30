@@ -3,18 +3,19 @@ using System.Collections.Generic;
 using DCL.Helpers;
 using UnityEngine;
 
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("HotScenesControllerTests")]
+
 public class HotScenesController : MonoBehaviour
 {
     public static HotScenesController i { get; private set; }
 
     public event Action OnHotSceneListFinishUpdating;
-    public event Action<HotSceneInfo[]> OnHotSceneListChunkUpdate;
+    public event Action OnHotSceneListChunkUpdated;
 
-    public List<HotSceneInfo> hotScenesList { get; private set; }
+    public List<HotSceneInfo> hotScenesList { get; private set; } = new List<HotSceneInfo>();
     public bool isUpdating { get; private set; }
     public float timeSinceLastUpdate { get { return Time.realtimeSinceStartup - lastUpdateTime; } }
 
-    private List<HotSceneInfo> tempHotScenesList = new List<HotSceneInfo>();
     private float lastUpdateTime = float.MinValue * .5f;
 
     [Serializable]
@@ -33,6 +34,14 @@ public class HotScenesController : MonoBehaviour
         public Realm[] realms;
     }
 
+    [Serializable]
+    internal struct HotScenesUpdatePayload
+    {
+        public int chunkIndex;
+        public int totalScenes;
+        public HotSceneInfo[] scenesInfo;
+    }
+
     void Awake()
     {
         i = this;
@@ -40,18 +49,22 @@ public class HotScenesController : MonoBehaviour
 
     public void UpdateHotScenesList(string json)
     {
-        isUpdating = true;
-        var hotScenes = Utils.ParseJsonArray<HotSceneInfo[]>(json);
-        tempHotScenesList.AddRange(hotScenes);
-        OnHotSceneListChunkUpdate?.Invoke(hotScenes);
-    }
+        var updatePayload = Utils.SafeFromJson<HotScenesUpdatePayload>(json);
 
-    public void FinishUpdateHotScenesList()
-    {
-        isUpdating = false;
-        lastUpdateTime = Time.realtimeSinceStartup;
-        hotScenesList = tempHotScenesList;
-        tempHotScenesList = new List<HotSceneInfo>();
-        OnHotSceneListFinishUpdating?.Invoke();
+        if (updatePayload.chunkIndex == 0)
+        {
+            isUpdating = true;
+            hotScenesList.Clear();
+        }
+
+        hotScenesList.AddRange(updatePayload.scenesInfo);
+        OnHotSceneListChunkUpdated?.Invoke();
+
+        if (hotScenesList.Count >= updatePayload.totalScenes)
+        {
+            isUpdating = false;
+            lastUpdateTime = Time.realtimeSinceStartup;
+            OnHotSceneListFinishUpdating?.Invoke();
+        }
     }
 }

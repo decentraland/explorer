@@ -444,7 +444,7 @@ const browserInterface = {
   },
 
   FetchHotScenes() {
-    reportHotScenes().catch(e => defaultLogger.error('FetchHotScenes error', e))
+    reportHotScenes().catch((e) => defaultLogger.error('FetchHotScenes error', e))
   }
 }
 globalThis.browserInterface2 = browserInterface
@@ -652,9 +652,9 @@ export const unityInterface = {
   UpdateHotScenesList(info: HotSceneInfo[]) {
     for (let i = 0; i < info.length; i += CHUNK_SIZE) {
       const chunk = info.slice(i, i + CHUNK_SIZE)
-      gameInstance.SendMessage('SceneController', 'UpdateHotScenesList', JSON.stringify(chunk))
+      const payload = { chunkIndex: i, totalScenes: info.length, scenesInfo: chunk }
+      gameInstance.SendMessage('SceneController', 'UpdateHotScenesList', JSON.stringify(payload))
     }
-    gameInstance.SendMessage('SceneController', 'FinishUpdateHotScenesList')
   },
 
   // *********************************************************************************
