@@ -38,7 +38,7 @@ public class HotScenesController : MonoBehaviour
     internal struct HotScenesUpdatePayload
     {
         public int chunkIndex;
-        public int totalScenes;
+        public int chunksCount;
         public HotSceneInfo[] scenesInfo;
     }
 
@@ -60,7 +60,7 @@ public class HotScenesController : MonoBehaviour
         hotScenesList.AddRange(updatePayload.scenesInfo);
         OnHotSceneListChunkUpdated?.Invoke();
 
-        if (hotScenesList.Count >= updatePayload.totalScenes)
+        if (updatePayload.chunkIndex >= updatePayload.chunksCount - 1)
         {
             isUpdating = false;
             lastUpdateTime = Time.realtimeSinceStartup;

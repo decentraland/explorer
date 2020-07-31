@@ -650,9 +650,14 @@ export const unityInterface = {
     gameInstance.SendMessage('HUDController', 'RequestTeleport', JSON.stringify(teleportData))
   },
   UpdateHotScenesList(info: HotSceneInfo[]) {
-    for (let i = 0; i < info.length; i += CHUNK_SIZE) {
-      const chunk = info.slice(i, i + CHUNK_SIZE)
-      const payload = { chunkIndex: i, totalScenes: info.length, scenesInfo: chunk }
+    const chunks = []
+
+    while (info.length) {
+      chunks.push(info.splice(0, CHUNK_SIZE))
+    }
+
+    for (let i = 0; i < chunks.length; i++) {
+      const payload = { chunkIndex: i, chunksCount: chunks.length, scenesInfo: chunks[i] }
       gameInstance.SendMessage('SceneController', 'UpdateHotScenesList', JSON.stringify(payload))
     }
   },

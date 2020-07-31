@@ -17,7 +17,7 @@ public class HotScenesControllerTests : TestsBase
         var payload = new HotScenesController.HotScenesUpdatePayload
         {
             chunkIndex = 0,
-            totalScenes = hotSceneList.Count,
+            chunksCount = 1,
             scenesInfo = hotSceneList.ToArray()
         };
 
