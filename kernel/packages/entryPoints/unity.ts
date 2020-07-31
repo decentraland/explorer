@@ -4,19 +4,21 @@ declare const global: any
 // IMPORTANT! This should be execd before loading 'config' module to ensure that init values are successfully loaded
 global.enableWeb3 = true
 
+import { createLogger } from 'shared/logger'
 import { ReportFatalError } from 'shared/loading/ReportFatalError'
 import { experienceStarted, NOT_INVITED, AUTH_ERROR_LOGGED_OUT, FAILED_FETCHING_UNITY } from 'shared/loading/types'
 import { worldToGrid } from '../atomicHelpers/parcelScenePositions'
 import { NO_MOTD, OPEN_AVATAR_EDITOR, DEBUG_PM, EDITOR } from '../config/index'
-import defaultLogger, { createLogger } from 'shared/logger'
 import { signalRendererInitialized, signalParcelLoadingStarted } from 'shared/renderer/actions'
 import { lastPlayerPosition, teleportObservable } from 'shared/world/positionThings'
 import { StoreContainer } from 'shared/store/rootTypes'
-import { startUnityParcelLoading, unityInterface, initializeDecentralandUI } from '../unity-interface/dcl'
+import { startUnityParcelLoading, initializeDecentralandUI } from '../unity-interface/dcl'
 import { initializeUnity } from '../unity-interface/initializer'
 import { HUDElementID } from 'shared/types'
-import { identity } from 'shared'
 import { worldRunningObservable, onNextWorldRunning } from 'shared/world/worldState'
+import { getCurrentIdentity } from 'shared/session/selectors'
+import { userAuthentified } from 'shared/session'
+import { realmInitialized } from 'shared/dao'
 
 const container = document.getElementById('gameContainer')
 
@@ -34,8 +36,9 @@ const observer = worldRunningObservable.add((isRunning) => {
 })
 
 initializeUnity(container)
-  .then(async (_) => {
-    const i = unityInterface
+  .then(async ({ instancedJS }) => {
+    const i = (await instancedJS).unityInterface
+    
     i.InitCallbacks()
     i.ConfigureHUDElement(HUDElementID.MINIMAP, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.AVATAR, { active: true, visible: true })
@@ -48,16 +51,24 @@ initializeUnity(container)
     i.ConfigureHUDElement(HUDElementID.TERMS_OF_SERVICE, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.TASKBAR, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.WORLD_CHAT_WINDOW, { active: true, visible: true })
-    i.ConfigureHUDElement(HUDElementID.FRIENDS, { active: identity.hasConnectedWeb3, visible: false })
     i.ConfigureHUDElement(HUDElementID.OPEN_EXTERNAL_URL_PROMPT, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.NFT_INFO_DIALOG, { active: true, visible: false })
     i.ConfigureHUDElement(HUDElementID.TELEPORT_DIALOG, { active: true, visible: false })
     i.ConfigureHUDElement(HUDElementID.CONTROLS_HUD, { active: true, visible: false })
 
+    try {
+      await userAuthentified()
+      const identity = getCurrentIdentity(globalThis.globalStore.getState())!
+      i.ConfigureHUDElement(HUDElementID.FRIENDS, { active: identity.hasConnectedWeb3, visible: false })
+    } catch (e) {
+      logger.error('error on configuring friends hud')
+    }
+
     globalThis.globalStore.dispatch(signalRendererInitialized())
 
     onNextWorldRunning(() => globalThis.globalStore.dispatch(experienceStarted()))
 
+    await realmInitialized()
     await startUnityParcelLoading()
 
     if (!EDITOR) {
@@ -70,11 +81,7 @@ initializeUnity(container)
       i.ConfigureHUDElement(HUDElementID.MESSAGE_OF_THE_DAY, { active: false, visible: true })
     }
 
-    _.instancedJS
-      .then(() => {
-        teleportObservable.notifyObservers(worldToGrid(lastPlayerPosition))
-      })
-      .catch(defaultLogger.error)
+    teleportObservable.notifyObservers(worldToGrid(lastPlayerPosition))
 
     document.body.classList.remove('dcl-loading')
     globalThis.UnityLoader.Error.handler = (error: any) => {

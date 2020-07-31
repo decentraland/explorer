@@ -1,6 +1,6 @@
 import { ReadOnlyVector3, Vector3, Matrix } from './math'
 import { RaycastResponse } from './Events'
-import { uuid, log, newId, newIdBase10 } from '../ecs/helpers'
+import { log, newIdBase10 } from '../ecs/helpers'
 
 /** @internal */
 import { DecentralandInterface } from './Types'
