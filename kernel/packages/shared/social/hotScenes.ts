@@ -15,19 +15,11 @@ declare const window: {
   }
 }
 
-type CrowdedSceneRealmInfo = {
-  realm: {
-    serverName: string
-    layerName: string
-  }
+type RealmInfo = {
+  serverName: string
+  layer: string
   usersCount: number
-  maxUsers: number
-}
-
-type CrowdedSceneInfo = {
-  name: string
-  baseCoord: string
-  realmsInfo: CrowdedSceneRealmInfo[]
+  usersMax: number
 }
 
 type CandidateCrowdedScene = {
@@ -37,16 +29,22 @@ type CandidateCrowdedScene = {
   usersCount: number
 }
 
+type HotSceneInfoRaw = {
+  name: string
+  baseCoord: string
+  realmsInfo: RealmInfo[]
+}
+
 export type HotSceneInfo = {
   baseCoords: { x: number; y: number }
   usersTotalCount: number
-  realms: { serverName: string; layer: string; usersCount: number; usersMax: number }[]
+  realms: RealmInfo[]
 }
 
-export async function fetchHotScenes(): Promise<CrowdedSceneInfo[]> {
+export async function fetchHotScenes(): Promise<HotSceneInfoRaw[]> {
   const candidates = await refreshCandidatesStatuses()
 
-  let crowdedScenes: Record<string, CrowdedSceneInfo> = {}
+  let crowdedScenes: Record<string, HotSceneInfoRaw> = {}
 
   const filteredCandidates = candidates.filter(
     (candidate) => candidate.layer && candidate.layer.usersCount > 0 && candidate.layer.usersParcels
@@ -60,11 +58,9 @@ export async function fetchHotScenes(): Promise<CrowdedSceneInfo[]> {
         crowdedScenes[sceneInfo.id] = crowdedSceneInfoFromCandidateScene(sceneInfo)
       }
       crowdedScenes[sceneInfo.id].realmsInfo.push({
-        realm: {
-          serverName: candidate.catalystName,
-          layerName: candidate.layer.name
-        },
-        maxUsers: candidate.layer.maxUsers,
+        serverName: candidate.catalystName,
+        layer: candidate.layer.name,
+        usersMax: candidate.layer.maxUsers,
         usersCount: sceneInfo.usersCount
       })
     })
@@ -83,7 +79,7 @@ export async function reportHotScenes() {
   window.unityInterface.UpdateHotScenesList(hotScenes.map((scene) => hotSceneInfoFromCrowdedSceneInfo(scene)))
 }
 
-function countUsers(a: CrowdedSceneInfo) {
+function countUsers(a: HotSceneInfoRaw) {
   return a.realmsInfo.reduce((total, realmInfo) => total + realmInfo.usersCount, 0)
 }
 
@@ -123,7 +119,7 @@ async function getCrowdedScenesFromCandidate(candidate: Candidate): Promise<Cand
   return Object.values(scenes)
 }
 
-function crowdedSceneInfoFromCandidateScene(candidateScene: CandidateCrowdedScene): CrowdedSceneInfo {
+function crowdedSceneInfoFromCandidateScene(candidateScene: CandidateCrowdedScene): HotSceneInfoRaw {
   const sceneName =
     getSceneNameFromAtlasState(candidateScene.scene) ??
     globalThis.globalStore.getState().atlas.tileToScene[candidateScene.baseCoord].name
@@ -135,18 +131,11 @@ function crowdedSceneInfoFromCandidateScene(candidateScene: CandidateCrowdedScen
   }
 }
 
-function hotSceneInfoFromCrowdedSceneInfo(crowdedSceneInfo: CrowdedSceneInfo): HotSceneInfo {
-  const baseCoord = crowdedSceneInfo.baseCoord.split(',').map((str) => parseInt(str, 10)) as [number, number]
+function hotSceneInfoFromCrowdedSceneInfo(hotSceneInfoRaw: HotSceneInfoRaw): HotSceneInfo {
+  const baseCoord = hotSceneInfoRaw.baseCoord.split(',').map((str) => parseInt(str, 10)) as [number, number]
   return {
     baseCoords: { x: baseCoord[0], y: baseCoord[1] },
-    usersTotalCount: countUsers(crowdedSceneInfo),
-    realms: crowdedSceneInfo.realmsInfo.map((realmInfo) => {
-      return {
-        serverName: realmInfo.realm.serverName,
-        layer: realmInfo.realm.layerName,
-        usersCount: realmInfo.usersCount,
-        usersMax: realmInfo.maxUsers
-      }
-    })
+    usersTotalCount: countUsers(hotSceneInfoRaw),
+    realms: hotSceneInfoRaw.realmsInfo
   }
 }
