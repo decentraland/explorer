@@ -111,7 +111,7 @@ namespace DCL
 #if !UNITY_EDITOR
             Debug.Log("DCL Unity Build Version: " + DCL.Configuration.ApplicationSettings.version);
 
-            Debug.unityLogger.logEnabled = false;
+            Debug.unityLogger.logEnabled = true;
 #endif
 
             InitializeSceneBoundariesChecker();
@@ -153,8 +153,8 @@ namespace DCL
 
         private void SetPositionDirty(DCLCharacterPosition character)
         {
-            var currentX = (int) Math.Floor(character.worldPosition.x / ParcelSettings.PARCEL_SIZE);
-            var currentY = (int) Math.Floor(character.worldPosition.z / ParcelSettings.PARCEL_SIZE);
+            var currentX = (int)Math.Floor(character.worldPosition.x / ParcelSettings.PARCEL_SIZE);
+            var currentY = (int)Math.Floor(character.worldPosition.z / ParcelSettings.PARCEL_SIZE);
 
             positionDirty = currentX != currentGridSceneCoordinate.x || currentY != currentGridSceneCoordinate.y;
 
@@ -309,10 +309,10 @@ namespace DCL
 
         public void CreateUIScene(string json)
         {
-#if UNITY_EDITOR
+            // #if UNITY_EDITOR
             if (debugScenes && ignoreGlobalScenes)
                 return;
-#endif
+            // #endif
             CreateUISceneMessage uiScene = SafeFromJson<CreateUISceneMessage>(json);
 
             string uiSceneId = uiScene.id;
@@ -411,13 +411,13 @@ namespace DCL
 
             var sceneToLoad = scene;
 
-#if UNITY_EDITOR
+            // #if UNITY_EDITOR
             if (debugScenes && sceneToLoad.basePosition.ToString() != debugSceneCoords.ToString())
             {
                 SendSceneReady(sceneToLoad.id);
                 return;
             }
-#endif
+            // #endif
 
             OnMessageProcessStart?.Invoke(MessagingTypes.SCENE_LOAD);
 
@@ -493,7 +493,7 @@ namespace DCL
         public void UnloadScene(string sceneKey)
         {
             var queuedMessage = new MessagingBus.QueuedSceneMessage()
-                {type = MessagingBus.QueuedSceneMessage.Type.UNLOAD_PARCEL, message = sceneKey};
+            { type = MessagingBus.QueuedSceneMessage.Type.UNLOAD_PARCEL, message = sceneKey };
 
             OnMessageWillQueue?.Invoke(MessagingTypes.SCENE_DESTROY);
 
@@ -566,7 +566,7 @@ namespace DCL
         public void UpdateParcelScenes(string decentralandSceneJSON)
         {
             var queuedMessage = new MessagingBus.QueuedSceneMessage()
-                {type = MessagingBus.QueuedSceneMessage.Type.UPDATE_PARCEL, message = decentralandSceneJSON};
+            { type = MessagingBus.QueuedSceneMessage.Type.UPDATE_PARCEL, message = decentralandSceneJSON };
 
             OnMessageWillQueue?.Invoke(MessagingTypes.SCENE_UPDATE);
 
@@ -575,7 +575,7 @@ namespace DCL
 
         public void UnloadAllScenesQueued()
         {
-            var queuedMessage = new MessagingBus.QueuedSceneMessage() {type = MessagingBus.QueuedSceneMessage.Type.UNLOAD_SCENES};
+            var queuedMessage = new MessagingBus.QueuedSceneMessage() { type = MessagingBus.QueuedSceneMessage.Type.UNLOAD_SCENES };
 
             OnMessageWillQueue?.Invoke(MessagingTypes.SCENE_DESTROY);
 
@@ -589,7 +589,7 @@ namespace DCL
 
         private string SendSceneMessage(string payload, bool enqueue)
         {
-            string[] chunks = payload.Split(new char[] {'\n'}, StringSplitOptions.RemoveEmptyEntries);
+            string[] chunks = payload.Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
             int count = chunks.Length;
             string lastBusId = null;
 
@@ -689,12 +689,12 @@ namespace DCL
 
             if (loadedScenes.TryGetValue(sceneId, out scene))
             {
-#if UNITY_EDITOR
+                // #if UNITY_EDITOR
                 if (debugScenes && scene is GlobalScene && ignoreGlobalScenes)
                 {
                     return false;
                 }
-#endif
+                // #endif
                 if (!scene.gameObject.activeInHierarchy)
                 {
                     return true;
@@ -828,7 +828,7 @@ namespace DCL
 
             if (data.parcels == null)
             {
-                data.parcels = new Vector2Int[] {data.basePosition};
+                data.parcels = new Vector2Int[] { data.basePosition };
             }
 
             if (string.IsNullOrEmpty(data.id))

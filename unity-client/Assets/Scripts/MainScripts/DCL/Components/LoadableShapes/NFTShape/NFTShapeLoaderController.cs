@@ -5,6 +5,8 @@ using DCL.Helpers.NFT;
 using System.Collections;
 using System.Text.RegularExpressions;
 using UnityEngine;
+using System;
+using System.Runtime.InteropServices;
 
 public class NFTShapeLoaderController : MonoBehaviour
 {
@@ -127,8 +129,19 @@ public class NFTShapeLoaderController : MonoBehaviour
         backgroundMaterial.SetColor(COLOR_SHADER_PROPERTY, newColor);
     }
 
+#if UNITY_WEBGL && !UNITY_EDITOR
+    [DllImport("__Internal")]
+    private static extern void GIFPlayerCreate();
+    [DllImport("__Internal")]
+    private static extern void SetTexturePointer(IntPtr texturePtr, string imageSource, bool isWebGL1);
+#else
+    private static void GIFPlayerCreate() { }
+    private static void SetTexturePointer(IntPtr texturePtr, string imageSource, bool isWebGL1) { }
+#endif
+
     IEnumerator FetchNFTImage()
     {
+        Debug.Log("pravs - called FetchNFTImage !!!");
         spinner?.SetActive(true);
 
         string thumbnailImageURL = null;
@@ -151,23 +164,55 @@ public class NFTShapeLoaderController : MonoBehaviour
 
         // We the "preview" 256px image
         bool foundDCLImage = false;
-        if (!string.IsNullOrEmpty(previewImageURL))
-        {
-            yield return Utils.FetchWrappedTextureAsset(previewImageURL, (downloadedAsset) =>
-            {
-                foundDCLImage = true;
-                SetFrameImage(downloadedAsset, resizeFrameMesh: true);
-            });
-        }
+        // if (!string.IsNullOrEmpty(previewImageURL))
+        // {
+        //     // yield return Utils.FetchWrappedTextureAsset(previewImageURL, (downloadedAsset) =>
+        //     // {
+        //     //     foundDCLImage = true;
+        //     //     SetFrameImage(downloadedAsset, resizeFrameMesh: true);
+        //     // });
+
+        //     yield return Utils.FetchTexture(previewImageURL, (tex) =>
+        //     {
+        //         Debug.Log("pravs - 1 - finished fetching tex SUCCESS!!!");
+
+        //         foundDCLImage = true;
+        //         UpdateTexture(tex);
+
+        //         // tex.GetNativeTexturePtr();
+        //         // bool isWebGL1 = SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.OpenGLES2
+
+        //     }, (errorMessage) => Debug.Log("pravs - 1 - finished fetching tex FAIL!!! error: " + errorMessage));
+        // }
 
         // We fall back to the nft original image which can have a really big size
         if (!foundDCLImage && !string.IsNullOrEmpty(originalImageURL))
         {
-            yield return Utils.FetchWrappedTextureAsset(originalImageURL, (downloadedAsset) =>
+            // yield return Utils.FetchWrappedTextureAsset(originalImageURL, (downloadedAsset) =>
+            // {
+            //     foundDCLImage = true;
+            //     SetFrameImage(downloadedAsset, resizeFrameMesh: true);
+            // }, DCL.WrappedTextureMaxSize._256);
+
+            yield return Utils.FetchTexture(originalImageURL, (tex) =>
             {
+                Debug.Log("pravs - finished fetching tex SUCCESS!!! " + originalImageURL);
+
                 foundDCLImage = true;
-                SetFrameImage(downloadedAsset, resizeFrameMesh: true);
-            }, DCL.WrappedTextureMaxSize._256);
+                // UpdateTexture(tex);
+
+                Texture2D newTex = new Texture2D(tex.width, tex.height, TextureFormat.ARGB32, false);
+                newTex.wrapMode = TextureWrapMode.Clamp;
+                imageMaterial.SetTexture(BASEMAP_SHADER_PROPERTY, newTex);
+                imageMaterial.SetColor(COLOR_SHADER_PROPERTY, Color.white);
+
+                bool isWebGL1 = SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.OpenGLES2;
+
+                SetTexturePointer(newTex.GetNativeTexturePtr(), originalImageURL, isWebGL1);
+
+                spinner?.SetActive(false);
+                OnLoadingAssetSuccess?.Invoke();
+            }, (errorMessage) => Debug.Log("pravs - finished fetching tex FAIL!!! error: " + errorMessage));
         }
 
         if (foundDCLImage)
