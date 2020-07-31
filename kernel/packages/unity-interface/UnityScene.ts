@@ -6,12 +6,9 @@ import { EntityAction, EnvironmentData } from 'shared/types'
 import { ParcelSceneAPI } from 'shared/world/ParcelSceneAPI'
 import { getParcelSceneID } from 'shared/world/parcelSceneManager'
 import { SceneWorker } from 'shared/world/SceneWorker'
-import { unityInterface } from './dcl'
-import { NativeMessagesBridge } from './nativeMessagesBridge'
-import { ProtobufMessagesBridge } from './protobufMessagesBridge'
-
-export const nativeMsgBridge: NativeMessagesBridge = new NativeMessagesBridge()
-export const protobufMsgBridge: ProtobufMessagesBridge = new ProtobufMessagesBridge()
+import { unityInterface } from './UnityInterface'
+import { protobufMsgBridge } from './protobufMessagesBridge'
+import { nativeMsgBridge } from './nativeMessagesBridge'
 
 export class UnityScene<T> implements ParcelSceneAPI {
   eventDispatcher = new EventDispatcher()
@@ -24,13 +21,13 @@ export class UnityScene<T> implements ParcelSceneAPI {
 
   sendBatch(actions: EntityAction[]): void {
     if (WSS_ENABLED) {
-      this.sendBatchWss(actions)
+      this.sendBatchWss(unityInterface, actions)
     } else {
-      this.sendBatchNative(actions)
+      this.sendBatchNative(unityInterface, actions)
     }
   }
 
-  sendBatchWss(actions: EntityAction[]): void {
+  sendBatchWss(unityInterface: any, actions: EntityAction[]): void {
     const sceneId = getParcelSceneID(this)
     let messages = ''
     for (let i = 0; i < actions.length; i++) {
@@ -42,7 +39,7 @@ export class UnityScene<T> implements ParcelSceneAPI {
     unityInterface.SendSceneMessage(messages)
   }
 
-  sendBatchNative(actions: EntityAction[]): void {
+  sendBatchNative(unityInterface: any, actions: EntityAction[]): void {
     const sceneId = getParcelSceneID(this)
     let messages = ''
     for (let i = 0; i < actions.length; i++) {

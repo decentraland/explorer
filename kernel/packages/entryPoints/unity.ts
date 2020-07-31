@@ -12,13 +12,17 @@ import { NO_MOTD, OPEN_AVATAR_EDITOR, DEBUG_PM, EDITOR } from '../config/index'
 import { signalRendererInitialized, signalParcelLoadingStarted } from 'shared/renderer/actions'
 import { lastPlayerPosition, teleportObservable } from 'shared/world/positionThings'
 import { StoreContainer } from 'shared/store/rootTypes'
-import { startUnityParcelLoading, initializeDecentralandUI } from '../unity-interface/dcl'
+import { startUnityParcelLoading, gameInstance } from '../unity-interface/dcl'
 import { initializeUnity } from '../unity-interface/initializer'
 import { HUDElementID } from 'shared/types'
 import { worldRunningObservable, onNextWorldRunning } from 'shared/world/worldState'
 import { getCurrentIdentity } from 'shared/session/selectors'
 import { userAuthentified } from 'shared/session'
 import { realmInitialized } from 'shared/dao'
+import { loadParcelScene, getParcelSceneID } from 'shared/world/parcelSceneManager'
+import { ensureUiApis } from 'shared/world/uiSceneInitializer'
+import { hudWorkerUrl } from 'shared/world/SceneWorker'
+import { UnityScene } from 'unity-interface/UnityScene'
 
 const container = document.getElementById('gameContainer')
 
@@ -35,11 +39,32 @@ const observer = worldRunningObservable.add((isRunning) => {
   }
 })
 
+export async function initializeDecentralandUI(unityInterface:any) {
+  const sceneId = 'dcl-ui-scene'
+
+  const scene = new UnityScene({
+    sceneId,
+    name: 'ui',
+    baseUrl: location.origin,
+    main: hudWorkerUrl,
+    useFPSThrottling: false,
+    data: {},
+    mappings: []
+  })
+
+  const worker = loadParcelScene(scene)
+  worker.persistent = true
+
+  await ensureUiApis(worker)
+
+  unityInterface.CreateUIScene({ id: getParcelSceneID(scene), baseUrl: scene.data.baseUrl })
+}
+
 initializeUnity(container)
   .then(async ({ instancedJS }) => {
     const i = (await instancedJS).unityInterface
     
-    i.InitCallbacks()
+    i.Init(gameInstance)
     i.ConfigureHUDElement(HUDElementID.MINIMAP, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.AVATAR, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.NOTIFICATION, { active: true, visible: true })
@@ -72,7 +97,7 @@ initializeUnity(container)
     await startUnityParcelLoading()
 
     if (!EDITOR) {
-      await initializeDecentralandUI()
+      await initializeDecentralandUI(i)
     }
 
     globalThis.globalStore.dispatch(signalParcelLoadingStarted())

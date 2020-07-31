@@ -158,3 +158,5 @@ export class ProtobufMessagesBridge {
     return this.openNFTDialog
   }
 }
+
+export const protobufMsgBridge: ProtobufMessagesBridge = new ProtobufMessagesBridge()
