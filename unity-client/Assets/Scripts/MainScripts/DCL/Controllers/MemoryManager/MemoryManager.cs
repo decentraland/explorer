@@ -32,7 +32,7 @@ namespace DCL
 
         bool NeedsMemoryCleanup()
         {
-            var usedMemory = 0;
+            uint usedMemory = 0;
 
 #if UNITY_WEBGL && !UNITY_EDITOR
             usedMemory = WebGLMemoryStats.GetUsedMemorySize();
