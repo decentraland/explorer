@@ -125,8 +125,14 @@ namespace DCL {
       return
     }
 
-    const response = await fetch(imgSource, { mode: 'no-cors' })
+    const imageFetch = fetch(imgSource)
+    imageFetch.catch((error) => defaultLogger.log('pravs - InitializeGIF (kernel) - ERROR: ' + error))
+
+    const response = await imageFetch
     const buffer = await response.arrayBuffer()
+
+    defaultLogger.log('pravs - InitializeGIF (kernel) - GIF buffer array bytelength: ' + buffer.byteLength)
+
     const frames = await decoder.decode(buffer) // an array of {imageData: ImageData, delay: number}
     let framesAsImage = new Array()
     let convertedFramesCount = 0

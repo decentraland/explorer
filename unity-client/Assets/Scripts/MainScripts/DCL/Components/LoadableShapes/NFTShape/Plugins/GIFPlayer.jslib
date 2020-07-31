@@ -1,19 +1,11 @@
 var GIFPlayer = {
   $frames: {},
 
-  GIFPlayerCreate: function () {
-    // var img = new Image();
-    // img.crossOrigin = "";
-    // img.src = "https://i.imgur.com/ZKMnXce.png";
-  },
-
   SetTexturePointer: function (texturePtr, imgSource, isWebGL1) {
     imgSource = Pointer_stringify(imgSource);
 
     console.log("pravs - SetTexturePointer (emscripten) - window.DCL.InitializeGIF()")
     console.log("pravs - SetTexturePointer (emscripten) - imgsource: " + imgSource)
-    console.log("pravs - SetTexturePointer (emscripten) - texturePtr: " + texturePtr)
-    console.log("pravs - SetTexturePointer (emscripten) - isWebGL1: " + isWebGL1)
 
     window.DCL.InitializeGIF(imgSource, function (image) {
       console.log("pravs - SetTexturePointer (emscripten) - CALLBACK CALLED!!!")

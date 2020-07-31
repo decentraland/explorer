@@ -131,11 +131,8 @@ public class NFTShapeLoaderController : MonoBehaviour
 
 #if UNITY_WEBGL && !UNITY_EDITOR
     [DllImport("__Internal")]
-    private static extern void GIFPlayerCreate();
-    [DllImport("__Internal")]
     private static extern void SetTexturePointer(IntPtr texturePtr, string imageSource, bool isWebGL1);
 #else
-    private static void GIFPlayerCreate() { }
     private static void SetTexturePointer(IntPtr texturePtr, string imageSource, bool isWebGL1) { }
 #endif
 
@@ -162,56 +159,31 @@ public class NFTShapeLoaderController : MonoBehaviour
             });
 
 
-        // We the "preview" 256px image
+        // We download the "preview" 256px image
         bool foundDCLImage = false;
         // if (!string.IsNullOrEmpty(previewImageURL))
         // {
-        //     // yield return Utils.FetchWrappedTextureAsset(previewImageURL, (downloadedAsset) =>
-        //     // {
-        //     //     foundDCLImage = true;
-        //     //     SetFrameImage(downloadedAsset, resizeFrameMesh: true);
-        //     // });
-
         //     yield return Utils.FetchTexture(previewImageURL, (tex) =>
         //     {
-        //         Debug.Log("pravs - 1 - finished fetching tex SUCCESS!!!");
-
         //         foundDCLImage = true;
-        //         UpdateTexture(tex);
 
-        //         // tex.GetNativeTexturePtr();
-        //         // bool isWebGL1 = SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.OpenGLES2
+        //         BindTextureToJSGIFPlayer(tex, previewImageURL);
 
-        //     }, (errorMessage) => Debug.Log("pravs - 1 - finished fetching tex FAIL!!! error: " + errorMessage));
+        //     }, (errorMessage) => Debug.Log(errorMessage));
         // }
 
         // We fall back to the nft original image which can have a really big size
         if (!foundDCLImage && !string.IsNullOrEmpty(originalImageURL))
         {
-            // yield return Utils.FetchWrappedTextureAsset(originalImageURL, (downloadedAsset) =>
-            // {
-            //     foundDCLImage = true;
-            //     SetFrameImage(downloadedAsset, resizeFrameMesh: true);
-            // }, DCL.WrappedTextureMaxSize._256);
-
             yield return Utils.FetchTexture(originalImageURL, (tex) =>
             {
                 Debug.Log("pravs - finished fetching tex SUCCESS!!! " + originalImageURL);
+                Debug.Log("pravs - fetched tex w:" + tex.width + ", h:" + tex.height);
 
                 foundDCLImage = true;
-                // UpdateTexture(tex);
 
-                Texture2D newTex = new Texture2D(tex.width, tex.height, TextureFormat.ARGB32, false);
-                newTex.wrapMode = TextureWrapMode.Clamp;
-                imageMaterial.SetTexture(BASEMAP_SHADER_PROPERTY, newTex);
-                imageMaterial.SetColor(COLOR_SHADER_PROPERTY, Color.white);
+                BindTextureToJSGIFPlayer(tex, originalImageURL);
 
-                bool isWebGL1 = SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.OpenGLES2;
-
-                SetTexturePointer(newTex.GetNativeTexturePtr(), originalImageURL, isWebGL1);
-
-                spinner?.SetActive(false);
-                OnLoadingAssetSuccess?.Invoke();
             }, (errorMessage) => Debug.Log("pravs - finished fetching tex FAIL!!! error: " + errorMessage));
         }
 
@@ -224,6 +196,24 @@ public class NFTShapeLoaderController : MonoBehaviour
         {
             OnLoadingAssetFail?.Invoke();
         }
+    }
+
+    void BindTextureToJSGIFPlayer(Texture2D tex, string texURL)
+    {
+        Debug.Log("pravs - finished fetching tex SUCCESS!!! " + texURL);
+        Debug.Log("pravs - fethed tex w:" + tex.width + ", h:" + tex.height);
+
+        Texture2D newTex = new Texture2D(tex.width, tex.height, TextureFormat.ARGB32, false);
+        newTex.wrapMode = TextureWrapMode.Clamp;
+        imageMaterial.SetTexture(BASEMAP_SHADER_PROPERTY, newTex);
+        imageMaterial.SetColor(COLOR_SHADER_PROPERTY, Color.white);
+
+        bool isWebGL1 = SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.OpenGLES2;
+
+        SetTexturePointer(newTex.GetNativeTexturePtr(), texURL, isWebGL1);
+
+        spinner?.SetActive(false);
+        OnLoadingAssetSuccess?.Invoke();
     }
 
     void SetFrameImage(DCL.IWrappedTextureAsset newAsset, bool resizeFrameMesh = false)
