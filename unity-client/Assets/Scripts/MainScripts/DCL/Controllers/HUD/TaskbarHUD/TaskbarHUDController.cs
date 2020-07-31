@@ -11,6 +11,7 @@ public class TaskbarHUDController : IHUD
     public WorldChatWindowHUDController worldChatWindowHud;
     public PrivateChatWindowHUDController privateChatWindowHud;
     public FriendsHUDController friendsHud;
+    public ExploreHUDController exploreHud;
 
     IMouseCatcher mouseCatcher;
     IChatController chatController;
@@ -265,6 +266,12 @@ public class TaskbarHUDController : IHUD
     {
         view.friendsButton.gameObject.SetActive(false);
         view.chatHeadsGroup.ClearChatHeads();
+    }
+
+    public void AddExploreHud(ExploreHUDController controller)
+    {
+        exploreHud = controller;
+        view.OnAddExploreHud();
     }
 
     private void OpenPrivateChatWindow(string userId)

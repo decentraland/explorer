@@ -12,6 +12,7 @@ public class TaskbarHUDView : MonoBehaviour
 
     [SerializeField] internal TaskbarButton chatButton;
     [SerializeField] internal TaskbarButton friendsButton;
+    [SerializeField] internal TaskbarButton exploreButton;
 
     [SerializeField] internal ChatHeadGroupView chatHeadsGroup;
 
@@ -47,6 +48,7 @@ public class TaskbarHUDView : MonoBehaviour
         chatHeadsGroup.Initialize(chatController, friendsController);
         chatButton.Initialize();
         friendsButton.Initialize();
+        exploreButton.Initialize();
 
         chatHeadsGroup.OnHeadToggleOn += OnWindowToggleOn;
         chatHeadsGroup.OnHeadToggleOff += OnWindowToggleOff;
@@ -56,6 +58,9 @@ public class TaskbarHUDView : MonoBehaviour
 
         friendsButton.OnToggleOn += OnWindowToggleOn;
         friendsButton.OnToggleOff += OnWindowToggleOff;
+
+        exploreButton.OnToggleOn += OnExploreHudToggleOn;
+        exploreButton.OnToggleOff += OnExploreHudToggleOff;
     }
 
     private void OnWindowToggleOff(TaskbarButton obj)
@@ -110,6 +115,16 @@ public class TaskbarHUDView : MonoBehaviour
         }
     }
 
+    private void OnExploreHudToggleOn(TaskbarButton obj)
+    {
+        controller.exploreHud.SetVisibility(true);
+    }
+
+    private void OnExploreHudToggleOff(TaskbarButton obj)
+    {
+        controller.exploreHud.SetVisibility(false);
+    }
+
     internal void OnAddChatWindow()
     {
         chatButton.gameObject.SetActive(true);
@@ -118,6 +133,11 @@ public class TaskbarHUDView : MonoBehaviour
     internal void OnAddFriendsWindow()
     {
         friendsButton.gameObject.SetActive(true);
+    }
+
+    internal void OnAddExploreHud()
+    {
+        exploreButton.gameObject.SetActive(true);
     }
 
     public void SetVisibility(bool visible)

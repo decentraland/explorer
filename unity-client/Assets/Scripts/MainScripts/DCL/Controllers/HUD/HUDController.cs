@@ -294,6 +294,11 @@ public class HUDController : MonoBehaviour
                 break;
             case HUDElementID.EXPLORE_HUD:
                 CreateHudElement<ExploreHUDController>(configuration, hudElementId);
+                ExploreHUDController controller = exploreHud;
+                if (controller != null)
+                {
+                    taskbarHud?.AddExploreHud(controller);
+                }
                 break;
         }
 
