@@ -62,6 +62,8 @@ public class HUDController : MonoBehaviour
 
     public ControlsHUDController controlsHud => GetHUDElement(HUDElementID.CONTROLS_HUD) as ControlsHUDController;
 
+    public ExploreHUDController exploreHud => GetHUDElement(HUDElementID.EXPLORE_HUD) as ExploreHUDController;
+
     public Dictionary<HUDElementID, IHUD> hudElements { get; private set; } = new Dictionary<HUDElementID, IHUD>();
 
     private UserProfile ownUserProfile => UserProfile.GetOwnUserProfile();
@@ -289,6 +291,9 @@ public class HUDController : MonoBehaviour
                 break;
             case HUDElementID.CONTROLS_HUD:
                 CreateHudElement<ControlsHUDController>(configuration, hudElementId);
+                break;
+            case HUDElementID.EXPLORE_HUD:
+                CreateHudElement<ExploreHUDController>(configuration, hudElementId);
                 break;
         }
 
