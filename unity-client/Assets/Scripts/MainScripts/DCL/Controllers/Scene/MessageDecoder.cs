@@ -98,7 +98,9 @@ namespace DCL
                 case MessagingTypes.INIT_DONE:
                     break;
                 case MessagingTypes.QUERY:
-                    queuedMessage.payload = sendSceneMessage.Query;
+                    QueryMessage query = new QueryMessage();
+                    DecodeQueryMessage(sendSceneMessage.Query.QueryId, sendSceneMessage.Query.Payload, ref query);
+                    queuedMessage.payload = query;
                     break;
                 case MessagingTypes.ENTITY_CREATE:
                     queuedMessage.payload = Protocol.CreateEntity.FromPB(sendSceneMessage.CreateEntity);

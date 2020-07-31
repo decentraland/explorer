@@ -1,6 +1,6 @@
 import { ReadOnlyVector3, Vector3, Matrix } from './math'
 import { RaycastResponse } from './Events'
-import { uuid, log } from '../ecs/helpers'
+import { uuid, log, newId, newIdBase10 } from '../ecs/helpers'
 
 /** @internal */
 import { DecentralandInterface } from './Types'
@@ -15,8 +15,8 @@ export type QueryType = 'HitFirst' | 'HitAll' | 'HitFirstAvatar' | 'HitAllAvatar
  * @internal
  */
 enum QueryPrefix {
-  HitFirst = 'rqhf',
-  HitAll = 'rqha'
+  HitFirst = 10000,
+  HitAll = 20000
 }
 
 /**
@@ -156,7 +156,7 @@ export class PhysicsCast implements IPhysicsCast {
   }
 
   public hitFirst(ray: Ray, hitCallback: (event: RaycastHitEntity) => void, id?: number) {
-    const queryId = typeof id === 'number' ? QueryPrefix.HitFirst + id : uuid()
+    const queryId = typeof id === 'number' ? QueryPrefix.HitFirst + id : newIdBase10()
 
     this.queries[queryId] = hitCallback as (event: RaycastHit) => void
 
@@ -164,7 +164,7 @@ export class PhysicsCast implements IPhysicsCast {
   }
 
   public hitAll(ray: Ray, hitCallback: (event: RaycastHitEntities) => void, id?: number) {
-    const queryId = typeof id === 'number' ? QueryPrefix.HitAll + id : uuid()
+    const queryId = typeof id === 'number' ? QueryPrefix.HitAll + id : newIdBase10()
 
     this.queries[queryId] = hitCallback as (event: RaycastHit) => void
 

@@ -720,7 +720,6 @@ namespace DCL
                         break;
                     }
 
-                    //NOTE(Brian): EntityComponent messages
                     case MessagingTypes.ENTITY_COMPONENT_CREATE_OR_UPDATE:
                     {
                         if (msgObject.payload is Protocol.EntityComponentCreateOrUpdate payload)
@@ -737,7 +736,6 @@ namespace DCL
                         break;
                     }
 
-                    //NOTE(Brian): SharedComponent messages
                     case MessagingTypes.SHARED_COMPONENT_ATTACH:
                     {
                         if (msgObject.payload is Protocol.SharedComponentAttach payload)
@@ -753,45 +751,55 @@ namespace DCL
 
                         break;
                     }
+
                     case MessagingTypes.SHARED_COMPONENT_DISPOSE:
                     {
                         if (msgObject.payload is Protocol.SharedComponentDispose payload)
                             scene.SharedComponentDispose(payload.id);
                         break;
                     }
+
                     case MessagingTypes.SHARED_COMPONENT_UPDATE:
                     {
                         if (msgObject.payload is Protocol.SharedComponentUpdate payload)
                             scene.SharedComponentUpdate(payload.componentId, payload.json, out yieldInstruction);
                         break;
                     }
+
                     case MessagingTypes.ENTITY_DESTROY:
                     {
                         if (msgObject.payload is Protocol.RemoveEntity payload)
                             scene.RemoveEntity(payload.entityId);
                         break;
                     }
+
                     case MessagingTypes.INIT_DONE:
+                    {
                         scene.SetInitMessagesDone();
                         break;
+                    }
+
                     case MessagingTypes.QUERY:
                     {
-                        PB_SendSceneMessage payload = msgObject.payload as PB_SendSceneMessage;
-                        ParseQuery(payload.Query.QueryId, payload.Query.Payload, scene.sceneData.id);
+                        if (msgObject.payload is QueryMessage queryMessage)
+                            ParseQuery(queryMessage.queryId, queryMessage.payload, scene.sceneData.id);
                         break;
                     }
+
                     case MessagingTypes.OPEN_EXTERNAL_URL:
                     {
                         if (msgObject.payload is Protocol.OpenExternalUrl payload)
                             OnOpenExternalUrlRequest?.Invoke(scene, payload.url);
                         break;
                     }
+
                     case MessagingTypes.OPEN_NFT_DIALOG:
                     {
                         if (msgObject.payload is Protocol.OpenNftDialog payload)
                             OnOpenNFTDialogRequest?.Invoke(payload.contactAddress, payload.tokenId, payload.comment);
                         break;
                     }
+
                     default:
                         Debug.LogError($"Unknown method {method}");
                         return true;
@@ -832,22 +840,18 @@ namespace DCL
             return worldPosition - Utils.GridToWorldPosition(scene.sceneData.basePosition.x, scene.sceneData.basePosition.y);
         }
 
-        public void ParseQuery(string queryId, string payload, string sceneId)
+        public void ParseQuery(string queryId, RaycastQuery payload, string sceneId)
         {
-            QueryMessage query = new QueryMessage();
-
-            MessageDecoder.DecodeQueryMessage(queryId, payload, ref query);
-
             ParcelScene scene = loadedScenes[sceneId];
 
-            Vector3 worldOrigin = query.payload.ray.origin + Utils.GridToWorldPosition(scene.sceneData.basePosition.x, scene.sceneData.basePosition.y);
-            query.payload.ray.unityOrigin = DCLCharacterController.i.characterPosition.WorldToUnityPosition(worldOrigin);
+            Vector3 worldOrigin = payload.ray.origin + Utils.GridToWorldPosition(scene.sceneData.basePosition.x, scene.sceneData.basePosition.y);
+            payload.ray.unityOrigin = DCLCharacterController.i.characterPosition.WorldToUnityPosition(worldOrigin);
 
-            switch (query.queryId)
+            switch (queryId)
             {
                 case "raycast":
-                    query.payload.sceneId = sceneId;
-                    PhysicsCast.i.Query(query.payload);
+                    payload.sceneId = sceneId;
+                    PhysicsCast.i.Query(payload);
                     break;
             }
         }

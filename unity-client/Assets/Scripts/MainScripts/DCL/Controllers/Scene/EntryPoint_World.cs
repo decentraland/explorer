@@ -163,11 +163,12 @@ public class EntryPoint_World
     {
         MessagingBus.QueuedSceneMessage_Scene queuedMessage = GetSceneMessageInstance();
 
-        Protocol.SharedComponentUpdate payload = new Protocol.SharedComponentUpdate()
-        {
-            componentId = id,
-            json = json
-        };
+        Protocol.SharedComponentUpdate payload =
+            new Protocol.SharedComponentUpdate
+            {
+                componentId = id,
+                json = json
+            };
 
         queuedMessage.payload = payload;
         queuedMessage.method = MessagingTypes.SHARED_COMPONENT_UPDATE;
@@ -180,10 +181,11 @@ public class EntryPoint_World
     {
         MessagingBus.QueuedSceneMessage_Scene queuedMessage = GetSceneMessageInstance();
 
-        Protocol.SharedComponentDispose payload = new Protocol.SharedComponentDispose()
-        {
-            id = id
-        };
+        Protocol.SharedComponentDispose payload =
+            new Protocol.SharedComponentDispose
+            {
+                id = id
+            };
 
         queuedMessage.payload = payload;
         queuedMessage.method = MessagingTypes.SHARED_COMPONENT_DISPOSE;
@@ -196,11 +198,12 @@ public class EntryPoint_World
     {
         MessagingBus.QueuedSceneMessage_Scene queuedMessage = GetSceneMessageInstance();
 
-        Protocol.SharedComponentCreate payload = new Protocol.SharedComponentCreate()
-        {
-            id = id,
-            classId = classId
-        };
+        Protocol.SharedComponentCreate payload =
+            new Protocol.SharedComponentCreate
+            {
+                id = id,
+                classId = classId
+            };
 
         queuedMessage.payload = payload;
         queuedMessage.method = MessagingTypes.SHARED_COMPONENT_CREATE;
@@ -213,12 +216,13 @@ public class EntryPoint_World
     {
         MessagingBus.QueuedSceneMessage_Scene queuedMessage = GetSceneMessageInstance();
 
-        Protocol.EntityComponentCreateOrUpdate payload = new Protocol.EntityComponentCreateOrUpdate
-        {
-            entityId = currentEntityId,
-            classId = classId,
-            json = json
-        };
+        Protocol.EntityComponentCreateOrUpdate payload =
+            new Protocol.EntityComponentCreateOrUpdate
+            {
+                entityId = currentEntityId,
+                classId = classId,
+                json = json
+            };
 
         queuedMessage.payload = payload;
         queuedMessage.method = MessagingTypes.ENTITY_COMPONENT_CREATE_OR_UPDATE;
@@ -231,11 +235,12 @@ public class EntryPoint_World
     {
         MessagingBus.QueuedSceneMessage_Scene queuedMessage = GetSceneMessageInstance();
 
-        Protocol.SetEntityParent payload = new Protocol.SetEntityParent
-        {
-            entityId = currentEntityId,
-            parentId = parentId
-        };
+        Protocol.SetEntityParent payload =
+            new Protocol.SetEntityParent
+            {
+                entityId = currentEntityId,
+                parentId = parentId
+            };
 
         queuedMessage.payload = payload;
         queuedMessage.method = MessagingTypes.ENTITY_REPARENT;
@@ -266,10 +271,11 @@ public class EntryPoint_World
     {
         MessagingBus.QueuedSceneMessage_Scene queuedMessage = GetSceneMessageInstance();
 
-        Protocol.CreateEntity payload = new Protocol.CreateEntity
-        {
-            entityId = currentEntityId
-        };
+        Protocol.CreateEntity payload =
+            new Protocol.CreateEntity
+            {
+                entityId = currentEntityId
+            };
 
         queuedMessage.payload = payload;
         queuedMessage.method = MessagingTypes.ENTITY_CREATE;
@@ -281,10 +287,11 @@ public class EntryPoint_World
     private static void RemoveEntity()
     {
         MessagingBus.QueuedSceneMessage_Scene queuedMessage = GetSceneMessageInstance();
-        Protocol.RemoveEntity payload = new Protocol.RemoveEntity()
-        {
-            entityId = currentEntityId
-        };
+        Protocol.RemoveEntity payload =
+            new Protocol.RemoveEntity()
+            {
+                entityId = currentEntityId
+            };
 
         queuedMessage.payload = payload;
         queuedMessage.method = MessagingTypes.ENTITY_DESTROY;

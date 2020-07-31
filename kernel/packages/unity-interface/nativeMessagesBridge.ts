@@ -90,7 +90,7 @@ export class NativeMessagesBridge {
       'string'
     ])
 
-    this.__entityComponentDestroy = this.unityModule.cwrap('call_EntityComponentRemove', null, ['string'])
+    this.__entityComponentDestroy = this.unityModule.cwrap('call_EntityComponentDestroy', null, ['string'])
 
     this.__sharedComponentCreate = this.unityModule.cwrap('call_SharedComponentCreate', null, ['number', 'string'])
     this.__sharedComponentAttach = this.unityModule.cwrap('call_SharedComponentAttach', null, ['string', 'string'])
@@ -168,7 +168,7 @@ export class NativeMessagesBridge {
     let queryType = this.queryTypeToId(queryPayload.queryId as QueryType)
 
     this.unityModule.HEAP32[alignedPtr++] = queryType
-    this.unityModule.HEAP32[alignedPtr++] = parseInt(queryPayload.payload.queryId, 36)
+    this.unityModule.HEAP32[alignedPtr++] = parseInt(queryPayload.payload.queryId, 10)
     this.unityModule.HEAP32[alignedPtr++] = queryType
     this.unityModule.HEAPF32[alignedPtr++] = queryPayload.payload.ray.origin.x
     this.unityModule.HEAPF32[alignedPtr++] = queryPayload.payload.ray.origin.y
