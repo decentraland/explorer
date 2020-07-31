@@ -2,12 +2,16 @@ using DCL.Controllers;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+#if UNITY_WEBGL && !UNITY_EDITOR
+using Kongregate;
+#endif
 
 namespace DCL
 {
     public class MemoryManager : Singleton<MemoryManager>
     {
-        private const float TIME_TO_POOL_CLEANUP = 60.0f;
+        private const float TIME_TO_CHECK_MEMORY_USE = 0.1f;
+        private const float FREE_MEMORY_PERCENTAGE_LIMIT = 10.0f;
 
         public void Initialize()
         {
@@ -27,10 +31,15 @@ namespace DCL
             };
         }
 
-        // TODO: here we'll define cleanup criteria
         bool NeedsMemoryCleanup()
         {
-            return true;
+#if UNITY_WEBGL && !UNITY_EDITOR
+            float freeMemory = WebGLMemoryStats.GetFreeMemorySize() * 100f / WebGLMemoryStats.GetTotalMemorySize();
+#else
+            float freeMemory = 0f;
+#endif
+
+            return freeMemory <= FREE_MEMORY_PERCENTAGE_LIMIT;
         }
 
         IEnumerator AutoCleanup()
@@ -42,7 +51,7 @@ namespace DCL
                     yield return CleanupPoolsIfNeeded();
                 }
 
-                yield return new WaitForSecondsRealtime(0.1f);
+                yield return new WaitForSecondsRealtime(TIME_TO_CHECK_MEMORY_USE);
             }
         }
 
@@ -54,8 +63,7 @@ namespace DCL
             if (pool.persistent)
                 return false;
 
-            bool timeout = Time.unscaledTime - pool.lastGetTime >= TIME_TO_POOL_CLEANUP;
-            return timeout && pool.usedObjectsCount == 0;
+            return pool.usedObjectsCount == 0;
         }
 
         public IEnumerator CleanupPoolsIfNeeded(bool forceCleanup = false)
