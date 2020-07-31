@@ -2,12 +2,16 @@ using DCL.Controllers;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+#if UNITY_WEBGL && !UNITY_EDITOR
+using Kongregate;
+#endif
 
 namespace DCL
 {
     public class MemoryManager : Singleton<MemoryManager>
     {
-        private const float TIME_TO_POOL_CLEANUP = 60.0f;
+        private const uint MAX_USED_MEMORY_MB = 1500 * 1024 * 1024;
+        private const float TIME_BETWEEN_USED_MEMORY_CHECK = 0.1f;
 
         public void Initialize()
         {
@@ -20,17 +24,21 @@ namespace DCL
             {
                 if (isEnable)
                 {
-                    MemoryManager.i.CleanupPoolsIfNeeded();
                     ParcelScene.parcelScenesCleaner.ForceCleanup();
                     Resources.UnloadUnusedAssets();
                 }
             };
         }
 
-        // TODO: here we'll define cleanup criteria
         bool NeedsMemoryCleanup()
         {
-            return true;
+            var usedMemory = 0;
+
+#if UNITY_WEBGL && !UNITY_EDITOR
+            usedMemory = WebGLMemoryStats.GetUsedMemorySize();
+#endif
+
+            return usedMemory >= MAX_USED_MEMORY_MB;
         }
 
         IEnumerator AutoCleanup()
@@ -42,7 +50,7 @@ namespace DCL
                     yield return CleanupPoolsIfNeeded();
                 }
 
-                yield return new WaitForSecondsRealtime(0.1f);
+                yield return new WaitForSecondsRealtime(TIME_BETWEEN_USED_MEMORY_CHECK);
             }
         }
 
@@ -54,8 +62,7 @@ namespace DCL
             if (pool.persistent)
                 return false;
 
-            bool timeout = Time.unscaledTime - pool.lastGetTime >= TIME_TO_POOL_CLEANUP;
-            return timeout && pool.usedObjectsCount == 0;
+            return pool.usedObjectsCount == 0;
         }
 
         public IEnumerator CleanupPoolsIfNeeded(bool forceCleanup = false)
