@@ -19,6 +19,7 @@ public class PoolsCounterDisplay : MonoBehaviour
 
 #if UNITY_WEBGL && !UNITY_EDITOR
         targetText += $"Used Memory: {WebGLMemoryStats.GetUsedMemorySize() / 1024 / 1024}MB/{WebGLMemoryStats.GetTotalMemorySize() / 1024 / 1024}MB ({(WebGLMemoryStats.GetFreeMemorySize() * 100f / WebGLMemoryStats.GetTotalMemorySize()).ToString("##.00")}%)\n";
+        targetText += $"Free Memory: {(WebGLMemoryStats.GetFreeMemorySize() * 100f / WebGLMemoryStats.GetTotalMemorySize()).ToString("##.00")}%\n";
 #endif
 
         targetText += $"Total Pools: {PoolManager.i.pools.Count} (Not Persistent: {PoolManager.i.pools.Count(p => !p.Value.persistent)})\n";
