@@ -10,8 +10,8 @@ namespace DCL
 {
     public class MemoryManager : Singleton<MemoryManager>
     {
-        private const uint MAX_USED_MEMORY = 1500 * 1024 * 1024;
-        private const float TIME_BETWEEN_USED_MEMORY_CHECK = 0.1f;
+        private const uint MAX_USED_MEMORY = 1800 * 1024 * 1024;
+        private const float TIME_FOR_NEW_MEMORY_CHECK = 1.0f;
 
         public void Initialize()
         {
@@ -50,7 +50,7 @@ namespace DCL
                     yield return CleanupPoolsIfNeeded();
                 }
 
-                yield return new WaitForSecondsRealtime(TIME_BETWEEN_USED_MEMORY_CHECK);
+                yield return new WaitForSecondsRealtime(TIME_FOR_NEW_MEMORY_CHECK);
             }
         }
 
