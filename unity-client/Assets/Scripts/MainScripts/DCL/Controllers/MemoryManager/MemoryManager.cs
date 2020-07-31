@@ -10,7 +10,7 @@ namespace DCL
 {
     public class MemoryManager : Singleton<MemoryManager>
     {
-        private const uint MAX_USED_MEMORY_MB = 1500 * 1024 * 1024;
+        private const uint MAX_USED_MEMORY = 1500 * 1024 * 1024;
         private const float TIME_BETWEEN_USED_MEMORY_CHECK = 0.1f;
 
         public void Initialize()
@@ -38,7 +38,7 @@ namespace DCL
             usedMemory = WebGLMemoryStats.GetUsedMemorySize();
 #endif
 
-            return usedMemory >= MAX_USED_MEMORY_MB;
+            return usedMemory >= MAX_USED_MEMORY;
         }
 
         IEnumerator AutoCleanup()
