@@ -118,12 +118,10 @@ namespace DCL
 
         private void HitFirstAvatar(RaycastQuery query)
         {
-
         }
 
         private void HitAllAvatars(RaycastQuery query)
         {
-
         }
 
         private UnityEngine.Ray GetUnityRayFromQuery(RaycastQuery query)

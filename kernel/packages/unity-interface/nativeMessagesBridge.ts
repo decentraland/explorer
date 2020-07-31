@@ -15,93 +15,103 @@ import {
   EntityActionType
 } from 'shared/types'
 import { PB_OpenExternalUrl } from 'shared/proto/engineinterface_pb'
+import { QueryType } from 'decentraland-ecs/src'
 
 export class NativeMessagesBridge {
+
   private __createEntity!: () => void
   private __removeEntity!: () => void
   private __sceneReady!: () => void
+
+  private __setTag!: (tag: string) => void
   private __setSceneId!: (sceneId: string) => void
   private __setEntityId!: (entityId: string) => void
+
   private __setEntityParent!: (parentId: string) => void
 
   private __entityComponentCreateOrUpdate!: (classId: number, json: string) => void
   private __entityComponentDestroy!: (name: string) => void
 
-  private __sharedComponentCreate!: (classId: number, id: string, name: string) => void
-  private __sharedComponentAttach!: (id: string, name: string) => void
+  private __sharedComponentCreate!: (classId: number, id: string) => void
+  private __sharedComponentAttach!: (id: string) => void
   private __sharedComponentUpdate!: (id: string, json: string) => void
   private __sharedComponentDispose!: (id: string) => void
 
   private __openNftDialog!: (contactAddress: string, comment: string) => void
   private __openExternalUrl!: (url: string) => void
-  private __query!: (payload: QueryPayload) => void
+  private __query!: (payload: number) => void
 
   private __loadParcelScene!: (scene: LoadableParcelScene) => void
   private __updateParcelScene!: (scene: LoadableParcelScene) => void
   private __unloadParcelScene!: (sceneId: string) => void
 
   private currentSceneId: string = ''
+  private currentTag: string = ''
   private currentEntityId: string = ''
 
-  //private currentTag: number = 0
+  private unityModule: any
+
+  private queryMemBlockPtr: number = 0
+
+  queryTypeToId( type:QueryType ) : number { 
+    switch (type) {
+      case 'HitFirst':
+        return 1
+      case 'HitAll':
+        return 2
+      case 'HitFirstAvatar':
+        return 3
+      case 'HitAllAvatars':
+        return 4
+      default:
+        return 0
+    }
+  }
 
   public initNativeMessages(gameInstance: any) {
-    let unityModule: any = gameInstance.Module
+    this.unityModule = gameInstance.Module
 
-    if (!unityModule) {
+    if (!this.unityModule) {
       console.error('Unity module not found! Are you in WSS mode?')
       return
     }
 
-    // this.__loadParcelScene = unityModule.cwrap('call_LoadParcelScene', null, ['number'])
-    // this.__updateParcelScene = unityModule.cwrap('call_UpdateParcelScene', null, ['number'])
-    // this.__unloadParcelScene = unityModule.cwrap('call_UnloadParcelScene', null, ['string'])
+    const QUERY_MEM_SIZE = 40
+    this.queryMemBlockPtr = this.unityModule._malloc(QUERY_MEM_SIZE)
 
-    this.__setEntityId = unityModule.cwrap('call_SetEntityId', null, ['string'])
-    this.__setSceneId = unityModule.cwrap('call_SetSceneId', null, ['string'])
-    this.__setEntityParent = unityModule.cwrap('call_SetEntityParent', null, ['string'])
-    
-    this.__entityComponentCreateOrUpdate = unityModule.cwrap('call_EntityComponentCreateOrUpdate', null, [
+    this.__setEntityId = this.unityModule.cwrap('call_SetEntityId', null, ['string'])
+    this.__setSceneId = this.unityModule.cwrap('call_SetSceneId', null, ['string'])
+    this.__setTag = this.unityModule.cwrap('call_SetTag', null, ['string'])
+
+    this.__setEntityParent = this.unityModule.cwrap('call_SetEntityParent', null, ['string'])
+
+    this.__entityComponentCreateOrUpdate = this.unityModule.cwrap('call_EntityComponentCreateOrUpdate', null, [
       'number',
       'string'
     ])
-    this.__entityComponentDestroy = unityModule.cwrap('call_EntityComponentRemove', null, ['string'])
 
-    this.__sharedComponentCreate = unityModule.cwrap('call_SharedComponentCreate', null, ['number', 'string'])
-    this.__sharedComponentAttach = unityModule.cwrap('call_SharedComponentAttach', null, ['string', 'string'])
-    this.__sharedComponentUpdate = unityModule.cwrap('call_SharedComponentUpdate', null, ['string', 'string'])
-    this.__sharedComponentDispose = unityModule.cwrap('call_SharedComponentDispose', null, ['string'])
-    
-    this.__openNftDialog = unityModule.cwrap('call_OpenNftDialog', null, ['string', 'string'])
-    this.__openExternalUrl = unityModule.cwrap('call_OpenExternalUrl', null, ['string'])
-    this.__query = unityModule.cwrap('call_Query', null, ['number'])
+    this.__entityComponentDestroy = this.unityModule.cwrap('call_EntityComponentRemove', null, ['string'])
 
-    this.__createEntity = unityModule.cwrap('call_CreateEntity', null, [])
-    this.__removeEntity = unityModule.cwrap('call_RemoveEntity', null, [])
-    this.__sceneReady = unityModule.cwrap('call_SceneReady', null, [])
-    console.log('Init native messages...')
+    this.__sharedComponentCreate = this.unityModule.cwrap('call_SharedComponentCreate', null, ['number', 'string'])
+    this.__sharedComponentAttach = this.unityModule.cwrap('call_SharedComponentAttach', null, ['string', 'string'])
+    this.__sharedComponentUpdate = this.unityModule.cwrap('call_SharedComponentUpdate', null, ['string', 'string'])
+    this.__sharedComponentDispose = this.unityModule.cwrap('call_SharedComponentDispose', null, ['string'])
+
+    this.__openNftDialog = this.unityModule.cwrap('call_OpenNftDialog', null, ['string', 'string'])
+    this.__openExternalUrl = this.unityModule.cwrap('call_OpenExternalUrl', null, ['string'])
+    this.__query = this.unityModule.cwrap('call_Query', null, ['number'])
+
+    this.__createEntity = this.unityModule.cwrap('call_CreateEntity', null, [])
+    this.__removeEntity = this.unityModule.cwrap('call_RemoveEntity', null, [])
+    this.__sceneReady = this.unityModule.cwrap('call_SceneReady', null, [])
   }
 
   public optimizeSendMessage() {
     //no-op
   }
 
-  // | 'UpdateEntityComponent'
-  // | 'AttachEntityComponent'
-  // | 'ComponentCreated'
-  // | 'ComponentDisposed'
-  // | 'ComponentRemoved'
-  // | 'ComponentUpdated'
   public isMethodSupported(method: EntityActionType): boolean {
-    return method !== 'Query'
-    // return (
-    //   method === 'CreateEntity' ||
-    //   method === 'RemoveEntity' ||
-    //   method === 'SetEntityParent' ||
-    //   method === 'InitMessagesFinished' ||
-    //   method === 'UpdateEntityComponent' ||
-    //   method === 'AttachEntityComponent' ||
-    // )
+    return true
   }
 
   setSceneId(sceneId: string) {
@@ -119,7 +129,10 @@ export class NativeMessagesBridge {
   }
 
   setTag(tag: string) {
-    //this.currentTag = tag
+    if (tag !== this.currentTag) {
+      this.__setTag(tag)
+    }
+    this.currentTag = tag
   }
 
   createEntity(payload: CreateEntityPayload) {
@@ -149,8 +162,23 @@ export class NativeMessagesBridge {
     this.__openExternalUrl(payload.getUrl())
   }
 
-  query(payload: QueryPayload) {
-    this.__query(payload)
+  query(queryPayload: QueryPayload) {
+    let alignedPtr = this.queryMemBlockPtr >> 2
+
+    let queryType = this.queryTypeToId(queryPayload.queryId as QueryType)
+
+    this.unityModule.HEAP32[alignedPtr++] = queryType
+    this.unityModule.HEAP32[alignedPtr++] = parseInt(queryPayload.payload.queryId, 36)
+    this.unityModule.HEAP32[alignedPtr++] = queryType
+    this.unityModule.HEAPF32[alignedPtr++] = queryPayload.payload.ray.origin.x
+    this.unityModule.HEAPF32[alignedPtr++] = queryPayload.payload.ray.origin.y
+    this.unityModule.HEAPF32[alignedPtr++] = queryPayload.payload.ray.origin.z
+    this.unityModule.HEAPF32[alignedPtr++] = queryPayload.payload.ray.direction.x
+    this.unityModule.HEAPF32[alignedPtr++] = queryPayload.payload.ray.direction.y
+    this.unityModule.HEAPF32[alignedPtr++] = queryPayload.payload.ray.direction.z
+    this.unityModule.HEAPF32[alignedPtr++] = queryPayload.payload.ray.distance
+
+    this.__query(this.queryMemBlockPtr)  
   }
 
   sharedComponentUpdate(payload: ComponentUpdatedPayload) {
@@ -167,12 +195,12 @@ export class NativeMessagesBridge {
   }
 
   sharedComponentCreate(payload: ComponentCreatedPayload) {
-    this.__sharedComponentCreate(payload.classId, payload.id, payload.name)
+    this.__sharedComponentCreate(payload.classId, payload.id)
   }
 
   sharedComponentAttach(payload: AttachEntityComponentPayload) {
     this.setEntityId(payload.entityId)
-    this.__sharedComponentAttach(payload.id, payload.name)
+    this.__sharedComponentAttach(payload.id)
   }
 
   entityComponentCreateOrUpdate(payload: UpdateEntityComponentPayload) {
@@ -195,7 +223,9 @@ export class NativeMessagesBridge {
   public SendNativeMessage(parcelSceneId: string, action: EntityAction): void {
     this.setSceneId(parcelSceneId)
 
-    if (action.tag !== undefined) this.setTag(action.tag)
+    if (action.tag !== undefined) { 
+      this.setTag(action.tag)
+    }
 
     switch (action.type) {
       case 'CreateEntity':
@@ -240,16 +270,3 @@ export class NativeMessagesBridge {
     }
   }
 }
-
-// tslint:disable:no-unused-variable
-// function asciiToInt(s: string): number {
-//   let result: number = 0
-//   for (let i = 0; i < s.length; i++) {
-//     let char = s.charCodeAt(i)
-//     result |= char
-//     if (i < s.length - 1) {
-//       result <<= 8
-//     }
-//   }
-//   return result
-// }

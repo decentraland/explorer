@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System;
+using System.Runtime.InteropServices;
 using DCL;
 using DCL.Interface;
 using DCL.Models;
@@ -7,6 +8,7 @@ public class EntryPoint_World
 {
     private static string currentEntityId;
     private static string currentSceneId;
+    private static string currentTag;
 
     private static SceneController sceneController;
 
@@ -15,6 +17,8 @@ public class EntryPoint_World
     delegate void JS_Delegate_VSS(string a, string b);
 
     delegate void JS_Delegate_VS(string a);
+
+    delegate void JS_Delegate_Query(Protocol.QueryPayload a);
 
     delegate void JS_Delegate_V();
 
@@ -28,6 +32,7 @@ public class EntryPoint_World
 
         SetCallback_SetEntityId(SetEntityId);
         SetCallback_SetSceneId(SetSceneId);
+        SetCallback_SetTag(SetTag);
 
         SetCallback_SetEntityParent(SetEntityParent);
 
@@ -112,13 +117,43 @@ public class EntryPoint_World
         sceneController.EnqueueSceneMessage(queuedMessage);
     }
 
-    [MonoPInvokeCallback(typeof(JS_Delegate_VS))]
-    private static void Query(string a)
+    [MonoPInvokeCallback(typeof(JS_Delegate_Query))]
+    private static void Query(Protocol.QueryPayload payload)
     {
         MessagingBus.QueuedSceneMessage_Scene queuedMessage = GetSceneMessageInstance();
 
-        //TODO(Brian): Implement this message
+        string queryId = Convert.ToString(payload.queryId);
+        string queryType = "";
+
+        switch (payload.raycastQueryPayload.queryType)
+        {
+            case 1:
+                queryType = "HitFirst";
+                break;
+            case 2:
+                queryType = "HitAll";
+                break;
+            case 3:
+                queryType = "HitFirstAvatar";
+                break;
+            case 4:
+                queryType = "HitAllAvatars";
+                break;
+        }
+
+        Ray ray = new Ray()
+        {
+            origin = payload.raycastQueryPayload.origin,
+            direction = payload.raycastQueryPayload.direction,
+            distance = payload.raycastQueryPayload.distance
+        };
+
         queuedMessage.method = MessagingTypes.QUERY;
+        queuedMessage.payload = new QueryMessage()
+        {
+            queryId = queryId,
+            payload = new RaycastQuery() {queryId = queryId, queryType = queryType, ray = ray, sceneId = currentSceneId}
+        };
 
         sceneController.EnqueueSceneMessage(queuedMessage);
     }
@@ -220,6 +255,12 @@ public class EntryPoint_World
         currentSceneId = id;
     }
 
+    [MonoPInvokeCallback(typeof(JS_Delegate_VS))]
+    private static void SetTag(string id)
+    {
+        currentTag = id;
+    }
+
     [MonoPInvokeCallback(typeof(JS_Delegate_V))]
     private static void CreateEntity()
     {
@@ -263,13 +304,14 @@ public class EntryPoint_World
     private static MessagingBus.QueuedSceneMessage_Scene GetSceneMessageInstance()
     {
         MessagingBus.QueuedSceneMessage_Scene message;
+
         if (sceneController.sceneMessagesPool.Count > 0)
             message = sceneController.sceneMessagesPool.Dequeue();
-
-        message = new MessagingBus.QueuedSceneMessage_Scene();
+        else
+            message = new MessagingBus.QueuedSceneMessage_Scene();
 
         message.sceneId = currentSceneId;
-        message.tag = currentSceneId;
+        message.tag = currentTag;
         message.type = MessagingBus.QueuedSceneMessage.Type.SCENE_MESSAGE;
 
         return message;
@@ -319,5 +361,8 @@ public class EntryPoint_World
     private static extern void SetCallback_SharedComponentCreate(JS_Delegate_VIS callback);
 
     [DllImport("__Internal")]
-    private static extern void SetCallback_Query(JS_Delegate_VS callback);
+    private static extern void SetCallback_SetTag(JS_Delegate_VS callback);
+
+    [DllImport("__Internal")]
+    private static extern void SetCallback_Query(JS_Delegate_Query callback);
 }

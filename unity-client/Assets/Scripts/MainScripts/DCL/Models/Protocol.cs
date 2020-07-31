@@ -208,6 +208,23 @@ namespace DCL.Models
                 return new OpenNftDialog() {contactAddress = pbPayload.AssetContractAddress, comment = pbPayload.Comment, tokenId = pbPayload.TokenId};
             }
         }
+
+        [System.Serializable]
+        public struct QueryPayload
+        {
+            public int queryId;
+            public RaycastQueryPayload raycastQueryPayload;
+        }
+
+        [System.Serializable]
+        public struct RaycastQueryPayload
+        {
+            public int queryId;
+            public int queryType;
+            public Vector3 origin;
+            public Vector3 direction;
+            public float distance;
+        }
     }
 
     [System.Serializable]
@@ -228,18 +245,16 @@ namespace DCL.Models
         }
     }
 
-
-    //-----------------------------------------------------
-    // Raycast
+//-----------------------------------------------------
+// Raycast
     [System.Serializable]
     public class Ray
     {
         public Vector3 origin;
-
-        [System.NonSerialized] public Vector3 unityOrigin;
-
         public Vector3 direction;
         public float distance;
+
+        [System.NonSerialized] public Vector3 unityOrigin;
     }
 
 
@@ -261,7 +276,6 @@ namespace DCL.Models
         public void FromJSON(string rawJson)
         {
             queryId = default(string);
-
             JsonUtility.FromJsonOverwrite(rawJson, this);
         }
     }

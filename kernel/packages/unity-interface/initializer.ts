@@ -66,10 +66,9 @@ export async function initializeUnity(
   }
 
   global['globalStore'].dispatch(waitingForRenderer())
+
   await all
   await engineInitialized
-
-
 
   return {
     engine: _gameInstance,

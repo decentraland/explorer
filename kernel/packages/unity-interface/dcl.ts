@@ -411,7 +411,6 @@ export const unityInterface = {
   debug: false,
 
   InitCallbacks() {
-    console.log('Init callbacks?')
     if (!WSS_ENABLED) {
       nativeMsgBridge.initNativeMessages(gameInstance)
     }

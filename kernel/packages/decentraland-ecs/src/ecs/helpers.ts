@@ -42,6 +42,10 @@ export function newId(type: string) {
   return type + lastGeneratedId.toString(36)
 }
 
+export function idToNumber(id:string) : number {
+  return parseInt(id, 36)
+}
+
 /**
  * @internal
  */

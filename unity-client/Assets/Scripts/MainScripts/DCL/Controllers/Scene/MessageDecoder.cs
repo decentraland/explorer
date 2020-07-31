@@ -1,3 +1,4 @@
+using System.Net;
 using UnityEngine;
 using DCL.Interface;
 using DCL.Models;
@@ -161,7 +162,7 @@ namespace DCL
             query.payload = new RaycastQuery();
             query.payload.queryId = pbRayQuery.QueryId;
             query.payload.queryType = pbRayQuery.QueryType;
-            query.payload.ray = new Models.Ray();
+            query.payload.ray = new DCL.Models.Ray();
             query.payload.ray.direction = new Vector3(pbRayQuery.Ray.Direction.X, pbRayQuery.Ray.Direction.Y, pbRayQuery.Ray.Direction.Z);
             query.payload.ray.distance = pbRayQuery.Ray.Distance;
             query.payload.ray.origin = new Vector3(pbRayQuery.Ray.Origin.X, pbRayQuery.Ray.Origin.Y, pbRayQuery.Ray.Origin.Z);

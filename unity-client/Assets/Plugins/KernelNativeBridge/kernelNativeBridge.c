@@ -39,12 +39,22 @@ void EMSCRIPTEN_KEEPALIVE call_ ## NAME_PARAM(int32_t a, char* b) {\
 	cb_ ## NAME_PARAM(a, b);\
 }\
 
+#define EXTERNAL_CALLBACK_QUERY(NAME_PARAM)\
+callback_query cb_ ## NAME_PARAM;\
+void SetCallback_ ## NAME_PARAM(callback_query NAME_PARAM) {\
+cb_ ## NAME_PARAM = NAME_PARAM;\
+}\
+void EMSCRIPTEN_KEEPALIVE call_ ## NAME_PARAM(QueryPayload query) {\
+	cb_ ## NAME_PARAM(query);\
+}\
+
 
 EXTERNAL_CALLBACK_V(CreateEntity)
 EXTERNAL_CALLBACK_V(RemoveEntity)
 EXTERNAL_CALLBACK_V(SceneReady)
 EXTERNAL_CALLBACK_VS(SetEntityId)
 EXTERNAL_CALLBACK_VS(SetSceneId)
+EXTERNAL_CALLBACK_VS(SetTag)
 EXTERNAL_CALLBACK_VS(SetEntityParent)
 EXTERNAL_CALLBACK_VIS(EntityComponentCreateOrUpdate)
 EXTERNAL_CALLBACK_VS(EntityComponentDestroy)
@@ -54,4 +64,4 @@ EXTERNAL_CALLBACK_VSS(SharedComponentUpdate)
 EXTERNAL_CALLBACK_VS(SharedComponentDispose)
 EXTERNAL_CALLBACK_VSS(OpenNftDialog)
 EXTERNAL_CALLBACK_VS(OpenExternalUrl)
-EXTERNAL_CALLBACK_VS(Query)
+EXTERNAL_CALLBACK_QUERY(Query)
