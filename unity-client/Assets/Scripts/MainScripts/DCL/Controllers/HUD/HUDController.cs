@@ -121,7 +121,8 @@ public class HUDController : MonoBehaviour
         NFT_INFO_DIALOG = 16,
         TELEPORT_DIALOG = 17,
         CONTROLS_HUD = 18,
-        COUNT = 19
+        EXPLORE_HUD = 19,
+        COUNT = 20
     }
 
     [System.Serializable]
