@@ -1,4 +1,5 @@
 using DCL.Controllers;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -22,11 +23,15 @@ namespace DCL
         {
             CommonScriptableObjects.rendererState.OnChange += (isEnable, prevState) =>
             {
-                 if (isEnable)
+                if (isEnable)
                 {
                     MemoryManager.i.CleanupPoolsIfNeeded();
                     ParcelScene.parcelScenesCleaner.ForceCleanup();
                     Resources.UnloadUnusedAssets();
+                }
+                else
+                {
+                    GC.Collect();
                 }
             };
         }
