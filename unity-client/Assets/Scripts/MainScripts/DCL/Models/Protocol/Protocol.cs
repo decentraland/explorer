@@ -1,4 +1,5 @@
-﻿using DCL.Interface;
+﻿using System.Runtime.InteropServices;
+using DCL.Interface;
 using UnityEngine;
 
 
@@ -59,7 +60,7 @@ namespace DCL.Models
         AUDIO_CLIP = 200
     }
 
-    public abstract class Protocol
+    public static class Protocol
     {
         [System.Serializable]
         public struct CreateEntity
@@ -212,18 +213,52 @@ namespace DCL.Models
         [System.Serializable]
         public struct QueryPayload
         {
-            public int queryId;
-            public RaycastQueryPayload raycastQueryPayload;
+            public int queryType;
+            public RaycastQueryPayload raycastPayload;
         }
 
         [System.Serializable]
         public struct RaycastQueryPayload
         {
-            public int queryId;
-            public int queryType;
+            public int id;
+            public int raycastType;
             public Vector3 origin;
             public Vector3 direction;
             public float distance;
+        }
+
+        public static string RaycastTypeToLiteral(Models.RaycastType raycastType)
+        {
+            switch (raycastType)
+            {
+                case RaycastType.HIT_FIRST:
+                    return "HitFirst";
+                case RaycastType.HIT_ALL:
+                    return "HitAll";
+                case RaycastType.HIT_FIRST_AVATAR:
+                    return "HitFirstAvatar";
+                case RaycastType.HIT_ALL_AVATARS:
+                    return "HitAllAvatars";
+                default:
+                    return "";
+            }
+        }
+
+        public static RaycastType RaycastLiteralToType(string literal)
+        {
+            switch (literal)
+            {
+                case "HitFirst":
+                    return RaycastType.HIT_FIRST;
+                case "HitAll":
+                    return RaycastType.HIT_ALL;
+                case "HitFirstAvatar":
+                    return RaycastType.HIT_FIRST_AVATAR;
+                case "HitAllAvatars":
+                    return RaycastType.HIT_ALL_AVATARS;
+                default:
+                    return RaycastType.NONE;
+            }
         }
     }
 
@@ -257,25 +292,33 @@ namespace DCL.Models
         [System.NonSerialized] public Vector3 unityOrigin;
     }
 
+    public enum RaycastType
+    {
+        NONE = 0,
+        HIT_FIRST = 1,
+        HIT_ALL = 2,
+        HIT_FIRST_AVATAR = 3,
+        HIT_ALL_AVATARS = 4
+    }
 
     [System.Serializable]
     public class RaycastQuery
     {
         public string sceneId;
-        public string queryId;
-        public string queryType;
+        public string id;
+        public RaycastType raycastType;
         public Ray ray;
     }
 
     [System.Serializable]
     public class QueryMessage
     {
-        public string queryId;
+        public string queryType;
         public RaycastQuery payload;
 
         public void FromJSON(string rawJson)
         {
-            queryId = default(string);
+            queryType = default(string);
             JsonUtility.FromJsonOverwrite(rawJson, this);
         }
     }

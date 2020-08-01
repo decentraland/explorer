@@ -160,10 +160,10 @@ namespace DCL
             byte[] bytes = System.Convert.FromBase64String(payload);
             PB_RayQuery pbRayQuery = PB_RayQuery.Parser.ParseFrom(bytes);
 
-            query.queryId = queryId;
+            query.queryType = queryId;
             query.payload = new RaycastQuery();
-            query.payload.queryId = pbRayQuery.QueryId;
-            query.payload.queryType = pbRayQuery.QueryType;
+            query.payload.id = pbRayQuery.QueryId;
+            query.payload.raycastType = Protocol.RaycastLiteralToType(pbRayQuery.QueryType);
             query.payload.ray = new DCL.Models.Ray();
             query.payload.ray.direction = new Vector3(pbRayQuery.Ray.Direction.X, pbRayQuery.Ray.Direction.Y, pbRayQuery.Ray.Direction.Z);
             query.payload.ray.distance = pbRayQuery.Ray.Distance;

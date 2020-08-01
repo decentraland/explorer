@@ -122,37 +122,21 @@ public class EntryPoint_World
     {
         MessagingBus.QueuedSceneMessage_Scene queuedMessage = GetSceneMessageInstance();
 
-        string queryId = Convert.ToString(payload.queryId);
-        string queryType = "";
+        string queryId = Convert.ToString(payload.raycastPayload.id);
 
-        switch (payload.raycastQueryPayload.queryType)
-        {
-            case 1:
-                queryType = "HitFirst";
-                break;
-            case 2:
-                queryType = "HitAll";
-                break;
-            case 3:
-                queryType = "HitFirstAvatar";
-                break;
-            case 4:
-                queryType = "HitAllAvatars";
-                break;
-        }
+        RaycastType raycastType = (RaycastType) payload.raycastPayload.raycastType;
 
         Ray ray = new Ray()
         {
-            origin = payload.raycastQueryPayload.origin,
-            direction = payload.raycastQueryPayload.direction,
-            distance = payload.raycastQueryPayload.distance
+            origin = payload.raycastPayload.origin,
+            direction = payload.raycastPayload.direction,
+            distance = payload.raycastPayload.distance
         };
 
         queuedMessage.method = MessagingTypes.QUERY;
         queuedMessage.payload = new QueryMessage()
         {
-            queryId = queryId,
-            payload = new RaycastQuery() {queryId = queryId, queryType = queryType, ray = ray, sceneId = currentSceneId}
+            payload = new RaycastQuery() {id = queryId, raycastType = raycastType, ray = ray, sceneId = currentSceneId}
         };
 
         sceneController.EnqueueSceneMessage(queuedMessage);

@@ -782,7 +782,7 @@ namespace DCL
                     case MessagingTypes.QUERY:
                     {
                         if (msgObject.payload is QueryMessage queryMessage)
-                            ParseQuery(queryMessage.queryId, queryMessage.payload, scene.sceneData.id);
+                            ParseQuery(queryMessage.payload, scene.sceneData.id);
                         break;
                     }
 
@@ -840,20 +840,18 @@ namespace DCL
             return worldPosition - Utils.GridToWorldPosition(scene.sceneData.basePosition.x, scene.sceneData.basePosition.y);
         }
 
-        public void ParseQuery(string queryId, RaycastQuery payload, string sceneId)
+        public void ParseQuery(object payload, string sceneId)
         {
             ParcelScene scene = loadedScenes[sceneId];
 
-            Vector3 worldOrigin = payload.ray.origin + Utils.GridToWorldPosition(scene.sceneData.basePosition.x, scene.sceneData.basePosition.y);
-            payload.ray.unityOrigin = DCLCharacterController.i.characterPosition.WorldToUnityPosition(worldOrigin);
+            if (!(payload is RaycastQuery raycastQuery))
+                return;
 
-            switch (queryId)
-            {
-                case "raycast":
-                    payload.sceneId = sceneId;
-                    PhysicsCast.i.Query(payload);
-                    break;
-            }
+            Vector3 worldOrigin = raycastQuery.ray.origin + Utils.GridToWorldPosition(scene.sceneData.basePosition.x, scene.sceneData.basePosition.y);
+
+            raycastQuery.ray.unityOrigin = DCLCharacterController.i.characterPosition.WorldToUnityPosition(worldOrigin);
+            raycastQuery.sceneId = sceneId;
+            PhysicsCast.i.Query(raycastQuery);
         }
 
         public T SafeFromJson<T>(string data)
