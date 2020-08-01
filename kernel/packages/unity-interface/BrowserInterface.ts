@@ -35,7 +35,7 @@ import { StoreContainer } from 'shared/store/rootTypes'
 import { unityInterface } from './UnityInterface'
 import { IFuture } from 'fp-future'
 
-export declare const globalThis: StoreContainer
+declare const globalThis: StoreContainer
 export let futures: Record<string, IFuture<any>> = {}
 
 // ** TODO - move to friends related file - moliva - 15/07/2020

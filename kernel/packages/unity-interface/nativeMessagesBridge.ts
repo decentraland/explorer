@@ -17,6 +17,29 @@ import {
 import { PB_OpenExternalUrl } from 'shared/proto/engineinterface_pb'
 import { QueryType } from 'decentraland-ecs/src'
 
+enum RaycastQueryType {
+  NONE,
+  HIT_FIRST = 1,
+  HIT_ALL = 2,
+  HIT_FIRST_AVATAR = 3,
+  HIT_ALL_AVATARS = 4
+}
+
+function queryTypeToId(type: QueryType): number {
+  switch (type) {
+    case 'HitFirst':
+      return RaycastQueryType.HIT_FIRST
+    case 'HitAll':
+      return RaycastQueryType.HIT_ALL
+    case 'HitFirstAvatar':
+      return RaycastQueryType.HIT_FIRST_AVATAR
+    case 'HitAllAvatars':
+      return RaycastQueryType.HIT_ALL_AVATARS
+    default:
+      return RaycastQueryType.NONE
+  }
+}
+
 export class NativeMessagesBridge {
   private callCreateEntity!: () => void
   private callRemoveEntity!: () => void
@@ -51,21 +74,6 @@ export class NativeMessagesBridge {
   private unityModule: any
 
   private queryMemBlockPtr: number = 0
-
-  queryTypeToId(type: QueryType): number {
-    switch (type) {
-      case 'HitFirst':
-        return 1
-      case 'HitAll':
-        return 2
-      case 'HitFirstAvatar':
-        return 3
-      case 'HitAllAvatars':
-        return 4
-      default:
-        return 0
-    }
-  }
 
   public initNativeMessages(gameInstance: any) {
     this.unityModule = gameInstance.Module
@@ -165,11 +173,11 @@ export class NativeMessagesBridge {
   query(queryPayload: QueryPayload) {
     let alignedPtr = this.queryMemBlockPtr >> 2
 
-    let queryType = this.queryTypeToId(queryPayload.queryId as QueryType)
+    let raycastType = queryTypeToId(queryPayload.payload.queryId as QueryType)
 
-    this.unityModule.HEAP32[alignedPtr++] = queryType
+    alignedPtr++ // Skip first byte because the only query type is raycast. Not needed.
     this.unityModule.HEAP32[alignedPtr++] = parseInt(queryPayload.payload.queryId, 10)
-    this.unityModule.HEAP32[alignedPtr++] = queryType
+    this.unityModule.HEAP32[alignedPtr++] = raycastType
     this.unityModule.HEAPF32[alignedPtr++] = queryPayload.payload.ray.origin.x
     this.unityModule.HEAPF32[alignedPtr++] = queryPayload.payload.ray.origin.y
     this.unityModule.HEAPF32[alignedPtr++] = queryPayload.payload.ray.origin.z

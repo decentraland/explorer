@@ -1,9 +1,9 @@
 import { TeleportController } from 'shared/world/TeleportController'
-import { DEBUG, EDITOR, ENGINE_DEBUG_PANEL, SCENE_DEBUG_PANEL, SHOW_FPS_COUNTER, NO_ASSET_BUNDLES } from 'config'
+import { DEBUG, EDITOR, ENGINE_DEBUG_PANEL, SCENE_DEBUG_PANEL, SHOW_FPS_COUNTER, NO_ASSET_BUNDLES, OPEN_AVATAR_EDITOR } from 'config'
 import { aborted } from 'shared/loading/ReportFatalError'
 import { loadingScenes, teleportTriggered } from 'shared/loading/types'
 import { defaultLogger } from 'shared/logger'
-import { ILand, SceneJsonData, LoadableParcelScene, MappingsResponse } from 'shared/types'
+import { ILand, SceneJsonData, LoadableParcelScene, MappingsResponse, HUDElementID } from 'shared/types'
 import { enableParcelSceneLoading, loadParcelScene, stopParcelSceneWorker } from 'shared/world/parcelSceneManager'
 import { teleportObservable } from 'shared/world/positionThings'
 import { SceneWorker } from 'shared/world/SceneWorker'
@@ -16,7 +16,7 @@ import { loginCompleted } from 'shared/ethereum/provider'
 import { UnityInterface, unityInterface } from './UnityInterface'
 import { BrowserInterface, browserInterface } from './BrowserInterface'
 
-export declare const globalThis: UnityInterfaceContainer &
+declare const globalThis: UnityInterfaceContainer &
   BrowserInterfaceContainer &
   StoreContainer & { analytics: any; delighted: any }
 
@@ -86,6 +86,24 @@ export async function initializeEngine(_gameInstance: GameInstance) {
   gameInstance = debuggingDecorator(_gameInstance)
 
   setLoadingScreenVisible(true)
+
+  unityInterface.Init(_gameInstance)
+
+  unityInterface.ConfigureHUDElement(HUDElementID.MINIMAP, { active: true, visible: true })
+  unityInterface.ConfigureHUDElement(HUDElementID.AVATAR, { active: true, visible: true })
+  unityInterface.ConfigureHUDElement(HUDElementID.NOTIFICATION, { active: true, visible: true })
+  unityInterface.ConfigureHUDElement(HUDElementID.AVATAR_EDITOR, { active: true, visible: OPEN_AVATAR_EDITOR })
+  unityInterface.ConfigureHUDElement(HUDElementID.SETTINGS, { active: true, visible: false })
+  unityInterface.ConfigureHUDElement(HUDElementID.EXPRESSIONS, { active: true, visible: true })
+  unityInterface.ConfigureHUDElement(HUDElementID.PLAYER_INFO_CARD, { active: true, visible: true })
+  unityInterface.ConfigureHUDElement(HUDElementID.AIRDROPPING, { active: true, visible: true })
+  unityInterface.ConfigureHUDElement(HUDElementID.TERMS_OF_SERVICE, { active: true, visible: true })
+  unityInterface.ConfigureHUDElement(HUDElementID.TASKBAR, { active: true, visible: true })
+  unityInterface.ConfigureHUDElement(HUDElementID.WORLD_CHAT_WINDOW, { active: true, visible: true })
+  unityInterface.ConfigureHUDElement(HUDElementID.OPEN_EXTERNAL_URL_PROMPT, { active: true, visible: true })
+  unityInterface.ConfigureHUDElement(HUDElementID.NFT_INFO_DIALOG, { active: true, visible: false })
+  unityInterface.ConfigureHUDElement(HUDElementID.TELEPORT_DIALOG, { active: true, visible: false })
+  unityInterface.ConfigureHUDElement(HUDElementID.CONTROLS_HUD, { active: true, visible: false })
 
   unityInterface.DeactivateRendering()
 

@@ -8,11 +8,11 @@ import { createLogger } from 'shared/logger'
 import { ReportFatalError } from 'shared/loading/ReportFatalError'
 import { experienceStarted, NOT_INVITED, AUTH_ERROR_LOGGED_OUT, FAILED_FETCHING_UNITY } from 'shared/loading/types'
 import { worldToGrid } from '../atomicHelpers/parcelScenePositions'
-import { NO_MOTD, OPEN_AVATAR_EDITOR, DEBUG_PM, EDITOR } from '../config/index'
+import { NO_MOTD, DEBUG_PM, EDITOR } from '../config/index'
 import { signalRendererInitialized, signalParcelLoadingStarted } from 'shared/renderer/actions'
 import { lastPlayerPosition, teleportObservable } from 'shared/world/positionThings'
 import { StoreContainer } from 'shared/store/rootTypes'
-import { startUnityParcelLoading, gameInstance } from '../unity-interface/dcl'
+import { startUnityParcelLoading } from '../unity-interface/dcl'
 import { initializeUnity } from '../unity-interface/initializer'
 import { HUDElementID } from 'shared/types'
 import { worldRunningObservable, onNextWorldRunning } from 'shared/world/worldState'
@@ -63,23 +63,6 @@ export async function initializeDecentralandUI(unityInterface:any) {
 initializeUnity(container)
   .then(async ({ instancedJS }) => {
     const i = (await instancedJS).unityInterface
-    
-    i.Init(gameInstance)
-    i.ConfigureHUDElement(HUDElementID.MINIMAP, { active: true, visible: true })
-    i.ConfigureHUDElement(HUDElementID.AVATAR, { active: true, visible: true })
-    i.ConfigureHUDElement(HUDElementID.NOTIFICATION, { active: true, visible: true })
-    i.ConfigureHUDElement(HUDElementID.AVATAR_EDITOR, { active: true, visible: OPEN_AVATAR_EDITOR })
-    i.ConfigureHUDElement(HUDElementID.SETTINGS, { active: true, visible: false })
-    i.ConfigureHUDElement(HUDElementID.EXPRESSIONS, { active: true, visible: true })
-    i.ConfigureHUDElement(HUDElementID.PLAYER_INFO_CARD, { active: true, visible: true })
-    i.ConfigureHUDElement(HUDElementID.AIRDROPPING, { active: true, visible: true })
-    i.ConfigureHUDElement(HUDElementID.TERMS_OF_SERVICE, { active: true, visible: true })
-    i.ConfigureHUDElement(HUDElementID.TASKBAR, { active: true, visible: true })
-    i.ConfigureHUDElement(HUDElementID.WORLD_CHAT_WINDOW, { active: true, visible: true })
-    i.ConfigureHUDElement(HUDElementID.OPEN_EXTERNAL_URL_PROMPT, { active: true, visible: true })
-    i.ConfigureHUDElement(HUDElementID.NFT_INFO_DIALOG, { active: true, visible: false })
-    i.ConfigureHUDElement(HUDElementID.TELEPORT_DIALOG, { active: true, visible: false })
-    i.ConfigureHUDElement(HUDElementID.CONTROLS_HUD, { active: true, visible: false })
 
     try {
       await userAuthentified()

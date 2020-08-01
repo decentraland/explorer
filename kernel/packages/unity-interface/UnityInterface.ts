@@ -17,7 +17,7 @@ import {
 } from 'shared/types'
 import { nativeMsgBridge } from './nativeMessagesBridge'
 
-export const MINIMAP_CHUNK_SIZE = 100
+const MINIMAP_CHUNK_SIZE = 100
 
 export class UnityInterface {
   public debug: boolean = false
