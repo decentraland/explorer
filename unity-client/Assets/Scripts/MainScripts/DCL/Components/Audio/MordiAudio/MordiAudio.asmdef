@@ -1,8 +1,7 @@
 {
-    "name": "HUDCommon",
+    "name": "MordiAudio",
     "references": [
-        "GUID:98bf3bf29030cbf4092d89a7cc28b7fb",
-        "GUID:4720e174f2805c74bb7aa94cc8bb5bf8"
+        "GUID:c0f060bc5c9451f4483d26a0ed2d3f99"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -1,31 +1,40 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 public class ButtonAudioHandler : MonoBehaviour, IPointerEnterHandler, IPointerDownHandler, IPointerUpHandler
 {
-    [SerializeField]
-    AudioContainer audioContainer;
+    Selectable selectable;
     AudioEvent eventHover, eventClick, eventRelease;
 
     void Start()
     {
-        eventHover = audioContainer.GetEvent("Hover");
-        eventClick = audioContainer.GetEvent("Click");
-        eventRelease = audioContainer.GetEvent("Release");
+        AudioContainer ac = HUDAudioPlayer.i.audioContainer;
+        eventHover = ac.GetEvent("ButtonHover");
+        eventClick = ac.GetEvent("ButtonClick");
+        eventRelease = ac.GetEvent("ButtonRelease");
+
+        selectable = GetComponent<Selectable>();
     }
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        eventHover.Play();
+        if (selectable.interactable) {
+            eventHover.Play();
+        }
     }
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        eventClick.Play();
+        if (selectable.interactable) {
+            eventClick.Play();
+        }
     }
 
     public void OnPointerUp(PointerEventData eventData)
     {
-        eventRelease.Play();
+        if (selectable.interactable) {
+            eventRelease.Play();
+        }
     }
 }
