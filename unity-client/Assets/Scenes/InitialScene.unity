@@ -1254,6 +1254,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1310817203}
+  - component: {fileID: 1310817204}
   - component: {fileID: 1310817202}
   m_Layer: 0
   m_Name: HUDAudioPlayer
@@ -1286,8 +1287,8 @@ MonoBehaviour:
     array:
     - name: ButtonHover
       loop: 0
-      volume: 1
-      randomPitch: 0
+      volume: 0.8
+      randomPitch: 0.2
       playOnAwake: 0
       clips:
         array:
@@ -1296,7 +1297,7 @@ MonoBehaviour:
     - name: ButtonClick
       loop: 0
       volume: 1
-      randomPitch: 0
+      randomPitch: 0.15
       playOnAwake: 0
       clips:
         array:
@@ -1305,11 +1306,74 @@ MonoBehaviour:
     - name: ButtonRelease
       loop: 0
       volume: 1
-      randomPitch: 0
+      randomPitch: 0.15
       playOnAwake: 0
       clips:
         array:
         - {fileID: 8300000, guid: c5c67e3189377ce42a40002734b704b6, type: 3}
+      source: {fileID: 0}
+    - name: Enable
+      loop: 0
+      volume: 1
+      randomPitch: 0.05
+      playOnAwake: 0
+      clips:
+        array:
+        - {fileID: 8300000, guid: afbd62fb3eb978c45b63b75e24478c53, type: 3}
+      source: {fileID: 0}
+    - name: Disable
+      loop: 0
+      volume: 1
+      randomPitch: 0.05
+      playOnAwake: 0
+      clips:
+        array:
+        - {fileID: 8300000, guid: 4804fe1b06df9eb46859950493280fa3, type: 3}
+      source: {fileID: 0}
+    - name: ListItemAppear
+      loop: 0
+      volume: 1
+      randomPitch: 0
+      playOnAwake: 0
+      clips:
+        array:
+        - {fileID: 8300000, guid: 5c19d7d76099d3248b1e70a573008365, type: 3}
+      source: {fileID: 0}
+    - name: DialogAppear
+      loop: 0
+      volume: 1
+      randomPitch: 0.15
+      playOnAwake: 0
+      clips:
+        array:
+        - {fileID: 8300000, guid: 20a27736f2c55ee44bb4ca65bed56e4b, type: 3}
+      source: {fileID: 0}
+    - name: DialogClose
+      loop: 0
+      volume: 1
+      randomPitch: 0.15
+      playOnAwake: 0
+      clips:
+        array:
+        - {fileID: 8300000, guid: d8c217cb0f8783b45912e8dfde963bf0, type: 3}
+      source: {fileID: 0}
+    - name: Confirm
+      loop: 0
+      volume: 1
+      randomPitch: 0
+      playOnAwake: 0
+      clips:
+        array:
+        - {fileID: 8300000, guid: 0bfffff4668dbb745a58ec7845891d43, type: 3}
+      source: {fileID: 0}
+    - name: Cancel
+      loop: 0
+      volume: 1
+      randomPitch: 0
+      playOnAwake: 0
+      clips:
+        array:
+        - {fileID: 8300000, guid: c502cfacea4f3d34aa2a4cc730ddfe0b, type: 3}
       source: {fileID: 0}
 --- !u!4 &1310817203
 Transform:
@@ -1325,6 +1389,19 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1310817204
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1310817201}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cd2aa437544359c41a883ffdba98307a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ac: {fileID: 0}
 --- !u!114 &1441454338 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 580683850, guid: b387035aa46399445bdc7951a41d5213,

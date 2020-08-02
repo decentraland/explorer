@@ -335,6 +335,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4bfd0d144b6d3dd438b84fa14a062c4f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  extraClickSound: 0
 --- !u!1 &237401485243872377
 GameObject:
   m_ObjectHideFlags: 0
@@ -661,6 +662,7 @@ GameObject:
   - component: {fileID: 553133660664086285}
   - component: {fileID: 74645732477718111}
   - component: {fileID: 255916208}
+  - component: {fileID: 2228907555793526266}
   m_Layer: 5
   m_Name: Handle
   m_TagString: Untagged
@@ -741,6 +743,19 @@ MonoBehaviour:
   targetRectTransform: {fileID: 7542005190962944585}
   hoverScale: 1.05
   normalScale: 1
+--- !u!114 &2228907555793526266
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 324781612248936819}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c1eb3a6099fc45c4da7d642417641f43, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  toggle: {fileID: 3923669846041665272}
 --- !u!1 &411263395442639746
 GameObject:
   m_ObjectHideFlags: 0
@@ -1238,6 +1253,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4bfd0d144b6d3dd438b84fa14a062c4f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  extraClickSound: 0
 --- !u!1 &813666442621547826
 GameObject:
   m_ObjectHideFlags: 0
@@ -1404,6 +1420,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4bfd0d144b6d3dd438b84fa14a062c4f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  extraClickSound: 0
 --- !u!1 &830286309143222203
 GameObject:
   m_ObjectHideFlags: 0
@@ -1597,6 +1614,7 @@ GameObject:
   - component: {fileID: 393602658077190288}
   - component: {fileID: 3134608586216450449}
   - component: {fileID: 1237483652}
+  - component: {fileID: 1317120808108472298}
   m_Layer: 5
   m_Name: Handle
   m_TagString: Untagged
@@ -1677,6 +1695,19 @@ MonoBehaviour:
   targetRectTransform: {fileID: 5024592128171021108}
   hoverScale: 1.05
   normalScale: 1
+--- !u!114 &1317120808108472298
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 921185696992968264}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c39392b45b723aa41ac188c028152b5b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  slider: {fileID: 2808552403342232384}
 --- !u!1 &1047896674606195576
 GameObject:
   m_ObjectHideFlags: 0
@@ -1764,6 +1795,7 @@ GameObject:
   - component: {fileID: 8087204386144979464}
   - component: {fileID: 8899376248553024546}
   - component: {fileID: 1006178312}
+  - component: {fileID: 8038190647065859329}
   m_Layer: 5
   m_Name: Handle
   m_TagString: Untagged
@@ -1844,6 +1876,19 @@ MonoBehaviour:
   targetRectTransform: {fileID: 5180641493798093685}
   hoverScale: 1.05
   normalScale: 1
+--- !u!114 &8038190647065859329
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1291822922001914734}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c1eb3a6099fc45c4da7d642417641f43, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  toggle: {fileID: 3218635305569080034}
 --- !u!1 &1329386392362328242
 GameObject:
   m_ObjectHideFlags: 0
@@ -1931,6 +1976,7 @@ GameObject:
   - component: {fileID: 4535369770926524378}
   - component: {fileID: 6456621289285771124}
   - component: {fileID: 767034402}
+  - component: {fileID: 3724268278107283931}
   m_Layer: 5
   m_Name: Handle
   m_TagString: Untagged
@@ -2011,6 +2057,19 @@ MonoBehaviour:
   targetRectTransform: {fileID: 3544951767541276315}
   hoverScale: 1.05
   normalScale: 1
+--- !u!114 &3724268278107283931
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1359484827620253685}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c1eb3a6099fc45c4da7d642417641f43, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  toggle: {fileID: 542168208583080907}
 --- !u!1 &1681096085663110834
 GameObject:
   m_ObjectHideFlags: 0
@@ -2181,6 +2240,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4bfd0d144b6d3dd438b84fa14a062c4f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  extraClickSound: 10
 --- !u!1 &1802137367426154170
 GameObject:
   m_ObjectHideFlags: 0
@@ -2347,6 +2407,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4bfd0d144b6d3dd438b84fa14a062c4f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  extraClickSound: 0
 --- !u!1 &2047421669643265075
 GameObject:
   m_ObjectHideFlags: 0
@@ -3024,6 +3085,7 @@ GameObject:
   - component: {fileID: 6376164957065755381}
   - component: {fileID: 164263740241479617}
   - component: {fileID: 512448497}
+  - component: {fileID: 8090276523508656556}
   m_Layer: 5
   m_Name: Handle
   m_TagString: Untagged
@@ -3104,6 +3166,19 @@ MonoBehaviour:
   targetRectTransform: {fileID: 1336971693483461522}
   hoverScale: 1.05
   normalScale: 1
+--- !u!114 &8090276523508656556
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2387246530532513980}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c1eb3a6099fc45c4da7d642417641f43, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  toggle: {fileID: 5257412117456053339}
 --- !u!1 &2389731016940212704
 GameObject:
   m_ObjectHideFlags: 0
@@ -3116,6 +3191,7 @@ GameObject:
   - component: {fileID: 2664164824232345060}
   - component: {fileID: 6384302717277679176}
   - component: {fileID: 868835142}
+  - component: {fileID: 8836330583440331077}
   m_Layer: 5
   m_Name: Handle
   m_TagString: Untagged
@@ -3196,6 +3272,19 @@ MonoBehaviour:
   targetRectTransform: {fileID: 9110413906632743260}
   hoverScale: 1.05
   normalScale: 1
+--- !u!114 &8836330583440331077
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2389731016940212704}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c1eb3a6099fc45c4da7d642417641f43, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  toggle: {fileID: 3923669846041665272}
 --- !u!1 &2424930893463056541
 GameObject:
   m_ObjectHideFlags: 0
@@ -3392,6 +3481,7 @@ GameObject:
   - component: {fileID: 3783221477733199402}
   - component: {fileID: 9007033861402063397}
   - component: {fileID: 1193150780}
+  - component: {fileID: 846664760302328730}
   m_Layer: 5
   m_Name: Handle
   m_TagString: Untagged
@@ -3472,6 +3562,19 @@ MonoBehaviour:
   targetRectTransform: {fileID: 3507845767296369466}
   hoverScale: 1.05
   normalScale: 1
+--- !u!114 &846664760302328730
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2691171868504435554}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c39392b45b723aa41ac188c028152b5b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  slider: {fileID: 4836257226068507552}
 --- !u!1 &2705817909747567764
 GameObject:
   m_ObjectHideFlags: 0
@@ -3787,6 +3890,7 @@ GameObject:
   m_Component:
   - component: {fileID: 102459606576706215}
   - component: {fileID: 4060049302113448191}
+  - component: {fileID: 5599123376736112883}
   m_Layer: 5
   m_Name: SliderRenderScale
   m_TagString: Untagged
@@ -3866,6 +3970,18 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &5599123376736112883
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2767302400350759514}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f5e5480a628df9f46af5fe5f68c11a41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2780345653779503707
 GameObject:
   m_ObjectHideFlags: 0
@@ -4110,6 +4226,7 @@ GameObject:
   - component: {fileID: 2483271549136109817}
   - component: {fileID: 7382424989040130506}
   - component: {fileID: 1946794409}
+  - component: {fileID: 4434966091627423430}
   m_Layer: 5
   m_Name: Handle
   m_TagString: Untagged
@@ -4190,6 +4307,19 @@ MonoBehaviour:
   targetRectTransform: {fileID: 1173818785709966369}
   hoverScale: 1.05
   normalScale: 1
+--- !u!114 &4434966091627423430
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2832117303673772636}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c1eb3a6099fc45c4da7d642417641f43, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  toggle: {fileID: 5257412117456053339}
 --- !u!1 &3006951611195025072
 GameObject:
   m_ObjectHideFlags: 0
@@ -5398,7 +5528,7 @@ GameObject:
   - component: {fileID: 5499917598630631092}
   - component: {fileID: 7713499577534073974}
   - component: {fileID: 2812198542793630734}
-  - component: {fileID: 1377088816691232914}
+  - component: {fileID: 8607330306026055787}
   m_Layer: 5
   m_Name: ToggleBloom
   m_TagString: Untagged
@@ -5488,7 +5618,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   activeOn: {fileID: 8681817966942656756}
   activeOff: {fileID: 7888337365935734311}
---- !u!114 &1377088816691232914
+--- !u!114 &8607330306026055787
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -5497,7 +5627,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 4047436424187406078}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4bfd0d144b6d3dd438b84fa14a062c4f, type: 3}
+  m_Script: {fileID: 11500000, guid: 1b102d1bc6e18474980da7b796ce9b08, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &4065900629903595690
@@ -5735,6 +5865,7 @@ GameObject:
   - component: {fileID: 1681647171705411072}
   - component: {fileID: 7876801259907262252}
   - component: {fileID: 1957485370}
+  - component: {fileID: 3621642179043415665}
   m_Layer: 5
   m_Name: Handle
   m_TagString: Untagged
@@ -5815,6 +5946,19 @@ MonoBehaviour:
   targetRectTransform: {fileID: 4776493644694893263}
   hoverScale: 1.05
   normalScale: 1
+--- !u!114 &3621642179043415665
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4171367125799450014}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c1eb3a6099fc45c4da7d642417641f43, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  toggle: {fileID: 7713499577534073974}
 --- !u!1 &4193966263461780902
 GameObject:
   m_ObjectHideFlags: 0
@@ -6196,7 +6340,7 @@ GameObject:
   - component: {fileID: 2702203374673697818}
   - component: {fileID: 542168208583080907}
   - component: {fileID: 6702207611458349222}
-  - component: {fileID: 6502360346953824719}
+  - component: {fileID: 459610271416805374}
   m_Layer: 5
   m_Name: ToggleShadow
   m_TagString: Untagged
@@ -6286,7 +6430,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   activeOn: {fileID: 2705817909747567764}
   activeOff: {fileID: 8381958765101323070}
---- !u!114 &6502360346953824719
+--- !u!114 &459610271416805374
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -6295,7 +6439,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 4478668969954265669}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4bfd0d144b6d3dd438b84fa14a062c4f, type: 3}
+  m_Script: {fileID: 11500000, guid: 1b102d1bc6e18474980da7b796ce9b08, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &4538264455226914665
@@ -6614,6 +6758,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4bfd0d144b6d3dd438b84fa14a062c4f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  extraClickSound: 0
 --- !u!1 &4799733724167739924
 GameObject:
   m_ObjectHideFlags: 0
@@ -6700,7 +6845,7 @@ GameObject:
   - component: {fileID: 5107435309828450874}
   - component: {fileID: 3923669846041665272}
   - component: {fileID: 8151220192830900983}
-  - component: {fileID: 1145542002169294683}
+  - component: {fileID: 6252663345600165037}
   m_Layer: 5
   m_Name: ToggleSoftShadow
   m_TagString: Untagged
@@ -6790,7 +6935,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   activeOn: {fileID: 2599293015460482845}
   activeOff: {fileID: 3225561354444461324}
---- !u!114 &1145542002169294683
+--- !u!114 &6252663345600165037
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -6799,7 +6944,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 4881303800799335724}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4bfd0d144b6d3dd438b84fa14a062c4f, type: 3}
+  m_Script: {fileID: 11500000, guid: 1b102d1bc6e18474980da7b796ce9b08, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &5032506270117638535
@@ -6889,6 +7034,7 @@ GameObject:
   - component: {fileID: 1133117135917407378}
   - component: {fileID: 3998288297039076235}
   - component: {fileID: 1364317252}
+  - component: {fileID: 7502035249626607963}
   m_Layer: 5
   m_Name: Handle
   m_TagString: Untagged
@@ -6969,6 +7115,19 @@ MonoBehaviour:
   targetRectTransform: {fileID: 2495073328172039114}
   hoverScale: 1.05
   normalScale: 1
+--- !u!114 &7502035249626607963
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5046264943934778358}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c1eb3a6099fc45c4da7d642417641f43, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  toggle: {fileID: 542168208583080907}
 --- !u!1 &5101267067752037033
 GameObject:
   m_ObjectHideFlags: 0
@@ -7488,6 +7647,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4bfd0d144b6d3dd438b84fa14a062c4f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  extraClickSound: 0
 --- !u!1 &5292997369548845070
 GameObject:
   m_ObjectHideFlags: 0
@@ -8079,6 +8239,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4bfd0d144b6d3dd438b84fa14a062c4f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  extraClickSound: 0
 --- !u!1 &5702436558995634957
 GameObject:
   m_ObjectHideFlags: 0
@@ -8442,6 +8603,7 @@ GameObject:
   - component: {fileID: 6988205492685821490}
   - component: {fileID: 7287392102277111355}
   - component: {fileID: 2085722324}
+  - component: {fileID: 1960157991918166522}
   m_Layer: 5
   m_Name: Handle
   m_TagString: Untagged
@@ -8522,6 +8684,19 @@ MonoBehaviour:
   targetRectTransform: {fileID: 2599490138772741266}
   hoverScale: 1.05
   normalScale: 1
+--- !u!114 &1960157991918166522
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5851289774421921301}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c39392b45b723aa41ac188c028152b5b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  slider: {fileID: 1521904782873654356}
 --- !u!1 &6218848888948750737
 GameObject:
   m_ObjectHideFlags: 0
@@ -8569,6 +8744,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6538987067703859866}
   - component: {fileID: 1521904782873654356}
+  - component: {fileID: 301371051248790919}
   m_Layer: 5
   m_Name: SliderDrawDistance
   m_TagString: Untagged
@@ -8648,6 +8824,18 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &301371051248790919
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6220115971320945187}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f5e5480a628df9f46af5fe5f68c11a41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &6243670894477728396
 GameObject:
   m_ObjectHideFlags: 0
@@ -8659,7 +8847,7 @@ GameObject:
   - component: {fileID: 526942228941812174}
   - component: {fileID: 3218635305569080034}
   - component: {fileID: 7401460056358862189}
-  - component: {fileID: 7903269143959978317}
+  - component: {fileID: 9213054370970247473}
   m_Layer: 5
   m_Name: ToggleColorGrading
   m_TagString: Untagged
@@ -8749,7 +8937,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   activeOn: {fileID: 2147230310202200334}
   activeOff: {fileID: 3640119393361796713}
---- !u!114 &7903269143959978317
+--- !u!114 &9213054370970247473
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8758,7 +8946,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 6243670894477728396}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4bfd0d144b6d3dd438b84fa14a062c4f, type: 3}
+  m_Script: {fileID: 11500000, guid: 1b102d1bc6e18474980da7b796ce9b08, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &6268984022621364072
@@ -8930,6 +9118,7 @@ GameObject:
   - component: {fileID: 898379660664787956}
   - component: {fileID: 8382234659036693562}
   - component: {fileID: 2083475739}
+  - component: {fileID: 8893965209208845015}
   m_Layer: 5
   m_Name: Handle
   m_TagString: Untagged
@@ -9010,6 +9199,19 @@ MonoBehaviour:
   targetRectTransform: {fileID: 9031214428386306435}
   hoverScale: 1.05
   normalScale: 1
+--- !u!114 &8893965209208845015
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6319017270304317721}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c1eb3a6099fc45c4da7d642417641f43, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  toggle: {fileID: 3218635305569080034}
 --- !u!1 &6329267665862851753
 GameObject:
   m_ObjectHideFlags: 0
@@ -9056,6 +9258,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1000663955066798852}
   - component: {fileID: 2808552403342232384}
+  - component: {fileID: 5537932070950730249}
   m_Layer: 5
   m_Name: SliderMouseSensitivity
   m_TagString: Untagged
@@ -9135,6 +9338,18 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &5537932070950730249
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6383964814392464805}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f5e5480a628df9f46af5fe5f68c11a41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &6440427499198514267
 GameObject:
   m_ObjectHideFlags: 0
@@ -9749,7 +9964,7 @@ GameObject:
   - component: {fileID: 8387608541642246897}
   - component: {fileID: 5257412117456053339}
   - component: {fileID: 6375045102031456374}
-  - component: {fileID: 2421874191352818884}
+  - component: {fileID: 9037011318928060226}
   m_Layer: 5
   m_Name: ToggleSound
   m_TagString: Untagged
@@ -9839,7 +10054,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   activeOn: {fileID: 4196299855106027335}
   activeOff: {fileID: 5788782635836695079}
---- !u!114 &2421874191352818884
+--- !u!114 &9037011318928060226
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -9848,7 +10063,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 6623835670503921786}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4bfd0d144b6d3dd438b84fa14a062c4f, type: 3}
+  m_Script: {fileID: 11500000, guid: 1b102d1bc6e18474980da7b796ce9b08, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &6636245586041926516
@@ -10325,6 +10540,7 @@ GameObject:
   m_Component:
   - component: {fileID: 884391455635361102}
   - component: {fileID: 4836257226068507552}
+  - component: {fileID: 8904922419132787577}
   m_Layer: 5
   m_Name: SliderAntiAliasing
   m_TagString: Untagged
@@ -10404,6 +10620,18 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &8904922419132787577
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6966791964694467538}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f5e5480a628df9f46af5fe5f68c11a41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &7096692695379579470
 GameObject:
   m_ObjectHideFlags: 0
@@ -10766,6 +10994,7 @@ GameObject:
   - component: {fileID: 6409305394097536441}
   - component: {fileID: 702756775366520234}
   - component: {fileID: 858949984}
+  - component: {fileID: 8111272466837383068}
   m_Layer: 5
   m_Name: Handle
   m_TagString: Untagged
@@ -10846,6 +11075,19 @@ MonoBehaviour:
   targetRectTransform: {fileID: 5017152396128531321}
   hoverScale: 1.05
   normalScale: 1
+--- !u!114 &8111272466837383068
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7188058084100074751}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c1eb3a6099fc45c4da7d642417641f43, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  toggle: {fileID: 7713499577534073974}
 --- !u!1 &7238030584004709643
 GameObject:
   m_ObjectHideFlags: 0
@@ -13320,6 +13562,7 @@ GameObject:
   - component: {fileID: 5995856538712104840}
   - component: {fileID: 3653830741682104068}
   - component: {fileID: 678239183}
+  - component: {fileID: 5875446284433264364}
   m_Layer: 5
   m_Name: Handle
   m_TagString: Untagged
@@ -13400,3 +13643,16 @@ MonoBehaviour:
   targetRectTransform: {fileID: 302752348913159034}
   hoverScale: 1.05
   normalScale: 1
+--- !u!114 &5875446284433264364
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9159735932050961674}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c39392b45b723aa41ac188c028152b5b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  slider: {fileID: 4060049302113448191}

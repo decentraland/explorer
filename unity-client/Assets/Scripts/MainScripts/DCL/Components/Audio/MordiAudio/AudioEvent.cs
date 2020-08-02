@@ -27,6 +27,8 @@ public class AudioEvent
     [HideInInspector]
     public AudioSource source;
 
+    private float pitch = 1f;
+
     public void Initialize()
     {
         RandomizeIndex();
@@ -44,7 +46,6 @@ public class AudioEvent
 
     public void Play(bool oneShot = false)
     {
-
         // Check if AudioSource is active
         if (!source.gameObject.activeSelf)
         {
@@ -55,7 +56,7 @@ public class AudioEvent
         source.clip = clips[index];
 
         // Set pitch
-        source.pitch = 1f + Random.Range(0f, randomPitch) - (randomPitch * 0.5f);
+        source.pitch = pitch + Random.Range(0f, randomPitch) - (randomPitch * 0.5f);
 
         // Play from source
         if (oneShot)
@@ -78,5 +79,10 @@ public class AudioEvent
     public void SetIndex(int index)
     {
         this.index = index;
+    }
+
+    public void SetPitch(float pitch)
+    {
+        this.pitch = pitch;
     }
 }

@@ -4,37 +4,40 @@ using UnityEngine.UI;
 
 public class ButtonAudioHandler : MonoBehaviour, IPointerEnterHandler, IPointerDownHandler, IPointerUpHandler
 {
+    HUDAudioPlayer audioPlayer;
     Selectable selectable;
-    AudioEvent eventHover, eventClick, eventRelease;
+    [SerializeField]
+    HUDAudioPlayer.Sound extraClickSound = HUDAudioPlayer.Sound.none;
 
     void Start()
     {
-        AudioContainer ac = HUDAudioPlayer.i.audioContainer;
-        eventHover = ac.GetEvent("ButtonHover");
-        eventClick = ac.GetEvent("ButtonClick");
-        eventRelease = ac.GetEvent("ButtonRelease");
-
+        audioPlayer = HUDAudioPlayer.i;
         selectable = GetComponent<Selectable>();
     }
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        if (selectable.interactable) {
-            eventHover.Play();
+        if (selectable.interactable && !Input.GetMouseButton(0)) {
+            audioPlayer.Play(HUDAudioPlayer.Sound.buttonHover);
         }
     }
 
     public void OnPointerDown(PointerEventData eventData)
     {
         if (selectable.interactable) {
-            eventClick.Play();
+            audioPlayer.Play(HUDAudioPlayer.Sound.buttonClick);
         }
     }
 
     public void OnPointerUp(PointerEventData eventData)
     {
         if (selectable.interactable) {
-            eventRelease.Play();
+            audioPlayer.Play(HUDAudioPlayer.Sound.buttonRelease);
+
+            if (extraClickSound != HUDAudioPlayer.Sound.none)
+            {
+                audioPlayer.Play(extraClickSound);
+            }
         }
     }
 }

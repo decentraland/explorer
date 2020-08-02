@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using DCL;
 using TMPro;
@@ -24,6 +24,8 @@ public class ItemToggle : UIButton, IPointerEnterHandler, IPointerExitHandler
     private string loadedThumbnailURL;
     private AssetPromise_Texture loadedThumbnailPromise;
 
+    private AvatarEditorHUDView avatarEditorHUDView;
+
     //Todo change this for a confirmation popup or implement it in a more elegant way
     public static Func<WearableItem, List<WearableItem>> getEquippedWearablesReplacedByFunc;
 
@@ -48,6 +50,8 @@ public class ItemToggle : UIButton, IPointerEnterHandler, IPointerExitHandler
         base.Awake();
         thumbnail.sprite = null;
         warningPanel.SetActive(false);
+
+        avatarEditorHUDView = GetComponentInParent<AvatarEditorHUDView>();
     }
 
     protected override void OnClick()
@@ -91,6 +95,9 @@ public class ItemToggle : UIButton, IPointerEnterHandler, IPointerExitHandler
             Destroy(thumbnail.sprite);
 
         thumbnail.sprite = ThumbnailsManager.CreateSpriteFromTexture(texture.texture);
+
+        if (avatarEditorHUDView.isOpen)
+            HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.listItemAppear);
     }
 
     private void OnEnable()
