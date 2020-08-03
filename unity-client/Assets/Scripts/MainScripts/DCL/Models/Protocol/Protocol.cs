@@ -63,6 +63,11 @@ namespace DCL.Models
     public static class Protocol
     {
         [System.Serializable]
+        public struct SceneReady
+        {
+        }
+
+        [System.Serializable]
         public struct CreateEntity
         {
             public string entityId;

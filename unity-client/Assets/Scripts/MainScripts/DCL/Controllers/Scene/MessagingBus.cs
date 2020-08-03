@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
 using DCL.Interface;
+using UnityEngine.SceneManagement;
 
 namespace DCL
 {
@@ -27,11 +28,12 @@ namespace DCL
         public const string OPEN_NFT_DIALOG = "OpenNFTDialog";
     }
 
-    public class MessagingBusId
+    public enum MessagingBusType
     {
-        public const string UI = "UI";
-        public const string INIT = "INIT";
-        public const string SYSTEM = "SYSTEM";
+        NONE,
+        UI,
+        INIT,
+        SYSTEM
     }
 
     public enum QueueMode
@@ -87,7 +89,7 @@ namespace DCL
 
         public CleanableYieldInstruction msgYieldInstruction;
 
-        public string id;
+        public MessagingBusType type;
         public string debugTag;
 
         public MessagingController owner;
@@ -103,14 +105,19 @@ namespace DCL
             set => timeBudgetValue = value;
         }
 
-        public MessagingBus(string id, IMessageHandler handler, MessagingController owner)
+        private SceneController sceneController;
+        private MessagingControllersManager manager;
+
+        public MessagingBus(MessagingBusType type, IMessageHandler handler, MessagingController owner)
         {
             Assert.IsNotNull(handler, "IMessageHandler can't be null!");
             this.handler = handler;
             this.enabled = false;
-            this.id = id;
+            this.type = type;
             this.owner = owner;
             this.pendingMessagesCount = 0;
+            sceneController = SceneController.i;
+            manager = MessagingControllersManager.i;
         }
 
         public void Start()
@@ -171,18 +178,18 @@ namespace DCL
                 if (message.type == QueuedSceneMessage.Type.SCENE_MESSAGE)
                 {
                     QueuedSceneMessage_Scene sm = message as QueuedSceneMessage_Scene;
-                    SceneController.i?.OnMessageWillQueue?.Invoke(sm.method);
+                    sceneController?.OnMessageWillQueue?.Invoke(sm.method);
                 }
 
-                if (id == MessagingBusId.INIT)
+                if (type == MessagingBusType.INIT)
                 {
-                    MessagingControllersManager.i.pendingInitMessagesCount++;
+                    manager.pendingInitMessagesCount++;
                 }
 
                 if (owner != null)
                 {
                     owner.enabled = true;
-                    MessagingControllersManager.i.MarkBusesDirty();
+                    manager.MarkBusesDirty();
                 }
             }
         }
@@ -284,16 +291,16 @@ namespace DCL
         {
             processedMessagesCount++;
 
-            if (id == MessagingBusId.INIT)
+            if (type == MessagingBusType.INIT)
             {
-                MessagingControllersManager.i.pendingInitMessagesCount--;
-                MessagingControllersManager.i.processedInitMessagesCount++;
+                manager.pendingInitMessagesCount--;
+                manager.processedInitMessagesCount++;
             }
         }
 
         private LinkedListNode<QueuedSceneMessage> AddReliableMessage(QueuedSceneMessage message)
         {
-            MessagingControllersManager.i.pendingMessagesCount++;
+            manager.pendingMessagesCount++;
             pendingMessagesCount++;
             return pendingMessages.AddLast(message);
         }
@@ -320,11 +327,11 @@ namespace DCL
 
             if (logType)
             {
-                Debug.Log($"#{bus.processedMessagesCount} ... bus = {finalTag}, id = {bus.id}... processing msg... type = {m.type}... message = {m.message}");
+                Debug.Log($"#{bus.processedMessagesCount} ... bus = {finalTag}, id = {bus.type}... processing msg... type = {m.type}... message = {m.message}");
             }
             else
             {
-                Debug.Log($"#{bus.processedMessagesCount} ... Bus = {finalTag}, id = {bus.id}... processing msg... {m.message}");
+                Debug.Log($"#{bus.processedMessagesCount} ... Bus = {finalTag}, id = {bus.type}... processing msg... {m.message}");
             }
         }
     }

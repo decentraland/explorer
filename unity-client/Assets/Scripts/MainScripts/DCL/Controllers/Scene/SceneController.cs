@@ -499,7 +499,7 @@ namespace DCL
 
             OnMessageWillQueue?.Invoke(MessagingTypes.SCENE_DESTROY);
 
-            MessagingControllersManager.i.ForceEnqueueToGlobal(MessagingBusId.INIT, queuedMessage);
+            MessagingControllersManager.i.ForceEnqueueToGlobal(MessagingBusType.INIT, queuedMessage);
 
             if (MessagingControllersManager.i.ContainsController(sceneKey))
                 MessagingControllersManager.i.RemoveController(sceneKey);
@@ -557,7 +557,7 @@ namespace DCL
 
             OnMessageWillQueue?.Invoke(MessagingTypes.SCENE_LOAD);
 
-            MessagingControllersManager.i.ForceEnqueueToGlobal(MessagingBusId.INIT, queuedMessage);
+            MessagingControllersManager.i.ForceEnqueueToGlobal(MessagingBusType.INIT, queuedMessage);
 
             sceneSortDirty = true;
 
@@ -572,7 +572,7 @@ namespace DCL
 
             OnMessageWillQueue?.Invoke(MessagingTypes.SCENE_UPDATE);
 
-            MessagingControllersManager.i.ForceEnqueueToGlobal(MessagingBusId.INIT, queuedMessage);
+            MessagingControllersManager.i.ForceEnqueueToGlobal(MessagingBusType.INIT, queuedMessage);
         }
 
         public void UnloadAllScenesQueued()
@@ -581,7 +581,7 @@ namespace DCL
 
             OnMessageWillQueue?.Invoke(MessagingTypes.SCENE_DESTROY);
 
-            MessagingControllersManager.i.ForceEnqueueToGlobal(MessagingBusId.INIT, queuedMessage);
+            MessagingControllersManager.i.ForceEnqueueToGlobal(MessagingBusType.INIT, queuedMessage);
         }
 
         public string SendSceneMessage(string payload)

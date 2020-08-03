@@ -288,6 +288,7 @@ public class EntryPoint_World
     {
         MessagingBus.QueuedSceneMessage_Scene queuedMessage = GetSceneMessageInstance();
         queuedMessage.method = MessagingTypes.INIT_DONE;
+        queuedMessage.payload = new Protocol.SceneReady();
 
         sceneController.EnqueueSceneMessage(queuedMessage);
     }

@@ -96,6 +96,7 @@ namespace DCL
             switch (method)
             {
                 case MessagingTypes.INIT_DONE:
+                    queuedMessage.payload = new Protocol.SceneReady();
                     break;
                 case MessagingTypes.QUERY:
                     QueryMessage query = new QueryMessage();
