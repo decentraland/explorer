@@ -36,7 +36,6 @@ import { unityInterface } from './UnityInterface'
 import { IFuture } from 'fp-future'
 import { reportHotScenes } from 'shared/social/hotScenes'
 
-
 declare const globalThis: StoreContainer
 export let futures: Record<string, IFuture<any>> = {}
 
@@ -332,7 +331,7 @@ export class BrowserInterface {
 
   public FetchHotScenes() {
     reportHotScenes().catch((e: any) => {
-        return defaultLogger.error('FetchHotScenes error', e)
+      return defaultLogger.error('FetchHotScenes error', e)
     })
   }
 }
