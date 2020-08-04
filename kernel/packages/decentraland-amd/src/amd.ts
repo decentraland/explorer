@@ -46,6 +46,15 @@ namespace loader {
     }
   }
 
+  function createModule(name: string, context?: any, handlers: Function[] = []): Module {
+    return {
+      name,
+      dclamd: MODULE_LOADING,
+      handlers,
+      context
+    };
+  }
+
   export function define(factory: any);
   export function define(id: string, factory: any);
   export function define(id: string, dependencies: string[], factory: any);
@@ -88,6 +97,8 @@ namespace loader {
         handlers[x](module);
       }
     }
+
+    registeredModules[id] = createModule(id);
 
     require(dependencies, ready, id);
   }
@@ -182,12 +193,7 @@ namespace loader {
       }
       return;
     } else {
-      registeredModules[moduleName] = {
-        name: moduleName,
-        dclamd: MODULE_LOADING,
-        handlers: [callback],
-        context: context
-      };
+      registeredModules[moduleName] = createModule(moduleName, context, [callback]);
     }
 
     if (moduleName.indexOf("@") === 0) {

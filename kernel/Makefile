@@ -176,10 +176,13 @@ SCENE_JSONS := $(PARCEL_SCENE_JSONS) $(ECS_SCENE_JSONS) $(HELLMAP_SCENE_JSONS)
 
 # CLI
 
-npm-link: build-essentials static/dist/preview.js static/dist/editor.js ## Run `npm link` to develop local scenes against this project
+dcl-amd:
+	cd $(CWD)/packages/decentraland-amd && make build
+
+npm-link: build-essentials static/dist/preview.js static/dist/editor.js dcl-amd ## Run `npm link` to develop local scenes against this project
 	rm -rf packages/decentraland-ecs/artifacts || true
 	mkdir packages/decentraland-ecs/artifacts
-	ln -sf $(CWD)/node_modules/dcl-amd/dist/amd.js packages/decentraland-ecs/artifacts/amd.js
+	ln -sf $(CWD)/packages/decentraland-amd/dist/amd.js packages/decentraland-ecs/artifacts/amd.js
 	ln -sf $(CWD)/packages/build-ecs/index.js packages/decentraland-ecs/artifacts/build-ecs.js
 	ln -sf $(CWD)/static/dist/preview.js packages/decentraland-ecs/artifacts/preview.js
 	ln -sf $(CWD)/static/dist/unityPreview.js packages/decentraland-ecs/artifacts/unityPreview.js
