@@ -16,6 +16,7 @@ import {
   UpdateUserStatusMessage
 } from 'shared/types'
 import { nativeMsgBridge } from './nativeMessagesBridge'
+import { HotSceneInfo } from 'shared/social/hotScenes'
 
 const MINIMAP_CHUNK_SIZE = 100
 
@@ -206,6 +207,19 @@ export class UnityInterface {
 
   public RequestTeleport(teleportData: {}) {
     this.gameInstance.SendMessage('HUDController', 'RequestTeleport', JSON.stringify(teleportData))
+  }
+
+  public UpdateHotScenesList(info: HotSceneInfo[]) {
+    const chunks = []
+
+    while (info.length) {
+      chunks.push(info.splice(0, MINIMAP_CHUNK_SIZE))
+    }
+
+    for (let i = 0; i < chunks.length; i++) {
+      const payload = { chunkIndex: i, chunksCount: chunks.length, scenesInfo: chunks[i] }
+      this.gameInstance.SendMessage('SceneController', 'UpdateHotScenesList', JSON.stringify(payload))
+    }
   }
 
   // *********************************************************************************

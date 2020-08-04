@@ -34,6 +34,8 @@ import { getIdentity, hasWallet } from 'shared/session'
 import { StoreContainer } from 'shared/store/rootTypes'
 import { unityInterface } from './UnityInterface'
 import { IFuture } from 'fp-future'
+import { reportHotScenes } from 'shared/social/hotScenes'
+
 
 declare const globalThis: StoreContainer
 export let futures: Record<string, IFuture<any>> = {}
@@ -326,6 +328,12 @@ export class BrowserInterface {
   public ScenesLoadingFeedback(data: { message: string; loadPercentage: number }) {
     const { message, loadPercentage } = data
     globalThis.globalStore.dispatch(updateStatusMessage(message, loadPercentage))
+  }
+
+  public FetchHotScenes() {
+    reportHotScenes().catch((e: any) => {
+        return defaultLogger.error('FetchHotScenes error', e)
+    })
   }
 }
 

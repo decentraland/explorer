@@ -898,5 +898,10 @@ namespace DCL.Interface
         {
             SendMessage("ScenesLoadingFeedback", message);
         }
+
+        public static void FetchHotScenes()
+        {
+            SendMessage("FetchHotScenes");
+        }
     }
 }
