@@ -49,6 +49,7 @@ export class UnityScene<T> implements ParcelSceneAPI {
         sendBatchMsgCount -= sendBatchMsgs.splice(0, 1)[0]
       }
 
+      // tslint:disable-next-line:no-console
       console.log(`sendBatch time total for msgs ${sendBatchMsgCount} calls: ${sendBatchTimeCount}ms ... `)
     }
   }
