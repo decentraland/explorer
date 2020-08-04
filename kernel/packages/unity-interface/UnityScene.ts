@@ -1,5 +1,5 @@
 import { EventDispatcher } from 'decentraland-rpc/lib/common/core/EventDispatcher'
-import { WSS_ENABLED } from 'config'
+import { WSS_ENABLED, FORCE_SEND_MESSAGE, DEBUG_MESSAGES_QUEUE_PERF } from 'config'
 import { IEventNames, IEvents } from '../decentraland-ecs/src/decentraland/Types'
 import { createLogger, ILogger } from 'shared/logger'
 import { EntityAction, EnvironmentData } from 'shared/types'
@@ -10,20 +10,46 @@ import { unityInterface } from './UnityInterface'
 import { protobufMsgBridge } from './protobufMessagesBridge'
 import { nativeMsgBridge } from './nativeMessagesBridge'
 
+let sendBatchTime: Array<number> = []
+let sendBatchMsgs: Array<number> = []
+let sendBatchTimeCount: number = 0
+let sendBatchMsgCount: number = 0
+
 export class UnityScene<T> implements ParcelSceneAPI {
   eventDispatcher = new EventDispatcher()
   worker!: SceneWorker
   logger: ILogger
+  initMessageCount: number = 0
+  initFinished: boolean = false
 
   constructor(public data: EnvironmentData<T>) {
     this.logger = createLogger(getParcelSceneID(this) + ': ')
   }
 
   sendBatch(actions: EntityAction[]): void {
-    if (WSS_ENABLED) {
+    let time = Date.now()
+    if (WSS_ENABLED || FORCE_SEND_MESSAGE) {
       this.sendBatchWss(unityInterface, actions)
     } else {
-      this.sendBatchNative(unityInterface, actions)
+      this.sendBatchNative(actions)
+    }
+
+    if (DEBUG_MESSAGES_QUEUE_PERF) {
+      time = Date.now() - time
+
+      sendBatchTime.push(time)
+      sendBatchMsgs.push(actions.length)
+
+      sendBatchTimeCount += time
+
+      sendBatchMsgCount += actions.length
+
+      while (sendBatchMsgCount >= 10000) {
+        sendBatchTimeCount -= sendBatchTime.splice(0, 1)[0]
+        sendBatchMsgCount -= sendBatchMsgs.splice(0, 1)[0]
+      }
+
+      console.log(`sendBatch time total for msgs ${sendBatchMsgCount} calls: ${sendBatchTimeCount}ms ... `)
     }
   }
 
@@ -39,26 +65,11 @@ export class UnityScene<T> implements ParcelSceneAPI {
     unityInterface.SendSceneMessage(messages)
   }
 
-  sendBatchNative(unityInterface: any, actions: EntityAction[]): void {
+  sendBatchNative(actions: EntityAction[]): void {
     const sceneId = getParcelSceneID(this)
-    let messages = ''
     for (let i = 0; i < actions.length; i++) {
       const action = actions[i]
-      if (nativeMsgBridge.isMethodSupported(action.type)) {
-        if (messages.length > 0) {
-          unityInterface.SendSceneMessage(messages)
-          messages = ''
-        }
-        nativeMsgBridge.SendNativeMessage(sceneId, action)
-        continue
-      }
-
-      messages += protobufMsgBridge.encodeSceneMessage(sceneId, action.type, action.payload, action.tag)
-      messages += '\n'
-    }
-
-    if (messages.length > 0) {
-      unityInterface.SendSceneMessage(messages)
+      nativeMsgBridge.SendNativeMessage(sceneId, action)
     }
   }
 
