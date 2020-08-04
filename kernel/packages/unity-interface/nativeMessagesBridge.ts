@@ -173,10 +173,11 @@ export class NativeMessagesBridge {
   query(queryPayload: QueryPayload) {
     let alignedPtr = this.queryMemBlockPtr >> 2
 
-    let raycastType = queryTypeToId(queryPayload.payload.queryId as QueryType)
+    let raycastType = queryTypeToId(queryPayload.payload.queryType as QueryType)
+    let id = parseInt(queryPayload.payload.queryId, 10)
 
     alignedPtr++ // Skip first byte because the only query type is raycast. Not needed.
-    this.unityModule.HEAP32[alignedPtr++] = parseInt(queryPayload.payload.queryId, 10)
+    this.unityModule.HEAP32[alignedPtr++] = id
     this.unityModule.HEAP32[alignedPtr++] = raycastType
     this.unityModule.HEAPF32[alignedPtr++] = queryPayload.payload.ray.origin.x
     this.unityModule.HEAPF32[alignedPtr++] = queryPayload.payload.ray.origin.y

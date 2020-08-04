@@ -1,4 +1,5 @@
 using System;
+using DCL.Helpers;
 using DCL.Models;
 using UnityEngine;
 using Ray = UnityEngine.Ray;
@@ -518,7 +519,7 @@ namespace DCL.Interface
         private static void ReportRaycastResult<T, P>(string sceneId, string queryId, string queryType, P payload) where T : RaycastResponse<P>, new() where P : RaycastHitInfo
         {
             T response = new T();
-            response.queryId = queryId;
+            response.queryId = Utils.DecimalToArbitrarySystem(int.Parse(queryId), 36);
             response.queryType = queryType;
             response.payload = payload;
 

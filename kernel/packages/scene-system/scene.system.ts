@@ -349,6 +349,7 @@ export default class GamekitScene extends Script {
 
         /** queries for a specific system with a certain query configuration */
         query(queryType: QueryType, payload: any) {
+          payload.queryId = parseInt( payload.queryId, 36 ).toString()
           that.events.push({
             type: 'Query',
             tag: sceneId + '_' + payload.queryId,

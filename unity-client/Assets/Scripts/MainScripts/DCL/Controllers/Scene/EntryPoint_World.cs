@@ -3,6 +3,8 @@ using System.Runtime.InteropServices;
 using DCL;
 using DCL.Interface;
 using DCL.Models;
+using UnityEngine;
+using Ray = DCL.Models.Ray;
 
 public class EntryPoint_World
 {
