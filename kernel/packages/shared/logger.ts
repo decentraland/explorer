@@ -7,6 +7,16 @@ export type ILogger = {
   trace(message: string, ...args: any[]): void
 }
 
+export function createDummyLogger(): ILogger {
+  return {
+    error(message: string | Error, ...args: any[]): void {},
+    log(message: string, ...args: any[]): void {},
+    warn(message: string, ...args: any[]): void {},
+    info(message: string, ...args: any[]): void {},
+    trace(message: string, ...args: any[]): void {}
+  }
+}
+
 export function createLogger(prefix: string): ILogger {
   return {
     error(message: string | Error, ...args: any[]): void {
