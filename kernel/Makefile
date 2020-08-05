@@ -70,7 +70,7 @@ static/unity/Build/%.unityweb: package.json package-lock.json
 empty-parcels:
 	cd static/loader/empty-scenes && node generate_all.js
 
-build-essentials: $(COMPILED_SUPPORT_JS_FILES) $(DECENTRALAND_ECS_TYPEDEF_FILE) $(BUILD_ECS) $(SCENE_SYSTEM) $(INTERNAL_SCENES) $(DECENTRALAND_LOADER) $(RENDERER_BUILD) empty-parcels generate-mocks ## Build the basic required files for the explorer
+build-essentials: $(COMPILED_SUPPORT_JS_FILES) dcl-amd $(DECENTRALAND_ECS_TYPEDEF_FILE) $(BUILD_ECS) $(SCENE_SYSTEM) $(INTERNAL_SCENES) $(DECENTRALAND_LOADER) $(RENDERER_BUILD) empty-parcels generate-mocks ## Build the basic required files for the explorer
 
 # Hellmap scenes
 
@@ -177,7 +177,7 @@ SCENE_JSONS := $(PARCEL_SCENE_JSONS) $(ECS_SCENE_JSONS) $(HELLMAP_SCENE_JSONS)
 # CLI
 
 dcl-amd:
-	cd $(CWD)/packages/decentraland-amd && make build
+	cd $(CWD)/packages/decentraland-amd; npm install; make build
 
 npm-link: build-essentials static/dist/preview.js static/dist/editor.js dcl-amd ## Run `npm link` to develop local scenes against this project
 	rm -rf packages/decentraland-ecs/artifacts || true
