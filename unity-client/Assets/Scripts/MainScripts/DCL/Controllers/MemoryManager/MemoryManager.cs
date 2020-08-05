@@ -2,15 +2,13 @@ using DCL.Controllers;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-#if UNITY_WEBGL && !UNITY_EDITOR
-using Kongregate;
-#endif
+using UnityEngine.Profiling;
 
 namespace DCL
 {
     public class MemoryManager : Singleton<MemoryManager>
     {
-        private const uint MAX_USED_MEMORY = 1800 * 1024 * 1024;
+        private const uint MAX_USED_MEMORY = 1300 * 1024 * 1024;
         private const float TIME_FOR_NEW_MEMORY_CHECK = 1.0f;
 
         public void Initialize()
@@ -32,12 +30,7 @@ namespace DCL
 
         bool NeedsMemoryCleanup()
         {
-            uint usedMemory = 0;
-
-#if UNITY_WEBGL && !UNITY_EDITOR
-            usedMemory = WebGLMemoryStats.GetUsedMemorySize();
-#endif
-
+            long usedMemory = Profiler.GetTotalAllocatedMemoryLong() + Profiler.GetMonoUsedSizeLong() + Profiler.GetAllocatedMemoryForGraphicsDriver();
             return usedMemory >= MAX_USED_MEMORY;
         }
 
