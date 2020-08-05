@@ -100,6 +100,10 @@ function* handleMessageFromEngine(
 }
 
 namespace DCL {
+
+  // This exposes JSEvents emscripten's object 
+  export let JSEvents:any
+
   // This function get's called by the engine
   export function EngineStarted() {
     globalThis.globalStore.dispatch(engineStarted())

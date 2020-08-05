@@ -20,15 +20,37 @@ import { HotSceneInfo } from 'shared/social/hotScenes'
 
 const MINIMAP_CHUNK_SIZE = 100
 
+let _gameInstance:any = null
+
 export class UnityInterface {
   public debug: boolean = false
-  private gameInstance: any
+  public gameInstance: any
+  public Module: any
 
   public Init(gameInstance: any): void {
     if (!WSS_ENABLED) {
       nativeMsgBridge.initNativeMessages(gameInstance)
     }
+
     this.gameInstance = gameInstance
+    this.Module = this.gameInstance.Module
+    _gameInstance = gameInstance
+
+    window.addEventListener('resize', this.resizeCanvasDelayed)
+
+    this.resizeCanvasDelayed(null)
+  }
+
+  private resizeCanvasDelayed(ev: UIEvent | null) {
+    setInterval(this.resizeCanvas, 100, _gameInstance.Module)
+  }
+
+  private resizeCanvas(module:any) {
+    let innerWidth = window.innerWidth
+    let innerHeight = window.innerHeight
+    let ratio = innerWidth / innerHeight
+    let desiredHeight = 720
+    module.setCanvasSize(desiredHeight * ratio, desiredHeight)
   }
 
   public SendGenericMessage(object: string, method: string, payload: string) {
