@@ -17,6 +17,7 @@ namespace DCL
         private void OnPoolRemoved(Pool pool)
         {
             pool.OnCleanup -= OnPoolRemoved;
+            masterAssets[pool.id].Cleanup();
             masterAssets.Remove(pool.id);
         }
 
