@@ -387,8 +387,9 @@ namespace DCL.Interface
         [System.Serializable]
         public class GIFSetupPayload
         {
-            public IntPtr texPointer;
-            public string url;
+            public string imageSource;
+            public string sceneId;
+            public string componentId;
             public bool isWebGL1;
         }
 
@@ -860,13 +861,14 @@ namespace DCL.Interface
             SendMessage("SetAudioStream", onAudioStreamingEvent);
         }
 
-        public static void SetupGIFPlayer(IntPtr texPointer, string gifURL, bool isWebGL1)
+        public static void RequestGIFPlayer(string gifURL, string sceneId, string componentId, bool isWebGL1)
         {
-            gifSetupPayload.texPointer = texPointer;
-            gifSetupPayload.url = gifURL;
+            gifSetupPayload.imageSource = gifURL;
+            gifSetupPayload.sceneId = sceneId;
+            gifSetupPayload.componentId = componentId;
             gifSetupPayload.isWebGL1 = isWebGL1;
 
-            SendMessage("SetupGIFPlayer", gifSetupPayload);
+            SendMessage("RequestGIFPlayer", gifSetupPayload);
         }
 
         public static void GoTo(int x, int y)

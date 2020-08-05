@@ -112,11 +112,16 @@ import { logout } from 'shared/session/actions'
 import { getIdentity, hasWallet } from 'shared/session'
 import { loginCompleted } from 'shared/ethereum/provider'
 
+const fastgif = require('fastgif/fastgif.js')
+
+declare const DCL: any
+
 declare const globalThis: UnityInterfaceContainer &
   BrowserInterfaceContainer &
   StoreContainer & { analytics: any; delighted: any }
 
 type GameInstance = {
+  Module: any
   SendMessage(object: string, method: string, ...args: (number | string)[]): void
 }
 
@@ -440,8 +445,56 @@ const browserInterface = {
   ScenesLoadingFeedback(data: { message: string; loadPercentage: number }) {
     const { message, loadPercentage } = data
     globalThis.globalStore.dispatch(updateStatusMessage(message, loadPercentage))
+  },
+
+  async RequestGIFPlayer(data: { imageSource: string, sceneId: string, componentId: string, isWebGL1: boolean }) {
+    // Generate texture that will be used for displaying the GIF frames
+    let ptr: GLuint = gameInstance.Module._malloc(4)
+    let tex = GenerateTexture(ptr)
+
+    // Fetch image and convert its frames ImageDate into Image
+    const gifDecoder = new fastgif.Decoder()
+    const imageConversionCanvas = document.createElement('canvas')
+    imageConversionCanvas.id = 'gif-image-conversion-canvas'
+    const imageConversionContext = imageConversionCanvas.getContext('2d')
+
+    const imageFetch = fetch(data.imageSource)
+
+    const response = await imageFetch
+    const buffer = await response.arrayBuffer()
+
+    const frames = await gifDecoder.decode(buffer) // an array of {imageData: ImageData, delay: number}
+    let framesAsImage = new Array()
+    let convertedFramesCount = 0
+
+    for (let frame of frames) {
+      imageConversionCanvas.width = frame.imageData.width
+      imageConversionCanvas.height = frame.imageData.height
+      imageConversionContext?.putImageData(frame.imageData, 0, 0)
+
+      const image = new Image()
+      image.crossOrigin = ''
+      image.src = imageConversionCanvas.toDataURL()
+
+      framesAsImage.push(image)
+
+      image.onload = function () {
+        convertedFramesCount++
+
+        if (convertedFramesCount === frames.length) {
+          // Tell Unity which tex to use
+          unityInterface.SendGIFPointer(data.sceneId, data.componentId, image.width, image.height, tex.name)
+
+          StartGIFPlayingPromise(frames, framesAsImage, tex.name, data.isWebGL1)
+
+          // we don't need this canvas anymore, so we remove it
+          imageConversionCanvas.parentNode?.removeChild(imageConversionCanvas)
+        }
+      }
+    }
   }
 }
+
 globalThis.browserInterface2 = browserInterface
 type BrowserInterfaceContainer = {
   browserInterface2: typeof browserInterface
@@ -643,6 +696,9 @@ export const unityInterface = {
   },
   RequestTeleport(teleportData: {}) {
     gameInstance.SendMessage('HUDController', 'RequestTeleport', JSON.stringify(teleportData))
+  },
+  SendGIFPointer(sceneId: string, componentId: string, width: number, height: number, pointer: number) {
+    gameInstance.SendMessage('SceneController', 'UpdateGIFPointer', JSON.stringify({ sceneId, componentId, width, height, pointer }))
   },
 
   // *********************************************************************************
@@ -938,6 +994,7 @@ export class UnityParcelScene extends UnityScene<LoadableParcelScene> {
 function debuggingDecorator(_gameInstance: GameInstance) {
   const debug = false
   const decorator = {
+    Module: null,
     // @ts-ignore
     SendMessage: (...args) => {
       defaultLogger.info('gameInstance', ...args)
@@ -1163,4 +1220,75 @@ function pointerLockChange() {
     unityInterface.SetCursorState(isLocked)
   }
   isPointerLocked = isLocked
+}
+
+/////////////////////////////////// GIFs PROCESSING ///////////////////////////////////
+
+function StartGIFPlayingPromise(frames: any[], framesAsImage: any[], texId: any, isWebGL1: boolean): void {
+  const promise = PlayGIF(frames, framesAsImage, texId, isWebGL1)
+  promise.catch((error) => defaultLogger.log(error))
+}
+
+async function PlayGIF(frames: any[], framesAsImage: any[], texId: any, isWebGL1: boolean) {
+  let frameIndex = 0
+
+  while (true) {
+    UpdateGIFTex(framesAsImage[frameIndex], texId, isWebGL1)
+
+    // TODO: frames[frameIndex].delay is always 0
+    let delay = 32
+
+    await new Promise((resolve) => window.setTimeout(resolve, delay))
+
+    if (++frameIndex === frames.length) {
+      frameIndex = 0
+    }
+  }
+}
+
+function UpdateGIFTex(image: any, texId: any, isWebGL1: boolean) {
+  let GLctx = gameInstance.Module.ctx
+  GLctx.bindTexture(GLctx.TEXTURE_2D, DCL.GL.textures[texId])
+
+  if (isWebGL1) {
+    GLctx.texImage2D(
+      GLctx.TEXTURE_2D,
+      0,
+      GLctx.RGBA,
+      GLctx.RGBA,
+      GLctx.UNSIGNED_BYTE,
+      image
+    )
+  } else {
+    GLctx.texImage2D(
+      GLctx.TEXTURE_2D,
+      0,
+      GLctx.RGBA,
+      image.width,
+      image.height,
+      0,
+      GLctx.RGBA,
+      GLctx.UNSIGNED_BYTE,
+      image
+    )
+  }
+}
+
+// Based on WebGL compiled "glGenTextures"
+function GenerateTexture(ptr: any): any {
+  let GLctx = gameInstance.Module.ctx
+  let texture = GLctx.createTexture();
+
+  if (!texture) {
+    DCL.GL.recordError(1282);
+    gameInstance.Module.HEAP32[ptr + 4 >> 2] = 0;
+    return
+  }
+
+  let id = DCL.GL.getNewId(DCL.GL.textures);
+  texture.name = id;
+  DCL.GL.textures[id] = texture;
+  gameInstance.Module.HEAP32[ptr >> 2] = id
+
+  return texture
 }

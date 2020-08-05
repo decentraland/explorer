@@ -9,6 +9,7 @@ namespace DCL.Components
 
         public bool withCollisions;
         public Color backgroundColor;
+        public BaseDisposable component;
 
         string assetUrl;
 
@@ -64,7 +65,7 @@ namespace DCL.Components
 
         void LoadAsset()
         {
-            loaderController?.LoadAsset(assetUrl, true);
+            loaderController?.LoadAsset(assetUrl, entity.scene.sceneData.id, component.id, true);
         }
 
         void OnRendererStateChanged(bool current, bool previous)

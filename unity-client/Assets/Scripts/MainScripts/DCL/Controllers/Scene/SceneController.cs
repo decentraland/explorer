@@ -111,7 +111,7 @@ namespace DCL
 #if !UNITY_EDITOR
             Debug.Log("DCL Unity Build Version: " + DCL.Configuration.ApplicationSettings.version);
 
-            Debug.unityLogger.logEnabled = true;
+            Debug.unityLogger.logEnabled = false;
 #endif
 
             InitializeSceneBoundariesChecker();
@@ -309,10 +309,10 @@ namespace DCL
 
         public void CreateUIScene(string json)
         {
-            // #if UNITY_EDITOR
+#if UNITY_EDITOR
             if (debugScenes && ignoreGlobalScenes)
                 return;
-            // #endif
+#endif
             CreateUISceneMessage uiScene = SafeFromJson<CreateUISceneMessage>(json);
 
             string uiSceneId = uiScene.id;
@@ -411,13 +411,13 @@ namespace DCL
 
             var sceneToLoad = scene;
 
-            // #if UNITY_EDITOR
+#if UNITY_EDITOR
             if (debugScenes && sceneToLoad.basePosition.ToString() != debugSceneCoords.ToString())
             {
                 SendSceneReady(sceneToLoad.id);
                 return;
             }
-            // #endif
+#endif
 
             OnMessageProcessStart?.Invoke(MessagingTypes.SCENE_LOAD);
 
@@ -689,12 +689,12 @@ namespace DCL
 
             if (loadedScenes.TryGetValue(sceneId, out scene))
             {
-                // #if UNITY_EDITOR
+#if UNITY_EDITOR
                 if (debugScenes && scene is GlobalScene && ignoreGlobalScenes)
                 {
                     return false;
                 }
-                // #endif
+#endif
                 if (!scene.gameObject.activeInHierarchy)
                 {
                     return true;
@@ -894,6 +894,22 @@ namespace DCL
         public void BuilderReady()
         {
             UnityEngine.SceneManagement.SceneManager.LoadScene("BuilderScene", UnityEngine.SceneManagement.LoadSceneMode.Additive);
+        }
+
+        [Serializable]
+        public class UpdateGIFPointerPayload
+        {
+            public string sceneId;
+            public string componentId;
+            public int width;
+            public int height;
+            public int pointer;
+        }
+        public void UpdateGIFPointer(string payload)
+        {
+            var parsedPayload = SafeFromJson<UpdateGIFPointerPayload>(payload);
+
+            (loadedScenes[parsedPayload.sceneId].disposableComponents[parsedPayload.componentId] as NFTShape).UpdateGIFPointer(parsedPayload.width, parsedPayload.height, (IntPtr)parsedPayload.pointer);
         }
     }
 }

@@ -4,7 +4,7 @@ import { DEBUG_MESSAGES } from 'config'
 import { initializeEngine } from 'unity-interface/dcl'
 
 import { waitingForRenderer, UNEXPECTED_ERROR } from 'shared/loading/types'
-import defaultLogger, { createLogger } from 'shared/logger'
+import { createLogger } from 'shared/logger'
 import { ReportFatalError } from 'shared/loading/ReportFatalError'
 import { StoreContainer } from 'shared/store/rootTypes'
 
@@ -20,7 +20,6 @@ import {
   rendererEnabled
 } from './actions'
 
-const fastgif = require('fastgif/fastgif.js')
 const queryString = require('query-string')
 
 declare const globalThis: StoreContainer
@@ -110,92 +109,6 @@ namespace DCL {
   export function MessageFromEngine(type: string, jsonEncodedMessage: string) {
     globalThis.globalStore.dispatch(messageFromEngine(type, jsonEncodedMessage))
   }
-
-  export async function InitializeGIF(imgSource: string, callback: (image: any) => void) {
-    const decoder = new fastgif.Decoder()
-
-    defaultLogger.log('pravs - InitializeGIF (kernel) - GIF URL is: ' + imgSource)
-
-    const canvas = document.createElement('canvas')
-    canvas.id = 'gif-processing-canvas'
-    const ctx = canvas.getContext('2d')
-
-    if (!ctx) {
-      defaultLogger.log('pravs - InitializeGIF (kernel) - GIF canvas context is null ?!?!?!')
-      return
-    }
-
-    const imageFetch = fetch(imgSource)
-    imageFetch.catch((error) => defaultLogger.log('pravs - InitializeGIF (kernel) - ERROR: ' + error))
-
-    const response = await imageFetch
-    const buffer = await response.arrayBuffer()
-
-    defaultLogger.log('pravs - InitializeGIF (kernel) - GIF buffer array bytelength: ' + buffer.byteLength)
-
-    const frames = await decoder.decode(buffer) // an array of {imageData: ImageData, delay: number}
-    let framesAsImage = new Array()
-    let convertedFramesCount = 0
-
-    defaultLogger.log('pravs - InitializeGIF (kernel) - Started processing ' + frames.length + ' frames.')
-    for (let frame of frames) {
-      defaultLogger.log(
-        'pravs - InitializeGIF (kernel) - processing frame w: ' +
-          frame.imageData.width +
-          ', h:' +
-          frame.imageData.height
-      )
-
-      canvas.width = frame.imageData.width
-      canvas.height = frame.imageData.height
-      ctx.putImageData(frame.imageData, 0, 0)
-
-      const image = new Image()
-      image.crossOrigin = ''
-      image.src = canvas.toDataURL()
-
-      framesAsImage.push(image)
-
-      image.onload = function () {
-        convertedFramesCount++
-
-        defaultLogger.log(
-          'pravs - InitializeGIF (kernel) - image loaded, converted frames count: ' +
-            convertedFramesCount +
-            '/' +
-            frames.length
-        )
-
-        if (convertedFramesCount === frames.length) {
-          StartGIFPromise(frames, framesAsImage, callback)
-
-          // we don't need this canvas anymore, so we remove it
-          canvas.parentNode?.removeChild(canvas)
-        }
-      }
-    }
-  }
-
-  function StartGIFPromise(frames: any[], framesAsImage: any[], updateUnityTex: (image: any) => void): void {
-    const promise = StartGIF(frames, framesAsImage, updateUnityTex)
-    promise.catch((error) => defaultLogger.log('ERROR IN StartGIFPromise!', error))
-  }
-
-  async function StartGIF(frames: any[], framesAsImage: any[], updateUnityTex: (image: any) => void) {
-    defaultLogger.log('pravs - InitializeGIF (kernel) - Finished converting frames to Image')
-
-    // Play the GIF
-    let frameIndex = 0
-    while (true) {
-      updateUnityTex(framesAsImage[frameIndex])
-
-      await new Promise((resolve) => window.setTimeout(resolve, frames[frameIndex].delay))
-
-      if (++frameIndex === frames.length) {
-        frameIndex = 0
-      }
-    }
-  }
 }
 
 // The namespace DCL is exposed to global because the unity template uses it to
@@ -236,6 +149,7 @@ function initializeUnityEditor(webSocketUrl: string, container: HTMLElement): Un
   }
 
   const gameInstance: UnityGame = {
+    Module: null,
     SendMessage(_obj, type, payload) {
       if (ws.readyState === ws.OPEN) {
         const msg = JSON.stringify({ type, payload })
