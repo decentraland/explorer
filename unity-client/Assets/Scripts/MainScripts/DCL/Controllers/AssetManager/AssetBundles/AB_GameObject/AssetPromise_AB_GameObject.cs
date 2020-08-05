@@ -1,10 +1,11 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Linq;
 using DCL.Helpers;
 using DCL.Configuration;
 using UnityEngine;
 using System.Collections.Generic;
+using Cinemachine;
 
 namespace DCL
 {
@@ -72,7 +73,7 @@ namespace DCL
             }
 
             if (asset != null)
-                GameObject.Destroy(asset.container);
+                UnityEngine.Object.Destroy(asset.container);
 
             AssetPromiseKeeper_AB.i.Forget(subPromise);
         }
@@ -88,7 +89,7 @@ namespace DCL
 
         public IEnumerator LoadingCoroutine(Action OnSuccess, Action OnFail)
         {
-            subPromise = new AssetPromise_AB(contentUrl, hash);
+            subPromise = new AssetPromise_AB(contentUrl, hash, asset.container.transform);
             bool success = false;
             subPromise.OnSuccessEvent += (x) => success = true;
             asset.ownerPromise = subPromise;
@@ -118,6 +119,19 @@ namespace DCL
         public IEnumerator InstantiateABGameObjects()
         {
             var goList = subPromise.asset.GetAssetsByExtensions<GameObject>("glb", "ltf");
+
+            if (goList.Count == 0)
+            {
+                if (asset.container != null)
+                    UnityEngine.Object.Destroy(asset.container);
+
+                asset.container = null;
+
+                if (subPromise.asset.ownerAssetBundle != null)
+                    subPromise.asset.ownerAssetBundle.Unload(false);
+
+                yield break;
+            }
 
             for (int i = 0; i < goList.Count; i++)
             {
@@ -149,7 +163,7 @@ namespace DCL
         {
             if (settings.forceNewInstance)
             {
-                return ((AssetLibrary_AB_GameObject) library).GetCopyFromOriginal(id);
+                return ((AssetLibrary_AB_GameObject)library).GetCopyFromOriginal(id);
             }
             else
             {
