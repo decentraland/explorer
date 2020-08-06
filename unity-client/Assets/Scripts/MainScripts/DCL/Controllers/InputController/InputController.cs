@@ -15,6 +15,7 @@ public enum DCLAction_Trigger
     ToggleWorldChat = 122,
     ToggleUIVisibility = 123,
     ToggleControlsHud = 124,
+    ToggleExploreHud = 125,
 
     OpenExpressions = 200,
     Expression_Wave = 201,
@@ -104,6 +105,10 @@ public class InputController : MonoBehaviour
                     break;
                 case DCLAction_Trigger.ToggleControlsHud:
                     InputProcessor.FromKey(action, KeyCode.C, modifiers: InputProcessor.Modifier.FocusNotInInput);
+                    break;
+                case DCLAction_Trigger.ToggleExploreHud:
+                    if (allUIHidden) break;
+                    InputProcessor.FromKey(action, KeyCode.X, modifiers: InputProcessor.Modifier.FocusNotInInput);
                     break;
                 case DCLAction_Trigger.Expression_Wave:
                     InputProcessor.FromKey(action, KeyCode.Alpha1, modifiers: InputProcessor.Modifier.FocusNotInInput);

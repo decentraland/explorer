@@ -102,6 +102,11 @@ public class TaskbarHUDController : IHUD
         OnCloseWindowToggleInputPress();
     }
 
+    private void ToggleExploreTrigger_OnTriggered()
+    {
+        view.exploreButton.SetToggleState(!view.exploreButton.toggledOn);
+    }
+
     private void View_OnChatToggleOn()
     {
         worldChatWindowHud.SetVisibility(true);
@@ -185,7 +190,7 @@ public class TaskbarHUDController : IHUD
 
     public void OpenPrivateChatTo(string userId)
     {
-        var button = view.chatHeadsGroup.AddChatHead(userId, (ulong) System.DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+        var button = view.chatHeadsGroup.AddChatHead(userId, (ulong)System.DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
         button.toggleButton.onClick.Invoke();
     }
 
@@ -272,6 +277,9 @@ public class TaskbarHUDController : IHUD
     {
         exploreHud = controller;
         view.OnAddExploreHud();
+
+        exploreHud.OnToggleTriggered -= ToggleExploreTrigger_OnTriggered;
+        exploreHud.OnToggleTriggered += ToggleExploreTrigger_OnTriggered;
     }
 
     private void OpenPrivateChatWindow(string userId)
@@ -311,6 +319,9 @@ public class TaskbarHUDController : IHUD
 
         if (toggleWorldChatTrigger != null)
             toggleWorldChatTrigger.OnTriggered -= ToggleWorldChatTrigger_OnTriggered;
+
+        if (exploreHud != null)
+            exploreHud.OnToggleTriggered -= ToggleExploreTrigger_OnTriggered;
 
         if (chatController != null)
             chatController.OnAddMessage -= OnAddMessage;
@@ -370,7 +381,7 @@ public class TaskbarHUDController : IHUD
     void OnAddMessage(ChatMessage message)
     {
         if (!AnyWindowsDifferentThanChatIsOpen() && message.messageType == ChatMessage.Type.PUBLIC)
-            worldChatWindowHud.MarkWorldChatMessagesAsRead((long) message.timestamp);
+            worldChatWindowHud.MarkWorldChatMessagesAsRead((long)message.timestamp);
     }
 
     private bool AnyWindowsDifferentThanChatIsOpen()
