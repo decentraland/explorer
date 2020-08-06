@@ -24,9 +24,12 @@ let _gameInstance: any = null
 let originalFillMouseEventData: any
 
 function fillMouseEventDataWrapper(eventStruct: any, e: any, target: any) {
+  let widthRatio = _gameInstance.Module.canvas.widthNative / (window.innerWidth * devicePixelRatio)
+  let heightRatio = _gameInstance.Module.canvas.heightNative / (window.innerHeight * devicePixelRatio)
+
   let eWrapper: any = {
-    clientX: (_gameInstance.Module.canvas.widthNative / _gameInstance.Module.canvas.clientWidth) * e.clientX * 0.8,
-    clientY: (_gameInstance.Module.canvas.heightNative / _gameInstance.Module.canvas.clientHeight) * e.clientY * 0.8,
+    clientX: e.clientX * widthRatio,
+    clientY: e.clientY * heightRatio,
     screenX: e.screenX,
     screenY: e.screenY,
     ctrlKey: e.ctrlKey,
@@ -349,11 +352,12 @@ export class UnityInterface {
   }
 
   private resizeCanvas(module: any) {
-    let innerWidth = window.innerWidth
-    let innerHeight = window.innerHeight
-    let ratio = innerWidth / innerHeight
     let desiredHeight = targetHeight
-    module.setCanvasSize(desiredHeight * ratio, desiredHeight)
+
+    if (module.canvas.height > desiredHeight) {
+      let ratio = desiredHeight / module.canvas.height
+      module.setCanvasSize(module.canvas.width * ratio, module.canvas.height * ratio)
+    }
   }
 }
 
