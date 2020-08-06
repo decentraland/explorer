@@ -21,11 +21,39 @@ import { HotSceneInfo } from 'shared/social/hotScenes'
 const MINIMAP_CHUNK_SIZE = 100
 
 let _gameInstance: any = null
+let originalFillMouseEventData: any
+
+function fillMouseEventDataWrapper(eventStruct: any, e: any, target: any) {
+  let eWrapper: any = {
+    clientX: (_gameInstance.Module.canvas.widthNative / _gameInstance.Module.canvas.clientWidth) * e.clientX * 0.8,
+    clientY: (_gameInstance.Module.canvas.heightNative / _gameInstance.Module.canvas.clientHeight) * e.clientY * 0.8,
+    screenX: e.screenX,
+    screenY: e.screenY,
+    ctrlKey: e.ctrlKey,
+    shiftKey: e.shiftKey,
+    altKey: e.altKey,
+    metaKey: e.metaKey,
+    button: e.button,
+    buttons: e.buttons,
+    movementX: e['movementX'] || e['mozMovementX'] || e['webkitMovementX'],
+    movementY: e['movementY'] || e['mozMovementY'] || e['webkitMovementY'],
+    type: e.type
+  }
+
+  originalFillMouseEventData(eventStruct, eWrapper, target)
+}
+
+export let targetHeight: number = 720
 
 export class UnityInterface {
   public debug: boolean = false
   public gameInstance: any
   public Module: any
+
+  public SetTargetHeight(height: number): void {
+    targetHeight = height
+    this.resizeCanvasDelayed(null)
+  }
 
   public Init(gameInstance: any): void {
     if (!WSS_ENABLED) {
@@ -39,6 +67,18 @@ export class UnityInterface {
     window.addEventListener('resize', this.resizeCanvasDelayed)
 
     this.resizeCanvasDelayed(null)
+    this.waitForFillMouseEventData()
+  }
+
+  public waitForFillMouseEventData() {
+    let DCL = (window as any)['DCL']
+
+    if (DCL.JSEvents !== undefined) {
+      originalFillMouseEventData = DCL.JSEvents.fillMouseEventData
+      DCL.JSEvents.fillMouseEventData = fillMouseEventDataWrapper
+    } else {
+      setTimeout(this.waitForFillMouseEventData, 100)
+    }
   }
 
   public SendGenericMessage(object: string, method: string, payload: string) {
@@ -312,7 +352,7 @@ export class UnityInterface {
     let innerWidth = window.innerWidth
     let innerHeight = window.innerHeight
     let ratio = innerWidth / innerHeight
-    let desiredHeight = 720
+    let desiredHeight = targetHeight
     module.setCanvasSize(desiredHeight * ratio, desiredHeight)
   }
 }
