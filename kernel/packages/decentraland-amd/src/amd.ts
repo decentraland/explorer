@@ -17,6 +17,7 @@ type Module = {
   context: any
   dependencies?: string[]
   handlers: Function[]
+  exports: any
 }
 
 declare var dcl: DecentralandInterface
@@ -52,7 +53,8 @@ namespace loader {
       name,
       dclamd: MODULE_LOADING,
       handlers,
-      context
+      context,
+      exports: {}
     }
   }
 
@@ -87,15 +89,20 @@ namespace loader {
       if (registeredModules[id]) {
         handlers = registeredModules[id].handlers
         context = registeredModules[id].context
+      } else {
+        registeredModules[id] = createModule(id)
       }
-      let module = (registeredModules[id] =
+
+      let module = registeredModules[id]
+      module.exports =
         typeof factory === 'function'
-          ? factory.apply(null, anonymousQueue.slice.call(arguments, 0)) || registeredModules[id] || {}
-          : factory)
+          ? factory.apply(null, anonymousQueue.slice.call(arguments, 0)) || registeredModules[id].exports || {}
+          : factory
+
       module.dclamd = MODULE_READY
       module.context = context
       for (let x = 0, xl = handlers ? handlers.length : 0; x < xl; x++) {
-        handlers[x](module)
+        handlers[x](module.exports)
       }
     }
 
@@ -152,7 +159,7 @@ namespace loader {
   export function require(modules: string, callback?: Function, context?: string)
   export function require(modules: string[], callback?: Function, context?: string)
   export function require(modules: string | string[], callback?: Function, context?: string) {
-    let loadedModules: any[] = []
+    let loadedModulesExports: any[] = []
     let loadedCount = 0
     let hasLoaded = false
 
@@ -176,15 +183,15 @@ namespace loader {
           _require.toUrl = function (module) {
             return toUrl(module, context)
           }
-          loadedModules[x] = _require
+          loadedModulesExports[x] = _require
           loadedCount++
           break
         case 'exports':
-          loadedModules[x] = registeredModules[context] || (registeredModules[context] = {} as any)
+          loadedModulesExports[x] = registeredModules[context].exports
           loadedCount++
           break
         case 'module':
-          loadedModules[x] = {
+          loadedModulesExports[x] = {
             id: context,
             uri: toUrl(context)
           }
@@ -193,20 +200,18 @@ namespace loader {
         default:
           // If we have a circular dependency, then we resolve the module even if it hasn't loaded yet
           if (hasDependencyWith(modules[x], context)) {
-            loadedModules[x] = registeredModules[modules[x]]
+            loadedModulesExports[x] = registeredModules[modules[x]].exports
             loadedCount++
           } else {
             load(
               modules[x],
               (loadedModuleExports) => {
-                loadedModules[x] = loadedModuleExports
+                loadedModulesExports[x] = loadedModuleExports
                 loadedCount++
+
                 if (loadedCount === xl && callback) {
                   hasLoaded = true
-                  callback.apply(null, loadedModules)
-                }
-                if (registeredModules[modules[x]]) {
-                  registeredModules[modules[x]].dclamd = MODULE_READY
+                  callback.apply(null, loadedModulesExports)
                 }
               },
               context
@@ -216,7 +221,7 @@ namespace loader {
     }
 
     if (!hasLoaded && loadedCount === xl && callback) {
-      callback.apply(null, loadedModules)
+      callback.apply(null, loadedModulesExports)
     }
   }
 
@@ -226,32 +231,38 @@ namespace loader {
     }
   }
 
-  function load(moduleName: string, callback: Function, context: string) {
+  function load(moduleName: string, handler: Function, context: string) {
     moduleName = context ? toUrl(moduleName, context) : moduleName
 
     if (registeredModules[moduleName]) {
       if (registeredModules[moduleName].dclamd === MODULE_LOADING) {
-        callback && registeredModules[moduleName].handlers.push(callback)
+        handler && registeredModules[moduleName].handlers.push(handler)
       } else {
-        callback && callback(registeredModules[moduleName])
+        handler && handler(registeredModules[moduleName].exports)
       }
-      return
     } else {
-      registeredModules[moduleName] = createModule(moduleName, context, [callback])
-    }
+      const module = (registeredModules[moduleName] = createModule(moduleName, context, [handler]))
+      if (moduleName.indexOf('@') === 0) {
+        if (typeof dcl !== 'undefined') {
+          dcl.loadModule(moduleName).then((descriptor: ModuleDescriptor) => {
+            let createdModuleExports = {}
 
-    if (moduleName.indexOf('@') === 0) {
-      if (typeof dcl !== 'undefined') {
-        dcl.loadModule(moduleName).then((descriptor: ModuleDescriptor) => {
-          let createdModule = {}
+            for (let i in descriptor.methods) {
+              const method = descriptor.methods[i]
+              createdModuleExports[method.name] = createMethodHandler(descriptor.rpcHandle, method)
+            }
 
-          for (let i in descriptor.methods) {
-            const method = descriptor.methods[i]
-            createdModule[method.name] = createMethodHandler(descriptor.rpcHandle, method)
-          }
+            // This is somewhat repeated with the ready function above... Should refactor with clear head
+            module.dclamd = MODULE_READY
+            module.exports = createdModuleExports
 
-          callback(createdModule)
-        })
+            const handlers = module.handlers
+
+            for (let i = 0; i < handlers.length; i++) {
+              handlers[i](createdModuleExports)
+            }
+          })
+        }
       }
     }
   }
