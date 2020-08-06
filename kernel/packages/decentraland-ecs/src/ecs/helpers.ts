@@ -42,20 +42,11 @@ export function newId(type: string) {
   return type + lastGeneratedId.toString(36)
 }
 
-export function newIdBase10() {
-  lastGeneratedId++
-  return lastGeneratedId.toString(10)
-}
-
-export function idToNumber(id: string): number {
-  return parseInt(id, 10)
-}
-
 /**
  * @internal
  */
 export function uuid() {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
     let r = (Math.random() * 16) | 0
     let v = c === 'x' ? r : (r & 0x3) | 0x8
     return v.toString(16)
