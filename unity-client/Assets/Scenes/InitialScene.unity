@@ -1375,6 +1375,15 @@ MonoBehaviour:
         array:
         - {fileID: 8300000, guid: c502cfacea4f3d34aa2a4cc730ddfe0b, type: 3}
       source: {fileID: 0}
+    - name: ValueChange
+      loop: 0
+      volume: 1
+      randomPitch: 0
+      playOnAwake: 0
+      clips:
+        array:
+        - {fileID: 8300000, guid: e134d8c09228ed0448e0458ba8602c43, type: 3}
+      source: {fileID: 0}
 --- !u!4 &1310817203
 Transform:
   m_ObjectHideFlags: 0
@@ -1452,11 +1461,11 @@ MonoBehaviour:
   customContentServerUrl: http://localhost:1338/
   baseUrlMode: 0
   baseUrlCustom: 
-  environment: 4
+  environment: 2
   startInCoords: {x: 0, y: 0}
   forceLocalComms: 0
-  allWearables: 0
-  testWearables: 0
+  allWearables: 1
+  testWearables: 1
   enableTutorial: 0
   useNewChat: 0
   debugPanelMode: 0

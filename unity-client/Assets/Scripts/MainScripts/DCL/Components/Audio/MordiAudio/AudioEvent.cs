@@ -27,10 +27,11 @@ public class AudioEvent
     [HideInInspector]
     public AudioSource source;
 
-    private float pitch = 1f;
+    private float pitch = 1f, defaultVolume;
 
     public void Initialize()
     {
+        defaultVolume = volume;
         RandomizeIndex();
     }
 
@@ -58,7 +59,7 @@ public class AudioEvent
         // Set pitch
         source.pitch = pitch + Random.Range(0f, randomPitch) - (randomPitch * 0.5f);
 
-        // Play from source
+        // Play
         if (oneShot)
         {
             source.PlayOneShot(source.clip);
@@ -67,6 +68,26 @@ public class AudioEvent
         {
             source.Play();
         }
+
+        RandomizeIndex();
+    }
+
+    public void PlayScheduled(float delaySeconds)
+    {
+        // Check if AudioSource is active
+        if (!source.gameObject.activeSelf)
+        {
+            return;
+        }
+
+        // Set clip
+        source.clip = clips[index];
+
+        // Set pitch
+        source.pitch = pitch + Random.Range(0f, randomPitch) - (randomPitch * 0.5f);
+
+        // Play
+        source.PlayScheduled(AudioSettings.dspTime + delaySeconds);
 
         RandomizeIndex();
     }
@@ -84,5 +105,10 @@ public class AudioEvent
     public void SetPitch(float pitch)
     {
         this.pitch = pitch;
+    }
+
+    public void ResetVolume()
+    {
+        volume = defaultVolume;
     }
 }

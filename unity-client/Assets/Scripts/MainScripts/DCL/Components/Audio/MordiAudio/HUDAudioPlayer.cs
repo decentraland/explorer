@@ -17,7 +17,8 @@ public class HUDAudioPlayer : MonoBehaviour
         dialogClose,
         confirm,
         cancel,
-        randomize
+        randomize,
+        valueChange
     }
 
     public static HUDAudioPlayer i { get; private set; }
@@ -25,13 +26,11 @@ public class HUDAudioPlayer : MonoBehaviour
     [HideInInspector]
     public AudioContainer ac;
 
-    AudioEvent eventHover, eventClick, eventRelease, eventEnable, eventDisable, eventListItemAppear, eventDialogAppear, eventDialogClose, eventConfirm, eventCancel;
+    AudioEvent eventHover, eventClick, eventRelease, eventEnable, eventDisable, eventListItemAppear, eventDialogAppear, eventDialogClose, eventConfirm, eventCancel,
+        eventValueChange;
 
     bool listItemAppearHasPlayed = false;
     float listItemAppearPitch = 1f;
-
-    float randomizeSoundTimer = 0f;
-    int randomizeSoundCount = -1;
 
     private void Awake()
     {
@@ -48,34 +47,15 @@ public class HUDAudioPlayer : MonoBehaviour
         eventDialogClose = ac.GetEvent("DialogClose");
         eventConfirm = ac.GetEvent("Confirm");
         eventCancel = ac.GetEvent("Cancel");
+        eventValueChange = ac.GetEvent("ValueChange");
     }
 
     private void Update()
     {
         listItemAppearHasPlayed = false;
-
-        // Handle randomize-sound
-        if (randomizeSoundCount != -1)
-        {
-            randomizeSoundTimer -= Time.deltaTime;
-            if (randomizeSoundTimer <= 0f)
-            {
-                randomizeSoundTimer = 0.005f + randomizeSoundCount / 70f;
-                eventListItemAppear.SetPitch(2f + randomizeSoundCount / 5f);
-                eventListItemAppear.Play(true);
-                randomizeSoundCount += 1;
-
-                if (randomizeSoundCount >= 10)
-                {
-                    eventListItemAppear.SetPitch(1f);
-                    randomizeSoundTimer = 0f;
-                    randomizeSoundCount = -1;
-                }
-            }
-        }
     }
 
-    public void Play(Sound sound)
+    public void Play(Sound sound, float pitch = 1f)
     {
         switch (sound)
         {
@@ -116,7 +96,11 @@ public class HUDAudioPlayer : MonoBehaviour
                 eventCancel.Play();
                 break;
             case Sound.randomize:
-                randomizeSoundCount = 0;
+                eventEnable.Play();
+                break;
+            case Sound.valueChange:
+                eventValueChange.SetPitch(pitch);
+                eventValueChange.Play(true);
                 break;
             default:
                 break;
