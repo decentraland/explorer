@@ -334,6 +334,10 @@ export class BrowserInterface {
       return defaultLogger.error('FetchHotScenes error', e)
     })
   }
+
+  public SetBaseResolution(data: { baseRes:number }) {
+    unityInterface.SetTargetHeight( data.baseRes )
+  }
 }
 
 export let browserInterface: BrowserInterface = new BrowserInterface()
