@@ -11,8 +11,11 @@ namespace DCL
         private const uint MAX_USED_MEMORY = 1300 * 1024 * 1024;
         private const float TIME_FOR_NEW_MEMORY_CHECK = 1.0f;
 
+        private List<object> idsToCleanup;
+
         public void Initialize()
         {
+            idsToCleanup = new List<object>();
             CoroutineStarter.Start(AutoCleanup());
         }
 
@@ -62,7 +65,7 @@ namespace DCL
         {
             using (var iterator = PoolManager.i.pools.GetEnumerator())
             {
-                List<object> idsToCleanup = new List<object>();
+                idsToCleanup.Clear();
 
                 while (iterator.MoveNext())
                 {
@@ -73,16 +76,15 @@ namespace DCL
                         idsToCleanup.Add(pool.id);
                     }
                 }
+            }
 
-                int count = idsToCleanup.Count;
-
-                if (count > 0)
+            int count = idsToCleanup.Count;
+            if (count > 0)
+            {
+                for (int i = 0; i < count; i++)
                 {
-                    for (int i = 0; i < count; i++)
-                    {
-                        PoolManager.i.RemovePool(idsToCleanup[i]);
-                        yield return null;
-                    }
+                    PoolManager.i.RemovePool(idsToCleanup[i]);
+                    yield return null;
                 }
             }
         }
