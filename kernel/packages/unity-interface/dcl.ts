@@ -1,9 +1,16 @@
 import { TeleportController } from 'shared/world/TeleportController'
-import { DEBUG, EDITOR, ENGINE_DEBUG_PANEL, SCENE_DEBUG_PANEL, SHOW_FPS_COUNTER, NO_ASSET_BUNDLES, OPEN_AVATAR_EDITOR } from 'config'
+import {
+  DEBUG,
+  EDITOR,
+  ENGINE_DEBUG_PANEL,
+  SCENE_DEBUG_PANEL,
+  SHOW_FPS_COUNTER,
+  NO_ASSET_BUNDLES
+} from 'config'
 import { aborted } from 'shared/loading/ReportFatalError'
 import { loadingScenes, teleportTriggered } from 'shared/loading/types'
 import { defaultLogger } from 'shared/logger'
-import { ILand, SceneJsonData, LoadableParcelScene, MappingsResponse, HUDElementID } from 'shared/types'
+import { ILand, SceneJsonData, LoadableParcelScene, MappingsResponse } from 'shared/types'
 import { enableParcelSceneLoading, loadParcelScene, stopParcelSceneWorker } from 'shared/world/parcelSceneManager'
 import { teleportObservable } from 'shared/world/positionThings'
 import { SceneWorker } from 'shared/world/SceneWorker'
