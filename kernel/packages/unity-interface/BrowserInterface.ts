@@ -335,8 +335,8 @@ export class BrowserInterface {
     })
   }
 
-  public SetBaseResolution(data: { baseRes:number }) {
-    unityInterface.SetTargetHeight( data.baseRes )
+  public SetBaseResolution(data: { baseRes: number }) {
+    unityInterface.SetTargetHeight(data.baseRes)
   }
 }
 
