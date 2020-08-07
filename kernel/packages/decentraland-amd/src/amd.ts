@@ -108,9 +108,29 @@ namespace loader {
 
     if (!registeredModules[id]) registeredModules[id] = createModule(id)
 
-    registeredModules[id].dependencies = dependencies
+    updateExistingModuleIfIndexModule(id)
+
+    registeredModules[id].dependencies = dependencies.map((dep) => toUrl(dep, id))
 
     require(dependencies, ready, id)
+  }
+
+  function updateExistingModuleIfIndexModule(id: string) {
+    const idParts = id.split('/')
+
+    if (idParts[idParts.length - 1] === 'index' && idParts.length > 1) {
+      idParts.pop()
+      const noIndexId = idParts.join('/')
+
+      const existingModule = registeredModules[noIndexId]
+
+      registeredModules[noIndexId] = registeredModules[id]
+
+      if (existingModule) {
+        registeredModules[noIndexId].context = existingModule.context
+        registeredModules[noIndexId].handlers.push(...existingModule.handlers)
+      }
+    }
   }
 
   export namespace define {
@@ -277,6 +297,7 @@ namespace loader {
       }
 
       if (notLoadedModules.length) {
+        debugger
         throw new Error(`These modules didn't load: ${notLoadedModules.map(($) => $.name).join(', ')}`)
       }
     })
@@ -295,7 +316,7 @@ namespace loader {
     const idParts = id.split('/')
     let i = idParts.length
     while (--i) {
-      switch (id[0]) {
+      switch (idParts[0]) {
         case '..':
           newContext.pop()
         case '.':
