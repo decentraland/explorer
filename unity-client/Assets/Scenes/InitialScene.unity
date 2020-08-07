@@ -1287,7 +1287,7 @@ MonoBehaviour:
     array:
     - name: ButtonHover
       loop: 0
-      volume: 0.8
+      volume: 1
       randomPitch: 0.2
       playOnAwake: 0
       clips:
@@ -1383,6 +1383,24 @@ MonoBehaviour:
       clips:
         array:
         - {fileID: 8300000, guid: e134d8c09228ed0448e0458ba8602c43, type: 3}
+      source: {fileID: 0}
+    - name: FadeIn
+      loop: 0
+      volume: 1
+      randomPitch: 0.15
+      playOnAwake: 0
+      clips:
+        array:
+        - {fileID: 8300000, guid: fedc09a4557ddf04d8fe3636130e3e8a, type: 3}
+      source: {fileID: 0}
+    - name: FadeOut
+      loop: 0
+      volume: 1
+      randomPitch: 0.15
+      playOnAwake: 0
+      clips:
+        array:
+        - {fileID: 8300000, guid: ff8f842dda3c9154e8171cd98267c7f8, type: 3}
       source: {fileID: 0}
 --- !u!4 &1310817203
 Transform:

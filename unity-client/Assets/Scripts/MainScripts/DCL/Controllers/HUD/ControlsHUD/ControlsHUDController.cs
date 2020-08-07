@@ -30,7 +30,7 @@ public class ControlsHUDController : IHUD
             }
 
             view.showHideAnimator.Hide();
-            HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogClose);
+            HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.fadeOut);
         }
         else if (!IsVisible() && visible)
         {
@@ -38,7 +38,7 @@ public class ControlsHUDController : IHUD
             Utils.UnlockCursor();
             view.gameObject.SetActive(true);
             view.showHideAnimator.Show();
-            HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogAppear);
+            HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.fadeIn);
         }
     }
 

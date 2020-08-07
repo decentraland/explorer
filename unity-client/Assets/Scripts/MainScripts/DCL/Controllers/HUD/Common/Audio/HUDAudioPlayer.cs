@@ -18,7 +18,9 @@ public class HUDAudioPlayer : MonoBehaviour
         confirm,
         cancel,
         randomize,
-        valueChange
+        valueChange,
+        fadeIn,
+        fadeOut
     }
 
     public static HUDAudioPlayer i { get; private set; }
@@ -27,7 +29,7 @@ public class HUDAudioPlayer : MonoBehaviour
     public AudioContainer ac;
 
     AudioEvent eventHover, eventClick, eventRelease, eventEnable, eventDisable, eventListItemAppear, eventDialogAppear, eventDialogClose, eventConfirm, eventCancel,
-        eventValueChange;
+        eventValueChange, eventFadeIn, eventFadeOut;
 
     bool listItemAppearHasPlayed = false;
     float listItemAppearPitch = 1f;
@@ -48,6 +50,8 @@ public class HUDAudioPlayer : MonoBehaviour
         eventConfirm = ac.GetEvent("Confirm");
         eventCancel = ac.GetEvent("Cancel");
         eventValueChange = ac.GetEvent("ValueChange");
+        eventFadeIn = ac.GetEvent("FadeIn");
+        eventFadeOut = ac.GetEvent("FadeOut");
     }
 
     private void Update()
@@ -101,6 +105,14 @@ public class HUDAudioPlayer : MonoBehaviour
             case Sound.valueChange:
                 eventValueChange.SetPitch(pitch);
                 eventValueChange.Play(true);
+                break;
+            case Sound.fadeIn:
+                eventFadeIn.Play();
+                break;
+            case Sound.fadeOut:
+                eventFadeOut.Play();
+                eventFadeOut.source.timeSamples = eventFadeOut.source.clip.samples - 1;
+                eventFadeOut.source.pitch = -1f;
                 break;
             default:
                 break;
