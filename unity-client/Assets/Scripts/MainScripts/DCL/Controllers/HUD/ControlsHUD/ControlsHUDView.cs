@@ -27,7 +27,6 @@ public class ControlsHUDView : MonoBehaviour
     private void OnToggleActionTriggered(DCLAction_Trigger action)
     {
         onToggleActionTriggered?.Invoke();
-        HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogAppear);
     }
 
     private void OnCloseActionTriggered(DCLAction_Trigger action)
@@ -38,6 +37,5 @@ public class ControlsHUDView : MonoBehaviour
     private void Close(bool closedByButtonPress)
     {
         onCloseActionTriggered?.Invoke(closedByButtonPress);
-        HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogClose);
     }
 }
