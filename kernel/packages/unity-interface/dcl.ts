@@ -89,22 +89,6 @@ export async function initializeEngine(_gameInstance: GameInstance) {
 
   unityInterface.Init(_gameInstance)
 
-  unityInterface.ConfigureHUDElement(HUDElementID.MINIMAP, { active: true, visible: true })
-  unityInterface.ConfigureHUDElement(HUDElementID.AVATAR, { active: true, visible: true })
-  unityInterface.ConfigureHUDElement(HUDElementID.NOTIFICATION, { active: true, visible: true })
-  unityInterface.ConfigureHUDElement(HUDElementID.AVATAR_EDITOR, { active: true, visible: OPEN_AVATAR_EDITOR })
-  unityInterface.ConfigureHUDElement(HUDElementID.SETTINGS, { active: true, visible: false })
-  unityInterface.ConfigureHUDElement(HUDElementID.EXPRESSIONS, { active: true, visible: true })
-  unityInterface.ConfigureHUDElement(HUDElementID.PLAYER_INFO_CARD, { active: true, visible: true })
-  unityInterface.ConfigureHUDElement(HUDElementID.AIRDROPPING, { active: true, visible: true })
-  unityInterface.ConfigureHUDElement(HUDElementID.TERMS_OF_SERVICE, { active: true, visible: true })
-  unityInterface.ConfigureHUDElement(HUDElementID.TASKBAR, { active: true, visible: true })
-  unityInterface.ConfigureHUDElement(HUDElementID.WORLD_CHAT_WINDOW, { active: true, visible: true })
-  unityInterface.ConfigureHUDElement(HUDElementID.OPEN_EXTERNAL_URL_PROMPT, { active: true, visible: true })
-  unityInterface.ConfigureHUDElement(HUDElementID.NFT_INFO_DIALOG, { active: true, visible: false })
-  unityInterface.ConfigureHUDElement(HUDElementID.TELEPORT_DIALOG, { active: true, visible: false })
-  unityInterface.ConfigureHUDElement(HUDElementID.CONTROLS_HUD, { active: true, visible: false })
-
   unityInterface.DeactivateRendering()
 
   if (DEBUG) {
