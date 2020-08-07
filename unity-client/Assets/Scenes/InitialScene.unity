@@ -1387,7 +1387,7 @@ MonoBehaviour:
     - name: FadeIn
       loop: 0
       volume: 1
-      randomPitch: 0.15
+      randomPitch: 0
       playOnAwake: 0
       clips:
         array:
@@ -1396,11 +1396,11 @@ MonoBehaviour:
     - name: FadeOut
       loop: 0
       volume: 1
-      randomPitch: 0.15
+      randomPitch: 0
       playOnAwake: 0
       clips:
         array:
-        - {fileID: 8300000, guid: ff8f842dda3c9154e8171cd98267c7f8, type: 3}
+        - {fileID: 8300000, guid: fedc09a4557ddf04d8fe3636130e3e8a, type: 3}
       source: {fileID: 0}
 --- !u!4 &1310817203
 Transform:
@@ -1479,7 +1479,7 @@ MonoBehaviour:
   customContentServerUrl: http://localhost:1338/
   baseUrlMode: 0
   baseUrlCustom: 
-  environment: 1
+  environment: 0
   startInCoords: {x: 0, y: 0}
   forceLocalComms: 0
   allWearables: 0
