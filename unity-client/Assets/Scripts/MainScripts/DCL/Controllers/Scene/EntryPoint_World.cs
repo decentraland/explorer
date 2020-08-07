@@ -138,7 +138,13 @@ public class EntryPoint_World
         queuedMessage.method = MessagingTypes.QUERY;
         queuedMessage.payload = new QueryMessage()
         {
-            payload = new RaycastQuery() {id = queryId, raycastType = raycastType, ray = ray, sceneId = currentSceneId}
+            payload = new RaycastQuery()
+            {
+                id = queryId,
+                raycastType = raycastType,
+                ray = ray,
+                sceneId = currentSceneId
+            }
         };
 
         sceneController.EnqueueSceneMessage(queuedMessage);

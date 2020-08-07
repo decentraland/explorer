@@ -92,6 +92,7 @@ function* handleMessageFromEngine(
       _instancedJS.then(($) => $.onMessage(type, jsonEncodedMessage)).catch((e) => logger.error(e.message))
       return
     }
+
     _instancedJS.then(($) => $.onMessage(type, JSON.parse(jsonEncodedMessage))).catch((e) => logger.error(e.message))
   } else {
     logger.error('Message received without initializing engine', type, jsonEncodedMessage)

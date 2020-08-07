@@ -519,7 +519,7 @@ namespace DCL.Interface
         private static void ReportRaycastResult<T, P>(string sceneId, string queryId, string queryType, P payload) where T : RaycastResponse<P>, new() where P : RaycastHitInfo
         {
             T response = new T();
-            response.queryId = Utils.DecimalToArbitrarySystem(int.Parse(queryId), 36);
+            response.queryId = queryId;
             response.queryType = queryType;
             response.payload = payload;
 
