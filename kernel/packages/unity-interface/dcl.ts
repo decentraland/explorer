@@ -140,7 +140,7 @@ export async function initializeEngine(_gameInstance: GameInstance) {
   }
 }
 
-export async function startUnityParcelLoading() {
+export async function startUnitySceneWorkers() {
   globalThis.globalStore.dispatch(loadingScenes())
 
   await enableParcelSceneLoading({

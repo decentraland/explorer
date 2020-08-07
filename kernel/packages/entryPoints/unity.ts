@@ -12,7 +12,7 @@ import { NO_MOTD, DEBUG_PM, EDITOR } from '../config/index'
 import { signalRendererInitialized, signalParcelLoadingStarted } from 'shared/renderer/actions'
 import { lastPlayerPosition, teleportObservable } from 'shared/world/positionThings'
 import { StoreContainer } from 'shared/store/rootTypes'
-import { startUnityParcelLoading } from '../unity-interface/dcl'
+import { startUnitySceneWorkers } from '../unity-interface/dcl'
 import { initializeUnity } from '../unity-interface/initializer'
 import { HUDElementID } from 'shared/types'
 import { worldRunningObservable, onNextWorldRunning } from 'shared/world/worldState'
@@ -39,7 +39,7 @@ const observer = worldRunningObservable.add((isRunning) => {
   }
 })
 
-export async function initializeDecentralandUI(unityInterface:any) {
+export async function startGlobalScene(unityInterface:any) {
   const sceneId = 'dcl-ui-scene'
 
   const scene = new UnityScene({
@@ -77,10 +77,10 @@ initializeUnity(container)
     onNextWorldRunning(() => globalThis.globalStore.dispatch(experienceStarted()))
 
     await realmInitialized()
-    await startUnityParcelLoading()
+    await startUnitySceneWorkers()
 
     if (!EDITOR) {
-      await initializeDecentralandUI(i)
+      await startGlobalScene(i)
     }
 
     globalThis.globalStore.dispatch(signalParcelLoadingStarted())
