@@ -353,7 +353,7 @@ export class UnityInterface {
 
   private resizeCanvas(module: any) {
     if (targetHeight > 2000) {
-      return //NOTE(Brian): if > 2000, just use native resolution
+      return // NOTE(Brian): if > 2000, just use native resolution
     }
 
     let desiredHeight = targetHeight
