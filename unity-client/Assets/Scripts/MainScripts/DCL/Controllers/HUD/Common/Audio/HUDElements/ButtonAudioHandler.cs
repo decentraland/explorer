@@ -8,6 +8,8 @@ public class ButtonAudioHandler : MonoBehaviour, IPointerEnterHandler, IPointerD
     Selectable selectable;
     [SerializeField]
     HUDAudioPlayer.Sound extraClickSound = HUDAudioPlayer.Sound.none;
+    [SerializeField]
+    bool playHoverSound = true;
 
     void Start()
     {
@@ -17,6 +19,9 @@ public class ButtonAudioHandler : MonoBehaviour, IPointerEnterHandler, IPointerD
 
     public void OnPointerEnter(PointerEventData eventData)
     {
+        if (!playHoverSound)
+            return;
+
         if (selectable.interactable && !Input.GetMouseButton(0)) {
             audioPlayer.Play(HUDAudioPlayer.Sound.buttonHover);
         }
