@@ -2125,6 +2125,7 @@ GameObject:
   - component: {fileID: 1347496358759656025}
   - component: {fileID: 6297801321353311123}
   - component: {fileID: 5098086527300088398}
+  - component: {fileID: 3951297853525738398}
   m_Layer: 5
   m_Name: MapRendererContainer
   m_TagString: Untagged
@@ -2203,6 +2204,20 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &3951297853525738398
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5908810523113329528}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bfd0d144b6d3dd438b84fa14a062c4f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  extraClickSound: 0
+  playHoverSound: 0
 --- !u!1 &6158691491735050548
 GameObject:
   m_ObjectHideFlags: 0

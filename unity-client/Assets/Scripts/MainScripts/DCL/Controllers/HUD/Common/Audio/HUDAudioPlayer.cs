@@ -24,7 +24,8 @@ public class HUDAudioPlayer : MonoBehaviour
         notification,
         chatEntry,
         cameraToThirdPerson,
-        cameraToFirstPerson
+        cameraToFirstPerson,
+        mapParcelHighlight
     }
 
     public static HUDAudioPlayer i { get; private set; }
@@ -68,6 +69,7 @@ public class HUDAudioPlayer : MonoBehaviour
         switch (sound)
         {
             case Sound.buttonHover:
+                eventHover.SetPitch(1f);
                 eventHover.Play(true);
                 break;
             case Sound.buttonClick:
@@ -135,6 +137,10 @@ public class HUDAudioPlayer : MonoBehaviour
             case Sound.cameraToThirdPerson:
                 eventFadeIn.SetPitch(0.85f);
                 eventFadeIn.Play(true);
+                break;
+            case Sound.mapParcelHighlight:
+                eventHover.SetPitch(3f);
+                eventHover.Play(true);
                 break;
             default:
                 break;

@@ -47,6 +47,9 @@ namespace DCL
 
         public void Populate(Vector2Int coordinates, MinimapMetadata.MinimapSceneInfo sceneInfo)
         {
+            if (!gameObject.activeSelf)
+                HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogAppear);
+
             bool sceneInfoExists = sceneInfo != null;
 
             MapRenderer.i.showCursorCoords = false;
