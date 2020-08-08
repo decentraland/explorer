@@ -20,7 +20,9 @@ public class HUDAudioPlayer : MonoBehaviour
         randomize,
         valueChange,
         fadeIn,
-        fadeOut
+        fadeOut,
+        notification,
+        chatEntry
     }
 
     public static HUDAudioPlayer i { get; private set; }
@@ -107,12 +109,21 @@ public class HUDAudioPlayer : MonoBehaviour
                 eventValueChange.Play(true);
                 break;
             case Sound.fadeIn:
+                eventFadeIn.SetPitch(1f);
                 eventFadeIn.Play();
                 break;
             case Sound.fadeOut:
                 eventFadeOut.Play();
                 eventFadeOut.source.timeSamples = eventFadeOut.source.clip.samples - 1;
                 eventFadeOut.source.pitch = -1f;
+                break;
+            case Sound.notification:
+                eventFadeIn.SetPitch(3f);
+                eventFadeIn.Play(true);
+                break;
+            case Sound.chatEntry:
+                eventHover.SetPitch(3f);
+                eventHover.Play(true);
                 break;
             default:
                 break;

@@ -147,6 +147,8 @@ public class ChatHUDView : MonoBehaviour
 
         if (setScrollPositionToBottom)
             scrollRect.verticalNormalizedPosition = 0;
+
+        HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.chatEntry);
     }
 
     private void OnOpenContextMenu(ChatEntry chatEntry)

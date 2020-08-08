@@ -61,10 +61,7 @@ public class TaskbarHUDView : MonoBehaviour
     private void OnWindowToggleOff(TaskbarButton obj)
     {
         if (obj == friendsButton)
-        {
             OnFriendsToggleOff?.Invoke();
-            HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogClose);
-        }
         else if (obj == chatButton)
             OnChatToggleOff?.Invoke();
 
@@ -93,10 +90,7 @@ public class TaskbarHUDView : MonoBehaviour
     private void OnWindowToggleOn(TaskbarButton obj)
     {
         if (obj == friendsButton)
-        {
             OnFriendsToggleOn?.Invoke();
-            HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogAppear);
-        }
         else if (obj == chatButton)
             OnChatToggleOn?.Invoke();
 
