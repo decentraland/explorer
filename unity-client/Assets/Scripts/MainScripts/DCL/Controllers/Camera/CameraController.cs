@@ -67,6 +67,18 @@ public class CameraController : MonoBehaviour
         currentCameraState.OnUnselect();
         currentMode = newMode;
         currentCameraState.OnSelect();
+
+        switch (newMode)
+        {
+            case CameraStateBase.ModeId.FirstPerson:
+                HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.cameraToFirstPerson);
+                break;
+            case CameraStateBase.ModeId.ThirdPerson:
+                HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.cameraToThirdPerson);
+                break;
+            default:
+                break;
+        }
     }
 
     private void PrecisionChanged(Vector3 newValue, Vector3 oldValue)

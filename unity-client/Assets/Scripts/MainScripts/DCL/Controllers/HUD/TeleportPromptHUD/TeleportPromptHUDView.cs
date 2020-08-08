@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -114,6 +114,8 @@ public class TeleportPromptHUDView : MonoBehaviour
             UnityEngine.Object.Destroy(downloadedBanner);
             downloadedBanner = null;
         }
+
+        HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogClose);
     }
 
     private void FetchScenePreviewImage(string previewImageUrl)

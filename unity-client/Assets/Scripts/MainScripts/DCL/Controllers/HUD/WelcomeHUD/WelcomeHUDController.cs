@@ -58,10 +58,12 @@ public class WelcomeHUDController : IHUD
         if (visible)
         {
             Utils.UnlockCursor();
+            HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogAppear);
         }
         else
         {
             Utils.LockCursor();
+            HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogClose);
         }
     }
 }

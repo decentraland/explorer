@@ -22,7 +22,9 @@ public class HUDAudioPlayer : MonoBehaviour
         fadeIn,
         fadeOut,
         notification,
-        chatEntry
+        chatEntry,
+        cameraToThirdPerson,
+        cameraToFirstPerson
     }
 
     public static HUDAudioPlayer i { get; private set; }
@@ -124,6 +126,15 @@ public class HUDAudioPlayer : MonoBehaviour
             case Sound.chatEntry:
                 eventHover.SetPitch(3f);
                 eventHover.Play(true);
+                break;
+            case Sound.cameraToFirstPerson:
+                eventFadeOut.Play();
+                eventFadeOut.source.timeSamples = eventFadeOut.source.clip.samples - 1;
+                eventFadeOut.source.pitch = -0.85f;
+                break;
+            case Sound.cameraToThirdPerson:
+                eventFadeIn.SetPitch(0.85f);
+                eventFadeIn.Play(true);
                 break;
             default:
                 break;
