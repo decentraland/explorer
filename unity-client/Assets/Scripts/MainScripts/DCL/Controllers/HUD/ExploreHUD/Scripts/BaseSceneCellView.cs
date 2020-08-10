@@ -1,14 +1,19 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System;
 
 internal class BaseSceneCellView : BaseCellView, IMapDataView
 {
     public delegate void JumpInDelegate(Vector2Int coords, string serverName, string layerName);
     static public event JumpInDelegate OnJumpIn;
 
+    public static event Action<BaseSceneCellView> OnInfoButtonPointerEnter;
+    public static event Action OnInfoButtonPointerExit;
+
     [SerializeField] TextMeshProUGUI sceneName;
     [SerializeField] Button jumpIn;
+    [SerializeField] UIHoverCallback sceneInfoButton;
 
     MinimapMetadata.MinimapSceneInfo mapInfo;
     Vector2Int baseCoords;
@@ -16,6 +21,9 @@ internal class BaseSceneCellView : BaseCellView, IMapDataView
     protected virtual void Awake()
     {
         jumpIn.onClick.AddListener(JumpInPressed);
+
+        sceneInfoButton.OnPointerEnter += () => OnInfoButtonPointerEnter?.Invoke(this);
+        sceneInfoButton.OnPointerExit += () => OnInfoButtonPointerExit?.Invoke();
     }
 
     public virtual void JumpInPressed()

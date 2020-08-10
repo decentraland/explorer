@@ -1,18 +1,13 @@
 ﻿using UnityEngine;
 using TMPro;
-using System;
 
 internal class HotSceneCellView : BaseSceneCellView, ICrowdDataView
 {
-    public static event Action<HotSceneCellView> OnInfoButtonPointerEnter;
-    public static event Action OnInfoButtonPointerExit;
-
     [SerializeField] GameObject crowdCountContainer;
     [SerializeField] TextMeshProUGUI crowdCount;
     [SerializeField] ShowHideAnimator jumpInButtonAnimator;
     [SerializeField] GameObject friendsContainer;
     [SerializeField] GameObject eventsContainer;
-    [SerializeField] UIHoverCallback sceneInfoButton;
     [SerializeField] UIHoverCallback hoverAreaCallback;
 
     HotScenesController.HotSceneInfo crowdInfo;
@@ -20,8 +15,6 @@ internal class HotSceneCellView : BaseSceneCellView, ICrowdDataView
     protected override void Awake()
     {
         base.Awake();
-        sceneInfoButton.OnPointerEnter += () => OnInfoButtonPointerEnter?.Invoke(this);
-        sceneInfoButton.OnPointerExit += () => OnInfoButtonPointerExit?.Invoke();
 
         hoverAreaCallback.OnPointerEnter += () =>
         {

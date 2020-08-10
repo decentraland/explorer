@@ -18,7 +18,7 @@ internal class SceneInfoView : MonoBehaviour
     private float timer;
     private RectTransform thisRT;
     private RectTransform parentRT;
-    private HotSceneCellView hotSceneView;
+    private BaseSceneCellView baseSceneView;
 
     public void Show()
     {
@@ -54,14 +54,14 @@ internal class SceneInfoView : MonoBehaviour
         }
     }
 
-    void SetSceneView(HotSceneCellView sceneView)
+    void SetSceneView(BaseSceneCellView sceneView)
     {
-        if (hotSceneView)
+        if (baseSceneView)
         {
-            hotSceneView.OnThumbnailFetched -= SetThumbnail;
+            baseSceneView.OnThumbnailFetched -= SetThumbnail;
         }
 
-        hotSceneView = sceneView;
+        baseSceneView = sceneView;
 
         SetMapInfoData(sceneView);
 
@@ -99,18 +99,17 @@ internal class SceneInfoView : MonoBehaviour
 
         jumpIn.onClick.AddListener(() =>
         {
-            if (hotSceneView)
+            if (baseSceneView)
             {
-                hotSceneView.JumpInPressed();
+                baseSceneView.JumpInPressed();
             }
         });
 
         hoverArea.OnPointerEnter += OnPointerEnter;
         hoverArea.OnPointerExit += OnPointerExit;
 
-        HotSceneCellView.OnInfoButtonPointerEnter += OnInfoButtonPointerEnter;
-        HotSceneCellView.OnInfoButtonPointerExit += OnInfoButtonPointerExit;
-
+        BaseSceneCellView.OnInfoButtonPointerEnter += OnInfoButtonPointerEnter;
+        BaseSceneCellView.OnInfoButtonPointerExit += OnInfoButtonPointerExit;
         BaseSceneCellView.OnJumpIn += OnJumpIn;
 
         showHideAnimator.OnWillFinishHide += OnHidden;
@@ -121,9 +120,8 @@ internal class SceneInfoView : MonoBehaviour
         hoverArea.OnPointerEnter -= OnPointerEnter;
         hoverArea.OnPointerExit -= OnPointerExit;
 
-        HotSceneCellView.OnInfoButtonPointerEnter -= OnInfoButtonPointerEnter;
-        HotSceneCellView.OnInfoButtonPointerExit -= OnInfoButtonPointerExit;
-
+        BaseSceneCellView.OnInfoButtonPointerEnter -= OnInfoButtonPointerEnter;
+        BaseSceneCellView.OnInfoButtonPointerExit -= OnInfoButtonPointerExit;
         BaseSceneCellView.OnJumpIn -= OnJumpIn;
 
         showHideAnimator.OnWillFinishHide -= OnHidden;
@@ -141,12 +139,12 @@ internal class SceneInfoView : MonoBehaviour
 
     void OnHidden(ShowHideAnimator animator)
     {
-        hotSceneView = null;
+        baseSceneView = null;
     }
 
-    void OnInfoButtonPointerEnter(HotSceneCellView sceneView)
+    void OnInfoButtonPointerEnter(BaseSceneCellView sceneView)
     {
-        if (sceneView == hotSceneView)
+        if (sceneView == baseSceneView)
             return;
 
 
