@@ -6,27 +6,26 @@ internal class HighlightScenesController : MonoBehaviour
 {
     const float SCENES_UPDATE_INTERVAL = 5;
 
-    [SerializeField] SceneCellView sceneCellViewRoot;
+    [SerializeField] HotSceneCellView hotsceneBaseCellView;
     [SerializeField] GameObject highlightScenesContent;
     [SerializeField] GameObject loadingSpinner;
 
-    Dictionary<Vector2Int, HotSceneData> cachedScenes = new Dictionary<Vector2Int, HotSceneData>();
-    List<HotSceneData> activeScenes = new List<HotSceneData>();
+    Dictionary<Vector2Int, HotSceneCellView> cachedScenes = new Dictionary<Vector2Int, HotSceneCellView>();
+    Queue<HotSceneCellView> pooledHotScenCells = new Queue<HotSceneCellView>();
 
-    List<HotSceneData> pendingSceneInfo = new List<HotSceneData>();
-    Queue<SceneCellView> pooledScenCells = new Queue<SceneCellView>();
-
-    bool isActiveListLocked = false;
+    List<GameObject> activeCellsView = new List<GameObject>();
+    List<IMapDataView> pendingSceneInfo = new List<IMapDataView>();
 
     public void Initialize()
     {
-        SetPooledSceneCell(sceneCellViewRoot);
+        SetPooledHotSceneCell(hotsceneBaseCellView);
         for (int i = 0; i < 5; i++)
         {
-            SetPooledSceneCell(CreateSceneCell());
+            SetPooledHotSceneCell(CreateHotSceneCell());
         }
-        HotSceneData.OnDisplayStateChanged += OnHotSceneDisplayStateChanged;
-        HotSceneData.OnCellViewFreed += SetPooledSceneCell;
+
+        MinimapMetadata.GetMetadata().OnSceneInfoUpdated -= OnMapInfoUpdated;
+        MinimapMetadata.GetMetadata().OnSceneInfoUpdated += OnMapInfoUpdated;
     }
 
     public void RefreshIfNeeded()
@@ -34,6 +33,10 @@ internal class HighlightScenesController : MonoBehaviour
         if (cachedScenes.Count == 0 || HotScenesController.i.timeSinceLastUpdate >= SCENES_UPDATE_INTERVAL)
         {
             FetchHotScenes();
+        }
+        else
+        {
+            loadingSpinner.SetActive(false);
         }
     }
 
@@ -51,122 +54,130 @@ internal class HighlightScenesController : MonoBehaviour
     {
         HotScenesController.i.OnHotSceneListFinishUpdating -= OnFetchHotScenes;
 
-        isActiveListLocked = true;
-        for (int i = 0; i < pendingSceneInfo.Count; i++)
-        {
-            pendingSceneInfo[i].DiscardCellView();
-        }
-        pendingSceneInfo.Clear();
-
-        for (int i = 0; i < activeScenes.Count; i++)
-        {
-            activeScenes[i].SetDisplay(false);
-        }
-        activeScenes.Clear();
-        isActiveListLocked = false;
+        ClearMapInfoPendingList();
+        HideActiveCells();
 
         for (int i = 0; i < HotScenesController.i.hotScenesList.Count; i++)
         {
             ProcessReceivedHotScene(HotScenesController.i.hotScenesList[i], i);
         }
-
-        if (pendingSceneInfo.Count > 0)
-        {
-            MinimapMetadata.GetMetadata().OnSceneInfoUpdated -= OnMapInfoUpdated;
-            MinimapMetadata.GetMetadata().OnSceneInfoUpdated += OnMapInfoUpdated;
-        }
     }
 
     void ProcessReceivedHotScene(HotScenesController.HotSceneInfo hotSceneInfo, int priority)
     {
-        HotSceneData hotSceneDataController = null;
-        cachedScenes.TryGetValue(hotSceneInfo.baseCoords, out hotSceneDataController);
+        Vector2Int baseCoords = hotSceneInfo.baseCoords;
+        HotSceneCellView hotSceneView = null;
 
-        if (hotSceneDataController == null)
+        if (cachedScenes.ContainsKey(baseCoords))
         {
-            hotSceneDataController = new HotSceneData(GetPooledSceneCell());
-            cachedScenes.Add(hotSceneInfo.baseCoords, hotSceneDataController);
+            hotSceneView = cachedScenes[baseCoords];
+            if (!hotSceneView) return;
+        }
+        else
+        {
+            hotSceneView = GetPooledHotSceneCell();
+            cachedScenes.Add(baseCoords, hotSceneView);
         }
 
-        hotSceneDataController.ResolveCrowdInfo(hotSceneInfo, priority);
+        hotSceneView.transform.SetSiblingIndex(priority);
 
-        if (hotSceneDataController.ShouldResolveMapInfo())
+        ((ICrowdDataView)hotSceneView).SetCrowdInfo(hotSceneInfo);
+        IMapDataView mapView = hotSceneView;
+
+        if (!mapView.HasMinimapSceneInfo())
         {
-            pendingSceneInfo.Add(hotSceneDataController);
-            WebInterface.RequestScenesInfoAroundParcel(hotSceneInfo.baseCoords, 0);
+            mapView.SetBaseCoord(baseCoords);
+
+            var mapInfo = MinimapMetadata.GetMetadata().GetSceneInfo(baseCoords.x, baseCoords.y);
+            if (mapInfo != null)
+            {
+                mapView.SetMinimapSceneInfo(mapInfo);
+                SetActiveCell(mapView.GetGameObject());
+            }
+            else
+            {
+                pendingSceneInfo.Add(mapView);
+            }
+        }
+        else
+        {
+            SetActiveCell(mapView.GetGameObject());
         }
     }
 
     void OnMapInfoUpdated(MinimapMetadata.MinimapSceneInfo mapInfo)
     {
+        Vector2Int baseCoords;
         for (int i = pendingSceneInfo.Count - 1; i >= 0; i--)
         {
-            if (mapInfo.parcels.Contains(pendingSceneInfo[i].crowdInfo.baseCoords))
+            baseCoords = pendingSceneInfo[i].GetBaseCoord();
+            if (mapInfo.parcels.Contains(baseCoords))
             {
-                pendingSceneInfo[i].ResolveMapInfo(mapInfo);
+                pendingSceneInfo[i].SetMinimapSceneInfo(mapInfo);
+                SetActiveCell(pendingSceneInfo[i].GetGameObject());
                 pendingSceneInfo.RemoveAt(i);
+                break;
             }
         }
-
-        if (pendingSceneInfo.Count == 0)
-        {
-            MinimapMetadata.GetMetadata().OnSceneInfoUpdated -= OnMapInfoUpdated;
-        }
     }
 
-    void OnHotSceneDisplayStateChanged(HotSceneData sceneData, bool display)
+    HotSceneCellView GetPooledHotSceneCell()
     {
-        if (isActiveListLocked)
+        HotSceneCellView ret;
+        if (pooledHotScenCells.Count > 0)
         {
-            return;
+            ret = pooledHotScenCells.Dequeue();
         }
-
-        if (display)
-        {
-            sceneData.cellView.gameObject.SetActive(true);
-            activeScenes.Add(sceneData);
-            loadingSpinner.SetActive(false);
-        }
-        else
-        {
-            sceneData.cellView.gameObject.SetActive(false);
-            activeScenes.Remove(sceneData);
-        }
+        ret = CreateHotSceneCell();
+        ret.gameObject.SetActive(false);
+        return ret;
     }
 
-    SceneCellView GetPooledSceneCell()
+    HotSceneCellView CreateHotSceneCell()
     {
-        if (pooledScenCells.Count > 0)
-        {
-            return pooledScenCells.Dequeue();
-        }
-        return CreateSceneCell();
+        return GameObject.Instantiate(hotsceneBaseCellView, hotsceneBaseCellView.transform.parent);
     }
 
-    SceneCellView CreateSceneCell()
-    {
-        return GameObject.Instantiate(sceneCellViewRoot, sceneCellViewRoot.transform.parent);
-    }
-
-    void SetPooledSceneCell(SceneCellView cellView)
+    void SetPooledHotSceneCell(HotSceneCellView cellView)
     {
         cellView.gameObject.SetActive(false);
-        pooledScenCells.Enqueue(cellView);
+        pooledHotScenCells.Enqueue(cellView);
+    }
+
+    void ClearMapInfoPendingList()
+    {
+        for (int i = 0; i < pendingSceneInfo.Count; i++)
+        {
+            var hotSceneView = pendingSceneInfo[i] as HotSceneCellView;
+            if (hotSceneView)
+            {
+                SetPooledHotSceneCell(hotSceneView);
+                cachedScenes[pendingSceneInfo[i].GetBaseCoord()] = null;
+            }
+        }
+        pendingSceneInfo.Clear();
+    }
+
+    void HideActiveCells()
+    {
+        for (int i = 0; i < activeCellsView.Count; i++)
+        {
+            activeCellsView[i].SetActive(false);
+        }
+    }
+
+    void SetActiveCell(GameObject view)
+    {
+        if (view == null) return;
+
+        view.gameObject.SetActive(true);
+        activeCellsView.Add(view.gameObject);
+        loadingSpinner.SetActive(false);
     }
 
     void OnDestroy()
     {
-        HotSceneData.OnDisplayStateChanged -= OnHotSceneDisplayStateChanged;
         HotScenesController.i.OnHotSceneListFinishUpdating -= OnFetchHotScenes;
         MinimapMetadata.GetMetadata().OnSceneInfoUpdated -= OnMapInfoUpdated;
-        HotSceneData.OnCellViewFreed -= SetPooledSceneCell;
-
-        using (var iterator = cachedScenes.GetEnumerator())
-        {
-            while (iterator.MoveNext())
-            {
-                iterator.Current.Value.Dispose();
-            }
-        }
     }
 }

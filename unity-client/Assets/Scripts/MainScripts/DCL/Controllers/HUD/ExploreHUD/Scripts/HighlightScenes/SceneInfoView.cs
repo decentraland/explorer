@@ -13,11 +13,12 @@ internal class SceneInfoView : MonoBehaviour
     [SerializeField] Button jumpIn;
     [SerializeField] ShowHideAnimator showHideAnimator;
     [SerializeField] UIHoverCallback hoverArea;
+    [SerializeField] GameObject loadingSpinner;
 
     private float timer;
     private RectTransform thisRT;
     private RectTransform parentRT;
-    private HotSceneData hotSceneData;
+    private HotSceneCellView hotSceneView;
 
     public void Show()
     {
@@ -53,14 +54,39 @@ internal class SceneInfoView : MonoBehaviour
         }
     }
 
-    void SetSceneData(HotSceneData sceneData)
+    void SetSceneView(HotSceneCellView sceneView)
     {
-        sceneName.text = sceneData.mapInfo.name;
-        coordinates.text = $"{sceneData.crowdInfo.baseCoords.x},{sceneData.crowdInfo.baseCoords.y}";
-        creatorName.text = sceneData.mapInfo.owner;
-        description.text = sceneData.mapInfo.description;
-        thumbnail.sprite = sceneData.thumbnail;
-        hotSceneData = sceneData;
+        if (hotSceneView)
+        {
+            hotSceneView.OnThumbnailFetched -= SetThumbnail;
+        }
+
+        hotSceneView = sceneView;
+
+        SetMapInfoData(sceneView);
+
+        thumbnail.sprite = sceneView.GetThumbnail();
+        bool hasThumbnail = thumbnail.sprite != null;
+        loadingSpinner.SetActive(!hasThumbnail);
+        if (!hasThumbnail)
+        {
+            sceneView.OnThumbnailFetched += SetThumbnail;
+        }
+    }
+
+    void SetMapInfoData(IMapDataView mapInfoView)
+    {
+        MinimapMetadata.MinimapSceneInfo mapInfo = mapInfoView.GetMinimapSceneInfo();
+        sceneName.text = mapInfo.name;
+        coordinates.text = $"{mapInfoView.GetBaseCoord().x},{mapInfoView.GetBaseCoord().y}";
+        creatorName.text = mapInfo.owner;
+        description.text = mapInfo.description;
+    }
+
+    void SetThumbnail(Sprite thumbnailSprite)
+    {
+        thumbnail.sprite = thumbnailSprite;
+        loadingSpinner.SetActive(thumbnailSprite != null);
     }
 
     void Awake()
@@ -71,11 +97,21 @@ internal class SceneInfoView : MonoBehaviour
         this.enabled = false;
         gameObject.SetActive(false);
 
+        jumpIn.onClick.AddListener(() =>
+        {
+            if (hotSceneView)
+            {
+                hotSceneView.JumpInPressed();
+            }
+        });
+
         hoverArea.OnPointerEnter += OnPointerEnter;
         hoverArea.OnPointerExit += OnPointerExit;
 
-        SceneCellView.OnInfoButtonPointerEnter += OnInfoButtonPointerEnter;
-        SceneCellView.OnInfoButtonPointerExit += OnInfoButtonPointerExit;
+        HotSceneCellView.OnInfoButtonPointerEnter += OnInfoButtonPointerEnter;
+        HotSceneCellView.OnInfoButtonPointerExit += OnInfoButtonPointerExit;
+
+        BaseSceneCellView.OnJumpIn += OnJumpIn;
 
         showHideAnimator.OnWillFinishHide += OnHidden;
     }
@@ -85,8 +121,10 @@ internal class SceneInfoView : MonoBehaviour
         hoverArea.OnPointerEnter -= OnPointerEnter;
         hoverArea.OnPointerExit -= OnPointerExit;
 
-        SceneCellView.OnInfoButtonPointerEnter -= OnInfoButtonPointerEnter;
-        SceneCellView.OnInfoButtonPointerExit -= OnInfoButtonPointerExit;
+        HotSceneCellView.OnInfoButtonPointerEnter -= OnInfoButtonPointerEnter;
+        HotSceneCellView.OnInfoButtonPointerExit -= OnInfoButtonPointerExit;
+
+        BaseSceneCellView.OnJumpIn -= OnJumpIn;
 
         showHideAnimator.OnWillFinishHide -= OnHidden;
     }
@@ -103,16 +141,16 @@ internal class SceneInfoView : MonoBehaviour
 
     void OnHidden(ShowHideAnimator animator)
     {
-        hotSceneData = null;
+        hotSceneView = null;
     }
 
-    void OnInfoButtonPointerEnter(HotSceneData sceneData)
+    void OnInfoButtonPointerEnter(HotSceneCellView sceneView)
     {
-        if (sceneData == hotSceneData)
+        if (sceneView == hotSceneView)
             return;
 
 
-        SetSceneData(sceneData);
+        SetSceneView(sceneView);
 
         Vector2 localpoint;
         if (RectTransformUtility.ScreenPointToLocalPointInRectangle(parentRT, Input.mousePosition, null, out localpoint))
@@ -134,5 +172,10 @@ internal class SceneInfoView : MonoBehaviour
     void OnPointerExit()
     {
         Hide();
+    }
+
+    void OnJumpIn(Vector2Int coords, string serverName, string layerName)
+    {
+        gameObject.SetActive(false);
     }
 }

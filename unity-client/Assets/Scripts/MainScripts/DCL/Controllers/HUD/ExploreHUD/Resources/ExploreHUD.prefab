@@ -194,7 +194,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2024251795879824103}
   - component: {fileID: 3280590638093989110}
-  - component: {fileID: 2330639918278986717}
+  - component: {fileID: 4306484462574699637}
   - component: {fileID: 1848853803404472557}
   - component: {fileID: 2062500308208626837}
   - component: {fileID: 4366445000514769400}
@@ -241,10 +241,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 96faf9b60697c49fda3ac364250f7f6f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  highlightScenesController: {fileID: 2330639918278986717}
+  highlightScenesController: {fileID: 4306484462574699637}
   showHideAnimator: {fileID: 4649203351918116211}
   closeButton: {fileID: 2925106485955452278}
---- !u!114 &2330639918278986717
+--- !u!114 &4306484462574699637
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -256,7 +256,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e1d4679f13e7b49ee87ab3cded5f1a70, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sceneCellViewRoot: {fileID: 8801357035239883773}
+  hotsceneBaseCellView: {fileID: 3567024299439535546}
   highlightScenesContent: {fileID: 8899091295327868417}
   loadingSpinner: {fileID: 6840813886269702536}
 --- !u!223 &1848853803404472557
@@ -876,7 +876,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 4159236082741345821}
   m_HandleRect: {fileID: 363348711185992695}
   m_Direction: 2
-  m_Value: 1
+  m_Value: 0
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -1424,7 +1424,7 @@ PrefabInstance:
     - target: {fileID: 8413457068488743235, guid: 8c341d082edd745b38c0660bd79d9d90,
         type: 3}
       propertyPath: m_Name
-      value: SceneCellView
+      value: HotSceneCellView
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8c341d082edd745b38c0660bd79d9d90, type: 3}
@@ -1434,15 +1434,15 @@ RectTransform:
     type: 3}
   m_PrefabInstance: {fileID: 7341390919130659041}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &8801357035239883773 stripped
+--- !u!114 &3567024299439535546 stripped
 MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 2289358798278916892, guid: 8c341d082edd745b38c0660bd79d9d90,
+  m_CorrespondingSourceObject: {fileID: 6080213086932307291, guid: 8c341d082edd745b38c0660bd79d9d90,
     type: 3}
   m_PrefabInstance: {fileID: 7341390919130659041}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3314a257015be4999b3b52873bbe1745, type: 3}
+  m_Script: {fileID: 11500000, guid: 3b23c3670bc8d473586ab5f11cab4947, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 

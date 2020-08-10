@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System;
 using DCL.Helpers;
+using DCL.Interface;
 
 public class ExploreHUDController : IHUD
 {
@@ -27,6 +28,8 @@ public class ExploreHUDController : IHUD
                 toggleExploreTrigger.RaiseOnTriggered();
             }
         });
+
+        BaseSceneCellView.OnJumpIn += OnJumpIn;
     }
 
     public void SetVisibility(bool visible)
@@ -51,6 +54,7 @@ public class ExploreHUDController : IHUD
             GameObject.Destroy(view.gameObject);
 
         toggleExploreTrigger.OnTriggered -= OnToggleActionTriggered;
+        BaseSceneCellView.OnJumpIn -= OnJumpIn;
     }
 
     void OnToggleActionTriggered(DCLAction_Trigger action)
@@ -58,6 +62,23 @@ public class ExploreHUDController : IHUD
         if (view)
         {
             OnToggleTriggered?.Invoke();
+        }
+    }
+
+    void OnJumpIn(Vector2Int coords, string serverName, string layerName)
+    {
+        if (view.IsVisible())
+        {
+            toggleExploreTrigger.RaiseOnTriggered();
+        }
+
+        if (string.IsNullOrEmpty(serverName) || string.IsNullOrEmpty(layerName))
+        {
+            WebInterface.GoTo(coords.x, coords.y);
+        }
+        else
+        {
+            WebInterface.JumpIn(coords.x, coords.y, serverName, layerName);
         }
     }
 }

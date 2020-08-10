@@ -1703,9 +1703,10 @@ GameObject:
   - component: {fileID: 435786120713324302}
   - component: {fileID: 1250810774633126341}
   - component: {fileID: 5952125889656491574}
-  - component: {fileID: 2289358798278916892}
+  - component: {fileID: 6080213086932307291}
+  - component: {fileID: 1456436786267007227}
   m_Layer: 5
-  m_Name: SceneCellView
+  m_Name: HotSceneCellView
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1775,7 +1776,7 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &2289358798278916892
+--- !u!114 &6080213086932307291
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1784,10 +1785,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 8413457068488743235}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3314a257015be4999b3b52873bbe1745, type: 3}
+  m_Script: {fileID: 11500000, guid: 3b23c3670bc8d473586ab5f11cab4947, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  thumbnail: {fileID: 7652983121175080888}
+  thumbnailImage: {fileID: 7652983121175080888}
+  loadingSpinner: {fileID: 7243261089757872620}
   sceneName: {fileID: 4287523942998609376}
   crowdCountContainer: {fileID: 90974729195903362}
   crowdCount: {fileID: 2967862310429266747}
@@ -1796,7 +1798,19 @@ MonoBehaviour:
   friendsContainer: {fileID: 7831703487075667138}
   eventsContainer: {fileID: 4672095495140026971}
   sceneInfoButton: {fileID: 524055130367528283}
-  loadingSpinner: {fileID: 7243261089757872620}
+  hoverAreaCallback: {fileID: 1456436786267007227}
+--- !u!114 &1456436786267007227
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8413457068488743235}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c571141d7b674d80b8ba9d9606ef819, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &8643498525636639973
 GameObject:
   m_ObjectHideFlags: 0

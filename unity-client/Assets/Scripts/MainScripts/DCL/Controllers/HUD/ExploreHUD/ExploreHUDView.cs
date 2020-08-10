@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 internal class ExploreHUDView : MonoBehaviour
 {
-    [SerializeField] HighlightScenesController highlightScenesController;
+    [SerializeField] internal HighlightScenesController highlightScenesController;
     [SerializeField] ShowHideAnimator showHideAnimator;
     [SerializeField] internal Button closeButton;
 
