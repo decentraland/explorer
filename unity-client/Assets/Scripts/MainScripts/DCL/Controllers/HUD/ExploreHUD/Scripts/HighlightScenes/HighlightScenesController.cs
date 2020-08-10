@@ -11,18 +11,15 @@ internal class HighlightScenesController : MonoBehaviour
     [SerializeField] GameObject loadingSpinner;
 
     Dictionary<Vector2Int, HotSceneCellView> cachedScenes = new Dictionary<Vector2Int, HotSceneCellView>();
-    Queue<HotSceneCellView> pooledHotScenCells = new Queue<HotSceneCellView>();
 
     List<GameObject> activeCellsView = new List<GameObject>();
     List<IMapDataView> pendingSceneInfo = new List<IMapDataView>();
 
+    ViewPool<HotSceneCellView> hotScenesViewPool;
+
     public void Initialize()
     {
-        SetPooledHotSceneCell(hotsceneBaseCellView);
-        for (int i = 0; i < 5; i++)
-        {
-            SetPooledHotSceneCell(CreateHotSceneCell());
-        }
+        hotScenesViewPool = new ViewPool<HotSceneCellView>(hotsceneBaseCellView, 5);
 
         MinimapMetadata.GetMetadata().OnSceneInfoUpdated -= OnMapInfoUpdated;
         MinimapMetadata.GetMetadata().OnSceneInfoUpdated += OnMapInfoUpdated;
@@ -75,7 +72,7 @@ internal class HighlightScenesController : MonoBehaviour
         }
         else
         {
-            hotSceneView = GetPooledHotSceneCell();
+            hotSceneView = hotScenesViewPool.GetView();
             cachedScenes.Add(baseCoords, hotSceneView);
         }
 
@@ -121,29 +118,6 @@ internal class HighlightScenesController : MonoBehaviour
         }
     }
 
-    HotSceneCellView GetPooledHotSceneCell()
-    {
-        HotSceneCellView ret;
-        if (pooledHotScenCells.Count > 0)
-        {
-            ret = pooledHotScenCells.Dequeue();
-        }
-        ret = CreateHotSceneCell();
-        ret.gameObject.SetActive(false);
-        return ret;
-    }
-
-    HotSceneCellView CreateHotSceneCell()
-    {
-        return GameObject.Instantiate(hotsceneBaseCellView, hotsceneBaseCellView.transform.parent);
-    }
-
-    void SetPooledHotSceneCell(HotSceneCellView cellView)
-    {
-        cellView.gameObject.SetActive(false);
-        pooledHotScenCells.Enqueue(cellView);
-    }
-
     void ClearMapInfoPendingList()
     {
         for (int i = 0; i < pendingSceneInfo.Count; i++)
@@ -151,7 +125,7 @@ internal class HighlightScenesController : MonoBehaviour
             var hotSceneView = pendingSceneInfo[i] as HotSceneCellView;
             if (hotSceneView)
             {
-                SetPooledHotSceneCell(hotSceneView);
+                hotScenesViewPool.PoolView(hotSceneView);
                 cachedScenes[pendingSceneInfo[i].GetBaseCoord()] = null;
             }
         }
