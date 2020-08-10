@@ -115,5 +115,6 @@ internal class HighlightScenesController : MonoBehaviour
     void OnDestroy()
     {
         HotScenesController.i.OnHotSceneListFinishUpdating -= OnFetchHotScenes;
+        hotScenesViewPool.Dispose();
     }
 }

@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using System;
 
-internal class ViewPool<T> where T : MonoBehaviour
+internal class ViewPool<T> : IDisposable where T : MonoBehaviour
 {
     T baseView;
     Queue<T> pooledHotScenCells = new Queue<T>();
@@ -14,6 +15,18 @@ internal class ViewPool<T> where T : MonoBehaviour
         for (int i = 0; i < prewarm; i++)
         {
             PoolView(CreateView());
+        }
+    }
+
+    public void Dispose()
+    {
+        while (pooledHotScenCells.Count > 0)
+        {
+            var obj = pooledHotScenCells.Dequeue();
+            if (obj != null)
+            {
+                GameObject.Destroy(obj.gameObject);
+            }
         }
     }
 
