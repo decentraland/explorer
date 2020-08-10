@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace DCL.Controllers.Gif
 {
-    public class DCLGif : IDisposable, ITexture
+    public class Asset_Gif : IDisposable, ITexture
     {
         public event Action<Texture2D> OnFrameTextureChanged;
 

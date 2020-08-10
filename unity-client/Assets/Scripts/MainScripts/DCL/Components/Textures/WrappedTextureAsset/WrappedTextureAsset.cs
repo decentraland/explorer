@@ -52,7 +52,7 @@ namespace DCL
                     yield break;
                 }
 
-                var gif = new DCLGif();
+                var gif = new Controllers.Gif.Asset_Gif();
 
                 yield return gif.Load(bytes, () =>
                 {
@@ -74,7 +74,7 @@ namespace DCL
 
     public class Asset_Gif : ITexture
     {
-        DCLGif gif;
+        Controllers.Gif.Asset_Gif gif;
         Coroutine updateRoutine = null;
 
         public Texture2D texture => gif.texture;
@@ -106,7 +106,7 @@ namespace DCL
             updateRoutine = CoroutineStarter.Start(gif.UpdateRoutine());
         }
 
-        public Asset_Gif(DCLGif gif)
+        public Asset_Gif(Controllers.Gif.Asset_Gif gif)
         {
             this.gif = gif;
         }
