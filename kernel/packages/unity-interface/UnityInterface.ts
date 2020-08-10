@@ -46,7 +46,18 @@ function fillMouseEventDataWrapper(eventStruct: any, e: any, target: any) {
   originalFillMouseEventData(eventStruct, eWrapper, target)
 }
 
-export let targetHeight: number = 720
+export let targetHeight: number = 1080
+
+function resizeCanvas(module: any) {
+  if (targetHeight > 2000) {
+    targetHeight = window.innerHeight * devicePixelRatio
+  }
+
+  let desiredHeight = targetHeight
+
+  let ratio = desiredHeight / module.canvas.height
+  module.setCanvasSize(module.canvas.width * ratio, module.canvas.height * ratio)
+}
 
 export class UnityInterface {
   public debug: boolean = false
@@ -54,17 +65,19 @@ export class UnityInterface {
   public Module: any
 
   public SetTargetHeight(height: number): void {
-    if ( targetHeight === height ) {
+    if (targetHeight === height) {
       return
     }
 
-    if ( !this.gameInstance.Module ) {
-      console.log(`Can't change base resolution height to ${height}! Are you running explorer in unity editor or native?`)
+    if (!this.gameInstance.Module) {
+      console.log(
+        `Can't change base resolution height to ${height}! Are you running explorer in unity editor or native?`
+      )
       return
     }
 
     targetHeight = height
-    this.resizeCanvasDelayed(null)
+    window.dispatchEvent(new Event('resize'))
   }
 
   public Init(gameInstance: any): void {
@@ -76,7 +89,7 @@ export class UnityInterface {
     this.Module = this.gameInstance.Module
     _gameInstance = gameInstance
 
-    if (this.Module) {
+    if (this.Module !== undefined) {
       window.addEventListener('resize', this.resizeCanvasDelayed)
       this.resizeCanvasDelayed(null)
       this.waitForFillMouseEventData()
@@ -358,20 +371,9 @@ export class UnityInterface {
   }
 
   private resizeCanvasDelayed(ev: UIEvent | null) {
-    setInterval(this.resizeCanvas, 100, _gameInstance.Module)
-  }
-
-  private resizeCanvas(module: any) {
-    if (targetHeight > 2000) {
-      return // NOTE(Brian): if > 2000, just use native resolution
-    }
-
-    let desiredHeight = targetHeight
-
-    if (module.canvas.height > desiredHeight) {
-      let ratio = desiredHeight / module.canvas.height
-      module.setCanvasSize(module.canvas.width * ratio, module.canvas.height * ratio)
-    }
+    window.setTimeout(() => {
+      resizeCanvas(_gameInstance.Module)
+    }, 100)
   }
 }
 

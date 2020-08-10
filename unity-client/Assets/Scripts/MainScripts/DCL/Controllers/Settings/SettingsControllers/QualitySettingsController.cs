@@ -23,7 +23,7 @@ namespace DCL.SettingsController
         public CinemachineFreeLook thirdPersonCamera = null;
         public CinemachineVirtualCamera firstPersonCamera = null;
 
-        void Awake()
+        void Start()
         {
             if (lightweightRenderPipelineAsset == null)
             {
