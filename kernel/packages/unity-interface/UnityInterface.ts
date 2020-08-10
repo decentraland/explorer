@@ -54,6 +54,15 @@ export class UnityInterface {
   public Module: any
 
   public SetTargetHeight(height: number): void {
+    if ( targetHeight === height ) {
+      return
+    }
+
+    if ( !this.gameInstance.Module ) {
+      console.log(`Can't change base resolution height to ${height}! Are you running explorer in unity editor or native?`)
+      return
+    }
+
     targetHeight = height
     this.resizeCanvasDelayed(null)
   }
@@ -67,10 +76,11 @@ export class UnityInterface {
     this.Module = this.gameInstance.Module
     _gameInstance = gameInstance
 
-    window.addEventListener('resize', this.resizeCanvasDelayed)
-
-    this.resizeCanvasDelayed(null)
-    this.waitForFillMouseEventData()
+    if (this.Module) {
+      window.addEventListener('resize', this.resizeCanvasDelayed)
+      this.resizeCanvasDelayed(null)
+      this.waitForFillMouseEventData()
+    }
   }
 
   public waitForFillMouseEventData() {

@@ -50,7 +50,6 @@ namespace DCL.SettingsController
 
         void ApplyQualitySettings(QualitySettings qualitySettings)
         {
-#if !UNITY_EDITOR
             switch (qualitySettings.baseResolution)
             {
                 case QualitySettings.BaseResolution.BaseRes_720:
@@ -63,9 +62,6 @@ namespace DCL.SettingsController
                     WebInterface.SetBaseResolution(9999);
                     break;
             }
-#else
-            Debug.Log("This setting is only applicable in WASM build!");
-#endif
 
             if (lightweightRenderPipelineAsset)
             {

@@ -1531,7 +1531,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   qualityPresetSpinBox: {fileID: 8528571613779276393}
-  baseResSpinBox: {fileID: 0}
+  baseResSpinBox: {fileID: 1755520278186876574}
   shadowResSpinBox: {fileID: 8988512653593649854}
   soundToggle: {fileID: 5257412117456053339}
   colorGradingToggle: {fileID: 3218635305569080034}
