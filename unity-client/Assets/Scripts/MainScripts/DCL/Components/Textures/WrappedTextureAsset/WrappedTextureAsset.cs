@@ -1,21 +1,62 @@
 ﻿using System;
 using System.Collections;
 using DCL.Controllers.Gif;
+using DCL.Helpers;
 using UnityEngine;
+using UnityEngine.Networking;
 
 namespace DCL
 {
-    public enum WrappedTextureMaxSize { DONT_RESIZE = -1, _32 = 32, _64 = 64, _128 = 128, _256 = 256, _512 = 512, _1024 = 1024, _2048 = 2048 }
-    public static class WrappedTextureAssetFactory
+    public enum WrappedTextureMaxSize
     {
-        static public IEnumerator Create(string contentType, byte[] bytes, WrappedTextureMaxSize maxTextureSize, Action<IWrappedTextureAsset> OnSuccess)
+        DONT_RESIZE = -1,
+        _32 = 32,
+        _64 = 64,
+        _128 = 128,
+        _256 = 256,
+        _512 = 512,
+        _1024 = 1024,
+        _2048 = 2048
+    }
+
+    public static class WrappedTextureUtils
+    {
+        public static IEnumerator Fetch(string url, Action<ITexture> OnSuccess,
+            WrappedTextureMaxSize maxTextureSize = WrappedTextureMaxSize.DONT_RESIZE)
+        {
+            string contentType = null;
+
+            var headReq = UnityWebRequest.Head(url);
+
+            yield return headReq.SendWebRequest();
+
+            if (headReq.WebRequestSucceded())
+            {
+                contentType = headReq.GetResponseHeader("Content-Type");
+            }
+
+            yield return Create(contentType, url, maxTextureSize, OnSuccess);
+        }
+
+        private static IEnumerator Create(string contentType, string url, WrappedTextureMaxSize maxTextureSize, Action<ITexture> OnSuccess, Action OnFail = null)
         {
             if (contentType == "image/gif")
             {
+                byte[] bytes = null;
+
+                yield return Utils.FetchAsset(url, UnityWebRequest.Get(url), (request) => { bytes = request.downloadHandler.data; });
+
+                if (bytes == null)
+                {
+                    OnFail?.Invoke();
+                    yield break;
+                }
+
                 var gif = new DCLGif();
+
                 yield return gif.Load(bytes, () =>
                 {
-                    var wrappedGif = new WrappedGif(gif);
+                    var wrappedGif = new Asset_Gif(gif);
                     wrappedGif.EnsureTextureMaxSize(maxTextureSize);
                     gif.Play();
                     OnSuccess?.Invoke(wrappedGif);
@@ -23,55 +64,15 @@ namespace DCL
             }
             else
             {
-                var texture = new Texture2D(1, 1);
-                texture.LoadImage(bytes);
-                var wrappedImage = new WrappedImage(texture);
-                wrappedImage.EnsureTextureMaxSize(maxTextureSize);
-                OnSuccess?.Invoke(wrappedImage);
+                AssetPromise_Texture texturePromise = new AssetPromise_Texture(url);
+                texturePromise.OnSuccessEvent += texture => { OnSuccess?.Invoke(texture); };
+
+                AssetPromiseKeeper_Texture.i.Keep(texturePromise);
             }
         }
     }
 
-    public interface IWrappedTextureAsset : IDisposable
-    {
-        Texture2D texture { get; }
-        int width { get; }
-        int height { get; }
-        void EnsureTextureMaxSize(WrappedTextureMaxSize maxTextureSize);
-    }
-
-    public class WrappedImage : IWrappedTextureAsset
-    {
-        public Texture2D texture { get { return texture2D; } }
-        public int width => texture.width;
-        public int height => texture.height;
-
-        private Texture2D texture2D;
-
-        public void Dispose()
-        {
-            if (texture2D != null)
-            {
-                UnityEngine.Object.Destroy(texture2D);
-                texture2D = null;
-            }
-        }
-
-        public WrappedImage(Texture2D t)
-        {
-            texture2D = t;
-        }
-
-        public void EnsureTextureMaxSize(WrappedTextureMaxSize maxTextureSize)
-        {
-            if (maxTextureSize != WrappedTextureMaxSize.DONT_RESIZE)
-            {
-                TextureHelpers.EnsureTexture2DMaxSize(ref texture2D, (int)maxTextureSize);
-            }
-        }
-    }
-
-    public class WrappedGif : IWrappedTextureAsset
+    public class Asset_Gif : ITexture
     {
         DCLGif gif;
         Coroutine updateRoutine = null;
@@ -86,6 +87,7 @@ namespace DCL
             {
                 CoroutineStarter.Stop(updateRoutine);
             }
+
             if (gif != null)
             {
                 gif.Dispose();
@@ -100,10 +102,11 @@ namespace DCL
             {
                 CoroutineStarter.Stop(updateRoutine);
             }
+
             updateRoutine = CoroutineStarter.Start(gif.UpdateRoutine());
         }
 
-        public WrappedGif(DCLGif gif)
+        public Asset_Gif(DCLGif gif)
         {
             this.gif = gif;
         }
@@ -112,7 +115,7 @@ namespace DCL
         {
             if (maxTextureSize != WrappedTextureMaxSize.DONT_RESIZE)
             {
-                gif.SetMaxTextureSize((int)maxTextureSize);
+                gif.SetMaxTextureSize((int) maxTextureSize);
             }
         }
     }

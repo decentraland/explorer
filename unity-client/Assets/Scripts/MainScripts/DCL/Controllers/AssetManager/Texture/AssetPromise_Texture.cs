@@ -123,7 +123,7 @@ namespace DCL
             return ((int) textureWrapMode).ToString() + ((int) textureFilterMode).ToString() + textureUrl;
         }
 
-        internal override object GetId()
+        public override object GetId()
         {
             // We only use the id-with-settings when storing/reading from the library
             return idWithDefaultTexSettings;

@@ -7,12 +7,11 @@
         "GUID:b1087c5731ff68448a0a9c625bb7e52d",
         "GUID:ef84d7ce90ba34f07be26ace428e9bc8",
         "GUID:27619889b8ba8c24980f49ee34dbb44a",
-        "GUID:0acc523941302664db1f4e527237feb3"
+        "GUID:0acc523941302664db1f4e527237feb3",
+        "GUID:a3ceb534947fac14da25035bc5c24788"
     ],
     "includePlatforms": [
-        "Android",
-        "Editor",
-        "iOS"
+        "Editor"
     ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

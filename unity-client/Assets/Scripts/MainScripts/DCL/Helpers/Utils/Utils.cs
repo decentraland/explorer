@@ -120,11 +120,8 @@ namespace DCL.Helpers
             else
             {
                 Utils.InverseTransformChildTraversal<RectTransform>(
-                (x) =>
-                {
-                    LayoutRebuilder.ForceRebuildLayoutImmediate(x);
-                },
-                rt);
+                    (x) => { LayoutRebuilder.ForceRebuildLayoutImmediate(x); },
+                    rt);
 
                 LayoutRebuilder.ForceRebuildLayoutImmediate(rt);
             }
@@ -135,11 +132,8 @@ namespace DCL.Helpers
             yield return null;
 
             Utils.InverseTransformChildTraversal<RectTransform>(
-            (x) =>
-            {
-                LayoutRebuilder.ForceRebuildLayoutImmediate(x);
-            },
-            rt);
+                (x) => { LayoutRebuilder.ForceRebuildLayoutImmediate(x); },
+                rt);
 
             LayoutRebuilder.ForceRebuildLayoutImmediate(rt);
         }
@@ -274,32 +268,13 @@ namespace DCL.Helpers
         public static IEnumerator FetchTexture(string textureURL, Action<Texture2D> OnSuccess, Action<string> OnFail = null)
         {
             //NOTE(Brian): This closure is called when the download is a success.
-            System.Action<UnityWebRequest> OnSuccessInternal =
-                (request) =>
-                {
-                    var texture = DownloadHandlerTexture.GetContent(request);
-                    OnSuccess?.Invoke(texture);
-                };
-
-            yield return FetchAsset(textureURL, UnityWebRequestTexture.GetTexture(textureURL), OnSuccessInternal, OnFail);
-        }
-
-        public static IEnumerator FetchWrappedTextureAsset(string url, Action<IWrappedTextureAsset> OnSuccess,
-            WrappedTextureMaxSize maxTextureSize = WrappedTextureMaxSize.DONT_RESIZE)
-        {
-            string contentType = null;
-            byte[] bytes = null;
-
-            yield return Utils.FetchAsset(url, UnityWebRequest.Get(url), (request) =>
+            void SuccessInternal(UnityWebRequest request)
             {
-                contentType = request.GetResponseHeader("Content-Type");
-                bytes = request.downloadHandler.data;
-            });
-
-            if (contentType != null && bytes != null)
-            {
-                yield return WrappedTextureAssetFactory.Create(contentType, bytes, maxTextureSize, OnSuccess);
+                var texture = DownloadHandlerTexture.GetContent(request);
+                OnSuccess?.Invoke(texture);
             }
+
+            yield return FetchAsset(textureURL, UnityWebRequestTexture.GetTexture(textureURL), SuccessInternal, OnFail);
         }
 
         public static AudioType GetAudioTypeFromUrlName(string url)
@@ -406,10 +381,11 @@ namespace DCL.Helpers
         public static Vector2Int WorldToGridPosition(Vector3 worldPosition)
         {
             return new Vector2Int(
-                (int)Mathf.Floor(worldPosition.x / ParcelSettings.PARCEL_SIZE),
-                (int)Mathf.Floor(worldPosition.z / ParcelSettings.PARCEL_SIZE)
+                (int) Mathf.Floor(worldPosition.x / ParcelSettings.PARCEL_SIZE),
+                (int) Mathf.Floor(worldPosition.z / ParcelSettings.PARCEL_SIZE)
             );
         }
+
         public static Vector2 WorldToGridPositionUnclamped(Vector3 worldPosition)
         {
             return new Vector2(
@@ -445,6 +421,7 @@ namespace DCL.Helpers
             {
                 return true;
             }
+
             return false;
         }
 
@@ -609,6 +586,5 @@ namespace DCL.Helpers
 
             return value;
         }
-
     }
 }

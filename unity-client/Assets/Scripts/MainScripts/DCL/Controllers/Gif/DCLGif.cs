@@ -5,23 +5,32 @@ using UnityEngine;
 
 namespace DCL.Controllers.Gif
 {
-    public class DCLGif : IDisposable
+    public class DCLGif : IDisposable, ITexture
     {
         public event Action<Texture2D> OnFrameTextureChanged;
 
-        public bool isLoaded { get { return gifTextures != null; } }
+        public bool isLoaded
+        {
+            get { return gifTextures != null; }
+        }
+
         public bool isPlaying { get; private set; }
         public int textureWidth { get; private set; }
         public int textureHeight { get; private set; }
+
         public Texture2D texture
         {
             get
             {
                 if (isLoaded)
                     return gifTextures[currentTextureIdx].m_texture2d;
+
                 return null;
             }
         }
+
+        public int width => texture.width;
+        public int height => texture.height;
 
         private List<UniGif.GifTexture> gifTextures;
 
@@ -29,7 +38,6 @@ namespace DCL.Controllers.Gif
         private float currentTimeDelay;
         private int currentTextureIdx = 0;
         private int maxLoopCount = 0;
-
 
         public IEnumerator Load(byte[] bytes, Action onFinish)
         {
@@ -51,6 +59,7 @@ namespace DCL.Controllers.Gif
                     if (gifTextures[i].m_texture2d)
                         UnityEngine.Object.Destroy(gifTextures[i].m_texture2d);
                 }
+
                 gifTextures.Clear();
                 gifTextures = null;
             }
@@ -91,6 +100,7 @@ namespace DCL.Controllers.Gif
 
                     currentTextureIdx = 0;
                 }
+
                 currentTimeDelay = gifTextures[currentTextureIdx].m_delaySec;
                 OnFrameTextureChanged?.Invoke(texture);
             }

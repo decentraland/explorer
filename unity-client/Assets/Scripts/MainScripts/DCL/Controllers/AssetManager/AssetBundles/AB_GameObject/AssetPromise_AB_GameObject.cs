@@ -5,7 +5,6 @@ using DCL.Helpers;
 using DCL.Configuration;
 using UnityEngine;
 using System.Collections.Generic;
-using Cinemachine;
 
 namespace DCL
 {
@@ -163,7 +162,7 @@ namespace DCL
         {
             if (settings.forceNewInstance)
             {
-                return ((AssetLibrary_AB_GameObject)library).GetCopyFromOriginal(id);
+                return ((AssetLibrary_AB_GameObject) library).GetCopyFromOriginal(id);
             }
             else
             {
