@@ -8,6 +8,7 @@ using UnityEngine;
 using System;
 using System.Runtime.InteropServices;
 using DCL;
+using DCL.Controllers.Gif;
 
 public class NFTShapeLoaderController : MonoBehaviour
 {
@@ -178,7 +179,7 @@ public class NFTShapeLoaderController : MonoBehaviour
             {
                 foundDCLImage = true;
                 SetFrameImage(downloadedAsset, resizeFrameMesh: true);
-            }, DCL.WrappedTextureMaxSize._256);
+            }, Asset_Gif.MaxSize._256);
         }
 
         if (foundDCLImage)
@@ -212,10 +213,11 @@ public class NFTShapeLoaderController : MonoBehaviour
 
         nftAsset = newAsset;
 
-        var gifAsset = nftAsset as DCL.Asset_Gif;
-        if (gifAsset != null)
+        if (nftAsset is Asset_Gif gifAsset)
         {
-            gifAsset.SetUpdateTextureCallback(UpdateTexture);
+            gifAsset.OnFrameTextureChanged -= UpdateTexture;
+            gifAsset.OnFrameTextureChanged += UpdateTexture;
+            gifAsset.Play(false);
         }
 
         UpdateTexture(nftAsset.texture);

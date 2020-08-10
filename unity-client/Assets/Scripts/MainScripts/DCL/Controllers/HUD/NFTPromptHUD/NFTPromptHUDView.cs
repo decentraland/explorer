@@ -6,6 +6,7 @@ using DCL.Helpers;
 using DCL.Helpers.NFT;
 using DCL.Interface;
 using System.Collections;
+using DCL.Controllers.Gif;
 
 public class NFTPromptHUDView : MonoBehaviour
 {
@@ -189,13 +190,14 @@ public class NFTPromptHUDView : MonoBehaviour
         spinnerNftImage.SetActive(true);
 
         ITexture nftImageAsset = null;
+
         yield return WrappedTextureUtils.Fetch(nftInfo.previewImageUrl,
             (asset) => { nftImageAsset = asset; });
 
         if (nftImageAsset == null)
         {
             yield return WrappedTextureUtils.Fetch(nftInfo.originalImageUrl,
-                (asset) => { nftImageAsset = asset; }, WrappedTextureMaxSize._256);
+                (asset) => { nftImageAsset = asset; }, Asset_Gif.MaxSize._256);
         }
 
         if (nftImageAsset != null)
@@ -205,11 +207,14 @@ public class NFTPromptHUDView : MonoBehaviour
 
             if (nftImageAsset is Asset_Gif gifAsset)
             {
-                gifAsset.SetUpdateTextureCallback((texture) => { imageNft.texture = texture; });
+                gifAsset.OnFrameTextureChanged += (texture) => { imageNft.texture = texture; };
+                gifAsset.Play();
             }
 
             SetNFTImageSize(nftImageAsset.texture);
-            if (!backgroundColorSet) SetSmartBackgroundColor(nftImageAsset.texture);
+
+            if (!backgroundColorSet)
+                SetSmartBackgroundColor(nftImageAsset.texture);
 
             imageNft.gameObject.SetActive(true);
             spinnerNftImage.SetActive(false);
