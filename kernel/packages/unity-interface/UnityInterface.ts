@@ -17,6 +17,7 @@ import {
 } from 'shared/types'
 import { nativeMsgBridge } from './nativeMessagesBridge'
 import { HotSceneInfo } from 'shared/social/hotScenes'
+import { defaultLogger } from 'shared/logger'
 
 const MINIMAP_CHUNK_SIZE = 100
 
@@ -70,7 +71,8 @@ export class UnityInterface {
     }
 
     if (!this.gameInstance.Module) {
-      console.log(
+
+      defaultLogger.log(
         `Can't change base resolution height to ${height}! Are you running explorer in unity editor or native?`
       )
       return
