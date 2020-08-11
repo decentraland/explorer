@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d8ba04a041474be2a7ac981e4fff73ef, type: 3}
   m_Name: ToggleExploreHud
   m_EditorClassIdentifier: 
-  dclAction: 125
+  dclAction: 126
