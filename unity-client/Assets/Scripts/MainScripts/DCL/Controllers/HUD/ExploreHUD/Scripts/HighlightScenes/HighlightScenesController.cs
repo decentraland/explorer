@@ -18,6 +18,8 @@ internal class HighlightScenesController : MonoBehaviour
 
     ViewPool<HotSceneCellView> hotScenesViewPool;
 
+    float lastTimeRefreshed = 0;
+
     public void Initialize(ExploreMiniMapDataController mapDataController, ExploreFriendsController friendsController)
     {
         this.mapDataController = mapDataController;
@@ -30,6 +32,10 @@ internal class HighlightScenesController : MonoBehaviour
         if (cachedHotScenes.Count == 0 || HotScenesController.i.timeSinceLastUpdate >= SCENES_UPDATE_INTERVAL)
         {
             FetchHotScenes();
+        }
+        else if ((Time.realtimeSinceStartup - lastTimeRefreshed) >= SCENES_UPDATE_INTERVAL)
+        {
+            ProcessHotScenes();
         }
         else
         {
@@ -52,6 +58,13 @@ internal class HighlightScenesController : MonoBehaviour
         HotScenesController.i.OnHotSceneListFinishUpdating -= OnFetchHotScenes;
 
         mapDataController.ClearPending();
+        ProcessHotScenes();
+    }
+
+    void ProcessHotScenes()
+    {
+        lastTimeRefreshed = Time.realtimeSinceStartup;
+
         HideActiveCells();
 
         for (int i = 0; i < HotScenesController.i.hotScenesList.Count; i++)

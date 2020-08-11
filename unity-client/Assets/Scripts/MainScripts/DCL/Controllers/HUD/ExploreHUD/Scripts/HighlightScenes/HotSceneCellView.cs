@@ -16,6 +16,9 @@ internal class HotSceneCellView : BaseSceneCellView, ICrowdDataView
     {
         base.Awake();
 
+        crowdCountContainer.SetActive(false);
+        eventsContainer.SetActive(false);
+
         hoverAreaCallback.OnPointerEnter += () =>
         {
             jumpInButtonAnimator.gameObject.SetActive(true);

@@ -26,6 +26,9 @@ internal class BaseCellView : MonoBehaviour
             UnityWebRequestAsyncOperation op = thumbnailRequest.SendWebRequest();
             op.completed += (_) =>
             {
+                if (thumbnailRequest == null)
+                    return;
+
                 if (!thumbnailRequest.isNetworkError && !thumbnailRequest.isHttpError)
                 {
                     thumbnailTexture = ((DownloadHandlerTexture)thumbnailRequest.downloadHandler).texture;
