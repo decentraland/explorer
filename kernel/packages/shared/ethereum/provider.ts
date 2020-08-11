@@ -115,7 +115,12 @@ export function awaitWeb3Approval(stateListener: (state: Web3LoginState) => void
         }
 
         const background = processLoginBackground()
-        background.then((result) => providerFuture.resolve(result)).catch((e) => providerFuture.reject(e))
+        background
+          .then((result) => {
+            providerFuture.resolve(result)
+            stateListener(Web3LoginState.LOGIN_COMPLETED)
+          })
+          .catch((e) => providerFuture.reject(e))
 
         stateListener(Web3LoginState.AWAITING_BUTTON_CLICK)
         const button = document.getElementById('eth-login-confirm-button')
@@ -159,7 +164,6 @@ export function awaitWeb3Approval(stateListener: (state: Web3LoginState) => void
         })
       }
 
-      stateListener(Web3LoginState.LOGIN_COMPLETED)
       loginCompleted.resolve()
     }).catch((e) => defaultLogger.error('error in login process', e))
   }

@@ -1,4 +1,4 @@
-import { put, takeLatest, call } from 'redux-saga/effects'
+import { put, takeLatest, call, delay, select } from 'redux-saga/effects'
 import { createIdentity } from 'eth-crypto'
 import { Eth } from 'web3x/eth'
 import { Personal } from 'web3x/personal/personal'
@@ -17,7 +17,12 @@ import {
 } from 'shared/ethereum/provider'
 import { getUserProfile, setLocalProfile } from 'shared/comms/peers'
 import { ReportFatalError } from 'shared/loading/ReportFatalError'
-import { AUTH_ERROR_LOGGED_OUT, NETWORK_MISMATCH, awaitingUserSignature } from 'shared/loading/types'
+import {
+  AUTH_ERROR_LOGGED_OUT,
+  NETWORK_MISMATCH,
+  awaitingUserSignature,
+  AWAITING_USER_SIGNATURE
+} from 'shared/loading/types'
 import { identifyUser, queueTrackingEvent } from 'shared/analytics'
 import { getNetworkFromTLD, getAppNetwork } from 'shared/web3'
 import { getNetwork } from 'shared/ethereum/EthereumService'
@@ -36,6 +41,7 @@ export function* sessionSaga(): any {
 
   yield takeLatest(LOGIN, login)
   yield takeLatest(LOGOUT, logout)
+  yield takeLatest(AWAITING_USER_SIGNATURE, scheduleAwaitingSignaturePrompt)
 }
 
 function* initializeTos() {
@@ -63,6 +69,17 @@ function* initializeTos() {
 function* handleWeb3State(state: Web3LoginState) {
   if (state === Web3LoginState.AWAITING_USER_SIGNATURE) {
     yield put(awaitingUserSignature())
+  } else if (state === Web3LoginState.LOGIN_COMPLETED) {
+    showAwaitingSignaturePrompt(false)
+  }
+}
+
+function* scheduleAwaitingSignaturePrompt() {
+  yield delay(10000)
+  const isStillWaiting = yield select((state) => !state.session?.initialized)
+
+  if (isStillWaiting) {
+    showAwaitingSignaturePrompt(true)
   }
 }
 
@@ -231,10 +248,18 @@ async function createAuthIdentity() {
 }
 
 function showEthSignAdvice(show: boolean) {
-  const element = document.getElementById('eth-sign-advice')
+  showElementById('eth-sign-advice', show)
+}
+
+function showElementById(id: string, show: boolean) {
+  const element = document.getElementById(id)
   if (element) {
     element.style.display = show ? 'block' : 'none'
   }
+}
+
+function showAwaitingSignaturePrompt(show: boolean) {
+  showElementById('check-wallet-prompt', show)
 }
 
 function* logout() {

@@ -232,7 +232,7 @@
       align-items: center;
       justify-content: center;
     }
-    #subtext-messages {
+    #subtext-messages-container {
       bottom: 40px;
       left: 0;
       position: fixed;
@@ -245,6 +245,21 @@
 
       font-size: 1.0em;
       color: #7D8385;
+    }
+
+    #subtext-messages-container div {
+      margin: auto;
+    }
+
+    div#check-wallet-prompt {
+      width: 395px;
+      text-align: center;
+      background: #43474B;
+      border-radius: 100px;
+      color: white;
+      font-weight: bold;
+      padding: 14px;
+      margin-bottom: 10px;
     }
 
     #eth-connect-advice {
@@ -539,7 +554,10 @@
   <body class="dcl-loading">
     <div id="load-messages-wrapper">
       <div id="load-messages"></div>
-      <div id="subtext-messages"></div>
+      <div id="subtext-messages-container">
+        <div id="check-wallet-prompt" style="display: none;">The application is waiting for your signature. Please check your wallet (i.e. MetaMask) and look for the signature request.</div>
+        <div id="subtext-messages"></div>
+      </div>
     </div>
     <div id="overlay"></div>
     <div id="progress-bar" class="progress ingame">
