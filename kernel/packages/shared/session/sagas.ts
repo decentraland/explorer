@@ -8,13 +8,7 @@ import { Authenticator } from 'dcl-crypto'
 import { ENABLE_WEB3, WORLD_EXPLORER, PREVIEW, ETHEREUM_NETWORK, getTLD, setNetwork } from 'config'
 
 import { createLogger } from 'shared/logger'
-import {
-  awaitWeb3Approval,
-  isSessionExpired,
-  providerFuture,
-  loginCompleted,
-  Web3LoginState
-} from 'shared/ethereum/provider'
+import { awaitWeb3Approval, isSessionExpired, providerFuture, loginCompleted } from 'shared/ethereum/provider'
 import { getUserProfile, setLocalProfile } from 'shared/comms/peers'
 import { ReportFatalError } from 'shared/loading/ReportFatalError'
 import {
@@ -32,7 +26,6 @@ import { getFromLocalStorage, saveToLocalStorage } from 'atomicHelpers/localStor
 import { Session } from '.'
 import { ExplorerIdentity } from './types'
 import { userAuthentified, LOGOUT, LOGIN, loginCompleted as loginCompletedAction } from './actions'
-import { channel } from 'redux-saga'
 
 const logger = createLogger('session: ')
 
@@ -66,12 +59,6 @@ function* initializeTos() {
   }
 }
 
-function* handleWeb3State(state: Web3LoginState) {
-  if (state === Web3LoginState.AWAITING_USER_SIGNATURE) {
-    yield put(awaitingUserSignature())
-  }
-}
-
 function* scheduleAwaitingSignaturePrompt() {
   yield delay(10000)
   const isStillWaiting = yield select((state) => !state.session?.initialized)
@@ -86,10 +73,7 @@ function* login() {
   let identity: ExplorerIdentity
 
   if (ENABLE_WEB3) {
-    const web3stateChannel = channel<Web3LoginState>()
-
-    yield takeLatest(web3stateChannel, handleWeb3State)
-    yield awaitWeb3Approval((state) => web3stateChannel.put(state))
+    yield awaitWeb3Approval()
 
     if (WORLD_EXPLORER && (yield checkTldVsNetwork())) {
       throw new Error('Network mismatch')
@@ -104,6 +88,7 @@ function* login() {
 
       // check that user data is stored & key is not expired
       if (isSessionExpired(userData)) {
+        yield put(awaitingUserSignature())
         identity = yield createAuthIdentity()
         showAwaitingSignaturePrompt(false)
         userId = identity.address
