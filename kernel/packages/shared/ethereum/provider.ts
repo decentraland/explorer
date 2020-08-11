@@ -97,7 +97,7 @@ function processLoginBackground() {
 export enum Web3LoginState {
   AWAITING_BUTTON_CLICK,
   AWAITING_USER_SIGNATURE,
-  LOGIN_COMPLETED
+  WEB3_APPROVED
 }
 
 export function awaitWeb3Approval(
@@ -119,12 +119,7 @@ export function awaitWeb3Approval(
         }
 
         const background = processLoginBackground()
-        background
-          .then((result) => {
-            providerFuture.resolve(result)
-            stateListener(Web3LoginState.LOGIN_COMPLETED)
-          })
-          .catch((e) => providerFuture.reject(e))
+        background.then((result) => providerFuture.resolve(result)).catch((e) => providerFuture.reject(e))
 
         stateListener(Web3LoginState.AWAITING_BUTTON_CLICK)
         const button = document.getElementById('eth-login-confirm-button')
@@ -153,6 +148,7 @@ export function awaitWeb3Approval(
           }
         }
 
+        stateListener(Web3LoginState.WEB3_APPROVED)
         showEthConnectAdvice(false)
 
         // post check

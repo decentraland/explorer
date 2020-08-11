@@ -69,8 +69,6 @@ function* initializeTos() {
 function* handleWeb3State(state: Web3LoginState) {
   if (state === Web3LoginState.AWAITING_USER_SIGNATURE) {
     yield put(awaitingUserSignature())
-  } else if (state === Web3LoginState.LOGIN_COMPLETED) {
-    showAwaitingSignaturePrompt(false)
   }
 }
 
@@ -107,6 +105,7 @@ function* login() {
       // check that user data is stored & key is not expired
       if (isSessionExpired(userData)) {
         identity = yield createAuthIdentity()
+        showAwaitingSignaturePrompt(false)
         userId = identity.address
 
         setLocalProfile(userId, {
