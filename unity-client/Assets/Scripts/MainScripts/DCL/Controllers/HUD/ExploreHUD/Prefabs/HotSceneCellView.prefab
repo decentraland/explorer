@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4897974716751563586}
-  - component: {fileID: 7639934907528463198}
+  - component: {fileID: 1167237317565750555}
   m_Layer: 5
   m_Name: AvatarPreview
   m_TagString: Untagged
@@ -38,26 +38,19 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 34.57, y: 34.57}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &7639934907528463198
+--- !u!114 &1167237317565750555
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5377762487815809}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 306cc8c2b49d7114eaa3623786fc2126, type: 3}
+  m_Script: {fileID: 11500000, guid: 95e7f5cb407204bbf96c85dd98f1b328, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_IgnoreLayout: 0
-  m_MinWidth: -1
-  m_MinHeight: -1
-  m_PreferredWidth: 34.57
-  m_PreferredHeight: 34.57
-  m_FlexibleWidth: 0.69
-  m_FlexibleHeight: -1
-  m_LayoutPriority: 1
+  friendPortrait: {fileID: 9131876449999456729}
 --- !u!1 &90974729195903362
 GameObject:
   m_ObjectHideFlags: 0
@@ -1791,13 +1784,14 @@ MonoBehaviour:
   thumbnailImage: {fileID: 7652983121175080888}
   loadingSpinner: {fileID: 7243261089757872620}
   sceneName: {fileID: 4287523942998609376}
+  jumpIn: {fileID: 3597652386360375073}
+  sceneInfoButton: {fileID: 524055130367528283}
+  friendsView: {fileID: 1167237317565750555}
   crowdCountContainer: {fileID: 90974729195903362}
   crowdCount: {fileID: 2967862310429266747}
-  jumpIn: {fileID: 3597652386360375073}
   jumpInButtonAnimator: {fileID: 681963098010535084}
   friendsContainer: {fileID: 7831703487075667138}
   eventsContainer: {fileID: 4672095495140026971}
-  sceneInfoButton: {fileID: 524055130367528283}
   hoverAreaCallback: {fileID: 1456436786267007227}
 --- !u!114 &1456436786267007227
 MonoBehaviour:

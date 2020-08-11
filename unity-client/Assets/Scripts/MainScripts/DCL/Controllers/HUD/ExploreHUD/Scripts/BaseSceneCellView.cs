@@ -2,8 +2,9 @@
 using UnityEngine.UI;
 using TMPro;
 using System;
+using System.Collections.Generic;
 
-internal class BaseSceneCellView : BaseCellView, IMapDataView
+internal class BaseSceneCellView : BaseCellView, IMapDataView, IExploreViewWithFriends
 {
     public delegate void JumpInDelegate(Vector2Int coords, string serverName, string layerName);
     static public event JumpInDelegate OnJumpIn;
@@ -14,16 +15,28 @@ internal class BaseSceneCellView : BaseCellView, IMapDataView
     [SerializeField] TextMeshProUGUI sceneName;
     [SerializeField] Button jumpIn;
     [SerializeField] UIHoverCallback sceneInfoButton;
+    [SerializeField] ExploreFriendsView friendsView;
 
     MinimapMetadata.MinimapSceneInfo mapInfo;
     Vector2Int baseCoords;
 
+    ViewPool<ExploreFriendsView> friendPool;
+    Dictionary<string, ExploreFriendsView> friendViewById = new Dictionary<string, ExploreFriendsView>();
+
     protected virtual void Awake()
     {
+        friendPool = new ViewPool<ExploreFriendsView>(friendsView, 0);
+
         jumpIn.onClick.AddListener(JumpInPressed);
 
         sceneInfoButton.OnPointerEnter += () => OnInfoButtonPointerEnter?.Invoke(this);
         sceneInfoButton.OnPointerExit += () => OnInfoButtonPointerExit?.Invoke();
+    }
+
+    protected override void OnDestroy()
+    {
+        base.OnDestroy();
+        friendPool.Dispose();
     }
 
     public virtual void JumpInPressed()
@@ -112,5 +125,27 @@ internal class BaseSceneCellView : BaseCellView, IMapDataView
 
         return string.Format("https://api.decentraland.org/v1/map.png?width={0}&height={1}&size={2}&center={3}&selected={4}",
             width, height, size, $"{centerX},{centerY}", parcels);
+    }
+
+    void IExploreViewWithFriends.OnFriendAdded(UserProfile profile)
+    {
+        var view = friendPool.GetView();
+        view.SetUserProfile(profile);
+        friendViewById.Add(profile.userId, view);
+    }
+
+    void IExploreViewWithFriends.OnFriendRemoved(UserProfile profile)
+    {
+        ExploreFriendsView view;
+        if (friendViewById.TryGetValue(profile.userId, out view))
+        {
+            friendPool.PoolView(view);
+            friendViewById.Remove(profile.userId);
+        }
+    }
+
+    bool IExploreViewWithFriends.ContainCoords(Vector2Int coords)
+    {
+        return ((IMapDataView)this).ContainCoords(coords);
     }
 }

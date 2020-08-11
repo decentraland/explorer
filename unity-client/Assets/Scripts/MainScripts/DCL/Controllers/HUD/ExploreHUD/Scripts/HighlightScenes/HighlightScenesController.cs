@@ -4,7 +4,7 @@ using DCL.Interface;
 
 internal class HighlightScenesController : MonoBehaviour
 {
-    const float SCENES_UPDATE_INTERVAL = 5;
+    const float SCENES_UPDATE_INTERVAL = 60;
 
     [SerializeField] HotSceneCellView hotsceneBaseCellView;
     [SerializeField] GameObject highlightScenesContent;
@@ -13,12 +13,15 @@ internal class HighlightScenesController : MonoBehaviour
     Dictionary<Vector2Int, HotSceneCellView> cachedHotScenes = new Dictionary<Vector2Int, HotSceneCellView>();
     List<GameObject> activeCellsView = new List<GameObject>();
 
-    ExploreMiniMapDataController miniMapDataController;
+    ExploreMiniMapDataController mapDataController;
+    ExploreFriendsController friendsController;
+
     ViewPool<HotSceneCellView> hotScenesViewPool;
 
-    public void Initialize(ExploreMiniMapDataController mapDataController)
+    public void Initialize(ExploreMiniMapDataController mapDataController, ExploreFriendsController friendsController)
     {
-        miniMapDataController = mapDataController;
+        this.mapDataController = mapDataController;
+        this.friendsController = friendsController;
         hotScenesViewPool = new ViewPool<HotSceneCellView>(hotsceneBaseCellView, 5);
     }
 
@@ -48,7 +51,7 @@ internal class HighlightScenesController : MonoBehaviour
     {
         HotScenesController.i.OnHotSceneListFinishUpdating -= OnFetchHotScenes;
 
-        miniMapDataController.ClearPending();
+        mapDataController.ClearPending();
         HideActiveCells();
 
         for (int i = 0; i < HotScenesController.i.hotScenesList.Count; i++)
@@ -79,10 +82,16 @@ internal class HighlightScenesController : MonoBehaviour
         crowdView.SetCrowdInfo(hotSceneInfo);
 
         IMapDataView mapView = hotSceneView;
-        miniMapDataController.SetMinimapData(baseCoords, mapView,
+        bool alreadyHasMapData = mapView.HasMinimapSceneInfo();
+
+        mapDataController.SetMinimapData(baseCoords, mapView,
             (resolvedView) =>
             {
                 SetActiveCell(resolvedView.GetGameObject());
+                if (!alreadyHasMapData)
+                {
+                    friendsController.AddListener(hotSceneView);
+                }
             },
             (rejectedView) =>
             {

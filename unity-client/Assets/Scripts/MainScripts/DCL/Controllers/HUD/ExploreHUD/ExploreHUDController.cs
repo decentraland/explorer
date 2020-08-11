@@ -10,6 +10,7 @@ public class ExploreHUDController : IHUD
     InputAction_Trigger toggleExploreTrigger;
 
     ExploreMiniMapDataController miniMapDataController = new ExploreMiniMapDataController();
+    ExploreFriendsController friendsController = new ExploreFriendsController();
 
     public event Action OnToggleTriggered;
 
@@ -19,7 +20,7 @@ public class ExploreHUDController : IHUD
         view.name = "_ExploreHUD";
         view.gameObject.SetActive(false);
 
-        view.Initialize(miniMapDataController);
+        view.Initialize(miniMapDataController, friendsController);
 
         toggleExploreTrigger = Resources.Load<InputAction_Trigger>("ToggleExploreHud");
         toggleExploreTrigger.OnTriggered += OnToggleActionTriggered;
@@ -54,6 +55,7 @@ public class ExploreHUDController : IHUD
     public void Dispose()
     {
         miniMapDataController.Dispose();
+        friendsController.Dispose();
 
         if (view != null)
             GameObject.Destroy(view.gameObject);
