@@ -306,7 +306,7 @@ namespace DCL
         {
             InputController_Legacy.i.Update();
 
-            if (lastSortFrame != Time.frameCount || sceneSortDirty)
+            if (lastSortFrame != Time.frameCount && sceneSortDirty)
             {
                 lastSortFrame = Time.frameCount;
                 sceneSortDirty = false;
