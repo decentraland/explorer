@@ -24,46 +24,48 @@ let providerRequested = false
 
 type LoginData = { successful: boolean; provider: any; localIdentity?: Account }
 
-async function processLoginAttempt(response: IFuture<LoginData>, backgroundLogin: IFuture<LoginData>) {
-  if (!backgroundLogin.isPending) {
-    backgroundLogin
-      .then((result) => response.resolve(result))
-      .catch((e) => defaultLogger.error('could not resolve login', e))
-    return
-  }
+function processLoginAttempt(response: IFuture<LoginData>, backgroundLogin: IFuture<LoginData>) {
+  return async () => {
+    if (!backgroundLogin.isPending) {
+      backgroundLogin
+        .then((result) => response.resolve(result))
+        .catch((e) => defaultLogger.error('could not resolve login', e))
+      return
+    }
 
-  // TODO - look for user id matching account - moliva - 18/02/2020
-  let userData = getUserProfile()
+    // TODO - look for user id matching account - moliva - 18/02/2020
+    let userData = getUserProfile()
 
-  // Modern dapp browsers...
-  if (window['ethereum'] && isSessionExpired(userData)) {
-    showEthConnectAdvice(false)
+    // Modern dapp browsers...
+    if (window['ethereum'] && isSessionExpired(userData)) {
+      showEthConnectAdvice(false)
 
-    let result
-    try {
-      // Request account access if needed
-      const accounts: string[] | undefined = await window.ethereum.enable()
+      let result
+      try {
+        // Request account access if needed
+        const accounts: string[] | undefined = await window.ethereum.enable()
 
-      if (accounts && accounts.length > 0) {
-        result = { successful: true, provider: window.ethereum }
-      } else {
-        // whether accounts is undefined or empty array => provider not enabled
+        if (accounts && accounts.length > 0) {
+          result = { successful: true, provider: window.ethereum }
+        } else {
+          // whether accounts is undefined or empty array => provider not enabled
+          result = {
+            successful: false,
+            provider: createProvider()
+          }
+        }
+      } catch (error) {
+        // User denied account access...
         result = {
           successful: false,
           provider: createProvider()
         }
       }
-    } catch (error) {
-      // User denied account access...
-      result = {
-        successful: false,
-        provider: createProvider()
-      }
+      backgroundLogin.resolve(result)
+      response.resolve(result)
+    } else {
+      defaultLogger.error('invalid login state!')
     }
-    backgroundLogin.resolve(result)
-    response.resolve(result)
-  } else {
-    defaultLogger.error('invalid login state!')
   }
 }
 
@@ -94,17 +96,7 @@ function processLoginBackground() {
   return response
 }
 
-export enum Web3LoginState {
-  AWAITING_BUTTON_CLICK,
-  AWAITING_USER_SIGNATURE,
-  WEB3_APPROVED
-}
-
-export function awaitWeb3Approval(
-  stateListener: (state: Web3LoginState) => void = (_) => {
-    // Nothing
-  }
-): Promise<void> {
+export function awaitWeb3Approval(): Promise<void> {
   if (!providerRequested) {
     providerRequested = true
 
@@ -121,24 +113,23 @@ export function awaitWeb3Approval(
         const background = processLoginBackground()
         background.then((result) => providerFuture.resolve(result)).catch((e) => providerFuture.reject(e))
 
-        stateListener(Web3LoginState.AWAITING_BUTTON_CLICK)
         const button = document.getElementById('eth-login-confirm-button')
 
         let response = future()
 
-        button!.onclick = async () => {
-          stateListener(Web3LoginState.AWAITING_USER_SIGNATURE)
-          await processLoginAttempt(response, background)
-        }
+        button!.onclick = processLoginAttempt(response, background)
 
         let result
-
         while (true) {
           result = await response
 
           element.style.display = 'none'
 
+          const button = document.getElementById('eth-relogin-confirm-button')
+
           response = future()
+
+          button!.onclick = processLoginAttempt(response, background)
 
           // if the user signed properly or doesn't have a wallet => move on with login
           if (result.successful || !window['ethereum']) {
@@ -148,7 +139,6 @@ export function awaitWeb3Approval(
           }
         }
 
-        stateListener(Web3LoginState.WEB3_APPROVED)
         showEthConnectAdvice(false)
 
         // post check
