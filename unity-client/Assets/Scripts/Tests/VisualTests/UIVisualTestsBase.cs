@@ -15,6 +15,7 @@ public class UIVisualTestsBase : VisualTestsBase
 
     protected IEnumerator InitUIVisualTestScene(string testName)
     {
+        VisualTestHelpers.snapshotIndex = 0;
         VisualTestHelpers.currentTestName = testName;
 
         yield return InitScene();
