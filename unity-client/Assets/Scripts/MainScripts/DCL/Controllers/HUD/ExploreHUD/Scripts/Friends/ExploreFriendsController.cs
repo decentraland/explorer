@@ -54,6 +54,13 @@ internal class ExploreFriendsController : IDisposable
 
     void OnFriendsInitialized()
     {
+        FriendsController.i.OnInitialized -= OnFriendsInitialized;
+
+        if (friendsInitialized)
+        {
+            return;
+        }
+
         using (var iterator = FriendsController.i.friends.GetEnumerator())
         {
             while (iterator.MoveNext())
