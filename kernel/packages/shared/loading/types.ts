@@ -38,7 +38,7 @@ export const NOT_STARTED = 'Getting things ready...'
 export const notStarted = () => action(NOT_STARTED)
 export const LOADING_STARTED = 'Authenticating user...'
 export const loadingStarted = () => action(LOADING_STARTED)
-export const AWAITING_USER_SIGNATURE = 'Awaiting user signature...'
+export const AWAITING_USER_SIGNATURE = 'Awaiting your signature...'
 export const awaitingUserSignature = () => action(AWAITING_USER_SIGNATURE)
 export const AUTH_SUCCESSFUL = 'Authentication successful.'
 export const authSuccessful = () => action(AUTH_SUCCESSFUL)
