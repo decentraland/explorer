@@ -25,13 +25,13 @@ public class ExploreHUDController : IHUD
         toggleExploreTrigger = Resources.Load<InputAction_Trigger>("ToggleExploreHud");
         toggleExploreTrigger.OnTriggered += OnToggleActionTriggered;
 
-        view.closeButton.onClick.AddListener(() =>
+        view.closeButton.onPointerDown += () =>
         {
             if (view.IsVisible())
             {
                 toggleExploreTrigger.RaiseOnTriggered();
             }
-        });
+        };
 
         view.gotoMagicButton.OnGotoMagicPressed += GoToMagic;
         BaseSceneCellView.OnJumpIn += OnJumpIn;

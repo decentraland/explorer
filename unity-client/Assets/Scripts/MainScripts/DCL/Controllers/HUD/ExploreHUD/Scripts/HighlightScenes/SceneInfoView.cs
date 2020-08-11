@@ -10,7 +10,7 @@ internal class SceneInfoView : MonoBehaviour
     [SerializeField] TextMeshProUGUI coordinates;
     [SerializeField] TextMeshProUGUI creatorName;
     [SerializeField] TextMeshProUGUI description;
-    [SerializeField] Button jumpIn;
+    [SerializeField] Button_OnPointerDown jumpIn;
     [SerializeField] ShowHideAnimator showHideAnimator;
     [SerializeField] UIHoverCallback hoverArea;
     [SerializeField] GameObject loadingSpinner;
@@ -97,13 +97,13 @@ internal class SceneInfoView : MonoBehaviour
         this.enabled = false;
         gameObject.SetActive(false);
 
-        jumpIn.onClick.AddListener(() =>
+        jumpIn.onPointerDown += () =>
         {
             if (baseSceneView)
             {
                 baseSceneView.JumpInPressed();
             }
-        });
+        };
 
         hoverArea.OnPointerEnter += OnPointerEnter;
         hoverArea.OnPointerExit += OnPointerExit;

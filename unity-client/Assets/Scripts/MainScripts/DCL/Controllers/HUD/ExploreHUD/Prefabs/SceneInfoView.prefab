@@ -85,7 +85,7 @@ GameObject:
   - component: {fileID: 4043271411245307307}
   - component: {fileID: 182395063738558231}
   - component: {fileID: 6648268429839581528}
-  - component: {fileID: 2274276639144976171}
+  - component: {fileID: 7683621711443231733}
   m_Layer: 5
   m_Name: Button_JumpIn
   m_TagString: Untagged
@@ -151,7 +151,7 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &2274276639144976171
+--- !u!114 &7683621711443231733
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -160,7 +160,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1158608371292926192}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Script: {fileID: 11500000, guid: 028f6aecab96a43f096fdbbc8a753ead, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Navigation:
@@ -172,8 +172,8 @@ MonoBehaviour:
   m_Transition: 1
   m_Colors:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
-    m_HighlightedColor: {r: 0.9150943, g: 0.9150943, b: 0.9150943, a: 1}
-    m_PressedColor: {r: 0.735849, g: 0.735849, b: 0.735849, a: 1}
+    m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
     m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
     m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
     m_ColorMultiplier: 1
@@ -1177,7 +1177,7 @@ MonoBehaviour:
   coordinates: {fileID: 5505618335151575807}
   creatorName: {fileID: 1144668133453221408}
   description: {fileID: 5516733375439800481}
-  jumpIn: {fileID: 2274276639144976171}
+  jumpIn: {fileID: 7683621711443231733}
   showHideAnimator: {fileID: 2231642363820955125}
   hoverArea: {fileID: 980895450898553507}
   loadingSpinner: {fileID: 8231367500397774865}

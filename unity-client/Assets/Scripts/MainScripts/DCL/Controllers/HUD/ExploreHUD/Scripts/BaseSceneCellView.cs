@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
 using TMPro;
 using System;
 using System.Collections.Generic;
@@ -13,7 +12,7 @@ internal class BaseSceneCellView : BaseCellView, IMapDataView, IExploreViewWithF
     public static event Action OnInfoButtonPointerExit;
 
     [SerializeField] TextMeshProUGUI sceneName;
-    [SerializeField] Button jumpIn;
+    [SerializeField] Button_OnPointerDown jumpIn;
     [SerializeField] UIHoverCallback sceneInfoButton;
     [SerializeField] ExploreFriendsView friendsView;
 
