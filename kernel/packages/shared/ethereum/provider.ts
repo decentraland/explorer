@@ -100,7 +100,11 @@ export enum Web3LoginState {
   LOGIN_COMPLETED
 }
 
-export function awaitWeb3Approval(stateListener: (state: Web3LoginState) => void = (_) => {}): Promise<void> {
+export function awaitWeb3Approval(
+  stateListener: (state: Web3LoginState) => void = (_) => {
+    // Nothing
+  }
+): Promise<void> {
   if (!providerRequested) {
     providerRequested = true
 
@@ -127,9 +131,9 @@ export function awaitWeb3Approval(stateListener: (state: Web3LoginState) => void
 
         let response = future()
 
-        button!.onclick = () => {
+        button!.onclick = async () => {
           stateListener(Web3LoginState.AWAITING_USER_SIGNATURE)
-          processLoginAttempt(response, background)
+          await processLoginAttempt(response, background)
         }
 
         let result
