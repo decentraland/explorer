@@ -8,10 +8,16 @@ import { Authenticator } from 'dcl-crypto'
 import { ENABLE_WEB3, WORLD_EXPLORER, PREVIEW, ETHEREUM_NETWORK, getTLD, setNetwork } from 'config'
 
 import { createLogger } from 'shared/logger'
-import { awaitWeb3Approval, isSessionExpired, providerFuture, loginCompleted } from 'shared/ethereum/provider'
+import {
+  awaitWeb3Approval,
+  isSessionExpired,
+  providerFuture,
+  loginCompleted,
+  Web3LoginState
+} from 'shared/ethereum/provider'
 import { getUserProfile, setLocalProfile } from 'shared/comms/peers'
 import { ReportFatalError } from 'shared/loading/ReportFatalError'
-import { AUTH_ERROR_LOGGED_OUT, NETWORK_MISMATCH } from 'shared/loading/types'
+import { AUTH_ERROR_LOGGED_OUT, NETWORK_MISMATCH, awaitingUserSignature } from 'shared/loading/types'
 import { identifyUser, queueTrackingEvent } from 'shared/analytics'
 import { getNetworkFromTLD, getAppNetwork } from 'shared/web3'
 import { getNetwork } from 'shared/ethereum/EthereumService'
@@ -21,6 +27,7 @@ import { getFromLocalStorage, saveToLocalStorage } from 'atomicHelpers/localStor
 import { Session } from '.'
 import { ExplorerIdentity } from './types'
 import { userAuthentified, LOGOUT, LOGIN, loginCompleted as loginCompletedAction } from './actions'
+import { channel } from 'redux-saga'
 
 const logger = createLogger('session: ')
 
@@ -53,12 +60,21 @@ function* initializeTos() {
   }
 }
 
+function* handleWeb3State(state: Web3LoginState) {
+  if (state === Web3LoginState.AWAITING_USER_SIGNATURE) {
+    yield put(awaitingUserSignature())
+  }
+}
+
 function* login() {
   let userId: string
   let identity: ExplorerIdentity
 
   if (ENABLE_WEB3) {
-    yield awaitWeb3Approval()
+    const web3stateChannel = channel<Web3LoginState>()
+
+    yield takeLatest(web3stateChannel, handleWeb3State)
+    yield awaitWeb3Approval((state) => web3stateChannel.put(state))
 
     if (WORLD_EXPLORER && (yield checkTldVsNetwork())) {
       throw new Error('Network mismatch')
