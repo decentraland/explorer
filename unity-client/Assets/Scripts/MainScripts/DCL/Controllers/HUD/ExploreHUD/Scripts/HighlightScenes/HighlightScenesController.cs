@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using DCL.Interface;
 
 internal class HighlightScenesController : MonoBehaviour
@@ -7,7 +8,7 @@ internal class HighlightScenesController : MonoBehaviour
     const float SCENES_UPDATE_INTERVAL = 60;
 
     [SerializeField] HotSceneCellView hotsceneBaseCellView;
-    [SerializeField] GameObject highlightScenesContent;
+    [SerializeField] ScrollRect scrollRect;
     [SerializeField] GameObject loadingSpinner;
 
     Dictionary<Vector2Int, HotSceneCellView> cachedHotScenes = new Dictionary<Vector2Int, HotSceneCellView>();
@@ -138,5 +139,10 @@ internal class HighlightScenesController : MonoBehaviour
     {
         HotScenesController.i.OnHotSceneListFinishUpdating -= OnFetchHotScenes;
         hotScenesViewPool.Dispose();
+    }
+
+    void OnEnable()
+    {
+        scrollRect.verticalNormalizedPosition = 1;
     }
 }
