@@ -26,6 +26,7 @@ internal class BaseSceneCellView : BaseCellView, IMapDataView, IExploreViewWithF
     {
         friendPool = new ViewPool<ExploreFriendsView>(friendsView, 0);
 
+        // NOTE: we don't use the pointer down callback to avoid being mistakenly pressed while dragging
         jumpIn.onClick.AddListener(JumpInPressed);
 
         sceneInfoButton.OnPointerEnter += () => OnInfoButtonPointerEnter?.Invoke(this);

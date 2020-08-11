@@ -95,13 +95,13 @@ internal class HighlightScenesController : MonoBehaviour
         crowdView.SetCrowdInfo(hotSceneInfo);
 
         IMapDataView mapView = hotSceneView;
-        bool alreadyHasMapData = mapView.HasMinimapSceneInfo();
+        bool addFriendListener = !mapView.HasMinimapSceneInfo();
 
         mapDataController.SetMinimapData(baseCoords, mapView,
             (resolvedView) =>
             {
                 SetActiveCell(resolvedView.GetGameObject());
-                if (!alreadyHasMapData)
+                if (addFriendListener)
                 {
                     friendsController.AddListener(hotSceneView);
                 }

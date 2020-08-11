@@ -38,7 +38,10 @@ internal class ExploreFriendsController : IDisposable
 
         FriendData friend;
         if (!friends.TryGetValue(userId, out friend))
-            return;
+        {
+            friend = new FriendData(userId);
+            friends.Add(userId, friend);
+        }
 
         friend.SetStatus(status);
 
@@ -92,10 +95,7 @@ internal class ExploreFriendsController : IDisposable
 
     void ProcessFriendLocation(FriendData friend, Vector2Int coords)
     {
-        if (friend.listeners.Count == 0)
-            return;
-
-        if (friend.listeners[0].ContainCoords(coords))
+        if (friend.listeners.Count > 0 && friend.listeners[0].ContainCoords(coords))
             return;
 
         for (int i = 0; i < friend.listeners.Count; i++)
@@ -116,6 +116,7 @@ internal class ExploreFriendsController : IDisposable
 
     void ProcessNewListener(IExploreViewWithFriends listener)
     {
+        Vector2Int friendCoords = new Vector2Int();
         using (var iterator = friends.GetEnumerator())
         {
             while (iterator.MoveNext())
@@ -124,10 +125,11 @@ internal class ExploreFriendsController : IDisposable
                 {
                     continue;
                 }
-                int x = (int)iterator.Current.Value.status.position.x;
-                int y = (int)iterator.Current.Value.status.position.y;
 
-                if (listener.ContainCoords(new Vector2Int(x, y)))
+                friendCoords.x = (int)iterator.Current.Value.status.position.x;
+                friendCoords.y = (int)iterator.Current.Value.status.position.y;
+
+                if (listener.ContainCoords(friendCoords))
                 {
                     listener.OnFriendAdded(iterator.Current.Value.profile);
                     iterator.Current.Value.listeners.Add(listener);
