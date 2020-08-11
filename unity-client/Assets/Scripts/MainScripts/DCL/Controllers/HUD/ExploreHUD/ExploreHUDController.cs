@@ -95,6 +95,11 @@ public class ExploreHUDController : IHUD
 
     void GoToMagic()
     {
+        if (view.IsVisible())
+        {
+            toggleExploreTrigger.RaiseOnTriggered();
+        }
+
         WebInterface.GoToMagic();
     }
 }
