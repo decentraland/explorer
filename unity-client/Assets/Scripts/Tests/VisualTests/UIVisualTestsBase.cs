@@ -15,6 +15,8 @@ public class UIVisualTestsBase : VisualTestsBase
 
     protected IEnumerator InitUIVisualTestScene(string testName)
     {
+        VisualTestHelpers.currentTestName = testName;
+
         yield return InitScene();
 
         //NOTE(Brian): If we don't wait a frame, RenderingController.Awake sets the rendering state back to false.
