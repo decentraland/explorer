@@ -33,6 +33,7 @@ public class ExploreHUDController : IHUD
             }
         });
 
+        view.gotoMagicButton.OnGotoMagicPressed += GoToMagic;
         BaseSceneCellView.OnJumpIn += OnJumpIn;
     }
 
@@ -57,11 +58,14 @@ public class ExploreHUDController : IHUD
         miniMapDataController.Dispose();
         friendsController.Dispose();
 
-        if (view != null)
-            GameObject.Destroy(view.gameObject);
-
         toggleExploreTrigger.OnTriggered -= OnToggleActionTriggered;
         BaseSceneCellView.OnJumpIn -= OnJumpIn;
+
+        if (view != null)
+        {
+            view.gotoMagicButton.OnGotoMagicPressed -= GoToMagic;
+            GameObject.Destroy(view.gameObject);
+        }
     }
 
     void OnToggleActionTriggered(DCLAction_Trigger action)
@@ -87,5 +91,10 @@ public class ExploreHUDController : IHUD
         {
             WebInterface.JumpIn(coords.x, coords.y, serverName, layerName);
         }
+    }
+
+    void GoToMagic()
+    {
+        WebInterface.GoToMagic();
     }
 }

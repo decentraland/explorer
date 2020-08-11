@@ -6,6 +6,7 @@ internal class ExploreHUDView : MonoBehaviour
     [SerializeField] internal HighlightScenesController highlightScenesController;
     [SerializeField] ShowHideAnimator showHideAnimator;
     [SerializeField] internal Button closeButton;
+    [SerializeField] internal GotoMagicButton gotoMagicButton;
 
     public void SetVisibility(bool visible)
     {
