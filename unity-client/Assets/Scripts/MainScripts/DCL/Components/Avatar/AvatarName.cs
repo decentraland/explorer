@@ -1,3 +1,4 @@
+using DCL.Helpers;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -32,7 +33,7 @@ public class AvatarName : MonoBehaviour
 
             for (int i = 0; i < layoutGroupRTs.Count; i++)
             {
-                LayoutRebuilder.ForceRebuildLayoutImmediate(layoutGroupRTs[i]);
+                Utils.ForceRebuildLayoutImmediate<LayoutGroup>(layoutGroupRTs[i]);
             }
 
             RefreshTextPosition();

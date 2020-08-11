@@ -87,7 +87,6 @@ namespace DCL.Helpers
             t.offsetMax = Vector2.one;
             t.sizeDelta = Vector2.zero;
             t.anchoredPosition = Vector2.zero;
-            t.ForceUpdateRectTransforms();
         }
 
         public static void SetToCentered(this RectTransform t)
@@ -97,7 +96,6 @@ namespace DCL.Helpers
             t.anchorMax = Vector2.one * 0.5f;
             t.offsetMax = Vector2.one * 0.5f;
             t.sizeDelta = Vector2.one * 100;
-            t.ForceUpdateRectTransforms();
         }
 
         public static void SetToBottomLeft(this RectTransform t)
@@ -107,7 +105,6 @@ namespace DCL.Helpers
             t.anchorMax = Vector2.zero;
             t.offsetMax = Vector2.zero;
             t.sizeDelta = Vector2.one * 100;
-            t.ForceUpdateRectTransforms();
         }
 
         public static void ForceUpdateLayout(this RectTransform rt, bool delayed = true)
@@ -120,10 +117,28 @@ namespace DCL.Helpers
             else
             {
                 Utils.InverseTransformChildTraversal<RectTransform>(
-                    (x) => { LayoutRebuilder.ForceRebuildLayoutImmediate(x); },
+                    (x) => { Utils.ForceRebuildLayoutImmediate<LayoutGroup>(x); },
                     rt);
 
-                LayoutRebuilder.ForceRebuildLayoutImmediate(rt);
+                Utils.ForceRebuildLayoutImmediate<LayoutGroup>(rt);
+            }
+        }
+
+        // NOTE(Santi): It seems to be very much cheaper to execute these 4 instructions in an independet way than
+        //              execute directly the function 'LayoutRebuilder.ForceRebuildLayoutImmediate(referencesContainer.layoutGroup.transform as RectTransform)',
+        //              that theorically already contains these 4 instructions.
+        public static void ForceRebuildLayoutImmediate<TLayout>(RectTransform layoutRoot)
+            where TLayout : LayoutGroup
+        {
+            if (layoutRoot == null) return;
+
+            TLayout[] layoutGroups = layoutRoot.GetComponentsInChildren<TLayout>();
+            for (int i = 0; i < layoutGroups.Length; i++)
+            {
+                layoutGroups[i].CalculateLayoutInputHorizontal();
+                layoutGroups[i].CalculateLayoutInputVertical();
+                layoutGroups[i].SetLayoutHorizontal();
+                layoutGroups[i].SetLayoutVertical();
             }
         }
 
@@ -132,7 +147,7 @@ namespace DCL.Helpers
             yield return null;
 
             Utils.InverseTransformChildTraversal<RectTransform>(
-                (x) => { LayoutRebuilder.ForceRebuildLayoutImmediate(x); },
+                (x) => { Utils.ForceRebuildLayoutImmediate<LayoutGroup>(x); },
                 rt);
 
             LayoutRebuilder.ForceRebuildLayoutImmediate(rt);

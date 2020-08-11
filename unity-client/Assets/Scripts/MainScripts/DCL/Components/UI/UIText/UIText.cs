@@ -45,7 +45,6 @@ namespace DCL.Components
         {
             if (refreshSize)
             {
-                referencesContainer.text.ForceMeshUpdate(false);
                 RectTransform parentTransform = referencesContainer.GetComponentInParent<RectTransform>();
                 Bounds b = referencesContainer.text.textBounds;
 
@@ -71,7 +70,6 @@ namespace DCL.Components
 
                 referencesContainer.layoutElementRT.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, width);
                 referencesContainer.layoutElementRT.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, height);
-                referencesContainer.layoutElementRT.ForceUpdateRectTransforms();
             }
 
             if (refreshAlignmentAndPosition)
