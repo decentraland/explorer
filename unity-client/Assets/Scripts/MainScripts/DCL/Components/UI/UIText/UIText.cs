@@ -45,6 +45,8 @@ namespace DCL.Components
         {
             if (refreshSize)
             {
+                referencesContainer.text.ForceMeshUpdate(false);
+
                 RectTransform parentTransform = referencesContainer.GetComponentInParent<RectTransform>();
                 Bounds b = referencesContainer.text.textBounds;
 
