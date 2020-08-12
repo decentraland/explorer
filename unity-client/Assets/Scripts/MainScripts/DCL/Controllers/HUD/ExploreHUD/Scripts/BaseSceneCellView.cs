@@ -8,7 +8,7 @@ internal class BaseSceneCellView : BaseCellView, IMapDataView, IExploreViewWithF
     public delegate void JumpInDelegate(Vector2Int coords, string serverName, string layerName);
     static public event JumpInDelegate OnJumpIn;
 
-    public static event Action<BaseSceneCellView> OnInfoButtonPointerEnter;
+    public static event Action<BaseSceneCellView> OnInfoButtonPointerDown;
     public static event Action OnInfoButtonPointerExit;
 
     [SerializeField] TextMeshProUGUI sceneName;
@@ -29,7 +29,7 @@ internal class BaseSceneCellView : BaseCellView, IMapDataView, IExploreViewWithF
         // NOTE: we don't use the pointer down callback to avoid being mistakenly pressed while dragging
         jumpIn.onClick.AddListener(JumpInPressed);
 
-        sceneInfoButton.OnPointerEnter += () => OnInfoButtonPointerEnter?.Invoke(this);
+        sceneInfoButton.OnPointerDown += () => OnInfoButtonPointerDown?.Invoke(this);
         sceneInfoButton.OnPointerExit += () => OnInfoButtonPointerExit?.Invoke();
     }
 

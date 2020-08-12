@@ -108,7 +108,7 @@ internal class SceneInfoView : MonoBehaviour
         hoverArea.OnPointerEnter += OnPointerEnter;
         hoverArea.OnPointerExit += OnPointerExit;
 
-        BaseSceneCellView.OnInfoButtonPointerEnter += OnInfoButtonPointerEnter;
+        BaseSceneCellView.OnInfoButtonPointerDown += OnInfoButtonPointerDown;
         BaseSceneCellView.OnInfoButtonPointerExit += OnInfoButtonPointerExit;
         BaseSceneCellView.OnJumpIn += OnJumpIn;
 
@@ -120,7 +120,7 @@ internal class SceneInfoView : MonoBehaviour
         hoverArea.OnPointerEnter -= OnPointerEnter;
         hoverArea.OnPointerExit -= OnPointerExit;
 
-        BaseSceneCellView.OnInfoButtonPointerEnter -= OnInfoButtonPointerEnter;
+        BaseSceneCellView.OnInfoButtonPointerDown -= OnInfoButtonPointerDown;
         BaseSceneCellView.OnInfoButtonPointerExit -= OnInfoButtonPointerExit;
         BaseSceneCellView.OnJumpIn -= OnJumpIn;
 
@@ -142,7 +142,7 @@ internal class SceneInfoView : MonoBehaviour
         baseSceneView = null;
     }
 
-    void OnInfoButtonPointerEnter(BaseSceneCellView sceneView)
+    void OnInfoButtonPointerDown(BaseSceneCellView sceneView)
     {
         if (sceneView == baseSceneView)
             return;
