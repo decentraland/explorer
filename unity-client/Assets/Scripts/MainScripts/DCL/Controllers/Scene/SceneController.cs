@@ -113,7 +113,7 @@ namespace DCL
 
 #if !UNITY_EDITOR
             Debug.Log("DCL Unity Build Version: " + DCL.Configuration.ApplicationSettings.version);
-            Debug.unityLogger.logEnabled = true;
+            Debug.unityLogger.logEnabled = false;
 #endif
 
             InitializeSceneBoundariesChecker();
@@ -671,8 +671,6 @@ namespace DCL
             // If it doesn't exist, create messaging controller for this scene id
             if (!MessagingControllersManager.i.ContainsController(message.sceneId))
                 MessagingControllersManager.i.AddController(this, message.sceneId);
-
-            Debug.Log($"Message: {JsonConvert.SerializeObject(message)}");
 
             MessagingControllersManager.i.Enqueue(scene, message);
         }
