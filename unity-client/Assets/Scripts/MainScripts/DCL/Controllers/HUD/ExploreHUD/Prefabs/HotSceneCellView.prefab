@@ -1687,6 +1687,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   thumbnailImage: {fileID: 7652983121175080888}
   loadingSpinner: {fileID: 7243261089757872620}
+  errorThumbnail: {fileID: 21300000, guid: e9e897b6576bf46f08d9e56bc1a82187, type: 3}
   sceneName: {fileID: 4287523942998609376}
   jumpIn: {fileID: 4729517059036391380}
   sceneInfoButton: {fileID: 524055130367528283}

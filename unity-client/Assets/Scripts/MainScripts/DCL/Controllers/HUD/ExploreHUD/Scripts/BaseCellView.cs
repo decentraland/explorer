@@ -7,6 +7,7 @@ internal class BaseCellView : MonoBehaviour
 {
     [SerializeField] Image thumbnailImage;
     [SerializeField] GameObject loadingSpinner;
+    [SerializeField] Sprite errorThumbnail;
 
     public event Action<Sprite> OnThumbnailFetched;
 
@@ -22,6 +23,8 @@ internal class BaseCellView : MonoBehaviour
         }
         else if (thumbnailRequest == null)
         {
+            thumbnailImage.sprite = null;
+
             thumbnailRequest = UnityWebRequestTexture.GetTexture(url);
             UnityWebRequestAsyncOperation op = thumbnailRequest.SendWebRequest();
             op.completed += (_) =>
@@ -34,15 +37,19 @@ internal class BaseCellView : MonoBehaviour
                     thumbnailTexture = ((DownloadHandlerTexture)thumbnailRequest.downloadHandler).texture;
                     thumbnailTexture.Compress(false);
                     thumbnail = Sprite.Create(thumbnailTexture, new Rect(0, 0, thumbnailTexture.width, thumbnailTexture.height), Vector2.zero);
-                    thumbnailImage.sprite = thumbnail;
-                    loadingSpinner.SetActive(false);
                 }
                 else
                 {
                     Debug.Log($"Error downloading: {url} {thumbnailRequest.error}");
+                    thumbnail = errorThumbnail;
                 }
+
+                thumbnailImage.sprite = thumbnail;
+                loadingSpinner.SetActive(false);
+
                 thumbnailRequest.Dispose();
                 thumbnailRequest = null;
+
                 OnThumbnailFetched?.Invoke(thumbnail);
             };
         }
