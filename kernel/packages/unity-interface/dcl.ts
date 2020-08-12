@@ -450,7 +450,7 @@ const browserInterface = {
 
   async RequestGIFPlayer(data: { imageSource: string, sceneId: string, componentId: string, isWebGL1: boolean }) {
     if (!DCL.gifPlayer) {
-      DCL.gifPlayer = new GIFPlayer(gameInstance, unityInterface)
+      DCL.gifPlayer = new GIFPlayer(gameInstance, unityInterface, data.isWebGL1)
     }
 
     DCL.gifPlayer.PlayGIF(data)
