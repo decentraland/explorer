@@ -14,7 +14,6 @@ import {
   UpdateEntityComponentPayload,
   EntityActionType
 } from 'shared/types'
-import { PB_OpenExternalUrl } from 'shared/proto/engineinterface_pb'
 import { QueryType } from 'decentraland-ecs/src'
 
 enum RaycastQueryType {
@@ -166,8 +165,8 @@ export class NativeMessagesBridge {
     this.callOpenNftDialog(payload.assetContractAddress, payload.comment ?? '')
   }
 
-  openExternalUrl(payload: PB_OpenExternalUrl) {
-    this.callOpenExternalUrl(payload.getUrl())
+  openExternalUrl(url: any) {
+    this.callOpenExternalUrl(url)
   }
 
   query(queryPayload: QueryPayload) {
