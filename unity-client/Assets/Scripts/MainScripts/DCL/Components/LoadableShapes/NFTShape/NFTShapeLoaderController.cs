@@ -160,7 +160,6 @@ public class NFTShapeLoaderController : MonoBehaviour
                 OnLoadingAssetFail?.Invoke();
             });
 
-
         // We the "preview" 256px image
         bool foundDCLImage = false;
         if (!string.IsNullOrEmpty(previewImageURL))
@@ -181,6 +180,8 @@ public class NFTShapeLoaderController : MonoBehaviour
                 SetFrameImage(downloadedAsset, resizeFrameMesh: true);
             }, Asset_Gif.MaxSize._256);
         }
+
+        //DCL.Interface.WebInterface.RequestGIFPlayer(previewImageURL, sceneId, componentId, SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.OpenGLES2);
 
         if (foundDCLImage)
         {

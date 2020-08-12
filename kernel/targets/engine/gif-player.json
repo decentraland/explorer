@@ -1,0 +1,8 @@
+[
+  {
+    "name": "Compile gif-player",
+    "kind": "Webpack",
+    "file": "./packages/gif-player/worker.ts",
+    "target": "webworker"
+  }
+]
