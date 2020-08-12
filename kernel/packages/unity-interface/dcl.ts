@@ -112,8 +112,6 @@ import { logout } from 'shared/session/actions'
 import { getIdentity, hasWallet } from 'shared/session'
 import { loginCompleted } from 'shared/ethereum/provider'
 import { GIFPlayer } from 'gif-player/manager'
-// const GIFPlayer = require('../gif-player/manager')
-// const fastgif = require('fastgif/fastgif.js')
 
 declare const DCL: any
 
@@ -450,6 +448,7 @@ const browserInterface = {
 
   async RequestGIFPlayer(data: { imageSource: string, sceneId: string, componentId: string, isWebGL1: boolean }) {
     if (!DCL.gifPlayer) {
+      // tslint:disable-next-line
       DCL.gifPlayer = new GIFPlayer(gameInstance, unityInterface, data.isWebGL1)
     }
 
