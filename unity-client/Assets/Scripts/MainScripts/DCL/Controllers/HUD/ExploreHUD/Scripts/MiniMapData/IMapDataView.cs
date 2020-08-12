@@ -8,5 +8,4 @@ internal interface IMapDataView
     void SetBaseCoord(Vector2Int coords);
     Vector2Int GetBaseCoord();
     bool ContainCoords(Vector2Int coords);
-    GameObject GetGameObject();
 }

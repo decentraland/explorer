@@ -1,34 +1,57 @@
 ﻿using UnityEngine;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 internal class ExploreFriendsController : IDisposable
 {
-    List<IExploreViewWithFriends> listeners = new List<IExploreViewWithFriends>();
-    Dictionary<string, FriendData> friends = new Dictionary<string, FriendData>();
+    Dictionary<IExploreViewWithFriends, ListenerWrapper> listeners = new Dictionary<IExploreViewWithFriends, ListenerWrapper>();
+    Dictionary<string, FriendWrapper> friends = new Dictionary<string, FriendWrapper>();
 
+    IFriendsController friendsController;
     bool friendsInitialized = false;
 
-    public ExploreFriendsController()
+    public ExploreFriendsController(IFriendsController friendsController)
     {
-        FriendsController.i.OnInitialized += OnFriendsInitialized;
-        FriendsController.i.OnUpdateUserStatus += OnUpdateUserStatus;
+        this.friendsController = friendsController;
+
+        friendsController.OnInitialized += OnFriendsInitialized;
+        friendsController.OnUpdateUserStatus += OnUpdateUserStatus;
     }
 
     public void Dispose()
     {
-        FriendsController.i.OnInitialized -= OnFriendsInitialized;
-        FriendsController.i.OnUpdateUserStatus -= OnUpdateUserStatus;
+        friendsController.OnInitialized -= OnFriendsInitialized;
+        friendsController.OnUpdateUserStatus -= OnUpdateUserStatus;
         listeners.Clear();
+        friends.Clear();
     }
 
     public void AddListener(IExploreViewWithFriends listener)
     {
+        ListenerWrapper wrapper;
+        if (listeners.TryGetValue(listener, out wrapper))
+        {
+            return;
+        }
+
+        wrapper = new ListenerWrapper(listener);
+
         if (friendsInitialized)
         {
-            ProcessNewListener(listener);
+            ProcessNewListener(wrapper);
         }
-        listeners.Add(listener);
+        listeners.Add(listener, wrapper);
+    }
+
+    public void RemoveListener(IExploreViewWithFriends listener)
+    {
+        ListenerWrapper wrapper;
+        if (listeners.TryGetValue(listener, out wrapper))
+        {
+            wrapper.Dispose();
+            listeners.Remove(listener);
+        }
     }
 
     void OnUpdateUserStatus(string userId, FriendsController.UserStatus status)
@@ -36,18 +59,18 @@ internal class ExploreFriendsController : IDisposable
         if (!friendsInitialized)
             return;
 
-        FriendData friend;
+        FriendWrapper friend;
         if (!friends.TryGetValue(userId, out friend))
         {
-            friend = new FriendData(userId);
+            friend = new FriendWrapper(userId);
             friends.Add(userId, friend);
         }
 
         friend.SetStatus(status);
 
-        if (!IsOnline(status))
+        if (!friend.IsOnline())
         {
-            ProcessFriendOffline(friend);
+            friend.RemoveFromAllListeners();
         }
         else
         {
@@ -57,105 +80,85 @@ internal class ExploreFriendsController : IDisposable
 
     void OnFriendsInitialized()
     {
-        FriendsController.i.OnInitialized -= OnFriendsInitialized;
+        friendsController.OnInitialized -= OnFriendsInitialized;
 
         if (friendsInitialized)
         {
             return;
         }
 
-        using (var iterator = FriendsController.i.friends.GetEnumerator())
+        using (var friendsIterator = friendsController.GetFriends().GetEnumerator())
         {
-            while (iterator.MoveNext())
+            while (friendsIterator.MoveNext())
             {
-                FriendData friend = new FriendData(iterator.Current.Key);
-                friend.SetStatus(iterator.Current.Value);
-                friends.Add(iterator.Current.Key, friend);
+                FriendWrapper friend = new FriendWrapper(friendsIterator.Current.Key);
+                friend.SetStatus(friendsIterator.Current.Value);
+                friends.Add(friendsIterator.Current.Key, friend);
             }
         }
 
-        for (int i = 0; i < listeners.Count; i++)
+        using (var listenersIterator = listeners.GetEnumerator())
         {
-            ProcessNewListener(listeners[i]);
+            while (listenersIterator.MoveNext())
+            {
+                ProcessNewListener(listenersIterator.Current.Value);
+            }
         }
+
         friendsInitialized = true;
     }
 
-    void ProcessFriendOffline(FriendData friend)
+    void ProcessFriendLocation(FriendWrapper friend, Vector2Int coords)
     {
-        if (friend.listeners.Count == 0)
+        if (!friend.HasChangeLocation(coords))
             return;
 
-        for (int i = 0; i < friend.listeners.Count; i++)
-        {
-            friend.listeners[i].OnFriendRemoved(friend.profile);
-        }
-        friend.listeners.Clear();
-    }
+        friend.RemoveFromAllListeners();
 
-    void ProcessFriendLocation(FriendData friend, Vector2Int coords)
-    {
-        if (friend.listeners.Count > 0 && friend.listeners[0].ContainCoords(coords))
-            return;
-
-        for (int i = 0; i < friend.listeners.Count; i++)
+        using (var listenersIterator = listeners.GetEnumerator())
         {
-            friend.listeners[i].OnFriendRemoved(friend.profile);
-        }
-        friend.listeners.Clear();
-
-        for (int i = 0; i < listeners.Count; i++)
-        {
-            if (listeners[i].ContainCoords(coords))
+            while (listenersIterator.MoveNext())
             {
-                listeners[i].OnFriendAdded(friend.profile);
-                friend.listeners.Add(listeners[i]);
+                if (listenersIterator.Current.Value.ContainCoords(coords))
+                {
+                    friend.AddListener(listenersIterator.Current.Value);
+                }
             }
         }
     }
 
-    void ProcessNewListener(IExploreViewWithFriends listener)
+    void ProcessNewListener(ListenerWrapper listener)
     {
         Vector2Int friendCoords = new Vector2Int();
-        using (var iterator = friends.GetEnumerator())
+        using (var friendIterator = friends.GetEnumerator())
         {
-            while (iterator.MoveNext())
+            while (friendIterator.MoveNext())
             {
-                if (!IsOnline(iterator.Current.Value.status))
+                if (!friendIterator.Current.Value.IsOnline())
                 {
                     continue;
                 }
 
-                friendCoords.x = (int)iterator.Current.Value.status.position.x;
-                friendCoords.y = (int)iterator.Current.Value.status.position.y;
+                friendCoords.x = (int)friendIterator.Current.Value.status.position.x;
+                friendCoords.y = (int)friendIterator.Current.Value.status.position.y;
 
                 if (listener.ContainCoords(friendCoords))
                 {
-                    listener.OnFriendAdded(iterator.Current.Value.profile);
-                    iterator.Current.Value.listeners.Add(listener);
+                    friendIterator.Current.Value.AddListener(listener);
                 }
             }
         }
     }
-
-    bool IsOnline(FriendsController.UserStatus status)
-    {
-        if (status.presence != PresenceStatus.ONLINE)
-            return false;
-        if (status.realm == null)
-            return false;
-        return !string.IsNullOrEmpty(status.realm.serverName) && !string.IsNullOrEmpty(status.realm.layer);
-    }
 }
 
-class FriendData
+class FriendWrapper
 {
-    public List<IExploreViewWithFriends> listeners = new List<IExploreViewWithFriends>();
+    HashSet<ListenerWrapper> listeners = new HashSet<ListenerWrapper>();
 
     public UserProfile profile { private set; get; }
     public FriendsController.UserStatus status { private set; get; }
 
-    public FriendData(string userId)
+    public FriendWrapper(string userId)
     {
         profile = UserProfileController.userProfilesCatalog.Get(userId);
     }
@@ -163,5 +166,102 @@ class FriendData
     public void SetStatus(FriendsController.UserStatus newStatus)
     {
         status = newStatus;
+    }
+
+    public void AddListener(ListenerWrapper listener)
+    {
+        listener.OnListenerDisposed += OnListenerDisposed;
+        listeners.Add(listener);
+        listener.OnFriendAdded(profile);
+    }
+
+    public void RemoveListener(ListenerWrapper listener)
+    {
+        OnListenerRemoved(listener);
+        listeners.Remove(listener);
+    }
+
+    public bool HasListeners()
+    {
+        return listeners.Count > 0;
+    }
+
+    public bool HasChangeLocation(Vector2Int coords)
+    {
+        if (listeners.Count > 0 && listeners.First().ContainCoords(coords))
+        {
+            return false;
+        }
+        return true;
+    }
+
+    public void RemoveFromAllListeners()
+    {
+        if (!HasListeners())
+        {
+            return;
+        }
+
+        using (var listenerIterator = listeners.GetEnumerator())
+        {
+            while (listenerIterator.MoveNext())
+            {
+                OnListenerRemoved(listenerIterator.Current);
+            }
+        }
+        listeners.Clear();
+    }
+
+    public bool IsOnline()
+    {
+        if (status.presence != PresenceStatus.ONLINE)
+            return false;
+        if (status.realm == null)
+            return false;
+        return !string.IsNullOrEmpty(status.realm.serverName) && !string.IsNullOrEmpty(status.realm.layer);
+    }
+
+    void OnListenerDisposed(ListenerWrapper listener)
+    {
+        listener.OnListenerDisposed -= OnListenerDisposed;
+        listeners.Remove(listener);
+    }
+
+    void OnListenerRemoved(ListenerWrapper listener)
+    {
+        listener.OnListenerDisposed -= OnListenerDisposed;
+        listener.OnFriendRemoved(profile);
+    }
+}
+
+class ListenerWrapper : IDisposable
+{
+    IExploreViewWithFriends listener;
+
+    public event Action<ListenerWrapper> OnListenerDisposed;
+
+    public ListenerWrapper(IExploreViewWithFriends listener)
+    {
+        this.listener = listener;
+    }
+
+    public void OnFriendAdded(UserProfile profile)
+    {
+        listener.OnFriendAdded(profile);
+    }
+
+    public void OnFriendRemoved(UserProfile profile)
+    {
+        listener.OnFriendRemoved(profile);
+    }
+
+    public bool ContainCoords(Vector2Int coords)
+    {
+        return listener.ContainCoords(coords);
+    }
+
+    public void Dispose()
+    {
+        OnListenerDisposed?.Invoke(this);
     }
 }

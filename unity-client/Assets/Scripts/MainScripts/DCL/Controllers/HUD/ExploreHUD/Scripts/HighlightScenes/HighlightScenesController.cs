@@ -12,7 +12,7 @@ internal class HighlightScenesController : MonoBehaviour
     [SerializeField] GameObject loadingSpinner;
 
     Dictionary<Vector2Int, HotSceneCellView> cachedHotScenes = new Dictionary<Vector2Int, HotSceneCellView>();
-    List<GameObject> activeCellsView = new List<GameObject>();
+    Dictionary<Vector2Int, BaseSceneCellView> activeHotSceneViews = new Dictionary<Vector2Int, BaseSceneCellView>();
 
     ExploreMiniMapDataController mapDataController;
     ExploreFriendsController friendsController;
@@ -66,11 +66,17 @@ internal class HighlightScenesController : MonoBehaviour
     {
         lastTimeRefreshed = Time.realtimeSinceStartup;
 
-        HideActiveCells();
+        List<Vector2Int> cellsToHide = new List<Vector2Int>(activeHotSceneViews.Keys);
 
         for (int i = 0; i < HotScenesController.i.hotScenesList.Count; i++)
         {
+            cellsToHide.Remove(HotScenesController.i.hotScenesList[i].baseCoords);
             ProcessReceivedHotScene(HotScenesController.i.hotScenesList[i], i);
+        }
+
+        for (int i = 0; i < cellsToHide.Count; i++)
+        {
+            RemoveActiveHotSceneCell(cellsToHide[i]);
         }
     }
 
@@ -101,38 +107,43 @@ internal class HighlightScenesController : MonoBehaviour
         mapDataController.SetMinimapData(baseCoords, mapView,
             (resolvedView) =>
             {
-                SetActiveCell(resolvedView.GetGameObject());
-                if (addFriendListener)
+                if (!IsHotSceneCellActive(baseCoords))
                 {
-                    friendsController.AddListener(hotSceneView);
+                    AddActiveHotSceneCell(baseCoords, hotSceneView);
                 }
+                loadingSpinner.SetActive(false);
             },
             (rejectedView) =>
             {
-                var sceneView = rejectedView as HotSceneCellView;
-                if (sceneView)
-                {
-                    hotScenesViewPool.PoolView(sceneView);
-                    cachedHotScenes[rejectedView.GetBaseCoord()] = null;
-                }
+                hotScenesViewPool.PoolView(hotSceneView);
+                cachedHotScenes[baseCoords] = null;
             });
     }
 
-    void HideActiveCells()
-    {
-        for (int i = 0; i < activeCellsView.Count; i++)
-        {
-            activeCellsView[i].SetActive(false);
-        }
-    }
-
-    void SetActiveCell(GameObject view)
+    void AddActiveHotSceneCell(Vector2Int coords, BaseSceneCellView view)
     {
         if (view == null) return;
 
         view.gameObject.SetActive(true);
-        activeCellsView.Add(view.gameObject);
-        loadingSpinner.SetActive(false);
+        activeHotSceneViews.Add(coords, view);
+        friendsController.AddListener(view);
+    }
+
+    bool IsHotSceneCellActive(Vector2Int coords)
+    {
+        return activeHotSceneViews.ContainsKey(coords);
+    }
+
+    void RemoveActiveHotSceneCell(Vector2Int coords)
+    {
+        BaseSceneCellView view;
+        if (activeHotSceneViews.TryGetValue(coords, out view))
+        {
+            view.gameObject.SetActive(false);
+            friendsController.RemoveListener(view);
+        }
+
+        activeHotSceneViews.Remove(coords);
     }
 
     void OnDestroy()

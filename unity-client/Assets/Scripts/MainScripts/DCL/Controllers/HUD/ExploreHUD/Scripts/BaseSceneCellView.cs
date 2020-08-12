@@ -94,11 +94,6 @@ internal class BaseSceneCellView : BaseCellView, IMapDataView, IExploreViewWithF
         return mapInfo.parcels.Contains(coords);
     }
 
-    GameObject IMapDataView.GetGameObject()
-    {
-        return gameObject;
-    }
-
     static string GetMarketPlaceThumbnailUrl(MinimapMetadata.MinimapSceneInfo info, int width, int height, int sizeFactor)
     {
         string parcels = "";

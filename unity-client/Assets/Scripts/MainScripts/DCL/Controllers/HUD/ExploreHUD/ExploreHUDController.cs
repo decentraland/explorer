@@ -9,8 +9,8 @@ public class ExploreHUDController : IHUD
 
     InputAction_Trigger toggleExploreTrigger;
 
-    ExploreMiniMapDataController miniMapDataController = new ExploreMiniMapDataController();
-    ExploreFriendsController friendsController = new ExploreFriendsController();
+    ExploreMiniMapDataController miniMapDataController;
+    ExploreFriendsController friendsController;
 
     public event Action OnToggleTriggered;
 
@@ -19,8 +19,6 @@ public class ExploreHUDController : IHUD
         view = UnityEngine.Object.Instantiate(Resources.Load<GameObject>("ExploreHUD")).GetComponent<ExploreHUDView>();
         view.name = "_ExploreHUD";
         view.gameObject.SetActive(false);
-
-        view.Initialize(miniMapDataController, friendsController);
 
         toggleExploreTrigger = Resources.Load<InputAction_Trigger>("ToggleExploreHud");
         toggleExploreTrigger.OnTriggered += OnToggleActionTriggered;
@@ -35,6 +33,14 @@ public class ExploreHUDController : IHUD
 
         view.gotoMagicButton.OnGotoMagicPressed += GoToMagic;
         BaseSceneCellView.OnJumpIn += OnJumpIn;
+    }
+
+    public void Initialize(IFriendsController friendsController)
+    {
+        this.friendsController = new ExploreFriendsController(friendsController);
+        miniMapDataController = new ExploreMiniMapDataController();
+
+        view.Initialize(miniMapDataController, this.friendsController);
     }
 
     public void SetVisibility(bool visible)
@@ -55,8 +61,8 @@ public class ExploreHUDController : IHUD
 
     public void Dispose()
     {
-        miniMapDataController.Dispose();
-        friendsController.Dispose();
+        miniMapDataController?.Dispose();
+        friendsController?.Dispose();
 
         toggleExploreTrigger.OnTriggered -= OnToggleActionTriggered;
         BaseSceneCellView.OnJumpIn -= OnJumpIn;
