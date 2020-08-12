@@ -121,8 +121,6 @@ namespace DCL.Helpers
                 Utils.InverseTransformChildTraversal<RectTransform>(
                     (x) => { Utils.ForceRebuildLayoutImmediate(x); },
                     rt);
-
-                Utils.ForceRebuildLayoutImmediate(rt);
             }
         }
 
@@ -162,8 +160,6 @@ namespace DCL.Helpers
             Utils.InverseTransformChildTraversal<RectTransform>(
                 (x) => { Utils.ForceRebuildLayoutImmediate(x); },
                 rt);
-
-            LayoutRebuilder.ForceRebuildLayoutImmediate(rt);
         }
 
 
