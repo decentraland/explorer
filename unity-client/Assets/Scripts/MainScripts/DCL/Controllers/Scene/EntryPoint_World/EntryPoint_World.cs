@@ -18,6 +18,8 @@ public class EntryPoint_World
 
     delegate void JS_Delegate_VSS(string a, string b);
 
+    delegate void JS_Delegate_VSSS(string a, string b, string c);
+
     delegate void JS_Delegate_VS(string a);
 
     delegate void JS_Delegate_Query(Protocol.QueryPayload a);
@@ -53,15 +55,16 @@ public class EntryPoint_World
 #endif
     }
 
-    [MonoPInvokeCallback(typeof(JS_Delegate_VSS))]
-    internal static void OpenNftDialog(string contactAddress, string comment)
+    [MonoPInvokeCallback(typeof(JS_Delegate_VSSS))]
+    internal static void OpenNftDialog(string contactAddress, string comment, string tokenId)
     {
         MessagingBus.QueuedSceneMessage_Scene queuedMessage = GetSceneMessageInstance();
 
         Protocol.OpenNftDialog payload = new Protocol.OpenNftDialog
         {
             contactAddress = contactAddress,
-            comment = comment
+            comment = comment,
+            tokenId = tokenId
         };
 
         queuedMessage.payload = payload;
@@ -353,7 +356,7 @@ public class EntryPoint_World
     private static extern void SetCallback_OpenExternalUrl(JS_Delegate_VS callback);
 
     [DllImport("__Internal")]
-    private static extern void SetCallback_OpenNftDialog(JS_Delegate_VSS callback);
+    private static extern void SetCallback_OpenNftDialog(JS_Delegate_VSSS callback);
 
     [DllImport("__Internal")]
     private static extern void SetCallback_SharedComponentUpdate(JS_Delegate_VSS callback);

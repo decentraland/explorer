@@ -58,7 +58,7 @@ export class NativeMessagesBridge {
   private callSharedComponentUpdate!: (id: string, json: string) => void
   private callSharedComponentDispose!: (id: string) => void
 
-  private callOpenNftDialog!: (contactAddress: string, comment: string) => void
+  private callOpenNftDialog!: (contactAddress: string, comment: string, tokenId: string) => void
   private callOpenExternalUrl!: (url: string) => void
   private callQuery!: (payload: number) => void
 
@@ -104,7 +104,7 @@ export class NativeMessagesBridge {
     this.callSharedComponentUpdate = this.unityModule.cwrap('call_SharedComponentUpdate', null, ['string', 'string'])
     this.callSharedComponentDispose = this.unityModule.cwrap('call_SharedComponentDispose', null, ['string'])
 
-    this.callOpenNftDialog = this.unityModule.cwrap('call_OpenNftDialog', null, ['string', 'string'])
+    this.callOpenNftDialog = this.unityModule.cwrap('call_OpenNftDialog', null, ['string', 'string', 'string'])
     this.callOpenExternalUrl = this.unityModule.cwrap('call_OpenExternalUrl', null, ['string'])
     this.callQuery = this.unityModule.cwrap('call_Query', null, ['number'])
 
@@ -162,7 +162,7 @@ export class NativeMessagesBridge {
   }
 
   openNftDialog(payload: OpenNFTDialogPayload) {
-    this.callOpenNftDialog(payload.assetContractAddress, payload.comment ?? '')
+    this.callOpenNftDialog(payload.assetContractAddress, payload.comment ?? '', payload.tokenId)
   }
 
   openExternalUrl(url: any) {
