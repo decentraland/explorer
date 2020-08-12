@@ -4,19 +4,25 @@ declare const global: any
 // IMPORTANT! This should be execd before loading 'config' module to ensure that init values are successfully loaded
 global.enableWeb3 = true
 
+import { createLogger } from 'shared/logger'
 import { ReportFatalError } from 'shared/loading/ReportFatalError'
 import { experienceStarted, NOT_INVITED, AUTH_ERROR_LOGGED_OUT, FAILED_FETCHING_UNITY } from 'shared/loading/types'
 import { worldToGrid } from '../atomicHelpers/parcelScenePositions'
-import { NO_MOTD, OPEN_AVATAR_EDITOR, DEBUG_PM } from '../config/index'
-import defaultLogger, { createLogger } from 'shared/logger'
+import { NO_MOTD, DEBUG_PM, EDITOR, OPEN_AVATAR_EDITOR } from '../config/index'
 import { signalRendererInitialized, signalParcelLoadingStarted } from 'shared/renderer/actions'
 import { lastPlayerPosition, teleportObservable } from 'shared/world/positionThings'
 import { StoreContainer } from 'shared/store/rootTypes'
-import { startUnityParcelLoading, unityInterface } from '../unity-interface/dcl'
+import { startUnitySceneWorkers } from '../unity-interface/dcl'
 import { initializeUnity } from '../unity-interface/initializer'
 import { HUDElementID } from 'shared/types'
-import { identity } from 'shared'
 import { worldRunningObservable, onNextWorldRunning } from 'shared/world/worldState'
+import { getCurrentIdentity } from 'shared/session/selectors'
+import { userAuthentified } from 'shared/session'
+import { realmInitialized } from 'shared/dao'
+import { loadParcelScene, getParcelSceneID } from 'shared/world/parcelSceneManager'
+import { ensureUiApis } from 'shared/world/uiSceneInitializer'
+import { hudWorkerUrl } from 'shared/world/SceneWorker'
+import { UnityScene } from 'unity-interface/UnityScene'
 
 const container = document.getElementById('gameContainer')
 
@@ -33,9 +39,31 @@ const observer = worldRunningObservable.add((isRunning) => {
   }
 })
 
+export async function startGlobalScene(unityInterface: any) {
+  const sceneId = 'dcl-ui-scene'
+
+  const scene = new UnityScene({
+    sceneId,
+    name: 'ui',
+    baseUrl: location.origin,
+    main: hudWorkerUrl,
+    useFPSThrottling: false,
+    data: {},
+    mappings: []
+  })
+
+  const worker = loadParcelScene(scene)
+  worker.persistent = true
+
+  await ensureUiApis(worker)
+
+  unityInterface.CreateUIScene({ id: getParcelSceneID(scene), baseUrl: scene.data.baseUrl })
+}
+
 initializeUnity(container)
-  .then(async (_) => {
-    const i = unityInterface
+  .then(async ({ instancedJS }) => {
+    const i = (await instancedJS).unityInterface
+
     i.ConfigureHUDElement(HUDElementID.MINIMAP, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.AVATAR, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.NOTIFICATION, { active: true, visible: true })
@@ -47,17 +75,29 @@ initializeUnity(container)
     i.ConfigureHUDElement(HUDElementID.TERMS_OF_SERVICE, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.TASKBAR, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.WORLD_CHAT_WINDOW, { active: true, visible: true })
-    i.ConfigureHUDElement(HUDElementID.FRIENDS, { active: identity.hasConnectedWeb3, visible: false })
     i.ConfigureHUDElement(HUDElementID.OPEN_EXTERNAL_URL_PROMPT, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.NFT_INFO_DIALOG, { active: true, visible: false })
     i.ConfigureHUDElement(HUDElementID.TELEPORT_DIALOG, { active: true, visible: false })
     i.ConfigureHUDElement(HUDElementID.CONTROLS_HUD, { active: true, visible: false })
 
+    try {
+      await userAuthentified()
+      const identity = getCurrentIdentity(globalThis.globalStore.getState())!
+      i.ConfigureHUDElement(HUDElementID.FRIENDS, { active: identity.hasConnectedWeb3, visible: false })
+    } catch (e) {
+      logger.error('error on configuring friends hud')
+    }
+
     globalThis.globalStore.dispatch(signalRendererInitialized())
 
     onNextWorldRunning(() => globalThis.globalStore.dispatch(experienceStarted()))
 
-    await startUnityParcelLoading()
+    await realmInitialized()
+    await startUnitySceneWorkers()
+
+    if (!EDITOR) {
+      await startGlobalScene(i)
+    }
 
     globalThis.globalStore.dispatch(signalParcelLoadingStarted())
 
@@ -65,11 +105,7 @@ initializeUnity(container)
       i.ConfigureHUDElement(HUDElementID.MESSAGE_OF_THE_DAY, { active: false, visible: true })
     }
 
-    _.instancedJS
-      .then(() => {
-        teleportObservable.notifyObservers(worldToGrid(lastPlayerPosition))
-      })
-      .catch(defaultLogger.error)
+    teleportObservable.notifyObservers(worldToGrid(lastPlayerPosition))
 
     document.body.classList.remove('dcl-loading')
     globalThis.UnityLoader.Error.handler = (error: any) => {

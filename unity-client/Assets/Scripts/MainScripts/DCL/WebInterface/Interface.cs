@@ -1,4 +1,8 @@
+using System;
+using DCL.Helpers;
+using DCL.Models;
 using UnityEngine;
+using Ray = UnityEngine.Ray;
 
 #if UNITY_WEBGL && !UNITY_EDITOR
 using System.Runtime.InteropServices;
@@ -264,6 +268,12 @@ namespace DCL.Interface
             public int y;
         };
 
+        [System.Serializable]
+        public class BaseResolution
+        {
+            public int baseResolution;
+        };
+
 
         //-----------------------------------------------------
         // Raycast
@@ -475,6 +485,7 @@ namespace DCL.Interface
         private static JumpInPayload jumpInPayload = new JumpInPayload();
         private static GotoEvent gotoEvent = new GotoEvent();
         private static SendChatMessageEvent sendChatMessageEvent = new SendChatMessageEvent();
+        private static BaseResolution baseResEvent = new BaseResolution();
 
         public static void SendSceneEvent<T>(string sceneId, string eventType, T payload)
         {
@@ -522,14 +533,14 @@ namespace DCL.Interface
             SendSceneEvent<T>(sceneId, "raycastResponse", response);
         }
 
-        public static void ReportRaycastHitFirstResult(string sceneId, string queryId, string queryType, RaycastHitEntity payload)
+        public static void ReportRaycastHitFirstResult(string sceneId, string queryId, RaycastType raycastType, RaycastHitEntity payload)
         {
-            ReportRaycastResult<RaycastHitFirstResponse, RaycastHitEntity>(sceneId, queryId, queryType, payload);
+            ReportRaycastResult<RaycastHitFirstResponse, RaycastHitEntity>(sceneId, queryId, Protocol.RaycastTypeToLiteral(raycastType), payload);
         }
 
-        public static void ReportRaycastHitAllResult(string sceneId, string queryId, string queryType, RaycastHitEntities payload)
+        public static void ReportRaycastHitAllResult(string sceneId, string queryId, RaycastType raycastType, RaycastHitEntities payload)
         {
-            ReportRaycastResult<RaycastHitAllResponse, RaycastHitEntities>(sceneId, queryId, queryType, payload);
+            ReportRaycastResult<RaycastHitAllResponse, RaycastHitEntities>(sceneId, queryId, Protocol.RaycastTypeToLiteral(raycastType), payload);
         }
 
         private static OnPointerEventPayload.Hit CreateHitObject(string entityId, string meshName, Vector3 point, Vector3 normal, float distance)
@@ -759,6 +770,7 @@ namespace DCL.Interface
         {
             MessageFromEngine("PerformanceReport", encodedFrameTimesInMS);
         }
+
         public static void SendPerformanceHiccupReport(int hiccupsInThousandFrames, float hiccupsTime, float totalTime)
         {
             SendMessage("PerformanceHiccupReport", new PerformanceHiccupPayload()
@@ -892,6 +904,17 @@ namespace DCL.Interface
         public static void ScenesLoadingFeedback(LoadingFeedbackMessage message)
         {
             SendMessage("ScenesLoadingFeedback", message);
+        }
+
+        public static void FetchHotScenes()
+        {
+            SendMessage("FetchHotScenes");
+        }
+
+        public static void SetBaseResolution(int resolution)
+        {
+            baseResEvent.baseResolution = resolution;
+            SendMessage("SetBaseResolution", baseResEvent);
         }
     }
 }

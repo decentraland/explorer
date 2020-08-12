@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Linq;
 using DCL.Helpers;
@@ -89,7 +89,7 @@ namespace DCL
 
         public IEnumerator LoadingCoroutine(Action OnSuccess, Action OnFail)
         {
-            subPromise = new AssetPromise_AB(contentUrl, hash);
+            subPromise = new AssetPromise_AB(contentUrl, hash, asset.container.transform);
             bool success = false;
             subPromise.OnSuccessEvent += (x) => success = true;
             asset.ownerPromise = subPromise;
@@ -127,8 +127,7 @@ namespace DCL
 
                 asset.container = null;
 
-                if (subPromise.asset.ownerAssetBundle != null)
-                    subPromise.asset.ownerAssetBundle.Unload(false);
+                AssetPromiseKeeper_AB.i.Forget(subPromise);
 
                 yield break;
             }
@@ -154,16 +153,13 @@ namespace DCL
                 assetBundleModelGO.transform.ResetLocalTRS();
                 yield return null;
             }
-
-            if (subPromise.asset.ownerAssetBundle != null)
-                subPromise.asset.ownerAssetBundle.Unload(false);
         }
 
         protected override Asset_AB_GameObject GetAsset(object id)
         {
             if (settings.forceNewInstance)
             {
-                return ((AssetLibrary_AB_GameObject) library).GetCopyFromOriginal(id);
+                return ((AssetLibrary_AB_GameObject)library).GetCopyFromOriginal(id);
             }
             else
             {

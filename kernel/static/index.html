@@ -178,10 +178,13 @@
     }
 
     body.dcl-loading #load-messages-wrapper {
-      display: block;
+      display: flex;
     }
     #load-messages-wrapper {
       display: none;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
       z-index: 8;
 
       position: fixed;
@@ -193,27 +196,31 @@
 
       color: white;
       text-align: center;
-      font-family: -apple-system, system-ui, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       font-size: 1.25em;
-      font-stretch: 125%;
-      font-weight: 400;
+      font-family: sfsemibold, "Helvetica Neue", Arial, sans-serif;
     }
+
+    #load-messages-wrapper div {
+        max-width: 820px;
+    }
+
     @media screen and (min-height: 500px) {
       #load-messages-wrapper {
         top: 20%;
-
-        padding-left: 20%;
-        padding-right: 20%;
       }
     }
     @media screen and (min-height: 800px) {
       #load-messages-wrapper {
-        top: 40%;
-
-        padding-left: 10%;
-        padding-right: 10%;
+        top: 35%;
       }
     }
+
+    @media screen and (min-height: 1000px) {
+      #load-messages-wrapper {
+        top: 38%;
+      }
+    }
+
     #load-images {
       max-width: 306px;
       max-height: 234px;
@@ -226,7 +233,7 @@
       align-items: center;
       justify-content: center;
     }
-    #subtext-messages {
+    #subtext-messages-container {
       bottom: 40px;
       left: 0;
       position: fixed;
@@ -239,6 +246,20 @@
 
       font-size: 1.0em;
       color: #7D8385;
+    }
+
+    #subtext-messages-container div {
+      margin: auto;
+    }
+
+    div#check-wallet-prompt {
+      width: 395px;
+      text-align: center;
+      background: #43474B;
+      border-radius: 100px;
+      color: white;
+      padding: 14px;
+      margin-bottom: 10px;
     }
 
     #eth-connect-advice {
@@ -471,6 +492,11 @@
       100% { transform: rotate(360deg); }
     }
   </style>
+  <script>
+    function checkTos() {
+      document.getElementById('eth-login-confirm-button').disabled = !document.getElementById('agree-check').checked;
+    }
+  </script>
 </head>
 
 <body class="dcl-loading">
@@ -480,7 +506,10 @@
   <div id="load-messages-wrapper">
     <div class="load-images-wrapper"><img id="load-images"></img></div>
     <div id="load-messages"></div>
-    <div id="subtext-messages"></div>
+    <div id="subtext-messages-container">
+      <div id="check-wallet-prompt" style="display: none;">Please check your wallet (i.e MetaMask) and look for the Signature Request.</div>
+      <div id="subtext-messages"></div>
+    </div>
   </div>
   <div id="overlay">
   </div>
@@ -497,10 +526,10 @@
     <div class="eth-login-popup">
       <img class="eth-login-logo" src="images/decentraland-connect/Isologotipo.png"></img>
       <div class="eth-login-description">Enter the first virtual world fully owned by its users.</div>
-      <div id="eth-login-confirmation-spinner" class="loader" style="display: none;"></div>
-      <div id="eth-login-confirmation-wrapper">
+      <div id="eth-login-confirmation-spinner" class="loader" style="display: block;"></div>
+      <div id="eth-login-confirmation-wrapper" style="display: none;">
         <div class="eth-login-tos">
-          <input type="checkbox" id="agree-check" class="eth-login-tos-agree" onchange="document.getElementById('eth-login-confirm-button').disabled = !this.checked;"></input>
+          <input type="checkbox" id="agree-check" class="eth-login-tos-agree" onchange="checkTos()"></input>
           <label for="agree-check" class="eth-login-tos-label">I am of legal age and I have read and agree to the <a href="https://decentraland.org/terms" target="_blank">Terms of Service</a> and <a href="https://decentraland.org/privacy" target="_blank">Privacy Policy</a></label>
         </div>
         <button id="eth-login-confirm-button" class="eth-login-confirm-button1" disabled>Start Exploring</button>
