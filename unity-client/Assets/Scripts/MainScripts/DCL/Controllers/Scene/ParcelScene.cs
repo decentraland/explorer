@@ -505,8 +505,6 @@ namespace DCL.Controllers
             }
         }
 
-        UUIDCallbackMessage uuidMessage = new UUIDCallbackMessage();
-
         public BaseComponent EntityComponentCreateOrUpdate(string entityId, CLASS_ID_COMPONENT classId, string data, out CleanableYieldInstruction yieldInstruction)
         {
             yieldInstruction = null;
@@ -539,6 +537,7 @@ namespace DCL.Controllers
                     entity.gameObject.transform.localRotation = DCLTransform.model.rotation;
                     entity.gameObject.transform.localScale = DCLTransform.model.scale;
 
+                    PhysicsSyncController.transformSyncDirty = true;
                     SceneController.i.boundariesChecker?.AddEntityToBeChecked(entity);
                 }
 
@@ -568,13 +567,13 @@ namespace DCL.Controllers
                     switch (type)
                     {
                         case OnClick.NAME:
-                            newComponent = Utils.GetOrCreateComponent<OnClick>(go);
+                            newComponent = go.GetOrCreateComponent<OnClick>();
                             break;
                         case OnPointerDown.NAME:
-                            newComponent = Utils.GetOrCreateComponent<OnPointerDown>(go);
+                            newComponent = go.GetOrCreateComponent<OnPointerDown>();
                             break;
                         case OnPointerUp.NAME:
-                            newComponent = Utils.GetOrCreateComponent<OnPointerUp>(go);
+                            newComponent = go.GetOrCreateComponent<OnPointerUp>();
                             break;
                     }
 
@@ -628,6 +627,7 @@ namespace DCL.Controllers
             if (newComponent != null && newComponent.isRoutineRunning)
                 yieldInstruction = newComponent.yieldInstruction;
 
+            PhysicsSyncController.transformSyncDirty = true;
             return newComponent;
         }
 

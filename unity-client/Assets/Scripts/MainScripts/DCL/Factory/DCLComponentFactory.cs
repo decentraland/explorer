@@ -128,6 +128,7 @@ namespace DCL
             else
             {
                 instancedGo = Instantiate(factoryItem.prefab.gameObject);
+                PhysicsSyncController.transformSyncDirty = true;
             }
 
             ItemType item = instancedGo.GetComponent<ItemType>();

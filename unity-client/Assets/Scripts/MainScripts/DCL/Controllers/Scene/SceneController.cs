@@ -42,6 +42,8 @@ namespace DCL
         Queue<string> payloadsToDecode = new Queue<string>();
         const float MAX_TIME_FOR_DECODE = 0.005f;
 
+        private PhysicsSyncController physicsSyncController;
+
 
         #region BENCHMARK_EVENTS
 
@@ -133,6 +135,8 @@ namespace DCL
                 StartCoroutine(DeferredDecoding());
 
             DCLCharacterController.OnCharacterMoved += SetPositionDirty;
+
+            physicsSyncController = new PhysicsSyncController();
 
 #if !UNITY_EDITOR
             worldEntryPoint = new EntryPoint_World(this);
@@ -300,6 +304,11 @@ namespace DCL
             CommonScriptableObjects.rendererState.OnChange -= OnRenderingStateChange;
             DCLCharacterController.OnCharacterMoved -= SetPositionDirty;
             ParcelScene.parcelScenesCleaner.Stop();
+        }
+
+        private void FixedUpdate()
+        {
+            physicsSyncController.FixedUpdate();
         }
 
         private void Update()
