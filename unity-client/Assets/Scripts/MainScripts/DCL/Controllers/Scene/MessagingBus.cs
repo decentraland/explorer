@@ -150,20 +150,11 @@ namespace DCL
             {
                 message.isUnreliable = true;
 
-                //LinkedListNode<QueuedSceneMessage> node = null;
-
                 message.unreliableMessageKey = message.tag;
 
                 if (unreliableMessages.ContainsKey(message.unreliableMessageKey))
                 {
-                    int index = unreliableMessages[message.unreliableMessageKey] + indexOffset;
-                    //
-                    // if (node.List != null)
-                    // {
-                    //     node.Value = message;
-                    //     enqueued = false;
-                    //     unreliableMessagesReplaced++;
-                    // }
+                    int index = unreliableMessages[message.unreliableMessageKey];
 
                     if (index > 0)
                     {
@@ -176,7 +167,7 @@ namespace DCL
                 if (enqueued)
                 {
                     AddReliableMessage(message);
-                    unreliableMessages[message.unreliableMessageKey] = pendingMessages.Count - 1 - indexOffset;
+                    unreliableMessages[message.unreliableMessageKey] = pendingMessages.Count - 1;
                 }
             }
 
@@ -201,7 +192,7 @@ namespace DCL
             }
         }
 
-        private int indexOffset = 0;
+        private int processedIndex = 0;
 
         public bool ProcessQueue(float timeBudget, out IEnumerator yieldReturn)
         {
@@ -213,14 +204,13 @@ namespace DCL
                 return false;
 
             float startTime = Time.realtimeSinceStartup;
-            SceneController sceneController = SceneController.i;
-            int index = 0;
+            int index = processedIndex;
+            int count = 0;
 
-            while (enabled && index < pendingMessagesCount && Time.realtimeSinceStartup - startTime < timeBudget)
+            while (enabled && count < pendingMessagesCount && Time.realtimeSinceStartup - startTime < timeBudget)
             {
                 QueuedSceneMessage m = pendingMessages[index++];
-
-                //RemoveFirstReliableMessage();
+                count++;
 
                 if (m.isUnreliable)
                     RemoveUnreliableMessage(m);
@@ -232,7 +222,6 @@ namespace DCL
                     case QueuedSceneMessage.Type.NONE:
                         break;
                     case QueuedSceneMessage.Type.SCENE_MESSAGE:
-
                         if (!(m is QueuedSceneMessage_Scene sceneMessage))
                             continue;
 
@@ -247,10 +236,9 @@ namespace DCL
                                     shouldLogMessage = false;
                                 }
 
-                                indexOffset -= index;
-                                pendingMessagesCount -= index;
-                                MessagingControllersManager.i.pendingMessagesCount -= index;
-                                pendingMessages.RemoveRange(0, index);
+                                processedIndex += count;
+                                pendingMessagesCount -= count;
+                                MessagingControllersManager.i.pendingMessagesCount -= count;
                                 return true;
                             }
 #endif
@@ -266,7 +254,6 @@ namespace DCL
                         if (msgYieldInstruction != null)
                         {
                             processedMessagesCount++;
-
                             msgYieldInstruction = null;
                         }
 
@@ -298,10 +285,9 @@ namespace DCL
 #endif
             }
 
-            indexOffset -= index;
-            pendingMessagesCount -= index;
-            MessagingControllersManager.i.pendingMessagesCount -= index;
-            pendingMessages.RemoveRange(0, index);
+            processedIndex += count;
+            pendingMessagesCount -= count;
+            MessagingControllersManager.i.pendingMessagesCount -= count;
             return false;
         }
 
@@ -321,16 +307,12 @@ namespace DCL
             manager.pendingMessagesCount++;
             pendingMessagesCount++;
             pendingMessages.Add(message);
-        }
 
-        private void RemoveFirstReliableMessage()
-        {
-            // if (pendingMessages.First != null)
-            // {
-            //     pendingMessages.RemoveFirst();
-            //     pendingMessagesCount--;
-            //     MessagingControllersManager.i.pendingMessagesCount--;
-            // }
+            if (processedIndex > 100000)
+            {
+                pendingMessages.RemoveRange(0, processedIndex);
+                processedIndex = 0;
+            }
         }
 
         private void RemoveUnreliableMessage(QueuedSceneMessage message)
