@@ -5,7 +5,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using DCL.Configuration;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.EventSystems;
@@ -117,28 +119,39 @@ namespace DCL.Helpers
             else
             {
                 Utils.InverseTransformChildTraversal<RectTransform>(
-                    (x) => { Utils.ForceRebuildLayoutImmediate<LayoutGroup>(x); },
+                    (x) => { Utils.ForceRebuildLayoutImmediate(x); },
                     rt);
 
-                Utils.ForceRebuildLayoutImmediate<LayoutGroup>(rt);
+                Utils.ForceRebuildLayoutImmediate(rt);
             }
         }
 
-        // NOTE(Santi): It seems to be very much cheaper to execute these 4 instructions in an independet way than
-        //              execute directly the function 'LayoutRebuilder.ForceRebuildLayoutImmediate(referencesContainer.layoutGroup.transform as RectTransform)',
-        //              that theorically already contains these 4 instructions.
-        public static void ForceRebuildLayoutImmediate<TLayout>(RectTransform layoutRoot)
-            where TLayout : LayoutGroup
-        {
-            if (layoutRoot == null) return;
 
-            TLayout[] layoutGroups = layoutRoot.GetComponentsInChildren<TLayout>();
-            for (int i = 0; i < layoutGroups.Length; i++)
+
+        /// <summary>
+        /// Reimplementation of the LayoutRebuilder.ForceRebuildLayoutImmediate() function (Unity UI API) for make it more performant.
+        /// </summary>
+        /// <param name="rectTransformRoot">Root from which to rebuild.</param>
+        public static void ForceRebuildLayoutImmediate(RectTransform rectTransformRoot)
+        {
+            if (rectTransformRoot == null) return;
+
+            // NOTE(Santi): It seems to be very much cheaper to execute the next instructions manually than execute directly the function
+            //              'LayoutRebuilder.ForceRebuildLayoutImmediate()', that theorically already contains these instructions.
+            var layoutElements = rectTransformRoot.GetComponentsInChildren(typeof(ILayoutElement), true).ToList();
+            layoutElements.RemoveAll(e => (e is Behaviour && !((Behaviour)e).isActiveAndEnabled) || e is TextMeshProUGUI);
+            foreach (var layoutElem in layoutElements)
             {
-                layoutGroups[i].CalculateLayoutInputHorizontal();
-                layoutGroups[i].CalculateLayoutInputVertical();
-                layoutGroups[i].SetLayoutHorizontal();
-                layoutGroups[i].SetLayoutVertical();
+                (layoutElem as ILayoutElement).CalculateLayoutInputHorizontal();
+                (layoutElem as ILayoutElement).CalculateLayoutInputVertical();
+            }
+
+            var layoutControllers = rectTransformRoot.GetComponentsInChildren(typeof(ILayoutController), true).ToList();
+            layoutControllers.RemoveAll(e => e is Behaviour && !((Behaviour)e).isActiveAndEnabled);
+            foreach (var layoutCtrl in layoutControllers)
+            {
+                (layoutCtrl as ILayoutController).SetLayoutHorizontal();
+                (layoutCtrl as ILayoutController).SetLayoutVertical();
             }
         }
 
@@ -147,7 +160,7 @@ namespace DCL.Helpers
             yield return null;
 
             Utils.InverseTransformChildTraversal<RectTransform>(
-                (x) => { Utils.ForceRebuildLayoutImmediate<LayoutGroup>(x); },
+                (x) => { Utils.ForceRebuildLayoutImmediate(x); },
                 rt);
 
             LayoutRebuilder.ForceRebuildLayoutImmediate(rt);

@@ -149,7 +149,7 @@ public class UISizeFitter : MonoBehaviour
 
         if (p != null)
         {
-            Utils.ForceRebuildLayoutImmediate<LayoutGroup>(p.transform as RectTransform);
+            Utils.ForceRebuildLayoutImmediate(p.transform as RectTransform);
         }
     }
 

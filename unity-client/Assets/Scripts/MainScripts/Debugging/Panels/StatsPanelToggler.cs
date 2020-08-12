@@ -61,7 +61,7 @@ namespace DCL
             }
 
             miscController.gameObject.SetActive(!miscController.gameObject.activeSelf);
-            Utils.ForceRebuildLayoutImmediate<LayoutGroup>(transform.parent.GetComponent<RectTransform>());
+            Utils.ForceRebuildLayoutImmediate(transform.parent.GetComponent<RectTransform>());
         }
 
         private void EnableDeepProfiling()

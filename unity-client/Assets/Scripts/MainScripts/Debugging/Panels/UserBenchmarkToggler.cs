@@ -28,7 +28,7 @@ namespace DCL
         private void TogglePanel()
         {
             userBenchmarkController.gameObject.SetActive(!userBenchmarkController.gameObject.activeSelf);
-            Utils.ForceRebuildLayoutImmediate<LayoutGroup>(transform.parent.GetComponent<RectTransform>());
+            Utils.ForceRebuildLayoutImmediate(transform.parent.GetComponent<RectTransform>());
         }
     }
 }

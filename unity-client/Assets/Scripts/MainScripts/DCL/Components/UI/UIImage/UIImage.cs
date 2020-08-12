@@ -90,7 +90,7 @@ namespace DCL.Components
             referencesContainer.paddingLayoutGroup.padding.left = Mathf.RoundToInt(model.paddingLeft);
             referencesContainer.paddingLayoutGroup.padding.right = Mathf.RoundToInt(model.paddingRight);
 
-            Utils.ForceRebuildLayoutImmediate<LayoutGroup>(parentRecTransform);
+            Utils.ForceRebuildLayoutImmediate(parentRecTransform);
             return null;
         }
 

@@ -88,7 +88,7 @@ public class NFTItemInfo : MonoBehaviour
         Utils.InverseTransformChildTraversal<LayoutGroup>((x) =>
         {
             RectTransform rt = x.transform as RectTransform;
-            Utils.ForceRebuildLayoutImmediate<LayoutGroup>(rt);
+            Utils.ForceRebuildLayoutImmediate(rt);
         }, transform);
 
         if (gameObject.activeInHierarchy)

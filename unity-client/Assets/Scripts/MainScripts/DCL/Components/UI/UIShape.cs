@@ -261,7 +261,7 @@ namespace DCL.Components
 
             referencesContainer.layoutElement.ignoreLayout = false;
             ConfigureAlignment(referencesContainer.layoutGroup);
-            Utils.ForceRebuildLayoutImmediate<HorizontalLayoutGroup>(parentTransform);
+            Utils.ForceRebuildLayoutImmediate(parentTransform);
             referencesContainer.layoutElement.ignoreLayout = true;
 
             // Reposition

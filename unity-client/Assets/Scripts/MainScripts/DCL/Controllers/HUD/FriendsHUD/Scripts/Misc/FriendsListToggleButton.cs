@@ -22,6 +22,6 @@ public class FriendsListToggleButton : MonoBehaviour
     {
         containerRectTransform.gameObject.SetActive(!containerRectTransform.gameObject.activeSelf);
         toggleButtonIcon.localScale = new Vector3(toggleButtonIcon.localScale.x, -toggleButtonIcon.localScale.y, 1f);
-        Utils.ForceRebuildLayoutImmediate<LayoutGroup>(containerRectTransform);
+        Utils.ForceRebuildLayoutImmediate(containerRectTransform);
     }
 }

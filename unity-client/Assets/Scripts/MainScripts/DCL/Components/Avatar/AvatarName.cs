@@ -33,7 +33,7 @@ public class AvatarName : MonoBehaviour
 
             for (int i = 0; i < layoutGroupRTs.Count; i++)
             {
-                Utils.ForceRebuildLayoutImmediate<LayoutGroup>(layoutGroupRTs[i]);
+                Utils.ForceRebuildLayoutImmediate(layoutGroupRTs[i]);
             }
 
             RefreshTextPosition();
