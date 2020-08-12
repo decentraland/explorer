@@ -138,6 +138,7 @@ public class NFTShapeLoaderController : MonoBehaviour
     {
         spinner?.SetActive(true);
 
+        bool foundDCLImage = false;
         string thumbnailImageURL = null;
         string previewImageURL = null;
         string originalImageURL = null;
@@ -155,37 +156,24 @@ public class NFTShapeLoaderController : MonoBehaviour
                 OnLoadingAssetFail?.Invoke();
             });
 
-
         // We download the "preview" 256px image
-        bool foundDCLImage = false;
-
-        if (string.IsNullOrEmpty(previewImageURL))
-        {
-            Debug.Log("NFTShapeLoaderController.FetchNFTImage() - previewImageURL is empty!");
-
-            yield break;
-        }
         // if (!string.IsNullOrEmpty(previewImageURL))
         // {
-        //     yield return Utils.FetchTexture(previewImageURL, (tex) =>
+        //     yield return Utils.FetchWrappedTextureAsset(previewImageURL, (downloadedAsset) =>
         //     {
         //         foundDCLImage = true;
-
-        //         BindTextureToJSGIFPlayer(tex, previewImageURL);
-
-        //     }, (errorMessage) => Debug.Log(errorMessage));
+        //         SetFrameImage(downloadedAsset, resizeFrameMesh: true);
+        //     });
         // }
 
         // // We fall back to the nft original image which can have a really big size
         // if (!foundDCLImage && !string.IsNullOrEmpty(originalImageURL))
         // {
-        //     yield return Utils.FetchTexture(originalImageURL, (tex) =>
+        //     yield return Utils.FetchWrappedTextureAsset(originalImageURL, (downloadedAsset) =>
         //     {
         //         foundDCLImage = true;
-
-        //         BindTextureToJSGIFPlayer(tex, originalImageURL);
-
-        //     }, (errorMessage) => Debug.Log(errorMessage));
+        //         SetFrameImage(downloadedAsset, resizeFrameMesh: true);
+        //     }, DCL.WrappedTextureMaxSize._256);
         // }
 
         DCL.Interface.WebInterface.RequestGIFPlayer(previewImageURL, sceneId, componentId, SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.OpenGLES2);
