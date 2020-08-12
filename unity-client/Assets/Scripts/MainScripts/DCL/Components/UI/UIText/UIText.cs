@@ -41,43 +41,37 @@ namespace DCL.Components
             RefreshAll();
         }
 
-        public override void RefreshDCLLayout(bool refreshSize = true, bool refreshAlignmentAndPosition = true)
+        protected override void RefreshDCLSize(RectTransform parentTransform = null)
         {
-            if (refreshSize)
+            if (parentTransform == null)
             {
-                referencesContainer.text.ForceMeshUpdate(false);
-
-                RectTransform parentTransform = referencesContainer.GetComponentInParent<RectTransform>();
-                Bounds b = referencesContainer.text.textBounds;
-
-                float width, height;
-
-                if (model.textModel.adaptWidth)
-                {
-                    width = b.size.x;
-                }
-                else
-                {
-                    width = model.width.GetScaledValue(parentTransform.rect.width);
-                }
-
-                if (model.textModel.adaptHeight)
-                {
-                    height = b.size.y;
-                }
-                else
-                {
-                    height = model.height.GetScaledValue(parentTransform.rect.height);
-                }
-
-                referencesContainer.layoutElementRT.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, width);
-                referencesContainer.layoutElementRT.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, height);
+                parentTransform = referencesContainer.GetComponentInParent<RectTransform>();
             }
 
-            if (refreshAlignmentAndPosition)
+            Bounds b = referencesContainer.text.textBounds;
+
+            float width, height;
+
+            if (model.textModel.adaptWidth)
             {
-                RefreshDCLAlignmentAndPosition();
+                width = b.size.x;
             }
+            else
+            {
+                width = model.width.GetScaledValue(parentTransform.rect.width);
+            }
+
+            if (model.textModel.adaptHeight)
+            {
+                height = b.size.y;
+            }
+            else
+            {
+                height = model.height.GetScaledValue(parentTransform.rect.height);
+            }
+
+            referencesContainer.layoutElementRT.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, width);
+            referencesContainer.layoutElementRT.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, height);
         }
 
         public override void Dispose()

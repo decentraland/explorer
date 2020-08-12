@@ -223,7 +223,7 @@ namespace DCL.Components
             RefreshDCLLayoutRecursively_Internal(refreshSize: false, refreshAlignmentAndPosition: true);
         }
 
-        public virtual void RefreshDCLLayout(bool refreshSize = true, bool refreshAlignmentAndPosition = true)
+        public void RefreshDCLLayout(bool refreshSize = true, bool refreshAlignmentAndPosition = true)
         {
             RectTransform parentRT = referencesContainer.GetComponentInParent<RectTransform>();
 
@@ -239,7 +239,7 @@ namespace DCL.Components
             }
         }
 
-        protected void RefreshDCLSize(RectTransform parentTransform = null)
+        protected virtual void RefreshDCLSize(RectTransform parentTransform = null)
         {
             if (parentTransform == null)
             {
