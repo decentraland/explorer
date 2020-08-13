@@ -6,8 +6,7 @@ using DCL.Interface;
 public class ExploreHUDController : IHUD
 {
     internal ExploreHUDView view;
-
-    InputAction_Trigger toggleExploreTrigger;
+    internal InputAction_Trigger toggleExploreTrigger;
 
     ExploreMiniMapDataController miniMapDataController;
     ExploreFriendsController friendsController;

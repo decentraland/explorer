@@ -19,20 +19,15 @@ internal class ExploreFriendsView : MonoBehaviour
 
         if (profile.faceSnapshot == null)
         {
-            gameObject.SetActive(false);
             profile.OnFaceSnapshotReadyEvent += OnFaceSnapshotReadyEvent;
         }
-        else
-        {
-            gameObject.SetActive(true);
-        }
+        gameObject.SetActive(true);
     }
 
     void OnFaceSnapshotReadyEvent(Sprite sprite)
     {
         userProfile.OnFaceSnapshotReadyEvent -= OnFaceSnapshotReadyEvent;
         friendPortrait.sprite = userProfile.faceSnapshot;
-        gameObject.SetActive(true);
     }
 
     void OnHeadHoverEnter()

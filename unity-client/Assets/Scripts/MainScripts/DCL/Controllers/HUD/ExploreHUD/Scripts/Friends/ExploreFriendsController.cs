@@ -9,13 +9,16 @@ internal class ExploreFriendsController : IDisposable
     Dictionary<string, FriendWrapper> friends = new Dictionary<string, FriendWrapper>();
 
     IFriendsController friendsController;
-    bool friendsInitialized = false;
 
     public ExploreFriendsController(IFriendsController friendsController)
     {
         this.friendsController = friendsController;
 
-        friendsController.OnInitialized += OnFriendsInitialized;
+        if (!friendsController.isInitialized)
+        {
+            friendsController.OnInitialized += OnFriendsInitialized;
+        }
+
         friendsController.OnUpdateUserStatus += OnUpdateUserStatus;
     }
 
@@ -37,7 +40,7 @@ internal class ExploreFriendsController : IDisposable
 
         wrapper = new ListenerWrapper(listener);
 
-        if (friendsInitialized)
+        if (friendsController.isInitialized)
         {
             ProcessNewListener(wrapper);
         }
@@ -56,7 +59,7 @@ internal class ExploreFriendsController : IDisposable
 
     void OnUpdateUserStatus(string userId, FriendsController.UserStatus status)
     {
-        if (!friendsInitialized)
+        if (!friendsController.isInitialized)
             return;
 
         FriendWrapper friend;
@@ -82,11 +85,6 @@ internal class ExploreFriendsController : IDisposable
     {
         friendsController.OnInitialized -= OnFriendsInitialized;
 
-        if (friendsInitialized)
-        {
-            return;
-        }
-
         using (var friendsIterator = friendsController.GetFriends().GetEnumerator())
         {
             while (friendsIterator.MoveNext())
@@ -104,8 +102,6 @@ internal class ExploreFriendsController : IDisposable
                 ProcessNewListener(listenersIterator.Current.Value);
             }
         }
-
-        friendsInitialized = true;
     }
 
     void ProcessFriendLocation(FriendWrapper friend, Vector2Int coords)
