@@ -150,7 +150,7 @@ public class NFTShapeLoaderController : MonoBehaviour
                 OnLoadingAssetFail?.Invoke();
             });
 
-        yield return new WaitUntil(() => Vector3.Distance(CommonScriptableObjects.playerUnityPosition, transform.position) < 30f);
+        yield return new WaitUntil(() => (CommonScriptableObjects.playerUnityPosition - transform.position).sqrMagnitude < 900f);
 
         // We the "preview" 256px image
         bool foundDCLImage = false;
