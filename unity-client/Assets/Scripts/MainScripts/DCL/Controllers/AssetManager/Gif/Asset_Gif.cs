@@ -54,14 +54,18 @@ namespace DCL.Controllers.Gif
         private Coroutine updateRoutine = null;
 
         private string url;
+        private string sceneId;
+        private string componentId;
         private MaxSize maxSize;
 
         public event Action<ITexture> OnSuccessEvent;
         public event Action OnFailEvent;
 
-        public Asset_Gif(string url, MaxSize maxSize, Action<ITexture> OnSuccess, Action OnFail)
+        public Asset_Gif(string url, MaxSize maxSize, string sceneId, string componentId, Action<ITexture> OnSuccess, Action OnFail)
         {
             this.url = url;
+            this.sceneId = sceneId;
+            this.componentId = componentId;
             this.maxSize = maxSize;
             this.OnSuccessEvent = OnSuccess;
             this.OnFailEvent = OnFail;
@@ -74,8 +78,15 @@ namespace DCL.Controllers.Gif
 
             byte[] bytes = null;
 
-            //TODO(Brian): Put here worker hook to load texture
+#if !UNITY_EDITOR && UNITY_WEBGL
+            Debug.Log("pravs - Asset_Gif.Load() - Requesting GIF Player for " + url);
+
+            if (string.IsNullOrEmpty(sceneId) || string.IsNullOrEmpty(componentId)) yield break;
+
+            DCL.Interface.WebInterface.RequestGIFPlayer(url, sceneId, componentId, SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.OpenGLES2);
+#else
             yield return Utils.FetchAsset(url, UnityWebRequest.Get(url), (request) => { bytes = request.downloadHandler.data; });
+#endif
 
             if (bytes == null)
             {
@@ -135,7 +146,9 @@ namespace DCL.Controllers.Gif
         {
             currentLoopCount = 0;
             currentTextureIdx = 0;
-            currentTimeDelay = gifTextures[currentTextureIdx].m_delaySec;
+
+            if (gifTextures != null)
+                currentTimeDelay = gifTextures[currentTextureIdx].m_delaySec;
 
             if (updateRoutine != null)
             {
@@ -179,9 +192,10 @@ namespace DCL.Controllers.Gif
             if (size == MaxSize.DONT_RESIZE)
                 return;
 
-            for (int i = 0; i < gifTextures.Count; i++)
+            int texturesCount = gifTextures.Count;
+            for (int i = 0; i < texturesCount; i++)
             {
-                TextureHelpers.EnsureTexture2DMaxSize(ref gifTextures[i].m_texture2d, (int) size);
+                TextureHelpers.EnsureTexture2DMaxSize(ref gifTextures[i].m_texture2d, (int)size);
             }
         }
 

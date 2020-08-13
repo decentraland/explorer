@@ -56,6 +56,8 @@ export class GIFPlayer {
   // TODO: If we make sure Unity tracks more than 1 component using the same GIF and calls the StopGIF()
   // when there are no remaining references, then we can just send the src and use that as the key
   StopGIF(data: { sceneId: string, componentId: string }) {
+    // TODO: destroy WebGL tex
+
     delete this.gifs[this.GenerateGIFKey(data.sceneId, data.componentId)]
   }
 

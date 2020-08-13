@@ -32,13 +32,15 @@ public class NFTShapeLoaderController : MonoBehaviour
     public event System.Action OnLoadingAssetSuccess;
     public event System.Action OnLoadingAssetFail;
 
-    [Header("Material Indexes")] [SerializeField]
+    [Header("Material Indexes")]
+    [SerializeField]
     int materialIndex_Background = -1;
 
     [SerializeField] int materialIndex_NFTImage = -1;
     [SerializeField] int materialIndex_Frame = -1;
 
-    [Header("Noise Shader")] [SerializeField]
+    [Header("Noise Shader")]
+    [SerializeField]
     NoiseType noiseType = NoiseType.Simplex;
 
     [SerializeField] bool noiseIs3D = false;
@@ -166,9 +168,11 @@ public class NFTShapeLoaderController : MonoBehaviour
         {
             yield return WrappedTextureUtils.Fetch(previewImageURL, downloadedAsset =>
             {
+                Debug.Log($"pravs - NFTShapeLoaderController.FetchNFTImage() - downloaded still picture: {downloadedAsset.width}x{downloadedAsset.height}");
                 foundDCLImage = true;
-                SetFrameImage(downloadedAsset, resizeFrameMesh: true);
-            });
+                // SetFrameImage(downloadedAsset, resizeFrameMesh: true);
+                SetFrameImage(downloadedAsset, resizeFrameMesh: false);
+            }, Asset_Gif.MaxSize.DONT_RESIZE, sceneId, componentId);
         }
 
         // We fall back to the nft original image which can have a really big size
@@ -177,8 +181,9 @@ public class NFTShapeLoaderController : MonoBehaviour
             yield return WrappedTextureUtils.Fetch(originalImageURL, (downloadedAsset) =>
             {
                 foundDCLImage = true;
-                SetFrameImage(downloadedAsset, resizeFrameMesh: true);
-            }, Asset_Gif.MaxSize._256);
+                // SetFrameImage(downloadedAsset, resizeFrameMesh: true);
+                SetFrameImage(downloadedAsset, resizeFrameMesh: false);
+            }, Asset_Gif.MaxSize._256, sceneId, componentId);
         }
 
         //DCL.Interface.WebInterface.RequestGIFPlayer(previewImageURL, sceneId, componentId, SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.OpenGLES2);
@@ -198,6 +203,7 @@ public class NFTShapeLoaderController : MonoBehaviour
 
     public void UpdateGIFPointer(int width, int height, System.IntPtr pointer)
     {
+        Debug.Log("pravs - NFTShapeLoaderController.UpdaeGIFPointer() - creating external texture");
         Texture2D newTex = Texture2D.CreateExternalTexture(width, height, TextureFormat.ARGB32, false, false, pointer);
 
         newTex.wrapMode = TextureWrapMode.Clamp;

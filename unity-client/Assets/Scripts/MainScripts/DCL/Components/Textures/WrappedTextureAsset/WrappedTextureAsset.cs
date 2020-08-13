@@ -10,7 +10,7 @@ namespace DCL
     public static class WrappedTextureUtils
     {
         public static IEnumerator Fetch(string url, Action<ITexture> OnSuccess,
-            Asset_Gif.MaxSize maxTextureSize = Asset_Gif.MaxSize.DONT_RESIZE)
+            Asset_Gif.MaxSize maxTextureSize = Asset_Gif.MaxSize.DONT_RESIZE, string sceneId = null, string componentId = null)
         {
             string contentType = null;
 
@@ -23,10 +23,10 @@ namespace DCL
                 contentType = headReq.GetResponseHeader("Content-Type");
             }
 
-            yield return Create(contentType, url, maxTextureSize, OnSuccess);
+            yield return Create(contentType, url, maxTextureSize, sceneId, componentId, OnSuccess);
         }
 
-        private static IEnumerator Create(string contentType, string url, Asset_Gif.MaxSize maxTextureSize, Action<ITexture> OnSuccess, Action OnFail = null)
+        private static IEnumerator Create(string contentType, string url, Asset_Gif.MaxSize maxTextureSize, string sceneId, string componentId, Action<ITexture> OnSuccess, Action OnFail = null)
         {
             if (contentType != "image/gif")
             {
@@ -37,11 +37,7 @@ namespace DCL
                 yield break;
             }
 
-            byte[] bytes = null;
-
-
-            var gif = new Asset_Gif(url, maxTextureSize, OnSuccess, null);
-
+            var gif = new Asset_Gif(url, maxTextureSize, sceneId, componentId, OnSuccess, null);
             yield return gif.Load();
         }
     }
