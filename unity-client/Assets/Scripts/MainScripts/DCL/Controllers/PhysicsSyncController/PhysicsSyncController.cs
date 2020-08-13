@@ -12,7 +12,7 @@ public class PhysicsSyncController
         Physics.autoSyncTransforms = false;
     }
 
-    public void FixedUpdate()
+    public void Update()
     {
         if (!transformSyncDirty)
             return;

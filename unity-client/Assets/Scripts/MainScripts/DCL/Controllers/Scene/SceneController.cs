@@ -306,10 +306,6 @@ namespace DCL
             ParcelScene.parcelScenesCleaner.Stop();
         }
 
-        private void FixedUpdate()
-        {
-            physicsSyncController.FixedUpdate();
-        }
 
         private void Update()
         {
@@ -321,6 +317,8 @@ namespace DCL
                 sceneSortDirty = false;
                 SortScenesByDistance();
             }
+
+            physicsSyncController.Update();
         }
 
         public void CreateUIScene(string json)
