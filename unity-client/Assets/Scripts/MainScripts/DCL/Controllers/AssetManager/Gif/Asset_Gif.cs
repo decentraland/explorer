@@ -84,6 +84,9 @@ namespace DCL.Controllers.Gif
             if (string.IsNullOrEmpty(sceneId) || string.IsNullOrEmpty(componentId)) yield break;
 
             DCL.Interface.WebInterface.RequestGIFPlayer(url, sceneId, componentId, SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.OpenGLES2);
+
+            // We return as we have to wait for kernel's comeback with the texture pointer (in NFTShapeLoaderController for now)
+            yield break;
 #else
             yield return Utils.FetchAsset(url, UnityWebRequest.Get(url), (request) => { bytes = request.downloadHandler.data; });
 #endif

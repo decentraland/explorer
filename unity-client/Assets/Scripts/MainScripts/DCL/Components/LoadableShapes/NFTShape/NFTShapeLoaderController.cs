@@ -142,6 +142,8 @@ public class NFTShapeLoaderController : MonoBehaviour
 
     IEnumerator FetchNFTImage()
     {
+        Debug.Log($"pravs - NFTShapeLoaderController.FetchNFTImage()");
+
         if (spinner != null)
             spinner.SetActive(true);
 
@@ -166,29 +168,42 @@ public class NFTShapeLoaderController : MonoBehaviour
         bool foundDCLImage = false;
         if (!string.IsNullOrEmpty(previewImageURL))
         {
+            // IEnumerator fetchRoutine;
+            // Debug.Log($"pravs - NFTShapeLoaderController.FetchNFTImage() - Will download PREVIEW IMAGE: " + previewImageURL);
+
+            // yield return fetchRoutine = WrappedTextureUtils.Fetch(previewImageURL, downloadedAsset =>
             yield return WrappedTextureUtils.Fetch(previewImageURL, downloadedAsset =>
             {
-                Debug.Log($"pravs - NFTShapeLoaderController.FetchNFTImage() - downloaded still picture: {downloadedAsset.width}x{downloadedAsset.height}");
+                // Debug.Log($"pravs - NFTShapeLoaderController.FetchNFTImage() - downloaded still picture: {downloadedAsset.width}x{downloadedAsset.height}");
                 foundDCLImage = true;
-                // SetFrameImage(downloadedAsset, resizeFrameMesh: true);
+                // SetFrameImage(downloadedAsset, resizeFrameMesh: true); // TODO: resixing is not working correctly
                 SetFrameImage(downloadedAsset, resizeFrameMesh: false);
             }, Asset_Gif.MaxSize.DONT_RESIZE, sceneId, componentId);
+
+            // if (fetchRoutine.Current == null)
+            //     yield break;
+            yield break;
         }
 
         // We fall back to the nft original image which can have a really big size
         if (!foundDCLImage && !string.IsNullOrEmpty(originalImageURL))
         {
+            Debug.Log($"pravs - NFTShapeLoaderController.FetchNFTImage() - Will download LARGE IMAGE: " + originalImageURL);
+
             yield return WrappedTextureUtils.Fetch(originalImageURL, (downloadedAsset) =>
             {
                 foundDCLImage = true;
-                // SetFrameImage(downloadedAsset, resizeFrameMesh: true);
+                // SetFrameImage(downloadedAsset, resizeFrameMesh: true); // TODO: resixing is not working correctly
                 SetFrameImage(downloadedAsset, resizeFrameMesh: false);
             }, Asset_Gif.MaxSize._256, sceneId, componentId);
         }
 
-        //DCL.Interface.WebInterface.RequestGIFPlayer(previewImageURL, sceneId, componentId, SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.OpenGLES2);
+        FinishLoading(foundDCLImage);
+    }
 
-        if (foundDCLImage)
+    void FinishLoading(bool loadedSuccessfully)
+    {
+        if (loadedSuccessfully)
         {
             if (spinner != null)
                 spinner.SetActive(false);
@@ -210,8 +225,7 @@ public class NFTShapeLoaderController : MonoBehaviour
         imageMaterial.SetTexture(BASEMAP_SHADER_PROPERTY, newTex);
         imageMaterial.SetColor(COLOR_SHADER_PROPERTY, Color.white);
 
-        spinner?.SetActive(false);
-        OnLoadingAssetSuccess?.Invoke();
+        FinishLoading(true);
     }
 
     void SetFrameImage(DCL.ITexture newAsset, bool resizeFrameMesh = false)
