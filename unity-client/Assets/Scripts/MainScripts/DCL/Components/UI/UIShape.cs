@@ -218,7 +218,7 @@ namespace DCL.Components
 
         public virtual void RefreshAll()
         {
-            RefreshDCLLayoutRecursively(refreshAlignmentAndPosition: false);
+            RefreshDCLLayoutRecursively(refreshSize: true, refreshAlignmentAndPosition: false);
             FixMaxStretchRecursively();
             RefreshDCLLayoutRecursively_Internal(refreshSize: false, refreshAlignmentAndPosition: true);
         }
