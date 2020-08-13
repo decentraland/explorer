@@ -73,7 +73,7 @@ internal class ExploreFriendsController : IDisposable
 
         if (!friend.IsOnline())
         {
-            friend.RemoveFromAllListeners();
+            friend.RemoveAllListeners();
         }
         else
         {
@@ -106,10 +106,10 @@ internal class ExploreFriendsController : IDisposable
 
     void ProcessFriendLocation(FriendWrapper friend, Vector2Int coords)
     {
-        if (!friend.HasChangeLocation(coords))
+        if (!friend.HasChangedLocation(coords))
             return;
 
-        friend.RemoveFromAllListeners();
+        friend.RemoveAllListeners();
 
         using (var listenersIterator = listeners.GetEnumerator())
         {
@@ -149,7 +149,7 @@ internal class ExploreFriendsController : IDisposable
 
 class FriendWrapper
 {
-    HashSet<ListenerWrapper> listeners = new HashSet<ListenerWrapper>();
+    HashSet<ListenerWrapper> friendListeners = new HashSet<ListenerWrapper>();
 
     public UserProfile profile { private set; get; }
     public FriendsController.UserStatus status { private set; get; }
@@ -167,45 +167,45 @@ class FriendWrapper
     public void AddListener(ListenerWrapper listener)
     {
         listener.OnListenerDisposed += OnListenerDisposed;
-        listeners.Add(listener);
+        friendListeners.Add(listener);
         listener.OnFriendAdded(profile);
     }
 
     public void RemoveListener(ListenerWrapper listener)
     {
         OnListenerRemoved(listener);
-        listeners.Remove(listener);
+        friendListeners.Remove(listener);
     }
 
     public bool HasListeners()
     {
-        return listeners.Count > 0;
+        return friendListeners.Count > 0;
     }
 
-    public bool HasChangeLocation(Vector2Int coords)
+    public bool HasChangedLocation(Vector2Int coords)
     {
-        if (listeners.Count > 0 && listeners.First().ContainCoords(coords))
+        if (friendListeners.Count > 0 && friendListeners.First().ContainCoords(coords))
         {
             return false;
         }
         return true;
     }
 
-    public void RemoveFromAllListeners()
+    public void RemoveAllListeners()
     {
         if (!HasListeners())
         {
             return;
         }
 
-        using (var listenerIterator = listeners.GetEnumerator())
+        using (var listenerIterator = friendListeners.GetEnumerator())
         {
             while (listenerIterator.MoveNext())
             {
                 OnListenerRemoved(listenerIterator.Current);
             }
         }
-        listeners.Clear();
+        friendListeners.Clear();
     }
 
     public bool IsOnline()
@@ -220,7 +220,7 @@ class FriendWrapper
     void OnListenerDisposed(ListenerWrapper listener)
     {
         listener.OnListenerDisposed -= OnListenerDisposed;
-        listeners.Remove(listener);
+        friendListeners.Remove(listener);
     }
 
     void OnListenerRemoved(ListenerWrapper listener)
@@ -232,28 +232,28 @@ class FriendWrapper
 
 class ListenerWrapper : IDisposable
 {
-    IExploreViewWithFriends listener;
+    IExploreViewWithFriends view;
 
     public event Action<ListenerWrapper> OnListenerDisposed;
 
-    public ListenerWrapper(IExploreViewWithFriends listener)
+    public ListenerWrapper(IExploreViewWithFriends view)
     {
-        this.listener = listener;
+        this.view = view;
     }
 
     public void OnFriendAdded(UserProfile profile)
     {
-        listener.OnFriendAdded(profile);
+        view.OnFriendAdded(profile);
     }
 
     public void OnFriendRemoved(UserProfile profile)
     {
-        listener.OnFriendRemoved(profile);
+        view.OnFriendRemoved(profile);
     }
 
     public bool ContainCoords(Vector2Int coords)
     {
-        return listener.ContainCoords(coords);
+        return view.ContainCoords(coords);
     }
 
     public void Dispose()

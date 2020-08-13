@@ -102,7 +102,6 @@ internal class HighlightScenesController : MonoBehaviour
         crowdView.SetCrowdInfo(hotSceneInfo);
 
         IMapDataView mapView = hotSceneView;
-        bool addFriendListener = !mapView.HasMinimapSceneInfo();
 
         mapDataController.SetMinimapData(baseCoords, mapView,
             (resolvedView) =>
