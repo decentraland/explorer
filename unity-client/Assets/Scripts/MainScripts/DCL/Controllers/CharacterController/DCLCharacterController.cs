@@ -9,8 +9,7 @@ public class DCLCharacterController : MonoBehaviour
 {
     public static DCLCharacterController i { get; private set; }
 
-    [Header("Movement")]
-    public float minimumYPosition = 1f;
+    [Header("Movement")] public float minimumYPosition = 1f;
     public float groundCheckExtraDistance = 0.25f;
     public float gravity = -55f;
     public float jumpForce = 12f;
@@ -22,17 +21,13 @@ public class DCLCharacterController : MonoBehaviour
 
     public DCLCharacterPosition characterPosition;
 
-    [Header("Collisions")]
-    public LayerMask groundLayers;
+    [Header("Collisions")] public LayerMask groundLayers;
 
-    [System.NonSerialized]
-    public bool initialPositionAlreadySet = false;
+    [System.NonSerialized] public bool initialPositionAlreadySet = false;
 
-    [System.NonSerialized]
-    public bool characterAlwaysEnabled = true;
+    [System.NonSerialized] public bool characterAlwaysEnabled = true;
 
-    [System.NonSerialized]
-    public CharacterController characterController;
+    [System.NonSerialized] public CharacterController characterController;
 
     new Collider collider;
 
@@ -56,8 +51,7 @@ public class DCLCharacterController : MonoBehaviour
     Quaternion groundLastRotation;
     bool jumpButtonPressed = false;
 
-    [Header("InputActions")]
-    public InputAction_Hold jumpAction;
+    [Header("InputActions")] public InputAction_Hold jumpAction;
     public InputAction_Hold sprintAction;
 
     public Vector3 moveVelocity;
@@ -329,6 +323,7 @@ public class DCLCharacterController : MonoBehaviour
     }
 
     Vector3 lastLocalGroundPosition;
+
     void CheckGround()
     {
         if (groundTransform == null)
@@ -336,6 +331,7 @@ public class DCLCharacterController : MonoBehaviour
 
         if (isOnMovingPlatform)
         {
+            Physics.SyncTransforms();
             //NOTE(Brian): This should move the character with the moving platform
             Vector3 newGroundWorldPos = groundTransform.TransformPoint(lastLocalGroundPosition);
             movingPlatformSpeed = Vector3.Distance(newGroundWorldPos, transform.position);
@@ -355,6 +351,7 @@ public class DCLCharacterController : MonoBehaviour
                     && groundHasMoved)
                 {
                     isOnMovingPlatform = true;
+                    Physics.SyncTransforms();
                     lastLocalGroundPosition = groundTransform.InverseTransformPoint(transform.position);
                 }
             }
