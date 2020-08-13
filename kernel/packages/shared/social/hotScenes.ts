@@ -54,7 +54,9 @@ export async function fetchHotScenes(): Promise<HotSceneInfoRaw[]> {
 }
 
 export async function reportHotScenes() {
-  const hotScenes = await fetchHotScenes()
+  const hotScenes = (await fetchHotScenes()).filter(
+    (scene) => globalThis.globalStore.getState().atlas.tileToScene[scene.baseCoord].type !== 7 // NOTE: filter roads
+  )
 
   globalThis.globalStore.dispatch(reportScenesFromTiles(hotScenes.map((scene) => scene.baseCoord)))
   window.unityInterface.UpdateHotScenesList(hotScenes.map((scene) => hotSceneInfoFromRaw(scene)))
