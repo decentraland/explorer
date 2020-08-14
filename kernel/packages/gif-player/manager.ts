@@ -5,6 +5,8 @@ declare const DCL: any
 
 const gifPlayerWorkerRaw = require('raw-loader!../../static/gif-player/worker.js')
 const gifPlayerWorkerUrl = URL.createObjectURL(new Blob([gifPlayerWorkerRaw]))
+
+// tslint:disable-next-line
 // const worker = new Worker(gifPlayerWorkerUrl, { name: 'gifPlayerWorker' })
 
 class GIF {
@@ -51,7 +53,7 @@ export class GIFPlayer {
       defaultLogger.log('pravs - GIFPlayer - got back from WORKER', e)
       if (frames.length <= 0) return
 
-      // // Generate texture that will be used for displaying the GIF frames
+      // Generate texture that will be used for displaying the GIF frames
       const ptr: GLuint = this.gameInstance.Module._malloc(4)
       const tex = this.GenerateTexture(ptr)
 
@@ -82,6 +84,7 @@ export class GIFPlayer {
       let delay = 64 // 15FPS
       await new Promise((resolve) => window.setTimeout(resolve, delay))
 
+      // tslint:disable-next-line
       // defaultLogger.log('pravs - GIFPlayer - playing ' + Object.keys(this.gifs).length + ' GIFs')
 
       for (const key in this.gifs) {
