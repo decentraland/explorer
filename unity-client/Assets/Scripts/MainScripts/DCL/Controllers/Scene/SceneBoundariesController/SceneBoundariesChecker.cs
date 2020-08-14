@@ -74,6 +74,8 @@ namespace DCL.Controllers
             if (!SceneController.i.useBoundariesChecker) return;
 
             entitiesToCheck.Add(entity);
+
+            CullingController.cullingListDirty = true;
         }
 
         public void RemoveEntityToBeChecked(DecentralandEntity entity)
@@ -81,6 +83,8 @@ namespace DCL.Controllers
             if (!SceneController.i.useBoundariesChecker) return;
 
             entitiesToCheck.Remove(entity);
+
+            CullingController.cullingListDirty = true;
         }
 
         public void EvaluateEntityPosition(DecentralandEntity entity)
