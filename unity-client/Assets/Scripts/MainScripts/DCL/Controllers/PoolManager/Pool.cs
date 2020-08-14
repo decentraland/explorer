@@ -98,6 +98,7 @@ namespace DCL
 
             EnablePoolableObject(poolable);
             poolable.OnPoolGet();
+            PhysicsSyncController.transformSyncDirty = true;
             return poolable;
         }
 

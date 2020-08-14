@@ -42,6 +42,8 @@ namespace DCL
         Queue<string> payloadsToDecode = new Queue<string>();
         const float MAX_TIME_FOR_DECODE = 0.005f;
 
+        private PhysicsSyncController physicsSyncController;
+
 
         #region BENCHMARK_EVENTS
 
@@ -133,6 +135,8 @@ namespace DCL
                 StartCoroutine(DeferredDecoding());
 
             DCLCharacterController.OnCharacterMoved += SetPositionDirty;
+
+            physicsSyncController = new PhysicsSyncController();
 
 #if !UNITY_EDITOR
             worldEntryPoint = new EntryPoint_World(this);
@@ -302,6 +306,7 @@ namespace DCL
             ParcelScene.parcelScenesCleaner.Stop();
         }
 
+
         private void Update()
         {
             InputController_Legacy.i.Update();
@@ -312,6 +317,8 @@ namespace DCL
                 sceneSortDirty = false;
                 SortScenesByDistance();
             }
+
+            physicsSyncController.Update();
         }
 
         public void CreateUIScene(string json)
