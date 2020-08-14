@@ -58,7 +58,7 @@ namespace DCL.Helpers
                 return;
             }
 
-            int cullMode = (int) material.GetFloat(ShaderUtils._Cull);
+            int cullMode = 2 - (int) material.GetFloat(ShaderUtils._Cull);
 
             int baseQueue;
 
