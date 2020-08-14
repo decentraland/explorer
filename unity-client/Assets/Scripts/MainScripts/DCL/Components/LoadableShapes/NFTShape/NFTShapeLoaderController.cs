@@ -188,7 +188,7 @@ public class NFTShapeLoaderController : MonoBehaviour
         // We fall back to the nft original image which can have a really big size
         if (!foundDCLImage && !string.IsNullOrEmpty(originalImageURL))
         {
-            Debug.Log($"pravs - NFTShapeLoaderController.FetchNFTImage() - Will download LARGE IMAGE: " + originalImageURL);
+            // Debug.Log($"pravs - NFTShapeLoaderController.FetchNFTImage() - Will download LARGE IMAGE: " + originalImageURL);
 
             yield return WrappedTextureUtils.Fetch(originalImageURL, (downloadedAsset) =>
             {
@@ -218,9 +218,20 @@ public class NFTShapeLoaderController : MonoBehaviour
 
     public void UpdateGIFPointer(int width, int height, System.IntPtr pointer)
     {
-        Debug.Log("pravs - NFTShapeLoaderController.UpdaeGIFPointer() - creating external texture");
+        if (width == 0 || height == 0)
+        {
+            Debug.Log("pravs - Couldn't create external texture! width or height are 0!");
+            return;
+        }
+
+        Debug.Log("pravs - NFTShapeLoaderController.UpdaeGIFPointer() - creating external texture, tex name/id/pointer: " + pointer);
         Texture2D newTex = Texture2D.CreateExternalTexture(width, height, TextureFormat.ARGB32, false, false, pointer);
 
+        if (newTex == null)
+        {
+            Debug.Log("pravs - Couldn't create external texture!");
+            return;
+        }
         newTex.wrapMode = TextureWrapMode.Clamp;
         imageMaterial.SetTexture(BASEMAP_SHADER_PROPERTY, newTex);
         imageMaterial.SetColor(COLOR_SHADER_PROPERTY, Color.white);
