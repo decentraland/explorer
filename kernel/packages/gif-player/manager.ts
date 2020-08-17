@@ -5,9 +5,11 @@ declare const DCL: any
 
 const gifPlayerWorkerRaw = require('raw-loader!../../static/gif-player/worker.js')
 const gifPlayerWorkerUrl = URL.createObjectURL(new Blob([gifPlayerWorkerRaw]))
+const offscreenCanvas = new OffscreenCanvas(1,1)
+const offscreenCanvasCtx = offscreenCanvas.getContext('2d')
 
 // tslint:disable-next-line
-// const worker = new Worker(gifPlayerWorkerUrl, { name: 'gifPlayerWorker' })
+const worker = new Worker(gifPlayerWorkerUrl, { name: 'gifPlayerWorker' })
 
 class GIF {
   frames: any[]
@@ -17,6 +19,14 @@ class GIF {
   constructor(frames: any[], texture: any) {
     this.frames = frames
     this.texture = texture
+
+    for (const key in frames) {
+      const frame = frames[key]
+      const frameImagedata = offscreenCanvasCtx?.createImageData(frame.dims.width, frame.dims.height)
+      frameImagedata?.data.set(frame.patch)
+
+      frame.imageData = frameImagedata
+    }
   }
 }
 
@@ -36,15 +46,7 @@ export class GIFPlayer {
 
     this.playingPromise = this.PlayGIFPromise()
     this.playingPromise.catch((error) => defaultLogger.log(error))
-  }
 
-  PlayGIF(data: { imageSource: string, sceneId: string, componentId: string }) {
-    const worker = new Worker(gifPlayerWorkerUrl, { name: 'gifPlayerWorker' })
-
-    // We process the GIF in the worker and get an array of {imageData: ImageData, delay: number} in e.data
-    worker.postMessage({ src: data.imageSource, sceneId: data.sceneId, componentId: data.componentId })
-
-    // TODO: This onmessage should be only in 1 place, otherwise the event gets replaced every time the PlayGIF is called
     worker.onmessage = (e: any) => {
       const frames = e.data.frames
       const sceneId = e.data.sceneId
@@ -60,10 +62,13 @@ export class GIFPlayer {
       defaultLogger.log('pravs - GIFPlayer - adding GIF to the collection, for ' + this.GenerateGIFKey(sceneId, componentId))
       this.gifs[this.GenerateGIFKey(sceneId, componentId)] = new GIF(frames, tex)
 
-      this.unityInterface.SendGIFPointer(sceneId, componentId, frames[0].imageData.width, frames[0].imageData.height, tex.name)
-
-      worker.terminate()
+      this.unityInterface.SendGIFPointer(sceneId, componentId, frames[0].dims.width, frames[0].dims.height, tex.name)
     }
+  }
+
+  PlayGIF(data: { imageSource: string, sceneId: string, componentId: string }) {
+    // We process the GIF in the worker and get an array of {imageData: ImageData, delay: number} in e.data
+    worker.postMessage({ src: data.imageSource, sceneId: data.sceneId, componentId: data.componentId })
   }
 
   // TODO: If we make sure Unity tracks more than 1 component using the same GIF and calls the StopGIF()
