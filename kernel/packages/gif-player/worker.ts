@@ -7,8 +7,6 @@ import { parseGIF, decompressFrames } from 'gifuct-js'
   let payloads: any[] = new Array()
 
   self.onmessage = (e: any) => {
-    defaultLogger.log('pravs - GIF WORKER - trying to fetch...', e.data.src)
-
     EnqueuePayload(e)
   }
 
@@ -30,14 +28,27 @@ import { parseGIF, decompressFrames } from 'gifuct-js'
   async function DownloadAndProcessGIF(e: any) {
     const imageFetch = fetch(e.data.src)
     const response = await imageFetch
-    defaultLogger.log('pravs - GIF WORKER - fetched...', response)
 
     const buffer = await response.arrayBuffer()
 
     const parsedGif = await parseGIF(buffer)
     const decompressedFrames = decompressFrames(parsedGif, true)
 
-    // TODO: Find a way to send data as a Transferable (to avoid cloning)
-    self.postMessage({ frames: decompressedFrames, sceneId: e.data.sceneId, componentId: e.data.componentId })
+    const arrayBufferFrames = new Array()
+    const frameDelays = new Array()
+    for (const key in decompressedFrames) {
+      arrayBufferFrames.push(decompressedFrames[key].patch.buffer)
+      frameDelays.push(decompressedFrames[key].delay)
+    }
+
+    // Passing ArrayBuffer made from the frames Uint8ClampedArray as transferable
+    self.postMessage({
+      frames: arrayBufferFrames,
+      width: decompressedFrames[0].dims.width,
+      height: decompressedFrames[0].dims.height,
+      delays: frameDelays,
+      sceneId: e.data.sceneId,
+      componentId: e.data.componentId
+    }, arrayBufferFrames)
   }
 }
