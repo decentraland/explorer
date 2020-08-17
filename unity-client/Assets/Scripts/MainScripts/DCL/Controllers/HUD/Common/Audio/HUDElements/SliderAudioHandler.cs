@@ -31,7 +31,9 @@ public class SliderAudioHandler : MonoBehaviour, IPointerDownHandler, IPointerUp
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        if (audioPlayer != null && slider.interactable)
+        if (audioPlayer != null &&
+            slider != null &&
+            slider.interactable)
         {
             audioPlayer.Play(HUDAudioPlayer.Sound.buttonClick);
         }
@@ -39,7 +41,9 @@ public class SliderAudioHandler : MonoBehaviour, IPointerDownHandler, IPointerUp
 
     public void OnPointerUp(PointerEventData eventData)
     {
-        if (audioPlayer != null && slider.interactable)
+        if (audioPlayer != null &&
+            slider != null &&
+            slider.interactable)
         {
             audioPlayer.Play(HUDAudioPlayer.Sound.buttonRelease);
         }

@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class HUDAudioPlayer : MonoBehaviour
@@ -41,6 +39,12 @@ public class HUDAudioPlayer : MonoBehaviour
 
     private void Awake()
     {
+        if (i != null)
+        {
+            Destroy(this);
+            return;
+        }
+
         i = this;
 
         ac = GetComponent<AudioContainer>();

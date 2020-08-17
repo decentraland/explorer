@@ -317,11 +317,8 @@ public class AvatarEditorHUDView : MonoBehaviour
         {
             if (visible && !isOpen)
                 HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogAppear);
-            else
-            {
-                if (isOpen)
-                    HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogClose);
-            }
+            else if (isOpen)
+                HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogClose);
         }
 
         characterPreviewController.camera.enabled = visible;

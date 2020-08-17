@@ -26,11 +26,8 @@ namespace DCL.SettingsHUD
             {
                 if (visible && !isOpen)
                     HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogAppear);
-                else
-                {
-                    if (isOpen)
-                        HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogClose);
-                }
+                else if (isOpen)
+                    HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogClose);
             }
 
             gameObject.SetActive(visible);

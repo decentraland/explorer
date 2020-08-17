@@ -15,7 +15,10 @@ public class ScrollbarHandleAudioHandler : MonoBehaviour, IPointerEnterHandler, 
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        if (audioPlayer != null && selectable.interactable && !Input.GetMouseButton(0))
+        if (audioPlayer != null &&
+            selectable != null &&
+            selectable.interactable &&
+            !Input.GetMouseButton(0))
         {
             audioPlayer.Play(HUDAudioPlayer.Sound.buttonHover);
         }
@@ -23,7 +26,9 @@ public class ScrollbarHandleAudioHandler : MonoBehaviour, IPointerEnterHandler, 
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        if (audioPlayer != null && selectable.interactable)
+        if (audioPlayer != null &&
+            selectable != null &&
+            selectable.interactable)
         {
             audioPlayer.Play(HUDAudioPlayer.Sound.buttonClick);
         }

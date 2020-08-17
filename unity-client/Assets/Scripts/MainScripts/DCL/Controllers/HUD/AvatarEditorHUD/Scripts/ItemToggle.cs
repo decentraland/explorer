@@ -96,7 +96,7 @@ public class ItemToggle : UIButton, IPointerEnterHandler, IPointerExitHandler
 
         thumbnail.sprite = ThumbnailsManager.CreateSpriteFromTexture(texture.texture);
 
-        if (HUDAudioPlayer.i != null && avatarEditorHUDView.isOpen)
+        if (HUDAudioPlayer.i != null && avatarEditorHUDView != null && avatarEditorHUDView.isOpen)
             HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.listItemAppear);
     }
 
