@@ -98,7 +98,7 @@ LightmapSettings:
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
   m_LightingDataAsset: {fileID: 0}
-  m_UseShadowmask: 1
+  m_UseShadowmask: 0
 --- !u!196 &4
 NavMeshSettings:
   serializedVersion: 2
@@ -1255,190 +1255,6 @@ MonoBehaviour:
   m_RequiresDepthTexture: 0
   m_RequiresColorTexture: 0
   m_Version: 2
---- !u!1 &1310817201
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1310817203}
-  - component: {fileID: 1310817204}
-  - component: {fileID: 1310817202}
-  m_Layer: 0
-  m_Name: HUDAudioPlayer
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1310817202
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1310817201}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b2589882c2954c0459054a94f3a04e36, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  identifier: UI
-  audioMixerGroup: {fileID: 3522371855724722028, guid: 97507d628c02bcf47859b9f108ab1823,
-    type: 2}
-  spatialBlend: 0
-  overrideDefaults: 0
-  dopplerLevel: 1
-  minDistance: 1
-  maxDistance: 500
-  audioEvents:
-    array:
-    - name: ButtonHover
-      loop: 0
-      volume: 1
-      randomPitch: 0.2
-      playOnAwake: 0
-      clips:
-        array:
-        - {fileID: 8300000, guid: e5820e20f76a6d74e94f531fc6b7ae02, type: 3}
-      source: {fileID: 0}
-    - name: ButtonClick
-      loop: 0
-      volume: 1
-      randomPitch: 0.15
-      playOnAwake: 0
-      clips:
-        array:
-        - {fileID: 8300000, guid: 69ce58bdf542d904d81eea1245e31686, type: 3}
-      source: {fileID: 0}
-    - name: ButtonRelease
-      loop: 0
-      volume: 1
-      randomPitch: 0.15
-      playOnAwake: 0
-      clips:
-        array:
-        - {fileID: 8300000, guid: c5c67e3189377ce42a40002734b704b6, type: 3}
-      source: {fileID: 0}
-    - name: Enable
-      loop: 0
-      volume: 1
-      randomPitch: 0.05
-      playOnAwake: 0
-      clips:
-        array:
-        - {fileID: 8300000, guid: afbd62fb3eb978c45b63b75e24478c53, type: 3}
-      source: {fileID: 0}
-    - name: Disable
-      loop: 0
-      volume: 1
-      randomPitch: 0.05
-      playOnAwake: 0
-      clips:
-        array:
-        - {fileID: 8300000, guid: 4804fe1b06df9eb46859950493280fa3, type: 3}
-      source: {fileID: 0}
-    - name: ListItemAppear
-      loop: 0
-      volume: 1
-      randomPitch: 0
-      playOnAwake: 0
-      clips:
-        array:
-        - {fileID: 8300000, guid: 5c19d7d76099d3248b1e70a573008365, type: 3}
-      source: {fileID: 0}
-    - name: DialogAppear
-      loop: 0
-      volume: 1
-      randomPitch: 0.15
-      playOnAwake: 0
-      clips:
-        array:
-        - {fileID: 8300000, guid: 20a27736f2c55ee44bb4ca65bed56e4b, type: 3}
-      source: {fileID: 0}
-    - name: DialogClose
-      loop: 0
-      volume: 1
-      randomPitch: 0.15
-      playOnAwake: 0
-      clips:
-        array:
-        - {fileID: 8300000, guid: d8c217cb0f8783b45912e8dfde963bf0, type: 3}
-      source: {fileID: 0}
-    - name: Confirm
-      loop: 0
-      volume: 1
-      randomPitch: 0
-      playOnAwake: 0
-      clips:
-        array:
-        - {fileID: 8300000, guid: 0bfffff4668dbb745a58ec7845891d43, type: 3}
-      source: {fileID: 0}
-    - name: Cancel
-      loop: 0
-      volume: 1
-      randomPitch: 0
-      playOnAwake: 0
-      clips:
-        array:
-        - {fileID: 8300000, guid: c502cfacea4f3d34aa2a4cc730ddfe0b, type: 3}
-      source: {fileID: 0}
-    - name: ValueChange
-      loop: 0
-      volume: 1
-      randomPitch: 0
-      playOnAwake: 0
-      clips:
-        array:
-        - {fileID: 8300000, guid: e134d8c09228ed0448e0458ba8602c43, type: 3}
-      source: {fileID: 0}
-    - name: FadeIn
-      loop: 0
-      volume: 1
-      randomPitch: 0
-      playOnAwake: 0
-      clips:
-        array:
-        - {fileID: 8300000, guid: fedc09a4557ddf04d8fe3636130e3e8a, type: 3}
-      source: {fileID: 0}
-    - name: FadeOut
-      loop: 0
-      volume: 1
-      randomPitch: 0
-      playOnAwake: 0
-      clips:
-        array:
-        - {fileID: 8300000, guid: fedc09a4557ddf04d8fe3636130e3e8a, type: 3}
-      source: {fileID: 0}
---- !u!4 &1310817203
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1310817201}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 821.7208, y: 782.1304, z: -1031.3528}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 5
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1310817204
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1310817201}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cd2aa437544359c41a883ffdba98307a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ac: {fileID: 0}
 --- !u!114 &1441454338 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 580683850, guid: b387035aa46399445bdc7951a41d5213,
@@ -1882,3 +1698,72 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 3cc27a6e023896e4598ba0a69519d17a, type: 3}
+--- !u!1001 &9163622794033587442
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 9163622792995413825, guid: 5328f06b59cfc724fa764ed3a266b2f4,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 821.7208
+      objectReference: {fileID: 0}
+    - target: {fileID: 9163622792995413825, guid: 5328f06b59cfc724fa764ed3a266b2f4,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 782.1304
+      objectReference: {fileID: 0}
+    - target: {fileID: 9163622792995413825, guid: 5328f06b59cfc724fa764ed3a266b2f4,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -1031.3528
+      objectReference: {fileID: 0}
+    - target: {fileID: 9163622792995413825, guid: 5328f06b59cfc724fa764ed3a266b2f4,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9163622792995413825, guid: 5328f06b59cfc724fa764ed3a266b2f4,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9163622792995413825, guid: 5328f06b59cfc724fa764ed3a266b2f4,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9163622792995413825, guid: 5328f06b59cfc724fa764ed3a266b2f4,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9163622792995413825, guid: 5328f06b59cfc724fa764ed3a266b2f4,
+        type: 3}
+      propertyPath: m_RootOrder
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 9163622792995413825, guid: 5328f06b59cfc724fa764ed3a266b2f4,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9163622792995413825, guid: 5328f06b59cfc724fa764ed3a266b2f4,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9163622792995413825, guid: 5328f06b59cfc724fa764ed3a266b2f4,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9163622792995413827, guid: 5328f06b59cfc724fa764ed3a266b2f4,
+        type: 3}
+      propertyPath: m_Name
+      value: HUDAudioPlayer
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 5328f06b59cfc724fa764ed3a266b2f4, type: 3}

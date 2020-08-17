@@ -49,6 +49,7 @@ public class AvatarEditorHUDView : MonoBehaviour
     [SerializeField] internal Button randomizeButton;
     [SerializeField] internal Button doneButton;
     [SerializeField] internal Button exitButton;
+    [SerializeField] internal AudioContainer audioContainer;
 
     [Header("Collectibles")] [SerializeField]
     internal GameObject web3Container;
@@ -228,9 +229,9 @@ public class AvatarEditorHUDView : MonoBehaviour
                 if (doneButton != null)
                     doneButton.interactable = true;
 
-                if (isOpen)
+                if (audioContainer != null && isOpen)
                 {
-                    GetComponent<AudioContainer>().GetEvent("ClothingAppear").Play();
+                    audioContainer.GetEvent("ClothingAppear").Play();
                 }
             });
     }

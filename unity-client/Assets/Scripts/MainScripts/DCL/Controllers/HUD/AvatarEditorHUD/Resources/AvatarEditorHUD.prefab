@@ -1619,6 +1619,7 @@ MonoBehaviour:
   randomizeButton: {fileID: 1450360507441575512}
   doneButton: {fileID: 8118935322395685570}
   exitButton: {fileID: 178893782665926146}
+  audioContainer: {fileID: 7128286101508952055}
   web3Container: {fileID: 233924306434789069}
   web3GoToMarketplaceButton: {fileID: 6975390227394394232}
   noWeb3Container: {fileID: 8183306655260157890}
@@ -3834,6 +3835,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   extraClickSound: 11
+  playHoverSound: 1
 --- !u!1 &4117789192915260585
 GameObject:
   m_ObjectHideFlags: 0
@@ -3983,6 +3985,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   extraClickSound: 10
+  playHoverSound: 1
 --- !u!114 &6010854815802116111
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3996,6 +3999,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   extraClickSound: 0
+  playHoverSound: 1
 --- !u!114 &7870549996479212623
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4734,6 +4738,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   extraClickSound: 9
+  playHoverSound: 1
 --- !u!1 &7711483335288023377
 GameObject:
   m_ObjectHideFlags: 0
@@ -4959,6 +4964,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   extraClickSound: 0
+  playHoverSound: 1
 --- !u!1 &7916447075905162670
 GameObject:
   m_ObjectHideFlags: 0
