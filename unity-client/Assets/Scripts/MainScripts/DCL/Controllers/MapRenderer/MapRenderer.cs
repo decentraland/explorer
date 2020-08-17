@@ -205,7 +205,7 @@ namespace DCL
             parcelHighlightImage.transform.position = worldCoordsOriginInMap + cursorMapCoords * parcelSizeInMap + new Vector3(parcelSizeInMap, parcelSizeInMap, 0f) / 2;
             highlightedParcelText.text = showCursorCoords ? $"{cursorMapCoords.x}, {cursorMapCoords.y}" : string.Empty;
 
-            if (highlightedParcelText.text != previousText && !Input.GetMouseButton(0))
+            if (HUDAudioPlayer.i != null && highlightedParcelText.text != previousText && !Input.GetMouseButton(0))
             {
                 HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.mapParcelHighlight);
             }

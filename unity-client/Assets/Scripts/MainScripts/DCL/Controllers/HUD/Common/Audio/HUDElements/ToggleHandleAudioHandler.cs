@@ -15,7 +15,7 @@ public class ToggleHandleAudioHandler : MonoBehaviour, IPointerEnterHandler
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        if (toggle.interactable && !Input.GetMouseButton(0))
+        if (audioPlayer != null && toggle.interactable && !Input.GetMouseButton(0))
         {
             audioPlayer.Play(HUDAudioPlayer.Sound.buttonHover);
         }

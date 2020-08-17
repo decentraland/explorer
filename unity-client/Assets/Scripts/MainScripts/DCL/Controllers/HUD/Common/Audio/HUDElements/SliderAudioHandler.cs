@@ -31,7 +31,7 @@ public class SliderAudioHandler : MonoBehaviour, IPointerDownHandler, IPointerUp
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        if (slider.interactable)
+        if (audioPlayer != null && slider.interactable)
         {
             audioPlayer.Play(HUDAudioPlayer.Sound.buttonClick);
         }
@@ -39,7 +39,7 @@ public class SliderAudioHandler : MonoBehaviour, IPointerDownHandler, IPointerUp
 
     public void OnPointerUp(PointerEventData eventData)
     {
-        if (slider.interactable)
+        if (audioPlayer != null && slider.interactable)
         {
             audioPlayer.Play(HUDAudioPlayer.Sound.buttonRelease);
         }
@@ -47,7 +47,7 @@ public class SliderAudioHandler : MonoBehaviour, IPointerDownHandler, IPointerUp
 
     void OnValueChanged(float value)
     {
-        if (valueIncrementTimer == 0f)
+        if (audioPlayer != null && valueIncrementTimer == 0f)
         {
             audioPlayer.Play(HUDAudioPlayer.Sound.valueChange, 1f + (slider.value / slider.maxValue) * 1.5f);
             valueIncrementTimer = INCREMENT_SOUND_INTERVAL;

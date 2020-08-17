@@ -15,7 +15,7 @@ public class AvatarEditorCategoryToggleAudioHandler : MonoBehaviour, IPointerEnt
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        if (selectable.interactable && !Input.GetMouseButton(0))
+        if (audioPlayer != null && selectable.interactable && !Input.GetMouseButton(0))
         {
             audioPlayer.Play(HUDAudioPlayer.Sound.buttonHover);
         }
@@ -23,7 +23,7 @@ public class AvatarEditorCategoryToggleAudioHandler : MonoBehaviour, IPointerEnt
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        if (selectable.interactable)
+        if (audioPlayer != null && selectable.interactable)
         {
             audioPlayer.Play(HUDAudioPlayer.Sound.buttonClick);
             audioPlayer.ResetListItemAppearPitch();
@@ -32,7 +32,7 @@ public class AvatarEditorCategoryToggleAudioHandler : MonoBehaviour, IPointerEnt
 
     public void OnPointerUp(PointerEventData eventData)
     {
-        if (selectable.interactable)
+        if (audioPlayer != null && selectable.interactable)
         {
             audioPlayer.Play(HUDAudioPlayer.Sound.buttonRelease);
         }

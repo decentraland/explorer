@@ -15,7 +15,7 @@ public class ToggleAudioHandler : MonoBehaviour, IPointerDownHandler, IPointerUp
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        if (toggle.interactable)
+        if (audioPlayer != null && toggle.interactable)
         {
             audioPlayer.Play(HUDAudioPlayer.Sound.buttonClick);
         }
@@ -23,7 +23,7 @@ public class ToggleAudioHandler : MonoBehaviour, IPointerDownHandler, IPointerUp
 
     public void OnPointerUp(PointerEventData eventData)
     {
-        if (toggle.interactable)
+        if (audioPlayer != null && toggle.interactable)
         {
             if (toggle.isOn)
             {
