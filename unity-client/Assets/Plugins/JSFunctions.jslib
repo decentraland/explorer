@@ -4,6 +4,7 @@
 
 mergeInto(LibraryManager.library, {
   StartDecentraland: function() {
+    window.DCL.JSEvents = JSEvents
     window.DCL.EngineStarted();
 
     // We expose the GL object to be able to generate WebGL textures in kernel and use them in Unity

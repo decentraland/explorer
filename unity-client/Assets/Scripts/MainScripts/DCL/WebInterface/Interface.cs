@@ -1,5 +1,9 @@
+using System;
+using DCL.Helpers;
+using DCL.Models;
 using UnityEngine;
 using System;
+using Ray = UnityEngine.Ray;
 
 #if UNITY_WEBGL && !UNITY_EDITOR
 using System.Runtime.InteropServices;
@@ -62,7 +66,7 @@ namespace DCL.Interface
                 public string sceneId;
             }
 
-            public SceneReady(string sceneId) : base("SceneReady", new Payload() { sceneId = sceneId })
+            public SceneReady(string sceneId) : base("SceneReady", new Payload() {sceneId = sceneId})
             {
             }
         }
@@ -263,6 +267,12 @@ namespace DCL.Interface
         {
             public int x;
             public int y;
+        };
+
+        [System.Serializable]
+        public class BaseResolution
+        {
+            public int baseResolution;
         };
 
 
@@ -486,6 +496,7 @@ namespace DCL.Interface
         private static JumpInPayload jumpInPayload = new JumpInPayload();
         private static GotoEvent gotoEvent = new GotoEvent();
         private static SendChatMessageEvent sendChatMessageEvent = new SendChatMessageEvent();
+        private static BaseResolution baseResEvent = new BaseResolution();
 
         public static void SendSceneEvent<T>(string sceneId, string eventType, T payload)
         {
@@ -533,14 +544,14 @@ namespace DCL.Interface
             SendSceneEvent<T>(sceneId, "raycastResponse", response);
         }
 
-        public static void ReportRaycastHitFirstResult(string sceneId, string queryId, string queryType, RaycastHitEntity payload)
+        public static void ReportRaycastHitFirstResult(string sceneId, string queryId, RaycastType raycastType, RaycastHitEntity payload)
         {
-            ReportRaycastResult<RaycastHitFirstResponse, RaycastHitEntity>(sceneId, queryId, queryType, payload);
+            ReportRaycastResult<RaycastHitFirstResponse, RaycastHitEntity>(sceneId, queryId, Protocol.RaycastTypeToLiteral(raycastType), payload);
         }
 
-        public static void ReportRaycastHitAllResult(string sceneId, string queryId, string queryType, RaycastHitEntities payload)
+        public static void ReportRaycastHitAllResult(string sceneId, string queryId, RaycastType raycastType, RaycastHitEntities payload)
         {
-            ReportRaycastResult<RaycastHitAllResponse, RaycastHitEntities>(sceneId, queryId, queryType, payload);
+            ReportRaycastResult<RaycastHitAllResponse, RaycastHitEntities>(sceneId, queryId, Protocol.RaycastTypeToLiteral(raycastType), payload);
         }
 
         private static OnPointerEventPayload.Hit CreateHitObject(string entityId, string meshName, Vector3 point, Vector3 normal, float distance)
@@ -571,7 +582,7 @@ namespace DCL.Interface
 
         public static void ReportGlobalPointerDownEvent(ACTION_BUTTON buttonId, Ray ray, Vector3 point, Vector3 normal, float distance, string sceneId, string entityId = null, string meshName = null, bool isHitInfoValid = false)
         {
-            SetPointerEventPayload((OnPointerEventPayload)onGlobalPointerEventPayload, buttonId, entityId, meshName, ray, point, normal, distance, isHitInfoValid);
+            SetPointerEventPayload((OnPointerEventPayload) onGlobalPointerEventPayload, buttonId, entityId, meshName, ray, point, normal, distance, isHitInfoValid);
             onGlobalPointerEventPayload.type = OnGlobalPointerEventPayload.InputEventType.DOWN;
 
             onGlobalPointerEvent.payload = onGlobalPointerEventPayload;
@@ -581,7 +592,7 @@ namespace DCL.Interface
 
         public static void ReportGlobalPointerUpEvent(ACTION_BUTTON buttonId, Ray ray, Vector3 point, Vector3 normal, float distance, string sceneId, string entityId = null, string meshName = null, bool isHitInfoValid = false)
         {
-            SetPointerEventPayload((OnPointerEventPayload)onGlobalPointerEventPayload, buttonId, entityId, meshName, ray, point, normal, distance, isHitInfoValid);
+            SetPointerEventPayload((OnPointerEventPayload) onGlobalPointerEventPayload, buttonId, entityId, meshName, ray, point, normal, distance, isHitInfoValid);
             onGlobalPointerEventPayload.type = OnGlobalPointerEventPayload.InputEventType.UP;
 
             onGlobalPointerEvent.payload = onGlobalPointerEventPayload;
@@ -758,18 +769,19 @@ namespace DCL.Interface
 
         public static void SendUserAcceptedCollectibles(string airdropId)
         {
-            SendMessage("UserAcceptedCollectibles", new UserAcceptedCollectiblesPayload { id = airdropId });
+            SendMessage("UserAcceptedCollectibles", new UserAcceptedCollectiblesPayload {id = airdropId});
         }
 
         public static void SaveUserTutorialStep(int newTutorialStep)
         {
-            SendMessage("SaveUserTutorialStep", new TutorialStepPayload() { tutorialStep = newTutorialStep });
+            SendMessage("SaveUserTutorialStep", new TutorialStepPayload() {tutorialStep = newTutorialStep});
         }
 
         public static void SendPerformanceReport(string encodedFrameTimesInMS)
         {
             MessageFromEngine("PerformanceReport", encodedFrameTimesInMS);
         }
+
         public static void SendPerformanceHiccupReport(int hiccupsInThousandFrames, float hiccupsTime, float totalTime)
         {
             SendMessage("PerformanceHiccupReport", new PerformanceHiccupPayload()
@@ -807,7 +819,7 @@ namespace DCL.Interface
 
         public static void OpenURL(string url)
         {
-            SendMessage("OpenWebURL", new OpenURLPayload { url = url });
+            SendMessage("OpenWebURL", new OpenURLPayload {url = url});
         }
 
         public static void SendReportScene(string sceneID)
@@ -913,6 +925,17 @@ namespace DCL.Interface
         public static void ScenesLoadingFeedback(LoadingFeedbackMessage message)
         {
             SendMessage("ScenesLoadingFeedback", message);
+        }
+
+        public static void FetchHotScenes()
+        {
+            SendMessage("FetchHotScenes");
+        }
+
+        public static void SetBaseResolution(int resolution)
+        {
+            baseResEvent.baseResolution = resolution;
+            SendMessage("SetBaseResolution", baseResEvent);
         }
     }
 }

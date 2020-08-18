@@ -32,15 +32,13 @@ public class NFTShapeLoaderController : MonoBehaviour
     public event System.Action OnLoadingAssetSuccess;
     public event System.Action OnLoadingAssetFail;
 
-    [Header("Material Indexes")]
-    [SerializeField]
+    [Header("Material Indexes")] [SerializeField]
     int materialIndex_Background = -1;
 
     [SerializeField] int materialIndex_NFTImage = -1;
     [SerializeField] int materialIndex_Frame = -1;
 
-    [Header("Noise Shader")]
-    [SerializeField]
+    [Header("Noise Shader")] [SerializeField]
     NoiseType noiseType = NoiseType.Simplex;
 
     [SerializeField] bool noiseIs3D = false;
@@ -164,6 +162,8 @@ public class NFTShapeLoaderController : MonoBehaviour
                 OnLoadingAssetFail?.Invoke();
             });
 
+        yield return new DCL.WaitUntil(() => (CommonScriptableObjects.playerUnityPosition - transform.position).sqrMagnitude < 900f);
+
         // We the "preview" 256px image
         bool foundDCLImage = false;
         if (!string.IsNullOrEmpty(previewImageURL))
@@ -185,7 +185,7 @@ public class NFTShapeLoaderController : MonoBehaviour
             yield break;
         }
 
-        // We fall back to the nft original image which can have a really big size
+        //We fall back to the nft original image which can have a really big size
         if (!foundDCLImage && !string.IsNullOrEmpty(originalImageURL))
         {
             // Debug.Log($"pravs - NFTShapeLoaderController.FetchNFTImage() - Will download LARGE IMAGE: " + originalImageURL);
@@ -232,6 +232,7 @@ public class NFTShapeLoaderController : MonoBehaviour
             Debug.Log("pravs - Couldn't create external texture!");
             return;
         }
+
         newTex.wrapMode = TextureWrapMode.Clamp;
         imageMaterial.SetTexture(BASEMAP_SHADER_PROPERTY, newTex);
         imageMaterial.SetColor(COLOR_SHADER_PROPERTY, Color.white);
