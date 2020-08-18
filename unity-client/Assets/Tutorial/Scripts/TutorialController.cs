@@ -1,6 +1,5 @@
-﻿using DCL.Controllers;
-using System.Collections;
-using System.Collections.Generic;
+﻿using DCL.Interface;
+using System;
 using UnityEngine;
 
 namespace DCL.Tutorial
@@ -8,13 +7,23 @@ namespace DCL.Tutorial
     public class TutorialController : MonoBehaviour
     {
         public static TutorialController i { private set; get; }
-
         public bool isTutorialEnabled { private set; get; } = false;
+
+        [Flags]
+        public enum TutorialStep
+        {
+            None = 0,
+            EmailRequested = 1
+        }
 
         public void SetTutorialEnabled()
         {
-            CommonScriptableObjects.rendererState.OnChange += OnRenderingStateChanged;
             isTutorialEnabled = true;
+        }
+
+        public void SetStepCompleted(TutorialStep step)
+        {
+            WebInterface.SaveUserTutorialStep(GetTutorialStepFromProfile() | (int)step);
         }
 
         private void Awake()
@@ -22,21 +31,14 @@ namespace DCL.Tutorial
             i = this;
         }
 
-
         private void OnDestroy()
         {
-            CommonScriptableObjects.rendererState.OnChange -= OnRenderingStateChanged;
             i = null;
         }
 
         private int GetTutorialStepFromProfile()
         {
             return UserProfile.GetOwnUserProfile().tutorialStep;
-        }
-
-        private void OnRenderingStateChanged(bool renderingEnabled, bool prevState)
-        {
-            if (!isTutorialEnabled || !renderingEnabled) return;
         }
     }
 }
