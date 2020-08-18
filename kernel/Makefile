@@ -40,7 +40,7 @@ packages/build-ecs/%.js: packages/build-ecs/%.ts packages/build-ecs/tsconfig.jso
 static/loader/lifecycle/worker.js: packages/decentraland-loader/**/*.ts
 	@$(COMPILER) targets/engine/loader.json
 
-static/gif-player/worker.js: packages/gif-player/**/*.ts
+static/gif-player/worker.js: packages/gif-player/*.ts
 	@$(COMPILER) targets/engine/gif-player.json
 
 static/default-profile/contents:

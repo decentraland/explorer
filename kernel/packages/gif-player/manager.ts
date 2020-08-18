@@ -3,6 +3,9 @@ import defaultLogger from 'shared/logger'
 declare const Worker: any
 declare const DCL: any
 
+const offscreenCanvas = new OffscreenCanvas(1,1)
+const offscreenCanvasCtx = offscreenCanvas.getContext('2d')
+
 const gifPlayerWorkerRaw = require('raw-loader!../../static/gif-player/worker.js')
 const gifPlayerWorkerUrl = URL.createObjectURL(new Blob([gifPlayerWorkerRaw]))
 const worker = new Worker(gifPlayerWorkerUrl, { name: 'gifPlayerWorker' })
@@ -11,21 +14,27 @@ class GIF {
   frames: any[]
   width: number = 0
   height: number = 0
-  frameDelays: number[]
+  frameDelays: any[]
   currentFrameIndex: number = 0
   texture: any
+  lastUpdateTime: number = 0
 
-  constructor(frames: any[], width: number, height: number, frameDelays: number[], texture: any) {
+  constructor(frames: any[], width: number, height: number, frameDelays: any[], texture: any) {
     this.frames = frames
     this.texture = texture
     this.frameDelays = frameDelays
+    this.width = width
+    this.height = height
 
-    for (const key in frames) {
-      const arreyBufferFrame = frames[key]
+    for (const key in this.frames) {
+      const frame = this.frames[key]
 
-      const frameImagedata = new ImageData(new Uint8ClampedArray(arreyBufferFrame), width, height)
+      offscreenCanvas.width = frame.dims.width
+      offscreenCanvas.height = frame.dims.height
 
-      frames[key].imageData = frameImagedata
+      const frameImagedata = offscreenCanvasCtx?.createImageData(frame.dims.width, frame.dims.height)
+      frameImagedata?.data.set(frame.patch)
+      frame.imageData = frameImagedata
     }
   }
 }
@@ -39,6 +48,7 @@ export class GIFPlayer {
   gifs: { [id: string]: GIF } = {}
 
   constructor (gameInstance: any, unityInterface: any, isWebGL1: boolean) {
+    defaultLogger.log("pravs - MAIN - CONSTRUCTING GIF PLAYER")
     this.gameInstance = gameInstance
     this.GLctx = this.gameInstance.Module.ctx
     this.unityInterface = unityInterface
@@ -48,11 +58,18 @@ export class GIFPlayer {
     this.playingPromise.catch((error) => defaultLogger.log(error))
 
     worker.onmessage = (e: any) => {
+      defaultLogger.log("pravs - MAIN - GOT BACK FROM WORKER:", e)
+
+      // if (!e.data.width || e.data.width === 0 || e.data.height === 0) {
+      //   defaultLogger.log("pravs - MAIN - width or height is 0!!!")
+      //   return
+      // }
+
       if (e.data.frames.length <= 0) return
 
       const frames = e.data.frames
-      const width = e.data.width
-      const height = e.data.height
+      const width = e.data.frames[0].dims.width
+      const height = e.data.frames[0].dims.height
       const frameDelays = e.data.delays
       const sceneId = e.data.sceneId
       const componentId = e.data.componentId
@@ -68,12 +85,14 @@ export class GIFPlayer {
   }
 
   PlayGIF(data: { imageSource: string, sceneId: string, componentId: string }) {
+    defaultLogger.log("pravs - MAIN - PLAY GIF: ", data.imageSource)
     worker.postMessage({ src: data.imageSource, sceneId: data.sceneId, componentId: data.componentId })
   }
 
   // TODO: If we make sure Unity tracks more than 1 component using the same GIF and calls the StopGIF()
   // when there are no remaining references, then we can just send the src and use that as the key
   StopGIF(data: { sceneId: string, componentId: string }) {
+    defaultLogger.log("pravs - MAIN - STOP GIF")
     const gifId = this.GenerateGIFKey(data.sceneId, data.componentId)
 
     this.GLctx.deleteTexture(DCL.GL.textures[this.gifs[gifId].texture.name])
@@ -88,16 +107,17 @@ export class GIFPlayer {
   async PlayGIFPromise() {
     while (true) {
       const delay = 16 // 60FPS
-      const previousTime = new Date().getTime()
       await new Promise((resolve) => window.setTimeout(resolve, delay))
-
-      const timeDiff = new Date().getTime() - previousTime
 
       for (const key in this.gifs) {
         const gif = this.gifs[key]
+        const currentTimeInMilliseconds = new Date().getTime()
+        const timeDiff = currentTimeInMilliseconds - gif.lastUpdateTime
 
         const enoughTimePassedToChangeFrame = timeDiff >= gif.frameDelays[gif.currentFrameIndex]
         if (!enoughTimePassedToChangeFrame) continue
+
+        gif.lastUpdateTime = currentTimeInMilliseconds
 
         this.UpdateGIFTex(gif.frames[gif.currentFrameIndex].imageData, gif.texture.name)
 

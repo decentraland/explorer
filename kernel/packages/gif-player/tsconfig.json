@@ -33,9 +33,6 @@
       }
     ]
   },
-  "include": [
-    "./src", "worker.ts", "manager.ts"
-  ],
   "exclude": [
     "../../node_modules"
   ]
