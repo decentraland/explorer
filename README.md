@@ -50,6 +50,13 @@ To run the client in first person perspective append the following query paramet
 To spawn in a specific set of coordinates append the following query paramter:
 
     http://localhost:8080/?DEBUG_MODE&fps&position=10,10
+    
+### Troubleshooting
+
+If while trying to compile the Unity project you get an error regarding some libraries that can not be added (for instance Newtonsoft
+Json.NET or Google Protobuf), please execute the following command in the root folder:
+
+    git lfs pull
 
 ## Running tests
 
