@@ -110,7 +110,6 @@ jobs:
                 bash test-ci.sh
                 exit $?
             fi;
-          no_output_timeout: 20m
       - save_cache:
           name: Store test results
           key: unity-tests-{{ checksum "../.unitysources-checksum" }}
