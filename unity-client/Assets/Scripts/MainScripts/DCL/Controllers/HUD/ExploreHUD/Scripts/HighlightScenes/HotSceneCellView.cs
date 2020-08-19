@@ -16,7 +16,7 @@ internal class HotSceneCellView : BaseSceneCellView, ICrowdDataView
     {
         base.Awake();
 
-        crowdCountContainer.SetActive(false);
+        crowdCountContainer.SetActive(crowdInfo.usersTotalCount > 0);
         eventsContainer.SetActive(false);
 
         hoverAreaCallback.OnPointerEnter += () =>
@@ -37,10 +37,21 @@ internal class HotSceneCellView : BaseSceneCellView, ICrowdDataView
     {
         crowdInfo = info;
         crowdCount.text = info.usersTotalCount.ToString();
+        crowdCountContainer.SetActive(info.usersTotalCount > 0);
     }
 
     public override void JumpInPressed()
     {
-        JumpIn(crowdInfo.baseCoords, crowdInfo.realms[0].serverName, crowdInfo.realms[0].layer);
+        HotScenesController.HotSceneInfo.Realm realm = new HotScenesController.HotSceneInfo.Realm() { layer = null, serverName = null };
+        for (int i = 0; i < crowdInfo.realms.Length; i++)
+        {
+            if (crowdInfo.realms[i].usersCount < crowdInfo.realms[i].usersMax)
+            {
+                realm = crowdInfo.realms[i];
+                break;
+            }
+        }
+
+        JumpIn(crowdInfo.baseCoords, realm.serverName, realm.layer);
     }
 }
