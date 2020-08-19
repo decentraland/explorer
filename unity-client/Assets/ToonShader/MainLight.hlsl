@@ -24,10 +24,6 @@ void GetShadowInformation_float(float3 WorldPos, out float3 ShadowAtten)
             half4 shadowCoord = TransformWorldToShadowCoord(WorldPos);
         #endif
         
-        #if !defined(_MAIN_LIGHT_SHADOWS) || defined(_RECEIVE_SHADOWS_OFF)
-            ShadowAtten = 1.0;
-        #endif
-        
         #if SHADOWS_SCREEN
             ShadowAtten = SampleScreenSpaceShadowmap(shadowCoord);
         #else
@@ -40,6 +36,10 @@ void GetShadowInformation_float(float3 WorldPos, out float3 ShadowAtten)
         
         Light light = GetMainLight();
         ShadowAtten += light.distanceAttenuation;
+
+        #if !defined(_MAIN_LIGHT_SHADOWS) || defined(_RECEIVE_SHADOWS_OFF)
+            ShadowAtten = 1.0;
+        #endif
         
     #endif
 }
