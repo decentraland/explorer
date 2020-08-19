@@ -7,6 +7,8 @@ using DCL.Tutorial;
 
 public class EmailPromptHUDController : IHUD
 {
+    const float POPUP_DELAY = 60;
+
     EmailPromptHUDView view;
 
     bool isRendererEnabled = false;
@@ -87,7 +89,7 @@ public class EmailPromptHUDController : IHUD
             return;
 
         isTimerCreated = true;
-        timerRoutine = CoroutineStarter.Start(WaitForSeconds(60));
+        timerRoutine = CoroutineStarter.Start(WaitForSeconds(POPUP_DELAY));
     }
 
     IEnumerator WaitForSeconds(float seconds)
