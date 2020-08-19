@@ -20,11 +20,13 @@ internal class GotoMagicButton : MonoBehaviour, IPointerEnterHandler, IPointerEx
 
     void IPointerEnterHandler.OnPointerEnter(PointerEventData eventData)
     {
+        buttonAnimator.ResetTrigger("Normal");
         buttonAnimator.SetTrigger("Highlighted");
     }
 
     void IPointerExitHandler.OnPointerExit(PointerEventData eventData)
     {
+        buttonAnimator.ResetTrigger("Highlighted");
         buttonAnimator.SetTrigger("Normal");
     }
 }
