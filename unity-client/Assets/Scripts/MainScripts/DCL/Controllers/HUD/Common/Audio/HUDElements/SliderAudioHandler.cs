@@ -53,7 +53,7 @@ public class SliderAudioHandler : MonoBehaviour, IPointerDownHandler, IPointerUp
     {
         if (audioPlayer != null && valueIncrementTimer == 0f)
         {
-            audioPlayer.Play(HUDAudioPlayer.Sound.valueChange, 1f + (slider.value / slider.maxValue) * 1.5f);
+            audioPlayer.Play(HUDAudioPlayer.Sound.valueChange, 1f + ((slider.value - slider.minValue) / (slider.maxValue - slider.minValue)) * 1.5f);
             valueIncrementTimer = INCREMENT_SOUND_INTERVAL;
         }
     }
