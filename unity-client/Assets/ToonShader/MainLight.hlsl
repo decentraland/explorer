@@ -35,11 +35,6 @@ void GetShadowInformation_float(float3 WorldPos, out float3 ShadowAtten)
         #endif
         
         Light light = GetMainLight();
-        ShadowAtten += 0.4;
-
-        #if !defined(_MAIN_LIGHT_SHADOWS_CASCADE) || defined(_RECEIVE_SHADOWS_OFF)
-            ShadowAtten = 1.0;
-        #endif
-        
+        ShadowAtten += 0.4;        
     #endif
 }
