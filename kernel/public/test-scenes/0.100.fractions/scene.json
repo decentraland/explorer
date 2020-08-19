@@ -24,7 +24,7 @@
     "voiceEnabled": true,
     "blacklist": []
   },
-  "main": "bin/game.js",
+  "main": "game.js",
   "tags": [],
   "spawnPoints": [
     {
