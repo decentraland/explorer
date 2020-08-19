@@ -268,7 +268,6 @@ GameObject:
   m_Component:
   - component: {fileID: 939965443422406254}
   - component: {fileID: 5787164180586272654}
-  - component: {fileID: 8690675031084386320}
   - component: {fileID: 1638813764987960748}
   m_Layer: 5
   m_Name: Container_GoToMagic
@@ -316,18 +315,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   buttonAnimator: {fileID: 1638813764987960748}
---- !u!225 &8690675031084386320
-CanvasGroup:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4723230744472303582}
-  m_Enabled: 1
-  m_Alpha: 1
-  m_Interactable: 1
-  m_BlocksRaycasts: 1
-  m_IgnoreParentGroups: 1
 --- !u!95 &1638813764987960748
 Animator:
   serializedVersion: 3
