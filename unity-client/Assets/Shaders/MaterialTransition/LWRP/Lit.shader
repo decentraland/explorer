@@ -29,6 +29,14 @@ Shader "DCL/LWRP/Lit"
         //NOTE(Brian): Had to hack this because CopyPropertiesFromMaterial has a bug and removes
         //             the _MatCap property if isn't present in the source material. There's no way to add it back afterwards.
         [HideInInspector] _MatCap("ToonShader MatCap Map", 2D) = "bump" {}
+        
+        //NOTE(Brian): Had to hack this because CopyPropertiesFromMaterial has a bug and removes
+        //             the _GlossMatCap property if isn't present in the source material. There's no way to add it back afterwards.
+        [HideInInspector] _GlossMatCap("ToonShader MatCap Map 2", 2D) = "bump" {}
+        
+        //NOTE(Brian): Had to hack this because CopyPropertiesFromMaterial has a bug and removes
+        //             the _FresnelMatCap property if isn't present in the source material. There's no way to add it back afterwards.
+        [HideInInspector] _FresnelMatCap("ToonShader MatCap Map 3", 2D) = "bump" {}
 
         _OcclusionStrength("Strength", Range(0.0, 1.0)) = 1.0
         _OcclusionMap("Occlusion", 2D) = "white" {}

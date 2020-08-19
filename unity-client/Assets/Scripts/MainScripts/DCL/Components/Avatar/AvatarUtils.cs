@@ -111,9 +111,17 @@ public static class AvatarUtils
                 Material copy = new Material(replaceThemWith);
 
                 Texture _MatCap = null;
+                Texture _GMatCap = null;
+                Texture _FMatCap = null;
 
                 if (replaceThemWith.HasProperty("_MatCap"))
                     _MatCap = replaceThemWith.GetTexture("_MatCap");
+
+                if (replaceThemWith.HasProperty("_GlossMatCap"))
+                    _GMatCap = replaceThemWith.GetTexture("_GlossMatCap");
+
+                if (replaceThemWith.HasProperty("_FresnelMatCap"))
+                    _FMatCap = replaceThemWith.GetTexture("_FresnelMatCap");
 
                 //NOTE(Brian): This method has a bug, if the material being copied lacks a property of the source material,
                 //             the source material property will get erased. It can't be added back and even the material inspector crashes.
@@ -123,10 +131,19 @@ public static class AvatarUtils
                 if (_MatCap != null)
                     copy.SetTexture("_MatCap", _MatCap);
 
-                int zWrite = (int) copy.GetFloat(ShaderUtils._ZWrite);
+                if (_GMatCap != null)
+                    copy.SetTexture("_GlossMatCap", _MatCap);
 
-                if (zWrite == 0)
-                    copy.renderQueue = (int) UnityEngine.Rendering.RenderQueue.Transparent;
+                if (_FMatCap != null)
+                    copy.SetTexture("_FresnelMatCap", _MatCap);
+
+                if (copy.HasProperty(ShaderUtils._ZWrite))
+                {
+                    int zWrite = (int) copy.GetFloat(ShaderUtils._ZWrite);
+
+                    if (zWrite == 0)
+                        copy.renderQueue = (int) UnityEngine.Rendering.RenderQueue.Transparent;
+                }
 
                 result.Add(copy);
                 return copy;
