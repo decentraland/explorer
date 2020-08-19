@@ -92,8 +92,8 @@ public class WearableController
             materials = AvatarUtils.ReplaceMaterialsWithCopiesOf(assetContainer.transform, defaultMaterial);
         }
 
-        var sssParams1 = new Vector4(.3f, 2f, 1f, 0.5f);
-        AvatarUtils.SetColorInHierarchyForSkin(assetContainer.transform, MATERIAL_FILTER_SKIN, skinColor, sssParams1, 0.75f);
+        var sssParams1 = new Vector4(.5f, 1f, 1f, 1f);
+        AvatarUtils.SetColorInHierarchyForSkin(assetContainer.transform, MATERIAL_FILTER_SKIN, skinColor, sssParams1, 1f);
 
         var sssParams2 = new Vector4(1.52f, 2.5f, 1.0f, 0.71f);
         AvatarUtils.SetColorInHierarchyForSkin(assetContainer.transform, MATERIAL_FILTER_HAIR, hairColor, sssParams2, 1f);
