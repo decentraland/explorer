@@ -13,7 +13,8 @@ namespace DCL.Tutorial
         public enum TutorialStep
         {
             None = 0,
-            EmailRequested = 1
+            OldTutorialValue = 99, // NOTE: old tutorial set tutorialStep to 99 when finished
+            EmailRequested = 128
         }
 
         public void SetTutorialEnabled()
