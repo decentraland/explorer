@@ -33,8 +33,5 @@ void GetShadowInformation_float(float3 WorldPos, out float3 ShadowAtten)
             sampler_MainLightShadowmapTexture),
             shadowSamplingData, shadowStrength, false);
         #endif
-        
-        Light light = GetMainLight();
-        ShadowAtten += 0.4;        
     #endif
 }
