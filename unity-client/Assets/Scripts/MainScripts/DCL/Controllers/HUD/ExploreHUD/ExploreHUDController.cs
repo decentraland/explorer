@@ -78,6 +78,7 @@ public class ExploreHUDController : IHUD
     {
         if (view)
         {
+            SetVisibility(!view.IsVisible());
             OnToggleTriggered?.Invoke();
         }
     }

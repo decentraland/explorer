@@ -297,7 +297,6 @@ public class HUDController : MonoBehaviour
                 if (exploreHud != null)
                 {
                     exploreHud.Initialize(FriendsController.i);
-                    taskbarHud?.AddExploreHud(exploreHud);
                 }
                 break;
         }
