@@ -290,7 +290,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4bfd0d144b6d3dd438b84fa14a062c4f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  extraClickSound: 10
+  extraClickSound: 0
+  playHoverSound: 1
 --- !u!1 &2765004884216864864
 GameObject:
   m_ObjectHideFlags: 0
@@ -621,7 +622,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4bfd0d144b6d3dd438b84fa14a062c4f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  extraClickSound: 10
+  extraClickSound: 0
+  playHoverSound: 1
 --- !u!1 &5811195269506904004
 GameObject:
   m_ObjectHideFlags: 0
@@ -1375,6 +1377,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   extraClickSound: 0
+  playHoverSound: 1
 --- !u!1 &8859036475654810075
 GameObject:
   m_ObjectHideFlags: 0
@@ -1509,6 +1512,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   extraClickSound: 0
+  playHoverSound: 1
 --- !u!1 &8867828480623445154
 GameObject:
   m_ObjectHideFlags: 0
