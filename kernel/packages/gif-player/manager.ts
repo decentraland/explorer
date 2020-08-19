@@ -3,8 +3,10 @@ import defaultLogger from 'shared/logger'
 declare const Worker: any
 declare const DCL: any
 
-const offscreenCanvas = new OffscreenCanvas(1,1)
-const offscreenCanvasCtx = offscreenCanvas.getContext('2d')
+const gifCanvas = new OffscreenCanvas(1,1)
+const gifCanvasCtx = gifCanvas.getContext('2d')
+const gifPatchCanvas = new OffscreenCanvas(1,1)
+const gifPatchCanvasCtx = gifPatchCanvas.getContext('2d')
 
 const gifPlayerWorkerRaw = require('raw-loader!../../static/gif-player/worker.js')
 const gifPlayerWorkerUrl = URL.createObjectURL(new Blob([gifPlayerWorkerRaw]))
@@ -26,15 +28,28 @@ class GIF {
     this.width = width
     this.height = height
 
-    for (const key in this.frames) {
-      const frame = this.frames[key]
+    gifCanvas.width = width
+    gifCanvas.height = height
 
-      offscreenCanvas.width = frame.dims.width
-      offscreenCanvas.height = frame.dims.height
+    let frameImageData = undefined
+    for (let i = 0; i < this.frames.length; i++) {
+      const frame = this.frames[i]
 
-      const frameImagedata = offscreenCanvasCtx?.createImageData(frame.dims.width, frame.dims.height)
-      frameImagedata?.data.set(frame.patch)
-      frame.imageData = frameImagedata
+      if (!frameImageData || frame.dims.width !== this.frames[i - 1].imageData.width || frame.dims.height !== this.frames[i - 1].imageData.height) {
+        gifPatchCanvas.width = frame.dims.width
+        gifPatchCanvas.height = frame.dims.height
+
+        frameImageData = gifPatchCanvasCtx?.createImageData(frame.dims.width, frame.dims.height)
+      }
+
+      if (frameImageData) {
+        frameImageData.data.set(frame.patch)
+        gifPatchCanvasCtx?.putImageData(frameImageData, 0, 0)
+
+        gifCanvasCtx?.drawImage(gifPatchCanvas, frame.dims.left, frame.dims.top)
+      }
+
+      frame.imageData = gifCanvasCtx?.getImageData(0, 0, gifCanvas.width , gifCanvas.height)
     }
   }
 }
