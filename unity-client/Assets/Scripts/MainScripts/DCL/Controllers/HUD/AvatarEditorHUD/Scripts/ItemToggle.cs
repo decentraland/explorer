@@ -10,7 +10,6 @@ public class ItemToggle : UIButton, IPointerEnterHandler, IPointerExitHandler
 {
     public event System.Action<ItemToggle> OnClicked;
     public event System.Action<ItemToggle> OnSellClicked;
-    public event System.Action<bool> OnThumbnailGotten;
 
     public WearableItem wearableItem { get; private set; }
 
@@ -66,8 +65,6 @@ public class ItemToggle : UIButton, IPointerEnterHandler, IPointerExitHandler
 
         if (gameObject.activeInHierarchy)
             GetThumbnail();
-        else
-            OnThumbnailGotten?.Invoke(false);
     }
 
     public void OnPointerEnter(PointerEventData eventData)
@@ -95,7 +92,8 @@ public class ItemToggle : UIButton, IPointerEnterHandler, IPointerExitHandler
 
         thumbnail.sprite = ThumbnailsManager.CreateSpriteFromTexture(texture.texture);
 
-        OnThumbnailGotten?.Invoke(true);
+        if (HUDAudioPlayer.i != null)
+            HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.listItemAppear);
     }
 
     private void OnEnable()

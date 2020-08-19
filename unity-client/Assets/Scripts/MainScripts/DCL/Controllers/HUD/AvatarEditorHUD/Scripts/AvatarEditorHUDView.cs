@@ -253,22 +253,10 @@ public class AvatarEditorHUDView : MonoBehaviour
         }
 
         selectorsByCategory[wearableItem.category].AddItemToggle(wearableItem, amount);
-        if (selectorsByCategory[wearableItem.category].itemToggles.ContainsKey(wearableItem.id))
-        {
-            selectorsByCategory[wearableItem.category].itemToggles[wearableItem.id].OnThumbnailGotten -= AvatarEditorHUDView_OnThumbnailGotten;
-            selectorsByCategory[wearableItem.category].itemToggles[wearableItem.id].OnThumbnailGotten += AvatarEditorHUDView_OnThumbnailGotten;
-        }
-
         if (wearableItem.IsCollectible())
         {
             collectiblesItemSelector.AddItemToggle(wearableItem, amount);
         }
-    }
-
-    private void AvatarEditorHUDView_OnThumbnailGotten(bool isThumbnailCreated)
-    {
-        if (isThumbnailCreated && isOpen && HUDAudioPlayer.i != null)
-            HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.listItemAppear);
     }
 
     public void RemoveWearable(WearableItem wearableItem)
