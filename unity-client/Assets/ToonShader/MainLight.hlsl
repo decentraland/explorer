@@ -18,10 +18,10 @@ void GetShadowInformation_float(float3 WorldPos, out float3 ShadowAtten)
         ShadowAtten = 1;
     #else 
         #if SHADOWS_SCREEN
-            half4 clipPos = TransformWorldToHClip(WorldPos);
-            half4 shadowCoord = ComputeScreenPos(clipPos);
+            float4 clipPos = TransformWorldToHClip(WorldPos);
+            float4 shadowCoord = ComputeScreenPos(clipPos);
         #else
-            half4 shadowCoord = TransformWorldToShadowCoord(WorldPos);
+            float4 shadowCoord = TransformWorldToShadowCoord(WorldPos);
         #endif
         
         #if SHADOWS_SCREEN
@@ -35,9 +35,9 @@ void GetShadowInformation_float(float3 WorldPos, out float3 ShadowAtten)
         #endif
         
         Light light = GetMainLight();
-        ShadowAtten += light.distanceAttenuation;
+        ShadowAtten += 0.4;
 
-        #if !defined(_MAIN_LIGHT_SHADOWS) || defined(_RECEIVE_SHADOWS_OFF)
+        #if !defined(_MAIN_LIGHT_SHADOWS_CASCADE) || defined(_RECEIVE_SHADOWS_OFF)
             ShadowAtten = 1.0;
         #endif
         

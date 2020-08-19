@@ -29,7 +29,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _FresnelMatCap:
-        m_Texture: {fileID: 2800000, guid: 06fed8c1808c027439361d6c851113ac, type: 3}
+        m_Texture: {fileID: 2800000, guid: a815c0d593c2d4fe3b0db4e5fc480bc4, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _GlossMatCap:
@@ -37,15 +37,17 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MatCap:
-        m_Texture: {fileID: 2800000, guid: 06fed8c1808c027439361d6c851113ac, type: 3}
+        m_Texture: {fileID: 2800000, guid: d15bbb298e2c3455892021eaeb0c6feb, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Floats:
     - _AlphaClip: 0
     - _Cull: 2
     - _DstBlend: 0
+    - _SSSIntensity: 0
     - _SrcBlend: 1
     - _ZWrite: 1
     m_Colors:
     - _BaseColor: {r: 0.6132076, g: 0.6132076, b: 0.6132076, a: 1}
     - _EmissionColor: {r: 1, g: 1, b: 1, a: 1}
+    - _SSSParams: {r: 0, g: 0, b: 0, a: 0}
