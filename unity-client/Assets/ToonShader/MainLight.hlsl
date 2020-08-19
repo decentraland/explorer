@@ -33,5 +33,10 @@ void GetShadowInformation_float(float3 WorldPos, out float3 ShadowAtten)
             sampler_MainLightShadowmapTexture),
             shadowSamplingData, shadowStrength, false);
         #endif
+        
+        #if defined(_RECEIVE_SHADOWS_OFF)
+            ShadowAtten = 1;
+        #endif
+
     #endif
 }

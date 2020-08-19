@@ -122,6 +122,8 @@ public class BodyShapeController : WearableController
 
     protected override void PrepareWearable(GameObject assetContainer)
     {
+        base.PrepareWearable(assetContainer);
+
         skinnedMeshRenderer = assetContainer.GetComponentInChildren<SkinnedMeshRenderer>();
 
         var animation = PrepareAnimation(assetContainer);
