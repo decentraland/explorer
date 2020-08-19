@@ -252,10 +252,10 @@ public class AvatarEditorHUDView : MonoBehaviour
             return;
         }
 
-        selectorsByCategory[wearableItem.category].AddItemToggle(wearableItem, amount, this);
+        selectorsByCategory[wearableItem.category].AddItemToggle(wearableItem, amount);
         if (wearableItem.IsCollectible())
         {
-            collectiblesItemSelector.AddItemToggle(wearableItem, amount, this);
+            collectiblesItemSelector.AddItemToggle(wearableItem, amount);
         }
     }
 

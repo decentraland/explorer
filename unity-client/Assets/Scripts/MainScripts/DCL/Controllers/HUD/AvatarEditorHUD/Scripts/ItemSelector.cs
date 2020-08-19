@@ -26,7 +26,7 @@ public class ItemSelector : MonoBehaviour
         };
     }
 
-    public void AddItemToggle(WearableItem item, int amount, AvatarEditorHUDView avatarEditorHUDView = null)
+    public void AddItemToggle(WearableItem item, int amount)
     {
         if (item == null) return;
         if (itemToggles.ContainsKey(item.id)) return;
@@ -42,7 +42,7 @@ public class ItemSelector : MonoBehaviour
             newToggle = itemToggleFactory.CreateBaseWearable(itemContainer);
         }
 
-        newToggle.Initialize(item, false, amount, avatarEditorHUDView);
+        newToggle.Initialize(item, false, amount);
         newToggle.OnClicked += ToggleClicked;
         newToggle.OnSellClicked += SellClicked;
         itemToggles.Add(item.id, newToggle);

@@ -24,8 +24,6 @@ public class ItemToggle : UIButton, IPointerEnterHandler, IPointerExitHandler
     private string loadedThumbnailURL;
     private AssetPromise_Texture loadedThumbnailPromise;
 
-    private AvatarEditorHUDView avatarEditorHUDView;
-
     //Todo change this for a confirmation popup or implement it in a more elegant way
     public static Func<WearableItem, List<WearableItem>> getEquippedWearablesReplacedByFunc;
 
@@ -58,9 +56,8 @@ public class ItemToggle : UIButton, IPointerEnterHandler, IPointerExitHandler
         warningPanel.SetActive(false);
     }
 
-    public virtual void Initialize(WearableItem w, bool isSelected, int amount, AvatarEditorHUDView avatarEditorHUDView = null)
+    public virtual void Initialize(WearableItem w, bool isSelected, int amount)
     {
-        this.avatarEditorHUDView = avatarEditorHUDView;
         wearableItem = w;
         selected = isSelected;
         amountContainer.gameObject.SetActive(amount > 1);
@@ -95,8 +92,8 @@ public class ItemToggle : UIButton, IPointerEnterHandler, IPointerExitHandler
 
         thumbnail.sprite = ThumbnailsManager.CreateSpriteFromTexture(texture.texture);
 
-        //if (HUDAudioPlayer.i != null && avatarEditorHUDView != null && avatarEditorHUDView.isOpen)
-        //    HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.listItemAppear);
+        if (HUDAudioPlayer.i != null)
+            HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.listItemAppear);
     }
 
     private void OnEnable()
