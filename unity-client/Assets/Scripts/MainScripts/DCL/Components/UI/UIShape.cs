@@ -202,8 +202,9 @@ namespace DCL.Components
             }
 
             uiGameObject =
-                UnityEngine.Object.Instantiate(Resources.Load(prefabPath), parentUIComponent.childHookRectTransform) as
-                    GameObject;
+                UnityEngine.Object.Instantiate(
+                    Resources.Load(prefabPath),
+                    parentUIComponent != null ? parentUIComponent.childHookRectTransform : null) as GameObject;
             referencesContainer = uiGameObject.GetComponent<T>();
 
             referencesContainer.rectTransform.SetToMaxStretch();
@@ -217,12 +218,12 @@ namespace DCL.Components
 
         public virtual void RefreshAll()
         {
-            RefreshDCLLayoutRecursively();
+            RefreshDCLLayoutRecursively(refreshSize: true, refreshAlignmentAndPosition: false);
             FixMaxStretchRecursively();
             RefreshDCLLayoutRecursively_Internal(refreshSize: false, refreshAlignmentAndPosition: true);
         }
 
-        public virtual void RefreshDCLLayout(bool refreshSize = true, bool refreshAlignmentAndPosition = true)
+        public void RefreshDCLLayout(bool refreshSize = true, bool refreshAlignmentAndPosition = true)
         {
             RectTransform parentRT = referencesContainer.GetComponentInParent<RectTransform>();
 
@@ -238,7 +239,7 @@ namespace DCL.Components
             }
         }
 
-        protected void RefreshDCLSize(RectTransform parentTransform = null)
+        protected virtual void RefreshDCLSize(RectTransform parentTransform = null)
         {
             if (parentTransform == null)
             {
@@ -249,8 +250,6 @@ namespace DCL.Components
                 model.width.GetScaledValue(parentTransform.rect.width));
             referencesContainer.layoutElementRT.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical,
                 model.height.GetScaledValue(parentTransform.rect.height));
-
-            referencesContainer.layoutElementRT.ForceUpdateRectTransforms();
         }
 
         public void RefreshDCLAlignmentAndPosition(RectTransform parentTransform = null)
@@ -262,7 +261,7 @@ namespace DCL.Components
 
             referencesContainer.layoutElement.ignoreLayout = false;
             ConfigureAlignment(referencesContainer.layoutGroup);
-            LayoutRebuilder.ForceRebuildLayoutImmediate(referencesContainer.layoutGroup.transform as RectTransform);
+            Utils.ForceRebuildLayoutImmediate(parentTransform);
             referencesContainer.layoutElement.ignoreLayout = true;
 
             // Reposition
