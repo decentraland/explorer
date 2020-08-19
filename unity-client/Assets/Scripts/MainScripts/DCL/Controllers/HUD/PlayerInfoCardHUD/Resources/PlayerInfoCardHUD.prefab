@@ -438,6 +438,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   extraClickSound: 10
+  playHoverSound: 1
 --- !u!1 &1193018594340784404
 GameObject:
   m_ObjectHideFlags: 0
@@ -1000,6 +1001,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   extraClickSound: 0
+  playHoverSound: 1
 --- !u!1 &1547998060326441118
 GameObject:
   m_ObjectHideFlags: 0
@@ -2044,6 +2046,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   extraClickSound: 0
+  playHoverSound: 1
 --- !u!1 &2054052090630472337
 GameObject:
   m_ObjectHideFlags: 0
@@ -2388,6 +2391,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   extraClickSound: 9
+  playHoverSound: 1
 --- !u!1 &2184345005228500431
 GameObject:
   m_ObjectHideFlags: 0
@@ -2561,6 +2565,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   extraClickSound: 5
+  playHoverSound: 1
 --- !u!1 &2348666775600967713
 GameObject:
   m_ObjectHideFlags: 0
@@ -2941,6 +2946,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   extraClickSound: 10
+  playHoverSound: 1
 --- !u!1 &2712932112715226368
 GameObject:
   m_ObjectHideFlags: 0
@@ -3297,6 +3303,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   extraClickSound: 0
+  playHoverSound: 1
 --- !u!1 &3049173983756084367
 GameObject:
   m_ObjectHideFlags: 0
@@ -4012,6 +4019,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   extraClickSound: 4
+  playHoverSound: 1
 --- !u!1 &4330974646726201636
 GameObject:
   m_ObjectHideFlags: 0
@@ -4785,6 +4793,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   extraClickSound: 0
+  playHoverSound: 0
 --- !u!1 &5610696480820155045
 GameObject:
   m_ObjectHideFlags: 0
@@ -5733,6 +5742,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   extraClickSound: 0
+  playHoverSound: 0
 --- !u!1 &7638501430301255021
 GameObject:
   m_ObjectHideFlags: 0
@@ -6039,6 +6049,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   extraClickSound: 0
+  playHoverSound: 0
 --- !u!1 &8155148640584326364
 GameObject:
   m_ObjectHideFlags: 0
