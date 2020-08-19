@@ -3,17 +3,13 @@ import defaultLogger from 'shared/logger'
 declare const Worker: any
 declare const DCL: any
 
-const gifCanvas = new OffscreenCanvas(1,1)
-const gifCanvasCtx = gifCanvas.getContext('2d')
-const gifPatchCanvas = new OffscreenCanvas(1,1)
-const gifPatchCanvasCtx = gifPatchCanvas.getContext('2d')
-
 const gifPlayerWorkerRaw = require('raw-loader!../../static/gif-player/worker.js')
 const gifPlayerWorkerUrl = URL.createObjectURL(new Blob([gifPlayerWorkerRaw]))
 const worker = new Worker(gifPlayerWorkerUrl, { name: 'gifPlayerWorker' })
 
 class GIF {
-  frames: any[]
+  frames: any[] = new Array()
+  arrayBufferFrames: any[]
   width: number = 0
   height: number = 0
   frameDelays: any[]
@@ -22,34 +18,14 @@ class GIF {
   lastUpdateTime: number = 0
 
   constructor(frames: any[], width: number, height: number, frameDelays: any[], texture: any) {
-    this.frames = frames
+    this.arrayBufferFrames = frames
     this.texture = texture
     this.frameDelays = frameDelays
     this.width = width
     this.height = height
 
-    gifCanvas.width = width
-    gifCanvas.height = height
-
-    let frameImageData = undefined
-    for (let i = 0; i < this.frames.length; i++) {
-      const frame = this.frames[i]
-
-      if (!frameImageData || frame.dims.width !== this.frames[i - 1].imageData.width || frame.dims.height !== this.frames[i - 1].imageData.height) {
-        gifPatchCanvas.width = frame.dims.width
-        gifPatchCanvas.height = frame.dims.height
-
-        frameImageData = gifPatchCanvasCtx?.createImageData(frame.dims.width, frame.dims.height)
-      }
-
-      if (frameImageData) {
-        frameImageData.data.set(frame.patch)
-        gifPatchCanvasCtx?.putImageData(frameImageData, 0, 0)
-
-        gifCanvasCtx?.drawImage(gifPatchCanvas, frame.dims.left, frame.dims.top)
-      }
-
-      frame.imageData = gifCanvasCtx?.getImageData(0, 0, gifCanvas.width , gifCanvas.height)
+    for (const key in this.arrayBufferFrames) {
+      this.frames.push(new ImageData(new Uint8ClampedArray(this.arrayBufferFrames[key]), width, height))
     }
   }
 }
@@ -77,9 +53,9 @@ export class GIFPlayer {
 
       if (e.data.frames.length <= 0) return
 
-      const frames = e.data.frames
-      const width = e.data.frames[0].dims.width
-      const height = e.data.frames[0].dims.height
+      const frames = e.data.arrayBufferFrames
+      const width = e.data.width
+      const height = e.data.height
       const frameDelays = e.data.delays
       const sceneId = e.data.sceneId
       const componentId = e.data.componentId
@@ -129,7 +105,7 @@ export class GIFPlayer {
 
         gif.lastUpdateTime = currentTimeInMilliseconds
 
-        this.UpdateGIFTex(gif.frames[gif.currentFrameIndex].imageData, gif.texture.name)
+        this.UpdateGIFTex(gif.frames[gif.currentFrameIndex], gif.texture.name)
 
         if (++gif.currentFrameIndex === gif.frames.length) {
           gif.currentFrameIndex = 0
