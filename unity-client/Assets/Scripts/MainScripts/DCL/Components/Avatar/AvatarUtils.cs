@@ -73,6 +73,30 @@ public static class AvatarUtils
             materialsContainingThisName);
     }
 
+    public static void SetColorInHierarchyForSkin(Transform transformRoot,
+        string materialsContainingThisName,
+        Color colorToChange,
+        Vector4 sssParams,
+        float sssIntensity = 1,
+        string shaderId = "_BaseColor")
+    {
+        Renderer[] renderers = transformRoot.GetComponentsInChildren<Renderer>();
+
+        int _Color = Shader.PropertyToID(shaderId);
+
+        MapSharedMaterialsRecursively(
+            transformRoot,
+            (mat) =>
+            {
+                mat.SetColor(_Color, colorToChange);
+                mat.SetVector("_SSSParams", sssParams);
+                mat.SetFloat("_SSSIntensity", sssIntensity);
+                return mat;
+            },
+            materialsContainingThisName);
+    }
+
+
     /// <summary>
     /// This will search all the transform hierachy for all renderers,
     /// and replace all of its materials containing the specified name by the new one.
@@ -123,19 +147,34 @@ public static class AvatarUtils
                 if (replaceThemWith.HasProperty("_FresnelMatCap"))
                     _FMatCap = replaceThemWith.GetTexture("_FresnelMatCap");
 
+                float? sssIntensity = null;
+                Vector4? sssParams = null;
+
+                if (replaceThemWith.HasProperty("_SSSIntensity"))
+                    sssIntensity = replaceThemWith.GetFloat("_SSSIntensity");
+
+                if (replaceThemWith.HasProperty("_SSSParams"))
+                    sssParams = replaceThemWith.GetVector("_SSSParams");
+
                 //NOTE(Brian): This method has a bug, if the material being copied lacks a property of the source material,
                 //             the source material property will get erased. It can't be added back and even the material inspector crashes.
                 //             Check the comment in Lit.shader.
                 copy.CopyPropertiesFromMaterial(mat);
 
+                if (sssParams.HasValue)
+                    copy.SetVector("_SSSParams", sssParams.Value);
+
+                if (sssIntensity.HasValue)
+                    copy.SetFloat("_SSSIntensity", sssIntensity.Value);
+
                 if (_MatCap != null)
                     copy.SetTexture("_MatCap", _MatCap);
 
                 if (_GMatCap != null)
-                    copy.SetTexture("_GlossMatCap", _MatCap);
+                    copy.SetTexture("_GlossMatCap", _GMatCap);
 
                 if (_FMatCap != null)
-                    copy.SetTexture("_FresnelMatCap", _MatCap);
+                    copy.SetTexture("_FresnelMatCap", _FMatCap);
 
                 if (copy.HasProperty(ShaderUtils._ZWrite))
                 {

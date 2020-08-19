@@ -37,6 +37,8 @@ Shader "DCL/LWRP/Lit"
         //NOTE(Brian): Had to hack this because CopyPropertiesFromMaterial has a bug and removes
         //             the _FresnelMatCap property if isn't present in the source material. There's no way to add it back afterwards.
         [HideInInspector] _FresnelMatCap("ToonShader MatCap Map 3", 2D) = "bump" {}
+        [HideInInspector] _SSSIntensity("Used by toon shader", Float) = 0
+        [HideInInspector] _SSSParams("Used by toon shader", Vector) = (1,1,1,1)
 
         _OcclusionStrength("Strength", Range(0.0, 1.0)) = 1.0
         _OcclusionMap("Occlusion", 2D) = "white" {}
