@@ -50,8 +50,6 @@ public class ItemToggle : UIButton, IPointerEnterHandler, IPointerExitHandler
         base.Awake();
         thumbnail.sprite = null;
         warningPanel.SetActive(false);
-
-        avatarEditorHUDView = GetComponentInParent<AvatarEditorHUDView>();
     }
 
     protected override void OnClick()
@@ -60,8 +58,9 @@ public class ItemToggle : UIButton, IPointerEnterHandler, IPointerExitHandler
         warningPanel.SetActive(false);
     }
 
-    public virtual void Initialize(WearableItem w, bool isSelected, int amount)
+    public virtual void Initialize(WearableItem w, bool isSelected, int amount, AvatarEditorHUDView avatarEditorHUDView = null)
     {
+        this.avatarEditorHUDView = avatarEditorHUDView;
         wearableItem = w;
         selected = isSelected;
         amountContainer.gameObject.SetActive(amount > 1);

@@ -23,9 +23,9 @@ public class NFTItemToggle : ItemToggle
         sellButton.onClick.AddListener(CallOnSellClicked);
     }
 
-    public override void Initialize(WearableItem w, bool isSelected, int amount)
+    public override void Initialize(WearableItem w, bool isSelected, int amount, AvatarEditorHUDView avatarEditorHUDView = null)
     {
-        base.Initialize(w, isSelected, amount);
+        base.Initialize(w, isSelected, amount, avatarEditorHUDView);
         nftItemInfo.SetModel(NFTItemInfo.Model.FromWearableItem(wearableItem));
     }
 
