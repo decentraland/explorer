@@ -42,6 +42,7 @@ internal class HighlightScenesController : MonoBehaviour
         {
             loadingSpinner.SetActive(false);
         }
+        scrollRect.verticalNormalizedPosition = 1;
     }
 
     void FetchHotScenes()
@@ -149,10 +150,5 @@ internal class HighlightScenesController : MonoBehaviour
     {
         HotScenesController.i.OnHotSceneListFinishUpdating -= OnFetchHotScenes;
         hotScenesViewPool?.Dispose();
-    }
-
-    void OnEnable()
-    {
-        scrollRect.verticalNormalizedPosition = 1;
     }
 }

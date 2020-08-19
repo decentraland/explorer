@@ -17,7 +17,7 @@ public class ExploreHUDController : IHUD
     {
         view = UnityEngine.Object.Instantiate(Resources.Load<GameObject>("ExploreHUD")).GetComponent<ExploreHUDView>();
         view.name = "_ExploreHUD";
-        view.gameObject.SetActive(false);
+        view.popup.gameObject.SetActive(false);
 
         toggleExploreTrigger = Resources.Load<InputAction_Trigger>("ToggleExploreHud");
         toggleExploreTrigger.OnTriggered += OnToggleActionTriggered;
@@ -31,6 +31,7 @@ public class ExploreHUDController : IHUD
         };
 
         view.gotoMagicButton.OnGotoMagicPressed += GoToMagic;
+        view.togglePopupButton.OnPressed += () => toggleExploreTrigger.RaiseOnTriggered();
         BaseSceneCellView.OnJumpIn += OnJumpIn;
     }
 

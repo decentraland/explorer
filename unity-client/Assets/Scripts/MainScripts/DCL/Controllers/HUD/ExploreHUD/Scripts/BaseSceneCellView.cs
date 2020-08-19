@@ -82,7 +82,7 @@ internal class BaseSceneCellView : BaseCellView, IMapDataView, IExploreViewWithF
             string url = mapInfo.previewImageUrl;
             if (string.IsNullOrEmpty(url))
             {
-                url = GetMarketPlaceThumbnailUrl(mapInfo, 196, 134, 50);
+                url = GetMarketPlaceThumbnailUrl(mapInfo, 196, 143, 50);
             }
             FetchThumbnail(url);
         }

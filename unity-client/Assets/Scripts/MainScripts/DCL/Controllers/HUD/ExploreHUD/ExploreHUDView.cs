@@ -4,9 +4,10 @@ using UnityEngine.UI;
 internal class ExploreHUDView : MonoBehaviour
 {
     [SerializeField] internal HighlightScenesController highlightScenesController;
-    [SerializeField] ShowHideAnimator showHideAnimator;
+    [SerializeField] internal ShowHideAnimator popup;
     [SerializeField] internal Button_OnPointerDown closeButton;
     [SerializeField] internal GotoMagicButton gotoMagicButton;
+    [SerializeField] internal TogglePopupButton togglePopupButton;
 
     public void SetVisibility(bool visible)
     {
@@ -14,25 +15,25 @@ internal class ExploreHUDView : MonoBehaviour
         {
             if (!IsActive())
             {
-                gameObject.SetActive(true);
+                popup.gameObject.SetActive(true);
             }
-            showHideAnimator.Show();
+            popup.Show();
         }
         else
         {
-            showHideAnimator.Hide();
+            popup.Hide();
         }
 
     }
 
     public bool IsVisible()
     {
-        return showHideAnimator.isVisible;
+        return popup.isVisible;
     }
 
     public bool IsActive()
     {
-        return gameObject.activeSelf;
+        return popup.gameObject.activeSelf;
     }
 
     public void RefreshData()
