@@ -60,11 +60,6 @@ export class GIFPlayer {
     worker.onmessage = (e: any) => {
       defaultLogger.log("pravs - MAIN - GOT BACK FROM WORKER:", e)
 
-      // if (!e.data.width || e.data.width === 0 || e.data.height === 0) {
-      //   defaultLogger.log("pravs - MAIN - width or height is 0!!!")
-      //   return
-      // }
-
       if (e.data.frames.length <= 0) return
 
       const frames = e.data.frames
