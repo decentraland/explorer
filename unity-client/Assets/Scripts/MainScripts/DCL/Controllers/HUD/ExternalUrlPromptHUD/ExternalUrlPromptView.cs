@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 using UnityEngine.UI;
 using DCL.Helpers;
@@ -33,9 +33,6 @@ public class ExternalUrlPromptView : MonoBehaviour
         domainText.text = uri.Host;
         urlText.text = uri.OriginalString;
         trustToggle.isOn = false;
-
-        if (HUDAudioPlayer.i != null)
-            HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogAppear);
     }
 
     private void Dismiss()

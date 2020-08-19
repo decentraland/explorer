@@ -51,18 +51,6 @@ public class TermsOfServiceHUDView : MonoBehaviour
     public void SetVisible(bool visible)
     {
         content.SetActive(visible);
-
-        if (HUDAudioPlayer.i != null)
-        {
-            if (visible)
-            {
-                HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogAppear);
-            }
-            else
-            {
-                HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogClose);
-            }
-        }
     }
 
     public void SetData(string sceneName, bool hasAdultContent, bool hasGamblingContent, bool hasToS, bool hasPrivacyPolicy, bool hasContactEmail)

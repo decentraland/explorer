@@ -201,15 +201,8 @@ namespace DCL
             if (!parcelHighlightImage.gameObject.activeSelf)
                 parcelHighlightImage.gameObject.SetActive(true);
 
-            string previousText = highlightedParcelText.text;
             parcelHighlightImage.transform.position = worldCoordsOriginInMap + cursorMapCoords * parcelSizeInMap + new Vector3(parcelSizeInMap, parcelSizeInMap, 0f) / 2;
             highlightedParcelText.text = showCursorCoords ? $"{cursorMapCoords.x}, {cursorMapCoords.y}" : string.Empty;
-
-            if (HUDAudioPlayer.i != null && highlightedParcelText.text != previousText && !Input.GetMouseButton(0))
-            {
-                HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.mapParcelHighlight);
-            }
-            
 
             // ----------------------------------------------------
             // TODO: Use sceneInfo to highlight whole scene parcels and populate scenes hover info on navmap once we can access all the scenes info
