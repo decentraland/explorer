@@ -94,8 +94,8 @@ public class WearableController
 
         //Intensity: 1
         //Params: -.7, 0.5, 1, 1.5
-        var p1 = new Vector4(.75f, 0.8f, 0.8f, 0.8f);
-        AvatarUtils.SetColorInHierarchyForSkin(assetContainer.transform, MATERIAL_FILTER_SKIN, skinColor, p1, 0.5f);
+        var p1 = new Vector4(.3f, 2f, 1f, 0.5f);
+        AvatarUtils.SetColorInHierarchyForSkin(assetContainer.transform, MATERIAL_FILTER_SKIN, skinColor, p1, 0.75f);
 
         //Intensity: 2.44
         //Params: 1.88, 1.36, 0.84, 0.69
