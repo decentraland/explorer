@@ -22,11 +22,11 @@ namespace DCL.SettingsHUD
 
         public void SetVisibility(bool visible)
         {
-            if (visible && !isOpen)
-                HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogAppear);
-            else
+            if (HUDAudioPlayer.i != null)
             {
-                if (isOpen)
+                if (visible && !isOpen)
+                    HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogAppear);
+                else if (isOpen)
                     HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogClose);
             }
 

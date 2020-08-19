@@ -22,21 +22,31 @@ public class ButtonAudioHandler : MonoBehaviour, IPointerEnterHandler, IPointerD
         if (!playHoverSound)
             return;
 
-        if (selectable.interactable && !Input.GetMouseButton(0)) {
+        if (audioPlayer != null &&
+            selectable != null &&
+            selectable.interactable &&
+            !Input.GetMouseButton(0))
+        {
             audioPlayer.Play(HUDAudioPlayer.Sound.buttonHover);
         }
     }
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        if (selectable.interactable) {
+        if (audioPlayer != null &&
+            selectable != null &&
+            selectable.interactable)
+        {
             audioPlayer.Play(HUDAudioPlayer.Sound.buttonClick);
         }
     }
 
     public void OnPointerUp(PointerEventData eventData)
     {
-        if (selectable.interactable) {
+        if (audioPlayer != null &&
+            selectable != null &&
+            selectable.interactable)
+        {
             audioPlayer.Play(HUDAudioPlayer.Sound.buttonRelease);
 
             if (extraClickSound != HUDAudioPlayer.Sound.none)

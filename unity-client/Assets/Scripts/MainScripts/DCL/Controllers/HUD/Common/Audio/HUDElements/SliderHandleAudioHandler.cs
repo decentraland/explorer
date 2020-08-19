@@ -15,7 +15,10 @@ public class SliderHandleAudioHandler : MonoBehaviour, IPointerEnterHandler
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        if (slider.interactable && !Input.GetMouseButton(0))
+        if (audioPlayer != null &&
+            slider != null &&
+            slider.interactable &&
+            !Input.GetMouseButton(0))
         {
             audioPlayer.Play(HUDAudioPlayer.Sound.buttonHover);
         }

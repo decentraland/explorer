@@ -309,6 +309,8 @@ public class FriendsHUDController : IHUD
 
     public void SetVisibility(bool visible)
     {
+        HUDAudioPlayer.Sound soundToPlay;
+
         view.gameObject.SetActive(visible);
 
         if (visible)
@@ -318,11 +320,14 @@ public class FriendsHUDController : IHUD
             if (view.friendsButton.interactable)
                 view.friendsButton.onClick.Invoke();
 
-            HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogAppear);
+            soundToPlay = HUDAudioPlayer.Sound.dialogAppear;
         }
         else
         {
-            HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogClose);
+            soundToPlay = HUDAudioPlayer.Sound.dialogClose;
         }
+
+        if (HUDAudioPlayer.i != null)
+            HUDAudioPlayer.i.Play(soundToPlay);
     }
 }

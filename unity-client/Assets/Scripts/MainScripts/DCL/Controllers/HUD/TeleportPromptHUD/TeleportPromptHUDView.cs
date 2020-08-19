@@ -115,7 +115,8 @@ public class TeleportPromptHUDView : MonoBehaviour
             downloadedBanner = null;
         }
 
-        HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogClose);
+        if (HUDAudioPlayer.i != null)
+            HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogClose);
     }
 
     private void FetchScenePreviewImage(string previewImageUrl)

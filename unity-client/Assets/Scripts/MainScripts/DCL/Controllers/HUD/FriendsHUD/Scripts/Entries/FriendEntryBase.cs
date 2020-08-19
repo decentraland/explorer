@@ -49,7 +49,9 @@ public class FriendEntryBase : MonoBehaviour, IPointerEnterHandler, IPointerExit
     {
         backgroundImage.sprite = hoveredBackgroundSprite;
         menuButton.gameObject.SetActive(true);
-        HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.buttonHover);
+
+        if (HUDAudioPlayer.i != null)
+            HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.buttonHover);
     }
 
     public void OnPointerExit(PointerEventData eventData)

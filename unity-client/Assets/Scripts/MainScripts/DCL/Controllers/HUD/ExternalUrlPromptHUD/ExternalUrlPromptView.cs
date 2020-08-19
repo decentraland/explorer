@@ -34,7 +34,8 @@ public class ExternalUrlPromptView : MonoBehaviour
         urlText.text = uri.OriginalString;
         trustToggle.isOn = false;
 
-        HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogAppear);
+        if (HUDAudioPlayer.i != null)
+            HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogAppear);
     }
 
     private void Dismiss()

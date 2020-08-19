@@ -1,8 +1,6 @@
 {
     "name": "MordiAudio",
     "references": [
-        "GUID:c0f060bc5c9451f4483d26a0ed2d3f99",
-        "GUID:0a539e14bd8634b9d90eeb21cbb662be",
         "GUID:b1087c5731ff68448a0a9c625bb7e52d"
     ],
     "includePlatforms": [],

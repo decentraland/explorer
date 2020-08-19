@@ -140,13 +140,12 @@ public class PlayerInfoCardHUDController : IHUD
     {
         view.SetVisibility(visible);
 
-        if (visible)
+        if (HUDAudioPlayer.i != null)
         {
-            HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogAppear);
-        }
-        else
-        {
-            HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogClose);
+            if (visible)
+                HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogAppear);
+            else
+                HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogClose);
         }
     }
 

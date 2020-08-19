@@ -68,16 +68,19 @@ public class CameraController : MonoBehaviour
         currentMode = newMode;
         currentCameraState.OnSelect();
 
-        switch (newMode)
+        if (HUDAudioPlayer.i != null)
         {
-            case CameraStateBase.ModeId.FirstPerson:
-                HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.cameraToFirstPerson);
-                break;
-            case CameraStateBase.ModeId.ThirdPerson:
-                HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.cameraToThirdPerson);
-                break;
-            default:
-                break;
+            switch (newMode)
+            {
+                case CameraStateBase.ModeId.FirstPerson:
+                    HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.cameraToFirstPerson);
+                    break;
+                case CameraStateBase.ModeId.ThirdPerson:
+                    HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.cameraToThirdPerson);
+                    break;
+                default:
+                    break;
+            }
         }
     }
 
