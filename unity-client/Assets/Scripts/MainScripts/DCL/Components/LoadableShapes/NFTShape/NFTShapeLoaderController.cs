@@ -287,10 +287,6 @@ public class NFTShapeLoaderController : MonoBehaviour
             gifAsset.OnFrameTextureChanged += UpdateTexture;
             gifAsset.Play(false);
         }
-        else
-        {
-            meshRenderer.transform.localRotation = Quaternion.Euler(0, 0, 180);
-        }
 
         UpdateTexture(nftAsset.texture);
 
