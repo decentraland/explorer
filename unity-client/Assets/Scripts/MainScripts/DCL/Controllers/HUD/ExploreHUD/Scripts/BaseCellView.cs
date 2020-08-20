@@ -1,4 +1,5 @@
 ﻿using System;
+using DCL.Helpers;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
@@ -32,7 +33,7 @@ internal class BaseCellView : MonoBehaviour
                 if (thumbnailRequest == null)
                     return;
 
-                if (!thumbnailRequest.isNetworkError && !thumbnailRequest.isHttpError)
+                if (thumbnailRequest.WebRequestSucceded())
                 {
                     thumbnailTexture = ((DownloadHandlerTexture)thumbnailRequest.downloadHandler).texture;
                     thumbnailTexture.Compress(false);
