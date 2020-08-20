@@ -10,7 +10,8 @@ internal class GotoMagicButton : MonoBehaviour, IPointerEnterHandler, IPointerEx
 
     void OnEnable()
     {
-        buttonAnimator.SetTrigger("Reset");
+        buttonAnimator.ResetTrigger("Highlighted");
+        buttonAnimator.SetTrigger("Normal");
     }
 
     void IPointerDownHandler.OnPointerDown(PointerEventData eventData)
