@@ -1,12 +1,14 @@
 ﻿namespace DCL
 {
-    public class Environment : Singleton<Environment>
+    public class Environment
     {
-        public MessagingControllersManager messagingControllersManager { get; }
+        public static readonly Environment i = new Environment();
+
+        public readonly MessagingControllersManager messagingControllersManager;
 
         /*
          * TODO: Continue moving static instances to this class. Each static instance should be converted to a local instance inside this class.
-         * 
+         *
         MemoryManager memoryManager;
         PointerEventsController pointerEventsController;
         ParcelScenesCleaner parcelScenesCleaner; // This is a static member of ParcelScene
@@ -14,7 +16,7 @@
 
         */
 
-        public Environment()
+        private Environment()
         {
             messagingControllersManager = new MessagingControllersManager();
         }
