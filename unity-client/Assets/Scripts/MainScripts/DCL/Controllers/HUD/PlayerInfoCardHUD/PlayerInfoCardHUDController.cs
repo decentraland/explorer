@@ -45,7 +45,9 @@ public class PlayerInfoCardHUDController : IHUD
     private void OnCloseButtonPressed(DCLAction_Trigger action = DCLAction_Trigger.CloseWindow)
     {
         CloseCard();
-        HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogClose);
+
+        if (HUDAudioPlayer.i != null)
+            HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogClose);
     }
 
     private void AddPlayerAsFriend()

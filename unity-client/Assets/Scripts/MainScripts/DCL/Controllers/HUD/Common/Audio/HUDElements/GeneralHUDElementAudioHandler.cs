@@ -15,7 +15,7 @@ public class GeneralHUDElementAudioHandler : MonoBehaviour, IPointerEnterHandler
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        if (playHover)
+        if (playHover && audioPlayer != null)
         {
             audioPlayer.Play(HUDAudioPlayer.Sound.buttonHover);
         }
@@ -23,11 +23,13 @@ public class GeneralHUDElementAudioHandler : MonoBehaviour, IPointerEnterHandler
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        audioPlayer.Play(HUDAudioPlayer.Sound.buttonClick);
+        if (audioPlayer != null)
+            audioPlayer.Play(HUDAudioPlayer.Sound.buttonClick);
     }
 
     public void OnPointerUp(PointerEventData eventData)
     {
-        audioPlayer.Play(HUDAudioPlayer.Sound.buttonRelease);
+        if (audioPlayer != null)
+            audioPlayer.Play(HUDAudioPlayer.Sound.buttonRelease);
     }
 }
