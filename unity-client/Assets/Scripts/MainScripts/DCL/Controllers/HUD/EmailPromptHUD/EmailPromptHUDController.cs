@@ -6,7 +6,7 @@ using DCL.Tutorial;
 
 public class EmailPromptHUDController : IHUD
 {
-    const float POPUP_DELAY = 10;
+    const float POPUP_DELAY = 60;
 
     EmailPromptHUDView view;
 
