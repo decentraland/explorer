@@ -24,6 +24,8 @@ namespace DCL
         [FormerlySerializedAs("factoryManifest")]
         public DCLComponentFactory componentFactory;
 
+        // public GIFProcessingBridge gifProcessingBridge;
+
         public HashSet<string> readyScenes = new HashSet<string>();
         public Dictionary<string, ParcelScene> loadedScenes = new Dictionary<string, ParcelScene>();
 
@@ -936,42 +938,14 @@ namespace DCL
             return true;
         }
 
+        // void RequestGIFProcessor(string url, string sceneId, string componentId, ITexture assetGif)
+        // {
+        //     gifProcessingBridge.RequestGIFProcessor(url, sceneId, componentId, assetGif);
+        // }
+
         public void BuilderReady()
         {
             UnityEngine.SceneManagement.SceneManager.LoadScene("BuilderScene", UnityEngine.SceneManagement.LoadSceneMode.Additive);
-        }
-
-        [Serializable]
-        public class UpdateGIFPointerPayload
-        {
-            public string sceneId;
-            public string componentId;
-            public int width;
-            public int height;
-            public int pointer;
-        }
-        public void UpdateGIFPointer(string payload)
-        {
-            var parsedPayload = SafeFromJson<UpdateGIFPointerPayload>(payload);
-
-            (loadedScenes[parsedPayload.sceneId].disposableComponents[parsedPayload.componentId] as NFTShape).UpdateGIFPointer(parsedPayload.width, parsedPayload.height, (IntPtr)parsedPayload.pointer);
-        }
-
-        [Serializable]
-        public class UpdateGIFPointersPayload
-        {
-            public string sceneId;
-            public string componentId;
-            public int width;
-            public int height;
-            public int[] pointers;
-            public float[] frameDelays;
-        }
-        public void UpdateGIFPointers(string payload)
-        {
-            var parsedPayload = SafeFromJson<UpdateGIFPointersPayload>(payload);
-
-            (loadedScenes[parsedPayload.sceneId].disposableComponents[parsedPayload.componentId] as NFTShape).UpdateGIFPointers(parsedPayload.width, parsedPayload.height, parsedPayload.pointers, parsedPayload.frameDelays);
         }
     }
 }

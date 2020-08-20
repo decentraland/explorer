@@ -81,15 +81,5 @@ namespace DCL.Components
 
             return $"{componentName} (src = {model.src})";
         }
-
-        public void UpdateGIFPointer(int width, int height, System.IntPtr pointer)
-        {
-            loadableShape.loaderController.UpdateGIFPointer(width, height, pointer);
-        }
-
-        public void UpdateGIFPointers(int width, int height, int[] pointers, float[] frameDelays)
-        {
-            loadableShape.loaderController.UpdateGIFPointers(width, height, pointers, frameDelays);
-        }
     }
 }

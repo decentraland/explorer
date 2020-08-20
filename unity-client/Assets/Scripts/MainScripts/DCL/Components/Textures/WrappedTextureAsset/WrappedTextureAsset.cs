@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using DCL.Controllers.Gif;
 using DCL.Helpers;
 using UnityEngine;
@@ -9,8 +10,8 @@ namespace DCL
 {
     public static class WrappedTextureUtils
     {
-        public static IEnumerator Fetch(string url, Action<ITexture> OnSuccess,
-            Asset_Gif.MaxSize maxTextureSize = Asset_Gif.MaxSize.DONT_RESIZE, string sceneId = null, string componentId = null)
+        public static IEnumerator Fetch(string url, Action<ITexture> OnSuccess, Asset_Gif.MaxSize maxTextureSize = Asset_Gif.MaxSize.DONT_RESIZE,
+                                        string sceneId = null, string componentId = null)
         {
             string contentType = null;
 
@@ -26,7 +27,8 @@ namespace DCL
             yield return Create(contentType, url, maxTextureSize, sceneId, componentId, OnSuccess);
         }
 
-        private static IEnumerator Create(string contentType, string url, Asset_Gif.MaxSize maxTextureSize, string sceneId, string componentId, Action<ITexture> OnSuccess, Action OnFail = null)
+        private static IEnumerator Create(string contentType, string url, Asset_Gif.MaxSize maxTextureSize, string sceneId, string componentId,
+                                        Action<ITexture> OnSuccess, Action OnFail = null)
         {
             if (contentType != "image/gif")
             {
@@ -37,7 +39,7 @@ namespace DCL
                 yield break;
             }
 
-            var gif = new Asset_Gif(url, maxTextureSize, sceneId, componentId, null, OnSuccess, null);
+            var gif = new Asset_Gif(url, maxTextureSize, sceneId, componentId, OnSuccess);
             yield return gif.Load();
         }
     }

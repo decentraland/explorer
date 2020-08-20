@@ -299,17 +299,9 @@ export class UnityInterface {
     }
   }
 
-  public SendGIFPointer(sceneId: string, componentId: string, width: number, height: number, pointer: number) {
-    this.gameInstance.SendMessage(
-      'SceneController',
-      'UpdateGIFPointer',
-      JSON.stringify({ sceneId, componentId, width, height, pointer })
-    )
-  }
-
   public SendGIFPointers(sceneId: string, componentId: string, width: number, height: number, pointers: number[], frameDelays: number[]) {
     this.gameInstance.SendMessage(
-      'SceneController',
+      'GIFProcessingBridge',
       'UpdateGIFPointers',
       JSON.stringify({ sceneId, componentId, width, height, pointers, frameDelays })
     )

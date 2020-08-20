@@ -5,6 +5,11 @@ const gifProcessorWorkerRaw = require('raw-loader!../../static/gif-processor/wor
 const gifProcessorWorkerUrl = URL.createObjectURL(new Blob([gifProcessorWorkerRaw]))
 const worker = new Worker(gifProcessorWorkerUrl, { name: 'gifProcessorWorker' })
 
+/**
+ *
+ * Class that triggers GIF processing in a worker and dispatches the generated texture pointers to Unity
+ *
+ */
 export class GIFProcessor {
   gameInstance: any
   GLctx: any
@@ -46,11 +51,20 @@ export class GIFProcessor {
     }
   }
 
+  /**
+   *
+   * Tells the worker to process a GIF
+   *
+   */
   ProcessGIF(data: { imageSource: string, sceneId: string, componentId: string }) {
     worker.postMessage({ src: data.imageSource, sceneId: data.sceneId, componentId: data.componentId })
   }
 
-  // Based on WebGL compiled "glGenTextures"
+  /**
+   *
+   * Based on WebGL compiled "glGenTextures", created a WebGL texture and returns it
+   *
+   */
   GenerateTexture(ptr: any): any {
     let GLctx = this.gameInstance.Module.ctx
     let texture = GLctx.createTexture()
@@ -69,6 +83,11 @@ export class GIFProcessor {
     return texture
   }
 
+  /**
+   *
+   * "Prints" an ImageData into an already existent WebGL texture
+   *
+   */
   UpdateGIFTex(image: any, texId: any) {
     this.GLctx.bindTexture(this.GLctx.TEXTURE_2D, DCL.GL.textures[texId])
 

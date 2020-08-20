@@ -61,7 +61,7 @@ namespace DCL.Controllers.Gif
         public event Action<ITexture> OnSuccessEvent;
         public event Action OnFailEvent;
 
-        public Asset_Gif(string url, MaxSize maxSize, string sceneId, string componentId, List<UniGif.GifTexture> preCreatedGifTextures, Action<ITexture> OnSuccess, Action OnFail)
+        public Asset_Gif(string url, MaxSize maxSize, string sceneId, string componentId, Action<ITexture> OnSuccess, Action OnFail = null)
         {
             this.url = url;
             this.sceneId = sceneId;
@@ -69,12 +69,13 @@ namespace DCL.Controllers.Gif
             this.maxSize = maxSize;
             this.OnSuccessEvent = OnSuccess;
             this.OnFailEvent = OnFail;
+        }
 
-            if (preCreatedGifTextures != null && preCreatedGifTextures.Count > 0)
-            {
-                OnGifLoaded(preCreatedGifTextures, 0, preCreatedGifTextures[0].m_texture2d.width, preCreatedGifTextures[0].m_texture2d.height);
-                OnSuccessEvent?.Invoke(this);
-            }
+        public void OverrideGifTextures(List<UniGif.GifTexture> newTextures)
+        {
+            if (newTextures == null || newTextures.Count == 0) return;
+
+            OnGifLoaded(newTextures, 0, newTextures[0].m_texture2d.width, newTextures[0].m_texture2d.height);
         }
 
         public IEnumerator Load()
@@ -82,19 +83,14 @@ namespace DCL.Controllers.Gif
             if (isLoaded)
                 Dispose();
 
-            byte[] bytes = null;
-
 #if !UNITY_EDITOR && UNITY_WEBGL
-
             if (string.IsNullOrEmpty(sceneId) || string.IsNullOrEmpty(componentId)) yield break;
 
-            DCL.Interface.WebInterface.RequestGIFProcessor(url, sceneId, componentId, SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.OpenGLES2);
-
-            // We return as we have to wait for kernel's comeback with the texture pointer (in NFTShapeLoaderController for now)
-            yield break;
+            yield return DCL.GIFProcessingBridge.i.RequestGIFProcessor(url, sceneId, componentId, OverrideGifTextures);
 #else
+            byte[] bytes = null;
+
             yield return Utils.FetchAsset(url, UnityWebRequest.Get(url), (request) => { bytes = request.downloadHandler.data; });
-#endif
 
             if (bytes == null)
             {
@@ -103,6 +99,7 @@ namespace DCL.Controllers.Gif
             }
 
             yield return UniGif.GetTextureListCoroutine(bytes, OnGifLoaded);
+#endif
 
             SetMaxTextureSize(maxSize);
             Play();
