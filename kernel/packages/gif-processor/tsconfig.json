@@ -21,7 +21,7 @@
     "jsxFactory": "createElement",
     "removeComments": true,
     "pretty": true,
-    "outDir": "../../static/gif-player",
+    "outDir": "../../static/gif-processor",
     "lib": [
       "es2017",
       "dom"

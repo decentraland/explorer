@@ -86,5 +86,10 @@ namespace DCL.Components
         {
             loadableShape.loaderController.UpdateGIFPointer(width, height, pointer);
         }
+
+        public void UpdateGIFPointers(int width, int height, int[] pointers, float[] frameDelays)
+        {
+            loadableShape.loaderController.UpdateGIFPointers(width, height, pointers, frameDelays);
+        }
     }
 }

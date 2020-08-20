@@ -706,99 +706,99 @@ namespace DCL
                 switch (method)
                 {
                     case MessagingTypes.ENTITY_CREATE:
-                    {
-                        if (msgObject.payload is Protocol.CreateEntity payload)
-                            scene.CreateEntity(payload.entityId);
+                        {
+                            if (msgObject.payload is Protocol.CreateEntity payload)
+                                scene.CreateEntity(payload.entityId);
 
-                        break;
-                    }
+                            break;
+                        }
                     case MessagingTypes.ENTITY_REPARENT:
-                    {
-                        if (msgObject.payload is Protocol.SetEntityParent payload)
-                            scene.SetEntityParent(payload.entityId, payload.parentId);
+                        {
+                            if (msgObject.payload is Protocol.SetEntityParent payload)
+                                scene.SetEntityParent(payload.entityId, payload.parentId);
 
-                        break;
-                    }
+                            break;
+                        }
 
                     case MessagingTypes.ENTITY_COMPONENT_CREATE_OR_UPDATE:
-                    {
-                        if (msgObject.payload is Protocol.EntityComponentCreateOrUpdate payload)
-                            scene.EntityComponentCreateOrUpdate(payload.entityId, (CLASS_ID_COMPONENT) payload.classId, payload.json, out yieldInstruction);
+                        {
+                            if (msgObject.payload is Protocol.EntityComponentCreateOrUpdate payload)
+                                scene.EntityComponentCreateOrUpdate(payload.entityId, (CLASS_ID_COMPONENT)payload.classId, payload.json, out yieldInstruction);
 
-                        break;
-                    }
+                            break;
+                        }
 
                     case MessagingTypes.ENTITY_COMPONENT_DESTROY:
-                    {
-                        if (msgObject.payload is Protocol.EntityComponentDestroy payload)
-                            scene.EntityComponentRemove(payload.entityId, payload.name);
+                        {
+                            if (msgObject.payload is Protocol.EntityComponentDestroy payload)
+                                scene.EntityComponentRemove(payload.entityId, payload.name);
 
-                        break;
-                    }
+                            break;
+                        }
 
                     case MessagingTypes.SHARED_COMPONENT_ATTACH:
-                    {
-                        if (msgObject.payload is Protocol.SharedComponentAttach payload)
-                            scene.SharedComponentAttach(payload.entityId, payload.id);
+                        {
+                            if (msgObject.payload is Protocol.SharedComponentAttach payload)
+                                scene.SharedComponentAttach(payload.entityId, payload.id);
 
-                        break;
-                    }
+                            break;
+                        }
 
                     case MessagingTypes.SHARED_COMPONENT_CREATE:
-                    {
-                        if (msgObject.payload is Protocol.SharedComponentCreate payload)
-                            scene.SharedComponentCreate(payload.id, payload.classId);
+                        {
+                            if (msgObject.payload is Protocol.SharedComponentCreate payload)
+                                scene.SharedComponentCreate(payload.id, payload.classId);
 
-                        break;
-                    }
+                            break;
+                        }
 
                     case MessagingTypes.SHARED_COMPONENT_DISPOSE:
-                    {
-                        if (msgObject.payload is Protocol.SharedComponentDispose payload)
-                            scene.SharedComponentDispose(payload.id);
-                        break;
-                    }
+                        {
+                            if (msgObject.payload is Protocol.SharedComponentDispose payload)
+                                scene.SharedComponentDispose(payload.id);
+                            break;
+                        }
 
                     case MessagingTypes.SHARED_COMPONENT_UPDATE:
-                    {
-                        if (msgObject.payload is Protocol.SharedComponentUpdate payload)
-                            scene.SharedComponentUpdate(payload.componentId, payload.json, out yieldInstruction);
-                        break;
-                    }
+                        {
+                            if (msgObject.payload is Protocol.SharedComponentUpdate payload)
+                                scene.SharedComponentUpdate(payload.componentId, payload.json, out yieldInstruction);
+                            break;
+                        }
 
                     case MessagingTypes.ENTITY_DESTROY:
-                    {
-                        if (msgObject.payload is Protocol.RemoveEntity payload)
-                            scene.RemoveEntity(payload.entityId);
-                        break;
-                    }
+                        {
+                            if (msgObject.payload is Protocol.RemoveEntity payload)
+                                scene.RemoveEntity(payload.entityId);
+                            break;
+                        }
 
                     case MessagingTypes.INIT_DONE:
-                    {
-                        scene.SetInitMessagesDone();
-                        break;
-                    }
+                        {
+                            scene.SetInitMessagesDone();
+                            break;
+                        }
 
                     case MessagingTypes.QUERY:
-                    {
-                        if (msgObject.payload is QueryMessage queryMessage)
-                            ParseQuery(queryMessage.payload, scene.sceneData.id);
-                        break;
-                    }
+                        {
+                            if (msgObject.payload is QueryMessage queryMessage)
+                                ParseQuery(queryMessage.payload, scene.sceneData.id);
+                            break;
+                        }
 
                     case MessagingTypes.OPEN_EXTERNAL_URL:
-                    {
-                        if (msgObject.payload is Protocol.OpenExternalUrl payload)
-                            OnOpenExternalUrlRequest?.Invoke(scene, payload.url);
-                        break;
-                    }
+                        {
+                            if (msgObject.payload is Protocol.OpenExternalUrl payload)
+                                OnOpenExternalUrlRequest?.Invoke(scene, payload.url);
+                            break;
+                        }
 
                     case MessagingTypes.OPEN_NFT_DIALOG:
-                    {
-                        if (msgObject.payload is Protocol.OpenNftDialog payload)
-                            OnOpenNFTDialogRequest?.Invoke(payload.contactAddress, payload.tokenId, payload.comment);
-                        break;
-                    }
+                        {
+                            if (msgObject.payload is Protocol.OpenNftDialog payload)
+                                OnOpenNFTDialogRequest?.Invoke(payload.contactAddress, payload.tokenId, payload.comment);
+                            break;
+                        }
 
                     default:
                         Debug.LogError($"Unknown method {method}");
@@ -955,6 +955,23 @@ namespace DCL
             var parsedPayload = SafeFromJson<UpdateGIFPointerPayload>(payload);
 
             (loadedScenes[parsedPayload.sceneId].disposableComponents[parsedPayload.componentId] as NFTShape).UpdateGIFPointer(parsedPayload.width, parsedPayload.height, (IntPtr)parsedPayload.pointer);
+        }
+
+        [Serializable]
+        public class UpdateGIFPointersPayload
+        {
+            public string sceneId;
+            public string componentId;
+            public int width;
+            public int height;
+            public int[] pointers;
+            public float[] frameDelays;
+        }
+        public void UpdateGIFPointers(string payload)
+        {
+            var parsedPayload = SafeFromJson<UpdateGIFPointersPayload>(payload);
+
+            (loadedScenes[parsedPayload.sceneId].disposableComponents[parsedPayload.componentId] as NFTShape).UpdateGIFPointers(parsedPayload.width, parsedPayload.height, parsedPayload.pointers, parsedPayload.frameDelays);
         }
     }
 }
