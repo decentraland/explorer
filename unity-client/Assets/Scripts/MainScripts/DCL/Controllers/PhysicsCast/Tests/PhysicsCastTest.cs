@@ -87,9 +87,9 @@ public class PhysicsCast_Tests : TestsBase
         response.queryId = raycastQuery.QueryId;
         response.payload = new WebInterface.RaycastHitEntity();
         response.payload.ray = new WebInterface.RayInfo();
-        response.payload.ray.origin = new Vector3(raycastQuery.Ray.Origin.X, raycastQuery.Ray.Origin.Y, raycastQuery.Ray.Origin.Z);
+        response.payload.ray.origin = new Vector3((float)raycastQuery.Ray.Origin.X, (float)raycastQuery.Ray.Origin.Y, (float)raycastQuery.Ray.Origin.Z);
         response.payload.ray.distance = raycastQuery.Ray.Distance;
-        response.payload.ray.direction = new Vector3(raycastQuery.Ray.Direction.X, raycastQuery.Ray.Direction.Y, raycastQuery.Ray.Direction.Z);
+        response.payload.ray.direction = new Vector3((float)raycastQuery.Ray.Direction.X, (float)raycastQuery.Ray.Direction.Y, (float)raycastQuery.Ray.Direction.Z);
         response.payload.entity = new WebInterface.HitEntityInfo();
         response.payload.entity.entityId = entities[0].entityId;
 
@@ -154,9 +154,9 @@ public class PhysicsCast_Tests : TestsBase
         response.queryId = raycastQuery.QueryId;
         response.payload = new WebInterface.RaycastHitEntities();
         response.payload.ray = new WebInterface.RayInfo();
-        response.payload.ray.origin = new Vector3(raycastQuery.Ray.Origin.X, raycastQuery.Ray.Origin.Y, raycastQuery.Ray.Origin.Z);
+        response.payload.ray.origin = new Vector3((float)raycastQuery.Ray.Origin.X, (float)raycastQuery.Ray.Origin.Y, (float)raycastQuery.Ray.Origin.Z);
         response.payload.ray.distance = raycastQuery.Ray.Distance;
-        response.payload.ray.direction = new Vector3(raycastQuery.Ray.Direction.X, raycastQuery.Ray.Direction.Y, raycastQuery.Ray.Direction.Z);
+        response.payload.ray.direction = new Vector3((float)raycastQuery.Ray.Direction.X, (float)raycastQuery.Ray.Direction.Y, (float)raycastQuery.Ray.Direction.Z);
         response.payload.entities = new WebInterface.RaycastHitEntity[ENTITIES_COUNT];
 
         for (int i = 0; i < ENTITIES_COUNT; i++)

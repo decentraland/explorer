@@ -147,8 +147,8 @@ namespace DCL
             byte[] bytes = System.Convert.FromBase64String(payload);
 
             DCL.Interface.PB_Transform pbTransform = DCL.Interface.PB_Transform.Parser.ParseFrom(bytes);
-            model.position = new Vector3(pbTransform.Position.X, pbTransform.Position.Y, pbTransform.Position.Z);
-            model.scale = new Vector3(pbTransform.Scale.X, pbTransform.Scale.Y, pbTransform.Scale.Z);
+            model.position = new Vector3((float) pbTransform.Position.X, (float) pbTransform.Position.Y, (float) pbTransform.Position.Z);
+            model.scale = new Vector3((float) pbTransform.Scale.X, (float) pbTransform.Scale.Y, (float) pbTransform.Scale.Z);
             model.rotation = new Quaternion((float) pbTransform.Rotation.X, (float) pbTransform.Rotation.Y, (float) pbTransform.Rotation.Z, (float) pbTransform.Rotation.W);
         }
 
@@ -166,9 +166,9 @@ namespace DCL
             query.payload.id = pbRayQuery.QueryId;
             query.payload.raycastType = Protocol.RaycastLiteralToType(pbRayQuery.QueryType);
             query.payload.ray = new DCL.Models.Ray();
-            query.payload.ray.direction = new Vector3(pbRayQuery.Ray.Direction.X, pbRayQuery.Ray.Direction.Y, pbRayQuery.Ray.Direction.Z);
+            query.payload.ray.direction = new Vector3((float)pbRayQuery.Ray.Direction.X, (float)pbRayQuery.Ray.Direction.Y, (float)pbRayQuery.Ray.Direction.Z);
             query.payload.ray.distance = pbRayQuery.Ray.Distance;
-            query.payload.ray.origin = new Vector3(pbRayQuery.Ray.Origin.X, pbRayQuery.Ray.Origin.Y, pbRayQuery.Ray.Origin.Z);
+            query.payload.ray.origin = new Vector3((float)pbRayQuery.Ray.Origin.X, (float)pbRayQuery.Ray.Origin.Y, (float)pbRayQuery.Ray.Origin.Z);
         }
 
 #if UNITY_EDITOR

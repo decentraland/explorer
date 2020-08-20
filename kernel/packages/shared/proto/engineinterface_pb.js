@@ -4795,15 +4795,15 @@ proto.engineinterface.PB_Vector3.deserializeBinaryFromReader = function(msg, rea
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = /** @type {number} */ (reader.readFloat());
+      var value = /** @type {number} */ (reader.readDouble());
       msg.setX(value);
       break;
     case 2:
-      var value = /** @type {number} */ (reader.readFloat());
+      var value = /** @type {number} */ (reader.readDouble());
       msg.setY(value);
       break;
     case 3:
-      var value = /** @type {number} */ (reader.readFloat());
+      var value = /** @type {number} */ (reader.readDouble());
       msg.setZ(value);
       break;
     default:
@@ -4837,21 +4837,21 @@ proto.engineinterface.PB_Vector3.serializeBinaryToWriter = function(message, wri
   var f = undefined;
   f = message.getX();
   if (f !== 0.0) {
-    writer.writeFloat(
+    writer.writeDouble(
       1,
       f
     );
   }
   f = message.getY();
   if (f !== 0.0) {
-    writer.writeFloat(
+    writer.writeDouble(
       2,
       f
     );
   }
   f = message.getZ();
   if (f !== 0.0) {
-    writer.writeFloat(
+    writer.writeDouble(
       3,
       f
     );
@@ -4860,7 +4860,7 @@ proto.engineinterface.PB_Vector3.serializeBinaryToWriter = function(message, wri
 
 
 /**
- * optional float x = 1;
+ * optional double x = 1;
  * @return {number}
  */
 proto.engineinterface.PB_Vector3.prototype.getX = function() {
@@ -4878,7 +4878,7 @@ proto.engineinterface.PB_Vector3.prototype.setX = function(value) {
 
 
 /**
- * optional float y = 2;
+ * optional double y = 2;
  * @return {number}
  */
 proto.engineinterface.PB_Vector3.prototype.getY = function() {
@@ -4896,7 +4896,7 @@ proto.engineinterface.PB_Vector3.prototype.setY = function(value) {
 
 
 /**
- * optional float z = 3;
+ * optional double z = 3;
  * @return {number}
  */
 proto.engineinterface.PB_Vector3.prototype.getZ = function() {

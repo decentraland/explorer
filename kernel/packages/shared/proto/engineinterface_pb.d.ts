@@ -1326,6 +1326,12 @@ export class PB_AvatarShape extends jspb.Message {
   getUsedummymodel(): boolean
   setUsedummymodel(value: boolean): void
 
+  getExpressiontriggerid(): string
+  setExpressiontriggerid(value: string): void
+
+  getExpressiontriggertimestamp(): number
+  setExpressiontriggertimestamp(value: number): void
+
   serializeBinary(): Uint8Array
   toObject(includeInstance?: boolean): PB_AvatarShape.AsObject
   static toObject(includeInstance: boolean, msg: PB_AvatarShape): PB_AvatarShape.AsObject
@@ -1349,6 +1355,8 @@ export namespace PB_AvatarShape {
     eyebrows?: PB_Face.AsObject
     mouth?: PB_Face.AsObject
     usedummymodel: boolean
+    expressiontriggerid: string
+    expressiontriggertimestamp: number
   }
 }
 
