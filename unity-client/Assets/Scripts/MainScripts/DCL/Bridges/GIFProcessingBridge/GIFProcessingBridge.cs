@@ -72,7 +72,7 @@ namespace DCL
             string key = parsedPayload.sceneId + parsedPayload.componentId;
 
             if (pendingGIFs.ContainsKey(key))
-                pendingGIFs[key].data = parsedPayload; // Thisi will unlock the waiting coroutine
+                pendingGIFs[key].data = parsedPayload;
         }
 
         public List<UniGif.GifTexture> GenerateTexturesList(int width, int height, int[] pointers, float[] frameDelays)

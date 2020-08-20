@@ -23,7 +23,7 @@ export class GIFProcessor {
     this.isWebGL1 = isWebGL1
 
     worker.onmessage = (e: any) => {
-      if (e.data.frames.length <= 0) return
+      if (e.data.arrayBufferFrames.length <= 0) return
 
       const textures = new Array()
       const texIDs = new Array()
@@ -35,7 +35,7 @@ export class GIFProcessor {
       const componentId = e.data.componentId
 
       // Generate all the GIF textures
-      for (let index = 0; index < e.data.frames.length; index++) {
+      for (let index = 0; index < frames.length; index++) {
         const ptr: GLuint = this.gameInstance.Module._malloc(4)
         const tex = this.GenerateTexture(ptr)
 

@@ -41,6 +41,7 @@ let frameImageData: any = undefined
     frameImageData = undefined
     gifCanvas.width = decompressedFrames[0].dims.width
     gifCanvas.height = decompressedFrames[0].dims.height
+    gifCanvasCtx?.scale(1, -1) // We have to flip it vertically or it's rendered upside down
 
     const frameDelays = new Array()
     const framesAsArrayBuffer = new Array()
@@ -50,7 +51,6 @@ let frameImageData: any = undefined
     }
 
     self.postMessage({
-      frames: decompressedFrames,
       arrayBufferFrames: framesAsArrayBuffer,
       width: decompressedFrames[0].dims.width,
       height: decompressedFrames[0].dims.height,
@@ -72,7 +72,7 @@ let frameImageData: any = undefined
       frameImageData.data.set(frame.patch)
       gifPatchCanvasCtx?.putImageData(frameImageData, 0, 0)
 
-      gifCanvasCtx?.drawImage(gifPatchCanvas, frame.dims.left, frame.dims.top)
+      gifCanvasCtx?.drawImage(gifPatchCanvas, frame.dims.left, -(gifCanvas.height - frame.dims.top))  // We have to flip it vertically or it's rendered upside down
     }
 
     return gifCanvasCtx?.getImageData(0, 0, gifCanvas.width , gifCanvas.height)
