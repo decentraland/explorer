@@ -1,6 +1,6 @@
 ﻿namespace DCL
 {
-    class Environment : Singleton<Environment>
+    public class Environment : Singleton<Environment>
     {
         public MessagingControllersManager messagingControllersManager { get; }
 
