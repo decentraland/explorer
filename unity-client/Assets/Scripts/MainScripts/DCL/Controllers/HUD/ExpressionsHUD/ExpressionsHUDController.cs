@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 
 public class ExpressionsHUDController : IHUD
 {
@@ -25,7 +25,12 @@ public class ExpressionsHUDController : IHUD
     {
         ownUserProfile.OnUpdate -= userProfileUpdateDelegate;
         ownUserProfile.OnAvatarExpressionSet -= OnAvatarExpressionSet;
-        view.CleanUp();
+
+        if (view != null)
+        {
+            view.CleanUp();
+            UnityEngine.Object.Destroy(view.gameObject);
+        }
     }
 
     public void ExpressionCalled(string id)
@@ -33,7 +38,7 @@ public class ExpressionsHUDController : IHUD
         UserProfile.GetOwnUserProfile().SetAvatarExpression(id);
     }
 
-    private void OnAvatarExpressionSet(string id)
+    private void OnAvatarExpressionSet(string id, long timestamp)
     {
         if (view.IsContentVisible())
         {

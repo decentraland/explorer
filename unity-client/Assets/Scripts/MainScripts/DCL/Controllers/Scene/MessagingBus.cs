@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
 using DCL.Interface;
+using UnityEngine.SceneManagement;
 
 namespace DCL
 {
@@ -27,11 +28,12 @@ namespace DCL
         public const string OPEN_NFT_DIALOG = "OpenNFTDialog";
     }
 
-    public class MessagingBusId
+    public enum MessagingBusType
     {
-        public const string UI = "UI";
-        public const string INIT = "INIT";
-        public const string SYSTEM = "SYSTEM";
+        NONE,
+        UI,
+        INIT,
+        SYSTEM
     }
 
     public enum QueueMode
@@ -40,19 +42,6 @@ namespace DCL
         Lossy,
     }
 
-    public struct PendingMessage
-    {
-        public MessagingBus.QueuedSceneMessage_Scene message;
-        public string busId;
-        public QueueMode queueMode;
-
-        public PendingMessage(string busId, MessagingBus.QueuedSceneMessage_Scene message, QueueMode queueMode)
-        {
-            this.busId = busId;
-            this.message = message;
-            this.queueMode = queueMode;
-        }
-    }
 
     public class MessagingBus : IDisposable
     {
@@ -79,13 +68,14 @@ namespace DCL
             public bool isUnreliable;
             public string unreliableMessageKey;
         }
+
         public class QueuedSceneMessage_Scene : QueuedSceneMessage
         {
             public string method;
-            public PB_SendSceneMessage payload;
+            public object payload; //PB_SendSceneMessage
         }
 
-        public IMessageHandler handler;
+        public IMessageProcessHandler handler;
 
         public LinkedList<QueuedSceneMessage> pendingMessages = new LinkedList<QueuedSceneMessage>();
         public bool hasPendingMessages => pendingMessagesCount > 0;
@@ -99,11 +89,8 @@ namespace DCL
 
         public CleanableYieldInstruction msgYieldInstruction;
 
-        public string id;
+        public MessagingBusType type;
         public string debugTag;
-
-        public float budgetMin;
-        public float budgetMax;
 
         public MessagingController owner;
 
@@ -118,14 +105,17 @@ namespace DCL
             set => timeBudgetValue = value;
         }
 
-        public MessagingBus(string id, IMessageHandler handler, MessagingController owner)
+        private SceneController sceneController;
+
+        public MessagingBus(MessagingBusType type, IMessageProcessHandler handler, MessagingController owner)
         {
             Assert.IsNotNull(handler, "IMessageHandler can't be null!");
             this.handler = handler;
             this.enabled = false;
-            this.id = id;
+            this.type = type;
             this.owner = owner;
             this.pendingMessagesCount = 0;
+            sceneController = SceneController.i;
         }
 
         public void Start()
@@ -136,18 +126,16 @@ namespace DCL
         public void Stop()
         {
             enabled = false;
-
-            if (msgYieldInstruction != null)
-                msgYieldInstruction.Cleanup();
-
+            msgYieldInstruction?.Cleanup();
             pendingMessagesCount = 0;
         }
+
         public void Dispose()
         {
             Stop();
         }
 
-        public void Enqueue(MessagingBus.QueuedSceneMessage message, QueueMode queueMode = QueueMode.Reliable)
+        public void Enqueue(QueuedSceneMessage message, QueueMode queueMode = QueueMode.Reliable)
         {
             bool enqueued = true;
 
@@ -160,7 +148,7 @@ namespace DCL
             {
                 message.isUnreliable = true;
 
-                LinkedListNode<MessagingBus.QueuedSceneMessage> node = null;
+                LinkedListNode<QueuedSceneMessage> node = null;
 
                 message.unreliableMessageKey = message.tag;
 
@@ -185,21 +173,21 @@ namespace DCL
 
             if (enqueued)
             {
-                if (message.type == MessagingBus.QueuedSceneMessage.Type.SCENE_MESSAGE)
+                if (message.type == QueuedSceneMessage.Type.SCENE_MESSAGE)
                 {
-                    MessagingBus.QueuedSceneMessage_Scene sm = message as MessagingBus.QueuedSceneMessage_Scene;
-                    SceneController.i?.OnMessageWillQueue?.Invoke(sm.method);
+                    QueuedSceneMessage_Scene sm = message as QueuedSceneMessage_Scene;
+                    sceneController?.OnMessageWillQueue?.Invoke(sm.method);
                 }
 
-                if (id == MessagingBusId.INIT)
+                if (type == MessagingBusType.INIT)
                 {
-                    MessagingControllersManager.i.pendingInitMessagesCount++;
+                    Environment.i.messagingControllersManager.pendingInitMessagesCount++;
                 }
 
                 if (owner != null)
                 {
                     owner.enabled = true;
-                    MessagingControllersManager.i.MarkBusesDirty();
+                    Environment.i.messagingControllersManager.MarkBusesDirty();
                 }
             }
         }
@@ -210,14 +198,15 @@ namespace DCL
 
             // Note (Zak): This check is to avoid calling Time.realtimeSinceStartup
             // unnecessarily because it's pretty slow in JS
-            if (timeBudget == 0 || !enabled || pendingMessages.Count == 0)
+            if (timeBudget <= 0 || !enabled || pendingMessagesCount == 0)
                 return false;
 
             float startTime = Time.realtimeSinceStartup;
+            SceneController sceneController = SceneController.i;
 
-            while (timeBudget != 0 && enabled && pendingMessages.Count > 0 && Time.realtimeSinceStartup - startTime < timeBudget)
+            while (enabled && pendingMessagesCount > 0 && Time.realtimeSinceStartup - startTime < timeBudget)
             {
-                MessagingBus.QueuedSceneMessage m = pendingMessages.First.Value;
+                QueuedSceneMessage m = pendingMessages.First.Value;
 
                 RemoveFirstReliableMessage();
 
@@ -228,16 +217,17 @@ namespace DCL
 
                 switch (m.type)
                 {
-                    case MessagingBus.QueuedSceneMessage.Type.NONE:
+                    case QueuedSceneMessage.Type.NONE:
                         break;
-                    case MessagingBus.QueuedSceneMessage.Type.SCENE_MESSAGE:
+                    case QueuedSceneMessage.Type.SCENE_MESSAGE:
 
-                        var messageObject = m as MessagingBus.QueuedSceneMessage_Scene;
+                        if (!(m is QueuedSceneMessage_Scene sceneMessage))
+                            continue;
 
-                        if (handler.ProcessMessage(messageObject, out msgYieldInstruction))
+                        if (handler.ProcessMessage(sceneMessage, out msgYieldInstruction))
                         {
 #if UNITY_EDITOR
-                            if (SceneController.i && SceneController.i.msgStepByStep)
+                            if (sceneController.msgStepByStep)
                             {
                                 if (VERBOSE)
                                 {
@@ -255,7 +245,7 @@ namespace DCL
                         }
 
                         OnMessageProcessed();
-                        SceneController.i.OnMessageWillDequeue?.Invoke(messageObject.method);
+                        sceneController.OnMessageWillDequeue?.Invoke(sceneMessage.method);
 
                         if (msgYieldInstruction != null)
                         {
@@ -265,21 +255,21 @@ namespace DCL
                         }
 
                         break;
-                    case MessagingBus.QueuedSceneMessage.Type.LOAD_PARCEL:
+                    case QueuedSceneMessage.Type.LOAD_PARCEL:
                         handler.LoadParcelScenesExecute(m.message);
-                        SceneController.i?.OnMessageWillDequeue?.Invoke("LoadScene");
+                        sceneController.OnMessageWillDequeue?.Invoke("LoadScene");
                         break;
-                    case MessagingBus.QueuedSceneMessage.Type.UNLOAD_PARCEL:
+                    case QueuedSceneMessage.Type.UNLOAD_PARCEL:
                         handler.UnloadParcelSceneExecute(m.message);
-                        SceneController.i?.OnMessageWillDequeue?.Invoke("UnloadScene");
+                        sceneController.OnMessageWillDequeue?.Invoke("UnloadScene");
                         break;
-                    case MessagingBus.QueuedSceneMessage.Type.UPDATE_PARCEL:
+                    case QueuedSceneMessage.Type.UPDATE_PARCEL:
                         handler.UpdateParcelScenesExecute(m.message);
-                        SceneController.i?.OnMessageWillDequeue?.Invoke("UpdateScene");
+                        sceneController.OnMessageWillDequeue?.Invoke("UpdateScene");
                         break;
-                    case MessagingBus.QueuedSceneMessage.Type.UNLOAD_SCENES:
+                    case QueuedSceneMessage.Type.UNLOAD_SCENES:
                         handler.UnloadAllScenes();
-                        SceneController.i?.OnMessageWillDequeue?.Invoke("UnloadAllScenes");
+                        sceneController.OnMessageWillDequeue?.Invoke("UnloadAllScenes");
                         break;
                 }
 
@@ -299,16 +289,16 @@ namespace DCL
         {
             processedMessagesCount++;
 
-            if (id == MessagingBusId.INIT)
+            if (type == MessagingBusType.INIT)
             {
-                MessagingControllersManager.i.pendingInitMessagesCount--;
-                MessagingControllersManager.i.processedInitMessagesCount++;
+                Environment.i.messagingControllersManager.pendingInitMessagesCount--;
+                Environment.i.messagingControllersManager.processedInitMessagesCount++;
             }
         }
 
         private LinkedListNode<QueuedSceneMessage> AddReliableMessage(QueuedSceneMessage message)
         {
-            MessagingControllersManager.i.pendingMessagesCount++;
+            Environment.i.messagingControllersManager.pendingMessagesCount++;
             pendingMessagesCount++;
             return pendingMessages.AddLast(message);
         }
@@ -319,27 +309,28 @@ namespace DCL
             {
                 pendingMessages.RemoveFirst();
                 pendingMessagesCount--;
-                MessagingControllersManager.i.pendingMessagesCount--;
+                Environment.i.messagingControllersManager.pendingMessagesCount--;
             }
         }
-        private void RemoveUnreliableMessage(MessagingBus.QueuedSceneMessage message)
+
+        private void RemoveUnreliableMessage(QueuedSceneMessage message)
         {
             if (unreliableMessages.ContainsKey(message.unreliableMessageKey))
                 unreliableMessages.Remove(message.unreliableMessageKey);
         }
-        private void LogMessage(MessagingBus.QueuedSceneMessage m, MessagingBus bus, bool logType = true)
+
+        private void LogMessage(QueuedSceneMessage m, MessagingBus bus, bool logType = true)
         {
             string finalTag = SceneController.i.TryToGetSceneCoordsID(bus.debugTag);
 
             if (logType)
             {
-                Debug.Log($"#{bus.processedMessagesCount} ... bus = {finalTag}, id = {bus.id}... processing msg... type = {m.type}... message = {m.message}");
+                Debug.Log($"#{bus.processedMessagesCount} ... bus = {finalTag}, id = {bus.type}... processing msg... type = {m.type}... message = {m.message}");
             }
             else
             {
-                Debug.Log($"#{bus.processedMessagesCount} ... Bus = {finalTag}, id = {bus.id}... processing msg... {m.message}");
+                Debug.Log($"#{bus.processedMessagesCount} ... Bus = {finalTag}, id = {bus.type}... processing msg... {m.message}");
             }
         }
-
     }
 }

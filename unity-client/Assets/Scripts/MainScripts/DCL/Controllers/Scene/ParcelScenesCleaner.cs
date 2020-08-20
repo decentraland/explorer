@@ -9,20 +9,34 @@ namespace DCL
     public class ParcelScenesCleaner
     {
         const float MAX_TIME_BUDGET = 0.01f;
-        private struct ParcelEntity
+
+        private struct MarkedEntityInfo
         {
             public ParcelScene scene;
             public DecentralandEntity entity;
 
-            public ParcelEntity(ParcelScene scene, DecentralandEntity entity)
+            public MarkedEntityInfo(ParcelScene scene, DecentralandEntity entity)
             {
                 this.scene = scene;
                 this.entity = entity;
             }
         }
 
+        private struct MarkedSharedComponentInfo
+        {
+            public ParcelScene scene;
+            public string componentId;
+
+            public MarkedSharedComponentInfo(ParcelScene scene, string componentId)
+            {
+                this.scene = scene;
+                this.componentId = componentId;
+            }
+        }
+
         Queue<DecentralandEntity> entitiesMarkedForCleanup = new Queue<DecentralandEntity>();
-        Queue<ParcelEntity> rootEntitiesMarkedForCleanup = new Queue<ParcelEntity>();
+        Queue<MarkedEntityInfo> rootEntitiesMarkedForCleanup = new Queue<MarkedEntityInfo>();
+        Queue<MarkedSharedComponentInfo> disposableComponentsMarkedForCleanup = new Queue<MarkedSharedComponentInfo>();
 
         Coroutine removeEntitiesCoroutine;
 
@@ -59,26 +73,33 @@ namespace DCL
         // to avoid traversing a lot of child entities in the same frame and other problems
         public void MarkRootEntityForCleanup(ParcelScene scene, DecentralandEntity entity)
         {
-            rootEntitiesMarkedForCleanup.Enqueue(new ParcelEntity(scene, entity));
+            rootEntitiesMarkedForCleanup.Enqueue(new MarkedEntityInfo(scene, entity));
+        }
+
+        public void MarkDisposableComponentForCleanup(ParcelScene scene, string componentId)
+        {
+            disposableComponentsMarkedForCleanup.Enqueue(new MarkedSharedComponentInfo(scene, componentId));
         }
 
         public void ForceCleanup()
         {
-            ParcelScene scene = null;
+            while (disposableComponentsMarkedForCleanup.Count > 0)
+            {
+                MarkedSharedComponentInfo markedSharedComponentInfo = disposableComponentsMarkedForCleanup.Dequeue();
+                markedSharedComponentInfo.scene.SharedComponentDispose(markedSharedComponentInfo.componentId);
+            }
+
+            HashSet<ParcelScene> scenesToRemove = new HashSet<ParcelScene>();
 
             // If we have root entities queued for removal, we call Parcel Scene's RemoveEntity()
             // so that the child entities end up recursively in the entitiesMarkedForCleanup queue
             while (rootEntitiesMarkedForCleanup.Count > 0)
             {
-                // If the next scene is different to the last one
-                // we removed all the entities from the parcel scene
-                if (scene != null && rootEntitiesMarkedForCleanup.Peek().scene != scene)
-                    break;
+                MarkedEntityInfo markedEntityInfo = rootEntitiesMarkedForCleanup.Dequeue();
+                markedEntityInfo.scene.RemoveEntity(markedEntityInfo.entity.entityId, false);
 
-                ParcelEntity parcelEntity = rootEntitiesMarkedForCleanup.Dequeue();
-
-                scene = parcelEntity.scene;
-                scene.RemoveEntity(parcelEntity.entity.entityId, false);
+                if (!scenesToRemove.Contains(markedEntityInfo.scene))
+                    scenesToRemove.Add(markedEntityInfo.scene);
             }
 
             while (entitiesMarkedForCleanup.Count > 0)
@@ -88,8 +109,11 @@ namespace DCL
                 entity.Cleanup();
             }
 
-            if (scene != null)
-                GameObject.Destroy(scene.gameObject);
+            foreach (var scene in scenesToRemove)
+            {
+                if (scene != null && !SceneController.i.loadedScenes.ContainsKey(scene.sceneData.id))
+                    Object.Destroy(scene.gameObject);
+            }
         }
 
         IEnumerator CleanupEntitiesCoroutine()
@@ -97,21 +121,30 @@ namespace DCL
             while (true)
             {
                 float lastTime = Time.unscaledTime;
-                ParcelScene scene = null;
+
+                while (disposableComponentsMarkedForCleanup.Count > 0)
+                {
+                    MarkedSharedComponentInfo markedSharedComponentInfo = disposableComponentsMarkedForCleanup.Dequeue();
+                    markedSharedComponentInfo.scene.SharedComponentDispose(markedSharedComponentInfo.componentId);
+
+                    if (DCLTime.realtimeSinceStartup - lastTime >= MAX_TIME_BUDGET)
+                    {
+                        yield return null;
+                        lastTime = Time.unscaledTime;
+                    }
+                }
+
+                HashSet<ParcelScene> scenesToRemove = new HashSet<ParcelScene>();
 
                 // If we have root entities queued for removal, we call Parcel Scene's RemoveEntity()
                 // so that the child entities end up recursively in the entitiesMarkedForCleanup queue
                 while (rootEntitiesMarkedForCleanup.Count > 0)
                 {
-                    // If the next scene is different to the last one
-                    // we removed all the entities from the parcel scene
-                    if (scene != null && rootEntitiesMarkedForCleanup.Peek().scene != scene)
-                        break;
+                    MarkedEntityInfo markedEntityInfo = rootEntitiesMarkedForCleanup.Dequeue();
+                    markedEntityInfo.scene.RemoveEntity(markedEntityInfo.entity.entityId, false);
 
-                    ParcelEntity parcelEntity = rootEntitiesMarkedForCleanup.Dequeue();
-
-                    scene = parcelEntity.scene;
-                    scene.RemoveEntity(parcelEntity.entity.entityId, false);
+                    if (!scenesToRemove.Contains(markedEntityInfo.scene))
+                        scenesToRemove.Add(markedEntityInfo.scene);
 
                     if (DCLTime.realtimeSinceStartup - lastTime >= MAX_TIME_BUDGET)
                     {
@@ -133,12 +166,22 @@ namespace DCL
                     }
                 }
 
-                if (scene != null)
-                    GameObject.Destroy(scene.gameObject);
+                foreach (var scene in scenesToRemove)
+                {
+                    if (scene != null && !SceneController.i.loadedScenes.ContainsKey(scene.sceneData.id))
+                    {
+                        Object.Destroy(scene.gameObject);
+
+                        if (DCLTime.realtimeSinceStartup - lastTime >= MAX_TIME_BUDGET)
+                        {
+                            yield return null;
+                            lastTime = Time.unscaledTime;
+                        }
+                    }
+                }
 
                 yield return null;
             }
-
         }
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using DCL.Helpers;
 using System.Collections;
 using UnityEngine;
@@ -12,14 +13,10 @@ namespace DCL
 
         public RawImage targetImage;
 
-        [System.NonSerialized]
-        public Vector2Int center;
-        [System.NonSerialized]
-        public Vector2Int size;
-        [System.NonSerialized]
-        public int tileSize;
-        [System.NonSerialized]
-        public MapAtlas owner;
+        [System.NonSerialized] public Vector2Int center;
+        [System.NonSerialized] public Vector2Int size;
+        [System.NonSerialized] public int tileSize;
+        [System.NonSerialized] public MapAtlas owner;
         protected RectTransform rt;
         protected bool isLoadingOrLoaded = false;
 
@@ -41,13 +38,18 @@ namespace DCL
 
             yield return Utils.FetchTexture(url, (x) => result = x);
 
-            result.filterMode = FilterMode.Trilinear;
-            result.wrapMode = TextureWrapMode.Clamp;
-            result.anisoLevel = 16;
+            if (result != null)
+            {
+                result.filterMode = FilterMode.Trilinear;
+                result.wrapMode = TextureWrapMode.Clamp;
+                result.anisoLevel = 16;
 
-            targetImage.texture = result;
-            targetImage.SetNativeSize();
-            targetImage.color = Color.white;
+                targetImage.texture = result;
+                targetImage.SetNativeSize();
+                targetImage.color = Color.white;
+            }
+
+            loadCoroutine = null;
         }
 
         public void UpdateCulling()
@@ -90,7 +92,18 @@ namespace DCL
             targetImage.enabled = visible;
 
             if (!isLoadingOrLoaded && visible)
-                CoroutineStarter.Start(LoadChunkImage());
+                loadCoroutine = CoroutineStarter.Start(LoadChunkImage());
+        }
+
+        private Coroutine loadCoroutine;
+
+        private void OnDestroy()
+        {
+            if (loadCoroutine != null)
+            {
+                CoroutineStarter.Stop(loadCoroutine);
+                loadCoroutine = null;
+            }
         }
     }
 }

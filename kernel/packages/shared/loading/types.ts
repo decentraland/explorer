@@ -1,9 +1,34 @@
 import { action } from 'typesafe-actions'
 
-export const helpTexts = [
-  `With blockchain-based virtual items, users are in control: buy, sell, or gift them without asking for permission.`,
-  `MANA is Decentraland's virtual currency. Use it to buy LAND and other premium items, vote on Decentraland's key policy, and pay platform fees.`,
-  `Decentraland is made up of over 90,000 LANDs, virtual spaces backed by cryptographic tokens. Only landowners determine the content that sits on their LAND.`
+export const loadingTips = [
+  {
+    text: `MANA is Decentraland’s virtual currency. Use it to buy LAND and other premium items, vote on key policies and pay platform fees.`,
+    image: 'images/decentraland-connect/loadingtips/Mana.png'
+  },
+  {
+    text: `Buy and sell LAND, Estates, Avatar wearables and names in the Decentraland Marketplace: stocking the very best digital goods and paraphernalia backed by the ethereum blockchain.`,
+    image: 'images/decentraland-connect/loadingtips/Marketplace.png'
+  },
+  {
+    text: `Create scenes, artworks, challenges and more, using the simple Builder: an easy drag and drop tool. For more experienced creators, the SDK provides the tools to fill the world with social games and applications.`,
+    image: 'images/decentraland-connect/loadingtips/Land.png'
+  },
+  {
+    text: `Decentraland is made up of over 90,000 LANDs: virtual spaces backed by cryptographic tokens. Only LANDowners can determine the content that sits on their LAND.`,
+    image: 'images/decentraland-connect/loadingtips/LandImg.png'
+  },
+  {
+    text: `Except for the default set of wearables you get when you start out, each wearable model has a limited supply. The rarest ones can get to be super valuable. You can buy and sell them in the Marketplace.`,
+    image: 'images/decentraland-connect/loadingtips/WearablesImg.png'
+  },
+  {
+    text: `Decentraland is the first fully decentralized virtual world. By voting through the DAO  ('Decentralized Autonomous Organization'), you are in control of the policies created to determine how the world behaves.`,
+    image: 'images/decentraland-connect/loadingtips/DAOImg.png'
+  },
+  {
+    text: `Genesis Plaza is built and maintained by the Decentraland Foundation but is still in many ways a community project. Around here you'll find several teleports that can take you directly to special scenes marked as points of interest.`,
+    image: 'images/decentraland-connect/loadingtips/GenesisPlazaImg.png'
+  }
 ]
 
 export const ROTATE_HELP_TEXT = 'Set Help Text'
@@ -13,11 +38,13 @@ export const NOT_STARTED = 'Getting things ready...'
 export const notStarted = () => action(NOT_STARTED)
 export const LOADING_STARTED = 'Authenticating user...'
 export const loadingStarted = () => action(LOADING_STARTED)
-export const AUTH_SUCCESSFUL = 'Authentication successful.'
+export const AWAITING_USER_SIGNATURE = 'Awaiting your signature...'
+export const awaitingUserSignature = () => action(AWAITING_USER_SIGNATURE)
+export const AUTH_SUCCESSFUL = 'Authentication successful. Loading the experience...'
 export const authSuccessful = () => action(AUTH_SUCCESSFUL)
 export const NOT_INVITED = 'Auth error: not invited'
 export const notInvited = () => action(NOT_INVITED)
-export const UNITY_CLIENT_LOADED = 'Rendering engine finished loading.'
+export const UNITY_CLIENT_LOADED = 'Rendering engine finished loading! Setting up scene system...'
 export const unityClientLoaded = () => action(UNITY_CLIENT_LOADED)
 export const LOADING_SCENES = 'Loading scenes...'
 export const loadingScenes = () => action(LOADING_SCENES)
@@ -29,11 +56,14 @@ export const establishingComms = () => action(ESTABLISHING_COMMS)
 export const COMMS_ESTABLISHED = 'Communications established. Loading profile and item catalogs...'
 export const commsEstablished = () => action(COMMS_ESTABLISHED)
 
-export const EXPERIENCE_STARTED = 'Setup finished: Loading scenes...'
+// ** TODO - trailing whitespace to workaround id -> label issue - moliva - 15/07/2020
+export const EXPERIENCE_STARTED = 'Loading scenes... '
 export const experienceStarted = () => action(EXPERIENCE_STARTED)
 
-export const TELEPORT_TRIGGERED = 'Teleporting...'
+// ** TODO - trailing whitespaces to workaround id -> label issue - moliva - 15/07/2020
+export const TELEPORT_TRIGGERED = 'Loading scenes...  '
 export const teleportTriggered = (payload: string) => action(TELEPORT_TRIGGERED, payload)
+
 export const SCENE_ENTERED = 'Entered into a new scene'
 export const sceneEntered = () => action(SCENE_ENTERED)
 export const UNEXPECTED_ERROR = 'Unexpected fatal error'
@@ -53,6 +83,8 @@ export const COMMS_ERROR_RETRYING = 'Communications channel error (will retry)'
 export const commsErrorRetrying = (attempt: number) => action(COMMS_ERROR_RETRYING, attempt)
 export const COMMS_COULD_NOT_BE_ESTABLISHED = 'Communications channel error'
 export const commsCouldNotBeEstablished = () => action(COMMS_COULD_NOT_BE_ESTABLISHED)
+export const CATALYST_COULD_NOT_LOAD = 'Catalysts Contract could not be queried'
+export const catalystCouldNotLoad = () => action(CATALYST_COULD_NOT_LOAD)
 export const MOBILE_NOT_SUPPORTED = 'Mobile is not supported'
 export const mobileNotSupported = () => action(MOBILE_NOT_SUPPORTED)
 export const NEW_LOGIN = 'New login'
@@ -81,6 +113,7 @@ export const ExecutionLifecycleNotifications = {
   failedFetchingUnity,
   commsErrorRetrying,
   commsCouldNotBeEstablished,
+  catalystCouldNotLoad,
   newLogin,
   networkMismatch
 }
@@ -107,12 +140,15 @@ export type ExecutionLifecycleEvent =
   | typeof FAILED_FETCHING_UNITY
   | typeof COMMS_ERROR_RETRYING
   | typeof COMMS_COULD_NOT_BE_ESTABLISHED
+  | typeof CATALYST_COULD_NOT_LOAD
   | typeof NEW_LOGIN
   | typeof NETWORK_MISMATCH
+  | typeof AWAITING_USER_SIGNATURE
 
 export const ExecutionLifecycleEventsList: ExecutionLifecycleEvent[] = [
   NOT_STARTED,
   LOADING_STARTED,
+  AWAITING_USER_SIGNATURE,
   AUTH_SUCCESSFUL,
   UNITY_CLIENT_LOADED,
   NOT_INVITED,
@@ -132,6 +168,15 @@ export const ExecutionLifecycleEventsList: ExecutionLifecycleEvent[] = [
   COMMS_ERROR_RETRYING,
   MOBILE_NOT_SUPPORTED,
   COMMS_COULD_NOT_BE_ESTABLISHED,
+  CATALYST_COULD_NOT_LOAD,
   NEW_LOGIN,
   NETWORK_MISMATCH
+]
+
+export const SUBSYSTEMS_EVENTS = [
+  NOT_STARTED,
+  LOADING_STARTED,
+  AUTH_SUCCESSFUL,
+  UNITY_CLIENT_LOADED,
+  WAITING_FOR_RENDERER
 ]

@@ -1,9 +1,10 @@
 import { Vector2Component } from 'atomicHelpers/landHelpers'
 import { MinimapSceneInfo } from 'decentraland-ecs/src/decentraland/Types'
 import { call, fork, put, select, take, takeEvery, race, takeLatest } from 'redux-saga/effects'
-import { parcelLimits } from '../../config'
-import { getServer, LifecycleManager } from '../../decentraland-loader/lifecycle/manager'
-import { getOwnerNameFromJsonData, getSceneDescriptionFromJsonData } from '../../shared/selectors'
+import { parcelLimits } from 'config'
+import { fetchSceneJson } from '../../decentraland-loader/lifecycle/utils/fetchSceneJson'
+import { fetchSceneIds } from '../../decentraland-loader/lifecycle/utils/fetchSceneIds'
+import { getOwnerNameFromJsonData, getSceneDescriptionFromJsonData } from 'shared/selectors'
 import defaultLogger from '../logger'
 import { lastPlayerPosition } from '../world/positionThings'
 import {
@@ -23,7 +24,10 @@ import {
   reportScenesAroundParcel,
   reportLastPosition,
   initializePoiTiles,
-  INITIALIZE_POI_TILES
+  INITIALIZE_POI_TILES,
+  ReportScenesFromTile,
+  reportScenesFromTiles,
+  REPORT_SCENES_FROM_TILES
 } from './actions'
 import { shouldLoadSceneJsonData, isMarketDataInitialized, getPoiTiles } from './selectors'
 import { AtlasState, RootAtlasState } from './types'
@@ -68,6 +72,7 @@ export function* atlasSaga(): any {
 
   yield takeEvery(QUERY_DATA_FROM_SCENE_JSON, querySceneDataAction)
   yield takeLatest(REPORT_SCENES_AROUND_PARCEL, reportScenesAroundParcelAction)
+  yield takeEvery(REPORT_SCENES_FROM_TILES, reportScenesFromTilesAction)
 }
 
 function* loadMarketplace(config: MarketplaceConfig) {
@@ -114,18 +119,6 @@ function* querySceneDataAction(action: QuerySceneData) {
   }
 }
 
-async function fetchSceneJson(sceneIds: string[]) {
-  const server: LifecycleManager = getServer()
-  const lands = await Promise.all(sceneIds.map((sceneId) => server.getParcelData(sceneId)))
-  return lands
-}
-
-async function fetchSceneIds(tiles: string[]) {
-  const server: LifecycleManager = getServer()
-  const promises = server.getSceneIds(tiles)
-  return Promise.all(promises)
-}
-
 const TRIGGER_DISTANCE = 10 * parcelLimits.parcelSize
 const MAX_SCENES_AROUND = 15
 
@@ -156,12 +149,12 @@ function* reportPois() {
 
   const pois: string[] = yield select(getPoiTiles)
 
-  yield call(reportScenesFromTiles, pois)
+  yield put(reportScenesFromTiles(pois))
 }
 
 function* reportScenesAroundParcelAction(action: ReportScenesAroundParcel) {
-  const tilesAround = getTilesRectFromCenter(action.payload.parcelCoord, MAX_SCENES_AROUND)
-  yield call(reportScenesFromTiles, tilesAround)
+  const tilesAround = getTilesRectFromCenter(action.payload.parcelCoord, action.payload.scenesAround)
+  yield put(reportScenesFromTiles(tilesAround))
 }
 
 function* initializePois() {
@@ -172,11 +165,12 @@ function* initializePois() {
 
 type stringOrNull = string | null
 
-function* reportScenesFromTiles(tiles: string[]) {
+function* reportScenesFromTilesAction(action: ReportScenesFromTile) {
   while (!(yield select(isMarketDataInitialized))) {
     yield take(MARKET_DATA)
   }
 
+  const tiles = action.payload.tiles
   const result: stringOrNull[] = yield call(fetchSceneIds, tiles)
 
   // filter non null & distinct

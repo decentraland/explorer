@@ -1,3 +1,4 @@
+﻿using System.Runtime.CompilerServices;
 using DCL;
 using UnityEngine;
 
@@ -37,14 +38,29 @@ public class PlayerAvatarController : MonoBehaviour
         if (!enableCameraCheck || repositioningWorld)
             return;
 
+        if (mainCamera == null)
+        {
+            mainCamera = Camera.main;
+
+            if (mainCamera == null)
+                return;
+        }
+
         bool shouldBeVisible = Vector3.Distance(mainCamera.transform.position, transform.position) > cameraDistanceToDeactivate;
 
         if (shouldBeVisible != avatarRenderer.gameObject.activeSelf)
             avatarRenderer.SetVisibility(shouldBeVisible);
     }
+
     private void OnEnable()
     {
         userProfile.OnUpdate += OnUserProfileOnUpdate;
+        userProfile.OnAvatarExpressionSet += OnAvatarExpression;
+    }
+
+    private void OnAvatarExpression(string id, long timestamp)
+    {
+        avatarRenderer.UpdateExpressions(id, timestamp);
     }
 
     private void OnUserProfileOnUpdate(UserProfile profile)
@@ -55,5 +71,6 @@ public class PlayerAvatarController : MonoBehaviour
     private void OnDisable()
     {
         userProfile.OnUpdate -= OnUserProfileOnUpdate;
+        userProfile.OnAvatarExpressionSet -= OnAvatarExpression;
     }
 }

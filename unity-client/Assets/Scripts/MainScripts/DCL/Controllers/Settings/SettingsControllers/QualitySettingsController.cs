@@ -1,32 +1,33 @@
-﻿using UnityEngine;
-using UnityEngine.Rendering;
-using UnityEngine.Rendering.LWRP;
-using UnityEngine.Rendering.PostProcessing;
-using System.Reflection;
 using Cinemachine;
-
+using System.Reflection;
+using DCL.Interface;
+using UnityEngine;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
+using QualitySettings = DCL.SettingsData.QualitySettings;
 using UnitySettings = UnityEngine.QualitySettings;
 
 namespace DCL.SettingsController
 {
     public class QualitySettingsController : MonoBehaviour
     {
-        private LightweightRenderPipelineAsset lightweightRenderPipelineAsset = null;
+        private UnityEngine.Rendering.Universal.UniversalRenderPipelineAsset lightweightRenderPipelineAsset = null;
 
         private FieldInfo lwrpaShadowField = null;
         private FieldInfo lwrpaSoftShadowField = null;
         private FieldInfo lwrpaShadowResolutionField = null;
 
         public Light environmentLight = null;
-        public PostProcessVolume postProcessVolume = null;
+
+        public Volume postProcessVolume = null;
         public CinemachineFreeLook thirdPersonCamera = null;
         public CinemachineVirtualCamera firstPersonCamera = null;
 
-        void Awake()
+        void Start()
         {
             if (lightweightRenderPipelineAsset == null)
             {
-                lightweightRenderPipelineAsset = GraphicsSettings.renderPipelineAsset as LightweightRenderPipelineAsset;
+                lightweightRenderPipelineAsset = GraphicsSettings.renderPipelineAsset as UnityEngine.Rendering.Universal.UniversalRenderPipelineAsset;
 
                 // NOTE: LightweightRenderPipelineAsset doesn't expose properties to set any of the following fields
                 lwrpaShadowField = lightweightRenderPipelineAsset.GetType().GetField("m_MainLightShadowsSupported", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -47,13 +48,24 @@ namespace DCL.SettingsController
             Settings.i.OnQualitySettingsChanged -= ApplyQualitySettings;
         }
 
-        void ApplyQualitySettings(SettingsData.QualitySettings qualitySettings)
+        void ApplyQualitySettings(QualitySettings qualitySettings)
         {
-            UnitySettings.masterTextureLimit = (int)qualitySettings.textureQuality;
+            switch (qualitySettings.baseResolution)
+            {
+                case QualitySettings.BaseResolution.BaseRes_720:
+                    WebInterface.SetBaseResolution(720);
+                    break;
+                case QualitySettings.BaseResolution.BaseRes_1080:
+                    WebInterface.SetBaseResolution(1080);
+                    break;
+                case QualitySettings.BaseResolution.BaseRes_Unlimited:
+                    WebInterface.SetBaseResolution(9999);
+                    break;
+            }
 
             if (lightweightRenderPipelineAsset)
             {
-                lightweightRenderPipelineAsset.msaaSampleCount = (int)qualitySettings.antiAliasing;
+                lightweightRenderPipelineAsset.msaaSampleCount = (int) qualitySettings.antiAliasing;
                 lightweightRenderPipelineAsset.renderScale = qualitySettings.renderScale;
 
                 lwrpaShadowField?.SetValue(lightweightRenderPipelineAsset, qualitySettings.shadows);
@@ -68,20 +80,22 @@ namespace DCL.SettingsController
                 {
                     shadowType = qualitySettings.softShadows ? LightShadows.Soft : LightShadows.Hard;
                 }
+
                 environmentLight.shadows = shadowType;
             }
 
             if (postProcessVolume)
             {
                 Bloom bloom;
-                if (postProcessVolume.profile.TryGetSettings(out bloom))
+                if (postProcessVolume.profile.TryGet<Bloom>(out bloom))
                 {
-                    bloom.enabled.value = qualitySettings.bloom;
+                    bloom.active = qualitySettings.bloom;
                 }
-                ColorGrading colorGrading;
-                if (postProcessVolume.profile.TryGetSettings(out colorGrading))
+
+                Tonemapping toneMapping;
+                if (postProcessVolume.profile.TryGet<Tonemapping>(out toneMapping))
                 {
-                    colorGrading.enabled.value = qualitySettings.colorGrading;
+                    toneMapping.active = qualitySettings.colorGrading;
                 }
             }
 

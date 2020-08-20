@@ -15,9 +15,15 @@ public class UIVisualTestsBase : VisualTestsBase
 
     protected IEnumerator InitUIVisualTestScene(string testName)
     {
+        VisualTestHelpers.snapshotIndex = 0;
+        VisualTestHelpers.currentTestName = testName;
+
         yield return InitScene();
 
-        yield return VisualTestHelpers.InitVisualTestsScene(testName);
+        //NOTE(Brian): If we don't wait a frame, RenderingController.Awake sets the rendering state back to false.
+        yield return null;
+
+        base.SetUp_Renderer();
 
         // Create UIScreenSpace
         UIScreenSpace screenSpace = TestHelpers.SharedComponentCreate<UIScreenSpace, UIScreenSpace.Model>(scene, CLASS_ID.UI_SCREEN_SPACE_SHAPE);
@@ -47,8 +53,7 @@ public class UIVisualTestsBase : VisualTestsBase
         // Creation
         var component = scene.SharedComponentCreate(
             componentId,
-            "material",
-            (int)classId
+            (int) classId
         ) as SharedComponentType;
         yield return component.routine;
 

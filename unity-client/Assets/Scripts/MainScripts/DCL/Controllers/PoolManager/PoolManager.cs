@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using Cinemachine;
 
 namespace DCL
 {
@@ -44,10 +45,7 @@ namespace DCL
                 return containerValue;
             }
 
-            set
-            {
-                containerValue = value;
-            }
+            set { containerValue = value; }
         }
 
         GameObject containerValue = null;
@@ -64,8 +62,8 @@ namespace DCL
 
             initializing = !CommonScriptableObjects.rendererState.Get();
             CommonScriptableObjects.rendererState.OnChange += OnRenderingStateChanged;
-
         }
+
         void OnRenderingStateChanged(bool renderingEnabled, bool prevState)
         {
             initializing = !renderingEnabled;
@@ -73,6 +71,11 @@ namespace DCL
 
         public Pool AddPool(object id, GameObject original, IPooledObjectInstantiator instantiator = null, int maxPrewarmCount = DEFAULT_PREWARM_COUNT, bool isPersistent = false)
         {
+            Pool existingPool = GetPool(id);
+
+            if (existingPool != null && !existingPool.IsValid())
+                RemovePool(id);
+
             if (ContainsPool(id))
             {
                 if (Pool.FindPoolInGameObject(original, out Pool poolAlreadyExists))
@@ -103,11 +106,11 @@ namespace DCL
             {
                 pool.container.transform.parent = container.transform;
                 pool.original.name = "Original";
-                pool.original.transform.parent = pool.container.transform;
+                pool.original.transform.SetParent(pool.container.transform, true);
             }
             else
             {
-                pool.original.transform.parent = null;
+                pool.original.transform.SetParent(null, true);
             }
 
             pool.original.SetActive(false);
@@ -169,7 +172,6 @@ namespace DCL
 #endif
                 return false;
             }
-
 
 
             if (poolables.TryGetValue(gameObject, out PoolableObject poolableObject))

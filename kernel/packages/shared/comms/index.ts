@@ -3,7 +3,7 @@ import { commConfigurations, parcelLimits, COMMS, AUTO_CHANGE_REALM } from 'conf
 import { CommunicationsController } from 'shared/apis/CommunicationsController'
 import { defaultLogger } from 'shared/logger'
 import { ChatMessage as InternalChatMessage, ChatMessageType } from 'shared/types'
-import { positionObservable, PositionReport } from 'shared/world/positionThings'
+import { positionObservable, PositionReport, lastPlayerPosition } from 'shared/world/positionThings'
 import { ProfileAsPromise } from '../profiles/ProfileAsPromise'
 import { notifyStatusThroughChat } from './chat'
 import { CliBrokerConnection } from './CliBrokerConnection'
@@ -43,18 +43,17 @@ import {
 } from './interface/utils'
 import { BrokerWorldInstanceConnection } from '../comms/v1/brokerWorldInstanceConnection'
 import { profileToRendererFormat } from 'shared/profiles/transformations/profileToRendererFormat'
-import { ProfileForRenderer } from 'decentraland-ecs/src'
-import { worldRunningObservable, isWorldRunning } from '../world/worldState'
+import { ProfileForRenderer, uuid } from 'decentraland-ecs/src'
+import { worldRunningObservable, isWorldRunning, onNextWorldRunning } from '../world/worldState'
 import { WorldInstanceConnection } from './interface/index'
 
 import { LighthouseWorldInstanceConnection } from './v2/LighthouseWorldInstanceConnection'
 
-import { identity } from '../index'
 import { Authenticator } from 'dcl-crypto'
 import { getCommsServer, getRealm, getAllCatalystCandidates } from '../dao/selectors'
 import { Realm, LayerUserInfo } from 'shared/dao/types'
 import { Store } from 'redux'
-import { RootState, StoreContainer } from 'shared/store/rootTypes'
+import { RootState } from 'shared/store/rootTypes'
 import { store } from 'shared/store/store'
 import {
   setCatalystRealmCommsStatus,
@@ -71,6 +70,16 @@ import { messageReceived } from '../chat/actions'
 import { arrayEquals } from 'atomicHelpers/arrayEquals'
 import { getCommsConfig } from 'shared/meta/selectors'
 import { ensureMetaConfigurationInitialized } from 'shared/meta/index'
+import { ReportFatalError } from 'shared/loading/ReportFatalError'
+import {
+  NEW_LOGIN,
+  UNEXPECTED_ERROR,
+  commsEstablished,
+  COMMS_COULD_NOT_BE_ESTABLISHED,
+  commsErrorRetrying
+} from 'shared/loading/types'
+import { getIdentity } from 'shared/session'
+import { createLogger } from '../logger'
 
 export type CommsVersion = 'v1' | 'v2'
 export type CommsMode = CommsV1Mode | CommsV2Mode
@@ -92,9 +101,16 @@ export const MORDOR_POSITION: Position = [
 
 type CommsContainer = {
   printCommsInformation: () => void
+  bots: {
+    create: () => string
+    list: () => string[]
+    remove: (id: string) => boolean
+  }
 }
 
-declare const globalThis: StoreContainer & CommsContainer
+declare const globalThis: CommsContainer
+
+const logger = createLogger('comms: ')
 
 export class PeerTrackingInfo {
   public position: Position | null = null
@@ -269,7 +285,7 @@ function ensurePeerTrackingInfo(context: Context, alias: string): PeerTrackingIn
 
 export function processChatMessage(context: Context, fromAlias: string, message: Package<ChatMessage>) {
   const msgId = message.data.id
-  const profile = getProfile(globalThis.globalStore.getState(), identity.address)
+  const profile = getProfile(store.getState(), getIdentity().address)
 
   const peerTrackingInfo = ensurePeerTrackingInfo(context, fromAlias)
   if (!peerTrackingInfo.receivedPublicChatMessages.has(msgId)) {
@@ -297,7 +313,7 @@ export function processChatMessage(context: Context, fromAlias: string, message:
             body: text,
             timestamp: message.time
           }
-          globalThis.globalStore.dispatch(messageReceived(messageEntry))
+          store.dispatch(messageReceived(messageEntry))
         }
       }
     }
@@ -474,7 +490,7 @@ function collectInfo(context: Context) {
       continue
     }
 
-    if (trackingInfo.identity === identity.address) {
+    if (trackingInfo.identity === getIdentity().address) {
       // If we are tracking a peer that is ourselves, we remove it
       removePeer(context, peerAlias)
       continue
@@ -621,13 +637,13 @@ export async function connect(userId: string) {
 
         const instance = new BrokerWorldInstanceConnection(commsBroker)
         await instance.isConnected
+        store.dispatch(commsEstablished())
 
         connection = instance
         break
       }
       case 'v2': {
         await ensureMetaConfigurationInitialized()
-        const store: Store<RootState> = globalThis.globalStore
         const lighthouseUrl = getCommsServer(store.getState())
         const realm = getRealm(store.getState())
         const commsConfig = getCommsConfig(store.getState())
@@ -638,12 +654,12 @@ export async function connect(userId: string) {
           },
           authHandler: async (msg: string) => {
             try {
-              return Authenticator.signPayload(identity, msg)
+              return Authenticator.signPayload(getIdentity(), msg)
             } catch (e) {
               defaultLogger.info(`error while trying to sign message from lighthouse '${msg}'`)
             }
             // if any error occurs
-            return identity
+            return getIdentity()
           },
           logLevel: 'NONE',
           targetConnections: commsConfig.targetConnections ?? 4,
@@ -670,7 +686,7 @@ export async function connect(userId: string) {
         defaultLogger.log('Using Remote lighthouse service: ', lighthouseUrl)
 
         connection = new LighthouseWorldInstanceConnection(
-          identity.address,
+          getIdentity().address,
           realm!,
           lighthouseUrl,
           peerConfig,
@@ -704,10 +720,18 @@ export async function connect(userId: string) {
     if (isWorldRunning()) {
       await startCommunications(context)
     } else {
-      let observer = worldRunningObservable.add((isRunning) => {
-        if (isRunning) {
-          startCommunications(context!).catch((e) => defaultLogger.log('Error starting communications!', e))
-          worldRunningObservable.remove(observer)
+      onNextWorldRunning(async () => {
+        try {
+          await startCommunications(context!)
+        } catch (e) {
+          disconnect()
+          if (e instanceof IdTakenError) {
+            ReportFatalError(NEW_LOGIN)
+          } else {
+            // not a comms issue per se => rethrow error
+            defaultLogger.error(`error while trying to establish communications `, e)
+            ReportFatalError(UNEXPECTED_ERROR)
+          }
         }
       })
     }
@@ -715,8 +739,8 @@ export async function connect(userId: string) {
     return context
   } catch (e) {
     defaultLogger.error(e)
-    if (e.message && e.message.includes('is taken')) {
-      throw new IdTakenError(e.message)
+    if (e instanceof IdTakenError) {
+      throw e
     } else {
       throw new ConnectionEstablishmentError(e.message)
     }
@@ -724,12 +748,47 @@ export async function connect(userId: string) {
 }
 
 export async function startCommunications(context: Context) {
-  const connection = context.worldInstanceConnection!
+  const maxAttemps = 5
+  for (let i = 1; ; ++i) {
+    try {
+      logger.info(`Attempt number ${i}...`)
+      await doStartCommunications(context)
 
+      break
+    } catch (e) {
+      if (e instanceof IdTakenError) {
+        disconnect()
+        ReportFatalError(NEW_LOGIN)
+        throw e
+      } else if (e instanceof ConnectionEstablishmentError) {
+        if (i >= maxAttemps) {
+          // max number of attemps reached => rethrow error
+          logger.info(`Max number of attemps reached (${maxAttemps}), unsuccessful connection`)
+          disconnect()
+          ReportFatalError(COMMS_COULD_NOT_BE_ESTABLISHED)
+          throw e
+        } else {
+          // max number of attempts not reached => continue with loop
+          store.dispatch(commsErrorRetrying(i))
+        }
+      } else {
+        // not a comms issue per se => rethrow error
+        logger.error(`error while trying to establish communications `, e)
+        disconnect()
+        const realm = getRealm(store.getState())
+        store.dispatch(markCatalystRealmConnectionError(realm!))
+      }
+    }
+  }
+}
+
+async function doStartCommunications(context: Context) {
+  const connection = context.worldInstanceConnection!
   try {
     try {
       if (connection instanceof LighthouseWorldInstanceConnection) {
         await connection.connectPeer()
+        store.dispatch(commsEstablished())
       }
     } catch (e) {
       // Do nothing if layer is full. This will be handled by status handler
@@ -806,12 +865,15 @@ export async function startCommunications(context: Context) {
       }
     }, 100)
   } catch (e) {
-    throw new ConnectionEstablishmentError(e.message)
+    if (e.message && e.message.includes('is taken')) {
+      throw new IdTakenError(e.message)
+    } else {
+      throw new ConnectionEstablishmentError(e.message)
+    }
   }
 }
 
 function handleReconnectionError() {
-  const store: Store<RootState> = globalThis.globalStore
   const realm = getRealm(store.getState())
 
   if (realm) {
@@ -832,7 +894,6 @@ function handleReconnectionError() {
 }
 
 function handleFullLayer() {
-  const store: Store<RootState> = globalThis.globalStore
   const realm = getRealm(store.getState())
 
   if (realm) {
@@ -890,7 +951,6 @@ export function disconnect() {
 }
 
 export async function fetchLayerUsersParcels(): Promise<ParcelArray[]> {
-  const store: Store<RootState> = globalThis.globalStore
   const realm = getRealm(store.getState())
   const commsUrl = getCommsServer(store.getState())
 
@@ -910,4 +970,46 @@ globalThis.printCommsInformation = function () {
     defaultLogger.log('Communication topics: ' + previousTopics)
     context.stats.printDebugInformation()
   }
+}
+
+type Bot = { id: string; handle: any }
+const bots: Bot[] = []
+
+globalThis.bots = {
+  create: () => {
+    const id = uuid()
+    processProfileMessage(context!, id, id, {
+      type: 'profile',
+      time: Date.now(),
+      data: {
+        version: '1',
+        user: id
+      }
+    })
+    const position = { ...lastPlayerPosition }
+    const handle = setInterval(() => {
+      processPositionMessage(context!, id, {
+        type: 'position',
+        time: Date.now(),
+        data: [position.x, position.y, position.z, 0, 0, 0, 0]
+      })
+    }, 1000)
+    bots.push({ id, handle })
+    return id
+  },
+  remove: (id: string | undefined) => {
+    let bot
+    if (id) {
+      bot = bots.find((bot) => bot.id === id)
+    } else {
+      bot = bots.length > 0 ? bots[0] : undefined
+    }
+    if (bot) {
+      clearInterval(bot.handle)
+      bots.splice(bots.indexOf(bot), 1)
+      return true
+    }
+    return false
+  },
+  list: () => bots.map((bot) => bot.id)
 }

@@ -11,6 +11,7 @@ import { getNetwork, getUserAccount } from './ethereum/EthereumService'
 import { awaitWeb3Approval } from './ethereum/provider'
 import { defaultLogger } from './logger'
 import { CatalystNode, GraphResponse } from './types'
+import { retry } from '../atomicHelpers/retry'
 
 async function getAddress(): Promise<string | undefined> {
   try {
@@ -83,12 +84,12 @@ export async function fetchCatalystNodes(): Promise<CatalystNode[]> {
 
   const contract = new Catalyst(eth, contractAddress)
 
-  const count = Number.parseInt(await contract.methods.catalystCount().call(), 10)
+  const count = Number.parseInt(await retry(() => contract.methods.catalystCount().call()), 10)
 
   const nodes = []
   for (let i = 0; i < count; ++i) {
-    const ids = await contract.methods.catalystIds(i).call()
-    const node = await contract.methods.catalystById(ids).call()
+    const ids = await retry(() => contract.methods.catalystIds(i).call())
+    const node = await retry(() => contract.methods.catalystById(ids).call())
 
     if (node.domain.startsWith('http://')) {
       defaultLogger.warn(`Catalyst node domain using http protocol, skipping ${node.domain}`)
@@ -108,37 +109,67 @@ export async function fetchCatalystNodes(): Promise<CatalystNode[]> {
   return nodes
 }
 
-const query = `
-  query GetNameByBeneficiary($beneficiary: String) {
-    nfts(where: { owner: $beneficiary, category: ens }) {
-      ens {
-        labelHash
-        beneficiary
-        caller
-        subdomain
-        createdAt
-      }
-    }
-  }`
-
-const opts = (ethAddress: string) => ({
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ query, variables: { beneficiary: ethAddress.toLowerCase() } })
-})
-
 export async function fetchOwnedENS(theGraphBaseUrl: string, ethAddress: string): Promise<string[]> {
-  const totalAttempts = 5
-  for (let attempt = 0; attempt < totalAttempts; attempt++) {
-    try {
-      const response = await fetch(theGraphBaseUrl, opts(ethAddress))
-      if (response.ok) {
-        const jsonResponse: GraphResponse = await response.json()
-        return jsonResponse.data.nfts.map(nft => nft.ens.subdomain)
-      }
-    } catch (error) {
-      defaultLogger.warn(`Could not retrieve ENS for address ${ethAddress}. Try ${attempt} of ${totalAttempts}.`, error)
+  const query = `
+query GetNameByBeneficiary($beneficiary: String) {
+  nfts(where: { owner: $beneficiary, category: ens }) {
+    ens {
+      labelHash
+      beneficiary
+      caller
+      subdomain
+      createdAt
     }
   }
+}`
+
+  const variables = { beneficiary: ethAddress.toLowerCase() }
+
+  try {
+    const jsonResponse: GraphResponse = await queryGraph(theGraphBaseUrl, query, variables)
+    return jsonResponse.data.nfts.map((nft) => nft.ens.subdomain)
+  } catch (e) {
+    // do nothing
+  }
   return []
+}
+
+export async function fetchOwner(url: string, name: string) {
+  const query = `
+    query GetOwner($name: String!) {
+      nfts(first: 1, where: { searchText: $name }) {
+        owner{
+          address
+        }
+      }
+    }`
+
+  const variables = { name: name.toLowerCase() }
+
+  try {
+    const resp = await queryGraph(url, query, variables)
+    return resp.data.nfts.length === 1 ? (resp.data.nfts[0].owner.address as string) : null
+  } catch (error) {
+    defaultLogger.error(`Error querying graph`, error)
+    throw error
+  }
+}
+
+async function queryGraph(url: string, query: string, variables: any, totalAttempts: number = 5) {
+  const opts = {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query, variables })
+  }
+
+  for (let attempt = 0; attempt < totalAttempts; attempt++) {
+    try {
+      const res = await fetch(url, opts)
+      return res.json()
+    } catch (error) {
+      defaultLogger.warn(`Could not query graph. Attempt ${attempt} of ${totalAttempts}.`, error)
+    }
+  }
+
+  throw new Error(`Error while querying graph url=${url}, query=${query}, variables=${JSON.stringify(variables)}`)
 }

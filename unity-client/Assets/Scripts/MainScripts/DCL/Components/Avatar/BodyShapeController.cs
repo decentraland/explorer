@@ -1,14 +1,20 @@
 using System;
+using System.Collections.Generic;
 using DCL.Helpers;
 using UnityEngine;
 
 public class BodyShapeController : WearableController
 {
-    public string bodyShapeType => wearable.id;
+    public string bodyShapeId => wearable.id;
     private Transform animationTarget;
 
-    public BodyShapeController(WearableItem wearableItem) : base(wearableItem, wearableItem?.id) { }
-    protected BodyShapeController(WearableController original) : base(original) { }
+    public BodyShapeController(WearableItem wearableItem) : base(wearableItem, wearableItem?.id)
+    {
+    }
+
+    protected BodyShapeController(WearableController original) : base(original)
+    {
+    }
 
     public SkinnedMeshRenderer skinnedMeshRenderer { get; private set; }
 
@@ -19,60 +25,81 @@ public class BodyShapeController : WearableController
         base.Load(parent, onSuccess, onFail);
     }
 
-    public void RemoveUnusedParts()
+    public void RemoveUnusedParts(HashSet<string> usedCategories)
     {
-        AvatarUtils.RemoveUnusedBodyParts_Hack(assetContainer.gameObject);
+        bool lowerBodyActive = false;
+        bool upperBodyActive = false;
+        bool feetActive = false;
+
+        foreach (var category in usedCategories)
+        {
+            switch (category)
+            {
+                case WearableLiterals.Categories.LOWER_BODY:
+                    lowerBodyActive = true;
+                    break;
+                case WearableLiterals.Categories.UPPER_BODY:
+                    upperBodyActive = true;
+                    break;
+                case WearableLiterals.Categories.FEET:
+                    feetActive = true;
+                    break;
+            }
+        }
+
+        lowerBodyRenderer.gameObject.SetActive(lowerBodyActive);
+        lowerBodyRenderer.enabled = lowerBodyActive;
+
+        upperBodyRenderer.gameObject.SetActive(upperBodyActive);
+        upperBodyRenderer.enabled = upperBodyActive;
+
+        feetRenderer.gameObject.SetActive(feetActive);
+        feetRenderer.enabled = feetActive;
     }
 
     public void SetupEyes(Material material, Texture texture, Texture mask, Color color)
     {
-        var eyesMaterial = new Material(material);
-
         AvatarUtils.MapSharedMaterialsRecursively(assetContainer.transform,
             (mat) =>
             {
-                eyesMaterial.SetTexture(AvatarUtils._EyesTexture, texture);
-                eyesMaterial.SetTexture(AvatarUtils._IrisMask, mask);
-                eyesMaterial.SetColor(AvatarUtils._EyeTint, color);
-
-                return eyesMaterial;
+                material.SetTexture(AvatarUtils._EyesTexture, texture);
+                material.SetTexture(AvatarUtils._IrisMask, mask);
+                material.SetColor(AvatarUtils._EyeTint, color);
+                return material;
             },
             "eyes");
     }
 
     public void SetupEyebrows(Material material, Texture texture, Color color)
     {
-        var eyebrowsMaterial = new Material(material);
         AvatarUtils.MapSharedMaterialsRecursively(assetContainer.transform,
             (mat) =>
             {
-                eyebrowsMaterial.SetTexture(AvatarUtils._BaseMap, texture);
+                material.SetTexture(AvatarUtils._BaseMap, texture);
 
                 //NOTE(Brian): This isn't an error, we must also apply hair color to this mat
-                eyebrowsMaterial.SetColor(AvatarUtils._BaseColor, color);
+                material.SetColor(AvatarUtils._BaseColor, color);
 
-                return eyebrowsMaterial;
+                return material;
             },
             "eyebrows");
     }
 
     public void SetupMouth(Material material, Texture texture, Color color)
     {
-        var mouthMaterial = new Material(material);
         AvatarUtils.MapSharedMaterialsRecursively(assetContainer.transform,
             (mat) =>
             {
-                mouthMaterial.SetTexture(AvatarUtils._BaseMap, texture);
+                material.SetTexture(AvatarUtils._BaseMap, texture);
 
                 //NOTE(Brian): This isn't an error, we must also apply skin color to this mat
-                mouthMaterial.SetColor(AvatarUtils._BaseColor, color);
-
-                return mouthMaterial;
+                material.SetColor(AvatarUtils._BaseColor, color);
+                return material;
             },
             "mouth");
     }
 
-    private Animation PrepareAnimation()
+    private Animation PrepareAnimation(GameObject container)
     {
         Animation createdAnimation = null;
 
@@ -87,7 +114,7 @@ public class BodyShapeController : WearableController
 
                 return true;
             },
-            assetContainer.transform);
+            container.transform);
 
         createdAnimation.cullingType = AnimationCullingType.BasedOnRenderers;
         return createdAnimation;
@@ -95,10 +122,36 @@ public class BodyShapeController : WearableController
 
     protected override void PrepareWearable(GameObject assetContainer)
     {
-        base.PrepareWearable(assetContainer);
         skinnedMeshRenderer = assetContainer.GetComponentInChildren<SkinnedMeshRenderer>();
-        var animation = PrepareAnimation();
+
+        var animation = PrepareAnimation(assetContainer);
         var animator = animationTarget.GetComponent<AvatarAnimatorLegacy>();
-        animator.BindBodyShape(animation, bodyShapeType, animationTarget);
+        animator.BindBodyShape(animation, bodyShapeId, animationTarget);
+
+        var allRenderers = assetContainer.GetComponentsInChildren<SkinnedMeshRenderer>(true);
+
+        foreach (var r in allRenderers)
+        {
+            string parentName = r.transform.parent.name.ToLower();
+
+            if (parentName.Contains("ubody"))
+                upperBodyRenderer = r;
+            else if (parentName.Contains("lbody"))
+                lowerBodyRenderer = r;
+            else if (parentName.Contains("feet"))
+                feetRenderer = r;
+        }
+    }
+
+    public SkinnedMeshRenderer feetRenderer { get; private set; }
+    public SkinnedMeshRenderer upperBodyRenderer { get; private set; }
+    public SkinnedMeshRenderer lowerBodyRenderer { get; private set; }
+
+    public override void UpdateVisibility()
+    {
+        SetAssetRenderersEnabled(!hiddenList.Contains(WearableLiterals.Misc.HEAD));
+        feetRenderer.enabled = !hiddenList.Contains(WearableLiterals.Categories.FEET);
+        upperBodyRenderer.enabled = !hiddenList.Contains(WearableLiterals.Categories.UPPER_BODY);
+        lowerBodyRenderer.enabled = !hiddenList.Contains(WearableLiterals.Categories.LOWER_BODY);
     }
 }

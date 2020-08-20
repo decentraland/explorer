@@ -1,10 +1,11 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Linq;
 using DCL.Helpers;
 using DCL.Configuration;
 using UnityEngine;
 using System.Collections.Generic;
+using Cinemachine;
 
 namespace DCL
 {
@@ -72,7 +73,7 @@ namespace DCL
             }
 
             if (asset != null)
-                GameObject.Destroy(asset.container);
+                UnityEngine.Object.Destroy(asset.container);
 
             AssetPromiseKeeper_AB.i.Forget(subPromise);
         }
@@ -88,7 +89,7 @@ namespace DCL
 
         public IEnumerator LoadingCoroutine(Action OnSuccess, Action OnFail)
         {
-            subPromise = new AssetPromise_AB(contentUrl, hash);
+            subPromise = new AssetPromise_AB(contentUrl, hash, asset.container.transform);
             bool success = false;
             subPromise.OnSuccessEvent += (x) => success = true;
             asset.ownerPromise = subPromise;
@@ -119,6 +120,18 @@ namespace DCL
         {
             var goList = subPromise.asset.GetAssetsByExtensions<GameObject>("glb", "ltf");
 
+            if (goList.Count == 0)
+            {
+                if (asset.container != null)
+                    UnityEngine.Object.Destroy(asset.container);
+
+                asset.container = null;
+
+                AssetPromiseKeeper_AB.i.Forget(subPromise);
+
+                yield break;
+            }
+
             for (int i = 0; i < goList.Count; i++)
             {
                 if (loadingCoroutine == null)
@@ -133,6 +146,13 @@ namespace DCL
                 //NOTE(Brian): Renderers are enabled in settings.ApplyAfterLoad
                 yield return MaterialCachingHelper.Process(list, enableRenderers: false, settings.cachingFlags);
 
+                var animators = assetBundleModelGO.GetComponentsInChildren<Animation>(true);
+
+                for (int animIndex = 0; animIndex < animators.Length; animIndex++)
+                {
+                    animators[animIndex].cullingType = AnimationCullingType.BasedOnRenderers;
+                }
+
 #if UNITY_EDITOR
                 assetBundleModelGO.name = subPromise.asset.assetBundleAssetName;
 #endif
@@ -140,9 +160,6 @@ namespace DCL
                 assetBundleModelGO.transform.ResetLocalTRS();
                 yield return null;
             }
-
-            if (subPromise.asset.ownerAssetBundle != null)
-                subPromise.asset.ownerAssetBundle.Unload(false);
         }
 
         protected override Asset_AB_GameObject GetAsset(object id)
