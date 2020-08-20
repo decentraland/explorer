@@ -102,7 +102,7 @@ namespace DCL.Tutorial
                 return;
 
             if (debugRunTutorial)
-                currentStepIndex = debugStartingStepIndex >= 0 && debugStartingStepIndex < steps.Count ? debugStartingStepIndex : 0;
+                currentStepIndex = debugStartingStepIndex >= 0 && debugStartingStepIndex < steps.Count ? debugStartingStepIndex : TUTORIAL_FINISHED_MARK;
             else
                 currentStepIndex = UserProfile.GetOwnUserProfile().tutorialStep;
 
@@ -114,6 +114,9 @@ namespace DCL.Tutorial
 
         private IEnumerator ExecuteSteps(int startingStepIndex)
         {
+            if (startingStepIndex < 0 || startingStepIndex >= steps.Count)
+                yield break;
+
             for (int i = startingStepIndex; i < steps.Count; i++)
             {
                 var stepPrefab = steps[i];
