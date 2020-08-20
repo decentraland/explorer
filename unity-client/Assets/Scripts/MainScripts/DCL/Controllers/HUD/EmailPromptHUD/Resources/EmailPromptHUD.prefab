@@ -681,6 +681,7 @@ MonoBehaviour:
   sendButton: {fileID: 6462468963638411156}
   dontAskAgain: {fileID: 1888323851016925300}
   showHideAnimator: {fileID: 2010703097762440681}
+  invalidEmailIndicator: {fileID: 5283840960803929079}
 --- !u!95 &744397392441356162
 Animator:
   serializedVersion: 3
@@ -1195,7 +1196,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &546682950794650579
 RectTransform:
   m_ObjectHideFlags: 0
