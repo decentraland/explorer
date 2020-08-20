@@ -37,7 +37,7 @@ namespace Tests
         public IEnumerator TriggerToggleCorrectly()
         {
             Assert.NotNull(controller.view);
-            Assert.IsFalse(controller.view.gameObject.activeSelf);
+            Assert.IsFalse(controller.view.popup.gameObject.activeSelf);
 
             bool wasTriggered = false;
             Action toggleTriggered = () => wasTriggered = true;
