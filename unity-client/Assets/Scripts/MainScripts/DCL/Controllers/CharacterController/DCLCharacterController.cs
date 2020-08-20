@@ -4,6 +4,7 @@ using DCL.Helpers;
 using UnityEngine;
 using System.Collections;
 using Cinemachine;
+using UnityEngine.SceneManagement;
 
 public class DCLCharacterController : MonoBehaviour
 {
@@ -153,6 +154,7 @@ public class DCLCharacterController : MonoBehaviour
         lastPosition = characterPosition.worldPosition;
         characterPosition.worldPosition = newPosition;
         transform.position = characterPosition.unityPosition;
+        PhysicsSyncController.transformSyncDirty = true;
 
         CommonScriptableObjects.playerUnityPosition.Set(characterPosition.unityPosition);
         CommonScriptableObjects.playerWorldPosition.Set(characterPosition.worldPosition);
@@ -288,7 +290,12 @@ public class DCLCharacterController : MonoBehaviour
         }
 
         if (characterController.enabled)
+        {
+            //NOTE(Brian): Transform has to be in sync before the Move call, otherwise this call
+            //             will reset the character controller to its previous position.
+            SceneController.i.physicsSyncController.Sync();
             characterController.Move(velocity * deltaTime);
+        }
 
         SetPosition(characterPosition.UnityToWorldPosition(transform.position));
 

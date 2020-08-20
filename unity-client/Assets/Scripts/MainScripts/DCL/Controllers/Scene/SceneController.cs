@@ -42,8 +42,7 @@ namespace DCL
         Queue<string> payloadsToDecode = new Queue<string>();
         const float MAX_TIME_FOR_DECODE = 0.005f;
 
-        private PhysicsSyncController physicsSyncController;
-
+        public PhysicsSyncController physicsSyncController;
 
         #region BENCHMARK_EVENTS
 
@@ -317,8 +316,11 @@ namespace DCL
                 sceneSortDirty = false;
                 SortScenesByDistance();
             }
+        }
 
-            physicsSyncController.Update();
+        private void LateUpdate()
+        {
+            physicsSyncController.Sync();
         }
 
         public void CreateUIScene(string json)

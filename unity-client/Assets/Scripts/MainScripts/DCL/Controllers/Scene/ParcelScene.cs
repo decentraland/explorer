@@ -470,6 +470,7 @@ namespace DCL.Controllers
             {
                 me.SetParent(null);
                 me.gameObject.transform.SetParent(gameObject.transform, false);
+                PhysicsSyncController.transformSyncDirty = true;
                 return;
             }
 
@@ -478,6 +479,7 @@ namespace DCL.Controllers
             if (me != null && myParent != null)
             {
                 me.SetParent(myParent);
+                PhysicsSyncController.transformSyncDirty = true;
             }
         }
 
