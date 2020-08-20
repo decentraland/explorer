@@ -58,10 +58,10 @@ namespace DCL
                 WebInterface.StartDecentraland();
             }
 
-            ParcelScene.parcelScenesCleaner.Start(); // Cambiar por la inicialización del Enviroment.parcelScenesCleaner
+            ParcelScene.parcelScenesCleaner.Start();
 
-            if (deferredMessagesDecoding)             // Esto se puede borrar
-                StartCoroutine(DeferredDecoding());   // Ver qué implicancias tiene y qué más hay que borrar
+            if (deferredMessagesDecoding)             // We should be able to delete this code
+                StartCoroutine(DeferredDecoding());   // 
 
             DCLCharacterController.OnCharacterMoved += SetPositionDirty;
 

@@ -5,7 +5,7 @@
         public MessagingControllersManager messagingControllersManager { get; }
 
         /*
-         * TODO: Continue moving static beans to this class
+         * TODO: Continue moving static instances to this class. Each static instance should be converted to a local instance inside this class.
          * 
         MemoryManager memoryManager;
         PointerEventsController pointerEventsController;
