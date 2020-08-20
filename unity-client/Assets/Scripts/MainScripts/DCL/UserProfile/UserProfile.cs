@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using DCL;
@@ -127,6 +127,13 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
     public string[] GetInventoryItemsIds()
     {
         return inventory.Keys.ToArray();
+    }
+
+    public void SetTutorialStepId(int newTutorialStep)
+    {
+        model.tutorialStep = newTutorialStep;
+
+        WebInterface.SaveUserTutorialStep(newTutorialStep);
     }
 
     internal static UserProfile ownUserProfile;
