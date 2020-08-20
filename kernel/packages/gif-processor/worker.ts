@@ -13,12 +13,10 @@ let frameImageData: any = undefined
   let payloads: any[] = new Array()
 
   self.onmessage = (e: any) => {
-    defaultLogger.log("pravs - WORKER - Entrypoint called", e)
     EnqueuePayload(e)
   }
 
   function EnqueuePayload(e: any) {
-    defaultLogger.log("pravs - WORKER - Enqueue Payload", e)
     payloads.push(e)
     if (payloads.length === 1) {
       const promise = ConsumePayload()
@@ -28,22 +26,17 @@ let frameImageData: any = undefined
 
   async function ConsumePayload() {
     while (payloads.length > 0) {
-      defaultLogger.log("pravs - WORKER - Consuming first payload", payloads)
       await DownloadAndProcessGIF(payloads[0])
       payloads.splice(0, 1)
     }
   }
 
   async function DownloadAndProcessGIF(e: any) {
-    defaultLogger.log("pravs - WORKER - DownloadAndProcessGIF")
     const imageFetch = fetch(e.data.src)
     const response = await imageFetch
-
     const buffer = await response.arrayBuffer()
-
     const parsedGif = await parseGIF(buffer)
     const decompressedFrames = decompressFrames(parsedGif, true)
-    defaultLogger.log("pravs - WORKER PROCESSED GIF:", decompressedFrames)
 
     frameImageData = undefined
     gifCanvas.width = decompressedFrames[0].dims.width

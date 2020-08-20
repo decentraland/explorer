@@ -5,6 +5,8 @@ using DCL.Helpers.NFT;
 using System.Collections;
 using System.Text.RegularExpressions;
 using UnityEngine;
+using System.Collections.Generic;
+using DCL.Controllers.Gif;
 using System;
 using System.Runtime.InteropServices;
 using DCL;
@@ -32,13 +34,15 @@ public class NFTShapeLoaderController : MonoBehaviour
     public event System.Action OnLoadingAssetSuccess;
     public event System.Action OnLoadingAssetFail;
 
-    [Header("Material Indexes")] [SerializeField]
+    [Header("Material Indexes")]
+    [SerializeField]
     int materialIndex_Background = -1;
 
     [SerializeField] int materialIndex_NFTImage = -1;
     [SerializeField] int materialIndex_Frame = -1;
 
-    [Header("Noise Shader")] [SerializeField]
+    [Header("Noise Shader")]
+    [SerializeField]
     NoiseType noiseType = NoiseType.Simplex;
 
     [SerializeField] bool noiseIs3D = false;
@@ -138,10 +142,9 @@ public class NFTShapeLoaderController : MonoBehaviour
         backgroundMaterial.SetColor(COLOR_SHADER_PROPERTY, newColor);
     }
 
+    string lastURLUsed = string.Empty;
     IEnumerator FetchNFTImage()
     {
-        Debug.Log($"pravs - NFTShapeLoaderController.FetchNFTImage()");
-
         if (spinner != null)
             spinner.SetActive(true);
 
@@ -164,10 +167,11 @@ public class NFTShapeLoaderController : MonoBehaviour
 
         yield return new DCL.WaitUntil(() => (CommonScriptableObjects.playerUnityPosition - transform.position).sqrMagnitude < 900f);
 
-        // We the "preview" 256px image
+        // We download the "preview" 256px image
         bool foundDCLImage = false;
         if (!string.IsNullOrEmpty(previewImageURL))
         {
+            lastURLUsed = previewImageURL;
             // IEnumerator fetchRoutine;
             // Debug.Log($"pravs - NFTShapeLoaderController.FetchNFTImage() - Will download PREVIEW IMAGE: " + previewImageURL);
 
@@ -176,8 +180,7 @@ public class NFTShapeLoaderController : MonoBehaviour
             {
                 // Debug.Log($"pravs - NFTShapeLoaderController.FetchNFTImage() - downloaded still picture: {downloadedAsset.width}x{downloadedAsset.height}");
                 foundDCLImage = true;
-                // SetFrameImage(downloadedAsset, resizeFrameMesh: true); // TODO: resixing is not working correctly
-                SetFrameImage(downloadedAsset, resizeFrameMesh: false);
+                SetFrameImage(downloadedAsset, resizeFrameMesh: false); // TODO: check if resizing is working fine again
             }, Asset_Gif.MaxSize.DONT_RESIZE, sceneId, componentId);
 
             // if (fetchRoutine.Current == null)
@@ -188,14 +191,15 @@ public class NFTShapeLoaderController : MonoBehaviour
         //We fall back to the nft original image which can have a really big size
         if (!foundDCLImage && !string.IsNullOrEmpty(originalImageURL))
         {
-            // Debug.Log($"pravs - NFTShapeLoaderController.FetchNFTImage() - Will download LARGE IMAGE: " + originalImageURL);
+            lastURLUsed = originalImageURL;
 
-            yield return WrappedTextureUtils.Fetch(originalImageURL, (downloadedAsset) =>
+            yield return WrappedTextureUtils.Fetch(originalImageURL, downloadedAsset =>
             {
                 foundDCLImage = true;
-                // SetFrameImage(downloadedAsset, resizeFrameMesh: true); // TODO: resixing is not working correctly
-                SetFrameImage(downloadedAsset, resizeFrameMesh: false);
+                SetFrameImage(downloadedAsset, resizeFrameMesh: false); // TODO: check if resizing is working fine again
             }, Asset_Gif.MaxSize._256, sceneId, componentId);
+
+            yield break;
         }
 
         FinishLoading(foundDCLImage);
@@ -220,21 +224,52 @@ public class NFTShapeLoaderController : MonoBehaviour
     {
         if (width == 0 || height == 0)
         {
-            Debug.Log("pravs - Couldn't create external texture! width or height are 0!");
+            Debug.Log("Couldn't create external texture! width or height are 0!");
             return;
         }
 
-        Debug.Log("pravs - NFTShapeLoaderController.UpdaeGIFPointer() - creating external texture, tex name/id/pointer: " + pointer);
         Texture2D newTex = Texture2D.CreateExternalTexture(width, height, TextureFormat.ARGB32, false, false, pointer);
 
         if (newTex == null)
         {
-            Debug.Log("pravs - Couldn't create external texture!");
+            Debug.Log("Couldn't create external texture!");
             return;
         }
 
         newTex.wrapMode = TextureWrapMode.Clamp;
         imageMaterial.SetTexture(BASEMAP_SHADER_PROPERTY, newTex);
+        imageMaterial.SetColor(COLOR_SHADER_PROPERTY, Color.white);
+
+        FinishLoading(true);
+    }
+
+    public void UpdateGIFPointers(int width, int height, int[] pointers, float[] frameDelays)
+    {
+        if (width == 0 || height == 0)
+        {
+            Debug.Log("Couldn't create external textures! width or height are 0!");
+            return;
+        }
+
+        List<UniGif.GifTexture> gifTexturesList = new List<UniGif.GifTexture>();
+        for (int i = 0; i < pointers.Length; i++)
+        {
+            Texture2D newTex = Texture2D.CreateExternalTexture(width, height, TextureFormat.ARGB32, false, false, (System.IntPtr)pointers[i]);
+
+            if (newTex == null)
+            {
+                Debug.Log("Couldn't create external texture!");
+                continue;
+            }
+
+            newTex.wrapMode = TextureWrapMode.Clamp;
+
+            gifTexturesList.Add(new UniGif.GifTexture(newTex, frameDelays[i] / 1000));
+        }
+
+        // TODO: Find a way to reutilize the original Asset_Gif created when using WrappedTextureUtils.Fetch inside FetchNFTImage()
+        SetFrameImage(new Asset_Gif(lastURLUsed, Asset_Gif.MaxSize._512, sceneId, componentId, gifTexturesList, null, null));
+
         imageMaterial.SetColor(COLOR_SHADER_PROPERTY, Color.white);
 
         FinishLoading(true);

@@ -36,7 +36,7 @@ import { unityInterface } from './UnityInterface'
 import { IFuture } from 'fp-future'
 import { reportHotScenes } from 'shared/social/hotScenes'
 
-import { GIFPlayer } from 'gif-player/manager'
+import { GIFProcessor } from 'gif-processor/processor'
 declare const DCL: any
 
 declare const globalThis: StoreContainer
@@ -342,13 +342,14 @@ export class BrowserInterface {
     unityInterface.SetTargetHeight(data.baseResolution)
   }
 
-  async RequestGIFPlayer(data: { imageSource: string; sceneId: string; componentId: string; isWebGL1: boolean }) {
-    if (!DCL.gifPlayer) {
+  async RequestGIFProcessor(data: { imageSource: string; sceneId: string; componentId: string; isWebGL1: boolean }) {
+    defaultLogger.log("pravs - MAIN - RequestGIFPlayer received ", data)
+    if (!DCL.gifProcessor) {
       // tslint:disable-next-line
-      DCL.gifPlayer = new GIFPlayer(unityInterface.gameInstance, unityInterface, data.isWebGL1)
+      DCL.gifProcessor = new GIFProcessor(unityInterface.gameInstance, unityInterface, data.isWebGL1)
     }
 
-    DCL.gifPlayer.PlayGIF(data)
+    DCL.gifProcessor.ProcessGIF(data)
   }
 }
 

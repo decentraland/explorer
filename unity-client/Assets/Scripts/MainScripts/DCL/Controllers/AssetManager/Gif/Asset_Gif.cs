@@ -61,7 +61,7 @@ namespace DCL.Controllers.Gif
         public event Action<ITexture> OnSuccessEvent;
         public event Action OnFailEvent;
 
-        public Asset_Gif(string url, MaxSize maxSize, string sceneId, string componentId, Action<ITexture> OnSuccess, Action OnFail)
+        public Asset_Gif(string url, MaxSize maxSize, string sceneId, string componentId, List<UniGif.GifTexture> preCreatedGifTextures, Action<ITexture> OnSuccess, Action OnFail)
         {
             this.url = url;
             this.sceneId = sceneId;
@@ -69,6 +69,12 @@ namespace DCL.Controllers.Gif
             this.maxSize = maxSize;
             this.OnSuccessEvent = OnSuccess;
             this.OnFailEvent = OnFail;
+
+            if (preCreatedGifTextures != null && preCreatedGifTextures.Count > 0)
+            {
+                OnGifLoaded(preCreatedGifTextures, 0, preCreatedGifTextures[0].m_texture2d.width, preCreatedGifTextures[0].m_texture2d.height);
+                OnSuccessEvent?.Invoke(this);
+            }
         }
 
         public IEnumerator Load()
@@ -79,11 +85,10 @@ namespace DCL.Controllers.Gif
             byte[] bytes = null;
 
 #if !UNITY_EDITOR && UNITY_WEBGL
-            Debug.Log("pravs - Asset_Gif.Load() - Requesting GIF Player for " + url);
 
             if (string.IsNullOrEmpty(sceneId) || string.IsNullOrEmpty(componentId)) yield break;
 
-            DCL.Interface.WebInterface.RequestGIFPlayer(url, sceneId, componentId, SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.OpenGLES2);
+            DCL.Interface.WebInterface.RequestGIFProcessor(url, sceneId, componentId, SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.OpenGLES2);
 
             // We return as we have to wait for kernel's comeback with the texture pointer (in NFTShapeLoaderController for now)
             yield break;
