@@ -1,22 +1,17 @@
 ﻿using UnityEngine;
 using DCL.Interface;
 using DCL.Helpers;
-using System;
 using System.Collections;
 using DCL.Tutorial;
 
 public class EmailPromptHUDController : IHUD
 {
-    const float POPUP_DELAY = 60;
+    const float POPUP_DELAY = 10;
 
     EmailPromptHUDView view;
 
-    bool isRendererEnabled = false;
-    bool isTimerComplete = false;
-    bool isTimerCreated = false;
-    bool isEnable = false;
-
-    Coroutine timerRoutine;
+    bool isPopupRoutineRunning = false;
+    Coroutine showPopupDelayedRoutine;
 
     public EmailPromptHUDController()
     {
@@ -27,8 +22,6 @@ public class EmailPromptHUDController : IHUD
         view.OnSendEmail += OnSendEmail;
 
         view.gameObject.SetActive(false);
-
-        CommonScriptableObjects.rendererState.OnChange += OnRendererStateChanged;
     }
 
     public void SetVisibility(bool visible)
@@ -47,78 +40,50 @@ public class EmailPromptHUDController : IHUD
 
     public void Dispose()
     {
-        CommonScriptableObjects.rendererState.OnChange -= OnRendererStateChanged;
-
         if (view != null)
         {
             GameObject.Destroy(view.gameObject);
         }
-        if (timerRoutine != null)
+        if (showPopupDelayedRoutine != null)
         {
-            CoroutineStarter.Stop(timerRoutine);
+            StopPopupRoutine();
         }
     }
 
     public void SetEnable(bool enable)
     {
-        bool wasEnabled = isEnable;
-        isEnable = enable;
-
-        if (enable && !wasEnabled)
+        if (enable && !isPopupRoutineRunning)
         {
-            if (CommonScriptableObjects.rendererState)
-            {
-                isRendererEnabled = true;
-                CreateTimer();
-            }
+            StartPopupRoutine();
         }
-        else if (!enable && wasEnabled)
+        else if (!enable && isPopupRoutineRunning)
         {
-            if (timerRoutine != null)
-            {
-                CoroutineStarter.Stop(timerRoutine);
-            }
-            isTimerComplete = false;
-            isTimerCreated = false;
+            StopPopupRoutine();
         }
     }
 
-    void CreateTimer()
+    void StartPopupRoutine()
     {
-        if (!isEnable)
-            return;
-
-        isTimerCreated = true;
-        timerRoutine = CoroutineStarter.Start(WaitForSeconds(POPUP_DELAY));
+        showPopupDelayedRoutine = CoroutineStarter.Start(ShowPopupDelayed(POPUP_DELAY));
     }
 
-    IEnumerator WaitForSeconds(float seconds)
+    void StopPopupRoutine()
     {
+        if (showPopupDelayedRoutine != null)
+        {
+            CoroutineStarter.Stop(showPopupDelayedRoutine);
+            showPopupDelayedRoutine = null;
+        }
+        isPopupRoutineRunning = false;
+    }
+
+    IEnumerator ShowPopupDelayed(float seconds)
+    {
+        isPopupRoutineRunning = true;
+        yield return new WaitUntil(() => CommonScriptableObjects.rendererState.Get());
         yield return WaitForSecondsCache.Get(seconds);
-        isTimerComplete = true;
-        CheckStateToDisplay();
-    }
-
-    void CheckStateToDisplay()
-    {
-        if (isTimerComplete && isRendererEnabled && isEnable)
-        {
-            CommonScriptableObjects.rendererState.OnChange -= OnRendererStateChanged;
-            SetVisibility(true);
-        }
-    }
-
-    void OnRendererStateChanged(bool prev, bool current)
-    {
-        isRendererEnabled = true;
-        if (!isTimerCreated)
-        {
-            CreateTimer();
-        }
-        else
-        {
-            CheckStateToDisplay();
-        }
+        SetVisibility(true);
+        isPopupRoutineRunning = false;
     }
 
     void OnSendEmail(string email)
