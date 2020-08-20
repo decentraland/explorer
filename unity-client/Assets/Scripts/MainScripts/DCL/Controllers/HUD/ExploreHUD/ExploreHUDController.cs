@@ -31,7 +31,7 @@ public class ExploreHUDController : IHUD
         };
 
         view.gotoMagicButton.OnGotoMagicPressed += GoToMagic;
-        view.togglePopupButton.OnPressed += () => toggleExploreTrigger.RaiseOnTriggered();
+        view.togglePopupButton.onPointerDown += () => toggleExploreTrigger.RaiseOnTriggered();
         BaseSceneCellView.OnJumpIn += OnJumpIn;
     }
 

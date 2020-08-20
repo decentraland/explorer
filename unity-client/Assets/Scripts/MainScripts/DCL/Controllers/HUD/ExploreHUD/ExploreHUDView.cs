@@ -7,7 +7,7 @@ internal class ExploreHUDView : MonoBehaviour
     [SerializeField] internal ShowHideAnimator popup;
     [SerializeField] internal Button_OnPointerDown closeButton;
     [SerializeField] internal GotoMagicButton gotoMagicButton;
-    [SerializeField] internal TogglePopupButton togglePopupButton;
+    [SerializeField] internal Button_OnPointerDown togglePopupButton;
 
     public void SetVisibility(bool visible)
     {
