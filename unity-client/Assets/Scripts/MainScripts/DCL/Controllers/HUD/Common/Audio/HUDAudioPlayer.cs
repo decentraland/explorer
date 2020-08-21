@@ -101,7 +101,7 @@ public class HUDAudioPlayer : MonoBehaviour
                 break;
             case Sound.dialogAppear:
                 dialogAppearLastPlayTime = Time.unscaledTime;
-                eventDialogAppear.Play();
+                eventDialogAppear.Play(true);
                 eventDialogClose.Stop();
                 break;
             case Sound.dialogClose:
@@ -109,7 +109,7 @@ public class HUDAudioPlayer : MonoBehaviour
                 if (dialogAppearLastPlayTime < Time.unscaledTime - 0.1)
                 {
                     dialogCloseLastPlayTime = Time.unscaledTime;
-                    eventDialogClose.Play();
+                    eventDialogClose.Play(true);
                 }
                 break;
             case Sound.confirm:
@@ -127,11 +127,11 @@ public class HUDAudioPlayer : MonoBehaviour
                 break;
             case Sound.fadeIn:
                 eventFadeIn.SetPitch(1f);
-                eventFadeIn.Play();
+                eventFadeIn.Play(true);
                 break;
             case Sound.fadeOut:
                 eventFadeOut.SetPitch(1f);
-                eventFadeOut.Play();
+                eventFadeOut.Play(true);
                 //eventFadeOut.source.timeSamples = eventFadeOut.source.clip.samples - 1;
                 break;
             case Sound.notification:
