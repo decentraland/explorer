@@ -37,6 +37,8 @@ public class HUDAudioPlayer : MonoBehaviour
     bool listItemAppearHasPlayed = false;
     float listItemAppearPitch = 1f;
 
+    double dialogAppearLastPlayTime = 0.0, dialogCloseLastPlayTime = 0.0;
+
     private void Awake()
     {
         if (i != null)
@@ -98,10 +100,17 @@ public class HUDAudioPlayer : MonoBehaviour
                 }
                 break;
             case Sound.dialogAppear:
+                dialogAppearLastPlayTime = Time.unscaledTime;
                 eventDialogAppear.Play();
+                eventDialogClose.Stop();
                 break;
             case Sound.dialogClose:
-                eventDialogClose.Play();
+                // Prevent dialog appear and close playing at the same time
+                if (dialogAppearLastPlayTime < Time.unscaledTime - 0.1)
+                {
+                    dialogCloseLastPlayTime = Time.unscaledTime;
+                    eventDialogClose.Play();
+                }
                 break;
             case Sound.confirm:
                 eventConfirm.Play();
@@ -121,9 +130,9 @@ public class HUDAudioPlayer : MonoBehaviour
                 eventFadeIn.Play();
                 break;
             case Sound.fadeOut:
+                eventFadeOut.SetPitch(1f);
                 eventFadeOut.Play();
-                eventFadeOut.source.timeSamples = eventFadeOut.source.clip.samples - 1;
-                eventFadeOut.source.pitch = -1f;
+                //eventFadeOut.source.timeSamples = eventFadeOut.source.clip.samples - 1;
                 break;
             case Sound.notification:
                 eventFadeIn.SetPitch(3f);
@@ -134,9 +143,8 @@ public class HUDAudioPlayer : MonoBehaviour
                 eventHover.Play(true);
                 break;
             case Sound.cameraToFirstPerson:
+                eventFadeOut.SetPitch(0.85f);
                 eventFadeOut.Play();
-                eventFadeOut.source.timeSamples = eventFadeOut.source.clip.samples - 1;
-                eventFadeOut.source.pitch = -0.85f;
                 break;
             case Sound.cameraToThirdPerson:
                 eventFadeIn.SetPitch(0.85f);
