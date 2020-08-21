@@ -103,11 +103,13 @@ public class PrivateChatWindowHUDController : IHUD
             MarkUserChatMessagesAsRead(conversationUserId);
             view.chatHudView.scrollRect.verticalNormalizedPosition = 0;
 
-            HUDAudioPlayer.i?.Play(HUDAudioPlayer.Sound.dialogAppear);
+            if (HUDAudioPlayer.i != null)
+                HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogAppear);
         }
         else
         {
-            HUDAudioPlayer.i?.Play(HUDAudioPlayer.Sound.dialogClose);
+            if (HUDAudioPlayer.i != null)
+                HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogClose);
         }
     }
 
