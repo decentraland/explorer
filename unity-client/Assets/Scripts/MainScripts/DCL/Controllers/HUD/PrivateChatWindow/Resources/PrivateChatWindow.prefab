@@ -274,7 +274,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4bfd0d144b6d3dd438b84fa14a062c4f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  extraClickSound: 8
+  extraClickSound: 0
   playHoverSound: 1
 --- !u!114 &4387516417175705394
 MonoBehaviour:
@@ -2048,7 +2048,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4bfd0d144b6d3dd438b84fa14a062c4f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  extraClickSound: 8
+  extraClickSound: 0
   playHoverSound: 1
 --- !u!1 &9081668781077161560
 GameObject:
