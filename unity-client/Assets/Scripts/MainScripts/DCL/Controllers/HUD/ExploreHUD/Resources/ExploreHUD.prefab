@@ -1731,7 +1731,7 @@ CanvasRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6920214216452327769}
-  m_CullTransparentMesh: 0
+  m_CullTransparentMesh: 1
 --- !u!114 &3676081654507061506
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2672,6 +2672,36 @@ PrefabInstance:
         type: 3}
       propertyPath: m_SizeDelta.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4729517059036391380, guid: 8c341d082edd745b38c0660bd79d9d90,
+        type: 3}
+      propertyPath: m_Colors.m_HighlightedColor.r
+      value: 0.9245283
+      objectReference: {fileID: 0}
+    - target: {fileID: 4729517059036391380, guid: 8c341d082edd745b38c0660bd79d9d90,
+        type: 3}
+      propertyPath: m_Colors.m_HighlightedColor.g
+      value: 0.9245283
+      objectReference: {fileID: 0}
+    - target: {fileID: 4729517059036391380, guid: 8c341d082edd745b38c0660bd79d9d90,
+        type: 3}
+      propertyPath: m_Colors.m_HighlightedColor.b
+      value: 0.9245283
+      objectReference: {fileID: 0}
+    - target: {fileID: 4729517059036391380, guid: 8c341d082edd745b38c0660bd79d9d90,
+        type: 3}
+      propertyPath: m_Colors.m_PressedColor.r
+      value: 0.8396226
+      objectReference: {fileID: 0}
+    - target: {fileID: 4729517059036391380, guid: 8c341d082edd745b38c0660bd79d9d90,
+        type: 3}
+      propertyPath: m_Colors.m_PressedColor.g
+      value: 0.8396226
+      objectReference: {fileID: 0}
+    - target: {fileID: 4729517059036391380, guid: 8c341d082edd745b38c0660bd79d9d90,
+        type: 3}
+      propertyPath: m_Colors.m_PressedColor.b
+      value: 0.8396226
       objectReference: {fileID: 0}
     - target: {fileID: 4897974716751563586, guid: 8c341d082edd745b38c0660bd79d9d90,
         type: 3}
