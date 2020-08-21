@@ -20,7 +20,9 @@ public class HUDAudioPlayer : MonoBehaviour
         fadeIn,
         fadeOut,
         notification,
-        chatEntry,
+        sendChatEntry,
+        receivePrivateChatEntry,
+        receiveGlobalChatEntry,
         cameraToThirdPerson,
         cameraToFirstPerson,
         mapParcelHighlight
@@ -36,6 +38,8 @@ public class HUDAudioPlayer : MonoBehaviour
 
     bool listItemAppearHasPlayed = false;
     float listItemAppearPitch = 1f;
+    
+    public ulong timeAtStart;
 
     private void Awake()
     {
@@ -61,6 +65,9 @@ public class HUDAudioPlayer : MonoBehaviour
         eventValueChange = ac.GetEvent("ValueChange");
         eventFadeIn = ac.GetEvent("FadeIn");
         eventFadeOut = ac.GetEvent("FadeOut");
+
+        // Get UTC datetime at start (used for chat messages)
+        timeAtStart = (ulong)System.DateTime.UtcNow.Millisecond;
     }
 
     private void Update()
@@ -78,7 +85,6 @@ public class HUDAudioPlayer : MonoBehaviour
                 return;
             }
         }
-        
 
         switch (sound)
         {
@@ -141,13 +147,20 @@ public class HUDAudioPlayer : MonoBehaviour
                 eventFadeIn.SetPitch(3f);
                 eventFadeIn.Play(true);
                 break;
-            case Sound.chatEntry:
-                eventHover.SetPitch(3f);
+            case Sound.sendChatEntry:
+                eventHover.SetPitch(2f);
                 eventHover.Play(true);
+                break;
+            case Sound.receivePrivateChatEntry:
+                eventListItemAppear.SetPitch(1f);
+                eventListItemAppear.Play(true);
+                break;
+            case Sound.receiveGlobalChatEntry:
+                eventListItemAppear.SetPitch(2f);
                 break;
             case Sound.cameraToFirstPerson:
                 eventFadeOut.SetPitch(0.85f);
-                eventFadeOut.Play();
+                eventFadeOut.Play(true);
                 break;
             case Sound.cameraToThirdPerson:
                 eventFadeIn.SetPitch(0.85f);
