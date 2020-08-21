@@ -37,8 +37,6 @@ public class HUDAudioPlayer : MonoBehaviour
     bool listItemAppearHasPlayed = false;
     float listItemAppearPitch = 1f;
 
-    double dialogAppearLastPlayTime = 0.0, dialogCloseLastPlayTime = 0.0;
-
     private void Awake()
     {
         if (i != null)
@@ -100,17 +98,13 @@ public class HUDAudioPlayer : MonoBehaviour
                 }
                 break;
             case Sound.dialogAppear:
-                dialogAppearLastPlayTime = Time.unscaledTime;
-                eventDialogAppear.Play(true);
-                eventDialogClose.Stop();
+                if (!eventDialogClose.source.isPlaying)
+                    eventDialogAppear.Play(true);
                 break;
             case Sound.dialogClose:
                 // Prevent dialog appear and close playing at the same time
-                if (dialogAppearLastPlayTime < Time.unscaledTime - 0.1)
-                {
-                    dialogCloseLastPlayTime = Time.unscaledTime;
+                if (!eventDialogAppear.source.isPlaying)
                     eventDialogClose.Play(true);
-                }
                 break;
             case Sound.confirm:
                 eventConfirm.Play();
@@ -132,7 +126,6 @@ public class HUDAudioPlayer : MonoBehaviour
             case Sound.fadeOut:
                 eventFadeOut.SetPitch(1f);
                 eventFadeOut.Play(true);
-                //eventFadeOut.source.timeSamples = eventFadeOut.source.clip.samples - 1;
                 break;
             case Sound.notification:
                 eventFadeIn.SetPitch(3f);

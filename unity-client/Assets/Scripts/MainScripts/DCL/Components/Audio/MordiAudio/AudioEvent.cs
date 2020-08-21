@@ -111,4 +111,18 @@ public class AudioEvent
     {
         volume = defaultVolume;
     }
+
+    public IEnumerator FadeOut(float fadeSeconds)
+    {
+        float startVolume = source.volume;
+
+        while (source.volume > 0)
+        {
+            source.volume -= startVolume * (Time.deltaTime / fadeSeconds);
+            yield return null;
+        }
+
+        source.Stop();
+        source.volume = volume;
+    }
 }
