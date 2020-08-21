@@ -1,15 +1,27 @@
+using DCL.Interface;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace DCL.Tutorial
 {
+    [Flags]
+    public enum TutorialFinishStep
+    {
+        None = 0,
+        OldTutorialValue = 99, // NOTE: old tutorial set tutorialStep to 99 when finished
+        EmailRequested = 128,
+        NewTutorialFinished = 256
+    }
+
     public interface ITutorialController
     {
         bool isTutorialEnabled { get; }
         void SetTutorialEnabled();
         void StartTutorialFromStep(int stepIndex);
         void SkipToNextStep();
+        void SetStepCompleted(int step);
     }
 
     /// <summary>
@@ -21,8 +33,6 @@ namespace DCL.Tutorial
 
         public bool isTutorialEnabled { get => isTutorialEnabledValue; }
 
-        private const int TUTORIAL_FINISHED_MARK = -1;
-
         [Header("Steps Configuration")]
         [SerializeField] List<TutorialStep> steps = new List<TutorialStep>();
         [SerializeField] float timeBetweenSteps = 0.5f;
@@ -32,7 +42,7 @@ namespace DCL.Tutorial
         public int debugStartingStepIndex;
 
         private bool isTutorialEnabledValue = false;
-        private int currentStepIndex = TUTORIAL_FINISHED_MARK;
+        private int currentStepIndex;
         private TutorialStep runningStep = null;
         private Coroutine executeStepsCoroutine;
 
@@ -90,10 +100,6 @@ namespace DCL.Tutorial
         public void SkipToNextStep()
         {
             int nextStepIndex = currentStepIndex + 1;
-
-            if (nextStepIndex >= steps.Count)
-                return;
-
             StartTutorialFromStep(nextStepIndex);
         }
 
@@ -102,7 +108,17 @@ namespace DCL.Tutorial
         /// </summary>
         public void SkipAllSteps()
         {
-            StartTutorialFromStep(TUTORIAL_FINISHED_MARK);
+            StartTutorialFromStep(steps.Count);
+        }
+
+        public void SetStepCompleted(int step)
+        {
+            WebInterface.SaveUserTutorialStep(GetTutorialStepFromProfile() | step);
+        }
+
+        private int GetTutorialStepFromProfile()
+        {
+            return UserProfile.GetOwnUserProfile().tutorialStep;
         }
 
         private void OnRenderingStateChanged(bool renderingEnabled, bool prevState)
@@ -111,21 +127,15 @@ namespace DCL.Tutorial
                 return;
 
             if (debugRunTutorial)
-                currentStepIndex = debugStartingStepIndex >= 0 && debugStartingStepIndex < steps.Count ? debugStartingStepIndex : TUTORIAL_FINISHED_MARK;
+                currentStepIndex = debugStartingStepIndex >= 0 ? debugStartingStepIndex : 0;
             else
-                currentStepIndex = UserProfile.GetOwnUserProfile().tutorialStep;
-
-            if (currentStepIndex == TUTORIAL_FINISHED_MARK || runningStep != null)
-                return;
+                currentStepIndex = (GetTutorialStepFromProfile() & (int)TutorialFinishStep.NewTutorialFinished) == 0 ? 0 : steps.Count;
 
             StartTutorialFromStep(currentStepIndex);
         }
 
         private IEnumerator ExecuteSteps(int startingStepIndex)
         {
-            if (startingStepIndex < 0 || startingStepIndex >= steps.Count)
-                yield break;
-
             for (int i = startingStepIndex; i < steps.Count; i++)
             {
                 var stepPrefab = steps[i];
@@ -133,9 +143,6 @@ namespace DCL.Tutorial
                 runningStep = Instantiate(stepPrefab, this.transform).GetComponent<TutorialStep>();
 
                 currentStepIndex = i;
-
-                if (!debugRunTutorial)
-                    UserProfile.GetOwnUserProfile().SetTutorialStepId(currentStepIndex);
 
                 runningStep.OnStepStart();
                 yield return runningStep.OnStepExecute();
@@ -149,9 +156,8 @@ namespace DCL.Tutorial
             }
 
             if (!debugRunTutorial)
-                UserProfile.GetOwnUserProfile().SetTutorialStepId(TUTORIAL_FINISHED_MARK);
+                SetStepCompleted((int)TutorialFinishStep.NewTutorialFinished);
 
-            currentStepIndex = TUTORIAL_FINISHED_MARK;
             runningStep = null;
         }
     }

@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using DCL.Interface;
 using DCL.Helpers;
 using System.Collections;
@@ -105,6 +105,6 @@ public class EmailPromptHUDController : IHUD
 
     void SetEmailFlag()
     {
-        TutorialController.i.SetStepCompleted(TutorialController.TutorialStep.EmailRequested);
+        TutorialController.i.SetStepCompleted((int)TutorialFinishStep.EmailRequested);
     }
 }
