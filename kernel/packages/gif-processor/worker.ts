@@ -43,19 +43,24 @@ let frameImageData: any = undefined
     const decompressedFrames = decompressFrames(parsedGif, true)
     const frameDelays = new Array()
     const framesAsArrayBuffer = new Array()
-    let finalWidth = undefined
-    let finalHeight = undefined
     let hasToBeResized = false
 
     frameImageData = undefined
+
     gifCanvas.width = decompressedFrames[0].dims.width
+    let finalWidth = gifCanvas.width
+
     gifCanvas.height = decompressedFrames[0].dims.height
+    let finalHeight = gifCanvas.height
 
     hasToBeResized = gifCanvas.width > maxGIFDimension || gifCanvas.height > maxGIFDimension
     if (hasToBeResized) {
       let scalingFactor = (gifCanvas.width > gifCanvas.height) ? (gifCanvas.width / maxGIFDimension) : (gifCanvas.height / maxGIFDimension)
       resizedCanvas.width = gifCanvas.width / scalingFactor
+      finalWidth = resizedCanvas.width
+
       resizedCanvas.height = gifCanvas.height / scalingFactor
+      finalHeight = resizedCanvas.height
     }
 
     for (const key in decompressedFrames) {
@@ -63,12 +68,6 @@ let frameImageData: any = undefined
 
       const processedImageData = GenerateFinalImageData(decompressedFrames[key], hasToBeResized)
       framesAsArrayBuffer.push(processedImageData.data.buffer)
-
-      // the first frame always has the whole GIF dimensions
-      if (!finalWidth || !finalHeight) {
-        finalWidth = processedImageData.width
-        finalHeight = processedImageData.height
-      }
     }
 
     self.postMessage({
