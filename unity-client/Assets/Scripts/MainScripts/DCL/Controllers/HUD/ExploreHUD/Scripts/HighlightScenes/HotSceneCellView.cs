@@ -25,6 +25,7 @@ internal class HotSceneCellView : BaseSceneCellView, ICrowdDataView
             jumpInButtonAnimator.Show();
         };
         hoverAreaCallback.OnPointerExit += () => jumpInButtonAnimator.Hide();
+        sceneInfoButton.OnPointerDown += () => jumpInButtonAnimator.Hide(true);
     }
 
     protected override void OnEnable()

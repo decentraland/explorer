@@ -13,8 +13,8 @@ internal class BaseSceneCellView : BaseCellView, IMapDataView, IExploreViewWithF
 
     [SerializeField] TextMeshProUGUI sceneName;
     [SerializeField] Button_OnPointerDown jumpIn;
-    [SerializeField] UIHoverCallback sceneInfoButton;
     [SerializeField] ExploreFriendsView friendsView;
+    [SerializeField] protected UIHoverCallback sceneInfoButton;
 
     MinimapMetadata.MinimapSceneInfo mapInfo;
     Vector2Int baseCoords;
