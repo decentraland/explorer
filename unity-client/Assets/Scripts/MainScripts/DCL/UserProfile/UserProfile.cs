@@ -129,13 +129,6 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
         return inventory.Keys.ToArray();
     }
 
-    public void SetTutorialStepId(int newTutorialStep)
-    {
-        model.tutorialStep = newTutorialStep;
-
-        WebInterface.SaveUserTutorialStep(newTutorialStep);
-    }
-
     internal static UserProfile ownUserProfile;
 
     public static UserProfile GetOwnUserProfile()

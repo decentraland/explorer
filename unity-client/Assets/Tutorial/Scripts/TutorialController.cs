@@ -21,7 +21,7 @@ namespace DCL.Tutorial
         void SetTutorialEnabled();
         void StartTutorialFromStep(int stepIndex);
         void SkipToNextStep();
-        void SetStepCompleted(int step);
+        void SetUserTutorialStepAsCompleted(TutorialFinishStep step);
     }
 
     /// <summary>
@@ -111,9 +111,13 @@ namespace DCL.Tutorial
             StartTutorialFromStep(steps.Count);
         }
 
-        public void SetStepCompleted(int step)
+        /// <summary>
+        /// Mark the tutorial as finished in the kernel side.
+        /// </summary>
+        /// <param name="finishStepType">A value from TutorialFinishStep enum.</param>
+        public void SetUserTutorialStepAsCompleted(TutorialFinishStep finishStepType)
         {
-            WebInterface.SaveUserTutorialStep(GetTutorialStepFromProfile() | step);
+            WebInterface.SaveUserTutorialStep(GetTutorialStepFromProfile() | (int)finishStepType);
         }
 
         private int GetTutorialStepFromProfile()
@@ -156,7 +160,7 @@ namespace DCL.Tutorial
             }
 
             if (!debugRunTutorial)
-                SetStepCompleted((int)TutorialFinishStep.NewTutorialFinished);
+                SetUserTutorialStepAsCompleted(TutorialFinishStep.NewTutorialFinished);
 
             runningStep = null;
         }

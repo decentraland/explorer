@@ -105,6 +105,6 @@ public class EmailPromptHUDController : IHUD
 
     void SetEmailFlag()
     {
-        TutorialController.i.SetStepCompleted((int)TutorialFinishStep.EmailRequested);
+        TutorialController.i.SetUserTutorialStepAsCompleted(TutorialFinishStep.EmailRequested);
     }
 }
