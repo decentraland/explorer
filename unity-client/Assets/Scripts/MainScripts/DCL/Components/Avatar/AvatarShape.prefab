@@ -61,7 +61,6 @@ MonoBehaviour:
   uiContainer: {fileID: 8543971490908220782}
   sourceTransform: {fileID: 2842120016485600253}
   nameText: {fileID: 1905714436465122683}
-  layoutGroupRTs: []
   offset: {x: 0, y: 3, z: 0}
 --- !u!1 &1905714436465122565
 GameObject:
@@ -415,7 +414,6 @@ MonoBehaviour:
   avatarName: {fileID: 3717630171843337652}
   avatarRenderer: {fileID: 3377148406933134318}
   avatarMovementController: {fileID: 122622683908687435}
-  minimapRepresentation: {fileID: 0}
   onPointerDown: {fileID: 3865137627712764486}
   model:
     id: 
@@ -444,6 +442,10 @@ MonoBehaviour:
   eyeMaterial: {fileID: 2100000, guid: fcfa021e0982c0840aaefe7411340f7f, type: 2}
   eyebrowMaterial: {fileID: 2100000, guid: db9e974bee285614b8ea2d8832d1a563, type: 2}
   mouthMaterial: {fileID: 2100000, guid: aa8f029bd537edb44b72b4737ca9b81d, type: 2}
+  useFx: 1
+  fxChangeWearable: {fileID: 5176108183135982478, guid: 519485bde70494ec39ff527893b93d54,
+    type: 3}
+  fxSpawn: {fileID: 4461659837953358430, guid: a409a73da0b844cf28dfb4e8066f3fdd, type: 3}
 --- !u!114 &5451946646277210429
 MonoBehaviour:
   m_ObjectHideFlags: 0

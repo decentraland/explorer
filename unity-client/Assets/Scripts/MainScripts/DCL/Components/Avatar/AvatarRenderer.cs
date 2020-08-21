@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using DCL.Helpers;
 using UnityEngine;
 using UnityEngine.Assertions;
 
@@ -13,6 +14,10 @@ namespace DCL
         public Material eyeMaterial;
         public Material eyebrowMaterial;
         public Material mouthMaterial;
+
+        public bool useFx = true;
+        public GameObject fxChangeWearable;
+        public GameObject fxSpawn;
 
         private AvatarModel model;
 
@@ -115,6 +120,7 @@ namespace DCL
             isLoading = false;
             OnFailEvent = null;
             OnSuccessEvent = null;
+            alreadySpawned = false;
         }
 
         void CleanUpUnusedItems()
@@ -152,6 +158,7 @@ namespace DCL
             }
         }
 
+        private bool alreadySpawned = false;
 
         private IEnumerator LoadAvatar()
         {
@@ -259,6 +266,23 @@ namespace DCL
 
             yield return new WaitUntil(AreWearablesReady);
 
+            if (useFx)
+            {
+                if (!alreadySpawned)
+                {
+                    GameObject fx = Instantiate(fxSpawn);
+                    fx.GetOrCreateComponent<FollowObject>().target = transform;
+                    fx.transform.position = transform.position;
+                    alreadySpawned = true;
+                }
+                else
+                {
+                    GameObject fx = Instantiate(fxChangeWearable);
+                    fx.GetOrCreateComponent<FollowObject>().target = transform;
+                    fx.transform.position = transform.position;
+                }
+            }
+
             eyesController.Load(bodyShapeController, model.eyeColor);
             eyebrowsController.Load(bodyShapeController, model.hairColor);
             mouthController.Load(bodyShapeController, model.skinColor);
@@ -333,6 +357,7 @@ namespace DCL
                 }
             }
         }
+
 
         public void UpdateExpressions(string id, long timestamp)
         {
