@@ -5,17 +5,19 @@ using TMPro;
 internal class ExploreFriendsView : MonoBehaviour
 {
     [SerializeField] Image friendPortrait;
+    [SerializeField] Image friendBackground;
     [SerializeField] ShowHideAnimator showHideAnimator;
     [SerializeField] TextMeshProUGUI friendName;
     [SerializeField] UIHoverCallback hoverCallback;
 
     UserProfile userProfile;
 
-    public void SetUserProfile(UserProfile profile)
+    public void SetUserProfile(UserProfile profile, Color backgroundColor)
     {
         userProfile = profile;
         friendPortrait.sprite = profile.faceSnapshot;
         friendName.text = profile.userName;
+        friendBackground.color = backgroundColor;
 
         if (profile.faceSnapshot == null)
         {

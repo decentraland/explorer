@@ -8,6 +8,7 @@ internal class ExploreHUDView : MonoBehaviour
     [SerializeField] internal Button_OnPointerDown closeButton;
     [SerializeField] internal GotoMagicButton gotoMagicButton;
     [SerializeField] internal Button_OnPointerDown togglePopupButton;
+    [SerializeField] internal Color[] friendColors = null;
 
     public void SetVisibility(bool visible)
     {

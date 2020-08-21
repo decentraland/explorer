@@ -122,10 +122,10 @@ internal class BaseSceneCellView : BaseCellView, IMapDataView, IExploreViewWithF
             width, height, size, $"{centerX},{centerY}", parcels);
     }
 
-    void IExploreViewWithFriends.OnFriendAdded(UserProfile profile)
+    void IExploreViewWithFriends.OnFriendAdded(UserProfile profile, Color backgroundColor)
     {
         var view = friendPool.GetView();
-        view.SetUserProfile(profile);
+        view.SetUserProfile(profile, backgroundColor);
         friendViewById.Add(profile.userId, view);
     }
 

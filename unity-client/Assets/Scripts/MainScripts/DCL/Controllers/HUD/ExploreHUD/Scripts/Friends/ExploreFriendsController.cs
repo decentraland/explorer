@@ -3,16 +3,28 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
+using Random = UnityEngine.Random;
+
 internal class ExploreFriendsController : IDisposable
 {
     Dictionary<IExploreViewWithFriends, ListenerWrapper> listeners = new Dictionary<IExploreViewWithFriends, ListenerWrapper>();
     Dictionary<string, FriendWrapper> friends = new Dictionary<string, FriendWrapper>();
 
     IFriendsController friendsController;
+    Color[] friendColors;
 
-    public ExploreFriendsController(IFriendsController friendsController)
+    public ExploreFriendsController(IFriendsController friendsController, Color[] friendColors)
     {
         this.friendsController = friendsController;
+
+        if (friendColors != null && friendColors.Length > 0)
+        {
+            this.friendColors = friendColors;
+        }
+        else
+        {
+            this.friendColors = new Color[] { Color.white };
+        }
 
         if (!friendsController.isInitialized)
         {
@@ -65,7 +77,7 @@ internal class ExploreFriendsController : IDisposable
         FriendWrapper friend;
         if (!friends.TryGetValue(userId, out friend))
         {
-            friend = new FriendWrapper(userId);
+            friend = new FriendWrapper(userId, friendColors[Random.Range(0, friendColors.Length)]);
             friends.Add(userId, friend);
         }
 
@@ -89,7 +101,7 @@ internal class ExploreFriendsController : IDisposable
         {
             while (friendsIterator.MoveNext())
             {
-                FriendWrapper friend = new FriendWrapper(friendsIterator.Current.Key);
+                FriendWrapper friend = new FriendWrapper(friendsIterator.Current.Key, friendColors[Random.Range(0, friendColors.Length)]);
                 friend.SetStatus(friendsIterator.Current.Value);
                 friends.Add(friendsIterator.Current.Key, friend);
             }
@@ -153,10 +165,12 @@ class FriendWrapper
 
     public UserProfile profile { private set; get; }
     public FriendsController.UserStatus status { private set; get; }
+    Color backgroundColor;
 
-    public FriendWrapper(string userId)
+    public FriendWrapper(string userId, Color backgroundColor)
     {
         profile = UserProfileController.userProfilesCatalog.Get(userId);
+        this.backgroundColor = backgroundColor;
     }
 
     public void SetStatus(FriendsController.UserStatus newStatus)
@@ -168,7 +182,7 @@ class FriendWrapper
     {
         listener.OnListenerDisposed += OnListenerDisposed;
         friendListeners.Add(listener);
-        listener.OnFriendAdded(profile);
+        listener.OnFriendAdded(profile, backgroundColor);
     }
 
     public void RemoveListener(ListenerWrapper listener)
@@ -241,9 +255,9 @@ class ListenerWrapper : IDisposable
         this.view = view;
     }
 
-    public void OnFriendAdded(UserProfile profile)
+    public void OnFriendAdded(UserProfile profile, Color backgroundColor)
     {
-        view.OnFriendAdded(profile);
+        view.OnFriendAdded(profile, backgroundColor);
     }
 
     public void OnFriendRemoved(UserProfile profile)

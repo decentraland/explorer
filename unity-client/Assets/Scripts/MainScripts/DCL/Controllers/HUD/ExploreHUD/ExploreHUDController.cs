@@ -37,7 +37,7 @@ public class ExploreHUDController : IHUD
 
     public void Initialize(IFriendsController friendsController)
     {
-        this.friendsController = new ExploreFriendsController(friendsController);
+        this.friendsController = new ExploreFriendsController(friendsController, view.friendColors);
         miniMapDataController = new ExploreMiniMapDataController();
 
         view.Initialize(miniMapDataController, this.friendsController);
