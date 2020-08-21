@@ -53,7 +53,7 @@ export class GIFProcessor {
 
   /**
    *
-   * Tells the worker to process a GIF
+   * Triggers the GIF processing in the worker (the comeback is executed at worker.onmessage)
    *
    */
   ProcessGIF(data: { imageSource: string, sceneId: string, componentId: string }) {
