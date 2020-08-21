@@ -45,6 +45,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   steps:
   - {fileID: 4146741736848859845, guid: e38c1e2e466c58a4aa90e19bbda22466, type: 3}
+  - {fileID: 3262231415127888666, guid: e3d6f385c55712e4d9db8f6285d8af9a, type: 3}
   timeBetweenSteps: 0.5
   debugRunTutorial: 0
   debugStartingStepIndex: 0

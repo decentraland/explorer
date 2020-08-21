@@ -97,6 +97,14 @@ namespace DCL.Tutorial
             StartTutorialFromStep(nextStepIndex);
         }
 
+        /// <summary>
+        /// Skips the all the steps and finalize the tutorial.
+        /// </summary>
+        public void SkipAllSteps()
+        {
+            StartTutorialFromStep(TUTORIAL_FINISHED_MARK);
+        }
+
         private void OnRenderingStateChanged(bool renderingEnabled, bool prevState)
         {
             if (!isTutorialEnabledValue || !renderingEnabled)

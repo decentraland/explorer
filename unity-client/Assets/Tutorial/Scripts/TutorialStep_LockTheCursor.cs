@@ -8,20 +8,6 @@ namespace DCL.Tutorial
     /// </summary>
     public class TutorialStep_LockTheCursor : TutorialStep
     {
-        MouseCatcher mouseCatcher;
-
-        public override void OnStepStart()
-        {
-            base.OnStepStart();
-
-            mouseCatcher = InitialSceneReferences.i?.mouseCatcher;
-
-            if (mouseCatcher == null)
-                return;
-
-            mouseCatcher.UnlockCursor();
-        }
-
         public override IEnumerator OnStepExecute()
         {
             yield return new WaitUntil(() => mouseCatcher.isLocked);

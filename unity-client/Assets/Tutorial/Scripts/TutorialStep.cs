@@ -17,7 +17,9 @@ namespace DCL.Tutorial
     public class TutorialStep : MonoBehaviour, ITutorialStep
     {
         protected const string STEP_FINISHED_ANIMATOR_TRIGGER = "StepFinished";
+
         protected Animator stepAnimator;
+        protected MouseCatcher mouseCatcher;
 
         /// <summary>
         /// Step initialization (occurs before OnStepExecute() execution).
@@ -25,6 +27,13 @@ namespace DCL.Tutorial
         public virtual void OnStepStart()
         {
             stepAnimator = GetComponent<Animator>();
+
+            mouseCatcher = InitialSceneReferences.i?.mouseCatcher;
+
+            if (mouseCatcher == null)
+                return;
+
+            mouseCatcher.UnlockCursor();
         }
 
         /// <summary>
