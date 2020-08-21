@@ -19,7 +19,7 @@ namespace DCL.Tutorial
     {
         void SetTutorialEnabled();
         IEnumerator StartTutorialFromStep(int stepIndex);
-        void SkipToNextStep();
+        void SkipAllSteps();
         void SetUserTutorialStepAsCompleted(TutorialFinishStep step);
     }
 
@@ -88,19 +88,7 @@ namespace DCL.Tutorial
         }
 
         /// <summary>
-        /// Skips the current running step and executes the next one.
-        /// </summary>
-        public void SkipToNextStep()
-        {
-            if (executeStepsCoroutine != null)
-                StopCoroutine(executeStepsCoroutine);
-
-            int nextStepIndex = currentStepIndex + 1;
-            executeStepsCoroutine = StartCoroutine(StartTutorialFromStep(nextStepIndex));
-        }
-
-        /// <summary>
-        /// Skips the all the steps and finalize the tutorial.
+        /// Skips all the steps and finalize the tutorial.
         /// </summary>
         public void SkipAllSteps()
         {
@@ -126,10 +114,10 @@ namespace DCL.Tutorial
 
         private void OnRenderingStateChanged(bool renderingEnabled, bool prevState)
         {
-            CommonScriptableObjects.rendererState.OnChange -= OnRenderingStateChanged;
-
             if (!renderingEnabled)
                 return;
+
+            CommonScriptableObjects.rendererState.OnChange -= OnRenderingStateChanged;
 
             if (debugRunTutorial)
                 currentStepIndex = debugStartingStepIndex >= 0 ? debugStartingStepIndex : 0;
