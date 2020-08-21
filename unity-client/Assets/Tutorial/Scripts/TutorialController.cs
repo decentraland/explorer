@@ -25,6 +25,7 @@ namespace DCL.Tutorial
 
         [Header("Steps Configuration")]
         [SerializeField] List<TutorialStep> steps = new List<TutorialStep>();
+        [SerializeField] float timeBetweenSteps = 0.5f;
 
         [Header("Debugging")]
         public bool debugRunTutorial = false;
@@ -121,7 +122,7 @@ namespace DCL.Tutorial
             {
                 var stepPrefab = steps[i];
 
-                runningStep = Instantiate(stepPrefab).GetComponent<TutorialStep>();
+                runningStep = Instantiate(stepPrefab, this.transform).GetComponent<TutorialStep>();
 
                 currentStepIndex = i;
 
@@ -130,9 +131,13 @@ namespace DCL.Tutorial
 
                 runningStep.OnStepStart();
                 yield return runningStep.OnStepExecute();
+                yield return runningStep.OnStepPlayAnimationForHidding();
                 runningStep.OnStepFinished();
 
                 Destroy(runningStep.gameObject);
+
+                if (i < steps.Count - 1 && timeBetweenSteps > 0)
+                    yield return new WaitForSeconds(timeBetweenSteps);
             }
 
             if (!debugRunTutorial)

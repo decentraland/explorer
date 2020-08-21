@@ -43,3 +43,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f6dbb06cb08104c1a9fc5ceaabd5115c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  steps:
+  - {fileID: 4146741736848859845, guid: e38c1e2e466c58a4aa90e19bbda22466, type: 3}
+  timeBetweenSteps: 0.5
+  debugRunTutorial: 0
+  debugStartingStepIndex: 0
