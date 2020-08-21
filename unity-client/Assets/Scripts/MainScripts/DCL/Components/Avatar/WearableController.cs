@@ -115,7 +115,8 @@ public class WearableController
     {
         foreach (var kvp in originalMaterials)
         {
-            kvp.Key.materials = kvp.Value;
+            if (kvp.Key != null)
+                kvp.Key.materials = kvp.Value;
         }
 
         originalMaterials.Clear();
