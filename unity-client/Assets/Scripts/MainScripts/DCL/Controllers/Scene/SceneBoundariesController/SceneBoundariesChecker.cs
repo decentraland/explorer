@@ -15,6 +15,8 @@ namespace DCL.Controllers
         Coroutine entitiesCheckRoutine = null;
         float lastCheckTime;
 
+        public int entitiesToCheckCount => entitiesToCheck.Count;
+
         public SceneBoundariesChecker()
         {
             entitiesCheckRoutine = CoroutineStarter.Start(CheckEntities());
