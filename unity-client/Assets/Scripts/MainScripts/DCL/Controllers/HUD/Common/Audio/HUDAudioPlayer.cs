@@ -70,6 +70,16 @@ public class HUDAudioPlayer : MonoBehaviour
 
     public void Play(Sound sound, float pitch = 1f)
     {
+        // Stop sounds from playing while loading
+        if (CommonScriptableObjects.rendererState != null)
+        {
+            if (!CommonScriptableObjects.rendererState.Get())
+            {
+                return;
+            }
+        }
+        
+
         switch (sound)
         {
             case Sound.buttonHover:
