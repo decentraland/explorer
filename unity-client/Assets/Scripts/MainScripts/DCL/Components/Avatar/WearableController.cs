@@ -36,7 +36,7 @@ public class WearableController
         this.bodyShapeId = bodyShapeId;
     }
 
-    public void SetHiddenList(HashSet<string> hiddenList)
+    public void SetHiddenCategoryList(HashSet<string> hiddenList)
     {
         this.hiddenList = hiddenList;
     }

@@ -9,6 +9,8 @@ namespace DCL
 {
     public class AvatarRenderer : MonoBehaviour
     {
+        const int MAX_RETRY_COUNT = 5;
+
         public Material defaultMaterial;
         public Material eyeMaterial;
         public Material eyebrowMaterial;
@@ -29,7 +31,7 @@ namespace DCL
         internal bool isLoading = false;
 
         private Coroutine loadCoroutine;
-        private HashSet<string> hiddenList = new HashSet<string>();
+        private HashSet<string> hiddenCategoryList = new HashSet<string>();
 
 
         private void Awake()
@@ -39,15 +41,6 @@ namespace DCL
 
         public void ApplyModel(AvatarModel model, Action onSuccess, Action onFail)
         {
-            if (this.model != null && model != null && this.model.Equals(model))
-            {
-                onSuccess?.Invoke();
-                return;
-            }
-
-            this.model = new AvatarModel();
-            this.model.CopyFrom(model);
-
             Action onSuccessWrapper = null;
             Action onFailWrapper = null;
 
@@ -65,6 +58,15 @@ namespace DCL
 
             this.OnSuccessEvent += onSuccessWrapper;
             this.OnFailEvent += onFailWrapper;
+
+            if (this.model != null && model != null && this.model.Equals(model))
+            {
+                this.OnSuccessEvent?.Invoke();
+                return;
+            }
+
+            this.model = new AvatarModel();
+            this.model.CopyFrom(model);
 
             isLoading = false;
 
@@ -111,13 +113,13 @@ namespace DCL
 
             wearableControllers.Clear();
             model = null;
-            hiddenList.Clear();
+            hiddenCategoryList.Clear();
             isLoading = false;
             OnFailEvent = null;
             OnSuccessEvent = null;
         }
 
-        void CleanUpUnusedItems()
+        void RemoveUnusedControllers()
         {
             if (model.wearables == null)
                 return;
@@ -139,16 +141,19 @@ namespace DCL
             if (!model.wearables.Contains(eyebrowsController.wearable.id))
             {
                 eyebrowsController.CleanUp();
+                eyebrowsController = null;
             }
 
             if (!model.wearables.Contains(eyesController.wearable.id))
             {
                 eyesController.CleanUp();
+                eyesController = null;
             }
 
             if (!model.wearables.Contains(mouthController.wearable.id))
             {
                 mouthController.CleanUp();
+                mouthController = null;
             }
         }
 
@@ -164,6 +169,79 @@ namespace DCL
                 yield break;
             }
 
+            bool changedBody = InitializeBodyController();
+
+            //NOTE(Brian): We add all the unused categories and then remove them as they are used.
+            HashSet<string> unusedCategories = new HashSet<string>(WearableLiterals.Categories.ALL);
+
+            PopulateWearableControllers(unusedCategories);
+            RemoveUnusedControllers();
+            SetDefaultFaceForUnusedCategories(unusedCategories);
+
+            hiddenCategoryList = CreateHiddenCategoryList();
+
+            Dictionary<WearableController, int> retryCount = new Dictionary<WearableController, int>();
+
+            void OnWearableLoadingFail(WearableController controller)
+            {
+                if (retryCount.ContainsKey(controller) && retryCount[controller] > MAX_RETRY_COUNT)
+                {
+                    controller.CleanUp();
+                    wearableControllers.Remove(controller.id);
+                    return;
+                }
+
+                controller.Load(transform, OnWearableLoadingSuccess, OnWearableLoadingFail);
+
+                if (!retryCount.ContainsKey(controller))
+                    retryCount.Add(controller, 0);
+
+                retryCount[controller]++;
+            }
+
+            if (!bodyShapeController.isReady)
+            {
+                bodyShapeController.SetHiddenCategoryList(hiddenCategoryList);
+                bodyShapeController.Load(transform, OnWearableLoadingSuccess, OnWearableLoadingFail);
+            }
+
+            foreach (var kvp in wearableControllers)
+            {
+                WearableController wearable = kvp.Value;
+
+                if (changedBody)
+                    wearable.boneRetargetingDirty = true;
+
+                wearable.SetHiddenCategoryList(hiddenCategoryList);
+                wearable.Load(transform, OnWearableLoadingSuccess, OnWearableLoadingFail);
+            }
+
+            yield return new WaitUntil(AreWearablesReady);
+
+            eyesController.Load(bodyShapeController, model.eyeColor);
+            eyebrowsController.Load(bodyShapeController, model.hairColor);
+            mouthController.Load(bodyShapeController, model.skinColor);
+
+            yield return new WaitUntil(IsFaceReady);
+
+            bodyShapeController.HideUnusedParts(unusedCategories);
+            bodyShapeController.UpdateVisibility();
+
+            foreach (var kvp in wearableControllers)
+            {
+                kvp.Value.UpdateVisibility();
+            }
+
+            isLoading = false;
+
+            SetWearableBones();
+            UpdateExpressions(model.expressionTriggerId, model.expressionTriggerTimestamp);
+
+            OnSuccessEvent?.Invoke();
+        }
+
+        private bool InitializeBodyController()
+        {
             bool changedBody = false;
 
             if (bodyShapeController != null && bodyShapeController.id != model?.bodyShape)
@@ -186,40 +264,13 @@ namespace DCL
                     bodyShapeController.SetupDefaultMaterial(defaultMaterial, model.skinColor, model.hairColor);
             }
 
-            HashSet<string> usedCategories = new HashSet<string>();
+            return changedBody;
+        }
 
-            usedCategories.Add(WearableLiterals.Categories.UPPER_BODY);
-            usedCategories.Add(WearableLiterals.Categories.LOWER_BODY);
-            usedCategories.Add(WearableLiterals.Categories.EYEBROWS);
-            usedCategories.Add(WearableLiterals.Categories.FACIAL);
-            usedCategories.Add(WearableLiterals.Categories.MOUTH);
-            usedCategories.Add(WearableLiterals.Categories.FEET);
-            usedCategories.Add(WearableLiterals.Categories.EYES);
-
-            int wearableCount = model.wearables.Count;
-
-            for (int index = 0; index < wearableCount; index++)
-            {
-                var wearableId = model.wearables[index];
-
-                var wearable = ResolveWearable(wearableId);
-
-                if (usedCategories.Contains(wearable.category))
-                {
-                    usedCategories.Remove(wearable.category);
-                }
-
-                if (!wearableControllers.ContainsKey(wearableId))
-                {
-                    AddWearableController(wearableId);
-                }
-                else
-                {
-                    UpdateWearableController(wearableId);
-                }
-            }
-
-            foreach (var category in usedCategories)
+        private void SetDefaultFaceForUnusedCategories(HashSet<string> unusedCategories)
+        {
+            //NOTE(Brian): Set default eyes if their categories are unused
+            foreach (var category in unusedCategories)
             {
                 switch (category)
                 {
@@ -234,52 +285,32 @@ namespace DCL
                         break;
                 }
             }
+        }
 
-            CleanUpUnusedItems();
+        private void PopulateWearableControllers(HashSet<string> unusedCategories)
+        {
+            int wearableCount = model.wearables.Count;
 
-            hiddenList = CreateHiddenList();
-
-            if (!bodyShapeController.isReady)
+            for (int index = 0; index < wearableCount; index++)
             {
-                bodyShapeController.SetHiddenList(hiddenList);
-                bodyShapeController.Load(transform, OnWearableLoadingSuccess, OnWearableLoadingFail);
+                var wearableId = model.wearables[index];
+
+                var wearable = ResolveWearable(wearableId);
+
+                if (unusedCategories.Contains(wearable.category))
+                {
+                    unusedCategories.Remove(wearable.category);
+                }
+
+                if (!wearableControllers.ContainsKey(wearableId))
+                {
+                    AddWearableController(wearableId);
+                }
+                else
+                {
+                    UpdateWearableController(wearableId);
+                }
             }
-
-            foreach (var kvp in wearableControllers)
-            {
-                WearableController wearable = kvp.Value;
-
-                if (changedBody)
-                    wearable.boneRetargetingDirty = true;
-
-                wearable.SetHiddenList(hiddenList);
-
-                wearable.Load(transform, OnWearableLoadingSuccess, OnWearableLoadingFail);
-            }
-
-            yield return new WaitUntil(AreWearablesReady);
-
-            eyesController.Load(bodyShapeController, model.eyeColor);
-            eyebrowsController.Load(bodyShapeController, model.hairColor);
-            mouthController.Load(bodyShapeController, model.skinColor);
-
-            yield return new WaitUntil(IsFaceReady);
-
-            bodyShapeController.RemoveUnusedParts(usedCategories);
-
-            bodyShapeController.UpdateVisibility();
-
-            foreach (var kvp in wearableControllers)
-            {
-                kvp.Value.UpdateVisibility();
-            }
-
-            isLoading = false;
-
-            SetWearableBones();
-            UpdateExpressions(model.expressionTriggerId, model.expressionTriggerTimestamp);
-
-            OnSuccessEvent?.Invoke();
         }
 
 
@@ -288,7 +319,7 @@ namespace DCL
             wearableController.SetupDefaultMaterial(defaultMaterial, model.skinColor, model.hairColor);
         }
 
-        void OnWearableLoadingFail(WearableController wearableController)
+        void OnAvatarLoadingFail(WearableController wearableController)
         {
             Debug.LogError($"Avatar: {model.name}  -  Failed loading wearable: {wearableController.id}");
             CleanupAvatar();
@@ -342,27 +373,30 @@ namespace DCL
         }
 
 
-        private HashSet<string> CreateHiddenList()
+        private HashSet<string> CreateHiddenCategoryList()
         {
             HashSet<string> hiddenCategories = new HashSet<string>();
-            if (model?.wearables != null)
+
+            if (model?.wearables == null)
+                return hiddenCategories;
+
+            //Last wearable added has priority over the rest
+            for (int i = model.wearables.Count - 1; i >= 0; i--)
             {
-                //Last wearable added has priority over the rest
-                for (int i = model.wearables.Count - 1; i >= 0; i--)
+                string id = model.wearables[i];
+
+                if (!wearableControllers.ContainsKey(id)) continue;
+
+                var wearable = wearableControllers[id].wearable;
+
+                if (hiddenCategories.Contains(wearable.category)) //Skip hidden elements to avoid two elements hiding each other
+                    continue;
+
+                var wearableHidesList = wearable.GetHidesList(bodyShapeController.bodyShapeId);
+
+                if (wearableHidesList != null)
                 {
-                    string id = model.wearables[i];
-                    if (!wearableControllers.ContainsKey(id)) continue;
-
-                    var wearable = wearableControllers[id].wearable;
-
-                    if (hiddenCategories.Contains(wearable.category)) //Skip hidden elements to avoid two elements hiding each other
-                        continue;
-
-                    var wearableHidesList = wearable.GetHidesList(bodyShapeController.bodyShapeId);
-                    if (wearableHidesList != null)
-                    {
-                        hiddenCategories.UnionWith(wearableHidesList);
-                    }
+                    hiddenCategories.UnionWith(wearableHidesList);
                 }
             }
 

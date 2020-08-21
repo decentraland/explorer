@@ -25,7 +25,12 @@ public class BodyShapeController : WearableController
         base.Load(parent, onSuccess, onFail);
     }
 
-    public void RemoveUnusedParts(HashSet<string> usedCategories)
+    /// <summary>
+    /// This method will iterate through the usedCategories, and hide the
+    /// avatar parts that are not in the list.
+    /// </summary>
+    /// <param name="usedCategories">HashSet with usedCategories ids.</param>
+    public void HideUnusedParts(HashSet<string> usedCategories)
     {
         bool lowerBodyActive = false;
         bool upperBodyActive = false;
