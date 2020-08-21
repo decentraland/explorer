@@ -17,9 +17,8 @@ namespace DCL.Tutorial
 
     public interface ITutorialController
     {
-        bool isTutorialEnabled { get; }
         void SetTutorialEnabled();
-        void StartTutorialFromStep(int stepIndex);
+        IEnumerator StartTutorialFromStep(int stepIndex);
         void SkipToNextStep();
         void SetUserTutorialStepAsCompleted(TutorialFinishStep step);
     }
@@ -31,8 +30,6 @@ namespace DCL.Tutorial
     {
         public static TutorialController i { get; private set; }
 
-        public bool isTutorialEnabled { get => isTutorialEnabledValue; }
-
         [Header("Steps Configuration")]
         [SerializeField] List<TutorialStep> steps = new List<TutorialStep>();
         [SerializeField] float timeBetweenSteps = 0.5f;
@@ -41,7 +38,6 @@ namespace DCL.Tutorial
         public bool debugRunTutorial = false;
         public int debugStartingStepIndex;
 
-        private bool isTutorialEnabledValue = false;
         private int currentStepIndex;
         private TutorialStep runningStep = null;
         private Coroutine executeStepsCoroutine;
@@ -67,31 +63,28 @@ namespace DCL.Tutorial
         /// </summary>
         public void SetTutorialEnabled()
         {
-            CommonScriptableObjects.rendererState.OnChange += OnRenderingStateChanged;
-            isTutorialEnabledValue = true;
+            if (!CommonScriptableObjects.rendererState.Get())
+                CommonScriptableObjects.rendererState.OnChange += OnRenderingStateChanged;
+            else
+                OnRenderingStateChanged(true, false);
         }
 
         /// <summary>
-        /// Starts to execute the tutorial from a specific step
-        /// (It is necessary that the tutorial is enabled before).
+        /// Starts to execute the tutorial from a specific step.
         /// </summary>
         /// <param name="stepIndex">First step to be executed.</param>
-        public void StartTutorialFromStep(int stepIndex)
+        public IEnumerator StartTutorialFromStep(int stepIndex)
         {
-            if (!isTutorialEnabledValue)
-                return;
-
             if (runningStep != null)
             {
-                StopCoroutine(executeStepsCoroutine);
-
+                yield return runningStep.OnStepPlayAnimationForHidding();
                 runningStep.OnStepFinished();
                 Destroy(runningStep.gameObject);
 
                 runningStep = null;
             }
 
-            executeStepsCoroutine = StartCoroutine(ExecuteSteps(stepIndex));
+            yield return ExecuteSteps(stepIndex);
         }
 
         /// <summary>
@@ -99,8 +92,11 @@ namespace DCL.Tutorial
         /// </summary>
         public void SkipToNextStep()
         {
+            if (executeStepsCoroutine != null)
+                StopCoroutine(executeStepsCoroutine);
+
             int nextStepIndex = currentStepIndex + 1;
-            StartTutorialFromStep(nextStepIndex);
+            executeStepsCoroutine = StartCoroutine(StartTutorialFromStep(nextStepIndex));
         }
 
         /// <summary>
@@ -108,7 +104,10 @@ namespace DCL.Tutorial
         /// </summary>
         public void SkipAllSteps()
         {
-            StartTutorialFromStep(steps.Count);
+            if (executeStepsCoroutine != null)
+                StopCoroutine(executeStepsCoroutine);
+
+            executeStepsCoroutine = StartCoroutine(StartTutorialFromStep(steps.Count));
         }
 
         /// <summary>
@@ -127,7 +126,9 @@ namespace DCL.Tutorial
 
         private void OnRenderingStateChanged(bool renderingEnabled, bool prevState)
         {
-            if (!isTutorialEnabledValue || !renderingEnabled)
+            CommonScriptableObjects.rendererState.OnChange -= OnRenderingStateChanged;
+
+            if (!renderingEnabled)
                 return;
 
             if (debugRunTutorial)
@@ -135,7 +136,7 @@ namespace DCL.Tutorial
             else
                 currentStepIndex = (GetTutorialStepFromProfile() & (int)TutorialFinishStep.NewTutorialFinished) == 0 ? 0 : steps.Count;
 
-            StartTutorialFromStep(currentStepIndex);
+            executeStepsCoroutine = StartCoroutine(StartTutorialFromStep(currentStepIndex));
         }
 
         private IEnumerator ExecuteSteps(int startingStepIndex)
