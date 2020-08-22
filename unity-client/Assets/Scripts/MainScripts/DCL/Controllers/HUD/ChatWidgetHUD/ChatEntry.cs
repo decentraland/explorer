@@ -133,7 +133,7 @@ public class ChatEntry : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
         if (fadeEnabled)
             group.alpha = 0;
 
-        /*if (HUDAudioPlayer.i != null)
+        if (HUDAudioPlayer.i != null)
         {
             Debug.Log(chatEntryModel.messageType.ToString() + " - " + chatEntryModel.subType + " - " + (chatEntryModel.timestamp - HUDAudioPlayer.i.timeAtStart));
             // Check whether or not this message is new
@@ -164,7 +164,7 @@ public class ChatEntry : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
                         break;
                 }
             }
-        }*/
+        }
     }
 
     public void OnPointerClick(PointerEventData pointerEventData)

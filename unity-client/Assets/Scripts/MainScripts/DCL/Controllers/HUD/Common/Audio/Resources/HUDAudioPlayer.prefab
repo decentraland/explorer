@@ -45,6 +45,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ac: {fileID: 0}
+  timeAtStart: 0
 --- !u!114 &9163622792995413824
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -183,4 +184,31 @@ MonoBehaviour:
       clips:
         array:
         - {fileID: 8300000, guid: ff8f842dda3c9154e8171cd98267c7f8, type: 3}
+      source: {fileID: 0}
+    - name: SendChatEntry
+      loop: 0
+      volume: 1
+      randomPitch: 0
+      playOnAwake: 0
+      clips:
+        array:
+        - {fileID: 8300000, guid: afbd62fb3eb978c45b63b75e24478c53, type: 3}
+      source: {fileID: 0}
+    - name: ReceivePrivateChatEntry
+      loop: 0
+      volume: 1
+      randomPitch: 0
+      playOnAwake: 0
+      clips:
+        array:
+        - {fileID: 8300000, guid: 0bfffff4668dbb745a58ec7845891d43, type: 3}
+      source: {fileID: 0}
+    - name: ReceiveGlobalChatEntry
+      loop: 0
+      volume: 1
+      randomPitch: 0
+      playOnAwake: 0
+      clips:
+        array:
+        - {fileID: 8300000, guid: 69ce58bdf542d904d81eea1245e31686, type: 3}
       source: {fileID: 0}

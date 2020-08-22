@@ -34,7 +34,7 @@ public class HUDAudioPlayer : MonoBehaviour
     public AudioContainer ac;
 
     AudioEvent eventHover, eventClick, eventRelease, eventEnable, eventDisable, eventListItemAppear, eventDialogAppear, eventDialogClose, eventConfirm, eventCancel,
-        eventValueChange, eventFadeIn, eventFadeOut;
+        eventValueChange, eventFadeIn, eventFadeOut, eventSendChatEntry, eventReceivePrivateChatEntry, eventReceiveGlobalChatEntry;
 
     bool listItemAppearHasPlayed = false;
     float listItemAppearPitch = 1f;
@@ -65,9 +65,12 @@ public class HUDAudioPlayer : MonoBehaviour
         eventValueChange = ac.GetEvent("ValueChange");
         eventFadeIn = ac.GetEvent("FadeIn");
         eventFadeOut = ac.GetEvent("FadeOut");
+        eventSendChatEntry = ac.GetEvent("SendChatEntry");
+        eventReceivePrivateChatEntry = ac.GetEvent("ReceivePrivateChatEntry");
+        eventReceiveGlobalChatEntry = ac.GetEvent("ReceiveGlobalChatEntry");
 
-        // Get UTC datetime at start (used for chat messages)
-        timeAtStart = (ulong)System.DateTime.UtcNow.Millisecond;
+        // Get UTC datetime at start (used to determine old/new chat messages)
+        timeAtStart = (ulong)(System.DateTime.UtcNow.Subtract(new System.DateTime(1970, 1, 1))).TotalMilliseconds;
     }
 
     private void Update()
@@ -148,15 +151,13 @@ public class HUDAudioPlayer : MonoBehaviour
                 eventFadeIn.Play(true);
                 break;
             case Sound.sendChatEntry:
-                eventHover.SetPitch(2f);
-                eventHover.Play(true);
+                eventSendChatEntry.Play(true);
                 break;
             case Sound.receivePrivateChatEntry:
-                eventListItemAppear.SetPitch(1f);
-                eventListItemAppear.Play(true);
+                eventReceivePrivateChatEntry.Play(true);
                 break;
             case Sound.receiveGlobalChatEntry:
-                eventListItemAppear.SetPitch(2f);
+                eventReceiveGlobalChatEntry.Play(true);
                 break;
             case Sound.cameraToFirstPerson:
                 eventFadeOut.SetPitch(0.85f);
