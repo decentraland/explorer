@@ -161,9 +161,9 @@ public class NFTShapeLoaderController : MonoBehaviour
                 Debug.LogError($"Didn't find any asset image for '{darURLRegistry}/{darURLAsset}' for the NFTShape.\n{error}");
                 OnLoadingAssetFail?.Invoke();
             });
-        // Debug.Log("pravs - NFTShapeLoaderController.FetchNFTImage() - 1");
+        
         yield return new DCL.WaitUntil(() => (CommonScriptableObjects.playerUnityPosition - transform.position).sqrMagnitude < 900f);
-        // Debug.Log("pravs - NFTShapeLoaderController.FetchNFTImage() - 2");
+        
         // We download the "preview" 256px image
         bool foundDCLImage = false;
         if (!string.IsNullOrEmpty(previewImageURL))
@@ -172,13 +172,13 @@ public class NFTShapeLoaderController : MonoBehaviour
 
             yield return WrappedTextureUtils.Fetch(previewImageURL, (downloadedTex, texturePromise) =>
             {
-                // Debug.Log("pravs - NFTShapeLoaderController.FetchNFTImage() - 2A");
+                
                 foundDCLImage = true;
                 this.texturePromise = texturePromise;
                 SetFrameImage(downloadedTex, resizeFrameMesh: false); // TODO: check if resizing is working fine again
             }, Asset_Gif.MaxSize.DONT_RESIZE, sceneId, componentId);
         }
-        // Debug.Log("pravs - NFTShapeLoaderController.FetchNFTImage() - 3");
+        
         //We fall back to the nft original image which can have a really big size
         if (!foundDCLImage && !string.IsNullOrEmpty(originalImageURL))
         {
@@ -186,14 +186,13 @@ public class NFTShapeLoaderController : MonoBehaviour
 
             yield return WrappedTextureUtils.Fetch(originalImageURL, (downloadedTex, texturePromise) =>
             {
-                // Debug.Log("pravs - NFTShapeLoaderController.FetchNFTImage() - 2B");
+                
                 foundDCLImage = true;
                 this.texturePromise = texturePromise;
                 SetFrameImage(downloadedTex, resizeFrameMesh: false); // TODO: check if resizing is working fine again
             }, Asset_Gif.MaxSize._256, sceneId, componentId);
         }
-        // Debug.Log("pravs - NFTShapeLoaderController.FetchNFTImage() - 4");
-        Debug.Log("pravs - NFTShapeLoaderController.FetchNFTImage() - FINISHED KEEP");
+        
         FinishLoading(foundDCLImage);
     }
 
@@ -218,15 +217,12 @@ public class NFTShapeLoaderController : MonoBehaviour
 
         nftAsset = newAsset;
 
-        // Debug.Log("pravs - NFTShapeLoaderController.SetFrameImage() - 1");
         if (nftAsset is Asset_Gif gifAsset)
         {
-            // Debug.Log("pravs - NFTShapeLoaderController.SetFrameImage() - 2");
             gifAsset.OnFrameTextureChanged -= UpdateTexture;
             gifAsset.OnFrameTextureChanged += UpdateTexture;
             gifAsset.Play(false);
         }
-        // Debug.Log("pravs - NFTShapeLoaderController.SetFrameImage() - 3");
 
         UpdateTexture(nftAsset.texture);
 
@@ -291,10 +287,9 @@ public class NFTShapeLoaderController : MonoBehaviour
             AssetPromiseKeeper_Texture.i.Forget(texturePromise);
             texturePromise = null;
         }
-
-        if (nftAsset != null)
+        else
         {
-            nftAsset.Dispose();
+            nftAsset?.Dispose();
         }
     }
 }

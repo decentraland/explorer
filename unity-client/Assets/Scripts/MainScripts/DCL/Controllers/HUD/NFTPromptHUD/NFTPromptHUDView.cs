@@ -76,7 +76,8 @@ public class NFTPromptHUDView : MonoBehaviour
     {
         content.SetActive(false);
 
-        if (imageAsset != null) imageAsset.Dispose();
+        OnDestroy();
+
         if (fetchNFTRoutine != null) StopCoroutine(fetchNFTRoutine);
         if (fetchNFTImageRoutine != null) StopCoroutine(fetchNFTImageRoutine);
 
@@ -327,10 +328,9 @@ public class NFTPromptHUDView : MonoBehaviour
             AssetPromiseKeeper_Texture.i.Forget(texturePromise);
             texturePromise = null;
         }
-
-        if (imageAsset != null)
+        else
         {
-            imageAsset.Dispose();
+            imageAsset?.Dispose();
         }
     }
 }
