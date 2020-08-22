@@ -83,7 +83,7 @@ MonoBehaviour:
       volume: 1
       randomPitch: 0.15
       playOnAwake: 0
-      cooldownSeconds: 0
+      cooldownSeconds: 0.05
       clips:
         array:
         - {fileID: 8300000, guid: 69ce58bdf542d904d81eea1245e31686, type: 3}
