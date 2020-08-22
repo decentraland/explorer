@@ -135,7 +135,6 @@ public class ChatEntry : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
 
         if (HUDAudioPlayer.i != null)
         {
-            Debug.Log(chatEntryModel.messageType.ToString() + " - " + chatEntryModel.subType + " - " + (chatEntryModel.timestamp - HUDAudioPlayer.i.timeAtStart));
             // Check whether or not this message is new
             if (chatEntryModel.timestamp > HUDAudioPlayer.i.timeAtStart)
             {

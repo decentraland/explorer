@@ -73,6 +73,7 @@ MonoBehaviour:
       volume: 1
       randomPitch: 0.2
       playOnAwake: 0
+      cooldownSeconds: 0
       clips:
         array:
         - {fileID: 8300000, guid: e5820e20f76a6d74e94f531fc6b7ae02, type: 3}
@@ -82,6 +83,7 @@ MonoBehaviour:
       volume: 1
       randomPitch: 0.15
       playOnAwake: 0
+      cooldownSeconds: 0
       clips:
         array:
         - {fileID: 8300000, guid: 69ce58bdf542d904d81eea1245e31686, type: 3}
@@ -91,6 +93,7 @@ MonoBehaviour:
       volume: 1
       randomPitch: 0.15
       playOnAwake: 0
+      cooldownSeconds: 0
       clips:
         array:
         - {fileID: 8300000, guid: c5c67e3189377ce42a40002734b704b6, type: 3}
@@ -100,6 +103,7 @@ MonoBehaviour:
       volume: 1
       randomPitch: 0.05
       playOnAwake: 0
+      cooldownSeconds: 0
       clips:
         array:
         - {fileID: 8300000, guid: afbd62fb3eb978c45b63b75e24478c53, type: 3}
@@ -109,6 +113,7 @@ MonoBehaviour:
       volume: 1
       randomPitch: 0.05
       playOnAwake: 0
+      cooldownSeconds: 0
       clips:
         array:
         - {fileID: 8300000, guid: 4804fe1b06df9eb46859950493280fa3, type: 3}
@@ -118,6 +123,7 @@ MonoBehaviour:
       volume: 1
       randomPitch: 0
       playOnAwake: 0
+      cooldownSeconds: 0
       clips:
         array:
         - {fileID: 8300000, guid: 5c19d7d76099d3248b1e70a573008365, type: 3}
@@ -127,6 +133,7 @@ MonoBehaviour:
       volume: 1
       randomPitch: 0.15
       playOnAwake: 0
+      cooldownSeconds: 0
       clips:
         array:
         - {fileID: 8300000, guid: 20a27736f2c55ee44bb4ca65bed56e4b, type: 3}
@@ -136,6 +143,7 @@ MonoBehaviour:
       volume: 1
       randomPitch: 0.15
       playOnAwake: 0
+      cooldownSeconds: 0
       clips:
         array:
         - {fileID: 8300000, guid: d8c217cb0f8783b45912e8dfde963bf0, type: 3}
@@ -145,6 +153,7 @@ MonoBehaviour:
       volume: 1
       randomPitch: 0
       playOnAwake: 0
+      cooldownSeconds: 0
       clips:
         array:
         - {fileID: 8300000, guid: 0bfffff4668dbb745a58ec7845891d43, type: 3}
@@ -154,6 +163,7 @@ MonoBehaviour:
       volume: 1
       randomPitch: 0
       playOnAwake: 0
+      cooldownSeconds: 0
       clips:
         array:
         - {fileID: 8300000, guid: c502cfacea4f3d34aa2a4cc730ddfe0b, type: 3}
@@ -163,6 +173,7 @@ MonoBehaviour:
       volume: 1
       randomPitch: 0
       playOnAwake: 0
+      cooldownSeconds: 0
       clips:
         array:
         - {fileID: 8300000, guid: e134d8c09228ed0448e0458ba8602c43, type: 3}
@@ -172,6 +183,7 @@ MonoBehaviour:
       volume: 1
       randomPitch: 0
       playOnAwake: 0
+      cooldownSeconds: 0
       clips:
         array:
         - {fileID: 8300000, guid: fedc09a4557ddf04d8fe3636130e3e8a, type: 3}
@@ -181,6 +193,7 @@ MonoBehaviour:
       volume: 1
       randomPitch: 0
       playOnAwake: 0
+      cooldownSeconds: 0
       clips:
         array:
         - {fileID: 8300000, guid: ff8f842dda3c9154e8171cd98267c7f8, type: 3}
@@ -190,6 +203,7 @@ MonoBehaviour:
       volume: 1
       randomPitch: 0
       playOnAwake: 0
+      cooldownSeconds: 0.1
       clips:
         array:
         - {fileID: 8300000, guid: afbd62fb3eb978c45b63b75e24478c53, type: 3}
@@ -199,6 +213,7 @@ MonoBehaviour:
       volume: 1
       randomPitch: 0
       playOnAwake: 0
+      cooldownSeconds: 0.1
       clips:
         array:
         - {fileID: 8300000, guid: 0bfffff4668dbb745a58ec7845891d43, type: 3}
@@ -208,6 +223,7 @@ MonoBehaviour:
       volume: 1
       randomPitch: 0
       playOnAwake: 0
+      cooldownSeconds: 0.1
       clips:
         array:
         - {fileID: 8300000, guid: 69ce58bdf542d904d81eea1245e31686, type: 3}

@@ -34,14 +34,6 @@ public class ChatController : MonoBehaviour, IChatController
         if (message == null)
             return;
 
-        /*if (HUDAudioPlayer.i != null)
-        {
-            if (message.messageType == ChatMessage.Type.SYSTEM)
-            {
-                HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.receiveGlobalChatEntry);
-            }
-        }*/
-
         entries.Add(message);
         OnAddMessage?.Invoke(message);
     }

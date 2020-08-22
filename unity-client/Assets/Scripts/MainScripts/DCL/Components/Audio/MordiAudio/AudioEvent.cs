@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using ReorderableList;
 
@@ -21,6 +20,7 @@ public class AudioEvent
     [Range(0f, 1f)]
     public float randomPitch = 0.0f;
     public bool playOnAwake = false;
+    public float cooldownSeconds = 0.0f;
     [Reorderable]
     public AudioClipList clips;
 
@@ -28,6 +28,7 @@ public class AudioEvent
     public AudioSource source;
 
     private float pitch = 1f, defaultVolume;
+    private float lastPlayed = 0.0f; //  <- Used for "cooldown"
 
     public void Initialize()
     {
@@ -47,8 +48,8 @@ public class AudioEvent
 
     public void Play(bool oneShot = false)
     {
-        // Check if AudioSource is active
-        if (!source.gameObject.activeSelf)
+        // Check if AudioSource is active and check cooldown time
+        if (!source.gameObject.activeSelf || Time.time < lastPlayed + cooldownSeconds)
         {
             return;
         }
@@ -70,6 +71,8 @@ public class AudioEvent
         }
 
         RandomizeIndex();
+
+        lastPlayed = Time.time;
     }
 
     public void PlayScheduled(float delaySeconds)
