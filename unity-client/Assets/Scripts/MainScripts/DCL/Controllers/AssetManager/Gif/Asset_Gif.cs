@@ -58,10 +58,10 @@ namespace DCL.Controllers.Gif
         private string componentId;
         private MaxSize maxSize;
 
-        public event Action<ITexture> OnSuccessEvent;
+        public event Action<ITexture, AssetPromise_Texture> OnSuccessEvent;
         public event Action OnFailEvent;
 
-        public Asset_Gif(string url, MaxSize maxSize, string sceneId, string componentId, Action<ITexture> OnSuccess, Action OnFail = null)
+        public Asset_Gif(string url, MaxSize maxSize, string sceneId, string componentId, Action<ITexture, AssetPromise_Texture> OnSuccess, Action OnFail = null)
         {
             this.url = url;
             this.sceneId = sceneId;
@@ -104,7 +104,7 @@ namespace DCL.Controllers.Gif
             SetMaxTextureSize(maxSize);
             Play();
 
-            OnSuccessEvent?.Invoke(this);
+            OnSuccessEvent?.Invoke(this, null);
         }
 
         public void Dispose()

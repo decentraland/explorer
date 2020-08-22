@@ -25,7 +25,8 @@ public class NFTPromptHUDView : MonoBehaviour
     [SerializeField] TextMeshProUGUI textPrice;
     [SerializeField] TextMeshProUGUI textPriceNotForSale;
 
-    [Header("Description & Comment")] [SerializeField]
+    [Header("Description & Comment")]
+    [SerializeField]
     TextMeshProUGUI textDescription;
 
     [SerializeField] TextMeshProUGUI textComment;
@@ -43,6 +44,7 @@ public class NFTPromptHUDView : MonoBehaviour
     Coroutine fetchNFTRoutine = null;
     Coroutine fetchNFTImageRoutine = null;
     ITexture imageAsset = null;
+    AssetPromise_Texture texturePromise = null;
 
     bool backgroundColorSet = false;
     string marketUrl = null;
@@ -192,12 +194,20 @@ public class NFTPromptHUDView : MonoBehaviour
         ITexture nftImageAsset = null;
 
         yield return WrappedTextureUtils.Fetch(nftInfo.previewImageUrl,
-            (asset) => { nftImageAsset = asset; });
+            (downloadedTex, texturePromise) =>
+            {
+                nftImageAsset = downloadedTex;
+                this.texturePromise = texturePromise;
+            });
 
         if (nftImageAsset == null)
         {
             yield return WrappedTextureUtils.Fetch(nftInfo.originalImageUrl,
-                (asset) => { nftImageAsset = asset; }, Asset_Gif.MaxSize._256);
+                (downloadedTex, texturePromise) =>
+                {
+                    nftImageAsset = downloadedTex;
+                    this.texturePromise = texturePromise;
+                }, Asset_Gif.MaxSize._256);
         }
 
         if (nftImageAsset != null)
@@ -223,17 +233,17 @@ public class NFTPromptHUDView : MonoBehaviour
 
     private void SetNFTImageSize(Texture2D texture)
     {
-        RectTransform rt = (RectTransform) imageNft.transform.parent;
+        RectTransform rt = (RectTransform)imageNft.transform.parent;
         float h, w;
         if (texture.height > texture.width)
         {
             h = rt.rect.height;
-            w = h * (texture.width / (float) texture.height);
+            w = h * (texture.width / (float)texture.height);
         }
         else
         {
             w = rt.rect.width;
-            h = w * (texture.height / (float) texture.width);
+            h = w * (texture.height / (float)texture.width);
         }
 
         imageNft.rectTransform.sizeDelta = new Vector2(w, h);
@@ -312,6 +322,12 @@ public class NFTPromptHUDView : MonoBehaviour
 
     private void OnDestroy()
     {
+        if (texturePromise != null)
+        {
+            AssetPromiseKeeper_Texture.i.Forget(texturePromise);
+            texturePromise = null;
+        }
+
         if (imageAsset != null)
         {
             imageAsset.Dispose();
