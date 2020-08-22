@@ -2217,7 +2217,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   extraClickSound: 0
-  playHoverSound: 0
+  playHoverSound: 1
 --- !u!1 &6158691491735050548
 GameObject:
   m_ObjectHideFlags: 0
