@@ -142,7 +142,11 @@ public class ChatEntry : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
                 switch (chatEntryModel.messageType)
                 {
                     case ChatMessage.Type.PUBLIC:
-                        HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.receiveGlobalChatEntry);
+                        // Check whether or not the message was sent by the local player
+                        if (chatEntryModel.senderId == UserProfile.GetOwnUserProfile().userId)
+                            HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.sendChatEntry);
+                        else
+                            HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.receiveGlobalChatEntry);
                         break;
                     case ChatMessage.Type.PRIVATE:
                         switch (chatEntryModel.subType)
