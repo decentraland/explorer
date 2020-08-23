@@ -14,6 +14,7 @@ public class AvatarEditorHUDAudioHandler : MonoBehaviour
     private void Start()
     {
         audioContainer = GetComponent<AudioContainer>();
+        audioContainer.GetEvent("AvatarAppear").SetPitch(0.35f);
 
         int nPairs = view.wearableGridPairs.Length;
         for (int i = 0; i < nPairs; i++)
