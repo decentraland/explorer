@@ -83,7 +83,7 @@ MonoBehaviour:
       volume: 1
       randomPitch: 0.15
       playOnAwake: 0
-      cooldownSeconds: 0.05
+      cooldownSeconds: 0.005
       clips:
         array:
         - {fileID: 8300000, guid: 69ce58bdf542d904d81eea1245e31686, type: 3}
@@ -93,7 +93,7 @@ MonoBehaviour:
       volume: 1
       randomPitch: 0.15
       playOnAwake: 0
-      cooldownSeconds: 0
+      cooldownSeconds: 0.005
       clips:
         array:
         - {fileID: 8300000, guid: c5c67e3189377ce42a40002734b704b6, type: 3}
@@ -133,7 +133,7 @@ MonoBehaviour:
       volume: 1
       randomPitch: 0.15
       playOnAwake: 0
-      cooldownSeconds: 0
+      cooldownSeconds: 0.01
       clips:
         array:
         - {fileID: 8300000, guid: 20a27736f2c55ee44bb4ca65bed56e4b, type: 3}
@@ -143,7 +143,7 @@ MonoBehaviour:
       volume: 1
       randomPitch: 0.15
       playOnAwake: 0
-      cooldownSeconds: 0
+      cooldownSeconds: 0.01
       clips:
         array:
         - {fileID: 8300000, guid: d8c217cb0f8783b45912e8dfde963bf0, type: 3}

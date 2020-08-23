@@ -121,7 +121,6 @@ public class HUDAudioPlayer : MonoBehaviour
                     eventDialogAppear.Play(true);
                 break;
             case Sound.dialogClose:
-                // Prevent dialog appear and close playing at the same time
                 if (!eventDialogAppear.source.isPlaying)
                     eventDialogClose.Play(true);
                 break;
