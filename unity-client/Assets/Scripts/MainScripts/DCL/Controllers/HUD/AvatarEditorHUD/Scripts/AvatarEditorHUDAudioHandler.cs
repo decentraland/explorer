@@ -52,8 +52,6 @@ public class AvatarEditorHUDAudioHandler : MonoBehaviour
 
         switch (wearable.category)
         {
-            case Categories.BODY_SHAPE:
-                break;
             case Categories.EYEBROWS:
                 Play("Hair");
                 break;
@@ -81,11 +79,21 @@ public class AvatarEditorHUDAudioHandler : MonoBehaviour
             case "earring":
                 Play("Jewelry");
                 break;
+            case "hat":
+                Play("Hat");
+                break;
+            case "top_head":
+                Play("Footwear");
+                break;
+            case "helmet":
+                Play("Footwear");
+                break;
+            case "mask":
+                Play("Hat");
+                break;
             default:
                 break;
         }
-
-        Debug.Log(wearable.type);
     }
 
     void OnSkinColorClicked(Color color)

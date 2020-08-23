@@ -245,7 +245,7 @@ public class AvatarEditorHUDView : MonoBehaviour
                         if (eventReaction != null)
                         {
                             if (!eventReaction.source.isPlaying)
-                                eventReaction.PlayScheduled(0.7f);
+                                eventReaction.PlayScheduled(0.6f);
                         }
                     }
                 }

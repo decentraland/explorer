@@ -4594,6 +4594,18 @@ MonoBehaviour:
         - {fileID: 8300000, guid: 2ebd6e4a7ea41f941858ea6ad138dc09, type: 3}
         - {fileID: 8300000, guid: 419d6916e6067a9448cf2c9c99dfc7aa, type: 3}
       source: {fileID: 0}
+    - name: Hat
+      loop: 0
+      volume: 1
+      randomPitch: 0.15
+      playOnAwake: 0
+      cooldownSeconds: 0
+      clips:
+        array:
+        - {fileID: 8300000, guid: b6f7da1d86b989042a5558407846ce18, type: 3}
+        - {fileID: 8300000, guid: cb08fe9555216c344adb8f0b8948df45, type: 3}
+        - {fileID: 8300000, guid: 505e34870a7d0fe4fad0cd84c9e54603, type: 3}
+      source: {fileID: 0}
 --- !u!1 &7607304237219422835
 GameObject:
   m_ObjectHideFlags: 0
