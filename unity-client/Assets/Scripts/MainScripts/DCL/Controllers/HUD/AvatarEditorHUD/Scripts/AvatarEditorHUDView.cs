@@ -231,7 +231,7 @@ public class AvatarEditorHUDView : MonoBehaviour
 
                 if (audioContainer != null && isOpen)
                 {
-                    audioContainer.GetEvent("ClothingAppear").Play();
+                    audioContainer.GetEvent("AvatarAppear").Play();
                 }
             });
     }
