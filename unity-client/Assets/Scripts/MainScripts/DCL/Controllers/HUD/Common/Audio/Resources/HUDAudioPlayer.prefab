@@ -226,5 +226,15 @@ MonoBehaviour:
       cooldownSeconds: 0.1
       clips:
         array:
-        - {fileID: 8300000, guid: 69ce58bdf542d904d81eea1245e31686, type: 3}
+        - {fileID: 8300000, guid: 5c19d7d76099d3248b1e70a573008365, type: 3}
+      source: {fileID: 0}
+    - name: Notification
+      loop: 0
+      volume: 1
+      randomPitch: 0
+      playOnAwake: 0
+      cooldownSeconds: 0.1
+      clips:
+        array:
+        - {fileID: 8300000, guid: fedc09a4557ddf04d8fe3636130e3e8a, type: 3}
       source: {fileID: 0}

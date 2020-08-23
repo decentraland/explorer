@@ -34,7 +34,7 @@ public class HUDAudioPlayer : MonoBehaviour
     public AudioContainer ac;
 
     AudioEvent eventHover, eventClick, eventRelease, eventEnable, eventDisable, eventListItemAppear, eventDialogAppear, eventDialogClose, eventConfirm, eventCancel,
-        eventValueChange, eventFadeIn, eventFadeOut, eventSendChatEntry, eventReceivePrivateChatEntry, eventReceiveGlobalChatEntry;
+        eventValueChange, eventFadeIn, eventFadeOut, eventSendChatEntry, eventReceivePrivateChatEntry, eventReceiveGlobalChatEntry, eventNotification;
 
     bool listItemAppearHasPlayed = false;
     float listItemAppearPitch = 1f;
@@ -68,6 +68,7 @@ public class HUDAudioPlayer : MonoBehaviour
         eventSendChatEntry = ac.GetEvent("SendChatEntry");
         eventReceivePrivateChatEntry = ac.GetEvent("ReceivePrivateChatEntry");
         eventReceiveGlobalChatEntry = ac.GetEvent("ReceiveGlobalChatEntry");
+        eventNotification = ac.GetEvent("Notification");
 
         // Get UTC datetime at start (used to determine old/new chat messages)
         timeAtStart = (ulong)(System.DateTime.UtcNow.Subtract(new System.DateTime(1970, 1, 1))).TotalMilliseconds;
@@ -146,8 +147,8 @@ public class HUDAudioPlayer : MonoBehaviour
                 eventFadeOut.Play(true);
                 break;
             case Sound.notification:
-                eventFadeIn.SetPitch(3f);
-                eventFadeIn.Play(true);
+                eventNotification.SetPitch(3f);
+                eventNotification.Play(true);
                 break;
             case Sound.sendChatEntry:
                 eventSendChatEntry.Play(true);
