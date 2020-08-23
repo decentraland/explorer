@@ -232,6 +232,24 @@ public class AvatarEditorHUDView : MonoBehaviour
                 if (audioContainer != null && isOpen)
                 {
                     audioContainer.GetEvent("AvatarAppear").Play();
+
+                    // Play a voice reaction sound from the avatar
+                    if (Random.Range(0f, 1f) > 0.4f)
+                    {
+                        AudioEvent eventReaction = null;
+                        if (avatarModel.bodyShape.Contains("Female"))
+                            eventReaction = audioContainer.GetEvent("ReactionFemale");
+                        else
+                            eventReaction = audioContainer.GetEvent("ReactionMale");
+
+                        if (eventReaction != null)
+                        {
+                            if (!eventReaction.source.isPlaying)
+                                eventReaction.PlayScheduled(0.7f);
+                        }
+
+                        Debug.Log(avatarModel.bodyShape);
+                    }
                 }
             });
     }

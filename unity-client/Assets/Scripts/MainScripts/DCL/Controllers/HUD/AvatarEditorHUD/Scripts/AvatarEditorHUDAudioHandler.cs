@@ -55,26 +55,37 @@ public class AvatarEditorHUDAudioHandler : MonoBehaviour
             case Categories.BODY_SHAPE:
                 break;
             case Categories.EYEBROWS:
-                break;
-            case Categories.EYES:
+                Play("Hair");
                 break;
             case Categories.FACIAL:
+                Play("Hair");
                 break;
             case Categories.FEET:
+                Play("Footwear");
                 break;
             case Categories.HAIR:
+                Play("Hair");
                 break;
             case Categories.LOWER_BODY:
                 Play("Clothing");
                 break;
-            case Categories.MOUTH:
-                break;
             case Categories.UPPER_BODY:
                 Play("Clothing");
+                break;
+            case "eyewear":
+                Play("Eyewear");
+                break;
+            case "tiara":
+                Play("Jewelry");
+                break;
+            case "earring":
+                Play("Jewelry");
                 break;
             default:
                 break;
         }
+
+        Debug.Log(wearable.type);
     }
 
     void OnSkinColorClicked(Color color)

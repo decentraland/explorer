@@ -77,8 +77,10 @@ public class AudioEvent
 
     public void PlayScheduled(float delaySeconds)
     {
-        // Check if AudioSource is active
-        if (!source.gameObject.activeSelf)
+        Debug.Log("Time is " + Mathf.Floor(Time.time) + " - Last played = " + Mathf.Floor(lastPlayed) + " - Cooldown = " + cooldownSeconds + " - Delay = " + delaySeconds);
+
+        // Check if AudioSource is active and check cooldown time (taking delay into account)
+        if (!source.gameObject.activeSelf || Time.time + delaySeconds < lastPlayed + cooldownSeconds)
         {
             return;
         }
@@ -93,6 +95,8 @@ public class AudioEvent
         source.PlayScheduled(AudioSettings.dspTime + delaySeconds);
 
         RandomizeIndex();
+
+        lastPlayed = Time.time;
     }
 
     public void Stop()

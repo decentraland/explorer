@@ -4508,7 +4508,31 @@ MonoBehaviour:
       cooldownSeconds: 0
       clips:
         array:
-        - {fileID: 8300000, guid: 5c19d7d76099d3248b1e70a573008365, type: 3}
+        - {fileID: 8300000, guid: e134d8c09228ed0448e0458ba8602c43, type: 3}
+      source: {fileID: 0}
+    - name: ReactionFemale
+      loop: 0
+      volume: 1
+      randomPitch: 0.1
+      playOnAwake: 0
+      cooldownSeconds: 6
+      clips:
+        array:
+        - {fileID: 8300000, guid: a475d15d253f13146a4f25741adc76fd, type: 3}
+        - {fileID: 8300000, guid: 975c9f4a9165bdf4583ee7f3ee04b6e8, type: 3}
+        - {fileID: 8300000, guid: 244b78608dea0a944b7cc4ef115f5b71, type: 3}
+      source: {fileID: 0}
+    - name: ReactionMale
+      loop: 0
+      volume: 1
+      randomPitch: 0.1
+      playOnAwake: 0
+      cooldownSeconds: 6
+      clips:
+        array:
+        - {fileID: 8300000, guid: decaebe8cde08dd4b91bbcf13d929540, type: 3}
+        - {fileID: 8300000, guid: 405355c89d0aa054da28cefcce25be98, type: 3}
+        - {fileID: 8300000, guid: 937a79fe677fb7f48b48a61b8966f38b, type: 3}
       source: {fileID: 0}
     - name: Clothing
       loop: 0
@@ -4521,6 +4545,54 @@ MonoBehaviour:
         - {fileID: 8300000, guid: 98a487130cc012e4ab5ff581d76ebdf6, type: 3}
         - {fileID: 8300000, guid: 39c70cbc99668624c96ec81f17efdae6, type: 3}
         - {fileID: 8300000, guid: 5cbc44aef70148a45a666858fe43cc1f, type: 3}
+      source: {fileID: 0}
+    - name: Eyewear
+      loop: 0
+      volume: 1
+      randomPitch: 0.15
+      playOnAwake: 0
+      cooldownSeconds: 0
+      clips:
+        array:
+        - {fileID: 8300000, guid: ce0246b50ee80b54a9029b7a0f9a8473, type: 3}
+        - {fileID: 8300000, guid: eb3bdf31ce9fd6c45b51fa75940c1e2a, type: 3}
+        - {fileID: 8300000, guid: 435cefdc3253eae459c9667d3af5bca0, type: 3}
+      source: {fileID: 0}
+    - name: Jewelry
+      loop: 0
+      volume: 1
+      randomPitch: 0.15
+      playOnAwake: 0
+      cooldownSeconds: 0
+      clips:
+        array:
+        - {fileID: 8300000, guid: 18d13a9756593cd438e221977e923d30, type: 3}
+        - {fileID: 8300000, guid: 567ff7867f0d4e044bbd4805daab357e, type: 3}
+        - {fileID: 8300000, guid: 7fdc14b8121bdfc45b4f576df840861f, type: 3}
+      source: {fileID: 0}
+    - name: Footwear
+      loop: 0
+      volume: 1
+      randomPitch: 0.15
+      playOnAwake: 0
+      cooldownSeconds: 0
+      clips:
+        array:
+        - {fileID: 8300000, guid: f7b6ac00cb685854dbfbe22e93feadfc, type: 3}
+        - {fileID: 8300000, guid: 9aa98f36ffc03924687fac18c83fe638, type: 3}
+        - {fileID: 8300000, guid: 4a60cf4f11df9c243be3501ad1863839, type: 3}
+      source: {fileID: 0}
+    - name: Hair
+      loop: 0
+      volume: 1
+      randomPitch: 0.15
+      playOnAwake: 0
+      cooldownSeconds: 0
+      clips:
+        array:
+        - {fileID: 8300000, guid: 309fe298bdbb2b9498914735541436f7, type: 3}
+        - {fileID: 8300000, guid: 2ebd6e4a7ea41f941858ea6ad138dc09, type: 3}
+        - {fileID: 8300000, guid: 419d6916e6067a9448cf2c9c99dfc7aa, type: 3}
       source: {fileID: 0}
 --- !u!1 &7607304237219422835
 GameObject:
