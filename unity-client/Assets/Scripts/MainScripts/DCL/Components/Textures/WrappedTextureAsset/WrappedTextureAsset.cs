@@ -32,7 +32,7 @@ namespace DCL
         {
             if (contentType != "image/gif")
             {
-                AssetPromise_Texture texturePromise = new AssetPromise_Texture(url);
+                AssetPromise_Texture texturePromise = new AssetPromise_Texture(url, storeTexAsNonReadable: false);
                 texturePromise.OnSuccessEvent += texture => { OnSuccess?.Invoke(texture, texturePromise); };
                 texturePromise.OnFailEvent += (x) => OnFail?.Invoke();
 
