@@ -38,7 +38,8 @@ public class HUDAudioPlayer : MonoBehaviour
 
     bool listItemAppearHasPlayed = false;
     float listItemAppearPitch = 1f;
-    
+
+    [HideInInspector]
     public ulong timeAtStart;
 
     private void Awake()
