@@ -136,7 +136,7 @@ public class ChatEntry : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
         if (HUDAudioPlayer.i != null)
         {
             // Check whether or not this message is new
-            if (chatEntryModel.timestamp > HUDAudioPlayer.i.timeAtStart)
+            if (chatEntryModel.timestamp > HUDAudioPlayer.i.chatLastCheckedTimestamp)
             {
                 switch (chatEntryModel.messageType)
                 {
@@ -167,6 +167,8 @@ public class ChatEntry : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
                         break;
                 }
             }
+
+            HUDAudioPlayer.i.RefreshChatLastCheckedTimestamp();
         }
     }
 

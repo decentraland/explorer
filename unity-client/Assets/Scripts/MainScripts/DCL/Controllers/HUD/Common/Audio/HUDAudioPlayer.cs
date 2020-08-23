@@ -40,7 +40,7 @@ public class HUDAudioPlayer : MonoBehaviour
     float listItemAppearPitch = 1f;
 
     [HideInInspector]
-    public ulong timeAtStart;
+    public ulong chatLastCheckedTimestamp;
 
     private void Awake()
     {
@@ -71,8 +71,7 @@ public class HUDAudioPlayer : MonoBehaviour
         eventReceiveGlobalChatEntry = ac.GetEvent("ReceiveGlobalChatEntry");
         eventNotification = ac.GetEvent("Notification");
 
-        // Get UTC datetime at start (used to determine old/new chat messages)
-        timeAtStart = (ulong)(System.DateTime.UtcNow.Subtract(new System.DateTime(1970, 1, 1))).TotalMilliseconds;
+        RefreshChatLastCheckedTimestamp();
     }
 
     private void Update()
@@ -180,5 +179,11 @@ public class HUDAudioPlayer : MonoBehaviour
     public void ResetListItemAppearPitch()
     {
         listItemAppearPitch = 1f;
+    }
+
+    public void RefreshChatLastCheckedTimestamp()
+    {
+        // Get UTC datetime (used to determine whether a message is old or new)
+        chatLastCheckedTimestamp = (ulong)(System.DateTime.UtcNow.Subtract(new System.DateTime(1970, 1, 1))).TotalMilliseconds;
     }
 }
