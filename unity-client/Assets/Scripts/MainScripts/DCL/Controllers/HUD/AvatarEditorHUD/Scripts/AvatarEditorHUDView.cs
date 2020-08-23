@@ -247,8 +247,6 @@ public class AvatarEditorHUDView : MonoBehaviour
                             if (!eventReaction.source.isPlaying)
                                 eventReaction.PlayScheduled(0.7f);
                         }
-
-                        Debug.Log(avatarModel.bodyShape);
                     }
                 }
             });

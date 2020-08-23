@@ -77,8 +77,6 @@ public class AudioEvent
 
     public void PlayScheduled(float delaySeconds)
     {
-        Debug.Log("Time is " + Mathf.Floor(Time.time) + " - Last played = " + Mathf.Floor(lastPlayed) + " - Cooldown = " + cooldownSeconds + " - Delay = " + delaySeconds);
-
         // Check if AudioSource is active and check cooldown time (taking delay into account)
         if (!source.gameObject.activeSelf || Time.time + delaySeconds < lastPlayed + cooldownSeconds)
         {
