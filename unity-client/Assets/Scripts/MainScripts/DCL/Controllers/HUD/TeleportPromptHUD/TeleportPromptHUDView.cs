@@ -114,9 +114,6 @@ public class TeleportPromptHUDView : MonoBehaviour
             UnityEngine.Object.Destroy(downloadedBanner);
             downloadedBanner = null;
         }
-
-        if (HUDAudioPlayer.i != null)
-            HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogClose);
     }
 
     private void FetchScenePreviewImage(string previewImageUrl)
@@ -144,6 +141,9 @@ public class TeleportPromptHUDView : MonoBehaviour
     {
         OnCloseEvent?.Invoke();
         contentAnimator.Hide(true);
+
+        if (HUDAudioPlayer.i != null)
+            HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.fadeOut);
     }
 
     private void OnTeleportPressed()
