@@ -53,5 +53,8 @@ public class ExternalUrlPromptView : MonoBehaviour
     private void Close()
     {
         content.SetActive(false);
+
+        if (HUDAudioPlayer.i != null)
+            HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogClose);
     }
 }

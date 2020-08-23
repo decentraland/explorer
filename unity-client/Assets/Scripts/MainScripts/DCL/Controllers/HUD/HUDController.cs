@@ -21,6 +21,17 @@ public class HUDController : MonoBehaviour
         toggleUIVisibilityTrigger.OnTriggered += ToggleUIVisibility_OnTriggered;
     }
 
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Z))
+        {
+            HUDConfiguration hudConfig = new HUDConfiguration();
+            hudConfig.active = true;
+            hudConfig.visible = true;
+            ConfigureHUDElement(HUDElementID.TELEPORT_DIALOG, hudConfig);
+        }
+    }
+
     public AvatarHUDController avatarHud => GetHUDElement(HUDElementID.AVATAR) as AvatarHUDController;
 
     public NotificationHUDController notificationHud =>

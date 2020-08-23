@@ -25,13 +25,8 @@ public class ExternalUrlPromptHUDController : IHUD
     {
         view.gameObject.SetActive(visible);
 
-        if (HUDAudioPlayer.i != null)
-        {
-            if (visible)
-                HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogAppear);
-            else
-                HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogClose);
-        }
+        if (HUDAudioPlayer.i != null && visible)
+            HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogAppear);
     }
 
     public void Dispose()
