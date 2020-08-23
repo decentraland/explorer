@@ -221,11 +221,13 @@ public class NFTPromptHUDView : MonoBehaviour
                 gifAsset.OnFrameTextureChanged += (texture) => { imageNft.texture = texture; };
                 gifAsset.Play();
             }
+            else
+            {
+                if (!backgroundColorSet)
+                    SetSmartBackgroundColor(nftImageAsset.texture);
+            }
 
             SetNFTImageSize(nftImageAsset.texture);
-
-            if (!backgroundColorSet)
-                SetSmartBackgroundColor(nftImageAsset.texture);
 
             imageNft.gameObject.SetActive(true);
             spinnerNftImage.SetActive(false);
