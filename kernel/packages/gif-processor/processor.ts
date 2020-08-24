@@ -1,9 +1,11 @@
+import { GIF_WORKERS } from 'config'
+
 declare const Worker: any
 declare const DCL: any
 
 const gifProcessorWorkerRaw = require('raw-loader!../../static/gif-processor/worker.js')
 const gifProcessorWorkerUrl = URL.createObjectURL(new Blob([gifProcessorWorkerRaw]))
-const worker = new Worker(gifProcessorWorkerUrl, { name: 'gifProcessorWorker' })
+const multipleGIFWorkers = GIF_WORKERS
 
 /**
  *
@@ -15,40 +17,13 @@ export class GIFProcessor {
   GLctx: any
   unityInterface: any
   isWebGL1: boolean = false
+  lastCreatedWorker: any
 
   constructor (gameInstance: any, unityInterface: any, isWebGL1: boolean) {
     this.gameInstance = gameInstance
     this.GLctx = this.gameInstance.Module.ctx
     this.unityInterface = unityInterface
     this.isWebGL1 = isWebGL1
-
-    worker.onmessage = (e: any) => {
-      if (e.data.arrayBufferFrames.length <= 0) return
-
-      const textures = new Array()
-      const texIDs = new Array()
-      const frames = e.data.arrayBufferFrames
-      const width = e.data.width
-      const height = e.data.height
-      const frameDelays = e.data.delays
-      const sceneId = e.data.sceneId
-      const componentId = e.data.componentId
-
-      // Generate all the GIF textures
-      for (let index = 0; index < frames.length; index++) {
-        const ptr: GLuint = this.gameInstance.Module._malloc(4)
-        const tex = this.GenerateTexture(ptr)
-
-        textures.push(tex)
-        texIDs.push(tex.name)
-
-        // print current image data onto current tex
-        const frameImageData = new ImageData(new Uint8ClampedArray(frames[index]), width, height)
-        this.UpdateGIFTex(frameImageData, tex.name)
-      }
-
-      this.unityInterface.SendGIFPointers(sceneId, componentId, width, height, texIDs, frameDelays)
-    }
   }
 
   /**
@@ -57,6 +32,8 @@ export class GIFProcessor {
    *
    */
   ProcessGIF(data: { imageSource: string, sceneId: string, componentId: string }) {
+    const worker = this.GetWorker()
+
     worker.postMessage({ src: data.imageSource, sceneId: data.sceneId, componentId: data.componentId })
   }
 
@@ -113,5 +90,47 @@ export class GIFProcessor {
         image
       )
     }
+  }
+
+  GetWorker() {
+    if (!this.lastCreatedWorker || multipleGIFWorkers) {
+      const worker = new Worker(gifProcessorWorkerUrl, { name: 'gifProcessorWorker' })
+
+      worker.onmessage = (e: any) => {
+        if (e.data.arrayBufferFrames.length <= 0) return
+
+        const textures = new Array()
+        const texIDs = new Array()
+        const frames = e.data.arrayBufferFrames
+        const width = e.data.width
+        const height = e.data.height
+        const frameDelays = e.data.delays
+        const sceneId = e.data.sceneId
+        const componentId = e.data.componentId
+
+        // Generate all the GIF textures
+        for (let index = 0; index < frames.length; index++) {
+          const ptr: GLuint = this.gameInstance.Module._malloc(4)
+          const tex = this.GenerateTexture(ptr)
+
+          textures.push(tex)
+          texIDs.push(tex.name)
+
+          // print current image data onto current tex
+          const frameImageData = new ImageData(new Uint8ClampedArray(frames[index]), width, height)
+          this.UpdateGIFTex(frameImageData, tex.name)
+        }
+
+        this.unityInterface.SendGIFPointers(sceneId, componentId, width, height, texIDs, frameDelays)
+
+        if (multipleGIFWorkers) {
+          worker.terminate()
+        }
+      }
+
+      this.lastCreatedWorker = worker
+    }
+
+    return this.lastCreatedWorker
   }
 }
