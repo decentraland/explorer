@@ -50,6 +50,7 @@ MonoBehaviour:
   - {fileID: 8144167254237475318, guid: d72391829edeae941b6ad77be0572567, type: 3}
   - {fileID: 3944418929927857064, guid: 4fd55914fb0d6c14ea2c87e9cd4897c1, type: 3}
   - {fileID: 8026892887502127638, guid: 2a0712804106e8a4995cd9e5acd62a7b, type: 3}
+  - {fileID: 6923122764151660070, guid: 8540e6f42393fff4aa4177acedbad899, type: 3}
   timeBetweenSteps: 0.5
   debugRunTutorial: 0
   debugStartingStepIndex: 0
