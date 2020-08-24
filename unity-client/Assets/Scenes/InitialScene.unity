@@ -1305,10 +1305,10 @@ MonoBehaviour:
   customContentServerUrl: http://localhost:1338/
   baseUrlMode: 0
   baseUrlCustom: 
-  environment: 0
+  environment: 2
   startInCoords: {x: 0, y: 0}
   forceLocalComms: 0
-  allWearables: 0
+  allWearables: 1
   testWearables: 0
   enableTutorial: 0
   useNewChat: 0

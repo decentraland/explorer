@@ -32,8 +32,6 @@ public class AvatarEditorHUDAudioHandler : MonoBehaviour
         var wearable = CatalogController.wearableCatalog.Get(wearableId);
         if (wearable == null) return;
 
-        Debug.Log(wearable.rarity + " - " + wearable.type + " - " + wearable.category);
-
         switch(wearable.rarity)
         {
             case Rarity.RARE:

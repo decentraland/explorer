@@ -4515,24 +4515,32 @@ MonoBehaviour:
       volume: 1
       randomPitch: 0.1
       playOnAwake: 0
-      cooldownSeconds: 6
+      cooldownSeconds: 4
       clips:
         array:
         - {fileID: 8300000, guid: a475d15d253f13146a4f25741adc76fd, type: 3}
         - {fileID: 8300000, guid: 975c9f4a9165bdf4583ee7f3ee04b6e8, type: 3}
         - {fileID: 8300000, guid: 244b78608dea0a944b7cc4ef115f5b71, type: 3}
+        - {fileID: 8300000, guid: e68c19388cb8ee64f9a62da8c3176971, type: 3}
+        - {fileID: 8300000, guid: 1e503ba94631b51419e18bf636e20b4d, type: 3}
+        - {fileID: 8300000, guid: 48546c863cf8c1749b97af6674926040, type: 3}
+        - {fileID: 8300000, guid: 9f188141077897845839a907c6839c1f, type: 3}
       source: {fileID: 0}
     - name: ReactionMale
       loop: 0
       volume: 1
       randomPitch: 0.1
       playOnAwake: 0
-      cooldownSeconds: 6
+      cooldownSeconds: 4
       clips:
         array:
         - {fileID: 8300000, guid: decaebe8cde08dd4b91bbcf13d929540, type: 3}
         - {fileID: 8300000, guid: 405355c89d0aa054da28cefcce25be98, type: 3}
         - {fileID: 8300000, guid: 937a79fe677fb7f48b48a61b8966f38b, type: 3}
+        - {fileID: 8300000, guid: 934a9384db29611449db8dbb49d97b58, type: 3}
+        - {fileID: 8300000, guid: d4779aa5d864ce64ab0dfaa27cb733a2, type: 3}
+        - {fileID: 8300000, guid: eacca16022554374ba8df635e6480db3, type: 3}
+        - {fileID: 8300000, guid: df9bde89ca28f8b4f9deb726a68933ec, type: 3}
       source: {fileID: 0}
     - name: Clothing
       loop: 0
