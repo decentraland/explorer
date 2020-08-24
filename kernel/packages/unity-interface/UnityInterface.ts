@@ -307,6 +307,14 @@ export class UnityInterface {
     )
   }
 
+  public ConfigureEmailPrompt(tutorialStep: number) {
+    const emailCompletedFlag = 128
+    this.ConfigureHUDElement(HUDElementID.EMAIL_PROMPT, {
+      active: (tutorialStep & emailCompletedFlag) === 0,
+      visible: false
+    })
+  }
+
   // *********************************************************************************
   // ************** Builder messages **************
   // *********************************************************************************
