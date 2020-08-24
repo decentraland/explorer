@@ -8,15 +8,15 @@ namespace DCL.Tutorial
     /// </summary>
     public class TutorialStep_AvatarMovement : TutorialStep_WithProgressBar
     {
-        [SerializeField] InputAction_Measurable playerXAxis;
-        [SerializeField] InputAction_Measurable playerYAxis;
+        [SerializeField] InputAction_Measurable playerXAxisInpuAction;
+        [SerializeField] InputAction_Measurable playerYAxisInputAction;
         [SerializeField] float minRunningTime = 2f;
 
         private float timeRunning = 0f;
 
         private void Update()
         {
-            if (playerXAxis.GetValue() != 0f || playerYAxis.GetValue() != 0f)
+            if (playerXAxisInpuAction.GetValue() != 0f || playerYAxisInputAction.GetValue() != 0f)
                 timeRunning += Time.deltaTime;
         }
 

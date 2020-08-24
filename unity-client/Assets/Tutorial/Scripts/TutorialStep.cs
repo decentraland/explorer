@@ -18,6 +18,8 @@ namespace DCL.Tutorial
     {
         protected const string STEP_FINISHED_ANIMATOR_TRIGGER = "StepFinished";
 
+        [SerializeField] bool unlockCursorAtStart = false;
+
         protected Animator stepAnimator;
         protected MouseCatcher mouseCatcher;
 
@@ -30,10 +32,8 @@ namespace DCL.Tutorial
 
             mouseCatcher = InitialSceneReferences.i?.mouseCatcher;
 
-            if (mouseCatcher == null)
-                return;
-
-            mouseCatcher.UnlockCursor();
+            if (unlockCursorAtStart)
+                mouseCatcher?.UnlockCursor();
         }
 
         /// <summary>
