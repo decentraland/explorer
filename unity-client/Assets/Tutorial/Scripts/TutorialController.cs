@@ -41,10 +41,13 @@ namespace DCL.Tutorial
         private int currentStepIndex;
         private TutorialStep runningStep = null;
         private Coroutine executeStepsCoroutine;
+        private float originalTimeBetweenSteps;
 
         private void Awake()
         {
             i = this;
+
+            originalTimeBetweenSteps = timeBetweenSteps;
         }
 
         private void Start()
@@ -105,6 +108,11 @@ namespace DCL.Tutorial
         public void SetUserTutorialStepAsCompleted(TutorialFinishStep finishStepType)
         {
             WebInterface.SaveUserTutorialStep(GetTutorialStepFromProfile() | (int)finishStepType);
+        }
+
+        public void SetTimeBetweenSteps(float newTime)
+        {
+            timeBetweenSteps = newTime;
         }
 
         private int GetTutorialStepFromProfile()

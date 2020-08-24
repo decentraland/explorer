@@ -1,0 +1,51 @@
+using System.Collections;
+using UnityEngine;
+
+namespace DCL.Tutorial
+{
+    /// <summary>
+    /// Base class that will be used by all those tutorial steps that need the progress bar actived during their life-cycle.
+    /// </summary>
+    public class TutorialStep_WithProgressBar : TutorialStep
+    {
+        [SerializeField] Tutorial_ProgressBar progressBar;
+        [SerializeField] int initPercentage;
+        [SerializeField] int finishPercentage;
+
+        protected bool progressBarIsFinished = false;
+
+        public override void OnStepStart()
+        {
+            base.OnStepStart();
+
+            progressBar.OnNewProgressBarSizeSet += ProgressBar_OnNewProgressBarSizeSet;
+
+            progressBar.SetPercentage(initPercentage, false);
+        }
+
+        public override IEnumerator OnStepExecute()
+        {
+            yield return WaitForProgressBarFinish();
+        }
+
+        public override void OnStepFinished()
+        {
+            base.OnStepFinished();
+
+            progressBar.OnNewProgressBarSizeSet -= ProgressBar_OnNewProgressBarSizeSet;
+        }
+
+        private IEnumerator WaitForProgressBarFinish()
+        {
+            progressBar.SetPercentage(finishPercentage);
+            progressBarIsFinished = false;
+
+            yield return new WaitUntil(() => progressBarIsFinished);
+        }
+
+        private void ProgressBar_OnNewProgressBarSizeSet()
+        {
+            progressBarIsFinished = true;
+        }
+    }
+}
