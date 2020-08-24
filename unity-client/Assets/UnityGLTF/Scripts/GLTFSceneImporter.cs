@@ -149,6 +149,8 @@ namespace UnityGLTF
         protected ILoader _loader;
         protected bool _isRunning = false;
 
+        public string id;
+
         struct NodeId_Like
         {
             public int Id;
@@ -175,10 +177,12 @@ namespace UnityGLTF
         public GLTFSceneImporter(string gltfFileName, ILoader externalDataLoader, AsyncCoroutineHelper asyncCoroutineHelper) : this(externalDataLoader, asyncCoroutineHelper)
         {
             _gltfFileName = gltfFileName;
+            id = gltfFileName;
         }
 
-        public GLTFSceneImporter(GLTFRoot rootNode, ILoader externalDataLoader, AsyncCoroutineHelper asyncCoroutineHelper, Stream gltfStream = null) : this(externalDataLoader, asyncCoroutineHelper)
+        public GLTFSceneImporter(string id, GLTFRoot rootNode, ILoader externalDataLoader, AsyncCoroutineHelper asyncCoroutineHelper, Stream gltfStream = null) : this(externalDataLoader, asyncCoroutineHelper)
         {
+            this.id = id;
             _gltfRoot = rootNode;
             _loader = externalDataLoader;
             if (gltfStream != null)
@@ -220,8 +224,6 @@ namespace UnityGLTF
         {
             get { return _lastLoadedScene; }
         }
-
-        public Transform enparentTarget;
 
         public static System.Action<float> OnPerformanceFinish;
 
@@ -497,7 +499,7 @@ namespace UnityGLTF
                 }
             }
 
-            if ((image.Uri == null || !PersistentAssetCache.ImageCacheByUri.ContainsKey(image.Uri)) && _assetCache.ImageStreamCache[sourceId] == null)
+            if ((image.Uri == null || !ImageIsInGlobalCache(image.Uri)) && _assetCache.ImageStreamCache[sourceId] == null)
             {
                 // we only load the streams if not a base64 uri, meaning the data is in the uri
                 if (image.Uri != null && !URIHelper.IsBase64Uri(image.Uri))
@@ -665,14 +667,15 @@ namespace UnityGLTF
                 }
                 else
                 {
-                    if (PersistentAssetCache.StreamCacheByUri.ContainsKey(buffer.Uri))
+                    if (BufferIsInGlobalCache(buffer.Uri))
                     {
-                        bufferDataStream = PersistentAssetCache.StreamCacheByUri[buffer.Uri].stream;
+                        bufferDataStream = GetCachedBuffer(buffer.Uri).stream;
                     }
                     else
                     {
                         yield return _loader.LoadStream(buffer.Uri);
                         bufferDataStream = _loader.LoadedStream;
+                        AddCachedBuffer(buffer.Uri, new RefCountedStreamData(buffer.Uri, bufferDataStream));
                     }
                 }
 
@@ -715,8 +718,8 @@ namespace UnityGLTF
                 {
                     string uri = image.Uri;
 
-                    byte[] bufferData;
-                    URIHelper.TryParseBase64(uri, out bufferData);
+                    URIHelper.TryParseBase64(uri, out byte[] bufferData);
+
                     if (bufferData != null)
                     {
                         stream = new MemoryStream(bufferData, 0, bufferData.Length, false, true);
@@ -1494,10 +1497,15 @@ namespace UnityGLTF
                 bindPoses[i] = gltfBindPoses[i].ToMatrix4x4Convert();
             }
 
-            renderer.rootBone = _assetCache.NodeCache[skeletonId].transform;
             curMesh.bindposes = bindPoses;
             renderer.bones = bones;
+            renderer.rootBone = _assetCache.NodeCache[skeletonId].transform;
+
+            if (!skeletonGameObjects.Contains(renderer.rootBone.gameObject))
+                skeletonGameObjects.Add(renderer.rootBone.gameObject);
         }
+
+        HashSet<GameObject> skeletonGameObjects = new HashSet<GameObject>();
 
         private BoneWeight[] CreateBoneWeightArray(Vector4[] joints, Vector4[] weights, int vertCount)
         {
@@ -2362,9 +2370,9 @@ namespace UnityGLTF
 
                 RefCountedTextureData source = null;
 
-                if (image.Uri != null && PersistentAssetCache.ImageCacheByUri.ContainsKey(image.Uri))
+                if (image.Uri != null && ImageIsInGlobalCache(image.Uri))
                 {
-                    source = PersistentAssetCache.ImageCacheByUri[image.Uri];
+                    source = GetGlobalCachedImage(image.Uri);
                     _assetCache.ImageCache[sourceId] = source.Texture;
                 }
                 else
@@ -2374,7 +2382,7 @@ namespace UnityGLTF
 
                     if (image.Uri != null && addImagesToPersistentCaching)
                     {
-                        PersistentAssetCache.ImageCacheByUri[image.Uri] = source;
+                        AddGlobalCachedImage(image.Uri, source);
                     }
                 }
 
@@ -2511,6 +2519,73 @@ namespace UnityGLTF
             var lastIndex = gltfPath.IndexOf(fileName);
             var partialPath = gltfPath.Substring(0, lastIndex);
             return partialPath;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="uri"></param>
+        /// <returns></returns>
+        public bool ImageIsInGlobalCache(string uri)
+        {
+            uri = $"{uri}@{id}";
+            bool result = PersistentAssetCache.ImageCacheByUri.ContainsKey(uri);
+            return result;
+        }
+
+        public string GetCacheId(string uri)
+        {
+            return $"{uri}@{id}";
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="uri"></param>
+        /// <returns></returns>
+        public RefCountedTextureData GetGlobalCachedImage(string uri)
+        {
+            return PersistentAssetCache.ImageCacheByUri[GetCacheId(uri)];
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="uri"></param>
+        /// <param name="refCountedTexture"></param>
+        public void AddGlobalCachedImage(string uri, RefCountedTextureData refCountedTexture)
+        {
+            PersistentAssetCache.ImageCacheByUri[GetCacheId(uri)] = refCountedTexture;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="uri"></param>
+        /// <returns></returns>
+        public bool BufferIsInGlobalCache(string uri)
+        {
+            return PersistentAssetCache.StreamCacheByUri.ContainsKey(GetCacheId(uri));
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="uri"></param>
+        /// <returns></returns>
+        public RefCountedStreamData GetCachedBuffer(string uri)
+        {
+            return PersistentAssetCache.StreamCacheByUri[GetCacheId(uri)];
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="uri"></param>
+        /// <param name="refCountedStream"></param>
+        public void AddCachedBuffer(string uri, RefCountedStreamData refCountedStream)
+        {
+            PersistentAssetCache.StreamCacheByUri[GetCacheId(uri)] = refCountedStream;
         }
     }
 }
