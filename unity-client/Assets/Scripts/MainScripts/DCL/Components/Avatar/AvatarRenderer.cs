@@ -178,6 +178,41 @@ namespace DCL
             RemoveUnusedControllers();
             SetDefaultFaceForUnusedCategories(unusedCategories);
 
+            yield return LoadAllWearables(changedBody);
+            yield return LoadAllFacialFeatures();
+
+            UpdateAllWearablesVisibility(unusedCategories);
+
+            isLoading = false;
+
+            SetWearableBones();
+            UpdateExpressions(model.expressionTriggerId, model.expressionTriggerTimestamp);
+
+            OnSuccessEvent?.Invoke();
+        }
+
+        private void UpdateAllWearablesVisibility(HashSet<string> unusedCategories)
+        {
+            bodyShapeController.HideUnusedParts(unusedCategories);
+            bodyShapeController.UpdateVisibility();
+
+            foreach (var kvp in wearableControllers)
+            {
+                kvp.Value.UpdateVisibility();
+            }
+        }
+
+        private IEnumerator LoadAllFacialFeatures()
+        {
+            eyesController.Load(bodyShapeController, model.eyeColor);
+            eyebrowsController.Load(bodyShapeController, model.hairColor);
+            mouthController.Load(bodyShapeController, model.skinColor);
+
+            yield return new WaitUntil(IsFaceReady);
+        }
+
+        private IEnumerator LoadAllWearables(bool changedBody)
+        {
             hiddenCategoryList = CreateHiddenCategoryList();
 
             Dictionary<WearableController, int> retryCount = new Dictionary<WearableController, int>();
@@ -217,27 +252,6 @@ namespace DCL
             }
 
             yield return new WaitUntil(AreWearablesReady);
-
-            eyesController.Load(bodyShapeController, model.eyeColor);
-            eyebrowsController.Load(bodyShapeController, model.hairColor);
-            mouthController.Load(bodyShapeController, model.skinColor);
-
-            yield return new WaitUntil(IsFaceReady);
-
-            bodyShapeController.HideUnusedParts(unusedCategories);
-            bodyShapeController.UpdateVisibility();
-
-            foreach (var kvp in wearableControllers)
-            {
-                kvp.Value.UpdateVisibility();
-            }
-
-            isLoading = false;
-
-            SetWearableBones();
-            UpdateExpressions(model.expressionTriggerId, model.expressionTriggerTimestamp);
-
-            OnSuccessEvent?.Invoke();
         }
 
         private bool InitializeBodyController()
@@ -342,6 +356,7 @@ namespace DCL
                 while (iterator.MoveNext())
                 {
                     var wearable = iterator.Current.Value;
+
                     if (!wearable.isReady)
                         return false;
                 }
