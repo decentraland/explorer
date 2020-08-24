@@ -2,6 +2,7 @@
 using TMPro;
 using System;
 using System.Collections.Generic;
+using DCL.Helpers;
 
 internal class BaseSceneCellView : BaseCellView, IMapDataView, IExploreViewWithFriends
 {
@@ -82,7 +83,7 @@ internal class BaseSceneCellView : BaseCellView, IMapDataView, IExploreViewWithF
             string url = mapInfo.previewImageUrl;
             if (string.IsNullOrEmpty(url))
             {
-                url = GetMarketPlaceThumbnailUrl(mapInfo, 196, 143, 50);
+                url = MapUtils.GetMarketPlaceThumbnailUrl(mapInfo, 196, 143, 50);
             }
             FetchThumbnail(url);
         }
@@ -92,34 +93,6 @@ internal class BaseSceneCellView : BaseCellView, IMapDataView, IExploreViewWithF
     {
         if (mapInfo == null) return false;
         return mapInfo.parcels.Contains(coords);
-    }
-
-    static string GetMarketPlaceThumbnailUrl(MinimapMetadata.MinimapSceneInfo info, int width, int height, int sizeFactor)
-    {
-        string parcels = "";
-        Vector2Int min = new Vector2Int(int.MaxValue, int.MaxValue);
-        Vector2Int max = new Vector2Int(int.MinValue, int.MinValue);
-        Vector2Int coord;
-
-        for (int i = 0; i < info.parcels.Count; i++)
-        {
-            coord = info.parcels[i];
-            parcels += string.Format("{0},{1}", coord.x, coord.y);
-            if (i < info.parcels.Count - 1) parcels += ";";
-
-            if (coord.x < min.x) min.x = coord.x;
-            if (coord.y < min.y) min.y = coord.y;
-            if (coord.x > max.x) max.x = coord.x;
-            if (coord.y > max.y) max.y = coord.y;
-        }
-
-        int centerX = (int)(min.x + (max.x - min.x) * 0.5f);
-        int centerY = (int)(min.y + (max.y - min.y) * 0.5f);
-        int sceneMaxSize = Mathf.Clamp(Mathf.Max(max.x - min.x, max.y - min.y), 1, int.MaxValue);
-        int size = sizeFactor / sceneMaxSize;
-
-        return string.Format("https://api.decentraland.org/v1/map.png?width={0}&height={1}&size={2}&center={3}&selected={4}",
-            width, height, size, $"{centerX},{centerY}", parcels);
     }
 
     void IExploreViewWithFriends.OnFriendAdded(UserProfile profile, Color backgroundColor)
