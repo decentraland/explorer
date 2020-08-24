@@ -175,7 +175,7 @@ public class NFTShapeLoaderController : MonoBehaviour
 
                 foundDCLImage = true;
                 this.texturePromise = texturePromise;
-                SetFrameImage(downloadedTex, resizeFrameMesh: false); // TODO: check if resizing is working fine again
+                SetFrameImage(downloadedTex, resizeFrameMesh: true);
             }, Asset_Gif.MaxSize.DONT_RESIZE);
         }
 
@@ -189,7 +189,7 @@ public class NFTShapeLoaderController : MonoBehaviour
 
                 foundDCLImage = true;
                 this.texturePromise = texturePromise;
-                SetFrameImage(downloadedTex, resizeFrameMesh: false); // TODO: check if resizing is working fine again
+                SetFrameImage(downloadedTex, resizeFrameMesh: true);
             }, Asset_Gif.MaxSize._256);
         }
 

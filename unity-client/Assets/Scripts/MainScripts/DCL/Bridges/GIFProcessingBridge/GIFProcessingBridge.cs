@@ -47,7 +47,6 @@ namespace DCL
         /// <param name="onFinishCallback">The callback that will be invoked with the generated textures list</param>
         public IEnumerator RequestGIFProcessor(string url, System.Action<List<UniGif.GifTexture>> onFinishCallback)
         {
-            Debug.Log("pravs - GIFProcessingBridge.RequestGIFProcessor() - 1");
             var gifDataContainer = new GIFDataContainer();
             string pendingGifId = url;
 
