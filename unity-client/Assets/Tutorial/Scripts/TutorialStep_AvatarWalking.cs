@@ -14,7 +14,6 @@ namespace DCL.Tutorial
         [SerializeField] float minWalkingTime = 2f;
 
         private float timeWalking = 0f;
-        private bool walkingActivated = false;
 
         private void Update()
         {
