@@ -18,41 +18,13 @@ namespace DCL.Tutorial
 
         private void Update()
         {
-            if ((playerXAxisInpuAction.GetValue() != 0f || playerYAxisInputAction.GetValue() != 0f) && walkingActivated)
+            if ((playerXAxisInpuAction.GetValue() != 0f || playerYAxisInputAction.GetValue() != 0f) && walkingInputAction.isOn)
                 timeWalking += Time.deltaTime;
-        }
-
-        public override void OnStepStart()
-        {
-            base.OnStepStart();
-
-            walkingInputAction.OnStarted += WalkingInputAction_OnStarted;
-            walkingInputAction.OnFinished += WalkingInputAction_OnFinished;
         }
 
         public override IEnumerator OnStepExecute()
         {
             yield return new WaitUntil(() => timeWalking >= minWalkingTime);
-
-            yield return base.OnStepExecute();
-        }
-
-        public override void OnStepFinished()
-        {
-            base.OnStepFinished();
-
-            walkingInputAction.OnStarted -= WalkingInputAction_OnStarted;
-            walkingInputAction.OnFinished -= WalkingInputAction_OnFinished;
-        }
-
-        private void WalkingInputAction_OnStarted(DCLAction_Hold action)
-        {
-            walkingActivated = true;
-        }
-
-        private void WalkingInputAction_OnFinished(DCLAction_Hold action)
-        {
-            walkingActivated = false;
         }
     }
 }

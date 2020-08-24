@@ -18,7 +18,7 @@ namespace DCL.Tutorial
     {
         protected const string STEP_FINISHED_ANIMATOR_TRIGGER = "StepFinished";
 
-        [SerializeField] bool unlockCursorAtStart = false;
+        [SerializeField] bool unlockCursorAtStart = true;
 
         protected Animator stepAnimator;
         protected MouseCatcher mouseCatcher;

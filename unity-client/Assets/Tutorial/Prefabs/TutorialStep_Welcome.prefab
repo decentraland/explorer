@@ -101,6 +101,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f68fa4c43f3aa3f40b50c8d5f12151f7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  unlockCursorAtStart: 0
   confirmInputAction: {fileID: 11400000, guid: 32762977b0149684282db4ff59068cbf, type: 2}
   cancelInputAction: {fileID: 11400000, guid: 38725fc935762a246976158d704f3b64, type: 2}
   mainSectionTransform: {fileID: 2999448931878445140}

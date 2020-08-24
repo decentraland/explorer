@@ -30,8 +30,6 @@ namespace DCL.Tutorial
         public override IEnumerator OnStepExecute()
         {
             yield return new WaitUntil(() => timeRunning >= minRunningTime);
-
-            yield return base.OnStepExecute();
         }
     }
 }

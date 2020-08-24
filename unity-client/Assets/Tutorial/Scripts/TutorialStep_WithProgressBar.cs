@@ -23,8 +23,12 @@ namespace DCL.Tutorial
             progressBar.SetPercentage(initPercentage, false);
         }
 
-        public override IEnumerator OnStepExecute()
+        public override IEnumerator OnStepPlayAnimationForHidding()
         {
+            progressBarIsFinished = false;
+            progressBar.SetPercentage(finishPercentage);
+
+            yield return base.OnStepPlayAnimationForHidding();
             yield return WaitForProgressBarFinish();
         }
 
@@ -37,9 +41,6 @@ namespace DCL.Tutorial
 
         private IEnumerator WaitForProgressBarFinish()
         {
-            progressBar.SetPercentage(finishPercentage);
-            progressBarIsFinished = false;
-
             yield return new WaitUntil(() => progressBarIsFinished);
         }
 
