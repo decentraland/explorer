@@ -1619,7 +1619,7 @@ MonoBehaviour:
   randomizeButton: {fileID: 1450360507441575512}
   doneButton: {fileID: 8118935322395685570}
   exitButton: {fileID: 178893782665926146}
-  audioContainer: {fileID: 3754502151453021522}
+  audioHandler: {fileID: 5663583825386291936}
   web3Container: {fileID: 233924306434789069}
   web3GoToMarketplaceButton: {fileID: 6975390227394394232}
   noWeb3Container: {fileID: 8183306655260157890}
@@ -4613,6 +4613,16 @@ MonoBehaviour:
         - {fileID: 8300000, guid: b6f7da1d86b989042a5558407846ce18, type: 3}
         - {fileID: 8300000, guid: cb08fe9555216c344adb8f0b8948df45, type: 3}
         - {fileID: 8300000, guid: 505e34870a7d0fe4fad0cd84c9e54603, type: 3}
+      source: {fileID: 0}
+    - name: Rarity
+      loop: 0
+      volume: 1
+      randomPitch: 0
+      playOnAwake: 0
+      cooldownSeconds: 0
+      clips:
+        array:
+        - {fileID: 8300000, guid: 62a7b3a182d610f4a8b1f80466a6137f, type: 3}
       source: {fileID: 0}
 --- !u!1 &7607304237219422835
 GameObject:

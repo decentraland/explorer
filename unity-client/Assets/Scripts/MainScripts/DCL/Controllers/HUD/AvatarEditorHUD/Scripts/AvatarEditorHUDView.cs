@@ -49,7 +49,7 @@ public class AvatarEditorHUDView : MonoBehaviour
     [SerializeField] internal Button randomizeButton;
     [SerializeField] internal Button doneButton;
     [SerializeField] internal Button exitButton;
-    [SerializeField] internal AudioContainer audioContainer;
+    [SerializeField] internal AvatarEditorHUDAudioHandler audioHandler;
 
     [Header("Collectibles")] [SerializeField]
     internal GameObject web3Container;
@@ -229,9 +229,14 @@ public class AvatarEditorHUDView : MonoBehaviour
                 if (doneButton != null)
                     doneButton.interactable = true;
 
+                AudioContainer audioContainer = null;
+                if (audioHandler != null)
+                    audioContainer = audioHandler.GetComponent<AudioContainer>();
+
                 if (audioContainer != null && isOpen)
                 {
                     audioContainer.GetEvent("AvatarAppear").Play();
+                    audioHandler.PlayRarity();
 
                     // Play a voice reaction sound from the avatar
                     if (Random.Range(0f, 1f) > 0.4f)
@@ -249,6 +254,8 @@ public class AvatarEditorHUDView : MonoBehaviour
                         }
                     }
                 }
+
+                
             });
     }
 

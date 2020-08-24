@@ -10,11 +10,16 @@ public class AvatarEditorHUDAudioHandler : MonoBehaviour
     AvatarEditorHUDView view;
 
     AudioContainer audioContainer;
+    AudioEvent eventRarity;
+
+    WearableItem lastClickedWearable = null;
 
     private void Start()
     {
         audioContainer = GetComponent<AudioContainer>();
         audioContainer.GetEvent("AvatarAppear").SetPitch(0.4f);
+
+        eventRarity = audioContainer.GetEvent("Rarity");
 
         int nPairs = view.wearableGridPairs.Length;
         for (int i = 0; i < nPairs; i++)
@@ -30,23 +35,8 @@ public class AvatarEditorHUDAudioHandler : MonoBehaviour
     void OnWearableClicked(string wearableId)
     {
         var wearable = CatalogController.wearableCatalog.Get(wearableId);
+        lastClickedWearable = wearable;
         if (wearable == null) return;
-
-        switch(wearable.rarity)
-        {
-            case Rarity.RARE:
-                break;
-            case Rarity.EPIC:
-                break;
-            case Rarity.LEGENDARY:
-                break;
-            case Rarity.MYTHIC:
-                break;
-            case Rarity.UNIQUE:
-                break;
-            default:
-                break;
-        }
 
         switch (wearable.category)
         {
@@ -112,5 +102,38 @@ public class AvatarEditorHUDAudioHandler : MonoBehaviour
     void Play(string eventName)
     {
         audioContainer.GetEvent(eventName).Play(true);
+    }
+
+    public void PlayRarity()
+    {
+        if (lastClickedWearable == null)
+            return;
+
+        if (lastClickedWearable.rarity == null)
+            return;
+
+        switch (lastClickedWearable.rarity)
+        {
+            case Rarity.RARE:
+                eventRarity.SetIndex(0);
+                break;
+            case Rarity.EPIC:
+                eventRarity.SetIndex(0);
+                break;
+            case Rarity.LEGENDARY:
+                eventRarity.SetIndex(0);
+                break;
+            case Rarity.MYTHIC:
+                eventRarity.SetIndex(0);
+                break;
+            case Rarity.UNIQUE:
+                eventRarity.SetIndex(0);
+                break;
+            default:
+                eventRarity.SetIndex(0);
+                break;
+        }
+
+        eventRarity.Play(true);
     }
 }
