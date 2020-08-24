@@ -342,10 +342,8 @@ export class BrowserInterface {
     unityInterface.SetTargetHeight(data.baseResolution)
   }
 
-  async RequestGIFProcessor(data: { imageSource: string; sceneId: string; componentId: string; isWebGL1: boolean }) {
-    defaultLogger.log("pravs - MAIN - RequestGIFPlayer received ", data)
+  async RequestGIFProcessor(data: { imageSource: string; id: string; isWebGL1: boolean }) {
     if (!DCL.gifProcessor) {
-      // tslint:disable-next-line
       DCL.gifProcessor = new GIFProcessor(unityInterface.gameInstance, unityInterface, data.isWebGL1)
     }
 

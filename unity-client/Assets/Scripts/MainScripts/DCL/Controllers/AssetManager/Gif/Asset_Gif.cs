@@ -54,18 +54,14 @@ namespace DCL.Controllers.Gif
         private Coroutine updateRoutine = null;
 
         private string url;
-        private string sceneId;
-        private string componentId;
         private MaxSize maxSize;
 
         public event Action<ITexture, AssetPromise_Texture> OnSuccessEvent;
         public event Action OnFailEvent;
 
-        public Asset_Gif(string url, MaxSize maxSize, string sceneId, string componentId, Action<ITexture, AssetPromise_Texture> OnSuccess, Action OnFail = null)
+        public Asset_Gif(string url, MaxSize maxSize, Action<ITexture, AssetPromise_Texture> OnSuccess, Action OnFail = null)
         {
             this.url = url;
-            this.sceneId = sceneId;
-            this.componentId = componentId;
             this.maxSize = maxSize;
             this.OnSuccessEvent = OnSuccess;
             this.OnFailEvent = OnFail;
@@ -84,9 +80,7 @@ namespace DCL.Controllers.Gif
                 Dispose();
 
 #if !UNITY_EDITOR && UNITY_WEBGL
-            if (string.IsNullOrEmpty(sceneId) || string.IsNullOrEmpty(componentId)) yield break;
-
-            yield return DCL.GIFProcessingBridge.i.RequestGIFProcessor(url, sceneId, componentId, OverrideGifTextures);
+            yield return DCL.GIFProcessingBridge.i.RequestGIFProcessor(url, OverrideGifTextures);
 #else
             byte[] bytes = null;
 

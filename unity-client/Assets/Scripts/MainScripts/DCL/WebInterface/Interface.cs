@@ -398,8 +398,7 @@ namespace DCL.Interface
         public class GIFSetupPayload
         {
             public string imageSource;
-            public string sceneId;
-            public string componentId;
+            public string id;
             public bool isWebGL1;
         }
 
@@ -873,11 +872,10 @@ namespace DCL.Interface
             SendMessage("SetAudioStream", onAudioStreamingEvent);
         }
 
-        public static void RequestGIFProcessor(string gifURL, string sceneId, string componentId, bool isWebGL1)
+        public static void RequestGIFProcessor(string gifURL, string gifId, bool isWebGL1)
         {
             gifSetupPayload.imageSource = gifURL;
-            gifSetupPayload.sceneId = sceneId;
-            gifSetupPayload.componentId = componentId;
+            gifSetupPayload.id = gifId;
             gifSetupPayload.isWebGL1 = isWebGL1;
 
             SendMessage("RequestGIFProcessor", gifSetupPayload);

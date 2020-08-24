@@ -75,8 +75,7 @@ let frameImageData: any = undefined
       width: finalWidth,
       height: finalHeight,
       delays: frameDelays,
-      sceneId: e.data.sceneId,
-      componentId: e.data.componentId
+      id: e.data.id,
     }, framesAsArrayBuffer)
   }
 

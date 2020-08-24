@@ -31,10 +31,10 @@ export class GIFProcessor {
    * Triggers the GIF processing in the worker (the comeback is executed at worker.onmessage)
    *
    */
-  ProcessGIF(data: { imageSource: string, sceneId: string, componentId: string }) {
+  ProcessGIF(data: { imageSource: string, id: string }) {
     const worker = this.GetWorker()
 
-    worker.postMessage({ src: data.imageSource, sceneId: data.sceneId, componentId: data.componentId })
+    worker.postMessage({ src: data.imageSource, id: data.id })
   }
 
   /**
@@ -105,8 +105,7 @@ export class GIFProcessor {
         const width = e.data.width
         const height = e.data.height
         const frameDelays = e.data.delays
-        const sceneId = e.data.sceneId
-        const componentId = e.data.componentId
+        const id = e.data.id
 
         // Generate all the GIF textures
         for (let index = 0; index < frames.length; index++) {
@@ -121,7 +120,7 @@ export class GIFProcessor {
           this.UpdateGIFTex(frameImageData, tex.name)
         }
 
-        this.unityInterface.SendGIFPointers(sceneId, componentId, width, height, texIDs, frameDelays)
+        this.unityInterface.SendGIFPointers(id, width, height, texIDs, frameDelays)
 
         if (multipleGIFWorkers) {
           worker.terminate()

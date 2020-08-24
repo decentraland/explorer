@@ -13,14 +13,14 @@ namespace DCL
         [System.Serializable]
         public class UpdateGIFPointersPayload
         {
-            public string sceneId;
-            public string componentId;
+            public string id;
             public int width;
             public int height;
             public int[] pointers;
             public float[] frameDelays;
         }
 
+        // TODO: Change into a struct???
         class GIFDataContainer
         {
             public UpdateGIFPointersPayload data = null;
@@ -45,21 +45,28 @@ namespace DCL
         /// Tells Kernel to start processing a desired GIF, waits for the data to come back from Kernel and passes it to the GIF through the onFinishCallback
         /// </summary>
         /// <param name="onFinishCallback">The callback that will be invoked with the generated textures list</param>
-        public IEnumerator RequestGIFProcessor(string url, string sceneId, string componentId, System.Action<List<UniGif.GifTexture>> onFinishCallback)
+        public IEnumerator RequestGIFProcessor(string url, System.Action<List<UniGif.GifTexture>> onFinishCallback)
         {
+            Debug.Log("pravs - GIFProcessingBridge.RequestGIFProcessor() - 1");
             var gifDataContainer = new GIFDataContainer();
-            string key = sceneId + componentId;
+            string pendingGifId = url;
 
-            pendingGIFs.Add(key, gifDataContainer);
+            // If we are already waiting for a GIF with the same URL, make another unique id, to avoid sharing the same textures and have problems when disposing them
+            while (pendingGIFs.ContainsKey(pendingGifId))
+            {
+                pendingGifId = "1" + pendingGifId;
+            }
 
-            DCL.Interface.WebInterface.RequestGIFProcessor(url, sceneId, componentId, SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.OpenGLES2);
+            pendingGIFs.Add(pendingGifId, gifDataContainer);
+
+            DCL.Interface.WebInterface.RequestGIFProcessor(url, pendingGifId, SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.OpenGLES2);
 
             // We use a container class instead of just UpdateGIFPointersPayload to hold its reference and avoid accessing the collection on every yield check
             yield return new WaitUntil(() => gifDataContainer.data != null);
 
             onFinishCallback?.Invoke(GenerateTexturesList(gifDataContainer.data.width, gifDataContainer.data.height, gifDataContainer.data.pointers, gifDataContainer.data.frameDelays));
 
-            pendingGIFs.Remove(key);
+            pendingGIFs.Remove(pendingGifId);
         }
 
         /// <summary>
@@ -69,10 +76,8 @@ namespace DCL
         {
             var parsedPayload = Utils.SafeFromJson<UpdateGIFPointersPayload>(payload);
 
-            string key = parsedPayload.sceneId + parsedPayload.componentId;
-
-            if (pendingGIFs.ContainsKey(key))
-                pendingGIFs[key].data = parsedPayload;
+            if (pendingGIFs.ContainsKey(parsedPayload.id))
+                pendingGIFs[parsedPayload.id].data = parsedPayload;
         }
 
         public List<UniGif.GifTexture> GenerateTexturesList(int width, int height, int[] pointers, float[] frameDelays)
