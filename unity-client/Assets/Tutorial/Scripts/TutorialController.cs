@@ -6,21 +6,12 @@ using UnityEngine;
 
 namespace DCL.Tutorial
 {
-    [Flags]
-    public enum TutorialFinishStep
-    {
-        None = 0,
-        OldTutorialValue = 99, // NOTE: old tutorial set tutorialStep to 99 when finished
-        EmailRequested = 128,
-        NewTutorialFinished = 256
-    }
-
     public interface ITutorialController
     {
         void SetTutorialEnabled();
         IEnumerator StartTutorialFromStep(int stepIndex);
         void SkipAllSteps();
-        void SetUserTutorialStepAsCompleted(TutorialFinishStep step);
+        void SetUserTutorialStepAsCompleted(TutorialController.TutorialFinishStep step);
     }
 
     /// <summary>
@@ -28,7 +19,18 @@ namespace DCL.Tutorial
     /// </summary>
     public class TutorialController : MonoBehaviour, ITutorialController
     {
+        [Flags]
+        public enum TutorialFinishStep
+        {
+            None = 0,
+            OldTutorialValue = 99, // NOTE: old tutorial set tutorialStep to 99 when finished
+            EmailRequested = 128,
+            NewTutorialFinished = 256
+        }
+
         public static TutorialController i { get; private set; }
+
+        public bool isRunning { get; private set; }
 
         [Header("Steps Configuration")]
         [SerializeField] List<TutorialStep> steps = new List<TutorialStep>();
@@ -56,6 +58,7 @@ namespace DCL.Tutorial
         private void OnDestroy()
         {
             CommonScriptableObjects.rendererState.OnChange -= OnRenderingStateChanged;
+            isRunning = false;
         }
 
         /// <summary>
@@ -124,6 +127,8 @@ namespace DCL.Tutorial
 
             CommonScriptableObjects.rendererState.OnChange -= OnRenderingStateChanged;
 
+            isRunning = true;
+
             if (debugRunTutorial)
                 currentStepIndex = debugStartingStepIndex >= 0 ? debugStartingStepIndex : 0;
             else
@@ -157,6 +162,7 @@ namespace DCL.Tutorial
                 SetUserTutorialStepAsCompleted(TutorialFinishStep.NewTutorialFinished);
 
             runningStep = null;
+            isRunning = false;
         }
     }
 }
