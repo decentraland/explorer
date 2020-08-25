@@ -51,6 +51,8 @@ namespace DCL.Tutorial
 
         private void Start()
         {
+            isRunning = false;
+
             if (debugRunTutorial)
                 SetTutorialEnabled();
         }
@@ -66,6 +68,11 @@ namespace DCL.Tutorial
         /// </summary>
         public void SetTutorialEnabled()
         {
+            if (isRunning)
+                return;
+
+            isRunning = true;
+
             if (!CommonScriptableObjects.rendererState.Get())
                 CommonScriptableObjects.rendererState.OnChange += OnRenderingStateChanged;
             else
@@ -127,12 +134,10 @@ namespace DCL.Tutorial
 
             CommonScriptableObjects.rendererState.OnChange -= OnRenderingStateChanged;
 
-            isRunning = true;
-
             if (debugRunTutorial)
                 currentStepIndex = debugStartingStepIndex >= 0 ? debugStartingStepIndex : 0;
             else
-                currentStepIndex = (GetTutorialStepFromProfile() & (int)TutorialFinishStep.NewTutorialFinished) == 0 ? 0 : steps.Count;
+                currentStepIndex = 0;
 
             executeStepsCoroutine = StartCoroutine(StartTutorialFromStep(currentStepIndex));
         }
