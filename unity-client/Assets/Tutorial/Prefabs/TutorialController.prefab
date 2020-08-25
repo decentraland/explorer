@@ -53,6 +53,7 @@ MonoBehaviour:
   - {fileID: 6923122764151660070, guid: 8540e6f42393fff4aa4177acedbad899, type: 3}
   - {fileID: 4047160411802248544, guid: 15f0a32e26e125647b0659df37c76c2c, type: 3}
   - {fileID: 6374337732264401976, guid: b68c6cdd25e679a4ea6cf6d74bec9be2, type: 3}
+  - {fileID: 8425120150227373069, guid: 92424a29d4210914cbcbd480f281874a, type: 3}
   timeBetweenSteps: 0.5
   debugRunTutorial: 0
   debugStartingStepIndex: 0
