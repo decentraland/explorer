@@ -99,10 +99,12 @@ export class BrowserInterface {
     // stub. there is no code about this in unity side yet
   }
 
-  public Track(data: { name: string, properties: { key: string, value: string }[] }) {
+  public Track(data: { name: string, properties: ({ key: string, value: string }[] | null) }) {
     const properties: Record<string, string> = {}
-    for (const property of data.properties) {
-      properties[property.key] = property.value
+    if (data.properties) {
+      for (const property of data.properties) {
+        properties[property.key] = property.value
+      }
     }
 
     queueTrackingEvent(data.name, properties)
