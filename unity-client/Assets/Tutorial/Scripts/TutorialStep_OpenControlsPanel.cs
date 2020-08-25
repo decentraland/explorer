@@ -17,6 +17,8 @@ namespace DCL.Tutorial
             base.OnStepStart();
 
             toggleControlsPanelInputAction.OnTriggered += ToggleControlsPanelInputAction_OnTriggered;
+
+            TutorialController.i?.SetTimeBetweenSteps(0.5f);
         }
 
         public override IEnumerator OnStepExecute()

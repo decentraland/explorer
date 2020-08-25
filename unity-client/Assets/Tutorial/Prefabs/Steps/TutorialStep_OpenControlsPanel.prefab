@@ -120,7 +120,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Controller
       value: 
-      objectReference: {fileID: 9100000, guid: ff71cdb2a1b8e7f488d2a8f6bdd4c32a, type: 2}
+      objectReference: {fileID: 9100000, guid: 3e516ec926ff36945be84115d62d1c9f, type: 2}
     - target: {fileID: 7196360176020811663, guid: cc71903c441610f40b884c6fe6ddedf5,
         type: 3}
       propertyPath: m_textInfo.characterCount

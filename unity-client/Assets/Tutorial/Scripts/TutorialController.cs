@@ -41,13 +41,10 @@ namespace DCL.Tutorial
         private int currentStepIndex;
         private TutorialStep runningStep = null;
         private Coroutine executeStepsCoroutine;
-        private float originalTimeBetweenSteps;
 
         private void Awake()
         {
             i = this;
-
-            originalTimeBetweenSteps = timeBetweenSteps;
         }
 
         private void Start()

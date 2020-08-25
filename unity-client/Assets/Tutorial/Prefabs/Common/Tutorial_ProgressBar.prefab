@@ -167,6 +167,7 @@ GameObject:
   m_Component:
   - component: {fileID: 9018461424031276101}
   - component: {fileID: 5379975061783837435}
+  - component: {fileID: 8009320959561522991}
   - component: {fileID: 2061666711378696817}
   - component: {fileID: 3590407347445728985}
   m_Layer: 5
@@ -207,6 +208,25 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 905322244704025421}
   m_CullTransparentMesh: 0
+--- !u!95 &8009320959561522991
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 905322244704025421}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 2462ffa689a35d64aaec9082487386e1, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!114 &2061666711378696817
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -248,6 +268,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2209eb8fcc419694e938f4f88e302a0d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  progressBarAnimator: {fileID: 8009320959561522991}
   progressBarRectTransform: {fileID: 4349035992480112953}
   percentageText: {fileID: 8344129354967619148}
   barSpeed: 3

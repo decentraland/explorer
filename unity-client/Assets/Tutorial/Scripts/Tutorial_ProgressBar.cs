@@ -10,6 +10,7 @@ namespace DCL.Tutorial
     /// </summary>
     public class Tutorial_ProgressBar : MonoBehaviour
     {
+        [SerializeField] Animator progressBarAnimator;
         [SerializeField] RectTransform progressBarRectTransform;
         [SerializeField] TMP_Text percentageText;
         [SerializeField] float barSpeed = 3.0f;
@@ -46,11 +47,16 @@ namespace DCL.Tutorial
             percentageText.text = string.Format("{0}%", percentage);
 
             if (applyAnimation)
+            {
+                progressBarAnimator.SetTrigger("SetNewPercentage");
                 progressBarCoroutine = StartCoroutine(ChangeProgressBarSize(progressBarRectTransform.sizeDelta.x, GetProgressBarWidthFromPercentage(percentage)));
+            }
             else
+            {
                 progressBarRectTransform.sizeDelta = new Vector2(
                     GetProgressBarWidthFromPercentage(percentage),
                     progressBarRectTransform.sizeDelta.y);
+            }
         }
 
         private float GetProgressBarWidthFromPercentage(int percentage)
