@@ -1,5 +1,6 @@
 using DCL.Configuration;
 using System;
+using DCL;
 using UnityEngine;
 
 public class DCLCharacterPosition
@@ -83,7 +84,7 @@ public class DCLCharacterPosition
 
             CommonScriptableObjects.playerWorldPosition.Set(worldPositionValue);
             CommonScriptableObjects.playerUnityToWorldOffset.Set(offset);
-            PhysicsSyncController.transformSyncDirty = true;
+            SceneController.i.physicsSyncController.MarkDirty();
         }
     }
 

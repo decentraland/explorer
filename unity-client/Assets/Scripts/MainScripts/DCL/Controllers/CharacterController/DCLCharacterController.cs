@@ -4,6 +4,7 @@ using DCL.Helpers;
 using UnityEngine;
 using System.Collections;
 using Cinemachine;
+using UnityEngine.SceneManagement;
 
 public class DCLCharacterController : MonoBehaviour
 {
@@ -66,6 +67,13 @@ public class DCLCharacterController : MonoBehaviour
     public static System.Action<DCLCharacterPosition> OnCharacterMoved;
     public static System.Action<DCLCharacterPosition> OnPositionSet;
 
+
+    // Will allow the game objects to be set, and create the DecentralandEntity manually during the Awake 
+    [HideInInspector] public DCL.Models.DecentralandEntity avatarPositionReference;
+    [HideInInspector] public DCL.Models.DecentralandEntity playerReference;
+    [SerializeField] private GameObject avatarPositionGameObject;
+    [SerializeField] private GameObject playerGameObject;
+
     [SerializeField] private InputAction_Measurable characterYAxis;
     [SerializeField] private InputAction_Measurable characterXAxis;
     private Vector3Variable cameraForward => CommonScriptableObjects.cameraForward;
@@ -102,6 +110,13 @@ public class DCLCharacterController : MonoBehaviour
 
         CommonScriptableObjects.rendererState.OnChange += OnRenderingStateChanged;
         OnRenderingStateChanged(CommonScriptableObjects.rendererState.Get(), false);
+
+        if (avatarPositionGameObject == null || playerGameObject == null)
+        {
+            throw new System.Exception("Both the avatar position and player game objects must be set.");
+        }
+        avatarPositionReference = new DCL.Models.DecentralandEntity { gameObject = avatarPositionGameObject };
+        playerReference = new DCL.Models.DecentralandEntity { gameObject = playerGameObject };
     }
 
     private void SuscribeToInput()
@@ -153,6 +168,7 @@ public class DCLCharacterController : MonoBehaviour
         lastPosition = characterPosition.worldPosition;
         characterPosition.worldPosition = newPosition;
         transform.position = characterPosition.unityPosition;
+        SceneController.i.physicsSyncController.MarkDirty();
 
         CommonScriptableObjects.playerUnityPosition.Set(characterPosition.unityPosition);
         CommonScriptableObjects.playerWorldPosition.Set(characterPosition.worldPosition);
@@ -288,7 +304,12 @@ public class DCLCharacterController : MonoBehaviour
         }
 
         if (characterController.enabled)
+        {
+            //NOTE(Brian): Transform has to be in sync before the Move call, otherwise this call
+            //             will reset the character controller to its previous position.
+            SceneController.i.physicsSyncController.Sync();
             characterController.Move(velocity * deltaTime);
+        }
 
         SetPosition(characterPosition.UnityToWorldPosition(transform.position));
 

@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class PhysicsSyncController
 {
-    public static bool transformSyncDirty = false;
+    public bool isDirty { get; private set; } = false;
 
     public PhysicsSyncController()
     {
@@ -12,12 +12,17 @@ public class PhysicsSyncController
         Physics.autoSyncTransforms = false;
     }
 
-    public void Update()
+    public void MarkDirty()
     {
-        if (!transformSyncDirty)
+        isDirty = true;
+    }
+
+    public void Sync()
+    {
+        if (!isDirty)
             return;
 
-        transformSyncDirty = false;
+        isDirty = false;
         Physics.SyncTransforms();
     }
 }
