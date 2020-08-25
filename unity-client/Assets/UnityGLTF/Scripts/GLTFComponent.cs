@@ -180,7 +180,8 @@ namespace UnityGLTF
                     Destroy(gameObject);
                 }
 
-                Debug.Log("GLTF Failure " + obj.ToString() + " ... url = " + this.GLTFUri);
+
+                Debug.Log($"GLTF Failure {obj} ... url = {this.GLTFUri}\n{obj.StackTrace}");
             }
         }
 
