@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Assertions;
+using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
 
 namespace DCL.Controllers
@@ -470,7 +471,7 @@ namespace DCL.Controllers
             {
                 me.SetParent(null);
                 me.gameObject.transform.SetParent(gameObject.transform, false);
-                PhysicsSyncController.transformSyncDirty = true;
+                SceneController.i.physicsSyncController.MarkDirty();
                 return;
             }
 
@@ -479,7 +480,7 @@ namespace DCL.Controllers
             if (me != null && myParent != null)
             {
                 me.SetParent(myParent);
-                PhysicsSyncController.transformSyncDirty = true;
+                SceneController.i.physicsSyncController.MarkDirty();
             }
         }
 
@@ -539,10 +540,10 @@ namespace DCL.Controllers
                     entity.gameObject.transform.localRotation = DCLTransform.model.rotation;
                     entity.gameObject.transform.localScale = DCLTransform.model.scale;
 
-                    PhysicsSyncController.transformSyncDirty = true;
                     SceneController.i.boundariesChecker?.AddEntityToBeChecked(entity);
                 }
 
+                SceneController.i.physicsSyncController.MarkDirty();
                 return null;
             }
 
@@ -608,6 +609,7 @@ namespace DCL.Controllers
                 if (!entity.components.ContainsKey(classId))
                 {
                     newComponent = factory.CreateItemFromId<BaseComponent>(classId);
+                    SceneController.i.physicsSyncController.MarkDirty();
 
                     if (newComponent != null)
                     {
@@ -629,7 +631,7 @@ namespace DCL.Controllers
             if (newComponent != null && newComponent.isRoutineRunning)
                 yieldInstruction = newComponent.yieldInstruction;
 
-            PhysicsSyncController.transformSyncDirty = true;
+            SceneController.i.physicsSyncController.MarkDirty();
             return newComponent;
         }
 

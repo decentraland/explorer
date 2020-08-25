@@ -136,6 +136,10 @@ namespace DCL
             DCLCharacterController.OnCharacterMoved += SetPositionDirty;
 
             physicsSyncController = new PhysicsSyncController();
+            //TODO(Brian): Move those suscriptions elsewhere when we have the PoolManager in its own
+            //             assembly. (already done in PR #1149, not merged yet)
+            PoolManager.i.OnGet -= physicsSyncController.MarkDirty;
+            PoolManager.i.OnGet += physicsSyncController.MarkDirty;
 
 #if !UNITY_EDITOR
             worldEntryPoint = new EntryPoint_World(this);
@@ -300,6 +304,7 @@ namespace DCL
 
         void OnDestroy()
         {
+            PoolManager.i.OnGet -= physicsSyncController.MarkDirty;
             CommonScriptableObjects.rendererState.OnChange -= OnRenderingStateChange;
             DCLCharacterController.OnCharacterMoved -= SetPositionDirty;
             ParcelScene.parcelScenesCleaner.Stop();

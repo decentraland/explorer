@@ -154,7 +154,7 @@ public class DCLCharacterController : MonoBehaviour
         lastPosition = characterPosition.worldPosition;
         characterPosition.worldPosition = newPosition;
         transform.position = characterPosition.unityPosition;
-        PhysicsSyncController.transformSyncDirty = true;
+        SceneController.i.physicsSyncController.MarkDirty();
 
         CommonScriptableObjects.playerUnityPosition.Set(characterPosition.unityPosition);
         CommonScriptableObjects.playerWorldPosition.Set(characterPosition.worldPosition);
