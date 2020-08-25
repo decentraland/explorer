@@ -79,5 +79,6 @@ public class GLTFImporterTests : TestsBase
         yield return LoadModel("/GLTF/Trunk2/Trunk.gltf", (m) => trunk2 = m);
 
         UnityEngine.Assertions.Assert.AreEqual(2, PersistentAssetCache.ImageCacheByUri.Count, "Image cache is colliding!");
+        UnityEngine.Assertions.Assert.AreEqual(2, PersistentAssetCache.StreamCacheByUri.Count, "Buffer cache is colliding!");
     }
 }
