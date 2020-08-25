@@ -61,7 +61,7 @@ namespace DCL
             ParcelScene.parcelScenesCleaner.Start();
 
             if (deferredMessagesDecoding)             // We should be able to delete this code
-                StartCoroutine(DeferredDecoding());   // 
+                StartCoroutine(DeferredDecoding());   //
 
             DCLCharacterController.OnCharacterMoved += SetPositionDirty;
 
@@ -948,26 +948,12 @@ namespace DCL
         private Vector2Int currentGridSceneCoordinate = new Vector2Int(EnvironmentSettings.MORDOR_SCALAR, EnvironmentSettings.MORDOR_SCALAR);
         private Vector2Int sortAuxiliaryVector = new Vector2Int(EnvironmentSettings.MORDOR_SCALAR, EnvironmentSettings.MORDOR_SCALAR);
 
-
-
         public const string EMPTY_GO_POOL_NAME = "Empty";
-
-
-
 
         public void SetDisableAssetBundles()
         {
             RendereableAssetLoadHelper.loadingType = RendereableAssetLoadHelper.LoadingType.GLTF_ONLY;
         }
-
-
-
-
-
-        // void RequestGIFProcessor(string url, string sceneId, string componentId, ITexture assetGif)
-        // {
-        //     gifProcessingBridge.RequestGIFProcessor(url, sceneId, componentId, assetGif);
-        // }
 
         public void BuilderReady()
         {

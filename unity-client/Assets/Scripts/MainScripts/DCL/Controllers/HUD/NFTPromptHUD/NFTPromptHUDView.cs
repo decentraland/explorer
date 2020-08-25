@@ -190,7 +190,6 @@ public class NFTPromptHUDView : MonoBehaviour
 
     private IEnumerator FetchNFTImage(NFTInfo nftInfo)
     {
-        Debug.Log("pravs - NFTPromptHUDView.FetchNFTImage() - 1 - Waiting fetch...");
         spinnerNftImage.SetActive(true);
 
         ITexture nftImageAsset = null;
@@ -198,18 +197,15 @@ public class NFTPromptHUDView : MonoBehaviour
         yield return WrappedTextureUtils.Fetch(nftInfo.previewImageUrl,
             (downloadedTex, texturePromise) =>
             {
-                Debug.Log("pravs - NFTPromptHUDView.FetchNFTImage() - 1.5 - Finished fetch...");
                 nftImageAsset = downloadedTex;
                 this.texturePromise = texturePromise;
             });
-        Debug.Log("pravs - NFTPromptHUDView.FetchNFTImage() - 2");
 
         if (nftImageAsset == null)
         {
             yield return WrappedTextureUtils.Fetch(nftInfo.originalImageUrl,
                 (downloadedTex, texturePromise) =>
                 {
-                    Debug.Log("pravs - NFTPromptHUDView.FetchNFTImage() - 2.5 - Finished ORIGINAL IMAGE fetch...");
                     nftImageAsset = downloadedTex;
                     this.texturePromise = texturePromise;
                 }, Asset_Gif.MaxSize._256);
@@ -217,24 +213,19 @@ public class NFTPromptHUDView : MonoBehaviour
 
         if (nftImageAsset != null)
         {
-            Debug.Log("pravs - NFTPromptHUDView.FetchNFTImage() - 3");
             imageAsset = nftImageAsset;
             imageNft.texture = nftImageAsset.texture;
 
             if (nftImageAsset is Asset_Gif gifAsset)
             {
-                Debug.Log("pravs - NFTPromptHUDView.FetchNFTImage() - 4 - GIF");
                 gifAsset.OnFrameTextureChanged += (texture) => { imageNft.texture = texture; };
                 gifAsset.Play();
             }
             else
             {
-                Debug.Log("pravs - NFTPromptHUDView.FetchNFTImage() - 5 - STILL PICTURE");
                 if (!backgroundColorSet)
                     SetSmartBackgroundColor(nftImageAsset.texture);
             }
-
-            Debug.Log("pravs - NFTPromptHUDView.FetchNFTImage() - 6 - Texture size for " + nftInfo.previewImageUrl + ": " + nftImageAsset.texture.width + "x" + nftImageAsset.texture.height);
 
             SetNFTImageSize(nftImageAsset.texture);
 
