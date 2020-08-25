@@ -58,7 +58,7 @@ namespace DCL
 
             tmpSettings.OnWebRequestStartEvent += ParseGLTFWebRequestedFile;
 
-            gltfComponent.LoadAsset(url, false, tmpSettings);
+            gltfComponent.LoadAsset(url, GetId() as string, false, tmpSettings);
             gltfComponent.OnSuccess += OnSuccess;
             gltfComponent.OnFail += OnFail;
 
@@ -112,7 +112,7 @@ namespace DCL
         {
             if (settings.forceNewInstance)
             {
-                return ((AssetLibrary_GLTF)library).GetCopyFromOriginal(id);
+                return ((AssetLibrary_GLTF) library).GetCopyFromOriginal(id);
             }
             else
             {

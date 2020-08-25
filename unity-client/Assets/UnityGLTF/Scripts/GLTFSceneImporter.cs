@@ -174,10 +174,10 @@ namespace UnityGLTF
         /// <param name="gltfFileName">glTF file relative to data loader path</param>
         /// <param name="externalDataLoader">Loader to load external data references</param>
         /// <param name="asyncCoroutineHelper">Helper to load coroutines on a seperate thread</param>
-        public GLTFSceneImporter(string gltfFileName, ILoader externalDataLoader, AsyncCoroutineHelper asyncCoroutineHelper) : this(externalDataLoader, asyncCoroutineHelper)
+        public GLTFSceneImporter(string id, string gltfFileName, ILoader externalDataLoader, AsyncCoroutineHelper asyncCoroutineHelper) : this(externalDataLoader, asyncCoroutineHelper)
         {
             _gltfFileName = gltfFileName;
-            id = gltfFileName;
+            this.id = string.IsNullOrEmpty(id) ? gltfFileName : id;
         }
 
         public GLTFSceneImporter(string id, GLTFRoot rootNode, ILoader externalDataLoader, AsyncCoroutineHelper asyncCoroutineHelper, Stream gltfStream = null) : this(externalDataLoader, asyncCoroutineHelper)
@@ -2516,7 +2516,7 @@ namespace UnityGLTF
         protected static string AbsoluteFilePath(string gltfPath)
         {
             var fileName = Path.GetFileName(gltfPath);
-            var lastIndex = gltfPath.IndexOf(fileName);
+            var lastIndex = gltfPath.IndexOf(fileName, StringComparison.Ordinal);
             var partialPath = gltfPath.Substring(0, lastIndex);
             return partialPath;
         }
@@ -2528,8 +2528,8 @@ namespace UnityGLTF
         /// <returns></returns>
         public bool ImageIsInGlobalCache(string uri)
         {
-            uri = $"{uri}@{id}";
-            bool result = PersistentAssetCache.ImageCacheByUri.ContainsKey(uri);
+            string key = GetCacheId(uri);
+            bool result = PersistentAssetCache.ImageCacheByUri.ContainsKey(key);
             return result;
         }
 
@@ -2555,7 +2555,8 @@ namespace UnityGLTF
         /// <param name="refCountedTexture"></param>
         public void AddGlobalCachedImage(string uri, RefCountedTextureData refCountedTexture)
         {
-            PersistentAssetCache.ImageCacheByUri[GetCacheId(uri)] = refCountedTexture;
+            var key = GetCacheId(uri);
+            PersistentAssetCache.ImageCacheByUri[key] = refCountedTexture;
         }
 
         /// <summary>
