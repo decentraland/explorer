@@ -65,7 +65,7 @@ namespace DCL.Components
 
         void LoadAsset()
         {
-            loaderController?.LoadAsset(assetUrl, entity.scene.sceneData.id, component.id, true);
+            loaderController?.LoadAsset(assetUrl, true);
         }
 
         void OnRendererStateChanged(bool current, bool previous)

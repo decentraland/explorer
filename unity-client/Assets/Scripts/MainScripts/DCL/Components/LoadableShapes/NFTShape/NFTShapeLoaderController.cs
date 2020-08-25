@@ -46,8 +46,6 @@ public class NFTShapeLoaderController : MonoBehaviour
 
     System.Action<LoadWrapper> OnSuccess;
     System.Action<LoadWrapper> OnFail;
-    string sceneId;
-    string componentId;
     string darURLProtocol;
     string darURLRegistry;
     string darURLAsset;
@@ -76,12 +74,9 @@ public class NFTShapeLoaderController : MonoBehaviour
         InitializePerlinNoise();
     }
 
-    public void LoadAsset(string url, string sceneId, string componentId, bool loadEvenIfAlreadyLoaded = false)
+    public void LoadAsset(string url, bool loadEvenIfAlreadyLoaded = false)
     {
         if (string.IsNullOrEmpty(url) || (!loadEvenIfAlreadyLoaded && alreadyLoadedAsset)) return;
-
-        this.sceneId = sceneId;
-        this.componentId = componentId;
 
         UpdateBackgroundColor(backgroundColor);
 
