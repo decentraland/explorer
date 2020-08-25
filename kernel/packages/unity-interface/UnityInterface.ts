@@ -71,7 +71,6 @@ export class UnityInterface {
     }
 
     if (!this.gameInstance.Module) {
-
       defaultLogger.log(
         `Can't change base resolution height to ${height}! Are you running explorer in unity editor or native?`
       )
@@ -225,7 +224,7 @@ export class UnityInterface {
   }
 
   public ShowNewWearablesNotification(wearableNumber: number) {
-    this.gameInstance.SendMessage('HUDController', 'ShowNewWearablesNotification', wearableNumber.toString())
+    // disabled
   }
 
   public ShowNotification(notification: Notification) {
@@ -298,6 +297,22 @@ export class UnityInterface {
       const payload = { chunkIndex: i, chunksCount: chunks.length, scenesInfo: chunks[i] }
       this.gameInstance.SendMessage('SceneController', 'UpdateHotScenesList', JSON.stringify(payload))
     }
+  }
+
+  public SendGIFPointers(id: string, width: number, height: number, pointers: number[], frameDelays: number[]) {
+    this.gameInstance.SendMessage(
+      'SceneController',
+      'UpdateGIFPointers',
+      JSON.stringify({ id, width, height, pointers, frameDelays })
+    )
+  }
+
+  public ConfigureEmailPrompt(tutorialStep: number) {
+    const emailCompletedFlag = 128
+    this.ConfigureHUDElement(HUDElementID.EMAIL_PROMPT, {
+      active: (tutorialStep & emailCompletedFlag) === 0,
+      visible: false
+    })
   }
 
   // *********************************************************************************
