@@ -10,7 +10,7 @@ namespace DCL.Tutorial
     {
         void SetTutorialEnabled();
         void SetTutorialDisabled();
-        IEnumerator StartTutorialFromStep(int stepIndex);
+        IEnumerator StartTutorialFromStep(int stepIndex, bool abortRunningStep = false);
         void SkipAllSteps();
         void SetUserTutorialStepAsCompleted(TutorialController.TutorialFinishStep step);
     }
@@ -102,11 +102,15 @@ namespace DCL.Tutorial
         /// Starts to execute the tutorial from a specific step.
         /// </summary>
         /// <param name="stepIndex">First step to be executed.</param>
-        public IEnumerator StartTutorialFromStep(int stepIndex)
+        public IEnumerator StartTutorialFromStep(int stepIndex, bool abortRunningStep = false)
         {
             if (runningStep != null)
             {
-                yield return runningStep.OnStepPlayAnimationForHidding();
+                if (abortRunningStep)
+                    yield return runningStep.AbortStep();
+                else
+                    yield return runningStep.OnStepPlayAnimationForHidding();
+
                 runningStep.OnStepFinished();
                 Destroy(runningStep.gameObject);
 
@@ -124,7 +128,7 @@ namespace DCL.Tutorial
             if (executeStepsCoroutine != null)
                 StopCoroutine(executeStepsCoroutine);
 
-            executeStepsCoroutine = StartCoroutine(StartTutorialFromStep(steps.Count));
+            executeStepsCoroutine = StartCoroutine(StartTutorialFromStep(steps.Count, true));
         }
 
         /// <summary>

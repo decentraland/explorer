@@ -9,6 +9,7 @@ namespace DCL.Tutorial
         IEnumerator OnStepExecute();
         IEnumerator OnStepPlayAnimationForHidding();
         void OnStepFinished();
+        IEnumerator AbortStep();
     }
 
     /// <summary>
@@ -17,6 +18,7 @@ namespace DCL.Tutorial
     public class TutorialStep : MonoBehaviour, ITutorialStep
     {
         protected const string STEP_FINISHED_ANIMATOR_TRIGGER = "StepFinished";
+        protected const string STEP_ABORTED_ANIMATOR_TRIGGER = "StepAborted";
 
         [SerializeField] bool unlockCursorAtStart = true;
 
@@ -51,12 +53,12 @@ namespace DCL.Tutorial
         /// <returns></returns>
         public virtual IEnumerator OnStepPlayAnimationForHidding()
         {
-            if (stepAnimator == null)
-                yield break;
+            yield return WaitForAnimation(STEP_FINISHED_ANIMATOR_TRIGGER);
+        }
 
-            stepAnimator.SetTrigger(STEP_FINISHED_ANIMATOR_TRIGGER);
-            yield return null; // NOTE(Santi): It is needed to wait a frame for get the reference to the next animation clip correctly.
-            yield return new WaitForSeconds(stepAnimator.GetCurrentAnimatorClipInfo(0)[0].clip.length);
+        public virtual IEnumerator AbortStep()
+        {
+            yield return WaitForAnimation(STEP_ABORTED_ANIMATOR_TRIGGER);
         }
 
         /// <summary>
@@ -64,6 +66,16 @@ namespace DCL.Tutorial
         /// </summary>
         public virtual void OnStepFinished()
         {
+        }
+
+        private IEnumerator WaitForAnimation(string animationTrigger)
+        {
+            if (stepAnimator == null)
+                yield break;
+
+            stepAnimator.SetTrigger(animationTrigger);
+            yield return null; // NOTE(Santi): It is needed to wait a frame for get the reference to the next animation clip correctly.
+            yield return new WaitForSeconds(stepAnimator.GetCurrentAnimatorClipInfo(0)[0].clip.length);
         }
     }
 }

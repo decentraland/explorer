@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &3944418929927857064
+--- !u!114 &4047160411802248544
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -9,14 +9,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 4034785743267394545}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1bf44efc1321a514786580e941d53984, type: 3}
+  m_Script: {fileID: 11500000, guid: 2f24ad1c07f9464408f644babfedc4d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  unlockCursorAtStart: 0
+  unlockCursorAtStart: 1
   progressBar: {fileID: 1756310050889357110}
-  initPercentage: 20
-  finishPercentage: 30
-  jumpingInputAction: {fileID: 11400000, guid: 8eddef1fc072ec845aeb62f5e1041b52, type: 2}
+  initPercentage: 55
+  finishPercentage: 65
+  closeButton: {fileID: 6893826977977458694}
 --- !u!1001 &4151981143031031852
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -27,7 +27,7 @@ PrefabInstance:
     - target: {fileID: 1036035276998138845, guid: cc71903c441610f40b884c6fe6ddedf5,
         type: 3}
       propertyPath: m_Name
-      value: TutorialStep_AvatarJumping
+      value: TutorialStep_OpenFriends
       objectReference: {fileID: 0}
     - target: {fileID: 3194584141860739375, guid: cc71903c441610f40b884c6fe6ddedf5,
         type: 3}
@@ -57,22 +57,22 @@ PrefabInstance:
     - target: {fileID: 3563827233588354408, guid: cc71903c441610f40b884c6fe6ddedf5,
         type: 3}
       propertyPath: m_textInfo.characterCount
-      value: 25
+      value: 128
       objectReference: {fileID: 0}
     - target: {fileID: 3563827233588354408, guid: cc71903c441610f40b884c6fe6ddedf5,
         type: 3}
       propertyPath: m_textInfo.spaceCount
-      value: 3
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 3563827233588354408, guid: cc71903c441610f40b884c6fe6ddedf5,
         type: 3}
       propertyPath: m_textInfo.wordCount
-      value: 4
+      value: 21
       objectReference: {fileID: 0}
     - target: {fileID: 3563827233588354408, guid: cc71903c441610f40b884c6fe6ddedf5,
         type: 3}
       propertyPath: m_textInfo.lineCount
-      value: 1
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 3563827233588354408, guid: cc71903c441610f40b884c6fe6ddedf5,
         type: 3}
@@ -82,17 +82,18 @@ PrefabInstance:
     - target: {fileID: 3563827233588354408, guid: cc71903c441610f40b884c6fe6ddedf5,
         type: 3}
       propertyPath: m_text
-      value: Jump pressing [Space bar]
+      value: Press [L] to open and close Friends panel. Use it to search players
+        by name, manage invitations and start private conversations.
       objectReference: {fileID: 0}
     - target: {fileID: 3595298937388248349, guid: cc71903c441610f40b884c6fe6ddedf5,
         type: 3}
       propertyPath: m_textInfo.characterCount
-      value: 11
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 3595298937388248349, guid: cc71903c441610f40b884c6fe6ddedf5,
         type: 3}
       propertyPath: m_textInfo.wordCount
-      value: 3
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 3595298937388248349, guid: cc71903c441610f40b884c6fe6ddedf5,
         type: 3}
@@ -107,12 +108,12 @@ PrefabInstance:
     - target: {fileID: 3595298937388248349, guid: cc71903c441610f40b884c6fe6ddedf5,
         type: 3}
       propertyPath: m_text
-      value: LIKE A BOSS
+      value: NAILED IT!
       objectReference: {fileID: 0}
     - target: {fileID: 3595298937388248349, guid: cc71903c441610f40b884c6fe6ddedf5,
         type: 3}
       propertyPath: m_textInfo.spaceCount
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4060861073055465969, guid: cc71903c441610f40b884c6fe6ddedf5,
         type: 3}
@@ -203,6 +204,18 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 4151981143031031852}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &6893826977977458694 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7364801310423894058, guid: cc71903c441610f40b884c6fe6ddedf5,
+    type: 3}
+  m_PrefabInstance: {fileID: 4151981143031031852}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &1756310050889357110 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 2432337932406325018, guid: cc71903c441610f40b884c6fe6ddedf5,

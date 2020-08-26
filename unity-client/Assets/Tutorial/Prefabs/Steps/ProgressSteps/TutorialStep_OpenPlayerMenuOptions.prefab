@@ -173,25 +173,8 @@ MonoBehaviour:
   progressBar: {fileID: 1756310050889357110}
   initPercentage: 50
   finishPercentage: 55
+  closeButton: {fileID: 6893826977977458694}
   confirmInputAction: {fileID: 11400000, guid: 32762977b0149684282db4ff59068cbf, type: 2}
---- !u!114 &8026892887502127638
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4034785743267394545}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9bded9fdc15b57a46a9b5d0a9a23d1f0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  unlockCursorAtStart: 0
-  progressBar: {fileID: 1756310050889357110}
-  initPercentage: 30
-  finishPercentage: 50
-  toggleWorldChatInputAction: {fileID: 11400000, guid: f5b88fea0b93d194bb750e3af19929b6,
-    type: 2}
 --- !u!1 &9157618547954974719
 GameObject:
   m_ObjectHideFlags: 0
@@ -479,6 +462,18 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 4151981143031031852}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &6893826977977458694 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7364801310423894058, guid: cc71903c441610f40b884c6fe6ddedf5,
+    type: 3}
+  m_PrefabInstance: {fileID: 4151981143031031852}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &1756310050889357110 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 2432337932406325018, guid: cc71903c441610f40b884c6fe6ddedf5,
