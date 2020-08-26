@@ -109,7 +109,7 @@ public class CullingController : MonoBehaviour
                 {
                     counter++;
 
-                    if (counter == 2000)
+                    if (counter == 500)
                     {
                         counter = 0;
                         yield return null;
@@ -121,13 +121,17 @@ public class CullingController : MonoBehaviour
                         continue;
 
                     Transform t = r.transform;
-                    float distance = Vector3.Distance(playerPosition, r.bounds.center + t.position);
-                    float size = (r.bounds.size.magnitude / distance) * Mathf.Rad2Deg;
+                    Bounds bounds = r.bounds;
+                    bounds.center += t.position;
+
+                    Vector3 boundingPoint = bounds.ClosestPoint(playerPosition);
+                    float distance = Vector3.Distance(playerPosition, boundingPoint);
+                    float size = (bounds.size.magnitude / distance) * Mathf.Rad2Deg;
 
                     float visThreshold = p.rendererVisibilityDistThreshold;
                     float shadowThreshold = p.rendererShadowDistThreshold;
 
-                    bool shouldBeVisible = distance < visThreshold || r.bounds.Contains(playerPosition);
+                    bool shouldBeVisible = distance < visThreshold || bounds.Contains(playerPosition);
                     bool isOpaque = r.materials[0].renderQueue < 3000;
 
                     if (isOpaque)
