@@ -5,13 +5,13 @@ let modulePromise: any
 type PositionType = { x: number; y: number; z: number }
 
 /**
- * move to inside scene position
+ * move player to a position inside the scene
  *
  * @param position PositionType
  * @param cameraTarget PositionType
  */
-export function moveTo(position: PositionType, cameraTarget?: PositionType) {
-  callModuleRpc('requestMoveTo', [position, cameraTarget])
+export function movePlayerTo(position: PositionType, cameraTarget?: PositionType) {
+  callModuleRpc('movePlayerTo', [position, cameraTarget])
 }
 
 function ensureModule(): boolean {

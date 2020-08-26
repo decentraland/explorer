@@ -11,7 +11,7 @@ enum Permission {
 }
 
 export interface IRestrictedActionModule {
-  requestMoveTo(newPosition: Vector3): Promise<void>
+  movePlayerTo(newPosition: Vector3, cameraTarget?: Vector3): Promise<void>
 }
 
 @registerAPI('RestrictedActionModule')
@@ -45,7 +45,7 @@ export class RestrictedActionModule extends ExposableAPI implements IRestrictedA
   }
 
   @exposeMethod
-  async requestMoveTo(newPosition: Vector3, cameraTarget?: Vector3): Promise<void> {
+  async movePlayerTo(newPosition: Vector3, cameraTarget?: Vector3): Promise<void> {
     // checks permissions
     if (!this.hasPermission(Permission.ALLOW_MOVE_INSIDE_SCENE)) {
       defaultLogger.error(`Permission "${Permission.ALLOW_MOVE_INSIDE_SCENE}" is required`)
