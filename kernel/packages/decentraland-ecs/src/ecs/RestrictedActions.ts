@@ -2,7 +2,7 @@ declare var dcl: any
 
 let modulePromise: any
 
-type PositionType = { x: number, y: number, z: number }
+type PositionType = { x: number; y: number; z: number }
 
 /**
  * move to inside scene position

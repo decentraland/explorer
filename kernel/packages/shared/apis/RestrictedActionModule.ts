@@ -1,13 +1,13 @@
-import {exposeMethod, registerAPI} from 'decentraland-rpc/lib/host'
-import {ExposableAPI} from './ExposableAPI'
+import { exposeMethod, registerAPI } from 'decentraland-rpc/lib/host'
+import { ExposableAPI } from './ExposableAPI'
 import defaultLogger from '../logger'
-import {unityInterface} from '../../unity-interface/UnityInterface'
-import {ParcelIdentity} from "./ParcelIdentity";
-import {Vector3} from "../../decentraland-ecs/src/decentraland/math";
-import {gridToWorld, isInParcel, parseParcelPosition} from "../../atomicHelpers/parcelScenePositions";
+import { unityInterface } from '../../unity-interface/UnityInterface'
+import { ParcelIdentity } from './ParcelIdentity'
+import { Vector3 } from '../../decentraland-ecs/src/decentraland/math'
+import { gridToWorld, isInParcel, parseParcelPosition } from '../../atomicHelpers/parcelScenePositions'
 
 enum Permission {
-  ALLOW_MOVE_INSIDE_SCENE = "ALLOW_MOVE_INSIDE_SCENE"
+  ALLOW_MOVE_INSIDE_SCENE = 'ALLOW_MOVE_INSIDE_SCENE'
 }
 
 export interface IRestrictedActionModule {
@@ -38,8 +38,8 @@ export class RestrictedActionModule extends ExposableAPI implements IRestrictedA
   }
 
   isPositionValid(position: Vector3) {
-    return this.getSceneData().scene.parcels.some(parcel => {
-      const {x, y} = parseParcelPosition(parcel)
+    return this.getSceneData().scene.parcels.some((parcel) => {
+      const { x, y } = parseParcelPosition(parcel)
       return isInParcel(position, gridToWorld(x, y, new Vector3()))
     })
   }
@@ -58,6 +58,6 @@ export class RestrictedActionModule extends ExposableAPI implements IRestrictedA
       defaultLogger.error('Error: Position is out of scene')
       return
     }
-    unityInterface.Teleport({position, cameraTarget})
+    unityInterface.Teleport({ position, cameraTarget })
   }
 }
