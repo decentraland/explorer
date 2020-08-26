@@ -40,22 +40,21 @@ export class RestrictedActionModule extends ExposableAPI implements IRestrictedA
   isPositionValid(position: Vector3) {
     return this.getSceneData().scene.parcels.some((parcel) => {
       const { x, y } = parseParcelPosition(parcel)
-      return isInParcel(position, gridToWorld(x, y, new Vector3()))
+      return isInParcel(position, gridToWorld(x, y))
     })
   }
 
   @exposeMethod
   async requestMoveTo(newPosition: Vector3, cameraTarget?: Vector3): Promise<void> {
-    // validar que tenga permission
+    // checks permissions
     if (!this.hasPermission(Permission.ALLOW_MOVE_INSIDE_SCENE)) {
       defaultLogger.error(`Permission "${Permission.ALLOW_MOVE_INSIDE_SCENE}" is required`)
       return
     }
-    // calcular nueva position
     const position = this.calculatePosition(newPosition)
-    // validate new position is inside of any scene
+    // validate new position is inside of some scene
     if (!this.isPositionValid(position)) {
-      defaultLogger.error('Error: Position is out of scene')
+      defaultLogger.error('Error: Position is out of scene', position)
       return
     }
     unityInterface.Teleport({ position, cameraTarget })
