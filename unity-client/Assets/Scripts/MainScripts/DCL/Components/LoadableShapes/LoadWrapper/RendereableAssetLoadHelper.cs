@@ -104,6 +104,7 @@ namespace DCL.Components
 
         public void Unload()
         {
+            Environment.i.cullingController.RemoveRenderersFromGameObject(this.loadedAsset);
             AssetPromiseKeeper_GLTF.i.Forget(gltfPromise);
             AssetPromiseKeeper_AB_GameObject.i.Forget(abPromise);
         }
@@ -191,6 +192,7 @@ namespace DCL.Components
             }
 
             this.loadedAsset = loadedAsset.container;
+            Environment.i.cullingController.AddRenderersFromGameObject(this.loadedAsset);
             OnSuccess?.Invoke(loadedAsset.container);
             ClearEvents();
         }

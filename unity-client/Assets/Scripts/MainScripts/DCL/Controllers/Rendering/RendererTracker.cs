@@ -5,6 +5,14 @@ using UnityEngine;
 
 namespace DCL
 {
+    /// <summary>
+    /// RendererTracker is a wrapper over a CullingGroup object, dedicated to tracking renderers
+    /// culling status.
+    /// List of responsibilities include:
+    ///     - Observer for any number of renderers
+    ///     - Event invoking when any of those renderers go over a determined distance or get
+    ///       frustum culled.
+    /// </summary>
     public class RendererTracker
     {
         private Dictionary<Renderer, int> rendererToIndex = new Dictionary<Renderer, int>();
@@ -18,6 +26,10 @@ namespace DCL
 
         public void AddRenderer(Renderer r)
         {
+            //TODO(Brian): Reference counting to avoid early removal?
+            if (rendererToIndex.ContainsKey(r))
+                return;
+
             int index = boundingSpheresSize;
             var bounds = r.bounds;
             boundingSpheres[index] = new BoundingSphere(bounds.center, bounds.size.magnitude);
@@ -30,6 +42,9 @@ namespace DCL
 
         public void RemoveRenderer(Renderer r)
         {
+            if (!rendererToIndex.ContainsKey(r))
+                return;
+
             int index = rendererToIndex[r];
 
             indexToRenderer.Remove(index);
@@ -37,26 +52,6 @@ namespace DCL
 
             CullingGroup.EraseSwapBack(index, boundingSpheres, ref boundingSpheresSize);
             this.group.SetBoundingSphereCount(boundingSpheresSize);
-        }
-
-        public void AddRenderersFromGameObject(GameObject go)
-        {
-            var rs = go.GetComponentsInChildren<Renderer>(true);
-
-            for (int i = 0; i < rs.Length; i++)
-            {
-                AddRenderer(rs[i]);
-            }
-        }
-
-        public void RemoveRenderersFromGameObject(GameObject go)
-        {
-            var rs = go.GetComponentsInChildren<Renderer>(true);
-
-            for (int i = 0; i < rs.Length; i++)
-            {
-                RemoveRenderer(rs[i]);
-            }
         }
 
         public RendererTracker(Transform referencePoint, Camera camera, float distanceLimit)

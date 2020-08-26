@@ -975,7 +975,6 @@ namespace DCL
         private Vector2Int sortAuxiliaryVector = new Vector2Int(EnvironmentSettings.MORDOR_SCALAR, EnvironmentSettings.MORDOR_SCALAR);
 
 
-
         public const string EMPTY_GO_POOL_NAME = "Empty";
 
 
