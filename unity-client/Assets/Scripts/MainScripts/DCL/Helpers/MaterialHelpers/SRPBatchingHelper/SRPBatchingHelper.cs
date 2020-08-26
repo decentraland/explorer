@@ -63,7 +63,7 @@ namespace DCL.Helpers
             int baseQueue;
 
             if (material.renderQueue == (int) UnityEngine.Rendering.RenderQueue.AlphaTest)
-                baseQueue = (int) UnityEngine.Rendering.RenderQueue.AlphaTest;
+                baseQueue = (int) UnityEngine.Rendering.RenderQueue.Geometry + 500;
             else
                 baseQueue = (int) UnityEngine.Rendering.RenderQueue.Geometry;
 
@@ -81,17 +81,11 @@ namespace DCL.Helpers
 
             //NOTE(Brian): This is to move the rendering of animated stuff on top of the queue, so the SRP batcher
             //             can group all the draw calls.
-            if (renderer is SkinnedMeshRenderer)
-            {
-                material.renderQueue = baseQueue;
-            }
-            else
-            {
-                //NOTE(Brian): we use 0, 100, 200 to group calls by culling mode (must group them or batches will break).
-                int queueOffset = (cullMode + 1) * 100;
 
-                material.renderQueue = baseQueue + crcToQueue[crc] + queueOffset;
-            }
+            //NOTE(Brian): we use 0, 100, 200 to group calls by culling mode (must group them or batches will break).
+            int queueOffset = (cullMode + 1) * 100;
+
+            material.renderQueue = baseQueue + crcToQueue[crc] + queueOffset;
         }
     }
 }
