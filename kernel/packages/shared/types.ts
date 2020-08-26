@@ -1,5 +1,5 @@
-import { Vector3Component, Vector2Component } from '../atomicHelpers/landHelpers'
-import { QueryType } from 'decentraland-ecs/src/decentraland/PhysicsCast'
+import {Vector2Component, Vector3Component} from '../atomicHelpers/landHelpers'
+import {QueryType} from 'decentraland-ecs/src/decentraland/PhysicsCast'
 
 export { Avatar, Profile, ColorString, WearableId, Wearable } from './profiles/types'
 
@@ -209,6 +209,7 @@ export type SceneJsonData = {
   policy?: ScenePolicy
   source?: SceneSource
   spawnPoints?: SceneSpawnPoint[]
+  requiredPermissions?: string[] | undefined
 }
 
 export type EnvironmentData<T> = {
