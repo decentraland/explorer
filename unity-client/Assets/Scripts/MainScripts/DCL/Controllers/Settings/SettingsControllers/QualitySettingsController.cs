@@ -50,6 +50,7 @@ namespace DCL.SettingsController
 
         void ApplyQualitySettings(QualitySettings qualitySettings)
         {
+#if !UNITY_EDITOR
             switch (qualitySettings.baseResolution)
             {
                 case QualitySettings.BaseResolution.BaseRes_720:
@@ -62,6 +63,7 @@ namespace DCL.SettingsController
                     WebInterface.SetBaseResolution(9999);
                     break;
             }
+#endif
 
             if (lightweightRenderPipelineAsset)
             {

@@ -32,7 +32,7 @@ SpriteAtlas:
     packables:
     - {fileID: 102900000, guid: 1eee3b038d846456b84c415627892c52, type: 3}
     - {fileID: 102900000, guid: 9a5ba57e279914a838dd2b4ff4f44335, type: 3}
-    totalSpriteSurfaceArea: 1506927
+    totalSpriteSurfaceArea: 1821975
     bindAsDefault: 1
   m_MasterAtlas: {fileID: 0}
   m_PackedSprites:
@@ -49,6 +49,7 @@ SpriteAtlas:
   - {fileID: 21300000, guid: 912f3de01d9104ef78c3c0b206f32021, type: 3}
   - {fileID: 21300000, guid: 44dd7b11a83bf4605916ad96f6ce3881, type: 3}
   - {fileID: 21300000, guid: 38dc6a210cae34a439bd286f6c382165, type: 3}
+  - {fileID: 21300000, guid: d35ae73176cdc4afaa2ef323399f3232, type: 3}
   - {fileID: 21300000, guid: e8a30441514b5499ea02a9e5a4617028, type: 3}
   - {fileID: 21300000, guid: 2195aa410c072497daf4105b9b388604, type: 3}
   - {fileID: 21300000, guid: 4b1c9751d9ed642a190d2431fa02b5f8, type: 3}
@@ -69,6 +70,7 @@ SpriteAtlas:
   - {fileID: 21300000, guid: 57ab1983ebf014dc19b433a255d6bfb0, type: 3}
   - {fileID: 21300000, guid: 1aac5e83391d74318b6be345b5ca43aa, type: 3}
   - {fileID: 21300000, guid: 3f0f9693166cb48a9b43e5e4bbd00332, type: 3}
+  - {fileID: 21300000, guid: 7c67c1a311ba3489892ab89b094714e5, type: 3}
   - {fileID: 21300000, guid: b58756c38981f466a8950af1a5edd094, type: 3}
   - {fileID: 21300000, guid: cb768af398af844a585c615342f68492, type: 3}
   - {fileID: 21300000, guid: 65d50244ec48c4d31b169fe48412f711, type: 3}
@@ -103,6 +105,7 @@ SpriteAtlas:
   - {fileID: 21300000, guid: cd958ac803911481ea50edce80f46f1c, type: 3}
   - {fileID: 21300000, guid: 874182f8d364145bd9836b8e817019eb, type: 3}
   - {fileID: 21300000, guid: 9ed344f88537e43a6b35556d00b77b39, type: 3}
+  - {fileID: 21300000, guid: dcdf9cf86d2644e82b7712af42584c7c, type: 3}
   - {fileID: 21300000, guid: 87bf14092660947eb9909d5772886279, type: 3}
   - {fileID: 21300000, guid: 314ecf09e6e7447d9aa0421d996754cc, type: 3}
   - {fileID: 21300000, guid: 1f9aa849cf4bd4cf8aba28982b518d5a, type: 3}
@@ -247,6 +250,7 @@ SpriteAtlas:
   - {fileID: 21300000, guid: 21edf28c5bb184f38a93adea195ee396, type: 3}
   - {fileID: 21300000, guid: 3a7eb5dce2acd4a86b88dfdba0abf820, type: 3}
   - {fileID: 21300000, guid: ac7397fcf96d541b3bbd698df8d05871, type: 3}
+  - {fileID: 21300000, guid: 017eca2d81e3343959735e87d3b06c02, type: 3}
   - {fileID: 21300000, guid: 22ebf95d89cdf450d8e049f66102beb7, type: 3}
   - {fileID: 21300000, guid: b0ffc37da7dc04fcfb5ab734d242a524, type: 3}
   - {fileID: 21300000, guid: 6b0d5bddc85904f9ebb40298ac0c94a1, type: 3}
@@ -279,6 +283,7 @@ SpriteAtlas:
   - BookIcon
   - MenuButton
   - ContainerShadowRadiusFour
+  - Radius11Shadow
   - NFTStarContainer
   - PinIcon
   - ContainerRadius6
@@ -299,6 +304,7 @@ SpriteAtlas:
   - BackpackIcon
   - SelectedParcel
   - OkIcon
+  - Button40
   - Tooltip
   - ContainerShadowRadiusEight
   - ConnectionStatus
@@ -333,6 +339,7 @@ SpriteAtlas:
   - ContainerRadius10
   - BackButton
   - ContainerShadow
+  - EmailHeader
   - DecentralandLogo
   - RejectButtonHover
   - Ellipse
@@ -477,6 +484,7 @@ SpriteAtlas:
   - Pointer
   - Button
   - TitleBackground
+  - EmailInput
   - PoiIcon
   - ButtonNotification
   - MapShadow
