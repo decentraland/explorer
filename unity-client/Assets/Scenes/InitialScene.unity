@@ -428,17 +428,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rendererProfile:
-    mediumSize: 3
-    smallSize: 0.5
-    rendererVisibilityDistThreshold: 80
-    rendererShadowDistThreshold: 60
+    mediumSize: 10
+    smallSize: 4
+    rendererVisibilityDistThreshold: 30
+    rendererShadowDistThreshold: 20
   skinnedRendererProfile:
-    mediumSize: 4
-    smallSize: 1.5
-    rendererVisibilityDistThreshold: 75
-    rendererShadowDistThreshold: 75
+    mediumSize: 5
+    smallSize: 4
+    rendererVisibilityDistThreshold: 50
+    rendererShadowDistThreshold: 40
   panel: {fileID: 1673048928}
-  paused: 1
+  paused: 0
 --- !u!223 &575270894
 Canvas:
   m_ObjectHideFlags: 0
