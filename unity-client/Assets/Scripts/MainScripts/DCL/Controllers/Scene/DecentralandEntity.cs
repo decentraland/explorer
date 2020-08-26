@@ -57,6 +57,7 @@ namespace DCL.Models
 
             GameObject meshRootGameObjectValue;
 
+
             public void UpdateRenderersCollection()
             {
                 if (meshRootGameObjectValue != null)
@@ -66,6 +67,7 @@ namespace DCL.Models
 
                     RecalculateBounds();
 
+                    CullingController.cullingListDirty = true;
                     OnUpdated?.Invoke();
                 }
             }

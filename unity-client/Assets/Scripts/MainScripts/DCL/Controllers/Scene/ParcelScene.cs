@@ -380,6 +380,7 @@ namespace DCL.Controllers
                 }
 
                 entities.Remove(id);
+                CullingController.cullingListDirty = true;
             }
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             else
@@ -504,7 +505,6 @@ namespace DCL.Controllers
                             SceneController.i.physicsSyncController.MarkDirty();
                         }
                     }
-                        
                 }
             }
         }
