@@ -15,13 +15,13 @@ internal class HighlightScenesController : MonoBehaviour
     Dictionary<Vector2Int, BaseSceneCellView> activeHotSceneViews = new Dictionary<Vector2Int, BaseSceneCellView>();
 
     ExploreMiniMapDataController mapDataController;
-    ExploreFriendsController friendsController;
+    FriendTrackerController friendsController;
 
     ViewPool<HotSceneCellView> hotScenesViewPool;
 
     float lastTimeRefreshed = 0;
 
-    public void Initialize(ExploreMiniMapDataController mapDataController, ExploreFriendsController friendsController)
+    public void Initialize(ExploreMiniMapDataController mapDataController, FriendTrackerController friendsController)
     {
         this.mapDataController = mapDataController;
         this.friendsController = friendsController;
@@ -126,7 +126,7 @@ internal class HighlightScenesController : MonoBehaviour
 
         view.gameObject.SetActive(true);
         activeHotSceneViews.Add(coords, view);
-        friendsController.AddListener(view);
+        friendsController.AddHandler(view);
     }
 
     bool IsHotSceneCellActive(Vector2Int coords)
@@ -140,7 +140,7 @@ internal class HighlightScenesController : MonoBehaviour
         if (activeHotSceneViews.TryGetValue(coords, out view))
         {
             view.gameObject.SetActive(false);
-            friendsController.RemoveListener(view);
+            friendsController.RemoveHandler(view);
         }
 
         activeHotSceneViews.Remove(coords);

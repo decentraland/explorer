@@ -9,7 +9,7 @@ public class ExploreHUDController : IHUD
     internal InputAction_Trigger toggleExploreTrigger;
 
     ExploreMiniMapDataController miniMapDataController;
-    ExploreFriendsController friendsController;
+    FriendTrackerController friendsController;
 
     public event Action OnToggleTriggered;
 
@@ -37,7 +37,7 @@ public class ExploreHUDController : IHUD
 
     public void Initialize(IFriendsController friendsController)
     {
-        this.friendsController = new ExploreFriendsController(friendsController, view.friendColors);
+        this.friendsController = new FriendTrackerController(friendsController, view.friendColors);
         miniMapDataController = new ExploreMiniMapDataController();
 
         view.Initialize(miniMapDataController, this.friendsController);

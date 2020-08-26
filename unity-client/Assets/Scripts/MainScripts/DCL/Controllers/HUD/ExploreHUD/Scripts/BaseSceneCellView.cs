@@ -4,9 +4,10 @@ using System;
 using System.Collections.Generic;
 using DCL.Helpers;
 
-internal class BaseSceneCellView : BaseCellView, IMapDataView, IExploreViewWithFriends
+internal class BaseSceneCellView : BaseCellView, IMapDataView, IFriendTrackerHandler
 {
     public delegate void JumpInDelegate(Vector2Int coords, string serverName, string layerName);
+
     static public event JumpInDelegate OnJumpIn;
 
     public static event Action<BaseSceneCellView> OnInfoButtonPointerDown;
@@ -85,6 +86,7 @@ internal class BaseSceneCellView : BaseCellView, IMapDataView, IExploreViewWithF
             {
                 url = MapUtils.GetMarketPlaceThumbnailUrl(mapInfo, 196, 143, 50);
             }
+
             FetchThumbnail(url);
         }
     }
@@ -95,14 +97,14 @@ internal class BaseSceneCellView : BaseCellView, IMapDataView, IExploreViewWithF
         return mapInfo.parcels.Contains(coords);
     }
 
-    void IExploreViewWithFriends.OnFriendAdded(UserProfile profile, Color backgroundColor)
+    void IFriendTrackerHandler.OnFriendAdded(UserProfile profile, Color backgroundColor)
     {
         var view = friendPool.GetView();
         view.SetUserProfile(profile, backgroundColor);
         friendViewById.Add(profile.userId, view);
     }
 
-    void IExploreViewWithFriends.OnFriendRemoved(UserProfile profile)
+    void IFriendTrackerHandler.OnFriendRemoved(UserProfile profile)
     {
         ExploreFriendsView view;
         if (friendViewById.TryGetValue(profile.userId, out view))
@@ -112,8 +114,8 @@ internal class BaseSceneCellView : BaseCellView, IMapDataView, IExploreViewWithF
         }
     }
 
-    bool IExploreViewWithFriends.ContainCoords(Vector2Int coords)
+    bool IFriendTrackerHandler.ContainCoords(Vector2Int coords)
     {
-        return ((IMapDataView)this).ContainCoords(coords);
+        return ((IMapDataView) this).ContainCoords(coords);
     }
 }
