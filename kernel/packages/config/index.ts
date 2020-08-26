@@ -1,4 +1,3 @@
-import { getUserProfile } from 'shared/comms/peers'
 import { contracts as contractInfo } from './contracts'
 const queryString = require('query-string')
 declare var window: any
@@ -141,14 +140,6 @@ export const WSS_ENABLED = qs.ws !== undefined
 export const FORCE_SEND_MESSAGE = location.search.indexOf('FORCE_SEND_MESSAGE') !== -1
 
 export const PIN_CATALYST = qs.PIN_CATALYST
-
-export function tutorialEnabled() {
-  const tutorialCompletedFlag = 256
-  return (
-    WORLD_EXPLORER &&
-    (RESET_TUTORIAL || (getUserProfile().profile.tutorialStep & tutorialCompletedFlag) === 0)
-  )
-}
 
 export namespace commConfigurations {
   export const debug = true

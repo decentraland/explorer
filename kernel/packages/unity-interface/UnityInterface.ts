@@ -1,5 +1,5 @@
 import { TeleportController } from 'shared/world/TeleportController'
-import { WSS_ENABLED } from 'config'
+import { WSS_ENABLED, WORLD_EXPLORER, RESET_TUTORIAL } from 'config'
 import { Vector3 } from '../decentraland-ecs/src/decentraland/math'
 import { ProfileForRenderer, MinimapSceneInfo } from '../decentraland-ecs/src/decentraland/Types'
 import { AirdropInfo } from 'shared/airdrops/interface'
@@ -313,6 +313,13 @@ export class UnityInterface {
       active: (tutorialStep & emailCompletedFlag) === 0,
       visible: false
     })
+  }
+
+  public ConfigureTutorial(tutorialStep: number) {
+    const tutorialCompletedFlag = 256
+    if (WORLD_EXPLORER && (RESET_TUTORIAL || (tutorialStep & tutorialCompletedFlag) === 0)) {
+      this.SetTutorialEnabled()
+    }
   }
 
   // *********************************************************************************
