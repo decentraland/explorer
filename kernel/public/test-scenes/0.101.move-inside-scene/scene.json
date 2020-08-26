@@ -27,7 +27,7 @@
   "main": "game.js",
   "tags": [],
   "requiredPermissions": [
-    "ALLOW_MOVE_INSIDE_SCENE"
+    "ALLOW_TO_MOVE_PLAYER_INSIDE_SCENE"
   ],
   "spawnPoints": [
     {

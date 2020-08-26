@@ -7,7 +7,7 @@ import { Vector3 } from '../../decentraland-ecs/src/decentraland/math'
 import { gridToWorld, isInParcel, parseParcelPosition } from '../../atomicHelpers/parcelScenePositions'
 
 enum Permission {
-  ALLOW_MOVE_INSIDE_SCENE = 'ALLOW_MOVE_INSIDE_SCENE'
+  ALLOW_TO_MOVE_PLAYER_INSIDE_SCENE = 'ALLOW_TO_MOVE_PLAYER_INSIDE_SCENE'
 }
 
 export interface IRestrictedActionModule {
@@ -47,8 +47,8 @@ export class RestrictedActionModule extends ExposableAPI implements IRestrictedA
   @exposeMethod
   async movePlayerTo(newPosition: Vector3, cameraTarget?: Vector3): Promise<void> {
     // checks permissions
-    if (!this.hasPermission(Permission.ALLOW_MOVE_INSIDE_SCENE)) {
-      defaultLogger.error(`Permission "${Permission.ALLOW_MOVE_INSIDE_SCENE}" is required`)
+    if (!this.hasPermission(Permission.ALLOW_TO_MOVE_PLAYER_INSIDE_SCENE)) {
+      defaultLogger.error(`Permission "${Permission.ALLOW_TO_MOVE_PLAYER_INSIDE_SCENE}" is required`)
       return
     }
     const position = this.calculatePosition(newPosition)
