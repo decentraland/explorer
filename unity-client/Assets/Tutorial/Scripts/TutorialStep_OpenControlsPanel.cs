@@ -8,34 +8,48 @@ namespace DCL.Tutorial
     /// </summary>
     public class TutorialStep_OpenControlsPanel : TutorialStep_WithProgressBar
     {
-        [SerializeField] InputAction_Trigger toggleControlsPanelInputAction;
-
-        private bool controlsPanelIsOpen = false;
+        private bool controlsHasBeenOpened = false;
+        private bool controlsHasBeenClosed = false;
 
         public override void OnStepStart()
         {
             base.OnStepStart();
 
-            toggleControlsPanelInputAction.OnTriggered += ToggleControlsPanelInputAction_OnTriggered;
+            if (TutorialController.i.hudController != null)
+            {
+                TutorialController.i.hudController.controlsHud.OnControlsOpened += ControlsHud_OnControlsOpened;
+                TutorialController.i.hudController.controlsHud.OnControlsClosed += ControlsHud_OnControlsClosed;
+            }
 
             TutorialController.i?.SetTimeBetweenSteps(0.5f);
         }
 
         public override IEnumerator OnStepExecute()
         {
-            yield return new WaitUntil(() => controlsPanelIsOpen);
+            yield return new WaitUntil(() => controlsHasBeenOpened && controlsHasBeenClosed);
         }
 
         public override void OnStepFinished()
         {
             base.OnStepFinished();
 
-            toggleControlsPanelInputAction.OnTriggered += ToggleControlsPanelInputAction_OnTriggered;
+            if (TutorialController.i.hudController != null)
+            {
+                TutorialController.i.hudController.controlsHud.OnControlsOpened -= ControlsHud_OnControlsOpened;
+                TutorialController.i.hudController.controlsHud.OnControlsClosed -= ControlsHud_OnControlsClosed;
+            }
         }
 
-        private void ToggleControlsPanelInputAction_OnTriggered(DCLAction_Trigger action)
+        private void ControlsHud_OnControlsOpened()
         {
-            controlsPanelIsOpen = true;
+            if (!controlsHasBeenOpened)
+                controlsHasBeenOpened = true;
+        }
+
+        private void ControlsHud_OnControlsClosed()
+        {
+            if (controlsHasBeenOpened)
+                controlsHasBeenClosed = true;
         }
     }
 }

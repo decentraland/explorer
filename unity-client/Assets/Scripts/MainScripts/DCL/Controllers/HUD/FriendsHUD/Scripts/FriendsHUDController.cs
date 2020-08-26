@@ -15,6 +15,8 @@ public class FriendsHUDController : IHUD
 
     IFriendsController friendsController;
     public event System.Action<string> OnPressWhisper;
+    public event System.Action OnFriendsOpened;
+    public event System.Action OnFriendsClosed;
 
     UserProfile ownUserProfile;
 
@@ -317,6 +319,12 @@ public class FriendsHUDController : IHUD
 
             if (view.friendsButton.interactable)
                 view.friendsButton.onClick.Invoke();
+
+            OnFriendsOpened?.Invoke();
+        }
+        else
+        {
+            OnFriendsClosed?.Invoke();
         }
     }
 }

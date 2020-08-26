@@ -10,30 +10,46 @@ namespace DCL.Tutorial
     {
         [SerializeField] InputAction_Trigger toggleWorldChatInputAction;
 
-        private bool worldChatIsOpen = false;
+        private bool worldChatHasBeenOpened = false;
+        private bool worldChatHasBeenClosed = false;
 
         public override void OnStepStart()
         {
             base.OnStepStart();
 
-            toggleWorldChatInputAction.OnTriggered += ToggleWorldChatInputAction_OnTriggered;
+            if (TutorialController.i.hudController != null)
+            {
+                TutorialController.i.hudController.worldChatWindowHud.view.OnDeactivatePreview += View_OnDeactivatePreview;
+                TutorialController.i.hudController.worldChatWindowHud.view.OnActivatePreview += View_OnActivatePreview;
+            }
         }
 
         public override IEnumerator OnStepExecute()
         {
-            yield return new WaitUntil(() => worldChatIsOpen);
+            yield return new WaitUntil(() => worldChatHasBeenOpened && worldChatHasBeenClosed);
         }
 
         public override void OnStepFinished()
         {
             base.OnStepFinished();
 
-            toggleWorldChatInputAction.OnTriggered -= ToggleWorldChatInputAction_OnTriggered;
+            if (TutorialController.i.hudController != null)
+            {
+                TutorialController.i.hudController.worldChatWindowHud.view.OnDeactivatePreview -= View_OnDeactivatePreview;
+                TutorialController.i.hudController.worldChatWindowHud.view.OnActivatePreview -= View_OnActivatePreview;
+            }
         }
 
-        private void ToggleWorldChatInputAction_OnTriggered(DCLAction_Trigger action)
+        private void View_OnDeactivatePreview()
         {
-            worldChatIsOpen = true;
+            if (!worldChatHasBeenOpened)
+                worldChatHasBeenOpened = true;
+        }
+
+        private void View_OnActivatePreview()
+        {
+            if (worldChatHasBeenOpened)
+                worldChatHasBeenClosed = true;
         }
     }
 }

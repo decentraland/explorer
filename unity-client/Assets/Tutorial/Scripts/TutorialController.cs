@@ -9,6 +9,7 @@ namespace DCL.Tutorial
     public interface ITutorialController
     {
         void SetTutorialEnabled();
+        void SetTutorialDisabled();
         IEnumerator StartTutorialFromStep(int stepIndex);
         void SkipAllSteps();
         void SetUserTutorialStepAsCompleted(TutorialController.TutorialFinishStep step);
@@ -30,7 +31,8 @@ namespace DCL.Tutorial
 
         public static TutorialController i { get; private set; }
 
-        public bool isRunning { get; private set; }
+        public bool isRunning { get; private set; } = false;
+        public HUDController hudController { get => HUDController.i; }
 
         [Header("Steps Configuration")]
         [SerializeField] List<TutorialStep> steps = new List<TutorialStep>();
@@ -51,16 +53,13 @@ namespace DCL.Tutorial
 
         private void Start()
         {
-            isRunning = false;
-
             if (debugRunTutorial)
                 SetTutorialEnabled();
         }
 
         private void OnDestroy()
         {
-            CommonScriptableObjects.rendererState.OnChange -= OnRenderingStateChanged;
-            isRunning = false;
+            SetTutorialDisabled();
         }
 
         /// <summary>
@@ -73,10 +72,30 @@ namespace DCL.Tutorial
 
             isRunning = true;
 
+            if (hudController != null && hudController.emailPromptHud != null)
+            {
+                hudController.emailPromptHud.OnSetEmailFlag += EmailPromptHud_OnSetEmailFlag;
+            }
+
             if (!CommonScriptableObjects.rendererState.Get())
                 CommonScriptableObjects.rendererState.OnChange += OnRenderingStateChanged;
             else
                 OnRenderingStateChanged(true, false);
+        }
+
+        /// <summary>
+        /// Disables the tutorial controller.
+        /// </summary>
+        public void SetTutorialDisabled()
+        {
+            isRunning = false;
+
+            if (hudController != null && hudController.emailPromptHud != null)
+            {
+                hudController.emailPromptHud.OnSetEmailFlag -= EmailPromptHud_OnSetEmailFlag;
+            }
+
+            CommonScriptableObjects.rendererState.OnChange -= OnRenderingStateChanged;
         }
 
         /// <summary>
@@ -167,7 +186,13 @@ namespace DCL.Tutorial
                 SetUserTutorialStepAsCompleted(TutorialFinishStep.NewTutorialFinished);
 
             runningStep = null;
-            isRunning = false;
+
+            SetTutorialDisabled();
+        }
+
+        private void EmailPromptHud_OnSetEmailFlag()
+        {
+            SetUserTutorialStepAsCompleted(TutorialFinishStep.EmailRequested);
         }
     }
 }

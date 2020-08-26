@@ -2,7 +2,7 @@ using UnityEngine;
 using DCL.Interface;
 using DCL.Helpers;
 using System.Collections;
-using DCL.Tutorial;
+using System;
 
 public class EmailPromptHUDController : IHUD
 {
@@ -12,6 +12,8 @@ public class EmailPromptHUDController : IHUD
 
     bool isPopupRoutineRunning = false;
     Coroutine showPopupDelayedRoutine;
+
+    public event Action OnSetEmailFlag;
 
     public EmailPromptHUDController()
     {
@@ -83,8 +85,6 @@ public class EmailPromptHUDController : IHUD
         yield return new WaitUntil(() => CommonScriptableObjects.rendererState.Get());
         yield return WaitForSecondsCache.Get(seconds);
         yield return new WaitUntil(() => CommonScriptableObjects.rendererState.Get());
-        if (TutorialController.i != null && TutorialController.i.isRunning)
-            yield return new WaitUntil(() => !TutorialController.i.isRunning);
         SetVisibility(true);
         isPopupRoutineRunning = false;
     }
@@ -107,6 +107,6 @@ public class EmailPromptHUDController : IHUD
 
     void SetEmailFlag()
     {
-        TutorialController.i?.SetUserTutorialStepAsCompleted(TutorialController.TutorialFinishStep.EmailRequested);
+        OnSetEmailFlag?.Invoke();
     }
 }
