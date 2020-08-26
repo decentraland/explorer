@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Configuration;
 using TMPro;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.PlayerLoop;
 using UnityEngine.Rendering;
@@ -44,6 +45,37 @@ public class CullingController : MonoBehaviour
         panel.text = $"Culling: {pausedString} (H = toggle)\nRenderer count: {rendererCount}\nHidden count: {hiddenRenderers.Count}\nShadows hidden:{shadowlessRenderers.Count}";
     }
 
+    void DrawBounds(Bounds b, Color color, float delay = 0)
+    {
+        // bottom
+        var p1 = new Vector3(b.min.x, b.min.y, b.min.z);
+        var p2 = new Vector3(b.max.x, b.min.y, b.min.z);
+        var p3 = new Vector3(b.max.x, b.min.y, b.max.z);
+        var p4 = new Vector3(b.min.x, b.min.y, b.max.z);
+
+        Debug.DrawLine(p1, p2, color, delay);
+        Debug.DrawLine(p2, p3, color, delay);
+        Debug.DrawLine(p3, p4, color, delay);
+        Debug.DrawLine(p4, p1, color, delay);
+
+        // top
+        var p5 = new Vector3(b.min.x, b.max.y, b.min.z);
+        var p6 = new Vector3(b.max.x, b.max.y, b.min.z);
+        var p7 = new Vector3(b.max.x, b.max.y, b.max.z);
+        var p8 = new Vector3(b.min.x, b.max.y, b.max.z);
+
+        Debug.DrawLine(p5, p6, color, delay);
+        Debug.DrawLine(p6, p7, color, delay);
+        Debug.DrawLine(p7, p8, color, delay);
+        Debug.DrawLine(p8, p5, color, delay);
+
+        // sides
+        Debug.DrawLine(p1, p5, color, delay);
+        Debug.DrawLine(p2, p6, color, delay);
+        Debug.DrawLine(p3, p7, color, delay);
+        Debug.DrawLine(p4, p8, color, delay);
+    }
+
     IEnumerator Start()
     {
         profiles = new List<Profile> {rendererProfile, skinnedRendererProfile};
@@ -57,6 +89,15 @@ public class CullingController : MonoBehaviour
             {
                 paused = !paused;
                 UpdatePanel();
+            }
+
+            if (Input.GetKeyDown(KeyCode.J))
+            {
+                FindObjectsOfType<Canvas>().ToList().ForEach((x) =>
+                {
+                    if (x.sortingOrder > -100)
+                        x.enabled = false;
+                });
             }
 
             if (paused)
@@ -122,7 +163,7 @@ public class CullingController : MonoBehaviour
 
                     Transform t = r.transform;
                     Bounds bounds = r.bounds;
-                    bounds.center += t.position;
+                    //bounds.center += t.position;
 
                     Vector3 boundingPoint = bounds.ClosestPoint(playerPosition);
                     float distance = Vector3.Distance(playerPosition, boundingPoint);
@@ -132,13 +173,21 @@ public class CullingController : MonoBehaviour
                     float shadowThreshold = p.rendererShadowDistThreshold;
 
                     bool shouldBeVisible = distance < visThreshold || bounds.Contains(playerPosition);
+
+
                     bool isOpaque = r.materials[0].renderQueue < 3000;
 
                     if (isOpaque)
                         shouldBeVisible |= size > p.smallSize;
-
+#if UNITY_EDITOR
+                    if (!shouldBeVisible)
+                    {
+                        DrawBounds(bounds, Color.blue, 1);
+                        DrawBounds(new Bounds() {center = boundingPoint, size = Vector3.one}, Color.red, 1);
+                    }
+#endif
                     bool shouldHaveShadow = distance < shadowThreshold;
-                    shouldHaveShadow |= distance >= shadowThreshold && size > p.mediumSize;
+                    shouldHaveShadow |= size > p.mediumSize;
 
                     if (r.enabled != shouldBeVisible)
                     {
@@ -155,7 +204,7 @@ public class CullingController : MonoBehaviour
                         r.shadowCastingMode = targetMode;
                     }
 
-                    if (!shouldHaveShadow && !shadowlessRenderers.Contains(r))
+                    if (shouldBeVisible && !shouldHaveShadow && !shadowlessRenderers.Contains(r))
                         shadowlessRenderers.Add(r);
                 }
             }
