@@ -90,7 +90,7 @@ export class UnityInterface {
     this.Module = this.gameInstance.Module
     _gameInstance = gameInstance
 
-    if (this.Module !== undefined) {
+    if (this.Module) {
       window.addEventListener('resize', this.resizeCanvasDelayed)
       this.resizeCanvasDelayed(null)
       this.waitForFillMouseEventData()
@@ -297,6 +297,14 @@ export class UnityInterface {
       const payload = { chunkIndex: i, chunksCount: chunks.length, scenesInfo: chunks[i] }
       this.gameInstance.SendMessage('SceneController', 'UpdateHotScenesList', JSON.stringify(payload))
     }
+  }
+
+  public SendGIFPointers(id: string, width: number, height: number, pointers: number[], frameDelays: number[]) {
+    this.gameInstance.SendMessage(
+      'SceneController',
+      'UpdateGIFPointers',
+      JSON.stringify({ id, width, height, pointers, frameDelays })
+    )
   }
 
   public ConfigureEmailPrompt(tutorialStep: number) {
