@@ -5,6 +5,7 @@ import { unityInterface } from 'unity-interface/UnityInterface'
 import { ParcelIdentity } from './ParcelIdentity'
 import { Vector3 } from 'decentraland-ecs/src'
 import { gridToWorld, isInParcel, parseParcelPosition } from '../../atomicHelpers/parcelScenePositions'
+import { lastPlayerPosition } from '../world/positionThings'
 
 export enum Permission {
   ALLOW_TO_MOVE_PLAYER_INSIDE_SCENE = 'ALLOW_TO_MOVE_PLAYER_INSIDE_SCENE'
@@ -55,6 +56,10 @@ export class RestrictedActionModule extends ExposableAPI implements IRestrictedA
     // validate new position is inside of some scene
     if (!this.isPositionValid(position)) {
       defaultLogger.error('Error: Position is out of scene', position)
+      return
+    }
+    if (!this.isPositionValid(lastPlayerPosition)) {
+      defaultLogger.error('Error: Player is not inside of scene', lastPlayerPosition)
       return
     }
     unityInterface.Teleport({ position, cameraTarget })
