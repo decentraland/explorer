@@ -153,5 +153,11 @@ namespace DCL.Controllers
             }
             return null;
         }
+
+        protected override void OnRemoveEntity(DecentralandEntity entity)
+        {
+            base.OnRemoveEntity(entity);
+            RemoveInvalidMeshEffect(entity);
+        }
     }
 }
