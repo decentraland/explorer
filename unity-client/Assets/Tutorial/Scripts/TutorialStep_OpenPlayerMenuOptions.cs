@@ -13,6 +13,8 @@ namespace DCL.Tutorial
         public override IEnumerator OnStepExecute()
         {
             yield return new WaitUntil(() => confirmInputAction.isOn);
+
+            tutorialController.PlayTeacherAnimation(TutorialTeacher.TeacherAnimation.Goodbye);
         }
     }
 }

@@ -169,6 +169,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   unlockCursorAtStart: 1
+  show3DTeacherAtStart: 1
+  teacherPositionRef: {fileID: 4526469471399856072}
   progressBar: {fileID: 1756310050889357110}
   initPercentage: 50
   finishPercentage: 55
@@ -488,6 +490,12 @@ MonoBehaviour:
 --- !u!224 &346890888204038615 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 4417657079435926011, guid: cc71903c441610f40b884c6fe6ddedf5,
+    type: 3}
+  m_PrefabInstance: {fileID: 4151981143031031852}
+  m_PrefabAsset: {fileID: 0}
+--- !u!224 &4526469471399856072 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 526794547092287460, guid: cc71903c441610f40b884c6fe6ddedf5,
     type: 3}
   m_PrefabInstance: {fileID: 4151981143031031852}
   m_PrefabAsset: {fileID: 0}

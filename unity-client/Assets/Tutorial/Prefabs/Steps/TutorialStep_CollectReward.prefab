@@ -295,6 +295,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   unlockCursorAtStart: 1
+  show3DTeacherAtStart: 0
+  teacherPositionRef: {fileID: 0}
   titleText: {fileID: 1600808801855214230}
   collectButton: {fileID: 3953972122111598414}
 --- !u!1 &1364692181531218564
@@ -1431,7 +1433,7 @@ Canvas:
   m_SortingBucketNormalizedSize: 0
   m_AdditionalShaderChannelsFlag: 25
   m_SortingLayerID: 0
-  m_SortingOrder: 50
+  m_SortingOrder: 2
   m_TargetDisplay: 0
 --- !u!114 &6936540006236163715
 MonoBehaviour:

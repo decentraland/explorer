@@ -20,6 +20,8 @@ namespace DCL.Tutorial
         public override IEnumerator OnStepExecute()
         {
             yield return new WaitUntil(() => emoteSelected);
+
+            tutorialController.PlayTeacherAnimation(TutorialTeacher.TeacherAnimation.Goodbye);
         }
 
         public override void OnStepFinished()

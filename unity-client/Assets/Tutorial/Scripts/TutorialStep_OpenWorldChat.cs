@@ -17,26 +17,28 @@ namespace DCL.Tutorial
         {
             base.OnStepStart();
 
-            if (TutorialController.i.hudController != null)
+            if (tutorialController != null && tutorialController.hudController != null)
             {
-                TutorialController.i.hudController.worldChatWindowHud.view.OnDeactivatePreview += View_OnDeactivatePreview;
-                TutorialController.i.hudController.worldChatWindowHud.view.OnActivatePreview += View_OnActivatePreview;
+                tutorialController.hudController.worldChatWindowHud.view.OnDeactivatePreview += View_OnDeactivatePreview;
+                tutorialController.hudController.worldChatWindowHud.view.OnActivatePreview += View_OnActivatePreview;
             }
         }
 
         public override IEnumerator OnStepExecute()
         {
             yield return new WaitUntil(() => worldChatHasBeenOpened && worldChatHasBeenClosed);
+
+            tutorialController.PlayTeacherAnimation(TutorialTeacher.TeacherAnimation.Goodbye);
         }
 
         public override void OnStepFinished()
         {
             base.OnStepFinished();
 
-            if (TutorialController.i.hudController != null)
+            if (tutorialController != null && tutorialController.hudController != null)
             {
-                TutorialController.i.hudController.worldChatWindowHud.view.OnDeactivatePreview -= View_OnDeactivatePreview;
-                TutorialController.i.hudController.worldChatWindowHud.view.OnActivatePreview -= View_OnActivatePreview;
+                tutorialController.hudController.worldChatWindowHud.view.OnDeactivatePreview -= View_OnDeactivatePreview;
+                tutorialController.hudController.worldChatWindowHud.view.OnActivatePreview -= View_OnActivatePreview;
             }
         }
 

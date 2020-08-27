@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace DCL.Tutorial
 {
@@ -13,6 +14,9 @@ namespace DCL.Tutorial
         IEnumerator StartTutorialFromStep(int stepIndex, bool abortRunningStep = false);
         void SkipAllSteps();
         void SetUserTutorialStepAsCompleted(TutorialController.TutorialFinishStep step);
+        void ShowTeacher3DModel(bool active);
+        void SetTeacherPosition(Vector2 position);
+        void PlayTeacherAnimation(TutorialTeacher.TeacherAnimation animation);
     }
 
     /// <summary>
@@ -35,8 +39,12 @@ namespace DCL.Tutorial
         public HUDController hudController { get => HUDController.i; }
 
         [Header("Steps Configuration")]
-        [SerializeField] List<TutorialStep> steps = new List<TutorialStep>();
         [SerializeField] float timeBetweenSteps = 0.5f;
+        [SerializeField] List<TutorialStep> steps = new List<TutorialStep>();
+
+        [Header("3D Model Teacher")]
+        [SerializeField] RawImage teacherRawImage;
+        [SerializeField] TutorialTeacher teacher;
 
         [Header("Debugging")]
         public bool debugRunTutorial = false;
@@ -53,6 +61,8 @@ namespace DCL.Tutorial
 
         private void Start()
         {
+            ShowTeacher3DModel(false);
+
             if (debugRunTutorial)
                 SetTutorialEnabled();
         }
@@ -89,6 +99,7 @@ namespace DCL.Tutorial
         public void SetTutorialDisabled()
         {
             isRunning = false;
+            ShowTeacher3DModel(false);
 
             if (hudController != null && hudController.emailPromptHud != null)
             {
@@ -107,9 +118,13 @@ namespace DCL.Tutorial
             if (runningStep != null)
             {
                 if (abortRunningStep)
+                {
                     yield return runningStep.AbortStep();
+                }
                 else
+                {
                     yield return runningStep.OnStepPlayAnimationForHidding();
+                }
 
                 runningStep.OnStepFinished();
                 Destroy(runningStep.gameObject);
@@ -143,6 +158,21 @@ namespace DCL.Tutorial
         public void SetTimeBetweenSteps(float newTime)
         {
             timeBetweenSteps = newTime;
+        }
+
+        public void ShowTeacher3DModel(bool active)
+        {
+            teacherRawImage.gameObject.SetActive(active);
+        }
+
+        public void SetTeacherPosition(Vector2 position)
+        {
+            teacherRawImage.rectTransform.position = position;
+        }
+
+        public void PlayTeacherAnimation(TutorialTeacher.TeacherAnimation animation)
+        {
+            teacher.PlayAnimation(animation);
         }
 
         private int GetTutorialStepFromProfile()

@@ -24,12 +24,14 @@ namespace DCL.Tutorial
         {
             base.OnStepStart();
 
-            TutorialController.i?.SetTimeBetweenSteps(0);
+            tutorialController?.SetTimeBetweenSteps(0);
         }
 
         public override IEnumerator OnStepExecute()
         {
             yield return new WaitUntil(() => timeRunning >= minRunningTime);
+
+            tutorialController.PlayTeacherAnimation(TutorialTeacher.TeacherAnimation.Goodbye);
         }
     }
 }

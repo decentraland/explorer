@@ -55,7 +55,7 @@ namespace DCL.Tutorial
 
         private void CloseTutorial()
         {
-            TutorialController.i.SkipAllSteps();
+            tutorialController?.SkipAllSteps();
         }
     }
 }

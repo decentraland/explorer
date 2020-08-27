@@ -24,6 +24,8 @@ namespace DCL.Tutorial
         public override IEnumerator OnStepExecute()
         {
             yield return new WaitUntil(() => timeWalking >= minWalkingTime);
+
+            tutorialController.PlayTeacherAnimation(TutorialTeacher.TeacherAnimation.Goodbye);
         }
     }
 }

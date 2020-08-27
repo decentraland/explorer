@@ -36,6 +36,8 @@ namespace DCL.Tutorial
         public override IEnumerator OnStepExecute()
         {
             yield return new WaitUntil(() => stepIsFinished);
+
+            tutorialController.PlayTeacherAnimation(TutorialTeacher.TeacherAnimation.Goodbye);
         }
 
         public override void OnStepFinished()
@@ -51,7 +53,7 @@ namespace DCL.Tutorial
             if (!skipConfirmationIsActive)
                 stepIsFinished = true;
             else
-                TutorialController.i?.SkipAllSteps();
+                tutorialController?.SkipAllSteps();
         }
 
         private void CancelInputAction_OnFinished(DCLAction_Hold action)

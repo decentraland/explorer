@@ -15,26 +15,28 @@ namespace DCL.Tutorial
         {
             base.OnStepStart();
 
-            if (TutorialController.i.hudController != null)
+            if (tutorialController != null && tutorialController.hudController != null)
             {
-                TutorialController.i.hudController.friendsHud.OnFriendsOpened += FriendsHud_OnFriendsOpened;
-                TutorialController.i.hudController.friendsHud.OnFriendsClosed += FriendsHud_OnFriendsClosed;
+                tutorialController.hudController.friendsHud.OnFriendsOpened += FriendsHud_OnFriendsOpened;
+                tutorialController.hudController.friendsHud.OnFriendsClosed += FriendsHud_OnFriendsClosed;
             }
         }
 
         public override IEnumerator OnStepExecute()
         {
             yield return new WaitUntil(() => friendsHasBeenOpened && friendsHasBeenClosed);
+
+            tutorialController.PlayTeacherAnimation(TutorialTeacher.TeacherAnimation.Goodbye);
         }
 
         public override void OnStepFinished()
         {
             base.OnStepFinished();
 
-            if (TutorialController.i.hudController != null)
+            if (tutorialController != null && tutorialController.hudController != null)
             {
-                TutorialController.i.hudController.friendsHud.OnFriendsOpened -= FriendsHud_OnFriendsOpened;
-                TutorialController.i.hudController.friendsHud.OnFriendsClosed -= FriendsHud_OnFriendsClosed;
+                tutorialController.hudController.friendsHud.OnFriendsOpened -= FriendsHud_OnFriendsOpened;
+                tutorialController.hudController.friendsHud.OnFriendsClosed -= FriendsHud_OnFriendsClosed;
             }
         }
 

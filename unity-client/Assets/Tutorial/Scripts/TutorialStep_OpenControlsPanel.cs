@@ -15,28 +15,30 @@ namespace DCL.Tutorial
         {
             base.OnStepStart();
 
-            if (TutorialController.i.hudController != null)
+            if (tutorialController != null && tutorialController.hudController != null)
             {
-                TutorialController.i.hudController.controlsHud.OnControlsOpened += ControlsHud_OnControlsOpened;
-                TutorialController.i.hudController.controlsHud.OnControlsClosed += ControlsHud_OnControlsClosed;
+                tutorialController.hudController.controlsHud.OnControlsOpened += ControlsHud_OnControlsOpened;
+                tutorialController.hudController.controlsHud.OnControlsClosed += ControlsHud_OnControlsClosed;
             }
 
-            TutorialController.i?.SetTimeBetweenSteps(0.5f);
+            tutorialController?.SetTimeBetweenSteps(0.5f);
         }
 
         public override IEnumerator OnStepExecute()
         {
             yield return new WaitUntil(() => controlsHasBeenOpened && controlsHasBeenClosed);
+
+            tutorialController.PlayTeacherAnimation(TutorialTeacher.TeacherAnimation.QuickGoodbye);
         }
 
         public override void OnStepFinished()
         {
             base.OnStepFinished();
 
-            if (TutorialController.i.hudController != null)
+            if (tutorialController != null && tutorialController.hudController != null)
             {
-                TutorialController.i.hudController.controlsHud.OnControlsOpened -= ControlsHud_OnControlsOpened;
-                TutorialController.i.hudController.controlsHud.OnControlsClosed -= ControlsHud_OnControlsClosed;
+                tutorialController.hudController.controlsHud.OnControlsOpened -= ControlsHud_OnControlsOpened;
+                tutorialController.hudController.controlsHud.OnControlsClosed -= ControlsHud_OnControlsClosed;
             }
         }
 
