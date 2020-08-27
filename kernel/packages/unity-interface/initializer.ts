@@ -13,6 +13,8 @@ export type InitializeUnityResult = {
   instancedJS: Promise<UnityInterfaceContainer>
 }
 
+const queryString = require('query-string')
+
 /** Initialize the engine in a container */
 export async function initializeUnity(
   container: HTMLElement,
@@ -20,7 +22,8 @@ export async function initializeUnity(
 ): Promise<InitializeUnityResult> {
   initShared()
 
-  globalThis.globalStore.dispatch(initializeRenderer(container, buildConfigPath))
+  const qs = queryString.parse(document.location.search)
+  globalThis.globalStore.dispatch(initializeRenderer(container, buildConfigPath, qs.ws))
   ;(window as any).USE_UNITY_INDEXED_DB_CACHE = USE_UNITY_INDEXED_DB_CACHE
 
   await rendererEnabled()

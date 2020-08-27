@@ -89,12 +89,12 @@ function debuggingDecorator(_gameInstance: GameInstance) {
  *
  * @param _gameInstance Unity game instance
  */
-export async function initializeEngine(_gameInstance: GameInstance) {
+export async function initializeEngine(_gameInstance: GameInstance, webSocketUrl: string | undefined) {
   gameInstance = debuggingDecorator(_gameInstance)
 
   setLoadingScreenVisible(true)
 
-  unityInterface.Init(_gameInstance)
+  unityInterface.Init(_gameInstance, webSocketUrl)
 
   unityInterface.DeactivateRendering()
 

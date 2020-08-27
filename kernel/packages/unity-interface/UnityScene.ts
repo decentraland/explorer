@@ -1,5 +1,5 @@
 import { EventDispatcher } from 'decentraland-rpc/lib/common/core/EventDispatcher'
-import { WSS_ENABLED, FORCE_SEND_MESSAGE, DEBUG_MESSAGES_QUEUE_PERF, DEBUG_SCENE_LOG } from 'config'
+import { FORCE_SEND_MESSAGE, DEBUG_MESSAGES_QUEUE_PERF, DEBUG_SCENE_LOG } from 'config'
 import { IEventNames, IEvents } from '../decentraland-ecs/src/decentraland/Types'
 import { createLogger, ILogger, createDummyLogger } from 'shared/logger'
 import { EntityAction, EnvironmentData } from 'shared/types'
@@ -28,7 +28,7 @@ export class UnityScene<T> implements ParcelSceneAPI {
 
   sendBatch(actions: EntityAction[]): void {
     let time = Date.now()
-    if (WSS_ENABLED || FORCE_SEND_MESSAGE) {
+    if (unityInterface.isWebSocketEnabled || FORCE_SEND_MESSAGE) {
       this.sendBatchWss(unityInterface, actions)
     } else {
       this.sendBatchNative(actions)

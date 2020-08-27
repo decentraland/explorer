@@ -1,5 +1,4 @@
 import { TeleportController } from 'shared/world/TeleportController'
-import { WSS_ENABLED } from 'config'
 import { Vector3 } from '../decentraland-ecs/src/decentraland/math'
 import { ProfileForRenderer, MinimapSceneInfo } from '../decentraland-ecs/src/decentraland/Types'
 import { AirdropInfo } from 'shared/airdrops/interface'
@@ -64,6 +63,7 @@ export class UnityInterface {
   public debug: boolean = false
   public gameInstance: any
   public Module: any
+  public isWebSocketEnabled: boolean = false
 
   public SetTargetHeight(height: number): void {
     if (targetHeight === height) {
@@ -81,8 +81,9 @@ export class UnityInterface {
     window.dispatchEvent(new Event('resize'))
   }
 
-  public Init(gameInstance: any): void {
-    if (!WSS_ENABLED) {
+  public Init(gameInstance: any, webSocketUrl: string | undefined): void {
+    this.isWebSocketEnabled = webSocketUrl !== undefined
+    if (!this.isWebSocketEnabled) {
       nativeMsgBridge.initNativeMessages(gameInstance)
     }
 

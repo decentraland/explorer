@@ -20,8 +20,6 @@ import {
   rendererEnabled
 } from './actions'
 
-const queryString = require('query-string')
-
 declare const globalThis: StoreContainer
 declare const UnityLoader: UnityLoaderType
 declare const global: any
@@ -41,18 +39,16 @@ export function* rendererSaga() {
   const _gameInstance = yield call(initializeRenderer, action)
 
   yield take(ENGINE_STARTED)
-  _instancedJS = yield call(wrapEngineInstance, _gameInstance)
+  _instancedJS = yield call(wrapEngineInstance, _gameInstance, action.payload.webSocketUrl)
 }
 
 function* initializeRenderer(action: InitializeRenderer) {
   const { container, buildConfigPath } = action.payload
 
-  const qs = queryString.parse(document.location.search)
-
   preventUnityKeyboardLock()
 
-  if (qs.ws) {
-    _gameInstance = initializeUnityEditor(qs.ws, container)
+  if (action.payload.webSocketUrl) {
+    _gameInstance = initializeUnityEditor(action.payload.webSocketUrl, container)
   } else {
     _gameInstance = UnityLoader.instantiate(container, buildConfigPath)
   }
@@ -62,12 +58,12 @@ function* initializeRenderer(action: InitializeRenderer) {
   return _gameInstance
 }
 
-function* wrapEngineInstance(_gameInstance: UnityGame) {
+function* wrapEngineInstance(_gameInstance: UnityGame, webSocketUrl: string | undefined) {
   if (!_gameInstance) {
     throw new Error('There is no UnityGame')
   }
 
-  const _instancedJS: ReturnType<typeof initializeEngine> = initializeEngine(_gameInstance)
+  const _instancedJS: ReturnType<typeof initializeEngine> = initializeEngine(_gameInstance, webSocketUrl)
 
   _instancedJS
     .then(($) => {
