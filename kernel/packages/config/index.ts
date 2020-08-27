@@ -93,6 +93,7 @@ export const STATIC_WORLD = location.search.indexOf('STATIC_WORLD') !== -1 || !!
 // Development
 export const ENABLE_WEB3 = location.search.indexOf('ENABLE_WEB3') !== -1 || !!(global as any).enableWeb3
 export const ENV_OVERRIDE = location.search.indexOf('ENV') !== -1
+export const GIF_WORKERS = location.search.indexOf('GIF_WORKERS') !== -1
 
 const qs = queryString.parse(location.search)
 
@@ -137,6 +138,8 @@ export const HAS_INITIAL_POSITION_MARK = location.search.indexOf('position') !==
 export const NO_ASSET_BUNDLES = location.search.indexOf('NO_ASSET_BUNDLES') !== -1
 export const WSS_ENABLED = qs.ws !== undefined
 export const FORCE_SEND_MESSAGE = location.search.indexOf('FORCE_SEND_MESSAGE') !== -1
+
+export const ENABLE_EXPLORE_HUD = location.search.indexOf('ENABLE_EXPLORE_HUD') !== -1
 
 export const PIN_CATALYST = qs.PIN_CATALYST
 
