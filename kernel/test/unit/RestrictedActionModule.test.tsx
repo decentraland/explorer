@@ -2,29 +2,12 @@ import * as sinon from 'sinon'
 import { Vector3 } from 'decentraland-ecs/src'
 import { unityInterface } from '../../packages/unity-interface/UnityInterface'
 import defaultLogger from '../../packages/shared/logger'
-import { RestrictedActionModule } from '../../packages/shared/apis/RestrictedActionModule'
+import { RestrictedActionModule, Permission } from '../../packages/shared/apis/RestrictedActionModule'
 
 describe('RestrictedActionModule tests', () => {
   describe('MovePlayerTo tests', () => {
     afterEach(() => sinon.restore())
-    const scene = {
-      land: {
-        sceneJsonData: {
-          display: { title: 'interactive-text', favicon: 'favicon_asset' },
-          contact: { name: 'Ezequiel', email: 'ezequiel@decentraland.org' },
-          owner: 'decentraland',
-          scene: { parcels: ['0,101'], base: '0,101' },
-          communications: { type: 'webrtc', signalling: 'https://signalling-01.decentraland.org' },
-          policy: { contentRating: 'E', fly: true, voiceEnabled: true, blacklist: [] },
-          main: 'game.js',
-          tags: [],
-          requiredPermissions: ['ALLOW_TO_MOVE_PLAYER_INSIDE_SCENE'],
-          spawnPoints: [
-            { name: 'spawn1', default: true, position: { x: 0, y: 0, z: 0 }, cameraTarget: { x: 8, y: 1, z: 8 } }
-          ]
-        }
-      }
-    }
+
     const options = {
       apiName: '',
       system: null,
@@ -34,8 +17,34 @@ describe('RestrictedActionModule tests', () => {
       getAPIInstance(name): any {}
     }
 
+    const buildParcelIdentity = (permissions = []) => {
+      return {
+        land: {
+          sceneJsonData: {
+            display: { title: 'interactive-text', favicon: 'favicon_asset' },
+            contact: { name: 'Ezequiel', email: 'ezequiel@decentraland.org' },
+            owner: 'decentraland',
+            scene: { parcels: ['0,101'], base: '0,101' },
+            communications: { type: 'webrtc', signalling: 'https://signalling-01.decentraland.org' },
+            policy: { contentRating: 'E', fly: true, voiceEnabled: true, blacklist: [] },
+            main: 'game.js',
+            tags: [],
+            requiredPermissions: permissions,
+            spawnPoints: [
+              { name: 'spawn1', default: true, position: { x: 0, y: 0, z: 0 }, cameraTarget: { x: 8, y: 1, z: 8 } }
+            ]
+          }
+        }
+      }
+    }
+
     it('should move the player', async () => {
-      sinon.mock(options).expects('getAPIInstance').withArgs().once().returns(scene)
+      sinon
+        .mock(options)
+        .expects('getAPIInstance')
+        .withArgs()
+        .once()
+        .returns(buildParcelIdentity([Permission.ALLOW_TO_MOVE_PLAYER_INSIDE_SCENE]))
 
       sinon
         .mock(unityInterface)
@@ -50,7 +59,12 @@ describe('RestrictedActionModule tests', () => {
     })
 
     it('should fail when position is outside scene', async () => {
-      sinon.mock(options).expects('getAPIInstance').withArgs().once().returns(scene)
+      sinon
+        .mock(options)
+        .expects('getAPIInstance')
+        .withArgs()
+        .once()
+        .returns(buildParcelIdentity([Permission.ALLOW_TO_MOVE_PLAYER_INSIDE_SCENE]))
       sinon
         .mock(defaultLogger)
         .expects('error')
@@ -66,10 +80,7 @@ describe('RestrictedActionModule tests', () => {
     })
 
     it('should fail when scene does not have permissions', async () => {
-      // remove permissions
-      scene.land.sceneJsonData.requiredPermissions = []
-
-      sinon.mock(options).expects('getAPIInstance').withArgs().once().returns(scene)
+      sinon.mock(options).expects('getAPIInstance').withArgs().once().returns(buildParcelIdentity([]))
       sinon.mock(unityInterface).expects('Teleport').never()
       sinon
         .mock(defaultLogger)

@@ -6,7 +6,7 @@ import { ParcelIdentity } from './ParcelIdentity'
 import { Vector3 } from 'decentraland-ecs/src'
 import { gridToWorld, isInParcel, parseParcelPosition } from '../../atomicHelpers/parcelScenePositions'
 
-enum Permission {
+export enum Permission {
   ALLOW_TO_MOVE_PLAYER_INSIDE_SCENE = 'ALLOW_TO_MOVE_PLAYER_INSIDE_SCENE'
 }
 
