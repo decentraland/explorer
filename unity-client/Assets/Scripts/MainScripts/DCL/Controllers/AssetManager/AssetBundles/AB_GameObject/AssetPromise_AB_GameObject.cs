@@ -140,16 +140,18 @@ namespace DCL
                     break;
 
                 GameObject assetBundleModelGO = UnityEngine.Object.Instantiate(goList[i], asset.container.transform);
-                var list = new List<Renderer>(assetBundleModelGO.GetComponentsInChildren<Renderer>(true));
+
+                List<Renderer> renderers = new List<Renderer>(assetBundleModelGO.GetComponentsInChildren<Renderer>(true));
 
                 //NOTE(Brian): Renderers are enabled in settings.ApplyAfterLoad
-                yield return MaterialCachingHelper.Process(list, enableRenderers: false, settings.cachingFlags);
+                yield return MaterialCachingHelper.Process(renderers, enableRenderers: false, settings.cachingFlags);
 
                 var animators = assetBundleModelGO.GetComponentsInChildren<Animation>(true);
 
                 for (int animIndex = 0; animIndex < animators.Length; animIndex++)
                 {
                     animators[animIndex].cullingType = AnimationCullingType.BasedOnRenderers;
+                    asset.hasAnimation = true;
                 }
 
 #if UNITY_EDITOR

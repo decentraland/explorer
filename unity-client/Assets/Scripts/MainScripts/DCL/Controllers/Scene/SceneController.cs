@@ -121,6 +121,7 @@ namespace DCL
             CommonScriptableObjects.rendererState.OnChange -= OnRenderingStateChange;
             DCLCharacterController.OnCharacterMoved -= SetPositionDirty;
             ParcelScene.parcelScenesCleaner.Stop();
+            Environment.i.Dispose();
         }
 
 

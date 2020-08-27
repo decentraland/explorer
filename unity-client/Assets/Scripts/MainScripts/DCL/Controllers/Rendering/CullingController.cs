@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace DCL
@@ -9,7 +10,7 @@ namespace DCL
     ///     - Handling animation culling setting depending on distance
     ///     - Any LOD related tasks 
     /// </summary>
-    public class CullingController
+    public class CullingController : IDisposable
     {
         private RendererTracker animationCullingTracker;
         private Dictionary<Renderer, Animation> animatorsCache = new Dictionary<Renderer, Animation>();
@@ -20,16 +21,36 @@ namespace DCL
             animationCullingTracker.OnRendererChangeState += AnimationCullingTracker_OnChangeState;
         }
 
+        public void AddAnimatedRenderer(Renderer r)
+        {
+            if (!animatorsCache.ContainsKey(r))
+            {
+                var anim = r.GetComponentInParent<Animation>();
+
+                if (anim != null)
+                {
+                    animatorsCache.Add(r, anim);
+                    animationCullingTracker.AddRenderer(r);
+                }
+            }
+        }
+
+        public void AddAnimatedRenderers(Renderer[] rs)
+        {
+            for (int i = 0; i < rs.Length; i++)
+            {
+                AddAnimatedRenderer(rs[i]);
+            }
+        }
+
+
         public void AddRenderer(Renderer r)
         {
-            if (r is SkinnedMeshRenderer)
-                animationCullingTracker.AddRenderer(r);
         }
 
         public void RemoveRenderer(Renderer r)
         {
-            if (r is SkinnedMeshRenderer)
-                animationCullingTracker.RemoveRenderer(r);
+            animationCullingTracker.RemoveRenderer(r);
         }
 
         public void AddRenderers(Renderer[] rs)
@@ -62,13 +83,15 @@ namespace DCL
 
         private void AnimationCullingTracker_OnChangeState(Renderer r, CullingGroupEvent e)
         {
-            if (!animatorsCache.ContainsKey(r))
-            {
-                var anim = r.GetComponentInParent<Animation>();
-                animatorsCache[r] = anim;
-            }
+            if (animatorsCache[r] == null)
+                return;
 
             animatorsCache[r].cullingType = e.currentDistance == 0 ? AnimationCullingType.AlwaysAnimate : AnimationCullingType.BasedOnRenderers;
+        }
+
+        public void Dispose()
+        {
+            animationCullingTracker?.Dispose();
         }
     }
 }

@@ -8,11 +8,10 @@ namespace DCL
     {
         internal AssetPromise_AB ownerPromise;
         public override GameObject container { get; set; }
-        public bool isInstantiated;
+        public override bool hasAnimation { get; set; }
 
         public Asset_AB_GameObject()
         {
-            isInstantiated = false;
             container = new GameObject("AB Container");
             // Hide gameobject until it's been correctly processed, otherwise it flashes at 0,0,0
             container.transform.position = EnvironmentSettings.MORDOR;

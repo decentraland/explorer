@@ -5,6 +5,7 @@ namespace DCL
     public abstract class Asset_WithPoolableContainer : Asset
     {
         public abstract GameObject container { get; set; }
+        public abstract bool hasAnimation { get; set; }
     }
 
     /// <summary>

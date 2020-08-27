@@ -1,8 +1,9 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace DCL
 {
-    public class Environment
+    public class Environment : IDisposable
     {
         public static readonly Environment i = new Environment();
 
@@ -33,8 +34,12 @@ namespace DCL
         public void Restart(IMessageProcessHandler messageHandler)
         {
             messagingControllersManager.Cleanup();
-
             this.Initialize(messageHandler);
+        }
+
+        public void Dispose()
+        {
+            cullingController.Dispose();
         }
     }
 }

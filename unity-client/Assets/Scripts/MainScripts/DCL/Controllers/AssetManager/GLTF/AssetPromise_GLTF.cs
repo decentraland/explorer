@@ -1,4 +1,5 @@
 using DCL.Helpers;
+using UnityEngine;
 using UnityGLTF;
 
 namespace DCL
@@ -35,6 +36,7 @@ namespace DCL
         protected override void OnAfterLoadOrReuse()
         {
             settings.ApplyAfterLoad(asset.container.transform);
+            asset.hasAnimation = asset.container.GetComponentsInChildren<Animation>() != null;
         }
 
         public override object GetId()

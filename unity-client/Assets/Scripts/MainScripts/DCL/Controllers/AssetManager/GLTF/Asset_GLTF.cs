@@ -7,9 +7,10 @@ namespace DCL
     public class Asset_GLTF : Asset_WithPoolableContainer
     {
         public override GameObject container { get; set; }
+        public override bool hasAnimation { get; set; }
+
         public string name;
         public bool visible = true;
-
         Coroutine showCoroutine;
 
         public Asset_GLTF()
