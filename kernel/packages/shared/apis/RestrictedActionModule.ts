@@ -1,9 +1,9 @@
 import { exposeMethod, registerAPI } from 'decentraland-rpc/lib/host'
 import { ExposableAPI } from './ExposableAPI'
 import defaultLogger from '../logger'
-import { unityInterface } from '../../unity-interface/UnityInterface'
+import { unityInterface } from 'unity-interface/UnityInterface'
 import { ParcelIdentity } from './ParcelIdentity'
-import { Vector3 } from '../../decentraland-ecs/src/decentraland/math'
+import { Vector3 } from 'decentraland-ecs/src'
 import { gridToWorld, isInParcel, parseParcelPosition } from '../../atomicHelpers/parcelScenePositions'
 
 enum Permission {
