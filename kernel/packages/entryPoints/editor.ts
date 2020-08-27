@@ -289,6 +289,10 @@ namespace editor {
   export function onKeyDown(key: string) {
     unityInterface.OnBuilderKeyDown(key)
   }
+
+  export function setBuilderCanvasSize(width: number, height: number) {
+    unityInterface.SetBuilderCanvasSize(width, height)
+  }
 }
 
 global.editor = editor
