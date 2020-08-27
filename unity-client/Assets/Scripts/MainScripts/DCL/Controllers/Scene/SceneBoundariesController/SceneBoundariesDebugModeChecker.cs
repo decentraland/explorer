@@ -157,7 +157,11 @@ namespace DCL.Controllers
         protected override void OnRemoveEntity(DecentralandEntity entity)
         {
             base.OnRemoveEntity(entity);
-            RemoveInvalidMeshEffect(entity);
+
+            if (entity.gameObject != null)
+            {
+                RemoveInvalidMeshEffect(entity);
+            }
         }
     }
 }
