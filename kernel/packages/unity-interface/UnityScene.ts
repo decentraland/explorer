@@ -28,7 +28,7 @@ export class UnityScene<T> implements ParcelSceneAPI {
 
   sendBatch(actions: EntityAction[]): void {
     let time = Date.now()
-    if (WSS_ENABLED || FORCE_SEND_MESSAGE) {
+    if (WSS_ENABLED() || FORCE_SEND_MESSAGE) {
       this.sendBatchWss(unityInterface, actions)
     } else {
       this.sendBatchNative(actions)

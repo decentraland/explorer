@@ -82,7 +82,7 @@ export class UnityInterface {
   }
 
   public Init(gameInstance: any): void {
-    if (!WSS_ENABLED) {
+    if (!WSS_ENABLED()) {
       nativeMsgBridge.initNativeMessages(gameInstance)
     }
 
