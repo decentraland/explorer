@@ -11,8 +11,7 @@ namespace DCL.Components
         [System.Serializable]
         public class Model
         {
-            [Range(0f, 1f)]
-            public float alphaTest = 0.5f;
+            [Range(0f, 1f)] public float alphaTest = 0.5f;
 
             public Color albedoColor = Color.white;
             public string albedoTexture;
@@ -34,8 +33,7 @@ namespace DCL.Components
             public string refractionTexture;
             public bool disableLighting = false;
 
-            [Range(0, 4)]
-            public int transparencyMode = 4; // 0: OPAQUE; 1: ALPHATEST; 2: ALPHBLEND; 3: ALPHATESTANDBLEND; 4: AUTO (Engine decide)
+            [Range(0, 4)] public int transparencyMode = 4; // 0: OPAQUE; 1: ALPHATEST; 2: ALPHBLEND; 3: ALPHATESTANDBLEND; 4: AUTO (Engine decide)
         }
 
         enum TransparencyMode
@@ -62,7 +60,7 @@ namespace DCL.Components
         {
             model = new Model();
 
-            LoadMaterial("ShapeMaterial");
+            LoadMaterial(PBR_MATERIAL_NAME);
 
             OnAttach += OnMaterialAttached;
             OnDetach += OnMaterialDetached;
@@ -77,6 +75,9 @@ namespace DCL.Components
 
             entity.RemoveSharedComponent(typeof(BasicMaterial));
 
+#if UNITY_EDITOR
+            material.name = "PBRMaterial_" + id;
+#endif
             base.AttachTo(entity);
         }
 
@@ -123,13 +124,12 @@ namespace DCL.Components
 
         private void SetupTransparencyMode()
         {
-
             // Reset shader keywords
             material.DisableKeyword("_ALPHATEST_ON"); // Cut Out Transparency
             material.DisableKeyword("_ALPHABLEND_ON"); // Fade Transparency
             material.DisableKeyword("_ALPHAPREMULTIPLY_ON"); // Transparent
 
-            TransparencyMode transparencyMode = (TransparencyMode)model.transparencyMode;
+            TransparencyMode transparencyMode = (TransparencyMode) model.transparencyMode;
 
             if (transparencyMode == TransparencyMode.AUTO)
             {
@@ -146,36 +146,36 @@ namespace DCL.Components
             switch (transparencyMode)
             {
                 case TransparencyMode.OPAQUE:
-                    material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Geometry;
+                    material.renderQueue = (int) UnityEngine.Rendering.RenderQueue.Geometry;
                     material.SetFloat("_AlphaClip", 0);
                     break;
                 case TransparencyMode.ALPHA_TEST: // ALPHATEST
                     material.EnableKeyword("_ALPHATEST_ON");
 
-                    material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
-                    material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.Zero);
+                    material.SetInt("_SrcBlend", (int) UnityEngine.Rendering.BlendMode.One);
+                    material.SetInt("_DstBlend", (int) UnityEngine.Rendering.BlendMode.Zero);
                     material.SetInt("_ZWrite", 1);
                     material.SetFloat("_AlphaClip", 1);
                     material.SetFloat("_Cutoff", model.alphaTest);
-                    material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.AlphaTest;
+                    material.renderQueue = (int) UnityEngine.Rendering.RenderQueue.AlphaTest;
                     break;
                 case TransparencyMode.ALPHA_BLEND: // ALPHABLEND
                     material.EnableKeyword("_ALPHABLEND_ON");
 
-                    material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
-                    material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                    material.SetInt("_SrcBlend", (int) UnityEngine.Rendering.BlendMode.SrcAlpha);
+                    material.SetInt("_DstBlend", (int) UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
                     material.SetInt("_ZWrite", 0);
                     material.SetFloat("_AlphaClip", 0);
-                    material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
+                    material.renderQueue = (int) UnityEngine.Rendering.RenderQueue.Transparent;
                     break;
                 case TransparencyMode.ALPHA_TEST_AND_BLEND:
                     material.EnableKeyword("_ALPHAPREMULTIPLY_ON");
 
-                    material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
-                    material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                    material.SetInt("_SrcBlend", (int) UnityEngine.Rendering.BlendMode.One);
+                    material.SetInt("_DstBlend", (int) UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
                     material.SetInt("_ZWrite", 0);
                     material.SetFloat("_AlphaClip", 1);
-                    material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
+                    material.renderQueue = (int) UnityEngine.Rendering.RenderQueue.Transparent;
                     break;
             }
         }
@@ -186,7 +186,7 @@ namespace DCL.Components
             {
                 if (material != null)
                 {
-                    UnityEngine.Object.Destroy(material);
+                    Object.Destroy(material);
                 }
 
                 material = new Material(Utils.EnsureResourcesMaterial(MATERIAL_RESOURCES_PATH + name));
@@ -226,13 +226,12 @@ namespace DCL.Components
 
                 if (matTransition != null && matTransition.canSwitchMaterial)
                 {
-                    matTransition.finalMaterials = new Material[] { material };
+                    matTransition.finalMaterials = new Material[] {material};
                     matTransition.PopulateTargetRendererWithMaterial(matTransition.finalMaterials);
                 }
 
                 meshRenderer.sharedMaterial = material;
                 SRPBatchingHelper.OptimizeMaterial(meshRenderer, material);
-
             }
         }
 
