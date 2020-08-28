@@ -42,8 +42,8 @@ namespace DCL.Tutorial
                 mouseCatcher?.UnlockCursor();
 
             tutorialController?.ShowTeacher3DModel(show3DTeacherAtStart);
-            //if (show3DTeacherAtStart && teacherPositionRef != null)
-            //    tutorialController?.SetTeacherPosition(teacherPositionRef.position);
+            if (show3DTeacherAtStart && teacherPositionRef != null)
+                tutorialController?.SetTeacherPosition(teacherPositionRef.position);
         }
 
         /// <summary>
