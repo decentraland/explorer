@@ -3,6 +3,7 @@ using DCL.Components;
 using DCL.Helpers;
 using DCL.Models;
 using System.Collections;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.TestTools;
@@ -24,7 +25,7 @@ public class PBRMaterialShould : TestsBase
 
         yield return texture.routine;
 
-        PBRMaterial matPBR = TestHelpers.CreateEntityWithPBRMaterial(scene,
+        PBRMaterial mat = TestHelpers.CreateEntityWithPBRMaterial(scene,
             new PBRMaterial.Model
             {
                 albedoTexture = texture.id,
@@ -33,9 +34,9 @@ public class PBRMaterialShould : TestsBase
             },
             out DecentralandEntity entity1);
 
-        yield return matPBR.routine;
+        yield return mat.routine;
 
-        PBRMaterial matPBR2 = TestHelpers.CreateEntityWithPBRMaterial(scene,
+        PBRMaterial mat2 = TestHelpers.CreateEntityWithPBRMaterial(scene,
             new PBRMaterial.Model
             {
                 albedoTexture = texture.id,
@@ -44,10 +45,9 @@ public class PBRMaterialShould : TestsBase
             },
             out DecentralandEntity entity2);
 
-        yield return matPBR2.routine;
+        yield return mat2.routine;
 
-        TestHelpers.RemoveSceneEntity(scene, entity1);
-
+        TestHelpers.SharedComponentDispose(mat);
         Assert.IsTrue(texture.texture != null, "Texture should persist because is used by the other material!!");
     }
 
@@ -248,47 +248,42 @@ public class PBRMaterialShould : TestsBase
     public IEnumerator AffectDifferentEntitiesCorrectly()
     {
         // Create first entity with material
-        string firstEntityID = "1";
-        string firstMaterialID = "a-material";
-
-        TestHelpers.InstantiateEntityWithMaterial(scene, firstEntityID, Vector3.zero,
-            new DCL.Components.PBRMaterial.Model
+        PBRMaterial material1 = TestHelpers.CreateEntityWithPBRMaterial(scene,
+            new PBRMaterial.Model
             {
                 metallic = 0.3f,
-            }, firstMaterialID);
+            }, out DecentralandEntity entity1);
 
-        Assert.IsTrue(scene.entities[firstEntityID].meshRootGameObject != null,
+        Assert.IsTrue(entity1.meshRootGameObject != null,
             "Every entity with a shape should have the mandatory 'Mesh' object as a child");
 
         // Create second entity with material
-        string secondEntityID = "2";
-        string secondMaterialID = "b-material";
-
-        TestHelpers.InstantiateEntityWithMaterial(scene, secondEntityID, Vector3.zero,
-            new DCL.Components.PBRMaterial.Model
+        PBRMaterial material2 = TestHelpers.CreateEntityWithPBRMaterial(scene,
+            new PBRMaterial.Model
             {
                 metallic = 0.66f,
-            }, secondMaterialID);
+            }, out DecentralandEntity entity2);
 
-        Assert.IsTrue(scene.entities[secondEntityID].meshRootGameObject != null,
+        Assert.IsTrue(entity2.meshRootGameObject != null,
             "Every entity with a shape should have the mandatory 'Mesh' object as a child");
 
         // Create third entity and assign 1st material
-        string thirdEntityID = "3";
+        var boxShape = TestHelpers.CreateEntityWithBoxShape(scene, Vector3.zero);
+        var entity3 = boxShape.attachedEntities.First();
 
-        TestHelpers.InstantiateEntityWithShape(scene, thirdEntityID, DCL.Models.CLASS_ID.BOX_SHAPE, Vector3.zero);
         scene.SharedComponentAttach(
-            thirdEntityID,
-            firstMaterialID
+            entity3.entityId,
+            material1.id
         );
 
-        Assert.IsTrue(scene.entities[thirdEntityID].meshRootGameObject != null,
+        Assert.IsTrue(entity3.meshRootGameObject != null,
             "Every entity with a shape should have the mandatory 'Mesh' object as a child");
 
         // Check renderers material references
-        var firstRenderer = scene.entities[firstEntityID].meshRootGameObject.GetComponent<MeshRenderer>();
-        var secondRenderer = scene.entities[secondEntityID].meshRootGameObject.GetComponent<MeshRenderer>();
-        var thirdRenderer = scene.entities[thirdEntityID].meshRootGameObject.GetComponent<MeshRenderer>();
+        var firstRenderer = entity1.meshRootGameObject.GetComponent<MeshRenderer>();
+        var secondRenderer = entity2.meshRootGameObject.GetComponent<MeshRenderer>();
+        var thirdRenderer = entity3.meshRootGameObject.GetComponent<MeshRenderer>();
+
         Assert.IsTrue(firstRenderer.sharedMaterial != secondRenderer.sharedMaterial,
             "1st and 2nd entities should have different materials");
         Assert.IsTrue(firstRenderer.sharedMaterial == thirdRenderer.sharedMaterial,
@@ -299,12 +294,12 @@ public class PBRMaterialShould : TestsBase
         Assert.AreApproximatelyEqual(0.66f, secondRenderer.sharedMaterial.GetFloat("_Metallic"));
 
         // Update material properties
-        scene.SharedComponentUpdate(firstMaterialID, JsonUtility.ToJson(new PBRMaterial.Model
+        scene.SharedComponentUpdate(material1.id, JsonUtility.ToJson(new PBRMaterial.Model
         {
             metallic = 0.95f
         }));
 
-        yield return (scene.disposableComponents[firstMaterialID] as PBRMaterial).routine;
+        yield return material1.routine;
 
         // Check material properties after updating them
         Assert.AreApproximatelyEqual(0.95f, firstRenderer.sharedMaterial.GetFloat("_Metallic"));

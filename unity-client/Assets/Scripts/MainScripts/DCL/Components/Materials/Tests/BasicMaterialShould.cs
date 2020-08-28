@@ -44,10 +44,7 @@ public class BasicMaterialShould : TestsBase
 
         yield return mat2.routine;
 
-        texture.Dispose();
-
-        yield return null;
-
+        TestHelpers.SharedComponentDispose(mat);
         Assert.IsTrue(texture.texture != null, "Texture should persist because is used by the other material!!");
     }
 
