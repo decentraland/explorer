@@ -47,6 +47,7 @@ namespace DCL.Components
 
         public Model model = new Model();
         public Material material { get; set; }
+        private string currentMaterialResourcesFilename;
 
         const string MATERIAL_RESOURCES_PATH = "Materials/";
         const string BASIC_MATERIAL_NAME = "BasicShapeMaterial";
@@ -74,10 +75,6 @@ namespace DCL.Components
             }
 
             entity.RemoveSharedComponent(typeof(BasicMaterial));
-
-#if UNITY_EDITOR
-            material.name = "PBRMaterial_" + id;
-#endif
             base.AttachTo(entity);
         }
 
@@ -180,17 +177,19 @@ namespace DCL.Components
             }
         }
 
-        private void LoadMaterial(string name)
+
+        private void LoadMaterial(string resourcesFilename)
         {
-            if (material == null || material.name != name)
+            if (material == null || currentMaterialResourcesFilename != resourcesFilename)
             {
                 if (material != null)
                     Object.Destroy(material);
 
-                material = new Material(Utils.EnsureResourcesMaterial(MATERIAL_RESOURCES_PATH + name));
-                material.name = name;
-                
-                
+                material = new Material(Utils.EnsureResourcesMaterial(MATERIAL_RESOURCES_PATH + resourcesFilename));
+#if UNITY_EDITOR
+                material.name = "PBRMaterial_" + id;
+#endif
+                currentMaterialResourcesFilename = resourcesFilename;
             }
         }
 

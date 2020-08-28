@@ -39,11 +39,6 @@ namespace DCL.Components
                 return;
 
             entity.RemoveSharedComponent(typeof(PBRMaterial));
-
-#if UNITY_EDITOR
-            material.name = "BasicMaterial_" + id;
-#endif
-
             base.AttachTo(entity);
         }
 
@@ -53,6 +48,10 @@ namespace DCL.Components
             {
                 yield break; // We escape ApplyChanges called in the parent's constructor
             }
+
+#if UNITY_EDITOR
+            material.name = "BasicMaterial_" + id;
+#endif
 
             model = SceneController.i.SafeFromJson<Model>(newJson);
 

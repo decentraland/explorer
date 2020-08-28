@@ -299,8 +299,11 @@ public class PBRMaterialShould : TestsBase
             metallic = 0.95f
         }));
 
+        Assert.IsTrue(firstRenderer.sharedMaterial != null);
+
         yield return material1.routine;
 
+        Assert.IsTrue(firstRenderer.sharedMaterial != null);
         // Check material properties after updating them
         Assert.AreApproximatelyEqual(0.95f, firstRenderer.sharedMaterial.GetFloat("_Metallic"));
         Assert.AreApproximatelyEqual(0.66f, secondRenderer.sharedMaterial.GetFloat("_Metallic"));
