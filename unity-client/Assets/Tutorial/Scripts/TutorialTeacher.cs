@@ -1,4 +1,3 @@
-using System.Collections;
 using UnityEngine;
 
 namespace DCL.Tutorial
@@ -10,25 +9,13 @@ namespace DCL.Tutorial
     {
         public enum TeacherAnimation
         {
-            Hello,
             Idle,
+            Hello,
             Goodbye,
             QuickGoodbye
         }
 
-        [SerializeField] Animation teacherAnimation;
-        [SerializeField] AnimationClip helloAnimationClip;
-        [SerializeField] AnimationClip idleAnimationClip;
-        [SerializeField] AnimationClip goodByeAnimationClip;
-        [SerializeField] AnimationClip quickkGoodByeAnimationClip;
-        [SerializeField] TeacherAnimation defaultAnimationClip = TeacherAnimation.Idle;
-
-        private Coroutine runningCoroutine;
-
-        private void Start()
-        {
-            PlayAnimation(defaultAnimationClip);
-        }
+        [SerializeField] Animator teacherAnimator;
 
         /// <summary>
         /// Play an animation.
@@ -39,37 +26,23 @@ namespace DCL.Tutorial
             if (!isActiveAndEnabled)
                 return;
 
-            if (runningCoroutine != null)
-                StopCoroutine(runningCoroutine);
-
             switch (animation)
             {
-                case TeacherAnimation.Hello:
-                    teacherAnimation.clip = helloAnimationClip;
-                    break;
                 case TeacherAnimation.Idle:
-                    teacherAnimation.clip = idleAnimationClip;
+                    teacherAnimator.SetTrigger("Idle");
+                    break;
+                case TeacherAnimation.Hello:
+                    teacherAnimator.SetTrigger("Hello");
                     break;
                 case TeacherAnimation.Goodbye:
-                    teacherAnimation.clip = goodByeAnimationClip;
+                    teacherAnimator.SetTrigger("Goodbye");
                     break;
                 case TeacherAnimation.QuickGoodbye:
-                    teacherAnimation.clip = quickkGoodByeAnimationClip;
+                    teacherAnimator.SetTrigger("QuickGoodbye");
                     break;
                 default:
                     break;
             }
-
-            teacherAnimation.Play();
-            if (teacherAnimation.clip.wrapMode == WrapMode.Once)
-                runningCoroutine = StartCoroutine(WaitForAnimationEndAndReturnToDefault(teacherAnimation.clip));
-        }
-
-        private IEnumerator WaitForAnimationEndAndReturnToDefault(AnimationClip clip)
-        {
-            yield return new WaitForSeconds(clip.length);
-
-            PlayAnimation(defaultAnimationClip);
         }
     }
 }

@@ -82,6 +82,8 @@ namespace DCL.Tutorial
 
             isRunning = true;
 
+            PlayTeacherAnimation(TutorialTeacher.TeacherAnimation.Idle);
+
             if (hudController != null && hudController.emailPromptHud != null)
             {
                 hudController.emailPromptHud.OnSetEmailFlag += EmailPromptHud_OnSetEmailFlag;
