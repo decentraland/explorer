@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 7380757057997404082}
   - component: {fileID: 5036753336486047301}
   - component: {fileID: 3583794830538604777}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: Primitive
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -88,7 +88,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3907980168720627669}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: mouth_JNT3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -118,7 +118,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7466954108961627769}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: r_eye_JNT8
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -148,7 +148,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6032318400079742918}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: l_eye_JNT11
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -180,7 +180,7 @@ GameObject:
   - component: {fileID: 7400609321670666578}
   - component: {fileID: 522257752242680950}
   - component: {fileID: 4944164969316172708}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: Primitive
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -257,7 +257,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1687305355730232002}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: l_eye_JNT16
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -287,7 +287,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8369172144104598039}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: mouth_JNT6
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -317,7 +317,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3191029969503259571}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: r_eye_JNT11
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -347,7 +347,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2477701523009725888}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: r_eye_JNT10
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -377,7 +377,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6121393389043710717}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: r_armAnim
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -410,7 +410,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1712269395585647957}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: l_eye_JNT1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -440,7 +440,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4800786375872352835}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: l_eye_JNT9
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -470,7 +470,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3639443072659246758}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: mouth_JNT2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -500,7 +500,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7257638794248773796}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: mouthAlice
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -531,7 +531,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6831148427765178890}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: mouth_JNT7
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -561,7 +561,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1971963752662892546}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: r_eyeAlice
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -592,7 +592,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3167432474674252384}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: l_armAnim
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -627,7 +627,7 @@ GameObject:
   - component: {fileID: 3524837959221674128}
   - component: {fileID: 912173055362926491}
   - component: {fileID: 2541050508877557136}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: Primitive
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -704,7 +704,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8636616988703278552}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: mouth_JNT15
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -736,7 +736,7 @@ GameObject:
   - component: {fileID: 8727254662585198033}
   - component: {fileID: 689330240078948493}
   - component: {fileID: 8787977096437955081}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: Primitive
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -813,7 +813,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5972177175607475114}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: mouth_JNT8
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -843,7 +843,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5430170498980690537}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: antennaAnim
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -875,7 +875,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1387700760306469783}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: aliceUpDownAnim_GRP
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -906,7 +906,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7645790472318105893}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: r_eye_JNT18
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -938,7 +938,7 @@ GameObject:
   - component: {fileID: 7873770744170201147}
   - component: {fileID: 3642285464623534484}
   - component: {fileID: 9154589086846690009}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: Primitive
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1017,7 +1017,7 @@ GameObject:
   - component: {fileID: 4359473683005158992}
   - component: {fileID: 6294047087574254498}
   - component: {fileID: 3202228417486235471}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: Primitive
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1094,7 +1094,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4900685734950385928}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: mouth_JNT4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1124,7 +1124,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4485197238581957956}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: r_eye_JNT1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1154,7 +1154,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7727779046586416191}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: l_eye_JNT3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1184,7 +1184,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1760349383864583550}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: mouth_JNT13
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1216,7 +1216,7 @@ GameObject:
   - component: {fileID: 4416639409980766705}
   - component: {fileID: 6552489521233832323}
   - component: {fileID: 5294203944090415106}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: Primitive
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1293,7 +1293,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1049052673026057684}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: mouth_JNT11
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1323,7 +1323,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5830716298578156998}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: r_eye_JNT12
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1353,7 +1353,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6455109403361740467}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: r_eye_JNT13
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1383,7 +1383,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3107497323994784232}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: r_eye_JNT6
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1413,7 +1413,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 779390448124304063}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: r_eye_JNT15
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1443,7 +1443,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4398979899410856518}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: l_eye_JNT6
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1473,7 +1473,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2218455886652410546}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: l_eye_JNT13
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1503,7 +1503,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 664606554614330020}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: r_eye_JNT17
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1533,7 +1533,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7871950117002056345}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: l_eye_JNT10
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1563,7 +1563,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2960358278051194290}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: l_eye_JNT17
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1595,7 +1595,7 @@ GameObject:
   - component: {fileID: 6209562579719991725}
   - component: {fileID: 1135343418400855111}
   - component: {fileID: 6959265500058235274}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: Primitive
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1706,7 +1706,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7808212230252486245}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: l_eye_JNT2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1736,7 +1736,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7053855160354505103}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: r_eye_JNT4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1766,7 +1766,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7443442363247724182}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: Default light
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1798,7 +1798,7 @@ GameObject:
   - component: {fileID: 1980442976541199958}
   - component: {fileID: 6241724641575132050}
   - component: {fileID: 8760634427681574881}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: Primitive
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1875,7 +1875,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6823921095221044325}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: mouth_JNT5
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1907,7 +1907,7 @@ GameObject:
   - component: {fileID: 2648733396302468725}
   - component: {fileID: 8732455350934600783}
   - component: {fileID: 8785939703645794302}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: Primitive
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1984,7 +1984,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 683870890892097403}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: mouth_JNT1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2014,7 +2014,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4257140785604968025}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: mouth_JNT17
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2044,7 +2044,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1369988209243432296}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: l_eye_JNT5
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2074,7 +2074,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5902423253222978223}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: r_eye_JNT5
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2106,7 +2106,7 @@ GameObject:
   - component: {fileID: 5389695417933624341}
   - component: {fileID: 6294254927611874358}
   - component: {fileID: 5320827859444973075}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: Primitive
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2183,7 +2183,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5319174546353251593}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: l_eyeAlice
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2214,7 +2214,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3156412478112762281}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: mouth_JNT18
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2244,7 +2244,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1527968378880750358}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: l_eye_JNT14
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2274,7 +2274,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 559903325132192699}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: r_eye_JNT9
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2304,7 +2304,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7883029546121378122}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: face_GRP
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2340,7 +2340,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6971216143166442280}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: r_eyeRoot_JNT
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2388,7 +2388,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1434239198308129157}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: mouthRoot_JNT
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2436,7 +2436,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2888495503375926603}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: r_eye_JNT3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2466,7 +2466,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8854909598794398143}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: r_eye_JNT7
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2496,7 +2496,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 992169327918112582}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: l_eye_JNT4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2526,7 +2526,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 9022775538049860248}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: l_eyeRoot_JNT
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2576,7 +2576,7 @@ GameObject:
   - component: {fileID: 2325762291897847384}
   - component: {fileID: 6544233584758434768}
   - component: {fileID: 3104212428716293755}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: Primitive
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2653,7 +2653,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3025886739032989199}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: mouth_JNT12
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2683,7 +2683,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2307905635233828534}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: head
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2716,7 +2716,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3703016410128149468}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: mouth_JNT9
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2746,7 +2746,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3473066669157810655}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: l_eye_JNT15
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2776,7 +2776,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3258975783386713048}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: l_eye_JNT7
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2806,7 +2806,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4731929061171034147}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: l_eye_JNT12
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2836,7 +2836,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7799025151197313338}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: r_eye_JNT14
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2866,7 +2866,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4407191093005044026}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: l_eye_JNT8
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2898,7 +2898,7 @@ GameObject:
   - component: {fileID: 7762840358117361877}
   - component: {fileID: 6972582668951004569}
   - component: {fileID: 7595336031069212135}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: Primitive
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3009,7 +3009,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4443026448950712811}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: r_eye_JNT16
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3039,7 +3039,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8049093769585013282}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: r_eye_JNT2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3069,7 +3069,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 775302748953893658}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: l_eye_JNT18
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3099,7 +3099,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2403726692022535408}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: mouth_JNT10
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3129,7 +3129,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8505472543305065013}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: aliceRotateAnim_GRP
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3166,7 +3166,7 @@ GameObject:
   - component: {fileID: 7766882530228456905}
   - component: {fileID: 2040355420613166260}
   - component: {fileID: 3797355419696234942}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: Primitive
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3277,7 +3277,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5627737038744161450}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: mouth_JNT14
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3309,7 +3309,7 @@ GameObject:
   - component: {fileID: 4625819327099662363}
   - component: {fileID: 4506431196728560802}
   - component: {fileID: 520190260524343929}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: TutorialRobot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3380,7 +3380,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7187812291590950011}
-  m_Layer: 21
+  m_Layer: 0
   m_Name: mouth_JNT16
   m_TagString: Untagged
   m_Icon: {fileID: 0}
