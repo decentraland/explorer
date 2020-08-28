@@ -35,8 +35,7 @@ namespace DCL.Tutorial
 
         public static TutorialController i { get; private set; }
 
-        public bool isRunning { get; private set; } = false;
-        public HUDController hudController { get => HUDController.i; }
+        internal HUDController hudController { get => HUDController.i; }
 
         [Header("Steps Configuration")]
         [SerializeField] float timeBetweenSteps = 0.5f;
@@ -50,6 +49,7 @@ namespace DCL.Tutorial
         public bool debugRunTutorial = false;
         public int debugStartingStepIndex;
 
+        private bool isRunning = false;
         private int currentStepIndex;
         private TutorialStep runningStep = null;
         private Coroutine executeStepsCoroutine;
@@ -85,6 +85,7 @@ namespace DCL.Tutorial
             if (hudController != null && hudController.emailPromptHud != null)
             {
                 hudController.emailPromptHud.OnSetEmailFlag += EmailPromptHud_OnSetEmailFlag;
+                hudController.emailPromptHud.waitForEndOfTutorial = true;
             }
 
             if (!CommonScriptableObjects.rendererState.Get())
@@ -104,6 +105,7 @@ namespace DCL.Tutorial
             if (hudController != null && hudController.emailPromptHud != null)
             {
                 hudController.emailPromptHud.OnSetEmailFlag -= EmailPromptHud_OnSetEmailFlag;
+                hudController.emailPromptHud.waitForEndOfTutorial = false;
             }
 
             CommonScriptableObjects.rendererState.OnChange -= OnRenderingStateChanged;

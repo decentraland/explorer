@@ -15,6 +15,8 @@ public class EmailPromptHUDController : IHUD
 
     public event Action OnSetEmailFlag;
 
+    public bool waitForEndOfTutorial { get; set; } = false;
+
     public EmailPromptHUDController()
     {
         view = UnityEngine.Object.Instantiate(Resources.Load<GameObject>("EmailPromptHUD")).GetComponent<EmailPromptHUDView>();
@@ -85,6 +87,7 @@ public class EmailPromptHUDController : IHUD
         yield return new WaitUntil(() => CommonScriptableObjects.rendererState.Get());
         yield return WaitForSecondsCache.Get(seconds);
         yield return new WaitUntil(() => CommonScriptableObjects.rendererState.Get());
+        yield return new WaitUntil(() => !waitForEndOfTutorial);
         SetVisibility(true);
         isPopupRoutineRunning = false;
     }
