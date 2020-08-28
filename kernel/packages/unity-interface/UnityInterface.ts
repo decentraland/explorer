@@ -393,13 +393,6 @@ export class UnityInterface {
     this.SendBuilderMessage('OnBuilderKeyDown', key)
   }
 
-  public SetBuilderCanvasSize(width: number, height: number) {
-    if (EDITOR) {
-      const module = this.Module
-      module?.setCanvasSize(width, height)
-    }
-  }
-
   private resizeCanvasDelayed(ev: UIEvent | null) {
     window.setTimeout(() => {
       resizeCanvas(_gameInstance.Module)
