@@ -17,14 +17,12 @@ public class PBRMaterialShould : TestsBase
     }
 
     [UnityTest]
-    public IEnumerator BeCreatedProperly()
+    public IEnumerator NotDestroySharedTextureWhenDisposed()
     {
         DCLTexture texture =
             TestHelpers.CreateDCLTexture(scene, Utils.GetTestsAssetsPath() + "/Images/atlas.png");
 
         yield return texture.routine;
-
-        DecentralandEntity entity = null;
 
         PBRMaterial matPBR = TestHelpers.CreateEntityWithPBRMaterial(scene,
             new PBRMaterial.Model
@@ -33,25 +31,59 @@ public class PBRMaterialShould : TestsBase
                 metallic = 0,
                 roughness = 1,
             },
-            out entity);
+            out DecentralandEntity entity1);
 
         yield return matPBR.routine;
 
-        {
-            Assert.IsTrue(entity.meshRootGameObject != null,
-                "Every entity with a shape should have the mandatory 'Mesh' object as a child");
+        PBRMaterial matPBR2 = TestHelpers.CreateEntityWithPBRMaterial(scene,
+            new PBRMaterial.Model
+            {
+                albedoTexture = texture.id,
+                metallic = 0,
+                roughness = 1,
+            },
+            out DecentralandEntity entity2);
 
-            var meshRenderer = entity.meshRootGameObject.GetComponent<MeshRenderer>();
-            Assert.IsTrue(meshRenderer != null, "MeshRenderer must exist");
+        yield return matPBR2.routine;
 
-            var assignedMaterial = meshRenderer.sharedMaterial;
-            Assert.IsTrue(meshRenderer != null, "MeshRenderer.sharedMaterial must be the same as assignedMaterial");
-            Assert.AreEqual(assignedMaterial, matPBR.material, "Assigned material");
+        TestHelpers.RemoveSceneEntity(scene, entity1);
 
-            var loadedTexture = meshRenderer.sharedMaterial.GetTexture("_BaseMap");
-            Assert.IsTrue(loadedTexture != null, "Texture must be loaded");
-            Assert.AreEqual(texture.texture, loadedTexture, "Texture data must be correct");
-        }
+        Assert.IsTrue(texture.texture != null, "Texture should persist because is used by the other material!!");
+    }
+
+
+    [UnityTest]
+    public IEnumerator BeCreatedProperly()
+    {
+        DCLTexture texture =
+            TestHelpers.CreateDCLTexture(scene, Utils.GetTestsAssetsPath() + "/Images/atlas.png");
+
+        yield return texture.routine;
+
+        PBRMaterial matPBR = TestHelpers.CreateEntityWithPBRMaterial(scene,
+            new PBRMaterial.Model
+            {
+                albedoTexture = texture.id,
+                metallic = 0,
+                roughness = 1,
+            },
+            out DecentralandEntity entity);
+
+        yield return matPBR.routine;
+
+        Assert.IsTrue(entity.meshRootGameObject != null,
+            "Every entity with a shape should have the mandatory 'Mesh' object as a child");
+
+        var meshRenderer = entity.meshRootGameObject.GetComponent<MeshRenderer>();
+        Assert.IsTrue(meshRenderer != null, "MeshRenderer must exist");
+
+        var assignedMaterial = meshRenderer.sharedMaterial;
+        Assert.IsTrue(meshRenderer != null, "MeshRenderer.sharedMaterial must be the same as assignedMaterial");
+        Assert.AreEqual(assignedMaterial, matPBR.material, "Assigned material");
+
+        var loadedTexture = meshRenderer.sharedMaterial.GetTexture("_BaseMap");
+        Assert.IsTrue(loadedTexture != null, "Texture must be loaded");
+        Assert.AreEqual(texture.texture, loadedTexture, "Texture data must be correct");
     }
 
     [UnityTest]

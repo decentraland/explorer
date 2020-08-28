@@ -303,10 +303,6 @@ namespace DCL.Components
             emissiveDCLTexture?.DetachFrom(this);
             bumpDCLTexture?.DetachFrom(this);
 
-            albedoDCLTexture?.Dispose();
-            emissiveDCLTexture?.Dispose();
-            bumpDCLTexture?.Dispose();
-
             if (material != null)
             {
                 Utils.SafeDestroy(material);

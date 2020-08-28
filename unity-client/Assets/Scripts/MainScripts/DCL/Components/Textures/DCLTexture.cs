@@ -2,6 +2,7 @@ using DCL.Components;
 using DCL.Controllers;
 using System;
 using System.Collections;
+using Cinemachine;
 using UnityEngine;
 
 namespace DCL
@@ -137,28 +138,47 @@ namespace DCL
             }
         }
 
+        private int refCount;
+
         public virtual void AttachTo(PBRMaterial material)
         {
+            AddRefCount();
         }
 
         public virtual void AttachTo(BasicMaterial material)
         {
+            AddRefCount();
         }
 
         public virtual void AttachTo(UIImage image)
         {
+            AddRefCount();
         }
 
         public virtual void DetachFrom(PBRMaterial material)
         {
+            RemoveRefCount();
         }
 
         public virtual void DetachFrom(BasicMaterial material)
         {
+            RemoveRefCount();
         }
 
         public virtual void DetachFrom(UIImage image)
         {
+            RemoveRefCount();
+        }
+
+        public void AddRefCount()
+        {
+            refCount++;
+        }
+
+        public void RemoveRefCount()
+        {
+            if (refCount == 0)
+                Dispose();
         }
 
         public override void Dispose()

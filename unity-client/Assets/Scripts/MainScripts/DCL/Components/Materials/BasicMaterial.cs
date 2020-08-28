@@ -142,7 +142,6 @@ namespace DCL.Components
         public override void Dispose()
         {
             dclTexture?.DetachFrom(this);
-            dclTexture?.Dispose();
 
             Object.Destroy(material);
 

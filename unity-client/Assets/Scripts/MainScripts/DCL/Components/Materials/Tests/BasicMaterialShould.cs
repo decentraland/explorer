@@ -17,6 +17,41 @@ public class BasicMaterialShould : TestsBase
     }
 
     [UnityTest]
+    public IEnumerator NotDestroySharedTextureWhenDisposed()
+    {
+        DCLTexture texture =
+            TestHelpers.CreateDCLTexture(scene, Utils.GetTestsAssetsPath() + "/Images/atlas.png");
+
+        yield return texture.routine;
+
+        BasicMaterial mat = TestHelpers.CreateEntityWithBasicMaterial(scene,
+            new BasicMaterial.Model
+            {
+                texture = texture.id,
+                alphaTest = 1,
+            },
+            out DecentralandEntity entity1);
+
+        yield return mat.routine;
+
+        BasicMaterial mat2 = TestHelpers.CreateEntityWithBasicMaterial(scene,
+            new BasicMaterial.Model
+            {
+                texture = texture.id,
+                alphaTest = 1,
+            },
+            out DecentralandEntity entity2);
+
+        yield return mat2.routine;
+
+        texture.Dispose();
+
+        yield return null;
+
+        Assert.IsTrue(texture.texture != null, "Texture should persist because is used by the other material!!");
+    }
+
+    [UnityTest]
     public IEnumerator WorkCorrectlyWhenAttachedBeforeShape()
     {
         DecentralandEntity entity = TestHelpers.CreateSceneEntity(scene);
@@ -62,23 +97,21 @@ public class BasicMaterialShould : TestsBase
     }
 
     [UnityTest]
-    public IEnumerator MaterialDetach()
+    public IEnumerator BeDetachedCorrectly()
     {
         string entityId = "1";
         string materialID = "a-material";
 
         TestHelpers.InstantiateEntityWithMaterial(scene, entityId, Vector3.zero,
-            new DCL.Components.BasicMaterial.Model(), materialID);
+            new BasicMaterial.Model(), materialID);
 
         Assert.IsTrue(scene.entities[entityId].meshRootGameObject != null,
             "Every entity with a shape should have the mandatory 'Mesh' object as a child");
 
         var meshRenderer = scene.entities[entityId].meshRootGameObject.GetComponent<MeshRenderer>();
-        var materialComponent = scene.disposableComponents[materialID] as DCL.Components.BasicMaterial;
+        var materialComponent = scene.disposableComponents[materialID] as BasicMaterial;
 
         yield return materialComponent.routine;
-
-        Assert.IsTrue(materialComponent is DCL.Components.BasicMaterial, "material is BasicMaterial");
 
         // Check if material initialized correctly
         {
@@ -96,7 +129,7 @@ public class BasicMaterialShould : TestsBase
     }
 
     [UnityTest]
-    public IEnumerator MaterialDisposedGetsDetached()
+    public IEnumerator BeDetachedOnDispose()
     {
         string firstEntityId = "1";
         string secondEntityId = "2";
@@ -104,13 +137,13 @@ public class BasicMaterialShould : TestsBase
 
         // Instantiate entity with material
         TestHelpers.InstantiateEntityWithMaterial(scene, firstEntityId, Vector3.zero,
-            new DCL.Components.BasicMaterial.Model(), materialID);
+            new BasicMaterial.Model(), materialID);
 
         Assert.IsTrue(scene.entities[firstEntityId].meshRootGameObject != null,
             "Every entity with a shape should have the mandatory 'Mesh' object as a child");
 
         // Create 2nd entity and attach same material to it
-        TestHelpers.InstantiateEntityWithShape(scene, secondEntityId, DCL.Models.CLASS_ID.BOX_SHAPE, Vector3.zero);
+        TestHelpers.InstantiateEntityWithShape(scene, secondEntityId, CLASS_ID.BOX_SHAPE, Vector3.zero);
         scene.SharedComponentAttach(
             secondEntityId,
             materialID
@@ -124,8 +157,6 @@ public class BasicMaterialShould : TestsBase
         var materialComponent = scene.disposableComponents[materialID] as DCL.Components.BasicMaterial;
 
         yield return materialComponent.routine;
-
-        Assert.IsTrue(materialComponent is DCL.Components.BasicMaterial, "material is BasicMaterial");
 
         // Check if material attached correctly
         {
@@ -152,20 +183,18 @@ public class BasicMaterialShould : TestsBase
 
         Assert.IsFalse(scene.disposableComponents.ContainsKey(materialID));
 
-        // Instantiate entity with default PBR Material
+        // Instantiate entity with default material
         TestHelpers.InstantiateEntityWithMaterial(scene, entityId, new Vector3(8, 1, 8),
-            new DCL.Components.BasicMaterial.Model(), materialID);
+            new BasicMaterial.Model(), materialID);
 
         var meshObject = scene.entities[entityId].meshRootGameObject;
         Assert.IsTrue(meshObject != null,
             "Every entity with a shape should have the mandatory 'Mesh' object as a child");
 
         var meshRenderer = meshObject.GetComponent<MeshRenderer>();
-        var materialComponent = scene.disposableComponents[materialID] as DCL.Components.BasicMaterial;
+        var materialComponent = scene.disposableComponents[materialID] as BasicMaterial;
 
         yield return materialComponent.routine;
-
-        Assert.IsTrue(materialComponent is DCL.Components.BasicMaterial, "material is BasicMaterial");
 
         // Check if material initialized correctly
         {
@@ -190,7 +219,7 @@ public class BasicMaterialShould : TestsBase
             FilterMode.Bilinear);
 
         // Update material
-        scene.SharedComponentUpdate(materialID, JsonUtility.ToJson(new DCL.Components.BasicMaterial.Model
+        scene.SharedComponentUpdate(materialID, JsonUtility.ToJson(new BasicMaterial.Model
         {
             texture = dclTexture.id,
             alphaTest = 0.5f,
@@ -210,7 +239,7 @@ public class BasicMaterialShould : TestsBase
     }
 
     [UnityTest]
-    public IEnumerator BasicMaterialComponentMissingValuesGetDefaultedOnUpdate()
+    public IEnumerator DefaultMissingValuesPropertyOnUpdate()
     {
         // 1. Create component with non-default configs
         BasicMaterial basicMaterialComponent =
