@@ -7,11 +7,17 @@
     "forceConsistentCasingInFileNames": true,
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "downlevelIteration": true,
     "keyofStringsOnly": true,
     "inlineSourceMap": true,
     "inlineSources": true,
+    "preserveConstEnums": true,
+    "alwaysStrict": true,
+    "useDefineForClassFields": false,
+    "strict": true,
+    "strictNullChecks": true,
+    "strictBindCallApply": true,
+    "strictFunctionTypes": true,
+    "strictPropertyInitialization": true,
     "noLib": true,
     "allowJs": true,
     "types": [
@@ -20,7 +26,8 @@
       "@decentraland/EthereumController",
       "@decentraland/SocialController",
       "@decentraland/Identity",
-      "@decentraland/web3-provider"
+      "@decentraland/web3-provider",
+      "@decentraland/EnvironmentAPI"
     ],
     "typeRoots": [
       "."
