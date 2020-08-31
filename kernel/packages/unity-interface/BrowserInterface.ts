@@ -38,6 +38,7 @@ import { reportHotScenes } from 'shared/social/hotScenes'
 
 import { GIFProcessor } from 'gif-processor/processor'
 declare const DCL: any
+declare const window: any
 
 declare const globalThis: StoreContainer
 export let futures: Record<string, IFuture<any>> = {}
@@ -343,6 +344,13 @@ export class BrowserInterface {
   }
 
   async RequestGIFProcessor(data: { imageSource: string; id: string; isWebGL1: boolean }) {
+    const isChrome = !!window.chrome && (!!window.chrome.webstore || !!window.chrome.runtime)
+
+    if (!isChrome) {
+      unityInterface.RejectGIFProcessingRequest()
+      return
+    }
+
     if (!DCL.gifProcessor) {
       DCL.gifProcessor = new GIFProcessor(unityInterface.gameInstance, unityInterface, data.isWebGL1)
     }
