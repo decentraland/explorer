@@ -3,37 +3,13 @@ import { parseGIF, decompressFrames } from 'gifuct-js'
 
 declare const self: any
 
-let gifCanvas: OffscreenCanvas | undefined
-let gifCanvasCtx: OffscreenCanvasRenderingContext2D | undefined | null
-let gifPatchCanvas: OffscreenCanvas | undefined = new OffscreenCanvas(1, 1)
-let gifPatchCanvasCtx: OffscreenCanvasRenderingContext2D | undefined | null
-let resizedCanvas: OffscreenCanvas | undefined = new OffscreenCanvas(1, 1)
-let resizedCanvasCtx: OffscreenCanvasRenderingContext2D | undefined | null
-
+const gifCanvas = new OffscreenCanvas(1,1)
+const gifCanvasCtx = gifCanvas.getContext('2d')
+const gifPatchCanvas = new OffscreenCanvas(1,1)
+const gifPatchCanvasCtx = gifPatchCanvas.getContext('2d')
+const resizedCanvas = new OffscreenCanvas(1,1)
+const resizedCanvasCtx = gifCanvas.getContext('2d')
 const maxGIFDimension = 512
-
-let canvasesInitializedResolver: { resolve: Function; reject: Function } | undefined
-
-const canvasesInitialized = new Promise((resolve, reject) => {
-  canvasesInitializedResolver = { resolve, reject }
-})
-
-if (typeof OffscreenCanvas !== 'undefined') {
-  gifCanvas = new OffscreenCanvas(1, 1)
-  gifPatchCanvas = new OffscreenCanvas(1, 1)
-  resizedCanvas = new OffscreenCanvas(1, 1)
-  initContexts()
-  canvasesInitializedResolver?.resolve()
-} else {
-  self.postMessage({ requestCanvas: true })
-}
-
-function initContexts() {
-  debugger
-  gifCanvasCtx = gifCanvas!.getContext('2d')
-  gifPatchCanvasCtx = gifPatchCanvas!.getContext('2d')
-  resizedCanvasCtx = resizedCanvas!.getContext('2d')
-}
 
 let frameImageData: any = undefined
 
@@ -41,15 +17,7 @@ let frameImageData: any = undefined
   let payloads: any[] = new Array()
 
   self.onmessage = (e: any) => {
-    if (e.data.gifCanvas) {
-      gifCanvas = e.data.gifCanvas
-      gifPatchCanvas = e.data.gifPatchCanvas
-      resizedCanvas = e.data.resizedCanvas
-      initContexts()
-      canvasesInitializedResolver?.resolve()
-    } else {
-      EnqueuePayload(e)
-    }
+    EnqueuePayload(e)
   }
 
   function EnqueuePayload(e: any) {
@@ -61,7 +29,6 @@ let frameImageData: any = undefined
   }
 
   async function ConsumePayload() {
-    await canvasesInitialized
     while (payloads.length > 0) {
       await DownloadAndProcessGIF(payloads[0])
       payloads.splice(0, 1)
@@ -80,21 +47,20 @@ let frameImageData: any = undefined
 
     frameImageData = undefined
 
-    gifCanvas!.width = decompressedFrames[0].dims.width
-    let finalWidth = gifCanvas!.width
+    gifCanvas.width = decompressedFrames[0].dims.width
+    let finalWidth = gifCanvas.width
 
-    gifCanvas!.height = decompressedFrames[0].dims.height
-    let finalHeight = gifCanvas!.height
+    gifCanvas.height = decompressedFrames[0].dims.height
+    let finalHeight = gifCanvas.height
 
-    hasToBeResized = gifCanvas!.width > maxGIFDimension || gifCanvas!.height > maxGIFDimension
+    hasToBeResized = gifCanvas.width > maxGIFDimension || gifCanvas.height > maxGIFDimension
     if (hasToBeResized) {
-      let scalingFactor =
-        gifCanvas!.width > gifCanvas!.height ? gifCanvas!.width / maxGIFDimension : gifCanvas!.height / maxGIFDimension
-      resizedCanvas!.width = gifCanvas!.width / scalingFactor
-      finalWidth = resizedCanvas!.width
+      let scalingFactor = (gifCanvas.width > gifCanvas.height) ? (gifCanvas.width / maxGIFDimension) : (gifCanvas.height / maxGIFDimension)
+      resizedCanvas.width = gifCanvas.width / scalingFactor
+      finalWidth = resizedCanvas.width
 
-      resizedCanvas!.height = gifCanvas!.height / scalingFactor
-      finalHeight = resizedCanvas!.height
+      resizedCanvas.height = gifCanvas.height / scalingFactor
+      finalHeight = resizedCanvas.height
     }
 
     for (const key in decompressedFrames) {
@@ -104,22 +70,19 @@ let frameImageData: any = undefined
       framesAsArrayBuffer.push(processedImageData.data.buffer)
     }
 
-    self.postMessage(
-      {
-        arrayBufferFrames: framesAsArrayBuffer,
-        width: finalWidth,
-        height: finalHeight,
-        delays: frameDelays,
-        id: e.data.id
-      },
-      framesAsArrayBuffer
-    )
+    self.postMessage({
+      arrayBufferFrames: framesAsArrayBuffer,
+      width: finalWidth,
+      height: finalHeight,
+      delays: frameDelays,
+      id: e.data.id,
+    }, framesAsArrayBuffer)
   }
 
   function GenerateFinalImageData(frame: any, hasToBeResized: boolean): any {
     if (!frameImageData || frame.dims.width !== frameImageData.width || frame.dims.height !== frameImageData.height) {
-      gifPatchCanvas!.width = frame.dims.width
-      gifPatchCanvas!.height = frame.dims.height
+      gifPatchCanvas.width = frame.dims.width
+      gifPatchCanvas.height = frame.dims.height
 
       frameImageData = gifPatchCanvasCtx?.createImageData(frame.dims.width, frame.dims.height)
     }
@@ -130,28 +93,18 @@ let frameImageData: any = undefined
 
       // We have to flip it vertically or it's rendered upside down
       gifCanvasCtx?.scale(1, -1)
-      gifCanvasCtx?.drawImage(gifPatchCanvas!, frame.dims.left, -(gifCanvas!.height - frame.dims.top))
+      gifCanvasCtx?.drawImage(gifPatchCanvas, frame.dims.left, -(gifCanvas.height - frame.dims.top))
     }
 
-    let finalImageData = gifCanvasCtx?.getImageData(0, 0, gifCanvas!.width, gifCanvas!.height)
+    let finalImageData = gifCanvasCtx?.getImageData(0, 0, gifCanvas.width, gifCanvas.height)
 
     // Reset the canvas scale/transformation (otherwise the resizing breaks)
     gifCanvasCtx?.setTransform(1, 0, 0, 1, 0, 0)
 
     if (finalImageData && hasToBeResized) {
-      resizedCanvasCtx?.drawImage(
-        gifCanvas!,
-        0,
-        0,
-        gifCanvas!.width,
-        gifCanvas!.height,
-        0,
-        0,
-        resizedCanvas!.width,
-        resizedCanvas!.height
-      )
+      resizedCanvasCtx?.drawImage(gifCanvas, 0, 0, gifCanvas.width, gifCanvas.height, 0, 0, resizedCanvas.width, resizedCanvas.height)
 
-      finalImageData = resizedCanvasCtx?.getImageData(0, 0, resizedCanvas!.width, resizedCanvas!.height)
+      finalImageData = resizedCanvasCtx?.getImageData(0, 0, resizedCanvas.width, resizedCanvas.height)
     }
 
     return finalImageData

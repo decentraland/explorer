@@ -19,7 +19,7 @@ export class GIFProcessor {
   isWebGL1: boolean = false
   lastCreatedWorker: any
 
-  constructor(gameInstance: any, unityInterface: any, isWebGL1: boolean) {
+  constructor (gameInstance: any, unityInterface: any, isWebGL1: boolean) {
     this.gameInstance = gameInstance
     this.GLctx = this.gameInstance.Module.ctx
     this.unityInterface = unityInterface
@@ -31,7 +31,7 @@ export class GIFProcessor {
    * Triggers the GIF processing in the worker (the comeback is executed at worker.onmessage)
    *
    */
-  ProcessGIF(data: { imageSource: string; id: string }) {
+  ProcessGIF(data: { imageSource: string, id: string }) {
     const worker = this.GetWorker()
 
     worker.postMessage({ src: data.imageSource, id: data.id })
@@ -48,7 +48,7 @@ export class GIFProcessor {
 
     if (!texture) {
       DCL.GL.recordError(1282)
-      this.gameInstance.Module.HEAP32[(ptr + 4) >> 2] = 0
+      this.gameInstance.Module.HEAP32[ptr + 4 >> 2] = 0
       return
     }
 
@@ -69,7 +69,14 @@ export class GIFProcessor {
     this.GLctx.bindTexture(this.GLctx.TEXTURE_2D, DCL.GL.textures[texId])
 
     if (this.isWebGL1) {
-      this.GLctx.texImage2D(this.GLctx.TEXTURE_2D, 0, this.GLctx.RGBA, this.GLctx.RGBA, this.GLctx.UNSIGNED_BYTE, image)
+      this.GLctx.texImage2D(
+        this.GLctx.TEXTURE_2D,
+        0,
+        this.GLctx.RGBA,
+        this.GLctx.RGBA,
+        this.GLctx.UNSIGNED_BYTE,
+        image
+      )
     } else {
       this.GLctx.texImage2D(
         this.GLctx.TEXTURE_2D,
@@ -90,10 +97,6 @@ export class GIFProcessor {
       const worker = new Worker(gifProcessorWorkerUrl, { name: 'gifProcessorWorker' })
 
       worker.onmessage = (e: any) => {
-        if (e.data.requestCanvas) {
-          this.SendCanvases(worker)
-        }
-
         if (e.data.arrayBufferFrames.length <= 0) return
 
         const textures = new Array()
@@ -128,19 +131,5 @@ export class GIFProcessor {
     }
 
     return this.lastCreatedWorker
-  }
-
-  SendCanvases(worker: Worker) {
-    const gifCanvas = new OffscreenCanvas(1, 1)
-    const gifPatchCanvas = new OffscreenCanvas(1, 1)
-    const resizedCanvas = new OffscreenCanvas(1, 1)
-    worker.postMessage(
-      {
-        gifCanvas,
-        gifPatchCanvas,
-        resizedCanvas
-      },
-      [gifCanvas, gifPatchCanvas, resizedCanvas]
-    )
   }
 }
