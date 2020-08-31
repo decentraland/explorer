@@ -43,7 +43,7 @@ public class AvatarEditorHUDAudioHandler : MonoBehaviour
             case Categories.EYEBROWS:
                 Play("Hair");
                 break;
-            case Categories.FACIAL:
+            case "facial_hair":
                 Play("Hair");
                 break;
             case Categories.FEET:
