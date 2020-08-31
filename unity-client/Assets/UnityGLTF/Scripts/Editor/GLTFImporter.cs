@@ -373,8 +373,6 @@ namespace UnityGLTF
                                                 }
                                             }
 
-                                            ;
-
                                             if (isNormalMap)
                                             {
                                                 // Try to auto-detect normal maps
