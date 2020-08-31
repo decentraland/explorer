@@ -2,7 +2,6 @@ using DCL.Components;
 using DCL.Controllers;
 using System;
 using System.Collections;
-using Cinemachine;
 using UnityEngine;
 
 namespace DCL
