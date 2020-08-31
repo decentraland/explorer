@@ -38,7 +38,6 @@ import { reportHotScenes } from 'shared/social/hotScenes'
 
 import { GIFProcessor } from 'gif-processor/processor'
 declare const DCL: any
-declare const window: any
 
 declare const globalThis: StoreContainer
 export let futures: Record<string, IFuture<any>> = {}
