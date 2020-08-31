@@ -15,7 +15,7 @@ namespace DCL.Tutorial
         void SetUserTutorialStepAsCompleted(TutorialController.TutorialFinishStep step);
         void SetTimeBetweenSteps(float newTime);
         void ShowTeacher3DModel(bool active);
-        void SetTeacherPosition(Vector2 position);
+        void SetTeacherPosition(Vector2 position, bool animated = true);
         void PlayTeacherAnimation(TutorialTeacher.TeacherAnimation animation);
     }
 
@@ -44,6 +44,8 @@ namespace DCL.Tutorial
         [Header("3D Model Teacher")]
         [SerializeField] RawImage teacherRawImage;
         [SerializeField] TutorialTeacher teacher;
+        [SerializeField] float teacherMovementSpeed = 4f;
+        [SerializeField] AnimationCurve teacherMovementCurve;
 
         [Header("Debugging")]
         public bool debugRunTutorial = false;
@@ -53,6 +55,7 @@ namespace DCL.Tutorial
         private int currentStepIndex;
         private TutorialStep runningStep = null;
         private Coroutine executeStepsCoroutine;
+        private Coroutine teacherMovementCoroutine;
 
         private void Awake()
         {
@@ -149,9 +152,15 @@ namespace DCL.Tutorial
             teacherRawImage.gameObject.SetActive(active);
         }
 
-        public void SetTeacherPosition(Vector2 position)
+        public void SetTeacherPosition(Vector2 position, bool animated = true)
         {
-            teacherRawImage.rectTransform.position = position;
+            if (teacherMovementCoroutine != null)
+                StopCoroutine(teacherMovementCoroutine);
+
+            if (animated)
+                teacherMovementCoroutine = StartCoroutine(MoveTeacher(teacherRawImage.rectTransform.position, position));
+            else
+                teacherRawImage.rectTransform.position = position;
         }
 
         public void PlayTeacherAnimation(TutorialTeacher.TeacherAnimation animation)
@@ -207,6 +216,22 @@ namespace DCL.Tutorial
             runningStep = null;
 
             SetTutorialDisabled();
+        }
+
+        private IEnumerator MoveTeacher(Vector2 fromPosition, Vector2 toPosition)
+        {
+            float t = 0f;
+
+            while (Vector2.Distance(teacherRawImage.rectTransform.position, toPosition) > 0)
+            {
+                t += teacherMovementSpeed * Time.deltaTime;
+                if (t <= 1.0f)
+                    teacherRawImage.rectTransform.position = Vector2.Lerp(fromPosition, toPosition, teacherMovementCurve.Evaluate(t));
+                else
+                    teacherRawImage.rectTransform.position = toPosition;
+
+                yield return null;
+            }
         }
 
         private void EmailPromptHud_OnSetEmailFlag()

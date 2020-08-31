@@ -167,6 +167,40 @@ MonoBehaviour:
   - {fileID: 3855330431105593682, guid: c64f9a580ba9e8e4db3bbd713d2cde8b, type: 3}
   teacherRawImage: {fileID: 6732306866191114328}
   teacher: {fileID: 977289631841785178}
+  teacherMovementSpeed: 0.8
+  teacherMovementCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 3.9831092
+      outSlope: 3.9831092
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.043580897
+    - serializedVersion: 3
+      time: 0.60207725
+      value: 0.95131886
+      inSlope: 0.19620486
+      outSlope: 0.12233817
+      tangentMode: 65
+      weightedMode: 0
+      inWeight: 0.13080323
+      outWeight: 0.12323118
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0.12233817
+      outSlope: 0
+      tangentMode: 5
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
   debugRunTutorial: 0
   debugStartingStepIndex: 0
 --- !u!1 &4806071478721018373
