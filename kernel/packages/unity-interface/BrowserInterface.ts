@@ -344,9 +344,9 @@ export class BrowserInterface {
   }
 
   async RequestGIFProcessor(data: { imageSource: string; id: string; isWebGL1: boolean }) {
-    const isChrome = !!window.chrome && (!!window.chrome.webstore || !!window.chrome.runtime)
+    const isSupported = typeof OffscreenCanvas !== "undefined"
 
-    if (!isChrome) {
+    if (!isSupported) {
       unityInterface.RejectGIFProcessingRequest()
       return
     }
