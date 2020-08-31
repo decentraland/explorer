@@ -12,7 +12,6 @@ namespace DCL.Tutorial
         [SerializeField] Tutorial_ProgressBar progressBar;
         [SerializeField] int initPercentage;
         [SerializeField] int finishPercentage;
-        [SerializeField] Button closeButton;
 
         protected bool progressBarIsFinished = false;
 
@@ -21,7 +20,6 @@ namespace DCL.Tutorial
             base.OnStepStart();
 
             progressBar.OnNewProgressBarSizeSet += ProgressBar_OnNewProgressBarSizeSet;
-            closeButton.onClick.AddListener(CloseTutorial);
 
             progressBar.SetPercentage(initPercentage, false);
         }
@@ -40,7 +38,6 @@ namespace DCL.Tutorial
             base.OnStepFinished();
 
             progressBar.OnNewProgressBarSizeSet -= ProgressBar_OnNewProgressBarSizeSet;
-            closeButton.onClick.RemoveListener(CloseTutorial);
         }
 
         private IEnumerator WaitForProgressBarFinish()
@@ -51,11 +48,6 @@ namespace DCL.Tutorial
         private void ProgressBar_OnNewProgressBarSizeSet()
         {
             progressBarIsFinished = true;
-        }
-
-        private void CloseTutorial()
-        {
-            tutorialController?.SkipAllSteps();
         }
     }
 }

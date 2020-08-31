@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 604084521501385079}
   - component: {fileID: 9079796753031531854}
   m_Layer: 0
-  m_Name: 3DTeacherCam
+  m_Name: TeacherCamera
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -158,16 +158,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   timeBetweenSteps: 0.5
   steps:
+  - {fileID: 6639514825351315494, guid: e80a4e30b31058544ada1af4125c4b91, type: 3}
   - {fileID: 4146741736848859845, guid: e38c1e2e466c58a4aa90e19bbda22466, type: 3}
-  - {fileID: 3262231415127888666, guid: e3d6f385c55712e4d9db8f6285d8af9a, type: 3}
   - {fileID: 3513632204808866648, guid: cc71903c441610f40b884c6fe6ddedf5, type: 3}
-  - {fileID: 8144167254237475318, guid: d72391829edeae941b6ad77be0572567, type: 3}
-  - {fileID: 3944418929927857064, guid: 4fd55914fb0d6c14ea2c87e9cd4897c1, type: 3}
-  - {fileID: 8026892887502127638, guid: 2a0712804106e8a4995cd9e5acd62a7b, type: 3}
-  - {fileID: 6923122764151660070, guid: 8540e6f42393fff4aa4177acedbad899, type: 3}
-  - {fileID: 4047160411802248544, guid: 15f0a32e26e125647b0659df37c76c2c, type: 3}
-  - {fileID: 6374337732264401976, guid: b68c6cdd25e679a4ea6cf6d74bec9be2, type: 3}
-  - {fileID: 8425120150227373069, guid: 92424a29d4210914cbcbd480f281874a, type: 3}
+  - {fileID: 4410924681366832147, guid: 0e9002742ce819f4583733f5a29364ad, type: 3}
+  - {fileID: 758471573230640681, guid: 53f98be530a835e4eae47ac30281cd4c, type: 3}
+  - {fileID: 5639665319216893634, guid: 259bf436d3fbfe847b44d46cf81f1201, type: 3}
   - {fileID: 3855330431105593682, guid: c64f9a580ba9e8e4db3bbd713d2cde8b, type: 3}
   teacherRawImage: {fileID: 6732306866191114328}
   teacher: {fileID: 977289631841785178}
@@ -209,7 +205,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 400, y: 400}
+  m_SizeDelta: {x: 250, y: 250}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &7633943964324853247
 CanvasRenderer:
@@ -259,7 +255,7 @@ GameObject:
   - component: {fileID: 2555235225510959561}
   - component: {fileID: 249836715671353207}
   m_Layer: 5
-  m_Name: MainCanvas
+  m_Name: TeacherCanvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -304,7 +300,7 @@ Canvas:
   m_SortingBucketNormalizedSize: 0
   m_AdditionalShaderChannelsFlag: 25
   m_SortingLayerID: 0
-  m_SortingOrder: 1
+  m_SortingOrder: 2
   m_TargetDisplay: 0
 --- !u!114 &5129415320331183001
 MonoBehaviour:

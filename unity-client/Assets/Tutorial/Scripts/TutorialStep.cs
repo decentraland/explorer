@@ -9,7 +9,6 @@ namespace DCL.Tutorial
         IEnumerator OnStepExecute();
         IEnumerator OnStepPlayAnimationForHidding();
         void OnStepFinished();
-        IEnumerator AbortStep();
     }
 
     /// <summary>
@@ -18,9 +17,8 @@ namespace DCL.Tutorial
     public class TutorialStep : MonoBehaviour, ITutorialStep
     {
         protected const string STEP_FINISHED_ANIMATOR_TRIGGER = "StepFinished";
-        protected const string STEP_ABORTED_ANIMATOR_TRIGGER = "StepAborted";
 
-        [SerializeField] bool unlockCursorAtStart = true;
+        [SerializeField] bool unlockCursorAtStart = false;
         [SerializeField] bool show3DTeacherAtStart = false;
         [SerializeField] RectTransform teacherPositionRef;
 
@@ -62,13 +60,6 @@ namespace DCL.Tutorial
         public virtual IEnumerator OnStepPlayAnimationForHidding()
         {
             yield return WaitForAnimation(STEP_FINISHED_ANIMATOR_TRIGGER);
-        }
-
-        public virtual IEnumerator AbortStep()
-        {
-            tutorialController.PlayTeacherAnimation(TutorialTeacher.TeacherAnimation.QuickGoodbye);
-
-            yield return WaitForAnimation(STEP_ABORTED_ANIMATOR_TRIGGER);
         }
 
         /// <summary>

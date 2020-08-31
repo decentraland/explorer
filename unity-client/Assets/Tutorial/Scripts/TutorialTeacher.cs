@@ -9,9 +9,7 @@ namespace DCL.Tutorial
     {
         public enum TeacherAnimation
         {
-            Idle,
-            Hello,
-            Goodbye,
+            StepCompleted,
             QuickGoodbye
         }
 
@@ -28,14 +26,8 @@ namespace DCL.Tutorial
 
             switch (animation)
             {
-                case TeacherAnimation.Idle:
-                    teacherAnimator.SetTrigger("Idle");
-                    break;
-                case TeacherAnimation.Hello:
-                    teacherAnimator.SetTrigger("Hello");
-                    break;
-                case TeacherAnimation.Goodbye:
-                    teacherAnimator.SetTrigger("Goodbye");
+                case TeacherAnimation.StepCompleted:
+                    teacherAnimator.SetTrigger("StepCompleted");
                     break;
                 case TeacherAnimation.QuickGoodbye:
                     teacherAnimator.SetTrigger("QuickGoodbye");

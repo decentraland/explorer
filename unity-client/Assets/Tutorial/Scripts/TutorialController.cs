@@ -11,9 +11,9 @@ namespace DCL.Tutorial
     {
         void SetTutorialEnabled();
         void SetTutorialDisabled();
-        IEnumerator StartTutorialFromStep(int stepIndex, bool abortRunningStep = false);
-        void SkipAllSteps();
+        IEnumerator StartTutorialFromStep(int stepIndex);
         void SetUserTutorialStepAsCompleted(TutorialController.TutorialFinishStep step);
+        void SetTimeBetweenSteps(float newTime);
         void ShowTeacher3DModel(bool active);
         void SetTeacherPosition(Vector2 position);
         void PlayTeacherAnimation(TutorialTeacher.TeacherAnimation animation);
@@ -82,8 +82,6 @@ namespace DCL.Tutorial
 
             isRunning = true;
 
-            PlayTeacherAnimation(TutorialTeacher.TeacherAnimation.Idle);
-
             if (hudController != null && hudController.emailPromptHud != null)
             {
                 hudController.emailPromptHud.OnSetEmailFlag += EmailPromptHud_OnSetEmailFlag;
@@ -117,18 +115,11 @@ namespace DCL.Tutorial
         /// Starts to execute the tutorial from a specific step.
         /// </summary>
         /// <param name="stepIndex">First step to be executed.</param>
-        public IEnumerator StartTutorialFromStep(int stepIndex, bool abortRunningStep = false)
+        public IEnumerator StartTutorialFromStep(int stepIndex)
         {
             if (runningStep != null)
             {
-                if (abortRunningStep)
-                {
-                    yield return runningStep.AbortStep();
-                }
-                else
-                {
-                    yield return runningStep.OnStepPlayAnimationForHidding();
-                }
+                yield return runningStep.OnStepPlayAnimationForHidding();
 
                 runningStep.OnStepFinished();
                 Destroy(runningStep.gameObject);
@@ -137,17 +128,6 @@ namespace DCL.Tutorial
             }
 
             yield return ExecuteSteps(stepIndex);
-        }
-
-        /// <summary>
-        /// Skips all the steps and finalize the tutorial.
-        /// </summary>
-        public void SkipAllSteps()
-        {
-            if (executeStepsCoroutine != null)
-                StopCoroutine(executeStepsCoroutine);
-
-            executeStepsCoroutine = StartCoroutine(StartTutorialFromStep(steps.Count, true));
         }
 
         /// <summary>
@@ -211,6 +191,7 @@ namespace DCL.Tutorial
 
                 runningStep.OnStepStart();
                 yield return runningStep.OnStepExecute();
+                PlayTeacherAnimation(TutorialTeacher.TeacherAnimation.StepCompleted);
                 yield return runningStep.OnStepPlayAnimationForHidding();
                 runningStep.OnStepFinished();
 
