@@ -22,6 +22,7 @@ export interface Profile {
   }
   version: number
   tutorialStep: number
+  interests: string[]
 }
 
 export interface Avatar {
@@ -105,6 +106,7 @@ export type ProfileState = {
   catalogs: {
     [key: string]: { id: string; status: 'loading' | 'error' | 'ok'; data?: Wearable[]; error?: any }
   }
+  interests: string[]
 }
 
 export type RootProfileState = {
@@ -114,7 +116,8 @@ export type RootProfileState = {
 export const INITIAL_PROFILES: ProfileState = {
   userInfo: {},
   userInventory: {},
-  catalogs: {}
+  catalogs: {},
+  interests: []
 }
 
 export type Timestamp = number
