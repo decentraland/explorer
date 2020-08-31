@@ -25,6 +25,9 @@ const nameCache = {}
 
 const WATCH = process.argv.indexOf('--watch') !== -1 || process.argv.indexOf('-w') !== -1
 
+// PRODUCTION == true : makes the compiler to prefer .min.js files while importing and produces a minified output
+const PRODUCTION = !WATCH && (process.argv.indexOf('--production') !== -1 || process.env.NODE_ENV === 'production')
+
 const watchedFiles = new Set<string>()
 
 type FileMap = ts.MapLike<{ version: number }>
@@ -136,7 +139,7 @@ function watchFile(fileName: string, services: ts.LanguageService, files: FileMa
 }
 
 async function minify(files: string | string[] | { [file: string]: string }) {
-  const result = (await terser.minify(files, {
+  const result = await terser.minify(files, {
     ecma: 5,
     nameCache,
     mangle: {
@@ -145,29 +148,19 @@ async function minify(files: string | string[] | { [file: string]: string }) {
       eval: true,
       keep_classnames: true,
       keep_fnames: true,
-      reserved: ['global', 'define']
+      reserved: ['global', 'globalThis', 'define']
     },
     compress: {
       passes: 2
     },
-    output: {
+    format: {
       ecma: 5,
       comments: /^!/,
       beautify: false
     },
     sourceMap: false,
     toplevel: false
-  } as any)) as any
-
-  if (result.warnings) {
-    for (let warning of result.warnings) {
-      console.warn('!   Warning: ' + warning)
-    }
-  }
-
-  if (result.error) {
-    console.warn('!   Error: ' + result.error)
-  }
+  })
 
   return result
 }
@@ -176,9 +169,9 @@ async function emitFile(fileName: string, services: ts.LanguageService, cfg: Pro
   let output = services.getEmitOutput(fileName)
 
   if (!output.emitSkipped) {
-    console.log(`> Processing ${fileName.replace(ts.sys.getCurrentDirectory(), '')}`)
+    console.log(`> processing ${fileName.replace(ts.sys.getCurrentDirectory(), '')}`)
   } else {
-    console.log(`> Processing ${fileName.replace(ts.sys.getCurrentDirectory(), '')} failed`)
+    console.log(`> processing ${fileName.replace(ts.sys.getCurrentDirectory(), '')} failed`)
   }
 
   logErrors(services)
@@ -190,6 +183,7 @@ async function emitFile(fileName: string, services: ts.LanguageService, cfg: Pro
       content: string
     }
     content?: string
+    sha256?: string
   }
 
   const loadedLibs: OutFile[] = []
@@ -210,9 +204,11 @@ async function emitFile(fileName: string, services: ts.LanguageService, cfg: Pro
     const path = resolveFile(lib)
 
     if (path) {
+      const content = loadArtifact(lib)
       loadedLibs.push({
         path: relative(ts.sys.getCurrentDirectory(), path),
-        content: loadArtifact(lib)
+        content,
+        sha256: ts.sys.createSHA256Hash!(content)
       })
       return true
     }
@@ -221,7 +217,12 @@ async function emitFile(fileName: string, services: ts.LanguageService, cfg: Pro
   }
 
   function loadLibOrJs(lib: string) {
-    return loadUllaLib(lib + '.lib') || loadJsLib(lib) || false
+    if (PRODUCTION) {
+      // prefer .min.js when available for PRODUCTION builds
+      return loadUllaLib(lib + '.lib') || loadJsLib(lib.replace(/\.js$/, '.min.js')) || loadJsLib(lib) || false
+    } else {
+      return loadUllaLib(lib + '.lib') || loadJsLib(lib) || false
+    }
   }
 
   cfg.libs.forEach((lib) => {
@@ -264,36 +265,48 @@ async function emitFile(fileName: string, services: ts.LanguageService, cfg: Pro
     if (file.path.endsWith('.js') && file.content && !file.path.endsWith('.min.js')) {
       loadedLibs.push({
         path: relative(ts.sys.getCurrentDirectory(), fileName),
-        content: file.content
+        content: file.content,
+        sha256: ts.sys.createSHA256Hash!(file.content)
       })
 
       const ret: string[] = []
 
-      for (let { path, content } of loadedLibs) {
-        const code = content + '\n//# sourceURL=ulla-build:///' + path
+      for (let { path, content, sha256 } of loadedLibs) {
+        const code = content + '\n//# sourceURL=dcl://' + path
 
-        ret.push(`/* ${JSON.stringify(path)} */ eval(${JSON.stringify(code)})`)
+        ret.push(`/*! ${JSON.stringify(path)} ${sha256 || ''} */ eval(${JSON.stringify(code)})`)
       }
 
       file.content = ret.join('\n')
 
       if (cfg.isDecentralandLib) {
-        // deps
+        // emit lib file if it is a decentraland lib
         const deps = getOutFile(file.path + '.lib')
         deps.content = JSON.stringify(loadedLibs, null, 2)
       }
 
-      {
-        // minify && map
-        const minifiedFile = getOutFile(file.path.replace(/\.js$/, '.min.js'))
-        console.log(`> preparing ${normalizePath(minifiedFile.path)}`)
+      if (PRODUCTION || cfg.isDecentralandLib) {
+        // minify && source map
+        const minifiedFile = getOutFile(cfg.isDecentralandLib ? file.path.replace(/\.js$/, '.min.js') : file.path)
+        console.log(`> minifying ${normalizePath(minifiedFile.path)}`)
 
-        const m = await minify(loadedLibs.map(($) => $.content).join(';\n'))
-        minifiedFile.content = m.code
+        try {
+          const minificationResult = await minify(loadedLibs.map(($) => $.content).join(';\n'))
+          minifiedFile.content = minificationResult.code
+          minifiedFile.sha256 = ts.sys.createSHA256Hash!(minificationResult.code!)
 
-        if (m.map) {
-          const f = getOutFile(file.path.replace(/\.js$/, '.js.map'))
-          f.content = typeof m.map === 'string' ? m.map : JSON.stringify(m.map)
+          // we don't want to always embed the source map in every scene. thus,
+          // a new file is generated. This is controlled by the minify function
+          if (minificationResult.map) {
+            const f = getOutFile(file.path.replace(/\.js$/, '.js.map'))
+            f.content =
+              typeof minificationResult.map === 'string'
+                ? minificationResult.map
+                : JSON.stringify(minificationResult.map)
+          }
+        } catch (e) {
+          console.error('! Error:')
+          console.error(e)
         }
       }
     }
@@ -439,6 +452,8 @@ function getConfiguration(packageJson: JsonManifest | null): ProjectConfig {
     libs.unshift({ main: process.env.ECS_PATH || 'decentraland-ecs/dist/src/index.js' }) // 1st place
   }
 
+  let hasCustomLibraries = false
+
   bundledLibs.forEach((libName) => {
     let resolved: string | null = null
 
@@ -479,6 +494,7 @@ function getConfiguration(packageJson: JsonManifest | null): ProjectConfig {
         }
 
         libs.push({ main, typings })
+        hasCustomLibraries = true
       } catch (e) {
         console.error(`! Error in library ${libName}: ${e.message}`)
         hasError = true
@@ -505,7 +521,7 @@ function getConfiguration(packageJson: JsonManifest | null): ProjectConfig {
   tsconfig.options.inlineSources = true
   tsconfig.options.sourceMap = false
   tsconfig.options.removeComments = false
-  tsconfig.options.sourceRoot = ts.sys.getCurrentDirectory()
+  tsconfig.options.rootDir = ts.sys.getCurrentDirectory()
 
   function ensurePathsAsterisk(options: any) {
     options.paths = options.paths || {}
@@ -516,7 +532,7 @@ function getConfiguration(packageJson: JsonManifest | null): ProjectConfig {
     return options.paths['*']
   }
 
-  if (libs.length > 2) {
+  if (hasCustomLibraries) {
     const asterisk = ensurePathsAsterisk(tsconfig.options)
     const rawAsterisk = ensurePathsAsterisk(tsconfig.raw!.compilerOptions)
 
