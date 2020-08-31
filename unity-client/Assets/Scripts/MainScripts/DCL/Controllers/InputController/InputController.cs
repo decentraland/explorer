@@ -25,7 +25,9 @@ public enum DCLAction_Trigger
     Expression_RaiseHand = 204,
     Expression_Clap = 205,
     Expression_ThrowMoney = 206,
-    Expression_SendKiss = 207
+    Expression_SendKiss = 207,
+
+    BuildEditModeChange = 208
 }
 
 public enum DCLAction_Hold
@@ -131,6 +133,9 @@ public class InputController : MonoBehaviour
                     break;
                 case DCLAction_Trigger.Expression_SendKiss:
                     InputProcessor.FromKey(action, KeyCode.Alpha7, modifiers: InputProcessor.Modifier.FocusNotInInput);
+                    break;
+                case DCLAction_Trigger.BuildEditModeChange:
+                    InputProcessor.FromKey(action, KeyCode.H, modifiers: InputProcessor.Modifier.FocusNotInInput);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

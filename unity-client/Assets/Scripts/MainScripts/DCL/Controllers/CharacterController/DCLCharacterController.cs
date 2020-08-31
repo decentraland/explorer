@@ -8,6 +8,11 @@ using UnityEngine.SceneManagement;
 
 public class DCLCharacterController : MonoBehaviour
 {
+    public enum MovementMode
+    {
+        Normal = 0,
+        FreeMode = 1
+    }
     public static DCLCharacterController i { get; private set; }
 
     [Header("Movement")] public float minimumYPosition = 1f;
@@ -81,6 +86,7 @@ public class DCLCharacterController : MonoBehaviour
 
     [System.NonSerialized] public float movingPlatformSpeed;
 
+    MovementMode currentMovementMode = MovementMode.Normal;
     void Awake()
     {
         if (i != null)
@@ -185,6 +191,11 @@ public class DCLCharacterController : MonoBehaviour
         lastPosition = transform.position;
     }
 
+    public void SetMovementMode(MovementMode mode)
+    {
+       currentMovementMode = mode;    
+    }
+
     public void Teleport(string teleportPayload)
     {
         ResetGround();
@@ -233,64 +244,74 @@ public class DCLCharacterController : MonoBehaviour
             SetPosition(characterPosition.worldPosition);
             return;
         }
+   
 
-        velocity.x = 0f;
-        velocity.z = 0f;
-        velocity.y += gravity * deltaTime;
-
-        bool previouslyGrounded = isGrounded;
-
-        if (!isJumping || velocity.y <= 0f)
-            CheckGround();
-
-        if (isGrounded)
+        if (currentMovementMode == MovementMode.FreeMode)
         {
-            isJumping = false;
-            velocity.y = gravity * deltaTime; // to avoid accumulating gravity in velocity.y while grounded
+            FreeMovement();
+
         }
-        else if (previouslyGrounded && !isJumping)
+        else
         {
-            lastUngroundedTime = Time.time;
-        }
+            velocity.x = 0f;
+            velocity.z = 0f;
+            velocity.y += gravity * deltaTime;
 
-        if (Utils.isCursorLocked && characterForward.HasValue())
-        {
-            // Horizontal movement
-            var speed = movementSpeed * (isSprinting ? runningSpeedMultiplier : 1f);
+            bool previouslyGrounded = isGrounded;
 
-            transform.forward = characterForward.Get().Value;
+            if (!isJumping || velocity.y <= 0f)
+                CheckGround();
 
-            var xzPlaneForward = Vector3.Scale(cameraForward.Get(), new Vector3(1, 0, 1));
-            var xzPlaneRight = Vector3.Scale(cameraRight.Get(), new Vector3(1, 0, 1));
-
-            Vector3 forwardTarget = Vector3.zero;
-
-            if (characterYAxis.GetValue() > 0)
-                forwardTarget += xzPlaneForward;
-            if (characterYAxis.GetValue() < 0)
-                forwardTarget -= xzPlaneForward;
-
-            if (characterXAxis.GetValue() > 0)
-                forwardTarget += xzPlaneRight;
-            if (characterXAxis.GetValue() < 0)
-                forwardTarget -= xzPlaneRight;
-
-            forwardTarget.Normalize();
-
-            velocity += forwardTarget * speed;
-
-            CommonScriptableObjects.playerUnityEulerAngles.Set(transform.eulerAngles);
-        }
-
-        bool jumpButtonPressedWithGraceTime = jumpButtonPressed && (Time.time - lastJumpButtonPressedTime < 0.15f);
-
-        if (jumpButtonPressedWithGraceTime) // almost-grounded jump button press allowed time
-        {
-            bool justLeftGround = (Time.time - lastUngroundedTime) < 0.1f;
-
-            if (isGrounded || justLeftGround) // just-left-ground jump allowed time
+            if (isGrounded)
             {
-                Jump();
+                isJumping = false;
+                velocity.y = gravity * deltaTime; // to avoid accumulating gravity in velocity.y while grounded
+            }
+            else if (previouslyGrounded && !isJumping)
+            {
+                lastUngroundedTime = Time.time;
+            }
+
+            if (Utils.isCursorLocked && characterForward.HasValue())
+            {
+                // Horizontal movement
+                var speed = movementSpeed * (isSprinting ? runningSpeedMultiplier : 1f);
+
+                transform.forward = characterForward.Get().Value;
+
+                var xzPlaneForward = Vector3.Scale(cameraForward.Get(), new Vector3(1, 0, 1));
+                var xzPlaneRight = Vector3.Scale(cameraRight.Get(), new Vector3(1, 0, 1));
+
+                Vector3 forwardTarget = Vector3.zero;
+
+                if (characterYAxis.GetValue() > 0)
+                    forwardTarget += xzPlaneForward;
+                if (characterYAxis.GetValue() < 0)
+                    forwardTarget -= xzPlaneForward;
+
+                if (characterXAxis.GetValue() > 0)
+                    forwardTarget += xzPlaneRight;
+                if (characterXAxis.GetValue() < 0)
+                    forwardTarget -= xzPlaneRight;
+
+
+                forwardTarget.Normalize();
+
+                velocity += forwardTarget * speed;
+
+                CommonScriptableObjects.playerUnityEulerAngles.Set(transform.eulerAngles);
+            }
+
+            bool jumpButtonPressedWithGraceTime = jumpButtonPressed && (Time.time - lastJumpButtonPressedTime < 0.15f);
+
+            if (jumpButtonPressedWithGraceTime) // almost-grounded jump button press allowed time
+            {
+                bool justLeftGround = (Time.time - lastUngroundedTime) < 0.1f;
+
+                if (isGrounded || justLeftGround) // just-left-ground jump allowed time
+                {
+                    Jump();
+                }
             }
         }
 
@@ -324,6 +345,49 @@ public class DCLCharacterController : MonoBehaviour
         }
     }
 
+    void FreeMovement()
+    {
+        velocity.x = 0f;
+        velocity.z = 0f;
+        velocity.y = 0;
+
+        if (characterController.enabled)
+        {
+            var speed = movementSpeed * (isSprinting ? runningSpeedMultiplier : 1f);
+
+            transform.forward = characterForward.Get().Value;
+
+            var xzPlaneForward = Vector3.Scale(cameraForward.Get(), new Vector3(1, 0, 1));
+            var xzPlaneRight = Vector3.Scale(cameraRight.Get(), new Vector3(1, 0, 1));
+
+            Vector3 forwardTarget = Vector3.zero;
+
+            if (characterYAxis.GetValue() > 0)
+                forwardTarget += xzPlaneForward;
+            if (characterYAxis.GetValue() < 0)
+                forwardTarget -= xzPlaneForward;
+
+            if (characterXAxis.GetValue() > 0)
+                forwardTarget += xzPlaneRight;
+            if (characterXAxis.GetValue() < 0)
+                forwardTarget -= xzPlaneRight;
+
+
+            if (Input.GetKey(KeyCode.Space)) forwardTarget  += Vector3.up;
+            else if (Input.GetKey(KeyCode.LeftControl)) forwardTarget += Vector3.down;
+
+            forwardTarget.Normalize();
+
+            velocity += forwardTarget * speed;
+
+            characterController.Move(velocity * deltaTime);
+
+            if ((DCLTime.realtimeSinceStartup - lastMovementReportTime) > PlayerSettings.POSITION_REPORTING_DELAY)
+            {
+                ReportMovement();
+            }
+        }
+    }
     void Jump()
     {
         if (isJumping) return;
