@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 8900000, guid: ade92094798774df4a51b327374145b8, type: 3}
   m_Sun: {fileID: 943100645024490816}
-  m_IndirectSpecularColor: {r: 0.27765352, g: 0.65676206, b: 0.96994627, a: 1}
+  m_IndirectSpecularColor: {r: 0.27771077, g: 0.65681255, b: 0.9724352, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -1305,13 +1305,13 @@ MonoBehaviour:
   customContentServerUrl: http://localhost:1338/
   baseUrlMode: 0
   baseUrlCustom: 
-  environment: 2
+  environment: 0
   startInCoords: {x: 0, y: 0}
-  forceLocalComms: 0
-  allWearables: 1
+  forceLocalComms: 1
+  allWearables: 0
   testWearables: 0
   enableTutorial: 0
-  useNewChat: 0
+  soloScene: 1
   debugPanelMode: 0
 --- !u!4 &1444882337
 Transform:

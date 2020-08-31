@@ -71,10 +71,10 @@ public class CameraController : MonoBehaviour
         {
             switch (newMode)
             {
-                case CameraStateBase.ModeId.FirstPerson:
+                case CameraMode.ModeId.FirstPerson:
                     HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.cameraToFirstPerson);
                     break;
-                case CameraStateBase.ModeId.ThirdPerson:
+                case CameraMode.ModeId.ThirdPerson:
                     HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.cameraToThirdPerson);
                     break;
                 default:
