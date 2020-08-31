@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Assertions;
+using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
 
 namespace DCL.Controllers
@@ -372,12 +373,6 @@ namespace DCL.Controllers
                     CleanUpEntityRecursively(entity, removeImmediatelyFromEntitiesList);
                 }
 
-                if (SceneController.i.useBoundariesChecker)
-                {
-                    entity.OnShapeUpdated -= SceneController.i.boundariesChecker.AddEntityToBeChecked;
-                    SceneController.i.boundariesChecker.RemoveEntityToBeChecked(entity);
-                }
-
                 entities.Remove(id);
             }
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
@@ -410,6 +405,12 @@ namespace DCL.Controllers
             else
             {
                 parcelScenesCleaner.MarkForCleanup(entity);
+            }
+
+            if (SceneController.i.useBoundariesChecker)
+            {
+                entity.OnShapeUpdated -= SceneController.i.boundariesChecker.AddEntityToBeChecked;
+                SceneController.i.boundariesChecker.RemoveEntityToBeChecked(entity);
             }
         }
 
@@ -466,18 +467,44 @@ namespace DCL.Controllers
 
             DecentralandEntity me = GetEntityForUpdate(entityId);
 
-            if (me != null && parentId == "0")
+            if (me != null)
             {
-                me.SetParent(null);
-                me.gameObject.transform.SetParent(gameObject.transform, false);
-                return;
-            }
+                if (parentId == "PlayerEntityReference")
+                {
+                    me.SetParent(DCLCharacterController.i.playerReference);
+                    SceneController.i.boundariesChecker.AddPersistent(me);
+                    SceneController.i.physicsSyncController.MarkDirty();
+                }
+                else if (parentId == "AvatarPositionEntityReference")
+                {
+                    me.SetParent(DCLCharacterController.i.avatarPositionReference);
+                    SceneController.i.boundariesChecker.AddPersistent(me);
+                    SceneController.i.physicsSyncController.MarkDirty();
+                }
+                else
+                {
+                    if (me.parent == DCLCharacterController.i.playerReference || me.parent == DCLCharacterController.i.avatarPositionReference)
+                    {
+                        SceneController.i.boundariesChecker.RemoveEntityToBeChecked(me);
+                    }
 
-            DecentralandEntity myParent = GetEntityForUpdate(parentId);
+                    if (parentId == "0")
+                    {
+                        me.SetParent(null);
+                        me.gameObject.transform.SetParent(gameObject.transform, false);
+                        SceneController.i.physicsSyncController.MarkDirty();
+                    }
+                    else
+                    {
+                        DecentralandEntity myParent = GetEntityForUpdate(parentId);
 
-            if (me != null && myParent != null)
-            {
-                me.SetParent(myParent);
+                        if (myParent != null)
+                        {
+                            me.SetParent(myParent);
+                            SceneController.i.physicsSyncController.MarkDirty();
+                        }
+                    }
+                }
             }
         }
 
@@ -504,8 +531,6 @@ namespace DCL.Controllers
                 disposableComponent.AttachTo(decentralandEntity);
             }
         }
-
-        UUIDCallbackMessage uuidMessage = new UUIDCallbackMessage();
 
         public BaseComponent EntityComponentCreateOrUpdate(string entityId, CLASS_ID_COMPONENT classId, string data, out CleanableYieldInstruction yieldInstruction)
         {
@@ -542,6 +567,7 @@ namespace DCL.Controllers
                     SceneController.i.boundariesChecker?.AddEntityToBeChecked(entity);
                 }
 
+                SceneController.i.physicsSyncController.MarkDirty();
                 return null;
             }
 
@@ -568,13 +594,13 @@ namespace DCL.Controllers
                     switch (type)
                     {
                         case OnClick.NAME:
-                            newComponent = Utils.GetOrCreateComponent<OnClick>(go);
+                            newComponent = go.GetOrCreateComponent<OnClick>();
                             break;
                         case OnPointerDown.NAME:
-                            newComponent = Utils.GetOrCreateComponent<OnPointerDown>(go);
+                            newComponent = go.GetOrCreateComponent<OnPointerDown>();
                             break;
                         case OnPointerUp.NAME:
-                            newComponent = Utils.GetOrCreateComponent<OnPointerUp>(go);
+                            newComponent = go.GetOrCreateComponent<OnPointerUp>();
                             break;
                     }
 
@@ -607,6 +633,7 @@ namespace DCL.Controllers
                 if (!entity.components.ContainsKey(classId))
                 {
                     newComponent = factory.CreateItemFromId<BaseComponent>(classId);
+                    SceneController.i.physicsSyncController.MarkDirty();
 
                     if (newComponent != null)
                     {
@@ -628,6 +655,7 @@ namespace DCL.Controllers
             if (newComponent != null && newComponent.isRoutineRunning)
                 yieldInstruction = newComponent.yieldInstruction;
 
+            SceneController.i.physicsSyncController.MarkDirty();
             return newComponent;
         }
 

@@ -307,8 +307,7 @@ MonoBehaviour:
   m_text: "\u200B"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 26b03903800224f718b64e9afbc91b61, type: 2}
-  m_sharedMaterial: {fileID: -6892909264025736228, guid: 26b03903800224f718b64e9afbc91b61,
-    type: 2}
+  m_sharedMaterial: {fileID: 2100000, guid: cbef7abfd5b4443bf9d5c298a464b5a6, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1399,7 +1398,6 @@ GameObject:
   - component: {fileID: 3532739826082998403}
   - component: {fileID: 3403960503076174711}
   - component: {fileID: 6940267282881019307}
-  - component: {fileID: 6941380852895951970}
   m_Layer: 5
   m_Name: ChatInput
   m_TagString: Untagged
@@ -1560,20 +1558,6 @@ MonoBehaviour:
   m_isRichTextEditingAllowed: 0
   m_LineLimit: 0
   m_InputValidator: {fileID: 0}
---- !u!114 &6941380852895951970
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8951916708160277889}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4bfd0d144b6d3dd438b84fa14a062c4f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  extraClickSound: 0
-  playHoverSound: 0
 --- !u!1001 &7192786869977515401
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1597,26 +1581,6 @@ PrefabInstance:
       value: 70.025
       objectReference: {fileID: 0}
     - target: {fileID: 1010798235755633637, guid: 3bced8f3f5d0b334aa15dc8c6218bcce,
-        type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: -19.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 1053615927688891085, guid: 3bced8f3f5d0b334aa15dc8c6218bcce,
-        type: 3}
-      propertyPath: m_AnchorMin.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1053615927688891085, guid: 3bced8f3f5d0b334aa15dc8c6218bcce,
-        type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1053615927688891085, guid: 3bced8f3f5d0b334aa15dc8c6218bcce,
-        type: 3}
-      propertyPath: m_AnchoredPosition.x
-      value: 70.025
-      objectReference: {fileID: 0}
-    - target: {fileID: 1053615927688891085, guid: 3bced8f3f5d0b334aa15dc8c6218bcce,
         type: 3}
       propertyPath: m_AnchoredPosition.y
       value: -19.5

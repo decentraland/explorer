@@ -447,8 +447,7 @@ MonoBehaviour:
   m_text: Cynthia
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 26b03903800224f718b64e9afbc91b61, type: 2}
-  m_sharedMaterial: {fileID: -6892909264025736228, guid: 26b03903800224f718b64e9afbc91b61,
-    type: 2}
+  m_sharedMaterial: {fileID: 2100000, guid: cbef7abfd5b4443bf9d5c298a464b5a6, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -550,7 +549,6 @@ GameObject:
   - component: {fileID: 2120995583777395619}
   - component: {fileID: 6359075905450045981}
   - component: {fileID: 5701910424821072492}
-  - component: {fileID: 3099901091317616972}
   m_Layer: 5
   m_Name: Settings
   m_TagString: Untagged
@@ -674,18 +672,6 @@ MonoBehaviour:
   targetRectTransform: {fileID: 6358739764607845524}
   hoverScale: 1.01
   normalScale: 1
---- !u!114 &3099901091317616972
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1810454000489069829}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4bfd0d144b6d3dd438b84fa14a062c4f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &2072399503169031478
 GameObject:
   m_ObjectHideFlags: 0
@@ -699,7 +685,6 @@ GameObject:
   - component: {fileID: 3804445499524313193}
   - component: {fileID: 8127968709767793726}
   - component: {fileID: 3378201487114180605}
-  - component: {fileID: 8222418990681198581}
   m_Layer: 5
   m_Name: Backpack
   m_TagString: Untagged
@@ -824,18 +809,6 @@ MonoBehaviour:
   targetRectTransform: {fileID: 9144767014507377151}
   hoverScale: 1.01
   normalScale: 1
---- !u!114 &8222418990681198581
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2072399503169031478}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4bfd0d144b6d3dd438b84fa14a062c4f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &2495736092994947693
 GameObject:
   m_ObjectHideFlags: 0
@@ -847,7 +820,6 @@ GameObject:
   - component: {fileID: 487610079711947160}
   - component: {fileID: 117772258556419525}
   - component: {fileID: 5249297500395189288}
-  - component: {fileID: 7888494037848011127}
   m_Layer: 5
   m_Name: AvatarPic
   m_TagString: Untagged
@@ -927,18 +899,6 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
---- !u!114 &7888494037848011127
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2495736092994947693}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4bfd0d144b6d3dd438b84fa14a062c4f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &2611028964087816398
 GameObject:
   m_ObjectHideFlags: 0
@@ -952,7 +912,6 @@ GameObject:
   - component: {fileID: 7780713580872662630}
   - component: {fileID: 2439665739510493948}
   - component: {fileID: 5790774113229220291}
-  - component: {fileID: 5782661552499443593}
   m_Layer: 5
   m_Name: LogOut
   m_TagString: Untagged
@@ -1076,18 +1035,6 @@ MonoBehaviour:
   targetRectTransform: {fileID: 5131703640686909951}
   hoverScale: 1.01
   normalScale: 1
---- !u!114 &5782661552499443593
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2611028964087816398}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4bfd0d144b6d3dd438b84fa14a062c4f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &3073583394034477279
 GameObject:
   m_ObjectHideFlags: 0
@@ -1143,7 +1090,6 @@ GameObject:
   - component: {fileID: 1051721981414603956}
   - component: {fileID: 5960867254960926024}
   - component: {fileID: 7209473278642642492}
-  - component: {fileID: 1695539785550637748}
   m_Layer: 5
   m_Name: HelpFAQs
   m_TagString: Untagged
@@ -1267,18 +1213,6 @@ MonoBehaviour:
   targetRectTransform: {fileID: 6019238154425629605}
   hoverScale: 1.01
   normalScale: 1
---- !u!114 &1695539785550637748
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3325608021088498842}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4bfd0d144b6d3dd438b84fa14a062c4f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &3475705995837572437
 GameObject:
   m_ObjectHideFlags: 0
@@ -1583,8 +1517,7 @@ MonoBehaviour:
   m_text: Avatar
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 26b03903800224f718b64e9afbc91b61, type: 2}
-  m_sharedMaterial: {fileID: -6892909264025736228, guid: 26b03903800224f718b64e9afbc91b61,
-    type: 2}
+  m_sharedMaterial: {fileID: 2100000, guid: cbef7abfd5b4443bf9d5c298a464b5a6, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1686,7 +1619,6 @@ GameObject:
   - component: {fileID: 3061721561504625919}
   - component: {fileID: 8802185040998133461}
   - component: {fileID: 7355355114654448752}
-  - component: {fileID: 2222251236780355917}
   m_Layer: 5
   m_Name: Controls
   m_TagString: Untagged
@@ -1810,18 +1742,6 @@ MonoBehaviour:
   targetRectTransform: {fileID: 7474969828941110349}
   hoverScale: 1.01
   normalScale: 1
---- !u!114 &2222251236780355917
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4015304667058342275}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4bfd0d144b6d3dd438b84fa14a062c4f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &4015978988222737975
 GameObject:
   m_ObjectHideFlags: 0
@@ -2077,8 +1997,7 @@ MonoBehaviour:
   m_text: Settings
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 26b03903800224f718b64e9afbc91b61, type: 2}
-  m_sharedMaterial: {fileID: -6892909264025736228, guid: 26b03903800224f718b64e9afbc91b61,
-    type: 2}
+  m_sharedMaterial: {fileID: 2100000, guid: cbef7abfd5b4443bf9d5c298a464b5a6, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -2472,8 +2391,7 @@ MonoBehaviour:
   m_text: Controls
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 26b03903800224f718b64e9afbc91b61, type: 2}
-  m_sharedMaterial: {fileID: -6892909264025736228, guid: 26b03903800224f718b64e9afbc91b61,
-    type: 2}
+  m_sharedMaterial: {fileID: 2100000, guid: cbef7abfd5b4443bf9d5c298a464b5a6, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -2629,8 +2547,7 @@ MonoBehaviour:
   m_text: Log Out
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 26b03903800224f718b64e9afbc91b61, type: 2}
-  m_sharedMaterial: {fileID: -6892909264025736228, guid: 26b03903800224f718b64e9afbc91b61,
-    type: 2}
+  m_sharedMaterial: {fileID: 2100000, guid: cbef7abfd5b4443bf9d5c298a464b5a6, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -2786,8 +2703,7 @@ MonoBehaviour:
   m_text: Help & FAQs
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 26b03903800224f718b64e9afbc91b61, type: 2}
-  m_sharedMaterial: {fileID: -6892909264025736228, guid: 26b03903800224f718b64e9afbc91b61,
-    type: 2}
+  m_sharedMaterial: {fileID: 2100000, guid: cbef7abfd5b4443bf9d5c298a464b5a6, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
