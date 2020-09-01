@@ -160,6 +160,7 @@ MonoBehaviour:
   steps:
   - {fileID: 6639514825351315494, guid: e80a4e30b31058544ada1af4125c4b91, type: 3}
   - {fileID: 4146741736848859845, guid: e38c1e2e466c58a4aa90e19bbda22466, type: 3}
+  - {fileID: 7706447210135135071, guid: 1e4462a1d0dc0b242bab8052d1486ff8, type: 3}
   - {fileID: 3513632204808866648, guid: cc71903c441610f40b884c6fe6ddedf5, type: 3}
   - {fileID: 4410924681366832147, guid: 0e9002742ce819f4583733f5a29364ad, type: 3}
   - {fileID: 758471573230640681, guid: 53f98be530a835e4eae47ac30281cd4c, type: 3}
@@ -334,7 +335,7 @@ Canvas:
   m_SortingBucketNormalizedSize: 0
   m_AdditionalShaderChannelsFlag: 25
   m_SortingLayerID: 0
-  m_SortingOrder: 2
+  m_SortingOrder: 4
   m_TargetDisplay: 0
 --- !u!114 &5129415320331183001
 MonoBehaviour:

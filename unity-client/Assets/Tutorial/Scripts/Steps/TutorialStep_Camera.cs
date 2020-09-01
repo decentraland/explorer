@@ -20,6 +20,7 @@ namespace DCL.Tutorial
         public override IEnumerator OnStepExecute()
         {
             yield return new WaitUntil(() => stepIsFinished);
+            yield return new WaitForSeconds(1);
         }
 
         private void CameraMode_OnChange(CameraMode.ModeId current, CameraMode.ModeId previous)
