@@ -93,15 +93,17 @@ TEST_SCENES_GAMEJS_FILES := $(subst .ts,.js,$(TEST_SCENES_SOURCE_FILES))
 public/test-scenes/%/game.js: $(SCENE_SYSTEM) public/test-scenes/%/game.ts
 	@$(COMPILER) targets/scenes/test-scenes.json
 
-TEST_ECS_SCENE_SOURCES += $(wildcard public/ecs-scenes/*/game.ts)
+TEST_ECS_SCENE_SOURCES := $(wildcard public/ecs-scenes/*/game.ts)
 TEST_ECS_SCENE_GAMEJS_FILES := $(subst .ts,.js,$(TEST_ECS_SCENE_SOURCES))
 
 # ECS scenes
 
+ECS_LIBRARY := public/ecs-scenes/-200.-30-libraries/node_modules/eth-wrapper/eth-wrapper.js
+
 public/ecs-scenes/-200.-30-libraries/node_modules/eth-wrapper/eth-wrapper.js: public/ecs-scenes/-200.-30-libraries/node_modules/eth-wrapper/eth-wrapper.ts $(BUILD_ECS)
 	$(BUILD_ECS) -p public/ecs-scenes/-200.-30-libraries/node_modules/eth-wrapper
 
-public/ecs-scenes/%/game.js: $(public/ecs-scenes/-200.-30-libraries/node_modules/eth-wrapper/eth-wrapper.js) $(SCENE_SYSTEM) public/ecs-scenes/%/game.ts
+public/ecs-scenes/%/game.js: $(ECS_LIBRARY) $(SCENE_SYSTEM) public/ecs-scenes/%/game.ts
 	@node scripts/buildECSprojects.js
 
 # All scenes together
