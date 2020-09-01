@@ -66,6 +66,10 @@ export class UnityInterface {
   public Module: any
 
   public SetTargetHeight(height: number): void {
+    if (EDITOR) {
+      return
+    }
+
     if (targetHeight === height) {
       return
     }
@@ -311,6 +315,10 @@ export class UnityInterface {
       'UpdateGIFPointers',
       JSON.stringify({ id, width, height, pointers, frameDelays })
     )
+  }
+
+  public RejectGIFProcessingRequest() {
+    this.gameInstance.SendMessage('SceneController', 'RejectGIFProcessingRequest')
   }
 
   public ConfigureEmailPrompt(tutorialStep: number) {
