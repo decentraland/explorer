@@ -25,8 +25,12 @@ export function noExclusiveMismatches(inventory: WearableId[]) {
     return wearableId.startsWith('dcl://base-avatars') || inventory.indexOf(wearableId) !== -1
   }
 }
+
+export function calculateDisplayName(userId: string, profile: any): string {
+  return profile.name || 'Guest-' + userId.substr(2, 6)
+}
 export function processServerProfile(userId: string, receivedProfile: any): Profile {
-  const name = receivedProfile.name || 'Guest-' + userId.substr(2, 6)
+  const name = calculateDisplayName(userId, receivedProfile)
   const wearables = receivedProfile.avatar.wearables
     .map(fixWearableIds)
     .filter(dropDeprecatedWearables)
@@ -53,7 +57,8 @@ export function processServerProfile(userId: string, receivedProfile: any): Prof
     },
     inventory: receivedProfile.inventory || [],
     blocked: receivedProfile.blocked,
-    tutorialStep: receivedProfile.tutorialStep || 0
+    tutorialStep: receivedProfile.tutorialStep || 0,
+    interests: receivedProfile.interests || []
   }
 }
 
