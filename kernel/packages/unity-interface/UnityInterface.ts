@@ -1,5 +1,5 @@
 import { TeleportController } from 'shared/world/TeleportController'
-import { WSS_ENABLED } from 'config'
+import { WSS_ENABLED, EDITOR } from 'config'
 import { Vector3 } from '../decentraland-ecs/src/decentraland/math'
 import { ProfileForRenderer, MinimapSceneInfo } from '../decentraland-ecs/src/decentraland/Types'
 import { AirdropInfo } from 'shared/airdrops/interface'
@@ -66,6 +66,10 @@ export class UnityInterface {
   public Module: any
 
   public SetTargetHeight(height: number): void {
+    if (EDITOR) {
+      return
+    }
+
     if (targetHeight === height) {
       return
     }
@@ -91,9 +95,15 @@ export class UnityInterface {
     _gameInstance = gameInstance
 
     if (this.Module) {
-      window.addEventListener('resize', this.resizeCanvasDelayed)
-      this.resizeCanvasDelayed(null)
-      this.waitForFillMouseEventData()
+      if (EDITOR) {
+        const canvas = this.Module.canvas
+        canvas.width = canvas.parentElement.clientWidth
+        canvas.height = canvas.parentElement.clientHeight
+      } else {
+        window.addEventListener('resize', this.resizeCanvasDelayed)
+        this.resizeCanvasDelayed(null)
+        this.waitForFillMouseEventData()
+      }
     }
   }
 
@@ -305,6 +315,10 @@ export class UnityInterface {
       'UpdateGIFPointers',
       JSON.stringify({ id, width, height, pointers, frameDelays })
     )
+  }
+
+  public RejectGIFProcessingRequest() {
+    this.gameInstance.SendMessage('SceneController', 'RejectGIFProcessingRequest')
   }
 
   public ConfigureEmailPrompt(tutorialStep: number) {
