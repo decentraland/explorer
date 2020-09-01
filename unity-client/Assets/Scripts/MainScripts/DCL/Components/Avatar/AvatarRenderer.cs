@@ -502,9 +502,8 @@ namespace DCL
         private void HideAll()
         {
             Renderer[] renderers = gameObject.GetComponentsInChildren<Renderer>();
-            for (int i = 0;
-                i < renderers.Length;
-                i++)
+
+            for (int i = 0; i < renderers.Length; i++)
             {
                 renderers[i].enabled = false;
             }
