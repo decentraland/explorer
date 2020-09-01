@@ -196,7 +196,7 @@ async function emitFile(fileName: string, services: ts.LanguageService, cfg: Pro
 
   const loadedLibs: OutFile[] = []
 
-  function loadUllaLib(lib: string) {
+  function loadDclLib(lib: string) {
     const path = resolveFile(lib)
 
     if (path) {
@@ -227,9 +227,9 @@ async function emitFile(fileName: string, services: ts.LanguageService, cfg: Pro
   function loadLibOrJs(lib: string) {
     if (PRODUCTION) {
       // prefer .min.js when available for PRODUCTION builds
-      return loadUllaLib(lib + '.lib') || loadJsLib(lib.replace(/\.js$/, '.min.js')) || loadJsLib(lib) || false
+      return loadDclLib(lib + '.lib') || loadJsLib(lib.replace(/\.js$/, '.min.js')) || loadJsLib(lib) || false
     } else {
-      return loadUllaLib(lib + '.lib') || loadJsLib(lib) || false
+      return loadDclLib(lib + '.lib') || loadJsLib(lib) || false
     }
   }
 
