@@ -16,11 +16,15 @@ internal class BaseCellView : MonoBehaviour
     Texture2D thumbnailTexture;
     Sprite thumbnail;
 
-    public void FetchThumbnail(string url)
+    public void FetchThumbnail(string url, Action onFetchFail)
     {
         if (thumbnail)
         {
             OnThumbnailFetched?.Invoke(thumbnail);
+        }
+        else if (string.IsNullOrEmpty(url))
+        {
+            onFetchFail?.Invoke();
         }
         else if (thumbnailRequest == null)
         {
@@ -33,27 +37,30 @@ internal class BaseCellView : MonoBehaviour
                 if (thumbnailRequest == null)
                     return;
 
-                if (thumbnailRequest.WebRequestSucceded())
+                bool success = thumbnailRequest.WebRequestSucceded();
+                if (success)
                 {
                     thumbnailTexture = ((DownloadHandlerTexture)thumbnailRequest.downloadHandler).texture;
                     thumbnailTexture.Compress(false);
-                    thumbnail = Sprite.Create(thumbnailTexture, new Rect(0, 0, thumbnailTexture.width, thumbnailTexture.height), Vector2.zero);
+                    var thumbnailSprite = Sprite.Create(thumbnailTexture, new Rect(0, 0, thumbnailTexture.width, thumbnailTexture.height), Vector2.zero);
+                    SetThumbnail(thumbnailSprite);
                 }
-                else
-                {
-                    Debug.Log($"Error downloading: {url} {thumbnailRequest.error}");
-                    thumbnail = errorThumbnail;
-                }
-
-                thumbnailImage.sprite = thumbnail;
-                loadingSpinner.SetActive(false);
 
                 thumbnailRequest.Dispose();
                 thumbnailRequest = null;
 
-                OnThumbnailFetched?.Invoke(thumbnail);
+                if (!success)
+                {
+                    Debug.Log($"Error downloading: {url}");
+                    onFetchFail?.Invoke();
+                }
             };
         }
+    }
+
+    public void SetDefaultThumbnail()
+    {
+        SetThumbnail(errorThumbnail);
     }
 
     public Sprite GetThumbnail()
@@ -82,5 +89,13 @@ internal class BaseCellView : MonoBehaviour
             thumbnailRequest.Dispose();
             thumbnailRequest = null;
         }
+    }
+
+    private void SetThumbnail(Sprite thmbnail)
+    {
+        thumbnail = thmbnail;
+        thumbnailImage.sprite = thumbnail;
+        loadingSpinner.SetActive(false);
+        OnThumbnailFetched?.Invoke(thumbnail);
     }
 }

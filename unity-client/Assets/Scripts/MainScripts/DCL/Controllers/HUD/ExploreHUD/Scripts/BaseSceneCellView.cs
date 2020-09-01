@@ -81,13 +81,9 @@ internal class BaseSceneCellView : BaseCellView, IMapDataView, IFriendTrackerHan
 
         if (GetThumbnail() == null)
         {
-            string url = mapInfo.previewImageUrl;
-            if (string.IsNullOrEmpty(url))
-            {
-                url = MapUtils.GetMarketPlaceThumbnailUrl(mapInfo, 196, 143, 50);
-            }
-
-            FetchThumbnail(url);
+            FetchThumbnail(mapInfo.previewImageUrl,
+                onFetchFail: () => FetchThumbnail(MapUtils.GetMarketPlaceThumbnailUrl(mapInfo, 196, 143, 50),
+                onFetchFail: () => SetDefaultThumbnail()));
         }
     }
 
@@ -116,6 +112,6 @@ internal class BaseSceneCellView : BaseCellView, IMapDataView, IFriendTrackerHan
 
     bool IFriendTrackerHandler.ContainCoords(Vector2Int coords)
     {
-        return ((IMapDataView) this).ContainCoords(coords);
+        return ((IMapDataView)this).ContainCoords(coords);
     }
 }
