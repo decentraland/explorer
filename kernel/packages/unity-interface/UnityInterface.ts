@@ -1,5 +1,5 @@
 import { TeleportController } from 'shared/world/TeleportController'
-import { WSS_ENABLED } from 'config'
+import { WSS_ENABLED, EDITOR } from 'config'
 import { Vector3 } from '../decentraland-ecs/src/decentraland/math'
 import { ProfileForRenderer, MinimapSceneInfo } from '../decentraland-ecs/src/decentraland/Types'
 import { AirdropInfo } from 'shared/airdrops/interface'
@@ -66,12 +66,15 @@ export class UnityInterface {
   public Module: any
 
   public SetTargetHeight(height: number): void {
+    if (EDITOR) {
+      return
+    }
+
     if (targetHeight === height) {
       return
     }
 
     if (!this.gameInstance.Module) {
-
       defaultLogger.log(
         `Can't change base resolution height to ${height}! Are you running explorer in unity editor or native?`
       )
@@ -91,10 +94,12 @@ export class UnityInterface {
     this.Module = this.gameInstance.Module
     _gameInstance = gameInstance
 
-    if (this.Module !== undefined) {
-      window.addEventListener('resize', this.resizeCanvasDelayed)
-      this.resizeCanvasDelayed(null)
-      this.waitForFillMouseEventData()
+    if (!EDITOR) {
+      if (this.Module !== undefined) {
+        window.addEventListener('resize', this.resizeCanvasDelayed)
+        this.resizeCanvasDelayed(null)
+        this.waitForFillMouseEventData()
+      }
     }
   }
 
@@ -298,6 +303,22 @@ export class UnityInterface {
       const payload = { chunkIndex: i, chunksCount: chunks.length, scenesInfo: chunks[i] }
       this.gameInstance.SendMessage('SceneController', 'UpdateHotScenesList', JSON.stringify(payload))
     }
+  }
+
+  public SendGIFPointers(id: string, width: number, height: number, pointers: number[], frameDelays: number[]) {
+    this.gameInstance.SendMessage(
+      'SceneController',
+      'UpdateGIFPointers',
+      JSON.stringify({ id, width, height, pointers, frameDelays })
+    )
+  }
+
+  public ConfigureEmailPrompt(tutorialStep: number) {
+    const emailCompletedFlag = 128
+    this.ConfigureHUDElement(HUDElementID.EMAIL_PROMPT, {
+      active: (tutorialStep & emailCompletedFlag) === 0,
+      visible: false
+    })
   }
 
   // *********************************************************************************
