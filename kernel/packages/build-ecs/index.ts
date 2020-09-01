@@ -6,11 +6,18 @@ import * as terser from 'terser'
 import { inspect } from 'util'
 import { resolve, dirname, relative } from 'path'
 
-type JsonManifest = {
-  // scene.json & package.json
+type PackageJson = {
   main: string
+
+  // only package.json
+  typings?: string
+
   bundleDependencies: string[]
   decentralandLibrary?: any
+}
+
+type SceneJson = {
+  main: string
 }
 
 type DecentralandLib = {
@@ -32,7 +39,7 @@ const watchedFiles = new Set<string>()
 
 type FileMap = ts.MapLike<{ version: number }>
 
-async function compile(watch: boolean) {
+async function compile() {
   // current working directory
   let CWD = process.cwd()
   ts.sys.getCurrentDirectory = () => CWD
@@ -53,18 +60,19 @@ async function compile(watch: boolean) {
 
   console.log(`> Working directory: ${ts.sys.getCurrentDirectory()}`)
 
-  let shouldEmitLib = false
-  let packageJson: JsonManifest | null = null
+  let packageJson: PackageJson | null = null
+  let sceneJson: SceneJson | null = null
 
   if (resolveFile('package.json')) {
     packageJson = JSON.parse(loadArtifact('package.json'))
     packageJson!.bundleDependencies = packageJson!.bundleDependencies || []
-    shouldEmitLib = 'decentralandLibrary' in packageJson!
   }
 
-  const cfg = getConfiguration(packageJson)
+  if (resolveFile('scene.json')) {
+    sceneJson = JSON.parse(loadArtifact('scene.json'))
+  }
 
-  cfg.isDecentralandLib = shouldEmitLib
+  const cfg = getConfiguration(packageJson, sceneJson)
 
   console.log('')
 
@@ -90,7 +98,7 @@ async function compile(watch: boolean) {
           return undefined
         }
 
-        if (watch) {
+        if (WATCH) {
           watchFile(fileName, services, files, cfg)
         }
 
@@ -106,7 +114,7 @@ async function compile(watch: boolean) {
     ts.createDocumentRegistry()
   )
 
-  if (watch) {
+  if (WATCH) {
     // Now let's watch the files
     cfg.fileNames.forEach((fileName) => {
       watchFile(fileName, services, files, cfg)
@@ -279,11 +287,9 @@ async function emitFile(fileName: string, services: ts.LanguageService, cfg: Pro
 
       file.content = ret.join('\n')
 
-      if (cfg.isDecentralandLib) {
-        // emit lib file if it is a decentraland lib
-        const deps = getOutFile(file.path + '.lib')
-        deps.content = JSON.stringify(loadedLibs, null, 2)
-      }
+      // emit lib file if it is a decentraland lib
+      const deps = getOutFile(file.path + '.lib')
+      deps.content = JSON.stringify(loadedLibs, null, 2)
 
       if (PRODUCTION || cfg.isDecentralandLib) {
         // minify && source map
@@ -339,7 +345,7 @@ function logErrors(services: ts.LanguageService) {
   allDiagnostics.forEach(printDiagnostic)
 }
 
-function getConfiguration(packageJson: JsonManifest | null): ProjectConfig {
+function getConfiguration(packageJson: PackageJson | null, sceneJson: SceneJson | null): ProjectConfig {
   const host: ts.ParseConfigHost = {
     useCaseSensitiveFileNames: ts.sys.useCaseSensitiveFileNames,
     fileExists: ts.sys.fileExists,
@@ -380,42 +386,8 @@ function getConfiguration(packageJson: JsonManifest | null): ProjectConfig {
   }
 
   if (!tsconfig.options.outFile) {
-    console.error('! Error: tsconfig.json: invalid outFile')
+    console.error('! Error: tsconfig.json: invalid or missing outFile')
     hasError = true
-  }
-
-  if (tsconfig.options.outFile) {
-    const outFile = ts.sys.resolvePath(tsconfig.options.outFile)
-
-    if (!outFile) {
-      console.error(`! Error: field "outFile" in tsconfig.json cannot be resolved.`)
-      hasError = true
-    }
-
-    if (packageJson) {
-      if (!packageJson.main) {
-        console.error(`! Error: field "main" in package.json is missing.`)
-        hasError = true
-      } else {
-        const mainFile = ts.sys.resolvePath(packageJson.main)
-        if (!mainFile) {
-          console.error(`! Error: field "main" in scene.json cannot be resolved.`)
-          hasError = true
-        }
-
-        if (outFile !== mainFile) {
-          console.error(
-            `! Error: tsconfig.json .outFile is not equal to scene.json .main\n       (${outFile.replace(
-              ts.sys.getCurrentDirectory(),
-              ''
-            )} != ${mainFile.replace(ts.sys.getCurrentDirectory(), '')})`
-          )
-          hasError = true
-        }
-      }
-    } else {
-      console.log('! Warning: missing package.json in project folder')
-    }
   }
 
   const libs: DecentralandLib[] = []
@@ -441,6 +413,31 @@ function getConfiguration(packageJson: JsonManifest | null): ProjectConfig {
       } else if (packageJson.bundleDependencies) {
         console.error(`! Error: package.json .bundleDependencies must be an array of strings.`)
         hasError = true
+      }
+    }
+  }
+
+  if (isDecentralandLib && sceneJson) {
+    console.error('! Error: project of type decentralandLibrary must not have scene.json')
+    process.exit(1)
+  }
+
+  if (isDecentralandLib && !packageJson) {
+    console.error('! Error: project of type decentralandLibrary requires a package.json')
+    process.exit(1)
+  }
+
+  if (tsconfig.options.outFile) {
+    const outFile = ts.sys.resolvePath(tsconfig.options.outFile)
+
+    if (!outFile) {
+      console.error(`! Error: field "outFile" in tsconfig.json cannot be resolved.`)
+      hasError = true
+    } else {
+      if (isDecentralandLib) {
+        validatePackageJsonForLibrary(packageJson!, outFile)
+      } else {
+        validateSceneJson(sceneJson!, outFile)
       }
     }
   }
@@ -521,7 +518,11 @@ function getConfiguration(packageJson: JsonManifest | null): ProjectConfig {
   tsconfig.options.inlineSources = true
   tsconfig.options.sourceMap = false
   tsconfig.options.removeComments = false
-  tsconfig.options.rootDir = ts.sys.getCurrentDirectory()
+
+  if (isDecentralandLib) {
+    tsconfig.options.declaration = true
+    delete tsconfig.options.declarationDir
+  }
 
   function ensurePathsAsterisk(options: any) {
     options.paths = options.paths || {}
@@ -631,12 +632,68 @@ function ensureDirectoriesExist(folder: string) {
   }
 }
 
-async function testScript(script: string) {
-  // TODO: perform vm2 validation of code (future PR)
+function validatePackageJsonForLibrary(packageJson: PackageJson, outFile: string) {
+  if (!packageJson.main) {
+    throw new Error(`field "main" in package.json is missing.`)
+  } else {
+    const mainFile = ts.sys.resolvePath(packageJson.main)
+
+    if (!mainFile) {
+      throw new Error(`! Error: field "main" in package.json cannot be resolved.`)
+    }
+
+    if (outFile !== mainFile) {
+      const help = `(${outFile.replace(ts.sys.getCurrentDirectory(), '')} != ${mainFile.replace(
+        ts.sys.getCurrentDirectory(),
+        ''
+      )})`
+      throw new Error(`! Error: tsconfig.json .outFile is not equal to package.json .main\n       ${help}`)
+    }
+  }
+
+  if (!packageJson.typings) {
+    throw new Error(`field "typings" in package.json is missing.`)
+  } else {
+    const typingsFile = ts.sys.resolvePath(packageJson.typings)
+
+    if (!typingsFile) {
+      throw new Error(`! Error: field "typings" in package.json cannot be resolved.`)
+    }
+
+    if (outFile !== typingsFile) {
+      const resolvedTypings = outFile.replace(/\.js$/, '.d.ts')
+      const help = `(${resolvedTypings.replace(ts.sys.getCurrentDirectory(), '')} != ${typingsFile.replace(
+        ts.sys.getCurrentDirectory(),
+        ''
+      )})`
+      throw new Error(`! Error: package.json .typings does not match the emited file\n       ${help}`)
+    }
+  }
+}
+
+function validateSceneJson(sceneJson: SceneJson, outFile: string) {
+  if (!sceneJson.main) {
+    console.dir(sceneJson)
+    throw new Error(`field "main" in scene.json is missing.`)
+  } else {
+    const mainFile = ts.sys.resolvePath(sceneJson.main)
+
+    if (!mainFile) {
+      throw new Error(`! Error: field "main" in scene.json cannot be resolved.`)
+    }
+
+    if (outFile !== mainFile) {
+      const help = `(${outFile.replace(ts.sys.getCurrentDirectory(), '')} != ${mainFile.replace(
+        ts.sys.getCurrentDirectory(),
+        ''
+      )})`
+      throw new Error(`! Error: tsconfig.json .outFile is not equal to scene.json .main\n       ${help}`)
+    }
+  }
 }
 
 // Start the watcher
-compile(WATCH).catch((e) => {
+compile().catch((e) => {
   console.error(e)
   process.exit(1)
 })
