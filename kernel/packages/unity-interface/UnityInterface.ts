@@ -260,8 +260,8 @@ export class UnityInterface {
     }
   }
 
-  public SetTutorialEnabled() {
-    this.gameInstance.SendMessage('TutorialController', 'SetTutorialEnabled')
+  public SetTutorialEnabled(fromDeepLink: boolean) {
+    this.gameInstance.SendMessage('TutorialController', 'SetTutorialEnabled', fromDeepLink)
   }
 
   public TriggerAirdropDisplay(data: AirdropInfo) {
@@ -321,10 +321,10 @@ export class UnityInterface {
     })
   }
 
-  public ConfigureTutorial(tutorialStep: number) {
+  public ConfigureTutorial(tutorialStep: number, fromDeepLink: boolean) {
     const tutorialCompletedFlag = 256
     if (WORLD_EXPLORER && (RESET_TUTORIAL || (tutorialStep & tutorialCompletedFlag) === 0)) {
-      this.SetTutorialEnabled()
+      this.SetTutorialEnabled(fromDeepLink)
     }
   }
 

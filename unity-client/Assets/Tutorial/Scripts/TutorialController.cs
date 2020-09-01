@@ -1,3 +1,4 @@
+using DCL.Controllers;
 using DCL.Interface;
 using System;
 using System.Collections;
@@ -9,7 +10,7 @@ namespace DCL.Tutorial
 {
     public interface ITutorialController
     {
-        void SetTutorialEnabled();
+        void SetTutorialEnabled(string fromDeepLink);
         void SetTutorialDisabled();
         IEnumerator StartTutorialFromStep(int stepIndex);
         void SetUserTutorialStepAsCompleted(TutorialController.TutorialFinishStep step);
@@ -37,9 +38,17 @@ namespace DCL.Tutorial
 
         internal HUDController hudController { get => HUDController.i; }
 
-        [Header("Steps Configuration")]
+        [Header("General Configuration")]
         [SerializeField] float timeBetweenSteps = 0.5f;
-        [SerializeField] List<TutorialStep> steps = new List<TutorialStep>();
+
+        [Header("Tutorial Steps on Genesis Plaza")]
+        [SerializeField] List<TutorialStep> stepsOnGenesisPlaza = new List<TutorialStep>();
+
+        [Header("Tutorial Steps from Deep Link")]
+        [SerializeField] List<TutorialStep> stepsFromDeepLink = new List<TutorialStep>();
+
+        [Header("Tutorial Steps on Genesis Plaza (after Deep Link)")]
+        [SerializeField] List<TutorialStep> stepsOnGenesisPlazaAfterDeepLink = new List<TutorialStep>();
 
         [Header("3D Model Teacher")]
         [SerializeField] RawImage teacherRawImage;
@@ -50,12 +59,16 @@ namespace DCL.Tutorial
         [Header("Debugging")]
         public bool debugRunTutorial = false;
         public int debugStartingStepIndex;
+        public bool debugOpenedFromDeepLink = false;
 
         private bool isRunning = false;
         private int currentStepIndex;
         private TutorialStep runningStep = null;
         private Coroutine executeStepsCoroutine;
         private Coroutine teacherMovementCoroutine;
+        private bool openedFromDeepLink = false;
+        private bool tutorialFromDeepLinkDone = false;
+        private bool playerIsInGenesisPlaza = false;
 
         private void Awake()
         {
@@ -67,23 +80,27 @@ namespace DCL.Tutorial
             ShowTeacher3DModel(false);
 
             if (debugRunTutorial)
-                SetTutorialEnabled();
+                SetTutorialEnabled(debugOpenedFromDeepLink.ToString());
         }
 
         private void OnDestroy()
         {
+            if (executeStepsCoroutine != null)
+                StopCoroutine(executeStepsCoroutine);
+
             SetTutorialDisabled();
         }
 
         /// <summary>
         /// Enables the tutorial controller and waits for the RenderingState is enabled to start to execute the corresponding tutorial steps.
         /// </summary>
-        public void SetTutorialEnabled()
+        public void SetTutorialEnabled(string fromDeepLink)
         {
             if (isRunning)
                 return;
 
             isRunning = true;
+            openedFromDeepLink = Convert.ToBoolean(fromDeepLink);
 
             if (hudController != null && hudController.emailPromptHud != null)
             {
@@ -130,7 +147,23 @@ namespace DCL.Tutorial
                 runningStep = null;
             }
 
-            yield return ExecuteSteps(stepIndex);
+            if (playerIsInGenesisPlaza)
+            {
+                if (tutorialFromDeepLinkDone)
+                    yield return ExecuteSteps(stepsOnGenesisPlazaAfterDeepLink, stepIndex);
+                else
+                    yield return ExecuteSteps(stepsOnGenesisPlaza, stepIndex);
+                
+            }
+            else if (openedFromDeepLink)
+            {
+                yield return ExecuteSteps(stepsFromDeepLink, stepIndex);
+                tutorialFromDeepLinkDone = true;
+            }
+            else
+            {
+                yield break;
+            }
         }
 
         /// <summary>
@@ -180,6 +213,8 @@ namespace DCL.Tutorial
 
             CommonScriptableObjects.rendererState.OnChange -= OnRenderingStateChanged;
 
+            playerIsInGenesisPlaza = IsPlayerInsideGenesisPlaza();
+
             if (debugRunTutorial)
                 currentStepIndex = debugStartingStepIndex >= 0 ? debugStartingStepIndex : 0;
             else
@@ -188,7 +223,7 @@ namespace DCL.Tutorial
             executeStepsCoroutine = StartCoroutine(StartTutorialFromStep(currentStepIndex));
         }
 
-        private IEnumerator ExecuteSteps(int startingStepIndex)
+        private IEnumerator ExecuteSteps(List<TutorialStep> steps, int startingStepIndex)
         {
             for (int i = startingStepIndex; i < steps.Count; i++)
             {
@@ -210,7 +245,7 @@ namespace DCL.Tutorial
                     yield return new WaitForSeconds(timeBetweenSteps);
             }
 
-            if (!debugRunTutorial)
+            if (!debugRunTutorial && !openedFromDeepLink)
                 SetUserTutorialStepAsCompleted(TutorialFinishStep.NewTutorialFinished);
 
             runningStep = null;
@@ -237,6 +272,20 @@ namespace DCL.Tutorial
         private void EmailPromptHud_OnSetEmailFlag()
         {
             SetUserTutorialStepAsCompleted(TutorialFinishStep.EmailRequested);
+        }
+
+        private bool IsPlayerInsideGenesisPlaza()
+        {
+            if (SceneController.i == null || SceneController.i.currentSceneId == null)
+                return false;
+
+            Vector2Int genesisPlazaBaseCoords = new Vector2Int(-9, -9);
+            ParcelScene currentScene = SceneController.i.loadedScenes[SceneController.i.currentSceneId];
+
+            if (currentScene != null && currentScene.IsInsideSceneBoundaries(genesisPlazaBaseCoords))
+                return true;
+
+            return false;
         }
     }
 }

@@ -1,5 +1,5 @@
 import { TeleportController } from 'shared/world/TeleportController'
-import { DEBUG, EDITOR, ENGINE_DEBUG_PANEL, SCENE_DEBUG_PANEL, SHOW_FPS_COUNTER, NO_ASSET_BUNDLES } from 'config'
+import { DEBUG, EDITOR, ENGINE_DEBUG_PANEL, SCENE_DEBUG_PANEL, SHOW_FPS_COUNTER, NO_ASSET_BUNDLES, HAS_INITIAL_POSITION_MARK } from 'config'
 import { aborted } from 'shared/loading/ReportFatalError'
 import { loadingScenes, teleportTriggered } from 'shared/loading/types'
 import { defaultLogger } from 'shared/logger'
@@ -121,7 +121,7 @@ export async function initializeEngine(_gameInstance: GameInstance) {
 
   if (!DEBUG) {
     unityInterface.ConfigureEmailPrompt(getUserProfile().profile.tutorialStep)
-    unityInterface.ConfigureTutorial(getUserProfile().profile.tutorialStep)
+    unityInterface.ConfigureTutorial(getUserProfile().profile.tutorialStep, HAS_INITIAL_POSITION_MARK)
   }
 
   if (!EDITOR) {

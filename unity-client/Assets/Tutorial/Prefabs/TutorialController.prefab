@@ -157,7 +157,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   timeBetweenSteps: 0.5
-  steps:
+  stepsOnGenesisPlaza:
   - {fileID: 6639514825351315494, guid: e80a4e30b31058544ada1af4125c4b91, type: 3}
   - {fileID: 4146741736848859845, guid: e38c1e2e466c58a4aa90e19bbda22466, type: 3}
   - {fileID: 7706447210135135071, guid: 1e4462a1d0dc0b242bab8052d1486ff8, type: 3}
@@ -165,6 +165,13 @@ MonoBehaviour:
   - {fileID: 4410924681366832147, guid: 0e9002742ce819f4583733f5a29364ad, type: 3}
   - {fileID: 758471573230640681, guid: 53f98be530a835e4eae47ac30281cd4c, type: 3}
   - {fileID: 5639665319216893634, guid: 259bf436d3fbfe847b44d46cf81f1201, type: 3}
+  - {fileID: 3855330431105593682, guid: c64f9a580ba9e8e4db3bbd713d2cde8b, type: 3}
+  stepsFromDeepLink:
+  - {fileID: 5317936615110094145, guid: b09c459c26cfc20478dbec66f7f8f120, type: 3}
+  - {fileID: 2279349500871665793, guid: 8c33a8a8dee303549b52b8aa6a60f6ae, type: 3}
+  stepsOnGenesisPlazaAfterDeepLink:
+  - {fileID: 6639514825351315494, guid: e80a4e30b31058544ada1af4125c4b91, type: 3}
+  - {fileID: 4146741736848859845, guid: e38c1e2e466c58a4aa90e19bbda22466, type: 3}
   - {fileID: 3855330431105593682, guid: c64f9a580ba9e8e4db3bbd713d2cde8b, type: 3}
   teacherRawImage: {fileID: 6732306866191114328}
   teacher: {fileID: 977289631841785178}
@@ -204,6 +211,7 @@ MonoBehaviour:
     m_RotationOrder: 4
   debugRunTutorial: 0
   debugStartingStepIndex: 0
+  debugIsFromDeepLink: 0
 --- !u!1 &4806071478721018373
 GameObject:
   m_ObjectHideFlags: 0

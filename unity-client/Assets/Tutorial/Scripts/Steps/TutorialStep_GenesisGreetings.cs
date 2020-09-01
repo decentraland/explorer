@@ -5,7 +5,10 @@ using UnityEngine.UI;
 
 namespace DCL.Tutorial
 {
-    public class TutorialStep_Greetings : TutorialStep
+    /// <summary>
+    /// Class that represents the onboarding tutorial step related to the greetings showed in Genesis Plaza.
+    /// </summary>
+    public class TutorialStep_GenesisGreetings : TutorialStep
     {
         [SerializeField] Button okButton;
         [SerializeField] TMP_Text titleText;
