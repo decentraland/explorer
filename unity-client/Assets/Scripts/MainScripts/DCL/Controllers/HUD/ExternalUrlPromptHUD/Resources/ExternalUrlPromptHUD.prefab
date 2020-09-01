@@ -1667,9 +1667,12 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1528383878579514654}
+  - component: {fileID: 2577669497937292068}
+  - component: {fileID: 1029167825307526191}
   - component: {fileID: 1191780443213190932}
   - component: {fileID: 1566415224542579564}
   - component: {fileID: 3871624349580654081}
+  - component: {fileID: 3696104042857636695}
   m_Layer: 5
   m_Name: Content
   m_TagString: Untagged
@@ -1698,6 +1701,41 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!114 &2577669497937292068
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4642206131667890045}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d8b939b5bedb9494b806609faeda7d8d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hideOnEnable: 0
+  animSpeedFactor: 1
+  disableAfterFadeOut: 1
+  visibleParam: visible
+--- !u!95 &1029167825307526191
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4642206131667890045}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 22100000, guid: d5f6cd638da0f1b4388c7a3679abe0b0, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!223 &1191780443213190932
 Canvas:
   m_ObjectHideFlags: 0
@@ -1758,6 +1796,18 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
+--- !u!225 &3696104042857636695
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4642206131667890045}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &4840031060944663586
 GameObject:
   m_ObjectHideFlags: 0
@@ -2065,6 +2115,7 @@ MonoBehaviour:
   domainText: {fileID: 4358091905459147228}
   urlText: {fileID: 3046767087853210261}
   trustToggle: {fileID: 1200478083728398239}
+  showHideAnimator: {fileID: 2577669497937292068}
 --- !u!1 &8674331462890837211
 GameObject:
   m_ObjectHideFlags: 0
