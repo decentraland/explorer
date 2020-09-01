@@ -29,7 +29,7 @@ public class UIContainerRectVisualTests : UIVisualTestsBase
         {
             parentComponent = screenSpaceId,
             color = Color.green,
-            width = new UIValue(50f, UIValue.Unit.PERCENT),
+            width = new UIValue(40f, UIValue.Unit.PERCENT),
             height = new UIValue(50f, UIValue.Unit.PERCENT)
         }, mainContainerId);
 
