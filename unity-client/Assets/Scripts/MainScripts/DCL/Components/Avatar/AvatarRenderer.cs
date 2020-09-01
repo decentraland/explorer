@@ -164,6 +164,10 @@ namespace DCL
                 for (int i = 0; i < model.wearables.Count; i++)
                 {
                     WearableItem item = ResolveWearable(model.wearables[i]);
+
+                    if (item == null)
+                        continue;
+
                     resolvedWearables.Add(item);
                 }
             }
