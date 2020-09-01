@@ -143,6 +143,15 @@ export class BrowserInterface {
     globalThis.globalStore.dispatch(logout())
   }
 
+  public SaveUserInterests(interests: string[]) {
+    if (!interests) {
+      return
+    }
+    const unique = new Set<string>(interests)
+    const profile: Profile = getUserProfile().profile as Profile
+    globalThis.globalStore.dispatch(saveProfileRequest({ ...profile, interests: Array.from(unique) }))
+  }
+
   public SaveUserAvatar(changes: { face: string; face128: string; face256: string; body: string; avatar: Avatar }) {
     const { face, face128, face256, body, avatar } = changes
     const profile: Profile = getUserProfile().profile as Profile
@@ -343,6 +352,14 @@ export class BrowserInterface {
   }
 
   async RequestGIFProcessor(data: { imageSource: string; id: string; isWebGL1: boolean }) {
+    // tslint:disable-next-line
+    const isSupported = (typeof OffscreenCanvas !== "undefined") && (typeof OffscreenCanvasRenderingContext2D === "function")
+
+    if (!isSupported) {
+      unityInterface.RejectGIFProcessingRequest()
+      return
+    }
+
     if (!DCL.gifProcessor) {
       DCL.gifProcessor = new GIFProcessor(unityInterface.gameInstance, unityInterface, data.isWebGL1)
     }
