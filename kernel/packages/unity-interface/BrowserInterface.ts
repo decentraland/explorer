@@ -144,7 +144,7 @@ export class BrowserInterface {
   }
 
   public SaveUserInterests(interests: string[]) {
-    if (!interests || interests.length === 0) {
+    if (!interests) {
       return
     }
     const unique = new Set<string>(interests)
