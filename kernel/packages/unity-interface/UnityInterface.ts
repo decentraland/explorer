@@ -265,7 +265,7 @@ export class UnityInterface {
   }
 
   public SetTutorialEnabled(fromDeepLink: boolean) {
-    this.gameInstance.SendMessage('TutorialController', 'SetTutorialEnabled', fromDeepLink)
+    this.gameInstance.SendMessage('TutorialController', 'SetTutorialEnabled', JSON.stringify(fromDeepLink))
   }
 
   public TriggerAirdropDisplay(data: AirdropInfo) {
