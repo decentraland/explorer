@@ -115,9 +115,13 @@ jobs:
           key: unity-tests-{{ checksum "../.unitysources-checksum" }}
           paths:
             - /tmp/explorer/unity-client/testlog/log.txt
+            - /tmp/explorer/unity-client/TestResources/VisualTests/CurrentTestImages/*.png
       - store_artifacts:
-          name: Store test result as artifacts
+          name: Store tests result as artifacts
           path: /tmp/explorer/unity-client/testlog
+      - store_artifacts:
+          name: Store visual tests result as artifacts
+          path: /tmp/explorer/unity-client/TestResources/VisualTests/CurrentTestImages
 
   build-unity:
     <<: *working_directory_unity
@@ -170,6 +174,10 @@ jobs:
     <<: *base_kernel_env
     steps:
       - <<: *attach_root
+      - run:
+          name: Install Puppeteer dependencies
+          command: |
+            sudo apt-get -y -qq install libxss1
       - run:
           name: Get the hash of source files
           command: |
