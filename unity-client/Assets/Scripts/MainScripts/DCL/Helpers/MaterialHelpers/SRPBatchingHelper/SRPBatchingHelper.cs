@@ -63,7 +63,7 @@ namespace DCL.Helpers
             int baseQueue;
 
             if (material.renderQueue == (int) UnityEngine.Rendering.RenderQueue.AlphaTest)
-                baseQueue = (int) UnityEngine.Rendering.RenderQueue.Geometry + 500;
+                baseQueue = (int) UnityEngine.Rendering.RenderQueue.Geometry + 600;
             else
                 baseQueue = (int) UnityEngine.Rendering.RenderQueue.Geometry;
 
@@ -79,11 +79,8 @@ namespace DCL.Helpers
             if (!crcToQueue.ContainsKey(crc))
                 crcToQueue.Add(crc, crcToQueue.Count + 1);
 
-            //NOTE(Brian): This is to move the rendering of animated stuff on top of the queue, so the SRP batcher
-            //             can group all the draw calls.
-
             //NOTE(Brian): we use 0, 100, 200 to group calls by culling mode (must group them or batches will break).
-            int queueOffset = (cullMode + 1) * 100;
+            int queueOffset = (cullMode + 1) * 150;
 
             material.renderQueue = baseQueue + crcToQueue[crc] + queueOffset;
         }

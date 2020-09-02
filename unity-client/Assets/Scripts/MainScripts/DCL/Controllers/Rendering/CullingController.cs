@@ -7,6 +7,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.PlayerLoop;
 using UnityEngine.Rendering;
+using UnityGLTF.Cache;
 using Object = System.Object;
 
 public class CullingController : MonoBehaviour
@@ -30,7 +31,10 @@ public class CullingController : MonoBehaviour
 
     private HashSet<Renderer> hiddenRenderers = new HashSet<Renderer>();
     private HashSet<Renderer> shadowlessRenderers = new HashSet<Renderer>();
+    private HashSet<Material> uniqueMaterials = new HashSet<Material>();
+    private Dictionary<Material, List<Renderer>> matToRends = new Dictionary<Material, List<Renderer>>();
 
+    private int cachedMats = 0;
     public static bool cullingListDirty = true;
     public static Vector3 lastPlayerPos;
 
@@ -43,6 +47,7 @@ public class CullingController : MonoBehaviour
         string pausedString = paused ? "OFF" : "ON";
         int rendererCount = (rs?.Length ?? 0) + (skrs?.Length ?? 0);
         panel.text = $"Culling: {pausedString} (H = toggle)\nRenderer count: {rendererCount}\nHidden count: {hiddenRenderers.Count}\nShadows hidden:{shadowlessRenderers.Count}";
+        panel.text += $"\nUnique materials: {uniqueMaterials.Count} (cached {cachedMats})";
     }
 
     void DrawBounds(Bounds b, Color color, float delay = 0)
@@ -74,6 +79,40 @@ public class CullingController : MonoBehaviour
         Debug.DrawLine(p2, p6, color, delay);
         Debug.DrawLine(p3, p7, color, delay);
         Debug.DrawLine(p4, p8, color, delay);
+    }
+
+    IEnumerator PopulateRenderersList()
+    {
+        rs = FindObjectsOfType<Renderer>().Where(x => !(x is SkinnedMeshRenderer)).ToArray();
+        yield return null;
+        skrs = FindObjectsOfType<SkinnedMeshRenderer>();
+        yield return null;
+        uniqueMaterials.Clear();
+        cachedMats = 0;
+
+        foreach (var r in rs)
+        {
+            var mats = r.sharedMaterials;
+
+            foreach (var m in mats)
+            {
+                if (!matToRends.ContainsKey(m))
+                    matToRends.Add(m, new List<Renderer>());
+
+                matToRends[m].Add(r);
+
+                if (!uniqueMaterials.Contains(m))
+                {
+                    uniqueMaterials.Add(m);
+                    string crc = m.ComputeCRC().ToString();
+
+                    if (PersistentAssetCache.MaterialCacheByCRC.ContainsKey(crc))
+                    {
+                        cachedMats++;
+                    }
+                }
+            }
+        }
     }
 
     IEnumerator Start()
@@ -110,10 +149,7 @@ public class CullingController : MonoBehaviour
 
             if (cullingListDirty)
             {
-                rs = FindObjectsOfType<Renderer>().Where(x => !(x is SkinnedMeshRenderer)).ToArray();
-                yield return null;
-                skrs = FindObjectsOfType<SkinnedMeshRenderer>();
-                yield return null;
+                yield return PopulateRenderersList();
                 cullingListDirty = false;
                 shouldCheck = true;
             }
@@ -174,8 +210,13 @@ public class CullingController : MonoBehaviour
 
                     bool shouldBeVisible = distance < visThreshold || bounds.Contains(playerPosition);
 
+                    bool isOpaque = true;
 
-                    bool isOpaque = r.materials[0].renderQueue < 3000;
+                    if (r.sharedMaterials[0].HasProperty("_ZWrite") &&
+                        r.sharedMaterials[0].GetFloat("_ZWrite") == 0)
+                    {
+                        isOpaque = false;
+                    }
 
                     if (isOpaque)
                         shouldBeVisible |= size > p.smallSize;
