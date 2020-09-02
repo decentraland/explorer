@@ -1303,8 +1303,8 @@ MonoBehaviour:
   openBrowserWhenStart: 1
   useCustomContentServer: 0
   customContentServerUrl: http://localhost:1338/
-  baseUrlMode: 0
-  baseUrlCustom: 
+  baseUrlMode: 1
+  baseUrlCustom: http://localhost:8080/?ENABLE_EXPLORE_HUD&
   environment: 0
   startInCoords: {x: 0, y: 0}
   forceLocalComms: 1
