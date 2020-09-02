@@ -123,7 +123,7 @@ namespace UnityGLTF
             set => useMaterialTransitionValue = value;
         }
 
-        public const int MAX_TEXTURE_SIZE = 1024;
+        public const int MAX_TEXTURE_SIZE = 512;
         private const float SAME_KEYFRAME_TIME_DELTA = 0.0001f;
 
         protected struct GLBStream
@@ -1229,7 +1229,6 @@ namespace UnityGLTF
                 yield return ConstructMaterialImageBuffers(gltfMaterial);
             }
 
-
             for (int i = 0; i < nodesWithMeshes.Count; i++)
             {
                 NodeId_Like nodeId = nodesWithMeshes[i];
@@ -1241,36 +1240,35 @@ namespace UnityGLTF
                     skin: node.Skin != null ? node.Skin.Value : null);
             }
 
-
-            if (_gltfRoot.Animations != null && _gltfRoot.Animations.Count > 0)
-            {
-                // create the AnimationClip that will contain animation data
-                // NOTE (Pravs): Khronos GLTFLoader sets the animationComponent as 'enabled = false' but we don't do that so that we can find the component when needed.
-                Animation animation = sceneObj.AddComponent<Animation>();
-                animation.playAutomatically = true;
-                animation.cullingType = AnimationCullingType.AlwaysAnimate;
-
-                for (int i = 0; i < _gltfRoot.Animations.Count; ++i)
-                {
-                    GLTFAnimation gltfAnimation = null;
-                    AnimationCacheData animationCache = null;
-
-                    yield return LoadAnimationBufferData(_gltfRoot.Animations[i], i);
-
-                    AnimationClip clip = ConstructClip(sceneObj.transform, _assetCache.NodeCache, i, out gltfAnimation, out animationCache);
-
-                    ProcessCurves(sceneObj.transform, _assetCache.NodeCache, clip, gltfAnimation, animationCache);
-
-                    clip.wrapMode = WrapMode.Loop;
-
-                    animation.AddClip(clip, clip.name);
-
-                    if (i == 0)
-                    {
-                        animation.clip = clip;
-                    }
-                }
-            }
+            // if (_gltfRoot.Animations != null && _gltfRoot.Animations.Count > 0)
+            // {
+            //     // create the AnimationClip that will contain animation data
+            //     // NOTE (Pravs): Khronos GLTFLoader sets the animationComponent as 'enabled = false' but we don't do that so that we can find the component when needed.
+            //     Animation animation = sceneObj.AddComponent<Animation>();
+            //     animation.playAutomatically = true;
+            //     animation.cullingType = AnimationCullingType.AlwaysAnimate;
+            //
+            //     for (int i = 0; i < _gltfRoot.Animations.Count; ++i)
+            //     {
+            //         GLTFAnimation gltfAnimation = null;
+            //         AnimationCacheData animationCache = null;
+            //
+            //         yield return LoadAnimationBufferData(_gltfRoot.Animations[i], i);
+            //
+            //         AnimationClip clip = ConstructClip(sceneObj.transform, _assetCache.NodeCache, i, out gltfAnimation, out animationCache);
+            //
+            //         ProcessCurves(sceneObj.transform, _assetCache.NodeCache, clip, gltfAnimation, animationCache);
+            //
+            //         clip.wrapMode = WrapMode.Loop;
+            //
+            //         animation.AddClip(clip, clip.name);
+            //
+            //         if (i == 0)
+            //         {
+            //             animation.clip = clip;
+            //         }
+            //     }
+            // }
 
             InitializeGltfTopLevelObject();
         }
