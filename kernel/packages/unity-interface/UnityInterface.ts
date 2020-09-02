@@ -147,7 +147,9 @@ export class UnityInterface {
 
     TeleportController.ensureTeleportAnimation()
     this.gameInstance.SendMessage('CharacterController', 'Teleport', JSON.stringify({ x, y: theY, z }))
-    this.gameInstance.SendMessage('CameraController', 'SetRotation', JSON.stringify({ x, y: theY, z, cameraTarget }))
+    if (cameraTarget) {
+      this.gameInstance.SendMessage('CameraController', 'SetRotation', JSON.stringify({ x, y: theY, z, cameraTarget }))
+    }
   }
 
   /** Tells the engine which scenes to load */
