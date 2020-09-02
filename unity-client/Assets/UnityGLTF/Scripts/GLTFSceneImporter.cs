@@ -123,7 +123,7 @@ namespace UnityGLTF
             set => useMaterialTransitionValue = value;
         }
 
-        public const int MAX_TEXTURE_SIZE = 512;
+        public const int MAX_TEXTURE_SIZE = 1024;
         private const float SAME_KEYFRAME_TIME_DELTA = 0.0001f;
 
         protected struct GLBStream
