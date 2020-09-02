@@ -67,8 +67,9 @@ namespace DCL.Tutorial
         private Coroutine executeStepsCoroutine;
         private Coroutine teacherMovementCoroutine;
         private bool openedFromDeepLink = false;
-        private bool tutorialFromDeepLinkDone = false;
+        private bool alreadyOpenedFromDeepLink = false;
         private bool playerIsInGenesisPlaza = false;
+        private bool markTutorialAsCompleted = false;
 
         private void Awake()
         {
@@ -115,10 +116,19 @@ namespace DCL.Tutorial
         }
 
         /// <summary>
-        /// Disables the tutorial controller.
+        /// Stop and disables the tutorial controller.
         /// </summary>
         public void SetTutorialDisabled()
         {
+            if (executeStepsCoroutine != null)
+                StopCoroutine(executeStepsCoroutine);
+
+            if (runningStep != null)
+            {
+                Destroy(runningStep.gameObject);
+                runningStep = null;
+            }
+
             isRunning = false;
             ShowTeacher3DModel(false);
 
@@ -132,11 +142,14 @@ namespace DCL.Tutorial
         }
 
         /// <summary>
-        /// Starts to execute the tutorial from a specific step.
+        /// Starts to execute the tutorial from a specific step (It is needed to call SetTutorialEnabled() before).
         /// </summary>
         /// <param name="stepIndex">First step to be executed.</param>
         public IEnumerator StartTutorialFromStep(int stepIndex)
         {
+            if (!isRunning)
+                yield break;
+
             if (runningStep != null)
             {
                 yield return runningStep.OnStepPlayAnimationForHidding();
@@ -149,7 +162,9 @@ namespace DCL.Tutorial
 
             if (playerIsInGenesisPlaza)
             {
-                if (tutorialFromDeepLinkDone)
+                markTutorialAsCompleted = true;
+
+                if (alreadyOpenedFromDeepLink)
                     yield return ExecuteSteps(stepsOnGenesisPlazaAfterDeepLink, stepIndex);
                 else
                     yield return ExecuteSteps(stepsOnGenesisPlaza, stepIndex);
@@ -157,17 +172,19 @@ namespace DCL.Tutorial
             }
             else if (openedFromDeepLink)
             {
+                markTutorialAsCompleted = false;
+                alreadyOpenedFromDeepLink = true;
                 yield return ExecuteSteps(stepsFromDeepLink, stepIndex);
-                tutorialFromDeepLinkDone = true;
             }
             else
             {
+                SetTutorialDisabled();
                 yield break;
             }
         }
 
         /// <summary>
-        /// Mark the tutorial as finished in the kernel side.
+        /// Marks the tutorial as finished in the kernel side.
         /// </summary>
         /// <param name="finishStepType">A value from TutorialFinishStep enum.</param>
         public void SetUserTutorialStepAsCompleted(TutorialFinishStep finishStepType)
@@ -175,16 +192,29 @@ namespace DCL.Tutorial
             WebInterface.SaveUserTutorialStep(GetTutorialStepFromProfile() | (int)finishStepType);
         }
 
+        /// <summary>
+        /// Changes the Time Between Steps parameter.
+        /// </summary>
+        /// <param name="newTime">Time in seconds.</param>
         public void SetTimeBetweenSteps(float newTime)
         {
             timeBetweenSteps = newTime;
         }
 
+        /// <summary>
+        /// Shows the teacher that will be guiding along the tutorial.
+        /// </summary>
+        /// <param name="active">True for show the teacher.</param>
         public void ShowTeacher3DModel(bool active)
         {
             teacherRawImage.gameObject.SetActive(active);
         }
 
+        /// <summary>
+        /// Move the tutorial teacher to a specific position.
+        /// </summary>
+        /// <param name="position">Target position.</param>
+        /// <param name="animated">True for apply a smooth movement.</param>
         public void SetTeacherPosition(Vector2 position, bool animated = true)
         {
             if (teacherMovementCoroutine != null)
@@ -196,6 +226,10 @@ namespace DCL.Tutorial
                 teacherRawImage.rectTransform.position = position;
         }
 
+        /// <summary>
+        /// Plays a specific animation on the tutorial teacher.
+        /// </summary>
+        /// <param name="animation">Animation to apply.</param>
         public void PlayTeacherAnimation(TutorialTeacher.TeacherAnimation animation)
         {
             teacher.PlayAnimation(animation);
@@ -245,7 +279,7 @@ namespace DCL.Tutorial
                     yield return new WaitForSeconds(timeBetweenSteps);
             }
 
-            if (!debugRunTutorial && !openedFromDeepLink)
+            if (!debugRunTutorial && markTutorialAsCompleted)
                 SetUserTutorialStepAsCompleted(TutorialFinishStep.NewTutorialFinished);
 
             runningStep = null;

@@ -21,7 +21,7 @@ namespace DCL.Tutorial
 
             titleText.text = titleText.text.Replace("{userName}", UserProfile.GetOwnUserProfile().userName);
 
-            okButton.onClick.AddListener(onOkButtonClick);
+            okButton.onClick.AddListener(OnOkButtonClick);
         }
 
         public override IEnumerator OnStepExecute()
@@ -29,7 +29,7 @@ namespace DCL.Tutorial
             yield return new WaitUntil(() => stepIsFinished);
         }
 
-        private void onOkButtonClick()
+        private void OnOkButtonClick()
         {
             stepIsFinished = true;
         }

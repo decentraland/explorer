@@ -1,3 +1,4 @@
+using DCL.Interface;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
@@ -10,6 +11,7 @@ namespace DCL.Tutorial
     public class TutorialStep_BasicControls : TutorialStep
     {
         [SerializeField] Button okButton;
+        [SerializeField] Button goToGenesisButton;
 
         private bool stepIsFinished = false;
 
@@ -17,7 +19,8 @@ namespace DCL.Tutorial
         {
             base.OnStepStart();
 
-            okButton.onClick.AddListener(onOkButtonClick);
+            okButton.onClick.AddListener(OnOkButtonClick);
+            goToGenesisButton.onClick.AddListener(OnGoToGenesisButtonClick);
         }
 
         public override IEnumerator OnStepExecute()
@@ -25,9 +28,34 @@ namespace DCL.Tutorial
             yield return new WaitUntil(() => stepIsFinished);
         }
 
-        private void onOkButtonClick()
+        private void OnOkButtonClick()
         {
             stepIsFinished = true;
+        }
+
+        private void OnGoToGenesisButtonClick()
+        {
+            CommonScriptableObjects.rendererState.OnChange += RendererState_OnChange;
+
+            WebInterface.GoTo(0, 0);
+            tutorialController.SetTutorialDisabled();
+        }
+
+        private void RendererState_OnChange(bool current, bool previous)
+        {
+            if (current)
+            {
+                CommonScriptableObjects.rendererState.OnChange -= RendererState_OnChange;
+                if (SceneController.i != null)
+                    SceneController.i.OnSortScenes += SceneController_OnSortScenes;
+            }
+        }
+
+        private void SceneController_OnSortScenes()
+        {
+            SceneController.i.OnSortScenes -= SceneController_OnSortScenes;
+
+            tutorialController.SetTutorialEnabled(false.ToString());
         }
     }
 }
