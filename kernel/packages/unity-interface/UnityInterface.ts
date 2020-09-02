@@ -94,8 +94,12 @@ export class UnityInterface {
     this.Module = this.gameInstance.Module
     _gameInstance = gameInstance
 
-    if (!EDITOR) {
-      if (this.Module) {
+    if (this.Module) {
+      if (EDITOR) {
+        const canvas = this.Module.canvas
+        canvas.width = canvas.parentElement.clientWidth
+        canvas.height = canvas.parentElement.clientHeight
+      } else {
         window.addEventListener('resize', this.resizeCanvasDelayed)
         this.resizeCanvasDelayed(null)
         this.waitForFillMouseEventData()
@@ -311,6 +315,10 @@ export class UnityInterface {
       'UpdateGIFPointers',
       JSON.stringify({ id, width, height, pointers, frameDelays })
     )
+  }
+
+  public RejectGIFProcessingRequest() {
+    this.gameInstance.SendMessage('SceneController', 'RejectGIFProcessingRequest')
   }
 
   public ConfigureEmailPrompt(tutorialStep: number) {
