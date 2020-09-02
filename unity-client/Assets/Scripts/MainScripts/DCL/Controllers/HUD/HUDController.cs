@@ -271,6 +271,9 @@ public class HUDController : MonoBehaviour
                             FriendsController.i);
                         taskbarHud.OnAnyTaskbarButtonClicked -= TaskbarHud_onAnyTaskbarButtonClicked;
                         taskbarHud.OnAnyTaskbarButtonClicked += TaskbarHud_onAnyTaskbarButtonClicked;
+
+                        taskbarHud.AddSettingsWindow(settingsHud);
+                        taskbarHud.AddBackpackWindow(avatarEditorHud);
                     }
                 }
                 else
@@ -307,6 +310,7 @@ public class HUDController : MonoBehaviour
                 if (exploreHud != null)
                 {
                     exploreHud.Initialize(FriendsController.i);
+                    taskbarHud?.AddExploreWindow(exploreHud);
                 }
                 break;
         }

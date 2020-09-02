@@ -12,6 +12,9 @@ public class TaskbarHUDView : MonoBehaviour
 
     [SerializeField] internal TaskbarButton chatButton;
     [SerializeField] internal TaskbarButton friendsButton;
+    [SerializeField] internal TaskbarButton settingsButton;
+    [SerializeField] internal TaskbarButton backpackButton;
+    [SerializeField] internal TaskbarButton exploreButton;
 
     [SerializeField] internal ChatHeadGroupView chatHeadsGroup;
 
@@ -21,6 +24,12 @@ public class TaskbarHUDView : MonoBehaviour
     public event System.Action OnChatToggleOff;
     public event System.Action OnFriendsToggleOn;
     public event System.Action OnFriendsToggleOff;
+    public event System.Action OnSettingsToggleOn;
+    public event System.Action OnSettingsToggleOff;
+    public event System.Action OnBackpackToggleOn;
+    public event System.Action OnBackpackToggleOff;
+    public event System.Action OnExploreToggleOn;
+    public event System.Action OnExploreToggleOff;
 
     internal List<TaskbarButton> GetButtonList()
     {
@@ -28,6 +37,9 @@ public class TaskbarHUDView : MonoBehaviour
         taskbarButtonList.Add(chatButton);
         taskbarButtonList.Add(friendsButton);
         taskbarButtonList.AddRange(chatHeadsGroup.chatHeads);
+        taskbarButtonList.Add(settingsButton);
+        taskbarButtonList.Add(backpackButton);
+        taskbarButtonList.Add(exploreButton);
         return taskbarButtonList;
     }
 
@@ -47,6 +59,9 @@ public class TaskbarHUDView : MonoBehaviour
         chatHeadsGroup.Initialize(chatController, friendsController);
         chatButton.Initialize();
         friendsButton.Initialize();
+        settingsButton.Initialize();
+        backpackButton.Initialize();
+        exploreButton.Initialize();
 
         chatHeadsGroup.OnHeadToggleOn += OnWindowToggleOn;
         chatHeadsGroup.OnHeadToggleOff += OnWindowToggleOff;
@@ -56,6 +71,15 @@ public class TaskbarHUDView : MonoBehaviour
 
         friendsButton.OnToggleOn += OnWindowToggleOn;
         friendsButton.OnToggleOff += OnWindowToggleOff;
+
+        settingsButton.OnToggleOn += OnWindowToggleOn;
+        settingsButton.OnToggleOff += OnWindowToggleOff;
+
+        backpackButton.OnToggleOn += OnWindowToggleOn;
+        backpackButton.OnToggleOff += OnWindowToggleOff;
+
+        exploreButton.OnToggleOn += OnWindowToggleOn;
+        exploreButton.OnToggleOff += OnWindowToggleOff;
     }
 
     private void OnWindowToggleOff(TaskbarButton obj)
@@ -64,6 +88,12 @@ public class TaskbarHUDView : MonoBehaviour
             OnFriendsToggleOff?.Invoke();
         else if (obj == chatButton)
             OnChatToggleOff?.Invoke();
+        else if (obj == settingsButton)
+            OnSettingsToggleOff?.Invoke();
+        else if (obj == backpackButton)
+            OnBackpackToggleOff?.Invoke();
+        else if (obj == exploreButton)
+            OnExploreToggleOff?.Invoke();
 
         if (AllButtonsToggledOff())
         {
@@ -93,6 +123,12 @@ public class TaskbarHUDView : MonoBehaviour
             OnFriendsToggleOn?.Invoke();
         else if (obj == chatButton)
             OnChatToggleOn?.Invoke();
+        else if (obj == settingsButton)
+            OnSettingsToggleOn?.Invoke();
+        else if (obj == backpackButton)
+            OnBackpackToggleOn?.Invoke();
+        else if (obj == exploreButton)
+            OnExploreToggleOn?.Invoke();
 
         SelectButton(obj);
     }
@@ -118,6 +154,21 @@ public class TaskbarHUDView : MonoBehaviour
     internal void OnAddFriendsWindow()
     {
         friendsButton.gameObject.SetActive(true);
+    }
+
+    internal void OnAddSettingsWindow()
+    {
+        settingsButton.gameObject.SetActive(true);
+    }
+
+    internal void OnAddBackpackWindow()
+    {
+        backpackButton.gameObject.SetActive(true);
+    }
+
+    internal void OnAddExploreWindow()
+    {
+        exploreButton.gameObject.SetActive(true);
     }
 
     public void SetVisibility(bool visible)
@@ -156,6 +207,24 @@ public class TaskbarHUDView : MonoBehaviour
         {
             friendsButton.OnToggleOn -= OnWindowToggleOn;
             friendsButton.OnToggleOff -= OnWindowToggleOff;
+        }
+
+        if (settingsButton != null)
+        {
+            settingsButton.OnToggleOn -= OnWindowToggleOn;
+            settingsButton.OnToggleOff -= OnWindowToggleOff;
+        }
+
+        if (backpackButton != null)
+        {
+            backpackButton.OnToggleOn -= OnWindowToggleOn;
+            backpackButton.OnToggleOff -= OnWindowToggleOff;
+        }
+
+        if (exploreButton != null)
+        {
+            exploreButton.OnToggleOn -= OnWindowToggleOn;
+            exploreButton.OnToggleOff -= OnWindowToggleOff;
         }
     }
 }
