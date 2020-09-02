@@ -1,5 +1,6 @@
 using DCL;
 using DCL.Controllers;
+using DCL.Models;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -32,13 +33,20 @@ public class BuildModeController : MonoBehaviour
     [SerializeField] internal InputAction_Trigger editModeChange;
 
 
+    ParcelScene sceneToEdit;
+
     bool isEditModeActivated = false, isSnapActivated = true;
 
+    //Object to edit related
+    DecentralandEntity entityToEdit;
     GameObject objectToEdit;
     Material originalMaterial;
     Transform originalGOParent;
     MeshRenderer originalMeshRenderer;
 
+    Quaternion initialRotation;
+
+    //
 
     float currentScale, currentYRotation, nexTimeToReceiveInput;
     // Start is called before the first frame update
@@ -65,6 +73,28 @@ public class BuildModeController : MonoBehaviour
         }
     }
 
+    void LateUpdate()
+    {
+        if (objectToEdit != null)
+        {
+            //Debug.Log("Euler angle Y" + transform.rotation.y)
+            //if (Input.GetKey(KeyCode.E))
+            //{
+                Vector3 initialRotationVector = objectToEdit.transform.rotation.eulerAngles;
+                //initialRotationVector.x = initialRotation.eulerAngles.x;
+       
+                //initialRotationVector.z = initialRotation.eulerAngles.z;
+
+            initialRotationVector.x =0;
+            initialRotationVector.z = 0;
+                Quaternion targetRotation = Quaternion.Euler(initialRotationVector);
+                objectToEdit.transform.rotation = targetRotation;
+            //}
+
+            Debug.Log("global rotation " + objectToEdit.transform.rotation.eulerAngles + "    global position " + objectToEdit.transform.position);
+        }
+    }
+
 
     void CheckEditModeInput()
     {
@@ -86,13 +116,15 @@ public class BuildModeController : MonoBehaviour
                 return;
             }
 
-            if(Input.GetKey(KeyCode.R))
+            if (Input.GetKey(KeyCode.R))
             {
                 currentYRotation += rotationSpeed;
-                objectToEdit.transform.Rotate(Vector3.up, currentYRotation);
+                //Quaternion.R
+                objectToEdit.transform.Rotate(Vector3.up, rotationSpeed);
             }
 
-            if(Input.mouseScrollDelta.y >0.5f)
+
+            if (Input.mouseScrollDelta.y >0.5f)
             {
                 objectToEdit.transform.localScale += Vector3.one * scaleSpeed;
             }
@@ -101,7 +133,6 @@ public class BuildModeController : MonoBehaviour
                 objectToEdit.transform.localScale -= Vector3.one * scaleSpeed;
             }
 
-                Debug.Log("Current scale "+currentScale+ " Scroll delta "+Input.mouseScrollDelta);
         }
     }
 
@@ -128,6 +159,31 @@ public class BuildModeController : MonoBehaviour
     void SelectObject()
     {
         objectToEdit = objectToTest;
+
+        RaycastHit hit;
+        UnityEngine.Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        if (Physics.Raycast(ray,out hit))
+        {
+            objectToEdit = hit.collider.gameObject.transform.parent.gameObject;
+        
+            if (objectToEdit.name.StartsWith("ENTITY_"))
+            {
+                string entityName = objectToEdit.name.Replace("ENTITY_", "");
+
+                entityToEdit = sceneToEdit.entities[entityName];
+                
+            }
+            else
+            {
+                objectToEdit = null;
+                return;
+            }
+        }
+
+
+   
+        initialRotation = objectToEdit.transform.rotation;
+
         originalMeshRenderer = objectToEdit.GetComponentInChildren<MeshRenderer>();
         originalMaterial = originalMeshRenderer.material;
         originalMeshRenderer.material = editMaterial;
@@ -139,6 +195,13 @@ public class BuildModeController : MonoBehaviour
         currentYRotation = objectToEdit.transform.eulerAngles.y;
         Debug.Log("Starting editing objet");
     }
+
+    #region Borrar
+
+
+
+
+    #endregion
 
     void StopEditObject()
     {
@@ -155,8 +218,11 @@ public class BuildModeController : MonoBehaviour
     {
         Debug.Log("Entered edit mode");
         editModeChangeFX.SetActive(true);
-        DCLCharacterController.i.SetMovementMode(DCLCharacterController.MovementMode.FreeMode);
+        DCLCharacterController.i.SetFreeMovementActive(true);
         isEditModeActivated = true;
+
+        sceneToEdit = SceneController.i.scenesSortedByDistance[0];
+
     }
 
 
@@ -165,7 +231,7 @@ public class BuildModeController : MonoBehaviour
         isEditModeActivated = false;
         Debug.Log("Exit edit mode");
         editModeChangeFX.SetActive(false);
-        DCLCharacterController.i.SetMovementMode(DCLCharacterController.MovementMode.Normal);
+        DCLCharacterController.i.SetFreeMovementActive(false);
         StopEditObject();
     }
 

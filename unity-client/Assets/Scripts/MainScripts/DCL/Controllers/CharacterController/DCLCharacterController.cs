@@ -8,11 +8,7 @@ using UnityEngine.SceneManagement;
 
 public class DCLCharacterController : MonoBehaviour
 {
-    public enum MovementMode
-    {
-        Normal = 0,
-        FreeMode = 1
-    }
+
     public static DCLCharacterController i { get; private set; }
 
     [Header("Movement")] public float minimumYPosition = 1f;
@@ -34,6 +30,8 @@ public class DCLCharacterController : MonoBehaviour
     [System.NonSerialized] public bool characterAlwaysEnabled = true;
 
     [System.NonSerialized] public CharacterController characterController;
+
+    FreeMovementController freeMovementController;
 
     new Collider collider;
 
@@ -86,7 +84,6 @@ public class DCLCharacterController : MonoBehaviour
 
     [System.NonSerialized] public float movingPlatformSpeed;
 
-    MovementMode currentMovementMode = MovementMode.Normal;
     void Awake()
     {
         if (i != null)
@@ -106,6 +103,7 @@ public class DCLCharacterController : MonoBehaviour
 
         characterPosition = new DCLCharacterPosition();
         characterController = GetComponent<CharacterController>();
+        freeMovementController = GetComponent<FreeMovementController>();
         collider = GetComponent<Collider>();
 
         characterPosition.OnPrecisionAdjust += OnPrecisionAdjust;
@@ -152,6 +150,10 @@ public class DCLCharacterController : MonoBehaviour
         CommonScriptableObjects.rendererState.OnChange -= OnRenderingStateChanged;
     }
 
+    public void SetFreeMovementActive(bool isActive)
+    {
+        freeMovementController.SetActive(isActive);
+    }
     void OnPrecisionAdjust(DCLCharacterPosition charPos)
     {
         Vector3 oldPos = this.transform.position;
@@ -191,10 +193,7 @@ public class DCLCharacterController : MonoBehaviour
         lastPosition = transform.position;
     }
 
-    public void SetMovementMode(MovementMode mode)
-    {
-       currentMovementMode = mode;    
-    }
+
 
     public void Teleport(string teleportPayload)
     {
@@ -244,15 +243,14 @@ public class DCLCharacterController : MonoBehaviour
             SetPosition(characterPosition.worldPosition);
             return;
         }
-   
 
-        if (currentMovementMode == MovementMode.FreeMode)
+        if (freeMovementController.IsActive())
         {
-            FreeMovement();
-
+            velocity = freeMovementController.CalculateMovement();
         }
         else
         {
+
             velocity.x = 0f;
             velocity.z = 0f;
             velocity.y += gravity * deltaTime;
@@ -296,9 +294,7 @@ public class DCLCharacterController : MonoBehaviour
 
 
                 forwardTarget.Normalize();
-
                 velocity += forwardTarget * speed;
-
                 CommonScriptableObjects.playerUnityEulerAngles.Set(transform.eulerAngles);
             }
 
@@ -314,6 +310,7 @@ public class DCLCharacterController : MonoBehaviour
                 }
             }
         }
+
 
         bool movingPlatformMovedTooMuch = Vector3.Distance(lastPosition, transform.position) > movingPlatformAllowedPosDelta;
 
@@ -345,49 +342,6 @@ public class DCLCharacterController : MonoBehaviour
         }
     }
 
-    void FreeMovement()
-    {
-        velocity.x = 0f;
-        velocity.z = 0f;
-        velocity.y = 0;
-
-        if (characterController.enabled)
-        {
-            var speed = movementSpeed * (isSprinting ? runningSpeedMultiplier : 1f);
-
-            transform.forward = characterForward.Get().Value;
-
-            var xzPlaneForward = Vector3.Scale(cameraForward.Get(), new Vector3(1, 0, 1));
-            var xzPlaneRight = Vector3.Scale(cameraRight.Get(), new Vector3(1, 0, 1));
-
-            Vector3 forwardTarget = Vector3.zero;
-
-            if (characterYAxis.GetValue() > 0)
-                forwardTarget += xzPlaneForward;
-            if (characterYAxis.GetValue() < 0)
-                forwardTarget -= xzPlaneForward;
-
-            if (characterXAxis.GetValue() > 0)
-                forwardTarget += xzPlaneRight;
-            if (characterXAxis.GetValue() < 0)
-                forwardTarget -= xzPlaneRight;
-
-
-            if (Input.GetKey(KeyCode.Space)) forwardTarget  += Vector3.up;
-            else if (Input.GetKey(KeyCode.LeftControl)) forwardTarget += Vector3.down;
-
-            forwardTarget.Normalize();
-
-            velocity += forwardTarget * speed;
-
-            characterController.Move(velocity * deltaTime);
-
-            if ((DCLTime.realtimeSinceStartup - lastMovementReportTime) > PlayerSettings.POSITION_REPORTING_DELAY)
-            {
-                ReportMovement();
-            }
-        }
-    }
     void Jump()
     {
         if (isJumping) return;
