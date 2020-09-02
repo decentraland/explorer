@@ -1111,21 +1111,48 @@ namespace UnityGLTF
 
             for (var ci = 0; ci < channelCount; ++ci)
             {
+                var optimizedKeyframes = OptimizeKeyFrames(keyframes[ci]);
                 // copy all key frames data to animation curve and add it to the clip
-                AnimationCurve curve = new AnimationCurve(keyframes[ci]);
+                AnimationCurve curve = new AnimationCurve(optimizedKeyframes);
 
                 // For cubic spline interpolation, the inTangents and outTangents are already explicitly defined.
                 // For the rest, set them appropriately.
                 if (mode != InterpolationType.CUBICSPLINE)
                 {
-                    for (var i = 0; i < keyframes[ci].Length; i++)
+                    for (var i = 0; i < optimizedKeyframes.Length; i++)
                     {
-                        SetTangentMode(curve, keyframes[ci], i, mode);
+                        SetTangentMode(curve, optimizedKeyframes, i, mode);
                     }
                 }
 
                 clip.SetCurve(relativePath, curveType, propertyNames[ci], curve);
             }
+        }
+
+        private Keyframe[] OptimizeKeyFrames(Keyframe[] rawKeyframes)
+        {
+            List<Keyframe> result = new List<Keyframe>(2);
+
+            Keyframe lastKf = rawKeyframes[0];
+            result.Add(lastKf);
+
+            for (int i = 1; i < rawKeyframes.Length; i++)
+            {
+                float valueDelta = Mathf.Abs(rawKeyframes[i].value - lastKf.value);
+                float deviation = valueDelta;
+
+                if (deviation > 0.001f)
+                {
+                    result.Add(rawKeyframes[i]);
+                }
+
+                lastKf = rawKeyframes[i];
+            }
+
+            if (result.Count == 1)
+                result.Add(lastKf);
+
+            return result.ToArray();
         }
 
         private static void SetTangentMode(AnimationCurve curve, Keyframe[] keyframes, int keyframeIndex, InterpolationType interpolation)
@@ -1240,35 +1267,35 @@ namespace UnityGLTF
                     skin: node.Skin != null ? node.Skin.Value : null);
             }
 
-            // if (_gltfRoot.Animations != null && _gltfRoot.Animations.Count > 0)
-            // {
-            //     // create the AnimationClip that will contain animation data
-            //     // NOTE (Pravs): Khronos GLTFLoader sets the animationComponent as 'enabled = false' but we don't do that so that we can find the component when needed.
-            //     Animation animation = sceneObj.AddComponent<Animation>();
-            //     animation.playAutomatically = true;
-            //     animation.cullingType = AnimationCullingType.AlwaysAnimate;
-            //
-            //     for (int i = 0; i < _gltfRoot.Animations.Count; ++i)
-            //     {
-            //         GLTFAnimation gltfAnimation = null;
-            //         AnimationCacheData animationCache = null;
-            //
-            //         yield return LoadAnimationBufferData(_gltfRoot.Animations[i], i);
-            //
-            //         AnimationClip clip = ConstructClip(sceneObj.transform, _assetCache.NodeCache, i, out gltfAnimation, out animationCache);
-            //
-            //         ProcessCurves(sceneObj.transform, _assetCache.NodeCache, clip, gltfAnimation, animationCache);
-            //
-            //         clip.wrapMode = WrapMode.Loop;
-            //
-            //         animation.AddClip(clip, clip.name);
-            //
-            //         if (i == 0)
-            //         {
-            //             animation.clip = clip;
-            //         }
-            //     }
-            // }
+            if (_gltfRoot.Animations != null && _gltfRoot.Animations.Count > 0)
+            {
+                // create the AnimationClip that will contain animation data
+                // NOTE (Pravs): Khronos GLTFLoader sets the animationComponent as 'enabled = false' but we don't do that so that we can find the component when needed.
+                Animation animation = sceneObj.AddComponent<Animation>();
+                animation.playAutomatically = true;
+                animation.cullingType = AnimationCullingType.AlwaysAnimate;
+
+                for (int i = 0; i < _gltfRoot.Animations.Count; ++i)
+                {
+                    GLTFAnimation gltfAnimation = null;
+                    AnimationCacheData animationCache = null;
+
+                    yield return LoadAnimationBufferData(_gltfRoot.Animations[i], i);
+
+                    AnimationClip clip = ConstructClip(sceneObj.transform, _assetCache.NodeCache, i, out gltfAnimation, out animationCache);
+
+                    ProcessCurves(sceneObj.transform, _assetCache.NodeCache, clip, gltfAnimation, animationCache);
+
+                    clip.wrapMode = WrapMode.Loop;
+
+                    animation.AddClip(clip, clip.name);
+
+                    if (i == 0)
+                    {
+                        animation.clip = clip;
+                    }
+                }
+            }
 
             InitializeGltfTopLevelObject();
         }
