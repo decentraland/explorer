@@ -935,5 +935,10 @@ namespace DCL.Interface
             baseResEvent.baseResolution = resolution;
             SendMessage("SetBaseResolution", baseResEvent);
         }
+
+        public static void FetchBalanceOfMANA()
+        {
+            SendMessage("FetchBalanceOfMANA");
+        }
     }
 }

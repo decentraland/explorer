@@ -329,6 +329,10 @@ export class UnityInterface {
     })
   }
 
+  public UpdateBalanceOfMANA(balance: string) {
+    this.gameInstance.SendMessage('HUDController', 'UpdateBalanceOfMANA', balance)
+  }
+
   // *********************************************************************************
   // ************** Builder messages **************
   // *********************************************************************************

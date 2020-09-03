@@ -5,7 +5,7 @@ import { avatarMessageObservable, getUserProfile } from 'shared/comms/peers'
 import { getProfile, hasConnectedWeb3 } from 'shared/profiles/selectors'
 import { TeleportController } from 'shared/world/TeleportController'
 import { reportScenesAroundParcel } from 'shared/atlas/actions'
-import { playerConfigurations, ethereumConfigurations } from 'config'
+import { playerConfigurations, ethereumConfigurations, decentralandConfigurations } from 'config'
 import { ReadOnlyQuaternion, ReadOnlyVector3, Vector3, Quaternion } from '../decentraland-ecs/src/decentraland/math'
 import { IEventNames } from '../decentraland-ecs/src/decentraland/Types'
 import { sceneLifeCycleObservable } from '../decentraland-loader/lifecycle/controllers/scene'
@@ -37,6 +37,7 @@ import { IFuture } from 'fp-future'
 import { reportHotScenes } from 'shared/social/hotScenes'
 
 import { GIFProcessor } from 'gif-processor/processor'
+import { getERC20Balance } from 'shared/ethereum/EthereumService'
 declare const DCL: any
 
 declare const globalThis: StoreContainer
@@ -365,6 +366,20 @@ export class BrowserInterface {
     }
 
     DCL.gifProcessor.ProcessGIF(data)
+  }
+
+  public async FetchBalanceOfMANA() {
+    const identity = getIdentity()
+
+    if (!identity.hasConnectedWeb3) {
+      return
+    }
+
+    const profile = getProfile(globalThis.globalStore.getState(), identity.address)
+    if (profile?.ethAddress) {
+      const balance = await getERC20Balance(profile.ethAddress, decentralandConfigurations.paymentTokens.MANA)
+      unityInterface.UpdateBalanceOfMANA(`${balance}`)
+    }
   }
 }
 
