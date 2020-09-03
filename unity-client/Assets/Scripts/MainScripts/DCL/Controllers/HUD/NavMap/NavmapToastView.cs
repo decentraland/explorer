@@ -61,7 +61,7 @@ namespace DCL
             sceneOwnerText.transform.parent.gameObject.SetActive(sceneInfoExists && !string.IsNullOrEmpty(sceneInfo.owner));
             sceneDescriptionText.transform.parent.gameObject.SetActive(sceneInfoExists && !string.IsNullOrEmpty(sceneInfo.description));
             sceneTitleText.transform.parent.gameObject.SetActive(sceneInfoExists && !string.IsNullOrEmpty(sceneInfo.name));
-            scenePreviewImage.gameObject.SetActive(sceneInfoExists && !string.IsNullOrEmpty(sceneInfo.previewImageUrl));
+            scenePreviewImage.gameObject.SetActive(false);
 
             if (sceneInfoExists)
             {
@@ -69,7 +69,14 @@ namespace DCL
                 sceneOwnerText.text = $"Created by: {sceneInfo.owner}";
                 sceneDescriptionText.text = sceneInfo.description;
 
-                if (currentImageUrl == sceneInfo.previewImageUrl) return;
+                if (currentImageUrl == sceneInfo.previewImageUrl)
+                {
+                    if (!string.IsNullOrEmpty(sceneInfo.previewImageUrl))
+                    {
+                        scenePreviewImage.gameObject.SetActive(true);
+                    }
+                    return;
+                }
 
                 if (currentImage != null)
                     Destroy(currentImage);
@@ -164,7 +171,11 @@ namespace DCL
             }
 
             scenePreviewImage.sprite = sprite;
-            currentImage = sprite.texture;
+            if (sprite != null)
+            {
+                currentImage = sprite.texture;
+                scenePreviewImage.gameObject.SetActive(true);
+            }
         }
     }
 }
