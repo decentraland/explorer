@@ -1,3 +1,4 @@
+using DCL.HelpAndSupportHUD;
 using DCL.SettingsHUD;
 using System.Collections.Generic;
 using UnityEngine;
@@ -66,6 +67,8 @@ public class HUDController : MonoBehaviour
 
     public ExploreHUDController exploreHud => GetHUDElement(HUDElementID.EXPLORE_HUD) as ExploreHUDController;
 
+    public HelpAndSupportHUDController helpAndSupportHud => GetHUDElement(HUDElementID.HELP_AND_SUPPORT) as HelpAndSupportHUDController;
+
     public Dictionary<HUDElementID, IHUD> hudElements { get; private set; } = new Dictionary<HUDElementID, IHUD>();
 
     private UserProfile ownUserProfile => UserProfile.GetOwnUserProfile();
@@ -127,7 +130,8 @@ public class HUDController : MonoBehaviour
         CONTROLS_HUD = 18,
         EMAIL_PROMPT = 19,
         EXPLORE_HUD = 20,
-        COUNT = 21
+        HELP_AND_SUPPORT = 21,
+        COUNT = 22
     }
 
     [System.Serializable]
@@ -312,6 +316,10 @@ public class HUDController : MonoBehaviour
                     exploreHud.Initialize(FriendsController.i);
                     taskbarHud?.AddExploreWindow(exploreHud);
                 }
+                break;
+            case HUDElementID.HELP_AND_SUPPORT:
+                CreateHudElement<HelpAndSupportHUDController>(configuration, hudElementId);
+                taskbarHud?.AddHelpAndSupportWindow(helpAndSupportHud);
                 break;
         }
 

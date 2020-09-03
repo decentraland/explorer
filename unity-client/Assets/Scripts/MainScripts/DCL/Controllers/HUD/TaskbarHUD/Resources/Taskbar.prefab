@@ -719,7 +719,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &4741142113279070135
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1011,6 +1011,7 @@ MonoBehaviour:
   settingsButton: {fileID: 4987211128768128962}
   backpackButton: {fileID: 196766316238799930}
   exploreButton: {fileID: 5044388401507377088}
+  helpAndSupportButton: {fileID: 1255887769930130344}
   chatHeadsGroup: {fileID: 1163524797233769629}
 --- !u!222 &7643556927286160474
 CanvasRenderer:
@@ -2597,7 +2598,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 131, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1163524797233769629

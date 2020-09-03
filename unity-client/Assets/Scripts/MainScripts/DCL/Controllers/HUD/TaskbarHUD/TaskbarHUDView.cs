@@ -15,6 +15,7 @@ public class TaskbarHUDView : MonoBehaviour
     [SerializeField] internal TaskbarButton settingsButton;
     [SerializeField] internal TaskbarButton backpackButton;
     [SerializeField] internal TaskbarButton exploreButton;
+    [SerializeField] internal TaskbarButton helpAndSupportButton;
 
     [SerializeField] internal ChatHeadGroupView chatHeadsGroup;
 
@@ -30,6 +31,8 @@ public class TaskbarHUDView : MonoBehaviour
     public event System.Action OnBackpackToggleOff;
     public event System.Action OnExploreToggleOn;
     public event System.Action OnExploreToggleOff;
+    public event System.Action OnHelpAndSupportToggleOn;
+    public event System.Action OnHelpAndSupportToggleOff;
 
     internal List<TaskbarButton> GetButtonList()
     {
@@ -40,6 +43,7 @@ public class TaskbarHUDView : MonoBehaviour
         taskbarButtonList.Add(settingsButton);
         taskbarButtonList.Add(backpackButton);
         taskbarButtonList.Add(exploreButton);
+        taskbarButtonList.Add(helpAndSupportButton);
         return taskbarButtonList;
     }
 
@@ -62,6 +66,7 @@ public class TaskbarHUDView : MonoBehaviour
         settingsButton.Initialize();
         backpackButton.Initialize();
         exploreButton.Initialize();
+        helpAndSupportButton.Initialize();
 
         chatHeadsGroup.OnHeadToggleOn += OnWindowToggleOn;
         chatHeadsGroup.OnHeadToggleOff += OnWindowToggleOff;
@@ -80,6 +85,9 @@ public class TaskbarHUDView : MonoBehaviour
 
         exploreButton.OnToggleOn += OnWindowToggleOn;
         exploreButton.OnToggleOff += OnWindowToggleOff;
+
+        helpAndSupportButton.OnToggleOn += OnWindowToggleOn;
+        helpAndSupportButton.OnToggleOff += OnWindowToggleOff;
     }
 
     private void OnWindowToggleOff(TaskbarButton obj)
@@ -94,6 +102,8 @@ public class TaskbarHUDView : MonoBehaviour
             OnBackpackToggleOff?.Invoke();
         else if (obj == exploreButton)
             OnExploreToggleOff?.Invoke();
+        else if (obj == helpAndSupportButton)
+            OnHelpAndSupportToggleOff?.Invoke();
 
         if (AllButtonsToggledOff())
         {
@@ -129,6 +139,8 @@ public class TaskbarHUDView : MonoBehaviour
             OnBackpackToggleOn?.Invoke();
         else if (obj == exploreButton)
             OnExploreToggleOn?.Invoke();
+        else if (obj == helpAndSupportButton)
+            OnHelpAndSupportToggleOn?.Invoke();
 
         SelectButton(obj);
     }
@@ -169,6 +181,11 @@ public class TaskbarHUDView : MonoBehaviour
     internal void OnAddExploreWindow()
     {
         exploreButton.gameObject.SetActive(true);
+    }
+
+    internal void OnAddHelpAndSupportWindow()
+    {
+        helpAndSupportButton.gameObject.SetActive(true);
     }
 
     public void SetVisibility(bool visible)
@@ -225,6 +242,12 @@ public class TaskbarHUDView : MonoBehaviour
         {
             exploreButton.OnToggleOn -= OnWindowToggleOn;
             exploreButton.OnToggleOff -= OnWindowToggleOff;
+        }
+
+        if (helpAndSupportButton != null)
+        {
+            helpAndSupportButton.OnToggleOn -= OnWindowToggleOn;
+            helpAndSupportButton.OnToggleOff -= OnWindowToggleOff;
         }
     }
 }
