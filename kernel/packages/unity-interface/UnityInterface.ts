@@ -94,8 +94,12 @@ export class UnityInterface {
     this.Module = this.gameInstance.Module
     _gameInstance = gameInstance
 
-    if (!EDITOR) {
-      if (this.Module !== undefined) {
+    if (this.Module) {
+      if (EDITOR) {
+        const canvas = this.Module.canvas
+        canvas.width = canvas.parentElement.clientWidth
+        canvas.height = canvas.parentElement.clientHeight
+      } else {
         window.addEventListener('resize', this.resizeCanvasDelayed)
         this.resizeCanvasDelayed(null)
         this.waitForFillMouseEventData()
@@ -138,12 +142,14 @@ export class UnityInterface {
 
   /** Sends the camera position & target to the engine */
 
-  public Teleport({ position: { x, y, z }, cameraTarget }: InstancedSpawnPoint) {
+  public Teleport({ position: { x, y, z }, cameraTarget }: InstancedSpawnPoint, rotateIfTargetIsNotSet: boolean = true) {
     const theY = y <= 0 ? 2 : y
 
     TeleportController.ensureTeleportAnimation()
     this.gameInstance.SendMessage('CharacterController', 'Teleport', JSON.stringify({ x, y: theY, z }))
-    this.gameInstance.SendMessage('CameraController', 'SetRotation', JSON.stringify({ x, y: theY, z, cameraTarget }))
+    if (cameraTarget || rotateIfTargetIsNotSet) {
+      this.gameInstance.SendMessage('CameraController', 'SetRotation', JSON.stringify({ x, y: theY, z, cameraTarget }))
+    }
   }
 
   /** Tells the engine which scenes to load */
