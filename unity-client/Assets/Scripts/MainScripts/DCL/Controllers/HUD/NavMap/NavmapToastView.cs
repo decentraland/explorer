@@ -128,6 +128,9 @@ namespace DCL
 
         public void OnCloseClick()
         {
+            if (HUDAudioPlayer.i != null && gameObject.activeSelf)
+                HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogClose);
+
             MapRenderer.i.showCursorCoords = true;
             gameObject.SetActive(false);
         }
