@@ -386,11 +386,8 @@ export class BrowserInterface {
       return
     }
 
-    const profile = getProfile(globalThis.globalStore.getState(), identity.address)
-    if (profile?.ethAddress) {
-      const balance = await getERC20Balance(profile.ethAddress, decentralandConfigurations.paymentTokens.MANA)
-      unityInterface.UpdateBalanceOfMANA(`${balance}`)
-    }
+    const balance = await getERC20Balance(identity.address, decentralandConfigurations.paymentTokens.MANA)
+    unityInterface.UpdateBalanceOfMANA(`${balance}`)
   }
 }
 
