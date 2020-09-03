@@ -1,6 +1,6 @@
 import { Store } from 'redux'
 import { EntityType } from 'dcl-catalyst-commons'
-import { CatalystClient, DeploymentBuilder, DeploymentData } from 'dcl-catalyst-client'
+import { ContentClient, DeploymentBuilder, DeploymentData } from 'dcl-catalyst-client'
 import { call, fork, put, race, select, take, takeEvery, takeLatest } from 'redux-saga/effects'
 
 import { getFromLocalStorage, saveToLocalStorage } from 'atomicHelpers/localStorage'
@@ -638,8 +638,7 @@ async function deploy(url: string, identity: ExplorerIdentity, metadata: any, co
   // sign the entity id fetchMetaContentServer
   const authChain = Authenticator.signPayload(identity, preparationData.entityId)
   // Build the client
-  const baseUrl = url.replace('/content', '')
-  const catalyst = new CatalystClient(baseUrl, 'explorer-profile')
+  const catalyst = new ContentClient(url, 'explorer-kernel-profile')
   // Build the deploy data
   const deployData: DeploymentData = { ...preparationData, authChain }
   // Deploy the actual entity
