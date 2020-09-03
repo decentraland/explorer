@@ -118,16 +118,16 @@ public class AvatarEditorHUDAudioHandler : MonoBehaviour
                 eventRarity.SetIndex(0);
                 break;
             case Rarity.EPIC:
-                eventRarity.SetIndex(0);
+                eventRarity.SetIndex(1);
                 break;
             case Rarity.LEGENDARY:
-                eventRarity.SetIndex(0);
+                eventRarity.SetIndex(2);
                 break;
             case Rarity.MYTHIC:
-                eventRarity.SetIndex(0);
+                eventRarity.SetIndex(3);
                 break;
             case Rarity.UNIQUE:
-                eventRarity.SetIndex(0);
+                eventRarity.SetIndex(4);
                 break;
             default:
                 eventRarity.SetIndex(0);
