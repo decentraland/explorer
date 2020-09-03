@@ -23,6 +23,7 @@ namespace DCL
         [SerializeField] private float parcelHightlightScale = 1.25f;
         [SerializeField] private float parcelHoldTimeInSeconds = 1f;
         [SerializeField] private Button ParcelHighlightButton;
+        [SerializeField] private MapRendererAudioHandler audioHandler;
         private float parcelSizeInMap;
         private Vector3Variable playerWorldPosition => CommonScriptableObjects.playerWorldPosition;
         private Vector3Variable playerRotation => CommonScriptableObjects.cameraForward;
@@ -205,11 +206,10 @@ namespace DCL
             parcelHighlightImage.transform.position = worldCoordsOriginInMap + cursorMapCoords * parcelSizeInMap + new Vector3(parcelSizeInMap, parcelSizeInMap, 0f) / 2;
             highlightedParcelText.text = showCursorCoords ? $"{cursorMapCoords.x}, {cursorMapCoords.y}" : string.Empty;
 
-            if (HUDAudioPlayer.i != null && highlightedParcelText.text != previousText && !Input.GetMouseButton(0))
+            if (audioHandler != null && highlightedParcelText.text != previousText && !Input.GetMouseButton(0))
             {
-                HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.mapParcelHighlight);
+                audioHandler.PlayMapParcelHighlight();
             }
-            
 
             // ----------------------------------------------------
             // TODO: Use sceneInfo to highlight whole scene parcels and populate scenes hover info on navmap once we can access all the scenes info
