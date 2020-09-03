@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -6,20 +8,35 @@ public class TaskbarHUDView : MonoBehaviour
 {
     const string VIEW_PATH = "Taskbar";
 
-    [SerializeField] internal RectTransform windowContainer;
-    [SerializeField] internal ShowHideAnimator windowContainerAnimator;
-    [SerializeField] internal LayoutGroup windowContainerLayout;
+    [Header("Taskbar Config")]
+    [SerializeField] internal ShowHideAnimator taskbarAnimator;
 
+    [Header("Left Side Config")]
+    [SerializeField] internal RectTransform leftWindowContainer;
+    [SerializeField] internal ShowHideAnimator leftWindowContainerAnimator;
+    [SerializeField] internal LayoutGroup leftWindowContainerLayout;
     [SerializeField] internal TaskbarButton chatButton;
     [SerializeField] internal TaskbarButton friendsButton;
+    [SerializeField] internal ChatHeadGroupView chatHeadsGroup;
+
+    [Header("Right Side Config")]
     [SerializeField] internal TaskbarButton settingsButton;
     [SerializeField] internal TaskbarButton backpackButton;
     [SerializeField] internal TaskbarButton exploreButton;
     [SerializeField] internal TaskbarButton helpAndSupportButton;
+    [SerializeField] internal GameObject separatorMark;
 
-    [SerializeField] internal ChatHeadGroupView chatHeadsGroup;
+    [Header("More Button Config")]
+    [SerializeField] internal ShowHideAnimator moreWindowContainerAnimator;
+    [SerializeField] internal Button moreButton;
+    [SerializeField] internal Button collapseBarButton;
+    [SerializeField] internal Button hideUIButton;
+    [SerializeField] internal Button controlsButton;
 
     internal TaskbarHUDController controller;
+
+    private bool isBarVisible = true;
+    private bool isMoreMenuVisible = false;
 
     public event System.Action OnChatToggleOn;
     public event System.Action OnChatToggleOff;
@@ -33,6 +50,8 @@ public class TaskbarHUDView : MonoBehaviour
     public event System.Action OnExploreToggleOff;
     public event System.Action OnHelpAndSupportToggleOn;
     public event System.Action OnHelpAndSupportToggleOff;
+    public event System.Action OnMoreToggleOn;
+    public event System.Action OnMoreToggleOff;
 
     internal List<TaskbarButton> GetButtonList()
     {
@@ -59,6 +78,18 @@ public class TaskbarHUDView : MonoBehaviour
         IFriendsController friendsController)
     {
         this.controller = controller;
+
+        ShowBar(true, true);
+        ShowMoreMenu(false, true);
+        chatButton.transform.parent.gameObject.SetActive(false);
+        friendsButton.transform.parent.gameObject.SetActive(false);
+        settingsButton.transform.parent.gameObject.SetActive(false);
+        backpackButton.transform.parent.gameObject.SetActive(false);
+        exploreButton.transform.parent.gameObject.SetActive(false);
+        helpAndSupportButton.transform.parent.gameObject.SetActive(false);
+        separatorMark.SetActive(false);
+
+        collapseBarButton.gameObject.SetActive(true);
 
         chatHeadsGroup.Initialize(chatController, friendsController);
         chatButton.Initialize();
@@ -88,6 +119,17 @@ public class TaskbarHUDView : MonoBehaviour
 
         helpAndSupportButton.OnToggleOn += OnWindowToggleOn;
         helpAndSupportButton.OnToggleOff += OnWindowToggleOff;
+
+        moreButton.onClick.AddListener(() =>
+        {
+            ShowMoreMenu(!isMoreMenuVisible);
+        });
+
+        collapseBarButton.onClick.AddListener(() =>
+        {
+            ShowBar(!isBarVisible);
+            ShowMoreMenu(false);
+        });
     }
 
     private void OnWindowToggleOff(TaskbarButton obj)
@@ -160,32 +202,62 @@ public class TaskbarHUDView : MonoBehaviour
 
     internal void OnAddChatWindow()
     {
-        chatButton.gameObject.SetActive(true);
+        chatButton.transform.parent.gameObject.SetActive(true);
     }
 
     internal void OnAddFriendsWindow()
     {
-        friendsButton.gameObject.SetActive(true);
+        friendsButton.transform.parent.gameObject.SetActive(true);
     }
 
     internal void OnAddSettingsWindow()
     {
-        settingsButton.gameObject.SetActive(true);
+        settingsButton.transform.parent.gameObject.SetActive(true);
+        separatorMark.SetActive(true);
     }
 
     internal void OnAddBackpackWindow()
     {
-        backpackButton.gameObject.SetActive(true);
+        backpackButton.transform.parent.gameObject.SetActive(true);
     }
 
     internal void OnAddExploreWindow()
     {
-        exploreButton.gameObject.SetActive(true);
+        exploreButton.transform.parent.gameObject.SetActive(true);
     }
 
     internal void OnAddHelpAndSupportWindow()
     {
-        helpAndSupportButton.gameObject.SetActive(true);
+        helpAndSupportButton.transform.parent.gameObject.SetActive(true);
+        separatorMark.SetActive(true);
+    }
+
+    internal void ShowMoreMenu(bool visible, bool instant = false)
+    {
+        if (visible)
+        {
+            moreWindowContainerAnimator.Show(instant);
+            isMoreMenuVisible = true;
+        }
+        else
+        {
+            moreWindowContainerAnimator.Hide(instant);
+            isMoreMenuVisible = false;
+        }
+    }
+
+    internal void ShowBar(bool visible, bool instant = false)
+    {
+        if (visible)
+        {
+            taskbarAnimator.Show(instant);
+            isBarVisible = true;
+        }
+        else
+        {
+            taskbarAnimator.Hide(instant);
+            isBarVisible = false;
+        }
     }
 
     public void SetVisibility(bool visible)
@@ -249,5 +321,11 @@ public class TaskbarHUDView : MonoBehaviour
             helpAndSupportButton.OnToggleOn -= OnWindowToggleOn;
             helpAndSupportButton.OnToggleOff -= OnWindowToggleOff;
         }
+
+        if (moreButton != null)
+            moreButton.onClick.RemoveAllListeners();
+
+        if (collapseBarButton != null)
+            collapseBarButton.onClick.RemoveAllListeners();
     }
 }

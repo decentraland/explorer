@@ -61,7 +61,7 @@ public class TaskbarHUDShould : TestsBase
 
         controller.AddWorldChatWindow(worldChatWindowController);
 
-        Assert.IsTrue(worldChatWindowController.view.transform.parent == view.windowContainer,
+        Assert.IsTrue(worldChatWindowController.view.transform.parent == view.leftWindowContainer,
             "Chat window isn't inside taskbar window container!");
         Assert.IsTrue(worldChatWindowController.view.gameObject.activeSelf, "Chat window is disabled!");
     }

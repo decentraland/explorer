@@ -46,7 +46,7 @@ public class TaskbarHUDController : IHUD
         view.chatHeadsGroup.OnHeadToggleOn += ChatHeadsGroup_OnHeadOpen;
         view.chatHeadsGroup.OnHeadToggleOff += ChatHeadsGroup_OnHeadClose;
 
-        view.windowContainerLayout.enabled = false;
+        view.leftWindowContainerLayout.enabled = false;
 
         view.OnChatToggleOff += View_OnChatToggleOff;
         view.OnChatToggleOn += View_OnChatToggleOn;
@@ -79,7 +79,7 @@ public class TaskbarHUDController : IHUD
             chatController.OnAddMessage += OnAddMessage;
         }
 
-        view.windowContainerAnimator.Show();
+        view.leftWindowContainerAnimator.Show();
     }
 
     private void ChatHeadsGroup_OnHeadClose(TaskbarButton obj)
@@ -193,12 +193,13 @@ public class TaskbarHUDController : IHUD
 
     private void MouseCatcher_OnMouseUnlock()
     {
-        view.windowContainerAnimator.Show();
+        view.leftWindowContainerAnimator.Show();
     }
 
     private void MouseCatcher_OnMouseLock()
     {
-        view.windowContainerAnimator.Hide();
+        view.leftWindowContainerAnimator.Hide();
+        view.ShowMoreMenu(false);
 
         foreach (var btn in view.GetButtonList())
         {
@@ -220,10 +221,10 @@ public class TaskbarHUDController : IHUD
             return;
         }
 
-        if (controller.view.transform.parent == view.windowContainer)
+        if (controller.view.transform.parent == view.leftWindowContainer)
             return;
 
-        controller.view.transform.SetParent(view.windowContainer, false);
+        controller.view.transform.SetParent(view.leftWindowContainer, false);
 
         worldChatWindowHud = controller;
 
@@ -253,10 +254,10 @@ public class TaskbarHUDController : IHUD
             return;
         }
 
-        if (controller.view.transform.parent == view.windowContainer)
+        if (controller.view.transform.parent == view.leftWindowContainer)
             return;
 
-        controller.view.transform.SetParent(view.windowContainer, false);
+        controller.view.transform.SetParent(view.leftWindowContainer, false);
 
         privateChatWindowHud = controller;
 
@@ -300,10 +301,10 @@ public class TaskbarHUDController : IHUD
             return;
         }
 
-        if (controller.view.transform.parent == view.windowContainer)
+        if (controller.view.transform.parent == view.leftWindowContainer)
             return;
 
-        controller.view.transform.SetParent(view.windowContainer, false);
+        controller.view.transform.SetParent(view.leftWindowContainer, false);
 
         friendsHud = controller;
         view.OnAddFriendsWindow();
@@ -497,7 +498,7 @@ public class TaskbarHUDController : IHUD
             return;
 
         Utils.UnlockCursor();
-        view.windowContainerAnimator.Show();
+        view.leftWindowContainerAnimator.Show();
         view.friendsButton.SetToggleState(!view.friendsButton.toggledOn);
     }
 
