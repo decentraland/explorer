@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using Categories = WearableLiterals.Categories;
 using Rarity = WearableLiterals.ItemRarity;
 
@@ -8,6 +9,8 @@ public class AvatarEditorHUDAudioHandler : MonoBehaviour
 {
     [SerializeField]
     AvatarEditorHUDView view;
+    [SerializeField]
+    Button randomizeButton;
 
     AudioContainer audioContainer;
     AudioEvent eventRarity;
@@ -30,6 +33,9 @@ public class AvatarEditorHUDAudioHandler : MonoBehaviour
         view.skinColorSelector.OnColorChanged += OnSkinColorClicked;
         view.eyeColorSelector.OnColorChanged += OnEyeColorClicked;
         view.hairColorSelector.OnColorChanged += OnHairColorClicked;
+
+        if (randomizeButton != null)
+            randomizeButton.onClick.AddListener(ResetLastClickedWearable);
     }
 
     void OnWearableClicked(string wearableId)
@@ -84,6 +90,11 @@ public class AvatarEditorHUDAudioHandler : MonoBehaviour
         }
     }
 
+    void ResetLastClickedWearable()
+    {
+        lastClickedWearable = null;
+    }
+
     void OnSkinColorClicked(Color color)
     {
 
@@ -112,7 +123,7 @@ public class AvatarEditorHUDAudioHandler : MonoBehaviour
         if (lastClickedWearable.rarity == null)
             return;
 
-        switch (lastClickedWearable.rarity)
+        /*switch (lastClickedWearable.rarity)
         {
             case Rarity.RARE:
                 eventRarity.SetIndex(0);
@@ -132,7 +143,7 @@ public class AvatarEditorHUDAudioHandler : MonoBehaviour
             default:
                 eventRarity.SetIndex(0);
                 break;
-        }
+        }*/
 
         eventRarity.Play(true);
     }

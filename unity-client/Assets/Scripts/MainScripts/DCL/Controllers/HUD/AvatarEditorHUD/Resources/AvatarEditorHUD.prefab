@@ -6684,6 +6684,11 @@ PrefabInstance:
       propertyPath: view
       value: 
       objectReference: {fileID: 8590993939644265710}
+    - target: {fileID: 6903690898286533778, guid: 3e6ea7d7a61f2dd4c80f1d446730269d,
+        type: 3}
+      propertyPath: randomizeButton
+      value: 
+      objectReference: {fileID: 1450360507441575512}
     - target: {fileID: 9023033888150710464, guid: 3e6ea7d7a61f2dd4c80f1d446730269d,
         type: 3}
       propertyPath: m_Name
@@ -14974,12 +14979,12 @@ PrefabInstance:
     - target: {fileID: 5176895286373489926, guid: 7d2f70c1de2924a44bbd79ddad5f3d1b,
         type: 3}
       propertyPath: m_AnchorMax.x
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5176895286373489926, guid: 7d2f70c1de2924a44bbd79ddad5f3d1b,
         type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5176895286559228628, guid: 7d2f70c1de2924a44bbd79ddad5f3d1b,
         type: 3}
@@ -15099,12 +15104,12 @@ PrefabInstance:
     - target: {fileID: 5176895287733378621, guid: 7d2f70c1de2924a44bbd79ddad5f3d1b,
         type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5176895287733378623, guid: 7d2f70c1de2924a44bbd79ddad5f3d1b,
         type: 3}
       propertyPath: m_Value
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6848830970342634219, guid: 7d2f70c1de2924a44bbd79ddad5f3d1b,
         type: 3}

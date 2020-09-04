@@ -71,9 +71,9 @@ MonoBehaviour:
     - name: ButtonHover
       loop: 0
       volume: 1
-      randomPitch: 0.2
+      randomPitch: 0
       playOnAwake: 0
-      cooldownSeconds: 0.01
+      cooldownSeconds: 0.03
       clips:
         array:
         - {fileID: 8300000, guid: e5820e20f76a6d74e94f531fc6b7ae02, type: 3}
@@ -240,7 +240,7 @@ MonoBehaviour:
       source: {fileID: 0}
     - name: TinyHover
       loop: 0
-      volume: 1
+      volume: 0.3
       randomPitch: 0.1
       playOnAwake: 0
       cooldownSeconds: 0.02
