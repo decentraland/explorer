@@ -8,6 +8,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.XR;
 
 public class BuildModeController : MonoBehaviour
 {
@@ -26,10 +27,20 @@ public class BuildModeController : MonoBehaviour
     public float distanceLimitToSelectObjects = 50;
 
 
+    [Header("Snap variables")]
+    public float snapFactor = 1f;
+    public float snapRotationDegresFactor = 15f;
+    public float snapScaleFactor = 0.5f;
+
+
+    [Header ("Scene references")]
+    public GameObject editModeChangeFX;
+    public GameObject snapActivateGO;
+
     [Header("Build References")]
 
     public Material editMaterial;
-    public GameObject editModeChangeFX;
+ 
     public LayerMask layerToRaycast;
 
     [Header("InputActions")]
@@ -52,11 +63,14 @@ public class BuildModeController : MonoBehaviour
     
     Dictionary<string, GameObject> collidersDictionary = new Dictionary<string, GameObject>();
 
+    GameObject undoGameObject,snapGameObject;
+
     float currentScale, currentYRotation, nexTimeToReceiveInput;
     // Start is called before the first frame update
     void Start()
     {
         editModeChange.OnTriggered += OnEditModeChangeAction;
+
     }
 
     private void OnDestroy()
@@ -83,6 +97,22 @@ public class BuildModeController : MonoBehaviour
             initialRotationVector.z = 0;
             Quaternion targetRotation = Quaternion.Euler(initialRotationVector);
             objectToEdit.transform.rotation = targetRotation;
+            snapGameObject.transform.rotation = targetRotation;
+
+            if (isSnapActivated)
+            {
+                Vector3 objectPosition = snapGameObject.transform.position;
+                Vector3 eulerRotation = snapGameObject.transform.rotation.eulerAngles;
+  
+                objectPosition.x = Mathf.RoundToInt(objectPosition.x);
+                objectPosition.y = Mathf.RoundToInt(objectPosition.y);
+                objectPosition.z = Mathf.RoundToInt(objectPosition.z);
+                eulerRotation.y = snapRotationDegresFactor * Mathf.FloorToInt((eulerRotation.y % snapRotationDegresFactor));
+
+                objectToEdit.transform.rotation = Quaternion.Euler(eulerRotation.x, eulerRotation.y, eulerRotation.z);
+                objectToEdit.transform.position = objectPosition;
+
+            }
         }
     }
 
@@ -93,8 +123,13 @@ public class BuildModeController : MonoBehaviour
     {
         if (Input.GetKeyUp(KeyCode.Q))
         {
-            if (objectToEdit != null) StopEditObject();
+            if (objectToEdit != null) DeselectObject();
             CreateEntity();
+        }
+
+        if(Input.GetKeyUp(KeyCode.T))
+        {
+            SetSnapActive(!isSnapActivated);
         }
 
         if (objectToEdit == null)
@@ -108,34 +143,91 @@ public class BuildModeController : MonoBehaviour
         }
         if (objectToEdit != null)
         {
+            if (Input.GetKey(KeyCode.LeftControl) && Input.GetKey(KeyCode.Z))
+            {
+                UndoEdit();
+                InputDone();
+                return;
+            }
             if (Input.GetMouseButtonDown(0))
             {
-                StopEditObject();
+                DeselectObject();
                 InputDone();
                 return;
             }
 
             if (Input.GetKey(KeyCode.R))
             {
-                currentYRotation += rotationSpeed;
-                objectToEdit.transform.Rotate(Vector3.up, rotationSpeed);
+                if (isSnapActivated)
+                {
+                    //currentYRotation += snapRotationDegresFactor;
+                    //objectToEdit.transform.Rotate(Vector3.up, snapRotationDegresFactor);
+                    //snapGameObject.transform.Rotate(Vector3.up, snapRotationDegresFactor);
+
+                    RotateSelectedGameObject(snapRotationDegresFactor);
+                    InputDone();
+                }
+                else
+                {
+                    //currentYRotation += rotationSpeed;
+                    //objectToEdit.transform.Rotate(Vector3.up, rotationSpeed);
+                    //snapGameObject.transform.Rotate(Vector3.up, rotationSpeed);
+                    RotateSelectedGameObject(rotationSpeed);
+                }
             }
 
 
             if (Input.mouseScrollDelta.y >0.5f)
             {
-                objectToEdit.transform.localScale += Vector3.one * scaleSpeed;
+
+                if (isSnapActivated)
+                {
+                    //objectToEdit.transform.localScale += Vector3.one * snapScaleFactor;
+                    ScaleSelectedGameObject(snapScaleFactor);
+                    InputDone();
+                }
+                else ScaleSelectedGameObject(scaleSpeed); //objectToEdit.transform.localScale += Vector3.one * scaleSpeed;
             }
             else if (Input.mouseScrollDelta.y < -0.5f)
             {
-                objectToEdit.transform.localScale -= Vector3.one * scaleSpeed;
+                if (isSnapActivated)
+                {
+                    //objectToEdit.transform.localScale -= Vector3.one * snapScaleFactor;
+                    ScaleSelectedGameObject(-snapScaleFactor);
+                    InputDone();
+                }
+                else ScaleSelectedGameObject(-scaleSpeed); // objectToEdit.transform.localScale -= Vector3.one * scaleSpeed;
             }
 
            
         }
     }
 
+    public void UndoEdit()
+    {   
+        CopyGameObjectStatus(undoGameObject, objectToEdit);
+        DeselectObject();
+    }
+    public void SetSnapActive(bool isActive)
+    {
+        isSnapActivated = isActive;
+        snapActivateGO.SetActive(isSnapActivated);
 
+    }
+
+
+    void RotateSelectedGameObject(float angleToRotate)
+    {
+        currentYRotation += angleToRotate;
+        objectToEdit.transform.Rotate(Vector3.up, angleToRotate);
+        snapGameObject.transform.Rotate(Vector3.up, angleToRotate);
+    }
+
+    void ScaleSelectedGameObject(float scaleFactor)
+    {
+        objectToEdit.transform.localScale += Vector3.one * scaleFactor;
+        snapGameObject.transform.localScale += Vector3.one * scaleFactor;
+    }
     void InputDone()
     {
         nexTimeToReceiveInput = Time.timeSinceLevelLoad+msBetweenInputInteraction/1000;      
@@ -159,6 +251,8 @@ public class BuildModeController : MonoBehaviour
         entityToEdit = decentralandEntity;
         objectToEdit = decentralandEntity.gameObject;
 
+        CopyGameObjectStatus(objectToEdit, undoGameObject);
+
         initialRotation = objectToEdit.transform.rotation;
 
         originalMeshRenderer = objectToEdit.GetComponentInChildren<MeshRenderer>();
@@ -170,6 +264,11 @@ public class BuildModeController : MonoBehaviour
 
         currentScale = objectToEdit.transform.localScale.magnitude;
         currentYRotation = objectToEdit.transform.eulerAngles.y;
+
+        CopyGameObjectStatus(objectToEdit, snapGameObject);
+
+
+    
         Debug.Log("Starting editing objet");
 
     }
@@ -184,6 +283,17 @@ public class BuildModeController : MonoBehaviour
             SelectObject(sceneToEdit.entities[entityID]);
             Debug.Log("Entity hitted " + entityID);
         } 
+    }
+
+    void DeselectObject()
+    {
+        if (objectToEdit != null)
+        {
+            originalMeshRenderer.material = originalMaterial;
+            objectToEdit.transform.SetParent(originalGOParent);
+            objectToEdit = null;
+            Debug.Log("Stop editing objet");
+        }
     }
 
     void CreateEntity()
@@ -205,22 +315,20 @@ public class BuildModeController : MonoBehaviour
         ((PBRMaterial)material).model.albedoColor = editMaterial.color;
         sceneToEdit.SharedComponentAttach(newEntity.entityId, material.id);
 
-
+        CreateCollidersForEntity(newEntity);
         SelectObject(newEntity);
     }
 
+
+    void CopyGameObjectStatus(GameObject gameObjectToCopy, GameObject gameObjectToReceive)
+    {
+        gameObjectToReceive.transform.SetParent(gameObjectToCopy.transform.parent);
+        gameObjectToReceive.transform.position = gameObjectToCopy.transform.position;
+        gameObjectToReceive.transform.localRotation = gameObjectToCopy.transform.localRotation;
+        gameObjectToReceive.transform.localScale = gameObjectToCopy.transform.localScale;
+    }
  
 
-    void StopEditObject()
-    {
-        if (objectToEdit != null)
-        {
-            originalMeshRenderer.material = originalMaterial;
-            objectToEdit.transform.SetParent(originalGOParent);
-            objectToEdit = null;      
-            Debug.Log("Stop editing objet");
-        }
-    }
 
     void EnterEditMode()
     {
@@ -230,6 +338,19 @@ public class BuildModeController : MonoBehaviour
         isEditModeActivated = true;
         ParcelSettings.VISUAL_LOADING_ENABLED = false;
 
+        if (snapGameObject == null)
+        {
+            snapGameObject = new GameObject("SnapGameObject");
+            snapGameObject.transform.SetParent(transform);
+        }
+        if (undoGameObject == null)
+        {
+            undoGameObject = new GameObject("UndoGameObject");
+            undoGameObject.transform.SetParent(transform);
+        }
+
+
+        SetSnapActive(snapActivateGO);
         sceneToEdit = SceneController.i.scenesSortedByDistance[0];
         CreateCollidersForAllEntities();
     }
@@ -241,9 +362,10 @@ public class BuildModeController : MonoBehaviour
         Debug.Log("Exit edit mode");
         editModeChangeFX.SetActive(false);
 
+        snapGameObject.transform.SetParent(transform);
         ParcelSettings.VISUAL_LOADING_ENABLED = true;
         DCLCharacterController.i.SetFreeMovementActive(false);
-        StopEditObject();
+        DeselectObject();
         DestroyCollidersForAllEntities();
     }
 
@@ -261,14 +383,17 @@ public class BuildModeController : MonoBehaviour
         {
             if (entity.meshRootGameObject && entity.meshesInfo.renderers.Length > 0)
             {
-                CreateColliders(entity, entity.meshesInfo);
+                CreateCollidersForEntity(entity);
             }       
         }
     }
 
 
-    private void CreateColliders(DecentralandEntity entity, DecentralandEntity.MeshesInfo meshInfo)
+    private void CreateCollidersForEntity(DecentralandEntity entity)
     {
+        DecentralandEntity.MeshesInfo meshInfo = entity.meshesInfo;
+        if (meshInfo == null) return;
+
         if (!collidersDictionary.ContainsKey(entity.entityId))
         {
             GameObject entityCollider = new GameObject(entity.entityId);
