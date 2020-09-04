@@ -8,13 +8,11 @@ namespace DCL
 {
     public class PointerEventsController : MonoBehaviour
     {
-        public static PointerEventsController i { get; private set; }
-
         public InteractionHoverCanvasController interactionHoverCanvasController;
 
         private static bool renderingIsDisabled => !CommonScriptableObjects.rendererState.Get();
-        public static System.Action OnPointerHoverStarts;
-        public static System.Action OnPointerHoverEnds;
+        public System.Action OnPointerHoverStarts;
+        public System.Action OnPointerHoverEnds;
 
         bool isTesting = false;
         RaycastHitInfo lastPointerDownEventHitInfo;
@@ -26,18 +24,6 @@ namespace DCL
         OnPointerEvent newHoveredEvent = null;
         OnPointerEvent[] lastHoveredEventList = null;
         RaycastHit hitInfo;
-
-        void Awake()
-        {
-            if (i != null)
-            {
-                Utils.SafeDestroy(this);
-
-                return;
-            }
-
-            i = this;
-        }
 
         public void Initialize(bool isTesting = false)
         {

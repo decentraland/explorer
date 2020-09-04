@@ -20,7 +20,7 @@ namespace Tests
         protected override IEnumerator SetUp()
         {
             yield return base.SetUp();
-            PointerEventsController.i.Initialize(isTesting: true);
+            Environment.i.InitializeForTesting();
             SceneController.i.useBoundariesChecker = false;
 
             // Set character position and camera rotation
@@ -1080,7 +1080,7 @@ namespace Tests
 
             yield return null;
 
-            var hoverCanvasController = PointerEventsController.i.interactionHoverCanvasController;
+            var hoverCanvasController = Environment.i.pointerEventsController.interactionHoverCanvasController;
             Assert.IsNotNull(hoverCanvasController);
             Assert.IsTrue(hoverCanvasController.canvas.enabled);
 
@@ -1133,7 +1133,7 @@ namespace Tests
 
             yield return null;
 
-            var hoverCanvas = PointerEventsController.i.GetComponentInChildren<InteractionHoverCanvasController>().canvas;
+            var hoverCanvas = Environment.i.pointerEventsController.GetComponentInChildren<InteractionHoverCanvasController>().canvas;
             Assert.IsNotNull(hoverCanvas);
 
             Assert.IsTrue(hoverCanvas.enabled);

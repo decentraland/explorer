@@ -39,8 +39,6 @@ namespace DCL
 
             i = this;
 
-            PointerEventsController.i.Initialize();
-
 #if !UNITY_EDITOR
             Debug.Log("DCL Unity Build Version: " + DCL.Configuration.ApplicationSettings.version);
             Debug.unityLogger.logEnabled = false;
@@ -49,8 +47,6 @@ namespace DCL
             InitializeSceneBoundariesChecker();
 
             Environment.i.Initialize(this);
-
-            MemoryManager.i.Initialize();
 
             // We trigger the Decentraland logic once SceneController has been instanced and is ready to act.
             if (startDecentralandAutomatically)
@@ -61,7 +57,7 @@ namespace DCL
             ParcelScene.parcelScenesCleaner.Start();
 
             if (deferredMessagesDecoding)             // We should be able to delete this code
-                StartCoroutine(DeferredDecoding());   // 
+                StartCoroutine(DeferredDecoding());   //
 
             DCLCharacterController.OnCharacterMoved += SetPositionDirty;
 
@@ -97,12 +93,6 @@ namespace DCL
         public void Restart()
         {
             Environment.i.Restart(this);
-
-            MemoryManager.i.CleanupPoolsIfNeeded(true);
-            MemoryManager.i.Initialize();
-
-            PointerEventsController.i.Cleanup();
-            PointerEventsController.i.Initialize();
 
             ParcelScene.parcelScenesCleaner.ForceCleanup();
         }

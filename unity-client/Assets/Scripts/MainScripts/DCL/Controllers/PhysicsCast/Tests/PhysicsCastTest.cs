@@ -24,7 +24,7 @@ public class PhysicsCast_Tests : TestsBase
     protected override IEnumerator SetUp()
     {
         yield return base.SetUp();
-        PointerEventsController.i.Initialize(isTesting: true);
+        Environment.i.InitializeForTesting();
         SceneController.i.useBoundariesChecker = false;
     }
 

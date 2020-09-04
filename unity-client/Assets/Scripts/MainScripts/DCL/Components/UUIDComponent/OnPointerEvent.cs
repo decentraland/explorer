@@ -73,7 +73,7 @@ namespace DCL.Components
             pointerEventColliders.refCount++;
 
             if (hoverCanvasController == null)
-                hoverCanvasController = PointerEventsController.i.interactionHoverCanvasController;
+                hoverCanvasController = Environment.i.pointerEventsController.interactionHoverCanvasController;
         }
 
         public bool IsVisible()
