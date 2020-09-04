@@ -131,7 +131,7 @@ public class HUDController : MonoBehaviour
         CONTROLS_HUD = 18,
         EMAIL_PROMPT = 19,
         EXPLORE_HUD = 20,
-        HELP_AND_SUPPORT = 22,
+        HELP_AND_SUPPORT = 21,
         COUNT = 22
     }
 

@@ -30,7 +30,6 @@ public class TaskbarHUDView : MonoBehaviour
 
     [Header("Old TaskbarCompatibility (temporal)")]
     [SerializeField] internal Image taskbarPanelImage;
-    [SerializeField] internal CanvasGroup taskbarPanelCanvasGroup;
     [SerializeField] internal GameObject rightButtonsContainer;
 
     internal TaskbarHUDController controller;
@@ -320,7 +319,6 @@ public class TaskbarHUDView : MonoBehaviour
     private void ActivateOldTaskbar()
     {
         taskbarPanelImage.color = new Color(taskbarPanelImage.color.r, taskbarPanelImage.color.g, taskbarPanelImage.color.b, 0f);
-        taskbarPanelCanvasGroup.blocksRaycasts = false;
         moreButton.gameObject.SetActive(false);
         rightButtonsContainer.SetActive(false);
     }
