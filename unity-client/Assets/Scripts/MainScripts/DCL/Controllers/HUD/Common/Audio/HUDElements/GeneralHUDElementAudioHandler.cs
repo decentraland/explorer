@@ -5,7 +5,9 @@ public class GeneralHUDElementAudioHandler : MonoBehaviour, IPointerEnterHandler
 {
     HUDAudioPlayer audioPlayer;
     [SerializeField]
-    bool playHover = false;
+    HUDAudioPlayer.Sound hoverSound = HUDAudioPlayer.Sound.buttonHover;
+    [SerializeField]
+    bool playHover = false, playClick = true, playRelease = true;
 
     void Start()
     {
@@ -15,20 +17,18 @@ public class GeneralHUDElementAudioHandler : MonoBehaviour, IPointerEnterHandler
     public void OnPointerEnter(PointerEventData eventData)
     {
         if (playHover && audioPlayer != null)
-        {
-            audioPlayer.Play(HUDAudioPlayer.Sound.buttonHover);
-        }
+            audioPlayer.Play(hoverSound);
     }
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        if (audioPlayer != null)
+        if (playClick && audioPlayer != null)
             audioPlayer.Play(HUDAudioPlayer.Sound.buttonClick);
     }
 
     public void OnPointerUp(PointerEventData eventData)
     {
-        if (audioPlayer != null)
+        if (playRelease && audioPlayer != null)
             audioPlayer.Play(HUDAudioPlayer.Sound.buttonRelease);
     }
 }

@@ -435,7 +435,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee9f4abe9743e8746a8476ea46e938d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  hoverSound: 1
   playHover: 1
+  playClick: 1
+  playRelease: 1
 --- !u!1 &4926889000998965773
 GameObject:
   m_ObjectHideFlags: 0
@@ -1635,7 +1638,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee9f4abe9743e8746a8476ea46e938d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  hoverSound: 1
   playHover: 1
+  playClick: 1
+  playRelease: 1
 --- !u!1 &6840813886269702536
 GameObject:
   m_ObjectHideFlags: 0
@@ -2553,7 +2559,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee9f4abe9743e8746a8476ea46e938d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  hoverSound: 1
   playHover: 1
+  playClick: 1
+  playRelease: 1
 --- !u!1001 &5567143751692109848
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -25,7 +25,7 @@ public class HUDAudioPlayer : MonoBehaviour
         receiveGlobalChatEntry,
         cameraToThirdPerson,
         cameraToFirstPerson,
-        mapParcelHighlight
+        tinyHover
     }
 
     public static HUDAudioPlayer i { get; private set; }
@@ -34,7 +34,7 @@ public class HUDAudioPlayer : MonoBehaviour
     public AudioContainer ac;
 
     AudioEvent eventHover, eventClick, eventRelease, eventEnable, eventDisable, eventListItemAppear, eventDialogAppear, eventDialogClose, eventConfirm, eventCancel,
-        eventValueChange, eventFadeIn, eventFadeOut, eventSendChatEntry, eventReceivePrivateChatEntry, eventReceiveGlobalChatEntry, eventNotification;
+        eventValueChange, eventFadeIn, eventFadeOut, eventSendChatEntry, eventReceivePrivateChatEntry, eventReceiveGlobalChatEntry, eventNotification, eventTinyHover;
 
     bool listItemAppearHasPlayed = false;
     float listItemAppearPitch = 1f;
@@ -70,6 +70,7 @@ public class HUDAudioPlayer : MonoBehaviour
         eventReceivePrivateChatEntry = ac.GetEvent("ReceivePrivateChatEntry");
         eventReceiveGlobalChatEntry = ac.GetEvent("ReceiveGlobalChatEntry");
         eventNotification = ac.GetEvent("Notification");
+        eventTinyHover = ac.GetEvent("TinyHover");
 
         RefreshChatLastCheckedTimestamp();
     }
@@ -167,9 +168,8 @@ public class HUDAudioPlayer : MonoBehaviour
                 eventFadeIn.SetPitch(0.85f);
                 eventFadeIn.Play(true);
                 break;
-            case Sound.mapParcelHighlight:
-                eventHover.SetPitch(3f);
-                eventHover.Play(true);
+            case Sound.tinyHover:
+                eventTinyHover.Play(true);
                 break;
             default:
                 break;

@@ -45,7 +45,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ac: {fileID: 0}
-  timeAtStart: 0
+  chatLastCheckedTimestamp: 0
 --- !u!114 &9163622792995413824
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -73,7 +73,7 @@ MonoBehaviour:
       volume: 1
       randomPitch: 0.2
       playOnAwake: 0
-      cooldownSeconds: 0
+      cooldownSeconds: 0.01
       clips:
         array:
         - {fileID: 8300000, guid: e5820e20f76a6d74e94f531fc6b7ae02, type: 3}
@@ -237,4 +237,14 @@ MonoBehaviour:
       clips:
         array:
         - {fileID: 8300000, guid: fedc09a4557ddf04d8fe3636130e3e8a, type: 3}
+      source: {fileID: 0}
+    - name: TinyHover
+      loop: 0
+      volume: 1
+      randomPitch: 0.1
+      playOnAwake: 0
+      cooldownSeconds: 0.02
+      clips:
+        array:
+        - {fileID: 8300000, guid: e8d0947f318cb954290d8a1111284e8c, type: 3}
       source: {fileID: 0}
