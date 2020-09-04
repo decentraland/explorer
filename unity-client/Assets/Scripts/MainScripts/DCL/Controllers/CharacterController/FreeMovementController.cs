@@ -7,7 +7,6 @@ public class FreeMovementController : MonoBehaviour
 {
 
     [Header("Movement")]
-    public float minimumYPosition = 0f;
     public float groundCheckExtraDistance = 0.25f;
     public float movementSpeed = 11f;
     public float runningSpeedMultiplier = 0.36f;

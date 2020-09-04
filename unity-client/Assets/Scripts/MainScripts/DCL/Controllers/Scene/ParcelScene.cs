@@ -532,6 +532,42 @@ namespace DCL.Controllers
                 disposableComponent.AttachTo(decentralandEntity);
             }
         }
+        public BaseComponent EntityComponentCreateOrUpdateFromUnity(string entityId, CLASS_ID_COMPONENT classId, DCLTransform.Model model)
+        {
+
+            SceneController.i.OnMessageDecodeStart?.Invoke("UpdateEntityComponent");
+            SceneController.i.OnMessageDecodeEnds?.Invoke("UpdateEntityComponent");
+
+            DecentralandEntity entity = GetEntityForUpdate(entityId);
+
+            if (entity == null)
+            {
+                Debug.LogError($"scene '{sceneData.id}': Can't create entity component if the entity {entityId} doesn't exist!");
+                return null;
+            }
+
+            if (!entity.components.ContainsKey(classId))
+                entity.components.Add(classId, null);
+
+            if (classId == CLASS_ID_COMPONENT.TRANSFORM)
+            {
+                if (entity.OnTransformChange != null)
+                {
+                    entity.OnTransformChange.Invoke(model);
+                }
+                else
+                {
+                    entity.gameObject.transform.localPosition = model.position;
+                    entity.gameObject.transform.localRotation = model.rotation;
+                    entity.gameObject.transform.localScale = model.scale;
+
+                    SceneController.i.boundariesChecker?.AddEntityToBeChecked(entity);
+                }
+
+                SceneController.i.physicsSyncController.MarkDirty();
+            }
+            return null;
+        }
 
         public BaseComponent EntityComponentCreateOrUpdate(string entityId, CLASS_ID_COMPONENT classId, string data, out CleanableYieldInstruction yieldInstruction)
         {

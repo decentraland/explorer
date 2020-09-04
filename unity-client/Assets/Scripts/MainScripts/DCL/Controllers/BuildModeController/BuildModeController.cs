@@ -1,6 +1,10 @@
 using DCL;
+using DCL.Components;
+using DCL.Configuration;
 using DCL.Controllers;
+using DCL.Helpers;
 using DCL.Models;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -19,15 +23,14 @@ public class BuildModeController : MonoBehaviour
     public float rotationSpeed = 0.5f;
     public float msBetweenInputInteraction = 200;
 
+    public float distanceLimitToSelectObjects = 50;
 
-    [Header("Scene References")]
-  
-    public GameObject objectToTest;
 
     [Header("Build References")]
 
     public Material editMaterial;
     public GameObject editModeChangeFX;
+    public LayerMask layerToRaycast;
 
     [Header("InputActions")]
     [SerializeField] internal InputAction_Trigger editModeChange;
@@ -38,7 +41,7 @@ public class BuildModeController : MonoBehaviour
     bool isEditModeActivated = false, isSnapActivated = true;
 
     //Object to edit related
-    DecentralandEntity entityToEdit;
+    DecentralandEntity entityToEdit,newEntity;
     GameObject objectToEdit;
     Material originalMaterial;
     Transform originalGOParent;
@@ -46,24 +49,21 @@ public class BuildModeController : MonoBehaviour
 
     Quaternion initialRotation;
 
-    //
+    
+    Dictionary<string, GameObject> collidersDictionary = new Dictionary<string, GameObject>();
 
     float currentScale, currentYRotation, nexTimeToReceiveInput;
     // Start is called before the first frame update
     void Start()
     {
-        //ÑAPA
-        SceneController.VERBOSE = true;
-
-
-        ParcelScene scene = SceneController.i.CreateTestScene(null);
-        scene.CreateEntity("TestEntity");
-
-        editModeChange.OnTriggered += OnCameraChangeAction;
-
-
+        editModeChange.OnTriggered += OnEditModeChangeAction;
     }
 
+    private void OnDestroy()
+    {
+        editModeChange.OnTriggered -= OnEditModeChangeAction;
+        DestroyCollidersForAllEntities();
+    }
 
     private void Update()
     {
@@ -77,27 +77,26 @@ public class BuildModeController : MonoBehaviour
     {
         if (objectToEdit != null)
         {
-            //Debug.Log("Euler angle Y" + transform.rotation.y)
-            //if (Input.GetKey(KeyCode.E))
-            //{
-                Vector3 initialRotationVector = objectToEdit.transform.rotation.eulerAngles;
-                //initialRotationVector.x = initialRotation.eulerAngles.x;
-       
-                //initialRotationVector.z = initialRotation.eulerAngles.z;
+            Vector3 initialRotationVector = objectToEdit.transform.rotation.eulerAngles;
 
-            initialRotationVector.x =0;
+            initialRotationVector.x = 0;
             initialRotationVector.z = 0;
-                Quaternion targetRotation = Quaternion.Euler(initialRotationVector);
-                objectToEdit.transform.rotation = targetRotation;
-            //}
-
-            Debug.Log("global rotation " + objectToEdit.transform.rotation.eulerAngles + "    global position " + objectToEdit.transform.position);
+            Quaternion targetRotation = Quaternion.Euler(initialRotationVector);
+            objectToEdit.transform.rotation = targetRotation;
         }
     }
 
 
+ 
+
     void CheckEditModeInput()
     {
+        if (Input.GetKeyUp(KeyCode.Q))
+        {
+            if (objectToEdit != null) StopEditObject();
+            CreateEntity();
+        }
+
         if (objectToEdit == null)
         {
             if (Input.GetMouseButtonDown(0))
@@ -119,7 +118,6 @@ public class BuildModeController : MonoBehaviour
             if (Input.GetKey(KeyCode.R))
             {
                 currentYRotation += rotationSpeed;
-                //Quaternion.R
                 objectToEdit.transform.Rotate(Vector3.up, rotationSpeed);
             }
 
@@ -133,18 +131,18 @@ public class BuildModeController : MonoBehaviour
                 objectToEdit.transform.localScale -= Vector3.one * scaleSpeed;
             }
 
+           
         }
     }
 
 
     void InputDone()
     {
-        nexTimeToReceiveInput = Time.timeSinceLevelLoad+msBetweenInputInteraction/1000;
-       
+        nexTimeToReceiveInput = Time.timeSinceLevelLoad+msBetweenInputInteraction/1000;      
     }
 
 
-    private void OnCameraChangeAction(DCLAction_Trigger action)
+    private void OnEditModeChangeAction(DCLAction_Trigger action)
     {
         if (isEditModeActivated)
         {
@@ -156,32 +154,11 @@ public class BuildModeController : MonoBehaviour
         }
     }
 
-    void SelectObject()
+    void SelectObject(DecentralandEntity decentralandEntity)
     {
-        objectToEdit = objectToTest;
+        entityToEdit = decentralandEntity;
+        objectToEdit = decentralandEntity.gameObject;
 
-        RaycastHit hit;
-        UnityEngine.Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        if (Physics.Raycast(ray,out hit))
-        {
-            objectToEdit = hit.collider.gameObject.transform.parent.gameObject;
-        
-            if (objectToEdit.name.StartsWith("ENTITY_"))
-            {
-                string entityName = objectToEdit.name.Replace("ENTITY_", "");
-
-                entityToEdit = sceneToEdit.entities[entityName];
-                
-            }
-            else
-            {
-                objectToEdit = null;
-                return;
-            }
-        }
-
-
-   
         initialRotation = objectToEdit.transform.rotation;
 
         originalMeshRenderer = objectToEdit.GetComponentInChildren<MeshRenderer>();
@@ -194,14 +171,45 @@ public class BuildModeController : MonoBehaviour
         currentScale = objectToEdit.transform.localScale.magnitude;
         currentYRotation = objectToEdit.transform.eulerAngles.y;
         Debug.Log("Starting editing objet");
+
+    }
+    void SelectObject()
+    {
+
+        RaycastHit hit;
+        UnityEngine.Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        if (Physics.Raycast(ray, out hit, distanceLimitToSelectObjects, layerToRaycast))
+        {
+            string entityID = hit.collider.gameObject.name;
+            SelectObject(sceneToEdit.entities[entityID]);
+            Debug.Log("Entity hitted " + entityID);
+        } 
     }
 
-    #region Borrar
+    void CreateEntity()
+    {
+      
+        newEntity = sceneToEdit.CreateEntity(Guid.NewGuid().ToString());
+
+        DCLTransform.model.position =  SceneController.i.ConvertUnityToScenePosition(Camera.main.transform.position+ Camera.main.transform.forward* 2,sceneToEdit);
+        DCLTransform.model.rotation = Camera.main.transform.rotation;
+        DCLTransform.model.scale = newEntity.gameObject.transform.localScale;
+
+        sceneToEdit.EntityComponentCreateOrUpdateFromUnity(newEntity.entityId, CLASS_ID_COMPONENT.TRANSFORM, DCLTransform.model);
+
+        BaseDisposable mesh = sceneToEdit.SharedComponentCreate(Guid.NewGuid().ToString(), Convert.ToInt32(CLASS_ID.BOX_SHAPE));
+        sceneToEdit.SharedComponentAttach(newEntity.entityId, mesh.id);
+
+        BaseDisposable material = sceneToEdit.SharedComponentCreate(Guid.NewGuid().ToString(), Convert.ToInt32(CLASS_ID.PBR_MATERIAL));
+
+        ((PBRMaterial)material).model.albedoColor = editMaterial.color;
+        sceneToEdit.SharedComponentAttach(newEntity.entityId, material.id);
 
 
+        SelectObject(newEntity);
+    }
 
-
-    #endregion
+ 
 
     void StopEditObject()
     {
@@ -209,7 +217,7 @@ public class BuildModeController : MonoBehaviour
         {
             originalMeshRenderer.material = originalMaterial;
             objectToEdit.transform.SetParent(originalGOParent);
-            objectToEdit = null;
+            objectToEdit = null;      
             Debug.Log("Stop editing objet");
         }
     }
@@ -220,9 +228,10 @@ public class BuildModeController : MonoBehaviour
         editModeChangeFX.SetActive(true);
         DCLCharacterController.i.SetFreeMovementActive(true);
         isEditModeActivated = true;
+        ParcelSettings.VISUAL_LOADING_ENABLED = false;
 
         sceneToEdit = SceneController.i.scenesSortedByDistance[0];
-
+        CreateCollidersForAllEntities();
     }
 
 
@@ -231,8 +240,63 @@ public class BuildModeController : MonoBehaviour
         isEditModeActivated = false;
         Debug.Log("Exit edit mode");
         editModeChangeFX.SetActive(false);
+
+        ParcelSettings.VISUAL_LOADING_ENABLED = true;
         DCLCharacterController.i.SetFreeMovementActive(false);
         StopEditObject();
+        DestroyCollidersForAllEntities();
     }
 
+    void DestroyCollidersForAllEntities()
+    {
+        foreach (GameObject entityCollider in collidersDictionary.Values)
+        {
+            Destroy(entityCollider);
+        }
+        collidersDictionary.Clear();
+    }
+    void CreateCollidersForAllEntities()
+    {
+        foreach(DecentralandEntity entity in sceneToEdit.entities.Values)
+        {
+            if (entity.meshRootGameObject && entity.meshesInfo.renderers.Length > 0)
+            {
+                CreateColliders(entity, entity.meshesInfo);
+            }       
+        }
+    }
+
+
+    private void CreateColliders(DecentralandEntity entity, DecentralandEntity.MeshesInfo meshInfo)
+    {
+        if (!collidersDictionary.ContainsKey(entity.entityId))
+        {
+            GameObject entityCollider = new GameObject(entity.entityId);
+            entityCollider.layer = LayerMask.NameToLayer("OnBuilderPointerClick");
+
+            for (int i = 0; i < meshInfo.renderers.Length; i++)
+            {                             
+                Transform t = entityCollider.transform;
+                t.SetParent(meshInfo.renderers[i].transform);
+                t.ResetLocalTRS();
+
+                var meshCollider = entityCollider.AddComponent<MeshCollider>();
+
+                if (meshInfo.renderers[i] is SkinnedMeshRenderer)
+                {
+                    Mesh meshColliderForSkinnedMesh = new Mesh();
+                    (meshInfo.renderers[i] as SkinnedMeshRenderer).BakeMesh(meshColliderForSkinnedMesh);
+                    meshCollider.sharedMesh = meshColliderForSkinnedMesh;
+                    t.localScale = new Vector3(1 / transform.lossyScale.x, 1 / transform.lossyScale.y, 1 / transform.lossyScale.z);
+                }
+                else
+                {
+                    meshCollider.sharedMesh = meshInfo.renderers[i].GetComponent<MeshFilter>().sharedMesh;
+                }
+                meshCollider.enabled = meshInfo.renderers[i].enabled;
+
+            }
+            collidersDictionary.Add(entity.entityId, entityCollider);
+        }
+    }
 }
