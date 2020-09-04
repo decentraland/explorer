@@ -209,6 +209,7 @@ export type SceneJsonData = {
   policy?: ScenePolicy
   source?: SceneSource
   spawnPoints?: SceneSpawnPoint[]
+  requiredPermissions?: string[] | undefined
 }
 
 export type EnvironmentData<T> = {
@@ -397,7 +398,9 @@ export enum HUDElementID {
   OPEN_EXTERNAL_URL_PROMPT = 14,
   NFT_INFO_DIALOG = 16,
   TELEPORT_DIALOG = 17,
-  CONTROLS_HUD = 18
+  CONTROLS_HUD = 18,
+  EMAIL_PROMPT = 19,
+  EXPLORE_HUD = 20
 }
 
 export type HUDConfiguration = {

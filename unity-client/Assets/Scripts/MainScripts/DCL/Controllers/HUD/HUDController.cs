@@ -62,6 +62,10 @@ public class HUDController : MonoBehaviour
 
     public ControlsHUDController controlsHud => GetHUDElement(HUDElementID.CONTROLS_HUD) as ControlsHUDController;
 
+    public EmailPromptHUDController emailPromptHud => GetHUDElement(HUDElementID.EMAIL_PROMPT) as EmailPromptHUDController;
+
+    public ExploreHUDController exploreHud => GetHUDElement(HUDElementID.EXPLORE_HUD) as ExploreHUDController;
+
     public Dictionary<HUDElementID, IHUD> hudElements { get; private set; } = new Dictionary<HUDElementID, IHUD>();
 
     private UserProfile ownUserProfile => UserProfile.GetOwnUserProfile();
@@ -121,7 +125,9 @@ public class HUDController : MonoBehaviour
         NFT_INFO_DIALOG = 16,
         TELEPORT_DIALOG = 17,
         CONTROLS_HUD = 18,
-        COUNT = 19
+        EMAIL_PROMPT = 19,
+        EXPLORE_HUD = 20,
+        COUNT = 21
     }
 
     [System.Serializable]
@@ -288,6 +294,20 @@ public class HUDController : MonoBehaviour
                 break;
             case HUDElementID.CONTROLS_HUD:
                 CreateHudElement<ControlsHUDController>(configuration, hudElementId);
+                break;
+            case HUDElementID.EMAIL_PROMPT:
+                if (emailPromptHud == null)
+                {
+                    CreateHudElement<EmailPromptHUDController>(configuration, hudElementId);
+                }
+                emailPromptHud?.SetEnable(configuration.active);
+                break;
+            case HUDElementID.EXPLORE_HUD:
+                CreateHudElement<ExploreHUDController>(configuration, hudElementId);
+                if (exploreHud != null)
+                {
+                    exploreHud.Initialize(FriendsController.i);
+                }
                 break;
         }
 

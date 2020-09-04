@@ -36,6 +36,9 @@ import { unityInterface } from './UnityInterface'
 import { IFuture } from 'fp-future'
 import { reportHotScenes } from 'shared/social/hotScenes'
 
+import { GIFProcessor } from 'gif-processor/processor'
+declare const DCL: any
+
 declare const globalThis: StoreContainer
 export let futures: Record<string, IFuture<any>> = {}
 
@@ -99,6 +102,17 @@ export class BrowserInterface {
     // stub. there is no code about this in unity side yet
   }
 
+  public Track(data: { name: string, properties: ({ key: string, value: string }[] | null) }) {
+    const properties: Record<string, string> = {}
+    if (data.properties) {
+      for (const property of data.properties) {
+        properties[property.key] = property.value
+      }
+    }
+
+    queueTrackingEvent(data.name, properties)
+  }
+
   public TriggerExpression(data: { id: string; timestamp: number }) {
     avatarMessageObservable.notifyObservers({
       type: AvatarMessageType.USER_EXPRESSION,
@@ -138,6 +152,15 @@ export class BrowserInterface {
 
   public LogOut() {
     globalThis.globalStore.dispatch(logout())
+  }
+
+  public SaveUserInterests(interests: string[]) {
+    if (!interests) {
+      return
+    }
+    const unique = new Set<string>(interests)
+    const profile: Profile = getUserProfile().profile as Profile
+    globalThis.globalStore.dispatch(saveProfileRequest({ ...profile, interests: Array.from(unique) }))
   }
 
   public SaveUserAvatar(changes: { face: string; face128: string; face256: string; body: string; avatar: Avatar }) {
@@ -337,6 +360,22 @@ export class BrowserInterface {
 
   public SetBaseResolution(data: { baseResolution: number }) {
     unityInterface.SetTargetHeight(data.baseResolution)
+  }
+
+  async RequestGIFProcessor(data: { imageSource: string; id: string; isWebGL1: boolean }) {
+    // tslint:disable-next-line
+    const isSupported = (typeof OffscreenCanvas !== "undefined") && (typeof OffscreenCanvasRenderingContext2D === "function")
+
+    if (!isSupported) {
+      unityInterface.RejectGIFProcessingRequest()
+      return
+    }
+
+    if (!DCL.gifProcessor) {
+      DCL.gifProcessor = new GIFProcessor(unityInterface.gameInstance, unityInterface, data.isWebGL1)
+    }
+
+    DCL.gifProcessor.ProcessGIF(data)
   }
 }
 
