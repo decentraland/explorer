@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -28,15 +26,11 @@ public class TaskbarHUDView : MonoBehaviour
 
     [Header("More Button Config")]
     [SerializeField] internal ShowHideAnimator moreWindowContainerAnimator;
-    [SerializeField] internal Button moreButton;
-    [SerializeField] internal Button collapseBarButton;
-    [SerializeField] internal Button hideUIButton;
-    [SerializeField] internal Button controlsButton;
+    [SerializeField] internal TaskbarButton moreButton;
+    [SerializeField] internal TaskbarMoreMenu moreMenu;
 
     internal TaskbarHUDController controller;
-
-    private bool isBarVisible = true;
-    private bool isMoreMenuVisible = false;
+    internal bool isBarVisible = true;
 
     public event System.Action OnChatToggleOn;
     public event System.Action OnChatToggleOff;
@@ -63,6 +57,7 @@ public class TaskbarHUDView : MonoBehaviour
         taskbarButtonList.Add(backpackButton);
         taskbarButtonList.Add(exploreButton);
         taskbarButtonList.Add(helpAndSupportButton);
+        taskbarButtonList.Add(moreButton);
         return taskbarButtonList;
     }
 
@@ -80,7 +75,6 @@ public class TaskbarHUDView : MonoBehaviour
         this.controller = controller;
 
         ShowBar(true, true);
-        ShowMoreMenu(false, true);
         chatButton.transform.parent.gameObject.SetActive(false);
         friendsButton.transform.parent.gameObject.SetActive(false);
         settingsButton.transform.parent.gameObject.SetActive(false);
@@ -89,7 +83,9 @@ public class TaskbarHUDView : MonoBehaviour
         helpAndSupportButton.transform.parent.gameObject.SetActive(false);
         separatorMark.SetActive(false);
 
-        collapseBarButton.gameObject.SetActive(true);
+        moreButton.gameObject.SetActive(true);
+        moreMenu.Initialize(this);
+        moreMenu.ShowMoreMenu(false, true);
 
         chatHeadsGroup.Initialize(chatController, friendsController);
         chatButton.Initialize();
@@ -98,6 +94,7 @@ public class TaskbarHUDView : MonoBehaviour
         backpackButton.Initialize();
         exploreButton.Initialize();
         helpAndSupportButton.Initialize();
+        moreButton.Initialize();
 
         chatHeadsGroup.OnHeadToggleOn += OnWindowToggleOn;
         chatHeadsGroup.OnHeadToggleOff += OnWindowToggleOff;
@@ -120,16 +117,8 @@ public class TaskbarHUDView : MonoBehaviour
         helpAndSupportButton.OnToggleOn += OnWindowToggleOn;
         helpAndSupportButton.OnToggleOff += OnWindowToggleOff;
 
-        moreButton.onClick.AddListener(() =>
-        {
-            ShowMoreMenu(!isMoreMenuVisible);
-        });
-
-        collapseBarButton.onClick.AddListener(() =>
-        {
-            ShowBar(!isBarVisible);
-            ShowMoreMenu(false);
-        });
+        moreButton.OnToggleOn += OnWindowToggleOn;
+        moreButton.OnToggleOff += OnWindowToggleOff;
     }
 
     private void OnWindowToggleOff(TaskbarButton obj)
@@ -146,6 +135,8 @@ public class TaskbarHUDView : MonoBehaviour
             OnExploreToggleOff?.Invoke();
         else if (obj == helpAndSupportButton)
             OnHelpAndSupportToggleOff?.Invoke();
+        else if (obj == moreButton)
+            moreMenu.ShowMoreMenu(false);
 
         if (AllButtonsToggledOff())
         {
@@ -183,6 +174,8 @@ public class TaskbarHUDView : MonoBehaviour
             OnExploreToggleOn?.Invoke();
         else if (obj == helpAndSupportButton)
             OnHelpAndSupportToggleOn?.Invoke();
+        else if (obj == moreButton)
+            moreMenu.ShowMoreMenu(true);
 
         SelectButton(obj);
     }
@@ -232,32 +225,14 @@ public class TaskbarHUDView : MonoBehaviour
         separatorMark.SetActive(true);
     }
 
-    internal void ShowMoreMenu(bool visible, bool instant = false)
-    {
-        if (visible)
-        {
-            moreWindowContainerAnimator.Show(instant);
-            isMoreMenuVisible = true;
-        }
-        else
-        {
-            moreWindowContainerAnimator.Hide(instant);
-            isMoreMenuVisible = false;
-        }
-    }
-
     internal void ShowBar(bool visible, bool instant = false)
     {
         if (visible)
-        {
             taskbarAnimator.Show(instant);
-            isBarVisible = true;
-        }
         else
-        {
             taskbarAnimator.Hide(instant);
-            isBarVisible = false;
-        }
+
+        isBarVisible = visible;
     }
 
     public void SetVisibility(bool visible)
@@ -323,9 +298,9 @@ public class TaskbarHUDView : MonoBehaviour
         }
 
         if (moreButton != null)
-            moreButton.onClick.RemoveAllListeners();
-
-        if (collapseBarButton != null)
-            collapseBarButton.onClick.RemoveAllListeners();
+        {
+            moreButton.OnToggleOn -= OnWindowToggleOn;
+            moreButton.OnToggleOff -= OnWindowToggleOff;
+        }
     }
 }

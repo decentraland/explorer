@@ -199,7 +199,7 @@ public class TaskbarHUDController : IHUD
     private void MouseCatcher_OnMouseLock()
     {
         view.leftWindowContainerAnimator.Hide();
-        view.ShowMoreMenu(false);
+        view.moreMenu.ShowMoreMenu(false);
 
         foreach (var btn in view.GetButtonList())
         {
