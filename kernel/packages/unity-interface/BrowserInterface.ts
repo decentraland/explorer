@@ -58,6 +58,8 @@ const positionEvent = {
 }
 
 export class BrowserInterface {
+  private lastBalanceOfMana: number = -1
+
   /** Triggered when the camera moves */
   public ReportPosition(data: { position: ReadOnlyVector3; rotation: ReadOnlyQuaternion; playerHeight?: number }) {
     positionEvent.position.set(data.position.x, data.position.y, data.position.z)
@@ -386,8 +388,11 @@ export class BrowserInterface {
       return
     }
 
-    const balance = await getERC20Balance(identity.address, decentralandConfigurations.paymentTokens.MANA)
-    unityInterface.UpdateBalanceOfMANA(`${balance}`)
+    const balance = (await getERC20Balance(identity.address, decentralandConfigurations.paymentTokens.MANA)).toNumber()
+    if (this.lastBalanceOfMana !== balance) {
+      this.lastBalanceOfMana = balance
+      unityInterface.UpdateBalanceOfMANA(`${balance}`)
+    }
   }
 }
 
