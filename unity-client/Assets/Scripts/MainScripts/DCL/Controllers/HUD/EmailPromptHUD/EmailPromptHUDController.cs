@@ -31,6 +31,7 @@ public class EmailPromptHUDController : IHUD
             Utils.UnlockCursor();
             view.gameObject.SetActive(true);
             view.showHideAnimator.Show();
+            WebInterface.ReportAnalyticsEvent("open email popup");
 
             if (HUDAudioPlayer.i != null)
                 HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.fadeIn);
@@ -107,6 +108,11 @@ public class EmailPromptHUDController : IHUD
             SetEmailFlag();
         }
         SetVisibility(false);
+
+        WebInterface.AnalyticsPayload.Property[] properties = new WebInterface.AnalyticsPayload.Property[]{
+             new WebInterface.AnalyticsPayload.Property("notAgain", dontAskAgain? "true" : "false")
+         };
+        WebInterface.ReportAnalyticsEvent("skip email popup", properties);
     }
 
     void SetEmailFlag()
