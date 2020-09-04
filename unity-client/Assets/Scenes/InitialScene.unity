@@ -1738,6 +1738,21 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 9163622792995413824, guid: 5328f06b59cfc724fa764ed3a266b2f4,
+        type: 3}
+      propertyPath: audioEvents.array.Array.data[0].cooldownSeconds
+      value: 0.03
+      objectReference: {fileID: 0}
+    - target: {fileID: 9163622792995413824, guid: 5328f06b59cfc724fa764ed3a266b2f4,
+        type: 3}
+      propertyPath: audioEvents.array.Array.data[0].randomPitch
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9163622792995413824, guid: 5328f06b59cfc724fa764ed3a266b2f4,
+        type: 3}
+      propertyPath: audioEvents.array.Array.data[17].volume
+      value: 0.3
+      objectReference: {fileID: 0}
     - target: {fileID: 9163622792995413825, guid: 5328f06b59cfc724fa764ed3a266b2f4,
         type: 3}
       propertyPath: m_LocalPosition.x
