@@ -248,3 +248,23 @@ MonoBehaviour:
         array:
         - {fileID: 8300000, guid: e8d0947f318cb954290d8a1111284e8c, type: 3}
       source: {fileID: 0}
+    - name: CameraFadeIn
+      loop: 0
+      volume: 1
+      randomPitch: 0.1
+      playOnAwake: 0
+      cooldownSeconds: 0.5
+      clips:
+        array:
+        - {fileID: 8300000, guid: 45b9b651c4e412f4bbe8c9df3059fb9c, type: 3}
+      source: {fileID: 0}
+    - name: CameraFadeOut
+      loop: 0
+      volume: 1
+      randomPitch: 0.1
+      playOnAwake: 0
+      cooldownSeconds: 0.5
+      clips:
+        array:
+        - {fileID: 8300000, guid: 9e03d0db7ad963247b7e9fa15394b092, type: 3}
+      source: {fileID: 0}

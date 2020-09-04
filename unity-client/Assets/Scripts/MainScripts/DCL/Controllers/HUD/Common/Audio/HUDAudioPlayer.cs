@@ -34,7 +34,8 @@ public class HUDAudioPlayer : MonoBehaviour
     public AudioContainer ac;
 
     AudioEvent eventHover, eventClick, eventRelease, eventEnable, eventDisable, eventListItemAppear, eventDialogAppear, eventDialogClose, eventConfirm, eventCancel,
-        eventValueChange, eventFadeIn, eventFadeOut, eventSendChatEntry, eventReceivePrivateChatEntry, eventReceiveGlobalChatEntry, eventNotification, eventTinyHover;
+        eventValueChange, eventFadeIn, eventFadeOut, eventSendChatEntry, eventReceivePrivateChatEntry, eventReceiveGlobalChatEntry, eventNotification, eventTinyHover,
+        eventCameraFadeIn, eventCameraFadeOut;
 
     bool listItemAppearHasPlayed = false;
     float listItemAppearPitch = 1f;
@@ -71,6 +72,8 @@ public class HUDAudioPlayer : MonoBehaviour
         eventReceiveGlobalChatEntry = ac.GetEvent("ReceiveGlobalChatEntry");
         eventNotification = ac.GetEvent("Notification");
         eventTinyHover = ac.GetEvent("TinyHover");
+        eventCameraFadeIn = ac.GetEvent("CameraFadeIn");
+        eventCameraFadeOut = ac.GetEvent("CameraFadeOut");
 
         RefreshChatLastCheckedTimestamp();
     }
@@ -161,12 +164,10 @@ public class HUDAudioPlayer : MonoBehaviour
                 eventReceiveGlobalChatEntry.Play(true);
                 break;
             case Sound.cameraToFirstPerson:
-                eventFadeOut.SetPitch(0.85f);
-                eventFadeOut.Play(true);
+                eventCameraFadeIn.Play(true);
                 break;
             case Sound.cameraToThirdPerson:
-                eventFadeIn.SetPitch(0.85f);
-                eventFadeIn.Play(true);
+                eventCameraFadeOut.Play(true);
                 break;
             case Sound.tinyHover:
                 eventTinyHover.Play(true);
