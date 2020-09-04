@@ -395,6 +395,11 @@ public class TaskbarHUDController : IHUD
         };
     }
 
+    public void AddControlsMoreOption()
+    {
+        view.OnAddControlsMoreOption();
+    }
+
     public void DisableFriendsWindow()
     {
         view.friendsButton.gameObject.SetActive(false);

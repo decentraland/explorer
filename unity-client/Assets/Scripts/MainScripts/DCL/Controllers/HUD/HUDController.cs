@@ -301,6 +301,7 @@ public class HUDController : MonoBehaviour
                 break;
             case HUDElementID.CONTROLS_HUD:
                 CreateHudElement<ControlsHUDController>(configuration, hudElementId);
+                taskbarHud?.AddControlsMoreOption();
                 break;
             case HUDElementID.EMAIL_PROMPT:
                 if (emailPromptHud == null)

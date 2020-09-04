@@ -1093,7 +1093,6 @@ MonoBehaviour:
   exploreButton: {fileID: 5044388401507377088}
   helpAndSupportButton: {fileID: 1255887769930130344}
   separatorMark: {fileID: 5897765151316848220}
-  moreWindowContainerAnimator: {fileID: 267723649576159537}
   moreButton: {fileID: 2780953233977255692}
   moreMenu: {fileID: 5102413631459841666}
 --- !u!222 &7643556927286160474
@@ -1257,11 +1256,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moreMenuAnimator: {fileID: 267723649576159537}
   collapseBarButton: {fileID: 7510301272497182283}
-  collapseBarButtonText: {fileID: 7693650452536660701}
   collapseIcon: {fileID: 2579436317829935173}
   collapseText: {fileID: 6778910183623629656}
   expandIcon: {fileID: 7414167371079566475}
   expandText: {fileID: 9157519028837207094}
+  hideUIButton: {fileID: 5147666751783043214}
+  controlsButton: {fileID: 702143947393827336}
+  controlsToggleAction: {fileID: 11400000, guid: 1d31dadea710e42ce80206a83c695e80,
+    type: 2}
 --- !u!1 &2579436317829935173
 GameObject:
   m_ObjectHideFlags: 0
@@ -2747,7 +2749,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 131, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1163524797233769629

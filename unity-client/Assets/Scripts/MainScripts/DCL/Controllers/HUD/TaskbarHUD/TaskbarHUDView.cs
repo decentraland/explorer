@@ -6,7 +6,7 @@ public class TaskbarHUDView : MonoBehaviour
 {
     const string VIEW_PATH = "Taskbar";
 
-    [Header("Taskbar Config")]
+    [Header("Taskbar Animation")]
     [SerializeField] internal ShowHideAnimator taskbarAnimator;
 
     [Header("Left Side Config")]
@@ -25,7 +25,6 @@ public class TaskbarHUDView : MonoBehaviour
     [SerializeField] internal GameObject separatorMark;
 
     [Header("More Button Config")]
-    [SerializeField] internal ShowHideAnimator moreWindowContainerAnimator;
     [SerializeField] internal TaskbarButton moreButton;
     [SerializeField] internal TaskbarMoreMenu moreMenu;
 
@@ -223,6 +222,11 @@ public class TaskbarHUDView : MonoBehaviour
     {
         helpAndSupportButton.transform.parent.gameObject.SetActive(true);
         separatorMark.SetActive(true);
+    }
+
+    internal void OnAddControlsMoreOption()
+    {
+        moreMenu.ActivateControlsButton();
     }
 
     internal void ShowBar(bool visible, bool instant = false)
