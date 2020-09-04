@@ -5,6 +5,8 @@ using System.Collections;
 public class ManaHUDController : IHUD
 {
     const float FETCH_INTERVAL = 60;
+    const string URL_MANA_INFO = "https://docs.decentraland.org/examples/get-a-wallet";
+    const string URL_MANA_PURCHASE = "https://market.decentraland.org/settings";
 
     internal ManaHUDview view;
 
@@ -63,12 +65,12 @@ public class ManaHUDController : IHUD
 
     void OnManaInfoPressed()
     {
-        WebInterface.OpenURL("https://docs.decentraland.org/examples/get-a-wallet");
+        WebInterface.OpenURL(URL_MANA_INFO);
     }
 
     void OnManaPurchasePressed()
     {
-        WebInterface.OpenURL("https://market.decentraland.org/settings");
+        WebInterface.OpenURL(URL_MANA_PURCHASE);
     }
 
     IEnumerator IntervalRoutine()
