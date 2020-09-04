@@ -28,6 +28,11 @@ public class TaskbarHUDView : MonoBehaviour
     [SerializeField] internal TaskbarButton moreButton;
     [SerializeField] internal TaskbarMoreMenu moreMenu;
 
+    [Header("Old TaskbarCompatibility (temporal)")]
+    [SerializeField] internal Image taskbarPanelImage;
+    [SerializeField] internal CanvasGroup taskbarPanelCanvasGroup;
+    [SerializeField] internal GameObject rightButtonsContainer;
+
     internal TaskbarHUDController controller;
     internal bool isBarVisible = true;
 
@@ -61,15 +66,15 @@ public class TaskbarHUDView : MonoBehaviour
     }
 
     internal static TaskbarHUDView Create(TaskbarHUDController controller, IChatController chatController,
-        IFriendsController friendsController)
+        IFriendsController friendsController, bool newTaskbarIsEnabled)
     {
         var view = Instantiate(Resources.Load<GameObject>(VIEW_PATH)).GetComponent<TaskbarHUDView>();
-        view.Initialize(controller, chatController, friendsController);
+        view.Initialize(controller, chatController, friendsController, newTaskbarIsEnabled);
         return view;
     }
 
     public void Initialize(TaskbarHUDController controller, IChatController chatController,
-        IFriendsController friendsController)
+        IFriendsController friendsController, bool newTaskbarIsEnabled)
     {
         this.controller = controller;
 
@@ -118,6 +123,9 @@ public class TaskbarHUDView : MonoBehaviour
 
         moreButton.OnToggleOn += OnWindowToggleOn;
         moreButton.OnToggleOff += OnWindowToggleOff;
+
+        if (!newTaskbarIsEnabled)
+            ActivateOldTaskbar();
     }
 
     private void OnWindowToggleOff(TaskbarButton obj)
@@ -306,5 +314,14 @@ public class TaskbarHUDView : MonoBehaviour
             moreButton.OnToggleOn -= OnWindowToggleOn;
             moreButton.OnToggleOff -= OnWindowToggleOff;
         }
+    }
+
+    // NOTE(Santi): This is temporal, until we remove the old taskbar
+    private void ActivateOldTaskbar()
+    {
+        taskbarPanelImage.color = new Color(taskbarPanelImage.color.r, taskbarPanelImage.color.g, taskbarPanelImage.color.b, 0f);
+        taskbarPanelCanvasGroup.blocksRaycasts = false;
+        moreButton.gameObject.SetActive(false);
+        rightButtonsContainer.SetActive(false);
     }
 }

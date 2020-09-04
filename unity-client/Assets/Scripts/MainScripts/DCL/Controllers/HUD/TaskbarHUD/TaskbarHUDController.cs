@@ -28,12 +28,12 @@ public class TaskbarHUDController : IHUD
     public event System.Action OnAnyTaskbarButtonClicked;
 
     public void Initialize(IMouseCatcher mouseCatcher, IChatController chatController,
-        IFriendsController friendsController)
+        IFriendsController friendsController, bool newTaskbarIsEnabled)
     {
         this.mouseCatcher = mouseCatcher;
         this.chatController = chatController;
 
-        view = TaskbarHUDView.Create(this, chatController, friendsController);
+        view = TaskbarHUDView.Create(this, chatController, friendsController, newTaskbarIsEnabled);
 
         if (mouseCatcher != null)
         {

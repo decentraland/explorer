@@ -13,6 +13,7 @@ public class HUDController : MonoBehaviour
     public static HUDController i { get; private set; }
 
     private InputAction_Trigger toggleUIVisibilityTrigger;
+    private bool newTaskbarIsEnabled = false; // NOTE(Santi): This is temporal, until we remove the old taskbar
 
     private void Awake()
     {
@@ -130,7 +131,7 @@ public class HUDController : MonoBehaviour
         CONTROLS_HUD = 18,
         EMAIL_PROMPT = 19,
         EXPLORE_HUD = 20,
-        HELP_AND_SUPPORT = 21,
+        HELP_AND_SUPPORT = 22,
         COUNT = 22
     }
 
@@ -272,7 +273,7 @@ public class HUDController : MonoBehaviour
                     if (taskbarHud != null)
                     {
                         taskbarHud.Initialize(DCL.InitialSceneReferences.i?.mouseCatcher, ChatController.i,
-                            FriendsController.i);
+                            FriendsController.i, newTaskbarIsEnabled);
                         taskbarHud.OnAnyTaskbarButtonClicked -= TaskbarHud_onAnyTaskbarButtonClicked;
                         taskbarHud.OnAnyTaskbarButtonClicked += TaskbarHud_onAnyTaskbarButtonClicked;
 
@@ -485,4 +486,10 @@ public class HUDController : MonoBehaviour
         Resources.Load<StringVariable>("CurrentPlayerInfoCardId").Set(newModel.userId);
     }
 #endif
+
+    // NOTE(Santi): This is temporal, until we remove the old taskbar
+    public void EnableNewTaskbar()
+    {
+        newTaskbarIsEnabled = true;
+    }
 }

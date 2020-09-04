@@ -1095,6 +1095,9 @@ MonoBehaviour:
   separatorMark: {fileID: 5897765151316848220}
   moreButton: {fileID: 2780953233977255692}
   moreMenu: {fileID: 5102413631459841666}
+  taskbarPanelImage: {fileID: 8366252944663895583}
+  taskbarPanelCanvasGroup: {fileID: 5475591619353631707}
+  rightButtonsContainer: {fileID: 8603069663900459623}
 --- !u!222 &7643556927286160474
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -2749,7 +2752,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 131, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1163524797233769629
