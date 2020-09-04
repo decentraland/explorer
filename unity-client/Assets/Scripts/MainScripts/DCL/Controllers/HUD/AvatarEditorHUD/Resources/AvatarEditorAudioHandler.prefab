@@ -50,6 +50,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   view: {fileID: 0}
+  randomizeButton: {fileID: 0}
 --- !u!114 &2556148421294819102
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -84,7 +85,7 @@ MonoBehaviour:
       source: {fileID: 0}
     - name: ReactionFemale
       loop: 0
-      volume: 1
+      volume: 0
       randomPitch: 0.1
       playOnAwake: 0
       cooldownSeconds: 4
@@ -100,7 +101,7 @@ MonoBehaviour:
       source: {fileID: 0}
     - name: ReactionMale
       loop: 0
-      volume: 1
+      volume: 0
       randomPitch: 0.1
       playOnAwake: 0
       cooldownSeconds: 4
@@ -188,7 +189,7 @@ MonoBehaviour:
       source: {fileID: 0}
     - name: Rarity
       loop: 0
-      volume: 1
+      volume: 0
       randomPitch: 0
       playOnAwake: 0
       cooldownSeconds: 1
