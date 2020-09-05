@@ -5,7 +5,7 @@ using TMPro;
 internal class SceneInfoView : MonoBehaviour
 {
     [SerializeField] float idleTime;
-    [SerializeField] Image thumbnail;
+    [SerializeField] RawImageFillParent thumbnail;
     [SerializeField] TextMeshProUGUI sceneName;
     [SerializeField] TextMeshProUGUI coordinates;
     [SerializeField] TextMeshProUGUI creatorName;
@@ -71,8 +71,8 @@ internal class SceneInfoView : MonoBehaviour
 
         SetMapInfoData(sceneView);
 
-        thumbnail.sprite = sceneView.GetThumbnail();
-        bool hasThumbnail = thumbnail.sprite != null;
+        thumbnail.texture = sceneView.GetThumbnail();
+        bool hasThumbnail = thumbnail.texture != null;
         loadingSpinner.SetActive(!hasThumbnail);
         if (!hasThumbnail)
         {
@@ -89,10 +89,10 @@ internal class SceneInfoView : MonoBehaviour
         description.text = mapInfo.description;
     }
 
-    void SetThumbnail(Sprite thumbnailSprite)
+    void SetThumbnail(Texture2D thumbnailTexture)
     {
-        thumbnail.sprite = thumbnailSprite;
-        loadingSpinner.SetActive(thumbnailSprite != null);
+        thumbnail.texture = thumbnailTexture;
+        loadingSpinner.SetActive(thumbnailTexture != null);
     }
 
     void Awake()
