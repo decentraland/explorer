@@ -30,7 +30,6 @@ public class NFTShapeLoaderController : MonoBehaviour
     public event System.Action OnLoadingAssetSuccess;
     public event System.Action OnLoadingAssetFail;
 
-    [Header("Materials")]
     [SerializeField]
     NFTShapeMaterial[] materials;
 
@@ -47,10 +46,9 @@ public class NFTShapeLoaderController : MonoBehaviour
     string darURLRegistry;
     string darURLAsset;
 
-    Material frameMaterial = null;
-    Material imageMaterial = null;
-    Material backgroundMaterial = null;
-
+    public Material frameMaterial { private set; get; } = null;
+    public Material imageMaterial { private set; get; } = null;
+    public Material backgroundMaterial { private set; get; } = null;
 
     int BASEMAP_SHADER_PROPERTY = Shader.PropertyToID("_BaseMap");
     int COLOR_SHADER_PROPERTY = Shader.PropertyToID("_BaseColor");
