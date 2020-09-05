@@ -14,7 +14,10 @@ namespace DCL
         [SerializeField] internal TextMeshProUGUI sceneLocationText;
         [SerializeField] internal TextMeshProUGUI sceneDescriptionText;
         [SerializeField] internal RectTransform toastContainer;
-        [SerializeField] internal Image scenePreviewImage;
+        [SerializeField] internal GameObject scenePreviewContainer;
+        [SerializeField] internal RawImageFillParent scenePreviewImage;
+        [SerializeField] internal GameObject scenePreviewLoadingSpinner;
+        [SerializeField] internal Sprite scenePreviewFailImage;
 
         [SerializeField] internal Button goToButton;
         [SerializeField] internal Button closeButton;
@@ -63,8 +66,9 @@ namespace DCL
 
             sceneOwnerText.transform.parent.gameObject.SetActive(sceneInfoExists && !string.IsNullOrEmpty(sceneInfo.owner));
             sceneDescriptionText.transform.parent.gameObject.SetActive(sceneInfoExists && !string.IsNullOrEmpty(sceneInfo.description));
-            sceneTitleText.transform.parent.gameObject.SetActive(sceneInfoExists && !string.IsNullOrEmpty(sceneInfo.name));
-            scenePreviewImage.gameObject.SetActive(false);
+            sceneTitleText.transform.parent.gameObject.SetActive(sceneInfoExists && !string.IsNullOrEmpty(sceneInfo.name)); scenePreviewImage.gameObject.SetActive(sceneInfoExists && !string.IsNullOrEmpty(sceneInfo.previewImageUrl));
+            scenePreviewContainer.SetActive(sceneInfoExists && !string.IsNullOrEmpty(sceneInfo.previewImageUrl));
+            scenePreviewLoadingSpinner.SetActive(false);
 
             if (sceneInfoExists)
             {
@@ -72,14 +76,7 @@ namespace DCL
                 sceneOwnerText.text = $"Created by: {sceneInfo.owner}";
                 sceneDescriptionText.text = sceneInfo.description;
 
-                if (currentImageUrl == sceneInfo.previewImageUrl)
-                {
-                    if (!string.IsNullOrEmpty(sceneInfo.previewImageUrl))
-                    {
-                        scenePreviewImage.gameObject.SetActive(true);
-                    }
-                    return;
-                }
+                if (currentImageUrl == sceneInfo.previewImageUrl) return;
 
                 if (currentImage != null)
                     Destroy(currentImage);
@@ -152,36 +149,30 @@ namespace DCL
         }
 
         string currentImageUrl;
-        Texture currentImage;
+        Texture2D currentImage;
         Coroutine downloadCoroutine;
 
         private IEnumerator Download(string url)
         {
+            scenePreviewLoadingSpinner.SetActive(true);
+            scenePreviewImage.texture = null;
+
             UnityWebRequest www = UnityWebRequestTexture.GetTexture(url);
 
             yield return www.SendWebRequest();
 
-            Sprite sprite;
-
             if (!www.isNetworkError && !www.isHttpError)
             {
-                var texture = ((DownloadHandlerTexture)www.downloadHandler).texture;
-                texture.Compress(false);
-                sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), Vector2.zero);
+                currentImage = ((DownloadHandlerTexture)www.downloadHandler).texture;
+                currentImage.Compress(false);
+                scenePreviewImage.texture = currentImage;
             }
             else
             {
                 Debug.Log($"Error downloading: {url} {www.error}");
-                // No point on making a fancy error because this will be replaced by AssetManager. By now let's use null as fallback value.
-                sprite = null;
+                scenePreviewImage.texture = scenePreviewFailImage.texture;
             }
-
-            scenePreviewImage.sprite = sprite;
-            if (sprite != null)
-            {
-                currentImage = sprite.texture;
-                scenePreviewImage.gameObject.SetActive(true);
-            }
+            scenePreviewLoadingSpinner.SetActive(false);
         }
     }
 }

@@ -33,16 +33,11 @@ public class RawImageFillParent : RawImage
     {
         RectTransform parent = transform.parent as RectTransform;
 
-        float widthDiff = parent.rect.width - base.texture.width;
-        float heightDiff = parent.rect.height - base.texture.height;
-
         float h, w;
-        if (heightDiff > widthDiff)
-        {
-            h = parent.rect.height;
-            w = h * (base.texture.width / (float)base.texture.height);
-        }
-        else
+        h = parent.rect.height;
+        w = h * (base.texture.width / (float)base.texture.height);
+
+        if ((parent.rect.width - w) > 0)
         {
             w = parent.rect.width;
             h = w * (base.texture.height / (float)base.texture.width);
