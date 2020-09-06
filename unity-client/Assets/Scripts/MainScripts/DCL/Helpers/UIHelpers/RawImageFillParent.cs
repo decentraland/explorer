@@ -31,6 +31,11 @@ public class RawImageFillParent : RawImage
 
     void ResizeFillParent()
     {
+        if (transform.parent == null)
+        {
+            return;
+        }
+
         RectTransform parent = transform.parent as RectTransform;
 
         float h, w;

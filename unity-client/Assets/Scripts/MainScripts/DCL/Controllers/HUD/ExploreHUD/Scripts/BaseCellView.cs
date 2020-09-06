@@ -41,7 +41,7 @@ internal class BaseCellView : MonoBehaviour
                 if (success)
                 {
                     thumbnailTexture = ((DownloadHandlerTexture)thumbnailRequest.downloadHandler).texture;
-                    thumbnailTexture.Compress(false);
+                    thumbnailTexture.Compress(true);
                     SetThumbnail(thumbnailTexture);
                 }
 
