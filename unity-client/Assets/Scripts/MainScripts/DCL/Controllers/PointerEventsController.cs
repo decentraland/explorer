@@ -6,10 +6,8 @@ using UnityEngine;
 
 namespace DCL
 {
-    public class PointerEventsController : MonoBehaviour
+    public class PointerEventsController
     {
-        public InteractionHoverCanvasController interactionHoverCanvasController;
-
         private static bool renderingIsDisabled => !CommonScriptableObjects.rendererState.Get();
         public System.Action OnPointerHoverStarts;
         public System.Action OnPointerHoverEnds;
@@ -38,7 +36,7 @@ namespace DCL
 
         private IRaycastPointerClickHandler clickHandler;
 
-        void Update()
+        public void Update(InteractionHoverCanvasController interactionHoverCanvasController)
         {
             if (!CommonScriptableObjects.rendererState.Get() || charCamera == null) return;
 
@@ -46,7 +44,7 @@ namespace DCL
             if (!Physics.Raycast(GetRayFromCamera(), out hitInfo, Mathf.Infinity, PhysicsLayers.physicsCastLayerMaskWithoutCharacter))
             {
                 clickHandler = null;
-                UnhoverLastHoveredObject();
+                UnhoverLastHoveredObject(interactionHoverCanvasController);
                 return;
             }
 
@@ -54,7 +52,7 @@ namespace DCL
             if (raycastHandlerTarget != null)
             {
                 ResolveGenericRaycastHandlers(raycastHandlerTarget);
-                UnhoverLastHoveredObject();
+                UnhoverLastHoveredObject(interactionHoverCanvasController);
                 return;
             }
 
@@ -67,7 +65,7 @@ namespace DCL
 
             if (!EventObjectCanBeHovered(newHoveredEvent, info))
             {
-                UnhoverLastHoveredObject();
+                UnhoverLastHoveredObject(interactionHoverCanvasController);
                 return;
             }
 
@@ -75,7 +73,7 @@ namespace DCL
 
             if (newHoveredObject != lastHoveredObject)
             {
-                UnhoverLastHoveredObject();
+                UnhoverLastHoveredObject(interactionHoverCanvasController);
 
                 lastHoveredObject = newHoveredObject;
                 lastHoveredEventList = newHoveredObject.GetComponents<OnPointerEvent>();
@@ -141,7 +139,7 @@ namespace DCL
             }
         }
 
-        void UnhoverLastHoveredObject()
+        void UnhoverLastHoveredObject(InteractionHoverCanvasController interactionHoverCanvasController)
         {
             if (lastHoveredObject == null)
             {

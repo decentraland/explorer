@@ -1080,7 +1080,7 @@ namespace Tests
 
             yield return null;
 
-            var hoverCanvasController = Environment.i.pointerEventsController.interactionHoverCanvasController;
+            var hoverCanvasController = SceneController.i.interactionHoverCanvasController;
             Assert.IsNotNull(hoverCanvasController);
             Assert.IsTrue(hoverCanvasController.canvas.enabled);
 
@@ -1133,7 +1133,7 @@ namespace Tests
 
             yield return null;
 
-            var hoverCanvas = Environment.i.pointerEventsController.GetComponentInChildren<InteractionHoverCanvasController>().canvas;
+            var hoverCanvas = SceneController.i.interactionHoverCanvasController.canvas;
             Assert.IsNotNull(hoverCanvas);
 
             Assert.IsTrue(hoverCanvas.enabled);
