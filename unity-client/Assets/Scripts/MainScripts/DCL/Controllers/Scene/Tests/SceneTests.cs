@@ -416,12 +416,12 @@ namespace Tests
             Assert.IsFalse(SceneController.i.boundariesChecker.WasAddedAsPersistent(entity));
 
             // Set player reference as parent
-            TestHelpers.SetEntityParent(scene, entityId, "PlayerEntityReference");
+            TestHelpers.SetEntityParent(scene, entityId, "FirstPersonCameraEntityReference");
             Assert.AreEqual(entity.parent, DCLCharacterController.i.firstPersonCameraReference);
             Assert.IsTrue(SceneController.i.boundariesChecker.WasAddedAsPersistent(entity));
 
             // Set avatar position reference as parent
-            TestHelpers.SetEntityParent(scene, entityId, "AvatarPositionEntityReference");
+            TestHelpers.SetEntityParent(scene, entityId, "AvatarEntityReference");
             Assert.AreEqual(entity.parent, DCLCharacterController.i.avatarReference);
             Assert.IsTrue(SceneController.i.boundariesChecker.WasAddedAsPersistent(entity));
 
