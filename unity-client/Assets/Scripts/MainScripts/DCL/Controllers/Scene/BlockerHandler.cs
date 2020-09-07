@@ -113,7 +113,7 @@ namespace DCL.Controllers
                         Vector2Int offset = aroundOffsets[i];
                         Vector2Int checkedPosition = new Vector2Int(pos.x + offset.x, pos.y + offset.y);
 
-                        if (!blockers.ContainsKey(checkedPosition) && !allLoadedParcelCoords.Contains(checkedPosition)) // Parcel is not in the loaded ones
+                        if (!allLoadedParcelCoords.Contains(checkedPosition) && !blockers.ContainsKey(checkedPosition))
                         {
                             InstantiateBlocker(checkedPosition, parent);
                         }
