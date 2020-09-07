@@ -70,6 +70,8 @@ public class HUDController : MonoBehaviour
 
     public HelpAndSupportHUDController helpAndSupportHud => GetHUDElement(HUDElementID.HELP_AND_SUPPORT) as HelpAndSupportHUDController;
 
+    public ManaHUDController manaHud => GetHUDElement(HUDElementID.MANA_HUD) as ManaHUDController;
+
     public Dictionary<HUDElementID, IHUD> hudElements { get; private set; } = new Dictionary<HUDElementID, IHUD>();
 
     private UserProfile ownUserProfile => UserProfile.GetOwnUserProfile();
@@ -131,8 +133,9 @@ public class HUDController : MonoBehaviour
         CONTROLS_HUD = 18,
         EMAIL_PROMPT = 19,
         EXPLORE_HUD = 20,
-        HELP_AND_SUPPORT = 21,
-        COUNT = 22
+        MANA_HUD = 21,
+        HELP_AND_SUPPORT = 22,
+        COUNT = 23
     }
 
     [System.Serializable]
@@ -319,6 +322,9 @@ public class HUDController : MonoBehaviour
                     taskbarHud?.AddExploreWindow(exploreHud);
                 }
                 break;
+            case HUDElementID.MANA_HUD:
+                CreateHudElement<ManaHUDController>(configuration, hudElementId);
+                break;
             case HUDElementID.HELP_AND_SUPPORT:
                 CreateHudElement<HelpAndSupportHUDController>(configuration, hudElementId);
                 taskbarHud?.AddHelpAndSupportWindow(helpAndSupportHud);
@@ -414,6 +420,11 @@ public class HUDController : MonoBehaviour
     public void RequestTeleport(string teleportDataJson)
     {
         teleportHud?.RequestTeleport(teleportDataJson);
+    }
+
+    public void UpdateBalanceOfMANA(string balance)
+    {
+        manaHud?.SetBalance(balance);
     }
 
     private void OnDestroy()

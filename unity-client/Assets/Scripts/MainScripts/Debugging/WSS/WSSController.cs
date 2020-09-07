@@ -424,6 +424,9 @@ namespace DCL
                             case "UpdateHotScenesList":
                                 HotScenesController.i.UpdateHotScenesList(msg.payload);
                                 break;
+                            case "UpdateBalanceOfMANA":
+                                HUDController.i.UpdateBalanceOfMANA(msg.payload);
+                                break;
                             case "EnableNewTaskbar":
                                 HUDController.i.EnableNewTaskbar(); // NOTE(Santi): This is temporal, until we remove the old taskbar
                                 break;
