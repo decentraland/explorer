@@ -39,10 +39,6 @@ public class PlaneShapeShould_VisualTests : VisualTestsBase
 
         yield return new WaitForAllMessagesProcessed();
 
-        Debug.Break();
-        yield return null;
-        yield return new WaitForSeconds(4);
         yield return VisualTestHelpers.TakeSnapshot();
-        yield return null;
     }
 }
