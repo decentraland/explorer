@@ -337,6 +337,10 @@ export class UnityInterface {
       this.SetTutorialEnabled(fromDeepLink)
     }
   }
+  
+  public UpdateBalanceOfMANA(balance: string) {
+    this.gameInstance.SendMessage('HUDController', 'UpdateBalanceOfMANA', balance)
+  }
 
   // *********************************************************************************
   // ************** Builder messages **************

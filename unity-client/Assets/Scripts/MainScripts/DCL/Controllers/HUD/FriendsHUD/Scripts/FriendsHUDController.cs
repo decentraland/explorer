@@ -321,10 +321,16 @@ public class FriendsHUDController : IHUD
                 view.friendsButton.onClick.Invoke();
 
             OnFriendsOpened?.Invoke();
+
+            if (HUDAudioPlayer.i != null)
+                HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogAppear);
         }
         else
         {
             OnFriendsClosed?.Invoke();
+            
+            if (HUDAudioPlayer.i != null)
+                HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogClose);
         }
     }
 }

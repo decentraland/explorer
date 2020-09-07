@@ -34,6 +34,9 @@ public class ControlsHUDController : IHUD
 
             view.showHideAnimator.Hide();
             OnControlsClosed?.Invoke();
+
+            if (HUDAudioPlayer.i != null)
+                HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.fadeOut);
         }
         else if (!IsVisible() && visible)
         {
@@ -42,6 +45,9 @@ public class ControlsHUDController : IHUD
             view.gameObject.SetActive(true);
             view.showHideAnimator.Show();
             OnControlsOpened?.Invoke();
+            
+            if (HUDAudioPlayer.i != null)
+                HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.fadeIn);
         }
     }
 
