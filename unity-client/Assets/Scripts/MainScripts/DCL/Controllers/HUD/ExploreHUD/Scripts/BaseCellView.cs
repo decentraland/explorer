@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using DCL;
 using DCL.Helpers;
 using UnityEngine;
@@ -11,7 +11,7 @@ internal class BaseCellView : MonoBehaviour
     [SerializeField] GameObject loadingSpinner;
     [SerializeField] Sprite errorThumbnail;
 
-    public event Action<Texture2D> OnThumbnailFetched;
+    public event Action<Texture2D> OnThumbnailSet;
 
     UnityWebRequest thumbnailRequest = null;
     Texture2D thumbnailTexture;
@@ -20,7 +20,7 @@ internal class BaseCellView : MonoBehaviour
     {
         if (thumbnailTexture != null)
         {
-            OnThumbnailFetched?.Invoke(thumbnailTexture);
+            OnThumbnailSet?.Invoke(thumbnailTexture);
         }
         else if (string.IsNullOrEmpty(url))
         {
@@ -95,7 +95,7 @@ internal class BaseCellView : MonoBehaviour
         thumbnailTexture = textureToSet;
         thumbnailImage.texture = textureToSet;
         loadingSpinner.SetActive(false);
-        OnThumbnailFetched?.Invoke(textureToSet);
+        OnThumbnailSet?.Invoke(textureToSet);
 
         if (HUDAudioPlayer.i != null)
             HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.listItemAppear);

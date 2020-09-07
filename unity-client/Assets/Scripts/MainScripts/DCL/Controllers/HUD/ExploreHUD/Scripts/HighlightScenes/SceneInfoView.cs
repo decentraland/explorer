@@ -64,7 +64,7 @@ internal class SceneInfoView : MonoBehaviour
     {
         if (baseSceneView)
         {
-            baseSceneView.OnThumbnailFetched -= SetThumbnail;
+            baseSceneView.OnThumbnailSet -= SetThumbnail;
         }
 
         baseSceneView = sceneView;
@@ -76,7 +76,7 @@ internal class SceneInfoView : MonoBehaviour
         loadingSpinner.SetActive(!hasThumbnail);
         if (!hasThumbnail)
         {
-            sceneView.OnThumbnailFetched += SetThumbnail;
+            sceneView.OnThumbnailSet += SetThumbnail;
         }
     }
 

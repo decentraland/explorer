@@ -6,6 +6,10 @@ using DCL.Helpers;
 
 internal class BaseSceneCellView : BaseCellView, IMapDataView, IFriendTrackerHandler
 {
+    const int THMBL_MARKETPLACE_WIDTH = 196;
+    const int THMBL_MARKETPLACE_HEIGHT = 143;
+    const int THMBL_MARKETPLACE_SIZEFACTOR = 50;
+
     public delegate void JumpInDelegate(Vector2Int coords, string serverName, string layerName);
 
     static public event JumpInDelegate OnJumpIn;
@@ -82,7 +86,7 @@ internal class BaseSceneCellView : BaseCellView, IMapDataView, IFriendTrackerHan
         if (GetThumbnail() == null)
         {
             FetchThumbnail(mapInfo.previewImageUrl,
-                onFetchFail: () => FetchThumbnail(MapUtils.GetMarketPlaceThumbnailUrl(mapInfo, 196, 143, 50),
+                onFetchFail: () => FetchThumbnail(MapUtils.GetMarketPlaceThumbnailUrl(mapInfo, THMBL_MARKETPLACE_WIDTH, THMBL_MARKETPLACE_HEIGHT, THMBL_MARKETPLACE_SIZEFACTOR),
                 onFetchFail: () => SetDefaultThumbnail()));
         }
     }

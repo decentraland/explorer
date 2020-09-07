@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>RawImage that resize itself to fill it parent while preserving it texture's aspect ratio</summary>
 public class RawImageFillParent : RawImage
 {
     new public Texture texture
