@@ -4,6 +4,7 @@ using DCL.Models;
 using NUnit.Framework;
 using System.Collections;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using UnityEngine;
 using UnityEngine.TestTools;
 using UnityGLTF;
@@ -63,13 +64,27 @@ public class GLTFImporterTests : TestsBase
     }
 
     [UnityTest]
+    public IEnumerator LoadSoyouScene()
+    {
+        InstantiatedGLTFObject trevorModel = null;
+        yield return LoadModel("/GLB/SoYou.glb", (m) => trevorModel = m);
+        Debug.Break();
+        yield return null;
+    }
+
+
+    [UnityTest]
     public IEnumerator CurvesAreOptimizedCorrectly()
     {
-        var curveContainer = Resources.Load<AnimationCurveContainer>("AnimationCurveContainer");
+        var curvesSource = Resources.Load<AnimationCurveContainer>("CurveOptimizedCorrectlySource");
+        //NOTE(Brian): We are going to output the optimization result in this SO, so it can be debugged more easily
+        var curvesResult = Resources.Load<AnimationCurveContainer>("CurveOptimizedCorrectlyResult");
 
-        for (int i = 0; i < curveContainer.curves.Length; i++)
+        curvesResult.curves = new AnimationCurve[curvesSource.curves.Length];
+
+        for (int i = 0; i < curvesSource.curves.Length; i++)
         {
-            var curve = curveContainer.curves[i];
+            var curve = curvesSource.curves[i];
 
             List<Keyframe> keys = new List<Keyframe>();
 
@@ -79,17 +94,16 @@ public class GLTFImporterTests : TestsBase
             }
 
             var result = GLTFSceneImporter.OptimizeKeyFrames(keys.ToArray());
-
             var modifiedCurve = new AnimationCurve(result);
 
-            curveContainer.curves[i] = modifiedCurve;
+            curvesResult.curves[i] = modifiedCurve;
 
             for (float time = 0; time < 1.0f; time += 0.032f)
             {
                 var v1 = curve.Evaluate(time);
                 var v2 = modifiedCurve.Evaluate(time);
 
-                UnityEngine.Assertions.Assert.AreApproximatelyEqual(v1, v2, 0.2f);
+                UnityEngine.Assertions.Assert.AreApproximatelyEqual(v1, v2, 0.01f);
             }
         }
 
