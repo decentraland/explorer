@@ -31,7 +31,8 @@ import {
   AvatarMessageType,
   ConnectionEstablishmentError,
   IdTakenError,
-  UnknownCommsModeError
+  UnknownCommsModeError,
+  VoiceFragment
 } from './interface/types'
 import {
   CommunicationArea,
@@ -80,6 +81,8 @@ import {
 } from 'shared/loading/types'
 import { getIdentity } from 'shared/session'
 import { createLogger } from '../logger'
+import { VoiceCommunicator } from 'voice-chat-codec/VoiceCommunicator'
+import { voicePlayingUpdate } from './actions'
 
 export type CommsVersion = 'v1' | 'v2'
 export type CommsMode = CommsV1Mode | CommsV2Mode
@@ -184,6 +187,7 @@ export class Context {
 
 let context: Context | null = null
 const scenesSubscribedToCommsEvents = new Set<CommunicationsController>()
+let voiceCommunicator: VoiceCommunicator | null = null
 
 /**
  * Returns a list of CIDs that must receive scene messages from comms
@@ -196,6 +200,37 @@ function getParcelSceneSubscriptions(): string[] {
   })
 
   return ids
+}
+
+export function updateVoiceRecordingStatus(recording: boolean) {
+  if (recording && voiceCommunicator) {
+    if (!voiceCommunicator.hasInput()) {
+      navigator.mediaDevices
+        .getUserMedia({
+          audio: {
+            channelCount: 1,
+            sampleRate: 48000,
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true,
+            advanced: [{ echoCancellation: true }, { autoGainControl: true }, { noiseSuppression: true }] as any
+          },
+          video: false
+        })
+        .then(
+          (a) => {
+            voiceCommunicator!.setInputStream(a)
+          },
+          (e) => {
+            defaultLogger.log('Error requesting audio: ', e)
+          }
+        )
+    } else {
+      voiceCommunicator.start()
+    }
+  } else if (!recording) {
+    voiceCommunicator!.pause()
+  }
 }
 
 export function sendPublicChatMessage(messageId: string, text: string) {
@@ -283,7 +318,7 @@ function ensurePeerTrackingInfo(context: Context, alias: string): PeerTrackingIn
   return peerTrackingInfo
 }
 
-export function processChatMessage(context: Context, fromAlias: string, message: Package<ChatMessage>) {
+function processChatMessage(context: Context, fromAlias: string, message: Package<ChatMessage>) {
   const msgId = message.data.id
   const profile = getProfile(store.getState(), getIdentity().address)
 
@@ -316,6 +351,18 @@ export function processChatMessage(context: Context, fromAlias: string, message:
           store.dispatch(messageReceived(messageEntry))
         }
       }
+    }
+  }
+}
+
+function processVoiceFragment(context: Context, fromAlias: string, message: Package<VoiceFragment>) {
+  const profile = getProfile(store.getState(), getIdentity().address)
+
+  const user = getUser(fromAlias)
+
+  if (user) {
+    if (profile && user.userId && !isBlocked(profile, user.userId)) {
+      voiceCommunicator?.playEncodedAudio(user.userId, message.data.encoded)
     }
   }
 }
@@ -809,6 +856,9 @@ async function doStartCommunications(context: Context) {
     connection.sceneMessageHandler = (alias: string, data: Package<BusMessage>) => {
       processParcelSceneCommsMessage(context, alias, data)
     }
+    connection.voiceHandler = (alias: string, data: Package<VoiceFragment>) => {
+      processVoiceFragment(context, alias, data)
+    }
 
     if (commConfigurations.debug) {
       connection.stats = context.stats
@@ -857,13 +907,30 @@ async function doStartCommunications(context: Context) {
       }
     })
 
-    window.addEventListener('beforeunload', () => sendToMordor())
+    window.addEventListener('beforeunload', () => {
+      context.positionUpdatesPaused = true
+      sendToMordor()
+    })
 
     context.infoCollecterInterval = setInterval(() => {
       if (context) {
         collectInfo(context)
       }
     }, 100)
+
+    if (!voiceCommunicator) {
+      voiceCommunicator = new VoiceCommunicator(context.userInfo.userId!, {
+        send(data: Uint8Array) {
+          if (context.currentPosition) {
+            context.worldInstanceConnection?.sendVoiceMessage(context.currentPosition, data)
+          }
+        }
+      })
+
+      voiceCommunicator.addStreamPlayingListener((userId, playing) => {
+        store.dispatch(voicePlayingUpdate(userId, playing))
+      })
+    }
   } catch (e) {
     if (e.message && e.message.includes('is taken')) {
       throw new IdTakenError(e.message)

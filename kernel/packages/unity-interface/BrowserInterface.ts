@@ -37,6 +37,7 @@ import { IFuture } from 'fp-future'
 import { reportHotScenes } from 'shared/social/hotScenes'
 
 import { GIFProcessor } from 'gif-processor/processor'
+import { setVoiceChatRecording } from 'shared/comms/actions'
 declare const DCL: any
 
 declare const globalThis: StoreContainer
@@ -266,6 +267,10 @@ export class BrowserInterface {
 
   public SendChatMessage(data: { message: ChatMessage }) {
     globalThis.globalStore.dispatch(sendMessage(data.message))
+  }
+
+  public SetVoiceChatRecording(recording: boolean) {
+    globalThis.globalStore.dispatch(setVoiceChatRecording(recording))
   }
 
   public async UpdateFriendshipStatus(message: FriendshipUpdateStatusMessage) {

@@ -109,7 +109,7 @@ export type PoseInformation = {
   v: Pose
 }
 
-export type PackageType = 'profile' | 'chat' | 'position'
+export type PackageType = 'profile' | 'chat' | 'position' | 'voice'
 
 export type Package<T> = {
   type: PackageType
@@ -125,6 +125,10 @@ export type ProfileVersion = {
 export type ChatMessage = {
   id: string
   text: string
+}
+
+export type VoiceFragment = {
+  encoded: Uint8Array
 }
 
 export type BusMessage = ChatMessage

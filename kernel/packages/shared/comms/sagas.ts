@@ -13,7 +13,8 @@ import { Realm } from 'shared/dao/types'
 import { realmToString } from 'shared/dao/utils/realmToString'
 import { createLogger } from 'shared/logger'
 
-import { connect } from '.'
+import { connect, updateVoiceRecordingStatus } from '.'
+import { SET_VOICE_CHAT_RECORDING, SetVoiceChatRecording } from './actions'
 
 const DEBUG = false
 const logger = createLogger('comms: ')
@@ -21,6 +22,7 @@ const logger = createLogger('comms: ')
 export function* commsSaga() {
   yield takeEvery(USER_AUTHENTIFIED, establishCommunications)
   yield takeLatest(CATALYST_REALMS_SCAN_SUCCESS, changeRealm)
+  yield takeEvery(SET_VOICE_CHAT_RECORDING, updateVoiceChatRecordingStatus)
 }
 
 function* establishCommunications() {
@@ -37,6 +39,10 @@ function* establishCommunications() {
   if (context !== undefined) {
     yield put(setWorldContext(context))
   }
+}
+
+function* updateVoiceChatRecordingStatus(action: SetVoiceChatRecording) {
+  updateVoiceRecordingStatus(action.payload.recording)
 }
 
 function* changeRealm() {

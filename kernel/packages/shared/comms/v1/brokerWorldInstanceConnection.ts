@@ -14,7 +14,14 @@ import {
   TopicIdentityFWMessage
 } from './proto/broker'
 import { Position, positionHash } from '../../comms/interface/utils'
-import { UserInformation, Package, ChatMessage, ProfileVersion, BusMessage } from '../../comms/interface/types'
+import {
+  UserInformation,
+  Package,
+  ChatMessage,
+  ProfileVersion,
+  BusMessage,
+  VoiceFragment
+} from '../../comms/interface/types'
 import { IBrokerConnection, BrokerMessage } from './IBrokerConnection'
 import { Stats } from '../../comms/debug'
 import { createLogger } from 'shared/logger'
@@ -37,6 +44,7 @@ export class BrokerWorldInstanceConnection implements WorldInstanceConnection {
   profileHandler: (fromAlias: string, identity: string, profileData: Package<ProfileVersion>) => void = NOOP
   chatHandler: (fromAlias: string, chatData: Package<ChatMessage>) => void = NOOP
   sceneMessageHandler: (fromAlias: string, chatData: Package<BusMessage>) => void = NOOP
+  voiceHandler: (alias: string, data: Package<VoiceFragment>) => void = NOOP
 
   ping: number = -1
 
@@ -455,5 +463,10 @@ export class BrokerWorldInstanceConnection implements WorldInstanceConnection {
       this.connection.sendUnreliable(bytes)
     }
     return new SendResult(bytes.length)
+  }
+
+  sendVoiceMessage(currentPosition: Position, data: Uint8Array): Promise<void> {
+    // Not implemented
+    return Promise.resolve()
   }
 }
