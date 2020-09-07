@@ -7,7 +7,7 @@ namespace DCL.Controllers
 {
     public class BlockerHandler
     {
-        private List<PoolableObject> blockers = new List<PoolableObject>();
+        private Dictionary<Vector2Int, PoolableObject> blockers = new Dictionary<Vector2Int, PoolableObject>();
 
         private static GameObject blockerPrefab;
         const string PARCEL_BLOCKER_POOL_NAME = "ParcelBlocker";
@@ -43,8 +43,7 @@ namespace DCL.Controllers
             }
         }
 
-
-        public void SetupBlockers(HashSet<Vector2Int> parcels, float height, Transform parent)
+        public void SetupSceneBlockers(HashSet<Vector2Int> parcels, float height, Transform parent)
         {
             CleanBlockers();
 
@@ -54,8 +53,6 @@ namespace DCL.Controllers
 
             auxPosVec.y = (height - 1) / 2;
 
-            float centerOffset = ParcelSettings.PARCEL_SIZE / 2;
-
             using (var it = parcels.GetEnumerator())
             {
                 while (it.MoveNext())
@@ -64,9 +61,9 @@ namespace DCL.Controllers
 
                     bool isSurrounded = true;
 
-                    for (int i1 = 0; i1 < aroundOffsets.Length; i1++)
+                    for (int i = 0; i < aroundOffsets.Length; i++)
                     {
-                        Vector2Int o = aroundOffsets[i1];
+                        Vector2Int o = aroundOffsets[i];
 
                         if (!parcels.Contains(new Vector2Int(pos.x + o.x, pos.y + o.y)))
                         {
@@ -78,35 +75,77 @@ namespace DCL.Controllers
                     if (isSurrounded)
                         continue;
 
-                    PoolableObject blockerPoolable = PoolManager.i.Get(PARCEL_BLOCKER_POOL_NAME);
-                    Transform blockerTransform = blockerPoolable.gameObject.transform;
-
-                    blockerTransform.SetParent(parent, false);
-
-                    if (DCLCharacterController.i != null)
-                        blockerTransform.position = DCLCharacterController.i.characterPosition.WorldToUnityPosition(Utils.GridToWorldPosition(pos.x, pos.y));
-                    else
-                        blockerTransform.position = Utils.GridToWorldPosition(pos.x, pos.y);
-
-                    auxPosVec.x = blockerTransform.position.x + centerOffset;
-                    auxPosVec.z = blockerTransform.position.z + centerOffset;
-
-                    blockerTransform.position = auxPosVec;
-                    blockerTransform.localScale = auxScaleVec;
-
-                    blockers.Add(blockerPoolable);
+                    InstantiateBlocker(pos, parent);
                 }
             }
         }
 
-        public void CleanBlockers()
+        public void SetupGlobalBlockers(Dictionary<string, ParcelScene> loadedScenes, float height, Transform parent)
         {
-            for (int i = 0; i < blockers.Count; i++)
+            CleanBlockers();
+
+            HashSet<Vector2Int> allLoadedParcels = new HashSet<Vector2Int>();
+
+            // get list of loaded parcels
+            foreach (var element in loadedScenes)
             {
-                blockers[i].Release();
+                allLoadedParcels.UnionWith(element.Value.parcels);
             }
 
-            blockers = new List<PoolableObject>();
+            //
+
+            auxScaleVec.x = ParcelSettings.PARCEL_SIZE;
+            auxScaleVec.y = height;
+            auxScaleVec.z = ParcelSettings.PARCEL_SIZE;
+
+            auxPosVec.y = (height - 1) / 2;
+
+            using (var it = allLoadedParcels.GetEnumerator())
+            {
+                while (it.MoveNext())
+                {
+                    Vector2Int pos = it.Current;
+
+                    for (int i = 0; i < aroundOffsets.Length; i++)
+                    {
+                        Vector2Int offset = aroundOffsets[i];
+                        Vector2Int checkedPosition = new Vector2Int(pos.x + offset.x, pos.y + offset.y);
+
+                        if (!blockers.ContainsKey(checkedPosition) && !allLoadedParcels.Contains(checkedPosition)) // Parcel is not in the loaded ones
+                        {
+                            InstantiateBlocker(checkedPosition, parent);
+                        }
+                    }
+                }
+            }
+        }
+
+        void InstantiateBlocker(Vector2Int pos, Transform parent)
+        {
+            float centerOffset = ParcelSettings.PARCEL_SIZE / 2;
+            PoolableObject blockerPoolable = PoolManager.i.Get(PARCEL_BLOCKER_POOL_NAME);
+            Transform blockerTransform = blockerPoolable.gameObject.transform;
+
+            blockerTransform.SetParent(parent, false);
+            blockerTransform.position = DCLCharacterController.i.characterPosition.WorldToUnityPosition(Utils.GridToWorldPosition(pos.x, pos.y));
+
+            auxPosVec.x = blockerTransform.position.x + centerOffset;
+            auxPosVec.z = blockerTransform.position.z + centerOffset;
+
+            blockerTransform.position = auxPosVec;
+            blockerTransform.localScale = auxScaleVec;
+
+            blockers.Add(pos, blockerPoolable);
+        }
+
+        public void CleanBlockers()
+        {
+            foreach (var blocker in blockers)
+            {
+                blocker.Value.Release();
+            }
+
+            blockers.Clear();
         }
     }
 }

@@ -18,7 +18,7 @@ namespace Tests
             var go = new GameObject();
 
             var blockerHandler = new BlockerHandler();
-            blockerHandler.SetupBlockers(new HashSet<Vector2Int>(Utils.GetBottomLeftZoneArray(Vector2Int.zero, new Vector2Int(10, 10))), 100, go.transform);
+            blockerHandler.SetupSceneBlockers(new HashSet<Vector2Int>(Utils.GetBottomLeftZoneArray(Vector2Int.zero, new Vector2Int(10, 10))), 100, go.transform);
 
             Assert.AreEqual(36, go.transform.childCount, "Blockers count is unexpected. Remember that blockers only should spawn surrounding the scene, not inside. The spawning code might be broken.");
 
@@ -34,7 +34,7 @@ namespace Tests
             var go = new GameObject();
 
             var blockerHandler = new BlockerHandler();
-            blockerHandler.SetupBlockers(new HashSet<Vector2Int>(Utils.GetBottomLeftZoneArray(Vector2Int.zero, new Vector2Int(10, 10))), 100, go.transform);
+            blockerHandler.SetupSceneBlockers(new HashSet<Vector2Int>(Utils.GetBottomLeftZoneArray(Vector2Int.zero, new Vector2Int(10, 10))), 100, go.transform);
             yield return null;
             blockerHandler.CleanBlockers();
             yield return null;
