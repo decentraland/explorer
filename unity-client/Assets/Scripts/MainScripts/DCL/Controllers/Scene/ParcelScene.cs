@@ -469,21 +469,21 @@ namespace DCL.Controllers
 
             if (me != null)
             {
-                if (parentId == "PlayerEntityReference")
+                if (parentId == "FirstPersonCameraEntityReference")
                 {
-                    me.SetParent(DCLCharacterController.i.playerReference);
+                    me.SetParent(DCLCharacterController.i.firstPersonCameraReference);
                     SceneController.i.boundariesChecker.AddPersistent(me);
                     SceneController.i.physicsSyncController.MarkDirty();
                 }
-                else if (parentId == "AvatarPositionEntityReference")
+                else if (parentId == "AvatarEntityReference")
                 {
-                    me.SetParent(DCLCharacterController.i.avatarPositionReference);
+                    me.SetParent(DCLCharacterController.i.avatarReference);
                     SceneController.i.boundariesChecker.AddPersistent(me);
                     SceneController.i.physicsSyncController.MarkDirty();
                 }
                 else
                 {
-                    if (me.parent == DCLCharacterController.i.playerReference || me.parent == DCLCharacterController.i.avatarPositionReference)
+                    if (me.parent == DCLCharacterController.i.firstPersonCameraReference || me.parent == DCLCharacterController.i.avatarReference)
                     {
                         SceneController.i.boundariesChecker.RemoveEntityToBeChecked(me);
                     }
