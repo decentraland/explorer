@@ -103,6 +103,17 @@ export class BrowserInterface {
     // stub. there is no code about this in unity side yet
   }
 
+  public Track(data: { name: string, properties: ({ key: string, value: string }[] | null) }) {
+    const properties: Record<string, string> = {}
+    if (data.properties) {
+      for (const property of data.properties) {
+        properties[property.key] = property.value
+      }
+    }
+
+    queueTrackingEvent(data.name, properties)
+  }
+
   public TriggerExpression(data: { id: string; timestamp: number }) {
     avatarMessageObservable.notifyObservers({
       type: AvatarMessageType.USER_EXPRESSION,
@@ -357,6 +368,14 @@ export class BrowserInterface {
   }
 
   async RequestGIFProcessor(data: { imageSource: string; id: string; isWebGL1: boolean }) {
+    // tslint:disable-next-line
+    const isSupported = (typeof OffscreenCanvas !== "undefined") && (typeof OffscreenCanvasRenderingContext2D === "function")
+
+    if (!isSupported) {
+      unityInterface.RejectGIFProcessingRequest()
+      return
+    }
+
     if (!DCL.gifProcessor) {
       DCL.gifProcessor = new GIFProcessor(unityInterface.gameInstance, unityInterface, data.isWebGL1)
     }
