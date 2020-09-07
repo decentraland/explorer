@@ -24,6 +24,14 @@ namespace DCL.SettingsHUD
 
         public void SetVisibility(bool visible)
         {
+            if (HUDAudioPlayer.i != null)
+            {
+                if (visible && !isOpen)
+                    HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogAppear);
+                else if (isOpen)
+                    HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogClose);
+            }
+
             gameObject.SetActive(visible);
             isOpen = visible;
 
