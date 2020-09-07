@@ -11,7 +11,22 @@ export type StreamPlayingListener = (streamId: string, playing: boolean) => any
 type VoiceOutput = {
   buffer: RingBuffer<Float32Array>
   scriptProcessor: ScriptProcessorNode
+  panNode: PannerNode
+  spatialParams: VoiceSpatialParams
   playing: boolean
+}
+
+export type VoiceCommunicatorOptions = {
+  sampleRate?: number
+  channelBufferSize?: number
+  maxDistance?: number
+  refDistance?: number
+  initialListenerParams?: VoiceSpatialParams
+}
+
+export type VoiceSpatialParams = {
+  position: [number, number, number]
+  orientation: [number, number, number]
 }
 
 export class VoiceCommunicator {
@@ -23,12 +38,24 @@ export class VoiceCommunicator {
 
   private streamPlayingListeners: StreamPlayingListener[] = []
 
-  private readonly sampleRate = 48000
-  private readonly channelBufferSize = 0.8
+  private readonly sampleRate: number
+  private readonly channelBufferSize: number
 
-  constructor(private selfId: string, private channel: AudioCommunicatorChannel) {
+  constructor(
+    private selfId: string,
+    private channel: AudioCommunicatorChannel,
+    private options: VoiceCommunicatorOptions
+  ) {
+    this.sampleRate = this.options.sampleRate ?? 20000
+    this.channelBufferSize = this.options.channelBufferSize ?? 2.0
+
     this.context = new AudioContext({ sampleRate: this.sampleRate })
-    this.inputProcessor = this.context.createScriptProcessor(2048, 1, 1)
+
+    if (this.options.initialListenerParams) {
+      this.setListenerSpatialParams(this.options.initialListenerParams)
+    }
+
+    this.inputProcessor = this.context.createScriptProcessor(4096, 1, 1)
     this.voiceChatWorkerMain = new VoiceChatCodecWorkerMain()
     this.createEncodeStream()
   }
@@ -57,13 +84,17 @@ export class VoiceCommunicator {
     }
   }
 
-  async playEncodedAudio(src: string, encoded: Uint8Array) {
+  async playEncodedAudio(src: string, relativePosition: VoiceSpatialParams, encoded: Uint8Array) {
     if (!this.outputs[src]) {
+      const nodes = this.createOutputNodes(src)
       this.outputs[src] = {
         buffer: new RingBuffer(Math.floor(this.channelBufferSize * this.sampleRate), Float32Array),
-        scriptProcessor: this.createScriptOutputFor(src),
-        playing: false
+        playing: false,
+        spatialParams: relativePosition,
+        ...nodes
       }
+    } else {
+      this.setVoiceRelativePosition(src, relativePosition)
     }
 
     let stream = this.voiceChatWorkerMain.decodeStreams[src]
@@ -75,6 +106,50 @@ export class VoiceCommunicator {
     }
 
     stream.decode(encoded)
+  }
+
+  setListenerSpatialParams(spatialParams: VoiceSpatialParams) {
+    const listener = this.context.listener
+    listener.setPosition(spatialParams.position[0], spatialParams.position[1], spatialParams.position[2])
+    listener.setOrientation(
+      spatialParams.orientation[0],
+      spatialParams.orientation[1],
+      spatialParams.orientation[2],
+      0,
+      1,
+      0
+    )
+  }
+
+  private setVoiceRelativePosition(src: string, spatialParams: VoiceSpatialParams) {
+    this.outputs[src].spatialParams = spatialParams
+    this.updatePannerNodeParameters(src)
+  }
+
+  updatePannerNodeParameters(src: string) {
+    const panNode = this.outputs[src].panNode
+    const spatialParams = this.outputs[src].spatialParams
+
+    panNode.positionX.value = spatialParams.position[0]
+    panNode.positionY.value = spatialParams.position[1]
+    panNode.positionZ.value = spatialParams.position[2]
+    panNode.orientationX.value = spatialParams.orientation[0]
+    panNode.orientationY.value = spatialParams.orientation[1]
+    panNode.orientationZ.value = spatialParams.orientation[2]
+  }
+
+  createOutputNodes(src: string): { scriptProcessor: ScriptProcessorNode; panNode: PannerNode } {
+    const scriptProcessor = this.createScriptOutputFor(src)
+    const panNode = this.context.createPanner()
+    panNode.coneInnerAngle = 140
+    panNode.coneOuterAngle = 360
+    panNode.coneOuterGain = 0.8
+    panNode.maxDistance = this.options.maxDistance ?? 48
+    panNode.refDistance = this.options.refDistance ?? 2
+    scriptProcessor.connect(panNode)
+    panNode.connect(this.context.destination)
+
+    return { scriptProcessor, panNode }
   }
 
   createScriptOutputFor(src: string) {
@@ -99,8 +174,6 @@ export class VoiceCommunicator {
       }
     }
 
-    processor.connect(this.context.destination)
-
     return processor
   }
 
@@ -118,14 +191,10 @@ export class VoiceCommunicator {
   }
 
   start() {
-    if (this.input) {
-      this.inputProcessor.connect(this.context.destination)
-    }
+    this.inputProcessor.connect(this.context.destination)
   }
 
   pause() {
-    if (this.input) {
-      this.inputProcessor.disconnect(this.context.destination)
-    }
+    this.inputProcessor.disconnect(this.context.destination)
   }
 }

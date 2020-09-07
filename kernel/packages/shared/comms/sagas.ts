@@ -14,7 +14,9 @@ import { realmToString } from 'shared/dao/utils/realmToString'
 import { createLogger } from 'shared/logger'
 
 import { connect, updateVoiceRecordingStatus } from '.'
-import { SET_VOICE_CHAT_RECORDING, SetVoiceChatRecording } from './actions'
+import { SET_VOICE_CHAT_RECORDING } from './actions'
+
+import { isVoiceChatRecording } from './selectors'
 
 const DEBUG = false
 const logger = createLogger('comms: ')
@@ -41,8 +43,9 @@ function* establishCommunications() {
   }
 }
 
-function* updateVoiceChatRecordingStatus(action: SetVoiceChatRecording) {
-  updateVoiceRecordingStatus(action.payload.recording)
+function* updateVoiceChatRecordingStatus() {
+  const recording = yield select(isVoiceChatRecording)
+  updateVoiceRecordingStatus(recording)
 }
 
 function* changeRealm() {

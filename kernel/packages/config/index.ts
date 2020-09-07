@@ -174,6 +174,8 @@ export namespace commConfigurations {
       username: 'usernamedcl'
     }
   ]
+
+  export const voiceChatSampleRate = 24000
 }
 export const loginConfig = {
   org: {

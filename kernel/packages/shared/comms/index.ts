@@ -40,7 +40,8 @@ import {
   position2parcel,
   sameParcel,
   squareDistance,
-  ParcelArray
+  ParcelArray,
+  rotateUsingQuaternion
 } from './interface/utils'
 import { BrokerWorldInstanceConnection } from '../comms/v1/brokerWorldInstanceConnection'
 import { profileToRendererFormat } from 'shared/profiles/transformations/profileToRendererFormat'
@@ -81,8 +82,9 @@ import {
 } from 'shared/loading/types'
 import { getIdentity } from 'shared/session'
 import { createLogger } from '../logger'
-import { VoiceCommunicator } from 'voice-chat-codec/VoiceCommunicator'
+import { VoiceCommunicator, VoiceSpatialParams } from 'voice-chat-codec/VoiceCommunicator'
 import { voicePlayingUpdate } from './actions'
+import { isVoiceChatRecording } from './selectors'
 
 export type CommsVersion = 'v1' | 'v2'
 export type CommsMode = CommsV1Mode | CommsV2Mode
@@ -202,29 +204,42 @@ function getParcelSceneSubscriptions(): string[] {
   return ids
 }
 
+let audioRequestPending = false
+
 export function updateVoiceRecordingStatus(recording: boolean) {
   if (recording && voiceCommunicator) {
     if (!voiceCommunicator.hasInput()) {
-      navigator.mediaDevices
-        .getUserMedia({
-          audio: {
-            channelCount: 1,
-            sampleRate: 48000,
-            echoCancellation: true,
-            noiseSuppression: true,
-            autoGainControl: true,
-            advanced: [{ echoCancellation: true }, { autoGainControl: true }, { noiseSuppression: true }] as any
-          },
-          video: false
-        })
-        .then(
-          (a) => {
-            voiceCommunicator!.setInputStream(a)
-          },
-          (e) => {
-            defaultLogger.log('Error requesting audio: ', e)
-          }
-        )
+      if (!audioRequestPending) {
+        audioRequestPending = true
+        navigator.mediaDevices
+          .getUserMedia({
+            audio: {
+              channelCount: 1,
+              sampleRate: commConfigurations.voiceChatSampleRate,
+              echoCancellation: true,
+              noiseSuppression: true,
+              autoGainControl: true,
+              advanced: [{ echoCancellation: true }, { autoGainControl: true }, { noiseSuppression: true }] as any
+            },
+            video: false
+          })
+          .then(
+            (a) => {
+              voiceCommunicator!.setInputStream(a)
+              if (isVoiceChatRecording(store.getState())) {
+                voiceCommunicator!.start()
+              } else {
+                voiceCommunicator!.pause()
+              }
+            },
+            (e) => {
+              defaultLogger.log('Error requesting audio: ', e)
+            }
+          )
+          .finally(() => {
+            audioRequestPending = false
+          })
+      }
     } else {
       voiceCommunicator.start()
     }
@@ -358,11 +373,20 @@ function processChatMessage(context: Context, fromAlias: string, message: Packag
 function processVoiceFragment(context: Context, fromAlias: string, message: Package<VoiceFragment>) {
   const profile = getProfile(store.getState(), getIdentity().address)
 
-  const user = getUser(fromAlias)
+  const peerTrackingInfo = ensurePeerTrackingInfo(context, fromAlias)
 
-  if (user) {
-    if (profile && user.userId && !isBlocked(profile, user.userId)) {
-      voiceCommunicator?.playEncodedAudio(user.userId, message.data.encoded)
+  if (peerTrackingInfo) {
+    if (
+      profile &&
+      peerTrackingInfo.identity &&
+      !isBlocked(profile, peerTrackingInfo.identity) &&
+      peerTrackingInfo.position
+    ) {
+      voiceCommunicator?.playEncodedAudio(
+        peerTrackingInfo.identity,
+        getSpatialParamsFor(peerTrackingInfo.position),
+        message.data.encoded
+      )
     }
   }
 }
@@ -501,6 +525,8 @@ export function onPositionUpdate(context: Context, p: Position) {
 
   context.currentPosition = p
 
+  voiceCommunicator?.setListenerSpatialParams(getSpatialParamsFor(context.currentPosition))
+
   const now = Date.now()
   const elapsed = now - lastNetworkUpdatePosition
 
@@ -513,6 +539,13 @@ export function onPositionUpdate(context: Context, p: Position) {
     lastPositionSent = p
     lastNetworkUpdatePosition = now
     worldConnection.sendPositionMessage(p).catch((e) => defaultLogger.warn(`error while sending message `, e))
+  }
+}
+
+function getSpatialParamsFor(position: Position): VoiceSpatialParams {
+  return {
+    position: position.slice(0, 3) as [number, number, number],
+    orientation: rotateUsingQuaternion(position, 0, 0, 1)
   }
 }
 
@@ -919,13 +952,21 @@ async function doStartCommunications(context: Context) {
     }, 100)
 
     if (!voiceCommunicator) {
-      voiceCommunicator = new VoiceCommunicator(context.userInfo.userId!, {
-        send(data: Uint8Array) {
-          if (context.currentPosition) {
-            context.worldInstanceConnection?.sendVoiceMessage(context.currentPosition, data)
+      voiceCommunicator = new VoiceCommunicator(
+        context.userInfo.userId!,
+        {
+          send(data: Uint8Array) {
+            if (context.currentPosition) {
+              context.worldInstanceConnection?.sendVoiceMessage(context.currentPosition, data)
+            }
           }
+        },
+
+        {
+          sampleRate: commConfigurations.voiceChatSampleRate,
+          initialListenerParams: context.currentPosition ? getSpatialParamsFor(context.currentPosition) : undefined
         }
-      })
+      )
 
       voiceCommunicator.addStreamPlayingListener((userId, playing) => {
         store.dispatch(voicePlayingUpdate(userId, playing))
