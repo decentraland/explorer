@@ -295,6 +295,7 @@ GameObject:
   - component: {fileID: 4558583283900186539}
   - component: {fileID: 8002379926953698459}
   - component: {fileID: 150534880425735011}
+  - component: {fileID: 3389939956673574174}
   m_Layer: 5
   m_Name: Explore Button
   m_TagString: Untagged
@@ -444,6 +445,20 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &3389939956673574174
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 886295006473339667}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bfd0d144b6d3dd438b84fa14a062c4f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  extraClickSound: 0
+  playHoverSound: 1
 --- !u!1 &1095350884341458218
 GameObject:
   m_ObjectHideFlags: 0
@@ -788,6 +803,7 @@ GameObject:
   - component: {fileID: 3612896257401112925}
   - component: {fileID: 8057990764222806425}
   - component: {fileID: 2224199985898369341}
+  - component: {fileID: 6054881705051542841}
   m_Layer: 5
   m_Name: Help Button
   m_TagString: Untagged
@@ -937,6 +953,20 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &6054881705051542841
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1605915090114359619}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bfd0d144b6d3dd438b84fa14a062c4f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  extraClickSound: 0
+  playHoverSound: 1
 --- !u!1 &1745068193824896935
 GameObject:
   m_ObjectHideFlags: 0
@@ -1096,7 +1126,6 @@ MonoBehaviour:
   moreButton: {fileID: 2780953233977255692}
   moreMenu: {fileID: 5102413631459841666}
   taskbarPanelImage: {fileID: 8366252944663895583}
-  taskbarPanelCanvasGroup: {fileID: 5475591619353631707}
   rightButtonsContainer: {fileID: 8603069663900459623}
 --- !u!222 &7643556927286160474
 CanvasRenderer:
@@ -1355,6 +1384,7 @@ GameObject:
   - component: {fileID: 4984223206757442300}
   - component: {fileID: 5695286407739124719}
   - component: {fileID: 2780953233977255692}
+  - component: {fileID: 5173558686886444464}
   m_Layer: 5
   m_Name: More Button
   m_TagString: Untagged
@@ -1488,6 +1518,20 @@ MonoBehaviour:
   toggleButton: {fileID: 5695286407739124719}
   lineOffIndicator: {fileID: 0}
   lineOnIndicator: {fileID: 0}
+--- !u!114 &5173558686886444464
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2603694545027937816}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bfd0d144b6d3dd438b84fa14a062c4f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  extraClickSound: 0
+  playHoverSound: 1
 --- !u!1 &2745028302703117785
 GameObject:
   m_ObjectHideFlags: 0
@@ -3213,6 +3257,7 @@ GameObject:
   - component: {fileID: 2140690286638271328}
   - component: {fileID: 1673856129170501966}
   - component: {fileID: 5170206826188390180}
+  - component: {fileID: 848385181622613770}
   m_Layer: 5
   m_Name: Backpack Button
   m_TagString: Untagged
@@ -3362,6 +3407,20 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &848385181622613770
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6226011899616430992}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bfd0d144b6d3dd438b84fa14a062c4f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  extraClickSound: 0
+  playHoverSound: 1
 --- !u!1 &6367743213003561031
 GameObject:
   m_ObjectHideFlags: 0
@@ -3492,6 +3551,7 @@ GameObject:
   - component: {fileID: 26898197273459194}
   - component: {fileID: 7009826137728465702}
   - component: {fileID: 8093009058974833093}
+  - component: {fileID: 1391277494035058288}
   m_Layer: 5
   m_Name: Settings Button
   m_TagString: Untagged
@@ -3641,6 +3701,20 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &1391277494035058288
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6401471022814983464}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bfd0d144b6d3dd438b84fa14a062c4f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  extraClickSound: 0
+  playHoverSound: 1
 --- !u!1 &6562160513829208447
 GameObject:
   m_ObjectHideFlags: 0
@@ -3809,6 +3883,7 @@ GameObject:
   - component: {fileID: 5568154503568184559}
   - component: {fileID: 7769267658850247127}
   - component: {fileID: 5147666751783043214}
+  - component: {fileID: 4051645476680630674}
   m_Layer: 5
   m_Name: HideUIButton
   m_TagString: Untagged
@@ -3917,6 +3992,20 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &4051645476680630674
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6732656422086074912}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bfd0d144b6d3dd438b84fa14a062c4f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  extraClickSound: 0
+  playHoverSound: 1
 --- !u!1 &6778910183623629656
 GameObject:
   m_ObjectHideFlags: 0
@@ -4085,6 +4174,7 @@ GameObject:
   - component: {fileID: 2666224317257862534}
   - component: {fileID: 1954259143765856639}
   - component: {fileID: 7510301272497182283}
+  - component: {fileID: 2972937949119167633}
   m_Layer: 5
   m_Name: CollapseBarButton
   m_TagString: Untagged
@@ -4195,6 +4285,20 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &2972937949119167633
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6879379445780578477}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bfd0d144b6d3dd438b84fa14a062c4f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  extraClickSound: 0
+  playHoverSound: 1
 --- !u!1 &7079197804690537619
 GameObject:
   m_ObjectHideFlags: 0
@@ -4243,6 +4347,7 @@ GameObject:
   - component: {fileID: 4836432817463991312}
   - component: {fileID: 1651306248573838172}
   - component: {fileID: 702143947393827336}
+  - component: {fileID: 7097478496321109117}
   m_Layer: 5
   m_Name: ControlsButton
   m_TagString: Untagged
@@ -4351,6 +4456,20 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &7097478496321109117
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7171551362107323602}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bfd0d144b6d3dd438b84fa14a062c4f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  extraClickSound: 0
+  playHoverSound: 1
 --- !u!1 &7414167371079566475
 GameObject:
   m_ObjectHideFlags: 0
@@ -5103,6 +5222,7 @@ GameObject:
   - component: {fileID: 7425461968562306836}
   - component: {fileID: 7061163220679428443}
   - component: {fileID: 3686269489964235905}
+  - component: {fileID: 1385795628160377899}
   m_Layer: 5
   m_Name: Friends Button
   m_TagString: Untagged
@@ -5242,6 +5362,20 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &1385795628160377899
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7772005873924984123}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bfd0d144b6d3dd438b84fa14a062c4f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  extraClickSound: 0
+  playHoverSound: 1
 --- !u!1 &7984381791258128339
 GameObject:
   m_ObjectHideFlags: 0
@@ -5292,6 +5426,7 @@ GameObject:
   - component: {fileID: 6765384184983891056}
   - component: {fileID: 1413073526740766789}
   - component: {fileID: 5681366293077149653}
+  - component: {fileID: 1551042969518037179}
   m_Layer: 5
   m_Name: Chat Button
   m_TagString: Untagged
@@ -5442,6 +5577,20 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &1551042969518037179
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8012558485580923328}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bfd0d144b6d3dd438b84fa14a062c4f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  extraClickSound: 0
+  playHoverSound: 1
 --- !u!1 &8593785276290262298
 GameObject:
   m_ObjectHideFlags: 0

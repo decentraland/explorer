@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 573415108347260977}
   - component: {fileID: 6423557460960465876}
   - component: {fileID: 31662781482329574}
+  - component: {fileID: 3801737928376811219}
   m_Layer: 5
   m_Name: VisitFAQButton
   m_TagString: Untagged
@@ -121,6 +122,20 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &3801737928376811219
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 171625655701898451}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bfd0d144b6d3dd438b84fa14a062c4f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  extraClickSound: 0
+  playHoverSound: 1
 --- !u!1 &1184250157061462077
 GameObject:
   m_ObjectHideFlags: 0
@@ -290,6 +305,7 @@ GameObject:
   - component: {fileID: 7585870184405622929}
   - component: {fileID: 2753986069255063991}
   - component: {fileID: 9087397109600482864}
+  - component: {fileID: 4717004302180432752}
   m_Layer: 5
   m_Name: CloseButton
   m_TagString: Untagged
@@ -412,6 +428,20 @@ MonoBehaviour:
   targetRectTransform: {fileID: 1322608392378913318}
   hoverScale: 1.05
   normalScale: 1
+--- !u!114 &4717004302180432752
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1681096085663110834}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bfd0d144b6d3dd438b84fa14a062c4f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  extraClickSound: 10
+  playHoverSound: 1
 --- !u!1 &2193087780547978950
 GameObject:
   m_ObjectHideFlags: 0
@@ -888,6 +918,7 @@ GameObject:
   - component: {fileID: 2847632043733718222}
   - component: {fileID: 3922214858197526300}
   - component: {fileID: 8829506031662869903}
+  - component: {fileID: 7624688565071848219}
   m_Layer: 5
   m_Name: JoinDiscordButton
   m_TagString: Untagged
@@ -997,6 +1028,20 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &7624688565071848219
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5113877863591927035}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bfd0d144b6d3dd438b84fa14a062c4f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  extraClickSound: 0
+  playHoverSound: 1
 --- !u!1 &5360800121203204040
 GameObject:
   m_ObjectHideFlags: 0
