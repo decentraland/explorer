@@ -349,10 +349,11 @@ public class AvatarEditorHUDView : MonoBehaviour
         characterPreviewController.camera.enabled = visible;
         avatarEditorCanvas.enabled = visible;
         avatarEditorCanvasGroup.blocksRaycasts = visible;
-        isOpen = visible;
 
-        if (!isOpen)
+        if (isOpen && !visible)
             OnClose?.Invoke();
+
+        isOpen = visible;
     }
 
     public void CleanUp()

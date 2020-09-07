@@ -5,7 +5,8 @@ using DCL.Interface;
 
 public class ExploreHUDController : IHUD
 {
-    public ExploreHUDView view;
+    public ExploreHUDView view { get; private set; }
+
     internal InputAction_Trigger toggleExploreTrigger;
 
     ExploreMiniMapDataController miniMapDataController;
