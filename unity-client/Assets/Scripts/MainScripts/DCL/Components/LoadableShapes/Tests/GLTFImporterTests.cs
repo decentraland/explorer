@@ -63,15 +63,6 @@ public class GLTFImporterTests : TestsBase
         yield return LoadModel("/GLB/Avatar/Avatar_Idle.glb", (m) => trevorModel = m);
     }
 
-    [UnityTest]
-    public IEnumerator LoadSoyouScene()
-    {
-        InstantiatedGLTFObject trevorModel = null;
-        yield return LoadModel("/GLB/SoYou.glb", (m) => trevorModel = m);
-        Debug.Break();
-        yield return null;
-    }
-
 
     [UnityTest]
     public IEnumerator CurvesAreOptimizedCorrectly()
