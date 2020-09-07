@@ -5,13 +5,13 @@ namespace DCL.Controllers
     public class WorldBlockersController : MonoBehaviour
     {
         BlockerHandler blockerHandler;
-        bool subscribedToWorldReposition = false;
 
         void Start()
         {
             blockerHandler = new BlockerHandler();
 
             SceneController.i.OnNewSceneAdded += OnNewSceneAdded;
+            DCLCharacterController.i.characterPosition.OnPrecisionAdjust += OnWorldReposition;
         }
 
         void OnDisable()
@@ -34,13 +34,6 @@ namespace DCL.Controllers
         void OnNewSceneAdded(ParcelScene newScene)
         {
             newScene.OnSceneReady += OnSceneReady;
-            if (!subscribedToWorldReposition && DCLCharacterController.i)
-            {
-                DCLCharacterController.i.characterPosition.OnPrecisionAdjust += OnWorldReposition;
-                subscribedToWorldReposition = true;
-            }
-
-            SetupWorldBlockers();
         }
 
         void OnSceneReady(ParcelScene scene)

@@ -11,6 +11,7 @@ Shader "DCL/FX/Hologram"
         [PerRendererData] _CullYPlane ("Cull Y Plane", Float) = 0.5
         _FadeThickness ("Fade Thickness", Float) = 5
         _FadeDirection ("Fade Direction", Float) = 0
+        _MaxRenderingDistance ("Max Rendering Distance", Float) = 45
     }
 
     SubShader
@@ -37,6 +38,7 @@ Shader "DCL/FX/Hologram"
                 float _FadeDirection;
                 float _FadeThickness;
                 float _CullYPlane;
+                float _MaxRenderingDistance;
             CBUFFER_END
 
             struct vertexInput
@@ -77,15 +79,18 @@ Shader "DCL/FX/Hologram"
 
             float4 frag(vertexOutput i) : COLOR
             {
-                float renderingDistance = length(_WorldSpaceCameraPos.xyz - i.posWorld.xyz);
-                float maxRenderingDistance = 45;
-
-                if (renderingDistance > maxRenderingDistance) return (0,0,0,0);
-
                 float distanceAlphaMultiplier = 1;
-                float halfMaxRenderingDistance = maxRenderingDistance / 2;
-                if (renderingDistance > halfMaxRenderingDistance)
-                    distanceAlphaMultiplier = 1 - ((renderingDistance - halfMaxRenderingDistance) / halfMaxRenderingDistance);
+
+                if(_MaxRenderingDistance > 0)
+                {
+                    float renderingDistance = length(_WorldSpaceCameraPos.xyz - i.posWorld.xyz);
+
+                    if (renderingDistance > _MaxRenderingDistance) return (0,0,0,0);
+
+                    float halfMaxRenderingDistance = _MaxRenderingDistance / 2;
+                    if (renderingDistance > halfMaxRenderingDistance)
+                        distanceAlphaMultiplier = 1 - ((renderingDistance - halfMaxRenderingDistance) / halfMaxRenderingDistance);
+                }
 
                 float lambertAtten = GetLambertAttenuation(i);
                 float rim = GetRimLighting(i);
