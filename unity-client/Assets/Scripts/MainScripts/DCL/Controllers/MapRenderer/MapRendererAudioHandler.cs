@@ -4,11 +4,11 @@ using UnityEngine;
 
 public class MapRendererAudioHandler : MonoBehaviour
 {
-    AudioEvent eventMapParcelHighlight;
+    AudioEventOld eventMapParcelHighlight;
 
     private void Awake()
     {
-        AudioContainer ac = GetComponent<AudioContainer>();
+        AudioContainerOld ac = GetComponent<AudioContainerOld>();
         eventMapParcelHighlight = ac.GetEvent("MapParcelHighlight");
         eventMapParcelHighlight.SetPitch(4f);
     }

@@ -2,20 +2,24 @@ using System.Collections;
 using UnityEngine;
 using ReorderableList;
 
-[System.Serializable, CreateAssetMenu(fileName = "AudioEvent", menuName = "AudioEvents/AudioEvent")]
-public class AudioEvent : ScriptableObject
+[System.Serializable]
+public class AudioEventOld
 {
     [System.Serializable]
     public class AudioClipList : ReorderableArray<AudioClip>
     {
     }
 
+    // Index for clips-array
+    private int index;
+
+    public string name;
     public bool loop = false;
     [Range(0f, 1f)]
     public float volume = 1.0f;
-    public float pitch = 1f;
     [Range(0f, 1f)]
     public float randomPitch = 0.0f;
+    public bool playOnAwake = false;
     public float cooldownSeconds = 0.0f;
     [Reorderable]
     public AudioClipList clips;
@@ -23,15 +27,13 @@ public class AudioEvent : ScriptableObject
     [HideInInspector]
     public AudioSource source;
 
-    private int clipIndex;
-    private float defaultVolume;
+    private float pitch = 1f, defaultVolume;
     private float lastPlayed = 0.0f; //  <- Used for "cooldown"
 
-    public void Initialize(AudioSource audioSource)
+    public void Initialize()
     {
         defaultVolume = volume;
         RandomizeIndex();
-        source = audioSource;
     }
 
     public void RandomizeIndex()
@@ -40,25 +42,33 @@ public class AudioEvent : ScriptableObject
         do
         {
             newIndex = Random.Range(0, clips.Length);
-        } while (clips.Length > 1 && newIndex == clipIndex);
-        clipIndex = newIndex;
+        } while (clips.Length > 1 && newIndex == index);
+        index = newIndex;
     }
 
-    public virtual void Play(bool oneShot = false)
+    public void Play(bool oneShot = false)
     {
-        if (source == null) return;
-
         // Check if AudioSource is active and check cooldown time
-        if (!source.gameObject.activeSelf || Time.time < lastPlayed + cooldownSeconds) return;
+        if (!source.gameObject.activeSelf || Time.time < lastPlayed + cooldownSeconds)
+        {
+            return;
+        }
 
-        source.clip = clips[clipIndex];
+        // Set clip
+        source.clip = clips[index];
+
+        // Set pitch
         source.pitch = pitch + Random.Range(0f, randomPitch) - (randomPitch * 0.5f);
 
         // Play
         if (oneShot)
+        {
             source.PlayOneShot(source.clip);
+        }
         else
+        {
             source.Play();
+        }
 
         RandomizeIndex();
 
@@ -67,13 +77,19 @@ public class AudioEvent : ScriptableObject
 
     public void PlayScheduled(float delaySeconds)
     {
-        if (source == null) return;
-
         // Check if AudioSource is active and check cooldown time (taking delay into account)
-        if (!source.gameObject.activeSelf || Time.time + delaySeconds < lastPlayed + cooldownSeconds) return;
+        if (!source.gameObject.activeSelf || Time.time + delaySeconds < lastPlayed + cooldownSeconds)
+        {
+            return;
+        }
 
-        source.clip = clips[clipIndex];
+        // Set clip
+        source.clip = clips[index];
+
+        // Set pitch
         source.pitch = pitch + Random.Range(0f, randomPitch) - (randomPitch * 0.5f);
+
+        // Play
         source.PlayScheduled(AudioSettings.dspTime + delaySeconds);
 
         RandomizeIndex();
@@ -88,7 +104,7 @@ public class AudioEvent : ScriptableObject
 
     public void SetIndex(int index)
     {
-        this.clipIndex = index;
+        this.index = index;
     }
 
     public void SetPitch(float pitch)

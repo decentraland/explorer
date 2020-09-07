@@ -2,14 +2,19 @@ using UnityEngine;
 using UnityEngine.Audio;
 using ReorderableList;
 
-public class AudioContainer : MonoBehaviour
+public class AudioContainerOld : MonoBehaviour
 {
     [System.Serializable]
-    public class AudioEventList : ReorderableArray<AudioEvent>
+    public class AudioEventList : ReorderableArray<AudioEventOld>
     {
     }
 
+    public string identifier;
+
+    [Header("General")]
     public AudioMixerGroup audioMixerGroup;
+
+    [Header("3D")]
     [Range(0f, 1f)]
     public float spatialBlend = 1f;
     public bool overrideDefaults = false;
@@ -29,16 +34,18 @@ public class AudioContainer : MonoBehaviour
             maxDistance = 400f;
         }
 
-        foreach (AudioEvent e in audioEvents)
+        foreach (AudioEventOld e in audioEvents)
         {
             if (e.clips.Length == 0)
             {
-                Debug.LogWarning("There are no clips in the audio event '" + e.name + "' (" + name + ")");
+                Debug.LogWarning("There are no clips in the audio event '" + e.name + "' (" + name + " -> " + identifier + ")");
                 continue;
             }
 
-            // Add AudioSource component for event
-            e.Initialize(gameObject.AddComponent(typeof(AudioSource)) as AudioSource);
+            e.Initialize();
+
+            // Set up AudioSource component for event
+            e.source = gameObject.AddComponent(typeof(AudioSource)) as AudioSource;
 
             e.source.clip = e.clips[0];
             e.source.outputAudioMixerGroup = audioMixerGroup;
@@ -52,6 +59,28 @@ public class AudioContainer : MonoBehaviour
             e.source.maxDistance = maxDistance;
 
             e.source.playOnAwake = false;
+
+            if (e.playOnAwake)
+            {
+                e.Play();
+            }
         }
+    }
+
+    public AudioEventOld GetEvent(string name)
+    {
+        AudioEventOld e = null;
+        foreach (AudioEventOld i in audioEvents)
+        {
+            if (i.name == name)
+            {
+                e = i;
+            }
+        }
+        if (e == null)
+        {
+            Debug.LogWarning(this.name + " -> AudioContainer (" + identifier + "): Couldn't find audio event: " + name);
+        }
+        return e;
     }
 }

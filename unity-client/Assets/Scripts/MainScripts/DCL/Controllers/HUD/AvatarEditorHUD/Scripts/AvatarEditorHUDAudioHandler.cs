@@ -12,14 +12,14 @@ public class AvatarEditorHUDAudioHandler : MonoBehaviour
     [SerializeField]
     Button randomizeButton;
 
-    AudioContainer audioContainer;
-    AudioEvent eventRarity;
+    AudioContainerOld audioContainer;
+    AudioEventOld eventRarity;
 
     WearableItem lastClickedWearable = null;
 
     private void Start()
     {
-        audioContainer = GetComponent<AudioContainer>();
+        audioContainer = GetComponent<AudioContainerOld>();
         audioContainer.GetEvent("AvatarAppear").SetPitch(0.4f);
 
         eventRarity = audioContainer.GetEvent("Rarity");

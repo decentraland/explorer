@@ -31,9 +31,9 @@ public class HUDAudioPlayer : MonoBehaviour
     public static HUDAudioPlayer i { get; private set; }
 
     [HideInInspector]
-    public AudioContainer ac;
+    public AudioContainerOld ac;
 
-    AudioEvent eventHover, eventClick, eventRelease, eventEnable, eventDisable, eventListItemAppear, eventDialogAppear, eventDialogClose, eventConfirm, eventCancel,
+    AudioEventOld eventHover, eventClick, eventRelease, eventEnable, eventDisable, eventListItemAppear, eventDialogAppear, eventDialogClose, eventConfirm, eventCancel,
         eventValueChange, eventFadeIn, eventFadeOut, eventSendChatEntry, eventReceivePrivateChatEntry, eventReceiveGlobalChatEntry, eventNotification, eventTinyHover,
         eventCameraFadeIn, eventCameraFadeOut;
 
@@ -53,7 +53,7 @@ public class HUDAudioPlayer : MonoBehaviour
 
         i = this;
 
-        ac = GetComponent<AudioContainer>();
+        ac = GetComponent<AudioContainerOld>();
         eventHover = ac.GetEvent("ButtonHover");
         eventClick = ac.GetEvent("ButtonClick");
         eventRelease = ac.GetEvent("ButtonRelease");

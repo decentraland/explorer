@@ -229,9 +229,9 @@ public class AvatarEditorHUDView : MonoBehaviour
                 if (doneButton != null)
                     doneButton.interactable = true;
 
-                AudioContainer audioContainer = null;
+                AudioContainerOld audioContainer = null;
                 if (audioHandler != null)
-                    audioContainer = audioHandler.GetComponent<AudioContainer>();
+                    audioContainer = audioHandler.GetComponent<AudioContainerOld>();
 
                 if (audioContainer != null && isOpen)
                 {
@@ -241,7 +241,7 @@ public class AvatarEditorHUDView : MonoBehaviour
                     // Play a voice reaction sound from the avatar
                     if (Random.Range(0f, 1f) > 0.4f)
                     {
-                        AudioEvent eventReaction = null;
+                        AudioEventOld eventReaction = null;
                         if (avatarModel.bodyShape.Contains("Female"))
                             eventReaction = audioContainer.GetEvent("ReactionFemale");
                         else
