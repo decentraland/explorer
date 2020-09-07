@@ -1129,7 +1129,7 @@ namespace UnityGLTF
             }
         }
 
-        private Keyframe[] OptimizeKeyFrames(Keyframe[] rawKeyframes)
+        public static Keyframe[] OptimizeKeyFrames(Keyframe[] rawKeyframes)
         {
             List<Keyframe> result = new List<Keyframe>(2);
 
