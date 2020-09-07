@@ -8,11 +8,10 @@ public class FirstPersonCameraEntityReference : MonoBehaviour
     private void Awake()
     {
         // Assign the camera position to the game object
-        if (cameraPosition == null)
+        if (cameraPosition != null)
         {
-            throw new System.Exception("The camera position must be set.");
+            transform.position = cameraPosition.position;
         }
-        transform.position = cameraPosition.position;
 
         // Listen to changes on the camera mode
         CommonScriptableObjects.cameraMode.OnChange += OnCameraModeChange;
