@@ -68,7 +68,7 @@ public class HUDController : MonoBehaviour
 
     public ExploreHUDController exploreHud => GetHUDElement(HUDElementID.EXPLORE_HUD) as ExploreHUDController;
 
-    public HelpAndSupportHUDController helpAndSupportHud => GetHUDElement(HUDElementID.HELP_AND_SUPPORT) as HelpAndSupportHUDController;
+    public HelpAndSupportHUDController helpAndSupportHud => GetHUDElement(HUDElementID.HELP_AND_SUPPORT_HUD) as HelpAndSupportHUDController;
 
     public ManaHUDController manaHud => GetHUDElement(HUDElementID.MANA_HUD) as ManaHUDController;
 
@@ -134,7 +134,7 @@ public class HUDController : MonoBehaviour
         EMAIL_PROMPT = 19,
         EXPLORE_HUD = 20,
         MANA_HUD = 21,
-        HELP_AND_SUPPORT = 22,
+        HELP_AND_SUPPORT_HUD = 22,
         COUNT = 23
     }
 
@@ -325,7 +325,7 @@ public class HUDController : MonoBehaviour
             case HUDElementID.MANA_HUD:
                 CreateHudElement<ManaHUDController>(configuration, hudElementId);
                 break;
-            case HUDElementID.HELP_AND_SUPPORT:
+            case HUDElementID.HELP_AND_SUPPORT_HUD:
                 CreateHudElement<HelpAndSupportHUDController>(configuration, hudElementId);
                 taskbarHud?.AddHelpAndSupportWindow(helpAndSupportHud);
                 break;
