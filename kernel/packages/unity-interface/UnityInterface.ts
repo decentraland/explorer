@@ -247,7 +247,7 @@ export class UnityInterface {
     this.gameInstance.SendMessage(
       'HUDController',
       `ConfigureHUDElement`,
-      JSON.stringify({ hudElementId: hudElementId, configuration: configuration })
+      JSON.stringify({ hudElementId: hudElementId, configuration: JSON.stringify(configuration) })
     )
   }
 

@@ -137,17 +137,16 @@ public class HUDController : MonoBehaviour
     class ConfigureHUDElementMessage
     {
         public HUDElementID hudElementId;
-        public HUDConfiguration configuration;
+        public string configuration;
     }
 
     public void ConfigureHUDElement(string payload)
     {
         ConfigureHUDElementMessage message = JsonUtility.FromJson<ConfigureHUDElementMessage>(payload);
 
-        HUDConfiguration configuration = message.configuration;
         HUDElementID id = message.hudElementId;
 
-        ConfigureHUDElement(id, configuration);
+        ConfigureHUDElement(id, ConfigurationFromJson(id, message.configuration));
     }
 
     public void ConfigureHUDElement(HUDElementID hudElementId, HUDConfiguration configuration)
@@ -321,6 +320,11 @@ public class HUDController : MonoBehaviour
 
         if (hudElement != null)
             hudElement.SetVisibility(configuration.active && configuration.visible);
+    }
+
+    private HUDConfiguration ConfigurationFromJson(HUDElementID hudElementId, string configuration)
+    {
+        return JsonUtility.FromJson<HUDConfiguration>(configuration);
     }
 
     private void OpenPrivateChatWindow(string targetUserId)
