@@ -20,14 +20,8 @@ namespace DCL.Controllers
             DCLCharacterController.i.characterPosition.OnPrecisionAdjust -= OnWorldReposition;
         }
 
-        void OnNewSceneAdded(ParcelScene newScene)
+        void SetupWorldBlockers()
         {
-            if (!subscribedToWorldReposition && DCLCharacterController.i)
-            {
-                DCLCharacterController.i.characterPosition.OnPrecisionAdjust += OnWorldReposition;
-                subscribedToWorldReposition = true;
-            }
-
             blockerHandler.SetupGlobalBlockers(SceneController.i.loadedScenes, 100, transform);
         }
 
@@ -35,6 +29,25 @@ namespace DCL.Controllers
         {
             var newPosition = charPos.WorldToUnityPosition(Vector3.zero);
             transform.position = newPosition;
+        }
+
+        void OnNewSceneAdded(ParcelScene newScene)
+        {
+            newScene.OnSceneReady += OnSceneReady;
+            if (!subscribedToWorldReposition && DCLCharacterController.i)
+            {
+                DCLCharacterController.i.characterPosition.OnPrecisionAdjust += OnWorldReposition;
+                subscribedToWorldReposition = true;
+            }
+
+            SetupWorldBlockers();
+        }
+
+        void OnSceneReady(ParcelScene scene)
+        {
+            scene.OnSceneReady -= OnSceneReady;
+
+            SetupWorldBlockers();
         }
     }
 }

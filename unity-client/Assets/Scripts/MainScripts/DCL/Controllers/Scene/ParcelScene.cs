@@ -41,7 +41,7 @@ namespace DCL.Controllers
         public ContentProvider contentProvider;
         public int disposableNotReadyCount => disposableNotReady.Count;
 
-        [System.NonSerialized] public bool useBlockers = true;
+        [System.NonSerialized] public bool useBlockers = false;
 
         [System.NonSerialized] public bool isTestScene = false;
 
