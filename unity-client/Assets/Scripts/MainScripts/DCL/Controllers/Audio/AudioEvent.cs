@@ -24,14 +24,13 @@ public class AudioEvent : ScriptableObject
     public AudioSource source;
 
     private int clipIndex;
-    private float defaultVolume;
-    private float lastPlayed = 0.0f; //  <- Used for "cooldown"
+    private float lastPlayed; // Used for cooldown
 
     public void Initialize(AudioSource audioSource)
     {
-        defaultVolume = volume;
         RandomizeIndex();
         source = audioSource;
+        lastPlayed = 0f;
     }
 
     public void RandomizeIndex()
@@ -46,6 +45,8 @@ public class AudioEvent : ScriptableObject
 
     public virtual void Play(bool oneShot = false)
     {
+        Debug.Log(name + " Play() :: " + Time.time + " >= " + (lastPlayed + cooldownSeconds));
+
         if (source == null) return;
 
         // Check if AudioSource is active and check cooldown time
@@ -94,11 +95,6 @@ public class AudioEvent : ScriptableObject
     public void SetPitch(float pitch)
     {
         this.pitch = pitch;
-    }
-
-    public void ResetVolume()
-    {
-        volume = defaultVolume;
     }
 
     public IEnumerator FadeOut(float fadeSeconds)

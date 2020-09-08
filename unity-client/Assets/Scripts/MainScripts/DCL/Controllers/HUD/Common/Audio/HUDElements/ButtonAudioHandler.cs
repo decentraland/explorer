@@ -4,16 +4,22 @@ using UnityEngine.UI;
 
 public class ButtonAudioHandler : MonoBehaviour, IPointerEnterHandler, IPointerDownHandler, IPointerUpHandler
 {
-    HUDAudioPlayer audioPlayer;
     Selectable selectable;
     [SerializeField]
     HUDAudioPlayer.Sound extraClickSound = HUDAudioPlayer.Sound.none;
     [SerializeField]
+    AudioEvent extraClickEvent = null;
+    [SerializeField]
     bool playHoverSound = true;
+
+    AudioEvent eventClick, eventHover, eventRelease;
 
     void Start()
     {
-        audioPlayer = HUDAudioPlayer.i;
+        eventClick = Resources.Load<AudioEvent>("ScriptableObjects/AudioEvents/HUDCommon/ButtonClick");
+        eventHover = Resources.Load<AudioEvent>("ScriptableObjects/AudioEvents/HUDCommon/ButtonHover");
+        eventRelease = Resources.Load<AudioEvent>("ScriptableObjects/AudioEvents/HUDCommon/ButtonRelease");
+
         selectable = GetComponent<Selectable>();
     }
 
@@ -22,36 +28,39 @@ public class ButtonAudioHandler : MonoBehaviour, IPointerEnterHandler, IPointerD
         if (!playHoverSound)
             return;
 
-        if (audioPlayer != null &&
-            selectable != null &&
-            selectable.interactable &&
-            !Input.GetMouseButton(0))
+        if (selectable != null && !Input.GetMouseButton(0))
         {
-            audioPlayer.Play(HUDAudioPlayer.Sound.buttonHover);
+            if (selectable.interactable)
+            {
+                if (eventHover != null)
+                    eventHover.Play(true);
+            }
         }
     }
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        if (audioPlayer != null &&
-            selectable != null &&
-            selectable.interactable)
+        if (selectable != null)
         {
-            audioPlayer.Play(HUDAudioPlayer.Sound.buttonClick);
+            if (selectable.interactable)
+            {
+                if (eventClick != null)
+                    eventClick.Play(true);
+            }
         }
     }
 
     public void OnPointerUp(PointerEventData eventData)
     {
-        if (audioPlayer != null &&
-            selectable != null &&
-            selectable.interactable)
+        if (selectable != null)
         {
-            audioPlayer.Play(HUDAudioPlayer.Sound.buttonRelease);
-
-            if (extraClickSound != HUDAudioPlayer.Sound.none)
+            if (selectable.interactable)
             {
-                audioPlayer.Play(extraClickSound);
+                if (eventRelease != null)
+                    eventRelease.Play(true);
+
+                if (extraClickEvent != null)
+                    extraClickEvent.Play(true);
             }
         }
     }
