@@ -4,16 +4,18 @@ using UnityEngine;
 
 public class MapRendererAudioHandler : MonoBehaviour
 {
-    AudioEventOld eventMapParcelHighlight;
+    [SerializeField]
+    DCL.MapRenderer mapRenderer;
+
+    [SerializeField]
+    AudioEvent eventMapParcelHighlight;
 
     private void Awake()
     {
-        AudioContainerOld ac = GetComponent<AudioContainerOld>();
-        eventMapParcelHighlight = ac.GetEvent("MapParcelHighlight");
-        eventMapParcelHighlight.SetPitch(4f);
+        mapRenderer.onMovedParcelCursor += OnMovedParcelCursor;
     }
 
-    public void PlayMapParcelHighlight()
+    public void OnMovedParcelCursor()
     {
         eventMapParcelHighlight.Play(true);
     }
