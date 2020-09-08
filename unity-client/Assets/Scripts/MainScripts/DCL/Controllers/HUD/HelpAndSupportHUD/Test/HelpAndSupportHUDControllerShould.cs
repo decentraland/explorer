@@ -36,7 +36,7 @@ namespace Tests
         {
             controller.view.gameObject.SetActive(false);
             controller.SetVisibility(true);
-            Assert.IsTrue(controller.view.gameObject.activeSelf);
+            Assert.IsTrue(controller.view.isOpen);
         }
 
         [Test]
@@ -44,7 +44,7 @@ namespace Tests
         {
             controller.view.gameObject.SetActive(true);
             controller.SetVisibility(false);
-            Assert.IsFalse(controller.view.gameObject.activeSelf);
+            Assert.IsFalse(controller.view.isOpen);
         }
     }
 }

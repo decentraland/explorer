@@ -4,6 +4,8 @@ namespace DCL.SettingsHUD
 {
     public class SettingsHUDView : MonoBehaviour
     {
+        [SerializeField] private ShowHideAnimator settingsAnimator;
+
         public bool isOpen { get; private set; }
 
         private const string PATH = "SettingsHUD";
@@ -30,7 +32,11 @@ namespace DCL.SettingsHUD
                     HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogClose);
             }
 
-            gameObject.SetActive(visible);
+            if (visible)
+                settingsAnimator.Show();
+            else
+                settingsAnimator.Hide();
+
             isOpen = visible;
         }
     }

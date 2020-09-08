@@ -15,9 +15,10 @@ namespace DCL.HelpAndSupportHUD
         private const string JOIN_DISCORD_URL = "https://discord.com/invite/k5ydeZp";
         private const string FAQ_URL = "https://docs.decentraland.org/decentraland/faq/";
 
-        public Button joinDiscordButton;
-        public Button visitFAQButton;
-        public Button closeButton;
+        [SerializeField] private ShowHideAnimator helpAndSupportAnimator;
+        [SerializeField] private Button joinDiscordButton;
+        [SerializeField] private Button visitFAQButton;
+        [SerializeField] private Button closeButton;
 
         private void Initialize()
         {
@@ -48,7 +49,10 @@ namespace DCL.HelpAndSupportHUD
 
         public void SetVisibility(bool visible)
         {
-            gameObject.SetActive(visible);
+            if (visible)
+                helpAndSupportAnimator.Show();
+            else
+                helpAndSupportAnimator.Hide();
 
             if (!visible && isOpen)
                 OnClose?.Invoke();

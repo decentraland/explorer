@@ -1440,6 +1440,9 @@ GameObject:
   - component: {fileID: 7869158961860957959}
   - component: {fileID: 8582158654685651409}
   - component: {fileID: 5303331811753503732}
+  - component: {fileID: 5769089342239212911}
+  - component: {fileID: 4009808828430240770}
+  - component: {fileID: 130523288579308580}
   - component: {fileID: 5463299747482654253}
   m_Layer: 5
   m_Name: HelpAndSupportHUD
@@ -1529,6 +1532,53 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
+--- !u!225 &5769089342239212911
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6498655820486328905}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
+--- !u!95 &4009808828430240770
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6498655820486328905}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 22100000, guid: d5f6cd638da0f1b4388c7a3679abe0b0, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
+--- !u!114 &130523288579308580
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6498655820486328905}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d8b939b5bedb9494b806609faeda7d8d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hideOnEnable: 1
+  animSpeedFactor: 1
+  disableAfterFadeOut: 0
+  visibleParam: visible
 --- !u!114 &5463299747482654253
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1541,6 +1591,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 80f66593cc368b94698bac6c81c50eb4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  helpAndSupportAnimator: {fileID: 130523288579308580}
   joinDiscordButton: {fileID: 8829506031662869903}
   visitFAQButton: {fileID: 31662781482329574}
   closeButton: {fileID: 2753986069255063991}
