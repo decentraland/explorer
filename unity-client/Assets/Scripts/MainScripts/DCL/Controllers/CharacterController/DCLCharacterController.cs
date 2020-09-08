@@ -69,8 +69,8 @@ public class DCLCharacterController : MonoBehaviour
 
 
     // Will allow the game objects to be set, and create the DecentralandEntity manually during the Awake 
-    [HideInInspector] public DCL.Models.DecentralandEntity avatarReference;
-    [HideInInspector] public DCL.Models.DecentralandEntity firstPersonCameraReference;
+    public DCL.Models.DecentralandEntity avatarReference { get; private set; }
+    public DCL.Models.DecentralandEntity firstPersonCameraReference  { get; private set; }
     [SerializeField] private GameObject avatarGameObject;
     [SerializeField] private GameObject firstPersonCameraGameObject;
 
