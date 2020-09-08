@@ -1,5 +1,10 @@
 using NUnit.Framework;
 using System.Collections;
+using DCL.Components;
+using DCL.Controllers;
+using DCL.Helpers;
+using Newtonsoft.Json;
+using UnityEngine;
 using UnityEngine.TestTools;
 
 namespace SceneBoundariesCheckerTests
@@ -14,7 +19,62 @@ namespace SceneBoundariesCheckerTests
             yield return SetUp_SceneController(debugMode: true);
             yield return SetUp_CharacterController();
 
+            SetUp_Renderer();
+
             sceneController.boundariesChecker.timeBetweenChecks = 0f;
+
+            UnityEngine.Assertions.Assert.IsTrue(sceneController.useBoundariesChecker);
+            UnityEngine.Assertions.Assert.IsTrue(sceneController.boundariesChecker is SceneBoundariesDebugModeChecker);
+        }
+
+        [UnityTest]
+        public IEnumerator ResetMaterialCorrectlyWhenInvalidEntitiesAreRemoved()
+        {
+            sceneController.isDebugMode = true;
+
+            var entity = TestHelpers.CreateSceneEntity(scene);
+            TestHelpers.SetEntityTransform(scene, entity, new DCLTransform.Model {position = new Vector3(8, 1, 8)});
+            TestHelpers.CreateAndSetShape(scene, entity.entityId, DCL.Models.CLASS_ID.GLTF_SHAPE, JsonConvert.SerializeObject(
+                new
+                {
+                    src = Utils.GetTestsAssetsPath() + "/GLB/PalmTree_01.glb"
+                }));
+
+            LoadWrapper gltfShape = GLTFShape.GetLoaderForEntity(entity);
+            yield return new WaitUntil(() => gltfShape.alreadyLoaded);
+
+            yield return null;
+
+            Assert.IsFalse(SBC_Asserts.MeshIsInvalid(entity.meshesInfo));
+            // Move object to surpass the scene boundaries
+            TestHelpers.SetEntityTransform(scene, entity, new DCLTransform.Model {position = new Vector3(18, 1, 18)});
+
+            yield return null;
+
+            Assert.IsTrue(SBC_Asserts.MeshIsInvalid(entity.meshesInfo));
+
+            TestHelpers.RemoveSceneEntity(scene, entity.entityId);
+
+            ParcelScene.parcelScenesCleaner.ForceCleanup();
+
+            yield return null;
+
+            var entity2 = TestHelpers.CreateSceneEntity(scene);
+
+            TestHelpers.SetEntityTransform(scene, entity2, new DCLTransform.Model {position = new Vector3(8, 1, 8)});
+            TestHelpers.CreateAndSetShape(scene, entity2.entityId, DCL.Models.CLASS_ID.GLTF_SHAPE, JsonConvert.SerializeObject(
+                new
+                {
+                    src = Utils.GetTestsAssetsPath() + "/GLB/PalmTree_01.glb"
+                }));
+
+            LoadWrapper gltfShape2 = GLTFShape.GetLoaderForEntity(entity2);
+
+            yield return new WaitUntil(() => gltfShape2.alreadyLoaded);
+            yield return null;
+
+            Assert.IsFalse(SBC_Asserts.MeshIsInvalid(entity2.meshesInfo));
+            sceneController.isDebugMode = false;
         }
 
         [UnityTest]

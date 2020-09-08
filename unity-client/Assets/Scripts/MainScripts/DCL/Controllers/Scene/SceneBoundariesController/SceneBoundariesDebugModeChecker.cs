@@ -151,6 +151,7 @@ namespace DCL.Controllers
             {
                 return invalidMeshesInfo[entity.gameObject].originalMaterials;
             }
+
             return null;
         }
 
