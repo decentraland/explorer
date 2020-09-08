@@ -362,6 +362,8 @@ MonoBehaviour:
   showHideAnimator: {fileID: 1279603784062009147}
   hideAnimatorOnAwake: 1
   enableAnimatorOnHover: 1
+  setVisibleDelay: 0
+  setHideDelay: 0
 --- !u!114 &8002379926953698459
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -870,6 +872,8 @@ MonoBehaviour:
   showHideAnimator: {fileID: 4722796747828968730}
   hideAnimatorOnAwake: 1
   enableAnimatorOnHover: 1
+  setVisibleDelay: 0
+  setHideDelay: 0
 --- !u!114 &8057990764222806425
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1125,6 +1129,7 @@ MonoBehaviour:
   separatorMark: {fileID: 5897765151316848220}
   moreButton: {fileID: 2780953233977255692}
   moreMenu: {fileID: 5102413631459841666}
+  taskbarPanelTransf: {fileID: 4515209315500026540}
   taskbarPanelImage: {fileID: 8366252944663895583}
   rightButtonsContainer: {fileID: 8603069663900459623}
 --- !u!222 &7643556927286160474
@@ -3324,6 +3329,8 @@ MonoBehaviour:
   showHideAnimator: {fileID: 2985476891310879014}
   hideAnimatorOnAwake: 1
   enableAnimatorOnHover: 1
+  setVisibleDelay: 0
+  setHideDelay: 0
 --- !u!114 &1673856129170501966
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3618,6 +3625,8 @@ MonoBehaviour:
   showHideAnimator: {fileID: 6886247203035731848}
   hideAnimatorOnAwake: 1
   enableAnimatorOnHover: 1
+  setVisibleDelay: 0
+  setHideDelay: 0
 --- !u!114 &7009826137728465702
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5290,6 +5299,8 @@ MonoBehaviour:
   showHideAnimator: {fileID: 3372890548839210124}
   hideAnimatorOnAwake: 1
   enableAnimatorOnHover: 1
+  setVisibleDelay: 0
+  setHideDelay: 0
 --- !u!114 &7061163220679428443
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5494,6 +5505,8 @@ MonoBehaviour:
   showHideAnimator: {fileID: 7882847985520842770}
   hideAnimatorOnAwake: 1
   enableAnimatorOnHover: 1
+  setVisibleDelay: 0
+  setHideDelay: 0
 --- !u!114 &1413073526740766789
 MonoBehaviour:
   m_ObjectHideFlags: 0

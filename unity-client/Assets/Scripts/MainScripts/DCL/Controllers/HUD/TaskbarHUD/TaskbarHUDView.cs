@@ -29,6 +29,7 @@ public class TaskbarHUDView : MonoBehaviour
     [SerializeField] internal TaskbarMoreMenu moreMenu;
 
     [Header("Old TaskbarCompatibility (temporal)")]
+    [SerializeField] internal RectTransform taskbarPanelTransf;
     [SerializeField] internal Image taskbarPanelImage;
     [SerializeField] internal GameObject rightButtonsContainer;
 
@@ -323,6 +324,7 @@ public class TaskbarHUDView : MonoBehaviour
     // NOTE(Santi): This is temporal, until we remove the old taskbar
     private void ActivateOldTaskbar()
     {
+        taskbarPanelTransf.offsetMax = new Vector2(-200, taskbarPanelTransf.offsetMax.y);
         taskbarPanelImage.color = new Color(taskbarPanelImage.color.r, taskbarPanelImage.color.g, taskbarPanelImage.color.b, 0f);
         moreButton.gameObject.SetActive(false);
         rightButtonsContainer.SetActive(false);
