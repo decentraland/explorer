@@ -11,7 +11,7 @@ namespace Legacy
 {
     public class AvatarHUDView : MonoBehaviour
     {
-        private const string VIEW_PATH = "Prefabs/AvatarHUD";
+        private const string VIEW_PATH = "Legacy/AvatarHUD";
         private const string VIEW_OBJECT_NAME = "_AvatarHUD";
 
 
