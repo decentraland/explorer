@@ -12,6 +12,11 @@ namespace DCL.Controllers
 
             SceneController.i.OnNewSceneAdded += OnNewSceneAdded;
             DCLCharacterController.i.characterPosition.OnPrecisionAdjust += OnWorldReposition;
+
+            SceneController.OnDebugModeSet += () =>
+            {
+                blockerHandler.CleanBlockers();
+            };
         }
 
         void OnDisable()
@@ -33,12 +38,20 @@ namespace DCL.Controllers
 
         void OnNewSceneAdded(ParcelScene newScene)
         {
+            if (SceneController.i.isDebugMode) return;
+
             newScene.OnSceneReady += OnSceneReady;
         }
 
         void OnSceneReady(ParcelScene scene)
         {
             scene.OnSceneReady -= OnSceneReady;
+
+            if (SceneController.i.isDebugMode)
+            {
+                blockerHandler.CleanBlockers();
+                return;
+            }
 
             SetupWorldBlockers();
         }
