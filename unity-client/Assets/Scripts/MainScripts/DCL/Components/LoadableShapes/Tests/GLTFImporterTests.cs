@@ -4,20 +4,28 @@ using DCL.Models;
 using NUnit.Framework;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Generic;
 using Newtonsoft.Json;
 using UnityEngine;
 using UnityEngine.TestTools;
 using UnityGLTF;
+using UnityGLTF.Cache;
+using UnityGLTF.Cache;
 
 public class GLTFImporterTests : TestsBase
 {
     public IEnumerator LoadModel(string path, System.Action<InstantiatedGLTFObject> OnFinishLoading)
     {
         string src = Utils.GetTestsAssetsPath() + path;
+
         DecentralandEntity entity = null;
+
         GLTFShape gltfShape = TestHelpers.CreateEntityWithGLTFShape(scene, Vector3.zero, src, out entity);
+
         yield return gltfShape.routine;
-        yield return new WaitForSeconds(4);
+
+        yield return new WaitForAllMessagesProcessed();
+        yield return new WaitUntil(() => GLTFComponent.downloadingCount == 0);
 
         if (OnFinishLoading != null)
         {
@@ -63,6 +71,20 @@ public class GLTFImporterTests : TestsBase
         yield return LoadModel("/GLB/Avatar/Avatar_Idle.glb", (m) => trevorModel = m);
     }
 
+    [UnityTest]
+    public IEnumerator TwoGLTFsWithSameExternalTexturePathDontCollide()
+    {
+        InstantiatedGLTFObject trunk1 = null;
+        InstantiatedGLTFObject trunk2 = null;
+
+        PersistentAssetCache.ImageCacheByUri.Clear();
+
+        yield return LoadModel("/GLTF/Trunk/Trunk.gltf", (m) => trunk1 = m);
+        yield return LoadModel("/GLTF/Trunk2/Trunk.gltf", (m) => trunk2 = m);
+        UnityEngine.Assertions.Assert.AreEqual(2, PersistentAssetCache.ImageCacheByUri.Count, "Image cache is colliding!");
+        UnityEngine.Assertions.Assert.AreEqual(2, PersistentAssetCache.StreamCacheByUri.Count, "Buffer cache is colliding!");
+    }
+
 
     [UnityTest]
     public IEnumerator CurvesAreOptimizedCorrectly()
@@ -100,4 +122,5 @@ public class GLTFImporterTests : TestsBase
 
         yield break;
     }
+
 }
