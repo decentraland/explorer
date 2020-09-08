@@ -231,7 +231,8 @@ public class AvatarEditorHUDView : MonoBehaviour
                 if (doneButton != null)
                     doneButton.interactable = true;
 
-                onAvatarAppear.Invoke(avatarModel);
+                if (onAvatarAppear != null)
+                    onAvatarAppear.Invoke(avatarModel);
             });
     }
 

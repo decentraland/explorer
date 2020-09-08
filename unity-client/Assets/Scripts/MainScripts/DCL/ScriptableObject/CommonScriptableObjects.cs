@@ -29,8 +29,26 @@ public static class AudioScriptableObjects
     private static AudioEvent dialogCloseEvent;
     public static AudioEvent dialogClose => CommonScriptableObjects.GetOrLoad(ref dialogCloseEvent, "ScriptableObjects/AudioEvents/HUDCommon/DialogClose");
 
+    private static AudioEvent fadeInEvent;
+    public static AudioEvent fadeIn => CommonScriptableObjects.GetOrLoad(ref fadeInEvent, "ScriptableObjects/AudioEvents/HUDCommon/FadeIn");
+
+    private static AudioEvent fadeOutEvent;
+    public static AudioEvent fadeOut => CommonScriptableObjects.GetOrLoad(ref fadeInEvent, "ScriptableObjects/AudioEvents/HUDCommon/FadeOut");
+
     private static AudioEvent listItemAppearEvent;
     public static AudioEvent listItemAppear => CommonScriptableObjects.GetOrLoad(ref listItemAppearEvent, "ScriptableObjects/AudioEvents/HUDCommon/ListItemAppear");
+
+    private static AudioEvent chatReceiveGlobalEvent;
+    public static AudioEvent chatReceiveGlobal => CommonScriptableObjects.GetOrLoad(ref chatReceiveGlobalEvent, "ScriptableObjects/AudioEvents/HUDCommon/ChatReceiveGlobal");
+
+    private static AudioEvent chatReceivePrivateEvent;
+    public static AudioEvent chatReceivePrivate => CommonScriptableObjects.GetOrLoad(ref chatReceivePrivateEvent, "ScriptableObjects/AudioEvents/HUDCommon/ChatReceivePrivate");
+
+    private static AudioEvent chatSendEvent;
+    public static AudioEvent chatSend => CommonScriptableObjects.GetOrLoad(ref chatSendEvent, "ScriptableObjects/AudioEvents/HUDCommon/ChatSend");
+
+    private static AudioEvent notificationEvent;
+    public static AudioEvent notification => CommonScriptableObjects.GetOrLoad(ref notificationEvent, "ScriptableObjects/AudioEvents/HUDCommon/Notification");
 }
 
 public static class CommonScriptableObjects

@@ -11,7 +11,7 @@ public class AvatarEditorCategoryToggleAudioHandler : ButtonAudioHandler
         if (selectable != null)
         {
             if (selectable.interactable)
-                HUDAudioPlayer.i.ResetListItemAppearPitch();
+                AudioScriptableObjects.listItemAppear.SetPitch(1f);
         }
     }
 }

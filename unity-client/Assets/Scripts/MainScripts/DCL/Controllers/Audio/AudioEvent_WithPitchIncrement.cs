@@ -6,9 +6,14 @@ public class AudioEvent_WithPitchIncrement : AudioEvent
     [SerializeField]
     float pitchIncrement;
 
-    public override void Play(bool oneShot = false)
+    public override void Initialize(AudioSource audioSource)
     {
-        base.Play(oneShot);
-        SetPitch(1f + pitchIncrement);
+        base.Initialize(audioSource);
+        onPlay += OnPlay;
+    }
+
+    void OnPlay()
+    {
+        SetPitch(pitch + pitchIncrement);
     }
 }
