@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public interface IMapDataView
+internal interface IMapDataView
 {
     void SetMinimapSceneInfo(MinimapMetadata.MinimapSceneInfo info);
     MinimapMetadata.MinimapSceneInfo GetMinimapSceneInfo();

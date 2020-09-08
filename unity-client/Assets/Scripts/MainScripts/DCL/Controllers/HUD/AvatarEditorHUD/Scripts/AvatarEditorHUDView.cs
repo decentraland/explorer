@@ -12,8 +12,6 @@ public class AvatarEditorHUDView : MonoBehaviour
 
     public bool isOpen { get; private set; }
 
-    public event System.Action OnClose;
-
     [System.Serializable]
     public class AvatarEditorNavigationInfo
     {
@@ -349,9 +347,6 @@ public class AvatarEditorHUDView : MonoBehaviour
         characterPreviewController.camera.enabled = visible;
         avatarEditorCanvas.enabled = visible;
         avatarEditorCanvasGroup.blocksRaycasts = visible;
-
-        if (isOpen && !visible)
-            OnClose?.Invoke();
 
         isOpen = visible;
     }

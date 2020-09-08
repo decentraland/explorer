@@ -6,8 +6,6 @@ namespace DCL.SettingsHUD
     {
         public bool isOpen { get; private set; }
 
-        public event System.Action OnClose;
-
         private const string PATH = "SettingsHUD";
 
         private void Awake()
@@ -34,9 +32,6 @@ namespace DCL.SettingsHUD
 
             gameObject.SetActive(visible);
             isOpen = visible;
-
-            if (!isOpen)
-                OnClose?.Invoke();
         }
     }
 }

@@ -321,7 +321,7 @@ public class TaskbarHUDController : IHUD
 
     public void AddSettingsWindow(SettingsHUDController controller)
     {
-        if (controller == null || controller.view == null)
+        if (controller == null)
         {
             Debug.LogWarning("AddSettingsWindow >>> Settings window doesn't exist yet!");
             return;
@@ -329,7 +329,7 @@ public class TaskbarHUDController : IHUD
 
         settingsHud = controller;
         view.OnAddSettingsWindow();
-        settingsHud.view.OnClose += () =>
+        settingsHud.OnClose += () =>
         {
             view.settingsButton.SetToggleState(false, false);
 
@@ -340,7 +340,7 @@ public class TaskbarHUDController : IHUD
 
     public void AddBackpackWindow(AvatarEditorHUDController controller)
     {
-        if (controller == null || controller.view == null)
+        if (controller == null)
         {
             Debug.LogWarning("AddBackpackWindow >>> Backpack window doesn't exist yet!");
             return;
@@ -348,7 +348,7 @@ public class TaskbarHUDController : IHUD
 
         avatarEditorHud = controller;
         view.OnAddBackpackWindow();
-        avatarEditorHud.view.OnClose += () =>
+        avatarEditorHud.OnClose += () =>
         {
             view.backpackButton.SetToggleState(false, false);
 
@@ -359,7 +359,7 @@ public class TaskbarHUDController : IHUD
 
     public void AddExploreWindow(ExploreHUDController controller)
     {
-        if (controller == null || controller.view == null)
+        if (controller == null)
         {
             Debug.LogWarning("AddExploreWindow >>> Explore window doesn't exist yet!");
             return;
@@ -367,7 +367,7 @@ public class TaskbarHUDController : IHUD
 
         exploreHud = controller;
         view.OnAddExploreWindow();
-        exploreHud.view.OnClose += () =>
+        exploreHud.OnClose += () =>
         {
             view.exploreButton.SetToggleState(false, false);
 

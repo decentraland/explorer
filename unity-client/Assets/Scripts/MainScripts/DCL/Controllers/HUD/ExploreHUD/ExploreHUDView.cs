@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ExploreHUDView : MonoBehaviour
+internal class ExploreHUDView : MonoBehaviour
 {
     [SerializeField] internal HighlightScenesController highlightScenesController;
     [SerializeField] internal ShowHideAnimator popup;
@@ -9,8 +9,6 @@ public class ExploreHUDView : MonoBehaviour
     [SerializeField] internal GotoMagicButton gotoMagicButton;
     [SerializeField] internal Button_OnPointerDown togglePopupButton;
     [SerializeField] internal Color[] friendColors = null;
-
-    public event System.Action OnClose;
 
     public void SetVisibility(bool visible)
     {
@@ -25,7 +23,6 @@ public class ExploreHUDView : MonoBehaviour
         else
         {
             popup.Hide();
-            OnClose?.Invoke();
         }
 
     }

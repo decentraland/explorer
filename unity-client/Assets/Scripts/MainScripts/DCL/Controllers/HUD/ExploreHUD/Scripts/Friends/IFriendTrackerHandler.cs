@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public interface IFriendTrackerHandler
+internal interface IFriendTrackerHandler
 {
     void OnFriendAdded(UserProfile profile, Color backgroundColor);
     void OnFriendRemoved(UserProfile profile);

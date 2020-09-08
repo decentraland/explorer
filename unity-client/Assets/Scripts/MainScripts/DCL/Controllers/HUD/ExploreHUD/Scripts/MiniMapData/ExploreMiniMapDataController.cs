@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 
-public class ExploreMiniMapDataController : IDisposable
+internal class ExploreMiniMapDataController : IDisposable
 {
     Dictionary<Vector2Int, PendingData> pendingSceneData = new Dictionary<Vector2Int, PendingData>();
 

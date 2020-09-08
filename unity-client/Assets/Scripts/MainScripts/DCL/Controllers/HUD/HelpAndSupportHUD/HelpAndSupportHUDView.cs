@@ -49,10 +49,11 @@ namespace DCL.HelpAndSupportHUD
         public void SetVisibility(bool visible)
         {
             gameObject.SetActive(visible);
-            isOpen = visible;
 
-            if (!isOpen)
+            if (!visible && isOpen)
                 OnClose?.Invoke();
+
+            isOpen = visible;
         }
     }
 }

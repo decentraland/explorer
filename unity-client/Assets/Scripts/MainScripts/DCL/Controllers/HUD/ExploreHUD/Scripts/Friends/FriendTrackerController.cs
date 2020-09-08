@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using Random = UnityEngine.Random;
 
-public class FriendTrackerController : IDisposable
+internal class FriendTrackerController : IDisposable
 {
     Dictionary<IFriendTrackerHandler, TrackedSceneInfo> listeners = new Dictionary<IFriendTrackerHandler, TrackedSceneInfo>();
     Dictionary<string, FriendTracker> friends = new Dictionary<string, FriendTracker>();

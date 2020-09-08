@@ -5,7 +5,7 @@ using DCL.Interface;
 
 public class ExploreHUDController : IHUD
 {
-    public ExploreHUDView view { get; private set; }
+    internal ExploreHUDView view;
 
     internal InputAction_Trigger toggleExploreTrigger;
 
@@ -13,6 +13,7 @@ public class ExploreHUDController : IHUD
     FriendTrackerController friendsController;
 
     public event Action OnToggleTriggered;
+    public event Action OnClose;
 
     public ExploreHUDController()
     {
@@ -55,6 +56,10 @@ public class ExploreHUDController : IHUD
         {
             Utils.UnlockCursor();
             view.RefreshData();
+        }
+        else if (!visible && view.IsActive())
+        {
+            OnClose?.Invoke();
         }
 
         view.SetVisibility(visible);
