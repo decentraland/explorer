@@ -126,11 +126,14 @@ export class VoiceCommunicator {
   createOutputNodes(src: string): { scriptProcessor: ScriptProcessorNode; panNode: PannerNode } {
     const scriptProcessor = this.createScriptOutputFor(src)
     const panNode = this.context.createPanner()
-    panNode.coneInnerAngle = 140
+    panNode.coneInnerAngle = 180
     panNode.coneOuterAngle = 360
-    panNode.coneOuterGain = 0.8
-    panNode.maxDistance = this.options.maxDistance ?? 40
-    panNode.refDistance = this.options.refDistance ?? 2
+    panNode.coneOuterGain = 0.9
+    panNode.maxDistance = this.options.maxDistance ?? 50
+    panNode.refDistance = this.options.refDistance ?? 5
+    panNode.panningModel = 'equalpower'
+    panNode.distanceModel = 'inverse'
+    panNode.rolloffFactor = 1.0
     scriptProcessor.connect(panNode)
     panNode.connect(this.context.destination)
 
