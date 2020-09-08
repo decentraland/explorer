@@ -4,11 +4,11 @@ namespace DCL.Controllers
 {
     public class WorldBlockersController : MonoBehaviour
     {
-        BlockerHandler blockerHandler;
+        WorldBlockerHandler blockerHandler;
 
         void Start()
         {
-            blockerHandler = new BlockerHandler();
+            blockerHandler = new WorldBlockerHandler();
 
             SceneController.i.OnNewSceneAdded += OnNewSceneAdded;
             DCLCharacterController.i.characterPosition.OnPrecisionAdjust += OnWorldReposition;
