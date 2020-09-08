@@ -137,7 +137,8 @@ public class HUDController : MonoBehaviour
     class ConfigureHUDElementMessage
     {
         public HUDElementID hudElementId;
-        public string configuration;
+        public HUDConfiguration configuration;
+        public string extraPayload;
     }
 
     public void ConfigureHUDElement(string payload)
@@ -145,11 +146,13 @@ public class HUDController : MonoBehaviour
         ConfigureHUDElementMessage message = JsonUtility.FromJson<ConfigureHUDElementMessage>(payload);
 
         HUDElementID id = message.hudElementId;
+        HUDConfiguration configuration = message.configuration;
+        string extraPayload = message.extraPayload;
 
-        ConfigureHUDElement(id, ConfigurationFromJson(id, message.configuration));
+        ConfigureHUDElement(id, configuration, extraPayload);
     }
 
-    public void ConfigureHUDElement(HUDElementID hudElementId, HUDConfiguration configuration)
+    public void ConfigureHUDElement(HUDElementID hudElementId, HUDConfiguration configuration, string extraPayload)
     {
         //TODO(Brian): For now, the factory code is using this switch approach.
         //             In order to avoid the factory upkeep we can transform the IHUD elements
@@ -320,11 +323,6 @@ public class HUDController : MonoBehaviour
 
         if (hudElement != null)
             hudElement.SetVisibility(configuration.active && configuration.visible);
-    }
-
-    private HUDConfiguration ConfigurationFromJson(HUDElementID hudElementId, string configuration)
-    {
-        return JsonUtility.FromJson<HUDConfiguration>(configuration);
     }
 
     private void OpenPrivateChatWindow(string targetUserId)
