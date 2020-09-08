@@ -4,8 +4,6 @@ using UnityEngine.EventSystems;
 public class GeneralHUDElementAudioHandler : MonoBehaviour, IPointerEnterHandler, IPointerDownHandler, IPointerUpHandler
 {
     [SerializeField]
-    HUDAudioPlayer.Sound hoverSound = HUDAudioPlayer.Sound.buttonHover;
-    [SerializeField]
     protected bool playHover = true, playClick = true, playRelease = true;
 
     AudioEvent eventClick, eventHover, eventRelease;
@@ -25,7 +23,9 @@ public class GeneralHUDElementAudioHandler : MonoBehaviour, IPointerEnterHandler
         if (!Input.GetMouseButton(0))
         {
             if (eventHover != null)
+            {
                 eventHover.Play(true);
+            }
         }
     }
 

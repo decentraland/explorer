@@ -49,7 +49,6 @@ public class AvatarEditorHUDView : MonoBehaviour
     [SerializeField] internal Button randomizeButton;
     [SerializeField] internal Button doneButton;
     [SerializeField] internal Button exitButton;
-    [SerializeField] internal AvatarEditorHUDAudioHandler audioHandler;
 
     [Header("Collectibles")] [SerializeField]
     internal GameObject web3Container;
@@ -61,6 +60,9 @@ public class AvatarEditorHUDView : MonoBehaviour
     internal static CharacterPreviewController characterPreviewController;
     private AvatarEditorHUDController controller;
     internal readonly Dictionary<string, ItemSelector> selectorsByCategory = new Dictionary<string, ItemSelector>();
+
+    [HideInInspector]
+    public System.Action<AvatarModel> onAvatarAppear;
 
     private void Awake()
     {
@@ -229,33 +231,7 @@ public class AvatarEditorHUDView : MonoBehaviour
                 if (doneButton != null)
                     doneButton.interactable = true;
 
-                AudioContainerOld audioContainer = null;
-                if (audioHandler != null)
-                    audioContainer = audioHandler.GetComponent<AudioContainerOld>();
-
-                if (audioContainer != null && isOpen)
-                {
-                    audioContainer.GetEvent("AvatarAppear").Play();
-                    audioHandler.PlayRarity();
-
-                    // Play a voice reaction sound from the avatar
-                    if (Random.Range(0f, 1f) > 0.4f)
-                    {
-                        AudioEventOld eventReaction = null;
-                        if (avatarModel.bodyShape.Contains("Female"))
-                            eventReaction = audioContainer.GetEvent("ReactionFemale");
-                        else
-                            eventReaction = audioContainer.GetEvent("ReactionMale");
-
-                        if (eventReaction != null)
-                        {
-                            if (!eventReaction.source.isPlaying)
-                                eventReaction.PlayScheduled(0.6f);
-                        }
-                    }
-                }
-
-                
+                onAvatarAppear.Invoke(avatarModel);
             });
     }
 

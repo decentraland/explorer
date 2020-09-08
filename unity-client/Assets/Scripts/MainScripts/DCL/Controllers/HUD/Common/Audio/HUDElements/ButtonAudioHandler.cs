@@ -6,11 +6,7 @@ public class ButtonAudioHandler : GeneralHUDElementAudioHandler
 {
     protected Selectable selectable;
     [SerializeField]
-    HUDAudioPlayer.Sound extraClickSound = HUDAudioPlayer.Sound.none;
-    [SerializeField]
     AudioEvent extraClickEvent = null;
-    [SerializeField]
-    bool playHoverSound = true;
 
     public override void Awake()
     {

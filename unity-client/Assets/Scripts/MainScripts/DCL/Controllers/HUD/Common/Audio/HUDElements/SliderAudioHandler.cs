@@ -4,57 +4,48 @@ using UnityEngine.UI;
 
 public class SliderAudioHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
 {
-    const float INCREMENT_SOUND_INTERVAL = 0.02f;
-
-    HUDAudioPlayer audioPlayer;
     Slider slider;
-    float valueIncrementTimer = 0f;
+    AudioEvent eventClick, eventRelease, eventValueChanged;
 
-    void Start()
+    void Awake()
     {
-        audioPlayer = HUDAudioPlayer.i;
+        eventClick = Resources.Load<AudioEvent>("ScriptableObjects/AudioEvents/HUDCommon/ButtonClick");
+        eventRelease = Resources.Load<AudioEvent>("ScriptableObjects/AudioEvents/HUDCommon/ButtonRelease");
+        eventValueChanged = Resources.Load<AudioEvent>("ScriptableObjects/AudioEvents/HUDCommon/SliderValueChange");
         slider = GetComponent<Slider>();
         slider.onValueChanged.AddListener(OnValueChanged);
     }
 
-    private void Update()
-    {
-        if (valueIncrementTimer > 0f)
-        {
-            valueIncrementTimer -= Time.deltaTime;
-            if (valueIncrementTimer < 0f)
-            {
-                valueIncrementTimer = 0f;
-            }
-        }
-    }
-
     public void OnPointerDown(PointerEventData eventData)
     {
-        if (audioPlayer != null &&
-            slider != null &&
-            slider.interactable)
+        if (slider != null)
         {
-            audioPlayer.Play(HUDAudioPlayer.Sound.buttonClick);
+            if (slider.interactable)
+            {
+                if (eventClick != null)
+                    eventClick.Play(true);
+            }
         }
     }
 
     public void OnPointerUp(PointerEventData eventData)
     {
-        if (audioPlayer != null &&
-            slider != null &&
-            slider.interactable)
+        if (slider != null)
         {
-            audioPlayer.Play(HUDAudioPlayer.Sound.buttonRelease);
+            if (slider.interactable)
+            {
+                if (eventRelease != null)
+                    eventRelease.Play(true);
+            }
         }
     }
 
     void OnValueChanged(float value)
     {
-        if (audioPlayer != null && valueIncrementTimer == 0f)
+        if (eventValueChanged != null)
         {
-            audioPlayer.Play(HUDAudioPlayer.Sound.valueChange, 1f + ((slider.value - slider.minValue) / (slider.maxValue - slider.minValue)) * 1.5f);
-            valueIncrementTimer = INCREMENT_SOUND_INTERVAL;
+            eventValueChanged.SetPitch(1f + ((slider.value - slider.minValue) / (slider.maxValue - slider.minValue)) * 1.5f);
+            eventValueChanged.Play(true);
         }
     }
 }
