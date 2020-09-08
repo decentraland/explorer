@@ -223,19 +223,17 @@ export function updateVoiceRecordingStatus(recording: boolean) {
             },
             video: false
           })
-          .then(
-            (a) => {
-              voiceCommunicator!.setInputStream(a)
-              if (isVoiceChatRecording(store.getState())) {
-                voiceCommunicator!.start()
-              } else {
-                voiceCommunicator!.pause()
-              }
-            },
-            (e) => {
-              defaultLogger.log('Error requesting audio: ', e)
+          .then((a) => {
+            voiceCommunicator!.setInputStream(a)
+            if (isVoiceChatRecording(store.getState())) {
+              voiceCommunicator!.start()
+            } else {
+              voiceCommunicator!.pause()
             }
-          )
+          })
+          .catch((e) => {
+            defaultLogger.log('Error requesting audio: ', e)
+          })
           .finally(() => {
             audioRequestPending = false
           })
