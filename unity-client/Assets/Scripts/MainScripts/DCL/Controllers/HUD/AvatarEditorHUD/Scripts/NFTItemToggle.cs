@@ -46,7 +46,7 @@ public class NFTItemToggle : ItemToggle
         if (HUDAudioPlayer.i != null)
         {
             if (!nftItemInfo.gameObject.activeSelf)
-                HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogAppear);
+                AudioScriptableObjects.dialogOpen.Play(true);
         }
 
         OnHideAllInfos?.Invoke();
@@ -55,11 +55,8 @@ public class NFTItemToggle : ItemToggle
 
     private void HideInfo()
     {
-        if (HUDAudioPlayer.i != null)
-        {
-            if (nftItemInfo.gameObject.activeSelf)
-                HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogClose);
-        }
+        if (nftItemInfo.gameObject.activeSelf)
+            AudioScriptableObjects.dialogClose.Play(true);
 
         nftItemInfo.SetActive(false);
     }
