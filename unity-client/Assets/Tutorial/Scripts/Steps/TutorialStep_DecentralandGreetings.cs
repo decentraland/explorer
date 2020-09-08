@@ -28,7 +28,8 @@ namespace DCL.Tutorial
         {
             yield return new WaitUntil(() => stepIsFinished);
 
-            tutorialController.PlayTeacherAnimation(TutorialTeacher.TeacherAnimation.QuickGoodbye);
+            if (tutorialController != null)
+                tutorialController.PlayTeacherAnimation(TutorialTeacher.TeacherAnimation.QuickGoodbye);
         }
 
         private void OnOkButtonClick()

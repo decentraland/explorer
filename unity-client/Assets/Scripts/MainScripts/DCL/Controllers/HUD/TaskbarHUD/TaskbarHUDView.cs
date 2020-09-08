@@ -21,12 +21,14 @@ public class TaskbarHUDView : MonoBehaviour
     [SerializeField] internal TaskbarButton settingsButton;
     [SerializeField] internal TaskbarButton backpackButton;
     [SerializeField] internal TaskbarButton exploreButton;
+    [SerializeField] internal RectTransform exploreTooltipReference;
     [SerializeField] internal TaskbarButton helpAndSupportButton;
     [SerializeField] internal GameObject separatorMark;
 
     [Header("More Button Config")]
     [SerializeField] internal TaskbarButton moreButton;
     [SerializeField] internal TaskbarMoreMenu moreMenu;
+    [SerializeField] internal RectTransform tutorialTooltipReference;
 
     [Header("Old TaskbarCompatibility (temporal)")]
     [SerializeField] internal RectTransform taskbarPanelTransf;

@@ -20,7 +20,7 @@ namespace DCL.Tutorial
 
         [SerializeField] bool unlockCursorAtStart = false;
         [SerializeField] bool show3DTeacherAtStart = false;
-        [SerializeField] RectTransform teacherPositionRef;
+        [SerializeField] protected RectTransform teacherPositionRef;
 
         protected TutorialController tutorialController;
         protected Animator stepAnimator;
@@ -39,9 +39,13 @@ namespace DCL.Tutorial
             if (unlockCursorAtStart)
                 mouseCatcher?.UnlockCursor();
 
-            tutorialController?.ShowTeacher3DModel(show3DTeacherAtStart);
-            if (show3DTeacherAtStart && teacherPositionRef != null)
-                tutorialController?.SetTeacherPosition(teacherPositionRef.position);
+            if (tutorialController != null)
+            {
+                tutorialController.ShowTeacher3DModel(show3DTeacherAtStart);
+
+                if (show3DTeacherAtStart && teacherPositionRef != null)
+                    tutorialController.SetTeacherPosition(teacherPositionRef.position);
+            }
         }
 
         /// <summary>

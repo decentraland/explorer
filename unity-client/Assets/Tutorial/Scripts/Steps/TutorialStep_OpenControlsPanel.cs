@@ -25,8 +25,6 @@ namespace DCL.Tutorial
         public override IEnumerator OnStepExecute()
         {
             yield return new WaitUntil(() => controlsHasBeenOpened && controlsHasBeenClosed);
-
-            tutorialController.PlayTeacherAnimation(TutorialTeacher.TeacherAnimation.QuickGoodbye);
         }
 
         public override void OnStepFinished()

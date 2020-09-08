@@ -165,11 +165,15 @@ MonoBehaviour:
   - {fileID: 4410924681366832147, guid: 0e9002742ce819f4583733f5a29364ad, type: 3}
   - {fileID: 758471573230640681, guid: 53f98be530a835e4eae47ac30281cd4c, type: 3}
   - {fileID: 5639665319216893634, guid: 259bf436d3fbfe847b44d46cf81f1201, type: 3}
+  - {fileID: 4712031868617782090, guid: 54219e5d1e0415f4ab74ddc2ee0adbfa, type: 3}
+  - {fileID: 3037048280107810980, guid: e5f5e18a835a34e45830f29570029838, type: 3}
   stepsFromDeepLink:
   - {fileID: 5317936615110094145, guid: b09c459c26cfc20478dbec66f7f8f120, type: 3}
   - {fileID: 2279349500871665793, guid: 8c33a8a8dee303549b52b8aa6a60f6ae, type: 3}
   stepsOnGenesisPlazaAfterDeepLink:
   - {fileID: 6639514825351315494, guid: e80a4e30b31058544ada1af4125c4b91, type: 3}
+  - {fileID: 4712031868617782090, guid: 54219e5d1e0415f4ab74ddc2ee0adbfa, type: 3}
+  - {fileID: 3037048280107810980, guid: e5f5e18a835a34e45830f29570029838, type: 3}
   teacherRawImage: {fileID: 6732306866191114328}
   teacher: {fileID: 977289631841785178}
   teacherMovementSpeed: 0.8

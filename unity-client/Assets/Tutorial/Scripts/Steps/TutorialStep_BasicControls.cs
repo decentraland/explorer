@@ -38,7 +38,9 @@ namespace DCL.Tutorial
             CommonScriptableObjects.rendererState.OnChange += RendererState_OnChange;
 
             WebInterface.GoTo(0, 0);
-            tutorialController.SetTutorialDisabled();
+
+            if (tutorialController != null)
+                tutorialController.SetTutorialDisabled();
         }
 
         private void RendererState_OnChange(bool current, bool previous)
@@ -55,7 +57,8 @@ namespace DCL.Tutorial
         {
             SceneController.i.OnSortScenes -= SceneController_OnSortScenes;
 
-            tutorialController.SetTutorialEnabled(false.ToString());
+            if (tutorialController != null)
+                tutorialController.SetTutorialEnabled(false.ToString());
         }
     }
 }
