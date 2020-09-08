@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class ButtonAudioHandler : MonoBehaviour, IPointerEnterHandler, IPointerDownHandler, IPointerUpHandler
+public class ButtonAudioHandler : GeneralHUDElementAudioHandler
 {
     protected Selectable selectable;
     [SerializeField]
@@ -12,52 +12,42 @@ public class ButtonAudioHandler : MonoBehaviour, IPointerEnterHandler, IPointerD
     [SerializeField]
     bool playHoverSound = true;
 
-    AudioEvent eventClick, eventHover, eventRelease;
-
-    void Start()
+    public override void Awake()
     {
-        eventClick = Resources.Load<AudioEvent>("ScriptableObjects/AudioEvents/HUDCommon/ButtonClick");
-        eventHover = Resources.Load<AudioEvent>("ScriptableObjects/AudioEvents/HUDCommon/ButtonHover");
-        eventRelease = Resources.Load<AudioEvent>("ScriptableObjects/AudioEvents/HUDCommon/ButtonRelease");
+        base.Awake();
 
         selectable = GetComponent<Selectable>();
     }
 
-    public void OnPointerEnter(PointerEventData eventData)
-    {
-        if (!playHoverSound)
-            return;
-
-        if (selectable != null && !Input.GetMouseButton(0))
-        {
-            if (selectable.interactable)
-            {
-                if (eventHover != null)
-                    eventHover.Play(true);
-            }
-        }
-    }
-
-    public virtual void OnPointerDown(PointerEventData eventData)
+    public override void OnPointerEnter(PointerEventData eventData)
     {
         if (selectable != null)
         {
             if (selectable.interactable)
             {
-                if (eventClick != null)
-                    eventClick.Play(true);
+                base.OnPointerEnter(eventData);
             }
         }
     }
 
-    public void OnPointerUp(PointerEventData eventData)
+    public override void OnPointerDown(PointerEventData eventData)
     {
         if (selectable != null)
         {
             if (selectable.interactable)
             {
-                if (eventRelease != null)
-                    eventRelease.Play(true);
+                base.OnPointerDown(eventData);
+            }
+        }
+    }
+
+    public override void OnPointerUp(PointerEventData eventData)
+    {
+        if (selectable != null)
+        {
+            if (selectable.interactable)
+            {
+                base.OnPointerUp(eventData);
 
                 if (extraClickEvent != null)
                     extraClickEvent.Play(true);

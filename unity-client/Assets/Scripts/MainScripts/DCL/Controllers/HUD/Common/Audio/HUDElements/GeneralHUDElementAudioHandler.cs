@@ -3,32 +3,47 @@ using UnityEngine.EventSystems;
 
 public class GeneralHUDElementAudioHandler : MonoBehaviour, IPointerEnterHandler, IPointerDownHandler, IPointerUpHandler
 {
-    HUDAudioPlayer audioPlayer;
     [SerializeField]
     HUDAudioPlayer.Sound hoverSound = HUDAudioPlayer.Sound.buttonHover;
     [SerializeField]
-    bool playHover = false, playClick = true, playRelease = true;
+    protected bool playHover = true, playClick = true, playRelease = true;
 
-    void Start()
+    AudioEvent eventClick, eventHover, eventRelease;
+
+    public virtual void Awake()
     {
-        audioPlayer = HUDAudioPlayer.i;
+        eventClick = Resources.Load<AudioEvent>("ScriptableObjects/AudioEvents/HUDCommon/ButtonClick");
+        eventHover = Resources.Load<AudioEvent>("ScriptableObjects/AudioEvents/HUDCommon/ButtonHover");
+        eventRelease = Resources.Load<AudioEvent>("ScriptableObjects/AudioEvents/HUDCommon/ButtonRelease");
     }
 
-    public void OnPointerEnter(PointerEventData eventData)
+    public virtual void OnPointerEnter(PointerEventData eventData)
     {
-        if (playHover && audioPlayer != null)
-            audioPlayer.Play(hoverSound);
+        if (!playHover)
+            return;
+
+        if (!Input.GetMouseButton(0))
+        {
+            if (eventHover != null)
+                eventHover.Play(true);
+        }
     }
 
-    public void OnPointerDown(PointerEventData eventData)
+    public virtual void OnPointerDown(PointerEventData eventData)
     {
-        if (playClick && audioPlayer != null)
-            audioPlayer.Play(HUDAudioPlayer.Sound.buttonClick);
+        if (!playClick)
+            return;
+
+        if (eventClick != null)
+            eventClick.Play(true);
     }
 
-    public void OnPointerUp(PointerEventData eventData)
+    public virtual void OnPointerUp(PointerEventData eventData)
     {
-        if (playRelease && audioPlayer != null)
-            audioPlayer.Play(HUDAudioPlayer.Sound.buttonRelease);
+        if (!playRelease)
+            return;
+
+        if (eventRelease != null)
+            eventRelease.Play(true);
     }
 }
