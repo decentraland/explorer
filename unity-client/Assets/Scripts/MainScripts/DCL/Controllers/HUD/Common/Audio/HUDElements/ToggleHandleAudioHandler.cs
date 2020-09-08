@@ -4,23 +4,25 @@ using UnityEngine.UI;
 
 public class ToggleHandleAudioHandler : MonoBehaviour, IPointerEnterHandler
 {
-    HUDAudioPlayer audioPlayer;
     [SerializeField]
     Toggle toggle;
 
-    void Start()
+    AudioEvent eventHover;
+
+    void Awake()
     {
-        audioPlayer = HUDAudioPlayer.i;
+        eventHover = Resources.Load<AudioEvent>("ScriptableObjects/AudioEvents/HUDCommon/ButtonHover");
     }
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        if (audioPlayer != null &&
-            toggle != null &&
-            toggle.interactable &&
-            !Input.GetMouseButton(0))
+        if (toggle != null && !Input.GetMouseButton(0))
         {
-            audioPlayer.Play(HUDAudioPlayer.Sound.buttonHover);
+            if (toggle.interactable)
+            {
+                if (eventHover != null)
+                    eventHover.Play(true);
+            }
         }
     }
 }
