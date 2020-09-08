@@ -1308,12 +1308,12 @@ MonoBehaviour:
   openBrowserWhenStart: 1
   useCustomContentServer: 0
   customContentServerUrl: http://localhost:1338/
-  baseUrlMode: 0
-  baseUrlCustom: 
-  environment: 4
+  baseUrlMode: 1
+  baseUrlCustom: http://localhost:8080/?ENABLE_EXPLORE_HUD&
+  environment: 2
   startInCoords: {x: 0, y: 0}
   forceLocalComms: 0
-  allWearables: 0
+  allWearables: 1
   testWearables: 0
   enableTutorial: 0
   soloScene: 0

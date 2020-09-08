@@ -7,17 +7,13 @@ public class ExploreHUDAudioHandler : MonoBehaviour
     [SerializeField]
     GotoMagicButton magicButton;
 
-    AudioEventOld eventMagicPointerEnter, eventMagicPointerExit, eventMagicButtonPressed;
+    [SerializeField]
+    AudioEvent eventMagicPointerEnter, eventMagicPointerExit, eventMagicButtonPressed;
 
     float magicPointerEnterLastPlayed = 0f;
 
     private void Start()
     {
-        AudioContainerOld ac = GetComponent<AudioContainerOld>();
-        eventMagicPointerEnter = ac.GetEvent("MagicButtonEnter");
-        eventMagicPointerExit = ac.GetEvent("MagicButtonExit");
-        eventMagicButtonPressed = ac.GetEvent("MagicButtonPressed");
-
         magicButton.OnGotoMagicPointerEnter += OnMagicButtonEnter;
         magicButton.onGotoMagicPointerExit += OnMagicButtonExit;
         magicButton.OnGotoMagicPressed += OnMagicButtonPressed;
@@ -37,6 +33,6 @@ public class ExploreHUDAudioHandler : MonoBehaviour
 
     void OnMagicButtonPressed()
     {
-        eventMagicButtonPressed.Play();
+        eventMagicButtonPressed.Play(true);
     }
 }
