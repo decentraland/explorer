@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace DCL.SettingsHUD
 {
@@ -9,6 +10,9 @@ namespace DCL.SettingsHUD
         public bool isOpen { get; private set; }
 
         private const string PATH = "SettingsHUD";
+
+        [SerializeField] internal Button closeButton;
+        [SerializeField] internal Button doneButton;
 
         private void Awake()
         {
