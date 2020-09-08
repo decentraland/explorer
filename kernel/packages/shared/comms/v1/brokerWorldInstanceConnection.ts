@@ -249,6 +249,11 @@ export class BrokerWorldInstanceConnection implements WorldInstanceConnection {
     return {}
   }
 
+  sendVoiceMessage(currentPosition: Position, data: Uint8Array): Promise<void> {
+    // Not implemented
+    return Promise.resolve()
+  }
+
   private handleMessage(message: BrokerMessage) {
     const msgSize = message.data.length
 
@@ -463,10 +468,5 @@ export class BrokerWorldInstanceConnection implements WorldInstanceConnection {
       this.connection.sendUnreliable(bytes)
     }
     return new SendResult(bytes.length)
-  }
-
-  sendVoiceMessage(currentPosition: Position, data: Uint8Array): Promise<void> {
-    // Not implemented
-    return Promise.resolve()
   }
 }

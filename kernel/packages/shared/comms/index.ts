@@ -211,6 +211,7 @@ export function updateVoiceRecordingStatus(recording: boolean) {
     if (!voiceCommunicator.hasInput()) {
       if (!audioRequestPending) {
         audioRequestPending = true
+        // tslint:disable-next-line
         navigator.mediaDevices
           .getUserMedia({
             audio: {

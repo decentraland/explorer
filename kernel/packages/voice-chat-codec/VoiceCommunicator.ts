@@ -74,16 +74,6 @@ export class VoiceCommunicator {
     return !!this.input
   }
 
-  private createEncodeStream() {
-    const encodeStream = this.voiceChatWorkerMain.getOrCreateEncodeStream(this.selfId, this.sampleRate)
-    encodeStream.addAudioEncodedListener((data) => this.channel.send(data))
-
-    this.inputProcessor.onaudioprocess = async function (e) {
-      const buffer = e.inputBuffer
-      encodeStream.encode(buffer.getChannelData(0))
-    }
-  }
-
   async playEncodedAudio(src: string, relativePosition: VoiceSpatialParams, encoded: Uint8Array) {
     if (!this.outputs[src]) {
       const nodes = this.createOutputNodes(src)
@@ -119,11 +109,6 @@ export class VoiceCommunicator {
       1,
       0
     )
-  }
-
-  private setVoiceRelativePosition(src: string, spatialParams: VoiceSpatialParams) {
-    this.outputs[src].spatialParams = spatialParams
-    this.updatePannerNodeParameters(src)
   }
 
   updatePannerNodeParameters(src: string) {
@@ -196,5 +181,20 @@ export class VoiceCommunicator {
 
   pause() {
     this.inputProcessor.disconnect(this.context.destination)
+  }
+
+  private createEncodeStream() {
+    const encodeStream = this.voiceChatWorkerMain.getOrCreateEncodeStream(this.selfId, this.sampleRate)
+    encodeStream.addAudioEncodedListener((data) => this.channel.send(data))
+
+    this.inputProcessor.onaudioprocess = async function (e) {
+      const buffer = e.inputBuffer
+      encodeStream.encode(buffer.getChannelData(0))
+    }
+  }
+
+  private setVoiceRelativePosition(src: string, spatialParams: VoiceSpatialParams) {
+    this.outputs[src].spatialParams = spatialParams
+    this.updatePannerNodeParameters(src)
   }
 }

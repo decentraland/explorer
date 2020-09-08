@@ -16,14 +16,14 @@ type DecodeStream = {
 }
 
 export class VoiceChatCodecWorkerMain {
+  public readonly encodeStreams: Record<string, EncodeStream> = {}
+  public readonly decodeStreams: Record<string, DecodeStream> = {}
+
   private requestId: number = 0
   private worker: Worker
 
   private encodeListeners: Record<string, EncodeListener[]> = {}
   private decodeListeners: Record<string, DecodeListener[]> = {}
-
-  public readonly encodeStreams: Record<string, EncodeStream> = {}
-  public readonly decodeStreams: Record<string, DecodeStream> = {}
 
   constructor() {
     this.worker = new Worker(workerUrl, { name: 'VoiceChatCodecWorker' })
@@ -33,13 +33,10 @@ export class VoiceChatCodecWorkerMain {
       } else if (ev.data.topic === ResponseTopic.DECODE) {
         this.decodeListeners[ev.data.streamId]?.forEach((listener) => listener(ev.data.samples))
       } else {
+        // tslint:disable-next-line:no-console
         console.warn('Unknown message topic received from worker', ev)
       }
     }
-  }
-
-  private generateId() {
-    return this.requestId++
   }
 
   getOrCreateEncodeStream(streamId: string, sampleRate: number): EncodeStream {
@@ -64,14 +61,6 @@ export class VoiceChatCodecWorkerMain {
     })
   }
 
-  private addListenerFor<T>(streamId: string, listeners: Record<string, T[]>, listener: T) {
-    if (!listeners[streamId]) {
-      listeners[streamId] = []
-    }
-
-    listeners[streamId].push(listener)
-  }
-
   addAudioEncodedListener(streamId: string, listener: EncodeListener) {
     this.addListenerFor(streamId, this.encodeListeners, listener)
   }
@@ -94,5 +83,17 @@ export class VoiceChatCodecWorkerMain {
     const id = this.generateId()
     message.id = id
     this.worker.postMessage(message)
+  }
+
+  private generateId() {
+    return this.requestId++
+  }
+
+  private addListenerFor<T>(streamId: string, listeners: Record<string, T[]>, listener: T) {
+    if (!listeners[streamId]) {
+      listeners[streamId] = []
+    }
+
+    listeners[streamId].push(listener)
   }
 }
