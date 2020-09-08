@@ -144,7 +144,7 @@ export class VoiceCommunicator {
     panNode.coneInnerAngle = 140
     panNode.coneOuterAngle = 360
     panNode.coneOuterGain = 0.8
-    panNode.maxDistance = this.options.maxDistance ?? 48
+    panNode.maxDistance = this.options.maxDistance ?? 40
     panNode.refDistance = this.options.refDistance ?? 2
     scriptProcessor.connect(panNode)
     panNode.connect(this.context.destination)

@@ -34,6 +34,7 @@ public enum DCLAction_Hold
     Sprint = 1,
     Jump = 2,
     FreeCameraMode = 101,
+    VoiceChatRecording = 102
 }
 
 public enum DCLAction_Measurable
@@ -155,6 +156,9 @@ public class InputController : MonoBehaviour
                     //Disable until the fine-tuning is ready
                     if (ENABLE_THIRD_PERSON_CAMERA)
                         InputProcessor.FromKey(action, KeyCode.T, InputProcessor.Modifier.NeedsPointerLocked);
+                    break;
+                case DCLAction_Hold.VoiceChatRecording:
+                    InputProcessor.FromKey(action, KeyCode.K, InputProcessor.Modifier.NeedsPointerLocked);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
