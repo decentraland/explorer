@@ -37,12 +37,15 @@ public class ExploreHUDController : IHUD
         BaseSceneCellView.OnJumpIn += OnJumpIn;
     }
 
-    public void Initialize(IFriendsController friendsController)
+    public void Initialize(IFriendsController friendsController, bool newTaskbarIsEnabled)
     {
         this.friendsController = new FriendTrackerController(friendsController, view.friendColors);
         miniMapDataController = new ExploreMiniMapDataController();
 
         view.Initialize(miniMapDataController, this.friendsController);
+
+        if (newTaskbarIsEnabled)
+            view.togglePopupButton.gameObject.SetActive(false);
     }
 
     public void SetVisibility(bool visible)

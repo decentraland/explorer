@@ -124,7 +124,7 @@ public class TaskbarHUDShould : TestsBase
     public void AddExploreWindowProperly()
     {
         exploreHUDController = new ExploreHUDController();
-        exploreHUDController.Initialize(friendsController);
+        exploreHUDController.Initialize(friendsController, false);
         controller.AddExploreWindow(exploreHUDController);
 
         Assert.IsTrue(exploreHUDController.view.gameObject.activeSelf, "Explore window is disabled!");

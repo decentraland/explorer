@@ -318,7 +318,7 @@ public class HUDController : MonoBehaviour
                 CreateHudElement<ExploreHUDController>(configuration, hudElementId);
                 if (exploreHud != null)
                 {
-                    exploreHud.Initialize(FriendsController.i);
+                    exploreHud.Initialize(FriendsController.i, newTaskbarIsEnabled);
                     taskbarHud?.AddExploreWindow(exploreHud);
                 }
                 break;
