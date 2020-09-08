@@ -5,12 +5,10 @@ using UnityEngine.UI;
 public class SliderAudioHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
 {
     Slider slider;
-    AudioEvent eventClick, eventRelease, eventValueChanged;
+    AudioEvent eventValueChanged;
 
     void Awake()
     {
-        eventClick = Resources.Load<AudioEvent>("ScriptableObjects/AudioEvents/HUDCommon/ButtonClick");
-        eventRelease = Resources.Load<AudioEvent>("ScriptableObjects/AudioEvents/HUDCommon/ButtonRelease");
         eventValueChanged = Resources.Load<AudioEvent>("ScriptableObjects/AudioEvents/HUDCommon/SliderValueChange");
         slider = GetComponent<Slider>();
         slider.onValueChanged.AddListener(OnValueChanged);
@@ -22,8 +20,7 @@ public class SliderAudioHandler : MonoBehaviour, IPointerDownHandler, IPointerUp
         {
             if (slider.interactable)
             {
-                if (eventClick != null)
-                    eventClick.Play(true);
+                AudioScriptableObjects.buttonClick.Play(true);
             }
         }
     }
@@ -34,8 +31,7 @@ public class SliderAudioHandler : MonoBehaviour, IPointerDownHandler, IPointerUp
         {
             if (slider.interactable)
             {
-                if (eventRelease != null)
-                    eventRelease.Play(true);
+                AudioScriptableObjects.buttonRelease.Play(true);
             }
         }
     }

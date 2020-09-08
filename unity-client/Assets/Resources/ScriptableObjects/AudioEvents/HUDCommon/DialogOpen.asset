@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ba51c89dee121ec40ada8e86c01b058e, type: 3}
-  m_Name: DialogAppear
+  m_Name: DialogOpen
   m_EditorClassIdentifier: 
   loop: 0
   volume: 1
-  pitch: 1
+  initialPitch: 1
   randomPitch: 0.1
   cooldownSeconds: 0.01
   clips:

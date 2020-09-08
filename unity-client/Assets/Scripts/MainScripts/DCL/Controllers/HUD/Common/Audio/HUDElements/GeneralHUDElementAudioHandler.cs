@@ -6,15 +6,6 @@ public class GeneralHUDElementAudioHandler : MonoBehaviour, IPointerEnterHandler
     [SerializeField]
     protected bool playHover = true, playClick = true, playRelease = true;
 
-    AudioEvent eventClick, eventHover, eventRelease;
-
-    public virtual void Awake()
-    {
-        eventClick = Resources.Load<AudioEvent>("ScriptableObjects/AudioEvents/HUDCommon/ButtonClick");
-        eventHover = Resources.Load<AudioEvent>("ScriptableObjects/AudioEvents/HUDCommon/ButtonHover");
-        eventRelease = Resources.Load<AudioEvent>("ScriptableObjects/AudioEvents/HUDCommon/ButtonRelease");
-    }
-
     public virtual void OnPointerEnter(PointerEventData eventData)
     {
         if (!playHover)
@@ -22,10 +13,7 @@ public class GeneralHUDElementAudioHandler : MonoBehaviour, IPointerEnterHandler
 
         if (!Input.GetMouseButton(0))
         {
-            if (eventHover != null)
-            {
-                eventHover.Play(true);
-            }
+            AudioScriptableObjects.buttonHover.Play(true);
         }
     }
 
@@ -34,8 +22,7 @@ public class GeneralHUDElementAudioHandler : MonoBehaviour, IPointerEnterHandler
         if (!playClick)
             return;
 
-        if (eventClick != null)
-            eventClick.Play(true);
+        AudioScriptableObjects.buttonClick.Play(true);
     }
 
     public virtual void OnPointerUp(PointerEventData eventData)
@@ -43,7 +30,6 @@ public class GeneralHUDElementAudioHandler : MonoBehaviour, IPointerEnterHandler
         if (!playRelease)
             return;
 
-        if (eventRelease != null)
-            eventRelease.Play(true);
+        AudioScriptableObjects.buttonRelease.Play(true);
     }
 }

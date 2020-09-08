@@ -5,11 +5,10 @@ using UnityEngine.UI;
 public class ToggleAudioHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
 {
     Toggle toggle;
-    AudioEvent eventClick, eventEnable, eventDisable;
+    AudioEvent eventEnable, eventDisable;
 
     void Awake()
     {
-        eventClick = Resources.Load<AudioEvent>("ScriptableObjects/AudioEvents/HUDCommon/ButtonClick");
         eventEnable = Resources.Load<AudioEvent>("ScriptableObjects/AudioEvents/HUDCommon/Enable");
         eventDisable = Resources.Load<AudioEvent>("ScriptableObjects/AudioEvents/HUDCommon/Disable");
 
@@ -22,8 +21,7 @@ public class ToggleAudioHandler : MonoBehaviour, IPointerDownHandler, IPointerUp
         {
             if (toggle.interactable)
             {
-                if (eventClick != null)
-                    eventClick.Play(true);
+                AudioScriptableObjects.buttonClick.Play(true);
             }
         }
     }

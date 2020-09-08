@@ -8,10 +8,8 @@ public class ButtonAudioHandler : GeneralHUDElementAudioHandler
     [SerializeField]
     AudioEvent extraClickEvent = null;
 
-    public override void Awake()
+    void Awake()
     {
-        base.Awake();
-
         selectable = GetComponent<Selectable>();
     }
 

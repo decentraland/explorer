@@ -25,9 +25,6 @@ public class AvatarEditorHUDAudioHandler : MonoBehaviour
             view.wearableGridPairs[i].selector.OnItemClicked += OnWearableClicked;
         }
 
-        view.skinColorSelector.OnColorChanged += OnSkinColorClicked;
-        view.eyeColorSelector.OnColorChanged += OnEyeColorClicked;
-        view.hairColorSelector.OnColorChanged += OnHairColorClicked;
         view.onAvatarAppear += OnAvatarAppear;
 
         if (randomizeButton != null)
@@ -89,21 +86,6 @@ public class AvatarEditorHUDAudioHandler : MonoBehaviour
     void ResetLastClickedWearable()
     {
         lastClickedWearable = null;
-    }
-
-    void OnSkinColorClicked(Color color)
-    {
-
-    }
-
-    void OnEyeColorClicked(Color color)
-    {
-
-    }
-
-    void OnHairColorClicked(Color color)
-    {
-
     }
 
     void OnAvatarAppear(AvatarModel model)
