@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 public class ButtonAudioHandler : MonoBehaviour, IPointerEnterHandler, IPointerDownHandler, IPointerUpHandler
 {
-    Selectable selectable;
+    protected Selectable selectable;
     [SerializeField]
     HUDAudioPlayer.Sound extraClickSound = HUDAudioPlayer.Sound.none;
     [SerializeField]
@@ -38,7 +38,7 @@ public class ButtonAudioHandler : MonoBehaviour, IPointerEnterHandler, IPointerD
         }
     }
 
-    public void OnPointerDown(PointerEventData eventData)
+    public virtual void OnPointerDown(PointerEventData eventData)
     {
         if (selectable != null)
         {

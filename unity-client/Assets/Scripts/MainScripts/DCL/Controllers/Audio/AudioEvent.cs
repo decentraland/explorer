@@ -24,33 +24,29 @@ public class AudioEvent : ScriptableObject
     public AudioSource source;
 
     private int clipIndex;
-    private float lastPlayed; // Used for cooldown
+    private float lastPlayed, nextPlayTime; // Used for cooldown
 
     public void Initialize(AudioSource audioSource)
     {
         RandomizeIndex();
         source = audioSource;
         lastPlayed = 0f;
+        nextPlayTime = 0f;
     }
 
     public void RandomizeIndex()
     {
         int newIndex;
-        do
-        {
-            newIndex = Random.Range(0, clips.Length);
-        } while (clips.Length > 1 && newIndex == clipIndex);
+        do { newIndex = Random.Range(0, clips.Length); } while (clips.Length > 1 && newIndex == clipIndex);
         clipIndex = newIndex;
     }
 
     public virtual void Play(bool oneShot = false)
     {
-        Debug.Log(name + " Play() :: " + Time.time + " >= " + (lastPlayed + cooldownSeconds));
-
         if (source == null) return;
 
         // Check if AudioSource is active and check cooldown time
-        if (!source.gameObject.activeSelf || Time.time < lastPlayed + cooldownSeconds) return;
+        if (!source.gameObject.activeSelf || Time.time < nextPlayTime) return;
 
         source.clip = clips[clipIndex];
         source.pitch = pitch + Random.Range(0f, randomPitch) - (randomPitch * 0.5f);
@@ -64,6 +60,7 @@ public class AudioEvent : ScriptableObject
         RandomizeIndex();
 
         lastPlayed = Time.time;
+        nextPlayTime = lastPlayed + cooldownSeconds;
     }
 
     public void PlayScheduled(float delaySeconds)
@@ -71,7 +68,7 @@ public class AudioEvent : ScriptableObject
         if (source == null) return;
 
         // Check if AudioSource is active and check cooldown time (taking delay into account)
-        if (!source.gameObject.activeSelf || Time.time + delaySeconds < lastPlayed + cooldownSeconds) return;
+        if (!source.gameObject.activeSelf || Time.time + delaySeconds < nextPlayTime) return;
 
         source.clip = clips[clipIndex];
         source.pitch = pitch + Random.Range(0f, randomPitch) - (randomPitch * 0.5f);
@@ -80,6 +77,7 @@ public class AudioEvent : ScriptableObject
         RandomizeIndex();
 
         lastPlayed = Time.time;
+        nextPlayTime = lastPlayed + cooldownSeconds;
     }
 
     public void Stop()
