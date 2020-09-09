@@ -1,12 +1,13 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace DCL.Tutorial
 {
     /// <summary>
     /// Class that represents one of the tooltip steps included in the onboarding tutorial.
     /// </summary>
-    public class TutorialStep_Tooltip : TutorialStep
+    public class TutorialStep_Tooltip : TutorialStep, IPointerDownHandler
     {
         [SerializeField] protected RectTransform tooltipTransform;
         [SerializeField] bool setMaxTimeToHide = true;
@@ -25,6 +26,11 @@ namespace DCL.Tutorial
 
             if (timeSinceWasOpened >= maxTimeToHide)
                 stepIsFinished = true;
+        }
+
+        public virtual void OnPointerDown(PointerEventData eventData)
+        {
+            stepIsFinished = true;
         }
 
         public override void OnStepStart()
