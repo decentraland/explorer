@@ -27,15 +27,38 @@ public class AudioEvent : ScriptableObject
     protected float pitch;
     private float lastPlayed, nextPlayTime; // Used for cooldown
 
-    protected System.Action onPlay;
+    protected event System.Action OnPlay;
 
-    public virtual void Initialize(AudioSource audioSource)
+    public virtual void Initialize(AudioContainer audioContainer)
     {
-        source = audioSource;
+        if (audioContainer == null) return;
+
         pitch = initialPitch;
         lastPlayed = 0f;
         nextPlayTime = 0f;
         RandomizeIndex();
+
+        // Add AudioSource component for event
+        source = audioContainer.gameObject.AddComponent(typeof(AudioSource)) as AudioSource;
+
+        if (clips.Length == 0)
+        {
+            Debug.LogWarning("There are no clips in the audio event '" + name + "' (" + audioContainer.name + ")");
+        }
+        else
+        {
+            source.clip = clips[0];
+        }
+        
+        source.volume = volume;
+        source.loop = loop;
+        source.playOnAwake = false;
+
+        source.outputAudioMixerGroup = audioContainer.audioMixerGroup;
+        source.spatialBlend = audioContainer.spatialBlend;
+        source.dopplerLevel = audioContainer.dopplerLevel;
+        source.minDistance = audioContainer.minDistance;
+        source.maxDistance = audioContainer.maxDistance;
     }
 
     public void RandomizeIndex()
@@ -66,8 +89,7 @@ public class AudioEvent : ScriptableObject
         lastPlayed = Time.time;
         nextPlayTime = lastPlayed + cooldownSeconds;
 
-        if (onPlay != null)
-            onPlay.Invoke();
+        OnPlay?.Invoke();
     }
 
     public void PlayScheduled(float delaySeconds)

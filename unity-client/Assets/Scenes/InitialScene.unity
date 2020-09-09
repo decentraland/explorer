@@ -1310,10 +1310,10 @@ MonoBehaviour:
   customContentServerUrl: http://localhost:1338/
   baseUrlMode: 1
   baseUrlCustom: http://localhost:8080/?ENABLE_EXPLORE_HUD&
-  environment: 2
+  environment: 0
   startInCoords: {x: 0, y: 0}
   forceLocalComms: 0
-  allWearables: 1
+  allWearables: 0
   testWearables: 0
   enableTutorial: 0
   soloScene: 0

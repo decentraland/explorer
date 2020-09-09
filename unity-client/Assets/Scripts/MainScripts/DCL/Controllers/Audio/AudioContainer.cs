@@ -31,27 +31,7 @@ public class AudioContainer : MonoBehaviour
 
         foreach (AudioEvent e in audioEvents)
         {
-            if (e.clips.Length == 0)
-            {
-                Debug.LogWarning("There are no clips in the audio event '" + e.name + "' (" + name + ")");
-                continue;
-            }
-
-            // Add AudioSource component for event
-            e.Initialize(gameObject.AddComponent(typeof(AudioSource)) as AudioSource);
-
-            e.source.clip = e.clips[0];
-            e.source.outputAudioMixerGroup = audioMixerGroup;
-
-            e.source.volume = e.volume;
-            e.source.loop = e.loop;
-            e.source.spatialBlend = spatialBlend;
-
-            e.source.dopplerLevel = dopplerLevel;
-            e.source.minDistance = minDistance;
-            e.source.maxDistance = maxDistance;
-
-            e.source.playOnAwake = false;
+            e.Initialize(this);
         }
     }
 }
