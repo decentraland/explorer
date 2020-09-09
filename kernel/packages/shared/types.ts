@@ -402,7 +402,8 @@ export enum HUDElementID {
   EMAIL_PROMPT = 19,
   EXPLORE_HUD = 20,
   MANA_HUD = 21,
-  HELP_AND_SUPPORT_HUD = 22
+  HELP_AND_SUPPORT_HUD = 22,
+  GO_TO_GENESIS_PLAZA_HUD = 23
 }
 
 export type HUDConfiguration = {

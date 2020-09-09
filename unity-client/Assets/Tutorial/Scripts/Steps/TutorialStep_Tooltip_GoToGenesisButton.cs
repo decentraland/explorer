@@ -1,11 +1,12 @@
 using System.Collections;
+using UnityEngine;
 
 namespace DCL.Tutorial
 {
     /// <summary>
-    /// Class that represents the onboarding tutorial step related to how to open the Minimap.
+    /// Class that represents the onboarding tutorial step related to how to Jump In the Genesis Plaza and become a DCL Citizen.
     /// </summary>
-    public class TutorialStep_MinimapTooltip : TutorialStep_Tooltip
+    public class TutorialStep_Tooltip_GoToGenesisButton : TutorialStep_Tooltip
     {
         public override IEnumerator OnStepExecute()
         {
@@ -21,9 +22,10 @@ namespace DCL.Tutorial
 
             if (tutorialController != null &&
                 tutorialController.hudController != null &&
-                tutorialController.hudController.minimapHud.minimapTooltipReference)
+                tutorialController.hudController.taskbarHud.goToGenesisTooltipReference)
             {
-                tooltipTransform.position = tutorialController.hudController.minimapHud.minimapTooltipReference.position;
+                tutorialController.hudController.taskbarHud.ShowGoToGenesisPlazaButton();
+                tooltipTransform.position = tutorialController.hudController.taskbarHud.goToGenesisTooltipReference.position;
             }
         }
     }

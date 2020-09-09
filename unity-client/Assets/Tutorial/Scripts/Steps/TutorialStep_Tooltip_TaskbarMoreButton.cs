@@ -7,16 +7,6 @@ namespace DCL.Tutorial
     /// </summary>
     public class TutorialStep_Tooltip_TaskbarMoreButton : TutorialStep_Tooltip
     {
-        public override void OnStepStart()
-        {
-            base.OnStepStart();
-        }
-
-        public override IEnumerator OnStepExecute()
-        {
-            yield return base.OnStepExecute();
-        }
-
         protected override void SetTooltipPosition()
         {
             base.SetTooltipPosition();

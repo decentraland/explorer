@@ -56,6 +56,7 @@ initializeUnity(container)
     i.ConfigureHUDElement(HUDElementID.CONTROLS_HUD, { active: true, visible: false })
     i.ConfigureHUDElement(HUDElementID.EXPLORE_HUD, { active: ENABLE_EXPLORE_HUD, visible: false })
     i.ConfigureHUDElement(HUDElementID.HELP_AND_SUPPORT_HUD, { active: true, visible: false })
+    i.ConfigureHUDElement(HUDElementID.GO_TO_GENESIS_PLAZA_HUD, { active: true, visible: false })
 
     try {
       await userAuthentified()

@@ -1,4 +1,5 @@
 using DCL;
+using DCL.GoToGenesisPlazaHUD;
 using DCL.HelpAndSupportHUD;
 using DCL.Helpers;
 using DCL.Interface;
@@ -17,6 +18,7 @@ public class TaskbarHUDController : IHUD
     public AvatarEditorHUDController avatarEditorHud;
     public ExploreHUDController exploreHud;
     public HelpAndSupportHUDController helpAndSupportHud;
+    public GoToGenesisPlazaHUDController goToGenesisHud;
 
     IMouseCatcher mouseCatcher;
     IChatController chatController;
@@ -30,6 +32,7 @@ public class TaskbarHUDController : IHUD
     public bool isNewTaskbar { get; private set; }
     public RectTransform tutorialTooltipReference { get => view.moreTooltipReference; }
     public RectTransform exploreTooltipReference { get => view.exploreTooltipReference; }
+    public RectTransform goToGenesisTooltipReference { get => view.goToGenesisTooltipReference; }
 
     public void Initialize(IMouseCatcher mouseCatcher, IChatController chatController,
         IFriendsController friendsController, bool newTaskbarIsEnabled)
@@ -65,6 +68,8 @@ public class TaskbarHUDController : IHUD
         view.OnExploreToggleOn += View_OnExploreToggleOn;
         view.OnHelpAndSupportToggleOff += View_OnHelpAndSupportToggleOff;
         view.OnHelpAndSupportToggleOn += View_OnHelpAndSupportToggleOn;
+        view.OnGoToGenesisToggleOff += View_OnGoToGenesisToggleOff;
+        view.OnGoToGenesisToggleOn += View_OnGoToGenesisToggleOn;
 
         toggleFriendsTrigger = Resources.Load<InputAction_Trigger>("ToggleFriends");
         toggleFriendsTrigger.OnTriggered -= ToggleFriendsTrigger_OnTriggered;
@@ -194,6 +199,17 @@ public class TaskbarHUDController : IHUD
     private void View_OnHelpAndSupportToggleOff()
     {
         helpAndSupportHud.SetVisibility(false);
+    }
+
+    private void View_OnGoToGenesisToggleOn()
+    {
+        goToGenesisHud.SetVisibility(true);
+        OnAnyTaskbarButtonClicked?.Invoke();
+    }
+
+    private void View_OnGoToGenesisToggleOff()
+    {
+        goToGenesisHud.SetVisibility(false);
     }
 
     private void MouseCatcher_OnMouseUnlock()
@@ -400,6 +416,34 @@ public class TaskbarHUDController : IHUD
         };
     }
 
+    public void AddGoToGenesisWindow(GoToGenesisPlazaHUDController controller)
+    {
+        if (controller == null || controller.view == null)
+        {
+            Debug.LogWarning("AddGoToGenesisWindow >>> Go to Genesis window doesn't exist yet!");
+            return;
+        }
+
+        goToGenesisHud = controller;
+        goToGenesisHud.view.OnClose += () =>
+        {
+            view.goToGenesisButton.SetToggleState(false, false);
+
+            if (!AnyWindowsDifferentThanChatIsOpen())
+                worldChatWindowHud.MarkWorldChatMessagesAsRead();
+        };
+    }
+
+    public void ShowGoToGenesisPlazaButton()
+    {
+        view.OnAddGoToGenesisWindow();
+
+        view.rightButtonsHorizontalLayout.CalculateLayoutInputHorizontal();
+        view.rightButtonsHorizontalLayout.CalculateLayoutInputVertical();
+        view.rightButtonsHorizontalLayout.SetLayoutHorizontal();
+        view.rightButtonsHorizontalLayout.SetLayoutVertical();
+    }
+
     public void AddControlsMoreOption()
     {
         view.OnAddControlsMoreOption();
@@ -438,6 +482,8 @@ public class TaskbarHUDController : IHUD
             view.OnExploreToggleOn -= View_OnExploreToggleOn;
             view.OnHelpAndSupportToggleOff -= View_OnHelpAndSupportToggleOff;
             view.OnHelpAndSupportToggleOn -= View_OnHelpAndSupportToggleOn;
+            view.OnGoToGenesisToggleOff -= View_OnGoToGenesisToggleOff;
+            view.OnGoToGenesisToggleOn -= View_OnGoToGenesisToggleOn;
 
             UnityEngine.Object.Destroy(view.gameObject);
         }

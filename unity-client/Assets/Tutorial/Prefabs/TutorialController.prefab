@@ -170,6 +170,7 @@ MonoBehaviour:
   - {fileID: 3680644473237013901, guid: 92afb818b93335f4c91c56034d82f56e, type: 3}
   stepsFromDeepLink:
   - {fileID: 2279349500871665793, guid: 8c33a8a8dee303549b52b8aa6a60f6ae, type: 3}
+  - {fileID: 7355157609001770265, guid: 3d256fc4674c9c348979fd3a0688eb7c, type: 3}
   stepsOnGenesisPlazaAfterDeepLink:
   - {fileID: 6639514825351315494, guid: e80a4e30b31058544ada1af4125c4b91, type: 3}
   - {fileID: 4712031868617782090, guid: 54219e5d1e0415f4ab74ddc2ee0adbfa, type: 3}
