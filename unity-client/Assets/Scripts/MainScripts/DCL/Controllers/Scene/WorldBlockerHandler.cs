@@ -9,8 +9,6 @@ namespace DCL.Controllers
         HashSet<Vector2Int> blockersToRemove = new HashSet<Vector2Int>();
         HashSet<Vector2Int> blockersToAdd = new HashSet<Vector2Int>();
 
-        static float milisecondsUsed = 0f;
-
         public void SetupGlobalBlockers(HashSet<Vector2Int> allLoadedParcelCoords, float height, Transform parent)
         {
             if (allLoadedParcelCoords.Count == 0) return;
