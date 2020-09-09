@@ -155,10 +155,10 @@ public class InputController : MonoBehaviour
                 case DCLAction_Hold.FreeCameraMode:
                     //Disable until the fine-tuning is ready
                     if (ENABLE_THIRD_PERSON_CAMERA)
-                        InputProcessor.FromKey(action, KeyCode.T, InputProcessor.Modifier.NeedsPointerLocked);
+                        InputProcessor.FromKey(action, KeyCode.Y, InputProcessor.Modifier.NeedsPointerLocked);
                     break;
                 case DCLAction_Hold.VoiceChatRecording:
-                    InputProcessor.FromKey(action, KeyCode.K, InputProcessor.Modifier.NeedsPointerLocked);
+                    InputProcessor.FromKey(action, KeyCode.T, InputProcessor.Modifier.FocusNotInInput);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
