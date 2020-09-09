@@ -7,6 +7,7 @@ using UnityEngine.Networking;
 using static DCL.ContentServerUtils;
 
 [assembly: InternalsVisibleTo("AssetBundleBuilderTests")]
+
 namespace DCL
 {
     public static class AssetBundleMenuItems
@@ -55,6 +56,15 @@ namespace DCL
             builder.DumpArea(new Vector2Int(x, y), new Vector2Int(10, 10), (error) => DumpAreaToMax(builder, nextX, nextY));
         }
 
+        [MenuItem("Decentraland/Asset Bundle Builder/Dump Tomb Chaser")]
+        public static void DumpOrg()
+        {
+            var builder = new AssetBundleBuilder();
+            builder.skipAlreadyBuiltBundles = true;
+            var zoneArray = Utils.GetCenteredZoneArray(new Vector2Int(12, 46), new Vector2Int(1, 1));
+            builder.DumpArea(zoneArray);
+        }
+
 
         [MenuItem("Decentraland/Asset Bundle Builder/Dump Org 0,0")]
         public static void DumpCenterPlaza()
@@ -83,7 +93,9 @@ namespace DCL
             UnityWebRequest w = UnityWebRequest.Get(url);
             w.SendWebRequest();
 
-            while (!w.isDone) { }
+            while (!w.isDone)
+            {
+            }
 
             if (!w.WebRequestSucceded())
             {
