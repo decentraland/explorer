@@ -29,6 +29,12 @@ public static class AudioScriptableObjects
     private static AudioEvent dialogCloseEvent;
     public static AudioEvent dialogClose => CommonScriptableObjects.GetOrLoad(ref dialogCloseEvent, "ScriptableObjects/AudioEvents/HUDCommon/DialogClose");
 
+    private static AudioEvent enableEvent;
+    public static AudioEvent enable => CommonScriptableObjects.GetOrLoad(ref enableEvent, "ScriptableObjects/AudioEvents/HUDCommon/Enable");
+
+    private static AudioEvent disableEvent;
+    public static AudioEvent disable => CommonScriptableObjects.GetOrLoad(ref disableEvent, "ScriptableObjects/AudioEvents/HUDCommon/Disable");
+
     private static AudioEvent fadeInEvent;
     public static AudioEvent fadeIn => CommonScriptableObjects.GetOrLoad(ref fadeInEvent, "ScriptableObjects/AudioEvents/HUDCommon/FadeIn");
 
@@ -49,6 +55,9 @@ public static class AudioScriptableObjects
 
     private static AudioEvent notificationEvent;
     public static AudioEvent notification => CommonScriptableObjects.GetOrLoad(ref notificationEvent, "ScriptableObjects/AudioEvents/HUDCommon/Notification");
+
+    private static AudioEvent sliderValueChangeEvent;
+    public static AudioEvent sliderValueChange => CommonScriptableObjects.GetOrLoad(ref sliderValueChangeEvent, "ScriptableObjects/AudioEvents/HUDCommon/SliderValueChange");
 }
 
 public static class CommonScriptableObjects

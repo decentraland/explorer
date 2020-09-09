@@ -25,7 +25,7 @@ public class AvatarEditorHUDAudioHandler : MonoBehaviour
             view.wearableGridPairs[i].selector.OnItemClicked += OnWearableClicked;
         }
 
-        view.onAvatarAppear += OnAvatarAppear;
+        view.OnAvatarAppear += OnAvatarAppear;
 
         if (randomizeButton != null)
             randomizeButton.onClick.AddListener(ResetLastClickedWearable);

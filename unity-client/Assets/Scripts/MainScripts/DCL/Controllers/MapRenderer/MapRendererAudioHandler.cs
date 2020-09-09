@@ -12,7 +12,7 @@ public class MapRendererAudioHandler : MonoBehaviour
 
     private void Awake()
     {
-        mapRenderer.onMovedParcelCursor += OnMovedParcelCursor;
+        mapRenderer.OnMovedParcelCursor += OnMovedParcelCursor;
     }
 
     public void OnMovedParcelCursor()

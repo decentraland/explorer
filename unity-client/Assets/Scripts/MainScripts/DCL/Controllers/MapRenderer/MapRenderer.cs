@@ -74,7 +74,7 @@ namespace DCL
         private bool isInitialized = false;
 
         [HideInInspector]
-        public System.Action onMovedParcelCursor;
+        public event System.Action OnMovedParcelCursor;
 
         private void Awake()
         {
@@ -210,8 +210,7 @@ namespace DCL
 
             if (highlightedParcelText.text != previousText && !Input.GetMouseButton(0))
             {
-                if (onMovedParcelCursor != null)
-                    onMovedParcelCursor.Invoke();
+                OnMovedParcelCursor?.Invoke();
             }
 
             // ----------------------------------------------------

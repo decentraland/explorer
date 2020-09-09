@@ -62,7 +62,7 @@ public class AvatarEditorHUDView : MonoBehaviour
     internal readonly Dictionary<string, ItemSelector> selectorsByCategory = new Dictionary<string, ItemSelector>();
 
     [HideInInspector]
-    public System.Action<AvatarModel> onAvatarAppear;
+    public event System.Action<AvatarModel> OnAvatarAppear;
 
     private void Awake()
     {
@@ -231,8 +231,7 @@ public class AvatarEditorHUDView : MonoBehaviour
                 if (doneButton != null)
                     doneButton.interactable = true;
 
-                if (onAvatarAppear != null)
-                    onAvatarAppear.Invoke(avatarModel);
+                OnAvatarAppear?.Invoke(avatarModel);
             });
     }
 
