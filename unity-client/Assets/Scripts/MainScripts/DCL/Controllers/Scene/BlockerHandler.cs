@@ -12,11 +12,13 @@ namespace DCL.Controllers
         const string PARCEL_BLOCKER_POOL_NAME = "ParcelBlocker";
         const string PARCEL_BLOCKER_PREFAB = "Prefabs/ParcelBlocker";
 
-        protected Vector3 auxPosVec = new Vector3();
-        protected Vector3 auxScaleVec = new Vector3();
-        protected Dictionary<Vector2Int, PoolableObject> blockers = new Dictionary<Vector2Int, PoolableObject>();
+        Vector3 auxPosVec = new Vector3();
+        Vector3 auxScaleVec = new Vector3();
+        Dictionary<Vector2Int, PoolableObject> blockers = new Dictionary<Vector2Int, PoolableObject>();
+        HashSet<Vector2Int> blockersToRemove = new HashSet<Vector2Int>();
+        HashSet<Vector2Int> blockersToAdd = new HashSet<Vector2Int>();
 
-        protected static Vector2Int[] aroundOffsets =
+        static Vector2Int[] aroundOffsets =
         {
             new Vector2Int(1, 0),
             new Vector2Int(-1, 0),
@@ -43,43 +45,6 @@ namespace DCL.Controllers
             }
         }
 
-        public void SetupSceneBlockers(HashSet<Vector2Int> parcels, float height, Transform parent)
-        {
-            CleanBlockers();
-
-            auxScaleVec.x = ParcelSettings.PARCEL_SIZE;
-            auxScaleVec.y = height;
-            auxScaleVec.z = ParcelSettings.PARCEL_SIZE;
-
-            auxPosVec.y = (height - 1) / 2;
-
-            using (var it = parcels.GetEnumerator())
-            {
-                while (it.MoveNext())
-                {
-                    Vector2Int pos = it.Current;
-
-                    bool isSurrounded = true;
-
-                    for (int i = 0; i < aroundOffsets.Length; i++)
-                    {
-                        Vector2Int o = aroundOffsets[i];
-
-                        if (!parcels.Contains(new Vector2Int(pos.x + o.x, pos.y + o.y)))
-                        {
-                            isSurrounded = false;
-                            break;
-                        }
-                    }
-
-                    if (isSurrounded)
-                        continue;
-
-                    InstantiateBlocker(pos, parent);
-                }
-            }
-        }
-
         protected void InstantiateBlocker(Vector2Int pos, Transform parent)
         {
             float centerOffset = ParcelSettings.PARCEL_SIZE / 2;
@@ -100,6 +65,80 @@ namespace DCL.Controllers
 #endif
 
             blockers.Add(pos, blockerPoolable);
+        }
+
+        public void SetupGlobalBlockers(HashSet<Vector2Int> allLoadedParcelCoords, float height, Transform parent)
+        {
+            if (allLoadedParcelCoords.Count == 0) return;
+
+            blockersToRemove.Clear();
+            blockersToAdd.Clear();
+
+            auxScaleVec.x = ParcelSettings.PARCEL_SIZE;
+            auxScaleVec.y = height;
+            auxScaleVec.z = ParcelSettings.PARCEL_SIZE;
+
+            auxPosVec.y = (height - 1) / 2;
+
+            // Detect blockers to be removed
+            foreach (var item in blockers)
+            {
+                if (allLoadedParcelCoords.Contains(item.Key))
+                {
+                    blockersToRemove.Add(item.Key);
+                }
+                else
+                {
+                    bool foundAroundLoadedScenes = false;
+                    for (int i = 0; i < aroundOffsets.Length; i++)
+                    {
+                        Vector2Int offset = aroundOffsets[i];
+                        Vector2Int checkedPosition = new Vector2Int(item.Key.x + offset.x, item.Key.y + offset.y);
+
+                        if (allLoadedParcelCoords.Contains(checkedPosition))
+                        {
+                            foundAroundLoadedScenes = true;
+                            break;
+                        }
+                    }
+
+                    if (!foundAroundLoadedScenes)
+                        blockersToRemove.Add(item.Key);
+                }
+            }
+
+            // Detect missing blockers to be added
+            using (var it = allLoadedParcelCoords.GetEnumerator())
+            {
+                while (it.MoveNext())
+                {
+                    Vector2Int pos = it.Current;
+
+                    for (int i = 0; i < aroundOffsets.Length; i++)
+                    {
+                        Vector2Int offset = aroundOffsets[i];
+                        Vector2Int checkedPosition = new Vector2Int(pos.x + offset.x, pos.y + offset.y);
+
+                        if (!allLoadedParcelCoords.Contains(checkedPosition) && !blockers.ContainsKey(checkedPosition))
+                        {
+                            blockersToAdd.Add(checkedPosition);
+                        }
+                    }
+                }
+            }
+
+            // Remove extra blockers
+            foreach (var coords in blockersToRemove)
+            {
+                blockers[coords].Release();
+                blockers.Remove(coords);
+            }
+
+            // Add missing blockers
+            foreach (var coords in blockersToAdd)
+            {
+                InstantiateBlocker(coords, parent);
+            }
         }
 
         public void CleanBlockers()

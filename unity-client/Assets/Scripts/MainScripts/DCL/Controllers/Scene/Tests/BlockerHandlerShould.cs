@@ -5,42 +5,156 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.TestTools;
+using DCL;
+using System.Linq;
 
 namespace Tests
 {
     public class BlockerHandlerShould : TestsBase
     {
-        protected override bool justSceneSetUp => true;
+        protected override bool enableSceneIntegrityChecker => false;
 
-        [UnityTest]
-        public IEnumerator CreateOnlyHullBlockersForBigScenes()
+        WorldBlockersController worldBlockersController;
+        BlockerHandler blockersHandler;
+        Dictionary<Vector2Int, PoolableObject> blockers;
+
+        [UnitySetUp]
+        protected override IEnumerator SetUp()
         {
-            var go = new GameObject();
+            yield return base.SetUp();
 
-            var blockerHandler = new BlockerHandler();
-            blockerHandler.SetupSceneBlockers(new HashSet<Vector2Int>(Utils.GetBottomLeftZoneArray(Vector2Int.zero, new Vector2Int(10, 10))), 100, go.transform);
+            worldBlockersController = Reflection_GetField<WorldBlockersController>(sceneController, "worldBlockersController");
 
-            Assert.AreEqual(36, go.transform.childCount, "Blockers count is unexpected. Remember that blockers only should spawn surrounding the scene, not inside. The spawning code might be broken.");
+            Assert.IsNotNull(worldBlockersController);
 
-            blockerHandler.CleanBlockers();
-
-            UnityEngine.Object.Destroy(go);
-            yield break;
+            blockersHandler = Reflection_GetField<BlockerHandler>(worldBlockersController, "blockerHandler");
+            blockers = Reflection_GetField<Dictionary<Vector2Int, PoolableObject>>(blockersHandler, "blockers");
         }
 
         [UnityTest]
-        public IEnumerator ReleaseBlockersOnUnload()
+        public IEnumerator PutBlockersAroundExplorableArea()
         {
-            var go = new GameObject();
+            var jsonMessageToLoad = "{\"id\":\"xxx\",\"basePosition\":{\"x\":0,\"y\":0},\"parcels\":[{\"x\":-1,\"y\":0}, {\"x\":0,\"y\":0}, {\"x\":-1,\"y\":1}],\"baseUrl\":\"http://localhost:9991/local-ipfs/contents/\",\"contents\":[],\"owner\":\"0x0f5d2fb29fb7d3cfee444a200298f468908cc942\"}";
+            sceneController.LoadParcelScenes(jsonMessageToLoad);
 
-            var blockerHandler = new BlockerHandler();
-            blockerHandler.SetupSceneBlockers(new HashSet<Vector2Int>(Utils.GetBottomLeftZoneArray(Vector2Int.zero, new Vector2Int(10, 10))), 100, go.transform);
-            yield return null;
-            blockerHandler.CleanBlockers();
+            yield return new WaitForAllMessagesProcessed();
             yield return null;
 
-            Assert.AreEqual(0, go.transform.childCount, "Blockers couldn't be released properly!");
-            UnityEngine.Object.Destroy(go);
+            sceneController.loadedScenes["xxx"].SetInitMessagesDone();
+            yield return null;
+
+            Assert.AreEqual(blockers.Count(), 12);
+
+            Assert.IsTrue(blockers.ContainsKey(new Vector2Int(1, 0)));
+            Assert.IsTrue(blockers.ContainsKey(new Vector2Int(0, 1)));
+            Assert.IsTrue(blockers.ContainsKey(new Vector2Int(0, -1)));
+            Assert.IsTrue(blockers.ContainsKey(new Vector2Int(1, 1)));
+            Assert.IsTrue(blockers.ContainsKey(new Vector2Int(-1, -1)));
+            Assert.IsTrue(blockers.ContainsKey(new Vector2Int(1, -1)));
+            Assert.IsTrue(blockers.ContainsKey(new Vector2Int(-2, 0)));
+            Assert.IsTrue(blockers.ContainsKey(new Vector2Int(-2, -1)));
+            Assert.IsTrue(blockers.ContainsKey(new Vector2Int(-2, 1)));
+            Assert.IsTrue(blockers.ContainsKey(new Vector2Int(-1, 2)));
+            Assert.IsTrue(blockers.ContainsKey(new Vector2Int(0, 2)));
+            Assert.IsTrue(blockers.ContainsKey(new Vector2Int(-2, 2)));
+        }
+
+        [UnityTest]
+        public IEnumerator ClearOnlyChangedBlockers()
+        {
+            // Load first scene
+            var firstSceneJson = "{\"id\":\"firstScene\",\"basePosition\":{\"x\":0,\"y\":0},\"parcels\":[{\"x\":-1,\"y\":0}, {\"x\":0,\"y\":0}, {\"x\":-1,\"y\":1}],\"baseUrl\":\"http://localhost:9991/local-ipfs/contents/\",\"contents\":[],\"owner\":\"0x0f5d2fb29fb7d3cfee444a200298f468908cc942\"}";
+            sceneController.LoadParcelScenes(firstSceneJson);
+
+            yield return new WaitForAllMessagesProcessed();
+            yield return null;
+
+            sceneController.loadedScenes["firstScene"].SetInitMessagesDone();
+            yield return null;
+
+            Assert.AreEqual(blockers.Count(), 12);
+
+            // Save instante id of some blockers that shouldn't change on the next scene load
+            var targetBlocker1InstanceId = blockers[new Vector2Int(-1, -1)].gameObject.GetInstanceID();
+            var targetBlocker2InstanceId = blockers[new Vector2Int(-2, -1)].gameObject.GetInstanceID();
+            var targetBlocker3InstanceId = blockers[new Vector2Int(-2, 0)].gameObject.GetInstanceID();
+
+            // check blocker that will get removed on next scene load
+            Assert.IsTrue(blockers.ContainsKey(new Vector2Int(0, 1)));
+
+            // Load 2nd scene next to the first one
+            var secondSceneJson = "{\"id\":\"secondScene\",\"basePosition\":{\"x\":0,\"y\":1},\"parcels\":[{\"x\":0,\"y\":2}, {\"x\":0,\"y\":1}, {\"x\":1,\"y\":1}],\"baseUrl\":\"http://localhost:9991/local-ipfs/contents/\",\"contents\":[],\"owner\":\"0x0f5d2fb29fb7d3cfee444a200298f468908cc942\"}";
+            sceneController.LoadParcelScenes(secondSceneJson);
+
+            yield return new WaitForAllMessagesProcessed();
+            yield return null;
+
+            sceneController.loadedScenes["secondScene"].SetInitMessagesDone();
+            yield return null;
+
+            Assert.AreEqual(blockers.Count(), 16);
+
+            // Check some non-changed blockers:
+            Assert.IsTrue(blockers[new Vector2Int(-1, -1)].gameObject.GetInstanceID() == targetBlocker1InstanceId);
+            Assert.IsTrue(blockers[new Vector2Int(-2, -1)].gameObject.GetInstanceID() == targetBlocker2InstanceId);
+            Assert.IsTrue(blockers[new Vector2Int(-2, 0)].gameObject.GetInstanceID() == targetBlocker3InstanceId);
+
+            // Check removed blocker
+            Assert.IsFalse(blockers.ContainsKey(new Vector2Int(0, 1)));
+        }
+
+        [UnityTest]
+        public IEnumerator RemoveBlockersOnNewlyLoadedScene()
+        {
+            // Load first scene
+            var firstSceneJson = "{\"id\":\"firstScene\",\"basePosition\":{\"x\":0,\"y\":0},\"parcels\":[{\"x\":-1,\"y\":0}, {\"x\":0,\"y\":0}, {\"x\":-1,\"y\":1}],\"baseUrl\":\"http://localhost:9991/local-ipfs/contents/\",\"contents\":[],\"owner\":\"0x0f5d2fb29fb7d3cfee444a200298f468908cc942\"}";
+            sceneController.LoadParcelScenes(firstSceneJson);
+
+            yield return new WaitForAllMessagesProcessed();
+            yield return null;
+
+            sceneController.loadedScenes["firstScene"].SetInitMessagesDone();
+            yield return null;
+
+            Assert.AreEqual(blockers.Count(), 12);
+
+            // Load 2nd scene next to the first one
+            var secondSceneJson = "{\"id\":\"secondScene\",\"basePosition\":{\"x\":0,\"y\":1},\"parcels\":[{\"x\":0,\"y\":2}, {\"x\":0,\"y\":1}, {\"x\":1,\"y\":1}],\"baseUrl\":\"http://localhost:9991/local-ipfs/contents/\",\"contents\":[],\"owner\":\"0x0f5d2fb29fb7d3cfee444a200298f468908cc942\"}";
+            sceneController.LoadParcelScenes(secondSceneJson);
+
+            yield return new WaitForAllMessagesProcessed();
+            yield return null;
+
+            // check blocker from previous load is on the new scene that still didn't finish loading
+            Assert.IsTrue(blockers.ContainsKey(new Vector2Int(0, 1)));
+
+            sceneController.loadedScenes["secondScene"].SetInitMessagesDone();
+            yield return null;
+
+            Assert.AreEqual(blockers.Count(), 16);
+
+            // Check the blocker was removed
+            Assert.IsFalse(blockers.ContainsKey(new Vector2Int(0, 1)));
+        }
+
+        [UnityTest]
+        public IEnumerator NotInstantiateBlockersInDebugMode()
+        {
+            SceneController.i.SetDebug();
+            DCL.Configuration.EnvironmentSettings.DEBUG = true;
+
+            yield return null;
+
+            var jsonMessageToLoad = "{\"id\":\"xxx\",\"basePosition\":{\"x\":0,\"y\":0},\"parcels\":[{\"x\":-1,\"y\":0}, {\"x\":0,\"y\":0}, {\"x\":-1,\"y\":1}],\"baseUrl\":\"http://localhost:9991/local-ipfs/contents/\",\"contents\":[],\"owner\":\"0x0f5d2fb29fb7d3cfee444a200298f468908cc942\"}";
+            sceneController.LoadParcelScenes(jsonMessageToLoad);
+
+            yield return new WaitForAllMessagesProcessed();
+            yield return null;
+
+            sceneController.loadedScenes["xxx"].SetInitMessagesDone();
+            yield return null;
+
+            Assert.AreEqual(blockers.Count(), 0);
         }
     }
 }

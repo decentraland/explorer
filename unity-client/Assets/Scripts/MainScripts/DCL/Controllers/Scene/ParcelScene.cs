@@ -41,15 +41,12 @@ namespace DCL.Controllers
         public ContentProvider contentProvider;
         public int disposableNotReadyCount => disposableNotReady.Count;
 
-        [System.NonSerialized] public bool useBlockers = false;
-
         [System.NonSerialized] public bool isTestScene = false;
 
         [System.NonSerialized] public bool isPersistent = false;
 
         [System.NonSerialized] public bool unloadWithDistance = true;
 
-        public BlockerHandler blockerHandler;
         public bool isReady => state == State.READY;
 
         readonly List<string> disposableNotReady = new List<string>();
@@ -81,11 +78,6 @@ namespace DCL.Controllers
         void OnDisable()
         {
             metricsController.Disable();
-        }
-
-        private void OnDestroy()
-        {
-            blockerHandler?.CleanBlockers();
         }
 
         private void Update()
@@ -140,9 +132,6 @@ namespace DCL.Controllers
                 parcels.Add(sceneData.parcels[i]);
             }
 
-            if (useBlockers)
-                blockerHandler = new BlockerHandler();
-
             if (DCLCharacterController.i != null)
                 gameObject.transform.position = DCLCharacterController.i.characterPosition.WorldToUnityPosition(Utils.GridToWorldPosition(data.basePosition.x, data.basePosition.y));
 
@@ -154,7 +143,6 @@ namespace DCL.Controllers
                 return;
             }
 #endif
-            blockerHandler?.SetupSceneBlockers(parcels, metricsController.GetLimits().sceneHeight, this.transform);
 
             if (isTestScene)
                 SetSceneReady();
@@ -1102,8 +1090,6 @@ namespace DCL.Controllers
                 Debug.Log($"{sceneData.basePosition} Scene Ready!");
 
             state = State.READY;
-
-            blockerHandler?.CleanBlockers();
 
             SceneController.i.SendSceneReady(sceneData.id);
             RefreshName();
