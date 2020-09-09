@@ -14,6 +14,7 @@ namespace Tests
     {
         protected override bool enableSceneIntegrityChecker => false;
 
+        const string PARCEL_BLOCKER_POOL_NAME = "ParcelBlocker";
         WorldBlockersController worldBlockersController;
         BlockerHandler blockersHandler;
         Dictionary<Vector2Int, PoolableObject> blockers;
@@ -29,6 +30,14 @@ namespace Tests
 
             blockersHandler = Reflection_GetField<BlockerHandler>(worldBlockersController, "blockerHandler");
             blockers = Reflection_GetField<Dictionary<Vector2Int, PoolableObject>>(blockersHandler, "blockers");
+
+            if (!PoolManager.i.ContainsPool(PARCEL_BLOCKER_POOL_NAME))
+            {
+                GameObject go = Object.Instantiate(Reflection_GetStaticField<GameObject>(typeof(BlockerHandler), "blockerPrefab"));
+                Pool pool = PoolManager.i.AddPool(PARCEL_BLOCKER_POOL_NAME, go);
+                pool.persistent = true;
+                pool.ForcePrewarm();
+            }
         }
 
         [UnityTest]
@@ -155,6 +164,8 @@ namespace Tests
             yield return null;
 
             Assert.AreEqual(blockers.Count(), 0);
+
+            sceneController.isDebugMode = false;
         }
     }
 }
