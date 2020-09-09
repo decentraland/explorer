@@ -196,7 +196,6 @@ export class VoiceCommunicator {
     try {
       this.inputProcessor.disconnect(this.context.destination)
     } catch (e) {
-      console.log(e)
       // Ignored. This will fail if it was already disconnected
     }
   }
