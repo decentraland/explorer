@@ -1,5 +1,5 @@
 import { TeleportController } from 'shared/world/TeleportController'
-import { WSS_ENABLED } from 'config'
+import { WSS_ENABLED, EDITOR } from 'config'
 import { Vector3 } from '../decentraland-ecs/src/decentraland/math'
 import { ProfileForRenderer, MinimapSceneInfo } from '../decentraland-ecs/src/decentraland/Types'
 import { AirdropInfo } from 'shared/airdrops/interface'
@@ -66,12 +66,15 @@ export class UnityInterface {
   public Module: any
 
   public SetTargetHeight(height: number): void {
+    if (EDITOR) {
+      return
+    }
+
     if (targetHeight === height) {
       return
     }
 
     if (!this.gameInstance.Module) {
-
       defaultLogger.log(
         `Can't change base resolution height to ${height}! Are you running explorer in unity editor or native?`
       )
@@ -91,10 +94,16 @@ export class UnityInterface {
     this.Module = this.gameInstance.Module
     _gameInstance = gameInstance
 
-    if (this.Module !== undefined) {
-      window.addEventListener('resize', this.resizeCanvasDelayed)
-      this.resizeCanvasDelayed(null)
-      this.waitForFillMouseEventData()
+    if (this.Module) {
+      if (EDITOR) {
+        const canvas = this.Module.canvas
+        canvas.width = canvas.parentElement.clientWidth
+        canvas.height = canvas.parentElement.clientHeight
+      } else {
+        window.addEventListener('resize', this.resizeCanvasDelayed)
+        this.resizeCanvasDelayed(null)
+        this.waitForFillMouseEventData()
+      }
     }
   }
 
@@ -133,12 +142,14 @@ export class UnityInterface {
 
   /** Sends the camera position & target to the engine */
 
-  public Teleport({ position: { x, y, z }, cameraTarget }: InstancedSpawnPoint) {
+  public Teleport({ position: { x, y, z }, cameraTarget }: InstancedSpawnPoint, rotateIfTargetIsNotSet: boolean = true) {
     const theY = y <= 0 ? 2 : y
 
     TeleportController.ensureTeleportAnimation()
     this.gameInstance.SendMessage('CharacterController', 'Teleport', JSON.stringify({ x, y: theY, z }))
-    this.gameInstance.SendMessage('CameraController', 'SetRotation', JSON.stringify({ x, y: theY, z, cameraTarget }))
+    if (cameraTarget || rotateIfTargetIsNotSet) {
+      this.gameInstance.SendMessage('CameraController', 'SetRotation', JSON.stringify({ x, y: theY, z, cameraTarget }))
+    }
   }
 
   /** Tells the engine which scenes to load */
@@ -172,6 +183,11 @@ export class UnityInterface {
 
   public ShowFPSPanel() {
     this.gameInstance.SendMessage('SceneController', 'ShowFPSPanel')
+  }
+
+  /* NOTE(Santi): This is temporal, until we remove the old taskbar */
+  public EnableNewTaskbar() {
+    this.gameInstance.SendMessage('HUDController', 'EnableNewTaskbar')
   }
 
   public HideFPSPanel() {
@@ -232,11 +248,11 @@ export class UnityInterface {
     this.gameInstance.SendMessage('HUDController', 'ShowNotificationFromJson', JSON.stringify(notification))
   }
 
-  public ConfigureHUDElement(hudElementId: HUDElementID, configuration: HUDConfiguration) {
+  public ConfigureHUDElement(hudElementId: HUDElementID, configuration: HUDConfiguration, extraPayload: any | null = null) {
     this.gameInstance.SendMessage(
       'HUDController',
       `ConfigureHUDElement`,
-      JSON.stringify({ hudElementId: hudElementId, configuration: configuration })
+      JSON.stringify({ hudElementId: hudElementId, configuration: configuration, extraPayload: extraPayload ? JSON.stringify(extraPayload) : null })
     )
   }
 
@@ -298,6 +314,30 @@ export class UnityInterface {
       const payload = { chunkIndex: i, chunksCount: chunks.length, scenesInfo: chunks[i] }
       this.gameInstance.SendMessage('SceneController', 'UpdateHotScenesList', JSON.stringify(payload))
     }
+  }
+
+  public SendGIFPointers(id: string, width: number, height: number, pointers: number[], frameDelays: number[]) {
+    this.gameInstance.SendMessage(
+      'SceneController',
+      'UpdateGIFPointers',
+      JSON.stringify({ id, width, height, pointers, frameDelays })
+    )
+  }
+
+  public RejectGIFProcessingRequest() {
+    this.gameInstance.SendMessage('SceneController', 'RejectGIFProcessingRequest')
+  }
+
+  public ConfigureEmailPrompt(tutorialStep: number) {
+    const emailCompletedFlag = 128
+    this.ConfigureHUDElement(HUDElementID.EMAIL_PROMPT, {
+      active: (tutorialStep & emailCompletedFlag) === 0,
+      visible: false
+    })
+  }
+
+  public UpdateBalanceOfMANA(balance: string) {
+    this.gameInstance.SendMessage('HUDController', 'UpdateBalanceOfMANA', balance)
   }
 
   // *********************************************************************************

@@ -32,9 +32,9 @@ namespace DCL
         internal static string DOWNLOADED_PATH_ROOT = Application.dataPath + "/" + DOWNLOADED_FOLDER_NAME;
         internal static string ASSET_BUNDLES_PATH_ROOT = Application.dataPath + "/../" + ASSET_BUNDLE_FOLDER_NAME;
 
-        internal static string[] bufferExtensions = { ".bin" };
-        internal static string[] gltfExtensions = { ".glb", ".gltf" };
-        internal static string[] textureExtensions = { ".jpg", ".png", ".jpeg", ".tga", ".gif", ".bmp", ".psd", ".tiff", ".iff" };
+        internal static string[] bufferExtensions = {".bin"};
+        internal static string[] gltfExtensions = {".glb", ".gltf"};
+        internal static string[] textureExtensions = {".jpg", ".png", ".jpeg", ".tga", ".gif", ".bmp", ".psd", ".tiff", ".iff"};
     }
 
     public class AssetBundleBuilder
@@ -182,7 +182,7 @@ namespace DCL
             Debug.Log(log);
 
             CleanupWorkingFolders();
-            AssetBundleBuilderUtils.Exit((int)errorCode);
+            AssetBundleBuilderUtils.Exit((int) errorCode);
         }
 
 
@@ -604,7 +604,7 @@ namespace DCL
 
                 //NOTE(Brian): This cache will be used by the GLTF importer when seeking textures. This way the importer will
                 //             consume the asset bundle dependencies instead of trying to create new textures.
-                PersistentAssetCache.ImageCacheByUri[id] = new RefCountedTextureData(relativePath, t2d);
+                PersistentAssetCache.AddImage(relativePath, gltfHash, new RefCountedTextureData(relativePath, t2d));
             }
         }
 
@@ -623,7 +623,7 @@ namespace DCL
 
                 // NOTE(Brian): This cache will be used by the GLTF importer when seeking streams. This way the importer will
                 //              consume the asset bundle dependencies instead of trying to create new streams.
-                PersistentAssetCache.StreamCacheByUri[id] = new RefCountedStreamData(relativePath, stream);
+                PersistentAssetCache.AddBuffer(relativePath, bufferMappingPair.hash, new RefCountedStreamData(relativePath, stream));
             }
         }
 
@@ -703,7 +703,7 @@ namespace DCL
 
         internal void DumpScene(string cid, Action<ErrorCodes> OnFinish = null)
         {
-            ConvertScenesToAssetBundles(new List<string> { cid }, OnFinish);
+            ConvertScenesToAssetBundles(new List<string> {cid}, OnFinish);
         }
 
         internal void InitializeDirectoryPaths(bool deleteIfExists)
