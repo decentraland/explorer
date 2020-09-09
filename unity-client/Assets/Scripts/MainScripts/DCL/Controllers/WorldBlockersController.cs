@@ -1,10 +1,12 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace DCL.Controllers
 {
     public class WorldBlockersController : MonoBehaviour
     {
         WorldBlockerHandler blockerHandler;
+        HashSet<Vector2Int> allLoadedParcelCoords = new HashSet<Vector2Int>();
 
         void Start()
         {
@@ -27,7 +29,17 @@ namespace DCL.Controllers
 
         void SetupWorldBlockers()
         {
-            blockerHandler.SetupGlobalBlockers(SceneController.i.loadedScenes, 100, transform);
+            allLoadedParcelCoords.Clear();
+
+            // Create fast (hashset) collection of loaded parcels coords
+            foreach (var element in SceneController.i.loadedScenes)
+            {
+                if (!element.Value.isReady) continue;
+
+                allLoadedParcelCoords.UnionWith(element.Value.parcels);
+            }
+
+            blockerHandler.SetupGlobalBlockers(allLoadedParcelCoords, 100, transform);
         }
 
         void OnWorldReposition(DCLCharacterPosition charPos)

@@ -6,23 +6,13 @@ namespace DCL.Controllers
 {
     public class WorldBlockerHandler : BlockerHandler
     {
-        HashSet<Vector2Int> allLoadedParcelCoords = new HashSet<Vector2Int>();
         HashSet<Vector2Int> blockersToRemove = new HashSet<Vector2Int>();
         HashSet<Vector2Int> blockersToAdd = new HashSet<Vector2Int>();
 
         static float milisecondsUsed = 0f;
 
-        public void SetupGlobalBlockers(Dictionary<string, ParcelScene> loadedScenes, float height, Transform parent)
+        public void SetupGlobalBlockers(HashSet<Vector2Int> allLoadedParcelCoords, float height, Transform parent)
         {
-            allLoadedParcelCoords.Clear();
-
-            // Create fast (hashset) collection of loaded parcels coords
-            foreach (var element in loadedScenes)
-            {
-                if (!element.Value.isReady) continue;
-
-                allLoadedParcelCoords.UnionWith(element.Value.parcels);
-            }
             if (allLoadedParcelCoords.Count == 0) return;
 
             blockersToRemove.Clear();
