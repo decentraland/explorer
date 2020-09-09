@@ -95,6 +95,10 @@ namespace DCL.Controllers
             blockerTransform.position = auxPosVec;
             blockerTransform.localScale = auxScaleVec;
 
+#if UNITY_EDITOR
+            blockerPoolable.gameObject.name = "BLOCKER " + pos;
+#endif
+
             blockers.Add(pos, blockerPoolable);
         }
 
