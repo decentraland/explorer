@@ -1,13 +1,9 @@
-using DCL.Configuration;
-using DCL.Models;
-using DCL.Components;
 using DCL;
 using DCL.Controllers;
 using DCL.Helpers;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Newtonsoft.Json;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.TestTools;

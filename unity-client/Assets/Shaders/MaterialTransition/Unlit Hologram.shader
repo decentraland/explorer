@@ -80,17 +80,12 @@ Shader "DCL/FX/Hologram"
             float4 frag(vertexOutput i) : COLOR
             {
                 float distanceAlphaMultiplier = 1;
+                float renderingDistance = length(_WorldSpaceCameraPos.xyz - i.posWorld.xyz);
 
-                if(_MaxRenderingDistance > 0)
-                {
-                    float renderingDistance = length(_WorldSpaceCameraPos.xyz - i.posWorld.xyz);
+                if (renderingDistance > _MaxRenderingDistance) return (0,0,0,0);
 
-                    if (renderingDistance > _MaxRenderingDistance) return (0,0,0,0);
-
-                    float halfMaxRenderingDistance = _MaxRenderingDistance / 2;
-                    if (renderingDistance > halfMaxRenderingDistance)
-                        distanceAlphaMultiplier = 1 - ((renderingDistance - halfMaxRenderingDistance) / halfMaxRenderingDistance);
-                }
+                float halfMaxRenderingDistance = _MaxRenderingDistance / 2;
+                distanceAlphaMultiplier = 1 - ((renderingDistance - halfMaxRenderingDistance) / halfMaxRenderingDistance);
 
                 float lambertAtten = GetLambertAttenuation(i);
                 float rim = GetRimLighting(i);
@@ -102,7 +97,7 @@ Shader "DCL/FX/Hologram"
                 float3 finalRimColor = _RimColor.rgb * (lambertAtten * finalRimFactor);
 
                 float4 finalColor = float4( _Color.rgb + finalRimColor, _Color.a + finalRimFactor );
-                finalColor.a = clamp(finalColor.a * distanceAlphaMultiplier, 0, 1);
+                finalColor.a = saturate(finalColor.a * distanceAlphaMultiplier);
 
                 // NOTE(Brian): fading code
                 bool insideFadeThreshold;
