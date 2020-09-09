@@ -284,8 +284,8 @@ export class BrowserInterface {
     globalThis.globalStore.dispatch(sendMessage(data.message))
   }
 
-  public SetVoiceChatRecording(recording: boolean) {
-    globalThis.globalStore.dispatch(setVoiceChatRecording(recording))
+  public SetVoiceChatRecording(recordingMessage: { recording: boolean }) {
+    globalThis.globalStore.dispatch(setVoiceChatRecording(recordingMessage.recording))
   }
 
   public async UpdateFriendshipStatus(message: FriendshipUpdateStatusMessage) {
@@ -373,7 +373,8 @@ export class BrowserInterface {
 
   async RequestGIFProcessor(data: { imageSource: string; id: string; isWebGL1: boolean }) {
     // tslint:disable-next-line
-    const isSupported = typeof OffscreenCanvas !== 'undefined' && typeof OffscreenCanvasRenderingContext2D === 'function'
+    const isSupported =
+      typeof OffscreenCanvas !== 'undefined' && typeof OffscreenCanvasRenderingContext2D === 'function'
 
     if (!isSupported) {
       unityInterface.RejectGIFProcessingRequest()

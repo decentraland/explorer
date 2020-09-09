@@ -14,6 +14,7 @@ type VoiceOutput = {
   panNode: PannerNode
   spatialParams: VoiceSpatialParams
   playing: boolean
+  lastUpdateTime: number
 }
 
 export type VoiceCommunicatorOptions = {
@@ -40,13 +41,14 @@ export class VoiceCommunicator {
 
   private readonly sampleRate: number
   private readonly channelBufferSize: number
+  private readonly outputExpireTime = 60 * 1000
 
   constructor(
     private selfId: string,
     private channel: AudioCommunicatorChannel,
     private options: VoiceCommunicatorOptions
   ) {
-    this.sampleRate = this.options.sampleRate ?? 20000
+    this.sampleRate = this.options.sampleRate ?? 24000
     this.channelBufferSize = this.options.channelBufferSize ?? 2.0
 
     this.context = new AudioContext({ sampleRate: this.sampleRate })
@@ -58,6 +60,8 @@ export class VoiceCommunicator {
     this.inputProcessor = this.context.createScriptProcessor(4096, 1, 1)
     this.voiceChatWorkerMain = new VoiceChatCodecWorkerMain()
     this.createEncodeStream()
+
+    this.startOutputsExpiration()
   }
 
   public setSelfId(selfId: string) {
@@ -81,9 +85,11 @@ export class VoiceCommunicator {
         buffer: new RingBuffer(Math.floor(this.channelBufferSize * this.sampleRate), Float32Array),
         playing: false,
         spatialParams: relativePosition,
+        lastUpdateTime: Date.now(),
         ...nodes
       }
     } else {
+      this.outputs[src].lastUpdateTime = Date.now()
       this.setVoiceRelativePosition(src, relativePosition)
     }
 
@@ -92,7 +98,10 @@ export class VoiceCommunicator {
     if (!stream) {
       stream = this.voiceChatWorkerMain.getOrCreateDecodeStream(src, this.sampleRate)
 
-      stream.addAudioDecodedListener((samples) => this.outputs[src].buffer.write(samples))
+      stream.addAudioDecodedListener((samples) => {
+        this.outputs[src].lastUpdateTime = Date.now()
+        this.outputs[src].buffer.write(samples)
+      })
     }
 
     stream.decode(encoded)
@@ -149,7 +158,7 @@ export class VoiceCommunicator {
       data.fill(0)
       if (this.outputs[src]) {
         const wasPlaying = this.outputs[src].playing
-        if (this.outputs[src].buffer.readAvailableCount() > bufferSize / 2) {
+        if (this.outputs[src].buffer.readAvailableCount() > 0) {
           data.set(this.outputs[src].buffer.read(data.length))
           if (!wasPlaying) {
             this.changePlayingStatus(src, true)
@@ -167,6 +176,7 @@ export class VoiceCommunicator {
 
   changePlayingStatus(streamId: string, playing: boolean) {
     this.outputs[streamId].playing = playing
+    this.outputs[streamId].lastUpdateTime = Date.now()
     // Listeners could be long running, so we defer the execution of them
     defer(() => {
       this.streamPlayingListeners.forEach((listener) => listener(streamId, playing))
@@ -183,7 +193,12 @@ export class VoiceCommunicator {
   }
 
   pause() {
-    this.inputProcessor.disconnect(this.context.destination)
+    try {
+      this.inputProcessor.disconnect(this.context.destination)
+    } catch (e) {
+      console.log(e)
+      // Ignored. This will fail if it was already disconnected
+    }
   }
 
   private createEncodeStream() {
@@ -199,5 +214,32 @@ export class VoiceCommunicator {
   private setVoiceRelativePosition(src: string, spatialParams: VoiceSpatialParams) {
     this.outputs[src].spatialParams = spatialParams
     this.updatePannerNodeParameters(src)
+  }
+
+  private startOutputsExpiration() {
+    const expireOutputs = () => {
+      Object.keys(this.outputs).forEach((outputId) => {
+        const output = this.outputs[outputId]
+        if (Date.now() - output.lastUpdateTime > this.outputExpireTime) {
+          this.destroyOutput(outputId)
+        }
+      })
+
+      setTimeout(expireOutputs, 2000)
+    }
+
+    setTimeout(expireOutputs, 0)
+  }
+
+  private destroyOutput(outputId: string) {
+    try {
+      this.outputs[outputId].panNode.disconnect(this.context.destination)
+    } catch (e) {
+      // Ignored. This may fail if the node wasn't connected yet
+    }
+
+    this.voiceChatWorkerMain.destroyDecodeStream(outputId)
+
+    delete this.outputs[outputId]
   }
 }

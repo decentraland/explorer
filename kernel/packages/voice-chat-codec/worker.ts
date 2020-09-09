@@ -24,7 +24,7 @@ type DecoderWorklet = {
 } & CodecWorklet
 
 function getSampleRate(e: MessageEvent) {
-  return e.data.sampleRate ? e.data.sampleRate : 20000
+  return e.data.sampleRate ? e.data.sampleRate : 24000
 }
 
 const encoderWorklets: Record<string, EncoderWorklet> = {}
@@ -146,25 +146,3 @@ function destroyWorklet(worklets: Record<string, CodecWorklet>, workletId: strin
   worklets[workletId]?.destroy()
   delete worklets[workletId]
 }
-
-const workletExpireTime = 60 * 1000
-
-function expireWorklets() {
-  const now = Date.now()
-
-  function expire(worklets: Record<string, CodecWorklet>) {
-    Object.keys(worklets).forEach((workletId) => {
-      const worklet = worklets[workletId]
-      if (!worklet.working && now - worklet.lastWorkTime > workletExpireTime) {
-        destroyWorklet(worklets, workletId)
-      }
-    })
-  }
-
-  expire(encoderWorklets)
-  expire(decoderWorklets)
-
-  setTimeout(expireWorklets, 2000)
-}
-
-setTimeout(expireWorklets, 0)

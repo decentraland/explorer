@@ -21,7 +21,7 @@ export function commsReducer(state?: CommsState, action?: AnyAction): CommsState
     case COMMS_ESTABLISHED:
       return { ...state, initialized: true }
     case SET_VOICE_CHAT_RECORDING:
-      return { ...state, voiceChatRecording: action.payload.recording.recording }
+      return { ...state, voiceChatRecording: action.payload.recording }
     default:
       return state
   }
