@@ -53,7 +53,7 @@ namespace DCL.Controllers
         public bool isReady => state == State.READY;
 
         readonly List<string> disposableNotReady = new List<string>();
-        bool isReleased = false;
+        bool isReleased = false,isEditModeActive = false;
 
         State stateValue = State.NOT_READY;
 
@@ -122,6 +122,15 @@ namespace DCL.Controllers
 #endif
         }
 
+        public void SetEditMode(bool isActive)
+        {
+            isEditModeActive = isActive;
+        }
+
+        public bool IsEditModeActive()
+        {
+            return isEditModeActive;
+        }
         public virtual void SetData(LoadParcelScenesMessage.UnityParcelScene data)
         {
             this.sceneData = data;

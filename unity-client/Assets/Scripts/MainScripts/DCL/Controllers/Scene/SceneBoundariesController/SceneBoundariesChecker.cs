@@ -19,10 +19,14 @@ namespace DCL.Controllers
 
         public int entitiesToCheckCount => entitiesToCheck.Count;
 
+        private SceneBoundariesEntityHandler sceneBoundariesEntityHandler;
+
         public SceneBoundariesChecker()
         {
+            sceneBoundariesEntityHandler = new SceneBoundariesEntityHandler();
             entitiesCheckRoutine = CoroutineStarter.Start(CheckEntities());
             lastCheckTime = Time.realtimeSinceStartup;
+       
         }
 
         // TODO: Improve MessagingControllersManager.i.timeBudgetCounter usage once we have the centralized budget controller for our immortal coroutines
@@ -145,8 +149,9 @@ namespace DCL.Controllers
             EvaluateMeshBounds(entity);
         }
 
-        void EvaluateMeshBounds(DecentralandEntity entity)
+        public bool IsEntityInsideSceneBoundaries(DecentralandEntity entity)
         {
+            if (entity.meshesInfo == null || entity.meshesInfo.mergedBounds == null) return false;
             Bounds meshBounds = entity.meshesInfo.mergedBounds;
 
             // 1st check (full mesh AABB)
@@ -157,10 +162,18 @@ namespace DCL.Controllers
             {
                 isInsideBoundaries = AreSubmeshesInsideBoundaries(entity);
             }
+            return isInsideBoundaries;
+        }
+        void EvaluateMeshBounds(DecentralandEntity entity)
+        {
+            bool isInsideBoundaries = IsEntityInsideSceneBoundaries(entity);
 
-            UpdateEntityMeshesValidState(entity, isInsideBoundaries, meshBounds);
+            sceneBoundariesEntityHandler.UpdateEntityMeshesValidState(entity, isInsideBoundaries);
+            sceneBoundariesEntityHandler.UpdateEntityCollidersValidState(entity, isInsideBoundaries);
 
-            UpdateEntityCollidersValidState(entity, isInsideBoundaries);
+            //UpdateEntityMeshesValidState(entity, isInsideBoundaries, meshBounds);
+
+            //UpdateEntityCollidersValidState(entity, isInsideBoundaries);
         }
 
         protected virtual bool AreSubmeshesInsideBoundaries(DecentralandEntity entity)

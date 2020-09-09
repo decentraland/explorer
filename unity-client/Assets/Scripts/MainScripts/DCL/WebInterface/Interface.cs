@@ -21,7 +21,6 @@ namespace DCL.Interface
     public static class WebInterface
     {
         public static bool VERBOSE = false;
-        public static bool CAN_SEND_POINTER_EVENTS = true;
         public static System.Action<string, string> OnMessageFromEngine;
 
         [System.Serializable]
@@ -602,7 +601,7 @@ namespace DCL.Interface
 
         public static void ReportOnPointerDownEvent(ACTION_BUTTON buttonId, string sceneId, string uuid, string entityId, string meshName, Ray ray, Vector3 point, Vector3 normal, float distance)
         {
-            if (string.IsNullOrEmpty(uuid) || !CAN_SEND_POINTER_EVENTS)
+            if (string.IsNullOrEmpty(uuid))
             {
                 return;
             }
@@ -616,7 +615,7 @@ namespace DCL.Interface
 
         public static void ReportOnPointerUpEvent(ACTION_BUTTON buttonId, string sceneId, string uuid, string entityId, string meshName, Ray ray, Vector3 point, Vector3 normal, float distance, bool isHitInfoValid)
         {
-            if (string.IsNullOrEmpty(uuid) || !CAN_SEND_POINTER_EVENTS)
+            if (string.IsNullOrEmpty(uuid))
             {
                 return;
             }

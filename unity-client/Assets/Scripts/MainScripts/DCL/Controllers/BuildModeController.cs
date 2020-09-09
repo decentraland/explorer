@@ -160,7 +160,7 @@ public class BuildModeController : MonoBehaviour
                 InputDone();
                 return;
             }
-            if (Input.GetMouseButtonDown(0))
+            if (Input.GetMouseButtonDown(0) && SceneController.i.boundariesChecker.IsEntityInsideSceneBoundaries(entityToEdit))
             {
                 DeselectObject();
                 InputDone();
@@ -314,8 +314,16 @@ public class BuildModeController : MonoBehaviour
     {
         if (gameObjectToEdit != null)
         {
+            if(SceneController.i.boundariesChecker.IsEntityInsideSceneBoundaries(entityToEdit))
+            {            
+                gameObjectToEdit.transform.SetParent(originalGOParent);
+                SceneController.i.boundariesChecker.EvaluateEntityPosition(entityToEdit);
+            }
+            else
+            {
+                UndoEdit();
+            }
             originalMeshRenderer.material = originalMaterial;
-            gameObjectToEdit.transform.SetParent(originalGOParent);
             SceneController.i.boundariesChecker.RemoveEntityToBeChecked(entityToEdit);
             gameObjectToEdit = null;
             entityToEdit = null;
@@ -365,8 +373,7 @@ public class BuildModeController : MonoBehaviour
 
 
     void EnterEditMode()
-    {
-        DCL.Interface.WebInterface.CAN_SEND_POINTER_EVENTS = false;
+    {     
         Debug.Log("Entered edit mode");
         editModeChangeFX.SetActive(true);
         DCLCharacterController.i.SetFreeMovementActive(true);
@@ -391,23 +398,46 @@ public class BuildModeController : MonoBehaviour
 
 
         SetSnapActive(isSnapActivated);
-        sceneToEdit = SceneController.i.scenesSortedByDistance[0];
+        FindSceneToEdit();
+        sceneToEdit.SetEditMode(true);
+        // NOTE(Adrian): This is a temporary as the kernel should do this job instead of the client
+        DCL.Environment.i.messagingControllersManager.messagingControllers[sceneToEdit.sceneData.id].systemBus.Stop();
+        //
         CreateCollidersForAllEntities();
     }
 
 
     void ExitEditMode()
     {
-        DCL.Interface.WebInterface.CAN_SEND_POINTER_EVENTS = true;
+        // NOTE(Adrian): This is a temporary as the kernel should do this job instead of the client
+        DCL.Environment.i.messagingControllersManager.messagingControllers[sceneToEdit.sceneData.id].systemBus.Start();
+        //
         isEditModeActivated = false;
         Debug.Log("Exit edit mode");
         editModeChangeFX.SetActive(false);
 
         snapGO.transform.SetParent(transform);
+        sceneToEdit.SetEditMode(false);
         ParcelSettings.VISUAL_LOADING_ENABLED = true;
         DCLCharacterController.i.SetFreeMovementActive(false);
         DeselectObject();
         DestroyCollidersForAllEntities();
+    }
+
+
+    void FindSceneToEdit()
+    {
+       
+        foreach(ParcelScene scene in SceneController.i.scenesSortedByDistance)
+        {
+
+            if(scene.IsInsideSceneBoundaries(DCLCharacterController.i.characterPosition))
+            {
+                sceneToEdit = scene;
+                break;
+            }
+        }
+     
     }
 
     void DestroyCollidersForAllEntities()
@@ -433,10 +463,25 @@ public class BuildModeController : MonoBehaviour
     private void CreateCollidersForEntity(DecentralandEntity entity)
     {
         DecentralandEntity.MeshesInfo meshInfo = entity.meshesInfo;
-        if (meshInfo == null) return;
+        if (meshInfo == null || meshInfo.currentShape == null ) return;
+        if (!meshInfo.currentShape.IsVisible()) return;
+        if (!meshInfo.currentShape.IsVisible() && meshInfo.currentShape.HasCollisions()) return;
+        if (!meshInfo.currentShape.IsVisible() && !meshInfo.currentShape.HasCollisions()) return;
 
         if (!collidersDictionary.ContainsKey(entity.entityId))
         {
+            if (entity.children.Count > 0)
+            {
+                using (var iterator = entity.children.GetEnumerator())
+                {
+                    while (iterator.MoveNext())
+                    {
+                        CreateCollidersForEntity(iterator.Current.Value);
+                    }
+                }
+            }
+
+
             GameObject entityCollider = new GameObject(entity.entityId);
             entityCollider.layer = LayerMask.NameToLayer("OnBuilderPointerClick");
 
@@ -463,6 +508,7 @@ public class BuildModeController : MonoBehaviour
                 meshCollider.enabled = meshInfo.renderers[i].enabled;
 
             }
+            
             collidersDictionary.Add(entity.entityId, entityCollider);
         }
     }

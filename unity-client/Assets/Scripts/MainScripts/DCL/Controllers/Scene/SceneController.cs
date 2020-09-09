@@ -906,6 +906,7 @@ namespace DCL
         public static bool VERBOSE = false;
         public bool ignoreGlobalScenes = false;
 
+        [ContextMenu ("Set Debug mode")]
         public void SetDebug()
         {
             Debug.unityLogger.logEnabled = true;
