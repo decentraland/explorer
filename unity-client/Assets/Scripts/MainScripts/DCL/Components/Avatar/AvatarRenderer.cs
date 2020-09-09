@@ -239,9 +239,9 @@ namespace DCL
 
             hiddenList = CreateHiddenList();
 
+            bodyShapeController.SetHiddenList(hiddenList);
             if (!bodyShapeController.isReady)
             {
-                bodyShapeController.SetHiddenList(hiddenList);
                 bodyShapeController.Load(transform, OnWearableLoadingSuccess, OnWearableLoadingFail);
             }
 
