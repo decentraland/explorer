@@ -5,7 +5,7 @@ import { avatarMessageObservable, getUserProfile } from 'shared/comms/peers'
 import { getProfile, hasConnectedWeb3 } from 'shared/profiles/selectors'
 import { TeleportController } from 'shared/world/TeleportController'
 import { reportScenesAroundParcel } from 'shared/atlas/actions'
-import { playerConfigurations, ethereumConfigurations } from 'config'
+import { playerConfigurations, ethereumConfigurations, decentralandConfigurations } from 'config'
 import { ReadOnlyQuaternion, ReadOnlyVector3, Vector3, Quaternion } from '../decentraland-ecs/src/decentraland/math'
 import { IEventNames } from '../decentraland-ecs/src/decentraland/Types'
 import { sceneLifeCycleObservable } from '../decentraland-loader/lifecycle/controllers/scene'
@@ -37,6 +37,7 @@ import { IFuture } from 'fp-future'
 import { reportHotScenes } from 'shared/social/hotScenes'
 
 import { GIFProcessor } from 'gif-processor/processor'
+import { getERC20Balance } from 'shared/ethereum/EthereumService'
 declare const DCL: any
 
 declare const globalThis: StoreContainer
@@ -57,6 +58,8 @@ const positionEvent = {
 }
 
 export class BrowserInterface {
+  private lastBalanceOfMana: number = -1
+
   /** Triggered when the camera moves */
   public ReportPosition(data: { position: ReadOnlyVector3; rotation: ReadOnlyQuaternion; playerHeight?: number }) {
     positionEvent.position.set(data.position.x, data.position.y, data.position.z)
@@ -102,6 +105,17 @@ export class BrowserInterface {
     // stub. there is no code about this in unity side yet
   }
 
+  public Track(data: { name: string, properties: ({ key: string, value: string }[] | null) }) {
+    const properties: Record<string, string> = {}
+    if (data.properties) {
+      for (const property of data.properties) {
+        properties[property.key] = property.value
+      }
+    }
+
+    queueTrackingEvent(data.name, properties)
+  }
+
   public TriggerExpression(data: { id: string; timestamp: number }) {
     avatarMessageObservable.notifyObservers({
       type: AvatarMessageType.USER_EXPRESSION,
@@ -141,6 +155,15 @@ export class BrowserInterface {
 
   public LogOut() {
     globalThis.globalStore.dispatch(logout())
+  }
+
+  public SaveUserInterests(interests: string[]) {
+    if (!interests) {
+      return
+    }
+    const unique = new Set<string>(interests)
+    const profile: Profile = getUserProfile().profile as Profile
+    globalThis.globalStore.dispatch(saveProfileRequest({ ...profile, interests: Array.from(unique) }))
   }
 
   public SaveUserAvatar(changes: { face: string; face128: string; face256: string; body: string; avatar: Avatar }) {
@@ -343,11 +366,33 @@ export class BrowserInterface {
   }
 
   async RequestGIFProcessor(data: { imageSource: string; id: string; isWebGL1: boolean }) {
+    // tslint:disable-next-line
+    const isSupported = (typeof OffscreenCanvas !== "undefined") && (typeof OffscreenCanvasRenderingContext2D === "function")
+
+    if (!isSupported) {
+      unityInterface.RejectGIFProcessingRequest()
+      return
+    }
+
     if (!DCL.gifProcessor) {
       DCL.gifProcessor = new GIFProcessor(unityInterface.gameInstance, unityInterface, data.isWebGL1)
     }
 
     DCL.gifProcessor.ProcessGIF(data)
+  }
+
+  public async FetchBalanceOfMANA() {
+    const identity = getIdentity()
+
+    if (!identity.hasConnectedWeb3) {
+      return
+    }
+
+    const balance = (await getERC20Balance(identity.address, decentralandConfigurations.paymentTokens.MANA)).toNumber()
+    if (this.lastBalanceOfMana !== balance) {
+      this.lastBalanceOfMana = balance
+      unityInterface.UpdateBalanceOfMANA(`${balance}`)
+    }
   }
 }
 
