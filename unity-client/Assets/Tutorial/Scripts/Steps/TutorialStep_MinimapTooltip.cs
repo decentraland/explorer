@@ -3,9 +3,9 @@ using System.Collections;
 namespace DCL.Tutorial
 {
     /// <summary>
-    /// Class that represents the onboarding tutorial step related to how to open the Explore window from the taskbar.
+    /// Class that represents the onboarding tutorial step related to how to open the Minimap.
     /// </summary>
-    public class TutorialStep_Tooltip_ExploreButton : TutorialStep_Tooltip
+    public class TutorialStep_MinimapTooltip : TutorialStep_Tooltip
     {
         public override void OnStepStart()
         {
@@ -15,6 +15,9 @@ namespace DCL.Tutorial
         public override IEnumerator OnStepExecute()
         {
             yield return base.OnStepExecute();
+
+            if (tutorialController != null)
+                tutorialController.PlayTeacherAnimation(TutorialTeacher.TeacherAnimation.QuickGoodbye);
         }
 
         protected override void SetTooltipPosition()
@@ -23,9 +26,9 @@ namespace DCL.Tutorial
 
             if (tutorialController != null &&
                 tutorialController.hudController != null &&
-                tutorialController.hudController.taskbarHud.exploreTooltipReference)
+                tutorialController.hudController.minimapHud.minimapTooltipReference)
             {
-                tooltipTransform.position = tutorialController.hudController.taskbarHud.exploreTooltipReference.position;
+                tooltipTransform.position = tutorialController.hudController.minimapHud.minimapTooltipReference.position;
             }
         }
     }

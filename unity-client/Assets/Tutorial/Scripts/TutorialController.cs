@@ -254,6 +254,7 @@ namespace DCL.Tutorial
             else
                 currentStepIndex = 0;
 
+            PlayTeacherAnimation(TutorialTeacher.TeacherAnimation.Reset);
             executeStepsCoroutine = StartCoroutine(StartTutorialFromStep(currentStepIndex));
         }
 

@@ -28,7 +28,7 @@ public class TaskbarHUDController : IHUD
     public event System.Action OnAnyTaskbarButtonClicked;
 
     public bool isNewTaskbar { get; private set; }
-    public RectTransform tutorialTooltipReference { get => view.tutorialTooltipReference; }
+    public RectTransform tutorialTooltipReference { get => view.moreTooltipReference; }
     public RectTransform exploreTooltipReference { get => view.exploreTooltipReference; }
 
     public void Initialize(IMouseCatcher mouseCatcher, IChatController chatController,

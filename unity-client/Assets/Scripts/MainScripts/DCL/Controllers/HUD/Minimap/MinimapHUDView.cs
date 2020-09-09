@@ -22,6 +22,8 @@ public class MinimapHUDView : MonoBehaviour
     public RectTransform mapViewport;
     [SerializeField] private Button openNavmapButton;
 
+    [Header("Tutorial Configuration")] [SerializeField] internal RectTransform minimapTooltipReference;
+
     public static System.Action<MinimapHUDModel> OnUpdateData;
     public static System.Action OnOpenNavmapClicked;
 

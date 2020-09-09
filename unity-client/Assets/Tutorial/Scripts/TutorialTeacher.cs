@@ -10,7 +10,8 @@ namespace DCL.Tutorial
         public enum TeacherAnimation
         {
             StepCompleted,
-            QuickGoodbye
+            QuickGoodbye,
+            Reset
         }
 
         [SerializeField] Animator teacherAnimator;
@@ -31,6 +32,9 @@ namespace DCL.Tutorial
                     break;
                 case TeacherAnimation.QuickGoodbye:
                     teacherAnimator.SetTrigger("QuickGoodbye");
+                    break;
+                case TeacherAnimation.Reset:
+                    teacherAnimator.SetTrigger("Reset");
                     break;
                 default:
                     break;
