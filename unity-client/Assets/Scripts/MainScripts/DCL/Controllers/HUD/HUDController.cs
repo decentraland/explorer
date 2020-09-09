@@ -176,7 +176,15 @@ public class HUDController : MonoBehaviour
                 CreateHudElement<MinimapHUDController>(configuration, hudElementId);
                 break;
             case HUDElementID.PROFILE_HUD:
-                CreateHudElement<Legacy.AvatarHUDController>(configuration, hudElementId);
+                var avatarHudConfig = JsonUtility.FromJson<Legacy.AvatarHUDConfiguration>(extraPayload);
+                if (avatarHudConfig != null && avatarHudConfig.useNewVersion)
+                {
+                    CreateHudElement<ProfileHUDController>(configuration, hudElementId);
+                }
+                else
+                {
+                    CreateHudElement<Legacy.AvatarHUDController>(configuration, hudElementId);
+                }
 
                 if (avatarHud_Legacy != null)
                 {

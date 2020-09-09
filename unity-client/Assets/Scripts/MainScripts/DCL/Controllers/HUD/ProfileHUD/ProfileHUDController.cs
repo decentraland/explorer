@@ -1,10 +1,11 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
+using DCL.Interface;
 
 public class ProfileHUDController : IHUD
 {
-    internal readonly ProfileHUDView view;
+    private const string URL_CLAIM_NAME = "https://avatars.decentraland.org/claim";
+
+    internal ProfileHUDView view;
 
     private UserProfile ownUserProfile => UserProfile.GetOwnUserProfile();
 
@@ -12,6 +13,9 @@ public class ProfileHUDController : IHUD
     {
         view = UnityEngine.Object.Instantiate(Resources.Load<GameObject>("ProfileHUD")).GetComponent<ProfileHUDView>();
         view.name = "_ProfileHUD";
+
+        view.buttonLogOut.onClick.AddListener(WebInterface.LogOut);
+        view.buttonClaimName.onClick.AddListener(()=> WebInterface.OpenURL(URL_CLAIM_NAME));
 
         ownUserProfile.OnUpdate += OnProfileUpdated;
     }
