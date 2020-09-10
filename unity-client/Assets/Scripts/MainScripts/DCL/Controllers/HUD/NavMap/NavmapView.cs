@@ -56,6 +56,7 @@ namespace DCL
             MapRenderer.OnParcelClicked += TriggerToast;
             MapRenderer.OnParcelHold += TriggerToast;
             MapRenderer.OnParcelHoldCancel += () => { toastView.OnCloseClick(); };
+            CommonScriptableObjects.playerCoords.OnChange += UpdateCurrentSceneData;
 
             Initialize();
         }
@@ -70,6 +71,7 @@ namespace DCL
         {
             MapRenderer.OnParcelClicked -= TriggerToast;
             MapRenderer.OnParcelHold -= TriggerToast;
+            CommonScriptableObjects.playerCoords.OnChange -= UpdateCurrentSceneData;
         }
 
         internal void ToggleNavMap(bool ignoreCursorLock = false)
@@ -84,7 +86,6 @@ namespace DCL
 
             if (isOpen)
             {
-                UpdateCurrentSceneData(CommonScriptableObjects.playerCoords);
                 cursorLockedBeforeOpening = Utils.isCursorLocked;
                 if (!ignoreCursorLock && cursorLockedBeforeOpening)
                     Utils.UnlockCursor();
@@ -129,11 +130,11 @@ namespace DCL
             }
         }
 
-        void UpdateCurrentSceneData(Vector2Int currentCoords)
+        void UpdateCurrentSceneData(Vector2Int current, Vector2Int previous)
         {
             const string format = "{0},{1}";
-            currentSceneCoordsText.text = string.Format(format, currentCoords.x, currentCoords.y);
-            currentSceneNameText.text = MinimapMetadata.GetMetadata().GetSceneInfo(currentCoords.x, currentCoords.y)?.name ?? "Unnamed";
+            currentSceneCoordsText.text = string.Format(format, current.x, current.y);
+            currentSceneNameText.text = MinimapMetadata.GetMetadata().GetSceneInfo(current.x, current.y)?.name ?? "Unnamed";
         }
 
         void TriggerToast(int cursorTileX, int cursorTileY)
