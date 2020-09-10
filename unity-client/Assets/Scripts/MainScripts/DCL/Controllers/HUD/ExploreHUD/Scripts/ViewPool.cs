@@ -5,7 +5,7 @@ using System;
 internal class ViewPool<T> : IDisposable where T : MonoBehaviour
 {
     T baseView;
-    public Queue<T> pooledHotScenCells { get; } = new Queue<T>();
+    Queue<T> pooledHotScenCells = new Queue<T>();
 
     public ViewPool(T baseView, int prewarm = 0)
     {
@@ -41,6 +41,11 @@ internal class ViewPool<T> : IDisposable where T : MonoBehaviour
     {
         cellView.gameObject.SetActive(false);
         pooledHotScenCells.Enqueue(cellView);
+    }
+
+    public Queue<T>.Enumerator GetEnumerator()
+    {
+        return pooledHotScenCells.GetEnumerator();
     }
 
     T CreateView()

@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using DCL.Interface;
@@ -6,6 +8,7 @@ using DCL.Interface;
 internal class HighlightScenesController : MonoBehaviour
 {
     const float SCENES_UPDATE_INTERVAL = 10;
+    private const float SCENE_FIRST_LOAD_TIME = 0.2f;
 
     [SerializeField] HotSceneCellView hotsceneBaseCellView;
     [SerializeField] ScrollRect scrollRect;
@@ -19,18 +22,23 @@ internal class HighlightScenesController : MonoBehaviour
     ViewPool<HotSceneCellView> hotScenesViewPool;
 
     float lastTimeRefreshed = 0;
+    private Coroutine firstLoadAnimRoutine = null;
 
     public void Initialize(ExploreMiniMapDataController mapDataController, FriendTrackerController friendsController)
     {
         this.mapDataController = mapDataController;
         this.friendsController = friendsController;
-        hotScenesViewPool = new ViewPool<HotSceneCellView>(hotsceneBaseCellView, 30);
+        hotScenesViewPool = new ViewPool<HotSceneCellView>(hotsceneBaseCellView, 9);
     }
 
     public void RefreshIfNeeded()
     {
         bool isFirstTimeLoad = cachedHotScenes.Count == 0;
-        if (isFirstTimeLoad || HotScenesController.i.timeSinceLastUpdate >= SCENES_UPDATE_INTERVAL)
+        if (isFirstTimeLoad)
+        {
+            firstLoadAnimRoutine = StartCoroutine(FirstTimeLoadingRoutine());
+        }
+        else if (HotScenesController.i.timeSinceLastUpdate >= SCENES_UPDATE_INTERVAL)
         {
             FetchHotScenes();
         }
@@ -93,6 +101,7 @@ internal class HighlightScenesController : MonoBehaviour
         }
 
         hotSceneView.transform.SetSiblingIndex(priority);
+        hotSceneView.gameObject.SetActive(true);
 
         if (!IsHotSceneCellActive(baseCoords))
         {
@@ -119,7 +128,6 @@ internal class HighlightScenesController : MonoBehaviour
     void AddActiveHotSceneCell(Vector2Int coords, HotSceneCellView view)
     {
         activeHotSceneViews.Add(coords, view);
-        view.gameObject.SetActive(true);
     }
 
     bool IsHotSceneCellActive(Vector2Int coords)
@@ -139,9 +147,33 @@ internal class HighlightScenesController : MonoBehaviour
         activeHotSceneViews.Remove(coords);
     }
 
+    private void OnDisable()
+    {
+        if (!(firstLoadAnimRoutine is null))
+        {
+            StopCoroutine(firstLoadAnimRoutine);
+            firstLoadAnimRoutine = null;
+        }
+    }
+
     void OnDestroy()
     {
         HotScenesController.i.OnHotSceneListFinishUpdating -= OnFetchHotScenes;
         hotScenesViewPool?.Dispose();
+    }
+
+    IEnumerator FirstTimeLoadingRoutine()
+    {
+        using (var iterator = hotScenesViewPool.GetEnumerator())
+        {
+            while (iterator.MoveNext())
+            {
+                if (iterator.Current is null) continue;
+
+                iterator.Current.gameObject.SetActive(true);
+                yield return new WaitForSeconds(SCENE_FIRST_LOAD_TIME);
+            }
+        }
+        FetchHotScenes();
     }
 }

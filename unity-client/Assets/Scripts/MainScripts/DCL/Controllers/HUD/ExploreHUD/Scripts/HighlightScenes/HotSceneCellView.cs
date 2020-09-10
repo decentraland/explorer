@@ -27,29 +27,31 @@ internal class HotSceneCellView : MonoBehaviour
 
     [Header("Scene")]
     [SerializeField] TextMeshProUGUI sceneName;
+    [SerializeField] internal RawImageFillParent thumbnailImage;
     [SerializeField] UIHoverCallback sceneInfoButton;
 
     [Header("UI")]
-    [SerializeField] UIHoverCallback hoverAreaCallback;
+    [SerializeField] UIHoverCallback jumpInHoverArea;
     [SerializeField] Button_OnPointerDown jumpIn;
-    [SerializeField] internal RawImageFillParent thumbnailImage;
     [SerializeField] Sprite errorThumbnail;
 
     public delegate void JumpInDelegate(Vector2Int coords, string serverName, string layerName);
-    static public event JumpInDelegate OnJumpIn;
+    public static event JumpInDelegate OnJumpIn;
 
     public static event Action<HotSceneCellView> OnInfoButtonPointerDown;
     public static event Action OnInfoButtonPointerExit;
 
     public event Action<Texture2D> OnThumbnailSet;
 
-    ViewPool<ExploreFriendsView> friendPool;
-    private Dictionary<string, ExploreFriendsView> friendViewById;
-
     public CrowdHandler crowdHandler { private set; get; }
     public MapInfoHandler mapInfoHandler { private set; get; }
     public FriendsHandler friendsHandler { private set; get; }
     public ThumbnailHandler thumbnailHandler { private set; get; }
+    public AnimationHandler animationHandler { private set; get; }
+
+    private ViewPool<ExploreFriendsView> friendPool;
+    private Dictionary<string, ExploreFriendsView> friendViewById;
+    private bool isLoaded = false;
 
     protected void Awake()
     {
@@ -67,16 +69,17 @@ internal class HotSceneCellView : MonoBehaviour
         friendsHandler.onFriendRemoved += OnFriendRemoved;
 
         thumbnailHandler = new ThumbnailHandler();
+        animationHandler = new AnimationHandler(viewAnimator);
 
         crowdCountContainer.SetActive(crowdHandler.info.usersTotalCount > 0);
         eventsContainer.SetActive(false);
 
-        hoverAreaCallback.OnPointerEnter += () =>
+        jumpInHoverArea.OnPointerEnter += () =>
         {
             jumpInButtonAnimator.gameObject.SetActive(true);
             jumpInButtonAnimator.Show();
         };
-        hoverAreaCallback.OnPointerExit += () => jumpInButtonAnimator.Hide();
+        jumpInHoverArea.OnPointerExit += () => jumpInButtonAnimator.Hide();
         sceneInfoButton.OnPointerDown += () => jumpInButtonAnimator.Hide(true);
 
         // NOTE: we don't use the pointer down callback to avoid being mistakenly pressed while dragging
@@ -104,6 +107,9 @@ internal class HotSceneCellView : MonoBehaviour
     public void Clear()
     {
         mapInfoHandler.Clear();
+        thumbnailHandler.Dispose();
+        thumbnailImage.texture = null;
+        isLoaded = false;
     }
 
     private void OnDestroy()
@@ -120,6 +126,11 @@ internal class HotSceneCellView : MonoBehaviour
     private void OnEnable()
     {
         jumpInButtonAnimator.gameObject.SetActive(false);
+        jumpInHoverArea.enabled = isLoaded;
+        if (isLoaded)
+        {
+            animationHandler.SetLoaded();
+        }
     }
 
     private void OnCrowdInfoUpdated(HotScenesController.HotSceneInfo info)
@@ -163,7 +174,16 @@ internal class HotSceneCellView : MonoBehaviour
         thumbnailImage.texture = texture;
         OnThumbnailSet?.Invoke(texture);
 
-        if (HUDAudioPlayer.i != null)
+        SetLoaded();
+
+        if (!(HUDAudioPlayer.i is null))
             HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.listItemAppear);
+    }
+
+    private void SetLoaded()
+    {
+        isLoaded = true;
+        animationHandler.SetLoaded();
+        jumpInHoverArea.enabled = true;
     }
 }
