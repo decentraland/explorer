@@ -5,14 +5,13 @@ using DCL.Interface;
 
 internal class HighlightScenesController : MonoBehaviour
 {
-    const float SCENES_UPDATE_INTERVAL = 60;
+    const float SCENES_UPDATE_INTERVAL = 10;
 
     [SerializeField] HotSceneCellView hotsceneBaseCellView;
     [SerializeField] ScrollRect scrollRect;
-    [SerializeField] GameObject loadingSpinner;
 
     Dictionary<Vector2Int, HotSceneCellView> cachedHotScenes = new Dictionary<Vector2Int, HotSceneCellView>();
-    Dictionary<Vector2Int, BaseSceneCellView> activeHotSceneViews = new Dictionary<Vector2Int, BaseSceneCellView>();
+    Dictionary<Vector2Int, HotSceneCellView> activeHotSceneViews = new Dictionary<Vector2Int, HotSceneCellView>();
 
     ExploreMiniMapDataController mapDataController;
     FriendTrackerController friendsController;
@@ -25,12 +24,13 @@ internal class HighlightScenesController : MonoBehaviour
     {
         this.mapDataController = mapDataController;
         this.friendsController = friendsController;
-        hotScenesViewPool = new ViewPool<HotSceneCellView>(hotsceneBaseCellView, 5);
+        hotScenesViewPool = new ViewPool<HotSceneCellView>(hotsceneBaseCellView, 30);
     }
 
     public void RefreshIfNeeded()
     {
-        if (cachedHotScenes.Count == 0 || HotScenesController.i.timeSinceLastUpdate >= SCENES_UPDATE_INTERVAL)
+        bool isFirstTimeLoad = cachedHotScenes.Count == 0;
+        if (isFirstTimeLoad || HotScenesController.i.timeSinceLastUpdate >= SCENES_UPDATE_INTERVAL)
         {
             FetchHotScenes();
         }
@@ -38,17 +38,12 @@ internal class HighlightScenesController : MonoBehaviour
         {
             ProcessHotScenes();
         }
-        else
-        {
-            loadingSpinner.SetActive(false);
-        }
+
         scrollRect.verticalNormalizedPosition = 1;
     }
 
     void FetchHotScenes()
     {
-        loadingSpinner.SetActive(true);
-
         WebInterface.FetchHotScenes();
 
         HotScenesController.i.OnHotSceneListFinishUpdating -= OnFetchHotScenes;
@@ -99,34 +94,32 @@ internal class HighlightScenesController : MonoBehaviour
 
         hotSceneView.transform.SetSiblingIndex(priority);
 
-        ICrowdDataView crowdView = hotSceneView;
-        crowdView.SetCrowdInfo(hotSceneInfo);
+        if (!IsHotSceneCellActive(baseCoords))
+        {
+            AddActiveHotSceneCell(baseCoords, hotSceneView);
+        }
 
-        IMapDataView mapView = hotSceneView;
+        hotSceneView.crowdHandler.SetCrowdInfo(hotSceneInfo);
 
-        mapDataController.SetMinimapData(baseCoords, mapView,
-            (resolvedView) =>
-            {
-                if (!IsHotSceneCellActive(baseCoords))
+        if (!hotSceneView.mapInfoHandler.HasMinimapSceneInfo())
+        {
+            mapDataController.SetMinimapData(baseCoords, hotSceneView.mapInfoHandler,
+                (resolvedView) =>
                 {
-                    AddActiveHotSceneCell(baseCoords, hotSceneView);
-                }
-                loadingSpinner.SetActive(false);
-            },
-            (rejectedView) =>
-            {
-                hotScenesViewPool.PoolView(hotSceneView);
-                cachedHotScenes[baseCoords] = null;
-            });
+                    friendsController.AddHandler(hotSceneView.friendsHandler);
+                },
+                (rejectedView) =>
+                {
+                    hotScenesViewPool.PoolView(hotSceneView);
+                    cachedHotScenes[baseCoords] = null;
+                });
+        }
     }
 
-    void AddActiveHotSceneCell(Vector2Int coords, BaseSceneCellView view)
+    void AddActiveHotSceneCell(Vector2Int coords, HotSceneCellView view)
     {
-        if (view == null) return;
-
-        view.gameObject.SetActive(true);
         activeHotSceneViews.Add(coords, view);
-        friendsController.AddHandler(view);
+        view.gameObject.SetActive(true);
     }
 
     bool IsHotSceneCellActive(Vector2Int coords)
@@ -136,11 +129,11 @@ internal class HighlightScenesController : MonoBehaviour
 
     void RemoveActiveHotSceneCell(Vector2Int coords)
     {
-        BaseSceneCellView view;
-        if (activeHotSceneViews.TryGetValue(coords, out view))
+        if (activeHotSceneViews.TryGetValue(coords, out HotSceneCellView view))
         {
             view.gameObject.SetActive(false);
-            friendsController.RemoveHandler(view);
+            view.Clear();
+            friendsController.RemoveHandler(view.friendsHandler);
         }
 
         activeHotSceneViews.Remove(coords);

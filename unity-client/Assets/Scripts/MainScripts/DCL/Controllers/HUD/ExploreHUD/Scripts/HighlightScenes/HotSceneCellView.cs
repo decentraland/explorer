@@ -1,22 +1,74 @@
-﻿using UnityEngine;
+﻿using System;
+using System.Collections.Generic;
+using DCL.Helpers;
+using UnityEngine;
 using TMPro;
 
-internal class HotSceneCellView : BaseSceneCellView, ICrowdDataView
+internal class HotSceneCellView : MonoBehaviour
 {
+    const int THMBL_MARKETPLACE_WIDTH = 196;
+    const int THMBL_MARKETPLACE_HEIGHT = 143;
+    const int THMBL_MARKETPLACE_SIZEFACTOR = 50;
+
+    [Header("Animators")]
+    [SerializeField] Animator viewAnimator;
+    [SerializeField] ShowHideAnimator jumpInButtonAnimator;
+
+    [Header("Crowd")]
     [SerializeField] GameObject crowdCountContainer;
     [SerializeField] TextMeshProUGUI crowdCount;
-    [SerializeField] ShowHideAnimator jumpInButtonAnimator;
-    [SerializeField] GameObject friendsContainer;
+
+    [Header("Events")]
     [SerializeField] GameObject eventsContainer;
+
+    [Header("Friends")]
+    [SerializeField] ExploreFriendsView friendsView;
+    [SerializeField] GameObject friendsContainer;
+
+    [Header("Scene")]
+    [SerializeField] TextMeshProUGUI sceneName;
+    [SerializeField] UIHoverCallback sceneInfoButton;
+
+    [Header("UI")]
     [SerializeField] UIHoverCallback hoverAreaCallback;
+    [SerializeField] Button_OnPointerDown jumpIn;
+    [SerializeField] internal RawImageFillParent thumbnailImage;
+    [SerializeField] Sprite errorThumbnail;
 
-    HotScenesController.HotSceneInfo crowdInfo;
+    public delegate void JumpInDelegate(Vector2Int coords, string serverName, string layerName);
+    static public event JumpInDelegate OnJumpIn;
 
-    protected override void Awake()
+    public static event Action<HotSceneCellView> OnInfoButtonPointerDown;
+    public static event Action OnInfoButtonPointerExit;
+
+    public event Action<Texture2D> OnThumbnailSet;
+
+    ViewPool<ExploreFriendsView> friendPool;
+    private Dictionary<string, ExploreFriendsView> friendViewById;
+
+    public CrowdHandler crowdHandler { private set; get; }
+    public MapInfoHandler mapInfoHandler { private set; get; }
+    public FriendsHandler friendsHandler { private set; get; }
+    public ThumbnailHandler thumbnailHandler { private set; get; }
+
+    protected void Awake()
     {
-        base.Awake();
+        friendPool = new ViewPool<ExploreFriendsView>(friendsView, 0);
+        friendViewById = new Dictionary<string, ExploreFriendsView>();
 
-        crowdCountContainer.SetActive(crowdInfo.usersTotalCount > 0);
+        crowdHandler = new CrowdHandler();
+        crowdHandler.onInfoUpdate += OnCrowdInfoUpdated;
+
+        mapInfoHandler = new MapInfoHandler();
+        mapInfoHandler.onInfoUpdate += OnMapInfoUpdated;
+
+        friendsHandler = new FriendsHandler(mapInfoHandler);
+        friendsHandler.onFriendAdded += OnFriendAdded;
+        friendsHandler.onFriendRemoved += OnFriendRemoved;
+
+        thumbnailHandler = new ThumbnailHandler();
+
+        crowdCountContainer.SetActive(crowdHandler.info.usersTotalCount > 0);
         eventsContainer.SetActive(false);
 
         hoverAreaCallback.OnPointerEnter += () =>
@@ -26,33 +78,92 @@ internal class HotSceneCellView : BaseSceneCellView, ICrowdDataView
         };
         hoverAreaCallback.OnPointerExit += () => jumpInButtonAnimator.Hide();
         sceneInfoButton.OnPointerDown += () => jumpInButtonAnimator.Hide(true);
+
+        // NOTE: we don't use the pointer down callback to avoid being mistakenly pressed while dragging
+        jumpIn.onClick.AddListener(JumpInPressed);
+
+        sceneInfoButton.OnPointerDown += () => OnInfoButtonPointerDown?.Invoke(this);
+        sceneInfoButton.OnPointerExit += () => OnInfoButtonPointerExit?.Invoke();
     }
 
-    protected override void OnEnable()
-    {
-        base.OnEnable();
-        jumpInButtonAnimator.gameObject.SetActive(false);
-    }
-
-    void ICrowdDataView.SetCrowdInfo(HotScenesController.HotSceneInfo info)
-    {
-        crowdInfo = info;
-        crowdCount.text = info.usersTotalCount.ToString();
-        crowdCountContainer.SetActive(info.usersTotalCount > 0);
-    }
-
-    public override void JumpInPressed()
+    public void JumpInPressed()
     {
         HotScenesController.HotSceneInfo.Realm realm = new HotScenesController.HotSceneInfo.Realm() { layer = null, serverName = null };
-        for (int i = 0; i < crowdInfo.realms.Length; i++)
+        for (int i = 0; i < crowdHandler.info.realms.Length; i++)
         {
-            if (crowdInfo.realms[i].usersCount < crowdInfo.realms[i].usersMax)
+            if (crowdHandler.info.realms[i].usersCount < crowdHandler.info.realms[i].usersMax)
             {
-                realm = crowdInfo.realms[i];
+                realm = crowdHandler.info.realms[i];
                 break;
             }
         }
 
-        JumpIn(crowdInfo.baseCoords, realm.serverName, realm.layer);
+        OnJumpIn?.Invoke(crowdHandler.info.baseCoords, realm.serverName, realm.layer);
+    }
+
+    public void Clear()
+    {
+        mapInfoHandler.Clear();
+    }
+
+    private void OnDestroy()
+    {
+        friendPool.Dispose();
+        thumbnailHandler.Dispose();
+
+        crowdHandler.onInfoUpdate -= OnCrowdInfoUpdated;
+        mapInfoHandler.onInfoUpdate -= OnMapInfoUpdated;
+        friendsHandler.onFriendAdded -= OnFriendAdded;
+        friendsHandler.onFriendRemoved -= OnFriendRemoved;
+    }
+
+    private void OnEnable()
+    {
+        jumpInButtonAnimator.gameObject.SetActive(false);
+    }
+
+    private void OnCrowdInfoUpdated(HotScenesController.HotSceneInfo info)
+    {
+        crowdCount.text = info.usersTotalCount.ToString();
+        crowdCountContainer.SetActive(info.usersTotalCount > 0);
+    }
+
+    private void OnFriendAdded(UserProfile profile, Color backgroundColor)
+    {
+        var view = friendPool.GetView();
+        view.SetUserProfile(profile, backgroundColor);
+        friendViewById.Add(profile.userId, view);
+    }
+
+    private void OnFriendRemoved(UserProfile profile)
+    {
+        if (friendViewById.TryGetValue(profile.userId, out ExploreFriendsView view))
+        {
+            friendPool.PoolView(view);
+            friendViewById.Remove(profile.userId);
+        }
+    }
+
+    private void OnMapInfoUpdated(MinimapMetadata.MinimapSceneInfo info)
+    {
+        sceneName.text = info.name;
+
+        FetchThumbnail(info.previewImageUrl,
+            onFail: () => FetchThumbnail(MapUtils.GetMarketPlaceThumbnailUrl(info, THMBL_MARKETPLACE_WIDTH, THMBL_MARKETPLACE_HEIGHT, THMBL_MARKETPLACE_SIZEFACTOR),
+            onFail: () => SetThumbnail(errorThumbnail.texture)));
+    }
+
+    private void FetchThumbnail(string url, Action onFail)
+    {
+        thumbnailHandler.FetchThumbnail(url, SetThumbnail, onFail);
+    }
+
+    private void SetThumbnail(Texture2D texture)
+    {
+        thumbnailImage.texture = texture;
+        OnThumbnailSet?.Invoke(texture);
+
+        if (HUDAudioPlayer.i != null)
+            HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.listItemAppear);
     }
 }

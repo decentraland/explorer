@@ -5,14 +5,14 @@ using System;
 internal class ViewPool<T> : IDisposable where T : MonoBehaviour
 {
     T baseView;
-    Queue<T> pooledHotScenCells = new Queue<T>();
+    public Queue<T> pooledHotScenCells { get; } = new Queue<T>();
 
     public ViewPool(T baseView, int prewarm = 0)
     {
         this.baseView = baseView;
 
         PoolView(baseView);
-        for (int i = 0; i < prewarm; i++)
+        for (int i = 0; i < prewarm - 1; i++)
         {
             PoolView(CreateView());
         }
@@ -32,12 +32,7 @@ internal class ViewPool<T> : IDisposable where T : MonoBehaviour
 
     public T GetView()
     {
-        T ret;
-        if (pooledHotScenCells.Count > 0)
-        {
-            ret = pooledHotScenCells.Dequeue();
-        }
-        ret = CreateView();
+        T ret = pooledHotScenCells.Count > 0 ? pooledHotScenCells.Dequeue() : CreateView();
         ret.gameObject.SetActive(false);
         return ret;
     }

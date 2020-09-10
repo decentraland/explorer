@@ -34,7 +34,7 @@ public class ExploreHUDController : IHUD
 
         view.gotoMagicButton.OnGotoMagicPressed += GoToMagic;
         view.togglePopupButton.onPointerDown += () => toggleExploreTrigger.RaiseOnTriggered();
-        BaseSceneCellView.OnJumpIn += OnJumpIn;
+        HotSceneCellView.OnJumpIn += OnJumpIn;
     }
 
     public void Initialize(IFriendsController friendsController, bool newTaskbarIsEnabled)
@@ -85,7 +85,7 @@ public class ExploreHUDController : IHUD
         friendsController?.Dispose();
 
         toggleExploreTrigger.OnTriggered -= OnToggleActionTriggered;
-        BaseSceneCellView.OnJumpIn -= OnJumpIn;
+        HotSceneCellView.OnJumpIn -= OnJumpIn;
 
         if (view != null)
         {
