@@ -8,14 +8,6 @@ namespace DCL.Tutorial
     /// </summary>
     public class TutorialStep_Tooltip_GoToGenesisButton : TutorialStep_Tooltip
     {
-        public override IEnumerator OnStepExecute()
-        {
-            yield return base.OnStepExecute();
-
-            if (tutorialController != null)
-                tutorialController.PlayTeacherAnimation(TutorialTeacher.TeacherAnimation.QuickGoodbye);
-        }
-
         protected override void SetTooltipPosition()
         {
             base.SetTooltipPosition();

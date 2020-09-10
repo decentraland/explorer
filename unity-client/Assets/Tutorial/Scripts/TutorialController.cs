@@ -14,7 +14,6 @@ namespace DCL.Tutorial
         void SetTutorialDisabled();
         IEnumerator StartTutorialFromStep(int stepIndex);
         void SetUserTutorialStepAsCompleted(TutorialController.TutorialFinishStep step);
-        void SetTimeBetweenSteps(float newTime);
         void ShowTeacher3DModel(bool active);
         void SetTeacherPosition(Vector2 position, bool animated = true);
         void PlayTeacherAnimation(TutorialTeacher.TeacherAnimation animation);
@@ -216,15 +215,6 @@ namespace DCL.Tutorial
         }
 
         /// <summary>
-        /// Changes the Time Between Steps parameter.
-        /// </summary>
-        /// <param name="newTime">Time in seconds.</param>
-        public void SetTimeBetweenSteps(float newTime)
-        {
-            timeBetweenSteps = newTime;
-        }
-
-        /// <summary>
         /// Shows the teacher that will be guiding along the tutorial.
         /// </summary>
         /// <param name="active">True for show the teacher.</param>
@@ -293,7 +283,11 @@ namespace DCL.Tutorial
 
                 runningStep.OnStepStart();
                 yield return runningStep.OnStepExecute();
-                PlayTeacherAnimation(TutorialTeacher.TeacherAnimation.StepCompleted);
+                if (i < steps.Count - 1)
+                    PlayTeacherAnimation(TutorialTeacher.TeacherAnimation.StepCompleted);
+                else
+                    PlayTeacherAnimation(TutorialTeacher.TeacherAnimation.QuickGoodbye);
+
                 yield return runningStep.OnStepPlayAnimationForHidding();
                 runningStep.OnStepFinished();
 
