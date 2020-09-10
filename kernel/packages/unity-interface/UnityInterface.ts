@@ -328,14 +328,6 @@ export class UnityInterface {
     this.gameInstance.SendMessage('SceneController', 'RejectGIFProcessingRequest')
   }
 
-  public ConfigureEmailPrompt(tutorialStep: number) {
-    const emailCompletedFlag = 128
-    this.ConfigureHUDElement(HUDElementID.EMAIL_PROMPT, {
-      active: (tutorialStep & emailCompletedFlag) === 0,
-      visible: false
-    })
-  }
-
   public ConfigureTutorial(tutorialStep: number, fromDeepLink: boolean) {
     const tutorialCompletedFlag = 256
 
