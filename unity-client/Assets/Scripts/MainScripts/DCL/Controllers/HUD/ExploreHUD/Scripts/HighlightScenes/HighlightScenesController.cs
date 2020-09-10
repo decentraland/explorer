@@ -7,8 +7,8 @@ using DCL.Interface;
 
 internal class HighlightScenesController : MonoBehaviour
 {
-    const float SCENES_UPDATE_INTERVAL = 10;
-    private const float SCENE_FIRST_LOAD_TIME = 0.2f;
+    const float SCENES_UPDATE_INTERVAL = 60;
+    private const float SCENE_FIRST_LOAD_DELAY = 0.2f;
 
     [SerializeField] HotSceneCellView hotsceneBaseCellView;
     [SerializeField] ScrollRect scrollRect;
@@ -97,11 +97,17 @@ internal class HighlightScenesController : MonoBehaviour
         else
         {
             hotSceneView = hotScenesViewPool.GetView();
+            hotSceneView.Setup();
             cachedHotScenes.Add(baseCoords, hotSceneView);
         }
 
         hotSceneView.transform.SetSiblingIndex(priority);
-        hotSceneView.gameObject.SetActive(true);
+
+        if (!hotSceneView.gameObject.activeSelf)
+        {
+            hotSceneView.gameObject.SetActive(true);
+            hotSceneView.animationHandler.Reset();
+        }
 
         if (!IsHotSceneCellActive(baseCoords))
         {
@@ -171,7 +177,7 @@ internal class HighlightScenesController : MonoBehaviour
                 if (iterator.Current is null) continue;
 
                 iterator.Current.gameObject.SetActive(true);
-                yield return new WaitForSeconds(SCENE_FIRST_LOAD_TIME);
+                yield return new WaitForSeconds(SCENE_FIRST_LOAD_DELAY);
             }
         }
         FetchHotScenes();

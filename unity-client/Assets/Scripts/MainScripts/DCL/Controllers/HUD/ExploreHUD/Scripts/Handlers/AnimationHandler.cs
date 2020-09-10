@@ -2,8 +2,8 @@ using UnityEngine;
 
 internal class AnimationHandler
 {
-    private const string PARAM_LOADING_COMPLETE = "LoadingComplete";
-    private static readonly int paramLoadingComplete = Animator.StringToHash(PARAM_LOADING_COMPLETE);
+    private static readonly int paramLoadingComplete = Animator.StringToHash("LoadingComplete");
+    private static readonly int paramInitialize = Animator.StringToHash("Initialize");
 
     private readonly Animator animator;
 
@@ -12,8 +12,15 @@ internal class AnimationHandler
         this.animator = animator;
     }
 
+    public void Reset()
+    {
+        animator.ResetTrigger(paramLoadingComplete);
+        animator.SetTrigger(paramInitialize);
+    }
+
     public void SetLoaded()
     {
-        animator.SetTrigger(paramLoadingComplete);
+        if (animator.gameObject.activeInHierarchy)
+            animator.SetTrigger(paramLoadingComplete);
     }
 }

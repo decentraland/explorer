@@ -9,7 +9,8 @@ internal class ViewPool<T> : IDisposable where T : MonoBehaviour
 
     public ViewPool(T baseView, int prewarm = 0)
     {
-        this.baseView = baseView;
+        this.baseView = GameObject.Instantiate(baseView, baseView.transform.parent);
+        baseView.gameObject.SetActive(false);
 
         PoolView(baseView);
         for (int i = 0; i < prewarm - 1; i++)
@@ -28,12 +29,12 @@ internal class ViewPool<T> : IDisposable where T : MonoBehaviour
                 GameObject.Destroy(obj.gameObject);
             }
         }
+        GameObject.Destroy(baseView.gameObject);
     }
 
     public T GetView()
     {
         T ret = pooledHotScenCells.Count > 0 ? pooledHotScenCells.Dequeue() : CreateView();
-        ret.gameObject.SetActive(false);
         return ret;
     }
 

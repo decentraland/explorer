@@ -11,7 +11,7 @@ internal class ThumbnailHandler : IDisposable
 
     public void FetchThumbnail(string url, Action<Texture2D> onSuccess, Action onFail)
     {
-        if (texture != null)
+        if (!(texture is null))
         {
             onSuccess?.Invoke(texture);
         }
@@ -19,7 +19,7 @@ internal class ThumbnailHandler : IDisposable
         {
             onFail?.Invoke();
         }
-        else if (thumbnailRequest == null)
+        else if (thumbnailRequest is null)
         {
             thumbnailRequest = UnityWebRequestTexture.GetTexture(url);
             UnityWebRequestAsyncOperation op = thumbnailRequest.SendWebRequest();
@@ -51,7 +51,7 @@ internal class ThumbnailHandler : IDisposable
     public void Dispose()
     {
         GameObject.Destroy(texture);
-        if (thumbnailRequest != null)
+        if (!(thumbnailRequest is null))
         {
             thumbnailRequest.Abort();
             thumbnailRequest.Dispose();

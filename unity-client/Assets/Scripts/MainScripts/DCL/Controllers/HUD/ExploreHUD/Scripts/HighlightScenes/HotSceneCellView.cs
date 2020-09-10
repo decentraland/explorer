@@ -52,26 +52,11 @@ internal class HotSceneCellView : MonoBehaviour
     private ViewPool<ExploreFriendsView> friendPool;
     private Dictionary<string, ExploreFriendsView> friendViewById;
     private bool isLoaded = false;
+    private bool isSetup = false;
 
     protected void Awake()
     {
-        friendPool = new ViewPool<ExploreFriendsView>(friendsView, 0);
-        friendViewById = new Dictionary<string, ExploreFriendsView>();
-
-        crowdHandler = new CrowdHandler();
-        crowdHandler.onInfoUpdate += OnCrowdInfoUpdated;
-
-        mapInfoHandler = new MapInfoHandler();
-        mapInfoHandler.onInfoUpdate += OnMapInfoUpdated;
-
-        friendsHandler = new FriendsHandler(mapInfoHandler);
-        friendsHandler.onFriendAdded += OnFriendAdded;
-        friendsHandler.onFriendRemoved += OnFriendRemoved;
-
-        thumbnailHandler = new ThumbnailHandler();
-        animationHandler = new AnimationHandler(viewAnimator);
-
-        crowdCountContainer.SetActive(crowdHandler.info.usersTotalCount > 0);
+        crowdCountContainer.SetActive(false);
         eventsContainer.SetActive(false);
 
         jumpInHoverArea.OnPointerEnter += () =>
@@ -87,6 +72,41 @@ internal class HotSceneCellView : MonoBehaviour
 
         sceneInfoButton.OnPointerDown += () => OnInfoButtonPointerDown?.Invoke(this);
         sceneInfoButton.OnPointerExit += () => OnInfoButtonPointerExit?.Invoke();
+
+        Setup();
+    }
+
+    public void Setup()
+    {
+        if (isSetup)
+            return;
+
+        isSetup = true;
+
+        friendPool = new ViewPool<ExploreFriendsView>(friendsView, 0);
+        friendViewById = new Dictionary<string, ExploreFriendsView>();
+
+        crowdHandler = new CrowdHandler();
+        crowdHandler.onInfoUpdate += OnCrowdInfoUpdated;
+
+        mapInfoHandler = new MapInfoHandler();
+        mapInfoHandler.onInfoUpdate += OnMapInfoUpdated;
+
+        friendsHandler = new FriendsHandler(mapInfoHandler);
+        friendsHandler.onFriendAdded += OnFriendAdded;
+        friendsHandler.onFriendRemoved += OnFriendRemoved;
+
+        thumbnailHandler = new ThumbnailHandler();
+        animationHandler = new AnimationHandler(viewAnimator);
+    }
+
+    public void Clear()
+    {
+        mapInfoHandler.Clear();
+        thumbnailImage.texture = null;
+        thumbnailHandler.Dispose();
+        thumbnailImage.gameObject.SetActive(false);
+        isLoaded = false;
     }
 
     public void JumpInPressed()
@@ -104,14 +124,6 @@ internal class HotSceneCellView : MonoBehaviour
         OnJumpIn?.Invoke(crowdHandler.info.baseCoords, realm.serverName, realm.layer);
     }
 
-    public void Clear()
-    {
-        mapInfoHandler.Clear();
-        thumbnailHandler.Dispose();
-        thumbnailImage.texture = null;
-        isLoaded = false;
-    }
-
     private void OnDestroy()
     {
         friendPool.Dispose();
@@ -127,6 +139,8 @@ internal class HotSceneCellView : MonoBehaviour
     {
         jumpInButtonAnimator.gameObject.SetActive(false);
         jumpInHoverArea.enabled = isLoaded;
+        thumbnailImage.gameObject.SetActive(isLoaded);
+
         if (isLoaded)
         {
             animationHandler.SetLoaded();
@@ -172,12 +186,15 @@ internal class HotSceneCellView : MonoBehaviour
     private void SetThumbnail(Texture2D texture)
     {
         thumbnailImage.texture = texture;
+        thumbnailImage.gameObject.SetActive(true);
         OnThumbnailSet?.Invoke(texture);
 
         SetLoaded();
 
-        if (!(HUDAudioPlayer.i is null))
-            HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.listItemAppear);
+        if (gameObject.activeInHierarchy)
+        {
+            AudioScriptableObjects.listItemAppear.Play(true);
+        }
     }
 
     private void SetLoaded()
