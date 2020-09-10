@@ -19,11 +19,11 @@ MonoBehaviour:
   cooldownSeconds: 4
   clips:
     array:
-    - {fileID: 8300000, guid: decaebe8cde08dd4b91bbcf13d929540, type: 3}
-    - {fileID: 8300000, guid: 405355c89d0aa054da28cefcce25be98, type: 3}
-    - {fileID: 8300000, guid: 937a79fe677fb7f48b48a61b8966f38b, type: 3}
-    - {fileID: 8300000, guid: 934a9384db29611449db8dbb49d97b58, type: 3}
-    - {fileID: 8300000, guid: d4779aa5d864ce64ab0dfaa27cb733a2, type: 3}
-    - {fileID: 8300000, guid: eacca16022554374ba8df635e6480db3, type: 3}
-    - {fileID: 8300000, guid: df9bde89ca28f8b4f9deb726a68933ec, type: 3}
+    - {fileID: 8300000, guid: f32c62e0a55947c40b82a4bc163c84ab, type: 3}
+    - {fileID: 8300000, guid: d0fb8721fcc4e2a41938f0e028913480, type: 3}
+    - {fileID: 8300000, guid: 62df524cad985374aaaaf4cef395e981, type: 3}
+    - {fileID: 8300000, guid: 6e5c90067dd49384696a7dada38a7b45, type: 3}
+    - {fileID: 8300000, guid: 3b7caa013f06fef4abacf4ca3de5ee37, type: 3}
+    - {fileID: 8300000, guid: f1618ce27d282a540a7f79160ecfed5c, type: 3}
+    - {fileID: 8300000, guid: bdb1c07dce47df44789679d9cb0e9371, type: 3}
   source: {fileID: 0}

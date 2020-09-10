@@ -99,6 +99,7 @@ public class AvatarEditorHUDAudioHandler : MonoBehaviour
         if (Random.Range(0f, 1f) > 0.25f)
         {
             AudioEvent eventReaction = null;
+
             if (model.bodyShape.Contains("Female"))
                 eventReaction = eventReactionFemale;
             else
@@ -107,7 +108,9 @@ public class AvatarEditorHUDAudioHandler : MonoBehaviour
             if (eventReaction != null)
             {
                 if (!eventReaction.source.isPlaying)
+                {
                     eventReaction.PlayScheduled(0.6f);
+                }
             }
         }
     }
