@@ -1,4 +1,4 @@
-import { VoiceChatCodecWorkerMain } from './VoiceChatCodecWorkerMain'
+import { VoiceChatCodecWorkerMain, EncodeStream } from './VoiceChatCodecWorkerMain'
 import { RingBuffer } from 'atomicHelpers/RingBuffer'
 import { defer } from 'atomicHelpers/defer'
 
@@ -17,6 +17,13 @@ type VoiceOutput = {
   lastUpdateTime: number
 }
 
+type VoiceInput = {
+  encodeInputProcessor: ScriptProcessorNode
+  inputStream: MediaStreamAudioSourceNode
+  recordingContext: AudioContext
+  encodeStream: EncodeStream
+}
+
 export type VoiceCommunicatorOptions = {
   sampleRate?: number
   channelBufferSize?: number
@@ -32,8 +39,7 @@ export type VoiceSpatialParams = {
 
 export class VoiceCommunicator {
   private context: AudioContext
-  private inputProcessor: ScriptProcessorNode
-  private input?: MediaStreamAudioSourceNode
+  private input?: VoiceInput
   private voiceChatWorkerMain: VoiceChatCodecWorkerMain
   private outputs: Record<string, VoiceOutput> = {}
 
@@ -57,9 +63,7 @@ export class VoiceCommunicator {
       this.setListenerSpatialParams(this.options.initialListenerParams)
     }
 
-    this.inputProcessor = this.context.createScriptProcessor(4096, 1, 1)
     this.voiceChatWorkerMain = new VoiceChatCodecWorkerMain()
-    this.createEncodeStream()
 
     this.startOutputsExpiration()
   }
@@ -67,7 +71,12 @@ export class VoiceCommunicator {
   public setSelfId(selfId: string) {
     this.voiceChatWorkerMain.destroyEncodeStream(this.selfId)
     this.selfId = selfId
-    this.createEncodeStream()
+    if (this.input) {
+      this.input.encodeStream = this.createInputEncodeStream(
+        this.input.recordingContext,
+        this.input.encodeInputProcessor
+      )
+    }
   }
 
   public addStreamPlayingListener(listener: StreamPlayingListener) {
@@ -184,30 +193,71 @@ export class VoiceCommunicator {
   }
 
   setInputStream(stream: MediaStream) {
-    this.input = this.context.createMediaStreamSource(stream)
-    this.input.connect(this.inputProcessor)
+    if (this.input) {
+      this.voiceChatWorkerMain.destroyEncodeStream(this.selfId)
+      if (this.input.recordingContext !== this.context) {
+        this.input.recordingContext.close()
+      }
+    }
+
+    try {
+      this.input = this.createInputFor(stream, this.context)
+    } catch (e) {
+      // If this fails, then it most likely it is because the sample rate of the stream is incompatible with the context's, so we create a special context for recording
+      if (e.message.includes('sample-rate is currently not supported')) {
+        const recordingContext = new AudioContext()
+        this.input = this.createInputFor(stream, recordingContext)
+      } else {
+        throw e
+      }
+    }
   }
 
   start() {
-    this.inputProcessor.connect(this.context.destination)
+    this.input?.encodeInputProcessor.connect(this.input.recordingContext.destination)
+    this.input?.inputStream.connect(this.input.encodeInputProcessor)
   }
 
   pause() {
     try {
-      this.inputProcessor.disconnect(this.context.destination)
+      this.input?.inputStream.disconnect(this.input.encodeInputProcessor)
+    } catch (e) {
+      // Ignored. This will fail if it was already disconnected
+    }
+
+    try {
+      this.input?.encodeInputProcessor.disconnect(this.input.recordingContext.destination)
     } catch (e) {
       // Ignored. This will fail if it was already disconnected
     }
   }
 
-  private createEncodeStream() {
-    const encodeStream = this.voiceChatWorkerMain.getOrCreateEncodeStream(this.selfId, this.sampleRate)
+  private createInputFor(stream: MediaStream, context: AudioContext) {
+    const streamSource = context.createMediaStreamSource(stream)
+    const inputProcessor = context.createScriptProcessor(4096, 1, 1)
+    return {
+      recordingContext: context,
+      encodeStream: this.createInputEncodeStream(context, inputProcessor),
+      encodeInputProcessor: inputProcessor,
+      inputStream: streamSource
+    }
+  }
+
+  private createInputEncodeStream(recordingContext: AudioContext, encodeInputProcessor: ScriptProcessorNode) {
+    const encodeStream = this.voiceChatWorkerMain.getOrCreateEncodeStream(
+      this.selfId,
+      this.sampleRate,
+      recordingContext.sampleRate
+    )
+
     encodeStream.addAudioEncodedListener((data) => this.channel.send(data))
 
-    this.inputProcessor.onaudioprocess = async function (e) {
+    encodeInputProcessor.onaudioprocess = async (e) => {
       const buffer = e.inputBuffer
       encodeStream.encode(buffer.getChannelData(0))
     }
+
+    return encodeStream
   }
 
   private setVoiceRelativePosition(src: string, spatialParams: VoiceSpatialParams) {

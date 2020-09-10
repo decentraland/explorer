@@ -1,4 +1,5 @@
 import { VoiceChatWorkerResponse, RequestTopic, ResponseTopic } from './types'
+import { Resampler } from './resampler'
 declare var self: WorkerGlobalScope & any
 
 declare function postMessage(message: any, transferables: any[]): void
@@ -74,7 +75,7 @@ onmessage = function (e) {
       }
     })
 
-    const samples = toInt16Samples(e.data.samples)
+    const samples = toInt16Samples(resampleIfNecessary(e.data.samples, e.data.sampleRate, e.data.inputSampleRate))
 
     encoderWorklet.encoder.input(samples)
 
@@ -126,6 +127,14 @@ onmessage = function (e) {
   }
 }
 
+function resampleIfNecessary(floatSamples: Float32Array, targetSampleRate: number, inputSampleRate?: number) {
+  if (inputSampleRate && inputSampleRate !== targetSampleRate) {
+    const resampler = new Resampler(inputSampleRate, targetSampleRate, 1)
+    return resampler.resample(floatSamples)
+  } else {
+    return floatSamples
+  }
+}
 function toInt16Samples(floatSamples: Float32Array) {
   return Int16Array.from(floatSamples, (floatSample) => {
     let val = Math.floor(32767 * floatSample)

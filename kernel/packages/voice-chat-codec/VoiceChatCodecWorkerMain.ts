@@ -5,12 +5,12 @@ const workerUrl = 'voice-chat-codec/worker.js'
 type EncodeListener = (encoded: Uint8Array) => any
 type DecodeListener = (samples: Float32Array) => any
 
-type EncodeStream = {
+export type EncodeStream = {
   encode(samples: Float32Array): void
   addAudioEncodedListener(listener: EncodeListener): void
 }
 
-type DecodeStream = {
+export type DecodeStream = {
   decode(encoded: Uint8Array): void
   addAudioDecodedListener(listener: DecodeListener): void
 }
@@ -39,10 +39,10 @@ export class VoiceChatCodecWorkerMain {
     }
   }
 
-  getOrCreateEncodeStream(streamId: string, sampleRate: number): EncodeStream {
+  getOrCreateEncodeStream(streamId: string, sampleRate: number, inputSampleRate?: number): EncodeStream {
     return (this.encodeStreams[streamId] = this.encodeStreams[streamId] || {
       encode: (samples) => {
-        this.sendRequestToWorker({ topic: RequestTopic.ENCODE, sampleRate: sampleRate, samples, streamId })
+        this.sendRequestToWorker({ topic: RequestTopic.ENCODE, sampleRate, samples, streamId, inputSampleRate })
       },
       addAudioEncodedListener: (listener) => {
         this.addAudioEncodedListener(streamId, listener)
