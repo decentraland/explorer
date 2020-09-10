@@ -384,6 +384,12 @@ namespace DCL.Controllers
 
             OnEntityRemoved?.Invoke(entity);
 
+            if (SceneController.i.useBoundariesChecker)
+            {
+                entity.OnShapeUpdated -= SceneController.i.boundariesChecker.AddEntityToBeChecked;
+                SceneController.i.boundariesChecker.RemoveEntityToBeChecked(entity);
+            }
+
             if (removeImmediatelyFromEntitiesList)
             {
                 // Every entity ends up being removed through here
@@ -393,12 +399,6 @@ namespace DCL.Controllers
             else
             {
                 parcelScenesCleaner.MarkForCleanup(entity);
-            }
-
-            if (SceneController.i.useBoundariesChecker)
-            {
-                entity.OnShapeUpdated -= SceneController.i.boundariesChecker.AddEntityToBeChecked;
-                SceneController.i.boundariesChecker.RemoveEntityToBeChecked(entity);
             }
         }
 
@@ -457,27 +457,32 @@ namespace DCL.Controllers
 
             if (me != null)
             {
-                if (parentId == "PlayerEntityReference")
+                if (parentId == "FirstPersonCameraEntityReference" || parentId == "PlayerEntityReference") // PlayerEntityReference is for compatibility purposes
                 {
-                    me.SetParent(DCLCharacterController.i.playerReference);
+                    // In this case, the entity will attached to the first person camera
+                    // On first person mode, the entity will rotate with the camera. On third person mode, the entity will rotate with the avatar
+                    me.SetParent(DCLCharacterController.i.firstPersonCameraReference);
                     SceneController.i.boundariesChecker.AddPersistent(me);
                     SceneController.i.physicsSyncController.MarkDirty();
                 }
-                else if (parentId == "AvatarPositionEntityReference")
+                else if (parentId == "AvatarEntityReference" || parentId == "AvatarPositionEntityReference") // AvatarPositionEntityReference is for compatibility purposes
                 {
-                    me.SetParent(DCLCharacterController.i.avatarPositionReference);
+                    // In this case, the entity will be attached to the avatar
+                    // It will simply rotate with the avatar, regardless of where the camera is pointing
+                    me.SetParent(DCLCharacterController.i.avatarReference);
                     SceneController.i.boundariesChecker.AddPersistent(me);
                     SceneController.i.physicsSyncController.MarkDirty();
                 }
                 else
                 {
-                    if (me.parent == DCLCharacterController.i.playerReference || me.parent == DCLCharacterController.i.avatarPositionReference)
+                    if (me.parent == DCLCharacterController.i.firstPersonCameraReference || me.parent == DCLCharacterController.i.avatarReference)
                     {
                         SceneController.i.boundariesChecker.RemoveEntityToBeChecked(me);
                     }
 
                     if (parentId == "0")
                     {
+                        // The entity will be child of the scene directly
                         me.SetParent(null);
                         me.gameObject.transform.SetParent(gameObject.transform, false);
                         SceneController.i.physicsSyncController.MarkDirty();
