@@ -324,13 +324,12 @@ public class FriendsHUDController : IHUD
 
             if (HUDAudioPlayer.i != null)
                 HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogAppear);
+
+            AudioScriptableObjects.dialogOpen.Play(true);
         }
         else
         {
-            OnFriendsClosed?.Invoke();
-            
-            if (HUDAudioPlayer.i != null)
-                HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogClose);
+            AudioScriptableObjects.dialogClose.Play(true);
         }
     }
 }
