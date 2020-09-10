@@ -1,13 +1,12 @@
 ﻿using System;
+using DCL;
 using UnityEngine;
-using UnityEngine.Networking;
-using DCL.Helpers;
 
 internal class ThumbnailHandler : IDisposable
 {
     public Texture2D texture { private set; get; }
 
-    UnityWebRequest thumbnailRequest = null;
+    AssetPromise_Texture texturePromise = null;
 
     public void FetchThumbnail(string url, Action<Texture2D> onSuccess, Action onFail)
     {
@@ -19,43 +18,34 @@ internal class ThumbnailHandler : IDisposable
         {
             onFail?.Invoke();
         }
-        else if (thumbnailRequest is null)
+        else if (texturePromise is null)
         {
-            thumbnailRequest = UnityWebRequestTexture.GetTexture(url);
-            UnityWebRequestAsyncOperation op = thumbnailRequest.SendWebRequest();
-            op.completed += (_) =>
+            texturePromise = new AssetPromise_Texture(url, storeTexAsNonReadable: false);
+            texturePromise.OnSuccessEvent += textureAsset =>
             {
-                if (thumbnailRequest == null)
-                    return;
-
-                bool success = thumbnailRequest.WebRequestSucceded();
-                if (success)
-                {
-                    texture = ((DownloadHandlerTexture)thumbnailRequest.downloadHandler).texture;
-                    texture.Compress(true);
-                    onSuccess?.Invoke(texture);
-                }
-
-                thumbnailRequest.Dispose();
-                thumbnailRequest = null;
-
-                if (!success)
-                {
-                    Debug.Log($"Error downloading: {url}");
-                    onFail?.Invoke();
-                }
+                texture = textureAsset.texture;
+                onSuccess?.Invoke(texture);
             };
+            texturePromise.OnFailEvent += textureAsset =>
+            {
+                texturePromise = null;
+                onFail?.Invoke();
+            };
+            AssetPromiseKeeper_Texture.i.Keep(texturePromise);
         }
     }
 
     public void Dispose()
     {
-        GameObject.Destroy(texture);
-        if (!(thumbnailRequest is null))
+        if (texture)
         {
-            thumbnailRequest.Abort();
-            thumbnailRequest.Dispose();
-            thumbnailRequest = null;
+            GameObject.Destroy(texture);
+        }
+
+        if (texturePromise != null)
+        {
+            AssetPromiseKeeper_Texture.i.Forget(texturePromise);
+            texturePromise = null;
         }
     }
 }
