@@ -322,9 +322,6 @@ public class FriendsHUDController : IHUD
 
             OnFriendsOpened?.Invoke();
 
-            if (HUDAudioPlayer.i != null)
-                HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogAppear);
-
             AudioScriptableObjects.dialogOpen.Play(true);
         }
         else

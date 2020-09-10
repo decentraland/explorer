@@ -44,10 +44,6 @@ public class ControlsHUDController : IHUD
             view.gameObject.SetActive(true);
             view.showHideAnimator.Show();
             OnControlsOpened?.Invoke();
-            
-            if (HUDAudioPlayer.i != null)
-                HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.fadeIn);
-                
             AudioScriptableObjects.fadeIn.Play(true);
         }
     }
