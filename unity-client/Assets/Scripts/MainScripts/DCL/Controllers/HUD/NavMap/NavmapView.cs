@@ -57,9 +57,6 @@ namespace DCL
             MapRenderer.OnParcelHold += TriggerToast;
             MapRenderer.OnParcelHoldCancel += () => { toastView.OnCloseClick(); };
 
-            MinimapHUDView.OnUpdateData += UpdateCurrentSceneData;
-            MinimapHUDView.OnOpenNavmapClicked += () => ToggleNavMap();
-
             Initialize();
         }
 
@@ -71,7 +68,6 @@ namespace DCL
 
         private void OnDestroy()
         {
-            MinimapHUDView.OnUpdateData -= UpdateCurrentSceneData;
             MapRenderer.OnParcelClicked -= TriggerToast;
             MapRenderer.OnParcelHold -= TriggerToast;
         }
@@ -88,6 +84,7 @@ namespace DCL
 
             if (isOpen)
             {
+                UpdateCurrentSceneData(CommonScriptableObjects.playerCoords);
                 cursorLockedBeforeOpening = Utils.isCursorLocked;
                 if (!ignoreCursorLock && cursorLockedBeforeOpening)
                     Utils.UnlockCursor();
@@ -132,10 +129,11 @@ namespace DCL
             }
         }
 
-        void UpdateCurrentSceneData(MinimapHUDModel model)
+        void UpdateCurrentSceneData(Vector2Int currentCoords)
         {
-            currentSceneNameText.text = string.IsNullOrEmpty(model.sceneName) ? "Unnamed" : model.sceneName;
-            currentSceneCoordsText.text = model.playerPosition;
+            const string format = "{0},{1}";
+            currentSceneCoordsText.text = string.Format(format, currentCoords.x, currentCoords.y);
+            currentSceneNameText.text = MinimapMetadata.GetMetadata().GetSceneInfo(currentCoords.x, currentCoords.y)?.name ?? "Unnamed";
         }
 
         void TriggerToast(int cursorTileX, int cursorTileY)
