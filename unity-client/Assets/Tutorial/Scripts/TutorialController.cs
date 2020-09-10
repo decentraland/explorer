@@ -29,7 +29,7 @@ namespace DCL.Tutorial
         {
             None = 0,
             OldTutorialValue = 99, // NOTE: old tutorial set tutorialStep to 99 when finished
-            EmailRequested = 128,
+            EmailRequested = 128, // NOTE: old email prompt set tutorialStep to 1289 when finished
             NewTutorialFinished = 256
         }
 
@@ -90,19 +90,10 @@ namespace DCL.Tutorial
 
             SetTutorialDisabled();
 
-            if (hudController != null)
+            if (hudController != null && hudController.goToGenesisPlazaHud != null)
             {
-                if (hudController.emailPromptHud != null)
-                {
-                    hudController.emailPromptHud.OnSetEmailFlag -= EmailPromptHud_OnSetEmailFlag;
-                    hudController.emailPromptHud.waitForEndOfTutorial = false;
-                }
-
-                if (hudController.goToGenesisPlazaHud != null)
-                {
-                    hudController.goToGenesisPlazaHud.OnBeforeGoToGenesisPlaza -= GoToGenesisPlazaHud_OnBeforeGoToGenesisPlaza;
-                    hudController.goToGenesisPlazaHud.OnAfterGoToGenesisPlaza -= GoToGenesisPlazaHud_OnAfterGoToGenesisPlaza;
-                }
+                hudController.goToGenesisPlazaHud.OnBeforeGoToGenesisPlaza -= GoToGenesisPlazaHud_OnBeforeGoToGenesisPlaza;
+                hudController.goToGenesisPlazaHud.OnAfterGoToGenesisPlaza -= GoToGenesisPlazaHud_OnAfterGoToGenesisPlaza;
             }
         }
 
@@ -117,21 +108,11 @@ namespace DCL.Tutorial
             isRunning = true;
             openedFromDeepLink = Convert.ToBoolean(fromDeepLink);
 
-            if (hudController != null)
+            if (hudController != null && hudController.goToGenesisPlazaHud != null)
             {
-                if (hudController.emailPromptHud != null)
-                {
-                    hudController.emailPromptHud.OnSetEmailFlag -= EmailPromptHud_OnSetEmailFlag;
-                    hudController.emailPromptHud.OnSetEmailFlag += EmailPromptHud_OnSetEmailFlag;
-                    hudController.emailPromptHud.waitForEndOfTutorial = true;
-                }
-
-                if (hudController.goToGenesisPlazaHud != null)
-                {
-                    hudController.goToGenesisPlazaHud.OnBeforeGoToGenesisPlaza -= GoToGenesisPlazaHud_OnBeforeGoToGenesisPlaza;
-                    hudController.goToGenesisPlazaHud.OnBeforeGoToGenesisPlaza += GoToGenesisPlazaHud_OnBeforeGoToGenesisPlaza;
-                    hudController.goToGenesisPlazaHud.OnAfterGoToGenesisPlaza += GoToGenesisPlazaHud_OnAfterGoToGenesisPlaza;
-                }
+                hudController.goToGenesisPlazaHud.OnBeforeGoToGenesisPlaza -= GoToGenesisPlazaHud_OnBeforeGoToGenesisPlaza;
+                hudController.goToGenesisPlazaHud.OnBeforeGoToGenesisPlaza += GoToGenesisPlazaHud_OnBeforeGoToGenesisPlaza;
+                hudController.goToGenesisPlazaHud.OnAfterGoToGenesisPlaza += GoToGenesisPlazaHud_OnAfterGoToGenesisPlaza;
             }
 
             if (!CommonScriptableObjects.rendererState.Get())
@@ -156,9 +137,6 @@ namespace DCL.Tutorial
 
             isRunning = false;
             ShowTeacher3DModel(false);
-
-            if (hudController != null && hudController.emailPromptHud != null)
-                hudController.emailPromptHud.waitForEndOfTutorial = false;
 
             CommonScriptableObjects.rendererState.OnChange -= OnRenderingStateChanged;
         }
@@ -319,11 +297,6 @@ namespace DCL.Tutorial
 
                 yield return null;
             }
-        }
-
-        private void EmailPromptHud_OnSetEmailFlag()
-        {
-            SetUserTutorialStepAsCompleted(TutorialFinishStep.EmailRequested);
         }
 
         private void GoToGenesisPlazaHud_OnBeforeGoToGenesisPlaza()

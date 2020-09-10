@@ -124,7 +124,6 @@ export async function initializeEngine(_gameInstance: GameInstance) {
   }
 
   if (!DEBUG) {
-    unityInterface.ConfigureEmailPrompt(getUserProfile().profile.tutorialStep)
     unityInterface.ConfigureTutorial(getUserProfile().profile.tutorialStep, HAS_INITIAL_POSITION_MARK)
   }
 
