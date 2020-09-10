@@ -10,7 +10,7 @@ internal class ViewPool<T> : IDisposable where T : MonoBehaviour
     public ViewPool(T baseView, int prewarm = 0)
     {
         this.baseView = GameObject.Instantiate(baseView, baseView.transform.parent);
-        baseView.gameObject.SetActive(false);
+        this.baseView.gameObject.SetActive(false);
 
         PoolView(baseView);
         for (int i = 0; i < prewarm - 1; i++)

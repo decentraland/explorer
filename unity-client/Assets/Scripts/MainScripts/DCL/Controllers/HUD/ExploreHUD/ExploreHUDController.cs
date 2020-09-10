@@ -5,8 +5,9 @@ using DCL.Interface;
 
 public class ExploreHUDController : IHUD
 {
-    internal ExploreHUDView view;
+    internal static bool isTest = false;
 
+    internal ExploreHUDView view;
     internal InputAction_Trigger toggleExploreTrigger;
 
     ExploreMiniMapDataController miniMapDataController;

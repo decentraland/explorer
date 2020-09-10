@@ -34,7 +34,7 @@ internal class HighlightScenesController : MonoBehaviour
     public void RefreshIfNeeded()
     {
         bool isFirstTimeLoad = cachedHotScenes.Count == 0;
-        if (isFirstTimeLoad)
+        if (isFirstTimeLoad && !ExploreHUDController.isTest)
         {
             firstLoadAnimRoutine = StartCoroutine(FirstTimeLoadingRoutine());
         }
@@ -106,7 +106,6 @@ internal class HighlightScenesController : MonoBehaviour
         if (!hotSceneView.gameObject.activeSelf)
         {
             hotSceneView.gameObject.SetActive(true);
-            hotSceneView.animationHandler.Reset();
         }
 
         if (!IsHotSceneCellActive(baseCoords))

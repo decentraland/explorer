@@ -12,12 +12,6 @@ internal class AnimationHandler
         this.animator = animator;
     }
 
-    public void Reset()
-    {
-        animator.ResetTrigger(paramLoadingComplete);
-        animator.SetTrigger(paramInitialize);
-    }
-
     public void SetLoaded()
     {
         if (animator.gameObject.activeInHierarchy)
