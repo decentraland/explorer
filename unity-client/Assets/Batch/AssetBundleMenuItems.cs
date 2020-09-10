@@ -38,6 +38,7 @@ namespace DCL
             builder.environment = ContentServerUtils.ApiEnvironment.ORG;
             builder.DumpArea(new Vector2Int(-110, -110), new Vector2Int(1, 1));
         }
+
         static void DumpAreaToMax(AssetBundleBuilder builder, int x, int y)
         {
             if (x >= 140 || y >= 140)
@@ -61,7 +62,7 @@ namespace DCL
         {
             var builder = new AssetBundleBuilder();
             builder.skipAlreadyBuiltBundles = true;
-            var zoneArray = Utils.GetCenteredZoneArray(new Vector2Int(12, 46), new Vector2Int(1, 1));
+            var zoneArray = Utils.GetCenteredZoneArray(new Vector2Int(28, 45), new Vector2Int(1, 1));
             builder.DumpArea(zoneArray);
         }
 

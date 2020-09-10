@@ -354,14 +354,14 @@ namespace DCL
 
                     if (endsWithTextureExtensions)
                     {
-                        RetrieveAndInjectTexture(hashToGltfPair, gltfHash, contentPair);
+                        RetrieveAndInjectTexture(kvp.Value, contentPair);
                     }
 
                     bool endsWithBufferExtensions = AssetBundleBuilderConfig.bufferExtensions.Any((x) => contentFilePathLower.EndsWith(x));
 
                     if (endsWithBufferExtensions)
                     {
-                        RetrieveAndInjectBuffer(gltfFilePath, contentPair, contentFilePath);
+                        RetrieveAndInjectBuffer(kvp.Value, contentPair);
                     }
                 }
 
@@ -559,7 +559,7 @@ namespace DCL
             }
         }
 
-        private void RetrieveAndInjectTexture(Dictionary<string, MappingPair> hashToGltfPair, string gltfHash, MappingPair textureMappingPair)
+        private void RetrieveAndInjectTexture(MappingPair gltfMappingPair, MappingPair textureMappingPair)
         {
             string fileExt = Path.GetExtension(textureMappingPair.file);
             string realOutputPath = finalDownloadedPath + textureMappingPair.hash + "/" + textureMappingPair.hash + fileExt;
@@ -588,7 +588,7 @@ namespace DCL
             PersistentAssetCache.AddImage(relativePath, realOutputPathGltf, new RefCountedTextureData(relativePath, t2d));
         }
 
-        private void RetrieveAndInjectBuffer(string gltfFilePath, MappingPair bufferMappingPair, string contentFilePath)
+        private void RetrieveAndInjectBuffer(MappingPair gltfMappingPair, MappingPair bufferMappingPair)
         {
             string bufferExt = Path.GetExtension(bufferMappingPair.file);
             string gltfExt = Path.GetExtension(gltfMappingPair.file);
