@@ -90,6 +90,21 @@ namespace DCL.Tutorial
                 StopCoroutine(executeStepsCoroutine);
 
             SetTutorialDisabled();
+
+            if (hudController != null)
+            {
+                if (hudController.emailPromptHud != null)
+                {
+                    hudController.emailPromptHud.OnSetEmailFlag -= EmailPromptHud_OnSetEmailFlag;
+                    hudController.emailPromptHud.waitForEndOfTutorial = false;
+                }
+
+                if (hudController.goToGenesisPlazaHud != null)
+                {
+                    hudController.goToGenesisPlazaHud.OnBeforeGoToGenesisPlaza -= GoToGenesisPlazaHud_OnBeforeGoToGenesisPlaza;
+                    hudController.goToGenesisPlazaHud.OnAfterGoToGenesisPlaza -= GoToGenesisPlazaHud_OnAfterGoToGenesisPlaza;
+                }
+            }
         }
 
         /// <summary>
@@ -103,10 +118,21 @@ namespace DCL.Tutorial
             isRunning = true;
             openedFromDeepLink = Convert.ToBoolean(fromDeepLink);
 
-            if (hudController != null && hudController.emailPromptHud != null)
+            if (hudController != null)
             {
-                hudController.emailPromptHud.OnSetEmailFlag += EmailPromptHud_OnSetEmailFlag;
-                hudController.emailPromptHud.waitForEndOfTutorial = true;
+                if (hudController.emailPromptHud != null)
+                {
+                    hudController.emailPromptHud.OnSetEmailFlag -= EmailPromptHud_OnSetEmailFlag;
+                    hudController.emailPromptHud.OnSetEmailFlag += EmailPromptHud_OnSetEmailFlag;
+                    hudController.emailPromptHud.waitForEndOfTutorial = true;
+                }
+
+                if (hudController.goToGenesisPlazaHud != null)
+                {
+                    hudController.goToGenesisPlazaHud.OnBeforeGoToGenesisPlaza -= GoToGenesisPlazaHud_OnBeforeGoToGenesisPlaza;
+                    hudController.goToGenesisPlazaHud.OnBeforeGoToGenesisPlaza += GoToGenesisPlazaHud_OnBeforeGoToGenesisPlaza;
+                    hudController.goToGenesisPlazaHud.OnAfterGoToGenesisPlaza += GoToGenesisPlazaHud_OnAfterGoToGenesisPlaza;
+                }
             }
 
             if (!CommonScriptableObjects.rendererState.Get())
@@ -133,10 +159,7 @@ namespace DCL.Tutorial
             ShowTeacher3DModel(false);
 
             if (hudController != null && hudController.emailPromptHud != null)
-            {
-                hudController.emailPromptHud.OnSetEmailFlag -= EmailPromptHud_OnSetEmailFlag;
                 hudController.emailPromptHud.waitForEndOfTutorial = false;
-            }
 
             CommonScriptableObjects.rendererState.OnChange -= OnRenderingStateChanged;
         }
@@ -307,6 +330,19 @@ namespace DCL.Tutorial
         private void EmailPromptHud_OnSetEmailFlag()
         {
             SetUserTutorialStepAsCompleted(TutorialFinishStep.EmailRequested);
+        }
+
+        private void GoToGenesisPlazaHud_OnBeforeGoToGenesisPlaza()
+        {
+            SetTutorialDisabled();
+        }
+
+        private void GoToGenesisPlazaHud_OnAfterGoToGenesisPlaza()
+        {
+            SetTutorialEnabled(false.ToString());
+
+            if (hudController != null)
+                hudController.taskbarHud.HideGoToGenesisPlazaButton();
         }
 
         private bool IsPlayerInsideGenesisPlaza()

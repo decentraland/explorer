@@ -288,6 +288,7 @@ public class HUDController : MonoBehaviour
 
                         taskbarHud.AddSettingsWindow(settingsHud);
                         taskbarHud.AddBackpackWindow(avatarEditorHud);
+                        taskbarHud.AddGoToGenesisWindow(goToGenesisPlazaHud);
                     }
                 }
                 else
@@ -337,7 +338,6 @@ public class HUDController : MonoBehaviour
                 break;
             case HUDElementID.GO_TO_GENESIS_PLAZA_HUD:
                 CreateHudElement<GoToGenesisPlazaHUDController>(configuration, hudElementId);
-                taskbarHud?.AddGoToGenesisWindow(goToGenesisPlazaHud);
                 break;
         }
 

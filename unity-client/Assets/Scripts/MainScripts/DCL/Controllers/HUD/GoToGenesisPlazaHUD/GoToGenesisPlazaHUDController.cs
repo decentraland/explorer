@@ -6,6 +6,9 @@ namespace DCL.GoToGenesisPlazaHUD
     {
         public GoToGenesisPlazaHUDView view { private set; get; }
 
+        public event System.Action OnBeforeGoToGenesisPlaza;
+        public event System.Action OnAfterGoToGenesisPlaza;
+
         public GoToGenesisPlazaHUDController()
         {
             view = GoToGenesisPlazaHUDView.Create();
@@ -29,30 +32,28 @@ namespace DCL.GoToGenesisPlazaHUD
 
         private void OnGoToGenesisButtonClick()
         {
-            //CommonScriptableObjects.rendererState.OnChange += RendererState_OnChange;
+            CommonScriptableObjects.rendererState.OnChange += RendererState_OnChange;
 
+            SetVisibility(false);
             WebInterface.GoTo(0, 0);
-
-            //if (tutorialController != null)
-            //    tutorialController.SetTutorialDisabled();
+            OnBeforeGoToGenesisPlaza?.Invoke();
         }
 
-        //private void RendererState_OnChange(bool current, bool previous)
-        //{
-        //    if (current)
-        //    {
-        //        CommonScriptableObjects.rendererState.OnChange -= RendererState_OnChange;
-        //        if (SceneController.i != null)
-        //            SceneController.i.OnSortScenes += SceneController_OnSortScenes;
-        //    }
-        //}
+        private void RendererState_OnChange(bool current, bool previous)
+        {
+            if (current)
+            {
+                CommonScriptableObjects.rendererState.OnChange -= RendererState_OnChange;
+                if (SceneController.i != null)
+                    SceneController.i.OnSortScenes += SceneController_OnSortScenes;
+            }
+        }
 
-        //private void SceneController_OnSortScenes()
-        //{
-        //    SceneController.i.OnSortScenes -= SceneController_OnSortScenes;
+        private void SceneController_OnSortScenes()
+        {
+            SceneController.i.OnSortScenes -= SceneController_OnSortScenes;
 
-        //    if (tutorialController != null)
-        //        tutorialController.SetTutorialEnabled(false.ToString());
-        //}
+            OnAfterGoToGenesisPlaza?.Invoke();
+        }
     }
 }

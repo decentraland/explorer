@@ -204,6 +204,7 @@ public class TaskbarHUDController : IHUD
     private void View_OnGoToGenesisToggleOn()
     {
         goToGenesisHud.SetVisibility(true);
+
         OnAnyTaskbarButtonClicked?.Invoke();
     }
 
@@ -436,12 +437,17 @@ public class TaskbarHUDController : IHUD
 
     public void ShowGoToGenesisPlazaButton()
     {
-        view.OnAddGoToGenesisWindow();
+        view.OnAddGoToGenesisWindow(true);
 
         view.rightButtonsHorizontalLayout.CalculateLayoutInputHorizontal();
         view.rightButtonsHorizontalLayout.CalculateLayoutInputVertical();
         view.rightButtonsHorizontalLayout.SetLayoutHorizontal();
         view.rightButtonsHorizontalLayout.SetLayoutVertical();
+    }
+
+    public void HideGoToGenesisPlazaButton()
+    {
+        view.OnAddGoToGenesisWindow(false);
     }
 
     public void AddControlsMoreOption()

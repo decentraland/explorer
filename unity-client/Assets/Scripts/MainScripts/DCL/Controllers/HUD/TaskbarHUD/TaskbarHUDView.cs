@@ -256,9 +256,9 @@ public class TaskbarHUDView : MonoBehaviour
         separatorMark.SetActive(true);
     }
 
-    internal void OnAddGoToGenesisWindow()
+    internal void OnAddGoToGenesisWindow(bool visible)
     {
-        goToGenesisButton.transform.parent.gameObject.SetActive(true);
+        goToGenesisButton.transform.parent.gameObject.SetActive(visible);
     }
 
     internal void OnAddControlsMoreOption()
