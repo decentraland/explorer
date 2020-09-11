@@ -10,6 +10,8 @@ public class AvatarEditorHUDAudioHandler : MonoBehaviour
     [SerializeField]
     AvatarEditorHUDView view;
     [SerializeField]
+    ItemSelector nftItemSelector; // (Mordi) This guy handles wearables in the "collectibles" tab
+    [SerializeField]
     Button randomizeButton;
     [SerializeField]
     AudioEvent eventRarity, eventAvatarAppear, eventReactionMale, eventReactionFemale, eventWearableClothing, eventWearableEyewear, eventWearableJewelry,
@@ -26,6 +28,8 @@ public class AvatarEditorHUDAudioHandler : MonoBehaviour
         }
 
         view.OnAvatarAppear += OnAvatarAppear;
+
+        nftItemSelector.OnItemClicked += OnWearableClicked;
 
         if (randomizeButton != null)
             randomizeButton.onClick.AddListener(ResetLastClickedWearable);
@@ -94,28 +98,13 @@ public class AvatarEditorHUDAudioHandler : MonoBehaviour
 
         eventAvatarAppear.Play(true);
         PlayRarity();
-
-        // Play voice reaction from the avatar
         if (Random.Range(0f, 1f) > 0.25f)
         {
-            AudioEvent eventReaction = null;
-
-            if (model.bodyShape.Contains("Female"))
-                eventReaction = eventReactionFemale;
-            else
-                eventReaction = eventReactionMale;
-
-            if (eventReaction != null)
-            {
-                if (!eventReaction.source.isPlaying)
-                {
-                    eventReaction.PlayScheduled(0.6f);
-                }
-            }
+            PlayVoiceReaction(model.bodyShape);
         }
     }
 
-    public void PlayRarity()
+    void PlayRarity()
     {
         if (lastClickedWearable == null)
             return;
@@ -146,5 +135,23 @@ public class AvatarEditorHUDAudioHandler : MonoBehaviour
         }*/
 
         eventRarity.Play(true);
+    }
+
+    void PlayVoiceReaction(string bodyShape)
+    {
+        AudioEvent eventReaction = null;
+
+        if (bodyShape.Contains("Female"))
+            eventReaction = eventReactionFemale;
+        else
+            eventReaction = eventReactionMale;
+
+        if (eventReaction != null)
+        {
+            if (!eventReaction.source.isPlaying)
+            {
+                eventReaction.PlayScheduled(0.6f);
+            }
+        }
     }
 }
