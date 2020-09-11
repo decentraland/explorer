@@ -71,11 +71,13 @@ export class VoiceChatCodecWorkerMain {
 
   destroyEncodeStream(streamId: string) {
     delete this.encodeStreams[streamId]
+    delete this.encodeListeners[streamId]
     this.sendRequestToWorker({ topic: RequestTopic.DESTROY_ENCODER, streamId })
   }
 
   destroyDecodeStream(streamId: string) {
     delete this.decodeStreams[streamId]
+    delete this.decodeListeners[streamId]
     this.sendRequestToWorker({ topic: RequestTopic.DESTROY_DECODER, streamId })
   }
 
