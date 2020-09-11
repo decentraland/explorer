@@ -325,7 +325,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee9f4abe9743e8746a8476ea46e938d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hoverSound: 1
   playHover: 1
   playClick: 1
   playRelease: 1
@@ -342,7 +341,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.8867924, g: 0.8867924, b: 0.8867924, a: 1}
+  m_Color: {r: 0.9433962, g: 0.9433962, b: 0.9433962, a: 1}
   m_RaycastTarget: 1
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -1358,7 +1357,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee9f4abe9743e8746a8476ea46e938d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hoverSound: 1
   playHover: 1
   playClick: 1
   playRelease: 1
@@ -1906,7 +1904,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.7843137}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -2133,7 +2131,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee9f4abe9743e8746a8476ea46e938d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hoverSound: 21
   playHover: 1
   playClick: 0
   playRelease: 0
@@ -2372,13 +2369,13 @@ PrefabInstance:
         type: 3}
       propertyPath: m_fontAsset
       value: 
-      objectReference: {fileID: 11400000, guid: 26b03903800224f718b64e9afbc91b61,
+      objectReference: {fileID: 11400000, guid: 131598e906f4d4a048cfa339caa74472,
         type: 2}
     - target: {fileID: 2777136830131887387, guid: 523b6c9aa6f4040eab849ba3dad0bb5c,
         type: 3}
       propertyPath: m_sharedMaterial
       value: 
-      objectReference: {fileID: -6892909264025736228, guid: 26b03903800224f718b64e9afbc91b61,
+      objectReference: {fileID: -2930943361234166642, guid: 131598e906f4d4a048cfa339caa74472,
         type: 2}
     - target: {fileID: 2777136830131887387, guid: 523b6c9aa6f4040eab849ba3dad0bb5c,
         type: 3}
