@@ -1,31 +1,36 @@
-import { put, takeLatest, call, delay, select } from 'redux-saga/effects'
+import { call, delay, put, select, takeLatest } from 'redux-saga/effects'
 import { createIdentity } from 'eth-crypto'
-import { Eth } from 'web3x/eth'
 import { Personal } from 'web3x/personal/personal'
 import { Account } from 'web3x/account'
 import { Authenticator } from 'dcl-crypto'
 
-import { ENABLE_WEB3, WORLD_EXPLORER, PREVIEW, ETHEREUM_NETWORK, getTLD, setNetwork } from 'config'
+import { ENABLE_WEB3, ETHEREUM_NETWORK, getTLD, PREVIEW, setNetwork, WORLD_EXPLORER } from 'config'
 
 import { createLogger } from 'shared/logger'
-import { awaitWeb3Approval, isSessionExpired, providerFuture, loginCompleted } from 'shared/ethereum/provider'
+import {
+  awaitWeb3Approval,
+  createEth,
+  isSessionExpired,
+  loginCompleted,
+  providerFuture
+} from 'shared/ethereum/provider'
 import { getUserProfile, setLocalProfile } from 'shared/comms/peers'
 import { ReportFatalError } from 'shared/loading/ReportFatalError'
 import {
   AUTH_ERROR_LOGGED_OUT,
-  NETWORK_MISMATCH,
+  AWAITING_USER_SIGNATURE,
   awaitingUserSignature,
-  AWAITING_USER_SIGNATURE
+  NETWORK_MISMATCH
 } from 'shared/loading/types'
 import { identifyUser, queueTrackingEvent } from 'shared/analytics'
-import { getNetworkFromTLD, getAppNetwork } from 'shared/web3'
+import { getAppNetwork, getNetworkFromTLD } from 'shared/web3'
 import { getNetwork } from 'shared/ethereum/EthereumService'
 
 import { getFromLocalStorage, saveToLocalStorage } from 'atomicHelpers/localStorage'
 
 import { Session } from '.'
 import { ExplorerIdentity } from './types'
-import { userAuthentified, LOGOUT, LOGIN, loginCompleted as loginCompletedAction } from './actions'
+import { LOGIN, loginCompleted as loginCompletedAction, LOGOUT, userAuthentified } from './actions'
 
 const logger = createLogger('session: ')
 
@@ -193,7 +198,7 @@ async function createAuthIdentity() {
   if (ENABLE_WEB3) {
     const result = await providerFuture
     if (result.successful) {
-      const eth = Eth.fromCurrentProvider()!
+      const eth = createEth()!
       const account = (await eth.getAccounts())[0]
 
       address = account.toJSON()

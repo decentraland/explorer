@@ -107,6 +107,7 @@
     "eth-connect": "^4.0.1",
     "eth-crypto": "^1.5.1",
     "ethereum-blockies": "^0.1.1",
+    "fortmatic": "^2.2.1",
     "fp-future": "^1.0.1",
     "gifuct-js": "github:matt-way/gifuct-js",
     "google-protobuf": "^3.6.1",
@@ -120,6 +121,7 @@
     "reselect": "^4.0.0",
     "sha3": "^2.1.2",
     "typesafe-actions": "^4.4.2",
+    "web3modal": "^1.9.0",
     "web3x": "^4.0.6",
     "ws": "^7.0.0"
   }
