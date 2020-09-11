@@ -5,7 +5,14 @@ using UnityEngine;
 
 namespace DCL.Controllers
 {
-    public class BlockerHandler
+    public interface IBlockerHandler
+    {
+        void SetupGlobalBlockers(HashSet<Vector2Int> allLoadedParcelCoords, float height, Transform parent);
+        void CleanBlockers();
+        Dictionary<Vector2Int, PoolableObject> GetBlockers();
+    }
+
+    public class BlockerHandler : IBlockerHandler
     {
         static GameObject blockerPrefab;
 
@@ -17,6 +24,7 @@ namespace DCL.Controllers
         Dictionary<Vector2Int, PoolableObject> blockers = new Dictionary<Vector2Int, PoolableObject>();
         HashSet<Vector2Int> blockersToRemove = new HashSet<Vector2Int>();
         HashSet<Vector2Int> blockersToAdd = new HashSet<Vector2Int>();
+        DCLCharacterPosition characterPosition;
 
         static Vector2Int[] aroundOffsets =
         {
@@ -30,8 +38,10 @@ namespace DCL.Controllers
             new Vector2Int(-1, 1)
         };
 
-        public BlockerHandler()
+        public BlockerHandler(DCLCharacterPosition characterPosition)
         {
+            this.characterPosition = characterPosition;
+
             if (blockerPrefab == null)
                 blockerPrefab = Resources.Load<GameObject>(PARCEL_BLOCKER_PREFAB);
 
@@ -52,7 +62,7 @@ namespace DCL.Controllers
             Transform blockerTransform = blockerPoolable.gameObject.transform;
 
             blockerTransform.SetParent(parent, false);
-            blockerTransform.position = DCLCharacterController.i.characterPosition.WorldToUnityPosition(Utils.GridToWorldPosition(pos.x, pos.y));
+            blockerTransform.position = this.characterPosition.WorldToUnityPosition(Utils.GridToWorldPosition(pos.x, pos.y));
 
             auxPosVec.x = blockerTransform.position.x + centerOffset;
             auxPosVec.z = blockerTransform.position.z + centerOffset;
@@ -139,6 +149,11 @@ namespace DCL.Controllers
             {
                 InstantiateBlocker(coords, parent);
             }
+        }
+
+        public Dictionary<Vector2Int, PoolableObject> GetBlockers()
+        {
+            return new Dictionary<Vector2Int, PoolableObject>(blockers);
         }
 
         public void CleanBlockers()

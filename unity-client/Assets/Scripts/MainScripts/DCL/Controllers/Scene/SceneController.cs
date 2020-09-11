@@ -14,7 +14,12 @@ using UnityEngine.Serialization;
 
 namespace DCL
 {
-    public class SceneController : MonoBehaviour, IMessageProcessHandler, IMessageQueueHandler
+    public interface ISceneHandler
+    {
+        HashSet<Vector2Int> GetAllLoadedScenesCoords();
+    }
+
+    public class SceneController : MonoBehaviour, IMessageProcessHandler, IMessageQueueHandler, ISceneHandler
     {
         public static SceneController i { get; private set; }
 
@@ -68,8 +73,7 @@ namespace DCL
 
             DCLCharacterController.OnCharacterMoved += SetPositionDirty;
 
-            GameObject worldBlockersParent = new GameObject("WorldBlockers");
-            worldBlockersController = new WorldBlockersController(this, worldBlockersParent.transform);
+            worldBlockersController = new WorldBlockersController(this, new BlockerHandler(DCLCharacterController.i.characterPosition), DCLCharacterController.i.characterPosition);
 
             physicsSyncController = new PhysicsSyncController();
             //TODO(Brian): Move those suscriptions elsewhere when we have the PoolManager in its own
@@ -519,6 +523,8 @@ namespace DCL
             Environment.i.messagingControllersManager.SetSceneReady(sceneId);
 
             WebInterface.ReportControlEvent(new WebInterface.SceneReady(sceneId));
+
+            worldBlockersController.SetupWorldBlockers();
         }
 
         public string TryToGetSceneCoordsID(string id)
@@ -886,6 +892,21 @@ namespace DCL
             }
         }
 
+        public HashSet<Vector2Int> GetAllLoadedScenesCoords()
+        {
+            HashSet<Vector2Int> allLoadedParcelCoords = new HashSet<Vector2Int>();
+
+            // Create fast (hashset) collection of loaded parcels coords
+            foreach (var element in loadedScenes)
+            {
+                if (!element.Value.isReady) continue;
+
+                allLoadedParcelCoords.UnionWith(element.Value.parcels);
+            }
+
+            return allLoadedParcelCoords;
+        }
+
         //======================================================================
 
         #endregion
@@ -919,6 +940,8 @@ namespace DCL
             InitializeSceneBoundariesChecker();
 
             OnDebugModeSet?.Invoke();
+
+            worldBlockersController.SetEnabled(false);
         }
 
         public void HideFPSPanel()
