@@ -18,6 +18,9 @@ public class BuildModeController : MonoBehaviour
         Active = 1,
         Selected_Object =2
     }
+
+    [Header("Activation of Feature")]
+    public bool activeFeature = false;
     [Header("Design variables")]
 
     public float scaleSpeed = 0.25f;
@@ -27,6 +30,7 @@ public class BuildModeController : MonoBehaviour
 
     public float distanceLimitToSelectObjects = 50;
 
+ 
 
     [Header("Snap variables")]
     public float snapFactor = 1f;
@@ -83,6 +87,7 @@ public class BuildModeController : MonoBehaviour
 
     private void Update()
     {
+        
         if(isEditModeActivated)
         {
             if(Time.timeSinceLevelLoad >= nexTimeToReceiveInput) CheckEditModeInput();          
@@ -248,13 +253,16 @@ public class BuildModeController : MonoBehaviour
 
     private void OnEditModeChangeAction(DCLAction_Trigger action)
     {
-        if (isEditModeActivated)
+        if (activeFeature)
         {
-            ExitEditMode();
-        }
-        else
-        {
-            EnterEditMode();
+            if (isEditModeActivated)
+            {
+                ExitEditMode();
+            }
+            else
+            {
+                EnterEditMode();
+            }
         }
     }
 
@@ -306,7 +314,6 @@ public class BuildModeController : MonoBehaviour
         {
             string entityID = hit.collider.gameObject.name;
             SelectObject(sceneToEdit.entities[entityID]);
-            Debug.Log("Entity hitted " + entityID);
         } 
     }
 
@@ -327,7 +334,6 @@ public class BuildModeController : MonoBehaviour
             SceneController.i.boundariesChecker.RemoveEntityToBeChecked(entityToEdit);
             gameObjectToEdit = null;
             entityToEdit = null;
-            Debug.Log("Stop editing objet");
         }
     }
 
@@ -374,7 +380,7 @@ public class BuildModeController : MonoBehaviour
 
     void EnterEditMode()
     {     
-        Debug.Log("Entered edit mode");
+
         editModeChangeFX.SetActive(true);
         DCLCharacterController.i.SetFreeMovementActive(true);
         isEditModeActivated = true;
@@ -413,7 +419,6 @@ public class BuildModeController : MonoBehaviour
         DCL.Environment.i.messagingControllersManager.messagingControllers[sceneToEdit.sceneData.id].systemBus.Start();
         //
         isEditModeActivated = false;
-        Debug.Log("Exit edit mode");
         editModeChangeFX.SetActive(false);
 
         snapGO.transform.SetParent(transform);

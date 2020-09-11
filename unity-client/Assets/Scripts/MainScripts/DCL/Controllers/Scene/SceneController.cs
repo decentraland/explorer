@@ -560,14 +560,11 @@ namespace DCL
             if (boundariesChecker != null)
                 boundariesChecker.Stop();
 
+            boundariesChecker = new SceneBoundariesChecker();
             if (isDebugMode)
-            {
-                boundariesChecker = new SceneBoundariesDebugModeChecker();
+            {       
+                boundariesChecker.SetDebugMode();
                 boundariesChecker.timeBetweenChecks = 0f;
-            }
-            else
-            {
-                boundariesChecker = new SceneBoundariesChecker();
             }
         }
 

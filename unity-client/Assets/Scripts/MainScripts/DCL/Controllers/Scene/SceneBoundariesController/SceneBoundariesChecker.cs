@@ -29,6 +29,11 @@ namespace DCL.Controllers
        
         }
 
+        public void SetDebugMode()
+        {
+            sceneBoundariesEntityHandler.DEBUG_MODE = true;
+        }
+
         // TODO: Improve MessagingControllersManager.i.timeBudgetCounter usage once we have the centralized budget controller for our immortal coroutines
         IEnumerator CheckEntities()
         {
