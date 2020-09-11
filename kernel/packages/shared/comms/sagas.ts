@@ -1,6 +1,6 @@
 import { put, takeEvery, select, call, takeLatest } from 'redux-saga/effects'
 
-import { STATIC_WORLD } from 'config'
+import { STATIC_WORLD, VOICE_CHAT_ENABLED } from 'config'
 
 import { establishingComms } from 'shared/loading/types'
 import { USER_AUTHENTIFIED } from 'shared/session/actions'
@@ -24,7 +24,9 @@ const logger = createLogger('comms: ')
 export function* commsSaga() {
   yield takeEvery(USER_AUTHENTIFIED, establishCommunications)
   yield takeLatest(CATALYST_REALMS_SCAN_SUCCESS, changeRealm)
-  yield takeEvery(SET_VOICE_CHAT_RECORDING, updateVoiceChatRecordingStatus)
+  if (VOICE_CHAT_ENABLED) {
+    yield takeEvery(SET_VOICE_CHAT_RECORDING, updateVoiceChatRecordingStatus)
+  }
 }
 
 function* establishCommunications() {

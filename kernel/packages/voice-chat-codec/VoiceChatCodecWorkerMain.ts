@@ -39,8 +39,7 @@ export class VoiceChatCodecWorkerMain {
       } else if (ev.data.topic === ResponseTopic.DECODE) {
         this.decodeListeners[ev.data.streamId]?.forEach((listener) => listener(ev.data.samples))
       } else {
-        // tslint:disable-next-line:no-console
-        console.warn('Unknown message topic received from worker', ev)
+        defaultLogger.warn('Unknown message topic received from worker', ev)
       }
     }
   }

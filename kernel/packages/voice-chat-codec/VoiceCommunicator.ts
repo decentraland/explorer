@@ -1,6 +1,7 @@
 import { VoiceChatCodecWorkerMain, EncodeStream } from './VoiceChatCodecWorkerMain'
 import { RingBuffer } from 'atomicHelpers/RingBuffer'
 import { defer } from 'atomicHelpers/defer'
+import defaultLogger from 'shared/logger'
 
 export type AudioCommunicatorChannel = {
   send(data: Uint8Array): any
@@ -196,7 +197,7 @@ export class VoiceCommunicator {
     if (this.input) {
       this.voiceChatWorkerMain.destroyEncodeStream(this.selfId)
       if (this.input.recordingContext !== this.context) {
-        this.input.recordingContext.close()
+        this.input.recordingContext.close().catch((e) => defaultLogger.error('Error closing recording context', e))
       }
     }
 

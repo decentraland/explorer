@@ -1,5 +1,5 @@
 import { saveToLocalStorage } from 'atomicHelpers/localStorage'
-import { commConfigurations, parcelLimits, COMMS, AUTO_CHANGE_REALM } from 'config'
+import { commConfigurations, parcelLimits, COMMS, AUTO_CHANGE_REALM, VOICE_CHAT_ENABLED } from 'config'
 import { CommunicationsController } from 'shared/apis/CommunicationsController'
 import { defaultLogger } from 'shared/logger'
 import { ChatMessage as InternalChatMessage, ChatMessageType } from 'shared/types'
@@ -242,8 +242,8 @@ export function updateVoiceRecordingStatus(recording: boolean) {
     } else {
       voiceCommunicator.start()
     }
-  } else if (!recording) {
-    voiceCommunicator!.pause()
+  } else if (!recording && voiceCommunicator) {
+    voiceCommunicator.pause()
   }
 }
 
@@ -950,7 +950,7 @@ async function doStartCommunications(context: Context) {
       }
     }, 100)
 
-    if (!voiceCommunicator) {
+    if (!voiceCommunicator && VOICE_CHAT_ENABLED) {
       voiceCommunicator = new VoiceCommunicator(
         context.userInfo.userId!,
         {
