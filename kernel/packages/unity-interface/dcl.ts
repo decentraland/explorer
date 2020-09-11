@@ -123,7 +123,7 @@ export async function initializeEngine(_gameInstance: GameInstance) {
     unityInterface.SetEngineDebugPanel()
   }
 
-  if (!DEBUG) {
+  if (!DEBUG && ENABLE_NEW_TASKBAR) {
     unityInterface.ConfigureTutorial(getUserProfile().profile.tutorialStep, HAS_INITIAL_POSITION_MARK)
   }
 
