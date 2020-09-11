@@ -24,7 +24,7 @@ public class HUDController : MonoBehaviour
         toggleUIVisibilityTrigger.OnTriggered += ToggleUIVisibility_OnTriggered;
     }
 
-    public Legacy.AvatarHUDController avatarHud_Legacy => GetHUDElement(HUDElementID.AVATAR) as Legacy.AvatarHUDController;
+    public Legacy.AvatarHUDController avatarHud_Legacy => GetHUDElement(HUDElementID.PROFILE_HUD) as Legacy.AvatarHUDController;
 
     public NotificationHUDController notificationHud =>
         GetHUDElement(HUDElementID.NOTIFICATION) as NotificationHUDController;
@@ -115,7 +115,7 @@ public class HUDController : MonoBehaviour
     {
         NONE = 0,
         MINIMAP = 1,
-        AVATAR = 2,
+        PROFILE_HUD = 2,
         NOTIFICATION = 3,
         AVATAR_EDITOR = 4,
         SETTINGS = 5,
@@ -175,7 +175,7 @@ public class HUDController : MonoBehaviour
             case HUDElementID.MINIMAP:
                 CreateHudElement<MinimapHUDController>(configuration, hudElementId);
                 break;
-            case HUDElementID.AVATAR:
+            case HUDElementID.PROFILE_HUD:
                 CreateHudElement<Legacy.AvatarHUDController>(configuration, hudElementId);
 
                 if (avatarHud_Legacy != null)
