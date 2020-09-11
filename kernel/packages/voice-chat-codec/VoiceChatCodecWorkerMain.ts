@@ -1,4 +1,5 @@
 import { ResponseTopic, RequestTopic, VoiceChatWorkerRequest } from './types'
+import defaultLogger from 'shared/logger'
 
 const workerUrl = 'voice-chat-codec/worker.js'
 
@@ -27,6 +28,11 @@ export class VoiceChatCodecWorkerMain {
 
   constructor() {
     this.worker = new Worker(workerUrl, { name: 'VoiceChatCodecWorker' })
+    this.worker.onerror = (e) => {
+      // Errors on voice worker should not be considered fatal for now
+      e.preventDefault()
+      defaultLogger.error('Error on voice chat worker: ', e)
+    }
     this.worker.onmessage = (ev) => {
       if (ev.data.topic === ResponseTopic.ENCODE) {
         this.encodeListeners[ev.data.streamId]?.forEach((listener) => listener(ev.data.encoded))
