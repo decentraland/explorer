@@ -79,9 +79,13 @@ namespace DCL.Tutorial_Tests
         [Test]
         public void SetTutorialTeacherPositionCorrectly()
         {
-            Vector3 newTeacherPosition = new Vector3(10, 30, 0);
-            tutorialController.SetTeacherPosition(newTeacherPosition, false);
-            Assert.IsTrue(tutorialController.teacherRawImage.rectTransform.position == newTeacherPosition);
+            Vector3 oldPosition = tutorialController.teacherRawImage.rectTransform.position;
+            tutorialController.SetTeacherPosition(new Vector2(10, 30), false);
+            Assert.IsTrue(tutorialController.teacherRawImage.rectTransform.position != oldPosition);
+
+            oldPosition = tutorialController.teacherRawImage.rectTransform.position;
+            tutorialController.SetTeacherPosition(new Vector2(50, 20), false);
+            Assert.IsTrue(tutorialController.teacherRawImage.rectTransform.position != oldPosition);
         }
 
         private void ConfigureTutorialForGenesisPlaza()
