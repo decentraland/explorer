@@ -8,21 +8,10 @@ using UnityEngine.UI;
 
 namespace DCL.Tutorial
 {
-    public interface ITutorialController
-    {
-        void SetTutorialEnabled(string fromDeepLink);
-        void SetTutorialDisabled();
-        IEnumerator StartTutorialFromStep(int stepIndex);
-        void SetUserTutorialStepAsCompleted(TutorialController.TutorialFinishStep step);
-        void ShowTeacher3DModel(bool active);
-        void SetTeacherPosition(Vector2 position, bool animated = true);
-        void PlayTeacherAnimation(TutorialTeacher.TeacherAnimation animation);
-    }
-
     /// <summary>
     /// Controller that handles all the flow related to the onboarding tutorial.
     /// </summary>
-    public class TutorialController : MonoBehaviour, ITutorialController
+    public class TutorialController : MonoBehaviour
     {
         [Flags]
         public enum TutorialFinishStep
@@ -35,40 +24,41 @@ namespace DCL.Tutorial
 
         public static TutorialController i { get; private set; }
 
-        internal HUDController hudController { get => HUDController.i; }
+        public HUDController hudController { get => HUDController.i; }
 
         [Header("General Configuration")]
-        [SerializeField] float timeBetweenSteps = 0.5f;
+        [SerializeField] internal float timeBetweenSteps = 0.5f;
 
         [Header("Tutorial Steps on Genesis Plaza")]
-        [SerializeField] List<TutorialStep> stepsOnGenesisPlaza = new List<TutorialStep>();
+        [SerializeField] internal List<TutorialStep> stepsOnGenesisPlaza = new List<TutorialStep>();
 
         [Header("Tutorial Steps from Deep Link")]
-        [SerializeField] List<TutorialStep> stepsFromDeepLink = new List<TutorialStep>();
+        [SerializeField] internal List<TutorialStep> stepsFromDeepLink = new List<TutorialStep>();
 
         [Header("Tutorial Steps on Genesis Plaza (after Deep Link)")]
-        [SerializeField] List<TutorialStep> stepsOnGenesisPlazaAfterDeepLink = new List<TutorialStep>();
+        [SerializeField] internal List<TutorialStep> stepsOnGenesisPlazaAfterDeepLink = new List<TutorialStep>();
 
         [Header("3D Model Teacher")]
-        [SerializeField] RawImage teacherRawImage;
-        [SerializeField] TutorialTeacher teacher;
-        [SerializeField] float teacherMovementSpeed = 4f;
-        [SerializeField] AnimationCurve teacherMovementCurve;
+        [SerializeField] internal RawImage teacherRawImage;
+        [SerializeField] internal TutorialTeacher teacher;
+        [SerializeField] internal float teacherMovementSpeed = 4f;
+        [SerializeField] internal AnimationCurve teacherMovementCurve;
 
         [Header("Debugging")]
-        public bool debugRunTutorial = false;
-        public int debugStartingStepIndex;
-        public bool debugOpenedFromDeepLink = false;
+        [SerializeField] internal bool debugRunTutorial = false;
+        [SerializeField] internal int debugStartingStepIndex;
+        [SerializeField] internal bool debugOpenedFromDeepLink = false;
 
-        private bool isRunning = false;
+        internal bool isRunning = false;
+        internal bool openedFromDeepLink = false;
+        internal bool alreadyOpenedFromDeepLink = false;
+        internal bool playerIsInGenesisPlaza = false;
+        internal bool markTutorialAsCompleted = false;
+        internal TutorialStep runningStep = null;
+
         private int currentStepIndex;
-        private TutorialStep runningStep = null;
         private Coroutine executeStepsCoroutine;
         private Coroutine teacherMovementCoroutine;
-        private bool openedFromDeepLink = false;
-        private bool alreadyOpenedFromDeepLink = false;
-        private bool playerIsInGenesisPlaza = false;
-        private bool markTutorialAsCompleted = false;
 
         private void Awake()
         {
@@ -85,9 +75,6 @@ namespace DCL.Tutorial
 
         private void OnDestroy()
         {
-            if (executeStepsCoroutine != null)
-                StopCoroutine(executeStepsCoroutine);
-
             SetTutorialDisabled();
 
             if (hudController != null && hudController.goToGenesisPlazaHud != null)
@@ -127,7 +114,10 @@ namespace DCL.Tutorial
         public void SetTutorialDisabled()
         {
             if (executeStepsCoroutine != null)
+            {
                 StopCoroutine(executeStepsCoroutine);
+                executeStepsCoroutine = null;
+            }
 
             if (runningStep != null)
             {
@@ -156,7 +146,6 @@ namespace DCL.Tutorial
 
                 runningStep.OnStepFinished();
                 Destroy(runningStep.gameObject);
-
                 runningStep = null;
             }
 
@@ -181,15 +170,6 @@ namespace DCL.Tutorial
                 SetTutorialDisabled();
                 yield break;
             }
-        }
-
-        /// <summary>
-        /// Marks the tutorial as finished in the kernel side.
-        /// </summary>
-        /// <param name="finishStepType">A value from TutorialFinishStep enum.</param>
-        public void SetUserTutorialStepAsCompleted(TutorialFinishStep finishStepType)
-        {
-            WebInterface.SaveUserTutorialStep(GetTutorialStepFromProfile() | (int)finishStepType);
         }
 
         /// <summary>
@@ -253,9 +233,12 @@ namespace DCL.Tutorial
         {
             for (int i = startingStepIndex; i < steps.Count; i++)
             {
-                var stepPrefab = steps[i];
+                var stepPrefab = steps[i] as TutorialStep;
 
-                runningStep = Instantiate(stepPrefab, this.transform).GetComponent<TutorialStep>();
+                if (stepPrefab != null)
+                    runningStep = Instantiate(stepPrefab, this.transform).GetComponent<TutorialStep>();
+                else
+                    runningStep = steps[i];
 
                 currentStepIndex = i;
 
@@ -268,7 +251,6 @@ namespace DCL.Tutorial
 
                 yield return runningStep.OnStepPlayAnimationForHidding();
                 runningStep.OnStepFinished();
-
                 Destroy(runningStep.gameObject);
 
                 if (i < steps.Count - 1 && timeBetweenSteps > 0)
@@ -276,7 +258,7 @@ namespace DCL.Tutorial
             }
 
             if (!debugRunTutorial && markTutorialAsCompleted)
-                SetUserTutorialStepAsCompleted(TutorialFinishStep.NewTutorialFinished);
+                WebInterface.SaveUserTutorialStep(GetTutorialStepFromProfile() | (int)TutorialFinishStep.NewTutorialFinished);
 
             runningStep = null;
 

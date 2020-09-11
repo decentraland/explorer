@@ -3,24 +3,16 @@ using UnityEngine;
 
 namespace DCL.Tutorial
 {
-    public interface ITutorialStep
-    {
-        void OnStepStart();
-        IEnumerator OnStepExecute();
-        IEnumerator OnStepPlayAnimationForHidding();
-        void OnStepFinished();
-    }
-
     /// <summary>
     /// Class that represents one of the steps included in the onboarding tutorial.
     /// </summary>
-    public class TutorialStep : MonoBehaviour, ITutorialStep
+    public class TutorialStep : MonoBehaviour
     {
         protected const string STEP_FINISHED_ANIMATOR_TRIGGER = "StepFinished";
 
-        [SerializeField] bool unlockCursorAtStart = false;
-        [SerializeField] bool show3DTeacherAtStart = false;
-        [SerializeField] protected RectTransform teacherPositionRef;
+        [SerializeField] internal bool unlockCursorAtStart = false;
+        [SerializeField] internal bool show3DTeacherAtStart = false;
+        [SerializeField] internal protected RectTransform teacherPositionRef;
 
         protected TutorialController tutorialController;
         protected Animator stepAnimator;

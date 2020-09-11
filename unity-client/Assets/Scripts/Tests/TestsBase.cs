@@ -1,4 +1,4 @@
-﻿using DCL;
+using DCL;
 using DCL.Controllers;
 using DCL.Helpers;
 using DCL.Models;
@@ -13,6 +13,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 using Assert = UnityEngine.Assertions.Assert;
+using DCL.Tutorial;
 
 public class TestsBase
 {
@@ -23,6 +24,7 @@ public class TestsBase
     protected SceneController sceneController;
     protected ParcelScene scene;
     protected CameraController cameraController;
+    protected TutorialController tutorialController;
 
     protected virtual bool justSceneSetUp => false;
     protected virtual bool enableSceneIntegrityChecker => true;
@@ -53,6 +55,7 @@ public class TestsBase
         yield return SetUp_SceneIntegrityChecker();
 
         SetUp_Renderer();
+        SetUp_TutorialController();
     }
 
 
@@ -184,6 +187,13 @@ public class TestsBase
         CommonScriptableObjects.rendererState.Set(true);
     }
 
+    public virtual void SetUp_TutorialController()
+    {
+        tutorialController = GameObject.FindObjectOfType<TutorialController>();
+
+        if (tutorialController == null)
+            tutorialController = GameObject.Instantiate(Resources.Load<GameObject>("TutorialController")).GetComponent<TutorialController>();
+    }
 
     protected virtual IEnumerator InitScene(bool usesWebServer = false, bool spawnCharController = true, bool spawnTestScene = true, bool spawnUIScene = true, bool debugMode = false, bool reloadUnityScene = true)
     {

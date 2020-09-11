@@ -14,7 +14,7 @@ namespace DCL.Tutorial
             Reset
         }
 
-        [SerializeField] Animator teacherAnimator;
+        [SerializeField] internal Animator teacherAnimator;
 
         /// <summary>
         /// Play an animation.
