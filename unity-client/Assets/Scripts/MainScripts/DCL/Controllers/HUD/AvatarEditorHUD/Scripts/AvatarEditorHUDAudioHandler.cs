@@ -113,26 +113,31 @@ public class AvatarEditorHUDAudioHandler : MonoBehaviour
             return;
 
         /*switch (lastClickedWearable.rarity)
-        {
-            case Rarity.RARE:
-                eventRarity.SetIndex(0);
-                break;
-            case Rarity.EPIC:
-                eventRarity.SetIndex(1);
-                break;
-            case Rarity.LEGENDARY:
-                eventRarity.SetIndex(2);
-                break;
-            case Rarity.MYTHIC:
-                eventRarity.SetIndex(3);
-                break;
-            case Rarity.UNIQUE:
-                eventRarity.SetIndex(4);
-                break;
-            default:
-                eventRarity.SetIndex(0);
-                break;
-        }*/
+         {
+             case Rarity.RARE:
+                 eventRarity.SetIndex(0);
+                 break;
+             case Rarity.EPIC:
+                 eventRarity.SetIndex(1);
+                 break;
+             case Rarity.LEGENDARY:
+                 eventRarity.SetIndex(2);
+                 break;
+             case Rarity.MYTHIC:
+                 eventRarity.SetIndex(3);
+                 break;
+             case Rarity.UNIQUE:
+                 eventRarity.SetIndex(4);
+                 break;
+             default:
+                 eventRarity.SetIndex(0);
+                 break;
+         }*/
+
+        if (lastClickedWearable.rarity == Rarity.UNIQUE)
+            eventRarity.SetIndex(1);
+        else
+            eventRarity.SetIndex(0);
 
         eventRarity.Play(true);
     }
