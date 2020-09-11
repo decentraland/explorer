@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using DCL;
@@ -83,8 +83,6 @@ public class NFTPromptHUDView : MonoBehaviour
 
         fetchNFTRoutine = null;
         fetchNFTImageRoutine = null;
-
-        AudioScriptableObjects.dialogClose.Play(true);
     }
 
     private void SetLoading()

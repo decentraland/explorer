@@ -7,17 +7,10 @@ public class VisualTestsBase : TestsBase
 {
     protected override bool enableSceneIntegrityChecker => false;
 
-    protected override IEnumerator SetUp()
-    {
-        yield break;
-    }
-
     public IEnumerator InitVisualTestsScene(string testName)
     {
         yield return InitScene();
         yield return null;
-
-        SceneController.i.useBoundariesChecker = false;
 
         base.SetUp_Renderer();
 
@@ -30,7 +23,7 @@ public class VisualTestsBase : TestsBase
         // Position character inside parcel (0,0)
         TestHelpers.SetCharacterPosition(new Vector3(0, 2f, 0f));
 
-        yield return null;
+        yield return new WaitForSeconds(2.0f);
     }
 
     protected override IEnumerator InitScene(bool usesWebServer = false, bool spawnCharController = true, bool spawnTestScene = true, bool spawnUIScene = true, bool debugMode = false, bool reloadUnityScene = true)

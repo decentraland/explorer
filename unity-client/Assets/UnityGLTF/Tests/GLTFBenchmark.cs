@@ -29,9 +29,7 @@ public class GLTFBenchmark : MonoBehaviour
             maxTime = Mathf.Max(obj, maxTime);
         }
     }
-
     GameObject lastGameObjectCreated;
-
     void RunTest()
     {
         if (count > sampleCount)
@@ -51,6 +49,6 @@ public class GLTFBenchmark : MonoBehaviour
         };
 
         gltfComponent.OnFinishedLoadingAsset += RunTest;
-        gltfComponent.LoadAsset(Utils.GetTestsAssetsPath() + url, Utils.GetTestsAssetsPath() + url, false, tmpSettings);
+        gltfComponent.LoadAsset(Utils.GetTestsAssetsPath() + url, false, tmpSettings);
     }
 }

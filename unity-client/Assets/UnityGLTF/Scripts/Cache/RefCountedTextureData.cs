@@ -6,18 +6,20 @@ namespace UnityGLTF.Cache
     public class RefCountedTextureData : RefCountedBase
     {
         public Texture2D Texture;
-        private string id;
+        private string uri;
 
-        public RefCountedTextureData(string id, Texture2D texture)
+        public RefCountedTextureData(string uri, Texture2D texture)
         {
-            this.id = id;
+            this.uri = uri;
             this.Texture = texture;
         }
 
         protected override void OnDestroyCachedData()
         {
-            PersistentAssetCache.RemoveImage(id);
-            Object.Destroy(Texture);
+            if (!string.IsNullOrEmpty(uri) && PersistentAssetCache.ImageCacheByUri.ContainsKey(uri))
+                PersistentAssetCache.ImageCacheByUri.Remove(uri);
+
+            UnityEngine.Object.Destroy(Texture);
         }
     }
 
@@ -25,18 +27,21 @@ namespace UnityGLTF.Cache
     public class RefCountedStreamData : RefCountedBase
     {
         public Stream stream;
-        private string id;
+        private string uri;
 
-        public RefCountedStreamData(string id, Stream stream)
+        public RefCountedStreamData(string uri, Stream stream)
         {
-            this.id = id;
+            this.uri = uri;
             this.stream = stream;
         }
 
         protected override void OnDestroyCachedData()
         {
-            PersistentAssetCache.RemoveBuffer(id);
+            if (!string.IsNullOrEmpty(uri) && PersistentAssetCache.ImageCacheByUri.ContainsKey(uri))
+                PersistentAssetCache.StreamCacheByUri.Remove(uri);
+
             stream.Dispose();
         }
     }
+
 }

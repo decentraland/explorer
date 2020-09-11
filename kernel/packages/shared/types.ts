@@ -383,7 +383,7 @@ export type Notification = {
 export enum HUDElementID {
   NONE = 0,
   MINIMAP = 1,
-  PROFILE_HUD = 2,
+  AVATAR = 2,
   NOTIFICATION = 3,
   AVATAR_EDITOR = 4,
   SETTINGS = 5,
@@ -400,9 +400,7 @@ export enum HUDElementID {
   TELEPORT_DIALOG = 17,
   CONTROLS_HUD = 18,
   EMAIL_PROMPT = 19,
-  EXPLORE_HUD = 20,
-  MANA_HUD = 21,
-  HELP_AND_SUPPORT_HUD = 22
+  EXPLORE_HUD = 20
 }
 
 export type HUDConfiguration = {

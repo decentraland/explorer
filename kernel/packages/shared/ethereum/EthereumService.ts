@@ -38,8 +38,7 @@ const whitelist = [
   'web3_sha3',
   'web3_clientVersion',
   'eth_getTransactionCount',
-  'eth_getBlockByNumber',
-  'eth_signTypedData_v4'
+  'eth_getBlockByNumber'
 ]
 
 function isWhitelistedRPC(msg: RPCSendableMessage) {

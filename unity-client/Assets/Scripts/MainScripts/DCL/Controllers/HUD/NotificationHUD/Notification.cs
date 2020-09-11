@@ -37,8 +37,6 @@ public class Notification : MonoBehaviour
     {
         if (actionButton != null)
             actionButton.onClick.AddListener(Dismiss);
-
-        AudioScriptableObjects.notification.Play(true);
     }
 
     private void OnDisable()

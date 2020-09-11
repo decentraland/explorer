@@ -297,6 +297,7 @@ namespace loader {
       }
 
       if (notLoadedModules.length) {
+        debugger
         throw new Error(`These modules didn't load: ${notLoadedModules.map(($) => $.name).join(', ')}`)
       }
     })

@@ -23,9 +23,6 @@ public class CameraController : MonoBehaviour
     
     public CameraStateBase currentCameraState => cachedModeToVirtualCamera[CommonScriptableObjects.cameraMode];
 
-    [HideInInspector]
-    public System.Action<CameraMode.ModeId> onSetCameraMode;
-
     private void Start()
     {
         CommonScriptableObjects.rendererState.OnChange += OnRenderingStateChanged;
@@ -69,8 +66,6 @@ public class CameraController : MonoBehaviour
         currentCameraState.OnUnselect();
         CommonScriptableObjects.cameraMode.Set(newMode);
         currentCameraState.OnSelect();
-
-        onSetCameraMode.Invoke(newMode);
     }
 
     private void PrecisionChanged(Vector3 newValue, Vector3 oldValue)

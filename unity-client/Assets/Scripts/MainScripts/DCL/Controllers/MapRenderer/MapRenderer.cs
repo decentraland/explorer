@@ -73,9 +73,6 @@ namespace DCL
 
         private bool isInitialized = false;
 
-        [HideInInspector]
-        public event System.Action OnMovedParcelCursor;
-
         private void Awake()
         {
             i = this;
@@ -204,14 +201,8 @@ namespace DCL
             if (!parcelHighlightImage.gameObject.activeSelf)
                 parcelHighlightImage.gameObject.SetActive(true);
 
-            string previousText = highlightedParcelText.text;
             parcelHighlightImage.transform.position = worldCoordsOriginInMap + cursorMapCoords * parcelSizeInMap + new Vector3(parcelSizeInMap, parcelSizeInMap, 0f) / 2;
             highlightedParcelText.text = showCursorCoords ? $"{cursorMapCoords.x}, {cursorMapCoords.y}" : string.Empty;
-
-            if (highlightedParcelText.text != previousText && !Input.GetMouseButton(0))
-            {
-                OnMovedParcelCursor?.Invoke();
-            }
 
             // ----------------------------------------------------
             // TODO: Use sceneInfo to highlight whole scene parcels and populate scenes hover info on navmap once we can access all the scenes info

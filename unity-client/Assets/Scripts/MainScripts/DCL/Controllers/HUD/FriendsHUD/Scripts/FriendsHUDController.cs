@@ -317,12 +317,6 @@ public class FriendsHUDController : IHUD
 
             if (view.friendsButton.interactable)
                 view.friendsButton.onClick.Invoke();
-
-            AudioScriptableObjects.dialogOpen.Play(true);
-        }
-        else
-        {
-            AudioScriptableObjects.dialogClose.Play(true);
         }
     }
 }

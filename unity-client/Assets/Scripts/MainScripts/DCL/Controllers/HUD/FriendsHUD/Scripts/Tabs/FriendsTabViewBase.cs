@@ -227,8 +227,7 @@ public class FriendsTabViewBase : MonoBehaviour, IPointerDownHandler
 
         entry.OnMenuToggle += (x) =>
         {
-            var ownUserProfiler = UserProfile.GetOwnUserProfile();
-            bool isBlocked = ownUserProfiler.blocked != null ? ownUserProfiler.blocked.Contains(userId) : false;
+            bool isBlocked = UserProfile.GetOwnUserProfile().blocked.Contains(userId);
             contextMenuPanel.Initialize(userId, string.Empty, isBlocked);
             contextMenuPanel.transform.position = entry.menuPositionReference.position;
             contextMenuPanel.Show();

@@ -72,10 +72,10 @@ public class DCLCharacterController : MonoBehaviour
 
 
     // Will allow the game objects to be set, and create the DecentralandEntity manually during the Awake 
-    public DCL.Models.DecentralandEntity avatarReference { get; private set; }
-    public DCL.Models.DecentralandEntity firstPersonCameraReference  { get; private set; }
-    [SerializeField] private GameObject avatarGameObject;
-    [SerializeField] private GameObject firstPersonCameraGameObject;
+    [HideInInspector] public DCL.Models.DecentralandEntity avatarPositionReference;
+    [HideInInspector] public DCL.Models.DecentralandEntity playerReference;
+    [SerializeField] private GameObject avatarPositionGameObject;
+    [SerializeField] private GameObject playerGameObject;
 
     [SerializeField] private InputAction_Measurable characterYAxis;
     [SerializeField] private InputAction_Measurable characterXAxis;
@@ -115,12 +115,12 @@ public class DCLCharacterController : MonoBehaviour
         CommonScriptableObjects.rendererState.OnChange += OnRenderingStateChanged;
         OnRenderingStateChanged(CommonScriptableObjects.rendererState.Get(), false);
 
-        if (avatarGameObject == null || firstPersonCameraGameObject == null)
+        if (avatarPositionGameObject == null || playerGameObject == null)
         {
-            throw new System.Exception("Both the avatar and first person camera game objects must be set.");
+            throw new System.Exception("Both the avatar position and player game objects must be set.");
         }
-        avatarReference = new DCL.Models.DecentralandEntity { gameObject = avatarGameObject };
-        firstPersonCameraReference = new DCL.Models.DecentralandEntity { gameObject = firstPersonCameraGameObject };
+        avatarPositionReference = new DCL.Models.DecentralandEntity { gameObject = avatarPositionGameObject };
+        playerReference = new DCL.Models.DecentralandEntity { gameObject = playerGameObject };
     }
 
     private void SuscribeToInput()

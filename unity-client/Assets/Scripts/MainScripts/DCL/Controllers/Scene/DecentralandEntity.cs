@@ -256,15 +256,15 @@ namespace DCL.Models
 
         public void RemoveSharedComponent(System.Type targetType, bool triggerDettaching = true)
         {
-            if (sharedComponents.TryGetValue(targetType, out BaseDisposable component))
+            BaseDisposable component;
+            if (sharedComponents.TryGetValue(targetType, out component) && component != null)
             {
-                if (component == null)
-                    return;
-
                 sharedComponents.Remove(targetType);
 
                 if (triggerDettaching)
+                {
                     component.DetachFrom(this, targetType);
+                }
             }
         }
 

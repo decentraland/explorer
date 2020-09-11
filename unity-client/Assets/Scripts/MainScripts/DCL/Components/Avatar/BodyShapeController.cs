@@ -12,15 +12,8 @@ public class BodyShapeController : WearableController
     {
     }
 
-    protected BodyShapeController(BodyShapeController original) : base(original)
+    protected BodyShapeController(WearableController original) : base(original)
     {
-        headRenderer = original.headRenderer;
-        eyebrowsRenderer = original.eyebrowsRenderer;
-        eyesRenderer = original.eyesRenderer;
-        mouthRenderer = original.mouthRenderer;
-        feetRenderer = original.feetRenderer;
-        upperBodyRenderer = original.upperBodyRenderer;
-        lowerBodyRenderer = original.lowerBodyRenderer;
     }
 
     public SkinnedMeshRenderer skinnedMeshRenderer { get; private set; }
@@ -147,34 +140,16 @@ public class BodyShapeController : WearableController
                 lowerBodyRenderer = r;
             else if (parentName.Contains("feet"))
                 feetRenderer = r;
-            else if (parentName.Contains("head"))
-                headRenderer = r;
-            else if (parentName.Contains("eyebrows"))
-                eyebrowsRenderer = r;
-            else if (parentName.Contains("eyes"))
-                eyesRenderer = r;
-            else if (parentName.Contains("mouth"))
-                mouthRenderer = r;
         }
     }
 
-    public SkinnedMeshRenderer headRenderer { get; private set; }
-    public SkinnedMeshRenderer eyebrowsRenderer { get; private set; }
-    public SkinnedMeshRenderer eyesRenderer { get; private set; }
-    public SkinnedMeshRenderer mouthRenderer { get; private set; }
     public SkinnedMeshRenderer feetRenderer { get; private set; }
     public SkinnedMeshRenderer upperBodyRenderer { get; private set; }
     public SkinnedMeshRenderer lowerBodyRenderer { get; private set; }
 
     public override void UpdateVisibility()
     {
-        bool headIsVisible = !hiddenList.Contains(WearableLiterals.Misc.HEAD);
-
-        headRenderer.enabled = headIsVisible;
-        eyebrowsRenderer.enabled = headIsVisible;
-        eyesRenderer.enabled = headIsVisible;
-        mouthRenderer.enabled = headIsVisible;
-
+        SetAssetRenderersEnabled(!hiddenList.Contains(WearableLiterals.Misc.HEAD));
         feetRenderer.enabled = !hiddenList.Contains(WearableLiterals.Categories.FEET);
         upperBodyRenderer.enabled = !hiddenList.Contains(WearableLiterals.Categories.UPPER_BODY);
         lowerBodyRenderer.enabled = !hiddenList.Contains(WearableLiterals.Categories.LOWER_BODY);

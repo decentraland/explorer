@@ -14,10 +14,7 @@ namespace DCL
         [SerializeField] internal TextMeshProUGUI sceneLocationText;
         [SerializeField] internal TextMeshProUGUI sceneDescriptionText;
         [SerializeField] internal RectTransform toastContainer;
-        [SerializeField] internal GameObject scenePreviewContainer;
-        [SerializeField] internal RawImageFillParent scenePreviewImage;
-        [SerializeField] internal GameObject scenePreviewLoadingSpinner;
-        [SerializeField] internal Sprite scenePreviewFailImage;
+        [SerializeField] internal Image scenePreviewImage;
 
         [SerializeField] internal Button goToButton;
         [SerializeField] internal Button closeButton;
@@ -50,9 +47,6 @@ namespace DCL
 
         public void Populate(Vector2Int coordinates, MinimapMetadata.MinimapSceneInfo sceneInfo)
         {
-            if (!gameObject.activeSelf)
-                AudioScriptableObjects.dialogOpen.Play(true);
-
             bool sceneInfoExists = sceneInfo != null;
 
             MapRenderer.i.showCursorCoords = false;
@@ -66,9 +60,8 @@ namespace DCL
 
             sceneOwnerText.transform.parent.gameObject.SetActive(sceneInfoExists && !string.IsNullOrEmpty(sceneInfo.owner));
             sceneDescriptionText.transform.parent.gameObject.SetActive(sceneInfoExists && !string.IsNullOrEmpty(sceneInfo.description));
-            sceneTitleText.transform.parent.gameObject.SetActive(sceneInfoExists && !string.IsNullOrEmpty(sceneInfo.name)); scenePreviewImage.gameObject.SetActive(sceneInfoExists && !string.IsNullOrEmpty(sceneInfo.previewImageUrl));
-            scenePreviewContainer.SetActive(sceneInfoExists && !string.IsNullOrEmpty(sceneInfo.previewImageUrl));
-            scenePreviewLoadingSpinner.SetActive(false);
+            sceneTitleText.transform.parent.gameObject.SetActive(sceneInfoExists && !string.IsNullOrEmpty(sceneInfo.name));
+            scenePreviewImage.gameObject.SetActive(sceneInfoExists && !string.IsNullOrEmpty(sceneInfo.previewImageUrl));
 
             if (sceneInfoExists)
             {
@@ -132,9 +125,6 @@ namespace DCL
 
         public void OnCloseClick()
         {
-            if (gameObject.activeSelf)
-                AudioScriptableObjects.dialogClose.Play(true);
-
             MapRenderer.i.showCursorCoords = true;
             gameObject.SetActive(false);
         }
@@ -149,30 +139,32 @@ namespace DCL
         }
 
         string currentImageUrl;
-        Texture2D currentImage;
+        Texture currentImage;
         Coroutine downloadCoroutine;
 
         private IEnumerator Download(string url)
         {
-            scenePreviewLoadingSpinner.SetActive(true);
-            scenePreviewImage.texture = null;
-
             UnityWebRequest www = UnityWebRequestTexture.GetTexture(url);
 
             yield return www.SendWebRequest();
 
+            Sprite sprite;
+
             if (!www.isNetworkError && !www.isHttpError)
             {
-                currentImage = ((DownloadHandlerTexture)www.downloadHandler).texture;
-                currentImage.Compress(false);
-                scenePreviewImage.texture = currentImage;
+                var texture = ((DownloadHandlerTexture)www.downloadHandler).texture;
+                texture.Compress(false);
+                sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), Vector2.zero);
             }
             else
             {
                 Debug.Log($"Error downloading: {url} {www.error}");
-                scenePreviewImage.texture = scenePreviewFailImage.texture;
+                // No point on making a fancy error because this will be replaced by AssetManager. By now let's use null as fallback value.
+                sprite = null;
             }
-            scenePreviewLoadingSpinner.SetActive(false);
+
+            scenePreviewImage.sprite = sprite;
+            currentImage = sprite.texture;
         }
     }
 }

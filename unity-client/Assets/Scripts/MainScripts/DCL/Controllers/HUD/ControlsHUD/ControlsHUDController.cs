@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using DCL.Helpers;
 
 public class ControlsHUDController : IHUD
@@ -30,8 +30,6 @@ public class ControlsHUDController : IHUD
             }
 
             view.showHideAnimator.Hide();
-
-            AudioScriptableObjects.fadeOut.Play(true);
         }
         else if (!IsVisible() && visible)
         {
@@ -39,7 +37,6 @@ public class ControlsHUDController : IHUD
             Utils.UnlockCursor();
             view.gameObject.SetActive(true);
             view.showHideAnimator.Show();
-            AudioScriptableObjects.fadeIn.Play(true);
         }
     }
 

@@ -95,7 +95,7 @@ function startTracking() {
 }
 
 function track({ name, data }: SegmentEvent) {
-  window.analytics.track(name, data, { integrations: { Klaviyo: false } }, () => {
+  window.analytics.track(name, data, {}, () => {
     if (trackingQueue.length === 0) {
       tracking = false
       return

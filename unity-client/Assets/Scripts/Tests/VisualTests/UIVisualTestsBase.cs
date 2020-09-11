@@ -8,6 +8,11 @@ public class UIVisualTestsBase : VisualTestsBase
 {
     protected string screenSpaceId;
 
+    protected override IEnumerator SetUp()
+    {
+        yield break;
+    }
+
     protected IEnumerator InitUIVisualTestScene(string testName)
     {
         VisualTestHelpers.snapshotIndex = 0;
@@ -48,7 +53,7 @@ public class UIVisualTestsBase : VisualTestsBase
         // Creation
         var component = scene.SharedComponentCreate(
             componentId,
-            (int)classId
+            (int) classId
         ) as SharedComponentType;
         yield return component.routine;
 

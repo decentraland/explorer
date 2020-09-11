@@ -1,5 +1,5 @@
 declare module '@decentraland/EnvironmentAPI' {
-  export type Realm = {
+  type Realm = {
     domain: string
     layer: string
     serverName: string

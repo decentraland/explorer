@@ -34,8 +34,6 @@ namespace UnityGLTF
         }
 
         public string GLTFUri = null;
-        public string idPrefix = null;
-
         public bool Multithreaded = false;
         public bool UseStream = false;
         public bool UseVisualFeedback = true;
@@ -92,20 +90,10 @@ namespace UnityGLTF
         private Camera mainCamera;
 
         public WebRequestLoader.WebRequestLoaderEventAction OnWebRequestStartEvent;
+        public Action OnSuccess { get { return OnFinishedLoadingAsset; } set { OnFinishedLoadingAsset = value; } }
+        public Action OnFail { get { return OnFailedLoadingAsset; } set { OnFailedLoadingAsset = value; } }
 
-        public Action OnSuccess
-        {
-            get { return OnFinishedLoadingAsset; }
-            set { OnFinishedLoadingAsset = value; }
-        }
-
-        public Action OnFail
-        {
-            get { return OnFailedLoadingAsset; }
-            set { OnFailedLoadingAsset = value; }
-        }
-
-        public void LoadAsset(string incomingURI = "", string idPrefix = "", bool loadEvenIfAlreadyLoaded = false, Settings settings = null)
+        public void LoadAsset(string incomingURI = "", bool loadEvenIfAlreadyLoaded = false, Settings settings = null)
         {
             if (alreadyLoadedAsset && !loadEvenIfAlreadyLoaded)
             {
@@ -113,10 +101,9 @@ namespace UnityGLTF
             }
 
             if (!string.IsNullOrEmpty(incomingURI))
+            {
                 GLTFUri = incomingURI;
-
-            if (!string.IsNullOrEmpty(idPrefix))
-                this.idPrefix = idPrefix;
+            }
 
             if (loadingRoutine != null)
             {
@@ -180,8 +167,7 @@ namespace UnityGLTF
                     Destroy(gameObject);
                 }
 
-
-                Debug.Log($"GLTF Failure {obj} ... url = {this.GLTFUri}\n{obj.StackTrace}");
+                Debug.Log("GLTF Failure " + obj.ToString() + " ... url = " + this.GLTFUri);
             }
         }
 
@@ -233,12 +219,11 @@ namespace UnityGLTF
                         // Path.Combine treats paths that start with the separator character
                         // as absolute paths, ignoring the first path passed in. This removes
                         // that character to properly handle a filename written with it.
-                        GLTFUri = GLTFUri.TrimStart(new[] {Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar});
+                        GLTFUri = GLTFUri.TrimStart(new[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar });
                         string fullPath = Path.Combine(Application.streamingAssetsPath, GLTFUri);
                         string directoryPath = URIHelper.GetDirectoryName(fullPath);
                         loader = new FileLoader(directoryPath);
                         sceneImporter = new GLTFSceneImporter(
-                            null,
                             Path.GetFileName(GLTFUri),
                             loader,
                             asyncCoroutineHelper
@@ -248,13 +233,12 @@ namespace UnityGLTF
                     {
                         loader = new WebRequestLoader("");
 
-                        string id = string.IsNullOrEmpty(idPrefix) ? GLTFUri : idPrefix;
-
                         if (OnWebRequestStartEvent != null)
+                        {
                             (loader as WebRequestLoader).OnLoadStreamStart += OnWebRequestStartEvent;
+                        }
 
                         sceneImporter = new GLTFSceneImporter(
-                            id,
                             GLTFUri,
                             loader,
                             asyncCoroutineHelper

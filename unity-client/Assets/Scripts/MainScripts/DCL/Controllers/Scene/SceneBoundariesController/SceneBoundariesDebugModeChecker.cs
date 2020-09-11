@@ -81,22 +81,16 @@ namespace DCL.Controllers
 
         void RemoveInvalidMeshEffect(DecentralandEntity entity)
         {
-            if (entity == null || WasEntityInAValidPosition(entity)) return;
+            if (WasEntityInAValidPosition(entity)) return;
 
             PoolableObject shapePoolableObjectBehaviour = PoolManager.i.GetPoolable(entity.meshesInfo.meshRootGameObject);
-
             if (shapePoolableObjectBehaviour != null)
                 shapePoolableObjectBehaviour.OnRelease -= invalidMeshesInfo[entity.gameObject].ResetMaterials;
 
-            var renderers = entity.meshesInfo.renderers;
-
-            if (renderers != null)
+            for (int i = 0; i < entity.renderers.Length; i++)
             {
-                for (int i = 0; i < renderers.Length; i++)
-                {
-                    if (invalidSubmeshes.Contains(renderers[i]))
-                        invalidSubmeshes.Remove(renderers[i]);
-                }
+                if (invalidSubmeshes.Contains(entity.renderers[i]))
+                    invalidSubmeshes.Remove(entity.renderers[i]);
             }
 
             invalidMeshesInfo[entity.gameObject].ResetMaterials();
@@ -157,18 +151,7 @@ namespace DCL.Controllers
             {
                 return invalidMeshesInfo[entity.gameObject].originalMaterials;
             }
-
             return null;
-        }
-
-        protected override void OnRemoveEntity(DecentralandEntity entity)
-        {
-            base.OnRemoveEntity(entity);
-
-            if (entity.gameObject != null)
-            {
-                RemoveInvalidMeshEffect(entity);
-            }
         }
     }
 }

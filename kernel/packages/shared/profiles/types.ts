@@ -22,7 +22,6 @@ export interface Profile {
   }
   version: number
   tutorialStep: number
-  interests?: string[]
 }
 
 export interface Avatar {

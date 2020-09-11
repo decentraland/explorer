@@ -10,7 +10,7 @@ public class HotScenesControllerTests : TestsBase
     [UnityTest]
     public IEnumerator HotScenesControllerShouldParseJsonCorrectly()
     {
-        var controller = HotScenesController.i;
+        var controller = new HotScenesController();
 
         var hotSceneList = GetTestHotSceneList();
 

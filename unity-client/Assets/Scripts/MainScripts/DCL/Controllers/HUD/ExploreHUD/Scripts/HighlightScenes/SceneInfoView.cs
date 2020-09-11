@@ -1,11 +1,11 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
 internal class SceneInfoView : MonoBehaviour
 {
     [SerializeField] float idleTime;
-    [SerializeField] RawImageFillParent thumbnail;
+    [SerializeField] Image thumbnail;
     [SerializeField] TextMeshProUGUI sceneName;
     [SerializeField] TextMeshProUGUI coordinates;
     [SerializeField] TextMeshProUGUI creatorName;
@@ -25,8 +25,6 @@ internal class SceneInfoView : MonoBehaviour
         if (!gameObject.activeSelf)
         {
             gameObject.SetActive(true);
-
-            AudioScriptableObjects.dialogOpen.Play(true);
         }
         showHideAnimator.Show();
         this.enabled = false;
@@ -48,8 +46,6 @@ internal class SceneInfoView : MonoBehaviour
         if (instant)
         {
             showHideAnimator.Hide(true);
-
-            AudioScriptableObjects.dialogClose.Play(true);
         }
         else
         {
@@ -62,19 +58,19 @@ internal class SceneInfoView : MonoBehaviour
     {
         if (baseSceneView)
         {
-            baseSceneView.OnThumbnailSet -= SetThumbnail;
+            baseSceneView.OnThumbnailFetched -= SetThumbnail;
         }
 
         baseSceneView = sceneView;
 
         SetMapInfoData(sceneView);
 
-        thumbnail.texture = sceneView.GetThumbnail();
-        bool hasThumbnail = thumbnail.texture != null;
+        thumbnail.sprite = sceneView.GetThumbnail();
+        bool hasThumbnail = thumbnail.sprite != null;
         loadingSpinner.SetActive(!hasThumbnail);
         if (!hasThumbnail)
         {
-            sceneView.OnThumbnailSet += SetThumbnail;
+            sceneView.OnThumbnailFetched += SetThumbnail;
         }
     }
 
@@ -87,10 +83,10 @@ internal class SceneInfoView : MonoBehaviour
         description.text = mapInfo.description;
     }
 
-    void SetThumbnail(Texture2D thumbnailTexture)
+    void SetThumbnail(Sprite thumbnailSprite)
     {
-        thumbnail.texture = thumbnailTexture;
-        loadingSpinner.SetActive(thumbnailTexture != null);
+        thumbnail.sprite = thumbnailSprite;
+        loadingSpinner.SetActive(thumbnailSprite != null);
     }
 
     void Awake()
@@ -138,8 +134,6 @@ internal class SceneInfoView : MonoBehaviour
         {
             showHideAnimator.Hide();
             this.enabled = false;
-
-            AudioScriptableObjects.dialogClose.Play(true);
         }
     }
 

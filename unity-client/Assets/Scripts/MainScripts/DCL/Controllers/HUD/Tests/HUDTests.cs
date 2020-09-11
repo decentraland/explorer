@@ -49,7 +49,7 @@ namespace Tests
 
             for (int i = 1; i < (int) HUDController.HUDElementID.COUNT; i++)
             {
-                hudController.ConfigureHUDElement((HUDController.HUDElementID) i, config, null);
+                hudController.ConfigureHUDElement((HUDController.HUDElementID) i, config);
             }
 
             yield return null;

@@ -11,10 +11,11 @@ namespace DCL
         private const uint MAX_USED_MEMORY = 1300 * 1024 * 1024;
         private const float TIME_FOR_NEW_MEMORY_CHECK = 1.0f;
 
-        private List<object> idsToCleanup = new List<object>();
+        private List<object> idsToCleanup;
 
         public void Initialize()
         {
+            idsToCleanup = new List<object>();
             CoroutineStarter.Start(AutoCleanup());
         }
 

@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System;
 using DCL.Helpers;
 using DCL.Interface;
@@ -33,8 +33,6 @@ public class TeleportPromptHUDController : IHUD
         {
             view.content.SetActive(true);
             view.contentAnimator.Show();
-
-            AudioScriptableObjects.fadeIn.Play(true);
         }
     }
 

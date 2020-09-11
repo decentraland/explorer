@@ -16,15 +16,14 @@ If you are using Windows 10 we recommend you to enable the Linux subsystem and i
 ## Running the kernel
 
 Make sure you have the following dependencies:
-- Node v10 or compatible installed via `sudo apt install nodejs`
-- yarn installed globally via `sudo npm install yarn -g`
-
-IMPORTANT: If your path has spaces the build process will fail. Make sure to clone this repo in a properly named path. 
+- Node v10 or compatible installed
+- yarn installed globally via `npm install yarn -g`
 
 Build the project:
 
     cd kernel
     npm install
+    make build-essentials
 
 To run and watch a server with the kernel build, run:
 
@@ -36,13 +35,17 @@ Optionally, you can build the test scenes which are used in `debug` mode:
 
 To run the Unity interface:
 
-1. Download and install Unity 2019.4.0f1
+1. Download and install Unity 2019.1.14f1 or a later 2019.1 version (note that 2019.2 does not work!)
 2. Open the Initial Scene
 3. Run the Initial Scene in the Unity editor!
 
 To run the client in `debug` mode append the following query parameter to the URL:
 
     http://localhost:8080/?DEBUG_MODE
+
+To run the client in first person perspective append the following query parameter to the URL:
+
+    http://localhost:8080/?DEBUG_MODE&fps
 
 To spawn in a specific set of coordinates append the following query paramter:
 
@@ -56,7 +59,7 @@ To see test logs/errors directly in the browser, run:
 
 Now, navigate to [http://localhost:8080/test](http://localhost:8080/test)
 
-### Kernel Visual tests
+### Visual tests
 
 Visual tests are meant to work in a similar way as `snapshot tests`. Each time a test parcel changes the author is required to commit new screenshots along the other changes. These screenshots are then validated to detect regressions at the time of the pull request. To generate new snapshot images to compare run `npm run test:dry` (it requires docker)
 
@@ -126,14 +129,32 @@ To avoid extremely slow building times due to the Lightweight Render Pipeline sh
 
 ### GLTF Dynamic Loading
 
-We are using a custom version of the [UnityGLTF](https://github.com/KhronosGroup/UnityGLTF) as a Dynamic GLTF/GLB loader for unity to handle GLTF models.
+We are using [UnityGLTF](https://github.com/KhronosGroup/UnityGLTF) as a Dynamic GLTF/GLB loader for unity to handle GLTF models.
 
-### Unity Visual Tests Pipeline
+#### Local changes made to UnityGLTF plugin
+
+##### NOTE: UnityGLTF plugin update is discouraged until Unity WebGL supports multi-threading
+
+1. GLTFComponent.cs has been adapted to:
+
+- Be able to avoid loading on start by default (for remotely-fetched models that need to take some time to download)
+- Have a 'finished loading asset callback' providing the time it took to load the GLTF asset (initially used for measuring loading times)
+- StartCoroutine has been replaced by StartThrowingCoroutine so we catch the invalid GLTF assets gracefully.
+
+2. SpecGlossMap.cs and MetalRoughMap.cs were adapted to use "Lightweight Render Pipeline/Simple Lit" and "Lightweight Render Pipeline/Lit" shaders respectively (the original PbrMetallicRoughness and PbrSpecularGlossiness don't work with the Lightweight Render Pipeline)
+
+3. Several files were modified to replce Tasks (multi-threading) with Coroutines as Unity WebGL build doesn't support multi-threading.
+
+4. Animation curve processing methods were adapted to be spread through many frames.
+
+5. GameObject reparenting is made as soon the root GLTF loading object is created, so a big mesh can be seen in place before the loading finished.
+
+### Visual Tests Pipeline
 
 #### How to create them
 
 1. Create a new test class that inherits from VisualTestsBase
-2. Initialize the visual tests using `VisualTestsBase.InitVisualTestsScene(string)` passing the test name as parameter
+2. After the `InitScene()` call, initialize the visual tests using `VisualTestHelpers.InitVisualTestsScene(string)` passing the test name as parameter
 3. Setup your scene as wanted and call `TestHelpers.TakeSnapshot(Vector3)`
 4. Tag the method with the attribute `[VisualTest]`. This isn't used yet but will be used to streamline the baseline images creation.
 
@@ -147,7 +168,8 @@ public class VisualTests : VisualTestsBase
     [UnityTest][VisualTest]
     public IEnumerator VisualTestStub()
     {
-        yield return InitVisualTestsScene("VisualTestStub");
+        yield return InitScene();
+        yield return VisualTestHelpers.InitVisualTestsScene("VisualTestStub");
 
         // Set up scene
 

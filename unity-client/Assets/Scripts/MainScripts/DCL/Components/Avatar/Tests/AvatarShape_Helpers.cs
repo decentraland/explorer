@@ -37,11 +37,7 @@ namespace AvatarShape_Tests
 
                 foreach (var rep in wearableItem.representations)
                 {
-                    rep.contents = rep.contents.Select((x) =>
-                    {
-                        x.hash = x.file;
-                        return x;
-                    }).ToArray();
+                    rep.contents = rep.contents.Select((x) => { x.hash = x.file; return x; }).ToArray();
                 }
 
                 wearableItem.thumbnail = "";
@@ -90,30 +86,22 @@ namespace AvatarShape_Tests
 
     class AvatarRenderer_Mock : AvatarRenderer
     {
-        public static Dictionary<string, WearableController_Mock> GetWearableMockControllers(AvatarRenderer renderer)
-        {
-            var controllers = GetWearableControllers(renderer);
-            return controllers.ToDictionary(x => x.Key, x => new WearableController_Mock(x.Value));
-        }
-
+        public static Dictionary<string, WearableController_Mock> GetWearableMockControllers(AvatarRenderer renderer) => GetWearableControllers(renderer).ToDictionary(x => x.Key, x => new WearableController_Mock(x.Value));
 
         public static Dictionary<string, WearableController> GetWearableControllers(AvatarRenderer renderer)
         {
             var avatarRendererMock = new GameObject("Temp").AddComponent<AvatarRenderer_Mock>();
             avatarRendererMock.CopyFrom(renderer);
 
-            var result =
-                avatarRendererMock.wearableControllers.ToDictionary(x => x.Value.id, y => y.Value);
-
+            var toReturn = avatarRendererMock.wearableControllers;
             Destroy(avatarRendererMock.gameObject);
 
-            return result;
+            return toReturn;
         }
 
         public static WearableController_Mock GetWearableController(AvatarRenderer renderer, string id)
         {
             var wearableControllers = GetWearableControllers(renderer);
-
             if (!wearableControllers.ContainsKey(id))
                 return null;
 
@@ -139,20 +127,13 @@ namespace AvatarShape_Tests
             return toReturn;
         }
 
-        protected override void OnDestroy()
-        {
-        } //Override OnDestroy to prevent mock renderer from resetting the Avatar
+        protected override void OnDestroy() { } //Override OnDestroy to prevent mock renderer from resetting the Avatar
     }
 
     class WearableController_Mock : WearableController
     {
-        public WearableController_Mock(WearableItem wearableItem, string bodyShapeId) : base(wearableItem, bodyShapeId)
-        {
-        }
-
-        public WearableController_Mock(WearableController original) : base(original)
-        {
-        }
+        public WearableController_Mock(WearableItem wearableItem, string bodyShapeId) : base(wearableItem, bodyShapeId) { }
+        public WearableController_Mock(WearableController original) : base(original) { }
 
         public Renderer[] myAssetRenderers => assetRenderers;
         public GameObject myAssetContainer => assetContainer;
@@ -161,13 +142,8 @@ namespace AvatarShape_Tests
 
     class BodyShapeController_Mock : BodyShapeController
     {
-        public BodyShapeController_Mock(WearableItem original) : base(original)
-        {
-        }
-
-        public BodyShapeController_Mock(BodyShapeController original) : base(original)
-        {
-        }
+        public BodyShapeController_Mock(WearableItem original) : base(original) { }
+        public BodyShapeController_Mock(WearableController original) : base(original) { }
 
         public Renderer[] myAssetRenderers => assetRenderers;
         public GameObject myAssetContainer => this.assetContainer;

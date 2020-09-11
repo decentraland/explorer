@@ -114,8 +114,6 @@ namespace Builder
                 return;
             }
 
-            bool gizmoOrEntityPressed = false;
-
             RaycastHit hit;
             if (builderRaycast.Raycast(mousePosition, builderRaycast.defaultMask | builderRaycast.gizmoMask, out hit, CompareSelectionHit))
             {
@@ -123,7 +121,6 @@ namespace Builder
                 if (gizmosAxis != null)
                 {
                     OnGizmosAxisPressed?.Invoke(gizmosAxis);
-                    gizmoOrEntityPressed = true;
                 }
                 else
                 {
@@ -139,13 +136,9 @@ namespace Builder
                     {
                         SetLastPressedEntity(pressedEntity, hit.point);
                         OnEntityPressed?.Invoke(pressedEntity, hit.point);
-                        gizmoOrEntityPressed = true;
                     }
                 }
-            }
 
-            if (gizmoOrEntityPressed)
-            {
                 groundClickTime = 0;
             }
             else

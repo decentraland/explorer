@@ -172,6 +172,9 @@ namespace Builder
             isShapeComponentSet = true;
             OnEntityShapeUpdated?.Invoke(this);
 
+            //let's reset scale so we generate colliders before any scaling animation
+            gameObject.transform.localScale = Vector3.one;
+
             // We don't want animation to be running on editor
             meshAnimations = GetComponentsInChildren<Animation>();
             if (hasSmartItemComponent)
@@ -182,6 +185,8 @@ namespace Builder
             {
                 DefaultAnimationSample(0);
             }
+            ProcessEntityShape(entity);
+
 
             if (hasGizmoComponent)
             {
@@ -191,7 +196,6 @@ namespace Builder
             else if (isTransformComponentSet)
             {
                 gameObject.transform.localScale = scaleTarget;
-                ProcessEntityShape(entity);
             }
 
             if (OnShapeLoaded != null)
@@ -207,11 +211,11 @@ namespace Builder
             gameObject.transform.position = transformModel.position;
             gameObject.transform.rotation = transformModel.rotation;
 
-            if (isScalingAnimation || !isShapeComponentSet)
+            if (isScalingAnimation)
             {
                 scaleTarget = transformModel.scale;
             }
-            else if (isShapeComponentSet)
+            else
             {
                 scaleTarget = transformModel.scale;
                 gameObject.transform.localScale = transformModel.scale;
@@ -223,10 +227,7 @@ namespace Builder
                 OnEntityAddedWithTransform?.Invoke(this);
             }
 
-            if (isShapeComponentSet)
-            {
-                OnEntityTransformUpdated?.Invoke(this);
-            }
+            OnEntityTransformUpdated?.Invoke(this);
         }
 
         private void OnPreviewModeChanged(bool isPreview)
@@ -248,10 +249,9 @@ namespace Builder
 
         private void ProcessEntityShape(DecentralandEntity entity)
         {
-            if (entity.meshRootGameObject && entity.meshesInfo.renderers.Length > 0)
+            if (entity.meshRootGameObject && entity.meshesInfo.renderers.Length > 0 && hasGizmoComponent)
             {
                 CreateColliders(entity.meshesInfo);
-                SetCollidersActive(true);
             }
         }
 
@@ -262,7 +262,6 @@ namespace Builder
             {
                 meshColliders[i] = new GameObject("BuilderSelectionCollider").AddComponent<DCLBuilderSelectionCollider>();
                 meshColliders[i].Initialize(this, meshInfo.renderers[i]);
-                meshColliders[i].gameObject.SetActive(false);
             }
         }
 
@@ -284,7 +283,6 @@ namespace Builder
             }
             gameObject.transform.localScale = scaleTarget;
             isScalingAnimation = false;
-            ProcessEntityShape(rootEntity);
             OnEntityTransformUpdated?.Invoke(this);
         }
 

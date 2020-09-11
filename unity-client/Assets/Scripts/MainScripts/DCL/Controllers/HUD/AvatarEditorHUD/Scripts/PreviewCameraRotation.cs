@@ -1,9 +1,9 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class PreviewCameraRotation : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHandler
+public class PreviewCameraRotation : MonoBehaviour, IDragHandler, IEndDragHandler
 {
     public event System.Action<float> OnHorizontalRotation;
 
@@ -18,11 +18,6 @@ public class PreviewCameraRotation : MonoBehaviour, IDragHandler, IBeginDragHand
     private Coroutine slowDownCoroutine;
 
     private float timer;
-
-    public void OnBeginDrag(PointerEventData eventData)
-    {
-        AudioScriptableObjects.buttonClick.Play(true);
-    }
 
     public void OnDrag(PointerEventData eventData)
     {
@@ -45,8 +40,6 @@ public class PreviewCameraRotation : MonoBehaviour, IDragHandler, IBeginDragHand
         {
             slowDownCoroutine = StartCoroutine(SlowDown());
         }
-
-        AudioScriptableObjects.buttonRelease.Play(true);
     }
 
     private IEnumerator SlowDown()

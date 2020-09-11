@@ -1,5 +1,6 @@
 using DCL.Components;
 using DCL.Controllers;
+using DCL.Helpers;
 using System;
 using System.Collections;
 using UnityEngine;
@@ -51,16 +52,33 @@ namespace DCL
             }
 
             DCLTexture textureComponent = scene.disposableComponents[componentId] as DCLTexture;
-
             if (textureComponent == null)
             {
                 Debug.Log($"couldn't fetch texture, the shared component with id {componentId} is NOT a DCLTexture");
                 yield break;
             }
 
-            yield return new WaitUntil(() => textureComponent.texture != null);
+            if (textureComponent.texture == null)
+            {
+                while (textureComponent.texture == null)
+                {
+                    yield return null;
 
-            OnFinish.Invoke(textureComponent);
+                    if (textureComponent.texture != null)
+                    {
+                        if (OnFinish != null)
+                        {
+                            OnFinish.Invoke(textureComponent);
+                        }
+
+                        yield break;
+                    }
+                }
+            }
+            else if (OnFinish != null)
+            {
+                OnFinish.Invoke(textureComponent);
+            }
         }
 
         public override IEnumerator ApplyChanges(string newJson)
@@ -128,7 +146,7 @@ namespace DCL
 
                         texturePromise = new AssetPromise_Texture(contentsUrl, unityWrap, unitySamplingMode, storeDefaultTextureInAdvance: true);
                         texturePromise.OnSuccessEvent += (x) => texture = x.texture;
-                        texturePromise.OnFailEvent += (x) => { texture = null; };
+                        texturePromise.OnFailEvent += (x) => texture = null;
 
                         AssetPromiseKeeper_Texture.i.Keep(texturePromise);
                         yield return texturePromise;
@@ -137,47 +155,28 @@ namespace DCL
             }
         }
 
-        private int refCount;
-
         public virtual void AttachTo(PBRMaterial material)
         {
-            AddRefCount();
         }
 
         public virtual void AttachTo(BasicMaterial material)
         {
-            AddRefCount();
         }
 
         public virtual void AttachTo(UIImage image)
         {
-            AddRefCount();
         }
 
         public virtual void DetachFrom(PBRMaterial material)
         {
-            RemoveRefCount();
         }
 
         public virtual void DetachFrom(BasicMaterial material)
         {
-            RemoveRefCount();
         }
 
         public virtual void DetachFrom(UIImage image)
         {
-            RemoveRefCount();
-        }
-
-        public void AddRefCount()
-        {
-            refCount++;
-        }
-
-        public void RemoveRefCount()
-        {
-            if (refCount == 0)
-                Dispose();
         }
 
         public override void Dispose()
@@ -186,6 +185,7 @@ namespace DCL
             {
                 AssetPromiseKeeper_Texture.i.Forget(texturePromise);
                 texturePromise = null;
+                Utils.SafeDestroy(texture);
             }
 
             base.Dispose();
