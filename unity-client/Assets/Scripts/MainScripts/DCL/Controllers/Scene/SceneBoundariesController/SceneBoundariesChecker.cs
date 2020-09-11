@@ -89,7 +89,7 @@ namespace DCL.Controllers
         {
             if (!SceneController.i.useBoundariesChecker) return;
 
-            entitiesToCheck.Add(entity);
+            OnAddEntity(entity);
         }
 
         /// <summary>
@@ -116,8 +116,7 @@ namespace DCL.Controllers
         {
             if (!SceneController.i.useBoundariesChecker) return;
 
-            entitiesToCheck.Remove(entity);
-            persistentEntities.Remove(entity);
+            OnRemoveEntity(entity);
         }
 
         public void EvaluateEntityPosition(DecentralandEntity entity)
@@ -219,6 +218,17 @@ namespace DCL.Controllers
                         entity.meshesInfo.colliders[i].enabled = isInsideBoundaries;
                 }
             }
+        }
+
+        protected virtual void OnAddEntity(DecentralandEntity entity)
+        {
+            entitiesToCheck.Add(entity);
+        }
+
+        protected virtual void OnRemoveEntity(DecentralandEntity entity)
+        {
+            entitiesToCheck.Remove(entity);
+            persistentEntities.Remove(entity);
         }
     }
 }
