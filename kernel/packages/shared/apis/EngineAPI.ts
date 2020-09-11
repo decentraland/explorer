@@ -23,6 +23,8 @@ export interface IEngineAPI {
    */
   sendBatch(actions: EntityAction[]): Promise<void>
 
+  disposeWorker(): void
+
   /**
    * Start signal, sent after everything was initialized
    */
@@ -70,6 +72,11 @@ export class EngineAPI extends ExposableAPI implements IEngineAPI {
   @exposeMethod
   async sendBatch(actions: EntityAction[]): Promise<void> {
     this.parcelSceneAPI.sendBatch(actions)
+  }
+
+  @exposeMethod
+  async disposeWorker() {
+    this.parcelSceneAPI.disposeWorker()
   }
 
   @exposeMethod

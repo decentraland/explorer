@@ -4,6 +4,7 @@ export type ParcelSceneAPI = {
   data: EnvironmentData<any>
   sendBatch(actions: EntityAction[]): void
   registerWorker(event: any): void
+  disposeWorker(): void
   dispose(): void
   on(event: string, cb: (event: any) => void): void
 }

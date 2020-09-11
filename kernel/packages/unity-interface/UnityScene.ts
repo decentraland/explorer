@@ -78,6 +78,10 @@ export class UnityScene<T> implements ParcelSceneAPI {
     this.worker = worker
   }
 
+  disposeWorker(): void {
+    this.worker.dispose()
+  }
+
   dispose(): void {
     // TODO: do we need to release some resource after releasing a scene worker?
   }

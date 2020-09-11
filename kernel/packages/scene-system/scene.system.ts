@@ -26,6 +26,7 @@ import { PB_Transform, PB_Vector3, PB_Quaternion } from '../shared/proto/enginei
 import { worldToGrid } from 'atomicHelpers/parcelScenePositions'
 import { sleep } from 'atomicHelpers/sleep'
 import future, { IFuture } from 'fp-future'
+import { STATIC_WORKERS_TERMINATION } from 'config'
 
 // tslint:disable-next-line:whitespace
 type IEngineAPI = import('shared/apis/EngineAPI').IEngineAPI
@@ -230,6 +231,8 @@ export default class GamekitScene extends Script {
   async systemDidEnable() {
     this.eventSubscriber = new EventSubscriber(this.engine as any)
     this.devToolsAdapter = new DevToolsAdapter(this.devTools)
+
+    let sceneIsStatic = false
 
     try {
       const [sceneData, source] = await this.loadProject()
@@ -516,6 +519,9 @@ export default class GamekitScene extends Script {
       }
 
       try {
+        sceneIsStatic = !(source.indexOf('ISystem') !== -1 || source.indexOf('OnPointer') !== -1)
+        // defaultLogger.log('static??? ' + sceneIsStatic)/
+
         await customEval((source as any) as string, getES5Context({ dcl }))
 
         let modulesNotLoaded: string[] = []
@@ -552,6 +558,12 @@ export default class GamekitScene extends Script {
       // unload should be triggered here
     } finally {
       this.didStart = true
+    }
+
+    if(STATIC_WORKERS_TERMINATION && sceneIsStatic) {
+      // KILL WORKER
+
+      ;((this.engine as any) as IEngineAPI).disposeWorker()
     }
   }
 
