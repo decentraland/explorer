@@ -191,10 +191,7 @@ internal class HotSceneCellView : MonoBehaviour
 
         SetLoaded();
 
-        if (gameObject.activeInHierarchy)
-        {
-            AudioScriptableObjects.listItemAppear.Play(true);
-        }
+       
     }
 
     private void SetLoaded()
