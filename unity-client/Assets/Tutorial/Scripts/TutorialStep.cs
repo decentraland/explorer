@@ -17,6 +17,7 @@ namespace DCL.Tutorial
         protected TutorialController tutorialController;
         protected Animator stepAnimator;
         protected MouseCatcher mouseCatcher;
+        internal bool letInstantiation = true;
 
         /// <summary>
         /// Step initialization (occurs before OnStepExecute() execution).

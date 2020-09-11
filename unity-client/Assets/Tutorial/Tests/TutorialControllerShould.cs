@@ -12,15 +12,13 @@ namespace DCL.Tutorial_Tests
         private int currentStepIndex = 0;
         private List<TutorialStep> currentSteps = new List<TutorialStep>();
 
-        [UnitySetUp]
-        protected override IEnumerator SetUp()
-        {
-            yield return base.SetUp();
-            AddFakeTutorialSteps();
-        }
-
         protected override IEnumerator TearDown()
         {
+            foreach (var step in currentSteps)
+            {
+                GameObject.Destroy(step);
+            }
+
             tutorialController.SetTutorialDisabled();
             tutorialController.stepsOnGenesisPlaza.Clear();
             tutorialController.stepsFromDeepLink.Clear();
@@ -86,72 +84,64 @@ namespace DCL.Tutorial_Tests
             Assert.IsTrue(tutorialController.teacherRawImage.rectTransform.position == newTeacherPosition);
         }
 
-        private void AddFakeTutorialSteps()
-        {
-            currentStepIndex = 0;
-
-            for (int i = 0; i < 5; i++)
-            {
-                tutorialController.stepsOnGenesisPlaza.Add(new TutorialStep_Mock
-                {
-                    customOnStepStart = WaitForOnStepStart,
-                    customOnStepExecute = WaitForOnStepExecute,
-                    customOnStepPlayAnimationForHidding = WaitForOnStepPlayAnimationForHidding,
-                    customOnStepFinished = WaitForOnStepFinished
-                });
-            }
-
-            for (int i = 0; i < 5; i++)
-            {
-                tutorialController.stepsFromDeepLink.Add(new TutorialStep_Mock
-                {
-                    customOnStepStart = WaitForOnStepStart,
-                    customOnStepExecute = WaitForOnStepExecute,
-                    customOnStepPlayAnimationForHidding = WaitForOnStepPlayAnimationForHidding,
-                    customOnStepFinished = WaitForOnStepFinished
-                });
-            }
-
-            for (int i = 0; i < 5; i++)
-            {
-                tutorialController.stepsOnGenesisPlazaAfterDeepLink.Add(new TutorialStep_Mock
-                {
-                    customOnStepStart = WaitForOnStepStart,
-                    customOnStepExecute = WaitForOnStepExecute,
-                    customOnStepPlayAnimationForHidding = WaitForOnStepPlayAnimationForHidding,
-                    customOnStepFinished = WaitForOnStepFinished
-                });
-            }
-        }
-
         private void ConfigureTutorialForGenesisPlaza()
         {
+            for (int i = 0; i < 5; i++)
+            {
+                tutorialController.stepsOnGenesisPlaza.Add(CreateNewFakeStep());
+            }
+
+            currentStepIndex = 0;
+            currentSteps = tutorialController.stepsOnGenesisPlaza;
+
             tutorialController.playerIsInGenesisPlaza = true;
             tutorialController.alreadyOpenedFromDeepLink = false;
             tutorialController.isRunning = true;
             tutorialController.markTutorialAsCompleted = false;
-
-            currentSteps = tutorialController.stepsOnGenesisPlaza;
         }
 
         private void ConfigureTutorialForDeepLink()
         {
+            for (int i = 0; i < 5; i++)
+            {
+                tutorialController.stepsFromDeepLink.Add(CreateNewFakeStep());
+            }
+
+            currentStepIndex = 0;
+            currentSteps = tutorialController.stepsFromDeepLink;
+
             tutorialController.playerIsInGenesisPlaza = false;
             tutorialController.openedFromDeepLink = true;
             tutorialController.isRunning = true;
             tutorialController.markTutorialAsCompleted = true;
-
-            currentSteps = tutorialController.stepsFromDeepLink;
         }
 
         private void ConfigureTutorialForGenesisPlazaAfterDeepLink()
         {
+            for (int i = 0; i < 5; i++)
+            {
+                tutorialController.stepsOnGenesisPlazaAfterDeepLink.Add(CreateNewFakeStep());
+            }
+
+            currentStepIndex = 0;
+            currentSteps = tutorialController.stepsOnGenesisPlazaAfterDeepLink;
+
             tutorialController.playerIsInGenesisPlaza = true;
             tutorialController.alreadyOpenedFromDeepLink = true;
             tutorialController.isRunning = true;
             tutorialController.markTutorialAsCompleted = false;
+        }
 
-            currentSteps = tutorialController.stepsOnGenesisPlazaAfterDeepLink;
+        private TutorialStep_Mock CreateNewFakeStep()
+        {
+            GameObject newStepObject = new GameObject("FakeStep");
+            TutorialStep_Mock newStep = newStepObject.AddComponent<TutorialStep_Mock>();
+            newStep.letInstantiation = false;
+            newStep.customOnStepStart = WaitForOnStepStart;
+            newStep.customOnStepExecute = WaitForOnStepExecute;
+            newStep.customOnStepPlayAnimationForHidding = WaitForOnStepPlayAnimationForHidding;
+            newStep.customOnStepFinished = WaitForOnStepFinished;
+            return newStep;
         }
 
         private void WaitForOnStepStart()

@@ -233,9 +233,9 @@ namespace DCL.Tutorial
         {
             for (int i = startingStepIndex; i < steps.Count; i++)
             {
-                var stepPrefab = steps[i] as TutorialStep;
+                var stepPrefab = steps[i];
 
-                if (stepPrefab != null)
+                if (stepPrefab.letInstantiation)
                     runningStep = Instantiate(stepPrefab, this.transform).GetComponent<TutorialStep>();
                 else
                     runningStep = steps[i];
