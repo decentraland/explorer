@@ -26,7 +26,6 @@ import { PB_Transform, PB_Vector3, PB_Quaternion } from '../shared/proto/enginei
 import { worldToGrid } from 'atomicHelpers/parcelScenePositions'
 import { sleep } from 'atomicHelpers/sleep'
 import future, { IFuture } from 'fp-future'
-import { STATIC_WORKERS_TERMINATION } from 'config'
 
 // tslint:disable-next-line:whitespace
 type IEngineAPI = import('shared/apis/EngineAPI').IEngineAPI
@@ -560,7 +559,7 @@ export default class GamekitScene extends Script {
       this.didStart = true
     }
 
-    if(STATIC_WORKERS_TERMINATION && sceneIsStatic) {
+    if(sceneIsStatic) {
       // KILL WORKER
 
       ;((this.engine as any) as IEngineAPI).disposeWorker()
