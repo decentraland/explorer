@@ -6,32 +6,49 @@ using UnityEngine.UI;
 internal class ProfileHUDView : MonoBehaviour
 {
     private const int ADDRESS_CHUNK_LENGTH = 6;
+    private const int NAME_POSTFIX_LENGTH = 4;
 
     [SerializeField] internal ShowHideAnimator showHideAnimator;
+    [SerializeField] internal GameObject loadingSpinner;
 
+    [Header("Hide GOs on claimed name")]
+    [SerializeField] internal GameObject[] hideOnNameClaimed;
+
+    [Header("Thumbnail")]
     [SerializeField] internal Image imageAvatarThumbnail;
+    [SerializeField] internal Button buttonToggleMenu;
 
+    [Header("Texts")]
     [SerializeField] internal TextMeshProUGUI textName;
+    [SerializeField] internal TextMeshProUGUI textPostfix;
     [SerializeField] internal TextMeshProUGUI textAddress;
 
+    [Header("Buttons")]
     [SerializeField] internal Button buttonEditUnverifiedName;
     [SerializeField] internal Button buttonClaimName;
     [SerializeField] internal Button buttonCopyAddress;
     [SerializeField] internal Button buttonLogOut;
-    [SerializeField] internal Button buttonToggleMenu;
 
-    [SerializeField] internal GameObject loadingSpinner;
 
     private UserProfile profile = null;
 
     private void Awake()
     {
+        // TODO: edit unverified name. copy address.
         buttonToggleMenu.onClick.AddListener(ToggleMenu);
     }
 
     public void SetProfile(UserProfile userProfile)
     {
-        HandleProfileName(userProfile);
+        if (userProfile.hasClaimedName)
+        {
+            HandleClaimedProfileName(userProfile);
+        }
+        else
+        {
+            HandleUnverifiedProfileName(userProfile);
+        }
+
         HandleProfileAddress(userProfile);
         HandleProfileSnapshot(userProfile);
         profile = userProfile;
@@ -67,9 +84,25 @@ internal class ProfileHUDView : MonoBehaviour
         }
     }
 
-    private void HandleProfileName(UserProfile userProfile)
+    private void HandleClaimedProfileName(UserProfile userProfile)
     {
         textName.text = userProfile.userName;
+        SetActiveUnverifiedNameGOs(false);
+    }
+
+    private void HandleUnverifiedProfileName(UserProfile userProfile)
+    {
+        textName.text = userProfile.userName;
+        textPostfix.text = $".{userProfile.userId.Substring(userProfile.userId.Length - NAME_POSTFIX_LENGTH)}";
+        SetActiveUnverifiedNameGOs(true);
+    }
+
+    private void SetActiveUnverifiedNameGOs(bool active)
+    {
+        for (int i = 0; i < hideOnNameClaimed.Length; i++)
+        {
+            hideOnNameClaimed[i].SetActive(active);
+        }
     }
 
     private void HandleProfileAddress(UserProfile userProfile)
