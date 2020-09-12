@@ -1,19 +1,24 @@
+#if UNITY_WEBGL && !UNITY_EDITOR
+#define WEB_PLATFORM
+#endif
+
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-#if UNITY_WEBGL && !UNITY_EDITOR
+#if WEB_PLATFORM
 using System.Runtime.InteropServices;
 using AOT;
 #endif
 
 public static class Clipboard
 {
-#if UNITY_WEBGL && !UNITY_EDITOR
+#if WEB_PLATFORM
     private delegate void ReadTextCallback(IntPtr ptrText, int intError);
+    private delegate void OnPasteTextCallback(IntPtr ptrText);
 
     [DllImport("__Internal")]
-    private static extern void initialize(Action<IntPtr,int> callback);
+    private static extern void initialize(Action<IntPtr,int> readTextCallback, Action<IntPtr> pasteCallback);
 
     [DllImport("__Internal")]
     private static extern void writeText(string text);
@@ -27,6 +32,13 @@ public static class Clipboard
         string value = Marshal.PtrToStringAuto(ptrText);
         bool error = intError == 0;
         OnReadText(value, error);
+    }
+
+    [MonoPInvokeCallback(typeof(OnPasteTextCallback))]
+    private static void OnReceivePasteText(IntPtr ptrText)
+    {
+        string value = Marshal.PtrToStringAuto(ptrText);
+        OnPaste(value);
     }
 #else
     private static void writeText(string text)
@@ -42,24 +54,27 @@ public static class Clipboard
 
     static readonly Queue<ClipboardReadPromise> promises = new Queue<ClipboardReadPromise>();
 
-    static Clipboard()
-    {
-#if UNITY_WEBGL && !UNITY_EDITOR
-        initialize(OnReceiveReadText);
-#endif
-    }
+    public static event Action<string> OnPasteInput;
 
     public static void WriteText(string text)
     {
         writeText(text);
     }
 
+    [Obsolete("Firefox not supported ")]
     public static ClipboardReadPromise ReadText()
     {
         ClipboardReadPromise promise = new ClipboardReadPromise();
         promises.Enqueue(promise);
         readText();
         return promise;
+    }
+
+    static Clipboard()
+    {
+#if WEB_PLATFORM
+        initialize(OnReceiveReadText, OnReceivePasteText);
+#endif
     }
 
     private static void OnReadText(string text, bool error)
@@ -69,6 +84,11 @@ public static class Clipboard
             var promise = promises.Dequeue();
             promise.Resolve(text, error);
         }
+    }
+
+    private static void OnPaste(string text)
+    {
+        OnPasteInput?.Invoke(text);
     }
 }
 
@@ -103,6 +123,8 @@ public class ClipboardReadPromise : CustomYieldInstruction
 
         resolved = true;
     }
+
+    internal ClipboardReadPromise() { }
 
     public ClipboardReadPromise Then(Action<string> success)
     {

@@ -1,12 +1,20 @@
 var Clipboard = {
-  initialize: function(csCallback){
-    window.nativeClipboardReadText = function (text, error){
+  initialize: function(csReadCallback, csPasteCallback){
+    unityInterface.clipboardReadText = function (text, error){
       const bufferSize = lengthBytesUTF8(text) + 1
       const ptrText = _malloc(bufferSize)
       stringToUTF8(text, ptrText, bufferSize)
       const intError = error? 0 : 1
-      Runtime.dynCall('vii', csCallback, [ptrText, intError]);
+      Runtime.dynCall('vii', csReadCallback, [ptrText, intError]);
     }
+
+    window.addEventListener('paste', function(e) {
+      const text = e.clipboardData.getData('text')
+      const bufferSize = lengthBytesUTF8(text) + 1
+      const ptrText = _malloc(bufferSize)
+      stringToUTF8(text, ptrText, bufferSize)
+      Runtime.dynCall('vi', csPasteCallback, [ptrText])
+    })
   },
 
   writeText: function (text){
@@ -14,10 +22,16 @@ var Clipboard = {
   },
 
   readText: function (){
+    // NOTE: firefox does not support clipboard.read
+    if (navigator.clipboard.readText === undefined){
+      unityInterface.clipboardReadText("not supported", true)
+      return
+    }
+
     // NOTE: workaround cause jslib don't support async functions
     eval("navigator.clipboard.readText()" +
-      ".then(text => window.nativeClipboardReadText(text, false))"+
-      ".catch(e => window.nativeClipboardReadText(e.message, true))")
+      ".then(text => unityInterface.clipboardReadText(text, false))"+
+      ".catch(e => unityInterface.clipboardReadText(e.message, true))")
   }
 };
 mergeInto(LibraryManager.library, Clipboard);
