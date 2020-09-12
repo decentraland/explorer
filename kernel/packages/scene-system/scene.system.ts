@@ -111,6 +111,7 @@ export default class GamekitScene extends Script {
 
   scenePosition: Vector2 = new Vector2()
   parcels: Array<{ x: number; y: number }> = []
+  allowedFirstStaticSceneWorker = false
 
   private allowOpenExternalUrl: boolean = false
 
@@ -244,6 +245,7 @@ export default class GamekitScene extends Script {
 
       const fullData = sceneData.data as LoadableParcelScene
       const sceneId = fullData.id
+      defaultLogger.log("scene id: " + sceneId)
 
       let loadingModules: Record<string, IFuture<void>> = {}
 
@@ -518,8 +520,9 @@ export default class GamekitScene extends Script {
       }
 
       try {
+        // defaultLogger.log('scene: ' + source)
         sceneIsStatic = !(source.indexOf('ISystem') !== -1 || source.indexOf('OnPointer') !== -1)
-        // defaultLogger.log('static??? ' + sceneIsStatic)/
+        // defaultLogger.log('static??? ' + sceneIsStatic)
 
         await customEval((source as any) as string, getES5Context({ dcl }))
 
@@ -562,7 +565,12 @@ export default class GamekitScene extends Script {
     if(sceneIsStatic) {
       // KILL WORKER
 
-      ;((this.engine as any) as IEngineAPI).disposeWorker()
+      // Horrible hack to skip the global-scene
+      if(!this.allowedFirstStaticSceneWorker) {
+        this.allowedFirstStaticSceneWorker = true
+      } else {
+        ((this.engine as any) as IEngineAPI).disposeWorker()
+      }
     }
   }
 
