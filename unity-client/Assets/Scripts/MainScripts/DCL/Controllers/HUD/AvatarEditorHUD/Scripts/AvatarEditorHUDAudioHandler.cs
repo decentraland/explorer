@@ -27,6 +27,8 @@ public class AvatarEditorHUDAudioHandler : MonoBehaviour
             view.wearableGridPairs[i].selector.OnItemClicked += OnWearableClicked;
         }
 
+        view.eyeColorSelector.OnColorChanged += OnEyeColorChanged;
+        view.skinColorSelector.OnColorChanged += OnSkinColorChanged;
         view.OnAvatarAppear += OnAvatarAppear;
 
         nftItemSelector.OnItemClicked += OnWearableClicked;
@@ -85,6 +87,16 @@ public class AvatarEditorHUDAudioHandler : MonoBehaviour
             default:
                 break;
         }
+    }
+
+    void OnEyeColorChanged(Color color)
+    {
+        ResetLastClickedWearable();
+    }
+
+    void OnSkinColorChanged(Color color)
+    {
+        ResetLastClickedWearable();
     }
 
     void ResetLastClickedWearable()
