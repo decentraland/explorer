@@ -16,7 +16,7 @@ MonoBehaviour:
   volume: 1
   initialPitch: 1
   randomPitch: 0
-  cooldownSeconds: 4
+  cooldownSeconds: 3
   clips:
     array:
     - {fileID: 8300000, guid: 3aaf584e527aa8e4991da15d9b62abd5, type: 3}
@@ -24,6 +24,8 @@ MonoBehaviour:
     - {fileID: 8300000, guid: 6b84667f45570fc4d9f8e077bd0167de, type: 3}
     - {fileID: 8300000, guid: 759c5e9332ce16048825e1e654b18c50, type: 3}
     - {fileID: 8300000, guid: 7c75ddbdbf4d94e47a6d6d282372e8ea, type: 3}
+    - {fileID: 8300000, guid: f44e4d42a9091fd45b55f68636807703, type: 3}
     - {fileID: 8300000, guid: 945b491a22e92a5469fb009593f09fd8, type: 3}
     - {fileID: 8300000, guid: f44e4d42a9091fd45b55f68636807703, type: 3}
+    - {fileID: 8300000, guid: 945b491a22e92a5469fb009593f09fd8, type: 3}
   source: {fileID: 0}
