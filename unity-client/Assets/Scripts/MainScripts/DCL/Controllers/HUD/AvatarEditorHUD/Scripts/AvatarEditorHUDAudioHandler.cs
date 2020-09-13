@@ -110,10 +110,7 @@ public class AvatarEditorHUDAudioHandler : MonoBehaviour
 
         eventAvatarAppear.Play(true);
         PlayRarity();
-        if (Random.Range(0f, 1f) > 0.25f)
-        {
-            PlayVoiceReaction(model.bodyShape);
-        }
+        PlayVoiceReaction(model.bodyShape);
     }
 
     void PlayRarity()
@@ -156,6 +153,8 @@ public class AvatarEditorHUDAudioHandler : MonoBehaviour
 
     void PlayVoiceReaction(string bodyShape)
     {
+        float chanceToPlay = 0.7f;
+
         AudioEvent eventReaction = null;
 
         if (bodyShape.Contains("Female"))
@@ -163,7 +162,24 @@ public class AvatarEditorHUDAudioHandler : MonoBehaviour
         else
             eventReaction = eventReactionMale;
 
-        if (eventReaction != null)
+        if (lastClickedWearable != null)
+        {
+            if (lastClickedWearable.rarity != null)
+            {
+                eventReaction.RandomizeIndex(5, 9);
+
+                if (lastClickedWearable.rarity == Rarity.UNIQUE)
+                {
+                    chanceToPlay = 1f;
+                }
+            }
+            else
+            {
+                eventReaction.RandomizeIndex(0, 5);
+            }
+        }
+
+        if (eventReaction != null && Random.Range(0f, 1f) <= chanceToPlay)
         {
             if (!eventReaction.source.isPlaying)
             {
