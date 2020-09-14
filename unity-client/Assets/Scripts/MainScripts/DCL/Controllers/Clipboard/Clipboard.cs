@@ -5,9 +5,6 @@ public static class Clipboard
 {
     static readonly Queue<ClipboardReadPromise> promises = new Queue<ClipboardReadPromise>();
     private static readonly IClipboardImplementation impl = null;
-    
-    public static event Action<string> OnPasteInput;
-    public static event Action OnCopyInput;
 
     public static void WriteText(string text)
     {
@@ -23,6 +20,15 @@ public static class Clipboard
         return promise;
     }
 
+#if UNITY_WEBGL && !UNITY_EDITOR
+    public static void HijackWebGLCopyPasteInput()
+    {
+        // NOTE: this does nothing but we'll use it to force the instantiation of this static class
+        // cause you need to call something for a static class to be instantiated.
+        // all the hijacking is actually done inside ClipboardWebGL class.
+    }
+#endif
+
     static Clipboard()
     {
 #if UNITY_WEBGL && !UNITY_EDITOR
@@ -30,7 +36,7 @@ public static class Clipboard
 #else
         impl = new ClipboardStandalone();
 #endif
-        impl.Initialize(OnCopy, OnPaste, OnReadText);
+        impl.Initialize(OnReadText);
     }
 
     private static void OnReadText(string text, bool error)
@@ -40,15 +46,5 @@ public static class Clipboard
             var promise = promises.Dequeue();
             promise.Resolve(text, error);
         }
-    }
-
-    private static void OnPaste(string text)
-    {
-        OnPasteInput?.Invoke(text);
-    }
-
-    private static void OnCopy()
-    {
-        OnCopyInput?.Invoke();
     }
 }

@@ -3,14 +3,12 @@ using System.Runtime.InteropServices;
 using AOT;
 using UnityEngine;
 
-internal class ClipboardWebGL : IClipboardImplementation
+internal class ClipboardWebGL : IClipboardImplementation, IDisposable
 {
     private static ClipboardWebGL i;
 
-    private Action onCopy;
     private Action<string, bool> onRead;
-
-    private ClipboardWebGLPasteHandler pasteHandler;
+    private bool copyInput = false;
 
     private delegate void ReadTextCallback(IntPtr ptrText, int intError);
     private delegate void OnPasteInputCallback(IntPtr ptrText);
@@ -38,29 +36,29 @@ internal class ClipboardWebGL : IClipboardImplementation
     private static void OnReceivePasteInput(IntPtr ptrText)
     {
         string value = Marshal.PtrToStringAuto(ptrText);
-        if (i != null && i.pasteHandler != null)
-        {
-            i.pasteHandler.pasteText = value;
-        }
+        GUIUtility.systemCopyBuffer = value;
     }
 
     [MonoPInvokeCallback(typeof(OnCopyInputCallback))]
     private static void OnReceiveCopyInput()
     {
-        i?.onCopy?.Invoke();
+        if (i != null) i.copyInput = true;
     }
 
     public ClipboardWebGL()
     {
         i = this;
-        pasteHandler = new GameObject("_WebGLPasteHandler").AddComponent<ClipboardWebGLPasteHandler>();
+        Application.onBeforeRender += OnBeforeRender;
     }
 
-    void IClipboardImplementation.Initialize(Action onCopy, Action<string> onPaste, Action<string, bool> onRead)
+    public void Dispose()
     {
-        this.onCopy = onCopy;
+        Application.onBeforeRender -= OnBeforeRender;
+    }
+
+    void IClipboardImplementation.Initialize(Action<string, bool> onRead)
+    {
         this.onRead = onRead;
-        pasteHandler.OnPasteCallback += onPaste;
         initialize(OnReceiveReadText, OnReceivePasteInput, OnReceiveCopyInput);
     }
 
@@ -72,5 +70,14 @@ internal class ClipboardWebGL : IClipboardImplementation
     void IClipboardImplementation.RequestGetText()
     {
         readText();
+    }
+
+    void OnBeforeRender()
+    {
+        if (copyInput)
+        {
+            copyInput = false;
+            writeText(GUIUtility.systemCopyBuffer);
+        }
     }
 }

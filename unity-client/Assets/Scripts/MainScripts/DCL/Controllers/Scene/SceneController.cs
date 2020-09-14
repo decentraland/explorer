@@ -76,6 +76,9 @@ namespace DCL
 #if !UNITY_EDITOR
             worldEntryPoint = new EntryPoint_World(this); // Es un subsistema independiente => Se pone en el entrypoint pero no en el enviroment.
 #endif
+#if UNITY_WEBGL && !UNITY_EDITOR
+            Clipboard.HijackWebGLCopyPasteInput(); //NOTE: we can move this call to the Environment when merged!
+#endif
         }
 
         void Start()
