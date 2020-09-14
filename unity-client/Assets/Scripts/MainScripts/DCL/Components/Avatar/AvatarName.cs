@@ -33,7 +33,8 @@ public class AvatarName : MonoBehaviour
         }
     }
 
-    public void SetTalking(bool talking) {
+    public void SetTalking(bool talking)
+    {
         talkingIconContainer.SetActive(talking);
     }
 
