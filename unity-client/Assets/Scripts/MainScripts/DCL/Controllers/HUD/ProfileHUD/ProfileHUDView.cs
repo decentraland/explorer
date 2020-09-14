@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -7,9 +8,13 @@ internal class ProfileHUDView : MonoBehaviour
 {
     private const int ADDRESS_CHUNK_LENGTH = 6;
     private const int NAME_POSTFIX_LENGTH = 4;
+    private const float COPY_TOAST_VISIBLE_TIME = 3;
 
     [SerializeField] internal ShowHideAnimator showHideAnimator;
     [SerializeField] internal GameObject loadingSpinner;
+
+    [SerializeField] internal ShowHideAnimator copyToast;
+    [SerializeField] internal GameObject copyTooltip;
 
     [Header("Hide GOs on claimed name")]
     [SerializeField] internal GameObject[] hideOnNameClaimed;
@@ -30,12 +35,23 @@ internal class ProfileHUDView : MonoBehaviour
     [SerializeField] internal Button buttonLogOut;
 
 
+    private Coroutine copyToastRoutine = null;
     private UserProfile profile = null;
 
     private void Awake()
     {
-        // TODO: edit unverified name. copy address.
         buttonToggleMenu.onClick.AddListener(ToggleMenu);
+        buttonCopyAddress.onClick.AddListener(() =>
+        {
+            copyTooltip.gameObject.SetActive(false);
+            if (copyToastRoutine != null)
+            {
+                StopCoroutine(copyToastRoutine);
+            }
+
+            copyToastRoutine = StartCoroutine(ShowCopyToast());
+        });
+        copyToast.gameObject.SetActive(false);
     }
 
     public void SetProfile(UserProfile userProfile)
@@ -126,5 +142,16 @@ internal class ProfileHUDView : MonoBehaviour
         {
             profile.OnFaceSnapshotReadyEvent -= SetProfileImage;
         }
+    }
+
+    private IEnumerator ShowCopyToast()
+    {
+        if (!copyToast.gameObject.activeSelf)
+        {
+            copyToast.gameObject.SetActive(true);
+        }
+        copyToast.Show();
+        yield return new WaitForSeconds(COPY_TOAST_VISIBLE_TIME);
+        copyToast.Hide();
     }
 }
