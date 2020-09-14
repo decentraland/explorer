@@ -33,6 +33,11 @@ public class AvatarName : MonoBehaviour
         }
     }
 
+    void OnDisable()
+    {
+        SetTalking(false);
+    }
+
     public void SetTalking(bool talking)
     {
         talkingIconContainer.SetActive(talking);
