@@ -305,7 +305,7 @@ namespace DCL
                                 renderingController.DeactivateRendering();
                                 break;
                             case "ActivateRendering":
-                                renderingController.ActivateRendering();
+                                renderingController.ActivateRendering(msg.payload);
                                 break;
                             case "ShowNotificationFromJson":
                                 NotificationsController.i.ShowNotificationFromJson(msg.payload);
@@ -429,6 +429,9 @@ namespace DCL
                                 break;
                             case "EnableNewTaskbar":
                                 HUDController.i.EnableNewTaskbar(); // NOTE(Santi): This is temporal, until we remove the old taskbar
+                                break;
+                            case "ShowAvatarEditorInSignInFlow":
+                                HUDController.i.ShowAvatarEditorInSignInFlow();
                                 break;
                             default:
                                 Debug.Log(

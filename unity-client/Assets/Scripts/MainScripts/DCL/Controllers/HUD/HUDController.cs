@@ -505,4 +505,13 @@ public class HUDController : MonoBehaviour
     {
         newTaskbarIsEnabled = true;
     }
+
+    public void ShowAvatarEditorInSignInFlow()
+    {
+        if (avatarEditorHud != null)
+        {
+            avatarEditorHud.IsSignUpFlowValue = true;
+            avatarEditorHud.SetVisibility(true);
+        }
+    }
 }

@@ -190,6 +190,10 @@ export class UnityInterface {
     this.gameInstance.SendMessage('HUDController', 'EnableNewTaskbar')
   }
 
+  public ShowAvatarEditorInSignInFlow() {
+    this.gameInstance.SendMessage('HUDController', 'ShowAvatarEditorInSignInFlow')
+  }
+
   public HideFPSPanel() {
     this.gameInstance.SendMessage('SceneController', 'HideFPSPanel')
   }
@@ -202,8 +206,8 @@ export class UnityInterface {
     this.gameInstance.SendMessage('SceneController', 'SetDisableAssetBundles')
   }
 
-  public ActivateRendering() {
-    this.gameInstance.SendMessage('SceneController', 'ActivateRendering')
+  public ActivateRendering(forzeActivation: boolean = false) {
+    this.gameInstance.SendMessage('SceneController', 'ActivateRendering', JSON.stringify(forzeActivation))
   }
 
   public DeactivateRendering() {

@@ -15,6 +15,7 @@ public class AvatarEditorHUDController : IHUD
     private UserProfile userProfile;
     private WearableDictionary catalog;
     bool renderingEnabled => CommonScriptableObjects.rendererState.Get();
+
     private readonly Dictionary<string, List<WearableItem>> wearablesByCategory = new Dictionary<string, List<WearableItem>>();
     protected readonly AvatarEditorHUDModel model = new AvatarEditorHUDModel();
 
@@ -23,6 +24,16 @@ public class AvatarEditorHUDController : IHUD
     private ColorList hairColorList;
 
     public AvatarEditorHUDView view;
+
+    private bool isSignUpFlow = false;
+    public bool IsSignUpFlowValue {
+        get => isSignUpFlow;
+        set
+        {
+            isSignUpFlow = value;
+            view.exitButton.gameObject.SetActive(!isSignUpFlow);
+        }
+    }
 
     public event Action OnClose;
 
@@ -443,10 +454,11 @@ public class AvatarEditorHUDController : IHUD
     public void SaveAvatar(Sprite faceSnapshot, Sprite face128Snapshot, Sprite face256Snapshot, Sprite bodySnapshot)
     {
         var avatarModel = model.ToAvatarModel();
-        WebInterface.SendSaveAvatar(avatarModel, faceSnapshot, face128Snapshot, face256Snapshot, bodySnapshot);
+        WebInterface.SendSaveAvatar(avatarModel, faceSnapshot, face128Snapshot, face256Snapshot, bodySnapshot, IsSignUpFlowValue);
         userProfile.OverrideAvatar(avatarModel, face256Snapshot);
 
         SetVisibility(false);
+        IsSignUpFlowValue = false;
     }
 
     public void DiscardAndClose()
