@@ -9,6 +9,7 @@ export enum AvatarMessageType {
   USER_EXPRESSION = 'USER_EXPRESSION',
   USER_REMOVED = 'USER_REMOVED',
   SET_LOCAL_UUID = 'SET_LOCAL_UUID',
+  USER_TALKING = 'USER_TALKING',
 
   // Actions related messages
   USER_MUTED = 'USER_MUTED',
@@ -39,6 +40,12 @@ export type ReceiveUserVisibleMessage = {
   visible: boolean
 }
 
+export type ReceiveUserTalkingMessage = {
+  type: AvatarMessageType.USER_TALKING
+  uuid: string
+  talking: boolean
+}
+
 export type ReceiveUserPoseMessage = {
   type: AvatarMessageType.USER_POSE
   uuid: string
@@ -58,6 +65,7 @@ export type UserMessage = {
     | AvatarMessageType.USER_MUTED
     | AvatarMessageType.USER_UNMUTED
     | AvatarMessageType.SHOW_WINDOW
+    | AvatarMessageType.USER_TALKING
   uuid: string
 }
 
@@ -68,6 +76,7 @@ export type AvatarMessage =
   | ReceiveUserExpressionMessage
   | UserRemovedMessage
   | UserMessage
+  | ReceiveUserTalkingMessage
 
 export type UUID = string
 

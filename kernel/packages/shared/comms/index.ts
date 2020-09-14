@@ -19,7 +19,8 @@ import {
   receiveUserPose,
   receiveUserVisible,
   removeById,
-  avatarMessageObservable
+  avatarMessageObservable,
+  receiveUserTalking
 } from './peers'
 import {
   Pose,
@@ -125,6 +126,7 @@ export class PeerTrackingInfo {
   public lastProfileUpdate: Timestamp = 0
   public lastUpdate: Timestamp = 0
   public receivedPublicChatMessages = new Set<string>()
+  public talking = false
 
   profilePromise: { promise: Promise<ProfileForRenderer | void>; version: number | null } = {
     promise: Promise.resolve(),
@@ -244,6 +246,17 @@ export function updateVoiceRecordingStatus(recording: boolean) {
     }
   } else if (!recording && voiceCommunicator) {
     voiceCommunicator.pause()
+  }
+}
+
+export function updatePeerVoicePlaying(userId: string, playing: boolean) {
+  if (context) {
+    for (const peerInfo of context.peerData.values()) {
+      if (peerInfo.identity === userId) {
+        peerInfo.talking = playing
+        break
+      }
+    }
   }
 }
 
@@ -462,6 +475,7 @@ type ProcessingPeerInfo = {
   userInfo: UserInformation
   squareDistance: number
   position: Position
+  talking: boolean
 }
 
 let currentParcelTopics = ''
@@ -588,7 +602,8 @@ function collectInfo(context: Context) {
       position: trackingInfo.position,
       userInfo: trackingInfo.userInfo,
       squareDistance: squareDistance(context.currentPosition, trackingInfo.position),
-      alias: peerAlias
+      alias: peerAlias,
+      talking: trackingInfo.talking
     })
   }
 
@@ -598,6 +613,7 @@ function collectInfo(context: Context) {
       receiveUserVisible(alias, true)
       receiveUserPose(alias, peerInfo.position as Pose)
       receiveUserData(alias, peerInfo.userInfo)
+      receiveUserTalking(alias, peerInfo.talking)
     }
   } else {
     const sortedBySqDistanceVisiblePeers = visiblePeers.sort((p1, p2) => p1.squareDistance - p2.squareDistance)
@@ -609,6 +625,7 @@ function collectInfo(context: Context) {
         receiveUserVisible(alias, true)
         receiveUserPose(alias, peer.position as Pose)
         receiveUserData(alias, peer.userInfo)
+        receiveUserTalking(alias, peer.talking)
       } else {
         receiveUserVisible(alias, false)
       }

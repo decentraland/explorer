@@ -10,6 +10,7 @@ public class AvatarName : MonoBehaviour
     public Transform sourceTransform;
     public TextMeshProUGUI nameText;
     public Vector3 offset;
+    public GameObject talkingIconContainer;
     Canvas canvas;
     Camera mainCamera;
     RectTransform canvasRect;
@@ -30,6 +31,10 @@ public class AvatarName : MonoBehaviour
             Utils.ForceRebuildLayoutImmediate(canvasRect);
             RefreshTextPosition();
         }
+    }
+
+    public void SetTalking(bool talking) {
+        talkingIconContainer.SetActive(talking);
     }
 
     private void Awake()
