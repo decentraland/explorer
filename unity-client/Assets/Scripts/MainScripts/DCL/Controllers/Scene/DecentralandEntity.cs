@@ -1,4 +1,4 @@
-﻿using DCL.Components;
+using DCL.Components;
 using DCL.Controllers;
 using DCL.Helpers;
 using System;
@@ -105,7 +105,7 @@ namespace DCL.Models
         }
 
         public ParcelScene scene;
-        public bool markedForCleanup = false;
+        public bool markedForCleanup = false, isLocked = false;
 
         public Dictionary<string, DecentralandEntity> children = new Dictionary<string, DecentralandEntity>();
         public DecentralandEntity parent;

@@ -41,7 +41,9 @@ public class BuildModeController : MonoBehaviour
     [Header ("Scene references")]
     public GameObject editModeChangeFX;
     public GameObject snapImgStatusShowGO;
-
+    public SceneObjectCatalogController catalogController;
+    public SceneLimitInfoController sceneLimitInfoController;
+    public BuildModeEntityListController buildModeEntityListController;
     [Header("Build References")]
 
     public Material editMaterial;
@@ -52,9 +54,10 @@ public class BuildModeController : MonoBehaviour
     [SerializeField] internal InputAction_Trigger editModeChange;
 
 
+    SceneObjectCatalogController sceneObjectCatalogController;
     ParcelScene sceneToEdit;
 
-    bool isEditModeActivated = false, isSnapActivated = true;
+    bool isEditModeActivated = false, isSnapActivated = true, isSceneInformationActive = false,isSceneEntitiesListActive = false,isSceneCatalogActive = false;
 
     //Object to edit related
     DecentralandEntity entityToEdit,newEntity;
@@ -76,6 +79,7 @@ public class BuildModeController : MonoBehaviour
     void Start()
     {
         editModeChange.OnTriggered += OnEditModeChangeAction;
+        sceneObjectCatalogController = new SceneObjectCatalogController();
 
     }
 
@@ -137,6 +141,41 @@ public class BuildModeController : MonoBehaviour
 
     void CheckEditModeInput()
     {
+        if (Input.GetKey(KeyCode.Y))
+        {
+            if (isSceneEntitiesListActive) buildModeEntityListController.CloseList();
+            else buildModeEntityListController.OpenEntityList(sceneToEdit);
+            isSceneEntitiesListActive = !isSceneEntitiesListActive;
+            InputDone();
+            return;
+        }
+        if (Input.GetKey(KeyCode.J))
+        {
+            if (isSceneCatalogActive) catalogController.CloseCatalog();
+            else catalogController.OpenCatalog();
+            isSceneCatalogActive = !isSceneCatalogActive;
+       
+            InputDone();
+            return;
+        }
+        if (Input.GetKey(KeyCode.G))
+        {
+            if(isSceneInformationActive)
+            {
+                sceneLimitInfoController.Disable();
+            }
+            else
+            {
+                sceneLimitInfoController.Enable();
+                
+            }
+            isSceneInformationActive = !isSceneInformationActive;
+            InputDone();
+            return;
+        }
+
+
+        
         if (Input.GetKeyUp(KeyCode.Q))
         {
             if (gameObjectToEdit != null) DeselectObject();
@@ -159,6 +198,7 @@ public class BuildModeController : MonoBehaviour
         }
         if (gameObjectToEdit != null)
         {
+           
             if (Input.GetKey(KeyCode.LeftControl) && Input.GetKey(KeyCode.Z))
             {
                 UndoEdit();
@@ -268,6 +308,7 @@ public class BuildModeController : MonoBehaviour
 
     void SelectObject(DecentralandEntity decentralandEntity)
     {
+        if (decentralandEntity.isLocked) return;
 
         selectionHasbeenCreated = false;
         currentYRotationAdded = 0;
@@ -361,7 +402,7 @@ public class BuildModeController : MonoBehaviour
         CreateCollidersForEntity(newEntity);
         SelectObject(newEntity);
 
-
+        sceneLimitInfoController.UpdateInfo();
         selectionHasbeenCreated = true;
     }
 
@@ -379,8 +420,8 @@ public class BuildModeController : MonoBehaviour
 
 
     void EnterEditMode()
-    {     
-
+    {
+        
         editModeChangeFX.SetActive(true);
         DCLCharacterController.i.SetFreeMovementActive(true);
         isEditModeActivated = true;
@@ -406,6 +447,7 @@ public class BuildModeController : MonoBehaviour
         SetSnapActive(isSnapActivated);
         FindSceneToEdit();
         sceneToEdit.SetEditMode(true);
+        sceneLimitInfoController.SetParcelScene(sceneToEdit);
         // NOTE(Adrian): This is a temporary as the kernel should do this job instead of the client
         DCL.Environment.i.messagingControllersManager.messagingControllers[sceneToEdit.sceneData.id].systemBus.Stop();
         //
