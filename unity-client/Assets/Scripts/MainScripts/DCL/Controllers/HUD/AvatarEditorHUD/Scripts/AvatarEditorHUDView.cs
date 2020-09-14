@@ -65,6 +65,12 @@ public class AvatarEditorHUDView : MonoBehaviour
     public event System.Action<AvatarModel> OnAvatarAppear;
     [HideInInspector]
     public event System.Action<bool> OnSetVisibility;
+    [HideInInspector]
+    public event System.Action OnRandomize;
+    [HideInInspector]
+    public event System.Action<WearableItem> OnSelectWearable;
+    [HideInInspector]
+    public event System.Action<WearableItem> OnUnselectWearable;
 
     private void Awake()
     {
@@ -176,12 +182,16 @@ public class AvatarEditorHUDView : MonoBehaviour
     {
         selectorsByCategory[wearable.category].Select(wearable.id);
         collectiblesItemSelector.Select(wearable.id);
+
+        OnSelectWearable?.Invoke(wearable);
     }
 
     public void UnselectWearable(WearableItem wearable)
     {
         selectorsByCategory[wearable.category].Unselect(wearable.id);
         collectiblesItemSelector.Unselect(wearable.id);
+
+        OnUnselectWearable?.Invoke(wearable);
     }
 
     public void SelectHairColor(Color hairColor)
@@ -290,6 +300,7 @@ public class AvatarEditorHUDView : MonoBehaviour
 
     private void OnRandomizeButton()
     {
+        OnRandomize?.Invoke();
         controller.RandomizeWearables();
     }
 
@@ -321,12 +332,12 @@ public class AvatarEditorHUDView : MonoBehaviour
         if (visible && !isOpen)
         {
             AudioScriptableObjects.dialogOpen.Play(true);
-            OnSetVisibility.Invoke(visible);
+            OnSetVisibility?.Invoke(visible);
         }
         else if (!visible && isOpen)
         {
             AudioScriptableObjects.dialogClose.Play(true);
-            OnSetVisibility.Invoke(visible);
+            OnSetVisibility?.Invoke(visible);
         }
 
         isOpen = visible;
