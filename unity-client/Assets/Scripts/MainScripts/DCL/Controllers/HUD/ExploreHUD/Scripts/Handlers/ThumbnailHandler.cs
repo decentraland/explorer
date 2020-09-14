@@ -37,11 +37,6 @@ internal class ThumbnailHandler : IDisposable
 
     public void Dispose()
     {
-        if (texture)
-        {
-            GameObject.Destroy(texture);
-        }
-
         if (texturePromise != null)
         {
             AssetPromiseKeeper_Texture.i.Forget(texturePromise);
