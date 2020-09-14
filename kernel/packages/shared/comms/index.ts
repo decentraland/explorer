@@ -84,7 +84,7 @@ import {
 import { getIdentity } from 'shared/session'
 import { createLogger } from '../logger'
 import { VoiceCommunicator, VoiceSpatialParams } from 'voice-chat-codec/VoiceCommunicator'
-import { voicePlayingUpdate } from './actions'
+import { voicePlayingUpdate, voiceRecordingUpdate } from './actions'
 import { isVoiceChatRecording } from './selectors'
 
 export type CommsVersion = 'v1' | 'v2'
@@ -986,6 +986,10 @@ async function doStartCommunications(context: Context) {
 
       voiceCommunicator.addStreamPlayingListener((userId, playing) => {
         store.dispatch(voicePlayingUpdate(userId, playing))
+      })
+
+      voiceCommunicator.addStreamRecordingListener((recording) => {
+        store.dispatch(voiceRecordingUpdate(recording))
       })
     }
   } catch (e) {

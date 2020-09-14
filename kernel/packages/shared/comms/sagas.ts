@@ -14,9 +14,16 @@ import { realmToString } from 'shared/dao/utils/realmToString'
 import { createLogger } from 'shared/logger'
 
 import { connect, updatePeerVoicePlaying, updateVoiceRecordingStatus } from '.'
-import { SET_VOICE_CHAT_RECORDING, VoicePlayingUpdate, VOICE_PLAYING_UPDATE } from './actions'
+import {
+  SET_VOICE_CHAT_RECORDING,
+  VoicePlayingUpdate,
+  VoiceRecordingUpdate,
+  VOICE_PLAYING_UPDATE,
+  VOICE_RECORDING_UPDATE
+} from './actions'
 
 import { isVoiceChatRecording } from './selectors'
+import { unityInterface } from 'unity-interface/UnityInterface'
 
 const DEBUG = false
 const logger = createLogger('comms: ')
@@ -27,6 +34,7 @@ export function* commsSaga() {
   if (VOICE_CHAT_ENABLED) {
     yield takeEvery(SET_VOICE_CHAT_RECORDING, updateVoiceChatRecordingStatus)
     yield takeEvery(VOICE_PLAYING_UPDATE, updateUserVoicePlaying)
+    yield takeEvery(VOICE_RECORDING_UPDATE, updatePlayerVoiceRecording)
   }
 }
 
@@ -53,6 +61,10 @@ function* updateVoiceChatRecordingStatus() {
 
 function* updateUserVoicePlaying(action: VoicePlayingUpdate) {
   updatePeerVoicePlaying(action.payload.userId, action.payload.playing)
+}
+
+function* updatePlayerVoiceRecording(action: VoiceRecordingUpdate) {
+  unityInterface.SetPlayerTalking(action.payload.recording)
 }
 
 function* changeRealm() {

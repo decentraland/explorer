@@ -8,6 +8,7 @@ export type AudioCommunicatorChannel = {
 }
 
 export type StreamPlayingListener = (streamId: string, playing: boolean) => any
+export type StreamRecordingListener = (recording: boolean) => any
 
 type VoiceOutput = {
   buffer: RingBuffer<Float32Array>
@@ -45,6 +46,7 @@ export class VoiceCommunicator {
   private outputs: Record<string, VoiceOutput> = {}
 
   private streamPlayingListeners: StreamPlayingListener[] = []
+  private streamRecordingListeners: StreamRecordingListener[] = []
 
   private readonly sampleRate: number
   private readonly channelBufferSize: number
@@ -82,6 +84,10 @@ export class VoiceCommunicator {
 
   public addStreamPlayingListener(listener: StreamPlayingListener) {
     this.streamPlayingListeners.push(listener)
+  }
+
+  public addStreamRecordingListener(listener: StreamRecordingListener) {
+    this.streamRecordingListeners.push(listener)
   }
 
   public hasInput() {
@@ -215,8 +221,13 @@ export class VoiceCommunicator {
   }
 
   start() {
-    this.input?.encodeInputProcessor.connect(this.input.recordingContext.destination)
-    this.input?.inputStream.connect(this.input.encodeInputProcessor)
+    if (this.input) {
+      this.input.encodeInputProcessor.connect(this.input.recordingContext.destination)
+      this.input.inputStream.connect(this.input.encodeInputProcessor)
+      this.notifyRecording(true)
+    } else {
+      this.notifyRecording(false)
+    }
   }
 
   pause() {
@@ -231,6 +242,8 @@ export class VoiceCommunicator {
     } catch (e) {
       // Ignored. This will fail if it was already disconnected
     }
+
+    this.notifyRecording(false)
   }
 
   private createInputFor(stream: MediaStream, context: AudioContext) {
@@ -264,6 +277,10 @@ export class VoiceCommunicator {
   private setVoiceRelativePosition(src: string, spatialParams: VoiceSpatialParams) {
     this.outputs[src].spatialParams = spatialParams
     this.updatePannerNodeParameters(src)
+  }
+
+  private notifyRecording(recording: boolean) {
+    this.streamRecordingListeners.forEach((listener) => listener(recording))
   }
 
   private startOutputsExpiration() {
