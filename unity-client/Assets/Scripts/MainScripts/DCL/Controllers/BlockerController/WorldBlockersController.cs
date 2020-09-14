@@ -6,10 +6,11 @@ namespace DCL.Controllers
     {
         public bool enabled = true;
 
-        ISceneHandler sceneHandler;
         Transform blockersParent;
-        IBlockerHandler blockerHandler;
-        DCLCharacterPosition characterPosition;
+        
+        readonly ISceneHandler sceneHandler;
+        readonly IBlockerHandler blockerHandler;
+        readonly DCLCharacterPosition characterPosition;
 
         public WorldBlockersController(ISceneHandler sceneHandler, IBlockerHandler blockerHandler, DCLCharacterPosition characterPosition)
         {
