@@ -1511,11 +1511,11 @@ MonoBehaviour:
   chatButton: {fileID: 8561792805223980205}
   friendsButton: {fileID: 4603229045924843475}
   chatHeadsGroup: {fileID: 1163524797233769629}
-  settingsButton: {fileID: 0}
+  settingsButton: {fileID: 4987211128768128962}
   backpackButton: {fileID: 196766316238799930}
   exploreButton: {fileID: 5044388401507377088}
-  helpAndSupportButton: {fileID: 0}
-  separatorMark: {fileID: 0}
+  helpAndSupportButton: {fileID: 1255887769930130344}
+  separatorMark: {fileID: 1920223494540621707}
   moreButton: {fileID: 2780953233977255692}
   moreMenu: {fileID: 5102413631459841666}
   taskbarPanelTransf: {fileID: 4515209315500026540}
@@ -1726,8 +1726,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 207, y: -19}
-  m_SizeDelta: {x: 2, y: 34}
+  m_AnchoredPosition: {x: 299, y: -28}
+  m_SizeDelta: {x: 2, y: 52}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &7637971638404705191
 CanvasRenderer:
@@ -1750,7 +1750,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.41509432, g: 0.41509432, b: 0.41509432, a: 1}
   m_RaycastTarget: 1
   m_Maskable: 1
   m_OnCullStateChanged:
