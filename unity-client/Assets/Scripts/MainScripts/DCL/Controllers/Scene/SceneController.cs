@@ -120,9 +120,9 @@ namespace DCL
         private void Update()
         {
             InputController_Legacy.i.Update();
-            if (interactionHoverCanvasController != null) {
+            
+            if (interactionHoverCanvasController != null)
                 Environment.i.pointerEventsController.Update(interactionHoverCanvasController);
-            }
 
             if (lastSortFrame != Time.frameCount || sceneSortDirty)
             {

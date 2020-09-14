@@ -8,7 +8,6 @@
         public readonly PointerEventsController pointerEventsController;
         public readonly MemoryManager memoryManager;
 
-
         /*
          * TODO: Continue moving static instances to this class. Each static instance should be converted to a local instance inside this class.
          *
@@ -34,20 +33,20 @@
         public void Cleanup()
         {
             messagingControllersManager.Cleanup();
-            pointerEventsController.Cleanup();
             memoryManager.CleanupPoolsIfNeeded(true);
+            pointerEventsController.Cleanup();
         }
 
         public void Restart(IMessageProcessHandler messageHandler, bool isTesting = false)
         {
-            this.Cleanup();
-            this.Initialize(messageHandler, isTesting);
-        }
+            Cleanup();
 
+            Initialize(messageHandler, isTesting);
+        }
 
         public void InitializeForTesting()
         {
-            this.Initialize(new DummyMessageHandler(), isTesting: true);
+            Initialize(new DummyMessageHandler(), isTesting: true);
         }
     }
 }
