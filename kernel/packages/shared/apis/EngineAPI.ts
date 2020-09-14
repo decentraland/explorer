@@ -2,6 +2,7 @@ import { IEventNames, IEvents } from 'decentraland-ecs/src/decentraland/Types'
 import { APIOptions, exposeMethod, registerAPI } from 'decentraland-rpc/lib/host'
 import { EntityAction } from '../types'
 import { ExposableAPI } from './ExposableAPI'
+import {STATIC_WORKERS_TERMINATION} from "../../config";
 
 export interface IEngineAPI {
   /**
@@ -76,6 +77,8 @@ export class EngineAPI extends ExposableAPI implements IEngineAPI {
 
   @exposeMethod
   async disposeWorker() {
+    if (!STATIC_WORKERS_TERMINATION) return
+
     this.parcelSceneAPI.disposeWorker()
   }
 
