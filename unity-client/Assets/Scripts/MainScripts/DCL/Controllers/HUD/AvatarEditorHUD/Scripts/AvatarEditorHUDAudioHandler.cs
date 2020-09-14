@@ -14,10 +14,12 @@ public class AvatarEditorHUDAudioHandler : MonoBehaviour
     [SerializeField]
     Button randomizeButton;
     [SerializeField]
-    AudioEvent eventRarity, eventAvatarAppear, eventReactionMale, eventReactionFemale, eventWearableClothing, eventWearableEyewear, eventWearableJewelry,
+    AudioEvent eventMusic, eventRarity, eventAvatarAppear, eventReactionMale, eventReactionFemale, eventWearableClothing, eventWearableEyewear, eventWearableJewelry,
         eventWearableFootwear, eventWearableHair, eventWearableHatMask, eventWearableRarity;
 
     WearableItem lastClickedWearable = null;
+
+    IEnumerator musicFadeOut;
 
     private void Start()
     {
@@ -30,6 +32,7 @@ public class AvatarEditorHUDAudioHandler : MonoBehaviour
         view.eyeColorSelector.OnColorChanged += OnEyeColorChanged;
         view.skinColorSelector.OnColorChanged += OnSkinColorChanged;
         view.OnAvatarAppear += OnAvatarAppear;
+        view.OnSetVisibility += OnSetAvatarEditorVisibility;
 
         nftItemSelector.OnItemClicked += OnWearableClicked;
 
@@ -185,6 +188,26 @@ public class AvatarEditorHUDAudioHandler : MonoBehaviour
             {
                 eventReaction.PlayScheduled(0.6f);
             }
+        }
+    }
+
+    void OnSetAvatarEditorVisibility(bool visible)
+    {
+        if (visible)
+        {
+            if (musicFadeOut != null)
+            {
+                StopCoroutine(musicFadeOut);
+                StartCoroutine(eventMusic.FadeIn(1f));
+            }
+
+            if (!eventMusic.source.isPlaying)
+                eventMusic.Play();
+        }
+        else
+        {
+            musicFadeOut = eventMusic.FadeOut(2f);
+            StartCoroutine(musicFadeOut);
         }
     }
 }

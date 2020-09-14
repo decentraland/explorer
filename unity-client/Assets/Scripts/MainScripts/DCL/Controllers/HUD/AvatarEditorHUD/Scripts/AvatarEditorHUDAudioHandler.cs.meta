@@ -5,17 +5,15 @@ MonoImporter:
   serializedVersion: 2
   defaultReferences:
   - view: {instanceID: 0}
+  - nftItemSelector: {instanceID: 0}
   - randomizeButton: {instanceID: 0}
+  - eventMusic: {fileID: 11400000, guid: 04d736dfcca0ffb40b80e13b0d0b3ac9, type: 2}
   - eventRarity: {fileID: 11400000, guid: ab6dfe6063700a84da51263d91986e29, type: 2}
   - eventAvatarAppear: {fileID: 11400000, guid: 9c4174c87fc665549bc204afa5ca6830,
       type: 2}
   - eventReactionMale: {fileID: 11400000, guid: ac80627e713f2d344aba9dd6b6108961,
       type: 2}
   - eventReactionFemale: {fileID: 11400000, guid: 7570ab98b121d5a4391d533dc765f979,
-      type: 2}
-  - eventReactionMaleRare: {fileID: 11400000, guid: a481de21cd8082240a4cb0df8c15ca91,
-      type: 2}
-  - eventReactionFemaleRare: {fileID: 11400000, guid: d0f984423a06cbe41ab3901144471feb,
       type: 2}
   - eventWearableClothing: {fileID: 11400000, guid: 93f9d68e6e225004c9dd116f7312aad9,
       type: 2}

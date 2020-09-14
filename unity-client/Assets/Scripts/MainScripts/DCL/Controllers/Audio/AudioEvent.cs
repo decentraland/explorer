@@ -12,7 +12,7 @@ public class AudioEvent : ScriptableObject
 
     public bool loop = false;
     [Range(0f, 1f)]
-    public float volume = 1.0f;
+    public float initialVolume = 1.0f;
     public float initialPitch = 1f;
     [Range(0f, 1f)]
     public float randomPitch = 0.0f;
@@ -51,7 +51,7 @@ public class AudioEvent : ScriptableObject
             source.clip = clips[0];
         }
         
-        source.volume = volume;
+        source.volume = initialVolume;
         source.loop = loop;
         source.playOnAwake = false;
 
@@ -115,7 +115,7 @@ public class AudioEvent : ScriptableObject
         lastPlayedIndex = clipIndex;
         RandomizeIndex();
 
-        lastPlayedTime = Time.time;
+        lastPlayedTime = Time.time + delaySeconds;
         nextPlayTime = lastPlayedTime + cooldownSeconds;
     }
 
@@ -134,6 +134,19 @@ public class AudioEvent : ScriptableObject
         this.pitch = pitch;
     }
 
+    public IEnumerator FadeIn(float fadeSeconds)
+    {
+        float startVolume = source.volume;
+
+        while (source.volume < initialVolume)
+        {
+            source.volume += (initialVolume - startVolume) * (Time.deltaTime / fadeSeconds);
+            yield return null;
+        }
+
+        source.volume = initialVolume;
+    }
+
     public IEnumerator FadeOut(float fadeSeconds)
     {
         float startVolume = source.volume;
@@ -145,6 +158,6 @@ public class AudioEvent : ScriptableObject
         }
 
         source.Stop();
-        source.volume = volume;
+        source.volume = initialVolume;
     }
 }
