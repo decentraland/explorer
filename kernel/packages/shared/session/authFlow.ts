@@ -1,6 +1,6 @@
-import { login, signup, signupAgree, signupForm } from './actions'
+import {login, signup, signupAgree, signupForm } from './actions'
 import { StoreContainer } from '../store/rootTypes'
-import { unityInterface } from 'unity-interface/UnityInterface'
+import {ensureUnityInterface} from "../renderer";
 
 declare const globalThis: StoreContainer
 
@@ -29,8 +29,11 @@ export function setupAuthFlow() {
         signupFlow!.style.display = 'block'
         signupStep2!.style.display = 'block'
 
-        unityInterface.ShowAvatarEditorInSignInFlow()
-        unityInterface.ActivateRendering(true)
+        ensureUnityInterface().then(unityInterface => {
+          unityInterface.ShowAvatarEditorInSignInFlow()
+          unityInterface.ActivateRendering(true)
+        })
+
       })
 
       btnSignupBack!.addEventListener('click', () => {
