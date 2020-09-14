@@ -2,11 +2,27 @@ import { action } from 'typesafe-actions'
 
 import { ETHEREUM_NETWORK } from 'config'
 
-import { ExplorerIdentity } from './types'
+import { ExplorerIdentity, SignUpData } from './types'
+
+export const SETUP_WEB3 = '[Request] Initializing web3'
+export const setupWeb3 = () => action(SETUP_WEB3)
+export type SetupWeb3 = ReturnType<typeof setupWeb3>
 
 export const LOGIN = '[Request] Login'
 export const login = () => action(LOGIN)
 export type Login = ReturnType<typeof login>
+
+export const SIGNUP_FORM = '[SIGN-UP] signup save form'
+export const signupForm = (values: SignUpData) => action(SIGNUP_FORM, values)
+export type SignUpFormAction = ReturnType<typeof signupForm>
+
+export const SIGNUP_AGREE = '[SIGN-UP] signup agree'
+export const signupAgree = () => action(SIGNUP_AGREE, true)
+export type SignAgreeAction = ReturnType<typeof signupAgree>
+
+export const SIGNUP = '[Request] Signup'
+export const signup = () => action(SIGNUP)
+export type Signup = ReturnType<typeof signup>
 
 export const USER_AUTHENTIFIED = '[Success] User authentified'
 export const userAuthentified = (userId: string, identity: ExplorerIdentity, network: ETHEREUM_NETWORK) =>

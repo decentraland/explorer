@@ -8,13 +8,14 @@ import { ENABLE_WEB3, ETHEREUM_NETWORK, getTLD, PREVIEW, setNetwork, WORLD_EXPLO
 
 import { createLogger } from 'shared/logger'
 import {
-  awaitWeb3Approval,
   createEth,
+  createWeb3Connector,
   isSessionExpired,
   loginCompleted,
-  providerFuture
+  providerFuture,
+  requestWeb3Provider
 } from 'shared/ethereum/provider'
-import { getUserProfile, setLocalProfile } from 'shared/comms/peers'
+import { getUserProfile, removeUserProfile, setLocalProfile } from 'shared/comms/peers'
 import { ReportFatalError } from 'shared/loading/ReportFatalError'
 import {
   AUTH_ERROR_LOGGED_OUT,
@@ -30,14 +31,17 @@ import { getFromLocalStorage, saveToLocalStorage } from 'atomicHelpers/localStor
 
 import { Session } from '.'
 import { ExplorerIdentity } from './types'
-import { LOGIN, loginCompleted as loginCompletedAction, LOGOUT, userAuthentified } from './actions'
+import { LOGIN, loginCompleted as loginCompletedAction, LOGOUT, SETUP_WEB3, SIGNUP, userAuthentified } from './actions'
+import { profileCheckExists } from '../profiles/actions'
 
 const logger = createLogger('session: ')
 
 export function* sessionSaga(): any {
   yield call(initializeTos)
 
+  yield takeLatest(SETUP_WEB3, setupWeb3)
   yield takeLatest(LOGIN, login)
+  yield takeLatest(SIGNUP, login) // signup)
   yield takeLatest(LOGOUT, logout)
   yield takeLatest(AWAITING_USER_SIGNATURE, scheduleAwaitingSignaturePrompt)
 }
@@ -73,12 +77,36 @@ function* scheduleAwaitingSignaturePrompt() {
   }
 }
 
+function* setupWeb3() {
+  if (ENABLE_WEB3) {
+    const web3Connector = yield createWeb3Connector()
+    const userData = getUserProfile()
+    if (userData && userData.userId) {
+      const exist = yield profileExists(userData.userId)
+      if (isSessionExpired(userData) || !exist) {
+        removeUserProfile()
+        web3Connector.clearCache()
+      }
+    }
+  }
+  enableLogin()
+}
+
+function* profileExists(userId: string) {
+  const profile = yield call(profileCheckExists, userId)
+  const profileId = profile && profile.payload && profile.payload.userId ? profile.payload.userId : null
+  return userId !== profileId
+}
+
 function* login() {
   let userId: string
   let identity: ExplorerIdentity
 
   if (ENABLE_WEB3) {
-    yield awaitWeb3Approval()
+    const provider = yield requestWeb3Provider()
+    if (!provider) {
+      return
+    }
 
     if (WORLD_EXPLORER && (yield checkTldVsNetwork())) {
       throw new Error('Network mismatch')
@@ -90,7 +118,10 @@ function* login() {
 
     try {
       const userData = getUserProfile()
-
+      if (userData && !profileExists(userData.userId)) {
+        // we should call to signUp
+        return
+      }
       // check that user data is stored & key is not expired
       if (isSessionExpired(userData)) {
         yield put(awaitingUserSignature())

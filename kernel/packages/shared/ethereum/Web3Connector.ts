@@ -1,7 +1,6 @@
 import Web3Modal from 'web3modal'
 import * as Fortmatic from 'fortmatic'
 import { Eth } from 'web3x/eth'
-import { defaultLogger } from '../logger'
 
 export default class Web3Connector {
   private provider: any
@@ -10,7 +9,7 @@ export default class Web3Connector {
   constructor() {
     this.web3Modal = new Web3Modal({
       network: 'ropsten', // 'mainnet',
-      cacheProvider: false,
+      cacheProvider: true,
       providerOptions: {
         fortmatic: {
           package: Fortmatic,
@@ -20,6 +19,9 @@ export default class Web3Connector {
         }
       }
     })
+  }
+
+  clearCache() {
     this.web3Modal.clearCachedProvider()
   }
 
@@ -32,7 +34,6 @@ export default class Web3Connector {
       }
       return this.provider
     } catch (e) {
-      defaultLogger.error(e)
       throw e
     }
   }

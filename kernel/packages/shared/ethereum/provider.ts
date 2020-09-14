@@ -4,7 +4,6 @@ import { future } from 'fp-future'
 import { ethereumConfigurations, ETHEREUM_NETWORK } from 'config'
 import { defaultLogger } from 'shared/logger'
 import { Account } from 'web3x/account'
-import { getUserProfile, removeUserProfile } from 'shared/comms/peers'
 import { getTLD } from '../../config'
 import { Eth } from 'web3x/eth'
 import Web3Connector from './Web3Connector'
@@ -13,7 +12,7 @@ declare var window: Window & {
   ethereum: any
   web3: any
 }
-export const web3Connector: Web3Connector = new Web3Connector()
+let web3Connector: Web3Connector
 
 export function createEth(provider: any = null): Eth {
   return web3Connector.createEth(provider)!
@@ -29,35 +28,34 @@ let providerRequested = false
 
 type LoginData = { successful: boolean; provider: any; localIdentity?: Account }
 
+export function createWeb3Connector(): Web3Connector {
+  defaultLogger.log('[web3Connector] creating', web3Connector)
+  if (!web3Connector) {
+    web3Connector = new Web3Connector()
+  }
+  return web3Connector
+}
+
+export async function requestWeb3Provider() {
+  try {
+    const provider = await web3Connector.connect()
+    requestManager.setProvider(provider)
+    providerFuture.resolve({
+      successful: true,
+      provider: provider
+    })
+    return provider
+  } catch (e) {
+    defaultLogger.log('Could not get a wallet connection', e)
+    requestManager.setProvider(null)
+  }
+}
+
 export async function awaitWeb3Approval(): Promise<void> {
   if (!providerRequested) {
     providerRequested = true
-
-    const userData = getUserProfile()
-    if (isSessionExpired(userData)) {
-      removeUserProfile()
-    }
-
     const element = document.getElementById('eth-login')
-    if (element) {
-      element.style.display = 'block'
-
-      const button = document.getElementById('eth-login-confirm-button')
-      button!.onclick = async () => {
-        try {
-          const provider = await web3Connector.connect()
-
-          providerFuture.resolve({
-            successful: true,
-            provider: provider
-          })
-        } catch (e) {
-          console.log('Could not get a wallet connection', e)
-          requestManager.setProvider(null)
-          providerFuture.reject(e)
-        }
-      }
-    } else {
+    if (!element) {
       // otherwise, login element not found (preview, builder)
       providerFuture.resolve({
         successful: false,
@@ -66,9 +64,7 @@ export async function awaitWeb3Approval(): Promise<void> {
       })
     }
   }
-
   providerFuture.then((result: LoginData) => requestManager.setProvider(result.provider)).catch(defaultLogger.error)
-
   return providerFuture
 }
 

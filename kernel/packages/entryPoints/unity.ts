@@ -18,6 +18,7 @@ import { HUDElementID } from 'shared/types'
 import { worldRunningObservable, onNextWorldRunning } from 'shared/world/worldState'
 import { getCurrentIdentity } from 'shared/session/selectors'
 import { userAuthentified } from 'shared/session'
+import { setupAuthFlow } from 'shared/session/authFlow'
 import { realmInitialized } from 'shared/dao'
 
 const container = document.getElementById('gameContainer')
@@ -35,6 +36,7 @@ const observer = worldRunningObservable.add((isRunning) => {
   }
 })
 
+setupAuthFlow()
 initializeUnity(container)
   .then(async ({ instancedJS }) => {
     const i = (await instancedJS).unityInterface

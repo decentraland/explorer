@@ -11,9 +11,16 @@ export type ExplorerIdentity = AuthIdentity & {
   hasConnectedWeb3: boolean
 }
 
+export type SignUpData = {
+  name: string
+  email: string
+  tos?: boolean
+}
+
 export type SessionState = {
   initialized: boolean
   userId: string | undefined
   identity: ExplorerIdentity | undefined
   network: ETHEREUM_NETWORK | undefined
+  signup: SignUpData
 }

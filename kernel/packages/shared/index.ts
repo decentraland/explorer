@@ -9,7 +9,7 @@ import { loadingStarted, notStarted, MOBILE_NOT_SUPPORTED } from './loading/type
 import { buildStore } from './store/store'
 import { initializeUrlPositionObserver } from './world/positionThings'
 import { StoreContainer } from './store/rootTypes'
-import { login } from './session/actions'
+import { setupWeb3 } from './session/actions'
 
 declare const globalThis: StoreContainer
 
@@ -31,7 +31,7 @@ export function initShared() {
   store.dispatch(notStarted())
   store.dispatch(loadingStarted())
 
-  store.dispatch(login())
+  store.dispatch(setupWeb3())
 
   initializeUrlPositionObserver()
   initializeUrlRealmObserver()

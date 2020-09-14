@@ -8,17 +8,20 @@ export const PROFILE_REQUEST = '[Request] Profile fetch'
 export const PROFILE_SUCCESS = '[Success] Profile fetch'
 export const PROFILE_FAILURE = '[Failure] Profile fetch'
 export const PROFILE_RANDOM = '[?] Profile randomized'
+export const PROFILE_CHECK_EXISTS = '[Request] Profile check exists'
 
 export const profileRequest = (userId: string) => action(PROFILE_REQUEST, { userId })
 export const profileSuccess = (userId: string, profile: Profile, hasConnectedWeb3: boolean = false) =>
   action(PROFILE_SUCCESS, { userId, profile, hasConnectedWeb3 })
 export const profileFailure = (userId: string, error: any) => action(PROFILE_FAILURE, { userId, error })
 export const profileRandom = (userId: string, profile: Profile) => action(PROFILE_RANDOM, { userId, profile })
+export const profileCheckExists = (userId: string) => action(PROFILE_CHECK_EXISTS, { userId })
 
 export type ProfileRequestAction = ReturnType<typeof profileRequest>
 export type ProfileSuccessAction = ReturnType<typeof profileSuccess>
 export type ProfileFailureAction = ReturnType<typeof profileFailure>
 export type ProfileRandomAction = ReturnType<typeof profileRandom>
+export type profileCheckExistsAction = ReturnType<typeof profileCheckExists>
 
 // Profile update
 

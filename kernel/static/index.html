@@ -536,6 +536,8 @@
           <label for="agree-check" class="eth-login-tos-label">I am of legal age and I have read and agree to the <a href="https://decentraland.org/terms" target="_blank">Terms of Service</a> and <a href="https://decentraland.org/privacy" target="_blank">Privacy Policy</a></label>
         </div>
         <button id="eth-login-confirm-button" class="eth-login-confirm-button1" disabled>Start Exploring</button>
+        <br>
+        <button id="btnSignUp" class="eth-login-confirm-button1">Sign up</button>
       </div>
     </div>
     <footer class="footer-bar">
@@ -547,6 +549,44 @@
         <span class="footer-text">© 2020 Decentraland</span>
       </div>
     </footer>
+  </div>
+  <div id="signup-flow" class="login" style="display: none">
+    <div id="signup-step2">
+      <div class="column">
+        <img width="60" height="60" src="https://previews.123rf.com/images/apoev/apoev1804/apoev180400197/99276087-default-placeholder-businesswoman-half-length-portrait-photo-avatar-woman-gray-color.jpg"/>
+        <em>active since Aug 2020</em>
+        <button id="btn-signup-edit-avatar">Edit Avatar</button>
+      </div>
+      <div class="column">
+        <form id="signup-form" method="POST">
+          <div>
+            <label for="signup-avatar-name">Name your avatar</label>
+            <input id="signup-avatar-name" type="text" name="name" placeholder="your avatar name">
+            <div>*required field (you can edit it later)</div>
+          </div>
+          <div>
+            <label for="signup-avatar-email">Let's stay in touch</label>
+            <input id="signup-avatar-email" type="text" name="email" placeholder="enter your email">
+          </div>
+          <div><button type="submit">Next</button></div>
+        </form>
+      </div>
+    </div>
+    <div id="signup-step3" style="display: none">
+      <h2>Terms of Service and Privacy Policy</h2>
+      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent porttitor efficitur sapien, at volutpat ligula scelerisque eget.
+        Morbi ut felis eget metus rutrum hendrerit. Maecenas sed ligula ac tortor semper feugiat sit amet et enim. Lorem ipsum dolor sit amet,
+        consectetur adipiscing elit. Vestibulum laoreet, metus eget posuere volutpat.
+      </p>
+      <button id="btnSignupBack">BACK</button>
+      <button id="btnSignupAgree">I AGREE</button>
+    </div>
+    <div id="signup-step4" style="display: none">
+      <h2>Sign up with a Digital wallet</h2>
+      <div>
+        <button id="btnSignupWallet" class="eth-login-confirm-button1">Select a wallet</button>
+      </div>
+    </div>
   </div>
   <div id="eth-connect-advice" class="login">
     <nav class="nav-bar">

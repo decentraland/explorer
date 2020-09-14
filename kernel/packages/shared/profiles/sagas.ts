@@ -49,7 +49,9 @@ import {
   profileRequest,
   saveProfileFailure,
   addedProfileToCatalog,
-  saveProfileRequest
+  saveProfileRequest,
+  PROFILE_CHECK_EXISTS,
+  profileCheckExistsAction
 } from './actions'
 import { generateRandomUserProfile } from './generateRandomUserProfile'
 import {
@@ -123,6 +125,7 @@ export function* profileSaga(): any {
   yield takeLatestByUserId(PROFILE_REQUEST, handleFetchProfile)
   yield takeLatestByUserId(PROFILE_SUCCESS, submitProfileToRenderer)
   yield takeLatestByUserId(PROFILE_RANDOM, handleRandomAsSuccess)
+  yield takeLatestByUserId(PROFILE_CHECK_EXISTS, checkProfileExists)
 
   yield takeLatestByUserId(SAVE_PROFILE_REQUEST, handleSaveAvatar)
 
@@ -283,6 +286,23 @@ export function* initialLoad() {
     yield put(addCatalog('base-avatars', baseCatalog))
     yield put(addCatalog('base-exclusive', []))
   }
+}
+
+export function* checkProfileExists(action: profileCheckExistsAction): any {
+  const userId = action.payload.userId
+  try {
+    const serverUrl = yield select(getProfileDownloadServer)
+    const profiles: { avatars: object[] } = yield call(profileServerRequest, serverUrl, userId)
+
+    if (profiles.avatars.length !== 0) {
+      return profiles.avatars[0]
+    }
+  } catch (error) {
+    if (error.message !== 'Profile not found') {
+      defaultLogger.log(`Error requesting profile for auth check ${userId}, `, error)
+    }
+  }
+  return null
 }
 
 export function* handleFetchProfile(action: ProfileRequestAction): any {
