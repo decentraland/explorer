@@ -35,7 +35,7 @@ MonoBehaviour:
     cameraDrawDistance: 80
     bloom: 1
     colorGrading: 1
-    shadowDistance: 50
+    shadowDistance: 45
   - displayName: High
     baseResolution: 2
     antiAliasing: 2
@@ -46,4 +46,4 @@ MonoBehaviour:
     cameraDrawDistance: 100
     bloom: 1
     colorGrading: 1
-    shadowDistance: 70
+    shadowDistance: 60
