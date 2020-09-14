@@ -185,6 +185,11 @@ export class UnityInterface {
     this.gameInstance.SendMessage('SceneController', 'ShowFPSPanel')
   }
 
+  /* NOTE(Santi): This is temporal, until we remove the old taskbar */
+  public EnableNewTaskbar() {
+    this.gameInstance.SendMessage('HUDController', 'EnableNewTaskbar')
+  }
+
   public HideFPSPanel() {
     this.gameInstance.SendMessage('SceneController', 'HideFPSPanel')
   }
@@ -243,11 +248,11 @@ export class UnityInterface {
     this.gameInstance.SendMessage('HUDController', 'ShowNotificationFromJson', JSON.stringify(notification))
   }
 
-  public ConfigureHUDElement(hudElementId: HUDElementID, configuration: HUDConfiguration) {
+  public ConfigureHUDElement(hudElementId: HUDElementID, configuration: HUDConfiguration, extraPayload: any | null = null) {
     this.gameInstance.SendMessage(
       'HUDController',
       `ConfigureHUDElement`,
-      JSON.stringify({ hudElementId: hudElementId, configuration: configuration })
+      JSON.stringify({ hudElementId: hudElementId, configuration: configuration, extraPayload: extraPayload ? JSON.stringify(extraPayload) : null })
     )
   }
 
@@ -329,6 +334,10 @@ export class UnityInterface {
       active: (tutorialStep & emailCompletedFlag) === 0,
       visible: false
     })
+  }
+
+  public UpdateBalanceOfMANA(balance: string) {
+    this.gameInstance.SendMessage('HUDController', 'UpdateBalanceOfMANA', balance)
   }
 
   // *********************************************************************************
