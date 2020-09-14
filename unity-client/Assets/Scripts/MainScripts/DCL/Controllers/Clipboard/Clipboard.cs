@@ -21,11 +21,11 @@ public static class Clipboard
     }
 
 #if UNITY_WEBGL && !UNITY_EDITOR
-    public static void HijackWebGLCopyPasteInput()
+    public static void HookBrowserCopyPasteInput()
     {
         // NOTE: this does nothing but we'll use it to force the instantiation of this static class
         // cause you need to call something for a static class to be instantiated.
-        // all the hijacking is actually done inside ClipboardWebGL class.
+        // all the hooking is actually done inside ClipboardWebGL class.
     }
 #endif
 
