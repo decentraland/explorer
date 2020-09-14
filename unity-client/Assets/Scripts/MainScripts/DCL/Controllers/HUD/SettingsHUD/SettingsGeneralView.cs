@@ -220,6 +220,7 @@ namespace DCL.SettingsHUD
             renderingScaleSlider.value = tempQualitySetting.renderScale;
             drawDistanceSlider.value = tempQualitySetting.cameraDrawDistance;
             shadowDistanceSlider.value = tempQualitySetting.shadowDistance;
+            Debug.Log("Why...");
         }
 
         public void Apply()
