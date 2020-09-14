@@ -79,7 +79,7 @@ export function isSessionExpired(userData: any) {
 
 export async function getUserAccount(): Promise<string | undefined> {
   try {
-    const eth = createEth()!
+    const eth = createEth()
     const accounts = await eth.getAccounts()
 
     if (!accounts || accounts.length === 0) {

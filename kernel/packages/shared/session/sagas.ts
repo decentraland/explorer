@@ -229,7 +229,7 @@ async function createAuthIdentity() {
   if (ENABLE_WEB3) {
     const result = await providerFuture
     if (result.successful) {
-      const eth = createEth()!
+      const eth = createEth()
       const account = (await eth.getAccounts())[0]
 
       address = account.toJSON()
