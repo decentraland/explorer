@@ -1,10 +1,12 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System;
 using DCL.Helpers;
 using DCL.Interface;
 
 public class ExploreHUDController : IHUD
 {
+    internal static bool isTest = false;
+
     internal ExploreHUDView view;
     internal InputAction_Trigger toggleExploreTrigger;
 
@@ -12,6 +14,7 @@ public class ExploreHUDController : IHUD
     FriendTrackerController friendsController;
 
     public event Action OnToggleTriggered;
+    public event Action OnClose;
 
     public ExploreHUDController()
     {
@@ -32,15 +35,18 @@ public class ExploreHUDController : IHUD
 
         view.gotoMagicButton.OnGotoMagicPressed += GoToMagic;
         view.togglePopupButton.onPointerDown += () => toggleExploreTrigger.RaiseOnTriggered();
-        BaseSceneCellView.OnJumpIn += OnJumpIn;
+        HotSceneCellView.OnJumpIn += OnJumpIn;
     }
 
-    public void Initialize(IFriendsController friendsController)
+    public void Initialize(IFriendsController friendsController, bool newTaskbarIsEnabled)
     {
         this.friendsController = new FriendTrackerController(friendsController, view.friendColors);
         miniMapDataController = new ExploreMiniMapDataController();
 
         view.Initialize(miniMapDataController, this.friendsController);
+
+        if (newTaskbarIsEnabled)
+            view.togglePopupButton.gameObject.SetActive(false);
     }
 
     public void SetVisibility(bool visible)
@@ -55,8 +61,20 @@ public class ExploreHUDController : IHUD
             Utils.UnlockCursor();
             view.RefreshData();
         }
+        else if (!visible && view.IsActive())
+        {
+            OnClose?.Invoke();
+        }
 
         view.SetVisibility(visible);
+
+        if (visible)
+        {
+            AudioScriptableObjects.dialogOpen.Play(true);
+            AudioScriptableObjects.listItemAppear.SetPitch(1f);
+        }
+        else
+            AudioScriptableObjects.dialogClose.Play(true);
     }
 
     public void Dispose()
@@ -65,7 +83,7 @@ public class ExploreHUDController : IHUD
         friendsController?.Dispose();
 
         toggleExploreTrigger.OnTriggered -= OnToggleActionTriggered;
-        BaseSceneCellView.OnJumpIn -= OnJumpIn;
+        HotSceneCellView.OnJumpIn -= OnJumpIn;
 
         if (view != null)
         {

@@ -1,3 +1,4 @@
+using DCL.HelpAndSupportHUD;
 using DCL.SettingsHUD;
 using System.Collections.Generic;
 using UnityEngine;
@@ -12,6 +13,7 @@ public class HUDController : MonoBehaviour
     public static HUDController i { get; private set; }
 
     private InputAction_Trigger toggleUIVisibilityTrigger;
+    private bool newTaskbarIsEnabled = false; // NOTE(Santi): This is temporal, until we remove the old taskbar
 
     private void Awake()
     {
@@ -21,7 +23,7 @@ public class HUDController : MonoBehaviour
         toggleUIVisibilityTrigger.OnTriggered += ToggleUIVisibility_OnTriggered;
     }
 
-    public AvatarHUDController avatarHud => GetHUDElement(HUDElementID.AVATAR) as AvatarHUDController;
+    public Legacy.AvatarHUDController avatarHud_Legacy => GetHUDElement(HUDElementID.PROFILE_HUD) as Legacy.AvatarHUDController;
 
     public NotificationHUDController notificationHud =>
         GetHUDElement(HUDElementID.NOTIFICATION) as NotificationHUDController;
@@ -66,6 +68,10 @@ public class HUDController : MonoBehaviour
 
     public ExploreHUDController exploreHud => GetHUDElement(HUDElementID.EXPLORE_HUD) as ExploreHUDController;
 
+    public HelpAndSupportHUDController helpAndSupportHud => GetHUDElement(HUDElementID.HELP_AND_SUPPORT_HUD) as HelpAndSupportHUDController;
+
+    public ManaHUDController manaHud => GetHUDElement(HUDElementID.MANA_HUD) as ManaHUDController;
+
     public Dictionary<HUDElementID, IHUD> hudElements { get; private set; } = new Dictionary<HUDElementID, IHUD>();
 
     private UserProfile ownUserProfile => UserProfile.GetOwnUserProfile();
@@ -108,7 +114,7 @@ public class HUDController : MonoBehaviour
     {
         NONE = 0,
         MINIMAP = 1,
-        AVATAR = 2,
+        PROFILE_HUD = 2,
         NOTIFICATION = 3,
         AVATAR_EDITOR = 4,
         SETTINGS = 5,
@@ -127,7 +133,9 @@ public class HUDController : MonoBehaviour
         CONTROLS_HUD = 18,
         EMAIL_PROMPT = 19,
         EXPLORE_HUD = 20,
-        COUNT = 21
+        MANA_HUD = 21,
+        HELP_AND_SUPPORT_HUD = 22,
+        COUNT = 23
     }
 
     [System.Serializable]
@@ -135,19 +143,21 @@ public class HUDController : MonoBehaviour
     {
         public HUDElementID hudElementId;
         public HUDConfiguration configuration;
+        public string extraPayload;
     }
 
     public void ConfigureHUDElement(string payload)
     {
         ConfigureHUDElementMessage message = JsonUtility.FromJson<ConfigureHUDElementMessage>(payload);
 
-        HUDConfiguration configuration = message.configuration;
         HUDElementID id = message.hudElementId;
+        HUDConfiguration configuration = message.configuration;
+        string extraPayload = message.extraPayload;
 
-        ConfigureHUDElement(id, configuration);
+        ConfigureHUDElement(id, configuration, extraPayload);
     }
 
-    public void ConfigureHUDElement(HUDElementID hudElementId, HUDConfiguration configuration)
+    public void ConfigureHUDElement(HUDElementID hudElementId, HUDConfiguration configuration, string extraPayload = null)
     {
         //TODO(Brian): For now, the factory code is using this switch approach.
         //             In order to avoid the factory upkeep we can transform the IHUD elements
@@ -164,15 +174,15 @@ public class HUDController : MonoBehaviour
             case HUDElementID.MINIMAP:
                 CreateHudElement<MinimapHUDController>(configuration, hudElementId);
                 break;
-            case HUDElementID.AVATAR:
-                CreateHudElement<AvatarHUDController>(configuration, hudElementId);
+            case HUDElementID.PROFILE_HUD:
+                CreateHudElement<Legacy.AvatarHUDController>(configuration, hudElementId);
 
-                if (avatarHud != null)
+                if (avatarHud_Legacy != null)
                 {
-                    avatarHud.Initialize();
-                    avatarHud.OnEditAvatarPressed += ShowAvatarEditor;
-                    avatarHud.OnSettingsPressed += ShowSettings;
-                    avatarHud.OnControlsPressed += ShowControls;
+                    avatarHud_Legacy.Initialize();
+                    avatarHud_Legacy.OnEditAvatarPressed += ShowAvatarEditor;
+                    avatarHud_Legacy.OnSettingsPressed += ShowSettings;
+                    avatarHud_Legacy.OnControlsPressed += ShowControls;
                     ownUserProfile.OnUpdate += OwnUserProfileUpdated;
                     OwnUserProfileUpdated(ownUserProfile);
                 }
@@ -268,9 +278,12 @@ public class HUDController : MonoBehaviour
                     if (taskbarHud != null)
                     {
                         taskbarHud.Initialize(DCL.InitialSceneReferences.i?.mouseCatcher, ChatController.i,
-                            FriendsController.i);
+                            FriendsController.i, newTaskbarIsEnabled);
                         taskbarHud.OnAnyTaskbarButtonClicked -= TaskbarHud_onAnyTaskbarButtonClicked;
                         taskbarHud.OnAnyTaskbarButtonClicked += TaskbarHud_onAnyTaskbarButtonClicked;
+
+                        taskbarHud.AddSettingsWindow(settingsHud);
+                        taskbarHud.AddBackpackWindow(avatarEditorHud);
                     }
                 }
                 else
@@ -294,6 +307,7 @@ public class HUDController : MonoBehaviour
                 break;
             case HUDElementID.CONTROLS_HUD:
                 CreateHudElement<ControlsHUDController>(configuration, hudElementId);
+                taskbarHud?.AddControlsMoreOption();
                 break;
             case HUDElementID.EMAIL_PROMPT:
                 if (emailPromptHud == null)
@@ -306,8 +320,16 @@ public class HUDController : MonoBehaviour
                 CreateHudElement<ExploreHUDController>(configuration, hudElementId);
                 if (exploreHud != null)
                 {
-                    exploreHud.Initialize(FriendsController.i);
+                    exploreHud.Initialize(FriendsController.i, newTaskbarIsEnabled);
+                    taskbarHud?.AddExploreWindow(exploreHud);
                 }
+                break;
+            case HUDElementID.MANA_HUD:
+                CreateHudElement<ManaHUDController>(configuration, hudElementId);
+                break;
+            case HUDElementID.HELP_AND_SUPPORT_HUD:
+                CreateHudElement<HelpAndSupportHUDController>(configuration, hudElementId);
+                taskbarHud?.AddHelpAndSupportWindow(helpAndSupportHud);
                 break;
         }
 
@@ -366,7 +388,7 @@ public class HUDController : MonoBehaviour
     {
         if (int.TryParse(wearableCountString, out int wearableCount))
         {
-            avatarHud.SetNewWearablesNotification(wearableCount);
+            avatarHud_Legacy.SetNewWearablesNotification(wearableCount);
         }
     }
 
@@ -389,7 +411,7 @@ public class HUDController : MonoBehaviour
 
     private void UpdateAvatarHUD()
     {
-        avatarHud?.UpdateData(new AvatarHUDModel()
+        avatarHud_Legacy?.UpdateData(new Legacy.AvatarHUDModel()
         {
             name = ownUserProfile.userName,
             mail = ownUserProfile.email,
@@ -400,6 +422,11 @@ public class HUDController : MonoBehaviour
     public void RequestTeleport(string teleportDataJson)
     {
         teleportHud?.RequestTeleport(teleportDataJson);
+    }
+
+    public void UpdateBalanceOfMANA(string balance)
+    {
+        manaHud?.SetBalance(balance);
     }
 
     private void OnDestroy()
@@ -414,11 +441,11 @@ public class HUDController : MonoBehaviour
         if (ownUserProfile != null)
             ownUserProfile.OnUpdate -= OwnUserProfileUpdated;
 
-        if (avatarHud != null)
+        if (avatarHud_Legacy != null)
         {
-            avatarHud.OnEditAvatarPressed -= ShowAvatarEditor;
-            avatarHud.OnSettingsPressed -= ShowSettings;
-            avatarHud.OnControlsPressed -= ShowControls;
+            avatarHud_Legacy.OnEditAvatarPressed -= ShowAvatarEditor;
+            avatarHud_Legacy.OnSettingsPressed -= ShowSettings;
+            avatarHud_Legacy.OnControlsPressed -= ShowControls;
         }
 
         if (worldChatWindowHud != null)
@@ -472,4 +499,10 @@ public class HUDController : MonoBehaviour
         Resources.Load<StringVariable>("CurrentPlayerInfoCardId").Set(newModel.userId);
     }
 #endif
+
+    // NOTE(Santi): This is temporal, until we remove the old taskbar
+    public void EnableNewTaskbar()
+    {
+        newTaskbarIsEnabled = true;
+    }
 }
