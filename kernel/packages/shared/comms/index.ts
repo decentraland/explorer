@@ -208,44 +208,53 @@ function getParcelSceneSubscriptions(): string[] {
 
 let audioRequestPending = false
 
+function requestMediaDevice() {
+  if (!audioRequestPending) {
+    audioRequestPending = true
+    // tslint:disable-next-line
+    navigator.mediaDevices
+      .getUserMedia({
+        audio: {
+          channelCount: 1,
+          sampleRate: commConfigurations.voiceChatSampleRate,
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+          advanced: [{ echoCancellation: true }, { autoGainControl: true }, { noiseSuppression: true }] as any
+        },
+        video: false
+      })
+      .then((a) => {
+        voiceCommunicator!.setInputStream(a)
+        if (isVoiceChatRecording(store.getState())) {
+          voiceCommunicator!.start()
+        } else {
+          voiceCommunicator!.pause()
+        }
+      })
+      .catch((e) => {
+        defaultLogger.log('Error requesting audio: ', e)
+      })
+      .finally(() => {
+        audioRequestPending = false
+      })
+  }
+}
+
 export function updateVoiceRecordingStatus(recording: boolean) {
-  if (recording && voiceCommunicator) {
-    if (!voiceCommunicator.hasInput()) {
-      if (!audioRequestPending) {
-        audioRequestPending = true
-        // tslint:disable-next-line
-        navigator.mediaDevices
-          .getUserMedia({
-            audio: {
-              channelCount: 1,
-              sampleRate: commConfigurations.voiceChatSampleRate,
-              echoCancellation: true,
-              noiseSuppression: true,
-              autoGainControl: true,
-              advanced: [{ echoCancellation: true }, { autoGainControl: true }, { noiseSuppression: true }] as any
-            },
-            video: false
-          })
-          .then((a) => {
-            voiceCommunicator!.setInputStream(a)
-            if (isVoiceChatRecording(store.getState())) {
-              voiceCommunicator!.start()
-            } else {
-              voiceCommunicator!.pause()
-            }
-          })
-          .catch((e) => {
-            defaultLogger.log('Error requesting audio: ', e)
-          })
-          .finally(() => {
-            audioRequestPending = false
-          })
-      }
-    } else {
-      voiceCommunicator.start()
-    }
-  } else if (!recording && voiceCommunicator) {
+  if (!voiceCommunicator) {
+    return
+  }
+
+  if (!recording) {
     voiceCommunicator.pause()
+    return
+  }
+
+  if (!voiceCommunicator.hasInput()) {
+    requestMediaDevice()
+  } else {
+    voiceCommunicator.start()
   }
 }
 
