@@ -7,6 +7,7 @@
         public readonly MessagingControllersManager messagingControllersManager;
         public readonly PointerEventsController pointerEventsController;
         public readonly MemoryManager memoryManager;
+        public InteractionHoverCanvasController interactionHoverCanvasController { get; private set; }
 
         /*
          * TODO: Continue moving static instances to this class. Each static instance should be converted to a local instance inside this class.
@@ -28,6 +29,11 @@
             messagingControllersManager.Initialize(messageHandler);
             pointerEventsController.Initialize(isTesting);
             memoryManager.Initialize();
+        }
+
+        public void SetInteractionHoverCanvasController(InteractionHoverCanvasController controller)
+        {
+            interactionHoverCanvasController = controller;
         }
 
         public void Cleanup()

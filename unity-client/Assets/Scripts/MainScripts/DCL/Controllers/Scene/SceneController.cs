@@ -19,8 +19,6 @@ namespace DCL
     {
         public static SceneController i { get; private set; }
 
-        public InteractionHoverCanvasController interactionHoverCanvasController;
-
         //======================================================================
 
         #region PROJECT_ENTRYPOINT
@@ -120,9 +118,8 @@ namespace DCL
         private void Update()
         {
             InputController_Legacy.i.Update();
-            
-            if (interactionHoverCanvasController != null)
-                Environment.i.pointerEventsController.Update(interactionHoverCanvasController);
+
+            Environment.i.pointerEventsController.Update();
 
             if (lastSortFrame != Time.frameCount || sceneSortDirty)
             {
