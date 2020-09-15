@@ -20,7 +20,6 @@ namespace Tests
         protected override IEnumerator SetUp()
         {
             yield return base.SetUp();
-            Environment.i.InitializeForTesting();
             SceneController.i.useBoundariesChecker = false;
 
             // Set character position and camera rotation

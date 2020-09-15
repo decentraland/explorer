@@ -21,27 +21,10 @@ namespace Tests
         protected override IEnumerator SetUp()
         {
             yield return base.SetUp();
+            Environment.i.Initialize(SceneController.i,  true);
             SceneController.i.SetDebug();
             DCL.Configuration.EnvironmentSettings.DEBUG = true;
         }
-        // [UnitySetUp]
-        // protected override IEnumerator SetUp()
-        // {
-        //     if (!sceneInitialized)
-        //     {
-        //         yield return InitUnityScene("MainTest");
-        //         sceneInitialized = true;
-        //     }
-        //
-        //     SetUp_Camera();
-        //     yield return SetUp_SceneController(debugMode: true, false, false);
-        //     yield return SetUp_CharacterController();
-        //
-        //     DCL.Configuration.EnvironmentSettings.DEBUG = true;
-        //
-        //     sceneController.SetDebug();
-        //     yield return null;
-        // }
 
         [UnityTest]
         public IEnumerator CreateUIScene()

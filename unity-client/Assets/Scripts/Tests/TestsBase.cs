@@ -53,6 +53,8 @@ public class TestsBase
         yield return SetUp_SceneIntegrityChecker();
 
         SetUp_Renderer();
+
+        Environment.i.Initialize(new DummyMessageHandler(), isTesting: true);
     }
 
 
@@ -204,7 +206,8 @@ public class TestsBase
             SetUp_UIScene();
         }
 
-        Environment.i.InitializeForTesting();
+        // Environment.i.InitializeForTesting();
+        Environment.i.Initialize(new DummyMessageHandler(), isTesting: true);
     }
 
 

@@ -49,10 +49,5 @@
 
             Initialize(messageHandler, isTesting);
         }
-
-        public void InitializeForTesting()
-        {
-            Initialize(new DummyMessageHandler(), isTesting: true);
-        }
     }
 }
