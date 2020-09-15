@@ -40,7 +40,7 @@ public class AvatarName : MonoBehaviour
 
     public void SetTalking(bool talking)
     {
-        talkingIconContainer.SetActive(talking);
+        talkingIconContainer?.SetActive(talking);
     }
 
     private void Awake()
