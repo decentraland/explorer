@@ -51,7 +51,9 @@ import {
   addedProfileToCatalog,
   saveProfileRequest,
   PROFILE_CHECK_EXISTS,
-  profileCheckExistsAction
+  profileCheckExistsAction,
+  CREATE_SIGNUP_PROFILE,
+  CreateSignUpProfile
 } from './actions'
 import { generateRandomUserProfile } from './generateRandomUserProfile'
 import {
@@ -128,6 +130,7 @@ export function* profileSaga(): any {
   yield takeLatestByUserId(PROFILE_CHECK_EXISTS, checkProfileExists)
 
   yield takeLatestByUserId(SAVE_PROFILE_REQUEST, handleSaveAvatar)
+  yield takeLatestByUserId(CREATE_SIGNUP_PROFILE, handleCreateSignUpProfile)
 
   yield takeLatestByUserId(INVENTORY_REQUEST, handleFetchInventory)
 
@@ -551,6 +554,23 @@ export async function fetchInventoryItemsByAddress(address: string) {
   const inventory: { id: string }[] = await result.json()
 
   return inventory.map((wearable) => wearable.id)
+}
+
+export function* handleCreateSignUpProfile(action: CreateSignUpProfile) {
+  const url: string = yield select(getUpdateProfileServer)
+  const profile = action.payload.profile as Profile
+  const userId = action.payload.profile.userId as string
+  const currentVersion = action.payload.profile.version || 0
+  const identity = action.payload.identity
+
+  const created = yield call(modifyAvatar, {
+    url,
+    userId,
+    currentVersion,
+    identity,
+    profile
+  })
+  return created
 }
 
 export function* handleSaveAvatar(saveAvatar: SaveProfileRequest) {

@@ -10,6 +10,7 @@ import { createLogger } from 'shared/logger'
 import {
   createEth,
   createWeb3Connector,
+  getUserAccount,
   isSessionExpired,
   loginCompleted,
   providerFuture,
@@ -32,7 +33,7 @@ import { getFromLocalStorage, saveToLocalStorage } from 'atomicHelpers/localStor
 import { Session } from '.'
 import { ExplorerIdentity } from './types'
 import { LOGIN, loginCompleted as loginCompletedAction, LOGOUT, SETUP_WEB3, SIGNUP, userAuthentified } from './actions'
-import { profileCheckExists } from '../profiles/actions'
+import { createSignUpProfile, profileCheckExists } from '../profiles/actions'
 
 const logger = createLogger('session: ')
 
@@ -41,14 +42,14 @@ export function* sessionSaga(): any {
 
   yield takeLatest(SETUP_WEB3, setupWeb3)
   yield takeLatest(LOGIN, login)
-  yield takeLatest(SIGNUP, login) // signup)
+  yield takeLatest(SIGNUP, signup)
   yield takeLatest(LOGOUT, logout)
   yield takeLatest(AWAITING_USER_SIGNATURE, scheduleAwaitingSignaturePrompt)
 }
 
 function* initializeTos() {
   const TOS_KEY = 'tos'
-  const tosAgreed: boolean = getFromLocalStorage(TOS_KEY) ?? false
+  const tosAgreed: boolean = !!getFromLocalStorage(TOS_KEY)
 
   const agreeCheck = document.getElementById('agree-check') as HTMLInputElement | undefined
   if (agreeCheck) {
@@ -64,13 +65,13 @@ function* initializeTos() {
     }
 
     // enable agree check after initialization
-    enableLogin()
+    return enableLogin()
   }
 }
 
 function* scheduleAwaitingSignaturePrompt() {
   yield delay(10000)
-  const isStillWaiting = yield select((state) => !state.session?.initialized)
+  const isStillWaiting = yield select((state) => !state.session || !state.session.initialized)
 
   if (isStillWaiting) {
     showAwaitingSignaturePrompt(true)
@@ -95,90 +96,40 @@ function* setupWeb3() {
 function* profileExists(userId: string) {
   const profile = yield call(profileCheckExists, userId)
   const profileId = profile && profile.payload && profile.payload.userId ? profile.payload.userId : null
-  return userId !== profileId
+  return userId === profileId
 }
 
 function* login() {
-  let userId: string
-  let identity: ExplorerIdentity
-
   if (ENABLE_WEB3) {
-    const provider = yield requestWeb3Provider()
+    const provider = yield requestProvider()
     if (!provider) {
       return
     }
+    const account = yield getUserAccount()
+    if (!account) {
+      return
+    }
+    if (!profileExists(account)) {
+      // we should call to signUp
+      return
+    }
+  }
+  const loggedIn = yield doLogin(getUserProfile())
+  console.log('LOGGED IN: ', loggedIn)
+  return loggedIn
+}
 
+function* requestProvider() {
+  const provider = yield requestWeb3Provider()
+  if (provider) {
     if (WORLD_EXPLORER && (yield checkTldVsNetwork())) {
       throw new Error('Network mismatch')
     }
-
     if (PREVIEW && ETHEREUM_NETWORK.MAINNET === (yield getNetworkValue())) {
       showNetworkWarning()
     }
-
-    try {
-      const userData = getUserProfile()
-      if (userData && !profileExists(userData.userId)) {
-        // we should call to signUp
-        return
-      }
-      // check that user data is stored & key is not expired
-      if (isSessionExpired(userData)) {
-        yield put(awaitingUserSignature())
-        identity = yield createAuthIdentity()
-        showAwaitingSignaturePrompt(false)
-        userId = identity.address
-
-        setLocalProfile(userId, {
-          userId,
-          identity
-        })
-      } else {
-        identity = userData.identity
-        userId = userData.identity.address
-
-        setLocalProfile(userId, {
-          userId,
-          identity
-        })
-      }
-    } catch (e) {
-      logger.error(e)
-      ReportFatalError(AUTH_ERROR_LOGGED_OUT)
-      throw e
-    }
-
-    if (identity.hasConnectedWeb3) {
-      identifyUser(userId)
-    }
-  } else {
-    logger.log(`Using test user.`)
-    identity = yield createAuthIdentity()
-    userId = identity.address
-
-    setLocalProfile(userId, {
-      userId,
-      identity
-    })
-
-    loginCompleted.resolve()
   }
-
-  logger.log(`User ${userId} logged in`)
-
-  let net: ETHEREUM_NETWORK = ETHEREUM_NETWORK.MAINNET
-  if (WORLD_EXPLORER) {
-    net = yield getAppNetwork()
-
-    // Load contracts from https://contracts.decentraland.org
-    yield setNetwork(net)
-    queueTrackingEvent('Use network', { net })
-  }
-
-  yield put(userAuthentified(userId, identity, net))
-
-  yield loginCompleted
-  yield put(loginCompletedAction())
+  return provider
 }
 
 async function checkTldVsNetwork() {
@@ -206,8 +157,7 @@ async function checkTldVsNetwork() {
 
 async function getNetworkValue() {
   const web3Network = await getNetwork()
-  const web3Net = web3Network === '1' ? ETHEREUM_NETWORK.MAINNET : ETHEREUM_NETWORK.ROPSTEN
-  return web3Net
+  return web3Network === '1' ? ETHEREUM_NETWORK.MAINNET : ETHEREUM_NETWORK.ROPSTEN
 }
 
 function showNetworkWarning() {
@@ -215,6 +165,75 @@ function showNetworkWarning() {
   if (element) {
     element.style.display = 'block'
   }
+}
+
+function* doLogin(userData: any, signUpIdentity?: ExplorerIdentity) {
+  let userId: string
+  let identity: ExplorerIdentity
+
+  if (ENABLE_WEB3) {
+    try {
+      // check that user data is stored & key is not expired
+      if (isSessionExpired(userData)) {
+        if (signUpIdentity) {
+          identity = signUpIdentity
+        } else {
+          yield put(awaitingUserSignature())
+          identity = yield createAuthIdentity()
+          showAwaitingSignaturePrompt(false)
+        }
+        userId = identity.address
+
+        setLocalProfile(userId, {
+          userId,
+          identity
+        })
+      } else {
+        identity = userData.identity
+        userId = userData.identity.address
+
+        setLocalProfile(userId, {
+          userId,
+          identity
+        })
+      }
+    } catch (e) {
+      logger.error(e)
+      ReportFatalError(AUTH_ERROR_LOGGED_OUT)
+      throw e
+    }
+
+    if (identity.hasConnectedWeb3) {
+      identifyUser(userId)
+    }
+
+    loginCompleted.resolve(undefined)
+  } else {
+    logger.log(`Using test user.`)
+    identity = yield createAuthIdentity()
+    userId = identity.address
+
+    setLocalProfile(userId, {
+      userId,
+      identity
+    })
+
+    loginCompleted.resolve(undefined)
+  }
+
+  logger.log(`User ${userId} logged in`)
+
+  let net: ETHEREUM_NETWORK = ETHEREUM_NETWORK.MAINNET
+  if (WORLD_EXPLORER) {
+    net = yield getAppNetwork()
+
+    // Load contracts from https://contracts.decentraland.org
+    yield setNetwork(net)
+    queueTrackingEvent('Use network', { net })
+  }
+
+  yield put(userAuthentified(userId, identity, net))
+  yield put(loginCompletedAction())
 }
 
 async function createAuthIdentity() {
@@ -229,7 +248,7 @@ async function createAuthIdentity() {
   if (ENABLE_WEB3) {
     const result = await providerFuture
     if (result.successful) {
-      const eth = createEth()!
+      const eth = createEth()
       const account = (await eth.getAccounts())[0]
 
       address = account.toJSON()
@@ -282,8 +301,45 @@ function showAwaitingSignaturePrompt(show: boolean) {
   showElementById('check-wallet-prompt', show)
 }
 
+function* signup() {
+  removeUserProfile()
+  const provider = yield requestWeb3Provider(true)
+  if (!provider) {
+    return
+  }
+  const account = yield getUserAccount()
+  if (!account) {
+    return
+  }
+  const exists = yield call(profileExists, account)
+  if (exists) {
+    // we should go to login
+    return
+  }
+  const identity = yield createAuthIdentity()
+  const signUpData = yield select((state) => {
+    return {
+      name: state.session.signup.name,
+      email: state.session.signup.email
+      // avatar: state.session.signup.avatar || null
+    }
+  })
+  const profile = {
+    userId: account.toString(),
+    name: signUpData.name,
+    hasClaimedName: false,
+    description: '',
+    email: signUpData.email,
+    ethAddress: account.toString()
+    // avatar: Avatar
+  }
+  yield call(createSignUpProfile, profile.userId, profile, identity)
+
+  return doLogin(null)
+}
+
 function* logout() {
-  Session.current.then((s) => s.logout()).catch((e) => logger.error('error while logging out', e))
+  return Session.current.then((s) => s.logout()).catch((e) => logger.error('error while logging out', e))
 }
 
 function enableLogin() {

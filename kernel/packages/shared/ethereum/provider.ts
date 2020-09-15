@@ -36,8 +36,11 @@ export function createWeb3Connector(): Web3Connector {
   return web3Connector
 }
 
-export async function requestWeb3Provider() {
+export async function requestWeb3Provider(clearCache = false) {
   try {
+    if (clearCache) {
+      web3Connector.clearCache()
+    }
     const provider = await web3Connector.connect()
     requestManager.setProvider(provider)
     providerFuture.resolve({
@@ -49,6 +52,7 @@ export async function requestWeb3Provider() {
     defaultLogger.log('Could not get a wallet connection', e)
     requestManager.setProvider(null)
   }
+  return null
 }
 
 export async function awaitWeb3Approval(): Promise<void> {
