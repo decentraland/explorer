@@ -63,55 +63,11 @@ function startWorklet<T extends CodecWorklet, O extends Uint8Array | Float32Arra
 
 onmessage = function (e) {
   if (e.data.topic === RequestTopic.ENCODE) {
-    const sampleRate = getSampleRate(e)
-    const encoderWorklet = (encoderWorklets[e.data.streamId] = encoderWorklets[e.data.streamId] || {
-      working: false,
-      encoder: new libopus.Encoder(1, sampleRate, 24000, 20, true),
-      lastWorkTime: Date.now(),
-      destroy: function () {
-        this.encoder.destroy()
-      }
-    })
-
-    const samples = toInt16Samples(resampleIfNecessary(e.data.samples, e.data.sampleRate, e.data.inputSampleRate))
-
-    encoderWorklet.encoder.input(samples)
-
-    if (!encoderWorklet.working) {
-      startWorklet(
-        e.data.streamId,
-        encoderWorklet,
-        (worklet) => worklet.encoder.output(),
-        (output, streamId) => ({ topic: ResponseTopic.ENCODE, streamId: streamId, encoded: output })
-      )
-    }
+    processEncodeMessage(e)
   }
 
   if (e.data.topic === RequestTopic.DECODE) {
-    const sampleRate = getSampleRate(e)
-    const decoderWorklet = (decoderWorklets[e.data.streamId] = decoderWorklets[e.data.streamId] || {
-      working: false,
-      decoder: new libopus.Decoder(1, sampleRate),
-      lastWorkTime: Date.now(),
-      destroy: function () {
-        this.decoder.destroy()
-      }
-    })
-
-    decoderWorklet.decoder.input(e.data.encoded)
-
-    if (!decoderWorklet.working) {
-      startWorklet(
-        e.data.streamId,
-        decoderWorklet,
-        (worklet) => worklet.decoder.output(),
-        (output, streamId) => ({
-          topic: ResponseTopic.DECODE,
-          streamId,
-          samples: toFloat32Samples(output)
-        })
-      )
-    }
+    processDecodeMessage(e)
   }
 
   if (e.data.topic === RequestTopic.DESTROY_DECODER) {
@@ -122,6 +78,58 @@ onmessage = function (e) {
   if (e.data.topic === RequestTopic.DESTROY_ENCODER) {
     const { streamId } = e.data
     destroyWorklet(encoderWorklets, streamId)
+  }
+}
+
+function processDecodeMessage(e: MessageEvent<any>) {
+  const sampleRate = getSampleRate(e)
+  const decoderWorklet = (decoderWorklets[e.data.streamId] = decoderWorklets[e.data.streamId] || {
+    working: false,
+    decoder: new libopus.Decoder(1, sampleRate),
+    lastWorkTime: Date.now(),
+    destroy: function () {
+      this.decoder.destroy()
+    }
+  })
+
+  decoderWorklet.decoder.input(e.data.encoded)
+
+  if (!decoderWorklet.working) {
+    startWorklet(
+      e.data.streamId,
+      decoderWorklet,
+      (worklet) => worklet.decoder.output(),
+      (output, streamId) => ({
+        topic: ResponseTopic.DECODE,
+        streamId,
+        samples: toFloat32Samples(output)
+      })
+    )
+  }
+}
+
+function processEncodeMessage(e: MessageEvent<any>) {
+  const sampleRate = getSampleRate(e)
+  const encoderWorklet = (encoderWorklets[e.data.streamId] = encoderWorklets[e.data.streamId] || {
+    working: false,
+    encoder: new libopus.Encoder(1, sampleRate, 24000, 20, true),
+    lastWorkTime: Date.now(),
+    destroy: function () {
+      this.encoder.destroy()
+    }
+  })
+
+  const samples = toInt16Samples(resampleIfNecessary(e.data.samples, e.data.sampleRate, e.data.inputSampleRate))
+
+  encoderWorklet.encoder.input(samples)
+
+  if (!encoderWorklet.working) {
+    startWorklet(
+      e.data.streamId,
+      encoderWorklet,
+      (worklet) => worklet.encoder.output(),
+      (output, streamId) => ({ topic: ResponseTopic.ENCODE, streamId: streamId, encoded: output })
+    )
   }
 }
 
