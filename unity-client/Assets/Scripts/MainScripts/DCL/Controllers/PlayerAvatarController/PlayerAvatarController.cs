@@ -48,8 +48,21 @@ public class PlayerAvatarController : MonoBehaviour
 
         bool shouldBeVisible = Vector3.Distance(mainCamera.transform.position, transform.position) > cameraDistanceToDeactivate;
 
-        if (shouldBeVisible != avatarRenderer.gameObject.activeSelf)
+        SetVisibility(shouldBeVisible);
+    }
+
+    private void SetVisibility(bool shouldBeVisible)
+    {
+        AvatarVisibility avatarVisibility = avatarRenderer.gameObject.GetComponent<AvatarVisibility>();
+        if (avatarVisibility != null)
+        {
+            avatarVisibility.SetVisibility(shouldBeVisible);
+        }
+        else if (shouldBeVisible != avatarRenderer.gameObject.activeSelf)
+        {
             avatarRenderer.SetVisibility(shouldBeVisible);
+
+        }
     }
 
     private void OnEnable()
