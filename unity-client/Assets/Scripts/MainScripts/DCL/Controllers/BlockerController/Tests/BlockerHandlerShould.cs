@@ -94,7 +94,7 @@ namespace Tests
             blockerHandler.SetupGlobalBlockers(sceneHandler.GetAllLoadedScenesCoords(), 10, blockersParent.transform);
             var blockers = blockerHandler.GetBlockers();
 
-            // Save instante id of some blockers that shouldn't change on the next scene load
+            // Save instance id of some blockers that shouldn't change on the next scene load
             var targetBlocker1InstanceId = blockers[new Vector2Int(-1, -1)].gameObject.GetInstanceID();
             var targetBlocker2InstanceId = blockers[new Vector2Int(-2, -1)].gameObject.GetInstanceID();
             var targetBlocker3InstanceId = blockers[new Vector2Int(-2, 0)].gameObject.GetInstanceID();
