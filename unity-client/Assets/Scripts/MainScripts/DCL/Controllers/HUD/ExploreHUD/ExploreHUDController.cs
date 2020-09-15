@@ -5,8 +5,9 @@ using DCL.Interface;
 
 public class ExploreHUDController : IHUD
 {
-    internal ExploreHUDView view;
+    internal static bool isTest = false;
 
+    internal ExploreHUDView view;
     internal InputAction_Trigger toggleExploreTrigger;
 
     ExploreMiniMapDataController miniMapDataController;
@@ -34,7 +35,7 @@ public class ExploreHUDController : IHUD
 
         view.gotoMagicButton.OnGotoMagicPressed += GoToMagic;
         view.togglePopupButton.onPointerDown += () => toggleExploreTrigger.RaiseOnTriggered();
-        BaseSceneCellView.OnJumpIn += OnJumpIn;
+        HotSceneCellView.OnJumpIn += OnJumpIn;
     }
 
     public void Initialize(IFriendsController friendsController, bool newTaskbarIsEnabled)
@@ -67,16 +68,13 @@ public class ExploreHUDController : IHUD
 
         view.SetVisibility(visible);
 
-        if (HUDAudioPlayer.i != null)
+        if (visible)
         {
-            if (visible)
-            {
-                HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogAppear);
-                HUDAudioPlayer.i.ResetListItemAppearPitch();
-            }
-            else
-                HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogClose);
+            AudioScriptableObjects.dialogOpen.Play(true);
+            AudioScriptableObjects.listItemAppear.SetPitch(1f);
         }
+        else
+            AudioScriptableObjects.dialogClose.Play(true);
     }
 
     public void Dispose()
@@ -85,7 +83,7 @@ public class ExploreHUDController : IHUD
         friendsController?.Dispose();
 
         toggleExploreTrigger.OnTriggered -= OnToggleActionTriggered;
-        BaseSceneCellView.OnJumpIn -= OnJumpIn;
+        HotSceneCellView.OnJumpIn -= OnJumpIn;
 
         if (view != null)
         {
