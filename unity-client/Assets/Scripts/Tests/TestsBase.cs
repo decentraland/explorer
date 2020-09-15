@@ -206,7 +206,7 @@ public class TestsBase
             SetUp_UIScene();
         }
 
-        // Environment.i.InitializeForTesting();
+        
         Environment.i.Initialize(new DummyMessageHandler(), isTesting: true);
     }
 
