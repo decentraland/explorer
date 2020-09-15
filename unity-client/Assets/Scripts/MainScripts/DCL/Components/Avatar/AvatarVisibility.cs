@@ -15,10 +15,10 @@ namespace DCL
         [Tooltip("Game objects that should be hidden/shown together with the renderer")]
         public GameObject[] gameObjectsToToggle;
         // When this property is true, then the visibility can't be modified
-        private Boolean locked = false;
-        private Boolean? isVisible;
+        private bool locked = false;
+        private bool? isVisible;
 
-        public void SetVisibility(Boolean visibility)
+        public void SetVisibility(bool visibility)
         {
             if (locked == false && isVisible != visibility)
             {
@@ -40,7 +40,7 @@ namespace DCL
 
         }
 
-        public void SetLock(Boolean newLockValue)
+        public void SetLock(bool newLockValue)
         {
             locked = newLockValue;
         }

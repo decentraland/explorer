@@ -503,9 +503,9 @@ namespace DCL
         {
             Renderer[] renderers = gameObject.GetComponentsInChildren<Renderer>();
 
-            foreach (Renderer renderer in renderers)
+            for (int i = 0; i < renderers.Length; i++)
             {
-                renderer.enabled = false;
+                renderers[i].enabled = false;
             }
         }
 
@@ -513,9 +513,9 @@ namespace DCL
         {
             Renderer[] renderers = gameObject.GetComponentsInChildren<Renderer>();
 
-            foreach (Renderer renderer in renderers)
+            for (int i = 0; i < renderers.Length; i++)
             {
-                renderer.enabled = true;
+                renderers[i].enabled = true;
             }
         }
 

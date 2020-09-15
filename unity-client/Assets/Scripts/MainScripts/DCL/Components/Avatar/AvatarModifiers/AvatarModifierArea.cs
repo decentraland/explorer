@@ -54,16 +54,13 @@ public class AvatarModifierArea : BaseComponent
             }
         }
 
-        yield return null;
+        yield break;
     }
 
     private void OnDestroy()
     {
         Collider collider = model?.area?.GetCollider(gameObject);
-        if (collider != null)
-        {
-            Destroy(collider);
-        }
+        Destroy(collider);
     }
 
     private void OnTriggerEnter(Collider other)
