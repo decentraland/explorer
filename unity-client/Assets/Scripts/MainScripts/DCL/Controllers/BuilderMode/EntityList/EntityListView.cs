@@ -3,25 +3,25 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class EntityListView : MonoBehaviour
+public class EntityListView : ListView<DecentralandEntity>
 {
-    public Transform contentPanel;
-
     public EntityListAdapter entityListAdapter;
+
     public System.Action<BuildModeEntityListController.EntityAction,DecentralandEntity> OnActioninvoked;
 
-    List<DecentralandEntity> entityList;
-    public void SetContent(List<DecentralandEntity> _entityList)
-    {
-        entityList = _entityList;
 
-        foreach (DecentralandEntity entity in entityList)
+    public override void AddAdapters()
+    {
+        base.AddAdapters();
+
+        foreach (DecentralandEntity entity in contentList)
         {
-            EntityListAdapter adapter = Instantiate(entityListAdapter, contentPanel).GetComponent<EntityListAdapter>();
+            EntityListAdapter adapter = Instantiate(entityListAdapter, contentPanelTransform).GetComponent<EntityListAdapter>();
             adapter.SetContent(entity);
             adapter.OnActioninvoked += EntityActionInvoked;
         }
     }
+
     public void EntityActionInvoked(BuildModeEntityListController.EntityAction action, DecentralandEntity entityToApply)
     {
         OnActioninvoked?.Invoke(action, entityToApply);

@@ -4,13 +4,17 @@ using Newtonsoft.Json.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.UI;
 
 public class SceneObjectCatalogController : MonoBehaviour 
 {
     public System.Action<string> OnResultReceived;
 
+    public TextMeshProUGUI catalogTitleTxt;
+    public Button backBtn;
     public GameObject catalogUIGO;
     public CatalogAssetPackListView catalogAssetPackListView;
     public CatalogGroupListView catalogGroupListView;
@@ -41,14 +45,37 @@ public class SceneObjectCatalogController : MonoBehaviour
     {
         catalogAssetPackListView.gameObject.SetActive(false);
         catalogGroupListView.gameObject.SetActive(true);
-        catalogGroupListView.SetContent(sceneAssetPack);
+        backBtn.gameObject.SetActive(true);
+
+        SetAssetPackInListView(sceneAssetPack);
+    }
+
+    void SetAssetPackInListView(SceneAssetPack sceneAssetPack)
+    {
+        catalogTitleTxt.text = sceneAssetPack.title;
+        Dictionary<string, List<SceneObject>> groupedSceneObjects = new Dictionary<string, List<SceneObject>>();
+
+        foreach (SceneObject sceneObject in sceneAssetPack.assets)
+        {
+            if (!groupedSceneObjects.ContainsKey(sceneObject.category))
+            {
+                groupedSceneObjects.Add(sceneObject.category, GetAssetsListByCategory(sceneObject.category, sceneAssetPack));
+            }
+        }
+        List<Dictionary<string, List<SceneObject>>> contentList = new List<Dictionary<string, List<SceneObject>>>
+        {
+            groupedSceneObjects
+        };
+        catalogGroupListView.SetContent(contentList);
     }
 
     public void OpenCatalog()
     {
+        catalogTitleTxt.text = "Asset Packs";
         catalogUIGO.SetActive(true);
         catalogAssetPackListView.gameObject.SetActive(true);
         catalogGroupListView.gameObject.SetActive(false);
+        backBtn.gameObject.SetActive(false);
         catalogAssetPackListView.SetContent(CatalogController.sceneObjectCatalog.GetValues().ToList());
     }
 
@@ -85,6 +112,19 @@ public class SceneObjectCatalogController : MonoBehaviour
 
 
     }
+
+    List<SceneObject> GetAssetsListByCategory(string category, SceneAssetPack sceneAssetPack)
+    {
+        List<SceneObject> sceneObjectsList = new List<SceneObject>();
+
+        foreach (SceneObject sceneObject in sceneAssetPack.assets)
+        {
+            if (category == sceneObject.category) sceneObjectsList.Add(sceneObject);
+        }
+
+        return sceneObjectsList;
+    }
+
 
     IEnumerator GetCatalog()
     {

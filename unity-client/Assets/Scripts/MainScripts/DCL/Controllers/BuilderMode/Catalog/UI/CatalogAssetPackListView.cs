@@ -2,26 +2,23 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CatalogAssetPackListView : MonoBehaviour
+public class CatalogAssetPackListView : ListView<SceneAssetPack>
 {
-    public Transform contentPanel;
 
     public CatalogAssetPackAdapter catalopgAssetPackItemAdapterPrefab;
     public System.Action<SceneAssetPack> OnSceneAssetPackClick;
 
 
-    public void SetContent(List<SceneAssetPack> sceneAssetPackList)
+    public override void AddAdapters()
     {
-        //tumbmailImg.sprite = sceneObject;
-        //content = sceneAssetPackList;
-        foreach(SceneAssetPack sceneAssetPack in sceneAssetPackList)
+        base.AddAdapters();
+        foreach (SceneAssetPack sceneAssetPack in contentList)
         {
-            CatalogAssetPackAdapter adapter = Instantiate(catalopgAssetPackItemAdapterPrefab, contentPanel).GetComponent<CatalogAssetPackAdapter>();
+            CatalogAssetPackAdapter adapter = Instantiate(catalopgAssetPackItemAdapterPrefab, contentPanelTransform).GetComponent<CatalogAssetPackAdapter>();
             adapter.SetContent(sceneAssetPack);
             adapter.OnSceneAssetPackClick += SceneAssetPackClick;
         }
     }
-
 
 
 

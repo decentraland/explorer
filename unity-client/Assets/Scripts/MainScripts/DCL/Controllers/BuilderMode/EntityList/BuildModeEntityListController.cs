@@ -64,6 +64,7 @@ public class BuildModeEntityListController : MonoBehaviour
                 CopyFromEntity(entityToApply, newEntity);
                 break;
         }
+        entityListView.SetContent(currentScene.entities.Values.ToList());
     }
 
 

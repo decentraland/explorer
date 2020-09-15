@@ -16,12 +16,22 @@ public class CatalogAssetGroupAdapter : MonoBehaviour
     public void SetContent(string category, List<SceneObject> sceneObjectsList)
     {
         categoryTxt.text = category;
-
+        RemoveAdapters();
         foreach (SceneObject sceneObject in sceneObjectsList)
         {
             CatalogItemAdapter adapter = Instantiate(catalogItemAdapterPrefab, categoryContentGO.transform).GetComponent<CatalogItemAdapter>();
             adapter.SetContent(sceneObject);
             adapter.OnSceneObjectClicked += OnSceneObjectClicked;
+        }
+    }
+
+    public void RemoveAdapters()
+    {
+
+        for (int i = 0; i < categoryContentGO.transform.childCount; i++)
+        {
+            GameObject toRemove = categoryContentGO.transform.GetChild(i).gameObject;
+            Destroy(toRemove);
         }
     }
 

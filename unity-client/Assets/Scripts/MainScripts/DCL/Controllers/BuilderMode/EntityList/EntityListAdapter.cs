@@ -18,6 +18,8 @@ public class EntityListAdapter : MonoBehaviour
         currentEntity = _decentrelandEntity;
         nameTxt.text = currentEntity.entityId;
         if (currentEntity.gameObject.activeSelf) showImg.color = selectedColor;
+        if (currentEntity.isLocked) lockImg.color = Color.white;
+        else lockImg.color = selectedColor;
     }
 
     public void SelectOrDeselect()
