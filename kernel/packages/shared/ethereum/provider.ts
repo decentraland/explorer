@@ -68,7 +68,7 @@ export async function awaitWeb3Approval(): Promise<void> {
   return providerFuture
 }
 
-function createProvider() {
+export function createProvider() {
   const network = getTLD() === 'zone' ? ETHEREUM_NETWORK.ROPSTEN : ETHEREUM_NETWORK.MAINNET
   return new WebSocketProvider(ethereumConfigurations[network].wss)
 }
