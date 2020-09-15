@@ -61,8 +61,6 @@ function startWorklet<T extends CodecWorklet, O extends Uint8Array | Float32Arra
   setTimeout(doWork, 0)
 }
 
-//Encoder(channels, samplerate, bitrate, frame_size, voice_optimization)
-
 onmessage = function (e) {
   if (e.data.topic === RequestTopic.ENCODE) {
     const sampleRate = getSampleRate(e)
