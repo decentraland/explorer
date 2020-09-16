@@ -64,6 +64,8 @@ public class TaskbarHUDController : IHUD
         view.OnBackpackToggleOn += View_OnBackpackToggleOn;
         view.OnExploreToggleOff += View_OnExploreToggleOff;
         view.OnExploreToggleOn += View_OnExploreToggleOn;
+        view.OnGoToGenesisToggleOff += View_OnGoToGenesisToggleOff;
+        view.OnGoToGenesisToggleOn += View_OnGoToGenesisToggleOn;
 
         toggleFriendsTrigger = Resources.Load<InputAction_Trigger>("ToggleFriends");
         toggleFriendsTrigger.OnTriggered -= ToggleFriendsTrigger_OnTriggered;
@@ -171,6 +173,18 @@ public class TaskbarHUDController : IHUD
     private void View_OnExploreToggleOff()
     {
         exploreHud.SetVisibility(false);
+    }
+
+    private void View_OnGoToGenesisToggleOn()
+    {
+        goToGenesisHud.SetVisibility(true);
+
+        OnAnyTaskbarButtonClicked?.Invoke();
+    }
+
+    private void View_OnGoToGenesisToggleOff()
+    {
+        goToGenesisHud.SetVisibility(false);
     }
 
     private void MouseCatcher_OnMouseUnlock()
@@ -440,6 +454,8 @@ public class TaskbarHUDController : IHUD
             view.OnBackpackToggleOn -= View_OnBackpackToggleOn;
             view.OnExploreToggleOff -= View_OnExploreToggleOff;
             view.OnExploreToggleOn -= View_OnExploreToggleOn;
+            view.OnGoToGenesisToggleOff -= View_OnGoToGenesisToggleOff;
+            view.OnGoToGenesisToggleOn -= View_OnGoToGenesisToggleOn;
 
             UnityEngine.Object.Destroy(view.gameObject);
         }
