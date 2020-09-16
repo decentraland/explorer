@@ -16,21 +16,28 @@ public class AvatarEditorHUDAudioHandler : MonoBehaviour
         eventWearableFootwear, eventWearableHair, eventWearableHatMask, eventWearableRarity;
 
     WearableItem lastSelectedWearable = null;
-    bool hasClickedRandomize = false;
+    bool hasClickedRandomize = false, wearableIsSameAsPrevious = false;
 
     IEnumerator musicFadeOut;
 
     private void Start()
     {
+        int nPairs = view.wearableGridPairs.Length;
+        for (int i = 0; i < nPairs; i++)
+        {
+            view.wearableGridPairs[i].selector.OnItemClicked += OnSelectWearable;
+        }
+
         view.OnSetVisibility += OnSetAvatarEditorVisibility;
         view.OnRandomize += OnClickRandomize;
-
-        //if (randomizeButton != null)
-        //    randomizeButton.onClick.AddListener(OnClickRandomize);
     }
 
-    void OnSelectWearable(WearableItem wearable)
+    void OnSelectWearable(string wearableId)
     {
+        var wearable = CatalogController.wearableCatalog.Get(wearableId);
+        wearableIsSameAsPrevious = (wearable == lastSelectedWearable);
+        if (wearableIsSameAsPrevious) return;
+
         lastSelectedWearable = wearable;
         if (wearable == null) return;
 
@@ -80,17 +87,17 @@ public class AvatarEditorHUDAudioHandler : MonoBehaviour
         }
     }
 
-    void OnUnselectWearable(WearableItem wearable)
-    {
-        ResetLastClickedWearable();
-    }
-
     void OnEyeColorChanged(Color color)
     {
         ResetLastClickedWearable();
     }
 
     void OnSkinColorChanged(Color color)
+    {
+        ResetLastClickedWearable();
+    }
+
+    void OnHairColorChanged(Color color)
     {
         ResetLastClickedWearable();
     }
@@ -112,13 +119,15 @@ public class AvatarEditorHUDAudioHandler : MonoBehaviour
 
         eventAvatarAppear.Play(true);
 
-        if (lastSelectedWearable != null)
-            PlayRarity();
+        if (!wearableIsSameAsPrevious)
+        {
+            if (lastSelectedWearable != null)
+                PlayRarity();
 
-        if (lastSelectedWearable != null || hasClickedRandomize)
-            PlayVoiceReaction(model.bodyShape);
+            if (lastSelectedWearable != null || hasClickedRandomize)
+                PlayVoiceReaction(model.bodyShape);
+        }
 
-        ResetLastClickedWearable();
         hasClickedRandomize = false;
     }
 
@@ -209,9 +218,8 @@ public class AvatarEditorHUDAudioHandler : MonoBehaviour
 
             view.eyeColorSelector.OnColorChanged += OnEyeColorChanged;
             view.skinColorSelector.OnColorChanged += OnSkinColorChanged;
+            view.hairColorSelector.OnColorChanged += OnHairColorChanged;
             view.OnAvatarAppear += OnAvatarAppear;
-            view.OnSelectWearable += OnSelectWearable;
-            view.OnUnselectWearable += OnUnselectWearable;
         }
         else
         {
@@ -220,9 +228,8 @@ public class AvatarEditorHUDAudioHandler : MonoBehaviour
 
             view.eyeColorSelector.OnColorChanged -= OnEyeColorChanged;
             view.skinColorSelector.OnColorChanged -= OnSkinColorChanged;
+            view.hairColorSelector.OnColorChanged -= OnHairColorChanged;
             view.OnAvatarAppear -= OnAvatarAppear;
-            view.OnSelectWearable -= OnSelectWearable;
-            view.OnUnselectWearable -= OnUnselectWearable;
         }
     }
 }

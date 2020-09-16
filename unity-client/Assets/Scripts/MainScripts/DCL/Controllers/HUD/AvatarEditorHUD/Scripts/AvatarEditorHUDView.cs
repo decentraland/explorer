@@ -67,10 +67,6 @@ public class AvatarEditorHUDView : MonoBehaviour
     public event System.Action<bool> OnSetVisibility;
     [HideInInspector]
     public event System.Action OnRandomize;
-    [HideInInspector]
-    public event System.Action<WearableItem> OnSelectWearable;
-    [HideInInspector]
-    public event System.Action<WearableItem> OnUnselectWearable;
 
     private void Awake()
     {
@@ -182,16 +178,12 @@ public class AvatarEditorHUDView : MonoBehaviour
     {
         selectorsByCategory[wearable.category].Select(wearable.id);
         collectiblesItemSelector.Select(wearable.id);
-
-        OnSelectWearable?.Invoke(wearable);
     }
 
     public void UnselectWearable(WearableItem wearable)
     {
         selectorsByCategory[wearable.category].Unselect(wearable.id);
         collectiblesItemSelector.Unselect(wearable.id);
-
-        OnUnselectWearable?.Invoke(wearable);
     }
 
     public void SelectHairColor(Color hairColor)
