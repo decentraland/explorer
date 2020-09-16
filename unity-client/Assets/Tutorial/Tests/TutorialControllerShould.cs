@@ -34,7 +34,7 @@ namespace DCL.Tutorial_Tests
         {
             ConfigureTutorialForGenesisPlaza();
 
-            yield return CoroutineStarter.Start(tutorialController.StartTutorialFromStep(0));
+            yield return tutorialController.StartTutorialFromStep(0);
 
             Assert.IsTrue(tutorialController.markTutorialAsCompleted);
             Assert.IsFalse(tutorialController.isRunning);
@@ -46,7 +46,7 @@ namespace DCL.Tutorial_Tests
         {
             ConfigureTutorialForDeepLink();
 
-            yield return CoroutineStarter.Start(tutorialController.StartTutorialFromStep(0));
+            yield return tutorialController.StartTutorialFromStep(0);
 
             Assert.IsFalse(tutorialController.markTutorialAsCompleted);
             Assert.IsTrue(tutorialController.alreadyOpenedFromDeepLink);
@@ -59,7 +59,7 @@ namespace DCL.Tutorial_Tests
         {
             ConfigureTutorialForGenesisPlazaAfterDeepLink();
 
-            yield return CoroutineStarter.Start(tutorialController.StartTutorialFromStep(0));
+            yield return tutorialController.StartTutorialFromStep(0);
 
             Assert.IsTrue(tutorialController.markTutorialAsCompleted);
             Assert.IsFalse(tutorialController.isRunning);
