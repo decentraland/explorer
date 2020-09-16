@@ -22,6 +22,7 @@ public class AvatarModifierArea : BaseComponent
     private event Action<GameObject> OnAvatarEnter;
     private event Action<GameObject> OnAvatarExit;
     private readonly Dictionary<string, AvatarModifier> modifiers;
+    private Collider collider;
 
     public AvatarModifierArea()
     {
@@ -36,14 +37,15 @@ public class AvatarModifierArea : BaseComponent
     public override IEnumerator ApplyChanges(string newJson)
     {
 
-        // Clean previous listeners
+        // Clean up previous listeners/colliders
         OnAvatarEnter = null;
         OnAvatarExit = null;
+        Destroy(collider);
 
         model = SceneController.i.SafeFromJson<Model>(newJson);
         if (model.modifiers != null)
         {
-            model.area.AddCollider(gameObject);
+            collider = model.area.AddCollider(gameObject);
 
             // Add all listeners
             foreach (string modifierKey in model.modifiers)
@@ -59,7 +61,6 @@ public class AvatarModifierArea : BaseComponent
 
     private void OnDestroy()
     {
-        Collider collider = model?.area?.GetCollider(gameObject);
         Destroy(collider);
     }
 
