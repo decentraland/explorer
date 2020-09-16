@@ -38,6 +38,7 @@ import { reportHotScenes } from 'shared/social/hotScenes'
 
 import { GIFProcessor } from 'gif-processor/processor'
 import { getERC20Balance } from 'shared/ethereum/EthereumService'
+import { toggleScreen } from "../shared/session/authFlow"
 declare const DCL: any
 
 declare const globalThis: StoreContainer
@@ -174,6 +175,7 @@ export class BrowserInterface {
 
     if (changes.isSignUpFlow) {
       unityInterface.DeactivateRendering()
+      toggleScreen('signin')
     }
   }
 

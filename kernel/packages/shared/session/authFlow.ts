@@ -7,6 +7,7 @@ import { getCurrentUserId } from './selectors'
 import { baseCatalogsLoaded } from '../profiles/selectors'
 import { Profile } from '../profiles/types'
 import { getUserProfile } from '../comms/peers'
+import { setLoadingScreenVisible } from '../../unity-interface/dcl'
 
 declare const globalThis: StoreContainer
 
@@ -32,8 +33,9 @@ export function setupAuthFlow() {
       signupStep4!.style.display = 'none'
 
       btnSignup.addEventListener('click', () => {
-        signupFlow!.style.display = 'block'
-        signupStep2!.style.display = 'block'
+        element.style.display = 'none'
+        toggleScreen('renderer')
+        setLoadingScreenVisible(true)
 
         const unsubscribe = globalThis.globalStore.subscribe(() => {
           if (baseCatalogsLoaded(globalThis.globalStore.getState())) {
@@ -42,6 +44,7 @@ export function setupAuthFlow() {
               .then((profile) => {
                 ensureUnityInterface()
                   .then((unityInterface) => {
+                    setLoadingScreenVisible(false)
                     unityInterface.LoadProfile(profileToRendererFormat(profile))
                     unityInterface.ShowAvatarEditorInSignInFlow()
                     unityInterface.ActivateRendering(true)
@@ -98,6 +101,21 @@ export function setupAuthFlow() {
         })
       }
     }
+  }
+}
+
+export function toggleScreen(screen: 'renderer' | 'signin') {
+  const signupFlow = document.getElementById('signup-flow')
+  const signupStep2 = document.getElementById('signup-step2')
+
+  if (screen === 'renderer') {
+    signupFlow!.style.display = 'none'
+    signupStep2!.style.display = 'none'
+    document.getElementById('gameContainer')!.setAttribute('style', 'display: block')
+  } else {
+    signupFlow!.style.display = 'block'
+    signupStep2!.style.display = 'block'
+    document.getElementById('gameContainer')!.setAttribute('style', 'display: none')
   }
 }
 
