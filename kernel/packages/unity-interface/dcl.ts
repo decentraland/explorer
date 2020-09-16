@@ -188,8 +188,7 @@ export async function startUnitySceneWorkers() {
     onPositionSettled: (spawnPoint) => {
       if (!aborted) {
         unityInterface.Teleport(spawnPoint)
-        // tslint:disable-next-line: no-commented-out-code
-        // unityInterface.ActivateRendering()
+        unityInterface.ActivateRendering()
       }
     },
     onPositionUnsettled: () => {

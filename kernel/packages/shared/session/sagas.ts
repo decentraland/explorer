@@ -3,17 +3,17 @@ import { createIdentity } from 'eth-crypto'
 import { Personal } from 'web3x/personal/personal'
 import { Account } from 'web3x/account'
 import { Authenticator } from 'dcl-crypto'
-import { Eth } from 'web3x/eth'
 
 import { ENABLE_WEB3, ETHEREUM_NETWORK, getTLD, PREVIEW, setNetwork, WORLD_EXPLORER } from 'config'
 
 import { createLogger } from 'shared/logger'
 import {
-  requestWeb3Provider,
+  createEth,
   createWeb3Connector,
   isSessionExpired,
   loginCompleted,
-  providerFuture, requestManager, createProvider
+  providerFuture,
+  requestWeb3Provider
 } from 'shared/ethereum/provider'
 import { getUserProfile, removeUserProfile, setLocalProfile } from 'shared/comms/peers'
 import { ReportFatalError } from 'shared/loading/ReportFatalError'
@@ -31,14 +31,7 @@ import { getFromLocalStorage, saveToLocalStorage } from 'atomicHelpers/localStor
 
 import { Session } from '.'
 import { ExplorerIdentity } from './types'
-import {
-  LOGIN, LOGIN_GUEST,
-  loginCompleted as loginCompletedAction,
-  LOGOUT,
-  SETUP_WEB3,
-  SIGNUP,
-  userAuthentified
-} from './actions'
+import { LOGIN, loginCompleted as loginCompletedAction, LOGOUT, SETUP_WEB3, SIGNUP, userAuthentified } from './actions'
 import { profileCheckExists } from '../profiles/actions'
 
 const logger = createLogger('session: ')
@@ -48,7 +41,6 @@ export function* sessionSaga(): any {
 
   yield takeLatest(SETUP_WEB3, setupWeb3)
   yield takeLatest(LOGIN, login)
-  yield takeLatest(LOGIN_GUEST, loginGuest)
   yield takeLatest(SIGNUP, login) // signup)
   yield takeLatest(LOGOUT, logout)
   yield takeLatest(AWAITING_USER_SIGNATURE, scheduleAwaitingSignaturePrompt)
@@ -126,7 +118,10 @@ function* login() {
 
     try {
       const userData = getUserProfile()
-
+      if (userData && !profileExists(userData.userId)) {
+        // we should call to signUp
+        return
+      }
       // check that user data is stored & key is not expired
       if (isSessionExpired(userData)) {
         yield put(awaitingUserSignature())
@@ -186,31 +181,6 @@ function* login() {
   yield put(loginCompletedAction())
 }
 
-function* loginGuest() {
-  requestManager.setProvider(createProvider())
-  const identity: ExplorerIdentity = yield createLocalAuthIdentity()
-  const userId: string = identity.address
-
-  setLocalProfile(userId, {
-    userId,
-    identity
-  })
-
-  loginCompleted.resolve()
-
-  let net: ETHEREUM_NETWORK = ETHEREUM_NETWORK.MAINNET
-  if (WORLD_EXPLORER) {
-    net = yield getAppNetwork()
-
-    // Load contracts from https://contracts.decentraland.org
-    yield setNetwork(net)
-    queueTrackingEvent('Use network', { net })
-  }
-
-  yield put(userAuthentified(userId, identity, net))
-  yield put(loginCompletedAction())
-}
-
 async function checkTldVsNetwork() {
   const web3Net = await getNetworkValue()
 
@@ -259,7 +229,7 @@ async function createAuthIdentity() {
   if (ENABLE_WEB3) {
     const result = await providerFuture
     if (result.successful) {
-      const eth = Eth.fromCurrentProvider()!
+      const eth = createEth()
       const account = (await eth.getAccounts())[0]
 
       address = account.toJSON()
@@ -295,16 +265,6 @@ async function createAuthIdentity() {
   const identity: ExplorerIdentity = { ...auth, address: address.toLocaleLowerCase(), hasConnectedWeb3 }
 
   return identity
-}
-
-async function createLocalAuthIdentity(): Promise<ExplorerIdentity> {
-  const ephemeral = createIdentity()
-  const ephemeralLifespanMinutes = 7 * 24 * 60 // 1 week
-  const account = Account.create()
-  const address = account.address.toJSON()
-  const signer = async (message: string) => account.sign(message).signature
-  const auth = await Authenticator.initializeAuthChain(address, ephemeral, ephemeralLifespanMinutes, signer)
-  return { ...auth, address: address.toLocaleLowerCase(), hasConnectedWeb3: false }
 }
 
 function showEthSignAdvice(show: boolean) {

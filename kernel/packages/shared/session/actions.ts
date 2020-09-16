@@ -12,10 +12,6 @@ export const LOGIN = '[Request] Login'
 export const login = () => action(LOGIN)
 export type Login = ReturnType<typeof login>
 
-export const LOGIN_GUEST = '[Request] Login Guest'
-export const loginGuest = () => action(LOGIN_GUEST)
-export type LoginGuest = ReturnType<typeof loginGuest>
-
 export const SIGNUP_FORM = '[SIGN-UP] signup save form'
 export const signupForm = (values: SignUpData) => action(SIGNUP_FORM, values)
 export type SignUpFormAction = ReturnType<typeof signupForm>
