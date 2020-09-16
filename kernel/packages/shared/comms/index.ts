@@ -989,7 +989,8 @@ async function doStartCommunications(context: Context) {
 
         {
           sampleRate: commConfigurations.voiceChatSampleRate,
-          initialListenerParams: context.currentPosition ? getSpatialParamsFor(context.currentPosition) : undefined
+          initialListenerParams: context.currentPosition ? getSpatialParamsFor(context.currentPosition) : undefined,
+          panningModel: commConfigurations.voiceChatUseHRTF ? 'HRTF' : 'equalpower'
         }
       )
 

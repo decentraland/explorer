@@ -32,6 +32,8 @@ export type VoiceCommunicatorOptions = {
   maxDistance?: number
   refDistance?: number
   initialListenerParams?: VoiceSpatialParams
+  panningModel?: PanningModelType
+  distanceModel?: DistanceModelType
 }
 
 export type VoiceSpatialParams = {
@@ -154,10 +156,10 @@ export class VoiceCommunicator {
     panNode.coneInnerAngle = 180
     panNode.coneOuterAngle = 360
     panNode.coneOuterGain = 0.9
-    panNode.maxDistance = this.options.maxDistance ?? 50
+    panNode.maxDistance = this.options.maxDistance ?? 10000
     panNode.refDistance = this.options.refDistance ?? 5
-    panNode.panningModel = 'equalpower'
-    panNode.distanceModel = 'inverse'
+    panNode.panningModel = this.options.panningModel ?? 'equalpower'
+    panNode.distanceModel = this.options.distanceModel ?? 'inverse'
     panNode.rolloffFactor = 1.0
     scriptProcessor.connect(panNode)
     panNode.connect(this.context.destination)
