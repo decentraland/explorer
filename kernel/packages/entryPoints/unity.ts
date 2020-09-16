@@ -59,14 +59,11 @@ initializeUnity(container)
     i.ConfigureHUDElement(HUDElementID.EXPLORE_HUD, { active: ENABLE_EXPLORE_HUD, visible: false })
     i.ConfigureHUDElement(HUDElementID.HELP_AND_SUPPORT_HUD, { active: true, visible: false })
 
-    try {
-      await userAuthentified()
+    userAuthentified().then(() => {
       const identity = getCurrentIdentity(globalThis.globalStore.getState())!
       i.ConfigureHUDElement(HUDElementID.FRIENDS, { active: identity.hasConnectedWeb3, visible: false })
       i.ConfigureHUDElement(HUDElementID.MANA_HUD, { active: ENABLE_MANA_HUD && identity.hasConnectedWeb3, visible: true })
-    } catch (e) {
-      logger.error('error on configuring friends hud')
-    }
+    }).catch(e => { logger.error('error on configuring friends hud') })
 
     globalThis.globalStore.dispatch(signalRendererInitialized())
 

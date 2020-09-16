@@ -1,6 +1,12 @@
-import {login, signup, signupAgree, signupForm } from './actions'
+import { login, signup, signupAgree, signupForm } from './actions'
 import { StoreContainer } from '../store/rootTypes'
-import {ensureUnityInterface} from "../renderer";
+import { ensureUnityInterface } from '../renderer'
+import { ProfileAsPromise } from '../profiles/ProfileAsPromise'
+import { profileToRendererFormat } from '../profiles/transformations/profileToRendererFormat'
+import { getCurrentUserId } from './selectors'
+import { baseCatalogsLoaded } from '../profiles/selectors'
+import { Profile } from '../profiles/types'
+import { getUserProfile } from '../comms/peers'
 
 declare const globalThis: StoreContainer
 
@@ -29,11 +35,22 @@ export function setupAuthFlow() {
         signupFlow!.style.display = 'block'
         signupStep2!.style.display = 'block'
 
-        ensureUnityInterface().then(unityInterface => {
-          unityInterface.ShowAvatarEditorInSignInFlow()
-          unityInterface.ActivateRendering(true)
+        const unsubscribe = globalThis.globalStore.subscribe(() => {
+          if (baseCatalogsLoaded(globalThis.globalStore.getState())) {
+            unsubscribe()
+            getLocalProfile()
+              .then((profile) => {
+                ensureUnityInterface()
+                  .then((unityInterface) => {
+                    unityInterface.LoadProfile(profileToRendererFormat(profile))
+                    unityInterface.ShowAvatarEditorInSignInFlow()
+                    unityInterface.ActivateRendering(true)
+                  })
+                  .catch()
+              })
+              .catch()
+          }
         })
-
       })
 
       btnSignupBack!.addEventListener('click', () => {
@@ -82,4 +99,14 @@ export function setupAuthFlow() {
       }
     }
   }
+}
+
+function getLocalProfile(): Promise<Profile> {
+  const profile = getUserProfile().profile as Profile | null
+  if (profile) {
+    return new Promise<Profile>((resolve) => {
+      return resolve(profile)
+    })
+  }
+  return ProfileAsPromise(getCurrentUserId(globalThis.globalStore.getState()) ?? '')
 }

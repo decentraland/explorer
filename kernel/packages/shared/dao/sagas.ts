@@ -74,6 +74,7 @@ function* loadDefaultCatalystRealms() {
   }
   yield put(setContentWhitelist([whiteList]))
   yield put(initCatalystRealm(realm))
+  yield put(catalystRealmInitialized())
 }
 
 /**
