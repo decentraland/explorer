@@ -1,5 +1,5 @@
 import { defaultLogger } from 'shared/logger'
-import { notifyStatusThroughChat } from "../comms/chat"
+import { notifyStatusThroughChat } from '../comms/chat'
 
 const DEFAULT_FETCH_INTERVAL = 60000
 
@@ -7,6 +7,7 @@ let fetchIntervalTime: number = DEFAULT_FETCH_INTERVAL
 let lastFetchTime: number = 0
 let initialMessageSent = false
 let initialized = false
+let liveEventsReported: string[] = []
 
 export function initCommunityEvents() {
   if (initialized) {
@@ -16,7 +17,7 @@ export function initCommunityEvents() {
   initialMessageSent = false
   initialized = true
   fetchAndReportEvents(Date.now())
-  setInterval(eventsInterval, 1000)
+  setInterval(eventsInterval, 30000)
 }
 
 function eventsInterval() {
@@ -36,15 +37,42 @@ function sendInitialMessage(events: Events) {
   if (events.liveId.length > 0 || events.todayId.length > 0) {
     let message: string = ''
     for (let eventId of events.liveId) {
-      message += `Event now: <indent=25%><i>${events.all[eventId].name}</i> `
-        + `<nobr>@ ${events.all[eventId].position[0]},${events.all[eventId].position[1]}</nobr></indent>\n`
+      liveEventsReported.push(eventId)
+      message += formatLiveEventString(events.all[eventId])
     }
     for (let eventId of events.todayId) {
-      let date = new Date(events.all[eventId].next_start_at)
-      message += `Event today: <indent=29%><i>${events.all[eventId].name}</i> `
-        + `<nobr>@ ${events.all[eventId].position[0]},${events.all[eventId].position[1]}</nobr> `
-        + `<nobr>${date.getHours()}:${date.getMinutes().toLocaleString(undefined, { minimumIntegerDigits: 2 })}hrs</nobr></indent>\n`
+      message += formatTodayEventString(events.all[eventId])
     }
+
+    if (message !== '') {
+      notifyStatusThroughChat(message)
+    }
+  }
+}
+
+function formatLiveEventString(event: EventJsonData) {
+  return `<u>Event now</u>: <i>${event.name}</i> ` + `<nobr>@ ${event.position[0]},${event.position[1]}</nobr>\n`
+}
+
+function formatTodayEventString(event: EventJsonData) {
+  let date = new Date(event.next_start_at)
+  return `<u>Event today</u>: <i>${event.name}</i> <nobr>@ ${event.position[0]},${
+    event.position[1]
+  }</nobr> <nobr>${date.getHours()}:${date
+    .getMinutes()
+    .toLocaleString(undefined, { minimumIntegerDigits: 2 })}hrs</nobr>\n`
+}
+
+function reportUnreportedLiveEvents(events: Events) {
+  const unreportedLiveEvents = events.liveId.filter(
+    (eventId) => liveEventsReported.filter((id) => id !== eventId).length === 0
+  )
+  let message: string = ''
+  for (let eventId of unreportedLiveEvents) {
+    liveEventsReported.push(eventId)
+    message += formatLiveEventString(events.all[eventId])
+  }
+  if (message !== '') {
     notifyStatusThroughChat(message)
   }
 }
@@ -58,7 +86,10 @@ function fetchAndReportEvents(now: number) {
         if (!initialMessageSent) {
           sendInitialMessage(events)
         }
-        fetchIntervalTime = now + events.interval
+
+        reportUnreportedLiveEvents(events)
+
+        fetchIntervalTime = events.interval
       }
     })
     .catch()
