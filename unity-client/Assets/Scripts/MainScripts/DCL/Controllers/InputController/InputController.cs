@@ -35,6 +35,8 @@ public enum DCLAction_Hold
     Jump = 2,
     FreeCameraMode = 101,
     VoiceChatRecording = 102
+    DefaultConfirmAction = 300,
+    DefaultCancelAction = 301
 }
 
 public enum DCLAction_Measurable
@@ -159,6 +161,12 @@ public class InputController : MonoBehaviour
                     break;
                 case DCLAction_Hold.VoiceChatRecording:
                     InputProcessor.FromKey(action, KeyCode.T, InputProcessor.Modifier.FocusNotInInput);
+                    break;
+                case DCLAction_Hold.DefaultConfirmAction:
+                    InputProcessor.FromKey(action, KeyCode.E, InputProcessor.Modifier.None);
+                    break;
+                case DCLAction_Hold.DefaultCancelAction:
+                    InputProcessor.FromKey(action, KeyCode.F, InputProcessor.Modifier.None);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
