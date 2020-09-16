@@ -20,7 +20,7 @@ namespace DCL.Helpers
 {
     public class WaitForAllMessagesProcessed : CustomYieldInstruction
     {
-        public override bool keepWaiting => SceneController.i.hasPendingMessages;
+        public override bool keepWaiting => Environment.i.messagingControllersManager.hasPendingMessages;
     }
 
     // NOTE(Brian): Attribute used to determine if tests are visual. Those tests will be run to generate the baseline images.
@@ -202,6 +202,11 @@ namespace DCL.Helpers
             return result;
         }
 
+        public static void SharedComponentDispose(BaseDisposable component)
+        {
+            component.scene.SharedComponentDispose(component.id);
+        }
+
         public static void SharedComponentAttach(BaseDisposable component, DecentralandEntity entity)
         {
             entity.scene.SharedComponentAttach(
@@ -368,7 +373,13 @@ namespace DCL.Helpers
         public static PBRMaterial CreateEntityWithPBRMaterial(ParcelScene scene, PBRMaterial.Model model,
             out DecentralandEntity entity)
         {
-            InstantiateEntityWithShape<BoxShape, BoxShape.Model>(scene, DCL.Models.CLASS_ID.BOX_SHAPE, Vector3.zero,
+            return CreateEntityWithPBRMaterial(scene, model, Vector3.zero, out entity);
+        }
+
+        public static PBRMaterial CreateEntityWithPBRMaterial(ParcelScene scene, PBRMaterial.Model model, Vector3 position,
+            out DecentralandEntity entity)
+        {
+            InstantiateEntityWithShape<BoxShape, BoxShape.Model>(scene, CLASS_ID.BOX_SHAPE, position,
                 out entity);
             PBRMaterial material =
                 SharedComponentCreate<PBRMaterial, PBRMaterial.Model>(scene, CLASS_ID.PBR_MATERIAL, model);

@@ -93,6 +93,7 @@ export const STATIC_WORLD = location.search.indexOf('STATIC_WORLD') !== -1 || !!
 // Development
 export const ENABLE_WEB3 = location.search.indexOf('ENABLE_WEB3') !== -1 || !!(global as any).enableWeb3
 export const ENV_OVERRIDE = location.search.indexOf('ENV') !== -1
+export const GIF_WORKERS = location.search.indexOf('GIF_WORKERS') !== -1
 
 const qs = queryString.parse(location.search)
 
@@ -112,12 +113,7 @@ export const AUTO_CHANGE_REALM = location.search.indexOf('AUTO_CHANGE_REALM') !=
 
 export const LOS = qs.LOS
 
-export const DEBUG =
-  location.search.indexOf('DEBUG_MODE') !== -1 ||
-  location.search.indexOf('DEBUG_LOG') !== -1 ||
-  !!(global as any).mocha ||
-  PREVIEW ||
-  EDITOR
+export const DEBUG = location.search.indexOf('DEBUG_MODE') !== -1 || !!(global as any).mocha || PREVIEW || EDITOR
 export const DEBUG_ANALYTICS = location.search.indexOf('DEBUG_ANALYTICS') !== -1
 export const DEBUG_MOBILE = location.search.indexOf('DEBUG_MOBILE') !== -1
 export const DEBUG_MESSAGES = location.search.indexOf('DEBUG_MESSAGES') !== -1
@@ -126,11 +122,13 @@ export const DEBUG_WS_MESSAGES = location.search.indexOf('DEBUG_WS_MESSAGES') !=
 export const DEBUG_REDUX = location.search.indexOf('DEBUG_REDUX') !== -1
 export const DEBUG_LOGIN = location.search.indexOf('DEBUG_LOGIN') !== -1
 export const DEBUG_PM = location.search.indexOf('DEBUG_PM') !== -1
+export const DEBUG_SCENE_LOG = location.search.indexOf('DEBUG_SCENE_LOG') !== -1
 
 export const INIT_PRE_LOAD = location.search.indexOf('INIT_PRE_LOAD') !== -1
 
 export const AWS = location.search.indexOf('AWS') !== -1
 export const NO_MOTD = location.search.indexOf('NO_MOTD') !== -1
+export const RESET_TUTORIAL = location.search.indexOf('RESET_TUTORIAL') !== -1
 
 export const DISABLE_AUTH = location.search.indexOf('DISABLE_AUTH') !== -1 || DEBUG
 export const ENGINE_DEBUG_PANEL = location.search.indexOf('ENGINE_DEBUG_PANEL') !== -1
@@ -140,6 +138,10 @@ export const HAS_INITIAL_POSITION_MARK = location.search.indexOf('position') !==
 export const NO_ASSET_BUNDLES = location.search.indexOf('NO_ASSET_BUNDLES') !== -1
 export const WSS_ENABLED = qs.ws !== undefined
 export const FORCE_SEND_MESSAGE = location.search.indexOf('FORCE_SEND_MESSAGE') !== -1
+
+export const ENABLE_EXPLORE_HUD = location.search.indexOf('ENABLE_EXPLORE_HUD') !== -1
+export const ENABLE_MANA_HUD = location.search.indexOf('ENABLE_MANA_HUD') !== -1
+export const ENABLE_NEW_TASKBAR = location.search.indexOf('ENABLE_NEW_TASKBAR') !== -1 /* NOTE(Santi): This is temporal, until we remove the old taskbar */
 
 export const PIN_CATALYST = qs.PIN_CATALYST
 

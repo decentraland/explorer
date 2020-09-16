@@ -1,9 +1,10 @@
-﻿using DCL;
+using DCL;
 using DCL.Controllers;
 using UnityEngine;
 using System;
 using System.Collections.Generic;
 using DCL.Interface;
+using DCL.Helpers;
 
 public class ExternalUrlPromptHUDController : IHUD
 {
@@ -24,6 +25,18 @@ public class ExternalUrlPromptHUDController : IHUD
     public void SetVisibility(bool visible)
     {
         view.gameObject.SetActive(visible);
+
+        if (visible)
+        {
+            view.content.SetActive(true);
+            view.showHideAnimator.Show();
+
+            AudioScriptableObjects.dialogOpen.Play(true);
+        }
+        else
+        {
+            view.showHideAnimator.Hide();
+        }
     }
 
     public void Dispose()
@@ -48,6 +61,8 @@ public class ExternalUrlPromptHUDController : IHUD
                 return;
             }
 
+            SetVisibility(true);
+            Utils.UnlockCursor();
             view.RequestOpenUrl(uri, result =>
             {
                 switch (result)
@@ -65,6 +80,7 @@ public class ExternalUrlPromptHUDController : IHUD
                         OpenUrl(url);
                         break;
                 }
+                SetVisibility(false);
             });
         }
     }

@@ -128,7 +128,7 @@ namespace DCL
         public bool allWearables = false;
         public bool testWearables = false;
         public bool enableTutorial = false;
-        public bool useNewChat = true;
+        public bool soloScene = true;
         public DebugPanel debugPanelMode = DebugPanel.Off;
 
 
@@ -198,6 +198,11 @@ namespace DCL
                 if (enableTutorial)
                 {
                     debugString += "RESET_TUTORIAL&";
+                }
+
+                if (soloScene)
+                {
+                    debugString += "LOS=0&";
                 }
 
                 string debugPanelString = "";
@@ -418,6 +423,12 @@ namespace DCL
                                 break;
                             case "UpdateHotScenesList":
                                 HotScenesController.i.UpdateHotScenesList(msg.payload);
+                                break;
+                            case "UpdateBalanceOfMANA":
+                                HUDController.i.UpdateBalanceOfMANA(msg.payload);
+                                break;
+                            case "EnableNewTaskbar":
+                                HUDController.i.EnableNewTaskbar(); // NOTE(Santi): This is temporal, until we remove the old taskbar
                                 break;
                             default:
                                 Debug.Log(

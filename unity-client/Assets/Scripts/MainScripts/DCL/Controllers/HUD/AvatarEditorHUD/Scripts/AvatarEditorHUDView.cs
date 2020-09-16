@@ -61,6 +61,9 @@ public class AvatarEditorHUDView : MonoBehaviour
     private AvatarEditorHUDController controller;
     internal readonly Dictionary<string, ItemSelector> selectorsByCategory = new Dictionary<string, ItemSelector>();
 
+    [HideInInspector]
+    public event System.Action<AvatarModel> OnAvatarAppear;
+
     private void Awake()
     {
         if (characterPreviewController == null)
@@ -227,6 +230,8 @@ public class AvatarEditorHUDView : MonoBehaviour
 
                 if (doneButton != null)
                     doneButton.interactable = true;
+
+                OnAvatarAppear?.Invoke(avatarModel);
             });
     }
 
@@ -307,9 +312,15 @@ public class AvatarEditorHUDView : MonoBehaviour
 
     public void SetVisibility(bool visible)
     {
+        if (visible && !isOpen)
+            AudioScriptableObjects.dialogOpen.Play(true);
+        else if (isOpen)
+            AudioScriptableObjects.dialogClose.Play(true);
+
         characterPreviewController.camera.enabled = visible;
         avatarEditorCanvas.enabled = visible;
         avatarEditorCanvasGroup.blocksRaycasts = visible;
+
         isOpen = visible;
     }
 

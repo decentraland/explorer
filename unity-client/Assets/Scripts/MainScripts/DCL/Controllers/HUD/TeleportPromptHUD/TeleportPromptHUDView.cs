@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -141,6 +141,8 @@ public class TeleportPromptHUDView : MonoBehaviour
     {
         OnCloseEvent?.Invoke();
         contentAnimator.Hide(true);
+
+        AudioScriptableObjects.dialogClose.Play(true);
     }
 
     private void OnTeleportPressed()

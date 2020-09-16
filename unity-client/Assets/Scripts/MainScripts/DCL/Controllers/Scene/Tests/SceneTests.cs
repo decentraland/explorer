@@ -21,27 +21,10 @@ namespace Tests
         protected override IEnumerator SetUp()
         {
             yield return base.SetUp();
+            Environment.i.Initialize(SceneController.i,  true);
             SceneController.i.SetDebug();
             DCL.Configuration.EnvironmentSettings.DEBUG = true;
         }
-        // [UnitySetUp]
-        // protected override IEnumerator SetUp()
-        // {
-        //     if (!sceneInitialized)
-        //     {
-        //         yield return InitUnityScene("MainTest");
-        //         sceneInitialized = true;
-        //     }
-        //
-        //     SetUp_Camera();
-        //     yield return SetUp_SceneController(debugMode: true, false, false);
-        //     yield return SetUp_CharacterController();
-        //
-        //     DCL.Configuration.EnvironmentSettings.DEBUG = true;
-        //
-        //     sceneController.SetDebug();
-        //     yield return null;
-        // }
 
         [UnityTest]
         public IEnumerator CreateUIScene()
@@ -51,7 +34,7 @@ namespace Tests
 
             string sceneGameObjectNamePrefix = "UI Scene - ";
             string sceneId = "Test UI Scene";
-            sceneController.CreateUIScene(JsonUtility.ToJson(new CreateUISceneMessage() {id = sceneId}));
+            sceneController.CreateUIScene(JsonUtility.ToJson(new CreateUISceneMessage() { id = sceneId }));
 
             GameObject sceneGo = GameObject.Find(sceneGameObjectNamePrefix + sceneId);
 
@@ -314,7 +297,6 @@ namespace Tests
             Assert.AreEqual(2, sceneController.loadedScenes.Count);
 
             var theScene = sceneController.loadedScenes["xxx"];
-            theScene.blockerHandler.CleanBlockers();
             yield return null;
 
             Assert.AreEqual(3, theScene.sceneData.parcels.Length);
@@ -342,7 +324,6 @@ namespace Tests
             Assert.AreEqual(2, sceneController.loadedScenes.Count);
 
             var theScene = sceneController.loadedScenes["xxx"];
-            theScene.blockerHandler.CleanBlockers();
             yield return null;
 
             Assert.AreEqual(3, theScene.sceneData.parcels.Length);
@@ -402,6 +383,33 @@ namespace Tests
             Assert.AreEqual(0, scene.disposableNotReadyCount);
             yield return boxShape.routine;
             Assert.AreEqual(0, scene.disposableNotReadyCount);
+        }
+
+        [Test]
+        public void ParcelScene_SetEntityParent()
+        {
+            SetUp_TestScene();
+            var entityId = "entityId";
+            var entity = TestHelpers.CreateSceneEntity(scene, entityId);
+
+            // Make sure that it doesn't have a parent
+            Assert.IsNull(entity.parent);
+            Assert.IsFalse(SceneController.i.boundariesChecker.WasAddedAsPersistent(entity));
+
+            // Set player reference as parent
+            TestHelpers.SetEntityParent(scene, entityId, "FirstPersonCameraEntityReference");
+            Assert.AreEqual(entity.parent, DCLCharacterController.i.firstPersonCameraReference);
+            Assert.IsTrue(SceneController.i.boundariesChecker.WasAddedAsPersistent(entity));
+
+            // Set avatar position reference as parent
+            TestHelpers.SetEntityParent(scene, entityId, "AvatarEntityReference");
+            Assert.AreEqual(entity.parent, DCLCharacterController.i.avatarReference);
+            Assert.IsTrue(SceneController.i.boundariesChecker.WasAddedAsPersistent(entity));
+
+            // Remove all parents
+            TestHelpers.SetEntityParent(scene, entityId, "0");
+            Assert.IsNull(entity.parent);
+            Assert.IsFalse(SceneController.i.boundariesChecker.WasAddedAsPersistent(entity));
         }
     }
 }
