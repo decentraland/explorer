@@ -58,7 +58,7 @@ namespace DCL
 
         public Dictionary<string, string> hashLowercaseToHashProper = new Dictionary<string, string>();
 
-        internal ContentServerUtils.ApiEnvironment environment = ContentServerUtils.ApiEnvironment.ORG;
+        internal ContentServerUtils.ApiEnvironment contentServerEnv = ContentServerUtils.ApiEnvironment.ORG;
 
         internal bool deleteDownloadPathAfterFinished = false;
         internal bool skipAlreadyBuiltBundles = false;
@@ -69,14 +69,19 @@ namespace DCL
 
         internal string customContentServerBaseUrl = "";
 
-        float startTime;
-        string logBuffer;
-        int totalAssets;
-        int skippedAssets;
+        private float startTime;
+        private string logBuffer;
+        private int totalAssets;
+        private int skippedAssets;
 
-        public AssetBundleBuilder(ContentServerUtils.ApiEnvironment environment = ContentServerUtils.ApiEnvironment.ORG)
+        private AssetBundleBuilderEnvironment env;
+        private static ILogger logger = Debug.unityLogger;
+
+        public AssetBundleBuilder(AssetBundleBuilderEnvironment env, ContentServerUtils.ApiEnvironment contentServerEnv = ContentServerUtils.ApiEnvironment.ORG)
         {
-            this.environment = environment;
+            this.env = env;
+            this.contentServerEnv = contentServerEnv;
+
             finalAssetBundlePath = AssetBundleBuilderConfig.ASSET_BUNDLES_PATH_ROOT + "/";
             finalDownloadedPath = AssetBundleBuilderConfig.DOWNLOADED_PATH_ROOT + "/";
             finalDownloadedAssetDbPath = AssetBundleBuilderConfig.DOWNLOADED_ASSET_DB_PATH_ROOT + "/";
@@ -89,7 +94,7 @@ namespace DCL
 
         public static void ExportSceneToAssetBundles(string[] commandLineArgs)
         {
-            AssetBundleBuilder builder = new AssetBundleBuilder();
+            AssetBundleBuilder builder = new AssetBundleBuilder(AssetBundleBuilderEnvironment.CreateWithDefaultImplementations());
             builder.skipAlreadyBuiltBundles = true;
             builder.deleteDownloadPathAfterFinished = true;
 
@@ -103,7 +108,7 @@ namespace DCL
                 if (AssetBundleBuilderUtils.ParseOption(commandLineArgs, AssetBundleBuilderConfig.CLI_SET_CUSTOM_BASE_URL, 1, out string[] customBaseUrl))
                 {
                     ContentServerUtils.customBaseUrl = customBaseUrl[0];
-                    builder.environment = ContentServerUtils.ApiEnvironment.NONE;
+                    builder.contentServerEnv = ContentServerUtils.ApiEnvironment.NONE;
                 }
 
                 if (AssetBundleBuilderUtils.ParseOption(commandLineArgs, AssetBundleBuilderConfig.CLI_VERBOSE, 0, out _))
@@ -159,7 +164,7 @@ namespace DCL
             }
             catch (Exception e)
             {
-                Debug.LogError(e.Message);
+                logger.Log(LogType.Error, e.Message);
                 builder.CleanAndExit(ErrorCodes.UNDEFINED);
             }
         }
@@ -181,7 +186,7 @@ namespace DCL
             log += "\n";
             log += logBuffer;
 
-            Debug.Log(log);
+            logger.Log(log);
 
             CleanupWorkingFolders();
             AssetBundleBuilderUtils.Exit((int) errorCode);
@@ -206,46 +211,45 @@ namespace DCL
                 string fileExt = Path.GetExtension(file);
                 string assetPath = hash + "/" + hash + fileExt;
 
-                AssetDatabase.ImportAsset(finalDownloadedAssetDbPath + assetPath, ImportAssetOptions.ForceUpdate);
-
-                AssetDatabase.SaveAssets();
+                env.assetDatabase.ImportAsset(finalDownloadedAssetDbPath + assetPath, ImportAssetOptions.ForceUpdate);
+                env.assetDatabase.SaveAssets();
 
                 string metaPath = finalDownloadedPath + assetPath + ".meta";
 
-                AssetDatabase.ReleaseCachedFileHandles();
+                env.assetDatabase.ReleaseCachedFileHandles();
 
                 //NOTE(Brian): in asset bundles, all dependencies are resolved by their guid (and not the AB hash nor CRC)
                 //             So to ensure dependencies are being kept in subsequent editor runs we normalize the asset guid using
                 //             the CID.
-                string metaContent = File.ReadAllText(metaPath);
+                string metaContent = env.file.ReadAllText(metaPath);
                 string guid = AssetBundleBuilderUtils.CidToGuid(hash);
                 string result = Regex.Replace(metaContent, @"guid: \w+?\n", $"guid: {guid}\n");
 
                 //NOTE(Brian): We must do this hack in order to the new guid to be added to the AssetDatabase
                 //             in windows, an AssetImporter.SaveAndReimport call makes the trick, but this won't work
                 //             in Unix based OSes for some reason.
-                File.Delete(metaPath);
+                env.file.Delete(metaPath);
 
-                File.Copy(finalDownloadedPath + assetPath, finalDownloadedPath + "tmp");
-                AssetDatabase.DeleteAsset(finalDownloadedAssetDbPath + assetPath);
-                File.Delete(finalDownloadedPath + assetPath);
+                env.file.Copy(finalDownloadedPath + assetPath, finalDownloadedPath + "tmp");
+                env.assetDatabase.DeleteAsset(finalDownloadedAssetDbPath + assetPath);
+                env.file.Delete(finalDownloadedPath + assetPath);
 
-                AssetDatabase.Refresh();
-                AssetDatabase.SaveAssets();
+                env.assetDatabase.Refresh();
+                env.assetDatabase.SaveAssets();
 
-                File.Copy(finalDownloadedPath + "tmp", finalDownloadedPath + assetPath);
-                File.WriteAllText(metaPath, result);
-                File.Delete(finalDownloadedPath + "tmp");
+                env.file.Copy(finalDownloadedPath + "tmp", finalDownloadedPath + assetPath);
+                env.file.WriteAllText(metaPath, result);
+                env.file.Delete(finalDownloadedPath + "tmp");
 
-                AssetDatabase.Refresh();
-                AssetDatabase.SaveAssets();
+                env.assetDatabase.Refresh();
+                env.assetDatabase.SaveAssets();
 
                 if (VERBOSE)
                 {
-                    Debug.Log($"content = {File.ReadAllText(metaPath)}");
+                    logger.Log($"content = {File.ReadAllText(metaPath)}");
 
-                    Debug.Log("guid should be " + guid);
-                    Debug.Log("guid is " + AssetDatabase.AssetPathToGUID(finalDownloadedAssetDbPath + assetPath));
+                    logger.Log("guid should be " + guid);
+                    logger.Log("guid is " + AssetDatabase.AssetPathToGUID(finalDownloadedAssetDbPath + assetPath));
                 }
 
                 if (fullPathToTag != null)
@@ -276,11 +280,6 @@ namespace DCL
 
         private bool DumpAssets(MappingPair[] rawContents)
         {
-            // rawContents = rawContents.Where((x) =>
-            //     x.hash == "QmWoH5VgsomNDsKERMH55u4Z2fhDGNeGYWnFpiFPsy3KX2" ||
-            //     x.hash == "QmeTdBwR6XguoA85b1nG1w1ysw63PYqJC6DY9q43wLKh9n" ||
-            //     x.hash == "QmbK1UdPvkFJ3nVp7GxDmzvyKUPko34HQ6j4fN5nSCfWZn").ToArray();
-
             var hashToGltfPair = AssetBundleBuilderUtils.FilterExtensions(rawContents, AssetBundleBuilderConfig.gltfExtensions);
             var hashToBufferPair = AssetBundleBuilderUtils.FilterExtensions(rawContents, AssetBundleBuilderConfig.bufferExtensions);
 
@@ -306,15 +305,13 @@ namespace DCL
             if (shouldAbortBecauseAllBundlesExist)
             {
                 if (VERBOSE)
-                    Debug.Log("All assets in this scene were already generated!. Skipping.");
+                    logger.Log("All assets in this scene were already generated!. Skipping.");
 
                 return false;
             }
-#if BRIAN
-            DumpSceneTextures(rawContents);
-#endif
 
-            Debug.Log("Dling buffers");
+            DumpSceneTextures(rawContents);
+
             //NOTE(Brian): Prepare buffers. We should prepare all the dependencies in this phase.
             foreach (var kvp in hashToBufferPair)
             {
@@ -345,9 +342,6 @@ namespace DCL
                 foreach (var contentPair in rawContents)
                 {
                     string contentFilePathLower = contentPair.file.ToLowerInvariant();
-                    string contentFilePath = contentPair.file;
-
-                    //Debug.Log("contentPair filename = " + contentFilePathLower);
 
                     bool endsWithTextureExtensions = AssetBundleBuilderConfig.textureExtensions.Any((x) => contentFilePathLower.EndsWith(x));
 
@@ -364,7 +358,6 @@ namespace DCL
                     }
                 }
 
-#if BRIAN
                 //NOTE(Brian): Finally, load the gLTF. The GLTFImporter will use the PersistentAssetCache to resolve the external dependencies.
                 string path = DownloadAsset(gltfFilePath, gltfHash, gltfHash + "/");
 
@@ -374,7 +367,6 @@ namespace DCL
                     AssetDatabase.SaveAssets();
                     pathsToTag.Add(path, gltfHash);
                 }
-#endif
 
                 foreach (var streamDataKvp in PersistentAssetCache.StreamCacheByUri)
                 {
@@ -383,16 +375,14 @@ namespace DCL
                 }
             }
 
-#if BRIAN
-            //Movi esto aca
-            AssetDatabase.Refresh();
-            AssetDatabase.SaveAssets();
+            env.assetDatabase.Refresh();
+            env.assetDatabase.SaveAssets();
 
             foreach (var kvp in pathsToTag)
             {
                 AssetBundleBuilderUtils.MarkForAssetBundleBuild(kvp.Key, kvp.Value);
             }
-#endif
+
             foreach (var s in streamsToDispose)
             {
                 s.Dispose();
@@ -402,18 +392,18 @@ namespace DCL
         }
 
 
-        internal bool BuildAssetBundles(out AssetBundleManifest manifest)
+        internal virtual bool BuildAssetBundles(out AssetBundleManifest manifest)
         {
-            AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport | ImportAssetOptions.ForceUpdate | ImportAssetOptions.ImportRecursive);
-            AssetDatabase.SaveAssets();
+            env.assetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport | ImportAssetOptions.ForceUpdate | ImportAssetOptions.ImportRecursive);
+            env.assetDatabase.SaveAssets();
 
-            AssetDatabase.MoveAsset(finalDownloadedAssetDbPath, AssetBundleBuilderConfig.DOWNLOADED_ASSET_DB_PATH_ROOT);
+            env.assetDatabase.MoveAsset(finalDownloadedAssetDbPath, AssetBundleBuilderConfig.DOWNLOADED_ASSET_DB_PATH_ROOT);
 
             manifest = BuildPipeline.BuildAssetBundles(finalAssetBundlePath, BuildAssetBundleOptions.UncompressedAssetBundle | BuildAssetBundleOptions.ForceRebuildAssetBundle, BuildTarget.WebGL);
 
             if (manifest == null)
             {
-                Debug.LogError("Error generating asset bundle!");
+                logger.Log(LogType.Error, "Error generating asset bundle!");
                 return false;
             }
 
@@ -450,7 +440,7 @@ namespace DCL
             FileInfo file = new FileInfo(finalAssetBundlePath);
             DriveInfo info = new DriveInfo(file.Directory.Root.FullName);
 
-            Debug.Log($"Conversion start... free space in disk: {info.AvailableFreeSpace}");
+            logger.Log($"Conversion start... free space in disk: {info.AvailableFreeSpace}");
 
             InitializeDirectoryPaths(true);
             PopulateLowercaseMappings(rawContents);
@@ -470,7 +460,7 @@ namespace DCL
                     if (!GLTFImporter.finishedImporting && Time.realtimeSinceStartup - timer < 60)
                         return;
 
-                    AssetDatabase.Refresh();
+                    env.assetDatabase.Refresh();
 
                     if (!assetsAlreadyDumped)
                     {
@@ -505,7 +495,7 @@ namespace DCL
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError(e.Message);
+                    logger.Log(LogType.Error, e.Message);
                     OnFinish?.Invoke(ErrorCodes.UNDEFINED);
                     EditorApplication.update -= updateLoop;
                 }
@@ -522,18 +512,18 @@ namespace DCL
 
             if (sceneCidsList == null || sceneCidsList.Count == 0)
             {
-                Debug.LogError("Scene list is null or count == 0! Maybe this sector lacks scenes or content requests failed?");
+                logger.Log(LogType.Error, "Scene list is null or count == 0! Maybe this sector lacks scenes or content requests failed?");
                 OnFinish?.Invoke(ErrorCodes.SCENE_LIST_NULL);
                 return;
             }
 
-            Debug.Log($"Building {sceneCidsList.Count} scenes...");
+            logger.Log($"Building {sceneCidsList.Count} scenes...");
 
             List<MappingPair> rawContents = new List<MappingPair>();
 
             foreach (var sceneCid in sceneCidsList)
             {
-                MappingsAPIData parcelInfoApiData = AssetBundleBuilderUtils.GetSceneMappingsData(environment, sceneCid);
+                MappingsAPIData parcelInfoApiData = AssetBundleBuilderUtils.GetSceneMappingsData(contentServerEnv, sceneCid);
                 rawContents.AddRange(parcelInfoApiData.data[0].content.contents);
             }
 
@@ -568,19 +558,16 @@ namespace DCL
 
             Texture2D t2d = null;
 
-            if (File.Exists(realOutputPath))
+            if (env.file.Exists(realOutputPath))
             {
                 string assetDBOutputPath = finalDownloadedAssetDbPath + textureMappingPair.hash + "/" + textureMappingPair.hash + fileExt;
-                t2d = AssetDatabase.LoadAssetAtPath<Texture2D>(assetDBOutputPath);
+                t2d = env.assetDatabase.LoadAssetAtPath<Texture2D>(assetDBOutputPath);
             }
 
             if (t2d == null)
                 return;
 
             string relativePath = AssetBundleBuilderUtils.GetRelativePathTo(gltfMappingPair.file, textureMappingPair.file);
-
-            // string assetDBOutputPath = finalDownloadedAssetDbPath + gltfMappingPair.hash + "/" + gltfMappingPair.hash + Path.GetExtension(gltfMappingPair.file);
-            // string id = relativePath + "@" + assetDBOutputPath;
 
             //NOTE(Brian): This cache will be used by the GLTF importer when seeking textures. This way the importer will
             //             consume the asset bundle dependencies instead of trying to create new textures.
@@ -593,18 +580,12 @@ namespace DCL
             string gltfExt = Path.GetExtension(gltfMappingPair.file);
             string realOutputPath = finalDownloadedPath + bufferMappingPair.hash + "/" + bufferMappingPair.hash + bufferExt;
             string gltfOutputPath = finalDownloadedAssetDbPath + gltfMappingPair.hash + "/" + gltfMappingPair.hash + gltfExt;
-#if BRIAN
-            if (!File.Exists(realOutputPath))
+
+            if (!env.file.Exists(realOutputPath))
                 return;
 
-            Stream stream = File.OpenRead(realOutputPath);
-#else
-            Stream stream = null;
-#endif
+            Stream stream = env.file.OpenRead(realOutputPath);
             string relativePath = AssetBundleBuilderUtils.GetRelativePathTo(gltfMappingPair.file, bufferMappingPair.file);
-
-            // string assetDbOutputPath = finalDownloadedAssetDbPath + gltfMappingPair.hash + "/" + gltfMappingPair.hash + fileExt;
-            // string id = relativePath + "@" + assetDbOutputPath;
 
             // NOTE(Brian): This cache will be used by the GLTF importer when seeking streams. This way the importer will
             //              consume the asset bundle dependencies instead of trying to create new streams.
@@ -613,7 +594,7 @@ namespace DCL
 
         private string DownloadAsset(string fileName, string hash, string additionalPath = "")
         {
-            string baseUrl = ContentServerUtils.GetContentAPIUrlBase(environment);
+            string baseUrl = ContentServerUtils.GetContentAPIUrlBase(contentServerEnv);
 
             string fileExt = Path.GetExtension(fileName);
 
@@ -623,17 +604,16 @@ namespace DCL
             string finalUrl = baseUrl + hash;
 
             if (VERBOSE)
-                Debug.Log("checking against " + outputPath);
+                logger.Log("checking against " + outputPath);
 
-            if (File.Exists(outputPath))
+            if (env.file.Exists(outputPath))
             {
                 if (VERBOSE)
-                    Debug.Log("Skipping already generated asset: " + outputPath);
+                    logger.Log("Skipping already generated asset: " + outputPath);
 
                 return finalDownloadedPath + additionalPath;
             }
 
-#if BRIAN
             UnityWebRequest req;
 
             int retryCount = ASSET_REQUEST_RETRY_COUNT;
@@ -654,25 +634,24 @@ namespace DCL
 
             if (VERBOSE)
             {
-                Debug.Log($"Downloaded asset = {finalUrl} to {outputPathDir}");
+                logger.Log($"Downloaded asset = {finalUrl} to {outputPathDir}");
             }
 
             if (!Directory.Exists(outputPathDir))
                 Directory.CreateDirectory(outputPathDir);
 
-            File.WriteAllBytes(outputPath, req.downloadHandler.data);
+            env.file.WriteAllBytes(outputPath, req.downloadHandler.data);
 
             string dbPath = finalDownloadedAssetDbPath + additionalPath + hash + fileExt;
-            AssetDatabase.ImportAsset(dbPath, ImportAssetOptions.ForceSynchronousImport | ImportAssetOptions.ImportRecursive);
-#endif
-            Debug.Log("Saved to " + outputPath);
+            env.assetDatabase.ImportAsset(dbPath, ImportAssetOptions.ForceSynchronousImport | ImportAssetOptions.ImportRecursive);
+
             return finalDownloadedPath + additionalPath;
         }
 
 
         internal void DumpArea(Vector2Int coords, Vector2Int size, Action<ErrorCodes> OnFinish = null)
         {
-            HashSet<string> sceneCids = AssetBundleBuilderUtils.GetSceneCids(environment, coords, size);
+            HashSet<string> sceneCids = AssetBundleBuilderUtils.GetSceneCids(contentServerEnv, coords, size);
 
             List<string> sceneCidsList = sceneCids.ToList();
             ConvertScenesToAssetBundles(sceneCidsList, OnFinish);
@@ -680,7 +659,7 @@ namespace DCL
 
         internal void DumpArea(List<Vector2Int> coords, Action<ErrorCodes> OnFinish = null)
         {
-            HashSet<string> sceneCids = AssetBundleBuilderUtils.GetScenesCids(environment, coords);
+            HashSet<string> sceneCids = AssetBundleBuilderUtils.GetScenesCids(contentServerEnv, coords);
 
             List<string> sceneCidsList = sceneCids.ToList();
             ConvertScenesToAssetBundles(sceneCidsList, OnFinish);
@@ -691,13 +670,13 @@ namespace DCL
             ConvertScenesToAssetBundles(new List<string> {cid}, OnFinish);
         }
 
-        internal void InitializeDirectoryPaths(bool deleteIfExists)
+        internal virtual void InitializeDirectoryPaths(bool deleteIfExists)
         {
             AssetBundleBuilderUtils.InitializeDirectory(finalDownloadedPath, deleteIfExists);
             AssetBundleBuilderUtils.InitializeDirectory(finalAssetBundlePath, deleteIfExists);
         }
 
-        internal void CleanupWorkingFolders()
+        internal virtual void CleanupWorkingFolders()
         {
             AssetBundleBuilderUtils.DeleteFile(finalAssetBundlePath + AssetBundleBuilderConfig.ASSET_BUNDLE_FOLDER_NAME);
             AssetBundleBuilderUtils.DeleteFile(finalAssetBundlePath + AssetBundleBuilderConfig.ASSET_BUNDLE_FOLDER_NAME + ".manifest");

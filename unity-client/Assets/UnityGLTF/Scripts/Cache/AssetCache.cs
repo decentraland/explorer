@@ -106,7 +106,6 @@ namespace UnityGLTF.Cache
         /// <returns>True if its cached</returns>
         public static bool HasBuffer(string uri, string idSuffix)
         {
-            Debug.Log("Has buffer...? " + GetCacheId(uri, idSuffix));
             return HasBuffer(GetCacheId(uri, idSuffix));
         }
 
