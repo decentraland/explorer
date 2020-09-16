@@ -192,7 +192,7 @@ namespace DCL
 
             if (bodyShapeController == null)
             {
-                HideAllRenderers();
+                HideAll();
                 bodyShapeController = new BodyShapeController(resolvedBody);
                 SetupDefaultFacialFeatures(bodyShapeController.bodyShapeId);
             }
@@ -499,23 +499,13 @@ namespace DCL
                 gameObject.SetActive(newVisibility);
         }
 
-        public void HideAllRenderers()
+        private void HideAll()
         {
             Renderer[] renderers = gameObject.GetComponentsInChildren<Renderer>();
 
             for (int i = 0; i < renderers.Length; i++)
             {
                 renderers[i].enabled = false;
-            }
-        }
-
-        public void ShowAllRenderers()
-        {
-            Renderer[] renderers = gameObject.GetComponentsInChildren<Renderer>();
-
-            for (int i = 0; i < renderers.Length; i++)
-            {
-                renderers[i].enabled = true;
             }
         }
 

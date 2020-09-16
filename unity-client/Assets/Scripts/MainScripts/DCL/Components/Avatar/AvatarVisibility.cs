@@ -3,6 +3,10 @@ using UnityEngine;
 
 namespace DCL
 {
+    /// <summary>
+    /// This class handles the avatar's visibility. Different callers will determine whether they want the avatar to be visible or not.
+    /// The avatar will be rendered only when all callers want the avatar to be visible. It only takes one caller to make the avatar not visible.
+    /// </summary>
     public class AvatarVisibility : MonoBehaviour
     {
 
@@ -25,7 +29,7 @@ namespace DCL
             else
             {
                 bool added = callsToHide.Add(callerId);
-                if (added && callsToHide.Count == 1)
+                if (added)
                 {
                     // Hide
                     SetVisibilityForGameObjects(false);
