@@ -8,7 +8,7 @@ using UnityEngine.TestTools;
 
 namespace Tests
 {
-    public class AvatarVisibilityTests
+    public class AvatarVisibilityShould
     {
 
         private GameObject parentGameObject;
@@ -33,7 +33,7 @@ namespace Tests
         }
 
         [Test]
-        public void WhenOneCallerSetsTheVisibilityToFalseThenTheGameObjectsAreDeactivated()
+        public void DeactivateGameObjectsWhenVisibilityIsSetToFalse()
         {
 
             Assert.IsTrue(toggledGameObject.activeSelf);
