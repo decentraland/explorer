@@ -24,7 +24,6 @@ public class TestsBase
     protected SceneController sceneController;
     protected ParcelScene scene;
     protected CameraController cameraController;
-    protected TutorialController tutorialController;
 
     protected virtual bool justSceneSetUp => false;
     protected virtual bool enableSceneIntegrityChecker => true;
@@ -55,7 +54,6 @@ public class TestsBase
         yield return SetUp_SceneIntegrityChecker();
 
         SetUp_Renderer();
-        SetUp_TutorialController();
 
         Environment.i.Initialize(new DummyMessageHandler(), isTesting: true);
     }
@@ -186,14 +184,6 @@ public class TestsBase
     public virtual void SetUp_Renderer()
     {
         CommonScriptableObjects.rendererState.Set(true);
-    }
-
-    public virtual void SetUp_TutorialController()
-    {
-        tutorialController = GameObject.FindObjectOfType<TutorialController>();
-
-        if (tutorialController == null)
-            tutorialController = GameObject.Instantiate(Resources.Load<GameObject>("TutorialController")).GetComponent<TutorialController>();
     }
 
     protected virtual IEnumerator InitScene(bool usesWebServer = false, bool spawnCharController = true, bool spawnTestScene = true, bool spawnUIScene = true, bool debugMode = false, bool reloadUnityScene = true)

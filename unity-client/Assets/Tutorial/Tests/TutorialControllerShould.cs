@@ -7,26 +7,22 @@ using UnityEngine.TestTools;
 
 namespace DCL.Tutorial_Tests
 {
-    public class TutorialControllerShould : TestsBase
+    public class TutorialControllerShould
     {
+        private TutorialController tutorialController;
         private int currentStepIndex = 0;
         private List<TutorialStep> currentSteps = new List<TutorialStep>();
 
-        protected override IEnumerator TearDown()
+        [SetUp]
+        public void SetUp()
         {
-            foreach (var step in currentSteps)
-            {
-                GameObject.Destroy(step);
-            }
+            CreateAndConfigureTutorial();
+        }
 
-            tutorialController.SetTutorialDisabled();
-            tutorialController.stepsOnGenesisPlaza.Clear();
-            tutorialController.stepsFromDeepLink.Clear();
-            tutorialController.stepsOnGenesisPlazaAfterDeepLink.Clear();
-            currentSteps.Clear();
-            currentStepIndex = 0;
-
-            yield return base.TearDown();
+        [TearDown]
+        public void TearDown()
+        {
+            DestroyTutorial();
         }
 
         [UnityTest]
@@ -86,6 +82,28 @@ namespace DCL.Tutorial_Tests
             oldPosition = tutorialController.teacherRawImage.rectTransform.position;
             tutorialController.SetTeacherPosition(new Vector2(50, 20), false);
             Assert.IsTrue(tutorialController.teacherRawImage.rectTransform.position != oldPosition);
+        }
+
+        private void CreateAndConfigureTutorial()
+        {
+            tutorialController = GameObject.Instantiate(Resources.Load<GameObject>("TutorialController")).GetComponent<TutorialController>();
+            tutorialController.stepsOnGenesisPlaza.Clear();
+            tutorialController.stepsFromDeepLink.Clear();
+            tutorialController.stepsOnGenesisPlazaAfterDeepLink.Clear();
+            tutorialController.timeBetweenSteps = 0f;
+            tutorialController.debugRunTutorial = false;
+        }
+
+        private void DestroyTutorial()
+        {
+            foreach (var step in currentSteps)
+            {
+                GameObject.Destroy(step);
+            }
+
+            GameObject.Destroy(tutorialController.gameObject);
+            currentSteps.Clear();
+            currentStepIndex = 0;
         }
 
         private void ConfigureTutorialForGenesisPlaza()
