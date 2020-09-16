@@ -108,7 +108,7 @@ public/ecs-scenes/%/game.js: $(ECS_LIBRARY) $(SCENE_SYSTEM) public/ecs-scenes/%/
 
 # All scenes together
 
-ecs-scenes: $(TEST_ECS_SCENE_GAMEJS_FILES)
+ecs-scenes: $(TEST_ECS_SCENE_GAMEJS_FILES) $(BUILD_ECS)
 	$(MAKE) generate-mocks
 
 test-scenes: $(TEST_SCENES_GAMEJS_FILES) $(HELLMAP_GAMEJS_FILES) $(TEST_ECS_SCENE_GAMEJS_FILES) ## Build the test scenes

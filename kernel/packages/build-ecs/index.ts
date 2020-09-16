@@ -43,6 +43,7 @@ async function compile() {
   // current working directory
   let CWD = process.cwd()
   ts.sys.getCurrentDirectory = () => CWD
+  ts.sys.resolvePath = (path: string) => resolve(ts.sys.getCurrentDirectory(), path)
 
   {
     // Read the target folder, if specified.
@@ -353,7 +354,7 @@ function getConfiguration(packageJson: PackageJson | null, sceneJson: SceneJson 
     readDirectory: ts.sys.readDirectory
   }
 
-  const tsconfigPath = ts.sys.resolvePath(resolve(ts.sys.getCurrentDirectory(), 'tsconfig.json'))
+  const tsconfigPath = ts.sys.resolvePath('tsconfig.json')
   const tsconfigContent = ts.sys.readFile(tsconfigPath)
 
   if (!tsconfigContent) {
@@ -419,6 +420,11 @@ function getConfiguration(packageJson: PackageJson | null, sceneJson: SceneJson 
 
   if (isDecentralandLib && sceneJson) {
     console.error('! Error: project of type decentralandLibrary must not have scene.json')
+    process.exit(1)
+  }
+
+  if (!isDecentralandLib && !sceneJson) {
+    console.error('! Error: project of type scene must have a scene.json')
     process.exit(1)
   }
 
@@ -514,12 +520,12 @@ function getConfiguration(packageJson: PackageJson | null, sceneJson: SceneJson 
 
   // the new code generation as libraries enables us to leverage source maps
   // source map config is overwritten for that reason.
-  tsconfig.options.inlineSourceMap = true
-  tsconfig.options.inlineSources = true
-  tsconfig.options.sourceMap = false
-  tsconfig.options.removeComments = false
 
   if (isDecentralandLib) {
+    tsconfig.options.inlineSourceMap = true
+    tsconfig.options.inlineSources = true
+    tsconfig.options.sourceMap = false
+    tsconfig.options.removeComments = false
     tsconfig.options.declaration = true
     delete tsconfig.options.declarationDir
   }
@@ -593,29 +599,25 @@ function loadArtifact(path: string): string {
 }
 
 function resolveFile(path: string): string | null {
-  if (ts.sys.fileExists(path)) {
-    return path
-  }
-
-  let ecsPackageAMD = resolve(ts.sys.getCurrentDirectory(), path)
+  let ecsPackageAMD = ts.sys.resolvePath(path)
 
   if (ts.sys.fileExists(ecsPackageAMD)) {
     return ecsPackageAMD
   }
 
-  ecsPackageAMD = 'node_modules/' + path
+  ecsPackageAMD = ts.sys.resolvePath('node_modules/' + path)
 
   if (ts.sys.fileExists(ecsPackageAMD)) {
     return ecsPackageAMD
   }
 
-  ecsPackageAMD = '../node_modules/' + path
+  ecsPackageAMD = ts.sys.resolvePath('../node_modules/' + path)
 
   if (ts.sys.fileExists(ecsPackageAMD)) {
     return ecsPackageAMD
   }
 
-  ecsPackageAMD = '../../node_modules/' + path
+  ecsPackageAMD = ts.sys.resolvePath('../../node_modules/' + path)
 
   if (ts.sys.fileExists(ecsPackageAMD)) {
     return ecsPackageAMD
@@ -660,8 +662,8 @@ function validatePackageJsonForLibrary(packageJson: PackageJson, outFile: string
       throw new Error(`! Error: field "typings" in package.json cannot be resolved.`)
     }
 
-    if (outFile !== typingsFile) {
-      const resolvedTypings = outFile.replace(/\.js$/, '.d.ts')
+    const resolvedTypings = outFile.replace(/\.js$/, '.d.ts')
+    if (resolvedTypings !== typingsFile) {
       const help = `(${resolvedTypings.replace(ts.sys.getCurrentDirectory(), '')} != ${typingsFile.replace(
         ts.sys.getCurrentDirectory(),
         ''

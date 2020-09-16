@@ -9,6 +9,8 @@
     "experimentalDecorators": true,
     "keyofStringsOnly": true,
     "inlineSourceMap": true,
+    "sourceMap": false,
+    "removeComments": false,
     "inlineSources": true,
     "preserveConstEnums": true,
     "alwaysStrict": true,
