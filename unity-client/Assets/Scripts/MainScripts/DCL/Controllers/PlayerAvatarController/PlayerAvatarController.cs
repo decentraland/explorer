@@ -53,15 +53,10 @@ public class PlayerAvatarController : MonoBehaviour
 
     private void SetVisibility(bool shouldBeVisible)
     {
-        AvatarVisibility avatarVisibility = avatarRenderer.gameObject.GetComponent<AvatarVisibility>();
+        AvatarVisibility avatarVisibility = gameObject.GetComponent<AvatarVisibility>();
         if (avatarVisibility != null)
         {
-            avatarVisibility.SetVisibility(shouldBeVisible);
-        }
-        else if (shouldBeVisible != avatarRenderer.gameObject.activeSelf)
-        {
-            avatarRenderer.SetVisibility(shouldBeVisible);
-
+            avatarVisibility.SetVisibility("PLAYER_AVATAR_CONTROLLER", shouldBeVisible);
         }
     }
 

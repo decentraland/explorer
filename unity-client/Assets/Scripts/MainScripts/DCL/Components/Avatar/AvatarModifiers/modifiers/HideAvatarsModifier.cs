@@ -3,14 +3,14 @@ using UnityEngine;
 
 public class HideAvatarsModifier : AvatarModifier
 {
+    private const string HIDE_AVATARS_MODIFIER = "HIDE_AVATARS_MODIFIER";
 
     public override void ApplyModifier(GameObject avatar)
     {
         AvatarVisibility avatarVisibility = avatar.GetComponent<AvatarVisibility>();
         if (avatarVisibility != null)
         {
-            avatarVisibility.SetVisibility(false);
-            avatarVisibility.SetLock(true);
+            avatarVisibility.SetVisibility(HIDE_AVATARS_MODIFIER, false);
         }
     }
 
@@ -19,8 +19,7 @@ public class HideAvatarsModifier : AvatarModifier
         AvatarVisibility avatarVisibility = avatar.GetComponent<AvatarVisibility>();
         if (avatarVisibility != null)
         {
-            avatarVisibility.SetLock(false);
-            avatarVisibility.SetVisibility(true);
+            avatarVisibility.SetVisibility(HIDE_AVATARS_MODIFIER, true);
         }
     }
 }

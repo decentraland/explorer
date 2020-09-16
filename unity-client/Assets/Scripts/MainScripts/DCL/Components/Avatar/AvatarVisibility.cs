@@ -1,49 +1,44 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
 using UnityEngine;
-using UnityEngine.Assertions;
 
 namespace DCL
 {
     public class AvatarVisibility : MonoBehaviour
     {
 
-        public AvatarRenderer renderer;
-        [Tooltip("Game objects that should be hidden/shown together with the renderer")]
+        [Tooltip("Game objects that should be hidden/shown")]
         public GameObject[] gameObjectsToToggle;
-        // When this property is true, then the visibility can't be modified
-        private bool locked = false;
-        private bool? isVisible;
+        // A list of all the callers that want to hide the avatar
+        private readonly HashSet<string> callsToHide = new HashSet<string>();
 
-        public void SetVisibility(bool visibility)
+        public void SetVisibility(string callerId, bool visibility)
         {
-            if (locked == false && isVisible != visibility)
+            if (visibility)
             {
-                if (visibility)
+                bool removed = callsToHide.Remove(callerId);
+                if (removed && callsToHide.Count == 0)
                 {
-                    renderer.ShowAllRenderers();
+                    // Show
+                    SetVisibilityForGameObjects(true);
                 }
-                else
-                {
-                    renderer.HideAllRenderers();
-                }
-                foreach (GameObject gameObject in gameObjectsToToggle)
-                {
-                    gameObject.SetActive(visibility);
-                }
-
-                isVisible = visibility;
             }
-
+            else
+            {
+                bool added = callsToHide.Add(callerId);
+                if (added && callsToHide.Count == 1)
+                {
+                    // Hide
+                    SetVisibilityForGameObjects(false);
+                }
+            }
         }
 
-        public void SetLock(bool newLockValue)
+        private void SetVisibilityForGameObjects(bool value)
         {
-            locked = newLockValue;
+            foreach (GameObject gameObject in gameObjectsToToggle)
+            {
+                gameObject.SetActive(value);
+            }
         }
-
     }
 }
