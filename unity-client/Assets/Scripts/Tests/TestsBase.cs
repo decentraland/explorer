@@ -56,6 +56,8 @@ public class TestsBase
 
         SetUp_Renderer();
         SetUp_TutorialController();
+
+        Environment.i.Initialize(new DummyMessageHandler(), isTesting: true);
     }
 
 
@@ -66,8 +68,7 @@ public class TestsBase
 
         TestHelpers.ForceUnloadAllScenes(SceneController.i);
 
-        if (PointerEventsController.i != null)
-            PointerEventsController.i.Cleanup();
+        Environment.i.Cleanup();
 
         if (DCLCharacterController.i != null)
         {
@@ -97,8 +98,8 @@ public class TestsBase
     {
         TearDown_PromiseKeepers();
 
-        if (MemoryManager.i != null)
-            yield return MemoryManager.i.CleanupPoolsIfNeeded(true);
+        if (Environment.i.memoryManager != null)
+            yield return Environment.i.memoryManager.CleanupPoolsIfNeeded(true);
 
         if (PoolManager.i != null)
             PoolManager.i.Cleanup();
@@ -215,7 +216,8 @@ public class TestsBase
             SetUp_UIScene();
         }
 
-        PointerEventsController.i.Initialize(isTesting: true);
+        
+        Environment.i.Initialize(new DummyMessageHandler(), isTesting: true);
     }
 
 

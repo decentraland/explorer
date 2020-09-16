@@ -60,16 +60,10 @@ public class TaskbarHUDController : IHUD
         view.OnChatToggleOn += View_OnChatToggleOn;
         view.OnFriendsToggleOff += View_OnFriendsToggleOff;
         view.OnFriendsToggleOn += View_OnFriendsToggleOn;
-        view.OnSettingsToggleOff += View_OnSettingsToggleOff;
-        view.OnSettingsToggleOn += View_OnSettingsToggleOn;
         view.OnBackpackToggleOff += View_OnBackpackToggleOff;
         view.OnBackpackToggleOn += View_OnBackpackToggleOn;
         view.OnExploreToggleOff += View_OnExploreToggleOff;
         view.OnExploreToggleOn += View_OnExploreToggleOn;
-        view.OnHelpAndSupportToggleOff += View_OnHelpAndSupportToggleOff;
-        view.OnHelpAndSupportToggleOn += View_OnHelpAndSupportToggleOn;
-        view.OnGoToGenesisToggleOff += View_OnGoToGenesisToggleOff;
-        view.OnGoToGenesisToggleOn += View_OnGoToGenesisToggleOn;
 
         toggleFriendsTrigger = Resources.Load<InputAction_Trigger>("ToggleFriends");
         toggleFriendsTrigger.OnTriggered -= ToggleFriendsTrigger_OnTriggered;
@@ -157,17 +151,6 @@ public class TaskbarHUDController : IHUD
         OpenPrivateChatWindow(head.profile.userId);
     }
 
-    private void View_OnSettingsToggleOn()
-    {
-        settingsHud.SetVisibility(true);
-        OnAnyTaskbarButtonClicked?.Invoke();
-    }
-
-    private void View_OnSettingsToggleOff()
-    {
-        settingsHud.SetVisibility(false);
-    }
-
     private void View_OnBackpackToggleOn()
     {
         avatarEditorHud.SetVisibility(true);
@@ -188,29 +171,6 @@ public class TaskbarHUDController : IHUD
     private void View_OnExploreToggleOff()
     {
         exploreHud.SetVisibility(false);
-    }
-
-    private void View_OnHelpAndSupportToggleOn()
-    {
-        helpAndSupportHud.SetVisibility(true);
-        OnAnyTaskbarButtonClicked?.Invoke();
-    }
-
-    private void View_OnHelpAndSupportToggleOff()
-    {
-        helpAndSupportHud.SetVisibility(false);
-    }
-
-    private void View_OnGoToGenesisToggleOn()
-    {
-        goToGenesisHud.SetVisibility(true);
-
-        OnAnyTaskbarButtonClicked?.Invoke();
-    }
-
-    private void View_OnGoToGenesisToggleOff()
-    {
-        goToGenesisHud.SetVisibility(false);
     }
 
     private void MouseCatcher_OnMouseUnlock()
@@ -353,8 +313,6 @@ public class TaskbarHUDController : IHUD
         view.OnAddSettingsWindow();
         settingsHud.OnClose += () =>
         {
-            view.settingsButton.SetToggleState(false, false);
-
             if (!AnyWindowsDifferentThanChatIsOpen())
                 worldChatWindowHud.MarkWorldChatMessagesAsRead();
         };
@@ -410,8 +368,6 @@ public class TaskbarHUDController : IHUD
         view.OnAddHelpAndSupportWindow();
         helpAndSupportHud.view.OnClose += () =>
         {
-            view.helpAndSupportButton.SetToggleState(false, false);
-
             if (!AnyWindowsDifferentThanChatIsOpen())
                 worldChatWindowHud.MarkWorldChatMessagesAsRead();
         };
@@ -480,16 +436,10 @@ public class TaskbarHUDController : IHUD
             view.OnChatToggleOn -= View_OnChatToggleOn;
             view.OnFriendsToggleOff -= View_OnFriendsToggleOff;
             view.OnFriendsToggleOn -= View_OnFriendsToggleOn;
-            view.OnSettingsToggleOff -= View_OnSettingsToggleOff;
-            view.OnSettingsToggleOn -= View_OnSettingsToggleOn;
             view.OnBackpackToggleOff -= View_OnBackpackToggleOff;
             view.OnBackpackToggleOn -= View_OnBackpackToggleOn;
             view.OnExploreToggleOff -= View_OnExploreToggleOff;
             view.OnExploreToggleOn -= View_OnExploreToggleOn;
-            view.OnHelpAndSupportToggleOff -= View_OnHelpAndSupportToggleOff;
-            view.OnHelpAndSupportToggleOn -= View_OnHelpAndSupportToggleOn;
-            view.OnGoToGenesisToggleOff -= View_OnGoToGenesisToggleOff;
-            view.OnGoToGenesisToggleOn -= View_OnGoToGenesisToggleOn;
 
             UnityEngine.Object.Destroy(view.gameObject);
         }

@@ -22,10 +22,11 @@ public class MinimapHUDView : MonoBehaviour
     public RectTransform mapViewport;
     [SerializeField] private Button openNavmapButton;
 
-    [Header("Tutorial Configuration")] [SerializeField] internal RectTransform minimapTooltipReference;
-
     public static System.Action<MinimapHUDModel> OnUpdateData;
     public static System.Action OnOpenNavmapClicked;
+    public InputAction_Trigger toggleNavMapAction;
+
+    [Header("Tutorial Configuration")] [SerializeField] internal RectTransform minimapTooltipReference;
 
     private void Initialize(MinimapHUDController controller)
     {
@@ -35,7 +36,7 @@ public class MinimapHUDView : MonoBehaviour
         optionsButton.onClick.AddListener(controller.ToggleOptions);
         addBookmarkButton.onClick.AddListener(controller.AddBookmark);
         reportSceneButton.onClick.AddListener(controller.ReportScene);
-        openNavmapButton.onClick.AddListener(() => { OnOpenNavmapClicked?.Invoke(); });
+        openNavmapButton.onClick.AddListener(toggleNavMapAction.RaiseOnTriggered);
 
         var renderer = MapRenderer.i;
 
@@ -58,8 +59,6 @@ public class MinimapHUDView : MonoBehaviour
     {
         sceneNameText.text = string.IsNullOrEmpty(model.sceneName) ? "Unnamed" : model.sceneName;
         playerPositionText.text = model.playerPosition;
-
-        OnUpdateData?.Invoke(model);
     }
 
     public void ToggleOptions()
