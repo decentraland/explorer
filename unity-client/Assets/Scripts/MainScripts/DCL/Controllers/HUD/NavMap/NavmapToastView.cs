@@ -50,8 +50,8 @@ namespace DCL
 
         public void Populate(Vector2Int coordinates, MinimapMetadata.MinimapSceneInfo sceneInfo)
         {
-            if (HUDAudioPlayer.i != null && !gameObject.activeSelf)
-                HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogAppear);
+            if (!gameObject.activeSelf)
+                AudioScriptableObjects.dialogOpen.Play(true);
 
             bool sceneInfoExists = sceneInfo != null;
 
@@ -66,9 +66,17 @@ namespace DCL
 
             sceneOwnerText.transform.parent.gameObject.SetActive(sceneInfoExists && !string.IsNullOrEmpty(sceneInfo.owner));
             sceneDescriptionText.transform.parent.gameObject.SetActive(sceneInfoExists && !string.IsNullOrEmpty(sceneInfo.description));
-            sceneTitleText.transform.parent.gameObject.SetActive(sceneInfoExists && !string.IsNullOrEmpty(sceneInfo.name)); scenePreviewImage.gameObject.SetActive(sceneInfoExists && !string.IsNullOrEmpty(sceneInfo.previewImageUrl));
-            scenePreviewContainer.SetActive(sceneInfoExists && !string.IsNullOrEmpty(sceneInfo.previewImageUrl));
+            sceneTitleText.transform.parent.gameObject.SetActive(sceneInfoExists && !string.IsNullOrEmpty(sceneInfo.name));
             scenePreviewLoadingSpinner.SetActive(false);
+
+            bool useDefaultThumbnail =
+                !sceneInfoExists || (sceneInfoExists && string.IsNullOrEmpty(sceneInfo.previewImageUrl));
+
+            if (useDefaultThumbnail)
+            {
+                scenePreviewImage.texture = scenePreviewFailImage.texture;
+                currentImageUrl = "";
+            }
 
             if (sceneInfoExists)
             {
@@ -132,8 +140,8 @@ namespace DCL
 
         public void OnCloseClick()
         {
-            if (HUDAudioPlayer.i != null && gameObject.activeSelf)
-                HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogClose);
+            if (gameObject.activeSelf)
+                AudioScriptableObjects.dialogClose.Play(true);
 
             MapRenderer.i.showCursorCoords = true;
             gameObject.SetActive(false);

@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
@@ -18,7 +18,7 @@ internal class SceneInfoView : MonoBehaviour
     private float timer;
     private RectTransform thisRT;
     private RectTransform parentRT;
-    private BaseSceneCellView baseSceneView;
+    private HotSceneCellView baseSceneView;
 
     public void Show()
     {
@@ -26,8 +26,7 @@ internal class SceneInfoView : MonoBehaviour
         {
             gameObject.SetActive(true);
 
-            if (HUDAudioPlayer.i != null)
-                HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogAppear);
+            AudioScriptableObjects.dialogOpen.Play(true);
         }
         showHideAnimator.Show();
         this.enabled = false;
@@ -50,8 +49,7 @@ internal class SceneInfoView : MonoBehaviour
         {
             showHideAnimator.Hide(true);
 
-            if (HUDAudioPlayer.i != null)
-                HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogClose);
+            AudioScriptableObjects.dialogClose.Play(true);
         }
         else
         {
@@ -60,7 +58,7 @@ internal class SceneInfoView : MonoBehaviour
         }
     }
 
-    void SetSceneView(BaseSceneCellView sceneView)
+    void SetSceneView(HotSceneCellView sceneView)
     {
         if (baseSceneView)
         {
@@ -69,9 +67,9 @@ internal class SceneInfoView : MonoBehaviour
 
         baseSceneView = sceneView;
 
-        SetMapInfoData(sceneView);
+        SetMapInfoData(sceneView.mapInfoHandler);
 
-        thumbnail.texture = sceneView.GetThumbnail();
+        thumbnail.texture = sceneView.thumbnailHandler.texture;
         bool hasThumbnail = thumbnail.texture != null;
         loadingSpinner.SetActive(!hasThumbnail);
         if (!hasThumbnail)
@@ -114,9 +112,9 @@ internal class SceneInfoView : MonoBehaviour
         hoverArea.OnPointerEnter += OnPointerEnter;
         hoverArea.OnPointerExit += OnPointerExit;
 
-        BaseSceneCellView.OnInfoButtonPointerDown += OnInfoButtonPointerDown;
-        BaseSceneCellView.OnInfoButtonPointerExit += OnInfoButtonPointerExit;
-        BaseSceneCellView.OnJumpIn += OnJumpIn;
+        HotSceneCellView.OnInfoButtonPointerDown += OnInfoButtonPointerDown;
+        HotSceneCellView.OnInfoButtonPointerExit += OnInfoButtonPointerExit;
+        HotSceneCellView.OnJumpIn += OnJumpIn;
 
         showHideAnimator.OnWillFinishHide += OnHidden;
     }
@@ -126,9 +124,9 @@ internal class SceneInfoView : MonoBehaviour
         hoverArea.OnPointerEnter -= OnPointerEnter;
         hoverArea.OnPointerExit -= OnPointerExit;
 
-        BaseSceneCellView.OnInfoButtonPointerDown -= OnInfoButtonPointerDown;
-        BaseSceneCellView.OnInfoButtonPointerExit -= OnInfoButtonPointerExit;
-        BaseSceneCellView.OnJumpIn -= OnJumpIn;
+        HotSceneCellView.OnInfoButtonPointerDown -= OnInfoButtonPointerDown;
+        HotSceneCellView.OnInfoButtonPointerExit -= OnInfoButtonPointerExit;
+        HotSceneCellView.OnJumpIn -= OnJumpIn;
 
         showHideAnimator.OnWillFinishHide -= OnHidden;
     }
@@ -141,8 +139,7 @@ internal class SceneInfoView : MonoBehaviour
             showHideAnimator.Hide();
             this.enabled = false;
 
-            if (HUDAudioPlayer.i != null)
-                HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogClose);
+            AudioScriptableObjects.dialogClose.Play(true);
         }
     }
 
@@ -151,7 +148,7 @@ internal class SceneInfoView : MonoBehaviour
         baseSceneView = null;
     }
 
-    void OnInfoButtonPointerDown(BaseSceneCellView sceneView)
+    void OnInfoButtonPointerDown(HotSceneCellView sceneView)
     {
         if (sceneView == baseSceneView)
             return;
