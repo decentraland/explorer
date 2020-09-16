@@ -81,7 +81,7 @@ onmessage = function (e) {
   }
 }
 
-function processDecodeMessage(e: MessageEvent<any>) {
+function processDecodeMessage(e: MessageEvent) {
   const sampleRate = getSampleRate(e)
   const decoderWorklet = (decoderWorklets[e.data.streamId] = decoderWorklets[e.data.streamId] || {
     working: false,
@@ -108,7 +108,7 @@ function processDecodeMessage(e: MessageEvent<any>) {
   }
 }
 
-function processEncodeMessage(e: MessageEvent<any>) {
+function processEncodeMessage(e: MessageEvent) {
   const sampleRate = getSampleRate(e)
   const encoderWorklet = (encoderWorklets[e.data.streamId] = encoderWorklets[e.data.streamId] || {
     working: false,
