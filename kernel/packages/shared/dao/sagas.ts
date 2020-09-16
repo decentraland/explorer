@@ -41,10 +41,39 @@ const CATALYST_CANDIDATES_KEY = CACHE_KEY + '-' + SET_CATALYST_CANDIDATES
 const CACHE_TLD_KEY = 'tld'
 
 export function* daoSaga(): any {
+  yield call(loadDefaultCatalystRealms)
   yield takeEvery(WEB3_INITIALIZED, loadCatalystRealms)
 
   yield takeEvery([INIT_CATALYST_REALM, SET_CATALYST_REALM], cacheCatalystRealm)
   yield takeEvery([SET_CATALYST_CANDIDATES, SET_ADDED_CATALYST_CANDIDATES], cacheCatalystCandidates)
+}
+
+function* loadDefaultCatalystRealms() {
+  yield call(waitForMetaConfigurationInitialization)
+
+  const tld = getDefaultTLD().toLowerCase() !== 'org' ? 'zone' : 'org'
+  const realm: Realm = {
+    domain: `https://peer.decentraland.${tld}`,
+    catalystName: 'fenrir',
+    layer: 'blue',
+    lighthouseVersion: '0.2'
+  }
+  const whiteList = {
+    domain: `https://peer.decentraland.${tld}`,
+    catalystName: 'fenrir',
+    elapsed: 544,
+    status: 0,
+    layer: {
+      name: 'blue',
+      usersCount: 0,
+      maxUsers: 100,
+      usersParcels: []
+    },
+    score: -50,
+    lighthouseVersion: '0.2'
+  }
+  yield put(setContentWhitelist([whiteList]))
+  yield put(initCatalystRealm(realm))
 }
 
 /**

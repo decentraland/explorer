@@ -9,7 +9,7 @@ export default class Web3Connector {
   constructor() {
     this.web3Modal = new Web3Modal({
       network: 'ropsten', // 'mainnet',
-      cacheProvider: true,
+      cacheProvider: false,
       providerOptions: {
         fortmatic: {
           package: Fortmatic,
