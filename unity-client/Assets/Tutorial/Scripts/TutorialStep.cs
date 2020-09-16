@@ -8,7 +8,7 @@ namespace DCL.Tutorial
     /// </summary>
     public class TutorialStep : MonoBehaviour
     {
-        protected const string STEP_FINISHED_ANIMATOR_TRIGGER = "StepFinished";
+        protected static int STEP_FINISHED_ANIMATOR_TRIGGER = Animator.StringToHash("StepFinished");
 
         [SerializeField] internal bool unlockCursorAtStart = false;
         [SerializeField] internal bool show3DTeacherAtStart = false;
@@ -66,7 +66,7 @@ namespace DCL.Tutorial
         {
         }
 
-        private IEnumerator WaitForAnimation(string animationTrigger)
+        private IEnumerator WaitForAnimation(int animationTrigger)
         {
             if (stepAnimator == null)
                 yield break;

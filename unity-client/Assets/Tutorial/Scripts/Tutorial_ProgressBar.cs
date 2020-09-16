@@ -20,6 +20,8 @@ namespace DCL.Tutorial
         private float maxBarWith;
         private Coroutine progressBarCoroutine;
 
+        private static int ANIM_PROPERTY_SET_NEW_PERCENTAGE = Animator.StringToHash("SetNewPercentage");
+
         private void Awake()
         {
             maxBarWith = ((RectTransform)transform).sizeDelta.x;
@@ -48,7 +50,7 @@ namespace DCL.Tutorial
 
             if (applyAnimation)
             {
-                progressBarAnimator.SetTrigger("SetNewPercentage");
+                progressBarAnimator.SetTrigger(ANIM_PROPERTY_SET_NEW_PERCENTAGE);
                 progressBarCoroutine = StartCoroutine(ChangeProgressBarSize(progressBarRectTransform.sizeDelta.x, GetProgressBarWidthFromPercentage(percentage)));
             }
             else
