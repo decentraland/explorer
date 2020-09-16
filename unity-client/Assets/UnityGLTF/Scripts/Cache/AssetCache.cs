@@ -94,7 +94,6 @@ namespace UnityGLTF.Cache
         /// <param name="refCountedStream"></param>
         public static void AddBuffer(string uri, string idSuffix, RefCountedStreamData refCountedStream)
         {
-            Debug.Log("Adding buffer... " + GetCacheId(uri, idSuffix));
             StreamCacheByUri[GetCacheId(uri, idSuffix)] = refCountedStream;
         }
 
@@ -106,7 +105,6 @@ namespace UnityGLTF.Cache
         /// <returns>True if its cached</returns>
         public static bool HasBuffer(string uri, string idSuffix)
         {
-            Debug.Log("Has buffer...? " + GetCacheId(uri, idSuffix));
             return HasBuffer(GetCacheId(uri, idSuffix));
         }
 
