@@ -1,10 +1,8 @@
-import { WebSocketProvider, RequestManager } from 'eth-connect'
+import { RequestManager } from 'eth-connect'
 import { future } from 'fp-future'
 
-import { ethereumConfigurations, ETHEREUM_NETWORK } from 'config'
 import { defaultLogger } from 'shared/logger'
 import { Account } from 'web3x/account'
-import { getTLD } from '../../config'
 import { Eth } from 'web3x/eth'
 import Web3Connector from './Web3Connector'
 
@@ -63,18 +61,13 @@ export async function awaitWeb3Approval(): Promise<void> {
       // otherwise, login element not found (preview, builder)
       providerFuture.resolve({
         successful: false,
-        provider: createProvider(),
+        provider: Web3Connector.createWebSocketProvider(),
         localIdentity: Account.create()
       })
     }
   }
   providerFuture.then((result: LoginData) => requestManager.setProvider(result.provider)).catch(defaultLogger.error)
   return providerFuture
-}
-
-function createProvider() {
-  const network = getTLD() === 'zone' ? ETHEREUM_NETWORK.ROPSTEN : ETHEREUM_NETWORK.MAINNET
-  return new WebSocketProvider(ethereumConfigurations[network].wss)
 }
 
 export function isSessionExpired(userData: any) {
