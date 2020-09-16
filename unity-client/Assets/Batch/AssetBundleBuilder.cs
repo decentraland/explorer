@@ -276,11 +276,6 @@ namespace DCL
 
         private bool DumpAssets(MappingPair[] rawContents)
         {
-            // rawContents = rawContents.Where((x) =>
-            //     x.hash == "QmWoH5VgsomNDsKERMH55u4Z2fhDGNeGYWnFpiFPsy3KX2" ||
-            //     x.hash == "QmeTdBwR6XguoA85b1nG1w1ysw63PYqJC6DY9q43wLKh9n" ||
-            //     x.hash == "QmbK1UdPvkFJ3nVp7GxDmzvyKUPko34HQ6j4fN5nSCfWZn").ToArray();
-
             var hashToGltfPair = AssetBundleBuilderUtils.FilterExtensions(rawContents, AssetBundleBuilderConfig.gltfExtensions);
             var hashToBufferPair = AssetBundleBuilderUtils.FilterExtensions(rawContents, AssetBundleBuilderConfig.bufferExtensions);
 
@@ -310,11 +305,9 @@ namespace DCL
 
                 return false;
             }
-#if BRIAN
-            DumpSceneTextures(rawContents);
-#endif
 
-            Debug.Log("Dling buffers");
+            DumpSceneTextures(rawContents);
+
             //NOTE(Brian): Prepare buffers. We should prepare all the dependencies in this phase.
             foreach (var kvp in hashToBufferPair)
             {
@@ -345,26 +338,18 @@ namespace DCL
                 foreach (var contentPair in rawContents)
                 {
                     string contentFilePathLower = contentPair.file.ToLowerInvariant();
-                    string contentFilePath = contentPair.file;
-
-                    //Debug.Log("contentPair filename = " + contentFilePathLower);
 
                     bool endsWithTextureExtensions = AssetBundleBuilderConfig.textureExtensions.Any((x) => contentFilePathLower.EndsWith(x));
 
                     if (endsWithTextureExtensions)
-                    {
                         RetrieveAndInjectTexture(kvp.Value, contentPair);
-                    }
 
                     bool endsWithBufferExtensions = AssetBundleBuilderConfig.bufferExtensions.Any((x) => contentFilePathLower.EndsWith(x));
 
                     if (endsWithBufferExtensions)
-                    {
                         RetrieveAndInjectBuffer(kvp.Value, contentPair);
-                    }
                 }
 
-#if BRIAN
                 //NOTE(Brian): Finally, load the gLTF. The GLTFImporter will use the PersistentAssetCache to resolve the external dependencies.
                 string path = DownloadAsset(gltfFilePath, gltfHash, gltfHash + "/");
 
@@ -374,7 +359,6 @@ namespace DCL
                     AssetDatabase.SaveAssets();
                     pathsToTag.Add(path, gltfHash);
                 }
-#endif
 
                 foreach (var streamDataKvp in PersistentAssetCache.StreamCacheByUri)
                 {
@@ -383,8 +367,6 @@ namespace DCL
                 }
             }
 
-#if BRIAN
-            //Movi esto aca
             AssetDatabase.Refresh();
             AssetDatabase.SaveAssets();
 
@@ -392,7 +374,7 @@ namespace DCL
             {
                 AssetBundleBuilderUtils.MarkForAssetBundleBuild(kvp.Key, kvp.Value);
             }
-#endif
+
             foreach (var s in streamsToDispose)
             {
                 s.Dispose();
@@ -579,9 +561,6 @@ namespace DCL
 
             string relativePath = AssetBundleBuilderUtils.GetRelativePathTo(gltfMappingPair.file, textureMappingPair.file);
 
-            // string assetDBOutputPath = finalDownloadedAssetDbPath + gltfMappingPair.hash + "/" + gltfMappingPair.hash + Path.GetExtension(gltfMappingPair.file);
-            // string id = relativePath + "@" + assetDBOutputPath;
-
             //NOTE(Brian): This cache will be used by the GLTF importer when seeking textures. This way the importer will
             //             consume the asset bundle dependencies instead of trying to create new textures.
             PersistentAssetCache.AddImage(relativePath, realOutputPathGltf, new RefCountedTextureData(relativePath, t2d));
@@ -593,18 +572,12 @@ namespace DCL
             string gltfExt = Path.GetExtension(gltfMappingPair.file);
             string realOutputPath = finalDownloadedPath + bufferMappingPair.hash + "/" + bufferMappingPair.hash + bufferExt;
             string gltfOutputPath = finalDownloadedAssetDbPath + gltfMappingPair.hash + "/" + gltfMappingPair.hash + gltfExt;
-#if BRIAN
+
             if (!File.Exists(realOutputPath))
                 return;
 
             Stream stream = File.OpenRead(realOutputPath);
-#else
-            Stream stream = null;
-#endif
             string relativePath = AssetBundleBuilderUtils.GetRelativePathTo(gltfMappingPair.file, bufferMappingPair.file);
-
-            // string assetDbOutputPath = finalDownloadedAssetDbPath + gltfMappingPair.hash + "/" + gltfMappingPair.hash + fileExt;
-            // string id = relativePath + "@" + assetDbOutputPath;
 
             // NOTE(Brian): This cache will be used by the GLTF importer when seeking streams. This way the importer will
             //              consume the asset bundle dependencies instead of trying to create new streams.
@@ -633,7 +606,6 @@ namespace DCL
                 return finalDownloadedPath + additionalPath;
             }
 
-#if BRIAN
             UnityWebRequest req;
 
             int retryCount = ASSET_REQUEST_RETRY_COUNT;
@@ -664,8 +636,7 @@ namespace DCL
 
             string dbPath = finalDownloadedAssetDbPath + additionalPath + hash + fileExt;
             AssetDatabase.ImportAsset(dbPath, ImportAssetOptions.ForceSynchronousImport | ImportAssetOptions.ImportRecursive);
-#endif
-            Debug.Log("Saved to " + outputPath);
+
             return finalDownloadedPath + additionalPath;
         }
 
