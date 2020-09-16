@@ -44,7 +44,7 @@ namespace Tests
         }
 
         [Test]
-        public void WhenVisibilityIsSetToTrueThenObjectsAreReactivated()
+        public void ReactivateGameObjectsWhenVisibilityIsSetToTrue()
         {
             visibility.SetVisibility("Caller1", false);
             Assert.IsFalse(toggledGameObject.activeSelf);
