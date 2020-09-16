@@ -1,3 +1,5 @@
+import { initCommunityEvents } from "../shared/social/communityEvents"
+
 declare const globalThis: { UnityLoader: any } & StoreContainer
 declare const global: any
 
@@ -67,7 +69,10 @@ initializeUnity(container)
 
     globalThis.globalStore.dispatch(signalRendererInitialized())
 
-    onNextWorldRunning(() => globalThis.globalStore.dispatch(experienceStarted()))
+    onNextWorldRunning(() => {
+      globalThis.globalStore.dispatch(experienceStarted())
+      initCommunityEvents()
+    })
 
     await realmInitialized()
     await startUnitySceneWorkers()

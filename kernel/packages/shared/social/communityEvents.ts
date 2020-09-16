@@ -1,40 +1,76 @@
 import { defaultLogger } from 'shared/logger'
+import { notifyStatusThroughChat } from "../comms/chat"
 
 const DEFAULT_FETCH_INTERVAL = 60000
 
 let fetchIntervalTime: number = DEFAULT_FETCH_INTERVAL
 let lastFetchTime: number = 0
+let initialMessageSent = false
+let initialized = false
 
 export function initCommunityEvents() {
-  let sentInitialMessage = false
+  if (initialized) {
+    return
+  }
 
-  setInterval(() => {
-    const now = Date.now()
-    if (now - lastFetchTime > fetchIntervalTime) {
-      fetchEvents()
-        .then((events) => {
-          if (events !== null) {
-            lastFetchTime = now
+  initialMessageSent = false
+  initialized = true
+  fetchAndReportEvents(Date.now())
+  setInterval(eventsInterval, 1000)
+}
 
-            if (!sentInitialMessage) {
-              sentInitialMessage = true
-              for (let live of events.liveId) {
-                console.log(`PATO: live event ${events.all[live].name}`)
-              }
-            }
-            fetchIntervalTime = now + events.interval
-          }
-        })
-        .catch()
+function eventsInterval() {
+  const now = Date.now()
+  if (now - lastFetchTime > fetchIntervalTime) {
+    fetchAndReportEvents(now)
+  }
+}
+
+function sendInitialMessage(events: Events) {
+  if (initialMessageSent) {
+    return
+  }
+
+  initialMessageSent = true
+
+  if (events.liveId.length > 0 || events.todayId.length > 0) {
+    let message: string = ''
+    for (let eventId of events.liveId) {
+      message += `Event now: <indent=25%><i>${events.all[eventId].name}</i> `
+        + `<nobr>@ ${events.all[eventId].position[0]},${events.all[eventId].position[1]}</nobr></indent>\n`
     }
-  }, 1000)
+    for (let eventId of events.todayId) {
+      let date = new Date(events.all[eventId].next_start_at)
+      message += `Event today: <indent=29%><i>${events.all[eventId].name}</i> `
+        + `<nobr>@ ${events.all[eventId].position[0]},${events.all[eventId].position[1]}</nobr> `
+        + `<nobr>${date.getHours()}:${date.getMinutes().toLocaleString(undefined, { minimumIntegerDigits: 2 })}hrs</nobr></indent>\n`
+    }
+    notifyStatusThroughChat(message)
+  }
+}
+
+function fetchAndReportEvents(now: number) {
+  fetchEvents()
+    .then((events) => {
+      if (events !== null) {
+        lastFetchTime = now
+
+        if (!initialMessageSent) {
+          sendInitialMessage(events)
+        }
+        fetchIntervalTime = now + events.interval
+      }
+    })
+    .catch()
 }
 
 async function fetchEvents(): Promise<Events | null> {
   try {
     const response = await fetch(`https://events.decentraland.org/api/events`)
     const json = (await response.json()) as EventApiResponse
-    return processEvents(json.data)
+    if (Array.isArray(json.data)) {
+      return processEvents(json.data)
+    }
   } catch (e) {
     defaultLogger.error(e)
   }
@@ -49,7 +85,7 @@ function processEvents(events: EventJsonData[]): Events {
     interval: DEFAULT_FETCH_INTERVAL
   }
 
-  const today = new Date()
+  const date = new Date()
 
   for (let event of events) {
     const startDate = new Date(event.next_start_at)
@@ -62,9 +98,9 @@ function processEvents(events: EventJsonData[]): Events {
           result.interval = millisecondsLeft
         }
       }
-    } else if (isToday(today, startDate)) {
+    } else if (isToday(date, startDate)) {
       result.todayId.push(event.id)
-      const millisecondsToStart = startDate.getTime() - today.getTime()
+      const millisecondsToStart = startDate.getTime() - date.getTime()
       if (millisecondsToStart > 0 && millisecondsToStart < result.interval) {
         result.interval = millisecondsToStart
       }
