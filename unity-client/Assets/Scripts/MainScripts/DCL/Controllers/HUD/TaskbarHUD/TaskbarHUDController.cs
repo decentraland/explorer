@@ -205,8 +205,7 @@ public class TaskbarHUDController : IHUD
         worldChatWindowHud.SetVisibility(true);
         worldChatWindowHud.view.ActivatePreview();
 
-        if (!AnyWindowsDifferentThanChatIsOpen())
-            worldChatWindowHud.MarkWorldChatMessagesAsRead();
+        MarkWorldChatAsReadIfOtherWindowIsOpen();
     }
 
     public void AddWorldChatWindow(WorldChatWindowHUDController controller)
@@ -267,8 +266,7 @@ public class TaskbarHUDController : IHUD
             if (btn != null)
                 btn.SetToggleState(false, false);
 
-            if (!AnyWindowsDifferentThanChatIsOpen())
-                worldChatWindowHud.MarkWorldChatMessagesAsRead();
+            MarkWorldChatAsReadIfOtherWindowIsOpen();
         };
 
         privateChatWindowHud.view.OnClose += () =>
@@ -284,8 +282,7 @@ public class TaskbarHUDController : IHUD
                 view.chatHeadsGroup.RemoveChatHead(btn);
             }
 
-            if (!AnyWindowsDifferentThanChatIsOpen())
-                worldChatWindowHud.MarkWorldChatMessagesAsRead();
+            MarkWorldChatAsReadIfOtherWindowIsOpen();
         };
     }
 
@@ -307,9 +304,7 @@ public class TaskbarHUDController : IHUD
         friendsHud.view.OnClose += () =>
         {
             view.friendsButton.SetToggleState(false, false);
-
-            if (!AnyWindowsDifferentThanChatIsOpen())
-                worldChatWindowHud.MarkWorldChatMessagesAsRead();
+            MarkWorldChatAsReadIfOtherWindowIsOpen();
         };
 
         friendsHud.view.friendsList.OnDeleteConfirmation += (userIdToRemove) => { view.chatHeadsGroup.RemoveChatHead(userIdToRemove); };
@@ -327,8 +322,7 @@ public class TaskbarHUDController : IHUD
         view.OnAddSettingsWindow();
         settingsHud.OnClose += () =>
         {
-            if (!AnyWindowsDifferentThanChatIsOpen())
-                worldChatWindowHud.MarkWorldChatMessagesAsRead();
+            MarkWorldChatAsReadIfOtherWindowIsOpen();
         };
     }
 
@@ -345,9 +339,7 @@ public class TaskbarHUDController : IHUD
         avatarEditorHud.OnClose += () =>
         {
             view.backpackButton.SetToggleState(false, false);
-
-            if (!AnyWindowsDifferentThanChatIsOpen())
-                worldChatWindowHud.MarkWorldChatMessagesAsRead();
+            MarkWorldChatAsReadIfOtherWindowIsOpen();
         };
     }
 
@@ -364,9 +356,7 @@ public class TaskbarHUDController : IHUD
         exploreHud.OnClose += () =>
         {
             view.exploreButton.SetToggleState(false, false);
-
-            if (!AnyWindowsDifferentThanChatIsOpen())
-                worldChatWindowHud.MarkWorldChatMessagesAsRead();
+            MarkWorldChatAsReadIfOtherWindowIsOpen();
         };
     }
 
@@ -382,8 +372,7 @@ public class TaskbarHUDController : IHUD
         view.OnAddHelpAndSupportWindow();
         helpAndSupportHud.view.OnClose += () =>
         {
-            if (!AnyWindowsDifferentThanChatIsOpen())
-                worldChatWindowHud.MarkWorldChatMessagesAsRead();
+            MarkWorldChatAsReadIfOtherWindowIsOpen();
         };
     }
 
@@ -399,9 +388,7 @@ public class TaskbarHUDController : IHUD
         goToGenesisHud.view.OnClose += () =>
         {
             view.goToGenesisButton.SetToggleState(false, false);
-
-            if (!AnyWindowsDifferentThanChatIsOpen())
-                worldChatWindowHud.MarkWorldChatMessagesAsRead();
+            MarkWorldChatAsReadIfOtherWindowIsOpen();
         };
     }
 
@@ -540,5 +527,11 @@ public class TaskbarHUDController : IHUD
     {
         return (friendsHud != null && friendsHud.view.gameObject.activeSelf) ||
                (privateChatWindowHud != null && privateChatWindowHud.view.gameObject.activeSelf);
+    }
+
+    private void MarkWorldChatAsReadIfOtherWindowIsOpen()
+    {
+        if (!AnyWindowsDifferentThanChatIsOpen())
+            worldChatWindowHud.MarkWorldChatMessagesAsRead();
     }
 }
