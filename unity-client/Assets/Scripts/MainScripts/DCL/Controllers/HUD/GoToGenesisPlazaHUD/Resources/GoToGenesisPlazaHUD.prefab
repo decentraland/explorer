@@ -132,8 +132,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4bfd0d144b6d3dd438b84fa14a062c4f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  extraClickSound: 0
-  playHoverSound: 1
+  playHover: 1
+  playClick: 1
+  playRelease: 1
+  extraClickEvent: {fileID: 0}
 --- !u!1 &3808685453050579936
 GameObject:
   m_ObjectHideFlags: 0
@@ -656,8 +658,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4bfd0d144b6d3dd438b84fa14a062c4f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  extraClickSound: 0
-  playHoverSound: 1
+  playHover: 1
+  playClick: 1
+  playRelease: 1
+  extraClickEvent: {fileID: 0}
 --- !u!1 &5360800121203204040
 GameObject:
   m_ObjectHideFlags: 0
@@ -1134,7 +1138,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7ab5b2d0fde9d74489ae5674d63a3bb6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GoToGenesisPlazaAnimator: {fileID: 130523288579308580}
+  goToGenesisPlazaAnimator: {fileID: 130523288579308580}
   cancelButton: {fileID: 8829506031662869903}
   continueButton: {fileID: 31662781482329574}
 --- !u!1 &9101157973253599486

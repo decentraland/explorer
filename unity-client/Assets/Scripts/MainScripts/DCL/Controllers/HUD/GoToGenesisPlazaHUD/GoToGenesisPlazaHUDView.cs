@@ -12,7 +12,7 @@ namespace DCL.GoToGenesisPlazaHUD
         private const string PATH = "GoToGenesisPlazaHUD";
         private const string VIEW_OBJECT_NAME = "_GoToGenesisPlazaHUD";
 
-        [SerializeField] private ShowHideAnimator GoToGenesisPlazaAnimator;
+        [SerializeField] private ShowHideAnimator goToGenesisPlazaAnimator;
         [SerializeField] private Button cancelButton;
         [SerializeField] internal Button continueButton;
 
@@ -36,9 +36,9 @@ namespace DCL.GoToGenesisPlazaHUD
         public void SetVisibility(bool visible)
         {
             if (visible)
-                GoToGenesisPlazaAnimator.Show();
+                goToGenesisPlazaAnimator.Show();
             else
-                GoToGenesisPlazaAnimator.Hide();
+                goToGenesisPlazaAnimator.Hide();
 
             if (!visible && isOpen)
                 OnClose?.Invoke();
