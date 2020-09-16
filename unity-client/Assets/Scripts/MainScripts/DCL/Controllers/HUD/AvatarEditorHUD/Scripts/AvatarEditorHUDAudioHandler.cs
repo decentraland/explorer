@@ -10,6 +10,8 @@ public class AvatarEditorHUDAudioHandler : MonoBehaviour
     [SerializeField]
     AvatarEditorHUDView view;
     [SerializeField]
+    ItemSelector nftItemSelector;
+    [SerializeField]
     Button randomizeButton;
     [SerializeField]
     AudioEvent eventMusic, eventRarity, eventAvatarAppear, eventReactionMale, eventReactionFemale, eventWearableClothing, eventWearableEyewear, eventWearableJewelry,
@@ -27,6 +29,8 @@ public class AvatarEditorHUDAudioHandler : MonoBehaviour
         {
             view.wearableGridPairs[i].selector.OnItemClicked += OnSelectWearable;
         }
+
+        nftItemSelector.OnItemClicked += OnSelectWearable;
 
         view.OnSetVisibility += OnSetAvatarEditorVisibility;
         view.OnRandomize += OnClickRandomize;
