@@ -33,7 +33,9 @@ import { getFromLocalStorage, saveToLocalStorage } from 'atomicHelpers/localStor
 import { Session } from '.'
 import { ExplorerIdentity } from './types'
 import { LOGIN, loginCompleted as loginCompletedAction, LOGOUT, SETUP_WEB3, SIGNUP, userAuthentified } from './actions'
-import { createSignUpProfile, profileCheckExists } from '../profiles/actions'
+import { createSignUpProfile } from '../profiles/actions'
+import { getProfileByUserId } from '../profiles/sagas'
+import { ensureRealmInitialized } from '../dao/sagas'
 
 const logger = createLogger('session: ')
 
@@ -79,6 +81,7 @@ function* scheduleAwaitingSignaturePrompt() {
 }
 
 function* setupWeb3() {
+  yield ensureRealmInitialized()
   if (ENABLE_WEB3) {
     const web3Connector = yield createWeb3Connector()
     const userData = getUserProfile()
@@ -94,29 +97,25 @@ function* setupWeb3() {
 }
 
 function* profileExists(userId: string) {
-  const profile = yield call(profileCheckExists, userId)
-  const profileId = profile && profile.payload && profile.payload.userId ? profile.payload.userId : null
-  return userId === profileId
+  const profile = yield getProfileByUserId(userId)
+  return profile && userId === profile.userId
 }
 
 function* login() {
   if (ENABLE_WEB3) {
-    const provider = yield requestProvider()
-    if (!provider) {
+    if (!(yield requestProvider())) {
       return
     }
     const account = yield getUserAccount()
     if (!account) {
       return
     }
-    if (!profileExists(account)) {
+    if (!(yield profileExists(account))) {
       // we should call to signUp
       return
     }
   }
-  const loggedIn = yield doLogin(getUserProfile())
-  console.log('LOGGED IN: ', loggedIn)
-  return loggedIn
+  return yield authenticate(getUserProfile())
 }
 
 function* requestProvider() {
@@ -167,7 +166,7 @@ function showNetworkWarning() {
   }
 }
 
-function* doLogin(userData: any, signUpIdentity?: ExplorerIdentity) {
+function* authenticate(userData: any, signUpIdentity?: ExplorerIdentity) {
   let userId: string
   let identity: ExplorerIdentity
 
@@ -302,7 +301,6 @@ function showAwaitingSignaturePrompt(show: boolean) {
 }
 
 function* signup() {
-  removeUserProfile()
   const provider = yield requestWeb3Provider(true)
   if (!provider) {
     return
@@ -311,8 +309,7 @@ function* signup() {
   if (!account) {
     return
   }
-  const exists = yield call(profileExists, account)
-  if (exists) {
+  if (yield call(profileExists, account)) {
     // we should go to login
     return
   }
@@ -335,7 +332,7 @@ function* signup() {
   }
   yield call(createSignUpProfile, profile.userId, profile, identity)
 
-  return doLogin(null)
+  return authenticate(null, identity)
 }
 
 function* logout() {
