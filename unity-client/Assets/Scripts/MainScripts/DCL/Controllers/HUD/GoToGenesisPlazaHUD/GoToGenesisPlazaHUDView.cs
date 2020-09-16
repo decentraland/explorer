@@ -8,22 +8,22 @@ namespace DCL.GoToGenesisPlazaHUD
         public bool isOpen { get; private set; } = false;
 
         public event System.Action OnClose;
+        public event System.Action OnContinueClick;
+        public event System.Action OnCancelClick;
 
         private const string PATH = "GoToGenesisPlazaHUD";
         private const string VIEW_OBJECT_NAME = "_GoToGenesisPlazaHUD";
 
         [SerializeField] private ShowHideAnimator goToGenesisPlazaAnimator;
         [SerializeField] private Button cancelButton;
-        [SerializeField] internal Button continueButton;
+        [SerializeField] private Button continueButton;
 
         private void Initialize()
         {
             gameObject.name = VIEW_OBJECT_NAME;
 
-            cancelButton.onClick.AddListener(() =>
-            {
-                SetVisibility(false);
-            });
+            cancelButton.onClick.AddListener(() => { OnCancelClick?.Invoke(); });
+            continueButton.onClick.AddListener(() => { OnContinueClick?.Invoke(); });
         }
 
         public static GoToGenesisPlazaHUDView Create()

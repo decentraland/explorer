@@ -13,7 +13,8 @@ namespace DCL.GoToGenesisPlazaHUD
         {
             view = GoToGenesisPlazaHUDView.Create();
 
-            view.continueButton.onClick.AddListener(OnGoToGenesisButtonClick);
+            view.OnContinueClick += () => OnGoToGenesisButtonClick();
+            view.OnCancelClick += () => SetVisibility(false);
         }
 
         public void SetVisibility(bool visible)
@@ -24,10 +25,7 @@ namespace DCL.GoToGenesisPlazaHUD
         public void Dispose()
         {
             if (view != null)
-            {
-                view.continueButton.onClick.RemoveListener(OnGoToGenesisButtonClick);
                 UnityEngine.Object.Destroy(view.gameObject);
-            }
         }
 
         private void OnGoToGenesisButtonClick()
