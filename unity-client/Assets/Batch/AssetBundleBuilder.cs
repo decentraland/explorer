@@ -125,7 +125,8 @@ namespace DCL
                     builder.DumpScene(sceneCid[0]);
                     return;
                 }
-                else if (AssetBundleBuilderUtils.ParseOption(commandLineArgs, AssetBundleBuilderConfig.CLI_BUILD_PARCELS_RANGE_SYNTAX, 4, out string[] xywh))
+
+                if (AssetBundleBuilderUtils.ParseOption(commandLineArgs, AssetBundleBuilderConfig.CLI_BUILD_PARCELS_RANGE_SYNTAX, 4, out string[] xywh))
                 {
                     if (xywh == null)
                     {
@@ -153,10 +154,8 @@ namespace DCL
                     builder.DumpArea(new Vector2Int(x, y), new Vector2Int(w, h));
                     return;
                 }
-                else
-                {
-                    throw new ArgumentException("Invalid arguments! You must pass -parcelsXYWH or -sceneCid for dump to work!");
-                }
+
+                throw new ArgumentException("Invalid arguments! You must pass -parcelsXYWH or -sceneCid for dump to work!");
             }
             catch (Exception e)
             {
