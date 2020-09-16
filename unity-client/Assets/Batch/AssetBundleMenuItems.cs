@@ -16,7 +16,7 @@ namespace DCL
         public static void DumpMuseum()
         {
             var builder = new AssetBundleBuilder();
-            builder.environment = ContentServerUtils.ApiEnvironment.ORG;
+            builder.tld = ContentServerUtils.ApiTLD.ORG;
             builder.skipAlreadyBuiltBundles = false;
             var zoneArray = Utils.GetCenteredZoneArray(new Vector2Int(13, 75), new Vector2Int(2, 2));
             builder.DumpArea(zoneArray);
@@ -35,7 +35,7 @@ namespace DCL
         public static void DumpZoneArea()
         {
             var builder = new AssetBundleBuilder();
-            builder.environment = ContentServerUtils.ApiEnvironment.ORG;
+            builder.tld = ContentServerUtils.ApiTLD.ORG;
             builder.DumpArea(new Vector2Int(-110, -110), new Vector2Int(1, 1));
         }
 

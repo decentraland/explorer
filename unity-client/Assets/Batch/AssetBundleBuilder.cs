@@ -58,7 +58,7 @@ namespace DCL
 
         public Dictionary<string, string> hashLowercaseToHashProper = new Dictionary<string, string>();
 
-        internal ContentServerUtils.ApiEnvironment environment = ContentServerUtils.ApiEnvironment.ORG;
+        internal ContentServerUtils.ApiTLD tld = ContentServerUtils.ApiTLD.ORG;
 
         internal bool deleteDownloadPathAfterFinished = false;
         internal bool skipAlreadyBuiltBundles = false;
@@ -74,9 +74,9 @@ namespace DCL
         int totalAssets;
         int skippedAssets;
 
-        public AssetBundleBuilder(ContentServerUtils.ApiEnvironment environment = ContentServerUtils.ApiEnvironment.ORG)
+        public AssetBundleBuilder(ContentServerUtils.ApiTLD tld = ContentServerUtils.ApiTLD.ORG)
         {
-            this.environment = environment;
+            this.tld = tld;
             finalAssetBundlePath = AssetBundleBuilderConfig.ASSET_BUNDLES_PATH_ROOT + "/";
             finalDownloadedPath = AssetBundleBuilderConfig.DOWNLOADED_PATH_ROOT + "/";
             finalDownloadedAssetDbPath = AssetBundleBuilderConfig.DOWNLOADED_ASSET_DB_PATH_ROOT + "/";
@@ -103,7 +103,7 @@ namespace DCL
                 if (AssetBundleBuilderUtils.ParseOption(commandLineArgs, AssetBundleBuilderConfig.CLI_SET_CUSTOM_BASE_URL, 1, out string[] customBaseUrl))
                 {
                     ContentServerUtils.customBaseUrl = customBaseUrl[0];
-                    builder.environment = ContentServerUtils.ApiEnvironment.NONE;
+                    builder.tld = ContentServerUtils.ApiTLD.NONE;
                 }
 
                 if (AssetBundleBuilderUtils.ParseOption(commandLineArgs, AssetBundleBuilderConfig.CLI_VERBOSE, 0, out _))
@@ -426,6 +426,8 @@ namespace DCL
         {
             if (OnFinish == null)
                 OnFinish = CleanAndExit;
+            else
+                OnFinish += CleanAndExit;
 
             startTime = Time.realtimeSinceStartup;
 
@@ -515,7 +517,7 @@ namespace DCL
 
             foreach (var sceneCid in sceneCidsList)
             {
-                MappingsAPIData parcelInfoApiData = AssetBundleBuilderUtils.GetSceneMappingsData(environment, sceneCid);
+                MappingsAPIData parcelInfoApiData = AssetBundleBuilderUtils.GetSceneMappingsData(tld, sceneCid);
                 rawContents.AddRange(parcelInfoApiData.data[0].content.contents);
             }
 
@@ -586,7 +588,7 @@ namespace DCL
 
         private string DownloadAsset(string fileName, string hash, string additionalPath = "")
         {
-            string baseUrl = ContentServerUtils.GetContentAPIUrlBase(environment);
+            string baseUrl = ContentServerUtils.GetContentAPIUrlBase(tld);
 
             string fileExt = Path.GetExtension(fileName);
 
@@ -643,7 +645,7 @@ namespace DCL
 
         internal void DumpArea(Vector2Int coords, Vector2Int size, Action<ErrorCodes> OnFinish = null)
         {
-            HashSet<string> sceneCids = AssetBundleBuilderUtils.GetSceneCids(environment, coords, size);
+            HashSet<string> sceneCids = AssetBundleBuilderUtils.GetSceneCids(tld, coords, size);
 
             List<string> sceneCidsList = sceneCids.ToList();
             ConvertScenesToAssetBundles(sceneCidsList, OnFinish);
@@ -651,7 +653,7 @@ namespace DCL
 
         internal void DumpArea(List<Vector2Int> coords, Action<ErrorCodes> OnFinish = null)
         {
-            HashSet<string> sceneCids = AssetBundleBuilderUtils.GetScenesCids(environment, coords);
+            HashSet<string> sceneCids = AssetBundleBuilderUtils.GetScenesCids(tld, coords);
 
             List<string> sceneCidsList = sceneCids.ToList();
             ConvertScenesToAssetBundles(sceneCidsList, OnFinish);
