@@ -1,4 +1,5 @@
 using DCL.HelpAndSupportHUD;
+using DCL.GoToGenesisPlazaHUD;
 using DCL.SettingsHUD;
 using System.Collections.Generic;
 using UnityEngine;
@@ -65,11 +66,11 @@ public class HUDController : MonoBehaviour
 
     public ControlsHUDController controlsHud => GetHUDElement(HUDElementID.CONTROLS_HUD) as ControlsHUDController;
 
-    public EmailPromptHUDController emailPromptHud => GetHUDElement(HUDElementID.EMAIL_PROMPT) as EmailPromptHUDController;
-
     public ExploreHUDController exploreHud => GetHUDElement(HUDElementID.EXPLORE_HUD) as ExploreHUDController;
 
     public HelpAndSupportHUDController helpAndSupportHud => GetHUDElement(HUDElementID.HELP_AND_SUPPORT_HUD) as HelpAndSupportHUDController;
+
+    public GoToGenesisPlazaHUDController goToGenesisPlazaHud => GetHUDElement(HUDElementID.GO_TO_GENESIS_PLAZA_HUD) as GoToGenesisPlazaHUDController;
 
     public ManaHUDController manaHud => GetHUDElement(HUDElementID.MANA_HUD) as ManaHUDController;
 
@@ -132,10 +133,10 @@ public class HUDController : MonoBehaviour
         NFT_INFO_DIALOG = 16,
         TELEPORT_DIALOG = 17,
         CONTROLS_HUD = 18,
-        EMAIL_PROMPT = 19,
-        EXPLORE_HUD = 20,
-        MANA_HUD = 21,
-        HELP_AND_SUPPORT_HUD = 22,
+        EXPLORE_HUD = 19,
+        MANA_HUD = 20,
+        HELP_AND_SUPPORT_HUD = 21,
+        GO_TO_GENESIS_PLAZA_HUD = 22,
         COUNT = 23
     }
 
@@ -293,6 +294,7 @@ public class HUDController : MonoBehaviour
 
                         taskbarHud.AddSettingsWindow(settingsHud);
                         taskbarHud.AddBackpackWindow(avatarEditorHud);
+                        taskbarHud.AddGoToGenesisWindow(goToGenesisPlazaHud);
                     }
                 }
                 else
@@ -318,13 +320,6 @@ public class HUDController : MonoBehaviour
                 CreateHudElement<ControlsHUDController>(configuration, hudElementId);
                 taskbarHud?.AddControlsMoreOption();
                 break;
-            case HUDElementID.EMAIL_PROMPT:
-                if (emailPromptHud == null)
-                {
-                    CreateHudElement<EmailPromptHUDController>(configuration, hudElementId);
-                }
-                emailPromptHud?.SetEnable(configuration.active);
-                break;
             case HUDElementID.EXPLORE_HUD:
                 CreateHudElement<ExploreHUDController>(configuration, hudElementId);
                 if (exploreHud != null)
@@ -339,6 +334,9 @@ public class HUDController : MonoBehaviour
             case HUDElementID.HELP_AND_SUPPORT_HUD:
                 CreateHudElement<HelpAndSupportHUDController>(configuration, hudElementId);
                 taskbarHud?.AddHelpAndSupportWindow(helpAndSupportHud);
+                break;
+            case HUDElementID.GO_TO_GENESIS_PLAZA_HUD:
+                CreateHudElement<GoToGenesisPlazaHUDController>(configuration, hudElementId);
                 break;
         }
 
