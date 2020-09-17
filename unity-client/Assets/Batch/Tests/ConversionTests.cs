@@ -2,10 +2,11 @@ using DCL;
 using NUnit.Framework;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.TestTools;
+using AssetDatabase = UnityEditor.AssetDatabase;
+using Directory = System.IO.Directory;
+using File = System.IO.File;
 
 namespace AssetBundleConversionTests
 {
@@ -38,7 +39,7 @@ namespace AssetBundleConversionTests
         [Test]
         public void PopulateLowercaseMappingsWorkCorrectly()
         {
-            var builder = new AssetBundleBuilder();
+            var builder = new AssetBundleBuilder(EditorEnvironment.CreateWithDefaultImplementations());
             var pairs = new List<ContentServerUtils.MappingPair>();
 
             pairs.Add(new ContentServerUtils.MappingPair() {file = "foo", hash = "tEsT1"});
@@ -62,7 +63,7 @@ namespace AssetBundleConversionTests
         [Test]
         public void InitializeDirectoryPathsWorkCorrectly()
         {
-            var builder = new AssetBundleBuilder();
+            var builder = new AssetBundleBuilder(EditorEnvironment.CreateWithDefaultImplementations());
             builder.InitializeDirectoryPaths(false);
 
             Assert.IsFalse(string.IsNullOrEmpty(builder.finalAssetBundlePath));
@@ -86,7 +87,7 @@ namespace AssetBundleConversionTests
         [UnityTest]
         public IEnumerator WhenConvertedWithExternalTexturesDependenciesAreGeneratedCorrectly()
         {
-            var builder = new AssetBundleBuilder(ContentServerUtils.ApiTLD.ZONE);
+            var builder = new AssetBundleBuilder(EditorEnvironment.CreateWithDefaultImplementations(), ContentServerUtils.ApiTLD.ZONE);
 
             bool finished = false;
 

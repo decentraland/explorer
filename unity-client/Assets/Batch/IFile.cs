@@ -8,6 +8,7 @@ namespace DCL
         bool Exists(string path);
 
         void Copy(string srcPath, string dstPath);
+        void Move(string srcPath, string dstPath);
 
         string ReadAllText(string path);
         void WriteAllText(string path, string text);

@@ -4,16 +4,14 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
+using DCL.Wrappers;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Networking;
 using static DCL.ContentServerUtils;
-
-[assembly: InternalsVisibleTo("AssetBundleBuilderTests")]
 
 namespace DCL
 {
@@ -79,32 +77,6 @@ namespace DCL
                 EditorApplication.Exit(errorCode);
         }
 
-        public static void DeleteFile(string path)
-        {
-            try
-            {
-                File.Delete(path);
-            }
-            catch (Exception e)
-            {
-                Debug.LogError($"Error trying to delete file {path}!\n{e.Message}");
-            }
-        }
-
-        public static void DeleteDirectory(string path)
-        {
-            try
-            {
-                if (Directory.Exists(path))
-                    Directory.Delete(path, true);
-            }
-            catch (Exception e)
-            {
-                Debug.LogError($"Error trying to delete directory {path}!\n{e.Message}");
-            }
-        }
-
-
         internal static void MarkForAssetBundleBuild(string path, string abName)
         {
             string assetPath = path.Substring(path.IndexOf("Assets"));
@@ -115,39 +87,11 @@ namespace DCL
             importer.SetAssetBundleNameAndVariant(abName, "");
         }
 
-        internal static void MarkForAssetBundleBuild(UnityEngine.Object asset, string abName)
+        internal static void MarkForAssetBundleBuild(IAssetDatabase assetDb, UnityEngine.Object asset, string abName)
         {
-            string assetPath = AssetDatabase.GetAssetPath(asset);
+            string assetPath = assetDb.GetAssetPath(asset);
             var importer = AssetImporter.GetAtPath(assetPath);
             importer.SetAssetBundleNameAndVariant(abName, "");
-        }
-
-
-        internal static bool CheckProviderItemExists(DCL.ContentProvider contentProvider, string fileName)
-        {
-            string finalUrl = contentProvider.GetContentsUrl(fileName);
-            return CheckUrlExists(finalUrl);
-        }
-
-        internal static bool CheckUrlExists(string url)
-        {
-            bool result = false;
-
-            using (UnityWebRequest req = UnityWebRequest.Get(url))
-            {
-                req.SendWebRequest();
-
-                while (req.downloadedBytes > 0)
-                {
-                }
-
-                if (req.WebRequestSucceded())
-                    result = true;
-
-                req.Abort();
-            }
-
-            return result;
         }
 
         public static MD5 md5 = new MD5CryptoServiceProvider();
@@ -348,26 +292,7 @@ namespace DCL
             return result;
         }
 
-        public static void InitializeDirectory(string path, bool deleteIfExists)
-        {
-            try
-            {
-                if (deleteIfExists)
-                {
-                    if (Directory.Exists(path))
-                        Directory.Delete(path, true);
-                }
-
-                if (!Directory.Exists(path))
-                    Directory.CreateDirectory(path);
-            }
-            catch (Exception e)
-            {
-                Debug.LogError($"Exception trying to clean up folder. Continuing anyways.\n{e.Message}");
-            }
-        }
-
-        public static void CleanAssetBundleFolder(string pathToSearch, string[] assetBundlesList, Dictionary<string, string> lowerToUpperDictionary)
+        public static void CleanAssetBundleFolder(IFile file, string pathToSearch, string[] assetBundlesList, Dictionary<string, string> lowerToUpperDictionary)
         {
             for (int i = 0; i < assetBundlesList.Length; i++)
             {
@@ -381,11 +306,11 @@ namespace DCL
                     {
                         string oldPath = pathToSearch + assetBundlesList[i];
                         string path = pathToSearch + hashWithUppercase;
-                        File.Move(oldPath, path);
+                        file.Move(oldPath, path);
                     }
 
                     string oldPathMf = pathToSearch + assetBundlesList[i] + ".manifest";
-                    File.Delete(oldPathMf);
+                    file.Delete(oldPathMf);
                 }
                 catch (Exception e)
                 {

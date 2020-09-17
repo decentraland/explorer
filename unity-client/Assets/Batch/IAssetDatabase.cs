@@ -1,16 +1,17 @@
 ﻿using UnityEditor;
 
-namespace DCL
+namespace DCL.Wrappers
 {
     public interface IAssetDatabase
     {
         void Refresh(ImportAssetOptions options = ImportAssetOptions.Default);
         void SaveAssets();
         void ImportAsset(string path, ImportAssetOptions options = ImportAssetOptions.Default);
-        void DeleteAsset(string path);
-        void MoveAsset(string src, string dst);
+        bool DeleteAsset(string path);
+        string MoveAsset(string src, string dst);
         void ReleaseCachedFileHandles();
-
-        T LoadAssetAtPath<T>(string path);
+        T LoadAssetAtPath<T>(string path) where T : UnityEngine.Object;
+        string GetAssetPath(UnityEngine.Object asset);
+        string AssetPathToGUID(string path);
     }
 }

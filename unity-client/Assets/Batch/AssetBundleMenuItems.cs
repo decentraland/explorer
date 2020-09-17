@@ -15,7 +15,7 @@ namespace DCL
         [MenuItem("Decentraland/Asset Bundle Builder/Dump Museum District")]
         public static void DumpMuseum()
         {
-            var builder = new AssetBundleBuilder();
+            var builder = new AssetBundleBuilder(EditorEnvironment.CreateWithDefaultImplementations());
             builder.tld = ContentServerUtils.ApiTLD.ORG;
             builder.skipAlreadyBuiltBundles = false;
             var zoneArray = Utils.GetCenteredZoneArray(new Vector2Int(13, 75), new Vector2Int(2, 2));
@@ -27,14 +27,14 @@ namespace DCL
         {
             var avatarItemList = GetAvatarMappingList("https://dcl-wearables.now.sh/index.json");
 
-            var builder = new AssetBundleBuilder();
+            var builder = new AssetBundleBuilder(EditorEnvironment.CreateWithDefaultImplementations());
             builder.DownloadAndConvertAssets(avatarItemList);
         }
 
         [MenuItem("Decentraland/Asset Bundle Builder/Dump Zone -110,-110")]
         public static void DumpZoneArea()
         {
-            var builder = new AssetBundleBuilder();
+            var builder = new AssetBundleBuilder(EditorEnvironment.CreateWithDefaultImplementations());
             builder.tld = ContentServerUtils.ApiTLD.ORG;
             builder.DumpArea(new Vector2Int(-110, -110), new Vector2Int(1, 1));
         }
@@ -60,7 +60,7 @@ namespace DCL
         [MenuItem("Decentraland/Asset Bundle Builder/Dump Tomb Chaser")]
         public static void DumpOrg()
         {
-            var builder = new AssetBundleBuilder();
+            var builder = new AssetBundleBuilder(EditorEnvironment.CreateWithDefaultImplementations());
             builder.skipAlreadyBuiltBundles = true;
             var zoneArray = Utils.GetCenteredZoneArray(new Vector2Int(28, 45), new Vector2Int(1, 1));
             builder.DumpArea(zoneArray);
@@ -70,7 +70,7 @@ namespace DCL
         [MenuItem("Decentraland/Asset Bundle Builder/Dump Org 0,0")]
         public static void DumpCenterPlaza()
         {
-            var builder = new AssetBundleBuilder();
+            var builder = new AssetBundleBuilder(EditorEnvironment.CreateWithDefaultImplementations());
             builder.skipAlreadyBuiltBundles = true;
             var zoneArray = Utils.GetCenteredZoneArray(new Vector2Int(0, 0), new Vector2Int(30, 30));
             builder.DumpArea(zoneArray);
