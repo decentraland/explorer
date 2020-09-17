@@ -41,6 +41,8 @@ export function setupAuthFlow() {
             unsubscribe()
             getLocalProfile()
               .then((profile) => {
+                profile.hasClaimedName = false
+                if (profile.ethAddress === '') profile.ethAddress = '0x0000000000000000000000000000000000000000'
                 ensureUnityInterface()
                   .then((unityInterface) => {
                     setLoadingScreenVisible(false)
