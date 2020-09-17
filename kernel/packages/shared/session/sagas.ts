@@ -43,10 +43,9 @@ import {
   SignupAction,
   userAuthentified
 } from './actions'
-import { createSignUpProfile, getProfileByUserId } from '../profiles/sagas'
+import { getProfileByUserId } from '../profiles/sagas'
 import { ensureRealmInitialized } from '../dao/sagas'
 import { ProviderType } from '../ethereum/Web3Connector'
-import { getSignUpData } from './selectors'
 
 const logger = createLogger('session: ')
 
@@ -321,19 +320,19 @@ function* signup(action: SignupAction) {
   if (!account) {
     put(authError(AuthError.ACCOUNT_NOT_FOUND))
   }
-  if (yield call(profileExists, account)) {
-    put(authError(AuthError.PROFILE_DOESNT_EXIST))
-    return
-  }
+  // if (yield call(profileExists, account)) {
+  //   put(authError(AuthError.PROFILE_DOESNT_EXIST))
+  //   return
+  // }
   const identity = yield createAuthIdentity()
-  const { profile, tos } = yield select(getSignUpData)
-  if (!tos) {
-    put(authError(AuthError.TOS_NOT_ACCEPTED))
-    return
-  }
-  profile.userId = account.toString()
-  profile.ethAddress = account.toString()
-  yield createSignUpProfile(profile, identity)
+  // const { profile, tos } = yield select(getSignUpData)
+  // if (!tos) {
+  //   put(authError(AuthError.TOS_NOT_ACCEPTED))
+  //   return
+  // }
+  // profile.userId = account.toString()
+  // profile.ethAddress = account.toString()
+  // yield createSignUpProfile(profile, identity)
 
   return authenticate(null, identity)
 }
