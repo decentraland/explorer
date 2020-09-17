@@ -4,21 +4,17 @@ using UnityEngine;
 public class DisablePassportModifier : AvatarModifier
 {
 
-    public override void ApplyModifier(GameObject avatar)
+    public override void ApplyModifier(AvatarShape avatarShape)
     {
-        AvatarShape avatarShape = avatar.GetComponent<AvatarShape>();
-        if (avatarShape != null)
-        {
-            avatarShape.DisablePassport();
-        }
+        if (avatarShape == null) return;
+
+        avatarShape.DisablePassport();
     }
 
-    public override void RemoveModifier(GameObject avatar)
+    public override void RemoveModifier(AvatarShape avatarShape)
     {
-        AvatarShape avatarShape = avatar.GetComponent<AvatarShape>();
-        if (avatarShape != null)
-        {
-            avatarShape.EnablePassport();
-        }
+        if (avatarShape == null) return;
+
+        avatarShape.EnablePassport();
     }
 }

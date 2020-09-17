@@ -19,8 +19,8 @@ public class AvatarModifierArea : BaseComponent
     [HideInInspector]
     public Model model = new Model();
 
-    private event Action<GameObject> OnAvatarEnter;
-    private event Action<GameObject> OnAvatarExit;
+    private event Action<AvatarShape> OnAvatarEnter;
+    private event Action<AvatarShape> OnAvatarExit;
     private readonly Dictionary<string, AvatarModifier> modifiers;
     private Collider collider;
 
@@ -66,14 +66,20 @@ public class AvatarModifierArea : BaseComponent
 
     private void OnTriggerEnter(Collider other)
     {
-        Transform parent = other.transform.parent;
-        OnAvatarEnter?.Invoke(parent.gameObject);
+        AvatarShape avatar = other.transform.parent?.GetComponent<AvatarShape>();
+
+        if (avatar == null) return;
+
+        OnAvatarEnter?.Invoke(avatar);
     }
 
     private void OnTriggerExit(Collider other)
     {
-        Transform parent = other.transform.parent;
-        OnAvatarExit?.Invoke(parent.gameObject);
+        AvatarShape avatar = other.transform.parent?.GetComponent<AvatarShape>();
+
+        if (avatar == null) return;
+
+        OnAvatarExit?.Invoke(avatar);
     }
 
 }
