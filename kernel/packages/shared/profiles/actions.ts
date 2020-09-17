@@ -26,20 +26,16 @@ export type ProfileRandomAction = ReturnType<typeof profileRandom>
 export const SAVE_PROFILE_REQUEST = '[Request] Save Profile'
 export const SAVE_PROFILE_SUCCESS = '[Success] Save Profile'
 export const SAVE_PROFILE_FAILURE = '[Failure] Save Profile'
-export const CREATE_SIGNUP_PROFILE = '[Request] Create signup Profile'
 
 export const saveProfileRequest = (profile: Partial<Profile>, userId?: string) =>
   action(SAVE_PROFILE_REQUEST, { userId, profile })
 export const saveProfileSuccess = (userId: string, version: number, profile: Profile) =>
   action(SAVE_PROFILE_SUCCESS, { userId, version, profile })
 export const saveProfileFailure = (userId: string, error: any) => action(SAVE_PROFILE_FAILURE, { userId, error })
-export const createSignUpProfile = (userId: string, profile: Partial<Profile>, identity: any) =>
-  action(CREATE_SIGNUP_PROFILE, { profile, identity })
 
 export type SaveProfileRequest = ReturnType<typeof saveProfileRequest>
 export type SaveProfileSuccess = ReturnType<typeof saveProfileSuccess>
 export type SaveProfileFailure = ReturnType<typeof saveProfileFailure>
-export type CreateSignUpProfile = ReturnType<typeof createSignUpProfile>
 
 // Wearables catalog
 

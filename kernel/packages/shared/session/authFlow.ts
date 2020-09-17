@@ -15,7 +15,6 @@ export function setupAuthFlow() {
       const signupStep4 = document.getElementById('signup-step4')
       const btnSignupBack = document.getElementById('btnSignupBack')
       const btnSignupAgree = document.getElementById('btnSignupAgree')
-      const btnSignupWallet = document.getElementById('btnSignupWallet')
 
       const form = document.getElementById('signup-form') as HTMLFormElement
 
@@ -42,9 +41,10 @@ export function setupAuthFlow() {
         signupStep4!.style.display = 'block'
       })
 
-      btnSignupWallet!.addEventListener('click', () => {
-        console.log('SIGNUP-CHOOSE_WALLET')
-        globalThis.globalStore.dispatch(signup())
+      document.querySelector('.btnSignupWallet')!.addEventListener('click', (event: any) => {
+        const provider = event.target.getAttribute('rel')
+        console.log('SIGNUP-CHOOSE_WALLET: ', provider)
+        globalThis.globalStore.dispatch(signup(provider))
       })
 
       form!.addEventListener('submit', (event) => {
@@ -64,8 +64,9 @@ export function setupAuthFlow() {
     }
     const btnLogin = document.getElementById('eth-login-confirm-button')
     if (btnLogin) {
-      btnLogin!.onclick = () => {
-        globalThis.globalStore.dispatch(login())
+      const handleLoginClick = (e: any) => {
+        const provider = e.target.getAttribute('rel') || 'metamask'
+        globalThis.globalStore.dispatch(login(provider))
         const unsubscribe = globalThis.globalStore.subscribe(() => {
           if (globalThis.globalStore.getState().session.initialized) {
             element.style.display = 'none'
@@ -73,6 +74,7 @@ export function setupAuthFlow() {
           }
         })
       }
+      btnLogin!.addEventListener('click', handleLoginClick)
     }
   }
 }

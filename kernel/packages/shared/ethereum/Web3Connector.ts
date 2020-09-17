@@ -4,9 +4,19 @@ import { Eth } from 'web3x/eth'
 import { ETHEREUM_NETWORK, ethereumConfigurations, getTLD } from '../../config'
 import { WebSocketProvider } from 'eth-connect'
 
+declare var window: Window & {
+  ethereum: any
+  web3: any
+}
+
+export enum ProviderType {
+  METAMASK = 'Metamask',
+  FORTMATIC = 'fortmatic'
+}
+
 const FORTMATIC_API_KEY = 'pk_test_A8AD7DB2F40251E7'
 
-export default class Web3Connector {
+export class Web3Connector {
   private provider: any
   private readonly web3Modal: Web3Modal
 
@@ -29,9 +39,11 @@ export default class Web3Connector {
     this.web3Modal.clearCachedProvider()
   }
 
-  async connect() {
+  async connect(type: ProviderType) {
     try {
+      console.log('TYPE: ', type)
       this.provider = await this.web3Modal.connect()
+      // this.provider = await this.web3Modal.connectTo(type)
       if (this.provider.isMetaMask) {
         // Request account access if needed
         await Promise.all([this.provider.enable(), window && window.ethereum ? window.ethereum.enable() : null])

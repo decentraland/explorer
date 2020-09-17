@@ -32,10 +32,19 @@ import { getFromLocalStorage, saveToLocalStorage } from 'atomicHelpers/localStor
 
 import { Session } from '.'
 import { ExplorerIdentity } from './types'
-import { LOGIN, loginCompleted as loginCompletedAction, LOGOUT, SETUP_WEB3, SIGNUP, userAuthentified } from './actions'
-import { createSignUpProfile } from '../profiles/actions'
+import {
+  LOGIN,
+  LoginAction,
+  loginCompleted as loginCompletedAction,
+  LOGOUT,
+  SETUP_WEB3,
+  SIGNUP,
+  SignupAction,
+  userAuthentified
+} from './actions'
 import { getProfileByUserId } from '../profiles/sagas'
 import { ensureRealmInitialized } from '../dao/sagas'
+import { ProviderType } from '../ethereum/Web3Connector'
 
 const logger = createLogger('session: ')
 
@@ -101,9 +110,9 @@ function* profileExists(userId: string) {
   return profile && userId === profile.userId
 }
 
-function* login() {
+function* login(action: LoginAction) {
   if (ENABLE_WEB3) {
-    if (!(yield requestProvider())) {
+    if (!(yield requestProvider(<ProviderType>action.payload.provider))) {
       return
     }
     const account = yield getUserAccount()
@@ -118,8 +127,8 @@ function* login() {
   return yield authenticate(getUserProfile())
 }
 
-function* requestProvider() {
-  const provider = yield requestWeb3Provider()
+function* requestProvider(providerType: ProviderType) {
+  const provider = yield requestWeb3Provider(providerType)
   if (provider) {
     if (WORLD_EXPLORER && (yield checkTldVsNetwork())) {
       throw new Error('Network mismatch')
@@ -300,8 +309,8 @@ function showAwaitingSignaturePrompt(show: boolean) {
   showElementById('check-wallet-prompt', show)
 }
 
-function* signup() {
-  const provider = yield requestWeb3Provider(true)
+function* signup(action: SignupAction) {
+  const provider = yield requestWeb3Provider(<ProviderType>action.payload.provider)
   if (!provider) {
     return
   }
@@ -314,23 +323,27 @@ function* signup() {
     return
   }
   const identity = yield createAuthIdentity()
-  const signUpData = yield select((state) => {
-    return {
-      name: state.session.signup.name,
-      email: state.session.signup.email
-      // avatar: state.session.signup.avatar || null
-    }
-  })
-  const profile = {
-    userId: account.toString(),
-    name: signUpData.name,
-    hasClaimedName: false,
-    description: '',
-    email: signUpData.email,
-    ethAddress: account.toString()
-    // avatar: Avatar
-  }
-  yield call(createSignUpProfile, profile.userId, profile, identity)
+  // const signUpData = yield select((state) => {
+  //   return {
+  //     name: state.session.signup.name,
+  //     email: state.session.signup.email
+  //     // avatar: state.session.signup.avatar || null
+  //   }
+  // })
+  // const profile: Profile = {
+  //   userId: account.toString(),
+  //   name: signUpData.name,
+  //   hasClaimedName: false,
+  //   description: '',
+  //   email: signUpData.email,
+  //   ethAddress: account.toString(),
+  //   blocked: [],
+  //   inventory: [],
+  //   tutorialStep: 0,
+  //   version: 0,
+  //   avatar: null
+  // }
+  // yield createSignUpProfile(profile, identity)
 
   return authenticate(null, identity)
 }
