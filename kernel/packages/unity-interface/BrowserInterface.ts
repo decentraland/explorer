@@ -166,11 +166,20 @@ export class BrowserInterface {
     globalThis.globalStore.dispatch(saveProfileRequest({ ...profile, interests: Array.from(unique) }))
   }
 
-  public SaveUserAvatar(changes: { face: string; face128: string; face256: string; body: string; avatar: Avatar }) {
+  public SaveUserAvatar(changes: { face: string; face128: string; face256: string; body: string; avatar: Avatar, isSignUpFlow: boolean }) {
     const { face, face128, face256, body, avatar } = changes
     const profile: Profile = getUserProfile().profile as Profile
     const updated = { ...profile, avatar: { ...avatar, snapshots: { face, face128, face256, body } } }
     globalThis.globalStore.dispatch(saveProfileRequest(updated))
+
+    if (changes.isSignUpFlow) {
+      unityInterface.DeactivateRendering()
+      const signupFlow = document.getElementById('signup-flow')
+      const signupStep2 = document.getElementById('signup-step2')
+      signupFlow!.style.display = 'block'
+      signupStep2!.style.display = 'block'
+      document.getElementById('gameContainer')!.setAttribute('style', 'display: none')
+    }
   }
 
   public SaveUserTutorialStep(data: { tutorialStep: number }) {

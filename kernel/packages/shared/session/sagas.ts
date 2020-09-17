@@ -114,7 +114,7 @@ function* profileExists(userId: string) {
 
 function* login(action: LoginAction) {
   if (ENABLE_WEB3) {
-    if (!(yield requestProvider(<ProviderType>action.payload.provider))) {
+    if (!(yield requestProvider(action.payload.provider as ProviderType))) {
       return
     }
     const account = yield getUserAccount()
@@ -313,7 +313,7 @@ function showAwaitingSignaturePrompt(show: boolean) {
 }
 
 function* signup(action: SignupAction) {
-  const provider = yield requestWeb3Provider(<ProviderType>action.payload.provider)
+  const provider = yield requestWeb3Provider(action.payload.provider as ProviderType)
   if (!provider) {
     return
   }

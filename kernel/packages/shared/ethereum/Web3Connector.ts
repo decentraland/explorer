@@ -35,15 +35,18 @@ export class Web3Connector {
     })
   }
 
+  static createWebSocketProvider() {
+    const network = getTLD() === 'zone' ? ETHEREUM_NETWORK.ROPSTEN : ETHEREUM_NETWORK.MAINNET
+    return new WebSocketProvider(ethereumConfigurations[network].wss)
+  }
+
   clearCache() {
     this.web3Modal.clearCachedProvider()
   }
 
   async connect(type: ProviderType) {
     try {
-      console.log('TYPE: ', type)
       this.provider = await this.web3Modal.connect()
-      // this.provider = await this.web3Modal.connectTo(type)
       if (this.provider.isMetaMask) {
         // Request account access if needed
         await Promise.all([this.provider.enable(), window && window.ethereum ? window.ethereum.enable() : null])
@@ -65,10 +68,5 @@ export class Web3Connector {
       return Eth.fromCurrentProvider()!
     }
     return new Eth(this.provider)
-  }
-
-  static createWebSocketProvider() {
-    const network = getTLD() === 'zone' ? ETHEREUM_NETWORK.ROPSTEN : ETHEREUM_NETWORK.MAINNET
-    return new WebSocketProvider(ethereumConfigurations[network].wss)
   }
 }
