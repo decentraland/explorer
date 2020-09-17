@@ -12,8 +12,7 @@ import {
   PIN_CATALYST,
   PREVIEW,
   ethereumConfigurations,
-  RESET_TUTORIAL,
-  DEBUG
+  RESET_TUTORIAL
 } from 'config'
 
 import { NotificationType } from 'shared/types'
@@ -50,8 +49,6 @@ import {
   saveProfileFailure,
   addedProfileToCatalog,
   saveProfileRequest,
-  PROFILE_CHECK_EXISTS,
-  profileCheckExistsAction,
   CREATE_SIGNUP_PROFILE,
   CreateSignUpProfile
 } from './actions'
@@ -127,7 +124,6 @@ export function* profileSaga(): any {
   yield takeLatestByUserId(PROFILE_REQUEST, handleFetchProfile)
   yield takeLatestByUserId(PROFILE_SUCCESS, submitProfileToRenderer)
   yield takeLatestByUserId(PROFILE_RANDOM, handleRandomAsSuccess)
-  yield takeLatestByUserId(PROFILE_CHECK_EXISTS, checkProfileExists)
 
   yield takeLatestByUserId(SAVE_PROFILE_REQUEST, handleSaveAvatar)
   yield takeLatestByUserId(CREATE_SIGNUP_PROFILE, handleCreateSignUpProfile)
@@ -291,11 +287,10 @@ export function* initialLoad() {
   }
 }
 
-export function* checkProfileExists(action: profileCheckExistsAction): any {
-  const userId = action.payload.userId
+export function* getProfileByUserId(userId: string): any {
   try {
     const serverUrl = yield select(getProfileDownloadServer)
-    const profiles: { avatars: object[] } = yield call(profileServerRequest, serverUrl, userId)
+    const profiles: { avatars: object[] } = yield profileServerRequest(serverUrl, userId)
 
     if (profiles.avatars.length !== 0) {
       return profiles.avatars[0]
@@ -500,10 +495,6 @@ export function* submitProfileToRenderer(action: ProfileSuccessAction): any {
     // FIXIT - need to have this duplicated here, as the inventory won't be used if not - moliva - 17/12/2019
     if (ALL_WEARABLES) {
       profile.inventory = (yield select(getExclusiveCatalog)).map((_: Wearable) => _.id)
-    }
-
-    if (!DEBUG) {
-      globalThis.unityInterface.ConfigureEmailPrompt(profile.tutorialStep)
     }
 
     yield call(sendLoadProfile, profile)

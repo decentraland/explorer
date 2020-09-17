@@ -50,31 +50,40 @@ export function* daoSaga(): any {
 
 function* loadDefaultCatalystRealms() {
   yield call(waitForMetaConfigurationInitialization)
-
-  const tld = getDefaultTLD().toLowerCase() !== 'org' ? 'zone' : 'org'
-  const realm: Realm = {
-    domain: `https://peer.decentraland.${tld}`,
-    catalystName: 'fenrir',
-    layer: 'blue',
-    lighthouseVersion: '0.2'
+  if (WORLD_EXPLORER) {
+    let cachedRealm: Realm | null = getFromLocalStorage(CACHE_KEY)
+    if (cachedRealm && !(yield checkValidRealm(cachedRealm))) {
+      cachedRealm = null
+    }
+    const tld = getDefaultTLD().toLowerCase() !== 'org' ? 'zone' : 'org'
+    const realm: Realm = cachedRealm || {
+      domain: `https://peer.decentraland.${tld}`,
+      catalystName: 'fenrir',
+      layer: 'blue',
+      lighthouseVersion: '0.2'
+    }
+    // set default realm domain as whiteList
+    yield put(
+      setContentWhitelist([
+        {
+          domain: realm.domain,
+          catalystName: realm.catalystName,
+          elapsed: 0,
+          status: 0,
+          layer: {
+            name: realm.layer,
+            usersCount: 0,
+            maxUsers: 100,
+            usersParcels: []
+          },
+          score: -50,
+          lighthouseVersion: realm.lighthouseVersion
+        }
+      ])
+    )
+    yield put(initCatalystRealm(realm))
+    yield put(catalystRealmInitialized())
   }
-  const whiteList = {
-    domain: `https://peer.decentraland.${tld}`,
-    catalystName: 'fenrir',
-    elapsed: 544,
-    status: 0,
-    layer: {
-      name: 'blue',
-      usersCount: 0,
-      maxUsers: 100,
-      usersParcels: []
-    },
-    score: -50,
-    lighthouseVersion: '0.2'
-  }
-  yield put(setContentWhitelist([whiteList]))
-  yield put(initCatalystRealm(realm))
-  yield put(catalystRealmInitialized())
 }
 
 /**

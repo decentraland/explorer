@@ -1,6 +1,10 @@
 import Web3Modal from 'web3modal'
 import * as Fortmatic from 'fortmatic'
 import { Eth } from 'web3x/eth'
+import { ETHEREUM_NETWORK, ethereumConfigurations, getTLD } from '../../config'
+import { WebSocketProvider } from 'eth-connect'
+
+const FORTMATIC_API_KEY = 'pk_test_A8AD7DB2F40251E7'
 
 export default class Web3Connector {
   private provider: any
@@ -14,7 +18,7 @@ export default class Web3Connector {
         fortmatic: {
           package: Fortmatic,
           options: {
-            key: 'pk_test_A8AD7DB2F40251E7'
+            key: FORTMATIC_API_KEY
           }
         }
       }
@@ -49,5 +53,10 @@ export default class Web3Connector {
       return Eth.fromCurrentProvider()!
     }
     return new Eth(this.provider)
+  }
+
+  static createWebSocketProvider() {
+    const network = getTLD() === 'zone' ? ETHEREUM_NETWORK.ROPSTEN : ETHEREUM_NETWORK.MAINNET
+    return new WebSocketProvider(ethereumConfigurations[network].wss)
   }
 }
