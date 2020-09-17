@@ -209,6 +209,8 @@ public class AvatarEditorHUDAudioHandler : MonoBehaviour
 
     void OnSetAvatarEditorVisibility(bool visible)
     {
+        AudioScriptableObjects.listItemAppear.ResetPitch();
+
         if (visible)
         {
             if (musicFadeOut != null)
