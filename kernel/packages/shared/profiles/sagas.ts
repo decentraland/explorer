@@ -85,6 +85,7 @@ import { fetchOwnedENS } from 'shared/web3'
 import { RootState } from 'shared/store/rootTypes'
 import { persistCurrentUser } from 'shared/comms'
 import { ensureRealmInitialized } from 'shared/dao/sagas'
+import { unityInterface } from 'unity-interface/UnityInterface'
 
 const CID = require('cids')
 const multihashing = require('multihashing-async')
@@ -177,6 +178,10 @@ function* initialProfileLoad() {
     if (RESET_TUTORIAL) {
       profile = { ...profile, tutorialStep: 0 }
       profileDirty = true
+    }
+
+    if (!DEBUG && ENABLE_NEW_TASKBAR) {
+      unityInterface.ConfigureTutorial(profile.tutorialStep, HAS_INITIAL_POSITION_MARK)
     }
 
     if (profileDirty) {
@@ -495,10 +500,6 @@ export function* submitProfileToRenderer(action: ProfileSuccessAction): any {
     // FIXIT - need to have this duplicated here, as the inventory won't be used if not - moliva - 17/12/2019
     if (ALL_WEARABLES) {
       profile.inventory = (yield select(getExclusiveCatalog)).map((_: Wearable) => _.id)
-    }
-
-    if (!DEBUG && ENABLE_NEW_TASKBAR) {
-      globalThis.unityInterface.ConfigureTutorial(profile.tutorialStep, HAS_INITIAL_POSITION_MARK)
     }
 
     yield call(sendLoadProfile, profile)
