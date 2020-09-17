@@ -27,6 +27,8 @@ namespace DCL
         RectTransform rectTransform;
         MinimapMetadata minimapMetadata;
 
+        AssetPromise_Texture texturePromise = null;
+
         public System.Action OnGotoClicked;
 
         public bool isOpen
@@ -48,6 +50,11 @@ namespace DCL
         private void OnDestroy()
         {
             minimapMetadata.OnSceneInfoUpdated -= OnMapMetadataInfoUpdated;
+            if (texturePromise != null)
+            {
+                AssetPromiseKeeper_Texture.i.Forget(texturePromise);
+                texturePromise = null;
+            }
         }
 
         public void Populate(Vector2Int coordinates, MinimapMetadata.MinimapSceneInfo sceneInfo)
@@ -88,18 +95,24 @@ namespace DCL
 
                 if (currentImageUrl == sceneInfo.previewImageUrl)
                 {
-                    DisplayThumbnail(currentImage);
+                    DisplayThumbnail(texturePromise.asset.texture);
                     return;
                 }
 
-                if (currentImage != null)
-                    Destroy(currentImage);
+                if (texturePromise != null)
+                {
+                    AssetPromiseKeeper_Texture.i.Forget(texturePromise);
+                    texturePromise = null;
+                }
 
-                if (downloadCoroutine != null)
-                    CoroutineStarter.Stop(downloadCoroutine);
 
-                if (sceneInfoExists && !string.IsNullOrEmpty(sceneInfo.previewImageUrl))
-                    downloadCoroutine = CoroutineStarter.Start(Download(sceneInfo.previewImageUrl));
+                if (!string.IsNullOrEmpty(sceneInfo.previewImageUrl))
+                {
+                    texturePromise = new AssetPromise_Texture(sceneInfo.previewImageUrl, storeTexAsNonReadable: false);
+                    texturePromise.OnSuccessEvent += (textureAsset) => { DisplayThumbnail(textureAsset.texture); };
+                    texturePromise.OnFailEvent += (textureAsset) => { DisplayThumbnail(scenePreviewFailImage.texture); };
+                    AssetPromiseKeeper_Texture.i.Keep(texturePromise);
+                }
 
                 currentImageUrl = sceneInfoExists ? sceneInfo.previewImageUrl : "";
             }
@@ -163,27 +176,6 @@ namespace DCL
         }
 
         string currentImageUrl;
-        Texture2D currentImage;
-        Coroutine downloadCoroutine;
-
-        private IEnumerator Download(string url)
-        {
-            UnityWebRequest www = UnityWebRequestTexture.GetTexture(url);
-
-            yield return www.SendWebRequest();
-
-            if (!www.isNetworkError && !www.isHttpError)
-            {
-                currentImage = ((DownloadHandlerTexture)www.downloadHandler).texture;
-                currentImage.Compress(false);
-                DisplayThumbnail(currentImage);
-            }
-            else
-            {
-                Debug.Log($"Error downloading: {url} {www.error}");
-                DisplayThumbnail(scenePreviewFailImage.texture);
-            }
-        }
 
         private void DisplayThumbnail(Texture2D texture)
         {
