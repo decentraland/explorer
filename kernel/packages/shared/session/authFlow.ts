@@ -23,6 +23,7 @@ export function setupAuthFlow() {
       const signupStep4 = document.getElementById('signup-step4')
       const btnSignupBack = document.getElementById('btnSignupBack')
       const btnSignupAgree = document.getElementById('btnSignupAgree')
+      const btnBackToAvatareditor = document.getElementById('btn-signup-edit-avatar')
 
       const form = document.getElementById('signup-form') as HTMLFormElement
 
@@ -32,32 +33,11 @@ export function setupAuthFlow() {
       signupStep4!.style.display = 'none'
 
       btnSignup.addEventListener('click', () => {
-        element.style.display = 'none'
-        toggleScreen('renderer')
-        setLoadingScreenVisible(true)
+        GoToAvatarEditor(element)
+      })
 
-        const unsubscribe = globalThis.globalStore.subscribe(() => {
-          if (baseCatalogsLoaded(globalThis.globalStore.getState())) {
-            unsubscribe()
-            getLocalProfile()
-              .then((profile) => {
-                profile.hasClaimedName = false
-                if (profile.userId === '') {
-                  profile.userId = '0x0000000000000000000000000000000000000000'
-                  profile.ethAddress = '0x0000000000000000000000000000000000000000'
-                }
-                ensureUnityInterface()
-                  .then((unityInterface) => {
-                    setLoadingScreenVisible(false)
-                    unityInterface.LoadProfile(profileToRendererFormat(profile))
-                    unityInterface.ShowAvatarEditorInSignInFlow()
-                    unityInterface.ActivateRendering(true)
-                  })
-                  .catch()
-              })
-              .catch()
-          }
-        })
+      btnBackToAvatareditor!.addEventListener('click', () => {
+        GoToAvatarEditor(element)
       })
 
       btnSignupBack!.addEventListener('click', () => {
@@ -124,6 +104,35 @@ export function toggleScreen(screen: 'renderer' | 'signin') {
     signupStep2!.style.display = 'block'
     document.getElementById('gameContainer')!.setAttribute('style', 'display: none')
   }
+}
+
+function GoToAvatarEditor(element: HTMLElement) {
+  element.style.display = 'none'
+  toggleScreen('renderer')
+  setLoadingScreenVisible(true)
+
+  const unsubscribe = globalThis.globalStore.subscribe(() => {
+    if (baseCatalogsLoaded(globalThis.globalStore.getState())) {
+      unsubscribe()
+      getLocalProfile()
+        .then((profile) => {
+          profile.hasClaimedName = false
+          if (profile.userId === '') {
+            profile.userId = '0x0000000000000000000000000000000000000000'
+            profile.ethAddress = '0x0000000000000000000000000000000000000000'
+          }
+          ensureUnityInterface()
+            .then((unityInterface) => {
+              setLoadingScreenVisible(false)
+              unityInterface.LoadProfile(profileToRendererFormat(profile))
+              unityInterface.ShowAvatarEditorInSignInFlow()
+              unityInterface.ActivateRendering(true)
+            })
+            .catch()
+        })
+        .catch()
+    }
+  })
 }
 
 function getLocalProfile(): Promise<Profile> {
