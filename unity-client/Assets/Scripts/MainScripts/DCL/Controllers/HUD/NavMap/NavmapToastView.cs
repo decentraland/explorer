@@ -64,8 +64,6 @@ namespace DCL
 
             bool sceneInfoExists = sceneInfo != null;
 
-            MapRenderer.i.showCursorCoords = false;
-
             gameObject.SetActive(true);
             scenePreviewImage.gameObject.SetActive(false);
             location = coordinates;
@@ -76,7 +74,7 @@ namespace DCL
 
             sceneOwnerText.transform.parent.gameObject.SetActive(sceneInfoExists && !string.IsNullOrEmpty(sceneInfo.owner));
             sceneDescriptionText.transform.parent.gameObject.SetActive(sceneInfoExists && !string.IsNullOrEmpty(sceneInfo.description));
-            sceneTitleText.transform.parent.gameObject.SetActive(sceneInfoExists && !string.IsNullOrEmpty(sceneInfo.name));
+            sceneTitleText.text = "Untitled Scene";
 
             bool useDefaultThumbnail =
                 !sceneInfoExists || (sceneInfoExists && string.IsNullOrEmpty(sceneInfo.previewImageUrl));
@@ -162,7 +160,6 @@ namespace DCL
             if (gameObject.activeSelf)
                 AudioScriptableObjects.dialogClose.Play(true);
 
-            MapRenderer.i.showCursorCoords = true;
             gameObject.SetActive(false);
         }
 
