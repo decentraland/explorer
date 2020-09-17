@@ -12,7 +12,10 @@ import {
   PIN_CATALYST,
   PREVIEW,
   ethereumConfigurations,
-  RESET_TUTORIAL
+  RESET_TUTORIAL,
+  ENABLE_NEW_TASKBAR,
+  HAS_INITIAL_POSITION_MARK,
+  DEBUG
 } from 'config'
 
 import { NotificationType } from 'shared/types'
@@ -82,6 +85,7 @@ import { fetchOwnedENS } from 'shared/web3'
 import { RootState } from 'shared/store/rootTypes'
 import { persistCurrentUser } from 'shared/comms'
 import { ensureRealmInitialized } from 'shared/dao/sagas'
+import { unityInterface } from 'unity-interface/UnityInterface'
 
 const CID = require('cids')
 const multihashing = require('multihashing-async')
@@ -174,6 +178,10 @@ function* initialProfileLoad() {
     if (RESET_TUTORIAL) {
       profile = { ...profile, tutorialStep: 0 }
       profileDirty = true
+    }
+
+    if (!DEBUG && ENABLE_NEW_TASKBAR) {
+      unityInterface.ConfigureTutorial(profile.tutorialStep, HAS_INITIAL_POSITION_MARK)
     }
 
     if (profileDirty) {
@@ -546,7 +554,7 @@ export async function fetchInventoryItemsByAddress(address: string) {
 
 export function* createSignUpProfile(profile: Profile, identity: ExplorerIdentity) {
   const url: string = yield select(getUpdateProfileServer)
-  const userId = profile.userId as string
+  const userId = profile.userId
   const currentVersion = profile.version || 0
 
   return yield modifyAvatar({

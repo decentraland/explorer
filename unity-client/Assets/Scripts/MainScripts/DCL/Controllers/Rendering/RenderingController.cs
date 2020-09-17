@@ -1,5 +1,6 @@
 using DCL.Helpers;
 using DCL.Interface;
+using System;
 using UnityEngine;
 
 public class RenderingController : MonoBehaviour
@@ -40,10 +41,16 @@ public class RenderingController : MonoBehaviour
     }
 
     [ContextMenu("Enable Rendering")]
-    public void ActivateRendering()
+    public void ActivateRendering(string forzeActivation = "false")
     {
         if (CommonScriptableObjects.rendererState.Get())
             return;
+
+        if (Convert.ToBoolean(forzeActivation))
+        {
+            ActivateRendering_Internal();
+            return;
+        }
 
         if (!firstActivationTimeHasBeenSet)
         {

@@ -217,6 +217,11 @@ namespace DCL.Tutorial
             if (!renderingEnabled)
                 return;
 
+            if (hudController != null &&
+                hudController.avatarEditorHud != null &&
+                hudController.avatarEditorHud.IsSignUpFlowValue)
+                return;
+
             CommonScriptableObjects.rendererState.OnChange -= OnRenderingStateChanged;
 
             playerIsInGenesisPlaza = IsPlayerInsideGenesisPlaza();

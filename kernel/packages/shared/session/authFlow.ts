@@ -1,5 +1,13 @@
 import { login, signup, signupAgree, signupForm } from './actions'
 import { StoreContainer } from '../store/rootTypes'
+import { ensureUnityInterface } from '../renderer'
+import { ProfileAsPromise } from '../profiles/ProfileAsPromise'
+import { profileToRendererFormat } from '../profiles/transformations/profileToRendererFormat'
+import { getCurrentUserId } from './selectors'
+import { baseCatalogsLoaded } from '../profiles/selectors'
+import { Profile } from '../profiles/types'
+import { getUserProfile } from '../comms/peers'
+import { setLoadingScreenVisible } from '../../unity-interface/dcl'
 
 declare const globalThis: StoreContainer
 
@@ -15,6 +23,7 @@ export function setupAuthFlow() {
       const signupStep4 = document.getElementById('signup-step4')
       const btnSignupBack = document.getElementById('btnSignupBack')
       const btnSignupAgree = document.getElementById('btnSignupAgree')
+      const btnBackToAvatareditor = document.getElementById('btn-signup-edit-avatar')
 
       const form = document.getElementById('signup-form') as HTMLFormElement
 
@@ -24,8 +33,11 @@ export function setupAuthFlow() {
       signupStep4!.style.display = 'none'
 
       btnSignup.addEventListener('click', () => {
-        signupFlow!.style.display = 'block'
-        signupStep2!.style.display = 'block'
+        GoToAvatarEditor(element)
+      })
+
+      btnBackToAvatareditor!.addEventListener('click', () => {
+        GoToAvatarEditor(element)
       })
 
       btnSignupBack!.addEventListener('click', () => {
@@ -77,4 +89,58 @@ export function setupAuthFlow() {
       btnLogin!.addEventListener('click', handleLoginClick)
     }
   }
+}
+
+export function toggleScreen(screen: 'renderer' | 'signin') {
+  const signupFlow = document.getElementById('signup-flow')
+  const signupStep2 = document.getElementById('signup-step2')
+
+  if (screen === 'renderer') {
+    signupFlow!.style.display = 'none'
+    signupStep2!.style.display = 'none'
+    document.getElementById('gameContainer')!.setAttribute('style', 'display: block')
+  } else {
+    signupFlow!.style.display = 'block'
+    signupStep2!.style.display = 'block'
+    document.getElementById('gameContainer')!.setAttribute('style', 'display: none')
+  }
+}
+
+function GoToAvatarEditor(element: HTMLElement) {
+  element.style.display = 'none'
+  toggleScreen('renderer')
+  setLoadingScreenVisible(true)
+
+  const unsubscribe = globalThis.globalStore.subscribe(() => {
+    if (baseCatalogsLoaded(globalThis.globalStore.getState())) {
+      unsubscribe()
+      getLocalProfile()
+        .then((profile) => {
+          profile.hasClaimedName = false
+          if (profile.userId === '') {
+            profile.userId = '0x0000000000000000000000000000000000000000'
+            profile.ethAddress = '0x0000000000000000000000000000000000000000'
+          }
+          ensureUnityInterface()
+            .then((unityInterface) => {
+              setLoadingScreenVisible(false)
+              unityInterface.LoadProfile(profileToRendererFormat(profile))
+              unityInterface.ShowAvatarEditorInSignInFlow()
+              unityInterface.ActivateRendering(true)
+            })
+            .catch()
+        })
+        .catch()
+    }
+  })
+}
+
+function getLocalProfile(): Promise<Profile> {
+  const profile = getUserProfile().profile as Profile | null
+  if (profile) {
+    return new Promise<Profile>((resolve) => {
+      return resolve(profile)
+    })
+  }
+  return ProfileAsPromise(getCurrentUserId(globalThis.globalStore.getState()) ?? '')
 }
