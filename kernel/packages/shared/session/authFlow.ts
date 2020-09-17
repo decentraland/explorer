@@ -42,7 +42,10 @@ export function setupAuthFlow() {
             getLocalProfile()
               .then((profile) => {
                 profile.hasClaimedName = false
-                if (profile.ethAddress === '') profile.ethAddress = '0x0000000000000000000000000000000000000000'
+                if (profile.userId === '') {
+                  profile.userId = '0x0000000000000000000000000000000000000000'
+                  profile.ethAddress = '0x0000000000000000000000000000000000000000'
+                }
                 ensureUnityInterface()
                   .then((unityInterface) => {
                     setLoadingScreenVisible(false)
