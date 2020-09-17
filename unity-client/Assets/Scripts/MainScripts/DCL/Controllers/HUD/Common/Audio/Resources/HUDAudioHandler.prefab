@@ -44,6 +44,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cd2aa437544359c41a883ffdba98307a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  audioMixer: {fileID: 24100000, guid: 97507d628c02bcf47859b9f108ab1823, type: 2}
+  snapshotInWorld: {fileID: 24500006, guid: 97507d628c02bcf47859b9f108ab1823, type: 2}
+  snapshotOutOfWorld: {fileID: -2133523486746758545, guid: 97507d628c02bcf47859b9f108ab1823,
+    type: 2}
   chatLastCheckedTimestamp: 0
 --- !u!114 &2155020464021034917
 MonoBehaviour:
