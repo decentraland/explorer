@@ -25,6 +25,11 @@ export default class Web3Connector {
     })
   }
 
+  static createWebSocketProvider() {
+    const network = getTLD() === 'zone' ? ETHEREUM_NETWORK.ROPSTEN : ETHEREUM_NETWORK.MAINNET
+    return new WebSocketProvider(ethereumConfigurations[network].wss)
+  }
+
   clearCache() {
     this.web3Modal.clearCachedProvider()
   }
@@ -53,10 +58,5 @@ export default class Web3Connector {
       return Eth.fromCurrentProvider()!
     }
     return new Eth(this.provider)
-  }
-
-  static createWebSocketProvider() {
-    const network = getTLD() === 'zone' ? ETHEREUM_NETWORK.ROPSTEN : ETHEREUM_NETWORK.MAINNET
-    return new WebSocketProvider(ethereumConfigurations[network].wss)
   }
 }

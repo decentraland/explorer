@@ -318,7 +318,6 @@ function* signup() {
     return {
       name: state.session.signup.name,
       email: state.session.signup.email
-      // avatar: state.session.signup.avatar || null
     }
   })
   const profile = {
@@ -328,7 +327,6 @@ function* signup() {
     description: '',
     email: signUpData.email,
     ethAddress: account.toString()
-    // avatar: Avatar
   }
   yield call(createSignUpProfile, profile.userId, profile, identity)
 
