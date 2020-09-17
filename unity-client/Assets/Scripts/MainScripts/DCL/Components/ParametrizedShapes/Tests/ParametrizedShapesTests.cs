@@ -309,6 +309,10 @@ public class ParametrizedShapesTests : TestsBase
     [UnityTest]
     [TestCase(5, true, ExpectedResult =  null)]
     [TestCase(5, false, ExpectedResult =  null)]
+    [TestCase(10, true, ExpectedResult =  null)]
+    [TestCase(10, false, ExpectedResult =  null)]
+    [TestCase(15, true, ExpectedResult =  null)]
+    [TestCase(15, false, ExpectedResult =  null)]
     //TODO: When refactoring these tests to split them by shape, replicate this on them
     public IEnumerator UpdateWithCollisionInMultipleEntities(int entitiesCount, bool withCollision)
     {
