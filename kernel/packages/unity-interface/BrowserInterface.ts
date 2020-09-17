@@ -29,7 +29,7 @@ import { getAppNetwork, fetchOwner } from 'shared/web3'
 import { updateStatusMessage } from 'shared/loading/actions'
 import { UnityParcelScene } from './UnityParcelScene'
 import { setAudioStream } from './audioStream'
-import { logout } from 'shared/session/actions'
+import { logout, signupSetProfile } from 'shared/session/actions'
 import { getIdentity, hasWallet } from 'shared/session'
 import { StoreContainer } from 'shared/store/rootTypes'
 import { unityInterface } from './UnityInterface'
@@ -105,7 +105,7 @@ export class BrowserInterface {
     // stub. there is no code about this in unity side yet
   }
 
-  public Track(data: { name: string, properties: ({ key: string, value: string }[] | null) }) {
+  public Track(data: { name: string; properties: { key: string; value: string }[] | null }) {
     const properties: Record<string, string> = {}
     if (data.properties) {
       for (const property of data.properties) {
@@ -166,19 +166,28 @@ export class BrowserInterface {
     globalThis.globalStore.dispatch(saveProfileRequest({ ...profile, interests: Array.from(unique) }))
   }
 
-  public SaveUserAvatar(changes: { face: string; face128: string; face256: string; body: string; avatar: Avatar, isSignUpFlow: boolean }) {
+  public SaveUserAvatar(changes: {
+    face: string
+    face128: string
+    face256: string
+    body: string
+    avatar: Avatar
+    isSignUpFlow: boolean
+  }) {
     const { face, face128, face256, body, avatar } = changes
     const profile: Profile = getUserProfile().profile as Profile
     const updated = { ...profile, avatar: { ...avatar, snapshots: { face, face128, face256, body } } }
-    globalThis.globalStore.dispatch(saveProfileRequest(updated))
 
     if (changes.isSignUpFlow) {
+      globalThis.globalStore.dispatch(signupSetProfile(updated))
       unityInterface.DeactivateRendering()
       const signupFlow = document.getElementById('signup-flow')
       const signupStep2 = document.getElementById('signup-step2')
       signupFlow!.style.display = 'block'
       signupStep2!.style.display = 'block'
       document.getElementById('gameContainer')!.setAttribute('style', 'display: none')
+    } else {
+      globalThis.globalStore.dispatch(saveProfileRequest(updated))
     }
   }
 
@@ -376,7 +385,8 @@ export class BrowserInterface {
 
   async RequestGIFProcessor(data: { imageSource: string; id: string; isWebGL1: boolean }) {
     // tslint:disable-next-line
-    const isSupported = (typeof OffscreenCanvas !== "undefined") && (typeof OffscreenCanvasRenderingContext2D === "function")
+    const isSupported =
+      typeof OffscreenCanvas !== 'undefined' && typeof OffscreenCanvasRenderingContext2D === 'function'
 
     if (!isSupported) {
       unityInterface.RejectGIFProcessingRequest()

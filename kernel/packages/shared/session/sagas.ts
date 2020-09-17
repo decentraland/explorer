@@ -331,6 +331,8 @@ function* signup(action: SignupAction) {
     put(authError(AuthError.TOS_NOT_ACCEPTED))
     return
   }
+  profile.userId = account.toString()
+  profile.ethAddress = account.toString()
   yield createSignUpProfile(profile, identity)
 
   return authenticate(null, identity)
