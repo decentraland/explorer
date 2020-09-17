@@ -50,30 +50,26 @@ namespace DCL
             ASSET_BUNDLE_BUILD_FAIL = 3,
         }
 
-        private const int ASSET_REQUEST_RETRY_COUNT = 5;
-
         private const string MAIN_SHADER_AB_NAME = "MainShader_Delete_Me";
 
         public Dictionary<string, string> hashLowercaseToHashProper = new Dictionary<string, string>();
 
-        internal ContentServerUtils.ApiTLD tld = ContentServerUtils.ApiTLD.ORG;
+        internal ContentServerUtils.ApiTLD tld;
+        internal string finalAssetBundlePath;
+
+        internal readonly string finalDownloadedPath;
+        internal readonly string finalDownloadedAssetDbPath;
 
         internal bool deleteDownloadPathAfterFinished = false;
         internal bool skipAlreadyBuiltBundles = false;
 
-        internal string finalAssetBundlePath = "";
-        internal string finalDownloadedPath = "";
-        internal string finalDownloadedAssetDbPath = "";
-
-        internal string customContentServerBaseUrl = "";
-
         private float startTime;
-        private string logBuffer;
         private int totalAssets;
         private int skippedAssets;
 
         private EditorEnvironment env;
-        private static ILogger logger = Debug.unityLogger;
+        private static Logger log = new Logger(nameof(AssetBundleBuilder));
+        private string logBuffer;
 
         public AssetBundleBuilder(EditorEnvironment env, ContentServerUtils.ApiTLD tld = ContentServerUtils.ApiTLD.ORG)
         {
@@ -82,6 +78,7 @@ namespace DCL
             finalAssetBundlePath = AssetBundleBuilderConfig.ASSET_BUNDLES_PATH_ROOT + "/";
             finalDownloadedPath = AssetBundleBuilderConfig.DOWNLOADED_PATH_ROOT + "/";
             finalDownloadedAssetDbPath = AssetBundleBuilderConfig.DOWNLOADED_ASSET_DB_PATH_ROOT + "/";
+            log.verboseEnabled = VERBOSE;
         }
 
         public static void ExportSceneToAssetBundles()
@@ -161,7 +158,7 @@ namespace DCL
             }
             catch (Exception e)
             {
-                logger.Log(LogType.Error, e.Message);
+                log.Error(e.Message);
                 builder.CleanAndExit(ErrorCodes.UNDEFINED);
             }
         }
@@ -169,21 +166,21 @@ namespace DCL
         private void CleanAndExit(ErrorCodes errorCode)
         {
             float conversionTime = Time.realtimeSinceStartup - startTime;
-            string log = $"Conversion finished!. error code = {errorCode}";
+            logBuffer = $"Conversion finished!. error code = {errorCode}";
 
-            log += "\n";
-            log += $"Converted {totalAssets - skippedAssets} of {totalAssets}. (Skipped {skippedAssets})\n";
-            log += $"Total time: {conversionTime}";
+            logBuffer += "\n";
+            logBuffer += $"Converted {totalAssets - skippedAssets} of {totalAssets}. (Skipped {skippedAssets})\n";
+            logBuffer += $"Total time: {conversionTime}";
 
             if (totalAssets > 0)
             {
-                log += $"... Time per asset: {conversionTime / totalAssets}\n";
+                logBuffer += $"... Time per asset: {conversionTime / totalAssets}\n";
             }
 
-            log += "\n";
-            log += logBuffer;
+            logBuffer += "\n";
+            logBuffer += logBuffer;
 
-            logger.Log(log);
+            log.Info(logBuffer);
 
             CleanupWorkingFolders();
             AssetBundleBuilderUtils.Exit((int) errorCode);
@@ -241,13 +238,9 @@ namespace DCL
                 env.assetDatabase.Refresh();
                 env.assetDatabase.SaveAssets();
 
-                if (VERBOSE)
-                {
-                    logger.Log($"content = {env.file.ReadAllText(metaPath)}");
-
-                    logger.Log("guid should be " + guid);
-                    logger.Log("guid is " + env.assetDatabase.AssetPathToGUID(finalDownloadedAssetDbPath + assetPath));
-                }
+                log.Verbose($"content = {env.file.ReadAllText(metaPath)}");
+                log.Verbose("guid should be " + guid);
+                log.Verbose("guid is " + env.assetDatabase.AssetPathToGUID(finalDownloadedAssetDbPath + assetPath));
 
                 if (fullPathToTag != null)
                 {
@@ -301,9 +294,7 @@ namespace DCL
 
             if (shouldAbortBecauseAllBundlesExist)
             {
-                if (VERBOSE)
-                    logger.Log("All assets in this scene were already generated!. Skipping.");
-
+                log.Info("All assets in this scene were already generated!. Skipping.");
                 return false;
             }
 
@@ -396,7 +387,7 @@ namespace DCL
 
             if (manifest == null)
             {
-                logger.Log(LogType.Error, "Error generating asset bundle!");
+                log.Error("Error generating asset bundle!");
                 return false;
             }
 
@@ -440,7 +431,7 @@ namespace DCL
 
             startTime = Time.realtimeSinceStartup;
 
-            logger.Log($"Conversion start... free space in disk: {GetFreeSpace()}");
+            log.Info($"Conversion start... free space in disk: {GetFreeSpace()}");
 
             InitializeDirectoryPaths(true);
             PopulateLowercaseMappings(rawContents);
@@ -495,7 +486,7 @@ namespace DCL
                 }
                 catch (Exception e)
                 {
-                    logger.Log(LogType.Error, e.Message);
+                    log.Error(e.Message);
                     OnFinish?.Invoke(ErrorCodes.UNDEFINED);
                     EditorApplication.update -= updateLoop;
                 }
@@ -512,12 +503,12 @@ namespace DCL
 
             if (sceneCidsList == null || sceneCidsList.Count == 0)
             {
-                logger.Log(LogType.Error, "Scene list is null or count == 0! Maybe this sector lacks scenes or content requests failed?");
+                log.Error("Scene list is null or count == 0! Maybe this sector lacks scenes or content requests failed?");
                 OnFinish?.Invoke(ErrorCodes.SCENE_LIST_NULL);
                 return;
             }
 
-            logger.Log($"Building {sceneCidsList.Count} scenes...");
+            log.Info($"Building {sceneCidsList.Count} scenes...");
 
             List<MappingPair> rawContents = new List<MappingPair>();
 
@@ -603,23 +594,18 @@ namespace DCL
 
             string finalUrl = baseUrl + hash;
 
-            if (VERBOSE)
-                logger.Log("checking against " + outputPath);
+            log.Verbose("checking against " + outputPath);
 
             if (env.file.Exists(outputPath))
             {
-                if (VERBOSE)
-                    logger.Log("Skipping already generated asset: " + outputPath);
+                log.Verbose("Skipping already generated asset: " + outputPath);
 
                 return finalDownloadedPath + additionalPath;
             }
 
             byte[] assetData = env.webRequest.Get(finalUrl);
 
-            if (VERBOSE)
-            {
-                logger.Log($"Downloaded asset = {finalUrl} to {outputPathDir}");
-            }
+            log.Verbose($"Downloaded asset = {finalUrl} to {outputPathDir}");
 
             if (!env.directory.Exists(outputPathDir))
                 env.directory.CreateDirectory(outputPathDir);
