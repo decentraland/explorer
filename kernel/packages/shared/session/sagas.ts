@@ -31,8 +31,9 @@ import { getNetwork } from 'shared/ethereum/EthereumService'
 import { getFromLocalStorage, saveToLocalStorage } from 'atomicHelpers/localStorage'
 
 import { Session } from '.'
-import { ExplorerIdentity } from './types'
+import { AuthError, ExplorerIdentity } from './types'
 import {
+  authError,
   LOGIN,
   LoginAction,
   loginCompleted as loginCompletedAction,
@@ -42,9 +43,10 @@ import {
   SignupAction,
   userAuthentified
 } from './actions'
-import { getProfileByUserId } from '../profiles/sagas'
+import { createSignUpProfile, getProfileByUserId } from '../profiles/sagas'
 import { ensureRealmInitialized } from '../dao/sagas'
 import { ProviderType } from '../ethereum/Web3Connector'
+import { getSignUpData } from './selectors'
 
 const logger = createLogger('session: ')
 
@@ -117,10 +119,11 @@ function* login(action: LoginAction) {
     }
     const account = yield getUserAccount()
     if (!account) {
+      put(authError(AuthError.ACCOUNT_NOT_FOUND))
       return
     }
     if (!(yield profileExists(account))) {
-      // we should call to signUp
+      put(authError(AuthError.PROFILE_ALREADY_EXISTS))
       return
     }
   }
@@ -316,34 +319,19 @@ function* signup(action: SignupAction) {
   }
   const account = yield getUserAccount()
   if (!account) {
-    return
+    put(authError(AuthError.ACCOUNT_NOT_FOUND))
   }
   if (yield call(profileExists, account)) {
-    // we should go to login
+    put(authError(AuthError.PROFILE_DOESNT_EXIST))
     return
   }
   const identity = yield createAuthIdentity()
-  // const signUpData = yield select((state) => {
-  //   return {
-  //     name: state.session.signup.name,
-  //     email: state.session.signup.email
-  //     // avatar: state.session.signup.avatar || null
-  //   }
-  // })
-  // const profile: Profile = {
-  //   userId: account.toString(),
-  //   name: signUpData.name,
-  //   hasClaimedName: false,
-  //   description: '',
-  //   email: signUpData.email,
-  //   ethAddress: account.toString(),
-  //   blocked: [],
-  //   inventory: [],
-  //   tutorialStep: 0,
-  //   version: 0,
-  //   avatar: null
-  // }
-  // yield createSignUpProfile(profile, identity)
+  const { profile, tos } = yield select(getSignUpData)
+  if (!tos) {
+    put(authError(AuthError.TOS_NOT_ACCEPTED))
+    return
+  }
+  yield createSignUpProfile(profile, identity)
 
   return authenticate(null, identity)
 }

@@ -2,7 +2,8 @@ import { action } from 'typesafe-actions'
 
 import { ETHEREUM_NETWORK } from 'config'
 
-import { ExplorerIdentity, SignUpData } from './types'
+import { AuthError, ExplorerIdentity, SignUpData } from './types'
+import { Profile } from '../profiles/types'
 
 export const SETUP_WEB3 = '[Request] Initializing web3'
 export const setupWeb3 = () => action(SETUP_WEB3)
@@ -20,6 +21,10 @@ export const SIGNUP_AGREE = '[SIGN-UP] signup agree'
 export const signupAgree = () => action(SIGNUP_AGREE, true)
 export type SignAgreeAction = ReturnType<typeof signupAgree>
 
+export const SIGNUP_SET_PROFILE = '[SIGN-UP] signup set profile'
+export const signupSetProfile = (profile: Partial<Profile>) => action(SIGNUP_SET_PROFILE, profile)
+export type SignSetProfileAction = ReturnType<typeof signupSetProfile>
+
 export const SIGNUP = '[Request] Signup'
 export const signup = (provider: string) => action(SIGNUP, { provider })
 export type SignupAction = ReturnType<typeof signup>
@@ -36,3 +41,7 @@ export type LoginCompleted = ReturnType<typeof loginCompleted>
 export const LOGOUT = '[Request] Logout'
 export const logout = () => action(LOGOUT)
 export type Logout = ReturnType<typeof logout>
+
+export const AUTH_ERROR = '[auth] signIn/signUp error'
+export const authError = (error: AuthError, errorMsg: string | null = null) => action(AUTH_ERROR, { error, errorMsg })
+export type AuthErrorAction = ReturnType<typeof authError>
