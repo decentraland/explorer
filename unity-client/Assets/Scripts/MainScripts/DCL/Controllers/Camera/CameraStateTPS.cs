@@ -1,3 +1,4 @@
+using System;
 using Cinemachine;
 using UnityEngine;
 
@@ -7,6 +8,7 @@ public class CameraStateTPS : CameraStateBase
 
     [SerializeField] private InputAction_Measurable characterYAxis;
     [SerializeField] private InputAction_Measurable characterXAxis;
+    [SerializeField] private CinemachineConfiner cameraConfiner;
 
     protected Vector3Variable characterPosition => CommonScriptableObjects.playerUnityPosition;
     protected Vector3NullableVariable characterForward => CommonScriptableObjects.characterForward;
@@ -16,6 +18,21 @@ public class CameraStateTPS : CameraStateBase
     protected Vector3Variable playerUnityToWorldOffset => CommonScriptableObjects.playerUnityToWorldOffset;
 
     public float rotationLerpSpeed = 10;
+
+    private void OnEnable()
+    {
+        CommonScriptableObjects.playerIsOnMovingPlatform.OnChange += UpdateMovingPlatformCamera;
+    }
+
+    private void OnDisable()
+    {
+        CommonScriptableObjects.playerIsOnMovingPlatform.OnChange -= UpdateMovingPlatformCamera;
+    }
+
+    void UpdateMovingPlatformCamera(bool isOnMovingPlatform, bool wasOnMovingPlatform)
+    {
+        cameraConfiner.enabled = isOnMovingPlatform;
+    }
 
     public override void OnSelect()
     {
