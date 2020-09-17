@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using DCL.Wrappers;
 using UnityEditor;
 using UnityEngine;
@@ -204,9 +205,9 @@ namespace DCL
         /// <param name="pairsToSearch"></param>
         /// <param name="extensions"></param>
         /// <returns>A dictionary that maps hashes to mapping pairs</returns>
-        public static Dictionary<string, MappingPair> FilterExtensions(MappingPair[] pairsToSearch, string[] extensions)
+        public static List<AssetPath> GetPathsFromPairs(string basePath, MappingPair[] pairsToSearch, string[] extensions)
         {
-            var result = new Dictionary<string, MappingPair>();
+            var tmpResult = new Dictionary<string, AssetPath>();
 
             for (int i = 0; i < pairsToSearch.Length; i++)
             {
@@ -216,14 +217,12 @@ namespace DCL
 
                 if (hasExtension)
                 {
-                    if (!result.ContainsKey(mappingPair.hash))
-                    {
-                        result.Add(mappingPair.hash, mappingPair);
-                    }
+                    if (!tmpResult.ContainsKey(mappingPair.hash))
+                        tmpResult.Add(mappingPair.hash, new AssetPath(basePath, mappingPair));
                 }
             }
 
-            return result;
+            return tmpResult.Values.ToList();
         }
 
         public static void FixGltfRootInvalidUriCharacters(GLTFRoot gltfRoot)
@@ -287,10 +286,60 @@ namespace DCL
             var relativeUri = fromUri.MakeRelativeUri(toUri);
             var relativePath = Uri.UnescapeDataString(relativeUri.ToString());
 
-            string result = relativePath.Replace('/', Path.DirectorySeparatorChar);
+            string result = FixDirectorySeparator(relativePath);
 
             return result;
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="fullPath"></param>
+        /// <returns></returns>
+        public static string FullPathToAssetPath(string fullPath)
+        {
+            char ps = Path.DirectorySeparatorChar;
+
+            fullPath = fullPath.Replace('/', ps);
+            fullPath = fullPath.Replace('\\', ps);
+
+            string pattern = $".*?(?<assetpath>\\{ps}Assets\\{ps}.*?$)";
+
+            var regex = new Regex(pattern);
+
+            var match = regex.Match(fullPath);
+
+            if (match.Success && match.Groups["assetpath"] != null)
+                return match.Groups["assetpath"].Value;
+
+            return string.Empty;
+        }
+
+        public static string FixDirectorySeparator(string path)
+        {
+            char ps = Path.DirectorySeparatorChar;
+            path = path.Replace('/', ps);
+            path = path.Replace('\\', ps);
+            return path;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="assetPath"></param>
+        /// <returns></returns>
+        public static string AssetPathToFullPath(string assetPath, string overrideDataPath = null)
+        {
+            assetPath = FixDirectorySeparator(assetPath);
+
+            string dataPath = overrideDataPath ?? Application.dataPath;
+            dataPath = FixDirectorySeparator(dataPath);
+
+            char ps = Path.DirectorySeparatorChar;
+            string dataPathWithoutAssets = dataPath.Replace($"{ps}Assets", "");
+            return dataPathWithoutAssets + assetPath;
+        }
+
 
         public static void CleanAssetBundleFolder(IFile file, string pathToSearch, string[] assetBundlesList, Dictionary<string, string> lowerToUpperDictionary)
         {

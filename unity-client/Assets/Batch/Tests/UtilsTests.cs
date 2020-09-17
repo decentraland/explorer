@@ -1,6 +1,7 @@
 using DCL;
 using NUnit.Framework;
 using System.IO;
+using UnityEngine;
 
 public class UtilsTests
 {
@@ -24,4 +25,27 @@ public class UtilsTests
         Assert.AreEqual(expected, AssetBundleBuilderUtils.GetRelativePathTo(from, to));
     }
 
+    [Test]
+    [TestCase("C:/MyProject/Assets/MyAsset.png", "/Assets/MyAsset.png")]
+    [TestCase("C:/MyProject/Assets/Blah/MyAsset.glb", "/Assets/Blah/MyAsset.glb")]
+    [TestCase("C:/MyProject/Assets/Blah/My Asset With Spaces.long", "/Assets/Blah/My Asset With Spaces.long")]
+    [TestCase("C:/MyProject", "")]
+    public void AssetPathToFullPathTest(string expected, string input)
+    {
+        expected = AssetBundleBuilderUtils.FixDirectorySeparator(expected);
+        string result = AssetBundleBuilderUtils.AssetPathToFullPath(input, $"C:/MyProject/Assets");
+        UnityEngine.Assertions.Assert.AreEqual(expected, result);
+    }
+
+    [Test]
+    [TestCase("C:/MyProjects/Assets/MyAsset.png", "/Assets/MyAsset.png")]
+    [TestCase("C:/MyProjects/Assets/Blah/MyAsset.glb", "/Assets/Blah/MyAsset.glb")]
+    [TestCase("C:/MyProjects/Assets/Blah/My Asset With Spaces.long", "/Assets/Blah/My Asset With Spaces.long")]
+    [TestCase("", "")]
+    public void FullPathToAssetPath(string input, string expected)
+    {
+        expected = AssetBundleBuilderUtils.FixDirectorySeparator(expected);
+        string result = AssetBundleBuilderUtils.FullPathToAssetPath(input);
+        UnityEngine.Assertions.Assert.AreEqual(expected, result);
+    }
 }

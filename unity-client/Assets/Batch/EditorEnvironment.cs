@@ -4,6 +4,7 @@ using DCL.Helpers;
 using DCL.Wrappers;
 using Unity.EditorCoroutines.Editor;
 using UnityEditor;
+using UnityEngine;
 using UnityEngine.Networking;
 using Object = UnityEngine.Object;
 
@@ -109,19 +110,23 @@ namespace DCL
             UnityEditor.AssetDatabase.SaveAssets();
         }
 
-        public void ImportAsset(string path, ImportAssetOptions options = ImportAssetOptions.Default)
+        public void ImportAsset(string fullPath, ImportAssetOptions options = ImportAssetOptions.Default)
         {
-            UnityEditor.AssetDatabase.ImportAsset(path, options);
+            string assetPath = AssetBundleBuilderUtils.FullPathToAssetPath(fullPath);
+            UnityEditor.AssetDatabase.ImportAsset(assetPath, options);
         }
 
-        public bool DeleteAsset(string path)
+        public bool DeleteAsset(string fullPath)
         {
-            return UnityEditor.AssetDatabase.DeleteAsset(path);
+            string assetPath = AssetBundleBuilderUtils.FullPathToAssetPath(fullPath);
+            return UnityEditor.AssetDatabase.DeleteAsset(assetPath);
         }
 
-        public string MoveAsset(string src, string dst)
+        public string MoveAsset(string fullPathSrc, string fullPathDst)
         {
-            return UnityEditor.AssetDatabase.MoveAsset(src, dst);
+            string assetPathSrc = AssetBundleBuilderUtils.FullPathToAssetPath(fullPathSrc);
+            string assetPathDst = AssetBundleBuilderUtils.FullPathToAssetPath(fullPathDst);
+            return UnityEditor.AssetDatabase.MoveAsset(assetPathSrc, assetPathDst);
         }
 
         public void ReleaseCachedFileHandles()
@@ -129,20 +134,28 @@ namespace DCL
             UnityEditor.AssetDatabase.ReleaseCachedFileHandles();
         }
 
-        public T LoadAssetAtPath<T>(string path)
+        public T LoadAssetAtPath<T>(string fullPath)
             where T : UnityEngine.Object
         {
-            return UnityEditor.AssetDatabase.LoadAssetAtPath<T>(path);
+            string assetPath = AssetBundleBuilderUtils.FullPathToAssetPath(fullPath);
+            return UnityEditor.AssetDatabase.LoadAssetAtPath<T>(assetPath);
         }
 
         public string GetAssetPath(Object asset)
         {
-            return UnityEditor.AssetDatabase.GetAssetPath(asset);
+            return AssetBundleBuilderUtils.AssetPathToFullPath(UnityEditor.AssetDatabase.GetAssetPath(asset));
         }
 
-        public string AssetPathToGUID(string path)
+        public string AssetPathToGUID(string fullPath)
         {
-            return UnityEditor.AssetDatabase.AssetPathToGUID(path);
+            string assetPath = AssetBundleBuilderUtils.FullPathToAssetPath(fullPath);
+            return UnityEditor.AssetDatabase.AssetPathToGUID(assetPath);
+        }
+
+        public string GetTextMetaFilePathFromAssetPath(string fullPath)
+        {
+            string assetPath = AssetBundleBuilderUtils.FullPathToAssetPath(fullPath);
+            return UnityEditor.AssetDatabase.GetTextMetaFilePathFromAssetPath(assetPath);
         }
     }
 }
