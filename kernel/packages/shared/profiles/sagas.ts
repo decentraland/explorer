@@ -554,7 +554,7 @@ export async function fetchInventoryItemsByAddress(address: string) {
 
 export function* createSignUpProfile(profile: Profile, identity: ExplorerIdentity) {
   const url: string = yield select(getUpdateProfileServer)
-  const userId = profile.userId as string
+  const userId = profile.userId
   const currentVersion = profile.version || 0
 
   return yield modifyAvatar({

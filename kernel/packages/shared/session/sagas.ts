@@ -112,7 +112,7 @@ function* profileExists(userId: string) {
 
 function* login(action: LoginAction) {
   if (ENABLE_WEB3) {
-    if (!(yield requestProvider(<ProviderType>action.payload.provider))) {
+    if (!(yield requestProvider(action.payload.provider as ProviderType))) {
       return
     }
     const account = yield getUserAccount()
@@ -310,7 +310,7 @@ function showAwaitingSignaturePrompt(show: boolean) {
 }
 
 function* signup(action: SignupAction) {
-  const provider = yield requestWeb3Provider(<ProviderType>action.payload.provider)
+  const provider = yield requestWeb3Provider(action.payload.provider as ProviderType)
   if (!provider) {
     return
   }
@@ -323,27 +323,6 @@ function* signup(action: SignupAction) {
     return
   }
   const identity = yield createAuthIdentity()
-  // const signUpData = yield select((state) => {
-  //   return {
-  //     name: state.session.signup.name,
-  //     email: state.session.signup.email
-  //     // avatar: state.session.signup.avatar || null
-  //   }
-  // })
-  // const profile: Profile = {
-  //   userId: account.toString(),
-  //   name: signUpData.name,
-  //   hasClaimedName: false,
-  //   description: '',
-  //   email: signUpData.email,
-  //   ethAddress: account.toString(),
-  //   blocked: [],
-  //   inventory: [],
-  //   tutorialStep: 0,
-  //   version: 0,
-  //   avatar: null
-  // }
-  // yield createSignUpProfile(profile, identity)
 
   return authenticate(null, identity)
 }
