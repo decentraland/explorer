@@ -706,7 +706,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Content: {fileID: 4562892339457273614}
-  m_Horizontal: 0
+  m_Horizontal: 1
   m_Vertical: 1
   m_MovementType: 1
   m_Elasticity: 0.1
@@ -1046,8 +1046,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 4654740177256172370}
   m_HandleRect: {fileID: 6473396510046919356}
   m_Direction: 0
-  m_Value: 0.49999976
-  m_Size: 0.8730356
+  m_Value: 0
+  m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -4231,9 +4231,9 @@ MonoBehaviour:
   toastContainer: {fileID: 6646560786880561982}
   scenePreviewContainer: {fileID: 283641030331509311}
   scenePreviewImage: {fileID: 5659270229256634915}
-  scenePreviewLoadingSpinner: {fileID: 600056190834933301}
   scenePreviewFailImage: {fileID: 21300000, guid: 1744fc3cbef3941db85c15f4beb5cb37,
     type: 3}
+  toastAnimator: {fileID: 5331274538259527739}
   goToButton: {fileID: 5806527675308957632}
   closeButton: {fileID: 5926779691405524458}
 --- !u!1001 &7513513862048072415
