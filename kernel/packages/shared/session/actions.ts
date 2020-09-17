@@ -9,8 +9,8 @@ export const setupWeb3 = () => action(SETUP_WEB3)
 export type SetupWeb3 = ReturnType<typeof setupWeb3>
 
 export const LOGIN = '[Request] Login'
-export const login = () => action(LOGIN)
-export type Login = ReturnType<typeof login>
+export const login = (provider: string) => action(LOGIN, { provider })
+export type LoginAction = ReturnType<typeof login>
 
 export const SIGNUP_FORM = '[SIGN-UP] signup save form'
 export const signupForm = (values: SignUpData) => action(SIGNUP_FORM, values)
@@ -21,8 +21,8 @@ export const signupAgree = () => action(SIGNUP_AGREE, true)
 export type SignAgreeAction = ReturnType<typeof signupAgree>
 
 export const SIGNUP = '[Request] Signup'
-export const signup = () => action(SIGNUP)
-export type Signup = ReturnType<typeof signup>
+export const signup = (provider: string) => action(SIGNUP, { provider })
+export type SignupAction = ReturnType<typeof signup>
 
 export const USER_AUTHENTIFIED = '[Success] User authentified'
 export const userAuthentified = (userId: string, identity: ExplorerIdentity, network: ETHEREUM_NETWORK) =>

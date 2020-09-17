@@ -4,12 +4,8 @@ import { future } from 'fp-future'
 import { defaultLogger } from 'shared/logger'
 import { Account } from 'web3x/account'
 import { Eth } from 'web3x/eth'
-import Web3Connector from './Web3Connector'
+import { Web3Connector, ProviderType } from './Web3Connector'
 
-declare var window: Window & {
-  ethereum: any
-  web3: any
-}
 let web3Connector: Web3Connector
 
 export function createEth(provider: any = null): Eth {
@@ -27,19 +23,15 @@ let providerRequested = false
 type LoginData = { successful: boolean; provider: any; localIdentity?: Account }
 
 export function createWeb3Connector(): Web3Connector {
-  defaultLogger.log('[web3Connector] creating', web3Connector)
   if (!web3Connector) {
     web3Connector = new Web3Connector()
   }
   return web3Connector
 }
 
-export async function requestWeb3Provider(clearCache = false) {
+export async function requestWeb3Provider(type: ProviderType) {
   try {
-    if (clearCache) {
-      web3Connector.clearCache()
-    }
-    const provider = await web3Connector.connect()
+    const provider = await web3Connector.connect(type)
     requestManager.setProvider(provider)
     providerFuture.resolve({
       successful: true,
