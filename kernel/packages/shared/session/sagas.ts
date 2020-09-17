@@ -46,6 +46,7 @@ import {
 import { getProfileByUserId } from '../profiles/sagas'
 import { ensureRealmInitialized } from '../dao/sagas'
 import { ProviderType } from '../ethereum/Web3Connector'
+import { unityInterface } from 'unity-interface/UnityInterface'
 
 const logger = createLogger('session: ')
 
@@ -333,6 +334,8 @@ function* signup(action: SignupAction) {
   // profile.userId = account.toString()
   // profile.ethAddress = account.toString()
   // yield createSignUpProfile(profile, identity)
+
+  unityInterface.ActivateRendering(true)
 
   return authenticate(null, identity)
 }
