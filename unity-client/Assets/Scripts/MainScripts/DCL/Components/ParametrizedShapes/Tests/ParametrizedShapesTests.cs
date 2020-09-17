@@ -309,10 +309,6 @@ public class ParametrizedShapesTests : TestsBase
     [UnityTest]
     [TestCase(5, true, ExpectedResult =  null)]
     [TestCase(5, false, ExpectedResult =  null)]
-    [TestCase(10, true, ExpectedResult =  null)]
-    [TestCase(10, false, ExpectedResult =  null)]
-    [TestCase(15, true, ExpectedResult =  null)]
-    [TestCase(15, false, ExpectedResult =  null)]
     //TODO: When refactoring these tests to split them by shape, replicate this on them
     public IEnumerator UpdateWithCollisionInMultipleEntities(int entitiesCount, bool withCollision)
     {
@@ -328,7 +324,8 @@ public class ParametrizedShapesTests : TestsBase
         }
 
         // Act: Update withCollision
-         yield return shapeComponent.ApplyChanges(JsonUtility.ToJson(new BaseShape.Model { withCollisions = withCollision }));
+        yield return shapeComponent.ApplyChanges(JsonUtility.ToJson(new BaseShape.Model { withCollisions = withCollision }));
+        yield return null;
 
         // Assert:
         foreach (DecentralandEntity entity in entities)
@@ -359,6 +356,7 @@ public class ParametrizedShapesTests : TestsBase
 
         // Act: Update visible
         yield return shapeComponent.ApplyChanges(JsonUtility.ToJson(new BaseShape.Model { visible = visible }));
+        yield return null;
 
         // Assert:
         foreach (DecentralandEntity entity in entities)
