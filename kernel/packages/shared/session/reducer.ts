@@ -5,9 +5,11 @@ import {
   AUTH_ERROR,
   AuthErrorAction,
   SignSetProfileAction,
+  SIGNUP_ACTIVE,
   SIGNUP_AGREE,
   SIGNUP_FORM,
   SIGNUP_SET_PROFILE,
+  SignUpActiveAction,
   SignUpFormAction,
   USER_AUTHENTIFIED,
   UserAuthentified
@@ -19,6 +21,7 @@ const INITIAL_STATE: SessionState = {
   userId: undefined,
   network: undefined,
   signup: {
+    active: false,
     tos: false,
     profile: {},
     error: null,
@@ -36,6 +39,15 @@ export function sessionReducer(state?: SessionState, action?: AnyAction): Sessio
   switch (action.type) {
     case USER_AUTHENTIFIED: {
       return { ...state, initialized: true, ...(action as UserAuthentified).payload }
+    }
+    case SIGNUP_ACTIVE: {
+      return {
+        ...state,
+        signup: {
+          ...state.signup,
+          active: (action as SignUpActiveAction).payload
+        }
+      }
     }
     case SIGNUP_SET_PROFILE: {
       const { name, email, ...values } = (action as SignSetProfileAction).payload

@@ -41,6 +41,7 @@ import {
   SETUP_WEB3,
   SIGNUP,
   SignupAction,
+  signUpActive,
   userAuthentified
 } from './actions'
 import { createSignUpProfile, getProfileByUserId } from '../profiles/sagas'
@@ -335,10 +336,11 @@ function* signup(action: SignupAction) {
   profile.userId = account.toString()
   profile.ethAddress = account.toString()
   yield createSignUpProfile(profile, identity)
+  yield authenticate(null, identity)
 
   unityInterface.ActivateRendering(true)
 
-  return yield authenticate(null, identity)
+  put(signUpActive(false))
 }
 
 function* logout() {

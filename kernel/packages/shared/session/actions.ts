@@ -13,6 +13,10 @@ export const LOGIN = '[Request] Login'
 export const login = (provider: string) => action(LOGIN, { provider })
 export type LoginAction = ReturnType<typeof login>
 
+export const SIGNUP_ACTIVE = '[SIGN-UP] signup active'
+export const signUpActive = (active: boolean) => action(SIGNUP_ACTIVE, active)
+export type SignUpActiveAction = ReturnType<typeof signUpActive>
+
 export const SIGNUP_FORM = '[SIGN-UP] signup save form'
 export const signupForm = (name: string, email: string) => action(SIGNUP_FORM, { name, email })
 export type SignUpFormAction = ReturnType<typeof signupForm>

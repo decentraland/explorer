@@ -1,4 +1,4 @@
-import { login, signup, signupAgree, signupForm } from './actions'
+import { login, signup, signupAgree, signupForm, signUpActive } from './actions'
 import { StoreContainer } from '../store/rootTypes'
 import { ensureUnityInterface } from '../renderer'
 import { ProfileAsPromise } from '../profiles/ProfileAsPromise'
@@ -33,6 +33,7 @@ export function setupAuthFlow() {
       signupStep4!.style.display = 'none'
 
       btnSignup.addEventListener('click', () => {
+        globalThis.globalStore.dispatch(signUpActive(true))
         GoToAvatarEditor(element)
       })
 

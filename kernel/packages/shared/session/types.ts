@@ -13,6 +13,7 @@ export type ExplorerIdentity = AuthIdentity & {
 }
 
 export type SignUpData = {
+  active: boolean
   tos?: boolean
   error?: AuthError | null
   errorMsg?: string | null
