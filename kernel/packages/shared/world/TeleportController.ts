@@ -72,7 +72,6 @@ export class TeleportController {
     if (isSignUpActive(globalThis.globalStore.getState())) {
       return
     }
-    console.log(`[SANTI] ensureTeleportAnimation...`)
     document
       .getElementById('gameContainer')!
       .setAttribute(
