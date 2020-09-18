@@ -337,8 +337,8 @@ function* signup(action: SignupAction) {
   yield createSignUpProfile(profile, identity)
 
   unityInterface.ActivateRendering(true)
-
-  return authenticate(null, identity)
+  
+  return yield authenticate(null, identity)
 }
 
 function* logout() {
