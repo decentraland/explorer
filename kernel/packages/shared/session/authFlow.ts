@@ -71,7 +71,7 @@ export function setupAuthFlow() {
 
         console.log('SIGNUP-FORM-DATA: ', { name, email })
 
-        globalThis.globalStore.dispatch(signupForm({ profile: { name, email } }))
+        globalThis.globalStore.dispatch(signupForm(name, email))
 
         signupStep2!.style.display = 'none'
         signupStep3!.style.display = 'block'
