@@ -72,7 +72,7 @@ export class TeleportController {
       .getElementById('gameContainer')!
       .setAttribute(
         'style',
-        'background: #151419 url(images/teleport.gif) no-repeat center !important; background-size: 194px 257px !important;'
+        'display: none; background: #151419 url(images/teleport.gif) no-repeat center !important; background-size: 194px 257px !important;'
       )
     document.body.setAttribute(
       'style',
