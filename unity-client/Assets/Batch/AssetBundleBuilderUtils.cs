@@ -206,7 +206,7 @@ namespace DCL
         /// <returns>A dictionary that maps hashes to mapping pairs</returns>
         public static List<AssetPath> GetPathsFromPairs(string basePath, MappingPair[] pairsToSearch, string[] extensions)
         {
-            var tmpResult = new Dictionary<string, AssetPath>();
+            var tmpResult = new Dictionary<(string, string), AssetPath>();
 
             for (int i = 0; i < pairsToSearch.Length; i++)
             {
@@ -216,8 +216,8 @@ namespace DCL
 
                 if (hasExtension)
                 {
-                    if (!tmpResult.ContainsKey(mappingPair.hash))
-                        tmpResult.Add(mappingPair.hash, new AssetPath(basePath, mappingPair));
+                    if (!tmpResult.ContainsKey((mappingPair.hash, mappingPair.file)))
+                        tmpResult.Add((mappingPair.hash, mappingPair.file), new AssetPath(basePath, mappingPair));
                 }
             }
 

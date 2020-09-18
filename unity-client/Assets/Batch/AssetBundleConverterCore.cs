@@ -95,6 +95,9 @@ namespace DCL
 
             foreach (var assetPath in textureAssetPaths)
             {
+                if (env.file.Exists(assetPath.finalPath))
+                    continue;
+
                 //NOTE(Brian): try to get an AB before getting the original texture, so we bind the dependencies correctly
                 string fullPathToTag = DownloadAsset(assetPath);
 
@@ -131,9 +134,11 @@ namespace DCL
                 env.assetDatabase.Refresh();
                 env.assetDatabase.SaveAssets();
 
-                log.Verbose($"content = {env.file.ReadAllText(metaPath)}");
-                log.Verbose("guid should be " + guid);
-                log.Verbose("guid is " + env.assetDatabase.AssetPathToGUID(assetPath.finalPath));
+                //log.Verbose($"content = {env.file.ReadAllText(metaPath)}");
+                //log.Verbose("guid should be " + guid);
+                //log.Verbose("guid is " + env.assetDatabase.AssetPathToGUID(assetPath.finalPath));
+
+                log.Verbose($"Dumping file -> {assetPath}");
 
                 if (fullPathToTag == null)
                 {
@@ -229,6 +234,8 @@ namespace DCL
             PersistentAssetCache.ImageCacheByUri.Clear();
             PersistentAssetCache.StreamCacheByUri.Clear();
 
+            log.Verbose("Start injecting stuff into " + gltfPath.hash);
+
             foreach (var texturePath in texturePaths)
             {
                 RetrieveAndInjectTexture(gltfPath, texturePath);
@@ -239,6 +246,8 @@ namespace DCL
                 RetrieveAndInjectBuffer(gltfPath, bufferPath);
             }
 
+            log.Verbose("About to load " + gltfPath.hash);
+
             //NOTE(Brian): Finally, load the gLTF. The GLTFImporter will use the PersistentAssetCache to resolve the external dependencies.
             string path = DownloadAsset(gltfPath);
 
@@ -247,6 +256,8 @@ namespace DCL
                 env.assetDatabase.Refresh();
                 env.assetDatabase.SaveAssets();
             }
+
+            log.Verbose("End load " + gltfPath.hash);
 
             foreach (var streamDataKvp in PersistentAssetCache.StreamCacheByUri)
             {
@@ -266,9 +277,12 @@ namespace DCL
         {
             foreach (var assetPath in bufferPaths)
             {
-                var result = DownloadAsset(assetPath);
+                if (env.file.Exists(assetPath.finalPath))
+                    continue;
 
-                if (result == null)
+                DownloadAsset(assetPath);
+
+                if (!env.file.Exists(assetPath.finalPath))
                 {
                     throw new Exception("Failed to get buffer dependencies! failing asset: " + assetPath.hash);
                 }
@@ -459,8 +473,6 @@ namespace DCL
             string outputPath = assetPath.finalPath;
             string outputPathDir = Path.GetDirectoryName(outputPath);
             string finalUrl = settings.baseUrl + assetPath.hash;
-
-            log.Verbose("checking against " + outputPath);
 
             if (env.file.Exists(outputPath))
             {

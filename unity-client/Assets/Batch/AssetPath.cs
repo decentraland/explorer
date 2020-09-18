@@ -30,5 +30,10 @@ namespace DCL
                 return basePath + pair.hash + dash + pair.hash + fileExt;
             }
         }
+
+        public override string ToString()
+        {
+            return $"{hash}@{file}";
+        }
     }
 }
