@@ -2,7 +2,7 @@ import { action } from 'typesafe-actions'
 
 import { ETHEREUM_NETWORK } from 'config'
 
-import { AuthError, ExplorerIdentity, SignUpData } from './types'
+import { AuthError, ExplorerIdentity } from './types'
 import { Profile } from '../profiles/types'
 
 export const SETUP_WEB3 = '[Request] Initializing web3'
@@ -14,7 +14,7 @@ export const login = (provider: string) => action(LOGIN, { provider })
 export type LoginAction = ReturnType<typeof login>
 
 export const SIGNUP_FORM = '[SIGN-UP] signup save form'
-export const signupForm = (values: SignUpData) => action(SIGNUP_FORM, values)
+export const signupForm = (name: string, email: string) => action(SIGNUP_FORM, { name, email })
 export type SignUpFormAction = ReturnType<typeof signupForm>
 
 export const SIGNUP_AGREE = '[SIGN-UP] signup agree'
