@@ -127,6 +127,7 @@ function GoToAvatarEditor(element: HTMLElement) {
               setLoadingScreenVisible(false)
               unityInterface.LoadProfile(profileToRendererFormat(profile))
               unityInterface.ShowAvatarEditorInSignInFlow()
+              console.log(`[SANTI] GO TO AVATAR EDITOR -> ActivateRendering()`)
               unityInterface.ActivateRendering(true)
             })
             .catch()

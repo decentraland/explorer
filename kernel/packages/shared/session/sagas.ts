@@ -338,6 +338,7 @@ function* signup(action: SignupAction) {
   yield createSignUpProfile(profile, identity)
   yield authenticate(null, identity)
 
+  logger.log(`[SANTI] -> SIGN UP -> ActivateRendering()`)
   unityInterface.ActivateRendering()
 
   put(signUpActive(false))
