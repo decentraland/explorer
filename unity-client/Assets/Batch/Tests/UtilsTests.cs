@@ -8,7 +8,7 @@ public class UtilsTests
     [Test]
     public void CIDtoGuidTest()
     {
-        Assert.AreEqual("d3b55cc7e3367537c1670ecebb1ccb05", DCL.AssetBundleBuilderUtils.CidToGuid("QmWVcyTEzSEBKC7hzq6doiTWnopZ6DdqJMqufx6gXwFnTS"));
+        Assert.AreEqual("d3b55cc7e3367537c1670ecebb1ccb05", DCL.ABConverter.Utils.CidToGuid("QmWVcyTEzSEBKC7hzq6doiTWnopZ6DdqJMqufx6gXwFnTS"));
     }
 
     [Test]
@@ -22,7 +22,7 @@ public class UtilsTests
     public void GetRelativePathToTest(string expected, string from, string to)
     {
         expected = expected.Replace('|', Path.DirectorySeparatorChar);
-        Assert.AreEqual(expected, AssetBundleBuilderUtils.GetRelativePathTo(from, to));
+        Assert.AreEqual(expected, ABConverter.Utils.GetRelativePathTo(from, to));
     }
 
     [Test]
@@ -32,8 +32,8 @@ public class UtilsTests
     [TestCase("C:/MyProject", "")]
     public void AssetPathToFullPathTest(string expected, string input)
     {
-        expected = AssetBundleBuilderUtils.FixDirectorySeparator(expected);
-        string result = AssetBundleBuilderUtils.AssetPathToFullPath(input, $"C:/MyProject/Assets");
+        expected = ABConverter.Utils.FixDirectorySeparator(expected);
+        string result = ABConverter.Utils.AssetPathToFullPath(input, $"C:/MyProject/Assets");
         UnityEngine.Assertions.Assert.AreEqual(expected, result);
     }
 
@@ -44,8 +44,8 @@ public class UtilsTests
     [TestCase("", "")]
     public void FullPathToAssetPath(string input, string expected)
     {
-        expected = AssetBundleBuilderUtils.FixDirectorySeparator(expected);
-        string result = AssetBundleBuilderUtils.FullPathToAssetPath(input);
+        expected = ABConverter.Utils.FixDirectorySeparator(expected);
+        string result = ABConverter.Utils.FullPathToAssetPath(input);
         UnityEngine.Assertions.Assert.AreEqual(expected, result);
     }
 }

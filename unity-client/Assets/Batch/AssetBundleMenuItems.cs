@@ -1,12 +1,10 @@
 using DCL.Helpers;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
+using System.ComponentModel;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Networking;
 using static DCL.ContentServerUtils;
-
-[assembly: InternalsVisibleTo("AssetBundleBuilderTests")]
 
 namespace DCL
 {
@@ -16,26 +14,26 @@ namespace DCL
         public static void DumpBaseAvatars()
         {
             var avatarItemList = GetAvatarMappingList("https://dcl-wearables.now.sh/index.json");
-            var builder = new AssetBundleConverterCore(EditorEnvironment.CreateWithDefaultImplementations());
+            var builder = new ABConverter.Core(EditorEnvironment.CreateWithDefaultImplementations());
             builder.Convert(avatarItemList);
         }
 
         [MenuItem("Decentraland/Asset Bundle Builder/Dump Zone -110,-110")]
         public static void DumpZoneArea()
         {
-            AssetBundleConverter.DumpArea(new Vector2Int(-110, -110), new Vector2Int(1, 1), ApiTLD.ORG, new AssetBundleConverter.Settings());
+            ABConverter.Client.DumpArea(new Vector2Int(-110, -110), new Vector2Int(1, 1), ApiTLD.ORG, new ABConverter.Client.Settings());
         }
 
         [MenuItem("Decentraland/Asset Bundle Builder/Dump Org 0,0")]
         public static void DumpCenterPlaza()
         {
-            var settings = new AssetBundleConverter.Settings
+            var settings = new ABConverter.Client.Settings
             {
                 skipAlreadyBuiltBundles = true
             };
 
             var zoneArray = Utils.GetCenteredZoneArray(new Vector2Int(0, 0), new Vector2Int(30, 30));
-            AssetBundleConverter.DumpArea(zoneArray, ApiTLD.ORG, settings);
+            ABConverter.Client.DumpArea(zoneArray, ApiTLD.ORG, settings);
         }
 
         [MenuItem("Decentraland/Asset Bundle Builder/Only Build Bundles")]

@@ -8,7 +8,7 @@ using AssetDatabase = UnityEditor.AssetDatabase;
 using Directory = System.IO.Directory;
 using File = System.IO.File;
 
-namespace AssetBundleConversionTests
+namespace ABConverterTests
 {
     public class ABConverterShould
     {
@@ -43,7 +43,7 @@ namespace AssetBundleConversionTests
         [Test]
         public void PopulateLowercaseMappingsCorrectly()
         {
-            var builder = new AssetBundleConverterCore(EditorEnvironment.CreateWithDefaultImplementations());
+            var builder = new ABConverter.Core(EditorEnvironment.CreateWithDefaultImplementations());
             var pairs = new List<ContentServerUtils.MappingPair>();
 
             pairs.Add(new ContentServerUtils.MappingPair() {file = "foo", hash = "tEsT1"});
@@ -67,7 +67,7 @@ namespace AssetBundleConversionTests
         [Test]
         public void InitializeDirectoryPathsCorrectly()
         {
-            var core = new AssetBundleConverterCore(EditorEnvironment.CreateWithDefaultImplementations());
+            var core = new ABConverter.Core(EditorEnvironment.CreateWithDefaultImplementations());
             core.InitializeDirectoryPaths(false);
 
             Assert.IsFalse(string.IsNullOrEmpty(core.settings.finalAssetBundlePath));
@@ -146,14 +146,14 @@ namespace AssetBundleConversionTests
         [UnityTest]
         public IEnumerator DownloadAssetCorrectly()
         {
-            var settings = new AssetBundleConverter.Settings();
+            var settings = new ABConverter.Client.Settings();
             settings.baseUrl = ContentServerUtils.GetBaseUrl(ContentServerUtils.ApiTLD.ZONE) + "/contents/";
             settings.verbose = true;
             settings.deleteDownloadPathAfterFinished = false;
 
-            var env = AssetBundleConverter.EnsureEnvironment();
+            var env = ABConverter.Client.EnsureEnvironment();
 
-            var core = new AssetBundleConverterCore(env, settings);
+            var core = new ABConverter.Core(env, settings);
 
             AssetPath path = new AssetPath(
                 core.finalDownloadedPath,
@@ -174,20 +174,20 @@ namespace AssetBundleConversionTests
         [UnityTest]
         public IEnumerator ConvertAssetsWithExternalDependenciesCorrectly()
         {
-            var settings = new AssetBundleConverter.Settings();
+            var settings = new ABConverter.Client.Settings();
             settings.baseUrl = ContentServerUtils.GetBaseUrl(ContentServerUtils.ApiTLD.ZONE) + "/contents/";
             settings.verbose = true;
             settings.deleteDownloadPathAfterFinished = false;
 
-            AssetBundleConverter.EnsureEnvironment();
+            ABConverter.Client.EnsureEnvironment();
 
-            var state = AssetBundleConverter.DumpArea(
+            var state = ABConverter.Client.DumpArea(
                 new Vector2Int(-110, -110),
                 new Vector2Int(1, 1),
                 ContentServerUtils.ApiTLD.ZONE,
                 settings);
 
-            yield return new WaitUntil(() => state.step == AssetBundleConverterCore.State.Step.FINISHED);
+            yield return new WaitUntil(() => state.step == ABConverter.Core.State.Step.FINISHED);
 
             AssetBundle abDependency = AssetBundle.LoadFromFile(AssetBundleConverterConfig.ASSET_BUNDLES_PATH_ROOT + "/QmWZaHM9CaVpCnsWh78LiNFuiXwjCzTQBTaJ6vZL7c9cbp");
             abDependency.LoadAllAssets();
