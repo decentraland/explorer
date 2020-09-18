@@ -7,6 +7,7 @@ import { Avatar, Profile } from '../profiles/types'
 import { setLoadingScreenVisible } from '../../unity-interface/dcl'
 import { createLocalAuthIdentity } from '../ethereum/provider'
 import { getFromLocalStorage } from '../../atomicHelpers/localStorage'
+import { ProfileAsPromise } from 'shared/profiles/ProfileAsPromise'
 
 declare const globalThis: StoreContainer
 
@@ -133,9 +134,15 @@ function GoToAvatarEditor(element: HTMLElement) {
 
 async function getLocalProfile() {
   let profile = getFromLocalStorage('signup_profile') as Profile | null
+  if (profile && profile.userId) {
+    return profile
+  }
+  const identity = await createLocalAuthIdentity()
+  profile = await ProfileAsPromise(identity.address)
   if (profile) {
     return profile
   }
+
   let avatar: Avatar = {
     bodyShape: 'dcl://base-avatars/BaseMale',
     snapshots: {
@@ -160,7 +167,6 @@ async function getLocalProfile() {
     ]
   }
 
-  const identity = await createLocalAuthIdentity()
   return {
     userId: identity.address.toString(),
     name: 'USER_TEST_AVATAR_EDITOR',
