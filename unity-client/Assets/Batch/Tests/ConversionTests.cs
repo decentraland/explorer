@@ -89,6 +89,61 @@ namespace AssetBundleConversionTests
         }
 
         [UnityTest]
+        public IEnumerator InjectTexturesCorrectly()
+        {
+            yield break;
+        }
+
+        [UnityTest]
+        public IEnumerator InjectBufferCorrectly()
+        {
+            yield break;
+        }
+
+        [UnityTest]
+        public IEnumerator CheckAlreadyGeneratedAssetsCorrectly()
+        {
+            yield break;
+        }
+
+        [UnityTest]
+        public IEnumerator DumpAreaCorrectly()
+        {
+            yield break;
+        }
+
+        [UnityTest]
+        public IEnumerator DumpSceneCorrectly()
+        {
+            yield break;
+        }
+
+        [UnityTest]
+        public IEnumerator AssetBundleFolderIsBeingCleanedProperly()
+        {
+            yield break;
+        }
+
+        [UnityTest]
+        public IEnumerator DumpGLTFCorrectly()
+        {
+            yield break;
+        }
+
+        [UnityTest]
+        public IEnumerator DumpTexturesCorrectly()
+        {
+            yield break;
+        }
+
+        [UnityTest]
+        public IEnumerator DumpBuffersCorrectly()
+        {
+            yield break;
+        }
+
+
+        [UnityTest]
         public IEnumerator DownloadAssetCorrectly()
         {
             var settings = new AssetBundleConverter.Settings();

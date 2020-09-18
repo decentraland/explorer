@@ -227,7 +227,7 @@ namespace DCL
             return true;
         }
 
-        private AssetPath DumpGltf(AssetPath gltfPath, List<AssetPath> texturePaths, List<AssetPath> bufferPaths)
+        internal AssetPath DumpGltf(AssetPath gltfPath, List<AssetPath> texturePaths, List<AssetPath> bufferPaths)
         {
             List<Stream> streamsToDispose = new List<Stream>();
 
