@@ -23,12 +23,7 @@ namespace DCL
         [MenuItem("Decentraland/Asset Bundle Builder/Dump Zone -110,-110")]
         public static void DumpZoneArea()
         {
-            var settings = new AssetBundleConverter.Settings
-            {
-                tld = ApiTLD.ORG
-            };
-
-            AssetBundleConverter.DumpArea(new Vector2Int(-110, -110), new Vector2Int(1, 1), settings);
+            AssetBundleConverter.DumpArea(new Vector2Int(-110, -110), new Vector2Int(1, 1), ApiTLD.ORG, new AssetBundleConverter.Settings());
         }
 
         [MenuItem("Decentraland/Asset Bundle Builder/Dump Org 0,0")]
@@ -40,7 +35,7 @@ namespace DCL
             };
 
             var zoneArray = Utils.GetCenteredZoneArray(new Vector2Int(0, 0), new Vector2Int(30, 30));
-            AssetBundleConverter.DumpArea(zoneArray, settings);
+            AssetBundleConverter.DumpArea(zoneArray, ApiTLD.ORG, settings);
         }
 
         [MenuItem("Decentraland/Asset Bundle Builder/Only Build Bundles")]

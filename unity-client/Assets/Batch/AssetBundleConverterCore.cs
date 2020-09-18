@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Networking;
 using UnityGLTF;
 using UnityGLTF.Cache;
 
@@ -20,11 +21,26 @@ namespace DCL
             ASSET_BUNDLE_BUILD_FAIL = 3,
         }
 
+        public struct State
+        {
+            public enum Step
+            {
+                IDLE,
+                DUMPING_ASSETS,
+                BUILDING_ASSET_BUNDLES,
+                FINISHED,
+            }
+
+            public Step step;
+            public ErrorCodes lastErrorCode;
+        }
+
+        public State state;
+
         private const string MAIN_SHADER_AB_NAME = "MainShader_Delete_Me";
 
         public Dictionary<string, string> hashLowercaseToHashProper = new Dictionary<string, string>();
 
-        internal string finalAssetBundlePath;
         internal readonly string finalDownloadedPath;
 
         public AssetBundleConverter.Settings settings;
@@ -41,11 +57,12 @@ namespace DCL
         {
             this.env = env;
 
-            this.settings = settings ?? new AssetBundleConverter.Settings();
+            this.settings = settings.Clone() ?? new AssetBundleConverter.Settings();
 
-            finalAssetBundlePath = AssetBundleConverterConfig.ASSET_BUNDLES_PATH_ROOT + "/";
             finalDownloadedPath = AssetBundleConverterConfig.DOWNLOADED_PATH_ROOT + "/";
             log.verboseEnabled = settings.verbose;
+
+            state.step = State.Step.IDLE;
         }
 
         public void CleanAndExit(ErrorCodes errorCode)
@@ -72,7 +89,7 @@ namespace DCL
         }
 
 
-        private List<AssetPath> DumpSceneTextures(List<AssetPath> textureAssetPaths)
+        internal List<AssetPath> DumpSceneTextures(List<AssetPath> textureAssetPaths)
         {
             List<AssetPath> result = new List<AssetPath>(textureAssetPaths);
 
@@ -185,7 +202,7 @@ namespace DCL
 
                 gltfPaths = gltfPaths.Where(
                     assetPath =>
-                        !env.file.Exists(finalAssetBundlePath + assetPath.hash)).ToList();
+                        !env.file.Exists(settings.finalAssetBundlePath + assetPath.hash)).ToList();
 
                 int skippedCount = gltfCount - gltfPaths.Count;
                 skippedAssets += skippedCount;
@@ -274,7 +291,7 @@ namespace DCL
 
             env.assetDatabase.MoveAsset(finalDownloadedPath, AssetBundleConverterConfig.DOWNLOADED_PATH_ROOT);
 
-            manifest = BuildPipeline.BuildAssetBundles(finalAssetBundlePath, BuildAssetBundleOptions.UncompressedAssetBundle | BuildAssetBundleOptions.ForceRebuildAssetBundle, BuildTarget.WebGL);
+            manifest = env.buildPipeline.BuildAssetBundles(settings.finalAssetBundlePath, BuildAssetBundleOptions.UncompressedAssetBundle | BuildAssetBundleOptions.ForceRebuildAssetBundle, BuildTarget.WebGL);
 
             if (manifest == null)
             {
@@ -282,8 +299,8 @@ namespace DCL
                 return false;
             }
 
-            DependencyMapBuilder.Generate(env.file, finalAssetBundlePath, hashLowercaseToHashProper, manifest, MAIN_SHADER_AB_NAME);
-            logBuffer += $"Generating asset bundles at path: {finalAssetBundlePath}\n";
+            DependencyMapBuilder.Generate(env.file, settings.finalAssetBundlePath, hashLowercaseToHashProper, manifest, MAIN_SHADER_AB_NAME);
+            logBuffer += $"Generating asset bundles at path: {settings.finalAssetBundlePath}\n";
 
             string[] assetBundles = manifest.GetAllAssetBundles();
 
@@ -302,7 +319,7 @@ namespace DCL
             return true;
         }
 
-        public void Convert(ContentServerUtils.MappingPair[] rawContents, System.Action<ErrorCodes> OnFinish = null)
+        public void Convert(ContentServerUtils.MappingPair[] rawContents, Action<ErrorCodes> OnFinish = null)
         {
             if (OnFinish == null)
                 OnFinish = CleanAndExit;
@@ -320,21 +337,20 @@ namespace DCL
             bool shouldGenerateAssetBundles = true;
             bool assetsAlreadyDumped = false;
 
-            EditorApplication.CallbackFunction updateLoop = null;
-
-            updateLoop = () =>
+            //TODO(Brian): Use async-await instead of Application.update
+            void UpdateLoop()
             {
                 try
                 {
                     //NOTE(Brian): We have to check this because the ImportAsset for GLTFs is not synchronous, and must execute some delayed calls
                     //             after the import asset finished. Therefore, we have to make sure those calls finished before continuing.
-                    if (!GLTFImporter.finishedImporting && Time.realtimeSinceStartup - timer < 60)
-                        return;
+                    if (!GLTFImporter.finishedImporting && Time.realtimeSinceStartup - timer < 60) return;
 
                     env.assetDatabase.Refresh();
 
                     if (!assetsAlreadyDumped)
                     {
+                        state.step = State.Step.DUMPING_ASSETS;
                         shouldGenerateAssetBundles |= DumpAssets(rawContents);
                         assetsAlreadyDumped = true;
                         timer = Time.realtimeSinceStartup;
@@ -343,42 +359,53 @@ namespace DCL
                         return;
                     }
 
-                    EditorApplication.update -= updateLoop;
+                    EditorApplication.update -= UpdateLoop;
 
                     if (shouldGenerateAssetBundles)
                     {
                         AssetBundleManifest manifest;
 
+                        state.step = State.Step.BUILDING_ASSET_BUNDLES;
+
                         if (BuildAssetBundles(out manifest))
                         {
                             CleanAssetBundleFolder(manifest.GetAllAssetBundles());
-                            OnFinish?.Invoke(ErrorCodes.SUCCESS);
+
+                            state.lastErrorCode = ErrorCodes.SUCCESS;
+                            state.step = State.Step.FINISHED;
+                            OnFinish?.Invoke(state.lastErrorCode);
                         }
                         else
                         {
-                            OnFinish?.Invoke(ErrorCodes.ASSET_BUNDLE_BUILD_FAIL);
+                            state.lastErrorCode = ErrorCodes.ASSET_BUNDLE_BUILD_FAIL;
+                            state.step = State.Step.FINISHED;
+                            OnFinish?.Invoke(state.lastErrorCode);
                         }
                     }
                     else
                     {
-                        OnFinish?.Invoke(ErrorCodes.SUCCESS);
+                        state.lastErrorCode = ErrorCodes.SUCCESS;
+                        state.step = State.Step.FINISHED;
+                        OnFinish?.Invoke(state.lastErrorCode);
                     }
                 }
                 catch (Exception e)
                 {
                     log.Error(e.Message);
-                    OnFinish?.Invoke(ErrorCodes.UNDEFINED);
-                    EditorApplication.update -= updateLoop;
+                    state.lastErrorCode = ErrorCodes.UNDEFINED;
+                    state.step = State.Step.FINISHED;
+                    OnFinish?.Invoke(state.lastErrorCode);
+                    EditorApplication.update -= UpdateLoop;
                 }
-            };
+            }
 
-            EditorApplication.update += updateLoop;
+            EditorApplication.update += UpdateLoop;
         }
 
 
         internal void CleanAssetBundleFolder(string[] assetBundles)
         {
-            AssetBundleBuilderUtils.CleanAssetBundleFolder(env.file, finalAssetBundlePath, assetBundles, hashLowercaseToHashProper);
+            AssetBundleBuilderUtils.CleanAssetBundleFolder(env.file, settings.finalAssetBundlePath, assetBundles, hashLowercaseToHashProper);
         }
 
 
@@ -431,9 +458,7 @@ namespace DCL
         {
             string outputPath = assetPath.finalPath;
             string outputPathDir = Path.GetDirectoryName(outputPath);
-
-            string baseUrl = ContentServerUtils.GetContentAPIUrlBase(settings.tld);
-            string finalUrl = baseUrl + assetPath.hash;
+            string finalUrl = settings.baseUrl + assetPath.hash;
 
             log.Verbose("checking against " + outputPath);
 
@@ -443,7 +468,15 @@ namespace DCL
                 return outputPath;
             }
 
-            byte[] assetData = env.webRequest.Get(finalUrl);
+            DownloadHandler downloadHandler = env.webRequest.Get(finalUrl);
+
+            if (downloadHandler == null)
+            {
+                log.Error($"Download failed! {finalUrl}");
+                return outputPath;
+            }
+
+            byte[] assetData = downloadHandler.data;
 
             log.Verbose($"Downloaded asset = {finalUrl} to {outputPathDir}");
 
@@ -459,13 +492,13 @@ namespace DCL
         internal virtual void InitializeDirectoryPaths(bool deleteIfExists)
         {
             env.directory.InitializeDirectory(finalDownloadedPath, deleteIfExists);
-            env.directory.InitializeDirectory(finalAssetBundlePath, deleteIfExists);
+            env.directory.InitializeDirectory(settings.finalAssetBundlePath, deleteIfExists);
         }
 
-        internal virtual void CleanupWorkingFolders()
+        internal void CleanupWorkingFolders()
         {
-            env.file.Delete(finalAssetBundlePath + AssetBundleConverterConfig.ASSET_BUNDLE_FOLDER_NAME);
-            env.file.Delete(finalAssetBundlePath + AssetBundleConverterConfig.ASSET_BUNDLE_FOLDER_NAME + ".manifest");
+            env.file.Delete(settings.finalAssetBundlePath + AssetBundleConverterConfig.ASSET_BUNDLE_FOLDER_NAME);
+            env.file.Delete(settings.finalAssetBundlePath + AssetBundleConverterConfig.ASSET_BUNDLE_FOLDER_NAME + ".manifest");
 
             if (settings.deleteDownloadPathAfterFinished)
             {
@@ -476,7 +509,7 @@ namespace DCL
 
         protected virtual float GetFreeSpace()
         {
-            FileInfo file = new FileInfo(finalAssetBundlePath);
+            FileInfo file = new FileInfo(settings.finalAssetBundlePath);
 
             if (file.Directory == null)
                 return 0;

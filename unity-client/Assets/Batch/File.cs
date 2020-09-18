@@ -4,53 +4,56 @@ using UnityEngine;
 
 namespace DCL
 {
-    public class File : IFile
+    public static partial class SystemWrappers
     {
-        public void Delete(string path)
+        public class File : IFile
         {
-            try
+            public void Delete(string path)
             {
-                System.IO.File.Delete(path);
+                try
+                {
+                    System.IO.File.Delete(path);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError($"Error trying to delete file {path}!\n{e.Message}");
+                }
             }
-            catch (Exception e)
+
+            public bool Exists(string path)
             {
-                Debug.LogError($"Error trying to delete file {path}!\n{e.Message}");
+                return System.IO.File.Exists(path);
             }
-        }
 
-        public bool Exists(string path)
-        {
-            return System.IO.File.Exists(path);
-        }
+            public void Copy(string srcPath, string dstPath)
+            {
+                System.IO.File.Copy(srcPath, dstPath);
+            }
 
-        public void Copy(string srcPath, string dstPath)
-        {
-            System.IO.File.Copy(srcPath, dstPath);
-        }
+            public void Move(string srcPath, string dstPath)
+            {
+                System.IO.File.Move(srcPath, dstPath);
+            }
 
-        public void Move(string srcPath, string dstPath)
-        {
-            System.IO.File.Move(srcPath, dstPath);
-        }
+            public string ReadAllText(string path)
+            {
+                return System.IO.File.ReadAllText(path);
+            }
 
-        public string ReadAllText(string path)
-        {
-            return System.IO.File.ReadAllText(path);
-        }
+            public void WriteAllText(string path, string text)
+            {
+                System.IO.File.WriteAllText(path, text);
+            }
 
-        public void WriteAllText(string path, string text)
-        {
-            System.IO.File.WriteAllText(path, text);
-        }
+            public void WriteAllBytes(string path, byte[] bytes)
+            {
+                System.IO.File.WriteAllBytes(path, bytes);
+            }
 
-        public void WriteAllBytes(string path, byte[] bytes)
-        {
-            System.IO.File.WriteAllBytes(path, bytes);
-        }
-
-        public Stream OpenRead(string path)
-        {
-            return System.IO.File.OpenRead(path);
+            public Stream OpenRead(string path)
+            {
+                return System.IO.File.OpenRead(path);
+            }
         }
     }
 }

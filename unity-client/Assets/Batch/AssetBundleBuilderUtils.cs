@@ -4,10 +4,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
-using DCL.Wrappers;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -110,25 +110,24 @@ namespace DCL
             return sBuilder.ToString();
         }
 
-        public static HashSet<string> GetSceneCids(ApiTLD tld, Vector2Int coords, Vector2Int size)
+        public static HashSet<string> GetSceneCids(IWebRequest webRequest, ApiTLD tld, Vector2Int coords, Vector2Int size)
         {
             HashSet<string> sceneCids = new HashSet<string>();
 
             string url = GetScenesAPIUrl(tld, coords.x, coords.y, size.x, size.y);
 
-            UnityWebRequest w = UnityWebRequest.Get(url);
-            w.SendWebRequest();
+            DownloadHandler downloadHandler = null;
 
-            while (!w.isDone)
+            try
             {
+                downloadHandler = webRequest.Get(url);
+            }
+            catch (HttpRequestException e)
+            {
+                throw new Exception($"Request error! Parcels couldn't be fetched! -- {e.Message}");
             }
 
-            if (!w.WebRequestSucceded())
-            {
-                throw new Exception($"Request error! Parcels couldn't be fetched! -- {w.error}");
-            }
-
-            ScenesAPIData scenesApiData = JsonUtility.FromJson<ScenesAPIData>(w.downloadHandler.text);
+            ScenesAPIData scenesApiData = JsonUtility.FromJson<ScenesAPIData>(downloadHandler.text);
 
             Assert.IsTrue(scenesApiData != null, "Invalid response from ScenesAPI");
             Assert.IsTrue(scenesApiData.data != null, "Invalid response from ScenesAPI");
@@ -141,7 +140,7 @@ namespace DCL
             return sceneCids;
         }
 
-        public static HashSet<string> GetScenesCids(ApiTLD tld, List<Vector2Int> coords)
+        public static HashSet<string> GetScenesCids(IWebRequest webRequest, ApiTLD tld, List<Vector2Int> coords)
         {
             HashSet<string> sceneCids = new HashSet<string>();
 
@@ -149,20 +148,19 @@ namespace DCL
             {
                 string url = GetScenesAPIUrl(tld, v.x, v.y, 0, 0);
 
-                UnityWebRequest w = UnityWebRequest.Get(url);
-                w.SendWebRequest();
+                DownloadHandler downloadHandler = null;
 
-                while (!w.isDone)
+                try
                 {
+                    downloadHandler = webRequest.Get(url);
                 }
-
-                if (!w.WebRequestSucceded())
+                catch (HttpRequestException e)
                 {
-                    Debug.LogWarning($"Request error! Parcels couldn't be fetched! -- {w.error}");
+                    Debug.LogWarning($"Request error! Parcels couldn't be fetched! -- {e.Message}");
                     continue;
                 }
 
-                ScenesAPIData scenesApiData = JsonUtility.FromJson<ScenesAPIData>(w.downloadHandler.text);
+                ScenesAPIData scenesApiData = JsonUtility.FromJson<ScenesAPIData>(downloadHandler.text);
 
                 Assert.IsTrue(scenesApiData != null, "Invalid response from ScenesAPI");
                 Assert.IsTrue(scenesApiData.data != null, "Invalid response from ScenesAPI");
@@ -176,20 +174,22 @@ namespace DCL
             return sceneCids;
         }
 
-        public static MappingsAPIData GetSceneMappingsData(ApiTLD tld, string sceneCid)
+        public static MappingsAPIData GetSceneMappingsData(IWebRequest webRequest, ApiTLD tld, string sceneCid)
         {
             string url = GetMappingsAPIUrl(tld, sceneCid);
-            UnityWebRequest w = UnityWebRequest.Get(url);
-            w.SendWebRequest();
 
-            while (w.isDone == false)
+            DownloadHandler downloadHandler = null;
+
+            try
             {
+                downloadHandler = webRequest.Get(url);
+            }
+            catch (HttpRequestException e)
+            {
+                throw new Exception($"Request error! mappings couldn't be fetched for scene {sceneCid}! -- {e.Message}");
             }
 
-            if (!w.WebRequestSucceded())
-                throw new Exception($"Request error! mappings couldn't be fetched for scene {sceneCid}! -- {w.error}");
-
-            MappingsAPIData parcelInfoApiData = JsonUtility.FromJson<MappingsAPIData>(w.downloadHandler.text);
+            MappingsAPIData parcelInfoApiData = JsonUtility.FromJson<MappingsAPIData>(downloadHandler.text);
 
             if (parcelInfoApiData.data.Length == 0 || parcelInfoApiData.data == null)
             {

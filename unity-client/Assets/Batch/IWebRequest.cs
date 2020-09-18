@@ -1,8 +1,10 @@
-﻿namespace DCL
+﻿using UnityEngine.Networking;
+
+namespace DCL
 {
     public interface IWebRequest
     {
-        byte[] Get(string url);
-        void GetAsync(string url, System.Action<byte[]> OnCompleted);
+        DownloadHandler Get(string url);
+        void GetAsync(string url, System.Action<DownloadHandler> OnCompleted, System.Action<string> OnFail);
     }
 }

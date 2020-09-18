@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditor;
 using UnityEngine;
 
 namespace DCL
@@ -12,11 +13,26 @@ namespace DCL
             public bool deleteDownloadPathAfterFinished = false;
             public bool skipAlreadyBuiltBundles = false;
             public bool verbose = false;
-            public string finalAssetBundlePath;
-            public ContentServerUtils.ApiTLD tld = ContentServerUtils.ApiTLD.ORG;
+            public string finalAssetBundlePath = AssetBundleConverterConfig.ASSET_BUNDLES_PATH_ROOT + "/";
+            public string baseUrl;
+
+            public Settings Clone()
+            {
+                return this.MemberwiseClone() as Settings;
+            }
         }
 
         private static Logger log = new Logger(nameof(AssetBundleConverter));
+
+        internal static EditorEnvironment env;
+
+        private static EditorEnvironment EnsureEnvironment()
+        {
+            if (env == null)
+                env = EditorEnvironment.CreateWithDefaultImplementations();
+
+            return env;
+        }
 
         /// <summary>
         /// Batch-mode entry point
@@ -40,10 +56,7 @@ namespace DCL
                 }
 
                 if (AssetBundleBuilderUtils.ParseOption(commandLineArgs, AssetBundleConverterConfig.CLI_SET_CUSTOM_BASE_URL, 1, out string[] customBaseUrl))
-                {
-                    ContentServerUtils.customBaseUrl = customBaseUrl[0];
-                    settings.tld = ContentServerUtils.ApiTLD.NONE;
-                }
+                    settings.baseUrl = customBaseUrl[0];
 
                 if (AssetBundleBuilderUtils.ParseOption(commandLineArgs, AssetBundleConverterConfig.CLI_VERBOSE, 0, out _))
                     settings.verbose = true;
@@ -61,7 +74,7 @@ namespace DCL
                         throw new ArgumentException("Invalid sceneCid argument! Please use -sceneCid <id> to establish the desired id to process.");
                     }
 
-                    DumpScene(sceneCid[0], settings);
+                    DumpScene(sceneCid[0], ContentServerUtils.ApiTLD.ORG, settings);
                     return;
                 }
 
@@ -90,7 +103,7 @@ namespace DCL
                         throw new ArgumentException("Invalid parcelsXYWH argument! Please don't use negative width/height values, and ensure any given width/height doesn't exceed 10.");
                     }
 
-                    DumpArea(new Vector2Int(x, y), new Vector2Int(w, h), settings);
+                    DumpArea(new Vector2Int(x, y), new Vector2Int(w, h), ContentServerUtils.ApiTLD.ORG, settings);
                     return;
                 }
 
@@ -102,7 +115,7 @@ namespace DCL
             }
         }
 
-        public static void ConvertScenesToAssetBundles(List<string> sceneCidsList, Settings settings = null)
+        public static void ConvertScenesToAssetBundles(List<string> sceneCidsList, ContentServerUtils.ApiTLD tld, Settings settings = null)
         {
             if (sceneCidsList == null || sceneCidsList.Count == 0)
             {
@@ -112,36 +125,51 @@ namespace DCL
 
             log.Info($"Building {sceneCidsList.Count} scenes...");
 
+            EnsureEnvironment();
+
             List<ContentServerUtils.MappingPair> rawContents = new List<ContentServerUtils.MappingPair>();
 
             foreach (var sceneCid in sceneCidsList)
             {
-                ContentServerUtils.MappingsAPIData parcelInfoApiData = AssetBundleBuilderUtils.GetSceneMappingsData(settings.tld, sceneCid);
+                ContentServerUtils.MappingsAPIData parcelInfoApiData = AssetBundleBuilderUtils.GetSceneMappingsData(env.webRequest, tld, sceneCid);
                 rawContents.AddRange(parcelInfoApiData.data[0].content.contents);
             }
 
-            var core = new AssetBundleConverterCore(EditorEnvironment.CreateWithDefaultImplementations(), settings);
+            var core = new AssetBundleConverterCore(env, settings);
             core.Convert(rawContents.ToArray());
         }
 
-        public static void DumpArea(Vector2Int coords, Vector2Int size, Settings settings)
+        public static void DumpArea(Vector2Int coords, Vector2Int size, ContentServerUtils.ApiTLD tld = ContentServerUtils.ApiTLD.ORG, Settings settings = null)
         {
-            HashSet<string> sceneCids = AssetBundleBuilderUtils.GetSceneCids(settings.tld, coords, size);
+            EnsureEnvironment();
+
+            if (settings == null)
+                settings = new Settings();
+
+            HashSet<string> sceneCids = AssetBundleBuilderUtils.GetSceneCids(env.webRequest, tld, coords, size);
             List<string> sceneCidsList = sceneCids.ToList();
-            ConvertScenesToAssetBundles(sceneCidsList, settings);
+            ConvertScenesToAssetBundles(sceneCidsList, tld, settings);
         }
 
-        public static void DumpArea(List<Vector2Int> coords, Settings settings)
+        public static void DumpArea(List<Vector2Int> coords, ContentServerUtils.ApiTLD tld = ContentServerUtils.ApiTLD.ORG, Settings settings = null)
         {
-            HashSet<string> sceneCids = AssetBundleBuilderUtils.GetScenesCids(settings.tld, coords);
+            EnsureEnvironment();
+
+            if (settings == null)
+                settings = new Settings();
+
+            HashSet<string> sceneCids = AssetBundleBuilderUtils.GetScenesCids(env.webRequest, tld, coords);
 
             List<string> sceneCidsList = sceneCids.ToList();
-            ConvertScenesToAssetBundles(sceneCidsList, settings);
+            ConvertScenesToAssetBundles(sceneCidsList, tld, settings);
         }
 
-        public static void DumpScene(string cid, Settings settings)
+        public static void DumpScene(string cid, ContentServerUtils.ApiTLD tld = ContentServerUtils.ApiTLD.ORG, Settings settings = null)
         {
-            ConvertScenesToAssetBundles(new List<string> {cid}, settings);
+            if (settings == null)
+                settings = new Settings();
+
+            ConvertScenesToAssetBundles(new List<string> {cid}, tld, settings);
         }
     }
 }

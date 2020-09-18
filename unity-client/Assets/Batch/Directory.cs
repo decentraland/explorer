@@ -3,48 +3,51 @@ using UnityEngine;
 
 namespace DCL
 {
-    public class Directory : IDirectory
+    public static partial class SystemWrappers
     {
-        public void CreateDirectory(string path)
+        public class Directory : IDirectory
         {
-            System.IO.Directory.CreateDirectory(path);
-        }
-
-        public void InitializeDirectory(string path, bool deleteIfExists)
-        {
-            try
+            public void CreateDirectory(string path)
             {
-                if (deleteIfExists)
+                System.IO.Directory.CreateDirectory(path);
+            }
+
+            public void InitializeDirectory(string path, bool deleteIfExists)
+            {
+                try
+                {
+                    if (deleteIfExists)
+                    {
+                        if (Exists(path))
+                            Delete(path, true);
+                    }
+
+                    if (!Exists(path))
+                        CreateDirectory(path);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError($"Exception trying to clean up folder. Continuing anyways.\n{e.Message}");
+                }
+            }
+
+            public void Delete(string path, bool recursive)
+            {
+                try
                 {
                     if (Exists(path))
-                        Delete(path, true);
+                        System.IO.Directory.Delete(path, recursive);
                 }
+                catch (Exception e)
+                {
+                    Debug.LogError($"Error trying to delete directory {path}!\n{e.Message}");
+                }
+            }
 
-                if (!Exists(path))
-                    CreateDirectory(path);
-            }
-            catch (Exception e)
+            public bool Exists(string path)
             {
-                Debug.LogError($"Exception trying to clean up folder. Continuing anyways.\n{e.Message}");
+                return System.IO.Directory.Exists(path);
             }
-        }
-
-        public void Delete(string path, bool recursive)
-        {
-            try
-            {
-                if (Exists(path))
-                    System.IO.Directory.Delete(path, recursive);
-            }
-            catch (Exception e)
-            {
-                Debug.LogError($"Error trying to delete directory {path}!\n{e.Message}");
-            }
-        }
-
-        public bool Exists(string path)
-        {
-            return System.IO.Directory.Exists(path);
         }
     }
 }

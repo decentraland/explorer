@@ -1,6 +1,6 @@
 ﻿using UnityEditor;
 
-namespace DCL.Wrappers
+namespace DCL
 {
     public interface IAssetDatabase
     {
