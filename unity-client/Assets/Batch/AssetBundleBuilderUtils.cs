@@ -124,7 +124,7 @@ namespace DCL
             }
             catch (HttpRequestException e)
             {
-                throw new Exception($"Request error! Parcels couldn't be fetched! -- {e.Message}");
+                throw new Exception($"Request error! Parcels couldn't be fetched! -- {e.Message}", e);
             }
 
             ScenesAPIData scenesApiData = JsonUtility.FromJson<ScenesAPIData>(downloadHandler.text);
@@ -156,8 +156,7 @@ namespace DCL
                 }
                 catch (HttpRequestException e)
                 {
-                    Debug.LogWarning($"Request error! Parcels couldn't be fetched! -- {e.Message}");
-                    continue;
+                    throw new HttpRequestException($"Request error! Parcels couldn't be fetched! -- {url} -- {e.Message}", e);
                 }
 
                 ScenesAPIData scenesApiData = JsonUtility.FromJson<ScenesAPIData>(downloadHandler.text);
@@ -303,7 +302,7 @@ namespace DCL
             fullPath = fullPath.Replace('/', ps);
             fullPath = fullPath.Replace('\\', ps);
 
-            string pattern = $".*?(?<assetpath>\\{ps}Assets\\{ps}.*?$)";
+            string pattern = $".*?\\{ps}(?<assetpath>Assets\\{ps}.*?$)";
 
             var regex = new Regex(pattern);
 
@@ -337,7 +336,7 @@ namespace DCL
 
             char ps = Path.DirectorySeparatorChar;
             string dataPathWithoutAssets = dataPath.Replace($"{ps}Assets", "");
-            return dataPathWithoutAssets + assetPath;
+            return dataPathWithoutAssets + "/" + assetPath;
         }
 
 

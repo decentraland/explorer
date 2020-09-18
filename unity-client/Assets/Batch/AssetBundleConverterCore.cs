@@ -391,7 +391,7 @@ namespace DCL
                 }
                 catch (Exception e)
                 {
-                    log.Error(e.Message);
+                    log.Error(e.Message + "\n" + e.StackTrace);
                     state.lastErrorCode = ErrorCodes.UNDEFINED;
                     state.step = State.Step.FINISHED;
                     OnFinish?.Invoke(state.lastErrorCode);
@@ -478,7 +478,7 @@ namespace DCL
 
             byte[] assetData = downloadHandler.data;
 
-            log.Verbose($"Downloaded asset = {finalUrl} to {outputPathDir}");
+            log.Verbose($"Downloaded asset = {finalUrl} to {outputPath}");
 
             if (!env.directory.Exists(outputPathDir))
                 env.directory.CreateDirectory(outputPathDir);
@@ -507,7 +507,7 @@ namespace DCL
             }
         }
 
-        protected virtual float GetFreeSpace()
+        protected virtual long GetFreeSpace()
         {
             FileInfo file = new FileInfo(settings.finalAssetBundlePath);
 

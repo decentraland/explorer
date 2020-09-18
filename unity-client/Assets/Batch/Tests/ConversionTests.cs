@@ -22,6 +22,9 @@ namespace AssetBundleConversionTests
             if (Directory.Exists(AssetBundleConverterConfig.DOWNLOADED_PATH_ROOT))
                 Directory.Delete(AssetBundleConverterConfig.DOWNLOADED_PATH_ROOT, true);
 
+            if (File.Exists(AssetBundleConverterConfig.DOWNLOADED_PATH_ROOT + ".meta"))
+                File.Delete(AssetBundleConverterConfig.DOWNLOADED_PATH_ROOT + ".meta");
+
             AssetDatabase.Refresh();
         }
 
@@ -34,7 +37,7 @@ namespace AssetBundleConversionTests
         [TearDown]
         public void TearDown()
         {
-            ResetCacheAndWorkingFolders();
+            //ResetCacheAndWorkingFolders();
         }
 
         [Test]
@@ -86,10 +89,40 @@ namespace AssetBundleConversionTests
         }
 
         [UnityTest]
+        public IEnumerator DownloadAssetCorrectly()
+        {
+            var settings = new AssetBundleConverter.Settings();
+            settings.baseUrl = ContentServerUtils.GetBaseUrl(ContentServerUtils.ApiTLD.ZONE) + "/contents/";
+            settings.verbose = true;
+            settings.deleteDownloadPathAfterFinished = false;
+
+            var env = AssetBundleConverter.EnsureEnvironment();
+
+            var core = new AssetBundleConverterCore(env, settings);
+
+            AssetPath path = new AssetPath(
+                core.finalDownloadedPath,
+                new ContentServerUtils.MappingPair
+                {
+                    file = "texture.png",
+                    hash = "QmPLdeHkHbT1SEdouMJLFRAubYr4jiQEut9HhKyuQ8oK8V"
+                }
+            );
+
+            string output = core.DownloadAsset(path);
+
+            UnityEngine.Assertions.Assert.IsTrue(env.file.Exists(output));
+            env.assetDatabase.Refresh();
+            yield return null;
+        }
+
+        [UnityTest]
         public IEnumerator ConvertAssetsWithExternalDependenciesCorrectly()
         {
             var settings = new AssetBundleConverter.Settings();
-            settings.baseUrl = ContentServerUtils.GetBaseUrl(ContentServerUtils.ApiTLD.ZONE);
+            settings.baseUrl = ContentServerUtils.GetBaseUrl(ContentServerUtils.ApiTLD.ZONE) + "/contents/";
+            settings.verbose = true;
+            settings.deleteDownloadPathAfterFinished = false;
 
             AssetBundleConverter.EnsureEnvironment();
 

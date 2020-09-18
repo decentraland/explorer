@@ -62,7 +62,7 @@ namespace DCL
             public string GetTextMetaFilePathFromAssetPath(string fullPath)
             {
                 string assetPath = AssetBundleBuilderUtils.FullPathToAssetPath(fullPath);
-                return UnityEditor.AssetDatabase.GetTextMetaFilePathFromAssetPath(assetPath);
+                return AssetBundleBuilderUtils.AssetPathToFullPath(UnityEditor.AssetDatabase.GetTextMetaFilePathFromAssetPath(assetPath));
             }
         }
     }

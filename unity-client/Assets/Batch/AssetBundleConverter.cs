@@ -26,10 +26,12 @@ namespace DCL
 
         public static EditorEnvironment env;
 
-        public static void EnsureEnvironment()
+        public static EditorEnvironment EnsureEnvironment()
         {
             if (env == null)
                 env = EditorEnvironment.CreateWithDefaultImplementations();
+
+            return env;
         }
 
         /// <summary>
@@ -46,6 +48,8 @@ namespace DCL
             Settings settings = new Settings();
             settings.skipAlreadyBuiltBundles = true;
             settings.deleteDownloadPathAfterFinished = true;
+            settings.verbose = true;
+            settings.baseUrl = ContentServerUtils.GetBaseUrl(ContentServerUtils.ApiTLD.ORG) + "/contents/";
 
             try
             {

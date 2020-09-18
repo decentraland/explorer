@@ -26,7 +26,7 @@ namespace DCL
             get
             {
                 string fileExt = Path.GetExtension(pair.file);
-                return basePath + pair.hash + "/" + pair.hash + fileExt;
+                return basePath + "/" + pair.hash + "/" + pair.hash + fileExt;
             }
         }
     }

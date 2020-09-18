@@ -55,17 +55,24 @@ namespace DCL
 
                 do
                 {
-                    req = UnityWebRequest.Get(url);
-                    req.SendWebRequest();
-                    while (req.isDone == false)
+                    try
                     {
+                        req = UnityWebRequest.Get(url);
+                        req.SendWebRequest();
+                        while (req.isDone == false)
+                        {
+                        }
+                    }
+                    catch (HttpRequestException e)
+                    {
+                        throw new HttpRequestException($"{e.Message} -- ({url})", e);
                     }
 
                     retryCount--;
 
                     if (retryCount == 0)
                     {
-                        throw new HttpRequestException(req.error);
+                        throw new HttpRequestException($"{req.error} -- ({url})");
                     }
                 } while (!req.WebRequestSucceded());
 
