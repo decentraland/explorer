@@ -6,13 +6,13 @@ import { EnvironmentData, LoadableParcelScene } from 'shared/types'
 import { getParcelSceneID } from 'shared/world/parcelSceneManager'
 import { SceneWorker } from 'shared/world/SceneWorker'
 import { UnityScene } from './UnityScene'
-import { DEBUG } from 'config'
+import { DEBUG_SCENE_LOG } from 'config'
 
 export class UnityParcelScene extends UnityScene<LoadableParcelScene> {
   constructor(public data: EnvironmentData<LoadableParcelScene>) {
     super(data)
     let loggerPrefix = data.data.basePosition.x + ',' + data.data.basePosition.y + ': '
-    this.logger = DEBUG === true ? createLogger(loggerPrefix) : createDummyLogger()
+    this.logger = DEBUG_SCENE_LOG === true ? createLogger(loggerPrefix) : createDummyLogger()
   }
 
   registerWorker(worker: SceneWorker): void {
@@ -25,7 +25,7 @@ export class UnityParcelScene extends UnityScene<LoadableParcelScene> {
         system.getAPIInstance(DevTools).logger = this.logger
 
         const parcelIdentity = system.getAPIInstance(ParcelIdentity)
-        parcelIdentity.land = this.data.data.land!
+        parcelIdentity.land = this.data.data.land
         parcelIdentity.cid = getParcelSceneID(worker.parcelScene)
       })
       .catch((e) => this.logger.error('Error initializing system', e))
