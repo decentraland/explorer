@@ -21,7 +21,7 @@ namespace DCL
             ASSET_BUNDLE_BUILD_FAIL = 3,
         }
 
-        public struct State
+        public class State
         {
             public enum Step
             {
@@ -31,11 +31,11 @@ namespace DCL
                 FINISHED,
             }
 
-            public Step step;
-            public ErrorCodes lastErrorCode;
+            public Step step { get; internal set; }
+            public ErrorCodes lastErrorCode { get; internal set; }
         }
 
-        public State state;
+        public readonly State state = new State();
 
         private const string MAIN_SHADER_AB_NAME = "MainShader_Delete_Me";
 

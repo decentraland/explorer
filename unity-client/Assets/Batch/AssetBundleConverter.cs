@@ -24,14 +24,12 @@ namespace DCL
 
         private static Logger log = new Logger(nameof(AssetBundleConverter));
 
-        internal static EditorEnvironment env;
+        public static EditorEnvironment env;
 
-        private static EditorEnvironment EnsureEnvironment()
+        public static void EnsureEnvironment()
         {
             if (env == null)
                 env = EditorEnvironment.CreateWithDefaultImplementations();
-
-            return env;
         }
 
         /// <summary>
@@ -39,6 +37,7 @@ namespace DCL
         /// </summary>
         public static void ExportSceneToAssetBundles()
         {
+            EnsureEnvironment();
             ExportSceneToAssetBundles(Environment.GetCommandLineArgs());
         }
 
@@ -115,17 +114,15 @@ namespace DCL
             }
         }
 
-        public static void ConvertScenesToAssetBundles(List<string> sceneCidsList, ContentServerUtils.ApiTLD tld, Settings settings = null)
+        public static AssetBundleConverterCore.State ConvertScenesToAssetBundles(List<string> sceneCidsList, ContentServerUtils.ApiTLD tld, Settings settings = null)
         {
             if (sceneCidsList == null || sceneCidsList.Count == 0)
             {
                 log.Error("Scene list is null or count == 0! Maybe this sector lacks scenes or content requests failed?");
-                return;
+                return new AssetBundleConverterCore.State() {lastErrorCode = AssetBundleConverterCore.ErrorCodes.SCENE_LIST_NULL};
             }
 
             log.Info($"Building {sceneCidsList.Count} scenes...");
-
-            EnsureEnvironment();
 
             List<ContentServerUtils.MappingPair> rawContents = new List<ContentServerUtils.MappingPair>();
 
@@ -137,39 +134,36 @@ namespace DCL
 
             var core = new AssetBundleConverterCore(env, settings);
             core.Convert(rawContents.ToArray());
+            return core.state;
         }
 
-        public static void DumpArea(Vector2Int coords, Vector2Int size, ContentServerUtils.ApiTLD tld = ContentServerUtils.ApiTLD.ORG, Settings settings = null)
+        public static AssetBundleConverterCore.State DumpArea(Vector2Int coords, Vector2Int size, ContentServerUtils.ApiTLD tld = ContentServerUtils.ApiTLD.ORG, Settings settings = null)
         {
-            EnsureEnvironment();
-
             if (settings == null)
                 settings = new Settings();
 
             HashSet<string> sceneCids = AssetBundleBuilderUtils.GetSceneCids(env.webRequest, tld, coords, size);
             List<string> sceneCidsList = sceneCids.ToList();
-            ConvertScenesToAssetBundles(sceneCidsList, tld, settings);
+            return ConvertScenesToAssetBundles(sceneCidsList, tld, settings);
         }
 
-        public static void DumpArea(List<Vector2Int> coords, ContentServerUtils.ApiTLD tld = ContentServerUtils.ApiTLD.ORG, Settings settings = null)
+        public static AssetBundleConverterCore.State DumpArea(List<Vector2Int> coords, ContentServerUtils.ApiTLD tld = ContentServerUtils.ApiTLD.ORG, Settings settings = null)
         {
-            EnsureEnvironment();
-
             if (settings == null)
                 settings = new Settings();
 
             HashSet<string> sceneCids = AssetBundleBuilderUtils.GetScenesCids(env.webRequest, tld, coords);
 
             List<string> sceneCidsList = sceneCids.ToList();
-            ConvertScenesToAssetBundles(sceneCidsList, tld, settings);
+            return ConvertScenesToAssetBundles(sceneCidsList, tld, settings);
         }
 
-        public static void DumpScene(string cid, ContentServerUtils.ApiTLD tld = ContentServerUtils.ApiTLD.ORG, Settings settings = null)
+        public static AssetBundleConverterCore.State DumpScene(string cid, ContentServerUtils.ApiTLD tld = ContentServerUtils.ApiTLD.ORG, Settings settings = null)
         {
             if (settings == null)
                 settings = new Settings();
 
-            ConvertScenesToAssetBundles(new List<string> {cid}, tld, settings);
+            return ConvertScenesToAssetBundles(new List<string> {cid}, tld, settings);
         }
     }
 }

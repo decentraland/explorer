@@ -10,34 +10,35 @@ using File = System.IO.File;
 
 namespace AssetBundleConversionTests
 {
-    public class ConversionTests
+    public class ABConverterShould
     {
-        void ResetEnvironment()
+        void ResetCacheAndWorkingFolders()
         {
             Caching.ClearCache();
-            AssetDatabase.Refresh();
 
             if (Directory.Exists(AssetBundleConverterConfig.ASSET_BUNDLES_PATH_ROOT))
                 Directory.Delete(AssetBundleConverterConfig.ASSET_BUNDLES_PATH_ROOT, true);
 
             if (Directory.Exists(AssetBundleConverterConfig.DOWNLOADED_PATH_ROOT))
                 Directory.Delete(AssetBundleConverterConfig.DOWNLOADED_PATH_ROOT, true);
+
+            AssetDatabase.Refresh();
         }
 
         [SetUp]
         public void SetUp()
         {
-            ResetEnvironment();
+            ResetCacheAndWorkingFolders();
         }
 
         [TearDown]
         public void TearDown()
         {
-            ResetEnvironment();
+            ResetCacheAndWorkingFolders();
         }
 
         [Test]
-        public void PopulateLowercaseMappingsWorkCorrectly()
+        public void PopulateLowercaseMappingsCorrectly()
         {
             var builder = new AssetBundleConverterCore(EditorEnvironment.CreateWithDefaultImplementations());
             var pairs = new List<ContentServerUtils.MappingPair>();
@@ -61,47 +62,44 @@ namespace AssetBundleConversionTests
         }
 
         [Test]
-        public void InitializeDirectoryPathsWorkCorrectly()
+        public void InitializeDirectoryPathsCorrectly()
         {
-            var builder = new AssetBundleConverterCore(EditorEnvironment.CreateWithDefaultImplementations());
-            builder.InitializeDirectoryPaths(false);
+            var core = new AssetBundleConverterCore(EditorEnvironment.CreateWithDefaultImplementations());
+            core.InitializeDirectoryPaths(false);
 
-            Assert.IsFalse(string.IsNullOrEmpty(builder.finalAssetBundlePath));
-            Assert.IsFalse(string.IsNullOrEmpty(builder.finalDownloadedPath));
+            Assert.IsFalse(string.IsNullOrEmpty(core.settings.finalAssetBundlePath));
+            Assert.IsFalse(string.IsNullOrEmpty(core.finalDownloadedPath));
 
-            Assert.IsTrue(Directory.Exists(builder.finalAssetBundlePath));
-            Assert.IsTrue(Directory.Exists(builder.finalDownloadedPath));
+            Assert.IsTrue(Directory.Exists(core.settings.finalAssetBundlePath));
+            Assert.IsTrue(Directory.Exists(core.finalDownloadedPath));
 
-            string file1 = builder.finalAssetBundlePath + "test.txt";
-            string file2 = builder.finalDownloadedPath + "test.txt";
+            string file1 = core.settings.finalAssetBundlePath + "test.txt";
+            string file2 = core.finalDownloadedPath + "test.txt";
 
             File.WriteAllText(file1, "test");
             File.WriteAllText(file2, "test");
 
-            builder.InitializeDirectoryPaths(true);
+            core.InitializeDirectoryPaths(true);
 
             Assert.IsFalse(File.Exists(file1));
             Assert.IsFalse(File.Exists(file2));
         }
 
         [UnityTest]
-        public IEnumerator WhenConvertedWithExternalTexturesDependenciesAreGeneratedCorrectly()
+        public IEnumerator ConvertAssetsWithExternalDependenciesCorrectly()
         {
             var settings = new AssetBundleConverter.Settings();
-            settings.tld = ContentServerUtils.ApiTLD.ZONE;
+            settings.baseUrl = ContentServerUtils.GetBaseUrl(ContentServerUtils.ApiTLD.ZONE);
 
-            // var builder = new AssetBundleConverterCore(EditorEnvironment.CreateWithDefaultImplementations(), settings);
+            AssetBundleConverter.EnsureEnvironment();
 
-            bool finished = false;
-
-            //TODO(Brian): Mock this method to work without requests
-            AssetBundleConverter.DumpArea(
+            var state = AssetBundleConverter.DumpArea(
                 new Vector2Int(-110, -110),
                 new Vector2Int(1, 1),
+                ContentServerUtils.ApiTLD.ZONE,
                 settings);
-            //(x) => finished = true);
 
-            yield return new WaitUntil(() => finished == true);
+            yield return new WaitUntil(() => state.step == AssetBundleConverterCore.State.Step.FINISHED);
 
             AssetBundle abDependency = AssetBundle.LoadFromFile(AssetBundleConverterConfig.ASSET_BUNDLES_PATH_ROOT + "/QmWZaHM9CaVpCnsWh78LiNFuiXwjCzTQBTaJ6vZL7c9cbp");
             abDependency.LoadAllAssets();
