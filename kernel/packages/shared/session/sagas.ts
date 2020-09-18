@@ -48,6 +48,7 @@ import { ensureRealmInitialized } from '../dao/sagas'
 import { ProviderType } from '../ethereum/Web3Connector'
 import { unityInterface } from 'unity-interface/UnityInterface'
 import { getSignUpData } from './selectors'
+import authFlow = require('./authFlow');
 
 const logger = createLogger('session: ')
 
@@ -336,7 +337,8 @@ function* signup(action: SignupAction) {
   profile.ethAddress = account.toString()
   yield createSignUpProfile(profile, identity)
 
-  unityInterface.ActivateRendering(true)
+  unityInterface.ActivateRendering()
+  authFlow.isSignInFlow = false
 
   return yield authenticate(null, identity)
 }

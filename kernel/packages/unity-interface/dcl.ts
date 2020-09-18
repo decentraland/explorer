@@ -22,6 +22,7 @@ import { UnityInterface, unityInterface } from './UnityInterface'
 import { BrowserInterface, browserInterface } from './BrowserInterface'
 import { UnityScene } from './UnityScene'
 import { ensureUiApis } from 'shared/world/uiSceneInitializer'
+import { isSignInFlow } from 'shared/session/authFlow'
 
 declare const globalThis: UnityInterfaceContainer &
   BrowserInterfaceContainer &
@@ -188,7 +189,9 @@ export async function startUnitySceneWorkers() {
     onPositionSettled: (spawnPoint) => {
       if (!aborted) {
         unityInterface.Teleport(spawnPoint)
-        unityInterface.ActivateRendering()
+        if (!isSignInFlow) {
+          unityInterface.ActivateRendering()
+        }
       }
     },
     onPositionUnsettled: () => {

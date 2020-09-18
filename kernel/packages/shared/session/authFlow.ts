@@ -8,8 +8,11 @@ import { baseCatalogsLoaded } from '../profiles/selectors'
 import { Profile } from '../profiles/types'
 import { getUserProfile } from '../comms/peers'
 import { setLoadingScreenVisible } from '../../unity-interface/dcl'
+import defaultLogger from 'shared/logger'
 
 declare const globalThis: StoreContainer
+
+export let isSignInFlow: boolean = false
 
 export function setupAuthFlow() {
   const element = document.getElementById('eth-login')
@@ -33,6 +36,7 @@ export function setupAuthFlow() {
       signupStep4!.style.display = 'none'
 
       btnSignup.addEventListener('click', () => {
+        isSignInFlow = true
         GoToAvatarEditor(element)
       })
 
