@@ -1,72 +1,17 @@
-using DCL.Helpers;
-using System;
-using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using UnityEditor;
-using UnityEditor.Experimental.TerrainAPI;
 using UnityEngine;
-using UnityEngine.Networking;
 using UnityGLTF;
 using UnityGLTF.Cache;
-using MappingPair = DCL.ContentServerUtils.MappingPair;
-using MappingsAPIData = DCL.ContentServerUtils.MappingsAPIData;
-
 
 namespace DCL
 {
-    public class AssetPath
+    public class AssetBundleConverterCore
     {
-        public readonly string basePath;
-        public readonly MappingPair pair;
-        public string hash => pair.hash;
-        public string file => pair.file;
-
-        public AssetPath(string basePath, MappingPair pair)
-        {
-            this.basePath = basePath;
-            this.pair = pair;
-        }
-
-        public string finalPath
-        {
-            get
-            {
-                string fileExt = Path.GetExtension(pair.file);
-                return basePath + pair.hash + "/" + pair.hash + fileExt;
-            }
-        }
-    }
-
-    public static class AssetBundleBuilderConfig
-    {
-        internal const string CLI_VERBOSE = "verbose";
-        internal const string CLI_ALWAYS_BUILD_SYNTAX = "alwaysBuild";
-        internal const string CLI_KEEP_BUNDLES_SYNTAX = "keepBundles";
-        internal const string CLI_BUILD_SCENE_SYNTAX = "sceneCid";
-        internal const string CLI_BUILD_PARCELS_RANGE_SYNTAX = "parcelsXYWH";
-        internal const string CLI_SET_CUSTOM_BASE_URL = "baseUrl";
-
-        internal const string CLI_SET_CUSTOM_OUTPUT_ROOT_PATH = "output";
-
-        internal static string ASSET_BUNDLE_FOLDER_NAME = "AssetBundles";
-        internal static string DOWNLOADED_FOLDER_NAME = "_Downloaded";
-
-        internal static string DOWNLOADED_ASSET_DB_PATH_ROOT = "Assets/" + DOWNLOADED_FOLDER_NAME;
-        internal static string DOWNLOADED_PATH_ROOT = Application.dataPath + "/" + DOWNLOADED_FOLDER_NAME;
-        internal static string ASSET_BUNDLES_PATH_ROOT = Application.dataPath + "/../" + ASSET_BUNDLE_FOLDER_NAME;
-
-        internal static string[] bufferExtensions = {".bin"};
-        internal static string[] gltfExtensions = {".glb", ".gltf"};
-        internal static string[] textureExtensions = {".jpg", ".png", ".jpeg", ".tga", ".gif", ".bmp", ".psd", ".tiff", ".iff"};
-    }
-
-    public class AssetBundleBuilder
-    {
-        static bool VERBOSE = false;
-
         public enum ErrorCodes
         {
             SUCCESS = 0,
@@ -79,116 +24,31 @@ namespace DCL
 
         public Dictionary<string, string> hashLowercaseToHashProper = new Dictionary<string, string>();
 
-        internal ContentServerUtils.ApiTLD tld;
         internal string finalAssetBundlePath;
-
         internal readonly string finalDownloadedPath;
-        internal bool deleteDownloadPathAfterFinished = false;
-        internal bool skipAlreadyBuiltBundles = false;
+
+        public AssetBundleConverter.Settings settings;
 
         private float startTime;
         private int totalAssets;
         private int skippedAssets;
 
         private EditorEnvironment env;
-        private static Logger log = new Logger(nameof(AssetBundleBuilder));
+        private static Logger log = new Logger(nameof(AssetBundleConverterCore));
         private string logBuffer;
 
-        public AssetBundleBuilder(EditorEnvironment env, ContentServerUtils.ApiTLD tld = ContentServerUtils.ApiTLD.ORG)
+        public AssetBundleConverterCore(EditorEnvironment env, AssetBundleConverter.Settings settings = null)
         {
             this.env = env;
-            this.tld = tld;
-            finalAssetBundlePath = AssetBundleBuilderConfig.ASSET_BUNDLES_PATH_ROOT + "/";
-            finalDownloadedPath = AssetBundleBuilderConfig.DOWNLOADED_PATH_ROOT + "/";
-            log.verboseEnabled = VERBOSE;
+
+            this.settings = settings ?? new AssetBundleConverter.Settings();
+
+            finalAssetBundlePath = AssetBundleConverterConfig.ASSET_BUNDLES_PATH_ROOT + "/";
+            finalDownloadedPath = AssetBundleConverterConfig.DOWNLOADED_PATH_ROOT + "/";
+            log.verboseEnabled = settings.verbose;
         }
 
-        /// <summary>
-        /// Batch-mode entry point
-        /// </summary>
-        public static void ExportSceneToAssetBundles()
-        {
-            ExportSceneToAssetBundles(Environment.GetCommandLineArgs());
-        }
-
-        public static void ExportSceneToAssetBundles(string[] commandLineArgs)
-        {
-            AssetBundleBuilder builder = new AssetBundleBuilder(EditorEnvironment.CreateWithDefaultImplementations());
-            builder.skipAlreadyBuiltBundles = true;
-            builder.deleteDownloadPathAfterFinished = true;
-
-            try
-            {
-                if (AssetBundleBuilderUtils.ParseOption(commandLineArgs, AssetBundleBuilderConfig.CLI_SET_CUSTOM_OUTPUT_ROOT_PATH, 1, out string[] outputPath))
-                {
-                    builder.finalAssetBundlePath = outputPath[0] + "/";
-                }
-
-                if (AssetBundleBuilderUtils.ParseOption(commandLineArgs, AssetBundleBuilderConfig.CLI_SET_CUSTOM_BASE_URL, 1, out string[] customBaseUrl))
-                {
-                    ContentServerUtils.customBaseUrl = customBaseUrl[0];
-                    builder.tld = ContentServerUtils.ApiTLD.NONE;
-                }
-
-                if (AssetBundleBuilderUtils.ParseOption(commandLineArgs, AssetBundleBuilderConfig.CLI_VERBOSE, 0, out _))
-                    VERBOSE = true;
-
-                if (AssetBundleBuilderUtils.ParseOption(commandLineArgs, AssetBundleBuilderConfig.CLI_ALWAYS_BUILD_SYNTAX, 0, out _))
-                    builder.skipAlreadyBuiltBundles = false;
-
-                if (AssetBundleBuilderUtils.ParseOption(commandLineArgs, AssetBundleBuilderConfig.CLI_KEEP_BUNDLES_SYNTAX, 0, out _))
-                    builder.deleteDownloadPathAfterFinished = false;
-
-                if (AssetBundleBuilderUtils.ParseOption(commandLineArgs, AssetBundleBuilderConfig.CLI_BUILD_SCENE_SYNTAX, 1, out string[] sceneCid))
-                {
-                    if (sceneCid == null || string.IsNullOrEmpty(sceneCid[0]))
-                    {
-                        throw new ArgumentException("Invalid sceneCid argument! Please use -sceneCid <id> to establish the desired id to process.");
-                    }
-
-                    builder.DumpScene(sceneCid[0]);
-                    return;
-                }
-
-                if (AssetBundleBuilderUtils.ParseOption(commandLineArgs, AssetBundleBuilderConfig.CLI_BUILD_PARCELS_RANGE_SYNTAX, 4, out string[] xywh))
-                {
-                    if (xywh == null)
-                    {
-                        throw new ArgumentException("Invalid parcelsXYWH argument! Please use -parcelsXYWH x y w h to establish the desired parcels range to process.");
-                    }
-
-                    int x, y, w, h;
-                    bool parseSuccess = false;
-
-                    parseSuccess |= int.TryParse(xywh[0], out x);
-                    parseSuccess |= int.TryParse(xywh[1], out y);
-                    parseSuccess |= int.TryParse(xywh[2], out w);
-                    parseSuccess |= int.TryParse(xywh[3], out h);
-
-                    if (!parseSuccess)
-                    {
-                        throw new ArgumentException("Invalid parcelsXYWH argument! Please use -parcelsXYWH x y w h to establish the desired parcels range to process.");
-                    }
-
-                    if (w > 10 || h > 10 || w < 0 || h < 0)
-                    {
-                        throw new ArgumentException("Invalid parcelsXYWH argument! Please don't use negative width/height values, and ensure any given width/height doesn't exceed 10.");
-                    }
-
-                    builder.DumpArea(new Vector2Int(x, y), new Vector2Int(w, h));
-                    return;
-                }
-
-                throw new ArgumentException("Invalid arguments! You must pass -parcelsXYWH or -sceneCid for dump to work!");
-            }
-            catch (Exception e)
-            {
-                log.Error(e.Message);
-                builder.CleanAndExit(ErrorCodes.UNDEFINED);
-            }
-        }
-
-        private void CleanAndExit(ErrorCodes errorCode)
+        public void CleanAndExit(ErrorCodes errorCode)
         {
             float conversionTime = Time.realtimeSinceStartup - startTime;
             logBuffer = $"Conversion finished!. error code = {errorCode}";
@@ -281,11 +141,11 @@ namespace DCL
         }
 
 
-        private bool DumpAssets(MappingPair[] rawContents)
+        private bool DumpAssets(ContentServerUtils.MappingPair[] rawContents)
         {
-            List<AssetPath> gltfPaths = AssetBundleBuilderUtils.GetPathsFromPairs(finalDownloadedPath, rawContents, AssetBundleBuilderConfig.gltfExtensions);
-            List<AssetPath> bufferPaths = AssetBundleBuilderUtils.GetPathsFromPairs(finalDownloadedPath, rawContents, AssetBundleBuilderConfig.bufferExtensions);
-            List<AssetPath> texturePaths = AssetBundleBuilderUtils.GetPathsFromPairs(finalDownloadedPath, rawContents, AssetBundleBuilderConfig.textureExtensions);
+            List<AssetPath> gltfPaths = AssetBundleBuilderUtils.GetPathsFromPairs(finalDownloadedPath, rawContents, AssetBundleConverterConfig.gltfExtensions);
+            List<AssetPath> bufferPaths = AssetBundleBuilderUtils.GetPathsFromPairs(finalDownloadedPath, rawContents, AssetBundleConverterConfig.bufferExtensions);
+            List<AssetPath> texturePaths = AssetBundleBuilderUtils.GetPathsFromPairs(finalDownloadedPath, rawContents, AssetBundleConverterConfig.textureExtensions);
 
             List<AssetPath> assetsToMark = new List<AssetPath>();
 
@@ -319,7 +179,7 @@ namespace DCL
 
             totalAssets += gltfPaths.Count;
 
-            if (skipAlreadyBuiltBundles)
+            if (settings.skipAlreadyBuiltBundles)
             {
                 int gltfCount = gltfPaths.Count;
 
@@ -412,7 +272,7 @@ namespace DCL
             env.assetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport | ImportAssetOptions.ForceUpdate | ImportAssetOptions.ImportRecursive);
             env.assetDatabase.SaveAssets();
 
-            env.assetDatabase.MoveAsset(finalDownloadedPath, AssetBundleBuilderConfig.DOWNLOADED_PATH_ROOT);
+            env.assetDatabase.MoveAsset(finalDownloadedPath, AssetBundleConverterConfig.DOWNLOADED_PATH_ROOT);
 
             manifest = BuildPipeline.BuildAssetBundles(finalAssetBundlePath, BuildAssetBundleOptions.UncompressedAssetBundle | BuildAssetBundleOptions.ForceRebuildAssetBundle, BuildTarget.WebGL);
 
@@ -442,7 +302,7 @@ namespace DCL
             return true;
         }
 
-        public void DownloadAndConvertAssets(MappingPair[] rawContents, System.Action<ErrorCodes> OnFinish = null)
+        public void Convert(ContentServerUtils.MappingPair[] rawContents, System.Action<ErrorCodes> OnFinish = null)
         {
             if (OnFinish == null)
                 OnFinish = CleanAndExit;
@@ -515,30 +375,6 @@ namespace DCL
             EditorApplication.update += updateLoop;
         }
 
-        internal void ConvertScenesToAssetBundles(List<string> sceneCidsList, System.Action<ErrorCodes> OnFinish = null)
-        {
-            if (OnFinish == null)
-                OnFinish = CleanAndExit;
-
-            if (sceneCidsList == null || sceneCidsList.Count == 0)
-            {
-                log.Error("Scene list is null or count == 0! Maybe this sector lacks scenes or content requests failed?");
-                OnFinish?.Invoke(ErrorCodes.SCENE_LIST_NULL);
-                return;
-            }
-
-            log.Info($"Building {sceneCidsList.Count} scenes...");
-
-            List<MappingPair> rawContents = new List<MappingPair>();
-
-            foreach (var sceneCid in sceneCidsList)
-            {
-                MappingsAPIData parcelInfoApiData = AssetBundleBuilderUtils.GetSceneMappingsData(tld, sceneCid);
-                rawContents.AddRange(parcelInfoApiData.data[0].content.contents);
-            }
-
-            DownloadAndConvertAssets(rawContents.ToArray(), OnFinish);
-        }
 
         internal void CleanAssetBundleFolder(string[] assetBundles)
         {
@@ -546,7 +382,7 @@ namespace DCL
         }
 
 
-        internal void PopulateLowercaseMappings(MappingPair[] pairs)
+        internal void PopulateLowercaseMappings(ContentServerUtils.MappingPair[] pairs)
         {
             foreach (var content in pairs)
             {
@@ -596,7 +432,7 @@ namespace DCL
             string outputPath = assetPath.finalPath;
             string outputPathDir = Path.GetDirectoryName(outputPath);
 
-            string baseUrl = ContentServerUtils.GetContentAPIUrlBase(tld);
+            string baseUrl = ContentServerUtils.GetContentAPIUrlBase(settings.tld);
             string finalUrl = baseUrl + assetPath.hash;
 
             log.Verbose("checking against " + outputPath);
@@ -620,28 +456,6 @@ namespace DCL
             return outputPath;
         }
 
-
-        internal void DumpArea(Vector2Int coords, Vector2Int size, Action<ErrorCodes> OnFinish = null)
-        {
-            HashSet<string> sceneCids = AssetBundleBuilderUtils.GetSceneCids(tld, coords, size);
-
-            List<string> sceneCidsList = sceneCids.ToList();
-            ConvertScenesToAssetBundles(sceneCidsList, OnFinish);
-        }
-
-        internal void DumpArea(List<Vector2Int> coords, Action<ErrorCodes> OnFinish = null)
-        {
-            HashSet<string> sceneCids = AssetBundleBuilderUtils.GetScenesCids(tld, coords);
-
-            List<string> sceneCidsList = sceneCids.ToList();
-            ConvertScenesToAssetBundles(sceneCidsList, OnFinish);
-        }
-
-        internal void DumpScene(string cid, Action<ErrorCodes> OnFinish = null)
-        {
-            ConvertScenesToAssetBundles(new List<string> {cid}, OnFinish);
-        }
-
         internal virtual void InitializeDirectoryPaths(bool deleteIfExists)
         {
             env.directory.InitializeDirectory(finalDownloadedPath, deleteIfExists);
@@ -650,10 +464,10 @@ namespace DCL
 
         internal virtual void CleanupWorkingFolders()
         {
-            env.file.Delete(finalAssetBundlePath + AssetBundleBuilderConfig.ASSET_BUNDLE_FOLDER_NAME);
-            env.file.Delete(finalAssetBundlePath + AssetBundleBuilderConfig.ASSET_BUNDLE_FOLDER_NAME + ".manifest");
+            env.file.Delete(finalAssetBundlePath + AssetBundleConverterConfig.ASSET_BUNDLE_FOLDER_NAME);
+            env.file.Delete(finalAssetBundlePath + AssetBundleConverterConfig.ASSET_BUNDLE_FOLDER_NAME + ".manifest");
 
-            if (deleteDownloadPathAfterFinished)
+            if (settings.deleteDownloadPathAfterFinished)
             {
                 env.directory.Delete(finalDownloadedPath);
                 env.assetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
