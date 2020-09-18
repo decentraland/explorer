@@ -40,10 +40,12 @@ public class BuildModeController : MonoBehaviour
 
     [Header ("Scene references")]
     public GameObject editModeChangeFX;
-    public GameObject snapImgStatusShowGO;
+    public GameObject snapImgStatusShowGO, shortCutsGO;
     public SceneObjectCatalogController catalogController;
     public SceneLimitInfoController sceneLimitInfoController;
+    public EntityInformationController entityInformationController;
     public BuildModeEntityListController buildModeEntityListController;
+
     [Header("Build References")]
 
     public Material editMaterial;
@@ -54,13 +56,14 @@ public class BuildModeController : MonoBehaviour
     [SerializeField] internal InputAction_Trigger editModeChange;
 
 
-    SceneObjectCatalogController sceneObjectCatalogController;
+
     ParcelScene sceneToEdit;
 
-    bool isEditModeActivated = false, isSnapActivated = true, isSceneInformationActive = false,isSceneEntitiesListActive = false,isSceneCatalogActive = false;
+    bool isEditModeActivated = false, isSnapActivated = true, isSceneInformationActive = false,isSceneEntitiesListActive = false;
+    bool objectHasMove = false;
 
     //Object to edit related
-    DecentralandEntity entityToEdit,newEntity;
+    DecentralandEntity entityToEdit;
     GameObject gameObjectToEdit;
     Material originalMaterial;
     Transform originalGOParent;
@@ -70,16 +73,19 @@ public class BuildModeController : MonoBehaviour
 
     
     Dictionary<string, GameObject> collidersDictionary = new Dictionary<string, GameObject>();
+    List<DecentralandEntity> createdEntitiesList = new List<DecentralandEntity>();
 
     GameObject undoGO,snapGO,freeMovementGO;
 
     bool selectionHasbeenCreated = false;
     float currentScaleAdded, currentYRotationAdded, nexTimeToReceiveInput;
+
+    int lastSilbingPosition;
     // Start is called before the first frame update
     void Start()
     {
         editModeChange.OnTriggered += OnEditModeChangeAction;
-        sceneObjectCatalogController = new SceneObjectCatalogController();
+        catalogController.OnSceneObjectSelected += OnSceneObjectSelected;
 
     }
 
@@ -94,17 +100,18 @@ public class BuildModeController : MonoBehaviour
         
         if(isEditModeActivated)
         {
-            if(Time.timeSinceLevelLoad >= nexTimeToReceiveInput) CheckEditModeInput();          
+            if (Time.timeSinceLevelLoad >= nexTimeToReceiveInput)
+            {
+                CheckInputForShowingWindows();
+                if (Utils.isCursorLocked) CheckEditModeInput();              
+            }
         }
     }
 
     void LateUpdate()
     {
         if (gameObjectToEdit != null)
-        {
-          
-
-
+        {         
             if (isSnapActivated)
             {
                 Vector3 objectPosition = snapGO.transform.position;
@@ -137,9 +144,84 @@ public class BuildModeController : MonoBehaviour
     }
 
 
- 
+    void OnSceneObjectSelected(SceneObject sceneObject)
+    {
+        LoadParcelScenesMessage.UnityParcelScene data =  sceneToEdit.sceneData;
+        data.baseUrl = "https://builder-api.decentraland.org/v1/storage/contents/";
 
-    void CheckEditModeInput()
+
+        foreach(KeyValuePair<string,string> content in sceneObject.contents)
+        {
+            ContentServerUtils.MappingPair mappingPair = new ContentServerUtils.MappingPair();
+            mappingPair.file = content.Key;
+            mappingPair.hash = content.Value;
+            bool found = false;
+            foreach (ContentServerUtils.MappingPair mappingPairToCheck in data.contents)
+            {
+                if (mappingPairToCheck.file == mappingPair.file)
+                {
+                    found = true;
+                    break;
+                }
+            }
+            if(!found) data.contents.Add(mappingPair);
+        }
+        SceneController.i.UpdateParcelScenesExecute(data);
+
+
+
+
+        GLTFShape mesh = (GLTFShape)sceneToEdit.SharedComponentCreate(sceneObject.id, Convert.ToInt32(CLASS_ID.GLTF_SHAPE));
+        mesh.model = new LoadableShape.Model();
+        mesh.model.src = sceneObject.model;
+
+
+        DecentralandEntity entity = CreateEntity();
+        sceneToEdit.SharedComponentAttach(entity.entityId, mesh.id);
+
+
+
+        mesh.CallWhenReady(MeshGetted);
+
+        catalogController.CloseCatalog();
+        //SelectObject(entity);
+
+        //string componentId = GetComponentUniqueId(scene, "gltfShape", (int)CLASS_ID.GLTF_SHAPE, entity.entityId);
+        //GLTFShape gltfShape = sceneToEdit.SharedComponentCreate<GLTFShape, GLTFShape.Model>(sceneToEdit, CLASS_ID.GLTF_SHAPE, model);
+
+        //SetEntityTransform(scene, entity, position, Quaternion.identity, Vector3.one);
+        //SharedComponentAttach(gltfShape, entity);
+
+    }
+
+    void MeshGetted(BaseDisposable baseDisposable)
+    {
+        Debug.Log("Compomente ready");
+        int lastIndex = -9999;
+     
+
+        DecentralandEntity entityToSelect = null;
+        foreach (DecentralandEntity createdEntity in createdEntitiesList)
+        {
+            if (baseDisposable.attachedEntities.Contains(createdEntity))
+            {
+                CreateCollidersForEntity(createdEntity);
+         
+               int entityIndex = createdEntitiesList.LastIndexOf(createdEntity);
+                if (entityIndex > lastIndex) entityToSelect = createdEntity;
+            }
+        }
+
+        if (entityToSelect != null)
+        {
+            entityToSelect.gameObject.transform.position = Camera.main.transform.position + Camera.main.transform.forward * distanceFromCameraForNewEntitties;
+
+            Select(entityToSelect);
+        }
+    }
+
+
+    void CheckInputForShowingWindows()
     {
         if (Input.GetKey(KeyCode.Y))
         {
@@ -151,35 +233,57 @@ public class BuildModeController : MonoBehaviour
         }
         if (Input.GetKey(KeyCode.J))
         {
-            if (isSceneCatalogActive) catalogController.CloseCatalog();
+            if (catalogController.IsCatalogOpen()) catalogController.CloseCatalog();
             else catalogController.OpenCatalog();
-            isSceneCatalogActive = !isSceneCatalogActive;
-       
+
             InputDone();
             return;
         }
         if (Input.GetKey(KeyCode.G))
         {
-            if(isSceneInformationActive)
+            if (isSceneInformationActive)
             {
                 sceneLimitInfoController.Disable();
             }
             else
             {
                 sceneLimitInfoController.Enable();
-                
+
             }
             isSceneInformationActive = !isSceneInformationActive;
             InputDone();
             return;
         }
+        if(Input.GetKey(KeyCode.N))
+        {
+            if(shortCutsGO.gameObject.activeSelf)
+            {
+               
+                //gameObject.transform.SetSiblingIndex(lastSilbingPosition);
+            }
+            else
+            {
+                //lastSilbingPosition = gameObject.transform.GetSiblingIndex();
+                //gameObject.transform.SetAsLastSibling();
+            }
 
+
+            shortCutsGO.SetActive(!shortCutsGO.gameObject.activeSelf);
+            InputDone();
+            return;
+        }
+
+    }
+
+    void CheckEditModeInput()
+    {
+  
 
         
         if (Input.GetKeyUp(KeyCode.Q))
         {
             if (gameObjectToEdit != null) DeselectObject();
-            CreateEntity();
+            CreateBoxEntity();
         }
 
         if(Input.GetKeyUp(KeyCode.T))
@@ -198,7 +302,12 @@ public class BuildModeController : MonoBehaviour
         }
         if (gameObjectToEdit != null)
         {
-           
+            if (Input.GetKey(KeyCode.LeftControl) && Input.GetKey(KeyCode.D))
+            {
+                DuplicateEntity();
+                InputDone();
+                return;
+            }
             if (Input.GetKey(KeyCode.LeftControl) && Input.GetKey(KeyCode.Z))
             {
                 UndoEdit();
@@ -264,6 +373,17 @@ public class BuildModeController : MonoBehaviour
             DeselectObject();
         }
     }
+
+    public void ResetScaleAndRotation()
+    {
+        gameObjectToEdit.transform.localScale = Vector3.one;
+        snapGO.transform.localScale = Vector3.one;
+        freeMovementGO.transform.localScale = Vector3.one;
+
+        gameObjectToEdit.transform.rotation = Quaternion.identity;
+        snapGO.transform.rotation = Quaternion.identity;
+        freeMovementGO.transform.rotation = Quaternion.identity;
+    }
     public void SetSnapActive(bool isActive)
     {
         isSnapActivated = isActive;
@@ -306,15 +426,18 @@ public class BuildModeController : MonoBehaviour
         }
     }
 
-    void SelectObject(DecentralandEntity decentralandEntity)
+    void Select(DecentralandEntity decentralandEntity)
     {
         if (decentralandEntity.isLocked) return;
+        if (gameObjectToEdit != null) DeselectObject();
 
         selectionHasbeenCreated = false;
         currentYRotationAdded = 0;
         currentScaleAdded = 1;
 
         entityToEdit = decentralandEntity;
+        //GLTFShape shape = (GLTFShape)entityToEdit.GetSharedComponent(typeof(GLTFShape));
+  
         gameObjectToEdit = decentralandEntity.gameObject;
 
         CopyGameObjectStatus(gameObjectToEdit, undoGO);
@@ -342,7 +465,8 @@ public class BuildModeController : MonoBehaviour
             gameObjectToEdit.transform.SetParent(freeMovementGO.transform, true);
         }
 
-
+        entityInformationController.Enable();
+        entityInformationController.SetEntity(entityToEdit, sceneToEdit);
         CopyGameObjectStatus(gameObjectToEdit, snapGO);
         SceneController.i.boundariesChecker.AddPersistent(entityToEdit);
     }
@@ -354,7 +478,7 @@ public class BuildModeController : MonoBehaviour
         if (Physics.Raycast(ray, out hit, distanceLimitToSelectObjects, layerToRaycast))
         {
             string entityID = hit.collider.gameObject.name;
-            SelectObject(sceneToEdit.entities[entityID]);
+            Select(sceneToEdit.entities[entityID]);
         } 
     }
 
@@ -371,23 +495,39 @@ public class BuildModeController : MonoBehaviour
             {
                 UndoEdit();
             }
-            originalMeshRenderer.material = originalMaterial;
+            if(originalMeshRenderer != null)originalMeshRenderer.material = originalMaterial;
             SceneController.i.boundariesChecker.RemoveEntityToBeChecked(entityToEdit);
             gameObjectToEdit = null;
             entityToEdit = null;
+            entityInformationController.Disable();
         }
+   
     }
 
-    void CreateEntity()
+    public void DuplicateEntity()
     {
-      
-        newEntity = sceneToEdit.CreateEntity(Guid.NewGuid().ToString());
+        //DecentralandEntity entity = sceneToEdit.DuplicateEntity(entityToEdit);
+        //Select(entity);
+    }
 
-        DCLTransform.model.position =  SceneController.i.ConvertUnityToScenePosition(Camera.main.transform.position+ Camera.main.transform.forward* distanceFromCameraForNewEntitties,sceneToEdit);
+    DecentralandEntity CreateEntity()
+    {
+
+        DecentralandEntity newEntity = sceneToEdit.CreateEntity(Guid.NewGuid().ToString());
+
+        DCLTransform.model.position = SceneController.i.ConvertUnityToScenePosition(Camera.main.transform.position + Camera.main.transform.forward * distanceFromCameraForNewEntitties, sceneToEdit);
         DCLTransform.model.rotation = Quaternion.Euler(Vector3.zero);
         DCLTransform.model.scale = newEntity.gameObject.transform.localScale;
 
         sceneToEdit.EntityComponentCreateOrUpdateFromUnity(newEntity.entityId, CLASS_ID_COMPONENT.TRANSFORM, DCLTransform.model);
+        createdEntitiesList.Add(newEntity);
+
+        return newEntity;
+    }
+    void CreateBoxEntity()
+    {
+
+        DecentralandEntity newEntity = CreateEntity();
 
         BaseDisposable mesh = sceneToEdit.SharedComponentCreate(Guid.NewGuid().ToString(), Convert.ToInt32(CLASS_ID.BOX_SHAPE));
         sceneToEdit.SharedComponentAttach(newEntity.entityId, mesh.id);
@@ -400,12 +540,14 @@ public class BuildModeController : MonoBehaviour
         if(isSnapActivated) newEntity.gameObject.transform.rotation = Quaternion.Euler(0, 0, 0);
 
         CreateCollidersForEntity(newEntity);
-        SelectObject(newEntity);
+        Select(newEntity);
 
         sceneLimitInfoController.UpdateInfo();
         selectionHasbeenCreated = true;
     }
 
+
+    
 
     void CopyGameObjectStatus(GameObject gameObjectToCopy, GameObject gameObjectToReceive)
     {

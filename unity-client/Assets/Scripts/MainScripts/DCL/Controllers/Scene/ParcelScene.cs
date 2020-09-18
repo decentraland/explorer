@@ -367,6 +367,20 @@ namespace DCL.Controllers
             return newEntity;
         }
 
+        public DecentralandEntity DuplicateEntity(DecentralandEntity decentralandEntity)
+        {
+            if (!entities.ContainsKey(decentralandEntity.entityId)) return null;
+
+            DecentralandEntity duplicatedEntity = CreateEntity(System.Guid.NewGuid().ToString());
+
+            foreach(KeyValuePair<System.Type, BaseDisposable> component in decentralandEntity.GetSharedComponents())
+            {
+                duplicatedEntity.AddSharedComponent(component.Key, component.Value);
+            }
+
+            return duplicatedEntity;
+        }
+
         public void RemoveEntity(string id, bool removeImmediatelyFromEntitiesList = true)
         {
             SceneController.i.OnMessageDecodeStart?.Invoke("RemoveEntity");

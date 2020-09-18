@@ -20,8 +20,17 @@ public class CatalogGroupListView : ListView<Dictionary<string, List<SceneObject
             {
                 CatalogAssetGroupAdapter adapter = Instantiate(categoryItemAdapterPrefab, contentPanelTransform).GetComponent<CatalogAssetGroupAdapter>();
                 adapter.SetContent(assetPackGroup.Key, assetPackGroup.Value);
-                adapter.OnSceneObjectClicked += OnSceneObjectClicked;
+                adapter.OnSceneObjectClicked += SceneObjectSelected;
             }
         }         
+    }
+
+
+   void SceneObjectSelected(SceneObject sceneObject)
+    {
+        Debug.Log("Object selected " + sceneObject.name);
+        OnSceneObjectClicked?.Invoke(sceneObject);
+
+
     }
 }

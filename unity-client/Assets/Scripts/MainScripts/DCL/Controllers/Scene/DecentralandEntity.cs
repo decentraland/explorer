@@ -144,6 +144,10 @@ namespace DCL.Models
             meshesInfo.OnCleanup += () => OnMeshesInfoCleaned?.Invoke(this);
         }
 
+        public Dictionary<System.Type, BaseDisposable> GetSharedComponents()
+        {
+            return sharedComponents;
+        }
         private void AddChild(DecentralandEntity entity)
         {
             if (!children.ContainsKey(entity.entityId))

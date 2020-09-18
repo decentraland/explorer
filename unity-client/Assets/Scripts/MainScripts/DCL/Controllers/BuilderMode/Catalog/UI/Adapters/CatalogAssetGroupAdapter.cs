@@ -21,7 +21,7 @@ public class CatalogAssetGroupAdapter : MonoBehaviour
         {
             CatalogItemAdapter adapter = Instantiate(catalogItemAdapterPrefab, categoryContentGO.transform).GetComponent<CatalogItemAdapter>();
             adapter.SetContent(sceneObject);
-            adapter.OnSceneObjectClicked += OnSceneObjectClicked;
+            adapter.OnSceneObjectClicked += SceneObjectClicked;
         }
     }
 
@@ -36,8 +36,8 @@ public class CatalogAssetGroupAdapter : MonoBehaviour
     }
 
 
-    //void SceneObjectClicked(SceneObject sceneObjectClicked)
-    //{
-    //    OnSceneObjectClicked?.Invoke(sceneObjectClicked);
-    //}
+    void SceneObjectClicked(SceneObject sceneObjectClicked)
+    {
+        OnSceneObjectClicked?.Invoke(sceneObjectClicked);
+    }
 }

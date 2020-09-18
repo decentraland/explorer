@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using DCL.Helpers;
+using System;
 
 public class CatalogItemAdapter : MonoBehaviour
 {
@@ -15,12 +16,19 @@ public class CatalogItemAdapter : MonoBehaviour
         //tumbmailImg.sprite = sceneObject;
         content = sceneObject;
 
+        CacheController.i.GetSprite("https://builder-api.decentraland.org/v1/storage/contents/" + sceneObject.thumbnail, SetSprite);
+
+        //ExternalCallsController.i.GetContentAsByteArray("https://builder-api.decentraland.org/v1/storage/contents/"+sceneObject.thumbnail, SetSprite);
     }
 
 
     public void SceneObjectClicked()
     {
-        Debug.Log("Clicked ");
         OnSceneObjectClicked?.Invoke(content);
+    }
+
+    public void SetSprite(Sprite sprite)
+    {
+        tumbmailImg.sprite = sprite;
     }
 }

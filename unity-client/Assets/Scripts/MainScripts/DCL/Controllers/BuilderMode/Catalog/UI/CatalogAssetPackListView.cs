@@ -9,6 +9,7 @@ public class CatalogAssetPackListView : ListView<SceneAssetPack>
     public System.Action<SceneAssetPack> OnSceneAssetPackClick;
 
 
+
     public override void AddAdapters()
     {
         base.AddAdapters();

@@ -92,7 +92,7 @@ public class FreeMovementController : MonoBehaviour
 
 
             if (Input.GetKey(KeyCode.Space)) forwardTarget += Vector3.up;
-            else if (Input.GetKey(KeyCode.LeftControl)) forwardTarget += Vector3.down;
+            else if (Input.GetKey(KeyCode.LeftAlt)) forwardTarget += Vector3.down;
 
             forwardTarget.Normalize();
 

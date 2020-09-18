@@ -696,6 +696,7 @@ namespace DCL
             OnMessageProcessEnds?.Invoke(MessagingTypes.SCENE_LOAD);
         }
 
+
         public void UpdateParcelScenesExecute(string decentralandSceneJSON)
         {
             LoadParcelScenesMessage.UnityParcelScene scene;
@@ -703,6 +704,11 @@ namespace DCL
             OnMessageDecodeStart?.Invoke(MessagingTypes.SCENE_UPDATE);
             scene = SafeFromJson<LoadParcelScenesMessage.UnityParcelScene>(decentralandSceneJSON);
             OnMessageDecodeEnds?.Invoke(MessagingTypes.SCENE_UPDATE);
+            UpdateParcelScenesExecute(scene);
+        }
+
+        public void UpdateParcelScenesExecute(LoadParcelScenesMessage.UnityParcelScene scene)
+        {
 
             if (scene == null || scene.id == null)
                 return;

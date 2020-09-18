@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -15,6 +16,8 @@ public class CatalogAssetPackAdapter : MonoBehaviour
     {
         sceneAssetPack = _sceneAssetPack;
         titleTxt.text = sceneAssetPack.title;
+
+        CacheController.i.GetSprite("https://builder-api.decentraland.org/v1/storage/assetPacks/" + _sceneAssetPack.thumbnail, SetSprite);
     }
 
 
@@ -22,4 +25,10 @@ public class CatalogAssetPackAdapter : MonoBehaviour
     {
         OnSceneAssetPackClick?.Invoke(sceneAssetPack);
     }
+
+    public void SetSprite(Sprite sprite)
+    {
+        packImg.sprite = sprite;
+    }
+  
 }
