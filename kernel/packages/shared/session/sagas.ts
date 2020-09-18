@@ -39,7 +39,9 @@ import {
   loginCompleted as loginCompletedAction,
   LOGOUT,
   SETUP_WEB3,
+  SignSetProfileAction,
   SIGNUP,
+  SIGNUP_SET_PROFILE,
   SignupAction,
   signUpActive,
   userAuthentified
@@ -59,7 +61,12 @@ export function* sessionSaga(): any {
   yield takeLatest(LOGIN, login)
   yield takeLatest(SIGNUP, signup)
   yield takeLatest(LOGOUT, logout)
+  yield takeLatest(SIGNUP_SET_PROFILE, saveSignUpProfile)
   yield takeLatest(AWAITING_USER_SIGNATURE, scheduleAwaitingSignaturePrompt)
+}
+
+function* saveSignUpProfile(action: SignSetProfileAction) {
+  return saveToLocalStorage('signup_profile', action.payload)
 }
 
 function* initializeTos() {

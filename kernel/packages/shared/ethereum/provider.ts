@@ -5,6 +5,9 @@ import { defaultLogger } from 'shared/logger'
 import { Account } from 'web3x/account'
 import { Eth } from 'web3x/eth'
 import { Web3Connector, ProviderType } from './Web3Connector'
+import { ExplorerIdentity } from '../session/types'
+import { createIdentity } from 'eth-crypto'
+import { Authenticator } from 'dcl-crypto'
 
 let web3Connector: Web3Connector
 
@@ -79,4 +82,14 @@ export async function getUserAccount(): Promise<string | undefined> {
   } catch (error) {
     throw new Error(`Could not access eth_accounts: "${error.message}"`)
   }
+}
+
+export async function createLocalAuthIdentity(): Promise<ExplorerIdentity> {
+  const ephemeral = createIdentity()
+  const ephemeralLifespanMinutes = 7 * 24 * 60 // 1 week
+  const account = Account.create()
+  const address = account.address.toJSON()
+  const signer = async (message: string) => account.sign(message).signature
+  const auth = await Authenticator.initializeAuthChain(address, ephemeral, ephemeralLifespanMinutes, signer)
+  return { ...auth, address: address.toLocaleLowerCase(), hasConnectedWeb3: false }
 }

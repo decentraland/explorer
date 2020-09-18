@@ -1,13 +1,12 @@
 import { login, signup, signupAgree, signupForm, signUpActive } from './actions'
 import { StoreContainer } from '../store/rootTypes'
 import { ensureUnityInterface } from '../renderer'
-import { ProfileAsPromise } from '../profiles/ProfileAsPromise'
 import { profileToRendererFormat } from '../profiles/transformations/profileToRendererFormat'
-import { getCurrentUserId } from './selectors'
 import { baseCatalogsLoaded } from '../profiles/selectors'
-import { Profile } from '../profiles/types'
-import { getUserProfile } from '../comms/peers'
+import { Avatar, Profile } from '../profiles/types'
 import { setLoadingScreenVisible } from '../../unity-interface/dcl'
+import { createLocalAuthIdentity } from '../ethereum/provider'
+import { getFromLocalStorage } from '../../atomicHelpers/localStorage'
 
 declare const globalThis: StoreContainer
 
@@ -116,12 +115,7 @@ function GoToAvatarEditor(element: HTMLElement) {
     if (baseCatalogsLoaded(globalThis.globalStore.getState())) {
       unsubscribe()
       getLocalProfile()
-        .then((profile) => {
-          profile.hasClaimedName = false
-          if (profile.userId === '') {
-            profile.userId = '0x0000000000000000000000000000000000000000'
-            profile.ethAddress = '0x0000000000000000000000000000000000000000'
-          }
+        .then((profile: Profile) => {
           ensureUnityInterface()
             .then((unityInterface) => {
               setLoadingScreenVisible(false)
@@ -137,12 +131,47 @@ function GoToAvatarEditor(element: HTMLElement) {
   })
 }
 
-function getLocalProfile(): Promise<Profile> {
-  const profile = getUserProfile().profile as Profile | null
+async function getLocalProfile() {
+  let profile = getFromLocalStorage('signup_profile') as Profile | null
   if (profile) {
-    return new Promise<Profile>((resolve) => {
-      return resolve(profile)
-    })
+    return profile
   }
-  return ProfileAsPromise(getCurrentUserId(globalThis.globalStore.getState()) ?? '')
+  let avatar: Avatar = {
+    bodyShape: 'dcl://base-avatars/BaseMale',
+    snapshots: {
+      face: 'QmdYJirtVP61n8AmRzX7FpZ9FzKrcQ8zMi33mjiEKZrXhs',
+      face128: 'QmNLneJ2SAV9pEvgGSL3bYAz8PLvHo3Xag7PPghX6NGtZS',
+      face256: 'QmNuoogE4r1ho3Bt5hYJMUgr3W6ZY4Jt8Z2Lt7cSvEv5PC',
+      body: 'Qmdm6a5kokhfAmTA9kxzyKspY6KSY8CtyvLMRBsviefjjZ'
+    },
+    eyeColor: '#FFFFFF',
+    hairColor: '#FFFFFF',
+    skinColor: '#FFFFFF',
+    wearables: [
+      'dcl://base-avatars/casual_hair_01',
+      'dcl://base-avatars/eyebrows_01',
+      'dcl://base-avatars/eyes_01',
+      'dcl://base-avatars/chin_beard',
+      'dcl://base-avatars/green_tshirt',
+      'dcl://base-avatars/comfortablepants',
+      'dcl://base-avatars/sport_black_shoes',
+      'dcl://base-avatars/black_sun_glasses',
+      'dcl://base-avatars/mouth_05'
+    ]
+  }
+
+  const identity = await createLocalAuthIdentity()
+  return {
+    userId: identity.address.toString(),
+    name: 'USER_TEST_AVATAR_EDITOR',
+    hasClaimedName: false,
+    description: '',
+    email: '',
+    avatar,
+    ethAddress: identity.address.toString(),
+    inventory: [],
+    blocked: [],
+    version: 0,
+    tutorialStep: 0
+  }
 }
