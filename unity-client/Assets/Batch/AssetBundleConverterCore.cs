@@ -59,7 +59,7 @@ namespace DCL
 
             this.settings = settings.Clone() ?? new AssetBundleConverter.Settings();
 
-            finalDownloadedPath = AssetBundleConverterConfig.DOWNLOADED_PATH_ROOT + "/";
+            finalDownloadedPath = AssetBundleBuilderUtils.FixDirectorySeparator(AssetBundleConverterConfig.DOWNLOADED_PATH_ROOT + AssetBundleConverterConfig.DASH);
             log.verboseEnabled = settings.verbose;
 
             state.step = State.Step.IDLE;

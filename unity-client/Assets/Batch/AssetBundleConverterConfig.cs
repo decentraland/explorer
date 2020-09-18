@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.IO;
+using UnityEngine;
 
 namespace DCL
 {
@@ -16,9 +17,10 @@ namespace DCL
         internal static string ASSET_BUNDLE_FOLDER_NAME = "AssetBundles";
         internal static string DOWNLOADED_FOLDER_NAME = "_Downloaded";
 
-        internal static string DOWNLOADED_ASSET_DB_PATH_ROOT = "Assets/" + DOWNLOADED_FOLDER_NAME;
-        internal static string DOWNLOADED_PATH_ROOT = Application.dataPath + "/" + DOWNLOADED_FOLDER_NAME;
-        internal static string ASSET_BUNDLES_PATH_ROOT = Application.dataPath + "/../" + ASSET_BUNDLE_FOLDER_NAME;
+        internal static char DASH = Path.DirectorySeparatorChar;
+        internal static string DOWNLOADED_ASSET_DB_PATH_ROOT = $"Assets{DASH}{DOWNLOADED_FOLDER_NAME}";
+        internal static string DOWNLOADED_PATH_ROOT = $"{Application.dataPath}{DASH}{DOWNLOADED_FOLDER_NAME}";
+        internal static string ASSET_BUNDLES_PATH_ROOT = $"{Application.dataPath}{DASH}..{DASH}{ASSET_BUNDLE_FOLDER_NAME}";
 
         internal static string[] bufferExtensions = {".bin"};
         internal static string[] gltfExtensions = {".glb", ".gltf"};

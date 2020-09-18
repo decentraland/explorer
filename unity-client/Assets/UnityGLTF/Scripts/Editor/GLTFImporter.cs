@@ -73,8 +73,15 @@ namespace UnityGLTF
             UnityEngine.Mesh[] meshes = null;
             try
             {
-                sceneName = Path.GetFileNameWithoutExtension(ctx.assetPath);
-                gltfScene = CreateGLTFScene(ctx.assetPath);
+                char ps = Path.DirectorySeparatorChar;
+
+                string assetPath = ctx.assetPath;
+
+                assetPath = assetPath.Replace('/', ps);
+                assetPath = assetPath.Replace('\\', ps);
+
+                sceneName = Path.GetFileNameWithoutExtension(assetPath);
+                gltfScene = CreateGLTFScene(assetPath);
 
                 // Remove empty roots
                 if (_removeEmptyRootObjects)

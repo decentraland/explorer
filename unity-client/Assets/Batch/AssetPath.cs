@@ -25,8 +25,9 @@ namespace DCL
         {
             get
             {
+                char dash = Path.DirectorySeparatorChar;
                 string fileExt = Path.GetExtension(pair.file);
-                return basePath + "/" + pair.hash + "/" + pair.hash + fileExt;
+                return basePath + pair.hash + dash + pair.hash + fileExt;
             }
         }
     }

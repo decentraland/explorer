@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
@@ -13,7 +14,7 @@ namespace DCL
             public bool deleteDownloadPathAfterFinished = false;
             public bool skipAlreadyBuiltBundles = false;
             public bool verbose = false;
-            public string finalAssetBundlePath = AssetBundleConverterConfig.ASSET_BUNDLES_PATH_ROOT + "/";
+            public string finalAssetBundlePath = AssetBundleConverterConfig.ASSET_BUNDLES_PATH_ROOT + Path.DirectorySeparatorChar;
             public string baseUrl;
 
             public Settings Clone()
