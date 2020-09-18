@@ -49,6 +49,7 @@ import { ensureRealmInitialized } from '../dao/sagas'
 import { ProviderType } from '../ethereum/Web3Connector'
 import { unityInterface } from 'unity-interface/UnityInterface'
 import { getSignUpData } from './selectors'
+import authFlow = require('./authFlow')
 
 const logger = createLogger('session: ')
 
@@ -338,7 +339,7 @@ function* signup(action: SignupAction) {
   yield createSignUpProfile(profile, identity)
   yield authenticate(null, identity)
 
-  unityInterface.ActivateRendering(true)
+  unityInterface.ActivateRendering()
 
   put(signUpActive(false))
 }
