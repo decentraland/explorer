@@ -29,8 +29,8 @@ export type SessionState = {
 }
 
 export enum AuthError {
-  TOS_NOT_ACCEPTED = 'TOS_NOT_ACCEPTED',
-  ACCOUNT_NOT_FOUND = 'ACCOUNT_NOT_FOUND',
-  PROFILE_DOESNT_EXIST = 'PROFILE_DOESNT_EXIST',
-  PROFILE_ALREADY_EXISTS = 'PROFILE_ALREADY_EXISTS'
+  TOS_NOT_ACCEPTED = 'signup-tos-not-accepted',
+  ACCOUNT_NOT_FOUND = 'signup-account-not-found',
+  PROFILE_DOESNT_EXIST = 'signup-profile-doesnt-exist',
+  PROFILE_ALREADY_EXISTS = 'signup-profile-already-exists'
 }

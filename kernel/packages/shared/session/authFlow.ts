@@ -1,4 +1,4 @@
-import { login, signup, signupAgree, signupForm, signUpActive } from './actions'
+import { login, signup, signupAgree, signupForm, signUpActive, authClearError } from './actions'
 import { StoreContainer } from '../store/rootTypes'
 import { ensureUnityInterface } from '../renderer'
 import { profileToRendererFormat } from '../profiles/transformations/profileToRendererFormat'
@@ -7,10 +7,22 @@ import { Avatar, Profile } from '../profiles/types'
 import { setLoadingScreenVisible } from '../../unity-interface/dcl'
 import { createLocalAuthIdentity } from '../ethereum/provider'
 import { getFromLocalStorage } from '../../atomicHelpers/localStorage'
+import { AuthError } from './types'
+import { getAuthError, isSignUpActive } from './selectors'
 
 declare const globalThis: StoreContainer
+enum AuthSection {
+  SIGN_IN = 'eth-login',
+  SING_UP = 'signup-flow',
+  SIGN_UP_EDITOR = 'avatar-editor',
+  SIGN_UP_STEP_2 = 'signup-step2',
+  SIGN_UP_STEP_3 = 'signup-step3',
+  SIGN_UP_STEP_4 = 'signup-step4'
+}
+let modals: Map<string, Modal>
 
 export function setupAuthFlow() {
+  modals = setupErrorModals()
   const element = document.getElementById('eth-login')
   if (element) {
     element.style.display = 'block'
@@ -33,29 +45,33 @@ export function setupAuthFlow() {
 
       btnSignup.addEventListener('click', () => {
         globalThis.globalStore.dispatch(signUpActive(true))
-        GoToAvatarEditor(element)
+        switchTo(AuthSection.SIGN_UP_EDITOR)
       })
 
       btnBackToAvatareditor!.addEventListener('click', () => {
-        GoToAvatarEditor(element)
+        switchTo(AuthSection.SIGN_UP_EDITOR, AuthSection.SIGN_UP_STEP_2)
       })
-
       btnSignupBack!.addEventListener('click', () => {
-        signupStep3!.style.display = 'none'
-        signupStep2!.style.display = 'block'
+        switchTo(AuthSection.SIGN_UP_STEP_2, AuthSection.SIGN_UP_STEP_2)
       })
       btnSignupAgree!.addEventListener('click', () => {
-        console.log('SIGNUP-AGREE')
-
         globalThis.globalStore.dispatch(signupAgree())
-
-        signupStep3!.style.display = 'none'
-        signupStep4!.style.display = 'block'
+        switchTo(AuthSection.SIGN_UP_STEP_4, AuthSection.SIGN_UP_STEP_3)
       })
 
       document.querySelector('.btnSignupWallet')!.addEventListener('click', (event: any) => {
         const provider = event.target.getAttribute('rel')
-        console.log('SIGNUP-CHOOSE_WALLET: ', provider)
+        const unsubscribe = globalThis.globalStore.subscribe(() => {
+          const error = getAuthError(globalThis.globalStore.getState())
+          if (modals.has(error)) {
+            unsubscribe()
+            globalThis.globalStore.dispatch(authClearError())
+            modals.get(error)!.open()
+          }
+          if (!isSignUpActive(globalThis.globalStore.getState())) {
+            unsubscribe()
+          }
+        })
         globalThis.globalStore.dispatch(signup(provider))
       })
 
@@ -80,6 +96,13 @@ export function setupAuthFlow() {
         const provider = e.target.getAttribute('rel') || 'metamask'
         globalThis.globalStore.dispatch(login(provider))
         const unsubscribe = globalThis.globalStore.subscribe(() => {
+          const error = getAuthError(globalThis.globalStore.getState())
+          if (modals.has(error)) {
+            unsubscribe()
+            globalThis.globalStore.dispatch(authClearError())
+            modals.get(error)!.open()
+            return
+          }
           if (globalThis.globalStore.getState().session.initialized) {
             element.style.display = 'none'
             unsubscribe()
@@ -174,4 +197,94 @@ async function getLocalProfile() {
     version: 0,
     tutorialStep: 0
   }
+}
+
+interface ModalClickListener {
+  (e: Event, modal: Modal): void
+}
+
+class Modal {
+  private readonly container: HTMLElement
+
+  constructor(id: string, onAccept: ModalClickListener, onCancel?: ModalClickListener) {
+    this.container = document.getElementById(id) as HTMLElement
+    if (!this.container) {
+      throw Error('Modal element does not exist')
+    }
+    const btnAccept = this.container.querySelector(`.btnAccept`)
+    if (btnAccept && onAccept) {
+      btnAccept.addEventListener('click', (event) => onAccept(event, this))
+    }
+    const btnCancel = this.container.querySelector(`.btnCancel`)
+    if (btnCancel && onCancel) {
+      btnCancel.addEventListener('click', (event) => onCancel(event, this))
+    }
+  }
+
+  open() {
+    this.container.style.display = 'block'
+  }
+
+  close() {
+    this.container.style.display = 'none'
+  }
+}
+
+function setupErrorModals() {
+  const tosNotAccepted = new Modal(AuthError.TOS_NOT_ACCEPTED, (event, modal) => modal.close())
+  const accountNotFound = new Modal(AuthError.ACCOUNT_NOT_FOUND, (event, modal) => modal.close())
+
+  const profileDoesntExist = new Modal(
+    AuthError.PROFILE_DOESNT_EXIST,
+    (event, modal) => {
+      modal.close()
+      switchTo(AuthSection.SIGN_UP_EDITOR)
+    },
+    (event, modal) => modal.close()
+  )
+  const profileAlreadyExists = new Modal(
+    AuthError.PROFILE_ALREADY_EXISTS,
+    (event, modal) => {
+      modal.close()
+      switchTo(AuthSection.SIGN_IN, AuthSection.SIGN_UP_STEP_4)
+    },
+    (event, modal) => modal.close()
+  )
+  return new Map<string, Modal>([
+    [AuthError.TOS_NOT_ACCEPTED, tosNotAccepted],
+    [AuthError.ACCOUNT_NOT_FOUND, accountNotFound],
+    [AuthError.PROFILE_DOESNT_EXIST, profileDoesntExist],
+    [AuthError.PROFILE_ALREADY_EXISTS, profileAlreadyExists]
+  ])
+}
+
+function switchTo(section: AuthSection, from?: AuthSection) {
+  const signInContainer = document.getElementById(AuthSection.SIGN_IN)
+  const signUpContainer = document.getElementById(AuthSection.SING_UP)
+  // close all modals
+  modals.forEach((m) => m.close())
+  ;[AuthSection.SIGN_UP_STEP_2, AuthSection.SIGN_UP_STEP_3, AuthSection.SIGN_UP_STEP_4].map((s) => {
+    const e = document.getElementById(s)
+    e ? (e.style.display = 'none') : null
+  })
+  switch (section) {
+    case AuthSection.SIGN_IN: {
+      signUpContainer ? (signUpContainer.style.display = 'none') : null
+      signInContainer ? (signInContainer.style.display = 'block') : null
+      return
+    }
+    case AuthSection.SIGN_UP_EDITOR: {
+      signInContainer ? (signInContainer.style.display = 'none') : null
+      signUpContainer ? (signUpContainer.style.display = 'none') : null
+      const fromElement = from ? document.getElementById(from) : null
+      fromElement ? (fromElement.style.display = 'none') : null
+      GoToAvatarEditor(signInContainer!)
+      return
+    }
+  }
+
+  const sectionTo = document.getElementById(section)
+  const fromElement = from ? document.getElementById(from) : null
+  fromElement ? (fromElement.style.display = 'none') : null
+  sectionTo ? (sectionTo.style.display = 'block') : null
 }

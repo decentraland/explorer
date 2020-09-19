@@ -128,11 +128,11 @@ function* login(action: LoginAction) {
     }
     const account = yield getUserAccount()
     if (!account) {
-      put(authError(AuthError.ACCOUNT_NOT_FOUND))
+      yield put(authError(AuthError.ACCOUNT_NOT_FOUND))
       return
     }
     if (!(yield profileExists(account))) {
-      put(authError(AuthError.PROFILE_ALREADY_EXISTS))
+      yield put(authError(AuthError.PROFILE_DOESNT_EXIST))
       return
     }
   }
@@ -328,16 +328,17 @@ function* signup(action: SignupAction) {
   }
   const account = yield getUserAccount()
   if (!account) {
-    put(authError(AuthError.ACCOUNT_NOT_FOUND))
+    yield put(authError(AuthError.ACCOUNT_NOT_FOUND))
+    return
   }
   if (yield call(profileExists, account)) {
-    put(authError(AuthError.PROFILE_DOESNT_EXIST))
+    yield put(authError(AuthError.PROFILE_ALREADY_EXISTS))
     return
   }
   const identity = yield createAuthIdentity()
   const { profile, tos } = yield select(getSignUpData)
   if (!tos) {
-    put(authError(AuthError.TOS_NOT_ACCEPTED))
+    yield put(authError(AuthError.TOS_NOT_ACCEPTED))
     return
   }
   profile.userId = account.toString()
