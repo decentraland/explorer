@@ -84,7 +84,7 @@ export function sessionReducer(state?: SessionState, action?: AnyAction): Sessio
         }
       }
     }
-    case AUTH_ERROR: {)
+    case AUTH_ERROR: {
       return {
         ...state,
         signup: {
