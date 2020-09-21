@@ -26,7 +26,7 @@ export function setupAuthFlow() {
   modals = setupErrorModals()
   const element = document.getElementById('eth-login')
   if (element) {
-    element.style.display = 'block'
+    element.style.display = ''
     const btnSignup = document.getElementById('btnSignUp')
     if (btnSignup) {
       const signupFlow = document.getElementById('signup-flow')
@@ -86,7 +86,7 @@ export function setupAuthFlow() {
         globalThis.globalStore.dispatch(signupForm(name, email))
 
         signupStep2!.style.display = 'none'
-        signupStep3!.style.display = 'block'
+        signupStep3!.style.display = ''
         return false
       })
     }
@@ -123,8 +123,8 @@ export function toggleScreen(screen: 'renderer' | 'signin') {
     signupStep2!.style.display = 'none'
     document.getElementById('gameContainer')!.setAttribute('style', 'display: block')
   } else {
-    signupFlow!.style.display = 'block'
-    signupStep2!.style.display = 'block'
+    signupFlow!.style.display = ''
+    signupStep2!.style.display = ''
     document.getElementById('gameContainer')!.setAttribute('style', 'display: none')
   }
 }
@@ -226,7 +226,7 @@ class Modal {
   }
 
   open() {
-    this.container.style.display = 'block'
+    this.container.style.display = ''
   }
 
   close() {
@@ -275,7 +275,7 @@ function switchTo(section: AuthSection, from?: AuthSection) {
     case AuthSection.SIGN_IN: {
       globalThis.globalStore.dispatch(signUpActive(false))
       signUpContainer ? (signUpContainer.style.display = 'none') : null
-      signInContainer ? (signInContainer.style.display = 'block') : null
+      signInContainer ? (signInContainer.style.display = '') : null
       return
     }
     case AuthSection.SIGN_UP_EDITOR: {
@@ -292,5 +292,5 @@ function switchTo(section: AuthSection, from?: AuthSection) {
   const sectionTo = document.getElementById(section)
   const fromElement = from ? document.getElementById(from) : null
   fromElement ? (fromElement.style.display = 'none') : null
-  sectionTo ? (sectionTo.style.display = 'block') : null
+  sectionTo ? (sectionTo.style.display = '') : null
 }
