@@ -1,6 +1,5 @@
 import { contracts as contractInfo } from './contracts'
 const queryString = require('query-string')
-declare var window: any
 
 export const performanceConfigurations = [
   { antialiasing: true, downsampling: 0, shadows: true },
@@ -205,11 +204,9 @@ let network: ETHEREUM_NETWORK | null = null
 
 export function getTLD() {
   if (ENV_OVERRIDE) {
-    return window.location.search.match(/ENV=(\w+)/)[1]
+    return location.search.match(/ENV=(\w+)/)![1]
   }
-  if (window) {
-    return window.location.hostname.match(/(\w+)$/)[0]
-  }
+  return location.hostname.match(/(\w+)$/)![0]
 }
 
 export const knownTLDs = ['zone', 'org', 'today']
@@ -233,7 +230,7 @@ export function getDefaultTLD() {
 }
 
 export function getExclusiveServer() {
-  if (window.location.search.match(/TEST_WEARABLES/)) {
+  if (location.search.match(/TEST_WEARABLES/)) {
     return 'https://dcl-wearables-dev.now.sh/index.json'
   }
   return 'https://wearable-api.decentraland.org/v2/collections'
