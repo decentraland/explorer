@@ -19,7 +19,6 @@ namespace DCL
         [SerializeField] internal Sprite scenePreviewFailImage;
 
         [SerializeField] internal Button goToButton;
-        [SerializeField] internal Button closeButton;
         Vector2Int location;
         RectTransform rectTransform;
         MinimapMetadata minimapMetadata;
@@ -37,7 +36,6 @@ namespace DCL
             rectTransform = transform as RectTransform;
 
             goToButton.onClick.AddListener(OnGotoClick);
-            closeButton.onClick.AddListener(OnCloseClick);
 
             minimapMetadata.OnSceneInfoUpdated += OnMapMetadataInfoUpdated;
         }

@@ -49,7 +49,7 @@ namespace Tests
 
             navmapToastView.Populate(new Vector2Int(10, 11), sceneInfo);
             Assert.IsTrue(navmapToastView.gameObject.activeSelf);
-            navmapToastView.closeButton.onClick.Invoke();
+            navmapToastView.OnCloseClick();
             Assert.IsFalse(navmapToastView.gameObject.activeSelf);
         }
 
