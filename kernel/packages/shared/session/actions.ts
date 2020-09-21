@@ -18,7 +18,7 @@ export const signUpActive = (active: boolean) => action(SIGNUP_ACTIVE, active)
 export type SignUpActiveAction = ReturnType<typeof signUpActive>
 
 export const SIGNUP_FORM = '[SIGN-UP] signup save form'
-export const signupForm = (name: string, email: string) => action(SIGNUP_FORM, { name, email })
+export const signupForm = (unverifiedName: string, email: string) => action(SIGNUP_FORM, { unverifiedName, email })
 export type SignUpFormAction = ReturnType<typeof signupForm>
 
 export const SIGNUP_AGREE = '[SIGN-UP] signup agree'

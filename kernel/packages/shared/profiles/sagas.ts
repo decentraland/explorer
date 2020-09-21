@@ -556,7 +556,8 @@ export function* createSignUpProfile(profile: Profile, identity: ExplorerIdentit
   const url: string = yield select(getUpdateProfileServer)
   const userId = profile.userId
   const currentVersion = profile.version || 0
-
+  // to prevent save a email on profile
+  profile.email = ''
   return yield modifyAvatar({
     url,
     userId,

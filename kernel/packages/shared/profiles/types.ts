@@ -23,6 +23,7 @@ export interface Profile {
   version: number
   tutorialStep: number
   interests?: string[]
+  unverifiedName?: string
 }
 
 export interface Avatar {
