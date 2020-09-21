@@ -9,19 +9,23 @@ namespace DCL
 {
     public class NavmapToastView : MonoBehaviour
     {
+        private static readonly int triggerLoadingComplete = Animator.StringToHash("LoadingComplete");
+
         [SerializeField] internal TextMeshProUGUI sceneTitleText;
         [SerializeField] internal TextMeshProUGUI sceneOwnerText;
         [SerializeField] internal TextMeshProUGUI sceneLocationText;
         [SerializeField] internal RectTransform toastContainer;
         [SerializeField] internal GameObject scenePreviewContainer;
         [SerializeField] internal RawImageFillParent scenePreviewImage;
-        [SerializeField] internal GameObject scenePreviewLoadingSpinner;
         [SerializeField] internal Sprite scenePreviewFailImage;
+        [SerializeField] internal Animator toastAnimator;
 
         [SerializeField] internal Button goToButton;
         Vector2Int location;
         RectTransform rectTransform;
         MinimapMetadata minimapMetadata;
+
+        AssetPromise_Texture texturePromise = null;
 
         public System.Action OnGotoClicked;
 
@@ -43,6 +47,11 @@ namespace DCL
         private void OnDestroy()
         {
             minimapMetadata.OnSceneInfoUpdated -= OnMapMetadataInfoUpdated;
+            if (texturePromise != null)
+            {
+                AssetPromiseKeeper_Texture.i.Forget(texturePromise);
+                texturePromise = null;
+            }
         }
 
         public void Populate(Vector2Int coordinates, MinimapMetadata.MinimapSceneInfo sceneInfo)
@@ -52,9 +61,8 @@ namespace DCL
 
             bool sceneInfoExists = sceneInfo != null;
 
-            MapRenderer.i.showCursorCoords = false;
-
             gameObject.SetActive(true);
+            scenePreviewImage.gameObject.SetActive(false);
             location = coordinates;
 
             PositionToast(coordinates);
@@ -62,15 +70,14 @@ namespace DCL
             sceneLocationText.text = $"{coordinates.x}, {coordinates.y}";
 
             sceneOwnerText.transform.parent.gameObject.SetActive(sceneInfoExists && !string.IsNullOrEmpty(sceneInfo.owner));
-            sceneTitleText.transform.parent.gameObject.SetActive(sceneInfoExists && !string.IsNullOrEmpty(sceneInfo.name));
-            scenePreviewLoadingSpinner.SetActive(false);
+            sceneTitleText.text = "Untitled Scene";
 
             bool useDefaultThumbnail =
                 !sceneInfoExists || (sceneInfoExists && string.IsNullOrEmpty(sceneInfo.previewImageUrl));
 
             if (useDefaultThumbnail)
             {
-                scenePreviewImage.texture = scenePreviewFailImage.texture;
+                DisplayThumbnail(scenePreviewFailImage.texture);
                 currentImageUrl = "";
             }
 
@@ -79,16 +86,26 @@ namespace DCL
                 sceneTitleText.text = sceneInfo.name;
                 sceneOwnerText.text = $"Created by: {sceneInfo.owner}";
 
-                if (currentImageUrl == sceneInfo.previewImageUrl) return;
+                if (currentImageUrl == sceneInfo.previewImageUrl)
+                {
+                    DisplayThumbnail(texturePromise.asset.texture);
+                    return;
+                }
 
-                if (currentImage != null)
-                    Destroy(currentImage);
+                if (texturePromise != null)
+                {
+                    AssetPromiseKeeper_Texture.i.Forget(texturePromise);
+                    texturePromise = null;
+                }
 
-                if (downloadCoroutine != null)
-                    CoroutineStarter.Stop(downloadCoroutine);
 
-                if (sceneInfoExists && !string.IsNullOrEmpty(sceneInfo.previewImageUrl))
-                    downloadCoroutine = CoroutineStarter.Start(Download(sceneInfo.previewImageUrl));
+                if (!string.IsNullOrEmpty(sceneInfo.previewImageUrl))
+                {
+                    texturePromise = new AssetPromise_Texture(sceneInfo.previewImageUrl, storeTexAsNonReadable: false);
+                    texturePromise.OnSuccessEvent += (textureAsset) => { DisplayThumbnail(textureAsset.texture); };
+                    texturePromise.OnFailEvent += (textureAsset) => { DisplayThumbnail(scenePreviewFailImage.texture); };
+                    AssetPromiseKeeper_Texture.i.Keep(texturePromise);
+                }
 
                 currentImageUrl = sceneInfoExists ? sceneInfo.previewImageUrl : "";
             }
@@ -138,7 +155,6 @@ namespace DCL
             if (gameObject.activeSelf)
                 AudioScriptableObjects.dialogClose.Play(true);
 
-            MapRenderer.i.showCursorCoords = true;
             gameObject.SetActive(false);
         }
 
@@ -152,30 +168,11 @@ namespace DCL
         }
 
         string currentImageUrl;
-        Texture2D currentImage;
-        Coroutine downloadCoroutine;
 
-        private IEnumerator Download(string url)
+        private void DisplayThumbnail(Texture2D texture)
         {
-            scenePreviewLoadingSpinner.SetActive(true);
-            scenePreviewImage.texture = null;
-
-            UnityWebRequest www = UnityWebRequestTexture.GetTexture(url);
-
-            yield return www.SendWebRequest();
-
-            if (!www.isNetworkError && !www.isHttpError)
-            {
-                currentImage = ((DownloadHandlerTexture)www.downloadHandler).texture;
-                currentImage.Compress(false);
-                scenePreviewImage.texture = currentImage;
-            }
-            else
-            {
-                Debug.Log($"Error downloading: {url} {www.error}");
-                scenePreviewImage.texture = scenePreviewFailImage.texture;
-            }
-            scenePreviewLoadingSpinner.SetActive(false);
+            scenePreviewImage.texture = texture;
+            toastAnimator.SetTrigger(triggerLoadingComplete);
         }
     }
 }
