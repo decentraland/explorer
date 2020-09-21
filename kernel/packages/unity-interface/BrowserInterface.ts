@@ -183,8 +183,8 @@ export class BrowserInterface {
       unityInterface.DeactivateRendering()
       const signupFlow = document.getElementById('signup-flow')
       const signupStep2 = document.getElementById('signup-step2')
-      signupFlow!.style.display = 'block'
-      signupStep2!.style.display = 'block'
+      signupFlow!.style.display = ''
+      signupStep2!.style.display = ''
       document.getElementById('gameContainer')!.setAttribute('style', 'display: none')
     } else {
       globalThis.globalStore.dispatch(saveProfileRequest(updated))
