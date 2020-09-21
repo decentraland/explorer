@@ -35,10 +35,10 @@ namespace DCL
         {
             return new EditorEnvironment
             (
-                directory: new SystemWrappers.Directory(),
-                file: new SystemWrappers.File(),
-                assetDatabase: new UnityEditorWrappers.AssetDatabase(),
-                webRequest: new UnityEditorWrappers.WebRequest_Editor(),
+                directory: new MockWrappers.Directory(),
+                file: new MockWrappers.File(),
+                assetDatabase: new MockWrappers.AssetDatabase(),
+                webRequest: new MockWrappers.WebRequest(),
                 buildPipeline: new UnityEditorWrappers.BuildPipeline()
             );
         }

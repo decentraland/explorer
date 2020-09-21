@@ -275,8 +275,11 @@ namespace DCL
                 return path != null ? gltfPath : null;
             }
 
-            private void DumpSceneBuffers(List<AssetPath> bufferPaths)
+            internal void DumpSceneBuffers(List<AssetPath> bufferPaths)
             {
+                if (bufferPaths.Count == 0 || bufferPaths == null)
+                    return;
+
                 foreach (var assetPath in bufferPaths)
                 {
                     if (env.file.Exists(assetPath.finalPath))

@@ -139,6 +139,17 @@ namespace ABConverterTests
         [UnityTest]
         public IEnumerator DumpBuffersCorrectly()
         {
+            var settings = new ABConverter.Client.Settings();
+            settings.baseUrl = ContentServerUtils.GetBaseUrl(ContentServerUtils.ApiTLD.ZONE) + "/contents/";
+            settings.verbose = true;
+            settings.deleteDownloadPathAfterFinished = false;
+
+            var env = ABConverter.Client.EnsureEnvironment();
+
+            List<AssetPath> paths = new List<AssetPath>();
+
+            var core = new ABConverter.Core(env, settings);
+            core.DumpSceneBuffers(paths);
             yield break;
         }
 
@@ -151,7 +162,7 @@ namespace ABConverterTests
             settings.verbose = true;
             settings.deleteDownloadPathAfterFinished = false;
 
-            var env = ABConverter.Client.EnsureEnvironment();
+            var env = EditorEnvironment.CreateWithMockImplementations();
 
             var core = new ABConverter.Core(env, settings);
 
