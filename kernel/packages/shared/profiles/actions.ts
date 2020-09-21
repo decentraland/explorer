@@ -8,7 +8,6 @@ export const PROFILE_REQUEST = '[Request] Profile fetch'
 export const PROFILE_SUCCESS = '[Success] Profile fetch'
 export const PROFILE_FAILURE = '[Failure] Profile fetch'
 export const PROFILE_RANDOM = '[?] Profile randomized'
-export const PROFILE_CHECK_EXISTS = '[Request] Profile check exists'
 
 export const profileRequest = (userId: string) => action(PROFILE_REQUEST, { userId })
 export const profileSuccess = (userId: string, profile: Profile, hasConnectedWeb3: boolean = false) =>
