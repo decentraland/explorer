@@ -15,6 +15,12 @@ namespace DCL
         public string hash => pair.hash;
         public string file => pair.file;
 
+        public AssetPath(string basePath, string hash, string file)
+        {
+            this.basePath = basePath;
+            this.pair = new MappingPair {hash = hash, file = file};
+        }
+
         public AssetPath(string basePath, MappingPair pair)
         {
             this.basePath = basePath;

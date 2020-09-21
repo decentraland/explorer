@@ -7,6 +7,7 @@ namespace DCL
 {
     public sealed partial class MockWrappers
     {
+        //TODO(Brian): Use mocking library to replace this mock
         public class AssetDatabase : IAssetDatabase
         {
             public bool refreshed = false;
