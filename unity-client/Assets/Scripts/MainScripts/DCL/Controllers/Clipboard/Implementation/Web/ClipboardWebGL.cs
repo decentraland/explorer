@@ -3,11 +3,11 @@ using System.Runtime.InteropServices;
 using AOT;
 using UnityEngine;
 
-internal class ClipboardWebGL : IClipboardImplementation, IDisposable
+internal class ClipboardWebGL : IClipboardHandler, IDisposable
 {
     private static ClipboardWebGL i;
 
-    private Action<string, bool> onRead;
+    private Action<string, bool> OnRead;
     private bool copyInput = false;
 
     private delegate void ReadTextCallback(IntPtr ptrText, int intError);
@@ -29,7 +29,7 @@ internal class ClipboardWebGL : IClipboardImplementation, IDisposable
     {
         string value = Marshal.PtrToStringAuto(ptrText);
         bool error = intError == 0;
-        i?.onRead?.Invoke(value, error);
+        i?.OnRead?.Invoke(value, error);
     }
 
     [MonoPInvokeCallback(typeof(OnPasteInputCallback))]
@@ -56,18 +56,18 @@ internal class ClipboardWebGL : IClipboardImplementation, IDisposable
         Application.onBeforeRender -= OnBeforeRender;
     }
 
-    void IClipboardImplementation.Initialize(Action<string, bool> onRead)
+    void IClipboardHandler.Initialize(Action<string, bool> onRead)
     {
-        this.onRead = onRead;
+        this.OnRead = onRead;
         initialize(OnReceiveReadText, OnReceivePasteInput, OnReceiveCopyInput);
     }
 
-    void IClipboardImplementation.RequestWriteText(string text)
+    void IClipboardHandler.RequestWriteText(string text)
     {
         writeText(text);
     }
 
-    void IClipboardImplementation.RequestGetText()
+    void IClipboardHandler.RequestGetText()
     {
         readText();
     }

@@ -1,20 +1,21 @@
 using System;
 using System.Collections.Generic;
+using DCL.Helpers;
 
-public static class Clipboard
+public class Clipboard
 {
-    static readonly Queue<ClipboardReadPromise> promises = new Queue<ClipboardReadPromise>();
-    private static readonly IClipboardImplementation impl = null;
+    private readonly Queue<Promise<string>> promises = new Queue<Promise<string>>();
+    private readonly IClipboardHandler impl = null;
 
-    public static void WriteText(string text)
+    public void WriteText(string text)
     {
         impl?.RequestWriteText(text);
     }
 
     [Obsolete("Firefox not supported")]
-    public static ClipboardReadPromise ReadText()
+    public Promise<string> ReadText()
     {
-        ClipboardReadPromise promise = new ClipboardReadPromise();
+        Promise<string> promise = new Promise<string>();
         promises.Enqueue(promise);
         impl?.RequestGetText();
         return promise;
@@ -29,7 +30,7 @@ public static class Clipboard
     }
 #endif
 
-    static Clipboard()
+    public Clipboard()
     {
 #if UNITY_WEBGL && !UNITY_EDITOR
         impl = new ClipboardWebGL();
@@ -39,12 +40,19 @@ public static class Clipboard
         impl.Initialize(OnReadText);
     }
 
-    private static void OnReadText(string text, bool error)
+    private void OnReadText(string text, bool error)
     {
         while (promises.Count > 0)
         {
             var promise = promises.Dequeue();
-            promise.Resolve(text, error);
+            if (error)
+            {
+                promise.Reject(text);
+            }
+            else
+            {
+                promise.Resolve(text);
+            }
         }
     }
 }

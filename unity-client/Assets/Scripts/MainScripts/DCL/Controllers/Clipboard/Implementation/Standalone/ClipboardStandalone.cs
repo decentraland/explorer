@@ -1,22 +1,22 @@
 using System;
 using UnityEngine;
 
-internal class ClipboardStandalone : IClipboardImplementation
+internal class ClipboardStandalone : IClipboardHandler
 {
-    private Action<string, bool> onRead;
+    private Action<string, bool> OnRead;
 
-    void IClipboardImplementation.Initialize(Action<string, bool> onRead)
+    void IClipboardHandler.Initialize(Action<string, bool> onRead)
     {
-        this.onRead = onRead;
+        this.OnRead = onRead;
     }
 
-    void IClipboardImplementation.RequestWriteText(string text)
+    void IClipboardHandler.RequestWriteText(string text)
     {
         GUIUtility.systemCopyBuffer = text;
     }
 
-    void IClipboardImplementation.RequestGetText()
+    void IClipboardHandler.RequestGetText()
     {
-        onRead?.Invoke(GUIUtility.systemCopyBuffer, false);
+        OnRead?.Invoke(GUIUtility.systemCopyBuffer, false);
     }
 }
