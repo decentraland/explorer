@@ -12,7 +12,6 @@ namespace DCL
         [SerializeField] internal TextMeshProUGUI sceneTitleText;
         [SerializeField] internal TextMeshProUGUI sceneOwnerText;
         [SerializeField] internal TextMeshProUGUI sceneLocationText;
-        [SerializeField] internal TextMeshProUGUI sceneDescriptionText;
         [SerializeField] internal RectTransform toastContainer;
         [SerializeField] internal GameObject scenePreviewContainer;
         [SerializeField] internal RawImageFillParent scenePreviewImage;
@@ -65,7 +64,6 @@ namespace DCL
             sceneLocationText.text = $"{coordinates.x}, {coordinates.y}";
 
             sceneOwnerText.transform.parent.gameObject.SetActive(sceneInfoExists && !string.IsNullOrEmpty(sceneInfo.owner));
-            sceneDescriptionText.transform.parent.gameObject.SetActive(sceneInfoExists && !string.IsNullOrEmpty(sceneInfo.description));
             sceneTitleText.transform.parent.gameObject.SetActive(sceneInfoExists && !string.IsNullOrEmpty(sceneInfo.name));
             scenePreviewLoadingSpinner.SetActive(false);
 
@@ -82,7 +80,6 @@ namespace DCL
             {
                 sceneTitleText.text = sceneInfo.name;
                 sceneOwnerText.text = $"Created by: {sceneInfo.owner}";
-                sceneDescriptionText.text = sceneInfo.description;
 
                 if (currentImageUrl == sceneInfo.previewImageUrl) return;
 
