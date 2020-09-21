@@ -15,7 +15,7 @@ public class SceneObject
         public int materials;
         public int textures;
         public int triangles;
-        public int entitites;
+        public int entities;
     }
 
     //[System.Serializable]

@@ -29,6 +29,10 @@ public class CatalogItemAdapter : MonoBehaviour
 
     public void SetSprite(Sprite sprite)
     {
-        tumbmailImg.sprite = sprite;
+        if (tumbmailImg != null)
+        {
+            tumbmailImg.enabled = true;
+            tumbmailImg.sprite = sprite;
+        }
     }
 }

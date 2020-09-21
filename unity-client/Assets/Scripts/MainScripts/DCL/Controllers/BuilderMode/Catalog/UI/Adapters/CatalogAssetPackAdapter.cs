@@ -28,7 +28,11 @@ public class CatalogAssetPackAdapter : MonoBehaviour
 
     public void SetSprite(Sprite sprite)
     {
-        packImg.sprite = sprite;
+        if (packImg != null)
+        {
+            packImg.enabled = true;
+            packImg.sprite = sprite;
+        }
     }
   
 }

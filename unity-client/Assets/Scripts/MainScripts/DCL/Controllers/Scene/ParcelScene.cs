@@ -373,9 +373,29 @@ namespace DCL.Controllers
 
             DecentralandEntity duplicatedEntity = CreateEntity(System.Guid.NewGuid().ToString());
 
-            foreach(KeyValuePair<System.Type, BaseDisposable> component in decentralandEntity.GetSharedComponents())
+            if (decentralandEntity.children.Count > 0)
             {
-                duplicatedEntity.AddSharedComponent(component.Key, component.Value);
+                using (var iterator = decentralandEntity.children.GetEnumerator())
+                {
+                    while (iterator.MoveNext())
+                    {
+                        DecentralandEntity childDuplicate = DuplicateEntity(iterator.Current.Value);
+                        childDuplicate.SetParent(duplicatedEntity);
+                    }
+                }
+            }
+            DCLTransform.model.position = SceneController.i.ConvertUnityToScenePosition(decentralandEntity.gameObject.transform.position);
+            DCLTransform.model.rotation = decentralandEntity.gameObject.transform.rotation;
+            DCLTransform.model.scale = decentralandEntity.gameObject.transform.lossyScale;
+  
+            foreach (KeyValuePair<CLASS_ID_COMPONENT, BaseComponent> component in decentralandEntity.components)
+            {
+                EntityComponentCreateOrUpdateFromUnity(duplicatedEntity.entityId, component.Key, DCLTransform.model);
+            }
+
+            foreach (KeyValuePair<System.Type, BaseDisposable> component in decentralandEntity.GetSharedComponents())
+            {
+                SharedComponentAttach(duplicatedEntity.entityId, component.Value.id);
             }
 
             return duplicatedEntity;

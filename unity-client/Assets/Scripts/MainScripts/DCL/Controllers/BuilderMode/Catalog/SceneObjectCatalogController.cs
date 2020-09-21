@@ -21,20 +21,73 @@ public class SceneObjectCatalogController : MonoBehaviour
     public GameObject catalogUIGO;
     public CatalogAssetPackListView catalogAssetPackListView;
     public CatalogGroupListView catalogGroupListView;
+    public TMP_InputField searchInputField;
 
-
+    List<Dictionary<string, List<SceneObject>>> filterObjects = new List<Dictionary<string, List<SceneObject>>>();
+    string lastFilterName = "";
     bool catalogInitializaed = false;
     private void Start()
     {
         OnResultReceived += AddFullSceneObjectCatalog;
         catalogAssetPackListView.OnSceneAssetPackClick += OnScenePackSelected;
         catalogGroupListView.OnSceneObjectClicked += SceneObjectSelected;
+        searchInputField.onValueChanged.AddListener(OnSearchInputChanged);
     }
 
     private void OnDestroy()
     {
         catalogAssetPackListView.OnSceneAssetPackClick -= OnScenePackSelected;
         catalogGroupListView.OnSceneObjectClicked -= SceneObjectSelected;
+    }
+
+    void OnSearchInputChanged(string currentSearchInput)
+    {
+        if (string.IsNullOrEmpty(currentSearchInput)) ShowAssetsPacks();
+        else
+        {
+            ShowCatalogContent();
+            FilterAssets(currentSearchInput);
+            catalogGroupListView.SetContent(filterObjects);
+
+        }
+        lastFilterName = currentSearchInput;
+    }
+
+    void FilterAssets(string nameToFilter)
+    {
+        //if(string.IsNullOrEmpty(lastFilterName))
+        //{
+
+        //}
+        //else
+        //{
+          filterObjects.Clear();
+            foreach (SceneAssetPack assetPack in CatalogController.sceneObjectCatalog.GetValues().ToList())
+            {
+                foreach(SceneObject sceneObject in assetPack.assets)
+                {
+                    if(sceneObject.category.Contains(nameToFilter) || sceneObject.tags.Contains(nameToFilter) || sceneObject.name.Contains(nameToFilter))
+                    {
+                        bool foundCategory = false;
+                        foreach(Dictionary<string, List<SceneObject>> groupedSceneObjects in filterObjects)
+                        {
+                            if (groupedSceneObjects.ContainsKey(sceneObject.category))
+                            {
+                                foundCategory = true;
+                                if (!groupedSceneObjects[sceneObject.category].Contains(sceneObject)) groupedSceneObjects[sceneObject.category].Add(sceneObject);
+                            }
+                        }
+                        if(!foundCategory)
+                        {
+                            Dictionary<string, List<SceneObject>> groupedSceneObjects = new Dictionary<string, List<SceneObject>>();
+                            groupedSceneObjects.Add(sceneObject.category, new List<SceneObject>() { sceneObject });
+                            filterObjects.Add(groupedSceneObjects);
+                        }
+                    }
+                }
+            }
+
+        //}
     }
 
     void SceneObjectSelected(SceneObject sceneObject)
@@ -47,9 +100,7 @@ public class SceneObjectCatalogController : MonoBehaviour
 
     void OnScenePackSelected(SceneAssetPack sceneAssetPack)
     {
-        catalogAssetPackListView.gameObject.SetActive(false);
-        catalogGroupListView.gameObject.SetActive(true);
-        backBtn.gameObject.SetActive(true);
+        ShowCatalogContent();
 
         SetAssetPackInListView(sceneAssetPack);
     }
@@ -77,14 +128,27 @@ public class SceneObjectCatalogController : MonoBehaviour
     {
         return catalogUIGO.activeSelf;
     }
+
+    public void ShowAssetsPacks()
+    {
+        catalogAssetPackListView.gameObject.SetActive(true);
+        catalogGroupListView.gameObject.SetActive(false);
+        backBtn.gameObject.SetActive(false);
+    }
+    public void ShowCatalogContent()
+    {
+        catalogAssetPackListView.gameObject.SetActive(false);
+        catalogGroupListView.gameObject.SetActive(true);
+        backBtn.gameObject.SetActive(true);
+    }
     public void OpenCatalog()
     {
         catalogTitleTxt.text = "Asset Packs";
         Utils.UnlockCursor();
         catalogUIGO.SetActive(true);
-        catalogAssetPackListView.gameObject.SetActive(true);
-        catalogGroupListView.gameObject.SetActive(false);
-        backBtn.gameObject.SetActive(false);
+        //catalogAssetPackListView.gameObject.SetActive(true);
+        //catalogGroupListView.gameObject.SetActive(false);
+        //backBtn.gameObject.SetActive(false);
 
         if (!catalogInitializaed)
         {

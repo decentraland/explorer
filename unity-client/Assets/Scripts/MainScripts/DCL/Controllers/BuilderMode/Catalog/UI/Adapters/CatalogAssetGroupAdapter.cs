@@ -15,7 +15,7 @@ public class CatalogAssetGroupAdapter : MonoBehaviour
 
     public void SetContent(string category, List<SceneObject> sceneObjectsList)
     {
-        categoryTxt.text = category;
+        categoryTxt.text = category.ToUpper();
         RemoveAdapters();
         foreach (SceneObject sceneObject in sceneObjectsList)
         {
