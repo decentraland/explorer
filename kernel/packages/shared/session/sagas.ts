@@ -240,8 +240,6 @@ function* authenticate(userData: any, signUpIdentity?: ExplorerIdentity) {
     })
 
     loginCompleted.resolve(undefined)
-
-    unityInterface.ActivateRendering()
   }
 
   logger.log(`User ${userId} logged in`)
@@ -254,6 +252,8 @@ function* authenticate(userData: any, signUpIdentity?: ExplorerIdentity) {
     yield setNetwork(net)
     queueTrackingEvent('Use network', { net })
   }
+
+  unityInterface.ActivateRendering()
 
   yield put(userAuthentified(userId, identity, net))
   yield put(loginCompletedAction())
