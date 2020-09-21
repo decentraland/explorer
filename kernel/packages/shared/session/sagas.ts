@@ -136,6 +136,7 @@ function* login(action: LoginAction) {
       return
     }
   }
+
   return yield authenticate(getUserProfile())
 }
 
@@ -239,6 +240,8 @@ function* authenticate(userData: any, signUpIdentity?: ExplorerIdentity) {
     })
 
     loginCompleted.resolve(undefined)
+
+    unityInterface.ActivateRendering()
   }
 
   logger.log(`User ${userId} logged in`)
@@ -345,9 +348,6 @@ function* signup(action: SignupAction) {
   profile.ethAddress = account.toString()
   yield createSignUpProfile(profile, identity)
   yield authenticate(null, identity)
-
-  logger.log(`[SANTI] -> SIGN UP -> ActivateRendering()`)
-  unityInterface.ActivateRendering()
 
   put(signUpActive(false))
 }
