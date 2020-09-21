@@ -23,7 +23,7 @@
             messagingControllersManager = new MessagingControllersManager();
             pointerEventsController = new PointerEventsController();
             memoryManager = new MemoryManager();
-            clipboard = new Clipboard();
+            clipboard = Clipboard.Create();
         }
 
         public void Initialize(IMessageProcessHandler messageHandler, bool isTesting = false)

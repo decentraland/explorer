@@ -5,39 +5,47 @@ using DCL.Helpers;
 public class Clipboard
 {
     private readonly Queue<Promise<string>> promises = new Queue<Promise<string>>();
-    private readonly IClipboardHandler impl = null;
+    private readonly IClipboardHandler handler = null;
 
-    public void WriteText(string text)
+    /// <summary>
+    /// Create a platform specific instance of Clipboard
+    /// </summary>
+    /// <returns>Clipboard instance</returns>
+    public static Clipboard Create()
     {
-        impl?.RequestWriteText(text);
+#if UNITY_WEBGL && !UNITY_EDITOR
+        return new Clipboard(ClipboardWebGL.i);
+#else
+        return new Clipboard(new ClipboardStandalone());
+#endif
     }
 
+    /// <summary>
+    /// Push a string value to the clipboard
+    /// </summary>
+    /// <param name="text">string to store</param>
+    public void WriteText(string text)
+    {
+        handler?.RequestWriteText(text);
+    }
+
+    /// <summary>
+    /// Request the string stored at the clipboard
+    /// </summary>
+    /// <returns>Promise of the string value stored at clipboard</returns>
     [Obsolete("Firefox not supported")]
     public Promise<string> ReadText()
     {
         Promise<string> promise = new Promise<string>();
         promises.Enqueue(promise);
-        impl?.RequestGetText();
+        handler?.RequestGetText();
         return promise;
     }
 
-#if UNITY_WEBGL && !UNITY_EDITOR
-    public static void HookBrowserCopyPasteInput()
+    public Clipboard(IClipboardHandler handler)
     {
-        // NOTE: this does nothing but we'll use it to force the instantiation of this static class
-        // cause you need to call something for a static class to be instantiated.
-        // all the hooking is actually done inside ClipboardWebGL class.
-    }
-#endif
-
-    public Clipboard()
-    {
-#if UNITY_WEBGL && !UNITY_EDITOR
-        impl = new ClipboardWebGL();
-#else
-        impl = new ClipboardStandalone();
-#endif
-        impl.Initialize(OnReadText);
+        this.handler = handler;
+        handler.Initialize(OnReadText);
     }
 
     private void OnReadText(string text, bool error)
