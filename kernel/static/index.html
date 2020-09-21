@@ -498,6 +498,7 @@
   <script>
     function checkTos() {
       document.getElementById('eth-login-confirm-button').disabled = !document.getElementById('agree-check').checked;
+      document.getElementById('btnSignUp').disabled = !document.getElementById('agree-check').checked;
     }
   </script>
 </head>
@@ -636,6 +637,42 @@
   </div>
   <div id="gameContainer"></div>
 
+  <!-- Begin modals -->
+  <div id="signup-account-not-found" style="display: none;z-index: 9999;background: white;max-width: 400px;min-height: 200px;color: black;" class="error-container">
+    <h2>Address not found</h2>
+    <div>
+      You should have at least an address to continue
+    </div>
+    <button class="btnCancel">Close</button>
+    <button class="btnAccept">Sign up</button>
+  </div>
+  <div id="signup-tos-not-accepted" style="display: none;z-index: 9999;background: white;max-width: 400px;min-height: 200px;color: black;" class="error-container">
+    <h2>Terms of Service and Privacy Policy are required</h2>
+    <div>
+      You should accept "Terms of Service and Privacy Policy"
+    </div>
+    <button class="btnCancel">Close</button>
+  </div>
+  <div id="signup-profile-already-exists" style="display: none;z-index: 9999;background: white;max-width: 400px;min-height: 200px;color: black;" class="error-container">
+    <h2>Metamask address already registered</h2>
+    <div>
+      You are trying to create an account with and address that already exist. If you want to create a new account with Metamask, go to your browser extension and change the address.
+      <br>
+      If you want to proceed with this one, press Log In. Have into account that the avatar information you created won’t be saved.
+    </div>
+    <button class="btnCancel">Close</button>
+    <button class="btnAccept">Go to Login</button>
+  </div>
+  <div id="signup-profile-doesnt-exist" style="display: none;z-index: 9999;background: white;max-width: 400px;min-height: 200px;color: black;" class="error-container">
+    <h2>Address does not exists</h2>
+    <div>
+      You are trying to create an account with and address that already exist. If you want to create a new account with Metamask, go to your browser extension and change the address.
+      <br>
+      If you want to proceed with this one, press Log In. Have into account that the avatar information you created won’t be saved.
+    </div>
+    <button class="btnCancel">Close</button>
+    <button class="btnAccept">Go to Sign up</button>
+  </div>
   <!-- Begin error messages -->
 
   <div id="error-networkmismatch" style="/*display: block !important*/" class="error-container hidden-error">

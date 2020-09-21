@@ -3,6 +3,7 @@ import { AnyAction } from 'redux'
 import { SessionState } from './types'
 import {
   AUTH_ERROR,
+  AUTH_CLEAR_ERROR,
   AuthErrorAction,
   SignSetProfileAction,
   SIGNUP_ACTIVE,
@@ -89,6 +90,16 @@ export function sessionReducer(state?: SessionState, action?: AnyAction): Sessio
         signup: {
           ...state.signup,
           ...(action as AuthErrorAction).payload
+        }
+      }
+    }
+    case AUTH_CLEAR_ERROR: {
+      return {
+        ...state,
+        signup: {
+          ...state.signup,
+          error: null,
+          errorMsg: null
         }
       }
     }

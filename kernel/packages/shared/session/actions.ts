@@ -49,3 +49,6 @@ export type Logout = ReturnType<typeof logout>
 export const AUTH_ERROR = '[auth] signIn/signUp error'
 export const authError = (error: AuthError, errorMsg: string | null = null) => action(AUTH_ERROR, { error, errorMsg })
 export type AuthErrorAction = ReturnType<typeof authError>
+
+export const AUTH_CLEAR_ERROR = '[Request] auth clear error'
+export const authClearError = () => action(AUTH_CLEAR_ERROR)
