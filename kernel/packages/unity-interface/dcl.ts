@@ -197,9 +197,7 @@ export async function startUnitySceneWorkers() {
     onPositionSettled: (spawnPoint) => {
       if (!aborted) {
         unityInterface.Teleport(spawnPoint)
-        defaultLogger.log(`[SANTI] ON SETTLED POSITION -> TRYING ActivateRendering...`)
         if (!isSignUpActive(globalThis.globalStore.getState())) {
-          defaultLogger.log(`[SANTI] ON SETTLED POSITION -> ActivateRendering()`)
           unityInterface.ActivateRendering()
         }
       }

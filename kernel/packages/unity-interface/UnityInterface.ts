@@ -207,7 +207,6 @@ export class UnityInterface {
   }
 
   public ActivateRendering(forzeActivation: boolean = false) {
-    defaultLogger.log(`[SANTI] UNITY INTERFACE -> ACTIVATE RENDERING - forzeActivation: ` + forzeActivation)
     this.gameInstance.SendMessage('SceneController', 'ActivateRendering', JSON.stringify(forzeActivation))
   }
 

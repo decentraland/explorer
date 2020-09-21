@@ -44,7 +44,6 @@ export function setupAuthFlow() {
       signupStep4!.style.display = 'none'
 
       btnSignup.addEventListener('click', () => {
-        globalThis.globalStore.dispatch(signUpActive(true))
         switchTo(AuthSection.SIGN_UP_EDITOR)
       })
 
@@ -144,7 +143,6 @@ function GoToAvatarEditor(element: HTMLElement) {
               setLoadingScreenVisible(false)
               unityInterface.LoadProfile(profileToRendererFormat(profile))
               unityInterface.ShowAvatarEditorInSignInFlow()
-              console.log(`[SANTI] GO TO AVATAR EDITOR -> ActivateRendering()`)
               unityInterface.ActivateRendering(true)
             })
             .catch()
@@ -269,11 +267,13 @@ function switchTo(section: AuthSection, from?: AuthSection) {
   })
   switch (section) {
     case AuthSection.SIGN_IN: {
+      globalThis.globalStore.dispatch(signUpActive(false))
       signUpContainer ? (signUpContainer.style.display = 'none') : null
       signInContainer ? (signInContainer.style.display = 'block') : null
       return
     }
     case AuthSection.SIGN_UP_EDITOR: {
+      globalThis.globalStore.dispatch(signUpActive(true))
       signInContainer ? (signInContainer.style.display = 'none') : null
       signUpContainer ? (signUpContainer.style.display = 'none') : null
       const fromElement = from ? document.getElementById(from) : null
