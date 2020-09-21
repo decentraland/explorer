@@ -265,9 +265,11 @@
     #eth-connect-advice {
       display: none;
     }
+
     #eth-sign-advice {
       display: none;
     }
+
     .login {
       background:#74A4D5;
       background-image: url(images/decentraland-connect/background.png);
@@ -282,9 +284,253 @@
       width: 100%;
       height: 100%;
     }
+
     #eth-login {
       display: block;
     }
+
+    .popup-container {
+      position: absolute;
+      z-index: 10;
+      top: 0;
+      left:0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .popup-container .popup {
+      position: relative;
+      width: 500px;
+      /* height: 565px; */
+      box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+      background: #f5f5f5 url("./images/pattern.png") repeat center center;
+      border: 2px solid white;
+      border-radius: 20px;
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      align-content: flex-start;
+      color:  rgba(0, 0, 0, 1);
+      font-family: -apple-system, system-ui, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    .popup-container .popup.big {
+      width: 856px;
+    }
+
+    .popup-container.error .popup {
+      background: #f5f5f5;
+      width: 460px;
+    }
+
+    .popup-container .popup .close {
+      width: 32px;
+      height: 32px;
+      display: block;
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      z-index: 20;
+      background: url("./images/popup-close.svg") no-repeat center center;
+      cursor: pointer;
+    }
+
+    .popup-container .popup h2 {
+      font-size: 25px;
+      line-height: 30px;
+      margin: 32px 43px;
+    }
+
+    .popup-container .popup .center {
+      text-align: center;
+      justify-content: center;
+    }
+
+    .popup-container .popup .column {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .popup-container .popup .row {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+    }
+
+    .popup-container.error .popup .row.actions {
+      width: 100%;
+      justify-content: space-around;
+      padding: 12px 0 48px;
+    }
+
+    .popup-container .popup .secondary {
+      color:  rgba(0, 0, 0, 0.3);
+    }
+
+    .popup-container .popup .avatar {
+      border-radius: 180px;
+      background: white;
+    }
+
+    .popup-container .popup em {
+      font-size: 18px;
+      line-height: 21px;
+      text-align: center;
+      color: rgba(0, 0, 0, 0.3);  
+    }
+
+    .popup-container .popup .button {
+      cursor: pointer;
+      border-radius: 10px;
+      background: #FFFFFF;
+      color: rgba(0, 0, 0, 1);
+      transition: transform .2s ease;
+      display: block;
+    }
+
+    .popup-container .popup .button.center {
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .popup-container .popup .button.primary {
+      cursor: pointer;
+      border-radius: 10px;
+      background: #FFFFFF;
+      border: 0;
+      box-shadow: 0 .3rem 0 rgba(0, 0, 0, 0.5);
+      min-width: 210px;
+      font-weight: 600;
+      font-size: 18.2222px;
+      line-height: 22px;
+      text-align: center;
+      text-transform: uppercase;
+      padding: 11px;
+    }
+
+    .popup-container.error .popup .button.primary {
+      font-weight: 600;
+      font-size: 16px;
+      line-height: 19px;
+      min-width: 180px;
+    }
+
+    .popup-container .popup .button.secondary {
+      font-size: 14px;
+      line-height: 21px;
+      text-align: center;
+      text-transform: uppercase;
+      padding: 11px 34px;
+      width: auto;
+      background-color: rgba(255, 255, 255, 0.5);
+      border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .popup-container .popup .button:focus {
+      outline: 0;
+    }
+
+    .popup-container .popup .button:hover {
+      transform: translateY(-.2rem);
+    }
+
+    .popup-container .popup .button.secondary:active {
+      background-color: rgba(255, 255, 255, 0.8);
+      transform: translateY(0rem);
+    }
+
+    .popup-container .popup .button.full {
+      width: 100%;
+    }
+
+    .popup-container .popup .button img {
+      display: inline-block;
+      vertical-align: bottom;
+      margin-right: .5em;
+    }
+
+    .popup-container .popup label {
+      font-style: normal;
+      font-weight: 600;
+      font-size: 25px;
+      line-height: 30px;
+    }
+
+    .popup-container .popup input[type="text"],
+    .popup-container .popup input[type="password"],
+    .popup-container .popup input[type="email"],
+    .popup-container .popup input[type="date"],
+    .popup-container .popup input[type="number"] {
+      background: #FFFFFF;
+      border: 2.45745px solid rgba(0, 0, 0, 0.1);
+      border-radius: 12px;
+      width: 100%;
+      margin-top: 12px;
+      margin-bottom: 50px;
+      padding: 12px;
+      font-style: normal;
+      font-weight: normal;
+      font-size: 22.2773px;
+      line-height: 27px;
+    }
+
+    .popup-container .popup .text-box{
+      font-style: normal;
+      font-weight: normal;
+      font-size: 16px;
+      line-height: 19px;
+      letter-spacing: -0.280657px;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+    }
+
+    #signup-form {
+      width: 375px;
+    }
+
+    .popup-container.error {
+      z-index: 15;
+    }
+
+    .popup-container.error::before {
+      display: block;
+      content: "";
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      position: absolute;
+      background-color: #000;
+      opacity: .5;
+    }
+
+    .popup-container.error .popup {
+      font-style: normal;
+      font-weight: normal;
+      font-size: 17px;
+      line-height: 20px;
+      display: flex;
+      align-items: center;
+      text-align: center;
+      letter-spacing: -0.280657px;
+    }
+
+    .popup-container.error  .popup h2 {
+      font-style: normal;
+      font-weight: 600;
+      font-size: 22px;
+      line-height: 26px;
+      text-align: center;
+      letter-spacing: -0.280657px;
+    }
+
     .eth-login-popup {
       width: 70%;
       max-width: 650px;
@@ -552,40 +798,106 @@
     </footer>
   </div>
   <div id="signup-flow" class="login" style="display: none">
-    <div id="signup-step2">
-      <div class="column">
-        <img width="60" height="60" src="https://previews.123rf.com/images/apoev/apoev1804/apoev180400197/99276087-default-placeholder-businesswoman-half-length-portrait-photo-avatar-woman-gray-color.jpg"/>
-        <em>active since Aug 2020</em>
-        <button id="btn-signup-edit-avatar">Edit Avatar</button>
-      </div>
-      <div class="column">
-        <form id="signup-form" method="POST">
-          <div>
-            <label for="signup-avatar-name">Name your avatar</label>
-            <input id="signup-avatar-name" type="text" name="name" placeholder="your avatar name">
-            <div>*required field (you can edit it later)</div>
-          </div>
-          <div>
-            <label for="signup-avatar-email">Let's stay in touch</label>
-            <input id="signup-avatar-email" type="text" name="email" placeholder="enter your email">
-          </div>
-          <div><button type="submit">Next</button></div>
-        </form>
+    <div id="signup-step2" class="popup-container" style="display: none;">
+      <div class="popup big">
+        <div class="column" style="flex: 0 0 100%;">
+          <h2>Passport</h2>
+        </div>
+        <div class="column center" style="align-self: self-start; flex: 0 0 400px; padding: 65px 110px 65px ">
+          <img class="avatar" width="180" height="180" src="https://peer.decentraland.org/content/contents/QmWUT7gPSJXvsscfkERKKKdVpMU4hu2EGuK9RJ72K9tUsU"/>
+          <em style="margin: 22px 0; text-align: center; font-weight: 300;">Active since Aug 2020</em>
+          <button id="btn-signup-edit-avatar" class="button secondary">Edit Avatar</button>
+        </div>
+        <div class="column" style="align-self: self-start; flex: 1 0 auto; padding: 65px 0;">
+          <form id="signup-form" method="POST">
+            <div>
+              <div>*required field (you can edit it later)</div>
+              <label for="signup-avatar-name">Name your avatar</label>
+              <input id="signup-avatar-name" type="text" name="name" placeholder="your avatar name">
+            </div>
+            <div>
+              <label for="signup-avatar-email">Let's stay in touch</label>
+              <input id="signup-avatar-email" type="text" name="email" placeholder="enter your email">
+            </div>
+            <div><button type="submit" class="button primary center">Next</button></div>
+          </form>
+        </div>
       </div>
     </div>
-    <div id="signup-step3" style="display: none">
-      <h2>Terms of Service and Privacy Policy</h2>
-      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent porttitor efficitur sapien, at volutpat ligula scelerisque eget.
-        Morbi ut felis eget metus rutrum hendrerit. Maecenas sed ligula ac tortor semper feugiat sit amet et enim. Lorem ipsum dolor sit amet,
-        consectetur adipiscing elit. Vestibulum laoreet, metus eget posuere volutpat.
-      </p>
-      <button id="btnSignupBack">BACK</button>
-      <button id="btnSignupAgree">I AGREE</button>
+    <div id="signup-step3" class="popup-container" style="display: none;">
+      <div class="popup big" style="flex-direction: row;">
+        <div class="row" style="height: 100px;">
+          <h2>Terms of Service and Privacy Policy</h2>
+        </div>
+        <div class="row" style="padding: 0 60px; height: 365px;">
+          <div class="text-box">
+            <p>1. Introduction</p>
+            <p>1.1 This Privacy Policy details important information regarding the collection, use and disclosure of User information collected on the Site and the Tools. The aim of this Privacy Policy is to help you understand how your personal information is used and your choices regarding said use. By using the Site or the Tools, you agree that the Foundation can collect, use, disclose, and process your information as described in this Privacy Policy. This Privacy Policy only applies to the Site and the Tools, and not to any other websites, products or services you may be able to access or link to via the Site or the Tools. We encourage you to read the privacy policies of any other websites you visit before providing your information to them.</p>
+            <p>The Site and the Tools may evolve over time, and this Privacy Policy will change to reflect that evolution. If changes are made, you will be notified by revising the date at the top of this Privacy Policy. In some cases, if significant changes are made, an statement may be placed in the homepage. We encourage you to review this Privacy Policy periodically to stay informed.</p>
+            <p>Some third-party providers may place cookies or pixels - small data files stored on your hard drive or in device memory - on your browser or hard drive. Note that this Privacy Policy does not cover the use of cookies or pixels by such third parties. Most web browsers are set to accept cookies and pixels by default, but you can usually set your browser to remove or reject browser cookies or pixels. If you do choose to remove or reject cookies or pixels, however, your ability to use the Site or the Tools might be affected.</p>
+            <p>1.2 This Privacy Policy should be read in conjunction with the Terms of Use. By accessing the Tools, you are consenting to the information collection and use practices described in this Privacy Policy.</p>
+            <p>1.3 Your use of the DCL Client and any personal information you provide through the Tools remains subject to the terms of this Privacy Policy and the Terms of Use, as each may be updated from time to time.</p>
+            <p>1.4 Any questions, comments or complaints that you might have should be emailed to privacy@decentraland.org.</p>
+            <p>2. Information Collected in the Site and the Tools</p>
+            <p>The personal information collected from you generally may include:</p>
+            <p>2.1 Network information regarding transactions, including, among other things, the type of device you use, access times, hardware model, operating system and version, and other unique device identifiers.</p>
+            <p>2.2. Information about plugins you might be using, included but not limited to those related to the management of cryptocurrency assets and any information provided by them.</p>
+            <p>2.3. Your email and Ether address.</p>
+            <p>2.4 The DCL Client requires the highest level of browser permissions that could potentially lead to procurement of more personal information. Information on these permissions are used for a limited purpose, and why this is necessary, can be found in paragraph 3 below.</p>
+            <p>2.5 Your interactions with the Site are documented via Segment.io and that information is processed by Google.</p>
+            <p>3. The Way your Personal Information is used</p>
+            <p>3.1 As with nearly all interactions that take place on the World Wide Web, the servers may receive information by virtue of your interaction with them, including but not limited to IP Addresses.</p>
+            <p>3.2 The DCL Client requires full browser permissions that could potentially be used to access additional personal information. Such browser permissions are used for an extremely limited technical purpose for allowing the DCL Client to properly interact with your browser. No additional information is obtained beyond what is necessary to provide the DCL Client. No information received is shared with any third-party except as required for provision of the DCL Client.</p>
+            <p>3.3 Segment.io is used for purposes of monitoring web traffic. Any identifying information collected via Segment.io is controlled by Segment.io, Inc.</p>
+            <p>3.4 Public blockchains provide transparency into transactions and the Foundation is not responsible for preventing or managing information broadcasted on a blockchain.</p>
+            <p>4. What Is Done With Your Information</p>
+            <p>4.1 Your information may be used in the following ways:</p>
+            <p>To analyze trends for how the Site and Tools are being used;</p>
+            <p>To improve the Site and the Tools;</p>
+            <p>To help personalize your experience of the Site and the Tools; and</p>
+            <p>If you provide your contact information, you may receive technical notices, updates, confirmations, security alerts, to provide support to you, to tell you about other products and services that might interest you, or to respond to your comments or questions.</p>
+            <p>4.2 Your information may be shared with third parties who need to access it in order to do work related to the Site and the Tools, including doing things like helping make the Site or DCL Client available, or providing analytics services. These third parties only access and use your information as necessary to perform their functions.</p>
+            <p>4.3 Aggregations and anonymizations that contain your information may be created in a way that does not directly identify you. Those aggregations and anonymizations may be used or shared for a variety of purposes related to the Site and the DCL Client.</p>
+            <p>4.4 Your personal information may be disclosed to agents, businesses, or service providers who process your personal information for providing the Site and the Tools to you. The agreements with these service providers limit the kinds of information they can use or process and ensure they use reasonable efforts to keep your personal information secure.</p>
+            <p>4.5 The Foundation also reserves the right to disclose personal information that it believes, in good faith, is appropriate or necessary to enforce the Terms of Use, take precautions against liability or harm, to investigate and respond to third-party claims or allegations, to respond to court orders or official requests, to protect the security or integrity of the Site or the Tools, and to protect the rights, property, or safety of the Foundation, the Decentraland community of users and LAND owners, or others.</p>
+            <p>4.6 In the event that the Foundation is involved in a merger, acquisition, sale, bankruptcy, insolvency, reorganization, receivership, assignment for the benefit of creditors, or the application of laws or equitable principles affecting creditors’ rights generally, or other change of control, there may be a disclosure of your information to another entity related to such event.</p>
+            <p>5. Your Choice</p>
+            <p>Your personal information will be processed in accordance with this Privacy Policy, and as part of that you will have limited or no opportunity to otherwise modify how your information is used.</p>
+            <p>6. Cookies</p>
+            <p>The Site and the Tools do not use cookies at this time but they might do so in the future, in which case this Privacy Policy shall be updated accordingly.</p>
+            <p>7. Information Not Collected</p>
+            <p>Any other personally-identifiable information about you shall not be collected, unless you give it to the Foundation directly: by filling out a form, giving written feedback, communicating via third party social media sites, or otherwise communicating via the Site, the Tools or any other means.</p>
+            <p>Your Ethereum public address is not collected, but you should understand that transactions that take place using the Site and the Tools are confirmed and managed via the Ethereum blockchain. You understand that your Ethereum public address will be made publicly visible whenever you engage in a transaction that is confirmed and managed via the Ethereum blockchain.</p>
+            <p>8. Information Security</p>
+            <p>Whilst neither the Foundation, nor any other organization, can guarantee the security of information processed online, the Foundation has appropriate security measures in place to protect your personal information. For example, the personal information you provide is stored on computer systems with limited access, encryption, or both.</p>
+            <p>9. Privacy Rights</p>
+            <p>9.1 Subject to applicable law, you may have some or all of the following rights in respect of your personal information: (i) to obtain a copy of your personal information together with information about how and on what basis that personal information is processed; (ii) to rectify inaccurate personal information (including the right to have incomplete personal information completed); (iii) to erase your personal information (in limited circumstances, where it is no longer necessary in relation to the purposes for which it was collected or processed); (iv) to restrict processing of your personal information where: a. the accuracy of the personal information is contested; b. the processing is unlawful but you object to the erasure of the personal information; or c. we no longer require the personal information but it is still required for the establishment, exercise or defense of a legal claim; (v) to challenge processing which we have justified on the basis of a legitimate interest (as opposed to your consent, or to perform a contract with you); (vi) to prevent us from sending you direct marketing; (vii) to withdraw your consent to our processing of your personal information (where that processing is based on your consent); (viii) to object to decisions which are based solely on automated processing or profiling; (ix) in addition to the above, you have the right to file a complaint with the supervisory authority.</p>
+            <p>9.2. If you reside in California, you may request certain general information regarding our disclosure of personal information to third parties for their direct marketing purposes.</p>
+            <p>9.3. If you wish to investigate the exercising of any of these rights, please write to us at the following address: privacy@decentraland.org.</p>
+            <p>10. Changes and Updates</p>
+            <p>10.1 This Privacy Policy may be revised periodically and this will be reflected by the “Last update posted” date above. Please revisit this page to stay aware of any changes. Your continued use of the DCL Client constitutes your agreement to this Privacy Policy and any future revisions.</p>
+            <p>10.2 Contact Information: privacy@decentraland.org.</p>
+          </div>
+        </div>
+        <div class="row" style="flex: 0 0 100%; height: 100px; justify-content: center;">
+          <div class="row" style="align-items: center;">
+            <button id="btnSignupBack" class="button primary" style="margin: 0 37px;">BACK</button>
+            <button id="btnSignupAgree" class="button primary" style="margin: 0 37px;">I AGREE</button>
+          </div>
+        </div>
+      </div>
     </div>
-    <div id="signup-step4" style="display: none">
-      <h2>Sign up with a Digital wallet</h2>
-      <div>
-        <button class="btnSignupWallet" rel="Metamask" class="eth-login-confirm-button1">select a wallet</button>
+    <div id="signup-step4" class="popup-container" >
+      <div class="popup">
+        <div class="column">
+          <h2>Sign up with a Digital wallet</h2>
+        </div>
+        <div class="column" style="flex: 0 0 100%; padding: 0 100px 30px;" >
+          <button id="btnSignupWallet" rel="Metamask" class="button full primary">
+            <img  src="images/metamask.svg" width="26" height="25"/>
+            <span style="text-transform: none">Metamask</span>
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -638,40 +950,66 @@
   <div id="gameContainer"></div>
 
   <!-- Begin modals -->
-  <div id="signup-account-not-found" style="display: none;z-index: 9999;background: white;max-width: 400px;min-height: 200px;color: black;" class="error-container">
-    <h2>Address not found</h2>
-    <div>
-      You should have at least an address to continue
+  <div id="signup-account-not-found"  class="popup-container error" style="display: none">
+    <div class="popup">
+      <div class="close"></div>
+      <div class="column">
+        <h2>Address not found</h2>
+      </div>
+      <div class="column" style="margin: 0 40px;">
+        <p>
+          You should have at least an address to continue
+        </p>
+      </div>
+      <div class="row actions">
+        <button class="btnCancel button primary">Close</button>
+        <button class="btnAccept button primary">Sign up</button>
+      </div>
     </div>
-    <button class="btnCancel">Close</button>
-    <button class="btnAccept">Sign up</button>
   </div>
-  <div id="signup-tos-not-accepted" style="display: none;z-index: 9999;background: white;max-width: 400px;min-height: 200px;color: black;" class="error-container">
-    <h2>Terms of Service and Privacy Policy are required</h2>
-    <div>
-      You should accept "Terms of Service and Privacy Policy"
+  <div id="signup-tos-not-accepted" class="popup-container error" style="display: none">
+    <div class="popup">
+      <div class="close"></div>
+      <div class="column">
+        <h2>Terms of Service and Privacy Policy are required</h2>
+      </div>
+      <div>
+        You should accept "Terms of Service and Privacy Policy"
+      </div>
+      <button class="btnCancel button primary">Close</button>
     </div>
-    <button class="btnCancel">Close</button>
   </div>
-  <div id="signup-profile-already-exists" style="display: none;z-index: 9999;background: white;max-width: 400px;min-height: 200px;color: black;" class="error-container">
-    <h2>Metamask address already registered</h2>
-    <div>
-      You are trying to create an account with and address that already exist. If you want to create a new account with Metamask, go to your browser extension and change the address.
-      <br>
-      If you want to proceed with this one, press Log In. Have into account that the avatar information you created won’t be saved.
+  <div id="signup-profile-already-exists" class="popup-container error" style="display: none">
+    <div class="popup">
+      <div class="close"></div>
+      <div class="column">
+        <h2>Metamask address already registered</h2>
+      </div>
+      <div class="column" style="margin: 0 40px;">
+        <p>You are trying to create an account with and address that already exist. If you want to create a new account with Metamask, go to your browser extension and change the address.</p>
+        <p>If you want to proceed with this one, press Log In. Have into account that the avatar information you created won’t be saved.</p>
+      </div>
+      <div class="row actions">
+        <button class="btnCancel button primary">Close</button>
+        <button class="btnAccept button primary">Go to Login</button>
+      </div>
     </div>
-    <button class="btnCancel">Close</button>
-    <button class="btnAccept">Go to Login</button>
   </div>
-  <div id="signup-profile-doesnt-exist" style="display: none;z-index: 9999;background: white;max-width: 400px;min-height: 200px;color: black;" class="error-container">
-    <h2>Address does not exists</h2>
-    <div>
-      You are trying to create an account with and address that already exist. If you want to create a new account with Metamask, go to your browser extension and change the address.
-      <br>
-      If you want to proceed with this one, press Log In. Have into account that the avatar information you created won’t be saved.
+  <div id="signup-profile-doesnt-exist" class="popup-container error" style="display: none">
+    <div class="popup">
+      <div class="close"></div>
+      <div class="column">
+        <h2>Address does not exists</h2>
+      </div>
+      <div class="column" style="margin: 0 40px;">
+        <p>You are trying to create an account with and address that already exist. If you want to create a new account with Metamask, go to your browser extension and change the address.</p>
+        <p>If you want to proceed with this one, press Log In. Have into account that the avatar information you created won’t be saved.</p>
+      </div>
+      <div class="row actions">
+        <button class="btnCancel button primary">Close</button>
+        <button class="btnAccept button primary">Go to Sign up</button>
+      </div>
     </div>
-    <button class="btnCancel">Close</button>
-    <button class="btnAccept">Go to Sign up</button>
   </div>
   <!-- Begin error messages -->
 
