@@ -325,7 +325,7 @@ function showAwaitingSignaturePrompt(show: boolean) {
 }
 
 function* signup(action: SignupAction) {
-  const provider = yield requestWeb3Provider(action.payload.provider as ProviderType)
+  const provider = yield requestProvider(action.payload.provider as ProviderType)
   if (!provider) {
     return
   }
