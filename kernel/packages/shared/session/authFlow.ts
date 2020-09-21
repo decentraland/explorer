@@ -59,7 +59,7 @@ export function setupAuthFlow() {
         switchTo(AuthSection.SIGN_UP_STEP_4, AuthSection.SIGN_UP_STEP_3)
       })
 
-      document.querySelector('.btnSignupWallet')!.addEventListener('click', (event: any) => {
+      document.querySelector('#btnSignupWallet')!.addEventListener('click', (event: any) => {
         const provider = event.target.getAttribute('rel')
         const unsubscribe = globalThis.globalStore.subscribe(() => {
           const error = getAuthError(globalThis.globalStore.getState())
