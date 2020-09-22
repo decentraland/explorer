@@ -238,10 +238,6 @@ export class UnityInterface {
     this.gameInstance.SendMessage('SceneController', 'ClearWearableCatalog')
   }
 
-  public ShowNewWearablesNotification(wearableNumber: number) {
-    // disabled
-  }
-
   public ShowNotification(notification: Notification) {
     this.gameInstance.SendMessage('HUDController', 'ShowNotificationFromJson', JSON.stringify(notification))
   }

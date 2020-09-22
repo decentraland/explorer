@@ -23,7 +23,6 @@ public class HUDController : MonoBehaviour
         toggleUIVisibilityTrigger.OnTriggered += ToggleUIVisibility_OnTriggered;
     }
 
-    public Legacy.AvatarHUDController avatarHud_Legacy => GetHUDElement(HUDElementID.PROFILE_HUD) as Legacy.AvatarHUDController;
     public ProfileHUDController profileHud => GetHUDElement(HUDElementID.PROFILE_HUD) as ProfileHUDController;
 
     public NotificationHUDController notificationHud =>
@@ -108,11 +107,6 @@ public class HUDController : MonoBehaviour
         CommonScriptableObjects.allUIHidden.Set(!CommonScriptableObjects.allUIHidden.Get());
     }
 
-    private void OwnUserProfileUpdated(UserProfile profile)
-    {
-        UpdateAvatarHUD();
-    }
-
     public enum HUDElementID
     {
         NONE = 0,
@@ -180,17 +174,6 @@ public class HUDController : MonoBehaviour
                 break;
             case HUDElementID.PROFILE_HUD:
                 CreateHudElement<ProfileHUDController>(configuration, hudElementId);
-
-                if (avatarHud_Legacy != null)
-                {
-                    avatarHud_Legacy.Initialize();
-                    avatarHud_Legacy.OnEditAvatarPressed += ShowAvatarEditor;
-                    avatarHud_Legacy.OnSettingsPressed += ShowSettings;
-                    avatarHud_Legacy.OnControlsPressed += ShowControls;
-                    ownUserProfile.OnUpdate += OwnUserProfileUpdated;
-                    OwnUserProfileUpdated(ownUserProfile);
-                }
-
                 break;
             case HUDElementID.NOTIFICATION:
                 CreateHudElement<NotificationHUDController>(configuration, hudElementId);
@@ -391,14 +374,6 @@ public class HUDController : MonoBehaviour
         hudElements[id].SetVisibility(config.visible);
     }
 
-    public void ShowNewWearablesNotification(string wearableCountString)
-    {
-        if (int.TryParse(wearableCountString, out int wearableCount))
-        {
-            avatarHud_Legacy.SetNewWearablesNotification(wearableCount);
-        }
-    }
-
     public void TriggerSelfUserExpression(string id)
     {
         expressionsHud?.ExpressionCalled(id);
@@ -414,16 +389,6 @@ public class HUDController : MonoBehaviour
     {
         var model = JsonUtility.FromJson<TermsOfServiceHUDController.Model>(payload);
         termsOfServiceHud?.ShowTermsOfService(model);
-    }
-
-    private void UpdateAvatarHUD()
-    {
-        avatarHud_Legacy?.UpdateData(new Legacy.AvatarHUDModel()
-        {
-            name = ownUserProfile.userName,
-            mail = ownUserProfile.email,
-            avatarPic = ownUserProfile.faceSnapshot
-        });
     }
 
     public void SetPlayerTalking(string talking)
@@ -449,16 +414,6 @@ public class HUDController : MonoBehaviour
     public void Cleanup()
     {
         toggleUIVisibilityTrigger.OnTriggered -= ToggleUIVisibility_OnTriggered;
-
-        if (ownUserProfile != null)
-            ownUserProfile.OnUpdate -= OwnUserProfileUpdated;
-
-        if (avatarHud_Legacy != null)
-        {
-            avatarHud_Legacy.OnEditAvatarPressed -= ShowAvatarEditor;
-            avatarHud_Legacy.OnSettingsPressed -= ShowSettings;
-            avatarHud_Legacy.OnControlsPressed -= ShowControls;
-        }
 
         if (worldChatWindowHud != null)
         {
