@@ -184,7 +184,7 @@ function* initialProfileLoad() {
       scheduleProfileUpdate(profile)
     }
 
-    if (!DEBUG && ENABLE_NEW_TASKBAR)  {
+    if (!DEBUG && ENABLE_NEW_TASKBAR) {
       unityInterface.ConfigureTutorial(profile, HAS_INITIAL_POSITION_MARK)
     }
   }
