@@ -124,8 +124,9 @@ export async function initializeEngine(_gameInstance: GameInstance) {
   }
 
   if (!DEBUG) {
-    unityInterface.ConfigureEmailPrompt(getUserProfile().profile.tutorialStep)
-    unityInterface.ConfigureTutorial(getUserProfile().profile.tutorialStep, HAS_INITIAL_POSITION_MARK)
+    var profile = getUserProfile().profile
+    unityInterface.ConfigureEmailPrompt(profile ? profile.tutorialStep : 0)
+    unityInterface.ConfigureTutorial(profile ? profile.tutorialStep : 0, HAS_INITIAL_POSITION_MARK)
   }
 
   return {
