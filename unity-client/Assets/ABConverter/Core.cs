@@ -53,17 +53,17 @@ namespace DCL
             private int totalAssets;
             private int skippedAssets;
 
-            private EditorEnvironment env;
+            private Environment env;
             private static Logger log = new Logger("ABConverter.Core");
             private string logBuffer;
 
-            public Core(EditorEnvironment env, Client.Settings settings = null)
+            public Core(Environment env, Client.Settings settings = null)
             {
                 this.env = env;
 
                 this.settings = settings.Clone() ?? new Client.Settings();
 
-                finalDownloadedPath = Utils.FixDirectorySeparator(AssetBundleConverterConfig.DOWNLOADED_PATH_ROOT + AssetBundleConverterConfig.DASH);
+                finalDownloadedPath = Utils.FixDirectorySeparator(Config.DOWNLOADED_PATH_ROOT + Config.DASH);
                 log.verboseEnabled = settings.verbose;
 
                 state.step = State.Step.IDLE;
@@ -166,9 +166,9 @@ namespace DCL
 
             private bool DumpAssets(ContentServerUtils.MappingPair[] rawContents)
             {
-                List<AssetPath> gltfPaths = ABConverter.Utils.GetPathsFromPairs(finalDownloadedPath, rawContents, AssetBundleConverterConfig.gltfExtensions);
-                List<AssetPath> bufferPaths = ABConverter.Utils.GetPathsFromPairs(finalDownloadedPath, rawContents, AssetBundleConverterConfig.bufferExtensions);
-                List<AssetPath> texturePaths = ABConverter.Utils.GetPathsFromPairs(finalDownloadedPath, rawContents, AssetBundleConverterConfig.textureExtensions);
+                List<AssetPath> gltfPaths = ABConverter.Utils.GetPathsFromPairs(finalDownloadedPath, rawContents, Config.gltfExtensions);
+                List<AssetPath> bufferPaths = ABConverter.Utils.GetPathsFromPairs(finalDownloadedPath, rawContents, Config.bufferExtensions);
+                List<AssetPath> texturePaths = ABConverter.Utils.GetPathsFromPairs(finalDownloadedPath, rawContents, Config.textureExtensions);
 
                 List<AssetPath> assetsToMark = new List<AssetPath>();
 
@@ -312,7 +312,7 @@ namespace DCL
                 env.assetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport | ImportAssetOptions.ForceUpdate | ImportAssetOptions.ImportRecursive);
                 env.assetDatabase.SaveAssets();
 
-                env.assetDatabase.MoveAsset(finalDownloadedPath, AssetBundleConverterConfig.DOWNLOADED_PATH_ROOT);
+                env.assetDatabase.MoveAsset(finalDownloadedPath, Config.DOWNLOADED_PATH_ROOT);
 
                 manifest = env.buildPipeline.BuildAssetBundles(settings.finalAssetBundlePath, BuildAssetBundleOptions.UncompressedAssetBundle | BuildAssetBundleOptions.ForceRebuildAssetBundle, BuildTarget.WebGL);
 
@@ -528,8 +528,8 @@ namespace DCL
 
             internal void CleanupWorkingFolders()
             {
-                env.file.Delete(settings.finalAssetBundlePath + AssetBundleConverterConfig.ASSET_BUNDLE_FOLDER_NAME);
-                env.file.Delete(settings.finalAssetBundlePath + AssetBundleConverterConfig.ASSET_BUNDLE_FOLDER_NAME + ".manifest");
+                env.file.Delete(settings.finalAssetBundlePath + Config.ASSET_BUNDLE_FOLDER_NAME);
+                env.file.Delete(settings.finalAssetBundlePath + Config.ASSET_BUNDLE_FOLDER_NAME + ".manifest");
 
                 if (settings.deleteDownloadPathAfterFinished)
                 {

@@ -16,7 +16,7 @@ namespace DCL
                 public bool deleteDownloadPathAfterFinished = false;
                 public bool skipAlreadyBuiltBundles = false;
                 public bool verbose = false;
-                public string finalAssetBundlePath = AssetBundleConverterConfig.ASSET_BUNDLES_PATH_ROOT + Path.DirectorySeparatorChar;
+                public string finalAssetBundlePath = Config.ASSET_BUNDLES_PATH_ROOT + Path.DirectorySeparatorChar;
                 public string baseUrl;
 
                 public Settings Clone()
@@ -27,12 +27,12 @@ namespace DCL
 
             private static Logger log = new Logger("ABConverter.Client");
 
-            public static EditorEnvironment env;
+            public static Environment env;
 
-            public static EditorEnvironment EnsureEnvironment()
+            public static Environment EnsureEnvironment()
             {
                 if (env == null)
-                    env = EditorEnvironment.CreateWithDefaultImplementations();
+                    env = Environment.CreateWithDefaultImplementations();
 
                 return env;
             }
@@ -43,7 +43,7 @@ namespace DCL
             public static void ExportSceneToAssetBundles()
             {
                 EnsureEnvironment();
-                ExportSceneToAssetBundles(Environment.GetCommandLineArgs());
+                ExportSceneToAssetBundles(System.Environment.GetCommandLineArgs());
             }
 
             public static void ExportSceneToAssetBundles(string[] commandLineArgs)
@@ -56,24 +56,24 @@ namespace DCL
 
                 try
                 {
-                    if (Utils.ParseOption(commandLineArgs, AssetBundleConverterConfig.CLI_SET_CUSTOM_OUTPUT_ROOT_PATH, 1, out string[] outputPath))
+                    if (Utils.ParseOption(commandLineArgs, Config.CLI_SET_CUSTOM_OUTPUT_ROOT_PATH, 1, out string[] outputPath))
                     {
                         settings.finalAssetBundlePath = outputPath[0] + "/";
                     }
 
-                    if (Utils.ParseOption(commandLineArgs, AssetBundleConverterConfig.CLI_SET_CUSTOM_BASE_URL, 1, out string[] customBaseUrl))
+                    if (Utils.ParseOption(commandLineArgs, Config.CLI_SET_CUSTOM_BASE_URL, 1, out string[] customBaseUrl))
                         settings.baseUrl = customBaseUrl[0];
 
-                    if (Utils.ParseOption(commandLineArgs, AssetBundleConverterConfig.CLI_VERBOSE, 0, out _))
+                    if (Utils.ParseOption(commandLineArgs, Config.CLI_VERBOSE, 0, out _))
                         settings.verbose = true;
 
-                    if (Utils.ParseOption(commandLineArgs, AssetBundleConverterConfig.CLI_ALWAYS_BUILD_SYNTAX, 0, out _))
+                    if (Utils.ParseOption(commandLineArgs, Config.CLI_ALWAYS_BUILD_SYNTAX, 0, out _))
                         settings.skipAlreadyBuiltBundles = false;
 
-                    if (Utils.ParseOption(commandLineArgs, AssetBundleConverterConfig.CLI_KEEP_BUNDLES_SYNTAX, 0, out _))
+                    if (Utils.ParseOption(commandLineArgs, Config.CLI_KEEP_BUNDLES_SYNTAX, 0, out _))
                         settings.deleteDownloadPathAfterFinished = false;
 
-                    if (Utils.ParseOption(commandLineArgs, AssetBundleConverterConfig.CLI_BUILD_SCENE_SYNTAX, 1, out string[] sceneCid))
+                    if (Utils.ParseOption(commandLineArgs, Config.CLI_BUILD_SCENE_SYNTAX, 1, out string[] sceneCid))
                     {
                         if (sceneCid == null || string.IsNullOrEmpty(sceneCid[0]))
                         {
@@ -84,7 +84,7 @@ namespace DCL
                         return;
                     }
 
-                    if (Utils.ParseOption(commandLineArgs, AssetBundleConverterConfig.CLI_BUILD_PARCELS_RANGE_SYNTAX, 4, out string[] xywh))
+                    if (Utils.ParseOption(commandLineArgs, Config.CLI_BUILD_PARCELS_RANGE_SYNTAX, 4, out string[] xywh))
                     {
                         if (xywh == null)
                         {

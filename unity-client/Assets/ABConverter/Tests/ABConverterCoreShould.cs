@@ -43,7 +43,7 @@ namespace ABConverterTests
     public class ABConverterCoreShould
     {
         private ABConverter.Core core;
-        private EditorEnvironment env;
+        private ABConverter.Environment env;
 
         string basePath = @"C:\test-path\";
         string hash1 = "QmHash1", hash2 = "QmHash2", hash3 = "QmHash3", hash4 = "QmHash4";
@@ -62,7 +62,7 @@ namespace ABConverterTests
             settings.verbose = false;
             settings.deleteDownloadPathAfterFinished = false;
 
-            env = EditorEnvironment.CreateWithMockImplementations();
+            env = ABConverter.Environment.CreateWithMockImplementations();
             core = new ABConverter.Core(env, settings);
 
             if (env.webRequest is Mocked.WebRequest mockedReq)
@@ -105,7 +105,7 @@ namespace ABConverterTests
         [Test]
         public void InitializeDirectoryPathsCorrectly()
         {
-            env = EditorEnvironment.CreateWithDefaultImplementations();
+            env = ABConverter.Environment.CreateWithDefaultImplementations();
 
             core.InitializeDirectoryPaths(false);
 
@@ -340,10 +340,10 @@ namespace ABConverterTests
 
             yield return new WaitUntil(() => state.step == ABConverter.Core.State.Step.FINISHED);
 
-            AssetBundle abDependency = AssetBundle.LoadFromFile(AssetBundleConverterConfig.ASSET_BUNDLES_PATH_ROOT + "/QmWZaHM9CaVpCnsWh78LiNFuiXwjCzTQBTaJ6vZL7c9cbp");
+            AssetBundle abDependency = AssetBundle.LoadFromFile(ABConverter.Config.ASSET_BUNDLES_PATH_ROOT + "/QmWZaHM9CaVpCnsWh78LiNFuiXwjCzTQBTaJ6vZL7c9cbp");
             abDependency.LoadAllAssets();
 
-            AssetBundle abMain = AssetBundle.LoadFromFile(AssetBundleConverterConfig.ASSET_BUNDLES_PATH_ROOT + "/QmS9eDwvcEpyYXChz6pFpyWyfyajiXbt6KA4CxQa3JKPGC");
+            AssetBundle abMain = AssetBundle.LoadFromFile(ABConverter.Config.ASSET_BUNDLES_PATH_ROOT + "/QmS9eDwvcEpyYXChz6pFpyWyfyajiXbt6KA4CxQa3JKPGC");
             Material[] mats = abMain.LoadAllAssets<Material>();
 
             bool hasMap = false;
@@ -364,14 +364,14 @@ namespace ABConverterTests
         {
             Caching.ClearCache();
 
-            if (Directory.Exists(AssetBundleConverterConfig.ASSET_BUNDLES_PATH_ROOT))
-                Directory.Delete(AssetBundleConverterConfig.ASSET_BUNDLES_PATH_ROOT, true);
+            if (Directory.Exists(ABConverter.Config.ASSET_BUNDLES_PATH_ROOT))
+                Directory.Delete(ABConverter.Config.ASSET_BUNDLES_PATH_ROOT, true);
 
-            if (Directory.Exists(AssetBundleConverterConfig.DOWNLOADED_PATH_ROOT))
-                Directory.Delete(AssetBundleConverterConfig.DOWNLOADED_PATH_ROOT, true);
+            if (Directory.Exists(ABConverter.Config.DOWNLOADED_PATH_ROOT))
+                Directory.Delete(ABConverter.Config.DOWNLOADED_PATH_ROOT, true);
 
-            if (File.Exists(AssetBundleConverterConfig.DOWNLOADED_PATH_ROOT + ".meta"))
-                File.Delete(AssetBundleConverterConfig.DOWNLOADED_PATH_ROOT + ".meta");
+            if (File.Exists(ABConverter.Config.DOWNLOADED_PATH_ROOT + ".meta"))
+                File.Delete(ABConverter.Config.DOWNLOADED_PATH_ROOT + ".meta");
 
             UnityEditor.AssetDatabase.Refresh();
         }

@@ -27,7 +27,7 @@ namespace DCL
 
             internal static bool ParseOption(string optionName, int argsQty, out string[] foundArgs)
             {
-                return ParseOptionExplicit(Environment.GetCommandLineArgs(), optionName, argsQty, out foundArgs);
+                return ParseOptionExplicit(System.Environment.GetCommandLineArgs(), optionName, argsQty, out foundArgs);
             }
 
             internal static bool ParseOptionExplicit(string[] rawArgsList, string optionName, int expectedArgsQty, out string[] foundArgs)

@@ -14,7 +14,7 @@ namespace DCL
         public static void DumpBaseAvatars()
         {
             var avatarItemList = GetAvatarMappingList("https://dcl-wearables.now.sh/index.json");
-            var builder = new ABConverter.Core(EditorEnvironment.CreateWithDefaultImplementations());
+            var builder = new ABConverter.Core(ABConverter.Environment.CreateWithDefaultImplementations());
             builder.Convert(avatarItemList);
         }
 
@@ -39,7 +39,7 @@ namespace DCL
         [MenuItem("Decentraland/Asset Bundle Builder/Only Build Bundles")]
         public static void OnlyBuildBundles()
         {
-            BuildPipeline.BuildAssetBundles(AssetBundleConverterConfig.ASSET_BUNDLES_PATH_ROOT, BuildAssetBundleOptions.UncompressedAssetBundle | BuildAssetBundleOptions.ForceRebuildAssetBundle, BuildTarget.WebGL);
+            BuildPipeline.BuildAssetBundles(ABConverter.Config.ASSET_BUNDLES_PATH_ROOT, BuildAssetBundleOptions.UncompressedAssetBundle | BuildAssetBundleOptions.ForceRebuildAssetBundle, BuildTarget.WebGL);
         }
 
         public class WearableItemArray
