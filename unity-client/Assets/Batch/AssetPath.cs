@@ -39,7 +39,7 @@ namespace DCL
 
         public override string ToString()
         {
-            return $"{hash}@{file}";
+            return $"hash:{hash} - file:{file}";
         }
     }
 }

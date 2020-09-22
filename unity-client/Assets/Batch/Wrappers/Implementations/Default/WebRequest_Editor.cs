@@ -10,7 +10,7 @@ namespace DCL
 {
     public static partial class UnityEditorWrappers
     {
-        public class WebRequest_Editor : IWebRequest
+        public class WebRequest : IWebRequest
         {
             private static int ASSET_REQUEST_RETRY_COUNT = 5;
 

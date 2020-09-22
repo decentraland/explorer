@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Text.RegularExpressions;
+using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -52,7 +54,7 @@ namespace DCL
             private int skippedAssets;
 
             private EditorEnvironment env;
-            private static Logger log = new Logger(nameof(Core));
+            private static Logger log = new Logger("ABConverter.Core");
             private string logBuffer;
 
             public Core(EditorEnvironment env, Client.Settings settings = null)
@@ -103,6 +105,13 @@ namespace DCL
                     //NOTE(Brian): try to get an AB before getting the original texture, so we bind the dependencies correctly
                     string fullPathToTag = DownloadAsset(assetPath);
 
+                    if (fullPathToTag == null)
+                    {
+                        result.Remove(assetPath);
+                        log.Error("Failed to get texture dependencies! failing asset: " + assetPath.hash);
+                        continue;
+                    }
+
                     env.assetDatabase.ImportAsset(assetPath.finalPath, ImportAssetOptions.ForceUpdate);
                     env.assetDatabase.SaveAssets();
 
@@ -117,9 +126,9 @@ namespace DCL
                     string guid = ABConverter.Utils.CidToGuid(assetPath.hash);
                     string newMetaContent = Regex.Replace(metaContent, @"guid: \w+?\n", $"guid: {guid}\n");
 
-                    //NOTE(Brian): We must do this hack in order to the new guid to be added to the AssetDatabase
-                    //             in windows, an AssetImporter.SaveAndReimport call makes the trick, but this won't work
-                    //             in Unix based OSes for some reason.
+                    //NOTE(Brian): We must do this hack in order to the new guid to be added to the AssetDatabase.
+                    //             on windows, an AssetImporter.SaveAndReimport call makes the trick, but this won't work
+                    //             on Unix based OSes for some reason.
                     env.file.Delete(metaPath);
 
                     env.file.Copy(assetPath.finalPath, finalDownloadedPath + "tmp");
@@ -136,17 +145,11 @@ namespace DCL
                     env.assetDatabase.Refresh();
                     env.assetDatabase.SaveAssets();
 
-                    //log.Verbose($"content = {env.file.ReadAllText(metaPath)}");
-                    //log.Verbose("guid should be " + guid);
-                    //log.Verbose("guid is " + env.assetDatabase.AssetPathToGUID(assetPath.finalPath));
+                    log.Verbose($"content = {env.file.ReadAllText(metaPath)}");
+                    log.Verbose("guid should be " + guid);
+                    log.Verbose("guid is " + env.assetDatabase.AssetPathToGUID(assetPath.finalPath));
 
                     log.Verbose($"Dumping file -> {assetPath}");
-
-                    if (fullPathToTag == null)
-                    {
-                        result.Remove(assetPath);
-                        log.Error("Failed to get texture dependencies! failing asset: " + assetPath.hash);
-                    }
                 }
 
                 return result;
@@ -275,23 +278,28 @@ namespace DCL
                 return path != null ? gltfPath : null;
             }
 
-            internal void DumpSceneBuffers(List<AssetPath> bufferPaths)
+            internal List<AssetPath> DumpSceneBuffers(List<AssetPath> bufferPaths)
             {
+                List<AssetPath> result = new List<AssetPath>(bufferPaths);
+
                 if (bufferPaths.Count == 0 || bufferPaths == null)
-                    return;
+                    return result;
 
                 foreach (var assetPath in bufferPaths)
                 {
                     if (env.file.Exists(assetPath.finalPath))
                         continue;
 
-                    DownloadAsset(assetPath);
+                    var finalDlPath = DownloadAsset(assetPath);
 
-                    if (!env.file.Exists(assetPath.finalPath))
+                    if (string.IsNullOrEmpty(finalDlPath))
                     {
-                        throw new Exception("Failed to get buffer dependencies! failing asset: " + assetPath.hash);
+                        result.Remove(assetPath);
+                        log.Error("Failed to get buffer dependencies! failing asset: " + assetPath.hash);
                     }
                 }
+
+                return result;
             }
 
             private void MarkAllAssetBundles(List<AssetPath> assetPaths)
@@ -485,12 +493,22 @@ namespace DCL
                     return outputPath;
                 }
 
-                DownloadHandler downloadHandler = env.webRequest.Get(finalUrl);
+                DownloadHandler downloadHandler = null;
 
-                if (downloadHandler == null)
+                try
                 {
-                    log.Error($"Download failed! {finalUrl}");
-                    return outputPath;
+                    downloadHandler = env.webRequest.Get(finalUrl);
+
+                    if (downloadHandler == null)
+                    {
+                        log.Error($"Download failed! {finalUrl} -- null DownloadHandler");
+                        return null;
+                    }
+                }
+                catch (HttpRequestException e)
+                {
+                    log.Error($"Download failed! {finalUrl} -- {e.Message}");
+                    return null;
                 }
 
                 byte[] assetData = downloadHandler.data;

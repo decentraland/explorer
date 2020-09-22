@@ -1,15 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.Http;
+using System.Text;
 using UnityEngine.Networking;
 
 namespace DCL
 {
-    public sealed partial class MockWrappers
+    public sealed partial class Mocked
     {
-        public class DownloadHandler_Mock : DownloadHandlerScript
+        public class DownloadHandler : DownloadHandlerScript
         {
             public string mockedText;
-            public byte[] mockedData;
 
             protected override string GetText()
             {
@@ -18,7 +19,7 @@ namespace DCL
 
             protected override byte[] GetData()
             {
-                return mockedData;
+                return Encoding.UTF8.GetBytes(mockedText);
             }
         }
 
@@ -28,18 +29,22 @@ namespace DCL
             public Dictionary<string, string> mockedContent = new Dictionary<string, string>();
             public float mockedDownloadTime = 0;
 
-            public DownloadHandler Get(string url)
+            public UnityEngine.Networking.DownloadHandler Get(string url)
             {
-                var buffer = new DownloadHandler_Mock();
+                var buffer = new Mocked.DownloadHandler();
+
+                if (!mockedContent.ContainsKey(url))
+                    throw new HttpRequestException($"Mocked 404 -- ({url})");
+
                 buffer.mockedText = mockedContent[url];
                 return buffer;
             }
 
-            public void GetAsync(string url, Action<DownloadHandler> OnCompleted, Action<string> OnFail)
+            public void GetAsync(string url, Action<UnityEngine.Networking.DownloadHandler> OnCompleted, Action<string> OnFail)
             {
                 if (mockedContent.ContainsKey(url))
                 {
-                    var buffer = new DownloadHandler_Mock();
+                    var buffer = new Mocked.DownloadHandler();
                     buffer.mockedText = mockedContent[url];
                     OnCompleted?.Invoke(buffer);
                     return;

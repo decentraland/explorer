@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace DCL
 {
-    public sealed partial class MockWrappers
+    public sealed partial class Mocked
     {
         //TODO(Brian): Use mocking library to replace this mock
         public class Directory : IDirectory

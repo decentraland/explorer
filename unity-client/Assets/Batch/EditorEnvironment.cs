@@ -26,19 +26,21 @@ namespace DCL
                 directory: new SystemWrappers.Directory(),
                 file: new SystemWrappers.File(),
                 assetDatabase: new UnityEditorWrappers.AssetDatabase(),
-                webRequest: new UnityEditorWrappers.WebRequest_Editor(),
+                webRequest: new UnityEditorWrappers.WebRequest(),
                 buildPipeline: new UnityEditorWrappers.BuildPipeline()
             );
         }
 
         public static EditorEnvironment CreateWithMockImplementations()
         {
+            var file = new Mocked.File();
+
             return new EditorEnvironment
             (
-                directory: new MockWrappers.Directory(),
-                file: new MockWrappers.File(),
-                assetDatabase: new MockWrappers.AssetDatabase(),
-                webRequest: new MockWrappers.WebRequest(),
+                directory: new Mocked.Directory(),
+                file: file,
+                assetDatabase: new Mocked.AssetDatabase(file),
+                webRequest: new Mocked.WebRequest(),
                 buildPipeline: new UnityEditorWrappers.BuildPipeline()
             );
         }
