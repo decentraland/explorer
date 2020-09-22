@@ -44,6 +44,8 @@ export function referUser(identity: ExplorerIdentity) {
     const options: RequestInit = {
       method: 'POST',
       mode: 'cors',
+      credentials: 'include',
+      referrerPolicy: 'no-referrer',
       headers: {
         'Authorization': 'Bearer ' + btoa(JSON.stringify(identity.authChain)),
         'Content-Type': 'application/json'
