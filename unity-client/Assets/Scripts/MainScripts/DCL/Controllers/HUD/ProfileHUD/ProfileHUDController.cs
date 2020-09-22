@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using DCL.Interface;
 
 public class ProfileHUDController : IHUD
@@ -8,6 +8,7 @@ public class ProfileHUDController : IHUD
     internal ProfileHUDView view;
 
     private UserProfile ownUserProfile => UserProfile.GetOwnUserProfile();
+    public bool talking { get; private set; }
 
     public ProfileHUDController()
     {
@@ -23,6 +24,12 @@ public class ProfileHUDController : IHUD
     public void SetVisibility(bool visible)
     {
         view?.gameObject.SetActive(visible);
+    }
+
+    public void SetTalking(bool value)
+    {
+        talking = value;
+        view.SetTalking(talking);
     }
 
     public void Dispose()

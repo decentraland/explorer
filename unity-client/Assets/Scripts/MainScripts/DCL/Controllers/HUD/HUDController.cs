@@ -428,7 +428,7 @@ public class HUDController : MonoBehaviour
 
     public void SetPlayerTalking(string talking)
     {
-        avatarHud_Legacy.SetTalking("true".Equals(talking));
+        profileHud.SetTalking("true".Equals(talking));
     }
 
     public void RequestTeleport(string teleportDataJson)
