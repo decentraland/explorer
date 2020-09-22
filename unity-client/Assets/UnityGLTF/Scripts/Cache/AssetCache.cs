@@ -25,7 +25,6 @@ namespace UnityGLTF.Cache
         public static void AddImage(string uri, string idSuffix, RefCountedTextureData refCountedTexture)
         {
             var key = GetCacheId(uri, idSuffix);
-            Debug.Log("Adding image with key " + key);
             ImageCacheByUri[key] = refCountedTexture;
         }
 
@@ -48,7 +47,6 @@ namespace UnityGLTF.Cache
         public static bool HasImage(string uri, string idSuffix)
         {
             string key = GetCacheId(uri, idSuffix);
-            Debug.Log("Has image with key? " + key);
             bool result = ImageCacheByUri.ContainsKey(key);
             return result;
         }
@@ -60,7 +58,6 @@ namespace UnityGLTF.Cache
         /// <returns>True if the image exists</returns>
         public static bool HasImage(string fullId)
         {
-            Debug.Log("Has image with key? " + fullId);
             return ImageCacheByUri.ContainsKey(fullId);
         }
 
@@ -74,6 +71,11 @@ namespace UnityGLTF.Cache
         public static RefCountedTextureData GetImage(string uri, string idSuffix)
         {
             return ImageCacheByUri[GetCacheId(uri, idSuffix)];
+        }
+
+        public static RefCountedTextureData GetImage(string fullId)
+        {
+            return ImageCacheByUri[fullId];
         }
 
         /// <summary>
@@ -98,7 +100,6 @@ namespace UnityGLTF.Cache
         public static void AddBuffer(string uri, string idSuffix, RefCountedStreamData refCountedStream)
         {
             var key = GetCacheId(uri, idSuffix);
-            Debug.Log("Add buffer with key " + key);
             StreamCacheByUri[key] = refCountedStream;
         }
 
@@ -111,7 +112,6 @@ namespace UnityGLTF.Cache
         public static bool HasBuffer(string uri, string idSuffix)
         {
             string key = GetCacheId(uri, idSuffix);
-            Debug.Log("Add buffer with key " + key);
             return HasBuffer(key);
         }
 
@@ -135,6 +135,12 @@ namespace UnityGLTF.Cache
         {
             return StreamCacheByUri[GetCacheId(uri, idSuffix)];
         }
+
+        public static RefCountedStreamData GetBuffer(string fullId)
+        {
+            return StreamCacheByUri[fullId];
+        }
+
 
         /// <summary>
         /// Remove buffer from persistent cache

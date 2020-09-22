@@ -37,6 +37,8 @@ namespace DCL
             }
         }
 
+        public string finalMetaPath => Path.ChangeExtension(finalPath, "meta");
+
         public override string ToString()
         {
             return $"hash:{hash} - file:{file}";

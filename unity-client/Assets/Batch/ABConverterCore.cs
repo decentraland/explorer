@@ -145,10 +145,6 @@ namespace DCL
                     env.assetDatabase.Refresh();
                     env.assetDatabase.SaveAssets();
 
-                    log.Verbose($"content = {env.file.ReadAllText(metaPath)}");
-                    log.Verbose("guid should be " + guid);
-                    log.Verbose("guid is " + env.assetDatabase.AssetPathToGUID(assetPath.finalPath));
-
                     log.Verbose($"Dumping file -> {assetPath}");
                 }
 
@@ -164,7 +160,7 @@ namespace DCL
                 //             This shader bundle doesn't need to be really used, as we are going to use the 
                 //             embedded one, so we are going to delete it after the generation ended.
                 var mainShader = Shader.Find("DCL/LWRP/Lit");
-                ABConverter.Utils.MarkForAssetBundleBuild(env.assetDatabase, mainShader, MAIN_SHADER_AB_NAME);
+                ABConverter.Utils.MarkAssetForAssetBundleBuild(env.assetDatabase, mainShader, MAIN_SHADER_AB_NAME);
             }
 
 
@@ -306,7 +302,7 @@ namespace DCL
             {
                 foreach (var assetPath in assetPaths)
                 {
-                    ABConverter.Utils.MarkForAssetBundleBuild(assetPath.finalPath, assetPath.hash);
+                    ABConverter.Utils.MarkFolderForAssetBundleBuild(assetPath.finalPath, assetPath.hash);
                 }
             }
 

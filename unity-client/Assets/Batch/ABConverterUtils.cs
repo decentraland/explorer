@@ -80,20 +80,20 @@ namespace DCL
                     EditorApplication.Exit(errorCode);
             }
 
-            internal static void MarkForAssetBundleBuild(string path, string abName)
+            internal static void MarkFolderForAssetBundleBuild(string fullPath, string abName)
             {
-                string assetPath = path.Substring(path.IndexOf("Assets"));
-                assetPath = Path.ChangeExtension(assetPath, null);
-
-                assetPath = assetPath.Substring(0, assetPath.Length - 1);
+                string assetPath = GetRelativePathTo(Application.dataPath, fullPath);
+                assetPath = Path.GetDirectoryName(assetPath); //ChangeExtension(assetPath, null);
                 AssetImporter importer = AssetImporter.GetAtPath(assetPath);
+                //Debug.Log("Path = " + assetPath);
                 importer.SetAssetBundleNameAndVariant(abName, "");
             }
 
-            internal static void MarkForAssetBundleBuild(IAssetDatabase assetDb, UnityEngine.Object asset, string abName)
+            internal static void MarkAssetForAssetBundleBuild(IAssetDatabase assetDb, UnityEngine.Object asset, string abName)
             {
-                string assetPath = assetDb.GetAssetPath(asset);
+                string assetPath = GetRelativePathTo(Application.dataPath, assetDb.GetAssetPath(asset));
                 var importer = AssetImporter.GetAtPath(assetPath);
+                Debug.Log("Path = " + assetPath);
                 importer.SetAssetBundleNameAndVariant(abName, "");
             }
 
