@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Monobehaviour that handles updating the entities transformation updates, if a lerpingSpeed is given throught the SDK or auto-calculated, the updates will be lerped, otherwise they will be applied instantly
+/// </summary>
 public class TransformLerpController : MonoBehaviour
 {
     public float lerpingSpeed = 0;
@@ -10,13 +13,19 @@ public class TransformLerpController : MonoBehaviour
 
     public void AddTargetPosition(Vector3 newTargetPos)
     {
+        if (lerpingSpeed <= 0)
+        {
+            transform.localPosition = newTargetPos;
+            return;
+        }
+
         targetPositions.Enqueue(newTargetPos);
     }
 
     void Update()
     {
         if (targetPositions.Count == 0) return;
-        
+
         var targetPos = targetPositions.Peek();
         var currentTime = lerpingSpeed * Time.deltaTime;
 
