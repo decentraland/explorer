@@ -185,6 +185,7 @@ function* initialProfileLoad() {
     }
 
     if (!DEBUG && ENABLE_NEW_TASKBAR) {
+      unityInterface.ConfigureEmailPrompt(getUserProfile().profile.tutorialStep)
       unityInterface.ConfigureTutorial(profile, HAS_INITIAL_POSITION_MARK)
     }
   }

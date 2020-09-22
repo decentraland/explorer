@@ -66,6 +66,8 @@ public class HUDController : MonoBehaviour
 
     public ControlsHUDController controlsHud => GetHUDElement(HUDElementID.CONTROLS_HUD) as ControlsHUDController;
 
+    public EmailPromptHUDController emailPromptHud => GetHUDElement(HUDElementID.EMAIL_PROMPT) as EmailPromptHUDController;
+
     public ExploreHUDController exploreHud => GetHUDElement(HUDElementID.EXPLORE_HUD) as ExploreHUDController;
 
     public HelpAndSupportHUDController helpAndSupportHud => GetHUDElement(HUDElementID.HELP_AND_SUPPORT_HUD) as HelpAndSupportHUDController;
@@ -137,7 +139,8 @@ public class HUDController : MonoBehaviour
         MANA_HUD = 20,
         HELP_AND_SUPPORT_HUD = 21,
         GO_TO_GENESIS_PLAZA_HUD = 22,
-        COUNT = 23
+        EMAIL_PROMPT = 23,
+        COUNT = 24
     }
 
     [System.Serializable]
@@ -319,6 +322,13 @@ public class HUDController : MonoBehaviour
             case HUDElementID.CONTROLS_HUD:
                 CreateHudElement<ControlsHUDController>(configuration, hudElementId);
                 taskbarHud?.AddControlsMoreOption();
+                break;
+            case HUDElementID.EMAIL_PROMPT:
+                if (emailPromptHud == null)
+                {
+                    CreateHudElement<EmailPromptHUDController>(configuration, hudElementId);
+                }
+                emailPromptHud?.SetEnable(configuration.active);
                 break;
             case HUDElementID.EXPLORE_HUD:
                 CreateHudElement<ExploreHUDController>(configuration, hudElementId);
