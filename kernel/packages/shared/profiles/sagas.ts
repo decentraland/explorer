@@ -84,7 +84,6 @@ import { fetchOwnedENS } from 'shared/web3'
 import { RootState } from 'shared/store/rootTypes'
 import { persistCurrentUser } from 'shared/comms'
 import { ensureRealmInitialized } from 'shared/dao/sagas'
-import { unityInterface } from 'unity-interface/UnityInterface'
 
 const CID = require('cids')
 const multihashing = require('multihashing-async')
@@ -184,8 +183,8 @@ function* initialProfileLoad() {
     }
 
     if (!DEBUG) {
-      unityInterface.ConfigureEmailPrompt(profile.tutorialStep)
-      unityInterface.ConfigureTutorial(profile.tutorialStep, HAS_INITIAL_POSITION_MARK)
+      globalThis.unityInterface.ConfigureEmailPrompt(profile.tutorialStep)
+      globalThis.unityInterface.ConfigureTutorial(profile.tutorialStep, HAS_INITIAL_POSITION_MARK)
     }
   }
 
