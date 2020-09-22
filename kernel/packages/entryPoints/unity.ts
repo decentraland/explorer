@@ -12,7 +12,6 @@ import {
   NO_MOTD,
   DEBUG_PM,
   OPEN_AVATAR_EDITOR,
-  ENABLE_MANA_HUD,
   ENABLE_NEW_TASKBAR
 } from '../config/index'
 import { signalRendererInitialized, signalParcelLoadingStarted } from 'shared/renderer/actions'
@@ -67,7 +66,7 @@ initializeUnity(container)
       await userAuthentified()
       const identity = getCurrentIdentity(globalThis.globalStore.getState())!
       i.ConfigureHUDElement(HUDElementID.FRIENDS, { active: identity.hasConnectedWeb3, visible: false })
-      i.ConfigureHUDElement(HUDElementID.MANA_HUD, { active: ENABLE_MANA_HUD && identity.hasConnectedWeb3, visible: true })
+      i.ConfigureHUDElement(HUDElementID.MANA_HUD, { active: identity.hasConnectedWeb3, visible: true })
     } catch (e) {
       logger.error('error on configuring friends hud')
     }
