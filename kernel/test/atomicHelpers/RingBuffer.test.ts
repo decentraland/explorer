@@ -1,10 +1,10 @@
-import { RingBuffer } from 'atomicHelpers/RingBuffer'
+import { OrderedRingBuffer } from 'atomicHelpers/RingBuffer'
 import { expect } from 'chai'
 
 describe('RingBuffer', () => {
-  let buffer: RingBuffer<Float32Array>
+  let buffer: OrderedRingBuffer<Float32Array>
   beforeEach(() => {
-    buffer = new RingBuffer(20, Float32Array)
+    buffer = new OrderedRingBuffer(20, Float32Array)
   })
 
   it('can write and read simple operations', () => {

@@ -9,10 +9,18 @@ type TypedArray =
   | Float32Array
   | Float64Array
 
-export class RingBuffer<T extends TypedArray> {
+type Chunk = {
+  order: number
+  startPointer: number
+  length: number
+}  
+
+export class OrderedRingBuffer<T extends TypedArray> {
   private writePointer: number = 0
   private readPointer: number = 0
   private buffer: T
+
+  private chunks: Chunk[] = [] 
 
   constructor(public readonly size: number, private readonly ArrayTypeConstructor: { new (size: number): T }) {
     this.buffer = new this.ArrayTypeConstructor(size)
@@ -22,7 +30,12 @@ export class RingBuffer<T extends TypedArray> {
     return this.writePointer - this.readPointer
   }
 
-  write(array: T, length?: number) {
+  write(array: T, order: number, length?: number) {
+    /*
+     * - Determinar si es el último chunk. Si es el último, la write position se mantiene y todo se hace de la misma forma.
+     * - Si no es el último, tomar como write position la posición del chunk inmediatamente posterior. 
+     * - - Apendear los chunks que se van a sobreescribir al final
+     */
     const len = length || array.length
 
     let toWrite = array

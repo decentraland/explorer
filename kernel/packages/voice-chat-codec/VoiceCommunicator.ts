@@ -1,5 +1,5 @@
 import { VoiceChatCodecWorkerMain, EncodeStream } from './VoiceChatCodecWorkerMain'
-import { RingBuffer } from 'atomicHelpers/RingBuffer'
+import { OrderedRingBuffer } from 'atomicHelpers/RingBuffer'
 import { defer } from 'atomicHelpers/defer'
 import defaultLogger from 'shared/logger'
 
@@ -11,7 +11,7 @@ export type StreamPlayingListener = (streamId: string, playing: boolean) => any
 export type StreamRecordingListener = (recording: boolean) => any
 
 type VoiceOutput = {
-  buffer: RingBuffer<Float32Array>
+  buffer: OrderedRingBuffer<Float32Array>
   scriptProcessor: ScriptProcessorNode
   panNode: PannerNode
   spatialParams: VoiceSpatialParams
@@ -99,11 +99,11 @@ export class VoiceCommunicator {
     return !!this.input
   }
 
-  async playEncodedAudio(src: string, relativePosition: VoiceSpatialParams, encoded: Uint8Array) {
+  async playEncodedAudio(src: string, relativePosition: VoiceSpatialParams, encoded: Uint8Array, time: number) {
     if (!this.outputs[src]) {
       const nodes = this.createOutputNodes(src)
       this.outputs[src] = {
-        buffer: new RingBuffer(Math.floor(this.channelBufferSize * this.sampleRate), Float32Array),
+        buffer: new OrderedRingBuffer(Math.floor(this.channelBufferSize * this.sampleRate), Float32Array),
         playing: false,
         spatialParams: relativePosition,
         lastUpdateTime: Date.now(),
