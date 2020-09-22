@@ -12,9 +12,7 @@ import {
   PIN_CATALYST,
   PREVIEW,
   ethereumConfigurations,
-  RESET_TUTORIAL,
-  DEBUG,
-  HAS_INITIAL_POSITION_MARK
+  RESET_TUTORIAL
 } from 'config'
 
 import { NotificationType } from 'shared/types'
@@ -180,11 +178,6 @@ function* initialProfileLoad() {
 
     if (profileDirty) {
       scheduleProfileUpdate(profile)
-    }
-
-    if (!DEBUG) {
-      globalThis.unityInterface.ConfigureEmailPrompt(profile.tutorialStep)
-      globalThis.unityInterface.ConfigureTutorial(profile.tutorialStep, HAS_INITIAL_POSITION_MARK)
     }
   }
 
