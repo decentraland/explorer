@@ -12,13 +12,13 @@ declare var history: any
 export function getReferralEndpoint() {
   switch (getDefaultTLD()) {
     case 'org':
-      return `https://referral.decentraland.org/referalOf`
+      return `https://referral.decentraland.org`
 
     case 'today':
-      return `https://referral.decentraland.net/referalOf`
+      return `https://referral.decentraland.net`
 
     case 'zone':
-      return `https://referral.decentraland.io/referalOf`
+      return `https://referral.decentraland.io`
 
     default:
       return undefined
@@ -43,9 +43,6 @@ export function referUser(identity: ExplorerIdentity) {
   if (code && endpoint && identity && identity.authChain) {
     const options: RequestInit = {
       method: 'POST',
-      mode: 'cors',
-      credentials: 'include',
-      referrerPolicy: 'no-referrer',
       headers: {
         'Authorization': 'Bearer ' + btoa(JSON.stringify(identity.authChain)),
         'Content-Type': 'application/json'
@@ -53,7 +50,7 @@ export function referUser(identity: ExplorerIdentity) {
       body: JSON.stringify({ code })
     }
 
-    fetch(endpoint, options)
+    fetch(endpoint + '/api/referralOf', options)
       .then((response) => response.json())
       .then((result) => {
         if (result.ok) {
