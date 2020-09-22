@@ -1,3 +1,5 @@
+import {WSS_ENABLED} from "../../packages/config";
+
 const fs = require('fs')
 const path = require('path')
 const fetch = require('node-fetch')
@@ -19,7 +21,7 @@ const downloadFile = async (url, path) => {
   })
 }
 
-const catalog = require('./basecatalog.json')
+const catalog = WSS_ENABLED ? require('./basecatalog-wss.json') : require('./basecatalog.json')
 
 let contentPath
 try {
