@@ -12,7 +12,10 @@ import {
   PIN_CATALYST,
   PREVIEW,
   ethereumConfigurations,
-  RESET_TUTORIAL
+  RESET_TUTORIAL,
+  DEBUG,
+  ENABLE_NEW_TASKBAR,
+  HAS_INITIAL_POSITION_MARK
 } from 'config'
 
 import { NotificationType } from 'shared/types'
@@ -82,6 +85,7 @@ import { fetchOwnedENS } from 'shared/web3'
 import { RootState } from 'shared/store/rootTypes'
 import { persistCurrentUser } from 'shared/comms'
 import { ensureRealmInitialized } from 'shared/dao/sagas'
+import { unityInterface } from 'unity-interface/UnityInterface'
 
 const CID = require('cids')
 const multihashing = require('multihashing-async')
@@ -178,6 +182,10 @@ function* initialProfileLoad() {
 
     if (profileDirty) {
       scheduleProfileUpdate(profile)
+    }
+
+    if (!DEBUG && ENABLE_NEW_TASKBAR)  {
+      unityInterface.ConfigureTutorial(profile, HAS_INITIAL_POSITION_MARK)
     }
   }
 
