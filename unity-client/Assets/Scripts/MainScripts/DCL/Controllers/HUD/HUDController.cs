@@ -14,7 +14,6 @@ public class HUDController : MonoBehaviour
     public static HUDController i { get; private set; }
 
     private InputAction_Trigger toggleUIVisibilityTrigger;
-    private bool newTaskbarIsEnabled = false; // NOTE(Santi): This is temporal, until we remove the old taskbar
 
     private void Awake()
     {
@@ -180,15 +179,7 @@ public class HUDController : MonoBehaviour
                 CreateHudElement<MinimapHUDController>(configuration, hudElementId);
                 break;
             case HUDElementID.PROFILE_HUD:
-                var avatarHudConfig = JsonUtility.FromJson<Legacy.AvatarHUDConfiguration>(extraPayload);
-                if (avatarHudConfig != null && avatarHudConfig.useNewVersion)
-                {
-                    CreateHudElement<ProfileHUDController>(configuration, hudElementId);
-                }
-                else
-                {
-                    CreateHudElement<Legacy.AvatarHUDController>(configuration, hudElementId);
-                }
+                CreateHudElement<ProfileHUDController>(configuration, hudElementId);
 
                 if (avatarHud_Legacy != null)
                 {
@@ -290,8 +281,7 @@ public class HUDController : MonoBehaviour
 
                     if (taskbarHud != null)
                     {
-                        taskbarHud.Initialize(DCL.InitialSceneReferences.i?.mouseCatcher, ChatController.i,
-                            FriendsController.i, newTaskbarIsEnabled);
+                        taskbarHud.Initialize(DCL.InitialSceneReferences.i?.mouseCatcher, ChatController.i, FriendsController.i);
                         taskbarHud.OnAnyTaskbarButtonClicked -= TaskbarHud_onAnyTaskbarButtonClicked;
                         taskbarHud.OnAnyTaskbarButtonClicked += TaskbarHud_onAnyTaskbarButtonClicked;
 
@@ -334,7 +324,7 @@ public class HUDController : MonoBehaviour
                 CreateHudElement<ExploreHUDController>(configuration, hudElementId);
                 if (exploreHud != null)
                 {
-                    exploreHud.Initialize(FriendsController.i, newTaskbarIsEnabled);
+                    exploreHud.Initialize(FriendsController.i);
                     taskbarHud?.AddExploreWindow(exploreHud);
                 }
                 break;
@@ -521,10 +511,4 @@ public class HUDController : MonoBehaviour
         Resources.Load<StringVariable>("CurrentPlayerInfoCardId").Set(newModel.userId);
     }
 #endif
-
-    // NOTE(Santi): This is temporal, until we remove the old taskbar
-    public void EnableNewTaskbar()
-    {
-        newTaskbarIsEnabled = true;
-    }
 }

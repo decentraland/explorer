@@ -67,15 +67,15 @@ public class TaskbarHUDView : MonoBehaviour
     }
 
     internal static TaskbarHUDView Create(TaskbarHUDController controller, IChatController chatController,
-        IFriendsController friendsController, bool newTaskbarIsEnabled)
+        IFriendsController friendsController)
     {
         var view = Instantiate(Resources.Load<GameObject>(VIEW_PATH)).GetComponent<TaskbarHUDView>();
-        view.Initialize(controller, chatController, friendsController, newTaskbarIsEnabled);
+        view.Initialize(controller, chatController, friendsController);
         return view;
     }
 
     public void Initialize(TaskbarHUDController controller, IChatController chatController,
-        IFriendsController friendsController, bool newTaskbarIsEnabled)
+        IFriendsController friendsController)
     {
         this.controller = controller;
 
@@ -118,9 +118,6 @@ public class TaskbarHUDView : MonoBehaviour
 
         moreButton.OnToggleOn += OnWindowToggleOn;
         moreButton.OnToggleOff += OnWindowToggleOff;
-
-        if (!newTaskbarIsEnabled)
-            ActivateOldTaskbar();
     }
 
     private void OnWindowToggleOff(TaskbarButton obj)
@@ -307,14 +304,5 @@ public class TaskbarHUDView : MonoBehaviour
             moreButton.OnToggleOn -= OnWindowToggleOn;
             moreButton.OnToggleOff -= OnWindowToggleOff;
         }
-    }
-
-    // NOTE(Santi): This is temporal, until we remove the old taskbar
-    private void ActivateOldTaskbar()
-    {
-        taskbarPanelTransf.offsetMax = new Vector2(-200, taskbarPanelTransf.offsetMax.y);
-        taskbarPanelImage.color = new Color(taskbarPanelImage.color.r, taskbarPanelImage.color.g, taskbarPanelImage.color.b, 0f);
-        moreButton.gameObject.SetActive(false);
-        rightButtonsContainer.SetActive(false);
     }
 }

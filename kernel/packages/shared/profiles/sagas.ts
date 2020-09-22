@@ -14,7 +14,6 @@ import {
   ethereumConfigurations,
   RESET_TUTORIAL,
   DEBUG,
-  ENABLE_NEW_TASKBAR,
   HAS_INITIAL_POSITION_MARK
 } from 'config'
 
@@ -184,9 +183,9 @@ function* initialProfileLoad() {
       scheduleProfileUpdate(profile)
     }
 
-    if (!DEBUG && ENABLE_NEW_TASKBAR) {
-      unityInterface.ConfigureEmailPrompt(getUserProfile().profile.tutorialStep)
-      unityInterface.ConfigureTutorial(profile, HAS_INITIAL_POSITION_MARK)
+    if (!DEBUG) {
+      unityInterface.ConfigureEmailPrompt(profile.tutorialStep)
+      unityInterface.ConfigureTutorial(profile.tutorialStep, HAS_INITIAL_POSITION_MARK)
     }
   }
 

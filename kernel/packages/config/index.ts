@@ -141,10 +141,6 @@ export const NO_ASSET_BUNDLES = location.search.indexOf('NO_ASSET_BUNDLES') !== 
 export const WSS_ENABLED = qs.ws !== undefined
 export const FORCE_SEND_MESSAGE = location.search.indexOf('FORCE_SEND_MESSAGE') !== -1
 
-export const ENABLE_NEW_TASKBAR =
-  location.search.indexOf('ENABLE_NEW_TASKBAR') !==
-  -1 /* NOTE(Santi): This is temporal, until we remove the old taskbar */
-
 export const PIN_CATALYST = qs.PIN_CATALYST
 
 export namespace commConfigurations {

@@ -41,7 +41,7 @@ public class TaskbarHUDShould : TestsBase
         userProfile = userProfileGO.AddComponent<UserProfileController>().ownUserProfile;
 
         controller = new TaskbarHUDController();
-        controller.Initialize(null, chatController, null, true);
+        controller.Initialize(null, chatController, null);
         view = controller.view;
 
         Assert.IsTrue(view != null, "Taskbar view is null?");
@@ -122,7 +122,7 @@ public class TaskbarHUDShould : TestsBase
     public void AddExploreWindowProperly()
     {
         exploreHUDController = new ExploreHUDController();
-        exploreHUDController.Initialize(friendsController, false);
+        exploreHUDController.Initialize(friendsController);
         controller.AddExploreWindow(exploreHUDController);
 
         Assert.IsTrue(exploreHUDController.view.gameObject.activeSelf, "Explore window is disabled!");

@@ -29,19 +29,16 @@ public class TaskbarHUDController : IHUD
 
     public event System.Action OnAnyTaskbarButtonClicked;
 
-    public bool isNewTaskbar { get; private set; }
     public RectTransform tutorialTooltipReference { get => view.moreTooltipReference; }
     public RectTransform exploreTooltipReference { get => view.exploreTooltipReference; }
     public RectTransform goToGenesisTooltipReference { get => view.goToGenesisTooltipReference; }
 
-    public void Initialize(IMouseCatcher mouseCatcher, IChatController chatController,
-        IFriendsController friendsController, bool newTaskbarIsEnabled)
+    public void Initialize(IMouseCatcher mouseCatcher, IChatController chatController, IFriendsController friendsController)
     {
         this.mouseCatcher = mouseCatcher;
         this.chatController = chatController;
 
-        isNewTaskbar = newTaskbarIsEnabled;
-        view = TaskbarHUDView.Create(this, chatController, friendsController, newTaskbarIsEnabled);
+        view = TaskbarHUDView.Create(this, chatController, friendsController);
 
         if (mouseCatcher != null)
         {

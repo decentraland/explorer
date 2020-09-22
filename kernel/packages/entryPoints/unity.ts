@@ -11,8 +11,7 @@ import { worldToGrid } from '../atomicHelpers/parcelScenePositions'
 import {
   NO_MOTD,
   DEBUG_PM,
-  OPEN_AVATAR_EDITOR,
-  ENABLE_NEW_TASKBAR
+  OPEN_AVATAR_EDITOR
 } from '../config/index'
 import { signalRendererInitialized, signalParcelLoadingStarted } from 'shared/renderer/actions'
 import { lastPlayerPosition, teleportObservable } from 'shared/world/positionThings'
@@ -45,7 +44,7 @@ initializeUnity(container)
     const i = (await instancedJS).unityInterface
 
     i.ConfigureHUDElement(HUDElementID.MINIMAP, { active: true, visible: true })
-    i.ConfigureHUDElement(HUDElementID.PROFILE_HUD, { active: true, visible: true }, { useNewVersion: ENABLE_NEW_TASKBAR })
+    i.ConfigureHUDElement(HUDElementID.PROFILE_HUD, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.NOTIFICATION, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.AVATAR_EDITOR, { active: true, visible: OPEN_AVATAR_EDITOR })
     i.ConfigureHUDElement(HUDElementID.SETTINGS, { active: true, visible: false })

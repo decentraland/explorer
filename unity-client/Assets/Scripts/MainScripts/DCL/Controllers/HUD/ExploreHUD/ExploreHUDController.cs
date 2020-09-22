@@ -38,15 +38,13 @@ public class ExploreHUDController : IHUD
         HotSceneCellView.OnJumpIn += OnJumpIn;
     }
 
-    public void Initialize(IFriendsController friendsController, bool newTaskbarIsEnabled)
+    public void Initialize(IFriendsController friendsController)
     {
         this.friendsController = new FriendTrackerController(friendsController, view.friendColors);
         miniMapDataController = new ExploreMiniMapDataController();
 
         view.Initialize(miniMapDataController, this.friendsController);
-
-        if (newTaskbarIsEnabled)
-            view.togglePopupButton.gameObject.SetActive(false);
+        view.togglePopupButton.gameObject.SetActive(false);
     }
 
     public void SetVisibility(bool visible)
