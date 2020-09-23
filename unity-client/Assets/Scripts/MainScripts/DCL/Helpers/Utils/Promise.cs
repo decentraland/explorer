@@ -57,9 +57,5 @@ namespace DCL.Helpers
                 errorCallback?.Invoke(this.error);
             }
         }
-
-        public Promise()
-        {
-        }
     }
 }
