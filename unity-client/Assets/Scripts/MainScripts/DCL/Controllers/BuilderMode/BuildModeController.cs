@@ -700,6 +700,7 @@ public class BuildModeController : MonoBehaviour
         sceneToEdit.SetEditMode(false);
         ParcelSettings.VISUAL_LOADING_ENABLED = true;
         DCLCharacterController.i.SetFreeMovementActive(false);
+        outlinerController.CancelAllOutlines();
         DeselectObject();
         DestroyCollidersForAllEntities();
     }
