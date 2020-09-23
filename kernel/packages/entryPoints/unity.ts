@@ -4,7 +4,7 @@ declare const global: any
 // IMPORTANT! This should be execd before loading 'config' module to ensure that init values are successfully loaded
 global.enableWeb3 = true
 
-import defaultLogger, { createLogger } from 'shared/logger'
+import { createLogger } from 'shared/logger'
 import { ReportFatalError } from 'shared/loading/ReportFatalError'
 import { experienceStarted, NOT_INVITED, AUTH_ERROR_LOGGED_OUT, FAILED_FETCHING_UNITY } from 'shared/loading/types'
 import { worldToGrid } from '../atomicHelpers/parcelScenePositions'
@@ -83,7 +83,7 @@ initializeUnity(container)
           .then((profile) => {
             i.ConfigureTutorial(profile.tutorialStep, HAS_INITIAL_POSITION_MARK)
           })
-          .catch((e) => defaultLogger.log(`error getting profile ${e}`))
+          .catch((e) => logger.error(`error getting profile ${e}`))
       }
     } catch (e) {
       logger.error('error on configuring friends hud')
