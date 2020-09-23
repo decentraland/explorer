@@ -1,4 +1,4 @@
-﻿using DCL.Interface;
+using DCL.Interface;
 using UnityEngine;
 using System.Collections;
 
@@ -48,7 +48,7 @@ public class ManaHUDController : IHUD
 
     public void Dispose()
     {
-        if (view?.gameObject)
+        if (view != null)
         {
             Object.Destroy(view.gameObject);
         }
