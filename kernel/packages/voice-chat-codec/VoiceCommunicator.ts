@@ -1,5 +1,5 @@
 import { VoiceChatCodecWorkerMain, EncodeStream } from './VoiceChatCodecWorkerMain'
-import { OrderedRingBuffer } from 'atomicHelpers/RingBuffer'
+import { OrderedRingBuffer } from 'atomicHelpers/OrderedRingBuffer'
 import { defer } from 'atomicHelpers/defer'
 import defaultLogger from 'shared/logger'
 
@@ -121,7 +121,7 @@ export class VoiceCommunicator {
 
       stream.addAudioDecodedListener((samples) => {
         this.outputs[src].lastUpdateTime = Date.now()
-        this.outputs[src].buffer.write(samples)
+        this.outputs[src].buffer.write(samples, time)
       })
     }
 

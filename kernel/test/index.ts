@@ -9,6 +9,7 @@ global['isRunningTests'] = true
 import './atomicHelpers/parcelScenePositions.test'
 import './atomicHelpers/landHelpers.test'
 import './atomicHelpers/vectorHelpers.test'
+import './atomicHelpers/OrderedRingBuffer.test'
 
 /* UNIT */
 import './unit/ethereum.test'

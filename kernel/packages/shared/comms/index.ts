@@ -412,7 +412,8 @@ function processVoiceFragment(context: Context, fromAlias: string, message: Pack
       voiceCommunicator?.playEncodedAudio(
         peerTrackingInfo.identity,
         getSpatialParamsFor(peerTrackingInfo.position),
-        message.data.encoded
+        message.data.encoded,
+        message.time
       )
     }
   }
