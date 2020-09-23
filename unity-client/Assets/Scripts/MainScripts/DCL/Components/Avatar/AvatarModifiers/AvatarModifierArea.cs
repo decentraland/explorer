@@ -72,7 +72,11 @@ public class AvatarModifierArea : BaseComponent
         }
 
         // Find avatars currently on the area
-        HashSet<GameObject> newAvatarsInArea = new HashSet<GameObject>(DetectAllAvatarsInArea());
+        HashSet<GameObject> newAvatarsInArea = DetectAllAvatarsInArea();
+        if (newAvatarsInArea == null || newAvatarsInArea.SetEquals(avatarsInArea))
+        {
+            return;
+        }
 
         // Call event for avatars that just entered the area
         foreach (GameObject avatarThatEntered in newAvatarsInArea.Except(avatarsInArea))
@@ -89,11 +93,11 @@ public class AvatarModifierArea : BaseComponent
         avatarsInArea = newAvatarsInArea;
     }
 
-    private GameObject[] DetectAllAvatarsInArea()
+    private HashSet<GameObject> DetectAllAvatarsInArea()
     {
         if (entity?.gameObject == null)
         {
-            return new GameObject[0];
+            return null;
         }
 
         Vector3 center = entity.gameObject.transform.position;
@@ -108,10 +112,13 @@ public class AvatarModifierArea : BaseComponent
             return;
         }
 
-        GameObject[] avatars = DetectAllAvatarsInArea();
-        for (int i = 0; i < avatars.Length; i++)
+        HashSet<GameObject> avatars = DetectAllAvatarsInArea();
+        if (avatars != null)
         {
-            OnAvatarExit?.Invoke(avatars[i]);
+            foreach (GameObject avatar in avatars)
+            {
+                OnAvatarExit?.Invoke(avatar);
+            }
         }
     }
 
