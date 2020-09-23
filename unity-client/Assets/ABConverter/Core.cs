@@ -61,7 +61,7 @@ namespace DCL
             {
                 this.env = env;
 
-                this.settings = settings.Clone() ?? new Client.Settings();
+                this.settings = settings.Clone() ?? new Client.Settings(ContentServerUtils.ApiTLD.ORG);
 
                 finalDownloadedPath = Utils.FixDirectorySeparator(Config.DOWNLOADED_PATH_ROOT + Config.DASH);
                 log.verboseEnabled = settings.verbose;
@@ -69,279 +69,19 @@ namespace DCL
                 state.step = State.Step.IDLE;
             }
 
-            public void CleanAndExit(ErrorCodes errorCode)
-            {
-                float conversionTime = Time.realtimeSinceStartup - startTime;
-                logBuffer = $"Conversion finished!. error code = {errorCode}";
-
-                logBuffer += "\n";
-                logBuffer += $"Converted {totalAssets - skippedAssets} of {totalAssets}. (Skipped {skippedAssets})\n";
-                logBuffer += $"Total time: {conversionTime}";
-
-                if (totalAssets > 0)
-                {
-                    logBuffer += $"... Time per asset: {conversionTime / totalAssets}\n";
-                }
-
-                logBuffer += "\n";
-                logBuffer += logBuffer;
-
-                log.Info(logBuffer);
-
-                CleanupWorkingFolders();
-                Utils.Exit((int) errorCode);
-            }
-
-
-            internal List<AssetPath> DumpSceneTextures(List<AssetPath> textureAssetPaths)
-            {
-                List<AssetPath> result = new List<AssetPath>(textureAssetPaths);
-
-                foreach (var assetPath in textureAssetPaths)
-                {
-                    if (env.file.Exists(assetPath.finalPath))
-                        continue;
-
-                    //NOTE(Brian): try to get an AB before getting the original texture, so we bind the dependencies correctly
-                    string fullPathToTag = DownloadAsset(assetPath);
-
-                    if (fullPathToTag == null)
-                    {
-                        result.Remove(assetPath);
-                        log.Error("Failed to get texture dependencies! failing asset: " + assetPath.hash);
-                        continue;
-                    }
-
-                    env.assetDatabase.ImportAsset(assetPath.finalPath, ImportAssetOptions.ForceUpdate);
-                    env.assetDatabase.SaveAssets();
-
-                    string metaPath = env.assetDatabase.GetTextMetaFilePathFromAssetPath(assetPath.finalPath);
-
-                    env.assetDatabase.ReleaseCachedFileHandles();
-
-                    //NOTE(Brian): in asset bundles, all dependencies are resolved by their guid (and not the AB hash nor CRC)
-                    //             So to ensure dependencies are being kept in subsequent editor runs we normalize the asset guid using
-                    //             the CID.
-                    string metaContent = env.file.ReadAllText(metaPath);
-                    string guid = ABConverter.Utils.CidToGuid(assetPath.hash);
-                    string newMetaContent = Regex.Replace(metaContent, @"guid: \w+?\n", $"guid: {guid}\n");
-
-                    //NOTE(Brian): We must do this hack in order to the new guid to be added to the AssetDatabase.
-                    //             on windows, an AssetImporter.SaveAndReimport call makes the trick, but this won't work
-                    //             on Unix based OSes for some reason.
-                    env.file.Delete(metaPath);
-
-                    env.file.Copy(assetPath.finalPath, finalDownloadedPath + "tmp");
-                    env.assetDatabase.DeleteAsset(assetPath.finalPath);
-                    env.file.Delete(assetPath.finalPath);
-
-                    env.assetDatabase.Refresh();
-                    env.assetDatabase.SaveAssets();
-
-                    env.file.Copy(finalDownloadedPath + "tmp", assetPath.finalPath);
-                    env.file.WriteAllText(metaPath, newMetaContent);
-                    env.file.Delete(finalDownloadedPath + "tmp");
-
-                    env.assetDatabase.Refresh();
-                    env.assetDatabase.SaveAssets();
-
-                    log.Verbose($"Dumping file -> {assetPath}");
-                }
-
-                return result;
-            }
-
-            private void MarkShaderAssetBundle()
-            {
-                //NOTE(Brian): We tag the main shader, so all the asset bundles don't contain repeated shader assets.
-                //             This way we save the big Shader.Parse and gpu compiling performance overhead and make
-                //             the bundles a bit lighter.
-
-                //             This shader bundle doesn't need to be really used, as we are going to use the 
-                //             embedded one, so we are going to delete it after the generation ended.
-                var mainShader = Shader.Find("DCL/LWRP/Lit");
-                ABConverter.Utils.MarkAssetForAssetBundleBuild(env.assetDatabase, mainShader, MAIN_SHADER_AB_NAME);
-            }
-
-
-            private bool DumpAssets(ContentServerUtils.MappingPair[] rawContents)
-            {
-                List<AssetPath> gltfPaths = ABConverter.Utils.GetPathsFromPairs(finalDownloadedPath, rawContents, Config.gltfExtensions);
-                List<AssetPath> bufferPaths = ABConverter.Utils.GetPathsFromPairs(finalDownloadedPath, rawContents, Config.bufferExtensions);
-                List<AssetPath> texturePaths = ABConverter.Utils.GetPathsFromPairs(finalDownloadedPath, rawContents, Config.textureExtensions);
-
-                List<AssetPath> assetsToMark = new List<AssetPath>();
-
-                if (!PrepareDump(ref gltfPaths))
-                    return false;
-
-                //NOTE(Brian): Prepare textures and buffers. We should prepare all the dependencies in this phase.
-                assetsToMark.AddRange(DumpSceneTextures(texturePaths));
-                DumpSceneBuffers(bufferPaths);
-
-                GLTFImporter.OnGLTFRootIsConstructed -= ABConverter.Utils.FixGltfRootInvalidUriCharacters;
-                GLTFImporter.OnGLTFRootIsConstructed += ABConverter.Utils.FixGltfRootInvalidUriCharacters;
-
-                //NOTE(Brian): Prepare gltfs gathering its dependencies first and filling the importer's static cache.
-                foreach (var gltfPath in gltfPaths)
-                {
-                    assetsToMark.Add(DumpGltf(gltfPath, texturePaths, bufferPaths));
-                }
-
-                env.assetDatabase.Refresh();
-                env.assetDatabase.SaveAssets();
-
-                MarkAllAssetBundles(assetsToMark);
-                MarkShaderAssetBundle();
-                return true;
-            }
-
-            internal bool PrepareDump(ref List<AssetPath> gltfPaths)
-            {
-                bool shouldAbortBecauseAllBundlesExist = true;
-
-                totalAssets += gltfPaths.Count;
-
-                if (settings.skipAlreadyBuiltBundles)
-                {
-                    int gltfCount = gltfPaths.Count;
-
-                    gltfPaths = gltfPaths.Where(
-                        assetPath =>
-                            !env.file.Exists(settings.finalAssetBundlePath + assetPath.hash)).ToList();
-
-                    int skippedCount = gltfCount - gltfPaths.Count;
-                    skippedAssets += skippedCount;
-                    shouldAbortBecauseAllBundlesExist = gltfPaths.Count == 0;
-                }
-                else
-                {
-                    shouldAbortBecauseAllBundlesExist = false;
-                }
-
-                if (shouldAbortBecauseAllBundlesExist)
-                {
-                    log.Info("All assets in this scene were already generated!. Skipping.");
-                    return false;
-                }
-
-                return true;
-            }
-
-            internal AssetPath DumpGltf(AssetPath gltfPath, List<AssetPath> texturePaths, List<AssetPath> bufferPaths)
-            {
-                List<Stream> streamsToDispose = new List<Stream>();
-
-                PersistentAssetCache.ImageCacheByUri.Clear();
-                PersistentAssetCache.StreamCacheByUri.Clear();
-
-                log.Verbose("Start injecting stuff into " + gltfPath.hash);
-
-                foreach (var texturePath in texturePaths)
-                {
-                    RetrieveAndInjectTexture(gltfPath, texturePath);
-                }
-
-                foreach (var bufferPath in bufferPaths)
-                {
-                    RetrieveAndInjectBuffer(gltfPath, bufferPath);
-                }
-
-                log.Verbose("About to load " + gltfPath.hash);
-
-                //NOTE(Brian): Finally, load the gLTF. The GLTFImporter will use the PersistentAssetCache to resolve the external dependencies.
-                string path = DownloadAsset(gltfPath);
-
-                if (path != null)
-                {
-                    env.assetDatabase.Refresh();
-                    env.assetDatabase.SaveAssets();
-                }
-
-                log.Verbose("End load " + gltfPath.hash);
-
-                foreach (var streamDataKvp in PersistentAssetCache.StreamCacheByUri)
-                {
-                    if (streamDataKvp.Value.stream != null)
-                        streamsToDispose.Add(streamDataKvp.Value.stream);
-                }
-
-                foreach (var s in streamsToDispose)
-                {
-                    s.Dispose();
-                }
-
-                return path != null ? gltfPath : null;
-            }
-
-            internal List<AssetPath> DumpSceneBuffers(List<AssetPath> bufferPaths)
-            {
-                List<AssetPath> result = new List<AssetPath>(bufferPaths);
-
-                if (bufferPaths.Count == 0 || bufferPaths == null)
-                    return result;
-
-                foreach (var assetPath in bufferPaths)
-                {
-                    if (env.file.Exists(assetPath.finalPath))
-                        continue;
-
-                    var finalDlPath = DownloadAsset(assetPath);
-
-                    if (string.IsNullOrEmpty(finalDlPath))
-                    {
-                        result.Remove(assetPath);
-                        log.Error("Failed to get buffer dependencies! failing asset: " + assetPath.hash);
-                    }
-                }
-
-                return result;
-            }
-
-            private void MarkAllAssetBundles(List<AssetPath> assetPaths)
-            {
-                foreach (var assetPath in assetPaths)
-                {
-                    ABConverter.Utils.MarkFolderForAssetBundleBuild(assetPath.finalPath, assetPath.hash);
-                }
-            }
-
-
-            protected virtual bool BuildAssetBundles(out AssetBundleManifest manifest)
-            {
-                env.assetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport | ImportAssetOptions.ForceUpdate | ImportAssetOptions.ImportRecursive);
-                env.assetDatabase.SaveAssets();
-
-                env.assetDatabase.MoveAsset(finalDownloadedPath, Config.DOWNLOADED_PATH_ROOT);
-
-                manifest = env.buildPipeline.BuildAssetBundles(settings.finalAssetBundlePath, BuildAssetBundleOptions.UncompressedAssetBundle | BuildAssetBundleOptions.ForceRebuildAssetBundle, BuildTarget.WebGL);
-
-                if (manifest == null)
-                {
-                    log.Error("Error generating asset bundle!");
-                    return false;
-                }
-
-                DependencyMapBuilder.Generate(env.file, settings.finalAssetBundlePath, hashLowercaseToHashProper, manifest, MAIN_SHADER_AB_NAME);
-                logBuffer += $"Generating asset bundles at path: {settings.finalAssetBundlePath}\n";
-
-                string[] assetBundles = manifest.GetAllAssetBundles();
-
-                logBuffer += $"Total generated asset bundles: {assetBundles.Length}\n";
-
-                for (int i = 0; i < assetBundles.Length; i++)
-                {
-                    if (string.IsNullOrEmpty(assetBundles[i]))
-                        continue;
-
-                    logBuffer += $"#{i} Generated asset bundle name: {assetBundles[i]}\n";
-                }
-
-                logBuffer += $"\nFree disk space after conv: {GetFreeSpace()}";
-
-                return true;
-            }
-
+            /// <summary>
+            /// Generate asset bundles using a MappingPair list.
+            ///
+            /// This method will try to dump GLTF models, textures and buffers from the given mapping pair list,
+            /// tag them for asset bundle building and finally build them.
+            ///
+            /// If the GLTF have external references of any texture/buffer of the same list, the references will be
+            /// resolved correctly on the GLTF importer and then correctly converted to Asset Bundles references.
+            ///
+            /// Shader assets will be stripped from the generated bundles.
+            /// </summary>
+            /// <param name="rawContents">A list detailing assets to be dumped</param>
+            /// <param name="OnFinish">End callback with the proper ErrorCode</param>
             public void Convert(ContentServerUtils.MappingPair[] rawContents, Action<ErrorCodes> OnFinish = null)
             {
                 if (OnFinish == null)
@@ -426,57 +166,202 @@ namespace DCL
             }
 
 
-            internal void CleanAssetBundleFolder(string[] assetBundles)
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="rawContents"></param>
+            /// <returns></returns>
+            private bool DumpAssets(ContentServerUtils.MappingPair[] rawContents)
             {
-                ABConverter.Utils.CleanAssetBundleFolder(env.file, settings.finalAssetBundlePath, assetBundles, hashLowercaseToHashProper);
-            }
+                List<AssetPath> gltfPaths = ABConverter.Utils.GetPathsFromPairs(finalDownloadedPath, rawContents, Config.gltfExtensions);
+                List<AssetPath> bufferPaths = ABConverter.Utils.GetPathsFromPairs(finalDownloadedPath, rawContents, Config.bufferExtensions);
+                List<AssetPath> texturePaths = ABConverter.Utils.GetPathsFromPairs(finalDownloadedPath, rawContents, Config.textureExtensions);
 
+                List<AssetPath> assetsToMark = new List<AssetPath>();
 
-            internal void PopulateLowercaseMappings(ContentServerUtils.MappingPair[] pairs)
-            {
-                foreach (var content in pairs)
+                if (!PrepareDump(ref gltfPaths))
+                    return false;
+
+                //NOTE(Brian): Prepare textures and buffers. We should prepare all the dependencies in this phase.
+                assetsToMark.AddRange(DumpSceneTextures(texturePaths));
+                DumpSceneBuffers(bufferPaths);
+
+                GLTFImporter.OnGLTFRootIsConstructed -= ABConverter.Utils.FixGltfRootInvalidUriCharacters;
+                GLTFImporter.OnGLTFRootIsConstructed += ABConverter.Utils.FixGltfRootInvalidUriCharacters;
+
+                //NOTE(Brian): Prepare gltfs gathering its dependencies first and filling the importer's static cache.
+                foreach (var gltfPath in gltfPaths)
                 {
-                    string hashLower = content.hash.ToLowerInvariant();
-
-                    if (!hashLowercaseToHashProper.ContainsKey(hashLower))
-                        hashLowercaseToHashProper.Add(hashLower, content.hash);
+                    assetsToMark.Add(DumpGltf(gltfPath, texturePaths, bufferPaths));
                 }
+
+                env.assetDatabase.Refresh();
+                env.assetDatabase.SaveAssets();
+
+                MarkAllAssetBundles(assetsToMark);
+                MarkShaderAssetBundle();
+                return true;
             }
 
-            internal void RetrieveAndInjectTexture(AssetPath gltfPath, AssetPath texturePath)
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="gltfPaths"></param>
+            /// <returns></returns>
+            internal bool PrepareDump(ref List<AssetPath> gltfPaths)
             {
-                string finalPath = texturePath.finalPath;
+                bool shouldAbortBecauseAllBundlesExist = true;
 
-                if (!env.file.Exists(finalPath))
-                    return;
+                totalAssets += gltfPaths.Count;
 
-                Texture2D t2d = env.assetDatabase.LoadAssetAtPath<Texture2D>(finalPath);
+                if (settings.skipAlreadyBuiltBundles)
+                {
+                    int gltfCount = gltfPaths.Count;
 
-                if (t2d == null)
-                    return;
+                    gltfPaths = gltfPaths.Where(
+                        assetPath =>
+                            !env.file.Exists(settings.finalAssetBundlePath + assetPath.hash)).ToList();
 
-                string relativePath = ABConverter.Utils.GetRelativePathTo(gltfPath.file, texturePath.file);
+                    int skippedCount = gltfCount - gltfPaths.Count;
+                    skippedAssets += skippedCount;
+                    shouldAbortBecauseAllBundlesExist = gltfPaths.Count == 0;
+                }
+                else
+                {
+                    shouldAbortBecauseAllBundlesExist = false;
+                }
 
-                //NOTE(Brian): This cache will be used by the GLTF importer when seeking textures. This way the importer will
-                //             consume the asset bundle dependencies instead of trying to create new textures.
-                PersistentAssetCache.AddImage(relativePath, gltfPath.finalPath, new RefCountedTextureData(relativePath, t2d));
+                if (shouldAbortBecauseAllBundlesExist)
+                {
+                    log.Info("All assets in this scene were already generated!. Skipping.");
+                    return false;
+                }
+
+                return true;
             }
 
-            internal void RetrieveAndInjectBuffer(AssetPath gltfPath, AssetPath bufferPath)
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="gltfPath"></param>
+            /// <param name="texturePaths"></param>
+            /// <param name="bufferPaths"></param>
+            /// <returns></returns>
+            internal AssetPath DumpGltf(AssetPath gltfPath, List<AssetPath> texturePaths, List<AssetPath> bufferPaths)
             {
-                string finalPath = bufferPath.finalPath;
+                List<Stream> streamsToDispose = new List<Stream>();
 
-                if (!env.file.Exists(finalPath))
-                    return;
+                PersistentAssetCache.ImageCacheByUri.Clear();
+                PersistentAssetCache.StreamCacheByUri.Clear();
 
-                Stream stream = env.file.OpenRead(finalPath);
-                string relativePath = ABConverter.Utils.GetRelativePathTo(gltfPath.file, bufferPath.file);
+                log.Verbose("Start injecting stuff into " + gltfPath.hash);
 
-                // NOTE(Brian): This cache will be used by the GLTF importer when seeking streams. This way the importer will
-                //              consume the asset bundle dependencies instead of trying to create new streams.
-                PersistentAssetCache.AddBuffer(relativePath, gltfPath.finalPath, new RefCountedStreamData(relativePath, stream));
+                foreach (var texturePath in texturePaths)
+                {
+                    RetrieveAndInjectTexture(gltfPath, texturePath);
+                }
+
+                foreach (var bufferPath in bufferPaths)
+                {
+                    RetrieveAndInjectBuffer(gltfPath, bufferPath);
+                }
+
+                log.Verbose("About to load " + gltfPath.hash);
+
+                //NOTE(Brian): Finally, load the gLTF. The GLTFImporter will use the PersistentAssetCache to resolve the external dependencies.
+                string path = DownloadAsset(gltfPath);
+
+                if (path != null)
+                {
+                    env.assetDatabase.Refresh();
+                    env.assetDatabase.SaveAssets();
+                }
+
+                log.Verbose("End load " + gltfPath.hash);
+
+                foreach (var streamDataKvp in PersistentAssetCache.StreamCacheByUri)
+                {
+                    if (streamDataKvp.Value.stream != null)
+                        streamsToDispose.Add(streamDataKvp.Value.stream);
+                }
+
+                foreach (var s in streamsToDispose)
+                {
+                    s.Dispose();
+                }
+
+                return path != null ? gltfPath : null;
             }
 
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="bufferPaths"></param>
+            /// <returns></returns>
+            internal List<AssetPath> DumpSceneBuffers(List<AssetPath> bufferPaths)
+            {
+                List<AssetPath> result = new List<AssetPath>(bufferPaths);
+
+                if (bufferPaths.Count == 0 || bufferPaths == null)
+                    return result;
+
+                foreach (var assetPath in bufferPaths)
+                {
+                    if (env.file.Exists(assetPath.finalPath))
+                        continue;
+
+                    var finalDlPath = DownloadAsset(assetPath);
+
+                    if (string.IsNullOrEmpty(finalDlPath))
+                    {
+                        result.Remove(assetPath);
+                        log.Error("Failed to get buffer dependencies! failing asset: " + assetPath.hash);
+                    }
+                }
+
+                return result;
+            }
+
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="textureAssetPaths"></param>
+            /// <returns></returns>
+            internal List<AssetPath> DumpSceneTextures(List<AssetPath> textureAssetPaths)
+            {
+                List<AssetPath> result = new List<AssetPath>(textureAssetPaths);
+
+                foreach (var assetPath in textureAssetPaths)
+                {
+                    if (env.file.Exists(assetPath.finalPath))
+                        continue;
+
+                    //NOTE(Brian): try to get an AB before getting the original texture, so we bind the dependencies correctly
+                    string fullPathToTag = DownloadAsset(assetPath);
+
+                    if (fullPathToTag == null)
+                    {
+                        result.Remove(assetPath);
+                        log.Error("Failed to get texture dependencies! failing asset: " + assetPath.hash);
+                        continue;
+                    }
+
+                    env.assetDatabase.ImportAsset(assetPath.finalPath, ImportAssetOptions.ForceUpdate);
+                    env.assetDatabase.SaveAssets();
+
+                    SetDeterministicAssetDatabaseGuid(assetPath);
+
+                    log.Verbose($"Dumping file -> {assetPath}");
+                }
+
+                return result;
+            }
+
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="assetPath"></param>
+            /// <returns></returns>
             internal string DownloadAsset(AssetPath assetPath)
             {
                 string outputPath = assetPath.finalPath;
@@ -508,6 +393,7 @@ namespace DCL
                 }
 
                 byte[] assetData = downloadHandler.data;
+                downloadHandler.Dispose();
 
                 log.Verbose($"Downloaded asset = {finalUrl} to {outputPath}");
 
@@ -519,6 +405,199 @@ namespace DCL
 
                 return outputPath;
             }
+
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="gltfPath"></param>
+            /// <param name="texturePath"></param>
+            internal void RetrieveAndInjectTexture(AssetPath gltfPath, AssetPath texturePath)
+            {
+                string finalPath = texturePath.finalPath;
+
+                if (!env.file.Exists(finalPath))
+                    return;
+
+                Texture2D t2d = env.assetDatabase.LoadAssetAtPath<Texture2D>(finalPath);
+
+                if (t2d == null)
+                    return;
+
+                string relativePath = ABConverter.Utils.GetRelativePathTo(gltfPath.file, texturePath.file);
+
+                //NOTE(Brian): This cache will be used by the GLTF importer when seeking textures. This way the importer will
+                //             consume the asset bundle dependencies instead of trying to create new textures.
+                PersistentAssetCache.AddImage(relativePath, gltfPath.finalPath, new RefCountedTextureData(relativePath, t2d));
+            }
+
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="gltfPath"></param>
+            /// <param name="bufferPath"></param>
+            internal void RetrieveAndInjectBuffer(AssetPath gltfPath, AssetPath bufferPath)
+            {
+                string finalPath = bufferPath.finalPath;
+
+                if (!env.file.Exists(finalPath))
+                    return;
+
+                Stream stream = env.file.OpenRead(finalPath);
+                string relativePath = ABConverter.Utils.GetRelativePathTo(gltfPath.file, bufferPath.file);
+
+                // NOTE(Brian): This cache will be used by the GLTF importer when seeking streams. This way the importer will
+                //              consume the asset bundle dependencies instead of trying to create new streams.
+                PersistentAssetCache.AddBuffer(relativePath, gltfPath.finalPath, new RefCountedStreamData(relativePath, stream));
+            }
+
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="assetPaths"></param>
+            private void MarkAllAssetBundles(List<AssetPath> assetPaths)
+            {
+                foreach (var assetPath in assetPaths)
+                {
+                    ABConverter.Utils.MarkFolderForAssetBundleBuild(assetPath.finalPath, assetPath.hash);
+                }
+            }
+
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="manifest"></param>
+            /// <returns></returns>
+            protected virtual bool BuildAssetBundles(out AssetBundleManifest manifest)
+            {
+                env.assetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport | ImportAssetOptions.ForceUpdate | ImportAssetOptions.ImportRecursive);
+                env.assetDatabase.SaveAssets();
+
+                env.assetDatabase.MoveAsset(finalDownloadedPath, Config.DOWNLOADED_PATH_ROOT);
+
+                manifest = env.buildPipeline.BuildAssetBundles(settings.finalAssetBundlePath, BuildAssetBundleOptions.UncompressedAssetBundle | BuildAssetBundleOptions.ForceRebuildAssetBundle, BuildTarget.WebGL);
+
+                if (manifest == null)
+                {
+                    log.Error("Error generating asset bundle!");
+                    return false;
+                }
+
+                DependencyMapBuilder.Generate(env.file, settings.finalAssetBundlePath, hashLowercaseToHashProper, manifest, MAIN_SHADER_AB_NAME);
+                logBuffer += $"Generating asset bundles at path: {settings.finalAssetBundlePath}\n";
+
+                string[] assetBundles = manifest.GetAllAssetBundles();
+
+                logBuffer += $"Total generated asset bundles: {assetBundles.Length}\n";
+
+                for (int i = 0; i < assetBundles.Length; i++)
+                {
+                    if (string.IsNullOrEmpty(assetBundles[i]))
+                        continue;
+
+                    logBuffer += $"#{i} Generated asset bundle name: {assetBundles[i]}\n";
+                }
+
+                logBuffer += $"\nFree disk space after conv: {GetFreeSpace()}";
+                return true;
+            }
+
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="errorCode"></param>
+            public void CleanAndExit(ErrorCodes errorCode)
+            {
+                float conversionTime = Time.realtimeSinceStartup - startTime;
+                logBuffer = $"Conversion finished!. error code = {errorCode}";
+
+                logBuffer += "\n";
+                logBuffer += $"Converted {totalAssets - skippedAssets} of {totalAssets}. (Skipped {skippedAssets})\n";
+                logBuffer += $"Total time: {conversionTime}";
+
+                if (totalAssets > 0)
+                {
+                    logBuffer += $"... Time per asset: {conversionTime / totalAssets}\n";
+                }
+
+                logBuffer += "\n";
+                logBuffer += logBuffer;
+
+                log.Info(logBuffer);
+
+                CleanupWorkingFolders();
+                Utils.Exit((int) errorCode);
+            }
+
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="assetPath"></param>
+            private void SetDeterministicAssetDatabaseGuid(AssetPath assetPath)
+            {
+                string metaPath = env.assetDatabase.GetTextMetaFilePathFromAssetPath(assetPath.finalPath);
+
+                env.assetDatabase.ReleaseCachedFileHandles();
+
+                //NOTE(Brian): in asset bundles, all dependencies are resolved by their guid (and not the AB hash nor CRC)
+                //             So to ensure dependencies are being kept in subsequent editor runs we normalize the asset guid using
+                //             the CID.
+                string metaContent = env.file.ReadAllText(metaPath);
+                string guid = ABConverter.Utils.CidToGuid(assetPath.hash);
+                string newMetaContent = Regex.Replace(metaContent, @"guid: \w+?\n", $"guid: {guid}\n");
+
+                //NOTE(Brian): We must do this hack in order to the new guid to be added to the AssetDatabase.
+                //             on windows, an AssetImporter.SaveAndReimport call makes the trick, but this won't work
+                //             on Unix based OSes for some reason.
+                env.file.Delete(metaPath);
+
+                env.file.Copy(assetPath.finalPath, finalDownloadedPath + "tmp");
+                env.assetDatabase.DeleteAsset(assetPath.finalPath);
+                env.file.Delete(assetPath.finalPath);
+
+                env.assetDatabase.Refresh();
+                env.assetDatabase.SaveAssets();
+
+                env.file.Copy(finalDownloadedPath + "tmp", assetPath.finalPath);
+                env.file.WriteAllText(metaPath, newMetaContent);
+                env.file.Delete(finalDownloadedPath + "tmp");
+
+                env.assetDatabase.Refresh();
+                env.assetDatabase.SaveAssets();
+            }
+
+
+            internal void CleanAssetBundleFolder(string[] assetBundles)
+            {
+                ABConverter.Utils.CleanAssetBundleFolder(env.file, settings.finalAssetBundlePath, assetBundles, hashLowercaseToHashProper);
+            }
+
+
+            internal void PopulateLowercaseMappings(ContentServerUtils.MappingPair[] pairs)
+            {
+                foreach (var content in pairs)
+                {
+                    string hashLower = content.hash.ToLowerInvariant();
+
+                    if (!hashLowercaseToHashProper.ContainsKey(hashLower))
+                        hashLowercaseToHashProper.Add(hashLower, content.hash);
+                }
+            }
+
+            /// <summary>
+            /// 
+            /// </summary>
+            private void MarkShaderAssetBundle()
+            {
+                //NOTE(Brian): We tag the main shader, so all the asset bundles don't contain repeated shader assets.
+                //             This way we save the big Shader.Parse and gpu compiling performance overhead and make
+                //             the bundles a bit lighter.
+
+                //             This shader bundle doesn't need to be really used, as we are going to use the 
+                //             embedded one, so we are going to delete it after the generation ended.
+                var mainShader = Shader.Find("DCL/LWRP/Lit");
+                ABConverter.Utils.MarkAssetForAssetBundleBuild(env.assetDatabase, mainShader, MAIN_SHADER_AB_NAME);
+            }
+
 
             internal virtual void InitializeDirectoryPaths(bool deleteIfExists)
             {

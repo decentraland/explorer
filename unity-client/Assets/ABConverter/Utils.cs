@@ -130,6 +130,7 @@ namespace DCL
                 }
 
                 ScenesAPIData scenesApiData = JsonUtility.FromJson<ScenesAPIData>(downloadHandler.text);
+                downloadHandler.Dispose();
 
                 Assert.IsTrue(scenesApiData != null, "Invalid response from ScenesAPI");
                 Assert.IsTrue(scenesApiData.data != null, "Invalid response from ScenesAPI");
@@ -162,6 +163,7 @@ namespace DCL
                     }
 
                     ScenesAPIData scenesApiData = JsonUtility.FromJson<ScenesAPIData>(downloadHandler.text);
+                    downloadHandler.Dispose();
 
                     Assert.IsTrue(scenesApiData != null, "Invalid response from ScenesAPI");
                     Assert.IsTrue(scenesApiData.data != null, "Invalid response from ScenesAPI");
@@ -191,6 +193,7 @@ namespace DCL
                 }
 
                 MappingsAPIData parcelInfoApiData = JsonUtility.FromJson<MappingsAPIData>(downloadHandler.text);
+                downloadHandler.Dispose();
 
                 if (parcelInfoApiData.data.Length == 0 || parcelInfoApiData.data == null)
                 {

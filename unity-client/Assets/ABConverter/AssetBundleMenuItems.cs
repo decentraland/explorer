@@ -21,19 +21,14 @@ namespace DCL
         [MenuItem("Decentraland/Asset Bundle Builder/Dump Zone -110,-110")]
         public static void DumpZoneArea()
         {
-            ABConverter.Client.DumpArea(new Vector2Int(-110, -110), new Vector2Int(1, 1), ApiTLD.ORG, new ABConverter.Client.Settings());
+            ABConverter.Client.DumpArea(new Vector2Int(-110, -110), new Vector2Int(1, 1));
         }
 
         [MenuItem("Decentraland/Asset Bundle Builder/Dump Org 0,0")]
         public static void DumpCenterPlaza()
         {
-            var settings = new ABConverter.Client.Settings
-            {
-                skipAlreadyBuiltBundles = true
-            };
-
-            var zoneArray = Utils.GetCenteredZoneArray(new Vector2Int(0, 0), new Vector2Int(30, 30));
-            ABConverter.Client.DumpArea(zoneArray, ApiTLD.ORG, settings);
+            var zoneArray = Utils.GetCenteredZoneArray(new Vector2Int(0, 0), new Vector2Int(1, 1));
+            ABConverter.Client.DumpArea(zoneArray);
         }
 
         [MenuItem("Decentraland/Asset Bundle Builder/Only Build Bundles")]

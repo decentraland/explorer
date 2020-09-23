@@ -57,9 +57,7 @@ namespace ABConverterTests
         {
             ResetCacheAndWorkingFolders();
 
-            var settings = new ABConverter.Client.Settings();
-            settings.baseUrl = ContentServerUtils.GetBaseUrl(ContentServerUtils.ApiTLD.ZONE) + "/contents/";
-            settings.verbose = false;
+            var settings = new ABConverter.Client.Settings(ContentServerUtils.ApiTLD.ZONE);
             settings.deleteDownloadPathAfterFinished = false;
 
             env = ABConverter.Environment.CreateWithMockImplementations();
@@ -236,6 +234,7 @@ namespace ABConverterTests
 
             var output = core.DumpGltf(gltfPath, texturePaths, bufferPaths);
 
+            LogAssert.Expect(LogType.Error, new Regex("^.*?Download failed!"));
             Assert.IsNull(output);
         }
 
@@ -255,9 +254,7 @@ namespace ABConverterTests
             string targetGuid2 = ABConverter.Utils.CidToGuid(hash2);
             string targetGuid3 = ABConverter.Utils.CidToGuid(hash3);
 
-            LogAssert.ignoreFailingMessages = true;
             var textures = core.DumpSceneTextures(paths);
-            LogAssert.ignoreFailingMessages = false;
 
             Assert.AreEqual(3, textures.Count);
 
@@ -291,9 +288,7 @@ namespace ABConverterTests
             paths.Add(new AssetPath(basePath, hash3, files[2]));
             paths.Add(new AssetPath(basePath, hash4, files[3]));
 
-            LogAssert.ignoreFailingMessages = true;
             var buffers = core.DumpSceneBuffers(paths);
-            LogAssert.ignoreFailingMessages = false;
 
             Assert.AreEqual(3, buffers.Count);
 
@@ -335,7 +330,6 @@ namespace ABConverterTests
             var state = ABConverter.Client.DumpArea(
                 new Vector2Int(-110, -110),
                 new Vector2Int(1, 1),
-                ContentServerUtils.ApiTLD.ZONE,
                 core.settings);
 
             yield return new WaitUntil(() => state.step == ABConverter.Core.State.Step.FINISHED);

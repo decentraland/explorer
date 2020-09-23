@@ -58,14 +58,15 @@ namespace DCL
                     try
                     {
                         req = UnityWebRequest.Get(url);
-                        req.SendWebRequest();
-                        while (req.isDone == false)
+                        var op = req.SendWebRequest();
+                        while (op.isDone == false)
                         {
                         }
                     }
                     catch (HttpRequestException e)
                     {
                         throw new HttpRequestException($"{e.Message} -- ({url})", e);
+                        break;
                     }
 
                     retryCount--;
@@ -73,10 +74,16 @@ namespace DCL
                     if (retryCount == 0)
                     {
                         throw new HttpRequestException($"{req.error} -- ({url})");
+                        break;
                     }
                 } while (!req.WebRequestSucceded());
 
-                return req.downloadHandler;
+                DownloadHandler result = req.downloadHandler;
+
+                req.disposeDownloadHandlerOnDispose = false;
+                req.Dispose();
+
+                return result;
             }
         }
     }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using UnityEditor;
@@ -13,15 +14,45 @@ namespace DCL
         {
             public class Settings
             {
+                /// <summary>
+                /// 
+                /// </summary>
                 public bool deleteDownloadPathAfterFinished = false;
+
+                /// <summary>
+                /// 
+                /// </summary>
                 public bool skipAlreadyBuiltBundles = false;
+
+                /// <summary>
+                /// 
+                /// </summary>
                 public bool verbose = false;
+
+                /// <summary>
+                /// 
+                /// </summary>
                 public string finalAssetBundlePath = Config.ASSET_BUNDLES_PATH_ROOT + Path.DirectorySeparatorChar;
+
+                /// <summary>
+                /// 
+                /// </summary>
+                public ContentServerUtils.ApiTLD tld = ContentServerUtils.ApiTLD.ORG;
+
+                /// <summary>
+                /// 
+                /// </summary>
                 public string baseUrl;
 
                 public Settings Clone()
                 {
                     return this.MemberwiseClone() as Settings;
+                }
+
+                public Settings(ContentServerUtils.ApiTLD tld = ContentServerUtils.ApiTLD.ORG)
+                {
+                    this.tld = tld;
+                    this.baseUrl = ContentServerUtils.GetContentAPIUrlBase(tld);
                 }
             }
 
@@ -46,13 +77,14 @@ namespace DCL
                 ExportSceneToAssetBundles(System.Environment.GetCommandLineArgs());
             }
 
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="commandLineArgs"></param>
+            /// <exception cref="ArgumentException"></exception>
             public static void ExportSceneToAssetBundles(string[] commandLineArgs)
             {
                 Settings settings = new Settings();
-                settings.skipAlreadyBuiltBundles = true;
-                settings.deleteDownloadPathAfterFinished = true;
-                settings.verbose = true;
-                settings.baseUrl = ContentServerUtils.GetBaseUrl(ContentServerUtils.ApiTLD.ORG) + "/contents/";
 
                 try
                 {
@@ -80,7 +112,7 @@ namespace DCL
                             throw new ArgumentException("Invalid sceneCid argument! Please use -sceneCid <id> to establish the desired id to process.");
                         }
 
-                        DumpScene(sceneCid[0], ContentServerUtils.ApiTLD.ORG, settings);
+                        DumpScene(sceneCid[0], settings);
                         return;
                     }
 
@@ -109,7 +141,7 @@ namespace DCL
                             throw new ArgumentException("Invalid parcelsXYWH argument! Please don't use negative width/height values, and ensure any given width/height doesn't exceed 10.");
                         }
 
-                        DumpArea(new Vector2Int(x, y), new Vector2Int(w, h), ContentServerUtils.ApiTLD.ORG, settings);
+                        DumpArea(new Vector2Int(x, y), new Vector2Int(w, h), settings);
                         return;
                     }
 
@@ -121,7 +153,13 @@ namespace DCL
                 }
             }
 
-            public static Core.State ConvertScenesToAssetBundles(List<string> sceneCidsList, ContentServerUtils.ApiTLD tld, Settings settings = null)
+            /// <summary>
+            /// This will start the asset bundle conversion for a given scene list, given a scene cids list.
+            /// </summary>
+            /// <param name="sceneCidsList">The cid list for the scenes to gather from the catalyst's content server</param>
+            /// <param name="settings">Any conversion settings object, if its null, a new one will be created</param>
+            /// <returns>A state context object useful for tracking the conversion progress</returns>
+            public static Core.State ConvertScenesToAssetBundles(List<string> sceneCidsList, Settings settings = null)
             {
                 if (sceneCidsList == null || sceneCidsList.Count == 0)
                 {
@@ -133,44 +171,74 @@ namespace DCL
 
                 List<ContentServerUtils.MappingPair> rawContents = new List<ContentServerUtils.MappingPair>();
 
+                EnsureEnvironment();
+
+                if (settings == null)
+                    settings = new Settings();
+
                 foreach (var sceneCid in sceneCidsList)
                 {
-                    ContentServerUtils.MappingsAPIData parcelInfoApiData = Utils.GetSceneMappingsData(env.webRequest, tld, sceneCid);
+                    ContentServerUtils.MappingsAPIData parcelInfoApiData = ABConverter.Utils.GetSceneMappingsData(env.webRequest, settings.tld, sceneCid);
                     rawContents.AddRange(parcelInfoApiData.data[0].content.contents);
                 }
 
-                var core = new Core(env, settings);
+                var core = new ABConverter.Core(env, settings);
                 core.Convert(rawContents.ToArray());
                 return core.state;
             }
 
-            public static Core.State DumpArea(Vector2Int coords, Vector2Int size, ContentServerUtils.ApiTLD tld = ContentServerUtils.ApiTLD.ORG, Settings settings = null)
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="coords"></param>
+            /// <param name="size"></param>
+            /// <param name="settings"></param>
+            /// <returns></returns>
+            public static Core.State DumpArea(Vector2Int coords, Vector2Int size, Settings settings = null)
             {
+                EnsureEnvironment();
+
                 if (settings == null)
                     settings = new Settings();
 
-                HashSet<string> sceneCids = Utils.GetSceneCids(env.webRequest, tld, coords, size);
+                HashSet<string> sceneCids = ABConverter.Utils.GetSceneCids(env.webRequest, settings.tld, coords, size);
                 List<string> sceneCidsList = sceneCids.ToList();
-                return ConvertScenesToAssetBundles(sceneCidsList, tld, settings);
+                return ConvertScenesToAssetBundles(sceneCidsList, settings);
             }
 
-            public static Core.State DumpArea(List<Vector2Int> coords, ContentServerUtils.ApiTLD tld = ContentServerUtils.ApiTLD.ORG, Settings settings = null)
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="coords"></param>
+            /// <param name="settings"></param>
+            /// <returns></returns>
+            public static Core.State DumpArea(List<Vector2Int> coords, Settings settings = null)
             {
+                EnsureEnvironment();
+
                 if (settings == null)
                     settings = new Settings();
 
-                HashSet<string> sceneCids = Utils.GetScenesCids(env.webRequest, tld, coords);
+                HashSet<string> sceneCids = Utils.GetScenesCids(env.webRequest, settings.tld, coords);
 
                 List<string> sceneCidsList = sceneCids.ToList();
-                return ConvertScenesToAssetBundles(sceneCidsList, tld, settings);
+                return ConvertScenesToAssetBundles(sceneCidsList, settings);
             }
 
-            public static Core.State DumpScene(string cid, ContentServerUtils.ApiTLD tld = ContentServerUtils.ApiTLD.ORG, Settings settings = null)
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="cid"></param>
+            /// <param name="settings"></param>
+            /// <returns></returns>
+            public static Core.State DumpScene(string cid, Settings settings = null)
             {
+                EnsureEnvironment();
+
                 if (settings == null)
                     settings = new Settings();
 
-                return ConvertScenesToAssetBundles(new List<string> {cid}, tld, settings);
+                return ConvertScenesToAssetBundles(new List<string> {cid}, settings);
             }
         }
     }
