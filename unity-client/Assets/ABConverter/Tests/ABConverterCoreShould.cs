@@ -13,16 +13,6 @@ using UnityGLTF.Cache;
 
 namespace ABConverterTests
 {
-    public class ABConverterUtilsShould
-    {
-        [Test]
-        public void MarkForAssetBundleBuild()
-        {
-            string url = @"Assets\_Downloaded\QmPLdeHkHbT1SEdouMJLFRAubYr4jiQEut9HhKyuQ8oK8V\QmPLdeHkHbT1SEdouMJLFRAubYr4jiQEut9HhKyuQ8oK8V";
-            ABConverter.Utils.MarkFolderForAssetBundleBuild(url, "Pepe");
-        }
-    }
-
     public class ABConverterShould
     {
         [UnityTest]
@@ -74,7 +64,7 @@ namespace ABConverterTests
         [TearDown]
         public void TearDown()
         {
-            //ResetCacheAndWorkingFolders();
+            ResetCacheAndWorkingFolders();
         }
 
         [Test]
@@ -143,15 +133,15 @@ namespace ABConverterTests
             env.file.WriteAllText(texturePath.finalPath, content1);
             env.file.WriteAllText(texturePath2.finalPath, content2);
 
-            core.RetrieveAndInjectBuffer(gltfPath, texturePath);
-            core.RetrieveAndInjectBuffer(gltfPath, texturePath2);
+            core.RetrieveAndInjectTexture(gltfPath, texturePath);
+            core.RetrieveAndInjectTexture(gltfPath, texturePath2);
 
             string id1 = $"texture.png@{gltfPath.finalPath}";
             string id2 = $"invalid-texture.png@{gltfPath.finalPath}";
 
             //NOTE(Brian): Check if streams exists and are added correctly
-            Assert.IsTrue(PersistentAssetCache.HasImage(id1));
-            Assert.IsFalse(PersistentAssetCache.HasImage(id2), "Second file shouldn't be injected because it doesn't exist!");
+            Assert.IsTrue(PersistentAssetCache.HasImage(id1), $"id1:{id1} doesn't exist?");
+            Assert.IsFalse(PersistentAssetCache.HasImage(id2), $"Second file with {id2} shouldn't be injected because it doesn't exist!");
 
             Assert.IsNotNull(PersistentAssetCache.GetImage(id1), "First image don't exist!");
 
@@ -239,7 +229,7 @@ namespace ABConverterTests
         }
 
         [Test]
-        public void DumpTexturesCorrectly()
+        public void DumpImportableAssetsCorrectly()
         {
             List<AssetPath> paths = new List<AssetPath>();
 
@@ -255,6 +245,9 @@ namespace ABConverterTests
             string targetGuid3 = ABConverter.Utils.CidToGuid(hash3);
 
             var textures = core.DumpImportableAssets(paths);
+
+            LogAssert.Expect(LogType.Error, new Regex(@"^.*?Download failed"));
+            LogAssert.Expect(LogType.Error, new Regex(@"^.*?QmHash4"));
 
             Assert.AreEqual(3, textures.Count);
 
@@ -277,7 +270,7 @@ namespace ABConverterTests
         }
 
         [Test]
-        public void DumpBuffersCorrectly()
+        public void DumpRawAssetsCorrectly()
         {
             List<AssetPath> paths = new List<AssetPath>();
 
@@ -289,6 +282,9 @@ namespace ABConverterTests
             paths.Add(new AssetPath(basePath, hash4, files[3]));
 
             var buffers = core.DumpRawAssets(paths);
+
+            LogAssert.Expect(LogType.Error, new Regex(@"^.*?Download failed"));
+            LogAssert.Expect(LogType.Error, new Regex(@"^.*?QmHash4"));
 
             Assert.AreEqual(3, buffers.Count);
 
