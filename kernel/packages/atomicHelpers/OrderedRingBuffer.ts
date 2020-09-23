@@ -78,7 +78,9 @@ export class OrderedRingBuffer<T extends TypedArray> {
     return this.peek(chunk.startPointer, chunk.length)
   }
 
-  peek(startPointer: number, readCount?: number): T {
+  peek(startPointer?: number, readCount?: number): T {
+    if (!startPointer) startPointer = this.readPointer
+
     const maxCountToRead = this.writePointer - this.readPointer
 
     const count = readCount ? Math.min(readCount, maxCountToRead) : maxCountToRead
