@@ -397,10 +397,14 @@ public class BuildModeController : MonoBehaviour
 
         currentScaleAdded = 0;
         currentYRotationAdded = 0;
-        initialRotation = Quaternion.identity;
-        gameObjectToEdit.transform.rotation = Quaternion.identity;
-        snapGO.transform.rotation = Quaternion.identity;
-        freeMovementGO.transform.rotation = Quaternion.identity;
+
+        Quaternion zeroAnglesQuaternion = Quaternion.Euler(Vector3.zero);
+        initialRotation = zeroAnglesQuaternion;
+
+        snapGO.transform.rotation = zeroAnglesQuaternion;
+        freeMovementGO.transform.rotation = zeroAnglesQuaternion;
+        gameObjectToEdit.transform.rotation = zeroAnglesQuaternion;
+      
     }
     public void SetSnapActive(bool isActive)
     {
@@ -527,21 +531,29 @@ public class BuildModeController : MonoBehaviour
         else
         {
 
+
+
             freeMovementGO.transform.position = gameObjectToEdit.transform.position;
+            freeMovementGO.transform.rotation = gameObjectToEdit.transform.rotation;
             freeMovementGO.transform.localScale = gameObjectToEdit.transform.localScale;
+    
+
             Vector3 pointToLookAt = Camera.main.transform.position;
             pointToLookAt.y = gameObjectToEdit.transform.position.y;
             Quaternion lookOnLook = Quaternion.LookRotation(gameObjectToEdit.transform.position - pointToLookAt);
 
             freeMovementGO.transform.rotation = lookOnLook;
             gameObjectToEdit.transform.SetParent(freeMovementGO.transform, true);
+
         }
     }
+
+
     void SelectObject()
     {
 
         RaycastHit hit;
-        UnityEngine.Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        UnityEngine.Ray ray = Camera.main.ScreenPointToRay(new Vector3(Screen.width / 2, Screen.height / 2, 0));
         if (Physics.Raycast(ray, out hit, distanceLimitToSelectObjects, layerToRaycast))
         {
             string entityID = hit.collider.gameObject.name;
@@ -603,8 +615,7 @@ public class BuildModeController : MonoBehaviour
         DCLTransform.model.rotation = Quaternion.Euler(Vector3.zero);
         DCLTransform.model.scale = newEntity.gameObject.transform.lossyScale;
 
-        sceneToEdit.EntityComponentCreateOrUpdateFromUnity(newEntity.entityId, CLASS_ID_COMPONENT.TRANSFORM, DCLTransform.model);
-        //newEntity.gameObject.transform.SetParent(sceneToEdit.transform);
+        sceneToEdit.EntityComponentCreateOrUpdateFromUnity(newEntity.entityId, CLASS_ID_COMPONENT.TRANSFORM, DCLTransform.model);      
 
         createdEntitiesList.Add(newEntity);
 
