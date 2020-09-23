@@ -22,7 +22,7 @@ public class UtilsTests
     public void GetRelativePathToTest(string expected, string from, string to)
     {
         expected = expected.Replace('|', Path.DirectorySeparatorChar);
-        Assert.AreEqual(expected, ABConverter.Utils.GetRelativePathTo(from, to));
+        Assert.AreEqual(expected, ABConverter.PathUtils.GetRelativePathTo(from, to));
     }
 
     [Test]
@@ -32,8 +32,8 @@ public class UtilsTests
     [TestCase("C:/MyProject", "")]
     public void AssetPathToFullPathTest(string expected, string input)
     {
-        expected = ABConverter.Utils.FixDirectorySeparator(expected);
-        string result = ABConverter.Utils.AssetPathToFullPath(input, $"C:/MyProject/Assets");
+        expected = ABConverter.PathUtils.FixDirectorySeparator(expected);
+        string result = ABConverter.PathUtils.AssetPathToFullPath(input, $"C:/MyProject/Assets");
         UnityEngine.Assertions.Assert.AreEqual(expected, result);
     }
 
@@ -44,8 +44,8 @@ public class UtilsTests
     [TestCase("", "")]
     public void FullPathToAssetPath(string input, string expected)
     {
-        expected = ABConverter.Utils.FixDirectorySeparator(expected);
-        string result = ABConverter.Utils.FullPathToAssetPath(input);
+        expected = ABConverter.PathUtils.FixDirectorySeparator(expected);
+        string result = ABConverter.PathUtils.FullPathToAssetPath(input);
         UnityEngine.Assertions.Assert.AreEqual(expected, result);
     }
 }

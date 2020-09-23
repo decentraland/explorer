@@ -61,10 +61,10 @@ namespace DCL
             {
                 this.env = env;
 
-                this.settings = settings.Clone() ?? new Client.Settings(ContentServerUtils.ApiTLD.ORG);
+                this.settings = settings?.Clone() ?? new Client.Settings();
 
-                finalDownloadedPath = Utils.FixDirectorySeparator(Config.DOWNLOADED_PATH_ROOT + Config.DASH);
-                log.verboseEnabled = settings.verbose;
+                finalDownloadedPath = PathUtils.FixDirectorySeparator(Config.DOWNLOADED_PATH_ROOT + Config.DASH);
+                log.verboseEnabled = this.settings.verbose;
 
                 state.step = State.Step.IDLE;
             }
@@ -91,7 +91,7 @@ namespace DCL
 
                 startTime = Time.realtimeSinceStartup;
 
-                log.Info($"Conversion start... free space in disk: {GetFreeSpace()}");
+                log.Info($"Conversion start... free space in disk: {PathUtils.GetFreeSpace()}");
 
                 InitializeDirectoryPaths(true);
                 PopulateLowercaseMappings(rawContents);
@@ -183,13 +183,12 @@ namespace DCL
                     return false;
 
                 //NOTE(Brian): Prepare textures and buffers. We should prepare all the dependencies in this phase.
-                assetsToMark.AddRange(DumpSceneTextures(texturePaths));
-                DumpSceneBuffers(bufferPaths);
+                assetsToMark.AddRange(DumpImportableAssets(texturePaths));
+                DumpRawAssets(bufferPaths);
 
                 GLTFImporter.OnGLTFRootIsConstructed -= ABConverter.Utils.FixGltfRootInvalidUriCharacters;
                 GLTFImporter.OnGLTFRootIsConstructed += ABConverter.Utils.FixGltfRootInvalidUriCharacters;
 
-                //NOTE(Brian): Prepare gltfs gathering its dependencies first and filling the importer's static cache.
                 foreach (var gltfPath in gltfPaths)
                 {
                     assetsToMark.Add(DumpGltf(gltfPath, texturePaths, bufferPaths));
@@ -256,6 +255,7 @@ namespace DCL
 
                 log.Verbose("Start injecting stuff into " + gltfPath.hash);
 
+                //NOTE(Brian): Prepare gltfs gathering its dependencies first and filling the importer's static cache.
                 foreach (var texturePath in texturePaths)
                 {
                     RetrieveAndInjectTexture(gltfPath, texturePath);
@@ -268,7 +268,8 @@ namespace DCL
 
                 log.Verbose("About to load " + gltfPath.hash);
 
-                //NOTE(Brian): Finally, load the gLTF. The GLTFImporter will use the PersistentAssetCache to resolve the external dependencies.
+                //NOTE(Brian): Load the gLTF after the dependencies are injected.
+                //             The GLTFImporter will use the PersistentAssetCache to resolve them.
                 string path = DownloadAsset(gltfPath);
 
                 if (path != null)
@@ -298,7 +299,7 @@ namespace DCL
             /// </summary>
             /// <param name="bufferPaths"></param>
             /// <returns></returns>
-            internal List<AssetPath> DumpSceneBuffers(List<AssetPath> bufferPaths)
+            internal List<AssetPath> DumpRawAssets(List<AssetPath> bufferPaths)
             {
                 List<AssetPath> result = new List<AssetPath>(bufferPaths);
 
@@ -323,15 +324,22 @@ namespace DCL
             }
 
             /// <summary>
-            /// 
+            /// This will dump all assets contained in the AssetPath list using the baseUrl + hash.
+            ///
+            /// After the assets are dumped, they will be imported using Unity's AssetDatabase and
+            /// their guids will be normalized using the asset's cid.
+            ///
+            /// The guid normalization will ensure the guids remain consistent and the same asset will
+            /// always have the asset guid. If we don't normalize the guids, Unity will chose a random one,
+            /// and this can break the Asset Bundles dependencies as they are resolved by guid.
             /// </summary>
-            /// <param name="textureAssetPaths"></param>
-            /// <returns></returns>
-            internal List<AssetPath> DumpSceneTextures(List<AssetPath> textureAssetPaths)
+            /// <param name="assetPaths">List of assetPaths to be dumped</param>
+            /// <returns>A list with assetPaths that were successfully dumped. This list will be empty if all dumps failed.</returns>
+            internal List<AssetPath> DumpImportableAssets(List<AssetPath> assetPaths)
             {
-                List<AssetPath> result = new List<AssetPath>(textureAssetPaths);
+                List<AssetPath> result = new List<AssetPath>(assetPaths);
 
-                foreach (var assetPath in textureAssetPaths)
+                foreach (var assetPath in assetPaths)
                 {
                     if (env.file.Exists(assetPath.finalPath))
                         continue;
@@ -358,10 +366,11 @@ namespace DCL
             }
 
             /// <summary>
-            /// 
+            /// This will download a single asset referenced by an AssetPath.
+            /// The download target is baseUrl + hash.
             /// </summary>
-            /// <param name="assetPath"></param>
-            /// <returns></returns>
+            /// <param name="assetPath">The AssetPath object referencing the asset to be downloaded</param>
+            /// <returns>The file output path. Null if download failed.</returns>
             internal string DownloadAsset(AssetPath assetPath)
             {
                 string outputPath = assetPath.finalPath;
@@ -423,7 +432,7 @@ namespace DCL
                 if (t2d == null)
                     return;
 
-                string relativePath = ABConverter.Utils.GetRelativePathTo(gltfPath.file, texturePath.file);
+                string relativePath = ABConverter.PathUtils.GetRelativePathTo(gltfPath.file, texturePath.file);
 
                 //NOTE(Brian): This cache will be used by the GLTF importer when seeking textures. This way the importer will
                 //             consume the asset bundle dependencies instead of trying to create new textures.
@@ -443,7 +452,7 @@ namespace DCL
                     return;
 
                 Stream stream = env.file.OpenRead(finalPath);
-                string relativePath = ABConverter.Utils.GetRelativePathTo(gltfPath.file, bufferPath.file);
+                string relativePath = ABConverter.PathUtils.GetRelativePathTo(gltfPath.file, bufferPath.file);
 
                 // NOTE(Brian): This cache will be used by the GLTF importer when seeking streams. This way the importer will
                 //              consume the asset bundle dependencies instead of trying to create new streams.
@@ -451,9 +460,9 @@ namespace DCL
             }
 
             /// <summary>
-            /// 
+            /// Mark all the given assetPaths to be built as asset bundles by Unity's BuildPipeline.
             /// </summary>
-            /// <param name="assetPaths"></param>
+            /// <param name="assetPaths">The paths to be built.</param>
             private void MarkAllAssetBundles(List<AssetPath> assetPaths)
             {
                 foreach (var assetPath in assetPaths)
@@ -463,10 +472,10 @@ namespace DCL
             }
 
             /// <summary>
-            /// 
+            /// Build all marked paths as asset bundles using Unity's BuildPipeline and generate their .depmap files
             /// </summary>
-            /// <param name="manifest"></param>
-            /// <returns></returns>
+            /// <param name="manifest">AssetBundleManifest generated by the build.</param>
+            /// <returns>true is build was successful</returns>
             protected virtual bool BuildAssetBundles(out AssetBundleManifest manifest)
             {
                 env.assetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport | ImportAssetOptions.ForceUpdate | ImportAssetOptions.ImportRecursive);
@@ -497,15 +506,15 @@ namespace DCL
                     logBuffer += $"#{i} Generated asset bundle name: {assetBundles[i]}\n";
                 }
 
-                logBuffer += $"\nFree disk space after conv: {GetFreeSpace()}";
+                logBuffer += $"\nFree disk space after conv: {PathUtils.GetFreeSpace()}";
                 return true;
             }
 
             /// <summary>
-            /// 
+            /// Clean all working folders and end the batch process.
             /// </summary>
-            /// <param name="errorCode"></param>
-            public void CleanAndExit(ErrorCodes errorCode)
+            /// <param name="errorCode">final errorCode of the conversion process</param>
+            private void CleanAndExit(ErrorCodes errorCode)
             {
                 float conversionTime = Time.realtimeSinceStartup - startTime;
                 logBuffer = $"Conversion finished!. error code = {errorCode}";
@@ -529,18 +538,22 @@ namespace DCL
             }
 
             /// <summary>
-            /// 
+            /// in asset bundles, all dependencies are resolved by their guid (and not the AB hash nor CRC)
+            /// So to ensure dependencies are being kept in subsequent editor runs we normalize the asset guid using
+            /// the CID.
+            ///
+            /// This method:
+            /// - Looks for the meta file of the given assetPath.
+            /// - Changes the .meta guid using the assetPath's cid as seed.
+            /// - Does some file system gymnastics to make sure the new guid is imported to our AssetDatabase.
             /// </summary>
-            /// <param name="assetPath"></param>
+            /// <param name="assetPath">AssetPath of the target asset to modify</param>
             private void SetDeterministicAssetDatabaseGuid(AssetPath assetPath)
             {
                 string metaPath = env.assetDatabase.GetTextMetaFilePathFromAssetPath(assetPath.finalPath);
 
                 env.assetDatabase.ReleaseCachedFileHandles();
 
-                //NOTE(Brian): in asset bundles, all dependencies are resolved by their guid (and not the AB hash nor CRC)
-                //             So to ensure dependencies are being kept in subsequent editor runs we normalize the asset guid using
-                //             the CID.
                 string metaContent = env.file.ReadAllText(metaPath);
                 string guid = ABConverter.Utils.CidToGuid(assetPath.hash);
                 string newMetaContent = Regex.Replace(metaContent, @"guid: \w+?\n", $"guid: {guid}\n");
@@ -584,16 +597,15 @@ namespace DCL
             }
 
             /// <summary>
-            /// 
+            /// This method tags the main shader, so all the asset bundles don't contain repeated shader assets.
+            /// This way we save the big Shader.Parse and gpu compiling performance overhead and make
+            /// the bundles a bit lighter.
             /// </summary>
             private void MarkShaderAssetBundle()
             {
-                //NOTE(Brian): We tag the main shader, so all the asset bundles don't contain repeated shader assets.
-                //             This way we save the big Shader.Parse and gpu compiling performance overhead and make
-                //             the bundles a bit lighter.
-
-                //             This shader bundle doesn't need to be really used, as we are going to use the 
-                //             embedded one, so we are going to delete it after the generation ended.
+                //NOTE(Brian): The shader asset bundle that's going to be generated doesn't need to be really used,
+                //             as we are going to use the embedded one, so we are going to just delete it after the
+                //             generation ended.
                 var mainShader = Shader.Find("DCL/LWRP/Lit");
                 ABConverter.Utils.MarkAssetForAssetBundleBuild(env.assetDatabase, mainShader, MAIN_SHADER_AB_NAME);
             }
@@ -615,17 +627,6 @@ namespace DCL
                     env.directory.Delete(finalDownloadedPath);
                     env.assetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
                 }
-            }
-
-            protected virtual long GetFreeSpace()
-            {
-                FileInfo file = new FileInfo(settings.finalAssetBundlePath);
-
-                if (file.Directory == null)
-                    return 0;
-
-                DriveInfo info = new DriveInfo(file.Directory.Root.FullName);
-                return info.AvailableFreeSpace;
             }
         }
     }

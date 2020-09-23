@@ -18,6 +18,86 @@ namespace DCL
 {
     public abstract partial class ABConverter
     {
+        public static class PathUtils
+        {
+            /// <summary>
+            /// Gets the relative path ("..\..\to_file_or_dir") of another file or directory (to) in relation to the current file/dir (from)
+            /// </summary>
+            /// <param name="to"></param>
+            /// <param name="from"></param>
+            /// <returns></returns>
+            public static string GetRelativePathTo(string from, string to)
+            {
+                var fromPath = Path.GetFullPath(from);
+                var toPath = Path.GetFullPath(to);
+
+                var fromUri = new Uri(fromPath);
+                var toUri = new Uri(toPath);
+
+                var relativeUri = fromUri.MakeRelativeUri(toUri);
+                var relativePath = Uri.UnescapeDataString(relativeUri.ToString());
+
+                string result = FixDirectorySeparator(relativePath);
+
+                return result;
+            }
+
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="fullPath"></param>
+            /// <returns></returns>
+            public static string FullPathToAssetPath(string fullPath)
+            {
+                char ps = Path.DirectorySeparatorChar;
+
+                fullPath = fullPath.Replace('/', ps);
+                fullPath = fullPath.Replace('\\', ps);
+
+                string pattern = $".*?\\{ps}(?<assetpath>Assets\\{ps}.*?$)";
+
+                var regex = new Regex(pattern);
+
+                var match = regex.Match(fullPath);
+
+                if (match.Success && match.Groups["assetpath"] != null)
+                    return match.Groups["assetpath"].Value;
+
+                return string.Empty;
+            }
+
+            public static string FixDirectorySeparator(string path)
+            {
+                char ps = Path.DirectorySeparatorChar;
+                path = path.Replace('/', ps);
+                path = path.Replace('\\', ps);
+                return path;
+            }
+
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="assetPath"></param>
+            /// <returns></returns>
+            public static string AssetPathToFullPath(string assetPath, string overrideDataPath = null)
+            {
+                assetPath = FixDirectorySeparator(assetPath);
+
+                string dataPath = overrideDataPath ?? Application.dataPath;
+                dataPath = FixDirectorySeparator(dataPath);
+
+                char ps = Path.DirectorySeparatorChar;
+                string dataPathWithoutAssets = dataPath.Replace($"{ps}Assets", "");
+                return dataPathWithoutAssets + "/" + assetPath;
+            }
+
+            public static long GetFreeSpace()
+            {
+                DriveInfo info = new DriveInfo(new DirectoryInfo(Application.dataPath).Root.FullName);
+                return info.AvailableFreeSpace;
+            }
+        }
+
         public static class Utils
         {
             internal static bool ParseOption(string[] fullCmdArgs, string optionName, int argsQty, out string[] foundArgs)
@@ -82,7 +162,7 @@ namespace DCL
 
             internal static void MarkFolderForAssetBundleBuild(string fullPath, string abName)
             {
-                string assetPath = GetRelativePathTo(Application.dataPath, fullPath);
+                string assetPath = PathUtils.GetRelativePathTo(Application.dataPath, fullPath);
                 assetPath = Path.GetDirectoryName(assetPath); //ChangeExtension(assetPath, null);
                 AssetImporter importer = AssetImporter.GetAtPath(assetPath);
                 //Debug.Log("Path = " + assetPath);
@@ -91,7 +171,7 @@ namespace DCL
 
             internal static void MarkAssetForAssetBundleBuild(IAssetDatabase assetDb, UnityEngine.Object asset, string abName)
             {
-                string assetPath = GetRelativePathTo(Application.dataPath, assetDb.GetAssetPath(asset));
+                string assetPath = PathUtils.GetRelativePathTo(Application.dataPath, assetDb.GetAssetPath(asset));
                 var importer = AssetImporter.GetAtPath(assetPath);
                 Debug.Log("Path = " + assetPath);
                 importer.SetAssetBundleNameAndVariant(abName, "");
@@ -271,79 +351,6 @@ namespace DCL
                     }
                 }
             }
-
-
-            /// <summary>
-            /// Gets the relative path ("..\..\to_file_or_dir") of another file or directory (to) in relation to the current file/dir (from)
-            /// </summary>
-            /// <param name="to"></param>
-            /// <param name="from"></param>
-            /// <returns></returns>
-            public static string GetRelativePathTo(string from, string to)
-            {
-                var fromPath = Path.GetFullPath(from);
-                var toPath = Path.GetFullPath(to);
-
-                var fromUri = new Uri(fromPath);
-                var toUri = new Uri(toPath);
-
-                var relativeUri = fromUri.MakeRelativeUri(toUri);
-                var relativePath = Uri.UnescapeDataString(relativeUri.ToString());
-
-                string result = FixDirectorySeparator(relativePath);
-
-                return result;
-            }
-
-            /// <summary>
-            /// 
-            /// </summary>
-            /// <param name="fullPath"></param>
-            /// <returns></returns>
-            public static string FullPathToAssetPath(string fullPath)
-            {
-                char ps = Path.DirectorySeparatorChar;
-
-                fullPath = fullPath.Replace('/', ps);
-                fullPath = fullPath.Replace('\\', ps);
-
-                string pattern = $".*?\\{ps}(?<assetpath>Assets\\{ps}.*?$)";
-
-                var regex = new Regex(pattern);
-
-                var match = regex.Match(fullPath);
-
-                if (match.Success && match.Groups["assetpath"] != null)
-                    return match.Groups["assetpath"].Value;
-
-                return string.Empty;
-            }
-
-            public static string FixDirectorySeparator(string path)
-            {
-                char ps = Path.DirectorySeparatorChar;
-                path = path.Replace('/', ps);
-                path = path.Replace('\\', ps);
-                return path;
-            }
-
-            /// <summary>
-            /// 
-            /// </summary>
-            /// <param name="assetPath"></param>
-            /// <returns></returns>
-            public static string AssetPathToFullPath(string assetPath, string overrideDataPath = null)
-            {
-                assetPath = FixDirectorySeparator(assetPath);
-
-                string dataPath = overrideDataPath ?? Application.dataPath;
-                dataPath = FixDirectorySeparator(dataPath);
-
-                char ps = Path.DirectorySeparatorChar;
-                string dataPathWithoutAssets = dataPath.Replace($"{ps}Assets", "");
-                return dataPathWithoutAssets + "/" + assetPath;
-            }
-
 
             public static void CleanAssetBundleFolder(IFile file, string pathToSearch, string[] assetBundlesList, Dictionary<string, string> lowerToUpperDictionary)
             {

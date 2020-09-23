@@ -254,7 +254,7 @@ namespace ABConverterTests
             string targetGuid2 = ABConverter.Utils.CidToGuid(hash2);
             string targetGuid3 = ABConverter.Utils.CidToGuid(hash3);
 
-            var textures = core.DumpSceneTextures(paths);
+            var textures = core.DumpImportableAssets(paths);
 
             Assert.AreEqual(3, textures.Count);
 
@@ -288,7 +288,7 @@ namespace ABConverterTests
             paths.Add(new AssetPath(basePath, hash3, files[2]));
             paths.Add(new AssetPath(basePath, hash4, files[3]));
 
-            var buffers = core.DumpSceneBuffers(paths);
+            var buffers = core.DumpRawAssets(paths);
 
             Assert.AreEqual(3, buffers.Count);
 
