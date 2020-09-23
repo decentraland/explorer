@@ -1,6 +1,6 @@
 var ClipboardWebGL = {
     initialize: function(csReadCallback, csPasteCallback, csCopyCallback){
-        unityInterface.clipboardReadText = function (text, error){
+        window.clipboardReadText = function (text, error){
             const bufferSize = lengthBytesUTF8(text) + 1
             const ptrText = _malloc(bufferSize)
             stringToUTF8(text, ptrText, bufferSize)
@@ -18,7 +18,7 @@ var ClipboardWebGL = {
 
         window.addEventListener('copy', function(e) {
             Runtime.dynCall('v', csCopyCallback)
-        })        
+        })
     },
 
     writeText: function (text){
@@ -28,14 +28,14 @@ var ClipboardWebGL = {
     readText: function (){
         // NOTE: firefox does not support clipboard.read
         if (navigator.clipboard.readText === undefined){
-            unityInterface.clipboardReadText("not supported", true)
+            window.clipboardReadText("not supported", true)
             return
         }
 
         // NOTE: workaround cause jslib don't support async functions
         eval("navigator.clipboard.readText()" +
-            ".then(text => unityInterface.clipboardReadText(text, false))"+
-            ".catch(e => unityInterface.clipboardReadText(e.message, true))")
+            ".then(text => window.clipboardReadText(text, false))"+
+            ".catch(e => window.clipboardReadText(e.message, true))")
     }
 };
 mergeInto(LibraryManager.library, ClipboardWebGL);
