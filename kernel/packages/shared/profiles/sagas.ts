@@ -12,7 +12,7 @@ import {
   PIN_CATALYST,
   PREVIEW,
   ethereumConfigurations,
-  RESET_TUTORIAL
+  RESET_TUTORIAL, WSS_ENABLED
 } from 'config'
 
 import { NotificationType } from 'shared/types'
@@ -274,7 +274,8 @@ export function* initialLoad() {
   } else {
     let baseCatalog = []
     try {
-      const response = yield fetch(getResourcesURL() + '/default-profile/basecatalog.json')
+      const catalogPath = WSS_ENABLED ? '/default-profile/basecatalog.json' : '/default-profile/basecatalog-wss.json'
+      const response = yield fetch(getResourcesURL() + catalogPath)
       baseCatalog = yield response.json()
     } catch (e) {
       defaultLogger.warn(`Could not load base catalog`)
