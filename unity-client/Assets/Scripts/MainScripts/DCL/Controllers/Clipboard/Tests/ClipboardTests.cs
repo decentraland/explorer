@@ -1,23 +1,9 @@
 using System.Collections;
-using DCL.Helpers;
 using NUnit.Framework;
-using UnityEngine;
 using UnityEngine.TestTools;
 
-public class ClipboardTests : TestsBase
+public class ClipboardTests
 {
-    [UnitySetUp]
-    protected override IEnumerator SetUp()
-    {
-        yield break;
-    }
-
-    [UnityTearDown]
-    protected override IEnumerator TearDown()
-    {
-        yield break;
-    }
-
     [UnityTest]
     public IEnumerator ReadClipboardPromiseShouldBehaveCorrectly()
     {
@@ -25,9 +11,19 @@ public class ClipboardTests : TestsBase
         Clipboard clipboard = new Clipboard(mockClipboardHandler);
 
         const string firstText = "sometext";
-        mockClipboardHandler.MockReadTextRequestResult(0.5f,firstText,false);
+        mockClipboardHandler.MockReadTextRequestResult(0.5f, firstText, false);
 
         var promise = clipboard.ReadText();
+        promise.Then(value =>
+            {
+                Assert.IsNull(promise.error);
+                Assert.IsNotNull(promise.value);
+                Assert.IsTrue(value == firstText);
+            })
+            .Catch(error =>
+            {
+                Assert.Fail("it shouldn't call this");
+            });
         yield return promise;
 
         Assert.IsNull(promise.error);
@@ -35,8 +31,19 @@ public class ClipboardTests : TestsBase
         Assert.IsTrue(promise.value == firstText);
 
         const string errorText = "errortext";
-        mockClipboardHandler.MockReadTextRequestResult(0,errorText,true);
+        mockClipboardHandler.MockReadTextRequestResult(0, errorText, true);
+
         promise = clipboard.ReadText();
+        promise.Then(value =>
+            {
+                Assert.Fail("it shouldn't call this");
+            })
+            .Catch(error =>
+            {
+                Assert.IsNull(promise.value);
+                Assert.IsNotNull(promise.error);
+                Assert.IsTrue(error == errorText);
+            });
 
         Assert.IsNull(promise.value);
         Assert.IsNotNull(promise.error);
