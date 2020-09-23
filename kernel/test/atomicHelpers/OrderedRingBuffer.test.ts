@@ -134,11 +134,13 @@ describe('OrderedRingBuffer', () => {
 
     expect(buffer.peek()).to.eql(Float32Array.of(5, 5, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7, 8, 8, 8, 8, 9, 9, 9, 9))
 
-    // We write something in the middle of 5 and 6, and something in the middle of 7 and 8
+    // We write something in the middle of 5 and 6, and something in the middle of 7 and 8 and something at the end
     buffer.write(Float32Array.of(11, 11, 11, 11), 55)
 
     buffer.write(Float32Array.of(22, 22, 22, 22), 75)
 
-    expect(buffer.read()).to.eql(Float32Array.of(6, 6, 6, 6, 7, 7, 7, 7, 22, 22, 22, 22, 8, 8, 8, 8, 9, 9, 9, 9))
+    buffer.write(Float32Array.of(33, 33), 95)
+
+    expect(buffer.read()).to.eql(Float32Array.of(6, 6, 7, 7, 7, 7, 22, 22, 22, 22, 8, 8, 8, 8, 9, 9, 9, 9, 33, 33))
   })
 })
