@@ -8,7 +8,7 @@ import { createLogger } from 'shared/logger'
 import { ReportFatalError } from 'shared/loading/ReportFatalError'
 import { experienceStarted, NOT_INVITED, AUTH_ERROR_LOGGED_OUT, FAILED_FETCHING_UNITY } from 'shared/loading/types'
 import { worldToGrid } from '../atomicHelpers/parcelScenePositions'
-import { NO_MOTD, DEBUG_PM, OPEN_AVATAR_EDITOR, ENABLE_EXPLORE_HUD } from '../config/index'
+import { NO_MOTD, DEBUG_PM, OPEN_AVATAR_EDITOR, ENABLE_EXPLORE_HUD, ENABLE_MANA_HUD } from '../config/index'
 import { signalRendererInitialized, signalParcelLoadingStarted } from 'shared/renderer/actions'
 import { lastPlayerPosition, teleportObservable } from 'shared/world/positionThings'
 import { StoreContainer } from 'shared/store/rootTypes'
@@ -40,7 +40,7 @@ initializeUnity(container)
     const i = (await instancedJS).unityInterface
 
     i.ConfigureHUDElement(HUDElementID.MINIMAP, { active: true, visible: true })
-    i.ConfigureHUDElement(HUDElementID.AVATAR, { active: true, visible: true })
+    i.ConfigureHUDElement(HUDElementID.PROFILE_HUD, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.NOTIFICATION, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.AVATAR_EDITOR, { active: true, visible: OPEN_AVATAR_EDITOR })
     i.ConfigureHUDElement(HUDElementID.SETTINGS, { active: true, visible: false })
@@ -55,11 +55,13 @@ initializeUnity(container)
     i.ConfigureHUDElement(HUDElementID.TELEPORT_DIALOG, { active: true, visible: false })
     i.ConfigureHUDElement(HUDElementID.CONTROLS_HUD, { active: true, visible: false })
     i.ConfigureHUDElement(HUDElementID.EXPLORE_HUD, { active: ENABLE_EXPLORE_HUD, visible: false })
+    i.ConfigureHUDElement(HUDElementID.HELP_AND_SUPPORT_HUD, { active: true, visible: false })
 
     try {
       await userAuthentified()
       const identity = getCurrentIdentity(globalThis.globalStore.getState())!
       i.ConfigureHUDElement(HUDElementID.FRIENDS, { active: identity.hasConnectedWeb3, visible: false })
+      i.ConfigureHUDElement(HUDElementID.MANA_HUD, { active: ENABLE_MANA_HUD && identity.hasConnectedWeb3, visible: true })
     } catch (e) {
       logger.error('error on configuring friends hud')
     }

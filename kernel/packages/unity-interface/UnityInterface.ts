@@ -142,12 +142,14 @@ export class UnityInterface {
 
   /** Sends the camera position & target to the engine */
 
-  public Teleport({ position: { x, y, z }, cameraTarget }: InstancedSpawnPoint) {
+  public Teleport({ position: { x, y, z }, cameraTarget }: InstancedSpawnPoint, rotateIfTargetIsNotSet: boolean = true) {
     const theY = y <= 0 ? 2 : y
 
     TeleportController.ensureTeleportAnimation()
     this.gameInstance.SendMessage('CharacterController', 'Teleport', JSON.stringify({ x, y: theY, z }))
-    this.gameInstance.SendMessage('CameraController', 'SetRotation', JSON.stringify({ x, y: theY, z, cameraTarget }))
+    if (cameraTarget || rotateIfTargetIsNotSet) {
+      this.gameInstance.SendMessage('CameraController', 'SetRotation', JSON.stringify({ x, y: theY, z, cameraTarget }))
+    }
   }
 
   /** Tells the engine which scenes to load */
@@ -181,6 +183,11 @@ export class UnityInterface {
 
   public ShowFPSPanel() {
     this.gameInstance.SendMessage('SceneController', 'ShowFPSPanel')
+  }
+
+  /* NOTE(Santi): This is temporal, until we remove the old taskbar */
+  public EnableNewTaskbar() {
+    this.gameInstance.SendMessage('HUDController', 'EnableNewTaskbar')
   }
 
   public HideFPSPanel() {
@@ -241,11 +248,11 @@ export class UnityInterface {
     this.gameInstance.SendMessage('HUDController', 'ShowNotificationFromJson', JSON.stringify(notification))
   }
 
-  public ConfigureHUDElement(hudElementId: HUDElementID, configuration: HUDConfiguration) {
+  public ConfigureHUDElement(hudElementId: HUDElementID, configuration: HUDConfiguration, extraPayload: any | null = null) {
     this.gameInstance.SendMessage(
       'HUDController',
       `ConfigureHUDElement`,
-      JSON.stringify({ hudElementId: hudElementId, configuration: configuration })
+      JSON.stringify({ hudElementId: hudElementId, configuration: configuration, extraPayload: extraPayload ? JSON.stringify(extraPayload) : null })
     )
   }
 
@@ -327,6 +334,10 @@ export class UnityInterface {
       active: (tutorialStep & emailCompletedFlag) === 0,
       visible: false
     })
+  }
+
+  public UpdateBalanceOfMANA(balance: string) {
+    this.gameInstance.SendMessage('HUDController', 'UpdateBalanceOfMANA', balance)
   }
 
   // *********************************************************************************
