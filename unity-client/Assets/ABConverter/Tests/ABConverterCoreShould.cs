@@ -93,7 +93,11 @@ namespace ABConverterTests
         [Test]
         public void InitializeDirectoryPathsCorrectly()
         {
+            var settings = new ABConverter.Client.Settings(ContentServerUtils.ApiTLD.ZONE);
+            settings.deleteDownloadPathAfterFinished = false;
+
             env = ABConverter.Environment.CreateWithDefaultImplementations();
+            core = new ABConverter.Core(env, settings);
 
             core.InitializeDirectoryPaths(false);
 
@@ -128,10 +132,7 @@ namespace ABConverterTests
             core.RetrieveAndInjectTexture(gltfPath, texturePath);
 
             string content1 = "Test";
-            string content2 = "Test2";
-
             env.file.WriteAllText(texturePath.finalPath, content1);
-            env.file.WriteAllText(texturePath2.finalPath, content2);
 
             core.RetrieveAndInjectTexture(gltfPath, texturePath);
             core.RetrieveAndInjectTexture(gltfPath, texturePath2);

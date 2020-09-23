@@ -13,10 +13,8 @@ namespace DCL
         {
             private static Logger logger = new Logger("Mocked.AssetDatabase") {verboseEnabled = false};
 
-            public bool refreshed = false;
             public HashSet<string> importedAssets = new HashSet<string>();
             public HashSet<string> savedAssets = new HashSet<string>();
-            private Object placeholderObject = new Object();
 
             private IFile file;
 
@@ -36,8 +34,6 @@ namespace DCL
                     if (!file.Exists(metaPath))
                         file.Copy(asset, metaPath);
                 }
-
-                refreshed = true;
             }
 
             public void SaveAssets()
@@ -99,7 +95,18 @@ namespace DCL
             public T LoadAssetAtPath<T>(string path) where T : Object
             {
                 logger.Verbose($"LoadAssetAtPath {path}");
-                return placeholderObject as T;
+
+                if (file.Exists(path))
+                {
+                    if (typeof(T) == typeof(Texture2D))
+                    {
+                        return Texture2D.whiteTexture as T;
+                    }
+
+                    return new Object() as T;
+                }
+
+                return null;
             }
 
             public string GetAssetPath(Object asset)

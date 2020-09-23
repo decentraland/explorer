@@ -20,9 +20,9 @@ namespace DCL
             internal static string DOWNLOADED_FOLDER_NAME = "_Downloaded";
 
             internal static char DASH = Path.DirectorySeparatorChar;
-            internal static string DOWNLOADED_ASSET_DB_PATH_ROOT = $"Assets{DASH}{DOWNLOADED_FOLDER_NAME}";
-            internal static string DOWNLOADED_PATH_ROOT = $"{Application.dataPath}{DASH}{DOWNLOADED_FOLDER_NAME}";
-            internal static string ASSET_BUNDLES_PATH_ROOT = $"{Application.dataPath}{DASH}..{DASH}{ASSET_BUNDLE_FOLDER_NAME}";
+
+            internal static string DOWNLOADED_PATH_ROOT = $"{PathUtils.FixDirectorySeparator(Application.dataPath)}{DASH}{DOWNLOADED_FOLDER_NAME}";
+            internal static string ASSET_BUNDLES_PATH_ROOT = $"{PathUtils.FixDirectorySeparator(Application.dataPath)}{DASH}..{DASH}{ASSET_BUNDLE_FOLDER_NAME}";
 
             internal static string[] bufferExtensions = {".bin"};
             internal static string[] gltfExtensions = {".glb", ".gltf"};
