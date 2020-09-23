@@ -22,12 +22,21 @@ namespace DCL.Tutorial
             NewTutorialFinished = 256
         }
 
+        internal enum TutorialPath
+        {
+            FromGenesisPlaza,
+            FromDeepLink,
+            FromGenesisPlazaAfterDeepLink
+        }
+
         public static TutorialController i { get; private set; }
 
         public HUDController hudController { get => HUDController.i; }
 
         [Header("General Configuration")]
+        [SerializeField] internal int tutorialVersion = 1;
         [SerializeField] internal float timeBetweenSteps = 0.5f;
+        [SerializeField] internal bool sendStats = true;
 
         [Header("Tutorial Steps on Genesis Plaza")]
         [SerializeField] internal List<TutorialStep> stepsOnGenesisPlaza = new List<TutorialStep>();
@@ -179,16 +188,16 @@ namespace DCL.Tutorial
                 markTutorialAsCompleted = true;
 
                 if (alreadyOpenedFromDeepLink)
-                    yield return ExecuteSteps(stepsOnGenesisPlazaAfterDeepLink, stepIndex);
+                    yield return ExecuteSteps(TutorialPath.FromGenesisPlazaAfterDeepLink, stepIndex);
                 else
-                    yield return ExecuteSteps(stepsOnGenesisPlaza, stepIndex);
+                    yield return ExecuteSteps(TutorialPath.FromGenesisPlaza, stepIndex);
                 
             }
             else if (openedFromDeepLink)
             {
                 markTutorialAsCompleted = false;
                 alreadyOpenedFromDeepLink = true;
-                yield return ExecuteSteps(stepsFromDeepLink, stepIndex);
+                yield return ExecuteSteps(TutorialPath.FromDeepLink, stepIndex);
             }
             else
             {
@@ -254,8 +263,24 @@ namespace DCL.Tutorial
             executeStepsCoroutine = StartCoroutine(StartTutorialFromStep(currentStepIndex));
         }
 
-        private IEnumerator ExecuteSteps(List<TutorialStep> steps, int startingStepIndex)
+        private IEnumerator ExecuteSteps(TutorialPath tutorialPath, int startingStepIndex)
         {
+            List<TutorialStep> steps = new List<TutorialStep>();
+
+            switch (tutorialPath)
+            {
+                case TutorialPath.FromGenesisPlaza:
+                    steps = stepsOnGenesisPlaza;
+                    break;
+                case TutorialPath.FromDeepLink:
+                    steps = stepsFromDeepLink;
+                    break;
+                case TutorialPath.FromGenesisPlazaAfterDeepLink:
+                    steps = stepsOnGenesisPlazaAfterDeepLink;
+                    break;
+            }
+
+            float elapsedTime = 0f;
             for (int i = startingStepIndex; i < steps.Count; i++)
             {
                 var stepPrefab = steps[i];
@@ -267,6 +292,7 @@ namespace DCL.Tutorial
 
                 currentStepIndex = i;
 
+                elapsedTime = Time.realtimeSinceStartup;
                 runningStep.OnStepStart();
                 yield return runningStep.OnStepExecute();
                 if (i < steps.Count - 1)
@@ -276,6 +302,16 @@ namespace DCL.Tutorial
 
                 yield return runningStep.OnStepPlayAnimationForHidding();
                 runningStep.OnStepFinished();
+                elapsedTime = Time.realtimeSinceStartup - elapsedTime;
+                if (!debugRunTutorial && sendStats)
+                {
+                    SendSegmentStats(
+                        tutorialVersion,
+                        tutorialPath,
+                        i + 1,
+                        runningStep.name.Replace("(Clone)", "").Replace("TutorialStep_", ""),
+                        elapsedTime);
+                }
                 Destroy(runningStep.gameObject);
 
                 if (i < steps.Count - 1 && timeBetweenSteps > 0)
@@ -341,6 +377,19 @@ namespace DCL.Tutorial
                 return true;
 
             return false;
+        }
+
+        private void SendSegmentStats(int version, TutorialPath tutorialPath, int stepNumber, string stepName, float elapsedTime)
+        {
+            WebInterface.AnalyticsPayload.Property[] properties = new WebInterface.AnalyticsPayload.Property[]
+            {
+                new WebInterface.AnalyticsPayload.Property("version", version.ToString()),
+                new WebInterface.AnalyticsPayload.Property("path", tutorialPath.ToString()),
+                new WebInterface.AnalyticsPayload.Property("step number", stepNumber.ToString()),
+                new WebInterface.AnalyticsPayload.Property("step name", stepName),
+                new WebInterface.AnalyticsPayload.Property("elapsed time", elapsedTime.ToString("0.00"))
+            };
+            WebInterface.ReportAnalyticsEvent("tutorial step completed", properties);
         }
     }
 }

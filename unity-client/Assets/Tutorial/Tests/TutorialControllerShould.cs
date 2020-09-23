@@ -91,6 +91,7 @@ namespace DCL.Tutorial_Tests
             tutorialController.stepsFromDeepLink.Clear();
             tutorialController.stepsOnGenesisPlazaAfterDeepLink.Clear();
             tutorialController.timeBetweenSteps = 0f;
+            tutorialController.sendStats = false;
             tutorialController.debugRunTutorial = false;
         }
 
