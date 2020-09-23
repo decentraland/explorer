@@ -13,6 +13,7 @@
     "sourceMap": false,
     "removeComments": false,
     "inlineSources": true,
+    "useDefineForClassFields": false,
     "noLib": true,
     "allowJs": true,
     "types": [
