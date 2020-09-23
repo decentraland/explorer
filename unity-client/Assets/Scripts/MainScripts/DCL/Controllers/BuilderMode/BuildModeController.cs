@@ -397,6 +397,7 @@ public class BuildModeController : MonoBehaviour
 
         currentScaleAdded = 0;
         currentYRotationAdded = 0;
+        initialRotation = Quaternion.identity;
         gameObjectToEdit.transform.rotation = Quaternion.identity;
         snapGO.transform.rotation = Quaternion.identity;
         freeMovementGO.transform.rotation = Quaternion.identity;
@@ -640,7 +641,7 @@ public class BuildModeController : MonoBehaviour
         gameObjectToReceive.transform.SetParent(gameObjectToCopy.transform.parent);
         gameObjectToReceive.transform.position = gameObjectToCopy.transform.position;
         gameObjectToReceive.transform.localRotation = gameObjectToCopy.transform.localRotation;
-        gameObjectToReceive.transform.localScale = gameObjectToCopy.transform.localScale;
+        gameObjectToReceive.transform.localScale = gameObjectToCopy.transform.lossyScale;
     }
 
 
