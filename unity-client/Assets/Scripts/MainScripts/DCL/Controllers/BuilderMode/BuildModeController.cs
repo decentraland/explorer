@@ -531,8 +531,6 @@ public class BuildModeController : MonoBehaviour
         else
         {
 
-
-
             freeMovementGO.transform.position = gameObjectToEdit.transform.position;
             freeMovementGO.transform.rotation = gameObjectToEdit.transform.rotation;
             freeMovementGO.transform.localScale = gameObjectToEdit.transform.localScale;
