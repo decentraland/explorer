@@ -45,6 +45,7 @@ public class BuildModeController : MonoBehaviour
     public SceneLimitInfoController sceneLimitInfoController;
     public EntityInformationController entityInformationController;
     public BuildModeEntityListController buildModeEntityListController;
+    public OutlinerController outlinerController;
 
     [Header("Build References")]
 
@@ -203,32 +204,6 @@ public class BuildModeController : MonoBehaviour
 
     }
 
-    //void MeshGetted(BaseDisposable baseDisposable)
-    //{
-    //    Debug.Log("Compomente ready");
-    //    int lastIndex = -9999;
-     
-
-    //    DecentralandEntity entityToSelect = null;
-    //    foreach (DecentralandEntity createdEntity in createdEntitiesList)
-    //    {
-    //        if (baseDisposable.attachedEntities.Contains(createdEntity))
-    //        {
-    //            CreateCollidersForEntity(createdEntity);
-         
-    //           int entityIndex = createdEntitiesList.LastIndexOf(createdEntity);
-    //            if (entityIndex > lastIndex) entityToSelect = createdEntity;
-    //        }
-    //    }
-
-    //    if (entityToSelect != null)
-    //    {
-    //        entityToSelect.gameObject.transform.position = Camera.main.transform.position + Camera.main.transform.forward * distanceFromCameraForNewEntitties;
-
-    //        Select(entityToSelect);
-    //    }
-    //}
-
 
     void CheckInputForShowingWindows()
     {
@@ -308,6 +283,7 @@ public class BuildModeController : MonoBehaviour
                 InputDone();
                 return;
             }
+            CheckEntityOnPointer();
         }
         if (gameObjectToEdit != null)
         {
@@ -373,6 +349,21 @@ public class BuildModeController : MonoBehaviour
 
            
         }
+    }
+
+    int outlinerCounter = 0;
+    private void CheckEntityOnPointer()
+    {
+        if (outlinerCounter >= 10)
+        {
+            DecentralandEntity entity = GetEntityOnPointer();
+            if (entity != null)
+            {
+                outlinerController.OutLineOnlyThisEntity(entity);
+            }
+            outlinerCounter = 0;
+        }
+        else outlinerCounter++;
     }
 
     public void UndoEdit()
@@ -501,7 +492,7 @@ public class BuildModeController : MonoBehaviour
 
     void GetOriginalRendersAndChangeMaterials(DecentralandEntity entity)
     {
-        originalRenderers = gameObjectToEdit.GetComponentsInChildren<Renderer>();
+        originalRenderers = entity.meshesInfo.renderers;
         if (originalRenderers != null && originalRenderers.Length >= 1)
         {
             originalMaterials = new Material[originalRenderers.Length];
@@ -513,8 +504,6 @@ public class BuildModeController : MonoBehaviour
                 cont++;
             }
 
-            //originalMaterials = originalRenderers.materials;
-            //originalRenderers.material = editMaterial;
         }
         else
         {
@@ -549,14 +538,20 @@ public class BuildModeController : MonoBehaviour
 
     void SelectObject()
     {
+        DecentralandEntity entityToSelect = GetEntityOnPointer();
+        if(entityToSelect != null) Select(entityToSelect); 
+    }
 
+    DecentralandEntity GetEntityOnPointer()
+    {
         RaycastHit hit;
         UnityEngine.Ray ray = Camera.main.ScreenPointToRay(new Vector3(Screen.width / 2, Screen.height / 2, 0));
         if (Physics.Raycast(ray, out hit, distanceLimitToSelectObjects, layerToRaycast))
         {
             string entityID = hit.collider.gameObject.name;
-            Select(sceneToEdit.entities[entityID]);
-        } 
+            return sceneToEdit.entities[entityID]; 
+        }
+        return null;
     }
 
     void DeselectObject()
