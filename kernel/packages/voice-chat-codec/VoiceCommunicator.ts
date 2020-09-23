@@ -2,6 +2,7 @@ import { VoiceChatCodecWorkerMain, EncodeStream } from './VoiceChatCodecWorkerMa
 import { OrderedRingBuffer } from 'atomicHelpers/OrderedRingBuffer'
 import { defer } from 'atomicHelpers/defer'
 import defaultLogger from 'shared/logger'
+import { OPUS_BITS_PER_SECOND, OPUS_FRAME_SIZE_MS, OUTPUT_NODE_BUFFER_SIZE } from './constants'
 
 export type AudioCommunicatorChannel = {
   send(data: Uint8Array): any
@@ -11,7 +12,8 @@ export type StreamPlayingListener = (streamId: string, playing: boolean) => any
 export type StreamRecordingListener = (recording: boolean) => any
 
 type VoiceOutput = {
-  buffer: OrderedRingBuffer<Float32Array>
+  encodedBuffer: OrderedRingBuffer<Uint8Array>
+  decodedBuffer: OrderedRingBuffer<Float32Array>
   scriptProcessor: ScriptProcessorNode
   panNode: PannerNode
   spatialParams: VoiceSpatialParams
@@ -101,31 +103,13 @@ export class VoiceCommunicator {
 
   async playEncodedAudio(src: string, relativePosition: VoiceSpatialParams, encoded: Uint8Array, time: number) {
     if (!this.outputs[src]) {
-      const nodes = this.createOutputNodes(src)
-      this.outputs[src] = {
-        buffer: new OrderedRingBuffer(Math.floor(this.channelBufferSize * this.sampleRate), Float32Array),
-        playing: false,
-        spatialParams: relativePosition,
-        lastUpdateTime: Date.now(),
-        ...nodes
-      }
+      this.createOutput(src, relativePosition)
     } else {
       this.outputs[src].lastUpdateTime = Date.now()
       this.setVoiceRelativePosition(src, relativePosition)
     }
 
-    let stream = this.voiceChatWorkerMain.decodeStreams[src]
-
-    if (!stream) {
-      stream = this.voiceChatWorkerMain.getOrCreateDecodeStream(src, this.sampleRate)
-
-      stream.addAudioDecodedListener((samples) => {
-        this.outputs[src].lastUpdateTime = Date.now()
-        this.outputs[src].buffer.write(samples, time)
-      })
-    }
-
-    stream.decode(encoded)
+    this.outputs[src].encodedBuffer.write(encoded, time)
   }
 
   setListenerSpatialParams(spatialParams: VoiceSpatialParams) {
@@ -175,7 +159,7 @@ export class VoiceCommunicator {
   }
 
   createScriptOutputFor(src: string) {
-    const bufferSize = 8192
+    const bufferSize = OUTPUT_NODE_BUFFER_SIZE
     const processor = this.context.createScriptProcessor(bufferSize, 0, 1)
     processor.onaudioprocess = (ev) => {
       const data = ev.outputBuffer.getChannelData(0)
@@ -183,14 +167,16 @@ export class VoiceCommunicator {
       data.fill(0)
       if (this.outputs[src]) {
         const wasPlaying = this.outputs[src].playing
-        if (this.outputs[src].buffer.readAvailableCount() > 0) {
-          data.set(this.outputs[src].buffer.read(data.length))
+        const minReadCount = wasPlaying ? 0 : OUTPUT_NODE_BUFFER_SIZE - 1
+        if (this.outputs[src].decodedBuffer.readAvailableCount() > minReadCount) {
+          data.set(this.outputs[src].decodedBuffer.read(data.length))
           if (!wasPlaying) {
             this.changePlayingStatus(src, true)
           }
         } else {
           if (wasPlaying) {
             this.changePlayingStatus(src, false)
+            this.outputs[src].decodedBuffer.read() // Emptying buffer
           }
         }
       }
@@ -253,6 +239,49 @@ export class VoiceCommunicator {
     }
 
     this.notifyRecording(false)
+  }
+
+  private createOutput(src: string, relativePosition: VoiceSpatialParams) {
+    const nodes = this.createOutputNodes(src)
+    this.outputs[src] = {
+      encodedBuffer: new OrderedRingBuffer(Math.floor((OPUS_BITS_PER_SECOND * this.channelBufferSize) / 8), Uint8Array),
+      decodedBuffer: new OrderedRingBuffer(Math.floor(this.channelBufferSize * this.sampleRate), Float32Array),
+      playing: false,
+      spatialParams: relativePosition,
+      lastUpdateTime: Date.now(),
+      ...nodes
+    }
+
+    const readEncodedBufferLoop = async () => {
+      if (this.outputs[src]) {
+        const amountToRead = Math.floor(((OUTPUT_NODE_BUFFER_SIZE / this.sampleRate) * 1000 * 1.2) / OPUS_FRAME_SIZE_MS)
+
+        const frames = await this.outputs[src].encodedBuffer.blockAndReadChunks(
+          amountToRead,
+          amountToRead * OPUS_FRAME_SIZE_MS
+        )
+
+        if (frames.length > 0) {
+          let stream = this.voiceChatWorkerMain.decodeStreams[src]
+
+          if (!stream) {
+            stream = this.voiceChatWorkerMain.getOrCreateDecodeStream(src, this.sampleRate)
+
+            stream.addAudioDecodedListener((samples) => {
+              const now = Date.now()
+              this.outputs[src].lastUpdateTime = now
+              this.outputs[src].decodedBuffer.write(samples, now)
+            })
+          }
+
+          frames.forEach((it) => stream.decode(it))
+        }
+
+        await readEncodedBufferLoop()
+      }
+    }
+
+    readEncodedBufferLoop().catch((e) => defaultLogger.log('Error while reading encoded buffer of ' + src, e))
   }
 
   private createInputFor(stream: MediaStream, context: AudioContext) {

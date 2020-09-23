@@ -1,3 +1,5 @@
+import future, { IFuture } from 'fp-future'
+
 type TypedArray =
   | Int8Array
   | Uint8Array
@@ -21,6 +23,8 @@ export class OrderedRingBuffer<T extends TypedArray> {
   private buffer: T
 
   private chunks: Chunk[] = []
+
+  private blockedReadChunksFuture?: { chunksToRead: number; future: IFuture<T[]> }
 
   constructor(public readonly size: number, private readonly ArrayTypeConstructor: { new (size: number): T }) {
     this.buffer = new this.ArrayTypeConstructor(size)
@@ -72,6 +76,16 @@ export class OrderedRingBuffer<T extends TypedArray> {
         writePointer += toWrite.length
       })
     }
+
+    this.resolveBlockedRead()
+  }
+
+  private resolveBlockedRead() {
+    if (this.blockedReadChunksFuture && this.chunks.length >= this.blockedReadChunksFuture.chunksToRead) {
+      const read = this.readChunks(this.blockedReadChunksFuture.chunksToRead)
+      this.blockedReadChunksFuture.future.resolve(read)
+      delete this.blockedReadChunksFuture
+    }
   }
 
   arrayForChunk(chunk: Chunk): T {
@@ -110,6 +124,43 @@ export class OrderedRingBuffer<T extends TypedArray> {
     this.discardUnreadableChunks()
 
     return result
+  }
+  /**
+   * The promise will block until there is chunksCount chunks to read,
+   * or until timeToWait has passed.
+   *
+   * Once timeToWait has passed, if there is nothing to read, an empty array is returned.
+   */
+  async blockAndReadChunks(chunksCount: number, timeToWait: number): Promise<T[]> {
+    if (this.chunks.length >= chunksCount) {
+      const chunks = this.readChunks(chunksCount)
+
+      return Promise.resolve(chunks)
+    } else {
+      if (this.blockedReadChunksFuture) {
+        this.blockedReadChunksFuture.future.reject(new Error('Only one blocking call is possible at the same time'))
+      }
+
+      const thisFuture = { chunksToRead: chunksCount, future: future() }
+
+      this.blockedReadChunksFuture = thisFuture
+
+      setTimeout(() => {
+        if (this.blockedReadChunksFuture === thisFuture) {
+          if (this.chunks.length > 0) {
+            thisFuture.future.resolve(this.readChunks(this.chunks.length))
+          } else {
+            thisFuture.future.resolve([])
+          }
+        }
+      }, timeToWait)
+
+      return this.blockedReadChunksFuture.future
+    }
+  }
+
+  private readChunks(chunksCount: number) {
+    return this.chunks.slice(0, chunksCount).map((it) => this.read(it.length))
   }
 
   private writeAt(array: T, startPointer: number, length?: number) {
