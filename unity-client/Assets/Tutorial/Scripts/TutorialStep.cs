@@ -12,6 +12,7 @@ namespace DCL.Tutorial
         protected static int STEP_FINISHED_ANIMATOR_TRIGGER = Animator.StringToHash("StepFinished");
 
         internal event Action OnShowAnimationFinished;
+        internal event Action OnJustAfterStepExecuted;
 
         [SerializeField] internal bool unlockCursorAtStart = false;
         [SerializeField] internal bool show3DTeacherAtStart = false;
@@ -60,7 +61,8 @@ namespace DCL.Tutorial
         /// <returns></returns>
         public virtual IEnumerator OnStepPlayAnimationForHidding()
         {
-            yield return WaitForAnimation(STEP_FINISHED_ANIMATOR_TRIGGER);
+            OnJustAfterStepExecuted?.Invoke();
+            yield return PlayAndWaitForHideAnimation();
         }
 
         /// <summary>
@@ -83,12 +85,12 @@ namespace DCL.Tutorial
             hideAnimationFinished = true;
         }
 
-        private IEnumerator WaitForAnimation(int animationTrigger)
+        private IEnumerator PlayAndWaitForHideAnimation()
         {
             if (stepAnimator == null)
                 yield break;
 
-            stepAnimator.SetTrigger(animationTrigger);
+            stepAnimator.SetTrigger(STEP_FINISHED_ANIMATOR_TRIGGER);
             yield return new WaitUntil(() => hideAnimationFinished);
         }
     }

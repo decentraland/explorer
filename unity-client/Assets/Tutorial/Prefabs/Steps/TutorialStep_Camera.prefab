@@ -784,36 +784,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 5974073482939636732}
     m_Modifications:
-    - target: {fileID: 2301598208962890080, guid: 468123de2261a7e4fa6759e41b8d66c3,
-        type: 3}
-      propertyPath: m_textInfo.characterCount
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 2301598208962890080, guid: 468123de2261a7e4fa6759e41b8d66c3,
-        type: 3}
-      propertyPath: m_textInfo.spaceCount
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2301598208962890080, guid: 468123de2261a7e4fa6759e41b8d66c3,
-        type: 3}
-      propertyPath: m_textInfo.wordCount
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 2301598208962890080, guid: 468123de2261a7e4fa6759e41b8d66c3,
-        type: 3}
-      propertyPath: m_textInfo.lineCount
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 2301598208962890080, guid: 468123de2261a7e4fa6759e41b8d66c3,
-        type: 3}
-      propertyPath: m_textInfo.pageCount
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 2301598208962890080, guid: 468123de2261a7e4fa6759e41b8d66c3,
-        type: 3}
-      propertyPath: m_fontColor32.rgba
-      value: 4282725152
-      objectReference: {fileID: 0}
     - target: {fileID: 4149099799273879009, guid: 468123de2261a7e4fa6759e41b8d66c3,
         type: 3}
       propertyPath: m_Name

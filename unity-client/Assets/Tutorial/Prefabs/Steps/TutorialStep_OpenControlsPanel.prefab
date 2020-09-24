@@ -1140,36 +1140,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: KeyC
       objectReference: {fileID: 0}
-    - target: {fileID: 7639325872784947608, guid: 48e8aa397bec5f246ad386a7fd2f4a7a,
-        type: 3}
-      propertyPath: m_textInfo.characterCount
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 7639325872784947608, guid: 48e8aa397bec5f246ad386a7fd2f4a7a,
-        type: 3}
-      propertyPath: m_textInfo.spaceCount
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7639325872784947608, guid: 48e8aa397bec5f246ad386a7fd2f4a7a,
-        type: 3}
-      propertyPath: m_textInfo.wordCount
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 7639325872784947608, guid: 48e8aa397bec5f246ad386a7fd2f4a7a,
-        type: 3}
-      propertyPath: m_textInfo.lineCount
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 7639325872784947608, guid: 48e8aa397bec5f246ad386a7fd2f4a7a,
-        type: 3}
-      propertyPath: m_textInfo.pageCount
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 7639325872784947608, guid: 48e8aa397bec5f246ad386a7fd2f4a7a,
-        type: 3}
-      propertyPath: m_fontColor32.rgba
-      value: 4282725152
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 48e8aa397bec5f246ad386a7fd2f4a7a, type: 3}
 --- !u!224 &3529043799647544223 stripped
