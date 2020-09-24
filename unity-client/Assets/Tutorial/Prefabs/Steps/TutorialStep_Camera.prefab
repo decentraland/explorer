@@ -819,6 +819,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: KeyV
       objectReference: {fileID: 0}
+    - target: {fileID: 4961611885901095150, guid: 468123de2261a7e4fa6759e41b8d66c3,
+        type: 3}
+      propertyPath: step
+      value: 
+      objectReference: {fileID: 758471573230640681}
     - target: {fileID: 6751362474758779796, guid: 468123de2261a7e4fa6759e41b8d66c3,
         type: 3}
       propertyPath: m_LocalPosition.x
