@@ -44,8 +44,6 @@ export class Web3Connector {
     return new WebSocketProvider(ethereumConfigurations[network].wss)
   }
 
-  clearCache() {}
-
   async connect(type: ProviderType, values: Map<string, string>) {
     try {
       this.connector = this.factory.create(type, this.network)

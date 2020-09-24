@@ -103,13 +103,12 @@ function* scheduleAwaitingSignaturePrompt() {
 function* setupWeb3() {
   yield ensureRealmInitialized()
   if (ENABLE_WEB3) {
-    const web3Connector = yield createWeb3Connector()
+    yield createWeb3Connector()
     const userData = getUserProfile()
     if (userData && userData.userId) {
       const exist = yield profileExists(userData.userId)
       if (isSessionExpired(userData) || !exist) {
         removeUserProfile()
-        web3Connector.clearCache()
       }
     }
   }
