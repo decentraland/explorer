@@ -205,7 +205,7 @@ namespace DCL.Tutorial
         /// <param name="active">True for show the teacher.</param>
         public void ShowTeacher3DModel(bool active)
         {
-            teacherCamera.gameObject.SetActive(active);
+            teacherCamera.enabled = active;
             teacherRawImage.gameObject.SetActive(active);
         }
 
