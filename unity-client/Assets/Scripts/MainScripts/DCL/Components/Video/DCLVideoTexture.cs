@@ -214,10 +214,22 @@ namespace DCL.Components
 
         private void UpdateVolume()
         {
-            if (texturePlayer != null)
-            {
-                texturePlayer.SetVolume(baseVolume * distanceVolumeModifier * Settings.i.generalSettings.sfxVolume);
-            }
+            if (texturePlayer == null) return;
+
+            float targetVolume = 0f;
+
+            if (CommonScriptableObjects.rendererState && IsPlayerInSameSceneAsComponent((CommonScriptableObjects.sceneID)))
+                targetVolume = baseVolume * distanceVolumeModifier * Settings.i.generalSettings.sfxVolume;
+
+            texturePlayer.SetVolume(targetVolume);
+        }
+
+        private bool IsPlayerInSameSceneAsComponent(string currentSceneId)
+        {
+            if (scene == null) return false;
+            if (string.IsNullOrEmpty(currentSceneId)) return false;
+
+            return scene.sceneData.id == currentSceneId;
         }
 
         private void OnPlayerCoordsChanged(Vector2Int coords, Vector2Int prevCoords)
