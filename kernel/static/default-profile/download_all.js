@@ -1,4 +1,4 @@
-import {WSS_ENABLED} from "../../packages/config";
+import WSS_ENABLED from '../../packages/config/index'
 
 const fs = require('fs')
 const path = require('path')
@@ -12,10 +12,10 @@ const downloadFile = async (url, path) => {
   const fileStream = fs.createWriteStream(path)
   await new Promise((resolve, reject) => {
     res.body.pipe(fileStream)
-    res.body.on('error', err => {
+    res.body.on('error', (err) => {
       reject(err)
     })
-    fileStream.on('finish', function() {
+    fileStream.on('finish', function () {
       resolve()
     })
   })
@@ -41,6 +41,6 @@ const hashes = catalog.reduce(
   []
 )
 
-hashes.forEach(async url => {
+hashes.forEach(async (url) => {
   await downloadFile(contentServerUrl + url, path.join(contentPath, url))
 })

@@ -274,7 +274,7 @@ export function* initialLoad() {
   } else {
     let baseCatalog = []
     try {
-      const catalogPath = WSS_ENABLED ? '/default-profile/basecatalog.json' : '/default-profile/basecatalog-wss.json'
+      const catalogPath = WSS_ENABLED ? '/default-profile/basecatalog-wss.json' : '/default-profile/basecatalog.json'
       const response = yield fetch(getResourcesURL() + catalogPath)
       baseCatalog = yield response.json()
     } catch (e) {
