@@ -90,22 +90,30 @@ namespace AvatarShape_Tests
 
     class AvatarRenderer_Mock : AvatarRenderer
     {
-        public static Dictionary<string, WearableController_Mock> GetWearableMockControllers(AvatarRenderer renderer) => GetWearableControllers(renderer).ToDictionary(x => x.Key, x => new WearableController_Mock(x.Value));
+        public static Dictionary<string, WearableController_Mock> GetWearableMockControllers(AvatarRenderer renderer)
+        {
+            var controllers = GetWearableControllers(renderer);
+            return controllers.ToDictionary(x => x.Key, x => new WearableController_Mock(x.Value));
+        }
+
 
         public static Dictionary<string, WearableController> GetWearableControllers(AvatarRenderer renderer)
         {
             var avatarRendererMock = new GameObject("Temp").AddComponent<AvatarRenderer_Mock>();
             avatarRendererMock.CopyFrom(renderer);
 
-            var toReturn = avatarRendererMock.wearableControllers;
+            var result =
+                avatarRendererMock.wearableControllers.ToDictionary(x => x.Value.id, y => y.Value);
+
             Destroy(avatarRendererMock.gameObject);
 
-            return toReturn;
+            return result;
         }
 
         public static WearableController_Mock GetWearableController(AvatarRenderer renderer, string id)
         {
             var wearableControllers = GetWearableControllers(renderer);
+
             if (!wearableControllers.ContainsKey(id))
                 return null;
 

@@ -56,9 +56,7 @@ namespace DCL
             MapRenderer.OnParcelClicked += TriggerToast;
             MapRenderer.OnParcelHold += TriggerToast;
             MapRenderer.OnParcelHoldCancel += () => { toastView.OnCloseClick(); };
-
-            MinimapHUDView.OnUpdateData += UpdateCurrentSceneData;
-            MinimapHUDView.OnOpenNavmapClicked += () => ToggleNavMap();
+            CommonScriptableObjects.playerCoords.OnChange += UpdateCurrentSceneData;
 
             Initialize();
         }
@@ -71,9 +69,9 @@ namespace DCL
 
         private void OnDestroy()
         {
-            MinimapHUDView.OnUpdateData -= UpdateCurrentSceneData;
             MapRenderer.OnParcelClicked -= TriggerToast;
             MapRenderer.OnParcelHold -= TriggerToast;
+            CommonScriptableObjects.playerCoords.OnChange -= UpdateCurrentSceneData;
         }
 
         internal void ToggleNavMap(bool ignoreCursorLock = false)
@@ -107,6 +105,8 @@ namespace DCL
 
                 // Center map
                 MapRenderer.i.atlas.CenterToTile(Utils.WorldToGridPositionUnclamped(CommonScriptableObjects.playerWorldPosition));
+
+                AudioScriptableObjects.dialogOpen.Play(true);
             }
             else
             {
@@ -125,13 +125,16 @@ namespace DCL
                 (MapRenderer.i.atlas.overlayLayerGameobject.transform as RectTransform).anchoredPosition = Vector2.zero;
 
                 MapRenderer.i.UpdateRendering(Utils.WorldToGridPositionUnclamped(CommonScriptableObjects.playerWorldPosition.Get()));
+
+                AudioScriptableObjects.dialogClose.Play(true);
             }
         }
 
-        void UpdateCurrentSceneData(MinimapHUDModel model)
+        void UpdateCurrentSceneData(Vector2Int current, Vector2Int previous)
         {
-            currentSceneNameText.text = string.IsNullOrEmpty(model.sceneName) ? "Unnamed" : model.sceneName;
-            currentSceneCoordsText.text = model.playerPosition;
+            const string format = "{0},{1}";
+            currentSceneCoordsText.text = string.Format(format, current.x, current.y);
+            currentSceneNameText.text = MinimapMetadata.GetMetadata().GetSceneInfo(current.x, current.y)?.name ?? "Unnamed";
         }
 
         void TriggerToast(int cursorTileX, int cursorTileY)

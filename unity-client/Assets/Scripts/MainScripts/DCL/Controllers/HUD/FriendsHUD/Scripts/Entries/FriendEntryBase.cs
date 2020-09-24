@@ -34,6 +34,7 @@ public class FriendEntryBase : MonoBehaviour, IPointerEnterHandler, IPointerExit
     [SerializeField] protected internal Button menuButton;
     [SerializeField] protected internal Image backgroundImage;
     [SerializeField] protected internal Sprite hoveredBackgroundSprite;
+    [SerializeField] protected internal AudioEvent audioEventHover;
     protected internal Sprite unhoveredBackgroundSprite;
 
     public event System.Action<FriendEntryBase> OnMenuToggle;
@@ -49,6 +50,9 @@ public class FriendEntryBase : MonoBehaviour, IPointerEnterHandler, IPointerExit
     {
         backgroundImage.sprite = hoveredBackgroundSprite;
         menuButton.gameObject.SetActive(true);
+
+        if (audioEventHover != null)
+            audioEventHover.Play(true);
     }
 
     public void OnPointerExit(PointerEventData eventData)

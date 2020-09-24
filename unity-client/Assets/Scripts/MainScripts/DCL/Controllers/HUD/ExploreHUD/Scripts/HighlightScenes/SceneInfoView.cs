@@ -5,7 +5,7 @@ using TMPro;
 internal class SceneInfoView : MonoBehaviour
 {
     [SerializeField] float idleTime;
-    [SerializeField] Image thumbnail;
+    [SerializeField] RawImageFillParent thumbnail;
     [SerializeField] TextMeshProUGUI sceneName;
     [SerializeField] TextMeshProUGUI coordinates;
     [SerializeField] TextMeshProUGUI creatorName;
@@ -18,13 +18,15 @@ internal class SceneInfoView : MonoBehaviour
     private float timer;
     private RectTransform thisRT;
     private RectTransform parentRT;
-    private BaseSceneCellView baseSceneView;
+    private HotSceneCellView baseSceneView;
 
     public void Show()
     {
         if (!gameObject.activeSelf)
         {
             gameObject.SetActive(true);
+
+            AudioScriptableObjects.dialogOpen.Play(true);
         }
         showHideAnimator.Show();
         this.enabled = false;
@@ -46,6 +48,8 @@ internal class SceneInfoView : MonoBehaviour
         if (instant)
         {
             showHideAnimator.Hide(true);
+
+            AudioScriptableObjects.dialogClose.Play(true);
         }
         else
         {
@@ -54,23 +58,23 @@ internal class SceneInfoView : MonoBehaviour
         }
     }
 
-    void SetSceneView(BaseSceneCellView sceneView)
+    void SetSceneView(HotSceneCellView sceneView)
     {
         if (baseSceneView)
         {
-            baseSceneView.OnThumbnailFetched -= SetThumbnail;
+            baseSceneView.OnThumbnailSet -= SetThumbnail;
         }
 
         baseSceneView = sceneView;
 
-        SetMapInfoData(sceneView);
+        SetMapInfoData(sceneView.mapInfoHandler);
 
-        thumbnail.sprite = sceneView.GetThumbnail();
-        bool hasThumbnail = thumbnail.sprite != null;
+        thumbnail.texture = sceneView.thumbnailHandler.texture;
+        bool hasThumbnail = thumbnail.texture != null;
         loadingSpinner.SetActive(!hasThumbnail);
         if (!hasThumbnail)
         {
-            sceneView.OnThumbnailFetched += SetThumbnail;
+            sceneView.OnThumbnailSet += SetThumbnail;
         }
     }
 
@@ -83,10 +87,10 @@ internal class SceneInfoView : MonoBehaviour
         description.text = mapInfo.description;
     }
 
-    void SetThumbnail(Sprite thumbnailSprite)
+    void SetThumbnail(Texture2D thumbnailTexture)
     {
-        thumbnail.sprite = thumbnailSprite;
-        loadingSpinner.SetActive(thumbnailSprite != null);
+        thumbnail.texture = thumbnailTexture;
+        loadingSpinner.SetActive(thumbnailTexture != null);
     }
 
     void Awake()
@@ -108,9 +112,9 @@ internal class SceneInfoView : MonoBehaviour
         hoverArea.OnPointerEnter += OnPointerEnter;
         hoverArea.OnPointerExit += OnPointerExit;
 
-        BaseSceneCellView.OnInfoButtonPointerDown += OnInfoButtonPointerDown;
-        BaseSceneCellView.OnInfoButtonPointerExit += OnInfoButtonPointerExit;
-        BaseSceneCellView.OnJumpIn += OnJumpIn;
+        HotSceneCellView.OnInfoButtonPointerDown += OnInfoButtonPointerDown;
+        HotSceneCellView.OnInfoButtonPointerExit += OnInfoButtonPointerExit;
+        HotSceneCellView.OnJumpIn += OnJumpIn;
 
         showHideAnimator.OnWillFinishHide += OnHidden;
     }
@@ -120,9 +124,9 @@ internal class SceneInfoView : MonoBehaviour
         hoverArea.OnPointerEnter -= OnPointerEnter;
         hoverArea.OnPointerExit -= OnPointerExit;
 
-        BaseSceneCellView.OnInfoButtonPointerDown -= OnInfoButtonPointerDown;
-        BaseSceneCellView.OnInfoButtonPointerExit -= OnInfoButtonPointerExit;
-        BaseSceneCellView.OnJumpIn -= OnJumpIn;
+        HotSceneCellView.OnInfoButtonPointerDown -= OnInfoButtonPointerDown;
+        HotSceneCellView.OnInfoButtonPointerExit -= OnInfoButtonPointerExit;
+        HotSceneCellView.OnJumpIn -= OnJumpIn;
 
         showHideAnimator.OnWillFinishHide -= OnHidden;
     }
@@ -134,6 +138,8 @@ internal class SceneInfoView : MonoBehaviour
         {
             showHideAnimator.Hide();
             this.enabled = false;
+
+            AudioScriptableObjects.dialogClose.Play(true);
         }
     }
 
@@ -142,7 +148,7 @@ internal class SceneInfoView : MonoBehaviour
         baseSceneView = null;
     }
 
-    void OnInfoButtonPointerDown(BaseSceneCellView sceneView)
+    void OnInfoButtonPointerDown(HotSceneCellView sceneView)
     {
         if (sceneView == baseSceneView)
             return;
