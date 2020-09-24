@@ -1,5 +1,5 @@
 import { VoiceChatCodecWorkerMain, EncodeStream } from './VoiceChatCodecWorkerMain'
-import { OrderedRingBuffer } from 'atomicHelpers/OrderedRingBuffer'
+import { OrderedRingBuffer } from 'atomicHelpers/RingBuffer'
 import { defer } from 'atomicHelpers/defer'
 import defaultLogger from 'shared/logger'
 import { OPUS_BITS_PER_SECOND, OPUS_FRAME_SIZE_MS, OUTPUT_NODE_BUFFER_SIZE } from './constants'
