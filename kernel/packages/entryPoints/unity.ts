@@ -12,8 +12,7 @@ import {
   NO_MOTD,
   DEBUG_PM,
   OPEN_AVATAR_EDITOR,
-  ENABLE_MANA_HUD,
-  ENABLE_NEW_TASKBAR
+  ENABLE_MANA_HUD
 } from '../config/index'
 import { signalRendererInitialized, signalParcelLoadingStarted } from 'shared/renderer/actions'
 import { lastPlayerPosition, teleportObservable } from 'shared/world/positionThings'
