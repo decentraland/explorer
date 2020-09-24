@@ -4,10 +4,11 @@ import { future } from 'fp-future'
 import { defaultLogger } from 'shared/logger'
 import { Account } from 'web3x/account'
 import { Eth } from 'web3x/eth'
-import { Web3Connector, ProviderType } from './Web3Connector'
+import { Web3Connector } from './Web3Connector'
 import { ExplorerIdentity } from '../session/types'
 import { createIdentity } from 'eth-crypto'
 import { Authenticator } from 'dcl-crypto'
+import { ProviderType } from './ProviderType'
 
 let web3Connector: Web3Connector
 
