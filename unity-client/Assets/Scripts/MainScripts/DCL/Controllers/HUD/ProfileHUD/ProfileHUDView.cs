@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using TMPro;
 using UnityEngine;
@@ -43,16 +43,7 @@ internal class ProfileHUDView : MonoBehaviour
     private void Awake()
     {
         buttonToggleMenu.onClick.AddListener(ToggleMenu);
-        buttonCopyAddress.onClick.AddListener(() =>
-        {
-            copyTooltip.gameObject.SetActive(false);
-            if (copyToastRoutine != null)
-            {
-                StopCoroutine(copyToastRoutine);
-            }
-
-            copyToastRoutine = StartCoroutine(ShowCopyToast());
-        });
+        buttonCopyAddress.onClick.AddListener(CopyAddress);
         copyToast.gameObject.SetActive(false);
     }
 
@@ -144,6 +135,24 @@ internal class ProfileHUDView : MonoBehaviour
         {
             profile.OnFaceSnapshotReadyEvent -= SetProfileImage;
         }
+    }
+
+    private void CopyAddress()
+    {
+        if (!profile)
+        {
+            return;
+        }
+
+        DCL.Environment.i.clipboard.WriteText(profile.userId);
+
+        copyTooltip.gameObject.SetActive(false);
+        if (copyToastRoutine != null)
+        {
+            StopCoroutine(copyToastRoutine);
+        }
+
+        copyToastRoutine = StartCoroutine(ShowCopyToast());
     }
 
     private IEnumerator ShowCopyToast()
