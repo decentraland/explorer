@@ -18,7 +18,7 @@ namespace DCL.Tutorial
         {
             None = 0,
             OldTutorialValue = 99, // NOTE: old tutorial set tutorialStep to 99 when finished
-            EmailRequested = 128, // NOTE: old email prompt set tutorialStep to 1289 when finished
+            EmailRequested = 128, // NOTE: old email prompt set tutorialStep to 128 when finished
             NewTutorialFinished = 256
         }
 
@@ -89,10 +89,7 @@ namespace DCL.Tutorial
             if (hudController != null)
             {
                 if (hudController.emailPromptHud != null)
-                {
-                    hudController.emailPromptHud.OnSetEmailFlag -= EmailPromptHud_OnSetEmailFlag;
                     hudController.emailPromptHud.waitForEndOfTutorial = false;
-                }
 
                 if (hudController.goToGenesisPlazaHud != null)
                 {
@@ -118,11 +115,7 @@ namespace DCL.Tutorial
             if (hudController != null)
             {
                 if (hudController.emailPromptHud != null)
-                {
-                    hudController.emailPromptHud.OnSetEmailFlag -= EmailPromptHud_OnSetEmailFlag;
-                    hudController.emailPromptHud.OnSetEmailFlag += EmailPromptHud_OnSetEmailFlag;
                     hudController.emailPromptHud.waitForEndOfTutorial = true;
-                }
 
                 if (hudController.goToGenesisPlazaHud != null)
                 {
@@ -240,11 +233,6 @@ namespace DCL.Tutorial
             teacher.PlayAnimation(animation);
         }
 
-        private int GetTutorialStepFromProfile()
-        {
-            return UserProfile.GetOwnUserProfile().tutorialStep;
-        }
-
         private void OnRenderingStateChanged(bool renderingEnabled, bool prevState)
         {
             if (!renderingEnabled)
@@ -328,7 +316,7 @@ namespace DCL.Tutorial
 
         private void SetUserTutorialStepAsCompleted(TutorialFinishStep finishStepType)
         {
-            WebInterface.SaveUserTutorialStep(GetTutorialStepFromProfile() | (int)finishStepType);
+            WebInterface.SaveUserTutorialStep(UserProfile.GetOwnUserProfile().tutorialStep | (int)finishStepType);
         }
 
         private IEnumerator MoveTeacher(Vector2 fromPosition, Vector2 toPosition)
@@ -345,11 +333,6 @@ namespace DCL.Tutorial
 
                 yield return null;
             }
-        }
-
-        private void EmailPromptHud_OnSetEmailFlag()
-        {
-            SetUserTutorialStepAsCompleted(TutorialFinishStep.EmailRequested);
         }
 
         private void GoToGenesisPlazaHud_OnBeforeGoToGenesisPlaza()

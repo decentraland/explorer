@@ -1,5 +1,5 @@
 import { TeleportController } from 'shared/world/TeleportController'
-import { DEBUG, EDITOR, ENGINE_DEBUG_PANEL, SCENE_DEBUG_PANEL, SHOW_FPS_COUNTER, NO_ASSET_BUNDLES, HAS_INITIAL_POSITION_MARK } from 'config'
+import { DEBUG, EDITOR, ENGINE_DEBUG_PANEL, SCENE_DEBUG_PANEL, SHOW_FPS_COUNTER, NO_ASSET_BUNDLES } from 'config'
 import { aborted } from 'shared/loading/ReportFatalError'
 import { loadingScenes, teleportTriggered } from 'shared/loading/types'
 import { defaultLogger } from 'shared/logger'
@@ -22,7 +22,6 @@ import { UnityInterface, unityInterface } from './UnityInterface'
 import { BrowserInterface, browserInterface } from './BrowserInterface'
 import { UnityScene } from './UnityScene'
 import { ensureUiApis } from 'shared/world/uiSceneInitializer'
-import { getUserProfile } from 'shared/comms/peers'
 
 declare const globalThis: UnityInterfaceContainer &
   BrowserInterfaceContainer &
@@ -121,12 +120,6 @@ export async function initializeEngine(_gameInstance: GameInstance) {
 
   if (!EDITOR) {
     await startGlobalScene(unityInterface)
-  }
-
-  if (!DEBUG) {
-    const profile = getUserProfile().profile
-    unityInterface.ConfigureEmailPrompt(profile ? profile.tutorialStep : 0)
-    unityInterface.ConfigureTutorial(profile ? profile.tutorialStep : 0, HAS_INITIAL_POSITION_MARK)
   }
 
   return {
