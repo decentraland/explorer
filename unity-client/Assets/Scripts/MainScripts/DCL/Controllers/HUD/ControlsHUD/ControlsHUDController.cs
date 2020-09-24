@@ -7,6 +7,9 @@ public class ControlsHUDController : IHUD
 
     private bool prevMouseLockState = false;
 
+    public event System.Action OnControlsOpened;
+    public event System.Action OnControlsClosed;
+
     public ControlsHUDController()
     {
         view = UnityEngine.Object.Instantiate(Resources.Load<GameObject>("ControlsHUD")).GetComponent<ControlsHUDView>();
@@ -30,9 +33,9 @@ public class ControlsHUDController : IHUD
             }
 
             view.showHideAnimator.Hide();
+            OnControlsClosed?.Invoke();
 
-            if (HUDAudioPlayer.i != null)
-                HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.fadeOut);
+            AudioScriptableObjects.fadeOut.Play(true);
         }
         else if (!IsVisible() && visible)
         {
@@ -40,8 +43,8 @@ public class ControlsHUDController : IHUD
             Utils.UnlockCursor();
             view.gameObject.SetActive(true);
             view.showHideAnimator.Show();
-            if (HUDAudioPlayer.i != null)
-                HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.fadeIn);
+            OnControlsOpened?.Invoke();
+            AudioScriptableObjects.fadeIn.Play(true);
         }
     }
 

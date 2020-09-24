@@ -1,12 +1,18 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace DCL.SettingsHUD
 {
     public class SettingsHUDView : MonoBehaviour
     {
+        [SerializeField] private ShowHideAnimator settingsAnimator;
+
         public bool isOpen { get; private set; }
 
         private const string PATH = "SettingsHUD";
+
+        [SerializeField] internal Button closeButton;
+        [SerializeField] internal Button doneButton;
 
         private void Awake()
         {
@@ -22,15 +28,16 @@ namespace DCL.SettingsHUD
 
         public void SetVisibility(bool visible)
         {
-            if (HUDAudioPlayer.i != null)
-            {
-                if (visible && !isOpen)
-                    HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogAppear);
-                else if (isOpen)
-                    HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogClose);
-            }
+            if (visible && !isOpen)
+                AudioScriptableObjects.dialogOpen.Play(true);
+            else if (isOpen)
+                AudioScriptableObjects.dialogClose.Play(true);
 
-            gameObject.SetActive(visible);
+            if (visible)
+                settingsAnimator.Show();
+            else
+                settingsAnimator.Hide();
+
             isOpen = visible;
         }
     }

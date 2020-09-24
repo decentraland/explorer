@@ -401,7 +401,7 @@ namespace DCL
                                 MinimapMetadataController.i?.UpdateMinimapSceneInformation(msg.payload);
                                 break;
                             case "SetTutorialEnabled":
-                                DCL.Tutorial.TutorialController.i?.SetTutorialEnabled();
+                                DCL.Tutorial.TutorialController.i?.SetTutorialEnabled(msg.payload);
                                 break;
                             case "TriggerSelfUserExpression":
                                 HUDController.i.TriggerSelfUserExpression(msg.payload);
@@ -426,6 +426,12 @@ namespace DCL
                                 break;
                             case "UpdateBalanceOfMANA":
                                 HUDController.i.UpdateBalanceOfMANA(msg.payload);
+                                break;
+                            case "SetPlayerTalking":
+                                HUDController.i.SetPlayerTalking(msg.payload);
+                                break;
+                            case "EnableNewTaskbar":
+                                HUDController.i.EnableNewTaskbar(); // NOTE(Santi): This is temporal, until we remove the old taskbar
                                 break;
                             default:
                                 Debug.Log(

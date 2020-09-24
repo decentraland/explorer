@@ -1,5 +1,5 @@
 import { TeleportController } from 'shared/world/TeleportController'
-import { WSS_ENABLED, EDITOR } from 'config'
+import { WSS_ENABLED, WORLD_EXPLORER, RESET_TUTORIAL, EDITOR } from 'config'
 import { Vector3 } from '../decentraland-ecs/src/decentraland/math'
 import { ProfileForRenderer, MinimapSceneInfo } from '../decentraland-ecs/src/decentraland/Types'
 import { AirdropInfo } from 'shared/airdrops/interface'
@@ -142,7 +142,10 @@ export class UnityInterface {
 
   /** Sends the camera position & target to the engine */
 
-  public Teleport({ position: { x, y, z }, cameraTarget }: InstancedSpawnPoint, rotateIfTargetIsNotSet: boolean = true) {
+  public Teleport(
+    { position: { x, y, z }, cameraTarget }: InstancedSpawnPoint,
+    rotateIfTargetIsNotSet: boolean = true
+  ) {
     const theY = y <= 0 ? 2 : y
 
     TeleportController.ensureTeleportAnimation()
@@ -183,6 +186,11 @@ export class UnityInterface {
 
   public ShowFPSPanel() {
     this.gameInstance.SendMessage('SceneController', 'ShowFPSPanel')
+  }
+
+  /* NOTE(Santi): This is temporal, until we remove the old taskbar */
+  public EnableNewTaskbar() {
+    this.gameInstance.SendMessage('HUDController', 'EnableNewTaskbar')
   }
 
   public HideFPSPanel() {
@@ -243,11 +251,19 @@ export class UnityInterface {
     this.gameInstance.SendMessage('HUDController', 'ShowNotificationFromJson', JSON.stringify(notification))
   }
 
-  public ConfigureHUDElement(hudElementId: HUDElementID, configuration: HUDConfiguration) {
+  public ConfigureHUDElement(
+    hudElementId: HUDElementID,
+    configuration: HUDConfiguration,
+    extraPayload: any | null = null
+  ) {
     this.gameInstance.SendMessage(
       'HUDController',
       `ConfigureHUDElement`,
-      JSON.stringify({ hudElementId: hudElementId, configuration: configuration })
+      JSON.stringify({
+        hudElementId: hudElementId,
+        configuration: configuration,
+        extraPayload: extraPayload ? JSON.stringify(extraPayload) : null
+      })
     )
   }
 
@@ -266,8 +282,8 @@ export class UnityInterface {
     }
   }
 
-  public SetTutorialEnabled() {
-    this.gameInstance.SendMessage('TutorialController', 'SetTutorialEnabled')
+  public SetTutorialEnabled(fromDeepLink: boolean) {
+    this.gameInstance.SendMessage('TutorialController', 'SetTutorialEnabled', JSON.stringify(fromDeepLink))
   }
 
   public TriggerAirdropDisplay(data: AirdropInfo) {
@@ -323,16 +339,25 @@ export class UnityInterface {
     this.gameInstance.SendMessage('SceneController', 'RejectGIFProcessingRequest')
   }
 
-  public ConfigureEmailPrompt(tutorialStep: number) {
-    const emailCompletedFlag = 128
-    this.ConfigureHUDElement(HUDElementID.EMAIL_PROMPT, {
-      active: (tutorialStep & emailCompletedFlag) === 0,
+  public ConfigureTutorial(tutorialStep: number, fromDeepLink: boolean) {
+    const tutorialCompletedFlag = 256
+
+    this.ConfigureHUDElement(HUDElementID.GO_TO_GENESIS_PLAZA_HUD, {
+      active: true,
       visible: false
     })
+
+    if (WORLD_EXPLORER && (RESET_TUTORIAL || (tutorialStep & tutorialCompletedFlag) === 0)) {
+      this.SetTutorialEnabled(fromDeepLink)
+    }
   }
 
   public UpdateBalanceOfMANA(balance: string) {
     this.gameInstance.SendMessage('HUDController', 'UpdateBalanceOfMANA', balance)
+  }
+
+  public SetPlayerTalking(talking: boolean) {
+    this.gameInstance.SendMessage('HUDController', 'SetPlayerTalking', JSON.stringify(talking))
   }
 
   // *********************************************************************************

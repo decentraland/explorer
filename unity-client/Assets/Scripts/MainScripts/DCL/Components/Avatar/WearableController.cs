@@ -69,14 +69,22 @@ public class WearableController
 
         assetRenderers = null;
 
-        loader.OnSuccessEvent += (x) =>
+        void OnSuccessWrapper(GameObject gameObject)
         {
-            assetRenderers = x.GetComponentsInChildren<Renderer>();
-            PrepareWearable(x);
+            loader.OnSuccessEvent -= OnSuccessWrapper;
+            assetRenderers = gameObject.GetComponentsInChildren<Renderer>();
+            PrepareWearable(gameObject);
             onSuccess.Invoke(this);
-        };
+        }
+        loader.OnSuccessEvent += OnSuccessWrapper;
 
-        loader.OnFailEvent += () => onFail.Invoke(this);
+        void OnFailEventWrapper()
+        {
+            loader.OnFailEvent -= OnFailEventWrapper;
+            loader = null;
+            onFail.Invoke(this);
+        }
+        loader.OnFailEvent += OnFailEventWrapper;
 
         loader.Load(representation.mainFile);
     }
@@ -145,11 +153,12 @@ public class WearableController
 
         if (loader != null)
         {
+            loader.ClearEvents();
             loader.Unload();
         }
     }
 
-    public void SetAssetRenderersEnabled(bool active)
+    public virtual void SetAssetRenderersEnabled(bool active)
     {
         for (var i = 0; i < assetRenderers.Length; i++)
         {
