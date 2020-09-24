@@ -5,7 +5,6 @@ using DCL.Helpers;
 using DCL.Configuration;
 using UnityEngine;
 using System.Collections.Generic;
-using Cinemachine;
 
 namespace DCL
 {
@@ -150,7 +149,7 @@ namespace DCL
 
                 for (int animIndex = 0; animIndex < animators.Length; animIndex++)
                 {
-                    animators[animIndex].cullingType = AnimationCullingType.BasedOnRenderers;
+                    animators[animIndex].cullingType = AnimationCullingType.AlwaysAnimate;
                 }
 
 #if UNITY_EDITOR

@@ -1,12 +1,17 @@
 import { TeleportController } from 'shared/world/TeleportController'
-import { DEBUG, EDITOR, ENGINE_DEBUG_PANEL, SCENE_DEBUG_PANEL, SHOW_FPS_COUNTER, NO_ASSET_BUNDLES } from 'config'
+import { DEBUG, EDITOR, ENGINE_DEBUG_PANEL, SCENE_DEBUG_PANEL, SHOW_FPS_COUNTER, NO_ASSET_BUNDLES, ENABLE_NEW_TASKBAR, HAS_INITIAL_POSITION_MARK } from 'config'
 import { aborted } from 'shared/loading/ReportFatalError'
 import { loadingScenes, teleportTriggered } from 'shared/loading/types'
 import { defaultLogger } from 'shared/logger'
 import { ILand, SceneJsonData, LoadableParcelScene, MappingsResponse } from 'shared/types'
-import { enableParcelSceneLoading, loadParcelScene, stopParcelSceneWorker } from 'shared/world/parcelSceneManager'
+import {
+  enableParcelSceneLoading,
+  loadParcelScene,
+  stopParcelSceneWorker,
+  getParcelSceneID
+} from 'shared/world/parcelSceneManager'
 import { teleportObservable } from 'shared/world/positionThings'
-import { SceneWorker } from 'shared/world/SceneWorker'
+import { SceneWorker, hudWorkerUrl } from 'shared/world/SceneWorker'
 import { worldRunningObservable } from 'shared/world/worldState'
 import { StoreContainer } from 'shared/store/rootTypes'
 import { ILandToLoadableParcelScene, ILandToLoadableParcelSceneUpdate } from 'shared/selectors'
@@ -15,6 +20,9 @@ import { UnityParcelScene } from './UnityParcelScene'
 import { loginCompleted } from 'shared/ethereum/provider'
 import { UnityInterface, unityInterface } from './UnityInterface'
 import { BrowserInterface, browserInterface } from './BrowserInterface'
+import { UnityScene } from './UnityScene'
+import { ensureUiApis } from 'shared/world/uiSceneInitializer'
+import { getUserProfile } from 'shared/comms/peers'
 
 declare const globalThis: UnityInterfaceContainer &
   BrowserInterfaceContainer &
@@ -107,8 +115,20 @@ export async function initializeEngine(_gameInstance: GameInstance) {
     unityInterface.ShowFPSPanel()
   }
 
+  if (ENABLE_NEW_TASKBAR) {
+    unityInterface.EnableNewTaskbar() /* NOTE(Santi): This is temporal, until we remove the old taskbar */
+  }
+
   if (ENGINE_DEBUG_PANEL) {
     unityInterface.SetEngineDebugPanel()
+  }
+
+  if (!DEBUG && ENABLE_NEW_TASKBAR) {
+    unityInterface.ConfigureTutorial(getUserProfile().profile.tutorialStep, HAS_INITIAL_POSITION_MARK)
+  }
+
+  if (!EDITOR) {
+    await startGlobalScene(unityInterface)
   }
 
   return {
@@ -116,12 +136,33 @@ export async function initializeEngine(_gameInstance: GameInstance) {
     onMessage(type: string, message: any) {
       if (type in browserInterface) {
         // tslint:disable-next-line:semicolon
-        ;(browserInterface as any)[type](message)
+        ; (browserInterface as any)[type](message)
       } else {
         defaultLogger.info(`Unknown message (did you forget to add ${type} to unity-interface/dcl.ts?)`, message)
       }
     }
   }
+}
+
+export async function startGlobalScene(unityInterface: UnityInterface) {
+  const sceneId = 'dcl-ui-scene'
+
+  const scene = new UnityScene({
+    sceneId,
+    name: 'ui',
+    baseUrl: location.origin,
+    main: hudWorkerUrl,
+    useFPSThrottling: false,
+    data: {},
+    mappings: []
+  })
+
+  const worker = loadParcelScene(scene)
+  worker.persistent = true
+
+  await ensureUiApis(worker)
+
+  unityInterface.CreateUIScene({ id: getParcelSceneID(scene), baseUrl: scene.data.baseUrl })
 }
 
 export async function startUnitySceneWorkers() {
@@ -227,6 +268,7 @@ export function loadBuilderScene(sceneData: ILand) {
 
 export function unloadCurrentBuilderScene() {
   if (currentLoadedScene) {
+    unityInterface.DeactivateRendering()
     const parcelScene = currentLoadedScene.parcelScene as UnityParcelScene
     parcelScene.emit('builderSceneUnloaded', {})
 
