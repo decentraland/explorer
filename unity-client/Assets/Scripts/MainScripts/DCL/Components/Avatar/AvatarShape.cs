@@ -102,6 +102,7 @@ namespace DCL
             MinimapMetadataController.i?.UpdateMinimapUserInformation(avatarUserInfo);
 
             avatarName.SetName(model.name);
+            avatarName.SetTalking(model.talking);
 
             everythingIsLoaded = true;
 
@@ -133,7 +134,6 @@ namespace DCL
             avatarUserInfo.userName = model.name;
             avatarUserInfo.worldPosition = updatedModel.position;
             MinimapMetadataController.i?.UpdateMinimapUserInformation(avatarUserInfo);
-            SceneController.i.physicsSyncController.MarkDirty();
         }
 
         public override void OnPoolGet()
