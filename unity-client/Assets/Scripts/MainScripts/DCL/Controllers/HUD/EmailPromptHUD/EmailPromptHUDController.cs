@@ -10,6 +10,7 @@ public class EmailPromptHUDController : IHUD
 
     EmailPromptHUDView view;
 
+    bool alreadyDisplayed = false;
     bool isPopupRoutineRunning = false;
     Coroutine showPopupDelayedRoutine;
 
@@ -31,6 +32,7 @@ public class EmailPromptHUDController : IHUD
         if (visible)
         {
             Utils.UnlockCursor();
+            alreadyDisplayed = true;
             view.gameObject.SetActive(true);
             view.showHideAnimator.Show();
             WebInterface.ReportAnalyticsEvent("open email popup");
@@ -59,7 +61,7 @@ public class EmailPromptHUDController : IHUD
 
     public void SetEnable(bool enable)
     {
-        if (enable && !isPopupRoutineRunning)
+        if (enable && !isPopupRoutineRunning && !alreadyDisplayed)
         {
             StartPopupRoutine();
         }
@@ -89,8 +91,8 @@ public class EmailPromptHUDController : IHUD
         isPopupRoutineRunning = true;
         yield return new WaitUntil(() => CommonScriptableObjects.rendererState.Get());
         yield return WaitForSecondsCache.Get(seconds);
-        yield return new WaitUntil(() => CommonScriptableObjects.rendererState.Get());
         yield return new WaitUntil(() => !waitForEndOfTutorial);
+        yield return new WaitUntil(() => CommonScriptableObjects.rendererState.Get());
         SetVisibility(true);
         isPopupRoutineRunning = false;
     }
