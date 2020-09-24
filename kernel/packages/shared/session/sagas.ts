@@ -48,9 +48,9 @@ import {
 } from './actions'
 import { createSignUpProfile, getProfileByUserId } from '../profiles/sagas'
 import { ensureRealmInitialized } from '../dao/sagas'
-import { ProviderType } from '../ethereum/Web3Connector'
 import { unityInterface } from 'unity-interface/UnityInterface'
 import { getSignUpData } from './selectors'
+import { ProviderType } from '../ethereum/ProviderType'
 
 const logger = createLogger('session: ')
 

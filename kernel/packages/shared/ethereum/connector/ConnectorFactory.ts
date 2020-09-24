@@ -1,4 +1,3 @@
-import { ProviderType } from '../Web3Connector'
 import { FortmaticConnector } from './FortmaticConnector'
 import { FortmaticSDKConnector } from './FortmaticSDKConnector'
 import { MagicLinkConnector } from './MagicLinkConnector'
@@ -6,6 +5,7 @@ import { BitskiConnector } from './BitskiConnector'
 import { MetamaskConnector } from './MetamaskConnector'
 import { ConnectorInterface } from './ConnectorInterface'
 import { PortisConnector } from './PortisConnector'
+import { ProviderType } from '../ProviderType'
 
 export class ConnectorFactory {
   private keys: Map<string, string>

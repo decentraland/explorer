@@ -1,17 +1,9 @@
 import { Eth } from 'web3x/eth'
 import { ETHEREUM_NETWORK, ethereumConfigurations, getTLD } from '../../config'
 import { WebSocketProvider } from 'eth-connect'
-import { ConnectorInterface } from './connector/ConnectorInterface'
 import { ConnectorFactory } from './connector/ConnectorFactory'
-
-export enum ProviderType {
-  METAMASK = 'Metamask',
-  FORTMATIC = 'fortmatic',
-  FORTMATIC_SDK = 'fortmatic-sdk',
-  MAGIC_LINK = 'MagiLink',
-  BITSKI = 'Bitski',
-  PORTIS = 'Portis'
-}
+import { ProviderType } from './ProviderType'
+import { ConnectorInterface } from './connector/ConnectorInterface'
 
 // @todo replace before merge
 const API_KEYS = new Map<string, Map<string, string>>([
