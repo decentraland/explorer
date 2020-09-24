@@ -1,74 +1,40 @@
 using DCL.Helpers;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
+using System.ComponentModel;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Networking;
 using static DCL.ContentServerUtils;
 
-[assembly: InternalsVisibleTo("AssetBundleBuilderTests")]
 namespace DCL
 {
     public static class AssetBundleMenuItems
     {
-        [MenuItem("Decentraland/Asset Bundle Builder/Dump Museum District")]
-        public static void DumpMuseum()
-        {
-            var builder = new AssetBundleBuilder();
-            builder.environment = ContentServerUtils.ApiEnvironment.ORG;
-            builder.skipAlreadyBuiltBundles = false;
-            var zoneArray = Utils.GetCenteredZoneArray(new Vector2Int(13, 75), new Vector2Int(2, 2));
-            builder.DumpArea(zoneArray);
-        }
-
         [MenuItem("Decentraland/Asset Bundle Builder/Dump All Wearables")]
         public static void DumpBaseAvatars()
         {
             var avatarItemList = GetAvatarMappingList("https://dcl-wearables.now.sh/index.json");
-
-            var builder = new AssetBundleBuilder();
-            builder.DownloadAndConvertAssets(avatarItemList);
+            var builder = new ABConverter.Core(ABConverter.Environment.CreateWithDefaultImplementations());
+            builder.Convert(avatarItemList);
         }
 
         [MenuItem("Decentraland/Asset Bundle Builder/Dump Zone -110,-110")]
         public static void DumpZoneArea()
         {
-            var builder = new AssetBundleBuilder();
-            builder.environment = ContentServerUtils.ApiEnvironment.ORG;
-            builder.DumpArea(new Vector2Int(-110, -110), new Vector2Int(1, 1));
+            ABConverter.Client.DumpArea(new Vector2Int(-110, -110), new Vector2Int(1, 1));
         }
-        static void DumpAreaToMax(AssetBundleBuilder builder, int x, int y)
-        {
-            if (x >= 140 || y >= 140)
-                return;
-
-            Debug.Log($"--DumpAreaToMax {x}, {y}");
-            int nextX = x + 10;
-            int nextY = y;
-
-            if (nextX > 130)
-            {
-                nextX = -130;
-                nextY = y + 10;
-            }
-
-            builder.DumpArea(new Vector2Int(x, y), new Vector2Int(10, 10), (error) => DumpAreaToMax(builder, nextX, nextY));
-        }
-
 
         [MenuItem("Decentraland/Asset Bundle Builder/Dump Org 0,0")]
         public static void DumpCenterPlaza()
         {
-            var builder = new AssetBundleBuilder();
-            builder.skipAlreadyBuiltBundles = true;
-            var zoneArray = Utils.GetCenteredZoneArray(new Vector2Int(0, 0), new Vector2Int(30, 30));
-            builder.DumpArea(zoneArray);
+            var zoneArray = Utils.GetCenteredZoneArray(new Vector2Int(-119, 135), new Vector2Int(1, 1));
+            ABConverter.Client.DumpArea(zoneArray);
         }
 
         [MenuItem("Decentraland/Asset Bundle Builder/Only Build Bundles")]
         public static void OnlyBuildBundles()
         {
-            BuildPipeline.BuildAssetBundles(AssetBundleBuilderConfig.ASSET_BUNDLES_PATH_ROOT, BuildAssetBundleOptions.UncompressedAssetBundle | BuildAssetBundleOptions.ForceRebuildAssetBundle, BuildTarget.WebGL);
+            BuildPipeline.BuildAssetBundles(ABConverter.Config.ASSET_BUNDLES_PATH_ROOT, BuildAssetBundleOptions.UncompressedAssetBundle | BuildAssetBundleOptions.ForceRebuildAssetBundle, BuildTarget.WebGL);
         }
 
         public class WearableItemArray
@@ -83,7 +49,9 @@ namespace DCL
             UnityWebRequest w = UnityWebRequest.Get(url);
             w.SendWebRequest();
 
-            while (!w.isDone) { }
+            while (!w.isDone)
+            {
+            }
 
             if (!w.WebRequestSucceded())
             {
