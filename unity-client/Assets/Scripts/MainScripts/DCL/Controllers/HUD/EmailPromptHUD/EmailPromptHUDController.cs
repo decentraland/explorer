@@ -6,7 +6,7 @@ using System;
 
 public class EmailPromptHUDController : IHUD
 {
-    const float POPUP_DELAY = 5;
+    const float POPUP_DELAY = 60;
 
     EmailPromptHUDView view;
 

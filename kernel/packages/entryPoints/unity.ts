@@ -75,7 +75,7 @@ initializeUnity(container)
           })
           .catch((e) => logger.error(`error getting profile ${e}`))
     } catch (e) {
-      logger.error('error on configuring friends hud')
+      logger.error('error on configuring friends hud / tutorial')
     }
 
     globalThis.globalStore.dispatch(signalRendererInitialized())
