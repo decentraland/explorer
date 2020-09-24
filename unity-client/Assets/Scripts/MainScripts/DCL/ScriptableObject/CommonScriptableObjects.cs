@@ -64,6 +64,12 @@ public static class AudioScriptableObjects
 
     private static AudioEvent inputFieldUnfocusEvent;
     public static AudioEvent inputFieldUnfocus => CommonScriptableObjects.GetOrLoad(ref inputFieldUnfocusEvent, "ScriptableObjects/AudioEvents/HUDCommon/InputFieldUnfocus");
+
+    private static AudioEvent UIHideEvent;
+    public static AudioEvent UIHide => CommonScriptableObjects.GetOrLoad(ref UIHideEvent, "ScriptableObjects/AudioEvents/HUDCommon/UIHide");
+
+    private static AudioEvent UIUnhideEvent;
+    public static AudioEvent UIUnhide => CommonScriptableObjects.GetOrLoad(ref UIUnhideEvent, "ScriptableObjects/AudioEvents/HUDCommon/UIUnhide");
 }
 
 public static class CommonScriptableObjects

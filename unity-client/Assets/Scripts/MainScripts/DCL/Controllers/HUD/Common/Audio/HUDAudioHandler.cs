@@ -25,6 +25,7 @@ public class HUDAudioHandler : MonoBehaviour
 
         RefreshChatLastCheckedTimestamp();
         CommonScriptableObjects.rendererState.OnChange += OnRendererStateChange;
+        CommonScriptableObjects.allUIHidden.OnChange += OnAllUIHiddenChange;
     }
 
     public void RefreshChatLastCheckedTimestamp()
@@ -39,5 +40,13 @@ public class HUDAudioHandler : MonoBehaviour
             snapshotInWorld.TransitionTo(0.1f);
         else
             snapshotOutOfWorld.TransitionTo(0.2f);
+    }
+
+    void OnAllUIHiddenChange(bool current, bool previous)
+    {
+        if (current)
+            AudioScriptableObjects.UIHide.Play(true);
+        else
+            AudioScriptableObjects.UIUnhide.Play(true);
     }
 }
