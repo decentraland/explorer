@@ -13,8 +13,6 @@ public class EmailPromptHUDController : IHUD
     bool isPopupRoutineRunning = false;
     Coroutine showPopupDelayedRoutine;
 
-    public event Action OnSetEmailFlag;
-
     public bool waitForEndOfTutorial { get; set; } = false;
 
     public EmailPromptHUDController()
@@ -120,6 +118,7 @@ public class EmailPromptHUDController : IHUD
 
     void SetEmailFlag()
     {
-        OnSetEmailFlag?.Invoke();
+        // NOTE(Santi): Email prompt set tutorialStep to 128 when finished (this is temporal until we have the new Onboarding flow)
+        WebInterface.SaveUserTutorialStep(UserProfile.GetOwnUserProfile().tutorialStep | 128);
     }
 }

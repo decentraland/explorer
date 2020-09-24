@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 
@@ -10,6 +11,8 @@ namespace DCL.Tutorial
     {
         protected static int STEP_FINISHED_ANIMATOR_TRIGGER = Animator.StringToHash("StepFinished");
 
+        internal event Action OnShowAnimationFinished;
+
         [SerializeField] internal bool unlockCursorAtStart = false;
         [SerializeField] internal bool show3DTeacherAtStart = false;
         [SerializeField] internal protected RectTransform teacherPositionRef;
@@ -17,6 +20,7 @@ namespace DCL.Tutorial
         protected TutorialController tutorialController;
         protected Animator stepAnimator;
         protected MouseCatcher mouseCatcher;
+        protected bool hideAnimationFinished = false;
         internal bool letInstantiation = true;
 
         /// <summary>
@@ -66,14 +70,26 @@ namespace DCL.Tutorial
         {
         }
 
+        private void OnShowAnimationFinish()
+        {
+            OnShowAnimationFinished?.Invoke();
+        }
+
+        /// <summary>
+        /// Warn about the finalization of the hide animation of the step
+        /// </summary>
+        private void OnHideAnimationFinish()
+        {
+            hideAnimationFinished = true;
+        }
+
         private IEnumerator WaitForAnimation(int animationTrigger)
         {
             if (stepAnimator == null)
                 yield break;
 
             stepAnimator.SetTrigger(animationTrigger);
-            yield return null; // NOTE(Santi): It is needed to wait a frame for get the reference to the next animation clip correctly.
-            yield return new WaitForSeconds(stepAnimator.GetCurrentAnimatorClipInfo(0)[0].clip.length);
+            yield return new WaitUntil(() => hideAnimationFinished);
         }
     }
 }
