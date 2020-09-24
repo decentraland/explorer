@@ -23,7 +23,11 @@ export class ConnectorFactory {
     config.set('apiKey', this.keys.get(type) as string)
 
     if (type === ProviderType.BITSKI) {
-      config.set('redirectUrl', `${window.location.origin}/bitski.html`)
+      const url =
+        window.location.hostname === 'play.decentraland.zone'
+          ? `${window.location.origin}/branch/test/signIn_signOut_TEST`
+          : window.location.origin
+      config.set('redirectUrl', `${url}/bitski.html`)
       return new BitskiConnector(config)
     }
     if (type === ProviderType.PORTIS) {
