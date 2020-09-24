@@ -93,8 +93,9 @@ export function setupAuthFlow() {
     const btnLogin = document.getElementById('eth-login-confirm-button')
     if (btnLogin) {
       const handleLoginClick = (e: any) => {
+        const input = document.getElementById('input_email') as HTMLInputElement
         const provider = e.target.getAttribute('rel') || 'metamask'
-        globalThis.globalStore.dispatch(login(provider))
+        globalThis.globalStore.dispatch(login(provider, input.value))
         const unsubscribe = globalThis.globalStore.subscribe(() => {
           const error = getAuthError(globalThis.globalStore.getState())
           if (modals.has(error)) {
@@ -110,6 +111,8 @@ export function setupAuthFlow() {
         })
       }
       btnLogin!.addEventListener('click', handleLoginClick)
+      const btnsLogin = document.querySelectorAll('.btnLogin')
+      btnsLogin.forEach((e) => e.addEventListener('click', handleLoginClick))
     }
   }
 }

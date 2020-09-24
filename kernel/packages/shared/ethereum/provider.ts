@@ -32,9 +32,9 @@ export function createWeb3Connector(): Web3Connector {
   return web3Connector
 }
 
-export async function requestWeb3Provider(type: ProviderType) {
+export async function requestWeb3Provider(type: ProviderType, values: Map<string, string>) {
   try {
-    const provider = await web3Connector.connect(type)
+    const provider = await web3Connector.connect(type, values)
     requestManager.setProvider(provider)
     providerFuture.resolve({
       successful: true,

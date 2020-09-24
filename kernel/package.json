@@ -92,7 +92,9 @@
     "web3x-codegen": "^4.0.6"
   },
   "dependencies": {
+    "@portis/web3": "^2.0.0-beta.59",
     "bignumber.js": "^9.0.0",
+    "bitski": "^0.10.9",
     "blob-to-buffer": "^1.2.8",
     "body-scroll-lock": "^2.5.10",
     "cids": "^0.7.3",
@@ -112,6 +114,7 @@
     "google-protobuf": "^3.6.1",
     "keccakjs": "^0.2.3",
     "long": "^4.0.0",
+    "magic-sdk": "^2.7.0",
     "multihashes": "^0.4.14",
     "multihashing-async": "^0.8.0",
     "oimo": "^1.0.9",
@@ -120,7 +123,6 @@
     "reselect": "^4.0.0",
     "sha3": "^2.1.2",
     "typesafe-actions": "^4.4.2",
-    "web3modal": "^1.9.0",
     "web3x": "^4.0.6",
     "ws": "^7.0.0"
   }

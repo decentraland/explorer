@@ -123,7 +123,7 @@ function* profileExists(userId: string) {
 
 function* login(action: LoginAction) {
   if (ENABLE_WEB3) {
-    if (!(yield requestProvider(action.payload.provider as ProviderType))) {
+    if (!(yield requestProvider(action.payload.provider as ProviderType, action.payload.values))) {
       return
     }
     const account = yield getUserAccount()
@@ -140,8 +140,8 @@ function* login(action: LoginAction) {
   return yield authenticate(getUserProfile())
 }
 
-function* requestProvider(providerType: ProviderType) {
-  const provider = yield requestWeb3Provider(providerType)
+function* requestProvider(providerType: ProviderType, values: Map<string, string>) {
+  const provider = yield requestWeb3Provider(providerType, values)
   if (provider) {
     if (WORLD_EXPLORER && (yield checkTldVsNetwork())) {
       throw new Error('Network mismatch')
@@ -325,7 +325,7 @@ function showAwaitingSignaturePrompt(show: boolean) {
 }
 
 function* signup(action: SignupAction) {
-  const provider = yield requestProvider(action.payload.provider as ProviderType)
+  const provider = yield requestProvider(action.payload.provider as ProviderType, new Map<string, string>())
   if (!provider) {
     return
   }

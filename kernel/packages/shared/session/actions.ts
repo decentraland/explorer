@@ -10,7 +10,8 @@ export const setupWeb3 = () => action(SETUP_WEB3)
 export type SetupWeb3 = ReturnType<typeof setupWeb3>
 
 export const LOGIN = '[Request] Login'
-export const login = (provider: string) => action(LOGIN, { provider })
+export const login = (provider: string, email: string) =>
+  action(LOGIN, { provider, values: new Map([['email', email]]) })
 export type LoginAction = ReturnType<typeof login>
 
 export const SIGNUP_ACTIVE = '[SIGN-UP] signup active'
@@ -46,9 +47,9 @@ export const LOGOUT = '[Request] Logout'
 export const logout = () => action(LOGOUT)
 export type Logout = ReturnType<typeof logout>
 
-export const AUTH_ERROR = '[auth] signIn/signUp error'
+export const AUTH_ERROR = '[connector] signIn/signUp error'
 export const authError = (error: AuthError, errorMsg: string | null = null) => action(AUTH_ERROR, { error, errorMsg })
 export type AuthErrorAction = ReturnType<typeof authError>
 
-export const AUTH_CLEAR_ERROR = '[Request] auth clear error'
+export const AUTH_CLEAR_ERROR = '[Request] connector clear error'
 export const authClearError = () => action(AUTH_CLEAR_ERROR)

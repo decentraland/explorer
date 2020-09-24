@@ -740,6 +740,15 @@
     .web3modal-modal-lightbox {
       z-index: 9999 !important;
     }
+    .signinWrapper {
+      margin-bottom: 10px;
+      display: flex;
+    }
+    .signinColumn button {
+      margin-bottom: 10px;
+      margin-right: 3px;
+    }
+    #input_email { margin-bottom: 3px; line-height: 30px; width: 200px;}
   </style>
   <script>
     function checkTos() {
@@ -782,8 +791,23 @@
           <input type="checkbox" id="agree-check" class="eth-login-tos-agree" onchange="checkTos()"></input>
           <label for="agree-check" class="eth-login-tos-label">I am of legal age and I have read and agree to the <a href="https://decentraland.org/terms" target="_blank">Terms of Service</a> and <a href="https://decentraland.org/privacy" target="_blank">Privacy Policy</a></label>
         </div>
-        <button id="eth-login-confirm-button" rel="Metamask" class="eth-login-confirm-button1">Login</button>
+        <input id="input_email" type="text" name="email" value="ezequiel+4@decentraland.org">
         <br>
+        <div class="signinWrapper">
+          <div class="signinColumn">
+            <button id="eth-login-confirm-button" rel="Metamask" class="btnLogin eth-login-confirm-button1">Metamask</button>
+            <button rel="MagiLink" class="btnLogin eth-login-confirm-button1">MagiLink</button>
+          </div>
+          <br />
+          <div class="signinColumn">
+            <button rel="fortmatic" class="btnLogin eth-login-confirm-button1">Formatic</button>
+            <button rel="fortmatic-sdk" class="btnLogin eth-login-confirm-button1">Formatic-sdk</button>
+          </div>
+          <div class="signinColumn">
+            <button rel="Bitski" class="btnLogin eth-login-confirm-button1">Bitski</button>
+            <button rel="Portis" class="btnLogin eth-login-confirm-button1">Portis</button>
+          </div>
+        </div>
         <button id="btnSignUp" class="eth-login-confirm-button1">Sign up</button>
       </div>
     </div>
