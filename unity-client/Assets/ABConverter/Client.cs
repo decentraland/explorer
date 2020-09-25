@@ -79,14 +79,13 @@ namespace DCL
             }
 
             /// <summary>
-            /// 
+            /// Start the conversion process with the given commandLineArgs. 
             /// </summary>
-            /// <param name="commandLineArgs"></param>
-            /// <exception cref="ArgumentException"></exception>
+            /// <param name="commandLineArgs">An array with the command line arguments.</param>
+            /// <exception cref="ArgumentException">When an invalid argument is passed</exception>
             public static void ExportSceneToAssetBundles(string[] commandLineArgs)
             {
                 Settings settings = new Settings();
-
                 try
                 {
                     if (Utils.ParseOption(commandLineArgs, Config.CLI_SET_CUSTOM_OUTPUT_ROOT_PATH, 1, out string[] outputPath))
