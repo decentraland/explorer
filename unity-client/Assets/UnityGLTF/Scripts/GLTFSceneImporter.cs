@@ -762,6 +762,9 @@ namespace UnityGLTF
 
         protected virtual IEnumerator ConstructUnityTexture(Stream stream, bool markGpuOnly, bool linear, GLTFImage image, int imageCacheIndex)
         {
+            if (stream == null)
+                yield break;
+
             if (stream is MemoryStream)
             {
                 using (MemoryStream memoryStream = stream as MemoryStream)
@@ -2417,92 +2420,93 @@ namespace UnityGLTF
         {
             yield return new WaitUntil(() => _assetCache.TextureCache[textureIndex] != null);
 
-            if (_assetCache.TextureCache[textureIndex].CachedTexture == null)
+            if (_assetCache.TextureCache[textureIndex].CachedTexture != null)
+                yield break;
+
+            int sourceId = GetTextureSourceId(texture);
+            GLTFImage image = _gltfRoot.Images[sourceId];
+
+            RefCountedTextureData source = null;
+
+            if (image.Uri != null && PersistentAssetCache.HasImage(image.Uri, id))
             {
-                int sourceId = GetTextureSourceId(texture);
-                GLTFImage image = _gltfRoot.Images[sourceId];
+                source = PersistentAssetCache.GetImage(image.Uri, id);
+                _assetCache.ImageCache[sourceId] = source.Texture;
+            }
+            else
+            {
+                yield return ConstructImage(image, sourceId, markGpuOnly, isLinear);
 
-                RefCountedTextureData source = null;
+                source = new RefCountedTextureData(image.Uri, _assetCache.ImageCache[sourceId] ?? Texture2D.whiteTexture);
 
-                if (image.Uri != null && PersistentAssetCache.HasImage(image.Uri, id))
+                if (image.Uri != null && addImagesToPersistentCaching)
                 {
-                    source = PersistentAssetCache.GetImage(image.Uri, id);
-                    _assetCache.ImageCache[sourceId] = source.Texture;
+                    PersistentAssetCache.AddImage(image.Uri, id, source);
                 }
-                else
+            }
+
+            var desiredFilterMode = FilterMode.Bilinear;
+            var desiredWrapMode = TextureWrapMode.Repeat;
+
+            if (texture.Sampler != null)
+            {
+                var sampler = texture.Sampler.Value;
+                switch (sampler.MinFilter)
                 {
-                    yield return ConstructImage(image, sourceId, markGpuOnly, isLinear);
-                    source = new RefCountedTextureData(image.Uri, _assetCache.ImageCache[sourceId]);
-
-                    if (image.Uri != null && addImagesToPersistentCaching)
-                    {
-                        PersistentAssetCache.AddImage(image.Uri, id, source);
-                    }
-                }
-
-                var desiredFilterMode = FilterMode.Bilinear;
-                var desiredWrapMode = TextureWrapMode.Repeat;
-
-                if (texture.Sampler != null)
-                {
-                    var sampler = texture.Sampler.Value;
-                    switch (sampler.MinFilter)
-                    {
-                        case MinFilterMode.Nearest:
-                        case MinFilterMode.NearestMipmapNearest:
-                        case MinFilterMode.NearestMipmapLinear:
-                            desiredFilterMode = FilterMode.Point;
-                            break;
-                        case MinFilterMode.Linear:
-                        case MinFilterMode.LinearMipmapNearest:
-                        case MinFilterMode.LinearMipmapLinear:
-                            desiredFilterMode = FilterMode.Bilinear;
-                            break;
-                        default:
-                            Debug.LogWarning("Unsupported Sampler.MinFilter: " + sampler.MinFilter);
-                            break;
-                    }
-
-                    switch (sampler.WrapS)
-                    {
-                        case GLTF.Schema.WrapMode.ClampToEdge:
-                            desiredWrapMode = TextureWrapMode.Clamp;
-                            break;
-                        case GLTF.Schema.WrapMode.Repeat:
-                        default:
-                            desiredWrapMode = TextureWrapMode.Repeat;
-                            break;
-                    }
+                    case MinFilterMode.Nearest:
+                    case MinFilterMode.NearestMipmapNearest:
+                    case MinFilterMode.NearestMipmapLinear:
+                        desiredFilterMode = FilterMode.Point;
+                        break;
+                    case MinFilterMode.Linear:
+                    case MinFilterMode.LinearMipmapNearest:
+                    case MinFilterMode.LinearMipmapLinear:
+                        desiredFilterMode = FilterMode.Bilinear;
+                        break;
+                    default:
+                        Debug.LogWarning("Unsupported Sampler.MinFilter: " + sampler.MinFilter);
+                        break;
                 }
 
-                if (markGpuOnly || (source.Texture.filterMode == desiredFilterMode && source.Texture.wrapMode == desiredWrapMode))
+                switch (sampler.WrapS)
                 {
-                    _assetCache.TextureCache[textureIndex].CachedTexture = source;
-
-                    if (markGpuOnly)
-                    {
-                        Debug.LogWarning("Ignoring sampler");
-                    }
+                    case GLTF.Schema.WrapMode.ClampToEdge:
+                        desiredWrapMode = TextureWrapMode.Clamp;
+                        break;
+                    case GLTF.Schema.WrapMode.Repeat:
+                    default:
+                        desiredWrapMode = TextureWrapMode.Repeat;
+                        break;
                 }
-                else
+            }
+
+            if (markGpuOnly || (source.Texture.filterMode == desiredFilterMode && source.Texture.wrapMode == desiredWrapMode))
+            {
+                _assetCache.TextureCache[textureIndex].CachedTexture = source;
+
+                if (markGpuOnly)
                 {
-                    if (source.Texture.isReadable)
-                    {
-                        var unityTexture = Object.Instantiate(source.Texture);
-                        unityTexture.filterMode = desiredFilterMode;
-                        unityTexture.wrapMode = desiredWrapMode;
+                    Debug.LogWarning("Ignoring sampler");
+                }
+            }
+            else
+            {
+                if (source.Texture.isReadable)
+                {
+                    var unityTexture = Object.Instantiate(source.Texture);
+                    unityTexture.filterMode = desiredFilterMode;
+                    unityTexture.wrapMode = desiredWrapMode;
 
 #if !UNITY_EDITOR
                         // NOTE(Brian): This breaks importing in edit mode, so only enable it for runtime.
                         unityTexture.Apply(false, true);
 #endif
-                        _assetCache.TextureCache[textureIndex].CachedTexture = new RefCountedTextureData(image.Uri, unityTexture);
-                    }
-                    else
-                    {
-                        Debug.LogWarning("Skipping instantiation of non-readable texture: " + image.Uri);
-                        _assetCache.TextureCache[textureIndex].CachedTexture = source;
-                    }
+                    _assetCache.TextureCache[textureIndex].CachedTexture = new RefCountedTextureData(image.Uri, unityTexture);
+                }
+                else
+                {
+                    Debug.LogWarning("Skipping instantiation of non-readable texture: " + image.Uri);
+                    _assetCache.TextureCache[textureIndex].CachedTexture = source;
                 }
             }
         }
