@@ -28,12 +28,7 @@ namespace DCL
                 do
                 {
                     req = UnityWebRequest.Get(url);
-                    req.SendWebRequest();
-
-                    while (req.isDone == false)
-                    {
-                        yield return null;
-                    }
+                    yield return req.SendWebRequest();
 
                     retryCount--;
 
