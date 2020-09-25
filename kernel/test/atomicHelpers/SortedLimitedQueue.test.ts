@@ -65,4 +65,63 @@ describe('SortedLimitedQueue', () => {
 
     expect(queue.dequeueItems(4).map((it) => it.name)).to.eql(['first', 'second', 'third', 'fourth'])
   })
+
+  it('can await elements to be dequeued', async () => {
+    queue.queue(1)
+    queue.queue(2)
+
+    const result = await queue.dequeueItemsWhenAvailable(2, 100)
+
+    expect(result).to.eql([1, 2])
+  })
+
+  it('can await elements with a timeout', async () => {
+    let timedout = false
+
+    queue.queue(1)
+
+    setTimeout(() => (timedout = true), 5)
+
+    const result = await queue.dequeueItemsWhenAvailable(2, 10)
+
+    expect(result).to.eql([1])
+    expect(timedout).to.be.true
+  })
+
+  it('can await elements with a timeout and it returns empty array', async () => {
+    let timedout = false
+
+    setTimeout(() => (timedout = true), 5)
+
+    const result = await queue.dequeueItemsWhenAvailable(2, 10)
+
+    expect(result).to.eql([])
+    expect(timedout).to.be.true
+  })
+
+  it('can await elements and it blocks until elements are available', async () => {
+    let blocked = false
+    let timedout = false
+
+    queue.queue(1)
+
+    setTimeout(() => (blocked = true), 5)
+    setTimeout(() => queue.queue(2), 10)
+    setTimeout(() => (timedout = true), 50)
+
+    const result = await queue.dequeueItemsWhenAvailable(2, 100)
+
+    expect(result).to.eql([1, 2])
+    expect(timedout).to.be.false
+    expect(blocked).to.be.true
+  })
+
+  it('puts the elements in the order they came if they have the same order value', () => {
+    const queue = new SortedLimitedQueue<{ name: string; order: number }>(10, (a, b) => a.order - b.order)
+
+    queue.queue({ name: 'first', order: 1 })
+    queue.queue({ name: 'second', order: 1 })
+
+    expect(queue.dequeueItems(2).map((it) => it.name)).to.eql(['first', 'second'])
+  })
 })

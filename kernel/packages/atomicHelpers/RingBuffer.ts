@@ -98,6 +98,10 @@ export class RingBuffer<T extends TypedArray> {
     this.updateReadPointerToMinReadPosition()
   }
 
+  isFull() {
+    return this.readAvailableCount() >= this.size
+  }
+
   private updateReadPointerToMinReadPosition() {
     const minReadPointer = this.writePointer - this.buffer.length
 

@@ -1,8 +1,14 @@
 import { VoiceChatCodecWorkerMain, EncodeStream } from './VoiceChatCodecWorkerMain'
-import { OrderedRingBuffer } from 'atomicHelpers/RingBuffer'
+import { RingBuffer } from 'atomicHelpers/RingBuffer'
+import { SortedLimitedQueue } from 'atomicHelpers/SortedLimitedQueue'
 import { defer } from 'atomicHelpers/defer'
 import defaultLogger from 'shared/logger'
-import { OPUS_BITS_PER_SECOND, OPUS_FRAME_SIZE_MS, OUTPUT_NODE_BUFFER_SIZE } from './constants'
+import {
+  VOICE_CHAT_SAMPLE_RATE,
+  OPUS_FRAME_SIZE_MS,
+  OUTPUT_NODE_BUFFER_SIZE,
+  OUTPUT_NODE_BUFFER_DURATION
+} from './constants'
 
 export type AudioCommunicatorChannel = {
   send(data: Uint8Array): any
@@ -11,9 +17,14 @@ export type AudioCommunicatorChannel = {
 export type StreamPlayingListener = (streamId: string, playing: boolean) => any
 export type StreamRecordingListener = (recording: boolean) => any
 
+type EncodedFrame = {
+  order: number
+  frame: Uint8Array
+}
+
 type VoiceOutput = {
-  encodedBuffer: OrderedRingBuffer<Uint8Array>
-  decodedBuffer: OrderedRingBuffer<Float32Array>
+  encodedFramesQueue: SortedLimitedQueue<EncodedFrame>
+  decodedBuffer: RingBuffer<Float32Array>
   scriptProcessor: ScriptProcessorNode
   panNode: PannerNode
   spatialParams: VoiceSpatialParams
@@ -62,7 +73,7 @@ export class VoiceCommunicator {
     private channel: AudioCommunicatorChannel,
     private options: VoiceCommunicatorOptions
   ) {
-    this.sampleRate = this.options.sampleRate ?? 24000
+    this.sampleRate = this.options.sampleRate ?? VOICE_CHAT_SAMPLE_RATE
     this.channelBufferSize = this.options.channelBufferSize ?? 2.0
 
     this.context = new AudioContext({ sampleRate: this.sampleRate })
@@ -109,7 +120,7 @@ export class VoiceCommunicator {
       this.setVoiceRelativePosition(src, relativePosition)
     }
 
-    this.outputs[src].encodedBuffer.write(encoded, time)
+    this.outputs[src].encodedFramesQueue.queue({ frame: encoded, order: time })
   }
 
   setListenerSpatialParams(spatialParams: VoiceSpatialParams) {
@@ -244,8 +255,11 @@ export class VoiceCommunicator {
   private createOutput(src: string, relativePosition: VoiceSpatialParams) {
     const nodes = this.createOutputNodes(src)
     this.outputs[src] = {
-      encodedBuffer: new OrderedRingBuffer(Math.floor((OPUS_BITS_PER_SECOND * this.channelBufferSize) / 8), Uint8Array),
-      decodedBuffer: new OrderedRingBuffer(Math.floor(this.channelBufferSize * this.sampleRate), Float32Array),
+      encodedFramesQueue: new SortedLimitedQueue(
+        Math.ceil((this.channelBufferSize * 1000) / OPUS_FRAME_SIZE_MS),
+        (frameA, frameB) => frameA.order - frameB.order
+      ),
+      decodedBuffer: new RingBuffer(Math.floor(this.channelBufferSize * this.sampleRate), Float32Array),
       playing: false,
       spatialParams: relativePosition,
       lastUpdateTime: Date.now(),
@@ -254,11 +268,11 @@ export class VoiceCommunicator {
 
     const readEncodedBufferLoop = async () => {
       if (this.outputs[src]) {
-        const amountToRead = Math.floor(((OUTPUT_NODE_BUFFER_SIZE / this.sampleRate) * 1000 * 1.2) / OPUS_FRAME_SIZE_MS)
+        const framesToRead = Math.ceil((OUTPUT_NODE_BUFFER_DURATION * 1.5) / OPUS_FRAME_SIZE_MS)
 
-        const frames = await this.outputs[src].encodedBuffer.blockAndReadChunks(
-          amountToRead,
-          amountToRead * OPUS_FRAME_SIZE_MS
+        const frames = await this.outputs[src].encodedFramesQueue.dequeueItemsWhenAvailable(
+          framesToRead,
+          OUTPUT_NODE_BUFFER_DURATION * 2
         )
 
         if (frames.length > 0) {
@@ -268,13 +282,12 @@ export class VoiceCommunicator {
             stream = this.voiceChatWorkerMain.getOrCreateDecodeStream(src, this.sampleRate)
 
             stream.addAudioDecodedListener((samples) => {
-              const now = Date.now()
-              this.outputs[src].lastUpdateTime = now
-              this.outputs[src].decodedBuffer.write(samples, now)
+              this.outputs[src].lastUpdateTime = Date.now()
+              this.outputs[src].decodedBuffer.write(samples)
             })
           }
 
-          frames.forEach((it) => stream.decode(it))
+          frames.forEach((it) => stream.decode(it.frame))
         }
 
         await readEncodedBufferLoop()
