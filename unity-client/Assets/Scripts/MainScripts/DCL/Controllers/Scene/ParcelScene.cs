@@ -544,12 +544,9 @@ namespace DCL.Controllers
             {
                 MessageDecoder.DecodeTransform(data, ref DCLTransform.model);
 
-                TransformLerpController lerpController = null;
                 if (!entity.components.ContainsKey(classId))
                 {
                     entity.components.Add(classId, null);
-
-                    lerpController = entity.gameObject.AddComponent<TransformLerpController>();
                 }
 
                 if (entity.OnTransformChange != null)
@@ -558,11 +555,7 @@ namespace DCL.Controllers
                 }
                 else
                 {
-                    if(lerpController == null)
-                        lerpController = entity.gameObject.GetComponent<TransformLerpController>();
-
-                    lerpController.AddTargetPosition(DCLTransform.model.position);
-
+                    entity.gameObject.transform.localPosition = DCLTransform.model.position;
                     entity.gameObject.transform.localRotation = DCLTransform.model.rotation;
                     entity.gameObject.transform.localScale = DCLTransform.model.scale;
 
