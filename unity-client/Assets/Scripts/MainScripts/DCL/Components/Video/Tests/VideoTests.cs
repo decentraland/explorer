@@ -4,9 +4,11 @@ using DCL.Components;
 using DCL.Models;
 using NUnit.Framework;
 using System.Collections;
+using DCL.Components.Video.Plugin;
 using UnityEngine;
 using UnityEngine.TestTools;
 using DCL.Controllers;
+using Newtonsoft.Json;
 
 namespace Tests
 {
@@ -113,11 +115,11 @@ namespace Tests
             yield return ent1Shape.routine;
 
             TestHelpers.SharedComponentAttach(ent1Shape, ent1);
-            yield return null; //a frame to wait DCLVideoTexture update    
+            yield return null; //a frame to wait DCLVideoTexture update
             Assert.IsTrue(videoTexture.isVisible, "DCLVideoTexture should be visible");
 
             yield return TestHelpers.SharedComponentUpdate<BoxShape, BoxShape.Model>(ent1Shape, new BoxShape.Model() { visible = false });
-            yield return null; //a frame to wait DCLVideoTexture update            
+            yield return null; //a frame to wait DCLVideoTexture update
 
             Assert.IsTrue(!videoTexture.isVisible, "DCLVideoTexture should not be visible ");
         }
@@ -139,11 +141,11 @@ namespace Tests
             TestHelpers.SharedComponentAttach(ent1Shape, ent1);
 
             yield return TestHelpers.SharedComponentUpdate<BasicMaterial, BasicMaterial.Model>(ent1Mat, new BasicMaterial.Model() { texture = videoTexture.id });
-            yield return null; //a frame to wait DCLVideoTexture update    
+            yield return null; //a frame to wait DCLVideoTexture update
             Assert.IsTrue(videoTexture.isVisible, "DCLVideoTexture should be visible");
 
             yield return TestHelpers.SharedComponentUpdate<BoxShape, BoxShape.Model>(ent1Shape, new BoxShape.Model() { visible = false });
-            yield return null; //a frame to wait DCLVideoTexture update            
+            yield return null; //a frame to wait DCLVideoTexture update
 
             Assert.IsTrue(!videoTexture.isVisible, "DCLVideoTexture should not be visible ");
         }
@@ -163,13 +165,61 @@ namespace Tests
             yield return ent1Shape.routine;
 
             TestHelpers.SharedComponentAttach(ent1Shape, ent1);
-            yield return null; //a frame to wait DCLVideoTexture update    
+            yield return null; //a frame to wait DCLVideoTexture update
             Assert.IsTrue(videoTexture.isVisible, "DCLVideoTexture should be visible");
 
             scene.RemoveEntity(ent1.entityId, true);
-            yield return null; //a frame to wait DCLVideoTexture update            
+            yield return null; //a frame to wait DCLVideoTexture update
 
             Assert.IsTrue(!videoTexture.isVisible, "DCLVideoTexture should not be visible ");
+        }
+
+        [UnityTest]
+        public IEnumerator VolumeIsToggledWhenCharacterEntersOrLeavesScene()
+        {
+            DCLVideoTexture videoTexture = CreateDCLVideoTexture(scene, "it-wont-load-during-test");
+            yield return videoTexture.routine;
+
+            var videoPlayer = Reflection_GetField<WebVideoPlayer>(videoTexture, "texturePlayer");
+            var videoTextureModel = Reflection_GetField<DCLVideoTexture.Model>(videoTexture, "model");
+
+            DecentralandEntity ent1 = TestHelpers.CreateSceneEntity(scene);
+            BasicMaterial ent1Mat = TestHelpers.SharedComponentCreate<BasicMaterial, BasicMaterial.Model>(scene, CLASS_ID.BASIC_MATERIAL, new BasicMaterial.Model() { texture = videoTexture.id });
+            TestHelpers.SharedComponentAttach(ent1Mat, ent1);
+            yield return ent1Mat.routine;
+
+            BoxShape ent1Shape = TestHelpers.SharedComponentCreate<BoxShape, BoxShape.Model>(scene, CLASS_ID.BOX_SHAPE, new BoxShape.Model());
+            yield return ent1Shape.routine;
+
+            TestHelpers.SharedComponentAttach(ent1Shape, ent1);
+            yield return null; //a frame to wait DCLVideoTexture update
+
+            // Check that the volume is the same as in the model
+            Assert.AreEqual(videoPlayer.volume, videoTextureModel.volume);
+
+            // Move character outside the parcel
+            DCLCharacterController.i.Teleport(JsonConvert.SerializeObject(new
+            {
+                x = -1f,
+                y = DCLCharacterController.i.transform.position.y,
+                z = -1f
+            }));
+            yield return null;
+
+            // Check that the volume is muted
+            Assert.AreEqual(videoPlayer.volume, 0f);
+
+            // Return character inside the parcel
+            DCLCharacterController.i.Teleport(JsonConvert.SerializeObject(new
+            {
+                x = 8f,
+                y = DCLCharacterController.i.transform.position.y,
+                z = 8f
+            }));
+            yield return null;
+
+            // Check that the volume is correct again
+            Assert.AreEqual(videoPlayer.volume, videoTextureModel.volume);
         }
 
         static DCLVideoClip CreateDCLVideoClip(ParcelScene scn, string url)
