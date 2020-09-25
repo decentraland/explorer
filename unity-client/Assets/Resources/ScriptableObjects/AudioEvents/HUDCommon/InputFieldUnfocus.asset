@@ -15,7 +15,7 @@ MonoBehaviour:
   loop: 0
   volume: 1
   initialPitch: 0.7
-  randomPitch: 0.1
+  randomPitch: 0
   cooldownSeconds: 0.1
   clips:
     array:
