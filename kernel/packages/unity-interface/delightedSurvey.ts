@@ -2,7 +2,6 @@ import { getUserProfile } from 'shared/comms/peers'
 import { defaultLogger } from 'shared/logger'
 import { Profile } from 'shared/profiles/types'
 import { ensureWorldRunning } from 'shared/world/worldState'
-import { isTheFirstLoading } from './dcl'
 
 const TIMEOUT_MS = 10 * 60 * 1000
 
@@ -31,7 +30,7 @@ function delightedSurvey() {
         return
       }
       const profile = getUserProfile().profile as Profile | null
-      if (!isTheFirstLoading && profile) {
+      if (profile) {
         const payload = {
           email: profile.ethAddress + '@dcl.gg',
           name: profile.name || 'Guest',
