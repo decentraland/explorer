@@ -5,6 +5,7 @@ using DCL.Models;
 using NUnit.Framework;
 using System.Collections;
 using System.Linq;
+using Newtonsoft.Json;
 using UnityEngine;
 using UnityEngine.TestTools;
 
@@ -218,6 +219,61 @@ namespace Tests
         {
             yield return TestHelpers.TestAttachedSharedComponentOfSameTypeIsReplaced<DCLAudioClip.Model, DCLAudioClip>(
                 scene, CLASS_ID.AUDIO_CLIP);
+        }
+
+        [UnityTest]
+        public IEnumerator VolumeIsToggledWhenCharacterEntersOrLeavesScene()
+        {
+            float originalVolume = 1.0f;
+            yield return LoadAudioClip(scene,
+                audioClipId: "audioClipTest",
+                url: DCL.Helpers.Utils.GetTestsAssetsPath() + "/Audio/Train.wav",
+                loop: true,
+                loading: true,
+                volume: originalVolume,
+                waitForLoading: true);
+
+            DecentralandEntity entity = TestHelpers.CreateSceneEntity(scene);
+            yield return null;
+
+            yield return CreateAudioSource(scene,
+                entityId: entity.entityId,
+                audioClipId: "audioClipTest",
+                playing: true);
+
+            DCLAudioSource dclAudioSource = entity.gameObject.GetComponentInChildren<DCLAudioSource>();
+            yield return dclAudioSource.routine;
+
+            AudioSource unityAudioSource = dclAudioSource.GetComponentInChildren<AudioSource>();
+
+            Assert.IsTrue(unityAudioSource.isPlaying, "Audio Source is not playing when it should!");
+
+            // Check that the volume is the same as in the model
+            Assert.AreEqual(unityAudioSource.volume, originalVolume);
+
+            // Move character outside the parcel
+            DCLCharacterController.i.Teleport(JsonConvert.SerializeObject(new
+            {
+                x = -1f,
+                y = DCLCharacterController.i.transform.position.y,
+                z = -1f
+            }));
+            yield return null;
+
+            // Check that the volume is muted
+            Assert.AreEqual(unityAudioSource.volume, 0f);
+
+            // Return character inside the parcel
+            DCLCharacterController.i.Teleport(JsonConvert.SerializeObject(new
+            {
+                x = 8f,
+                y = DCLCharacterController.i.transform.position.y,
+                z = 8f
+            }));
+            yield return null;
+
+            // Check that the volume is correct again
+            Assert.AreEqual(unityAudioSource.volume, originalVolume);
         }
 
         [Test]
