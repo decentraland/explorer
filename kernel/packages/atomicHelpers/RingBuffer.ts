@@ -45,13 +45,13 @@ export class RingBuffer<T extends TypedArray> {
   }
 
   peek(startPointer?: number, readCount?: number): T {
-    if (!startPointer) startPointer = this.readPointer
+    const start = startPointer ? startPointer : this.readPointer
 
     const maxCountToRead = this.writePointer - this.readPointer
 
     const count = readCount ? Math.min(readCount, maxCountToRead) : maxCountToRead
 
-    const readPosition = startPointer % this.buffer.length
+    const readPosition = start % this.buffer.length
 
     const endIndex = readPosition + count
 
@@ -251,4 +251,3 @@ export class OrderedRingBuffer<T extends TypedArray> {
     }
   }
 }
-
