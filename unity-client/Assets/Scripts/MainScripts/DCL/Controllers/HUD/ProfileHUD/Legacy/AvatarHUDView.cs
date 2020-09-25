@@ -1,4 +1,4 @@
-﻿using System.Runtime.CompilerServices;
+using System.Runtime.CompilerServices;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -97,6 +97,11 @@ namespace Legacy
 
         internal void SetExpanded(bool visibility)
         {
+            if (visibility && !expandedContainer.activeSelf)
+                AudioScriptableObjects.dialogOpen.Play(true);
+            if (!visibility && expandedContainer.activeSelf)
+                AudioScriptableObjects.dialogClose.Play(true);
+
             expandedContainer.SetActive(visibility);
         }
 
