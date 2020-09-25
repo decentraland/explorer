@@ -19,6 +19,11 @@ namespace DCL.GoToGenesisPlazaHUD
 
         public void SetVisibility(bool visible)
         {
+            if (visible && !view.isOpen)
+                AudioScriptableObjects.dialogOpen.Play(true);
+            if (!visible && view.isOpen)
+                AudioScriptableObjects.dialogClose.Play(true);
+
             view.SetVisibility(visible);
         }
 
