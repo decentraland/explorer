@@ -362,13 +362,18 @@ namespace UnityGLTF
                                         if (importer != null)
                                         {
                                             importer.isReadable = true;
-                                            var isNormalMap = false;
+                                            var isNormalMap = true;
 
                                             foreach (var materialMap in materialMaps)
                                             {
                                                 if (materialMap.Material == mat)
                                                 {
-                                                    isNormalMap |= materialMap.IsNormalMap;
+                                                    //NOTE(Brian): Only set as normal map if is exclusively
+                                                    //             used for that.
+                                                    //             We don't want DXTnm in color textures.
+                                                    if (!materialMap.IsNormalMap)
+                                                        isNormalMap = false;
+
                                                     newMat.SetTexture(materialMap.Property, importedTex);
                                                 }
                                             }
@@ -383,6 +388,10 @@ namespace UnityGLTF
                                                 // Force disable sprite mode, even for 2D projects
                                                 importer.textureType = TextureImporterType.Default;
                                             }
+
+                                            importer.crunchedCompression = true;
+                                            importer.textureCompression = TextureImporterCompression.CompressedHQ;
+                                            importer.SaveAndReimport();
                                         }
                                         else
                                         {
