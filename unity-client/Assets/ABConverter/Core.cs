@@ -167,10 +167,10 @@ namespace DCL
 
 
             /// <summary>
-            /// 
+            /// Dump all assets and tag them for asset bundle building.
             /// </summary>
-            /// <param name="rawContents"></param>
-            /// <returns></returns>
+            /// <param name="rawContents">An array containing all the assets to be dumped.</param>
+            /// <returns>true if succeeded</returns>
             private bool DumpAssets(ContentServerUtils.MappingPair[] rawContents)
             {
                 List<AssetPath> gltfPaths = ABConverter.Utils.GetPathsFromPairs(finalDownloadedPath, rawContents, Config.gltfExtensions);
@@ -203,10 +203,11 @@ namespace DCL
             }
 
             /// <summary>
-            /// 
+            /// Trims off existing asset bundles from the given AssetPath array,
+            /// if none exists and shouldAbortBecauseAllBundlesExist is true, it will return false.
             /// </summary>
-            /// <param name="gltfPaths"></param>
-            /// <returns></returns>
+            /// <param name="gltfPaths">paths to be checked for existence</param>
+            /// <returns>false if all paths are already converted to asset bundles, true if the conversion makes sense</returns>
             internal bool PrepareDump(ref List<AssetPath> gltfPaths)
             {
                 bool shouldAbortBecauseAllBundlesExist = true;
@@ -240,12 +241,12 @@ namespace DCL
             }
 
             /// <summary>
-            /// 
+            /// Dump a single gltf asset injecting the proper external references
             /// </summary>
-            /// <param name="gltfPath"></param>
-            /// <param name="texturePaths"></param>
-            /// <param name="bufferPaths"></param>
-            /// <returns></returns>
+            /// <param name="gltfPath">GLTF to be dumped</param>
+            /// <param name="texturePaths">array with texture dependencies</param>
+            /// <param name="bufferPaths">array with buffer dependencies</param>
+            /// <returns>gltf AssetPath if dump succeeded, null if don't</returns>
             internal AssetPath DumpGltf(AssetPath gltfPath, List<AssetPath> texturePaths, List<AssetPath> bufferPaths)
             {
                 List<Stream> streamsToDispose = new List<Stream>();
@@ -295,10 +296,10 @@ namespace DCL
             }
 
             /// <summary>
-            /// 
+            /// Download assets and put them in the working folder.
             /// </summary>
-            /// <param name="bufferPaths"></param>
-            /// <returns></returns>
+            /// <param name="bufferPaths">AssetPath list containing all the desired paths to be dumped</param>
+            /// <returns>List of the successfully dumped assets.</returns>
             internal List<AssetPath> DumpRawAssets(List<AssetPath> bufferPaths)
             {
                 List<AssetPath> result = new List<AssetPath>(bufferPaths);
@@ -416,10 +417,11 @@ namespace DCL
             }
 
             /// <summary>
-            /// 
+            /// Load dumped textures and put them in PersistentAssetCache so the GLTFSceneImporter
+            /// can pick them up.
             /// </summary>
-            /// <param name="gltfPath"></param>
-            /// <param name="texturePath"></param>
+            /// <param name="gltfPath">GLTF path of the gltf that will pick up the references</param>
+            /// <param name="texturePath">Texture path of the texture to be injected</param>
             internal void RetrieveAndInjectTexture(AssetPath gltfPath, AssetPath texturePath)
             {
                 string finalPath = texturePath.finalPath;
@@ -440,10 +442,11 @@ namespace DCL
             }
 
             /// <summary>
-            /// 
+            /// Load dumped buffers and put them in PersistentAssetCache so the GLTFSceneImporter
+            /// can pick them up.
             /// </summary>
-            /// <param name="gltfPath"></param>
-            /// <param name="bufferPath"></param>
+            /// <param name="gltfPath">GLTF path of the gltf that will pick up the references</param>
+            /// <param name="bufferPath">Buffer path of the texture to be injected</param>
             internal void RetrieveAndInjectBuffer(AssetPath gltfPath, AssetPath bufferPath)
             {
                 string finalPath = bufferPath.finalPath;

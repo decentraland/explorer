@@ -43,10 +43,10 @@ namespace DCL
             }
 
             /// <summary>
-            /// 
+            /// Converts an absolute path to an Application.dataPath relative path.
             /// </summary>
-            /// <param name="fullPath"></param>
-            /// <returns></returns>
+            /// <param name="fullPath">the full path.</param>
+            /// <returns>the Application.dataPath relative path</returns>
             public static string FullPathToAssetPath(string fullPath)
             {
                 char ps = Path.DirectorySeparatorChar;
@@ -75,10 +75,11 @@ namespace DCL
             }
 
             /// <summary>
-            /// 
+            /// Convert a path relative to Application.dataPath to an absolute path.
             /// </summary>
-            /// <param name="assetPath"></param>
-            /// <returns></returns>
+            /// <param name="assetPath">The relative path</param>
+            /// <param name="overrideDataPath">Convert from an arbitrary path instead of Application.dataPath. Used for testing.</param>
+            /// <returns>The full path.</returns>
             public static string AssetPathToFullPath(string assetPath, string overrideDataPath = null)
             {
                 assetPath = FixDirectorySeparator(assetPath);
@@ -163,9 +164,8 @@ namespace DCL
             internal static void MarkFolderForAssetBundleBuild(string fullPath, string abName)
             {
                 string assetPath = PathUtils.GetRelativePathTo(Application.dataPath, fullPath);
-                assetPath = Path.GetDirectoryName(assetPath); //ChangeExtension(assetPath, null);
+                assetPath = Path.GetDirectoryName(assetPath);
                 AssetImporter importer = AssetImporter.GetAtPath(assetPath);
-                //Debug.Log("Path = " + assetPath);
                 importer.SetAssetBundleNameAndVariant(abName, "");
             }
 
@@ -284,10 +284,10 @@ namespace DCL
             }
 
             /// <summary>
-            /// 
+            /// Given a MappingPair list, returns a AssetPath list filtered by file extensions
             /// </summary>
-            /// <param name="pairsToSearch"></param>
-            /// <param name="extensions"></param>
+            /// <param name="pairsToSearch">The MappingPair list to be filtered and converted</param>
+            /// <param name="extensions">An array detailing the extensions to filter them</param>
             /// <returns>A dictionary that maps hashes to mapping pairs</returns>
             public static List<AssetPath> GetPathsFromPairs(string basePath, MappingPair[] pairsToSearch, string[] extensions)
             {
