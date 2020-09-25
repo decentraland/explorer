@@ -18,6 +18,7 @@ import {
 import { nativeMsgBridge } from './nativeMessagesBridge'
 import { HotSceneInfo } from 'shared/social/hotScenes'
 import { defaultLogger } from 'shared/logger'
+import { setDelightedSurveyEnabled } from './delightedSurvey'
 
 const MINIMAP_CHUNK_SIZE = 100
 
@@ -346,8 +347,12 @@ export class UnityInterface {
       visible: false
     })
 
-    if (WORLD_EXPLORER && (RESET_TUTORIAL || (tutorialStep & tutorialCompletedFlag) === 0)) {
-      this.SetTutorialEnabled(fromDeepLink)
+    if (WORLD_EXPLORER) {
+      if (RESET_TUTORIAL || (tutorialStep & tutorialCompletedFlag) === 0) {
+        this.SetTutorialEnabled(fromDeepLink)
+      } else {
+        setDelightedSurveyEnabled(true)
+      }
     }
   }
 

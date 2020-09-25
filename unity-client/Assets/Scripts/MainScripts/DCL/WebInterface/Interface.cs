@@ -463,6 +463,12 @@ namespace DCL.Interface
             public Property[] properties;
         }
 
+        [System.Serializable]
+        public class DelightedSurveyEnabledPayload
+        {
+            public bool enabled;
+        }
+
 #if UNITY_WEBGL && !UNITY_EDITOR
     /**
      * This method is called after the first render. It marks the loading of the
@@ -532,6 +538,7 @@ namespace DCL.Interface
         private static SendChatMessageEvent sendChatMessageEvent = new SendChatMessageEvent();
         private static BaseResolution baseResEvent = new BaseResolution();
         private static AnalyticsPayload analyticsEvent = new AnalyticsPayload();
+        private static DelightedSurveyEnabledPayload delightedSurveyEnabled = new DelightedSurveyEnabledPayload();
 
         public static void SendSceneEvent<T>(string sceneId, string eventType, T payload)
         {
@@ -774,9 +781,10 @@ namespace DCL.Interface
             SendMessage("SendScreenshot", onSendScreenshot);
         }
 
-        public static void ReportEditAvatarClicked()
+        public static void SetDelightedSurveyEnabled(bool enabled)
         {
-            SendMessage("EditAvatarClicked");
+            delightedSurveyEnabled.enabled = enabled;
+            SendMessage("SetDelightedSurveyEnabled", delightedSurveyEnabled);
         }
 
         [System.Serializable]

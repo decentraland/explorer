@@ -126,6 +126,8 @@ namespace DCL.Tutorial
                 }
             }
 
+            WebInterface.SetDelightedSurveyEnabled(false);
+
             if (!CommonScriptableObjects.rendererState.Get())
                 CommonScriptableObjects.rendererState.OnChange += OnRenderingStateChanged;
             else
@@ -151,6 +153,7 @@ namespace DCL.Tutorial
 
             isRunning = false;
             ShowTeacher3DModel(false);
+            WebInterface.SetDelightedSurveyEnabled(true);
 
             if (hudController != null && hudController.emailPromptHud != null)
                 hudController.emailPromptHud.waitForEndOfTutorial = false;
@@ -184,7 +187,7 @@ namespace DCL.Tutorial
                     yield return ExecuteSteps(TutorialPath.FromGenesisPlazaAfterDeepLink, stepIndex);
                 else
                     yield return ExecuteSteps(TutorialPath.FromGenesisPlaza, stepIndex);
-                
+
             }
             else if (openedFromDeepLink)
             {
