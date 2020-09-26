@@ -172,8 +172,7 @@ public class AvatarEditorHUDAudioHandler : MonoBehaviour
 
     void PlayVoiceReaction(string bodyShape)
     {
-        float chanceToPlay = 0.7f;
-
+        float chanceToPlay = 0.75f;
         AudioEvent eventReaction = null;
 
         if (bodyShape.Contains("Female"))
@@ -183,18 +182,17 @@ public class AvatarEditorHUDAudioHandler : MonoBehaviour
 
         if (lastSelectedWearable != null)
         {
-            if (lastSelectedWearable.rarity != null)
+            if (lastSelectedWearable.rarity == Rarity.EPIC
+                || lastSelectedWearable.rarity == Rarity.LEGENDARY
+                || lastSelectedWearable.rarity == Rarity.MYTHIC
+                || lastSelectedWearable.rarity == Rarity.UNIQUE)
             {
-                eventReaction.RandomizeIndex(5, 9);
-
-                if (lastSelectedWearable.rarity == Rarity.UNIQUE)
-                {
-                    chanceToPlay = 1f;
-                }
+                eventReaction.RandomizeIndex(14, 28);
+                chanceToPlay = 1f;
             }
             else
             {
-                eventReaction.RandomizeIndex(0, 5);
+                eventReaction.RandomizeIndex(0, 14);
             }
         }
 
