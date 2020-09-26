@@ -6694,6 +6694,11 @@ PrefabInstance:
       propertyPath: randomizeButton
       value: 
       objectReference: {fileID: 1450360507441575512}
+    - target: {fileID: 6903690898286533778, guid: 3e6ea7d7a61f2dd4c80f1d446730269d,
+        type: 3}
+      propertyPath: nftItemSelector
+      value: 
+      objectReference: {fileID: 5289564723011178695}
     - target: {fileID: 9023033888150710464, guid: 3e6ea7d7a61f2dd4c80f1d446730269d,
         type: 3}
       propertyPath: m_Name
