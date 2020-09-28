@@ -2635,6 +2635,7 @@ GameObject:
   - component: {fileID: 2953123244498007512}
   - component: {fileID: 7791268057431998478}
   - component: {fileID: 5031985112320876763}
+  - component: {fileID: 3983825655707803974}
   m_Layer: 5
   m_Name: OkButton
   m_TagString: Untagged
@@ -2659,8 +2660,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: 0, y: 163.59998}
-  m_SizeDelta: {x: 182, y: 52}
+  m_AnchoredPosition: {x: 0, y: 139}
+  m_SizeDelta: {x: 188, y: 58}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &2953123244498007512
 CanvasRenderer:
@@ -2742,6 +2743,21 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &3983825655707803974
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5699852383211709506}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d30b4ce08e6854094b8461fdea1282aa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  targetRectTransform: {fileID: 4889840328966578398}
+  hoverScale: 1.01
+  normalScale: 1
 --- !u!1 &5713264258040442327
 GameObject:
   m_ObjectHideFlags: 0
@@ -3532,8 +3548,8 @@ MonoBehaviour:
   m_outlineColor:
     serializedVersion: 2
     rgba: 4278190080
-  m_fontSize: 16
-  m_fontSizeBase: 16
+  m_fontSize: 18
+  m_fontSizeBase: 18
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
