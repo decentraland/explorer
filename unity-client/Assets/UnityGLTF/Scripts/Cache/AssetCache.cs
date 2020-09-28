@@ -95,7 +95,7 @@ namespace UnityGLTF.Cache
         /// <summary>
         /// Remove image from persistent cache
         /// </summary>
-        /// <param name="texture">full id of the cached image</param>
+        /// <param name="texture">Reference to the cached image to find and remove</param>
         public static void RemoveImage(Texture texture)
         {
             string foundKey = ImageCacheByUri.
