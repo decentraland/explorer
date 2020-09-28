@@ -90,8 +90,8 @@ public class EmailPromptHUDController : IHUD
     {
         isPopupRoutineRunning = true;
         yield return new WaitUntil(() => CommonScriptableObjects.rendererState.Get());
-        yield return WaitForSecondsCache.Get(seconds);
         yield return new WaitUntil(() => !waitForEndOfTutorial);
+        yield return WaitForSecondsCache.Get(seconds);
         yield return new WaitUntil(() => CommonScriptableObjects.rendererState.Get());
         SetVisibility(true);
         isPopupRoutineRunning = false;
