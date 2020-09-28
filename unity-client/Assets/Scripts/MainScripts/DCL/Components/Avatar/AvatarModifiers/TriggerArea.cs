@@ -15,11 +15,14 @@ public class BoxTriggerArea : TriggerArea
 
     public override HashSet<GameObject> DetectAvatars(Vector3 center, Quaternion rotation)
     {
-        Collider[] colliders = Physics.OverlapBox(center, box / 2, rotation, LayerMask.GetMask("AvatarTriggerDetection"), QueryTriggerInteraction.Collide);
+        Collider[] colliders = Physics.OverlapBox(center, box * 0.5f, rotation, LayerMask.GetMask("AvatarTriggerDetection"), QueryTriggerInteraction.Collide);
         HashSet<GameObject> result = new HashSet<GameObject>();
-        foreach (Collider collider in colliders)
+        if (colliders.Length > 0)
         {
-            result.Add(collider.transform.parent.gameObject);
+            foreach (Collider collider in colliders)
+            {
+                result.Add(collider.transform.parent.gameObject);
+            }
         }
         return result;
     }
