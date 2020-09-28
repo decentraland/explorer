@@ -156,7 +156,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f6dbb06cb08104c1a9fc5ceaabd5115c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  tutorialVersion: 1
   timeBetweenSteps: 0.5
+  sendStats: 1
   stepsOnGenesisPlaza:
   - {fileID: 6639514825351315494, guid: e80a4e30b31058544ada1af4125c4b91, type: 3}
   - {fileID: 4146741736848859845, guid: e38c1e2e466c58a4aa90e19bbda22466, type: 3}
@@ -348,7 +350,7 @@ Canvas:
   m_SortingBucketNormalizedSize: 0
   m_AdditionalShaderChannelsFlag: 25
   m_SortingLayerID: 0
-  m_SortingOrder: 1
+  m_SortingOrder: 4
   m_TargetDisplay: 0
 --- !u!114 &5129415320331183001
 MonoBehaviour:
