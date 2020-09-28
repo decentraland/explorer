@@ -77,6 +77,7 @@ function countUsers(a: HotSceneInfoRaw) {
 async function fillHotScenesRecord(candidate: Candidate, crowdedScenes: Record<string, HotSceneInfoRaw>) {
   const tiles =
     candidate.layer.usersParcels
+      // tslint:disable:strict-type-predicates
       ?.filter((value) => typeof value[0] !== 'undefined' && typeof value[1] !== 'undefined')
       .map((value) => `${value[0]},${value[1]}`) ?? []
 
