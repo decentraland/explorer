@@ -2432,11 +2432,12 @@ namespace UnityGLTF
                 else
                 {
                     yield return ConstructImage(image, sourceId, markGpuOnly, isLinear);
-                    source = new RefCountedTextureData(image.Uri, _assetCache.ImageCache[sourceId]);
+                    string fullId = PersistentAssetCache.GetCacheId(image.Uri, id);
+                    source = new RefCountedTextureData(fullId, _assetCache.ImageCache[sourceId]);
 
-                    if (image.Uri != null && addImagesToPersistentCaching)
+                    if (fullId != null && addImagesToPersistentCaching)
                     {
-                        PersistentAssetCache.AddImage(image.Uri, id, source);
+                        PersistentAssetCache.AddImage(fullId, source);
                     }
                 }
 

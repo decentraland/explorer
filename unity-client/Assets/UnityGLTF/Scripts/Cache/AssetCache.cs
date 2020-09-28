@@ -2,6 +2,7 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace UnityGLTF.Cache
@@ -89,6 +90,23 @@ namespace UnityGLTF.Cache
 
             if (HasImage(fullId))
                 ImageCacheByUri.Remove(fullId);
+        }
+
+        /// <summary>
+        /// Remove image from persistent cache
+        /// </summary>
+        /// <param name="texture">full id of the cached image</param>
+        public static void RemoveImage(Texture texture)
+        {
+            string foundKey = ImageCacheByUri.
+                Where(x => x.Value.Texture == texture).
+                Select(x => x.Key).
+                FirstOrDefault();
+
+            if(foundKey == null)
+                return;
+
+            ImageCacheByUri.Remove(foundKey);
         }
 
         /// <summary>
