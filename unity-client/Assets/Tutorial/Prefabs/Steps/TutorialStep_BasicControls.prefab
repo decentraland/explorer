@@ -564,8 +564,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   unlockCursorAtStart: 1
-  show3DTeacherAtStart: 0
-  teacherPositionRef: {fileID: 0}
+  show3DTeacherAtStart: 1
+  teacherPositionRef: {fileID: 5515950248451678154}
   okButton: {fileID: 5031985112320876763}
 --- !u!1 &1211342315728853102
 GameObject:
