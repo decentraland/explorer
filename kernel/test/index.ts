@@ -9,7 +9,7 @@ global['isRunningTests'] = true
 import './atomicHelpers/parcelScenePositions.test'
 import './atomicHelpers/landHelpers.test'
 import './atomicHelpers/vectorHelpers.test'
-import './atomicHelpers/RingBuffer.test'
+import './atomicHelpers/OrderedRingBuffer.test'
 import './atomicHelpers/SortedLimitedQueue.test'
 
 /* UNIT */
