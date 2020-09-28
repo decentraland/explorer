@@ -108,6 +108,16 @@ namespace DCL
             onPointerDown.collider.enabled = true;
         }
 
+        public void DisablePassport()
+        {
+            onPointerDown.collider.enabled = false;
+        }
+
+        public void EnablePassport()
+        {
+            onPointerDown.collider.enabled = true;
+        }
+
         private void PrecisionAdjust(DCLCharacterPosition obj)
         {
             avatarUserInfo.worldPosition = entity.gameObject.transform.position;
