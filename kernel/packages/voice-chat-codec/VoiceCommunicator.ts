@@ -7,7 +7,9 @@ import {
   VOICE_CHAT_SAMPLE_RATE,
   OPUS_FRAME_SIZE_MS,
   OUTPUT_NODE_BUFFER_SIZE,
-  OUTPUT_NODE_BUFFER_DURATION
+  OUTPUT_NODE_BUFFER_DURATION,
+  OPUS_SAMPLES_PER_FRAME,
+  INPUT_NODE_BUFFER_SIZE
 } from './constants'
 
 export type AudioCommunicatorChannel = {
@@ -67,6 +69,9 @@ export class VoiceCommunicator {
   private readonly sampleRate: number
   private readonly channelBufferSize: number
   private readonly outputExpireTime = 60 * 1000
+
+  private pauseRequested: boolean = false
+  private inputSamplesCount: number = 0
 
   constructor(
     private selfId: string,
@@ -227,6 +232,7 @@ export class VoiceCommunicator {
   }
 
   start() {
+    this.pauseRequested = false
     if (this.input) {
       this.input.encodeInputProcessor.connect(this.input.recordingContext.destination)
       this.input.inputStream.connect(this.input.encodeInputProcessor)
@@ -237,17 +243,13 @@ export class VoiceCommunicator {
   }
 
   pause() {
-    try {
-      this.input?.inputStream.disconnect(this.input.encodeInputProcessor)
-    } catch (e) {
-      // Ignored. This will fail if it was already disconnected
-    }
+    this.pauseRequested = true
+  }
 
-    try {
-      this.input?.encodeInputProcessor.disconnect(this.input.recordingContext.destination)
-    } catch (e) {
-      // Ignored. This will fail if it was already disconnected
-    }
+  private disconnectInput() {
+    this.input?.inputStream.disconnect()
+
+    this.input?.encodeInputProcessor.disconnect()
 
     this.notifyRecording(false)
   }
@@ -272,7 +274,7 @@ export class VoiceCommunicator {
 
         const frames = await this.outputs[src].encodedFramesQueue.dequeueItemsWhenAvailable(
           framesToRead,
-          OUTPUT_NODE_BUFFER_DURATION * 2
+          OUTPUT_NODE_BUFFER_DURATION * 3
         )
 
         if (frames.length > 0) {
@@ -299,7 +301,7 @@ export class VoiceCommunicator {
 
   private createInputFor(stream: MediaStream, context: AudioContext) {
     const streamSource = context.createMediaStreamSource(stream)
-    const inputProcessor = context.createScriptProcessor(4096, 1, 1)
+    const inputProcessor = context.createScriptProcessor(INPUT_NODE_BUFFER_SIZE, 1, 1)
     return {
       recordingContext: context,
       encodeStream: this.createInputEncodeStream(context, inputProcessor),
@@ -317,9 +319,23 @@ export class VoiceCommunicator {
 
     encodeStream.addAudioEncodedListener((data) => this.channel.send(data))
 
-    encodeInputProcessor.onaudioprocess = async (e) => {
+    encodeInputProcessor.onaudioprocess = (e) => {
       const buffer = e.inputBuffer
-      encodeStream.encode(buffer.getChannelData(0))
+      let data = buffer.getChannelData(0)
+
+      if (this.pauseRequested) {
+        // We try to use as many samples as we can that would complete some frames
+        const samplesToUse =
+          Math.floor(data.length / OPUS_SAMPLES_PER_FRAME) * OPUS_SAMPLES_PER_FRAME +
+          OPUS_SAMPLES_PER_FRAME -
+          (this.inputSamplesCount % OPUS_SAMPLES_PER_FRAME)
+        data = data.slice(0, samplesToUse)
+        this.disconnectInput()
+        this.pauseRequested = false
+      }
+
+      encodeStream.encode(data)
+      this.inputSamplesCount += data.length
     }
 
     return encodeStream
@@ -350,14 +366,16 @@ export class VoiceCommunicator {
   }
 
   private destroyOutput(outputId: string) {
-    try {
-      this.outputs[outputId].panNode.disconnect(this.context.destination)
-    } catch (e) {
-      // Ignored. This may fail if the node wasn't connected yet
-    }
+    this.disconnectOutputNodes(outputId)
 
     this.voiceChatWorkerMain.destroyDecodeStream(outputId)
 
     delete this.outputs[outputId]
+  }
+
+  private disconnectOutputNodes(outputId: string) {
+    const output = this.outputs[outputId]
+    output.panNode.disconnect()
+    output.scriptProcessor.disconnect()
   }
 }
