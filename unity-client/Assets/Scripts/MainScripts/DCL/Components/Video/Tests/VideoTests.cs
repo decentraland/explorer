@@ -180,8 +180,6 @@ namespace Tests
             Assert.IsTrue(!videoTexture.isVisible, "DCLVideoTexture should not be visible ");
         }
 
-        //--------------------------------
-
         [UnityTest]
         public IEnumerator VolumeWhenVideoCreatedWithNoUserInScene()
         {
@@ -193,9 +191,6 @@ namespace Tests
 
             DCLVideoTexture videoTexture = CreateDCLVideoTexture(scene, "it-wont-load-during-test");
             yield return videoTexture.routine;
-
-            var videoPlayer = Reflection_GetField<WebVideoPlayer>(videoTexture, "texturePlayer");
-            var videoTextureModel = Reflection_GetField<DCLVideoTexture.Model>(videoTexture, "model");
 
             DecentralandEntity ent1 = TestHelpers.CreateSceneEntity(scene);
             BasicMaterial ent1Mat = TestHelpers.SharedComponentCreate<BasicMaterial, BasicMaterial.Model>(scene, CLASS_ID.BASIC_MATERIAL, new BasicMaterial.Model() { texture = videoTexture.id });
@@ -209,7 +204,7 @@ namespace Tests
             yield return null; //a frame to wait DCLVideoTexture update
 
             // Check the volume
-            Assert.AreEqual(videoPlayer.volume, 0f);
+            Assert.AreEqual(0f, videoTexture.texturePlayer.volume);
         }
 
         [UnityTest]
@@ -224,9 +219,6 @@ namespace Tests
             DCLVideoTexture videoTexture = CreateDCLVideoTexture(scene, "it-wont-load-during-test");
             yield return videoTexture.routine;
 
-            var videoPlayer = Reflection_GetField<WebVideoPlayer>(videoTexture, "texturePlayer");
-            var videoTextureModel = Reflection_GetField<DCLVideoTexture.Model>(videoTexture, "model");
-
             DecentralandEntity ent1 = TestHelpers.CreateSceneEntity(scene);
             BasicMaterial ent1Mat = TestHelpers.SharedComponentCreate<BasicMaterial, BasicMaterial.Model>(scene, CLASS_ID.BASIC_MATERIAL, new BasicMaterial.Model() { texture = videoTexture.id });
             TestHelpers.SharedComponentAttach(ent1Mat, ent1);
@@ -239,7 +231,7 @@ namespace Tests
             yield return null; //a frame to wait DCLVideoTexture update
 
             // Check the volume
-            Assert.AreEqual(videoPlayer.volume, videoTextureModel.volume);
+            Assert.AreEqual(videoTexture.model.volume, videoTexture.texturePlayer.volume);
         }
 
         [UnityTest]
@@ -255,9 +247,6 @@ namespace Tests
             DCLVideoTexture videoTexture = CreateDCLVideoTexture(scene, "it-wont-load-during-test");
             yield return videoTexture.routine;
 
-            var videoPlayer = Reflection_GetField<WebVideoPlayer>(videoTexture, "texturePlayer");
-            var videoTextureModel = Reflection_GetField<DCLVideoTexture.Model>(videoTexture, "model");
-
             DecentralandEntity ent1 = TestHelpers.CreateSceneEntity(scene);
             BasicMaterial ent1Mat = TestHelpers.SharedComponentCreate<BasicMaterial, BasicMaterial.Model>(scene, CLASS_ID.BASIC_MATERIAL, new BasicMaterial.Model() { texture = videoTexture.id });
             TestHelpers.SharedComponentAttach(ent1Mat, ent1);
@@ -278,7 +267,7 @@ namespace Tests
             yield return null;
 
             // Check the volume
-            Assert.AreEqual(videoPlayer.volume, 0f);
+            Assert.AreEqual(0f, videoTexture.texturePlayer.volume);
         }
 
         [UnityTest]
@@ -292,9 +281,6 @@ namespace Tests
 
             DCLVideoTexture videoTexture = CreateDCLVideoTexture(scene, "it-wont-load-during-test");
             yield return videoTexture.routine;
-
-            var videoPlayer = Reflection_GetField<WebVideoPlayer>(videoTexture, "texturePlayer");
-            var videoTextureModel = Reflection_GetField<DCLVideoTexture.Model>(videoTexture, "model");
 
             DecentralandEntity ent1 = TestHelpers.CreateSceneEntity(scene);
             BasicMaterial ent1Mat = TestHelpers.SharedComponentCreate<BasicMaterial, BasicMaterial.Model>(scene, CLASS_ID.BASIC_MATERIAL, new BasicMaterial.Model() { texture = videoTexture.id });
@@ -316,7 +302,7 @@ namespace Tests
             yield return null;
 
             // Check the volume
-            Assert.AreEqual(videoPlayer.volume, videoTextureModel.volume);
+            Assert.AreEqual(videoTexture.model.volume, videoTexture.texturePlayer.volume);
         }
 
         static DCLVideoClip CreateDCLVideoClip(ParcelScene scn, string url)

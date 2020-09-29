@@ -29,9 +29,9 @@ namespace DCL.Components
             public FilterMode samplingMode = FilterMode.Bilinear;
         }
 
-        new protected Model model;
+        new protected internal Model model;
 
-        private WebVideoPlayer texturePlayer;
+        internal WebVideoPlayer texturePlayer;
         private Coroutine texturePlayerUpdateRoutine;
         private float baseVolume;
         private float distanceVolumeModifier = 1f;
