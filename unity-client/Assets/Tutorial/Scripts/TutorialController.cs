@@ -53,6 +53,7 @@ namespace DCL.Tutorial
         [SerializeField] internal TutorialTeacher teacher;
         [SerializeField] internal float teacherMovementSpeed = 4f;
         [SerializeField] internal AnimationCurve teacherMovementCurve;
+        [SerializeField] internal Canvas teacherCanvas;
 
         [Header("Debugging")]
         [SerializeField] internal bool debugRunTutorial = false;
@@ -235,6 +236,15 @@ namespace DCL.Tutorial
         public void PlayTeacherAnimation(TutorialTeacher.TeacherAnimation animation)
         {
             teacher.PlayAnimation(animation);
+        }
+
+        /// <summary>
+        /// Set sort order for canvas containing teacher RawImage
+        /// </summary>
+        /// <param name="sortOrder"></param>
+        public void SetTeacherCanvasSortingOrder(int sortOrder)
+        {
+            teacherCanvas.sortingOrder = sortOrder;
         }
 
         private void OnRenderingStateChanged(bool renderingEnabled, bool prevState)

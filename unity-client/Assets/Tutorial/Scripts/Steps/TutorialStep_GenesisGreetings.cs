@@ -10,10 +10,13 @@ namespace DCL.Tutorial
     /// </summary>
     public class TutorialStep_GenesisGreetings : TutorialStep
     {
+        private const int TEACHER_CANVAS_SORT_ORDER_START = 4;
+
         [SerializeField] Button okButton;
         [SerializeField] TMP_Text titleText;
 
         private bool stepIsFinished = false;
+        private int defaultTeacherCanvasSortOrder;
 
         public override void OnStepStart()
         {
@@ -22,11 +25,20 @@ namespace DCL.Tutorial
             titleText.text = titleText.text.Replace("{userName}", UserProfile.GetOwnUserProfile().userName);
 
             okButton.onClick.AddListener(OnOkButtonClick);
+
+            defaultTeacherCanvasSortOrder = tutorialController.teacherCanvas.sortingOrder;
+            tutorialController.SetTeacherCanvasSortingOrder(TEACHER_CANVAS_SORT_ORDER_START);
         }
 
         public override IEnumerator OnStepExecute()
         {
             yield return new WaitUntil(() => stepIsFinished);
+        }
+
+        public override void OnStepFinished()
+        {
+            base.OnStepFinished();
+            tutorialController.SetTeacherCanvasSortingOrder(defaultTeacherCanvasSortOrder);
         }
 
         private void OnOkButtonClick()
