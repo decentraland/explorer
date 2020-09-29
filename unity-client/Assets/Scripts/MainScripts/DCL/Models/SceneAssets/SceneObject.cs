@@ -18,12 +18,6 @@ public class SceneObject
         public int entities;
     }
 
-    //[System.Serializable]
-    //public class Contents
-    //{
-    //    public Dictionary<string, string> contentValues;
-    //}
-
 
     public string id;
     public string asset_pack_id;
@@ -40,8 +34,10 @@ public class SceneObject
 
     public ObjectMetrics metrics;
     public string script;
-    //public List<string> parameters;
-    //public List<string> actions;
 
-
+    string baseUrl = "https://builder-api.decentraland.org/v1/storage/contents/";
+    public string ComposeThumbnailUrl()
+    {
+        return baseUrl + thumbnail;
+    }
 }

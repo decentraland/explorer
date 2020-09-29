@@ -1,5 +1,6 @@
 using DCL;
 using DCL.Controllers;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -35,9 +36,14 @@ public class SceneLimitInfoController : MonoBehaviour
     public void UpdateInfo()
     {
 
-        int size = currentParcelScene.sceneData.parcels.Length * 2;
-        int meters = size * 16;
-        titleTxt.text = size + "x" + size + " LAND <color=#959696>" + meters+"x"+ meters+"m";
+  
+        if (IsParcelSceneSquare(currentParcelScene))
+        {
+            int size = (int) Math.Sqrt(currentParcelScene.sceneData.parcels.Length);
+            int meters = size * 16;
+            titleTxt.text = size + "x" + size + " LAND <color=#959696>" + meters + "x" + meters + "m";
+        }
+        else titleTxt.text = "CUSTOM LAND";
 
 
         SceneMetricsController.Model limits = currentParcelScene.metricsController.GetLimits();
@@ -56,5 +62,29 @@ public class SceneLimitInfoController : MonoBehaviour
     string AppendUsageAndLimit(string name, int usage, int limit)
     {
         return name + ":   " + usage + " / <color=#959696>" + limit + "</color>";
+    }
+
+    bool IsParcelSceneSquare(ParcelScene scene)
+    {
+        Vector2Int[] parcelsPoints = scene.sceneData.parcels;
+        int minX = 9999;
+        int minY = 9999;
+        int maxX = -9999;
+        int maxY = -9999;
+
+        foreach(Vector2Int vector in parcelsPoints)
+        {
+            if (vector.x < minX) minX = vector.x;
+            if (vector.y < minY) minY = vector.y;
+            if (vector.x > maxX) maxX = vector.x;
+            if (vector.y > maxY) maxY = vector.y;
+        }
+
+        if(maxX - minX != maxY - minY) return false;
+
+        int lateralLengh = Math.Abs((maxX - minX) + 1);
+        if (parcelsPoints.Length != lateralLengh * lateralLengh) return false;
+        
+        return true;
     }
 }

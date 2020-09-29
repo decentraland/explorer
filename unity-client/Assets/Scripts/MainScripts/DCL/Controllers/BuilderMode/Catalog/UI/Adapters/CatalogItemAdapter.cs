@@ -4,35 +4,65 @@ using UnityEngine;
 using UnityEngine.UI;
 using DCL.Helpers;
 using System;
+using DCL;
 
 public class CatalogItemAdapter : MonoBehaviour
 {
-    public Image tumbmailImg;
+    public RawImage thumbnailImg;
     public System.Action<SceneObject> OnSceneObjectClicked;
 
-    SceneObject content;
+    SceneObject sceneObject;
+
+    string loadedThumbnailURL;
+    AssetPromise_Texture loadedThumbnailPromise;
+
+
     public void SetContent(SceneObject sceneObject)
     {
-        //tumbmailImg.sprite = sceneObject;
-        content = sceneObject;
+        this.sceneObject = sceneObject;
 
-        CacheController.i.GetSprite("https://builder-api.decentraland.org/v1/storage/contents/" + sceneObject.thumbnail, SetSprite);
+        GetThumbnail();
+    }
 
-        //ExternalCallsController.i.GetContentAsByteArray("https://builder-api.decentraland.org/v1/storage/contents/"+sceneObject.thumbnail, SetSprite);
+
+
+    private void GetThumbnail()
+    {
+        var url = sceneObject?.ComposeThumbnailUrl();
+
+        if (url == loadedThumbnailURL)
+            return;
+
+        if (sceneObject == null || string.IsNullOrEmpty(url))
+            return;
+
+        string newLoadedThumbnailURL = url;
+        var newLoadedThumbnailPromise =  new AssetPromise_Texture(url);
+
+
+        newLoadedThumbnailPromise.OnSuccessEvent += SetThumbnail;
+        newLoadedThumbnailPromise.OnFailEvent += x => { Debug.Log($"Error downloading: {url}"); };
+
+        AssetPromiseKeeper_Texture.i.Keep(newLoadedThumbnailPromise);
+
+
+        AssetPromiseKeeper_Texture.i.Forget(loadedThumbnailPromise);
+        loadedThumbnailPromise = newLoadedThumbnailPromise;
+        loadedThumbnailURL = newLoadedThumbnailURL;
     }
 
 
     public void SceneObjectClicked()
     {
-        OnSceneObjectClicked?.Invoke(content);
+        OnSceneObjectClicked?.Invoke(sceneObject);
     }
 
-    public void SetSprite(Sprite sprite)
+    public void SetThumbnail(Asset_Texture texture)
     {
-        if (tumbmailImg != null)
+        if (thumbnailImg != null)
         {
-            tumbmailImg.enabled = true;
-            tumbmailImg.sprite = sprite;
+            thumbnailImg.enabled = true;
+            thumbnailImg.texture = texture.texture;
         }
     }
 }

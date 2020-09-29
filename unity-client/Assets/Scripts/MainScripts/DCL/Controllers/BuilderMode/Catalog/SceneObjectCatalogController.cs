@@ -92,7 +92,7 @@ public class SceneObjectCatalogController : MonoBehaviour
 
     void SceneObjectSelected(SceneObject sceneObject)
     {
-        Debug.Log("Object selected " + sceneObject.name);
+
         OnSceneObjectSelected?.Invoke(sceneObject);
 
 

@@ -17,24 +17,9 @@ public class SceneAssetPack
     public List<SceneObject> assets;
 
 
-
-    //public void LoadSceneObjectListFromJSON(JObject jObject)
-    //{
-    //    assets = new List<SceneObject>();
-    //    JArray array = JArray.Parse(jObject["assets"].ToString());
-    //    //JArray array = new JArray(jObject["data"]);
-    //    foreach (JObject item in array)
-    //    {
-    //        try
-    //        {
-    //            SceneObject sceneObject = JsonConvert.DeserializeObject<SceneObject>(item.ToString());
-    //            assets.Add(sceneObject);
-    //        }
-    //        catch(Exception e)
-    //        {
-    //            SceneObject sceneObject = JsonConvert.DeserializeObject<SceneObject>(item.ToString());
-    //            assets.Add(sceneObject);
-    //        }
-    //    }
-    //}
+    string baseUrl = "https://builder-api.decentraland.org/v1/storage/assetPacks/";
+    public string ComposeThumbnailUrl()
+    {
+        return baseUrl + thumbnail;
+    }
 }

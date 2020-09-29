@@ -37,6 +37,8 @@ public class BuildModeController : MonoBehaviour
     public float snapRotationDegresFactor = 15f;
     public float snapScaleFactor = 0.5f;
 
+    public float snapDistanceToActivateMovement = 10f;
+
 
     [Header ("Scene references")]
     public GameObject editModeChangeFX;
@@ -57,29 +59,25 @@ public class BuildModeController : MonoBehaviour
     [SerializeField] internal InputAction_Trigger editModeChange;
 
 
-
     ParcelScene sceneToEdit;
 
-    bool isEditModeActivated = false, isSnapActivated = true, isSceneInformationActive = false,isSceneEntitiesListActive = false;
+    bool isEditModeActivated = false, isSnapActivated = true, isSceneInformationActive = false,isSceneEntitiesListActive = false, isMultiSelectionActive = false;
 
-    //Object to edit related
-    DecentralandEntity entityToEdit;
+    List<DecentrelandEntityToEdit> selectedEntities = new List<DecentrelandEntityToEdit>();
+    Dictionary<string, DecentrelandEntityToEdit> convertedEntities = new Dictionary<string, DecentrelandEntityToEdit>();
+
     GameObject gameObjectToEdit;
-
-    Transform originalGOParent;
-    Material[] originalMaterials;
-    Renderer[] originalRenderers;
+    GameObject undoGO, snapGO, freeMovementGO;
 
     Quaternion initialRotation;
 
-    
-    Dictionary<string, GameObject> collidersDictionary = new Dictionary<string, GameObject>();
-    List<DecentralandEntity> createdEntitiesList = new List<DecentralandEntity>();
+    Transform originalParentGOEdit;
 
-    GameObject undoGO,snapGO,freeMovementGO;
-
-    bool selectionHasbeenCreated = false;
     float currentScaleAdded, currentYRotationAdded, nexTimeToReceiveInput;
+
+    int outlinerOptimizationCounter = 0, checkerInsideSceneOptimizationCounter = 0;
+
+    bool snapObjectAlreadyMoved = false;
 
     // Start is called before the first frame update
     void Start()
@@ -100,37 +98,62 @@ public class BuildModeController : MonoBehaviour
         
         if(isEditModeActivated)
         {
+            if (Input.GetKeyDown(KeyCode.LeftShift))
+            {
+                StartMultiSelection();
+            }
+
+            if (Input.GetKeyUp(KeyCode.LeftShift))
+            {
+                EndMultiSelection();
+            }
+
             if (Time.timeSinceLevelLoad >= nexTimeToReceiveInput)
             {
                 CheckInputForShowingWindows();
                 if (Utils.isCursorLocked) CheckEditModeInput();              
             }
+
+            if (checkerInsideSceneOptimizationCounter >= 60)
+            {
+                if (!sceneToEdit.IsInsideSceneBoundaries(DCLCharacterController.i.characterPosition)) ExitEditMode();
+                checkerInsideSceneOptimizationCounter = 0;
+            }
+            else checkerInsideSceneOptimizationCounter++;
         }
     }
 
     void LateUpdate()
     {
-        if (gameObjectToEdit != null)
+        if (selectedEntities.Count > 0 && !isMultiSelectionActive)
         {         
             if (isSnapActivated)
             {
-                Vector3 objectPosition = snapGO.transform.position;
-                Vector3 eulerRotation = snapGO.transform.rotation.eulerAngles;
+                if (snapObjectAlreadyMoved)
+                {
+                    Vector3 objectPosition = snapGO.transform.position;
+                    Vector3 eulerRotation = snapGO.transform.rotation.eulerAngles;
 
-                float currentSnapFactor = snapFactor;
+                    float currentSnapFactor = snapFactor;
 
-                //float currentSnapFactor = snapFactor * currentScaleAdded;
+                    //float currentSnapFactor = snapFactor * currentScaleAdded;
 
-                objectPosition.x = Mathf.RoundToInt(objectPosition.x / currentSnapFactor) * currentSnapFactor;
-                objectPosition.y = Mathf.RoundToInt(objectPosition.y / currentSnapFactor) * currentSnapFactor;
-                objectPosition.z = Mathf.RoundToInt(objectPosition.z / currentSnapFactor) * currentSnapFactor;
-                eulerRotation.y = snapRotationDegresFactor * Mathf.FloorToInt((eulerRotation.y % snapRotationDegresFactor));
+                    objectPosition.x = Mathf.RoundToInt(objectPosition.x / currentSnapFactor) * currentSnapFactor;
+                    objectPosition.y = Mathf.RoundToInt(objectPosition.y / currentSnapFactor) * currentSnapFactor;
+                    objectPosition.z = Mathf.RoundToInt(objectPosition.z / currentSnapFactor) * currentSnapFactor;
+                    eulerRotation.y = snapRotationDegresFactor * Mathf.FloorToInt((eulerRotation.y % snapRotationDegresFactor));
 
-
-
-                Quaternion destinationRotation = Quaternion.AngleAxis(currentYRotationAdded, Vector3.up);
-                gameObjectToEdit.transform.rotation = initialRotation* destinationRotation;
-                gameObjectToEdit.transform.position = objectPosition;
+                    Quaternion destinationRotation = Quaternion.AngleAxis(currentYRotationAdded, Vector3.up);
+                    gameObjectToEdit.transform.rotation = initialRotation * destinationRotation;
+                    gameObjectToEdit.transform.position = objectPosition;
+                }
+                else if (Vector3.Distance(snapGO.transform.position, gameObjectToEdit.transform.position) >= snapDistanceToActivateMovement)
+                {
+                    CopyGameObjectStatus(gameObjectToEdit, snapGO, false);
+                    gameObjectToEdit.transform.SetParent(Camera.main.transform);
+                    
+                    snapObjectAlreadyMoved = true;
+                }
 
             }
             else
@@ -191,16 +214,9 @@ public class BuildModeController : MonoBehaviour
 
 
         Select(entity);
-        //mesh.CallWhenReady(MeshGetted);
         
         catalogController.CloseCatalog();
    
-
-        //string componentId = GetComponentUniqueId(scene, "gltfShape", (int)CLASS_ID.GLTF_SHAPE, entity.entityId);
-        //GLTFShape gltfShape = sceneToEdit.SharedComponentCreate<GLTFShape, GLTFShape.Model>(sceneToEdit, CLASS_ID.GLTF_SHAPE, model);
-
-        //SetEntityTransform(scene, entity, position, Quaternion.identity, Vector3.one);
-        //SharedComponentAttach(gltfShape, entity);
 
     }
 
@@ -240,17 +256,6 @@ public class BuildModeController : MonoBehaviour
         }
         if(Input.GetKey(KeyCode.N))
         {
-            if(shortCutsGO.gameObject.activeSelf)
-            {
-               
-                //gameObject.transform.SetSiblingIndex(lastSilbingPosition);
-            }
-            else
-            {
-                //lastSilbingPosition = gameObject.transform.GetSiblingIndex();
-                //gameObject.transform.SetAsLastSibling();
-            }
-
 
             shortCutsGO.SetActive(!shortCutsGO.gameObject.activeSelf);
             InputDone();
@@ -260,13 +265,10 @@ public class BuildModeController : MonoBehaviour
     }
 
     void CheckEditModeInput()
-    {
-  
-
-        
+    {        
         if (Input.GetKeyUp(KeyCode.Q))
         {
-            if (gameObjectToEdit != null) DeselectObject();
+            if (selectedEntities.Count > 0) DeselectEntities();
             CreateBoxEntity();
         }
 
@@ -275,7 +277,10 @@ public class BuildModeController : MonoBehaviour
             SetSnapActive(!isSnapActivated);
         }
 
-        if (gameObjectToEdit == null)
+      
+
+
+        if (selectedEntities.Count <= 0 || Input.GetKey(KeyCode.LeftShift))
         {
             if (Input.GetMouseButtonDown(0))
             {
@@ -285,29 +290,30 @@ public class BuildModeController : MonoBehaviour
             }
             CheckEntityOnPointer();
         }
-        if (gameObjectToEdit != null)
+        if (selectedEntities.Count > 0)
         {
             if(Input.GetKey(KeyCode.Delete))
             {
-                DeletedSelectedEntity();
+                DeletedSelectedEntities();
                 InputDone();
                 return;
             }
             if (Input.GetKey(KeyCode.LeftControl) && Input.GetKey(KeyCode.D))
             {
-                DuplicateEntity();
+                DuplicateEntities();
                 InputDone();
                 return;
             }
             if (Input.GetKey(KeyCode.LeftControl) && Input.GetKey(KeyCode.Z))
             {
                 UndoEdit();
+                DeselectEntities();
                 InputDone();
                 return;
             }
-            if (Input.GetMouseButtonDown(0) && SceneController.i.boundariesChecker.IsEntityInsideSceneBoundaries(entityToEdit))
+            if (Input.GetMouseButtonDown(0) && AreAllEntitiesInsideBoundaries())
             {
-                DeselectObject();
+                DeselectEntities();
                 InputDone();
                 return;
             }
@@ -317,12 +323,12 @@ public class BuildModeController : MonoBehaviour
                 if (isSnapActivated)
                 {
 
-                    RotateSelectedGameObject(snapRotationDegresFactor);
+                    RotateSelection(snapRotationDegresFactor);
                     InputDone();
                 }
                 else
                 {
-                    RotateSelectedGameObject(rotationSpeed);
+                    RotateSelection(rotationSpeed);
                 }
             }
 
@@ -332,52 +338,92 @@ public class BuildModeController : MonoBehaviour
 
                 if (isSnapActivated)
                 {
-                    ScaleSelectedGameObject(snapScaleFactor);
+                    ScaleSelection(snapScaleFactor);
                     InputDone();
                 }
-                else ScaleSelectedGameObject(scaleSpeed);
+                else ScaleSelection(scaleSpeed);
             }
             else if (Input.mouseScrollDelta.y < -0.5f)
             {
                 if (isSnapActivated)
                 {
-                    ScaleSelectedGameObject(-snapScaleFactor);
+                    ScaleSelection(-snapScaleFactor);
                     InputDone();
                 }
-                else ScaleSelectedGameObject(-scaleSpeed); 
+                else ScaleSelection(-scaleSpeed); 
             }
 
            
         }
     }
 
-    int outlinerCounter = 0;
+
+    void StartMultiSelection()
+    {
+        isMultiSelectionActive = true;
+        originalParentGOEdit = gameObjectToEdit.transform.parent;
+
+        gameObjectToEdit.transform.SetParent(null);
+        snapGO.transform.SetParent(null);
+        freeMovementGO.transform.SetParent(null);
+    }
+
+    void EndMultiSelection()
+    {
+        isMultiSelectionActive = false;
+        gameObjectToEdit.transform.SetParent(originalParentGOEdit,true);
+        snapGO.transform.SetParent(Camera.main.transform);
+        freeMovementGO.transform.SetParent(Camera.main.transform);
+
+        SetObjectIfSnapOrNot();
+    }
+
+    bool AreAllEntitiesInsideBoundaries()
+    {
+        bool areAllIn = true;
+        foreach(DecentrelandEntityToEdit entity in selectedEntities)
+        {
+            if (!SceneController.i.boundariesChecker.IsEntityInsideSceneBoundaries(entity.entity))
+            {
+                areAllIn = false;
+                break;
+            }
+        }
+        return areAllIn;
+    }
     private void CheckEntityOnPointer()
     {
-        if (outlinerCounter >= 10)
+        if (outlinerOptimizationCounter >= 10)
         {
             DecentralandEntity entity = GetEntityOnPointer();
             if (entity != null)
             {
                 outlinerController.OutLineOnlyThisEntity(entity);
             }
-            outlinerCounter = 0;
+            else outlinerController.CancelAllOutlines();
+            outlinerOptimizationCounter = 0;
         }
-        else outlinerCounter++;
+        else outlinerOptimizationCounter++;
     }
 
     public void UndoEdit()
     {
-        if (!selectionHasbeenCreated)
+        List<DecentrelandEntityToEdit> entitiesToRemove = new List<DecentrelandEntityToEdit>();
+        foreach(DecentrelandEntityToEdit entity in selectedEntities)
         {
-            CopyGameObjectStatus(undoGO, gameObjectToEdit);
-            DeselectObject();
+            if (entity.isSelected && entity.isNew) entitiesToRemove.Add(entity);
         }
-        else
+
+        CopyGameObjectStatus(undoGO, gameObjectToEdit,false,false);
+
+        foreach(DecentrelandEntityToEdit entity in entitiesToRemove)
         {
-            sceneToEdit.RemoveEntity(entityToEdit.entityId, true);
-            DeselectObject();
+            selectedEntities.Remove(entity);
+            convertedEntities.Remove(entity.entityUniqueId);
+            sceneToEdit.RemoveEntity(entity.entity.entityId, true);
         }
+    
+
     }
 
     public void ResetScaleAndRotation()
@@ -401,22 +447,23 @@ public class BuildModeController : MonoBehaviour
     {
         isSnapActivated = isActive;
         snapImgStatusShowGO.SetActive(isSnapActivated);
-        if (gameObjectToEdit != null)
+        if (isSnapActivated)
         {
-            SetObjectIfSnapOrNot();
-            //gameObjectToEdit.transform.SetParent(Camera.main.transform, true);
+            snapObjectAlreadyMoved = false;
+            snapGO.transform.SetParent(Camera.main.transform);
         }
+        SetObjectIfSnapOrNot();
     }
 
 
-    void RotateSelectedGameObject(float angleToRotate)
+    void RotateSelection(float angleToRotate)
     {
         currentYRotationAdded += angleToRotate;
         gameObjectToEdit.transform.Rotate(Vector3.up, angleToRotate);
         snapGO.transform.Rotate(Vector3.up, angleToRotate);
     }
 
-    void ScaleSelectedGameObject(float scaleFactor)
+    void ScaleSelection(float scaleFactor)
     {
         currentScaleAdded += scaleFactor;
         gameObjectToEdit.transform.localScale += Vector3.one * scaleFactor;
@@ -445,93 +492,96 @@ public class BuildModeController : MonoBehaviour
 
     void Select(DecentralandEntity decentralandEntity)
     {
-        if (decentralandEntity.isLocked) return;
-        if (gameObjectToEdit != null) DeselectObject();
-
-        selectionHasbeenCreated = false;
-        currentYRotationAdded = 0;
-        currentScaleAdded = 1;
-
-        entityToEdit = decentralandEntity;
-        //GLTFShape shape = (GLTFShape)entityToEdit.GetSharedComponent(typeof(GLTFShape));
-  
-        gameObjectToEdit = decentralandEntity.gameObject;
-
-        CopyGameObjectStatus(gameObjectToEdit, undoGO);
-
-        initialRotation = gameObjectToEdit.transform.rotation;
-        originalGOParent = gameObjectToEdit.transform.parent;
-
-        SetObjectIfSnapOrNot();
-
-
-        GetOriginalRendersAndChangeMaterials(entityToEdit);
-
-        entityInformationController.Enable();
-        entityInformationController.SetEntity(entityToEdit, sceneToEdit);
-        CopyGameObjectStatus(gameObjectToEdit, snapGO);
-        SceneController.i.boundariesChecker.AddPersistent(entityToEdit);
-        sceneLimitInfoController.UpdateInfo(); 
-    }
-
-    void ShapeUpdate(DecentralandEntity decentralandEntity)
-    {
-        Debug.Log("Shape update");
-        if(decentralandEntity == entityToEdit)
+        if (convertedEntities.ContainsKey(sceneToEdit.sceneData.id+decentralandEntity.entityId))
         {
-            GetOriginalRendersAndChangeMaterials(decentralandEntity);
+            DecentrelandEntityToEdit entityEditable = convertedEntities[sceneToEdit.sceneData.id + decentralandEntity.entityId];
+            if (entityEditable.isLocked || entityEditable.isSelected) return;
+            //if (gameObjectToEdit != null) DeselectObject();
 
+            entityEditable.Select();
 
-            if (!collidersDictionary.ContainsKey(decentralandEntity.entityId))
+            currentYRotationAdded = 0;
+            currentScaleAdded = 1;
+
+            selectedEntities.Add(entityEditable);
+
+            //GLTFShape shape = (GLTFShape)entityToEdit.GetSharedComponent(typeof(GLTFShape));
+            foreach (DecentrelandEntityToEdit entity in selectedEntities)
             {
-                CreateCollidersForEntity(decentralandEntity);
+                entity.entity.gameObject.transform.SetParent(null);
             }
-        }
-        sceneLimitInfoController.UpdateInfo();
-    }
-
-    void GetOriginalRendersAndChangeMaterials(DecentralandEntity entity)
-    {
-        originalRenderers = entity.meshesInfo.renderers;
-        if (originalRenderers != null && originalRenderers.Length >= 1)
-        {
-            originalMaterials = new Material[originalRenderers.Length];
-            int cont = 0;
-            foreach (Renderer renderer in originalRenderers)
+            gameObjectToEdit.transform.position = GetCenterPointOfSelectedObjects();
+            gameObjectToEdit.transform.rotation = Quaternion.Euler(0, 0, 0);
+            gameObjectToEdit.transform.localScale = Vector3.one;
+            foreach (DecentrelandEntityToEdit entity in selectedEntities)
             {
-                originalMaterials[cont] = renderer.material;
-                renderer.material = editMaterial;
-                cont++;
+                entity.entity.gameObject.transform.SetParent(gameObjectToEdit.transform);
             }
+        
 
-        }
-        else
-        {
-            entity.OnShapeUpdated += ShapeUpdate;
+    
+
+            initialRotation = gameObjectToEdit.transform.rotation;
+
+            SetObjectIfSnapOrNot();
+
+
+
+            entityInformationController.Enable();
+            entityInformationController.SetEntity(decentralandEntity, sceneToEdit);
+            CopyGameObjectStatus(gameObjectToEdit, undoGO,false,false);
+            CopyGameObjectStatus(gameObjectToEdit, snapGO,false);
+          
+
+
+            sceneLimitInfoController.UpdateInfo();
         }
     }
+
+    Vector3 GetCenterPointOfSelectedObjects()
+    {
+        float totalX = 0f;
+        float totalY = 0f;
+        float totalZ = 0f;
+        foreach (DecentrelandEntityToEdit entity in selectedEntities)
+        {
+            totalX += entity.entity.gameObject.transform.position.x;
+            totalY += entity.entity.gameObject.transform.position.y;
+            totalZ += entity.entity.gameObject.transform.position.z;
+        }
+        float centerX = totalX / selectedEntities.Count;
+        float centerY = totalY / selectedEntities.Count;
+        float centerZ = totalZ / selectedEntities.Count;
+        return new Vector3(centerX, centerY, centerZ);
+    }
+
 
     void SetObjectIfSnapOrNot()
     {
-        if (isSnapActivated)
+        if (!isMultiSelectionActive)
         {
-            gameObjectToEdit.transform.SetParent(Camera.main.transform);
-        }
-        else
-        {
+            if (!isSnapActivated)
+            {
+                Transform originalParent = gameObject.transform.parent;
+                gameObjectToEdit.transform.SetParent(null);
+                freeMovementGO.transform.position = gameObjectToEdit.transform.position;
+                freeMovementGO.transform.rotation = gameObjectToEdit.transform.rotation;
+                freeMovementGO.transform.localScale = gameObjectToEdit.transform.localScale;
 
-            freeMovementGO.transform.position = gameObjectToEdit.transform.position;
-            freeMovementGO.transform.rotation = gameObjectToEdit.transform.rotation;
-            freeMovementGO.transform.localScale = gameObjectToEdit.transform.localScale;
-    
+                gameObjectToEdit.transform.SetParent(originalParent);
 
-            Vector3 pointToLookAt = Camera.main.transform.position;
-            pointToLookAt.y = gameObjectToEdit.transform.position.y;
-            Quaternion lookOnLook = Quaternion.LookRotation(gameObjectToEdit.transform.position - pointToLookAt);
+                Vector3 pointToLookAt = Camera.main.transform.position;
+                pointToLookAt.y = gameObjectToEdit.transform.position.y;
+                Quaternion lookOnLook = Quaternion.LookRotation(gameObjectToEdit.transform.position - pointToLookAt);
 
-            freeMovementGO.transform.rotation = lookOnLook;
-            gameObjectToEdit.transform.SetParent(freeMovementGO.transform, true);
+                freeMovementGO.transform.rotation = lookOnLook;
+                gameObjectToEdit.transform.SetParent(freeMovementGO.transform, true);
 
+            }
+            else
+            {
+                gameObjectToEdit.transform.SetParent(null);
+            }
         }
     }
 
@@ -549,54 +599,74 @@ public class BuildModeController : MonoBehaviour
         if (Physics.Raycast(ray, out hit, distanceLimitToSelectObjects, layerToRaycast))
         {
             string entityID = hit.collider.gameObject.name;
-            return sceneToEdit.entities[entityID]; 
+            if(sceneToEdit.entities.ContainsKey(entityID)) return sceneToEdit.entities[entityID];
         }
         return null;
     }
 
-    void DeselectObject()
+    void DeselectEntities()
     {
-        if (gameObjectToEdit != null)
+        if (selectedEntities.Count > 0)
         {
-            if(SceneController.i.boundariesChecker.IsEntityInsideSceneBoundaries(entityToEdit))
-            {            
-                gameObjectToEdit.transform.SetParent(originalGOParent);
-                SceneController.i.boundariesChecker.EvaluateEntityPosition(entityToEdit);
-            }
-            else
+            bool areAllEntitiesInsideSceneBoundaries = true;
+            foreach(DecentrelandEntityToEdit entity in selectedEntities)
             {
-                UndoEdit();
-            }
-            if (originalRenderers != null)
-            {
-                //originalRenderers.material = originalMaterials;
-                int cont = 0;
-                foreach (Renderer renderer in originalRenderers)
-                {
-                    renderer.material = originalMaterials[cont];
-                    cont++;
+                if (!SceneController.i.boundariesChecker.IsEntityInsideSceneBoundaries(entity.entity))
+                {              
+                    areAllEntitiesInsideSceneBoundaries = false;
                 }
+               
+             
             }
-            SceneController.i.boundariesChecker.RemoveEntityToBeChecked(entityToEdit);
-            gameObjectToEdit = null;
-            entityToEdit = null;
+
+            if(!areAllEntitiesInsideSceneBoundaries) UndoEdit();
+
+
+            foreach (DecentrelandEntityToEdit entity in selectedEntities)
+            {
+                SceneController.i.boundariesChecker.EvaluateEntityPosition(entity.entity);
+                SceneController.i.boundariesChecker.RemoveEntityToBeChecked(entity.entity);
+                entity.Deselect();
+            }
+
+            selectedEntities.Clear();
             entityInformationController.Disable();
         }
    
     }
 
-    public void DeletedSelectedEntity()
+    public void DeletedSelectedEntities()
     {
-        string id = entityToEdit.entityId;
-        DeselectObject();
-        sceneToEdit.RemoveEntity(id, true);
-    }
-    public void DuplicateEntity()
-    {
-        DecentralandEntity entity = sceneToEdit.DuplicateEntity(entityToEdit);
-        CreateCollidersForEntity(entity);
+        List<string> idsToRemove = new List<string>();
 
-        Select(entity);
+        for (int i = 0; i < selectedEntities.Count; i++)
+        {         
+            idsToRemove.Add(selectedEntities[i].entity.entityId);          
+        }
+
+        DeselectEntities();
+
+        foreach(string id in idsToRemove)
+        {
+            sceneToEdit.RemoveEntity(id, true);
+        }
+   
+    }
+    public void DuplicateEntities()
+    {
+        foreach(DecentrelandEntityToEdit entity in selectedEntities)
+        {
+            if (!SceneController.i.boundariesChecker.IsEntityInsideSceneBoundaries(entity.entity)) return;
+        }
+
+        int amount = selectedEntities.Count;
+        for (int i = 0; i < amount; i++)
+        {
+            DecentralandEntity entity = sceneToEdit.DuplicateEntity(selectedEntities[i].entity);
+            SetupEntityToEdit(entity);
+            //Select(entity);
+        }
+
     }
 
     DecentralandEntity CreateEntity()
@@ -605,14 +675,19 @@ public class BuildModeController : MonoBehaviour
         DecentralandEntity newEntity = sceneToEdit.CreateEntity(Guid.NewGuid().ToString());
 
         DCLTransform.model.position = SceneController.i.ConvertUnityToScenePosition(Camera.main.transform.position + Camera.main.transform.forward * distanceFromCameraForNewEntitties, sceneToEdit);
-        DCLTransform.model.rotation = Quaternion.Euler(Vector3.zero);
+
+        Vector3 pointToLookAt = Camera.main.transform.position;
+        pointToLookAt.y = gameObjectToEdit.transform.position.y;
+        Quaternion lookOnLook = Quaternion.LookRotation(gameObjectToEdit.transform.position - pointToLookAt);
+
+        DCLTransform.model.rotation = lookOnLook;
         DCLTransform.model.scale = newEntity.gameObject.transform.lossyScale;
 
         sceneToEdit.EntityComponentCreateOrUpdateFromUnity(newEntity.entityId, CLASS_ID_COMPONENT.TRANSFORM, DCLTransform.model);      
 
-        createdEntitiesList.Add(newEntity);
 
         sceneLimitInfoController.UpdateInfo();
+        SetupEntityToEdit(newEntity,true);
         return newEntity;
     }
     void CreateBoxEntity()
@@ -630,26 +705,22 @@ public class BuildModeController : MonoBehaviour
 
         if(isSnapActivated) newEntity.gameObject.transform.rotation = Quaternion.Euler(0, 0, 0);
 
-        CreateCollidersForEntity(newEntity);
         Select(newEntity);
 
         sceneLimitInfoController.UpdateInfo();
-        selectionHasbeenCreated = true;
     }
 
 
     
 
-    void CopyGameObjectStatus(GameObject gameObjectToCopy, GameObject gameObjectToReceive)
+    void CopyGameObjectStatus(GameObject gameObjectToCopy, GameObject gameObjectToReceive, bool copyParent = true,bool localRotation = true)
     {
-        gameObjectToReceive.transform.SetParent(gameObjectToCopy.transform.parent);
+        if(copyParent)gameObjectToReceive.transform.SetParent(gameObjectToCopy.transform.parent);
         gameObjectToReceive.transform.position = gameObjectToCopy.transform.position;
-        gameObjectToReceive.transform.localRotation = gameObjectToCopy.transform.localRotation;
+        if(localRotation)gameObjectToReceive.transform.localRotation = gameObjectToCopy.transform.localRotation;
+        else gameObjectToReceive.transform.rotation = gameObjectToCopy.transform.rotation;
         gameObjectToReceive.transform.localScale = gameObjectToCopy.transform.lossyScale;
     }
-
-
- 
 
 
     void EnterEditMode()
@@ -663,13 +734,21 @@ public class BuildModeController : MonoBehaviour
         if (snapGO == null)
         {
             snapGO = new GameObject("SnapGameObject");
-            snapGO.transform.SetParent(transform);
+           
         }
+        snapGO.transform.SetParent(transform);
         if (freeMovementGO == null)
         {
             freeMovementGO = new GameObject("FreeMovementGO");
-            freeMovementGO.transform.SetParent(Camera.main.transform);
+         
         }
+        freeMovementGO.transform.SetParent(Camera.main.transform);
+        if (gameObjectToEdit == null)
+        {
+            gameObjectToEdit = new GameObject("EditionGO");
+         
+        }
+        gameObjectToEdit.transform.SetParent(Camera.main.transform);
         if (undoGO == null)
         {
             undoGO = new GameObject("UndoGameObject");
@@ -684,7 +763,7 @@ public class BuildModeController : MonoBehaviour
         // NOTE(Adrian): This is a temporary as the kernel should do this job instead of the client
         DCL.Environment.i.messagingControllersManager.messagingControllers[sceneToEdit.sceneData.id].systemBus.Stop();
         //
-        CreateCollidersForAllEntities();
+        SetupAllEntities();
     }
 
 
@@ -693,25 +772,25 @@ public class BuildModeController : MonoBehaviour
         // NOTE(Adrian): This is a temporary as the kernel should do this job instead of the client
         DCL.Environment.i.messagingControllersManager.messagingControllers[sceneToEdit.sceneData.id].systemBus.Start();
         //
-        isEditModeActivated = false;
+
+
         editModeChangeFX.SetActive(false);
 
         snapGO.transform.SetParent(transform);
-        sceneToEdit.SetEditMode(false);
+
         ParcelSettings.VISUAL_LOADING_ENABLED = true;
         DCLCharacterController.i.SetFreeMovementActive(false);
         outlinerController.CancelAllOutlines();
-        DeselectObject();
-        DestroyCollidersForAllEntities();
+        DeselectEntities();
+        isEditModeActivated = false;
+        sceneToEdit.SetEditMode(false);
     }
 
 
     void FindSceneToEdit()
-    {
-       
+    {      
         foreach(ParcelScene scene in SceneController.i.scenesSortedByDistance)
         {
-
             if(scene.IsInsideSceneBoundaries(DCLCharacterController.i.characterPosition))
             {
                 sceneToEdit = scene;
@@ -723,74 +802,37 @@ public class BuildModeController : MonoBehaviour
 
     void DestroyCollidersForAllEntities()
     {
-        foreach (GameObject entityCollider in collidersDictionary.Values)
+        foreach(DecentrelandEntityToEdit entity in convertedEntities.Values)
         {
-            Destroy(entityCollider);
+            entity.DestroyColliders();
         }
-        collidersDictionary.Clear();
     }
-    void CreateCollidersForAllEntities()
+
+    void SetupAllEntities()
     {
-        foreach(DecentralandEntity entity in sceneToEdit.entities.Values)
+        
+        foreach (DecentralandEntity entity in sceneToEdit.entities.Values)
         {
-            if (entity.meshRootGameObject && entity.meshesInfo.renderers.Length > 0)
-            {
-                CreateCollidersForEntity(entity);
-            }       
+            SetupEntityToEdit(entity);
         }
     }
 
-
-    private void CreateCollidersForEntity(DecentralandEntity entity)
+    void SetupEntityToEdit(DecentralandEntity entity,bool hasBeenCreated = false)
     {
-        DecentralandEntity.MeshesInfo meshInfo = entity.meshesInfo;
-        if (meshInfo == null || meshInfo.currentShape == null ) return;
-        if (!meshInfo.currentShape.IsVisible()) return;
-        if (!meshInfo.currentShape.IsVisible() && meshInfo.currentShape.HasCollisions()) return;
-        if (!meshInfo.currentShape.IsVisible() && !meshInfo.currentShape.HasCollisions()) return;
-
-        if (!collidersDictionary.ContainsKey(entity.entityId))
+        if (!convertedEntities.ContainsKey(entity.scene.sceneData.id + entity.entityId))
         {
-            if (entity.children.Count > 0)
-            {
-                using (var iterator = entity.children.GetEnumerator())
-                {
-                    while (iterator.MoveNext())
-                    {
-                        CreateCollidersForEntity(iterator.Current.Value);
-                    }
-                }
-            }
-
-
-            GameObject entityCollider = new GameObject(entity.entityId);
-            entityCollider.layer = LayerMask.NameToLayer("OnBuilderPointerClick");
-
-            for (int i = 0; i < meshInfo.renderers.Length; i++)
-            {                             
-                Transform t = entityCollider.transform;
-                t.SetParent(meshInfo.renderers[i].transform);
-                t.ResetLocalTRS();
-
-                var meshCollider = entityCollider.AddComponent<MeshCollider>();
-                //meshCollider.convex = true;
-                //meshCollider.isTrigger = true;
-                if (meshInfo.renderers[i] is SkinnedMeshRenderer)
-                {
-                    Mesh meshColliderForSkinnedMesh = new Mesh();
-                    (meshInfo.renderers[i] as SkinnedMeshRenderer).BakeMesh(meshColliderForSkinnedMesh);
-                    meshCollider.sharedMesh = meshColliderForSkinnedMesh;
-                    t.localScale = new Vector3(1 / transform.lossyScale.x, 1 / transform.lossyScale.y, 1 / transform.lossyScale.z);
-                }
-                else
-                {
-                    meshCollider.sharedMesh = meshInfo.renderers[i].GetComponent<MeshFilter>().sharedMesh;
-                }
-                meshCollider.enabled = meshInfo.renderers[i].enabled;
-
-            }
-            
-            collidersDictionary.Add(entity.entityId, entityCollider);
+           
+            DecentrelandEntityToEdit entityToEdit = new DecentrelandEntityToEdit(entity, editMaterial);
+            convertedEntities.Add(entityToEdit.entityUniqueId, entityToEdit);
+            entity.OnRemoved += RemoveConvertedEntity;
+            entityToEdit.isNew = hasBeenCreated;
         }
+
     }
+
+    void RemoveConvertedEntity(DecentralandEntity entity)
+    {
+        convertedEntities.Remove(entity.scene.sceneData.id + entity.entityId);
+    }
+
 }

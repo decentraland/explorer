@@ -384,6 +384,8 @@ namespace DCL.Controllers
                     }
                 }
             }
+            if(decentralandEntity.parent != null)SetEntityParent(duplicatedEntity.entityId, decentralandEntity.parent.entityId);
+
             DCLTransform.model.position = SceneController.i.ConvertUnityToScenePosition(decentralandEntity.gameObject.transform.position);
             DCLTransform.model.rotation = decentralandEntity.gameObject.transform.rotation;
             DCLTransform.model.scale = decentralandEntity.gameObject.transform.lossyScale;
@@ -396,6 +398,12 @@ namespace DCL.Controllers
             foreach (KeyValuePair<System.Type, BaseDisposable> component in decentralandEntity.GetSharedComponents())
             {
                 SharedComponentAttach(duplicatedEntity.entityId, component.Value.id);
+            }
+
+            //TODO: (Adrian) Evaluate if all created components should be handle as equals instead of different
+            foreach (KeyValuePair<string, UUIDComponent> component in decentralandEntity.uuidComponents)
+            {
+                EntityComponentCreateOrUpdateFromUnity(duplicatedEntity.entityId, CLASS_ID_COMPONENT.UUID_CALLBACK,component.Value.model);
             }
 
             return duplicatedEntity;
@@ -575,7 +583,9 @@ namespace DCL.Controllers
                 disposableComponent.AttachTo(decentralandEntity);
             }
         }
-        public BaseComponent EntityComponentCreateOrUpdateFromUnity(string entityId, CLASS_ID_COMPONENT classId, DCLTransform.Model model)
+
+
+        public BaseComponent EntityComponentCreateOrUpdateFromUnity(string entityId, CLASS_ID_COMPONENT classId, object data)
         {
 
             SceneController.i.OnMessageDecodeStart?.Invoke("UpdateEntityComponent");
@@ -589,27 +599,101 @@ namespace DCL.Controllers
                 return null;
             }
 
-            if (!entity.components.ContainsKey(classId))
-                entity.components.Add(classId, null);
-
+       
             if (classId == CLASS_ID_COMPONENT.TRANSFORM)
             {
+
+
+                if (!(data is DCLTransform.Model))
+                {
+                    Debug.LogError("Data is not a DCLTransform.Model type!");
+                    return null;
+                }
+                DCLTransform.Model modelRecovered = (DCLTransform.Model)data;
+
+                if (!entity.components.ContainsKey(classId))
+                    entity.components.Add(classId, null);
+
+
                 if (entity.OnTransformChange != null)
                 {
-                    entity.OnTransformChange.Invoke(model);
+                    entity.OnTransformChange.Invoke(modelRecovered);
                 }
                 else
                 {
-                    entity.gameObject.transform.localPosition = model.position;
-                    entity.gameObject.transform.localRotation = model.rotation;
-                    entity.gameObject.transform.localScale = model.scale;
+                    entity.gameObject.transform.localPosition = modelRecovered.position;
+                    entity.gameObject.transform.localRotation = modelRecovered.rotation;
+                    entity.gameObject.transform.localScale = modelRecovered.scale;
 
                     SceneController.i.boundariesChecker?.AddEntityToBeChecked(entity);
                 }
 
                 SceneController.i.physicsSyncController.MarkDirty();
+
+                return null;
             }
-            return null;
+
+            BaseComponent newComponent = null;
+            DCLComponentFactory factory = ownerController.componentFactory;
+            Assert.IsNotNull(factory, "Factory is null?");
+
+            if (classId == CLASS_ID_COMPONENT.UUID_CALLBACK)
+            {
+                string type = "";
+                if (!(data is OnPointerEvent.Model))
+                {
+                    Debug.LogError("Data is not a DCLTransform.Model type!");
+                    return null;
+                }
+                OnPointerEvent.Model model = (OnPointerEvent.Model)data;
+
+                type = model.type;
+
+                if (!entity.uuidComponents.ContainsKey(type))
+                {
+                    //NOTE(Brian): We have to contain it in a gameObject or it will be pooled with the components attached.
+                    var go = new GameObject("UUID Component");
+                    go.transform.SetParent(entity.gameObject.transform, false);
+
+                    switch (type)
+                    {
+                        case OnClick.NAME:
+                            newComponent = go.GetOrCreateComponent<OnClick>();
+                            break;
+                        case OnPointerDown.NAME:
+                            newComponent = go.GetOrCreateComponent<OnPointerDown>();
+                            break;
+                        case OnPointerUp.NAME:
+                            newComponent = go.GetOrCreateComponent<OnPointerUp>();
+                            break;
+                    }
+
+                    if (newComponent != null)
+                    {
+                        UUIDComponent uuidComponent = newComponent as UUIDComponent;
+
+                        if (uuidComponent != null)
+                        {
+                            uuidComponent.Setup(this, entity, model);
+                            entity.uuidComponents.Add(type, uuidComponent);
+                        }
+                        else
+                        {
+                            Debug.LogError("uuidComponent is not of UUIDComponent type!");
+                        }
+                    }
+                    else
+                    {
+                        Debug.LogError("EntityComponentCreateOrUpdate: Invalid UUID type!");
+                    }
+                }
+                else
+                {
+                    newComponent = EntityUUIDComponentUpdate(entity, type, model);
+                }
+            }
+            SceneController.i.physicsSyncController.MarkDirty();
+            return newComponent;
         }
 
         public BaseComponent EntityComponentCreateOrUpdate(string entityId, CLASS_ID_COMPONENT classId, string data, out CleanableYieldInstruction yieldInstruction)

@@ -6,7 +6,7 @@ public class CatalogAssetGroup
 {
     public string idPack;
     public string title;
-    public string thumbail;
+    public string thumbnail;
 
 
     public Dictionary<string, List<SceneObject>> groupedSceneObjects;

@@ -194,6 +194,7 @@ namespace DCL.Controllers
             return true;
         }
 
+    
         protected virtual void UpdateEntityMeshesValidState(DecentralandEntity entity, bool isInsideBoundaries, Bounds meshBounds)
         {
             if (entity.meshesInfo.renderers[0] == null) return;

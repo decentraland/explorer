@@ -58,19 +58,21 @@ public class EntityInformationController : MonoBehaviour
 
     public void UpdateInfo()
     {
+        if (currentEntity.gameObject != null)
+        {
+            Vector3 positionConverted = SceneController.i.ConvertUnityToScenePosition(currentEntity.gameObject.transform.position, parcelScene);
+            Vector3 currentRotation = currentEntity.gameObject.transform.rotation.eulerAngles;
+            Vector3 currentScale = currentEntity.gameObject.transform.localScale;
+            //string desc = "POSITION:   X: " + positionConverted.x + "  Y: " + positionConverted.y + "  Z:"+ positionConverted.z;
+            //desc +=   "\n\nROTATION:   X: " + currentRotation.x +   "  Y: " + currentRotation.y +   "  Z:" + currentRotation.z;
+            //desc +=   "\n\nSCALE:      X: " + currentScale.x +      "  Y: " + currentScale.y +      "  Z:" + currentScale.z;
 
-        Vector3 positionConverted = SceneController.i.ConvertUnityToScenePosition(currentEntity.gameObject.transform.position, parcelScene);
-        Vector3 currentRotation = currentEntity.gameObject.transform.rotation.eulerAngles;
-        Vector3 currentScale = currentEntity.gameObject.transform.localScale;
-        //string desc = "POSITION:   X: " + positionConverted.x + "  Y: " + positionConverted.y + "  Z:"+ positionConverted.z;
-        //desc +=   "\n\nROTATION:   X: " + currentRotation.x +   "  Y: " + currentRotation.y +   "  Z:" + currentRotation.z;
-        //desc +=   "\n\nSCALE:      X: " + currentScale.x +      "  Y: " + currentScale.y +      "  Z:" + currentScale.z;
+            string desc = AppendUsageAndLimit("POSITION:   ", positionConverted, "0.#");
+            desc += "\n\n" + AppendUsageAndLimit("ROTATION:  ", currentRotation, "0");
+            desc += "\n\n" + AppendUsageAndLimit("SCALE:        ", currentScale, "0.##");
 
-        string desc = AppendUsageAndLimit("POSITION:   ", positionConverted, "0.#");
-        desc += "\n\n"+AppendUsageAndLimit("ROTATION:  ", currentRotation, "0");
-        desc += "\n\n"+ AppendUsageAndLimit("SCALE:        ", currentScale, "0.##");
-         
-        descTxt.text = desc;
+            descTxt.text = desc;
+        }
 
     }
 

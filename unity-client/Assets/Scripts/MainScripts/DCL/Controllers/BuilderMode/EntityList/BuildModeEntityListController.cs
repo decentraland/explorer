@@ -51,7 +51,7 @@ public class BuildModeEntityListController : MonoBehaviour
             case EntityAction.SELECT:
                 break;
             case EntityAction.LOCK:
-                entityToApply.isLocked = !entityToApply.isLocked;
+                //entityToApply.isLocked = !entityToApply.isLocked;
                 break;
             case EntityAction.DELETE:
                 currentScene.RemoveEntity(entityToApply.entityId);

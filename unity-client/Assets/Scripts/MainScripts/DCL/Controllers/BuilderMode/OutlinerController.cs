@@ -1,3 +1,4 @@
+using DCL;
 using DCL.Models;
 using System.Collections;
 using System.Collections.Generic;
@@ -9,25 +10,53 @@ public class OutlinerController : MonoBehaviour
 
 
     List<MeshFilter> outliners = new List<MeshFilter>();
+
+    public DecentralandEntity currentSelectedEntity;
     public void OutLineOnlyThisEntity(DecentralandEntity entity)
     {
-
-        for(int i = 0; i < entity.meshesInfo.renderers.Length; i++)
+        if (currentSelectedEntity != null)
         {
-            if (i >= outliners.Count) outliners.Add(Instantiate(outlinerPrefab).GetComponent<MeshFilter>());
-            else
+            currentSelectedEntity.OnCleanupEvent -= CleanOutLinersFromClean;
+            currentSelectedEntity.OnRemoved -= CleanOutlinersFromEntity;
+        }
+        entity.OnCleanupEvent += CleanOutLinersFromClean;
+        entity.OnRemoved += CleanOutlinersFromEntity;
+        currentSelectedEntity = entity;
+        foreach (MeshFilter meshFilter in outliners)
+        {
+            if(meshFilter != null)meshFilter.gameObject.SetActive(false);
+        }
+    
+        if (entity.meshRootGameObject && entity.meshesInfo.renderers.Length > 0)
+        {
+            for (int i = 0; i < entity.meshesInfo.renderers.Length; i++)
             {
-                outliners[i].gameObject.SetActive(true);
-                outliners[i].mesh = entity.meshesInfo.renderers[i].GetComponent<MeshFilter>().mesh;
-                outliners[i].gameObject.transform.SetParent(entity.meshesInfo.renderers[i].gameObject.transform.parent, false);
+                if (i >= outliners.Count) outliners.Add(Instantiate(outlinerPrefab).GetComponent<MeshFilter>());
+                else
+                {
+                    if (outliners[i] == null) outliners[i] = Instantiate(outlinerPrefab).GetComponent<MeshFilter>();
+                    outliners[i].gameObject.SetActive(true);
+                    outliners[i].mesh = entity.meshesInfo.renderers[i].GetComponent<MeshFilter>().mesh;
+                    outliners[i].gameObject.transform.SetParent(entity.meshesInfo.renderers[i].gameObject.transform.parent, false);
+                }
             }
         }
-        for(int i = entity.meshesInfo.meshFilters.Length; i < outliners.Count; i++)
+    }
+
+    void CleanOutLinersFromClean(ICleanableEventDispatcher dispatcher)
+    {
+        CleanOutLiners();
+    }
+    void CleanOutlinersFromEntity(DecentralandEntity entity)
+    {
+        CleanOutLiners();
+    }
+    void CleanOutLiners()
+    {
+        for(int i = 0; i <outliners.Count;i++)
         {
-            outliners[i].gameObject.SetActive(false);
+            if(outliners[i] == null) outliners.Remove(outliners[i]);
         }
-       
- 
     }
 
 
@@ -35,7 +64,7 @@ public class OutlinerController : MonoBehaviour
     {
         foreach(MeshFilter filter in outliners)
         {
-            filter.gameObject.SetActive(false);
+            if (filter != null) filter.gameObject.SetActive(false);
         }
     }
 }

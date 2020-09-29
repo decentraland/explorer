@@ -28,7 +28,7 @@ public class CatalogGroupListView : ListView<Dictionary<string, List<SceneObject
 
    void SceneObjectSelected(SceneObject sceneObject)
     {
-        Debug.Log("Object selected " + sceneObject.name);
+
         OnSceneObjectClicked?.Invoke(sceneObject);
 
 

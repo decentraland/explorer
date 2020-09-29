@@ -1579,7 +1579,7 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4281479730
+    rgba: 4294967295
   m_fontColor: {r: 1, g: 1, b: 1, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
@@ -8841,11 +8841,12 @@ MonoBehaviour:
   scaleSpeed: 0.05
   rotationSpeed: 1.25
   msBetweenInputInteraction: 200
-  distanceFromCameraForNewEntitties: 4
+  distanceFromCameraForNewEntitties: 5
   distanceLimitToSelectObjects: 50
   snapFactor: 1
   snapRotationDegresFactor: 30
   snapScaleFactor: 0.25
+  snapDistanceToActivateMovement: 1
   editModeChangeFX: {fileID: 763778910}
   snapImgStatusShowGO: {fileID: 1222208636}
   shortCutsGO: {fileID: 2133271001}
@@ -9262,7 +9263,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 475807047}
   m_HandleRect: {fileID: 475807046}
   m_Direction: 2
-  m_Value: 1
+  m_Value: 0
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -10897,7 +10898,7 @@ MonoBehaviour:
   baseUrlMode: 0
   baseUrlCustom: 
   environment: 4
-  startInCoords: {x: -3, y: -14}
+  startInCoords: {x: -71, y: -36}
   forceLocalComms: 0
   allWearables: 0
   testWearables: 0
@@ -15819,6 +15820,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   outlinerPrefab: {fileID: 6303291496796273328, guid: c2e9b4d6c8f24d14faf40f59edce612a,
     type: 3}
+  currentSelectedEntity:
+    scene: {fileID: 0}
+    markedForCleanup: 0
+    gameObject: {fileID: 0}
+    entityId: 
+    meshesInfo:
+      renderers: []
+      meshFilters: []
+      colliders: []
 --- !u!1001 &326638024064006570
 PrefabInstance:
   m_ObjectHideFlags: 0

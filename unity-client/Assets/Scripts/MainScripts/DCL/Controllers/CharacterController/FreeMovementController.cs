@@ -42,8 +42,8 @@ public class FreeMovementController : MonoBehaviour
     {
         characterController = GetComponent<CharacterController>();
 
-        sprintStartedDelegate = (action) => isSprinting = true;
-        sprintFinishedDelegate = (action) => isSprinting = false;
+        //sprintStartedDelegate = (action) => isSprinting = true;
+        //sprintFinishedDelegate = (action) => isSprinting = false;
         sprintAction.OnStarted += sprintStartedDelegate;
         sprintAction.OnFinished += sprintFinishedDelegate;
     }
