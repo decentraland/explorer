@@ -99,7 +99,7 @@ namespace DCL.Tutorial
                 }
             }
 
-
+            NotificationsController.disableWelcomeNotification = false;
         }
 
         /// <summary>
@@ -126,6 +126,8 @@ namespace DCL.Tutorial
                     hudController.goToGenesisPlazaHud.OnAfterGoToGenesisPlaza += GoToGenesisPlazaHud_OnAfterGoToGenesisPlaza;
                 }
             }
+
+            NotificationsController.disableWelcomeNotification = true;
 
             WebInterface.SetDelightedSurveyEnabled(false);
 
@@ -155,6 +157,8 @@ namespace DCL.Tutorial
             isRunning = false;
             ShowTeacher3DModel(false);
             WebInterface.SetDelightedSurveyEnabled(true);
+
+            NotificationsController.disableWelcomeNotification = false;
 
             if (hudController != null && hudController.emailPromptHud != null)
                 hudController.emailPromptHud.waitForEndOfTutorial = false;
