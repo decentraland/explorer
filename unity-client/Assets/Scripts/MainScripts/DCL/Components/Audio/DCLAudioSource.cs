@@ -41,7 +41,7 @@ namespace DCL.Components
             CommonScriptableObjects.sceneID.OnChange -= OnCurrentSceneChanged;
             CommonScriptableObjects.sceneID.OnChange += OnCurrentSceneChanged;
 
-            audioSource.volume = (scene.sceneData.id == CommonScriptableObjects.sceneID) ? model.volume : 0f;
+            audioSource.volume = (scene.sceneData.id == CommonScriptableObjects.sceneID.Get()) ? model.volume : 0f;
             audioSource.loop = model.loop;
             audioSource.pitch = model.pitch;
             audioSource.spatialBlend = 1;
