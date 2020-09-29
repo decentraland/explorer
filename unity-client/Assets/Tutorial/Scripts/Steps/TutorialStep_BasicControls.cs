@@ -18,11 +18,18 @@ namespace DCL.Tutorial
             base.OnStepStart();
 
             okButton.onClick.AddListener(OnOkButtonClick);
+            tutorialController.hudController?.taskbarHud?.SetVisibility(false);
         }
 
         public override IEnumerator OnStepExecute()
         {
             yield return new WaitUntil(() => stepIsFinished);
+        }
+
+        public override void OnStepFinished()
+        {
+            base.OnStepFinished();
+            tutorialController.hudController?.taskbarHud?.SetVisibility(true);
         }
 
         private void OnOkButtonClick()

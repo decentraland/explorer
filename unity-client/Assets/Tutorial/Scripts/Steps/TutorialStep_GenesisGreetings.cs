@@ -28,6 +28,8 @@ namespace DCL.Tutorial
 
             defaultTeacherCanvasSortOrder = tutorialController.teacherCanvas.sortingOrder;
             tutorialController.SetTeacherCanvasSortingOrder(TEACHER_CANVAS_SORT_ORDER_START);
+
+            tutorialController.hudController?.taskbarHud?.SetVisibility(false);
         }
 
         public override IEnumerator OnStepExecute()

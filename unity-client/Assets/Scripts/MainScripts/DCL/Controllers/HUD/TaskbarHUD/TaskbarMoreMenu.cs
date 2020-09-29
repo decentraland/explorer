@@ -80,9 +80,24 @@ public class TaskbarMoreMenu : MonoBehaviour
     internal void ShowMoreMenu(bool visible, bool instant = false)
     {
         if (visible)
+        {
+            if (!moreMenuAnimator.gameObject.activeInHierarchy)
+            {
+                moreMenuAnimator.gameObject.SetActive(true);
+            }
             moreMenuAnimator.Show(instant);
+        }
         else
-            moreMenuAnimator.Hide(instant);
+        {
+            if (!moreMenuAnimator.gameObject.activeInHierarchy)
+            {
+                moreMenuAnimator.gameObject.SetActive(false);
+            }
+            else
+            {
+                moreMenuAnimator.Hide(instant);
+            }
+        }
     }
 
     private void ToggleCollapseBar()
