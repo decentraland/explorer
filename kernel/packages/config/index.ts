@@ -238,7 +238,13 @@ export function getDefaultTLD() {
 }
 
 export function getExclusiveServer() {
-  if (window.location.search.match(/TEST_WEARABLES/)) {
+  const url = new URL(window.location)
+  if (url.searchParams.has('TEST_WEARABLES')) {
+    try {
+      return new URL(url.searchParams.get('TEST_WEARABLES') as string).toString()
+    } catch (e) {
+      // ignore error -> return default test url
+    }
     return 'https://dcl-wearables-dev.now.sh/index.json'
   }
   return 'https://wearable-api.decentraland.org/v2/collections'
