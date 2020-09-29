@@ -88,6 +88,22 @@ namespace Tests
             }
         }
 
+        IEnumerator CreateAudioSourceWithClipForEntity(DecentralandEntity entity)
+        {
+            yield return LoadAudioClip(scene,
+                audioClipId: "audioClipTest",
+                url: DCL.Helpers.Utils.GetTestsAssetsPath() + "/Audio/Train.wav",
+                loop: true,
+                loading: true,
+                volume: 1f,
+                waitForLoading: true);
+
+            yield return CreateAudioSource(scene,
+                entityId: entity.entityId,
+                audioClipId: "audioClipTest",
+                playing: true);
+        }
+
         public IEnumerator CreateAndLoadAudioClip(bool waitForLoading = true)
         {
             yield return LoadAudioClip(scene,
@@ -234,21 +250,10 @@ namespace Tests
             // Set current scene as a different one
             CommonScriptableObjects.sceneID.Set("unexistent-scene");
 
-            yield return LoadAudioClip(scene,
-                audioClipId: "audioClipTest",
-                url: DCL.Helpers.Utils.GetTestsAssetsPath() + "/Audio/Train.wav",
-                loop: true,
-                loading: true,
-                volume: 1f,
-                waitForLoading: true);
-
             DecentralandEntity entity = TestHelpers.CreateSceneEntity(scene);
             yield return null;
 
-            yield return CreateAudioSource(scene,
-                entityId: entity.entityId,
-                audioClipId: "audioClipTest",
-                playing: true);
+            yield return CreateAudioSourceWithClipForEntity(entity);
 
             DCLAudioSource dclAudioSource = entity.gameObject.GetComponentInChildren<DCLAudioSource>();
             yield return dclAudioSource.routine;
@@ -268,22 +273,10 @@ namespace Tests
             // Set current scene with this scene's id
             CommonScriptableObjects.sceneID.Set(scene.sceneData.id);
 
-            float originalVolume = 1.0f;
-            yield return LoadAudioClip(scene,
-                audioClipId: "audioClipTest",
-                url: DCL.Helpers.Utils.GetTestsAssetsPath() + "/Audio/Train.wav",
-                loop: true,
-                loading: true,
-                volume: originalVolume,
-                waitForLoading: true);
-
             DecentralandEntity entity = TestHelpers.CreateSceneEntity(scene);
             yield return null;
 
-            yield return CreateAudioSource(scene,
-                entityId: entity.entityId,
-                audioClipId: "audioClipTest",
-                playing: true);
+            yield return CreateAudioSourceWithClipForEntity(entity);
 
             DCLAudioSource dclAudioSource = entity.gameObject.GetComponentInChildren<DCLAudioSource>();
             yield return dclAudioSource.routine;
@@ -291,7 +284,7 @@ namespace Tests
             AudioSource unityAudioSource = dclAudioSource.GetComponentInChildren<AudioSource>();
 
             // Check the volume
-            Assert.AreEqual(unityAudioSource.volume, originalVolume);
+            Assert.AreEqual(unityAudioSource.volume, dclAudioSource.model.volume);
         }
 
         [UnityTest]
@@ -303,22 +296,10 @@ namespace Tests
             // Set current scene with this scene's id
             CommonScriptableObjects.sceneID.Set(scene.sceneData.id);
 
-            float originalVolume = 1.0f;
-            yield return LoadAudioClip(scene,
-                audioClipId: "audioClipTest",
-                url: DCL.Helpers.Utils.GetTestsAssetsPath() + "/Audio/Train.wav",
-                loop: true,
-                loading: true,
-                volume: originalVolume,
-                waitForLoading: true);
-
             DecentralandEntity entity = TestHelpers.CreateSceneEntity(scene);
             yield return null;
 
-            yield return CreateAudioSource(scene,
-                entityId: entity.entityId,
-                audioClipId: "audioClipTest",
-                playing: true);
+            yield return CreateAudioSourceWithClipForEntity(entity);
 
             DCLAudioSource dclAudioSource = entity.gameObject.GetComponentInChildren<DCLAudioSource>();
             yield return dclAudioSource.routine;
@@ -341,22 +322,10 @@ namespace Tests
             // Set current scene as a different one
             CommonScriptableObjects.sceneID.Set("unexistent-scene");
 
-            float originalVolume = 1.0f;
-            yield return LoadAudioClip(scene,
-                audioClipId: "audioClipTest",
-                url: DCL.Helpers.Utils.GetTestsAssetsPath() + "/Audio/Train.wav",
-                loop: true,
-                loading: true,
-                volume: originalVolume,
-                waitForLoading: true);
-
             DecentralandEntity entity = TestHelpers.CreateSceneEntity(scene);
             yield return null;
 
-            yield return CreateAudioSource(scene,
-                entityId: entity.entityId,
-                audioClipId: "audioClipTest",
-                playing: true);
+            yield return CreateAudioSourceWithClipForEntity(entity);
 
             DCLAudioSource dclAudioSource = entity.gameObject.GetComponentInChildren<DCLAudioSource>();
             yield return dclAudioSource.routine;
@@ -367,7 +336,7 @@ namespace Tests
             CommonScriptableObjects.sceneID.Set(scene.sceneData.id);
 
             // Check the volume
-            Assert.AreEqual(unityAudioSource.volume, originalVolume);
+            Assert.AreEqual(unityAudioSource.volume, dclAudioSource.model.volume);
         }
 
         [Test]
