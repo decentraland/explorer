@@ -16,8 +16,18 @@ export function ensureFileExists(root: string, file: string) {
 }
 
 export function copyFile(from: string, to: string) {
+  console.log(`> copying ${from} to ${to}`)
+
   if (!fs.existsSync(from)) {
     throw new Error(`${from} does not exist`)
+  }
+
+  // if it is not a file, remove it to avoid conflict with symbolic links
+  if (fs.existsSync(to)) {
+    const type = fs.lstatSync(to)
+    if (!type.isFile()) {
+      fs.removeSync(to)
+    }
   }
 
   fs.copySync(from, to)
