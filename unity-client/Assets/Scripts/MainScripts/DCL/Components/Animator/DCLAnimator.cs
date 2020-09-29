@@ -84,7 +84,7 @@ namespace DCL.Components
 
             animComponent.playAutomatically = true;
             animComponent.enabled = true;
-            //animComponent.Stop(); //NOTE(Brian): When the GLTF is created by GLTFSceneImporter a frame may be elapsed,
+            animComponent.Stop(); //NOTE(Brian): When the GLTF is created by GLTFSceneImporter a frame may be elapsed,
             //putting the component in play state if playAutomatically was true at that point.
             animComponent.clip?.SampleAnimation(animComponent.gameObject, 0);
 
