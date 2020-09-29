@@ -243,9 +243,8 @@ export function getExclusiveServer() {
     try {
       return new URL(url.searchParams.get('TEST_WEARABLES') as string).toString()
     } catch (e) {
-      // ignore error -> return default test url
+      return 'https://dcl-wearables-dev.now.sh/index.json'
     }
-    return 'https://dcl-wearables-dev.now.sh/index.json'
   }
   return 'https://wearable-api.decentraland.org/v2/collections'
 }
