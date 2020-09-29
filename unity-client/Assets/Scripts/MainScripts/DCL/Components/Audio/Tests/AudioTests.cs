@@ -31,6 +31,11 @@ namespace Tests
             yield return audioSource.routine;
         }
 
+        protected override IEnumerator TearDown()
+        {
+            sceneController.enabled = true;
+            return base.TearDown();
+        }
 
         public DCLAudioClip CreateAudioClip(string url, bool loop, bool shouldTryToLoad, double volume)
         {
@@ -70,8 +75,7 @@ namespace Tests
 
             yield return audioClip.routine;
 
-            Assert.IsTrue(scene.disposableComponents.ContainsKey(audioClipId),
-                "Shared component was not created correctly!");
+            Assert.IsTrue(scene.disposableComponents.ContainsKey(audioClipId), "Shared component was not created correctly!");
 
             if (waitForLoading)
             {
@@ -224,13 +228,11 @@ namespace Tests
         [UnityTest]
         public IEnumerator VolumeWhenAudioCreatedWithNoUserInScene()
         {
-            DCLCharacterController.i.Teleport(JsonConvert.SerializeObject(new
-            {
-                x = -1f,
-                y = DCLCharacterController.i.transform.position.y,
-                z = -1f
-            }));
-            yield return null;
+            // We disable SceneController monobehaviour to avoid its current scene id update
+            sceneController.enabled = false;
+
+            // Set current scene as a different one
+            CommonScriptableObjects.sceneID.Set("unexistent-scene");
 
             yield return LoadAudioClip(scene,
                 audioClipId: "audioClipTest",
@@ -254,19 +256,17 @@ namespace Tests
             AudioSource unityAudioSource = dclAudioSource.GetComponentInChildren<AudioSource>();
 
             // Check the volume
-            Assert.AreEqual(unityAudioSource.volume, 0f);
+            Assert.AreEqual(0f, unityAudioSource.volume);
         }
 
         [UnityTest]
         public IEnumerator VolumeWhenAudioCreatedWithUserInScene()
         {
-            DCLCharacterController.i.Teleport(JsonConvert.SerializeObject(new
-            {
-                x = 8f,
-                y = DCLCharacterController.i.transform.position.y,
-                z = 8f
-            }));
-            yield return null;
+            // We disable SceneController monobehaviour to avoid its current scene id update
+            sceneController.enabled = false;
+
+            // Set current scene with this scene's id
+            CommonScriptableObjects.sceneID.Set(scene.sceneData.id);
 
             float originalVolume = 1.0f;
             yield return LoadAudioClip(scene,
@@ -297,13 +297,11 @@ namespace Tests
         [UnityTest]
         public IEnumerator VolumeIsMutedWhenUserLeavesScene()
         {
-            DCLCharacterController.i.Teleport(JsonConvert.SerializeObject(new
-            {
-                x = 8f,
-                y = DCLCharacterController.i.transform.position.y,
-                z = 8f
-            }));
-            yield return null;
+            // We disable SceneController monobehaviour to avoid its current scene id update
+            sceneController.enabled = false;
+
+            // Set current scene with this scene's id
+            CommonScriptableObjects.sceneID.Set(scene.sceneData.id);
 
             float originalVolume = 1.0f;
             yield return LoadAudioClip(scene,
@@ -327,14 +325,8 @@ namespace Tests
 
             AudioSource unityAudioSource = dclAudioSource.GetComponentInChildren<AudioSource>();
 
-            // Move character outwise scene
-            DCLCharacterController.i.Teleport(JsonConvert.SerializeObject(new
-            {
-                x = -1f,
-                y = DCLCharacterController.i.transform.position.y,
-                z = -1f
-            }));
-            yield return null;
+            // Set current scene as a different one
+            CommonScriptableObjects.sceneID.Set("unexistent-scene");
 
             // Check the volume
             Assert.AreEqual(unityAudioSource.volume, 0f);
@@ -343,13 +335,11 @@ namespace Tests
         [UnityTest]
         public IEnumerator VolumeIsUnmutedWhenUserEntersScene()
         {
-            DCLCharacterController.i.Teleport(JsonConvert.SerializeObject(new
-            {
-                x = -1f,
-                y = DCLCharacterController.i.transform.position.y,
-                z = -1f
-            }));
-            yield return null;
+            // We disable SceneController monobehaviour to avoid its current scene id update
+            sceneController.enabled = false;
+
+            // Set current scene as a different one
+            CommonScriptableObjects.sceneID.Set("unexistent-scene");
 
             float originalVolume = 1.0f;
             yield return LoadAudioClip(scene,
@@ -373,14 +363,8 @@ namespace Tests
 
             AudioSource unityAudioSource = dclAudioSource.GetComponentInChildren<AudioSource>();
 
-            // Move character outwise scene
-            DCLCharacterController.i.Teleport(JsonConvert.SerializeObject(new
-            {
-                x = 8f,
-                y = DCLCharacterController.i.transform.position.y,
-                z = 8f
-            }));
-            yield return null;
+            // Set current scene with this scene's id
+            CommonScriptableObjects.sceneID.Set(scene.sceneData.id);
 
             // Check the volume
             Assert.AreEqual(unityAudioSource.volume, originalVolume);

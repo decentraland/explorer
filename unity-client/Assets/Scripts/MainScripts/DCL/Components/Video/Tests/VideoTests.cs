@@ -21,6 +21,12 @@ namespace Tests
             DCLVideoTexture.isTest = true;
         }
 
+        protected override IEnumerator TearDown()
+        {
+            sceneController.enabled = true;
+            return base.TearDown();
+        }
+
         [UnityTest]
         public IEnumerator VideoTextureIsCreatedCorrectly()
         {
@@ -179,13 +185,11 @@ namespace Tests
         [UnityTest]
         public IEnumerator VolumeWhenVideoCreatedWithNoUserInScene()
         {
-            DCLCharacterController.i.Teleport(JsonConvert.SerializeObject(new
-            {
-                x = -1f,
-                y = DCLCharacterController.i.transform.position.y,
-                z = -1f
-            }));
-            yield return null;
+            // We disable SceneController monobehaviour to avoid its current scene id update
+            sceneController.enabled = false;
+
+            // Set current scene as a different one
+            CommonScriptableObjects.sceneID.Set("unexistent-scene");
 
             DCLVideoTexture videoTexture = CreateDCLVideoTexture(scene, "it-wont-load-during-test");
             yield return videoTexture.routine;
@@ -211,13 +215,11 @@ namespace Tests
         [UnityTest]
         public IEnumerator VolumeWhenVideoCreatedWithUserInScene()
         {
-            DCLCharacterController.i.Teleport(JsonConvert.SerializeObject(new
-            {
-                x = 8f,
-                y = DCLCharacterController.i.transform.position.y,
-                z = 8f
-            }));
-            yield return null;
+            // We disable SceneController monobehaviour to avoid its current scene id update
+            sceneController.enabled = false;
+
+            // Set current scene with this scene's id
+            CommonScriptableObjects.sceneID.Set(scene.sceneData.id);
 
             DCLVideoTexture videoTexture = CreateDCLVideoTexture(scene, "it-wont-load-during-test");
             yield return videoTexture.routine;
@@ -243,12 +245,11 @@ namespace Tests
         [UnityTest]
         public IEnumerator VolumeIsMutedWhenUserLeavesScene()
         {
-            DCLCharacterController.i.Teleport(JsonConvert.SerializeObject(new
-            {
-                x = 8f,
-                y = DCLCharacterController.i.transform.position.y,
-                z = 8f
-            }));
+            // We disable SceneController monobehaviour to avoid its current scene id update
+            sceneController.enabled = false;
+
+            // Set current scene with this scene's id
+            CommonScriptableObjects.sceneID.Set(scene.sceneData.id);
             yield return null;
 
             DCLVideoTexture videoTexture = CreateDCLVideoTexture(scene, "it-wont-load-during-test");
@@ -268,12 +269,12 @@ namespace Tests
             TestHelpers.SharedComponentAttach(ent1Shape, ent1);
             yield return null; //a frame to wait DCLVideoTexture update
 
-            DCLCharacterController.i.Teleport(JsonConvert.SerializeObject(new
-            {
-                x = -1f,
-                y = DCLCharacterController.i.transform.position.y,
-                z = -1f
-            }));
+            // Set current scene as a different one
+            CommonScriptableObjects.sceneID.Set("unexistent-scene");
+
+            // to force the video player to update its volume
+            CommonScriptableObjects.playerCoords.Set(new Vector2Int(666,666));
+
             yield return null;
 
             // Check the volume
@@ -283,13 +284,11 @@ namespace Tests
         [UnityTest]
         public IEnumerator VolumeIsUnmutedWhenUserEntersScene()
         {
-            DCLCharacterController.i.Teleport(JsonConvert.SerializeObject(new
-            {
-                x = -1f,
-                y = DCLCharacterController.i.transform.position.y,
-                z = -1f
-            }));
-            yield return null;
+            // We disable SceneController monobehaviour to avoid its current scene id update
+            sceneController.enabled = false;
+
+            // Set current scene as a different one
+            CommonScriptableObjects.sceneID.Set("unexistent-scene");
 
             DCLVideoTexture videoTexture = CreateDCLVideoTexture(scene, "it-wont-load-during-test");
             yield return videoTexture.routine;
@@ -308,12 +307,12 @@ namespace Tests
             TestHelpers.SharedComponentAttach(ent1Shape, ent1);
             yield return null; //a frame to wait DCLVideoTexture update
 
-            DCLCharacterController.i.Teleport(JsonConvert.SerializeObject(new
-            {
-                x = 8f,
-                y = DCLCharacterController.i.transform.position.y,
-                z = 8f
-            }));
+            // Set current scene with this scene's id
+            CommonScriptableObjects.sceneID.Set(scene.sceneData.id);
+
+            // to force the video player to update its volume
+            CommonScriptableObjects.playerCoords.Set(new Vector2Int(666,666));
+
             yield return null;
 
             // Check the volume
