@@ -25,6 +25,7 @@ DECENTRALAND_LOADER := static/loader/lifecycle/worker.js
 GIF_PROCESSOR := static/gif-processor/worker.js
 INTERNAL_SCENES := static/systems/decentraland-ui.scene.js
 BUILD_ECS := packages/build-ecs/index.js
+VOICE_CHAT_CODEC_WORKER := static/voice-chat-codec/worker.js
 
 config-contracts:
 	@echo 'Updating contracts...'
@@ -36,12 +37,16 @@ scripts/%.js: $(SOURCE_SUPPORT_TS_FILES) scripts/tsconfig.json config-contracts
 
 packages/build-ecs/%.js: packages/build-ecs/%.ts packages/build-ecs/tsconfig.json
 	@npx tsc --build packages/build-ecs/tsconfig.json
+	@chmod +x packages/build-ecs/index.js
 
 static/loader/lifecycle/worker.js: packages/decentraland-loader/**/*.ts
 	@$(COMPILER) targets/engine/loader.json
 
 static/gif-processor/worker.js: packages/gif-processor/*.ts
 	@$(COMPILER) targets/engine/gif-processor.json
+
+static/voice-chat-codec/worker.js: packages/voice-chat-codec/*.ts
+	@$(COMPILER) targets/engine/voice-chat-codec.json
 
 static/default-profile/contents:
 	@node ./static/default-profile/download_all.js
@@ -74,7 +79,7 @@ static/unity/Build/%.unityweb: package.json package-lock.json
 empty-parcels:
 	cd static/loader/empty-scenes && node generate_all.js
 
-build-essentials: $(COMPILED_SUPPORT_JS_FILES) dcl-amd $(DECENTRALAND_ECS_TYPEDEF_FILE) $(BUILD_ECS) $(SCENE_SYSTEM) $(INTERNAL_SCENES) $(DECENTRALAND_LOADER) $(GIF_PROCESSOR) $(RENDERER_BUILD) empty-parcels generate-mocks ## Build the basic required files for the explorer
+build-essentials: $(COMPILED_SUPPORT_JS_FILES) dcl-amd $(DECENTRALAND_ECS_TYPEDEF_FILE) $(BUILD_ECS) $(SCENE_SYSTEM) $(INTERNAL_SCENES) $(DECENTRALAND_LOADER) $(GIF_PROCESSOR) $(VOICE_CHAT_CODEC_WORKER) $(RENDERER_BUILD) empty-parcels generate-mocks ## Build the basic required files for the explorer
 
 # Hellmap scenes
 
@@ -97,10 +102,18 @@ TEST_ECS_SCENE_GAMEJS_FILES := $(subst .ts,.js,$(TEST_ECS_SCENE_SOURCES))
 
 # ECS scenes
 
-public/ecs-scenes/%/game.js: $(SCENE_SYSTEM) public/ecs-scenes/%/game.ts
+ECS_LIBRARY := public/ecs-scenes/-200.-30-libraries/node_modules/eth-wrapper/eth-wrapper.js
+
+public/ecs-scenes/-200.-30-libraries/node_modules/eth-wrapper/eth-wrapper.js: public/ecs-scenes/-200.-30-libraries/node_modules/eth-wrapper/eth-wrapper.ts $(BUILD_ECS)
+	$(BUILD_ECS) -p public/ecs-scenes/-200.-30-libraries/node_modules/eth-wrapper
+
+public/ecs-scenes/%/game.js: $(ECS_LIBRARY) $(SCENE_SYSTEM) public/ecs-scenes/%/game.ts
 	@node scripts/buildECSprojects.js
 
 # All scenes together
+
+ecs-scenes: $(TEST_ECS_SCENE_GAMEJS_FILES) $(BUILD_ECS)
+	$(MAKE) generate-mocks
 
 test-scenes: $(TEST_SCENES_GAMEJS_FILES) $(HELLMAP_GAMEJS_FILES) $(TEST_ECS_SCENE_GAMEJS_FILES) ## Build the test scenes
 	$(MAKE) generate-mocks
@@ -182,11 +195,17 @@ SCENE_JSONS := $(PARCEL_SCENE_JSONS) $(ECS_SCENE_JSONS) $(HELLMAP_SCENE_JSONS)
 
 dcl-amd:
 	cd $(CWD)/packages/decentraland-amd; npm install; make build
+	mkdir -p packages/decentraland-ecs/artifacts
+	ln -sf $(CWD)/packages/decentraland-amd/dist/amd.js packages/decentraland-ecs/artifacts/amd.js
+	ln -sf $(CWD)/packages/decentraland-amd/dist/amd.min.js packages/decentraland-ecs/artifacts/amd.min.js
+	ln -sf $(CWD)/packages/decentraland-amd/dist/amd.min.js.map packages/decentraland-ecs/artifacts/amd.min.js.map
 
 npm-link: build-essentials static/dist/preview.js static/dist/editor.js dcl-amd ## Run `npm link` to develop local scenes against this project
 	rm -rf packages/decentraland-ecs/artifacts || true
 	mkdir packages/decentraland-ecs/artifacts
 	ln -sf $(CWD)/packages/decentraland-amd/dist/amd.js packages/decentraland-ecs/artifacts/amd.js
+	ln -sf $(CWD)/packages/decentraland-amd/dist/amd.min.js packages/decentraland-ecs/artifacts/amd.min.js
+	ln -sf $(CWD)/packages/decentraland-amd/dist/amd.min.js.map packages/decentraland-ecs/artifacts/amd.min.js.map
 	ln -sf $(CWD)/packages/build-ecs/index.js packages/decentraland-ecs/artifacts/build-ecs.js
 	ln -sf $(CWD)/static/dist/preview.js packages/decentraland-ecs/artifacts/preview.js
 	ln -sf $(CWD)/static/dist/unityPreview.js packages/decentraland-ecs/artifacts/unityPreview.js

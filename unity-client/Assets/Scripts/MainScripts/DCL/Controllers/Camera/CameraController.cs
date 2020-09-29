@@ -20,8 +20,11 @@ public class CameraController : MonoBehaviour
     private Vector3Variable cameraRight => CommonScriptableObjects.cameraRight;
     private Vector3Variable cameraPosition => CommonScriptableObjects.cameraPosition;
     private Vector3Variable playerUnityToWorldOffset => CommonScriptableObjects.playerUnityToWorldOffset;
-    
+
     public CameraStateBase currentCameraState => cachedModeToVirtualCamera[CommonScriptableObjects.cameraMode];
+
+    [HideInInspector]
+    public System.Action<CameraMode.ModeId> onSetCameraMode;
 
     private void Start()
     {
@@ -67,20 +70,7 @@ public class CameraController : MonoBehaviour
         CommonScriptableObjects.cameraMode.Set(newMode);
         currentCameraState.OnSelect();
 
-        if (HUDAudioPlayer.i != null)
-        {
-            switch (newMode)
-            {
-                case CameraMode.ModeId.FirstPerson:
-                    HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.cameraToFirstPerson);
-                    break;
-                case CameraMode.ModeId.ThirdPerson:
-                    HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.cameraToThirdPerson);
-                    break;
-                default:
-                    break;
-            }
-        }
+        onSetCameraMode.Invoke(newMode);
     }
 
     private void PrecisionChanged(Vector3 newValue, Vector3 oldValue)
